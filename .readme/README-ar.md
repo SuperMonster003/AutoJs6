@@ -324,12 +324,16 @@
 
 > ملاحظة: إذا كان نظام الكمبيوتر يحتوي بالفعل على Android SDK (مجموعة تطوير البرمجيات لنظام أندرويد)، فيمكنك تخطي هذا القسم.
 
-في برنامج Android Studio، استخدم الاختصار `CTRL + ALT + S` لفتح صفحة الإعدادات:
+افتح صفحة إعدادات `Android SDK (مجموعة تطوير برمجيات أندرويد)` (بأيٍّ من الطرق التالية):
 
 ```text
-Appearance & Behavior (الشكل العام والسلوك) -> 
-System Settings (إعدادات النظام) -> 
-Android SDK (مجموعة تطوير البرامج لنظام Android)
+Help (مساعدة) | Find action (بحث عن إجراء) # إدخال "Android SDK"
+[ أو ]
+File (ملف) | Settings (إعدادات) # بحث "Android SDK"
+[ أو ]
+File (ملف) | Settings (إعدادات) | Language & Frameworks (اللغات وأُطر العمل) | Android SDK (مجموعة تطوير البرامج لنظام Android)
+[ أو ]
+File (ملف) | Settings (إعدادات) | Appearance & Behavior (المظهر والسلوك) | System Settings (إعدادات النظام) | Android SDK (مجموعة تطوير البرامج لنظام Android)
 ```
 
 إذا كان حقل `موقع Android SDK (Android SDK Location)` فارغًا، يمكنك النقر على زر `تحرير (Edit)` على اليمين، والنقر على `التالي (Next)` عدة مرات في النافذة المنبثقة.
@@ -345,13 +349,16 @@ AutoJs6 يتطلب استخدام بعض أدوات SDK (مثل NDK وCMake).
 
 > ملاحظة: إذا كان النظام يحتوي بالفعل على جميع أدوات Android SDK المطلوبة لمشروع AutoJs6، فيمكنك تخطي هذا القسم.
 
-استخدام اختصار `CTRL + ALT + S` في برنامج Android Studio لفتح صفحة الإعدادات:
+افتح صفحة إعدادات `SDK Tools (أدوات SDK)` (بأيٍّ من الطرق التالية):
 
 ```text
-Appearance & Behavior (الشكل العام والسلوك) -> 
-System Settings (إعدادات النظام) -> 
-Android SDK (مجموعة تطوير البرامج لنظام Android) -> 
-SDK Tools  (أدوات SDK) (في النافذة اليمنى)
+Help (مساعدة) | Find action (بحث عن إجراء) # إدخال "SDK Tools"
+[ أو ]
+File (ملف) | Settings (إعدادات) # بحث "SDK Tools"
+[ أو ]
+File (ملف) | Settings (إعدادات) | Language & Frameworks (اللغات وأُطر العمل) | Android SDK (مجموعة تطوير البرامج لنظام Android) | SDK Tools  (أدوات SDK) (في النافذة اليمنى)
+[ أو ]
+File (ملف) | Settings (إعدادات) | Appearance & Behavior (المظهر والسلوك) | System Settings (إعدادات النظام) | Android SDK (مجموعة تطوير البرامج لنظام Android) | SDK Tools  (أدوات SDK) (في النافذة اليمنى) 
 ```
 
 حدد `إظهار تفاصيل الحزمة (Show Package Details)`، وقم بالنقر على NDK و CMake، وتأكد من تحديد الأدوات الخاصة بها ,تقع معلومات إصدار أدوات SDK في ملف `version.properties` في جذر مشروع AutoJs6.
@@ -360,18 +367,20 @@ SDK Tools  (أدوات SDK) (في النافذة اليمنى)
 
 يعتمد مشروع AutoJs6 على إصدار `JDK (مجموعة تطوير جافا)` بإصدار لا يقل عن `17`، ولكن يفضل الإصدار الذي لا يقل عن `19`.
 
-اعتبارًا من 27 May 2025، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `24`.
+اعتبارًا من 29 May 2025، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `24`.
 
 > ملاحظة: إذا كان نظام الكمبيوتر يحتوي على JDK والإصدار يفي بالمتطلبات المذكورة أعلاه، فيمكنك تخطي هذا القسم.
 
 يمكن تنزيل JDK مباشرةً باستخدام IDE، أو زيارة [موقع Oracle](https://www.oracle.com/java/technologies/downloads/) لتنزيله.
 
-استخدم اختصار `CTRL + ALT + S` في برنامج Android Studio لفتح صفحة الإعدادات:
+افتح صفحة إعدادات `Gradle JDK` (بأيٍّ من الطرق التالية):
 
 ```text
-Build, Execution, Deployment (البناء، التنفيذ، التوزيع) -> 
-Build Tools (أدوات البناء) -> 
-Gradle
+Help (مساعدة) | Find action (بحث عن إجراء) # إدخال "Gradle JDK"
+[ أو ]
+File (ملف) | Settings (إعدادات) # بحث "Gradle"
+[ أو ]
+File (ملف) | Settings (إعدادات) | Build, Execution, Deployment (البناء، التنفيذ، النشر) | Build Tools (أدوات البناء) | Gradle
 ```
 
 يمكنك اختيار أو إضافة إصدار JDK مختلف في حقل `Gradle JDK`.
@@ -419,11 +428,11 @@ Gradle
 حزم المشروع وإنشاء ملف APK يمكن تثبيته على أجهزة Android:
 
 - نسخة تجريبية (Debug Version)
-    - `Build (بناء)` -> `Build Bundle(s) / APK(s)` -> `Build APK(s)`
+    - `Build (بناء)` | `Build Bundle(s) / APK(s)` | `Build APK(s)`
     - توليد حزمة تثبيت الإصدار التجريبي مع التوقيع الافتراضي
     - مثال على المسار: `"D:\AutoJs6\app\build\outputs\apk\debug\"`
 - نسخة مطروحة (Release Version)
-    - `Build (بناء)` -> `Generate Signed Bundle / APK`
+    - `Build (بناء)` | `Generate Signed Bundle / APK`
     - اختيار خيار `APK`
     - قم بإعداد ملف التوقيع (تكوين جديد أو اختيار موجود)، وتوليد حزمة تثبيت الإصدار المطروح
     - مثال على المسار: `"D:\AutoJs6\app\release\"`

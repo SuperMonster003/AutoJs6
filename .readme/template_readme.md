@@ -180,9 +180,13 @@
 {{ p_android_sdk_preparation_open_settings_android_studio }}:
 
 ```text
-{{ step_appearance_behavior }} {{ symbol_arrow }} 
-{{ step_system_settings }} {{ symbol_arrow }} 
-{{ step_android_sdk_location }}
+{{ step_help }} {{ symbol_pipe }} {{ step_find_action }} {{ symbol_hash }} {{ text_input }} "Android SDK"
+[ {{ text_or }} ]
+{{ step_file }} {{ symbol_pipe }} {{ step_settings }} {{ symbol_hash }} {{ text_search }} "Android SDK"
+[ {{ text_or }} ]
+{{ step_file }} {{ symbol_pipe }} {{ step_settings }} {{ symbol_pipe }} {{ step_languages_and_frameworks }} {{ symbol_pipe }} {{ step_android_sdk }}
+[ {{ text_or }} ]
+{{ step_file }} {{ symbol_pipe }} {{ step_settings }} {{ symbol_pipe }} {{ step_appearance_behavior }} {{ symbol_pipe }} {{ step_system_settings }} {{ symbol_pipe }} {{ step_android_sdk }}
 ```
 
 {{ p_android_sdk_preparation_edit_sdk_location }}.
@@ -201,10 +205,13 @@
 {{ p_android_sdk_tools_preparation_sdk_tools }}:
 
 ```text
-{{ step_sdk_appearance_behavior }} {{ symbol_arrow }} 
-{{ step_sdk_system_settings }} {{ symbol_arrow }} 
-{{ step_sdk_android_sdk }} {{ symbol_arrow }} 
-{{ step_sdk_tools_show_details }}
+{{ step_help }} {{ symbol_pipe }} {{ step_find_action }} {{ symbol_hash }} {{ text_input }} "SDK Tools"
+[ {{ text_or }} ]
+{{ step_file }} {{ symbol_pipe }} {{ step_settings }} {{ symbol_hash }} {{ text_search }} "SDK Tools"
+[ {{ text_or }} ]
+{{ step_file }} {{ symbol_pipe }} {{ step_settings }} {{ symbol_pipe }} {{ step_languages_and_frameworks }} {{ symbol_pipe }} {{ step_android_sdk }} {{ symbol_pipe }} {{ step_sdk_tools_show_details }}
+[ {{ text_or }} ]
+{{ step_file }} {{ symbol_pipe }} {{ step_settings }} {{ symbol_pipe }} {{ step_appearance_behavior }} {{ symbol_pipe }} {{ step_system_settings }} {{ symbol_pipe }} {{ step_android_sdk }} {{ symbol_pipe }} {{ step_sdk_tools_show_details }} 
 ```
 
 {{ p_android_sdk_tools_preparation_show_package_details }}.
@@ -222,9 +229,11 @@
 {{ p_jdk_preparation_open_jdk_settings }}:
 
 ```text
-{{ step_build_execution_deployment }} {{ symbol_arrow }} 
-{{ step_build_tools }} {{ symbol_arrow }} 
-Gradle
+{{ step_help }} {{ symbol_pipe }} {{ step_find_action }} {{ symbol_hash }} {{ text_input }} "Gradle JDK"
+[ {{ text_or }} ]
+{{ step_file }} {{ symbol_pipe }} {{ step_settings }} {{ symbol_hash }} {{ text_search }} "Gradle"
+[ {{ text_or }} ]
+{{ step_file }} {{ symbol_pipe }} {{ step_settings }} {{ symbol_pipe }} {{ step_build_execution_deployment }} {{ symbol_pipe }} {{ step_build_tools }} {{ symbol_pipe }} Gradle
 ```
 
 {{ p_jdk_preparation_select_gradle_jdk }}.
@@ -272,11 +281,11 @@ Gradle
 {{ p_autojs6_project_deploy_apk_overview }}:
 
 - {{ step_debug_version_path }}
-    - {{ step_generate_debug_apk }} {{ symbol_arrow }} `Build Bundle(s) / APK(s)` {{ symbol_arrow }} `Build APK(s)`
+    - {{ step_generate_debug_apk }} {{ symbol_pipe }} `Build Bundle(s) / APK(s)` {{ symbol_pipe }} `Build APK(s)`
     - {{ step_debug_apk_path }}
     - {{ step_example_debug_path }}
 - {{ step_release_version_apk }}
-    - {{ step_release_version_path }} {{ symbol_arrow }} `Generate Signed Bundle / APK`
+    - {{ step_release_version_path }} {{ symbol_pipe }} `Generate Signed Bundle / APK`
     - {{ step_select_apk_option }}
     - {{ step_prepare_signing_file }}
     - {{ step_example_release_path }}

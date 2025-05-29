@@ -324,12 +324,16 @@ AutoJs6 오픈 소스 프로젝트를 디버깅하거나 개발하려면 [Androi
 
 > 메모: 시스템에 이미 Android SDK(안드로이드 소프트웨어 개발 키트)가 설치되어 있는 경우, 이 섹션을 건너뛸 수 있습니다.
 
-Android Studio 소프트웨어에서 `CTRL + ALT + S` 단축키를 사용하여 설정 페이지를 엽니다:
+`Android SDK (Android 소프트웨어 개발 키트)` 설정 페이지 열기(아래 방법 중 하나):
 
 ```text
-Appearance & Behavior (외관 및 행동) -> 
-System Settings (시스템 설정) -> 
-Android SDK (안드로이드 소프트웨어 개발 키트)
+Help (도움말) | Find action (동작 찾기) # 입력 "Android SDK"
+[ 또는 ]
+File (파일) | Settings (설정) # 검색 "Android SDK"
+[ 또는 ]
+File (파일) | Settings (설정) | Language & Frameworks (언어 및 프레임워크) | Android SDK (안드로이드 소프트웨어 개발 키트)
+[ 또는 ]
+File (파일) | Settings (설정) | Appearance & Behavior (모양 및 동작) | System Settings (시스템 설정) | Android SDK (안드로이드 소프트웨어 개발 키트)
 ```
 
 `Android SDK Location` (안드로이드 소프트웨어 개발 키트 위치) 필드가 비어 있는 경우, 오른쪽의 `Edit` (편집) 버튼을 클릭하고, 팝업 창에서 여러 번 `Next` (다음)를 클릭합니다.
@@ -345,13 +349,16 @@ AutoJs6은 일부 SDK 도구 (예: NDK 및 CMake)를 사용해야 합니다.
 
 > 메모: 시스템에 AutoJs6이 필요한 모든 Android SDK 도구가 설치되어 있는 경우, 이 섹션을 건너뛸 수 있습니다.
 
-Android Studio 소프트웨어에서 `CTRL + ALT + S` 단축키를 사용하여 설정 페이지를 엽니다:
+`SDK Tools (SDK 도구)` 설정 페이지 열기(아래 방법 중 하나):
 
 ```text
-Appearance & Behavior (외관 및 행동) -> 
-System Settings (시스템 설정) -> 
-Android SDK (안드로이드 소프트웨어 개발 키트) -> 
-SDK Tools (SDK 도구) (오른쪽 창에 위치)
+Help (도움말) | Find action (동작 찾기) # 입력 "SDK Tools"
+[ 또는 ]
+File (파일) | Settings (설정) # 검색 "SDK Tools"
+[ 또는 ]
+File (파일) | Settings (설정) | Language & Frameworks (언어 및 프레임워크) | Android SDK (안드로이드 소프트웨어 개발 키트) | SDK Tools (SDK 도구) (오른쪽 창에 위치)
+[ 또는 ]
+File (파일) | Settings (설정) | Appearance & Behavior (모양 및 동작) | System Settings (시스템 설정) | Android SDK (안드로이드 소프트웨어 개발 키트) | SDK Tools (SDK 도구) (오른쪽 창에 위치) 
 ```
 
 `Show Package Details` (패키지 세부사항 표시)를 선택하고, NDK와 CMake를 차례로 클릭하여 해당 버전의 도구가 선택되었는지 확인하십시오, SDK 도구 버전 정보는 AutoJs6 프로젝트 루트 디렉터리에 있는 `version.properties` 파일에 있습니다.
@@ -360,18 +367,20 @@ SDK Tools (SDK 도구) (오른쪽 창에 위치)
 
 AutoJs6 프로젝트는 `JDK (Java 개발 도구 키트)` 버전이 `17` 이상이어야 하지만, `19` 이상을 권장합니다.
 
-2025 년 5 월 27 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `24` 입니다.
+2025 년 5 월 29 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `24` 입니다.
 
 > 메모: 시스템에 JDK가 설치되어 있고, 버전이 위의 요구 사항을 충족하는 경우, 이 섹션을 건너뛸 수 있습니다.
 
 JDK는 IDE에서 직접 다운로드하거나 [Oracle 웹사이트](https://www.oracle.com/java/technologies/downloads/) 에서 다운로드할 수 있습니다.
 
-Android Studio 소프트웨어에서 단축키 `CTRL + ALT + S` 를 사용하여 설정 페이지를 여십시오:
+`Gradle JDK` 설정 페이지 열기(아래 방법 중 하나):
 
 ```text
-Build, Execution, Deployment (구축, 실행, 개발) -> 
-Build Tools (구축 도구) -> 
-Gradle
+Help (도움말) | Find action (동작 찾기) # 입력 "Gradle JDK"
+[ 또는 ]
+File (파일) | Settings (설정) # 검색 "Gradle"
+[ 또는 ]
+File (파일) | Settings (설정) | Build, Execution, Deployment (빌드, 실행, 배포) | Build Tools (구축 도구) | Gradle
 ```
 
 `Gradle JDK` 에서 다양한 버전의 JDK를 선택하거나 추가할 수 있습니다.
@@ -419,11 +428,11 @@ Android Studio 메인 화면에서 `Get from VCS (버전 관리 시스템에서 
 프로젝트를 패키징하여 Android 디바이스에 설치할 수 있는 APK 파일을 생성합니다:
 
 - 디버그 버전 (Debug Version)
-    - `Build (구축)` -> `Build Bundle(s) / APK(s)` -> `Build APK(s)`
+    - `Build (구축)` | `Build Bundle(s) / APK(s)` | `Build APK(s)`
     - 기본 서명을 포함한 디버그 버전 APK 생성
     - 경로 예시: `"D:\AutoJs6\app\build\outputs\apk\debug\"`
 - 릴리즈 버전 (Release Version)
-    - `Build (구축)` -> `Generate Signed Bundle / APK`
+    - `Build (구축)` | `Generate Signed Bundle / APK`
     - `APK` 옵션 선택
     - 서명 파일을 준비하고 (새로 만들거나 선택) 서명된 릴리즈 버전 설치 패키지를 생성합니다
     - 경로 예시: `"D:\AutoJs6\app\release\"`

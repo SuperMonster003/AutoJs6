@@ -324,12 +324,16 @@ Install or extract the above file, then run the Android Studio software (e.g., `
 
 > Note: If the Android SDK is already installed on the computer system, this section can be skipped.
 
-Use `CTRL + ALT + S` in Android Studio to open the settings page:
+Open the `Android SDK (Android Software Development Kit)` settings page (any of the following ways):
 
 ```text
-Appearance & Behavior -> 
-System Settings -> 
-Android SDK
+Help | Find action # Input "Android SDK"
+[ or ]
+File | Settings # Search "Android SDK"
+[ or ]
+File | Settings | Language & Frameworks | Android SDK
+[ or ]
+File | Settings | Appearance & Behavior | System Settings | Android SDK
 ```
 
 If the `Android SDK Location` field is blank, click the `Edit` button on the right and click `Next` multiple times in the pop-up window.
@@ -345,13 +349,16 @@ AutoJs6 requires certain SDK tools (like NDK and CMake).
 
 > Note: If all required Android SDK Tools for AutoJs6 are already installed on the computer system, this section can be skipped.
 
-Use `CTRL + ALT + S` in Android Studio to open the settings page:
+Open the `SDK Tools` settings page (any of the following ways):
 
 ```text
-Appearance & Behavior -> 
-System Settings -> 
-Android SDK -> 
-SDK Tools (located in the right window)
+Help | Find action # Input "SDK Tools"
+[ or ]
+File | Settings # Search "SDK Tools"
+[ or ]
+File | Settings | Language & Frameworks | Android SDK | SDK Tools (located in the right window)
+[ or ]
+File | Settings | Appearance & Behavior | System Settings | Android SDK | SDK Tools (located in the right window) 
 ```
 
 Check `Show Package Details`, click NDK and CMake respectively to ensure the corresponding version tools are checked, the version information of the SDK tools is located in the `version.properties` file in the root directory of the AutoJs6 project.
@@ -360,18 +367,20 @@ Check `Show Package Details`, click NDK and CMake respectively to ensure the cor
 
 The `JDK (Java Development Kit)` version required for the AutoJs6 project should be at least `17`, but `19` or higher is recommended.
 
-As of May 27, 2025, AutoJs6 supports up to version `24` of the JDK.
+As of May 29, 2025, AutoJs6 supports up to version `24` of the JDK.
 
 > Note: If the JDK is already installed on the computer system and the version meets the above requirements, this section can be skipped.
 
 JDK can be downloaded directly via the IDE or from the [Oracle website](https://www.oracle.com/java/technologies/downloads/).
 
-Use `CTRL + ALT + S` in Android Studio to open the settings page:
+Open the `Gradle JDK` settings page (any of the following ways):
 
 ```text
-Build, Execution, Deployment -> 
-Build Tools -> 
-Gradle
+Help | Find action # Input "Gradle JDK"
+[ or ]
+File | Settings # Search "Gradle"
+[ or ]
+File | Settings | Build, Execution, Deployment | Build Tools | Gradle
 ```
 
 `Gradle JDK` can be chosen or added with different versions of JDK.
@@ -419,11 +428,11 @@ Once the project is built successfully, it can be deployed as an application (Ap
 Package the project and generate an APK file that can be installed on Android devices:
 
 - Debug Version
-    - `Build` -> `Build Bundle(s) / APK(s)` -> `Build APK(s)`
+    - `Build` | `Build Bundle(s) / APK(s)` | `Build APK(s)`
     - Generate signed debug APK
     - Path example: `"D:\AutoJs6\app\build\outputs\apk\debug\"`
 - Release Version
-    - `Build` -> `Generate Signed Bundle / APK`
+    - `Build` | `Generate Signed Bundle / APK`
     - Select `APK` option
     - Prepare the signing file (create new or select existing), generate the signed release package
     - Path example: `"D:\AutoJs6\app\release\"`

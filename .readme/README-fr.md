@@ -324,12 +324,16 @@ Installez ou extrayez le fichier ci-dessus, exécutez Android Studio (par exempl
 
 > Note : Si le SDK Android (Kit de développement logiciel) est déjà installé sur le système de votre ordinateur, vous pouvez ignorer cette section.
 
-Dans Android Studio, ouvrez la page des paramètres avec le raccourci `CTRL + ALT + S`:
+Ouvrir la page de paramètres `Android SDK (Kit de développement logiciel Android)` (l'une des méthodes suivantes) :
 
 ```text
-Apparence et comportement (Appearance & Behavior) -> 
-Paramètres système (System Settings) -> 
-Android SDK (Kit de développement logiciel Android)
+Help (Aide) | Find action (Rechercher une action) # Saisir "Android SDK"
+[ ou ]
+File (Fichier) | Settings (Paramètres) # Rechercher "Android SDK"
+[ ou ]
+File (Fichier) | Settings (Paramètres) | Language & Frameworks (Langages et Frameworks) | Android SDK (Kit de développement logiciel Android)
+[ ou ]
+File (Fichier) | Settings (Paramètres) | Appearance & Behavior (Apparence et Comportement) | Paramètres système (System Settings) | Android SDK (Kit de développement logiciel Android)
 ```
 
 Si le champ `Android SDK Location (emplacement du SDK Android)` est vide, cliquez sur le bouton `Edit (modifier)` à droite, cliquez plusieurs fois sur `Next (suivant)` dans la fenêtre contextuelle.
@@ -345,13 +349,16 @@ AutoJs6 nécessite certains outils SDK (comme NDK et CMake).
 
 > Note : Si tous les outils SDK Android requis par AutoJs6 sont déjà installés sur le système de votre ordinateur, vous pouvez ignorer cette section.
 
-Dans Android Studio, ouvrez la page des paramètres avec le raccourci `CTRL + ALT + S`:
+Ouvrir la page de paramètres `SDK Tools (Outils du SDK)` (l'une des méthodes suivantes) :
 
 ```text
-Apparence et comportement (Appearance & Behavior) -> 
-Paramètres système (System Settings) -> 
-Android SDK (Kit de développement logiciel Android) -> 
-Outils SDK (SDK Tools) (situés dans la fenêtre de droite)
+Help (Aide) | Find action (Rechercher une action) # Saisir "SDK Tools"
+[ ou ]
+File (Fichier) | Settings (Paramètres) # Rechercher "SDK Tools"
+[ ou ]
+File (Fichier) | Settings (Paramètres) | Language & Frameworks (Langages et Frameworks) | Android SDK (Kit de développement logiciel Android) | Outils SDK (SDK Tools) (situés dans la fenêtre de droite)
+[ ou ]
+File (Fichier) | Settings (Paramètres) | Appearance & Behavior (Apparence et Comportement) | Paramètres système (System Settings) | Android SDK (Kit de développement logiciel Android) | Outils SDK (SDK Tools) (situés dans la fenêtre de droite) 
 ```
 
 Cochez `Show Package Details (afficher les détails du package)`, puis cliquez respectivement sur NDK et CMake, assurez-vous que les versions appropriées des outils sont cochées, Les informations de version des outils SDK se trouvent dans le fichier `version.properties` à la racine du projet AutoJs6.
@@ -360,18 +367,20 @@ Cochez `Show Package Details (afficher les détails du package)`, puis cliquez r
 
 La version de JDK (Kit de développement Java) requise pour le projet AutoJs6 doit être au moins `17`, mais il est recommandé d'avoir au moins `19`.
 
-À partir du 27 May 2025, AutoJs6 prend en charge la version maximale de JDK `24`.
+À partir du 29 May 2025, AutoJs6 prend en charge la version maximale de JDK `24`.
 
 > Note : Si le JDK est déjà installé sur le système informatique et que la version répond aux exigences ci-dessus, vous pouvez ignorer cette section.
 
 Vous pouvez télécharger le JDK directement via l'IDE, ou visiter [le site Web d'Oracle](https://www.oracle.com/java/technologies/downloads/) pour le télécharger.
 
-Ouvrez la page des paramètres dans Android Studio en utilisant le raccourci `CTRL + ALT + S`:
+Ouvrir la page de paramètres `Gradle JDK` (l'une des méthodes suivantes) :
 
 ```text
-Construction, exécution, déploiement (Build, Execution, Deployment) -> 
-Outils de construction (Build Tools) -> 
-Gradle
+Help (Aide) | Find action (Rechercher une action) # Saisir "Gradle JDK"
+[ ou ]
+File (Fichier) | Settings (Paramètres) # Rechercher "Gradle"
+[ ou ]
+File (Fichier) | Settings (Paramètres) | Build, Execution, Deployment (Compilation, Exécution, Déploiement) | Outils de construction (Build Tools) | Gradle
 ```
 
 Vous pouvez sélectionner ou ajouter différentes versions de JDK à la section `Gradle JDK`.
@@ -419,11 +428,11 @@ Une fois le projet construit avec succès, il peut être déployé en tant qu'ap
 Emballer le projet et générer un fichier APK qui peut être installé sur les appareils Android:
 
 - Version de débogage (Debug Version)
-    - `Construire (Build)` -> `Build Bundle(s) / APK(s)` -> `Build APK(s)`
+    - `Construire (Build)` | `Build Bundle(s) / APK(s)` | `Build APK(s)`
     - Générer un package d'installation de version de débogage signé par défaut
     - Exemple de chemin : `"D:\AutoJs6\app\build\outputs\apk\debug\"`
 - Version publiée (Release Version)
-    - `Construire (Build)` -> `Generate Signed Bundle / APK`
+    - `Construire (Build)` | `Generate Signed Bundle / APK`
     - Sélectionnez l'option `APK`
     - Préparer le fichier de signature (nouveau ou existant), et générer un package d'installation de version publiée signée
     - Exemple de chemin : `"D:\AutoJs6\app\release\"`
