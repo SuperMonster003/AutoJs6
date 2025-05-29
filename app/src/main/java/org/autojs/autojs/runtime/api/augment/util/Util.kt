@@ -27,9 +27,12 @@ import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.global.Species
 import org.autojs.autojs.runtime.api.augment.util.Inspect.inspectRhino
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
+import org.autojs.autojs.util.DisplayUtils
 import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.ObsoletedRhinoFunctionException
 import org.autojs.autojs.util.RhinoUtils.callToStringFunction
+import org.autojs.autojs.util.RhinoUtils.coerceFloatNumber
+import org.autojs.autojs.util.RhinoUtils.coerceNumber
 import org.autojs.autojs.util.RhinoUtils.js_function_bind
 import org.autojs.autojs.util.RhinoUtils.js_json_stringify
 import org.autojs.autojs.util.RhinoUtils.js_object_create
@@ -108,6 +111,10 @@ object Util : Augmentable() {
         ::toRegular.name,
         ::toRegularAndCall.name,
         ::toRegularAndApply.name,
+        ::dpToPx.name,
+        ::spToPx.name,
+        ::pxToDp.name,
+        ::pxToSp.name,
     )
 
     private val availableTypes = listOf(
@@ -568,9 +575,10 @@ object Util : Augmentable() {
     fun ensureTypeRhino(o: Any?, type: Any?) {
         if (type !is String) throw WrappedIllegalArgumentException("Argument \"type\" must be a string")
         val niceType = type.lowercase()
-        if (niceType !in availableTypes) throw WrappedIllegalArgumentException("Argument \"type\" must be one of these types: ${
-            availableTypes.joinToString(", ") { "\"$it\"" }
-        }")
+        if (niceType !in availableTypes) throw WrappedIllegalArgumentException(
+            "Argument \"type\" must be one of these types: ${
+                availableTypes.joinToString(", ") { "\"$it\"" }
+            }")
         if (js_typeof(o) != niceType) {
             throw WrappedIllegalArgumentException("Argument must be type of $type instead of ${o.jsBrief()}")
         }
@@ -734,6 +742,30 @@ object Util : Augmentable() {
     @RhinoSingletonFunctionInterface
     fun toRegularAndApply(args: Array<out Any?>) {
         throw ObsoletedRhinoFunctionException(::toRegularAndCall.name)
+    }
+
+    @JvmStatic
+    @RhinoSingletonFunctionInterface
+    fun dpToPx(args: Array<out Any?>): Double = ensureArgumentsOnlyOne(args) {
+        coerceNumber(DisplayUtils.dpToPx(coerceFloatNumber(it)))
+    }
+
+    @JvmStatic
+    @RhinoSingletonFunctionInterface
+    fun spToPx(args: Array<out Any?>): Double = ensureArgumentsOnlyOne(args) {
+        coerceNumber(DisplayUtils.spToPx(coerceFloatNumber(it)))
+    }
+
+    @JvmStatic
+    @RhinoSingletonFunctionInterface
+    fun pxToDp(args: Array<out Any?>): Double = ensureArgumentsOnlyOne(args) {
+        coerceNumber(DisplayUtils.pxToDp(coerceFloatNumber(it)))
+    }
+
+    @JvmStatic
+    @RhinoSingletonFunctionInterface
+    fun pxToSp(args: Array<out Any?>): Double = ensureArgumentsOnlyOne(args) {
+        coerceNumber(DisplayUtils.pxToSp(coerceFloatNumber(it)))
     }
 
     private fun getClassInternal(o: Any): Scriptable = when (o) {
