@@ -2,15 +2,16 @@ package org.autojs.autojs.ui.settings
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.view.View
 import android.view.animation.AlphaAnimation
+import androidx.core.net.toUri
 import com.afollestad.materialdialogs.MaterialDialog
 import com.jaredrummler.android.widget.AnimatedSvgView
 import de.psdev.licensesdialog.LicenseResolver
 import de.psdev.licensesdialog.LicensesDialog
+import org.autojs.autojs.extension.MaterialDialogExtensions.widgetThemeColor
 import org.autojs.autojs.network.UpdateChecker
 import org.autojs.autojs.network.UpdateChecker.PromptMode
 import org.autojs.autojs.ui.BaseActivity
@@ -22,8 +23,6 @@ import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ActivityAboutBinding
 import org.autojs.autojs6.databinding.ActivityAboutFunctionButtonsBinding
-import androidx.core.net.toUri
-import org.autojs.autojs.extension.MaterialDialogExtensions.widgetThemeColor
 
 /**
  * Created by Stardust on Feb 2, 2017.
