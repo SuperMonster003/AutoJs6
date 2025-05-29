@@ -324,12 +324,16 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 
 > 注: 如果計算機系統已安裝 Android SDK (安卓軟體開發工具包), 則可跳過此小節內容.
 
-在 Android Studio 軟體中使用快捷鍵 `CTRL + ALT + S` 開啟設定頁面:
+打開 `Android SDK (安卓軟件開發工具包)` 設置頁面 (任選一種方式):
 
 ```text
-Appearance & Behavior (外觀與表現) -> 
-System Settings (系統設定) -> 
-Android SDK (安卓軟體開發工具包)
+Help (幫助) | Find action (查找操作) # 輸入 "Android SDK"
+[ 或 ]
+File (文件) | Settings (設置) # 搜索 "Android SDK"
+[ 或 ]
+File (文件) | Settings (設置) | Language & Frameworks (語言和框架) | Android SDK (安卓軟體開發工具包)
+[ 或 ]
+File (文件) | Settings (設置) | Appearance & Behavior (外觀與行為) | System Settings (系統設定) | Android SDK (安卓軟體開發工具包)
 ```
 
 `Android SDK Location (安卓軟體開發工具包位置)` 處如果是空白內容, 可點選右側 `Edit (編輯)` 按鈕, 在彈出的視窗中多次點選 `Next (下一步)`.
@@ -345,13 +349,16 @@ AutoJs6 需要使用部分 SDK 工具 (如 NDK 及 CMake).
 
 > 注: 如果計算機系統已安裝 AutoJs6 全部所需的 Android SDK Tools, 則可跳過此小節內容.
 
-在 Android Studio 軟體中使用快捷鍵 `CTRL + ALT + S` 開啟設定頁面:
+打開 `SDK Tools (SDK 工具)` 設置頁面 (任選一種方式):
 
 ```text
-Appearance & Behavior (外觀與表現) -> 
-System Settings (系統設定) -> 
-Android SDK (安卓軟體開發工具包) -> 
-SDK Tools (SDK 工具) (位於右側視窗)
+Help (幫助) | Find action (查找操作) # 輸入 "SDK Tools"
+[ 或 ]
+File (文件) | Settings (設置) # 搜索 "SDK Tools"
+[ 或 ]
+File (文件) | Settings (設置) | Language & Frameworks (語言和框架) | Android SDK (安卓軟體開發工具包) | SDK Tools (SDK 工具) (位於右側視窗)
+[ 或 ]
+File (文件) | Settings (設置) | Appearance & Behavior (外觀與行為) | System Settings (系統設定) | Android SDK (安卓軟體開發工具包) | SDK Tools (SDK 工具) (位於右側視窗) 
 ```
 
 勾選 `Show Package Details (顯示包詳情)`, 依次點選 NDK 及 CMake, 確保相應版本的工具已勾選, SDK 工具的版本資訊位於 AutoJs6 專案根目錄的 `version.properties` 檔案中.
@@ -360,18 +367,20 @@ SDK Tools (SDK 工具) (位於右側視窗)
 
 AutoJs6 專案依賴的 `JDK (Java 開發工具包)` 發行版本不低於 `17`, 但建議不低於 `19`.
 
-截至 2025 年 5 月 27 日, AutoJs6 可支援 JDK 最高版本為 `24`.
+截至 2025 年 5 月 29 日, AutoJs6 可支援 JDK 最高版本為 `24`.
 
 > 注: 如果計算機系統已安裝 JDK 且版本滿足上述要求, 則可跳過此小節內容.
 
 JDK 可使用 IDE 直接下載, 或訪問 [Oracle 網站](https://www.oracle.com/java/technologies/downloads/) 下載.
 
-在 Android Studio 軟體中使用快捷鍵 `CTRL + ALT + S` 開啟設定頁面:
+打開 `Gradle JDK` 設置頁面 (任選一種方式):
 
 ```text
-Build, Execution, Deployment (構建, 執行, 開發) -> 
-Build Tools (構建工具) -> 
-Gradle
+Help (幫助) | Find action (查找操作) # 輸入 "Gradle JDK"
+[ 或 ]
+File (文件) | Settings (設置) # 搜索 "Gradle"
+[ 或 ]
+File (文件) | Settings (設置) | Build, Execution, Deployment (構建, 執行, 部署) | Build Tools (構建工具) | Gradle
 ```
 
 `Gradle JDK` 處可選擇或新增不同版本的 JDK.
@@ -419,11 +428,11 @@ Gradle
 打包專案並生成可安裝到安卓裝置的 APK 檔案:
 
 - 除錯版 (Debug Version)
-    - `Build (構建)` -> `Build Bundle(s) / APK(s)` -> `Build APK(s)`
+    - `Build (構建)` | `Build Bundle(s) / APK(s)` | `Build APK(s)`
     - 生成帶預設簽名的除錯版安裝包
     - 路徑示例: `"D:\AutoJs6\app\build\outputs\apk\debug\"`
 - 釋出版 (Release Version)
-    - `Build (構建)` -> `Generate Signed Bundle / APK`
+    - `Build (構建)` | `Generate Signed Bundle / APK`
     - 選擇 `APK` 選項
     - 準備好簽名檔案 (新建或選取), 生成已簽名的釋出版安裝包
     - 路徑示例: `"D:\AutoJs6\app\release\"`

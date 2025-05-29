@@ -324,12 +324,16 @@ AutoJs6 オープンソース プロジェクトのデバッグや開発が必�
 
 > 注: コンピュータシステムに既にAndroid SDK (Androidソフトウェア開発キット)がインストールされている場合, この節の内容をスキップできます.
 
-Android Studioソフトウェアで `CTRL + ALT + S` のショートカットキーを使用して設定ページを開く:
+`Android SDK (Android ソフトウェア開発キット)` の設定ページを開く (いずれかの方法):
 
 ```text
-Appearance & Behavior (外観と動作) -> 
-System Settings (システム設定) -> 
-Android SDK (Android ソフトウェア開発キット)
+Help (ヘルプ) | Find action (アクションを検索) # 入力 "Android SDK"
+[ または ]
+File (ファイル) | Settings (設定) # 検索 "Android SDK"
+[ または ]
+File (ファイル) | Settings (設定) | Language & Frameworks (言語とフレームワーク) | Android SDK (Android ソフトウェア開発キット)
+[ または ]
+File (ファイル) | Settings (設定) | Appearance & Behavior (外観と動作) | System Settings (システム設定) | Android SDK (Android ソフトウェア開発キット)
 ```
 
 `Android SDK場所` の欄が空白の場合は, 右側の `編集` ボタンをクリックし, 表示されるウィンドウで `次へ` ボタンを数回クリックします.
@@ -345,13 +349,16 @@ AutoJs6では一部のSDKツール(NDKやCMakeなど)が必要です.
 
 > 注: コンピュータシステムにAutoJs6ですべて必要なAndroid SDKツールがインストールされている場合, この節の内容をスキップできます.
 
-Android Studioソフトウェアで `CTRL + ALT + S` のショートカットキーを使用して設定ページを開く:
+`SDK Tools (SDK ツール)` の設定ページを開く (いずれかの方法):
 
 ```text
-Appearance & Behavior (外観と動作) -> 
-System Settings (システム設定) -> 
-Android SDK (Android ソフトウェア開発キット) -> 
-SDK Tools (SDK ツール) (右側のウィンドウにあります)
+Help (ヘルプ) | Find action (アクションを検索) # 入力 "SDK Tools"
+[ または ]
+File (ファイル) | Settings (設定) # 検索 "SDK Tools"
+[ または ]
+File (ファイル) | Settings (設定) | Language & Frameworks (言語とフレームワーク) | Android SDK (Android ソフトウェア開発キット) | SDK Tools (SDK ツール) (右側のウィンドウにあります)
+[ または ]
+File (ファイル) | Settings (設定) | Appearance & Behavior (外観と動作) | System Settings (システム設定) | Android SDK (Android ソフトウェア開発キット) | SDK Tools (SDK ツール) (右側のウィンドウにあります) 
 ```
 
 `パッケージの詳細を表示` を選択し, NDKおよびCMakeをそれぞれクリックして, 対応するバージョンのツールが選択されていることを確認してください, SDKツールのバージョン情報は, AutoJs6プロジェクトのルートディレクトリにある `version.properties` ファイルに記載されています.
@@ -360,18 +367,20 @@ SDK Tools (SDK ツール) (右側のウィンドウにあります)
 
 AutoJs6プロジェクトが依存する `JDK (Java開発キット)` のリリースバージョンは少なくとも `17` で, それ以下のバージョンは推奨されませんが, 最低でも `19` の使用を推奨します.
 
-2025 年 5 月 27 日 現在, AutoJs6がサポートする最大のJDKバージョンは `24` です.
+2025 年 5 月 29 日 現在, AutoJs6がサポートする最大のJDKバージョンは `24` です.
 
 > 注: コンピュータシステムに適切なバージョンのJDKがインストールされている場合, この節の内容をスキップできます.
 
 JDK は IDE から直接ダウンロードするか, [Oracle サイト](https://www.oracle.com/java/technologies/downloads/) にアクセスしてダウンロードできます.
 
-Android Studio ソフトウェアでショートカットキー `CTRL + ALT + S` を使用して設定ページを開きます:
+`Gradle JDK` の設定ページを開く (いずれかの方法):
 
 ```text
-Build, Execution, Deployment (ビルド, 実行, 展開) -> 
-Build Tools (ビルドツール) -> 
-Gradle
+Help (ヘルプ) | Find action (アクションを検索) # 入力 "Gradle JDK"
+[ または ]
+File (ファイル) | Settings (設定) # 検索 "Gradle"
+[ または ]
+File (ファイル) | Settings (設定) | Build, Execution, Deployment (ビルド、実行、デプロイ) | Build Tools (ビルドツール) | Gradle
 ```
 
 `Gradle JDK` で異なるバージョンの JDK を選択または追加できます.
@@ -419,11 +428,11 @@ Android Studio のメインページで `Get from VCS (バージョン管理シ�
 プロジェクトをパッケージして, Android デバイスにインストール可能な APK ファイルを生成します:
 
 - デバッグ版 (デバッグバージョン)
-    - `Build (ビルド)` -> `Build Bundle(s) / APK(s)` -> `Build APK(s)`
+    - `Build (ビルド)` | `Build Bundle(s) / APK(s)` | `Build APK(s)`
     - デフォルトの署名が含まれたデバッグ版のインストールパッケージを生成します
     - パスの例: `"D:\AutoJs6\app\build\outputs\apk\debug\"`
 - リリース版 (リリースバージョン)
-    - `Build (ビルド)` -> `Generate Signed Bundle / APK`
+    - `Build (ビルド)` | `Generate Signed Bundle / APK`
     - `APK` オプションを選択します
     - 署名ファイル (新規または選択) を準備して署名付きのリリース版インストールパッケージを生成します
     - パスの例: `"D:\AutoJs6\app\release\"`
