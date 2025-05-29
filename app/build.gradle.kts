@@ -53,6 +53,9 @@ dependencies /* Unclassified */ {
     // SwipeRefreshLayout
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 
+    // ConstraintLayout
+    implementation("androidx.constraintlayout:constraintlayout:2.2.1")
+
     // FlexboxLayout
     implementation("com.google.android.flexbox:flexbox:3.0.0")
 

@@ -32,21 +32,22 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_margin="4dp"
             android:orientation="vertical">
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
-                android:layout_weight="1"
+                android:layout_weight="15"
+                android:gravity="center"
                 android:layout_gravity="center_horizontal"
                 android:orientation="horizontal">
 
                 <LinearLayout
+                    android:id="@+id/icon_1st_developer_container"
                     android:layout_width="180dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginEnd="32dp"
                     android:background="?selectableItemBackground"
                     android:baselineAligned="false"
                     android:gravity="center"
@@ -65,7 +66,7 @@
                         <ImageView
                             android:layout_width="@dimen/icon_developer_identifier_image_side_length_compact"
                             android:layout_height="@dimen/icon_developer_identifier_image_side_length_compact"
-                            android:padding="@dimen/icon_developer_identifier_image_padding_compact"
+                            android:padding="@dimen/icon_developer_identifier_image_padding"
                             android:layout_gravity="center"
                             android:src="@drawable/ic_looks_1_black_48dp"
                             app:tint="@color/tint_1st_developer_identifier"
@@ -80,12 +81,11 @@
                         android:background="?selectableItemBackground"
                         android:clickable="true"
                         android:focusable="true"
-                        android:gravity="center"
                         android:orientation="horizontal">
 
                         <de.hdodenhof.circleimageview.CircleImageView
-                            android:layout_width="@dimen/about_item_avatar_side_length_land_compact"
-                            android:layout_height="@dimen/about_item_avatar_side_length_land_compact"
+                            android:layout_width="@dimen/about_item_avatar_side_length_land"
+                            android:layout_height="@dimen/about_item_avatar_side_length_land"
                             android:src="@drawable/avatar_original_developer"
                             android:contentDescription="avatar_original_developer"
                             app:civ_border_width="@dimen/github_avatar_border_width"
@@ -111,7 +111,7 @@
                             android:maxLines="1"
                             android:text="@string/original_developer_full_name"
                             android:textColor="@color/github_color_fg_default"
-                            android:textSize="@dimen/github_font_size_full_name"
+                            android:textSize="@dimen/github_font_size_full_name_compat"
                             android:textStyle="bold" />
 
                         <TextView
@@ -122,7 +122,7 @@
                             android:maxLines="1"
                             android:text="@string/original_developer_nickname"
                             android:textColor="@color/github_color_fg_muted"
-                            android:textSize="@dimen/github_font_size_nickname" />
+                            android:textSize="@dimen/github_font_size_nickname_compat" />
 
                     </LinearLayout>
 
@@ -144,10 +144,10 @@
 
                         <com.jaredrummler.android.widget.AnimatedSvgView
                             android:id="@+id/icon_about_app_svg_view"
-                            android:layout_width="86dp"
-                            android:layout_height="86dp"
+                            android:layout_width="82dp"
+                            android:layout_height="82dp"
                             android:layout_gravity="center"
-                            android:layout_margin="9dp"
+                            android:layout_margin="8dp"
                             app:animatedSvgFillColors="@array/icon_about_app_svg_view_fill_colors"
                             app:animatedSvgGlyphStrings="@array/icon_about_app_svg_view_paths"
                             app:animatedSvgTraceColors="@array/icon_about_app_svg_view_trace_colors"
@@ -163,9 +163,9 @@
                             android:id="@+id/icon_about_app"
                             android:visibility="invisible"
                             tools:visibility="visible"
-                            android:layout_width="86dp"
-                            android:layout_height="86dp"
-                            android:layout_margin="9dp"
+                            android:layout_width="82dp"
+                            android:layout_height="82dp"
+                            android:layout_margin="8dp"
                             android:src="@drawable/autojs6_material"
                             tools:ignore="ContentDescription,ImageContrastCheck" />
 
@@ -173,7 +173,7 @@
 
                     <LinearLayout
                         android:layout_width="wrap_content"
-                        android:layout_height="47dp"
+                        android:layout_height="40dp"
                         android:orientation="vertical"
                         android:gravity="center">
 
@@ -184,7 +184,7 @@
                             android:layout_weight="1"
                             android:gravity="center"
                             android:textColor="@color/about_app_version_info"
-                            android:textSize="16sp"
+                            android:textSize="14sp"
                             android:text="@string/text_sample_string" />
 
                         <TextView
@@ -194,7 +194,7 @@
                             android:layout_weight="1"
                             android:gravity="center"
                             android:textColor="@color/about_app_version_info"
-                            android:textSize="13sp"
+                            android:textSize="11sp"
                             android:text="@string/text_sample_string" />
 
                     </LinearLayout>
@@ -202,10 +202,11 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/icon_2nd_developer_container"
                     android:layout_width="180dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginStart="32dp"
                     android:background="?selectableItemBackground"
                     android:baselineAligned="false"
                     android:gravity="center"
@@ -224,7 +225,7 @@
                         <ImageView
                             android:layout_width="@dimen/icon_developer_identifier_image_side_length_compact"
                             android:layout_height="@dimen/icon_developer_identifier_image_side_length_compact"
-                            android:padding="@dimen/icon_developer_identifier_image_padding_compact"
+                            android:padding="@dimen/icon_developer_identifier_image_padding"
                             android:layout_gravity="center"
                             android:src="@drawable/ic_looks_2_black_48dp"
                             app:tint="@color/tint_2nd_developer_identifier"
@@ -243,8 +244,8 @@
                         android:orientation="horizontal">
 
                         <de.hdodenhof.circleimageview.CircleImageView
-                            android:layout_width="@dimen/about_item_avatar_side_length_land_compact"
-                            android:layout_height="@dimen/about_item_avatar_side_length_land_compact"
+                            android:layout_width="@dimen/about_item_avatar_side_length_land"
+                            android:layout_height="@dimen/about_item_avatar_side_length_land"
                             android:src="@drawable/avatar_developer"
                             android:contentDescription="avatar_developer"
                             app:civ_border_width="@dimen/github_avatar_border_width"
@@ -270,7 +271,7 @@
                             android:maxLines="1"
                             android:text="@string/developer_full_name"
                             android:textColor="@color/github_color_fg_default"
-                            android:textSize="@dimen/github_font_size_full_name"
+                            android:textSize="@dimen/github_font_size_full_name_compat"
                             android:textStyle="bold" />
 
                         <TextView
@@ -281,7 +282,7 @@
                             android:maxLines="1"
                             android:text="@string/developer_nickname"
                             android:textColor="@color/github_color_fg_muted"
-                            android:textSize="@dimen/github_font_size_nickname" />
+                            android:textSize="@dimen/github_font_size_nickname_compat" />
 
                     </LinearLayout>
 
@@ -291,28 +292,28 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="32dp"
+                android:layout_weight="4.5"
                 android:orientation="vertical"
-                android:layout_gravity="bottom"
                 android:gravity="center">
 
                 <include
                     android:id="@+id/activity_about_function_buttons"
                     layout="@layout/activity_about_function_buttons"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal" />
-
-                <org.autojs.autojs.ui.widget.CopyrightTextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:layout_marginVertical="2dp"
-                    tools:text="@string/text_copyright_sample"
-                    android:textColor="@color/prefTextColorPrimary"
-                    android:textSize="13sp" />
+                    android:layout_gravity="center" />
 
             </LinearLayout>
+
+            <org.autojs.autojs.ui.widget.CopyrightTextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.5"
+                android:gravity="center"
+                android:textColor="@color/prefTextColorPrimary"
+                android:textSize="13sp"
+                tools:text="@string/text_copyright_sample" />
 
         </LinearLayout>
 

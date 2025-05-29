@@ -32,21 +32,23 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_margin="8dp"
+            android:layout_margin="4dp"
             android:orientation="vertical">
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
-                android:layout_weight="1"
+                android:layout_weight="15"
+                android:gravity="center"
                 android:layout_gravity="center_horizontal"
                 android:orientation="horizontal">
 
                 <LinearLayout
+                    android:id="@+id/icon_1st_developer_container"
                     android:layout_width="180dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginEnd="32dp"
                     android:background="?selectableItemBackground"
                     android:baselineAligned="false"
                     android:gravity="center"
@@ -80,7 +82,6 @@
                         android:background="?selectableItemBackground"
                         android:clickable="true"
                         android:focusable="true"
-                        android:gravity="center"
                         android:orientation="horizontal">
 
                         <de.hdodenhof.circleimageview.CircleImageView
@@ -147,7 +148,7 @@
                             android:layout_width="91dp"
                             android:layout_height="91dp"
                             android:layout_gravity="center"
-                            android:layout_margin="10dp"
+                            android:layout_margin="12dp"
                             app:animatedSvgFillColors="@array/icon_about_app_svg_view_fill_colors"
                             app:animatedSvgGlyphStrings="@array/icon_about_app_svg_view_paths"
                             app:animatedSvgTraceColors="@array/icon_about_app_svg_view_trace_colors"
@@ -165,7 +166,7 @@
                             tools:visibility="visible"
                             android:layout_width="91dp"
                             android:layout_height="91dp"
-                            android:layout_margin="10dp"
+                            android:layout_margin="12dp"
                             android:src="@drawable/autojs6_material"
                             tools:ignore="ContentDescription,ImageContrastCheck" />
 
@@ -173,7 +174,7 @@
 
                     <LinearLayout
                         android:layout_width="wrap_content"
-                        android:layout_height="50dp"
+                        android:layout_height="47dp"
                         android:orientation="vertical"
                         android:gravity="center">
 
@@ -202,10 +203,11 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/icon_2nd_developer_container"
                     android:layout_width="180dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginStart="32dp"
                     android:background="?selectableItemBackground"
                     android:baselineAligned="false"
                     android:gravity="center"
@@ -289,30 +291,35 @@
 
             </LinearLayout>
 
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="4dp"
+                android:layout_weight="1" />
+
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="36dp"
+                android:layout_weight="5"
                 android:orientation="vertical"
-                android:layout_gravity="bottom"
                 android:gravity="center">
 
                 <include
                     android:id="@+id/activity_about_function_buttons"
                     layout="@layout/activity_about_function_buttons"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal" />
-
-                <org.autojs.autojs.ui.widget.CopyrightTextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:layout_marginTop="9dp"
-                    tools:text="@string/text_copyright_sample"
-                    android:textColor="@color/prefTextColorPrimary"
-                    android:textSize="14sp" />
+                    android:layout_gravity="center" />
 
             </LinearLayout>
+
+            <org.autojs.autojs.ui.widget.CopyrightTextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:textColor="@color/prefTextColorPrimary"
+                android:textSize="13sp"
+                tools:text="@string/text_copyright_sample" />
 
         </LinearLayout>
 

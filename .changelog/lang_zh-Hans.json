@@ -9,10 +9,10 @@
         "Android 15 部分页面状态栏背景着色区域不完整的问题 _[`issue #398`](http://issues.autojs6.com/398)_"
       ],
       "improvement": [
-
+        "关于应用与开发者页面增加布局适配通用性并去除不必要的布局分类"
       ],
       "dependency": [
-
+        "附加 Androidx ConstraintLayout 版本 2.2.1"
       ]
     },
     "v6.6.3": {
