@@ -32,286 +32,336 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_margin="4dp"
             android:orientation="vertical">
 
-            <LinearLayout
-                android:id="@+id/icon_container"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/main_content_container"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:minHeight="180dp"
+                android:layout_height="0dp"
+                android:layout_weight="15"
                 android:gravity="center"
                 android:orientation="vertical"
                 android:background="@android:color/transparent"
                 android:foreground="?selectableItemBackgroundBorderless">
 
-                <FrameLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
-
-                    <com.jaredrummler.android.widget.AnimatedSvgView
-                        android:id="@+id/icon_about_app_svg_view"
-                        android:layout_width="91dp"
-                        android:layout_height="91dp"
-                        android:layout_gravity="center"
-                        android:layout_margin="10dp"
-                        app:animatedSvgFillColors="@array/icon_about_app_svg_view_fill_colors"
-                        app:animatedSvgGlyphStrings="@array/icon_about_app_svg_view_paths"
-                        app:animatedSvgTraceColors="@array/icon_about_app_svg_view_trace_colors"
-                        app:animatedSvgTraceResidueColors="@array/icon_about_app_svg_view_trace_residue_colors"
-                        app:animatedSvgImageSizeX="576"
-                        app:animatedSvgImageSizeY="576"
-                        app:animatedSvgFillStart="200"
-                        app:animatedSvgFillTime="200"
-                        app:animatedSvgTraceTime="500"
-                        app:animatedSvgTraceTimePerGlyph="500" />
-
-                    <ImageView
-                        android:id="@+id/icon_about_app"
-                        android:visibility="invisible"
-                        android:layout_width="91dp"
-                        android:layout_height="91dp"
-                        android:layout_margin="10dp"
-                        android:src="@drawable/autojs6_material"
-                        tools:ignore="ContentDescription,ImageContrastCheck" />
-
-                </FrameLayout>
-
                 <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="50dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toTopOf="@id/main_content_guideline_45"
+                    android:id="@+id/icon_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
                     android:orientation="vertical"
-                    android:gravity="center">
+                    android:background="@android:color/transparent"
+                    android:foreground="?selectableItemBackgroundBorderless">
 
-                    <TextView
-                        android:id="@+id/version"
+                    <FrameLayout
                         android:layout_width="wrap_content"
-                        android:layout_height="0dp"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:textColor="@color/about_app_version_info"
-                        android:textSize="16sp"
-                        android:text="@string/text_sample_string" />
+                        android:layout_height="wrap_content">
 
-                    <TextView
-                        android:id="@+id/since"
+                        <com.jaredrummler.android.widget.AnimatedSvgView
+                            android:id="@+id/icon_about_app_svg_view"
+                            android:layout_width="91dp"
+                            android:layout_height="91dp"
+                            android:layout_gravity="center"
+                            android:layout_margin="10dp"
+                            app:animatedSvgFillColors="@array/icon_about_app_svg_view_fill_colors"
+                            app:animatedSvgGlyphStrings="@array/icon_about_app_svg_view_paths"
+                            app:animatedSvgTraceColors="@array/icon_about_app_svg_view_trace_colors"
+                            app:animatedSvgTraceResidueColors="@array/icon_about_app_svg_view_trace_residue_colors"
+                            app:animatedSvgImageSizeX="576"
+                            app:animatedSvgImageSizeY="576"
+                            app:animatedSvgFillStart="200"
+                            app:animatedSvgFillTime="200"
+                            app:animatedSvgTraceTime="500"
+                            app:animatedSvgTraceTimePerGlyph="500" />
+
+                        <ImageView
+                            android:id="@+id/icon_about_app"
+                            android:visibility="invisible"
+                            tools:visibility="visible"
+                            android:layout_width="91dp"
+                            android:layout_height="91dp"
+                            android:layout_margin="10dp"
+                            android:src="@drawable/autojs6_material"
+                            tools:ignore="ContentDescription,ImageContrastCheck" />
+
+                    </FrameLayout>
+
+                    <LinearLayout
                         android:layout_width="wrap_content"
-                        android:layout_height="0dp"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:textColor="@color/about_app_version_info"
-                        android:textSize="13sp"
-                        android:text="@string/text_sample_string" />
+                        android:layout_height="50dp"
+                        android:orientation="vertical"
+                        android:gravity="center">
+
+                        <TextView
+                            android:id="@+id/version"
+                            android:layout_width="wrap_content"
+                            android:layout_height="0dp"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:textColor="@color/about_app_version_info"
+                            android:textSize="16sp"
+                            android:text="@string/text_sample_string" />
+
+                        <TextView
+                            android:id="@+id/since"
+                            android:layout_width="wrap_content"
+                            android:layout_height="0dp"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:textColor="@color/about_app_version_info"
+                            android:textSize="13sp"
+                            android:text="@string/text_sample_string" />
+
+                    </LinearLayout>
 
                 </LinearLayout>
 
-            </LinearLayout>
+                <androidx.constraintlayout.widget.Guideline
+                    android:id="@+id/main_content_guideline_45"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:orientation="horizontal"
+                    app:layout_constraintGuide_percent="0.45" />
+
+                <androidx.constraintlayout.widget.Guideline
+                    android:id="@+id/main_content_guideline_55"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:orientation="horizontal"
+                    app:layout_constraintGuide_percent="0.55" />
+
+                <LinearLayout
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/main_content_guideline_55"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:id="@+id/developers_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="16dp"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:background="@android:color/transparent"
+                    android:foreground="?selectableItemBackgroundBorderless">
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:maxWidth="480dp"
+                        android:background="?selectableItemBackground"
+                        android:baselineAligned="false"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            android:id="@+id/avatar_original_developer"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:background="?selectableItemBackground"
+                            android:gravity="center"
+                            android:focusable="true"
+                            android:clickable="true">
+
+                            <de.hdodenhof.circleimageview.CircleImageView
+                                android:layout_width="@dimen/about_item_avatar_side_length"
+                                android:layout_height="@dimen/about_item_avatar_side_length"
+                                android:src="@drawable/avatar_original_developer"
+                                android:contentDescription="avatar_original_developer"
+                                app:civ_border_width="@dimen/github_avatar_border_width"
+                                app:civ_border_color="@color/github_avatar_border" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            app:layout_constraintStart_toEndOf="@id/avatar_original_developer"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            android:id="@+id/avatar_original_developer_user_contents"
+                            android:gravity="center_vertical"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="@dimen/about_item_avatar_side_length"
+                            android:layout_marginHorizontal="12dp"
+                            android:paddingTop="0.8dp"
+                            android:background="?selectableItemBackground"
+                            android:orientation="vertical"
+                            android:clickable="true"
+                            android:focusable="true">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textStyle="bold"
+                                android:text="@string/original_developer_full_name"
+                                android:textColor="@color/github_color_fg_default"
+                                android:textSize="@dimen/github_font_size_full_name" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/original_developer_nickname"
+                                android:textColor="@color/github_color_fg_muted"
+                                android:textSize="@dimen/github_font_size_nickname" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            android:id="@+id/icon_1st_developer_identifier"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:background="?selectableItemBackground"
+                            android:gravity="end"
+                            android:focusable="true"
+                            android:clickable="true">
+
+                            <ImageView
+                                android:layout_width="@dimen/icon_developer_identifier_image_side_length"
+                                android:layout_height="@dimen/icon_developer_identifier_image_side_length"
+                                android:padding="@dimen/icon_developer_identifier_image_padding"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_looks_1_black_48dp"
+                                app:tint="@color/tint_1st_developer_identifier"
+                                android:contentDescription="icon_1st_developer_identifier" />
+
+                        </LinearLayout>
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    <Space
+                        android:layout_width="match_parent"
+                        android:layout_height="24dp" />
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:maxWidth="480dp"
+                        android:background="?selectableItemBackground"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:baselineAligned="false">
+
+                        <LinearLayout
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            android:id="@+id/avatar_developer"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:background="?selectableItemBackground"
+                            android:gravity="center"
+                            android:focusable="true"
+                            android:clickable="true">
+
+                            <de.hdodenhof.circleimageview.CircleImageView
+                                android:layout_width="@dimen/about_item_avatar_side_length"
+                                android:layout_height="@dimen/about_item_avatar_side_length"
+                                android:src="@drawable/avatar_developer"
+                                android:contentDescription="avatar_developer"
+                                app:civ_border_width="@dimen/github_avatar_border_width"
+                                app:civ_border_color="@color/github_avatar_border" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            app:layout_constraintStart_toEndOf="@id/avatar_developer"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            android:id="@+id/avatar_developer_user_contents"
+                            android:gravity="center_vertical"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="@dimen/about_item_avatar_side_length"
+                            android:layout_marginHorizontal="12dp"
+                            android:paddingTop="0.8dp"
+                            android:background="?selectableItemBackground"
+                            android:orientation="vertical"
+                            android:clickable="true"
+                            android:focusable="true">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textStyle="bold"
+                                android:text="@string/developer_full_name"
+                                android:textColor="@color/github_color_fg_default"
+                                android:textSize="@dimen/github_font_size_full_name" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/developer_nickname"
+                                android:textColor="@color/github_color_fg_muted"
+                                android:textSize="@dimen/github_font_size_nickname" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            android:id="@+id/icon_2nd_developer_identifier"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:background="?selectableItemBackground"
+                            android:gravity="end"
+                            android:focusable="true"
+                            android:clickable="true">
+
+                            <ImageView
+                                android:layout_width="@dimen/icon_developer_identifier_image_side_length"
+                                android:layout_height="@dimen/icon_developer_identifier_image_side_length"
+                                android:padding="@dimen/icon_developer_identifier_image_padding"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_looks_2_black_48dp"
+                                app:tint="@color/tint_2nd_developer_identifier"
+                                android:contentDescription="icon_2nd_developer_identifier" />
+
+                        </LinearLayout>
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                </LinearLayout>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginTop="4dp"
-                android:orientation="vertical">
+                android:layout_marginHorizontal="16dp"
+                android:layout_height="0dp"
+                android:layout_weight="3"
+                android:orientation="vertical"
+                android:gravity="center">
 
-                <LinearLayout
+                <include
+                    android:id="@+id/activity_about_function_buttons"
+                    layout="@layout/activity_about_function_buttons"
                     android:layout_width="match_parent"
-                    android:layout_height="62dp"
-                    android:layout_marginHorizontal="10dp"
-                    android:layout_marginVertical="4dp"
-                    android:background="?selectableItemBackground"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:baselineAligned="false">
-
-                    <LinearLayout
-                        android:id="@+id/avatar_original_developer"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:background="?selectableItemBackground"
-                        android:gravity="center"
-                        android:focusable="true"
-                        android:clickable="true">
-
-                        <de.hdodenhof.circleimageview.CircleImageView
-                            android:layout_width="@dimen/about_item_avatar_side_length"
-                            android:layout_height="@dimen/about_item_avatar_side_length"
-                            android:src="@drawable/avatar_original_developer"
-                            android:contentDescription="avatar_original_developer"
-                            app:civ_border_width="@dimen/github_avatar_border_width"
-                            app:civ_border_color="@color/github_avatar_border" />
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/avatar_original_developer_user_contents"
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:layout_height="@dimen/about_item_avatar_side_length"
-                        android:layout_marginHorizontal="12dp"
-                        android:paddingTop="0.8dp"
-                        android:background="?selectableItemBackground"
-                        android:orientation="vertical"
-                        android:clickable="true"
-                        android:focusable="true">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textStyle="bold"
-                            android:ellipsize="middle"
-                            android:maxLines="1"
-                            android:text="@string/original_developer_full_name"
-                            android:textColor="@color/github_color_fg_default"
-                            android:textSize="@dimen/github_font_size_full_name" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:ellipsize="middle"
-                            android:maxLines="1"
-                            android:text="@string/original_developer_nickname"
-                            android:textColor="@color/github_color_fg_muted"
-                            android:textSize="@dimen/github_font_size_nickname" />
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/icon_1st_developer_identifier"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:background="?selectableItemBackground"
-                        android:gravity="end"
-                        android:focusable="true"
-                        android:clickable="true">
-
-                        <ImageView
-                            android:layout_width="@dimen/icon_developer_identifier_image_side_length"
-                            android:layout_height="@dimen/icon_developer_identifier_image_side_length"
-                            android:padding="@dimen/icon_developer_identifier_image_padding"
-                            android:layout_gravity="center"
-                            android:src="@drawable/ic_looks_1_black_48dp"
-                            app:tint="@color/tint_1st_developer_identifier"
-                            android:contentDescription="icon_1st_developer_identifier" />
-
-                    </LinearLayout>
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="62dp"
-                    android:layout_marginHorizontal="10dp"
-                    android:layout_marginVertical="4dp"
-                    android:background="?selectableItemBackground"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:baselineAligned="false">
-
-                    <LinearLayout
-                        android:id="@+id/avatar_developer"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:background="?selectableItemBackground"
-                        android:gravity="center"
-                        android:focusable="true"
-                        android:clickable="true">
-
-                        <de.hdodenhof.circleimageview.CircleImageView
-                            android:layout_width="@dimen/about_item_avatar_side_length"
-                            android:layout_height="@dimen/about_item_avatar_side_length"
-                            android:src="@drawable/avatar_developer"
-                            android:contentDescription="avatar_developer"
-                            app:civ_border_width="@dimen/github_avatar_border_width"
-                            app:civ_border_color="@color/github_avatar_border" />
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/avatar_developer_user_contents"
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:layout_height="@dimen/about_item_avatar_side_length"
-                        android:layout_marginHorizontal="12dp"
-                        android:paddingTop="0.8dp"
-                        android:background="?selectableItemBackground"
-                        android:orientation="vertical"
-                        android:clickable="true"
-                        android:focusable="true">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textStyle="bold"
-                            android:maxLines="1"
-                            android:ellipsize="middle"
-                            android:text="@string/developer_full_name"
-                            android:textColor="@color/github_color_fg_default"
-                            android:textSize="@dimen/github_font_size_full_name" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:ellipsize="middle"
-                            android:maxLines="1"
-                            android:text="@string/developer_nickname"
-                            android:textColor="@color/github_color_fg_muted"
-                            android:textSize="@dimen/github_font_size_nickname" />
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/icon_2nd_developer_identifier"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:background="?selectableItemBackground"
-                        android:gravity="end"
-                        android:focusable="true"
-                        android:clickable="true">
-
-                        <ImageView
-                            android:layout_width="@dimen/icon_developer_identifier_image_side_length"
-                            android:layout_height="@dimen/icon_developer_identifier_image_side_length"
-                            android:padding="@dimen/icon_developer_identifier_image_padding"
-                            android:layout_gravity="center"
-                            android:src="@drawable/ic_looks_2_black_48dp"
-                            app:tint="@color/tint_2nd_developer_identifier"
-                            android:contentDescription="icon_2nd_developer_identifier" />
-
-                    </LinearLayout>
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:gravity="center|bottom">
-
-                    <include
-                        android:id="@+id/activity_about_function_buttons"
-                        layout="@layout/activity_about_function_buttons"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal" />
-
-                    <org.autojs.autojs.ui.widget.CopyrightTextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:layout_marginTop="16dp"
-                        android:ellipsize="middle"
-                        android:maxLines="1"
-                        tools:text="@string/text_copyright_sample"
-                        android:textColor="@color/prefTextColorPrimary"
-                        android:textSize="13sp" />
-
-                </LinearLayout>
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal" />
 
             </LinearLayout>
+
+            <org.autojs.autojs.ui.widget.CopyrightTextView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:layout_marginBottom="8dp"
+                tools:text="@string/text_copyright_sample"
+                android:textColor="@color/prefTextColorPrimary"
+                android:textSize="14sp" />
 
         </LinearLayout>
 
