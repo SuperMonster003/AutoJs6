@@ -127,7 +127,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private val mDocsWebView: EWebView = binding.docs
     private val mDrawerLayout: DrawerLayout = binding.drawerLayout
 
-    private var mCurrentCharset: Charset = StandardCharsets.UTF_8
+    private var mCurrentCharsetConfidence: Int = 0
+    private var mCurrentCharset: Charset = DEFAULT_CHARSET_TO_WRITE_FILE
     private var mHadBom = false
     private var mReadOnly = false
     private var mAutoCompletion: AutoCompletion? = null
@@ -244,7 +245,9 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 val resolver = context.contentResolver
                 val rawBytes = resolver.openInputStream(uri)?.use { it.readBytes() } ?: ByteArray(0)
 
-                mCurrentCharset = StringUtils.detectCharset(rawBytes).charsetOrDefault()
+                val detectedCharsetWrapper = StringUtils.detectCharset(rawBytes)
+                mCurrentCharsetConfidence = detectedCharsetWrapper.confidence ?: 0
+                mCurrentCharset = detectedCharsetWrapper.charsetOrDefault()
                 mHadBom = StringUtils.hasBom(rawBytes, mCurrentCharset)
 
                 val effectiveBytes = if (mHadBom) {
@@ -451,8 +454,21 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     private fun writeTextWithCharset(uri: Uri, text: String) {
         context.contentResolver.openOutputStream(uri, "rwt")?.use { out ->
-            if (mHadBom) out.write(StringUtils.bomBytes(mCurrentCharset))
-            out.write(text.toByteArray(mCurrentCharset))
+            val (targetCharset, needBom) = when {
+                mHadBom -> {
+                    mCurrentCharset to true
+                }
+                mCurrentCharsetConfidence >= MIN_CONFIDENCE_TO_WRITE_FILE -> {
+                    mCurrentCharset to false
+                }
+                else -> {
+                    DEFAULT_CHARSET_TO_WRITE_FILE to false
+                }
+            }
+            if (needBom) {
+                out.write(StringUtils.bomBytes(targetCharset))
+            }
+            out.write(text.toByteArray(targetCharset))
         } ?: throw IOException("Cannot open output stream for $uri")
     }
 
@@ -739,13 +755,19 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     companion object {
+
         private val TAG = EditorView::class.java.simpleName
+
+        private const val MIN_CONFIDENCE_TO_WRITE_FILE = 60
+        private val DEFAULT_CHARSET_TO_WRITE_FILE = StandardCharsets.UTF_8
+
         const val EXTRA_PATH = "path"
         const val EXTRA_NAME = "name"
         const val EXTRA_CONTENT = "content"
         const val EXTRA_READ_ONLY = "readOnly"
         const val EXTRA_SAVE_ENABLED = "saveEnabled"
         const val EXTRA_RUN_ENABLED = "runEnabled"
+
     }
 
 }
