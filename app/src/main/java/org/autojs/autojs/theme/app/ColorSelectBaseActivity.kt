@@ -53,7 +53,6 @@ import org.autojs.autojs.util.ViewUtils.setMenuIconsColorByColorLuminance
 import org.autojs.autojs.util.ViewUtils.setNavigationIconColorByColorLuminance
 import org.autojs.autojs.util.ViewUtils.setTitlesTextColorByColorLuminance
 import org.autojs.autojs6.R
-import org.autojs.autojs6.R.string.text_search_color
 import org.greenrobot.eventbus.EventBus
 import java.util.*
 import kotlin.math.absoluteValue
@@ -132,7 +131,7 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
         !is SearchView -> null
         else -> searchView.also {
             mSearchView = it
-            it.queryHint = it.context.getString(text_search_color)
+            it.queryHint = it.context.getString(R.string.text_search_color)
             it.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
                 override fun onQueryTextSubmit(query: String?) = true.also { onQueryTextSimpleListener(query) }
                 override fun onQueryTextChange(newText: String?) = true.also { onQueryTextSimpleListener(newText) }

@@ -23,6 +23,7 @@ import android.view.Gravity
 import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewTreeObserver
 import android.view.Window
 import android.view.WindowInsets
@@ -42,6 +43,9 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.core.view.children
+import androidx.core.view.get
+import androidx.core.view.size
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import org.autojs.autojs.app.GlobalAppContext
@@ -50,8 +54,6 @@ import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs6.R
 import kotlin.math.roundToInt
-import androidx.core.view.size
-import androidx.core.view.get
 
 /**
  * Created by Stardust on Jan 24, 2017.
@@ -232,67 +234,46 @@ object ViewUtils {
         }
     }
 
-    fun setStatusBarAppearanceLightByColorLuminance(activity: Activity, aimColor: Int) {
+    fun setStatusBarAppearanceLightByColorLuminance(activity: Activity, @ColorInt aimColor: Int) {
         val shouldBeLight = isLuminanceDark(aimColor)
         setStatusBarAppearanceLight(activity, shouldBeLight)
     }
 
     @JvmStatic
     fun setStatusBarBackgroundColor(activity: Activity, @ColorInt color: Int) {
-        val window = activity.window
-        val decorView = window.decorView as ViewGroup
-
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) {
-            @Suppress("DEPRECATION")
-            window.statusBarColor = color
-            return
-        }
-
-        // @Hint by JetBrains AI Assistant on May 3, 2025.
-        //  ! `View.setOnApplyWindowInsetsListener { ... }` is invoked repeatedly only in these cases:
-        //  !   - The root view explicitly calls `requestApplyInsets()`
-        //  !   - A configuration change occurs (rotation, navigation-mode switch, etc.)
-        //  !   - WindowInsets change dynamically (IME/keyboard, gesture bar showing or hiding)
-        //  ! Hence, only the first WindowInsets dispatch that happens during Activity startup
-        //  ! actually paints the correct status-bar color. Subsequent calls to
-        //  ! `setStatusBarBackgroundColor()` merely cache the new color but do NOT trigger
-        //  ! another inset callback, so the visual change on the status bar is never observed.
-        //  !
-        //  ! zh-CN:
-        //  !
-        //  ! `View.setOnApplyWindowInsetsListener { ... }` 只在下列场景被重复触发:
-        //  !   - 根视图调用 `requestApplyInsets()`
-        //  !   - Configuration 变化 (旋转, 手势导航显示方式切换等)
-        //  !   - WindowInsets 动态变化 (键盘, 手势指示条出现或隐藏)
-        //  ! 因此, 仅在 Activity 启动时触发的一次 WindowInsets 分发可以正确设置背景色,
-        //  ! 之后重复调用 `setStatusBarBackgroundColor()`, 代码只是把新颜色暂存,
-        //  ! 并不会重新触发 Inset 回调, 导致无法观测到状态栏的颜色变化.
-        //  !
-        //  # decorView.setOnApplyWindowInsetsListener { view, insets ->
-        //  #     val statusBarInsets = insets.getInsets(WindowInsets.Type.statusBars())
-        //  #     val contentView: ViewGroup? = activity.findViewById(android.R.id.content)
-        //  #     val statusBarOverlay = View(activity).apply {
-        //  #         layoutParams = FrameLayout.LayoutParams(
-        //  #             FrameLayout.LayoutParams.MATCH_PARENT,
-        //  #             statusBarInsets.top, // 状态栏高度
-        //  #         )
-        //  #         setBackgroundColor(color)
-        //  #     }
-        //  #     contentView?.addView(statusBarOverlay)
-        //  #     view.onApplyWindowInsets(insets)
-        //  # }
-
-        val scrim = decorView.findViewWithTag(TAG_STATUS_BAR_SCRIM) ?: run {
-            View(activity).apply {
-                tag = TAG_STATUS_BAR_SCRIM
-                layoutParams = ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    getStatusBarHeightByWindow(activity)
-                )
-                decorView.addView(this)
+        @Suppress("DEPRECATION")
+        activity.window.apply {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                isStatusBarContrastEnforced = false
             }
+            statusBarColor = color
         }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+            installOrUpdateScrim(activity, color)
+        }
+    }
+
+    private fun installOrUpdateScrim(activity: Activity, @ColorInt color: Int) {
+        val decor = activity.window.decorView as ViewGroup
+        val scrim = decor.children.find { it.tag == TAG_STATUS_BAR_SCRIM }
+            ?: FrameLayout(activity).also {
+                it.tag = TAG_STATUS_BAR_SCRIM
+                // Height will be set by Insets later.
+                // zh-CN: 高度稍后由 Insets 赋值.
+                val lp = FrameLayout.LayoutParams(MATCH_PARENT, 0, Gravity.TOP)
+                decor.addView(it, lp)
+            }
         scrim.setBackgroundColor(color)
+        // Sync height with Insets change (precise after Android 15).
+        // zh-CN: 每次 Insets 变化时同步高度 (Android 15 之后才能保证精确).
+        ViewCompat.setOnApplyWindowInsetsListener(scrim) { v, insets ->
+            val statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
+            if (v.layoutParams.height != statusBarHeight) {
+                v.layoutParams.height = statusBarHeight
+                v.requestLayout()
+            }
+            insets
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -322,23 +303,24 @@ object ViewUtils {
         val window = activity.window
         val decorView = window.decorView
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
-            decorView.setOnApplyWindowInsetsListener { view, insets ->
-                val navBarInsets = insets.getInsets(WindowInsets.Type.navigationBars())
-                val contentView: ViewGroup? = activity.findViewById(android.R.id.content)
-                val navBarOverlay = View(activity).apply {
-                    layoutParams = FrameLayout.LayoutParams(
-                        FrameLayout.LayoutParams.MATCH_PARENT,
-                        navBarInsets.bottom, // 导航栏高度
-                    ).apply { gravity = Gravity.BOTTOM }
-                    setBackgroundColor(color)
-                }
-                contentView?.addView(navBarOverlay)
-                view.onApplyWindowInsets(insets)
-            }
-        } else {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) {
             @Suppress("DEPRECATION")
             window.navigationBarColor = color
+            return
+        }
+
+        decorView.setOnApplyWindowInsetsListener { view, insets ->
+            val navBarInsets = insets.getInsets(WindowInsets.Type.navigationBars())
+            val contentView: ViewGroup? = activity.findViewById(android.R.id.content)
+            val navBarOverlay = View(activity).apply {
+                layoutParams = FrameLayout.LayoutParams(
+                    MATCH_PARENT,
+                    navBarInsets.bottom, // 导航栏高度
+                ).apply { gravity = Gravity.BOTTOM }
+                setBackgroundColor(color)
+            }
+            contentView?.addView(navBarOverlay)
+            view.onApplyWindowInsets(insets)
         }
     }
 

@@ -1,5 +1,20 @@
 {
   "$data": {
+    "v6.6.4": {
+      "released_date": "2025/05/29",
+      "feature": [
+
+      ],
+      "fix": [
+        "Android 15 部分页面状态栏背景着色区域不完整的问题 _[`issue #398`](http://issues.autojs6.com/398)_"
+      ],
+      "improvement": [
+
+      ],
+      "dependency": [
+
+      ]
+    },
     "v6.6.3": {
       "released_date": "2025/05/27",
       "feature": [
