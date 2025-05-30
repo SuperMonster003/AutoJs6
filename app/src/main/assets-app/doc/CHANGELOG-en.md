@@ -4,6 +4,20 @@
 
 ******
 
+# v6.6.4
+
+###### 2025/05/31
+
+* `Hint` API change: ui.(status/navigation)BarAppearanceLight[By] -> ui.(status/navigation)BarIconLight[By]
+* `Feature` util.dpToPx/spToPx/pxToDp/pxToSp methods for pixel unit conversion
+* `Fix` Subtitles may be displayed incompletely when rotating the screen to landscape orientation
+* `Fix` Some page content may be obscured by the side navigation bar when rotating to landscape
+* `Fix` Incomplete status bar background tint area on some pages in Android 15 _[`issue #398`](http://issues.autojs6.com/398)_
+* `Fix` Code editor might write files with low-confidence encoding causing decoding errors (attempted fix)
+* `Improvement` Improved layout adaptability on the App and Developer pages and removed unnecessary layout categories
+* `Improvement` README.md build section added multiple methods to help locate the target settings page _[`issue #404`](http://issues.autojs6.com/404)_
+* `Dependency` Added Androidx ConstraintLayout version 2.2.1
+
 # v6.6.3
 
 ###### 2025/05/27

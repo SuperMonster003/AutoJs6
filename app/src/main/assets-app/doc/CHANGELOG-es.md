@@ -4,6 +4,20 @@
 
 ******
 
+# v6.6.4
+
+###### 2025/05/31
+
+* `Sugerencia` Cambio de API: ui.(status/navigation)BarAppearanceLight[By] -> ui.(status/navigation)BarIconLight[By]
+* `Nuevo` Métodos util.dpToPx/spToPx/pxToDp/pxToSp para conversión de unidades de píxeles
+* `Corrección` Subtítulos que pueden mostrarse incompletos al rotar la pantalla a orientación horizontal
+* `Corrección` Parte del contenido de algunas páginas oculto por la barra de navegación lateral al rotar la pantalla a horizontal
+* `Corrección` Área de coloreado de fondo de la barra de estado incompleta en algunas páginas bajo Android 15 _[`issue #398`](http://issues.autojs6.com/398)_
+* `Corrección` El editor de código podría escribir archivos con una codificación de confianza insuficiente causando errores de decodificación (arreglo tentativa)
+* `Mejora` Mejorada la adaptabilidad de diseño en las páginas de Aplicación y Desarrollador y eliminadas categorías de diseño innecesarias
+* `Mejora` En README.md, sección de compilación, añadidas varias formas para facilitar la localización de la página de configuración del objetivo _[`issue #404`](http://issues.autojs6.com/404)_
+* `Dependencia` Añadido Androidx ConstraintLayout versión 2.2.1
+
 # v6.6.3
 
 ###### 2025/05/27

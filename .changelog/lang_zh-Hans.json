@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.6.4": {
-      "released_date": "2025/05/30",
+      "released_date": "2025/05/31",
       "hint": [
         "API 变更: ui.(status/navigation)BarAppearanceLight[By] -> ui.(status/navigation)BarIconLight[By]"
       ],

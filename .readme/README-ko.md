@@ -155,6 +155,20 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 
 ******
 
+# v6.6.4
+
+###### 2025/05/31
+
+* `힌트` API 변경: ui.(status/navigation)BarAppearanceLight[By] -> ui.(status/navigation)BarIconLight[By]
+* `추가` util.dpToPx/spToPx/pxToDp/pxToSp 메서드(픽셀 단위 변환용)
+* `수정` 화면을 가로 모드로 회전하면 자막이 완전히 표시되지 않을 수 있는 문제
+* `수정` 화면을 가로 모드로 회전하면 일부 페이지 콘텐츠가 사이드 내비게이션 바에 가려지는 문제
+* `수정` Android 15 일부 페이지에서 상태 표시줄 배경 색칠 영역이 불완전한 문제 _[`issue #398`](http://issues.autojs6.com/398)_
+* `수정` 코드 편집기가 신뢰도 낮은 인코딩으로 파일을 기록해 디코딩 오류가 발생할 수 있는 문제(수정 시도)
+* `개선` 앱 및 개발자 페이지 레이아웃 호환성 개선 및 불필요한 레이아웃 분류 제거
+* `개선` README.md 빌드 섹션에 여러 방법 추가로 대상 설정 페이지 찾기 용이화 _[`issue #404`](http://issues.autojs6.com/404)_
+* `개선` 일부 의존성 또는 로컬 라이브러리 버전 조정 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v664)_
+
 # v6.6.3
 
 ###### 2025/05/27
@@ -269,32 +283,6 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `개선` README.md 를 개선하여 프로젝트 빌드 및 실행 방법에 대한 문서를 보강 _[`issue #344`](http://issues.autojs6.com/344)_
 * `개선` 일부 의존성 또는 로컬 라이브러리 버전 조정 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v662)_
 
-# v6.6.1
-
-###### 2025/01/01
-
-* `추가` 중국어 병음 변환을 위한 Pinyin 모듈 (프로젝트 문서 참고 > [중국어 병음](https://docs.autojs6.com/#/pinyin))
-* `추가` 중국어 병음 변환을 위한 Pinyin4j 모듈 (프로젝트 문서 참고 > [중국어 병음](https://docs.autojs6.com/#/pinyin4j))
-* `추가` 컨트롤 또는 컨트롤 컬렉션이 유사한지 여부를 확인하는 UiObject#isSimilar 및 UiObjectCollection#isSimilar 메서드
-* `추가` "currentComponent" 전역 메서드로, 현재 활성화된 구성 요소의 이름 정보를 가져오는 데 사용됩니다
-* `수정` 일부 환경에서 이전 버전으로 롤백하여 프로젝트가 정상적으로 컴파일되지 않는 문제
-* `수정` 존재하지 않는 메서드를 호출할 때 발생할 수 있는 "비원시 값" 예외
-* `수정` 일부 기기에서 스크립트 바로가기를 정상적으로 추가할 수 없는 문제 (임시 수정) _[`issue #221`](http://issues.autojs6.com/221)_
-* `수정` automator.click/longClick 메서드의 파라미터 유형 제한 오류 _[`issue #275`](http://issues.autojs6.com/275)_
-* `수정` 선택자가 ConsString 유형의 파라미터를 지원하지 않는 문제 _[`issue #277`](http://issues.autojs6.com/277)_
-* `수정` UiObjectCollection 인스턴스에서 메서드 및 속성이 누락된 문제
-* `개선` 패키징 페이지에서 서명 구성, 키 저장소 관리 및 권한 설정을 지원합니다. ([luckyloogn]()) _[`pr #286`]()_
-* `개선` 플로팅 윈도우의 현재 패키지 이름 및 현재 활동 이름의 인식 정확도가 향상되었습니다 (우선 순위: Shizuku > Root > A11Y)
-* `개선` currentPackage 및 currentActivity 의 인식 정확도가 향상되었습니다 (우선 순위: Shizuku > Root > A11Y)
-* `개선` 로그 활동 창의 개별 항목 텍스트 내용을 더블 클릭 또는 길게 눌러 선택하는 기능 복원 _[`issue #280`](http://issues.autojs6.com/280)_
-* `개선` project.json 파일이 손상된 경우에도 가능한 한 중요한 정보를 복원
-* `개선` 단일 파일을 패키징할 때 자동 생성된 패키지 이름 접미사를 간체자로부터 병음으로 변환 (다음 음도 지원)
-* `개선` UiSelector#findOnce 및 UiSelector#find 메서드에서 음수 인수 지원
-* `개선` app.startActivity/startDualActivity 메서드의 적응성이 향상되었습니다
-* `개선` UI 요소 및 className 관련 선택자가 RecyclerView, Snackbar 등과 같은 더욱 다양한 패키지 이름 접두사 생략 형식을 지원
-* `개선` Rhino 엔진의 최신 업스트림 코드를 동기화하고 기존 프로젝트에 맞게 조정합니다
-* `개선` 일부 의존성 또는 로컬 라이브러리 버전 조정 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v661)_
-
 ##### 더 많은 버전 기록은 참조하십시오
 
 * [CHANGELOG.md](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG-ko.md)
@@ -311,12 +299,12 @@ AutoJs6 오픈 소스 프로젝트를 디버깅하거나 개발하려면 [Androi
 
 #### Android Studio 준비
 
-`Android Studio Meerkat Feature Drop | 2024.3.2` 버전을 다운로드하십시오 (필요에 따라 선택):
+`Android Studio Meerkat Feature Drop | 2024.3.2 Patch 1` 버전을 다운로드하십시오 (필요에 따라 선택):
 
-- [android-studio-2024.3.2.14-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.3.2.14/android-studio-2024.3.2.14-windows.exe) (1.23 GB)
-- [android-studio-2024.3.2.14-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.3.2.14/android-studio-2024.3.2.14-windows.zip) (1.23 GB)
+- [android-studio-2024.3.2.15-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.3.2.15/android-studio-2024.3.2.15-windows.exe) (1.23 GB)
+- [android-studio-2024.3.2.15-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.3.2.15/android-studio-2024.3.2.15-windows.zip) (1.23 GB)
 
-> 메모: 상기 버전 출시 날짜는 2025 년 5 월 6 일입니다. 다른 버전을 다운로드하거나 상기 링크가 만료되었을 경우, [Android Studio 릴리스 아카이브](https://developer.android.com/studio/archive?hl=en) 페이지를 방문하십시오.
+> 메모: 상기 버전 출시 날짜는 2025 년 5 월 28 일입니다. 다른 버전을 다운로드하거나 상기 링크가 만료되었을 경우, [Android Studio 릴리스 아카이브](https://developer.android.com/studio/archive?hl=en) 페이지를 방문하십시오.
 
 위의 파일을 설치하거나 압축을 풀고 Android Studio 소프트웨어를 실행합니다 (예: `"D:\android-studio\bin\studio64.exe"`).
 
@@ -367,7 +355,7 @@ File (파일) | Settings (설정) | Appearance & Behavior (모양 및 동작) | 
 
 AutoJs6 프로젝트는 `JDK (Java 개발 도구 키트)` 버전이 `17` 이상이어야 하지만, `19` 이상을 권장합니다.
 
-2025 년 5 월 29 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `24` 입니다.
+2025 년 5 월 31 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `24` 입니다.
 
 > 메모: 시스템에 JDK가 설치되어 있고, 버전이 위의 요구 사항을 충족하는 경우, 이 섹션을 건너뛸 수 있습니다.
 

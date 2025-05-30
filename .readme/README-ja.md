@@ -155,6 +155,20 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 
 ******
 
+# v6.6.4
+
+###### 2025/05/31
+
+* `ヒント` API変更: ui.(status/navigation)BarAppearanceLight[By] -> ui.(status/navigation)BarIconLight[By]
+* `新機能` util.dpToPx/spToPx/pxToDp/pxToSp メソッド (ピクセル単位変換用)
+* `修正` 画面を横向きに回転するとサブタイトルが不完全に表示される問題
+* `修正` 画面を横向きに回転すると一部ページのコンテンツがサイドナビゲーションバーに隠れる問題
+* `修正` Android 15 で一部ページのステータスバー背景の着色領域が不完全になる問題 _[`issue #398`](http://issues.autojs6.com/398)_
+* `修正` コードエディタが信頼性の低いエンコーディングでファイルを書き込み, デコードエラーを引き起こす可能性がある問題 (修正試行)
+* `改善` アプリおよび開発者ページのレイアウト適応性を向上し, 不要なレイアウト区分を削除
+* `改善` README.md のビルド節に複数の方法を追加してターゲット設定ページの特定を容易化 _[`issue #404`](http://issues.autojs6.com/404)_
+* `改善` 一部の依存関係またはローカルライブラリのバージョン調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v664)_
+
 # v6.6.3
 
 ###### 2025/05/27
@@ -193,8 +207,8 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `改善` レイアウトインスペクターが要素の非表示をサポート (寄稿 [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #371`](http://pr.autojs6.com/371)_ _[`issue #355`](http://issues.autojs6.com/355)_
 * `改善` レイアウトインスペクターのメニューに機能グループ化用のグラデーション区切りを追加
 * `改善` project.json がスクリプトプロジェクト用 permissions オプションをサポート (寄稿 [wirsnow](https://github.com/wirsnow)) _[`pr #391`](http://pr.autojs6.com/391)_ _[`issue #362`](http://issues.autojs6.com/362)_
-* `改善` 単一ファイルをパッケージングする際、インストール済みアプリの宣言パーミッションを自動読み取り・選択 _[`issue #362`](http://issues.autojs6.com/362)_
-* `改善` テーマカラーの適用範囲を拡大、より多くのウィジェットをサポート
+* `改善` 単一ファイルをパッケージングする際, インストール済みアプリの宣言パーミッションを自動読み取り・選択 _[`issue #362`](http://issues.autojs6.com/362)_
+* `改善` テーマカラーの適用範囲を拡大, より多くのウィジェットをサポート
 * `改善` メインページのドロワー幅がランドスケープおよび超ワイド画面に適応
 * `改善` 『アプリについて』と『開発者について』ページに横向きとコンパクトレイアウトを追加
 * `改善` 設定ダイアログに「デフォルト値を使用」メニューを追加
@@ -269,32 +283,6 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `改善` README.md を改善し, プロジェクトのビルドおよび実行方法のドキュメントを充実 _[`issue #344`](http://issues.autojs6.com/344)_
 * `改善` 一部の依存関係またはローカルライブラリのバージョン調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v662)_
 
-# v6.6.1
-
-###### 2025/01/01
-
-* `新機能` 中国語のピンイン変換用の Pinyin モジュール (プロジェクトドキュメントを参照 > [中国語ピンイン](https://docs.autojs6.com/#/pinyin))
-* `新機能` 中国語のピンイン変換用の Pinyin4j モジュール (プロジェクトドキュメントを参照 > [中国語ピンイン](https://docs.autojs6.com/#/pinyin4j))
-* `新機能` コントロールまたはコントロールコレクションが類似しているかを判定する UiObject#isSimilar と UiObjectCollection#isSimilar メソッド
-* `新機能` グローバルメソッド "currentComponent", 現在アクティブなコンポーネントの名前情報を取得するために使用されます
-* `修正` 一部の環境でバージョンを低く戻すことでプロジェクトが正常にコンパイルできなくなる問題
-* `修正` 存在しないメソッドを呼び出す際に発生する可能性がある「非プリミティブ型の値」エラー
-* `修正` 一部のデバイスでスクリプトショートカットが正常に追加できない問題 (暫定修正) _[`issue #221`](http://issues.autojs6.com/221)_
-* `修正` automator.click/longClick メソッドのパラメーター型制限の誤り _[`issue #275`](http://issues.autojs6.com/275)_
-* `修正` セレクターが ConsString 型のパラメーターをサポートしない問題 _[`issue #277`](http://issues.autojs6.com/277)_
-* `修正` UiObjectCollection インスタンスにメソッドおよびプロパティが欠如している問題
-* `改善` パッケージ化ページで署名設定, キーストア管理, 権限設定をサポートします ([luckyloogn]() による) _[`pr #286`]()_
-* `改善` フローティングウィンドウの現在のパッケージ名および現在のアクティビティ名の認識精度を向上 (優先順位: Shizuku > Root > A11Y)
-* `改善` currentPackage と currentActivity の認識精度を向上 (優先順位: Shizuku > Root > A11Y)
-* `改善` ログアクティビティウィンドウの個別エントリのテキスト内容をダブルクリックまたは長押しで選択する機能を復元 _[`issue #280`](http://issues.autojs6.com/280)_
-* `改善` project.json ファイルが破損した場合でも, スクリプトプロジェクトの重要な情報を可能な限り復元
-* `改善` 単一ファイルをパッケージ化する際に, 自動生成されるパッケージ名のサフィックスを簡体字中国語からピンインに変換 (多音字対応)
-* `改善` UiSelector#findOnce と UiSelector#find メソッドで負の引数をサポート
-* `改善` app.startActivity/startDualActivity メソッドの適応性が向上しました
-* `改善` UI 要素や className に関連するセレクターが RecyclerView や Snackbar などのパッケージ名プレフィックス省略形式にさらに対応
-* `改善` Rhino エンジンの最新の上流コードを同期し, 既存のプロジェクトに適応させる
-* `改善` 一部の依存関係またはローカルライブラリのバージョン調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v661)_
-
 ##### 他のバージョン履歴については以下を参照してください
 
 * [CHANGELOG.md](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG-ja.md)
@@ -311,12 +299,12 @@ AutoJs6 オープンソース プロジェクトのデバッグや開発が必�
 
 #### Android Studioの準備
 
-`Android Studio Meerkat Feature Drop | 2024.3.2` バージョンをダウンロードしてください (いずれかを選択):
+`Android Studio Meerkat Feature Drop | 2024.3.2 Patch 1` バージョンをダウンロードしてください (いずれかを選択):
 
-- [android-studio-2024.3.2.14-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.3.2.14/android-studio-2024.3.2.14-windows.exe) (1.23 GB)
-- [android-studio-2024.3.2.14-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.3.2.14/android-studio-2024.3.2.14-windows.zip) (1.23 GB)
+- [android-studio-2024.3.2.15-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.3.2.15/android-studio-2024.3.2.15-windows.exe) (1.23 GB)
+- [android-studio-2024.3.2.15-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.3.2.15/android-studio-2024.3.2.15-windows.zip) (1.23 GB)
 
-> 注: 上述バージョンのリリース日は 2025 年 5 月 6 日 です. その他のバージョンをダウンロードするか, 上記のリンクが失効している場合は, [Android Studioリリースアーカイブ](https://developer.android.com/studio/archive?hl=en)のページをご覧ください.
+> 注: 上述バージョンのリリース日は 2025 年 5 月 28 日 です. その他のバージョンをダウンロードするか, 上記のリンクが失効している場合は, [Android Studioリリースアーカイブ](https://developer.android.com/studio/archive?hl=en)のページをご覧ください.
 
 上記のファイルをインストールまたは解凍し, Android Studio ソフトウェアを実行します (例: `"D:\android-studio\bin\studio64.exe"`).
 
@@ -367,7 +355,7 @@ File (ファイル) | Settings (設定) | Appearance & Behavior (外観と動作
 
 AutoJs6プロジェクトが依存する `JDK (Java開発キット)` のリリースバージョンは少なくとも `17` で, それ以下のバージョンは推奨されませんが, 最低でも `19` の使用を推奨します.
 
-2025 年 5 月 29 日 現在, AutoJs6がサポートする最大のJDKバージョンは `24` です.
+2025 年 5 月 31 日 現在, AutoJs6がサポートする最大のJDKバージョンは `24` です.
 
 > 注: コンピュータシステムに適切なバージョンのJDKがインストールされている場合, この節の内容をスキップできます.
 

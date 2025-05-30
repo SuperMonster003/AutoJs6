@@ -1,5 +1,27 @@
 {
   "$data": {
+    "v6.6.4": {
+      "released_date": "2025/05/31",
+      "hint": [
+        "API変更: ui.(status/navigation)BarAppearanceLight[By] -> ui.(status/navigation)BarIconLight[By]"
+      ],
+      "feature": [
+        "util.dpToPx/spToPx/pxToDp/pxToSp メソッド (ピクセル単位変換用)"
+      ],
+      "fix": [
+        "画面を横向きに回転するとサブタイトルが不完全に表示される問題",
+        "画面を横向きに回転すると一部ページのコンテンツがサイドナビゲーションバーに隠れる問題",
+        "Android 15 で一部ページのステータスバー背景の着色領域が不完全になる問題 _[`issue #398`](http://issues.autojs6.com/398)_",
+        "コードエディタが信頼性の低いエンコーディングでファイルを書き込み, デコードエラーを引き起こす可能性がある問題 (修正試行)"
+      ],
+      "improvement": [
+        "アプリおよび開発者ページのレイアウト適応性を向上し, 不要なレイアウト区分を削除",
+        "README.md のビルド節に複数の方法を追加してターゲット設定ページの特定を容易化 _[`issue #404`](http://issues.autojs6.com/404)_"
+      ],
+      "dependency": [
+        "Androidx ConstraintLayout バージョン 2.2.1 を追加"
+      ]
+    },
     "v6.6.3": {
       "released_date": "2025/05/27",
       "feature": [
@@ -41,8 +63,8 @@
         "レイアウトインスペクターが要素の非表示をサポート (寄稿 [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #371`](http://pr.autojs6.com/371)_ _[`issue #355`](http://issues.autojs6.com/355)_",
         "レイアウトインスペクターのメニューに機能グループ化用のグラデーション区切りを追加",
         "project.json がスクリプトプロジェクト用 permissions オプションをサポート (寄稿 [wirsnow](https://github.com/wirsnow)) _[`pr #391`](http://pr.autojs6.com/391)_ _[`issue #362`](http://issues.autojs6.com/362)_",
-        "単一ファイルをパッケージングする際、インストール済みアプリの宣言パーミッションを自動読み取り・選択 _[`issue #362`](http://issues.autojs6.com/362)_",
-        "テーマカラーの適用範囲を拡大、より多くのウィジェットをサポート",
+        "単一ファイルをパッケージングする際, インストール済みアプリの宣言パーミッションを自動読み取り・選択 _[`issue #362`](http://issues.autojs6.com/362)_",
+        "テーマカラーの適用範囲を拡大, より多くのウィジェットをサポート",
         "メインページのドロワー幅がランドスケープおよび超ワイド画面に適応",
         "『アプリについて』と『開発者について』ページに横向きとコンパクトレイアウトを追加",
         "設定ダイアログに「デフォルト値を使用」メニューを追加",

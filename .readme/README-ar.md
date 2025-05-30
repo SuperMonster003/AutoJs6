@@ -155,6 +155,20 @@
 
 ******
 
+# v6.6.4
+
+###### 2025/05/31
+
+* `تلميح` تغيير API: ui.(status/navigation)BarAppearanceLight[By] -> ui.(status/navigation)BarIconLight[By]
+* `إضافة جديدة` طرق util.dpToPx/spToPx/pxToDp/pxToSp لتحويل وحدات البكسل
+* `تصليح` مشكلة عرض العنوان الفرعي بشكل غير مكتمل عند تدوير الشاشة إلى الوضع الأفقي
+* `تصليح` مشكلة تغطية جزء من محتوى الصفحة بواسطة شريط التنقل الجانبي عند التدوير إلى الوضع الأفقي
+* `تصليح` منطقة تلوين خلفية شريط الحالة غير مكتملة في بعض الصفحات على Android 15 _[`issue #398`](http://issues.autojs6.com/398)_
+* `تصليح` قد يستخدم محرر الأكواد ترميزًا منخفض الثقة عند الكتابة مما يؤدي إلى أخطاء فك الترميز (محاولة إصلاح)
+* `تحسين` زيادة توافق التخطيط في صفحات التطبيق والمطور وإزالة تصنيفات التخطيط غير الضرورية
+* `تحسين` في README.md، قسم البناء، إضافة طرق متعددة لتسهيل تحديد صفحة إعداد الهدف _[`issue #404`](http://issues.autojs6.com/404)_
+* `تحسين` تعديلات على إصدارات بعض التبعيات أو المكتبات المحلية _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v664)_
+
 # v6.6.3
 
 ###### 2025/05/27
@@ -269,32 +283,6 @@
 * `تحسين` تحسين README.md لتوثيق أفضل لعملية بناء وتشغيل المشروع _[`issue #344`](http://issues.autojs6.com/344)_
 * `تحسين` تعديلات على إصدارات بعض التبعيات أو المكتبات المحلية _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v662)_
 
-# v6.6.1
-
-###### 2025/01/01
-
-* `إضافة جديدة` وحدة Pinyin لتحويل النصوص الصينية إلى بينيين (راجع وثائق المشروع > [البينيين الصيني](https://docs.autojs6.com/#/pinyin))
-* `إضافة جديدة` وحدة Pinyin4j لتحويل النصوص الصينية إلى بينيين (راجع وثائق المشروع > [البينيين الصيني](https://docs.autojs6.com/#/pinyin4j))
-* `إضافة جديدة` الطرق UiObject#isSimilar و UiObjectCollection#isSimilar لتحديد ما إذا كان العنصر أو مجموعة العناصر متشابهة
-* `إضافة جديدة` الطريقة العامة "currentComponent"، تُستخدم للحصول على اسم المكون النشط الحالي
-* `تصليح` مشكلة عدم قدرة المشروع على التجميع بشكل صحيح في بعض البيئات بسبب الرجوع إلى إصدار أقدم
-* `تصليح` خطأ "قيمة غير أولية" قد يحدث عند استدعاء طرق غير موجودة
-* `تصليح` مشكلة عدم إمكانية إضافة اختصارات النصوص على بعض الأجهزة (إصلاح مؤقت) _[`issue #221`](http://issues.autojs6.com/221)_
-* `تصليح` خطأ في قيود نوع الوسائط للطرق automator.click/longClick _[`issue #275`](http://issues.autojs6.com/275)_
-* `تصليح` مشكلة عدم دعم المصفوفات مع الوسائط من نوع ConsString _[`issue #277`](http://issues.autojs6.com/277)_
-* `تصليح` مشكلة فقدان الطرق والخصائص في مثيلات UiObjectCollection
-* `تحسين` تدعم صفحة التغليف إعداد التوقيعات وإدارة مستودعات المفاتيح وإعداد الأذونات (بواسطة [luckyloogn]()) _[`pr #286`]()_
-* `تحسين` تم تحسين دقة التعرف على اسم الحزمة الحالية واسم النشاط الحالي في النوافذ العائمة (الأولوية: Shizuku > Root > A11Y)
-* `تحسين` تم تحسين دقة التعرف على currentPackage و currentActivity (الأولوية: Shizuku > Root > A11Y)
-* `تحسين` استعادة إمكانية اختيار محتوى النص لكل عنصر في نافذة النشاط الخاصة بالسجلات بالنقر المزدوج أو الضغط المطول _[`issue #280`](http://issues.autojs6.com/280)_
-* `تحسين` استعادة أكبر قدر ممكن من المعلومات الأساسية لمشاريع النصوص عند تلف ملف project.json
-* `تحسين` تحويل اللغة الصينية المبسطة تلقائيًا إلى نظام بينيين (بما في ذلك الحروف متعددة النغمات) عند توليد اللواحق للأسماء في الملفات المفردة
-* `تحسين` دعم الوسائط السلبية في الطرق UiSelector#findOnce و UiSelector#find
-* `تحسين` تم تحسين تكيفية أساليب app.startActivity/startDualActivity
-* `تحسين` دعم أشكال مختصرة إضافية لبادئات الأسماء في المصفوفات المرتبطة بعناصر الواجهة (مثل RecyclerView و Snackbar وغيرها)
-* `تحسين` مزامنة أحدث كود من المصدر الرئيسي لمحرك Rhino وتكييفه مع المشروع الحالي
-* `تحسين` تعديلات على إصدارات بعض التبعيات أو المكتبات المحلية _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v661)_
-
 ##### لمزيد من تاريخ الإصدارات، ارجع إلى
 
 * [CHANGELOG.md](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG-ar.md)
@@ -311,12 +299,12 @@
 
 #### تحضير Android Studio
 
-قم بتنزيل إصدار `Android Studio Meerkat Feature Drop | 2024.3.2` (حدد أحدها حسب الحاجة):
+قم بتنزيل إصدار `Android Studio Meerkat Feature Drop | 2024.3.2 Patch 1` (حدد أحدها حسب الحاجة):
 
-- [android-studio-2024.3.2.14-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.3.2.14/android-studio-2024.3.2.14-windows.exe) (1.23 GB)
-- [android-studio-2024.3.2.14-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.3.2.14/android-studio-2024.3.2.14-windows.zip) (1.23 GB)
+- [android-studio-2024.3.2.15-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.3.2.15/android-studio-2024.3.2.15-windows.exe) (1.23 GB)
+- [android-studio-2024.3.2.15-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.3.2.15/android-studio-2024.3.2.15-windows.zip) (1.23 GB)
 
-> ملاحظة: تاريخ الإصدار بالنسخة المذكورة أعلاه هو 6 May 2025. إذا كنت بحاجة إلى تنزيل إصدار آخر، أو إذا كان الرابط المذكور غير صالح، يمكنك زيارة [أرشيف إصدارات Android Studio](https://developer.android.com/studio/archive?hl=en).
+> ملاحظة: تاريخ الإصدار بالنسخة المذكورة أعلاه هو 28 May 2025. إذا كنت بحاجة إلى تنزيل إصدار آخر، أو إذا كان الرابط المذكور غير صالح، يمكنك زيارة [أرشيف إصدارات Android Studio](https://developer.android.com/studio/archive?hl=en).
 
 قم بتثبيت أو فك ضغط الملف المذكور سابقًا، ثم قم بتشغيل برنامج Android Studio (مثل `"D:\android-studio\bin\studio64.exe"`).
 
@@ -367,7 +355,7 @@ File (ملف) | Settings (إعدادات) | Appearance & Behavior (المظهر 
 
 يعتمد مشروع AutoJs6 على إصدار `JDK (مجموعة تطوير جافا)` بإصدار لا يقل عن `17`، ولكن يفضل الإصدار الذي لا يقل عن `19`.
 
-اعتبارًا من 29 May 2025، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `24`.
+اعتبارًا من 31 May 2025، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `24`.
 
 > ملاحظة: إذا كان نظام الكمبيوتر يحتوي على JDK والإصدار يفي بالمتطلبات المذكورة أعلاه، فيمكنك تخطي هذا القسم.
 
