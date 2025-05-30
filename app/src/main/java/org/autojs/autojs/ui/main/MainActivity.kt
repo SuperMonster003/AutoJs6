@@ -199,8 +199,8 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
                     //  ! zh-CN:
                     //  ! 此处改为中间值 (如 `slideOffset < 0.5`) 会带来更好的通知栏亮暗色转换视觉体验,
                     //  ! 但会造成抽屉视图滑动时出现些微卡顿.
-                    slideOffset < 1 -> setUpStatusBarAppearanceLightByThemeColor()
-                    else -> setUpStatusBarAppearanceLightByNightMode()
+                    slideOffset < 1 -> setUpStatusBarIconLightByThemeColor()
+                    else -> setUpStatusBarIconLightByNightMode()
                 }
             }
 
@@ -258,13 +258,13 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
         super.initThemeColors()
         setUpToolbarColors()
         setUpTabLayoutColors()
-        setUpStatusBarAppearanceLight()
+        setUpStatusBarIconLight()
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
         if (hasFocus) {
-            setUpStatusBarAppearanceLight()
+            setUpStatusBarIconLight()
         }
     }
 
@@ -294,12 +294,12 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
         mTab.setSelectedTabIndicatorColor(tabSelectedIndicatorColor)
     }
 
-    private fun setUpStatusBarAppearanceLight() {
+    private fun setUpStatusBarIconLight() {
         Handler(Looper.getMainLooper()).post {
             if (sIsActionBarDrawerOpened) {
-                setUpStatusBarAppearanceLightByNightMode()
+                setUpStatusBarIconLightByNightMode()
             } else {
-                setUpStatusBarAppearanceLightByThemeColor()
+                setUpStatusBarIconLightByThemeColor()
             }
         }
     }

@@ -80,10 +80,10 @@ class ScriptExecuteActivity : AppCompatActivity(), OnActivityResultDelegate.Dele
         if (windowBackground is ColorDrawable) windowBackground.color.let { backgroundColor ->
             val isLightColor = ViewUtils.isLuminanceDark(backgroundColor)
             ViewUtils.setStatusBarBackgroundColor(this, backgroundColor)
-            ViewUtils.setStatusBarAppearanceLight(this, isLightColor)
+            ViewUtils.setStatusBarIconLight(this, isLightColor)
             ViewUtils.setNavigationBarBackgroundColor(this, backgroundColor)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                ViewUtils.setNavigationBarAppearanceLight(this, isLightColor)
+                ViewUtils.setNavigationBarIconLight(this, isLightColor)
             }
         }
 

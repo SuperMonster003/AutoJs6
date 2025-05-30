@@ -48,7 +48,7 @@ abstract class BaseActivity : AppCompatActivity() {
             initThemeColors()
             if (handleStatusBarThemeColorAutomatically) {
                 ThemeColorManager.setStatusBarBackgroundColor(this)
-                setUpStatusBarAppearanceLightByThemeColor()
+                setUpStatusBarIconLightByThemeColor()
             }
         }
 
@@ -75,7 +75,7 @@ abstract class BaseActivity : AppCompatActivity() {
         initThemeColors()
         if (handleStatusBarThemeColorAutomatically) {
             ThemeColorManager.addActivityStatusBar(this)
-            setUpStatusBarAppearanceLightByThemeColor()
+            setUpStatusBarIconLightByThemeColor()
         }
     }
 
@@ -92,12 +92,12 @@ abstract class BaseActivity : AppCompatActivity() {
 
     fun setToolbarAsBack(title: String?) = ViewUtils.setToolbarAsBack(this, title)
 
-    protected fun setUpStatusBarAppearanceLightByNightMode() {
-        ViewUtils.setStatusBarAppearanceLight(this, ViewUtils.isNightModeEnabled)
+    protected fun setUpStatusBarIconLightByNightMode() {
+        ViewUtils.setStatusBarIconLight(this, ViewUtils.isNightModeEnabled)
     }
 
-    protected fun setUpStatusBarAppearanceLightByThemeColor() {
-        ThemeColorManager.setStatusBarAppearanceLight(this)
+    protected fun setUpStatusBarIconLightByThemeColor() {
+        ThemeColorManager.setStatusBarIconLight(this)
     }
 
 }

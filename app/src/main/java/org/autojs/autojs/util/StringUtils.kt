@@ -245,7 +245,7 @@ object StringUtils {
     @JvmStatic
     fun detectCharset(bytes: ByteArray): CharsetMatchWrapper {
         val matches = kotlin.runCatching {
-            CharsetDetector().apply { setText(bytes) }.detectAll()
+            CharsetDetector().apply { setText(bytes).setDeclaredEncoding("UTF-8") }.detectAll()
         }.getOrNull() ?: return CharsetMatchWrapper(null)
 
         matches.firstOrNull {

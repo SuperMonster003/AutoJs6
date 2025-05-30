@@ -43,7 +43,7 @@ class DocumentationActivity : BaseActivity() {
 
     override fun onStart() {
         super.onStart()
-        setUpStatusBarAppearanceLightByNightMode()
+        setUpStatusBarIconLightByNightMode()
     }
 
     @SuppressLint("MissingSuperCall")

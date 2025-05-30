@@ -68,7 +68,7 @@ abstract class BaseDisplayContentActivity : BaseActivity() {
         internalFabView = binding.fab.apply {
             if (internalMenuResource > 0) {
                 setOnClickListener { view -> showPopupMenu(view, internalTextView) }
-                ViewUtils.excludeFloatingActionButtonFromNavigationBar(this)
+                ViewUtils.excludeFloatingActionButtonFromBottomNavigationBar(this)
                 visibility = View.VISIBLE
             }
         }
@@ -76,6 +76,7 @@ abstract class BaseDisplayContentActivity : BaseActivity() {
         val scaleGestureDetector = ScaleGestureDetector(this, ScaleListener(internalTextView))
 
         val innerScrollView = binding.innerScrollView.also {
+            ViewUtils.excludePaddingClippableViewFromBottomNavigationBar(it)
             it.setOnTouchListener { view, event ->
                 when (event.pointerCount) {
                     2 -> {
@@ -118,7 +119,6 @@ abstract class BaseDisplayContentActivity : BaseActivity() {
                     else -> super.onTouchEvent(event)
                 }
             }
-            ViewUtils.excludePaddingClippableViewFromNavigationBar(it)
         }
 
         // 使用协程加载内容
@@ -148,12 +148,12 @@ abstract class BaseDisplayContentActivity : BaseActivity() {
             internalFabView.backgroundTintList = ColorStateList.valueOf(themeColorNight)
             internalFabView.imageTintList = ColorStateList.valueOf(if (ViewUtils.isLuminanceDark(themeColorNight)) getColor(R.color.night) else getColor(R.color.day))
             ViewUtils.setStatusBarBackgroundColor(this, themeColorNight)
-            ViewUtils.setStatusBarAppearanceLight(this, ViewUtils.isLuminanceDark(themeColorNight))
+            ViewUtils.setStatusBarIconLight(this, ViewUtils.isLuminanceDark(themeColorNight))
         } else {
             internalFabView.backgroundTintList = ColorStateList.valueOf(themeColorDay)
             internalFabView.imageTintList = ColorStateList.valueOf(if (ViewUtils.isLuminanceDark(themeColorDay)) getColor(R.color.night) else getColor(R.color.day))
             ViewUtils.setStatusBarBackgroundColor(this, themeColorDay)
-            ViewUtils.setStatusBarAppearanceLight(this, ViewUtils.isLuminanceDark(themeColorDay))
+            ViewUtils.setStatusBarIconLight(this, ViewUtils.isLuminanceDark(themeColorDay))
         }
     }
 

@@ -100,8 +100,8 @@ object ThemeColorManager {
     }
 
     @JvmStatic
-    fun setStatusBarAppearanceLight(activity: Activity) {
-        ViewUtils.setStatusBarAppearanceLight(activity, isLuminanceDark())
+    fun setStatusBarIconLight(activity: Activity) {
+        ViewUtils.setStatusBarIconLight(activity, isLuminanceDark())
     }
 
     private object BackgroundColorManager {

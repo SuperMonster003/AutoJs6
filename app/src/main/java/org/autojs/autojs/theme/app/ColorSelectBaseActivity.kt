@@ -145,7 +145,7 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
         super.initThemeColors()
         updateToolbarColors()
         updateSearchViewColors()
-        ViewUtils.setStatusBarAppearanceLightByColorLuminance(this, currentColor)
+        ViewUtils.setStatusBarIconLightByColorLuminance(this, currentColor)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

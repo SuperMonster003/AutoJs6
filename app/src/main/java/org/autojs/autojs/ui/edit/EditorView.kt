@@ -758,7 +758,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
         private val TAG = EditorView::class.java.simpleName
 
-        private const val MIN_CONFIDENCE_TO_WRITE_FILE = 60
+        private const val MIN_CONFIDENCE_TO_WRITE_FILE = 90
         private val DEFAULT_CHARSET_TO_WRITE_FILE = StandardCharsets.UTF_8
 
         const val EXTRA_PATH = "path"
