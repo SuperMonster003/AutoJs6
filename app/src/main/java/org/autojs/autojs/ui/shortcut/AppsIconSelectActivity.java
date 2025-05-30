@@ -63,7 +63,7 @@ public class AppsIconSelectActivity extends BaseActivity {
         mAppsRecyclerView = binding.apps;
         mAppsRecyclerView.setAdapter(new AppsAdapter());
 
-        ViewUtils.excludePaddingClippableViewFromNavigationBar(mAppsRecyclerView);
+        ViewUtils.excludePaddingClippableViewFromBottomNavigationBar(mAppsRecyclerView);
 
         WrapContentGridLayoutManger manager = new WrapContentGridLayoutManger(this, 5);
         manager.setDebugInfo("IconSelectView");

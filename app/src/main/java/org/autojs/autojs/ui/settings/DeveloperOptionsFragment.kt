@@ -14,7 +14,7 @@ class DeveloperOptionsFragment : PreferenceFragmentCompat() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        ViewUtils.excludePaddingClippableViewFromNavigationBar(listView)
+        ViewUtils.excludePaddingClippableViewFromBottomNavigationBar(listView)
     }
 
 }

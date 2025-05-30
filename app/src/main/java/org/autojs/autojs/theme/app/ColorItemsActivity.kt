@@ -91,7 +91,7 @@ class ColorItemsActivity : ColorSelectBaseActivity() {
             it.adapter = ColorItemAdapter(library.colors).also { mAdapter = it }
 
             it.addItemDecoration(DividerItemDecoration(this, VERTICAL))
-            ViewUtils.excludePaddingClippableViewFromNavigationBar(it)
+            ViewUtils.excludePaddingClippableViewFromBottomNavigationBar(it)
 
             setUpSelectedPosition(mAdapter)
 

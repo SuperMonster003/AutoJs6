@@ -73,7 +73,7 @@ class DisplayVersionHistoriesActivity : BaseActivity() {
                 addDuration = 200
                 supportsChangeAnimations = false
             }
-            ViewUtils.excludePaddingClippableViewFromNavigationBar(it)
+            ViewUtils.excludePaddingClippableViewFromBottomNavigationBar(it)
         }
 
         lifecycleScope.launch {

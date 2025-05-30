@@ -50,7 +50,7 @@ open class TaskManagerFragment : ViewPagerFragment(45), ViewStatesManageable {
                     recyclerView.postDelayed({ refreshLayout.isRefreshing = false }, 800)
                 }
             }
-            ViewUtils.excludePaddingClippableViewFromNavigationBar(recyclerView)
+            ViewUtils.excludePaddingClippableViewFromBottomNavigationBar(recyclerView)
         }
         restoreViewStates()
     }

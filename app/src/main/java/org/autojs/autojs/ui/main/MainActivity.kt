@@ -126,7 +126,7 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
             val drawerLayout = it.drawerLayout
             setContentView(it.root)
             mViewPager = it.viewpager
-            mFab = it.fab.apply { ViewUtils.excludeFloatingActionButtonFromNavigationBar(this) }
+            mFab = it.fab.apply { ViewUtils.excludeFloatingActionButtonFromBottomNavigationBar(this) }
             mTab = it.tab
             mToolbar = it.toolbar
             addViewBackground(it.appBar)

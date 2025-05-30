@@ -45,7 +45,7 @@ class ColorSelectActivity : ColorSelectBaseActivity() {
         mColorSettingRecyclerView = colorSettingRecyclerView.apply {
             setUpSelectedPosition(currentColor)
             setOnItemClickListener(mOnItemClickListener)
-            ViewUtils.excludePaddingClippableViewFromNavigationBar(this)
+            ViewUtils.excludePaddingClippableViewFromBottomNavigationBar(this)
         }
     }
 

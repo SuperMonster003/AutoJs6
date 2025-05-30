@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:fitsSystemWindows="true"
-        android:theme="@style/AppTheme.AppBarOverlay">
+        app:theme="@style/AppTheme.AppBarOverlay">
 
         <org.autojs.autojs.theme.widget.ThemeColorToolbar
             android:id="@+id/toolbar"
@@ -45,7 +45,6 @@
         android:alpha="0.9"
         android:src="@drawable/ic_add_white_48dp"
         android:tint="@color/toolbar_text"
-        app:backgroundTint="?attr/colorPrimary"
         app:layout_behavior="org.autojs.autojs.ui.widget.ScrollAwareFABBehavior" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

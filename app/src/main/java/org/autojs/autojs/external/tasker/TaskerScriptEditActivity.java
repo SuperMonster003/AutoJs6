@@ -31,6 +31,11 @@ public class TaskerScriptEditActivity extends BaseActivity {
 
     private EditorView mEditorView;
 
+    @Override
+    public boolean getHandleContentViewFromHorizontalNavigationBarAutomatically() {
+        return false;
+    }
+
     @SuppressLint("CheckResult")
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {

@@ -25,6 +25,7 @@ import org.autojs.autojs6.R
  */
 abstract class BaseActivity : AppCompatActivity() {
 
+    open val handleContentViewFromHorizontalNavigationBarAutomatically = true
     open val handleStatusBarThemeColorAutomatically = true
     open val handleNavigationBarContrastEnforcedAutomatically = true
 
@@ -35,6 +36,10 @@ abstract class BaseActivity : AppCompatActivity() {
 
         @Suppress("DEPRECATION")
         ViewUtils.appendSystemUiVisibility(this, SYSTEM_UI_FLAG_LAYOUT_STABLE or SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION)
+
+        if (handleContentViewFromHorizontalNavigationBarAutomatically) {
+            ViewUtils.excludeContentViewFromHorizontalNavigationBar(this)
+        }
 
         if (handleNavigationBarContrastEnforcedAutomatically) {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {

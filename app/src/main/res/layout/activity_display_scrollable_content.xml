@@ -3,14 +3,14 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fitsSystemWindows="true">
+    android:layout_height="match_parent">
 
     <org.autojs.autojs.ui.common.NestedOuterScrollView
         android:id="@+id/outerScrollView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"
+        android:fitsSystemWindows="true"
         android:paddingVertical="2sp"
         android:scrollbars="vertical">
 

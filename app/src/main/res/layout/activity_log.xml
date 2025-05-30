@@ -8,14 +8,13 @@
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay"
-        android:fitsSystemWindows="true">
+        android:fitsSystemWindows="true"
+        app:theme="@style/AppTheme.AppBarOverlay">
 
         <org.autojs.autojs.theme.widget.ThemeColorToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
             android:theme="@style/ToolBarStyle"
             app:popupTheme="@style/AppTheme.PopupOverlay" />
 
@@ -37,7 +36,6 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
         android:tint="@color/toolbar_text"
-        app:backgroundTint="?attr/colorPrimary"
         app:layout_behavior="org.autojs.autojs.ui.widget.ScrollAwareFABBehavior"
         app:srcCompat="@drawable/ic_clear_white_48dp" />
 
