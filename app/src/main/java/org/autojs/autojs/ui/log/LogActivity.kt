@@ -35,7 +35,7 @@ class LogActivity : BaseActivity() {
 
         activityLogBinding.fab.apply {
             setOnClickListener { mConsoleImpl.clear() }
-            ViewUtils.excludeFloatingActionButtonFromNavigationBar(this)
+            ViewUtils.excludeFloatingActionButtonFromBottomNavigationBar(this)
         }
     }
 

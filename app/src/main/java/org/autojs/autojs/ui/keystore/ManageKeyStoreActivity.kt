@@ -91,7 +91,7 @@ class ManageKeyStoreActivity : BaseActivity() {
             setOnClickListener {
                 NewKeyStoreDialog(newKeyStoreDialogCallback).show(supportFragmentManager, null)
             }
-            ViewUtils.excludeFloatingActionButtonFromNavigationBar(this)
+            ViewUtils.excludeFloatingActionButtonFromBottomNavigationBar(this)
         }
 
         keyStoreAdapter = KeyStoreAdaptor(keyStoreAdapterCallback)
@@ -99,7 +99,7 @@ class ManageKeyStoreActivity : BaseActivity() {
             adapter = keyStoreAdapter
             layoutManager = LinearLayoutManager(this@ManageKeyStoreActivity)
             itemAnimator = DefaultItemAnimator()
-            ViewUtils.excludePaddingClippableViewFromNavigationBar(this)
+            ViewUtils.excludePaddingClippableViewFromBottomNavigationBar(this)
         }
         binding.swipeRefreshLayout.setOnRefreshListener {
             loadKeyStores()

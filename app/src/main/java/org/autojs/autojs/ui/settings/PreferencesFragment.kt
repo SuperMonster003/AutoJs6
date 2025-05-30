@@ -16,7 +16,7 @@ class PreferencesFragment : PreferenceFragmentCompat() {
         super.onViewCreated(view, savedInstanceState)
         listView.isHorizontalScrollBarEnabled = false
         listView.isVerticalScrollBarEnabled = false
-        ViewUtils.excludePaddingClippableViewFromNavigationBar(listView)
+        ViewUtils.excludePaddingClippableViewFromBottomNavigationBar(listView)
     }
 
 }

@@ -139,7 +139,7 @@ class TimedTaskSettingActivity : BaseActivity() {
 
         setUpTaskSettings()
 
-        ViewUtils.excludePaddingClippableViewFromNavigationBar(binding.scrollView)
+        ViewUtils.excludePaddingClippableViewFromBottomNavigationBar(binding.scrollView)
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, insets ->
             val sysBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())

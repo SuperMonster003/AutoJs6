@@ -30,6 +30,8 @@ import org.autojs.autojs6.databinding.ActivityAboutFunctionButtonsBinding
  */
 open class AboutActivity : BaseActivity() {
 
+    override val handleContentViewFromHorizontalNavigationBarAutomatically = false
+
     private lateinit var activityBinding: ActivityAboutBinding
     private lateinit var functionsButtonsBinding: ActivityAboutFunctionButtonsBinding
 

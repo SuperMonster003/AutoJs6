@@ -49,6 +49,8 @@ import androidx.core.view.size
  */
 open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyActivity {
 
+    override val handleContentViewFromHorizontalNavigationBarAutomatically = false
+
     private var mToolbar: ThemeColorToolbar? = null
     private val mMediator = OnActivityResultDelegate.Mediator()
 

@@ -93,11 +93,11 @@ class ProjectConfigActivity : BaseActivity() {
 
         binding.fab.apply {
             setOnClickListener { commit() }
-            ViewUtils.excludeFloatingActionButtonFromNavigationBar(this)
+            ViewUtils.excludeFloatingActionButtonFromBottomNavigationBar(this)
         }
 
         binding.scrollView.apply {
-            ViewUtils.excludePaddingClippableViewFromNavigationBar(this)
+            ViewUtils.excludePaddingClippableViewFromBottomNavigationBar(this)
         }
 
         mNewProject = intent.getBooleanExtra(EXTRA_NEW_PROJECT, false)

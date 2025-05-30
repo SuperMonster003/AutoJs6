@@ -73,7 +73,7 @@ class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListen
                     }
                 }
             })
-            explorerView.explorerItemListView?.let { ViewUtils.excludePaddingClippableViewFromNavigationBar(it) }
+            explorerView.explorerItemListView?.let { ViewUtils.excludePaddingClippableViewFromBottomNavigationBar(it) }
         }
         (activity as? MainActivity)?.apply {
             val tabLayout: TabLayout = findViewById(R.id.tab)

@@ -1,322 +1,314 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:tools="http://schemas.android.com/tools">
+    android:fitsSystemWindows="true"
+    android:orientation="vertical">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:theme="@style/AppTheme.AppBarOverlay">
+
+        <org.autojs.autojs.theme.widget.ThemeColorToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:theme="@style/ToolBarStyle"
+            app:popupTheme="@style/AppTheme.PopupOverlay"
+            app:title="@string/text_about" />
+
+    </com.google.android.material.appbar.AppBarLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fitsSystemWindows="true"
         android:orientation="vertical">
 
-        <com.google.android.material.appbar.AppBarLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:theme="@style/AppTheme.AppBarOverlay"
-            android:fitsSystemWindows="true">
-
-            <org.autojs.autojs.theme.widget.ThemeColorToolbar
-                android:id="@+id/toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:background="?attr/colorPrimary"
-                android:theme="@style/ToolBarStyle"
-                app:popupTheme="@style/AppTheme.PopupOverlay"
-                app:title="@string/text_about" />
-
-        </com.google.android.material.appbar.AppBarLayout>
-
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="15"
+            android:gravity="center"
+            android:layout_gravity="center_horizontal"
+            android:orientation="horizontal">
 
             <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="0dp"
-                android:layout_weight="15"
+                android:id="@+id/icon_1st_developer_container"
+                android:layout_width="180dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginEnd="32dp"
+                android:background="?selectableItemBackground"
+                android:baselineAligned="false"
                 android:gravity="center"
-                android:layout_gravity="center_horizontal"
-                android:orientation="horizontal">
+                android:orientation="vertical">
 
                 <LinearLayout
-                    android:id="@+id/icon_1st_developer_container"
-                    android:layout_width="180dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginEnd="32dp"
-                    android:background="?selectableItemBackground"
-                    android:baselineAligned="false"
-                    android:gravity="center"
-                    android:orientation="vertical">
-
-                    <LinearLayout
-                        android:id="@+id/icon_1st_developer_identifier"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="?selectableItemBackground"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:gravity="end"
-                        android:orientation="horizontal">
-
-                        <ImageView
-                            android:layout_width="@dimen/icon_developer_identifier_image_side_length_compact"
-                            android:layout_height="@dimen/icon_developer_identifier_image_side_length_compact"
-                            android:padding="@dimen/icon_developer_identifier_image_padding"
-                            android:layout_gravity="center"
-                            android:src="@drawable/ic_looks_1_black_48dp"
-                            app:tint="@color/tint_1st_developer_identifier"
-                            android:contentDescription="icon_1st_developer_identifier" />
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/avatar_original_developer"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="?selectableItemBackground"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:orientation="horizontal">
-
-                        <de.hdodenhof.circleimageview.CircleImageView
-                            android:layout_width="@dimen/about_item_avatar_side_length_land"
-                            android:layout_height="@dimen/about_item_avatar_side_length_land"
-                            android:src="@drawable/avatar_original_developer"
-                            android:contentDescription="avatar_original_developer"
-                            app:civ_border_width="@dimen/github_avatar_border_width"
-                            app:civ_border_color="@color/github_avatar_border" />
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/avatar_original_developer_user_contents"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="1dp"
-                        android:background="?selectableItemBackground"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:ellipsize="middle"
-                            android:maxLines="1"
-                            android:text="@string/original_developer_full_name"
-                            android:textColor="@color/github_color_fg_default"
-                            android:textSize="@dimen/github_font_size_full_name_compat"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:ellipsize="middle"
-                            android:maxLines="1"
-                            android:text="@string/original_developer_nickname"
-                            android:textColor="@color/github_color_fg_muted"
-                            android:textSize="@dimen/github_font_size_nickname_compat" />
-
-                    </LinearLayout>
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/icon_container"
+                    android:id="@+id/icon_1st_developer_identifier"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:gravity="center"
-                    android:orientation="vertical"
-                    android:background="@android:color/transparent"
-                    android:foreground="?selectableItemBackgroundBorderless">
+                    android:background="?selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="end"
+                    android:orientation="horizontal">
 
-                    <FrameLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content">
-
-                        <com.jaredrummler.android.widget.AnimatedSvgView
-                            android:id="@+id/icon_about_app_svg_view"
-                            android:layout_width="82dp"
-                            android:layout_height="82dp"
-                            android:layout_gravity="center"
-                            android:layout_margin="8dp"
-                            app:animatedSvgFillColors="@array/icon_about_app_svg_view_fill_colors"
-                            app:animatedSvgGlyphStrings="@array/icon_about_app_svg_view_paths"
-                            app:animatedSvgTraceColors="@array/icon_about_app_svg_view_trace_colors"
-                            app:animatedSvgTraceResidueColors="@array/icon_about_app_svg_view_trace_residue_colors"
-                            app:animatedSvgImageSizeX="576"
-                            app:animatedSvgImageSizeY="576"
-                            app:animatedSvgFillStart="200"
-                            app:animatedSvgFillTime="200"
-                            app:animatedSvgTraceTime="500"
-                            app:animatedSvgTraceTimePerGlyph="500" />
-
-                        <ImageView
-                            android:id="@+id/icon_about_app"
-                            android:visibility="invisible"
-                            tools:visibility="visible"
-                            android:layout_width="82dp"
-                            android:layout_height="82dp"
-                            android:layout_margin="8dp"
-                            android:src="@drawable/autojs6_material"
-                            tools:ignore="ContentDescription,ImageContrastCheck" />
-
-                    </FrameLayout>
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="40dp"
-                        android:orientation="vertical"
-                        android:gravity="center">
-
-                        <TextView
-                            android:id="@+id/version"
-                            android:layout_width="wrap_content"
-                            android:layout_height="0dp"
-                            android:layout_weight="1"
-                            android:gravity="center"
-                            android:textColor="@color/about_app_version_info"
-                            android:textSize="14sp"
-                            android:text="@string/text_sample_string" />
-
-                        <TextView
-                            android:id="@+id/since"
-                            android:layout_width="wrap_content"
-                            android:layout_height="0dp"
-                            android:layout_weight="1"
-                            android:gravity="center"
-                            android:textColor="@color/about_app_version_info"
-                            android:textSize="11sp"
-                            android:text="@string/text_sample_string" />
-
-                    </LinearLayout>
+                    <ImageView
+                        android:layout_width="@dimen/icon_developer_identifier_image_side_length_compact"
+                        android:layout_height="@dimen/icon_developer_identifier_image_side_length_compact"
+                        android:padding="@dimen/icon_developer_identifier_image_padding"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_looks_1_black_48dp"
+                        app:tint="@color/tint_1st_developer_identifier"
+                        android:contentDescription="icon_1st_developer_identifier" />
 
                 </LinearLayout>
 
                 <LinearLayout
-                    android:id="@+id/icon_2nd_developer_container"
-                    android:layout_width="180dp"
+                    android:id="@+id/avatar_original_developer"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginStart="32dp"
                     android:background="?selectableItemBackground"
-                    android:baselineAligned="false"
-                    android:gravity="center"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:orientation="horizontal">
+
+                    <de.hdodenhof.circleimageview.CircleImageView
+                        android:layout_width="@dimen/about_item_avatar_side_length_land"
+                        android:layout_height="@dimen/about_item_avatar_side_length_land"
+                        android:src="@drawable/avatar_original_developer"
+                        android:contentDescription="avatar_original_developer"
+                        app:civ_border_width="@dimen/github_avatar_border_width"
+                        app:civ_border_color="@color/github_avatar_border" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/avatar_original_developer_user_contents"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="1dp"
+                    android:background="?selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
                     android:orientation="vertical">
 
-                    <LinearLayout
-                        android:id="@+id/icon_2nd_developer_identifier"
+                    <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:background="?selectableItemBackground"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:gravity="end"
-                        android:orientation="horizontal">
+                        android:layout_gravity="center"
+                        android:ellipsize="middle"
+                        android:maxLines="1"
+                        android:text="@string/original_developer_full_name"
+                        android:textColor="@color/github_color_fg_default"
+                        android:textSize="@dimen/github_font_size_full_name_compat"
+                        android:textStyle="bold" />
 
-                        <ImageView
-                            android:layout_width="@dimen/icon_developer_identifier_image_side_length_compact"
-                            android:layout_height="@dimen/icon_developer_identifier_image_side_length_compact"
-                            android:padding="@dimen/icon_developer_identifier_image_padding"
-                            android:layout_gravity="center"
-                            android:src="@drawable/ic_looks_2_black_48dp"
-                            app:tint="@color/tint_2nd_developer_identifier"
-                            android:contentDescription="icon_2nd_developer_identifier" />
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/avatar_developer"
+                    <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:background="?selectableItemBackground"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:gravity="center"
-                        android:orientation="horizontal">
-
-                        <de.hdodenhof.circleimageview.CircleImageView
-                            android:layout_width="@dimen/about_item_avatar_side_length_land"
-                            android:layout_height="@dimen/about_item_avatar_side_length_land"
-                            android:src="@drawable/avatar_developer"
-                            android:contentDescription="avatar_developer"
-                            app:civ_border_width="@dimen/github_avatar_border_width"
-                            app:civ_border_color="@color/github_avatar_border" />
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/avatar_developer_user_contents"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="1dp"
-                        android:background="?selectableItemBackground"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:ellipsize="middle"
-                            android:maxLines="1"
-                            android:text="@string/developer_full_name"
-                            android:textColor="@color/github_color_fg_default"
-                            android:textSize="@dimen/github_font_size_full_name_compat"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:ellipsize="middle"
-                            android:maxLines="1"
-                            android:text="@string/developer_nickname"
-                            android:textColor="@color/github_color_fg_muted"
-                            android:textSize="@dimen/github_font_size_nickname_compat" />
-
-                    </LinearLayout>
+                        android:layout_gravity="center"
+                        android:ellipsize="middle"
+                        android:maxLines="1"
+                        android:text="@string/original_developer_nickname"
+                        android:textColor="@color/github_color_fg_muted"
+                        android:textSize="@dimen/github_font_size_nickname_compat" />
 
                 </LinearLayout>
 
             </LinearLayout>
 
             <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="32dp"
-                android:layout_weight="4.5"
+                android:id="@+id/icon_container"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
                 android:orientation="vertical"
-                android:gravity="center">
+                android:background="@android:color/transparent"
+                android:foreground="?selectableItemBackgroundBorderless">
 
-                <include
-                    android:id="@+id/activity_about_function_buttons"
-                    layout="@layout/activity_about_function_buttons"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center" />
+                <FrameLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <com.jaredrummler.android.widget.AnimatedSvgView
+                        android:id="@+id/icon_about_app_svg_view"
+                        android:layout_width="82dp"
+                        android:layout_height="82dp"
+                        android:layout_gravity="center"
+                        android:layout_margin="8dp"
+                        app:animatedSvgFillColors="@array/icon_about_app_svg_view_fill_colors"
+                        app:animatedSvgGlyphStrings="@array/icon_about_app_svg_view_paths"
+                        app:animatedSvgTraceColors="@array/icon_about_app_svg_view_trace_colors"
+                        app:animatedSvgTraceResidueColors="@array/icon_about_app_svg_view_trace_residue_colors"
+                        app:animatedSvgImageSizeX="576"
+                        app:animatedSvgImageSizeY="576"
+                        app:animatedSvgFillStart="200"
+                        app:animatedSvgFillTime="200"
+                        app:animatedSvgTraceTime="500"
+                        app:animatedSvgTraceTimePerGlyph="500" />
+
+                    <ImageView
+                        android:id="@+id/icon_about_app"
+                        android:visibility="invisible"
+                        tools:visibility="visible"
+                        android:layout_width="82dp"
+                        android:layout_height="82dp"
+                        android:layout_margin="8dp"
+                        android:src="@drawable/autojs6_material"
+                        tools:ignore="ContentDescription,ImageContrastCheck" />
+
+                </FrameLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+                    <TextView
+                        android:id="@+id/version"
+                        android:layout_width="wrap_content"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:textColor="@color/about_app_version_info"
+                        android:textSize="14sp"
+                        android:text="@string/text_sample_string" />
+
+                    <TextView
+                        android:id="@+id/since"
+                        android:layout_width="wrap_content"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:textColor="@color/about_app_version_info"
+                        android:textSize="11sp"
+                        android:text="@string/text_sample_string" />
+
+                </LinearLayout>
 
             </LinearLayout>
 
-            <org.autojs.autojs.ui.widget.CopyrightTextView
-                android:layout_width="match_parent"
+            <LinearLayout
+                android:id="@+id/icon_2nd_developer_container"
+                android:layout_width="180dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="0.5"
+                android:layout_gravity="center"
+                android:layout_marginStart="32dp"
+                android:background="?selectableItemBackground"
+                android:baselineAligned="false"
                 android:gravity="center"
-                android:textColor="@color/prefTextColorPrimary"
-                android:textSize="13sp"
-                tools:text="@string/text_copyright_sample" />
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:id="@+id/icon_2nd_developer_identifier"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="?selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="end"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="@dimen/icon_developer_identifier_image_side_length_compact"
+                        android:layout_height="@dimen/icon_developer_identifier_image_side_length_compact"
+                        android:padding="@dimen/icon_developer_identifier_image_padding"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_looks_2_black_48dp"
+                        app:tint="@color/tint_2nd_developer_identifier"
+                        android:contentDescription="icon_2nd_developer_identifier" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/avatar_developer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="?selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <de.hdodenhof.circleimageview.CircleImageView
+                        android:layout_width="@dimen/about_item_avatar_side_length_land"
+                        android:layout_height="@dimen/about_item_avatar_side_length_land"
+                        android:src="@drawable/avatar_developer"
+                        android:contentDescription="avatar_developer"
+                        app:civ_border_width="@dimen/github_avatar_border_width"
+                        app:civ_border_color="@color/github_avatar_border" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/avatar_developer_user_contents"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="1dp"
+                    android:background="?selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:ellipsize="middle"
+                        android:maxLines="1"
+                        android:text="@string/developer_full_name"
+                        android:textColor="@color/github_color_fg_default"
+                        android:textSize="@dimen/github_font_size_full_name_compat"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:ellipsize="middle"
+                        android:maxLines="1"
+                        android:text="@string/developer_nickname"
+                        android:textColor="@color/github_color_fg_muted"
+                        android:textSize="@dimen/github_font_size_nickname_compat" />
+
+                </LinearLayout>
+
+            </LinearLayout>
 
         </LinearLayout>
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="32dp"
+            android:layout_weight="4.5"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <include
+                android:id="@+id/activity_about_function_buttons"
+                layout="@layout/activity_about_function_buttons"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center" />
+
+        </LinearLayout>
+
+        <org.autojs.autojs.ui.widget.CopyrightTextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:gravity="center"
+            android:textColor="@color/prefTextColorPrimary"
+            android:textSize="13sp"
+            tools:text="@string/text_copyright_sample" />
+
     </LinearLayout>
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+</LinearLayout>

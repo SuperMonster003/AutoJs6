@@ -16,12 +16,10 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import org.autojs.autojs.theme.ThemeColorHelper;
 import org.autojs.autojs.tool.MapBuilder;
 import org.autojs.autojs.ui.enhancedfloaty.ResizableExpandableFloatyWindow;
@@ -135,7 +133,7 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
         initSubmitButton();
 
         if (isExcludeFromNavigationBar) {
-            ViewUtils.excludePaddingClippableViewFromNavigationBar(mLogListRecyclerView);
+            ViewUtils.excludePaddingClippableViewFromBottomNavigationBar(mLogListRecyclerView);
         }
     }
 

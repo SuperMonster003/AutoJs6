@@ -18,9 +18,9 @@
             android:id="@+id/app_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:theme="@style/AppTheme.AppBarOverlay"
             android:clipToPadding="true"
-            android:fitsSystemWindows="true">
+            android:fitsSystemWindows="true"
+            app:theme="@style/AppTheme.AppBarOverlay">
 
             <org.autojs.autojs.theme.widget.ThemeColorToolbar
                 android:id="@+id/toolbar"
@@ -54,7 +54,6 @@
             android:layout_gravity="end|bottom"
             android:layout_margin="16dp"
             android:src="@drawable/ic_add_white_48dp"
-            app:backgroundTint="?attr/colorPrimary"
             app:layout_anchor="@id/viewpager"
             app:layout_anchorGravity="bottom|end"
             app:layout_behavior="org.autojs.autojs.ui.widget.ScrollAwareFABBehavior"

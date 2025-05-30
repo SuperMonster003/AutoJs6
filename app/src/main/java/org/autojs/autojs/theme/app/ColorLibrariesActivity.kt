@@ -65,7 +65,7 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
             it.layoutManager = LinearLayoutManager(this)
             it.adapter = libraryAdapter
             it.addItemDecoration(DividerItemDecoration(this, VERTICAL))
-            ViewUtils.excludePaddingClippableViewFromNavigationBar(it)
+            ViewUtils.excludePaddingClippableViewFromBottomNavigationBar(it)
         }
     }
 

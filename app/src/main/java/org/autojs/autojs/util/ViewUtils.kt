@@ -315,9 +315,9 @@ object ViewUtils {
 
     @JvmStatic
     @JvmOverloads
-    fun excludeFloatingActionButtonFromNavigationBar(fab: FloatingActionButton, extraMarginBottomDp: Float = 16F) {
+    fun excludeFloatingActionButtonFromBottomNavigationBar(fab: FloatingActionButton, extraMarginBottomDp: Float = 16F) {
         ViewCompat.setOnApplyWindowInsetsListener(fab) { view, insets ->
-            val bottomInset = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom
+            val bottomInset = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
             view.layoutParams.runCatching {
                 javaClass.getField("bottomMargin")
                     .setInt(this, DisplayUtils.dpToPx(extraMarginBottomDp).roundToInt() + bottomInset)
@@ -328,11 +328,28 @@ object ViewUtils {
 
     @JvmStatic
     @JvmOverloads
-    fun excludePaddingClippableViewFromNavigationBar(view: View, extraPaddingBottomDp: Float = 0F, clipToPadding: Boolean = false) {
+    fun excludePaddingClippableViewFromBottomNavigationBar(view: View, extraPaddingBottomDp: Float = 0F, clipToPadding: Boolean = false) {
         ViewCompat.setOnApplyWindowInsetsListener(view) { _, insets ->
-            val bottomInset = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom
+            val bottomInset = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
             view.setPadding(0, 0, 0, DisplayUtils.dpToPx(extraPaddingBottomDp).roundToInt() + bottomInset)
             runCatching { view.javaClass.getMethod("setClipToPadding", Boolean::class.java).invoke(view, clipToPadding) }
+            insets
+        }
+    }
+
+    @JvmStatic
+    fun excludeContentViewFromHorizontalNavigationBar(activity: Activity) {
+        val contentView = activity.findViewById<View?>(android.R.id.content) ?: return
+        ViewCompat.setOnApplyWindowInsetsListener(contentView) { v, insets ->
+            val sysInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+
+            val left = sysInsets.left
+            val top = v.paddingTop
+            val right = sysInsets.right
+            val bottom = v.paddingBottom
+
+            v.setPaddingRelative(left, top, right, bottom)
+
             insets
         }
     }

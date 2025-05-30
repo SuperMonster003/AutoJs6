@@ -55,7 +55,7 @@ public class ScriptWidgetSettingsActivity extends BaseActivity {
         });
         RecyclerView explorerItemListView = explorerView.getExplorerItemListView();
         if (explorerItemListView != null) {
-            ViewUtils.excludePaddingClippableViewFromNavigationBar(explorerItemListView);
+            ViewUtils.excludePaddingClippableViewFromBottomNavigationBar(explorerItemListView);
         }
     }
 

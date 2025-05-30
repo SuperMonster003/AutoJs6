@@ -27,7 +27,7 @@ open class FloatingActionButtonAttributes(scriptRuntime: ScriptRuntime, resource
         registerAttrs(arrayOf("backgroundTint", "bgTint")) { view.backgroundTintList = ColorUtils.toColorStateList(view, it) }
         registerAttr("ensureMinTouchTargetSize") { view.setEnsureMinTouchTargetSize(it.toBoolean()) }
         registerAttr("maxImageSize") { view.setMaxImageSize(it.toInt()) }
-        registerAttr("excludeFromNavigationBar") { ViewUtils.excludeFloatingActionButtonFromNavigationBar(view) }
+        registerAttr("excludeFromNavigationBar") { ViewUtils.excludeFloatingActionButtonFromBottomNavigationBar(view) }
     }
 
 }
