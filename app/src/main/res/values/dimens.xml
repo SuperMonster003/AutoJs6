@@ -40,6 +40,7 @@
     <dimen name="editor_title_min_text_size_triple_line">11sp</dimen>
     <dimen name="editor_title_text_size_step">0.5sp</dimen>
     <dimen name="main_title_text_size">20sp</dimen>
+    <dimen name="main_title_text_size_horizontal_with_subtitle">18sp</dimen>
     <dimen name="main_subtitle_text_size">12sp</dimen>
     <dimen name="textSize_item_property">14sp</dimen>
     <dimen name="first_char_view_stroke_width">2dp</dimen>

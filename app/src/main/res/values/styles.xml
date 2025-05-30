@@ -80,7 +80,9 @@
         <item name="windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
         <item name="android:windowBackground">@color/window_background</item>
+        <item name="android:statusBarColor">@color/window_background</item>
         <item name="android:navigationBarColor">@color/window_background</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
     </style>
 
     <style name="AppTheme.Settings" parent="AppTheme">
@@ -203,17 +205,23 @@
         <item name="paddingStart">0dp</item>
     </style>
 
-    <style name="TextAppearanceMainTitle" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
+    <style name="TextAppearanceDefaultMainTitle" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
         <item name="android:textSize">@dimen/main_title_text_size</item>
         <item name="android:maxLines">1</item>
         <item name="android:ellipsize">end</item>
     </style>
 
-    <style name="TextAppearanceMainSubtitle" parent="TextAppearanceMainTitle">
-        <item name="android:textSize">@dimen/main_subtitle_text_size</item>
+    <style name="TextAppearanceHorizontalWithSubtitleMainTitle" parent="TextAppearanceDefaultMainTitle">
+        <item name="android:textSize">@dimen/main_title_text_size_horizontal_with_subtitle</item>
     </style>
 
-    <style name="OverflowIconDarkTheme" parent="@style/Widget.AppCompat.ActionButton.Overflow" >
+    <style name="TextAppearanceMainSubtitle" parent="TextAppearanceDefaultMainTitle">
+        <item name="android:textSize">@dimen/main_subtitle_text_size</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:ellipsize">end</item>
+    </style>
+
+    <style name="OverflowIconDarkTheme" parent="@style/Widget.AppCompat.ActionButton.Overflow">
         <item name="android:tint">@color/md_white_1000</item>
     </style>
 
