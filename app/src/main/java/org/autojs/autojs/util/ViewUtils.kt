@@ -35,7 +35,6 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.annotation.ColorInt
 import androidx.annotation.IdRes
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.SearchView
@@ -215,28 +214,22 @@ object ViewUtils {
     }
 
     @JvmStatic
-    fun isStatusBarAppearanceLight(activity: Activity): Boolean {
-        return !isStatusBarAppearanceDark(activity)
+    fun isStatusBarIconLight(activity: Activity): Boolean {
+        return !WindowInsetsControllerCompat(activity.window, activity.window.decorView).isAppearanceLightStatusBars
     }
 
     @JvmStatic
-    fun isStatusBarAppearanceDark(activity: Activity): Boolean {
-        @Suppress("DEPRECATION")
-        return hasSystemUiVisibility(activity, View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
+    fun isStatusBarIconDark(activity: Activity): Boolean {
+        return !isStatusBarIconLight(activity)
     }
 
-    fun setStatusBarAppearanceLight(activity: Activity, isLight: Boolean) {
-        @Suppress("DEPRECATION")
-        when {
-            isStatusBarAppearanceLight(activity) == isLight -> return
-            isLight -> removeSystemUiVisibility(activity, View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
-            else -> appendSystemUiVisibility(activity, View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
-        }
+    fun setStatusBarIconLight(activity: Activity, isLight: Boolean) {
+        WindowInsetsControllerCompat(activity.window, activity.window.decorView).isAppearanceLightStatusBars = !isLight
     }
 
-    fun setStatusBarAppearanceLightByColorLuminance(activity: Activity, @ColorInt aimColor: Int) {
-        val shouldBeLight = isLuminanceDark(aimColor)
-        setStatusBarAppearanceLight(activity, shouldBeLight)
+    fun setStatusBarIconLightByColorLuminance(activity: Activity, @ColorInt referenceBackgroundColor: Int) {
+        val shouldBeLight = isLuminanceDark(referenceBackgroundColor)
+        setStatusBarIconLight(activity, shouldBeLight)
     }
 
     @JvmStatic
@@ -276,27 +269,23 @@ object ViewUtils {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     @JvmStatic
-    fun isNavigationBarAppearanceLight(activity: Activity): Boolean {
-        return !isNavigationBarAppearanceDark(activity)
+    fun isNavigationBarIconLight(activity: Activity): Boolean {
+        return !WindowInsetsControllerCompat(activity.window, activity.window.decorView).isAppearanceLightNavigationBars
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     @JvmStatic
-    fun isNavigationBarAppearanceDark(activity: Activity): Boolean {
-        @Suppress("DEPRECATION")
-        return hasSystemUiVisibility(activity, View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR)
+    fun isNavigationBarIconDark(activity: Activity): Boolean {
+        return !isNavigationBarIconLight(activity)
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    fun setNavigationBarAppearanceLight(activity: Activity, isLight: Boolean) {
-        @Suppress("DEPRECATION")
-        when {
-            isNavigationBarAppearanceLight(activity) == isLight -> return
-            isLight -> removeSystemUiVisibility(activity, View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR)
-            else -> appendSystemUiVisibility(activity, View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR)
-        }
+    fun setNavigationBarIconLight(activity: Activity, isLight: Boolean) {
+        WindowInsetsControllerCompat(activity.window, activity.window.decorView).isAppearanceLightNavigationBars = isLight
+    }
+
+    fun setNavigationBarIconLightByColorLuminance(activity: Activity, @ColorInt referenceBackgroundColor: Int) {
+        val shouldBeLight = isLuminanceDark(referenceBackgroundColor)
+        setNavigationBarIconLight(activity, shouldBeLight)
     }
 
     fun setNavigationBarBackgroundColor(activity: Activity, color: Int) {
@@ -365,11 +354,10 @@ object ViewUtils {
 
     fun makeBarsAdaptToNightMode(activity: AppCompatActivity) {
         val isConfigDark = isNightModeYes(activity)
-        val isConfigTakenAsLight = !isConfigDark
 
         getWindowInsetsController(activity).apply {
-            isAppearanceLightStatusBars = isConfigTakenAsLight
-            isAppearanceLightNavigationBars = isConfigTakenAsLight
+            isAppearanceLightStatusBars = isConfigDark
+            isAppearanceLightNavigationBars = isConfigDark
         }
     }
 

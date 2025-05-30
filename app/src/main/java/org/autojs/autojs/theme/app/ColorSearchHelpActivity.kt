@@ -37,7 +37,7 @@ class ColorSearchHelpActivity : BaseActivity() {
 
     override fun onStart() {
         super.onStart()
-        setUpStatusBarAppearanceLightByNightMode()
+        setUpStatusBarIconLightByNightMode()
     }
 
     private fun getContent(contentResourceId: Int) = runCatching {

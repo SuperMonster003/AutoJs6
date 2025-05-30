@@ -114,12 +114,12 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         ::registerWidget.name,
         ::setContentView.name,
         ::statusBarColor.name,
-        ::statusBarAppearanceLight.name,
-        ::statusBarAppearanceLightBy.name,
+        ::statusBarIconLight.name,
+        ::statusBarIconLightBy.name,
         ::backgroundColor.name,
         ::navigationBarColor.name,
-        ::navigationBarAppearanceLight.name,
-        ::navigationBarAppearanceLightBy.name,
+        ::navigationBarIconLight.name,
+        ::navigationBarIconLightBy.name,
         ::findById.name,
         ::findByStringId.name,
         ::findView.name,
@@ -539,11 +539,11 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun statusBarAppearanceLight(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsAtMost(args, 1) { argList ->
+        fun statusBarIconLight(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsAtMost(args, 1) { argList ->
             val (isLight) = argList
             ensureActivity(scriptRuntime) { activity ->
                 runRhinoRuntime(scriptRuntime, newBaseFunction("action", {
-                    ViewUtils.setStatusBarAppearanceLight(activity, coerceBoolean(isLight, true))
+                    ViewUtils.setStatusBarIconLight(activity, coerceBoolean(isLight, true))
                 }, NOT_CONSTRUCTABLE))
             }
             UNDEFINED
@@ -551,10 +551,10 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun statusBarAppearanceLightBy(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsOnlyOne(args) { refColor ->
+        fun statusBarIconLightBy(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsOnlyOne(args) { refColor ->
             ensureActivity(scriptRuntime) { activity ->
                 runRhinoRuntime(scriptRuntime, newBaseFunction("action", {
-                    Colors.toIntRhino(refColor).also { ViewUtils.setStatusBarAppearanceLight(activity, ViewUtils.isLuminanceDark(it)) }
+                    Colors.toIntRhino(refColor).also { ViewUtils.setStatusBarIconLight(activity, ViewUtils.isLuminanceDark(it)) }
                 }, NOT_CONSTRUCTABLE))
             }
             UNDEFINED
@@ -586,14 +586,14 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun navigationBarAppearanceLight(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsAtMost(args, 1) { argList ->
+        fun navigationBarIconLight(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsAtMost(args, 1) { argList ->
             val (isLight) = argList
             ensureActivity(scriptRuntime) { activity ->
                 runRhinoRuntime(scriptRuntime, newBaseFunction("action", {
                     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
                         ScriptRuntime.requiresApi(Build.VERSION_CODES.O)
                     } else {
-                        ViewUtils.setNavigationBarAppearanceLight(activity, coerceBoolean(isLight, true))
+                        ViewUtils.setNavigationBarIconLight(activity, coerceBoolean(isLight, true))
                     }
                 }, NOT_CONSTRUCTABLE))
             }
@@ -602,14 +602,14 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun navigationBarAppearanceLightBy(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsOnlyOne(args) { refColor ->
+        fun navigationBarIconLightBy(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsOnlyOne(args) { refColor ->
             ensureActivity(scriptRuntime) { activity ->
                 runRhinoRuntime(scriptRuntime, newBaseFunction("action", {
                     Colors.toIntRhino(refColor).also {
                         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
                             ScriptRuntime.requiresApi(Build.VERSION_CODES.O)
                         } else {
-                            ViewUtils.setNavigationBarAppearanceLight(activity, ViewUtils.isLuminanceDark(it))
+                            ViewUtils.setNavigationBarIconLight(activity, ViewUtils.isLuminanceDark(it))
                         }
                     }
                 }, NOT_CONSTRUCTABLE))

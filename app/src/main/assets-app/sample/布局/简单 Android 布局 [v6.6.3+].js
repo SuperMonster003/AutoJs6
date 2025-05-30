@@ -19,10 +19,10 @@ setTimeout(() => {
     ui.backgroundColor(themeColor);
 
     ui.statusBarColor(themeColor);
-    ui.statusBarAppearanceLightBy(themeColor);
+    ui.statusBarIconLightBy(themeColor);
 
     ui.navigationBarColor(themeColor);
-    ui.navigationBarAppearanceLightBy(themeColor);
+    ui.navigationBarIconLightBy(themeColor);
 
     /** @type {JsTextClock} */
     let textClockView = ui['text_clock'];
