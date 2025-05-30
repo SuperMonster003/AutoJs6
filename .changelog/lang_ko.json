@@ -1,5 +1,27 @@
 {
   "$data": {
+    "v6.6.4": {
+      "released_date": "2025/05/31",
+      "hint": [
+        "API 변경: ui.(status/navigation)BarAppearanceLight[By] -> ui.(status/navigation)BarIconLight[By]"
+      ],
+      "feature": [
+        "util.dpToPx/spToPx/pxToDp/pxToSp 메서드(픽셀 단위 변환용)"
+      ],
+      "fix": [
+        "화면을 가로 모드로 회전하면 자막이 완전히 표시되지 않을 수 있는 문제",
+        "화면을 가로 모드로 회전하면 일부 페이지 콘텐츠가 사이드 내비게이션 바에 가려지는 문제",
+        "Android 15 일부 페이지에서 상태 표시줄 배경 색칠 영역이 불완전한 문제 _[`issue #398`](http://issues.autojs6.com/398)_",
+        "코드 편집기가 신뢰도 낮은 인코딩으로 파일을 기록해 디코딩 오류가 발생할 수 있는 문제(수정 시도)"
+      ],
+      "improvement": [
+        "앱 및 개발자 페이지 레이아웃 호환성 개선 및 불필요한 레이아웃 분류 제거",
+        "README.md 빌드 섹션에 여러 방법 추가로 대상 설정 페이지 찾기 용이화 _[`issue #404`](http://issues.autojs6.com/404)_"
+      ],
+      "dependency": [
+        "Androidx ConstraintLayout 버전 2.2.1 추가"
+      ]
+    },
     "v6.6.3": {
       "released_date": "2025/05/27",
       "feature": [

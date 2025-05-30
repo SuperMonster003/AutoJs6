@@ -157,12 +157,16 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 # v6.6.4
 
-###### 2025/05/29
+###### 2025/05/31
 
+* `提示` API 变更: ui.(status/navigation)BarAppearanceLight[By] -> ui.(status/navigation)BarIconLight[By]
 * `新增` util.dpToPx/spToPx/pxToDp/pxToSp 方法, 用于像素单位转换
+* `修复` 屏幕旋转至横向时子标题可能显示不完整的问题
+* `修复` 屏幕旋转至横向时部分页面内容被侧边导航栏遮挡的问题
 * `修复` Android 15 部分页面状态栏背景着色区域不完整的问题 _[`issue #398`](http://issues.autojs6.com/398)_
 * `修复` 代码编辑器可能使用置信度不足的编码写入文件导致内容解码异常的问题 (试修)
 * `优化` 关于应用与开发者页面增加布局适配通用性并去除不必要的布局分类
+* `优化` README.md 项目编译构建小节添加多种方式便于定位目标设置页面 _[`issue #404`](http://issues.autojs6.com/404)_
 * `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v664)_
 
 # v6.6.3
@@ -295,12 +299,12 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 #### Android Studio 准备
 
-下载 `Android Studio Meerkat Feature Drop | 2024.3.2` 版本 (按需选择其一):
+下载 `Android Studio Meerkat Feature Drop | 2024.3.2 Patch 1` 版本 (按需选择其一):
 
-- [android-studio-2024.3.2.14-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.3.2.14/android-studio-2024.3.2.14-windows.exe) (1.23 GB)
-- [android-studio-2024.3.2.14-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.3.2.14/android-studio-2024.3.2.14-windows.zip) (1.23 GB)
+- [android-studio-2024.3.2.15-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.3.2.15/android-studio-2024.3.2.15-windows.exe) (1.23 GB)
+- [android-studio-2024.3.2.15-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.3.2.15/android-studio-2024.3.2.15-windows.zip) (1.23 GB)
 
-> 注: 上述版本发布时间为 2025 年 5 月 6 日. 如需下载其他版本, 或上述链接已失效, 可访问 [Android Studio 发行版本归档](https://developer.android.com/studio/archive?hl=en) 页面.
+> 注: 上述版本发布时间为 2025 年 5 月 28 日. 如需下载其他版本, 或上述链接已失效, 可访问 [Android Studio 发行版本归档](https://developer.android.com/studio/archive?hl=en) 页面.
 
 安装或解压上述文件, 运行 Android Studio 软件 (如 `"D:\android-studio\bin\studio64.exe"`).
 
@@ -351,7 +355,7 @@ File (文件) | Settings (设置) | Appearance & Behavior (外观与行为) | Sy
 
 AutoJs6 项目依赖的 `JDK (Java 开发工具包)` 发行版本不低于 `17`, 但建议不低于 `19`.
 
-截至 2025 年 5 月 29 日, AutoJs6 可支持 JDK 最高版本为 `24`.
+截至 2025 年 5 月 31 日, AutoJs6 可支持 JDK 最高版本为 `24`.
 
 > 注: 如果计算机系统已安装 JDK 且版本满足上述要求, 则可跳过此小节内容.
 

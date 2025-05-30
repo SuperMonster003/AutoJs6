@@ -155,6 +155,20 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 
 ******
 
+# v6.6.4
+
+###### 2025/05/31
+
+* `提示` API 變更: ui.(status/navigation)BarAppearanceLight[By] -> ui.(status/navigation)BarIconLight[By]
+* `新增` util.dpToPx/spToPx/pxToDp/pxToSp 方法, 用於畫素單位轉換
+* `修復` 螢幕旋轉至橫向時子標題可能顯示不完整的問題
+* `修復` 螢幕旋轉至橫向時部分頁面內容被側邊導航欄遮擋的問題
+* `修復` Android 15 部分頁面狀態列背景著色區域不完整的問題 _[`issue #398`](http://issues.autojs6.com/398)_
+* `修復` 程式碼編輯器可能使用置信度不足的編碼寫入檔案導致內容解碼異常的問題 (試修)
+* `最佳化` 關於應用與開發者頁面增加布局適配通用性並去除不必要的佈局分類
+* `最佳化` README.md 專案編譯構建小節新增多種方式便於定位目標設定頁面 _[`issue #404`](http://issues.autojs6.com/404)_
+* `最佳化` 部分依賴或本地庫版本調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v664)_
+
 # v6.6.3
 
 ###### 2025/05/27
@@ -269,32 +283,6 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `最佳化` README.md 完善專案構建與執行相關內容 _[`issue #344`](http://issues.autojs6.com/344)_
 * `最佳化` 部分依賴或本地庫版本調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v662)_
 
-# v6.6.1
-
-###### 2025/01/01
-
-* `新增` pinyin 模組, 用於漢語拼音轉換 (參閱 專案文件 > [漢語拼音](https://docs.autojs6.com/#/pinyin))
-* `新增` pinyin4j 模組, 用於漢語拼音轉換 (參閱 專案文件 > [漢語拼音](https://docs.autojs6.com/#/pinyin4j))
-* `新增` UiObject#isSimilar 及 UiObjectCollection#isSimilar 方法, 用於確定控制元件或控制元件集合是否相似
-* `新增` currentComponent 全域性方法, 用於獲取當前活動的元件名稱資訊
-* `修復` 部分環境因回退版本過低而無法正常編譯專案的問題
-* `修復` 呼叫不存在的方法時可能出現的 "非原始型別值" 異常
-* `修復` 部分裝置無法正常新增指令碼快捷方式的問題 (試修) _[`issue #221`](http://issues.autojs6.com/221)_
-* `修復` automator.click/longClick 方法引數型別限制錯誤 _[`issue #275`](http://issues.autojs6.com/275)_
-* `修復` 選擇器不支援 ConsString 型別引數的問題 _[`issue #277`](http://issues.autojs6.com/277)_
-* `修復` UiObjectCollection 例項缺失自身方法及屬性的問題
-* `最佳化` 打包頁面支援簽名配置/金鑰庫管理/許可權設定 (by [luckyloogn](https://github.com/luckyloogn)) _[`pr #286`](http://pr.autojs6.com/286)_
-* `最佳化` 提升浮動視窗當前包名及當前活動名的識別準確性 (優先順序: Shizuku > Root > A11Y)
-* `最佳化` 提升 currentPackage/currentActivity 識別準確性 (優先順序: Shizuku > Root > A11Y)
-* `最佳化` 恢復日誌活動視窗單個條目文字內容的雙擊或長按選擇功能 _[`issue #280`](http://issues.autojs6.com/280)_
-* `最佳化` 指令碼專案識別在 project.json 損壞情況下儘可能還原關鍵資訊
-* `最佳化` 打包單檔案時自動生成的包名字尾支援將簡體中文轉換為拼音 (支援多音字)
-* `最佳化` UiSelector#findOnce 及 UiSelector#find 方法支援負數引數
-* `最佳化` app.startActivity/startDualActivity 方法增強適配性
-* `最佳化` UI 元素及 className 相關選擇器支援更多的包名字首省略形式 (如 RecyclerView, Snackbar 等)
-* `最佳化` 同步最新的 Rhino 引擎官方上游程式碼並進行必要的程式碼適配
-* `最佳化` 部分依賴或本地庫版本調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v661)_
-
 ##### 更多版本歷史可參閱
 
 * [CHANGELOG.md](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG-zh-Hant-TW.md)
@@ -311,12 +299,12 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 
 #### Android Studio 準備
 
-下載 `Android Studio Meerkat Feature Drop | 2024.3.2` 版本 (按需選擇其一):
+下載 `Android Studio Meerkat Feature Drop | 2024.3.2 Patch 1` 版本 (按需選擇其一):
 
-- [android-studio-2024.3.2.14-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.3.2.14/android-studio-2024.3.2.14-windows.exe) (1.23 GB)
-- [android-studio-2024.3.2.14-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.3.2.14/android-studio-2024.3.2.14-windows.zip) (1.23 GB)
+- [android-studio-2024.3.2.15-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.3.2.15/android-studio-2024.3.2.15-windows.exe) (1.23 GB)
+- [android-studio-2024.3.2.15-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.3.2.15/android-studio-2024.3.2.15-windows.zip) (1.23 GB)
 
-> 注: 上述版本釋出時間為 2025 年 5 月 6 日. 如需下載其他版本, 或上述連結已失效, 可訪問 [Android Studio 發行版本歸檔](https://developer.android.com/studio/archive?hl=en) 頁面.
+> 注: 上述版本釋出時間為 2025 年 5 月 28 日. 如需下載其他版本, 或上述連結已失效, 可訪問 [Android Studio 發行版本歸檔](https://developer.android.com/studio/archive?hl=en) 頁面.
 
 安裝或解壓上述檔案, 執行 Android Studio 軟體 (如 `"D:\android-studio\bin\studio64.exe"`).
 
@@ -367,7 +355,7 @@ File (文件) | Settings (設置) | Appearance & Behavior (外觀與行為) | Sy
 
 AutoJs6 專案依賴的 `JDK (Java 開發工具包)` 發行版本不低於 `17`, 但建議不低於 `19`.
 
-截至 2025 年 5 月 29 日, AutoJs6 可支援 JDK 最高版本為 `24`.
+截至 2025 年 5 月 31 日, AutoJs6 可支援 JDK 最高版本為 `24`.
 
 > 注: 如果計算機系統已安裝 JDK 且版本滿足上述要求, 則可跳過此小節內容.
 

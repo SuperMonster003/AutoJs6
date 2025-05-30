@@ -6,12 +6,16 @@
 
 # v6.6.4
 
-###### 2025/05/29
+###### 2025/05/31
 
+* `提示` API 变更: ui.(status/navigation)BarAppearanceLight[By] -> ui.(status/navigation)BarIconLight[By]
 * `新增` util.dpToPx/spToPx/pxToDp/pxToSp 方法, 用于像素单位转换
+* `修复` 屏幕旋转至横向时子标题可能显示不完整的问题
+* `修复` 屏幕旋转至横向时部分页面内容被侧边导航栏遮挡的问题
 * `修复` Android 15 部分页面状态栏背景着色区域不完整的问题 _[`issue #398`](http://issues.autojs6.com/398)_
 * `修复` 代码编辑器可能使用置信度不足的编码写入文件导致内容解码异常的问题 (试修)
 * `优化` 关于应用与开发者页面增加布局适配通用性并去除不必要的布局分类
+* `优化` README.md 项目编译构建小节添加多种方式便于定位目标设置页面 _[`issue #404`](http://issues.autojs6.com/404)_
 * `依赖` 附加 Androidx ConstraintLayout 版本 2.2.1
 
 # v6.6.3

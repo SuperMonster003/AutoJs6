@@ -1,5 +1,27 @@
 {
   "$data": {
+    "v6.6.4": {
+      "released_date": "2025/05/31",
+      "hint": [
+        "Changement d'API : ui.(status/navigation)BarAppearanceLight[By] -> ui.(status/navigation)BarIconLight[By]"
+      ],
+      "feature": [
+        "Méthodes util.dpToPx/spToPx/pxToDp/pxToSp pour la conversion d'unités en pixels"
+      ],
+      "fix": [
+        "Les sous-titres peuvent s'afficher de manière incomplète lors du passage en mode paysage",
+        "Le contenu de certaines pages peut être masqué par la barre de navigation latérale en mode paysage",
+        "Zone de coloration de fond de la barre d'état incomplète sur certaines pages sous Android 15 _[`issue #398`](http://issues.autojs6.com/398)_",
+        "L'éditeur de code pouvait écrire des fichiers avec un encodage peu fiable, entraînant des erreurs de décodage (tentative de correction)"
+      ],
+      "improvement": [
+        "Adaptabilité de la mise en page améliorée pour les pages Application et Développeur et suppression des catégories de mise en page inutiles",
+        "Dans README.md, section Build, ajout de plusieurs méthodes pour faciliter la localisation de la page de configuration de la cible _[`issue #404`](http://issues.autojs6.com/404)_"
+      ],
+      "dependency": [
+        "Ajout de Androidx ConstraintLayout version 2.2.1"
+      ]
+    },
     "v6.6.3": {
       "released_date": "2025/05/27",
       "feature": [
