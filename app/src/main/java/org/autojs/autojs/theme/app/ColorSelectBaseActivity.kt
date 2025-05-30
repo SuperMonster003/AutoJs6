@@ -104,8 +104,6 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
             subtitle = this@ColorSelectBaseActivity.getSubtitle()
             setSupportActionBar(this)
             setNavigationOnClickListener { finish() }
-            setTitleTextAppearance(this@ColorSelectBaseActivity, R.style.TextAppearanceMainTitle)
-            setSubtitleTextAppearance(this@ColorSelectBaseActivity, R.style.TextAppearanceMainSubtitle)
             mToolbar = this
         }
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
