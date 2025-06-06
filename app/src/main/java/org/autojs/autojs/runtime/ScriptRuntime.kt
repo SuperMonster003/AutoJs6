@@ -93,6 +93,7 @@ import org.autojs.autojs.runtime.api.augment.util.VersionCodesInfo
 import org.autojs.autojs.runtime.api.augment.web.Web
 import org.autojs.autojs.runtime.api.augment.web.WebSocket
 import org.autojs.autojs.runtime.api.augment.web.WebSocketFields
+import org.autojs.autojs.runtime.api.augment.zip.Zip
 import org.autojs.autojs.runtime.exception.ScriptEnvironmentException
 import org.autojs.autojs.runtime.exception.ScriptException
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
@@ -764,6 +765,7 @@ class ScriptRuntime private constructor(builder: Builder) {
         Mime(this).augment(target, mime, true)
         SysProps(this).augment(target, true)
         SQLite(this).augment(target, true)
+        Zip(this).augment(target, true)
         NanoID.augment(target, true)
         Pinyin.augment(target, true)
         Pinyin4j.augment(target, true)
