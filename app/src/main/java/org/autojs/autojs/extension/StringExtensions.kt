@@ -1,6 +1,7 @@
 package org.autojs.autojs.extension
 
 import androidx.core.net.toUri
+import java.io.File
 import java.text.Normalizer
 
 object StringExtensions {
@@ -66,6 +67,12 @@ object StringExtensions {
         val uri = runCatching { this.toUri() }.getOrNull() ?: return false
         uri.scheme?.lowercase() ?: return false
         return true
+    }
+
+    @JvmStatic
+    fun String.toFile(): File {
+        val path = this
+        return File(path)
     }
 
 }
