@@ -107,6 +107,7 @@ pluginManagement {
     // @Reference https://developer.android.com/build/releases/gradle-plugin#updating-gradle
     // @Updated by SuperMonster003 on May 13, 2025.
     val agpGradleCompatibility: List<Pair<String, String>> = listOf(
+        "8.10" to "8.11.1",
         "8.9" to "8.11.1",
         "8.8" to "8.10.2",
         "8.7" to "8.9",
@@ -122,10 +123,11 @@ pluginManagement {
     )
 
     // @Reference https://developer.android.com/reference/tools/gradle-api
-    // @Updated by SuperMonster003 on May 17, 2025.
+    // @Updated by SuperMonster003 on Jun 7, 2025.
     val agpReleases: List<String> = listOf(
-        "8.11.0-alpha10",
-        "8.10.0",
+        "8.12.0-alpha04", /* Jun 7, 2025. */
+        "8.11.0-rc01", /* Jun 7, 2025. */
+        "8.10.1", /* Jun 7, 2025. */
         "8.9.3", /* May 17, 2025. */
         "8.8.2",
         "8.7.3",
@@ -218,7 +220,7 @@ pluginManagement {
                 // @Reference https://developer.android.com/studio/releases#android_gradle_plugin_and_android_studio_compatibility
                 // @Updated by SuperMonster003 on May 13, 2025.
                 agpVersionMap = mapOf(
-                    "2025.1" to "8.10.0", /* May 13, 2025. */
+                    "2025.1" to "8.10.1", /* Jun 7, 2025. */
                     "2024.3" to "8.9.3", /* May 17, 2025. */
                     "2024.2" to "8.7.3", /* Jan 13, 2025. */
                     "2024.1" to "8.5.2", /* Aug 30, 2024. */
@@ -280,7 +282,7 @@ pluginManagement {
                 name = "IntelliJIdea", vendor = "Jetbrains",
                 // @Updated by SuperMonster003 on Apr 23, 2025.
                 agpVersionMap = mapOf(
-                    "2025.1" to "8.9.3", /* May 17, 2025. */
+                    "2025.1" to "8.10.1", /* Jun 7, 2025. */
                     "2024.3.1" to "8.7.3", /* Dec 10, 2024. */
                     "2024.3" to "8.7.0-rc01", /* Nov 15, 2024. */
                     "2024.2" to "8.5.2", /* Aug 13, 2024. */
@@ -369,6 +371,7 @@ pluginManagement {
         // @Reference https://github.com/google/ksp/releases
         // @Updated by SuperMonster003 on May 13, 2025.
         val kspVersionMap = mapOf(
+            "2.2.0-RC2" to "2.0.1", /* Jun 6, 2025. */
             "2.2.0-RC" to "2.0.1", /* May 17, 2025. */
             "2.2.0-Beta2" to "2.0.1", /* May 2, 2025. */
             "2.2.0-Beta1" to "2.0.0", /* Apr 17, 2025. */
