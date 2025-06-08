@@ -24,10 +24,6 @@ import org.autojs.autojs.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.extension.AnyExtensions.jsSanitize
 import org.autojs.autojs.extension.AnyExtensions.jsUnwrapped
-import org.autojs.autojs.extension.FlexibleArray.Companion.component1
-import org.autojs.autojs.extension.FlexibleArray.Companion.component2
-import org.autojs.autojs.extension.FlexibleArray.Companion.component3
-import org.autojs.autojs.extension.FlexibleArray.Companion.component4
 import org.autojs.autojs.extension.ScriptableExtensions.defineProp
 import org.autojs.autojs.extension.ScriptableExtensions.prop
 import org.autojs.autojs.rhino.ProxyObject.Companion.PROXY_GETTER_KEY
@@ -718,9 +714,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
 
         private fun bindValueForApplyingAttribute(scriptRuntime: ScriptRuntime, value: String): String {
             val ctx = scriptRuntime.ui.bindingContext ?: return value
-            val niceCtx = ctx as? Scriptable
-                ?: Context.javaToJS(ctx, scriptRuntime.topLevelScope) as? Scriptable
-                ?: scriptRuntime.topLevelScope
+            val niceCtx = Context.toObject(ctx, ctx as? Scriptable ?: scriptRuntime.topLevelScope)
             var tmp = value
             var i = -1
             while (tmp.indexOf("{{", i + 1).also { i = it } >= 0) {
