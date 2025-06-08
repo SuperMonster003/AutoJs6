@@ -405,7 +405,7 @@ autojs6-v6.6.2-arm64-v8a-0f2a9d74.apk
         - Update TypeScript declarations according to section `dependency` if needed
     - $projectDir/.readme/template_readme.md
         - Update badges like [ android studio / rhino / ... ]
-        - Update contribution section: {{ h3_contribution }}
+        - Update contribution section: [ h3_contribution ]
     - $projectDir/.readme/common.json
         - Update android studio download links and version names
         - Update contribution section: var_date_contribution_table_data_updated

@@ -69,12 +69,12 @@ dependencies /* Unclassified */ {
     implementation("de.psdev.licensesdialog:licensesdialog:2.2.0")
 
     // Apache Commons
-    implementation("org.apache.commons:commons-lang3:3.16.0")
+    implementation("org.apache.commons:commons-lang3:3.17.0")
 
     // Retrofit
-    implementation("com.squareup.retrofit2:retrofit:2.11.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
-    implementation("com.squareup.retrofit2:adapter-rxjava2:2.11.0")
+    implementation("com.squareup.retrofit2:retrofit:2.12.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.12.0")
+    implementation("com.squareup.retrofit2:adapter-rxjava2:2.12.0")
     implementation("com.jakewharton.retrofit:retrofit2-kotlin-coroutines-adapter:0.9.2")
 
     // Glide
@@ -82,7 +82,7 @@ dependencies /* Unclassified */ {
     ksp("com.github.bumptech.glide:ksp:4.16.0")
 
     // Joda Time
-    implementation("joda-time:joda-time:2.12.7")
+    implementation("joda-time:joda-time:2.14.0")
 
     // Flurry
     implementation("com.flurry.android:analytics:14.4.0")
@@ -95,10 +95,10 @@ dependencies /* Unclassified */ {
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
     // Webkit
-    implementation("androidx.webkit:webkit:1.13.0")
+    implementation("androidx.webkit:webkit:1.14.0")
 
     // Gson
-    implementation("com.google.code.gson:gson:2.11.0")
+    implementation("com.google.code.gson:gson:2.13.1")
 
     // Zip4j
     implementation("net.lingala.zip4j:zip4j:2.11.5")
@@ -201,7 +201,7 @@ dependencies /* Unclassified */ {
     implementation("dev.rikka.shizuku:provider:13.1.5")
 
     // ARSCLib
-    implementation("io.github.reandroid:ARSCLib:1.3.1")
+    implementation("io.github.reandroid:ARSCLib:1.3.5")
 
     // Toaster
     implementation("com.github.getActivity:Toaster:12.6")
@@ -236,7 +236,7 @@ dependencies /* Unclassified */ {
     implementation("org.eclipse.paho:org.eclipse.paho.android.service:1.1.1")
 
     // Jsoup
-    implementation("org.jsoup:jsoup:1.19.1")
+    implementation("org.jsoup:jsoup:1.20.1")
 
     // Material Date Time Picker
     implementation(project(":modules:material-date-time-picker"))
@@ -260,7 +260,7 @@ dependencies /* MIME */ {
 dependencies /* Test */ {
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test:runner:1.6.2")
-    androidTestImplementation("org.junit.jupiter:junit-jupiter:5.10.3")
+    androidTestImplementation("org.junit.jupiter:junit-jupiter:5.13.0")
 }
 
 dependencies /* Annotations */ {
@@ -283,7 +283,7 @@ dependencies /* AppCompat */ {
     //  ! zh-CN:
     //  ! 查看 Appcompat 库的发行版本,
     //  ! 可访问 https://developer.android.com/jetpack/androidx/releases/appcompat.
-    implementation("androidx.appcompat:appcompat:1.7.0")
+    implementation("androidx.appcompat:appcompat:1.7.1")
 
     // AppCompat for legacy views (such as JsTextViewLegacy)
     implementation(project(":libs:androidx.appcompat-1.0.2")) {
@@ -307,7 +307,7 @@ dependencies /* Material Dialogs */ {
     //  #     implementation("com.afollestad.material-dialogs:commons", cfg)
     //  # }
     implementation(project(":modules:material-dialogs"))
-    implementation("me.zhanghai.android.materialprogressbar:library:1.4.2")
+    implementation("me.zhanghai.android.materialprogressbar:library:1.6.1")
 }
 
 dependencies /* Layout */ {
@@ -857,7 +857,7 @@ class Versions(filePath: String) {
     private var javaVersionInfoSuffix = ""
 
     val javaVersion: JavaVersion by lazy {
-        var javaVersionInt = determineJavaVersion()
+        val javaVersionInt = determineJavaVersion()
         gradle.beforeProject {
             extensions.extraProperties["javaVersion"] = javaVersionInt
         }
