@@ -88,9 +88,9 @@ public class ForegroundServiceCreator {
                 notificationContent);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && foregroundServiceType != FOREGROUND_SERVICE_TYPE_UNKNOWN) {
-                service.startForeground(notificationId, notification, foregroundServiceType);
+            service.startForeground(notificationId, notification, foregroundServiceType);
         } else {
-                service.startForeground(notificationId, notification);
+            service.startForeground(notificationId, notification);
         }
     }
 

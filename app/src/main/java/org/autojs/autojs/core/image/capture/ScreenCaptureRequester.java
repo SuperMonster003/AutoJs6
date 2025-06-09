@@ -75,6 +75,7 @@ public class ScreenCaptureRequester extends SimpleActivityLifecycleCallbacks imp
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+
         // @Hint by kvii (https://github.com/kvii) on Oct 23, 2024.
         //  ! 按照官方文档 (https://developer.android.com/reference/android/media/projection/MediaProjectionManager), 启动媒体投影的示例流程如下:
         //  ! 1. AndroidManifest.xml 声明 mediaProjection 类型前台服务
@@ -101,27 +102,33 @@ public class ScreenCaptureRequester extends SimpleActivityLifecycleCallbacks imp
         //  ! The original code in ScreenCaptureRequesterImpl#request's startService may have timing issues,
         //  ! if the user has not yet completed authorization, starting the foreground service on Android 14 will crash.
         //  ! Change it to bindService and wait for the onServiceConnected callback.
-        if (requestCode == REQUEST_CODE_MEDIA_PROJECTION) {
-            Context applicationContext = getApplication().getApplicationContext();
-            applicationContext.startService(new Intent(applicationContext, ScreenCapturerForegroundService.class));
-            var clazz = ScreenCapturerForegroundService.class;
-            if (ForegroundServiceUtils.isRunning(applicationContext, clazz)) {
-                onRequest(resultCode, data);
-            } else {
-                mServiceConnection = new ServiceConnection() {
-                    @Override
-                    public void onServiceConnected(ComponentName name, IBinder service) {
-                        onRequest(resultCode, data);
-                    }
 
-                    @Override
-                    public void onServiceDisconnected(ComponentName name) {
-                        /* Empty body. */
-                    }
-                };
-                applicationContext.bindService(new Intent(applicationContext, clazz), mServiceConnection, Context.BIND_AUTO_CREATE);
-            }
+        if (requestCode != REQUEST_CODE_MEDIA_PROJECTION) {
+            return;
         }
+        if (resultCode != Activity.RESULT_OK) {
+            onRequest(resultCode, data);
+            return;
+        }
+        var clazz = ScreenCapturerForegroundService.class;
+        Context applicationContext = getApplication().getApplicationContext();
+        applicationContext.startService(new Intent(applicationContext, clazz));
+        if (ForegroundServiceUtils.isRunning(applicationContext, clazz)) {
+            onRequest(resultCode, data);
+            return;
+        }
+        mServiceConnection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                onRequest(resultCode, data);
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                /* Empty body. */
+            }
+        };
+        applicationContext.bindService(new Intent(applicationContext, clazz), mServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
@@ -149,14 +156,13 @@ public class ScreenCaptureRequester extends SimpleActivityLifecycleCallbacks imp
             try {
                 StartForResultActivity.start(context, this);
                 scheduleActivityCreateTimeout();
-                return;
             } catch (Exception e) {
                 if (mCallback != null) {
                     mCallback.onRequestError(e);
                     recycle();
                 }
-                return;
             }
+            return;
         }
         throw new IllegalStateException(ScreenCaptureRequester.class.getSimpleName() + "#request can be only call once");
     }
