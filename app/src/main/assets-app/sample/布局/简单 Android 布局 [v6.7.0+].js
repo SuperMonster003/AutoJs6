@@ -9,7 +9,7 @@ ui.layout(
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:format24Hour="HH:mm"
-        android:textSize="36sp"/>,
+        android:textSize="36sp" />,
 );
 
 /* 1 秒钟后应用自定义样式. */
@@ -28,9 +28,10 @@ setTimeout(() => {
     let textClockView = ui['text_clock'];
 
     textClockView.attr('color', ColorUtils.adjustThemeColorForContrast(themeColor.toInt()));
-    textClockView.attr('size', '64');
+    textClockView.attr('size', calcAutoSp());
     textClockView.attr('layout_gravity', 'center');
     textClockView.attr('format24Hour', 'HH:mm:ss');
+    textClockView.setTypeface(Typeface.createFromAsset(context.assets, 'fonts/droid_sans.ttf'));
 
     let textSizeSp = DisplayUtils.pxToSp(textClockView.getTextSize());
     let detector = new ScaleGestureDetector(context,
@@ -49,3 +50,10 @@ setTimeout(() => {
         },
     });
 }, 1e3);
+
+function calcAutoSp(percent = 0.16) {
+    let dm = context.getResources().getDisplayMetrics();
+    let shortEdgePx = Math.min(dm.widthPixels, dm.heightPixels);
+    let sizePx = shortEdgePx * percent;
+    return sizePx / dm.scaledDensity;
+}

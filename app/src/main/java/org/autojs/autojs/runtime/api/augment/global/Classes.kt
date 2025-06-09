@@ -45,6 +45,9 @@ class Classes {
     val PorterDuff = android.graphics.PorterDuff::class
 
     @JvmField
+    val Typeface = android.graphics.Typeface::class
+
+    @JvmField
     val ColorDrawable = android.graphics.drawable.ColorDrawable::class
 
     @JvmField
