@@ -2,6 +2,7 @@ package org.autojs.autojs.runtime.api.augment.threads
 
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.core.looper.TimerThread
+import org.autojs.autojs.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.extension.FlexibleArray
 import org.autojs.autojs.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.ScriptRuntime
@@ -74,7 +75,7 @@ class Threads(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @RhinoRuntimeFunctionInterface
         fun sync(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Synchronizer = ensureArgumentsLengthInRange(args, 1..2) {
             val (func, lock) = it
-            require(func is BaseFunction) { "Argument func for global.sync must be a JavaScript Function" }
+            require(func is BaseFunction) { "Argument \"func\" ${func.jsBrief()} for global.sync must be a JavaScript Function" }
             Synchronizer(func, lock)
         }
 

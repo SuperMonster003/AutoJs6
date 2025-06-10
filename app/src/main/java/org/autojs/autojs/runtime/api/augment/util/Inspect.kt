@@ -4,6 +4,7 @@ import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.core.automator.UiObjectCollection
 import org.autojs.autojs.extension.AnyExtensions.isJsNonNullObject
 import org.autojs.autojs.extension.AnyExtensions.isJsNullish
+import org.autojs.autojs.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.extension.ArrayExtensions.toNativeObject
 import org.autojs.autojs.extension.FlexibleArray.Companion.component1
 import org.autojs.autojs.extension.FlexibleArray.Companion.component2
@@ -231,7 +232,7 @@ object Inspect : Augmentable(), Invokable {
                     opt.colors = Context.toBoolean(optionColors)
                 }
             }
-            else -> throw WrappedIllegalArgumentException("Argument options for util.inspect must be a JavaScript Object")
+            else -> throw WrappedIllegalArgumentException("Argument \"options\" ${options.jsBrief()} for util.inspect must be a JavaScript Object")
         }
         val ctx = Ctx().also {
             it.showHidden = opt.showHidden

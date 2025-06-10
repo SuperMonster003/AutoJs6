@@ -60,7 +60,7 @@ class ZipNativeObject(
         else -> {
             val pathString = coerceString(rawPath)
             require(pathString.isNotBlank()) {
-                "Argument path ${pathString.jsBrief()} for zip.$operationName cannot be empty"
+                "Argument \"path\" ${pathString.jsBrief()} for zip.$operationName cannot be empty"
             }
             scriptRuntime.files.nonNullPath(pathString)
         }
@@ -72,7 +72,7 @@ class ZipNativeObject(
         else -> {
             val niceOptions = rawOptions
             require(niceOptions is ScriptableObject) {
-                "Argument options ${niceOptions.jsBrief()} for zip.$operationName must be a JavaScript Object"
+                "Argument \"options\" ${niceOptions.jsBrief()} for zip.$operationName must be a JavaScript Object"
             }
             niceOptions
         }
@@ -131,7 +131,7 @@ class ZipNativeObject(
             return params
         }
         require(opts is ScriptableObject) {
-            "Argument options ${opts.jsBrief()} for zip.$funcName must be a JavaScript Object"
+            "Argument \"options\" ${opts.jsBrief()} for zip.$funcName must be a JavaScript Object"
         }
         params.aesKeyStrength = opts.inquire("aesKeyStrength", { o, def ->
             o.toAesKeyStrength() ?: def
@@ -247,7 +247,7 @@ class ZipNativeObject(
             return params
         }
         require(opts is ScriptableObject) {
-            "Argument options ${opts.jsBrief()} for zip.$funcName must be a JavaScript Object"
+            "Argument \"options\" ${opts.jsBrief()} for zip.$funcName must be a JavaScript Object"
         }
         opts.inquire("isExtractSymbolicLinks", ::coerceBoolean, true)
         opts.inquire("password") { coerceString(it) }?.let { password ->
@@ -385,7 +385,7 @@ class ZipNativeObject(
             val zip = thisObj as ZipNativeObject
             val (filePathList, options) = argList
             require(filePathList is Iterable<*>) {
-                "Argument filePathList ${filePathList.jsBrief()} for ${ZipNativeObject::class.java.simpleName}#${Companion::addFiles.name} must be an Iterable"
+                "Argument \"filePathList\" ${filePathList.jsBrief()} for ${ZipNativeObject::class.java.simpleName}#${Companion::addFiles.name} must be an Iterable"
             }
             val fileList = mutableListOf<File>()
             filePathList.forEach { rawFilePath ->

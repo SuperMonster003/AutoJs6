@@ -42,10 +42,10 @@ class SQLite(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
             require(niceName.isNotEmpty()) { "Argument name of sqlite.open() must not be empty" }
 
             val niceOptions = if (options.isJsNullish()) newNativeObject() else options
-            require(niceOptions is NativeObject) { "Argument options ${options.jsBrief()} for sqlite.open() must be a JavaScript Object" }
+            require(niceOptions is NativeObject) { "Argument \"options\" ${options.jsBrief()} for sqlite.open() must be a JavaScript Object" }
 
             val niceCallback = callback.jsSanitize()?.jsTryToJava<DatabaseCallback>()
-            require(niceCallback is DatabaseCallback?) { "Argument callback ${callback.jsBrief()} for sqlite.open() must be a DatabaseCallback" }
+            require(niceCallback is DatabaseCallback?) { "Argument \"callback\" ${callback.jsBrief()} for sqlite.open() must be a DatabaseCallback" }
 
             scriptRuntime.sqlite.open(
                 name = niceName,

@@ -84,7 +84,7 @@ class Tasks(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                 is TimedTask -> TimedTaskManager.addTaskSync(task)
                 is IntentTask -> TimedTaskManager.addTaskSync(task)
                 else -> listOf(
-                    "Argument task ${task.jsBrief()} for tasks.addTask",
+                    "Argument \"task\" ${task.jsBrief()} for tasks.addTask",
                     "must be either TimedTask or IntentTask",
                 ).joinToString(" ").let { throw WrappedIllegalArgumentException(it) }
             }

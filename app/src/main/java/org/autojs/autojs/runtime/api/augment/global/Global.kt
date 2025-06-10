@@ -586,7 +586,7 @@ class Global(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
             when {
                 base.isJsNullish() -> base = scriptRuntime.scale.baseX
                 base is Number -> require(RhinoUtils.isInteger(base)) { "Scale base ${base.jsBrief()} must be a positive integer for cX" }
-                else -> throw WrappedIllegalArgumentException("Argument base ${base.jsBrief()} for cX must be a number if provided")
+                else -> throw WrappedIllegalArgumentException("Argument \"base\" ${base.jsBrief()} for cX must be a number if provided")
             }
             return@ensureArgumentsAtMost (deviceWidth * num / coerceIntNumber(base)).roundToLong().toDouble()
         }
@@ -610,7 +610,7 @@ class Global(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
             when {
                 base.isJsNullish() -> base = scriptRuntime.scale.baseY
                 base is Number -> require(RhinoUtils.isInteger(base)) { "Scale base ${base.jsBrief()} must be a positive integer for cY" }
-                else -> throw WrappedIllegalArgumentException("Argument base ${base.jsBrief()} for cY must be a number if provided")
+                else -> throw WrappedIllegalArgumentException("Argument \"base\" ${base.jsBrief()} for cY must be a number if provided")
             }
             return@ensureArgumentsAtMost (deviceHeight * num / coerceIntNumber(base)).roundToLong().toDouble()
         }

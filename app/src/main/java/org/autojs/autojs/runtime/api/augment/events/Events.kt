@@ -4,6 +4,7 @@ import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.core.eventloop.EventEmitter
 import org.autojs.autojs.core.looper.MainThreadProxy
 import org.autojs.autojs.extension.AnyExtensions.isJsNullish
+import org.autojs.autojs.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.extension.AnyExtensions.jsSpecies
 import org.autojs.autojs.extension.FlexibleArray
 import org.autojs.autojs.extension.ScriptableExtensions.defineProp
@@ -37,12 +38,12 @@ class Events(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             if (obj.isJsNullish()) {
                 obj = newNativeObject()
             }
-            require(obj is ScriptableObject) { "Argument obj for events.__asEmitter__ must be a ScriptableObject" }
+            require(obj is ScriptableObject) { "Argument \"obj\" ${obj.jsBrief()} for events.__asEmitter__ must be a ScriptableObject" }
             val emitter: EventEmitter = when {
                 thread.isJsNullish() -> scriptRuntime.events.emitter()
                 thread is MainThreadProxy -> scriptRuntime.events.emitter(thread)
                 thread is Thread -> scriptRuntime.events.emitter(thread)
-                else -> throw WrappedIllegalArgumentException("Argument thread for events.__asEmitter__ must be a MainThreadProxy or Thread instead of ${thread.jsSpecies()}")
+                else -> throw WrappedIllegalArgumentException("Argument thread ${thread.jsSpecies()} for events.__asEmitter__ must be a MainThreadProxy or Thread")
             }
             val scope = scriptRuntime.topLevelScope
             emitter.javaClass.declaredMethods.filter {

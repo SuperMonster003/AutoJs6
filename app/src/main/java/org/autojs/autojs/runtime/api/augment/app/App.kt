@@ -106,7 +106,7 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         fun intentRhinoWithRuntime(scriptRuntime: ScriptRuntime, o: Any?): Intent = when (o) {
             is Intent -> o
             is NativeObject -> Intent().configure(scriptRuntime, o)
-            else -> throw IllegalArgumentException("Argument for app.intent must be either an Intent or a JavaScript Object rather than ${o.jsBrief()}")
+            else -> throw IllegalArgumentException("Argument \"o\" ${o.jsBrief()} for app.intent must be either an Intent or a JavaScript Object")
         }
 
         @JvmStatic
@@ -453,7 +453,7 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
         @JvmStatic
         fun sendLocalBroadcastSyncRhino(intent: Any?) = undefined {
-            require(intent is Intent?) { "Argument intent ${intent.jsBrief()} for app.sendLocalBroadcastSync must be a Intent" }
+            require(intent is Intent?) { "Argument \"intent\" ${intent.jsBrief()} for app.sendLocalBroadcastSync must be a Intent" }
             sendLocalBroadcastSyncInternal(intent)
         }
 

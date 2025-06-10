@@ -25,7 +25,7 @@ class SQLite(private val context: Context, private val scriptRuntime: ScriptRunt
     private class TypeAdapterImpl : Database.TypeAdapter {
 
         override fun toContentValues(obj: Any?): ContentValues {
-            require(obj is Map<*, *>) { "Argument obj for toContentValue must be a Map<String, Object> instead of ${obj.jsBrief()}" }
+            require(obj is Map<*, *>) { "Argument \"obj\" ${obj.jsBrief()} for toContentValue must be a Map<String, Object>" }
             val contentValues = ContentValues()
             for ((k, v) in obj) {
                 val key = coerceString(k)

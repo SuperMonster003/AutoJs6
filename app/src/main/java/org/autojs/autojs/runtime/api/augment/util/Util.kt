@@ -321,9 +321,9 @@ object Util : Augmentable() {
     @JvmStatic
     @RhinoFunctionBody
     fun __assignFunctions__Rhino(src: Any?, target: Any?, funcNames: Any?) {
-        if (src !is ScriptableObject) throw WrappedIllegalArgumentException("Argument src for util.__assignFunctions__ must be a ScriptableObject")
-        if (target !is ScriptableObject) throw WrappedIllegalArgumentException("Argument target for util.__assignFunctions__ must be a ScriptableObject")
-        if (funcNames !is NativeArray) throw WrappedIllegalArgumentException("Argument funcNames for util.__assignFunctions__ must be a NativeArray")
+        if (src !is ScriptableObject) throw WrappedIllegalArgumentException("Argument \"src\" ${src.jsBrief()} for util.__assignFunctions__ must be a ScriptableObject")
+        if (target !is ScriptableObject) throw WrappedIllegalArgumentException("Argument \"target\" ${target.jsBrief()} for util.__assignFunctions__ must be a ScriptableObject")
+        if (funcNames !is NativeArray) throw WrappedIllegalArgumentException("Argument \"funcNames\" ${funcNames.jsBrief()} for util.__assignFunctions__ must be a NativeArray")
 
         funcNames.forEach { funcName ->
             val name = Context.toString(funcName)
@@ -461,14 +461,14 @@ object Util : Augmentable() {
     @JvmStatic
     @RhinoSingletonFunctionInterface
     fun `class`(args: Array<out Any?>): Scriptable = ensureArgumentsOnlyOne(args) { o ->
-        require(o != null) { "Argument for util.class must be non-null" }
+        require(o != null) { "Argument \"o\" ${o.jsBrief()} for util.class must be non-null" }
         getClassInternal(o)
     }
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
     fun getClass(args: Array<out Any?>): Scriptable = ensureArgumentsOnlyOne(args) { o ->
-        require(o != null) { "Argument for util.getClass must be non-null" }
+        require(o != null) { "Argument \"o\" ${o.jsBrief()} for util.getClass must be non-null" }
         getClassInternal(o)
     }
 
@@ -476,7 +476,7 @@ object Util : Augmentable() {
     @RhinoSingletonFunctionInterface
     fun className(args: Array<out Any?>): String = ensureArgumentsOnlyOne(args) {
         when (it) {
-            null -> throw WrappedIllegalArgumentException("Argument for util.className must be non-null")
+            null -> throw WrappedIllegalArgumentException("Argument \"o\" ${it.jsBrief()} for util.className must be non-null")
             is Class<*> -> it.name
             else -> it.javaClass.name
         }
@@ -486,7 +486,7 @@ object Util : Augmentable() {
     @RhinoSingletonFunctionInterface
     fun getClassName(args: Array<out Any?>): String = ensureArgumentsOnlyOne(args) {
         when (it) {
-            null -> throw WrappedIllegalArgumentException("Argument for util.getClassName must be non-null")
+            null -> throw WrappedIllegalArgumentException("Argument \"o\" ${it.jsBrief()} for util.getClassName must be non-null")
             is Class<*> -> it.name
             else -> it.javaClass.name
         }
@@ -513,7 +513,7 @@ object Util : Augmentable() {
             else -> throw Error("Unknown pattern $pattern for util.checkStringArgument")
         }
         val niceSrc = when {
-            src.isJsNullish() -> throw WrappedIllegalArgumentException("Argument src for util.checkStringArgument must be non-nullish")
+            src.isJsNullish() -> throw WrappedIllegalArgumentException("Argument \"src\" ${src.jsBrief()} for util.checkStringArgument must be non-nullish")
             isPrimitiveRhino(src) -> Context.toString(src)
             else -> throw Error("Param src must be non-nullish")
         }
@@ -530,8 +530,8 @@ object Util : Augmentable() {
     @JvmStatic
     @RhinoFunctionBody
     fun assureStringStartsWithRhino(s: Any?, start: Any?): String {
-        if (s !is String) throw WrappedIllegalArgumentException("Argument s for util.assureStringStartsWith must be a string")
-        if (start !is String) throw WrappedIllegalArgumentException("Argument start for util.assureStringStartsWith must be a string")
+        if (s !is String) throw WrappedIllegalArgumentException("Argument \"s\" ${s.jsBrief()} for util.assureStringStartsWith must be a string")
+        if (start !is String) throw WrappedIllegalArgumentException("Argument \"start\" ${start.jsBrief()} for util.assureStringStartsWith must be a string")
         return if (s.startsWith(start)) s else start + s
     }
 
@@ -545,8 +545,8 @@ object Util : Augmentable() {
     @JvmStatic
     @RhinoFunctionBody
     fun assureStringEndsWithRhino(s: Any?, end: Any?): String {
-        if (s !is String) throw WrappedIllegalArgumentException("Argument s for util.assureStringEndsWith must be a string")
-        if (end !is String) throw WrappedIllegalArgumentException("Argument end for util.assureStringEndsWith must be a string")
+        if (s !is String) throw WrappedIllegalArgumentException("Argument \"s\" ${s.jsBrief()} for util.assureStringEndsWith must be a string")
+        if (end !is String) throw WrappedIllegalArgumentException("Argument \"end\" ${end.jsBrief()} for util.assureStringEndsWith must be a string")
         return if (s.endsWith(end)) s else s + end
     }
 

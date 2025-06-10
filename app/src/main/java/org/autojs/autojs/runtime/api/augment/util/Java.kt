@@ -3,6 +3,7 @@ package org.autojs.autojs.runtime.api.augment.util
 import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoSingletonFunctionInterface
 import org.autojs.autojs.extension.AnyExtensions.isJsNullish
+import org.autojs.autojs.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.extension.ArrayExtensions.toNativeArray
 import org.autojs.autojs.extension.ScriptableExtensions.prop
 import org.autojs.autojs.runtime.api.augment.Augmentable
@@ -92,7 +93,7 @@ object Java : Augmentable() {
     @RhinoSingletonFunctionInterface
     fun objectToMap(args: Array<out Any?>): Any? = ensureArgumentsOnlyOne(args) { o ->
         if (o.isJsNullish()) return@ensureArgumentsOnlyOne null
-        if (o !is NativeObject) throw WrappedIllegalArgumentException("Argument for util.objectToMap must be a JavaScript Object")
+        if (o !is NativeObject) throw WrappedIllegalArgumentException("Argument \"o\" ${o.jsBrief()} for util.objectToMap must be a JavaScript Object")
         hashMapOf<String, Any?>().also { map ->
             for (key in ScriptableObject.getPropertyIds(o)) {
                 map[key.toString()] = o.prop(key.toString())
@@ -104,7 +105,7 @@ object Java : Augmentable() {
     @RhinoSingletonFunctionInterface
     fun mapToObject(args: Array<out Any?>): Any? = ensureArgumentsOnlyOne(args) { map ->
         if (map.isJsNullish()) return@ensureArgumentsOnlyOne null
-        if (map !is Map<*, *>) throw WrappedIllegalArgumentException("Argument for util.mapToObject must be a Java Map")
+        if (map !is Map<*, *>) throw WrappedIllegalArgumentException("Argument \"map\" ${map.jsBrief()} for util.mapToObject must be a Java Map")
         newNativeObject().also { o ->
             val iter = map.iterator()
             while (iter.hasNext()) {

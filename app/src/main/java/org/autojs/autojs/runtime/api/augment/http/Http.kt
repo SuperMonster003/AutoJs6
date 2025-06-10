@@ -167,7 +167,7 @@ class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @RhinoFunctionBody
         fun getRhinoWithRuntime(scriptRuntime: ScriptRuntime, url: Any?, options: Any? = null, callback: Any? = null): Any {
             val niceOptions = if (options.isJsNullish()) newNativeObject() else options
-            require(niceOptions is NativeObject) { "Argument options ${options.jsBrief()} for http.get must be a JavaScript Object" }
+            require(niceOptions is NativeObject) { "Argument \"options\" ${options.jsBrief()} for http.get must be a JavaScript Object" }
             put(niceOptions, KEY_METHOD to METHOD_GET)
             return requestRhinoWithRuntime(scriptRuntime, url, niceOptions, callback)
         }
@@ -184,7 +184,7 @@ class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @RhinoFunctionBody
         fun postRhinoWithRuntime(scriptRuntime: ScriptRuntime, url: Any?, data: Any? = null, options: Any? = null, callback: Any? = null): Any {
             val niceOptions = if (options.isJsNullish()) newNativeObject() else options
-            require(niceOptions is NativeObject) { "Argument options ${options.jsBrief()} for http.post must be a JavaScript Object" }
+            require(niceOptions is NativeObject) { "Argument \"options\" ${options.jsBrief()} for http.post must be a JavaScript Object" }
             put(niceOptions, KEY_METHOD to METHOD_POST)
             putIfAbsent(niceOptions, KEY_CONTENT_TYPE to DEFAULT_CONTENT_TYPE)
             fillPostData(niceOptions, data)
@@ -203,7 +203,7 @@ class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @RhinoFunctionBody
         fun postJsonRhinoWithRuntime(scriptRuntime: ScriptRuntime, url: Any?, data: Any?, options: Any? = null, callback: Any? = null): Any {
             val niceOptions = if (options.isJsNullish()) newNativeObject() else options
-            require(niceOptions is NativeObject) { "Argument options ${options.jsBrief()} for http.postJson] must be a JavaScript Object" }
+            require(niceOptions is NativeObject) { "Argument \"options\" ${options.jsBrief()} for http.postJson] must be a JavaScript Object" }
             put(niceOptions, KEY_CONTENT_TYPE to Mime.APPLICATION_JSON)
             return postRhinoWithRuntime(scriptRuntime, url, data, niceOptions, callback)
         }
@@ -220,7 +220,7 @@ class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @RhinoFunctionBody
         fun postMultipartRhinoWithRuntime(scriptRuntime: ScriptRuntime, url: Any?, files: Any?, options: Any? = null, callback: Any? = null): Any {
             val niceOptions = if (options.isJsNullish()) newNativeObject() else options
-            require(niceOptions is NativeObject) { "Argument options ${options.jsBrief()} for http.postMultipart] must be a JavaScript Object" }
+            require(niceOptions is NativeObject) { "Argument \"options\" ${options.jsBrief()} for http.postMultipart] must be a JavaScript Object" }
             listOf(
                 KEY_METHOD to METHOD_POST,
                 KEY_CONTENT_TYPE to Mime.MULTIPART_FORM_DATA,
