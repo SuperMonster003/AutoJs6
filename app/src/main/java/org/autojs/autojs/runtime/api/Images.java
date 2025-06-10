@@ -23,6 +23,7 @@ import org.autojs.autojs.annotation.ScriptVariable;
 import org.autojs.autojs.concurrent.VolatileDispose;
 import org.autojs.autojs.core.image.CapturedImage;
 import org.autojs.autojs.core.image.ImageWrapper;
+import org.autojs.autojs.core.image.Shootable;
 import org.autojs.autojs.core.image.RhinoColorFinder;
 import org.autojs.autojs.core.image.TemplateMatching;
 import org.autojs.autojs.core.image.capture.ScreenCaptureRequester;
@@ -56,6 +57,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import static android.app.Activity.RESULT_OK;
 import static org.autojs.autojs.util.RhinoUtils.isMainThread;
@@ -153,12 +155,22 @@ public class Images {
         if (image == null) {
             throw new NullPointerException(str(R.string.error_method_called_with_null_argument, "Images.pixel", "image"));
         }
-        int pixel = image.pixel(x, y);
-        image.shoot();
-        return pixel;
+        try {
+            return image.pixel(x, y);
+        } finally {
+            shoot(image);
+        }
     }
 
     public static ImageWrapper concat(ScriptRuntime scriptRuntime, ImageWrapper imgA, ImageWrapper imgB, int direction) {
+        try {
+            return concatInternal(scriptRuntime, imgA, imgB, direction);
+        } finally {
+            shoot(imgA, imgB);
+        }
+    }
+
+    private static ImageWrapper concatInternal(ScriptRuntime scriptRuntime, ImageWrapper imgA, ImageWrapper imgB, int direction) {
         if (!Arrays.asList(Gravity.START, Gravity.END, Gravity.TOP, Gravity.BOTTOM).contains(direction)) {
             throw new IllegalArgumentException(str(R.string.error_illegal_argument, "direction", direction));
         }
@@ -186,8 +198,6 @@ public class Images {
             canvas.drawBitmap(imgA.getBitmap(), (float) (width - imgA.getWidth()) / 2, 0, paint);
             canvas.drawBitmap(imgB.getBitmap(), (float) (width - imgB.getWidth()) / 2, imgA.getHeight(), paint);
         }
-        imgA.shoot();
-        imgB.shoot();
         return ImageWrapper.ofBitmap(scriptRuntime, bitmap);
     }
 
@@ -279,12 +289,22 @@ public class Images {
     }
 
     public ImageWrapper copy(@NonNull ImageWrapper image) {
-        ImageWrapper imageWrapper = image.clone();
-        image.shoot();
-        return imageWrapper;
+        try {
+            return image.clone();
+        } finally {
+            shoot(image);
+        }
     }
 
     public boolean save(@NonNull ImageWrapper image, @NonNull String path, @NonNull String format, int quality) throws IOException {
+        try {
+            return saveInternal(image, path, format, quality);
+        } finally {
+            shoot(image);
+        }
+    }
+
+    private boolean saveInternal(@NonNull ImageWrapper image, @NonNull String path, @NonNull String format, int quality) throws IOException {
         Bitmap bitmap = image.getBitmap();
         Bitmap.CompressFormat compressFormat = parseImageFormat(format);
 
@@ -306,19 +326,24 @@ public class Images {
         }
 
         try (FileOutputStream fos = new FileOutputStream(path)) {
-            boolean b = bitmap.compress(compressFormat, quality, fos);
-            image.shoot();
-            return b;
+            return bitmap.compress(compressFormat, quality, fos);
         }
     }
 
     public byte[] compressToBytes(@NotNull ImageWrapper image, @NotNull String format, int quality) {
+        try {
+            return compressToBytesInternal(image, format, quality);
+        } finally {
+            shoot(image);
+        }
+    }
+
+    private byte[] compressToBytesInternal(@NotNull ImageWrapper image, @NotNull String format, int quality) {
         Bitmap bitmap = image.getBitmap();
         Bitmap.CompressFormat compressFormat = parseImageFormat(format);
 
         if (compressFormat == Bitmap.CompressFormat.PNG && quality != 100) {
             byte[] compressed = PngQuantBridge.quantize(bitmap, quality);
-            image.shoot();
             if (compressed != null) {
                 return compressed;
             }
@@ -327,14 +352,12 @@ public class Images {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             if (compressFormat == Bitmap.CompressFormat.WEBP_LOSSLESS && quality != 100) {
-                image.shoot();
                 throw new IllegalArgumentException(mContext.getString(R.string.error_webp_lossless_quality_not_supported));
             }
         }
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         bitmap.compress(compressFormat, quality, outputStream);
-        image.shoot();
         return outputStream.toByteArray();
     }
 
@@ -352,17 +375,31 @@ public class Images {
         releaseScreenCapturer();
     }
 
-    public ImageWrapper rotate(@NonNull ImageWrapper img, float x, float y, float degree) {
+    public ImageWrapper rotate(@NonNull ImageWrapper image, float x, float y, float degree) {
+        try {
+            return rotateInternal(image, x, y, degree);
+        } finally {
+            shoot(image);
+        }
+    }
+
+    private ImageWrapper rotateInternal(@NonNull ImageWrapper image, float x, float y, float degree) {
         Matrix matrix = new Matrix();
         matrix.postRotate(degree, x, y);
-        ImageWrapper imageWrapper = ImageWrapper.ofBitmap(mScriptRuntime, Bitmap.createBitmap(img.getBitmap(), 0, 0, img.getWidth(), img.getHeight(), matrix, true));
-        img.shoot();
-        return imageWrapper;
+        return ImageWrapper.ofBitmap(mScriptRuntime, Bitmap.createBitmap(image.getBitmap(), 0, 0, image.getWidth(), image.getHeight(), matrix, true));
     }
 
     @ScriptInterface
-    public ImageWrapper flip(@NonNull ImageWrapper img, boolean horizontal, boolean vertical) {
-        Bitmap original = img.getBitmap();
+    public ImageWrapper flip(@NonNull ImageWrapper image, boolean horizontal, boolean vertical) {
+        try {
+            return flipInternal(image, horizontal, vertical);
+        } finally {
+            shoot(image);
+        }
+    }
+
+    private ImageWrapper flipInternal(@NonNull ImageWrapper image, boolean horizontal, boolean vertical) {
+        Bitmap original = image.getBitmap();
         Matrix matrix = new Matrix();
 
         // Set scaling ratio according to input parameters.
@@ -380,14 +417,19 @@ public class Images {
         if (vertical) matrix.postTranslate(0, original.getHeight());
 
         Bitmap flipped = Bitmap.createBitmap(original, 0, 0, original.getWidth(), original.getHeight(), matrix, true);
-        img.shoot();
         return ImageWrapper.ofBitmap(mScriptRuntime, flipped);
     }
 
-    public ImageWrapper clip(@NonNull ImageWrapper img, int x, int y, int w, int h) {
-        ImageWrapper imageWrapper = ImageWrapper.ofBitmap(mScriptRuntime, Bitmap.createBitmap(img.getBitmap(), x, y, w, h));
-        img.shoot();
-        return imageWrapper;
+    public ImageWrapper clip(@NonNull ImageWrapper image, int x, int y, int w, int h) {
+        try {
+            return clipInternal(image, x, y, w, h);
+        } finally {
+            shoot(image);
+        }
+    }
+
+    private ImageWrapper clipInternal(@NonNull ImageWrapper image, int x, int y, int w, int h) {
+        return ImageWrapper.ofBitmap(mScriptRuntime, Bitmap.createBitmap(image.getBitmap(), x, y, w, h));
     }
 
     public ImageWrapper read(String path) {
@@ -416,25 +458,32 @@ public class Images {
         return ImageWrapper.ofBitmap(mScriptRuntime, Drawables.loadBase64Data(data));
     }
 
-    public String toBase64(ImageWrapper img, String format, int quality) {
-        byte[] input = toBytes(img, format, quality);
-        img.shoot();
-        return Base64.encodeToString(input, Base64.NO_WRAP);
+    public String toBase64(ImageWrapper image, String format, int quality) {
+        try {
+            byte[] input = toBytes(image, format, quality);
+            return Base64.encodeToString(input, Base64.NO_WRAP);
+        } finally {
+            shoot(image);
+        }
     }
 
-    public byte[] toBytes(@NonNull ImageWrapper img, String format, int quality) {
-        Bitmap.CompressFormat compressFormat = parseImageFormat(format);
-        Bitmap bitmap = img.getBitmap();
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        bitmap.compress(compressFormat, quality, outputStream);
-        img.shoot();
-        return outputStream.toByteArray();
+    public byte[] toBytes(@NonNull ImageWrapper image, String format, int quality) {
+        try {
+            Bitmap.CompressFormat compressFormat = parseImageFormat(format);
+            Bitmap bitmap = image.getBitmap();
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            bitmap.compress(compressFormat, quality, outputStream);
+            return outputStream.toByteArray();
+        } finally {
+            shoot(image);
+        }
     }
 
     public ImageWrapper fromBytes(byte[] bytes) throws BitmapUtils.DecodeException {
         return ImageWrapper.ofBitmap(mScriptRuntime, BitmapUtils.bitmapFromByteArrayOrThrow(bytes));
     }
 
+    /** @noinspection deprecation */
     private Bitmap.CompressFormat parseImageFormat(String format) {
         return switch (format.toLowerCase(Language.getPrefLanguage().getLocale())) {
             case "png" -> Bitmap.CompressFormat.PNG;
@@ -468,6 +517,14 @@ public class Images {
     }
 
     public ImageWrapper invert(@NonNull ImageWrapper image) {
+        try {
+            return invertInternal(image);
+        } finally {
+            shoot(image);
+        }
+    }
+
+    private ImageWrapper invertInternal(@NonNull ImageWrapper image) {
         initOpenCvIfNeeded();
 
         Bitmap originalBitmap = image.getBitmap();
@@ -502,8 +559,6 @@ public class Images {
         // 转换反色后的 Mat 回 Bitmap
         Bitmap invertedBitmap = Bitmap.createBitmap(originalWidth, originalHeight, Bitmap.Config.ARGB_8888);
         Utils.matToBitmap(destMat, invertedBitmap);
-
-        image.shoot();
 
         return ImageWrapper.ofBitmap(mScriptRuntime, invertedBitmap);
     }
@@ -557,6 +612,14 @@ public class Images {
     @Nullable
     @ScriptInterface
     public Point findImage(ImageWrapper image, ImageWrapper template, float weakThreshold, float strictThreshold, Rect rect, int maxLevel) throws Exception {
+        try {
+            return findImageInternal(image, template, weakThreshold, strictThreshold, rect, maxLevel);
+        } finally {
+            shoot(image, template);
+        }
+    }
+
+    private Point findImageInternal(ImageWrapper image, ImageWrapper template, float weakThreshold, float strictThreshold, Rect rect, int maxLevel) throws Exception {
         initOpenCvIfNeeded();
         if (image == null) {
             throw new NullPointerException(mContext.getString(R.string.error_method_called_with_null_argument, "Images.findImage", "image"));
@@ -588,8 +651,6 @@ public class Images {
             if (shouldReleaseMat) {
                 OpenCVHelper.release(src);
             }
-            image.shoot();
-            template.shoot();
         }
         if (point != null) {
             if (rect != null) {
@@ -603,6 +664,14 @@ public class Images {
     }
 
     public List<TemplateMatching.Match> matchTemplate(ImageWrapper image, ImageWrapper template, float weakThreshold, float strictThreshold, Rect rect, int maxLevel, int limit, boolean useTransparentMask) {
+        try {
+            return matchTemplateInternal(image, template, weakThreshold, strictThreshold, rect, maxLevel, limit, useTransparentMask);
+        } finally {
+            shoot(image, template);
+        }
+    }
+
+    private List<TemplateMatching.Match> matchTemplateInternal(ImageWrapper image, ImageWrapper template, float weakThreshold, float strictThreshold, Rect rect, int maxLevel, int limit, boolean useTransparentMask) {
         initOpenCvIfNeeded();
         if (image == null) {
             throw new NullPointerException(mContext.getString(R.string.error_method_called_with_null_argument, "Images.matchTemplate", "image"));
@@ -623,8 +692,6 @@ public class Images {
         if (src != image.getMat()) {
             OpenCVHelper.release(src);
         }
-        image.shoot();
-        template.shoot();
 
         for (TemplateMatching.Match match : result) {
             Point point = match.point;
@@ -667,6 +734,10 @@ public class Images {
         if (mScreenCapturer != null) {
             mScreenCapturer.setImageCaptureCallback(mOnScreenCaptureAvailableListener);
         }
+    }
+
+    public static void shoot(Shootable<?>... shootableArgs) {
+        Arrays.stream(shootableArgs).filter(Objects::nonNull).forEach(Shootable::shoot);
     }
 
 }

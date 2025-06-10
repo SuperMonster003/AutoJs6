@@ -32,7 +32,7 @@ import java.util.concurrent.atomic.AtomicLong
  * Transformed by SuperMonster003 on May 16, 2023.
  */
 // @Reference to Auto.js Pro 9.3.11 by SuperMonster003 on Dec 20, 2023.
-open class ImageWrapper : Recyclable, MonitorResource {
+open class ImageWrapper : Shootable<ImageWrapper>, MonitorResource {
 
     private var mScriptRuntime: ScriptRuntime
 
@@ -62,36 +62,44 @@ open class ImageWrapper : Recyclable, MonitorResource {
     val size
         get() = Size(mWidth.toDouble(), mHeight.toDouble()).also { ensureNotRecycled() }
 
-    val bitmap by lazy {
-        ensureNotRecycled()
-        if (mBitmap == null) {
-            if (mMat != null) {
-                mBitmap = createBitmap(mMat!!.width(), mMat!!.height())
-                Utils.matToBitmap(mMat, mBitmap)
-            } else {
-                mBitmap = mediaImage?.let { toBitmap(it) }
+    val bitmap: Bitmap
+        get() {
+            ensureNotRecycled()
+            if (mBitmap == null) {
+                val mat = mMat
+                if (mat != null) {
+                    val bitmap = createBitmap(mat.width(), mat.height()).also { mBitmap = it }
+                    Utils.matToBitmap(mat, bitmap)
+                } else {
+                    val mediaImage = mediaImage
+                    if (mediaImage != null) {
+                        mBitmap = toBitmap(mediaImage)
+                    }
+                }
             }
+            return mBitmap ?: throw Exception("Bitmap of ImageWrapper should never be null")
         }
-        return@lazy mBitmap ?: throw Exception("Bitmap of ImageWrapper should never be null")
-    }
 
-    val mat by lazy {
-        ensureNotRecycled()
-        if (mMat != null) {
-            return@lazy mMat!!
+    val mat: Mat
+        get() {
+            ensureNotRecycled()
+            val mat = mMat
+            if (mat != null) {
+                return mat
+            }
+            val bitmap = mBitmap
+            if (bitmap != null) {
+                val newMat = Mat().also { mMat = it }
+                Utils.bitmapToMat(bitmap, newMat)
+                return newMat
+            }
+            if (mediaImage != null) {
+                val plane = plane ?: throw AssertionError("Image plain is null")
+                plane.buffer.position(0)
+                return Mat(mHeight, mWidth, CvType.CV_8UC4, plane.buffer, plane.rowStride.toLong()).also { mMat = it }
+            }
+            throw AssertionError("Both bitmap and image are null")
         }
-        if (mBitmap != null) {
-            mMat = Mat()
-            Utils.bitmapToMat(mBitmap, mMat)
-            return@lazy mMat!!
-        }
-        if (mediaImage != null) {
-            val plane = plane ?: throw AssertionError("Image plain is null")
-            plane.buffer.position(0)
-            return@lazy Mat(mHeight, mWidth, CvType.CV_8UC4, plane.buffer, plane.rowStride.toLong()).also { mMat = it }
-        }
-        throw AssertionError("Both bitmap and image are null")
-    }
 
     val bgrMat
         get() = Mat().also {
@@ -308,7 +316,7 @@ open class ImageWrapper : Recyclable, MonitorResource {
         fun recycleAll() {
             imageList.forEach {
                 when (val o = it.get()) {
-                    is Recyclable -> o.recycle()
+                    is Shootable<*> -> o.recycle()
                     is Bitmap -> o.recycle()
                     is org.opencv.core.Mat -> OpenCVHelper.release(o)
                     is Image -> o.close()
