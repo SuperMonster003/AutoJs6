@@ -501,9 +501,6 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
                 "libc++_shared.so",
                 "libpaddle_light_api_shared.so",
                 "libNative.so",
-                "libhiai.so",
-                "libhiai_ir.so",
-                "libhiai_ir_build.so",
             ),
             assetDirsToExclude = listOf(
                 "models",
@@ -515,6 +512,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
             aliases = listOf("rapid", "rapidocr", "rapid-ocr", "rapid_ocr"),
             libsToInclude = listOf(
                 "libRapidOcr.so",
+                "libonnxruntime.so",
             ),
             assetDirsToExclude = listOf(
                 "labels",
@@ -578,6 +576,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
             if (!isInrt) return
             val nativeLibraryDir = File(globalContext.applicationInfo.nativeLibraryDir)
             val primaryNativeLibraries = nativeLibraryDir.list()?.toList() ?: emptyList()
+            Log.d(TAG, "Native libraries: [ ${primaryNativeLibraries.joinToString(", ")} ]")
             if (!primaryNativeLibraries.containsAll(libsToInclude)) {
                 throw Exception(globalContext.getString(R.string.error_module_does_not_work_due_to_the_lack_of_necessary_library_files, moduleName))
             }

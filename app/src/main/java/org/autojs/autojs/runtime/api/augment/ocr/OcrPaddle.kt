@@ -11,7 +11,6 @@ import org.autojs.autojs.runtime.api.augment.Invokable
 import org.autojs.autojs.runtime.api.augment.ocr.Ocr.Companion.OcrMode
 import org.autojs.autojs.util.RhinoUtils.coerceBoolean
 import org.autojs.autojs.util.RhinoUtils.coerceIntNumber
-import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeObject
 
@@ -45,22 +44,21 @@ class OcrPaddle(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRu
 
         fun recognizeTextInternal(scriptRuntime: ScriptRuntime, image: ImageWrapper, options: NativeObject): List<String> {
             ApkBuilder.Libs.PADDLE_OCR.ensureLibFiles(OcrMode.PADDLE.value)
-            val (cpuThreadNum, useSlim) = getOptions(options)
+            val (cpuThreadNum, useSlim) = getOcrOptions(options)
             return scriptRuntime.ocrPaddle.recognizeText(image, cpuThreadNum, useSlim)
         }
 
         fun detectInternal(scriptRuntime: ScriptRuntime, image: ImageWrapper, options: NativeObject): List<OcrResult> {
             ApkBuilder.Libs.PADDLE_OCR.ensureLibFiles(OcrMode.PADDLE.value)
-            val (cpuThreadNum, useSlim) = getOptions(options)
+            val (cpuThreadNum, useSlim) = getOcrOptions(options)
             return scriptRuntime.ocrPaddle.detect(image, cpuThreadNum, useSlim).map { result ->
                 OcrResult(result.label, result.confidence, result.bounds)
             }
         }
 
-        private fun getOptions(options: NativeObject): OcrOptions {
-            val opt = options as? NativeObject ?: newNativeObject()
-            val cpuThreadNum = opt.inquire("cpuThreadNum", ::coerceIntNumber, DEFAULT_CPU_THREAD_NUM)
-            val useSlim = opt.inquire("useSlim", ::coerceBoolean, DEFAULT_USE_SLIM)
+        private fun getOcrOptions(options: NativeObject): OcrOptions {
+            val cpuThreadNum = options.inquire("cpuThreadNum", ::coerceIntNumber, DEFAULT_CPU_THREAD_NUM)
+            val useSlim = options.inquire("useSlim", ::coerceBoolean, DEFAULT_USE_SLIM)
             return OcrOptions(cpuThreadNum, useSlim)
         }
 
