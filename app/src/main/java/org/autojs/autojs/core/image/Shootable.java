@@ -1,14 +1,14 @@
 package org.autojs.autojs.core.image;
 
-public interface Recyclable {
+public interface Shootable<T> {
 
     void recycle();
 
     boolean isRecycled();
 
-    ImageWrapper setOneShot(boolean b);
+    T setOneShot(boolean b);
 
-    default ImageWrapper oneShot() {
+    default T oneShot() {
         return setOneShot(true);
     }
 

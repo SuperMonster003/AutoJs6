@@ -1,13 +1,14 @@
 {
   "$data": {
     "v6.7.0": {
-      "released_date": "2025/06/08",
+      "released_date": "2025/06/10",
       "feature": [
         "zip 模块, 用于文件压缩与解压缩操作 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (参阅 项目文档 > [Zip](https://docs.autojs6.com/#/zip))"
       ],
       "fix": [
         "使用 XML 语法将 JavaScript 表达式作为属性值时, this 对象可能出现指向错误的问题",
         "调用 images.requestScreenCapture 时用户取消授权可能导致应用崩溃的问题",
+        "images 部分相关方法出现异常时 oneShot 标记功能失效的问题 _[`issue #372`](http://issues.autojs6.com/372)_",
         "版本历史页面部分系统因字体差别导致统计数据显示不完整的问题"
       ],
       "improvement": [],
