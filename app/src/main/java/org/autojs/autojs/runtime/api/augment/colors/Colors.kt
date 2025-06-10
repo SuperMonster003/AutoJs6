@@ -13,6 +13,7 @@ import org.autojs.autojs.annotation.RhinoSingletonFunctionInterface
 import org.autojs.autojs.core.image.ColorDetector
 import org.autojs.autojs.core.image.ColorTable
 import org.autojs.autojs.extension.AnyExtensions.isJsNullish
+import org.autojs.autojs.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.extension.AnyExtensions.jsSpecies
 import org.autojs.autojs.extension.ArrayExtensions.jsArrayBrief
 import org.autojs.autojs.extension.ArrayExtensions.toNativeArray
@@ -1321,7 +1322,7 @@ object Colors : Augmentable(), SimpleGetterProxy {
     @JvmStatic
     @RhinoFunctionBody
     fun setPaintColorRhino(paint: Any?, color: Any?) {
-        require(paint is Paint) { "Argument paint for colors.setPaintColor must be a Paint instead of ${paint?.javaClass}" }
+        require(paint is Paint) { "Argument \"paint\" ${paint.jsBrief()} for colors.setPaintColor must be a Paint" }
         when {
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> {
                 val (a, r, g, b) = toArgbRhino(color).map { it.roundToInt() }

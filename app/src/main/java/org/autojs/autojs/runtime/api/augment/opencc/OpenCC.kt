@@ -71,7 +71,7 @@ object OpenCC : Augmentable(), Invokable {
             throw WrappedIllegalArgumentException("Unknown type \"$type\" for opencc")
         }
         is ConversionType -> ChineseConverter.convert(coerceString(s), type, globalContext)
-        else -> throw WrappedIllegalArgumentException("Argument type ${type.jsBrief()} for opencc.convert is invalid")
+        else -> throw WrappedIllegalArgumentException("Argument \"type\" ${type.jsBrief()} for opencc.convert is invalid")
     }
 
     /* OpenCC internal conversion. */

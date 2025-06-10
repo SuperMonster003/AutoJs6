@@ -1,6 +1,7 @@
 package org.autojs.autojs.runtime.api.augment.continuation
 
 import org.autojs.autojs.extension.AnyExtensions.isJsNullish
+import org.autojs.autojs.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.rhino.continuation.Continuation
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED
@@ -32,7 +33,7 @@ class Creator(scriptRuntime: ScriptRuntime, scope: Scriptable? = null) {
     }
 
     fun resumeError(error: Any?) {
-        require(!error.isJsNullish()) { "Argument error for continuation.resumeError must be non-nullish" }
+        require(!error.isJsNullish()) { "Argument \"error\" ${error.jsBrief()} for continuation.resumeError must be non-nullish" }
         mContinuation.resumeWith(Continuation.Result.failure(error))
     }
 

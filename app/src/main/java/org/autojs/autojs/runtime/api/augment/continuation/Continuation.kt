@@ -57,7 +57,7 @@ class Continuation(private val scriptRuntime: ScriptRuntime) : Augmentable(scrip
         // @JvmStatic
         // @RhinoFunctionBody
         // fun awaitRhinoWithRuntime(scriptRuntime: ScriptRuntime, promise: Any?): Any? {
-        //     require(promise is ScriptableObject) { "Argument promise for continuation.await must be a ScriptableObject" }
+        //     require(promise is ScriptableObject) { "Argument \"promise\" ${promise.jsBrief()} for continuation.await must be a ScriptableObject" }
         //     val scope = scriptRuntime.topLevelScope
         //     val cont = Context.javaToJS(createRhinoWithRuntime(scriptRuntime, scope), scope) as Scriptable
         //     val thenFunc = promise.prop("then")

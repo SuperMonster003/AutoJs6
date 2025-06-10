@@ -84,7 +84,7 @@ class Zip(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime)
         fun zipFiles(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ZipNativeObject = ensureArgumentsLengthInRange(args, 2..3) { argList ->
             var (filePathList, destZipPath, options) = argList
             require(filePathList is Iterable<*>) {
-                "Argument filePathList ${filePathList.jsBrief()} for zip.${Companion::zipFiles.name} must be an Iterable"
+                "Argument \"filePathList\" ${filePathList.jsBrief()} for zip.${Companion::zipFiles.name} must be an Iterable"
             }
             val fileList = mutableListOf<File>()
             filePathList.forEach { filePath ->

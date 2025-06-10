@@ -138,7 +138,7 @@ class Engines(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunt
                         it.entries.forEach { (key, value) -> result.setArgument(coerceString(key), value) }
                     }
                 }
-                else -> throw WrappedIllegalArgumentException("Argument config ${config.jsBrief()} for Engines#fillConfig is invalid")
+                else -> throw WrappedIllegalArgumentException("Argument \"config\" ${config.jsBrief()} for Engines#fillConfig is invalid")
             }
             return result
         }

@@ -400,7 +400,7 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             val selectedIndices = when {
                 defaultIndices.isJsNullish() -> intArrayOf()
                 defaultIndices is NativeArray -> defaultIndices.map { coerceIntNumber(it, 0) }.toIntArray()
-                else -> throw WrappedIllegalArgumentException("Argument defaultIndices ${defaultIndices.jsBrief()} for dialogs.multiChoice is invalid")
+                else -> throw WrappedIllegalArgumentException("Argument \"defaultIndices\" ${defaultIndices.jsBrief()} for dialogs.multiChoice is invalid")
             }
             val scope = scriptRuntime.topLevelScope
             when {
@@ -531,7 +531,7 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             if (!properties.prop("progress").isJsNullish()) {
                 val progress = properties.prop("progress")
                 require(progress is NativeObject) {
-                    "Property progress of argument properties for dialogs.build must be a JavaScript Object"
+                    "Property \"progress\" ${progress.jsBrief()} of argument properties for dialogs.build must be a JavaScript Object"
                 }
                 val max = progress.inquire("max", ::coerceIntNumber, 0)
                 val showMinMax = progress.inquire("showMinMax", ::coerceBoolean, false)
@@ -558,7 +558,7 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                     customView = customView.unwrap()
                 }
                 require(customView is View) {
-                    "Property customView ${customView.jsBrief()} of argument properties for dialogs.build is invalid"
+                    "Property \"customView\" ${customView.jsBrief()} of argument properties for dialogs.build is invalid"
                 }
                 val wrapInScrollView = properties.inquire("wrapInScrollView", ::coerceBoolean, true)
                 builder.customView(customView, wrapInScrollView)

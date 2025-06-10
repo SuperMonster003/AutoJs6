@@ -41,7 +41,7 @@ class ToastParser(private val msg: Any?, long: Any? = null, forcible: Any? = nul
             badge.long.matches(o) -> true
             badge.short.matches(o) -> false
             badge.forcible.matches(o) -> isLong.also { this.isForcible = true }
-            else -> throw IllegalArgumentException("Argument isLong ${o.jsBrief()} for Toast.Parser is invalid")
+            else -> throw IllegalArgumentException("Argument \"isLong\" ${o.jsBrief()} for Toast.Parser is invalid")
         }
         else -> isLong
     }.also { isLong = it }
@@ -53,7 +53,7 @@ class ToastParser(private val msg: Any?, long: Any? = null, forcible: Any? = nul
             badge.forcible.matches(o) -> true
             badge.long.matches(o) -> isForcible.also { this.isLong = true }
             badge.short.matches(o) -> isForcible.also { this.isLong = false }
-            else -> throw IllegalArgumentException("Argument isForcible ${o.jsBrief()} for Toast.Parser is invalid")
+            else -> throw IllegalArgumentException("Argument \"isForcible\" ${o.jsBrief()} for Toast.Parser is invalid")
         }
         else -> isForcible
     }.also { isForcible = it }

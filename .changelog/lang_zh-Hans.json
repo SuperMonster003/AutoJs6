@@ -12,7 +12,9 @@
         "打包应用无法正常使用 Paddle OCR 与 Rapid OCR 功能的问题",
         "版本历史页面部分系统因字体差别导致统计数据显示不完整的问题"
       ],
-      "improvement": [],
+      "improvement": [
+        "内置模块相关方法实参类型的异常消息增加类型摘要信息"
+      ],
       "dependency": [
         "升级 Gradle 版本 8.14 -> 8.14.2",
         "升级 Apache Commons 版本 3.16.0 -> 3.17.0",

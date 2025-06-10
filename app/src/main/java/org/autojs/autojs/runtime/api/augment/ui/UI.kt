@@ -349,11 +349,11 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         @RhinoFunctionBody
         fun __inflateRhinoRuntime__(scriptRuntime: ScriptRuntime, ctx: Any?, xml: Any?, parent: Any?, isAttachedToParent: Any?): View {
             require(ctx is InflateContext) {
-                "Augment ctx for ui.__inflate__ must be a InflateContext instead of ${ctx.jsBrief()}"
+                "Argument \"ctx\" ${ctx.jsBrief()} for ui.__inflate__ must be a InflateContext instead of ${ctx.jsBrief()}"
             }
             val parentView = parent.jsSanitize()
             require(parentView is ViewGroup?) {
-                "Augment parentView for ui.__inflate__ must be a ViewGroup instead of ${parentView.jsBrief()}"
+                "Argument \"parentView\" ${parentView.jsBrief()} for ui.__inflate__ must be a ViewGroup instead of ${parentView.jsBrief()}"
             }
             return scriptRuntime.ui.layoutInflater.inflate(ctx, toXMLString(xml), parentView, coerceBoolean(isAttachedToParent, false))
         }
@@ -370,7 +370,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         fun inflateRhinoRuntime(scriptRuntime: ScriptRuntime, xml: Any?, parent: Any? = null, isAttachedToParent: Any? = false): NativeView {
             val parentView = parent.jsSanitize()
             require(parentView is ViewGroup?) {
-                "Augment parentView for ui.inflate must be a ViewGroup instead of ${parentView.jsBrief()}"
+                "Argument \"parentView\" ${parentView.jsBrief()} for ui.inflate must be a ViewGroup instead of ${parentView.jsBrief()}"
             }
             val activity = getActivity(scriptRuntime)
             scriptRuntime.ui.layoutInflater.context = when {
@@ -404,7 +404,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         @RhinoFunctionBody
         fun runRhinoRuntime(scriptRuntime: ScriptRuntime, action: Any?): Any? {
             require(action is BaseFunction) {
-                "Argument action for ui.run must be a JavaScript Function instead of ${action.jsBrief()}"
+                "Argument \"action\" ${action.jsBrief()} for ui.run must be a JavaScript Function"
             }
             return when {
                 RhinoUtils.isUiThread() -> callFunction(scriptRuntime, action, arrayOf())
@@ -451,7 +451,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         @RhinoFunctionBody
         fun postRhinoRuntime(scriptRuntime: ScriptRuntime, action: Any?, delay: Any? = null): Boolean {
             require(action is BaseFunction) {
-                "Argument action for ui.post must be a JavaScript Function instead of ${action.jsBrief()}"
+                "Argument \"action\" ${action.jsBrief()} for ui.post must be a JavaScript Function"
             }
             return when {
                 delay.isJsNullish() -> scriptRuntime.uiHandler.post(wrapUiAction(scriptRuntime, action))
@@ -492,10 +492,10 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         fun registerWidgetRhinoRuntime(scriptRuntime: ScriptRuntime, name: Any?, widget: Any?): Undefined {
             val niceName = coerceString(name, "")
             require(niceName.isNotEmpty()) {
-                "Argument name for ui.registerWidget must be a valid non-empty string"
+                "Argument \"name\" ${name.jsBrief()} for ui.registerWidget must be a valid non-empty string"
             }
             require(widget is BaseFunction) {
-                "Argument widget for ui.registerWidget must be a JavaScript Function instead of ${widget.jsBrief()}"
+                "Argument \"widget\" ${widget.jsBrief()} for ui.registerWidget must be a JavaScript Function"
             }
             scriptRuntime.ui.widgets.defineProp(niceName, widget)
             return UNDEFINED
@@ -511,7 +511,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         @RhinoFunctionBody
         fun setContentViewRhinoRuntime(scriptRuntime: ScriptRuntime, view: Any?): Undefined {
             require(view is View) {
-                "Argument view for ui.setContentView must be a View instead of ${view.jsBrief()}"
+                "Argument \"view\" ${view.jsBrief()} for ui.setContentView must be a View"
             }
             ensureActivity(scriptRuntime) { activity ->
                 scriptRuntime.ui.view = view
@@ -617,13 +617,8 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         @RhinoRuntimeFunctionInterface
         fun findById(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = ensureArgumentsOnlyOne(args) { id ->
             when {
-                id.isJsNullish() -> {
-                    findByIdRhinoWithRuntime(scriptRuntime, null)
-                }
-                else -> {
-                    // require(id is String) { "Argument id for ui.findById must be a string instead of ${id.jsBrief()}" }
-                    findByIdRhinoWithRuntime(scriptRuntime, coerceString(id))
-                }
+                id.isJsNullish() -> findByIdRhinoWithRuntime(scriptRuntime, null)
+                else -> findByIdRhinoWithRuntime(scriptRuntime, coerceString(id))
             }
         }
 
@@ -638,15 +633,10 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         @RhinoRuntimeFunctionInterface
         fun findByStringId(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = ensureArgumentsLength(args, 2) { argList ->
             val (view, id) = argList
-            require(view is View) { "Argument view for ui.findByStringId must be a View instead of ${view.jsBrief()}" }
+            require(view is View) { "Argument \"view\" ${view.jsBrief()} for ui.findByStringId must be a View" }
             when {
-                id.isJsNullish() -> {
-                    findByStringIdRhinoRuntime(scriptRuntime, view, null)
-                }
-                else -> {
-                    // require(id is String) { "Argument id for ui.findByStringId must be a string instead of ${id.jsBrief()}" }
-                    findByStringIdRhinoRuntime(scriptRuntime, view, coerceString(id))
-                }
+                id.isJsNullish() -> findByStringIdRhinoRuntime(scriptRuntime, view, null)
+                else -> findByStringIdRhinoRuntime(scriptRuntime, view, coerceString(id))
             }
         }
 
@@ -661,13 +651,8 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         @RhinoRuntimeFunctionInterface
         fun findView(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = ensureArgumentsOnlyOne(args) { id ->
             when {
-                id.isJsNullish() -> {
-                    findByIdRhinoWithRuntime(scriptRuntime, null)
-                }
-                else -> {
-                    // require(id is String) { "Argument id for ui.findView must be a string instead of ${id.jsBrief()}" }
-                    findByIdRhinoWithRuntime(scriptRuntime, coerceString(id))
-                }
+                id.isJsNullish() -> findByIdRhinoWithRuntime(scriptRuntime, null)
+                else -> findByIdRhinoWithRuntime(scriptRuntime, coerceString(id))
             }
         }
 
