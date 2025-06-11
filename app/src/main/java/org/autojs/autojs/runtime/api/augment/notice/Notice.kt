@@ -32,15 +32,6 @@ import java.util.function.Supplier
 import kotlin.math.roundToInt
 import kotlin.reflect.KMutableProperty1
 
-// @Caution by SuperMonster003 on May 6, 2023.
-//  ! On device running with Android 7.x, importing NotificationManagerCompat will cause an exception:
-//  ! java.lang.ClassNotFoundException: Didn't find class "android.app.NotificationChannel" on path: DexPathList ...
-//  ! zh-CN:
-//  ! 在安卓 7.x 设备上, 导入 NotificationManagerCompat 类将导致异常:
-//  ! java.lang.ClassNotFoundException: 无法找到 "android.app.NotificationChannel" 类在此路径: DexPathList ...
-//  !
-//  # import androidx.core.app.NotificationManagerCompat
-
 @Suppress("unused", "UNUSED_PARAMETER")
 class Notice(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), Invokable {
 

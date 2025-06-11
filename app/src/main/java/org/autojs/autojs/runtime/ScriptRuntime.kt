@@ -63,6 +63,7 @@ import org.autojs.autojs.runtime.api.augment.jsox.Jsox
 import org.autojs.autojs.runtime.api.augment.jsox.Mathx
 import org.autojs.autojs.runtime.api.augment.jsox.Numberx
 import org.autojs.autojs.runtime.api.augment.media.Media
+import org.autojs.autojs.runtime.api.augment.mediainfo.Mediainfo
 import org.autojs.autojs.runtime.api.augment.mime.Mime
 import org.autojs.autojs.runtime.api.augment.nanoid.NanoID
 import org.autojs.autojs.runtime.api.augment.notice.Notice
@@ -109,6 +110,7 @@ import org.autojs.autojs.util.SdkVersionUtils
 import org.autojs.autojs.util.StringUtils
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
+import org.mediainfo.android.MediaInfo
 import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.ContextFactory
 import org.mozilla.javascript.RhinoException
@@ -365,6 +367,10 @@ class ScriptRuntime private constructor(builder: Builder) {
             mRootShell = it
         }
     }
+
+    @JvmField
+    @ScriptInterface
+    val mediaInfo = MediaInfo()
 
     private lateinit var augmentedApp: ScriptableObject
 
@@ -769,6 +775,7 @@ class ScriptRuntime private constructor(builder: Builder) {
         NanoID.augment(target, true)
         Pinyin.augment(target, true)
         Pinyin4j.augment(target, true)
+        Mediainfo(this).augment(target, true)
 
         augmentedApp.defineProp(Autojs::class.java.simpleName.lowercase(), augmentedAutojs)
     }
