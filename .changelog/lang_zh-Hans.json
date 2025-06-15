@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.7.0": {
-      "released_date": "2025/06/10",
+      "released_date": "2025/06/15",
       "feature": [
         "zip 模块, 用于文件压缩与解压缩操作 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (参阅 项目文档 > [Zip](https://docs.autojs6.com/#/zip))",
         "mediainfo 模块, 用于查看媒体文件的详细信息 (参阅 项目文档 > [媒体信息](https://docs.autojs6.com/#/mediainfo))"
@@ -14,6 +14,7 @@
         "版本历史页面部分系统因字体差别导致统计数据显示不完整的问题"
       ],
       "improvement": [
+        "android.graphics.Paint#setColor 支持正常解析 ColorInt/ColorHex/ColorName 等颜色参数",
         "内置模块相关方法实参类型的异常消息增加类型摘要信息"
       ],
       "dependency": [
@@ -634,6 +635,7 @@
         "notice 模块 (参阅 项目文档 > [消息通知](https://docs.autojs6.com/#/notice))",
         "s13n 模块 (参阅 项目文档 > [标准化](https://docs.autojs6.com/#/s13n))",
         "Color 模块 (参阅 项目文档 > [颜色类](https://docs.autojs6.com/#/colorType))",
+        "colors.setColorPaint 方法, 用于设置 android.graphics.Paint 画笔颜色 (参阅 项目文档 > [颜色类](https://docs.autojs6.com/#/colorType?id=m-setpaintcolor))",
         "前台时保持屏幕常亮功能及设置选项",
         "额外的文档启动器 (launcher) 便于独立阅读应用文档 (支持在设置中隐藏或显示)"
       ],

@@ -1,8 +1,10 @@
 package org.autojs.autojs.engine
 
 import android.annotation.SuppressLint
+import android.graphics.Paint
 import android.util.Log
 import android.view.View
+import org.autojs.autojs.core.image.RhinoPaint
 import org.autojs.autojs.core.ui.ViewExtras
 import org.autojs.autojs.engine.module.AssetAndUrlModuleSourceProvider
 import org.autojs.autojs.extension.AnyExtensions.isJsNullish
@@ -207,6 +209,7 @@ open class RhinoJavaScriptEngine(private val scriptRuntime: ScriptRuntime, priva
         override fun wrapAsJavaObject(cx: Context?, scope: Scriptable, javaObject: Any?, staticType: Class<*>?): Scriptable? {
             return when (javaObject) {
                 is View -> ViewExtras.getNativeView(scope, /* view = */ javaObject, staticType, runtime)
+                is Paint -> super.wrapAsJavaObject(cx, scope, RhinoPaint(javaObject), staticType)
                 else -> super.wrapAsJavaObject(cx, scope, javaObject, staticType)
             }
         }
