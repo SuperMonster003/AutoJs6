@@ -14,6 +14,7 @@
         "版本历史页面部分系统因字体差别导致统计数据显示不完整的问题"
       ],
       "improvement": [
+        "http 模块相关方法支持不安全选项参数 (isInsecure/insecure), 用于忽略证书相关异常 _[`issue #417`](http://issues.autojs6.com/417)_",
         "android.graphics.Paint#setColor 支持正常解析 ColorInt/ColorHex/ColorName 等颜色参数",
         "内置模块相关方法实参类型的异常消息增加类型摘要信息"
       ],
@@ -676,7 +677,7 @@
         "控制台浮动窗口支持拖动标题区域移动窗口位置",
         "控制台浮动窗口支持脚本结束后自动延迟关闭",
         "控制台浮动窗口及其 Activity 活动窗口支持双指缩放调整字体大小",
-        "http 模块相关方法支持超时参数 (timeout)",
+        "http 模块相关方法支持超时选项参数 (timeout)",
         "Gradle 构建脚本支持 JDK 版本主动降级 (fallback)",
         "Gradle 构建脚本支持根据平台类型及版本自动选择合适的构建工具版本 (程度有限)"
       ],

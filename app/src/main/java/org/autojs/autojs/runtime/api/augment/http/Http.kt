@@ -24,6 +24,7 @@ import org.autojs.autojs.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.extension.ArrayExtensions.toNativeArray
 import org.autojs.autojs.extension.FlexibleArray
 import org.autojs.autojs.extension.ScriptableExtensions.prop
+import org.autojs.autojs.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.pio.PFile
 import org.autojs.autojs.pio.PFileInterface
 import org.autojs.autojs.runtime.ScriptRuntime
@@ -34,6 +35,7 @@ import org.autojs.autojs.runtime.api.augment.continuation.Creator
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED
+import org.autojs.autojs.util.RhinoUtils.coerceBoolean
 import org.autojs.autojs.util.RhinoUtils.coerceIntNumber
 import org.autojs.autojs.util.RhinoUtils.coerceLongNumber
 import org.autojs.autojs.util.RhinoUtils.coerceObject
@@ -128,6 +130,7 @@ class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
             scriptRuntime.http.okhttp.timeout = coerceLongNumber(opt.prop(KEY_TIMEOUT), DEFAULT_TIMEOUT)
             scriptRuntime.http.okhttp.maxRetries = coerceIntNumber(opt.prop(KEY_MAX_RETRIES), DEFAULT_MAX_RETRIES)
+            scriptRuntime.http.okhttp.isInsecure = opt.inquire(listOf("isInsecure", "insecure"), ::coerceBoolean, false)
 
             val newCall = scriptRuntime.http.client().newCall(buildRequestRhino(url, options))
 
