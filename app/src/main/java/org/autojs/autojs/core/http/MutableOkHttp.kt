@@ -1,9 +1,15 @@
 package org.autojs.autojs.core.http
 
+import android.annotation.SuppressLint
 import android.util.Log
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import java.security.SecureRandom
+import java.security.cert.X509Certificate
 import java.util.concurrent.TimeUnit
+import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManager
+import javax.net.ssl.X509TrustManager
 
 /**
  * Created by Stardust on Apr 11, 2018.
@@ -12,6 +18,7 @@ import java.util.concurrent.TimeUnit
 class MutableOkHttp : OkHttpClient() {
 
     private var mTimeout = DEFAULT_TIMEOUT
+    private var mIsInsecure = DEFAULT_IS_INSECURE
     private var mOkHttpClient: OkHttpClient
     private val mInterceptors: MutableList<Interceptor> = ArrayList()
 
@@ -22,6 +29,13 @@ class MutableOkHttp : OkHttpClient() {
         get() = mTimeout
         set(timeout) {
             mTimeout = timeout
+            muteClient()
+        }
+
+    var isInsecure: Boolean
+        get() = mIsInsecure
+        set(isInsecure) {
+            mIsInsecure = isInsecure
             muteClient()
         }
 
@@ -38,6 +52,21 @@ class MutableOkHttp : OkHttpClient() {
             .readTimeout(timeout, TimeUnit.MILLISECONDS)
             .writeTimeout(timeout, TimeUnit.MILLISECONDS)
             .connectTimeout(timeout, TimeUnit.MILLISECONDS)
+            .also { b ->
+                if (!isInsecure) return@also
+                @SuppressLint("CustomX509TrustManager")
+                val trustAllCerts = arrayOf<TrustManager>(object : X509TrustManager {
+                    override fun checkClientTrusted(chain: Array<X509Certificate>, authType: String) = Unit
+                    override fun checkServerTrusted(chain: Array<X509Certificate>, authType: String) = Unit
+                    override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
+                })
+                val sslContext = SSLContext.getInstance("TLS").apply {
+                    init(null, trustAllCerts, SecureRandom())
+                }
+                val trustManager = trustAllCerts.first() as X509TrustManager
+                b.sslSocketFactory(sslContext.socketFactory, trustManager)
+                b.hostnameVerifier { _, _ -> true }
+            }
             .build()
     }
 
@@ -66,16 +95,18 @@ class MutableOkHttp : OkHttpClient() {
         response
     }
 
+    @Suppress("MayBeConstant")
     companion object {
 
         private val TAG = MutableOkHttp::class.java.simpleName
 
         @JvmField
-        @Suppress("MayBeConstant")
         val DEFAULT_TIMEOUT = 30 * 1000L
 
         @JvmField
-        @Suppress("MayBeConstant")
+        val DEFAULT_IS_INSECURE = false
+
+        @JvmField
         val DEFAULT_MAX_RETRIES = 3
 
     }
