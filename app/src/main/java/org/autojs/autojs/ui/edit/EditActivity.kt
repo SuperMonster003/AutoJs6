@@ -1,15 +1,21 @@
 package org.autojs.autojs.ui.edit
 
+import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.text.Layout
+import android.text.StaticLayout
+import android.text.TextPaint
 import android.util.Log
+import android.util.TypedValue
 import android.view.ActionMode
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.TextView
 import com.afollestad.materialdialogs.MaterialDialog
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -19,16 +25,23 @@ import org.autojs.autojs.app.OnActivityResultDelegate.DelegateHost
 import org.autojs.autojs.core.permission.OnRequestPermissionsResultCallback
 import org.autojs.autojs.core.permission.PermissionRequestProxyActivity
 import org.autojs.autojs.core.permission.RequestPermissionCallbacks
+import org.autojs.autojs.extension.ViewExtensions.setOnTitleViewClickListener
+import org.autojs.autojs.extension.ViewExtensions.titleView
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.storage.file.TmpScriptFiles
-import org.autojs.autojs.theme.ThemeColorManager
+import org.autojs.autojs.theme.widget.ThemeColorToolbar
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.main.MainActivity
+import org.autojs.autojs.ui.main.scripts.EditableFileInfoDialogManager
 import org.autojs.autojs.util.Observers
+import org.autojs.autojs.util.ViewUtils.onceGlobalLayout
+import org.autojs.autojs.util.ViewUtils.setMenuIconsColorByThemeColorLuminance
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ActivityEditBinding
 import java.io.File
 import java.io.IOException
+import androidx.core.view.get
+import androidx.core.view.size
 
 /**
  * Created by Stardust on Jan 29, 2017.
@@ -36,6 +49,9 @@ import java.io.IOException
  */
 open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyActivity {
 
+    override val handleContentViewFromHorizontalNavigationBarAutomatically = false
+
+    private var mToolbar: ThemeColorToolbar? = null
     private val mMediator = OnActivityResultDelegate.Mediator()
 
     private lateinit var mEditorView: EditorView
@@ -48,37 +64,33 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val binding = ActivityEditBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
+        val binding = ActivityEditBinding.inflate(layoutInflater).also { setContentView(it.root) }
+        mToolbar = findViewById<ThemeColorToolbar>(R.id.toolbar).apply {
+            setTitleTextAppearance(this@EditActivity, R.style.TextAppearanceEditorTitle)
+            setOnTitleViewClickListener {
+                EditableFileInfoDialogManager.showEditableFileInfoDialog(this@EditActivity, mEditorView.uri.path?.let { File(it) }) {
+                    mEditorView.editor.text
+                }
+            }
+        }
         mEditorView = binding.editorView.apply {
             handleIntent(intent)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(Observers.emptyConsumer()) { ex: Throwable -> onLoadFileError(ex.message) }
         }
-
         mEditorMenu = EditorMenu(mEditorView)
-
         mNewTask = intent.flags and Intent.FLAG_ACTIVITY_NEW_TASK != 0
         setUpToolbar()
-        window.statusBarColor = ThemeColorManager.colorPrimary
-    }
-
-    override fun onWindowStartingActionMode(callback: ActionMode.Callback): ActionMode? {
-        return super.onWindowStartingActionMode(callback)
-    }
-
-    override fun onWindowStartingActionMode(callback: ActionMode.Callback, type: Int): ActionMode? {
-        return super.onWindowStartingActionMode(callback, type)
     }
 
     private fun onLoadFileError(message: String?) {
         MaterialDialog.Builder(this)
             .title(getString(R.string.text_cannot_read_file))
-            .content(message ?: "")
+            .apply { message?.let(::content) }
             .positiveText(R.string.text_exit)
-            .cancelable(false)
+            .positiveColorRes(R.color.dialog_button_failure)
             .onPositive { _, _ -> finish() }
+            .cancelable(false)
             .show()
     }
 
@@ -88,28 +100,129 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_editor, menu)
+        mToolbar?.let { toolbar ->
+            toolbar.setMenuIconsColorByThemeColorLuminance(this)
+            toolbar.onceGlobalLayout { toolbar.titleView?.adjustTitleTextView() }
+        }
         return true
+    }
+
+    private fun TextView.adjustTitleTextView() = this.post {
+        ValueAnimator.ofFloat(this.textSize, calculatedTextSize(this) ?: return@post).let { animator ->
+            animator.duration = 120L
+            animator.addUpdateListener { this.setTextSize(TypedValue.COMPLEX_UNIT_PX, it.animatedValue as Float) }
+            animator.start()
+        }
+    }
+
+    // @Created by JetBrains AI Assistant on Mar 24, 2025.
+    private fun calculatedTextSize(textView: TextView): Float? {
+
+        // Available width excluding padding.
+        // zh-CN: 可用宽度, 排除内边距.
+        val availableWidth = textView.width - textView.paddingLeft - textView.paddingRight
+        if (availableWidth <= 0) return null
+
+        val textStr = textView.text.toString()
+        val isNonAscii = textStr.any { it.code >= 0x80 }
+        val paint: TextPaint = textView.paint
+        val step = resources.getDimension(R.dimen.editor_title_text_size_step)
+
+        /* Try single line display.
+         * zh-CN: 尝试一行显示 (单行). */
+
+        textView.isSingleLine = true
+        textView.maxLines = 1
+
+        var oneLineTextSizePx = textView.textSize
+        val minOneLineSizePx = resources.getDimension(R.dimen.editor_title_min_text_size_single_line)
+
+        // Measure single line text width.
+        // zh-CN: 测量一行文字宽度.
+        paint.textSize = oneLineTextSizePx
+        var measuredWidth = paint.measureText(textStr)
+        // Gradually decrease text size when width exceeds and size is above minimum.
+        // zh-CN: 当文字宽度超出可用宽度并且字号还高于下限的时候逐步降低字号.
+        while (measuredWidth > availableWidth && oneLineTextSizePx > minOneLineSizePx) {
+            oneLineTextSizePx -= step
+            paint.textSize = oneLineTextSizePx
+            measuredWidth = paint.measureText(textStr)
+        }
+
+        // If text fits in one line, apply changes directly.
+        // zh-CN: 如果一行能够显示文字, 则直接应用修改.
+        if (measuredWidth <= availableWidth) {
+            return oneLineTextSizePx
+        }
+
+        /* Switch to double line display.
+         * zh-CN: 切换为两行显示. */
+
+        textView.isSingleLine = false
+        textView.maxLines = 2
+
+        // Reset text size.
+        // zh-CN: 重置字号.
+        var twoLineTextSize = when (isNonAscii) {
+            true -> resources.getDimension(R.dimen.editor_title_text_size_double_line_non_ascii)
+            else -> resources.getDimension(R.dimen.editor_title_text_size_double_line_ascii)
+        }
+
+        val minTwoLineSize = resources.getDimension(R.dimen.editor_title_min_text_size_double_line)
+        paint.textSize = twoLineTextSize
+
+        // Check if two lines are sufficient using StaticLayout to measure text display.
+        // zh-CN: 检查两行显示是否足够: 利用 StaticLayout 测量文字显示效果.
+        fun createStaticLayout(textSize: Float): StaticLayout {
+            paint.textSize = textSize
+            return StaticLayout.Builder
+                .obtain(textStr, 0, textStr.length, paint, availableWidth)
+                .setAlignment(Layout.Alignment.ALIGN_NORMAL)
+                .setLineSpacing(0f, 1f)
+                .build()
+        }
+
+        var layout = createStaticLayout(twoLineTextSize)
+        // When line count exceeds 2 and text size is above minimum, decrease size gradually.
+        // zh-CN: 当行数超出了两行且字号尚未到达最低要求, 则逐步降低字号.
+        while (layout.lineCount > 2 && twoLineTextSize > minTwoLineSize) {
+            twoLineTextSize -= step
+            layout = createStaticLayout(twoLineTextSize)
+        }
+        if (layout.lineCount <= 2) {
+            return twoLineTextSize
+        }
+
+        /* Switch to triple line display.
+         * zh-CN: 切换为三行显示. */
+
+        textView.maxLines = 3
+
+        var threeLineSize = when (isNonAscii) {
+            true -> resources.getDimension(R.dimen.editor_title_text_size_triple_line_non_ascii)
+            else -> resources.getDimension(R.dimen.editor_title_text_size_triple_line_ascii)
+        }
+
+        val minThreeLineSize = resources.getDimension(R.dimen.editor_title_min_text_size_triple_line)
+
+        paint.textSize = threeLineSize
+        layout = createStaticLayout(threeLineSize)
+        while (layout.lineCount > 3 && threeLineSize > minThreeLineSize) {
+            threeLineSize -= step
+            layout = createStaticLayout(threeLineSize)
+        }
+        return threeLineSize
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return mEditorMenu.onOptionsItemSelected(item)
     }
 
-    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
-        Log.d(LOG_TAG, "onPrepareOptionsMenu: $menu")
-
-        // val isScriptRunning = mEditorView.scriptExecutionId != ScriptExecution.NO_ID
-        // val forceStopItem = menu.findItem(R.id.action_force_stop)
-        // forceStopItem.isEnabled = isScriptRunning
-
-        return super.onPrepareOptionsMenu(menu)
-    }
-
     override fun onActionModeStarted(mode: ActionMode) {
         Log.d(LOG_TAG, "onActionModeStarted: $mode")
 
         val menu = mode.menu
-        val item = menu.getItem(menu.size() - 1)
+        val item = menu[menu.size - 1]
 
         addMenuItem(menu, item.groupId, R.id.action_delete_line, 10000, R.string.text_delete_line) { mEditorMenu.deleteLine() }
         addMenuItem(menu, item.groupId, R.id.action_copy_line, 20000, R.string.text_copy_line) { mEditorMenu.copyLine() }

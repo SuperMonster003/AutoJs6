@@ -10,8 +10,8 @@
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay"
-        android:fitsSystemWindows="true">
+        android:fitsSystemWindows="true"
+        app:theme="@style/AppTheme.AppBarOverlay">
 
         <org.autojs.autojs.theme.widget.ThemeColorToolbar
             android:id="@+id/toolbar"
@@ -27,6 +27,7 @@
         android:paddingTop="6dp">
 
         <ScrollView
+            android:id="@+id/scrollView"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
@@ -56,7 +57,7 @@
                         android:layout_marginTop="8dp"
                         android:orientation="horizontal">
 
-                        <com.google.android.material.textfield.TextInputLayout
+                        <org.autojs.autojs.theme.widget.ThemeColorTextInputLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
@@ -71,7 +72,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content" />
 
-                        </com.google.android.material.textfield.TextInputLayout>
+                        </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
 
                         <ImageView
                             android:id="@+id/select_source"
@@ -93,7 +94,7 @@
                         android:layout_marginTop="8dp"
                         android:orientation="horizontal">
 
-                        <com.google.android.material.textfield.TextInputLayout
+                        <org.autojs.autojs.theme.widget.ThemeColorTextInputLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
@@ -108,7 +109,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content" />
 
-                        </com.google.android.material.textfield.TextInputLayout>
+                        </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
 
                         <ImageView
                             android:id="@+id/select_output"
@@ -142,7 +143,7 @@
                         android:textAppearance="@style/TextAppearance.AppCompat.Body2"
                         android:textColor="?android:textColorSecondary" />
 
-                    <com.google.android.material.textfield.TextInputLayout
+                    <org.autojs.autojs.theme.widget.ThemeColorTextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="@string/text_app_name"
@@ -154,9 +155,9 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content" />
 
-                    </com.google.android.material.textfield.TextInputLayout>
+                    </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
 
-                    <com.google.android.material.textfield.TextInputLayout
+                    <org.autojs.autojs.theme.widget.ThemeColorTextInputLayout
                         android:id="@+id/package_name_parent"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -175,7 +176,7 @@
                             android:inputType="text"
                             android:imeOptions="actionNext" />
 
-                    </com.google.android.material.textfield.TextInputLayout>
+                    </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -189,7 +190,7 @@
                             android:layout_weight="1"
                             android:orientation="vertical">
 
-                            <com.google.android.material.textfield.TextInputLayout
+                            <org.autojs.autojs.theme.widget.ThemeColorTextInputLayout
                                 android:id="@+id/version_name_parent"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
@@ -204,9 +205,9 @@
                                     android:inputType="text"
                                     tools:text="1.0.0" />
 
-                            </com.google.android.material.textfield.TextInputLayout>
+                            </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
 
-                            <com.google.android.material.textfield.TextInputLayout
+                            <org.autojs.autojs.theme.widget.ThemeColorTextInputLayout
                                 android:id="@+id/version_code_parent"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
@@ -221,7 +222,7 @@
                                     android:inputType="number"
                                     tools:text="1" />
 
-                            </com.google.android.material.textfield.TextInputLayout>
+                            </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
 
                         </LinearLayout>
 
@@ -449,7 +450,6 @@
             android:layout_gravity="end|bottom"
             android:layout_margin="16dp"
             android:src="@drawable/ic_packaging"
-            app:backgroundTint="?attr/colorPrimary"
             android:tint="@color/toolbar_text" />
 
     </FrameLayout>

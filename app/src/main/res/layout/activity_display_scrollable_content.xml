@@ -1,21 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="16dp">
+    android:layout_height="match_parent">
 
     <org.autojs.autojs.ui.common.NestedOuterScrollView
         android:id="@+id/outerScrollView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:fitsSystemWindows="true"
+        android:paddingVertical="2sp"
         android:scrollbars="vertical">
 
         <HorizontalScrollView
             android:id="@+id/innerScrollView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:clipToPadding="false"
+            android:paddingHorizontal="8sp"
             android:scrollbars="horizontal">
 
             <org.autojs.autojs.ui.widget.SelectableTextView
@@ -23,7 +27,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceSmall"
-                android:padding="16dp"
                 android:scrollbars="vertical"
                 android:fontFamily="monospace" />
 
@@ -31,16 +34,16 @@
 
     </org.autojs.autojs.ui.common.NestedOuterScrollView>
 
-    <org.autojs.autojs.theme.widget.ThemeColorFloatingActionButton
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
         android:layout_margin="16dp"
         android:contentDescription="@string/content_description_fab_for_display_manifest"
-        app:backgroundTint="?attr/colorPrimary"
-        android:tint="@color/toolbar_text"
-        android:src="@android:drawable/ic_menu_more" />
+        android:src="@android:drawable/ic_menu_more"
+        android:visibility="gone"
+        tools:visibility="visible" />
 
 </RelativeLayout>

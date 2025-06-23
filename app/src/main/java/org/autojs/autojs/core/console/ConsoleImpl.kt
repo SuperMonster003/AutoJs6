@@ -27,6 +27,7 @@ import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.annotation.ScriptInterface
 import org.autojs.autojs.core.pref.Language
 import org.autojs.autojs.core.ui.inflater.util.Gravities
+import org.autojs.autojs.extension.MaterialDialogExtensions.widgetThemeColor
 import org.autojs.autojs.permission.DisplayOverOtherAppsPermission
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.AbstractConsole
@@ -282,8 +283,10 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
                 ).apply {
                     title(R.string.text_prompt)
                     content("$msgReason, $msgAction.")
+                    widgetThemeColor()
                     cancelable(false)
                     negativeText(R.string.dialog_button_quit)
+                    negativeColorRes(R.color.dialog_button_default)
                     positiveText(R.string.dialog_button_continue)
                     positiveColorRes(R.color.dialog_button_attraction)
                     onPositive { _, _ -> send(cutOutEntries) }
@@ -347,6 +350,7 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
                 dialog.titleView?.text = context.getString(R.string.text_details)
             }
             .positiveText(R.string.dialog_button_dismiss)
+            .positiveColorRes(R.color.dialog_button_default)
             .onPositive { dialog, _ -> dialog.dismiss() }
             .show()
     }
@@ -632,7 +636,7 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
     fun getContentTextSize() = getFloatingConsoleView()?.textSize ?: 0f
 
     @ScriptInterface
-    fun setContentTextColors(colors: Array<out Int>) = runWithWindow({ configurator.setContentTextColors(colors) }) {
+    fun setContentTextColors(colors: Array<out Int?>) = runWithWindow({ configurator.setContentTextColors(colors) }) {
         getFloatingConsoleView()?.setTextColors(colors)
     }
 
@@ -859,7 +863,7 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
             private set
 
         @Volatile
-        var contentTextColors: Array<out Int>? = null
+        var contentTextColors: Array<out Int?>? = null
             private set
 
         @Volatile
@@ -923,7 +927,7 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
             contentTextSize = size
         }
 
-        fun setContentTextColors(colors: Array<out Int>) = also {
+        fun setContentTextColors(colors: Array<out Int?>) = also {
             contentTextColors = colors
         }
 

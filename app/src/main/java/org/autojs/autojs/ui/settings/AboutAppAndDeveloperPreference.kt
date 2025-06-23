@@ -58,7 +58,7 @@ class AboutAppAndDeveloperPreference : MaterialPreference {
                     }.let { context.startActivity(it) }
                 } catch (e: Exception) {
                     context.getString(
-                        R.string.error_app_not_installed,
+                        R.string.error_app_not_installed_with_name,
                         context.getString(R.string.app_name_qq),
                     ).let { msg -> ViewUtils.showToast(context, msg, true) }
                 }

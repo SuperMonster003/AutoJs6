@@ -9,8 +9,10 @@ import org.autojs.autojs.execution.ScriptExecution;
 import org.autojs.autojs.script.ScriptSource;
 import org.autojs.autojs.tool.Supplier;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -52,7 +54,9 @@ public class ScriptEngineManager {
     }
 
     public Set<ScriptEngine<? extends ScriptSource>> getEngines() {
-        return mEngines;
+        synchronized (mEngines) {
+            return Collections.unmodifiableSet(new LinkedHashSet<>(mEngines));
+        }
     }
 
     public android.content.Context getAndroidContext() {

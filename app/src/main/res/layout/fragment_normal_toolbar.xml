@@ -1,42 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end"
-        android:orientation="horizontal">
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="?attr/actionBarSize"
+    android:layout_gravity="end"
+    android:orientation="horizontal">
 
     <org.autojs.autojs.ui.widget.ToolbarMenuItem
-            android:id="@+id/run"
-            android:layout_width="40dp"
-            android:layout_height="match_parent"
-            app:icon="@drawable/ic_play_arrow_white_48dp"
-            app:icon_color="@color/toolbar_text"
-            app:text="@string/text_run_simplified" />
+        android:id="@+id/run"
+        android:layout_width="@dimen/toolbar_menu_item_width"
+        android:layout_height="match_parent"
+        app:icon="@drawable/ic_play_arrow_white_48dp"
+        app:text="@string/text_run_simplified" />
 
     <org.autojs.autojs.ui.widget.ToolbarMenuItem
-            android:id="@+id/undo"
-            android:layout_width="40dp"
-            android:layout_height="match_parent"
-            app:icon="@drawable/ic_undo_white_48dp"
-            app:icon_color="@color/toolbar_text"
-            app:text="@string/text_undo_simplified" />
+        android:id="@+id/undo"
+        android:layout_width="@dimen/toolbar_menu_item_width"
+        android:layout_height="match_parent"
+        app:icon="@drawable/ic_undo_white_48dp"
+        app:text="@string/text_undo_simplified" />
 
     <org.autojs.autojs.ui.widget.ToolbarMenuItem
-            android:id="@+id/redo"
-            android:layout_width="40dp"
-            android:layout_height="match_parent"
-            app:icon="@drawable/ic_redo_white_48dp"
-            app:icon_color="@color/toolbar_text"
-            app:text="@string/text_redo_simplified" />
+        android:id="@+id/redo"
+        android:layout_width="@dimen/toolbar_menu_item_width"
+        android:layout_height="match_parent"
+        app:icon="@drawable/ic_redo_white_48dp"
+        app:text="@string/text_redo_simplified" />
 
     <org.autojs.autojs.ui.widget.ToolbarMenuItem
-            android:id="@+id/save"
-            android:layout_width="40dp"
-            android:layout_height="match_parent"
-            android:enabled="false"
-            app:icon="@drawable/ic_save_white_48dp"
-            app:icon_color="@color/toolbar_text"
-            app:text="@string/text_save_simplified" />
+        android:id="@+id/save"
+        android:layout_width="@dimen/toolbar_menu_item_width"
+        android:layout_height="match_parent"
+        android:enabled="false"
+        app:icon="@drawable/ic_save_white_48dp"
+        app:text="@string/text_save_simplified" />
 
 </LinearLayout>

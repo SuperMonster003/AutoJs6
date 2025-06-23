@@ -26,7 +26,7 @@ import java.io.IOException
 open class AssetsProjectLauncher(private val mAssetsProjectDir: String, private val mActivity: Context) {
     private val mProjectDir: String = File(mActivity.filesDir, "project/").path
     private val mProjectConfig: ProjectConfig = ProjectConfig.fromAssets(mActivity, ProjectConfig.configFileOfDir(mAssetsProjectDir))
-    private val mMainScriptFile: File = File(mProjectDir, mProjectConfig.mainScriptFile)
+    private val mMainScriptFile: File = File(mProjectDir, mProjectConfig.mainScriptFileName)
     private val mHandler: Handler = Handler(Looper.getMainLooper())
     private var mScriptExecution: ScriptExecution? = null
 
@@ -36,7 +36,7 @@ open class AssetsProjectLauncher(private val mAssetsProjectDir: String, private 
 
     fun launch(activity: Activity) {
         // 如果需要隐藏日志界面, 则直接运行脚本
-        if (mProjectConfig.launchConfig.shouldHideLogs() || Pref.shouldHideLogs()) {
+        if (!mProjectConfig.launchConfig.isLogsVisible || Pref.shouldHideLogs()) {
             runScript(activity)
         } else {
             // 如果不隐藏日志界面
@@ -95,7 +95,7 @@ open class AssetsProjectLauncher(private val mAssetsProjectDir: String, private 
     }
 
     private fun initKey(projectConfig: ProjectConfig) {
-        val key = MD5.md5(projectConfig.packageName + projectConfig.versionName + projectConfig.mainScriptFile)
+        val key = MD5.md5(projectConfig.packageName + projectConfig.versionName + projectConfig.mainScriptFileName)
         val vec = MD5.md5(projectConfig.buildInfo.buildId + projectConfig.name).substring(0, 16)
         try {
             val fieldKey = ScriptEncryption::class.java.getDeclaredField("mKey")

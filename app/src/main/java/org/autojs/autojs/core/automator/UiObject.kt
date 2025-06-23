@@ -19,6 +19,7 @@ import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.util.DisplayUtils.toRoundIntX
 import org.autojs.autojs.util.DisplayUtils.toRoundIntY
 import org.autojs.autojs.util.RhinoUtils
+import org.autojs.autojs.util.StringUtils
 import org.autojs.autojs.util.StringUtils.str
 import org.autojs.autojs6.R
 import org.mozilla.javascript.BaseFunction
@@ -436,56 +437,60 @@ open class UiObject(
         }
     }
 
-    fun summary() = listOf("{").asSequence().plus(
-        /* Common */ arrayOf(
-            "packageName='${packageName()}'",
-            "parent='${parent?.className}'",
-            "id='${id()}'",
-            "fullId='${fullId()}'",
-            "idHex='${idHex()}'",
-            "desc='${desc()}'",
-            "text='${text()}'",
-            "bounds='${bounds()}'",
-            "center='${center()}'",
-            "className='${className()}'",
-            "clickable=${clickable()}",
-            "longClickable=${longClickable()}",
-            "scrollable=${scrollable()}",
-            "indexInParent=${indexInParent()}",
-            "childCount=${childCount()}",
-            "depth=${depth()}"
-        ).joinToString("\n")
-    ).plus(
-        /* Regular */ arrayOf(
-            "checked=${checked()}",
-            "enabled=${enabled()}",
-            "editable=${editable()}",
-            "focusable=${focusable()}",
-            "checkable=${checkable()}",
-            "selected=${selected()}",
-            "dismissable=$isDismissable",
-            "visibleToUser=${visibleToUser()}"
-        ).joinToString("\n")
-    ).plus(
-        /* Rare */ arrayOf(
-            "contextClickable=$isContextClickable",
-            "focused=${focused()}",
-            "accessibilityFocused=${isAccessibilityFocused}",
-            "rowCount=${rowCount()}",
-            "columnCount=${columnCount()}",
-            "row=${row()}",
-            "column=${column()}",
-            "rowSpan=${rowSpan()}",
-            "columnSpan=${columnSpan()}",
-            "drawingOrder=$drawingOrder"
-        ).joinToString("\n")
-    ).plus(
-        /* Arrays */ arrayOf(
-            "actions=${actionNames()}"
-        ).joinToString("\n")
-    ).plus("}").joinToString("\n")
+    fun summary(): String = listOf(
 
-    override fun toString() = "[${UiObject::class.java.simpleName}] $className ${summary()}"
+        /* Common */
+
+        "packageName" to { packageName() },
+        "parent" to { parent?.className },
+        "id" to { id() },
+        "fullId" to { fullId() },
+        "idHex" to { idHex() },
+        "desc" to { desc() },
+        "text" to { text() },
+        "bounds" to { bounds() },
+        "center" to { center() },
+        "className" to { className() },
+        "clickable" to { clickable() },
+        "longClickable" to { longClickable() },
+        "scrollable" to { scrollable() },
+        "indexInParent" to { indexInParent() },
+        "childCount" to { childCount() },
+        "depth" to { depth() },
+
+        /* Regular */
+
+        "checked" to { checked() },
+        "enabled" to { enabled() },
+        "editable" to { editable() },
+        "focusable" to { focusable() },
+        "checkable" to { checkable() },
+        "selected" to { selected() },
+        "dismissable" to { isDismissable },
+        "visibleToUser" to { visibleToUser() },
+
+        /* Rare */
+
+        "contextClickable" to { isContextClickable },
+        "focused" to { focused() },
+        "accessibilityFocused" to { isAccessibilityFocused },
+        "rowCount" to { rowCount() },
+        "columnCount" to { columnCount() },
+        "row" to { row() },
+        "column" to { column() },
+        "rowSpan" to { rowSpan() },
+        "columnSpan" to { columnSpan() },
+        "drawingOrder" to { drawingOrder },
+
+        /* List */
+
+        "actions" to { actionNames() },
+    ).let { StringUtils.toFormattedSummary(it) }
+
+    override fun toString(): String {
+        val simpledClassName = "$className".substringAfterLast(".")
+        return "[${UiObject::class.java.simpleName}] $simpledClassName ${summary()}"
+    }
 
     override fun hashCode() = listOf(
         "${packageName()}",
@@ -533,7 +538,12 @@ open class UiObject(
         if (this === other) return true
         if (other !is UiObject) return false
 
-        return packageName() == other.packageName() &&
+        // @Reference to Hunter1023 (https://github.com/Hunter1023) by SuperMonster003 on Mar 28, 2025.
+        //  ! http://issues.autojs6.com/288#issuecomment-2692248348
+        val info = unwrap() ?: return false
+
+        return info == other.unwrap() &&
+                packageName() == other.packageName() &&
                 parent == other.parent &&
                 id() == other.id() &&
                 fullId() == other.fullId() &&
@@ -730,7 +740,7 @@ open class UiObject(
                     }
 
                     in RESULT_GROUP_EXISTENCE -> when (compass) {
-                        null, COMPASS_PASS_ON -> selector?.exists() ?: false
+                        null, COMPASS_PASS_ON -> selector?.exists() == true
                         else -> getUiObject() != null
                     }
 
@@ -863,7 +873,7 @@ open class UiObject(
                 private val cString = String::class.java
                 private val cBoolean = Boolean::class.java
 
-                internal val interceptedMap: Map<String, Intercepted> by lazy {
+                val interceptedMap: Map<String, Intercepted> by lazy {
                     val numberClassMap: Map<Array<out Class<*>>, Array<String>> = mapOf(
                         arrayOf(cIntPrim) to arrayOf(
                             "child", "getChild", "performAction", "setDrawingOrder", "setInputType",
@@ -918,7 +928,7 @@ open class UiObject(
                     }.flatten().associateBy { it.name }
                 }
 
-                internal fun has(name: String) = interceptedMap.containsKey(name)
+                fun has(name: String) = interceptedMap.containsKey(name)
 
             }
 

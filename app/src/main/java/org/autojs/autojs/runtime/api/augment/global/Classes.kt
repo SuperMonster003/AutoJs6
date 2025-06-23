@@ -18,6 +18,9 @@ class Classes {
     val PendingIntent = android.app.PendingIntent::class
 
     @JvmField
+    val ComponentName = android.content.ComponentName::class
+
+    @JvmField
     val Context = android.content.Context::class
 
     @JvmField
@@ -60,6 +63,9 @@ class Classes {
     val Settings = android.provider.Settings::class
 
     @JvmField
+    val TextToSpeech = android.speech.tts.TextToSpeech::class
+
+    @JvmField
     val InputType = android.text.InputType::class
 
     @JvmField
@@ -75,6 +81,9 @@ class Classes {
     val Log = android.util.Log::class
 
     @JvmField
+    val TypedValue = android.util.TypedValue::class
+
+    @JvmField
     val ContextThemeWrapper = android.view.ContextThemeWrapper::class
 
     @JvmField
@@ -85,6 +94,12 @@ class Classes {
 
     @JvmField
     val MotionEvent = android.view.MotionEvent::class
+
+    @JvmField
+    val ScaleGestureDetector = android.view.ScaleGestureDetector::class
+
+    @JvmField
+    val WindowManager = android.view.WindowManager::class
 
     @JvmField
     val LayoutParams = android.view.WindowManager.LayoutParams::class
@@ -118,6 +133,9 @@ class Classes {
 
     @JvmField
     val Snackbar = com.google.android.material.snackbar.Snackbar::class
+
+    @JvmField
+    val MaterialDialog = com.afollestad.materialdialogs.MaterialDialog::class
 
     @JvmField
     val LogConfigurator = de.mindpipe.android.logging.log4j.LogConfigurator::class
@@ -295,6 +313,9 @@ class Classes {
 
     @JvmField
     val DisplayUtils = org.autojs.autojs.util.DisplayUtils::class
+
+    @JvmField
+    val IntentUtils = org.autojs.autojs.util.IntentUtils::class
 
     @JvmField
     val JavaUtils = org.autojs.autojs.util.JavaUtils::class

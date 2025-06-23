@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Default title for color picker dialog [CHAR LIMIT=30] -->
+    <string name="cpv_default_title">Selecciona un color</string>
+    <string name="cpv_presets">Predeterminados</string>
+    <string name="cpv_custom">Personalizar</string>
+    <string name="cpv_select">Seleccionar</string>
+    <string name="cpv_transparency">Transparencia</string>
+    <string name="cpv_menu_item_histories">Historiales</string>
+    <string name="cpv_menu_item_reset_color_palette">Restablecer paleta</string>
+</resources>

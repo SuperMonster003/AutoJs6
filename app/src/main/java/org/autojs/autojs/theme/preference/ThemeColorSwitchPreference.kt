@@ -8,7 +8,6 @@ import android.util.AttributeSet
 import android.view.View
 import android.widget.Switch
 import androidx.appcompat.widget.SwitchCompat
-import androidx.core.content.res.TypedArrayUtils
 import androidx.preference.PreferenceViewHolder
 import androidx.preference.SwitchPreference
 import org.autojs.autojs.app.DialogUtils
@@ -21,7 +20,7 @@ import org.autojs.autojs6.R
 /**
  * Created by Stardust on Mar 5, 2017.
  */
-class ThemeColorSwitchPreference : SwitchPreference, ThemeColorMutable, LongClickablePreferenceLike {
+open class ThemeColorSwitchPreference : SwitchPreference, ThemeColorMutable, LongClickablePreferenceLike {
 
     private var mCheckableView: View? = null
     private var mColor = Color.TRANSPARENT
@@ -32,26 +31,31 @@ class ThemeColorSwitchPreference : SwitchPreference, ThemeColorMutable, LongClic
     override var longClickPromptMore: CharSequence? = null
 
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes) {
-        obtainStyledAttrs(context, attrs, R.styleable.MaterialPreference, defStyleAttr, defStyleRes)
-            .let { a ->
-                getAttrString(a, R.styleable.MaterialPreference_longClickPrompt)?.also { longClickPrompt = it }
-                getAttrString(a, R.styleable.MaterialPreference_longClickPromptMore)?.also { longClickPromptMore = it }
-                a.recycle()
-            }
+        init(context, attrs, defStyleAttr, defStyleRes)
     }
 
-    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : this(context, attrs, defStyleAttr, 0)
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
+        init(context, attrs, defStyleAttr, 0)
+    }
 
-    constructor(context: Context, attrs: AttributeSet?) : this(
-        context, attrs, TypedArrayUtils.getAttr(
-            context, androidx.preference.R.attr.switchPreferenceStyle, android.R.attr.switchPreferenceStyle
-        )
-    )
+    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
+        init(context, attrs, 0, 0)
+    }
 
-    constructor(context: Context) : this(context, null)
+    constructor(context: Context) : super(context) {
+        init(context, null, 0, 0)
+    }
 
     init {
         ThemeColorManager.add(this)
+    }
+
+    private fun init(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) {
+        obtainStyledAttrs(context, attrs, R.styleable.MaterialPreference, defStyleAttr, defStyleRes).let { a ->
+            getAttrString(a, R.styleable.MaterialPreference_longClickPrompt)?.also { longClickPrompt = it }
+            getAttrString(a, R.styleable.MaterialPreference_longClickPromptMore)?.also { longClickPromptMore = it }
+            a.recycle()
+        }
     }
 
     override fun onBindViewHolder(holder: PreferenceViewHolder) {
@@ -70,17 +74,17 @@ class ThemeColorSwitchPreference : SwitchPreference, ThemeColorMutable, LongClic
 
     private fun applyColor() {
         if (mCheckableView is Switch) {
-            ThemeColorHelper.setColorPrimary(mCheckableView as Switch?, mColor)
+            ThemeColorHelper.setColorPrimary(mCheckableView as Switch, mColor, true)
         }
         if (mCheckableView is SwitchCompat) {
-            ThemeColorHelper.setColorPrimary(mCheckableView as SwitchCompat?, mColor)
+            ThemeColorHelper.setColorPrimary(mCheckableView as SwitchCompat, mColor, true)
         }
     }
 
-    private fun obtainStyledAttrs(context: Context, set: AttributeSet?, styleableRes: IntArray, defStyleAttr: Int, defStyleRes: Int): TypedArray {
+    protected fun obtainStyledAttrs(context: Context, set: AttributeSet?, styleableRes: IntArray, defStyleAttr: Int, defStyleRes: Int): TypedArray {
         return context.obtainStyledAttributes(set, styleableRes, defStyleAttr, defStyleRes)
     }
 
-    private fun getAttrString(a: TypedArray, index: Int): String? = TypedArrayUtils.getString(a, index, index)
+    protected fun getAttrString(a: TypedArray, index: Int): String? = a.getString(index)
 
 }

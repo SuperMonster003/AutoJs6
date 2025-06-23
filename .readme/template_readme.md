@@ -9,10 +9,10 @@
 
   <p>
     <a href="http://download.autojs6.com"><img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/SuperMonster003/AutoJs6"/></a>
-    <a href="http://issues.autojs6.com"><img alt="GitHub closed issues" src="https://img.shields.io/github/issues/SuperMonster003/AutoJs6?color=009688"/></a>
+    <a href="http://issues.autojs6.com"><img alt="GitHub closed issues" src="https://img.shields.io/github/issues/SuperMonster003/AutoJs6?color=A24232"/></a>
     <a href="http://commit.autojs6.com/99a1d8490fac5b6d55f6f183db59ad833a2064ed"><img alt="Created" src="https://img.shields.io/date/1636632233?color=2e7d32&label=created"/></a>
     <br>
-    <a href="https://github.com/mozilla/rhino"><img alt="Rhino" src="https://img.shields.io/badge/rhino-1.7.16--snapshot-A24232"/></a>
+    <a href="https://github.com/mozilla/rhino"><img alt="Rhino" src="https://img.shields.io/badge/rhino-1.8.1--SNAPSHOT-795548"/></a>
     <a href="https://developer.android.com/studio/archive"><img alt="Android Studio" src="https://img.shields.io/badge/android%20studio-2022.1+-B64FC8"/></a>
     <br>
     <a href="https://www.codefactor.io/repository/github/SuperMonster003/AutoJs6"><img alt="CodeFactor Grade" src="https://www.codefactor.io/repository/github/SuperMonster003/AutoJs6/badge"/></a>
@@ -55,7 +55,7 @@
 |        <span style="word-break:keep-all;white-space:nowrap">[Auto.js Pro 9](https://pro.autojs.org/)</span>        |                                                                                    <span style="word-break:keep-all;white-space:nowrap">AutoJsPro</span>                                                                                     |          <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span>           |                             <span style="word-break:keep-all;white-space:nowrap">`2021/03/28`</span>                              |                            <span style="word-break:keep-all;white-space:nowrap">`2023/02/09`</span>                             |
 | <span style="word-break:keep-all;white-space:nowrap">[AutoJs6](https://github.com/SuperMonster003/AutoJs6)</span>  |  <span style="word-break:keep-all;white-space:nowrap">[AutoJs6](https://github.com/SuperMonster003/AutoJs6/commit/a8ce1b9acb541e9736c33134be3194c3148a15a3#diff-833a46a97033e77558372a2dce103fd6fee29aaaa899f610022a7aece592ee7bR27)</span>  |  <span style="word-break:keep-all;white-space:nowrap">[SuperMonster003](https://github.com/SuperMonster003)</span>   |                             <span style="word-break:keep-all;white-space:nowrap">`2021/12/01`</span>                              |                                  <span style="word-break:keep-all;white-space:nowrap">-</span>                                  |
 |      <span style="word-break:keep-all;white-space:nowrap">[AutoX](https://github.com/kkevsekk1/AutoX)</span>       |            <span style="white-space:pre">[Autox.js&#160;v6](https://github.com/kkevsekk1/AutoX/commit/8b6776cff8b0fca4be4a52719b7d7d07c0a058f3#diff-51a0b488f963eb0be6c6599bf5df497313877cf5bdff3950807373912ac1cdc9R130)</span>             |           <span style="word-break:keep-all;white-space:nowrap">[wilinz](https://github.com/wilinz)</span>            |                             <span style="word-break:keep-all;white-space:nowrap">`2022/05/26`</span>                              |                                  <span style="word-break:keep-all;white-space:nowrap">-</span>                                  |
-|      <span style="word-break:keep-all;white-space:nowrap">[AutoX](https://github.com/kkevsekk1/AutoX)</span>       |            <span style="white-space:pre">[Autox.js&#160;v7](https://github.com/kkevsekk1/AutoX/commit/484491fd5fe12b8203d0b09c181eb0f471c0ea9f#diff-8cff73265af19c059547b76aca8882cbaa3209291406f52df1dafbbc78e80c46R120)</span>             |           <span style="word-break:keep-all;white-space:nowrap">[aiselp](https://github.com/aiselp)</span>            |                             <span style="word-break:keep-all;white-space:nowrap">`2024/04/21`</span>                              |                                  <span style="word-break:keep-all;white-space:nowrap">-</span>                                  |
+|        <span style="word-break:keep-all;white-space:nowrap">[AutoX](https://github.com/aiselp/AutoX)</span>        |              <span style="white-space:pre">[Autox.js&#160;v7](https://github.com/aiselp/AutoX/commit/484491fd5fe12b8203d0b09c181eb0f471c0ea9f#diff-8cff73265af19c059547b76aca8882cbaa3209291406f52df1dafbbc78e80c46R120)</span>              |           <span style="word-break:keep-all;white-space:nowrap">[aiselp](https://github.com/aiselp)</span>            |                             <span style="word-break:keep-all;white-space:nowrap">`2024/04/21`</span>                              |                                  <span style="word-break:keep-all;white-space:nowrap">-</span>                                  |
 
 {{ p_introduction_related_autojs_table_date_is_estimated }}.
 
@@ -113,6 +113,7 @@
 * {{ li_major_changes_websocket_support }}
 * {{ li_major_changes_new_modules }}
 * {{ li_major_changes_multilingual_support }}
+* {{ li_major_changes_theme_color_support }}
 * {{ li_major_changes_night_mode_support }}
 * {{ li_major_changes_vscode_plugin_support }}
 * {{ li_major_changes_rhino_engine_upgrade }}
@@ -179,9 +180,13 @@
 {{ p_android_sdk_preparation_open_settings_android_studio }}:
 
 ```text
-{{ step_appearance_behavior }} {{ symbol_arrow }} 
-{{ step_system_settings }} {{ symbol_arrow }} 
-{{ step_android_sdk_location }}
+{{ step_help }} {{ symbol_pipe }} {{ step_find_action }} {{ symbol_hash }} {{ text_input }} "Android SDK"
+[ {{ text_or }} ]
+{{ step_file }} {{ symbol_pipe }} {{ step_settings }} {{ symbol_hash }} {{ text_search }} "Android SDK"
+[ {{ text_or }} ]
+{{ step_file }} {{ symbol_pipe }} {{ step_settings }} {{ symbol_pipe }} {{ step_languages_and_frameworks }} {{ symbol_pipe }} {{ step_android_sdk }}
+[ {{ text_or }} ]
+{{ step_file }} {{ symbol_pipe }} {{ step_settings }} {{ symbol_pipe }} {{ step_appearance_behavior }} {{ symbol_pipe }} {{ step_system_settings }} {{ symbol_pipe }} {{ step_android_sdk }}
 ```
 
 {{ p_android_sdk_preparation_edit_sdk_location }}.
@@ -200,10 +205,13 @@
 {{ p_android_sdk_tools_preparation_sdk_tools }}:
 
 ```text
-{{ step_sdk_appearance_behavior }} {{ symbol_arrow }} 
-{{ step_sdk_system_settings }} {{ symbol_arrow }} 
-{{ step_sdk_android_sdk }} {{ symbol_arrow }} 
-{{ step_sdk_tools_show_details }}
+{{ step_help }} {{ symbol_pipe }} {{ step_find_action }} {{ symbol_hash }} {{ text_input }} "SDK Tools"
+[ {{ text_or }} ]
+{{ step_file }} {{ symbol_pipe }} {{ step_settings }} {{ symbol_hash }} {{ text_search }} "SDK Tools"
+[ {{ text_or }} ]
+{{ step_file }} {{ symbol_pipe }} {{ step_settings }} {{ symbol_pipe }} {{ step_languages_and_frameworks }} {{ symbol_pipe }} {{ step_android_sdk }} {{ symbol_pipe }} {{ step_sdk_tools_show_details }}
+[ {{ text_or }} ]
+{{ step_file }} {{ symbol_pipe }} {{ step_settings }} {{ symbol_pipe }} {{ step_appearance_behavior }} {{ symbol_pipe }} {{ step_system_settings }} {{ symbol_pipe }} {{ step_android_sdk }} {{ symbol_pipe }} {{ step_sdk_tools_show_details }} 
 ```
 
 {{ p_android_sdk_tools_preparation_show_package_details }}.
@@ -221,9 +229,11 @@
 {{ p_jdk_preparation_open_jdk_settings }}:
 
 ```text
-{{ step_build_execution_deployment }} {{ symbol_arrow }} 
-{{ step_build_tools }} {{ symbol_arrow }} 
-Gradle
+{{ step_help }} {{ symbol_pipe }} {{ step_find_action }} {{ symbol_hash }} {{ text_input }} "Gradle JDK"
+[ {{ text_or }} ]
+{{ step_file }} {{ symbol_pipe }} {{ step_settings }} {{ symbol_hash }} {{ text_search }} "Gradle"
+[ {{ text_or }} ]
+{{ step_file }} {{ symbol_pipe }} {{ step_settings }} {{ symbol_pipe }} {{ step_build_execution_deployment }} {{ symbol_pipe }} {{ step_build_tools }} {{ symbol_pipe }} Gradle
 ```
 
 {{ p_jdk_preparation_select_gradle_jdk }}.
@@ -247,19 +257,79 @@ Gradle
 
 > {{ bq_annotation_autojs6_project_cloning_retry_clone }}.
 
-{{ p_autojs6_project_cloning_build_successful }}.
+{{ p_autojs6_project_building_if_failed }}:
 
-{{ p_autojs6_project_cloning_debug_version_apk }}:
+- {{ li_project_build_step_toolbar }}
+- {{ li_project_build_step_click_build_project }}
+- {{ li_project_build_step_wait_build_success }}
+
+{{ p_autojs6_project_building_failed }}.
+
+> {{ bq_annotation_autojs6_project_building_reference }}
+
+#### {{ h4_autojs6_project_deploy_run }}
+
+{{ p_autojs6_project_deploy_run_overview }}.
+
+- {{ li_deploy_run_step_select_app }}
+- {{ li_deploy_run_step_select_device }}
+- {{ li_deploy_run_step_click_run }}
+- {{ li_deploy_run_step_wait_install }}
+
+#### {{ h4_autojs6_project_deploy_apk }}
+
+{{ p_autojs6_project_deploy_apk_overview }}:
 
 - {{ step_debug_version_path }}
-    - {{ step_generate_debug_apk }} {{ symbol_arrow }} `Build Bundle(s) / APK(s)` {{ symbol_arrow }} `Build APK(s)`
+    - {{ step_generate_debug_apk }} {{ symbol_pipe }} `Build Bundle(s) / APK(s)` {{ symbol_pipe }} `Build APK(s)`
     - {{ step_debug_apk_path }}
     - {{ step_example_debug_path }}
 - {{ step_release_version_apk }}
-    - {{ step_release_version_path }} {{ symbol_arrow }} `Generate Signed Bundle / APK`
+    - {{ step_release_version_path }} {{ symbol_pipe }} `Generate Signed Bundle / APK`
     - {{ step_select_apk_option }}
     - {{ step_prepare_signing_file }}
     - {{ step_example_release_path }}
+
+> {{ bq_annotation_autojs6_project_deploy_apk }}
+
+#### {{ h4_autojs6_gradle_tasks }}
+
+{{ p_autojs6_gradle_tasks_intro }}.
+
+{{ p_autojs6_gradle_tasks_overview }}.
+
+- AutoJs6 [inrt:assemble]
+
+{{ p_gradle_task_inrt_summary }}.
+
+{{ p_gradle_task_inrt_description }}.
+
+{{ p_gradle_task_inrt_exception }}:
+
+> java.io.FileNotFoundException: template.apk
+
+{{ p_gradle_task_inrt_exception_explanation }}.
+
+> {{ bq_annotation_gradle_task_inrt_rebuild_if_needed }}
+
+- AutoJs6 [app:bundle]
+
+{{ p_gradle_task_app_bundle_summary }}.
+
+{{ p_gradle_task_app_bundle_description }}.
+
+- AutoJs6 [app:digest]
+
+{{ p_gradle_task_app_digest_summary }}.
+
+{{ p_gradle_task_app_digest_filename_comparison }}:
+
+```text
+{{ label_before }}:
+autojs6-v6.6.2-arm64-v8a.apk
+{{ label_after }}:
+autojs6-v6.6.2-arm64-v8a-0f2a9d74.apk
+```
 
 > {{ text_reference }}: [Android Docs](https://developer.android.com/studio/run?hl=zh-cn)
 
@@ -301,16 +371,17 @@ Gradle
 
 {{ p_contribution_table_thank_all_contributors }}.
 
-|     <span style="word-break:keep-all;white-space:nowrap">{{ table_header_contribution_contributors }}</span>     |                   <span style="word-break:keep-all;white-space:nowrap">{{ table_header_contribution_number_of_commits }}</span>                    | <span style="word-break:keep-all;white-space:nowrap">{{ table_header_contribution_recent_submissions }}</span> |
-|:----------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------:|
-|     <span style="word-break:keep-all;white-space:nowrap">[luckyloogn](https://github.com/luckyloogn)</span>      |       <span style="word-break:keep-all;white-space:nowrap">[3](https://github.com/SuperMonster003/AutoJs6/commits?author=luckyloogn)</span>        |                    <span style="word-break:keep-all;white-space:nowrap">`2025/01/01`</span>                    |
-|           <span style="word-break:keep-all;white-space:nowrap">[kvii](https://github.com/kvii)</span>            |          <span style="word-break:keep-all;white-space:nowrap">[1](https://github.com/SuperMonster003/AutoJs6/commits?author=kvii)</span>           |                    <span style="word-break:keep-all;white-space:nowrap">`2024/10/16`</span>                    |
-|  <span style="word-break:keep-all;white-space:nowrap">[chenguangming](https://github.com/chenguangming)</span>   | <span style="word-break:keep-all;white-space:nowrap">[2](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+author%3Achenguangming)</span> |                    <span style="word-break:keep-all;white-space:nowrap">`2024/05/14`</span>                    |
-|         <span style="word-break:keep-all;white-space:nowrap">[LZX284](https://github.com/LZX284)</span>          |         <span style="word-break:keep-all;white-space:nowrap">[17](https://github.com/SuperMonster003/AutoJs6/commits?author=LZX284)</span>         |                    <span style="word-break:keep-all;white-space:nowrap">`2023/11/19`</span>                    |
-|    <span style="word-break:keep-all;white-space:nowrap">[TonyJiangWJ](https://github.com/TonyJiangWJ)</span>     |       <span style="word-break:keep-all;white-space:nowrap">[4](https://github.com/SuperMonster003/AutoJs6/commits?author=TonyJiangWJ)</span>       |                    <span style="word-break:keep-all;white-space:nowrap">`2023/10/31`</span>                    |
-| <span style="word-break:keep-all;white-space:nowrap">[little&#x2011;alei](https://github.com/little-alei)</span> |      <span style="word-break:keep-all;white-space:nowrap">[12](https://github.com/SuperMonster003/AutoJs6/commits?author=little-alei)</span>       |                    <span style="word-break:keep-all;white-space:nowrap">`2023/07/12`</span>                    |
-|         <span style="word-break:keep-all;white-space:nowrap">[aiselp](https://github.com/aiselp)</span>          |    <span style="word-break:keep-all;white-space:nowrap">[6](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+author%3Aaiselp)</span>     |                    <span style="word-break:keep-all;white-space:nowrap">`2023/06/14`</span>                    |
-|          <span style="word-break:keep-all;white-space:nowrap">[LYS86](https://github.com/LYS86)</span>           |          <span style="word-break:keep-all;white-space:nowrap">[2](https://github.com/SuperMonster003/AutoJs6/commits?author=LYS86)</span>          |                    <span style="word-break:keep-all;white-space:nowrap">`2023/06/03`</span>                    |
+|         <span style="word-break:keep-all;white-space:nowrap">{{ table_header_contribution_contributors }}</span>          |                   <span style="word-break:keep-all;white-space:nowrap">{{ table_header_contribution_number_of_commits }}</span>                    | <span style="word-break:keep-all;white-space:nowrap">{{ table_header_contribution_recent_submissions }}</span> |
+|:-------------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------:|
+|             <span style="word-break:keep-all;white-space:nowrap">[wirsnow](https://github.com/wirsnow)</span>             |         <span style="word-break:keep-all;white-space:nowrap">[1](https://github.com/SuperMonster003/AutoJs6/commits?author=wirsnow)</span>         |                    <span style="word-break:keep-all;white-space:nowrap">`2025/05/19`</span>                    |
+|         <span style="word-break:keep-all;white-space:nowrap">[TonyJiangWJ](https://github.com/TonyJiangWJ)</span>         |       <span style="word-break:keep-all;white-space:nowrap">[5](https://github.com/SuperMonster003/AutoJs6/commits?author=TonyJiangWJ)</span>       |                    <span style="word-break:keep-all;white-space:nowrap">`2025/04/24`</span>                    |
+|          <span style="word-break:keep-all;white-space:nowrap">[luckyloogn](https://github.com/luckyloogn)</span>          |       <span style="word-break:keep-all;white-space:nowrap">[3](https://github.com/SuperMonster003/AutoJs6/commits?author=luckyloogn)</span>        |                    <span style="word-break:keep-all;white-space:nowrap">`2025/01/01`</span>                    |
+|                <span style="word-break:keep-all;white-space:nowrap">[kvii](https://github.com/kvii)</span>                |          <span style="word-break:keep-all;white-space:nowrap">[1](https://github.com/SuperMonster003/AutoJs6/commits?author=kvii)</span>           |                    <span style="word-break:keep-all;white-space:nowrap">`2024/10/16`</span>                    |
+|   <span style="word-break:keep-all;white-space:nowrap">[chenguangming](https://github.com/chenguangming) `(Tom)`</span>   | <span style="word-break:keep-all;white-space:nowrap">[2](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+author%3Achenguangming)</span> |                    <span style="word-break:keep-all;white-space:nowrap">`2024/05/14`</span>                    |
+|          <span style="word-break:keep-all;white-space:nowrap">[LZX284](https://github.com/LZX284) `(AI)`</span>           |         <span style="word-break:keep-all;white-space:nowrap">[17](https://github.com/SuperMonster003/AutoJs6/commits?author=LZX284)</span>         |                    <span style="word-break:keep-all;white-space:nowrap">`2023/11/19`</span>                    |
+| <span style="word-break:keep-all;white-space:nowrap">[little&#x2011;alei](https://github.com/little-alei) `(抠脚本人)`</span> |      <span style="word-break:keep-all;white-space:nowrap">[12](https://github.com/SuperMonster003/AutoJs6/commits?author=little-alei)</span>       |                    <span style="word-break:keep-all;white-space:nowrap">`2023/07/12`</span>                    |
+|              <span style="word-break:keep-all;white-space:nowrap">[aiselp](https://github.com/aiselp)</span>              |    <span style="word-break:keep-all;white-space:nowrap">[6](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+author%3Aaiselp)</span>     |                    <span style="word-break:keep-all;white-space:nowrap">`2023/06/14`</span>                    |
+|           <span style="word-break:keep-all;white-space:nowrap">[LYS86](https://github.com/LYS86) `(Lin)`</span>           |          <span style="word-break:keep-all;white-space:nowrap">[2](https://github.com/SuperMonster003/AutoJs6/commits?author=LYS86)</span>          |                    <span style="word-break:keep-all;white-space:nowrap">`2023/06/03`</span>                    |
 
 {{ p_contribution_table_data_updated_on }}.
 
@@ -324,23 +395,29 @@ Gradle
     # --------------------------------------------------------------#
     # Before committing and pushing to the remote GitHub repository #
     # --------------------------------------------------------------#
-    - CHANGELOG.md
-        - Update entries for AutoJs6 by checking all changed files
-        - Update entries for Gradle plugins [ implementation ]
-        - Update version name and released date
-        - Append related GitHub issues to changelog entries
-    - README.md
+    - IDE
         - The summary of the latest changelog for committing to Git [ DO NOT commit or push ]
+    - $projectDir/version.properties
+        - Remove the part like [ alpha / beta / ... ] of VERSION_NAME
+    - $projectDir/.changelog/lang_zh-Hans.json
+        - Update version name and released date
+        - Translate into other languages
+        - Update TypeScript declarations according to section `dependency` if needed
+    - $projectDir/.readme/template_readme.md
         - Update badges like [ android studio / rhino / ... ]
+        - Update contribution section: {{ h3_contribution }}
+    - $projectDir/.readme/common.json
         - Update android studio download links and version names
-        - Update contribution section
-    - Remove the part like [ alpha / beta / ... ] of VERSION_NAME in version.properties
-    - Update dependencies TypeScript declarations if needed.
-    - Re-generate documentation/markdown by running the python script
-    - Check the two-way versions for AutoJs6 and VSCode ext, then publish the ext to Microsoft
-    - Run Gradle task "app:assembleInrtRelease"
-    - Build APK to determine the final VERSION_BUILD field
-    - Run Gradle task "app:appendDigestToReleasedFiles"
-    - Commit and push to GitHub
-    - Publish the latest release with signed APKs
+        - Update contribution section: var_date_contribution_table_data_updated
+    - $projectDir/.python/generate_markdown.py
+        - Re-generate markdown by running the python script [ link: aj6mdgen ]
+    - Others
+        - Re-generate documentation by running the python script [ link: aj6docgen ]
+        - Check the two-way versions for AutoJs6 and VSCode ext, then publish the ext to Microsoft if needed
+        - Run Gradle task "app:assembleInrtRelease" [ shortcut: C+A+0#- ]
+        - Build APK to determine the final VERSION_BUILD field [ shortcut: C+A+0#A ]
+        - Run Gradle task "app:appendDigestToReleasedFiles" [ shortcut: C+A+0#= ]
+        - Check VERSION_BUILD in version.properties with released apks
+        - Commit and push to GitHub
+        - Publish the latest release with signed APKs
 )

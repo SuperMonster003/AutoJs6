@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 
+import org.autojs.autojs.theme.ThemeColorHelper;
 import org.autojs.autojs6.R;
 import org.autojs.autojs6.databinding.DialogTextSizeSettingBinding;
 
@@ -55,8 +56,10 @@ public class TextSizeSettingDialogBuilder extends MaterialDialog.Builder impleme
         neutralColorRes(R.color.dialog_button_reset);
         onNeutral((dialog, which) -> initialValue(Integer.parseInt(getContext().getString(R.string.text_text_size_default_value))));
         negativeText(R.string.text_cancel);
+        negativeColorRes(R.color.dialog_button_default);
         onNegative((dialog, which) -> dialog.dismiss());
-        positiveText(R.string.text_ok);
+        positiveText(R.string.dialog_button_confirm);
+        positiveColorRes(R.color.dialog_button_attraction);
         onPositive((dialog, which) -> dialog.dismiss());
     }
 

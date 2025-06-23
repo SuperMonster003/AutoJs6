@@ -1,9 +1,11 @@
 package org.autojs.autojs.runtime.api.augment.ui
 
-import android.graphics.drawable.ColorDrawable
+import android.os.Build
 import android.view.ContextThemeWrapper
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
+import androidx.core.graphics.drawable.toDrawable
 import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.core.ui.JsViewHelper
@@ -14,12 +16,18 @@ import org.autojs.autojs.core.ui.inflater.InflateContext
 import org.autojs.autojs.core.ui.inflater.LayoutInflaterDelegate
 import org.autojs.autojs.core.ui.inflater.inflaters.ViewGroupInflater
 import org.autojs.autojs.core.ui.inflater.inflaters.ViewInflater
+import org.autojs.autojs.core.ui.nativeview.NativeView
 import org.autojs.autojs.core.ui.widget.JsListView
+import org.autojs.autojs.core.ui.widget.JsWebView
 import org.autojs.autojs.execution.ScriptExecuteActivity
 import org.autojs.autojs.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.extension.AnyExtensions.jsSanitize
 import org.autojs.autojs.extension.AnyExtensions.jsUnwrapped
+import org.autojs.autojs.extension.FlexibleArray.Companion.component1
+import org.autojs.autojs.extension.FlexibleArray.Companion.component2
+import org.autojs.autojs.extension.FlexibleArray.Companion.component3
+import org.autojs.autojs.extension.FlexibleArray.Companion.component4
 import org.autojs.autojs.extension.ScriptableExtensions.defineProp
 import org.autojs.autojs.extension.ScriptableExtensions.prop
 import org.autojs.autojs.rhino.ProxyObject.Companion.PROXY_GETTER_KEY
@@ -45,6 +53,7 @@ import org.autojs.autojs.util.RhinoUtils.newBaseFunction
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import org.autojs.autojs.util.RhinoUtils.undefined
 import org.autojs.autojs.util.RhinoUtils.withRhinoContext
+import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.Context
@@ -105,19 +114,32 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         ::registerWidget.name,
         ::setContentView.name,
         ::statusBarColor.name,
+        ::statusBarIconLight.name,
+        ::statusBarIconLightBy.name,
         ::backgroundColor.name,
+        ::navigationBarColor.name,
+        ::navigationBarIconLight.name,
+        ::navigationBarIconLightBy.name,
         ::findById.name,
         ::findByStringId.name,
         ::findView.name,
         ::finish.name,
+        ::keepScreenOn.name,
     )
 
     override val selfAssignmentGetters = listOf<Pair<String, Supplier<Any?>>>(
         "R" to Supplier { scriptRuntime.topLevelScope.prop("R").jsUnwrapped() },
         "__widgets__" to Supplier { scriptRuntime.ui.widgets },
+        "root" to Supplier {
+            val activity = getActivity(scriptRuntime)
+            (activity as? ScriptExecuteActivity)?.findViewById(android.R.id.content)
+        },
         "emitter" to Supplier {
             val activity = getActivity(scriptRuntime)
             (activity as? ScriptExecuteActivity)?.eventEmitter
+        },
+        "statusBarHeight" to Supplier {
+            ViewUtils.getStatusBarHeightByDimen(globalContext)
         },
     )
 
@@ -186,8 +208,8 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
             val widgets = scriptRuntime.ui.widgets
             if (widgets.contains(viewName)) {
                 val ctor = widgets.prop(viewName) as NativeFunction
-                val widget = withRhinoContext { ctx ->
-                    ctor.construct(ctx, scriptRuntime.topLevelScope, arrayOf())
+                val widget = withRhinoContext { cx ->
+                    ctor.construct(cx, scriptRuntime.topLevelScope, arrayOf())
                 } as ScriptableObject
                 val f = widget.prop("renderInternal") as BaseFunction
                 return __inflateRhinoRuntime__(scriptRuntime, scriptRuntime.ui.layoutInflater.newInflateContext().also { ctx ->
@@ -207,8 +229,9 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         }
 
         override fun afterCreateView(inflateContext: InflateContext, view: View, node: Node?, viewName: String, parent: ViewGroup?): View {
-            if (view is JsListView) {
-                initListView(scriptRuntime, view)
+            when (view) {
+                is JsListView -> initListView(scriptRuntime, view)
+                is JsWebView -> initWebView(scriptRuntime, view)
             }
             val widget = inflateContext.get("widget")
             if (widget is NativeObject) {
@@ -341,14 +364,14 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun inflate(scriptRuntime: ScriptRuntime, args: Array<out Any?>): View = ensureArgumentsLengthInRange(args, 1..3) { argList ->
+        fun inflate(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeView = ensureArgumentsLengthInRange(args, 1..3) { argList ->
             val (xml, parent, isAttachedToParent) = argList
             inflateRhinoRuntime(scriptRuntime, xml, parent, isAttachedToParent)
         }
 
         @JvmStatic
         @RhinoFunctionBody
-        fun inflateRhinoRuntime(scriptRuntime: ScriptRuntime, xml: Any?, parent: Any? = null, isAttachedToParent: Any? = false): View {
+        fun inflateRhinoRuntime(scriptRuntime: ScriptRuntime, xml: Any?, parent: Any? = null, isAttachedToParent: Any? = false): NativeView {
             val parentView = parent.jsSanitize()
             require(parentView is ViewGroup?) {
                 "Augment parentView for ui.inflate must be a ViewGroup instead of ${parentView.jsBrief()}"
@@ -359,7 +382,8 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
                 activity is ScriptExecuteActivity -> activity
                 else -> throw WrappedIllegalArgumentException("Global activity ${activity.jsBrief()} must be a ScriptExecuteActivity")
             }
-            return scriptRuntime.ui.layoutInflater.inflate(toXMLString(xml), parentView, coerceBoolean(isAttachedToParent, false))
+            val inflatedView = scriptRuntime.ui.layoutInflater.inflate(toXMLString(xml), parentView, coerceBoolean(isAttachedToParent, false))
+            return ViewExtras.getNativeView(scriptRuntime.topLevelScope, inflatedView, inflatedView::class.java, scriptRuntime)
         }
 
         @JvmStatic
@@ -507,9 +531,30 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         fun statusBarColor(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsOnlyOne(args) { color ->
             ensureActivity(scriptRuntime) { activity ->
                 runRhinoRuntime(scriptRuntime, newBaseFunction("action", {
-                    Colors.toIntRhino(color).also {
-                        activity.window.statusBarColor = it
-                    }
+                    Colors.toIntRhino(color).also { ViewUtils.setStatusBarBackgroundColor(activity, it) }
+                }, NOT_CONSTRUCTABLE))
+            }
+            UNDEFINED
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun statusBarIconLight(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsAtMost(args, 1) { argList ->
+            val (isLight) = argList
+            ensureActivity(scriptRuntime) { activity ->
+                runRhinoRuntime(scriptRuntime, newBaseFunction("action", {
+                    ViewUtils.setStatusBarIconLight(activity, coerceBoolean(isLight, true))
+                }, NOT_CONSTRUCTABLE))
+            }
+            UNDEFINED
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun statusBarIconLightBy(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsOnlyOne(args) { refColor ->
+            ensureActivity(scriptRuntime) { activity ->
+                runRhinoRuntime(scriptRuntime, newBaseFunction("action", {
+                    Colors.toIntRhino(refColor).also { ViewUtils.setStatusBarIconLight(activity, ViewUtils.isLuminanceDark(it)) }
                 }, NOT_CONSTRUCTABLE))
             }
             UNDEFINED
@@ -521,7 +566,51 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
             ensureActivity(scriptRuntime) { activity ->
                 runRhinoRuntime(scriptRuntime, newBaseFunction("action", {
                     Colors.toIntRhino(Colors.setAlphaRhino(color, 1.0)).also {
-                        activity.window.setBackgroundDrawable(ColorDrawable(it))
+                        activity.window.setBackgroundDrawable(it.toDrawable())
+                    }
+                }, NOT_CONSTRUCTABLE))
+            }
+            UNDEFINED
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun navigationBarColor(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsOnlyOne(args) { color ->
+            ensureActivity(scriptRuntime) { activity ->
+                runRhinoRuntime(scriptRuntime, newBaseFunction("action", {
+                    Colors.toIntRhino(color).also { ViewUtils.setNavigationBarBackgroundColor(activity, it) }
+                }, NOT_CONSTRUCTABLE))
+            }
+            UNDEFINED
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun navigationBarIconLight(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsAtMost(args, 1) { argList ->
+            val (isLight) = argList
+            ensureActivity(scriptRuntime) { activity ->
+                runRhinoRuntime(scriptRuntime, newBaseFunction("action", {
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                        ScriptRuntime.requiresApi(Build.VERSION_CODES.O)
+                    } else {
+                        ViewUtils.setNavigationBarIconLight(activity, coerceBoolean(isLight, true))
+                    }
+                }, NOT_CONSTRUCTABLE))
+            }
+            UNDEFINED
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun navigationBarIconLightBy(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsOnlyOne(args) { refColor ->
+            ensureActivity(scriptRuntime) { activity ->
+                runRhinoRuntime(scriptRuntime, newBaseFunction("action", {
+                    Colors.toIntRhino(refColor).also {
+                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                            ScriptRuntime.requiresApi(Build.VERSION_CODES.O)
+                        } else {
+                            ViewUtils.setNavigationBarIconLight(activity, ViewUtils.isLuminanceDark(it))
+                        }
                     }
                 }, NOT_CONSTRUCTABLE))
             }
@@ -544,9 +633,9 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
 
         @JvmStatic
         @RhinoFunctionBody
-        fun findByIdRhinoWithRuntime(scriptRuntime: ScriptRuntime, id: String?): View? {
+        fun findByIdRhinoWithRuntime(scriptRuntime: ScriptRuntime, id: String?): NativeView? {
             val view = scriptRuntime.ui.view ?: return null
-            return findByStringIdRhino(view, id)
+            return findByStringIdRhinoRuntime(scriptRuntime, view, id)
         }
 
         @JvmStatic
@@ -556,19 +645,20 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
             require(view is View) { "Argument view for ui.findByStringId must be a View instead of ${view.jsBrief()}" }
             when {
                 id.isJsNullish() -> {
-                    findByStringIdRhino(view, null)
+                    findByStringIdRhinoRuntime(scriptRuntime, view, null)
                 }
                 else -> {
                     // require(id is String) { "Argument id for ui.findByStringId must be a string instead of ${id.jsBrief()}" }
-                    findByStringIdRhino(view, coerceString(id))
+                    findByStringIdRhinoRuntime(scriptRuntime, view, coerceString(id))
                 }
             }
         }
 
         @JvmStatic
         @RhinoFunctionBody
-        fun findByStringIdRhino(view: View, id: String?): View? {
-            return JsViewHelper.findViewByStringId(view, id)
+        fun findByStringIdRhinoRuntime(scriptRuntime: ScriptRuntime, view: View, id: String?): NativeView? {
+            val foundView = JsViewHelper.findViewByStringId(view, id) ?: return null
+            return ViewExtras.getNativeView(scriptRuntime.topLevelScope, foundView, foundView::class.java, scriptRuntime)
         }
 
         @JvmStatic
@@ -596,6 +686,15 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
             UNDEFINED
         }
 
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun keepScreenOn(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsIsEmpty(args) {
+            ensureActivity(scriptRuntime) { activity ->
+                activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            }
+            UNDEFINED
+        }
+
         private fun initWidgetConstructor(ctor: BaseFunction) {
             val prototype = ctor.prop("prototype") as? ScriptableObject ?: newNativeObject()
             assignWidgetProperties(prototype)
@@ -619,14 +718,15 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
 
         private fun bindValueForApplyingAttribute(scriptRuntime: ScriptRuntime, value: String): String {
             val ctx = scriptRuntime.ui.bindingContext ?: return value
+            val niceCtx = ctx as? Scriptable
+                ?: Context.javaToJS(ctx, scriptRuntime.topLevelScope) as? Scriptable
+                ?: scriptRuntime.topLevelScope
             var tmp = value
             var i = -1
             while (tmp.indexOf("{{", i + 1).also { i = it } >= 0) {
                 val j = tmp.indexOf("}}", i + 1)
-                if (j < 0) {
-                    return tmp
-                }
-                val evaluated = evalInContext(scriptRuntime, tmp.slice(i + 2 until j), ctx)
+                if (j < 0) return tmp
+                val evaluated = evalInContext(tmp.slice(i + 2 until j), niceCtx)
                 tmp = tmp.slice(0 until i) + attrValueConvert(evaluated) + tmp.slice(j + 2 until tmp.length)
             }
             return tmp
@@ -644,38 +744,39 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
             else -> xml.toString()
         }
 
-        private fun evalInContext(scriptRuntime: ScriptRuntime, expression: String, ctx: Any): Any {
-            val scope = scriptRuntime.topLevelScope
-            return withRhinoContext { context ->
-
-                // FIXME by SuperMonster003 on Jul 21, 2024.
-                //  ! This code snippet is difficult to convert to Kotlin.
-                //  ! The reason is that it contains JavaScript's "with" statement,
-                //  ! and I haven't found a way to convert it in Rhino for now.
-                //  ! Use the literal JavaScript code to ensure the functionality temporarily.
-                //  ! zh-CN:
-                //  ! 这段代码转换为 Kotlin 有些困难.
-                //  ! 因为它包含了 JavaScript 的 "with" 语句,
-                //  ! 我暂时没有找到对应的 Rhino 转换方式.
-                //  ! 暂时先用 JavaScript 字面量代码的方式保证其功能性.
-
-                // language=JavaScript
-                val script = """
-                // noinspection JSUnusedLocalSymbols
-                function evalInContext(expression, ctx) {
-                    return __exitIfError__(() => {
-                        // noinspection WithStatementJS
-                        with (ctx) {
-                            return (/* @IIFE */ function () {
-                                return eval(expression);
-                            })();
-                        }
-                    });
+        /**
+         * This method is used to execute a given JavaScript expression within a specified context
+         * and return the result of that execution.
+         *
+         * zh-CN: 此方法用于在指定的上下文中执行所给定的 JavaScript 表达式, 并返回执行结果.
+         *
+         * The core logic of this method comes from the following JavaScript code.
+         *
+         * zh-CN: 该方法的核心逻辑来源于以下 JavaScript 代码:
+         *
+         * ```JavaScript
+         * function evalInContext(expression, ctx) {
+         *     return __exitIfError__(() => {
+         *         with (ctx) {
+         *             return (/* @IIFE */ function () {
+         *                 return eval(expression);
+         *             })();
+         *         }
+         *     });
+         * }
+         * ```
+         *
+         * @param expression The JavaScript expression to evaluate as a string. (zh-CN: 用于执行的表达式.)
+         * @param ctx The context (scriptable scope) in which the expression should be evaluated. (zh-CN: 提供给参数 expression 的作用域上下文.)
+         * @return The result of evaluating the expression. (zh-CN: 参数 expression 执行结果.)
+         */
+        private fun evalInContext(expression: String, ctx: Scriptable): Any? {
+            val iife = object : BaseFunction() {
+                override fun call(cx: Context, scope: Scriptable, thisObj: Scriptable, args: Array<out Any?>): Any? {
+                    return cx.evaluateString(scope, expression, "<eval>", 1, null)
                 }
-            """
-                val func = context.evaluateString(scope, script, "evalInContext", 1, null) as BaseFunction
-                func.call(context, scope, scope, arrayOf(expression, ctx))
-            }!!
+            }
+            return callFunction(iife, ctx, ctx, emptyArray())
         }
 
         private fun initListView(scriptRuntime: ScriptRuntime, list: JsListView) {
@@ -729,20 +830,24 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
                             }
                         }
                     }, NOT_CONSTRUCTABLE)
-                    withRhinoContext { context ->
-                        arrayObserveFunc.call(context, global, globalArray, arrayOf(dataSource, handlerFunc))
+                    withRhinoContext { cx ->
+                        arrayObserveFunc.call(cx, global, globalArray, arrayOf(dataSource, handlerFunc))
                     }
                 }
             })
         }
 
+        private fun initWebView(scriptRuntime: ScriptRuntime, webView: JsWebView) {
+            callFunction(scriptRuntime.js_UiExt, scriptRuntime.topLevelScope, null, arrayOf(webView))
+        }
+
         private fun wrapUiAction(scriptRuntime: ScriptRuntime, action: BaseFunction) = Runnable {
             when {
                 !getActivity(scriptRuntime).isJsNullish() -> callFunction(scriptRuntime, action, scriptRuntime.topLevelScope, arrayOf())
-                else -> withRhinoContext { context ->
+                else -> withRhinoContext { cx ->
                     val scope = scriptRuntime.topLevelScope
                     val func = scope.prop("__exitIfError__") as BaseFunction
-                    func.call(context, scope, scope, arrayOf(newBaseFunction("action", {
+                    func.call(cx, scope, scope, arrayOf(newBaseFunction("action", {
                         callFunction(scriptRuntime, action, arrayOf())
                     }, NOT_CONSTRUCTABLE)))
                 }
@@ -763,7 +868,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         private fun attrValueConvert(o: Any?): Any? = when (o) {
             is String -> o
             is ColorNativeObject -> Colors.toHexRhino(o)
-            is ThemeColor -> o.getColorPrimary()
+            is ThemeColor -> o.colorPrimary
             is NativeWith -> attrValueConvert(o.prototype)
             else -> o
         }

@@ -32,6 +32,7 @@ import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.continuation.Continuation
 import org.autojs.autojs.runtime.api.augment.continuation.Creator
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
+import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED
 import org.autojs.autojs.util.RhinoUtils.coerceIntNumber
 import org.autojs.autojs.util.RhinoUtils.coerceLongNumber
@@ -138,15 +139,15 @@ class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                 override fun onResponse(call: Call, response: Response) {
                     val wrappedResponse = ResponseWrapper(response).wrap()
                     cont?.resume(wrappedResponse)
-                    if (callback is BaseFunction) withRhinoContext { context ->
-                        callback.call(context, callback, callback, arrayOf(wrappedResponse, null))
+                    if (callback is BaseFunction) withRhinoContext { cx ->
+                        callback.call(cx, callback, callback, arrayOf(wrappedResponse, null))
                     }
                 }
 
                 override fun onFailure(call: Call, e: IOException) {
                     cont?.resumeError(e)
-                    if (callback is BaseFunction) withRhinoContext { context ->
-                        callback.call(context, callback, callback, arrayOf(null, e))
+                    if (callback is BaseFunction) withRhinoContext { cx ->
+                        callback.call(cx, callback, callback, arrayOf(null, e))
                     }
                 }
             })
@@ -305,7 +306,7 @@ class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         private class ResponseBodyNativeObject(val resBody: ResponseBody, val responseWrapper: ResponseWrapper) : NativeObject() {
 
             init {
-                super.exportAsJSClass(MAX_PROTOTYPE_ID, this, false)
+                RhinoUtils.initNativeObjectPrototype(this)
             }
 
             companion object : FlexibleArray() {
@@ -403,8 +404,8 @@ class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                     }
 
                     override fun writeTo(sink: BufferedSink) {
-                        withRhinoContext { context ->
-                            body.call(context, body, body, arrayOf(sink))
+                        withRhinoContext { cx ->
+                            body.call(cx, body, body, arrayOf(sink))
                         }
                     }
                 }

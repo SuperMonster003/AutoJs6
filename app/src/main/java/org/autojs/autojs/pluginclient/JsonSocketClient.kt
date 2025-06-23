@@ -130,6 +130,7 @@ class JsonSocketClient(service: DevPluginService?, private val ctx: Context, hos
                     .title(activity.getString(R.string.text_connection_cannot_be_established))
                     .content(msg)
                     .positiveText(R.string.dialog_button_dismiss)
+                    .positiveColorRes(R.color.dialog_button_default)
                     .build()
                     .also {
                         it.contentView?.apply {
@@ -234,6 +235,10 @@ class JsonSocketClient(service: DevPluginService?, private val ctx: Context, hos
 
         fun removeFromHistories(ip: String) {
             serverAddressHistories = serverAddressHistories.apply { remove(ip) }
+        }
+
+        fun clearAllHistories() {
+            serverAddressHistories = linkedSetOf()
         }
 
         val cxnState = PublishSubject.create<DevPluginService.State>()

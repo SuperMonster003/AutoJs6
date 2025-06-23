@@ -9,6 +9,8 @@ import pxb.android.axml.AxmlReader;
 import pxb.android.axml.AxmlWriter;
 import pxb.android.axml.NodeVisitor;
 
+import static org.autojs.autojs.apkbuilder.ApkBuilder.INRT_APP_ID;
+
 /**
  * Created by Stardust on Oct 23, 2017.
  */
@@ -102,7 +104,7 @@ public class ManifestEditor {
             @Override
             protected void onAttr(AxmlWriter.Attr a) {
                 if ("permission".equals(this.name.data) && "name".equals(a.name.data) && a.value instanceof StringItem) {
-                    if ("org.autojs.autojs6.inrt.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION".equals(((StringItem) a.value).data)) {
+                    if ((INRT_APP_ID + ".DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION").equals(((StringItem) a.value).data)) {
                         ((StringItem) a.value).data = mPackageName + ".DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION";
                         super.onAttr(a);
                         return;

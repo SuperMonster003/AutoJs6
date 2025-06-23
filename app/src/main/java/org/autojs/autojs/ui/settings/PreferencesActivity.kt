@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import org.autojs.autojs.app.GlobalAppContext
+import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ActivityPreferencesBinding
@@ -32,6 +33,11 @@ open class PreferencesActivity : BaseActivity() {
             .replace(R.id.fragment_preferences, PreferencesFragment())
             .disallowAddToBackStack()
             .commit()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        binding.toolbar.navigationIcon?.setTint(ThemeColorManager.getDayOrNightColorByLuminance(this))
     }
 
     companion object {

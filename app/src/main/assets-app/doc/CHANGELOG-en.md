@@ -4,6 +4,150 @@
 
 ******
 
+# v6.6.4
+
+###### 2025/05/31
+
+* `Hint` API change: ui.(status/navigation)BarAppearanceLight[By] -> ui.(status/navigation)BarIconLight[By]
+* `Feature` util.dpToPx/spToPx/pxToDp/pxToSp methods for pixel unit conversion
+* `Fix` Subtitles may be displayed incompletely when rotating the screen to landscape orientation
+* `Fix` Some page content may be obscured by the side navigation bar when rotating to landscape
+* `Fix` Incomplete status bar background tint area on some pages in Android 15 _[`issue #398`](http://issues.autojs6.com/398)_
+* `Fix` Code editor might write files with low-confidence encoding causing decoding errors (attempted fix)
+* `Improvement` Improved layout adaptability on the App and Developer pages and removed unnecessary layout categories
+* `Improvement` README.md build section added multiple methods to help locate the target settings page _[`issue #404`](http://issues.autojs6.com/404)_
+* `Dependency` Added Androidx ConstraintLayout version 2.2.1
+
+# v6.6.3
+
+###### 2025/05/27
+
+* `Feature` Version history feature: view multi-language release changelogs and statistics
+* `Feature` timers.keepAlive method (now global) for keeping the script alive
+* `Feature` Event listeners such as engines.on('start/stop/error', callback) for global engine events
+* `Feature` images.detectMultiColors method for multi-point color verification _[`issue #374`](http://issues.autojs6.com/374)_
+* `Feature` images.matchFeatures / detectAndComputeFeatures methods: full-resolution image matching (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) _[`issue #366`](http://issues.autojs6.com/366)_
+* `Feature` images.compressToBytes method to compress an image and generate a byte array
+* `Feature` images.downsample method for pixel down-sampling and creating a new ImageWrapper
+* `Feature` ui.keepScreenOn method to keep the device screen on while a UI page is focused
+* `Feature` ui.root property (getter) to obtain the "window content root container" node of the UI layout
+* `Feature` webview element now supports JsBridge-based web page layouts (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) [see Sample Code > Layout > Interactive HTML / Vue2 + Vant (SFC)] _[`issue #281`](http://issues.autojs6.com/281)_
+* `Fix` Online docs in the Home > Docs tab and Docs activity may be covered by the system navigation bar
+* `Fix` Clicking Toolbar buttons on some pages could accidentally trigger the title click event
+* `Fix` Blank lines in the code editor showed box glyphs on some devices
+* `Fix` Color-picker dialog in the theme-color settings page could stack infinitely
+* `Fix` Volume-up key failed to stop all scripts when the accessibility service was disabled
+* `Fix` IME overlay issue when editing custom broadcast content in the Scheduled Tasks page
+* `Fix` Controls inside webview elements could not activate the soft keyboard properly
+* `Fix` APK file info dialog might fail to obtain app name and SDK info
+* `Fix` File-manager sample code might fail to auto-load child directory contents when entering a project folder
+* `Fix` Top content of UI mode on Android 15 was covered by the status bar
+* `Fix` Status-bar background color on some Android 15 pages could not follow the theme color dynamically
+* `Fix` dialogs module could not use the customView property _[`issue #364`](http://issues.autojs6.com/364)_
+* `Fix` Expression parameter of dialogs.input might not return the execution result
+* `Fix` Using JavaAdapter led to a ClassLoader stack overflow _[`issue #376`](http://issues.autojs6.com/376)_
+* `Fix` console.setContentTextColor caused log text color to lose its default value _[`issue #346`](http://issues.autojs6.com/346)_
+* `Fix` console.setContentBackgroundColor could not accept color-name arguments _[`issue #384`](http://issues.autojs6.com/384)_
+* `Fix` images.compress implementation corrected: now changes encoding quality instead of pixel down-sampling
+* `Fix` images.resize method did not work properly
+* `Fix` engines.all could trigger ConcurrentModificationException _[`issue #394`](http://issues.autojs6.com/394)_
+* `Fix` Incorrect date formats in some languages within README.md
+* `Fix` Gradle build could fail due to invalid library archive length _[`issue #389`](http://issues.autojs6.com/389)_
+* `Improvement` Layout Inspector supports hiding controls (by [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #371`](http://pr.autojs6.com/371)_ _[`issue #355`](http://issues.autojs6.com/355)_
+* `Improvement` Added gradient separators to the Layout Inspector menu for lightweight grouping
+* `Improvement` project.json now supports a permissions option for script projects (by [wirsnow](https://github.com/wirsnow)) _[`pr #391`](http://pr.autojs6.com/391)_ _[`issue #362`](http://issues.autojs6.com/362)_
+* `Improvement` Automatically read and check declared permissions of installed apps when packaging a single file _[`issue #362`](http://issues.autojs6.com/362)_
+* `Improvement` Expanded theme-color adaptation scope; supports more widget types
+* `Improvement` Adaptive drawer width on the Home page for landscape / ultra-wide screens
+* `Improvement` Added horizontal and small-screen layouts for About App & Developer pages
+* `Improvement` Settings-page dialogs now offer a "Use default value" menu option
+* `Improvement` Floating Action Button in File Manager auto-hides when tapping elsewhere
+* `Improvement` Code formatter now supports operators such as `??`, `?.`, `??=`
+* `Improvement` Code editor supports reading and writing files encoded in GB18030 / UTF-16 (LE/BE) / Shift_JIS, etc.
+* `Improvement` Code editor supports displaying detailed file information (path/encoding/line break format/total bytes and characters, etc.) _[`issue #395`](http://issues.autojs6.com/395)_
+* `Improvement` Added operation-error prompts for intent actions (edit / view / install / send / play, etc.)
+* `Improvement` webview element's url attribute supports relative paths
+* `Improvement` ImageWrapper#saveTo path parameter supports relative paths
+* `Improvement` images.save supports PNG file-size compression when using the quality parameter _[`issue #367`](http://issues.autojs6.com/367)_
+* `Improvement` Clearing ignored update records and client-mode connection addresses is now supported
+* `Improvement` Version-update information supports multi-language display (in sync with current UI language)
+* `Improvement` Asynchronous loading significantly improves File Manager list scrolling smoothness
+* `Improvement` Improved content and formatting of script exception messages in the console
+* `Improvement` Sample code now supports resetting a folder to its initial contents
+* `Improvement` Increased efficiency when checking APK signature information
+* `Improvement` Optimized dialog display efficiency and information presentation for APK/media file type info
+* `Improvement` Gradle build script now better adapts to newer versions _[`discussion #369`](http://discussions.autojs6.com/369)_
+* `Dependency` Bundled Material Dialogs 0.9.6.0 (localized)
+* `Dependency` Bundled Material Date Time Picker 4.2.3 (localized)
+* `Dependency` Bundled libimagequant 2.17.0 (localized)
+* `Dependency` Bundled libpng 1.6.49 (localized)
+* `Dependency` Added ICU4J 77.1
+* `Dependency` Added Jsoup 1.19.1
+* `Dependency` Added Material Progressbar 1.4.2
+* `Dependency` Added Flexmark Java HTML to Markdown 0.64.8
+* `Dependency` Upgraded Gradle 8.14-rc-1 -> 8.14
+* `Dependency` Upgraded Androidx Room 2.7.0 -> 2.7.1
+
+# v6.6.2
+
+###### 2025/04/16
+
+* `Feature` Methods such as ui.statusBarAppearanceLight, statusBarAppearanceLightBy, navigationBarColor, etc.
+* `Feature` ui.statusBarHeight attribute (getter) for obtaining the status bar height _[`issue #357`](http://issues.autojs6.com/357)_
+* `Feature` images.flip method for image flipping _[`issue #349`](http://issues.autojs6.com/349)_
+* `Feature` Added "file extension" option in the settings page
+* `Feature` New layout support in the theme color settings page (grouping, positioning, search, history, enhanced color palette, etc.)
+* `Fix` Issue where Android 15's status bar background color did not match the theme color
+* `Fix` Issue where the plugins.load method failed to properly load plugins _[`issue #290`](http://issues.autojs6.com/290)_
+* `Fix` Issue where the dx library could not be used properly on Android 7.x _[`issue #293`](http://issues.autojs6.com/293)_
+* `Fix` Potential synchronization issues in ScriptRuntime when using require to import built-in modules (tentative fix) _[`issue #298`](http://issues.autojs6.com/298)_
+* `Fix` Issue where the notice module was missing extension methods such as getBuilder _[`issue #301`](http://issues.autojs6.com/301)_
+* `Fix` Issue where methods like shizuku/shell could not accept string parameters _[`issue #310`](http://issues.autojs6.com/310)_
+* `Fix` Issue where the colors.pixel method could not accept single-channel image parameters _[`issue #350`](http://issues.autojs6.com/350)_
+* `Fix` Issue where methods such as engines.execScript/execScriptFile had abnormal default working directories when executing scripts _[`issue #358`](http://issues.autojs6.com/358)_ _[`issue #340`](http://issues.autojs6.com/340)_ _[`issue #339`](http://issues.autojs6.com/339)_
+* `Fix` Issue where floaty.window/floaty.rawWindow could not be executed on background threads
+* `Fix` Issue where floaty.getClip might not correctly retrieve clipboard content _[`issue #341`](http://issues.autojs6.com/341)_
+* `Fix` Issue where ui.inflate returned values were missing prototype methods such as attr/on/click
+* `Fix` Issue where incorrect scope context binding when using XML syntax to use a JavaScript expression as an attribute value _[`issue #319`](http://issues.autojs6.com/319)_
+* `Fix` Issue where exceptions in some method calls could not be caught by try..catch blocks _[`issue #345`](http://issues.autojs6.com/345)_
+* `Fix` Issue where generating code on the layout analysis page could cause the app to crash _[`issue #288`](http://issues.autojs6.com/288)_
+* `Fix` Issue where packaged applications could not properly use the shizuku module _[`issue #227`](http://issues.autojs6.com/227)_ _[`issue #231`](http://issues.autojs6.com/231)_ _[`issue #284`](http://issues.autojs6.com/284)_ _[`issue #287`](http://issues.autojs6.com/287)_ _[`issue #304`](http://issues.autojs6.com/304)_
+* `Fix` Issue in the code editor where jumping to the end of a line might actually move the cursor to the beginning of the next line
+* `Fix` Issue where rapid consecutive clicks on dialog-type items in the settings page could cause the app to crash
+* `Improvement` Streamlined the APK file size for the packaged application template
+* `Improvement` Enhanced app (and packaged apps) support for more permissions _[`issue #338`](http://issues.autojs6.com/338)_
+* `Improvement` Added support for the Pinyin library option on the packaging page
+* `Improvement` Optimized the status bar background and text color on the main activity page of packaged apps
+* `Improvement` Added special permission toggles (such as access all files and send notifications) to the packaged app settings page _[`issue #354`](http://issues.autojs6.com/354)_
+* `Improvement` Automatically switched control text and icon colors based on the brightness of the theme color
+* `Improvement` Improved visual experience when contrast between control theme color and background is too low
+* `Improvement` Enhanced HEX input control in the color palette for better compatibility when pasting color values from the clipboard
+* `Improvement` Set in-app navigation bar to be transparent or semi-transparent to enhance visual experience
+* `Improvement` Default UI mode for status bar and navigation bar set to `md_grey_50` color in light mode
+* `Improvement` Homepage drawer's accessibility service toggle now syncs with script code
+* `Improvement` Homepage document page search now supports bidirectional find buttons
+* `Improvement` Homepage "Files" tab now supports toggling floating button visibility via long press
+* `Improvement` Code editor title text now supports auto-adjusting font size
+* `Improvement` Log page floating button visibility now linked with list scrolling actions
+* `Improvement` Script project configuration file project.json now supports more packaging options _[`issue #305`](http://issues.autojs6.com/305)_ _[`issue #306`](http://issues.autojs6.com/306)_
+* `Improvement` Improved project.json to support lenient matching of option names and alias compatibility
+* `Improvement` APK file type info dialog now includes file size and signature scheme information
+* `Improvement` APK file type info dialog now supports click listeners for copying text and navigating to app details
+* `Improvement` Attempted to restore com.stardust prefixed packages to improve code compatibility _[`issue #290`](http://issues.autojs6.com/290)_
+* `Improvement` Enhanced floaty.window/floaty.rawWindow to support execution on both main and background threads
+* `Improvement` Global getClip method now leverages floaty.getClip as needed to improve compatibility
+* `Improvement` Improved compatibility when passing null paths to files.path and related methods
+* `Improvement` Synchronized with the latest official upstream code of the Rhino engine and performed necessary code adaptations
+* `Improvement` Enhanced README.md to better document project build and run instructions _[`issue #344`](http://issues.autojs6.com/344)_
+* `Dependency` Added Eclipse Paho Client Mqttv3 version 1.1.0 _[`issue #330`](http://issues.autojs6.com/330)_
+* `Dependency` Upgraded Gradle Compile version from 34 to 35
+* `Dependency` Upgraded Gradle from 8.12 to 8.14-rc-1
+* `Dependency` Upgraded Rhino from 1.8.0-SNAPSHOT to 1.8.1-SNAPSHOT
+* `Dependency` Upgraded Androidx Recyclerview from 1.3.2 to 1.4.0
+* `Dependency` Upgraded Androidx Room from 2.6.1 to 2.7.0
+* `Dependency` Upgraded Androidx WebKit from 1.12.1 to 1.13.0
+* `Dependency` Upgraded Pinyin4j from 2.5.0 to 2.5.1
+
 # v6.6.1
 
 ###### 2025/01/01
@@ -63,9 +207,9 @@
 * `Feature` floaty.getClip method for indirectly obtaining clipboard content using a floating window
 * `Fix` Memory leak in View Binding of Fragment subclasses (e.g., [DrawerFragment](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/ui/main/drawer/DrawerFragment.kt#L369) / [ExplorerFragment](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/ui/main/scripts/ExplorerFragment.kt#L48))
 * `Fix` Instance memory leak in classes such as [ScreenCapture](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/core/image/capture/ScreenCapturer.java#L70) / [ThemeColorPreference](https://github.com/SuperMonster003/AutoJs6/blob/10960ddbee71f75ef80907ad5b6ab42f3e1bf31e/app/src/main/java/org/autojs/autojs/ui/settings/ThemeColorPreference.kt#L21)
-* `Fix` Issue causing app crash when requesting screenshot permissions on Android 14+ (by [chenguangming](https://github.com/chenguangming)) _[`pr #242`](http://pr.autojs6.com/242)_
-* `Fix` Issue causing app crash when starting foreground service on Android 14+
-* `Fix` Issue with run button in code editor not lighting up properly on Android 14+
+* `Fix` Issue causing app crash when requesting screenshot permissions on Android 14 (by [chenguangming](https://github.com/chenguangming)) _[`pr #242`](http://pr.autojs6.com/242)_
+* `Fix` Issue causing app crash when starting foreground service on Android 14
+* `Fix` Issue with run button in code editor not lighting up properly on Android 14
 * `Fix` App may not run properly after packaging due to missing necessary library files _[`issue #202`](http://issues.autojs6.com/202)_ _[`issue #223`](http://issues.autojs6.com/223)_ _[`pr #264`](http://pr.autojs6.com/264)_
 * `Fix` App crash when editing project due to missing specified icon resources _[`issue #203`](http://issues.autojs6.com/203)_
 * `Fix` Unable to use parameters properly to obtain screenshot resources of specified screen orientation when requesting screenshot permissions
@@ -124,7 +268,7 @@
 * `Dependency` Include Toaster version 12.6
 * `Dependency` Include EasyWindow (for Toaster) version 10.3
 * `Dependency` Upgrade Gradle version from 8.5 -> 8.11.1
-* `Dependency` Upgrade Rhino version 1.7.15-snapshot -> 1.7.16-snapshot
+* `Dependency` Upgrade Rhino version 1.7.15-SNAPSHOT -> 1.8.0-SNAPSHOT
 * `Dependency` Upgrade Android Material Lang3 version 1.10.0 -> 1.12.0
 * `Dependency` Upgrade Androidx Annotation version 1.7.0 -> 1.9.1
 * `Dependency` Upgrade Androidx AppCompat version 1.6.1 -> 1.7.0
@@ -640,7 +784,7 @@
 * `Dependency` Upgraded Kotlinx Coroutines version 1.6.0 -> 1.6.1-native-mt
 * `Dependency` Upgraded LeakCanary version 2.8.1 -> 2.9.1
 * `Dependency` Upgraded OkHttp3 version 5.0.0-alpha.6 -> 5.0.0-alpha.7
-* `Dependency` Upgraded Rhino engine version 1.7.14 -> 1.7.15-snapshot
+* `Dependency` Upgraded Rhino engine version 1.7.14 -> 1.7.15-SNAPSHOT
 * `Dependency` Upgraded Zip4j version 2.9.1 -> 2.10.0
 * `Dependency` Removed Groovy JSON version 3.0.8
 * `Dependency` Removed Kotlin Stdlib JDK7 version 1.6.21
@@ -692,7 +836,7 @@
 * `Dependency` Added Androidx AppCompat (Legacy) version 1.0.2
 * `Dependency` Upgraded Androidx AppCompat version 1.4.0 -> 1.4.1
 * `Dependency` Upgraded Androidx Preference version 1.1.1 -> 1.2.0
-* `Dependency` Upgraded Rhino engine version 1.7.14-snapshot -> 1.7.14
+* `Dependency` Upgraded Rhino engine version 1.7.14-SNAPSHOT -> 1.7.14
 * `Dependency` Upgraded OkHttp3 version 3.10.0 -> 5.0.0-alpha.3 -> 5.0.0-alpha.4
 * `Dependency` Upgraded Android Material version 1.6.0-alpha01 -> 1.6.0-alpha02
 * `Dependency` Upgraded Gradle build tools version 7.2.0-alpha06 -> 7.2.0-beta01
@@ -729,7 +873,7 @@
 * `Fix` Fixed issue where packing plugins could not be detected and invalid plugin download addresses
 * `Fix` Fixed issue where the switch state of 'View Usage Stats Permission' in the home drawer might not sync
 * `Fix` Fixed potential Mat memory leak issue in TemplateMatching.fastTemplateMatching
-* `Improvement` Upgraded Rhino engine version 1.7.7.2 -> 1.7.13 -> 1.7.14-snapshot
+* `Improvement` Upgraded Rhino engine version 1.7.7.2 -> 1.7.13 -> 1.7.14-SNAPSHOT
 * `Improvement` Upgraded OpenCV version 3.4.3 -> 4.5.4
 * `Improvement` Enhanced compatibility of ViewUtil.getStatusBarHeight
 * `Improvement` Removed user login related modules and layout placeholders from the home drawer

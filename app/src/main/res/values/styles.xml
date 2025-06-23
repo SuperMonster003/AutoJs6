@@ -1,5 +1,23 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
+    <string name="css_style_license_dialog_notices" translatable="false">
+        p.license {
+            background: grey;
+        }
+        body {
+            font-family: sans-serif;
+            overflow-wrap: break-word;
+        }
+        body a:link {
+            color: #00838F;
+        }
+        pre {
+            background-color: #F2F2F2;
+            padding: 1em;
+            white-space: pre-wrap;
+        }
+    </string>
+
     <style name="AppTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
         <item name="android:actionMenuTextColor">@color/day_night</item>
         <item name="android:divider">@color/divider</item>
@@ -8,6 +26,7 @@
         <item name="android:textColorPrimary">@color/text_color_primary</item>
         <item name="android:textColorSecondary">@color/text_color_secondly</item>
         <item name="android:windowBackground">@color/window_background</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
@@ -16,6 +35,11 @@
         <item name="itemBackgroundDark">@color/item_background_dark</item>
         <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
         <item name="actionOverflowMenuStyle">@style/OverflowMenu</item>
+    </style>
+
+    <style name="ToolBarStyleRaw" parent="ThemeOverlay.AppCompat.DayNight.ActionBar">
+        <item name="searchViewStyle">@style/SearchViewActionBar</item>
+        <item name="titleMarginStart">0dp</item>
     </style>
 
     <style name="ToolBarStyle" parent="ThemeOverlay.AppCompat.DayNight.ActionBar">
@@ -28,8 +52,16 @@
         <item name="popupTheme">@style/PopupMenuTheme</item>
     </style>
 
-    <style name="ToolBarStyleInrt" parent="ThemeOverlay.AppCompat.DayNight.ActionBar">
+    <style name="ToolBarStyleInrt" parent="ToolBarStyle">
         <item name="colorControlNormal">@color/md_black_1000</item>
+    </style>
+
+    <style name="AppTheme.NoActionBarInrt" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:statusBarColor">@color/md_blue_gray_50</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="colorPrimary">@color/md_blue_gray_50</item>
+        <item name="colorPrimaryDark">@color/md_blue_gray_50</item>
+        <item name="colorAccent">@color/md_black_1000</item>
     </style>
 
     <style name="EditorTheme" parent="AppTheme">
@@ -40,12 +72,17 @@
     <style name="AppTheme.FullScreen" parent="AppTheme">
         <item name="windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
 
     <style name="AppTheme.Splash" parent="@android:style/Theme.NoTitleBar.Fullscreen">
         <item name="windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
         <item name="android:windowBackground">@color/window_background</item>
+        <item name="android:statusBarColor">@color/window_background</item>
+        <item name="android:navigationBarColor">@color/window_background</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
     </style>
 
     <style name="AppTheme.Settings" parent="AppTheme">
@@ -65,24 +102,47 @@
         <item name="android:backgroundDimEnabled">false</item>
     </style>
 
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.DayNight.ActionBar" />
+    <style name="AppTheme.SevereTransparent" parent="AppTheme">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowDisablePreview">true</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:windowTranslucentNavigation">false</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.DayNight.ActionBar">
+        <item name="actionOverflowMenuStyle">@style/OverflowMenu</item>
+    </style>
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.DayNight.ActionBar">
-        <item name="android:textColorPrimary">#212121</item>
+        <item name="android:textColorPrimary">@color/day_full</item>
         <item name="android:textColorSecondary">@color/colorAccent</item>
+        <item name="actionOverflowMenuStyle">@style/OverflowMenu</item>
     </style>
 
     <style name="MtAppTheme.FullScreen" parent="Theme.AppCompat.DayNight.NoActionBar">
         <item name="windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
+        <item name="android:windowBackground">@color/window_background</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
     </style>
 
-    <style name="MtAppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.DayNight.ActionBar" />
+    <style name="MtAppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.DayNight.ActionBar">
+        <item name="actionOverflowMenuStyle">@style/OverflowMenu</item>
+    </style>
 
-    <style name="MtAppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.DayNight.ActionBar">
-        <item name="android:textColorPrimary">#212121</item>
+    <style name="MtAppTheme.PopupOverlay" parent="OverflowMenu">
+        <item name="android:textColor">@color/day_night_full</item>
+        <item name="android:tint">@color/day_night_full</item>
     </style>
 
     <style name="ConsoleTheme" parent="Theme.AppCompat.Light.DarkActionBar">
@@ -111,8 +171,28 @@
     </style>
 
     <style name="PopupMenuTheme" parent="AppTheme.PopupOverlay">
+        <item name="android:textColor">@color/day_night_full</item>
+        <item name="android:tint">@color/day_night_full</item>
+    </style>
+
+    <style name="PopupMenuThemeLight" parent="AppTheme.PopupOverlay">
+        <item name="android:textColor">@color/day_full</item>
+        <item name="android:tint">@color/day_full</item>
+    </style>
+
+    <style name="PopupMenuThemeDark" parent="AppTheme.PopupOverlay">
+        <item name="android:textColor">@color/night_full</item>
+        <item name="android:tint">@color/night_full</item>
+    </style>
+
+    <style name="PopupMenu.HideIndicator" parent="@style/ThemeOverlay.AppCompat.DayNight">
+        <item name="android:radioButtonStyle">@style/PopupMenu.Radio.Null</item>
+        <item name="android:checkboxStyle">@style/PopupMenu.Radio.Null</item>
         <item name="android:textColor">@color/day_night</item>
-        <item name="android:tint">@color/day_night</item>
+    </style>
+
+    <style name="PopupMenu.Radio.Null" parent="@style/Widget.AppCompat.CompoundButton.RadioButton">
+        <item name="android:button">@null</item>
     </style>
 
     <style name="SearchViewActionBar" parent="@style/Widget.AppCompat.SearchView.ActionBar" />
@@ -121,21 +201,33 @@
 
     <style name="TextAppearanceEditorTitle" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
         <item name="android:textSize">@dimen/editor_title_text_size</item>
-        <item name="android:maxLines">2</item>
-        <item name="android:ellipsize">middle</item>
+        <item name="maxLines">2</item>
+        <item name="paddingStart">0dp</item>
     </style>
 
-    <style name="TextAppearanceMainTitle" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
+    <style name="TextAppearanceDefaultMainTitle" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
         <item name="android:textSize">@dimen/main_title_text_size</item>
         <item name="android:maxLines">1</item>
         <item name="android:ellipsize">end</item>
     </style>
 
-    <style name="OverflowIconDarkTheme" parent="@style/Widget.AppCompat.ActionButton.Overflow" >
+    <style name="TextAppearanceHorizontalWithSubtitleMainTitle" parent="TextAppearanceDefaultMainTitle">
+        <item name="android:textSize">@dimen/main_title_text_size_horizontal_with_subtitle</item>
+    </style>
+
+    <style name="TextAppearanceMainSubtitle" parent="TextAppearanceDefaultMainTitle">
+        <item name="android:textSize">@dimen/main_subtitle_text_size</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:ellipsize">end</item>
+    </style>
+
+    <style name="OverflowIconDarkTheme" parent="@style/Widget.AppCompat.ActionButton.Overflow">
         <item name="android:tint">@color/md_white_1000</item>
     </style>
 
     <style name="OverflowMenu" parent="Widget.AppCompat.PopupMenu.Overflow">
+        <item name="android:textColor">@color/day_night_full</item>
+        <item name="android:itemBackground">@color/item_background</item>
         <item name="android:windowDisablePreview">true</item>
         <item name="overlapAnchor">false</item>
         <item name="android:dropDownVerticalOffset">5.0dp</item>
@@ -143,8 +235,8 @@
 
     <style name="OverflowMenuInrt" parent="OverflowMenu">
         <item name="android:textColor">@color/md_black_1000</item>
-        <item name="android:popupBackground">@color/md_blue_grey_100</item>
-        <item name="android:itemBackground">@color/md_blue_grey_100</item>
+        <item name="android:popupBackground">@color/md_blue_gray_50</item>
+        <item name="android:itemBackground">@color/md_blue_gray_50</item>
     </style>
 
 </resources>

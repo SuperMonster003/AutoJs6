@@ -18,9 +18,9 @@
             android:id="@+id/app_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:theme="@style/AppTheme.AppBarOverlay"
             android:clipToPadding="true"
-            android:fitsSystemWindows="true">
+            android:fitsSystemWindows="true"
+            app:theme="@style/AppTheme.AppBarOverlay">
 
             <org.autojs.autojs.theme.widget.ThemeColorToolbar
                 android:id="@+id/toolbar"
@@ -28,7 +28,6 @@
                 android:layout_height="?attr/actionBarSize"
                 android:theme="@style/ToolBarStyle"
                 android:title="@string/app_name"
-                app:layout_scrollFlags="enterAlways"
                 app:popupTheme="@style/PopupMenuTheme" />
 
             <com.google.android.material.tabs.TabLayout
@@ -37,10 +36,7 @@
                 android:layout_height="match_parent"
                 app:tabGravity="fill"
                 app:tabMaxWidth="0dp"
-                app:tabIndicatorColor="@color/tab_indicator"
-                app:tabMode="fixed"
-                app:tabSelectedTextColor="@color/tab_selected_text"
-                app:tabTextColor="@color/tab_text" />
+                app:tabMode="fixed" />
 
         </com.google.android.material.appbar.AppBarLayout>
 
@@ -48,6 +44,7 @@
             android:id="@+id/viewpager"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:clipToPadding="false"
             app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
         <org.autojs.autojs.theme.widget.ThemeColorFloatingActionButton
@@ -57,8 +54,6 @@
             android:layout_gravity="end|bottom"
             android:layout_margin="16dp"
             android:src="@drawable/ic_add_white_48dp"
-            android:tint="@color/toolbar_text"
-            app:backgroundTint="?attr/colorPrimary"
             app:layout_anchor="@id/viewpager"
             app:layout_anchorGravity="bottom|end"
             app:layout_behavior="org.autojs.autojs.ui.widget.ScrollAwareFABBehavior"
@@ -84,7 +79,7 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:fitsSystemWindows="false"
+        android:fitsSystemWindows="true"
         tools:layout="@layout/fragment_drawer" />
 
 </androidx.drawerlayout.widget.DrawerLayout>

@@ -84,7 +84,7 @@ public class ScreenCaptureRequester extends SimpleActivityLifecycleCallbacks imp
         //  ! 5. 通过 MediaProjection#createVirtualDisplay 调用启动媒体投影的屏幕捕获会话
         //  ! 总结就是, 要保证: 先授权, 再启动服务, 再录屏的顺序.
         //  !
-        //  ! 原代码在 ScreenCaptureRequesterImpl#requst 中 startService 会有时序问题, 此时用户还没授权完成时, Android 14+ 启动前台服务实测会崩溃.
+        //  ! 原代码在 ScreenCaptureRequesterImpl#requst 中 startService 会有时序问题, 此时用户还没授权完成时, Android 14 启动前台服务实测会崩溃.
         //  ! 改成 bindService 并等待 onServiceConnected 回调.
         //  !
         //  ! en-US (translated by JetBrains AI Assistant on Jul 28, 2024):
@@ -99,7 +99,7 @@ public class ScreenCaptureRequester extends SimpleActivityLifecycleCallbacks imp
         //  ! In summary, ensure the sequence: authorize first, then start the service, and finally start the screen recording.
         //  !
         //  ! The original code in ScreenCaptureRequesterImpl#request's startService may have timing issues,
-        //  ! if the user has not yet completed authorization, starting the foreground service on Android 14+ will crash.
+        //  ! if the user has not yet completed authorization, starting the foreground service on Android 14 will crash.
         //  ! Change it to bindService and wait for the onServiceConnected callback.
         if (requestCode == REQUEST_CODE_MEDIA_PROJECTION) {
             Context applicationContext = getApplication().getApplicationContext();

@@ -1,5 +1,7 @@
 package org.autojs.autojs.util
 
+import org.joda.time.DateTime
+import org.joda.time.format.DateTimeFormat
 import java.util.concurrent.TimeUnit
 
 /**
@@ -27,5 +29,13 @@ object TimeUtils {
 
     @JvmStatic
     fun toDays(timeUtil: TimeUnit, duration: Long) = timeUtil.toNanos(duration).toDouble() / TimeUnit.DAYS.toNanos(1)
+
+    @JvmStatic
+    @JvmOverloads
+    fun formatTimestamp(ts: Long, pattern: String = "yyyy/MM/dd HH:mm"): String {
+        val dt = DateTime(ts)
+        val fmt = DateTimeFormat.forPattern(pattern)
+        return fmt.print(dt)
+    }
 
 }

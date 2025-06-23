@@ -2,9 +2,10 @@ package org.autojs.autojs.model.explorer;
 
 import android.content.Context;
 import android.content.res.AssetManager;
-
 import androidx.annotation.Nullable;
-
+import io.reactivex.Observable;
+import io.reactivex.Single;
+import io.reactivex.schedulers.Schedulers;
 import org.autojs.autojs.model.script.ScriptFile;
 import org.autojs.autojs.pio.PFile;
 import org.autojs.autojs.pio.PFiles;
@@ -14,11 +15,7 @@ import org.autojs.autojs.util.WorkingDirectoryUtils;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileNotFoundException;
-import java.io.InputStream;
-
-import io.reactivex.Observable;
-import io.reactivex.Single;
-import io.reactivex.schedulers.Schedulers;
+import java.io.IOException;
 
 public class WorkspaceFileProvider extends ExplorerFileProvider {
 
@@ -88,31 +85,47 @@ public class WorkspaceFileProvider extends ExplorerFileProvider {
         return Observable.just(pathOfAsset)
                 .flatMap(path -> Observable.fromArray(mAssetManager.list(path)))
                 .map(child -> {
-                    PFile file = new PFile(new File(directory, child).getPath());
-                    if (file.exists()) {
-                        return file;
-                    }
-                    try {
-                        InputStream stream = mAssetManager.open(pathOfAsset + File.separator + child);
-                        PFiles.copyStream(stream, file.getPath());
-                    } catch (FileNotFoundException e) {
-                        file.mkdirs();
-                    }
-                    return file;
+                    PFile localFile = new PFile(new File(directory, child).getPath());
+                    copyAssetRecursively(pathOfAsset + File.separator + child, localFile);
+                    return localFile;
                 });
+    }
+
+    private void copyAssetRecursively(String assetPath, File dest) throws IOException {
+        String[] children = mAssetManager.list(assetPath);
+        if (children == null || children.length == 0) {
+            if (!dest.exists()) {
+                try {
+                    PFiles.copyAssetFile(mAssetManager, assetPath, dest.getPath());
+                } catch (FileNotFoundException ignored) {
+                    /* Ignored. */
+                }
+            }
+            return;
+        }
+        if (!dest.exists()) {
+            dest.mkdirs();
+        }
+        for (String child : children) {
+            copyAssetRecursively(assetPath + File.separator + child, new File(dest, child));
+        }
     }
 
     @Nullable
     public Observable<ScriptFile> resetSample(ScriptFile file) {
-        if (file.getPath().length() <= mSampleDir.getPath().length() + 1) {
+        if (!file.getPath().startsWith(mSampleDir.getPath())) {
             return null;
         }
         String pathOfSample = file.getPath().substring(mSampleDir.getPath().length());
         String pathOfAsset = SAMPLE_PATH + pathOfSample;
         return Observable
                 .fromCallable(() -> {
-                    try (InputStream stream = mAssetManager.open(pathOfAsset)) {
-                        PFiles.copyStream(stream, file.getPath());
+                    try {
+                        if (file.isDirectory()) {
+                            PFiles.copyAssetDir(mAssetManager, pathOfAsset, file.getPath());
+                        } else {
+                            PFiles.copyAssetFile(mAssetManager, pathOfAsset, file.getPath());
+                        }
                     } catch (FileNotFoundException ignored) {
                         return new ScriptFile(System.currentTimeMillis() + "\ufeff" + Math.random());
                     }

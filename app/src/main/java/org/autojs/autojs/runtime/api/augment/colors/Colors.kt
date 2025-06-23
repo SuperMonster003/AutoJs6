@@ -14,17 +14,25 @@ import org.autojs.autojs.core.image.ColorDetector
 import org.autojs.autojs.core.image.ColorTable
 import org.autojs.autojs.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.extension.AnyExtensions.jsSpecies
+import org.autojs.autojs.extension.ArrayExtensions.jsArrayBrief
 import org.autojs.autojs.extension.ArrayExtensions.toNativeArray
 import org.autojs.autojs.extension.ArrayExtensions.toNativeObject
-import org.autojs.autojs.extension.NumberExtensions.string
+import org.autojs.autojs.extension.FlexibleArray.Companion.component1
+import org.autojs.autojs.extension.FlexibleArray.Companion.component2
 import org.autojs.autojs.extension.ScriptableExtensions.prop
+import org.autojs.autojs.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.SimpleGetterProxy
 import org.autojs.autojs.runtime.api.augment.jsox.Numberx
-import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.runtime.exception.ShouldNeverHappenException
+import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.theme.ThemeColor
 import org.autojs.autojs.util.ColorUtils
+import org.autojs.autojs.util.ColorUtils.roundToAlphaString
+import org.autojs.autojs.util.ColorUtils.roundToHueString
+import org.autojs.autojs.util.ColorUtils.roundToSaturationString
+import org.autojs.autojs.util.ColorUtils.roundToValueString
+import org.autojs.autojs.util.RhinoUtils.coerceBoolean
 import org.autojs.autojs.util.RhinoUtils.ensureNativeArrayLength
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import org.mozilla.javascript.Context
@@ -32,7 +40,6 @@ import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.Scriptable.NOT_FOUND
-import java.math.RoundingMode
 import java.util.function.Supplier
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -122,6 +129,13 @@ object Colors : Augmentable(), SimpleGetterProxy {
         ::toHsva.name,
         ::toHsl.name,
         ::toHsla.name,
+        ::toRgbString.name,
+        ::toRgbaString.name,
+        ::toArgbString.name,
+        ::toHsvString.name,
+        ::toHsvaString.name,
+        ::toHslString.name,
+        ::toHslaString.name,
         ::isSimilar.name,
         ::isEqual.name,
         ::toColorStateList.name,
@@ -609,15 +623,15 @@ object Colors : Augmentable(), SimpleGetterProxy {
         when (it.size) {
             1 -> rgbRhino(it[0])
             3 -> rgbRhino(it[0], it[1], it[2])
-            else -> throw WrappedIllegalArgumentException("Invalid arguments \"[$it]\" for colors.rgb")
+            else -> throw WrappedIllegalArgumentException("Invalid arguments ${it.jsArrayBrief()} for colors.rgb")
         }
     }
 
     /**
-     * Parameters <br>
-     * - red: ColorComponent <br>
-     * - green: ColorComponent <br>
-     * - blue: ColorComponent <br>
+     * Parameters
+     * * red: `ColorComponent`
+     * * green: `ColorComponent`
+     * * blue: `ColorComponent`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -627,9 +641,9 @@ object Colors : Augmentable(), SimpleGetterProxy {
     }
 
     /**
-     * Parameters <br>
-     * - o <1> rgbComponents: &#91;ColorComponent, ColorComponent, ColorComponent&#93; <br>
-     * - o <2> color: OmniColor <br>
+     * Parameters
+     * * o <1> rgbComponents: `[ColorComponent, ColorComponent, ColorComponent]`
+     * * o <2> color: `OmniColor`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -647,16 +661,16 @@ object Colors : Augmentable(), SimpleGetterProxy {
         when (it.size) {
             1 -> argbRhino(it[0])
             4 -> argbRhino(it[0], it[1], it[2], it[3])
-            else -> throw WrappedIllegalArgumentException("Invalid arguments \"[$it]\" for colors.argb")
+            else -> throw WrappedIllegalArgumentException("Invalid arguments ${it.jsArrayBrief()} for colors.argb")
         }
     }
 
     /**
-     * Parameters <br>
-     * - alpha: ColorComponent <br>
-     * - red: ColorComponent <br>
-     * - green: ColorComponent <br>
-     * - blue: ColorComponent <br>
+     * Parameters
+     * * alpha: `ColorComponent`
+     * * red: `ColorComponent`
+     * * green: `ColorComponent`
+     * * blue: `ColorComponent`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -666,9 +680,9 @@ object Colors : Augmentable(), SimpleGetterProxy {
     }
 
     /**
-     * Parameters <br>
-     * - o <1> argbComponents: &#91;ColorComponent, ColorComponent, ColorComponent, ColorComponent&#93; <br>
-     * - o <2> colorHex: String (#AARRGGBB) <br>
+     * Parameters
+     * * o <1> argbComponents: `[ColorComponent, ColorComponent, ColorComponent, ColorComponent]`
+     * * o <2> colorHex: `String` (#AARRGGBB)
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -687,16 +701,16 @@ object Colors : Augmentable(), SimpleGetterProxy {
             1 -> rgbaRhino(it[0])
             2 -> rgbaRhino(it[0], it[1])
             4 -> rgbaRhino(it[0], it[1], it[2], it[3])
-            else -> throw WrappedIllegalArgumentException("Invalid arguments \"[$it]\" for colors.rgba")
+            else -> throw WrappedIllegalArgumentException("Invalid arguments ${it.jsArrayBrief()} for colors.rgba")
         }
     }
 
     /**
-     * Parameters <br>
-     * - red: ColorComponent <br>
-     * - green: ColorComponent <br>
-     * - blue: ColorComponent <br>
-     * - alpha: ColorComponent <br>
+     * Parameters
+     * * red: `ColorComponent`
+     * * green: `ColorComponent`
+     * * blue: `ColorComponent`
+     * * alpha: `ColorComponent`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -706,9 +720,9 @@ object Colors : Augmentable(), SimpleGetterProxy {
     }
 
     /**
-     * Parameters <br>
-     * - rgbComponents: &#91;ColorComponent, ColorComponent, ColorComponent&#93; <br>
-     * - alpha: ColorComponent <br>
+     * Parameters
+     * * rgbComponents: `[ColorComponent, ColorComponent, ColorComponent]`
+     * * alpha: `ColorComponent`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -719,9 +733,9 @@ object Colors : Augmentable(), SimpleGetterProxy {
     }
 
     /**
-     * Parameters <br>
-     * - o <1> rgbaComponents: &#91;ColorComponent, ColorComponent, ColorComponent, ColorComponent&#93; <br>
-     * - o <2> colorHex: String (#RRGGBBAA) <br>
+     * Parameters
+     * * o <1> rgbaComponents: `[ColorComponent, ColorComponent, ColorComponent, ColorComponent]`
+     * * o <2> colorHex: `String` (#RRGGBBAA)
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -744,15 +758,15 @@ object Colors : Augmentable(), SimpleGetterProxy {
         when (it.size) {
             1 -> hsvRhino(it[0])
             3 -> hsvRhino(it[0], it[1], it[2])
-            else -> throw WrappedIllegalArgumentException("Invalid arguments \"[$it]\" for colors.hsv")
+            else -> throw WrappedIllegalArgumentException("Invalid arguments ${it.jsArrayBrief()} for colors.hsv")
         }
     }
 
     /**
-     * Parameters <br>
-     * - h: ColorComponent <br>
-     * - s: ColorComponent <br>
-     * - v: ColorComponent <br>
+     * Parameters
+     * * h: `ColorComponent`
+     * * s: `ColorComponent`
+     * * v: `ColorComponent`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -762,8 +776,8 @@ object Colors : Augmentable(), SimpleGetterProxy {
     }
 
     /**
-     * Parameters <br>
-     * - hsvComponents: &#91;ColorComponent, ColorComponent, ColorComponent&#93; <br>
+     * Parameters
+     * * hsvComponents: `[ColorComponent, ColorComponent, ColorComponent]`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -780,16 +794,16 @@ object Colors : Augmentable(), SimpleGetterProxy {
             1 -> hsvaRhino(it[0])
             2 -> hsvaRhino(it[0], it[1])
             4 -> hsvaRhino(it[0], it[1], it[2], it[3])
-            else -> throw WrappedIllegalArgumentException("Invalid arguments \"[$it]\" for colors.hsva")
+            else -> throw WrappedIllegalArgumentException("Invalid arguments ${it.jsArrayBrief()} for colors.hsva")
         }
     }
 
     /**
-     * Parameters <br>
-     * - h: ColorComponent <br>
-     * - s: ColorComponent <br>
-     * - v: ColorComponent <br>
-     * - a: ColorComponent <br>
+     * Parameters
+     * * h: `ColorComponent`
+     * * s: `ColorComponent`
+     * * v: `ColorComponent`
+     * * a: `ColorComponent`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -799,9 +813,9 @@ object Colors : Augmentable(), SimpleGetterProxy {
     }
 
     /**
-     * Parameters <br>
-     * - hsvComponents: &#91;ColorComponent, ColorComponent, ColorComponent&#93; <br>
-     * - alpha: ColorComponent <br>
+     * Parameters
+     * * hsvComponents: `[ColorComponent, ColorComponent, ColorComponent]`
+     * * alpha: `ColorComponent`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -812,8 +826,8 @@ object Colors : Augmentable(), SimpleGetterProxy {
     }
 
     /**
-     * Parameters <br>
-     * - hsvaComponents: &#91;ColorComponent, ColorComponent, ColorComponent, ColorComponent&#93; <br>
+     * Parameters
+     * * hsvaComponents: `[ColorComponent, ColorComponent, ColorComponent, ColorComponent]`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -829,15 +843,15 @@ object Colors : Augmentable(), SimpleGetterProxy {
         when (it.size) {
             1 -> hslRhino(it[0])
             3 -> hslRhino(it[0], it[1], it[2])
-            else -> throw WrappedIllegalArgumentException("Invalid arguments \"[$it]\" for colors.hsl")
+            else -> throw WrappedIllegalArgumentException("Invalid arguments ${it.jsArrayBrief()} for colors.hsl")
         }
     }
 
     /**
-     * Parameters <br>
-     * - h: ColorComponent <br>
-     * - s: ColorComponent <br>
-     * - l: ColorComponent <br>
+     * Parameters
+     * * h: `ColorComponent`
+     * * s: `ColorComponent`
+     * * l: `ColorComponent`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -847,8 +861,8 @@ object Colors : Augmentable(), SimpleGetterProxy {
     }
 
     /**
-     * Parameters <br>
-     * - hslComponents: &#91;ColorComponent, ColorComponent, ColorComponent&#93; <br>
+     * Parameters
+     * * hslComponents: `[ColorComponent, ColorComponent, ColorComponent]`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -865,16 +879,16 @@ object Colors : Augmentable(), SimpleGetterProxy {
             1 -> hslaRhino(it[0])
             2 -> hslaRhino(it[0], it[1])
             4 -> hslaRhino(it[0], it[1], it[2], it[3])
-            else -> throw WrappedIllegalArgumentException("Invalid arguments \"[$it]\" for colors.hsla")
+            else -> throw WrappedIllegalArgumentException("Invalid arguments ${it.jsArrayBrief()} for colors.hsla")
         }
     }
 
     /**
-     * Parameters <br>
-     * - h: ColorComponent <br>
-     * - s: ColorComponent <br>
-     * - l: ColorComponent <br>
-     * - a: ColorComponent <br>
+     * Parameters
+     * * h: `ColorComponent`
+     * * s: `ColorComponent`
+     * * l: `ColorComponent`
+     * * a: `ColorComponent`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -884,9 +898,9 @@ object Colors : Augmentable(), SimpleGetterProxy {
     }
 
     /**
-     * Parameters <br>
-     * - hslComponents: &#91;ColorComponent, ColorComponent, ColorComponent&#93; <br>
-     * - alpha: ColorComponent <br>
+     * Parameters
+     * * hslComponents: `[ColorComponent, ColorComponent, ColorComponent]`
+     * * alpha: `ColorComponent`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -897,8 +911,8 @@ object Colors : Augmentable(), SimpleGetterProxy {
     }
 
     /**
-     * Parameters <br>
-     * - hslaComponents: &#91;ColorComponent, ColorComponent, ColorComponent, ColorComponent&#93; <br>
+     * Parameters
+     * * hslaComponents: `[ColorComponent, ColorComponent, ColorComponent, ColorComponent]`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -914,7 +928,7 @@ object Colors : Augmentable(), SimpleGetterProxy {
         when (it.size) {
             1 -> toRgbRhino(it[0])
             3 -> toRgbRhino(it[0], it[1], it[2])
-            else -> throw WrappedIllegalArgumentException("Invalid arguments \"[$it]\" for colors.rgb")
+            else -> throw WrappedIllegalArgumentException("Invalid arguments ${it.jsArrayBrief()} for colors.rgb")
         }.toNativeArray()
     }
 
@@ -949,9 +963,9 @@ object Colors : Augmentable(), SimpleGetterProxy {
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
-    fun toArgb(args: Array<out Any?>): List<Double> = ensureArgumentsLengthInRange(args, 1..2) {
+    fun toArgb(args: Array<out Any?>): NativeArray = ensureArgumentsLengthInRange(args, 1..2) {
         val (colorArg, optionsArg) = it
-        toArgbRhino(colorArg, optionsArg)
+        toArgbRhino(colorArg, optionsArg).toNativeArray()
     }
 
     @JvmStatic
@@ -964,19 +978,19 @@ object Colors : Augmentable(), SimpleGetterProxy {
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
-    fun toHsv(args: Array<out Any?>) = ensureArgumentsLengthInRange(args, 1..4) {
+    fun toHsv(args: Array<out Any?>): NativeArray = ensureArgumentsLengthInRange(args, 1..4) {
         when (it.size) {
             1 -> toHsvRhino(it[0])
             2 -> toHsvRhino(it[0], it[1])
             3 -> toHsvRhino(it[0], it[1], it[2])
             4 -> toHsvRhino(it[0], it[1], it[2], it[3])
-            else -> ShouldNeverHappenException()
-        }
+            else -> throw ShouldNeverHappenException()
+        }.toNativeArray()
     }
 
     /**
-     * Parameters <br>
-     * - color: OmniColor <br>
+     * Parameters
+     * * color: `OmniColor`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -985,9 +999,9 @@ object Colors : Augmentable(), SimpleGetterProxy {
     }
 
     /**
-     * Parameters <br>
-     * - color: OmniColor <br>
-     * - hsvResultContainer: java.lang.Float[] <br>
+     * Parameters
+     * * color: `OmniColor`
+     * * hsvResultContainer: `java.lang.Float[]`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -1003,10 +1017,10 @@ object Colors : Augmentable(), SimpleGetterProxy {
     }
 
     /**
-     * Parameters <br>
-     * - r: ColorComponent <br>
-     * - g: ColorComponent <br>
-     * - b: ColorComponent <br>
+     * Parameters
+     * * r: `ColorComponent`
+     * * g: `ColorComponent`
+     * * b: `ColorComponent`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -1015,11 +1029,11 @@ object Colors : Augmentable(), SimpleGetterProxy {
     }
 
     /**
-     * Parameters <br>
-     * - r: ColorComponent <br>
-     * - g: ColorComponent <br>
-     * - b: ColorComponent <br>
-     * - hsvResultContainer: java.lang.Float[] <br>
+     * Parameters
+     * * r: `ColorComponent`
+     * * g: `ColorComponent`
+     * * b: `ColorComponent`
+     * * hsvResultContainer: `java.lang.Float[]`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -1030,35 +1044,35 @@ object Colors : Augmentable(), SimpleGetterProxy {
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
-    fun toHsva(args: Array<out Any?>) = ensureArgumentsLengthInRange(args, 1..5) {
+    fun toHsva(args: Array<out Any?>): NativeArray = ensureArgumentsLengthInRange(args, 1..5) {
         when (it.size) {
             1 -> toHsvaRhino(it[0])
             2 -> toHsvaRhino(it[0], it[1])
             4 -> toHsvaRhino(it[0], it[1], it[2], it[3])
             5 -> toHsvaRhino(it[0], it[1], it[2], it[3], it[4])
-            else -> throw WrappedIllegalArgumentException("Invalid arguments \"[$it]\" for colors.toHsva")
-        }
+            else -> throw WrappedIllegalArgumentException("Invalid arguments ${it.jsArrayBrief()} for colors.toHsva")
+        }.toNativeArray()
     }
 
     /**
-     * Parameters <br>
-     * - color: OmniColor <br>
+     * Parameters
+     * * color: `OmniColor`
      */
     @JvmStatic
     @RhinoFunctionBody
     fun toHsvaRhino(color: Any?): List<Double> {
-        return toHsvaRhino(color, FloatArray(3))
+        return toHsvaRhino(color, FloatArray(4))
     }
 
     /**
-     * Parameters <br>
-     * - color: OmniColor <br>
-     * - hsvaResultContainer: java.lang.Float[] <br>
+     * Parameters
+     * * color: `OmniColor`
+     * * hsvaResultContainer: `java.lang.Float[]`
      */
     @JvmStatic
     @RhinoFunctionBody
     fun toHsvaRhino(color: Any?, hsvaResultContainer: Any?): List<Double> {
-        require(hsvaResultContainer is FloatArray) { "Container argument \"hsvaResultContainer\" must be a Java Float Array for colors.toHsva(r, g, b, a, hsvResultContainer)" }
+        require(hsvaResultContainer is FloatArray) { "Container argument \"hsvaResultContainer\" must be a Java Float Array for colors.toHsva(color, hsvResultContainer)" }
         val r = redRhino(color)
         val g = greenRhino(color)
         val b = blueRhino(color)
@@ -1071,11 +1085,11 @@ object Colors : Augmentable(), SimpleGetterProxy {
     }
 
     /**
-     * Parameters <br>
-     * - r: ColorComponent <br>
-     * - g: ColorComponent <br>
-     * - b: ColorComponent <br>
-     * - a: ColorComponent <br>
+     * Parameters
+     * * r: `ColorComponent`
+     * * g: `ColorComponent`
+     * * b: `ColorComponent`
+     * * a: `ColorComponent`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -1084,12 +1098,12 @@ object Colors : Augmentable(), SimpleGetterProxy {
     }
 
     /**
-     * Parameters <br>
-     * - r: ColorComponent <br>
-     * - g: ColorComponent <br>
-     * - b: ColorComponent <br>
-     * - a: ColorComponent <br>
-     * - hsvaResultContainer: java.lang.Float[] <br>
+     * Parameters
+     * * r: `ColorComponent`
+     * * g: `ColorComponent`
+     * * b: `ColorComponent`
+     * * a: `ColorComponent`
+     * * hsvaResultContainer: `java.lang.Float[]`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -1100,19 +1114,19 @@ object Colors : Augmentable(), SimpleGetterProxy {
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
-    fun toHsl(args: Array<out Any?>) = ensureArgumentsLengthInRange(args, 1..4) {
+    fun toHsl(args: Array<out Any?>): NativeArray = ensureArgumentsLengthInRange(args, 1..4) {
         when (it.size) {
             1 -> toHslRhino(it[0])
             2 -> toHslRhino(it[0], it[1])
             3 -> toHslRhino(it[0], it[1], it[2])
             4 -> toHslRhino(it[0], it[1], it[2], it[3])
-            else -> ShouldNeverHappenException()
-        }
+            else -> throw ShouldNeverHappenException()
+        }.toNativeArray()
     }
 
     /**
-     * Parameters <br>
-     * - color: OmniColor <br>
+     * Parameters
+     * * color: `OmniColor`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -1121,9 +1135,9 @@ object Colors : Augmentable(), SimpleGetterProxy {
     }
 
     /**
-     * Parameters <br>
-     * - color: OmniColor <br>
-     * - hslResultContainer: java.lang.Float[] <br>
+     * Parameters
+     * * color: `OmniColor`
+     * * hslResultContainer: `java.lang.Float[]`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -1139,10 +1153,10 @@ object Colors : Augmentable(), SimpleGetterProxy {
     }
 
     /**
-     * Parameters <br>
-     * - r: ColorComponent <br>
-     * - g: ColorComponent <br>
-     * - b: ColorComponent <br>
+     * Parameters
+     * * r: `ColorComponent`
+     * * g: `ColorComponent`
+     * * b: `ColorComponent`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -1151,11 +1165,11 @@ object Colors : Augmentable(), SimpleGetterProxy {
     }
 
     /**
-     * Parameters <br>
-     * - r: ColorComponent <br>
-     * - g: ColorComponent <br>
-     * - b: ColorComponent <br>
-     * - hslResultContainer: java.lang.Float[] <br>
+     * Parameters
+     * * r: `ColorComponent`
+     * * g: `ColorComponent`
+     * * b: `ColorComponent`
+     * * hslResultContainer: `java.lang.Float[]`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -1166,17 +1180,17 @@ object Colors : Augmentable(), SimpleGetterProxy {
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
-    fun toHsla(args: Array<out Any?>) = ensureArgumentsLengthInRange(args, 1..4) {
+    fun toHsla(args: Array<out Any?>): NativeArray = ensureArgumentsLengthInRange(args, 1..4) {
         when (it.size) {
             1 -> toHslaRhino(it[0])
             4 -> toHslaRhino(it[0], it[1], it[2], it[3])
-            else -> throw WrappedIllegalArgumentException("Invalid arguments \"[$it]\" for colors.toHsla")
-        }
+            else -> throw WrappedIllegalArgumentException("Invalid arguments ${it.jsArrayBrief()} for colors.toHsla")
+        }.toNativeArray()
     }
 
     /**
-     * Parameters <br>
-     * - color: OmniColor <br>
+     * Parameters
+     * * color: `OmniColor`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -1185,11 +1199,11 @@ object Colors : Augmentable(), SimpleGetterProxy {
     }
 
     /**
-     * Parameters <br>
-     * - r: ColorComponent <br>
-     * - g: ColorComponent <br>
-     * - b: ColorComponent <br>
-     * - a: ColorComponent <br>
+     * Parameters
+     * * r: `ColorComponent`
+     * * g: `ColorComponent`
+     * * b: `ColorComponent`
+     * * a: `ColorComponent`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -1205,7 +1219,7 @@ object Colors : Augmentable(), SimpleGetterProxy {
             2 -> isSimilarRhino(it[0], it[1])
             3 -> isSimilarRhino(it[0], it[1], it[2])
             4 -> isSimilarRhino(it[0], it[1], it[2], it[3])
-            else -> throw WrappedIllegalArgumentException("Invalid arguments \"[$it]\" for colors.isSimilar")
+            else -> throw WrappedIllegalArgumentException("Invalid arguments ${it.jsArrayBrief()} for colors.isSimilar")
         }
     }
 
@@ -1268,7 +1282,7 @@ object Colors : Augmentable(), SimpleGetterProxy {
         when (it.size) {
             2 -> isSimilarRhino(it[0], it[1])
             3 -> isSimilarRhino(it[0], it[1], it[2])
-            else -> throw WrappedIllegalArgumentException("Invalid arguments \"[$it]\" for colors.isEqual")
+            else -> throw WrappedIllegalArgumentException("Invalid arguments ${it.jsArrayBrief()} for colors.isEqual")
         }
     }
 
@@ -1341,13 +1355,9 @@ object Colors : Augmentable(), SimpleGetterProxy {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun summaryRhino(color: Any?): String {
-        val (r, g, b, a) = toRgbaRhino(color)
-        val niceA = when (val doubleA = toDoubleComponent(a)) {
-            1.0 -> "1.0"
-            else -> doubleA.toBigDecimal().setScale(2, RoundingMode.HALF_EVEN).stripTrailingZeros().toPlainString()
-        }
-        return "Color { hex(${toHexRhino(color)}), rgba(${r.string},${g.string},${b.string}/$niceA), int(${toIntRhino(color)}) }"
+    fun summaryRhino(color: Any?): String = when (alphaDoubleRhino(color)) {
+        1.0 -> "Color { ${toHexRhino(color)} | ${toRgbStringRhino(color)} | ${toHslStringRhino(color)} | ${toHsvStringRhino(color)} | int(${toIntRhino(color)}) }"
+        else -> "Color { ${toHexRhino(color)} | ${toRgbaString(arrayOf(color))} | ${toHslaString(arrayOf(color))} | ${toHsvaString(arrayOf(color))} | int(${toIntRhino(color)}) }"
     }
 
     internal fun parseRelativePercentage(percentage: Any?): Double {
@@ -1430,6 +1440,168 @@ object Colors : Augmentable(), SimpleGetterProxy {
         if (x.isNaN()) throw WrappedIllegalArgumentException("Argument $o cannot be converted to a hue component")
         if (abs(x) < 1.0) x *= 360
         return Numberx.clampToRhino(x, listOf(0, 360), 360).toFloat()
+    }
+
+    @JvmStatic
+    @RhinoSingletonFunctionInterface
+    fun toRgbString(args: Array<out Any?>): String = ensureArgumentsLengthInRange(args, 1..3) {
+        when (it.size) {
+            1 -> toRgbStringRhino(it[0])
+            3 -> toRgbStringRhino(it[0], it[1], it[2])
+            else -> throw WrappedIllegalArgumentException("Invalid arguments ${it.jsArrayBrief()} for colors.toRgbString")
+        }
+    }
+
+    @JvmStatic
+    @RhinoFunctionBody
+    fun toRgbStringRhino(color: Any?): String {
+        return toRgbRhino(color).joinToString(", ", prefix = "rgb(", postfix = ")") {
+            it.roundToInt().coerceIn(0..255).toString()
+        }
+    }
+
+    @JvmStatic
+    @RhinoFunctionBody
+    fun toRgbStringRhino(r: Any?, g: Any?, b: Any?): String {
+        return toRgbRhino(r, g, b).joinToString(", ", prefix = "rgb(", postfix = ")") {
+            it.roundToInt().coerceIn(0..255).toString()
+        }
+    }
+
+    @JvmStatic
+    @RhinoSingletonFunctionInterface
+    fun toRgbaString(args: Array<out Any?>): String = ensureArgumentsAtMost(args, 2) { argList ->
+        val (color, options) = argList
+
+        val keepTrailingZeroForFullAlpha = when (options) {
+            is NativeObject -> options.inquire<Boolean>("keepTrailingZeroForFullAlpha", ::coerceBoolean) != false
+            is Boolean -> options
+            else -> true
+        }
+
+        val list = listOf(redRhino(color), greenRhino(color), blueRhino(color)).map {
+            it.roundToInt().coerceIn(0..255).toString()
+        } + alphaDoubleRhino(color).roundToAlphaString(keepTrailingZeroForFullAlpha = keepTrailingZeroForFullAlpha)
+
+        list.joinToString(", ", prefix = "rgba(", postfix = ")")
+    }
+
+    @JvmStatic
+    @RhinoSingletonFunctionInterface
+    fun toArgbString(args: Array<out Any?>): String = ensureArgumentsAtMost(args, 2) { argList ->
+        val (color, options) = argList
+
+        val keepTrailingZeroForFullAlpha = when (options) {
+            is NativeObject -> options.inquire<Boolean>("keepTrailingZeroForFullAlpha", ::coerceBoolean) != false
+            is Boolean -> options
+            else -> true
+        }
+
+        val list = listOf(
+            alphaDoubleRhino(color).roundToAlphaString(keepTrailingZeroForFullAlpha = keepTrailingZeroForFullAlpha)
+        ) + listOf(redRhino(color), greenRhino(color), blueRhino(color)).map {
+            it.roundToInt().coerceIn(0..255).toString()
+        }
+
+        list.joinToString(", ", prefix = "argb(", postfix = ")")
+    }
+
+    @JvmStatic
+    @RhinoSingletonFunctionInterface
+    fun toHsvString(args: Array<out Any?>): String = ensureArgumentsLengthInRange(args, 1..3) {
+        when (it.size) {
+            1 -> toHsvStringRhino(it[0])
+            3 -> toHsvStringRhino(it[0], it[1], it[2])
+            else -> throw WrappedIllegalArgumentException("Invalid arguments ${it.jsArrayBrief()} for colors.toHsvString")
+        }
+    }
+
+    @JvmStatic
+    @RhinoFunctionBody
+    fun toHsvStringRhino(color: Any?): String {
+        val (r, g, b) = toRgbRhino(color)
+        return toHsvStringRhino(r, g, b)
+    }
+
+    @JvmStatic
+    @RhinoFunctionBody
+    fun toHsvStringRhino(r: Any?, g: Any?, b: Any?): String {
+        val (hue, saturation, value) = toHsvRhino(r, g, b)
+        return listOf(
+            hue.roundToHueString(),
+            saturation.roundToSaturationString(),
+            value.roundToValueString(),
+        ).joinToString(", ", prefix = "hsv(", postfix = ")")
+    }
+
+    @JvmStatic
+    @RhinoSingletonFunctionInterface
+    fun toHsvaString(args: Array<out Any?>): String = ensureArgumentsAtMost(args, 2) { argList ->
+        val (color, options) = argList
+        val (hue, saturation, value) = toHsvRhino(color)
+
+        val keepTrailingZeroForFullAlpha = when (options) {
+            is NativeObject -> options.inquire<Boolean>("keepTrailingZeroForFullAlpha", ::coerceBoolean) != false
+            is Boolean -> options
+            else -> true
+        }
+
+        val list = listOf(
+            hue.roundToHueString(),
+            saturation.roundToSaturationString(),
+            value.roundToValueString(),
+        ) + alphaDoubleRhino(color).roundToAlphaString(keepTrailingZeroForFullAlpha = keepTrailingZeroForFullAlpha)
+
+        list.joinToString(", ", prefix = "hsva(", postfix = ")")
+    }
+
+    @JvmStatic
+    @RhinoSingletonFunctionInterface
+    fun toHslString(args: Array<out Any?>): String = ensureArgumentsLengthInRange(args, 1..3) {
+        when (it.size) {
+            1 -> toHslStringRhino(it[0])
+            3 -> toHslStringRhino(it[0], it[1], it[2])
+            else -> throw WrappedIllegalArgumentException("Invalid arguments ${it.jsArrayBrief()} for colors.toHslString")
+        }
+    }
+
+    @JvmStatic
+    @RhinoFunctionBody
+    fun toHslStringRhino(color: Any?): String {
+        val (r, g, b) = toRgbRhino(color)
+        return toHslStringRhino(r, g, b)
+    }
+
+    @JvmStatic
+    @RhinoFunctionBody
+    fun toHslStringRhino(r: Any?, g: Any?, b: Any?): String {
+        val (hue, saturation, lightness) = toHslRhino(r, g, b)
+        return listOf(
+            hue.roundToHueString(),
+            saturation.roundToSaturationString(),
+            lightness.roundToValueString(),
+        ).joinToString(", ", prefix = "hsl(", postfix = ")")
+    }
+
+    @JvmStatic
+    @RhinoSingletonFunctionInterface
+    fun toHslaString(args: Array<out Any?>): String = ensureArgumentsAtMost(args, 2) { argList ->
+        val (color, options) = argList
+        val (hue, saturation, lightness) = toHslRhino(color)
+
+        val keepTrailingZeroForFullAlpha = when (options) {
+            is NativeObject -> options.inquire<Boolean>("keepTrailingZeroForFullAlpha", ::coerceBoolean) != false
+            is Boolean -> options
+            else -> true
+        }
+
+        val list = listOf(
+            hue.roundToHueString(),
+            saturation.roundToSaturationString(),
+            lightness.roundToValueString(),
+        ) + alphaDoubleRhino(color).roundToAlphaString(keepTrailingZeroForFullAlpha = keepTrailingZeroForFullAlpha)
+
+        list.joinToString(", ", prefix = "hsla(", postfix = ")")
     }
 
 }

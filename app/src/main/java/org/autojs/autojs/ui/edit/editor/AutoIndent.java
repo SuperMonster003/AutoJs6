@@ -62,6 +62,21 @@ public class AutoIndent implements TextWatcher {
 
     @Override
     public void afterTextChanged(Editable s) {
+        // @Commented by SuperMonster003 on Apr 17, 2025.
+        //  ! Does not work as expected.
+        //  ! zh-CN: 未能达到预期效果.
+        //  # // 换行符标准化: CRLF 或单独的 CR 替换成 LF
+        //  # String original = s.toString();
+        //  # String normalized = original
+        //  #         .replace("\r\n", "\n")
+        //  #         .replace("\r", "\n");
+        //  # if (!normalized.equals(original)) {
+        //  #     mInsertingIndent = true;
+        //  #     s.replace(0, s.length(), normalized);
+        //  #     mInsertingIndent = false;
+        //  #     // 结束后返回等待下一次回调
+        //  #     return;
+        //  # }
         if (mInsertingIndent || !mAutoIndent) {
             return;
         }

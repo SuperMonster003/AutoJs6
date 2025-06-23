@@ -40,6 +40,8 @@ class TaskPrefEditActivity : AbstractAppCompatPluginActivity() {
         binding.editScript.setOnClickListener { editPreExecuteScript() }
 
         ViewUtils.setToolbarAsBack(this, R.string.text_please_choose_a_script)
+        ViewUtils.excludeContentViewFromHorizontalNavigationBar(this)
+        ViewUtils.excludePaddingClippableViewFromBottomNavigationBar(binding.scriptList)
         initScriptListRecyclerView()
     }
 

@@ -51,7 +51,7 @@ open class LayoutBoundsView : View {
 
     init {
         this.setWillNotDraw(false)
-        statusBarHeight = ViewUtils.getStatusBarHeight(context)
+        statusBarHeight = ViewUtils.getStatusBarHeightByWindow(context)
     }
 
     fun setOnNodeInfoSelectListener(onNodeInfoSelectListener: OnNodeInfoSelectListener?) {
@@ -61,6 +61,28 @@ open class LayoutBoundsView : View {
     fun setRootNode(rootNode: NodeInfo?) {
         mRootNode = rootNode
         mTouchedNode = null
+    }
+
+    fun hideAllBoundsSameNode(targetNode: NodeInfo?) {
+        if (mRootNode == null || targetNode == null) {
+            return
+        }
+        hideNodes(mRootNode, targetNode)
+    }
+
+    private fun hideNodes(parent: NodeInfo?, targetNode: NodeInfo) {
+        if (parent == null) {
+            return
+        }
+        if (parent.boundsInScreen == targetNode.boundsInScreen) {
+            parent.hidden = true
+        }
+        if (parent.children.size == 0) {
+            return
+        }
+        for (child in parent.children) {
+            hideNodes(child, targetNode)
+        }
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -93,7 +115,9 @@ open class LayoutBoundsView : View {
 
     private fun draw(canvas: Canvas, node: NodeInfo?) {
         if (node == null) return
-        drawRect(canvas, node.boundsInScreen, statusBarHeight, boundsPaint)
+        if (!node.hidden) {
+            drawRect(canvas, node.boundsInScreen, statusBarHeight, boundsPaint)
+        }
         for (child in node.children) {
             draw(canvas, child)
         }
@@ -125,7 +149,9 @@ open class LayoutBoundsView : View {
     private fun findNodeAt(node: NodeInfo, x: Int, y: Int, list: MutableList<NodeInfo>) {
         for (child in node.children) {
             if (child.boundsInScreen.contains(x, y)) {
-                list.add(child)
+                if (!child.hidden) {
+                    list.add(child)
+                }
                 findNodeAt(child, x, y, list)
             }
         }

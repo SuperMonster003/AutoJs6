@@ -10,6 +10,7 @@ import org.autojs.autojs.core.record.inputevent.InputEventRecorder;
 import org.autojs.autojs.core.record.inputevent.InputEventToAutoFileRecorder;
 import org.autojs.autojs.core.record.inputevent.InputEventToRootAutomatorRecorder;
 import org.autojs.autojs.core.record.inputevent.TouchRecorder;
+import org.autojs.autojs.extension.MaterialDialogExtensions;
 import org.autojs.autojs.ui.common.ScriptOperations;
 import org.autojs.autojs.util.ClipboardUtils;
 import org.autojs.autojs.util.ViewUtils;
@@ -164,7 +165,7 @@ public class GlobalActionRecorder implements Recorder.OnStateChangedListener {
     }
 
     private void showRecordHandleDialog(final String script) {
-        DialogUtils.showDialog(new MaterialDialog.Builder(mContext)
+        MaterialDialog.Builder builder = new MaterialDialog.Builder(mContext)
                 .title(R.string.text_record_finished)
                 .content(R.string.content_way_of_output_for_recorded_script)
                 .items(getString(R.string.text_new_file), getString(R.string.text_copy_to_clip))
@@ -179,9 +180,12 @@ public class GlobalActionRecorder implements Recorder.OnStateChangedListener {
                     return false;
                 })
                 .negativeText(R.string.text_cancel)
+                .negativeColorRes(R.color.dialog_button_default)
                 .positiveText(R.string.dialog_button_confirm)
-                .canceledOnTouchOutside(false)
-                .build());
+                .positiveColorRes(R.color.dialog_button_attraction)
+                .canceledOnTouchOutside(false);
+        MaterialDialogExtensions.choiceWidgetThemeColor(builder);
+        DialogUtils.showDialog(builder.build());
     }
 
     private String getString(int res) {

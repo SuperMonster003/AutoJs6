@@ -1,11 +1,27 @@
 <resources>
 
     <plurals name="text_items_total_sum">
+        <item quantity="other">共計 %d 項</item>
+    </plurals>
+
+    <plurals name="text_items_total_sum_with_colon">
         <item quantity="other">共計: %d 項</item>
     </plurals>
 
     <plurals name="text_already_stop_n_scripts">
         <item quantity="other">已停止執行 %d 個指令碼</item>
+    </plurals>
+
+    <plurals name="error_method_only_accepts_n_arguments">
+        <item quantity="other">方法僅可接受 %d 個引數</item>
+    </plurals>
+
+    <plurals name="error_method_only_accepts_no_more_than_n_arguments">
+        <item quantity="other">方法僅可接受不多於 %d 個引數</item>
+    </plurals>
+
+    <plurals name="error_method_only_accepts_no_less_than_n_arguments">
+        <item quantity="other">方法僅可接受不少於 %d 個引數</item>
     </plurals>
 
 </resources>

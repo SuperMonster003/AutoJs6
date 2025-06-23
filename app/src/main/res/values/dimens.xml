@@ -1,15 +1,22 @@
 <resources>
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="about_item_avatar_side_length">50dp</dimen>
+    <dimen name="about_item_avatar_side_length_compat">42dp</dimen>
+    <dimen name="about_item_avatar_side_length_land">60dp</dimen>
+    <dimen name="about_item_avatar_side_length_land_compact">54dp</dimen>
     <dimen name="content_inset">16dp</dimen>
     <dimen name="divider_drawer_menu_group">6dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="floaty_window_offset">12dp</dimen>
     <dimen name="github_avatar_border_width">1dp</dimen>
     <dimen name="github_font_size_full_name">18sp</dimen>
+    <dimen name="github_font_size_full_name_compat">14sp</dimen>
     <dimen name="github_font_size_nickname">15sp</dimen>
+    <dimen name="github_font_size_nickname_compat">12sp</dimen>
     <dimen name="icon_developer_identifier_image_padding">5dp</dimen>
+    <dimen name="icon_developer_identifier_image_padding_compact">3dp</dimen>
     <dimen name="icon_developer_identifier_image_side_length">48dp</dimen>
+    <dimen name="icon_developer_identifier_image_side_length_compact">40dp</dimen>
     <dimen name="level_beam_view_line_offset">3dp</dimen>
     <dimen name="level_beam_view_line_width">2dp</dimen>
     <dimen name="level_beam_view_padding_left">2dp</dimen>
@@ -23,8 +30,18 @@
     <dimen name="snackbar_padding_horizontal">12dp</dimen>
     <dimen name="snackbar_padding_vertical">14dp</dimen>
     <dimen name="snackbar_text_size">14sp</dimen>
-    <dimen name="editor_title_text_size">18sp</dimen>
+    <dimen name="editor_title_text_size">19sp</dimen>
+    <dimen name="editor_title_text_size_double_line_ascii">19sp</dimen>
+    <dimen name="editor_title_text_size_double_line_non_ascii">16sp</dimen>
+    <dimen name="editor_title_text_size_triple_line_ascii">13sp</dimen>
+    <dimen name="editor_title_text_size_triple_line_non_ascii">11sp</dimen>
+    <dimen name="editor_title_min_text_size_single_line">16sp</dimen>
+    <dimen name="editor_title_min_text_size_double_line">13sp</dimen>
+    <dimen name="editor_title_min_text_size_triple_line">11sp</dimen>
+    <dimen name="editor_title_text_size_step">0.5sp</dimen>
     <dimen name="main_title_text_size">20sp</dimen>
+    <dimen name="main_title_text_size_horizontal_with_subtitle">18sp</dimen>
+    <dimen name="main_subtitle_text_size">12sp</dimen>
     <dimen name="textSize_item_property">14sp</dimen>
     <dimen name="first_char_view_stroke_width">2dp</dimen>
     <dimen name="expanded_view_initial_width">280dp</dimen>
@@ -51,5 +68,6 @@
     <dimen name="ref_md_listitem_vertical_margin">12dp</dimen>
     <dimen name="ref_md_listitem_textsize">16sp</dimen>
     <dimen name="ref_md_listitem_height">48dp</dimen>
+    <dimen name="toolbar_menu_item_width">40dp</dimen>
 
 </resources>

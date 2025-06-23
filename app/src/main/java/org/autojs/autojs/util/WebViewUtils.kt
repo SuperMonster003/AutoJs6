@@ -1,16 +1,24 @@
 package org.autojs.autojs.util
 
-import android.content.Context
-import android.os.Build.VERSION.SDK_INT
-import android.os.Build.VERSION_CODES.TIRAMISU
+import android.view.View
 import android.webkit.WebView
+import android.webkit.WebViewClient
+import androidx.core.graphics.Insets
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.webkit.WebSettingsCompat
 import androidx.webkit.WebViewFeature.ALGORITHMIC_DARKENING
 import androidx.webkit.WebViewFeature.FORCE_DARK
 import androidx.webkit.WebViewFeature.isFeatureSupported
+import org.intellij.lang.annotations.Language
 
+/**
+ * Created by SuperMonster003 on Aug 26, 2022.
+ * Modified by SuperMonster003 as of Mar 12, 2025.
+ */
 class WebViewUtils {
 
+    @Suppress("SameParameterValue")
     companion object {
 
         // @Hint by SuperMonster003 on Aug 26, 2022.
@@ -18,7 +26,7 @@ class WebViewUtils {
         //  ! - For Android API Level >= 29 (10) [Q]:
         //  !   - Android System WebView (or browsers like Google Chrome) version >= 76
         //  ! - For Android API Level <= 28 (9) [P]:
-        //  !   - Android System WebView (or browsers like Google Chrome) version >= 105
+        //  !   - Android System WebView (or similar Google Chrome browsers) version >= 105
         //  ! Reference: https://stackoverflow.com/questions/57449900/letting-webview-on-android-work-with-prefers-color-scheme-dark
         //  ! zh-CN:
         //  ! 当前特性需满足如下要求：
@@ -28,23 +36,112 @@ class WebViewUtils {
         //  !   - 安卓系统 WebView（或类似 Google Chrome 浏览器）版本 >= 105
         //  ! 参阅: https://stackoverflow.com/questions/57449900/letting-webview-on-android-work-with-prefers-color-scheme-dark
         @JvmStatic
-        fun adaptDarkMode(context: Context, webView: WebView) {
-            if (isFeatureSupported(FORCE_DARK) && SDK_INT < TIRAMISU) {
-                webView.settings.let { webSettings ->
-                    webSettings.setSupportMultipleWindows(true)
-                    // @Comment by SuperMonster003 on Aug 14, 2023.
-                    //  # @Suppress("DEPRECATION")
-                    //  # WebSettingsCompat.setForceDark(
-                    //  #     webSettings, when (ViewUtils.isNightModeYes(context)) {
-                    //  #         true -> FORCE_DARK_ON
-                    //  #         else -> FORCE_DARK_OFF
-                    //  #     }
-                    //  # )
-                    if (isFeatureSupported(ALGORITHMIC_DARKENING)) {
-                        WebSettingsCompat.setAlgorithmicDarkeningAllowed(webSettings, ViewUtils.isNightModeYes(context))
+        fun adaptDarkMode(webView: WebView) {
+            val settings = webView.settings
+            when {
+                isFeatureSupported(ALGORITHMIC_DARKENING) -> {
+                    WebSettingsCompat.setAlgorithmicDarkeningAllowed(settings, true)
+                }
+                isFeatureSupported(FORCE_DARK) -> {
+                    @Suppress("DEPRECATION")
+                    WebSettingsCompat.setForceDark(settings, WebSettingsCompat.FORCE_DARK_ON)
+                }
+                // FIXME by SuperMonster003 on Mar 14, 2025.
+                //  ! Not working.
+                //  ! zh-CN: 不起作用.
+                // else -> injectDarkModeCSS(webView)
+            }
+        }
+
+        private fun injectDarkModeCSS(webView: WebView) {
+            val darkModeCSS = """
+             (function() {
+                 let style = document.createElement('style');
+                 style.type = 'text/css';
+                 style.innerHTML = `
+                     html { filter: invert(1) hue-rotate(180deg); }
+                     img, video { filter: invert(1) hue-rotate(180deg); }
+                 `;
+                 document.head.appendChild(style);
+             })();
+         """.trimIndent()
+
+            webView.evaluateJavascript(darkModeCSS, null)
+        }
+
+        fun excludeWebViewFromNavigationBar(webViewWrapper: View, webView: WebView) {
+            excludeWebViewFromSystemBars(webViewWrapper, webView, excludeStatusBar = false, excludeNavigationBar = true)
+        }
+
+        fun excludeWebViewFromNavigationBar(webViewWrapper: View, webView: WebView, excludeNavigationBarInjectCode: (systemBarInsetsBottom: Int) -> String) {
+            excludeWebViewFromSystemBars(webViewWrapper, webView, excludeStatusBar = false, excludeNavigationBarInjectCode = excludeNavigationBarInjectCode)
+        }
+
+        fun excludeWebViewFromStatusBarAndNavigationBar(webViewWrapper: View, webView: WebView) {
+            excludeWebViewFromSystemBars(webViewWrapper, webView, excludeStatusBar = true, excludeNavigationBar = true)
+        }
+
+        fun excludeWebViewFromStatusBarAndNavigationBar(webViewWrapper: View, webView: WebView, excludeNavigationBarInjectCode: (systemBarInsetsBottom: Int) -> String) {
+            excludeWebViewFromSystemBars(webViewWrapper, webView, excludeStatusBar = true, excludeNavigationBarInjectCode = excludeNavigationBarInjectCode)
+        }
+
+        private fun excludeWebViewFromSystemBars(webViewWrapper: View, webView: WebView, excludeStatusBar: Boolean, excludeNavigationBarInjectCode: (systemBarInsetsBottom: Int) -> String) {
+            var mSystemBarInsets: Insets? = null
+            ViewCompat.setOnApplyWindowInsetsListener(webViewWrapper) { v, insets ->
+                val systemBarInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars()).also {
+                    mSystemBarInsets = it
+                }
+                if (excludeStatusBar) {
+                    v.setPadding(0, systemBarInsets.top, 0, 0)
+                }
+                webView.setPadding(0, 0, 0, systemBarInsets.bottom)
+                insets
+            }
+            webView.webViewClient = object : WebViewClient() {
+                override fun onPageFinished(view: WebView?, url: String?) {
+                    super.onPageFinished(view, url)
+                    val systemBarInsets = mSystemBarInsets ?: return
+                    val webView = view ?: return
+                    val injectCode = excludeNavigationBarInjectCode(systemBarInsets.bottom)
+                    adjustBodyPaddingToAvoidNavOverlay(webView, injectCode)
+                }
+            }
+        }
+
+        private fun excludeWebViewFromSystemBars(webViewWrapper: View, webView: WebView, excludeStatusBar: Boolean, excludeNavigationBar: Boolean) {
+            var mSystemBarInsets: Insets? = null
+            ViewCompat.setOnApplyWindowInsetsListener(webViewWrapper) { v, insets ->
+                val systemBarInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars()).also {
+                    mSystemBarInsets = it
+                }
+                if (excludeStatusBar) {
+                    v.setPadding(0, systemBarInsets.top, 0, 0)
+                }
+                if (excludeNavigationBar) {
+                    webView.setPadding(0, 0, 0, systemBarInsets.bottom)
+                }
+                insets
+            }
+            if (excludeNavigationBar) {
+                webView.webViewClient = object : WebViewClient() {
+                    override fun onPageFinished(view: WebView?, url: String?) {
+                        super.onPageFinished(view, url)
+                        val systemBarInsets = mSystemBarInsets ?: return
+                        val webView = view ?: return
+                        // @Hint by SuperMonster003 on Mar 12, 2025.
+                        //  ! Inject JavaScript code for document body with adding a bottom padding
+                        //  ! to ensure that content won't be covered by nav bar when scrolling to the end.
+                        //  ! zh-CN: 注入 JavaScript, 为 body 添加底部 padding, 确保滚动到底部时导航栏不遮挡内容.
+                        @Language("JavaScript")
+                        val defaultInjectCode = "document.body.style.paddingBottom = '${systemBarInsets.bottom}px'"
+                        adjustBodyPaddingToAvoidNavOverlay(webView, defaultInjectCode)
                     }
                 }
             }
+        }
+
+        private fun adjustBodyPaddingToAvoidNavOverlay(webView: WebView, injectCode: String) {
+            webView.evaluateJavascript(injectCode, null)
         }
 
     }

@@ -1,66 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:orientation="vertical">
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical">
 
     <com.google.android.material.appbar.AppBarLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:theme="@style/AppTheme.AppBarOverlay"
-            android:fitsSystemWindows="true">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:theme="@style/AppTheme.AppBarOverlay">
 
         <org.autojs.autojs.theme.widget.ThemeColorToolbarEditor
-                android:id="@+id/toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:theme="@style/ToolBarStyle"
-                android:background="?attr/colorPrimary"
-                tools:title="@string/app_name"
-                app:contentInsetStartWithNavigation="0dp"
-                app:contentInsetEndWithActions="2dp"
-                app:titleTextAppearance="@style/TextAppearanceEditorTitle"
-                app:popupTheme="@style/PopupMenuTheme">
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:theme="@style/ToolBarStyle"
+            app:contentInsetEndWithActions="2dp"
+            app:contentInsetStartWithNavigation="0dp"
+            app:popupTheme="@style/PopupMenuTheme"
+            tools:title="@string/app_name"
+            app:titleTextAppearance="@style/TextAppearanceEditorTitle">
 
             <FrameLayout
-                    android:id="@+id/toolbar_menu"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_gravity="end" />
+                android:id="@+id/toolbar_menu"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="end" />
 
         </org.autojs.autojs.theme.widget.ThemeColorToolbarEditor>
 
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.drawerlayout.widget.DrawerLayout
-            android:id="@+id/drawer_layout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+        android:id="@+id/drawer_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
         <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
             <org.autojs.autojs.ui.edit.editor.CodeEditor
-                    android:id="@+id/editor"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1" />
+                android:id="@+id/editor"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
 
             <RelativeLayout
-                    android:id="@+id/input_method_enhance_bar"
-                    android:layout_width="match_parent"
-                    android:layout_height="70dp"
-                    android:background="#77f2f3f7">
+                android:id="@+id/input_method_enhance_bar"
+                android:layout_width="match_parent"
+                android:layout_height="70dp"
+                android:background="#77f2f3f7">
 
                 <org.autojs.autojs.ui.edit.completion.CodeCompletionBar
-                        android:id="@+id/symbol_bar"
-                        android:layout_width="match_parent"
-                        android:layout_height="35dp"
-                        android:layout_alignParentBottom="true" />
+                    android:id="@+id/symbol_bar"
+                    android:layout_width="match_parent"
+                    android:layout_height="35dp"
+                    android:layout_alignParentBottom="true" />
 
                 <ImageView
                     android:id="@+id/functions"
@@ -75,35 +75,35 @@
                     app:tint="#222329" />
 
                 <org.autojs.autojs.ui.edit.completion.CodeCompletionBar
-                        android:id="@+id/code_completion_bar"
-                        android:layout_width="match_parent"
-                        android:layout_height="35dp"
-                        android:layout_above="@+id/symbol_bar"
-                        android:layout_alignParentEnd="true"
-                        android:layout_alignParentTop="true"
-                        android:layout_toEndOf="@+id/functions" />
+                    android:id="@+id/code_completion_bar"
+                    android:layout_width="match_parent"
+                    android:layout_height="35dp"
+                    android:layout_above="@+id/symbol_bar"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_toEndOf="@+id/functions" />
 
             </RelativeLayout>
 
             <org.autojs.autojs.ui.edit.keyboard.FunctionsKeyboardView
-                    android:id="@+id/functions_keyboard"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:visibility="gone" />
+                android:id="@+id/functions_keyboard"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone" />
 
             <org.autojs.autojs.ui.edit.debug.DebugBar
-                    android:id="@+id/debug_bar"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:visibility="gone" />
+                android:id="@+id/debug_bar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone" />
 
         </LinearLayout>
 
         <org.autojs.autojs.ui.widget.EWebView
-                android:id="@+id/docs"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_gravity="start" />
+            android:id="@+id/docs"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="start" />
 
     </androidx.drawerlayout.widget.DrawerLayout>
 

@@ -1,0 +1,14 @@
+<resources>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="legacy_level_beam_view_padding_left">3dp</dimen>
+    <dimen name="legacy_level_beam_view_line_width">6dp</dimen>
+    <dimen name="legacy_level_beam_view_line_offset">2dp</dimen>
+    <dimen name="legacy_level_beam_view_padding_right">-4dp</dimen>
+    <dimen name="legacy_script_and_folder_list_divider_left_margin">0dp</dimen>
+    <dimen name="legacy_script_and_folder_list_divider_right_margin">0dp</dimen>
+    <dimen name="legacy_fab_margin">16dp</dimen>
+    <dimen name="legacy_textSize_item_property">14sp</dimen>
+    <dimen name="legacy_divider_drawer_menu_group">6dp</dimen>
+    <dimen name="legacy_padding_circular_menu_recording">8dp</dimen>
+    <dimen name="legacy_padding_circular_menu_normal">5dp</dimen>
+</resources>

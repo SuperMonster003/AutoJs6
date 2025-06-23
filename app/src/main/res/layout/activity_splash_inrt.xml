@@ -1,21 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center|bottom">
+
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="128dp"
-        android:layout_gravity="center|bottom"
+        android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
+        android:fitsSystemWindows="true"
         android:gravity="center"
+        android:minHeight="128dp"
         android:orientation="vertical">
 
-    <ImageView
+        <ImageView
+            android:id="@+id/icon"
+            android:visibility="gone"
+            tools:visibility="visible"
             android:layout_width="72dp"
             android:layout_height="72dp"
             android:layout_gravity="center"
             android:src="@mipmap/ic_launcher" />
 
-    <TextView
+        <TextView
             android:id="@+id/slug"
+            android:visibility="gone"
+            tools:visibility="visible"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -23,5 +35,7 @@
             android:text="@string/text_powered_by_autojs"
             android:textColor="@color/day_night_full"
             android:textSize="16sp" />
+
+    </LinearLayout>
 
 </LinearLayout>

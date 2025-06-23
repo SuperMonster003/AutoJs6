@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- google's material design colours from
+    http://www.google.com/design/spec/style/color.html#color-ui-color-palette -->
+
+    <!-- reds -->
+    <string name="md_red_50">レッド (50)</string>
+    <string name="md_red_100">レッド (100)</string>
+    <string name="md_red_200">レッド (200)</string>
+    <string name="md_red_300">レッド (300)</string>
+    <string name="md_red_400">レッド (400)</string>
+    <string name="md_red_500">レッド (500)</string>
+    <string name="md_red_600">レッド (600)</string>
+    <string name="md_red_700">レッド (700)</string>
+    <string name="md_red_800">レッド (800)</string>
+    <string name="md_red_900">レッド (900)</string>
+    <string name="md_red_a100">レッド (A100)</string>
+    <string name="md_red_a200">レッド (A200)</string>
+    <string name="md_red_a400">レッド (A400)</string>
+    <string name="md_red_a700">レッド (A700)</string>
+
+    <!-- pinks -->
+    <string name="md_pink_50">ピンク (50)</string>
+    <string name="md_pink_100">ピンク (100)</string>
+    <string name="md_pink_200">ピンク (200)</string>
+    <string name="md_pink_300">ピンク (300)</string>
+    <string name="md_pink_400">ピンク (400)</string>
+    <string name="md_pink_500">ピンク (500)</string>
+    <string name="md_pink_600">ピンク (600)</string>
+    <string name="md_pink_700">ピンク (700)</string>
+    <string name="md_pink_800">ピンク (800)</string>
+    <string name="md_pink_900">ピンク (900)</string>
+    <string name="md_pink_a100">ピンク (A100)</string>
+    <string name="md_pink_a200">ピンク (A200)</string>
+    <string name="md_pink_a400">ピンク (A400)</string>
+    <string name="md_pink_a700">ピンク (A700)</string>
+
+    <!-- purples -->
+    <string name="md_purple_50">パープル (50)</string>
+    <string name="md_purple_100">パープル (100)</string>
+    <string name="md_purple_200">パープル (200)</string>
+    <string name="md_purple_300">パープル (300)</string>
+    <string name="md_purple_400">パープル (400)</string>
+    <string name="md_purple_500">パープル (500)</string>
+    <string name="md_purple_600">パープル (600)</string>
+    <string name="md_purple_700">パープル (700)</string>
+    <string name="md_purple_800">パープル (800)</string>
+    <string name="md_purple_900">パープル (900)</string>
+    <string name="md_purple_a100">パープル (A100)</string>
+    <string name="md_purple_a200">パープル (A200)</string>
+    <string name="md_purple_a400">パープル (A400)</string>
+    <string name="md_purple_a700">パープル (A700)</string>
+
+    <!-- deep purples -->
+    <string name="md_deep_purple_50">ディープパープル (50)</string>
+    <string name="md_deep_purple_100">ディープパープル (100)</string>
+    <string name="md_deep_purple_200">ディープパープル (200)</string>
+    <string name="md_deep_purple_300">ディープパープル (300)</string>
+    <string name="md_deep_purple_400">ディープパープル (400)</string>
+    <string name="md_deep_purple_500">ディープパープル (500)</string>
+    <string name="md_deep_purple_600">ディープパープル (600)</string>
+    <string name="md_deep_purple_700">ディープパープル (700)</string>
+    <string name="md_deep_purple_800">ディープパープル (800)</string>
+    <string name="md_deep_purple_900">ディープパープル (900)</string>
+    <string name="md_deep_purple_a100">ディープパープル (A100)</string>
+    <string name="md_deep_purple_a200">ディープパープル (A200)</string>
+    <string name="md_deep_purple_a400">ディープパープル (A400)</string>
+    <string name="md_deep_purple_a700">ディープパープル (A700)</string>
+
+    <!-- indigo -->
+    <string name="md_indigo_50">インディゴ (50)</string>
+    <string name="md_indigo_100">インディゴ (100)</string>
+    <string name="md_indigo_200">インディゴ (200)</string>
+    <string name="md_indigo_300">インディゴ (300)</string>
+    <string name="md_indigo_400">インディゴ (400)</string>
+    <string name="md_indigo_500">インディゴ (500)</string>
+    <string name="md_indigo_600">インディゴ (600)</string>
+    <string name="md_indigo_700">インディゴ (700)</string>
+    <string name="md_indigo_800">インディゴ (800)</string>
+    <string name="md_indigo_900">インディゴ (900)</string>
+    <string name="md_indigo_a100">インディゴ (A100)</string>
+    <string name="md_indigo_a200">インディゴ (A200)</string>
+    <string name="md_indigo_a400">インディゴ (A400)</string>
+    <string name="md_indigo_a700">インディゴ (A700)</string>
+
+    <!-- blue -->
+    <string name="md_blue_50">ブルー (50)</string>
+    <string name="md_blue_100">ブルー (100)</string>
+    <string name="md_blue_200">ブルー (200)</string>
+    <string name="md_blue_300">ブルー (300)</string>
+    <string name="md_blue_400">ブルー (400)</string>
+    <string name="md_blue_500">ブルー (500)</string>
+    <string name="md_blue_600">ブルー (600)</string>
+    <string name="md_blue_700">ブルー (700)</string>
+    <string name="md_blue_800">ブルー (800)</string>
+    <string name="md_blue_900">ブルー (900)</string>
+    <string name="md_blue_a100">ブルー (A100)</string>
+    <string name="md_blue_a200">ブルー (A200)</string>
+    <string name="md_blue_a400">ブルー (A400)</string>
+    <string name="md_blue_a700">ブルー (A700)</string>
+
+    <!-- light blue-->
+    <string name="md_light_blue_50">水色 (50)</string>
+    <string name="md_light_blue_100">水色 (100)</string>
+    <string name="md_light_blue_200">水色 (200)</string>
+    <string name="md_light_blue_300">水色 (300)</string>
+    <string name="md_light_blue_400">水色 (400)</string>
+    <string name="md_light_blue_500">水色 (500)</string>
+    <string name="md_light_blue_600">水色 (600)</string>
+    <string name="md_light_blue_700">水色 (700)</string>
+    <string name="md_light_blue_800">水色 (800)</string>
+    <string name="md_light_blue_900">水色 (900)</string>
+    <string name="md_light_blue_a100">水色 (A100)</string>
+    <string name="md_light_blue_a200">水色 (A200)</string>
+    <string name="md_light_blue_a400">水色 (A400)</string>
+    <string name="md_light_blue_a700">水色 (A700)</string>
+
+    <!-- cyan -->
+    <string name="md_cyan_50">シアン (50)</string>
+    <string name="md_cyan_100">シアン (100)</string>
+    <string name="md_cyan_200">シアン (200)</string>
+    <string name="md_cyan_300">シアン (300)</string>
+    <string name="md_cyan_400">シアン (400)</string>
+    <string name="md_cyan_500">シアン (500)</string>
+    <string name="md_cyan_600">シアン (600)</string>
+    <string name="md_cyan_700">シアン (700)</string>
+    <string name="md_cyan_800">シアン (800)</string>
+    <string name="md_cyan_900">シアン (900)</string>
+    <string name="md_cyan_a100">シアン (A100)</string>
+    <string name="md_cyan_a200">シアン (A200)</string>
+    <string name="md_cyan_a400">シアン (A400)</string>
+    <string name="md_cyan_a700">シアン (A700)</string>
+
+    <!-- teal -->
+    <string name="md_teal_50">ティール (50)</string>
+    <string name="md_teal_100">ティール (100)</string>
+    <string name="md_teal_200">ティール (200)</string>
+    <string name="md_teal_300">ティール (300)</string>
+    <string name="md_teal_400">ティール (400)</string>
+    <string name="md_teal_500">ティール (500)</string>
+    <string name="md_teal_600">ティール (600)</string>
+    <string name="md_teal_700">ティール (700)</string>
+    <string name="md_teal_800">ティール (800)</string>
+    <string name="md_teal_900">ティール (900)</string>
+    <string name="md_teal_a100">ティール (A100)</string>
+    <string name="md_teal_a200">ティール (A200)</string>
+    <string name="md_teal_a400">ティール (A400)</string>
+    <string name="md_teal_a700">ティール (A700)</string>
+
+    <!-- green -->
+    <string name="md_green_50">グリーン (50)</string>
+    <string name="md_green_100">グリーン (100)</string>
+    <string name="md_green_200">グリーン (200)</string>
+    <string name="md_green_300">グリーン (300)</string>
+    <string name="md_green_400">グリーン (400)</string>
+    <string name="md_green_500">グリーン (500)</string>
+    <string name="md_green_600">グリーン (600)</string>
+    <string name="md_green_700">グリーン (700)</string>
+    <string name="md_green_800">グリーン (800)</string>
+    <string name="md_green_900">グリーン (900)</string>
+    <string name="md_green_a100">グリーン (A100)</string>
+    <string name="md_green_a200">グリーン (A200)</string>
+    <string name="md_green_a400">グリーン (A400)</string>
+    <string name="md_green_a700">グリーン (A700)</string>
+
+    <!--light green-->
+    <string name="md_light_green_50">ライトグリーン (50)</string>
+    <string name="md_light_green_100">ライトグリーン (100)</string>
+    <string name="md_light_green_200">ライトグリーン (200)</string>
+    <string name="md_light_green_300">ライトグリーン (300)</string>
+    <string name="md_light_green_400">ライトグリーン (400)</string>
+    <string name="md_light_green_500">ライトグリーン (500)</string>
+    <string name="md_light_green_600">ライトグリーン (600)</string>
+    <string name="md_light_green_700">ライトグリーン (700)</string>
+    <string name="md_light_green_800">ライトグリーン (800)</string>
+    <string name="md_light_green_900">ライトグリーン (900)</string>
+    <string name="md_light_green_a100">ライトグリーン (A100)</string>
+    <string name="md_light_green_a200">ライトグリーン (A200)</string>
+    <string name="md_light_green_a400">ライトグリーン (A400)</string>
+    <string name="md_light_green_a700">ライトグリーン (A700)</string>
+
+    <!-- lime -->
+    <string name="md_lime_50">石灰 (50)</string>
+    <string name="md_lime_100">石灰 (100)</string>
+    <string name="md_lime_200">石灰 (200)</string>
+    <string name="md_lime_300">石灰 (300)</string>
+    <string name="md_lime_400">石灰 (400)</string>
+    <string name="md_lime_500">石灰 (500)</string>
+    <string name="md_lime_600">石灰 (600)</string>
+    <string name="md_lime_700">石灰 (700)</string>
+    <string name="md_lime_800">石灰 (800)</string>
+    <string name="md_lime_900">石灰 (900)</string>
+    <string name="md_lime_a100">石灰 (A100)</string>
+    <string name="md_lime_a200">石灰 (A200)</string>
+    <string name="md_lime_a400">石灰 (A400)</string>
+    <string name="md_lime_a700">石灰 (A700)</string>
+
+    <!-- yellow -->
+    <string name="md_yellow_50">黄 (50)</string>
+    <string name="md_yellow_100">黄 (100)</string>
+    <string name="md_yellow_200">黄 (200)</string>
+    <string name="md_yellow_300">黄 (300)</string>
+    <string name="md_yellow_400">黄 (400)</string>
+    <string name="md_yellow_500">黄 (500)</string>
+    <string name="md_yellow_600">黄 (600)</string>
+    <string name="md_yellow_700">黄 (700)</string>
+    <string name="md_yellow_800">黄 (800)</string>
+    <string name="md_yellow_900">黄 (900)</string>
+    <string name="md_yellow_a100">黄 (A100)</string>
+    <string name="md_yellow_a200">黄 (A200)</string>
+    <string name="md_yellow_a400">黄 (A400)</string>
+    <string name="md_yellow_a700">黄 (A700)</string>
+
+    <!-- amber -->
+    <string name="md_amber_50">琥珀色 (50)</string>
+    <string name="md_amber_100">琥珀色 (100)</string>
+    <string name="md_amber_200">琥珀色 (200)</string>
+    <string name="md_amber_300">琥珀色 (300)</string>
+    <string name="md_amber_400">琥珀色 (400)</string>
+    <string name="md_amber_500">琥珀色 (500)</string>
+    <string name="md_amber_600">琥珀色 (600)</string>
+    <string name="md_amber_700">琥珀色 (700)</string>
+    <string name="md_amber_800">琥珀色 (800)</string>
+    <string name="md_amber_900">琥珀色 (900)</string>
+    <string name="md_amber_a100">琥珀色 (A100)</string>
+    <string name="md_amber_a200">琥珀色 (A200)</string>
+    <string name="md_amber_a400">琥珀色 (A400)</string>
+    <string name="md_amber_a700">琥珀色 (A700)</string>
+
+    <!-- orange -->
+    <string name="md_orange_50">オレンジ (50)</string>
+    <string name="md_orange_100">オレンジ (100)</string>
+    <string name="md_orange_200">オレンジ (200)</string>
+    <string name="md_orange_300">オレンジ (300)</string>
+    <string name="md_orange_400">オレンジ (400)</string>
+    <string name="md_orange_500">オレンジ (500)</string>
+    <string name="md_orange_600">オレンジ (600)</string>
+    <string name="md_orange_700">オレンジ (700)</string>
+    <string name="md_orange_800">オレンジ (800)</string>
+    <string name="md_orange_900">オレンジ (900)</string>
+    <string name="md_orange_a100">オレンジ (A100)</string>
+    <string name="md_orange_a200">オレンジ (A200)</string>
+    <string name="md_orange_a400">オレンジ (A400)</string>
+    <string name="md_orange_a700">オレンジ (A700)</string>
+
+    <!--deep orange-->
+    <string name="md_deep_orange_50">ディープオレンジ (50)</string>
+    <string name="md_deep_orange_100">ディープオレンジ (100)</string>
+    <string name="md_deep_orange_200">ディープオレンジ (200)</string>
+    <string name="md_deep_orange_300">ディープオレンジ (300)</string>
+    <string name="md_deep_orange_400">ディープオレンジ (400)</string>
+    <string name="md_deep_orange_500">ディープオレンジ (500)</string>
+    <string name="md_deep_orange_600">ディープオレンジ (600)</string>
+    <string name="md_deep_orange_700">ディープオレンジ (700)</string>
+    <string name="md_deep_orange_800">ディープオレンジ (800)</string>
+    <string name="md_deep_orange_900">ディープオレンジ (900)</string>
+    <string name="md_deep_orange_a100">ディープオレンジ (A100)</string>
+    <string name="md_deep_orange_a200">ディープオレンジ (A200)</string>
+    <string name="md_deep_orange_a400">ディープオレンジ (A400)</string>
+    <string name="md_deep_orange_a700">ディープオレンジ (A700)</string>
+
+    <!-- brown -->
+    <string name="md_brown_50">ブラウン (50)</string>
+    <string name="md_brown_100">ブラウン (100)</string>
+    <string name="md_brown_200">ブラウン (200)</string>
+    <string name="md_brown_300">ブラウン (300)</string>
+    <string name="md_brown_400">ブラウン (400)</string>
+    <string name="md_brown_500">ブラウン (500)</string>
+    <string name="md_brown_600">ブラウン (600)</string>
+    <string name="md_brown_700">ブラウン (700)</string>
+    <string name="md_brown_800">ブラウン (800)</string>
+    <string name="md_brown_900">ブラウン (900)</string>
+
+    <!-- gray -->
+    <string name="md_gray_50">グレー (50)</string>
+    <string name="md_gray_100">グレー (100)</string>
+    <string name="md_gray_200">グレー (200)</string>
+    <string name="md_gray_300">グレー (300)</string>
+    <string name="md_gray_400">グレー (400)</string>
+    <string name="md_gray_500">グレー (500)</string>
+    <string name="md_gray_600">グレー (600)</string>
+    <string name="md_gray_700">グレー (700)</string>
+    <string name="md_gray_800">グレー (800)</string>
+    <string name="md_gray_900">グレー (900)</string>
+    <string name="md_black_1000">ブラック (1000)</string>
+    <string name="md_white_1000">ホワイト (1000)</string>
+
+    <!--blue gray-->
+    <string name="md_blue_gray_50">ブルーグレー (50)</string>
+    <string name="md_blue_gray_100">ブルーグレー (100)</string>
+    <string name="md_blue_gray_200">ブルーグレー (200)</string>
+    <string name="md_blue_gray_300">ブルーグレー (300)</string>
+    <string name="md_blue_gray_400">ブルーグレー (400)</string>
+    <string name="md_blue_gray_500">ブルーグレー (500)</string>
+    <string name="md_blue_gray_600">ブルーグレー (600)</string>
+    <string name="md_blue_gray_700">ブルーグレー (700)</string>
+    <string name="md_blue_gray_800">ブルーグレー (800)</string>
+    <string name="md_blue_gray_900">ブルーグレー (900)</string>
+
+</resources>

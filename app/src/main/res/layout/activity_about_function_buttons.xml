@@ -1,113 +1,249 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="match_parent"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:maxWidth="480dp"
+    android:layout_gravity="center"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <View
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/about_functions_button_licenses"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintWidth_max="20dp"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constrainedWidth="true"
+        android:id="@+id/space_0_1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        app:layout_constraintStart_toEndOf="@id/space_0_1"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/space_1_2"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:id="@+id/about_functions_button_licenses"
+        android:layout_width="72dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:background="@android:color/transparent"
-        android:orientation="vertical">
+        android:background="?selectableItemBackground"
+        android:focusable="true"
+        android:clickable="true">
 
-    <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="16dp"
-            android:background="?selectableItemBackground"
-            android:gravity="center"
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline_50_licenses"
             android:orientation="horizontal"
-            android:baselineAligned="false">
+            app:layout_constraintGuide_percent="0.5"
+            android:layout_width="0dp"
+            android:layout_height="0dp" />
 
-        <LinearLayout
-                android:id="@+id/about_functions_button_licenses"
-                android:layout_width="80dp"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:background="?selectableItemBackground"
-                android:gravity="top|center"
-                android:layout_marginHorizontal="3dp"
-                android:focusable="true"
-                android:clickable="true">
+        <ImageView
+            android:id="@+id/about_functions_button_licenses_icon"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_about_license"
+            android:contentDescription="@string/text_about_functions_licenses"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/guideline_50_licenses" />
 
-            <ImageView
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_gravity="center"
-                    android:layout_marginTop="4dp"
-                    android:src="@drawable/ic_about_license"
-                    android:contentDescription="@string/desc_about_functions_button_licenses" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="@string/text_about_functions_licenses"
+            android:maxLines="2"
+            android:gravity="center"
+            android:textSize="13sp"
+            android:textColor="@color/about_app_function_buttons"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/guideline_50_licenses"
+            app:layout_constraintEnd_toEndOf="parent" />
 
-            <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginVertical="6dp"
-                    android:text="@string/text_about_functions_licenses"
-                    android:maxLines="2"
-                    android:gravity="center"
-                    android:textSize="13sp"
-                    android:textColor="@color/about_app_function_buttons" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-        </LinearLayout>
+    <View
+        app:layout_constraintStart_toEndOf="@id/about_functions_button_licenses"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/about_functions_button_update"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintWidth_max="40dp"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constrainedWidth="true"
+        android:id="@+id/space_1_2"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content" />
 
-        <LinearLayout
-                android:id="@+id/about_functions_button_update"
-                android:layout_width="80dp"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:background="?selectableItemBackground"
-                android:gravity="top|center"
-                android:layout_marginHorizontal="3dp"
-                android:focusable="true"
-                android:clickable="true">
+    <androidx.constraintlayout.widget.ConstraintLayout
+        app:layout_constraintStart_toEndOf="@id/space_1_2"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/space_2_3"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:id="@+id/about_functions_button_update"
+        android:layout_width="72dp"
+        android:layout_height="wrap_content"
+        android:background="?selectableItemBackground"
+        android:focusable="true"
+        android:clickable="true">
 
-            <ImageView
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_gravity="center"
-                    android:layout_marginTop="4dp"
-                    android:src="@drawable/ic_about_update"
-                    android:contentDescription="@string/desc_about_functions_button_update" />
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline_50_update"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.5"
+            android:layout_width="0dp"
+            android:layout_height="0dp" />
 
-            <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginVertical="6dp"
-                    android:maxLines="2"
-                    android:gravity="center"
-                    android:text="@string/text_about_functions_update"
-                    android:textSize="13sp"
-                    android:textColor="@color/about_app_function_buttons" />
+        <ImageView
+            android:id="@+id/about_functions_button_update_icon"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="4dp"
+            android:src="@drawable/ic_about_update"
+            android:contentDescription="@string/text_about_functions_update"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/guideline_50_update" />
 
-        </LinearLayout>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:maxLines="2"
+            android:gravity="center"
+            android:text="@string/text_about_functions_update"
+            android:textSize="13sp"
+            android:textColor="@color/about_app_function_buttons"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/guideline_50_update"
+            app:layout_constraintEnd_toEndOf="parent" />
 
-        <LinearLayout
-                android:id="@+id/about_functions_button_feedback"
-                android:layout_width="80dp"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:background="?selectableItemBackground"
-                android:gravity="top|center"
-                android:layout_marginHorizontal="3dp"
-                android:focusable="true"
-                android:clickable="true">
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <ImageView
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_gravity="center"
-                    android:layout_marginTop="4dp"
-                    android:src="@drawable/ic_about_feedback"
-                    android:contentDescription="@string/desc_about_functions_button_feedback" />
+    <View
+        app:layout_constraintStart_toEndOf="@id/about_functions_button_update"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/about_functions_button_version_histories"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintWidth_max="40dp"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constrainedWidth="true"
+        android:id="@+id/space_2_3"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content" />
 
-            <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginVertical="6dp"
-                    android:maxLines="2"
-                    android:gravity="center"
-                    android:text="@string/text_about_functions_feedback"
-                    android:textSize="13sp"
-                    android:textColor="@color/about_app_function_buttons" />
+    <androidx.constraintlayout.widget.ConstraintLayout
+        app:layout_constraintStart_toEndOf="@id/space_2_3"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/space_3_4"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:id="@+id/about_functions_button_version_histories"
+        android:layout_width="72dp"
+        android:layout_height="wrap_content"
+        android:background="?selectableItemBackground"
+        android:focusable="true"
+        android:clickable="true">
 
-        </LinearLayout>
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline_50_version_histories"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.5"
+            android:layout_width="0dp"
+            android:layout_height="0dp" />
 
-    </LinearLayout>
+        <ImageView
+            android:id="@+id/about_functions_button_version_histories_icon"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="4dp"
+            android:src="@drawable/ic_about_version_histories"
+            android:contentDescription="@string/text_about_functions_version_histories"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/guideline_50_version_histories" />
 
-</LinearLayout>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:maxLines="2"
+            android:gravity="center"
+            android:text="@string/text_about_functions_version_histories"
+            android:textSize="13sp"
+            android:textColor="@color/about_app_function_buttons"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/guideline_50_version_histories"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <View
+        app:layout_constraintStart_toEndOf="@id/about_functions_button_version_histories"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/about_functions_button_feedback"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintWidth_max="40dp"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constrainedWidth="true"
+        android:id="@+id/space_3_4"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        app:layout_constraintStart_toEndOf="@id/space_3_4"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/space_4_end"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:id="@+id/about_functions_button_feedback"
+        android:layout_width="72dp"
+        android:layout_height="wrap_content"
+        android:background="?selectableItemBackground"
+        android:focusable="true"
+        android:clickable="true">
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline_50_feedback"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.5"
+            android:layout_width="0dp"
+            android:layout_height="0dp" />
+
+        <ImageView
+            android:id="@+id/about_functions_button_feedback_icon"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="4dp"
+            android:src="@drawable/ic_about_feedback"
+            android:contentDescription="@string/text_about_functions_feedback"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/guideline_50_feedback" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:maxLines="2"
+            android:gravity="center"
+            android:text="@string/text_about_functions_feedback"
+            android:textSize="13sp"
+            android:textColor="@color/about_app_function_buttons"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/guideline_50_feedback"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <View
+        app:layout_constraintStart_toEndOf="@id/about_functions_button_feedback"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintWidth_max="20dp"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constrainedWidth="true"
+        android:id="@+id/space_4_end"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

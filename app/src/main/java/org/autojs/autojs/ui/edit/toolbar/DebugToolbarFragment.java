@@ -8,11 +8,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
-
 import org.autojs.autojs.execution.ScriptExecution;
 import org.autojs.autojs.pio.PFiles;
 import org.autojs.autojs.rhino.debug.DebugCallback;
@@ -46,7 +44,7 @@ import java.util.List;
 //  #     at org.mozilla.javascript.Kit.codeBug(Kit.java:353)
 //  #     at org.autojs.autojs.rhino.debug.Dim.interrupted(Dim.java:806)
 //  #     ... ...
-public class DebugToolbarFragment extends ToolbarFragment implements DebugCallback, CodeEditor.CursorChangeCallback, CodeEvaluator {
+public class DebugToolbarFragment extends ToolbarFragment<FragmentDebugToolbarBinding> implements DebugCallback, CodeEditor.CursorChangeCallback, CodeEvaluator {
 
     private static final String LOG_TAG = "DebugToolbarFragment";
     private EditorView mEditorView;
@@ -76,7 +74,6 @@ public class DebugToolbarFragment extends ToolbarFragment implements DebugCallba
             mDebugger.clearAllBreakpoints();
         }
     };
-    private FragmentDebugToolbarBinding binding;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -84,11 +81,9 @@ public class DebugToolbarFragment extends ToolbarFragment implements DebugCallba
         mHandler = new Handler(Looper.getMainLooper());
     }
 
-    @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        binding = FragmentDebugToolbarBinding.inflate(inflater, container, false);
-        return binding.getRoot();
+    protected FragmentDebugToolbarBinding createBinding(@NonNull @NotNull LayoutInflater inflater, @Nullable @org.jetbrains.annotations.Nullable ViewGroup container) {
+        return FragmentDebugToolbarBinding.inflate(inflater, container, false);
     }
 
     @Override
@@ -98,7 +93,7 @@ public class DebugToolbarFragment extends ToolbarFragment implements DebugCallba
         mDebugger = DebuggerSingleton.get();
         mDebugger.setWeakDebugCallback(new WeakReference<>(this));
         setInterrupted(false);
-        mCurrentEditorSourceUrl = mInitialEditorSourceUrl = mEditorView.uri != null ? mEditorView.uri.toString() : null;
+        mCurrentEditorSourceUrl = mInitialEditorSourceUrl = mEditorView.uri.toString();
         mInitialEditorSource = mEditorView.editor.getText();
         setupEditor();
         ScriptExecution execution = mEditorView.run(false);
@@ -119,12 +114,6 @@ public class DebugToolbarFragment extends ToolbarFragment implements DebugCallba
         binding.stepOut.setOnClickListener(v -> stepOut());
         binding.forceStop.setOnClickListener(v -> forceStop());
         binding.resume.setOnClickListener(v -> resume());
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        binding = null;
     }
 
     private void setupEditor() {
@@ -274,8 +263,12 @@ public class DebugToolbarFragment extends ToolbarFragment implements DebugCallba
         }
         String variable = findVariableOnCursor(line, ch);
         Log.d(LOG_TAG, "onCursorChange: variable = " + variable + ", ch = " + ch + ", line = " + line);
-        String value = eval(variable);
-        mEditorView.debugBar.updateCurrentVariable(variable, value);
+        try {
+            String value = eval(variable);
+            mEditorView.debugBar.updateCurrentVariable(variable, value);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private String findVariableOnCursor(String line, int ch) {

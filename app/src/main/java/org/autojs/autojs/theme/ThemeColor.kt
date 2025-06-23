@@ -4,11 +4,8 @@ import android.content.Context
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 import org.autojs.autojs.annotation.ScriptInterface
-import org.autojs.autojs.core.pref.Pref.containsKey
-import org.autojs.autojs.core.pref.Pref.getInt
-import org.autojs.autojs.core.pref.Pref.putInt
+import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.extension.ArrayExtensions.toHashCode
-import org.autojs.autojs.theme.ThemeColorManager.defaultThemeColor
 import org.autojs.autojs6.R
 
 /**
@@ -16,16 +13,10 @@ import org.autojs.autojs6.R
  * Modified by SuperMonster003 as of Mar 30, 2023.
  * Transformed by SuperMonster003 on Mar 30, 2023.
  */
-class ThemeColor {
+class ThemeColor(@JvmField var colorPrimary: Int, @JvmField var colorPrimaryDark: Int, @JvmField var colorAccent: Int) {
 
-    @JvmField
-    var colorPrimary = 0
-
-    @JvmField
-    var colorAccent = 0
-
-    @JvmField
-    var colorPrimaryDark = 0
+    @JvmOverloads
+    constructor(color: Int = 0) : this(color, color, color)
 
     @ScriptInterface
     fun getColorPrimary() = colorPrimary
@@ -36,15 +27,11 @@ class ThemeColor {
     @ScriptInterface
     fun getColorPrimaryDark() = colorPrimaryDark
 
-    constructor()
+    @JvmOverloads
+    fun isLuminanceLight(backgroundColorMatters: Boolean = true) = ThemeColorManager.isLuminanceLight(backgroundColorMatters)
 
-    constructor(color: Int) : this(color, color, color)
-
-    constructor(colorPrimary: Int, colorPrimaryDark: Int, colorAccent: Int) {
-        this.colorPrimary = colorPrimary
-        this.colorPrimaryDark = colorPrimaryDark
-        this.colorAccent = colorAccent
-    }
+    @JvmOverloads
+    fun isLuminanceDark(backgroundColorMatters: Boolean = true) = !isLuminanceLight(backgroundColorMatters)
 
     fun colorPrimary(colorPrimary: Int) = also { this.colorPrimary = colorPrimary }
 
@@ -53,9 +40,9 @@ class ThemeColor {
     fun colorAccent(colorAccent: Int) = also { this.colorAccent = colorAccent }
 
     fun saveIn() {
-        putInt(R.string.key_theme_color_primary, colorPrimary)
-        putInt(R.string.key_theme_color_primary_dark, colorPrimaryDark)
-        putInt(R.string.key_theme_color_accent, colorAccent)
+        Pref.putInt(R.string.key_theme_color_primary, colorPrimary)
+        Pref.putInt(R.string.key_theme_color_primary_dark, colorPrimaryDark)
+        Pref.putInt(R.string.key_theme_color_accent, colorAccent)
     }
 
     override fun equals(other: Any?): Boolean {
@@ -69,9 +56,9 @@ class ThemeColor {
     }
 
     fun readFrom() = also {
-        colorPrimary = getInt(R.string.key_theme_color_primary, defaultThemeColor.colorPrimary)
-        colorAccent = getInt(R.string.key_theme_color_accent, defaultThemeColor.colorAccent)
-        colorPrimaryDark = getInt(R.string.key_theme_color_primary_dark, defaultThemeColor.colorPrimaryDark)
+        colorPrimary = Pref.getInt(R.string.key_theme_color_primary, ThemeColorManager.defaultThemeColor.colorPrimary)
+        colorAccent = Pref.getInt(R.string.key_theme_color_accent, ThemeColorManager.defaultThemeColor.colorAccent)
+        colorPrimaryDark = Pref.getInt(R.string.key_theme_color_primary_dark, ThemeColorManager.defaultThemeColor.colorPrimaryDark)
     }
 
     override fun hashCode(): Int {
@@ -81,7 +68,7 @@ class ThemeColor {
     companion object {
 
         fun fromPreferences(): ThemeColor? {
-            return if (containsKey(
+            return if (Pref.containsKey(
                     R.string.key_theme_color_primary,
                     R.string.key_theme_color_primary_dark,
                     R.string.key_theme_color_accent

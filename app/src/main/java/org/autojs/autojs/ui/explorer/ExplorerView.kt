@@ -4,24 +4,23 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import android.util.Log
+import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.PopupMenu
 import android.widget.TextView
-import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
-import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.pref.Pref.getInt
 import org.autojs.autojs.core.pref.Pref.getLinkedList
 import org.autojs.autojs.core.pref.Pref.getStringOrNull
@@ -29,7 +28,7 @@ import org.autojs.autojs.core.pref.Pref.putInt
 import org.autojs.autojs.core.pref.Pref.putLinkedList
 import org.autojs.autojs.core.pref.Pref.putString
 import org.autojs.autojs.core.pref.Pref.remove
-import org.autojs.autojs.external.fileprovider.AppFileProvider
+import org.autojs.autojs.extension.ViewExtensions.setForceShowIconCompat
 import org.autojs.autojs.groundwork.WrapContentGridLayoutManger
 import org.autojs.autojs.model.explorer.Explorer
 import org.autojs.autojs.model.explorer.ExplorerChangeEvent
@@ -45,6 +44,8 @@ import org.autojs.autojs.model.script.Scripts
 import org.autojs.autojs.pio.PFile
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.project.ProjectConfig
+import org.autojs.autojs.theme.ThemeColorHelper
+import org.autojs.autojs.theme.ThemeColorManagerCompat
 import org.autojs.autojs.theme.widget.ThemeColorSwipeRefreshLayout
 import org.autojs.autojs.ui.common.ScriptLoopDialog
 import org.autojs.autojs.ui.common.ScriptOperations
@@ -53,11 +54,15 @@ import org.autojs.autojs.ui.main.scripts.ApkInfoDialogManager
 import org.autojs.autojs.ui.main.scripts.MediaInfoDialogManager
 import org.autojs.autojs.ui.project.BuildActivity
 import org.autojs.autojs.ui.viewmodel.ExplorerItemManager
+import org.autojs.autojs.ui.viewmodel.ExplorerItemManager.Companion.SORT_TYPE_DATE
+import org.autojs.autojs.ui.viewmodel.ExplorerItemManager.Companion.SORT_TYPE_NAME
+import org.autojs.autojs.ui.viewmodel.ExplorerItemManager.Companion.SORT_TYPE_SIZE
+import org.autojs.autojs.ui.viewmodel.ExplorerItemManager.Companion.SORT_TYPE_TYPE
 import org.autojs.autojs.ui.widget.BindableViewHolder
 import org.autojs.autojs.ui.widget.FirstCharView
+import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.EnvironmentUtils.externalStoragePath
 import org.autojs.autojs.util.FileUtils
-import org.autojs.autojs.util.IntentUtils
 import org.autojs.autojs.util.Observers
 import org.autojs.autojs.util.ViewUtils.showSnack
 import org.autojs.autojs.util.WorkingDirectoryUtils
@@ -107,7 +112,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     val currentDirectory: ScriptFile
         get() = currentPage.toScriptFile()
 
-    protected var explorerItemListView: RecyclerView? = null
+    var explorerItemListView: RecyclerView? = null
         private set
 
     private lateinit var mProjectToolbar: ExplorerProjectToolbar
@@ -131,30 +136,30 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     }
 
     private fun init() {
-        Log.d(LOG_TAG, "item bg = " + Integer.toHexString(ContextCompat.getColor(context, R.color.item_background)))
         ExplorerViewBinding.inflate(LayoutInflater.from(context), this, true).also { binding ->
             this.binding = binding
-            explorerItemListView = initExplorerItemListView(binding.explorerItemList)
-            mProjectToolbar = binding.projectToolbar
+            binding.explorerItemList.also {
+                this.explorerItemListView = it
+                it.adapter = mExplorerAdapter
+                it.setHasFixedSize(true)
+                it.layoutManager = WrapContentGridLayoutManger(this.context, 2).also { manager ->
+                    manager.setDebugInfo(ExplorerView::class.java.simpleName)
+                    manager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+                        override fun getSpanSize(position: Int) = when {
+                            position > positionOfCategoryDir && position < positionOfCategoryFile() -> {
+                                mDirectorySpanSize // For directories
+                            }
+                            else -> 2 // For files and category
+                        }
+                    }
+                }
+            }
+            binding.projectToolbar.also {
+                mProjectToolbar = it
+            }
         }
         restoreSortConfig()
         setOnRefreshListener(this)
-    }
-
-    private fun initExplorerItemListView(explorerItemListView: RecyclerView) = explorerItemListView.also {
-        it.adapter = mExplorerAdapter
-        it.setItemViewCacheSize(4)
-        it.layoutManager = WrapContentGridLayoutManger(context, 2).also { manager ->
-            manager.setDebugInfo("ExplorerView")
-            manager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
-                override fun getSpanSize(position: Int) = when {
-                    position > positionOfCategoryDir && position < positionOfCategoryFile() -> {
-                        mDirectorySpanSize // For directories
-                    }
-                    else -> 2 // For files and category
-                }
-            }
-        }
     }
 
     @Subscribe
@@ -547,22 +552,42 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                 explorerItemManager = newManager
                 notifyDataSetChanged()
                 isRefreshing = false
-                post { scrollToPositionSmoothly() }
+                post { scrollToPositionImmediately() }
             }
     }
 
     private fun scrollToPositionSmoothly() {
-        val layoutManager = explorerItemListView!!.layoutManager
+        val recyclerView = explorerItemListView ?: return
+        val layoutManager = recyclerView.layoutManager
         val position = currentPageState.scrollY
 
         val smoothScroller: RecyclerView.SmoothScroller = object : LinearSmoothScroller(context) {
             override fun getVerticalSnapPreference(): Int {
                 return SNAP_TO_START
             }
+        }.apply { targetPosition = position }
+
+        when (layoutManager) {
+            null -> recyclerView.smoothScrollToPosition(position)
+            is GridLayoutManager -> layoutManager.startSmoothScroll(smoothScroller)
+            is LinearLayoutManager -> layoutManager.startSmoothScroll(smoothScroller)
+            else -> layoutManager.startSmoothScroll(smoothScroller)
         }
-        smoothScroller.targetPosition = position
-        layoutManager?.startSmoothScroll(smoothScroller)
     }
+
+    private fun scrollToPositionImmediately() {
+        val recyclerView = explorerItemListView ?: return
+        val layoutManager = recyclerView.layoutManager
+        val position = currentPageState.scrollY
+
+        when (layoutManager) {
+            null -> recyclerView.scrollToPosition(position)
+            is GridLayoutManager -> layoutManager.scrollToPositionWithOffset(position, 0)
+            is LinearLayoutManager -> layoutManager.scrollToPositionWithOffset(position, 0)
+            else -> layoutManager.scrollToPosition(position)
+        }
+    }
+
 
     private inner class ExplorerAdapter : RecyclerView.Adapter<BindableViewHolder<Any>>() {
 
@@ -586,6 +611,11 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                     holder.bind(item, position)
                 }
             }
+        }
+
+        override fun onViewRecycled(holder: BindableViewHolder<Any>) {
+            super.onViewRecycled(holder)
+            holder.onViewRecycled()
         }
 
         override fun getItemViewType(position: Int): Int {
@@ -636,17 +666,19 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
 
     internal inner class ExplorerItemViewHolder(itemView: View) : BindableViewHolder<Any>(itemView) {
 
-        private val globalAppContext by lazy { GlobalAppContext.get() }
+        private val mFirstChar: FirstCharView
 
         private val mName: TextView
         private val mFileDate: TextView
         private val mFileSize: TextView
-        private val mOptions: View
+
+        private val mActionIconContainer: View
         private val mInstall: View
         private val mRun: View
         private val mEdit: View
         private val mInfo: View
-        private val mFirstChar: FirstCharView
+
+        private val mOptions: View
 
         private lateinit var mExplorerItem: ExplorerItem
 
@@ -654,25 +686,20 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             val explorerFileBinding = ExplorerFileBinding.bind(itemView)
             val firstCharIconBinding = ExplorerFirstCharIconBinding.bind(itemView)
 
+            mFirstChar = firstCharIconBinding.firstChar
+
             mName = explorerFileBinding.name
             mFileDate = explorerFileBinding.scriptFileDate
             mFileSize = explorerFileBinding.scriptFileSize
-            mFirstChar = firstCharIconBinding.firstChar
 
-            mRun = explorerFileBinding.run
-            mRun.setOnClickListener { withItemSelected { run() } }
+            mActionIconContainer = explorerFileBinding.actionIconContainer
 
-            mEdit = explorerFileBinding.edit
-            mEdit.setOnClickListener { withItemSelected { edit() } }
+            mRun = explorerFileBinding.run.apply { setOnClickListener { withItemSelected { run() } } }
+            mEdit = explorerFileBinding.edit.apply { setOnClickListener { withItemSelected { edit() } } }
+            mInfo = explorerFileBinding.info.apply { setOnClickListener { withItemSelected { showInfo() } } }
+            mInstall = explorerFileBinding.install.apply { setOnClickListener { withItemSelected { install() } } }
 
-            mInfo = explorerFileBinding.info
-            mInfo.setOnClickListener { withItemSelected { showInfo() } }
-
-            mInstall = explorerFileBinding.install
-            mInstall.setOnClickListener { withItemSelected { install() } }
-
-            mOptions = explorerFileBinding.more
-            mOptions.setOnClickListener { withItemSelected { showOptionsMenu() } }
+            mOptions = explorerFileBinding.more.apply { setOnClickListener { withItemSelected { showOptionsMenu() } } }
 
             explorerFileBinding.item.setOnClickListener { withItemSelected { onItemClick() } }
         }
@@ -682,49 +709,117 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             if (item !is ExplorerItem) return
             mExplorerItem = item
 
-            mName.text = ExplorerViewHelper.getDisplayName(context, item)
-            mFileDate.text = PFile.getFullDateString(item.lastModified())
-            mFileSize.text = PFiles.getHumanReadableSize(item.size)
-
             setFirstChar(item)
 
-            updateVisibility(mEdit, item.isTextEditable || item.isExternalEditable)
-            updateVisibility(mRun, item.isExecutable || item.isMediaPlayable)
-            updateVisibility(mInstall, item.isInstallable)
-            updateVisibility(mInfo, item.isInstallable || item.isMediaMenu || item.isMediaPlayable)
+            setTextWith(mName) { ExplorerViewHelper.getDisplayName(context, item) }
+            setTextWith(mFileDate) { PFile.getFullDateString(item.lastModified()) }
+            setTextWith(mFileSize) { PFiles.getHumanReadableSize(item.size) }
 
-            when /* listOf(mEdit, mRun, mInstall, mInfo).filter { it.isVisible }.size > 2 */ {
-                listOf(mEdit, mRun, mInfo).all { it.isVisible } -> {
-                    mInfo.isVisible = false
-                }
-                listOf(mEdit, mInstall, mInfo).all { it.isVisible } -> {
-                    mInfo.isVisible = false
-                }
-                // listOf(mEdit, mRun, mInstall).all { it.isVisible } -> { /* Should not happen. */ }
-                // listOf(mRun, mInstall, mInfo).all { it.isVisible } -> { /* Should not happen. */ }
-                // listOf(mEdit, mRun, mInstall, mInfo).all { it.isVisible } -> { /* Should not happen. */ }
+            Observable.fromCallable {
+                val shouldEditShow = item.isTextEditable || item.isExternalEditable
+                val shouldRunShow = item.isExecutable || item.isMediaPlayable
+                val shouldInstallShow = item.isInstallable
+
+                val alreadyHasTwoImportantIcons = shouldEditShow && (shouldRunShow || shouldInstallShow)
+                val shouldInfoShow = !alreadyHasTwoImportantIcons && (item.isInstallable || item.isMediaMenu || item.isMediaPlayable)
+
+                listOf(shouldEditShow, shouldRunShow, shouldInstallShow, shouldInfoShow)
             }
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe { list ->
+                    val (shouldEditShow, shouldRunShow, shouldInstallShow, shouldInfoShow) = list
+                    if (shouldEditShow || shouldRunShow || shouldInstallShow || shouldInfoShow) {
+                        setVisibilityIf(mEdit, shouldEditShow)
+                        setVisibilityIf(mRun, shouldRunShow)
+                        setVisibilityIf(mInstall, shouldInstallShow)
+                        setVisibilityIf(mInfo, shouldInfoShow)
+                        setVisibilityIf(mActionIconContainer, true)
+                    } else {
+                        setVisibilityIf(mActionIconContainer, false)
+                    }
+                }
         }
 
-        private fun updateVisibility(view: View, visible: Boolean) {
-            val visibility = if (visible) View.VISIBLE else View.GONE
+        private fun setTextWith(textView: TextView, callable: () -> CharSequence) {
+            Observable.fromCallable(callable)
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe { text -> textView.text = text }
+        }
+
+        private fun setVisibilityWith(view: View, callable: () -> Boolean) {
+            Observable.fromCallable(callable)
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe { isVisible ->
+                    if (view.isVisible != isVisible) {
+                        view.isVisible = isVisible
+                    }
+                }
+        }
+
+        private fun setVisibilityIf(view: View, visibility: Int) {
             if (view.visibility != visibility) {
                 view.visibility = visibility
             }
         }
 
+        private fun setVisibilityIf(view: View, visible: Boolean) {
+            setVisibilityIf(view, if (visible) VISIBLE else GONE)
+        }
+
         private fun setFirstChar(item: ExplorerItem) {
-            mFirstChar.setIcon(ExplorerViewHelper.getIcon(item))
-            when (item.type) {
-                FileUtils.TYPE.JAVASCRIPT, FileUtils.TYPE.AUTO -> mFirstChar
-                    .setIconTextColorNightDay()
-                    .setStrokeThemeColor()
-                    .setFillThemeColor()
-                else -> mFirstChar
-                    .setIconTextColorDayNight()
-                    .setStrokeColorDayNight()
-                    .setFillTransparent()
-            }
+            Observable.fromCallable { ExplorerViewHelper.getIcon(item) }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe { icon ->
+                    mFirstChar.setIcon(icon)
+
+                    val actions = when (item.type) {
+                        FileUtils.TYPE.JAVASCRIPT, FileUtils.TYPE.AUTO -> {
+                            Observable.fromCallable {
+                                ColorUtils.adjustColorForContrast(
+                                    context.getColor(R.color.item_background_dark),
+                                    ThemeColorManagerCompat.getColorPrimary(),
+                                    1.15,
+                                )
+                            }.map { themeColorForContrast ->
+                                listOf(
+                                    { mFirstChar.setIconTextColorByThemeColorLuminance() },
+                                    { mFirstChar.setStrokeColor(themeColorForContrast) },
+                                    { mFirstChar.setFillColor(themeColorForContrast) },
+                                    { mFirstChar.visibility = VISIBLE },
+                                )
+                            }
+                        }
+                        else -> Observable.just(
+                            listOf(
+                                { mFirstChar.setIconTextColorDayNight() },
+                                { mFirstChar.setStrokeColorDayNight() },
+                                { mFirstChar.setFillTransparent() },
+                                { mFirstChar.visibility = VISIBLE },
+                            )
+                        )
+                    }
+
+                    actions.subscribeOn(Schedulers.computation())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .flatMapCompletable { list ->
+                            Observable.fromIterable(list)
+                                .flatMapCompletable { action -> Completable.fromAction { action.invoke() } }
+                        }
+                        .subscribe()
+                }
+        }
+
+        override fun onViewRecycled() {
+            super.onViewRecycled()
+            mName.text = null
+            mFileDate.text = null
+            mFileSize.text = null
+            setVisibilityIf(mFirstChar, INVISIBLE)
+            setVisibilityIf(mActionIconContainer, false)
         }
 
         private fun onItemClick() {
@@ -741,7 +836,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                     notifyItemOperated()
                 }
                 mExplorerItem.isMediaPlayable -> {
-                    mExplorerItem.play(context)
+                    mExplorerItem.play(this@ExplorerView)
                     notifyItemOperated()
                 }
             }
@@ -754,7 +849,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                     notifyItemOperated()
                 }
                 mExplorerItem.isExternalEditable -> {
-                    IntentUtils.editFile(globalAppContext, mExplorerItem.path, AppFileProvider.AUTHORITY)
+                    mExplorerItem.edit(this@ExplorerView)
                     notifyItemOperated()
                 }
             }
@@ -763,7 +858,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         private fun showInfo() {
             when {
                 mExplorerItem.isInstallable -> {
-                    ApkInfoDialogManager.showApkInfoDialog(context, mExplorerItem)
+                    ApkInfoDialogManager.showApkInfoDialog(context, mExplorerItem.toScriptFile())
                     notifyItemOperated()
                 }
                 mExplorerItem.isMediaMenu || mExplorerItem.isMediaPlayable -> {
@@ -776,11 +871,11 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         private fun install() {
             when {
                 mExplorerItem.isInstallable -> {
-                    mExplorerItem.install(context)
+                    mExplorerItem.install(this@ExplorerView)
                     notifyItemOperated()
                 }
                 else -> {
-                    IntentUtils.viewFile(globalAppContext, mExplorerItem.path)
+                    mExplorerItem.view(this@ExplorerView)
                     notifyItemOperated()
                 }
             }
@@ -809,7 +904,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                 menu.removeItem(R.id.action_set_as_working_dir)
             }
             val samplePath = PFile(context.filesDir, WorkspaceFileProvider.SAMPLE_PATH).path
-            if (!(mExplorerItem.path.startsWith(samplePath))) {
+            if (!mExplorerItem.path.startsWith(samplePath)) {
                 menu.removeItem(R.id.reset)
             }
             popupMenu.setOnMenuItemClickListener(this@ExplorerView)
@@ -823,32 +918,26 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     }
 
     internal inner class ExplorerPageViewHolder(itemView: View) : BindableViewHolder<Any>(itemView) {
-        var mName: TextView
-        var mDirDate: TextView
-        var mOptions: View
-        var mIcon: ImageView
+
+        private val binding = ExplorerDirectoryBinding.bind(itemView).also {
+            it.item.setOnClickListener { withItemSelected { onItemClick() } }
+        }
+
+        private var mName = binding.name
+        private var mDirDate = binding.scriptDirDate
+        private var mIcon = binding.icon
+        private var mOptions = binding.more.also {
+            it.setOnClickListener { withItemSelected { showOptionsMenu() } }
+        }
 
         private var mExplorerPage: ExplorerPage? = null
-
-        init {
-            val binding = ExplorerDirectoryBinding.bind(itemView)
-
-            mName = binding.name
-            mDirDate = binding.scriptDirDate
-            mIcon = binding.icon
-
-            mOptions = binding.more
-            mOptions.setOnClickListener { withItemSelected { showOptionsMenu() } }
-
-            binding.item.setOnClickListener { withItemSelected { onItemClick() } }
-        }
 
         override fun bind(data: Any, position: Int) {
             if (data !is ExplorerPage) return
             mName.text = ExplorerViewHelper.getDisplayName(context, data)
             mDirDate.text = PFile.getFullDateString(data.lastModified())
             mIcon.setImageResource(ExplorerViewHelper.getIconRes(data))
-            mOptions.visibility = if (data is ExplorerSamplePage) View.GONE else View.VISIBLE
+            mOptions.visibility = if (data is ExplorerSamplePage) GONE else VISIBLE
             mExplorerPage = data
         }
 
@@ -872,6 +961,10 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             if (!mExplorerPage!!.canBuildApk()) {
                 menu.removeItem(R.id.action_build_apk)
             }
+            val samplePath = PFile(context.filesDir, WorkspaceFileProvider.SAMPLE_PATH).path
+            if (!mExplorerPage!!.path.startsWith(samplePath)) {
+                menu.removeItem(R.id.reset)
+            }
             popupMenu.setOnMenuItemClickListener { item: MenuItem ->
                 when (item.itemId) {
                     R.id.action_rename -> {
@@ -890,6 +983,22 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                     R.id.action_build_apk -> {
                         BuildActivity.launch(context, selectedItem!!.path)
                     }
+                    R.id.reset -> {
+                        val o = Explorers.Providers.workspace()
+                            .resetSample(selectedItem!!.toScriptFile())
+                        if (o == null) {
+                            resetFailed()
+                        } else {
+                            o.observeOn(AndroidSchedulers.mainThread())
+                                .subscribe({ file: ScriptFile ->
+                                    if (file.exists()) {
+                                        resetSucceeded()
+                                    } else {
+                                        resetFailed()
+                                    }
+                                }, Observers.toastMessage())
+                        }
+                    }
                     else -> null
                 } != null
             }
@@ -903,7 +1012,8 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     }
 
     internal inner class ExplorerCategoryViewHolder(itemView: View) : BindableViewHolder<Any>(itemView) {
-        val binding: ExplorerCategoryBinding = ExplorerCategoryBinding.bind(itemView)
+
+        private val binding = ExplorerCategoryBinding.bind(itemView)
 
         private var mIsDir = false
 
@@ -922,36 +1032,34 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                 }
             }
             binding.sortType.setOnClickListener {
-                val popupMenu = PopupMenu(context, binding.sortType)
-                popupMenu.inflate(R.menu.menu_sort_options)
+                val themedCtx = ContextThemeWrapper(context, R.style.PopupMenu_HideIndicator)
+                val popupMenu = PopupMenu(themedCtx, binding.sortType).apply {
+                    inflate(R.menu.menu_sort_options)
+                    setForceShowIconCompat()
+                }
 
                 isDirSortMenuShowing = mIsDir
 
                 val currentSortType = if (mIsDir) explorerItemManager.dirSortType else explorerItemManager.fileSortType
-                when (currentSortType) {
-                    ExplorerItemManager.SORT_TYPE_DATE -> popupMenu.menu.findItem(R.id.action_sort_by_date).setChecked(true)
-                    ExplorerItemManager.SORT_TYPE_SIZE -> popupMenu.menu.findItem(R.id.action_sort_by_size).setChecked(true)
-                    ExplorerItemManager.SORT_TYPE_TYPE -> popupMenu.menu.findItem(R.id.action_sort_by_type).setChecked(true)
-                    else -> popupMenu.menu.findItem(R.id.action_sort_by_name).setChecked(true)
+                val initItemId = when (currentSortType) {
+                    SORT_TYPE_DATE -> R.id.action_sort_by_date
+                    SORT_TYPE_SIZE -> R.id.action_sort_by_size
+                    SORT_TYPE_TYPE -> R.id.action_sort_by_type
+                    else -> R.id.action_sort_by_name
                 }
+                popupMenu.menu.findItem(initItemId).isChecked = true
+                ThemeColorHelper.setThemeColorPrimary(popupMenu.menu, themedCtx, context.getColor(R.color.item_background), initItemId)
 
                 popupMenu.setOnMenuItemClickListener { item: MenuItem ->
-                    item.setChecked(true)
+                    item.isChecked = true
                     when (item.itemId) {
-                        R.id.action_sort_by_name -> {
-                            sort(ExplorerItemManager.SORT_TYPE_NAME, isDirSortMenuShowing, true)
-                        }
-                        R.id.action_sort_by_date -> {
-                            sort(ExplorerItemManager.SORT_TYPE_DATE, isDirSortMenuShowing, false)
-                        }
-                        R.id.action_sort_by_size -> {
-                            sort(ExplorerItemManager.SORT_TYPE_SIZE, isDirSortMenuShowing, false)
-                        }
-                        R.id.action_sort_by_type -> {
-                            sort(ExplorerItemManager.SORT_TYPE_TYPE, isDirSortMenuShowing, true)
-                        }
-                        else -> null
-                    } != null
+                        R.id.action_sort_by_name -> sort(SORT_TYPE_NAME, isDirSortMenuShowing, true)
+                        R.id.action_sort_by_date -> sort(SORT_TYPE_DATE, isDirSortMenuShowing, false)
+                        R.id.action_sort_by_size -> sort(SORT_TYPE_SIZE, isDirSortMenuShowing, false)
+                        R.id.action_sort_by_type -> sort(SORT_TYPE_TYPE, isDirSortMenuShowing, true)
+                    }
+                    ThemeColorHelper.setThemeColorPrimary(popupMenu.menu, themedCtx, true, item.itemId)
+                    true
                 }
                 popupMenu.show()
             }
@@ -974,9 +1082,9 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             binding.title.setText(if (isDirCategory) R.string.text_directory else R.string.text_file)
             mIsDir = isDirCategory
             if (isDirCategory && canGoUp()) {
-                binding.goUp.visibility = View.VISIBLE
+                binding.goUp.visibility = VISIBLE
             } else {
-                binding.goUp.visibility = View.GONE
+                binding.goUp.visibility = GONE
             }
             if (isDirCategory) {
                 binding.arrowIcon.rotation = (if (currentPageState.dirsCollapsed) -90 else 0).toFloat()

@@ -2,23 +2,35 @@ package org.autojs.autojs.ui.main.scripts
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.pm.PackageInfo
+import android.content.pm.PackageManager
 import android.content.pm.PackageManager.GET_META_DATA
 import android.os.Build
 import android.view.LayoutInflater
 import android.view.View.MeasureSpec.UNSPECIFIED
-import android.view.ViewGroup
-import android.widget.TextView
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
-import com.jaredrummler.apkparser.ApkParser
+import com.android.apksig.ApkVerifier
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.selects.select
 import kotlinx.coroutines.withContext
-import org.autojs.autojs.model.explorer.ExplorerItem
+import net.dongliu.apk.parser.ApkFile
+import org.autojs.autojs.extension.MaterialDialogExtensions.makeSettingsLaunchable
+import org.autojs.autojs.extension.MaterialDialogExtensions.makeTextCopyable
+import org.autojs.autojs.extension.MaterialDialogExtensions.setCopyableTextIfAbsent
+import org.autojs.autojs.external.fileprovider.AppFileProvider
+import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.runtime.api.AppUtils
+import org.autojs.autojs.util.IntentUtils
+import org.autojs.autojs.util.IntentUtils.ToastExceptionHolder
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ApkFileInfoDialogListItemBinding
 import java.io.File
@@ -27,149 +39,168 @@ object ApkInfoDialogManager {
 
     @JvmStatic
     @SuppressLint("SetTextI18n")
-    fun showApkInfoDialog(context: Context, explorerItem: ExplorerItem) {
+    fun showApkInfoDialog(context: Context, apkFile: File) {
         val binding = ApkFileInfoDialogListItemBinding.inflate(LayoutInflater.from(context))
-        val root = binding.root as ViewGroup
 
-        val dialog = MaterialDialog.Builder(context)
-            .title(explorerItem.name)
-            .customView(root, false)
-            .autoDismiss(false)
-            .iconRes(R.drawable.transparent)
-            .limitIconToDefaultSize()
-            .positiveText(R.string.text_install)
-            .onPositive { materialDialog, _ ->
-                materialDialog.dismiss()
-                explorerItem.install(context)
-            }
-            .positiveColorRes(R.color.dialog_button_attraction)
-            .negativeText(R.string.text_cancel)
-            .onNegative { materialDialog, _ -> materialDialog.dismiss() }
-            .neutralColorRes(R.color.dialog_button_hint)
-            .show()
+        // Create an independent Scope for the Dialog, bind its lifecycle with the Dialog.
+        // zh-CN: 针对 Dialog 独立创建一个 Scope, 生命周期与 Dialog 绑定.
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
-        val apkFilePath = explorerItem.toScriptFile().absolutePath
+        val apkFilePath = apkFile.absolutePath
         val packageManager = context.packageManager
 
-        CoroutineScope(Dispatchers.Main).launch {
-            val packageInfo = withContext(Dispatchers.IO) {
-                runCatching { packageManager.getPackageArchiveInfo(apkFilePath, GET_META_DATA) }.getOrNull()
+        val dialog = MaterialDialog.Builder(context)
+            .title(apkFile.name)
+            .customView(binding.root, false)
+            .autoDismiss(false)
+            .iconRes(R.drawable.ic_three_dots_outline_small)
+            .limitIconToDefaultSize()
+            .positiveText(R.string.text_install)
+            .positiveColorRes(R.color.dialog_button_attraction)
+            .onPositive { materialDialog, _ ->
+                materialDialog.dismiss()
+                IntentUtils.installApk(
+                    context = context,
+                    path = apkFilePath,
+                    fileProviderAuthority = AppFileProvider.AUTHORITY,
+                    exceptionHolder = ToastExceptionHolder(context),
+                )
             }
-            val applicationInfo = packageInfo?.applicationInfo
+            .negativeText(R.string.text_cancel)
+            .negativeColorRes(R.color.dialog_button_default)
+            .neutralColorRes(R.color.dialog_button_hint)
+            .onNegative { materialDialog, _ -> materialDialog.dismiss() }
+            .show()
+            .apply {
+                makeTextCopyable { titleView }
+                setOnDismissListener { scope.cancel() }
+            }
 
-            val packageName = packageInfo?.packageName
-            val versionName = packageInfo?.versionName
-            val versionCode = packageInfo?.let {
-                when {
-                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.P -> it.longVersionCode
-                    else -> @Suppress("DEPRECATION") it.versionCode.toLong()
+        scope.launch {
+            val apkInfoDeferred = async(Dispatchers.IO) { getApkInfo(apkFile) }
+            val packageInfoDeferred = async(Dispatchers.IO) { getPackageInfo(packageManager, apkFilePath) }
+
+            val firstPackageName: String? = select {
+                apkInfoDeferred.onAwait { it?.packageName }
+                packageInfoDeferred.onAwait { it?.packageName }
+            }
+            val packageName: String? = firstPackageName ?: when {
+                apkInfoDeferred.isCompleted -> packageInfoDeferred.await()?.packageName
+                else -> apkInfoDeferred.await()?.packageName
+            }
+
+            // @Hint by SuperMonster003 on Nov 27, 2024.
+            //  ! Prioritize handling "installed version" to determine whether to display its content view.
+            //  ! This is the only content view that needs to be considered before displaying the dialog.
+            //  ! It is now safe to display the dialog immediately as all content views have placeholders.
+            //  ! zh-CN:
+            //  ! 优先处理 "已安装版本", 决定是否显示其内容视图.
+            //  ! 这是唯一一个在显示对话框之前需要考虑的内容视图.
+            //  ! 此时可立即安全显示对话框, 因所有内容视图均已完成占位.
+            val installedPackageName: String? = packageName?.also { pkg ->
+                AppUtils.getInstalledVersionInfo(pkg)?.let { versionInfo ->
+                    binding.installedVersionParent.isVisible = true
+                    dialog.setCopyableTextIfAbsent(
+                        binding.installedVersionValue,
+                        context.getString(R.string.text_full_version_info, versionInfo.versionName, versionInfo.versionCode),
+                    )
                 }
             }
 
-            withContext(Dispatchers.Main) {
-                // @Hint by SuperMonster003 on Nov 27, 2024.
-                //  ! Prioritize handling "installed version" to determine whether to display its content view.
-                //  ! This is the only content view that needs to be considered before displaying the dialog.
-                //  ! It is now safe to display the dialog immediately as all content views have placeholders.
-                //  ! zh-CN:
-                //  ! 优先处理 "已安装版本", 决定是否显示其内容视图.
-                //  ! 这是唯一一个在显示对话框之前需要考虑的内容视图.
-                //  ! 此时可立即安全显示对话框, 因所有内容视图均已完成占位.
-                bindInstalledVersion(binding, context, packageName)
+            restoreEssentialViews(binding, context)
+            updateGuidelines(binding)
 
-                restoreEssentialViews(binding, context)
-                updateGuidelines(binding)
+            dialog.setCopyableTextIfAbsent(binding.packageNameValue, packageName)
+            dialog.setCopyableTextIfAbsent(binding.deviceSdkValue, "${Build.VERSION.SDK_INT}")
+            dialog.setCopyableTextIfAbsent(binding.fileSizeValue, this) { PFiles.getHumanReadableSize(apkFile.length()) }
+            dialog.setCopyableTextIfAbsent(binding.signatureSchemeValue, this) { getApkSignatureInfo(apkFile) }
 
-                packageName?.let { binding.packageNameValue.text = it }
-                binding.deviceSdkValue.text = "${Build.VERSION.SDK_INT}"
-                bindVersionInfo(binding, context, versionName, versionCode)
+            launch(Dispatchers.IO) {
+                val apkInfo = apkInfoDeferred.await()
 
-                dialog.setIcon(applicationInfo?.apply {
-                    sourceDir = apkFilePath
-                    publicSourceDir = apkFilePath
-                }?.loadIcon(packageManager) ?: context.getDrawable(R.drawable.ic_packaging))
+                withContext(Dispatchers.Main) {
+                    dialog.setCopyableTextIfAbsent(binding.labelNameValue, apkInfo?.label)
+                    dialog.setCopyableTextIfAbsent(binding.minSdkValue, apkInfo?.minSdkVersion?.toString())
+                    dialog.setCopyableTextIfAbsent(binding.targetSdkValue, apkInfo?.targetSdkVersion?.toString())
 
-                val apkInfo = getApkInfo(explorerItem.toScriptFile())
+                    if (apkInfo != null) dialog.getActionButton(DialogAction.NEUTRAL).let { neutralButton ->
+                        neutralButton.isVisible = true
+                        neutralButton.text = "Manifest"
+                        neutralButton.setOnClickListener { DisplayManifestActivity.launch(context, apkInfo.manifestXml, apkInfo.usesPermissions) }
+                    }
+                }
+            }
 
-                binding.labelNameValue.setTextIfAbsent { apkInfo?.label }
-                binding.packageNameValue.setTextIfAbsent { apkInfo?.packageName }
-                binding.minSdkValue.setTextIfAbsent { apkInfo?.minSdkVersion?.toString() }
-                binding.targetSdkValue.setTextIfAbsent { apkInfo?.targetSdkVersion?.toString() }
+            launch(Dispatchers.IO) {
+                val packageInfo = packageInfoDeferred.await()
+                val applicationInfo = packageInfo?.applicationInfo
+                val versionName = packageInfo?.versionName
+                val versionCode = packageInfo?.let {
+                    when {
+                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.P -> it.longVersionCode
+                        else -> @Suppress("DEPRECATION") it.versionCode.toLong()
+                    }
+                }
+                withContext(Dispatchers.Main) {
+                    when {
+                        versionName != null -> {
+                            binding.versionPlaceholderLabel.text = context.getString(R.string.text_version)
+                            dialog.setCopyableTextIfAbsent(
+                                binding.versionPlaceholderValue,
+                                context.getString(R.string.text_full_version_info, versionName, versionCode),
+                            )
+                        }
+                        versionCode != null -> {
+                            binding.versionPlaceholderLabel.text = context.getString(R.string.text_version_code)
+                            dialog.setCopyableTextIfAbsent(binding.versionPlaceholderValue, "$versionCode")
+                        }
+                        else -> dialog.setCopyableTextIfAbsent(binding.versionPlaceholderValue, null)
+                    }
 
-                if (apkInfo != null) dialog.getActionButton(DialogAction.NEUTRAL).let { neutralButton ->
-                    neutralButton.isVisible = true
-                    neutralButton.text = "Manifest"
-                    neutralButton.setOnClickListener { DisplayManifestActivity.launch(context, apkInfo.manifestXml, apkInfo.usesPermissions) }
+                    dialog.setIcon(applicationInfo?.apply {
+                        sourceDir = apkFilePath
+                        publicSourceDir = apkFilePath
+                    }?.loadIcon(packageManager) ?: AppCompatResources.getDrawable(context, R.drawable.ic_packaging))
+                    dialog.makeSettingsLaunchable({ it.iconView }, installedPackageName)
                 }
             }
         }
     }
 
-    private suspend fun getApkInfo(apkFile: File): ApkInfo? = withContext(Dispatchers.IO) {
-        runCatching {
-            ApkParser.create(apkFile).use { parser ->
-                val meta = runCatching { parser.apkMeta }.getOrNull()
-                val label = meta?.label
-                val packageName = meta?.packageName
-                val minSdkVersion = meta?.minSdkVersion?.toIntOrNull()
-                val targetSdkVersion = meta?.targetSdkVersion?.toIntOrNull()
-                val usesPermissions = meta?.usesPermissions ?: emptyList()
-                val manifestXml = parser.manifestXml
-                ApkInfo(label, packageName, minSdkVersion, targetSdkVersion, usesPermissions, manifestXml)
-            }
-        }.getOrNull()
-    }
-
-    private fun bindVersionInfo(binding: ApkFileInfoDialogListItemBinding, context: Context, versionName: String?, versionCode: Long?) {
-        when {
-            versionName != null && versionCode != null -> {
-                binding.versionPlaceholderLabel.text = context.getString(R.string.text_version)
-                binding.versionPlaceholderValue.text = context.getString(R.string.text_full_version_info, versionName, versionCode)
-            }
-            else -> versionName?.let {
-                binding.versionPlaceholderLabel.text = context.getString(R.string.text_version_name)
-                binding.versionPlaceholderValue.text = it
-            } ?: versionCode?.let {
-                binding.versionPlaceholderLabel.text = context.getString(R.string.text_version_code)
-                binding.versionPlaceholderValue.text = "$it"
-            } ?: run { binding.versionPlaceholderValue.text = context.getString(R.string.text_unknown) }
+    private fun getApkInfo(apkFile: File): ApkInfo? = runCatching {
+        ApkFile(apkFile).use { parser ->
+            val meta = runCatching { parser.apkMeta }.getOrNull()
+            val label = meta?.label
+            val packageName = meta?.packageName
+            val minSdkVersion = meta?.minSdkVersion?.toIntOrNull()
+            val targetSdkVersion = meta?.targetSdkVersion?.toIntOrNull()
+            val usesPermissions = meta?.usesPermissions ?: emptyList()
+            val manifestXml = parser.manifestXml
+            ApkInfo(label, packageName, minSdkVersion, targetSdkVersion, usesPermissions, manifestXml)
         }
-    }
+    }.getOrNull()
 
-    private fun TextView.setTextIfAbsent(f: () -> String?) {
-        if (this.text == context.getString(R.string.ellipsis_six)) {
-            this.text = f.invoke() ?: context.getString(R.string.text_unknown)
-        }
-    }
-
-    private fun bindInstalledVersion(binding: ApkFileInfoDialogListItemBinding, context: Context, packageName: String?) {
-        packageName?.let {
-            AppUtils.getInstalledVersionInfo(it)?.let { versionInfo ->
-                binding.installedVersionParent.isVisible = true
-                binding.installedVersionValue.text = context.getString(R.string.text_full_version_info, versionInfo.versionName, versionInfo.versionCode)
-            }
-        } ?: run { binding.installedVersionValue.text = context.getString(R.string.text_unknown) }
-    }
+    private fun getPackageInfo(packageManager: PackageManager, apkFilePath: String): PackageInfo? = runCatching {
+        packageManager.getPackageArchiveInfo(apkFilePath, GET_META_DATA)
+    }.getOrNull()
 
     private fun restoreEssentialViews(binding: ApkFileInfoDialogListItemBinding, context: Context) {
-        binding.labelNameLabel.text = context.getString(R.string.text_label_name)
-        binding.labelNameColon.isVisible = true
-        binding.labelNameValue.isVisible = true
-        binding.packageNameLabel.text = context.getString(R.string.apk_info_package_name)
-        binding.packageNameColon.isVisible = true
-        binding.packageNameValue.isVisible = true
-        binding.versionPlaceholderLabel.text = context.getString(R.string.text_version)
-        binding.versionPlaceholderColon.isVisible = true
-        binding.versionPlaceholderValue.isVisible = true
-        binding.minSdkLabel.text = context.getString(R.string.apk_info_min_sdk)
-        binding.minSdkColon.isVisible = true
-        binding.minSdkValue.isVisible = true
-        binding.targetSdkLabel.text = context.getString(R.string.apk_info_target_sdk)
-        binding.targetSdkColon.isVisible = true
-        binding.targetSdkValue.isVisible = true
-        binding.deviceSdkLabel.text = context.getString(R.string.apk_info_device_sdk)
-        binding.deviceSdkColon.isVisible = true
-        binding.deviceSdkValue.isVisible = true
+        listOf(
+            Triple(binding.labelNameLabel, binding.labelNameColon, binding.labelNameValue) to R.string.text_label_name,
+            Triple(binding.packageNameLabel, binding.packageNameColon, binding.packageNameValue) to R.string.apk_info_package_name,
+            Triple(binding.versionPlaceholderLabel, binding.versionPlaceholderColon, binding.versionPlaceholderValue) to R.string.text_version,
+            Triple(binding.fileSizeLabel, binding.fileSizeColon, binding.fileSizeValue) to R.string.apk_info_file_size,
+            Triple(binding.signatureSchemeLabel, binding.signatureSchemeColon, binding.signatureSchemeValue) to R.string.apk_info_signature_scheme,
+            Triple(binding.minSdkLabel, binding.minSdkColon, binding.minSdkValue) to R.string.apk_info_min_sdk,
+            Triple(binding.targetSdkLabel, binding.targetSdkColon, binding.targetSdkValue) to R.string.apk_info_target_sdk,
+            Triple(binding.deviceSdkLabel, binding.deviceSdkColon, binding.deviceSdkValue) to R.string.apk_info_device_sdk,
+        ).forEach { pair ->
+            val (triple, labelTextRes) = pair
+            val (labelView, colonView, valueView) = triple
+            labelView.text = context.getString(labelTextRes)
+            colonView.isVisible = true
+            valueView.isVisible = true
+        }
     }
 
     private fun updateGuidelines(binding: ApkFileInfoDialogListItemBinding) {
@@ -177,6 +208,8 @@ object ApkInfoDialogManager {
             binding.labelNameLabel to binding.labelNameGuideline,
             binding.packageNameLabel to binding.packageNameGuideline,
             binding.versionPlaceholderLabel to binding.versionPlaceholderGuideline,
+            binding.fileSizeLabel to binding.fileSizeGuideline,
+            binding.signatureSchemeLabel to binding.signatureSchemeGuideline,
             binding.minSdkLabel to binding.minSdkGuideline,
             binding.targetSdkLabel to binding.targetSdkGuideline,
             binding.installedVersionLabel to binding.installedVersionGuideline,
@@ -192,6 +225,35 @@ object ApkInfoDialogManager {
             }
         }
     }
+
+    private fun getApkSignatureInfo(apkFile: File): String? = runCatching {
+        // @Hint by JetBrains AI Assistant on May 21, 2025.
+        //  ! APK (Zip) has an "APK Signing Block" at the end,
+        //  ! storing <ID/Data> pairs for V2/V3/V4 sequentially.
+        //  ! Only need to locate and check for corresponding ID to determine signature data existence.
+        //  ! zh-CN:
+        //  ! APK (Zip) 末尾有一段 "APK Signing Block", 依次存放 V2/V3/V4 的 <ID/数据> 对.
+        //  ! 只需定位并查看其中是否存在对应 ID, 即可判断是否存在签名数据.
+        ApkSignatureDetector.detectSchemes(apkFile)
+    }.getOrNull() ?: getApkSignatureInfoLegacy(apkFile)
+
+    private fun getApkSignatureInfoLegacy(apkFile: File): String? = runCatching {
+        // @Hint by JetBrains AI Assistant on May 21, 2025.
+        //  ! `ApkVerifier.verify()` parses ZIP structure to find V2/V3/V4 Signing Block,
+        //  ! calculates hash values (SHA-256/512) for each signature scheme segment,
+        //  ! requiring re-traversal of files for each signature.
+        //  ! zh-CN:
+        //  ! `ApkVerifier.verify()` 解析 ZIP 结构找到 V2/V3/V4 Signing Block,
+        //  ! 对每一种签名方案逐段计算哈希值 (SHA-256/512), 每种签名都需要重新遍历文件.
+        ApkVerifier.Builder(apkFile).build().verify().run {
+            listOfNotNull(
+                "V1".takeIf { isVerifiedUsingV1Scheme || ApkSignatureDetector.hasV1Signature(apkFile) },
+                "V2".takeIf { isVerifiedUsingV2Scheme },
+                "V3".takeIf { isVerifiedUsingV3Scheme },
+                "V4".takeIf { isVerifiedUsingV4Scheme },
+            ).takeUnless { it.isEmpty() }?.joinToString(" + ")
+        }
+    }.getOrNull()
 
     private data class ApkInfo(
         val label: String?,

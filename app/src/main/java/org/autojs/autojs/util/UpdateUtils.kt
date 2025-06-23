@@ -2,23 +2,19 @@ package org.autojs.autojs.util
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.net.toUri
+import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
-import okhttp3.ResponseBody
-import org.autojs.autojs.annotation.ScriptInterface
 import org.autojs.autojs.app.DialogUtils
-import org.autojs.autojs.network.UpdateChecker
-import org.autojs.autojs.network.UpdateChecker.PromptMode
-import org.autojs.autojs.network.entity.VersionInfo
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.core.pref.Pref.isAutoCheckForUpdatesEnabled
 import org.autojs.autojs.core.pref.Pref.lastNoNewerUpdatesTimestamp
 import org.autojs.autojs.core.pref.Pref.lastUpdatesAutoCheckedTimestamp
 import org.autojs.autojs.core.pref.Pref.lastUpdatesPostponedTimestamp
-import org.autojs.autojs.core.pref.Pref.refreshLastUpdatesAutoCheckedTimestamp
-import org.autojs.autojs.tool.SimpleObserver
+import org.autojs.autojs.network.UpdateChecker
+import org.autojs.autojs.network.UpdateChecker.PromptMode
+import org.autojs.autojs.network.entity.VersionInfo
 import org.autojs.autojs6.R
 
 /**
@@ -26,52 +22,15 @@ import org.autojs.autojs6.R
  */
 object UpdateUtils {
 
-    const val BASE_URL_RAW = "https://raw.githubusercontent.com/"
-    const val BASE_URL = "https://github.com/"
-    private const val RELATIVE_URL_RAW = "/SuperMonster003/AutoJs6/master/version.properties"
-    private const val RELATIVE_URL = "/SuperMonster003/AutoJs6/blob/master/version.properties"
-
     private val ignoredVersions: LinkedHashSet<String> by lazy {
         Pref.getLinkedHashSet(R.string.key_ignored_updates)
     }
 
-    @ScriptInterface
-    fun getDialogChecker(context: Context, url: String?, callback: SimpleObserver<ResponseBody>?): UpdateChecker {
-        return getBuilder(context, url, callback)
-            .setPromptMode(PromptMode.DIALOG)
-            .build()
-    }
-
-    fun getDialogChecker(context: Context): UpdateChecker {
-        return getDialogChecker(context, null, null)
-    }
-
     @JvmStatic
-    fun getSnackbarChecker(context: Context, view: View): UpdateChecker {
-        return getBuilder(context, view)
-            .setPromptMode(PromptMode.SNACKBAR)
-            .build()
-    }
-
-    private fun getBuilder(context: Context, url: String?, callback: SimpleObserver<ResponseBody>?): UpdateChecker.Builder {
-        return UpdateChecker.Builder(context)
-            .setBaseUrl(BASE_URL)
-            .setUrl(url ?: RELATIVE_URL)
-            .setCallback(callback)
-    }
-
-    private fun getBuilder(context: Context, view: View): UpdateChecker.Builder {
-        return UpdateChecker.Builder(context, view)
-            .setBaseUrl(BASE_URL)
-            .setUrl(RELATIVE_URL)
-            .setCallback(null)
-    }
-
-    @JvmStatic
-    fun openUrl(context: Context, url: String?) {
+    fun openUrl(context: Context, url: String) {
         context.startActivity(
             Intent(Intent.ACTION_VIEW)
-                .setData(Uri.parse(url))
+                .setData(url.toUri())
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         )
     }
@@ -120,23 +79,50 @@ object UpdateUtils {
                     .title(R.string.text_version_info)
                     .content(
                         "${context.getString(R.string.text_version_name)}: ${simpleInfo.versionName}\n" +
-                        "${context.getString(R.string.text_version_code)}: ${simpleInfo.versionCode}"
+                                "${context.getString(R.string.text_version_code)}: ${simpleInfo.versionCode}"
                     )
                     .neutralText(R.string.dialog_button_remove)
                     .neutralColorRes(R.color.dialog_button_warn)
                     .onNeutral { dVersionInfo, _ ->
                         showRemoveIgnoredVersionPrompt(context, dialog, dVersionInfo, text)
                     }
-                    .positiveText(R.string.dialog_button_cancel)
+                    .positiveText(R.string.dialog_button_back)
+                    .positiveColorRes(R.color.dialog_button_default)
                     .onPositive { dVersionInfo, _ -> dVersionInfo.dismiss() }
                     .autoDismiss(false)
                     .show()
             }
-            .positiveText(R.string.dialog_button_cancel)
+            .neutralText(R.string.dialog_button_clear_items)
+            .neutralColorRes(R.color.dialog_button_warn)
+            .onNeutral { dialogParent, _ ->
+                MaterialDialog.Builder(context)
+                    .title(R.string.text_prompt)
+                    .content(R.string.text_confirm_to_clear_all_items)
+                    .negativeText(R.string.dialog_button_cancel)
+                    .negativeColorRes(R.color.dialog_button_default)
+                    .positiveText(R.string.dialog_button_confirm)
+                    .positiveColorRes(R.color.dialog_button_caution)
+                    .onPositive { _, _ ->
+                        clearIgnoredVersions()
+                        dialogParent.items?.let {
+                            it.clear()
+                            dialogParent.notifyItemsChanged()
+                            DialogUtils.toggleContentViewByItems(dialogParent)
+                            DialogUtils.toggleActionButtonAbilityByItems(dialogParent, DialogAction.NEUTRAL)
+                        }
+                        ViewUtils.showSnack(dialogParent.view, R.string.text_all_items_cleared)
+                    }
+                    .show()
+            }
+            .positiveText(R.string.dialog_button_dismiss)
+            .positiveColorRes(R.color.dialog_button_default)
             .onPositive { dialog, _ -> dialog.dismiss() }
             .autoDismiss(false)
             .build()
-            .also { DialogUtils.toggleContentViewByItems(it) }
+            .also {
+                DialogUtils.toggleContentViewByItems(it)
+                DialogUtils.toggleActionButtonAbilityByItems(it, DialogAction.NEUTRAL)
+            }
             .show()
     }
 
@@ -173,14 +159,21 @@ object UpdateUtils {
         Pref.putLinkedHashSet(R.string.key_ignored_updates, ignoredVersions)
     }
 
+    private fun clearIgnoredVersions() {
+        ignoredVersions.clear()
+        Pref.putLinkedHashSet(R.string.key_ignored_updates, ignoredVersions)
+    }
+
     @JvmStatic
     @JvmOverloads
     fun autoCheckForUpdatesIfNeededWithSnackbar(activity: AppCompatActivity, snackbarViewIdRes: Int = android.R.id.content) {
         if (isAutoCheckForUpdatesEnabled) {
             val checker = IntervalChecker()
             if (checker.isBeyondNoNewer && checker.isBeyondPostponed && checker.isBeyondAutoChecked) {
-                getSnackbarChecker(activity, activity.findViewById(snackbarViewIdRes)).checkNow()
-                refreshLastUpdatesAutoCheckedTimestamp()
+                UpdateChecker.Builder(activity.findViewById(snackbarViewIdRes))
+                    .setPromptMode(PromptMode.SNACKBAR)
+                    .build().checkNow()
+                Pref.refreshLastUpdatesAutoCheckedTimestamp()
             }
         }
     }

@@ -133,7 +133,7 @@ object AnyExtensions {
 
     fun Any?.toRuntimePath(scriptRuntime: ScriptRuntime, isStrict: Boolean = false): String {
         if (isStrict && this.isJsNullish()) throw IllegalArgumentException(str(R.string.error_cannot_convert_value_into_a_script_runtime_path, this.jsBrief()))
-        return scriptRuntime.files.path(coerceString(this, "."))
+        return scriptRuntime.files.nonNullPath(coerceString(this, "."))
     }
 
 }

@@ -6,12 +6,14 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.RecyclerView;
 import org.autojs.autojs.model.explorer.Explorer;
 import org.autojs.autojs.model.explorer.ExplorerDirPage;
 import org.autojs.autojs.model.explorer.ExplorerFileProvider;
 import org.autojs.autojs.model.script.Scripts;
 import org.autojs.autojs.ui.BaseActivity;
 import org.autojs.autojs.ui.explorer.ExplorerView;
+import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs.util.WorkingDirectoryUtils;
 import org.autojs.autojs6.R;
 import org.autojs.autojs6.databinding.ActivityScriptWidgetSettingsBinding;
@@ -38,6 +40,10 @@ public class ScriptWidgetSettingsActivity extends BaseActivity {
         initScriptListRecyclerView();
     }
 
+    private void setUpToolbarColors() {
+        ViewUtils.setToolbarMenuIconsColorByThemeColorLuminance(this, binding.toolbar);
+    }
+
     private void initScriptListRecyclerView() {
         mExplorer = new Explorer(new ExplorerFileProvider(Scripts.FILE_FILTER), 0);
         ExplorerView explorerView = binding.scriptList;
@@ -47,6 +53,10 @@ public class ScriptWidgetSettingsActivity extends BaseActivity {
             mSelectedScriptFilePath = file.getPath();
             finish();
         });
+        RecyclerView explorerItemListView = explorerView.getExplorerItemListView();
+        if (explorerItemListView != null) {
+            ViewUtils.excludePaddingClippableViewFromBottomNavigationBar(explorerItemListView);
+        }
     }
 
     @Override
@@ -62,6 +72,7 @@ public class ScriptWidgetSettingsActivity extends BaseActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.script_widget_settings_menu, menu);
+        setUpToolbarColors();
         return true;
     }
 

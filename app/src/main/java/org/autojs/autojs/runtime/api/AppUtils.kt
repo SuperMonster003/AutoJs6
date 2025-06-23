@@ -5,11 +5,14 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
-import android.content.pm.PackageManager.*
+import android.content.pm.PackageManager.ApplicationInfoFlags
+import android.content.pm.PackageManager.GET_META_DATA
+import android.content.pm.PackageManager.NameNotFoundException
+import android.content.pm.PackageManager.PackageInfoFlags
 import android.graphics.drawable.Drawable
-import android.net.Uri
 import android.os.Build
 import android.util.Log
+import androidx.core.net.toUri
 import org.autojs.autojs.annotation.ScriptInterface
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.external.fileprovider.AppFileProvider
@@ -33,7 +36,7 @@ import org.autojs.autojs.runtime.api.augment.app.App as AugmentableApp
  * Created by Stardust on Apr 2, 2017.
  * Modified by SuperMonster003 as of Jul 13, 2022.
  */
-class AppUtils(context: Context, @get:ScriptInterface val fileProviderAuthority: String? = AppFileProvider.AUTHORITY) {
+class AppUtils(context: Context, @get:ScriptInterface val fileProviderAuthority: String = AppFileProvider.AUTHORITY) {
 
     private val mContext: Context = context
     private val mPackageManager = mContext.packageManager
@@ -70,7 +73,7 @@ class AppUtils(context: Context, @get:ScriptInterface val fileProviderAuthority:
     }
 
     @ScriptInterface
-    fun launchApp(appName: String) = getPackageName(appName)?.let { launchPackage(it) } ?: false
+    fun launchApp(appName: String) = getPackageName(appName)?.let { launchPackage(it) } == true
 
     @ScriptInterface
     fun getPackageName(appName: String): String? = mPackageManager.let {
@@ -85,7 +88,7 @@ class AppUtils(context: Context, @get:ScriptInterface val fileProviderAuthority:
     @ScriptInterface
     fun getAppName(packageName: String?) = try {
         packageName?.let { "${mPackageManager.getApplicationLabel(getApplicationInfoCompat(mPackageManager, it, 0))}" }
-    } catch (ignore: NameNotFoundException) {
+    } catch (_: NameNotFoundException) {
         null
     }
 
@@ -113,7 +116,7 @@ class AppUtils(context: Context, @get:ScriptInterface val fileProviderAuthority:
     @ScriptInterface
     fun isInstalled(packageName: String?) = try {
         getPackageInfoCompat(mPackageManager, packageName!!, 0) != null
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         false
     }
 
@@ -131,7 +134,7 @@ class AppUtils(context: Context, @get:ScriptInterface val fileProviderAuthority:
         runCatching {
             getPackageInfoCompat(mPackageManager, packageName!!, 0)
         }.getOrElse {
-            throw Exception(mContext.getString(R.string.error_app_not_installed, packageName))
+            throw Exception(mContext.getString(R.string.error_app_not_installed_with_name, packageName))
         }
     }
 
@@ -141,7 +144,7 @@ class AppUtils(context: Context, @get:ScriptInterface val fileProviderAuthority:
         runCatching {
             getPackageInfoCompat(mPackageManager, app.packageName, 0)
         }.getOrElse {
-            throw Exception("${mContext.getString(R.string.error_app_not_installed, app.getAppName())} [ ${app.packageName} ]")
+            throw Exception("${mContext.getString(R.string.error_app_not_installed_with_name, app.getAppName())} [ ${app.packageName} ]")
         }
     }
 
@@ -155,16 +158,27 @@ class AppUtils(context: Context, @get:ScriptInterface val fileProviderAuthority:
 
     @ScriptInterface
     fun uninstall(packageName: String) {
-        Intent(Intent.ACTION_DELETE, Uri.parse("package:$packageName"))
+        Intent(Intent.ACTION_DELETE, "package:$packageName".toUri())
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             .let { mContext.startActivity(it) }
     }
 
     @ScriptInterface
-    fun viewFile(path: String) = IntentUtils.viewFile(mContext, path, fileProviderAuthority)
+    fun viewFile(path: String) = IntentUtils.viewFile(
+        context = mContext,
+        path = path,
+        mimeType = null,
+        fileProviderAuthority = fileProviderAuthority,
+        exceptionHolder = IntentUtils.ToastExceptionHolder(mContext),
+    )
 
     @ScriptInterface
-    fun editFile(path: String) = IntentUtils.editFile(mContext, path, fileProviderAuthority)
+    fun editFile(path: String) = IntentUtils.editFile(
+        context = mContext,
+        path = path,
+        fileProviderAuthority = fileProviderAuthority,
+        exceptionHolder = IntentUtils.ToastExceptionHolder(mContext),
+    )
 
     @ScriptInterface
     fun openUrl(url: String) {
@@ -280,7 +294,7 @@ class AppUtils(context: Context, @get:ScriptInterface val fileProviderAuthority:
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.P -> packageInfo.longVersionCode
                 else -> @Suppress("DEPRECATION") packageInfo.versionCode.toLong()
             }
-            val versionName = packageInfo.versionName
+            val versionName = packageInfo.versionName ?: "Unknown"
             SimpleVersionInfo(versionName, versionCode)
         }.getOrNull()
 

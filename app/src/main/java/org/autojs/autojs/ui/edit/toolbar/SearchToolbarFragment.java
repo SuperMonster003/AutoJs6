@@ -4,27 +4,22 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 import org.autojs.autojs6.R;
 import org.autojs.autojs6.databinding.FragmentSearchToolbarBinding;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class SearchToolbarFragment extends ToolbarFragment {
+public class SearchToolbarFragment extends ToolbarFragment<FragmentSearchToolbarBinding> {
 
     public static final String ARGUMENT_SHOW_REPLACE_ITEM = "show_replace_item";
 
-    private FragmentSearchToolbarBinding binding;
-
-    @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        binding = FragmentSearchToolbarBinding.inflate(inflater, container, false);
-        return binding.getRoot();
+    protected FragmentSearchToolbarBinding createBinding(@NonNull @NotNull LayoutInflater inflater, @Nullable @org.jetbrains.annotations.Nullable ViewGroup container) {
+        return FragmentSearchToolbarBinding.inflate(inflater, container, false);
     }
 
     @Override
@@ -42,9 +37,4 @@ public class SearchToolbarFragment extends ToolbarFragment {
         return Arrays.asList(R.id.replace, R.id.find_next, R.id.find_prev, R.id.cancel_search);
     }
 
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        binding = null;
-    }
 }

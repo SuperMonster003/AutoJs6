@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import ezy.assist.compat.SettingsCompat
+import org.autojs.autojs.extension.MaterialDialogExtensions.widgetThemeColor
 import org.autojs.autojs.ui.common.NotAskAgainDialog
 import org.autojs.autojs.ui.enhancedfloaty.util.FloatingWindowPermissionUtil
 import org.autojs.autojs.ui.main.drawer.PermissionItemHelper
@@ -64,9 +65,12 @@ class DisplayOverOtherAppsPermission(override val context: Context) : Permission
                     context.getString(R.string.text_click_ok_to_go_to_access_settings),
                 )
             )
+            .widgetThemeColor()
             .negativeText(R.string.text_cancel)
-            .positiveText(R.string.text_ok)
+            .negativeColorRes(R.color.dialog_button_default)
             .onNegative { dialog, _ -> dialog.dismiss() }
+            .positiveText(R.string.dialog_button_confirm)
+            .positiveColorRes(R.color.dialog_button_attraction)
             .onPositive { dialog, _ -> dialog.dismiss().also { config() } }
             .cancelable(false)
             .autoDismiss(false)

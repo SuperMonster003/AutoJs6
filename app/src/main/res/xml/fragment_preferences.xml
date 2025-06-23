@@ -1,244 +1,254 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+<PreferenceScreen
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
-            app:layout="@layout/preference_category_custom"
-            app:title="@string/text_appearance">
+        app:layout="@layout/preference_category_custom"
+        app:title="@string/text_appearance">
 
         <org.autojs.autojs.ui.settings.AppLanguagePreference
-                app:layout="@layout/preference_custom"
-                app:key="@string/key_app_language"
-                app:title="@string/text_app_language"
-                app:itemKeys="@array/keys_app_language"
-                app:itemValues="@array/values_app_language"
-                app:itemDefaultKey="@string/key_app_language_auto"
-                app:neutralText="@string/dialog_button_system_settings"
-                app:neutralTextShort="@string/dialog_button_system_settings_simplified"
-                app:longClickPrompt="@string/description_app_language_preference"
-                app:onConfirmPrompt="@string/prompt_restart_may_be_needed_for_language_switch" />
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_app_language"
+            app:title="@string/text_app_language"
+            app:itemKeys="@array/keys_app_language"
+            app:itemValues="@array/values_app_language"
+            app:itemDefaultKey="@string/key_app_language_auto"
+            app:neutralText="@string/dialog_button_system_settings"
+            app:neutralTextShort="@string/dialog_button_system_settings_simplified"
+            app:longClickPrompt="@string/description_app_language_preference"
+            app:onConfirmPrompt="@string/prompt_restart_may_be_needed_for_language_switch" />
 
         <org.autojs.autojs.ui.settings.NightModePreference
-                app:layout="@layout/preference_custom"
-                app:key="@string/key_night_mode"
-                app:title="@string/text_night_mode"
-                app:itemKeys="@array/keys_night_mode"
-                app:itemValues="@array/values_night_mode"
-                app:itemDefaultKey="@string/key_night_mode_follow_system"
-                app:longClickPrompt="@string/description_night_mode_preference"
-                app:longClickPromptMore="@string/description_night_mode_preference_more" />
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_night_mode"
+            app:title="@string/text_night_mode"
+            app:itemKeys="@array/keys_night_mode"
+            app:itemValues="@array/values_night_mode"
+            app:itemDefaultKey="@string/key_night_mode_follow_system"
+            app:longClickPrompt="@string/description_night_mode_preference"
+            app:longClickPromptMore="@string/description_night_mode_preference_more" />
 
         <org.autojs.autojs.ui.settings.ThemeColorPreference
-                app:layout="@layout/preference_custom"
-                app:key="@string/key_theme_color"
-                app:title="@string/text_theme_color"
-                app:longClickPrompt="@string/description_theme_color_preference" />
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_theme_color"
+            app:title="@string/text_theme_color"
+            app:longClickPrompt="@string/description_theme_color_preference" />
 
         <org.autojs.autojs.ui.settings.KeepScreenOnWhenInForegroundPreference
-                app:layout="@layout/preference_custom"
-                app:key="@string/key_keep_screen_on_when_in_foreground"
-                app:title="@string/text_keep_screen_on_when_in_foreground"
-                app:itemKeys="@array/keys_keep_screen_on_when_in_foreground"
-                app:itemValues="@array/values_keep_screen_on_when_in_foreground"
-                app:itemDefaultKey="@string/key_keep_screen_on_when_in_foreground_disabled"
-                app:longClickPrompt="@string/description_keep_screen_on_when_in_foreground_preference" />
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_keep_screen_on_when_in_foreground"
+            app:title="@string/text_keep_screen_on_when_in_foreground"
+            app:itemKeys="@array/keys_keep_screen_on_when_in_foreground"
+            app:itemValues="@array/values_keep_screen_on_when_in_foreground"
+            app:itemDefaultKey="@string/key_keep_screen_on_when_in_foreground_disabled"
+            app:longClickPrompt="@string/description_keep_screen_on_when_in_foreground_preference" />
 
     </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
 
     <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
-            app:layout="@layout/preference_category_custom"
-            app:title="@string/text_config">
+        app:layout="@layout/preference_category_custom"
+        app:title="@string/text_config">
 
         <org.autojs.autojs.theme.preference.MaterialListPreference
-                app:layout="@layout/preference_custom"
-                app:key="@string/key_documentation_source"
-                app:title="@string/text_documentation_source"
-                app:itemKeys="@array/keys_documentation_source"
-                app:itemValues="@array/values_documentation_source"
-                app:itemDefaultKey="@string/key_documentation_source_local"
-                app:onConfirmPrompt="@string/prompt_restart_is_needed_for_docs_source_switch"
-                app:longClickPrompt="@string/description_documentation_source_preference"
-                app:longClickPromptMore="@string/description_documentation_source_preference_more" />
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_documentation_source"
+            app:title="@string/text_documentation_source"
+            app:itemKeys="@array/keys_documentation_source"
+            app:itemValues="@array/values_documentation_source"
+            app:itemDefaultKey="@string/key_documentation_source_local"
+            app:onConfirmPrompt="@string/prompt_restart_is_needed_for_docs_source_switch"
+            app:longClickPrompt="@string/description_documentation_source_preference"
+            app:longClickPromptMore="@string/description_documentation_source_preference_more" />
 
         <org.autojs.autojs.ui.settings.LauncherShortcutsPreference
-                app:layout="@layout/preference_custom"
-                app:key="@string/key_launcher_shortcuts"
-                app:title="@string/text_launcher_shortcuts"
-                app:summary="@string/summary_text_launcher_shortcuts"
-                app:longClickPrompt="@string/description_launcher_shortcuts" />
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_launcher_shortcuts"
+            app:title="@string/text_launcher_shortcuts"
+            app:summary="@string/summary_text_launcher_shortcuts"
+            app:longClickPrompt="@string/description_launcher_shortcuts" />
 
         <org.autojs.autojs.ui.settings.WorkingDirectoryPreference
-                app:layout="@layout/preference_custom"
-                app:key="@string/key_change_working_dir"
-                app:title="@string/text_change_working_dir"
-                app:longClickPrompt="@string/description_change_working_dir_preference" />
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_change_working_dir"
+            app:title="@string/text_change_working_dir"
+            app:longClickPrompt="@string/description_change_working_dir_preference" />
 
         <org.autojs.autojs.ui.settings.RootModePreference
-                app:layout="@layout/preference_custom"
-                app:key="@string/key_root_mode"
-                app:title="@string/text_root_mode_title"
-                app:itemKeys="@array/keys_root_mode"
-                app:itemValues="@array/values_root_mode"
-                app:itemDefaultKey="@string/key_root_mode_auto_detect"
-                app:longClickPrompt="@string/description_root_mode_preference" />
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_root_mode"
+            app:title="@string/text_root_mode_title"
+            app:itemKeys="@array/keys_root_mode"
+            app:itemValues="@array/values_root_mode"
+            app:itemDefaultKey="@string/key_root_mode_auto_detect"
+            app:longClickPrompt="@string/description_root_mode_preference" />
+
+    </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
+
+    <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
+        app:layout="@layout/preference_category_custom"
+        app:title="@string/text_file_explorer">
 
         <org.autojs.autojs.ui.settings.HiddenFilesPreference
-                app:layout="@layout/preference_custom"
-                app:key="@string/key_hidden_files"
-                app:title="@string/text_hidden_files_title"
-                app:itemValues="@array/values_hidden_files"
-                app:itemKeys="@array/keys_hidden_files"
-                app:itemDefaultKey="@string/default_key_hidden_files"
-                app:longClickPrompt="@string/description_hidden_files_preference" />
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_hidden_files"
+            app:title="@string/text_hidden_files_title"
+            app:itemValues="@array/values_hidden_files"
+            app:itemKeys="@array/keys_hidden_files"
+            app:itemDefaultKey="@string/default_key_hidden_files"
+            app:longClickPrompt="@string/description_hidden_files_preference" />
+
+        <org.autojs.autojs.ui.settings.FileExtensionsPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_file_extensions"
+            app:title="@string/text_file_extensions_title"
+            app:itemValues="@array/values_file_extensions"
+            app:itemKeys="@array/keys_file_extensions"
+            app:itemDefaultKey="@string/default_key_file_extensions"
+            app:longClickPrompt="@string/description_file_extensions_preference" />
 
     </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
 
     <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
-            app:layout="@layout/preference_category_custom"
-            app:title="@string/text_a11y_service">
+        app:layout="@layout/preference_category_custom"
+        app:title="@string/text_a11y_service">
 
         <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
-                app:layout="@layout/preference_custom"
-                app:key="@string/key_enable_a11y_service_with_root_access"
-                app:defaultValue="@bool/pref_enable_a11y_service_with_root_access"
-                app:title="@string/text_enable_a11y_service_with_root_access_automatically"
-                app:summary="@string/summary_enable_a11y_service_with_root_access" />
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_enable_a11y_service_with_root_access"
+            app:defaultValue="@bool/pref_enable_a11y_service_with_root_access"
+            app:title="@string/text_enable_a11y_service_with_root_access_automatically"
+            app:summary="@string/summary_enable_a11y_service_with_root_access" />
 
         <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
-                app:layout="@layout/preference_custom"
-                app:key="@string/key_enable_a11y_service_with_secure_settings"
-                app:defaultValue="@bool/pref_enable_a11y_service_with_secure_settings"
-                app:title="@string/text_enable_a11y_service_with_secure_settings_automatically"
-                app:summary="@string/summary_enable_a11y_service_with_secure_settings" />
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_enable_a11y_service_with_secure_settings"
+            app:defaultValue="@bool/pref_enable_a11y_service_with_secure_settings"
+            app:title="@string/text_enable_a11y_service_with_secure_settings_automatically"
+            app:summary="@string/summary_enable_a11y_service_with_secure_settings" />
 
         <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
-                app:layout="@layout/preference_custom"
-                app:key="@string/key_stable_mode"
-                app:defaultValue="@bool/pref_stable_mode"
-                app:title="@string/text_stable_mode"
-                app:summary="@string/summary_stable_mode" />
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_stable_mode"
+            app:defaultValue="@bool/pref_stable_mode"
+            app:title="@string/text_stable_mode"
+            app:summary="@string/summary_stable_mode" />
 
     </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
 
     <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
-            app:layout="@layout/preference_category_custom"
-            app:title="@string/text_script_running">
+        app:layout="@layout/preference_category_custom"
+        app:title="@string/text_script_running">
 
         <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
-                app:layout="@layout/preference_custom"
-                app:key="@string/key_use_volume_control_running"
-                app:defaultValue="@bool/pref_use_volume_control_running"
-                app:title="@string/text_use_volume_key_to_control_script_running"
-                app:summary="@string/summary_use_volume_key_to_stop_running_scripts" />
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_use_volume_control_running"
+            app:defaultValue="@bool/pref_use_volume_control_running"
+            app:title="@string/text_use_volume_key_to_control_script_running"
+            app:summary="@string/summary_use_volume_key_to_stop_running_scripts" />
 
         <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
-                app:layout="@layout/preference_custom"
-                app:key="@string/key_guard_mode"
-                app:defaultValue="@bool/pref_guard_mode"
-                app:title="@string/text_guard_mode"
-                app:summary="@string/summary_guard_mode" />
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_guard_mode"
+            app:defaultValue="@bool/pref_guard_mode"
+            app:title="@string/text_guard_mode"
+            app:summary="@string/summary_guard_mode" />
 
     </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
 
     <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
-            app:layout="@layout/preference_category_custom"
-            app:title="@string/text_script_record">
+        app:layout="@layout/preference_category_custom"
+        app:title="@string/text_script_record">
 
         <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
-                app:layout="@layout/preference_custom"
-                app:key="@string/key_use_volume_control_record"
-                app:defaultValue="@bool/pref_use_volume_control_record"
-                app:title="@string/text_use_volume_control_record"
-                app:summary="@string/summary_use_volume_control_record" />
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_use_volume_control_record"
+            app:defaultValue="@bool/pref_use_volume_control_record"
+            app:title="@string/text_use_volume_control_record"
+            app:summary="@string/summary_use_volume_control_record" />
 
         <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
-                app:layout="@layout/preference_custom"
-                app:key="@string/key_record_toast"
-                app:defaultValue="@bool/pref_record_toast"
-                app:title="@string/text_record_prompt"
-                app:summary="@string/summary_record_prompt" />
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_record_toast"
+            app:defaultValue="@bool/pref_record_toast"
+            app:title="@string/text_record_prompt"
+            app:summary="@string/summary_record_prompt" />
 
         <org.autojs.autojs.theme.preference.MaterialListPreference
-                app:layout="@layout/preference_custom"
-                app:key="@string/key_root_record_out_file_type"
-                app:title="@string/text_recorded_output_file_type"
-                app:itemKeys="@array/keys_root_record_out_file_type"
-                app:itemValues="@array/values_root_record_out_file_type"
-                app:itemDefaultKey="@string/default_key_root_record_out_file_type"
-                app:longClickPrompt="@string/description_root_record_out_file_type_preference" />
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_root_record_out_file_type"
+            app:title="@string/text_recorded_output_file_type"
+            app:itemKeys="@array/keys_root_record_out_file_type"
+            app:itemValues="@array/values_root_record_out_file_type"
+            app:itemDefaultKey="@string/default_key_root_record_out_file_type"
+            app:longClickPrompt="@string/description_root_record_out_file_type_preference" />
 
     </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
 
     <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
-            app:layout="@layout/preference_category_custom"
-            app:title="@string/text_compatibility">
+        app:layout="@layout/preference_category_custom"
+        app:title="@string/text_extensibility">
 
         <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
-                app:layout="@layout/preference_custom"
-                app:key="@string/key_compatibility_with_classes_for_ver_4_x"
-                app:defaultValue="@bool/pref_compatibility_with_classes_for_ver_4_x"
-                app:title="@string/text_compatibility_with_classes_for_ver_4_x"
-                app:summary="@string/summary_compatibility_with_classes_for_ver_4_x"
-                app:longClickPrompt="@string/description_compatibility_with_classes_for_ver_4_x" />
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_extending_js_build_in_objects"
+            app:defaultValue="@bool/pref_extending_js_build_in_objects"
+            app:title="@string/text_extending_js_build_in_objects"
+            app:summary="@string/summary_extending_js_build_in_objects"
+            app:longClickPrompt="@string/description_extending_js_build_in_objects" />
 
     </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
 
     <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
-            app:layout="@layout/preference_category_custom"
-            app:title="@string/text_extensibility">
-
-        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
-                app:layout="@layout/preference_custom"
-                app:key="@string/key_extending_js_build_in_objects"
-                app:defaultValue="@bool/pref_extending_js_build_in_objects"
-                app:title="@string/text_extending_js_build_in_objects"
-                app:summary="@string/summary_extending_js_build_in_objects"
-                app:longClickPrompt="@string/description_extending_js_build_in_objects" />
-
-    </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
-
-    <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
-            app:layout="@layout/preference_category_custom"
-            app:title="@string/text_updates">
+        app:layout="@layout/preference_category_custom"
+        app:title="@string/text_updates">
 
         <org.autojs.autojs.ui.settings.CheckForUpdatesPreference
-                app:layout="@layout/preference_custom"
-                app:key="@string/key_check_for_updates"
-                app:title="@string/text_check_for_updates"
-                app:longClickPrompt="@string/description_check_for_updates_preference" />
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_check_for_updates"
+            app:title="@string/text_check_for_updates"
+            app:longClickPrompt="@string/description_check_for_updates_preference" />
 
         <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
-                app:layout="@layout/preference_custom"
-                app:key="@string/key_auto_check_for_updates"
-                app:defaultValue="@bool/pref_auto_check_for_updates"
-                app:title="@string/text_auto_check_for_updates"
-                app:summary="@string/text_auto_check_for_updates_and_show_snackbar" />
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_auto_check_for_updates"
+            app:defaultValue="@bool/pref_auto_check_for_updates"
+            app:title="@string/text_auto_check_for_updates"
+            app:summary="@string/text_auto_check_for_updates_and_show_snackbar" />
 
         <org.autojs.autojs.ui.settings.ManageIgnoredUpdatesPreference
-                app:layout="@layout/preference_custom"
-                app:key="@string/key_manage_ignored_updates"
-                app:title="@string/text_manage_ignored_updates"
-                app:longClickPrompt="@string/description_manage_ignored_updates_preference" />
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_manage_ignored_updates"
+            app:title="@string/text_manage_ignored_updates"
+            app:longClickPrompt="@string/description_manage_ignored_updates_preference" />
+
+        <org.autojs.autojs.ui.settings.VersionHistoryPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_version_histories"
+            app:title="@string/text_version_histories"
+            app:summary="@string/summary_version_histories_preference"
+            app:longClickPrompt="@string/description_version_histories_preference" />
 
     </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
 
     <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
-            app:layout="@layout/preference_category_custom"
-            app:title="@string/text_about">
+        app:layout="@layout/preference_category_custom"
+        app:title="@string/text_about">
 
         <org.autojs.autojs.theme.preference.MaterialDialogPreference
-                app:layout="@layout/preference_custom"
-                app:key="@string/key_about_app_tips"
-                app:title="@string/text_about_app_tips"
-                app:summary="@string/summary_about_app_tips"
-                app:dialogContent="@string/content_about_app_tips"
-                app:positiveText="@string/dialog_button_cancel"
-                app:longClickPrompt="@string/description_about_app_tips_preference" />
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_about_app_tips"
+            app:title="@string/text_about_app_tips"
+            app:summary="@string/summary_about_app_tips"
+            app:dialogContent="@string/content_about_app_tips"
+            app:positiveText="@string/dialog_button_dismiss"
+            app:positiveColor="@color/dialog_button_default"
+            app:longClickPrompt="@string/description_about_app_tips_preference" />
 
         <org.autojs.autojs.ui.settings.AboutAppAndDeveloperPreference
-                app:layout="@layout/preference_custom"
-                app:key="@string/key_about_app_and_developer"
-                app:title="@string/text_about_app_and_developer"
-                app:longClickPrompt="@string/description_about_app_and_developer_preference" />
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_about_app_and_developer"
+            app:title="@string/text_about_app_and_developer"
+            app:longClickPrompt="@string/description_about_app_and_developer_preference" />
 
     </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
 

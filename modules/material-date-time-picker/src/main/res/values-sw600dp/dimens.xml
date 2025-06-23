@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*
+** Copyright 2013, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+-->
+
+<resources>
+
+    <dimen name="mdtp_date_picker_component_width">400dp</dimen>
+    <dimen name="mdtp_date_picker_view_animator_height">400dp</dimen>
+    <dimen name="mdtp_date_picker_view_animator_height_v2">400dp</dimen>
+    <dimen name="mdtp_selected_calendar_layout_height">360dp</dimen>
+    <dimen name="mdtp_date_picker_title_height">45dp</dimen>
+    <dimen name="mdtp_month_list_item_header_height">75dp</dimen>
+    <dimen name="mdtp_month_list_item_padding">20dp</dimen>
+    <dimen name="mdtp_day_number_select_circle_radius">20dp</dimen>
+    <dimen name="mdtp_month_select_circle_radius">36dp</dimen>
+    <dimen name="mdtp_selected_date_year_size">45dp</dimen>
+    <dimen name="mdtp_selected_date_day_size">150dp</dimen>
+    <dimen name="mdtp_selected_date_month_size">45dp</dimen>
+    <dimen name="mdtp_year_label_height">96dp</dimen>
+    <dimen name="mdtp_year_label_text_size">33dp</dimen>
+    <dimen name="mdtp_date_picker_header_text_size">18dp</dimen>
+    <dimen name="mdtp_time_picker_header_text_size">18dp</dimen>
+
+    <dimen name="mdtp_month_list_item_size">18sp</dimen>
+    <dimen name="mdtp_month_label_size">16sp</dimen>
+    <dimen name="mdtp_day_number_size">14sp</dimen>
+    <dimen name="mdtp_month_day_label_text_size">12sp</dimen>
+
+    <dimen name="mdtp_time_label_size">76dp</dimen>
+    <dimen name="mdtp_time_label_subscript_size">38dp</dimen>
+    <dimen name="mdtp_extra_time_label_margin">-50dp</dimen>
+    <dimen name="mdtp_ampm_label_size">16dp</dimen>
+    <dimen name="mdtp_ampm_left_padding">6dip</dimen>
+    <dimen name="mdtp_separator_padding">5dip</dimen>
+    <dimen name="mdtp_header_height">120dip</dimen>
+    <dimen name="mdtp_footer_height">60dip</dimen>
+    <dimen name="mdtp_minimum_margin_sides">48dip</dimen>
+    <dimen name="mdtp_minimum_margin_top_bottom">24dip</dimen>
+    <dimen name="mdtp_picker_dimen">400dip</dimen>
+    <dimen name="mdtp_time_picker_height">450dp</dimen>
+
+</resources>

@@ -4,12 +4,9 @@ import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Context;
 import android.view.MenuItem;
-import android.widget.EditText;
-
 import androidx.appcompat.widget.SearchView;
 import androidx.core.view.MenuItemCompat;
-
-import org.autojs.autojs6.R;
+import org.autojs.autojs.util.ViewUtils;
 
 /**
  * Created by Stardust on Oct 25, 2017.
@@ -20,26 +17,33 @@ public class SearchViewItem implements MenuItemCompat.OnActionExpandListener, Se
         void summitQuery(String query);
     }
 
-    private QueryCallback mQueryCallback;
+    private SearchView.OnQueryTextListener mQueryCallback;
     private final MenuItem mSearchMenuItem;
+    private final SearchView mSearchView;
+    private final Activity mActivity;
 
     public SearchViewItem(Activity activity, MenuItem searchMenuItem) {
+        mActivity = activity;
         mSearchMenuItem = searchMenuItem;
         SearchManager searchManager = (SearchManager) activity.getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView = (SearchView) searchMenuItem.getActionView();
-        if (searchView == null) {
+        mSearchView = (SearchView) searchMenuItem.getActionView();
+        if (mSearchView == null) {
             return;
         }
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(activity.getComponentName()));
-        EditText textview = searchView.findViewById(androidx.appcompat.R.id.search_src_text);
-        if (textview != null) {
-            textview.setHintTextColor(activity.getColor(R.color.night_day));
-        }
+        mSearchView.setSubmitButtonEnabled(false);
+        mSearchView.setSearchableInfo(searchManager.getSearchableInfo(activity.getComponentName()));
+        setColorsByThemeColorLuminance();
         MenuItemCompat.setOnActionExpandListener(searchMenuItem, this);
-        searchView.setOnQueryTextListener(this);
+        mSearchView.setOnQueryTextListener(this);
     }
 
-    public void setQueryCallback(QueryCallback queryCallback) {
+    public void setColorsByThemeColorLuminance() {
+        if (mSearchView != null) {
+            ViewUtils.setSearchViewColorsByThemeColorLuminance(mActivity, mSearchView);
+        }
+    }
+
+    public void setQueryCallback(SearchView.OnQueryTextListener queryCallback) {
         mQueryCallback = queryCallback;
     }
 
@@ -57,21 +61,23 @@ public class SearchViewItem implements MenuItemCompat.OnActionExpandListener, Se
         if (mQueryCallback == null) {
             return true;
         }
-        mQueryCallback.summitQuery(null);
+        mQueryCallback.onQueryTextSubmit(null);
         return true;
     }
 
     @Override
     public boolean onQueryTextSubmit(String query) {
-        if (mQueryCallback == null) {
-            return true;
+        if (mQueryCallback != null) {
+            mQueryCallback.onQueryTextSubmit(query);
         }
-        mQueryCallback.summitQuery(query);
         return true;
     }
 
     @Override
     public boolean onQueryTextChange(String newText) {
+        if (mQueryCallback != null) {
+            mQueryCallback.onQueryTextChange(newText);
+        }
         return false;
     }
 

@@ -5,10 +5,14 @@ import android.content.Intent
 import android.view.ContextThemeWrapper
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
+import kotlinx.coroutines.Runnable
 import org.autojs.autojs.annotation.ScriptInterface
+import org.autojs.autojs.concurrent.VolatileDispose
 import org.autojs.autojs.core.floaty.BaseResizableFloatyWindow
 import org.autojs.autojs.core.floaty.RawWindow
 import org.autojs.autojs.core.ui.JsViewHelper
+import org.autojs.autojs.core.ui.inflater.Exceptions
 import org.autojs.autojs.permission.DisplayOverOtherAppsPermission
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.ui.UI
@@ -16,50 +20,47 @@ import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.tool.UiHandler
 import org.autojs.autojs.ui.enhancedfloaty.FloatyService
 import org.autojs.autojs.util.RhinoUtils.NOT_CONSTRUCTABLE
+import org.autojs.autojs.util.RhinoUtils.isMainThread
 import org.autojs.autojs.util.RhinoUtils.isUiThread
 import org.autojs.autojs.util.RhinoUtils.newBaseFunction
 import org.autojs.autojs.util.ViewUtils.setViewMeasure
 import org.autojs.autojs6.R
 import java.util.concurrent.CopyOnWriteArraySet
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
-import kotlin.concurrent.Volatile
-import kotlin.math.max
 
 /**
  * Created by Stardust on Dec 5, 2017.
  * Modified by SuperMonster003 as of Mar 27, 2022.
  * Transformed by SuperMonster003 on Mar 27, 2022.
  */
-class Floaty(private val mUiHandler: UiHandler, private val mRuntime: ScriptRuntime) {
+class Floaty(private val uiHandler: UiHandler, private val scriptRuntime: ScriptRuntime) {
 
-    private val mContext = ContextThemeWrapper(mUiHandler.applicationContext, R.style.ScriptTheme)
+    private val mContext = ContextThemeWrapper(uiHandler.applicationContext, R.style.ScriptTheme)
     private val mWindows = CopyOnWriteArraySet<JsWindow>()
     private val mDisplayOverOtherAppsPerm = DisplayOverOtherAppsPermission(mContext)
 
     fun window(supplier: BaseResizableFloatyWindow.ViewSupplier): JsResizableWindow {
         try {
             mDisplayOverOtherAppsPerm.waitFor()
-        } catch (e: InterruptedException) {
+        } catch (_: InterruptedException) {
             throw ScriptInterruptedException()
         }
         return JsResizableWindow(supplier).also { addWindow(it) }
     }
 
-    fun window(view: View): JsResizableWindow = window(object : BaseResizableFloatyWindow.ViewSupplier {
+    fun window(view: View) = window(object : BaseResizableFloatyWindow.ViewSupplier {
         override fun inflate(context: Context, parent: ViewGroup?) = view
     })
 
-    fun rawWindow(floaty: BaseResizableFloatyWindow.ViewSupplier): JsRawWindow {
+    fun rawWindow(supplier: BaseResizableFloatyWindow.ViewSupplier): JsRawWindow {
         try {
             mDisplayOverOtherAppsPerm.waitFor()
-        } catch (e: InterruptedException) {
+        } catch (_: InterruptedException) {
             throw ScriptInterruptedException()
         }
-        return JsRawWindow(floaty).also { addWindow(it) }
+        return JsRawWindow(supplier).also { addWindow(it) }
     }
 
-    fun rawWindow(view: View) = JsRawWindow(object : BaseResizableFloatyWindow.ViewSupplier {
+    fun rawWindow(view: View) = rawWindow(object : BaseResizableFloatyWindow.ViewSupplier {
         override fun inflate(context: Context, parent: ViewGroup?) = view
     })
 
@@ -95,41 +96,67 @@ class Floaty(private val mUiHandler: UiHandler, private val mRuntime: ScriptRunt
     }
 
     @ScriptInterface
-    fun getClip(delay: Long = 0L): String {
+    fun getClip(maxDelayAfterWindowReady: Long = 500L): String {
         val start = System.currentTimeMillis()
-        val timeoutForAttachedToWindowManager: Long = 2_000
-        val latch = CountDownLatch(1)
-        val win = window(View(mContext).apply { visibility = View.INVISIBLE })
-        UI.postRhinoRuntime(mRuntime, newBaseFunction("action", {
+        val timeoutForAttachedToWindowManager = 1000L
+        val view = FrameLayout(mContext)
+        val win = rawWindow(view)
+        UI.runRhinoRuntime(scriptRuntime, newBaseFunction("action", {
             while (System.currentTimeMillis() - start < timeoutForAttachedToWindowManager) {
                 if (runCatching { win.requestFocus() }.isSuccess) break
             }
         }, NOT_CONSTRUCTABLE))
-        latch.await(max(0, delay - (System.currentTimeMillis() - start)), TimeUnit.MILLISECONDS)
-        return mRuntime.clip.also { win.close() }
+        val getClipboardData = {
+            val getter = { scriptRuntime.clip.also { win.close() } }
+            val startTime = System.currentTimeMillis()
+            var result = getter()
+            while (System.currentTimeMillis() - startTime < maxDelayAfterWindowReady) {
+                if (result.isNotBlank()) break
+                Thread.sleep(10)
+                result = getter()
+            }
+            result
+        }
+        return when {
+            isMainThread() -> {
+                getClipboardData()
+            }
+            else -> {
+                val result = VolatileDispose<String>()
+                scriptRuntime.uiHandler.post { result.setAndNotify(getClipboardData()) }
+                result.blockedGetOrThrow(ScriptInterruptedException::class.java)
+            }
+        }
     }
 
     interface JsWindow {
         fun close(removeFromWindows: Boolean)
     }
 
-    inner class JsRawWindow(floaty: BaseResizableFloatyWindow.ViewSupplier) : JsWindow {
+    inner class JsRawWindow(supplier: BaseResizableFloatyWindow.ViewSupplier) : JsWindow {
 
         private var mWindow: RawWindow? = null
         private var mExitOnClose = false
 
         init {
-            mWindow = RawWindow(floaty, mUiHandler.applicationContext)
-            mUiHandler.applicationContext.startService(Intent(mUiHandler.applicationContext, FloatyService::class.java))
-
-            val r = Runnable { FloatyService.addWindow(mWindow) }
-
-            /* 如果是 UI 线程则直接创建, 否则放入 UI 线程. */
-            if (isUiThread()) r.run() else mUiHandler.post(r)
+            val context = uiHandler.applicationContext
+            val window = RawWindow(supplier).also { mWindow = it }
+            val r = Runnable {
+                context.startService(Intent(context, FloatyService::class.java))
+                FloatyService.addWindow(window)
+            }
+            if (isUiThread()) {
+                r.run()
+            } else {
+                uiHandler.post(r)
+                window.waitForCreation()?.let { if (it != Exceptions.NO_EXCEPTION) throw it }
+            }
         }
 
         fun findView(id: String?): View? {
-            return mWindow?.let { JsViewHelper.findViewByStringId(it.contentView, id) }
+            val win = mWindow ?: return null
+            val contentView = win.contentView ?: return null
+            return JsViewHelper.findViewByStringId(contentView, id)
         }
 
         val x: Int
@@ -151,8 +178,11 @@ class Floaty(private val mUiHandler: UiHandler, private val mRuntime: ScriptRunt
         }
 
         private fun runWithWindow(r: Runnable) {
-            mWindow ?: return
-            mUiHandler.post(r)
+            when {
+                mWindow == null -> return
+                isUiThread() -> r.run()
+                else -> uiHandler.post { mWindow?.let { r.run() } }
+            }
         }
 
         fun setPosition(x: Int, y: Int) = runWithWindow {
@@ -175,7 +205,7 @@ class Floaty(private val mUiHandler: UiHandler, private val mRuntime: ScriptRunt
                     mWindow!!.close()
                     mWindow = null
                     if (mExitOnClose) {
-                        mRuntime.exit()
+                        scriptRuntime.exit()
                     }
                 }
             }
@@ -184,28 +214,29 @@ class Floaty(private val mUiHandler: UiHandler, private val mRuntime: ScriptRunt
 
     inner class JsResizableWindow(supplier: BaseResizableFloatyWindow.ViewSupplier) : JsWindow {
 
-        private var mView: View? = null
-
         @Volatile
         private var mWindow: BaseResizableFloatyWindow? = null
-
+        private var mView: View? = null
         private var mExitOnClose = false
 
         init {
-            mWindow = BaseResizableFloatyWindow(mContext, object : BaseResizableFloatyWindow.ViewSupplier {
+            val context = uiHandler.applicationContext
+            val window = BaseResizableFloatyWindow(mContext, object : BaseResizableFloatyWindow.ViewSupplier {
                 override fun inflate(context: Context, parent: ViewGroup?): View {
                     return supplier.inflate(context, parent).also { mView = it }
                 }
-            })
-            mUiHandler.applicationContext.startService(Intent(mUiHandler.applicationContext, FloatyService::class.java))
-
-            val r = Runnable { FloatyService.addWindow(mWindow!!) }
-
-            /* 如果是 UI 线程则直接创建, 否则放入 UI 线程. */
-            if (isUiThread()) r.run() else mUiHandler.post(r)
-
-            mWindow!!.setOnCloseButtonClickListener { _ -> close() }
-            // setSize(mWindow.getWindowBridge().getScreenWidth() / 2, mWindow.getWindowBridge().getScreenHeight() / 2);
+            }).also { mWindow = it }
+            val r = Runnable {
+                context.startService(Intent(context, FloatyService::class.java))
+                FloatyService.addWindow(window)
+            }
+            if (isUiThread()) {
+                r.run()
+            } else {
+                uiHandler.post(r)
+                window.waitForCreation()?.let { if (it != Exceptions.NO_EXCEPTION) throw it }
+            }
+            window.setOnCloseButtonClickListener { close() }
         }
 
         fun findView(id: String?) = mView?.let { JsViewHelper.findViewByStringId(it, id) }
@@ -225,8 +256,11 @@ class Floaty(private val mUiHandler: UiHandler, private val mRuntime: ScriptRunt
         }
 
         private fun runWithWindow(r: Runnable) {
-            mWindow ?: return
-            mUiHandler.post(r)
+            when {
+                mWindow == null -> return
+                isUiThread() -> r.run()
+                else -> uiHandler.post { mWindow?.let { r.run() } }
+            }
         }
 
         fun setPosition(x: Int, y: Int) = runWithWindow {
@@ -234,7 +268,7 @@ class Floaty(private val mUiHandler: UiHandler, private val mRuntime: ScriptRunt
         }
 
         var isAdjustEnabled: Boolean
-            get() = mWindow?.isAdjustEnabled ?: false
+            get() = mWindow?.isAdjustEnabled == true
             set(enabled) {
                 runWithWindow { mWindow!!.isAdjustEnabled = enabled }
             }
@@ -255,7 +289,7 @@ class Floaty(private val mUiHandler: UiHandler, private val mRuntime: ScriptRunt
                     mWindow!!.close()
                     mWindow = null
                     if (mExitOnClose) {
-                        mRuntime.exit()
+                        scriptRuntime.exit()
                     }
                 }
             }

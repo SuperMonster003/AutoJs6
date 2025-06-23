@@ -4,6 +4,150 @@
 
 ******
 
+# v6.6.4
+
+###### 2025/05/31
+
+* `提示` API 變更: ui.(status/navigation)BarAppearanceLight[By] -> ui.(status/navigation)BarIconLight[By]
+* `新增` util.dpToPx/spToPx/pxToDp/pxToSp 方法, 用於像素單位轉換
+* `修復` 屏幕旋轉至橫向時子標題可能顯示不完整的問題
+* `修復` 屏幕旋轉至橫向時部分頁面內容被側邊導航欄遮擋的問題
+* `修復` Android 15 部分頁面狀態欄背景着色區域不完整的問題 _[`issue #398`](http://issues.autojs6.com/398)_
+* `修復` 代碼編輯器可能使用置信度不足的編碼寫入文件導致內容解碼異常的問題 (試修)
+* `優化` 關於應用與開發者頁面增加布局適配通用性並去除不必要的佈局分類
+* `優化` README.md 項目編譯構建小節添加多種方式便於定位目標設置頁面 _[`issue #404`](http://issues.autojs6.com/404)_
+* `依賴` 附加 Androidx ConstraintLayout 版本 2.2.1
+
+# v6.6.3
+
+###### 2025/05/27
+
+* `新增` 版本歷史功能, 可查看發行版本歷史更新記錄 (多語言) 與統計數據
+* `新增` timers.keepAlive 方法 (已全局化), 用於保持腳本活躍狀態
+* `新增` engines.on('start/stop/error', callback) 等事件監聽方法, 用於監聽腳本引擎全局事件
+* `新增` images.detectMultiColors 方法, 用於多點顏色校驗 _[`issue #374`](http://issues.autojs6.com/374)_
+* `新增` images.matchFeatures/detectAndComputeFeatures 方法, 支持全分辨率找圖 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) _[`issue #366`](http://issues.autojs6.com/366)_
+* `新增` images.compressToBytes 方法, 用於壓縮圖像並生成字節數組
+* `新增` images.downsample 方法, 用於像素降採樣並生成新的 ImageWrapper
+* `新增` ui.keepScreenOn 方法, 用於 UI 頁面獲取焦點時保持設備屏幕常亮
+* `新增` ui.root 屬性 (getter), 用於獲取 UI 頁面佈局的 "窗口內容根容器" 節點
+* `新增` webview 元素支持基於 JsBridge 的 Web 頁面佈局 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) [參閱 示例代碼 > 佈局 > 可交互 HTML / Vue2 + Vant (SFC)] _[`issue #281`](http://issues.autojs6.com/281)_
+* `修復` 主頁文檔標籤及文檔活動頁面顯示在線文檔時部分內容被系統導航欄遮擋的問題
+* `修復` 部分頁面 Toolbar 點擊按鈕時可能導致標題點擊事件誤觸發的問題
+* `修復` 部分設備代碼編輯器空行顯示方框字符的問題
+* `修復` 主題色設置頁面調色盤對話框可能無限疊加的問題
+* `修復` 無障礙服務關閉時音量加鍵停止所有腳本功能失效的問題
+* `修復` 定時任務頁面編輯自定義廣播內容時出現的輸入法遮擋問題
+* `修復` webview 元素中的控件無法正常激活輸入法軟鍵盤的問題
+* `修復` APK 文件類型信息對話框可能無法獲取應用名稱及 SDK 信息的問題
+* `修復` 文件管理器示例代碼進入項目目錄時可能無法自動加載子目錄文件內容的問題
+* `修復` Android 15 UI 模式頂部內容被狀態欄覆蓋的問題
+* `修復` Android 15 部分頁面狀態欄背景顏色可能無法動態跟隨主題色的問題
+* `修復` dialogs 模塊無法正常使用 customView 屬性的問題 _[`issue #364`](http://issues.autojs6.com/364)_
+* `修復` dialogs.input 方法的表達式參數可能無法獲得執行結果的問題
+* `修復` 使用 JavaAdapter 時導致 ClassLoader 調用棧溢出的問題 _[`issue #376`](http://issues.autojs6.com/376)_
+* `修復` console.setContentTextColor 方法導致日誌字體顏色丟失默認值的問題 _[`issue #346`](http://issues.autojs6.com/346)_
+* `修復` console.setContentBackgroundColor 方法無法接受顏色名稱參數的問題 _[`issue #384`](http://issues.autojs6.com/384)_
+* `修復` images.compress 方法實現原理由像素降採樣修正爲編碼質量變化
+* `修復` images.resize 方法無法正常使用的問題
+* `修復` engines.all 方法可能觸發 ConcurrentModificationException 的問題 _[`issue #394`](http://issues.autojs6.com/394)_
+* `修復` README.md 中部分語言日期格式不正確的問題
+* `修復` Gradle 構建腳本可能因獲取到無效庫檔案文件長度而導致構建失敗的問題 _[`issue #389`](http://issues.autojs6.com/389)_
+* `優化` 佈局分析支持控件隱藏 (by [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #371`](http://pr.autojs6.com/371)_ _[`issue #355`](http://issues.autojs6.com/355)_
+* `優化` 佈局分析菜單添加漸變分隔線實現一定程度的功能分組
+* `優化` 腳本項目配置文件 project.json 支持 permissions 選項 (by [wirsnow](https://github.com/wirsnow)) _[`pr #391`](http://pr.autojs6.com/391)_ _[`issue #362`](http://issues.autojs6.com/362)_
+* `優化` 打包單文件時自動讀取並勾選已安裝應用的聲明權限 _[`issue #362`](http://issues.autojs6.com/362)_
+* `優化` 主題色擴充適配範圍並支持更多控件類型
+* `優化` 主頁抽屜在橫向屏幕或超寬屏幕的寬度適應性
+* `優化` 關於應用與開發者頁面增加水平佈局及小屏佈局適配
+* `優化` 設置頁面對話框相關設置支持 "使用默認值" 菜單選項
+* `優化` 文件管理器浮動按鈕展開後點擊其他區域可自動隱藏
+* `優化` 代碼編輯器格式化代碼支持 `??`, `?.`, `??=` 等運算符
+* `優化` 代碼編輯器支持 GB18030 / UTF-16 (LE/BE) / Shift_JIS 等編碼的文件讀寫
+* `優化` 代碼編輯器支持顯示文件詳細信息 (路徑/編碼/換行符/字節及字符總數等) _[`issue #395`](http://issues.autojs6.com/395)_
+* `優化` 意圖相關操作 (編輯/查看/安裝/發送/播放等) 增加操作異常提示
+* `優化` webview 元素的 url 屬性支持相對路徑
+* `優化` ImageWrapper#saveTo 方法的路徑參數支持相對路徑
+* `優化` images.save 方法使用 quality 參數時支持 png 格式的文件體積壓縮 _[`issue #367`](http://issues.autojs6.com/367)_
+* `優化` 已忽略更新記錄及客戶端模式連接地址記錄支持清空操作
+* `優化` 版本更新信息支持多語言顯示 (與當前顯示語言同步)
+* `優化` 使用異步加載方式一定程度提升文件管理器列表滑動流暢性
+* `優化` 腳本異常消息在控制檯的顯示內容與格式
+* `優化` 示例代碼支持將文件夾重置爲初始內容
+* `優化` APK 文件簽名信息提升檢測效率
+* `優化` APK 文件類型信息及媒體文件類型信息優化對話框顯示效率及信息展示邏輯
+* `優化` Gradle 構建腳本提升版本自適應能力 _[`discussion #369`](http://discussions.autojs6.com/369)_
+* `依賴` 本地化 Material Dialogs 版本 0.9.6.0
+* `依賴` 本地化 Material Date Time Picker 版本 4.2.3
+* `依賴` 本地化 libimagequant 版本 2.17.0
+* `依賴` 本地化 libpng 版本 1.6.49
+* `依賴` 附加 ICU4J 版本 77.1
+* `依賴` 附加 Jsoup 版本 1.19.1
+* `依賴` 附加 Material Progressbar 版本 1.4.2
+* `依賴` 附加 Flexmark Java HTML to Markdown 版本 0.64.8
+* `依賴` 升級 Gradle 版本 8.14-rc-1 -> 8.14
+* `依賴` 升級 Androidx Room 版本 2.7.0 -> 2.7.1
+
+# v6.6.2
+
+###### 2025/04/16
+
+* `新增` ui.statusBarAppearanceLight/statusBarAppearanceLightBy/navigationBarColor 等方法
+* `新增` ui.statusBarHeight 屬性 (getter), 用於獲取狀態欄高度 _[`issue #357`](http://issues.autojs6.com/357)_
+* `新增` images.flip 方法, 用於圖像翻轉 _[`issue #349`](http://issues.autojs6.com/349)_
+* `新增` 設置頁面增加 "文件擴展名" 設置選項
+* `新增` 主題色設置頁面增加新佈局支持 (分組/定位/搜索/歷史記錄/調色盤增強等)
+* `修復` Android 15 狀態欄背景顏色與主題色不一致的問題
+* `修復` plugins.load 方法無法正常加載插件的問題 _[`issue #290`](http://issues.autojs6.com/290)_
+* `修復` dx 庫在 Android 7.x 無法正常使用的問題 _[`issue #293`](http://issues.autojs6.com/293)_
+* `修復` ScriptRuntime 使用 require 引用內置模塊時可能出現的同步狀態異常 (試修) _[`issue #298`](http://issues.autojs6.com/298)_
+* `修復` notice 模塊缺失 getBuilder 等擴展方法的問題 _[`issue #301`](http://issues.autojs6.com/301)_
+* `修復` shizuku/shell 等方法無法接受字符串參數的問題 _[`issue #310`](http://issues.autojs6.com/310)_
+* `修復` colors.pixel 方法無法接受單通道圖像參數的問題 _[`issue #350`](http://issues.autojs6.com/350)_
+* `修復` engines.execScript/execScriptFile 等方法執行腳本時默認工作路徑異常 _[`issue #358`](http://issues.autojs6.com/358)_ _[`issue #340`](http://issues.autojs6.com/340)_ _[`issue #339`](http://issues.autojs6.com/339)_
+* `修復` floaty.window/floaty.rawWindow 無法在子線程執行的問題
+* `修復` floaty.getClip 可能無法正常獲取剪切板內容的問題 _[`issue #341`](http://issues.autojs6.com/341)_
+* `修復` ui.inflate 返回值丟失 attr/on/click 等原型方法的問題
+* `修復` 使用 XML 語法將 JavaScript 表達式作為屬性值時, 其作用域上下文綁定錯誤的問題 _[`issue #319`](http://issues.autojs6.com/319)_
+* `修復` 部分方法調用出現異常時無法被 try..catch 塊捕獲的問題 _[`issue #345`](http://issues.autojs6.com/345)_
+* `修復` 佈局分析頁面生成代碼時可能導致應用崩潰的問題 _[`issue #288`](http://issues.autojs6.com/288)_
+* `修復` 打包應用無法正常使用 shizuku 模塊的問題 _[`issue #227`](http://issues.autojs6.com/227)_ _[`issue #231`](http://issues.autojs6.com/231)_ _[`issue #284`](http://issues.autojs6.com/284)_ _[`issue #287`](http://issues.autojs6.com/287)_ _[`issue #304`](http://issues.autojs6.com/304)_
+* `修復` 代碼編輯器跳轉到行尾時可能跳轉到下一行起始位置的問題
+* `修復` 設置頁面連續快速點擊對話框類型項目時可能導致應用崩潰的問題
+* `優化` 精簡打包應用模板 APK 文件大小
+* `優化` 應用 (以及打包應用) 支持更多權限 _[`issue #338`](http://issues.autojs6.com/338)_
+* `優化` 打包頁面支持 Pinyin 庫選項
+* `優化` 打包應用主活動頁面優化狀態欄背景及文字顏色
+* `優化` 打包應用設置頁面增加訪問所有文件和發送通知等特殊權限開關 _[`issue #354`](http://issues.autojs6.com/354)_
+* `優化` 控件的文字及圖標根據主題色亮度值自動切換合適的顏色
+* `優化` 部分控件主題色與背景色對比度過低時的視覺體驗
+* `優化` 調色盤 HEX 輸入控件增強剪貼板粘貼色值時的兼容性
+* `優化` 應用內頁面導航欄設置為透明或半透明以增強視覺體驗
+* `優化` UI 模式狀態欄及導航欄默認為 `md_grey_50` 色值且設置為亮色模式
+* `優化` 主頁抽屜無障礙服務開關支持與腳本代碼同步
+* `優化` 主頁文檔頁面搜索時支持雙向查找按鈕
+* `優化` 主頁 "文件" 標籤支持通過長按切換浮動按鈕可見狀態
+* `優化` 代碼編輯器標題文字支持字體大小自適應
+* `優化` 日誌頁面浮動按鈕可見狀態與列表滾動操作聯動
+* `優化` 腳本項目配置文件 project.json 支持更多打包選項 _[`issue #305`](http://issues.autojs6.com/305)_ _[`issue #306`](http://issues.autojs6.com/306)_
+* `優化` 腳本項目配置文件 project.json 支持選項名稱寬鬆匹配及別名兼容
+* `優化` APK 文件類型信息對話框增加文件大小與簽名方案信息
+* `優化` APK 文件類型信息對話框增加點擊監聽器支持文本複製與應用詳情跳轉
+* `優化` 嘗試恢復 com.stardust 前綴包以便提升代碼兼容性 _[`issue #290`](http://issues.autojs6.com/290)_
+* `優化` floaty.window/floaty.rawWindow 同時支持主線程和子線程執行
+* `優化` getClip 全局方法適時藉助 floaty.getClip 方法以提升兼容性
+* `優化` files.path 及相關方法傳入空值路徑參數時的兼容性
+* `優化` 同步最新的 Rhino 引擎官方上游代碼並進行必要的代碼適配
+* `優化` README.md 完善項目構建與運行相關內容 _[`issue #344`](http://issues.autojs6.com/344)_
+* `依賴` 附加 Eclipse Paho Client Mqttv3 版本 1.1.0 _[`issue #330`](http://issues.autojs6.com/330)_
+* `依賴` 升級 Gradle Compile 版本 34 -> 35
+* `依賴` 升級 Gradle 版本 8.12 -> 8.14-rc-1
+* `依賴` 升級 Rhino 版本 1.8.0-SNAPSHOT -> 1.8.1-SNAPSHOT
+* `依賴` 升級 Androidx Recyclerview 版本 1.3.2 -> 1.4.0
+* `依賴` 升級 Androidx Room 版本 2.6.1 -> 2.7.0
+* `依賴` 升級 Androidx WebKit 版本 1.12.1 -> 1.13.0
+* `依賴` 升級 Pinyin4j 版本 2.5.0 -> 2.5.1
+
 # v6.6.1
 
 ###### 2025/01/01
@@ -63,9 +207,9 @@
 * `新增` floaty.getClip 方法, 用於藉助浮動窗口聚焦間接獲取剪切板內容
 * `修復` Fragment 子類 (如 [DrawerFragment](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/ui/main/drawer/DrawerFragment.kt#L369) / [ExplorerFragment](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/ui/main/scripts/ExplorerFragment.kt#L48) 等) 中存在的 View Binding 內存泄漏
 * `修復` [ScreenCapture](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/core/image/capture/ScreenCapturer.java#L70) / [ThemeColorPreference](https://github.com/SuperMonster003/AutoJs6/blob/10960ddbee71f75ef80907ad5b6ab42f3e1bf31e/app/src/main/java/org/autojs/autojs/ui/settings/ThemeColorPreference.kt#L21) 等類中存在的實例內存泄漏
-* `修復` Android 14+ 申請截圖權限導致應用崩潰的問題 (by [chenguangming](https://github.com/chenguangming)) _[`pr #242`](http://pr.autojs6.com/242)_
-* `修復` Android 14+ 開啓前台服務導致應用崩潰的問題
-* `修復` Android 14+ 代碼編輯器運行按鈕點擊後無法正常亮起的問題
+* `修復` Android 14 申請截圖權限導致應用崩潰的問題 (by [chenguangming](https://github.com/chenguangming)) _[`pr #242`](http://pr.autojs6.com/242)_
+* `修復` Android 14 開啓前台服務導致應用崩潰的問題
+* `修復` Android 14 代碼編輯器運行按鈕點擊後無法正常亮起的問題
 * `修復` 項目打包後應用可能因缺少必要庫文件無法正常運行的問題 _[`issue #202`](http://issues.autojs6.com/202)_ _[`issue #223`](http://issues.autojs6.com/223)_ _[`pr #264`](http://pr.autojs6.com/264)_
 * `修復` 編輯項目時可能因指定圖標資源不存在而導致應用崩潰的問題 _[`issue #203`](http://issues.autojs6.com/203)_
 * `修復` 截圖權限申請時無法正常使用參數獲取指定屏幕方向的截圖資源
@@ -124,7 +268,7 @@
 * `依賴` 附加 Toaster 版本 12.6
 * `依賴` 附加 EasyWindow (for Toaster) 版本 10.3
 * `依賴` 升級 Gradle 版本 8.5 -> 8.11.1
-* `依賴` 升級 Rhino 版本 1.7.15-snapshot -> 1.7.16-snapshot
+* `依賴` 升級 Rhino 版本 1.7.15-SNAPSHOT -> 1.8.0-SNAPSHOT
 * `依賴` 升級 Android Material Lang3 版本 1.10.0 -> 1.12.0
 * `依賴` 升級 Androidx Annotation 版本 1.7.0 -> 1.9.1
 * `依賴` 升級 Androidx AppCompat 版本 1.6.1 -> 1.7.0
@@ -640,7 +784,7 @@
 * `依賴` 升級 Kotlinx Coroutines 版本 1.6.0 -> 1.6.1-native-mt
 * `依賴` 升級 LeakCanary 版本 2.8.1 -> 2.9.1
 * `依賴` 升級 OkHttp3 版本 5.0.0-alpha.6 -> 5.0.0-alpha.7
-* `依賴` 升級 Rhino 引擎版本 1.7.14 -> 1.7.15-snapshot
+* `依賴` 升級 Rhino 引擎版本 1.7.14 -> 1.7.15-SNAPSHOT
 * `依賴` 升級 Zip4j 版本 2.9.1 -> 2.10.0
 * `依賴` 移除 Groovy JSON 版本 3.0.8
 * `依賴` 移除 Kotlin Stdlib JDK7 版本 1.6.21
@@ -692,7 +836,7 @@
 * `依賴` 附加 Androidx AppCompat (Legacy) 版本 1.0.2
 * `依賴` 升級 Androidx AppCompat 版本 1.4.0 -> 1.4.1
 * `依賴` 升級 Androidx Preference 版本 1.1.1 -> 1.2.0
-* `依賴` 升級 Rhino 引擎版本 1.7.14-snapshot -> 1.7.14
+* `依賴` 升級 Rhino 引擎版本 1.7.14-SNAPSHOT -> 1.7.14
 * `依賴` 升級 OkHttp3 版本 3.10.0 -> 5.0.0-alpha.3 -> 5.0.0-alpha.4
 * `依賴` 升級 Android Material 版本 1.6.0-alpha01 -> 1.6.0-alpha02
 * `依賴` 升級 Gradle 構建工具版本 7.2.0-alpha06 -> 7.2.0-beta01
@@ -729,7 +873,7 @@
 * `修復` 無法識別打包插件及打包插件下載地址無效的問題
 * `修復` 主頁抽屜 "查看使用情況權限" 開關狀態可能不同步的問題
 * `修復` TemplateMatching.fastTemplateMatching 潛在的 Mat 內存泄漏問題
-* `優化` 升級 Rhino 引擎版本 1.7.7.2 -> 1.7.13 -> 1.7.14-snapshot
+* `優化` 升級 Rhino 引擎版本 1.7.7.2 -> 1.7.13 -> 1.7.14-SNAPSHOT
 * `優化` 升級 OpenCV 版本 3.4.3 -> 4.5.4
 * `優化` ViewUtil.getStatusBarHeight 提升兼容性
 * `優化` 主頁抽屜移除用户登錄相關模塊並移除佈局佔位

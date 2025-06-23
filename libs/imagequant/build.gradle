@@ -1,0 +1,90 @@
+apply plugin: 'com.android.library'
+apply plugin: 'org.jetbrains.kotlin.android'
+apply from: '../utils.build.gradle'
+
+ext {
+    projectName = "Image Quantization"
+}
+
+def versions = Utils.newVersions(project)
+
+def versionMap = [
+        "libimagequant": "2.17.0",
+        "libpng"       : "1.6.49",
+
+        "MIN_SDK"      : versions["MIN_SDK"] as Integer,
+        "COMPILE_SDK"  : versions["COMPILE_SDK"] as Integer,
+        "TARGET_SDK"   : versions["TARGET_SDK"] as Integer,
+
+        "NDK"          : versions["IMAGE_QUANT/NDK"],
+        "CMAKE"        : versions["IMAGE_QUANT/CMAKE"],
+]
+
+def nameMap = [
+        "PROJECT": ext["projectName"],
+        "NDK"    : "NDK",
+        "CMAKE"  : "Cmake",
+]
+
+android {
+
+    namespace = "org.pngquant"
+
+    ndkVersion versionMap.NDK
+    compileSdk versionMap.COMPILE_SDK
+
+    defaultConfig {
+        minSdk versionMap.MIN_SDK
+        targetSdk versionMap.TARGET_SDK
+
+        externalNativeBuild {
+            cmake {
+                cppFlags "-std=c++17"
+                cFlags "-ljnigraphics"
+            }
+        }
+
+        ndk {
+            abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.toVersion(project.ext.javaVersion)
+        targetCompatibility = JavaVersion.toVersion(project.ext.javaVersion)
+    }
+
+    kotlinOptions {
+        jvmTarget = project.ext.javaVersion
+    }
+
+    externalNativeBuild {
+        cmake {
+            path "CMakeLists.txt"
+            version versionMap.CMAKE
+        }
+    }
+}
+
+clean.doFirst {
+    delete project.layout.buildDirectory
+    ['.cxx'].forEach { delete file(it) }
+}
+
+gradle.taskGraph.whenReady { taskGraph ->
+    if (taskGraph.allTasks.any { it.name == "clean" }) return
+
+    Utils.newFormatted("Version information for ${nameMap.PROJECT} Library", [
+            "libimagequant",
+            "libpng",
+            "NDK",
+            "CMAKE",
+    ].collect { "${nameMap[it] ?: it}: ${versionMap[it]}" }).print()
+}

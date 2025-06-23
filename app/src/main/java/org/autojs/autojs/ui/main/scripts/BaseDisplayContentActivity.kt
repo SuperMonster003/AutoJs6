@@ -3,6 +3,7 @@ package org.autojs.autojs.ui.main.scripts
 import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.text.SpannableStringBuilder
 import android.util.TypedValue
@@ -10,15 +11,18 @@ import android.view.KeyEvent
 import android.view.ScaleGestureDetector
 import android.view.View
 import android.widget.TextView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import io.noties.markwon.syntax.Prism4jThemeBase
 import io.noties.markwon.syntax.Prism4jThemeDarkula
 import io.noties.markwon.syntax.Prism4jThemeDefault
 import io.noties.prism4j.GrammarLocator
 import io.noties.prism4j.Prism4j
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import org.autojs.autojs.theme.widget.ThemeColorFloatingActionButton
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.util.DisplayUtils
 import org.autojs.autojs.util.ViewUtils
@@ -28,14 +32,17 @@ import kotlin.math.floor
 
 abstract class BaseDisplayContentActivity : BaseActivity() {
 
-    abstract var internalMenuResource: Int
+    override val handleStatusBarThemeColorAutomatically = false
 
     abstract var highlightGrammarLocator: GrammarLocator
     abstract var highlightGrammarName: String
     abstract var highlightThemeLanguage: String
 
+    open var internalMenuResource: Int = 0
+    open var themeColorDayNight = R.color.md_blue_gray_50 to R.color.md_blue_gray_900
+
     private lateinit var internalTextView: TextView
-    private lateinit var internalFabView: ThemeColorFloatingActionButton
+    private lateinit var internalFabView: FloatingActionButton
 
     protected val popMenuActionMap = mutableMapOf<Int, () -> Unit>()
 
@@ -57,13 +64,19 @@ abstract class BaseDisplayContentActivity : BaseActivity() {
         }
 
         internalTextView = binding.textView
+
         internalFabView = binding.fab.apply {
-            setOnClickListener { view -> showPopupMenu(view, internalTextView) }
+            if (internalMenuResource > 0) {
+                setOnClickListener { view -> showPopupMenu(view, internalTextView) }
+                ViewUtils.excludeFloatingActionButtonFromBottomNavigationBar(this)
+                visibility = View.VISIBLE
+            }
         }
 
         val scaleGestureDetector = ScaleGestureDetector(this, ScaleListener(internalTextView))
 
         val innerScrollView = binding.innerScrollView.also {
+            ViewUtils.excludePaddingClippableViewFromBottomNavigationBar(it)
             it.setOnTouchListener { view, event ->
                 when (event.pointerCount) {
                     2 -> {
@@ -88,7 +101,6 @@ abstract class BaseDisplayContentActivity : BaseActivity() {
                         //  ! zh-CN: 事实上, 此处依然存疑.
                         //  ! Reference: https://stackoverflow.com/questions/3866499/two-directional-scroll-view
                         //  !
-
                         super.onTouchEvent(event) or view.onTouchEvent(event)
                     }
                     else -> super.onTouchEvent(event)
@@ -121,6 +133,27 @@ abstract class BaseDisplayContentActivity : BaseActivity() {
             }
             loadAndDisplayContent()
             mIsContentLoaded = true
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        val (themeColorDayRes, themeColorNightRes) = themeColorDayNight
+
+        val themeColorDay = getColor(themeColorDayRes)
+        val themeColorNight = getColor(themeColorNightRes)
+
+        if (ViewUtils.isNightModeYes(this)) {
+            internalFabView.backgroundTintList = ColorStateList.valueOf(themeColorNight)
+            internalFabView.imageTintList = ColorStateList.valueOf(if (ViewUtils.isLuminanceDark(themeColorNight)) getColor(R.color.night) else getColor(R.color.day))
+            ViewUtils.setStatusBarBackgroundColor(this, themeColorNight)
+            ViewUtils.setStatusBarIconLight(this, ViewUtils.isLuminanceDark(themeColorNight))
+        } else {
+            internalFabView.backgroundTintList = ColorStateList.valueOf(themeColorDay)
+            internalFabView.imageTintList = ColorStateList.valueOf(if (ViewUtils.isLuminanceDark(themeColorDay)) getColor(R.color.night) else getColor(R.color.day))
+            ViewUtils.setStatusBarBackgroundColor(this, themeColorDay)
+            ViewUtils.setStatusBarIconLight(this, ViewUtils.isLuminanceDark(themeColorDay))
         }
     }
 
@@ -190,10 +223,6 @@ abstract class BaseDisplayContentActivity : BaseActivity() {
     }
 
     private fun showPopupMenu(view: View, textView: TextView) {
-        if (internalMenuResource == 0) {
-            ViewUtils.showToast(view.context, "Menu resource is not set a valid resource id", true)
-            return
-        }
         val popupMenu = android.widget.PopupMenu(this, view).also {
             it.inflate(internalMenuResource)
         }

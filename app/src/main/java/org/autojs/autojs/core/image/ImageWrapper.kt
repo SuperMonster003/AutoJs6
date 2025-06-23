@@ -4,12 +4,15 @@ import android.graphics.Bitmap
 import android.graphics.Bitmap.CompressFormat
 import android.graphics.Color
 import android.media.Image
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.get
 import org.autojs.autojs.annotation.ScriptInterface
 import org.autojs.autojs.core.opencv.Mat
 import org.autojs.autojs.core.opencv.OpenCVHelper
 import org.autojs.autojs.core.ref.MonitorResource
 import org.autojs.autojs.core.ref.NativeObjectReference
 import org.autojs.autojs.pio.UncheckedIOException
+import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.Images
 import org.autojs.autojs.util.StringUtils.str
 import org.autojs.autojs6.R
@@ -30,6 +33,8 @@ import java.util.concurrent.atomic.AtomicLong
  */
 // @Reference to Auto.js Pro 9.3.11 by SuperMonster003 on Dec 20, 2023.
 open class ImageWrapper : Recyclable, MonitorResource {
+
+    private var mScriptRuntime: ScriptRuntime
 
     private var mMat: Mat? = null
     private var mBgrMat: Mat? = null
@@ -61,7 +66,7 @@ open class ImageWrapper : Recyclable, MonitorResource {
         ensureNotRecycled()
         if (mBitmap == null) {
             if (mMat != null) {
-                mBitmap = Bitmap.createBitmap(mMat!!.width(), mMat!!.height(), Bitmap.Config.ARGB_8888)
+                mBitmap = createBitmap(mMat!!.width(), mMat!!.height())
                 Utils.matToBitmap(mMat, mBitmap)
             } else {
                 mBitmap = mediaImage?.let { toBitmap(it) }
@@ -100,23 +105,26 @@ open class ImageWrapper : Recyclable, MonitorResource {
         }
         get() = mPlane ?: mediaImage?.planes?.get(0)
 
-    constructor(width: Int, height: Int) : this(Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888))
+    constructor(scriptRuntime: ScriptRuntime, width: Int, height: Int) : this(scriptRuntime, createBitmap(width, height))
 
-    constructor(bitmap: Bitmap) {
+    constructor(scriptRuntime: ScriptRuntime, bitmap: Bitmap) {
+        mScriptRuntime = scriptRuntime
         mId = mNextId.incrementAndGet()
         mBitmap = bitmap.also { addToList(it) }
         mWidth = bitmap.width
         mHeight = bitmap.height
     }
 
-    constructor(mat: Mat) {
+    constructor(scriptRuntime: ScriptRuntime, mat: Mat) {
+        mScriptRuntime = scriptRuntime
         mId = mNextId.incrementAndGet()
         mMat = mat.also { addToList(it) }
         mWidth = mat.cols()
         mHeight = mat.rows()
     }
 
-    constructor(mat: org.opencv.core.Mat) {
+    constructor(scriptRuntime: ScriptRuntime, mat: org.opencv.core.Mat) {
+        mScriptRuntime = scriptRuntime
         mId = mNextId.incrementAndGet()
         mMat = when (mat.nativeObj != 0L) {
             true -> Mat(mat.nativeObj)
@@ -126,7 +134,8 @@ open class ImageWrapper : Recyclable, MonitorResource {
         mHeight = mat.rows()
     }
 
-    constructor(bitmap: Bitmap, mat: Mat?) {
+    constructor(scriptRuntime: ScriptRuntime, bitmap: Bitmap, mat: Mat?) {
+        mScriptRuntime = scriptRuntime
         mId = mNextId.incrementAndGet()
         mMat = mat?.also { addToList(it) }
         mBitmap = bitmap.also { addToList(it) }
@@ -134,7 +143,8 @@ open class ImageWrapper : Recyclable, MonitorResource {
         mHeight = bitmap.height
     }
 
-    constructor(mediaImage: Image) {
+    constructor(scriptRuntime: ScriptRuntime, mediaImage: Image) {
+        mScriptRuntime = scriptRuntime
         mId = mNextId.incrementAndGet()
         this.mediaImage = mediaImage.also { addToList(it) }
         mWidth = mediaImage.width
@@ -149,27 +159,23 @@ open class ImageWrapper : Recyclable, MonitorResource {
         imageList.add(WeakReference(image))
     }
 
-    fun saveTo(path: String?): Boolean {
+    fun saveTo(path: String): Boolean {
         ensureNotRecycled()
-        path ?: return false
+        val fullPath = mScriptRuntime.files.nonNullPath(path)
         if (mBitmap == null) {
             if (mMat != null) {
-                return Imgcodecs.imwrite(path, mMat)
+                return Imgcodecs.imwrite(fullPath, mMat)
             }
             bitmap /* Getter, for initializing `mBitmap`. */
         }
-        return try {
-            true.also { saveWithBitmap(path) }
-        } catch (e: Exception) {
-            false
-        }
+        return runCatching { saveWithBitmap(fullPath) }.isSuccess
     }
 
-    private fun saveWithBitmap(path: String?) {
+    private fun saveWithBitmap(fullPath: String?) {
         try {
-            path ?: throw Exception("Argument \"path\" cannot be null")
+            fullPath ?: throw Exception("Argument \"path\" cannot be null")
             mBitmap ?: throw Exception("Member \"bitmap\" cannot be null")
-            mBitmap!!.compress(CompressFormat.PNG, 100, FileOutputStream(path))
+            mBitmap!!.compress(CompressFormat.PNG, 100, FileOutputStream(fullPath))
         } catch (e: FileNotFoundException) {
             throw UncheckedIOException(e)
         }
@@ -181,7 +187,7 @@ open class ImageWrapper : Recyclable, MonitorResource {
             throw ArrayIndexOutOfBoundsException("Point ($x, $y) out of bounds of $this")
         }
         mBitmap?.let { oBitmap ->
-            return oBitmap.getPixel(x, y)
+            return oBitmap[x, y]
         }
         mMat?.let { oMat ->
 
@@ -194,8 +200,45 @@ open class ImageWrapper : Recyclable, MonitorResource {
             //  ! 注意 `org.opencv.core.Mat.get(row, col)` 方法参数, "row" 对应 "y", "col" 对应 "x".
             val pixelList = oMat.get(/* row = */ y, /* col = */ x) ?: throw Exception("Channel list is null at ($x, $y) of $this")
 
-            val (r, g, b, a) = pixelList.map { pixelValue -> pixelValue.toInt() }
-            return Color.argb(a, r, g, b)
+            // @Hint by SuperMonster003 on Apr 9, 2025.
+            //  ! Here we assume that pixelList contains ARGB channels.
+            //  ! If mMat does not have these channels, an IndexOutOfBoundsException will be triggered:
+            //  # java.lang.IndexOutOfBoundsException: Index: 1, Size: 1
+            //  ! Therefore, it is necessary to consider cases with different numbers of channels.
+            //  !
+            //  ! Refer to: http://issues.autojs6.com/350
+            //  !
+            //  ! zh-CN:
+            //  ! 此处默认 pixelList 为 ARGB 通道, 当 mMat 不是上述通道时, 将触发索引越界异常:
+            //  # java.lang.IndexOutOfBoundsException: Index: 1, Size: 1
+            //  ! 因此需要考虑不同通道数量的情况.
+            //  !
+            //  ! 参阅: http://issues.autojs6.com/350
+            //  !
+            //  # val (r, g, b, a) = pixelList.map { pixelValue -> pixelValue.toInt() }
+            //  # return Color.argb(a, r, g, b)
+
+            return when (pixelList.size) {
+                1 -> {
+                    // Single-channel image (grayscale/binary/...)
+                    // zh-CN: 单通道图像 (灰度图/二值图/...)
+                    val value = pixelList[0].toInt()
+                    Color.argb(255, value, value, value)
+                }
+                3 -> {
+                    // RGB
+                    val (r, g, b) = pixelList.map { it.toInt() }
+                    Color.argb(255, r, g, b)
+                }
+                in 4..Int.MAX_VALUE -> {
+                    // RGBA
+                    val (r, g, b, a) = pixelList.map { it.toInt() }
+                    Color.argb(a, r, g, b)
+                }
+                else -> {
+                    throw Exception("Unsupported pixel channel count (${pixelList.size}) at ($x, $y) of $this")
+                }
+            }
         }
         plane?.let { oPlane ->
             val buffer = oPlane.buffer.apply { position(0) }
@@ -245,8 +288,8 @@ open class ImageWrapper : Recyclable, MonitorResource {
     fun clone(): ImageWrapper {
         ensureNotRecycled()
         return when (val bitmap = mBitmap) {
-            null -> ofMat(mat.clone())
-            else -> ofBitmap(bitmap.copy(bitmap.config, true))
+            null -> ofMat(mScriptRuntime, mat.clone())
+            else -> ofBitmap(mScriptRuntime, bitmap.copy(bitmap.config ?: Bitmap.Config.ARGB_8888, true))
         }
     }
 
@@ -275,16 +318,16 @@ open class ImageWrapper : Recyclable, MonitorResource {
         }
 
         @JvmStatic
-        fun ofImage(image: Image) = ImageWrapper(image)
+        fun ofImage(scriptRuntime: ScriptRuntime, image: Image) = ImageWrapper(scriptRuntime, image)
 
         @JvmStatic
-        fun ofMat(mat: Mat) = ImageWrapper(mat)
+        fun ofMat(scriptRuntime: ScriptRuntime, mat: Mat) = ImageWrapper(scriptRuntime, mat)
 
         @JvmStatic
-        fun ofMat(mat: org.opencv.core.Mat) = ImageWrapper(mat)
+        fun ofMat(scriptRuntime: ScriptRuntime, mat: org.opencv.core.Mat) = ImageWrapper(scriptRuntime, mat)
 
         @JvmStatic
-        fun ofBitmap(bitmap: Bitmap) = ImageWrapper(bitmap)
+        fun ofBitmap(scriptRuntime: ScriptRuntime, bitmap: Bitmap) = ImageWrapper(scriptRuntime, bitmap)
 
         @ScriptInterface
         fun toBitmap(image: Image): Bitmap {
@@ -292,11 +335,7 @@ open class ImageWrapper : Recyclable, MonitorResource {
             val buffer = plane.buffer.apply { position(0) }
             val pixelStride = plane.pixelStride
             val rowPadding = plane.rowStride - pixelStride * image.width
-            val bitmap = Bitmap.createBitmap(
-                image.width + rowPadding / pixelStride,
-                image.height,
-                Bitmap.Config.ARGB_8888,
-            ).apply { copyPixelsFromBuffer(buffer) }
+            val bitmap = createBitmap(image.width + rowPadding / pixelStride, image.height).apply { copyPixelsFromBuffer(buffer) }
             return when (rowPadding == 0) {
                 true -> bitmap
                 else -> Bitmap.createBitmap(bitmap, 0, 0, image.width, image.height)

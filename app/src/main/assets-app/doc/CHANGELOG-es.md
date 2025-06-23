@@ -4,6 +4,150 @@
 
 ******
 
+# v6.6.4
+
+###### 2025/05/31
+
+* `Sugerencia` Cambio de API: ui.(status/navigation)BarAppearanceLight[By] -> ui.(status/navigation)BarIconLight[By]
+* `Nuevo` Métodos util.dpToPx/spToPx/pxToDp/pxToSp para conversión de unidades de píxeles
+* `Corrección` Subtítulos que pueden mostrarse incompletos al rotar la pantalla a orientación horizontal
+* `Corrección` Parte del contenido de algunas páginas oculto por la barra de navegación lateral al rotar la pantalla a horizontal
+* `Corrección` Área de coloreado de fondo de la barra de estado incompleta en algunas páginas bajo Android 15 _[`issue #398`](http://issues.autojs6.com/398)_
+* `Corrección` El editor de código podría escribir archivos con una codificación de confianza insuficiente causando errores de decodificación (arreglo tentativa)
+* `Mejora` Mejorada la adaptabilidad de diseño en las páginas de Aplicación y Desarrollador y eliminadas categorías de diseño innecesarias
+* `Mejora` En README.md, sección de compilación, añadidas varias formas para facilitar la localización de la página de configuración del objetivo _[`issue #404`](http://issues.autojs6.com/404)_
+* `Dependencia` Añadido Androidx ConstraintLayout versión 2.2.1
+
+# v6.6.3
+
+###### 2025/05/27
+
+* `Nuevo` Función de historial de versiones: ver registros de cambios multilenguaje y estadísticas
+* `Nuevo` Método timers.keepAlive (ahora global) para mantener activo el script
+* `Nuevo` Métodos de escucha de eventos como engines.on('start/stop/error', callback) para eventos globales del motor
+* `Nuevo` Método images.detectMultiColors para verificación de colores multipunto _[`issue #374`](http://issues.autojs6.com/374)_
+* `Nuevo` Métodos images.matchFeatures/detectAndComputeFeatures: búsqueda de imágenes a resolución completa (Ref a [Auto.js Pro](https://g.pro.autojs.org/)) _[`issue #366`](http://issues.autojs6.com/366)_
+* `Nuevo` Método images.compressToBytes para comprimir una imagen y generar un arreglo de bytes
+* `Nuevo` Método images.downsample para submuestreo de píxeles y creación de un nuevo ImageWrapper
+* `Nuevo` Método ui.keepScreenOn para mantener la pantalla encendida cuando la página UI está en foco
+* `Nuevo` Propiedad ui.root (getter) para obtener el nodo "contenedor raíz del contenido de la ventana" del layout UI
+* `Nuevo` El elemento webview admite diseños de páginas web basados en JsBridge (Ref a [Auto.js Pro](https://g.pro.autojs.org/)) [ver Código de ejemplo > Diseño > HTML interactivo / Vue2 + Vant (SFC)] _[`issue #281`](http://issues.autojs6.com/281)_
+* `Corrección` El contenido de la documentación en línea en la pestaña Documentos y la actividad Documentos podía quedar cubierto por la barra de navegación del sistema
+* `Corrección` En algunas páginas, al pulsar botones de la Toolbar se podía activar por error el evento de clic en el título
+* `Corrección` Las líneas en blanco del editor de código mostraban caracteres de cuadro en ciertos dispositivos
+* `Corrección` El cuadro de diálogo del selector de colores en los ajustes de color de tema podía apilarse infinitamente
+* `Corrección` La tecla de subir volumen no detenía todos los scripts cuando el servicio de accesibilidad estaba desactivado
+* `Corrección` Superposición del teclado IME al editar contenido de difusión personalizado en la página de tareas programadas
+* `Corrección` Los controles dentro de elementos webview no podían activar correctamente el teclado en pantalla
+* `Corrección` El diálogo de información de APK podía no obtener el nombre de la app ni la información del SDK
+* `Corrección` El ejemplo del administrador de archivos podía no cargar automáticamente el contenido de subcarpetas al acceder a un directorio de proyecto
+* `Corrección` El contenido superior en modo UI de Android 15 quedaba cubierto por la barra de estado
+* `Corrección` El color de fondo de la barra de estado en algunas páginas de Android 15 no seguía el color de tema de forma dinámica
+* `Corrección` El módulo dialogs no podía usar la propiedad customView _[`issue #364`](http://issues.autojs6.com/364)_
+* `Corrección` El parámetro de expresión de dialogs.input podía no devolver el resultado de ejecución
+* `Corrección` El uso de JavaAdapter provocaba desbordamiento de pila de ClassLoader _[`issue #376`](http://issues.autojs6.com/376)_
+* `Corrección` console.setContentTextColor hacía perder el color de texto por defecto _[`issue #346`](http://issues.autojs6.com/346)_
+* `Corrección` console.setContentBackgroundColor no aceptaba nombres de color _[`issue #384`](http://issues.autojs6.com/384)_
+* `Corrección` images.compress ahora ajusta la calidad de codificación en lugar de reducir píxeles
+* `Corrección` El método images.resize no funcionaba correctamente
+* `Corrección` engines.all podía lanzar ConcurrentModificationException _[`issue #394`](http://issues.autojs6.com/394)_
+* `Corrección` Formato de fecha incorrecto en algunos idiomas de README.md
+* `Corrección` La compilación Gradle podía fallar por longitud inválida de archivo de biblioteca _[`issue #389`](http://issues.autojs6.com/389)_
+* `Mejora` El inspector de diseño permite ocultar controles (por [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #371`](http://pr.autojs6.com/371)_ _[`issue #355`](http://issues.autojs6.com/355)_
+* `Mejora` Añadidos separadores degradados en el menú del inspector de diseño para agrupar funciones
+* `Mejora` project.json admite la opción permissions para proyectos de scripts (por [wirsnow](https://github.com/wirsnow)) _[`pr #391`](http://pr.autojs6.com/391)_ _[`issue #362`](http://issues.autojs6.com/362)_
+* `Mejora` Al empaquetar un solo archivo se leen y seleccionan automáticamente los permisos declarados por la app instalada _[`issue #362`](http://issues.autojs6.com/362)_
+* `Mejora` Ampliado el soporte de adaptación del color de tema y más tipos de controles
+* `Mejora` Adaptabilidad de la anchura del cajón en la pantalla principal para modo horizontal o pantallas ultra-anchas
+* `Mejora` Nuevos diseños horizontal y de pantalla pequeña para las páginas Acerca de la app y Desarrollador
+* `Mejora` Las páginas de ajustes ofrecen la opción "Usar valor predeterminado" en los diálogos
+* `Mejora` El botón flotante del administrador de archivos se oculta automáticamente al pulsar fuera
+* `Mejora` El formateador de código admite operadores `??`, `?.`, `??=`
+* `Mejora` El editor de código admite la lectura y escritura de archivos con codificaciones GB18030 / UTF-16 (LE/BE) / Shift_JIS, etc.
+* `Mejora` El editor de código ahora muestra información detallada del archivo (ruta/codificación/salto de línea/total de bytes y caracteres, etc.) _[`issue #395`](http://issues.autojs6.com/395)_
+* `Mejora` Se añaden mensajes de error para acciones de intent (editar / ver / instalar / enviar / reproducir, etc.)
+* `Mejora` El atributo url de webview admite rutas relativas
+* `Mejora` El parámetro ruta de ImageWrapper#saveTo admite rutas relativas
+* `Mejora` images.save permite comprimir archivos PNG al usar el parámetro quality _[`issue #367`](http://issues.autojs6.com/367)_
+* `Mejora` Se permite limpiar registros de actualizaciones ignoradas y direcciones de conexión en modo cliente
+* `Mejora` La información de actualización de versión se muestra en varios idiomas según el idioma actual
+* `Mejora` La carga asíncrona mejora la fluidez de la lista en el administrador de archivos
+* `Mejora` Mejorado el contenido y formato de los mensajes de excepción de scripts en la consola
+* `Mejora` El código de ejemplo puede restablecer carpetas a su contenido inicial
+* `Mejora` Mayor eficiencia al comprobar la firma de APK
+* `Mejora` Optimizada la eficiencia y presentación de diálogos de información de archivos APK y multimedia
+* `Mejora` El script de compilación Gradle mejora su capacidad de adaptación de versiones _[`discussion #369`](http://discussions.autojs6.com/369)_
+* `Dependencia` Incluido Material Dialogs versión 0.9.6.0 (localizado)
+* `Dependencia` Incluido Material Date Time Picker versión 4.2.3 (localizado)
+* `Dependencia` Incluido libimagequant versión 2.17.0 (localizado)
+* `Dependencia` Incluido libpng versión 1.6.49 (localizado)
+* `Dependencia` Añadido ICU4J versión 77.1
+* `Dependencia` Añadido Jsoup versión 1.19.1
+* `Dependencia` Añadido Material Progressbar versión 1.4.2
+* `Dependencia` Añadido Flexmark Java HTML to Markdown versión 0.64.8
+* `Dependencia` Actualizado Gradle 8.14-rc-1 -> 8.14
+* `Dependencia` Actualizado Androidx Room 2.7.0 -> 2.7.1
+
+# v6.6.2
+
+###### 2025/04/16
+
+* `Nuevo` Métodos como ui.statusBarAppearanceLight, statusBarAppearanceLightBy y navigationBarColor, etc.
+* `Nuevo` Atributo ui.statusBarHeight (getter), utilizado para obtener la altura de la barra de estado _[`issue #357`](http://issues.autojs6.com/357)_
+* `Nuevo` Método images.flip para voltear imágenes _[`issue #349`](http://issues.autojs6.com/349)_
+* `Nuevo` Se añadió la opción 'extensión de archivo' en la página de configuración
+* `Nuevo` La página de configuración del color del tema añade soporte para nuevos diseños (agrupación, posicionamiento, búsqueda, historial, mejora del selector de color, etc.)
+* `Corrección` Problema en el que el color de fondo de la barra de estado de Android 15 no coincide con el color del tema
+* `Corrección` Problema en el que el método plugins.load no carga correctamente los plugins _[`issue #290`](http://issues.autojs6.com/290)_
+* `Corrección` Problema en el que la biblioteca dx no funciona correctamente en Android 7.x _[`issue #293`](http://issues.autojs6.com/293)_
+* `Corrección` Problema en el que ScriptRuntime puede presentar un estado de sincronización anómalo al utilizar require para importar módulos integrados (solución tentativa) _[`issue #298`](http://issues.autojs6.com/298)_
+* `Corrección` Problema en el que el módulo notice carece de métodos de extensión como getBuilder _[`issue #301`](http://issues.autojs6.com/301)_
+* `Corrección` Problema en el que los métodos shizuku/shell no aceptan parámetros de tipo cadena _[`issue #310`](http://issues.autojs6.com/310)_
+* `Corrección` Problema en el que el método colors.pixel no acepta parámetros con imágenes de un solo canal _[`issue #350`](http://issues.autojs6.com/350)_
+* `Corrección` Problema en el que los métodos engines.execScript / execScriptFile asignan de forma anómala el directorio de trabajo predeterminado al ejecutar scripts _[`issue #358`](http://issues.autojs6.com/358)_ _[`issue #340`](http://issues.autojs6.com/340)_ _[`issue #339`](http://issues.autojs6.com/339)_
+* `Corrección` Problema en el que floaty.window / floaty.rawWindow no puede ejecutarse en subprocesos
+* `Corrección` Problema en el que floaty.getClip puede no obtener correctamente el contenido del portapapeles _[`issue #341`](http://issues.autojs6.com/341)_
+* `Corrección` Problema en el que el retorno de ui.inflate pierde métodos de prototipo como attr, on y click
+* `Corrección` Problema en el que se produce un enlace incorrecto del contexto de ámbito al utilizar la sintaxis XML para usar una expresión JavaScript como valor de atributo _[`issue #319`](http://issues.autojs6.com/319)_
+* `Corrección` Problema en el que algunas llamadas a métodos, al producir excepciones, no son capturadas por bloques try..catch _[`issue #345`](http://issues.autojs6.com/345)_
+* `Corrección` Problema en el que la generación de código en la página de análisis de layouts puede provocar que la aplicación se bloquee _[`issue #288`](http://issues.autojs6.com/288)_
+* `Corrección` Problema en el que las aplicaciones empaquetadas no pueden utilizar correctamente el módulo shizuku _[`issue #227`](http://issues.autojs6.com/227)_ _[`issue #231`](http://issues.autojs6.com/231)_ _[`issue #284`](http://issues.autojs6.com/284)_ _[`issue #287`](http://issues.autojs6.com/287)_ _[`issue #304`](http://issues.autojs6.com/304)_
+* `Corrección` Problema en el que el editor de código, al saltar al final de una línea, puede mover el cursor al inicio de la siguiente línea
+* `Corrección` Problema en el que pulsaciones rápidas consecutivas en elementos tipo diálogo de la página de configuración pueden provocar que la aplicación se bloquee
+* `Mejora` Optimización del tamaño del archivo APK en la plantilla de aplicaciones empaquetadas
+* `Mejora` La aplicación (y las aplicaciones empaquetadas) ahora soportan más permisos _[`issue #338`](http://issues.autojs6.com/338)_
+* `Mejora` La página de empaquetado añade la opción para la biblioteca Pinyin
+* `Mejora` Optimización del fondo de la barra de estado y del color del texto en la página principal de la aplicación empaquetada
+* `Mejora` La página de configuración de la aplicación empaquetada añade interruptores para permisos especiales (acceso a todos los archivos y envío de notificaciones) _[`issue #354`](http://issues.autojs6.com/354)_
+* `Mejora` Los textos e iconos de los controles cambian automáticamente a un color adecuado en función de la luminosidad del tema
+* `Mejora` Mejora en la experiencia visual cuando el contraste entre el color del tema de un control y su fondo es bajo
+* `Mejora` Mejora en la compatibilidad del control de entrada HEX en la paleta de colores al pegar valores desde el portapapeles
+* `Mejora` La barra de navegación de la aplicación se configura para ser transparente o semi-transparente y así mejorar la experiencia visual
+* `Mejora` El modo UI por defecto de la barra de estado y de la barra de navegación se establece en el color `md_grey_50` en modo claro
+* `Mejora` El interruptor del servicio de accesibilidad en el cajón de la página principal ahora se sincroniza con el código del script
+* `Mejora` La página de documentación de la página principal ahora soporta botones de búsqueda bidireccionales
+* `Mejora` La pestaña 'Archivos' de la página principal permite cambiar la visibilidad del botón flotante mediante pulsación prolongada
+* `Mejora` El título del editor de código ahora soporta el ajuste automático del tamaño de la fuente
+* `Mejora` La visibilidad del botón flotante en la página de registros se vincula a las acciones de desplazamiento de la lista
+* `Mejora` El archivo de configuración project.json del proyecto de script ahora soporta más opciones de empaquetado _[`issue #305`](http://issues.autojs6.com/305)_ _[`issue #306`](http://issues.autojs6.com/306)_
+* `Mejora` El archivo project.json ahora admite coincidencia flexible de nombres de opción y compatibilidad con alias
+* `Mejora` El diálogo de información de tipo de archivo APK ahora incluye el tamaño del archivo y la información del esquema de firma
+* `Mejora` El diálogo de información de tipo de archivo APK ahora admite escuchas de clic para copiar texto y navegar a los detalles de la aplicación
+* `Mejora` Intento de restaurar los paquetes con prefijo com.stardust para mejorar la compatibilidad del código _[`issue #290`](http://issues.autojs6.com/290)_
+* `Mejora` Los métodos floaty.window / floaty.rawWindow ahora soportan la ejecución tanto en el hilo principal como en hilos secundarios
+* `Mejora` El método global getClip ahora utiliza floaty.getClip según sea necesario para mejorar la compatibilidad
+* `Mejora` Mejora en la compatibilidad de files.path y métodos relacionados al recibir rutas nulas
+* `Mejora` Sincronización con la última versión oficial del motor Rhino y adaptación necesaria del código
+* `Mejora` Mejoras en el README.md para documentar la construcción y ejecución del proyecto _[`issue #344`](http://issues.autojs6.com/344)_
+* `Dependencia` Añadido Eclipse Paho Client Mqttv3 versión 1.1.0 _[`issue #330`](http://issues.autojs6.com/330)_
+* `Dependencia` Actualizado la versión de Gradle Compile de 34 a 35
+* `Dependencia` Actualizado Gradle de 8.12 a 8.14-rc-1
+* `Dependencia` Actualizado Rhino de 1.8.0-SNAPSHOT a 1.8.1-SNAPSHOT
+* `Dependencia` Actualizado Androidx Recyclerview de 1.3.2 a 1.4.0
+* `Dependencia` Actualizado Androidx Room de 2.6.1 a 2.7.0
+* `Dependencia` Actualizado Androidx WebKit de 1.12.1 a 1.13.0
+* `Dependencia` Actualizado Pinyin4j de 2.5.0 a 2.5.1
+
 # v6.6.1
 
 ###### 2025/01/01
@@ -63,9 +207,9 @@
 * `Nuevo` El método floaty.getClip se utiliza para obtener indirectamente el contenido del portapapeles mediante una ventana flotante
 * `Corrección` Fuga de memoria en el View Binding de subclases de Fragment (por ejemplo, [DrawerFragment](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/ui/main/drawer/DrawerFragment.kt#L369) / [ExplorerFragment](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/ui/main/scripts/ExplorerFragment.kt#L48))
 * `Corrección` Fuga de memoria de instancia en clases como [ScreenCapture](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/core/image/capture/ScreenCapturer.java#L70) / [ThemeColorPreference](https://github.com/SuperMonster003/AutoJs6/blob/10960ddbee71f75ef80907ad5b6ab42f3e1bf31e/app/src/main/java/org/autojs/autojs/ui/settings/ThemeColorPreference.kt#L21)
-* `Corrección` Problema que causa que la aplicación se bloquee al solicitar permisos de captura de pantalla en Android 14+ (por [chenguangming](https://github.com/chenguangming)) _[`pr #242`](http://pr.autojs6.com/242)_
-* `Corrección` Problema que causa que la aplicación se bloquee al iniciar el servicio en primer plano en Android 14+
-* `Corrección` Problema con el botón de ejecución en el editor de código que no se enciende correctamente en Android 14+
+* `Corrección` Problema que causa que la aplicación se bloquee al solicitar permisos de captura de pantalla en Android 14 (por [chenguangming](https://github.com/chenguangming)) _[`pr #242`](http://pr.autojs6.com/242)_
+* `Corrección` Problema que causa que la aplicación se bloquee al iniciar el servicio en primer plano en Android 14
+* `Corrección` Problema con el botón de ejecución en el editor de código que no se enciende correctamente en Android 14
 * `Corrección` La aplicación puede no funcionar correctamente después de empaquetar debido a la falta de archivos de biblioteca necesarios _[`issue #202`](http://issues.autojs6.com/202)_ _[`issue #223`](http://issues.autojs6.com/223)_ _[`pr #264`](http://pr.autojs6.com/264)_
 * `Corrección` Bloqueo de la aplicación cuando se edita el proyecto debido a recursos de icono especificados que faltan _[`issue #203`](http://issues.autojs6.com/203)_
 * `Corrección` Incapacidad para usar parámetros adecuadamente para obtener recursos de captura de pantalla de orientación de pantalla especificada al solicitar permisos de captura de pantalla
@@ -124,7 +268,7 @@
 * `Dependencia` Incluir la versión 12.6 de Toaster
 * `Dependencia` Incluir la versión 10.3 de EasyWindow (para Toaster)
 * `Dependencia` Actualización de versión de Gradle de 8.5 a 8.11.1
-* `Dependencia` Actualizar la versión 1.7.15-snapshot de Rhino -> 1.7.16-snapshot
+* `Dependencia` Actualizar la versión 1.7.15-SNAPSHOT de Rhino -> 1.8.0-SNAPSHOT
 * `Dependencia` Actualizar la versión 1.10.0 de Android Material Lang3 -> 1.12.0
 * `Dependencia` Actualizar la versión 1.7.0 de Androidx Annotation -> 1.9.1
 * `Dependencia` Actualizar la versión 1.6.1 de Androidx AppCompat -> 1.7.0
@@ -252,6 +396,7 @@
 * `Corrección` Problema de fuente pequeña del título de la toolbar al rotar la pantalla a modo horizontal
 * `Corrección` Problema de disposición apretada de pestañas en la página principal en modo horizontal
 * `Corrección` Problema de desbordamiento de botón flotante al rotar la pantalla múltiples veces _[`issue #90`](http://issues.autojs6.com/90)_
+* `Corrección` Problema de que, tras múltiples rotaciones de pantalla, no se restauran las coordenadas del botón flotante ni la orientación del borde de la pantalla
 * `Corrección` Problema de visualización faltante o repetida de mensajes en el marco flotante en ciertos dispositivos
 * `Corrección` Problema de mensajes flotantes ocultos cuando múltiples scripts se ejecutan simultáneamente _[`issue #67`](http://issues.autojs6.com/67)_
 * `Corrección` Problema de cierre inesperado de la aplicación al hacer clic en el menú de análisis de diseño con broadcast
@@ -639,7 +784,7 @@
 * `Dependencia` Actualización de Kotlinx Coroutines de la versión 1.6.0 a 1.6.1-native-mt
 * `Dependencia` Actualización de LeakCanary de la versión 2.8.1 a 2.9.1
 * `Dependencia` Actualización de OkHttp3 de la versión 5.0.0-alpha.6 a 5.0.0-alpha.7
-* `Dependencia` Actualización del motor Rhino de la versión 1.7.14 a 1.7.15-snapshot
+* `Dependencia` Actualización del motor Rhino de la versión 1.7.14 a 1.7.15-SNAPSHOT
 * `Dependencia` Actualización de Zip4j de la versión 2.9.1 a 2.10.0
 * `Dependencia` Eliminación de Groovy JSON versión 3.0.8
 * `Dependencia` Eliminación de Kotlin Stdlib JDK7 versión 1.6.21
@@ -691,7 +836,7 @@
 * `Dependencia` Añadida compatibilidad con Androidx AppCompat (Legacy) versión 1.0.2
 * `Dependencia` Actualización de Androidx AppCompat de la versión 1.4.0 a 1.4.1
 * `Dependencia` Actualización de Androidx Preference de la versión 1.1.1 a 1.2.0
-* `Dependencia` Actualización del motor Rhino de la versión 1.7.14-snapshot a 1.7.14
+* `Dependencia` Actualización del motor Rhino de la versión 1.7.14-SNAPSHOT a 1.7.14
 * `Dependencia` Actualización de OkHttp3 de la versión 3.10.0 a 5.0.0-alpha.3 y a 5.0.0-alpha.4
 * `Dependencia` Actualización de Android Material de la versión 1.6.0-alpha01 a 1.6.0-alpha02
 * `Dependencia` Actualización de las herramientas de construcción de Gradle de la versión 7.2.0-alpha06 a 7.2.0-beta01
@@ -728,7 +873,7 @@
 * `Corrección` Corrección de problemas de reconocimiento del plugin de empaquetado y la URL de descarga del plugin
 * `Corrección` Corrección del problema de sincronización del estado del interruptor de "ver permisos de uso" en el cajón de la página principal
 * `Corrección` Corrección de fugas de memoria potenciales en TemplateMatching.fastTemplateMatching relacionadas con Mat
-* `Mejora` Actualización de la versión del motor Rhino de 1.7.7.2 -> 1.7.13 -> 1.7.14-snapshot
+* `Mejora` Actualización de la versión del motor Rhino de 1.7.7.2 -> 1.7.13 -> 1.7.14-SNAPSHOT
 * `Mejora` Actualización de OpenCV de 3.4.3 -> 4.5.4
 * `Mejora` Mejora de la compatibilidad de ViewUtil.getStatusBarHeight
 * `Mejora` Eliminación del módulo de inicio de sesión de usuario del cajón de la página principal y eliminación del espacio ocupado en el diseño

@@ -12,11 +12,13 @@ import org.autojs.autojs.external.ScriptIntents
 import org.autojs.autojs.external.fileprovider.AppFileProvider
 import org.autojs.autojs.external.shortcut.Shortcut
 import org.autojs.autojs.external.shortcut.ShortcutActivity
+import org.autojs.autojs.runtime.api.Mime
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.script.ScriptSource
 import org.autojs.autojs.ui.edit.EditActivity
 import org.autojs.autojs.util.FileUtils
 import org.autojs.autojs.util.IntentUtils
+import org.autojs.autojs.util.IntentUtils.ToastExceptionHolder
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.WorkingDirectoryUtils
 import org.autojs.autojs6.R
@@ -77,7 +79,13 @@ object Scripts {
 
     @JvmStatic
     fun openByOtherApps(uri: Uri) {
-        IntentUtils.viewFile(globalAppContext, uri, "text/plain", AppFileProvider.AUTHORITY)
+        IntentUtils.viewFile(
+            globalAppContext,
+            uri,
+            Mime.TEXT_PLAIN,
+            AppFileProvider.AUTHORITY,
+            ToastExceptionHolder(globalAppContext),
+        )
     }
 
     @JvmStatic
@@ -159,15 +167,12 @@ object Scripts {
 
     @JvmStatic
     fun send(context: Context, file: ScriptFile) {
-        Intent(Intent.ACTION_SEND)
-            .setType("text/plain")
-            .putExtra(
-                Intent.EXTRA_STREAM,
-                IntentUtils.getUriOfFile(context, file.path, AppFileProvider.AUTHORITY)
-            )
-            .let { Intent.createChooser(it, context.getString(R.string.text_send)) }
-            .apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
-            .let { context.startActivity(it) }
+        IntentUtils.sendFile(
+            context,
+            file.path,
+            AppFileProvider.AUTHORITY,
+            ToastExceptionHolder(context),
+        )
     }
 
 }

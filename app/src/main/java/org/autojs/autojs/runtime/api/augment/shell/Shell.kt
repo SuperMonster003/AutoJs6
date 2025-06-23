@@ -90,7 +90,7 @@ class Shell(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntim
             if (!RootUtils.isRootAvailable()) return@ensureArgumentsOnlyOne false
             when (val packageName = App.getPackageName(scriptRuntime, arrayOf(app))) {
                 null -> false
-                else -> execCommand(scriptRuntime, arrayOf("am force-stop $packageName", true)).code == 0
+                else -> execCommand(scriptRuntime, arrayOf<Any>("am force-stop $packageName", true)).code == 0
             }
         }
 

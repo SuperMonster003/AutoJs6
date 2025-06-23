@@ -1,13 +1,21 @@
 package org.autojs.autojs.ui.filechooser;
 
+import android.content.Context;
+import android.content.res.ColorStateList;
 import android.view.View;
 
 import androidx.annotation.NonNull;
 
+import org.autojs.autojs.core.ui.widget.JsCheckBox;
 import org.autojs.autojs.model.explorer.ExplorerItem;
+import org.autojs.autojs.pio.PFile;
 import org.autojs.autojs.pio.PFiles;
+import org.autojs.autojs.theme.ThemeColorHelper;
+import org.autojs.autojs.theme.ThemeColorManagerCompat;
 import org.autojs.autojs.ui.explorer.ExplorerViewHelper;
 import org.autojs.autojs.ui.widget.BindableViewHolder;
+import org.autojs.autojs.util.ColorUtils;
+import org.autojs.autojs6.R;
 import org.autojs.autojs6.databinding.ExplorerFirstCharIconBinding;
 import org.autojs.autojs6.databinding.FileChooseListFileBinding;
 
@@ -33,22 +41,32 @@ class ExplorerItemViewHolder extends BindableViewHolder<Object> {
     public void bind(Object item, int position) {
         if (!(item instanceof ExplorerItem explorerItem)) return;
         mExplorerItem = explorerItem;
-        listFileBinding.name.setText(ExplorerViewHelper.getDisplayName(fileChooseListView.getContext(), explorerItem));
-        listFileBinding.item.setOnClickListener(view -> listFileBinding.checkbox.toggle());
-        listFileBinding.checkbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (listFileBinding.checkbox.isChecked()) {
+
+        Context context = fileChooseListView.getContext();
+        JsCheckBox checkbox = listFileBinding.checkbox;
+
+        int itemBackgroundDarkColor = context.getColor(R.color.item_background_dark);
+        int itemIconThemeColorForContrast = ColorUtils.adjustThemeColorForContrast(itemBackgroundDarkColor, 1.15);
+
+        ThemeColorHelper.setThemeColorPrimary(checkbox, itemBackgroundDarkColor);
+
+        listFileBinding.name.setText(ExplorerViewHelper.getDisplayName(context, explorerItem));
+        listFileBinding.item.setOnClickListener(view -> checkbox.toggle());
+        checkbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (checkbox.isChecked()) {
                 fileChooseListView.check(mExplorerItem.toScriptFile(), getAdapterPosition());
             } else {
                 fileChooseListView.getSelectedFiles().remove(mExplorerItem.toScriptFile());
             }
         });
         listFileBinding.scriptFileSize.setText(PFiles.getHumanReadableSize(explorerItem.getSize()));
+        listFileBinding.scriptFileDate.setText(PFile.getFullDateString(explorerItem.lastModified()));
 
         switch (explorerItem.getType()) {
             case JAVASCRIPT, AUTO -> firstCharIconBinding.firstChar
-                    .setIconTextColorNightDay()
-                    .setStrokeThemeColor()
-                    .setFillColorDayNight();
+                    .setIconTextColorByThemeColorLuminance()
+                    .setStrokeColor(itemIconThemeColorForContrast)
+                    .setFillColor(itemIconThemeColorForContrast);
             default -> firstCharIconBinding.firstChar
                     .setIconTextColorDayNight()
                     .setStrokeColorDayNight()
@@ -57,7 +75,7 @@ class ExplorerItemViewHolder extends BindableViewHolder<Object> {
 
         firstCharIconBinding.firstChar.setIcon(ExplorerViewHelper.getIcon(explorerItem));
 
-        listFileBinding.checkbox.setChecked(fileChooseListView.getSelectedFiles().containsKey(mExplorerItem.toScriptFile()), false);
+        checkbox.setChecked(fileChooseListView.getSelectedFiles().containsKey(mExplorerItem.toScriptFile()), false);
     }
 
 }

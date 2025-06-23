@@ -107,6 +107,7 @@ class Console(scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRuntime) {
         ::setContentTextSize.name,
         ::setContentTextColor.name,
         ::setContentTextColors.name,
+        ::setContentBackgroundColor.name,
         ::setContentBackgroundTint.name,
         ::setContentBackgroundAlpha.name,
         ::setTextSize.name,
@@ -129,11 +130,11 @@ class Console(scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRuntime) {
         ::launch.name to "launchConsole",
     )
 
-    private fun getStackTrace() = withRhinoContext { context ->
+    private fun getStackTrace() = withRhinoContext { cx ->
         newNativeObject().also { o ->
             val globalErrorObject = mTopLevelScope.prop(NativeError.ERROR_TAG) as ScriptableObject
             NativeError.js_captureStackTrace(
-                context,
+                cx,
                 mCaptureStack,
                 globalErrorObject,
                 arrayOf(o, mCaptureStack),
@@ -410,10 +411,13 @@ class Console(scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRuntime) {
             when (argList.size) {
                 1 -> when (val o = argList[0]) {
                     is NativeArray -> {
-                        scriptRuntime.console.setContentTextColors(o.map { S13n.color(arrayOf(it)) }.toTypedArray())
+                        val tmp = Array(6) { index ->
+                            if (index < o.size) S13n.color(arrayOf(o[index])) else null
+                        }
+                        scriptRuntime.console.setContentTextColors(tmp)
                     }
                     is NativeObject -> {
-                        val tmp = Array(6) { 0 }
+                        val tmp = Array<Int?>(6) { null }
                         listOf("verbose", "log", "info", "warn", "error", "assert").forEachIndexed { index, key ->
                             if (o.hasProp(key)) {
                                 tmp[index] = S13n.color(arrayOf(o.prop(key)))
@@ -433,6 +437,13 @@ class Console(scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRuntime) {
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun setContentTextColors(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ProxyObject = setContentTextColor(scriptRuntime, args)
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun setContentBackgroundColor(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ProxyObject = ensureArgumentsOnlyOne(args) {
+            scriptRuntime.console.setContentBackgroundColor(S13n.color(arrayOf(it)))
+            scriptRuntime.consoleProxyObject
+        }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
@@ -511,7 +522,7 @@ class Console(scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRuntime) {
         fun setGlobalLogConfig(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsOnlyOne(args) { config ->
             require(config is NativeObject) { "Argument for console.${::setGlobalLogConfig.name} must be a JavaScript Object" }
             LogConfigurator().apply {
-                fileName = scriptRuntime.files.path(config.inquire("file", ::coerceString, "android-log4j.log"))
+                fileName = scriptRuntime.files.nonNullPath(config.inquire("file", ::coerceString, "android-log4j.log"))
                 filePattern = config.inquire("filePattern", ::coerceString, "%m%n")
                 maxFileSize = config.inquire("maxFileSize", ::coerceLongNumber, 512 * 1024)
                 maxBackupSize = config.inquire("maxBackupSize", ::coerceIntNumber, 5)

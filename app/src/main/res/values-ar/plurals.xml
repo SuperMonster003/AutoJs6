@@ -1,21 +1,63 @@
 <resources>
 
+    <!-- المجموع %d عنصر -->
     <plurals name="text_items_total_sum">
-        <item quantity="zero">المجموع: لا شيء</item>
+        <item quantity="zero">المجموع لا عناصر</item>
+        <item quantity="one">المجموع عنصر واحد</item>
+        <item quantity="two">المجموع عنصران</item>
+        <item quantity="few">المجموع %d عناصر</item>
+        <item quantity="many">المجموع %d عنصراً</item>
+        <item quantity="other">المجموع %d عنصر</item>
+    </plurals>
+
+    <!-- المجموع: %d عنصر -->
+    <plurals name="text_items_total_sum_with_colon">
+        <item quantity="zero">المجموع: لا عناصر</item>
         <item quantity="one">المجموع: عنصر واحد</item>
         <item quantity="two">المجموع: عنصران</item>
         <item quantity="few">المجموع: %d عناصر</item>
-        <item quantity="many">المجموع: %d عنصرًا</item>
-        <item quantity="other">المجموع: %d عناصر</item>
+        <item quantity="many">المجموع: %d عنصراً</item>
+        <item quantity="other">المجموع: %d عنصر</item>
     </plurals>
 
+    <!-- تم إيقاف %d سكربت -->
     <plurals name="text_already_stop_n_scripts">
-        <item quantity="zero">لم يتم إيقاف أي برنامج نصي</item>
-        <item quantity="one">تم إيقاف %d برنامج نصي</item>
-        <item quantity="two">تم إيقاف برنامجين نصيين</item>
-        <item quantity="few">تم إيقاف %d نصوص</item>
-        <item quantity="many">تم إيقاف %d نصوص</item>
-        <item quantity="other">تم إيقاف %d نصوص</item>
+        <item quantity="zero">لم يُوقَف أي سكربت</item>
+        <item quantity="one">تم إيقاف سكربت واحد</item>
+        <item quantity="two">تم إيقاف سكربتين</item>
+        <item quantity="few">تم إيقاف %d سكربتات</item>
+        <item quantity="many">تم إيقاف %d سكربتاً</item>
+        <item quantity="other">تم إيقاف %d سكربت</item>
+    </plurals>
+
+    <!-- تقبل الدالة %d مُعاملاً فقط -->
+    <plurals name="error_method_only_accepts_n_arguments">
+        <item quantity="zero">لا تقبل الدالة أي مُعامل</item>
+        <item quantity="one">تقبل الدالة مُعاملاً واحداً فقط</item>
+        <item quantity="two">تقبل الدالة مُعاملين فقط</item>
+        <item quantity="few">تقبل الدالة %d مُعاملات فقط</item>
+        <item quantity="many">تقبل الدالة %d مُعاملاً فقط</item>
+        <item quantity="other">تقبل الدالة %d مُعامل فقط</item>
+    </plurals>
+
+    <!-- تقبل الدالة ما لا يزيد عن %d مُعاملاً -->
+    <plurals name="error_method_only_accepts_no_more_than_n_arguments">
+        <item quantity="zero">لا تقبل الدالة أي مُعامل</item>
+        <item quantity="one">تقبل الدالة مُعاملاً واحداً كحد أقصى</item>
+        <item quantity="two">تقبل الدالة مُعاملين كحد أقصى</item>
+        <item quantity="few">تقبل الدالة %d مُعاملات كحد أقصى</item>
+        <item quantity="many">تقبل الدالة %d مُعاملاً كحد أقصى</item>
+        <item quantity="other">تقبل الدالة %d مُعامل كحد أقصى</item>
+    </plurals>
+
+    <!-- تقبل الدالة ما لا يقل عن %d مُعاملاً -->
+    <plurals name="error_method_only_accepts_no_less_than_n_arguments">
+        <item quantity="zero">لا تعمل الدالة دون مُعاملات</item>
+        <item quantity="one">تقبل الدالة مُعاملاً واحداً على الأقل</item>
+        <item quantity="two">تقبل الدالة مُعاملين على الأقل</item>
+        <item quantity="few">تقبل الدالة %d مُعاملات على الأقل</item>
+        <item quantity="many">تقبل الدالة %d مُعاملاً على الأقل</item>
+        <item quantity="other">تقبل الدالة %d مُعامل على الأقل</item>
     </plurals>
 
 </resources>

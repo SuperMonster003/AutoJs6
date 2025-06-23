@@ -14,6 +14,7 @@ import org.autojs.autojs.runtime.api.augment.events.Events
 import org.autojs.autojs.runtime.exception.ScriptException
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
+import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException.Companion.getRefinedStackTrace
 import org.autojs.autojs.runtime.exception.WrappedRuntimeException
 import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.DEFAULT_CALLER
@@ -29,7 +30,6 @@ import org.mozilla.javascript.ScriptableObject.DONTENUM
 import org.mozilla.javascript.ScriptableObject.PERMANENT
 import org.mozilla.javascript.ScriptableObject.READONLY
 import org.mozilla.javascript.ScriptableObject.UNINITIALIZED_CONST
-import org.mozilla.javascript.WrappedException
 import java.lang.reflect.InvocationTargetException
 import java.util.function.Consumer
 import java.util.function.Supplier
@@ -144,10 +144,21 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : F
             try {
                 (this as Invokable).invoke(*args)
             } catch (e: Exception) {
-                val message = e.message?.let {
-                    globalContext.getString(R.string.error_failed_to_call_method_with_cause, key, it)
+                val message = e.message?.let { msg ->
+                    when {
+                        msg.contains("\n") -> {
+                            msg.split("\n").let { split ->
+                                globalContext.getString(R.string.error_failed_to_call_method_with_cause, key, split.first()).let { result ->
+                                    split.slice(1..split.lastIndex).joinToString("\n").takeUnless { it.isBlank() }?.let {
+                                        "$result\n$it"
+                                    } ?: result
+                                }
+                            }
+                        }
+                        else -> globalContext.getString(R.string.error_failed_to_call_method_with_cause, key, msg)
+                    }
                 } ?: globalContext.getString(R.string.error_failed_to_call_method, key)
-                throw RuntimeException(message, e)
+                throw WrappedRuntimeException(message, e)
             }
         }
 
@@ -158,7 +169,7 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : F
                 val message = e.message?.let {
                     globalContext.getString(R.string.error_failed_to_instantiate_with_cause, key, it)
                 } ?: globalContext.getString(R.string.error_failed_to_instantiate, key)
-                throw RuntimeException(message, e)
+                throw WrappedRuntimeException(message, e)
             }
         }
 
@@ -427,33 +438,28 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : F
                             else -> targetEx
                         }
                         else -> t
-                    }
+                    }.also { it.printStackTrace() }
+
                     if (ScriptInterruptedException.causedByInterrupt(e)) {
-                        throw WrappedException(e)
+                        throw e
                     }
                     val funcNameSuffix = if (funcName != funcNameAlias) " (${globalContext.getString(R.string.text_alias)}: $funcNameAlias)" else ""
                     val methodDescription = "$key.$funcName$funcNameSuffix"
-                    val message = globalContext.getString(R.string.error_failed_to_invoke_method_with_description, methodDescription)
+                    val message = globalContext.getString(R.string.error_failed_to_call_method, methodDescription)
                     val niceMessage = when (val errMsg = e.message) {
-                        null -> message
-                        else -> "$message. ${errMsg.replaceFirst(Regex("^(Wrapped )?\\w*(\\.\\w+)*(Exception|Error): "), "")}"
-                    }
-                    when (e) {
-                        is WrappedIllegalArgumentException -> {
-                            // @Hint by SuperMonster003 on Oct 31, 2024.
-                            //  ! Here we force WrappedIllegalArgumentException to be converted to RuntimeException
-                            //  ! to prevent Rhino JavaScript code's try..catch blocks from catching this important exception.
-                            //  ! Additionally, WrappedIllegalArgumentException itself inherits from WrappedException,
-                            //  ! so the exception's code line number will be included when printing the error stack trace.
-                            //  ! zh-CN:
-                            //  ! 这里强制将 WrappedIllegalArgumentException 转换为 RuntimeException,
-                            //  ! 是为了让 Rhino JavaScript 代码的 try..catch 块无法捕获这个重要异常.
-                            //  ! 另外 WrappedIllegalArgumentException 本身继承了 WrappedException,
-                            //  ! 因此在打印错误堆栈信息时会包含异常所在的 code line number (代码行号).
-                            throw RuntimeException(niceMessage, e)
+                        null -> e.takeUnless { it is WrappedIllegalArgumentException }?.stackTraceToString()?.let {
+                            getRefinedStackTrace(message, it)
+                        } ?: message
+                        else -> {
+                            val refined = errMsg.replaceFirst(Regex("^(Wrapped )?\\w*(\\.\\w+)*(Exception|Error): "), "")
+                            val trailingDot = if (refined.endsWith(".")) "" else "."
+                            when (e is WrappedIllegalArgumentException) {
+                                true -> "$message. $refined$trailingDot"
+                                else -> "$message. $refined$trailingDot\n$e"
+                            }
                         }
-                        else -> throw WrappedRuntimeException(niceMessage, e)
                     }
+                    throw WrappedRuntimeException(niceMessage)
                 }
             }, NOT_CONSTRUCTABLE)
             destination.defineProperty(funcNameAlias, f, attributes)

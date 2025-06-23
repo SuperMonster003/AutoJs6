@@ -1,25 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:app="http://schemas.android.com/apk/res-auto"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:orientation="vertical">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay">
+        android:fitsSystemWindows="true"
+        app:theme="@style/AppTheme.AppBarOverlay">
 
         <org.autojs.autojs.theme.widget.ThemeColorToolbar
             android:id="@+id/toolbar"
             android:theme="@style/ToolBarStyle"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:popupTheme="@style/AppTheme.PopupOverlay">
+            app:popupTheme="@style/AppTheme.PopupOverlay" />
 
-        </org.autojs.autojs.theme.widget.ThemeColorToolbar>
     </com.google.android.material.appbar.AppBarLayout>
 
     <TextView
@@ -30,5 +29,6 @@
         android:scrollbars="vertical"
         android:textColor="@android:color/secondary_text_light"
         android:textSize="16sp"
-        tools:text="@string/text_error"/>
+        tools:text="@string/text_error" />
+
 </LinearLayout>

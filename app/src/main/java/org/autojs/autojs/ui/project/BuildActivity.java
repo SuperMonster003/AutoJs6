@@ -3,6 +3,7 @@ package org.autojs.autojs.ui.project;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Editable;
@@ -12,8 +13,8 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
-import android.widget.CheckBox;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -21,36 +22,42 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.util.Pair;
 import androidx.lifecycle.ViewModelProvider;
-
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.android.flexbox.FlexboxLayout;
 import com.google.android.material.textfield.TextInputLayout;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import net.dongliu.apk.parser.ApkFile;
+import net.dongliu.apk.parser.bean.ApkMeta;
 import org.autojs.autojs.apkbuilder.ApkBuilder;
+import org.autojs.autojs.apkbuilder.keystore.KeyStore;
 import org.autojs.autojs.core.pref.Language;
+import org.autojs.autojs.extension.MaterialDialogExtensions;
+import org.autojs.autojs.external.fileprovider.AppFileProvider;
 import org.autojs.autojs.model.explorer.Explorers;
 import org.autojs.autojs.model.script.ScriptFile;
 import org.autojs.autojs.project.ProjectConfig;
-import org.autojs.autojs.runtime.ScriptRuntime;
 import org.autojs.autojs.runtime.api.AppUtils;
 import org.autojs.autojs.runtime.api.AppUtils.Companion.SimpleVersionInfo;
 import org.autojs.autojs.runtime.api.augment.pinyin.Pinyin;
 import org.autojs.autojs.ui.BaseActivity;
 import org.autojs.autojs.ui.common.NotAskAgainDialog;
+import org.autojs.autojs.ui.error.ErrorDialogActivity;
 import org.autojs.autojs.ui.filechooser.FileChooserDialogBuilder;
-import org.autojs.autojs.apkbuilder.keystore.KeyStore;
-import org.autojs.autojs.ui.viewmodel.KeyStoreViewModel;
 import org.autojs.autojs.ui.keystore.ManageKeyStoreActivity;
+import org.autojs.autojs.ui.main.scripts.ApkInfoDialogManager;
 import org.autojs.autojs.ui.shortcut.AppsIconSelectActivity;
+import org.autojs.autojs.ui.viewmodel.KeyStoreViewModel;
 import org.autojs.autojs.ui.widget.RoundCheckboxWithText;
 import org.autojs.autojs.util.AndroidUtils;
 import org.autojs.autojs.util.AndroidUtils.Abi;
 import org.autojs.autojs.util.BitmapUtils;
 import org.autojs.autojs.util.EnvironmentUtils;
 import org.autojs.autojs.util.IntentUtils;
+import org.autojs.autojs.util.IntentUtils.ToastExceptionHolder;
 import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs.util.WorkingDirectoryUtils;
 import org.autojs.autojs6.R;
@@ -59,11 +66,13 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
@@ -71,6 +80,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.autojs.autojs.apkbuilder.ApkBuilder.TEMPLATE_APK_NAME;
 import static org.autojs.autojs.util.StringUtils.key;
@@ -78,6 +88,8 @@ import static org.autojs.autojs.util.StringUtils.key;
 /**
  * Created by Stardust on Oct 22, 2017.
  * Modified by SuperMonster003 as of Dec 1, 2023.
+ *
+ * @noinspection ResultOfMethodCallIgnored
  */
 public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCallback {
 
@@ -102,102 +114,122 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         put(Abi.ARMEABI, /* armeabi */ List.of("armeabi", "arme", "armv5te", "arm5te", "armv5", "v5", "arm5", "5"));
     }};
 
-    private static final ArrayList<String> SUPPORTED_LIBS = new ArrayList<>() {{
-        add(ApkBuilder.Constants.OPENCV);
-        add(ApkBuilder.Constants.MLKIT_OCR);
-        add(ApkBuilder.Constants.PADDLE_OCR);
-        add(ApkBuilder.Constants.RAPID_OCR);
-        add(ApkBuilder.Constants.OPENCC);
-        add(ApkBuilder.Constants.MLKIT_BARCODE);
+    private static final ArrayList<String> SUPPORTED_LIBS = new ArrayList<>();
+
+    private static final Map<String, List<String>> LIB_ALIASES = new HashMap<>();
+
+    private static final List<Pair<String, String>> SIGNATURE_SCHEMES = new ArrayList<>() {{
+        add(new Pair<>("V1 + V2", null));
+        add(new Pair<>("V1 + V3", null));
+        add(new Pair<>("V1 + V2 + V3", null));
+        add(new Pair<>("V1", null));
+        add(new Pair<>("V2 + V3", "Android 7.0+"));
+        add(new Pair<>("V2", "Android 7.0+"));
+        add(new Pair<>("V3", "Android 9.0+"));
     }};
 
-    private static final Map<String, List<String>> LIB_ALIASES = new HashMap<>() {{
-        put(ApkBuilder.Constants.OPENCV, List.of("cv"));
-        put(ApkBuilder.Constants.MLKIT_OCR, List.of("mlkit", "mlkitocr", "mlkit-ocr", "mlkit_ocr"));
-        put(ApkBuilder.Constants.PADDLE_OCR, List.of("paddle", "paddleocr", "paddle-ocr", "paddle_ocr"));
-        put(ApkBuilder.Constants.RAPID_OCR, List.of("rapid", "rapidocr", "rapid-ocr", "rapid_ocr"));
-        put(ApkBuilder.Constants.OPENCC, List.of("cc"));
-        put(ApkBuilder.Constants.MLKIT_BARCODE, List.of("barcode", "mlkit-barcode", "mlkit_barcode"));
-    }};
-
-    private static final ArrayList<String> SIGNATURE_SCHEMES = new ArrayList<>() {{
-        add("V1 + V2");
-        add("V1 + V3");
-        add("V1 + V2 + V3");
-        add("V1");
-        add("V2 + V3 (Android 7.0+)");
-        add("V2 (Android 7.0+)");
-        add("V3 (Android 9.0+)");
+    private final Map<String, String> PERMISSION_ALIAS = new HashMap<>() {{
+        put("shizuku", "moe.shizuku.manager.permission.API_V23");
+        put("termux", "com.termux.permission.RUN_COMMAND");
     }};
 
     private final Map<String, Integer> SUPPORTED_PERMISSIONS = new TreeMap<>() {{
-        put("android.permission.ACCESS_COARSE_LOCATION", R.string.text_permission_access_coarse_location);
-        put("android.permission.ACCESS_FINE_LOCATION", R.string.text_permission_access_fine_location);
-        put("android.permission.ACCESS_NETWORK_STATE", R.string.text_permission_access_network_state);
-        put("android.permission.ACCESS_WIFI_STATE", R.string.text_permission_access_wifi_state);
-        put("android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS", R.string.text_permission_broadcast_close_system_dialogs);
-        put("android.permission.CAPTURE_VIDEO_OUTPUT", R.string.text_permission_capture_video_output);
-        put("android.permission.DUMP", R.string.text_permission_dump);
-        put("android.permission.FOREGROUND_SERVICE", R.string.text_permission_foreground_service);
-        put("android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION", R.string.text_permission_foreground_service_media_projection);
-        put("android.permission.FOREGROUND_SERVICE_SPECIAL_USE", R.string.text_permission_foreground_service_special_use);
-        put("android.permission.INTERNET", R.string.text_permission_internet);
-        put("android.permission.INTERACT_ACROSS_USERS_FULL", R.string.text_permission_interact_across_users_full);
-        put("android.permission.MANAGE_EXTERNAL_STORAGE", R.string.text_permission_manage_external_storage);
-        put("android.permission.MANAGE_USERS", R.string.text_permission_manage_users);
-        put("android.permission.POST_NOTIFICATIONS", R.string.text_permission_post_notifications);
-        put("android.permission.QUERY_ALL_PACKAGES", R.string.text_permission_query_all_packages);
-        put("android.permission.READ_EXTERNAL_STORAGE", R.string.text_permission_read_external_storage);
-        put("android.permission.READ_MEDIA_AUDIO", R.string.text_permission_read_media_audio);
-        put("android.permission.READ_MEDIA_IMAGES", R.string.text_permission_read_media_images);
-        put("android.permission.READ_MEDIA_VIDEO", R.string.text_permission_read_media_video);
-        put("android.permission.READ_PHONE_STATE", R.string.text_permission_read_phone_state);
-        put("android.permission.READ_PRIVILEGED_PHONE_STATE", R.string.text_permission_read_privileged_phone_state);
-        put("android.permission.READ_SMS", R.string.text_permission_read_sms);
-        put("android.permission.RECEIVE_BOOT_COMPLETED", R.string.text_permission_receive_boot_completed);
-        put("android.permission.RECORD_AUDIO", R.string.text_permission_record_audio);
-        put("android.permission.REORDER_TASKS", R.string.text_permission_reorder_tasks);
-        put("android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS", R.string.text_permission_request_ignore_battery_optimizations);
-        put("android.permission.REQUEST_INSTALL_PACKAGES", R.string.text_permission_request_install_packages);
-        put("android.permission.SCHEDULE_EXACT_ALARM", R.string.text_permission_schedule_exact_alarm);
-        put("android.permission.SYSTEM_ALERT_WINDOW", R.string.text_permission_system_alert_window);
-        put("android.permission.UNLIMITED_TOASTS", R.string.text_permission_unlimited_toasts);
-        put("android.permission.UNINSTALL_SHORTCUT", R.string.text_permission_uninstall_shortcut);
-        put("android.permission.USE_EXACT_ALARM", R.string.text_permission_use_exact_alarm);
-        put("android.permission.VIBRATE", R.string.text_permission_vibrate);
-        put("android.permission.WAKE_LOCK", R.string.text_permission_wake_lock);
-        put("android.permission.WRITE_EXTERNAL_STORAGE", R.string.text_permission_write_external_storage);
-        put("android.permission.WRITE_SECURE_SETTINGS", R.string.text_permission_write_secure_settings);
-        put("android.permission.WRITE_SETTINGS", R.string.text_permission_write_settings);
-        put("com.android.launcher.permission.INSTALL_SHORTCUT", R.string.text_permission_install_shortcut);
-        put("com.android.launcher.permission.UNINSTALL_SHORTCUT", R.string.text_permission_uninstall_shortcut);
-        put("com.termux.permission.RUN_COMMAND", R.string.text_permission_run_command);
-        put("moe.shizuku.manager.permission.API_V23", R.string.text_permission_shizuku);
+        put("android.permission.ACCESS_COARSE_LOCATION", R.string.text_permission_desc_access_coarse_location);
+        put("android.permission.ACCESS_FINE_LOCATION", R.string.text_permission_desc_access_fine_location);
+        put("android.permission.ACCESS_LOCATION_EXTRA_COMMANDS", R.string.text_permission_desc_access_location_extra_commands);
+        put("android.permission.ACCESS_NETWORK_STATE", R.string.text_permission_desc_access_network_state);
+        put("android.permission.ACCESS_WIFI_STATE", R.string.text_permission_desc_access_wifi_state);
+        put("android.permission.BLUETOOTH", R.string.text_permission_desc_bluetooth);
+        put("android.permission.BLUETOOTH_ADMIN", R.string.text_permission_desc_bluetooth_admin);
+        put("android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS", R.string.text_permission_desc_broadcast_close_system_dialogs);
+        put("android.permission.CALL_PHONE", R.string.text_permission_desc_call_phone);
+        put("android.permission.CAMERA", R.string.text_permission_desc_camera);
+        put("android.permission.CAPTURE_VIDEO_OUTPUT", R.string.text_permission_desc_capture_video_output);
+        put("android.permission.CHANGE_NETWORK_STATE", R.string.text_permission_desc_change_network_state);
+        put("android.permission.CHANGE_WIFI_MULTICAST_STATE", R.string.text_permission_desc_change_wifi_multicast_state);
+        put("android.permission.CHANGE_WIFI_STATE", R.string.text_permission_desc_change_wifi_state);
+        put("android.permission.DISABLE_KEYGUARD", R.string.text_permission_desc_disable_keyguard);
+        put("android.permission.DUMP", R.string.text_permission_desc_dump);
+        put("android.permission.EXPAND_STATUS_BAR", R.string.text_permission_desc_expand_status_bar);
+        put("android.permission.FLASHLIGHT", R.string.text_permission_desc_flashlight);
+        put("android.permission.FOREGROUND_SERVICE", R.string.text_permission_desc_foreground_service);
+        put("android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION", R.string.text_permission_desc_foreground_service_media_projection);
+        put("android.permission.FOREGROUND_SERVICE_SPECIAL_USE", R.string.text_permission_desc_foreground_service_special_use);
+        put("android.permission.GET_ACCOUNTS", R.string.text_permission_desc_get_accounts);
+        put("android.permission.INTERNET", R.string.text_permission_desc_internet);
+        put("android.permission.INTERACT_ACROSS_USERS_FULL", R.string.text_permission_desc_interact_across_users_full);
+        put("android.permission.KILL_BACKGROUND_PROCESSES", R.string.text_permission_desc_kill_background_processes);
+        put("android.permission.MANAGE_EXTERNAL_STORAGE", R.string.text_permission_desc_manage_external_storage);
+        put("android.permission.MANAGE_USERS", R.string.text_permission_desc_manage_users);
+        put("android.permission.MODIFY_AUDIO_SETTINGS", R.string.text_permission_desc_modify_audio_settings);
+        put("android.permission.MOUNT_FORMAT_FILESYSTEMS", R.string.text_permission_desc_mount_format_filesystems);
+        put("android.permission.MOUNT_UNMOUNT_FILESYSTEMS", R.string.text_permission_desc_mount_unmount_filesystems);
+        put("android.permission.NFC", R.string.text_permission_desc_nfc);
+        put("android.permission.POST_NOTIFICATIONS", R.string.text_permission_desc_post_notifications);
+        put("android.permission.QUERY_ALL_PACKAGES", R.string.text_permission_desc_query_all_packages);
+        put("android.permission.READ_CALENDAR", R.string.text_permission_desc_read_calendar);
+        put("android.permission.READ_CONTACTS", R.string.text_permission_desc_read_contacts);
+        put("android.permission.READ_EXTERNAL_STORAGE", R.string.text_permission_desc_read_external_storage);
+        put("android.permission.READ_MEDIA_AUDIO", R.string.text_permission_desc_read_media_audio);
+        put("android.permission.READ_MEDIA_IMAGES", R.string.text_permission_desc_read_media_images);
+        put("android.permission.READ_MEDIA_VIDEO", R.string.text_permission_desc_read_media_video);
+        put("android.permission.READ_PHONE_STATE", R.string.text_permission_desc_read_phone_state);
+        put("android.permission.READ_PRIVILEGED_PHONE_STATE", R.string.text_permission_desc_read_privileged_phone_state);
+        put("android.permission.READ_SMS", R.string.text_permission_desc_read_sms);
+        put("android.permission.RECEIVE_BOOT_COMPLETED", R.string.text_permission_desc_receive_boot_completed);
+        put("android.permission.RECEIVE_SMS", R.string.text_permission_desc_receive_sms);
+        put("android.permission.RECORD_AUDIO", R.string.text_permission_desc_record_audio);
+        put("android.permission.REORDER_TASKS", R.string.text_permission_desc_reorder_tasks);
+        put("android.permission.REQUEST_DELETE_PACKAGES", R.string.text_permission_desc_request_delete_packages);
+        put("android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS", R.string.text_permission_desc_request_ignore_battery_optimizations);
+        put("android.permission.REQUEST_INSTALL_PACKAGES", R.string.text_permission_desc_request_install_packages);
+        put("android.permission.SCHEDULE_EXACT_ALARM", R.string.text_permission_desc_schedule_exact_alarm);
+        put("android.permission.SEND_SMS", R.string.text_permission_desc_send_sms);
+        put("android.permission.SET_WALLPAPER", R.string.text_permission_desc_set_wallpaper);
+        put("android.permission.SET_WALLPAPER_HINTS", R.string.text_permission_desc_set_wallpaper_hints);
+        put("android.permission.SYSTEM_ALERT_WINDOW", R.string.text_permission_desc_system_alert_window);
+        put("android.permission.UNLIMITED_TOASTS", R.string.text_permission_desc_unlimited_toasts);
+        put("android.permission.USE_EXACT_ALARM", R.string.text_permission_desc_use_exact_alarm);
+        put("android.permission.VIBRATE", R.string.text_permission_desc_vibrate);
+        put("android.permission.WAKE_LOCK", R.string.text_permission_desc_wake_lock);
+        put("android.permission.WRITE_CALENDAR", R.string.text_permission_desc_write_calendar);
+        put("android.permission.WRITE_CONTACTS", R.string.text_permission_desc_write_contacts);
+        put("android.permission.WRITE_EXTERNAL_STORAGE", R.string.text_permission_desc_write_external_storage);
+        put("android.permission.WRITE_SECURE_SETTINGS", R.string.text_permission_desc_write_secure_settings);
+        put("android.permission.WRITE_SETTINGS", R.string.text_permission_desc_write_settings);
+        put("com.android.launcher.permission.INSTALL_SHORTCUT", R.string.text_permission_desc_install_shortcut);
+        put("com.android.launcher.permission.UNINSTALL_SHORTCUT", R.string.text_permission_desc_uninstall_shortcut);
+        put("com.android.vending.BILLING", R.string.text_permission_desc_billing);
+        put(PERMISSION_ALIAS.get("termux"), R.string.text_permission_desc_termux_run_command);
+        put(PERMISSION_ALIAS.get("shizuku"), R.string.text_permission_desc_shizuku);
     }};
 
-    EditText mSourcePath;
-    View mSourcePathContainer;
-    EditText mOutputPath;
-    EditText mAppName;
-    EditText mPackageName;
-    TextInputLayout mPackageNameParent;
-    EditText mVersionName;
-    TextInputLayout mVersionNameParent;
-    EditText mVersionCode;
-    TextInputLayout mVersionCodeParent;
-    ImageView mIcon;
-    LinearLayout mAppConfig;
+    EditText mSourcePathView;
+    View mSourcePathContainerView;
+    EditText mOutputPathView;
+    EditText mAppNameView;
+    EditText mPackageNameView;
+    TextInputLayout mPackageNameParentView;
+    EditText mVersionNameView;
+    TextInputLayout mVersionNameParentView;
+    EditText mVersionCodeView;
+    TextInputLayout mVersionCodeParentView;
+    ImageView mIconView;
+    LinearLayout mAppConfigView;
 
+    @Nullable
     private ProjectConfig mProjectConfig;
+
     private MaterialDialog mProgressDialog;
     private String mSource;
     private boolean mIsDefaultIcon = true;
     private boolean mIsProjectLevelBuilding;
-    private FlexboxLayout mFlexboxAbis;
-    private FlexboxLayout mFlexboxLibs;
-    private Spinner mSignatureSchemes;
-    private Spinner mVerifiedKeyStores;
-    private FlexboxLayout mFlexboxPermissions;
+
+    private FlexboxLayout mFlexboxAbisView;
+    private FlexboxLayout mFlexboxLibsView;
+    private Spinner mSignatureSchemesView;
+    private Spinner mVerifiedKeyStoresView;
+    private FlexboxLayout mFlexboxPermissionsView;
 
     private final ArrayList<String> mInvalidAbis = new ArrayList<>();
     private final ArrayList<String> mUnavailableAbis = new ArrayList<>();
@@ -207,6 +239,15 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
 
     private KeyStoreViewModel mKeyStoreViewModel;
 
+    static {
+        for (ApkBuilder.Libs entry : ApkBuilder.Libs.getEntries()) {
+            if (entry.enumerable) {
+                SUPPORTED_LIBS.add(entry.label);
+                LIB_ALIASES.put(entry.label, entry.aliases);
+            }
+        }
+    }
+
     @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -215,24 +256,24 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         ActivityBuildBinding binding = ActivityBuildBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        mSourcePath = binding.sourcePath;
-        mSourcePath.setOnKeyListener((v, keyCode, event) -> {
+        mSourcePathView = binding.sourcePath;
+        mSourcePathView.setOnKeyListener((v, keyCode, event) -> {
             if (keyCode == KeyEvent.KEYCODE_ENTER) {
                 if (event.getAction() == KeyEvent.ACTION_UP) {
-                    mOutputPath.requestFocus();
+                    mOutputPathView.requestFocus();
                 }
                 return true;
             }
             return false;
         });
 
-        mSourcePathContainer = binding.sourcePathContainer;
+        mSourcePathContainerView = binding.sourcePathContainer;
 
-        mOutputPath = binding.outputPath;
-        mOutputPath.setOnKeyListener((v, keyCode, event) -> {
+        mOutputPathView = binding.outputPath;
+        mOutputPathView.setOnKeyListener((v, keyCode, event) -> {
             if (keyCode == KeyEvent.KEYCODE_ENTER) {
                 if (event.getAction() == KeyEvent.ACTION_UP) {
-                    TextView nextField = (TextView) mOutputPath.focusSearch(View.FOCUS_DOWN);
+                    TextView nextField = (TextView) mOutputPathView.focusSearch(View.FOCUS_DOWN);
                     if (nextField != null) {
                         nextField.requestFocus();
                     }
@@ -242,66 +283,69 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
             return false;
         });
 
-        mAppName = binding.appName;
+        mAppNameView = binding.appName;
 
-        mPackageName = binding.packageName;
-        mPackageName.setOnKeyListener((v, keyCode, event) -> {
+        mPackageNameView = binding.packageName;
+        mPackageNameView.setOnKeyListener((v, keyCode, event) -> {
             if (keyCode == KeyEvent.KEYCODE_ENTER) {
                 if (event.getAction() == KeyEvent.ACTION_UP) {
-                    mVersionName.requestFocus();
+                    mVersionNameView.requestFocus();
                 }
                 return true;
             }
             return false;
         });
-        mPackageNameParent = binding.packageNameParent;
+        mPackageNameParentView = binding.packageNameParent;
 
-        mVersionName = binding.versionName;
-        mVersionNameParent = binding.versionNameParent;
-        mVersionCode = binding.versionCode;
-        mVersionCodeParent = binding.versionCodeParent;
+        mVersionNameView = binding.versionName;
+        mVersionNameParentView = binding.versionNameParent;
+        mVersionCodeView = binding.versionCode;
+        mVersionCodeParentView = binding.versionCodeParent;
 
-        mIcon = binding.appIcon;
-        mIcon.setVisibility(View.INVISIBLE);
-        mIcon.setOnClickListener(v -> selectIcon());
+        mIconView = binding.appIcon;
+        mIconView.setVisibility(View.INVISIBLE);
+        mIconView.setOnClickListener(v -> selectIcon());
 
-        mAppConfig = binding.appConfig;
+        mAppConfigView = binding.appConfig;
 
-        mFlexboxAbis = binding.flexboxAbis;
+        mFlexboxAbisView = binding.flexboxAbis;
         initAbisChildren();
 
-        mFlexboxLibs = binding.flexboxLibraries;
+        mFlexboxLibsView = binding.flexboxLibraries;
         initLibsChildren();
 
         mKeyStoreViewModel = new ViewModelProvider(this, new KeyStoreViewModel.Factory(getApplicationContext())).get(KeyStoreViewModel.class);
         mKeyStoreViewModel.updateVerifiedKeyStores();
 
-        mSignatureSchemes = binding.spinnerSignatureSchemes;
-        initSignatureSchemeSpinner();
-
-        mVerifiedKeyStores = binding.spinnerVerifiedKeyStores;
-        initVerifiedKeyStoresSpinner();
-
-        mFlexboxPermissions = binding.flexboxPermissions;
-        initPermissionsChildren();
+        mSignatureSchemesView = binding.spinnerSignatureSchemes;
+        mVerifiedKeyStoresView = binding.spinnerVerifiedKeyStores;
+        mFlexboxPermissionsView = binding.flexboxPermissions;
 
         binding.fab.setOnClickListener(v -> buildApk());
+        ViewUtils.excludeFloatingActionButtonFromBottomNavigationBar(binding.fab);
+
+        ViewUtils.excludePaddingClippableViewFromBottomNavigationBar(binding.scrollView);
+
         binding.selectSource.setOnClickListener(v -> selectSourceFilePath());
         binding.selectOutput.setOnClickListener(v -> selectOutputDirPath());
-        binding.textAbis.setOnClickListener(v -> toggleAllFlexboxChildren(mFlexboxAbis));
+        binding.textAbis.setOnClickListener(v -> toggleAllFlexboxChildren(mFlexboxAbisView));
         binding.textAbis.setOnLongClickListener(v -> {
             syncAbisCheckedStates();
             return true;
         });
-        binding.textLibs.setOnClickListener(v -> toggleAllFlexboxChildren(mFlexboxLibs));
+        binding.textLibs.setOnClickListener(v -> toggleAllFlexboxChildren(mFlexboxLibsView));
         binding.manageKeyStore.setOnClickListener(v -> ManageKeyStoreActivity.Companion.startActivity(this));
-        binding.textPermissions.setOnClickListener(v -> toggleAllFlexboxChildren(mFlexboxPermissions));
+        binding.textPermissions.setOnClickListener(v -> toggleAllFlexboxChildren(mFlexboxPermissionsView));
 
         setToolbarAsBack(R.string.text_build_apk);
         mSource = getIntent().getStringExtra(EXTRA_SOURCE);
         if (mSource != null) {
             setupWithSourceFile(new ScriptFile(mSource));
         }
+
+        initSignatureSchemeSpinner();
+        initVerifiedKeyStoresSpinner();
+        initPermissionsChildren();
 
         syncAbisCheckedStates();
         syncLibsCheckedStates();
@@ -360,7 +404,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
             child.setChecked(false);
             child.setEnabled(false);
             child.setOnBeingUnavailableListener(this::promptForUnavailability);
-            mFlexboxAbis.addView(child);
+            mFlexboxAbisView.addView(child);
         });
     }
 
@@ -377,6 +421,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                         getString(R.string.text_download_link_for_autojs6) + ":\n" +
                         getString(R.string.uri_autojs6_download_link));
         builder.positiveText(R.string.dialog_button_dismiss);
+        builder.positiveColorRes(R.color.dialog_button_hint);
+        MaterialDialogExtensions.widgetThemeColor(builder);
         MaterialDialog dialog = builder.show();
         if (dialog != null) {
             TextView contentView = dialog.getContentView();
@@ -403,8 +449,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
 
     private void syncAbisWithDefaultCheckedFilter(Function<String, Boolean> filterForDefaultChecked) {
         List<String> appSupportedAbiList = AndroidUtils.getAppSupportedAbiList();
-        for (int i = 0; i < mFlexboxAbis.getChildCount(); i += 1) {
-            View child = mFlexboxAbis.getChildAt(i);
+        for (int i = 0; i < mFlexboxAbisView.getChildCount(); i += 1) {
+            View child = mFlexboxAbisView.getChildAt(i);
             if (child instanceof RoundCheckboxWithText) {
                 CharSequence standardAbi = ((RoundCheckboxWithText) child).getText();
                 if (standardAbi != null) {
@@ -425,7 +471,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
             RoundCheckboxWithText child = new RoundCheckboxWithText(this, null);
             child.setText(text);
             child.setChecked(false);
-            mFlexboxLibs.addView(child);
+            mFlexboxLibsView.addView(child);
         });
     }
 
@@ -438,8 +484,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         // 创建一个新的副本
         var candidates = new ArrayList<>(configLibs);
 
-        for (int i = 0; i < mFlexboxLibs.getChildCount(); i += 1) {
-            View child = mFlexboxLibs.getChildAt(i);
+        for (int i = 0; i < mFlexboxLibsView.getChildCount(); i += 1) {
+            View child = mFlexboxLibsView.getChildAt(i);
             if (child instanceof RoundCheckboxWithText) {
                 CharSequence standardLib = ((RoundCheckboxWithText) child).getText();
                 if (standardLib != null) {
@@ -453,9 +499,23 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     }
 
     private void initSignatureSchemeSpinner() {
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, SIGNATURE_SCHEMES);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, SIGNATURE_SCHEMES.stream().map(pair -> {
+            if (pair.second == null || pair.second.isEmpty()) {
+                return pair.first;
+            }
+            return pair.first + " (" + pair.second + ")";
+        }).collect(Collectors.toList()));
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        mSignatureSchemes.setAdapter(adapter);
+        mSignatureSchemesView.setAdapter(adapter);
+        if (mProjectConfig != null) {
+            int initialSelection = IntStream.range(0, SIGNATURE_SCHEMES.size())
+                    .filter(i -> SIGNATURE_SCHEMES.get(i).first.equalsIgnoreCase(mProjectConfig.getSignatureScheme()))
+                    .findFirst()
+                    .orElse(-1);
+            if (initialSelection >= 0) {
+                mSignatureSchemesView.setSelection(initialSelection);
+            }
+        }
     }
 
     private void initVerifiedKeyStoresSpinner() {
@@ -466,7 +526,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
 
         ArrayAdapter<KeyStore> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, verifiedKeyStores);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        mVerifiedKeyStores.setAdapter(adapter);
+        mVerifiedKeyStoresView.setAdapter(adapter);
 
         mKeyStoreViewModel.getVerifiedKeyStores().observe(this, keyStores -> {
             // 清空现有的选项，但保留第一个元素，即默认密钥库
@@ -488,12 +548,32 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
             checkBox.setAlpha(0.87f);
             checkBox.setText(permission + "\n" + getString(descriptionResId));
             checkBox.setButtonDrawable(R.drawable.round_checkbox);
+            checkBox.setBackground(null);
             checkBox.setGravity(Gravity.CENTER_VERTICAL);
             checkBox.setTextSize(12);
             int marginInPixels = (int) (8 * getResources().getDisplayMetrics().density);
             checkBox.setPadding(marginInPixels, 0, 0, 0);
-            checkBox.setChecked(false);
-            mFlexboxPermissions.addView(checkBox);
+            if (mProjectConfig != null) {
+                boolean checked = mProjectConfig.getPermissions().stream().anyMatch(p -> {
+                    var lc = p.toLowerCase(Locale.ROOT);
+                    var uc = p.toUpperCase(Locale.ROOT);
+                    if (p.equalsIgnoreCase(permission)) {
+                        return true;
+                    }
+                    if (permission.contains("android")) {
+                        String refined = uc.substring(uc.lastIndexOf(".") + 1).replaceAll("\\W", "_");
+                        return Objects.equals(refined, permission.substring(permission.lastIndexOf(".") + 1));
+                    }
+                    if (PERMISSION_ALIAS.containsKey(lc)) {
+                        return Objects.equals(permission, PERMISSION_ALIAS.get(lc));
+                    }
+                    return false;
+                });
+                checkBox.setChecked(checked);
+            } else {
+                checkBox.setChecked(false);
+            }
+            mFlexboxPermissionsView.addView(checkBox);
         });
     }
 
@@ -521,8 +601,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         if (dir != null && dir.startsWith(getFilesDir().getPath())) {
             dir = WorkingDirectoryUtils.getPath();
         }
-        mOutputPath.setText(dir);
-        mAppName.setText(file.getSimplifiedName());
+        mOutputPathView.setText(dir);
+        mAppNameView.setText(file.getSimplifiedName());
 
         Observable.fromCallable(() -> {
                     String packageNameSuffix = generatePackageNameSuffix(file);
@@ -531,37 +611,83 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(packageName -> {
-                    mPackageName.setText(packageName);
-                    mPackageNameParent.setHint(R.string.text_package_name);
+                    mPackageNameView.setText(packageName);
+                    mPackageNameParentView.setHint(R.string.text_package_name);
 
                     SimpleVersionInfo nextVersionInfo = AppUtils.generateNextVersionInfo(packageName);
                     if (nextVersionInfo != null) {
-                        mVersionName.setText(nextVersionInfo.versionName);
-                        mVersionCode.setText(nextVersionInfo.versionCodeString);
+                        mVersionNameView.setText(nextVersionInfo.versionName);
+                        mVersionCodeView.setText(nextVersionInfo.versionCodeString);
                     } else {
-                        mVersionName.setText(R.string.default_build_apk_version_name);
-                        mVersionCode.setText(R.string.default_build_apk_version_code);
+                        mVersionNameView.setText(R.string.default_build_apk_version_name);
+                        mVersionCodeView.setText(R.string.default_build_apk_version_code);
                     }
-                    mVersionNameParent.setHint(R.string.text_version_name);
-                    mVersionCodeParent.setHint(R.string.text_version_code);
+                    mVersionNameParentView.setHint(R.string.text_version_name);
+                    mVersionCodeParentView.setHint(R.string.text_version_code);
 
                     Drawable iconDrawable = AppUtils.getInstalledAppIcon(packageName);
                     if (iconDrawable != null) {
-                        mIcon.setImageDrawable(iconDrawable);
+                        mIconView.setImageDrawable(iconDrawable);
                         mIsDefaultIcon = false;
                     }
-                    mIcon.setVisibility(View.VISIBLE);
+                    mIconView.setVisibility(View.VISIBLE);
+
+                    updatePermissionsCheckboxes(packageName);
                 }, throwable -> {
-                    mPackageName.setText(getString(R.string.format_default_package_name, file.getSimplifiedName().toLowerCase(Language.getPrefLanguage().getLocale())));
-                    mVersionName.setText(R.string.default_build_apk_version_name);
-                    mVersionCode.setText(R.string.default_build_apk_version_code);
-                    mPackageNameParent.setHint(R.string.text_package_name);
-                    mVersionNameParent.setHint(R.string.text_version_name);
-                    mVersionCodeParent.setHint(R.string.text_version_code);
-                    mIcon.setVisibility(View.VISIBLE);
+                    mPackageNameView.setText(getString(R.string.format_default_package_name, file.getSimplifiedName().toLowerCase(Language.getPrefLanguage().getLocale())));
+                    mVersionNameView.setText(R.string.default_build_apk_version_name);
+                    mVersionCodeView.setText(R.string.default_build_apk_version_code);
+                    mPackageNameParentView.setHint(R.string.text_package_name);
+                    mVersionNameParentView.setHint(R.string.text_version_name);
+                    mVersionCodeParentView.setHint(R.string.text_version_code);
+                    mIconView.setVisibility(View.VISIBLE);
                 });
 
         setSource(file);
+    }
+
+    private void updatePermissionsCheckboxes(String packageName) {
+        ApkFile apkFile;
+        try {
+            apkFile = new ApkFile(new File(getPackageManager().getApplicationInfo(packageName, 0).sourceDir));
+        } catch (PackageManager.NameNotFoundException | IOException e) {
+            return;
+        }
+
+        try {
+            ApkMeta meta = apkFile.getApkMeta();
+            if (meta == null) {
+                return;
+            }
+            var initialPermissions = meta.usesPermissions;
+            IntStream.range(0, mFlexboxPermissionsView.getChildCount())
+                    .mapToObj(i -> mFlexboxPermissionsView.getChildAt(i))
+                    .forEach(child -> {
+                        CharSequence viewCharSequence = child instanceof RoundCheckboxWithText
+                                ? ((RoundCheckboxWithText) child).getText()
+                                : child instanceof CheckBox ? ((CheckBox) child).getText() : null;
+                        if (viewCharSequence == null) {
+                            return;
+                        }
+                        String viewText = viewCharSequence.toString().split("\n")[0].trim();
+                        if (!initialPermissions.contains(viewText)) {
+                            return;
+                        }
+                        if (child instanceof RoundCheckboxWithText) {
+                            ((RoundCheckboxWithText) child).setChecked(true);
+                        } else {
+                            ((CheckBox) child).setChecked(true);
+                        }
+                    });
+        } catch (Exception ignored) {
+            /* Ignored. */
+        } finally {
+            try {
+                apkFile.close();
+            } catch (IOException e) {
+                /* Ignored. */
+            }
+        }
     }
 
     private static String generatePackageNameSuffix(ScriptFile file) {
@@ -585,7 +711,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     }
 
     void selectSourceFilePath() {
-        String initialDir = new File(mSourcePath.getText().toString()).getParent();
+        String initialDir = new File(mSourcePathView.getText().toString()).getParent();
         new FileChooserDialogBuilder(this)
                 .title(R.string.text_source_file_path)
                 .dir(EnvironmentUtils.getExternalStoragePath(),
@@ -596,7 +722,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
 
     private void setSource(File file) {
         if (!file.isDirectory()) {
-            mSourcePath.setText(file.getPath());
+            mSourcePathView.setText(file.getPath());
             return;
         }
         mProjectConfig = ProjectConfig.fromProjectDir(file.getPath());
@@ -604,20 +730,21 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
             return;
         }
         mIsProjectLevelBuilding = true;
-        mOutputPath.setText(new File(mSource, mProjectConfig.getBuildDir()).getPath());
-        mAppConfig.setVisibility(View.GONE);
-        mSourcePathContainer.setVisibility(View.GONE);
+        mOutputPathView.setText(new File(mSource, mProjectConfig.getBuildDir()).getPath());
+        mAppConfigView.setVisibility(View.GONE);
+        mSourcePathContainerView.setVisibility(View.GONE);
     }
 
     void selectOutputDirPath() {
-        String initialDir = new File(mOutputPath.getText().toString()).exists()
-                ? mOutputPath.getText().toString()
+        String initialDir = new File(mOutputPathView.getText().toString()).exists()
+                ? mOutputPathView.getText().toString()
                 : WorkingDirectoryUtils.getPath();
         new FileChooserDialogBuilder(this)
                 .title(R.string.text_output_apk_path)
                 .dir(initialDir)
                 .chooseDir()
-                .singleChoice(dir -> mOutputPath.setText(dir.getPath()))
+                .singleChoice(dir -> mOutputPathView.setText(dir.getPath()))
+                .positiveColorRes(R.color.dialog_button_attraction)
                 .show();
     }
 
@@ -639,19 +766,19 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
 
     private boolean checkInputs() {
         if (mIsProjectLevelBuilding) {
-            return checkNotEmpty(mOutputPath);
+            return checkNotEmpty(mOutputPathView);
         }
-        return checkNotEmpty(mSourcePath)
-               & checkNotEmpty(mOutputPath)
-               & checkNotEmpty(mAppName)
-               & checkNotEmpty(mVersionCode)
-               & checkNotEmpty(mVersionName)
-               & checkPackageNameValid(mPackageName);
+        return checkNotEmpty(mSourcePathView)
+               & checkNotEmpty(mOutputPathView)
+               & checkNotEmpty(mAppNameView)
+               & checkNotEmpty(mVersionCodeView)
+               & checkNotEmpty(mVersionNameView)
+               & checkPackageNameValid(mPackageNameView);
     }
 
     private boolean checkAbis() {
-        for (int i = 0; i < mFlexboxAbis.getChildCount(); i += 1) {
-            View child = mFlexboxAbis.getChildAt(i);
+        for (int i = 0; i < mFlexboxAbisView.getChildCount(); i += 1) {
+            View child = mFlexboxAbisView.getChildAt(i);
             if (child instanceof RoundCheckboxWithText) {
                 if (((RoundCheckboxWithText) child).isChecked() && child.isEnabled()) {
                     return true;
@@ -754,6 +881,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                 .title(R.string.text_prompt)
                 .content(content)
                 .positiveText(R.string.dialog_button_dismiss)
+                .positiveColorRes(R.color.dialog_button_failure)
                 .cancelable(false)
                 .show();
     }
@@ -779,12 +907,12 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @SuppressLint("CheckResult")
     private void doBuildingApk() {
-        ApkBuilder.AppConfig appConfig = createAppConfig();
-        File tmpDir = new File(getCacheDir(), "build/");
-        File outApk = new File(mOutputPath.getText().toString(),
-                String.format("%s_v%s.apk", appConfig.getAppName(), appConfig.getVersionName()));
+        ProjectConfig projectConfig = determineProjectConfig();
+        File buildPath = new File(getCacheDir(), "build/");
+        File outApk = new File(mOutputPathView.getText().toString(),
+                String.format("%s_v%s.apk", projectConfig.getName(), projectConfig.getVersionName()));
         showProgressDialog();
-        Observable.fromCallable(() -> callApkBuilder(tmpDir, outApk, appConfig))
+        Observable.fromCallable(() -> callApkBuilder(buildPath, outApk, projectConfig))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(apkBuilder -> {
@@ -796,37 +924,38 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                 }, this::onBuildFailed);
     }
 
-    private ApkBuilder.AppConfig createAppConfig() {
-        ArrayList<String> abis = collectCheckedItems(mFlexboxAbis);
-        ArrayList<String> libs = collectCheckedItems(mFlexboxLibs);
-        ArrayList<String> permissions = collectCheckedItems(mFlexboxPermissions);
+    private ProjectConfig determineProjectConfig() {
+        ArrayList<String> abis = collectCheckedItems(mFlexboxAbisView);
+        ArrayList<String> libs = collectCheckedItems(mFlexboxLibsView);
+        ArrayList<String> permissions = collectCheckedItems(mFlexboxPermissionsView);
 
-        ApkBuilder.AppConfig appConfig = mProjectConfig != null
-                ? ApkBuilder.AppConfig.fromProjectConfig(mSource, mProjectConfig)
-                : new ApkBuilder.AppConfig()
-                .setAppName(mAppName.getText().toString())
-                .setSourcePath(mSourcePath.getText().toString())
-                .setPackageName(mPackageName.getText().toString())
-                .setVersionName(mVersionName.getText().toString())
-                .setVersionCode(Integer.parseInt(mVersionCode.getText().toString()))
-                .setIcon(mIsDefaultIcon ? null : () -> BitmapUtils.drawableToBitmap(mIcon.getDrawable()));
-
-        appConfig.setAbis(abis);
-        appConfig.setLibs(libs);
-        appConfig.setSignatureSchemes(mSignatureSchemes.getSelectedItem().toString());
-        if (mVerifiedKeyStores.getSelectedItemPosition() > 0) {
-            appConfig.setKeyStore((KeyStore) mVerifiedKeyStores.getSelectedItem());
+        ProjectConfig projectConfig;
+        if (mProjectConfig != null) {
+            projectConfig = mProjectConfig
+                    .excludeDir(new File(mSource, mProjectConfig.getBuildDir()))
+                    .setSourcePath(mSource)
+                    .setIconPath(mProjectConfig.getIconPath() == null ? null : new File(mSource, mProjectConfig.getIconPath()).getPath());
         } else {
-            appConfig.setKeyStore(null);
+            projectConfig = new ProjectConfig()
+                    .setName(mAppNameView.getText().toString())
+                    .setSourcePath(mSourcePathView.getText().toString())
+                    .setPackageName(mPackageNameView.getText().toString())
+                    .setVersionName(mVersionNameView.getText().toString())
+                    .setVersionCode(Integer.parseInt(mVersionCodeView.getText().toString()))
+                    .setIconGetter(mIsDefaultIcon ? null : () -> BitmapUtils.drawableToBitmap(mIconView.getDrawable()));
         }
-        appConfig.setPermissions(permissions);
 
-        return appConfig;
+        return projectConfig
+                .setAbis(abis)
+                .setLibs(libs)
+                .setKeyStore(mVerifiedKeyStoresView.getSelectedItemPosition() > 0 ? (KeyStore) mVerifiedKeyStoresView.getSelectedItem() : null)
+                .setSignatureScheme(mSignatureSchemesView.getSelectedItem().toString())
+                .setPermissions(permissions);
     }
 
     @NotNull
     private ArrayList<String> collectCheckedItems(FlexboxLayout flexboxLayout) {
-        ArrayList<String> libs = new ArrayList<>();
+        ArrayList<String> result = new ArrayList<>();
 
         for (int i = 0; i < flexboxLayout.getChildCount(); i += 1) {
             View child = flexboxLayout.getChildAt(i);
@@ -834,27 +963,27 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                 if (((RoundCheckboxWithText) child).isChecked()) {
                     CharSequence charSequence = ((RoundCheckboxWithText) child).getText();
                     if (charSequence != null) {
-                        libs.add(charSequence.toString());
+                        result.add(charSequence.toString());
                     }
                 }
             } else if (child instanceof CheckBox) {
                 if (((CheckBox) child).isChecked()) {
                     CharSequence charSequence = ((CheckBox) child).getText();
                     if (charSequence != null) {
-                        libs.add(charSequence.toString().split("\n")[0]);
+                        result.add(charSequence.toString().split("\n")[0]);
                     }
                 }
             }
         }
-        return libs;
+        return result;
     }
 
-    private ApkBuilder callApkBuilder(File tmpDir, File outApk, ApkBuilder.AppConfig appConfig) throws Exception {
+    private ApkBuilder callApkBuilder(File buildPath, File outApk, ProjectConfig projectConfig) throws Exception {
         InputStream templateApk = getAssets().open(TEMPLATE_APK_NAME);
-        return new ApkBuilder(templateApk, outApk, tmpDir.getPath())
+        return new ApkBuilder(templateApk, outApk, buildPath.getPath())
                 .setProgressCallback(BuildActivity.this)
                 .prepare()
-                .withConfig(appConfig)
+                .withConfig(projectConfig)
                 .build()
                 .sign()
                 .cleanWorkspace();
@@ -873,9 +1002,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
             mProgressDialog.dismiss();
             mProgressDialog = null;
         }
-        String message = getString(R.string.text_failed_to_build) + "\n" + error.getMessage();
-        ViewUtils.showToast(this, message, true);
-        ScriptRuntime.popException(message);
+        ErrorDialogActivity.showErrorDialog(this, R.string.text_failed_to_build, error.getMessage());
         Log.e(LOG_TAG, "Failed to build", error);
     }
 
@@ -887,8 +1014,18 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                 .title(R.string.text_build_succeeded)
                 .content(getString(R.string.format_build_succeeded, outApk.getPath()))
                 .positiveText(R.string.text_install)
+                .positiveColorRes(R.color.dialog_button_attraction)
+                .onPositive((dialog, which) -> IntentUtils.installApk(
+                        BuildActivity.this,
+                        outApk.getPath(),
+                        AppFileProvider.AUTHORITY,
+                        new ToastExceptionHolder(BuildActivity.this)
+                ))
                 .negativeText(R.string.text_cancel)
-                .onPositive((dialog, which) -> IntentUtils.installApk(BuildActivity.this, outApk.getPath()))
+                .negativeColorRes(R.color.dialog_button_default)
+                .neutralText(R.string.dialog_button_file_information)
+                .neutralColorRes(R.color.dialog_button_hint)
+                .onNeutral((dialog, which) -> ApkInfoDialogManager.showApkInfoDialog(dialog.getContext(), outApk))
                 .show();
     }
 
@@ -921,7 +1058,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(drawable -> {
-                        mIcon.setImageDrawable(drawable);
+                        mIconView.setImageDrawable(drawable);
                         mIsDefaultIcon = false;
                     }, Throwable::printStackTrace);
         }

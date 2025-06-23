@@ -37,16 +37,16 @@ class VersionInfo : ExtendedVersionInfo {
         val regexVersionName = "$versionNameKey(?:</\\w+>)?=([\\w.]+)".toRegex()
         val regexVersionCode = "$versionCodeKey(?:</\\w+>)?=(\\d+)".toRegex()
 
-        for (string in propertiesFileRawString.split("\\n".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()) {
-            if (versionName.isEmpty() && string.contains(regexVersionName)) {
-                versionName = regexVersionName.find(string)?.groupValues?.get(1) ?: ""
+        for (line in propertiesFileRawString.lineSequence().filter { it.isNotEmpty() }) {
+            if (versionName.isBlank() && line.contains(regexVersionName)) {
+                versionName = regexVersionName.find(line)?.groupValues?.get(1).orEmpty()
                 Log.d(TAG, "versionName: $versionName")
             }
-            if (versionCode <= 0 && string.contains(regexVersionCode)) {
-                versionCode = regexVersionCode.find(string)?.groupValues?.get(1)?.toDouble()?.roundToInt() ?: -1
+            if (versionCode <= 0 && line.contains(regexVersionCode)) {
+                versionCode = regexVersionCode.find(line)?.groupValues?.get(1)?.toDouble()?.roundToInt() ?: -1
                 Log.d(TAG, "versionCode: $versionCode")
             }
-            if (versionName.isNotEmpty() && versionCode > 0) {
+            if (versionName.isNotBlank() && versionCode > 0) {
                 break
             }
         }

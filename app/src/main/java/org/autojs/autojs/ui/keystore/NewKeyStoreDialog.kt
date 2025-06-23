@@ -12,6 +12,8 @@ import android.view.WindowManager
 import android.widget.ArrayAdapter
 import android.widget.LinearLayout
 import androidx.fragment.app.DialogFragment
+import org.autojs.autojs.theme.ThemeColorHelper
+import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.DialogNewKeyStoreBinding
 
@@ -195,8 +197,11 @@ open class NewKeyStoreDialog(
             dismiss()
         }
 
-        binding.moreOptions.setOnCheckedChangeListener { _, isChecked ->
-            binding.moreOptionsContainer.visibility = if (isChecked) View.VISIBLE else View.GONE
+        binding.moreOptions.apply {
+            ThemeColorHelper.setColorPrimary(this, ThemeColorManager.colorPrimary, true)
+            setOnCheckedChangeListener { _, isChecked ->
+                binding.moreOptionsContainer.visibility = if (isChecked) View.VISIBLE else View.GONE
+            }
         }
     }
 

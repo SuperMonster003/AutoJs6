@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="legacy_colorPrimary">#009688</color>
+    <color name="legacy_colorPrimaryDark">#009688</color>
+    <color name="legacy_colorAccent">#03a9f4</color>
+    <color name="legacy_sliding_up_panel_shadow_color">#99444444</color>
+    <color name="legacy_bubble_bg">#eef2f3f9</color>
+    <color name="legacy_color_r">#FD999A</color>
+    <color name="legacy_color_j">#99CC99</color>
+    <color name="legacy_prefTextColorSecondary">#9DA0A2</color>
+    <color name="legacy_prefTextColorPrimary">#282C2F</color>
+    <color name="legacy_divider_functions_keyboard">#f0f0f0</color>
+    <color name="legacy_theme_color_black">#111214</color>
+
+    <color name="legacy_window_background">#FFFFFF</color>
+    <color name="legacy_item_background">#FFFFFF</color>
+    <color name="legacy_item_background_dark">#FFFFFF</color>
+    <color name="legacy_text_color_secondary">#484C4F</color>
+    <color name="legacy_text_color_thirdly">#9DA0A2</color>
+    <color name="legacy_divider">#f2f3f5</color>
+    <color name="legacy_drawer_menu_item_text_color">#484C4F</color>
+    <color name="legacy_drawer_menu_group_text_color">#999999</color>
+    <color name="legacy_tab_indicator">@android:color/white</color>
+    <color name="legacy_tab_text">#a0ffffff</color>
+    <color name="legacy_toolbar">@android:color/white</color>
+    <color name="legacy_toolbar_disabled">#77e0e0e0</color>
+    <color name="legacy_console_debug">#cc000000</color>
+    <color name="legacy_console_verbose">#dfc0c0c0</color>
+    <color name="legacy_market_button_selected">#e14123</color>
+    <color name="legacy_market_button_unselected">#939393</color>
+
+
+</resources>

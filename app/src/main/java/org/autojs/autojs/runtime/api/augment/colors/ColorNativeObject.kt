@@ -10,6 +10,7 @@ import org.autojs.autojs.runtime.api.StringReadable
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.colors.Colors.parseRelativePercentage
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
+import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.NOT_CONSTRUCTABLE
 import org.autojs.autojs.util.RhinoUtils.newBaseFunction
 import org.autojs.autojs.util.StringUtils.uppercaseFirstChar
@@ -23,7 +24,7 @@ import org.mozilla.javascript.Scriptable
 class ColorNativeObject @JvmOverloads constructor(color: Any? = BLACK) : NativeObject(), StringReadable {
 
     init {
-        super.exportAsJSClass(MAX_PROTOTYPE_ID, this, false)
+        RhinoUtils.initNativeObjectPrototype(this)
     }
 
     private val mProxyTowardsNames by lazy {

@@ -32,7 +32,7 @@ date_formats = {
     "es": "%d de %B de %Y",  # 西班牙文
     "ja": "%Y 年 %m 月 %d 日",  # 日文
     "ko": "%Y 년 %m 월 %d 일",  # 韩文
-    "ru": "%d %B %Y г.",  # 俄文
+    "ru": "%d %B %Y года",  # 俄文
     "ar": "%d %B %Y"  # 阿拉伯文
 }
 
@@ -85,6 +85,8 @@ def format_date(date_str, lang_code):
 
             # 在 formatted_date 中每个非字母和非数字字符前后增加空格（如果没有空格）
             formatted_date_with_spaces = re.sub(r'(\d+)', r' \1 ', formatted_date).strip()
+            # 将数字与逗号之间的空格去除
+            formatted_date_with_spaces = re.sub(r'(\d)\s+,', r'\1,', formatted_date_with_spaces)
             formatted_date_with_spaces = re.sub(r'\s+', ' ', formatted_date_with_spaces)
 
             # 去掉前导零
@@ -157,18 +159,19 @@ def extract_latest_versions(lang_code, lang_content, num_versions=3):
         dependency_text = lang_content['text_changelog_item_dependency']
         # noinspection HttpUrlsUsage
         base_url = 'http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md'
-        formatted_version = (
-            f'{version.strip()}\n'
-            f'* `{improvement_label}` {dependency_text} '
-            f'_[`CHANGELOG.md`]({base_url}#{version_url_fragment})_\n'
-        )
 
-        # 去除以 `依赖` label 开头的行
-        filtered_version = "\n".join(
-            line for line in formatted_version.strip().split("\n")
+        original_lines = version.strip().split("\n")
+        filtered_content = "\n".join(
+            line for line in original_lines
             if not line.strip().startswith(f"* `{changelog_content['changelog_label_dependency']}`")
         )
-        filtered_versions.append(filtered_version + '\n')
+        is_filtered = len(original_lines) != len(filtered_content.split("\n"))
+
+        if is_filtered:
+            filtered_versions.append(filtered_content)
+            filtered_versions.append(f'* `{improvement_label}` {dependency_text} _[`CHANGELOG.md`]({base_url}#{version_url_fragment})_\n')
+        else:
+            filtered_versions.append(f'{filtered_content}\n')
 
     return filtered_versions
 

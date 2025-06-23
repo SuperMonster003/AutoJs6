@@ -1,0 +1,4 @@
+<resources>
+  <public name="dummy1" type="drawable"/>
+  <public name="dummy2" type="drawable"/>
+</resources>

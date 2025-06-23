@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_search_color"
+        android:title="@string/text_search_color"
+        android:icon="@drawable/ic_search_black_48dp"
+        android:imeOptions="actionSearch"
+        android:inputType="text"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"
+        app:showAsAction="always|collapseActionView" />
+
+    <item
+        android:id="@+id/action_locate_current_theme_color"
+        android:title="@string/text_locate_current_theme_color"
+        android:icon="@drawable/ic_locate"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_show_histories"
+        android:title="@string/text_histories"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_color_search_help"
+        android:title="@string/text_search_help"
+        android:visible="false"
+        app:showAsAction="never" />
+
+</menu>

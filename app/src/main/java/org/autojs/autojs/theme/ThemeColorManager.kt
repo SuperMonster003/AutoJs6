@@ -1,13 +1,14 @@
 package org.autojs.autojs.theme
 
 import android.app.Activity
+import android.content.Context
 import android.graphics.Paint
 import android.view.View
+import org.autojs.autojs.AbstractAutoJs.Companion.isInrt
 import org.autojs.autojs.util.ColorUtils
-import org.autojs.autojs6.R
+import org.autojs.autojs.util.ViewUtils
 import java.lang.ref.WeakReference
-import java.util.LinkedList
-import java.util.Vector
+import java.util.*
 
 /**
  * Created by Stardust on May 10, 2016.
@@ -15,7 +16,12 @@ import java.util.Vector
 object ThemeColorManager {
 
     @JvmField
-    var defaultThemeColor = ThemeColor(ColorUtils.fromResources(R.color.theme_color_default))
+    var defaultThemeColor = when {
+        // R.color.md_blue_gray_900
+        isInrt -> "#263238"
+        // R.color.theme_color_default
+        else -> "#00695C"
+    }.let { ThemeColor(ColorUtils.parseColor(it)) }
 
     @JvmStatic
     lateinit var currentThemeColor: ThemeColor
@@ -24,7 +30,7 @@ object ThemeColorManager {
     val colorPrimary: Int
         get() = currentThemeColor.colorPrimary
 
-    init {
+    fun init() {
         ThemeColor.fromPreferences()?.let { currentThemeColor = it } ?: setThemeColor(defaultThemeColor)
     }
 
@@ -42,7 +48,7 @@ object ThemeColorManager {
         ThemeColorWidgetReferenceManager.add(object : ThemeColorMutableReference {
             val weakReference = WeakReference(activity)
             override fun setThemeColor(color: ThemeColor) {
-                activity.window.navigationBarColor = color.colorPrimary
+                ViewUtils.setNavigationBarBackgroundColor(activity, color.colorPrimary)
             }
 
             override fun isNull() = weakReference.get() == null
@@ -60,14 +66,42 @@ object ThemeColorManager {
         ThemeColorWidgetReferenceManager.setColor(themeColor)
     }
 
-    /**
-     * 设置主题色并为记录的状态栏和标题栏改变颜色
-     * @param color 主题色RGB值
-     */
     fun setThemeColor(color: Int) = setThemeColor(ThemeColor(color))
 
     private fun saveThemeColorIfNeeded() {
         currentThemeColor.saveIn()
+    }
+
+    @JvmStatic
+    @JvmOverloads
+    fun isLuminanceLight(backgroundColorMatters: Boolean = true): Boolean {
+        return ViewUtils.isLuminanceLight(colorPrimary, backgroundColorMatters)
+    }
+
+    @JvmStatic
+    @JvmOverloads
+    fun isLuminanceDark(backgroundColorMatters: Boolean = true): Boolean {
+        return ViewUtils.isLuminanceDark(colorPrimary, backgroundColorMatters)
+    }
+
+    @JvmStatic
+    fun getDayOrNightColorByLuminance(context: Context): Int {
+        return ViewUtils.getDayOrNightColorByLuminance(context, colorPrimary)
+    }
+
+    @JvmStatic
+    fun getDayOrNightColorResByLuminance(): Int {
+        return ViewUtils.getDayOrNightColorResByLuminance(colorPrimary)
+    }
+
+    @JvmStatic
+    fun setStatusBarBackgroundColor(activity: Activity) {
+        ViewUtils.setStatusBarBackgroundColor(activity, colorPrimary)
+    }
+
+    @JvmStatic
+    fun setStatusBarIconLight(activity: Activity) {
+        ViewUtils.setStatusBarIconLight(activity, isLuminanceDark())
     }
 
     private object BackgroundColorManager {
@@ -92,14 +126,15 @@ object ThemeColorManager {
 
         fun add(activity: Activity) {
             activityRefs.add(WeakReference(activity))
-            activity.window.statusBarColor = currentThemeColor.colorPrimary
+            setStatusBarBackgroundColor(activity)
         }
 
         fun setColor(color: Int) {
-            activityRefs.iterator().let {
-                while (it.hasNext()) {
-                    it.next().get()?.apply { window.statusBarColor = color } ?: it.remove()
-                }
+            val iterator = activityRefs.iterator()
+            while (iterator.hasNext()) {
+                iterator.next().get()?.also { activity ->
+                    ViewUtils.setStatusBarBackgroundColor(activity, color)
+                } ?: iterator.remove()
             }
         }
     }

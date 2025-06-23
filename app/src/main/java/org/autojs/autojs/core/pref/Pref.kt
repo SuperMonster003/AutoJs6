@@ -61,13 +61,6 @@ object Pref {
     fun get(): SharedPreferences = sPref
 
     @JvmStatic
-    val isCompatibilityWithClassesForVer4xEnabled
-        get() = getBoolean(
-            R.string.key_compatibility_with_classes_for_ver_4_x,
-            resources.getBoolean(R.bool.pref_compatibility_with_classes_for_ver_4_x),
-        )
-
-    @JvmStatic
     val isExtendingJsBuildInObjectsEnabled
         get() = getBoolean(
             R.string.key_extending_js_build_in_objects,
@@ -149,8 +142,20 @@ object Pref {
         )
 
     @JvmStatic
-    val isHiddenFilesShow
+    val isHiddenFilesShown
         get() = getString(R.string.key_hidden_files, key(R.string.default_key_hidden_files)) == key(R.string.key_hidden_files_show)
+
+    @JvmStatic
+    val isFileExtensionsShownForAll
+        get() = getString(R.string.key_file_extensions, key(R.string.default_key_file_extensions)) == key(R.string.key_file_extensions_show_all)
+
+    @JvmStatic
+    val isFileExtensionsShownForAllButExecutable
+        get() = getString(R.string.key_file_extensions, key(R.string.default_key_file_extensions)) == key(R.string.key_file_extensions_show_all_but_executable)
+
+    @JvmStatic
+    val isFileExtensionsHidden
+        get() = getString(R.string.key_file_extensions, key(R.string.default_key_file_extensions)) == key(R.string.key_file_extensions_not_show)
 
     @JvmStatic
     val isRecordToastEnabled

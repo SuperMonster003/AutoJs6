@@ -37,6 +37,8 @@ import org.mozilla.javascript.Undefined
 import java.io.File
 import java.net.URI
 import org.autojs.autojs.util.App as PresetApp
+import androidx.core.net.toUri
+import org.autojs.autojs.extension.ScriptableExtensions.deleteProp
 
 @Suppress("unused", "UNUSED_PARAMETER")
 class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
@@ -49,13 +51,13 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
     @Suppress("DEPRECATION")
     override val selfAssignmentFunctions = listOf(
         ::intent.name,
-        ::startActivity.name,
-        ::startDualActivity.name,
+        ::startActivity.name to AS_GLOBAL,
+        ::startDualActivity.name to AS_GLOBAL,
         ::intentToShell.name,
-        ::startService.name,
-        ::sendEmail.name,
-        ::sendBroadcast.name,
-        ::sendLocalBroadcastSync.name,
+        ::startService.name to AS_GLOBAL,
+        ::sendEmail.name to AS_GLOBAL,
+        ::sendBroadcast.name to AS_GLOBAL,
+        ::sendLocalBroadcastSync.name to AS_GLOBAL,
         ::parseUri.name,
         ::openUrl.name,
         ::openDualUrl.name,
@@ -73,8 +75,8 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         ::launchDualSettings.name to AS_GLOBAL,
         ::openAppSetting.name to AS_GLOBAL,
         ::openDualAppSetting.name to AS_GLOBAL,
-        ::uninstall.name,
-        ::uninstallDual.name,
+        ::uninstall.name to AS_GLOBAL,
+        ::uninstallDual.name to AS_GLOBAL,
         ::viewFile.name,
         ::editFile.name,
         ::kill.name to AS_GLOBAL,
@@ -133,7 +135,7 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                             checkDualProperty(options) -> startDualActivity(scriptRuntime, args)
                             checkRootProperty(options) && RootUtils.isRootAvailable() -> {
                                 val tmpIntent = configuredIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                Shell.execCommand(scriptRuntime, arrayOf("am start ${intentToShellRhino(tmpIntent)}", /* withRoot = */ true)).throwIfError()
+                                Shell.execCommand(scriptRuntime, arrayOf<Any>("am start ${intentToShellRhino(tmpIntent)}", /* withRoot = */ true)).throwIfError()
                             }
                             checkShizukuProperty(options) && WrappedShizuku.isOperational() -> {
                                 val tmpIntent = configuredIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -158,7 +160,7 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                         checkDualProperty(opt) -> startDualActivity(scriptRuntime, args)
                         checkRootProperty(opt) && RootUtils.isRootAvailable() -> {
                             val tmpIntent = intentRhinoWithRuntime(scriptRuntime, opt).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
-                            Shell.execCommand(scriptRuntime, arrayOf("am start ${intentToShellRhino(tmpIntent)}", /* withRoot = */ true)).throwIfError()
+                            Shell.execCommand(scriptRuntime, arrayOf<Any>("am start ${intentToShellRhino(tmpIntent)}", /* withRoot = */ true)).throwIfError()
                         }
                         checkShizukuProperty(opt) && WrappedShizuku.isOperational() -> {
                             val tmpIntent = intentRhinoWithRuntime(scriptRuntime, opt).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
@@ -376,7 +378,7 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             when {
                 o is NativeObject && checkRootProperty(o) -> {
                     @Suppress("SpellCheckingInspection")
-                    Shell.execCommand(scriptRuntime, arrayOf(/* cmd = */ "am startservice ${intentToShellRhino(o)}", /* withRoot = */ true))
+                    Shell.execCommand(scriptRuntime, arrayOf<Any>(/* cmd = */ "am startservice ${intentToShellRhino(o)}", /* withRoot = */ true))
                 }
                 else -> globalContext.startService(intentRhinoWithRuntime(scriptRuntime, o))
             }
@@ -435,7 +437,7 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                 }
                 else -> when {
                     o is NativeObject && checkRootProperty(o) -> {
-                        Shell.execCommand(scriptRuntime, arrayOf("am broadcast ${intentToShellRhino(o)}", /* withRoot = */ true))
+                        Shell.execCommand(scriptRuntime, arrayOf<Any>("am broadcast ${intentToShellRhino(o)}", /* withRoot = */ true))
                     }
                     else -> globalContext.sendBroadcast(intentRhinoWithRuntime(scriptRuntime, o))
                 }
@@ -471,7 +473,7 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         fun parseUriRhinoWithRuntime(scriptRuntime: ScriptRuntime, uri: Any?): Uri? = when (uri) {
             is String -> when {
                 uri.startsWith(PROTOCOL_FILE) -> getUriForFileRhinoWithRuntime(scriptRuntime, uri)
-                else -> Uri.parse(uri)
+                else -> uri.toUri()
             }
             is Uri -> parseUriRhinoWithRuntime(scriptRuntime, uri.host)
             else -> null
@@ -501,7 +503,7 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         fun openUrlInternal(url: String) {
             val prefix = "http://".takeUnless { url.contains("://") } ?: ""
             Intent(Intent.ACTION_VIEW)
-                .setData(Uri.parse(prefix + url))
+                .setData((prefix + url).toUri())
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 .let { globalContext.startActivity(it) }
         }
@@ -510,7 +512,7 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         private fun openDualUrlInternal(scriptRuntime: ScriptRuntime, url: String) {
             val prefix = "http://".takeUnless { url.contains("://") } ?: ""
             Intent(Intent.ACTION_VIEW)
-                .setData(Uri.parse(prefix + url))
+                .setData((prefix + url).toUri())
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 .let { startActivityForDualUser(scriptRuntime, it) }
         }
@@ -523,16 +525,15 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
         @JvmStatic
         @RhinoFunctionBody
-        fun getUriForFileRhinoWithRuntime(scriptRuntime: ScriptRuntime, uri: String): Uri? = Uri.fromFile(
-            File(
-                scriptRuntime.files.path(
-                    when {
-                        uri.startsWith(PROTOCOL_FILE) -> uri.substring(PROTOCOL_FILE.length)
-                        else -> uri
-                    }
-                )
-            )
-        )
+        fun getUriForFileRhinoWithRuntime(scriptRuntime: ScriptRuntime, uri: String): Uri? {
+            val path = scriptRuntime.files.path(
+                when {
+                    uri.startsWith(PROTOCOL_FILE) -> uri.substring(PROTOCOL_FILE.length)
+                    else -> uri
+                }
+            ) ?: return null
+            return Uri.fromFile(File(path))
+        }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
@@ -702,7 +703,7 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                 path.isJsNullish() -> false
                 path !is String -> throw RuntimeException("Cannot view $path as it isn't a string")
                 else -> {
-                    val nicePath = scriptRuntime.files.path(path)
+                    val nicePath = scriptRuntime.files.nonNullPath(path)
                     if (!scriptRuntime.files.exists(nicePath)) {
                         throw Error("Cannot view $path as it doesn't exist")
                     }
@@ -724,7 +725,7 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                 path.isJsNullish() -> false
                 path !is String -> throw RuntimeException("Cannot edit $path as it isn't a string")
                 else -> {
-                    val nicePath = scriptRuntime.files.path(path)
+                    val nicePath = scriptRuntime.files.nonNullPath(path)
                     if (!scriptRuntime.files.exists(nicePath)) {
                         throw Error("Cannot edit $path as it doesn't exist")
                     }
@@ -742,9 +743,9 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             val packageName = getPackageName(scriptRuntime, argList) ?: return@ensureArgumentsLength false
             val command = "am force-stop $packageName"
             when {
-                RootUtils.isRootAvailable() -> Shell.execCommand(scriptRuntime, arrayOf(command, /* withRoot = */ true))
+                RootUtils.isRootAvailable() -> Shell.execCommand(scriptRuntime, arrayOf<Any>(command, /* withRoot = */ true))
                 WrappedShizuku.isOperational() -> WrappedShizuku.execCommand(command)
-                else -> Shell.execCommand(scriptRuntime, arrayOf(command, /* withRoot = */ false))
+                else -> Shell.execCommand(scriptRuntime, arrayOf<Any>(command, /* withRoot = */ false))
             }.code == 0
         }
 
@@ -883,9 +884,9 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                 if (currentUserIdentifier != processUserIdentifier) {
                     val niceCommand = "$command --user $currentUserIdentifier"
                     when {
-                        withRoot && RootUtils.isRootAvailable() -> Shell.execCommand(scriptRuntime, arrayOf(niceCommand, /* withRoot = */ true))
+                        withRoot && RootUtils.isRootAvailable() -> Shell.execCommand(scriptRuntime, arrayOf<Any>(niceCommand, /* withRoot = */ true))
                         withShizuku && WrappedShizuku.isOperational() -> WrappedShizuku.execCommand(niceCommand)
-                        else -> Shell.execCommand(scriptRuntime, arrayOf(niceCommand, /* withRoot = */ false))
+                        else -> Shell.execCommand(scriptRuntime, arrayOf<Any>(niceCommand, /* withRoot = */ false))
                     }.throwIfError()
                 }
             }
@@ -908,13 +909,13 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
         private fun launchDualSettingsInternal(scriptRuntime: ScriptRuntime, packageName: String) {
             startActivityForDualUser(scriptRuntime, Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                data = Uri.parse("package:$packageName")
+                data = "package:$packageName".toUri()
             })
         }
 
         private fun uninstallDualInternal(scriptRuntime: ScriptRuntime, packageName: String) {
             startActivityForDualUser(scriptRuntime, Intent(Intent.ACTION_DELETE).apply {
-                data = Uri.parse("package:$packageName")
+                data = "package:$packageName".toUri()
             })
         }
 
@@ -927,27 +928,45 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         private fun Intent.configure(scriptRuntime: ScriptRuntime, o: NativeObject): Intent {
             val intent = this
 
-            if (!o.prop("url").isJsNullish()) {
-                o.put("data", o, parseIntentUrl(scriptRuntime, o))
+            val urlRaw = o.prop("url")
+            val packageRaw = o.prop("package")
+            var packageNameRaw = o.prop("packageName")
+            val classNameRaw = o.prop("className")
+            val extrasRaw = o.prop("extras")
+            val categoryRaw = o.prop("category")
+            val actionRaw = o.prop("action")
+            val flagsRaw = o.prop("flags")
+            val typeRaw = o.prop("type")
+            val dataRaw = o.prop("data")
+
+            if (!urlRaw.isJsNullish()) {
+                o.defineProp("data", parseIntentUrl(scriptRuntime, o))
             }
 
-            if (!o.prop("package").isJsNullish()) {
-                if (o.prop("packageName").isJsNullish()) {
-                    o.put("packageName", o, o.prop("package"))
-                }
-            } else {
-                if (!o.prop("packageName").isJsNullish()) {
-                    o.put("package", o, o.prop("packageName"))
+            if (!packageRaw.isJsNullish()) {
+                if (packageNameRaw.isJsNullish()) {
+                    o.defineProp("packageName", packageRaw).also {
+                        packageNameRaw = packageRaw
+                    }
                 }
             }
+            o.deleteProp("package")
 
-            if (!o.prop("packageName").isJsNullish()) {
-                val k = Context.toString(o.prop("packageName"))
-                if (k in presetPackageNames) {
-                    o.defineProp("packageName", presetPackageNames[k])
+            if (!packageNameRaw.isJsNullish()) {
+                val packageName = when (packageNameRaw) {
+                    is PresetApp -> packageNameRaw.packageName
+                    else -> when (val packageNameStr = coerceString(packageNameRaw)) {
+                        in presetPackageNames -> presetPackageNames[packageNameStr]!!
+                        else -> packageNameStr
+                    }
                 }
-                if (!o.prop("className").isJsNullish()) {
-                    intent.setClassName(coerceString(o.prop("packageName")), parseClassName(o))
+                if (packageName != packageNameRaw) {
+                    o.defineProp("packageName", packageName).also {
+                        packageNameRaw = packageName
+                    }
+                }
+                if (!classNameRaw.isJsNullish()) {
+                    intent.setClassName(packageName, parseClassName(o))
                 } else {
                     // @Hint by SuperMonster003 on Jun 23, 2020.
                     //  ! the Intent can only match the components
@@ -958,44 +977,43 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                     //  ! Intent 只能匹配通过 setPackage() 设置的给定应用包中的组件.
                     //  ! 否则, 如果有多个应用可以处理该 Intent,
                     //  ! 系统会向用户展示一个对话框, 让用户选择要使用哪个应用.
-                    intent.setPackage(coerceString(o.prop("packageName")))
+                    intent.setPackage(packageName)
                 }
             }
 
-            if (o.prop("extras") is NativeObject) {
-                (o.prop("extras") as NativeObject).entries.forEach { entry ->
+            if (extrasRaw is NativeObject) {
+                extrasRaw.entries.forEach { entry ->
                     val (key, value) = entry
                     RhinoUtils.putExtraForIntent(intent, key, value)
                 }
             }
 
-            if (!o.prop("category").isJsNullish()) {
-                if (o.prop("category") is Iterable<*>) {
-                    (o.prop("category") as Iterable<*>).forEach { cat ->
+            if (!categoryRaw.isJsNullish()) {
+                when (categoryRaw) {
+                    is Iterable<*> -> categoryRaw.forEach { cat ->
                         intent.addCategory(Context.toString(cat))
                     }
-                } else {
-                    intent.addCategory(Context.toString(o.prop("category")))
+                    else -> intent.addCategory(Context.toString(categoryRaw))
                 }
             }
 
-            if (!o.prop("action").isJsNullish()) {
-                intent.setAction(parseIntentAction(o.prop("action")))
+            if (!actionRaw.isJsNullish()) {
+                intent.setAction(parseIntentAction(actionRaw))
             }
 
-            if (!o.prop("flags").isJsNullish()) {
-                intent.setFlags(parseIntentFlags(o.prop("flags")))
+            if (!flagsRaw.isJsNullish()) {
+                intent.setFlags(parseIntentFlags(flagsRaw))
             }
 
-            if (!o.prop("type").isJsNullish()) {
-                if (!o.prop("data").isJsNullish()) {
-                    intent.setDataAndType(parseUriRhinoWithRuntime(scriptRuntime, o.prop("data")), Context.toString(o.prop("type")))
+            if (!typeRaw.isJsNullish()) {
+                if (!dataRaw.isJsNullish()) {
+                    intent.setDataAndType(parseUriRhinoWithRuntime(scriptRuntime, dataRaw), Context.toString(typeRaw))
                 } else {
-                    intent.setType(Context.toString(o.prop("type")))
+                    intent.setType(Context.toString(typeRaw))
                 }
             } else {
-                if (!o.prop("data").isJsNullish()) {
-                    intent.setData(Uri.parse(Context.toString(o.prop("data"))))
+                if (!dataRaw.isJsNullish()) {
+                    intent.setData(Context.toString(dataRaw).toUri())
                 }
             }
 

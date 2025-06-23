@@ -15,7 +15,6 @@
             android:paddingEnd="0dp"
             android:paddingStart="16dp"
             android:gravity="center_vertical"
-            android:textColor="?attr/colorPrimary"
             android:textSize="13sp"
             tools:text="@string/text_sample_string" />
 </LinearLayout>

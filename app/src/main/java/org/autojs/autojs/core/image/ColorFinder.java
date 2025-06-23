@@ -135,7 +135,6 @@ public class ColorFinder {
 
     @Deprecated
     @ScriptInterface
-    @SuppressWarnings("deprecation")
     @CodeAuthor(name = "LYS86", homepage = "https://github.com/LYS86")
     public Point[] findAllMultiColors(ImageWrapper image, int firstColor, int threshold, Rect rect, int[] points) {
         Point[] firstPoints = findAllPointsForColor(image, firstColor, threshold, rect);
@@ -151,14 +150,23 @@ public class ColorFinder {
         return resultPoints.toArray(new Point[0]);
     }
 
+    public boolean detectMultiColors(ImageWrapper image, int x, int y, int firstColor, int threshold, Rect region, int[] points) {
+        int pixel = image.pixel(x, y);
+        ColorDetector colorDetector = new ColorDetector.DifferenceDetector(firstColor, threshold);
+        if (!colorDetector.detectColor(Color.red(pixel), Color.green(pixel), Color.blue(pixel))) {
+            return false;
+        }
+        return checksPath(image, new Point(x, y), threshold, points);
+    }
+
     private boolean checksPath(ImageWrapper image, Point startingPoint, int threshold, int[] points) {
         for (int i = 0; i < points.length; i += 3) {
             int x = points[i];
             int y = points[i + 1];
             int color = points[i + 2];
             ColorDetector colorDetector = new ColorDetector.DifferenceDetector(color, threshold);
-            x += startingPoint.x;
-            y += startingPoint.y;
+            x += (int) startingPoint.x;
+            y += (int) startingPoint.y;
             if (x >= image.getWidth() || y >= image.getHeight() || x < 0 || y < 0) {
                 return false;
             }
@@ -173,7 +181,6 @@ public class ColorFinder {
     @Nullable
     @Deprecated
     @ScriptInterface
-    @SuppressWarnings("deprecation")
     public Point findColorEquals(ImageWrapper imageWrapper, int color) {
         return findColorEquals(imageWrapper, color, null);
     }
@@ -181,7 +188,6 @@ public class ColorFinder {
     @Nullable
     @Deprecated
     @ScriptInterface
-    @SuppressWarnings("deprecation")
     public Point findColorEquals(ImageWrapper imageWrapper, int color, Rect region) {
         return findColor(imageWrapper, color, 0, region);
     }

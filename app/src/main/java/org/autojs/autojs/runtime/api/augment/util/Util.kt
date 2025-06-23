@@ -20,16 +20,19 @@ import org.autojs.autojs.extension.AnyExtensions.isJsSymbol
 import org.autojs.autojs.extension.AnyExtensions.isJsUndefined
 import org.autojs.autojs.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.extension.FlexibleArray
-import org.autojs.autojs.extension.NumberExtensions.string
+import org.autojs.autojs.extension.NumberExtensions.jsString
 import org.autojs.autojs.extension.ScriptableExtensions.prop
 import org.autojs.autojs.extension.ScriptableExtensions.defineProp
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.global.Species
 import org.autojs.autojs.runtime.api.augment.util.Inspect.inspectRhino
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
+import org.autojs.autojs.util.DisplayUtils
 import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.ObsoletedRhinoFunctionException
 import org.autojs.autojs.util.RhinoUtils.callToStringFunction
+import org.autojs.autojs.util.RhinoUtils.coerceFloatNumber
+import org.autojs.autojs.util.RhinoUtils.coerceNumber
 import org.autojs.autojs.util.RhinoUtils.js_function_bind
 import org.autojs.autojs.util.RhinoUtils.js_json_stringify
 import org.autojs.autojs.util.RhinoUtils.js_object_create
@@ -108,6 +111,10 @@ object Util : Augmentable() {
         ::toRegular.name,
         ::toRegularAndCall.name,
         ::toRegularAndApply.name,
+        ::dpToPx.name,
+        ::spToPx.name,
+        ::pxToDp.name,
+        ::pxToSp.name,
     )
 
     private val availableTypes = listOf(
@@ -274,13 +281,13 @@ object Util : Augmentable() {
 
         val bPrototype: Scriptable? = when {
             niceB == null -> js_object_create(null)
-            else -> withRhinoContext { context ->
+            else -> withRhinoContext { cx ->
                 val tmp = object : BaseFunction() {
                     override fun call(cx: Context, scope: Scriptable, thisObj: Scriptable?, args: Array<out Any?>) = newNativeObject().also {
                         it.defineProperty("constructor", d, READONLY or DONTENUM or PERMANENT)
                     }
                 }
-                tmp.construct(context, ImporterTopLevel(context), arrayOf()).also { instance ->
+                tmp.construct(cx, ImporterTopLevel(cx), arrayOf()).also { instance ->
                     // FIXME by SuperMonster003 on Jul 13, 2024.
                     //  ! I'm not sure if there is a better way
                     //  ! to implement JavaScript snippet `tmp.prototype = b.prototype;`,
@@ -352,7 +359,7 @@ object Util : Augmentable() {
 
             when (matchResult.value) {
                 "%s" -> Context.toString(args[index++])
-                "%d" -> Context.toNumber(args[index++]).string
+                "%d" -> Context.toNumber(args[index++]).jsString
                 "%j" -> try {
                     Context.toString(js_json_stringify(args[index++]))
                 } catch (e: Exception) {
@@ -568,9 +575,10 @@ object Util : Augmentable() {
     fun ensureTypeRhino(o: Any?, type: Any?) {
         if (type !is String) throw WrappedIllegalArgumentException("Argument \"type\" must be a string")
         val niceType = type.lowercase()
-        if (niceType !in availableTypes) throw WrappedIllegalArgumentException("Argument \"type\" must be one of these types: ${
-            availableTypes.joinToString(", ") { "\"$it\"" }
-        }")
+        if (niceType !in availableTypes) throw WrappedIllegalArgumentException(
+            "Argument \"type\" must be one of these types: ${
+                availableTypes.joinToString(", ") { "\"$it\"" }
+            }")
         if (js_typeof(o) != niceType) {
             throw WrappedIllegalArgumentException("Argument must be type of $type instead of ${o.jsBrief()}")
         }
@@ -736,10 +744,34 @@ object Util : Augmentable() {
         throw ObsoletedRhinoFunctionException(::toRegularAndCall.name)
     }
 
+    @JvmStatic
+    @RhinoSingletonFunctionInterface
+    fun dpToPx(args: Array<out Any?>): Double = ensureArgumentsOnlyOne(args) {
+        coerceNumber(DisplayUtils.dpToPx(coerceFloatNumber(it)))
+    }
+
+    @JvmStatic
+    @RhinoSingletonFunctionInterface
+    fun spToPx(args: Array<out Any?>): Double = ensureArgumentsOnlyOne(args) {
+        coerceNumber(DisplayUtils.spToPx(coerceFloatNumber(it)))
+    }
+
+    @JvmStatic
+    @RhinoSingletonFunctionInterface
+    fun pxToDp(args: Array<out Any?>): Double = ensureArgumentsOnlyOne(args) {
+        coerceNumber(DisplayUtils.pxToDp(coerceFloatNumber(it)))
+    }
+
+    @JvmStatic
+    @RhinoSingletonFunctionInterface
+    fun pxToSp(args: Array<out Any?>): Double = ensureArgumentsOnlyOne(args) {
+        coerceNumber(DisplayUtils.pxToSp(coerceFloatNumber(it)))
+    }
+
     private fun getClassInternal(o: Any): Scriptable = when (o) {
         is Class<*> -> o
         else -> o.javaClass
-    }.let { cls -> withRhinoContext { cx -> cx.wrapFactory.wrapJavaClass(cx, ImporterTopLevel(cx), cls) }!! }
+    }.let { cls -> withRhinoContext { cx -> cx.wrapFactory.wrapJavaClass(cx, ImporterTopLevel(cx), cls) } }
 
     internal class RegularFunction(private val func: BaseFunction) : BaseFunction() {
 

@@ -2,9 +2,15 @@ package org.autojs.autojs.util
 
 import android.content.res.Configuration
 import android.text.TextUtils
+import com.ibm.icu.text.CharsetDetector
+import com.ibm.icu.text.CharsetMatch
 import org.autojs.autojs.annotation.LocaleNonRelated
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.pref.Language
+import org.autojs.autojs.extension.NumberExtensions.roundToString
+import org.opencv.core.Point
+import java.nio.charset.Charset
+import java.nio.charset.StandardCharsets
 import java.util.Locale
 import kotlin.math.min
 import kotlin.math.pow
@@ -18,6 +24,14 @@ object StringUtils {
     private val regexPattern = "^/(.+)/$".toRegex()
 
     private val globalAppContext by lazy { GlobalAppContext.get() }
+
+    private val localePref = mapOf(
+        Language.ZH_HANS.languageTag to listOf("GB18030", "GBK", "Big5"),
+        Language.ZH_HANT_HK.languageTag to listOf("Big5", "GB18030"),
+        Language.ZH_HANT_TW.languageTag to listOf("Big5", "GB18030"),
+        Language.JA.languageTag to listOf("Shift_JIS", "EUC-JP", "ISO-2022-JP"),
+        Language.KO.languageTag to listOf("EUC-KR")
+    )
 
     @JvmStatic
     fun str(@LocaleNonRelated resId: Int, vararg args: Any): String = globalAppContext.getString(resId, *args)
@@ -203,5 +217,91 @@ object StringUtils {
     @JvmStatic
     @Deprecated("Deprecated since v6.6.0", ReplaceWith("uppercaseFirstChar(s)"))
     fun toUpperCaseFirst(s: String) = uppercaseFirstChar(s)
+
+    @JvmStatic
+    fun toFormattedSummary(dataList: List<Pair<String, () -> Any?>>): String {
+        val separatorLv0 = "\n"
+        val separatorLv1 = "$separatorLv0  "
+        val separatorLv2 = "$separatorLv1  "
+
+        return dataList.joinToString(prefix = "{$separatorLv1", separator = separatorLv1, postfix = "$separatorLv0}") { (name, action) ->
+            val value = when (val actionResult = action()) {
+                is CharSequence -> "\"$actionResult\""
+                is Iterable<*> -> actionResult.joinToString(prefix = "[$separatorLv2", separator = separatorLv2, postfix = "$separatorLv1]")
+                is Array<*> -> actionResult.joinToString(prefix = "[$separatorLv2", separator = separatorLv2, postfix = "$separatorLv1]")
+                is Point -> actionResult.toFormattedPointString(0)
+                else -> actionResult
+            }
+            "$name=$value"
+        }
+    }
+
+    @JvmStatic
+    @JvmOverloads
+    fun Point.toFormattedPointString(scale: Int = 0): String {
+        return "{${x.roundToString(scale)}, ${y.roundToString(scale)}}"
+    }
+
+    @JvmStatic
+    fun detectCharset(bytes: ByteArray): CharsetMatchWrapper {
+        val matches = kotlin.runCatching {
+            CharsetDetector().apply { setText(bytes).setDeclaredEncoding("UTF-8") }.detectAll()
+        }.getOrNull() ?: return CharsetMatchWrapper(null)
+
+        matches.firstOrNull {
+            it.name.startsWith("UTF-", true) && it.confidence >= 30
+        }?.let {
+            return CharsetMatchWrapper(it)
+        }
+
+        val topScore = matches.maxOfOrNull { it.confidence } ?: -1
+        val candidates = matches.filter { it.confidence == topScore }
+        val localeTag = Language.getPrefLanguage().getLocalCompatibleLanguageTag()
+        val prefList = localePref[localeTag] ?: emptyList()
+        val best = candidates.minByOrNull {
+            prefList.indexOf(it.name).takeIf { i -> i >= 0 } ?: Int.MAX_VALUE
+        } ?: candidates.first()
+
+        return CharsetMatchWrapper(best)
+    }
+
+    @JvmStatic
+    fun hasBom(bytes: ByteArray, charset: Charset): Boolean {
+        val bom = bomBytes(charset)
+        return bom.isNotEmpty() && bytes.take(bom.size).toByteArray().contentEquals(bom)
+    }
+
+    @JvmStatic
+    fun bomBytes(charset: Charset): ByteArray = when (charset) {
+        StandardCharsets.UTF_8 -> byteArrayOf(0xEF.toByte(), 0xBB.toByte(), 0xBF.toByte())
+        StandardCharsets.UTF_16LE -> byteArrayOf(0xFF.toByte(), 0xFE.toByte())
+        StandardCharsets.UTF_16BE -> byteArrayOf(0xFE.toByte(), 0xFF.toByte())
+        else -> ByteArray(0)
+    }
+
+    @JvmStatic
+    fun dropBom(bytes: ByteArray, charset: Charset): ByteArray {
+        val bom = bomBytes(charset)
+        if (bom.isEmpty() || bytes.size < bom.size || !bytes.take(bom.size).toByteArray().contentEquals(bom)) {
+            return bytes
+        }
+        return bytes.copyOfRange(bom.size, bytes.size)
+    }
+
+    class CharsetMatchWrapper(private val charsetMatch: CharsetMatch?) {
+
+        val name: String? by lazy { charsetMatch?.name }
+        val confidence: Int? by lazy { charsetMatch?.confidence }
+
+        fun charsetOrNull(): Charset? = runCatching {
+            name?.let { Charset.forName(it) }
+        }.getOrNull()
+
+        @JvmOverloads
+        fun charsetOrDefault(defaultValue: Charset = StandardCharsets.UTF_8): Charset = charsetOrNull() ?: defaultValue
+
+        fun nameOrDefault(defaultValue: String): String = name ?: defaultValue
+
+    }
 
 }

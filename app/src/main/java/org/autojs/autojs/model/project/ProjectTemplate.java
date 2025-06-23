@@ -26,7 +26,7 @@ public class ProjectTemplate {
         return Observable.fromCallable(() -> {
             mProjectDir.mkdirs();
             PFiles.write(ProjectConfig.configFileOfDir(mProjectDir.getPath()), mProjectConfig.toJson());
-            new File(mProjectDir, mProjectConfig.getMainScriptFile()).createNewFile();
+            new File(mProjectDir, mProjectConfig.getMainScriptFileName()).createNewFile();
             return mProjectDir;
         })
                 .subscribeOn(Schedulers.io())

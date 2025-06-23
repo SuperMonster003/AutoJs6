@@ -4,6 +4,150 @@
 
 ******
 
+# v6.6.4
+
+###### 2025/05/31
+
+* `ヒント` API変更: ui.(status/navigation)BarAppearanceLight[By] -> ui.(status/navigation)BarIconLight[By]
+* `新機能` util.dpToPx/spToPx/pxToDp/pxToSp メソッド (ピクセル単位変換用)
+* `修正` 画面を横向きに回転するとサブタイトルが不完全に表示される問題
+* `修正` 画面を横向きに回転すると一部ページのコンテンツがサイドナビゲーションバーに隠れる問題
+* `修正` Android 15 で一部ページのステータスバー背景の着色領域が不完全になる問題 _[`issue #398`](http://issues.autojs6.com/398)_
+* `修正` コードエディタが信頼性の低いエンコーディングでファイルを書き込み, デコードエラーを引き起こす可能性がある問題 (修正試行)
+* `改善` アプリおよび開発者ページのレイアウト適応性を向上し, 不要なレイアウト区分を削除
+* `改善` README.md のビルド節に複数の方法を追加してターゲット設定ページの特定を容易化 _[`issue #404`](http://issues.autojs6.com/404)_
+* `依存関係` Androidx ConstraintLayout バージョン 2.2.1 を追加
+
+# v6.6.3
+
+###### 2025/05/27
+
+* `新機能` バージョン履歴機能: 多言語の変更履歴と統計を閲覧
+* `新機能` timers.keepAlive メソッド (グローバルへ昇格) によりスクリプトの活動を維持
+* `新機能` engines.on('start/stop/error', callback) などのイベントリスナーでエンジンのグローバルイベントを受信
+* `新機能` images.detectMultiColors メソッドで複数点のカラーを検査 _[`issue #374`](http://issues.autojs6.com/374)_
+* `新機能` images.matchFeatures/detectAndComputeFeatures メソッド: フル解像度画像検索 (参照 [Auto.js Pro](https://g.pro.autojs.org/)) _[`issue #366`](http://issues.autojs6.com/366)_
+* `新機能` images.compressToBytes メソッドで画像を圧縮してバイト配列を取得
+* `新機能` images.downsample メソッドで解像度を下げて新しい ImageWrapper を生成
+* `新機能` ui.keepScreenOn メソッドで UI ページがフォーカス中は画面を点灯したまま維持
+* `新機能` ui.root プロパティ (getter) で UI レイアウト内の「ウィンドウコンテンツのルートコンテナ」ノードを取得
+* `新機能` webview 要素が JsBridge ベースのウェブページレイアウトをサポート (参照 [Auto.js Pro](https://g.pro.autojs.org/)) [例: Layout > Interactive HTML / Vue2 + Vant (SFC)] _[`issue #281`](http://issues.autojs6.com/281)_
+* `修正` Docs タブおよび Docs アクティビティのオンラインドキュメントがシステムナビゲーションバーと重なる場合がある問題を修正
+* `修正` 一部ページで Toolbar ボタンをタップすると誤ってタイトルのクリックイベントが発火する問題を修正
+* `修正` コードエディタの空行が一部デバイスで四角形として表示される問題を修正
+* `修正` テーマカラー設定のカラーピッカーダイアログが無限に重なる問題を修正
+* `修正` アクセシビリティサービスが無効のときに音量アップキーが全スクリプトを停止しない問題を修正
+* `修正` スケジュールタスクでユーザー定義ブロードキャストメッセージを編集する際に IME が入力エリアを覆う問題を修正
+* `修正` webview 内のコントロールがソフトキーボードを正常に呼び出せない問題を修正
+* `修正` APK 情報ダイアログがアプリ名や SDK 情報を取得できない場合がある問題を修正
+* `修正` ファイルマネージャーのサンプルでプロジェクトディレクトリに入る際にサブフォルダーの内容が読み込まれない問題を修正
+* `修正` Android 15 の UI モードでステータスバーが上部コンテンツを覆う問題を修正
+* `修正` Android 15 の一部ページでステータスバー背景色がテーマカラーと同期しない問題を修正
+* `修正` dialogs モジュールが customView プロパティをサポートしていない問題を修正 _[`issue #364`](http://issues.autojs6.com/364)_
+* `修正` dialogs.input の expression パラメータが実行結果を返さない問題を修正
+* `修正` JavaAdapter 使用時に ClassLoader スタックオーバーフローが発生する問題を修正 _[`issue #376`](http://issues.autojs6.com/376)_
+* `修正` console.setContentTextColor がデフォルト文字色をリセットしてしまう問題を修正 _[`issue #346`](http://issues.autojs6.com/346)_
+* `修正` console.setContentBackgroundColor がカラー名を受け付けない問題を修正 _[`issue #384`](http://issues.autojs6.com/384)_
+* `修正` images.compress 実装を修正: ダウンサンプリングではなくエンコード品質を変更
+* `修正` images.resize メソッドが正しく動作しない問題を修正
+* `修正` engines.all が ConcurrentModificationException を投げる場合がある問題を修正 _[`issue #394`](http://issues.autojs6.com/394)_
+* `修正` README.md の一部言語で日付フォーマットが誤っていた問題を修正
+* `修正` Gradle ビルドがライブラリアーカイブのサイズ不正で失敗する問題を修正 _[`issue #389`](http://issues.autojs6.com/389)_
+* `改善` レイアウトインスペクターが要素の非表示をサポート (寄稿 [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #371`](http://pr.autojs6.com/371)_ _[`issue #355`](http://issues.autojs6.com/355)_
+* `改善` レイアウトインスペクターのメニューに機能グループ化用のグラデーション区切りを追加
+* `改善` project.json がスクリプトプロジェクト用 permissions オプションをサポート (寄稿 [wirsnow](https://github.com/wirsnow)) _[`pr #391`](http://pr.autojs6.com/391)_ _[`issue #362`](http://issues.autojs6.com/362)_
+* `改善` 単一ファイルをパッケージングする際, インストール済みアプリの宣言パーミッションを自動読み取り・選択 _[`issue #362`](http://issues.autojs6.com/362)_
+* `改善` テーマカラーの適用範囲を拡大, より多くのウィジェットをサポート
+* `改善` メインページのドロワー幅がランドスケープおよび超ワイド画面に適応
+* `改善` 『アプリについて』と『開発者について』ページに横向きとコンパクトレイアウトを追加
+* `改善` 設定ダイアログに「デフォルト値を使用」メニューを追加
+* `改善` ファイルマネージャーの FAB が外部タップ時に自動で隠れるように
+* `改善` コードフォーマッターが `??`, `?.`, `??=` 演算子をサポート
+* `改善` コードエディタが GB18030 / UTF-16 (LE/BE) / Shift_JIS などのエンコーディングでのファイル読み書きに対応
+* `改善` コードエディタがファイルの詳細情報 (パス/エンコーディング/改行コード/総バイト数・文字数 など) の表示に対応 _[`issue #395`](http://issues.autojs6.com/395)_
+* `改善` Intent 操作 (編集/閲覧/インストール/送信/再生など) にエラーメッセージを追加
+* `改善` webview 要素の url 属性が相対パスをサポート
+* `改善` ImageWrapper#saveTo の path パラメータが相対パスをサポート
+* `改善` images.save が PNG 圧縮を quality パラメータでサポート _[`issue #367`](http://issues.autojs6.com/367)_
+* `改善` 無視した更新リストとクライアントモードアドレスをクリア可能に
+* `改善` バージョンアップデート情報を UI 言語に合わせて表示
+* `改善` 非同期ロードでファイルマネージャーリストのスクロールがよりスムーズに
+* `改善` コンソールでのスクリプト例外メッセージの内容とフォーマットを改善
+* `改善` サンプルコードをフォルダーの初期内容にリセット可能
+* `改善` APK 署名検証を高速化
+* `改善` APK/メディアファイル情報ダイアログを速度と表示ロジック面で最適化
+* `改善` Gradle ビルドスクリプトが新しいバージョンに柔軟に対応 _[`discussion #369`](http://discussions.autojs6.com/369)_
+* `依存関係` 同梱 Material Dialogs バージョン 0.9.6.0 (ローカライズ済み)
+* `依存関係` 同梱 Material Date Time Picker バージョン 4.2.3 (ローカライズ済み)
+* `依存関係` 同梱 libimagequant バージョン 2.17.0 (ローカライズ済み)
+* `依存関係` 同梱 libpng バージョン 1.6.49 (ローカライズ済み)
+* `依存関係` 追加 ICU4J バージョン 77.1
+* `依存関係` 追加 Jsoup バージョン 1.19.1
+* `依存関係` 追加 Material Progressbar バージョン 1.4.2
+* `依存関係` 追加 Flexmark Java HTML to Markdown バージョン 0.64.8
+* `依存関係` 更新 Gradle 8.14-rc-1 -> 8.14
+* `依存関係` 更新 Androidx Room 2.7.0 -> 2.7.1
+
+# v6.6.2
+
+###### 2025/04/16
+
+* `新機能` ui.statusBarAppearanceLight, statusBarAppearanceLightBy, navigationBarColor などのメソッド
+* `新機能` ui.statusBarHeight 属性 (getter) により, ステータスバーの高さを取得可能 _[`issue #357`](http://issues.autojs6.com/357)_
+* `新機能` images.flip メソッドで画像を反転 _[`issue #349`](http://issues.autojs6.com/349)_
+* `新機能` 設定ページに『ファイル拡張子』オプションを追加
+* `新機能` テーマ設定ページが新しいレイアウト (グルーピング, 配置, 検索, 履歴, カラーピッカーの改善など) に対応
+* `修正` Android 15 において, ステータスバーの背景色がテーマカラーと一致しない問題を修正
+* `修正` plugins.load メソッドでプラグインが正しくロードされない問題を修正 _[`issue #290`](http://issues.autojs6.com/290)_
+* `修正` Android 7.x で dx ライブラリが正しく動作しない問題を修正 _[`issue #293`](http://issues.autojs6.com/293)_
+* `修正` require を使用して組み込みモジュールをインポートする際, ScriptRuntime の同期状態に問題が生じる (暫定対応) _[`issue #298`](http://issues.autojs6.com/298)_
+* `修正` notice モジュールに getBuilder などの拡張メソッドが欠如している問題を修正 _[`issue #301`](http://issues.autojs6.com/301)_
+* `修正` shizuku/shell メソッドが文字列パラメータを受け付けない問題を修正 _[`issue #310`](http://issues.autojs6.com/310)_
+* `修正` colors.pixel メソッドがシングルチャンネル画像のパラメータを受け付けない問題を修正 _[`issue #350`](http://issues.autojs6.com/350)_
+* `修正` engines.execScript / execScriptFile メソッドが, スクリプト実行時にワーキングディレクトリを誤って設定する問題を修正 _[`issue #358`](http://issues.autojs6.com/358)_ _[`issue #340`](http://issues.autojs6.com/340)_ _[`issue #339`](http://issues.autojs6.com/339)_
+* `修正` floaty.window / floaty.rawWindow がサブスレッドで実行できない問題を修正
+* `修正` floaty.getClip がクリップボードの内容を正しく取得できない場合がある問題を修正 _[`issue #341`](http://issues.autojs6.com/341)_
+* `修正` ui.inflate の返り値から attr, on, click などのプロトタイプメソッドが欠落する問題を修正
+* `修正` XML 構文を用いて JavaScript の式を属性値として使用する際, スコープのコンテキストが不正にバインドされる問題 _[`issue #319`](http://issues.autojs6.com/319)_
+* `修正` 一部メソッドで発生する例外が try..catch によって捕捉されない問題を修正 _[`issue #345`](http://issues.autojs6.com/345)_
+* `修正` レイアウト解析ページでコード生成時にアプリがクラッシュする可能性がある問題を修正 _[`issue #288`](http://issues.autojs6.com/288)_
+* `修正` パッケージ化されたアプリが shizuku モジュールを正しく利用できない問題を修正 _[`issue #227`](http://issues.autojs6.com/227)_ _[`issue #231`](http://issues.autojs6.com/231)_ _[`issue #284`](http://issues.autojs6.com/284)_ _[`issue #287`](http://issues.autojs6.com/287)_ _[`issue #304`](http://issues.autojs6.com/304)_
+* `修正` コードエディタで行末へ移動すると, カーソルが次の行の先頭に位置してしまう問題を修正
+* `修正` 設定ページのダイアログ要素を連続して高速にタップすると, アプリがクラッシュする問題を修正
+* `改善` パッケージアプリのテンプレートにおける APK ファイルサイズの最適化
+* `改善` アプリ (およびパッケージアプリ) がより多くの権限に対応 _[`issue #338`](http://issues.autojs6.com/338)_
+* `改善` パッケージングページに Pinyin ライブラリのオプションを追加
+* `改善` パッケージアプリのメインページにおいて, ステータスバーの背景とテキスト色を最適化
+* `改善` パッケージアプリの設定ページに, 特別な権限 (全ファイルアクセスや通知送信) 用のトグルスイッチを追加 _[`issue #354`](http://issues.autojs6.com/354)_
+* `改善` コントロールのテキストとアイコンが, テーマの明るさに合わせて自動で調整されるよう改善
+* `改善` コントロールの色と背景とのコントラストが低い場合の視認性を向上
+* `改善` カラーピッカー内の HEX 入力欄に, クリップボードからの貼り付け時の互換性を向上
+* `改善` アプリのナビゲーションバーを, より良いビジュアル体験のために透明または半透明に設定
+* `改善` ライトモード時, ステータスバーとナビゲーションバーのデフォルト UI モードをカラー `md_grey_50` に設定
+* `改善` ホームドロワー内のアクセシビリティサービスのスイッチを, スクリプトコードと同期するよう改善
+* `改善` ホームページのドキュメントページに双方向検索ボタンを追加
+* `改善` ホームページの『ファイル』タブで, 長押しによりフローティングボタンの表示状態を切り替え可能に
+* `改善` コードエディタのタイトルがフォントサイズを自動調整するよう改善
+* `改善` ログページのフローティングボタンの表示が, リストのスクロール動作と連動するよう改善
+* `改善` スクリプトプロジェクトの project.json 設定ファイルが, より多くのパッケージオプションに対応 _[`issue #305`](http://issues.autojs6.com/305)_ _[`issue #306`](http://issues.autojs6.com/306)_
+* `改善` project.json 設定ファイルが, オプション名の柔軟なマッチングとエイリアスに対応するよう改善
+* `改善` APK ファイル情報ダイアログに, ファイルサイズと署名スキームの情報を追加
+* `改善` APK ファイル情報ダイアログで, テキストコピーやアプリ詳細への遷移用クリックリスナーに対応
+* `改善` com.stardust 接頭辞のパッケージを復元し, コード互換性を向上 _[`issue #290`](http://issues.autojs6.com/290)_
+* `改善` floaty.window / floaty.rawWindow メソッドを, メインスレッドおよびサブスレッドの両方で実行可能に改善
+* `改善` グローバルメソッド getClip が, 必要に応じて floaty.getClip を利用するよう改善し, 互換性を向上
+* `改善` files.path および関連メソッドが, null のパス指定時にも適切に動作するよう改善
+* `改善` 最新の公式 Rhino エンジンへの同期およびコードの調整
+* `改善` README.md を改善し, プロジェクトのビルドおよび実行方法のドキュメントを充実 _[`issue #344`](http://issues.autojs6.com/344)_
+* `依存関係` Eclipse Paho Client Mqttv3 バージョン 1.1.0 を追加 _[`issue #330`](http://issues.autojs6.com/330)_
+* `依存関係` Gradle Compile のバージョンを 34 から 35 に更新
+* `依存関係` Gradle を 8.12 から 8.14-rc-1 に更新
+* `依存関係` Rhino を 1.8.0-SNAPSHOT から 1.8.1-SNAPSHOT に更新
+* `依存関係` Androidx Recyclerview を 1.3.2 から 1.4.0 に更新
+* `依存関係` Androidx Room を 2.6.1 から 2.7.0 に更新
+* `依存関係` Androidx WebKit を 1.12.1 から 1.13.0 に更新
+* `依存関係` Pinyin4j を 2.5.0 から 2.5.1 に更新
+
 # v6.6.1
 
 ###### 2025/01/01
@@ -11,14 +155,14 @@
 * `新機能` 中国語のピンイン変換用の Pinyin モジュール (プロジェクトドキュメントを参照 > [中国語ピンイン](https://docs.autojs6.com/#/pinyin))
 * `新機能` 中国語のピンイン変換用の Pinyin4j モジュール (プロジェクトドキュメントを参照 > [中国語ピンイン](https://docs.autojs6.com/#/pinyin4j))
 * `新機能` コントロールまたはコントロールコレクションが類似しているかを判定する UiObject#isSimilar と UiObjectCollection#isSimilar メソッド
-* `新機能` グローバルメソッド「currentComponent」、現在アクティブなコンポーネントの名前情報を取得するために使用されます
+* `新機能` グローバルメソッド "currentComponent", 現在アクティブなコンポーネントの名前情報を取得するために使用されます
 * `修正` 一部の環境でバージョンを低く戻すことでプロジェクトが正常にコンパイルできなくなる問題
 * `修正` 存在しないメソッドを呼び出す際に発生する可能性がある「非プリミティブ型の値」エラー
 * `修正` 一部のデバイスでスクリプトショートカットが正常に追加できない問題 (暫定修正) _[`issue #221`](http://issues.autojs6.com/221)_
 * `修正` automator.click/longClick メソッドのパラメーター型制限の誤り _[`issue #275`](http://issues.autojs6.com/275)_
 * `修正` セレクターが ConsString 型のパラメーターをサポートしない問題 _[`issue #277`](http://issues.autojs6.com/277)_
 * `修正` UiObjectCollection インスタンスにメソッドおよびプロパティが欠如している問題
-* `改善` パッケージ化ページで署名設定、キーストア管理、権限設定をサポートします（[luckyloogn]() による） _[`pr #286`]()_
+* `改善` パッケージ化ページで署名設定, キーストア管理, 権限設定をサポートします ([luckyloogn]() による) _[`pr #286`]()_
 * `改善` フローティングウィンドウの現在のパッケージ名および現在のアクティビティ名の認識精度を向上 (優先順位: Shizuku > Root > A11Y)
 * `改善` currentPackage と currentActivity の認識精度を向上 (優先順位: Shizuku > Root > A11Y)
 * `改善` ログアクティビティウィンドウの個別エントリのテキスト内容をダブルクリックまたは長押しで選択する機能を復元 _[`issue #280`](http://issues.autojs6.com/280)_
@@ -26,7 +170,7 @@
 * `改善` 単一ファイルをパッケージ化する際に, 自動生成されるパッケージ名のサフィックスを簡体字中国語からピンインに変換 (多音字対応)
 * `改善` UiSelector#findOnce と UiSelector#find メソッドで負の引数をサポート
 * `改善` app.startActivity/startDualActivity メソッドの適応性が向上しました
-* `改善` UI要素や className に関連するセレクターが RecyclerView や Snackbar などのパッケージ名プレフィックス省略形式にさらに対応
+* `改善` UI 要素や className に関連するセレクターが RecyclerView や Snackbar などのパッケージ名プレフィックス省略形式にさらに対応
 * `改善` Rhino エンジンの最新の上流コードを同期し, 既存のプロジェクトに適応させる
 * `依存関係` Pinyin4j バージョン 2.5.0 を追加
 * `依存関係` Jieba Analysis バージョン 1.0.3-SNAPSHOT (修正版) を追加
@@ -44,14 +188,14 @@
 * `新機能` nanoid モジュール, 文字列 ID ジェネレーターとして使用できます ([ai/nanoid](https://github.com/ai/nanoid) 参照)
 * `新機能` sysprops モジュール, ランタイム環境の構成データを取得するために使用されます (プロジェクトドキュメント > [システムプロパティ](https://docs.autojs6.com/#/sysprops) を参照)
 * `新機能` ocr モジュールは [Rapid OCR](https://github.com/RapidAI/RapidOCR) エンジンをサポートしています
-* `新機能` レイアウト解析はウィンドウの切り替えをサポートしています (Auto.js Pro
-* `新機能` auto.clearCache メソッド, コントロールキャッシュをクリアすることをサポートします (Auto.js Pro
-* `新機能` threads.pool メソッド, シンプルなスレッドプールアプリケーションをサポートします (Auto.js Pro
-* `新機能` images.matchTemplate メソッドは useTransparentMask オプションパラメーターを追加し, 透明画像検索をサポートします (Auto.js Pro
-* `新機能` images.requestScreenCaptureAsync メソッド, UI モードで非同期にスクリーンキャプチャの許可を要求するために使用されます  (Auto.js Pro
-* `新機能` images.requestScreenCapture メソッドは isAsync オプションパラメーターを追加し, 非同期でスクリーンキャプチャを取得することをサポートします (Auto.js Pro
-* `新機能` images.on('screen_capture', callback) などのイベントリスニングメソッドは, スクリーンキャプチャが使用可能なイベントをモニターすることをサポートします (Auto.js Pro
-* `新機能` images.stopScreenCapture メソッドは, スクリーンキャプチャ要求に関連するリソースを積極的に解放することをサポートします (Auto.js Pro
+* `新機能` レイアウト解析はウィンドウの切り替えをサポートしています (Auto.js Pro)
+* `新機能` auto.clearCache メソッド, コントロールキャッシュをクリアすることをサポートします (Auto.js Pro)
+* `新機能` threads.pool メソッド, シンプルなスレッドプールアプリケーションをサポートします (Auto.js Pro)
+* `新機能` images.matchTemplate メソッドは useTransparentMask オプションパラメーターを追加し, 透明画像検索をサポートします (Auto.js Pro)
+* `新機能` images.requestScreenCaptureAsync メソッド, UI モードで非同期にスクリーンキャプチャの許可を要求するために使用されます (Auto.js Pro)
+* `新機能` images.requestScreenCapture メソッドは isAsync オプションパラメーターを追加し, 非同期でスクリーンキャプチャを取得することをサポートします (Auto.js Pro)
+* `新機能` images.on('screen_capture', callback) などのイベントリスニングメソッドは, スクリーンキャプチャが使用可能なイベントをモニターすることをサポートします (Auto.js Pro)
+* `新機能` images.stopScreenCapture メソッドは, スクリーンキャプチャ要求に関連するリソースを積極的に解放することをサポートします (Auto.js Pro)
 * `新機能` images.psnr/mse/ssim/mssim/hist/ncc および images.getSimilarity メソッドは, 画像類似度測定値を取得するために使用されます
 * `新機能` images.isGrayscale メソッドは, 画像がグレースケールかどうかを判断するために使用されます
 * `新機能` images.invert メソッドは, 画像の色を反転するために使用されます
@@ -63,9 +207,9 @@
 * `新機能` floaty.getClip メソッドは, フローティングウィンドウのフォーカスを通じてクリップボードの内容を間接的に取得するために使用されます
 * `修正` Fragment のサブクラス (例 [DrawerFragment](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/ui/main/drawer/DrawerFragment.kt#L369) / [ExplorerFragment](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/ui/main/scripts/ExplorerFragment.kt#L48) 等) 内の View Binding のメモリリーク
 * `修正` [ScreenCapture](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/core/image/capture/ScreenCapturer.java#L70) / [ThemeColorPreference](https://github.com/SuperMonster003/AutoJs6/blob/10960ddbee71f75ef80907ad5b6ab42f3e1bf31e/app/src/main/java/org/autojs/autojs/ui/settings/ThemeColorPreference.kt#L21) 等のクラス内のインスタンスのメモリリーク
-* `修正` Android 14+ でスクリーンキャプチャの許可を求めるとアプリがクラッシュする問題 (by [chenguangming](https://github.com/chenguangming)) _[`pr #242`](http://pr.autojs6.com/242)_
-* `修正` Android 14+ でフォアグラウンドサービスを開始するとアプリがクラッシュする問題
-* `修正` Android 14+ でコードエディタの実行ボタンをクリックしても点灯しない問題
+* `修正` Android 14 でスクリーンキャプチャの許可を求めるとアプリがクラッシュする問題 (by [chenguangming](https://github.com/chenguangming)) _[`pr #242`](http://pr.autojs6.com/242)_
+* `修正` Android 14 でフォアグラウンドサービスを開始するとアプリがクラッシュする問題
+* `修正` Android 14 でコードエディタの実行ボタンをクリックしても点灯しない問題
 * `修正` プロジェクトのパッケージ後に必要なライブラリファイルが不足してアプリが正常に動作しない可能性がある問題 _[`issue #202`](http://issues.autojs6.com/202)_ _[`issue #223`](http://issues.autojs6.com/223)_ _[`pr #264`](http://pr.autojs6.com/264)_
 * `修正` プロジェクトの編集時に指定されたアイコンリソースが存在しない場合にアプリがクラッシュする問題 _[`issue #203`](http://issues.autojs6.com/203)_
 * `修正` スクリーンキャプチャの許可を取得時に指定された画面方向のスクリーンショットリソースをパラメータで正常に取得できない場合がある問題
@@ -124,7 +268,7 @@
 * `依存関係` 追加 Toaster バージョン 12.6
 * `依存関係` 追加 EasyWindow (for Toaster) バージョン 10.3
 * `依存関係` Gradle バージョンを 8.5 -> 8.11.1 にアップグレード
-* `依存関係` Rhino バージョン 1.7.15-snapshot -> 1.7.16-snapshot にアップグレード
+* `依存関係` Rhino バージョン 1.7.15-SNAPSHOT -> 1.8.0-SNAPSHOT にアップグレード
 * `依存関係` Android Material Lang3 バージョン 1.10.0 -> 1.12.0 にアップグレード
 * `依存関係` Androidx Annotation バージョン 1.7.0 -> 1.9.1 にアップグレード
 * `依存関係` Androidx AppCompat バージョン 1.6.1 -> 1.7.0 にアップグレード
@@ -175,12 +319,12 @@
 * `修正` コードエディターのモジュール関数クイックパネルのボタン名が溢れる可能性のある問題
 * `改善` コードエディターのモジュール関数クイックパネルがナイトモードに適応します
 * `改善` パッケージ化されたアプリケーションの起動画面がナイトモードに適応し, アプリアイコンのレイアウトが調整されます
-* `改善` パッケージ化されたアプリのページは, ソフトウェアキーボードのENTERキーを使用してカーソルナビゲーションをサポートします
-* `改善` パッケージ化されたアプリのページでは, ABIおよびライブラリのタイトルをクリックして全選択状態を切り替えることができます
-* `改善` パッケージ化されたアプリのページでは, デフォルトのABI選択がインテリジェントになり, 選択不可の項目にガイドプロンプトが追加されます
+* `改善` パッケージ化されたアプリのページは, ソフトウェアキーボードの ENTER キーを使用してカーソルナビゲーションをサポートします
+* `改善` パッケージ化されたアプリのページでは, ABI およびライブラリのタイトルをクリックして全選択状態を切り替えることができます
+* `改善` パッケージ化されたアプリのページでは, デフォルトの ABI 選択がインテリジェントになり, 選択不可の項目にガイドプロンプトが追加されます
 * `改善` ファイルマネージャーは, ファイルとフォルダの種類と特性に基づいてメニュー項目の表示を調整します
 * `改善` ファイルマネージャーのフォルダ右クリックメニューには, パッケージ化アプリのオプションが追加されます
-* `改善` アクセシビリティサービスが有効になっているが機能していない場合, 異常状態はAutoJs6ホームページのドロワースイッチに反映されます
+* `改善` アクセシビリティサービスが有効になっているが機能していない場合, 異常状態は AutoJs6 ホームページのドロワースイッチに反映されます
 * `改善` コンソールはエラーメッセージを印刷するときに詳細なスタック情報を含みます
 * `依存関係` 追加 ARSCLib バージョン 1.2.4
 * `依存関係` 追加 Flexbox バージョン 3.0.0
@@ -193,20 +337,20 @@
 
 * `新機能` dialogs.build() オプションパラメータ属性 inputSingleLine
 * `新機能` console.setTouchable メソッド _[`issue #122`](http://issues.autojs6.com/122)_
-* `修正` ocr モジュールの一部の方法でエリアパラメータを認識できなかった問題 _[`issue #162`](http://issues.autojs6.com/162)_  _[`issue #175`](http://issues.autojs6.com/175)_
+* `修正` ocr モジュールの一部の方法でエリアパラメータを認識できなかった問題 _[`issue #162`](http://issues.autojs6.com/162)_ _[`issue #175`](http://issues.autojs6.com/175)_
 * `修正` Android 7.x で新バージョンを検出する際にバージョン情報を取得できなかった問題
 * `修正` Android 14 でスクリーンショット権限を要求するとアプリがクラッシュする問題
 * `修正` ホームドロワーで「浮動ボタン」を切り替えるとアプリがクラッシュすることがある問題
 * `修正` メニューを使用して浮動ボタンを閉じた後にアプリを再起動すると浮動ボタンが表示されたままになることがある問題
-* `修正` Android 13 以降のシステム設定ページでAutoJs6の言語を選択および切り替えると反映されない問題
-* `修正` ビルドツールが最初のビルド時にOpenCVリソースの自動デプロイを完了できない問題
+* `修正` Android 13 以降のシステム設定ページで AutoJs6 の言語を選択および切り替えると反映されない問題
+* `修正` ビルドツールが最初のビルド時に OpenCV リソースの自動デプロイを完了できない問題
 * `改善` bridges モジュールのネイティブ化によるスクリプト実行効率の向上 (Ref to [aiselp](https://github.com/aiselp/AutoX/commit/7c41af6d2b9b36d00440a9c8b7e971d025f98327))
 * `改善` 無障害サービス関連コードのリファクタリングにより無障害サービスの機能安定性を強化 (実験的) _[`issue #167`](http://issues.autojs6.com/167)_
 * `改善` UiObject と UiObjectCollection の印刷出力形式
-* `改善` ビルドツールでGradle JDKバージョンが要件を満たしていない場合のアップグレード通知
+* `改善` ビルドツールで Gradle JDK バージョンが要件を満たしていない場合のアップグレード通知
 * `依存関係` Gradle バージョンのアップグレード 8.4 -> 8.5-rc-1
 * `依存関係` Commons IO バージョンのダウングレード 2.14.0 -> 2.8.0
-* `依存関係` Jackson DataBindバージョンのダウングレード 2.14.3 -> 2.13.3
+* `依存関係` Jackson DataBind バージョンのダウングレード 2.14.3 -> 2.13.3
 
 # v6.4.1
 
@@ -214,36 +358,36 @@
 
 * `修正` ビルドツールが未知のプラットフォームに自動適応しない問題 (by [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #158`](http://pr.autojs6.com/158)_
 * `修正` スクリプトの終了時にアプリがクラッシュすることがある問題 _[`issue #159`](http://issues.autojs6.com/159)_
-* `修正` http モジュールでレスポンスオブジェクトのbody.contentTypeの戻り値タイプが間違っている問題 _[`issue #142`](http://issues.autojs6.com/142)_
+* `修正` http モジュールでレスポンスオブジェクトの body.contentType の戻り値タイプが間違っている問題 _[`issue #142`](http://issues.autojs6.com/142)_
 * `修正` device.width と device.height の戻り値が正しくない問題 _[`issue #160`](http://issues.autojs6.com/160)_
 * `修正` コードエディタでのロングプレス削除時にアプリがクラッシュすることがある問題 (試修) _[`issue #156`](http://issues.autojs6.com/156)_
 * `修正` コードエディタでテキストを逆選択した後の通常操作でアプリがクラッシュすることがある問題
-* `修正` 一部のデバイスでAutoJs6アプリアイコンのロングプレスでショートカットメニューが表示されない問題
+* `修正` 一部のデバイスで AutoJs6 アプリアイコンのロングプレスでショートカットメニューが表示されない問題
 * `修正` 一部のデバイスでプロジェクトパッケージング時に確認ボタンをクリックしても反応しない問題
 * `修正` app.sendBroadcast と app.startActivity が省略名パラメータを使用できない問題
-* `修正` floaty モジュールのJsWindow#setPositionなどのメソッドの初回呼び出し時の機能異常
-* `改善` Termux 関連権限を追加してIntentを利用してTermuxでADBコマンドを実行可能に _[`issue #136`](http://issues.autojs6.com/136)_
-* `改善` http モジュールで取得したレスポンスオブジェクトがbody.string()およびbody.bytes()メソッドを再使用可能に
+* `修正` floaty モジュールの JsWindow#setPosition などのメソッドの初回呼び出し時の機能異常
+* `改善` Termux 関連権限を追加して Intent を利用して Termux で ADB コマンドを実行可能に _[`issue #136`](http://issues.autojs6.com/136)_
+* `改善` http モジュールで取得したレスポンスオブジェクトが body.string() および body.bytes() メソッドを再使用可能に
 * `改善` GitHub Actions の自動パッケージングサポートを追加 (by [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #158`](http://pr.autojs6.com/158)_
-* `改善` ビルドツールがTemurinプラットフォームに自動適応
+* `改善` ビルドツールが Temurin プラットフォームに自動適応
 * `依存関係` Gradle バージョンのアップグレード 8.4-rc-3 -> 8.4
-* `依存関係` Android dxバージョンのアップグレード 1.11 -> 1.14
+* `依存関係` Android dx バージョンのアップグレード 1.11 -> 1.14
 
 # v6.4.0
 
 ###### 2023/10/30
 
-* `新機能` ocr モジュールがPaddle Liteエンジンをサポート(by [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #120`](http://pr.autojs6.com/120)_
-* `新機能` パッケージング機能が内蔵プラグインと外部プラグインの両方のパッケージング方法をサポート(by [LZX284](https://github.com/LZX284)) _[`pr #151`](http://pr.autojs6.com/151)_
+* `新機能` ocr モジュールが Paddle Lite エンジンをサポート (by [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #120`](http://pr.autojs6.com/120)_
+* `新機能` パッケージング機能が内蔵プラグインと外部プラグインの両方のパッケージング方法をサポート (by [LZX284](https://github.com/LZX284)) _[`pr #151`](http://pr.autojs6.com/151)_
 * `新機能` WebSocket モジュール (参照 プロジェクトドキュメント > [WebSocket](https://docs.autojs6.com/#/webSocketType))
-* `新機能` barcode / qrcode モジュール (参照 プロジェクトドキュメント > [バーコード](https://docs.autojs6.com/#/barcode) / [QRコード](https://docs.autojs6.com/#/qrcode))
+* `新機能` barcode / qrcode モジュール (参照 プロジェクトドキュメント > [バーコード](https://docs.autojs6.com/#/barcode) / [QR コード](https://docs.autojs6.com/#/qrcode))
 * `新機能` shizuku モジュール (参照 プロジェクトドキュメント > [Shizuku](https://docs.autojs6.com/#/shizuku)) とホームドロワー権限スイッチ
 * `新機能` device.rotation / device.orientation などの方法
-* `新機能` 内部Javaクラスが静的プロパティアクセスをサポート
-* `新機能` Androidシステム設定ページでアプリの言語を選択および切り替えをサポート (Android 13 以降)
-* `新機能` 設定ページにアプリのショートカットを追加またはアプリアイコンを長押しして[アプリショートカット](https://developer.android.com/guide/topics/ui/shortcuts?hl=ja)をアクティブ化し, ドキュメントや設定ページを起動可能に
-* `修正` 一部のスクリプトが正常に終了しない問題を解決するための一部PRの再マージ(by [aiselp](https://github.com/aiselp)) _[`pr #75`](http://pr.autojs6.com/75)_ _[`pr #78`](http://pr.autojs6.com/78)_
-* `修正` パッケージングされたアプリがAutoJs6の新しいAPIを使用できない問題(by [LZX284](https://github.com/LZX284)) _[`pr #151`](http://pr.autojs6.com/151)_ _[`issue #149`](http://issues.autojs6.com/149)_
+* `新機能` 内部 Java クラスが静的プロパティアクセスをサポート
+* `新機能` Android システム設定ページでアプリの言語を選択および切り替えをサポート (Android 13 以降)
+* `新機能` 設定ページにアプリのショートカットを追加またはアプリアイコンを長押しして [アプリショートカット](https://developer.android.com/guide/topics/ui/shortcuts?hl=ja) をアクティブ化し, ドキュメントや設定ページを起動可能に
+* `修正` 一部のスクリプトが正常に終了しない問題を解決するための一部 PR の再マージ (by [aiselp](https://github.com/aiselp)) _[`pr #75`](http://pr.autojs6.com/75)_ _[`pr #78`](http://pr.autojs6.com/78)_
+* `修正` パッケージングされたアプリが AutoJs6 の新しい API を使用できない問題 (by [LZX284](https://github.com/LZX284)) _[`pr #151`](http://pr.autojs6.com/151)_ _[`issue #149`](http://issues.autojs6.com/149)_
 * `修正` パッケージングされたアプリのシステムナイトモードでのスタイル異常
 * `修正` VSCode プラグインがファイルをローカルに保存する際にファイル拡張子情報が失われる問題
 * `修正` コルーチン機能を使用してプロジェクトを実行する際に未処理例外でアプリがクラッシュする問題
@@ -256,35 +400,35 @@
 * `修正` 一部のデバイスでメッセージ浮動枠が表示されないまたは重複して表示されることがある問題
 * `修正` 複数のスクリプトが同時に実行されている時にメッセージ浮動枠が隠れることがある問題 _[`issue #67`](http://issues.autojs6.com/67)_
 * `修正` ブロードキャストを使用してレイアウトを解析する時にレイアウトをクリックするとメニューが表示されず, アプリがクラッシュする問題
-* `修正` 二回目以降に作成されたWebSocketインスタンスがリスナーを正常にトリガーできない問題
-* `修正` importPackageの全体リダイレクトを取り消して特定のスコープでのパッケージインポートの異常を回避 _[`issue #88`](http://issues.autojs6.com/88)_
+* `修正` 二回目以降に作成された WebSocket インスタンスがリスナーを正常にトリガーできない問題
+* `修正` importPackage の全体リダイレクトを取り消して特定のスコープでのパッケージインポートの異常を回避 _[`issue #88`](http://issues.autojs6.com/88)_
 * `修正` ログアクティビティページでコピーまたはエクスポート機能を使用するとアプリがクラッシュする問題
 * `改善` ログアクティビティページのエクスポート機能の名前を送信機能に変更し, 実際の意味に合ったエクスポート機能を再実装
 * `改善` ログアクティビティページの送信機能がエントリー数が多い場合には自動的に分割して通知
-* `改善` ocrモジュールがGoogle MLKitおよびPaddle Liteエンジンの双方をサポートに (参照 プロジェクトドキュメント > [光学文字認識](https://docs.autojs6.com/#/ocr?id=p-mode))
+* `改善` ocr モジュールが Google MLKit および Paddle Lite エンジンの双方をサポートに (参照 プロジェクトドキュメント > [光学文字認識](https://docs.autojs6.com/#/ocr?id=p-mode))
 * `改善` 無障害サービスの自動開始成功率を向上
-* `改善` Kotlinアノテーション処理をkaptからKSPに移行
-* `改善` ビルドツールがIntelliJ Idea EAPバージョンをサポート
-* `改善` ビルドツールがJavaリリースバージョンに適応して「無効なリリースバージョン」問題を回避するように
-* `改善` ビルドツールのIDEおよび関連プラグインのバージョンダウングレードロジックを最適化し, バージョン予測能力を追加
-* `改善` VSCodeプラグイン1.0.7に適応
-* `依存関係` Rikka Shizuku バージョン 13.1.5を追加
-* `依存関係` MLKit Barcode Scanning バージョン 17.2.0を追加
-* `依存関係` OpenCVバージョンのアップグレード 4.5.5 -> 4.8.0 (Ref to [TonyJiangWJ](https://github.com/TonyJiangWJ))
-* `依存関係` Gradle Compileバージョンのアップグレード 33 -> 34
-* `依存関係` Gradleバージョンのアップグレード 8.3-rc-1 -> 8.4-rc-3
-* `依存関係` Apache Commons Lang3バージョンのアップグレード 3.12.0 -> 3.13.0
-* `依存関係` Glideバージョンのアップグレード 4.15.1 -> 4.16.0
-* `依存関係` Android Analyticsバージョンのアップグレード 14.3.0 -> 14.4.0
-* `依存関係` Androidx WebKitバージョンのアップグレード 1.7.0 -> 1.8.0
-* `依存関係` Androidx Preferenceバージョンのアップグレード 1.2.0 -> 1.2.1
-* `依存関係` Androidx Annotationバージョンのアップグレード 1.6.0 -> 1.7.0
-* `依存関係` Androidx Recyclerviewバージョンのアップグレード 1.3.0 -> 1.3.2
-* `依存関係` Android Materialバージョンのアップグレード 1.9.0 -> 1.10.0
+* `改善` Kotlin アノテーション処理を kapt から KSP に移行
+* `改善` ビルドツールが IntelliJ Idea EAP バージョンをサポート
+* `改善` ビルドツールが Java リリースバージョンに適応して「無効なリリースバージョン」問題を回避するように
+* `改善` ビルドツールの IDE および関連プラグインのバージョンダウングレードロジックを最適化し, バージョン予測能力を追加
+* `改善` VSCode プラグイン 1.0.7 に適応
+* `依存関係` Rikka Shizuku バージョン 13.1.5 を追加
+* `依存関係` MLKit Barcode Scanning バージョン 17.2.0 を追加
+* `依存関係` OpenCV バージョンのアップグレード 4.5.5 -> 4.8.0 (Ref to [TonyJiangWJ](https://github.com/TonyJiangWJ))
+* `依存関係` Gradle Compile バージョンのアップグレード 33 -> 34
+* `依存関係` Gradle バージョンのアップグレード 8.3-rc-1 -> 8.4-rc-3
+* `依存関係` Apache Commons Lang3 バージョンのアップグレード 3.12.0 -> 3.13.0
+* `依存関係` Glide バージョンのアップグレード 4.15.1 -> 4.16.0
+* `依存関係` Android Analytics バージョンのアップグレード 14.3.0 -> 14.4.0
+* `依存関係` Androidx WebKit バージョンのアップグレード 1.7.0 -> 1.8.0
+* `依存関係` Androidx Preference バージョンのアップグレード 1.2.0 -> 1.2.1
+* `依存関係` Androidx Annotation バージョンのアップグレード 1.6.0 -> 1.7.0
+* `依存関係` Androidx Recyclerview バージョンのアップグレード 1.3.0 -> 1.3.2
+* `依存関係` Android Material バージョンのアップグレード 1.9.0 -> 1.10.0
 * `依存関係` Androidx AppCompat バージョンのアップグレード 1.4.2 -> 1.6.1
 * `依存関係` Commons IO バージョンのアップグレード 2.8.0 -> 2.14.0
-* `依存関係` Jackson DataBindバージョンのアップグレード 2.13.3 -> 2.14.3
-* `依存関係` Zeugma Solutions LocaleHelper バージョン 1.5.1を削除
+* `依存関係` Jackson DataBind バージョンのアップグレード 2.13.3 -> 2.14.3
+* `依存関係` Zeugma Solutions LocaleHelper バージョン 1.5.1 を削除
 
 # v6.3.3
 
@@ -293,140 +437,140 @@
 * `新機能` コードエディタのコードコメント機能 (by [little-alei](https://github.com/little-alei)) _[`pr #98`](http://pr.autojs6.com/98)_
 * `新機能` auto.stateListener を無障害サービス接続状態のリスニングに使用 (by [little-alei](https://github.com/little-alei)) _[`pr #98`](http://pr.autojs6.com/98)_
 * `新機能` UiObject タイプに nextSibling / lastChild / offset などの方法を追加 (参照 プロジェクトドキュメント > [コントロールノード](https://docs.autojs6.com/#/uiObjectType))
-* `修正` VSCodeプラグインがスクリプトの文字総数が4桁を超えるとデータを解析できない問題 _[`issue #91`](http://issues.autojs6.com/91)_ _[`issue #93`](http://issues.autojs6.com/93)_ _[`issue #100`](http://issues.autojs6.com/100)_ _[`issue #109`](http://issues.autojs6.com/109)_
-* `修正` VSCodeプラグインがファイルを正常に保存できない問題 _[`issue #92`](http://issues.autojs6.com/91)_ _[`issue #94`](http://issues.autojs6.com/93)_
+* `修正` VSCode プラグインがスクリプトの文字総数が 4 桁を超えるとデータを解析できない問題 _[`issue #91`](http://issues.autojs6.com/91)_ _[`issue #93`](http://issues.autojs6.com/93)_ _[`issue #100`](http://issues.autojs6.com/100)_ _[`issue #109`](http://issues.autojs6.com/109)_
+* `修正` VSCode プラグインがファイルを正常に保存できない問題 _[`issue #92`](http://issues.autojs6.com/91)_ _[`issue #94`](http://issues.autojs6.com/93)_
 * `修正` 無障害サービスの「管理」メニュー項目のクリックでページが遷移しないことがある問題
 * `修正` runtime.requestPermissions メソッドが消失した問題 _[`issue #104`](http://issues.autojs6.com/104)_
 * `修正` events.emitter が MainThreadProxy パラメータに対応しない問題 _[`issue #103`](http://issues.autojs6.com/103)_
 * `修正`  _[`pr #78`](http://pr.autojs6.com/78)_ で存在していたコードエディタがコードを整形できない問題
-* `修正` JavaAdapterを使用するとClassLoaderの呼び出しスタックがオーバーフローする問題 _[`issue #99`](http://issues.autojs6.com/99)_ _[`issue #110`](http://issues.autojs6.com/110)_
+* `修正` JavaAdapter を使用すると ClassLoader の呼び出しスタックがオーバーフローする問題 _[`issue #99`](http://issues.autojs6.com/99)_ _[`issue #110`](http://issues.autojs6.com/110)_
 * `改善` モジュールスコープの調整 (by [aiselp](https://github.com/aiselp)) _[`pr #75`](http://pr.autojs6.com/75)_ _[`pr #78`](http://pr.autojs6.com/78)_
 * `改善` リリースバージョンアプリの起動時の署名チェックを削除 (by [LZX284](https://github.com/LZX284)) _[`pr #81`](http://pr.autojs6.com/81)_
 * `改善` _[`pr #98`](http://pr.autojs6.com/98)_ に基づくコードエディタのコードコメント機能の動作, スタイル, およびカーソル位置処理
 * `改善` _[`pr #98`](http://pr.autojs6.com/98)_ に基づいてコードコメントメニュー項目を追加
-* `改善` VSCodeプラグイン1.0.6に適応
+* `改善` VSCode プラグイン 1.0.6 に適応
 * `改善` UiObject#parent メソッドに階数パラメータのサポートを追加 (参照 プロジェクトドキュメント > [コントロールノード](https://docs.autojs6.com/#/uiObjectType))
-* `依存関係` Gradleバージョンのアップグレード 8.2 -> 8.3-rc-1
+* `依存関係` Gradle バージョンのアップグレード 8.2 -> 8.3-rc-1
 
 # v6.3.2
 
 ###### 2023/07/06
 
-* `新機能` cryptoモジュール (プロジェクトドキュメント > [暗号文](https://docs.autojs6.com/#/crypto) を参照) _[`issue #70`](http://issues.autojs6.com/70)_
-* `新機能` UIモードにtextswitcher / viewswitcher / viewflipper / numberpicker / video / searchなどのコントロールを追加
+* `新機能` crypto モジュール (プロジェクトドキュメント > [暗号文](https://docs.autojs6.com/#/crypto) を参照) _[`issue #70`](http://issues.autojs6.com/70)_
+* `新機能` UI モードに textswitcher / viewswitcher / viewflipper / numberpicker / video / search などのコントロールを追加
 * `新機能` ログ活動ページにログのコピーやエクスポート機能を追加 _[`issue #76`](http://issues.autojs6.com/76)_
-* `新機能` クライアントモードにIPアドレスの履歴機能を追加
-* `修正` クライアントモードの自動接続やサーバーモードの自動起動後にIPアドレス情報が表示されない問題
+* `新機能` クライアントモードに IP アドレスの履歴機能を追加
+* `修正` クライアントモードの自動接続やサーバーモードの自動起動後に IP アドレス情報が表示されない問題
 * `修正` クライアントモードおよびサーバーモードで接続後に言語やナイトモードを切り替えると接続が切断され再接続できない問題
 * `修正` クライアントモードでカスタムポートを使用できない問題
-* `修正` クライアントモードで特定の文字を入力するとAutoJs6がクラッシュする問題
-* `修正` VSCodeプラグインのリモートコマンドが解析に失敗し, コマンドが応答しない問題 (一時的な修正)
+* `修正` クライアントモードで特定の文字を入力すると AutoJs6 がクラッシュする問題
+* `修正` VSCode プラグインのリモートコマンドが解析に失敗し, コマンドが応答しない問題 (一時的な修正)
 * `修正` Android 7.x で新バージョンを検出した際にバージョン詳細を取得できない問題
-* `修正` images.pixelがアクセシビリティサービスのスクリーンショットのピクセルカラー値を取得できない問題 _[`issue #73`](http://issues.autojs6.com/73)_
-* `修正` UIモードのAndroidネイティブコントロールがプリセットコントロール属性を使用できない問題
-* `修正` runtime.loadDex/loadJarで複数のファイルを読み込む際に最初のファイルだけが有効になる問題 _[`issue #88`](http://issues.autojs6.com/88)_
+* `修正` images.pixel がアクセシビリティサービスのスクリーンショットのピクセルカラー値を取得できない問題 _[`issue #73`](http://issues.autojs6.com/73)_
+* `修正` UI モードの Android ネイティブコントロールがプリセットコントロール属性を使用できない問題
+* `修正` runtime.loadDex/loadJar で複数のファイルを読み込む際に最初のファイルだけが有効になる問題 _[`issue #88`](http://issues.autojs6.com/88)_
 * `修正` 一部のデバイスでアプリケーションをインストール後にランチャーに文書アイコンのみが表示される問題 (一時的な修正) _[`issue #85`](http://issues.autojs6.com/85)_
-* `改善` VSCodeプラグインバージョン1.0.5に対応
-* `改善` cheerioモジュールのサポート追加 (参照：[aiselp](https://github.com/aiselp/AutoX/commit/7176f5ad52d6904383024fb700bf19af75e22903)) _[`issue #65`](http://issues.autojs6.com/65)_
-* `改善` JsWebSocketインスタンスがrebuildメソッドを使用してインスタンスを再構築し接続を行うサポート追加 _[`issue #69`](http://issues.autojs6.com/69)_
-* `改善` base64モジュールがnumber配列およびJavaバイト配列を主要なパラメータとしてエンコード及びデコードをサポート
-* `改善` JavaMail for Androidのサポート追加 _[`issue #71`](http://issues.autojs6.com/71)_
-* `改善` バージョン更新情報を取得する際, Blobデータタイプを使用してプロクシなしのネットワーク環境に対応
-* `改善` クライアントモード接続中にホームドロワーのサブタイトルにターゲットIPアドレスを表示
+* `改善` VSCode プラグインバージョン 1.0.5 に対応
+* `改善` cheerio モジュールのサポート追加 (参照: [aiselp](https://github.com/aiselp/AutoX/commit/7176f5ad52d6904383024fb700bf19af75e22903)) _[`issue #65`](http://issues.autojs6.com/65)_
+* `改善` JsWebSocket インスタンスが rebuild メソッドを使用してインスタンスを再構築し接続を行うサポート追加 _[`issue #69`](http://issues.autojs6.com/69)_
+* `改善` base64 モジュールが number 配列および Java バイト配列を主要なパラメータとしてエンコード及びデコードをサポート
+* `改善` JavaMail for Android のサポート追加 _[`issue #71`](http://issues.autojs6.com/71)_
+* `改善` バージョン更新情報を取得する際, Blob データタイプを使用してプロクシなしのネットワーク環境に対応
+* `改善` クライアントモード接続中にホームドロワーのサブタイトルにターゲット IP アドレスを表示
 * `改善` クライアントモードで不正な入力に対して警告を表示するサポートを追加
 * `改善` クライアントモードでソフトキーボードのエンターキーを使用して接続を確立
-* `改善` サーバーモードの開始後は常にオンの状態を維持（手動でオフにするかアプリケーションプロセスが終了するまで）_[`issue #64`](http://issues.autojs6.com/64#issuecomment-1596990158)_
-* `改善` AutoJs6とVSCodeプラグイン間の双方向バージョン検出を実装し異常が検出された場合に警告_[`issue #89`](http://issues.autojs6.com/89)_
-* `改善` SMSデータ読み取り許可(android.permission.READ_SMS)を追加（デフォルトではオフ）
-* `改善` findMultiColorsメソッドの内部実装 (by [LYS86](https://github.com/LYS86)) _[`pr #72`](http://pr.autojs6.com/72)_
-* `改善` runtime.loadDex/loadJar/loadがディレクトリレベルでのロードや複数ファイルの同時ロードをサポート
-* `依存関係` LeakCanaryバージョン2.11 -> 2.12にアップグレード
-* `依存関係` Android Analyticsバージョン14.2.0 -> 14.3.0にアップグレード
-* `依存関係` Gradleバージョン8.2-milestone-1 -> 8.2にアップグレード
+* `改善` サーバーモードの開始後は常にオンの状態を維持 (手動でオフにするかアプリケーションプロセスが終了するまで) _[`issue #64`](http://issues.autojs6.com/64#issuecomment-1596990158)_
+* `改善` AutoJs6 と VSCode プラグイン間の双方向バージョン検出を実装し異常が検出された場合に警告_[`issue #89`](http://issues.autojs6.com/89)_
+* `改善` SMS データ読み取り許可 (android.permission.READ_SMS) を追加 (デフォルトではオフ) 
+* `改善` findMultiColors メソッドの内部実装 (by [LYS86](https://github.com/LYS86)) _[`pr #72`](http://pr.autojs6.com/72)_
+* `改善` runtime.loadDex/loadJar/load がディレクトリレベルでのロードや複数ファイルの同時ロードをサポート
+* `依存関係` LeakCanary バージョン 2.11 -> 2.12 にアップグレード
+* `依存関係` Android Analytics バージョン 14.2.0 -> 14.3.0 にアップグレード
+* `依存関係` Gradle バージョン 8.2-milestone-1 -> 8.2 にアップグレード
 
 # v6.3.1
 
 ###### 2023/05/26
 
 * `新機能` 通知許可及びホームドロワースイッチを追加 _[`issue #55`](http://issues.autojs6.com/55)_
-* `新機能` UIモードが簡単なAndroidレイアウト解析をサポート（サンプルコード > レイアウト > 簡単なAndroidレイアウトを参照）
-* `新機能` UIモードにconsole / imagebutton / ratingbar / switch / textclock / togglebuttonなどのコントロールを追加
-* `新機能` UIモードのコントロールに[OmniColor](https://docs.autojs6.com/#/omniTypes?id=omnicolor)タイプの色値をサポート（例：color="orange")
-* `新機能` UIモードのコントロールがattrメソッドでの属性設定を完全サポート（例：ui.text.attr('color', 'blue')）
-* `新機能` UIモードのコントロールがブール型の属性値のデフォルト形式をサポート（例：clickable="true" は clickable または isClickable と簡略化可能）
-* `新機能` buttonコントロールがisColoredおよびisBorderlessブール型属性をサポート
-* `新機能` console.resetGlobalLogConfigメソッドがグローバルログ設定をリセット
-* `新機能` web.newWebSocketメソッドがWeb Socketインスタンスの作成をサポート（プロジェクトドキュメント > [万維网](https://docs.autojs6.com/#/web?id=m-newwebsocket)を参照）
+* `新機能` UI モードが簡単な Android レイアウト解析をサポート (サンプルコード > レイアウト > 簡単な Android レイアウトを参照) 
+* `新機能` UI モードに console / imagebutton / ratingbar / switch / textclock / togglebutton などのコントロールを追加
+* `新機能` UI モードのコントロールに [OmniColor](https://docs.autojs6.com/#/omniTypes?id=omnicolor) タイプの色値をサポート (例: color="orange")
+* `新機能` UI モードのコントロールが attr メソッドでの属性設定を完全サポート (例: ui.text.attr('color', 'blue')) 
+* `新機能` UI モードのコントロールがブール型の属性値のデフォルト形式をサポート (例: clickable="true" は clickable または isClickable と簡略化可能) 
+* `新機能` button コントロールが isColored および isBorderless ブール型属性をサポート
+* `新機能` console.resetGlobalLogConfig メソッドがグローバルログ設定をリセット
+* `新機能` web.newWebSocket メソッドが Web Socket インスタンスの作成をサポート (プロジェクトドキュメント > [万維网](https://docs.autojs6.com/#/web?id=m-newwebsocket) を参照) 
 * `修正` ファイルマネージャーのフォルダソートの異常
-* `修正` floatyモジュールで構築された浮動ウィンドウのスタイルや位置を調整できない問題 _[`issue #60`](http://issues.autojs6.com/60)_
-* `修正` floatyモジュールで構築された浮動ウィンドウがシステムステータスバーと重なる問題
-* `修正` http.postMultipartメソッドの機能異常 _[`issue #56`](http://issues.autojs6.com/56)_
-* `修正` Android 7.xでスクリプトを実行できない問題 _[`issue #61`](http://issues.autojs6.com/61)_
-* `修正` sign.propertyファイルが存在しないとプロジェクトを構築できない問題
-* `修正` 新しいバージョンのシステムでAutoJs6がバックグラウンドにある時に前景通知許可がないためクラッシュする問題（API >= 33）
-* `修正` console.showメソッドの呼び出し後にログウィンドウのFABボタンをクリックしてもログがクリアされない問題
-* `修正` スクリプトエディタのデバッグ時に発生するprototypeの空ポインタ例外
+* `修正` floaty モジュールで構築された浮動ウィンドウのスタイルや位置を調整できない問題 _[`issue #60`](http://issues.autojs6.com/60)_
+* `修正` floaty モジュールで構築された浮動ウィンドウがシステムステータスバーと重なる問題
+* `修正` http.postMultipart メソッドの機能異常 _[`issue #56`](http://issues.autojs6.com/56)_
+* `修正` Android 7.x でスクリプトを実行できない問題 _[`issue #61`](http://issues.autojs6.com/61)_
+* `修正` sign.property ファイルが存在しないとプロジェクトを構築できない問題
+* `修正` 新しいバージョンのシステムで AutoJs6 がバックグラウンドにある時に前景通知許可がないためクラッシュする問題 (API >= 33) 
+* `修正` console.show メソッドの呼び出し後にログウィンドウの FAB ボタンをクリックしてもログがクリアされない問題
+* `修正` スクリプトエディタのデバッグ時に発生する prototype の空ポインタ例外
 * `修正` スクリプトエディタがスクリプトを実行する時キャッシュフォルダに一時スクリプトを実行するのではなく, 元の位置に保存して実行することでスクリプト内容の喪失問題を回避
 * `修正` レイアウトの階層解析の階層色バー幅を調整して階層が多すぎる場合にコンポーネント名を表示できるようにした問題 _[`issue #46`](http://issues.autojs6.com/46)_
 * `改善` レイアウト解析の浮動ウインドウに終了ボタンを追加してウィンドウを閉じるように _[`issue #63`](http://issues.autojs6.com/63)_
 * `改善` スクリプトの絶対パスを省略形式で使用することによりテキストの長さを短縮し, 読みやすくする
-* `改善` ErrorをExceptionに変更し, 例外が発生した時にAutoJs6がクラッシュしないようにする
-* `改善` ビュー (View) のバインディングをButterKnifeからView Bindingに移行 _[`issue #48`](http://issues.autojs6.com/48)_
-* `改善` サーバーモードの異常終了時にはAutoJs6起動時に自動的に再起動 _[`issue #64`](http://issues.autojs6.com/64)_
-* `改善` クライアントモードの異常終了時にはAutoJs6起動時に最新の履歴アドレスに自動的に接続
-* `依存関係` LeakCanaryバージョン2.10 -> 2.11にアップグレード
-* `依存関係` Android Materialバージョン1.8.0 -> 1.9.0にアップグレード
-* `依存関係` Androidx WebKitバージョン1.6.1 -> 1.7.0にアップグレード
-* `依存関係` OkHttp3バージョン3.10.0 -> 5.0.0-alpha.9 -> 5.0.0-alpha.11にアップグレード
-* `依存関係` MLKit Text Recognition Chineseバージョン16.0.0-beta6 -> 16.0.0にアップグレード
+* `改善` Error を Exception に変更し, 例外が発生した時に AutoJs6 がクラッシュしないようにする
+* `改善` ビュー (View) のバインディングを ButterKnife から View Binding に移行 _[`issue #48`](http://issues.autojs6.com/48)_
+* `改善` サーバーモードの異常終了時には AutoJs6 起動時に自動的に再起動 _[`issue #64`](http://issues.autojs6.com/64)_
+* `改善` クライアントモードの異常終了時には AutoJs6 起動時に最新の履歴アドレスに自動的に接続
+* `依存関係` LeakCanary バージョン 2.10 -> 2.11 にアップグレード
+* `依存関係` Android Material バージョン 1.8.0 -> 1.9.0 にアップグレード
+* `依存関係` Androidx WebKit バージョン 1.6.1 -> 1.7.0 にアップグレード
+* `依存関係` OkHttp3 バージョン 3.10.0 -> 5.0.0-alpha.9 -> 5.0.0-alpha.11 にアップグレード
+* `依存関係` MLKit Text Recognition Chinese バージョン 16.0.0-beta6 -> 16.0.0 にアップグレード
 
 # v6.3.0
 
 ###### 2023/04/29
 
-* `新機能` ocr モジュール（プロジェクトドキュメントを参照> [光学文字認識](https://docs.autojs6.com/#/ocr)) _[`issue #8`](http://issues.autojs6.com/8)_
-* `新機能` notice モジュール（プロジェクトドキュメントを参照> [メッセージ通知](https://docs.autojs6.com/#/notice))
-* `新機能` s13n モジュール（プロジェクトドキュメントを参照> [標準化](https://docs.autojs6.com/#/s13n))
-* `新機能` Color モジュール（プロジェクトドキュメントを参照> [カラータイプ](https://docs.autojs6.com/#/colorType))
+* `新機能` ocr モジュール (プロジェクトドキュメントを参照> [光学文字認識](https://docs.autojs6.com/#/ocr)) _[`issue #8`](http://issues.autojs6.com/8)_
+* `新機能` notice モジュール (プロジェクトドキュメントを参照> [メッセージ通知](https://docs.autojs6.com/#/notice))
+* `新機能` s13n モジュール (プロジェクトドキュメントを参照> [標準化](https://docs.autojs6.com/#/s13n))
+* `新機能` Color モジュール (プロジェクトドキュメントを参照> [カラータイプ](https://docs.autojs6.com/#/colorType))
 * `新機能` 前景時に画面を常時点灯させる機能と設定オプション
-* `新機能` 独立したアプリ文書を読むための追加のドキュメントランチャー（設定で非表示または表示が可能）
+* `新機能` 独立したアプリ文書を読むための追加のドキュメントランチャー (設定で非表示または表示が可能) 
 * `修正` colors.toString メソッドの機能異常
 * `修正` app.openUrl メソッドの自動プロトコル接頭辞追加機能異常
 * `修正` app.viewFile/editFile 使用時, パラメータの対応ファイルが存在しない場合の動作異常
 * `修正` pickup メソッドのコールバック関数が呼び出されない問題
 * `修正` レイアウト解析表示のウィジェット情報の bounds 属性値負符号がカンマに置き換えられる問題
-* `修正` bounds/boundsInside/boundsContains セレクターが狭義の空矩形（境界逆位の矩形など）を正常に選別できない _[`issue #49`](http://issues.autojs6.com/49)_
+* `修正` bounds/boundsInside/boundsContains セレクターが狭義の空矩形 (境界逆位の矩形など) を正常に選別できない _[`issue #49`](http://issues.autojs6.com/49)_
 * `修正` テーマの変更や言語の修正後にホームドキュメントタブをクリックまたは長押しするとアプリがクラッシュする問題
 * `修正` テキストエディタのピンチズームでフォントサイズを調整するときに発生する可能性のある揺れの問題
-* `修正` ビルドスクリプトの一部依存関係のソースがダウンロードできない問題（すべて統合済み） _[`issue #40`](http://issues.autojs6.com/40)_
-* `修正` Tasker が AutoJs6 操作プラグイン（アクションプラグイン）を追加できない問題（試修） _[`issue #41`](http://issues.autojs6.com/41)_
+* `修正` ビルドスクリプトの一部依存関係のソースがダウンロードできない問題 (すべて統合済み) _[`issue #40`](http://issues.autojs6.com/40)_
+* `修正` Tasker が AutoJs6 操作プラグイン (アクションプラグイン) を追加できない問題 (試修) _[`issue #41`](http://issues.autojs6.com/41)_
 * `修正` 最新の JDK バージョンでプロジェクトをコンパイルすると, ButterKnife アノテーションがリソース ID を解析できない問題 _[`issue #48`](http://issues.autojs6.com/48)_
-* `修正` アクセシビリティサービスの高確率でのサービス異常発生の問題（試修）
+* `修正` アクセシビリティサービスの高確率でのサービス異常発生の問題 (試修) 
 * `修正` images.medianBlur の size パラメータの使用方法がドキュメントと一致しない問題
 * `修正` engines モジュールがスクリプトの全称を表示する際にファイル名と拡張子の間のピリオドが欠落する問題
-* `修正` 加重 RGB 距離測定アルゴリズム内部の実装において計算ミスの可能性（試修）
+* `修正` 加重 RGB 距離測定アルゴリズム内部の実装において計算ミスの可能性 (試修) 
 * `修正` console モジュールの浮動ウィンドウ関連メソッドが show メソッドの前に使用できない問題
 * `修正` console.setSize などのメソッドが機能しない可能性のある問題 _[`issue #50`](http://issues.autojs6.com/50)_
 * `修正` colors.material カラースペースの色定数の誤った割り当て
 * `修正` UI モードの日付選択ウィジェットの minDate および maxDate 属性が日付フォーマットを正しく解析できない問題
-* `修正` スクリプトを実行した後, ホームの「タスク」タブページに素早く切り替えると, 同じ実行中のタスクが2つ表示される問題
+* `修正` スクリプトを実行した後, ホームの「タスク」タブページに素早く切り替えると, 同じ実行中のタスクが 2 つ表示される問題
 * `修正` ファイルマネージャのページが他のページから戻るとページの状態がリセットされる可能性のある問題 _[`issue #52`](http://issues.autojs6.com/52)_
 * `修正` ファイルマネージャのページソート状態とアイコン表示状態が一致しない問題
 * `改善` ファイルマネージャページにファイルおよびフォルダの変更時間の表示を追加
 * `改善` ファイルマネージャページのソートタイプが状態記憶をサポート
 * `改善` README.md にプロジェクトコンパイルビルドセクションとスクリプト開発補助セクションを追加 _[`issue #33`](http://issues.autojs6.com/33)_
-* `改善` images モジュール関連メソッドのリージョン（region）オプションパラメータがより多くの入力方法をサポート（プロジェクトドキュメントを参照> [オムニタイプ](https://docs.autojs6.com/#/omniTypes?id=omniregion))
+* `改善` images モジュール関連メソッドのリージョン (region) オプションパラメータがより多くの入力方法をサポート (プロジェクトドキュメントを参照> [オムニタイプ](https://docs.autojs6.com/#/omniTypes?id=omniregion))
 * `改善` app.startActivity ページの省略形パラメータに pref/homepage/docs/about などの形式をサポート
-* `改善` web モジュールのグローバルメソッドをモジュール本体にマウントして使いやすく（プロジェクトドキュメントを参照> [ウェブ](https://docs.autojs6.com/#/web))
+* `改善` web モジュールのグローバルメソッドをモジュール本体にマウントして使いやすく (プロジェクトドキュメントを参照> [ウェブ](https://docs.autojs6.com/#/web))
 * `改善` web.newInjectableWebView メソッド内で一部の一般的な WebView 設定オプションをデフォルトで実装
 * `改善` colors モジュールに多くの変換メソッドとツールメソッドを追加し, さらに多くの静的定数と直接パラメータとして使用できる色名を追加
 * `改善` console モジュールに多くのコンソール浮動ウィンドウのスタイル設定メソッドを追加し, build 構築子を用いてウィンドウスタイルを統一設定
 * `改善` コンソール浮動ウィンドウがタイトル部分をドラッグしてウィンドウの位置を移動可能
 * `改善` コンソール浮動ウィンドウはスクリプト終了後に自動的に遅延して閉じる
 * `改善` コンソール浮動ウィンドウおよびその Activity ウィンドウがピンチズームでフォントサイズ調整をサポート
-* `改善` http モジュール関連メソッドがタイムアウトパラメータ（timeout）をサポート
-* `改善` Gradle ビルドスクリプトが JDK バージョンの自主降格（フォールバック）をサポート
-* `改善` Gradle ビルドスクリプトがプラットフォームの種類およびバージョンに応じて適切なビルドツールバージョンを自動的に選択（程度は限定的）
+* `改善` http モジュール関連メソッドがタイムアウトパラメータ (timeout) をサポート
+* `改善` Gradle ビルドスクリプトが JDK バージョンの自主降格 (フォールバック) をサポート
+* `改善` Gradle ビルドスクリプトがプラットフォームの種類およびバージョンに応じて適切なビルドツールバージョンを自動的に選択 (程度は限定的) 
 * `依存関係` ローカライズされた Auto.js APK Builder バージョン 1.0.3
 * `依存関係` ローカライズされた MultiLevelListView バージョン 1.1
 * `依存関係` ローカライズされた Settings Compat バージョン 1.1.5
@@ -464,19 +608,19 @@
 * `新機能` ウィジェットコンパス (UiObject#compass) (プロジェクトドキュメントを参照 > [ウィジェットノード](https://docs.autojs6.com/#/uiObjectType)) _[`issue #23`](http://issues.autojs6.com/23)_
 * `新機能` グローバル待機メソッド wait (プロジェクトドキュメントを参照 > [グローバルオブジェクト](https://docs.autojs6.com/#/global?id=m-wait))
 * `新機能` グローバルスケーリングメソッド cX/cY/cYx (プロジェクトドキュメントを参照 > [グローバルオブジェクト](https://docs.autojs6.com/#/global?id=m-wait))
-* `新機能` グローバルAppタイプ (プロジェクトドキュメントを参照 > [アプリケーション列挙型](https://docs.autojs6.com/#/appType))
-* `新機能` i18nモジュール (banana-i18nをベースとしたJavaScript多言語ソリューション) (プロジェクトドキュメントを参照 > 国際化)
+* `新機能` グローバル App タイプ (プロジェクトドキュメントを参照 > [アプリケーション列挙型](https://docs.autojs6.com/#/appType))
+* `新機能` i18n モジュール (banana-i18n をベースとした JavaScript 多言語ソリューション) (プロジェクトドキュメントを参照 > 国際化)
 * `修正` ソフトウェア言語切り替え後にページのテキストがちらついたり, いくつかのページボタンが機能しない問題
 * `修正` 作業パスがプロジェクトである場合, ソフトウェア起動後にプロジェクトツールバーが表示されない問題
 * `修正` 作業パスがソフトウェア言語切り替えに応じて自動的に変更される可能性の問題 _[`issue #19`](http://issues.autojs6.com/19)_
 * `修正` 定時タスク起動遅延が顕著な問題 (試修) _[`issue #21`](http://issues.autojs6.com/21)_
-* `修正` JavaScriptモジュール名が上書き宣言された場合に依存関係のある内部モジュールが正常に動作しない問題 _[`issue #29`](http://issues.autojs6.com/29)_
-* `修正` 高バージョンのAndroidシステムでクイック設定パネルのアイコンをクリックした後, パネルが自動的に閉じない場合がある問題 (試修) _[`issue #7`](http://issues.autojs6.com/7)_
-* `修正` 高バージョンのAndroidシステムで一部のページが通知バー領域と重なる問題
-* `修正` Android 10以降のシステムでブラシの色を設定するサンプルコードが正常に動作しない問題
+* `修正` JavaScript モジュール名が上書き宣言された場合に依存関係のある内部モジュールが正常に動作しない問題 _[`issue #29`](http://issues.autojs6.com/29)_
+* `修正` 高バージョンの Android システムでクイック設定パネルのアイコンをクリックした後, パネルが自動的に閉じない場合がある問題 (試修) _[`issue #7`](http://issues.autojs6.com/7)_
+* `修正` 高バージョンの Android システムで一部のページが通知バー領域と重なる問題
+* `修正` Android 10 以降のシステムでブラシの色を設定するサンプルコードが正常に動作しない問題
 * `修正` サンプルコード「音楽管理者」のファイル名を「ファイル管理者」に訂正し, 正常機能を回復
 * `修正` ファイルマネージャーで下にスワイプして更新する際に位置ずれが発生する可能性のある問題
-* `修正` uiモジュールのスコープバインディングエラーにより, 一部のUIベーススクリプトがコンポーネントの属性にアクセスできない問題
+* `修正` ui モジュールのスコープバインディングエラーにより, 一部の UI ベーススクリプトがコンポーネントの属性にアクセスできない問題
 * `修正` 録画スクリプト後のファイル名入力ダイアログが外部領域をクリックすると録画内容が失われる問題
 * `修正` ドキュメントの一部の章の見出しが画面の幅を超える場合, 自動的に改行されず内容が失われる問題
 * `修正` ドキュメントのサンプルコードエリアが正常に左右にスクロールできない問題
@@ -485,90 +629,90 @@
 * `修正` システムの夜間モードをオンにするとアプリ起動後に夜間モードが強制的に有効になる問題
 * `修正` 夜間モードをオンにした後, テーマカラーが生效しない場合がある問題
 * `修正` 夜間モードで一部の設定オプションのテキストと背景色が同じで識別できない問題
-* `修正` Aboutページのボタンテキストが長すぎて完全に表示されない問題
+* `修正` About ページのボタンテキストが長すぎて完全に表示されない問題
 * `修正` ホームドロワーの設定項目の見出しが長すぎて, テキストとボタンが重なる問題
 * `修正` ホームドロワーの権限スイッチがメッセージボックス消失後に状態が同期しない可能性のある問題
-* `修正` Root権限でホームドロワーの権限スイッチを操作できない場合, ADBツールボックスが表示されない問題
-* `修正` Root権限でさしゅ位置を表示する際, 初回使用時に権限がないことを通知しない問題
+* `修正` Root 権限でホームドロワーの権限スイッチを操作できない場合, ADB ツールボックスが表示されない問題
+* `修正` Root 権限でさしゅ位置を表示する際, 初回使用時に権限がないことを通知しない問題
 * `修正` アイコン選択ページでアイコン要素のレイアウトが異常
 * `修正` テキストエディタ起動時に夜間モード設定で画面がフラッシュすることがある問題 (試修)
 * `修正` テキストエディタのフォントサイズ設定時, 使用可能な最大値が制限されている問題
-* `修正` 一部のAndroidシステムでスクリプト終了時にログに実行時間が記録されない問題
-* `修正` Floatingボタンメニューの閉じるボタンを使用した後, アプリを再起動してもFloatingボタンが表示される問題
+* `修正` 一部の Android システムでスクリプト終了時にログに実行時間が記録されない問題
+* `修正` Floating ボタンメニューの閉じるボタンを使用した後, アプリを再起動しても Floating ボタンが表示される問題
 * `修正` レイアウト階層分析でリストアイテムを長押しした際, ポップアップメニューが画面の下に溢れる問題
-* `修正` Android 7.xシステムで夜間モードがオフの際にナビゲーションバーのボタンが識別しにくい問題
-* `修正` http.post等のメソッドで, リクエストが閉じられない場合の問題
-* `修正` colors.toString メソッドにおいて, アルファチャンネルが0の時にそのチャンネル情報が結果に含まれない問題
+* `修正` Android 7.x システムで夜間モードがオフの際にナビゲーションバーのボタンが識別しにくい問題
+* `修正` http.post 等のメソッドで, リクエストが閉じられない場合の問題
+* `修正` colors.toString メソッドにおいて, アルファチャンネルが 0 の時にそのチャンネル情報が結果に含まれない問題
 * `改善` Auto.js 4.x バージョンの公開クラスをリダイレクトして可能な限り下位互換を実現 (限界あり)
-* `改善` すべてのプロジェクトモジュールをマージし, 循環参照などの問題を回避 (暫時inrtモジュールを削除)
-* `改善` Gradleのビルド設定をGroovyからKTSに移行
-* `改善` Rhinoの例外メッセージに多言語サポートを追加
+* `改善` すべてのプロジェクトモジュールをマージし, 循環参照などの問題を回避 (暫時 inrt モジュールを削除)
+* `改善` Gradle のビルド設定を Groovy から KTS に移行
+* `改善` Rhino の例外メッセージに多言語サポートを追加
 * `改善` ホームドロワーのパーミッションスイッチは有効時にのみメッセージを表示
 * `改善` ホームドロワーレイアウトがステータスバーの下に配置され, 上部のカラーバーの低互換性を回避
-* `改善` 更新チェック/更新ダウンロード/更新通知機能がAndroid 7.xシステムに対応
-* `改善` 設定ページを再設計 (AndroidXに移行)
+* `改善` 更新チェック/更新ダウンロード/更新通知機能が Android 7.x システムに対応
+* `改善` 設定ページを再設計 (AndroidX に移行)
 * `改善` 設定ページで設定項目を長押しして詳細情報を取得することが可能
-* `改善` 夜間モードに「システムに従う」設定オプションを追加 (Android 9および以上)
+* `改善` 夜間モードに「システムに従う」設定オプションを追加 (Android 9 および以上)
 * `改善` アプリ起動画面が夜間モードに適応
 * `改善` アプリアイコンに番号付けを追加して複数のオープンソースバージョンを共存するユーザーの使用体験を向上
-* `改善` テーマカラーにより多くのMaterial Design Color (マテリアルデザインカラー) オプションを追加
+* `改善` テーマカラーにより多くの Material Design Color (マテリアルデザインカラー) オプションを追加
 * `改善` ファイルマネージャー/タスクパネルなどのリストアイテムのアイコンを適度に軽量化し, テーマカラーに適応
 * `改善` ホームの検索バーのプレースホルダーテキストの色を夜間モードに適応
 * `改善` ダイアログ/テキスト/Fab/AppBar/リストアイテムなどのコンポーネントを夜間モードに適応
-* `改善` ドキュメント/設定/アバウト/テーマカラー/レイアウト分析などのページおよびFloatingボタンメニューを夜間モードに適応
-* `改善` ページレイアウトが可能な限りRTL (Right-To-Left) レイアウトに対応
-* `改善` Aboutページにアイコンアニメーション効果を追加
-* `改善` Aboutページの著作権声明テキストが自動的に年次情報を更新
+* `改善` ドキュメント/設定/アバウト/テーマカラー/レイアウト分析などのページおよび Floating ボタンメニューを夜間モードに適応
+* `改善` ページレイアウトが可能な限り RTL (Right-To-Left) レイアウトに対応
+* `改善` About ページにアイコンアニメーション効果を追加
+* `改善` About ページの著作権声明テキストが自動的に年次情報を更新
 * `改善` アプリ初回インストール後, 適切な作業ディレクトリを自動的に決定および設定
 * `改善` ドキュメントページのピンチズーム機能を無効化し, ドキュメント内容の表示不具合を回避
 * `改善` タスクパネルリストアイテムを相対パスで簡略化し, タスクの名前およびパスを表示
 * `改善` テキストエディタのボタンテキストを適度に短縮し, テキスト内容の溢れを避ける
 * `改善` テキストエディタのフォントサイズ設定でデフォルト値に戻すことが可能
-* `改善` Floatingボタンのクリック反応速度を向上
-* `改善` Floatingボタンのレイアウト分析ボタンをクリックして直接レイアウト範囲分析を実行
-* `改善` レイアウト分析のテーマが自動適応 (Floatingウィンドウがアプリのテーマに従い, クイック設定パネルがシステムのテーマに従う)
+* `改善` Floating ボタンのクリック反応速度を向上
+* `改善` Floating ボタンのレイアウト分析ボタンをクリックして直接レイアウト範囲分析を実行
+* `改善` レイアウト分析のテーマが自動適応 (Floating ウィンドウがアプリのテーマに従い, クイック設定パネルがシステムのテーマに従う)
 * `改善` レイアウトウィジェット情報リストを使用頻度に基づいて再編成
 * `改善` レイアウトウィジェット情報をクリックしてコピーする際に, セレクタの種類に応じて出力フォーマットを自動的に最適化
-* `改善` Floatingウィンドウでファイルを選択する際に, 戻るキーを押して上位ディレクトリに戻ることができ, ウィンドウを直接閉じない
+* `改善` Floating ウィンドウでファイルを選択する際に, 戻るキーを押して上位ディレクトリに戻ることができ, ウィンドウを直接閉じない
 * `改善` クライアントモードでコンピュータのアドレスを入力する際に, 数値の有効性チェックおよびピリオドシンボルの自動変換をサポート
-* `改善` クライアントおよびサーバーの接続後にホームドロワーに対応するデバイスのIPアドレスを表示
+* `改善` クライアントおよびサーバーの接続後にホームドロワーに対応するデバイスの IP アドレスを表示
 * `改善` 一部のグローバルオブジェクトおよび組み込みモジュールにオーバーライドプロテクションを追加 (プロジェクトドキュメントを参照 > グローバルオブジェクト > [オーバーライドプロテクション](https://docs.autojs6.com/#/global?id=%e8%a6%86%e5%86%99%e4%bf%9d%e6%8a%a4))
-* `改善` importClassおよびimportPackageが文字列パラメータおよび可変長パラメータをサポート
-* `改善` ui.runが例外発生時にスタックトレース情報を出力サポート
-* `改善` ui.Rおよびauto.RがAutoJs6のリソースIDを簡単に取得可能
-* `改善` appモジュール内でアプリに関連する操作メソッドがAppタイプパラメータおよびアプリのエイリアスパラメータをサポート
-* `改善` dialogsモジュール内の非同期コールバック関連メソッドが事前入力パラメータの省略をサポート
-* `改善` app.startActivityなどがurlオプションパラメータをサポート (参照: サンプルコード > アプリケーション > インテント)
-* `改善` deviceモジュールがIMEIまたはハードウェアシリアル番号の取得に失敗した場合, nullを返し, 例外をスローしない
-* `改善` console.showが表示するログのFloatingウィンドウの文字の明るさを向上させ, 内容の識別度を高める
-* `改善` ImageWrapper#saveToが相対パスで画像ファイルを保存サポート
-* `改善` colorsグローバルオブジェクトを再設計し, HSV/HSLなどのカラーモードをサポート (プロジェクトドキュメントを参照 > [カラー](https://docs.autojs6.com/#/color))
-* `依存関係` Gradle Compileバージョンを32 -> 33にアップグレード
-* `依存関係` ローカライズされたAndroid Jobバージョン 1.4.3
-* `依存関係` ローカライズされたAndroid Plugin Client SDK For Localeバージョン 9.0.0
-* `依存関係` ローカライズされたGitHub APIバージョン 1.306
-* `依存関係` 追加されたJCIP Annotationsバージョン 1.0
-* `依存関係` 追加されたAndroidx WebKitバージョン 1.5.0
-* `依存関係` 追加されたCommons IOバージョン 2.8.0
-* `依存関係` 追加されたDesugar JDK Libsバージョン 2.0.0
-* `依存関係` 追加されたJackson DataBindバージョン 2.13.3
-* `依存関係` 追加されたJaredrummler Android Device Namesバージョン 2.1.0
-* `依存関係` 追加されたJaredrummler Animated SVG Viewバージョン 1.0.6
-* `依存関係` Jrummyapps ColorPickerバージョン 2.1.7をJaredrummler ColorPickerバージョン 1.1.0に置き換え
-* `依存関係` Gradleバージョンを7.5-rc-1 -> 8.0-rc-1にアップグレード
-* `依存関係` Gradleビルドツールバージョンを7.4.0-alpha02 -> 8.0.0-alpha09にアップグレード
-* `依存関係` Kotlin Gradleプラグインバージョンを1.6.10 -> 1.8.0-RC2にアップグレード
-* `依存関係` Android Materialバージョンを1.6.0 -> 1.7.0にアップグレード
-* `依存関係` Androidx Annotationバージョンを1.3.0 -> 1.5.0にアップグレード
-* `依存関係` Androidx AppCompatバージョンを1.4.1 -> 1.4.2にアップグレード
-* `依存関係` Android Analyticsバージョンを13.3.0 -> 14.0.0にアップグレード
-* `依存関係` Gsonバージョンを2.9.0 -> 2.10にアップグレード
-* `依存関係` Joda Timeバージョンを2.10.14 -> 2.12.1にアップグレード
-* `依存関係` Kotlinx Coroutinesバージョンを1.6.1-native-mt -> 1.6.1にアップグレード
-* `依存関係` OkHttp3バージョンを3.10.0 -> 5.0.0-alpha.7 -> 5.0.0-alpha.9にアップグレード
-* `依存関係` Zip4jバージョンを2.10.0 -> 2.11.2にアップグレード
-* `依存関係` Glideバージョンを4.13.2 -> 4.14.2にアップグレード
-* `依存関係` Junit Jupiterバージョンを5.9.0 -> 5.9.1にアップグレード
+* `改善` importClass および importPackage が文字列パラメータおよび可変長パラメータをサポート
+* `改善` ui.run が例外発生時にスタックトレース情報を出力サポート
+* `改善` ui.R および auto.R が AutoJs6 のリソース ID を簡単に取得可能
+* `改善` app モジュール内でアプリに関連する操作メソッドが App タイプパラメータおよびアプリのエイリアスパラメータをサポート
+* `改善` dialogs モジュール内の非同期コールバック関連メソッドが事前入力パラメータの省略をサポート
+* `改善` app.startActivity などが url オプションパラメータをサポート (参照: サンプルコード > アプリケーション > インテント)
+* `改善` device モジュールが IMEI またはハードウェアシリアル番号の取得に失敗した場合, null を返し, 例外をスローしない
+* `改善` console.show が表示するログの Floating ウィンドウの文字の明るさを向上させ, 内容の識別度を高める
+* `改善` ImageWrapper#saveTo が相対パスで画像ファイルを保存サポート
+* `改善` colors グローバルオブジェクトを再設計し, HSV/HSL などのカラーモードをサポート (プロジェクトドキュメントを参照 > [カラー](https://docs.autojs6.com/#/color))
+* `依存関係` Gradle Compile バージョンを 32 -> 33 にアップグレード
+* `依存関係` ローカライズされた Android Job バージョン 1.4.3
+* `依存関係` ローカライズされた Android Plugin Client SDK For Locale バージョン 9.0.0
+* `依存関係` ローカライズされた GitHub API バージョン 1.306
+* `依存関係` 追加された JCIP Annotations バージョン 1.0
+* `依存関係` 追加された Androidx WebKit バージョン 1.5.0
+* `依存関係` 追加された Commons IO バージョン 2.8.0
+* `依存関係` 追加された Desugar JDK Libs バージョン 2.0.0
+* `依存関係` 追加された Jackson DataBind バージョン 2.13.3
+* `依存関係` 追加された Jaredrummler Android Device Names バージョン 2.1.0
+* `依存関係` 追加された Jaredrummler Animated SVG View バージョン 1.0.6
+* `依存関係` Jrummyapps ColorPicker バージョン 2.1.7 を Jaredrummler ColorPicker バージョン 1.1.0 に置き換え
+* `依存関係` Gradle バージョンを 7.5-rc-1 -> 8.0-rc-1 にアップグレード
+* `依存関係` Gradle ビルドツールバージョンを 7.4.0-alpha02 -> 8.0.0-alpha09 にアップグレード
+* `依存関係` Kotlin Gradle プラグインバージョンを 1.6.10 -> 1.8.0-RC2 にアップグレード
+* `依存関係` Android Material バージョンを 1.6.0 -> 1.7.0 にアップグレード
+* `依存関係` Androidx Annotation バージョンを 1.3.0 -> 1.5.0 にアップグレード
+* `依存関係` Androidx AppCompat バージョンを 1.4.1 -> 1.4.2 にアップグレード
+* `依存関係` Android Analytics バージョンを 13.3.0 -> 14.0.0 にアップグレード
+* `依存関係` Gson バージョンを 2.9.0 -> 2.10 にアップグレード
+* `依存関係` Joda Time バージョンを 2.10.14 -> 2.12.1 にアップグレード
+* `依存関係` Kotlinx Coroutines バージョンを 1.6.1-native-mt -> 1.6.1 にアップグレード
+* `依存関係` OkHttp3 バージョンを 3.10.0 -> 5.0.0-alpha.7 -> 5.0.0-alpha.9 にアップグレード
+* `依存関係` Zip4j バージョンを 2.10.0 -> 2.11.2 にアップグレード
+* `依存関係` Glide バージョンを 4.13.2 -> 4.14.2 にアップグレード
+* `依存関係` Junit Jupiter バージョンを 5.9.0 -> 5.9.1 にアップグレード
 
 # v6.1.1
 
@@ -640,7 +784,7 @@
 * `依存関係` Kotlinx Coroutines バージョン 1.6.0 -> 1.6.1-native-mt にアップグレード
 * `依存関係` LeakCanary バージョン 2.8.1 -> 2.9.1 にアップグレード
 * `依存関係` OkHttp3 バージョン 5.0.0-alpha.6 -> 5.0.0-alpha.7 にアップグレード
-* `依存関係` Rhino エンジン バージョン 1.7.14 -> 1.7.15-snapshot にアップグレード
+* `依存関係` Rhino エンジン バージョン 1.7.14 -> 1.7.15-SNAPSHOT にアップグレード
 * `依存関係` Zip4j バージョン 2.9.1 -> 2.10.0 にアップグレード
 * `依存関係` Groovy JSON バージョン 3.0.8 を削除
 * `依存関係` Kotlin Stdlib JDK7 バージョン 1.6.21 を削除
@@ -692,7 +836,7 @@
 * `依存関係` 追加 Androidx AppCompat (Legacy) バージョン 1.0.2
 * `依存関係` アップグレード Androidx AppCompat バージョン 1.4.0 -> 1.4.1
 * `依存関係` アップグレード Androidx Preference バージョン 1.1.1 -> 1.2.0
-* `依存関係` アップグレード Rhino エンジンバージョン 1.7.14-snapshot -> 1.7.14
+* `依存関係` アップグレード Rhino エンジンバージョン 1.7.14-SNAPSHOT -> 1.7.14
 * `依存関係` アップグレード OkHttp3 バージョン 3.10.0 -> 5.0.0-alpha.3 -> 5.0.0-alpha.4
 * `依存関係` アップグレード Android Material バージョン 1.6.0-alpha01 -> 1.6.0-alpha02
 * `依存関係` アップグレード Gradle ビルドツールバージョン 7.2.0-alpha06 -> 7.2.0-beta01
@@ -729,7 +873,7 @@
 * `修正` パッケージプラグインが認識されないおよびダウンロードアドレスが無効な問題
 * `修正` ホーム画面ドロワー 「使用状況アクセス権限を見る」スイッチの状態が同期されない問題
 * `修正` TemplateMatching.fastTemplateMatching 潜在的な Mat メモリリーク問題
-* `改善` アップグレード Rhino エンジンバージョン 1.7.7.2 -> 1.7.13 -> 1.7.14-snapshot
+* `改善` アップグレード Rhino エンジンバージョン 1.7.7.2 -> 1.7.13 -> 1.7.14-SNAPSHOT
 * `改善` アップグレード OpenCV バージョン 3.4.3 -> 4.5.4
 * `改善` ViewUtil.getStatusBarHeight の互換性の向上
 * `改善` ホーム画面ドロワーからユーザーログイン関連モジュールおよびレイアウトプレースホルダーを削除

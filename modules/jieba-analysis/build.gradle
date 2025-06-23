@@ -1,0 +1,59 @@
+plugins {
+    id 'com.android.library'
+    id 'kotlin-android'
+}
+
+android {
+    namespace = 'com.huaban.jieba'
+    compileSdk = project.ext.compileSdk
+
+    defaultConfig {
+        minSdk = project.ext.minSdk
+        targetSdk = project.ext.targetSdk
+
+        group = 'com.huaban'
+        versionName = '1.0.3-SNAPSHOT (Optimized for AutoJs6)'
+        description = '结巴分词工具(jieba for java)'
+
+        testInstrumentationRunner = 'androidx.test.runner.AndroidJUnitRunner'
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.toVersion(project.ext.javaVersion)
+        targetCompatibility = JavaVersion.toVersion(project.ext.javaVersion)
+    }
+
+    kotlinOptions {
+        jvmTarget = project.ext.javaVersion
+    }
+
+    sourceSets {
+        main {
+            // 主 Java/Kotlin 目录
+            java.srcDirs = ['src/main/java']
+            // 将资源文件夹指定为 assets 目录
+            assets.srcDirs = ['src/main/assets']
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+    google()
+}
+
+dependencies {
+    // implementation "org.jetbrains.kotlin:kotlin-stdlib:${project.ext.kotlinVersion}"
+
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+
+    implementation 'org.apache.commons:commons-lang3:3.16.0'
+
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}

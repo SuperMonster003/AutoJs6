@@ -25,9 +25,11 @@ import org.autojs.autojs.model.project.ProjectTemplate
 import org.autojs.autojs.pio.PFiles.ensureDir
 import org.autojs.autojs.pio.PFiles.write
 import org.autojs.autojs.project.ProjectConfig
+import org.autojs.autojs.theme.ThemeColorHelper
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.shortcut.AppsIconSelectActivity
 import org.autojs.autojs.ui.widget.SimpleTextWatcher
+import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.showToast
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ActivityProjectConfigBinding
@@ -81,11 +83,22 @@ class ProjectConfigActivity : BaseActivity() {
         mVersionCode = binding.versionCode
         mMainFileName = binding.mainFileName
 
+        binding.defaultStableMode.apply {
+            ThemeColorHelper.setThemeColorPrimary(this, true)
+        }
+
         mIcon = binding.appIcon.apply {
             setOnClickListener { selectIcon() }
         }
 
-        binding.fab.setOnClickListener { commit() }
+        binding.fab.apply {
+            setOnClickListener { commit() }
+            ViewUtils.excludeFloatingActionButtonFromBottomNavigationBar(this)
+        }
+
+        binding.scrollView.apply {
+            ViewUtils.excludePaddingClippableViewFromBottomNavigationBar(this)
+        }
 
         mNewProject = intent.getBooleanExtra(EXTRA_NEW_PROJECT, false)
 
@@ -110,7 +123,8 @@ class ProjectConfigActivity : BaseActivity() {
             if (mProjectConfig == null) {
                 MaterialDialog.Builder(this)
                     .title(R.string.text_invalid_project)
-                    .positiveText(R.string.text_ok)
+                    .positiveText(R.string.dialog_button_dismiss)
+                    .positiveColorRes(R.color.dialog_button_failure)
                     .dismissListener { finish() }
                     .show()
             }
@@ -122,12 +136,12 @@ class ProjectConfigActivity : BaseActivity() {
             } else {
                 mAppName.setText(config.name)
                 setToolbarAsBack(config.name)
-                mVersionCode.setText(config.versionCode.toString())
+                mVersionCode.setText(config.versionCode.coerceAtLeast(0).toString())
                 mPackageName.setText(config.packageName)
                 mVersionName.setText(config.versionName)
-                mMainFileName.setText(config.mainScriptFile)
+                mMainFileName.setText(config.mainScriptFileName)
                 mProjectLocationWrapper.visibility = View.GONE
-                config.icon?.let { icon ->
+                config.iconPath?.let { icon ->
                     File(mDirectory, icon).takeIf { it.exists() }?.let { iconFile ->
                         Glide.with(this)
                             .load(iconFile)
@@ -197,7 +211,7 @@ class ProjectConfigActivity : BaseActivity() {
             it.name = mAppName.text.toString()
             it.versionCode = mVersionCode.text.toString().toInt()
             it.versionName = mVersionName.text.toString()
-            it.mainScriptFile = mMainFileName.text.toString()
+            it.mainScriptFileName = mMainFileName.text.toString()
             it.packageName = mPackageName.text.toString()
         }
         if (mNewProject) {
@@ -259,7 +273,7 @@ class ProjectConfigActivity : BaseActivity() {
     private fun saveIcon(b: Bitmap): Observable<String> {
         return Observable.just(b)
             .map { bitmap: Bitmap ->
-                var iconPath = mProjectConfig!!.icon
+                var iconPath = mProjectConfig!!.iconPath
                 if (iconPath == null) {
                     iconPath = "res/logo.png"
                 }
@@ -272,7 +286,7 @@ class ProjectConfigActivity : BaseActivity() {
             }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .doOnNext { iconPath: String? -> mProjectConfig!!.icon = iconPath }
+            .doOnNext { iconPath: String? -> mProjectConfig!!.iconPath = iconPath }
     }
 
     override fun onDestroy() {

@@ -14,6 +14,7 @@ import org.autojs.autojs.core.pref.Pref.getEditorTextSize
 import org.autojs.autojs.core.pref.Pref.getString
 import org.autojs.autojs.core.pref.Pref.setEditorTextSize
 import org.autojs.autojs.script.JsBeautifier
+import org.autojs.autojs.theme.ThemeColorHelper
 import org.autojs.autojs.ui.edit.theme.Theme
 import org.autojs.autojs.util.ClipboardUtils.setClip
 import org.autojs.autojs.util.DisplayUtils.pxToSp
@@ -60,6 +61,7 @@ class CodeEditor : HVScrollView {
     val codeEditText: CodeEditText = binding.codeEditText.also {
         it.addTextChangedListener(AutoIndent(it))
         lastTextSize = getEditorTextSize(pxToSp(it.textSize).toInt())
+        ThemeColorHelper.setThemeColorPrimary(it, true)
     }
 
     val lineCount
@@ -250,20 +252,27 @@ class CodeEditor : HVScrollView {
         val layout = codeEditText.layout
         val line = LayoutHelper.getLineOfChar(layout, minOf(codeEditText.selectionStart, codeEditText.selectionEnd))
         if (line >= 0 && line < layout.lineCount) {
-            codeEditText.setSelection(layout.getLineEnd(line))
-            // codeEditText.setSelection(layout.getLineEnd(line) - 1)
+            val lineEnd = layout.getLineEnd(line)
+            val text = codeEditText.text.toString()
+            val finalPosition = when {
+                lineEnd > 0 && text[lineEnd - 1] == '\n' -> {
+                    lineEnd - 1
+                }
+                else -> lineEnd
+            }
+            codeEditText.setSelection(finalPosition)
         }
     }
 
-    fun setTheme(theme: Theme?) {
+    fun setTheme(theme: Theme) {
         mTheme = theme
-        setBackgroundColor(mTheme!!.backgroundColor)
+        setBackgroundColor(theme.backgroundColor)
         mJavaScriptHighlighter.setTheme(theme)
         val text = codeEditText.text
         if (text != null) {
             mJavaScriptHighlighter.updateTokens(text.toString())
         }
-        codeEditText.setTheme(mTheme!!)
+        codeEditText.setTheme(theme)
         invalidate()
     }
 

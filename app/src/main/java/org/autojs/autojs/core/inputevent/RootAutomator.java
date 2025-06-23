@@ -288,7 +288,9 @@ public class RootAutomator implements Shell.Callback {
     @Override
     public void onInitialized() {
         String path = RootAutomatorEngine.getExecutablePath(mContext);
-        String deviceNameOrPath = RootAutomatorEngine.getDeviceNameOrPath(mContext, InputDevices.getTouchDeviceName());
+        // @Reference to ozobiozobi (https://github.com/ozobiozobi) by SuperMonster003 on Mar 10, 2025.
+        //  ! https://github.com/aiselp/AutoX/commit/8fe5d674f080c0ab109ce13f7cabd98795c22a1f#diff-dc753defa5bc4d7d6fab4f2e59a219ce7b89d7bcff2c9585f87c96964081ad72R290-R291
+        String deviceNameOrPath = "'" + RootAutomatorEngine.getDeviceNameOrPath(mContext, InputDevices.getTouchDeviceName()) + "'";
         Log.d(LOG_TAG, "deviceNameOrPath: " + deviceNameOrPath);
         mShell.exec("chmod 777 " + path);
         String command = String.format(Locale.getDefault(),

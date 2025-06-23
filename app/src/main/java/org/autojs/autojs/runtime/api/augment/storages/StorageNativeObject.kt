@@ -6,6 +6,7 @@ import org.autojs.autojs.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.extension.FlexibleArray
 import org.autojs.autojs.runtime.api.StringReadable
+import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED
 import org.autojs.autojs.util.RhinoUtils.coerceString
 import org.autojs.autojs.util.RhinoUtils.js_json_parse
@@ -35,7 +36,7 @@ class StorageNativeObject(@JvmField val name: String) : NativeObject(), StringRe
     )
 
     init {
-        super.exportAsJSClass(MAX_PROTOTYPE_ID, this, false)
+        RhinoUtils.initNativeObjectPrototype(this)
         defineProperty("name", name, PERMANENT)
         defineProperty("size", { storage.size() }, null, PERMANENT)
         defineFunctionProperties(mFunctionNames, Getter::class.java, PERMANENT)

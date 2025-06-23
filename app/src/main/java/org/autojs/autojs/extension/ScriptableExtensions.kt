@@ -3,6 +3,7 @@ package org.autojs.autojs.extension
 import org.autojs.autojs.util.RhinoUtils.undefined
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
+import org.mozilla.javascript.Wrapper
 
 /**
  * Created by SuperMonster003 on Sep 28, 2024.
@@ -17,7 +18,9 @@ object ScriptableExtensions {
      * @param key A property name
      * @return The value of a property with name `key` found in this object or any object in its prototype chain, or [Scriptable.NOT_FOUND] if not found
      */
-    fun Scriptable.getProp(key: String): Any? = ScriptableObject.getProperty(this, key)
+    fun Scriptable.getProp(key: String): Any? = ScriptableObject.getProperty(this, key).let {
+        if (it is Wrapper) it.unwrap() else it
+    }
 
     /**
      * This method is a clone of [Scriptable.getProp].

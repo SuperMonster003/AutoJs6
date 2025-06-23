@@ -2,29 +2,30 @@ package org.autojs.autojs.ui.edit;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.net.Uri;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import androidx.annotation.Nullable;
 import com.afollestad.materialdialogs.MaterialDialog;
-import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import org.autojs.autojs.core.pref.Language;
 import org.autojs.autojs.core.pref.Pref;
+import org.autojs.autojs.extension.MaterialDialogExtensions;
 import org.autojs.autojs.model.indices.AndroidClass;
 import org.autojs.autojs.model.indices.ClassSearchingItem;
-import org.autojs.autojs.pio.PFiles;
 import org.autojs.autojs.script.JavaScriptFileSource;
 import org.autojs.autojs.ui.common.NotAskAgainDialog;
 import org.autojs.autojs.ui.edit.editor.CodeEditor;
+import org.autojs.autojs.ui.main.scripts.EditableFileInfoDialogManager;
 import org.autojs.autojs.ui.project.BuildActivity;
 import org.autojs.autojs.util.ClipboardUtils;
 import org.autojs.autojs.util.ConsoleUtils;
 import org.autojs.autojs.util.IntentUtils;
+import org.autojs.autojs.util.IntentUtils.ToastExceptionHolder;
 import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs6.R;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -57,9 +58,9 @@ public class EditorMenu {
             return tryDoing(mEditorView::forceStop);
         }
         return onEditOptionsSelected(item)
-                || onJumpOptionsSelected(item)
-                || onMoreOptionsSelected(item)
-                || onDebugOptionsSelected(item);
+               || onJumpOptionsSelected(item)
+               || onMoreOptionsSelected(item)
+               || onDebugOptionsSelected(item);
     }
 
     private boolean onDebugOptionsSelected(MenuItem item) {
@@ -69,11 +70,13 @@ public class EditorMenu {
             return true;
         }
         if (itemId == R.id.action_launch_debugger) {
-            new NotAskAgainDialog.Builder(mEditorView.getContext(), "editor.debug.long_click_hint")
+            var builder = new NotAskAgainDialog.Builder(mEditorView.getContext(), "editor.debug.long_click_hint")
                     .title(R.string.text_prompt)
                     .content(R.string.hint_long_click_run_to_debug)
-                    .positiveText(R.string.text_ok)
-                    .show();
+                    .positiveText(R.string.dialog_button_dismiss)
+                    .positiveColorRes(R.color.dialog_button_default);
+            MaterialDialogExtensions.widgetThemeColor(builder);
+            builder.show();
             return tryDoing(mEditorView::debug);
         }
         if (itemId == R.id.action_remove_all_breakpoints) {
@@ -134,8 +137,8 @@ public class EditorMenu {
         if (itemId == R.id.action_open_by_other_apps) {
             return tryDoing(mEditorView::openByOtherApps);
         }
-        if (itemId == R.id.action_info) {
-            showInfo();
+        if (itemId == R.id.action_file_details) {
+            showFileDetails();
             return true;
         }
         if (itemId == R.id.action_build_apk) {
@@ -169,9 +172,12 @@ public class EditorMenu {
         new MaterialDialog.Builder(mContext)
                 .title(title)
                 .content(desc)
-                .positiveText(R.string.text_copy)
-                .negativeText(R.string.text_en_import)
                 .neutralText(R.string.text_view_docs)
+                .neutralColorRes(R.color.dialog_button_hint)
+                .negativeText(R.string.text_en_import)
+                .negativeColorRes(R.color.dialog_button_hint)
+                .positiveText(R.string.text_copy)
+                .positiveColorRes(R.color.dialog_button_hint)
                 .onPositive((ignored, which) -> {
                     ClipboardUtils.setClip(mContext, desc);
                     ViewUtils.showToast(mContext, R.string.text_already_copied_to_clip);
@@ -192,16 +198,17 @@ public class EditorMenu {
                     var executionInfo = JavaScriptFileSource.parseExecutionMode(mEditor.getText());
                     mEditor.insert(executionInfo.getLineno(), item.getImportText() + ";\n");
                 })
-                .onNeutral((ignored, which) -> IntentUtils.browse(mContext, item.getUrl()))
+                .onNeutral((ignored, which) -> IntentUtils.browse(
+                        mContext,
+                        item.getUrl(),
+                        new ToastExceptionHolder(mContext)
+                ))
                 .onAny((ignored, which) -> dialog.dismiss())
                 .show();
     }
 
     private void startBuildApkActivity() {
-        Uri uri = mEditorView.uri;
-        if (uri != null) {
-            BuildActivity.launch(mContext, uri.getPath());
-        }
+        BuildActivity.launch(mContext, mEditorView.uri.getPath());
     }
 
     private void setPinchToZoomStrategy() {
@@ -234,10 +241,14 @@ public class EditorMenu {
                 //     // Hint dialog.
                 // })
                 .negativeText(R.string.dialog_button_cancel)
+                .negativeColorRes(R.color.dialog_button_default)
                 .onNegative((dialog, which) -> dialog.dismiss())
                 .positiveText(R.string.dialog_button_confirm)
+                .positiveColorRes(R.color.dialog_button_attraction)
                 .onPositive((dialog, which) -> dialog.dismiss())
                 .autoDismiss(false);
+
+        MaterialDialogExtensions.choiceWidgetThemeColor(builder);
 
         // TODO by SuperMonster003 on Oct 17, 2022.
         //  ! Implementation for "scale view".
@@ -249,7 +260,7 @@ public class EditorMenu {
         builder.itemsDisabledIndices(i);
         MaterialDialog built = builder.build();
         assert built.getItems() != null;
-        built.getItems().set(i, built.getItems().get(i) + " (" + builder.getContext().getString(R.string.text_under_development_title).toLowerCase(Language.getPrefLanguage().getLocale()) + ")");
+        built.getItems().set(i, built.getItems().get(i) + " (" + builder.getContext().getString(R.string.text_under_development).toLowerCase(Language.getPrefLanguage().getLocale()) + ")");
         built.show();
     }
 
@@ -302,7 +313,7 @@ public class EditorMenu {
 
     private void showJumpDialog(final int lineCount) {
         String hint = "1 - " + lineCount;
-        new MaterialDialog.Builder(mContext)
+        MaterialDialog.Builder builder = new MaterialDialog.Builder(mContext)
                 .title(R.string.text_jump_to_line)
                 .input(hint, "", (dialog, input) -> {
                     if (TextUtils.isEmpty(input)) {
@@ -315,28 +326,17 @@ public class EditorMenu {
                         /* Ignored. */
                     }
                 })
-                .inputType(InputType.TYPE_CLASS_NUMBER)
-                .show();
+                .inputType(InputType.TYPE_CLASS_NUMBER);
+        builder.positiveColorRes(R.color.dialog_button_attraction);
+        builder.negativeText(R.string.dialog_button_cancel);
+        builder.negativeColorRes(R.color.dialog_button_default);
+        MaterialDialogExtensions.widgetThemeColor(builder);
+        builder.show();
     }
 
-    @SuppressLint("StringFormatMatches")
-    private void showInfo() {
-        Observable
-                .zip(Observable.just(mEditor.getText()), mEditor.getLineCount(), (text, lineCount) -> {
-                    String size = PFiles.getHumanReadableSize(text.length());
-                    return String.format(Language.getPrefLanguage().getLocale(), mContext.getString(R.string.format_editor_info),
-                            text.length(), lineCount, size);
-                })
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::showInfo);
-
-    }
-
-    private void showInfo(String info) {
-        new MaterialDialog.Builder(mContext)
-                .title(R.string.text_info)
-                .content(info)
-                .show();
+    private void showFileDetails() {
+        var path = mEditorView.uri.getPath();
+        EditableFileInfoDialogManager.showEditableFileInfoDialog(mContext, new File(path), mEditor::getText);
     }
 
     protected boolean copyLine() {
@@ -364,9 +364,12 @@ public class EditorMenu {
     private void findOrReplace() {
         mEditor.getSelection()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(s -> new FindOrReplaceDialogBuilder(mContext, mEditorView)
-                        .setQueryIfNotEmpty(s)
-                        .show());
+                .subscribe(s -> {
+                    FindOrReplaceDialogBuilder builder = new FindOrReplaceDialogBuilder(mContext, mEditorView)
+                            .setQueryIfNotEmpty(s);
+                    builder.positiveColorRes(R.color.dialog_button_attraction);
+                    builder.show();
+                });
     }
 
     private void copyAll() {

@@ -1,5 +1,6 @@
 package org.autojs.autojs.ui.main.drawer
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -14,10 +15,11 @@ import org.autojs.autojs.app.tool.FloatingButtonTool
 import org.autojs.autojs.app.tool.JsonSocketClientTool
 import org.autojs.autojs.app.tool.JsonSocketServerTool
 import org.autojs.autojs.core.accessibility.AccessibilityTool
+import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.permission.DisplayOverOtherAppsPermission
 import org.autojs.autojs.permission.IgnoreBatteryOptimizationsPermission
 import org.autojs.autojs.permission.MediaProjectionPermission
-import org.autojs.autojs.permission.PostNotificationPermission
+import org.autojs.autojs.permission.PostNotificationsPermission
 import org.autojs.autojs.permission.ShizukuPermission
 import org.autojs.autojs.permission.UsageStatsPermission
 import org.autojs.autojs.permission.WriteSecureSettingsPermission
@@ -25,26 +27,28 @@ import org.autojs.autojs.permission.WriteSystemSettingsPermission
 import org.autojs.autojs.pluginclient.DevPluginService
 import org.autojs.autojs.pluginclient.JsonSocketClient
 import org.autojs.autojs.pluginclient.JsonSocketServer
-import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.service.AccessibilityService
 import org.autojs.autojs.service.ForegroundService
 import org.autojs.autojs.service.NotificationService
-import org.autojs.autojs.theme.app.ColorSelectActivity
+import org.autojs.autojs.theme.ThemeChangeNotifier
+import org.autojs.autojs.theme.app.ColorSelectBaseActivity
 import org.autojs.autojs.ui.floating.CircularMenu
 import org.autojs.autojs.ui.floating.FloatyWindowManger
+import org.autojs.autojs.ui.fragment.BindingDelegates.viewBinding
 import org.autojs.autojs.ui.main.MainActivity
 import org.autojs.autojs.ui.settings.AboutActivity
 import org.autojs.autojs.ui.settings.PreferencesActivity
+import org.autojs.autojs.util.DisplayUtils
 import org.autojs.autojs.util.NetworkUtils
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.MODE
-import org.autojs.autojs.util.ViewUtils.isNightModeYes
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.FragmentDrawerBinding
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import java.lang.ref.WeakReference
+import kotlin.math.roundToInt
 
 /**
  * Created by Stardust on Jan 30, 2017.
@@ -53,7 +57,7 @@ import java.lang.ref.WeakReference
  */
 open class DrawerFragment : Fragment() {
 
-    private var binding: FragmentDrawerBinding? = null
+    private val binding by viewBinding(FragmentDrawerBinding::bind)
 
     private var privateDrawerMenu: RecyclerView? = null
     private var privateContext: WeakReference<Context?>? = null
@@ -103,6 +107,11 @@ open class DrawerFragment : Fragment() {
         super.onCreate(savedInstanceState)
 
         EventBus.getDefault().register(this)
+
+        @SuppressLint("NotifyDataSetChanged")
+        ThemeChangeNotifier.themeChanged.observe(this) {
+            updateThemeColorSubtitle()
+        }
 
         mContext = requireContext()
 
@@ -178,14 +187,15 @@ open class DrawerFragment : Fragment() {
             mClientModeItem = DrawerMenuDisposableItem(this, R.drawable.ic_computer_black_48dp, R.string.text_client_mode).also {
                 setClientModeItem(it)
             }
-            setStateDisposable(JsonSocketClient.cxnState
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe {
-                    if (it.state == DevPluginService.State.DISCONNECTED) {
-                        mClientModeItem.subtitle = null
-                    }
-                    consumeJsonSocketItemState(mClientModeItem, it)
-                })
+            setStateDisposable(
+                JsonSocketClient.cxnState
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe {
+                        if (it.state == DevPluginService.State.DISCONNECTED) {
+                            mClientModeItem.subtitle = null
+                        }
+                        consumeJsonSocketItemState(mClientModeItem, it)
+                    })
             setOnConnectionException { e: Throwable ->
                 mClientModeItem.setCheckedIfNeeded(false)
                 ViewUtils.showToast(context, getString(R.string.error_connect_to_remote, e.message), true)
@@ -195,14 +205,15 @@ open class DrawerFragment : Fragment() {
         }
 
         JsonSocketServerTool(mContext).apply {
-            setStateDisposable(JsonSocketServer.cxnState
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe { state: DevPluginService.State ->
-                    mServerModeItem.subtitle = takeIf { state.state == DevPluginService.State.CONNECTED }?.let {
-                        NetworkUtils.getIpAddress()
-                    }
-                    consumeJsonSocketItemState(mServerModeItem, state)
-                })
+            setStateDisposable(
+                JsonSocketServer.cxnState
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe { state: DevPluginService.State ->
+                        mServerModeItem.subtitle = takeIf { state.state == DevPluginService.State.CONNECTED }?.let {
+                            NetworkUtils.getIpAddress()
+                        }
+                        consumeJsonSocketItemState(mServerModeItem, state)
+                    })
             setOnConnectionException { e: Throwable ->
                 mServerModeItem.setCheckedIfNeeded(false)
                 ViewUtils.showToast(context, getString(R.string.error_enable_server, e.message), true)
@@ -212,7 +223,7 @@ open class DrawerFragment : Fragment() {
         }
 
         mNotificationPostItem = DrawerMenuToggleableItem(
-            PostNotificationPermission(mContext),
+            PostNotificationsPermission(mContext),
             R.drawable.ic_ali_notification,
             R.string.text_post_notifications_permission,
         )
@@ -273,7 +284,7 @@ open class DrawerFragment : Fragment() {
             object : DrawerMenuItemCustomHelper(mContext) {
                 override fun toggle(): Boolean = runCatching {
                     val isTurningOn = !isActive
-                    val isNightModeYes = isNightModeYes(resources.configuration)
+                    val isNightModeYes = ViewUtils.isNightModeYes(resources.configuration)
                     val mode = when {
                         isTurningOn -> MODE.FOLLOW
                         isNightModeYes -> MODE.NIGHT
@@ -281,7 +292,7 @@ open class DrawerFragment : Fragment() {
                     }
                     ViewUtils.setDefaultNightMode(mode)
                     if (isTurningOn) {
-                        ViewUtils.isNightModeEnabled = isNightModeYes
+                        ViewUtils.isNightModeEnabled = ViewUtils.isSystemDarkModeEnabled(mContext)
                         Pref.putString(R.string.key_night_mode, MODE.FOLLOW.key)
                     } else {
                         when (isNightModeYes) {
@@ -366,7 +377,8 @@ open class DrawerFragment : Fragment() {
         )
 
         mThemeColorItem = DrawerMenuShortcutItem(R.drawable.ic_personalize, R.string.text_theme_color)
-            .setAction(Runnable { ColorSelectActivity.startActivity(mContext) })
+            .setAction(Runnable { ColorSelectBaseActivity.startActivity(mContext) })
+            .apply { subtitle = ColorSelectBaseActivity.getCurrentColorSummary(mContext) }
 
         mAboutAppAndDevItem = DrawerMenuShortcutItem(R.drawable.ic_about, R.string.text_about_app_and_developer)
             .setAction(Runnable { AboutActivity.startActivity(mContext) })
@@ -374,26 +386,36 @@ open class DrawerFragment : Fragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return FragmentDrawerBinding.inflate(inflater, container, false).also { binding = it }.root
+        return FragmentDrawerBinding.inflate(inflater, container, false).root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        mDrawerMenu = binding!!.drawerMenu
+        mDrawerMenu = binding.drawerMenu
+        configureDrawerWidth()
         initMenuItems()
         initMenuItemStates()
         setupListeners()
     }
 
+    private fun configureDrawerWidth() {
+        val screenWidthDp = resources.configuration.screenWidthDp
+        val targetWidthPx = 288f.coerceIn(
+            screenWidthDp * 0.4f,
+            screenWidthDp * 0.9f,
+        ).let { DisplayUtils.dpToPx(it) }.roundToInt()
+        binding.drawerMenuContainer.layoutParams.width = targetWidthPx
+    }
+
     private fun setupListeners() {
-        binding!!.settings.setOnClickListener { view ->
+        binding.settings.setOnClickListener { view ->
             startActivity(
                 Intent(view.context, PreferencesActivity::class.java)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             )
         }
-        binding!!.restart.setOnClickListener { mActivity.rebirth() }
-        binding!!.exit.setOnClickListener { mActivity.exitCompletely() }
+        binding.restart.setOnClickListener { mActivity.rebirth() }
+        binding.exit.setOnClickListener { mActivity.exitCompletely() }
     }
 
     override fun onResume() {
@@ -405,13 +427,12 @@ open class DrawerFragment : Fragment() {
         super.onDestroy()
         mClientModeItem.dispose()
         mServerModeItem.dispose()
-        EventBus.getDefault().unregister(this)
         // mActivity.unregisterReceiver(mReceiver)
+        EventBus.getDefault().unregister(this)
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        binding = null
         privateDrawerMenu = null
         privateContext = null
         privateActivity = null
@@ -434,6 +455,23 @@ open class DrawerFragment : Fragment() {
     @Suppress("unused", "UNUSED_PARAMETER")
     fun onDrawerClosed(event: Event.OnDrawerClosed) {
         // ViewCompat.getWindowInsetsController(mActivity.window.decorView)?.show(WindowInsets.Type.systemBars())
+    }
+
+    @Subscribe
+    @Suppress("unused", "UNUSED_PARAMETER")
+    fun onAccessibilityServiceStateChanged(event: Event.AccessibilityServiceStateChangedEvent) {
+        mAccessibilityServiceItem.sync()
+    }
+
+    @Subscribe
+    @Suppress("unused", "UNUSED_PARAMETER")
+    fun onThemeColorLayoutSwitched(event: Event.ThemeColorLayoutSwitchedEvent) {
+        updateThemeColorSubtitle()
+    }
+
+    private fun updateThemeColorSubtitle() {
+        mThemeColorItem.subtitle = ColorSelectBaseActivity.getCurrentColorSummary(mContext)
+        (mDrawerMenu.adapter as? DrawerMenuAdapter)?.notifyItemChanged(mThemeColorItem)
     }
 
     private fun initMenuItems() {
@@ -511,6 +549,8 @@ open class DrawerFragment : Fragment() {
         class Event {
             interface OnDrawerOpened
             interface OnDrawerClosed
+            interface AccessibilityServiceStateChangedEvent
+            interface ThemeColorLayoutSwitchedEvent
         }
 
     }

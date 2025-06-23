@@ -17,11 +17,9 @@ import org.autojs.autojs6.databinding.SelectLauncherShortcutBinding
  */
 class LauncherShortcutsPreference : MaterialPreference {
 
-    private var binding: SelectLauncherShortcutBinding? = null
-
     private val mDialog by lazy {
 
-        val binding = SelectLauncherShortcutBinding.inflate(LayoutInflater.from(prefContext)).also { binding = it }
+        val binding = SelectLauncherShortcutBinding.inflate(LayoutInflater.from(prefContext))
 
         MaterialDialog.Builder(prefContext)
             .customView(binding.root, true)
@@ -77,11 +75,6 @@ class LauncherShortcutsPreference : MaterialPreference {
             ShortcutUtils.showPinShortcutNotSupportedDialog(prefContext)
         }
         super.onClick()
-    }
-
-    override fun onDetached() {
-        super.onDetached()
-        binding = null
     }
 
     private fun showShortcutsSelectionDialog() {

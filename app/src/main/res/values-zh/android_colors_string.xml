@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="android_black">黑</string>
+    <string name="android_blue">蓝</string>
+    <string name="android_cyan">青</string>
+    <string name="android_dark_gray">暗灰</string>
+    <string name="android_gray">灰</string>
+    <string name="android_green">绿</string>
+    <string name="android_light_gray">亮灰</string>
+    <string name="android_magenta">品红 / 洋红</string>
+    <string name="android_maroon">栗</string>
+    <string name="android_navy">海军蓝 / 藏青</string>
+    <string name="android_olive">橄榄</string>
+    <string name="android_purple">紫</string>
+    <string name="android_red">红</string>
+    <string name="android_silver">银</string>
+    <string name="android_teal">鸭绿 / 凫绿</string>
+    <string name="android_white">白</string>
+    <string name="android_yellow">黄</string>
+
+</resources>

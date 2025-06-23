@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+     Copyright (C) 2013 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="mdtp_done_label" msgid="7007948707597430919">"Listo"</string>
+    <string name="mdtp_hour_picker_description" msgid="7586639618712934060">"Control deslizante circular de horas"</string>
+    <string name="mdtp_minute_picker_description" msgid="6024811202872705251">"Control deslizante circular de minutos"</string>
+    <string name="mdtp_select_hours" msgid="7651068754188418859">"Seleccionar horas"</string>
+    <string name="mdtp_select_minutes" msgid="8327182090226828481">"Seleccionar minutos"</string>
+    <string name="mdtp_day_picker_description" msgid="3968620852217927702">"Cuadrícula mensual de días"</string>
+    <string name="mdtp_year_picker_description" msgid="6963340404644587098">"Lista de años"</string>
+    <string name="mdtp_select_day" msgid="3973338219107019769">"Seleccionar mes y día"</string>
+    <string name="mdtp_select_year" msgid="2603330600102539372">"Seleccionar año"</string>
+    <string name="mdtp_item_is_selected" msgid="2674929164900463786">"<xliff:g id="ITEM">%1$s</xliff:g> seleccionado"</string>
+    <string name="mdtp_deleted_key" msgid="6908431551612331381">"<xliff:g id="KEY">%1$s</xliff:g> eliminado"</string>
+    <string name="mdtp_date_v1_monthyear">MMMM \'de\' yyyy</string>
+    <string name="mdtp_date_v2_daymonthyear">EEE dd \'de\' MMM</string>
+    <string name="mdtp_next_month_arrow_description">Pŕoximo Mes</string>
+    <string name="mdtp_previous_month_arrow_description">Mes Previo</string>
+</resources>

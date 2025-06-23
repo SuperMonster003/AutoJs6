@@ -155,7 +155,7 @@ public class LayoutHierarchyView extends MultiLevelListView {
         mPaint.setStyle(Paint.Style.STROKE);
         mPaint.setAntiAlias(true);
         mPaint.setStrokeWidth(3);
-        mStatusBarHeight = ViewUtils.getStatusBarHeight(getContext());
+        mStatusBarHeight = ViewUtils.getStatusBarHeightByWindow(getContext());
     }
 
     public Paint getBoundsPaint() {

@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- google's material design colours from
+    http://www.google.com/design/spec/style/color.html#color-ui-color-palette -->
+
+    <!-- reds -->
+    <string name="md_red_50">أحمر (50)</string>
+    <string name="md_red_100">أحمر (100)</string>
+    <string name="md_red_200">أحمر (200)</string>
+    <string name="md_red_300">أحمر (300)</string>
+    <string name="md_red_400">أحمر (400)</string>
+    <string name="md_red_500">أحمر (500)</string>
+    <string name="md_red_600">أحمر (600)</string>
+    <string name="md_red_700">أحمر (700)</string>
+    <string name="md_red_800">أحمر (800)</string>
+    <string name="md_red_900">أحمر (900)</string>
+    <string name="md_red_a100">أحمر (A100)</string>
+    <string name="md_red_a200">أحمر (A200)</string>
+    <string name="md_red_a400">أحمر (A400)</string>
+    <string name="md_red_a700">أحمر (A700)</string>
+
+    <!-- pinks -->
+    <string name="md_pink_50">بينك (50)</string>
+    <string name="md_pink_100">بينك (100)</string>
+    <string name="md_pink_200">بينك (200)</string>
+    <string name="md_pink_300">بينك (300)</string>
+    <string name="md_pink_400">بينك (400)</string>
+    <string name="md_pink_500">بينك (500)</string>
+    <string name="md_pink_600">بينك (600)</string>
+    <string name="md_pink_700">بينك (700)</string>
+    <string name="md_pink_800">بينك (800)</string>
+    <string name="md_pink_900">بينك (900)</string>
+    <string name="md_pink_a100">بينك (A100)</string>
+    <string name="md_pink_a200">بينك (A200)</string>
+    <string name="md_pink_a400">بينك (A400)</string>
+    <string name="md_pink_a700">بينك (A700)</string>
+
+    <!-- purples -->
+    <string name="md_purple_50">أرجواني (50)</string>
+    <string name="md_purple_100">أرجواني (100)</string>
+    <string name="md_purple_200">أرجواني (200)</string>
+    <string name="md_purple_300">أرجواني (300)</string>
+    <string name="md_purple_400">أرجواني (400)</string>
+    <string name="md_purple_500">أرجواني (500)</string>
+    <string name="md_purple_600">أرجواني (600)</string>
+    <string name="md_purple_700">أرجواني (700)</string>
+    <string name="md_purple_800">أرجواني (800)</string>
+    <string name="md_purple_900">أرجواني (900)</string>
+    <string name="md_purple_a100">أرجواني (A100)</string>
+    <string name="md_purple_a200">أرجواني (A200)</string>
+    <string name="md_purple_a400">أرجواني (A400)</string>
+    <string name="md_purple_a700">أرجواني (A700)</string>
+
+    <!-- deep purples -->
+    <string name="md_deep_purple_50">الأرجواني العميق (50)</string>
+    <string name="md_deep_purple_100">الأرجواني العميق (100)</string>
+    <string name="md_deep_purple_200">الأرجواني العميق (200)</string>
+    <string name="md_deep_purple_300">الأرجواني العميق (300)</string>
+    <string name="md_deep_purple_400">الأرجواني العميق (400)</string>
+    <string name="md_deep_purple_500">الأرجواني العميق (500)</string>
+    <string name="md_deep_purple_600">الأرجواني العميق (600)</string>
+    <string name="md_deep_purple_700">الأرجواني العميق (700)</string>
+    <string name="md_deep_purple_800">الأرجواني العميق (800)</string>
+    <string name="md_deep_purple_900">الأرجواني العميق (900)</string>
+    <string name="md_deep_purple_a100">الأرجواني العميق (A100)</string>
+    <string name="md_deep_purple_a200">الأرجواني العميق (A200)</string>
+    <string name="md_deep_purple_a400">الأرجواني العميق (A400)</string>
+    <string name="md_deep_purple_a700">الأرجواني العميق (A700)</string>
+
+    <!-- indigo -->
+    <string name="md_indigo_50">النيلي (50)</string>
+    <string name="md_indigo_100">النيلي (100)</string>
+    <string name="md_indigo_200">النيلي (200)</string>
+    <string name="md_indigo_300">النيلي (300)</string>
+    <string name="md_indigo_400">النيلي (400)</string>
+    <string name="md_indigo_500">النيلي (500)</string>
+    <string name="md_indigo_600">النيلي (600)</string>
+    <string name="md_indigo_700">النيلي (700)</string>
+    <string name="md_indigo_800">النيلي (800)</string>
+    <string name="md_indigo_900">النيلي (900)</string>
+    <string name="md_indigo_a100">النيلي (A100)</string>
+    <string name="md_indigo_a200">النيلي (A200)</string>
+    <string name="md_indigo_a400">النيلي (A400)</string>
+    <string name="md_indigo_a700">النيلي (A700)</string>
+
+    <!-- blue -->
+    <string name="md_blue_50">الأزرق (50)</string>
+    <string name="md_blue_100">الأزرق (100)</string>
+    <string name="md_blue_200">الأزرق (200)</string>
+    <string name="md_blue_300">الأزرق (300)</string>
+    <string name="md_blue_400">الأزرق (400)</string>
+    <string name="md_blue_500">الأزرق (500)</string>
+    <string name="md_blue_600">الأزرق (600)</string>
+    <string name="md_blue_700">الأزرق (700)</string>
+    <string name="md_blue_800">الأزرق (800)</string>
+    <string name="md_blue_900">الأزرق (900)</string>
+    <string name="md_blue_a100">الأزرق (A100)</string>
+    <string name="md_blue_a200">الأزرق (A200)</string>
+    <string name="md_blue_a400">الأزرق (A400)</string>
+    <string name="md_blue_a700">الأزرق (A700)</string>
+
+    <!-- light blue-->
+    <string name="md_light_blue_50">الأزرق الفاتح (50)</string>
+    <string name="md_light_blue_100">الأزرق الفاتح (100)</string>
+    <string name="md_light_blue_200">الأزرق الفاتح (200)</string>
+    <string name="md_light_blue_300">الأزرق الفاتح (300)</string>
+    <string name="md_light_blue_400">الأزرق الفاتح (400)</string>
+    <string name="md_light_blue_500">الأزرق الفاتح (500)</string>
+    <string name="md_light_blue_600">الأزرق الفاتح (600)</string>
+    <string name="md_light_blue_700">الأزرق الفاتح (700)</string>
+    <string name="md_light_blue_800">الأزرق الفاتح (800)</string>
+    <string name="md_light_blue_900">الأزرق الفاتح (900)</string>
+    <string name="md_light_blue_a100">الأزرق الفاتح (A100)</string>
+    <string name="md_light_blue_a200">الأزرق الفاتح (A200)</string>
+    <string name="md_light_blue_a400">الأزرق الفاتح (A400)</string>
+    <string name="md_light_blue_a700">الأزرق الفاتح (A700)</string>
+
+    <!-- cyan -->
+    <string name="md_cyan_50">ازرق سماوي (50)</string>
+    <string name="md_cyan_100">ازرق سماوي (100)</string>
+    <string name="md_cyan_200">ازرق سماوي (200)</string>
+    <string name="md_cyan_300">ازرق سماوي (300)</string>
+    <string name="md_cyan_400">ازرق سماوي (400)</string>
+    <string name="md_cyan_500">ازرق سماوي (500)</string>
+    <string name="md_cyan_600">ازرق سماوي (600)</string>
+    <string name="md_cyan_700">ازرق سماوي (700)</string>
+    <string name="md_cyan_800">ازرق سماوي (800)</string>
+    <string name="md_cyan_900">ازرق سماوي (900)</string>
+    <string name="md_cyan_a100">ازرق سماوي (A100)</string>
+    <string name="md_cyan_a200">ازرق سماوي (A200)</string>
+    <string name="md_cyan_a400">ازرق سماوي (A400)</string>
+    <string name="md_cyan_a700">ازرق سماوي (A700)</string>
+
+    <!-- teal -->
+    <string name="md_teal_50">تيل (50)</string>
+    <string name="md_teal_100">تيل (100)</string>
+    <string name="md_teal_200">تيل (200)</string>
+    <string name="md_teal_300">تيل (300)</string>
+    <string name="md_teal_400">تيل (400)</string>
+    <string name="md_teal_500">تيل (500)</string>
+    <string name="md_teal_600">تيل (600)</string>
+    <string name="md_teal_700">تيل (700)</string>
+    <string name="md_teal_800">تيل (800)</string>
+    <string name="md_teal_900">تيل (900)</string>
+    <string name="md_teal_a100">تيل (A100)</string>
+    <string name="md_teal_a200">تيل (A200)</string>
+    <string name="md_teal_a400">تيل (A400)</string>
+    <string name="md_teal_a700">تيل (A700)</string>
+
+    <!-- green -->
+    <string name="md_green_50">جرين (50)</string>
+    <string name="md_green_100">جرين (100)</string>
+    <string name="md_green_200">جرين (200)</string>
+    <string name="md_green_300">جرين (300)</string>
+    <string name="md_green_400">جرين (400)</string>
+    <string name="md_green_500">جرين (500)</string>
+    <string name="md_green_600">جرين (600)</string>
+    <string name="md_green_700">جرين (700)</string>
+    <string name="md_green_800">جرين (800)</string>
+    <string name="md_green_900">جرين (900)</string>
+    <string name="md_green_a100">جرين (A100)</string>
+    <string name="md_green_a200">جرين (A200)</string>
+    <string name="md_green_a400">جرين (A400)</string>
+    <string name="md_green_a700">جرين (A700)</string>
+
+    <!--light green-->
+    <string name="md_light_green_50">خضراء فاتحة (50)</string>
+    <string name="md_light_green_100">خضراء فاتحة (100)</string>
+    <string name="md_light_green_200">خضراء فاتحة (200)</string>
+    <string name="md_light_green_300">خضراء فاتحة (300)</string>
+    <string name="md_light_green_400">خضراء فاتحة (400)</string>
+    <string name="md_light_green_500">خضراء فاتحة (500)</string>
+    <string name="md_light_green_600">خضراء فاتحة (600)</string>
+    <string name="md_light_green_700">خضراء فاتحة (700)</string>
+    <string name="md_light_green_800">خضراء فاتحة (800)</string>
+    <string name="md_light_green_900">خضراء فاتحة (900)</string>
+    <string name="md_light_green_a100">خضراء فاتحة (A100)</string>
+    <string name="md_light_green_a200">خضراء فاتحة (A200)</string>
+    <string name="md_light_green_a400">خضراء فاتحة (A400)</string>
+    <string name="md_light_green_a700">خضراء فاتحة (A700)</string>
+
+    <!-- lime -->
+    <string name="md_lime_50">الجير (50)</string>
+    <string name="md_lime_100">الجير (100)</string>
+    <string name="md_lime_200">الجير (200)</string>
+    <string name="md_lime_300">الجير (300)</string>
+    <string name="md_lime_400">الجير (400)</string>
+    <string name="md_lime_500">الجير (500)</string>
+    <string name="md_lime_600">الجير (600)</string>
+    <string name="md_lime_700">الجير (700)</string>
+    <string name="md_lime_800">الجير (800)</string>
+    <string name="md_lime_900">الجير (900)</string>
+    <string name="md_lime_a100">الجير (A100)</string>
+    <string name="md_lime_a200">الجير (A200)</string>
+    <string name="md_lime_a400">الجير (A400)</string>
+    <string name="md_lime_a700">الجير (A700)</string>
+
+    <!-- yellow -->
+    <string name="md_yellow_50">أصفر (50)</string>
+    <string name="md_yellow_100">أصفر (100)</string>
+    <string name="md_yellow_200">أصفر (200)</string>
+    <string name="md_yellow_300">أصفر (300)</string>
+    <string name="md_yellow_400">أصفر (400)</string>
+    <string name="md_yellow_500">أصفر (500)</string>
+    <string name="md_yellow_600">أصفر (600)</string>
+    <string name="md_yellow_700">أصفر (700)</string>
+    <string name="md_yellow_800">أصفر (800)</string>
+    <string name="md_yellow_900">أصفر (900)</string>
+    <string name="md_yellow_a100">أصفر (A100)</string>
+    <string name="md_yellow_a200">أصفر (A200)</string>
+    <string name="md_yellow_a400">أصفر (A400)</string>
+    <string name="md_yellow_a700">أصفر (A700)</string>
+
+    <!-- amber -->
+    <string name="md_amber_50">العنبر (50)</string>
+    <string name="md_amber_100">العنبر (100)</string>
+    <string name="md_amber_200">العنبر (200)</string>
+    <string name="md_amber_300">العنبر (300)</string>
+    <string name="md_amber_400">العنبر (400)</string>
+    <string name="md_amber_500">العنبر (500)</string>
+    <string name="md_amber_600">العنبر (600)</string>
+    <string name="md_amber_700">العنبر (700)</string>
+    <string name="md_amber_800">العنبر (800)</string>
+    <string name="md_amber_900">العنبر (900)</string>
+    <string name="md_amber_a100">العنبر (A100)</string>
+    <string name="md_amber_a200">العنبر (A200)</string>
+    <string name="md_amber_a400">العنبر (A400)</string>
+    <string name="md_amber_a700">العنبر (A700)</string>
+
+    <!-- orange -->
+    <string name="md_orange_50">أورانج (50)</string>
+    <string name="md_orange_100">أورانج (100)</string>
+    <string name="md_orange_200">أورانج (200)</string>
+    <string name="md_orange_300">أورانج (300)</string>
+    <string name="md_orange_400">أورانج (400)</string>
+    <string name="md_orange_500">أورانج (500)</string>
+    <string name="md_orange_600">أورانج (600)</string>
+    <string name="md_orange_700">أورانج (700)</string>
+    <string name="md_orange_800">أورانج (800)</string>
+    <string name="md_orange_900">أورانج (900)</string>
+    <string name="md_orange_a100">أورانج (A100)</string>
+    <string name="md_orange_a200">أورانج (A200)</string>
+    <string name="md_orange_a400">أورانج (A400)</string>
+    <string name="md_orange_a700">أورانج (A700)</string>
+
+    <!--deep orange-->
+    <string name="md_deep_orange_50">برتقالي عميق (50)</string>
+    <string name="md_deep_orange_100">برتقالي عميق (100)</string>
+    <string name="md_deep_orange_200">برتقالي عميق (200)</string>
+    <string name="md_deep_orange_300">برتقالي عميق (300)</string>
+    <string name="md_deep_orange_400">برتقالي عميق (400)</string>
+    <string name="md_deep_orange_500">برتقالي عميق (500)</string>
+    <string name="md_deep_orange_600">برتقالي عميق (600)</string>
+    <string name="md_deep_orange_700">برتقالي عميق (700)</string>
+    <string name="md_deep_orange_800">برتقالي عميق (800)</string>
+    <string name="md_deep_orange_900">برتقالي عميق (900)</string>
+    <string name="md_deep_orange_a100">برتقالي عميق (A100)</string>
+    <string name="md_deep_orange_a200">برتقالي عميق (A200)</string>
+    <string name="md_deep_orange_a400">برتقالي عميق (A400)</string>
+    <string name="md_deep_orange_a700">برتقالي عميق (A700)</string>
+
+    <!-- brown -->
+    <string name="md_brown_50">براون (50)</string>
+    <string name="md_brown_100">براون (100)</string>
+    <string name="md_brown_200">براون (200)</string>
+    <string name="md_brown_300">براون (300)</string>
+    <string name="md_brown_400">براون (400)</string>
+    <string name="md_brown_500">براون (500)</string>
+    <string name="md_brown_600">براون (600)</string>
+    <string name="md_brown_700">براون (700)</string>
+    <string name="md_brown_800">براون (800)</string>
+    <string name="md_brown_900">براون (900)</string>
+
+    <!-- gray -->
+    <string name="md_gray_50">غراي (50)</string>
+    <string name="md_gray_100">غراي (100)</string>
+    <string name="md_gray_200">غراي (200)</string>
+    <string name="md_gray_300">غراي (300)</string>
+    <string name="md_gray_400">غراي (400)</string>
+    <string name="md_gray_500">غراي (500)</string>
+    <string name="md_gray_600">غراي (600)</string>
+    <string name="md_gray_700">غراي (700)</string>
+    <string name="md_gray_800">غراي (800)</string>
+    <string name="md_gray_900">غراي (900)</string>
+    <string name="md_black_1000">أسود (1000)</string>
+    <string name="md_white_1000">وايت (1000)</string>
+
+    <!--blue gray-->
+    <string name="md_blue_gray_50">ازرق رمادي (50)</string>
+    <string name="md_blue_gray_100">ازرق رمادي (100)</string>
+    <string name="md_blue_gray_200">ازرق رمادي (200)</string>
+    <string name="md_blue_gray_300">ازرق رمادي (300)</string>
+    <string name="md_blue_gray_400">ازرق رمادي (400)</string>
+    <string name="md_blue_gray_500">ازرق رمادي (500)</string>
+    <string name="md_blue_gray_600">ازرق رمادي (600)</string>
+    <string name="md_blue_gray_700">ازرق رمادي (700)</string>
+    <string name="md_blue_gray_800">ازرق رمادي (800)</string>
+    <string name="md_blue_gray_900">ازرق رمادي (900)</string>
+
+</resources>

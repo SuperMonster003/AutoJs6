@@ -19,11 +19,13 @@ import com.mcal.apksigner.utils.KeyStoreHelper
 import org.autojs.autojs.apkbuilder.keystore.AESUtils
 import org.autojs.autojs.apkbuilder.keystore.KeyStore
 import org.autojs.autojs.core.pref.Pref
-import org.autojs.autojs6.R
-import org.autojs.autojs6.databinding.ActivityManageKeyStoreBinding
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.keystore.NewKeyStoreDialog.NewKeyStoreConfigs
 import org.autojs.autojs.ui.viewmodel.KeyStoreViewModel
+import org.autojs.autojs.util.ViewUtils
+import org.autojs.autojs.util.ViewUtils.setMenuIconsColorByThemeColorLuminance
+import org.autojs.autojs6.R
+import org.autojs.autojs6.databinding.ActivityManageKeyStoreBinding
 import java.io.File
 import java.io.IOException
 
@@ -60,7 +62,10 @@ class ManageKeyStoreActivity : BaseActivity() {
         override fun onDeleteButtonClicked(keyStore: KeyStore) {
             MaterialDialog.Builder(this@ManageKeyStoreActivity)
                 .title(getString(R.string.text_confirm_to_delete))
-                .positiveText(R.string.text_ok).negativeText(R.string.text_cancel)
+                .negativeText(R.string.dialog_button_cancel)
+                .negativeColorRes(R.color.dialog_button_default)
+                .positiveText(R.string.dialog_button_confirm)
+                .positiveColorRes(R.color.dialog_button_caution)
                 .onPositive { _: MaterialDialog, _: DialogAction ->
                     deleteKeyStore(keyStore)
                 }.show()
@@ -82,8 +87,11 @@ class ManageKeyStoreActivity : BaseActivity() {
         keyStoreViewModel =
             ViewModelProvider(this, KeyStoreViewModel.Factory(this))[KeyStoreViewModel::class.java]
 
-        binding.fab.setOnClickListener {
-            NewKeyStoreDialog(newKeyStoreDialogCallback).show(supportFragmentManager, null)
+        binding.fab.apply {
+            setOnClickListener {
+                NewKeyStoreDialog(newKeyStoreDialogCallback).show(supportFragmentManager, null)
+            }
+            ViewUtils.excludeFloatingActionButtonFromBottomNavigationBar(this)
         }
 
         keyStoreAdapter = KeyStoreAdaptor(keyStoreAdapterCallback)
@@ -91,6 +99,7 @@ class ManageKeyStoreActivity : BaseActivity() {
             adapter = keyStoreAdapter
             layoutManager = LinearLayoutManager(this@ManageKeyStoreActivity)
             itemAnimator = DefaultItemAnimator()
+            ViewUtils.excludePaddingClippableViewFromBottomNavigationBar(this)
         }
         binding.swipeRefreshLayout.setOnRefreshListener {
             loadKeyStores()
@@ -113,6 +122,7 @@ class ManageKeyStoreActivity : BaseActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_manage_key_store, menu)
+        binding.toolbar.setMenuIconsColorByThemeColorLuminance(this)
         return true
     }
 
@@ -121,13 +131,14 @@ class ManageKeyStoreActivity : BaseActivity() {
             R.id.action_delete_all -> {
                 MaterialDialog.Builder(this@ManageKeyStoreActivity)
                     .title(getString(R.string.text_delete_all))
-                    .positiveText(R.string.text_ok).negativeText(R.string.text_cancel)
+                    .negativeText(R.string.dialog_button_cancel)
+                    .negativeColorRes(R.color.dialog_button_default)
+                    .positiveText(R.string.dialog_button_confirm)
+                    .positiveColorRes(R.color.dialog_button_caution)
                     .onPositive { _: MaterialDialog, _: DialogAction ->
                         deleteAllKeyStores()
                     }.show()
             }
-
-            else -> {}
         }
         return super.onOptionsItemSelected(item)
     }
@@ -222,25 +233,17 @@ class ManageKeyStoreActivity : BaseActivity() {
         configs: VerifyKeyStoreDialog.VerifyKeyStoreConfigs, keyStore: KeyStore,
     ) {
         // 验证密钥库密码
-        val tmpKeyStore = try {
+        val tmpKeyStore = runCatching {
             KeyStoreHelper.loadKeyStore(File(keyStore.absolutePath), configs.password.toCharArray())
-        } catch (e: Exception) {
-            null
-        }
-
-        if (tmpKeyStore == null) {
+        }.getOrElse {
             showToast(R.string.text_verify_failed)
             return
         }
 
         // 验证别名和别名密码
-        val tmpKey = try {
+        runCatching {
             tmpKeyStore.getKey(configs.alias, configs.aliasPassword.toCharArray())
-        } catch (e: Exception) {
-            null
-        }
-
-        if (tmpKey == null) {
+        }.getOrElse {
             showToast(R.string.text_verify_failed)
             return
         }
@@ -264,4 +267,5 @@ class ManageKeyStoreActivity : BaseActivity() {
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
+
 }

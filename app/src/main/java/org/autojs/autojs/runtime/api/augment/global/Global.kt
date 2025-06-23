@@ -1,12 +1,13 @@
 package org.autojs.autojs.runtime.api.augment.global
 
+import android.os.Build
 import io.github.g00fy2.versioncompare.Version
 import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.core.automator.UiObject
 import org.autojs.autojs.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.extension.AnyExtensions.jsBrief
-import org.autojs.autojs.extension.NumberExtensions.string
+import org.autojs.autojs.extension.NumberExtensions.jsString
 import org.autojs.autojs.extension.ScriptableExtensions.defineProp
 import org.autojs.autojs.extension.ScriptableExtensions.prop
 import org.autojs.autojs.extension.ScriptableObjectExtensions.inquire
@@ -295,7 +296,14 @@ class Global(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun getClip(scriptRuntime: ScriptRuntime, args: Array<out Any?>): String = ensureArgumentsIsEmpty(args) {
-            scriptRuntime.clip
+            val legacyResult = scriptRuntime.clip
+            when {
+                legacyResult.isNotEmpty() -> legacyResult
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && scriptRuntime.floaty.hasPermission() -> {
+                    scriptRuntime.floaty.getClip()
+                }
+                else -> legacyResult
+            }
         }
 
         @JvmStatic
@@ -500,7 +508,7 @@ class Global(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
                                 "指定的 AutoJs6 应用版本号需大于 461"
                             }
                             require(BuildConfig.VERSION_CODE >= num.toInt()) {
-                                "AutoJs6 应用版本号需不低于 ${num.string}"
+                                "AutoJs6 应用版本号需不低于 ${num.jsString}"
                             }
                         }
                     }

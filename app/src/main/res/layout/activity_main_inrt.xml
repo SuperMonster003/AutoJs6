@@ -1,49 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fitsSystemWindows="true"
-        android:theme="@style/Theme.AppCompat.Light.NoActionBar"
-        android:orientation="vertical">
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <com.google.android.material.appbar.AppBarLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
-            android:fitsSystemWindows="true">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="true"
+        app:theme="@style/AppTheme.AppBarOverlay">
 
         <androidx.appcompat.widget.Toolbar
-                android:id="@+id/toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                app:titleTextColor="@color/md_black_1000"
-                app:subtitleTextColor="@color/md_black_1000"
-                android:theme="@style/ToolBarStyleInrt"
-                android:background="@color/md_blue_grey_50"
-                app:contentInsetStartWithNavigation="0dp"
-                app:contentInsetEndWithActions="2dp"
-                app:titleTextAppearance="@style/TextAppearanceEditorTitle"
-                app:popupTheme="@style/OverflowMenuInrt" />
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:theme="@style/ToolBarStyleInrt"
+            app:contentInsetEndWithActions="2dp"
+            app:contentInsetStartWithNavigation="0dp"
+            app:popupTheme="@style/OverflowMenuInrt"
+            app:subtitleTextColor="@color/day_full"
+            app:titleTextColor="@color/day_full" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
     <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingStart="4dp"
-            android:paddingEnd="2dp">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingStart="4dp"
+        android:paddingEnd="2dp">
 
         <org.autojs.autojs.core.console.ConsoleView
-                android:id="@+id/console"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                app:color_verbose="#DFC0C0C0"
-                app:color_debug="#CC000000"
-                app:color_info="#FF43A047"
-                app:color_warn="#FF1976D2"
-                app:color_error="#FFC62828"
-                app:color_assert="#FFE254FF" />
+            android:id="@+id/console"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:excludeFromNavigationBar="true"
+            app:color_verbose="#BDBDBD"
+            app:color_debug="#111214"
+            app:color_info="#43A047"
+            app:color_warn="#1976D2"
+            app:color_error="#C62828"
+            app:color_assert="#E254FF" />
 
     </FrameLayout>
 

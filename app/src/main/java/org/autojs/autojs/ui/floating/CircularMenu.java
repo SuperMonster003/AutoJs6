@@ -118,7 +118,8 @@ public class CircularMenu implements Recorder.OnStateChangedListener, LayoutInsp
             final MaterialDialog dialog = new AppLevelThemeDialogBuilder(mContext)
                     .title(mContext.getString(R.string.text_run_script))
                     .customView(explorerView, false)
-                    .positiveText(mContext.getString(R.string.text_cancel))
+                    .positiveText(R.string.dialog_button_dismiss)
+                    .positiveColorRes(R.color.dialog_button_default)
                     .cancelable(false)
                     .build();
             explorerView.setOnItemOperateListener(item -> dialog.dismiss());
@@ -130,6 +131,7 @@ public class CircularMenu implements Recorder.OnStateChangedListener, LayoutInsp
                             .title(mContext.getString(R.string.error_failed_to_run_script))
                             .content(mContext.getString(R.string.text_file_with_abs_path_is_not_an_executable_script, item.toScriptFile().getAbsolutePath()))
                             .positiveText(R.string.dialog_button_dismiss)
+                            .positiveColorRes(R.color.dialog_button_failure)
                             .show();
                 }
             });
@@ -146,7 +148,8 @@ public class CircularMenu implements Recorder.OnStateChangedListener, LayoutInsp
                 DialogUtils.showDialog(new AppLevelThemeDialogBuilder(mContext)
                         .title(mContext.getString(R.string.text_no_root_access))
                         .content(mContext.getString(R.string.no_root_access_for_record))
-                        .positiveText(mContext.getString(R.string.dialog_button_quit))
+                        .positiveText(R.string.dialog_button_quit)
+                        .positiveColorRes(R.color.dialog_button_failure)
                         .build());
             } else {
                 mRecorder.start();

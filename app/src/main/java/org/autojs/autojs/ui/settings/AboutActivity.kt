@@ -2,26 +2,27 @@ package org.autojs.autojs.ui.settings
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.view.View
 import android.view.animation.AlphaAnimation
+import androidx.core.net.toUri
 import com.afollestad.materialdialogs.MaterialDialog
 import com.jaredrummler.android.widget.AnimatedSvgView
 import de.psdev.licensesdialog.LicenseResolver
 import de.psdev.licensesdialog.LicensesDialog
+import org.autojs.autojs.extension.MaterialDialogExtensions.widgetThemeColor
+import org.autojs.autojs.network.UpdateChecker
+import org.autojs.autojs.network.UpdateChecker.PromptMode
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.common.NotAskAgainDialog
 import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.DeviceUtils
-import org.autojs.autojs.util.UpdateUtils
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ActivityAboutBinding
 import org.autojs.autojs6.databinding.ActivityAboutFunctionButtonsBinding
-import org.autojs.autojs6.databinding.ActivityAboutItemsBinding
 
 /**
  * Created by Stardust on Feb 2, 2017.
@@ -29,8 +30,9 @@ import org.autojs.autojs6.databinding.ActivityAboutItemsBinding
  */
 open class AboutActivity : BaseActivity() {
 
+    override val handleContentViewFromHorizontalNavigationBarAutomatically = false
+
     private lateinit var activityBinding: ActivityAboutBinding
-    private lateinit var itemsBinding: ActivityAboutItemsBinding
     private lateinit var functionsButtonsBinding: ActivityAboutFunctionButtonsBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,7 +41,6 @@ open class AboutActivity : BaseActivity() {
             setContentView(it.root)
             it.version.text = BuildConfig.VERSION_NAME
             it.since.text = BuildConfig.VERSION_DATE
-            itemsBinding = it.activityAboutItems
             functionsButtonsBinding = it.activityAboutFunctionButtons
         }
         setToolbarAsBack(R.string.text_about)
@@ -47,14 +48,14 @@ open class AboutActivity : BaseActivity() {
     }
 
     private fun setupBindingListeners() {
-        itemsBinding.avatarOriginalDeveloper.setOnClickListener { toastForUnderDevelopment() }
-        itemsBinding.avatarDeveloper.setOnClickListener { toastForUnderDevelopment() }
+        activityBinding.avatarOriginalDeveloper.setOnClickListener { toastForUnderDevelopment() }
+        activityBinding.avatarDeveloper.setOnClickListener { toastForUnderDevelopment() }
 
-        itemsBinding.avatarOriginalDeveloperUserContents.setOnClickListener { toastForUnderDevelopment() }
-        itemsBinding.avatarDeveloperUserContents.setOnClickListener { toastForUnderDevelopment() }
+        activityBinding.avatarOriginalDeveloperUserContents.setOnClickListener { toastForUnderDevelopment() }
+        activityBinding.avatarDeveloperUserContents.setOnClickListener { toastForUnderDevelopment() }
 
-        itemsBinding.icon1stDeveloperIdentifier.setOnClickListener { toastForFirstDeveloperIdentifier() }
-        itemsBinding.icon2ndDeveloperIdentifier.setOnClickListener { toastForSecondDeveloperIdentifier() }
+        activityBinding.icon1stDeveloperIdentifier.setOnClickListener { toastForFirstDeveloperIdentifier() }
+        activityBinding.icon2ndDeveloperIdentifier.setOnClickListener { toastForSecondDeveloperIdentifier() }
 
         activityBinding.iconAboutAppSvgView.setOnClickListener { showDeviceInfo() }
         activityBinding.iconAboutAppSvgView.setOnLongClickListener { true.also { launchDeveloperOptions() } }
@@ -64,6 +65,7 @@ open class AboutActivity : BaseActivity() {
 
         functionsButtonsBinding.aboutFunctionsButtonLicenses.setOnClickListener { showLicensesDialog() }
         functionsButtonsBinding.aboutFunctionsButtonUpdate.setOnClickListener { checkForUpdates() }
+        functionsButtonsBinding.aboutFunctionsButtonVersionHistories.setOnClickListener { showVersionHistories() }
         functionsButtonsBinding.aboutFunctionsButtonFeedback.setOnClickListener { startFeedbackActivity() }
     }
 
@@ -159,7 +161,13 @@ open class AboutActivity : BaseActivity() {
     }
 
     private fun checkForUpdates() {
-        UpdateUtils.getDialogChecker(this).checkNow()
+        UpdateChecker.Builder(this)
+            .setPromptMode(PromptMode.DIALOG)
+            .build().checkNow()
+    }
+
+    private fun showVersionHistories() {
+        DisplayVersionHistoriesActivity.launch(this)
     }
 
     private fun startFeedbackActivity() {
@@ -167,17 +175,19 @@ open class AboutActivity : BaseActivity() {
         NotAskAgainDialog.Builder(this, key)
             .title(R.string.text_prompt)
             .content(R.string.content_github_feedback)
+            .widgetThemeColor()
             .negativeText(R.string.dialog_button_cancel)
-            .positiveText(R.string.dialog_button_continue)
+            .negativeColorRes(R.color.dialog_button_default)
             .onNegative { d, _ -> d.dismiss() }
+            .positiveText(R.string.dialog_button_continue)
+            .positiveColorRes(R.color.dialog_button_attraction)
             .onPositive { _, _ -> launchGithubIssuesPage() }
-            .cancelable(false)
             .show() ?: launchGithubIssuesPage()
     }
 
     private fun launchGithubIssuesPage() {
         Intent(Intent.ACTION_VIEW)
-            .setData(Uri.parse(getString(R.string.url_github_autojs6_issues)))
+            .setData(getString(R.string.url_github_autojs6_issues).toUri())
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             .let { startActivity(it) }
     }

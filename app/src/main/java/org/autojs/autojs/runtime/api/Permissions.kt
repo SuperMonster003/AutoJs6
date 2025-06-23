@@ -1,8 +1,15 @@
 package org.autojs.autojs.runtime.api
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.util.Log
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions
+import androidx.fragment.app.FragmentActivity
+import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.util.RomUtils
+import org.autojs.autojs6.R
 
 class Permissions(private val context: Context) {
 
@@ -45,5 +52,21 @@ class Permissions(private val context: Context) {
     /* permissions.writeSystemSettings */
     /* permissions.writeSecuritySettings */
     /* permissions.projectMediaAccess */
+
+    companion object {
+
+        private val TAG = Permissions::class.java.simpleName
+
+        @JvmStatic
+        fun getRequestMultiplePermissionsLauncher(activity: FragmentActivity): ActivityResultLauncher<Array<String>> = activity.registerForActivityResult(RequestMultiplePermissions()) {
+            it.forEach { (key: String, isGranted: Boolean) ->
+                Log.d(TAG, "$key: $isGranted")
+                if (key == Manifest.permission.POST_NOTIFICATIONS) {
+                    Pref.putBoolean(R.string.key_post_notification_permission_requested, true)
+                }
+            }
+        }
+
+    }
 
 }

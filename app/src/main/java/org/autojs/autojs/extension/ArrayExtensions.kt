@@ -1,5 +1,6 @@
 package org.autojs.autojs.extension
 
+import org.autojs.autojs.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import org.autojs.autojs.util.RhinoUtils.withRhinoContext
@@ -39,6 +40,7 @@ object ArrayExtensions {
             else -> o.hashCode()
         }
     }
+
     fun <T> Array<T>.unshiftWith(thisObj: Any?): Array<Any?> {
         return Array(this.size + 1) { if (it == 0) thisObj else this[it - 1] }
     }
@@ -50,15 +52,17 @@ object ArrayExtensions {
     }
 
     fun Iterable<*>.toNativeArray(): NativeArray {
-        return withRhinoContext { context, standardObjects ->
-            context.newArray(standardObjects, this.map { Context.javaToJS(it, standardObjects) }.toTypedArray()) as NativeArray
-        }!!
+        return withRhinoContext { cx ->
+            val standardObjects = cx.initStandardObjects()
+            cx.newArray(standardObjects, this.map { Context.javaToJS(it, standardObjects) }.toTypedArray()) as NativeArray
+        }
     }
 
     fun Array<*>.toNativeArray(): NativeArray {
-        return withRhinoContext { context, standardObjects ->
-            context.newArray(standardObjects, this.toList().map { Context.javaToJS(it, standardObjects) }.toTypedArray()) as NativeArray
-        }!!
+        return withRhinoContext { cx ->
+            val standardObjects = cx.initStandardObjects()
+            cx.newArray(standardObjects, this.toList().map { Context.javaToJS(it, standardObjects) }.toTypedArray()) as NativeArray
+        }
     }
 
     fun <K, V> Map<K, V>.toNativeObject(): NativeObject = newNativeObject().also { o ->
@@ -79,6 +83,11 @@ object ArrayExtensions {
                 else -> o.put(key, o, Context.javaToJS(value, o))
             }
         }
+    }
+
+    fun <T> Array<T>.jsArrayBrief(separator: String = ", ", appendPaddingSpace: Boolean = true) = when (appendPaddingSpace) {
+        true -> "[ ${this.joinToString(separator) { it.jsBrief() }} ]"
+        else -> "[${this.joinToString(separator) { it.jsBrief() }}]"
     }
 
 }

@@ -7,6 +7,7 @@ import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.os.IBinder
 import android.util.Log
+import org.autojs.autojs.AbstractAutoJs.Companion.isInrt
 import org.autojs.autojs.App
 import org.autojs.autojs.annotation.ScriptInterface
 import org.autojs.autojs.app.GlobalAppContext
@@ -14,7 +15,6 @@ import org.autojs.autojs.core.shizuku.IUserService
 import org.autojs.autojs.core.shizuku.UserService
 import org.autojs.autojs.util.App.SHIZUKU
 import org.autojs.autojs.util.ViewUtils
-import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import rikka.shizuku.Shizuku
 import java.util.concurrent.CountDownLatch
@@ -32,7 +32,7 @@ object WrappedShizuku {
     private val TAG: String = WrappedShizuku::class.java.simpleName
 
     private val mRequestCode = when {
-        BuildConfig.isInrt -> "shizuku-request-code-inrt".hashCode()
+        isInrt -> "shizuku-request-code-inrt".hashCode()
         else -> "shizuku-request-code".hashCode()
     }
     private var mHasBinder = false
@@ -52,9 +52,12 @@ object WrappedShizuku {
         }
     }
 
-    private val mUserServiceArgs = Shizuku.UserServiceArgs(ComponentName(BuildConfig.APPLICATION_ID, UserService::class.java.name))
-        .processNameSuffix("shizuku-service-for-${BuildConfig.APPLICATION_ID.substringAfterLast(".")}")
-        .daemon(false)
+    private val mUserServiceArgs by lazy {
+        val pkg = GlobalAppContext.get().packageName
+        Shizuku.UserServiceArgs(ComponentName(pkg, UserService::class.java.name))
+            .processNameSuffix("shizuku-service-for-${pkg.substringAfterLast(".")}")
+            .daemon(false)
+    }
 
     private val mBinderReceivedListener = Shizuku.OnBinderReceivedListener {
         if (Shizuku.isPreV11()) {

@@ -242,7 +242,7 @@ class SimpleActionAutomator(private val accessibilityBridge: AccessibilityBridge
                     val bitmap = hardwareBuffer.copy(Bitmap.Config.ARGB_8888, true)
 
                     hardwareBuffer.recycle()
-                    promiseAdapter.resolve(ImageWrapper.ofBitmap(bitmap))
+                    promiseAdapter.resolve(ImageWrapper.ofBitmap(scriptRuntime, bitmap))
                 }
                 mPromiseAdapter = null
             }

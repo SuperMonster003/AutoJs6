@@ -4,10 +4,10 @@ import android.content.Context
 import android.os.Bundle
 import android.text.TextUtils
 import android.util.AttributeSet
-import androidx.core.content.res.TypedArrayUtils
-import androidx.preference.Preference.SummaryProvider
 import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.extension.MaterialDialogExtensions.choiceWidgetThemeColor
+import org.autojs.autojs.extension.MaterialDialogExtensions.widgetThemeColor
 import org.autojs.autojs.ui.common.NotAskAgainDialog
 import org.autojs.autojs6.R
 
@@ -33,12 +33,40 @@ open class MaterialListPreference : MaterialDialogPreference {
     protected val entry: CharSequence?
         get() = mItemValues.takeIf { it.isNotEmpty() }?.toList()?.get(itemPrefIndex ?: mItemDefaultIndex)
 
+    protected val defaultEntry: CharSequence?
+        get() {
+            val keyIndex = getKeyIndex(mItemDefaultKey) ?: return null
+            return mItemValues.takeIf { it.isNotEmpty() }?.toList()?.get(keyIndex)
+        }
+
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int, bundle: Bundle) : super(context, attrs, defStyleAttr, defStyleRes) {
+        init(context, attrs, defStyleAttr, defStyleRes, bundle)
+    }
+
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes) {
+        init(context, attrs, defStyleAttr, defStyleRes, Bundle())
+    }
+
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
+        init(context, attrs, defStyleAttr, 0, Bundle())
+    }
+
+    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
+        init(context, attrs, 0, 0, Bundle())
+    }
+
+    private fun init(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int, bundle: Bundle) {
         obtainStyledAttrs(context, attrs, R.styleable.MaterialListPreference, defStyleAttr, defStyleRes)
             .let { a ->
                 getAttrString(a, R.styleable.MaterialListPreference_dialogTitle)?.also { dialogTitle = it }
                 getAttrString(a, R.styleable.MaterialListPreference_dialogContent)?.also { dialogContent = it }
+                getAttrColor(a, R.styleable.MaterialListPreference_negativeColor)?.takeIf { it != -1 }?.let {
+                    negativeColor = it
+                }
                 positiveText = getAttrString(a, R.styleable.MaterialListPreference_positiveText) ?: context.getString(R.string.dialog_button_confirm)
+                getAttrColor(a, R.styleable.MaterialListPreference_positiveColor)?.takeIf { it != -1 }?.let {
+                    positiveColor = it
+                }
                 negativeText = getAttrString(a, R.styleable.MaterialListPreference_negativeText) ?: context.getString(R.string.dialog_button_cancel)
                 getAttrTextArray(a, R.styleable.MaterialListPreference_itemKeys)?.also { mItemKeys = it.toList() }
                 getAttrTextArray(a, R.styleable.MaterialListPreference_itemValues)?.also { mItemValues = it.toList() }
@@ -56,17 +84,6 @@ open class MaterialListPreference : MaterialDialogPreference {
         }
     }
 
-    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : this(context, attrs, defStyleAttr, defStyleRes, Bundle())
-
-    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : this(context, attrs, defStyleAttr, 0)
-
-    constructor(context: Context, attrs: AttributeSet?) : this(
-        context, attrs, TypedArrayUtils.getAttr(
-            context, android.R.attr.dialogPreferenceStyle,
-            android.R.attr.dialogPreferenceStyle,
-        )
-    )
-
     constructor(context: Context) : this(context, null)
 
     override fun getBuilder(): MaterialDialog.Builder = super.getBuilder().also { builder ->
@@ -74,6 +91,7 @@ open class MaterialListPreference : MaterialDialogPreference {
             builder.autoDismiss(false)
             builder.onNegative { d, _ -> d.dismiss() }
             builder.items(it)
+            builder.choiceWidgetThemeColor()
             builder.takeIf { mItemDisables.isNotEmpty() }?.itemsDisabledIndices(*mItemDisables)
             builder.itemsCallbackSingleChoice(itemPrefIndex ?: mItemDefaultIndex) { d, _, which, _ ->
                 if (itemPrefIndex != which) {
@@ -83,6 +101,15 @@ open class MaterialListPreference : MaterialDialogPreference {
                     d.dismiss()
                 }
                 return@itemsCallbackSingleChoice true
+            }
+            if (defaultEntry != null) {
+                builder.options(
+                    listOf(
+                        MaterialDialog.OptionMenuItemSpec(context.getString(R.string.dialog_button_use_default)) { dialog ->
+                            dialog.selectedIndex = mItemDefaultIndex
+                        },
+                    )
+                )
             }
         }
     }
@@ -95,7 +122,9 @@ open class MaterialListPreference : MaterialDialogPreference {
         NotAskAgainDialog.Builder(prefContext, "prompt_\$_${key}")
             .title(R.string.text_prompt)
             .content(content)
-            .positiveText(R.string.text_ok)
+            .widgetThemeColor()
+            .positiveText(R.string.dialog_button_confirm)
+            .positiveColorRes(R.color.dialog_button_hint)
             .dismissListener { onChangeConfirmed(getDialog()) }
             .show()
     }

@@ -4,124 +4,35 @@
 
     <!ENTITY url_github_autojs6 "http://project.autojs6.com">
 
-    <!ENTITY url_github_autojs6_vscode_extension "http://vsc_ext-project.autojs6.com">
+    <!ENTITY url_github_autojs6_vscode_extension "http://vscext-project.autojs6.com">
 
     ]>
 
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <string name="css_style_license_dialog_notices" translatable="false">
-        p.license {
-        background: grey;
-        }
-        body {
-        font-family: sans-serif;
-        overflow-wrap: break-word;
-        }
-        body a:link {
-        color: #00838F;
-        }
-        pre {
-        background-color: #F2F2F2;
-        padding: 1em;
-        white-space: pre-wrap;
-        }
-    </string>
-
     <!-- Forcibly use LeakCanary to detect memory leaks. -->
     <string name="leak_canary_test_class_name" translatable="false">assertk.Assert</string>
 
-    <string name="apk_builder_build" tools:ignore="TypographyEllipsis">Building...</string>
-    <string name="apk_builder_clean" tools:ignore="TypographyEllipsis">Cleaning...</string>
-    <string name="apk_builder_package" tools:ignore="TypographyEllipsis">Packaging...</string>
-    <string name="apk_builder_plugin_version_incompatible">Incompatible version of \"apk builder\".\nDownload it now?</string>
-    <string name="apk_builder_prepare" tools:ignore="TypographyEllipsis">Preparing...</string>
-    <string name="apk_info_device_sdk">Device SDK</string>
-    <string name="apk_info_installed_version">Installed</string>
-    <string name="apk_info_max_sdk">Max SDK</string>
-    <string name="apk_info_min_sdk">Min SDK</string>
-    <string name="apk_info_package_name">Package</string>
-    <string name="apk_info_target_sdk">Target SDK</string>
     <string name="app_name" translatable="false">AutoJs6</string>
     <string name="app_name_qq" translatable="false">QQ</string>
-    <string name="blocking_operations_cannot_be_performed_on_the_ui_thread_for_waitforactivity_with_solution">Blocking operations cannot be performed on the UI thread. Try executing waitForActivity in a sub-thread or sub-script, or use setInterval to loop and check the activity</string>
-    <string name="blocking_operations_cannot_be_performed_on_the_ui_thread_for_waitforpackage_with_solution">Blocking operations cannot be performed on the UI thread. Try executing waitForPackage in a sub-thread or sub-script, or use setInterval to loop and check the package</string>
-    <string name="com_twofortyfouram_log_tag" tools:ignore="ResourceName" translatable="false"/>
-    <string name="config_abi_options_contains_invalid">Config \"abi\" contains invalid options</string>
-    <string name="config_abi_options_contains_unavailable">Config \"abi\" contains unavailable options</string>
-    <string name="config_lib_options_contains_invalid">Config \"lib\" contains invalid options</string>
-    <string name="config_lib_options_contains_unavailable">Config \"lib\" contains unavailable options</string>
-    <string name="confirm_overwrite_file">File already exists.\nOverwrite?</string>
-    <string name="content_about_app_tips">1. Press and hold the application name (AutoJs6) on the home page to jump to the settings page\n2. Press and hold a certain settings option on the settings page to view detailed information</string>
-    <string name="content_description_fab_for_display_manifest">A Floating Action Button widget for displaying the manifest</string>
-    <string name="content_github_feedback">A web page will be launched to report an issue.\nAn account for GitHub may be needed.</string>
-    <string name="content_way_of_output_for_recorded_script">Select a way of output for recorded script</string>
-    <string name="crash_feedback">Copy debugging log or exit directly</string>
-    <string name="current_available_abi_options">Current available \"abi\" options</string>
+    <string name="color_library_identifier_android_colors" translatable="false">Android</string>
+    <string name="color_library_identifier_css_colors" translatable="false">CSS</string>
+    <string name="color_library_identifier_web_colors" translatable="false">WEB</string>
+    <string name="com_twofortyfouram_log_tag" tools:ignore="ResourceName" translatable="false" />
+    <string name="default_build_apk_version_code" translatable="false">1</string>
+    <string name="default_build_apk_version_name" translatable="false">1.0.0</string>
     <string name="default_key_editor_pinch_to_zoom_strategy" translatable="false">@string/key_editor_pinch_to_zoom_change_text_size</string>
+    <string name="default_key_file_extensions" translatable="false">@string/key_file_extensions_show_all_but_executable</string>
     <string name="default_key_hidden_files" translatable="false">@string/key_hidden_files_not_show</string>
     <string name="default_key_keep_screen_on_when_in_foreground" translatable="false">@string/key_keep_screen_on_when_in_foreground_disabled</string>
     <string name="default_key_root_record_out_file_type" translatable="false">@string/key_root_record_out_file_type_binary</string>
     <string name="default_main_file_name" translatable="false">main.js</string>
-    <string name="default_script_notification_channel_description">@string/default_script_notification_content</string>
-    <string name="default_script_notification_channel_name">@string/default_script_notification_title</string>
-    <string name="default_script_notification_content">Notification from script</string>
-    <string name="default_script_notification_title">Script notification</string>
-    <string name="default_value_working_directory">/Scripts</string>
-    <string name="desc_about_functions_button_feedback" translatable="false">about_functions_button_feedback</string>
-    <string name="desc_about_functions_button_licenses" translatable="false">about_functions_button_licenses</string>
-    <string name="desc_about_functions_button_update" translatable="false">about_functions_button_update</string>
-    <string name="description_about_app_and_developer_preference">AutoJs6 is a JavaScript automated tool for android, which is open-source and cloned from \"hyb1996/Auto.js\".\n\nTo ask for help or feedback, go to GitHub issues or join Tencent QQ group 690946137.</string>
-    <string name="description_about_app_tips_preference">1. Press and hold the app icon on the \"About app and developer\" page to jump to AutoJs6 developer options page</string>
-    <string name="description_app_language_preference">Preference for changing the display language of AutoJs6, including exception messages from running scripts.\n\nNote: an app restart may be needed to make language applied as expected.</string>
-    <string name="description_change_working_dir_preference">Change the path of the directory containing scripts</string>
-    <string name="description_check_for_updates_preference">AutoJs6 gets and downloads updates from GitHub.\n\nNote: The update does not provide multilingual support yet.</string>
-    <string name="description_compatibility_with_classes_for_ver_4_x">Provides a degree of Java class name compatibility for 4.x versions through class name remapping.\nWith this option turned on, there will be a varying degree of startup delay (tens to hundreds of milliseconds) each time the script is started.\nIt is recommended to keep the option off at all times if not specifically required.</string>
-    <string name="description_documentation_source_preference">Local docs: Using AutoJs6 build-in files as documentation sources, no network connection required. The content changes as AutoJs6 is updated.\nOnline docs: Using GitHub pages as documentation sources, requiring network connection. The content is always up to date.\n\nNote: To maximize the reading experience of online documents, it is recommended to use a widescreen display device such as a desktop monitor.\nNote: As of version 6.2.0, the documentation is still in the preliminary stages of development, and most of the content has not yet been written or updated.</string>
-    <string name="description_documentation_source_preference_more">The following conditions must be met for dark theme support on document pages:\n1. AutoJs6 has night mode enabled\n2. Android System WebView (or browsers like Google Chrome):\n- Android API Level 29 (Android 10) [Q] and above: version >= 76\n- Android API Level 28 (Android 9) [P] and below: version >= 105</string>
-    <string name="description_extending_js_build_in_objects">Extending JavaScript built-in objects can increase code flexibility and enable richer functionality, but can cause conflicts and even breakage.\nAll scripts have built-in extensions enabled by default when the option is turned on.\nBuilt-in extensions are often insecure, and are not recommended unless the principles and risks of built-in extensions are clearly understood.\nWhen the option is turned off, built-in extensions can still be enabled through the plugins global object, as described in the project documentation.</string>
-    <string name="description_hidden_files_preference">Used to set whether or not to show hidden files and folders (usually starting with \".\") in AutoJs6 file explorer.</string>
-    <string name="description_keep_screen_on_when_in_foreground_preference">Preference for keeping the device\'s screen turned on and bright when AutoJs6 is in the foreground.\nTo make it happen only on the homepage among all pages of the AutoJs6 application, choose \"homepage only\" option.</string>
-    <string name="description_launcher_shortcuts">Shortcuts can perform specific actions in AutoJs6. Users can display these shortcuts in a supported launcher and quickly start some tasks or launch an activity, such as reading AutoJs6 application documentation, launching AutoJs6 settings page, and so on.</string>
-    <string name="description_manage_ignored_updates_preference">Click to view or manage list items.\nLong press to remove the list item.</string>
-    <string name="description_night_mode_preference">Night mode (also known as Dark theme) applies to both the Android system UI and apps running on the device, which improves visibility for users with low vision and those who are sensitive to bright light, and makes it easier for anyone to use a device in a low-light environment.\n\nFollow system: AutoJs6 has Night mode settings same as Android system\nAlways on: AutoJs6 keeps Night mode on (regardless of Android system settings)\nAlways off: AutoJs6 keeps Night mode off (regardless of Android system settings)\n\nNote: Follow system option is only for Android API Level 28 (Android 9) [P] and above.</string>
-    <string name="description_night_mode_preference_more">To enable Night mode in Android system:\n- Android API Level 29 (Android 10) [Q] and above: Settings -> Display -> Theme.\n- Android API Level 28 (Android 9) [P]: Developer options -> Night mode.\n\nThe following conditions must to met for applying a Night mode (Dark theme) to web-based content using a WebView component (like AutoJs6 documentation page):\n1. Android System WebView (or browsers like Google Chrome):\n- Android API Level 29 (Android 10) [Q] and above: version >= 76\n- Android API Level 28 (Android 9) [P]: version >= 105\n2. Web-based content in WebView component is adapted to Dark theme (by CSS or Android XML resources and so forth)</string>
-    <string name="description_root_mode_preference">If you have exotic root or abnormal state for root access, you can force set root to root or non-root.</string>
-    <string name="description_root_record_out_file_type_preference">Binary type: non-editable, with the file extension \"auto\"\nJavaScript type: can be edited or copied directly, with the file extension \"js\"</string>
-    <string name="description_stable_mode">Stable mode makes it more stable when getting layout bounds, but some results may be ignored.\nA11y service\'s restart required.</string>
-    <string name="description_theme_color_preference">Theme color is applied to widgets including but not limited to the following ones:\nStatus bar\nAppbar\nFile icon\nTask item icon\nFab\nSettings category title\nSwitch button\n\nNote: As of AutoJs6 version 6.2.0, there has been no difference between primary color, primary dark color and accent color yet.</string>
     <string name="developer_full_name" translatable="false">SuperMonster003</string>
     <string name="developer_nickname" translatable="false">SuperMonster003</string>
-    <string name="dialog_button_back">@string/text_back</string>
-    <string name="dialog_button_cancel">Cancel</string>
-    <string name="dialog_button_cancel_download">Cancel</string>
-    <string name="dialog_button_confirm">OK</string>
-    <string name="dialog_button_continue">@string/text_continue</string>
-    <string name="dialog_button_copy">@string/text_copy</string>
-    <string name="dialog_button_default_prefix">Def prefix</string>
-    <string name="dialog_button_details">Details</string>
-    <string name="dialog_button_dismiss">Dismiss</string>
-    <string name="dialog_button_download_with_browser">Browser</string>
-    <string name="dialog_button_history">History</string>
-    <string name="dialog_button_ignore_current_update">Ignore</string>
-    <string name="dialog_button_join_group">Join group</string>
-    <string name="dialog_button_more">More</string>
-    <string name="dialog_button_quit">Quit</string>
-    <string name="dialog_button_remove">Remove</string>
-    <string name="dialog_button_retry">Retry</string>
-    <string name="dialog_button_save">Save</string>
-    <string name="dialog_button_system_settings">System Settings</string>
-    <string name="dialog_button_system_settings_simplified">System</string>
-    <string name="dialog_button_update_now">Update</string>
-    <string name="dialog_button_use_default">Use default</string>
-    <string name="dialog_button_view_file">View File</string>
-    <string name="edit_and_run_handle_intent_error">Cannot process file</string>
-    <string name="edit_exit_without_save_warn">The content has not been saved, are you sure to exit?</string>
     <string name="ellipsis_six" translatable="false" tools:ignore="TypographyEllipsis">... ...</string>
     <string name="ellipsis_three" translatable="false" tools:ignore="TypographyEllipsis">...</string>
     <string name="email" translatable="false">hybbbb1996@gmail.com</string>
     <string name="entry_app_language_ar" translatable="false">العربية</string>
-    <string name="entry_app_language_auto">Follow system</string>
     <string name="entry_app_language_en" translatable="false">English</string>
     <string name="entry_app_language_es" translatable="false">Español</string>
     <string name="entry_app_language_fr" translatable="false">Français</string>
@@ -131,161 +42,16 @@
     <string name="entry_app_language_zh_hans" translatable="false">简体中文</string>
     <string name="entry_app_language_zh_hant_hk" translatable="false">繁體中文 (香港)</string>
     <string name="entry_app_language_zh_hant_tw" translatable="false">繁體中文 (台灣)</string>
-    <string name="entry_documentation_source_local">Local docs</string>
-    <string name="entry_documentation_source_online">Online docs</string>
-    <string name="entry_editor_pinch_to_zoom_change_text_size">Change text size</string>
-    <string name="entry_editor_pinch_to_zoom_disable">Disable</string>
-    <string name="entry_editor_pinch_to_zoom_scale_view">Scale view</string>
-    <string name="entry_hidden_files_not_show">Don\'t show hidden files or folders</string>
-    <string name="entry_hidden_files_show">Show hidden files and folders</string>
-    <string name="entry_keep_screen_on_when_in_foreground_all_pages">All pages</string>
-    <string name="entry_keep_screen_on_when_in_foreground_disabled">Disabled</string>
-    <string name="entry_keep_screen_on_when_in_foreground_homepage_only">Homepage only</string>
-    <string name="entry_night_mode_always_off">Always off</string>
-    <string name="entry_night_mode_always_on">Always on</string>
-    <string name="entry_night_mode_follow_system">Follow system</string>
-    <string name="entry_root_mode_auto_detect">Auto detect root access</string>
-    <string name="entry_root_mode_force_non_root">Force set non-root mode</string>
-    <string name="entry_root_mode_force_root">Force set root mode</string>
-    <string name="entry_root_record_out_file_type_binary">Binary type (non-editable)</string>
-    <string name="entry_root_record_out_file_type_js">JavaScript type (editable)</string>
-    <string name="error_a_runtime_has_been_set">A runtime has been set</string>
-    <string name="error_abandoned_method">Method %s has been abandoned and should not be used</string>
-    <string name="error_action_cannot_be_completed_with_negative_coordinate">The \"%1$s\" operation cannot be completed because the parameter contains negative coordinate values (%2$d, %3$d)</string>
-    <string name="error_activity_is_required_for_ui_exec_mode">An activity is required, which could be provided by running in \"ui\" execution mode</string>
-    <string name="error_an_operation_is_not_implemented">An operation is not implemented</string>
-    <string name="error_app_not_installed">App is not installed: \"%s\"</string>
-    <string name="error_argument_name_for_class_name_and_member_func_name_cannot_be_nullish">Argument %1$s for %2$s#%3$s cannot be nullish</string>
-    <string name="error_arguments_cannot_be_empty">Arguments cannot be empty</string>
-    <string name="error_arguments_must_be_empty">Arguments must be empty</string>
-    <string name="error_at_least_one_abi_needs_to_be_selected">At least one ABI needs to be selected</string>
-    <string name="error_both_bitmap_and_mat_are_null">Both bitmap and mat are null</string>
-    <string name="error_cannot_be_null">%s cannot be null</string>
-    <string name="error_cannot_connect_to_github">Cannot connect to GitHub</string>
-    <string name="error_cannot_convert_value_into_a_script_runtime_path">Cannot convert %s into a ScriptRuntime path</string>
-    <string name="error_cannot_find_editor_view_from_child_view">Cannot find EditorView from child view: %s</string>
-    <string name="error_cannot_get_download_url">Cannot get downloading URL</string>
-    <string name="error_cannot_rename">Failed to rename</string>
-    <string name="error_cannot_retrieve_battery_state">Cannot retrieve the battery state</string>
-    <string name="error_change_password_error_length">Use more characters for the password</string>
-    <string name="error_change_password_error_match">Those passwords didn\'t match</string>
-    <string name="error_check_for_update">Failed to check for updates</string>
-    <string name="error_colon_must_follow_a_valid_ip_address">Colon must follow a valid IP address</string>
-    <string name="error_compass_cannot_be_null">Compass cannot be null</string>
-    <string name="error_connect_to_remote">Cannot connect to the remote server: %s</string>
-    <string name="error_continuation_resume_called_without_suspend">Method resume() should be called after suspend()</string>
-    <string name="error_continuation_suspend_called_more_than_once">Method suspend() should be only called once</string>
-    <string name="error_corresponding_github_release_may_not_published">Corresponding GitHub release may have not been published yet</string>
-    <string name="error_dot_decimal_notation_num_over_255">Dot-decimal number over 255</string>
-    <string name="error_download_interrupted">Download interrupted</string>
-    <string name="error_email_taken">The e-mail is taken</string>
-    <string name="error_empty_broadcast_selection">At least one broadcast must be selected</string>
-    <string name="error_empty_github_release_assets">No GitHub release assets to download</string>
-    <string name="error_empty_shell_command">Command is empty</string>
-    <string name="error_enable_server">Cannot enable AutoJs6 server: %s</string>
-    <string name="error_excessive_height_for_template_n_region">Excessive height: template [%1$d] > region [%2$d]</string>
-    <string name="error_excessive_width_for_template_n_region">Excessive width: template [%1$d] > region [%2$d]</string>
-    <string name="error_failed_to_call_method">Failed to call method "%s"</string>
-    <string name="error_failed_to_call_method_with_cause"><![CDATA[Failed to call method "%1$s": [ %2$s ]]]></string>
-    <string name="error_failed_to_convert_into_drawable">Failed to convert value %s into a Drawable</string>
-    <string name="error_failed_to_grant_shizuku_access">Failed to grant Shizuku access</string>
-    <string name="error_failed_to_instantiate">Failed to instantiate "%s"</string>
-    <string name="error_failed_to_instantiate_with_cause"><![CDATA[Failed to instantiate "%1$s": [ %2$s ]]]></string>
-    <string name="error_failed_to_invoke_method_with_description">Failed to invoke method %1$s</string>
-    <string name="error_failed_to_revoke_shizuku_access">Failed to revoke Shizuku access</string>
-    <string name="error_failed_to_run_script">Failed to run script</string>
-    <string name="error_file_in_path_does_not_exist">File in path \"%1$s\" does not exist</string>
-    <string name="error_function_called_in_ui_thread">UI thread cannot be blocked. Try running %s() in sub-thread or sub-script</string>
-    <string name="error_function_called_more_than_once">%s() called more than once</string>
-    <string name="error_get_github_latest_release">Cannot get latest GitHub release</string>
-    <string name="error_handshake_timed_out">Handshake timed out after %d ms</string>
-    <string name="error_illegal_argument" formatted="false">Illegal argument %s: %s</string>
-    <string name="error_illegal_relative_url_argument_without_base">Relative URL cannot be used without base URL</string>
-    <string name="error_illegal_ui_object_result_type" formatted="false">Result type \"%s\" is not supported for UiObject</string>
-    <string name="error_illegal_url_argument" formatted="false">URL must starts with a protocol like \"https://\" and so forth</string>
-    <string name="error_illegal_widget_command" formatted="false">Parameter %s (%s) must be or can be cast to %s type</string>
-    <string name="error_image_has_been_recycled">Image has been recycled</string>
-    <string name="error_images_must_have_the_same_size">Images must have the same size</string>
-    <string name="error_images_must_have_the_same_size_and_type">Images must have the same size and type</string>
-    <string name="error_input_fields_check_failed">Input fields check failed</string>
-    <string name="error_invalid_compass">Invalid compass: %s</string>
-    <string name="error_invalid_github_repo">Invalid GitHub repository: %s</string>
-    <string name="error_invalid_ip_address">Invalid IP address</string>
-    <string name="error_invalid_login_credentials">Invalid login credentials</string>
-    <string name="error_invalid_rest_compass">Invalid rest compass: %s</string>
-    <string name="error_invalid_selector_map_element" formatted="false">Invalid selector map element: { %s: %s (%s) }</string>
-    <string name="error_ip_address_should_not_be_empty">IP address can not be empty</string>
-    <string name="error_max_listeners_exceeded">Max listeners exceeded: %d</string>
-    <string name="error_may_not_have_root_access_to_run_auto_file">AutoJs6 may not have root access to run \"auto\" file</string>
-    <string name="error_method_called_with_null_argument" formatted="false">%s() called with null argument: %s</string>
-    <string name="error_method_only_accepts_a_number_of_arguments_in_the_range_n_to_m">Method only accepts a number of arguments in the range [%1$d\.\.%2$d]</string>
-    <string name="error_module_does_not_work_due_to_the_lack_of_necessary_library_files">The \"%s\" module does not work due to the lack of necessary library files</string>
-    <string name="error_no_accessibility_permission">Accessibility service is disabled and the script has stopped</string>
-    <string name="error_no_accessibility_permission_to_capture">Accessibility service is not activated</string>
-    <string name="error_no_accessibility_service">No accessibility service</string>
-    <string name="error_no_display_over_other_apps_permission">No \"display over other apps\" permission</string>
-    <string name="error_no_permission_to_access_shizuku">No permission to access Shizuku</string>
-    <string name="error_no_post_notifications_permission">No \"post notifications\" permission</string>
-    <string name="error_no_read_phone_state_permission">No \"read phone state\" permission</string>
-    <string name="error_no_screen_capture_permission">No screen capture permission</string>
-    <string name="error_no_storage_rw_permission">No \"storage r/w\" permission</string>
-    <string name="error_no_such_selector_method" formatted="false">No such selector method %s(%s: %s)</string>
-    <string name="error_no_usage_stats_permission">No \"usage stats\" permission</string>
-    <string name="error_no_write_settings_permission">No \"write settings\" permission</string>
-    <string name="error_only_one_child_for_scroll_view">ScrollView can host only one direct child</string>
-    <string name="error_parse_github_release_assets">Failed to parse GitHub release assets</string>
-    <string name="error_parse_version_info">Failed to parse version information</string>
-    <string name="error_pattern_syntax">Invalid pattern syntax</string>
-    <string name="error_port_num_over_65535">Port number over 65535</string>
-    <string name="error_project_main_script_file_with_abs_path_does_not_exist">Project main script file \"%1$s\" does not exist</string>
-    <string name="error_put_value_into_json">Cannot put value %s into JSON</string>
-    <string name="error_regex_find_prev">Cannot find previous with regex</string>
-    <string name="error_repeated_colon_symbol">Repeated colon symbol</string>
-    <string name="error_repeated_dot_symbol">Repeated dot symbol</string>
-    <string name="error_required_property_is_nullish_or_does_not_exist">Required property \"%1$s\" is nullish or does not exist</string>
-    <string name="error_script_is_on_exiting">Script is on exiting</string>
-    <string name="error_selector_method_without_calling">Selector method should be called rather than passed as a parameter: %s</string>
-    <string name="error_selector_result_type_with_compass">Cannot use a compass when result type is selector</string>
-    <string name="error_set_both_icon_res_and_icon">Cannot set both iconRes and icon</string>
-    <string name="error_shizuku_is_not_installed">Shizuku is not installed</string>
-    <string name="error_shizuku_service_may_be_not_running">Shizuku service may be not running</string>
-    <string name="error_shizuku_version_is_not_supported">Shizuku version is not supported</string>
-    <string name="error_the_transformer_for_required_property_cannot_return_nullish">The transformer for required property \"%1$s\" cannot return nullish</string>
-    <string name="error_thread_is_not_alive">Thread is not alive</string>
-    <string name="error_unable_to_use_shizuku_service">Unable to use Shizuku service</string>
-    <string name="error_unacceptable_character">Unacceptable character</string>
-    <string name="error_unknown">Unknown error</string>
-    <string name="error_unknown_algorithm_selector_param">Unknown algorithm selector param: %s</string>
-    <string name="error_unknown_color_name">Unknown color name: %s</string>
-    <string name="error_unknown_element_name">Unknown element name: %1$s</string>
-    <string name="error_unknown_gravity_for">Unknown gravity: %s</string>
-    <string name="error_unknown_operation">Unknown operation</string>
-    <string name="error_unknown_picker_result_type">Unknown result type {name: %s}</string>
-    <string name="error_unknown_picker_result_type_with_params" formatted="false">Unknown result type {name: %s, params: %s}</string>
-    <string name="error_unknown_picker_selector_type" formatted="false">Unknown selector {name: %s, type: %s}</string>
-    <string name="error_unknown_type">Unknown type: %s</string>
-    <string name="file_not_exist_or_readable">File doesn\'t exist or readable: %s</string>
-    <string name="foreground_notification_channel_name">AutoJs6 foreground service</string>
-    <string name="foreground_notification_text">Click to launch AutoJs6</string>
-    <string name="foreground_notification_title">AutoJs6 foreground service</string>
-    <string name="format_build_succeeded" formatted="true">Build succeeded.\nFile path: %s</string>
-    <string name="format_debug_bar_title"><![CDATA[Debug [ %s ]]]></string>
     <string name="format_default_package_name" formatted="true" translatable="false">org.autojs.autojs6.%s</string>
     <string name="format_dialog_progress_number_format_kilo_bytes" translatable="false">%.1fKB/%.1fKB</string>
     <string name="format_dialog_progress_number_format_mega_bytes" translatable="false">%.2fMB/%.2fMB</string>
-    <string name="format_editor_info" formatted="false">Chars: %d\nLines: %d\nSize: %s</string>
-    <string name="format_file_downloaded" formatted="true">File downloaded to %s</string>
-    <string name="go_to_accessibility_settings"><![CDATA[[Go to] Settings -> Accessibility Services -> AutoJs6 [Enable]]]></string>
-    <string name="hint_find_with_regex">Regex is supported. Use \"$1\" - \"$9\" for captured groups.</string>
-    <string name="hint_long_click_run_to_debug">Long click \"Run\" button to debug</string>
-    <string name="hint_loop_delay">Delay before loop</string>
-    <string name="hint_loop_times">0 for infinite loop</string>
     <string name="id_launcher_shortcut_docs" translatable="false">shortcut_$_docs</string>
     <string name="id_launcher_shortcut_log" translatable="false">shortcut_$_log</string>
     <string name="id_launcher_shortcut_settings" translatable="false">shortcut_$_settings</string>
     <string name="key_a11y_service" translatable="false">key_$_a11y_service</string>
     <string name="key_about_app_and_developer" translatable="false">key_$_about_app_and_developer</string>
     <string name="key_about_app_tips" translatable="false">key_$_about_app_tips</string>
+    <string name="key_all_files_access" translatable="false">key_$_all_files_access</string>
     <string name="key_app_language" translatable="false">key_$_app_language</string>
     <string name="key_app_language_ar" translatable="false">key_$_app_language_ar</string>
     <string name="key_app_language_auto" translatable="false">key_$_app_language_auto</string>
@@ -302,14 +68,16 @@
     <string name="key_auto_night_mode_enabled" translatable="false">key_$_auto_night_mode_enabled</string>
     <string name="key_change_working_dir" translatable="false">key_$_change_working_dir</string>
     <string name="key_check_for_updates" translatable="false">key_$_check_for_updates</string>
+    <string name="key_check_for_updates_while_ignoring_the_local_version" translatable="false">key_$_check_for_updates_while_ignoring_the_local_version</string>
     <string name="key_client_socket_normally_closed" translatable="false">key_$_client_socket_normally_closed</string>
-    <string name="key_compatibility_with_classes_for_ver_4_x" translatable="false">key_$_compatibility_with_classes_for_ver_4_x</string>
+    <string name="key_color_select_activity_legacy_layout" translatable="false">key_$_color_select_activity_legacy_layout</string>
     <string name="key_dialog_check_display_over_other_apps" translatable="false">key_$_dialog_check_display_over_other_apps</string>
     <string name="key_dialog_foreground_svc" translatable="false">key_$_dialog_foreground_svc</string>
     <string name="key_dialog_log_entries_exported" translatable="false">key_$_dialog_log_entries_exported</string>
     <string name="key_dialog_manage_all_files_permission" translatable="false">key_$_dialog_manage_all_files_permission</string>
     <string name="key_dialog_num_of_log_entries_exceeds_limit_for_sending" translatable="false">key_$_num_of_log_entries_exceeds_limit_for_sending</string>
     <string name="key_dialog_selected_abi_is_unavailable" translatable="false">key_$_dialog_selected_abi_is_unavailable</string>
+    <string name="key_display_over_other_apps" translatable="false">key_$_display_over_other_apps</string>
     <string name="key_documentation_source" translatable="false">key_$_documentation_source</string>
     <string name="key_documentation_source_local" translatable="false">key_$_documentation_source_local</string>
     <string name="key_documentation_source_online" translatable="false">key_$_documentation_source_online</string>
@@ -322,7 +90,12 @@
     <string name="key_enable_a11y_service_with_root_access" translatable="false">key_$_enable_a11y_service_with_root_access</string>
     <string name="key_enable_a11y_service_with_secure_settings" translatable="false">key_$_enable_a11y_service_with_secure_settings</string>
     <string name="key_enable_observe_key" translatable="false">key_$_enable_observe_key</string>
+    <string name="key_explorer_file_default_prefix" translatable="false">key_$_explorer_file_default_prefix</string>
     <string name="key_extending_js_build_in_objects" translatable="false">key_$_extending_js_build_in_objects</string>
+    <string name="key_file_extensions" translatable="false">key_$_file_extensions</string>
+    <string name="key_file_extensions_not_show" translatable="false">key_$_file_extensions_not_show</string>
+    <string name="key_file_extensions_show_all" translatable="false">key_$_file_extensions_show_all</string>
+    <string name="key_file_extensions_show_all_but_executable" translatable="false">key_$_file_extensions_show_all_but_executable</string>
     <string name="key_floating_menu_shown" translatable="false">key_$_floating_menu_shown</string>
     <string name="key_foreground_service" translatable="false">key_$_foreground_service</string>
     <string name="key_gesture_observing" translatable="false">key_$_gesture_observing</string>
@@ -352,6 +125,7 @@
     <string name="key_not_showing_main_activity" translatable="false">key_$_not_showing_main_activity</string>
     <string name="key_pc_server_address_histories" translatable="false">key_$_pc_server_address_histories</string>
     <string name="key_post_notification_permission_requested" translatable="false">key_$_post_notification_permission_urged</string>
+    <string name="key_post_notifications_permission" translatable="false">key_$_post_notifications_permission</string>
     <string name="key_pref_bundle_default_item" translatable="false">key_$_pref_bundle_default_item</string>
     <string name="key_pref_bundle_disabled_items" translatable="false">key_$_pref_bundle_disabled_items</string>
     <string name="key_record_toast" translatable="false">key_$_record_toast</string>
@@ -372,9 +146,398 @@
     <string name="key_updates_checked_states_cleared" translatable="false">key_$_updates_checked_states_cleared</string>
     <string name="key_use_volume_control_record" translatable="false">key_$_use_volume_control_record</string>
     <string name="key_use_volume_control_running" translatable="false">key_$_use_volume_control_running</string>
+    <string name="key_version_histories" translatable="false">key_$_version_histories</string>
     <string name="key_working_directory" translatable="false">key_$_working_directory</string>
     <string name="key_working_directory_histories" translatable="false">key_$_working_directory_histories</string>
     <string name="key_working_directory_initialized" translatable="false">key_$_working_directory_initialized</string>
+    <string name="literal_color_int" translatable="false">ColorInt</string>
+    <string name="literal_hex_uppercase" translatable="false">HEX</string>
+    <string name="literal_hsl_uppercase" translatable="false">HSL</string>
+    <string name="literal_hsv_uppercase" translatable="false">HSV</string>
+    <string name="literal_rgb_uppercase" translatable="false">RGB</string>
+    <string name="num_zero" translatable="false">0</string>
+    <string name="original_developer_full_name" translatable="false">Stardust</string>
+    <string name="original_developer_nickname" translatable="false">hyb1996</string>
+    <string name="property_key_app_version_code" translatable="false">VERSION_BUILD</string>
+    <string name="property_key_app_version_name" translatable="false">VERSION_NAME</string>
+    <string name="symbol_colon" translatable="false">:</string>
+    <string name="symbol_question_mark" translatable="false">\?</string>
+    <string name="text_abis" translatable="false">ABIs</string>
+    <string name="text_app_name_accuweather" translatable="false">AccuWeather</string>
+    <string name="text_app_name_adm" translatable="false">ADM</string>
+    <string name="text_app_name_appops" translatable="false">App Ops</string>
+    <string name="text_app_name_aquamail" translatable="false">Aqua Mail</string>
+    <string name="text_app_name_autojs" translatable="false">Auto.js</string>
+    <string name="text_app_name_autojs6" translatable="false">@string/app_name</string>
+    <string name="text_app_name_autojspro" translatable="false">AutoJsPro</string>
+    <string name="text_app_name_chrome" translatable="false">Chrome</string>
+    <string name="text_app_name_digical" translatable="false">DigiCal</string>
+    <string name="text_app_name_excel" translatable="false">Excel</string>
+    <string name="text_app_name_firefox" translatable="false">Firefox</string>
+    <string name="text_app_name_fx" translatable="false">FX</string>
+    <string name="text_app_name_httpcanary" translatable="false">HttpCanary</string>
+    <string name="text_app_name_idlefish" translatable="false">闲鱼</string>
+    <string name="text_app_name_idmplus" translatable="false">IDM+</string>
+    <string name="text_app_name_jd" translatable="false">京东</string>
+    <string name="text_app_name_keep" translatable="false">Keep</string>
+    <string name="text_app_name_magisk" translatable="false">Magisk</string>
+    <string name="text_app_name_onedrive" translatable="false">OneDrive</string>
+    <string name="text_app_name_packet_capture" translatable="false">Packet Capture</string>
+    <string name="text_app_name_powerpoint" translatable="false">PowerPoint</string>
+    <string name="text_app_name_pulsar_plus" translatable="false">Pulsar+</string>
+    <string name="text_app_name_pure_weather" translatable="false">Pure天气</string>
+    <string name="text_app_name_qq" translatable="false">QQ</string>
+    <string name="text_app_name_sdmaid" translatable="false">SD Maid</string>
+    <string name="text_app_name_shizuku" translatable="false">Shizuku</string>
+    <string name="text_app_name_stopapp" translatable="false">小黑屋</string>
+    <string name="text_app_name_taobao" translatable="false">淘宝</string>
+    <string name="text_app_name_trainnote" translatable="false">训记</string>
+    <string name="text_app_name_twitter" translatable="false">Twitter</string>
+    <string name="text_app_name_unionpay" translatable="false">云闪付</string>
+    <string name="text_app_name_via" translatable="false">Via</string>
+    <string name="text_app_name_vysor" translatable="false">Vysor</string>
+    <string name="text_app_name_word" translatable="false">Word</string>
+    <string name="text_app_name_zhihu" translatable="false">知乎</string>
+    <string name="text_bks" translatable="false">BKS</string>
+    <string name="text_broadcast_action_prefix" translatable="false">android.intent.action.</string>
+    <string name="text_clear_updates_checked_states_description" translatable="false">NoNewer, Postponed, Check, AutoCheck</string>
+    <string name="text_copyright_dynamic" translatable="false">Copyright © 2017-%d All Rights Reserved</string>
+    <string name="text_copyright_sample" translatable="false">Copyright © 2017-2022 All Rights Reserved</string>
+    <string name="text_default_alias" translatable="false">key0</string>
+    <string name="text_default_country_code" translatable="false">CN</string>
+    <string name="text_default_validity_years" translatable="false">25</string>
+    <string name="text_device_imei" translatable="false">IMEI</string>
+    <string name="text_en_import" translatable="false">import</string>
+    <string name="text_full_version_info" translatable="false">%1$s (%2$d)</string>
+    <string name="text_half_ellipsis" translatable="false" formatted="true">...</string>
+    <string name="text_jks" translatable="false">JKS</string>
+    <string name="text_powered_by_autojs" translatable="false">Powered by AutoJs6</string>
+    <string name="text_root" translatable="false">Root</string>
+    <string name="text_sample_button" translatable="false">Hello</string>
+    <string name="text_sample_file_date" translatable="false">2023-04-02 22:54</string>
+    <string name="text_sample_file_path" translatable="false">/Scripts/My_First_Project/main.js</string>
+    <string name="text_sample_file_size" translatable="false">18 KB</string>
+    <string name="text_sample_string" translatable="false">Sample string</string>
+    <string name="text_share_app" translatable="false">AutoJs6:\n&url_github_autojs6;</string>
+    <string name="text_should_never_happen" translatable="false">Should never happen</string>
+    <string name="text_str_colon_space_str_formatter" translatable="false">%s: %s</string>
+    <string name="text_text_size_default_value" translatable="false">14</string>
+    <string name="text_text_size_max_value" translatable="false">96</string>
+    <string name="text_text_size_min_value" translatable="false">4</string>
+    <string name="uri_autojs6_download_link" translatable="false">http://download.autojs6.com</string>
+    <string name="url_github_autojs6" translatable="false">&url_github_autojs6;</string>
+    <string name="url_github_autojs6_issues" translatable="false">&url_github_autojs6;/issues</string>
+    <string name="url_github_autojs6_vscode_extension_repo" translatable="false">&url_github_autojs6_vscode_extension;</string>
+    <string name="url_github_autojs6_vscode_extension_usage" translatable="false">&url_github_autojs6_vscode_extension;/#%E4%BD%BF%E7%94%A8-usage</string>
+    <string name="value_app_language_default" translatable="false">@string/value_app_language_follow_system</string>
+    <string name="value_app_language_english" translatable="false">EN</string>
+    <string name="value_app_language_follow_system" translatable="false">Auto</string>
+    <string name="value_app_language_simplified_chinese" translatable="false">ZH_CN</string>
+
+    <string name="apk_builder_build" tools:ignore="TypographyEllipsis">Building...</string>
+    <string name="apk_builder_clean" tools:ignore="TypographyEllipsis">Cleaning...</string>
+    <string name="apk_builder_package" tools:ignore="TypographyEllipsis">Packaging...</string>
+    <string name="apk_builder_plugin_version_incompatible">Incompatible version of \"apk builder\".\nDownload it now?</string>
+    <string name="apk_builder_prepare" tools:ignore="TypographyEllipsis">Preparing...</string>
+    <string name="apk_info_device_sdk">Device SDK</string>
+    <string name="apk_info_file_size">File size</string>
+    <string name="apk_info_installed_version">Installed</string>
+    <string name="apk_info_max_sdk">Max SDK</string>
+    <string name="apk_info_min_sdk">Min SDK</string>
+    <string name="apk_info_package_name">Package</string>
+    <string name="apk_info_signature_scheme">Signature</string>
+    <string name="apk_info_target_sdk">Target SDK</string>
+    <string name="blocking_operations_cannot_be_performed_on_the_ui_thread_for_waitforactivity_with_solution">Blocking operations cannot be performed on the UI thread. Try executing waitForActivity in a sub-thread or sub-script, or use setInterval to loop and check the activity</string>
+    <string name="blocking_operations_cannot_be_performed_on_the_ui_thread_for_waitforpackage_with_solution">Blocking operations cannot be performed on the UI thread. Try executing waitForPackage in a sub-thread or sub-script, or use setInterval to loop and check the package</string>
+    <string name="changelog_label_dependency">Dependency</string>
+    <string name="changelog_label_feature">Feature</string>
+    <string name="changelog_label_fix">Fix</string>
+    <string name="changelog_label_hint">Hint</string>
+    <string name="changelog_label_improvement">Improvement</string>
+    <string name="color_library_android_colors">Android color library</string>
+    <string name="color_library_css_colors">CSS color library</string>
+    <string name="color_library_default_colors">Default color library</string>
+    <string name="color_library_identifier_created">Created</string>
+    <string name="color_library_identifier_custom">@string/mt_custom</string>
+    <string name="color_library_identifier_default_colors">@string/text_default</string>
+    <string name="color_library_identifier_intelligent_colors">Intell.</string>
+    <string name="color_library_identifier_material_design_colors">Material</string>
+    <string name="color_library_identifier_palette">Palette</string>
+    <string name="color_library_intelligent_colors">Intelligent color library</string>
+    <string name="color_library_material_design_colors">Material design color library</string>
+    <string name="color_library_title_android_colors">Android colors</string>
+    <string name="color_library_title_css_colors">CSS colors</string>
+    <string name="color_library_title_default_colors">Default colors</string>
+    <string name="color_library_title_intelligent_colors">Intelligent colors</string>
+    <string name="color_library_title_material_design_colors">Material colors</string>
+    <string name="color_library_title_web_colors">WEB colors</string>
+    <string name="color_library_web_colors">WEB color library</string>
+    <string name="color_name_window_background_light">Background light</string>
+    <string name="color_name_window_background_night">Background night</string>
+    <string name="config_abi_options_contains_invalid">Config \"abi\" contains invalid options</string>
+    <string name="config_abi_options_contains_unavailable">Config \"abi\" contains unavailable options</string>
+    <string name="config_lib_options_contains_invalid">Config \"lib\" contains invalid options</string>
+    <string name="config_lib_options_contains_unavailable">Config \"lib\" contains unavailable options</string>
+    <string name="confirm_overwrite_file">File already exists.\nOverwrite?</string>
+    <string name="content_about_app_tips">1. Press and hold the application name (AutoJs6) on the home page to jump to the settings page\n2. Press and hold a certain settings option on the settings page to view detailed information</string>
+    <string name="content_current_theme_color_configured_by_palette">Current theme color %1$s is configured by the color palette</string>
+    <string name="content_description_fab_for_display_manifest">A Floating Action Button widget for displaying the manifest</string>
+    <string name="content_failed_to_determine_index_of_theme_color_item">Failed to determine the index of the theme color item</string>
+    <string name="content_failed_to_locate_library_for_theme_color">Failed to locate the color library for the theme color</string>
+    <string name="content_failed_to_retrieve_released_notes_of_current_language_with_zh_hans_fallback">Failed to retrieve the release notes for the currently displayed language. Please try again later.\n\nCurrently, the release notes for \"简体中文 (zh-Hans)\" are temporarily displayed.</string>
+    <string name="content_github_feedback">A web page will be launched to report an issue.\nAn account for GitHub may be needed.</string>
+    <string name="content_way_of_output_for_recorded_script">Select a way of output for recorded script</string>
+    <string name="crash_feedback">Copy debugging log or exit directly</string>
+    <string name="current_available_abi_options">Current available \"abi\" options</string>
+    <string name="default_script_notification_channel_description">@string/default_script_notification_content</string>
+    <string name="default_script_notification_channel_name">@string/default_script_notification_title</string>
+    <string name="default_script_notification_content">Notification from script</string>
+    <string name="default_script_notification_title">Script notification</string>
+    <string name="default_value_working_directory">/Scripts</string>
+    <string name="description_about_app_and_developer_preference">AutoJs6 is a JavaScript automated tool for android, which is open-source and cloned from \"hyb1996/Auto.js\".\n\nTo ask for help or feedback, go to GitHub issues or join Tencent QQ group 690946137.</string>
+    <string name="description_about_app_tips_preference">1. Press and hold the app icon on the \"About app and developer\" page to jump to AutoJs6 developer options page</string>
+    <string name="description_app_language_preference">Preference for changing the display language of AutoJs6, including exception messages from running scripts.\n\nNote: an app restart may be needed to make language applied as expected.</string>
+    <string name="description_change_working_dir_preference">Change the path of the directory containing scripts</string>
+    <string name="description_check_for_updates_preference">AutoJs6 gets and downloads updates from GitHub.</string>
+    <string name="description_documentation_source_preference">Local docs: Using AutoJs6 build-in files as documentation sources, no network connection required. The content changes as AutoJs6 is updated.\nOnline docs: Using GitHub pages as documentation sources, requiring network connection. The content is always up to date.\n\nNote: To maximize the reading experience of online documents, it is recommended to use a widescreen display device such as a desktop monitor.\nNote: As of version 6.2.0, the documentation is still in the preliminary stages of development, and most of the content has not yet been written or updated.</string>
+    <string name="description_documentation_source_preference_more">The following conditions must be met for dark theme support on document pages:\n1. AutoJs6 has night mode enabled\n2. Android System WebView (or browsers like Google Chrome):\n- Android API Level 29 (Android 10) [Q] and above: version >= 76\n- Android API Level 28 (Android 9) [P] and below: version >= 105</string>
+    <string name="description_extending_js_build_in_objects">Extending JavaScript built-in objects can increase code flexibility and enable richer functionality, but can cause conflicts and even breakage.\nAll scripts have built-in extensions enabled by default when the option is turned on.\nBuilt-in extensions are often insecure, and are not recommended unless the principles and risks of built-in extensions are clearly understood.\nWhen the option is turned off, built-in extensions can still be enabled through the plugins global object, as described in the project documentation.</string>
+    <string name="description_file_extensions_preference">Used to set whether to show file extensions in AutoJs6 file explorer.</string>
+    <string name="description_hidden_files_preference">Used to set whether to show hidden files and folders (usually starting with \".\") in AutoJs6 file explorer.</string>
+    <string name="description_keep_screen_on_when_in_foreground_preference">Preference for keeping the device\'s screen turned on and bright when AutoJs6 is in the foreground.\nTo make it happen only on the homepage among all pages of the AutoJs6 application, choose \"homepage only\" option.</string>
+    <string name="description_launcher_shortcuts">Shortcuts can perform specific actions in AutoJs6. Users can display these shortcuts in a supported launcher and quickly start some tasks or launch an activity, such as reading AutoJs6 application documentation, launching AutoJs6 settings page, and so on.</string>
+    <string name="description_manage_ignored_updates_preference">Click to view or manage list items.\nLong press to remove the list item.</string>
+    <string name="description_night_mode_preference">Night mode (also known as Dark theme) applies to both the Android system UI and apps running on the device, which improves visibility for users with low vision and those who are sensitive to bright light, and makes it easier for anyone to use a device in a low-light environment.\n\nFollow system: AutoJs6 has Night mode settings same as Android system\nAlways on: AutoJs6 keeps Night mode on (regardless of Android system settings)\nAlways off: AutoJs6 keeps Night mode off (regardless of Android system settings)\n\nNote: Follow system option is only for Android API Level 28 (Android 9) [P] and above.</string>
+    <string name="description_night_mode_preference_more">To enable Night mode in Android system:\n- Android API Level 29 (Android 10) [Q] and above: Settings -> Display -> Theme.\n- Android API Level 28 (Android 9) [P]: Developer options -> Night mode.\n\nThe following conditions must to met for applying a Night mode (Dark theme) to web-based content using a WebView component (like AutoJs6 documentation page):\n1. Android System WebView (or browsers like Google Chrome):\n- Android API Level 29 (Android 10) [Q] and above: version >= 76\n- Android API Level 28 (Android 9) [P]: version >= 105\n2. Web-based content in WebView component is adapted to Dark theme (by CSS or Android XML resources and so forth)</string>
+    <string name="description_root_mode_preference">If you have exotic root or abnormal state for root access, you can force set root to root or non-root.</string>
+    <string name="description_root_record_out_file_type_preference">Binary type: non-editable, with the file extension \"auto\"\nJavaScript type: can be edited or copied directly, with the file extension \"js\"</string>
+    <string name="description_stable_mode">Stable mode makes it more stable when getting layout bounds, but some results may be ignored.\nA11y service\'s restart required.</string>
+    <string name="description_theme_color_preference">Theme color is applied to widgets including but not limited to the following ones:\nStatus bar\nAppbar\nFile icon\nTask item icon\nFab\nSettings category title\nSwitch button\n\nNote: As of AutoJs6 version 6.2.0, there has been no difference between primary color, primary dark color and accent color yet.</string>
+    <string name="description_version_histories_preference">View the release version history and key category statistics of AutoJs6 on GitHub.</string>
+    <string name="dialog_button_back">@string/text_back</string>
+    <string name="dialog_button_cancel">Cancel</string>
+    <string name="dialog_button_cancel_download">Cancel</string>
+    <string name="dialog_button_clear_items">Clear</string>
+    <string name="dialog_button_confirm">OK</string>
+    <string name="dialog_button_continue">@string/text_continue</string>
+    <string name="dialog_button_copy">@string/text_copy</string>
+    <string name="dialog_button_default_prefix">Def prefix</string>
+    <string name="dialog_button_details">Details</string>
+    <string name="dialog_button_dismiss">Dismiss</string>
+    <string name="dialog_button_download_with_browser">Browser</string>
+    <string name="dialog_button_file_information">File info</string>
+    <string name="dialog_button_history">History</string>
+    <string name="dialog_button_ignore_current_update">Ignore</string>
+    <string name="dialog_button_join_group">Join group</string>
+    <string name="dialog_button_more">More</string>
+    <string name="dialog_button_open_color_palette">Palette</string>
+    <string name="dialog_button_quit">Quit</string>
+    <string name="dialog_button_remove">Remove</string>
+    <string name="dialog_button_retry">Retry</string>
+    <string name="dialog_button_save">Save</string>
+    <string name="dialog_button_system_settings">System Settings</string>
+    <string name="dialog_button_system_settings_simplified">System</string>
+    <string name="dialog_button_update_now">Update</string>
+    <string name="dialog_button_use_default">Use default</string>
+    <string name="dialog_button_use_palette">Use palette</string>
+    <string name="dialog_button_version_histories">Histories</string>
+    <string name="dialog_button_view_file">View File</string>
+    <string name="dialog_title_color_details">Color details</string>
+    <string name="dialog_title_color_palette">Color palette</string>
+    <string name="dialog_title_theme_color_details">Theme color details</string>
+    <string name="edit_and_run_handle_intent_error">Cannot process file</string>
+    <string name="edit_exit_without_save_warn">The content has not been saved, are you sure to exit?</string>
+    <string name="editable_file_info_byte_count_label">Bytes</string>
+    <string name="editable_file_info_char_count_label">Chars</string>
+    <string name="editable_file_info_file_charset_label">Charset</string>
+    <string name="editable_file_info_file_path_label">Path</string>
+    <string name="editable_file_info_file_size_label">Size</string>
+    <string name="editable_file_info_line_break_label">EOL</string>
+    <string name="editable_file_info_line_count_label">Lines</string>
+    <string name="entry_app_language_auto">Follow system</string>
+    <string name="entry_documentation_source_local">Local docs</string>
+    <string name="entry_documentation_source_online">Online docs</string>
+    <string name="entry_editor_pinch_to_zoom_change_text_size">Change text size</string>
+    <string name="entry_editor_pinch_to_zoom_disable">Disable</string>
+    <string name="entry_editor_pinch_to_zoom_scale_view">Scale view</string>
+    <string name="entry_file_extensions_not_show">Hide all file extensions</string>
+    <string name="entry_file_extensions_show_all">Show all file extensions</string>
+    <string name="entry_file_extensions_show_all_but_executable">Show file extensions (exclude *.js / *.auto)</string>
+    <string name="entry_hidden_files_not_show">Do not show hidden files or folders</string>
+    <string name="entry_hidden_files_show">Show hidden files and folders</string>
+    <string name="entry_keep_screen_on_when_in_foreground_all_pages">All pages</string>
+    <string name="entry_keep_screen_on_when_in_foreground_disabled">Disabled</string>
+    <string name="entry_keep_screen_on_when_in_foreground_homepage_only">Homepage only</string>
+    <string name="entry_night_mode_always_off">Always off</string>
+    <string name="entry_night_mode_always_on">Always on</string>
+    <string name="entry_night_mode_follow_system">Follow system</string>
+    <string name="entry_root_mode_auto_detect">Auto detect root access</string>
+    <string name="entry_root_mode_force_non_root">Force set non-root mode</string>
+    <string name="entry_root_mode_force_root">Force set root mode</string>
+    <string name="entry_root_record_out_file_type_binary">Binary type (non-editable)</string>
+    <string name="entry_root_record_out_file_type_js">JavaScript type (editable)</string>
+    <string name="error_a_runtime_has_been_set">A runtime has been set</string>
+    <string name="error_abandoned_method">Method %s has been abandoned and should not be used</string>
+    <string name="error_action_cannot_be_completed_with_negative_coordinate">The \"%1$s\" operation cannot be completed because the parameter contains negative coordinate values (%2$d, %3$d)</string>
+    <string name="error_activity_is_required_for_ui_exec_mode">An activity is required, which could be provided by running in \"ui\" execution mode</string>
+    <string name="error_an_operation_is_not_implemented">An operation is not implemented</string>
+    <string name="error_app_not_installed">App is not installed</string>
+    <string name="error_app_not_installed_with_name">App is not installed: \"%s\"</string>
+    <string name="error_argument_name_for_class_name_and_member_func_name_cannot_be_nullish">Argument %1$s for %2$s#%3$s cannot be nullish</string>
+    <string name="error_arguments_cannot_be_empty">Arguments cannot be empty</string>
+    <string name="error_arguments_must_be_empty">Arguments must be empty</string>
+    <string name="error_at_least_one_abi_needs_to_be_selected">At least one ABI needs to be selected</string>
+    <string name="error_both_bitmap_and_mat_are_null">Both bitmap and mat are null</string>
+    <string name="error_cannot_be_null">%s cannot be null</string>
+    <string name="error_cannot_connect_to_github">Cannot connect to GitHub</string>
+    <string name="error_cannot_convert_value_into_a_script_runtime_path">Cannot convert %s into a ScriptRuntime path</string>
+    <string name="error_cannot_find_editor_view_from_child_view">Cannot find EditorView from child view: %s</string>
+    <string name="error_cannot_get_download_url">Cannot get downloading URL</string>
+    <string name="error_cannot_rename">Failed to rename</string>
+    <string name="error_cannot_retrieve_battery_state">Cannot retrieve the battery state</string>
+    <string name="error_change_password_error_length">Use more characters for the password</string>
+    <string name="error_change_password_error_match">Those passwords did not match</string>
+    <string name="error_check_for_update">Failed to check for updates</string>
+    <string name="error_colon_must_follow_a_valid_ip_address">Colon must follow a valid IP address</string>
+    <string name="error_compass_cannot_be_null">Compass cannot be null</string>
+    <string name="error_connect_to_remote">Cannot connect to the remote server: %s</string>
+    <string name="error_continuation_resume_called_without_suspend">Method resume() should be called after suspend()</string>
+    <string name="error_continuation_suspend_called_more_than_once">Method suspend() should be only called once</string>
+    <string name="error_corresponding_github_release_may_not_published">Corresponding GitHub release may have not been published yet</string>
+    <string name="error_dot_decimal_notation_num_over_255">Dot-decimal number over 255</string>
+    <string name="error_download_interrupted">Download interrupted</string>
+    <string name="error_email_taken">The e-mail is taken</string>
+    <string name="error_empty_broadcast_selection">At least one broadcast must be selected</string>
+    <string name="error_empty_github_release_assets">No GitHub release assets to download</string>
+    <string name="error_empty_shell_command">Command is empty</string>
+    <string name="error_enable_server">Cannot enable AutoJs6 server: %s</string>
+    <string name="error_excessive_height_for_template_n_region">Excessive height: template [%1$d] > region [%2$d]</string>
+    <string name="error_excessive_width_for_template_n_region">Excessive width: template [%1$d] > region [%2$d]</string>
+    <string name="error_failed_to_apply_current_color_history">Failed to apply current color history</string>
+    <string name="error_failed_to_call_method">Failed to call method "%s"</string>
+    <string name="error_failed_to_call_method_with_cause"><![CDATA[Failed to call method "%1$s": [ %2$s ]]]></string>
+    <string name="error_failed_to_convert_into_drawable">Failed to convert value %s into a Drawable</string>
+    <string name="error_failed_to_grant_shizuku_access">Failed to grant Shizuku access</string>
+    <string name="error_failed_to_instantiate">Failed to instantiate "%s"</string>
+    <string name="error_failed_to_instantiate_with_cause"><![CDATA[Failed to instantiate "%1$s": [ %2$s ]]]></string>
+    <string name="error_failed_to_render_content">Failed to render content</string>
+    <string name="error_failed_to_retrieve_released_notes">Failed to retrieve release notes</string>
+    <string name="error_failed_to_retrieve_version_histories">Failed to retrieve version histories</string>
+    <string name="error_failed_to_retrieve_version_properties_file_to_parse_version_information">Failed to retrieve version.properties to parse version information</string>
+    <string name="error_failed_to_revoke_shizuku_access">Failed to revoke Shizuku access</string>
+    <string name="error_failed_to_run_script">Failed to run script</string>
+    <string name="error_file_in_path_does_not_exist">File in path \"%1$s\" does not exist</string>
+    <string name="error_function_called_in_ui_thread">UI thread cannot be blocked. Try running %s() in sub-thread or sub-script</string>
+    <string name="error_function_called_more_than_once">%s() called more than once</string>
+    <string name="error_get_github_latest_release">Cannot get latest GitHub release</string>
+    <string name="error_handshake_timed_out">Handshake timed out after %d ms</string>
+    <string name="error_illegal_argument" formatted="false">Illegal argument %s: %s</string>
+    <string name="error_illegal_relative_url_argument_without_base">Relative URL cannot be used without base URL</string>
+    <string name="error_illegal_ui_object_result_type" formatted="false">Result type \"%s\" is not supported for UiObject</string>
+    <string name="error_illegal_url_argument" formatted="false">URL must starts with a protocol like \"https://\" and so forth</string>
+    <string name="error_illegal_widget_command" formatted="false">Parameter %s (%s) must be or can be cast to %s type</string>
+    <string name="error_image_has_been_recycled">Image has been recycled</string>
+    <string name="error_images_must_have_the_same_size">Images must have the same size</string>
+    <string name="error_images_must_have_the_same_size_and_type">Images must have the same size and type</string>
+    <string name="error_input_fields_check_failed">Input fields check failed</string>
+    <string name="error_invalid_color">Invalied color</string>
+    <string name="error_invalid_compass">Invalid compass: %s</string>
+    <string name="error_invalid_github_repo">Invalid GitHub repository: %s</string>
+    <string name="error_invalid_ip_address">Invalid IP address</string>
+    <string name="error_invalid_login_credentials">Invalid login credentials</string>
+    <string name="error_invalid_rest_compass">Invalid rest compass: %s</string>
+    <string name="error_invalid_selector_map_element" formatted="false">Invalid selector map element: { %s: %s (%s) }</string>
+    <string name="error_ip_address_should_not_be_empty">IP address can not be empty</string>
+    <string name="error_max_listeners_exceeded">Max listeners exceeded: %d</string>
+    <string name="error_may_not_have_root_access_to_run_auto_file">AutoJs6 may not have root access to run \"auto\" file</string>
+    <string name="error_method_called_with_null_argument" formatted="false">%s() called with null argument: %s</string>
+    <string name="error_method_only_accepts_a_number_of_arguments_in_the_range_n_to_m">Method only accepts a number of arguments in the range [%1$d\.\.%2$d]</string>
+    <string name="error_module_does_not_work_due_to_the_lack_of_necessary_library_files">The \"%s\" module does not work due to the lack of necessary library files</string>
+    <string name="error_no_accessibility_permission">Accessibility service is disabled and the script has stopped</string>
+    <string name="error_no_accessibility_permission_to_capture">Accessibility service is not activated</string>
+    <string name="error_no_accessibility_service">No accessibility service</string>
+    <string name="error_no_applications_available_for_browsing_this_link">No applications available for browsing this link</string>
+    <string name="error_no_applications_available_for_editing_this_file">No applications available for editing this file</string>
+    <string name="error_no_applications_available_for_installing_this_file">No applications available for installing this file</string>
+    <string name="error_no_applications_available_for_playing_this_file">No applications available for playing this file</string>
+    <string name="error_no_applications_available_for_sending_this_file">No applications available for sending this file</string>
+    <string name="error_no_applications_available_for_viewing_this_file">No applications available for viewing this file</string>
+    <string name="error_no_display_over_other_apps_permission">No \"display over other apps\" permission</string>
+    <string name="error_no_permission_to_access_shizuku">No permission to access Shizuku</string>
+    <string name="error_no_post_notifications_permission">No \"post notifications\" permission</string>
+    <string name="error_no_read_phone_state_permission">No \"read phone state\" permission</string>
+    <string name="error_no_screen_capture_permission">No screen capture permission</string>
+    <string name="error_no_storage_rw_permission">No \"storage r/w\" permission</string>
+    <string name="error_no_such_selector_method" formatted="false">No such selector method %s(%s: %s)</string>
+    <string name="error_no_usage_stats_permission">No \"usage stats\" permission</string>
+    <string name="error_no_write_settings_permission">No \"write settings\" permission</string>
+    <string name="error_only_one_child_for_scroll_view">ScrollView can host only one direct child</string>
+    <string name="error_parse_github_release_assets">Failed to parse GitHub release assets</string>
+    <string name="error_parse_version_info">Failed to parse version information</string>
+    <string name="error_pattern_syntax">Invalid pattern syntax</string>
+    <string name="error_port_num_over_65535">Port number over 65535</string>
+    <string name="error_project_main_script_file_with_abs_path_does_not_exist">Project main script file \"%1$s\" does not exist</string>
+    <string name="error_put_value_into_json">Cannot put value %s into JSON</string>
+    <string name="error_regex_find_prev">Cannot find previous with regex</string>
+    <string name="error_repeated_colon_symbol">Repeated colon symbol</string>
+    <string name="error_repeated_dot_symbol">Repeated dot symbol</string>
+    <string name="error_required_property_is_nullish_or_does_not_exist">Required property \"%1$s\" is nullish or does not exist</string>
+    <string name="error_resolved_path_for_a_relative_path_cannot_be_null">Resolved path for \"%1$s\" cannot be null</string>
+    <string name="error_script_is_on_exiting">Script is on exiting</string>
+    <string name="error_selector_method_without_calling">Selector method should be called rather than passed as a parameter: %s</string>
+    <string name="error_selector_result_type_with_compass">Cannot use a compass when result type is selector</string>
+    <string name="error_set_both_icon_res_and_icon">Cannot set both iconRes and icon</string>
+    <string name="error_shizuku_is_not_installed">Shizuku is not installed</string>
+    <string name="error_shizuku_service_may_be_not_running">Shizuku service may be not running</string>
+    <string name="error_shizuku_version_is_not_supported">Shizuku version is not supported</string>
+    <string name="error_the_transformer_for_required_property_cannot_return_nullish">The transformer for required property \"%1$s\" cannot return nullish</string>
+    <string name="error_thread_is_not_alive">Thread is not alive</string>
+    <string name="error_unable_to_use_shizuku_service">Unable to use Shizuku service</string>
+    <string name="error_unacceptable_character">Unacceptable character</string>
+    <string name="error_unknown">Unknown error</string>
+    <string name="error_unknown_algorithm_selector_param">Unknown algorithm selector param: %s</string>
+    <string name="error_unknown_color_name">Unknown color name: %s</string>
+    <string name="error_unknown_element_name">Unknown element name: %1$s</string>
+    <string name="error_unknown_gravity_for">Unknown gravity: %s</string>
+    <string name="error_unknown_operation">Unknown operation</string>
+    <string name="error_unknown_picker_result_type">Unknown result type {name: %s}</string>
+    <string name="error_unknown_picker_result_type_with_params" formatted="false">Unknown result type {name: %s, params: %s}</string>
+    <string name="error_unknown_picker_selector_type" formatted="false">Unknown selector {name: %s, type: %s}</string>
+    <string name="error_unknown_type">Unknown type: %s</string>
+    <string name="error_webp_lossless_quality_not_supported">Format WebP-Lossless cannot be compressed with a quality parameter, use JPEG/PNG/WebP-Lossy instead</string>
+    <string name="file_not_exist_or_readable">File does not exist or readable: %s</string>
+    <string name="foreground_notification_channel_name">AutoJs6 foreground service</string>
+    <string name="foreground_notification_text">Click to launch AutoJs6</string>
+    <string name="foreground_notification_title">AutoJs6 foreground service</string>
+    <string name="format_build_succeeded" formatted="true">Build succeeded.\nFile path: %s</string>
+    <string name="format_debug_bar_title"><![CDATA[Debug [ %s ]]]></string>
+    <string name="format_editor_info" formatted="false">Chars: %d\nLines: %d\nSize: %s</string>
+    <string name="format_file_downloaded" formatted="true">File downloaded to %s</string>
+    <string name="go_to_accessibility_settings"><![CDATA[[Go to] Settings -> Accessibility Services -> AutoJs6 [Enable]]]></string>
+    <string name="hint_find_with_regex">Regex is supported. Use \"$1\" - \"$9\" for captured groups.</string>
+    <string name="hint_long_click_run_to_debug">Long click \"Run\" button to debug</string>
+    <string name="hint_loop_delay">Delay before loop</string>
+    <string name="hint_loop_times">0 for infinite loop</string>
+    <string name="label_latest_used_time">Latest used: %1$s</string>
+    <string name="logger_ver_history_blob_thread_failure">\"Blob\" thread request failed</string>
+    <string name="logger_ver_history_blob_thread_success">\"Blob\" thread request successful, writing offline cache</string>
+    <string name="logger_ver_history_data_loaded">Data loaded</string>
+    <string name="logger_ver_history_initial_content_chosen">Chosen initial content</string>
+    <string name="logger_ver_history_insert_new_entries">Inserting new entries</string>
+    <string name="logger_ver_history_load_local_data">Loading local data</string>
+    <string name="logger_ver_history_local_asset_file">Local asset file</string>
+    <string name="logger_ver_history_local_asset_latest">Local asset file is latest version</string>
+    <string name="logger_ver_history_local_data_empty">Local data is empty</string>
+    <string name="logger_ver_history_local_data_newer_stop_online">Local data is newer, stop analyzing online data</string>
+    <string name="logger_ver_history_no_processing_needed">No processing needed</string>
+    <string name="logger_ver_history_offline_cache_file">Offline cache file</string>
+    <string name="logger_ver_history_offline_cache_latest">Offline cache file is latest version</string>
+    <string name="logger_ver_history_overwrite_date">Overwriting date content</string>
+    <string name="logger_ver_history_overwrite_update_record">Overwriting update record</string>
+    <string name="logger_ver_history_raw_thread_failure">\"Raw\" thread request failed</string>
+    <string name="logger_ver_history_raw_thread_success">\"Raw\" thread request successful, writing offline cache</string>
+    <string name="logger_ver_history_start_blob_thread">Starting \"blob\" fallback request thread</string>
+    <string name="logger_ver_history_start_raw_thread">Starting \"raw\" request thread</string>
     <string name="media_info_album_label">Album</string>
     <string name="media_info_aspect_ratio_label">Aspect ratio</string>
     <string name="media_info_audio_format_label">Audio</string>
@@ -391,36 +554,35 @@
     <string name="mt_custom">Custom</string>
     <string name="no_apk_builder_plugin">APK Builder is not installed</string>
     <string name="no_root_access_for_record">AutoJs6 has no root access to record a script</string>
-    <string name="original_developer_full_name" translatable="false">Stardust</string>
-    <string name="original_developer_nickname" translatable="false">hyb1996</string>
     <string name="prompt_add_ignored_version">Are you sure to ignore current update version?\nYou can manage all ignored versions by app settings.</string>
     <string name="prompt_restart_is_needed_for_docs_source_switch">An app restart is needed to apply new settings</string>
     <string name="prompt_restart_may_be_needed_for_language_switch">An app restart may be needed to make language applied as expected</string>
-    <string name="property_key_app_version_code" translatable="false">VERSION_BUILD</string>
-    <string name="property_key_app_version_name" translatable="false">VERSION_NAME</string>
     <string name="screen_capturer_foreground_notification_channel_name">Screen capturer foreground service</string>
     <string name="screen_capturer_foreground_notification_text">This notification is being displayed for capturing screen</string>
     <string name="screen_capturer_foreground_notification_title">Screen capturer foreground service</string>
     <string name="summary_about_app_tips">Better user experience</string>
-    <string name="summary_compatibility_with_classes_for_ver_4_x">Provide a degree of Java class name compatibility for 4.x versions</string>
+    <string name="summary_all_files_access">Allows AutoJs6 to access all files, including those in external storage</string>
+    <string name="summary_all_files_access_inrt">Allow the application to access all files, including external storage</string>
+    <string name="summary_display_over_other_apps">Allows AutoJs6 to display content over other apps</string>
+    <string name="summary_display_over_other_apps_inrt">Allow the application to display content over other apps</string>
     <string name="summary_enable_a11y_service_with_root_access">Enable accessibility service with root access automatically when needed</string>
     <string name="summary_enable_a11y_service_with_secure_settings">Enable accessibility service with secure settings automatically when needed</string>
     <string name="summary_extending_js_build_in_objects">Increase code flexibility and enable richer functionality by extending JavaScript built-in objects</string>
     <string name="summary_guard_mode">Prevent automation actions from scripts when AutoJs6 is in the foreground</string>
     <string name="summary_not_showing_main_activity">Run script directly without showing main activity</string>
+    <string name="summary_post_notifications_permission">Allows AutoJs6 to create and post notifications</string>
+    <string name="summary_post_notifications_permission_inrt">Allow the application to create and send notifications</string>
     <string name="summary_pre_execute_script">Execute before the script file</string>
     <string name="summary_record_prompt">Show message when starting or stopping recording a script</string>
     <string name="summary_stable_mode">More stable layout analysis but worse code compatibility (a11y service restarting needed)</string>
     <string name="summary_text_launcher_shortcuts">Add shortcuts to launcher</string>
     <string name="summary_use_volume_control_record">Start or stop recording controlled by "Volume Down" key when floating button is showing</string>
     <string name="summary_use_volume_key_to_stop_running_scripts">Press \"Volume Up\" key to stop all running scripts</string>
-    <string name="symbol_colon" translatable="false">:</string>
-    <string name="symbol_question_mark" translatable="false">\?</string>
+    <string name="summary_version_histories_preference">View release version history and statistics</string>
     <string name="text_a11y_service">Accessibility service</string>
     <string name="text_a11y_service_description">Required by the script automatic operation (click, long press, slide, etc.).</string>
     <string name="text_a11y_service_enabled_but_not_running">Accessibility service enabled but not running (Re-enable or reboot the device)</string>
     <string name="text_a11y_service_may_be_needed">Accessibility service may be needed</string>
-    <string name="text_abis" translatable="false">ABIs</string>
     <string name="text_about">About</string>
     <string name="text_about_all_files_access">About all files access</string>
     <string name="text_about_app_and_developer">About app and developer</string>
@@ -429,6 +591,7 @@
     <string name="text_about_functions_feedback">Feedback</string>
     <string name="text_about_functions_licenses">Licenses</string>
     <string name="text_about_functions_update">Update</string>
+    <string name="text_about_functions_version_histories">@string/text_version_histories</string>
     <string name="text_access_has_been_granted">Access has been granted</string>
     <string name="text_act_by_click">Click (click)</string>
     <string name="text_act_by_long_click">Long click (longClick)</string>
@@ -438,9 +601,15 @@
     <string name="text_action">Action</string>
     <string name="text_activity_not_found_for_apk_installing">No APK installer</string>
     <string name="text_adb_tool_needed">ADB tool is needed</string>
+    <string name="text_add_color_library">Add a color library</string>
     <string name="text_alias">alias</string>
+    <string name="text_alias_cannot_be_empty">Alias cannot be empty</string>
+    <string name="text_alias_password">Alias Password</string>
     <string name="text_all_files_access">All files access</string>
     <string name="text_all_files_access_is_needed">\"All files access\" is needed to access script files on the phone</string>
+    <string name="text_all_histories">All histories</string>
+    <string name="text_all_histories_cleared">All histories have been cleared</string>
+    <string name="text_all_items_cleared">All items have been cleared</string>
     <string name="text_already_copied_to_clip">Copied to clipboard</string>
     <string name="text_already_copied_to_clip_but_only_latest_few_items">Already copied to clipboard (only latest %d items)</string>
     <string name="text_already_created">Created</string>
@@ -454,60 +623,25 @@
     <string name="text_app_crashed">AutoJs6 crashed</string>
     <string name="text_app_language">Language</string>
     <string name="text_app_name">App name</string>
-    <string name="text_app_name_accuweather" translatable="false">AccuWeather</string>
-    <string name="text_app_name_adm" translatable="false">ADM</string>
     <string name="text_app_name_alipay">Alipay</string>
     <string name="text_app_name_amap">Amap</string>
-    <string name="text_app_name_appops" translatable="false">App Ops</string>
-    <string name="text_app_name_aquamail" translatable="false">Aqua Mail</string>
-    <string name="text_app_name_autojs" translatable="false">Auto.js</string>
-    <string name="text_app_name_autojs6" translatable="false">@string/app_name</string>
-    <string name="text_app_name_autojspro" translatable="false">AutoJsPro</string>
     <string name="text_app_name_baidumap">BaiduMap</string>
     <string name="text_app_name_bilibili">bilibili</string>
     <string name="text_app_name_brevent">Brevent</string>
     <string name="text_app_name_calendar">Calendar</string>
-    <string name="text_app_name_chrome" translatable="false">Chrome</string>
     <string name="text_app_name_coolapk">CoolApk</string>
     <string name="text_app_name_dianping">Dianping</string>
-    <string name="text_app_name_digical" translatable="false">DigiCal</string>
     <string name="text_app_name_drive">Drive</string>
     <string name="text_app_name_es">ES File Explorer</string>
     <string name="text_app_name_eudic">Eudic</string>
-    <string name="text_app_name_excel" translatable="false">Excel</string>
-    <string name="text_app_name_firefox" translatable="false">Firefox</string>
-    <string name="text_app_name_fx" translatable="false">FX</string>
     <string name="text_app_name_geometric_weather">Geometric Weather</string>
-    <string name="text_app_name_httpcanary" translatable="false">HttpCanary</string>
-    <string name="text_app_name_idlefish" translatable="false">闲鱼</string>
-    <string name="text_app_name_idmplus" translatable="false">IDM+</string>
-    <string name="text_app_name_jd" translatable="false">京东</string>
-    <string name="text_app_name_keep" translatable="false">Keep</string>
     <string name="text_app_name_keep_notes">Keep Notes</string>
-    <string name="text_app_name_magisk" translatable="false">Magisk</string>
     <string name="text_app_name_meituan">Meituan</string>
     <string name="text_app_name_mt">MT Manager</string>
     <string name="text_app_name_mxpro">MX Player Pro</string>
-    <string name="text_app_name_onedrive" translatable="false">OneDrive</string>
-    <string name="text_app_name_packet_capture" translatable="false">Packet Capture</string>
     <string name="text_app_name_parallel_space">Parallel Space</string>
-    <string name="text_app_name_powerpoint" translatable="false">PowerPoint</string>
-    <string name="text_app_name_pulsar_plus" translatable="false">Pulsar+</string>
-    <string name="text_app_name_pure_weather" translatable="false">Pure天气</string>
-    <string name="text_app_name_qq" translatable="false">QQ</string>
     <string name="text_app_name_qqmusic">QQMusic</string>
-    <string name="text_app_name_sdmaid" translatable="false">SD Maid</string>
-    <string name="text_app_name_shizuku" translatable="false">Shizuku</string>
-    <string name="text_app_name_stopapp" translatable="false">小黑屋</string>
-    <string name="text_app_name_taobao" translatable="false">淘宝</string>
-    <string name="text_app_name_trainnote" translatable="false">训记</string>
-    <string name="text_app_name_twitter" translatable="false">Twitter</string>
-    <string name="text_app_name_unionpay" translatable="false">云闪付</string>
-    <string name="text_app_name_via" translatable="false">Via</string>
-    <string name="text_app_name_vysor" translatable="false">Vysor</string>
     <string name="text_app_name_wechat">WeChat</string>
-    <string name="text_app_name_word" translatable="false">Word</string>
-    <string name="text_app_name_zhihu" translatable="false">知乎</string>
     <string name="text_app_shortcut_disabled">This shortcut is disabled</string>
     <string name="text_app_shortcut_docs_long_label">AutoJs6 Docs</string>
     <string name="text_app_shortcut_docs_short_label">Docs</string>
@@ -519,6 +653,7 @@
     <string name="text_app_version_code">App version code</string>
     <string name="text_app_version_name">App version name</string>
     <string name="text_appearance">Appearance</string>
+    <string name="text_at_least_one_certificate_issuer_field_is_not_empty">At least one field from \"Full Name, Organization Name, Organizational Unit, Country Code, State or Province, City or Locality, Street\" must be filled</string>
     <string name="text_attribute">Attribute</string>
     <string name="text_auto_check_for_updates">Auto check for updates</string>
     <string name="text_auto_check_for_updates_and_show_snackbar">Check for updates automatically and show a snackbar on homepage</string>
@@ -526,7 +661,6 @@
     <string name="text_available_windows">Available windows</string>
     <string name="text_back">Back</string>
     <string name="text_broadcast_action">Action</string>
-    <string name="text_broadcast_action_prefix" translatable="false">android.intent.action.</string>
     <string name="text_broadcast_task">Broadcast task</string>
     <string name="text_build_apk">Build APK</string>
     <string name="text_build_succeeded">Build succeeded</string>
@@ -548,28 +682,40 @@
     <string name="text_captured_window_info_type_of_split_screen_divider">Split Screen Divider</string>
     <string name="text_captured_window_info_type_of_system">System</string>
     <string name="text_captured_window_info_type_unknown">Unknown type</string>
+    <string name="text_category_filter">Category filter</string>
     <string name="text_change_working_dir">Change working directory</string>
+    <string name="text_changelog_item_dependency">Some dependency or local library version adjustments</string>
     <string name="text_check_for_updates">Check for updates</string>
+    <string name="text_check_for_updates_while_ignoring_the_local_version">Check for updates (ignore the local version)</string>
+    <string name="text_check_for_updates_while_ignoring_the_local_version_description">Fetch the latest remote version directly when checking for updates</string>
     <string name="text_checking_update" tools:ignore="TypographyEllipsis">Checking for updates...</string>
+    <string name="text_city_or_locality">City or Locality</string>
     <string name="text_class_or_package_name">Class / Package name</string>
     <string name="text_clear">Clear</string>
     <string name="text_clear_file_selection">Clear file selection</string>
     <string name="text_clear_pre_execute_script">Clear pre-execute script</string>
     <string name="text_clear_updates_checked_states">Clear updates checked states</string>
-    <string name="text_clear_updates_checked_states_description" translatable="false">NoNewer, Postponed, Check, AutoCheck</string>
     <string name="text_click_item_to_remove">Click the item to remove</string>
     <string name="text_click_ok_to_go_to_access_settings">Click \"OK\" to go to settings</string>
     <string name="text_click_too_frequently">Frequent operation</string>
     <string name="text_client_mode">Client mode</string>
+    <string name="text_clone_color_library">Clone a color library</string>
     <string name="text_close">Close</string>
     <string name="text_close_floating_button">Close floating button</string>
     <string name="text_code">Code</string>
     <string name="text_code_beautify">Beautify code</string>
+    <string name="text_collapse_all">Collapse all</string>
+    <string name="text_color_library">Color library</string>
+    <string name="text_color_palette">Color palette</string>
     <string name="text_command_already_copied_to_clip">Command copied to clipboard</string>
     <string name="text_comment">Comment</string>
     <string name="text_compatibility">Compatibility</string>
-    <string name="text_compatibility_with_classes_for_ver_4_x">Compatibility with Java classes for version 4.x</string>
+    <string name="text_confidence_level">Confidence</string>
     <string name="text_config">Config</string>
+    <string name="text_confirm_to_clear_all_histories">Are you sure to clear all histories?</string>
+    <string name="text_confirm_to_clear_all_items">Are you sure to clear all items?</string>
+    <string name="text_confirm_to_clear_histories_of">All histories below will be cleared\n\n[ %1$s ]\n\nAre you sure to clear them all?</string>
+    <string name="text_confirm_to_clear_histories_of_all_color_libraries">All histories below will be cleared\n\n[ All color libraries ]\n\nAre you sure to clear them all?</string>
     <string name="text_confirm_to_delete">Are you sure to delete?</string>
     <string name="text_confirm_to_remove">Are you sure to remove?</string>
     <string name="text_connect_to_pc">Connect to PC</string>
@@ -584,8 +730,8 @@
     <string name="text_copy_line">Copy line</string>
     <string name="text_copy_to_clip">Copy to clipboard</string>
     <string name="text_copy_value">Copy value</string>
-    <string name="text_copyright_dynamic" translatable="false">Copyright © 2017-%d All Rights Reserved</string>
-    <string name="text_copyright_sample" translatable="false">Copyright © 2017-2022 All Rights Reserved</string>
+    <string name="text_country_code">Country Code (XX)</string>
+    <string name="text_country_code_must_be_two_capital_letters">Country code must be two capital letters</string>
     <string name="text_current_version">Current version</string>
     <string name="text_daily_task">Daily task</string>
     <string name="text_date">Date</string>
@@ -601,8 +747,11 @@
     <string name="text_debug_step_into">Step into</string>
     <string name="text_debug_step_out">Step out</string>
     <string name="text_debug_step_over">Step over</string>
+    <string name="text_default">Default</string>
+    <string name="text_default_key_store">Default Keystore</string>
     <string name="text_default_prefix">Default prefix</string>
     <string name="text_delete">Delete</string>
+    <string name="text_delete_all">Delete All</string>
     <string name="text_delete_line">Delete line</string>
     <string name="text_details">Details</string>
     <string name="text_developer_details_under_development">Developer details is under development</string>
@@ -610,19 +759,19 @@
     <string name="text_device_brand">Device brand</string>
     <string name="text_device_hardware_name">Device hardware name</string>
     <string name="text_device_hardware_serial_number">Device hardware serial number</string>
-    <string name="text_device_imei" translatable="false">IMEI</string>
     <string name="text_device_manufacturer">Device manufacturer</string>
     <string name="text_device_model">Device model</string>
     <string name="text_device_name">Device name</string>
     <string name="text_device_product_name">Device product name</string>
+    <string name="text_device_screen_resolution">Device screen resolution</string>
     <string name="text_directly_download">Download now</string>
     <string name="text_directory">Directory</string>
     <string name="text_display_over_other_app">Display over other apps</string>
     <string name="text_display_over_other_app_is_recommended">\"Display over other apps\" permission is recommended to make all widgets displayed properly</string>
     <string name="text_disposable_task">Disposable task</string>
     <string name="text_disposable_task_time_before_now">Time should be later than now</string>
-    <string name="text_do_not_ask_again_for_this_version">Don’t ask again for this version</string>
-    <string name="text_do_not_show_again">Don\'t show again</string>
+    <string name="text_do_not_ask_again_for_this_version">Don\'t ask again for this version</string>
+    <string name="text_do_not_show_again">Do not show again</string>
     <string name="text_documentation">Documents</string>
     <string name="text_documentation_source">Documentation source</string>
     <string name="text_done">Done</string>
@@ -644,7 +793,6 @@
     <string name="text_email_cannot_be_empty">E-mail cannot be empty</string>
     <string name="text_email_format_error">Invalid e-mail format</string>
     <string name="text_empty_release_note">No release note</string>
-    <string name="text_en_import" translatable="false">import</string>
     <string name="text_enable_a11y_service">Enable accessibility service</string>
     <string name="text_enable_a11y_service_with_root_access_automatically">Enable accessibility service with root access automatically</string>
     <string name="text_enable_a11y_service_with_root_access_timeout">Enable accessibility service with root access timed out</string>
@@ -653,11 +801,13 @@
     <string name="text_error">Error</string>
     <string name="text_error_copy_file" formatted="true">Failed to copy file: %s</string>
     <string name="text_error_report">Bug report</string>
+    <string name="text_estimated">Estimated</string>
     <string name="text_execute">Execute</string>
     <string name="text_execute_code">Execute code</string>
     <string name="text_execution_finished" formatted="false">[%s] finished in %s seconds.\n</string>
     <string name="text_exit">Exit</string>
     <string name="text_exit_directly">Exit</string>
+    <string name="text_expand_all">Expand all</string>
     <string name="text_export">Export</string>
     <string name="text_exported">Exported</string>
     <string name="text_extending_js_build_in_objects">Extending JavaScript build-in objects</string>
@@ -666,6 +816,7 @@
     <string name="text_failed_to_build">Failed to build</string>
     <string name="text_failed_to_copy">Failed to copy</string>
     <string name="text_failed_to_create">Failed to create</string>
+    <string name="text_failed_to_create_key_store">Failed to create signature key</string>
     <string name="text_failed_to_delete">Failed to delete</string>
     <string name="text_failed_to_disable_a11y_service">Failed to disable accessibility service</string>
     <string name="text_failed_to_download">Failed to download</string>
@@ -677,6 +828,7 @@
     <string name="text_failed_to_grant_access">Failed to grant access</string>
     <string name="text_failed_to_grant_draw_overlays_permission">Failed to grant display over other apps permission</string>
     <string name="text_failed_to_import">Failed to import</string>
+    <string name="text_failed_to_locate">Failed to locate</string>
     <string name="text_failed_to_login">Failed to login</string>
     <string name="text_failed_to_register">Failed to register</string>
     <string name="text_failed_to_report">Failed to submit</string>
@@ -684,22 +836,29 @@
     <string name="text_failed_to_send_log_entries">Failed to send log entries</string>
     <string name="text_failed_to_write_file">Failed to write file</string>
     <string name="text_file">File</string>
+    <string name="text_file_details">File details</string>
     <string name="text_file_exists">File already exists</string>
+    <string name="text_file_explorer">File explorer</string>
+    <string name="text_file_extensions_title">File extensions</string>
     <string name="text_file_name">File name</string>
-    <string name="text_file_not_exists">File doesn\'t exist</string>
+    <string name="text_file_not_exists">File does not exist</string>
+    <string name="text_file_path">File Path</string>
     <string name="text_file_with_abs_path_is_not_an_executable_script">File \"%1$s\" is not an executable script</string>
+    <string name="text_filename_cannot_be_empty">Filename cannot be empty</string>
+    <string name="text_filename_cannot_contain_invalid_character">Filename cannot contain the following characters: \\ / : * ? &quot; &lt; &gt; |</string>
+    <string name="text_filename_is_too_long">Filename is too long</string>
     <string name="text_files_transfer">Files transfer</string>
     <string name="text_find">Find</string>
     <string name="text_find_java_classes">Find Java classes</string>
     <string name="text_find_next_simplified">Next</string>
     <string name="text_find_or_replace">Find / Replace</string>
     <string name="text_find_prev_simplified">Prev</string>
+    <string name="text_first_and_last_name">Full Name</string>
     <string name="text_floating_button">Floating button</string>
     <string name="text_force_stop">Force stop</string>
     <string name="text_foreground_service">Foreground service</string>
     <string name="text_foreground_service_description">Foreground services perform operations that are noticeable to the user.\nForeground services show a status bar notification, so that users are actively aware that your app is performing a task in the foreground and is consuming system resources.\nThe notification cannot be dismissed unless the service is either stopped or removed from the foreground.\nNotification may be set low priority, even be turned off, by long-pressing notification.</string>
     <string name="text_formatting_completed">Formatting completed</string>
-    <string name="text_full_version_info" translatable="false">%1$s (%2$d)</string>
     <string name="text_function">Function</string>
     <string name="text_fx_keyboard">Fx keyboard</string>
     <string name="text_generate">Generate</string>
@@ -711,17 +870,19 @@
     <string name="text_grant_autojs6_access_in_shizuku_app">Grant AutoJs6 access in Shizuku app</string>
     <string name="text_granted">Granted</string>
     <string name="text_guard_mode">Guard mode</string>
-    <string name="text_half_ellipsis" translatable="false" formatted="true">...</string>
     <string name="text_help">Help</string>
     <string name="text_hidden_files_description">Whether the hidden files and folders show or not in file explorer. A file or folder is considered to be hidden if its name begins with a period character (\".\").</string>
     <string name="text_hidden_files_title">Hidden files and folders</string>
     <string name="text_hide">Hide</string>
     <string name="text_hide_button">Hide button</string>
+    <string name="text_hide_node">Hide this node</string>
+    <string name="text_hide_same_frame_nodes">Hide same frame nodes</string>
     <string name="text_histories">Histories</string>
     <string name="text_icon">Icon</string>
     <string name="text_ignore_battery_optimizations">Ignore battery optimizations</string>
     <string name="text_ignored_updates">Ignored updates</string>
     <string name="text_import">Import</string>
+    <string name="text_import_color_library">Import a color library</string>
     <string name="text_import_script">Import script(s)</string>
     <string name="text_import_succeed">Import succeeded</string>
     <string name="text_import_to_my_scripts">Import to \"my scripts\"</string>
@@ -745,6 +906,11 @@
     <string name="text_jump_to_line_start">Jump to line start</string>
     <string name="text_jump_to_start">Jump to start</string>
     <string name="text_keep_screen_on_when_in_foreground">Keep screen on when in foreground</string>
+    <string name="text_key_alias">Alias</string>
+    <string name="text_key_store">Keystore</string>
+    <string name="text_key_store_has_been_verified">Keystore has been verified</string>
+    <string name="text_key_store_has_not_been_verified">Keystore has not been verified</string>
+    <string name="text_key_store_password">Key Store Password</string>
     <string name="text_label_name">Label</string>
     <string name="text_last_updates_checked_time">Last checked: %s</string>
     <string name="text_latest_activity">Latest activity</string>
@@ -754,7 +920,9 @@
     <string name="text_launcher_shortcuts">Launcher shortcuts</string>
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">Inspecting layout...</string>
     <string name="text_licenses">Open Sources Licenses</string>
+    <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">Trying a fallback solution...</string>
     <string name="text_loading_with_dots" tools:ignore="TypographyEllipsis">Loading...</string>
+    <string name="text_locate_current_theme_color">Locate current theme color</string>
     <string name="text_log">Log</string>
     <string name="text_logging_in">Logging in</string>
     <string name="text_login">Login</string>
@@ -769,6 +937,7 @@
     <string name="text_manage">Manage</string>
     <string name="text_manage_a11y_service">Manage accessibility service</string>
     <string name="text_manage_ignored_updates">Manage ignored updates</string>
+    <string name="text_manage_key_store">Manage Keystore</string>
     <string name="text_min_version">Minimum version</string>
     <string name="text_min_version_of_vscode_vsc_ext">Minimum version of VSCode extension</string>
     <string name="text_mobile_qq_not_installed">\"Mobile QQ\" not installed</string>
@@ -778,7 +947,10 @@
     <string name="text_multiple_options">Multiple options</string>
     <string name="text_name">Name</string>
     <string name="text_need_to_enable_a11y_service">Need to enable accessibility service</string>
+    <string name="text_new_color_library">New color library</string>
     <string name="text_new_file">New file</string>
+    <string name="text_new_intelligent_color_library">New intelligent color library</string>
+    <string name="text_new_key_store">New Key Store</string>
     <string name="text_new_path">New path</string>
     <string name="text_new_path_is_same_as_old_path">New path is same as old path</string>
     <string name="text_new_project">New project</string>
@@ -813,20 +985,93 @@
     <string name="text_open_with">Open with</string>
     <string name="text_operation_is_completed">Operation is completed</string>
     <string name="text_options">Options</string>
+    <string name="text_organization">Organization Name</string>
+    <string name="text_organizational_unit">Organizational Unit</string>
     <string name="text_original_developer">Original developer</string>
     <string name="text_others">Others</string>
     <string name="text_output_apk_path">APK output path</string>
     <string name="text_package_name">Package name</string>
+    <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">Package name (computing...)</string>
     <string name="text_password">Password</string>
     <string name="text_password_cannot_be_empty">Password cannot be empty</string>
+    <string name="text_password_requires_at_least_n_characters">Password must be at least %d characters long</string>
     <string name="text_paste">Paste</string>
     <string name="text_path_is_empty">Path is empty</string>
     <string name="text_pc_server_address">PC server address</string>
+    <string name="text_permission_desc_access_coarse_location">Allow the app to access approximate location via network</string>
+    <string name="text_permission_desc_access_fine_location">Allow the app to access precise location via GPS</string>
+    <string name="text_permission_desc_access_location_extra_commands">Allow the app to access extra commands for location providers</string>
+    <string name="text_permission_desc_access_network_state">Allow the app to view network connection status</string>
+    <string name="text_permission_desc_access_wifi_state">Allow the app to access Wi-Fi state</string>
+    <string name="text_permission_desc_billing">Allow the app to perform in-app purchases</string>
+    <string name="text_permission_desc_bluetooth">Allow the app to access Bluetooth devices</string>
+    <string name="text_permission_desc_bluetooth_admin">Allow the app to configure Bluetooth devices</string>
+    <string name="text_permission_desc_broadcast_close_system_dialogs">Allow the app to send an intent to close system dialogs</string>
+    <string name="text_permission_desc_call_phone">Allow the app to make phone calls</string>
+    <string name="text_permission_desc_camera">Allow the app to access the camera</string>
+    <string name="text_permission_desc_capture_video_output">Allow the app to capture video output</string>
+    <string name="text_permission_desc_change_network_state">Allow the app to change network state</string>
+    <string name="text_permission_desc_change_wifi_multicast_state">Allow the app to change Wi-Fi multicast state</string>
+    <string name="text_permission_desc_change_wifi_state">Allow the app to change Wi-Fi state</string>
+    <string name="text_permission_desc_disable_keyguard">Allow the app to disable screen lock</string>
+    <string name="text_permission_desc_dump">Allow the app to dump system information</string>
+    <string name="text_permission_desc_expand_status_bar">Allow the app to expand/collapse status bar</string>
+    <string name="text_permission_desc_flashlight">Allow the app to control the flashlight</string>
+    <string name="text_permission_desc_foreground_service">Allow the app to run foreground services</string>
+    <string name="text_permission_desc_foreground_service_media_projection">Allow the app to use screen recording and media projection in foreground services</string>
+    <string name="text_permission_desc_foreground_service_special_use">Allow the app to perform special operations in foreground services</string>
+    <string name="text_permission_desc_get_accounts">Allow the app to access accounts on the device</string>
+    <string name="text_permission_desc_install_shortcut">Allow the app to install shortcuts</string>
+    <string name="text_permission_desc_interact_across_users_full">Allow the app to interact across users</string>
+    <string name="text_permission_desc_internet">Allow the app to access the internet</string>
+    <string name="text_permission_desc_kill_background_processes">Allow the app to terminate background processes</string>
+    <string name="text_permission_desc_manage_external_storage">Allow the app to manage all files in external storage</string>
+    <string name="text_permission_desc_manage_users">Allow the app to manage users</string>
+    <string name="text_permission_desc_modify_audio_settings">Allow the app to modify audio settings</string>
+    <string name="text_permission_desc_mount_format_filesystems">Allow the app to format external storage</string>
+    <string name="text_permission_desc_mount_unmount_filesystems">Allow the app to mount/unmount file systems</string>
+    <string name="text_permission_desc_nfc">Allow the app to communicate with NFC devices</string>
+    <string name="text_permission_desc_post_notifications">Allow the app to post notifications</string>
+    <string name="text_permission_desc_query_all_packages">Allow the app to query all packages</string>
+    <string name="text_permission_desc_read_calendar">Allow the app to read calendar events</string>
+    <string name="text_permission_desc_read_contacts">Allow the app to read contacts</string>
+    <string name="text_permission_desc_read_external_storage">Allow the app to read from external storage</string>
+    <string name="text_permission_desc_read_media_audio">Allow the app to read audio files from shared storage</string>
+    <string name="text_permission_desc_read_media_images">Allow the app to read image files from shared storage</string>
+    <string name="text_permission_desc_read_media_video">Allow the app to read video files from shared storage</string>
+    <string name="text_permission_desc_read_phone_state">Allow the app to read phone state and identity</string>
+    <string name="text_permission_desc_read_privileged_phone_state">Allow the app to access all phone state information</string>
+    <string name="text_permission_desc_read_sms">Allow the app to read SMS messages</string>
+    <string name="text_permission_desc_receive_boot_completed">Allow the app to receive broadcast when device boot completes</string>
+    <string name="text_permission_desc_receive_sms">Allow the app to receive SMS messages</string>
+    <string name="text_permission_desc_record_audio">Allow the app to record audio</string>
+    <string name="text_permission_desc_reorder_tasks">Allow the app to reorder running applications</string>
+    <string name="text_permission_desc_request_delete_packages">Allow the app to request deletion of packages</string>
+    <string name="text_permission_desc_request_ignore_battery_optimizations">Allow the app to request ignoring battery optimizations</string>
+    <string name="text_permission_desc_request_install_packages">Allow the app to request installation of other apps</string>
+    <string name="text_permission_desc_schedule_exact_alarm">Allow the app to schedule time-precise operations</string>
+    <string name="text_permission_desc_send_sms">Allow the app to send SMS messages</string>
+    <string name="text_permission_desc_set_wallpaper">Allow the app to set wallpaper</string>
+    <string name="text_permission_desc_set_wallpaper_hints">Allow the app to set wallpaper size hints</string>
+    <string name="text_permission_desc_shizuku">Allow the app to interact with the system with elevated permissions via Shizuku service</string>
+    <string name="text_permission_desc_system_alert_window">Allow the app to display over other apps</string>
+    <string name="text_permission_desc_termux_run_command">Allow running commands (specific to Termux app)</string>
+    <string name="text_permission_desc_uninstall_shortcut">Allow the app to uninstall shortcuts</string>
+    <string name="text_permission_desc_unlimited_toasts">Allow the app to show unlimited Toast notifications</string>
+    <string name="text_permission_desc_use_exact_alarm">Allow the app to schedule exact alarms or event reminders</string>
+    <string name="text_permission_desc_vibrate">Allow the app to control phone vibration</string>
+    <string name="text_permission_desc_wake_lock">Allow the app to prevent the phone from going to sleep</string>
+    <string name="text_permission_desc_write_calendar">Allow the app to add or modify calendar events</string>
+    <string name="text_permission_desc_write_contacts">Allow the app to modify contacts</string>
+    <string name="text_permission_desc_write_external_storage">Allow the app to write to external storage</string>
+    <string name="text_permission_desc_write_secure_settings">Allow the app to read/write secure system settings</string>
+    <string name="text_permission_desc_write_settings">Allow the app to modify system settings</string>
     <string name="text_permission_granted">Permission granted</string>
     <string name="text_permission_granted_failed_with_root">Failed to grant permission (with root)</string>
     <string name="text_permission_granted_failed_with_shizuku">Failed to grant permission (with Shizuku)</string>
     <string name="text_permission_granted_with_root">Permission granted (with root)</string>
     <string name="text_permission_granted_with_shizuku">Permission granted (with Shizuku)</string>
+    <string name="text_permission_package_usage_stats">Allow the app to access usage statistics of other apps</string>
     <string name="text_permission_revoked">Permission revoked</string>
     <string name="text_permission_revoked_failed_with_root">Failed to revoke permission (with root)</string>
     <string name="text_permission_revoked_failed_with_shizuku">Failed to revoke permission (with Shizuku)</string>
@@ -841,10 +1086,11 @@
     <string name="text_please_choose">Please choose</string>
     <string name="text_please_choose_a_script">Choose a script</string>
     <string name="text_please_input_name">Input name</string>
+    <string name="text_please_wait" tools:ignore="TypographyEllipsis">Please wait...</string>
+    <string name="text_please_wait_a_moment_before_trying_again" tools:ignore="TypographyEllipsis">Please wait a moment before trying again...</string>
     <string name="text_pointer_location">Pointer location</string>
     <string name="text_pointer_location_toggle_failed_with_hint">Toggle \"pointer location\" failed.\nRoot access is required.</string>
     <string name="text_post_notifications_permission">Post notifications</string>
-    <string name="text_powered_by_autojs" translatable="false">Powered by AutoJs6</string>
     <string name="text_pre_execute_script">Pre-execute script</string>
     <string name="text_preparing" tools:ignore="TypographyEllipsis">Preparing...</string>
     <string name="text_preset_dialog_content">Preset dialog content</string>
@@ -853,6 +1099,7 @@
     <string name="text_press_again_to_exit">Press again to exit</string>
     <string name="text_press_back_or_vol_down_to_close_window">To close, press \"Back\" or \"Volume Down\"</string>
     <string name="text_preview">Preview</string>
+    <string name="text_process_log">Process log</string>
     <string name="text_processing">Processing</string>
     <string name="text_project">Project</string>
     <string name="text_project_location">Project location</string>
@@ -892,7 +1139,6 @@
     <string name="text_restart_app">Restart</string>
     <string name="text_result">Result</string>
     <string name="text_revoke_autojs6_access_in_shizuku_app">Revoke AutoJs6 access in Shizuku app</string>
-    <string name="text_root" translatable="false">Root</string>
     <string name="text_root_mode_title">Force set root check</string>
     <string name="text_run">Run</string>
     <string name="text_run_on_battery_change">On battery changed</string>
@@ -916,12 +1162,7 @@
     <string name="text_run_simplified">Run</string>
     <string name="text_running_task">Running task</string>
     <string name="text_sample">Samples</string>
-    <string name="text_sample_button" translatable="false">Hello</string>
-    <string name="text_sample_file_date" translatable="false">2023-04-02 22:54</string>
-    <string name="text_sample_file_path" translatable="false">/Scripts/My_First_Project/main.js</string>
-    <string name="text_sample_file_size" translatable="false">18 KB</string>
     <string name="text_sample_name">Running service</string>
-    <string name="text_sample_string" translatable="false">Sample string</string>
     <string name="text_save">Save</string>
     <string name="text_save_and_exit">Save and exit</string>
     <string name="text_save_simplified">Save</string>
@@ -929,6 +1170,9 @@
     <string name="text_script_record">Script recording</string>
     <string name="text_script_running">Script running</string>
     <string name="text_search">Search</string>
+    <string name="text_search_all_colors">Search all colors</string>
+    <string name="text_search_color">Search color</string>
+    <string name="text_search_help">Search help</string>
     <string name="text_select">Select</string>
     <string name="text_select_by_exists">If clip exists (exists)</string>
     <string name="text_select_by_find_one">Until find one (findOne)</string>
@@ -945,124 +1189,41 @@
     <string name="text_set_as_working_dir">Set as working dir</string>
     <string name="text_set_breakpoint">Set a breakpoint</string>
     <string name="text_settings">Settings</string>
-    <string name="text_share_app" translatable="false">AutoJs6:\n&url_github_autojs6;</string>
     <string name="text_shizuku_access">Shizuku access</string>
     <string name="text_shizuku_access_description">Shizuku makes it possible to uses system API with ADB privileges</string>
     <string name="text_shizuku_service_may_need_to_be_run_first">Shizuku service may need to be run first</string>
-    <string name="text_should_never_happen" translatable="false">Should never happen</string>
     <string name="text_should_not_be_empty">Text cannot be empty</string>
     <string name="text_show_layout_bounds">View in layout bounds</string>
     <string name="text_show_layout_hierarchy">View in layout hierarchy</string>
     <string name="text_show_widget_information">Show widget information</string>
+    <string name="text_signature_algorithm">Signature Algorithm</string>
+    <string name="text_signature_configuration">Signature Configuration</string>
+    <string name="text_signature_scheme">Signature Scheme</string>
     <string name="text_size">Size</string>
     <string name="text_some_items_exported">%d items exported</string>
     <string name="text_source_file_path">Source code path</string>
+    <string name="text_special_permissions">Special permissions</string>
     <string name="text_stable_mode">Stable mode</string>
     <string name="text_star">Star</string>
     <string name="text_start_record">Start recording</string>
     <string name="text_start_running">Running</string>
+    <string name="text_state_or_province">State or Province</string>
     <string name="text_stop">Stop</string>
+    <string name="text_street">Street</string>
+    <string name="text_successfully_created_key_store">Successfully created signature key</string>
     <string name="text_supported_abis_short">ABIs</string>
     <string name="text_supported_abis_short_32bit">ABIs (32-bit)</string>
     <string name="text_supported_abis_short_64bit">ABIs (64-bit)</string>
     <string name="text_supported_libraries_short">Libraries</string>
-    <string name="text_jks" translatable="false">JKS</string>
-    <string name="text_bks" translatable="false">BKS</string>
-    <string name="text_default_alias" translatable="false">key0</string>
-    <string name="text_default_validity_years" translatable="false">25</string>
-    <string name="text_default_country_code" translatable="false">CN</string>
-    <string name="text_str_colon_space_str_formatter" translatable="false">%s: %s</string>
-    <string name="text_signature_configuration">Signature Configuration</string>
-    <string name="text_key_store">Keystore</string>
-    <string name="text_default_key_store">Default Keystore</string>
-    <string name="text_manage_key_store">Manage Keystore</string>
-    <string name="text_signature_scheme">Signature Scheme</string>
-    <string name="text_new_key_store">New Key Store</string>
-    <string name="text_key_store_password">Key Store Password</string>
-    <string name="text_key_alias">Alias</string>
-    <string name="text_alias_password">Alias Password</string>
-    <string name="text_signature_algorithm">Signature Algorithm</string>
-    <string name="text_validity_years">Validity (Years)</string>
-    <string name="text_first_and_last_name">Full Name</string>
-    <string name="text_organization">Organization Name</string>
-    <string name="text_organizational_unit">Organizational Unit</string>
-    <string name="text_country_code">Country Code (XX)</string>
-    <string name="text_state_or_province">State or Province</string>
-    <string name="text_city_or_locality">City or Locality</string>
-    <string name="text_street">Street</string>
-    <string name="text_filename_cannot_be_empty">Filename cannot be empty</string>
-    <string name="text_filename_cannot_contain_invalid_character">Filename cannot contain the following characters: \\ / : * ? &quot; &lt; &gt; |</string>
-    <string name="text_filename_is_too_long">Filename is too long</string>
-    <string name="text_password_requires_at_least_n_characters">Password must be at least %d characters long</string>
-    <string name="text_alias_cannot_be_empty">Alias cannot be empty</string>
-    <string name="text_validity_years_cannot_be_empty">Validity years cannot be empty</string>
-    <string name="text_validity_years_cannot_be_zero">Validity years cannot be zero</string>
-    <string name="text_country_code_must_be_two_capital_letters">Country code must be two capital letters</string>
-    <string name="text_at_least_one_certificate_issuer_field_is_not_empty">At least one field from \"Full Name, Organization Name, Organizational Unit, Country Code, State or Province, City or Locality, Street\" must be filled</string>
-    <string name="text_successfully_created_key_store">Successfully created signature key</string>
-    <string name="text_failed_to_create_key_store">Failed to create signature key</string>
-    <string name="text_key_store_has_not_been_verified">Keystore has not been verified</string>
-    <string name="text_key_store_has_been_verified">Keystore has been verified</string>
-    <string name="text_verify">Verify</string>
-    <string name="text_delete_all">Delete All</string>
-    <string name="text_unverified">Unverified</string>
-    <string name="text_verified">Verified</string>
-    <string name="text_verify_key_store">Verify Keystore</string>
-    <string name="text_verify_success">Verification successful</string>
-    <string name="text_verify_failed">Verification failed</string>
-    <string name="text_file_path">File Path</string>
     <string name="text_supported_permissions_short">Permissions</string>
-    <string name="text_permission_access_wifi_state">Allow the app to access Wi-Fi state</string>
-    <string name="text_permission_write_external_storage">Allow the app to write to external storage</string>
-    <string name="text_permission_read_external_storage">Allow the app to read from external storage</string>
-    <string name="text_permission_read_media_images">Allow the app to read image files from shared storage</string>
-    <string name="text_permission_read_media_video">Allow the app to read video files from shared storage</string>
-    <string name="text_permission_read_media_audio">Allow the app to read audio files from shared storage</string>
-    <string name="text_permission_manage_external_storage">Allow the app to manage all files in external storage</string>
-    <string name="text_permission_broadcast_close_system_dialogs">Allow the app to send an intent to close system dialogs</string>
-    <string name="text_permission_read_privileged_phone_state">Allow the app to access all phone state information</string>
-    <string name="text_permission_install_shortcut">Allow the app to install shortcuts</string>
-    <string name="text_permission_uninstall_shortcut">Allow the app to uninstall shortcuts</string>
-    <string name="text_permission_request_install_packages">Allow the app to request installation of other apps</string>
-    <string name="text_permission_wake_lock">Prevent the phone from going to sleep</string>
-    <string name="text_permission_use_exact_alarm">Allow the app to schedule exact alarms or event reminders</string>
-    <string name="text_permission_schedule_exact_alarm">Allow the app to schedule time-precise operations</string>
-    <string name="text_permission_vibrate">Allow the app to control phone vibration</string>
-    <string name="text_permission_internet">Allow the app to access the internet</string>
-    <string name="text_permission_access_network_state">Allow the app to view network connection status</string>
-    <string name="text_permission_system_alert_window">Allow the app to display over other apps</string>
-    <string name="text_permission_reorder_tasks">Allow the app to reorder running tasks</string>
-    <string name="text_permission_request_ignore_battery_optimizations">Allow the app to request ignoring battery optimizations</string>
-    <string name="text_permission_receive_boot_completed">Allow the app to receive broadcast when device boot completes</string>
-    <string name="text_permission_post_notifications">Allow the app to post notifications</string>
-    <string name="text_permission_foreground_service">Allow the app to run foreground services</string>
-    <string name="text_permission_foreground_service_media_projection">Allow the app to use screen recording and media projection in foreground services</string>
-    <string name="text_permission_foreground_service_special_use">Allow the app to perform special operations in foreground services</string>
-    <string name="text_permission_unlimited_toasts">Allow the app to show unlimited Toast notifications</string>
-    <string name="text_permission_capture_video_output">Allow the app to capture video output</string>
-    <string name="text_permission_dump">Allow the app to dump system information</string>
-    <string name="text_permission_query_all_packages">Allow the app to query all packages</string>
-    <string name="text_permission_package_usage_stats">Allow the app to access usage statistics of other apps</string>
-    <string name="text_permission_write_settings">Allow the app to modify system settings</string>
-    <string name="text_permission_write_secure_settings">Allow the app to read/write secure system settings</string>
-    <string name="text_permission_manage_users">Allow the app to manage users</string>
-    <string name="text_permission_interact_across_users_full">Allow the app to interact across users</string>
-    <string name="text_permission_access_coarse_location">Allow the app to access approximate location via network</string>
-    <string name="text_permission_access_fine_location">Allow the app to access precise location via GPS</string>
-    <string name="text_permission_record_audio">Allow the app to record audio</string>
-    <string name="text_permission_run_command">Specific to Termux app, allow running commands</string>
-    <string name="text_permission_read_phone_state">Allow the app to read phone state and identity</string>
-    <string name="text_permission_read_sms">Allow the app to read SMS</string>
-    <string name="text_permission_shizuku">Allow the app to interact with the system with elevated permissions via Shizuku service</string>
+    <string name="text_switch_to_legacy_layout">Switch to legacy layout</string>
+    <string name="text_switch_to_new_layout">Switch to new layout</string>
     <string name="text_switch_window">Switch window</string>
     <string name="text_symbols_settings">Symbols settings</string>
     <string name="text_tailor_made_developer">Tailor-made developer</string>
     <string name="text_task">Task</string>
     <string name="text_text_size">Text size</string>
     <string name="text_text_size_current_value" formatted="true">Text size: %d</string>
-    <string name="text_text_size_default_value" translatable="false">14</string>
-    <string name="text_text_size_max_value" translatable="false">96</string>
-    <string name="text_text_size_min_value" translatable="false">4</string>
     <string name="text_the_following_solutions_can_be_referred_to">The following solutions can be referred to</string>
     <string name="text_theme_color">Theme color</string>
     <string name="text_time">Time</string>
@@ -1074,11 +1235,13 @@
     <string name="text_unable_to_build_apk_as_autojs6_does_not_include_selected_abi">The selected ABI \"%s\" cannot be used to create a packaged application, because the current version of AutoJs6 does not include the above ABI.</string>
     <string name="text_unavailable">Unavailable</string>
     <string name="text_unavailable_abi_for">ABI \"%s\" is unavailable</string>
+    <string name="text_under_development">Under development</string>
     <string name="text_under_development_content">The feature will be ready to use in the next few updates</string>
-    <string name="text_under_development_title">Under development</string>
+    <string name="text_under_development_title">@string/text_under_development</string>
     <string name="text_undo">Undo</string>
     <string name="text_undo_simplified">Undo</string>
     <string name="text_unknown">Unknown</string>
+    <string name="text_unverified">Unverified</string>
     <string name="text_updates">Updates</string>
     <string name="text_updates_checked_states_cleared">Updates checked states cleared</string>
     <string name="text_updates_snack_bar_act_later">Later</string>
@@ -1086,6 +1249,7 @@
     <string name="text_usage_stats_permission">Usage stats access</string>
     <string name="text_usage_stats_permission_description">Provides access to device usage history and statistics which results in currentPackage() a more accurate result</string>
     <string name="text_use_android_n_shortcut">Use Android 7.0 shortcut</string>
+    <string name="text_use_default_icon">Use default icon</string>
     <string name="text_use_volume_control_record">Use "Volume Down" key to control recording</string>
     <string name="text_use_volume_key_to_control_script_running">Use \"Volume Up\" key to control the script running</string>
     <string name="text_username">Username</string>
@@ -1093,35 +1257,32 @@
     <string name="text_using_desc_selector">Use desc selector</string>
     <string name="text_using_id_selector">Use id selector</string>
     <string name="text_using_text_selector">Use text selector</string>
+    <string name="text_validity_years">Validity (Years)</string>
+    <string name="text_validity_years_cannot_be_empty">Validity years cannot be empty</string>
+    <string name="text_validity_years_cannot_be_zero">Validity years cannot be zero</string>
     <string name="text_value">Value</string>
     <string name="text_variable_or_expr">Variable or expression</string>
+    <string name="text_verified">Verified</string>
+    <string name="text_verify">Verify</string>
+    <string name="text_verify_failed">Verification failed</string>
+    <string name="text_verify_key_store">Verify Keystore</string>
+    <string name="text_verify_success">Verification successful</string>
     <string name="text_version">Version</string>
     <string name="text_version_code">Version code</string>
+    <string name="text_version_code_with_computing" tools:ignore="TypographyEllipsis">Version code (computing...)</string>
+    <string name="text_version_histories">Version histories</string>
     <string name="text_version_info">Version info</string>
     <string name="text_version_name">Version name</string>
+    <string name="text_version_name_with_computing" tools:ignore="TypographyEllipsis">Version name (computing...)</string>
     <string name="text_view">View</string>
     <string name="text_view_docs">View documents</string>
     <string name="text_vsc_ext_version_not_meet_requirement">The version of the VSCode extension does not meet the requirements</string>
+    <string name="text_waiting_for_all_data_processing_to_complete" tools:ignore="TypographyEllipsis">Waiting for all data processing to complete...</string>
     <string name="text_weekly_task">Weekly task</string>
     <string name="text_weekly_task_should_check_day_of_week">At least one day must be selected</string>
     <string name="text_working_dir_path">Working directory path</string>
     <string name="text_write_secure_settings">Write security settings</string>
     <string name="text_write_secure_settings_description">Secure system settings, containing system preferences that applications can read but are not allowed to write.\nThese are for preferences that the user must explicitly modify through the UI of a system app.\nWith secure system settings permission, normal applications can directly modify the secure settings (such as accessibility service).</string>
     <string name="text_write_system_settings">Write system settings</string>
-    <string name="theme_color_default">Default</string>
-    <string name="uri_autojs6_download_link" translatable="false">http://download.autojs6.com</string>
-    <string name="url_github_autojs6" translatable="false">&url_github_autojs6;</string>
-    <string name="url_github_autojs6_issues" translatable="false">&url_github_autojs6;/issues</string>
-    <string name="url_github_autojs6_vscode_extension_repo" translatable="false">&url_github_autojs6_vscode_extension;</string>
-    <string name="url_github_autojs6_vscode_extension_usage" translatable="false">&url_github_autojs6_vscode_extension;/#%E4%BD%BF%E7%94%A8-usage</string>
-    <string name="value_app_language_default" translatable="false">@string/value_app_language_follow_system</string>
-    <string name="value_app_language_english" translatable="false">EN</string>
-    <string name="value_app_language_follow_system" translatable="false">Auto</string>
-    <string name="value_app_language_simplified_chinese" translatable="false">ZH_CN</string>
-    <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">Package name (computing...)</string>
-    <string name="text_version_name_with_computing" tools:ignore="TypographyEllipsis">Version name (computing...)</string>
-    <string name="text_version_code_with_computing" tools:ignore="TypographyEllipsis">Version code (computing...)</string>
-    <string name="default_build_apk_version_name" translatable="false">1.0.0</string>
-    <string name="default_build_apk_version_code" translatable="false">1</string>
 
 </resources>

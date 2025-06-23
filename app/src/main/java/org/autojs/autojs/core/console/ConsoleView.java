@@ -16,18 +16,17 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
+import org.autojs.autojs.theme.ThemeColorHelper;
 import org.autojs.autojs.tool.MapBuilder;
 import org.autojs.autojs.ui.enhancedfloaty.ResizableExpandableFloatyWindow;
 import org.autojs.autojs.ui.log.LogActivity;
 import org.autojs.autojs.util.DisplayUtils;
+import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs6.R;
-import org.jetbrains.annotations.NotNull;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -61,17 +60,17 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
 
     public ConsoleView(Context context) {
         super(context);
-        init(null);
+        init(null, 0);
     }
 
     public ConsoleView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        init(attrs);
+        init(attrs, 0);
     }
 
     public ConsoleView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init(attrs);
+        init(attrs, defStyleAttr);
     }
 
     public Map<Integer, Integer> getTextColors() {
@@ -79,14 +78,16 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    private void init(@Nullable AttributeSet attrs) {
+    private void init(@Nullable AttributeSet attrs, int defStyleAttr) {
         inflate(getContext(), R.layout.console_view, this);
 
         Map<Integer, Integer> logLevelColorResIdMap = getLogLevelMap();
         Map<Integer, Integer> logLevelColorIntMap = getLogLevelMap();
 
+        boolean isExcludeFromNavigationBar = false;
+
         if (attrs != null) {
-            TypedArray ta = getContext().obtainStyledAttributes(attrs, R.styleable.ConsoleView);
+            TypedArray ta = getContext().obtainStyledAttributes(attrs, R.styleable.ConsoleView, defStyleAttr, 0);
 
             logLevelColorIntMap.put(Log.VERBOSE, ta.getColor(R.styleable.ConsoleView_color_verbose, Color.TRANSPARENT));
             logLevelColorIntMap.put(Log.DEBUG, ta.getColor(R.styleable.ConsoleView_color_debug, Color.TRANSPARENT));
@@ -94,6 +95,8 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
             logLevelColorIntMap.put(Log.WARN, ta.getColor(R.styleable.ConsoleView_color_warn, Color.TRANSPARENT));
             logLevelColorIntMap.put(Log.ERROR, ta.getColor(R.styleable.ConsoleView_color_error, Color.TRANSPARENT));
             logLevelColorIntMap.put(Log.ASSERT, ta.getColor(R.styleable.ConsoleView_color_assert, Color.TRANSPARENT));
+
+            isExcludeFromNavigationBar = ta.getBoolean(R.styleable.ConsoleView_excludeFromNavigationBar, false);
 
             ta.recycle();
         }
@@ -128,6 +131,10 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
 
         initEditText();
         initSubmitButton();
+
+        if (isExcludeFromNavigationBar) {
+            ViewUtils.excludePaddingClippableViewFromBottomNavigationBar(mLogListRecyclerView);
+        }
     }
 
     @NonNull
@@ -392,6 +399,7 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
             TextView textView = holder.textView;
             ConsoleImpl.LogEntry logEntry = mLogEntries.get(position);
             textView.setText(logEntry.content);
+            ThemeColorHelper.setThemeColorPrimary(textView, true);
             Integer color = mColors.get(logEntry.level);
             if (color != null) {
                 textView.setTextColor(color);

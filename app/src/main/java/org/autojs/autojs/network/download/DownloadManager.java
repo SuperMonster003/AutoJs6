@@ -16,6 +16,7 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.afollestad.materialdialogs.internal.MDButton;
 
 import org.autojs.autojs.concurrent.VolatileBox;
+import org.autojs.autojs.network.UpdateChecker;
 import org.autojs.autojs.network.api.DownloadApi;
 import org.autojs.autojs.network.entity.VersionInfo;
 import org.autojs.autojs.pio.PFiles;
@@ -70,7 +71,7 @@ public class DownloadManager {
         mOkHttpClient = getOkHttpClient();
 
         Retrofit mRetrofit = new Retrofit.Builder()
-                .baseUrl(UpdateUtils.BASE_URL_RAW)
+                .baseUrl(UpdateChecker.URL_BASE_GITHUB_RAW)
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .client(mOkHttpClient)
                 .build();
@@ -149,7 +150,7 @@ public class DownloadManager {
         return download(context, url, path);
     }
 
-    private void initProgressDialog(Context context, String url, @Nullable VersionInfo versionInfo, @Nullable String content) {
+    private void initProgressDialog(Context context, @NonNull String url, @Nullable VersionInfo versionInfo, @Nullable String content) {
         mProgressDialog = new MaterialDialog.Builder(context)
                 .title(context.getString(R.string.text_downloading))
                 .neutralText(R.string.dialog_button_download_with_browser)

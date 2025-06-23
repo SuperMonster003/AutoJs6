@@ -1,0 +1,57 @@
+plugins {
+    id 'com.android.library'
+    id 'kotlin-android'
+}
+
+android {
+    namespace = 'com.wdullaer.materialdatetimepicker'
+
+    compileSdk = project.ext.compileSdk
+
+    defaultConfig {
+        minSdk = project.ext.minSdk
+        targetSdk = project.ext.targetSdk
+
+        versionName '4.2.3'
+        versionCode 54
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.toVersion(project.ext.javaVersion)
+        targetCompatibility = JavaVersion.toVersion(project.ext.javaVersion)
+    }
+
+    kotlinOptions {
+        jvmTarget = project.ext.javaVersion
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+}
+
+repositories {
+    mavenCentral()
+    google()
+}
+
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'androidx.recyclerview:recyclerview:1.4.0'
+
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'com.pholser:junit-quickcheck-core:0.9.2'
+    testImplementation 'com.pholser:junit-quickcheck-generators:0.9.1'
+
+    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+    androidTestImplementation 'androidx.test:runner:1.6.2'
+    androidTestImplementation 'androidx.test:rules:1.6.1'
+}

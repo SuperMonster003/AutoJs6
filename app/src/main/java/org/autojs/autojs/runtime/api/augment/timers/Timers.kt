@@ -20,6 +20,7 @@ open class Timers(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
     override val selfAssignmentFunctions = listOf(
         ::setIntervalExt.name,
+        ::keepAlive.name,
     )
 
     override val globalAssignmentFunctions = listOf(
@@ -30,13 +31,14 @@ open class Timers(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         ::clearInterval.name,
         ::clearImmediate.name,
         ::loop.name,
+        ::keepAlive.name,
     )
 
     companion object : FlexibleArray() {
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun setTimeout(scriptRuntime: ScriptRuntime, args: Array<out Any?>) = ensureArgumentsAtLeast(args, 1) {
+        fun setTimeout(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Double = ensureArgumentsAtLeast(args, 1) {
             val (callbackArg, intervalArg) = it
             val callback = coerceFunction(callbackArg)
             val interval = coerceLongNumber(intervalArg, 1L)
@@ -49,13 +51,13 @@ open class Timers(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun clearTimeout(scriptRuntime: ScriptRuntime, args: Array<out Any?>) = ensureArgumentsOnlyOne(args) {
+        fun clearTimeout(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsOnlyOne(args) {
             scriptRuntime.timers.clearTimeout(coerceNumber(it))
         }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun setInterval(scriptRuntime: ScriptRuntime, args: Array<out Any?>) = ensureArgumentsAtLeast(args, 1) {
+        fun setInterval(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Double = ensureArgumentsAtLeast(args, 1) {
             val (callbackArg, intervalArg) = it
             val callback = coerceFunction(callbackArg)
             val interval = coerceLongNumber(intervalArg, 1L)
@@ -68,13 +70,13 @@ open class Timers(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun clearInterval(scriptRuntime: ScriptRuntime, args: Array<out Any?>) = ensureArgumentsOnlyOne(args) {
+        fun clearInterval(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsOnlyOne(args) {
             scriptRuntime.timers.clearInterval(coerceNumber(it))
         }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun setImmediate(scriptRuntime: ScriptRuntime, args: Array<out Any?>) = ensureArgumentsAtLeast(args, 1) {
+        fun setImmediate(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Double = ensureArgumentsAtLeast(args, 1) {
             val (callbackArg) = it
             val callback = coerceFunction(callbackArg)
             when (it.size) {
@@ -85,7 +87,7 @@ open class Timers(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun clearImmediate(scriptRuntime: ScriptRuntime, args: Array<out Any?>) = ensureArgumentsOnlyOne(args) {
+        fun clearImmediate(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsOnlyOne(args) {
             scriptRuntime.timers.clearImmediate(coerceNumber(it))
         }
 
@@ -96,6 +98,13 @@ open class Timers(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             AutoJs.instance.globalConsole.warn(AutoJs.instance.applicationContext.getString(R.string.error_abandoned_method, "loop"))
             AutoJs.instance.globalConsole.warn("")
             UNDEFINED
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun keepAlive(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Double = ensureArgumentsAtMost(args, 1) {
+            val (internal) = it
+            setInterval(scriptRuntime, arrayOf(BaseFunction(), coerceNumber(internal, 10_000)))
         }
 
         @JvmStatic

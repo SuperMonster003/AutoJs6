@@ -96,7 +96,7 @@ object NotificationUtils {
                 title?.let { setContentTitle(it) }
                 content?.let { setContentText(it) }
                 bigContent?.let { setStyle(NotificationCompat.BigTextStyle().bigText(it)) }
-                setSmallIcon(R.drawable.autojs6_material)
+                setSmallIcon(R.drawable.autojs6_status_bar_icon)
             }
     }
 
@@ -105,7 +105,7 @@ object NotificationUtils {
         @Suppress("DEPRECATION")
         return NotificationCompat.Builder(globalAppContext)
             .apply {
-                setSmallIcon(R.drawable.autojs6_material)
+                setSmallIcon(R.drawable.autojs6_status_bar_icon)
                 /**
                  * For Android 7.1 and below only.
                  */

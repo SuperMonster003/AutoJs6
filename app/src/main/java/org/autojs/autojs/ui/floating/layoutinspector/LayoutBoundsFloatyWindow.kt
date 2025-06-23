@@ -22,10 +22,14 @@ open class LayoutBoundsFloatyWindow @JvmOverloads constructor(
 
     private lateinit var mLayoutBoundsView: LayoutBoundsView
 
-    override val popMenuActions = linkedMapOf(
+    override val popMenuActions = listOf(
         R.string.text_show_widget_information to ::showNodeInfo,
         R.string.text_show_layout_hierarchy to ::showLayoutHierarchy,
         R.string.text_generate_code to ::generateCode,
+        SPLIT_LINE,
+        R.string.text_hide_node to ::excludeNode,
+        R.string.text_hide_same_frame_nodes to ::excludeAllBoundsSameNodeInternal,
+        SPLIT_LINE,
         R.string.text_switch_window to ::switchWindow,
         R.string.text_exit to ::close,
     )
@@ -67,6 +71,10 @@ open class LayoutBoundsFloatyWindow @JvmOverloads constructor(
             view.setRootNode(capture.root)
             getLayoutSelectedNode()?.let { view.setSelectedNode(it) }
         }
+    }
+
+    private fun excludeAllBoundsSameNodeInternal() {
+        excludeAllBoundsSameNode(mLayoutBoundsView)
     }
 
 }

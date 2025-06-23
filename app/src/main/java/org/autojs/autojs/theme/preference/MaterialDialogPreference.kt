@@ -2,25 +2,42 @@ package org.autojs.autojs.theme.preference
 
 import android.content.Context
 import android.util.AttributeSet
-import androidx.core.content.res.TypedArrayUtils
 import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs6.R
 
 open class MaterialDialogPreference : MaterialPreference {
 
-    private val mBuilder: MaterialDialog.Builder
-    private val mContext: Context
+    private var mBuilder: MaterialDialog.Builder? = null
+    private var mContext: Context? = null
 
     private lateinit var mDialog: MaterialDialog
 
-    protected var dialogTitle: CharSequence?
-    protected var dialogContent: CharSequence?
-    protected var neutralText: CharSequence?
-    protected var negativeText: CharSequence?
-    protected var neutralTextShort: CharSequence?
-    protected var positiveText: CharSequence?
+    protected var dialogTitle: CharSequence? = null
+    protected var dialogContent: CharSequence? = null
+    protected var neutralText: CharSequence? = null
+    protected var negativeText: CharSequence? = null
+    protected var negativeColor: Int? = null
+    protected var neutralTextShort: CharSequence? = null
+    protected var positiveText: CharSequence? = null
+    protected var positiveColor: Int? = null
 
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes) {
+        init(context, attrs, defStyleAttr, defStyleRes)
+    }
+
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
+        init(context, attrs, defStyleAttr, 0)
+    }
+
+    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
+        init(context, attrs, 0, 0)
+    }
+
+    constructor(context: Context) : super(context) {
+        init(context, null, 0, 0)
+    }
+
+    private fun init(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) {
         mContext = context
         mBuilder = MaterialDialog.Builder(context)
 
@@ -31,30 +48,34 @@ open class MaterialDialogPreference : MaterialPreference {
                 neutralText = getAttrString(a, R.styleable.MaterialDialogPreference_neutralText)
                 neutralTextShort = getAttrString(a, R.styleable.MaterialDialogPreference_neutralTextShort)
                 negativeText = getAttrString(a, R.styleable.MaterialDialogPreference_negativeText)
+                getAttrColor(a, R.styleable.MaterialDialogPreference_negativeColor)?.takeIf { it != -1 }?.let {
+                    negativeColor = it
+                }
                 positiveText = getAttrString(a, R.styleable.MaterialDialogPreference_positiveText)
+                getAttrColor(a, R.styleable.MaterialDialogPreference_positiveColor)?.takeIf { it != -1 }?.let {
+                    positiveColor = it
+                }
                 a.recycle()
             }
     }
 
-    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : this(context, attrs, defStyleAttr, 0)
-
-    constructor(context: Context, attrs: AttributeSet?) : this(
-        context, attrs, TypedArrayUtils.getAttr(
-            context, android.R.attr.dialogPreferenceStyle,
-            android.R.attr.dialogPreferenceStyle,
-        )
-    )
-
-    constructor(context: Context) : this(context, null)
-
     override fun onClick() {
+
+        // @Hint by SuperMonster003 on Mar 27, 2025.
+        //  ! Avoid rapid consecutive clicks to prevent the app from crashing.
+        //  ! zh-CN: 避免连续快速点击可能导致应用崩溃.
+        //  # java.lang.IllegalArgumentException:
+        //  # LayoutManager androidx.recyclerview.widget.LinearLayoutManager@xxx
+        //  # is already attached to a RecyclerView: androidx.recyclerview.widget.RecyclerView{...}
+        if (::mDialog.isInitialized && mDialog.isShowing) return
+
         getBuilder().build().also { mDialog = it }.show()
         super.onClick()
     }
 
     protected fun getDialog() = mDialog
 
-    protected open fun getBuilder(): MaterialDialog.Builder = mBuilder
+    protected open fun getBuilder(): MaterialDialog.Builder = mBuilder!!
         .neutralColorRes(R.color.dialog_button_hint)
         .dismissListener { mDialog.recyclerView?.layoutManager = null }
         .onNeutral { _, _ -> onNeutral() }
@@ -62,8 +83,18 @@ open class MaterialDialogPreference : MaterialPreference {
             dialogTitle?.let { builder.title(it) }
             dialogContent?.let { builder.content(it) }
             setNeutralTextIfNeeded(builder)
-            negativeText?.let { builder.negativeText(it) }
-            positiveText?.let { builder.positiveText(it) }
+            negativeText?.let {
+                builder.negativeText(it)
+                negativeColor?.let { color -> builder.negativeColor(color) } ?: run {
+                    builder.negativeColorRes(R.color.dialog_button_default)
+                }
+            }
+            positiveText?.let {
+                builder.positiveText(it)
+                positiveColor?.let { color -> builder.positiveColor(color) } ?: run {
+                    builder.positiveColorRes(R.color.dialog_button_attraction)
+                }
+            }
         }
 
     private fun setNeutralTextIfNeeded(builder: MaterialDialog.Builder) {

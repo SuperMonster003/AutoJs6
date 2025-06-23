@@ -43,7 +43,7 @@ class Plugins(private val context: Context, private val runtime: PluginRuntime) 
             try {
                 val plugin = Plugin.load(context, packageContext, runtime, runtime.topLevelScope)
                 val scriptCacheDir = getScriptCacheDir(packageName)
-                copyAssetDir(packageContext.context.assets, plugin.assetsScriptDir, scriptCacheDir.path, null)
+                copyAssetDir(packageContext.context.assets, plugin.assetsScriptDir, scriptCacheDir.path)
                 plugin.mainScriptPath = File(scriptCacheDir, "index.js").path
                 bindService(plugin)
                 mPlugins[packageName] = plugin
@@ -80,7 +80,7 @@ class Plugins(private val context: Context, private val runtime: PluginRuntime) 
         val applicationInfo = context.packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
         val ctx = context.createPackageContext(packageName, Context.CONTEXT_INCLUDE_CODE or Context.CONTEXT_IGNORE_SECURITY)
         Plugin.Package(ctx, applicationInfo, true)
-    } catch (e: PackageManager.NameNotFoundException) {
+    } catch (_: PackageManager.NameNotFoundException) {
         null
     }
 

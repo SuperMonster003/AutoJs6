@@ -5,25 +5,24 @@ import android.content.pm.PackageManager.ApplicationInfoFlags
 import android.content.pm.PackageManager.GET_SHARED_LIBRARY_FILES
 import android.content.res.AssetManager
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.os.Build
 import android.util.Log
 import com.mcal.apksigner.ApkSigner
 import com.reandroid.arsc.chunk.TableBlock
-import org.apache.commons.io.FileUtils.copyFile
-import org.apache.commons.io.FileUtils.copyInputStreamToFile
+import org.apache.commons.io.FileUtils
+import org.autojs.autojs.AbstractAutoJs.Companion.isInrt
 import org.autojs.autojs.apkbuilder.keystore.AESUtils
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.engine.encryption.AdvancedEncryptionStandard
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.project.BuildInfo
+import org.autojs.autojs.project.LaunchConfig
 import org.autojs.autojs.project.ProjectConfig
+import org.autojs.autojs.project.ProjectConfig.CONFIG_FILE_NAME
 import org.autojs.autojs.script.EncryptedScriptFileHeader.writeHeader
 import org.autojs.autojs.script.JavaScriptFileSource
-import org.autojs.autojs.apkbuilder.keystore.KeyStore
 import org.autojs.autojs.util.FileUtils.TYPE.JAVASCRIPT
 import org.autojs.autojs.util.MD5Utils
-import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import pxb.android.StringItem
 import pxb.android.axml.AxmlWriter
@@ -35,13 +34,12 @@ import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
-import java.util.concurrent.Callable
 
 /**
  * Created by Stardust on Oct 24, 2017.
  * Modified by SuperMonster003 as of Jul 8, 2022.
  */
-open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File, private val workspacePath: String) {
+open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File, private val buildPath: String) {
 
     private var mProgressCallback: ProgressCallback? = null
     private var mArscPackageName: String? = null
@@ -49,21 +47,24 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
     private var mInitVector: String? = null
     private var mKey: String? = null
 
-    private lateinit var mAppConfig: AppConfig
+    private lateinit var mProjectConfig: ProjectConfig
 
-    private val mApkPackager = ApkPackager(apkInputStream, workspacePath)
+    private val mApkPackager = ApkPackager(apkInputStream, buildPath)
 
     private val mAssetManager: AssetManager by lazy { globalContext.assets }
 
-    private var mLibsIncludes = Libs.DEFALUT_INCLUDES.toMutableList()
-    private var mAssetsFileIncludes = Assets.File.DEFAULT_INCLUDES.toMutableList()
-    private var mAssetsDirExcludes = Assets.Dir.DEFAULT_EXCLUDES.toMutableList()
+    private var mLibsIncludes = Libs.defaultLibsToInclude.toMutableList()
+    private var mAssetsFileIncludes = Libs.defaultAssetFilesToInclude.toMutableList()
+    private var mAssetsDirExcludes = Libs.defaultAssetDirsToExclude.toMutableList()
+
+    private var mSplashThemeId: Int = 0
+    private var mNoSplashThemeId: Int = 0
 
     private val mManifestFile
-        get() = File(workspacePath, "AndroidManifest.xml")
+        get() = File(buildPath, "AndroidManifest.xml")
 
     private val mResourcesArscFile
-        get() = File(workspacePath, "resources.arsc")
+        get() = File(buildPath, "resources.arsc")
 
     init {
         PFiles.ensureDir(outApkFile.path)
@@ -74,7 +75,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
     @Throws(IOException::class)
     fun prepare() = also {
         mProgressCallback?.let { callback -> GlobalAppContext.post { callback.onPrepare(this) } }
-        File(workspacePath).mkdirs()
+        File(buildPath).mkdirs()
         mApkPackager.unzip()
     }
 
@@ -96,7 +97,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
 
     @Throws(IOException::class)
     fun copyDir(srcFile: File, relativeDestPath: String) {
-        val destDirFile = File(workspacePath, relativeDestPath).apply { mkdir() }
+        val destDirFile = File(buildPath, relativeDestPath).apply { mkdir() }
         srcFile.listFiles()?.forEach { srcChildFile ->
             if (srcChildFile.isFile) {
                 if (srcChildFile.name.endsWith(JAVASCRIPT.extensionWithDot)) {
@@ -105,7 +106,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
                     srcChildFile.copyTo(File(destDirFile, srcChildFile.name), true)
                 }
             } else {
-                if (!mAppConfig.ignoredDirs.contains(srcChildFile)) {
+                if (!mProjectConfig.excludedDirs.contains(srcChildFile)) {
                     copyDir(srcChildFile, PFiles.join(relativeDestPath, srcChildFile.name + File.separator))
                 }
             }
@@ -132,7 +133,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
 
     @Throws(IOException::class)
     fun replaceFile(srcFile: File, relativeDestPath: String) = also {
-        val destFile = File(workspacePath, relativeDestPath)
+        val destFile = File(buildPath, relativeDestPath)
         if (destFile.name.endsWith(JAVASCRIPT.extensionWithDot)) {
             encrypt(srcFile, destFile)
         } else {
@@ -141,72 +142,101 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
     }
 
     @Throws(IOException::class)
-    fun withConfig(config: AppConfig) = also {
-        config.also { mAppConfig = it }.run {
-            mManifestEditor = editManifest()
-                .setAppName(appName)
-                .setVersionName(versionName)
-                .setVersionCode(versionCode)
-                .setPackageName(packageName)
-
+    fun withConfig(config: ProjectConfig) = also {
+        config.also { mProjectConfig = it }.run {
+            retrieveSplashThemeResources(launchConfig)
+            prepareManifestConfiguration(this)
             setArscPackageName(packageName)
             updateProjectConfig(this)
-            copyAssetsRecursively("", File(workspacePath, "assets"))
+            copyAssetsRecursively("", File(buildPath, "assets"))
             copyLibrariesByConfig(this)
             setScriptFile(sourcePath)
+        }
+    }
+
+    private fun prepareManifestConfiguration(config: ProjectConfig) {
+        mManifestEditor = editManifest()
+            .setAppName(config.name)
+            .setVersionName(config.versionName)
+            .setVersionCode(config.versionCode)
+            .setPackageName(config.packageName)
+    }
+
+    private fun retrieveSplashThemeResources(launchConfig: LaunchConfig) {
+        if (launchConfig.isSplashVisible) {
+            // @Hint by SuperMonster003 on Jan 23, 2024.
+            //   ! Members `mSplashThemeId` and `mNoSplashThemeId` will keep their default values.
+            //   ! zh-CN: 成员变量 `mSplashThemeId` 及 `mNoSplashThemeId` 将保持其默认值.
+            return
+        }
+        try {
+            val tableBlock = TableBlock.load(mResourcesArscFile)
+            val packageName = "${GlobalAppContext.get().packageName}.inrt"
+            val packageBlock = tableBlock.getOrCreatePackage(0x7f, packageName).also {
+                tableBlock.currentPackage = it
+            }
+            packageBlock.getEntry("", "style", "AppTheme.Splash")?.let {
+                mSplashThemeId = it.resourceId
+            }
+            packageBlock.getEntry("", "style", "AppTheme.SevereTransparent")?.let {
+                mNoSplashThemeId = it.resourceId
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
     @Throws(FileNotFoundException::class)
     fun editManifest(): ManifestEditor = ManifestEditorWithAuthorities(FileInputStream(mManifestFile)).also { mManifestEditor = it }
 
-    private fun updateProjectConfig(appConfig: AppConfig) {
-        val projectConfig = when {
-            !PFiles.isDir(appConfig.sourcePath) -> null
-            else -> ProjectConfig.fromProjectDir(appConfig.sourcePath)?.also {
-                val buildNumber = it.buildInfo.buildNumber
-                it.buildInfo = BuildInfo.generate(buildNumber + 1)
-                PFiles.write(ProjectConfig.configFileOfDir(appConfig.sourcePath), it.toJson())
+    private fun updateProjectConfig(config: ProjectConfig) {
+
+        // 这里为什么要有这样的一个方法? (
+        //     会不会是因为有些配置需要写入到文件中, 这些配置包括自增的版本号, 用户的选择或键入值等等
+        // )
+        // 参数 config 只是获取了一部分的字段用于设置新的 projectConfig, 为什么不直接使用全部的字段? (
+        //     因为有些不需要更新. 如果我们需要将所有设置开放到 Activity 页面中, 那么其实所有配置都是需要更新的
+        // )
+        // 像 abis, libs, signatureScheme 等信息就全部丢失了. (
+        //     所以需要添加到这个方法中
+        // )
+
+        val projectConfig = run {
+            if (PFiles.isDir(config.sourcePath)) {
+                // @Hint by SuperMonster003 on Jan 23, 2025.
+                //  ! Project directory packaging.
+                //  ! zh-CN: 打包项目目录.
+                ProjectConfig.fromProjectDir(config.sourcePath)?.let { sourceProjectConfig ->
+                    sourceProjectConfig
+                        .setBuildInfo(BuildInfo.generate(sourceProjectConfig.buildInfo.buildNumber + 1))
+                    File(ProjectConfig.configFileOfDir(config.sourcePath)).writeText(sourceProjectConfig.toJson())
+                    return@run sourceProjectConfig
+                }
             }
-        } ?: ProjectConfig()
-            .setMainScriptFile("main.js")
-            .setName(appConfig.appName)
-            .setPackageName(appConfig.packageName)
-            .setVersionName(appConfig.versionName)
-            .setVersionCode(appConfig.versionCode)
-            .also { config ->
-                config.buildInfo = BuildInfo.generate(appConfig.versionCode.toLong())
-                File(workspacePath, "assets/project/${ProjectConfig.CONFIG_FILE_NAME}").also { file ->
+            // @Hint by SuperMonster003 on Jan 23, 2025.
+            //  ! Single file packaging.
+            //  ! zh-CN: 打包单独文件.
+            return@run ProjectConfig().also { newProjectConfig ->
+                newProjectConfig
+                    .setName(config.name)
+                    .setPackageName(config.packageName)
+                    .setVersionName(config.versionName)
+                    .setVersionCode(config.versionCode)
+                    .setBuildInfo(BuildInfo.generate(newProjectConfig.versionCode.toLong()))
+                File(buildPath, "assets/project/$CONFIG_FILE_NAME").also { file ->
                     file.parentFile?.let { parent -> if (!parent.exists()) parent.mkdirs() }
-                }.writeText(config.toJson())
+                }.writeText(newProjectConfig.toJson())
             }
 
-        projectConfig.run {
-            mKey = MD5Utils.md5(packageName + versionName + mainScriptFile)
-            mInitVector = MD5Utils.md5(buildInfo.buildId + name).substring(0, 16)
-            if (appConfig.libs.contains(Constants.OPENCV)) {
-                mLibsIncludes += Libs.OPENCV.toSet()
-                mAssetsDirExcludes -= Assets.Dir.OPENCV.toSet()
-            }
-            if (appConfig.libs.contains(Constants.MLKIT_OCR)) {
-                mLibsIncludes += Libs.MLKIT_GOOGLE_OCR.toSet()
-                mAssetsDirExcludes -= Assets.Dir.MLKIT_GOOGLE_OCR.toSet()
-            }
-            if (appConfig.libs.contains(Constants.PADDLE_OCR)) {
-                mLibsIncludes += Libs.PADDLE_LITE.toSet() + Libs.PADDLE_LITE_EXT.toSet()
-                mAssetsDirExcludes -= Assets.Dir.PADDLE_LITE.toSet()
-            }
-            if (appConfig.libs.contains(Constants.MLKIT_BARCODE)) {
-                mLibsIncludes += Libs.MLKIT_BARCODE.toSet()
-                mAssetsDirExcludes -= Assets.Dir.MLKIT_BARCODE.toSet()
-            }
-            if (appConfig.libs.contains(Constants.RAPID_OCR)) {
-                mLibsIncludes += Libs.RAPID_OCR.toSet()
-                mAssetsDirExcludes -= Assets.Dir.RAPID_OCR.toSet()
-            }
-            if (appConfig.libs.contains(Constants.OPENCC)) {
-                mLibsIncludes += Libs.OPENCC.toSet()
-                mAssetsDirExcludes -= Assets.Dir.OPENCC.toSet()
+        }
+
+        mKey = MD5Utils.md5(projectConfig.run { packageName + versionName + mainScriptFileName })
+        mInitVector = MD5Utils.md5(projectConfig.run { buildInfo.buildId + name }).take(16)
+        Libs.entries.forEach { entry ->
+            if (config.libs.contains(entry.label)) {
+                mLibsIncludes += entry.libsToInclude.toSet()
+                mAssetsFileIncludes += entry.assetFilesToInclude.toSet()
+                mAssetsDirExcludes -= entry.assetDirsToExclude.toSet()
             }
         }
     }
@@ -214,7 +244,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
     @Throws(Exception::class)
     fun build() = also {
         mProgressCallback?.let { callback -> GlobalAppContext.post { callback.onBuild(this) } }
-        mAppConfig.icon?.let { callable ->
+        mProjectConfig.iconBitmapGetter?.let { callable ->
             runCatching {
                 val tableBlock = TableBlock.load(mResourcesArscFile)
                 val packageName = "${GlobalAppContext.get().packageName}.inrt"
@@ -224,7 +254,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
                 val appIcon = packageBlock.getOrCreate("", ICON_RES_DIR, ICON_NAME)
                 val appIconPath = appIcon.resValue.decodeValue()
                 Log.d(TAG, "Icon path: $appIconPath")
-                val file = File(workspacePath, appIconPath).also {
+                val file = File(buildPath, appIconPath).also {
                     if (!it.exists()) {
                         File(it.parent!!).mkdirs()
                         it.createNewFile()
@@ -272,26 +302,27 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
     fun sign() = also {
         mProgressCallback?.let { callback -> GlobalAppContext.post { callback.onSign(this) } }
         val fos = FileOutputStream(outApkFile)
-        TinySign.sign(File(workspacePath), fos)
+        TinySign.sign(File(buildPath), fos)
         fos.close()
 
-        val defaultKeyStoreFile = File(workspacePath, "default_key_store.bks")
-        val tmpOutputApk = File(workspacePath, "temp.apk")
-        copyInputStreamToFile(GlobalAppContext.get().assets.open("default_key_store.bks"), defaultKeyStoreFile)
+        val defaultKeyStoreFile = File(buildPath, "default_key_store.bks")
+        val tmpOutputApk = File(buildPath, "temp.apk")
+        FileUtils.copyInputStreamToFile(GlobalAppContext.get().assets.open("default_key_store.bks"), defaultKeyStoreFile)
 
-        val signer = ApkSigner(outApkFile, tmpOutputApk)
-        signer.useDefaultSignatureVersion = false
-        signer.v1SigningEnabled = mAppConfig.signatureSchemes.contains("V1")
-        signer.v2SigningEnabled = mAppConfig.signatureSchemes.contains("V2")
-        signer.v3SigningEnabled = mAppConfig.signatureSchemes.contains("V3")
-        signer.v4SigningEnabled = mAppConfig.signatureSchemes.contains("V4")
+        val signer = ApkSigner(outApkFile, tmpOutputApk).apply {
+            useDefaultSignatureVersion = false
+            v1SigningEnabled = "V1" in mProjectConfig.signatureScheme
+            v2SigningEnabled = "V2" in mProjectConfig.signatureScheme
+            v3SigningEnabled = "V3" in mProjectConfig.signatureScheme
+            v4SigningEnabled = "V4" in mProjectConfig.signatureScheme
+        }
 
         var keyStoreFile = defaultKeyStoreFile
         var password = "AutoJs6"
         var alias = "AutoJs6"
         var aliasPassword = "AutoJs6"
 
-        mAppConfig.keyStore?.let {
+        mProjectConfig.keyStore?.let {
             keyStoreFile = File(it.absolutePath)
             password = AESUtils.decrypt(it.password)
             alias = it.alias
@@ -304,7 +335,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         }
 
         try {
-            copyFile(tmpOutputApk, outApkFile)
+            FileUtils.copyFile(tmpOutputApk, outApkFile)
         } catch (e: java.lang.Exception) {
             throw java.lang.RuntimeException(e)
         }
@@ -312,7 +343,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
 
     fun cleanWorkspace() = also {
         mProgressCallback?.let { callback -> GlobalAppContext.post { callback.onClean(this) } }
-        delete(File(workspacePath))
+        delete(File(buildPath))
     }
 
     @Throws(IOException::class)
@@ -320,8 +351,8 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
 
     @Throws(IOException::class)
     private fun buildArsc() {
-        val oldArsc = File(workspacePath, "resources.arsc")
-        val newArsc = File(workspacePath, "resources.arsc.new")
+        val oldArsc = File(buildPath, "resources.arsc")
+        val newArsc = File(buildPath, "resources.arsc.new")
         val decoder = ARSCDecoder(BufferedInputStream(FileInputStream(oldArsc)), null, false)
         decoder.CloneArsc(FileOutputStream(newArsc), mArscPackageName, true)
         oldArsc.delete()
@@ -341,88 +372,33 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
 
     }
 
-    class AppConfig {
-
-        var appName: String? = null
-            private set
-        var versionName: String? = null
-            private set
-        var versionCode = 0
-            private set
-        var sourcePath: String? = null
-            private set
-        var packageName: String? = null
-            private set
-        var ignoredDirs = ArrayList<File>()
-        var icon: Callable<Bitmap>? = null
-            private set
-        var abis: List<String> = emptyList()
-            private set
-        var libs: List<String> = emptyList()
-            private set
-        var keyStore: KeyStore? = null
-            private set
-        var signatureSchemes: String = "V1 + V2"
-            private set
-        var permissions: List<String> = emptyList()
-            private set
-
-        fun ignoreDir(dir: File) = also { ignoredDirs.add(dir) }
-
-        fun setAppName(appName: String?) = also { appName?.let { this.appName = it } }
-
-        fun setVersionName(versionName: String?) = also { versionName?.let { this.versionName = it } }
-
-        fun setVersionCode(versionCode: Int?) = also { versionCode?.let { this.versionCode = it } }
-
-        fun setSourcePath(sourcePath: String?) = also { sourcePath?.let { this.sourcePath = it } }
-
-        fun setPackageName(packageName: String?) = also { packageName?.let { this.packageName = it } }
-
-        fun setIcon(icon: Callable<Bitmap>?) = also { icon?.let { this.icon = it } }
-
-        fun setIcon(iconPath: String?) = also { iconPath?.let { this.icon = Callable { BitmapFactory.decodeFile(it) } } }
-
-        fun setAbis(abis: List<String>) = also { this.abis = abis }
-
-        fun setLibs(libs: List<String>) = also { this.libs = libs }
-
-        fun setKeyStore(keyStore: KeyStore?) = also { this.keyStore = keyStore }
-
-        fun setSignatureSchemes(signatureSchemes: String) = also { this.signatureSchemes = signatureSchemes }
-
-        fun setPermissions(permissions: List<String>) = also { this.permissions = permissions }
-
-        companion object {
-            @JvmStatic
-            fun fromProjectConfig(projectDir: String?, projectConfig: ProjectConfig) = AppConfig()
-                .setAppName(projectConfig.name)
-                .setPackageName(projectConfig.packageName)
-                .ignoreDir(File(projectDir, projectConfig.buildDir))
-                .setVersionCode(projectConfig.versionCode)
-                .setVersionName(projectConfig.versionName)
-                .setSourcePath(projectDir)
-                .setIcon(projectConfig.icon?.let { File(projectDir, it).path })
-        }
-    }
-
     private inner class ManifestEditorWithAuthorities(manifestInputStream: InputStream?) : ManifestEditor(manifestInputStream) {
         override fun onAttr(attr: AxmlWriter.Attr) {
             attr.apply {
-                if (name.data == "authorities" && value is StringItem) {
-                    (value as StringItem).data = "${mAppConfig.packageName}.fileprovider"
-                } else {
-                    super.onAttr(this)
+
+                // @Reference to aiselp (https://github.com/aiselp) by SuperMonster003 on Jan 18, 2025.
+                //  ! https://github.com/aiselp/AutoX/blob/5b3303926082d591a166b1845702357406811aaf/app/src/main/java/org/autojs/autojs/build/ApkBuilder.kt#L175-L188
+                if (!mProjectConfig.launchConfig.isSplashVisible && mSplashThemeId != 0 && value == mSplashThemeId) {
+                    value = mNoSplashThemeId
+                }
+
+                when {
+                    name.data == "authorities" -> (value as? StringItem)?.apply {
+                        // @Reference to aiselp (https://github.com/aiselp) by SuperMonster003 on Apr 12, 2025.
+                        //  ! https://github.com/aiselp/AutoX/commit/d085ccd41aafcf74d503bdf5ac08d021567945b2#diff-97c191813b60e8f000917ca5fe93dced97e688bdd48b25d212d03152d5f1678cR432
+                        data = data.replace(INRT_APP_ID, mProjectConfig.packageName)
+                    }
+                    else -> super.onAttr(this)
                 }
             }
         }
 
         override fun isPermissionRequired(permissionName: String): Boolean {
-            return mAppConfig.permissions.contains(permissionName)
+            return mProjectConfig.permissions.contains(permissionName)
         }
     }
 
-    private fun copyLibrariesByConfig(config: AppConfig) {
+    private fun copyLibrariesByConfig(config: ProjectConfig) {
 
         // @Hint by SuperMonster003 on Dec 11, 2023.
         //  ! The list contains only abi names not matching the canonical name itself.
@@ -443,13 +419,13 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
     private fun copyLibrariesByAbi(abiSrcName: String, abiDestName: String) {
 
         // @Reference to LZX284 (https://github.com/LZX284) by SuperMonster003 on Dec 11, 2023.
-        //  ! https://github.com/SuperMonster003/AutoJs6/pull/187/files#diff-d932ac49867d4610f8eeb21b59306e8e923d016cbca192b254caebd829198856R61
+        //  ! http://pr.autojs6.com/187/files#diff-d932ac49867d4610f8eeb21b59306e8e923d016cbca192b254caebd829198856R61
         val srcLibDir = File(appApkFile.parent, LIBRARY_DIR).path
 
         mLibsIncludes.distinct().forEach { libName ->
             runCatching {
                 File(srcLibDir, "$abiSrcName/$libName").takeIf { it.exists() }?.copyTo(
-                    File(workspacePath, "lib/$abiDestName/$libName"),
+                    File(buildPath, "lib/$abiDestName/$libName"),
                     overwrite = true
                 )
             }.onFailure { it.printStackTrace() }
@@ -463,6 +439,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         const val LIBRARY_DIR = "lib"
 
         const val TEMPLATE_APK_NAME = "template.apk"
+        const val INRT_APP_ID = "org.autojs.autojs6.inrt"
 
         private val TAG = ApkBuilder::class.java.simpleName
 
@@ -479,118 +456,149 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
     }
 
     @Suppress("SpellCheckingInspection")
-    object Libs {
+    enum class Libs(
+        @JvmField val label: String,
+        @JvmField val aliases: List<String> = emptyList(),
+        @JvmField val enumerable: Boolean = true,
+        internal val libsToInclude: List<String> = emptyList(),
+        internal val assetFilesToInclude: List<String> = emptyList(),
+        internal val assetDirsToExclude: List<String> = emptyList(),
+    ) {
 
-        private val BASIC = listOf(
-            "libjackpal-androidterm5.so", /* Terminal Emulator. */
-            "libjackpal-termexec2.so", /* Terminal Emulator. */
-        )
+        TERMINAL_EMULATOR(
+            label = "Terminal Emulator",
+            enumerable = false,
+            libsToInclude = listOf(
+                "libjackpal-androidterm5.so",
+                "libjackpal-termexec2.so",
+            ),
+        ),
 
-        private val MISCELLANEOUS = emptyList<String>()
+        OPENCV(
+            label = "OpenCV",
+            aliases = listOf("cv"),
+            libsToInclude = listOf(
+                "libc++_shared.so",
+                "libopencv_java4.so",
+            ),
+        ),
 
-        @JvmField
-        val OPENCV = listOf(
-            "libc++_shared.so",
-            "libopencv_java4.so",
-        )
+        MLKIT_OCR(
+            label = "MLKit OCR",
+            aliases = listOf("mlkit", "mlkitocr", "mlkit-ocr", "mlkit_ocr"),
+            libsToInclude = listOf(
+                "libmlkit_google_ocr_pipeline.so",
+            ),
+            assetDirsToExclude = listOf(
+                "mlkit-google-ocr-models",
+            ),
+        ),
 
-        @JvmField
-        val MLKIT_GOOGLE_OCR = listOf(
-            "libmlkit_google_ocr_pipeline.so",
-        )
+        PADDLE_OCR(
+            label = "Paddle OCR",
+            aliases = listOf("paddle", "paddleocr", "paddle-ocr", "paddle_ocr"),
+            libsToInclude = listOf(
+                "libc++_shared.so",
+                "libpaddle_light_api_shared.so",
+                "libNative.so",
+                "libhiai.so",
+                "libhiai_ir.so",
+                "libhiai_ir_build.so",
+            ),
+            assetDirsToExclude = listOf(
+                "models",
+            )
+        ),
 
-        @JvmField
-        val PADDLE_LITE = listOf(
-            "libc++_shared.so",
-            "libpaddle_light_api_shared.so",
-            "libNative.so",
-        )
+        RAPID_OCR(
+            label = "Rapid OCR",
+            aliases = listOf("rapid", "rapidocr", "rapid-ocr", "rapid_ocr"),
+            libsToInclude = listOf(
+                "libRapidOcr.so",
+            ),
+            assetDirsToExclude = listOf(
+                "labels",
+            ),
+        ),
 
-        val PADDLE_LITE_EXT = listOf(
-            "libhiai.so",
-            "libhiai_ir.so",
-            "libhiai_ir_build.so",
-        )
+        OPENCC(
+            label = "OpenCC",
+            aliases = listOf("cc"),
+            libsToInclude = listOf(
+                "libChineseConverter.so",
+            ),
+            assetDirsToExclude = listOf(
+                "openccdata",
+            ),
+        ),
 
-        @JvmField
-        val MLKIT_BARCODE = emptyList<String>()
+        PINYIN(
+            label = "Pinyin",
+            aliases = listOf("pin"),
+            assetFilesToInclude = listOf(
+                "dict-chinese-words.db.gzip",
+                "dict-chinese-phrases.db.gzip",
+                "dict-chinese-chars.db.gzip",
+                "prob_emit.txt",
+            ),
+        ),
 
-        @JvmField
-        val RAPID_OCR = listOf(
-            "libRapidOcr.so",
-        )
+        MLKIT_BARCODE(
+            label = "MLKit Barcode",
+            aliases = listOf("barcode", "mlkit-barcode", "mlkit_barcode"),
+            libsToInclude = listOf(
+                "libbarhopper_v3.so",
+            ),
+            assetDirsToExclude = listOf(
+                "mlkit_barcode_models",
+            ),
+        ),
 
-        @JvmField
-        val OPENCC = listOf(
-            "libChineseConverter.so",
-        )
+        MEDIA_INFO(
+            label = "MediaInfo",
+            aliases = listOf("mediainfo", "media-info", "media_info"),
+            libsToInclude = listOf(
+                "libmediainfo.so",
+            ),
+        ),
 
-        val DEFALUT_INCLUDES: List<String> = (BASIC + MISCELLANEOUS).distinct()
+        IMAGE_QUANT(
+            label = "Image Quantization",
+            aliases = listOf("imagequant", "image-quant", "image-quantization", "image_quant", "image_quantization"),
+            libsToInclude = listOf(
+                "libpng.so",
+                "libpng16d.so",
+                "libpngquant_bridge.so",
+            ),
+        ),
 
-        @JvmStatic
-        fun ensure(name: String, libNameList: List<String>) {
-            if (!BuildConfig.isInrt) return
+        ;
+
+        fun ensureLibFiles(moduleName: String = label) {
+            if (!isInrt) return
             val nativeLibraryDir = File(globalContext.applicationInfo.nativeLibraryDir)
             val primaryNativeLibraries = nativeLibraryDir.list()?.toList() ?: emptyList()
-            if (!primaryNativeLibraries.containsAll(libNameList)) {
-                throw Exception(globalContext.getString(R.string.error_module_does_not_work_due_to_the_lack_of_necessary_library_files, name))
+            if (!primaryNativeLibraries.containsAll(libsToInclude)) {
+                throw Exception(globalContext.getString(R.string.error_module_does_not_work_due_to_the_lack_of_necessary_library_files, moduleName))
             }
         }
 
-    }
+        companion object {
 
-    @Suppress("SpellCheckingInspection")
-    object Assets {
+            val defaultLibsToInclude = listOf(
+                TERMINAL_EMULATOR,
+            ).flatMap { it.libsToInclude }
 
-        object File {
-
-            private val BASIC = listOf(
-                "init.js", "roboto_medium.ttf"
+            val defaultAssetFilesToInclude = listOf(
+                "init.js", "roboto_medium.ttf",
             )
 
-            private val MISCELLANEOUS = emptyList<String>()
-
-            val DEFAULT_INCLUDES = (BASIC + MISCELLANEOUS).distinct()
-
-        }
-
-        object Dir {
-
-            private val BASIC = listOf("doc", "docs", "editor", "indices", "js-beautify", "sample")
-
-            private val MISCELLANEOUS = listOf("stored-locales")
-
-            @JvmField
-            val OPENCV = emptyList<String>()
-
-            @JvmField
-            val MLKIT_GOOGLE_OCR = listOf("mlkit-google-ocr-models")
-
-            @JvmField
-            val MLKIT_BARCODE = listOf("mlkit_barcode_models")
-
-            @JvmField
-            val PADDLE_LITE = listOf("models")
-
-            @JvmField
-            val RAPID_OCR = listOf("labels")
-
-            @JvmField
-            val OPENCC = listOf("openccdata")
-
-            val DEFAULT_EXCLUDES = (BASIC + MLKIT_GOOGLE_OCR + MLKIT_BARCODE + PADDLE_LITE + RAPID_OCR + OPENCC + MISCELLANEOUS).distinct()
+            val defaultAssetDirsToExclude = listOf(
+                "doc", "docs", "editor", "indices", "js-beautify", "sample", "stored-locales",
+            ) + Libs.entries.flatMap { it.assetDirsToExclude }
 
         }
 
-    }
-
-    object Constants {
-        const val OPENCV = "OpenCV"
-        const val MLKIT_OCR = "MLKit OCR"
-        const val PADDLE_OCR = "Paddle OCR"
-        const val RAPID_OCR = "Rapid OCR"
-        const val OPENCC = "OpenCC"
-        const val MLKIT_BARCODE = "MLKit Barcode"
     }
 
 }

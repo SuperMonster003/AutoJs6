@@ -7,7 +7,7 @@ import android.os.Looper
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.floating.FloatyWindowManger
 import org.autojs.autojs.ui.main.MainActivity
-import org.autojs.autojs6.R
+import org.autojs.autojs6.databinding.ActivitySplashBinding
 
 /**
  * Created by Stardust on Jul 7, 2017.
@@ -17,20 +17,24 @@ import org.autojs.autojs6.R
 @SuppressLint("CustomSplashScreen")
 class SplashActivity : BaseActivity() {
 
+    override val handleStatusBarThemeColorAutomatically = false
+    override val handleNavigationBarContrastEnforcedAutomatically = false
+
     private var mAlreadyEnterNextActivity = false
     private var mPaused = false
 
     private lateinit var mHandler: Handler
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        setContentView(R.layout.activity_splash)
+        super.onCreate(savedInstanceState)
+
+        setContentView(ActivitySplashBinding.inflate(layoutInflater).root)
 
         @Suppress("DEPRECATION")
         mHandler = Looper.myLooper()?.let { Handler(it) } ?: Handler()
         mHandler.postDelayed({ enterNextActivity() }, INIT_TIMEOUT)
 
         FloatyWindowManger.hideCircularMenuIfNeeded()
-        super.onCreate(savedInstanceState)
     }
 
     override fun onPause() {
@@ -56,7 +60,7 @@ class SplashActivity : BaseActivity() {
 
     companion object {
 
-        const val INIT_TIMEOUT: Long = 1000
+        const val INIT_TIMEOUT = 1000L
 
     }
 

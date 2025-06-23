@@ -2,24 +2,24 @@ package org.autojs.autojs.ui.main;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 import android.widget.TextView;
-
 import androidx.annotation.AttrRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
-
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-
-import org.autojs.autojs6.R;
-
 import io.reactivex.subjects.PublishSubject;
+import org.autojs.autojs6.R;
 
 /**
  * Created by Stardust on Sep 24, 2017.
@@ -33,7 +33,7 @@ public class FloatingActionMenu extends FrameLayout implements View.OnClickListe
     private static final int[] ICONS = {
             R.drawable.ic_floating_action_menu_dir,
             R.drawable.ic_floating_action_menu_file,
-            R.drawable.ic_import_thick,
+            R.drawable.ic_file_download_white_cropped,
             R.drawable.ic_project_white};
 
     private static final int[] LABELS = {
@@ -42,9 +42,12 @@ public class FloatingActionMenu extends FrameLayout implements View.OnClickListe
             R.string.text_import,
             R.string.text_project};
 
+    private View mOverlay = null;
+
     private FloatingActionButton[] mFabs;
     private View[] mFabContainers;
     private boolean mExpanded = false;
+    private boolean mShouldCheckExpanded = true;
     private final int mInterval = 30;
     private final int mDuration = 250;
     private final Interpolator mInterpolator = new FastOutSlowInInterpolator();
@@ -74,7 +77,12 @@ public class FloatingActionMenu extends FrameLayout implements View.OnClickListe
         return mExpanded;
     }
 
+    public boolean shouldCheckExpanded() {
+        return mShouldCheckExpanded;
+    }
+
     public void expand() {
+        showOverlay();
         setVisibility(VISIBLE);
         int h = mFabs[0].getHeight();
         for (int i = 0; i < mFabContainers.length; i++) {
@@ -104,10 +112,12 @@ public class FloatingActionMenu extends FrameLayout implements View.OnClickListe
     }
 
     public void collapse() {
+        hideOverlay();
         animateY(mFabContainers[0], 0, new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
                 setVisibility(INVISIBLE);
+                mShouldCheckExpanded = true;
             }
         });
         for (int i = 1; i < mFabContainers.length; i++) {
@@ -157,14 +167,49 @@ public class FloatingActionMenu extends FrameLayout implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
-        collapse();
+        // collapse();
         if (mOnFloatingActionButtonClickListener != null) {
             mOnFloatingActionButtonClickListener.onClick((FloatingActionButton) v, (int) v.getTag());
         }
-
     }
 
     public void setOnFloatingActionButtonClickListener(OnFloatingActionButtonClickListener onFloatingActionButtonClickListener) {
         mOnFloatingActionButtonClickListener = onFloatingActionButtonClickListener;
     }
+
+    private void showOverlay() {
+        if (mOverlay != null && mOverlay.getVisibility() == VISIBLE) return;
+
+        Context context = getContext();
+
+        if (!(context instanceof Activity activity)) return;
+
+        if (!(activity.findViewById(android.R.id.content) instanceof ViewGroup root)) return;
+
+        mOverlay = new View(context) {
+            @Override
+            public boolean onTouchEvent(MotionEvent event) {
+                mShouldCheckExpanded = false;
+                collapse();
+                root.post(() -> root.removeView(this));
+                var replay = MotionEvent.obtain(event);
+                root.post(() -> activity.getWindow().getDecorView().dispatchTouchEvent(replay));
+                return false;
+            }
+        };
+
+        LayoutParams params = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+        mOverlay.setLayoutParams(params);
+        mOverlay.setBackgroundColor(Color.TRANSPARENT);
+
+        root.addView(mOverlay);
+    }
+
+    private void hideOverlay() {
+        if (mOverlay == null) return;
+        if (!(mOverlay.getParent() instanceof ViewGroup parent)) return;
+        parent.removeView(mOverlay);
+        mOverlay = null;
+    }
+
 }

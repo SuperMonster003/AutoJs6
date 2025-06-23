@@ -1,7 +1,6 @@
 package org.autojs.autojs
 
 import android.annotation.SuppressLint
-import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
@@ -29,7 +28,6 @@ import org.autojs.autojs.event.GlobalKeyObserver
 import org.autojs.autojs.external.receiver.DynamicBroadcastReceivers
 import org.autojs.autojs.leakcanary.LeakCanarySetup
 import org.autojs.autojs.pluginclient.DevPluginService
-import org.autojs.autojs.runtime.api.WrappedShizuku
 import org.autojs.autojs.timing.TimedTaskManager
 import org.autojs.autojs.timing.TimedTaskScheduler
 import org.autojs.autojs.tool.CrashHandler
@@ -66,7 +64,7 @@ class App : MultiDexApplication() {
         setUpLeakCanary()
 
         AutoJs.initInstance(this)
-        GlobalKeyObserver.initIfNeeded()
+        GlobalKeyObserver.initIfNeeded(applicationContext)
         setupDrawableImageLoader()
         TimedTaskScheduler.init(this)
         initDynamicBroadcastReceivers()
@@ -117,7 +115,6 @@ class App : MultiDexApplication() {
                         else -> ViewUtils.MODE.DAY
                     }
                 }
-
                 else -> ViewUtils.MODE.NULL
             }
         )
@@ -223,7 +220,7 @@ class App : MultiDexApplication() {
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
-        ViewUtils.onConfigurationChanged(newConfig)
+        ViewUtils.onConfigurationChangedForNightMode(newConfig)
         EventBus.getDefault().post(newConfig)
         FloatyWindowManger.getCircularMenu()?.savePosition(newConfig)
         super.onConfigurationChanged(newConfig)
@@ -239,7 +236,7 @@ class App : MultiDexApplication() {
             get() = instance.get()!!
 
         fun getProcessNameCompat(): String {
-            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) Application.getProcessName() else {
+            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) getProcessName() else {
                 try {
                     @SuppressLint("PrivateApi") val activityThread = Class.forName("android.app.ActivityThread")
                     @SuppressLint("DiscouragedPrivateApi") val method: Method = activityThread.getDeclaredMethod("currentProcessName")

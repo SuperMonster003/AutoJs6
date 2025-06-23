@@ -1,22 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto">
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-            android:id="@+id/action_log"
-            android:icon="@drawable/ic_ali_log"
-            android:title="@string/text_log"
-            android:iconTint="@color/toolbar_text"
-            app:showAsAction="ifRoom" />
+        android:id="@+id/action_log"
+        android:icon="@drawable/ic_ali_log"
+        android:title="@string/text_log"
+        app:showAsAction="always" />
 
     <item
-            android:id="@+id/action_search"
-            android:icon="@drawable/ic_search_white_36dp"
-            android:title="@string/text_search"
-            android:iconTint="@color/toolbar_text"
-            android:imeOptions="actionSearch"
-            android:inputType="text"
-            app:actionViewClass="androidx.appcompat.widget.SearchView"
-            app:showAsAction="ifRoom|collapseActionView" />
+        android:id="@+id/action_search"
+        android:icon="@drawable/ic_search_black_48dp"
+        android:title="@string/text_search"
+        android:imeOptions="actionSearch"
+        android:inputType="text"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"
+        app:showAsAction="always|collapseActionView" />
+
+    <item
+        android:id="@+id/action_search_prev"
+        android:icon="@drawable/ic_ali_up"
+        android:title="@string/text_find_prev_simplified"
+        android:visible="false"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/action_search_next"
+        android:icon="@drawable/ic_ali_down"
+        android:title="@string/text_find_next_simplified"
+        android:visible="false"
+        app:showAsAction="always" />
 
 </menu>

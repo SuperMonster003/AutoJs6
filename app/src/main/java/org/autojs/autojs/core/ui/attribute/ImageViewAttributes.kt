@@ -50,11 +50,11 @@ open class ImageViewAttributes(scriptRuntime: ScriptRuntime, resourceParser: Res
     }
 
     private fun ScriptRuntime.getPath(s: String, def: String = s): String {
-        return if (this.files.exists(s)) this.files.path(s) else def
+        return if (this.files.exists(s)) this.files.nonNullPath(s) else def
     }
 
     private fun ScriptRuntime.getPath(s: String, def: (String) -> String): String {
-        return if (this.files.exists(s)) this.files.path(s) else def(s)
+        return if (this.files.exists(s)) this.files.nonNullPath(s) else def(s)
     }
 
     companion object {

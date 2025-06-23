@@ -1,0 +1,49 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/md_titleFrame"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:baselineAligned="false"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingHorizontal="@dimen/md_dialog_frame_margin"
+    android:paddingTop="@dimen/md_dialog_frame_margin"
+    android:paddingBottom="@dimen/md_title_frame_margin_bottom">
+
+    <ImageView
+        android:id="@+id/md_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/md_icon_margin"
+        android:scaleType="fitXY"
+        tools:ignore="ContentDescription" />
+
+    <TextView
+        android:id="@+id/md_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="center_vertical"
+        android:maxLines="5"
+        android:ellipsize="end"
+        android:textSize="@dimen/md_title_textsize"
+        tools:text="Title" />
+
+    <ImageView
+        android:id="@+id/md_options"
+        android:layout_width="27dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="center_vertical"
+        android:layout_marginEnd="-10dp"
+        android:maxHeight="27dp"
+        android:paddingTop="3dp"
+        android:paddingHorizontal="3dp"
+        android:src="@drawable/md_ic_more"
+        android:visibility="gone"
+        app:tint="?android:attr/textColorPrimary"
+        tools:ignore="ContentDescription"
+        tools:visibility="visible" />
+
+</LinearLayout>

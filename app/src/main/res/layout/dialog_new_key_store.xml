@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -24,7 +25,7 @@
                 android:layout_centerVertical="true"
                 android:layout_toStartOf="@+id/type_radio_group"
                 android:text="@string/text_new_key_store"
-                android:textColor="@color/text_color_primary"
+                android:textColor="@color/day_night_full"
                 android:textSize="24sp" />
 
             <RadioGroup
@@ -37,7 +38,7 @@
                 android:orientation="horizontal"
                 tools:ignore="RelativeOverlap">
 
-                <RadioButton
+                <org.autojs.autojs.theme.widget.ThemeColorRadioButton
                     android:id="@+id/type_jks"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -45,17 +46,17 @@
                     android:text="@string/text_jks"
                     android:textSize="16sp" />
 
-                <RadioButton
+                <org.autojs.autojs.theme.widget.ThemeColorRadioButton
                     android:id="@+id/type_bks"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
                     android:text="@string/text_bks"
                     android:textSize="16sp" />
+
             </RadioGroup>
 
         </RelativeLayout>
-
 
         <ScrollView
             android:layout_width="match_parent"
@@ -74,25 +75,28 @@
                     android:layout_marginBottom="8dp"
                     android:orientation="vertical">
 
-                    <com.google.android.material.textfield.TextInputLayout
+                    <org.autojs.autojs.theme.widget.ThemeColorTextInputLayout
                         android:id="@+id/filename_text_input_layout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/text_file_name">
+                        android:hint="@string/text_file_name"
+                        app:expandedHintEnabled="false">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/filename"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:textColor="@color/text_color_primary" />
-                    </com.google.android.material.textfield.TextInputLayout>
 
-                    <com.google.android.material.textfield.TextInputLayout
+                    </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
+
+                    <org.autojs.autojs.theme.widget.ThemeColorTextInputLayout
                         android:id="@+id/password_text_input_layout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="@string/text_key_store_password"
-                        app:endIconMode="password_toggle">
+                        app:endIconMode="password_toggle"
+                        app:expandedHintEnabled="false">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/password"
@@ -100,13 +104,15 @@
                             android:layout_height="wrap_content"
                             android:inputType="textPassword"
                             android:textColor="@color/text_color_primary" />
-                    </com.google.android.material.textfield.TextInputLayout>
 
-                    <com.google.android.material.textfield.TextInputLayout
+                    </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
+
+                    <org.autojs.autojs.theme.widget.ThemeColorTextInputLayout
                         android:id="@+id/alias_text_input_layout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/text_key_alias">
+                        android:hint="@string/text_key_alias"
+                        app:expandedHintEnabled="false">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/alias"
@@ -114,14 +120,16 @@
                             android:layout_height="wrap_content"
                             android:text="@string/text_default_alias"
                             android:textColor="@color/text_color_primary" />
-                    </com.google.android.material.textfield.TextInputLayout>
 
-                    <com.google.android.material.textfield.TextInputLayout
+                    </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
+
+                    <org.autojs.autojs.theme.widget.ThemeColorTextInputLayout
                         android:id="@+id/alias_password_text_input_layout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="@string/text_alias_password"
-                        app:endIconMode="password_toggle">
+                        app:endIconMode="password_toggle"
+                        app:expandedHintEnabled="false">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/alias_password"
@@ -129,7 +137,9 @@
                             android:layout_height="wrap_content"
                             android:inputType="textPassword"
                             android:textColor="@color/text_color_primary" />
-                    </com.google.android.material.textfield.TextInputLayout>
+
+                    </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
+
                 </LinearLayout>
 
                 <com.google.android.material.switchmaterial.SwitchMaterial
@@ -174,13 +184,15 @@
                             android:textAlignment="viewStart"
                             android:textColor="@color/text_color_primary"
                             android:textSize="16sp" />
+
                     </LinearLayout>
 
-                    <com.google.android.material.textfield.TextInputLayout
+                    <org.autojs.autojs.theme.widget.ThemeColorTextInputLayout
                         android:id="@+id/validity_years_text_input_layout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/text_validity_years">
+                        android:hint="@string/text_validity_years"
+                        app:expandedHintEnabled="false">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/validity_years"
@@ -189,52 +201,60 @@
                             android:inputType="number"
                             android:text="@string/text_default_validity_years"
                             android:textColor="@color/text_color_primary" />
-                    </com.google.android.material.textfield.TextInputLayout>
 
-                    <com.google.android.material.textfield.TextInputLayout
+                    </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
+
+                    <org.autojs.autojs.theme.widget.ThemeColorTextInputLayout
                         android:id="@+id/first_and_last_name_text_input_layout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/text_first_and_last_name">
+                        android:hint="@string/text_first_and_last_name"
+                        app:expandedHintEnabled="false">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/first_and_last_name"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:textColor="@color/text_color_primary" />
-                    </com.google.android.material.textfield.TextInputLayout>
 
-                    <com.google.android.material.textfield.TextInputLayout
+                    </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
+
+                    <org.autojs.autojs.theme.widget.ThemeColorTextInputLayout
                         android:id="@+id/organization_text_input_layout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/text_organization">
+                        android:hint="@string/text_organization"
+                        app:expandedHintEnabled="false">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/organization"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:textColor="@color/text_color_primary" />
-                    </com.google.android.material.textfield.TextInputLayout>
 
-                    <com.google.android.material.textfield.TextInputLayout
+                    </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
+
+                    <org.autojs.autojs.theme.widget.ThemeColorTextInputLayout
                         android:id="@+id/organizational_unit_text_input_layout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/text_organizational_unit">
+                        android:hint="@string/text_organizational_unit"
+                        app:expandedHintEnabled="false">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/organizational_unit"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:textColor="@color/text_color_primary" />
-                    </com.google.android.material.textfield.TextInputLayout>
 
-                    <com.google.android.material.textfield.TextInputLayout
+                    </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
+
+                    <org.autojs.autojs.theme.widget.ThemeColorTextInputLayout
                         android:id="@+id/country_code_text_input_layout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/text_country_code">
+                        android:hint="@string/text_country_code"
+                        app:expandedHintEnabled="false">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/country_code"
@@ -242,48 +262,58 @@
                             android:layout_height="wrap_content"
                             android:text="@string/text_default_country_code"
                             android:textColor="@color/text_color_primary" />
-                    </com.google.android.material.textfield.TextInputLayout>
 
-                    <com.google.android.material.textfield.TextInputLayout
+                    </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
+
+                    <org.autojs.autojs.theme.widget.ThemeColorTextInputLayout
                         android:id="@+id/state_or_province_text_input_layout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/text_state_or_province">
+                        android:hint="@string/text_state_or_province"
+                        app:expandedHintEnabled="false">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/state_or_province"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:textColor="@color/text_color_primary" />
-                    </com.google.android.material.textfield.TextInputLayout>
 
-                    <com.google.android.material.textfield.TextInputLayout
+                    </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
+
+                    <org.autojs.autojs.theme.widget.ThemeColorTextInputLayout
                         android:id="@+id/city_or_locality_text_input_layout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/text_city_or_locality">
+                        android:hint="@string/text_city_or_locality"
+                        app:expandedHintEnabled="false">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/city_or_locality"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:textColor="@color/text_color_primary" />
-                    </com.google.android.material.textfield.TextInputLayout>
 
-                    <com.google.android.material.textfield.TextInputLayout
+                    </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
+
+                    <org.autojs.autojs.theme.widget.ThemeColorTextInputLayout
                         android:id="@+id/street_text_input_layout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/text_street">
+                        android:hint="@string/text_street"
+                        app:expandedHintEnabled="false">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/street"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:textColor="@color/text_color_primary" />
-                    </com.google.android.material.textfield.TextInputLayout>
+
+                    </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
+
                 </LinearLayout>
+
             </LinearLayout>
+
         </ScrollView>
 
         <LinearLayout
@@ -295,23 +325,28 @@
 
             <Button
                 android:id="@+id/cancel"
-                style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
+                style="@style/MD_ActionButton.Text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
                 android:layout_marginTop="8dp"
                 android:elegantTextHeight="true"
-                android:text="@string/text_cancel" />
+                android:text="@string/text_cancel"
+                android:textColor="@color/dialog_button_default" />
 
             <Button
                 android:id="@+id/confirm"
-                style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
+                style="@style/MD_ActionButton.Text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
                 android:layout_marginTop="8dp"
                 android:elegantTextHeight="true"
-                android:text="@string/text_ok" />
+                android:text="@string/dialog_button_confirm"
+                android:textColor="@color/dialog_button_attraction" />
+
         </LinearLayout>
+
     </LinearLayout>
+
 </androidx.cardview.widget.CardView>

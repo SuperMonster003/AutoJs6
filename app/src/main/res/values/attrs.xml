@@ -12,7 +12,6 @@
             <enum name="single" value="0" />
             <enum name="multiple" value="1" />
         </attr>
-
         <attr name="alwaysExtended" format="boolean" />
         <attr name="list" format="reference" />
     </declare-styleable>
@@ -24,19 +23,25 @@
         <attr name="neutralText" format="string" />
         <attr name="neutralTextShort" format="string" />
         <attr name="negativeText" format="string" />
+        <attr name="negativeColor" format="color" />
         <attr name="positiveText" format="string" />
+        <attr name="positiveColor" format="color" />
         <attr name="onConfirmPrompt" format="string" />
     </declare-styleable>
+
     <declare-styleable name="MaterialPreference">
         <attr name="longClickPrompt" format="string" />
         <attr name="longClickPromptMore" format="string" />
     </declare-styleable>
+
     <declare-styleable name="MaterialListPreference">
         <attr name="dialogTitle" />
         <attr name="dialogContent" />
         <attr name="neutralText" />
         <attr name="negativeText" />
+        <attr name="negativeColor" />
         <attr name="positiveText" />
+        <attr name="positiveColor" />
         <attr name="onConfirmPrompt" />
         <attr name="itemKeys" format="reference" />
         <attr name="itemValues" format="reference" />
@@ -46,7 +51,6 @@
     <declare-styleable name="ToolbarMenuItem">
         <attr name="text" format="string|reference" />
         <attr name="icon" />
-        <attr name="icon_color" format="color|reference" />
     </declare-styleable>
 
     <declare-styleable name="RoundCheckboxWithText">
@@ -88,5 +92,7 @@
         <attr name="color_warn" format="reference|color" />
         <attr name="color_error" format="reference|color" />
         <attr name="color_assert" format="reference|color" />
+        <attr name="excludeFromNavigationBar" format="boolean" />
     </declare-styleable>
+
 </resources>
