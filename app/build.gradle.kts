@@ -27,6 +27,11 @@ val buildTypeRelease = "release"
 val buildActionAssemble = "assemble"
 val templateName = "template"
 
+val taskNames = gradle.startParameter.taskNames
+val isAppAssembleTaskRequested = taskNames.any { it.contains(Regex("^(:?$flavorNameApp:)?$buildActionAssemble", IGNORE_CASE)) }
+val isInrtAssembleTaskRequested = taskNames.any { it.contains(Regex("^(:?$flavorNameApp:)?$buildActionAssemble$flavorNameInrt", IGNORE_CASE)) }
+val isInrtTaskRequested = taskNames.any { it.contains(flavorNameInrt, true) }
+
 plugins {
     id("com.android.application")
     id("com.google.devtools.ksp")
@@ -39,6 +44,9 @@ dependencies /* Unclassified */ {
 
     // Kotlin reflect
     implementation(kotlin("reflect"))
+
+    // Androidx Core
+    implementation("androidx.core:core-ktx:1.16.0")
 
     // LeakCanary
     debugImplementation("com.squareup.leakcanary:leakcanary-android:2.14")
@@ -218,9 +226,9 @@ dependencies /* Unclassified */ {
     implementation(files("$rootDir/libs/tiny-sign-0.9.jar"))
 
     // Room
-    implementation("androidx.room:room-runtime:2.7.1")
-    implementation("androidx.room:room-ktx:2.7.1")
-    ksp("androidx.room:room-compiler:2.7.1")
+    implementation("androidx.room:room-runtime:2.7.2")
+    implementation("androidx.room:room-ktx:2.7.2")
+    ksp("androidx.room:room-compiler:2.7.2")
 
     // ApkSig
     // implementation("com.android.tools.build:apksig:8.7.3")
@@ -549,10 +557,10 @@ android {
         }
 
         androidResources {
-            if (gradle.startParameter.taskNames.any { it.contains(Regex("^(:?$flavorNameApp:)?$buildActionAssemble")) }) {
+            if (isAppAssembleTaskRequested) {
                 ignoreAssetsPatterns.addAll(listOf(".idea", "declarations", "sample/declarations"))
             }
-            if (gradle.startParameter.taskNames.any { it.contains(Regex("^(:?$flavorNameApp:)?$buildActionAssemble$flavorNameInrt", IGNORE_CASE)) }) {
+            if (isInrtAssembleTaskRequested) {
                 // @Hint by SuperMonster003 on Oct 16, 2023.
                 //  ! Runtime assets will be copied from flavor "app"
                 //  ! while building an apk on org.autojs.autojs.ui.project.BuildActivity.
@@ -635,7 +643,7 @@ android {
             "EmojiReference.txt",
         ).let { resources.excludes.addAll(it) }
 
-        if (gradle.startParameter.taskNames.any { it.contains(flavorNameInrt, true) }) {
+        if (isInrtTaskRequested) {
             listOf(
                 "**/prob_emit.txt", // Jieba Analysis (zh-CN: 结巴分词)
                 "**/dict-chinese-*.db.gzip", // Jieba Analysis (zh-CN: 结巴分词)
@@ -742,9 +750,7 @@ android {
         // Configures multiple APKs based on ABI.
         abi {
             // Enables building multiple APKs per ABI.
-            isEnable = /* isNotAssembleInrt */ gradle.startParameter.taskNames.none {
-                it.contains(Regex("^(:?$flavorNameApp:)?$buildActionAssemble$flavorNameInrt", IGNORE_CASE))
-            }
+            isEnable = !isInrtAssembleTaskRequested
             // By default, all ABIs are included, so use reset() and include to specify that we only
             // want APKs for x86 and x86_64.
             // Resets the list of ABIs that Gradle should create APKs for to none.
@@ -788,7 +794,7 @@ tasks {
 
             rename { name ->
                 Utils.digestCRC32(file("${src}/$name")).let { digest ->
-                    name.replace("^(.+?)(\\.$ext)\$".toRegex(), "\$1-$digest\$2")
+                    name.replace(Regex("^(.+?)(\\.$ext)$"), "$1-$digest$2")
                 }
             }
 
