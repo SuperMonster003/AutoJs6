@@ -13,9 +13,10 @@ import org.autojs.autojs.core.accessibility.AccessibilityNodeInfoHelper
 import org.autojs.autojs.core.accessibility.UiSelector
 import org.autojs.autojs.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.extension.AnyExtensions.isJsUndefined
-import org.autojs.autojs.extension.ArrayExtensions.toHashCode
+import org.autojs.autojs.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.extension.ArrayExtensions.toNativeArray
 import org.autojs.autojs.runtime.ScriptRuntime
+import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.DisplayUtils.toRoundIntX
 import org.autojs.autojs.util.DisplayUtils.toRoundIntY
 import org.autojs.autojs.util.RhinoUtils
@@ -24,9 +25,9 @@ import org.autojs.autojs.util.StringUtils.str
 import org.autojs.autojs6.R
 import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.Context
-import org.mozilla.javascript.Scriptable
 import org.opencv.core.Point
 import org.opencv.core.Size
+import kotlin.math.abs
 import kotlin.math.roundToInt
 
 /**
@@ -56,32 +57,45 @@ open class UiObject(
         indexInParent: Int = -1,
     ) : this(info, null, depth, indexInParent)
 
-    open fun parent(): UiObject? = try {
+    open fun parent(): UiObject? = runCatching {
         super.getParent()?.let { node ->
             UiObject(node.unwrap(), depth - 1, node.parent?.run {
                 // @Dubious by SuperMonster003 on May 26, 2022.
                 //  ! May lead to poor performance?
                 //  ! zh-CN: 可能导致性能不佳?
-                (0 until childCount).firstOrNull { getChild(it) == node } ?: -1
+                (0 until childCount).firstOrNull { child(it) == node } ?: -1
             } ?: 0)
         }
-    } catch (e: IllegalStateException) {
+    }.onFailure {
         // FIXME by Stardust on May 5, 2017.
-        null.also { e.printStackTrace() }
+        it.printStackTrace()
+    }.getOrNull()
+
+    fun parent(i: Int): UiObject? {
+        require(i >= 0) { "Index for UiObject#parent cannot be negative ($i)" }
+        return compass("p$i")
     }
 
-    fun parent(i: Int): UiObject? = if (i < 0) throw Exception("i < 0") else compass("p$i")
-
-    open fun child(i: Int): UiObject? {
-        if (i < 0) {
-            return (i + childCount).takeIf { it >= 0 }?.let { child(it) }
+    open fun child(i: Int): UiObject? = when {
+        i >= childCount -> {
+            null
         }
-        return try {
-            super.getChild(i)?.run { UiObject(unwrap(), depth + 1, i) }
-        } catch (e: IllegalStateException) {
+        i < 0 -> when (val targetIdx = i + childCount) {
+            in 0 until childCount -> child(targetIdx)
+            else -> null
+        }
+        else -> runCatching {
+            // @Caution by SuperMonster003 on Jun 19, 2025.
+            //  ! `super.getChild` may cause ArrayIndexOutOfBoundsException when `i` is out of range of [0..childCound).
+            //  ! zh-CN: 当 `i` 超出 [0..childCount) 范围时可能导致 ArrayIndexOutOfBoundsException 异常.
+            // @Dubious by SuperMonster003 on Jun 19, 2025.
+            //  ! It seems that the situation above only happens on API Level 29 (Android 10) [Q] ?
+            //  ! zh-CN: 似乎上述情况只发生在 API Level 29 (Android 10) [Q] ?
+            super.getChild(i)?.let { UiObject(it.unwrap(), depth + 1, i) }
+        }.onFailure {
             // FIXME by Stardust on May 5, 2017.
-            null.also { e.printStackTrace() }
-        }
+            it.printStackTrace()
+        }.getOrNull()
     }
 
     // @Deprecated by SuperMonster003 on Jul 20, 2023.
@@ -413,10 +427,13 @@ open class UiObject(
         false.also { e.printStackTrace() }
     }
 
-    override fun getChild(index: Int): AccessibilityNodeInfoCompat =
-        allocator?.getChild(this, index) ?: super.getChild(index)
+    override fun getChild(index: Int): AccessibilityNodeInfoCompat {
+        return allocator?.getChild(this, index) ?: super.getChild(index)
+    }
 
-    override fun getParent(): AccessibilityNodeInfoCompat? = allocator?.getParent(this) ?: super.getParent()
+    override fun getParent(): AccessibilityNodeInfoCompat? {
+        return allocator?.getParent(this) ?: super.getParent()
+    }
 
     override fun findAccessibilityNodeInfosByText(text: String): List<AccessibilityNodeInfoCompat> {
         return allocator?.findAccessibilityNodeInfosByText(this, text)
@@ -492,49 +509,7 @@ open class UiObject(
         return "[${UiObject::class.java.simpleName}] $simpledClassName ${summary()}"
     }
 
-    override fun hashCode() = listOf(
-        "${packageName()}",
-        "$parent",
-        "${id()}",
-        "${fullId()}",
-        "${idHex()}",
-        "${desc()}",
-        text(),
-        "${bounds()}",
-        "${className()}",
-        "${clickable()}",
-        "${longClickable()}",
-        "${scrollable()}",
-        "${indexInParent()}",
-        "${childCount()}",
-        "${depth()}",
-        "${checked()}",
-        "${enabled()}",
-        "${editable()}",
-        "${focusable()}",
-        "${checkable()}",
-        "${selected()}",
-        "$isDismissable",
-        "${visibleToUser()}",
-        "$isContextClickable",
-        "${focused()}",
-        "$isAccessibilityFocused",
-        "${rowCount()}",
-        "${columnCount()}",
-        "${row()}",
-        "${column()}",
-        "${rowSpan()}",
-        "${columnSpan()}",
-        "$drawingOrder",
-        "${actionNames()}",
-        "${isSingleton()}",
-        "${firstSibling()}",
-        "${lastSibling()}",
-        "${firstChild()}",
-        "${lastChild()}",
-    ).toHashCode()
-
-    override fun equals(other: Any?): Boolean {
+    fun isSimilar(other: Any?): Boolean {
         if (this === other) return true
         if (other !is UiObject) return false
 
@@ -543,6 +518,7 @@ open class UiObject(
         val info = unwrap() ?: return false
 
         return info == other.unwrap() &&
+                bounds() == other.bounds() &&
                 packageName() == other.packageName() &&
                 parent == other.parent &&
                 id() == other.id() &&
@@ -550,7 +526,6 @@ open class UiObject(
                 idHex() == other.idHex() &&
                 desc() == other.desc() &&
                 text() == other.text() &&
-                bounds() == other.bounds() &&
                 className() == other.className() &&
                 clickable() == other.clickable() &&
                 longClickable() == other.longClickable() &&
@@ -578,26 +553,32 @@ open class UiObject(
                 drawingOrder == other.drawingOrder &&
                 actionNames() == other.actionNames() &&
                 isSingleton() == other.isSingleton() &&
-                "${firstSibling()}" == "${other.firstSibling()}" &&
-                "${lastSibling()}" == "${other.lastSibling()}" &&
-                "${firstChild()}" == "${other.firstChild()}" &&
-                "${lastChild()}" == "${other.lastChild()}"
+                "${firstSibling() ?: ""}" == "${other.firstSibling()}" &&
+                "${lastSibling() ?: ""}" == "${other.lastSibling()}" &&
+                "${firstChild() ?: ""}" == "${other.firstChild()}" &&
+                "${lastChild() ?: ""}" == "${other.lastChild()}"
     }
 
-    fun isSimilar(other: Any?): Boolean {
-        if (this === other) return true
-        if (other == null) return false
-        when (other) {
-            is Scriptable -> {
-                val thisHashCode = hashCode()
-                val otherHashCode = RhinoUtils.hashCodeOfScriptable(other) ?: return false
-                return thisHashCode == otherHashCode
+    fun isShifted(other: UiObject) = bounds() == other.bounds()
+
+    fun isShifted(other: UiObject, tolerance: Double): Boolean {
+        val a = bounds()
+        val b = other.bounds()
+        return when {
+            tolerance < 0 -> throw WrappedIllegalArgumentException(
+                "Argument \"tolerance\" ${tolerance.jsBrief()} for UiObject#isShifted must be greater than or equal to 0",
+            )
+            tolerance < 1 -> (width() to height()).let { (w, h) ->
+                return@let abs(a.left - b.left) > tolerance * w
+                        || abs(a.top - b.top) > tolerance * h
+                        || abs(a.right - b.right) > tolerance * w
+                        || abs(a.bottom - b.bottom) > tolerance * h
             }
-            else -> {
-                return when {
-                    other.javaClass != UiObject::class.java -> false
-                    else -> hashCode() == other.hashCode()
-                }
+            else -> let {
+                return@let abs(a.left - b.left) > tolerance
+                        || abs(a.top - b.top) > tolerance
+                        || abs(a.right - b.right) > tolerance
+                        || abs(a.bottom - b.bottom) > tolerance
             }
         }
     }
