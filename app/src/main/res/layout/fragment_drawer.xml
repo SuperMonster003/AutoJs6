@@ -83,7 +83,7 @@
                 android:layout_gravity="center_vertical"
                 android:layout_marginEnd="4dp"
                 android:gravity="center"
-                android:text="@string/text_restart_app"
+                android:text="@string/text_restart"
                 android:textColor="?android:textColorPrimary"
                 android:textSize="15sp" />
 

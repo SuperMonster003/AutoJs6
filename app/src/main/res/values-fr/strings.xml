@@ -908,7 +908,7 @@
     <string name="text_reset_succeed">Réinitialisation réussie</string>
     <string name="text_reset_to_initial_content">Réinitialisation initiale</string>
     <string name="text_reset_to_initial_content_only_for_assets">Reset n\'est que pour les échantillons</string>
-    <string name="text_restart_app">Redémarrer</string>
+    <string name="text_restart">Redémarrer</string>
     <string name="text_result">Résultat</string>
     <string name="text_revoke_autojs6_access_in_shizuku_app">Révoquer les privilèges AutoJs6 dans une application Shizuku</string>
     <string name="text_root_mode_title">Force set root check</string>

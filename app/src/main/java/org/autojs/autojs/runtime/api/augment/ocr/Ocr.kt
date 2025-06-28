@@ -3,6 +3,7 @@ package org.autojs.autojs.runtime.api.augment.ocr
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.core.image.ImageWrapper
 import org.autojs.autojs.extension.AnyExtensions.isJsNullish
+import org.autojs.autojs.extension.AnyExtensions.isJsString
 import org.autojs.autojs.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.extension.AnyExtensions.jsSpecies
 import org.autojs.autojs.extension.ArrayExtensions.toNativeArray
@@ -14,6 +15,7 @@ import org.autojs.autojs.runtime.api.augment.Invokable
 import org.autojs.autojs.runtime.api.augment.images.Images
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.runtime.exception.ShouldNeverHappenException
+import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED
 import org.autojs.autojs.util.RhinoUtils.newNativeArray
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
@@ -58,13 +60,12 @@ class Ocr(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime)
                 scriptRuntime.augmentedOcrMLKit -> OcrMode.MLKIT
                 scriptRuntime.augmentedOcrPaddle -> OcrMode.PADDLE
                 scriptRuntime.augmentedOcrRapid -> OcrMode.RAPID
-                is String -> when (mode.lowercase()) {
+                else -> when (RhinoUtils.coerceStringLowercase(mode, "")) {
                     OcrMode.MLKIT.value -> OcrMode.MLKIT
                     OcrMode.PADDLE.value -> OcrMode.PADDLE
                     OcrMode.RAPID.value -> OcrMode.RAPID
                     else -> null
                 }
-                else -> null
             } ?: OcrMode.MLKIT.also { throw WrappedIllegalArgumentException("Unknown mode ${mode.jsSpecies()} for ocr.tap") }
             return@ensureArgumentsOnlyOne UNDEFINED
         }
@@ -75,7 +76,7 @@ class Ocr(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime)
             val (arg0, arg1, arg2) = argList
 
             when {
-                arg0 is String -> {
+                arg0.isJsString() -> {
 
                     // @Signature
                     // recognizeText(imgPath: string, options?: DetectOptionsMLKit | DetectOptionsPaddle): string[];
@@ -153,7 +154,7 @@ class Ocr(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime)
             val (arg0, arg1, arg2) = argList
 
             when {
-                arg0 is String -> {
+                arg0.isJsString() -> {
 
                     // @Signature
                     // detect(imgPath: string, options?: DetectOptionsMLKit | DetectOptionsPaddle): org.autojs.autojs.runtime.api.OcrResult[];
