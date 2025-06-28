@@ -908,7 +908,7 @@
     <string name="text_reset_succeed">Сброс выполнен успешно</string>
     <string name="text_reset_to_initial_content">Сброс первоначально</string>
     <string name="text_reset_to_initial_content_only_for_assets">Сброс выполняется только для образцов</string>
-    <string name="text_restart_app">Перезапустить</string>
+    <string name="text_restart">Перезапустить</string>
     <string name="text_result">Результат</string>
     <string name="text_revoke_autojs6_access_in_shizuku_app">Отмена привилегий AutoJs6 в приложении Shizuku</string>
     <string name="text_root_mode_title">Проверка принудительной установки root</string>

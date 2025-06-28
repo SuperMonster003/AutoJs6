@@ -908,7 +908,7 @@
     <string name="text_reset_succeed">Restablecer con éxito</string>
     <string name="text_reset_to_initial_content">Restablecer inicialmente</string>
     <string name="text_reset_to_initial_content_only_for_assets">El restablecimiento es sólo para las muestras</string>
-    <string name="text_restart_app">Reiniciar</string>
+    <string name="text_restart">Reiniciar</string>
     <string name="text_result">Resultado</string>
     <string name="text_revoke_autojs6_access_in_shizuku_app">Revocar privilegios de AutoJs6 en una aplicación Shizuku</string>
     <string name="text_root_mode_title">Forzar la comprobación de root</string>

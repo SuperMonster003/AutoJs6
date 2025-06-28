@@ -910,7 +910,7 @@
     <string name="text_reset_succeed">نجحت إعادة تعيين</string>
     <string name="text_reset_to_initial_content">إعادة تعيين في البداية</string>
     <string name="text_reset_to_initial_content_only_for_assets">إعادة التعيين هي فقط للعينات</string>
-    <string name="text_restart_app">إعادة بدء</string>
+    <string name="text_restart">إعادة بدء</string>
     <string name="text_result">نتيجة</string>
     <string name="text_revoke_autojs6_access_in_shizuku_app">قم بإلغاء الوصول إلى AutoJs6 في تطبيق Shizuku</string>
     <string name="text_root_mode_title">فحص الجذر مجموعة القوة</string>

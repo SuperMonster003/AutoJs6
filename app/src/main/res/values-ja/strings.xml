@@ -909,7 +909,7 @@
     <string name="text_reset_succeed">リセット成功</string>
     <string name="text_reset_to_initial_content">初期リセット</string>
     <string name="text_reset_to_initial_content_only_for_assets">リセットはサンプルのみ</string>
-    <string name="text_restart_app">再起動</string>
+    <string name="text_restart">再起動</string>
     <string name="text_result">結果</string>
     <string name="text_revoke_autojs6_access_in_shizuku_app">Shizuku アプリケーションで AutoJs6 権限を取り消す</string>
     <string name="text_root_mode_title">強制的に root にするチェック</string>

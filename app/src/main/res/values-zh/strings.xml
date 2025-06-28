@@ -906,7 +906,7 @@
     <string name="text_reset_succeed">重置成功</string>
     <string name="text_reset_to_initial_content">重置为初始内容</string>
     <string name="text_reset_to_initial_content_only_for_assets">只能重置示例代码文件</string>
-    <string name="text_restart_app">重启</string>
+    <string name="text_restart">重启</string>
     <string name="text_result">结果</string>
     <string name="text_revoke_autojs6_access_in_shizuku_app">在 Shizuku 应用中撤销 AutoJs6 权限</string>
     <string name="text_root_mode_title">强制 Root 权限检查</string>

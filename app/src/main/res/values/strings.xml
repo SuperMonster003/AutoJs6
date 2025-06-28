@@ -1136,7 +1136,7 @@
     <string name="text_reset_succeed">Reset succeeded</string>
     <string name="text_reset_to_initial_content">Reset initially</string>
     <string name="text_reset_to_initial_content_only_for_assets">Reset is only for samples</string>
-    <string name="text_restart_app">Restart</string>
+    <string name="text_restart">Restart</string>
     <string name="text_result">Result</string>
     <string name="text_revoke_autojs6_access_in_shizuku_app">Revoke AutoJs6 access in Shizuku app</string>
     <string name="text_root_mode_title">Force set root check</string>

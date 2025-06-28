@@ -6,9 +6,7 @@ import android.content.ClipboardManager
 import android.content.res.ColorStateList
 import android.os.Bundle
 import android.text.SpannableStringBuilder
-import android.util.TypedValue
 import android.view.KeyEvent
-import android.view.ScaleGestureDetector
 import android.view.View
 import android.widget.TextView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -24,11 +22,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.autojs.autojs.ui.BaseActivity
-import org.autojs.autojs.util.DisplayUtils
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ActivityDisplayScrollableContentBinding
-import kotlin.math.floor
 
 abstract class BaseDisplayContentActivity : BaseActivity() {
 
@@ -49,12 +45,6 @@ abstract class BaseDisplayContentActivity : BaseActivity() {
     private var mIsContentLoaded = false
     private val mTextUpdateMutex = Mutex()
 
-    protected val minTextSize = 4.0f
-    protected val maxTextSize = 72.0f
-
-    private var mLastScaleFactor = 1.0f
-    private var mLastTextSize = 0.0f
-
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,7 +63,7 @@ abstract class BaseDisplayContentActivity : BaseActivity() {
             }
         }
 
-        val scaleGestureDetector = ScaleGestureDetector(this, ScaleListener(internalTextView))
+        val scaleGestureDetector = ViewUtils.TextSizeScaleDetector(this, internalTextView)
 
         val innerScrollView = binding.innerScrollView.also {
             ViewUtils.excludePaddingClippableViewFromBottomNavigationBar(it)
@@ -262,37 +252,6 @@ abstract class BaseDisplayContentActivity : BaseActivity() {
         val clip = ClipData.newPlainText(javaClass.simpleName.removeSuffix("Activity"), text)
         clipboard.setPrimaryClip(clip)
         ViewUtils.showSnack(internalTextView, R.string.text_already_copied_to_clip, true)
-    }
-
-    // Scaling & Text Size Handling
-    protected inner class ScaleListener(private val textView: TextView) : ScaleGestureDetector.SimpleOnScaleGestureListener() {
-
-        override fun onScale(detector: ScaleGestureDetector): Boolean {
-            val currentFactor = (floor((detector.scaleFactor * 10).toDouble()) / 10).toFloat()
-            if (mLastTextSize <= 0) {
-                mLastTextSize = getTextSize()
-            }
-            if (currentFactor > 0 && mLastScaleFactor != currentFactor) {
-                val currentTextSize: Float = mLastTextSize + (if (currentFactor > mLastScaleFactor) 1 else -1)
-                mLastTextSize = currentTextSize.coerceIn(minTextSize, maxTextSize)
-                setTextSize(mLastTextSize)
-                mLastScaleFactor = currentFactor
-            }
-            return super.onScale(detector)
-        }
-
-        override fun onScaleEnd(detector: ScaleGestureDetector) {
-            mLastScaleFactor = 1.0f
-            super.onScaleEnd(detector)
-        }
-
-        fun setTextSize(size: Float) {
-            mLastTextSize = size
-            textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, size)
-        }
-
-        fun getTextSize(): Float = DisplayUtils.pxToSp(textView.textSize)
-
     }
 
 }

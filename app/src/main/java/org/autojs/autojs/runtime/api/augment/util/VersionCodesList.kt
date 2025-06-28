@@ -1,12 +1,15 @@
 package org.autojs.autojs.runtime.api.augment.util
 
+import android.os.Build
+import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
 
 object VersionCodesInfo {
 
-    // @UpTo Jan 2, 2025.
+    // @Updated by SuperMonster003 on Jun 26, 2025.
+    // @Reference https://en.wikipedia.org/wiki/Android_version_history
     private val raw = mutableMapOf(
-        "BAKLAVA" to listOf("Android 16", "Baklava", "16", "36", "Q2, 2025"),
+        "BAKLAVA" to listOf("Android 16", "Baklava", "16", "36", "Jun 10, 2025"),
         "VANILLA_ICE_CREAM" to listOf("Android 15", "Vanilla Ice Cream", "15", "35", "September 3, 2024"),
         "UPSIDE_DOWN_CAKE" to listOf("Android 14", "Upside Down Cake", "14", "34", "October 4, 2023"),
         "TIRAMISU" to listOf("Android 13", "Tiramisu", "13", "33", "August 15, 2022"),
@@ -56,5 +59,20 @@ object VersionCodesInfo {
             list += info
         }
     }
+
+    @JvmStatic
+    @JvmOverloads
+    fun briefOfVersionInt(versionInt: Int, isCompat: Boolean = false): String {
+        return list.find { runCatching { it.apiLevel.toInt() }.getOrNull() == versionInt }?.let { info ->
+            var result = "${if (isCompat) "API Lv." else "Android API Level "}${info.apiLevel}"
+            info.releaseName.takeIf { it.isNotBlank() }?.let { result += " ($it)" }
+            info.internalCodename.takeIf { it.isNotBlank() }?.let { result += " [$it]" }
+            result
+        } ?: throw WrappedIllegalArgumentException("$versionInt is an invalid or unknown version int")
+    }
+
+    @JvmStatic
+    @JvmOverloads
+    fun briefOfCurrentVersionInt(isCompat: Boolean = false) = briefOfVersionInt(Build.VERSION.SDK_INT, isCompat)
 
 }

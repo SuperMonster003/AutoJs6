@@ -21,6 +21,7 @@ import android.util.DisplayMetrics
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.Menu
+import android.view.ScaleGestureDetector
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
@@ -32,6 +33,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.ColorInt
 import androidx.annotation.IdRes
@@ -52,6 +54,7 @@ import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs6.R
+import kotlin.math.floor
 import kotlin.math.roundToInt
 
 /**
@@ -697,6 +700,66 @@ object ViewUtils {
             }
 
         }
+
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    class TextSizeScaleDetector(context: Context, textView: TextView) :ScaleGestureDetector(context, TextSizeScaleListener(textView)) {
+
+        init {
+            textView.apply {
+                setTextIsSelectable(true)
+                isLongClickable = true
+                isFocusableInTouchMode = true
+                setOnTouchListener { v, event ->
+                    this@TextSizeScaleDetector.onTouchEvent(event)
+                    when {
+                        event.pointerCount > 1 -> {
+                            v.parent?.requestDisallowInterceptTouchEvent(true)
+                            true
+                        }
+                        else -> false
+                    }
+                }
+            }
+        }
+
+    }
+
+    // Scaling & Text Size Handling
+    private class TextSizeScaleListener(private val textView: TextView) : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+
+        private val mMinTextSize = 4.0f
+        private val mMaxTextSize = 72.0f
+
+        private var mLastScaleFactor = 1.0f
+        private var mLastTextSize = 0.0f
+
+        override fun onScale(detector: ScaleGestureDetector): Boolean {
+            val currentFactor = (floor((detector.scaleFactor * 10).toDouble()) / 10).toFloat()
+            if (mLastTextSize <= 0) {
+                mLastTextSize = getTextSize()
+            }
+            if (currentFactor > 0 && mLastScaleFactor != currentFactor) {
+                val currentTextSize: Float = mLastTextSize + (if (currentFactor > mLastScaleFactor) 1 else -1)
+                mLastTextSize = currentTextSize.coerceIn(mMinTextSize, mMaxTextSize)
+                setTextSize(mLastTextSize)
+                mLastScaleFactor = currentFactor
+            }
+            return super.onScale(detector)
+        }
+
+        override fun onScaleEnd(detector: ScaleGestureDetector) {
+            mLastScaleFactor = 1.0f
+            super.onScaleEnd(detector)
+        }
+
+        fun setTextSize(size: Float) {
+            mLastTextSize = size
+            textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, size)
+        }
+
+        fun getTextSize(): Float = DisplayUtils.pxToSp(textView.textSize)
 
     }
 

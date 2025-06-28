@@ -910,7 +910,7 @@
     <string name="text_reset_succeed">재설정이 성공했습니다</string>
     <string name="text_reset_to_initial_content">처음에 재설정하십시오</string>
     <string name="text_reset_to_initial_content_only_for_assets">재설정은 샘플에만 해당됩니다</string>
-    <string name="text_restart_app">재시작</string>
+    <string name="text_restart">재시작</string>
     <string name="text_result">결과</string>
     <string name="text_revoke_autojs6_access_in_shizuku_app">Shizuku 애플리케이션에서 AutoJs6 권한 취소하기</string>
     <string name="text_root_mode_title">강제 설정 루트 검사</string>

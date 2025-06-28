@@ -2,7 +2,6 @@ package org.autojs.autojs.ui.error;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.Window;
 import com.afollestad.materialdialogs.MaterialDialog;
 import org.autojs.autojs.extension.MaterialDialogExtensions;
 import org.autojs.autojs.ui.BaseActivity;
@@ -21,7 +20,6 @@ public class ErrorDialogActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
 
         // Get extras from intent
         Intent intent = getIntent();
