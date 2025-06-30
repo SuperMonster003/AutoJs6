@@ -31,7 +31,7 @@ import org.autojs.autojs.pluginclient.DevPluginService
 import org.autojs.autojs.timing.TimedTaskManager
 import org.autojs.autojs.timing.TimedTaskScheduler
 import org.autojs.autojs.tool.CrashHandler
-import org.autojs.autojs.ui.error.ErrorReportActivity
+import org.autojs.autojs.ui.error.CrashReportActivity
 import org.autojs.autojs.ui.floating.FloatyWindowManger
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.BuildConfig
@@ -89,7 +89,7 @@ class App : MultiDexApplication() {
 
     private fun setUpDebugEnvironment() {
         Bugly.isDev = false
-        val crashHandler = CrashHandler(ErrorReportActivity::class.java)
+        val crashHandler = CrashHandler(CrashReportActivity::class.java)
 
         val strategy = CrashReport.UserStrategy(applicationContext)
         strategy.setCrashHandleCallback(crashHandler)

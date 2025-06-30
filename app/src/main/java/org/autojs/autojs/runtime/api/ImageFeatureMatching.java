@@ -4,10 +4,6 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import org.autojs.autojs.annotation.ScriptInterface;
-import org.autojs.autojs.core.cleaner.Cleaner;
-import org.autojs.autojs.core.cleaner.ICleaner;
-import org.autojs.autojs.core.ref.MonitorResource;
-import org.autojs.autojs.core.ref.NativeObjectReference;
 import org.autojs.autojs.util.ImageUtils;
 import org.opencv.calib3d.Calib3d;
 import org.opencv.core.Core;
@@ -314,11 +310,10 @@ public final class ImageFeatureMatching {
      * A reusable bundle of feature-extraction results for a single image.
      * zh-CN: 单张图片的特征提取结果集合.
      */
-    public static class FeatureMatchingDescriptor implements MonitorResource {
+    public static class FeatureMatchingDescriptor {
 
         private final Mat mDescriptors;
         private long mNativePtr;
-        private NativeObjectReference<MonitorResource> mRef;
         private final MatOfKeyPoint mKeyPoint;
         private final MatOfPoint2f mCorners;
 
@@ -344,15 +339,9 @@ public final class ImageFeatureMatching {
             mNativePtr = descriptors.nativeObj;
             mKeyPoint = keyPoint;
             mCorners = corners;
-            Cleaner.instance.cleanup(this, SelfCleaner.INSTANCE);
         }
 
         public long getNativePtr() {
-            return mNativePtr;
-        }
-
-        @Override
-        public long getPointer() {
             return mNativePtr;
         }
 
@@ -367,18 +356,10 @@ public final class ImageFeatureMatching {
         public void release() {
             synchronized (this) {
                 if (mNativePtr != 0L) {
-                    SelfCleaner.INSTANCE.cleanup(mNativePtr);
+                    releaseFeatureMatchingDescriptor(mNativePtr);
                     mNativePtr = 0L;
-                    if (mRef != null) {
-                        mRef.pointer = 0L;
-                    }
                 }
             }
-        }
-
-        @Override
-        public void setNativeObjectReference(NativeObjectReference<MonitorResource> ref) {
-            mRef = ref;
         }
 
         public void setNativePtr(long nativePtr) {
@@ -389,23 +370,6 @@ public final class ImageFeatureMatching {
             return mCorners;
         }
 
-        public static class SelfCleaner implements ICleaner {
-
-            public static SelfCleaner INSTANCE;
-
-            static {
-                INSTANCE = new SelfCleaner();
-            }
-
-            private SelfCleaner() {
-                /* Empty body. */
-            }
-
-            @Override
-            public void cleanup(long pointer) {
-                releaseFeatureMatchingDescriptor(pointer);
-            }
-        }
     }
 
     /**

@@ -11,17 +11,18 @@
         "使用 XML 语法将 JavaScript 表达式作为属性值时, this 对象可能出现指向错误的问题",
         "调用 images.requestScreenCapture 时用户取消授权可能导致应用崩溃的问题",
         "images 部分相关方法出现异常时 oneShot 标记功能失效的问题 _[`issue #372`](http://issues.autojs6.com/372)_",
+        "images 部分相关方法可能引发内存泄露的问题 _[`issue #372`](http://issues.autojs6.com/372)_",
         "Android 10 UiObject#child 方法可能出现 ArrayIndexOutOfBoundsException 异常的问题 _[`issue #416`](http://issues.autojs6.com/416)_",
         "打包应用无法正常使用 Paddle OCR 与 Rapid OCR 功能的问题",
         "版本历史页面部分系统因字体差别导致统计数据显示不完整的问题",
         "ErrorDialogActivity 可能无法正常启动的问题 _[`issue #414`](http://issues.autojs6.com/414)_ _[`issue #340`](http://issues.autojs6.com/340#issuecomment-2973485826)_",
-        "错误报告页面复制详细信息功能失效的问题"
+        "崩溃报告页面复制详细信息功能失效的问题"
       ],
       "improvement": [
         "http 模块相关方法支持不安全选项参数 (isInsecure/insecure), 用于忽略证书相关异常 _[`issue #417`](http://issues.autojs6.com/417)_",
         "android.graphics.Paint#setColor 支持正常解析 ColorInt/ColorHex/ColorName 等颜色参数",
         "内置模块相关方法实参类型的异常消息增加类型摘要信息",
-        "错误报告页面支持双指缩放调整字体大小并添加常用功能按钮"
+        "崩溃报告页面支持双指缩放调整字体大小并添加常用功能按钮"
       ],
       "dependency": [
         "附加 Androidx Core (KTX) 版本 1.16.0",

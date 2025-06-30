@@ -290,8 +290,8 @@
             android:name="org.autojs.autojs.ui.settings.DeveloperOptionsActivity"
             android:theme="@style/AppTheme.Settings" />
 
-        <!-- <activity android:name="org.autojs.autojs.ui.error.ErrorReportActivity" android:process=":crash_report"/> -->
-        <activity android:name="org.autojs.autojs.ui.error.ErrorReportActivity" />
+        <!-- <activity android:name="org.autojs.autojs.ui.error.CrashReportActivity" android:process=":crash_report"/> -->
+        <activity android:name="org.autojs.autojs.ui.error.CrashReportActivity" />
 
         <activity
             android:name="org.autojs.autojs.external.tasker.TaskerScriptEditActivity"
