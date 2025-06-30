@@ -158,32 +158,28 @@ public class TemplateMatching {
             Mat currentTemplate = getPyramidDownAtLevel(template, level);
             Mat transparentMask = useTransparentMask ? createTransparentMask(currentTemplate) : null;
 
-            boolean shouldStop;
-
-            Label_Check_Should_Stop:
-            {
-                // 如果在上一轮中没有匹配到图片, 则考虑是否退出匹配
-                if (previousMatchResult.isEmpty()) {
-                    // 如果不是第一次匹配, 并且不满足shouldContinueMatching的条件, 则直接退出匹配
-                    if (!isFirstMatching && !shouldContinueMatching(level, selectPyramidLevel)) {
-                        shouldStop = true;
-                        break Label_Check_Should_Stop;
-                    }
-                    Mat matchResult = matchTemplate(src, currentTemplate, matchingMethod, transparentMask);
-                    getBestMatched(matchResult, currentTemplate, matchingMethod, weakThreshold, currentMatchResult, limit, level, null, finalMatchResult);
-                    OpenCVHelper.release(matchResult);
-                } else {
-                    for (Match match : previousMatchResult) {
-                        // 根据上一轮的匹配点, 计算本次匹配的区域
-                        Rect roi = getROI(match.point, src, currentTemplate);
-                        Mat m = new Mat(src, roi);
-                        Mat matchResult = matchTemplate(m, currentTemplate, matchingMethod, transparentMask);
-                        getBestMatched(matchResult, currentTemplate, matchingMethod, weakThreshold, currentMatchResult, limit, level, roi, finalMatchResult);
-                        OpenCVHelper.release(m);
-                        OpenCVHelper.release(matchResult);
-                    }
+            // 如果在上一轮中没有匹配到图片, 则考虑是否退出匹配
+            if (previousMatchResult.isEmpty()) {
+                // 如果不是第一次匹配, 并且不满足shouldContinueMatching的条件, 则直接退出匹配
+                if (!isFirstMatching && !shouldContinueMatching(level, selectPyramidLevel)) {
+                    releaseIfNeeded(src, img);
+                    releaseIfNeeded(currentTemplate, template);
+                    OpenCVHelper.release(transparentMask);
+                    break;
                 }
-                shouldStop = false;
+                Mat matchResult = matchTemplate(src, currentTemplate, matchingMethod, transparentMask);
+                getBestMatched(matchResult, currentTemplate, matchingMethod, weakThreshold, currentMatchResult, limit, level, null, finalMatchResult);
+                OpenCVHelper.release(matchResult);
+            } else {
+                for (Match match : previousMatchResult) {
+                    // 根据上一轮的匹配点, 计算本次匹配的区域
+                    Rect roi = getROI(match.point, src, currentTemplate);
+                    Mat m = new Mat(src, roi);
+                    Mat matchResult = matchTemplate(m, currentTemplate, matchingMethod, transparentMask);
+                    getBestMatched(matchResult, currentTemplate, matchingMethod, weakThreshold, currentMatchResult, limit, level, roi, finalMatchResult);
+                    OpenCVHelper.release(m);
+                    OpenCVHelper.release(matchResult);
+                }
             }
             releaseIfNeeded(src, img);
             releaseIfNeeded(currentTemplate, template);
@@ -191,26 +187,24 @@ public class TemplateMatching {
 
             logger.addSplit("level:" + level + ", result:" + previousMatchResult);
 
-            if (!shouldStop) {
-                // 把满足强阈值的点找出来, 加到最终结果列表
-                if (!currentMatchResult.isEmpty()) {
-                    Iterator<Match> iterator = currentMatchResult.iterator();
-                    while (iterator.hasNext()) {
-                        Match match = iterator.next();
-                        if (match.similarity >= strictThreshold) {
-                            pyrUp(match.point, level);
-                            finalMatchResult.add(match);
-                            iterator.remove();
-                        }
-                    }
-                    // 如果所有结果都满足强阈值, 则退出循环, 返回最终结果
-                    if (currentMatchResult.isEmpty()) {
-                        break;
+            // 把满足强阈值的点找出来, 加到最终结果列表
+            if (!currentMatchResult.isEmpty()) {
+                Iterator<Match> iterator = currentMatchResult.iterator();
+                while (iterator.hasNext()) {
+                    Match match = iterator.next();
+                    if (match.similarity >= strictThreshold) {
+                        pyrUp(match.point, level);
+                        finalMatchResult.add(match);
+                        iterator.remove();
                     }
                 }
-                previousMatchResult = currentMatchResult;
-                isFirstMatching = false;
+                // 如果所有结果都满足强阈值, 则退出循环, 返回最终结果
+                if (currentMatchResult.isEmpty()) {
+                    break;
+                }
             }
+            isFirstMatching = false;
+            previousMatchResult = currentMatchResult;
         }
         logger.addSplit("result:" + finalMatchResult);
         logger.dumpToLog();

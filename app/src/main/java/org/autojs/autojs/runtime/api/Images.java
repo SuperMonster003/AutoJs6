@@ -628,7 +628,6 @@ public class Images {
             throw new NullPointerException(mContext.getString(R.string.error_method_called_with_null_argument, "Images.findImage", "template"));
         }
         Mat src = image.getMat();
-        boolean shouldReleaseMat = false;
         if (rect != null) {
             if (template.getWidth() > rect.width) {
                 throw new Exception(mContext.getString(R.string.error_excessive_width_for_template_n_region, template.getWidth(), rect.width));
@@ -637,7 +636,6 @@ public class Images {
                 throw new Exception(mContext.getString(R.string.error_excessive_height_for_template_n_region, template.getHeight(), rect.height));
             }
             src = new Mat(src, rect);
-            shouldReleaseMat = true;
         }
         @Nullable
         org.opencv.core.Point point;
@@ -645,10 +643,10 @@ public class Images {
             point = TemplateMatching.singleTemplateMatching(
                     src,
                     template.getMat(),
-                    new TemplateMatching.Options(-1, weakThreshold, strictThreshold, maxLevel)
+                    new TemplateMatching.Options(TemplateMatching.MATCHING_METHOD_NONE, weakThreshold, strictThreshold, maxLevel)
             );
         } finally {
-            if (shouldReleaseMat) {
+            if (src != image.getMat()) {
                 OpenCVHelper.release(src);
             }
         }

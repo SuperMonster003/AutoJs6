@@ -16,9 +16,9 @@ import org.autojs.autojs6.databinding.ActivityErrorReportBinding
  * Created by Stardust on Feb 2, 2017.
  * Transformed by SuperMonster003 on Mar 10, 2025.
  */
-class ErrorReportActivity : BaseActivity() {
+class CrashReportActivity : BaseActivity() {
 
-    private lateinit var errorMessage: String
+    private lateinit var crashMessage: String
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,7 +29,7 @@ class ErrorReportActivity : BaseActivity() {
             appendLine(briefOfCurrentVersionInt(true))
             intent.getStringExtra("message")?.let { appendLine().appendLine(it.trimEnd()) }
             intent.getStringExtra("error")?.let { appendLine().appendLine(it.trimEnd()) }
-        }.also { errorMessage = it }
+        }.also { crashMessage = it }
 
         val binding = ActivityErrorReportBinding.inflate(layoutInflater).also {
             setContentView(it.root)
@@ -62,7 +62,7 @@ class ErrorReportActivity : BaseActivity() {
     @SuppressLint("MissingSuperCall")
     override fun onBackPressed() = exit()
 
-    private fun copy() = ClipboardUtils.setClip(this, errorMessage)
+    private fun copy() = ClipboardUtils.setClip(this, crashMessage)
 
     private fun exit() = finishAffinity()
 

@@ -37,7 +37,7 @@ class CrashHandler(private val errorReportClass: Class<*>) : CrashHandleCallback
             if (crashTooManyTimes()) {
                 return super.onCrashHandleStart(crashType, errorType, errorMessage, errorStack)
             }
-            startErrorReportActivity("$errorType: $errorMessage", errorStack ?: "[ No stack message ]")
+            startCrashReportActivity("$errorType: $errorMessage", errorStack ?: "[ No stack message ]")
         } catch (e: Throwable) {
             e.printStackTrace()
         }
@@ -79,7 +79,7 @@ class CrashHandler(private val errorReportClass: Class<*>) : CrashHandleCallback
         mBuglyHandler = buglyHandler
     }
 
-    private fun startErrorReportActivity(msg: String, detail: String) {
+    private fun startCrashReportActivity(msg: String, detail: String) {
         Intent(GlobalAppContext.get(), errorReportClass).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
             putExtra("message", msg)

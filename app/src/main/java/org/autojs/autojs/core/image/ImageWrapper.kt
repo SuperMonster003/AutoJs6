@@ -9,8 +9,6 @@ import androidx.core.graphics.get
 import org.autojs.autojs.annotation.ScriptInterface
 import org.autojs.autojs.core.opencv.Mat
 import org.autojs.autojs.core.opencv.OpenCVHelper
-import org.autojs.autojs.core.ref.MonitorResource
-import org.autojs.autojs.core.ref.NativeObjectReference
 import org.autojs.autojs.pio.UncheckedIOException
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.Images
@@ -24,7 +22,6 @@ import org.opencv.imgproc.Imgproc
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.lang.ref.WeakReference
-import java.util.concurrent.atomic.AtomicLong
 
 /**
  * Created by Stardust on Nov 25, 2017.
@@ -32,26 +29,20 @@ import java.util.concurrent.atomic.AtomicLong
  * Transformed by SuperMonster003 on May 16, 2023.
  */
 // @Reference to Auto.js Pro 9.3.11 by SuperMonster003 on Dec 20, 2023.
-open class ImageWrapper : Shootable<ImageWrapper>, MonitorResource {
+open class ImageWrapper : Shootable<ImageWrapper> {
 
     private var mScriptRuntime: ScriptRuntime
 
     private var mMat: Mat? = null
     private var mBgrMat: Mat? = null
     private var mBitmap: Bitmap? = null
-    private var mRef: NativeObjectReference<MonitorResource>? = null
+    private var mMediaImage: Image? = null
     private var mPlane: Image.Plane? = null
 
     private var mWidth = 0
     private var mHeight = 0
     private var mIsRecycled = false
     private var mIsOneShot = false
-
-    private var mId = 0L
-    private val mNextId = AtomicLong()
-
-    var mediaImage: Image? = null
-        private set
 
     val width
         get() = mWidth.also { ensureNotRecycled() }
@@ -71,10 +62,7 @@ open class ImageWrapper : Shootable<ImageWrapper>, MonitorResource {
                     val bitmap = createBitmap(mat.width(), mat.height()).also { mBitmap = it }
                     Utils.matToBitmap(mat, bitmap)
                 } else {
-                    val mediaImage = mediaImage
-                    if (mediaImage != null) {
-                        mBitmap = toBitmap(mediaImage)
-                    }
+                    mMediaImage?.let { mBitmap = toBitmap(it) }
                 }
             }
             return mBitmap ?: throw Exception("Bitmap of ImageWrapper should never be null")
@@ -93,7 +81,7 @@ open class ImageWrapper : Shootable<ImageWrapper>, MonitorResource {
                 Utils.bitmapToMat(bitmap, newMat)
                 return newMat
             }
-            if (mediaImage != null) {
+            if (mMediaImage != null) {
                 val plane = plane ?: throw AssertionError("Image plain is null")
                 plane.buffer.position(0)
                 return Mat(mHeight, mWidth, CvType.CV_8UC4, plane.buffer, plane.rowStride.toLong()).also { mMat = it }
@@ -111,13 +99,12 @@ open class ImageWrapper : Shootable<ImageWrapper>, MonitorResource {
         private set(plane) {
             mPlane = plane
         }
-        get() = mPlane ?: mediaImage?.planes?.get(0)
+        get() = mPlane ?: mMediaImage?.planes?.get(0)
 
     constructor(scriptRuntime: ScriptRuntime, width: Int, height: Int) : this(scriptRuntime, createBitmap(width, height))
 
     constructor(scriptRuntime: ScriptRuntime, bitmap: Bitmap) {
         mScriptRuntime = scriptRuntime
-        mId = mNextId.incrementAndGet()
         mBitmap = bitmap.also { addToList(it) }
         mWidth = bitmap.width
         mHeight = bitmap.height
@@ -125,7 +112,6 @@ open class ImageWrapper : Shootable<ImageWrapper>, MonitorResource {
 
     constructor(scriptRuntime: ScriptRuntime, mat: Mat) {
         mScriptRuntime = scriptRuntime
-        mId = mNextId.incrementAndGet()
         mMat = mat.also { addToList(it) }
         mWidth = mat.cols()
         mHeight = mat.rows()
@@ -133,7 +119,6 @@ open class ImageWrapper : Shootable<ImageWrapper>, MonitorResource {
 
     constructor(scriptRuntime: ScriptRuntime, mat: org.opencv.core.Mat) {
         mScriptRuntime = scriptRuntime
-        mId = mNextId.incrementAndGet()
         mMat = when (mat.nativeObj != 0L) {
             true -> Mat(mat.nativeObj)
             else -> Mat(mat.rows(), mat.cols(), mat.type())
@@ -144,7 +129,6 @@ open class ImageWrapper : Shootable<ImageWrapper>, MonitorResource {
 
     constructor(scriptRuntime: ScriptRuntime, bitmap: Bitmap, mat: Mat?) {
         mScriptRuntime = scriptRuntime
-        mId = mNextId.incrementAndGet()
         mMat = mat?.also { addToList(it) }
         mBitmap = bitmap.also { addToList(it) }
         mWidth = bitmap.width
@@ -153,8 +137,7 @@ open class ImageWrapper : Shootable<ImageWrapper>, MonitorResource {
 
     constructor(scriptRuntime: ScriptRuntime, mediaImage: Image) {
         mScriptRuntime = scriptRuntime
-        mId = mNextId.incrementAndGet()
-        this.mediaImage = mediaImage.also { addToList(it) }
+        mMediaImage = mediaImage.also { addToList(it) }
         mWidth = mediaImage.width
         mHeight = mediaImage.height
     }
@@ -269,12 +252,10 @@ open class ImageWrapper : Shootable<ImageWrapper>, MonitorResource {
                 OpenCVHelper.release(it)
                 mBgrMat = null
             }
-            mediaImage?.let {
+            mMediaImage?.let {
                 it.close()
-                mediaImage = null
-            }
-            mRef?.let {
-                it.pointer = 0L
+                mMediaImage = null
+                mPlane = null
             }
             mIsRecycled = true
         }
@@ -299,12 +280,6 @@ open class ImageWrapper : Shootable<ImageWrapper>, MonitorResource {
             null -> ofMat(mScriptRuntime, mat.clone())
             else -> ofBitmap(mScriptRuntime, bitmap.copy(bitmap.config ?: Bitmap.Config.ARGB_8888, true))
         }
-    }
-
-    override fun getPointer() = mId
-
-    override fun setNativeObjectReference(reference: NativeObjectReference<MonitorResource>) {
-        mRef = reference
     }
 
     companion object {

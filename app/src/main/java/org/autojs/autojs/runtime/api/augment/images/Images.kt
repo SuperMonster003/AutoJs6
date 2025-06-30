@@ -760,14 +760,15 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @RhinoRuntimeFunctionInterface
         fun concat(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ImageWrapper = ensureArgumentsLengthInRange(args, 2..3) {
             val (oA, oB, direction) = it
-            val imageA = if (oA.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(oA), true))?.oneShot() else oA
-            require(imageA is ImageWrapper) { "Argument \"imageA\" ${imageA.jsBrief()} for images.concat must be a ImageWrapper" }
-            val imageB = if (oB.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(oB), true))?.oneShot() else oB
-            require(imageB is ImageWrapper) {
-                imageA.shoot()
-                "Argument \"imageB\" ${imageB.jsBrief()} for images.concat must be a ImageWrapper"
-            }
+            var imageA: ImageWrapper? = null
+            var imageB: ImageWrapper? = null
             try {
+                val imageARaw = if (oA.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(oA), true))?.oneShot() else oA
+                require(imageARaw is ImageWrapper) { "Argument \"imageA\" ${imageARaw.jsBrief()} for images.concat must be a ImageWrapper" }
+                imageA = imageARaw
+                val imageBRaw = if (oB.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(oB), true))?.oneShot() else oB
+                require(imageBRaw is ImageWrapper) { "Argument \"imageB\" ${imageBRaw.jsBrief()} for images.concat must be a ImageWrapper" }
+                imageB = imageBRaw
                 initOpenCvIfNeeded()
                 ApiImages.concat(scriptRuntime, imageA, imageB, directionToGravityToConcat(direction))
             } finally {
@@ -777,48 +778,55 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun detectColor(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsLengthInRange(args, 4..6) {
-            val (o, color, x, y, threshold, algorithm) = it
-            val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
-            require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.detectColor must be a ImageWrapper" }
+        fun detectColor(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsLengthInRange(args, 4..6) { argList ->
+            detectColorRhino(scriptRuntime, argList, ::detectColor.name)
+        }
+
+        @JvmStatic
+        fun detectColorRhino(scriptRuntime: ScriptRuntime, args: Array<out Any?>, funcName: String): Boolean {
+            val (o, color, x, y, threshold, algorithm) = args
+            var imageRef: ImageWrapper? = null
             try {
+                val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
+                require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.detectColor must be a ImageWrapper" }
+                imageRef = image
                 initOpenCvIfNeeded()
                 val pixel = pixel(scriptRuntime, arrayOf(image, coerceIntNumber(x), coerceIntNumber(y)))
-                ColorDetector
+                return ColorDetector
                     .get(Colors.toIntRhino(color), coerceString(algorithm, DEFAULT_COLOR_ALGORITHM), parseNumber(threshold, DEFAULT_COLOR_THRESHOLD))
                     .detectColor(Colors.redRhino(pixel).roundToInt(), Colors.greenRhino(pixel).roundToInt(), Colors.blueRhino(pixel).roundToInt())
             } finally {
-                image.shoot()
+                ApiImages.shoot(imageRef)
             }
         }
 
         @Deprecated("Deprecated in Java", ReplaceWith("detectColor(image, color, x, y, threshold, algorithm)"))
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun detectsColor(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsLengthInRange(args, 4..6) {
-            val (o) = it
-            val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
-            require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.detectsColor must be a ImageWrapper" }
-            try {
-                initOpenCvIfNeeded()
-                detectColor(scriptRuntime, it)
-            } finally {
-                image.shoot()
-            }
+        fun detectsColor(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsLengthInRange(args, 4..6) { argList ->
+            @Suppress("DEPRECATION")
+            detectColorRhino(scriptRuntime, argList, ::detectsColor.name)
         }
 
         // @Reference to module __images__.js from Auto.js Pro 9.3.11 by SuperMonster003 on May 10, 2025.
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun detectMultiColors(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsLengthInRange(args, 5..6) {
-            val (o, x, y, firstColor, paths, options) = it
-            val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
-            require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.detectMultiColors must be a ImageWrapper" }
+        fun detectMultiColors(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsLengthInRange(args, 5..6) { argList ->
+            detectMultiColorsRhino(scriptRuntime, argList, ::detectMultiColors.name)
+        }
+
+        @JvmStatic
+        fun detectMultiColorsRhino(scriptRuntime: ScriptRuntime, args: Array<out Any?>, funcName: String): Boolean {
+            val (o, x, y, firstColor, paths, options) = args
+            var imageRef: ImageWrapper? = null
             try {
+                val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
+                require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.detectMultiColors must be a ImageWrapper" }
+                imageRef = image
                 require(paths is NativeArray) { "Argument \"paths\" ${paths.jsBrief()} for images.detectMultiColors must be a JavaScript Array" }
                 initOpenCvIfNeeded()
                 val opt = options as? NativeObject ?: newNativeObject()
-                scriptRuntime.images.colorFinder.detectMultiColors(
+                return scriptRuntime.images.colorFinder.detectMultiColors(
                     image,
                     coerceIntNumber(x),
                     coerceIntNumber(y),
@@ -831,133 +839,140 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
                     }.toIntArray(),
                 )
             } finally {
-                image.shoot()
+                ApiImages.shoot(imageRef)
             }
         }
 
         @Deprecated("Deprecated in Java", ReplaceWith("detectMultiColors(image, x, y, firstColor, paths, options)"))
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun detectsMultiColors(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsLengthInRange(args, 5..6) {
-            val (o, _, _, _, paths) = it
-            val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
-            require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.detectMultiColors must be a ImageWrapper" }
-            try {
-                require(paths is NativeArray) { "Argument \"paths\" ${paths.jsBrief()} for images.detectMultiColors must be a JavaScript Array" }
-                initOpenCvIfNeeded()
-                detectMultiColors(scriptRuntime, it)
-            } finally {
-                image.shoot()
-            }
+        fun detectsMultiColors(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsLengthInRange(args, 5..6) { argList ->
+            @Suppress("DEPRECATION")
+            detectMultiColorsRhino(scriptRuntime, argList, ::detectsMultiColors.name)
         }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun findPointByColor(scriptRuntime: ScriptRuntime, args: Array<out Any?>): OpencvPoint? = ensureArgumentsLengthInRange(args, 2..7) { argList ->
-            val (o, color, xOrOptions, y, width, height, threshold) = argList
-            val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
-            require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.findPointByColor must be a ImageWrapper" }
+            findPointByColorRhino(scriptRuntime, argList, ::findPointByColor.name)
+        }
+
+        @JvmStatic
+        fun findPointByColorRhino(scriptRuntime: ScriptRuntime, args: Array<out Any?>, funcName: String, overriddenThreshold: Int? = null): OpencvPoint? {
+            val (o, color, xOrOptions, y, width, height, threshold) = args
+            var imageRef: ImageWrapper? = null
             try {
+                val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
+                require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.findPointByColor must be a ImageWrapper" }
+                imageRef = image
                 initOpenCvIfNeeded()
                 val opt = when {
-                    argList.size < 3 -> newNativeObject()
-                    argList.size == 3 -> when {
+                    args.size < 3 -> newNativeObject()
+                    args.size == 3 -> when {
                         xOrOptions.isJsNullish() -> newNativeObject()
                         else -> xOrOptions as? NativeObject
                     }
                     else -> null
                 }
-                scriptRuntime.images.colorFinder.findPointByColor(
+                return scriptRuntime.images.colorFinder.findPointByColor(
                     image,
                     Colors.toIntRhino(color),
-                    opt?.let { parseThreshold(it).roundToInt() } ?: coerceIntNumber(threshold, DEFAULT_COLOR_THRESHOLD),
+                    overriddenThreshold ?: opt?.let { parseThreshold(it).roundToInt() } ?: coerceIntNumber(threshold, DEFAULT_COLOR_THRESHOLD),
                     buildRegionInternal(image, opt?.prop("region")?.takeUnless { it.isJsNullish() } ?: listOf(/* x = */ xOrOptions, y, width, height))
                 ).also { image.shoot() }
             } finally {
-                image.shoot()
+                ApiImages.shoot(imageRef)
             }
         }
 
         @Deprecated("Deprecated in Java", ReplaceWith("findPointByColor(image, color, options)"))
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun findColor(scriptRuntime: ScriptRuntime, args: Array<out Any?>): OpencvPoint? = ensureArgumentsLengthInRange(args, 2..3) {
-            val (o, color, options) = it
-            val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
-            require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.findColor must be a ImageWrapper" }
-            findPointByColor(scriptRuntime, arrayOf(image, color, options))
+        fun findColor(scriptRuntime: ScriptRuntime, args: Array<out Any?>): OpencvPoint? = ensureArgumentsLengthInRange(args, 2..3) { argList ->
+            @Suppress("DEPRECATION")
+            findPointByColorRhino(scriptRuntime, argList, ::findColor.name)
         }
 
         @Deprecated("Deprecated in Java", ReplaceWith("findPointByColor(image, color, options)"))
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun findColorInRegion(scriptRuntime: ScriptRuntime, args: Array<out Any?>): OpencvPoint? = ensureArgumentsLengthInRange(args, 2..7) {
-            val (o) = it
-            val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
-            require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.findColorInRegion must be a ImageWrapper" }
-            findPointByColor(scriptRuntime, it)
+        fun findColorInRegion(scriptRuntime: ScriptRuntime, args: Array<out Any?>): OpencvPoint? = ensureArgumentsLengthInRange(args, 2..7) { argList ->
+            @Suppress("DEPRECATION")
+            findPointByColorRhino(scriptRuntime, argList, ::findColorInRegion.name)
         }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun findPointByColorExactly(scriptRuntime: ScriptRuntime, args: Array<out Any?>): OpencvPoint? = ensureArgumentsLengthInRange(args, 2..6) {
-            val (o) = it
-            val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
-            require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.findPointByColorExactly must be a ImageWrapper" }
-            findPointByColor(scriptRuntime, it + /* threshold = */ 0)
+        fun findPointByColorExactly(scriptRuntime: ScriptRuntime, args: Array<out Any?>): OpencvPoint? = ensureArgumentsLengthInRange(args, 2..6) { argList ->
+            findPointByColorExactlyRhino(scriptRuntime, argList, ::findPointByColorExactly.name)
+        }
+
+        @JvmStatic
+        fun findPointByColorExactlyRhino(scriptRuntime: ScriptRuntime, args: Array<out Any?>, funcName: String): OpencvPoint? {
+            return findPointByColorRhino(scriptRuntime, args, funcName, 0)
         }
 
         @Deprecated("Deprecated in Java", ReplaceWith("findPointByColorExactly(image, color, x, y, width, height)"))
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun findColorEquals(scriptRuntime: ScriptRuntime, args: Array<out Any?>): OpencvPoint? = ensureArgumentsLengthInRange(args, 2..6) {
-            val (o) = it
-            val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
-            require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.findColorEquals must be a ImageWrapper" }
-            findPointByColorExactly(scriptRuntime, it)
+        fun findColorEquals(scriptRuntime: ScriptRuntime, args: Array<out Any?>): OpencvPoint? = ensureArgumentsLengthInRange(args, 2..6) { argList ->
+            @Suppress("DEPRECATION")
+            findPointByColorExactlyRhino(scriptRuntime, argList, ::findColorEquals.name)
         }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun findPointsByColor(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeArray = ensureArgumentsLengthInRange(args, 2..3) {
-            val (o, color, options) = it
-            val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
-            require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.findPointsByColor must be a ImageWrapper" }
+        fun findPointsByColor(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeArray = ensureArgumentsLengthInRange(args, 2..3) { argList ->
+            findPointsByColorRhino(scriptRuntime, argList, ::findPointsByColor.name)
+        }
+
+        @JvmStatic
+        fun findPointsByColorRhino(scriptRuntime: ScriptRuntime, args: Array<out Any?>, funcName: String): NativeArray {
+            val (o, color, options) = args
+            var imageRef: ImageWrapper? = null
             try {
+                val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
+                require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.findPointsByColor must be a ImageWrapper" }
+                imageRef = image
                 initOpenCvIfNeeded()
                 val opt = options as? NativeObject ?: newNativeObject()
-                scriptRuntime.images.colorFinder.findPointsByColor(
+                return scriptRuntime.images.colorFinder.findPointsByColor(
                     image,
                     Colors.toIntRhino(color),
                     parseThreshold(opt).roundToInt(),
                     opt.inquire("region") { region -> buildRegionInternal(image, region) },
                 ).toNativeArray()
             } finally {
-                image.shoot()
+                ApiImages.shoot(imageRef)
             }
         }
 
         @Deprecated("Deprecated in Java", ReplaceWith("findPointsByColor(image, color, options)"))
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun findAllPointsForColor(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeArray = ensureArgumentsLengthInRange(args, 2..3) {
-            val (o) = it
-            val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
-            require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.findAllPointsForColor must be a ImageWrapper" }
-            findPointsByColor(scriptRuntime, it)
+        fun findAllPointsForColor(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeArray = ensureArgumentsLengthInRange(args, 2..3) { argList ->
+            @Suppress("DEPRECATION")
+            findPointsByColorRhino(scriptRuntime, argList, ::findAllPointsForColor.name)
         }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun findPointByColors(scriptRuntime: ScriptRuntime, args: Array<out Any?>): OpencvPoint? = ensureArgumentsLengthInRange(args, 3..4) {
-            val (o, firstColor, paths, options) = it
-            val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
-            require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.findPointByColors must be a ImageWrapper" }
+        fun findPointByColors(scriptRuntime: ScriptRuntime, args: Array<out Any?>): OpencvPoint? = ensureArgumentsLengthInRange(args, 3..4) { argList ->
+            findPointByColorsRhino(scriptRuntime, argList, ::findPointByColors.name)
+        }
+
+        @JvmStatic
+        fun findPointByColorsRhino(scriptRuntime: ScriptRuntime, args: Array<out Any?>, funcName: String): OpencvPoint? {
+            val (o, firstColor, paths, options) = args
+            var imageRef: ImageWrapper? = null
             try {
+                val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
+                require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.findPointByColors must be a ImageWrapper" }
+                imageRef = image
                 require(paths is NativeArray) { "Argument \"paths\" ${paths.jsBrief()} for images.findPointByColors must be a JavaScript Array" }
                 initOpenCvIfNeeded()
                 val opt = options as? NativeObject ?: newNativeObject()
-                scriptRuntime.images.colorFinder.findPointByColors(
+                return scriptRuntime.images.colorFinder.findPointByColors(
                     image,
                     Colors.toIntRhino(firstColor),
                     parseThreshold(opt).roundToInt(),
@@ -968,22 +983,16 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
                     }.toIntArray(),
                 )
             } finally {
-                image.shoot()
+                ApiImages.shoot(imageRef)
             }
         }
 
         @Deprecated("Deprecated in Java", ReplaceWith("findPointByColors(image, firstColor, paths, options)"))
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun findMultiColors(scriptRuntime: ScriptRuntime, args: Array<out Any?>): OpencvPoint? = ensureArgumentsLengthInRange(args, 3..4) {
-            val (o, _, paths) = it
-            val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
-            require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.findMultiColors must be a ImageWrapper" }
-            require(paths is NativeArray) {
-                image.shoot()
-                "Argument \"paths\" ${paths.jsBrief()} for images.findMultiColors must be a JavaScript Array"
-            }
-            findPointByColors(scriptRuntime, it)
+        fun findMultiColors(scriptRuntime: ScriptRuntime, args: Array<out Any?>): OpencvPoint? = ensureArgumentsLengthInRange(args, 3..4) { argList ->
+            @Suppress("DEPRECATION")
+            findPointByColorsRhino(scriptRuntime, argList, ::findMultiColors.name)
         }
 
         @JvmStatic
@@ -1014,26 +1023,33 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun findPointByImage(scriptRuntime: ScriptRuntime, args: Array<out Any?>): OpencvPoint? = ensureArgumentsLengthInRange(args, 2..7) { argList ->
-            val (o, template, xOrOptions, y, width, height, thresholdArg) = argList
-            val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
-            require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.findPointByImage must be a ImageWrapper" }
-            require(template is ImageWrapper) {
-                image.shoot()
-                "Argument \"template\" ${template.jsBrief()} for images.findPointByImage must be a ImageWrapper"
-            }
+            findPointByImageRhino(scriptRuntime, argList, ::findPointByImage.name)
+        }
+
+        @JvmStatic
+        fun findPointByImageRhino(scriptRuntime: ScriptRuntime, args: Array<out Any?>, funcName: String): OpencvPoint? {
+            val (oA, oB, xOrOptions, y, width, height, thresholdArg) = args
+            var imageA: ImageWrapper? = null
+            var imageB: ImageWrapper? = null
             try {
+                val image = if (oA.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(oA), true))?.oneShot() else oA
+                require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.$funcName must be a ImageWrapper" }
+                imageA = image
+                val template = if (oB.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(oB), true))?.oneShot() else oB
+                require(template is ImageWrapper) { "Argument \"template\" ${oB.jsBrief()} for images.$funcName must be a ImageWrapper" }
+                imageB = template
                 initOpenCvIfNeeded()
-                when {
-                    argList.size > 2 && xOrOptions !is NativeObject -> {
+                return when {
+                    args.size > 2 && xOrOptions !is NativeObject -> {
                         val options = mapOf(
                             "region" to listOf(/* x = */ xOrOptions, y, width, height),
                             "threshold" to thresholdArg,
                         ).toNativeObject()
-                        findPointByImage(scriptRuntime, arrayOf(image, template, options))
+                        findPointByImageRhino(scriptRuntime, arrayOf(image, template, options), funcName)
                     }
                     else -> {
                         val opt = when {
-                            argList.size > 2 -> xOrOptions as? NativeObject
+                            args.size > 2 -> xOrOptions as? NativeObject
                             else -> null
                         } ?: newNativeObject()
                         val weakThreshold = parseWeakThreshold(opt, 0.6).toFloat()
@@ -1044,49 +1060,39 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
                     }
                 }
             } finally {
-                ApiImages.shoot(image, template)
+                ApiImages.shoot(imageA, imageB)
             }
         }
 
         @Deprecated("Deprecated in Java", ReplaceWith("findPointByImage(image, template, options)"))
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun findImage(scriptRuntime: ScriptRuntime, args: Array<out Any?>): OpencvPoint? = ensureArgumentsLengthInRange(args, 2..3) {
-            val (o, template) = it
-            val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
-            require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.findImage must be a ImageWrapper" }
-            require(template is ImageWrapper) {
-                image.shoot()
-                "Argument \"template\" ${template.jsBrief()} for images.findImage must be a ImageWrapper"
-            }
-            findPointByImage(scriptRuntime, it)
+        fun findImage(scriptRuntime: ScriptRuntime, args: Array<out Any?>): OpencvPoint? = ensureArgumentsLengthInRange(args, 2..7) { argList ->
+            @Suppress("DEPRECATION")
+            findPointByImageRhino(scriptRuntime, argList, ::findImage.name)
         }
 
         @Deprecated("Deprecated in Java", ReplaceWith("findPointByImage(image, template, x, y, width, height, threshold)"))
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun findImageInRegion(scriptRuntime: ScriptRuntime, args: Array<out Any?>): OpencvPoint? = ensureArgumentsLengthInRange(args, 2..7) {
-            val (o, template) = it
-            val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
-            require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.findImageInRegion must be a ImageWrapper" }
-            require(template is ImageWrapper) {
-                image.shoot()
-                "Argument \"template\" ${template.jsBrief()} for images.findImageInRegion must be a ImageWrapper"
-            }
-            findPointByImage(scriptRuntime, it)
+        fun findImageInRegion(scriptRuntime: ScriptRuntime, args: Array<out Any?>): OpencvPoint? = ensureArgumentsLengthInRange(args, 2..7) { argList ->
+            @Suppress("DEPRECATION")
+            findPointByImageRhino(scriptRuntime, argList, ::findImageInRegion.name)
         }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun matchTemplate(scriptRuntime: ScriptRuntime, args: Array<out Any?>): MatchingResult = ensureArgumentsLengthInRange(args, 2..3) {
-            val (o, template, options) = it
-            val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
-            require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.matchTemplate must be a ImageWrapper" }
-            require(template is ImageWrapper) {
-                image.shoot()
-                "Argument \"template\" ${template.jsBrief()} for images.matchTemplate must be a ImageWrapper"
-            }
+            val (oA, oB, options) = it
+            var imageA: ImageWrapper? = null
+            var imageB: ImageWrapper? = null
             try {
+                val image = if (oA.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(oA), true))?.oneShot() else oA
+                require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.matchTemplate must be a ImageWrapper" }
+                imageA = image
+                val template = if (oB.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(oB), true))?.oneShot() else oB
+                require(template is ImageWrapper) { "Argument \"template\" ${template.jsBrief()} for images.matchTemplate must be a ImageWrapper" }
+                imageB = template
                 initOpenCvIfNeeded()
                 val opt = options as? NativeObject ?: newNativeObject()
                 val weakThreshold = parseWeakThreshold(opt, 0.6).toFloat()
@@ -1101,7 +1107,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
                 }
                 MatchingResult(scriptRuntime.images.matchTemplate(image, template, weakThreshold, threshold, region, level, max, useTransparentMask))
             } finally {
-                ApiImages.shoot(image, template)
+                ApiImages.shoot(imageA, imageB)
             }
         }
 
@@ -1452,17 +1458,18 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @RhinoRuntimeFunctionInterface
         fun isEqual(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsLength(args, 2) { argList ->
             val (oA, oB) = argList
-            val imageA = if (oA.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(oA), true))?.oneShot() else oA
-            require(imageA is ImageWrapper) { "Argument \"imageA\" ${imageA.jsBrief()} for images.isEqual must be a ImageWrapper}" }
-            val imageB = if (oB.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(oB), true))?.oneShot() else oB
-            require(imageB is ImageWrapper) {
-                imageA.shoot()
-                "Argument \"imageB\" ${imageB.jsBrief()} for images.isEqual must be a ImageWrapper"
-            }
+            var imageARef: ImageWrapper? = null
+            var imageBRef: ImageWrapper? = null
             try {
+                val imageA = if (oA.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(oA), true))?.oneShot() else oA
+                require(imageA is ImageWrapper) { "Argument \"imageA\" ${imageA.jsBrief()} for images.isEqual must be a ImageWrapper}" }
+                imageARef = imageA
+                val imageB = if (oB.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(oB), true))?.oneShot() else oB
+                require(imageB is ImageWrapper) { "Argument \"imageB\" ${imageB.jsBrief()} for images.isEqual must be a ImageWrapper" }
+                imageBRef = imageB
                 ImageSimilarity.isEqual(imageA.mat, imageB.mat)
             } finally {
-                ApiImages.shoot(imageA, imageB)
+                ApiImages.shoot(imageARef, imageBRef)
             }
         }
 
