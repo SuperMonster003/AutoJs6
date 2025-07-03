@@ -481,7 +481,7 @@ android {
                     "intentCategory" to "android.intent.category.LAUNCHER",
                     "intentCategoryInrt" to "android.intent.category.DEFAULT",
                     "authorities" to "org.autojs.autojs6.fileprovider",
-                    "icon" to "@drawable/autojs6_material",
+                    "icon" to "@mipmap/ic_app_launcher_adaptive",
                 )
             )
         }

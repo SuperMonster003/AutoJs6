@@ -29,6 +29,7 @@ object Dimensions {
 
     private val DIMENSION_PATTERN = Pattern.compile("([+-]?[0-9.]+)([a-zA-Z]*)")
 
+    @JvmStatic
     fun parseToPixel(dimension: String, view: View, parent: ViewGroup?, horizontal: Boolean): Int {
         if (dimension.endsWith("%") && parent != null) {
             val pct = dimension.substring(0, dimension.length - 1).toFloat() / 100.0f
@@ -37,15 +38,18 @@ object Dimensions {
         return parseToIntPixel(dimension, view.context)
     }
 
+    @JvmStatic
     fun parseToPixel(dimension: String, view: View): Float {
         return parseToPixel(dimension, view.context)
     }
 
+    @JvmStatic
     fun parseToPixel(view: View, dimension: String): Float {
         return parseToPixel(dimension, view.context)
     }
 
     @SuppressLint("DiscouragedApi")
+    @JvmStatic
     fun parseToPixel(dimension: String, context: Context): Float {
         if (dimension.startsWith("?")) {
             val attr = intArrayOf(
@@ -71,14 +75,17 @@ object Dimensions {
         }.getOrElse { e -> throw RuntimeException(e) }
     }
 
+    @JvmStatic
     fun parseToIntPixel(value: String, view: View): Int {
         return parseToPixel(value, view).roundToInt()
     }
 
+    @JvmStatic
     fun parseToIntPixel(value: String, context: Context): Int {
         return parseToPixel(value, context).roundToInt()
     }
 
+    @JvmStatic
     fun parseToIntPixelArray(view: View, value: String): IntArray {
         val split: Array<String> = ViewAttributes.parseAttrValue(value).toTypedArray()
         val pixels = IntArray(4)

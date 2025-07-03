@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.7.0": {
-      "released_date": "2025/06/28",
+      "released_date": "2025/07/03",
       "feature": [
         "zip 模块, 用于文件压缩与解压缩操作 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (参阅 项目文档 > [Zip](https://docs.autojs6.com/#/zip))",
         "mediainfo 模块, 用于查看媒体文件的详细信息 (参阅 项目文档 > [媒体信息](https://docs.autojs6.com/#/mediainfo))",
@@ -22,7 +22,8 @@
         "http 模块相关方法支持不安全选项参数 (isInsecure/insecure), 用于忽略证书相关异常 _[`issue #417`](http://issues.autojs6.com/417)_",
         "android.graphics.Paint#setColor 支持正常解析 ColorInt/ColorHex/ColorName 等颜色参数",
         "内置模块相关方法实参类型的异常消息增加类型摘要信息",
-        "崩溃报告页面支持双指缩放调整字体大小并添加常用功能按钮"
+        "崩溃报告页面支持双指缩放调整字体大小并添加常用功能按钮",
+        "应用启动器图标支持自适应图标特性 _[`issue #405`](http://issues.autojs6.com/405)_"
       ],
       "dependency": [
         "附加 Androidx Core (KTX) 版本 1.16.0",

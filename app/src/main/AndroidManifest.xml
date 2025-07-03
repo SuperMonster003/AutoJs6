@@ -209,7 +209,6 @@
         <activity
             android:name="org.autojs.autojs.ui.splash.SplashActivity"
             android:exported="true"
-            android:icon="@drawable/autojs6_material"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.Splash"
             tools:ignore="RedundantLabel">
@@ -403,7 +402,6 @@
         <activity-alias
             android:name="org.autojs.autojs.external.tasker.PluginActivity"
             android:exported="true"
-            android:icon="@drawable/autojs6_material"
             android:label="@string/app_name"
             android:targetActivity="org.autojs.autojs.external.tasker.TaskPrefEditActivity"
             tools:ignore="ExportedActivity">
@@ -507,7 +505,6 @@
         <activity
             android:name="org.autojs.autojs.external.open.EditIntentActivity"
             android:exported="true"
-            android:icon="@drawable/autojs6_material"
             android:label="@string/text_edit_script">
             <intent-filter>
 
@@ -533,7 +530,6 @@
         <activity
             android:name="org.autojs.autojs.external.open.RunIntentActivity"
             android:exported="true"
-            android:icon="@drawable/autojs6_material"
             android:label="@string/text_run_script"
             android:taskAffinity="org.autojs.autojs.external.open.RunIntentActivity"
             android:theme="@android:style/Theme.NoDisplay">
@@ -561,7 +557,6 @@
         <activity
             android:name="org.autojs.autojs.external.open.ImportIntentActivity"
             android:exported="true"
-            android:icon="@drawable/autojs6_material"
             android:label="@string/text_import_script"
             android:theme="@style/AppTheme.Transparent">
             <intent-filter>
