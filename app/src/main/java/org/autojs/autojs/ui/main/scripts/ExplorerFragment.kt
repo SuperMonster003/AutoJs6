@@ -119,8 +119,7 @@ class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListen
     }
 
     override fun onFabClick(fab: FloatingActionButton) {
-        // initFloatingActionMenuIfNeeded(fab).run { if (isExpanded) collapse() else expand() }
-        initFloatingActionMenuIfNeeded(fab).run { if (shouldCheckExpanded() && !isExpanded) expand() }
+        initFloatingActionMenuIfNeeded(fab).run { if (isExpanded) collapse() else expand() }
     }
 
     private fun initFloatingActionMenuIfNeeded(fab: FloatingActionButton): FloatingActionMenu {
