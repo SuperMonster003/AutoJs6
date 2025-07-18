@@ -1,11 +1,12 @@
 {
   "$data": {
     "v6.7.0": {
-      "released_date": "2025/07/03",
+      "released_date": "2025/07/18",
       "feature": [
         "zip 模块, 用于文件压缩与解压缩操作 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (参阅 项目文档 > [Zip](https://docs.autojs6.com/#/zip))",
         "mediainfo 模块, 用于查看媒体文件的详细信息 (参阅 项目文档 > [媒体信息](https://docs.autojs6.com/#/mediainfo))",
-        "UiObject#isShifted 方法, 用于检测控件位置变化"
+        "UiObject#isShifted 方法, 用于检测控件位置变化",
+        "设置页面支持应用启动器图标设置选项 _[`issue #405`](http://issues.autojs6.com/405)_"
       ],
       "fix": [
         "使用 XML 语法将 JavaScript 表达式作为属性值时, this 对象可能出现指向错误的问题",

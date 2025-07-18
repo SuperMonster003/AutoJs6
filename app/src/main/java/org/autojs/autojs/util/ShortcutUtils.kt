@@ -1,15 +1,21 @@
 package org.autojs.autojs.util
 
 import android.app.PendingIntent
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ShortcutInfo
+import android.content.pm.ShortcutManager
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
+import android.os.Build
+import androidx.core.content.getSystemService
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
 import com.afollestad.materialdialogs.MaterialDialog
+import org.autojs.autojs.external.ScriptIntents
 import org.autojs.autojs6.R
 
 /**
@@ -81,6 +87,30 @@ object ShortcutUtils {
             .positiveText(R.string.dialog_button_dismiss)
             .positiveColorRes(R.color.dialog_button_failure)
             .build().also { it.show() }
+    }
+
+    @JvmStatic
+    @JvmOverloads
+    fun getAllShortcuts(context: Context, componentName: String? = null): List<ShortcutInfo> = when {
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1 -> {
+            context.getSystemService<ShortcutManager>()?.let { manager ->
+                manager.pinnedShortcuts.filter { shortcut ->
+                    componentName == null || shortcut.intent?.component?.className == componentName
+                }
+            }
+        }
+        else -> null
+    } ?: emptyList()
+
+    @JvmStatic
+    @JvmOverloads
+    fun getAllShortcutScriptPaths(context: Context, componentName: String? = null): List<String> = when {
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1 -> {
+            getAllShortcuts(context, componentName).mapNotNull { shortcut ->
+                shortcut.intent?.getStringExtra(ScriptIntents.EXTRA_KEY_PATH)
+            }
+        }
+        else -> emptyList()
     }
 
 }
