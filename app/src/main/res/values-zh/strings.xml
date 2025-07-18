@@ -75,6 +75,7 @@
     <string name="description_file_extensions_preference">用于设置是否在 AutoJs6 文件管理器中显示文件扩展名.</string>
     <string name="description_hidden_files_preference">用于设置是否在 AutoJs6 文件管理器中显示隐藏文件和文件夹 (通常以 \".\" 开头).</string>
     <string name="description_keep_screen_on_when_in_foreground_preference">用于当 AutoJs6 位于前台时使设备屏幕保持常亮.\n如需在 AutoJs6 应用的所有页面中, 仅在主页时保持设备屏幕常亮, 可选择 \"仅限主页\" 选项.</string>
+    <string name="description_launcher_icon_preference">启动器图标支持自适应图标显示方式与传统透明背景图标显示方式. 不同安卓系统的图标实际显示效果可能有所不同. 切换显示方式后, 可能需要几秒钟的时间生效.</string>
     <string name="description_launcher_shortcuts">快捷方式可以在 AutoJs6 中执行特定操作, 用户可以在启动器中显示这些快捷方式, 并快速开始某些任务或启动某个活动, 如阅读 AutoJs6 应用文档, 启动 AutoJs6 设置页面等.</string>
     <string name="description_manage_ignored_updates_preference">点击可查看或管理列表项.\n长按可移除列表项.</string>
     <string name="description_night_mode_preference">夜间模式, 亦称 [ 暗黑模式 / 深色主题 ] 等.\n夜间模式应用于安卓系统 UI (如通知栏和导航栏) 及 AutoJs6 应用页面.\n夜间模式可提升设备在低光环境下的易用性, 同时有助于提升弱视或光敏感用户的视觉体验.\n\n跟随系统: AutoJs6 与安卓操作系统的夜间模式设置一致\n总是开启: AutoJs6 保持开启夜间模式 (忽略操作系统设置)\n总是关闭: AutoJs6 保持关闭夜间模式 (忽略操作系统设置)\n\n注: 跟随系统功能仅支持安卓 API 级别 28 (安卓 9) [P] 及以上操作系统.</string>
@@ -82,7 +83,7 @@
     <string name="description_root_mode_preference">如果设备使用非常规 Root 方式或 Root 权限检测结果异常, 可设置 \"强制 Root 模式\" 或 \"强制非 Root 模式\".</string>
     <string name="description_root_record_out_file_type_preference">二进制文件: 不可编辑, 文件扩展名为 \"auto\"\nJavaScript 文件: 可编辑或直接复制, 文件扩展名为 \"js\"</string>
     <string name="description_stable_mode">稳定模式省略布局细节, 脚本分析布局时更稳定, 但可能影响获取的控件总量.\n需重启无障碍服务.</string>
-    <string name="description_theme_color_preference">主题色的应用范围包括但不限于以下部件:\n系统通知栏\n应用栏 (AppBar)\n文件图标\n任务项图标\n浮动操作按钮 (Fab)\n设置页面类别标题\n按钮开关\n\n注: 截至 6.2.0 版本, AutoJs6 主题色暂未对 [ 主要色 (Primary Color) / 主要暗色 (Primary Dark Color) / 强调色 (Accent Color) ] 作出区分.</string>
+    <string name="description_theme_color_preference">主题色的应用范围包括但不限于以下部件:\n系统通知栏\n应用栏 (AppBar)\n文件图标\n任务项图标\n浮动操作按钮 (FAB)\n设置页面类别标题\n按钮开关\n\n注: 截至 6.2.0 版本, AutoJs6 主题色暂未对 [ 主要色 (Primary Color) / 主要暗色 (Primary Dark Color) / 强调色 (Accent Color) ] 作出区分.</string>
     <string name="description_version_histories_preference">查看 AutoJs6 在 GitHub 发行版本的历史更新记录及重要分类的统计数据.</string>
     <string name="dialog_button_back">@string/text_back</string>
     <string name="dialog_button_cancel">取消</string>
@@ -138,6 +139,8 @@
     <string name="entry_keep_screen_on_when_in_foreground_all_pages">所有页面</string>
     <string name="entry_keep_screen_on_when_in_foreground_disabled">禁用</string>
     <string name="entry_keep_screen_on_when_in_foreground_homepage_only">仅限主页</string>
+    <string name="entry_launcher_icon_adaptive">自适应图标</string>
+    <string name="entry_launcher_icon_transparent_background">透明背景图标</string>
     <string name="entry_night_mode_always_off">总是关闭</string>
     <string name="entry_night_mode_always_on">总是开启</string>
     <string name="entry_night_mode_follow_system">跟随系统</string>
@@ -910,6 +913,7 @@
     <string name="text_result">结果</string>
     <string name="text_revoke_autojs6_access_in_shizuku_app">在 Shizuku 应用中撤销 AutoJs6 权限</string>
     <string name="text_root_mode_title">强制 Root 权限检查</string>
+    <string name="text_launcher_icon_title">启动器图标</string>
     <string name="text_run">运行</string>
     <string name="text_run_on_battery_change">电量变化时</string>
     <string name="text_run_on_boot">开机时</string>

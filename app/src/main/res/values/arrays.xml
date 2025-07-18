@@ -48,6 +48,16 @@
         <item>@string/entry_app_language_ar</item>
     </string-array>
 
+    <string-array name="keys_launcher_icon">
+        <item>@string/key_launcher_icon_adaptive</item>
+        <item>@string/key_launcher_icon_transparent_background</item>
+    </string-array>
+
+    <string-array name="values_launcher_icon">
+        <item>@string/entry_launcher_icon_adaptive</item>
+        <item>@string/entry_launcher_icon_transparent_background</item>
+    </string-array>
+
     <string-array name="keys_night_mode">
         <item>@string/key_night_mode_follow_system</item>
         <item>@string/key_night_mode_always_on</item>

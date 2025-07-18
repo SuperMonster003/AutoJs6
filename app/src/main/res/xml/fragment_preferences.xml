@@ -60,6 +60,15 @@
             app:longClickPrompt="@string/description_documentation_source_preference"
             app:longClickPromptMore="@string/description_documentation_source_preference_more" />
 
+        <org.autojs.autojs.ui.settings.LauncherIconPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_launcher_icon"
+            app:title="@string/text_launcher_icon_title"
+            app:itemKeys="@array/keys_launcher_icon"
+            app:itemValues="@array/values_launcher_icon"
+            app:itemDefaultKey="@string/key_launcher_icon_adaptive"
+            app:longClickPrompt="@string/description_launcher_icon_preference" />
+
         <org.autojs.autojs.ui.settings.LauncherShortcutsPreference
             app:layout="@layout/preference_custom"
             app:key="@string/key_launcher_shortcuts"

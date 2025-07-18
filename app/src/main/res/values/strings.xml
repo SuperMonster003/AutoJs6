@@ -114,6 +114,9 @@
     <string name="key_last_updates_auto_checked" translatable="false">key_$_last_updates_auto_checked</string>
     <string name="key_last_updates_checked" translatable="false">key_$_last_updates_checked</string>
     <string name="key_last_updates_postponed" translatable="false">key_$_last_updates_postponed</string>
+    <string name="key_launcher_icon" translatable="false">key_$_launcher_icon</string>
+    <string name="key_launcher_icon_adaptive" translatable="false">key_$_launcher_icon_adaptive</string>
+    <string name="key_launcher_icon_transparent_background" translatable="false">key_$_launcher_icon_transparent_background</string>
     <string name="key_launcher_shortcuts" translatable="false">key_$_launcher_shortcuts</string>
     <string name="key_manage_ignored_updates" translatable="false">key_$_manage_ignored_updates</string>
     <string name="key_night_mode" translatable="false">key_$_night_mode</string>
@@ -305,6 +308,7 @@
     <string name="description_file_extensions_preference">Used to set whether to show file extensions in AutoJs6 file explorer.</string>
     <string name="description_hidden_files_preference">Used to set whether to show hidden files and folders (usually starting with \".\") in AutoJs6 file explorer.</string>
     <string name="description_keep_screen_on_when_in_foreground_preference">Preference for keeping the device\'s screen turned on and bright when AutoJs6 is in the foreground.\nTo make it happen only on the homepage among all pages of the AutoJs6 application, choose \"homepage only\" option.</string>
+    <string name="description_launcher_icon_preference">Launcher icon supports both adaptive icon or legacy transparent background icon display modes. The actual display effect may vary on different Android systems. It may take a few seconds to take effect after switching display modes.</string>
     <string name="description_launcher_shortcuts">Shortcuts can perform specific actions in AutoJs6. Users can display these shortcuts in a supported launcher and quickly start some tasks or launch an activity, such as reading AutoJs6 application documentation, launching AutoJs6 settings page, and so on.</string>
     <string name="description_manage_ignored_updates_preference">Click to view or manage list items.\nLong press to remove the list item.</string>
     <string name="description_night_mode_preference">Night mode (also known as Dark theme) applies to both the Android system UI and apps running on the device, which improves visibility for users with low vision and those who are sensitive to bright light, and makes it easier for anyone to use a device in a low-light environment.\n\nFollow system: AutoJs6 has Night mode settings same as Android system\nAlways on: AutoJs6 keeps Night mode on (regardless of Android system settings)\nAlways off: AutoJs6 keeps Night mode off (regardless of Android system settings)\n\nNote: Follow system option is only for Android API Level 28 (Android 9) [P] and above.</string>
@@ -312,7 +316,7 @@
     <string name="description_root_mode_preference">If you have exotic root or abnormal state for root access, you can force set root to root or non-root.</string>
     <string name="description_root_record_out_file_type_preference">Binary type: non-editable, with the file extension \"auto\"\nJavaScript type: can be edited or copied directly, with the file extension \"js\"</string>
     <string name="description_stable_mode">Stable mode makes it more stable when getting layout bounds, but some results may be ignored.\nA11y service\'s restart required.</string>
-    <string name="description_theme_color_preference">Theme color is applied to widgets including but not limited to the following ones:\nStatus bar\nAppbar\nFile icon\nTask item icon\nFab\nSettings category title\nSwitch button\n\nNote: As of AutoJs6 version 6.2.0, there has been no difference between primary color, primary dark color and accent color yet.</string>
+    <string name="description_theme_color_preference">Theme color is applied to widgets including but not limited to the following ones:\nStatus bar\nAppbar\nFile icon\nTask item icon\nFAB\nSettings category title\nSwitch button\n\nNote: As of AutoJs6 version 6.2.0, there has been no difference between primary color, primary dark color and accent color yet.</string>
     <string name="description_version_histories_preference">View the release version history and key category statistics of AutoJs6 on GitHub.</string>
     <string name="dialog_button_back">@string/text_back</string>
     <string name="dialog_button_cancel">Cancel</string>
@@ -368,6 +372,8 @@
     <string name="entry_keep_screen_on_when_in_foreground_all_pages">All pages</string>
     <string name="entry_keep_screen_on_when_in_foreground_disabled">Disabled</string>
     <string name="entry_keep_screen_on_when_in_foreground_homepage_only">Homepage only</string>
+    <string name="entry_launcher_icon_adaptive">Adaptive icon</string>
+    <string name="entry_launcher_icon_transparent_background">Transparent background icon</string>
     <string name="entry_night_mode_always_off">Always off</string>
     <string name="entry_night_mode_always_on">Always on</string>
     <string name="entry_night_mode_follow_system">Follow system</string>
@@ -1140,6 +1146,7 @@
     <string name="text_result">Result</string>
     <string name="text_revoke_autojs6_access_in_shizuku_app">Revoke AutoJs6 access in Shizuku app</string>
     <string name="text_root_mode_title">Force set root check</string>
+    <string name="text_launcher_icon_title">Launcher icon</string>
     <string name="text_run">Run</string>
     <string name="text_run_on_battery_change">On battery changed</string>
     <string name="text_run_on_boot">On booted</string>
