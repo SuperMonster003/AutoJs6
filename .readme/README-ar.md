@@ -299,12 +299,12 @@
 
 #### تحضير Android Studio
 
-قم بتنزيل إصدار `Android Studio Meerkat Feature Drop | 2024.3.2 Patch 1` (حدد أحدها حسب الحاجة):
+قم بتنزيل إصدار `Android Studio Narwhal | 2025.1.1 Patch 1` (حدد أحدها حسب الحاجة):
 
-- [android-studio-2024.3.2.15-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.3.2.15/android-studio-2024.3.2.15-windows.exe) (1.23 GB)
-- [android-studio-2024.3.2.15-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.3.2.15/android-studio-2024.3.2.15-windows.zip) (1.23 GB)
+- [android-studio-2025.1.1.14-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2025.1.1.14/android-studio-2025.1.1.14-windows.exe) (1.37 GB)
+- [android-studio-2025.1.1.14-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2025.1.1.14/android-studio-2025.1.1.14-windows.zip) (1.38 GB)
 
-> ملاحظة: تاريخ الإصدار بالنسخة المذكورة أعلاه هو 28 May 2025. إذا كنت بحاجة إلى تنزيل إصدار آخر، أو إذا كان الرابط المذكور غير صالح، يمكنك زيارة [أرشيف إصدارات Android Studio](https://developer.android.com/studio/archive?hl=en).
+> ملاحظة: تاريخ الإصدار بالنسخة المذكورة أعلاه هو 10 July 2025. إذا كنت بحاجة إلى تنزيل إصدار آخر، أو إذا كان الرابط المذكور غير صالح، يمكنك زيارة [أرشيف إصدارات Android Studio](https://developer.android.com/studio/archive?hl=en).
 
 قم بتثبيت أو فك ضغط الملف المذكور سابقًا، ثم قم بتشغيل برنامج Android Studio (مثل `"D:\android-studio\bin\studio64.exe"`).
 
@@ -355,7 +355,7 @@ File (ملف) | Settings (إعدادات) | Appearance & Behavior (المظهر 
 
 يعتمد مشروع AutoJs6 على إصدار `JDK (مجموعة تطوير جافا)` بإصدار لا يقل عن `17`، ولكن يفضل الإصدار الذي لا يقل عن `19`.
 
-اعتبارًا من 31 May 2025، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `24`.
+اعتبارًا من 18 July 2025، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `24`.
 
 > ملاحظة: إذا كان نظام الكمبيوتر يحتوي على JDK والإصدار يفي بالمتطلبات المذكورة أعلاه، فيمكنك تخطي هذا القسم.
 
@@ -540,7 +540,7 @@ autojs6-v6.6.2-arm64-v8a-0f2a9d74.apk
         - Update TypeScript declarations according to section `dependency` if needed
     - $projectDir/.readme/template_readme.md
         - Update badges like [ android studio / rhino / ... ]
-        - Update contribution section: المشاركة بالإسهام
+        - Update contribution section: [ h3_contribution ]
     - $projectDir/.readme/common.json
         - Update android studio download links and version names
         - Update contribution section: var_date_contribution_table_data_updated
