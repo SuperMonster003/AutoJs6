@@ -299,12 +299,12 @@ This section introduces the compilation and build methods of the AutoJs6 open-so
 
 #### Android Studio Preparation
 
-Download `Android Studio Meerkat Feature Drop | 2024.3.2 Patch 1` version (choose one as needed):
+Download `Android Studio Narwhal | 2025.1.1 Patch 1` version (choose one as needed):
 
-- [android-studio-2024.3.2.15-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.3.2.15/android-studio-2024.3.2.15-windows.exe) (1.23 GB)
-- [android-studio-2024.3.2.15-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.3.2.15/android-studio-2024.3.2.15-windows.zip) (1.23 GB)
+- [android-studio-2025.1.1.14-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2025.1.1.14/android-studio-2025.1.1.14-windows.exe) (1.37 GB)
+- [android-studio-2025.1.1.14-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2025.1.1.14/android-studio-2025.1.1.14-windows.zip) (1.38 GB)
 
-> Note: The release date for the above version is May 28, 2025. To download other versions, or if the above link is invalid, you can visit the [Android Studio release archive](https://developer.android.com/studio/archive?hl=en) page.
+> Note: The release date for the above version is Jul 10, 2025. To download other versions, or if the above link is invalid, you can visit the [Android Studio release archive](https://developer.android.com/studio/archive?hl=en) page.
 
 Install or extract the above file, then run the Android Studio software (e.g., `"D:\android-studio\bin\studio64.exe"`).
 
@@ -355,7 +355,7 @@ Check `Show Package Details`, click NDK and CMake respectively to ensure the cor
 
 The `JDK (Java Development Kit)` version required for the AutoJs6 project should be at least `17`, but `19` or higher is recommended.
 
-As of May 31, 2025, AutoJs6 supports up to version `24` of the JDK.
+As of Jul 18, 2025, AutoJs6 supports up to version `24` of the JDK.
 
 > Note: If the JDK is already installed on the computer system and the version meets the above requirements, this section can be skipped.
 
@@ -540,7 +540,7 @@ Some contributors do not appear correctly in the [GitHub Contributors](https://g
         - Update TypeScript declarations according to section `dependency` if needed
     - $projectDir/.readme/template_readme.md
         - Update badges like [ android studio / rhino / ... ]
-        - Update contribution section: Contribution
+        - Update contribution section: [ h3_contribution ]
     - $projectDir/.readme/common.json
         - Update android studio download links and version names
         - Update contribution section: var_date_contribution_table_data_updated

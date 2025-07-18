@@ -299,12 +299,12 @@ Esta sección toma como ejemplo Android Studio para presentar los métodos de co
 
 #### Preparación de Android Studio
 
-Descarga la versión `Android Studio Meerkat Feature Drop | 2024.3.2 Patch 1` (elige una según tus necesidades):
+Descarga la versión `Android Studio Narwhal | 2025.1.1 Patch 1` (elige una según tus necesidades):
 
-- [android-studio-2024.3.2.15-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.3.2.15/android-studio-2024.3.2.15-windows.exe) (1.23 GB)
-- [android-studio-2024.3.2.15-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.3.2.15/android-studio-2024.3.2.15-windows.zip) (1.23 GB)
+- [android-studio-2025.1.1.14-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2025.1.1.14/android-studio-2025.1.1.14-windows.exe) (1.37 GB)
+- [android-studio-2025.1.1.14-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2025.1.1.14/android-studio-2025.1.1.14-windows.zip) (1.38 GB)
 
-> Nota: La fecha de lanzamiento de la versión anterior es el 28 de May de 2025. Para descargar otras versiones, o si los enlaces anteriores ya no funcionan, puedes visitar la página del [Archivo de versiones de Android Studio](https://developer.android.com/studio/archive?hl=en).
+> Nota: La fecha de lanzamiento de la versión anterior es el 10 de July de 2025. Para descargar otras versiones, o si los enlaces anteriores ya no funcionan, puedes visitar la página del [Archivo de versiones de Android Studio](https://developer.android.com/studio/archive?hl=en).
 
 Instala o descomprime los archivos mencionados anteriormente y ejecuta el software Android Studio (por ejemplo, `"D:\android-studio\bin\studio64.exe"`).
 
@@ -355,7 +355,7 @@ Marca `Show Package Details (Mostrar detalles del paquete)`, haz clic en NDK y C
 
 La versión mínima requerida del `JDK (Kit de Desarrollo de Java)` para el proyecto AutoJs6 es `17`, pero se recomienda usar una versión no inferior a `19`.
 
-Hasta el 31 de May de 2025, AutoJs6 soporta hasta la versión `24` de JDK.
+Hasta el 18 de July de 2025, AutoJs6 soporta hasta la versión `24` de JDK.
 
 > Nota: Si el sistema ya tiene instalado JDK y cumple con los requisitos anteriores, puedes omitir esta sección.
 
@@ -540,7 +540,7 @@ Algunos contribuyentes no aparecen en [GitHub Contributors](https://github.com/S
         - Update TypeScript declarations according to section `dependency` if needed
     - $projectDir/.readme/template_readme.md
         - Update badges like [ android studio / rhino / ... ]
-        - Update contribution section: Contribución
+        - Update contribution section: [ h3_contribution ]
     - $projectDir/.readme/common.json
         - Update android studio download links and version names
         - Update contribution section: var_date_contribution_table_data_updated

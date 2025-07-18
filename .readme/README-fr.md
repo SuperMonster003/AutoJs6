@@ -299,12 +299,12 @@ Cette section présente la méthode de compilation et de construction du projet 
 
 #### Préparation de Android Studio
 
-Téléchargez la version `Android Studio Meerkat Feature Drop | 2024.3.2 Patch 1` (choisissez-en une selon vos besoins):
+Téléchargez la version `Android Studio Narwhal | 2025.1.1 Patch 1` (choisissez-en une selon vos besoins):
 
-- [android-studio-2024.3.2.15-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.3.2.15/android-studio-2024.3.2.15-windows.exe) (1.23 GB)
-- [android-studio-2024.3.2.15-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.3.2.15/android-studio-2024.3.2.15-windows.zip) (1.23 GB)
+- [android-studio-2025.1.1.14-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2025.1.1.14/android-studio-2025.1.1.14-windows.exe) (1.37 GB)
+- [android-studio-2025.1.1.14-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2025.1.1.14/android-studio-2025.1.1.14-windows.zip) (1.38 GB)
 
-> Note : La version mentionnée ci-dessus a été publiée le 28 May 2025. Pour télécharger d'autres versions ou si le lien ci-dessus n'est plus valide, visitez la page [archive des versions de Android Studio](https://developer.android.com/studio/archive?hl=en).
+> Note : La version mentionnée ci-dessus a été publiée le 10 July 2025. Pour télécharger d'autres versions ou si le lien ci-dessus n'est plus valide, visitez la page [archive des versions de Android Studio](https://developer.android.com/studio/archive?hl=en).
 
 Installez ou extrayez le fichier ci-dessus, exécutez Android Studio (par exemple `"D:\android-studio\bin\studio64.exe"`).
 
@@ -355,7 +355,7 @@ Cochez `Show Package Details (afficher les détails du package)`, puis cliquez r
 
 La version de JDK (Kit de développement Java) requise pour le projet AutoJs6 doit être au moins `17`, mais il est recommandé d'avoir au moins `19`.
 
-À partir du 31 May 2025, AutoJs6 prend en charge la version maximale de JDK `24`.
+À partir du 18 July 2025, AutoJs6 prend en charge la version maximale de JDK `24`.
 
 > Note : Si le JDK est déjà installé sur le système informatique et que la version répond aux exigences ci-dessus, vous pouvez ignorer cette section.
 
@@ -540,7 +540,7 @@ Certains contributeurs ne figurant pas correctement dans [GitHub Contributors](h
         - Update TypeScript declarations according to section `dependency` if needed
     - $projectDir/.readme/template_readme.md
         - Update badges like [ android studio / rhino / ... ]
-        - Update contribution section: Contribution
+        - Update contribution section: [ h3_contribution ]
     - $projectDir/.readme/common.json
         - Update android studio download links and version names
         - Update contribution section: var_date_contribution_table_data_updated

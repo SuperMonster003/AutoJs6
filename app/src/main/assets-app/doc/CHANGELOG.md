@@ -4,6 +4,45 @@
 
 ******
 
+# v6.7.0
+
+###### 2025/07/18
+
+* `新增` zip 模块, 用于文件压缩与解压缩操作 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (参阅 项目文档 > [Zip](https://docs.autojs6.com/#/zip))
+* `新增` mediainfo 模块, 用于查看媒体文件的详细信息 (参阅 项目文档 > [媒体信息](https://docs.autojs6.com/#/mediainfo))
+* `新增` UiObject#isShifted 方法, 用于检测控件位置变化
+* `新增` 设置页面支持应用启动器图标设置选项 _[`issue #405`](http://issues.autojs6.com/405)_
+* `修复` 使用 XML 语法将 JavaScript 表达式作为属性值时, this 对象可能出现指向错误的问题
+* `修复` 调用 images.requestScreenCapture 时用户取消授权可能导致应用崩溃的问题
+* `修复` images 部分相关方法出现异常时 oneShot 标记功能失效的问题 _[`issue #372`](http://issues.autojs6.com/372)_
+* `修复` images 部分相关方法可能引发内存泄露的问题 _[`issue #372`](http://issues.autojs6.com/372)_
+* `修复` Android 10 UiObject#child 方法可能出现 ArrayIndexOutOfBoundsException 异常的问题 _[`issue #416`](http://issues.autojs6.com/416)_
+* `修复` 打包应用无法正常使用 Paddle OCR 与 Rapid OCR 功能的问题
+* `修复` 版本历史页面部分系统因字体差别导致统计数据显示不完整的问题
+* `修复` ErrorDialogActivity 可能无法正常启动的问题 _[`issue #414`](http://issues.autojs6.com/414)_ _[`issue #340`](http://issues.autojs6.com/340#issuecomment-2973485826)_
+* `修复` 崩溃报告页面复制详细信息功能失效的问题
+* `优化` http 模块相关方法支持不安全选项参数 (isInsecure/insecure), 用于忽略证书相关异常 _[`issue #417`](http://issues.autojs6.com/417)_
+* `优化` android.graphics.Paint#setColor 支持正常解析 ColorInt/ColorHex/ColorName 等颜色参数
+* `优化` 内置模块相关方法实参类型的异常消息增加类型摘要信息
+* `优化` 文件管理器浮动按钮展开后点击菜单项时优化菜单收起时机
+* `优化` 崩溃报告页面支持双指缩放调整字体大小并添加常用功能按钮
+* `优化` 应用启动器图标支持自适应图标特性 _[`issue #405`](http://issues.autojs6.com/405)_
+* `依赖` 附加 Androidx Core (KTX) 版本 1.16.0
+* `依赖` 升级 Gradle 版本 8.14 -> 8.14.2
+* `依赖` 升级 Apache Commons 版本 3.16.0 -> 3.17.0
+* `依赖` 升级 Retrofit2 Retrofit 版本 2.11.0 -> 2.12.0
+* `依赖` 升级 Retrofit2 Converter Gson 版本 2.11.0 -> 2.12.0
+* `依赖` 升级 Retrofit2 RxJava2 版本 2.11.0 -> 2.12.0
+* `依赖` 升级 Joda Time 版本 2.12.7 -> 2.14.0
+* `依赖` 升级 Androidx WebKit 版本 1.13.0 -> 1.14.0
+* `依赖` 升级 Gson 版本 2.11.0 -> 2.13.1
+* `依赖` 升级 ARSCLib 版本 1.3.1 -> 1.3.5
+* `依赖` 升级 Jsoup 版本 1.19.1 -> 1.20.1
+* `依赖` 升级 Junit Jupiter 版本 5.10.3 -> 5.13.0
+* `依赖` 升级 Androidx AppCompat 版本 1.7.0 -> 1.7.1
+* `依赖` 升级 Material Progressbar 版本 1.4.2 -> 1.6.1
+* `依赖` 升级 Androidx Room 版本 2.7.1 -> 2.7.2
+
 # v6.6.4
 
 ###### 2025/05/31
@@ -532,6 +571,7 @@
 * `新增` notice 模块 (参阅 项目文档 > [消息通知](https://docs.autojs6.com/#/notice))
 * `新增` s13n 模块 (参阅 项目文档 > [标准化](https://docs.autojs6.com/#/s13n))
 * `新增` Color 模块 (参阅 项目文档 > [颜色类](https://docs.autojs6.com/#/colorType))
+* `新增` colors.setColorPaint 方法, 用于设置 android.graphics.Paint 画笔颜色 (参阅 项目文档 > [颜色类](https://docs.autojs6.com/#/colorType?id=m-setpaintcolor))
 * `新增` 前台时保持屏幕常亮功能及设置选项
 * `新增` 额外的文档启动器 (launcher) 便于独立阅读应用文档 (支持在设置中隐藏或显示)
 * `修复` colors.toString 方法功能异常
@@ -568,7 +608,7 @@
 * `优化` 控制台浮动窗口支持拖动标题区域移动窗口位置
 * `优化` 控制台浮动窗口支持脚本结束后自动延迟关闭
 * `优化` 控制台浮动窗口及其 Activity 活动窗口支持双指缩放调整字体大小
-* `优化` http 模块相关方法支持超时参数 (timeout)
+* `优化` http 模块相关方法支持超时选项参数 (timeout)
 * `优化` Gradle 构建脚本支持 JDK 版本主动降级 (fallback)
 * `优化` Gradle 构建脚本支持根据平台类型及版本自动选择合适的构建工具版本 (程度有限)
 * `依赖` 本地化 Auto.js APK Builder 版本 1.0.3
@@ -658,7 +698,7 @@
 * `优化` 主题色增加更多 Material Design Color (材料设计颜色) 选项
 * `优化` 文件管理器/任务面板等列表项图标适当轻量化并适配主题色
 * `优化` 主页搜索框的提示文本颜色适配夜间模式
-* `优化` 对话框/文本/Fab/AppBar/列表项等部件适配夜间模式
+* `优化` 对话框/文本/FAB/AppBar/列表项等部件适配夜间模式
 * `优化` 文档/设置/关于/主题色/布局分析等页面及浮动按钮菜单适配夜间模式
 * `优化` 页面布局尽可能兼容 RTL (Right-To-Left) 布局
 * `优化` 关于页面增加图标动画效果
