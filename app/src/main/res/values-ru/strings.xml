@@ -77,6 +77,7 @@
     <string name="description_file_extensions_preference">Используется для настройки отображения расширений файлов в файловом менеджере AutoJs6.</string>
     <string name="description_hidden_files_preference">Используется для установки того, показывать или нет скрытые файлы и папки (обычно начинающиеся с \".\") в файловом проводнике AutoJs6.</string>
     <string name="description_keep_screen_on_when_in_foreground_preference">Предпочтение для сохранения экрана устройства включенным и ярким, когда AutoJs6 находится на переднем плане.\nЧтобы это происходило только на главной странице среди всех страниц приложения AutoJs6, выберите опцию \"Только главная страница\".</string>
+    <string name="description_launcher_icon_preference">Значок запуска поддерживает режимы отображения адаптивного значка или наследуемого значка с прозрачным фоном. Фактический вид может различаться на разных версиях Android. После переключения режима отображения может пройти несколько секунд, прежде чем изменения вступят в силу.</string>
     <string name="description_launcher_shortcuts">Ярлыки позволяют выполнять определенные действия в AutoJs6. Пользователи могут отображать эти ярлыки в поддерживаемой программе запуска и быстро запускать некоторые задачи или действия, например, читать документацию по приложению AutoJs6, запускать страницу настроек AutoJs6 и т.д.</string>
     <string name="description_manage_ignored_updates_preference">Нажмите для просмотра или управления элементами списка.\nДлинное нажатие для удаления элемента списка.</string>
     <string name="description_night_mode_preference">Ночной режим (также известный как темная тема) применяется как к системному пользовательскому интерфейсу Android, так и к приложениям, запущенным на устройстве, что улучшает видимость для пользователей со слабым зрением и тех, кто чувствителен к яркому свету, а также облегчает любому человеку использование устройства в условиях недостаточной освещенности.\n\nСистема слежения: AutoJs6 имеет настройки ночного режима, такие же, как и система Android\nВсегда включен: AutoJs6 держит Ночной режим включенным (независимо от настроек системы Android)\nВсегда выключен: AutoJs6 отключает ночной режим (независимо от настроек системы Android)\n\nПримечание: Опция \"Следовать за системой\" доступна только для Android API Level 28 (Android 9) [P] и выше.</string>
@@ -114,6 +115,7 @@
     <string name="dialog_button_use_palette">Использовать палитру</string>
     <string name="dialog_button_version_histories">История</string>
     <string name="dialog_button_view_file">Просмотр файла</string>
+    <string name="dialog_button_view_shortcuts">Просмотреть ярлыки</string>
     <string name="dialog_title_color_details">Детали цвета</string>
     <string name="dialog_title_color_palette">Цветовая палитра</string>
     <string name="dialog_title_theme_color_details">Детали цвета темы</string>
@@ -140,6 +142,8 @@
     <string name="entry_keep_screen_on_when_in_foreground_all_pages">Все страницы</string>
     <string name="entry_keep_screen_on_when_in_foreground_disabled">Отключено</string>
     <string name="entry_keep_screen_on_when_in_foreground_homepage_only">Только домашняя страница</string>
+    <string name="entry_launcher_icon_adaptive">Адаптивный значок</string>
+    <string name="entry_launcher_icon_transparent_background">Значок с прозрачным фоном</string>
     <string name="entry_night_mode_always_off">Всегда выключено</string>
     <string name="entry_night_mode_always_on">Всегда включено</string>
     <string name="entry_night_mode_follow_system">Следовать за системой</string>
@@ -689,7 +693,9 @@
     <string name="text_latest_package">Последний пакет</string>
     <string name="text_launch_config">Запуск конфигурации</string>
     <string name="text_launch_debugger">Запуск отладчика</string>
+    <string name="text_launcher_icon_title">Значок запуска</string>
     <string name="text_launcher_shortcuts">Ярлыки лаунчера</string>
+    <string name="text_launcher_shortcuts_may_be_lost_after_launcher_icon_changed">Смена значков запуска на некоторых устройствах может привести к потере всех существующих ярлыков AutoJs6, действуйте с осторожностью</string>
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">Проверка макета...</string>
     <string name="text_licenses">Лицензии на открытые источники</string>
     <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">Пробуем запасное решение...</string>
@@ -1002,6 +1008,7 @@
     <string name="text_timed_task">Задание по времени</string>
     <string name="text_timed_task_timing">Время</string>
     <string name="text_tools">Инструменты</string>
+    <string name="text_transparent_background_launcher_icon_may_not_take_effect">Значок запуска с прозрачным фоном может быть автоматически замаскирован системой или получить фон, поэтому фактический результат может отличаться на разных устройствах</string>
     <string name="text_tutorial">Учебник</string>
     <string name="text_type">Тип</string>
     <string name="text_unable_to_build_apk_as_autojs6_does_not_include_selected_abi">Выбранный ABI \"%s\" не может быть использован для создания упакованного приложения, поскольку текущая версия AutoJs6 не включает указанный ABI.</string>

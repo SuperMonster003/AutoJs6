@@ -77,6 +77,7 @@
     <string name="description_file_extensions_preference">Se utiliza para definir si se deben mostrar las extensiones de archivo en el explorador de archivos de AutoJs6.</string>
     <string name="description_hidden_files_preference">2. Se utiliza para establecer si se muestran o no los archivos y carpetas ocultos (que suelen empezar por \".\") en el explorador de archivos de AutoJs6.</string>
     <string name="description_keep_screen_on_when_in_foreground_preference">Preferencia para mantener la pantalla del dispositivo encendida y brillante cuando AutoJs6 está en primer plano.\nPara que sólo ocurra en la página de inicio entre todas las páginas de la aplicación AutoJs6, elija la opción \"sólo página de inicio\".</string>
+    <string name="description_launcher_icon_preference">El ícono del iniciador admite modos de visualización de ícono adaptable o heredado con fondo transparente. El efecto de visualización real puede variar en diferentes sistemas Android. Puede tardar unos segundos en surtir efecto después de cambiar el modo de visualización.</string>
     <string name="description_launcher_shortcuts">Los accesos directos pueden realizar acciones específicas en AutoJs6. Los usuarios pueden mostrar estos accesos directos en un lanzador compatible e iniciar rápidamente algunas tareas o iniciar una actividad, como leer la documentación de la aplicación AutoJs6, iniciar la página de configuración de AutoJs6, etc.</string>
     <string name="description_manage_ignored_updates_preference">Pulse para ver o gestionar los elementos de la lista.\nHaga una pulsación larga para eliminar el elemento de la lista.</string>
     <string name="description_night_mode_preference">El modo nocturno (también conocido como tema oscuro) se aplica tanto a la interfaz de usuario del sistema Android como a las aplicaciones que se ejecutan en el dispositivo, lo que mejora la visibilidad para los usuarios con baja visión y los que son sensibles a la luz brillante, y facilita el uso de un dispositivo en un entorno con poca luz.\n\nSistema de seguimiento: AutoJs6 tiene ajustes de modo nocturno iguales a los del sistema Android\nSiempre activado: AutoJs6 mantiene activado el modo Noche (independientemente de la configuración del sistema Android)\nSiempre desactivado: AutoJs6 mantiene el modo nocturno desactivado (independientemente de la configuración del sistema Android)\n\nNota: La opción de seguir el sistema es sólo para el nivel 28 de la API de Android (Android 9) [P] y superior.</string>
@@ -114,6 +115,7 @@
     <string name="dialog_button_use_palette">Usar paleta</string>
     <string name="dialog_button_version_histories">Historial</string>
     <string name="dialog_button_view_file">Ver archivo</string>
+    <string name="dialog_button_view_shortcuts">Ver accesos directos</string>
     <string name="dialog_title_color_details">Detalles del color</string>
     <string name="dialog_title_color_palette">Paleta de colores</string>
     <string name="dialog_title_theme_color_details">Detalles del color del tema</string>
@@ -140,6 +142,8 @@
     <string name="entry_keep_screen_on_when_in_foreground_all_pages">Todas las páginas</string>
     <string name="entry_keep_screen_on_when_in_foreground_disabled">Desactivado</string>
     <string name="entry_keep_screen_on_when_in_foreground_homepage_only">Sólo página de inicio</string>
+    <string name="entry_launcher_icon_adaptive">Ícono adaptable</string>
+    <string name="entry_launcher_icon_transparent_background">Ícono con fondo transparente</string>
     <string name="entry_night_mode_always_off">Siempre desactivado</string>
     <string name="entry_night_mode_always_on">Siempre activado</string>
     <string name="entry_night_mode_follow_system">Seguir el sistema</string>
@@ -689,7 +693,9 @@
     <string name="text_latest_package">Último paquete</string>
     <string name="text_launch_config">Iniciar la configuración</string>
     <string name="text_launch_debugger">Iniciar el depurador</string>
+    <string name="text_launcher_icon_title">Ícono del iniciador</string>
     <string name="text_launcher_shortcuts">Atajos del lanzador</string>
+    <string name="text_launcher_shortcuts_may_be_lost_after_launcher_icon_changed">Cambiar los íconos del iniciador en algunos dispositivos puede provocar la pérdida de todos los accesos directos existentes de AutoJs6, proceda con precaución</string>
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">Inspeccionando el diseño...</string>
     <string name="text_licenses">Licencias de fuentes abiertas</string>
     <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">Intentando una solución alternativa...</string>
@@ -1002,6 +1008,7 @@
     <string name="text_timed_task">Tarea cronometrada</string>
     <string name="text_timed_task_timing">Cronometraje</string>
     <string name="text_tools">Herramientas</string>
+    <string name="text_transparent_background_launcher_icon_may_not_take_effect">El ícono de iniciador con fondo transparente puede ser enmascarado automáticamente o recibir un fondo por parte del sistema, por lo que el efecto real puede variar entre dispositivos</string>
     <string name="text_tutorial">Tutorial</string>
     <string name="text_type">Tipo</string>
     <string name="text_unable_to_build_apk_as_autojs6_does_not_include_selected_abi">La ABI seleccionada \"%s\" no se puede utilizar para crear una aplicación empaquetada, porque la versión actual de AutoJs6 no incluye la ABI mencionada.</string>

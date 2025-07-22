@@ -75,6 +75,7 @@
     <string name="description_extending_js_build_in_objects">擴展 JavaScript 內置對象可以增加代碼靈活性並實現更豐富的功能, 但可能造成衝突甚至破壞.\n選項開啓後所有腳本均默認啓用內置擴展.\n內置擴展往往是不安全的, 除非明確瞭解內置擴展的原理及風險, 否則不建議啓用.\n選項關閉後, 仍然可以通過 plugins 全局對象啓用內置擴展, 詳見項目文檔.</string>
     <string name="description_hidden_files_preference">用於設置是否在 AutoJs6 文件管理器中顯示隱藏文件和文件夾 (通常以 \".\" 開頭).</string>
     <string name="description_keep_screen_on_when_in_foreground_preference">用於當 AutoJs6 位於前台時使設備屏幕保持常亮.\n如需在 AutoJs6 應用的所有頁面中, 僅在主頁時保持設備屏幕常亮, 可選擇 \"僅限主頁\" 選項.</string>
+    <string name="description_launcher_icon_preference">啓動器圖標支持自適應圖標顯示方式與傳統透明背景圖標顯示方式. 不同安卓系統的圖標實際顯示效果可能有所不同. 切換顯示方式後, 可能需要幾秒鐘的時間生效.</string>
     <string name="description_launcher_shortcuts">快捷方式可以在 AutoJs6 中執行特定操作, 用户可以在啓動器中顯示這些快捷方式, 並快速開始某些任務或啓動某個活動, 如閲讀 AutoJs6 應用文檔, 啓動 AutoJs6 設置頁面等.</string>
     <string name="description_manage_ignored_updates_preference">點擊可查看或管理列表項.\n長按可移除列表項.</string>
     <string name="description_night_mode_preference">夜間模式, 亦稱 [ 暗黑模式 / 深色主題 ] 等.\n夜間模式應用於安卓系統 UI (如通知欄和導航欄) 及 AutoJs6 應用頁面.\n夜間模式可提升設備在低光環境下的易用性, 同時有助於提升弱視或光敏感用户的視覺體驗.\n\n跟隨系統: AutoJs6 與安卓操作系統的夜間模式設置一致\n總是開啓: AutoJs6 保持開啓夜間模式 (忽略操作系統設置)\n總是關閉: AutoJs6 保持關閉夜間模式 (忽略操作系統設置)\n\n注: 跟隨系統功能僅支持安卓 API 級別 28 (安卓 9) [P] 及以上操作系統.</string>
@@ -112,6 +113,7 @@
     <string name="dialog_button_use_palette">使用調色盤</string>
     <string name="dialog_button_version_histories">版本歷史</string>
     <string name="dialog_button_view_file">查看文件</string>
+    <string name="dialog_button_view_shortcuts">查看快捷方式</string>
     <string name="dialog_title_color_details">顏色詳情</string>
     <string name="dialog_title_color_palette">調色盤</string>
     <string name="dialog_title_theme_color_details">主題色詳情</string>
@@ -138,6 +140,8 @@
     <string name="entry_keep_screen_on_when_in_foreground_all_pages">所有頁面</string>
     <string name="entry_keep_screen_on_when_in_foreground_disabled">禁用</string>
     <string name="entry_keep_screen_on_when_in_foreground_homepage_only">僅限主頁</string>
+    <string name="entry_launcher_icon_adaptive">自適應圖標</string>
+    <string name="entry_launcher_icon_transparent_background">透明背景圖標</string>
     <string name="entry_night_mode_always_off">總是關閉</string>
     <string name="entry_night_mode_always_on">總是開啓</string>
     <string name="entry_night_mode_follow_system">跟隨系統</string>
@@ -687,7 +691,9 @@
     <string name="text_latest_package">最近包名</string>
     <string name="text_launch_config">運行配置</string>
     <string name="text_launch_debugger">啓動調試</string>
+    <string name="text_launcher_icon_title">啓動器圖標</string>
     <string name="text_launcher_shortcuts">啓動器快捷方式</string>
+    <string name="text_launcher_shortcuts_may_be_lost_after_launcher_icon_changed">部分設備切換啓動器圖標可能導致已創建的 AutoJs6 快捷方式全部丟失, 需謹慎操作</string>
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">佈局分析中...</string>
     <string name="text_licenses">開源許可信息</string>
     <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">正在嘗試備選方案...</string>
@@ -1000,6 +1006,7 @@
     <string name="text_timed_task">定時任務</string>
     <string name="text_timed_task_timing">定時</string>
     <string name="text_tools">工具</string>
+    <string name="text_transparent_background_launcher_icon_may_not_take_effect">透明背景啓動器圖標可能被系統自動添加遮罩或背景, 因此不同設備的實際效果與預期可能不完全一致</string>
     <string name="text_tutorial">教程</string>
     <string name="text_type">類型</string>
     <string name="text_unable_to_build_apk_as_autojs6_does_not_include_selected_abi">選擇的 ABI 架構 \"%s\" 無法用於創建打包應用, 因當前 AutoJs6 版本未包含上述 ABI 架構.</string>

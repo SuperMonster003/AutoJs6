@@ -74,6 +74,7 @@
     <string name="description_file_extensions_preference">Used to set whether to show file extensions in AutoJs6 file explorer.</string>
     <string name="description_hidden_files_preference">Used to set whether to show hidden files and folders (usually starting with \".\") in AutoJs6 file explorer.</string>
     <string name="description_keep_screen_on_when_in_foreground_preference">Preference for keeping the device\'s screen turned on and bright when AutoJs6 is in the foreground.\nTo make it happen only on the homepage among all pages of the AutoJs6 application, choose \"homepage only\" option.</string>
+    <string name="description_launcher_icon_preference">Launcher icon supports both adaptive icon or legacy transparent background icon display modes. The actual display effect may vary on different Android systems. It may take a few seconds to take effect after switching display modes.</string>
     <string name="description_launcher_shortcuts">Shortcuts can perform specific actions in AutoJs6. Users can display these shortcuts in a supported launcher and quickly start some tasks or launch an activity, such as reading AutoJs6 application documentation, launching AutoJs6 settings page, and so on.</string>
     <string name="description_manage_ignored_updates_preference">Click to view or manage list items.\nLong press to remove the list item.</string>
     <string name="description_night_mode_preference">Night mode (also known as Dark theme) applies to both the Android system UI and apps running on the device, which improves visibility for users with low vision and those who are sensitive to bright light, and makes it easier for anyone to use a device in a low-light environment.\n\nFollow system: AutoJs6 has Night mode settings same as Android system\nAlways on: AutoJs6 keeps Night mode on (regardless of Android system settings)\nAlways off: AutoJs6 keeps Night mode off (regardless of Android system settings)\n\nNote: Follow system option is only for Android API Level 28 (Android 9) [P] and above.</string>
@@ -111,6 +112,7 @@
     <string name="dialog_button_use_palette">Use palette</string>
     <string name="dialog_button_version_histories">Histories</string>
     <string name="dialog_button_view_file">View File</string>
+    <string name="dialog_button_view_shortcuts">View shortcuts</string>
     <string name="dialog_title_color_details">Color details</string>
     <string name="dialog_title_color_palette">Color palette</string>
     <string name="dialog_title_theme_color_details">Theme color details</string>
@@ -137,6 +139,8 @@
     <string name="entry_keep_screen_on_when_in_foreground_all_pages">All pages</string>
     <string name="entry_keep_screen_on_when_in_foreground_disabled">Disabled</string>
     <string name="entry_keep_screen_on_when_in_foreground_homepage_only">Homepage only</string>
+    <string name="entry_launcher_icon_adaptive">Adaptive icon</string>
+    <string name="entry_launcher_icon_transparent_background">Transparent background icon</string>
     <string name="entry_night_mode_always_off">Always off</string>
     <string name="entry_night_mode_always_on">Always on</string>
     <string name="entry_night_mode_follow_system">Follow system</string>
@@ -686,7 +690,9 @@
     <string name="text_latest_package">Latest package</string>
     <string name="text_launch_config">Launch config</string>
     <string name="text_launch_debugger">Launch debugger</string>
+    <string name="text_launcher_icon_title">Launcher icon</string>
     <string name="text_launcher_shortcuts">Launcher shortcuts</string>
+    <string name="text_launcher_shortcuts_may_be_lost_after_launcher_icon_changed">Switching launcher icons on some devices may cause all existing AutoJs6 shortcuts to be lost, please proceed with caution</string>
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">Inspecting layout...</string>
     <string name="text_licenses">Open Sources Licenses</string>
     <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">Trying a fallback solution...</string>
@@ -999,6 +1005,7 @@
     <string name="text_timed_task">Timed task</string>
     <string name="text_timed_task_timing">Timing</string>
     <string name="text_tools">Tools</string>
+    <string name="text_transparent_background_launcher_icon_may_not_take_effect">The transparent background launcher icon may be automatically masked or given a background by the system, so the actual effect may vary across different devices</string>
     <string name="text_tutorial">Tutorial</string>
     <string name="text_type">Type</string>
     <string name="text_unable_to_build_apk_as_autojs6_does_not_include_selected_abi">The selected ABI \"%s\" cannot be used to create a packaged application, because the current version of AutoJs6 does not include the above ABI.</string>

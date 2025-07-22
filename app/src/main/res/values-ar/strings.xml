@@ -79,6 +79,7 @@
     <string name="description_file_extensions_preference">يُستخدم لتحديد ما إذا كان يجب عرض امتدادات الملف في مستكشف ملفات AutoJs6.</string>
     <string name="description_hidden_files_preference">تُستخدم لتعيين إظهار الملفات والمجلدات المخفية (تبدأ عادةً بـ \".\") في مستكشف الملفات AutoJs6 أم لا.</string>
     <string name="description_keep_screen_on_when_in_foreground_preference">تفضيل إبقاء شاشة الجهاز قيد التشغيل وساطعة عندما يكون AutoJs6 في المقدمة.\nلتحقيق ذلك فقط على الصفحة الرئيسية بين جميع صفحات تطبيق AutoJs6 ، اختر خيار \"الصفحة الرئيسية فقط\".</string>
+    <string name="description_launcher_icon_preference">يدعم رمز المشغّل وضعي عرض: الرمز المتكيّف أو الرمز التقليدي بخلفية شفافة. قد يختلف تأثير العرض الفعلي عبر أنظمة أندرويد المختلفة. قد يستغرق الأمر بضع ثوانٍ ليصبح التغيير ساريًا بعد تبديل وضع العرض.</string>
     <string name="description_launcher_shortcuts">يمكن للاختصارات تنفيذ إجراءات محددة في AutoJs6. يمكن للمستخدمين عرض هذه الاختصارات في مشغل مدعوم وبدء بعض المهام أو تشغيل نشاط بسرعة، مثل قراءة وثائق تطبيق AutoJs6، وتشغيل صفحة إعدادات AutoJs6، وما إلى ذلك.</string>
     <string name="description_manage_ignored_updates_preference">انقر لعرض أو إدارة عناصر القائمة.\nاضغط لفترة طويلة لإزالة عنصر القائمة.</string>
     <string name="description_night_mode_preference">ينطبق الوضع الليلي (المعروف أيضًا باسم Dark theme) على كل من واجهة مستخدم نظام Android والتطبيقات التي تعمل على الجهاز ، مما يحسن الرؤية للمستخدمين ضعاف البصر وأولئك الذين لديهم حساسية للضوء الساطع ، ويسهل على أي شخص استخدام الجهاز. في بيئة الإضاءة المنخفضة.\n\nنظام المتابعة: يحتوي AutoJs6 على إعدادات الوضع الليلي مثل نظام Android\nيعمل دائمًا: يحافظ AutoJs6 على تشغيل الوضع الليلي (بغض النظر عن إعدادات نظام Android)\nإيقاف التشغيل دائمًا: يقوم AutoJs6 بإيقاف تشغيل الوضع الليلي (بغض النظر عن إعدادات نظام Android)\n\nملاحظة: خيار متابعة النظام متاح فقط لـ Android API Level 28 (Android 9) [P] وما فوق.</string>
@@ -116,6 +117,7 @@
     <string name="dialog_button_use_palette">ستخدام اللوحة</string>
     <string name="dialog_button_version_histories">السجل</string>
     <string name="dialog_button_view_file">استعراض الملف</string>
+    <string name="dialog_button_view_shortcuts">عرض الاختصارات</string>
     <string name="dialog_title_color_details">تفاصيل اللون</string>
     <string name="dialog_title_color_palette">لوحة الألوان</string>
     <string name="dialog_title_theme_color_details">تفاصيل لون الثيم</string>
@@ -142,6 +144,8 @@
     <string name="entry_keep_screen_on_when_in_foreground_all_pages">كل الصفحات</string>
     <string name="entry_keep_screen_on_when_in_foreground_disabled">عاجز</string>
     <string name="entry_keep_screen_on_when_in_foreground_homepage_only">الصفحة الرئيسية فقط</string>
+    <string name="entry_launcher_icon_adaptive">رمز متكيّف</string>
+    <string name="entry_launcher_icon_transparent_background">رمز بخلفية شفافة</string>
     <string name="entry_night_mode_always_off">دائما خارج</string>
     <string name="entry_night_mode_always_on">دائما متاح</string>
     <string name="entry_night_mode_follow_system">اتبع النظام</string>
@@ -691,7 +695,9 @@
     <string name="text_latest_package">أحدث حزمة</string>
     <string name="text_launch_config">إطلاق التكوين</string>
     <string name="text_launch_debugger">إطلاق الأخطاء</string>
+    <string name="text_launcher_icon_title">رمز المشغّل</string>
     <string name="text_launcher_shortcuts">اختصارات المشغل</string>
+    <string name="text_launcher_shortcuts_may_be_lost_after_launcher_icon_changed">قد يؤدي تبديل رموز المشغّل على بعض الأجهزة إلى فقدان جميع اختصارات AutoJs6 الحالية, يرجى المتابعة بحذر</string>
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">فحص التصميم ...</string>
     <string name="text_licenses">تراخيص المصادر المفتوحة</string>
     <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">جارٍ تجربة حل بديل...</string>
@@ -1004,6 +1010,7 @@
     <string name="text_timed_task">مهمة توقيت</string>
     <string name="text_timed_task_timing">توقيت</string>
     <string name="text_tools">أدوات</string>
+    <string name="text_transparent_background_launcher_icon_may_not_take_effect">قد يتم تلقائيًا إخفاء رمز المشغّل بخلفية شفافة أو إضافة خلفية إليه بواسطة النظام, لذلك قد يختلف التأثير الفعلي بين الأجهزة المختلفة</string>
     <string name="text_tutorial">الدورة التعليمية</string>
     <string name="text_type">يكتب</string>
     <string name="text_unable_to_build_apk_as_autojs6_does_not_include_selected_abi">لا يمكن استخدام ABI المحدد \"%s\" لإنشاء تطبيق مجمع، لأن الإصدار الحالي من AutoJs6 لا يتضمن ABI أعلاه.</string>

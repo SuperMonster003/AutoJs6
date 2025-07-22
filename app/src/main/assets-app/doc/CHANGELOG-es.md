@@ -532,6 +532,7 @@
 * `Nuevo` Módulo notice (ver Documentos del Proyecto > [Notificaciones](https://docs.autojs6.com/#/notice))
 * `Nuevo` Módulo s13n (ver Documentos del Proyecto > [Estandarización](https://docs.autojs6.com/#/s13n))
 * `Nuevo` Módulo Color (ver Documentos del Proyecto > [Clase de Color](https://docs.autojs6.com/#/colorType))
+* `Nuevo` colors.setColorPaint método, para establecer el color del pincel android.graphics.Paint (consulte la documentación del proyecto > [Color Type](https://docs.autojs6.com/#/colorType?id=m-setpaintcolor))
 * `Nuevo` Funcionalidad de mantener la pantalla despierta en primer plano y opciones de configuración
 * `Nuevo` Lanzador de documentos adicional para una lectura independiente de la aplicación de documentos (opción para ocultar o mostrar en la configuración)
 * `Corrección` Problemas con la funcionalidad del método colors.toString
@@ -568,7 +569,7 @@
 * `Mejora` Soporte de arrastrar el área del título para mover la posición de la ventana flotante del console
 * `Mejora` Soporte para cierre automático de la ventana flotante del console después de un retraso tras terminar el script
 * `Mejora` Soporte para suavizar la fuente en la ventana de la actividad de la consola y en su ventana flotante
-* `Mejora` Soporte para parámetros de tiempo de espera (timeout) en métodos relacionados del módulo http
+* `Mejora` Soporte para parámetros de tiempo de espera (timeout) en los métodos relacionados con el módulo http
 * `Mejora` Soporte para degradar la versión de JDK en el script de construcción de Gradle (fallback)
 * `Mejora` Soporte para seleccionar automáticamente la versión adecuada de las herramientas de construcción según el tipo de plataforma y versión (limitado en cierto grado)
 * `Dependencia` Versión localizada de Auto.js APK Builder 1.0.3

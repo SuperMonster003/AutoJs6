@@ -77,6 +77,7 @@
     <string name="key_dialog_manage_all_files_permission" translatable="false">key_$_dialog_manage_all_files_permission</string>
     <string name="key_dialog_num_of_log_entries_exceeds_limit_for_sending" translatable="false">key_$_num_of_log_entries_exceeds_limit_for_sending</string>
     <string name="key_dialog_selected_abi_is_unavailable" translatable="false">key_$_dialog_selected_abi_is_unavailable</string>
+    <string name="key_dialog_transparent_background_launcher_icon" translatable="false">key_$_dialog_transparent_background_launcher_icon</string>
     <string name="key_display_over_other_apps" translatable="false">key_$_display_over_other_apps</string>
     <string name="key_documentation_source" translatable="false">key_$_documentation_source</string>
     <string name="key_documentation_source_local" translatable="false">key_$_documentation_source_local</string>
@@ -346,6 +347,7 @@
     <string name="dialog_button_use_palette">Use palette</string>
     <string name="dialog_button_version_histories">Histories</string>
     <string name="dialog_button_view_file">View File</string>
+    <string name="dialog_button_view_shortcuts">View shortcuts</string>
     <string name="dialog_title_color_details">Color details</string>
     <string name="dialog_title_color_palette">Color palette</string>
     <string name="dialog_title_theme_color_details">Theme color details</string>
@@ -923,7 +925,9 @@
     <string name="text_latest_package">Latest package</string>
     <string name="text_launch_config">Launch config</string>
     <string name="text_launch_debugger">Launch debugger</string>
+    <string name="text_launcher_icon_title">Launcher icon</string>
     <string name="text_launcher_shortcuts">Launcher shortcuts</string>
+    <string name="text_launcher_shortcuts_may_be_lost_after_launcher_icon_changed">Switching launcher icons on some devices may cause all existing AutoJs6 shortcuts to be lost, please proceed with caution</string>
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">Inspecting layout...</string>
     <string name="text_licenses">Open Sources Licenses</string>
     <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">Trying a fallback solution...</string>
@@ -1146,7 +1150,6 @@
     <string name="text_result">Result</string>
     <string name="text_revoke_autojs6_access_in_shizuku_app">Revoke AutoJs6 access in Shizuku app</string>
     <string name="text_root_mode_title">Force set root check</string>
-    <string name="text_launcher_icon_title">Launcher icon</string>
     <string name="text_run">Run</string>
     <string name="text_run_on_battery_change">On battery changed</string>
     <string name="text_run_on_boot">On booted</string>
@@ -1237,6 +1240,7 @@
     <string name="text_timed_task">Timed task</string>
     <string name="text_timed_task_timing">Timing</string>
     <string name="text_tools">Tools</string>
+    <string name="text_transparent_background_launcher_icon_may_not_take_effect">The transparent background launcher icon may be automatically masked or given a background by the system, so the actual effect may vary across different devices</string>
     <string name="text_tutorial">Tutorial</string>
     <string name="text_type">Type</string>
     <string name="text_unable_to_build_apk_as_autojs6_does_not_include_selected_abi">The selected ABI \"%s\" cannot be used to create a packaged application, because the current version of AutoJs6 does not include the above ABI.</string>

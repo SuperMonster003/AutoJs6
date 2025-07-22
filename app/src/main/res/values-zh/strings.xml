@@ -113,6 +113,7 @@
     <string name="dialog_button_use_palette">使用调色盘</string>
     <string name="dialog_button_version_histories">版本历史</string>
     <string name="dialog_button_view_file">查看文件</string>
+    <string name="dialog_button_view_shortcuts">查看快捷方式</string>
     <string name="dialog_title_color_details">颜色详情</string>
     <string name="dialog_title_color_palette">调色盘</string>
     <string name="dialog_title_theme_color_details">主题色详情</string>
@@ -690,7 +691,9 @@
     <string name="text_latest_package">最近包名</string>
     <string name="text_launch_config">运行配置</string>
     <string name="text_launch_debugger">启动调试</string>
+    <string name="text_launcher_icon_title">启动器图标</string>
     <string name="text_launcher_shortcuts">启动器快捷方式</string>
+    <string name="text_launcher_shortcuts_may_be_lost_after_launcher_icon_changed">部分设备切换启动器图标可能导致已创建的 AutoJs6 快捷方式全部丢失, 需谨慎操作</string>
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">布局分析中...</string>
     <string name="text_licenses">开源许可信息</string>
     <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">正在尝试备选方案...</string>
@@ -913,7 +916,6 @@
     <string name="text_result">结果</string>
     <string name="text_revoke_autojs6_access_in_shizuku_app">在 Shizuku 应用中撤销 AutoJs6 权限</string>
     <string name="text_root_mode_title">强制 Root 权限检查</string>
-    <string name="text_launcher_icon_title">启动器图标</string>
     <string name="text_run">运行</string>
     <string name="text_run_on_battery_change">电量变化时</string>
     <string name="text_run_on_boot">开机时</string>
@@ -1004,6 +1006,7 @@
     <string name="text_timed_task">定时任务</string>
     <string name="text_timed_task_timing">定时</string>
     <string name="text_tools">工具</string>
+    <string name="text_transparent_background_launcher_icon_may_not_take_effect">透明背景启动器图标可能被系统自动添加遮罩或背景, 因此不同设备的实际效果与预期可能不完全一致</string>
     <string name="text_tutorial">教程</string>
     <string name="text_type">类型</string>
     <string name="text_unable_to_build_apk_as_autojs6_does_not_include_selected_abi">选择的 ABI 架构 \"%s\" 无法用于创建打包应用, 因当前 AutoJs6 版本未包含上述 ABI 架构.</string>

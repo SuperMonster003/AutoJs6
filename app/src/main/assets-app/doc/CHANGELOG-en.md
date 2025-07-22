@@ -152,8 +152,8 @@
 
 ###### 2025/01/01
 
-* `Feature` Pinyin module for Chinese Pinyin conversion (Refer to Project Documentation > [Chinese Pinyin](https://docs.autojs6.com/#/pinyin))
-* `Feature` Pinyin4j module for Chinese Pinyin conversion (Refer to Project Documentation > [Chinese Pinyin](https://docs.autojs6.com/#/pinyin4j))
+* `Feature` Pinyin module for Chinese Pinyin conversion (Refer to project documentation > [Chinese Pinyin](https://docs.autojs6.com/#/pinyin))
+* `Feature` Pinyin4j module for Chinese Pinyin conversion (Refer to project documentation > [Chinese Pinyin](https://docs.autojs6.com/#/pinyin4j))
 * `Feature` Methods UiObject#isSimilar and UiObjectCollection#isSimilar for determining whether a control or a collection of controls is similar
 * `Feature` Global method "currentComponent", used to obtain the name information of the currently active component
 * `Fix` Issue where the project could not compile properly in certain environments due to a rollback to an earlier version
@@ -292,7 +292,7 @@
 
 ###### 2023/12/02
 
-* `Feature` opencc module (Refer to Project Documentation > [Chinese Conversion](https://docs.autojs6.com/#/opencc)) (Ref to [LZX284](https://github.com/SuperMonster003/AutoJs6/pull/187/files#diff-8cff73265af19c059547b76aca8882cbaa3209291406f52df1dafbbc78e80c46R268))
+* `Feature` opencc module (Refer to project documentation > [Chinese Conversion](https://docs.autojs6.com/#/opencc)) (Ref to [LZX284](https://github.com/SuperMonster003/AutoJs6/pull/187/files#diff-8cff73265af19c059547b76aca8882cbaa3209291406f52df1dafbbc78e80c46R268))
 * `Feature` UiSelector adds [plus](https://docs.autojs6.com/#/uiObjectType?id=m-plus) and [append](https://docs.autojs6.com/#/uiObjectType?id=m-append) methods _[`issue #115`](http://issues.autojs6.com/115)_
 * `Feature` Packaging application page adds support for filtering ABIs and libraries (Ref to [AutoX](https://github.com/kkevsekk1/AutoX)) _[`issue #189`](http://issues.autojs6.com/189)_
 * `Fix` Abnormally large file size issue in packaged applications (Ref to [AutoX](https://github.com/kkevsekk1/AutoX) / [LZX284](https://github.com/SuperMonster003/AutoJs6/pull/187/files#diff-d932ac49867d4610f8eeb21b59306e8e923d016cbca192b254caebd829198856R61)) _[`issue #176`](http://issues.autojs6.com/176)_
@@ -379,9 +379,9 @@
 
 * `Feature` ocr module supports Paddle Lite engine (by [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #120`](http://pr.autojs6.com/120)_
 * `Feature` Packaging function supports internal and external plugin packaging methods (by [LZX284](https://github.com/LZX284)) _[`pr #151`](http://pr.autojs6.com/151)_
-* `Feature` WebSocket module (Refer to Project Documentation > [WebSocket](https://docs.autojs6.com/#/webSocketType))
-* `Feature` barcode / qrcode modules (Refer to Project Documentation > [Barcode](https://docs.autojs6.com/#/barcode) / [QRCode](https://docs.autojs6.com/#/qrcode))
-* `Feature` shizuku module (Refer to Project Documentation > [Shizuku](https://docs.autojs6.com/#/shizuku)) and permission switch in home page drawer
+* `Feature` WebSocket module (Refer to project documentation > [WebSocket](https://docs.autojs6.com/#/webSocketType))
+* `Feature` barcode / qrcode modules (Refer to project documentation > [Barcode](https://docs.autojs6.com/#/barcode) / [QRCode](https://docs.autojs6.com/#/qrcode))
+* `Feature` shizuku module (Refer to project documentation > [Shizuku](https://docs.autojs6.com/#/shizuku)) and permission switch in home page drawer
 * `Feature` device.rotation / device.orientation methods
 * `Feature` Support for static property access of internal Java classes
 * `Feature` Support for selecting and switching application language in Android system settings page (Android 13 and above)
@@ -405,7 +405,7 @@
 * `Fix` Issue where using copy or export functions in log activity page might cause application crash
 * `Improvement` Renamed export function to send function and re-implemented meaningful export function in log activity page
 * `Improvement` Added automatic interception and prompt when entry count is too large for send function in log activity page
-* `Improvement` ocr module is compatible with both Google MLKit and Paddle Lite engines (Refer to Project Documentation > [Optical Character Recognition](https://docs.autojs6.com/#/ocr?id=p-mode))
+* `Improvement` ocr module is compatible with both Google MLKit and Paddle Lite engines (Refer to project documentation > [Optical Character Recognition](https://docs.autojs6.com/#/ocr?id=p-mode))
 * `Improvement` Increased the success rate of auto-starting accessibility service
 * `Improvement` Migrated Kotlin annotation processor from kapt to KSP
 * `Improvement` Build tools support IntelliJ Idea EAP versions
@@ -436,7 +436,7 @@
 
 * `Feature` Code commenting feature in code editor (by [little-alei](https://github.com/little-alei)) _[`pr #98`](http://pr.autojs6.com/98)_
 * `Feature` auto.stateListener for accessibility service connection status listening (by [little-alei](https://github.com/little-alei)) _[`pr #98`](http://pr.autojs6.com/98)_
-* `Feature` Added nextSibling / lastChild / offset methods to UiObject type (Refer to Project Documentation > [UiObject](https://docs.autojs6.com/#/uiObjectType))
+* `Feature` Added nextSibling / lastChild / offset methods to UiObject type (Refer to project documentation > [UiObject](https://docs.autojs6.com/#/uiObjectType))
 * `Fix` Issue where VSCode plugin could not parse data when script character total length exceeded four-decimal digits _[`issue #91`](http://issues.autojs6.com/91)_ _[`issue #93`](http://issues.autojs6.com/93)_ _[`issue #100`](http://issues.autojs6.com/100)_ _[`issue #109`](http://issues.autojs6.com/109)_
 * `Fix` Issue where VSCode plugin could not save file properly _[`issue #92`](http://issues.autojs6.com/91)_ _[`issue #94`](http://issues.autojs6.com/93)_
 * `Fix` Issue where clicking 'Manage Accessibility Service' in floating button menu might not trigger page navigation
@@ -449,14 +449,14 @@
 * `Improvement` Enhanced editor code commenting behavior, style, and cursor position handling based on _[`pr #98`](http://pr.autojs6.com/98)_
 * `Improvement` Added code commenting menu item based on _[`pr #98`](http://pr.autojs6.com/98)_
 * `Improvement` Adapted to VSCode plugin 1.0.6
-* `Improvement` Added level parameter support to UiObject#parent method (Refer to Project Documentation > [UiObject](https://docs.autojs6.com/#/uiObjectType))
+* `Improvement` Added level parameter support to UiObject#parent method (Refer to project documentation > [UiObject](https://docs.autojs6.com/#/uiObjectType))
 * `Dependency` Upgraded Gradle version from 8.2 -> 8.3-rc-1
 
 # v6.3.2
 
 ###### 2023/07/06
 
-* `Feature` crypto module (Refer to Project Documentation > [Crypto](https://docs.autojs6.com/#/crypto)) _[`issue #70`](http://issues.autojs6.com/70)_
+* `Feature` crypto module (Refer to project documentation > [Crypto](https://docs.autojs6.com/#/crypto)) _[`issue #70`](http://issues.autojs6.com/70)_
 * `Feature` Added textswitcher / viewswitcher / viewflipper / numberpicker / video / search controls to UI mode
 * `Feature` Added copy and export log functionalities to Log Activity Page _[`issue #76`](http://issues.autojs6.com/76)_
 * `Feature` Added IP address history feature to Client Mode
@@ -500,7 +500,7 @@
 * `Feature` Supports concise form for boolean type property values in UI mode (e.g., clickable="true" can be shortened to clickable or isClickable)
 * `Feature` Button control supports isColored and isBorderless boolean properties
 * `Feature` console.resetGlobalLogConfig method for resetting global log configuration
-* `Feature` web.newWebSocket method for creating WebSocket instance (Refer to Project Documentation > [Web](https://docs.autojs6.com/#/web?id=m-newwebsocket))
+* `Feature` web.newWebSocket method for creating WebSocket instance (Refer to project documentation > [Web](https://docs.autojs6.com/#/web?id=m-newwebsocket))
 * `Fix` Abnormal folder sorting in File Manager
 * `Fix` Issue where floaty module built floating window could not adjust style and position _[`issue #60`](http://issues.autojs6.com/60)_
 * `Fix` Issue where floaty module built floating window overlapped with system status bar
@@ -532,6 +532,7 @@
 * `Feature` notice module (refer to project documentation > [Message Notification](https://docs.autojs6.com/#/notice))
 * `Feature` s13n module (refer to project documentation > [Serialization](https://docs.autojs6.com/#/s13n))
 * `Feature` Color module (refer to project documentation > [Color Type](https://docs.autojs6.com/#/colorType))
+* `Feature` colors.setColorPaint method for setting android.graphics.Paint brush color (refer to project documentation > [Color Type](https://docs.autojs6.com/#/colorType?id=m-setpaintcolor))
 * `Feature` Keep the screen on functionality and setting options while in the foreground
 * `Feature` Additional documentation launcher for independent reading of application documents (support hiding or showing in settings)
 * `Fix` Abnormal function of colors.toString method
@@ -568,7 +569,7 @@
 * `Improvement` Support dragging title area to move window position for console floating window
 * `Improvement` Support automatic delayed closing after script ends for console floating window
 * `Improvement` Support adjusting font size with pinch-to-zoom for both console floating window and its Activity window
-* `Improvement` Support timeout parameter for http module related methods
+* `Improvement` Support timeout option parameter for http module related methods
 * `Improvement` Support active downgrade (fallback) of JDK version in Gradle build script
 * `Improvement` Support for Gradle build script to automatically select appropriate build tool versions based on platform type and version (to some extent)
 * `Dependency` Localized Auto.js APK Builder version 1.0.3

@@ -13,9 +13,14 @@ import android.util.AttributeSet
 import androidx.preference.PreferenceManager
 import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.extension.MaterialDialogExtensions.widgetThemeColor
 import org.autojs.autojs.external.shortcut.ShortcutActivity
 import org.autojs.autojs.theme.preference.MaterialListPreference
+import org.autojs.autojs.ui.common.NotAskAgainDialog
+import org.autojs.autojs.util.ClipboardUtils
+import org.autojs.autojs.util.ShortcutUtils
 import org.autojs.autojs.util.StringUtils.key
+import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 
 class LauncherIconPreference : MaterialListPreference, SharedPreferences.OnSharedPreferenceChangeListener {
@@ -45,13 +50,16 @@ class LauncherIconPreference : MaterialListPreference, SharedPreferences.OnShare
         val isComponentTransparent = isComponentEnabled(prefContext, ALIAS_TRANSPARENT_BACKGROUND)
         val isBeforeAndroidO = Build.VERSION.SDK_INT < Build.VERSION_CODES.O
         val shouldBeTransparent = isComponentTransparent || isBeforeAndroidO
-        val targetKey = if (shouldBeTransparent) {
-            prefContext.getString(R.string.key_launcher_icon_transparent_background)
-        } else {
-            prefContext.getString(R.string.key_launcher_icon_adaptive)
-        }
-        if (getPersistedString("") != targetKey) {
-            persistString(targetKey)
+        when (shouldBeTransparent) {
+            true -> R.string.key_launcher_icon_transparent_background
+            else -> R.string.key_launcher_icon_adaptive
+        }.also { resetIfNeeded(it) }
+    }
+
+    private fun resetIfNeeded(aimValueRes: Int) {
+        val aimValue = prefContext.getString(aimValueRes)
+        if (getPersistedString("") != aimValue) {
+            persistString(aimValue)
             notifyChanged()
         }
     }
@@ -61,13 +69,83 @@ class LauncherIconPreference : MaterialListPreference, SharedPreferences.OnShare
 
         when (dialog.items?.get(dialog.selectedIndex)?.toString()) {
             prefContext.getString(R.string.entry_launcher_icon_adaptive) -> {
-                switchComponent(prefContext, ALIAS_ADAPTIVE, ALIAS_TRANSPARENT_BACKGROUND)
+                showPromptAboutShortcutsLost {
+                    switchComponent(prefContext, ALIAS_ADAPTIVE, ALIAS_TRANSPARENT_BACKGROUND)
+                }
             }
             prefContext.getString(R.string.entry_launcher_icon_transparent_background) -> {
-                switchComponent(prefContext, ALIAS_TRANSPARENT_BACKGROUND, ALIAS_ADAPTIVE)
+                showPromptAboutTransparentBackground {
+                    showPromptAboutShortcutsLost {
+                        switchComponent(prefContext, ALIAS_TRANSPARENT_BACKGROUND, ALIAS_ADAPTIVE)
+                    }
+                }
             }
             else -> Unit
         }
+    }
+
+    private fun showPromptAboutTransparentBackground(callback: () -> Unit) {
+        NotAskAgainDialog.Builder(context, key(R.string.key_dialog_transparent_background_launcher_icon)).run {
+            title(R.string.text_prompt)
+            content(R.string.text_transparent_background_launcher_icon_may_not_take_effect)
+            widgetThemeColor()
+            negativeText(R.string.text_quit)
+            negativeColorRes(R.color.dialog_button_default)
+            onNegative { dialog, _ -> dialog.dismiss().also { resetIfNeeded(R.string.key_launcher_icon_adaptive) } }
+            positiveText(R.string.dialog_button_continue)
+            positiveColorRes(R.color.dialog_button_warn)
+            onPositive { dialog, _ -> dialog.dismiss().also { callback() } }
+            cancelable(false)
+            autoDismiss(false)
+            show()
+        } ?: callback()
+    }
+
+    private fun showPromptAboutShortcutsLost(callback: () -> Unit) {
+        val shortcuts = ShortcutUtils.getAllShortcutScriptPaths(context)
+        if (shortcuts.isEmpty()) {
+            callback()
+            return
+        }
+        NotAskAgainDialog.Builder(context, key(R.string.key_dialog_transparent_background_launcher_icon)).run {
+            title(R.string.text_prompt)
+            content(R.string.text_launcher_shortcuts_may_be_lost_after_launcher_icon_changed)
+            widgetThemeColor()
+            neutralText(R.string.dialog_button_view_shortcuts)
+            neutralColorRes(R.color.dialog_button_hint)
+            onNeutral { dialog, _ ->
+                MaterialDialog.Builder(context).run {
+                    title(R.string.text_launcher_shortcuts)
+                    items(shortcuts)
+                    itemsCallback { _, _, _, text ->
+                        true.also {
+                            ClipboardUtils.setClip(context, text)
+                            ViewUtils.showSnack(dialog.view, R.string.text_already_copied_to_clip, false)
+                        }
+                    }
+                    neutralText(R.string.dialog_button_copy)
+                    neutralColorRes(R.color.dialog_button_hint)
+                    onNeutral { dialog, _ ->
+                        ClipboardUtils.setClip(context, shortcuts.joinToString("\n"))
+                        ViewUtils.showSnack(dialog.view, R.string.text_already_copied_to_clip, false)
+                    }
+                    positiveText(R.string.dialog_button_dismiss)
+                    positiveColorRes(R.color.dialog_button_default)
+                    onPositive { dialog, _ -> dialog.dismiss() }
+                    autoDismiss(false)
+                    show()
+                }
+            }
+            negativeText(R.string.text_quit)
+            negativeColorRes(R.color.dialog_button_default)
+            onNegative { dialog, _ -> dialog.dismiss().also { syncValueWithCurrentComponent() } }
+            positiveText(R.string.dialog_button_continue)
+            positiveColorRes(R.color.dialog_button_caution)
+            onPositive { dialog, _ -> dialog.dismiss().also { callback() } }
+            cancelable(false)
+            autoDismiss(false)
+            show()
+        } ?: callback()
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) = notifyChanged()
