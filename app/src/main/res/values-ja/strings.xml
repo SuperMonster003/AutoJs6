@@ -78,6 +78,7 @@
     <string name="description_file_extensions_preference">AutoJs6のファイルエクスプローラーでファイル拡張子を表示するかどうかの設定に使用されます。</string>
     <string name="description_hidden_files_preference">AutoJs6 ファイルエクスプローラーで隠しファイルや隠しフォルダ (通常は「.」で始まる) を表示するかどうかを設定するために使用します</string>
     <string name="description_keep_screen_on_when_in_foreground_preference">AutoJs6 がフォアグラウンドにあるとき, デバイスの画面をオンにして明るく保つための設定です.\nAutoJs6 アプリケーションの全ページのうち, ホームページでのみ使用する場合は, \"ホームページのみ\" オプションを選択します</string>
+    <string name="description_launcher_icon_preference">ランチャーアイコンはアダプティブアイコンと従来の透過背景アイコンの表示モードに対応しています. 実際の表示効果はAndroidシステムによって異なる場合があります. 表示モードを切り替えた後, 反映されるまで数秒かかることがあります.</string>
     <string name="description_launcher_shortcuts">ショートカットは, AutoJs6 で特定のアクションを実行することができます. ユーザーは, サポートされているランチャーにこれらのショートカットを表示し, AutoJs6 アプリケーションのドキュメントを読んだり, AutoJs6 の設定ページを起動したりするなど, いくつかのタスクを素早く開始したり, アクティビティを起動したりすることができます</string>
     <string name="description_manage_ignored_updates_preference">クリックすると, リストアイテムを表示または管理できます.\nリストアイテムを削除するには, 長押しします</string>
     <string name="description_night_mode_preference">ナイトモード (ダークテーマとも呼ばれる) は, Android システムの UI と端末上で動作するアプリケーションの両方に適用され, 弱視のユーザーや明るい光に敏感なユーザーの視認性を向上させ, 誰でも簡単に暗い環境下で端末を使用できるようにします.\n\nフォローシステム AutoJs6 では, Android と同じ Night モードが設定できます.\n常にオン Android のシステム設定に関係なく, 常に Night モードが ON になります.\n常にオフ Android のシステム設定に関係なく, AutoJs6 はナイトモードをオフにします.\n\n注: Follow system オプションは, Android API Level 28 (Android 9) [P] 以上の場合のみです</string>
@@ -115,6 +116,7 @@
     <string name="dialog_button_use_palette">パレットを使う</string>
     <string name="dialog_button_version_histories">更新履歴</string>
     <string name="dialog_button_view_file">ファイルの表示</string>
+    <string name="dialog_button_view_shortcuts">ショートカットを表示</string>
     <string name="dialog_title_color_details">カラー詳細</string>
     <string name="dialog_title_color_palette">カラーパレット</string>
     <string name="dialog_title_theme_color_details">テーマカラー詳細</string>
@@ -141,6 +143,8 @@
     <string name="entry_keep_screen_on_when_in_foreground_all_pages">全ページ</string>
     <string name="entry_keep_screen_on_when_in_foreground_disabled">使用不可</string>
     <string name="entry_keep_screen_on_when_in_foreground_homepage_only">ホームページのみ</string>
+    <string name="entry_launcher_icon_adaptive">アダプティブアイコン</string>
+    <string name="entry_launcher_icon_transparent_background">透過背景アイコン</string>
     <string name="entry_night_mode_always_off">常にオフ</string>
     <string name="entry_night_mode_always_on">常にオン</string>
     <string name="entry_night_mode_follow_system">システムに従う</string>
@@ -690,7 +694,9 @@
     <string name="text_latest_package">最新のパッケージ</string>
     <string name="text_launch_config">コンフィグを起動する</string>
     <string name="text_launch_debugger">デバッガを起動する</string>
+    <string name="text_launcher_icon_title">ランチャーアイコン</string>
     <string name="text_launcher_shortcuts">ランチャーショートカット</string>
+    <string name="text_launcher_shortcuts_may_be_lost_after_launcher_icon_changed">一部のデバイスでランチャーアイコンを切り替えると既存の AutoJs6 ショートカットがすべて失われる可能性があります, 注意して操作してください</string>
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">レイアウトの検査中...</string>
     <string name="text_licenses">オープンソースライセンス</string>
     <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">バックアップ策を試しています...</string>
@@ -1003,6 +1009,7 @@
     <string name="text_timed_task">時間指定タスク</string>
     <string name="text_timed_task_timing">タイミング</string>
     <string name="text_tools">ツール</string>
+    <string name="text_transparent_background_launcher_icon_may_not_take_effect">透過背景ランチャーアイコンはシステムによって自動的にマスクされたり背景が追加されたりする場合があるため, 実際の効果はデバイスによって異なる場合があります</string>
     <string name="text_tutorial">チュートリアル</string>
     <string name="text_type">種類</string>
     <string name="text_unable_to_build_apk_as_autojs6_does_not_include_selected_abi">現在のバージョンの AutoJs6 には上記の ABI が含まれていないため, 選択した ABI \"%s\" を使用してパッケージ・アプリケーションを作成できません</string>

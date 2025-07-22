@@ -532,6 +532,7 @@
 * `新增` notice 模塊 (參閲 項目文檔 > [消息通知](https://docs.autojs6.com/#/notice))
 * `新增` s13n 模塊 (參閲 項目文檔 > [標準化](https://docs.autojs6.com/#/s13n))
 * `新增` Color 模塊 (參閲 項目文檔 > [顏色類](https://docs.autojs6.com/#/colorType))
+* `新增` colors.setColorPaint 方法, 用於設置 android.graphics.Paint 畫筆顏色 (參閲 項目文檔 > [顏色類](https://docs.autojs6.com/#/colorType?id=m-setpaintcolor))
 * `新增` 前台時保持屏幕常亮功能及設置選項
 * `新增` 額外的文檔啓動器 (launcher) 便於獨立閲讀應用文檔 (支持在設置中隱藏或顯示)
 * `修復` colors.toString 方法功能異常
@@ -568,7 +569,7 @@
 * `優化` 控制枱浮動窗口支持拖動標題區域移動窗口位置
 * `優化` 控制枱浮動窗口支持腳本結束後自動延遲關閉
 * `優化` 控制枱浮動窗口及其 Activity 活動窗口支持雙指縮放調整字體大小
-* `優化` http 模塊相關方法支持超時參數 (timeout)
+* `優化` http 模塊相關方法支持超時選項參數 (timeout)
 * `優化` Gradle 構建腳本支持 JDK 版本主動降級 (fallback)
 * `優化` Gradle 構建腳本支持根據平台類型及版本自動選擇合適的構建工具版本 (程度有限)
 * `依賴` 本地化 Auto.js APK Builder 版本 1.0.3

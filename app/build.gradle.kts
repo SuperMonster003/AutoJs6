@@ -19,7 +19,7 @@ val globalApplicationId = "org.autojs.autojs6"
 val sign = Sign("$rootDir/sign.properties")
 val versions = Versions("$rootDir/version.properties")
 
-val dimention = "channel"
+val flavorDimension = "channel"
 val flavorNameApp = "app"
 val flavorNameInrt = "inrt"
 val buildTypeDebug = "debug"
@@ -464,12 +464,12 @@ android {
         }
     }
 
-    flavorDimensions.add(dimention)
+    flavorDimensions.add(flavorDimension)
 
     productFlavors {
 
         create(flavorNameApp) {
-            dimension = dimention
+            dimension = flavorDimension
             versionCode = versions.appVersionCode
             versionName = versions.appVersionName
             buildConfigField("String", "CHANNEL", "\"$flavorNameApp\"")
@@ -487,7 +487,7 @@ android {
         }
 
         create(flavorNameInrt) {
-            dimension = dimention
+            dimension = flavorDimension
             applicationIdSuffix = ".$flavorNameInrt"
             minSdk = versions.sdkVersionMin
             targetSdk = versions.sdkVersionTargetInrt

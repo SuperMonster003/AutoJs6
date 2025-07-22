@@ -79,6 +79,7 @@
     <string name="description_file_extensions_preference">AutoJs6 파일 탐색기에서 파일 확장자 표시 여부를 설정하는 데 사용됩니다.</string>
     <string name="description_hidden_files_preference">AutoJs6 파일 탐색기에서 숨겨진 파일 및 폴더(보통 \".\" 로 시작)를 표시할지 여부를 설정하는 데 사용됩니다.</string>
     <string name="description_keep_screen_on_when_in_foreground_preference">AutoJs6 이 포그라운드에 있을 때 장치의 화면을 켜고 밝게 유지하기 위한 기본 설정입니다.\nAutoJs6 애플리케이션의 모든 페이지 중 홈페이지에서만 발생하도록 하려면 \"홈페이지만\" 옵션을 선택합니다.</string>
+    <string name="description_launcher_icon_preference">런처 아이콘은 어댑티브 아이콘과 기존 투명 배경 아이콘 두 가지 표시 모드를 지원합니다. 실제 표시 효과는 안드로이드 시스템별로 다를 수 있습니다. 표시 모드를 전환한 후 적용되기까지 몇 초가 걸릴 수 있습니다.</string>
     <string name="description_launcher_shortcuts">바로가기는 AutoJs6 에서 특정 작업을 수행할 수 있습니다. 사용자는 지원되는 런처에 이러한 바로가기를 표시하고 AutoJs6 애플리케이션 문서 읽기, AutoJs6 설정 페이지 실행 등과 같은 일부 작업을 빠르게 시작하거나 활동을 실행할 수 있습니다.</string>
     <string name="description_manage_ignored_updates_preference">목록 항목을 보거나 관리하려면 클릭하세요.\n목록 항목을 제거하려면 길게 누릅니다.</string>
     <string name="description_night_mode_preference">야간 모드 (다크 테마라고도 함) 는 Android 시스템 UI 와 장치에서 실행되는 앱 모두에 적용되어 저시력 사용자와 밝은 빛에 민감한 사용자의 가시성을 향상시키고 누구나 쉽게 장치를 사용할 수 있습니다. 저조도 환경에서.\n\n시스템 따르기: AutoJs6 에는 Android 시스템과 동일한 야간 모드 설정이 있습니다.\n항상 켜짐: AutoJs6 은 Android 시스템 설정에 관계없이 야간 모드를 유지합니다.\n항상 끄기: AutoJs6 은 야간 모드를 끈 상태로 유지합니다(Android 시스템 설정에 관계없이).\n\n참고: 팔로우 시스템 옵션은 Android API 레벨 28 (Android 9) [P] 이상에만 적용됩니다.</string>
@@ -116,6 +117,7 @@
     <string name="dialog_button_use_palette">팔레트 사용</string>
     <string name="dialog_button_version_histories">변경내역</string>
     <string name="dialog_button_view_file">파일 보기</string>
+    <string name="dialog_button_view_shortcuts">바로가기 보기</string>
     <string name="dialog_title_color_details">색상 세부정보</string>
     <string name="dialog_title_color_palette">색상 팔레트</string>
     <string name="dialog_title_theme_color_details">테마 색상 세부정보</string>
@@ -142,6 +144,8 @@
     <string name="entry_keep_screen_on_when_in_foreground_all_pages">모든 페이지</string>
     <string name="entry_keep_screen_on_when_in_foreground_disabled">장애가 있는</string>
     <string name="entry_keep_screen_on_when_in_foreground_homepage_only">홈페이지만</string>
+    <string name="entry_launcher_icon_adaptive">어댑티브 아이콘</string>
+    <string name="entry_launcher_icon_transparent_background">투명 배경 아이콘</string>
     <string name="entry_night_mode_always_off">항상 꺼져 있습니다</string>
     <string name="entry_night_mode_always_on">항상 켜져 있습니다</string>
     <string name="entry_night_mode_follow_system">시스템을 따르십시오</string>
@@ -691,7 +695,9 @@
     <string name="text_latest_package">최신 패키지</string>
     <string name="text_launch_config">구성을 시작하십시오</string>
     <string name="text_launch_debugger">디버거를 시작하십시오</string>
+    <string name="text_launcher_icon_title">런처 아이콘</string>
     <string name="text_launcher_shortcuts">런처 바로 가기</string>
+    <string name="text_launcher_shortcuts_may_be_lost_after_launcher_icon_changed">일부 기기에서 런처 아이콘을 변경하면 기존 AutoJs6 바로가기가 모두 삭제될 수 있으니 주의하십시오</string>
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">레이아웃 검사 ...</string>
     <string name="text_licenses">오픈 소스 라이센스</string>
     <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">대체 솔루션을 시도하는 중...</string>
@@ -1004,6 +1010,7 @@
     <string name="text_timed_task">시간이 정한 작업</string>
     <string name="text_timed_task_timing">타이밍</string>
     <string name="text_tools">도구</string>
+    <string name="text_transparent_background_launcher_icon_may_not_take_effect">투명 배경 런처 아이콘은 시스템에 의해 자동으로 마스킹되거나 배경이 추가될 수 있어 장치마다 실제 효과가 다를 수 있습니다</string>
     <string name="text_tutorial">지도 시간</string>
     <string name="text_type">유형</string>
     <string name="text_unable_to_build_apk_as_autojs6_does_not_include_selected_abi">현재 버전의 AutoJs6 에 위의 ABI 가 포함되어 있지 않으므로 선택한 ABI \"%s\" 를 사용하여 패키지 응용 프로그램을 만들 수 없습니다.</string>

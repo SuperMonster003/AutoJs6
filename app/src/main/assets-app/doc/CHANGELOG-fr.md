@@ -456,7 +456,7 @@
 
 ###### 2023/07/06
 
-* `Fonctionnalité` module crypto (voir Documentation du Projet > [Cryptage](https://docs.autojs6.com/#/crypto)) _[`issue #70`](http://issues.autojs6.com/70)_
+* `Fonctionnalité` module crypto (voir documentation du projet > [Cryptage](https://docs.autojs6.com/#/crypto)) _[`issue #70`](http://issues.autojs6.com/70)_
 * `Fonctionnalité` Mode UI ajoute des contrôles tels que textswitcher / viewswitcher / viewflipper / numberpicker / video / search
 * `Fonctionnalité` Ajout des fonctionnalités de copie et d'exportation des journaux sur la page d'activité des journaux _[`issue #76`](http://issues.autojs6.com/76)_
 * `Fonctionnalité` Le mode client ajoute une fonction d'historique des adresses IP
@@ -500,7 +500,7 @@
 * `Fonctionnalité` Support des valeurs de propriété booléennes sous forme abrégée (ex. clickable="true" peut être abrégé en clickable ou isClickable)
 * `Fonctionnalité` Support des propriétés booléennes isColored et isBorderless pour les contrôles button
 * `Fonctionnalité` La méthode console.resetGlobalLogConfig réinitialise la configuration globale des journaux
-* `Fonctionnalité` La méthode web.newWebSocket crée une instance de WebSocket (voir Documentation du Projet > [Web](https://docs.autojs6.com/#/web?id=m-newwebsocket))
+* `Fonctionnalité` La méthode web.newWebSocket crée une instance de WebSocket (voir documentation du projet > [Web](https://docs.autojs6.com/#/web?id=m-newwebsocket))
 * `Correction` Problème de tri des dossiers dans le gestionnaire de fichiers
 * `Correction` Problème où la fenêtre flottante du module floaty ne peut pas ajuster le style et la position _[`issue #60`](http://issues.autojs6.com/60)_
 * `Correction` Problème de chevauchement de la fenêtre flottante du module floaty avec la barre d'état du système
@@ -528,10 +528,11 @@
 
 ###### 2023/04/29
 
-* `Fonctionnalité` module ocr (voir Documentation du Projet > [Reconnaissance Optique de Caractères](https://docs.autojs6.com/#/ocr)) _[`issue #8`](http://issues.autojs6.com/8)_
-* `Fonctionnalité` module notice (voir Documentation du Projet > [Notifications](https://docs.autojs6.com/#/notice))
-* `Fonctionnalité` module s13n (voir Documentation du Projet > [Standardisation](https://docs.autojs6.com/#/s13n))
-* `Fonctionnalité` module Color (voir Documentation du Projet > [Type de Couleur](https://docs.autojs6.com/#/colorType))
+* `Fonctionnalité` module ocr (voir documentation du projet > [Reconnaissance Optique de Caractères](https://docs.autojs6.com/#/ocr)) _[`issue #8`](http://issues.autojs6.com/8)_
+* `Fonctionnalité` module notice (voir documentation du projet > [Notifications](https://docs.autojs6.com/#/notice))
+* `Fonctionnalité` module s13n (voir documentation du projet > [Standardisation](https://docs.autojs6.com/#/s13n))
+* `Fonctionnalité` module Color (voir documentation du projet > [Type de Couleur](https://docs.autojs6.com/#/colorType))
+* `Fonctionnalité` colors.setColorPaint méthode, pour définir la couleur du pinceau android.graphics.Paint (voir la documentation du projet > [Color Type](https://docs.autojs6.com/#/colorType?id=m-setpaintcolor))
 * `Fonctionnalité` Support de maintien de l'écran allumé en avant-plan et options de configuration
 * `Fonctionnalité` Ajout d'une application de lecture indépendante de la documentation
 * `Correction` Problème dans la méthode colors.toString
@@ -559,16 +560,16 @@
 * `Amélioration` Affichage de la date de modification des fichiers et dossiers dans la page de gestion des fichiers
 * `Amélioration` Support de la mémorisation du type de tri dans la page de gestion des fichiers
 * `Amélioration` Ajout de sections sur la compilation et construction du projet et sur les outils d'aide au développement des scripts dans README.md _[`issue #33`](http://issues.autojs6.com/33)_
-* `Amélioration` Support d'autres formats pour le paramètre d'option de région dans les méthodes du module images (voir Documentation du Projet > [Types Omnipotents](https://docs.autojs6.com/#/omniTypes?id=omniregion))
+* `Amélioration` Support d'autres formats pour le paramètre d'option de région dans les méthodes du module images (voir documentation du projet > [Types Omnipotents](https://docs.autojs6.com/#/omniTypes?id=omniregion))
 * `Amélioration` Support de pages abrégées additionnelles (comme pref/homepage/docs/about) pour app.startActivity
-* `Amélioration` Ancrage des méthodes globales du module web au module lui-même pour améliorer l'utilisabilité (voir Documentation du Projet > [Web](https://docs.autojs6.com/#/web))
+* `Amélioration` Ancrage des méthodes globales du module web au module lui-même pour améliorer l'utilisabilité (voir documentation du projet > [Web](https://docs.autojs6.com/#/web))
 * `Amélioration` Support par la méthode web.newInjectableWebView des options de configuration WebView par défaut pour une meilleure fonctionnalité
 * `Amélioration` Ajout de plusieurs méthodes de conversion et utilitaires dans le module colors, ajout de constantes statiques supplémentaires et de noms de couleurs pouvant être directement utilisés comme paramètres
 * `Amélioration` Ajout de plusieurs méthodes de configuration de la fenêtre flottante du module console et support de l'unification des styles de fenêtre via un constructeur build
 * `Amélioration` Support du déplacement de la fenêtre flottante du module console via le glissement de la zone de titre
 * `Amélioration` Support de la fermeture automatique retardée de la fenêtre flottante du module console après la fin du script
 * `Amélioration` Support du zoom à deux doigts pour ajuster la taille de la police dans la fenêtre flottante et dans l'Activité du module console
-* `Amélioration` Support du paramètre de délai d'expiration (timeout) dans les méthodes associées au module http
+* `Amélioration` Support du paramètre d'option de délai d'attente (timeout) pour les méthodes liées au module http
 * `Amélioration` Support de la réduction proactive de la version JDK dans les scripts de construction Gradle en cas de besoin
 * `Amélioration` Support de la sélection automatique de la version appropriée des outils de construction selon le type et la version de la plateforme dans les scripts de construction Gradle (dans la mesure du possible)
 * `Dépendance` Intégration de la version localisée 1.0.3 de Auto.js APK Builder

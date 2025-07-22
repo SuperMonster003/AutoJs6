@@ -12,5 +12,6 @@
   "jdk_min_supported": 17,
   "jdk_min_suggested": 19,
   "jdk_max_supported": 24,
-  "var_date_jdk_max_supported": "%CURRENT_DATE%"
+  "var_date_jdk_max_supported": "%CURRENT_DATE%",
+  "var_date_active_maintenance_phase_statistics_since_when": "%CURRENT_DATE%"
 }

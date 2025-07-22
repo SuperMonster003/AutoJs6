@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.7.0": {
-      "released_date": "2025/07/18",
+      "released_date": "2025/07/22",
       "feature": [
         "zip 模块, 用于文件压缩与解压缩操作 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (参阅 项目文档 > [Zip](https://docs.autojs6.com/#/zip))",
         "mediainfo 模块, 用于查看媒体文件的详细信息 (参阅 项目文档 > [媒体信息](https://docs.autojs6.com/#/mediainfo))",

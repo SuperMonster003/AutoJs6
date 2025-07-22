@@ -8,7 +8,7 @@ encoding = locale.getpreferredencoding()
 if encoding.lower() != 'utf-8':
     # 强制使用 UTF-8 编码
     locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
-    # 如果 locale 无法设置，使用以下方式
+    # 如果 locale 无法设置, 使用以下方式
     # sys.stdout.reconfigure(encoding='utf-8')
     # sys.stderr.reconfigure(encoding='utf-8')
 
@@ -83,7 +83,7 @@ def format_date(date_str, lang_code):
             date_obj = datetime.strptime(date_str, "%Y/%m/%d")
             formatted_date = date_obj.strftime(date_formats[lang_code])
 
-            # 在 formatted_date 中每个非字母和非数字字符前后增加空格（如果没有空格）
+            # 在 formatted_date 中每个非字母和非数字字符前后增加空格 (如果没有空格)
             formatted_date_with_spaces = re.sub(r'(\d+)', r' \1 ', formatted_date).strip()
             # 将数字与逗号之间的空格去除
             formatted_date_with_spaces = re.sub(r'(\d)\s+,', r'\1,', formatted_date_with_spaces)
@@ -115,6 +115,26 @@ def init_languages():
             for key, value in merged_data.items():
                 if key.startswith('var_date_'):
                     merged_data[key] = format_date(value, language_code)
+
+            # 计算活跃维护年数
+            def calc_years_from(date_str: str) -> str:
+                try:
+                    since_date = datetime.strptime(date_str, "%Y/%m/%d")
+                    days = (datetime.now() - since_date).days
+                    return f"{days / 365:.2f}"      # 始终保留两位小数
+                except ValueError:
+                    return date_str                 # 日期格式异常时保持原值
+
+            maintenance_map = {
+                "data_active_maintenance_phase_tonyjiangwj_auto_js_since_date": "2019/11/21",
+                "data_active_maintenance_phase_supermonster003_autojs6_since_date": "2021/12/01",
+                "data_active_maintenance_phase_aiselp_autox_since_date": "2024/04/21",
+            }
+
+            # 自动遍历 merged_data, 处理所有 *_since_date 键
+            for since_key, since_date in maintenance_map.items():
+                target_key = since_key[:-len('_since_date')]   # 去掉后缀
+                merged_data[target_key] = calc_years_from(since_date)
 
             # 渲染动态字符串
             language_content_map[language_code] = render_dynamic_strings(merged_data, merged_data)

@@ -602,6 +602,7 @@
         "notice 모듈 (참조 프로젝트 문서 > [메시지 알림](https://docs.autojs6.com/#/notice))",
         "s13n 모듈 (참조 프로젝트 문서 > [표준화](https://docs.autojs6.com/#/s13n))",
         "Color 모듈 (참조 프로젝트 문서 > [색상 클래스](https://docs.autojs6.com/#/colorType))",
+        "colors.setColorPaint 메서드, android.graphics.Paint 브러시 색상을 설정하기 위한 기능 (프로젝트 문서 > [Color Type](https://docs.autojs6.com/#/colorType?id=m-setpaintcolor) 참조)",
         "화면을 항상 켜두는 기능 및 설정 옵션",
         "독립적으로 애플리케이션 문서를 읽을 수 있는 추가 런처 (설정에서 숨기기 또는 표시 가능)"
       ],
@@ -642,7 +643,7 @@
         "콘솔 플로팅 윈도우에서 제목 영역을 드래그하여 윈도우 위치 이동 지원",
         "콘솔 플로팅 윈도우가 스크립트 종료 후 자동 지연 종료 지원",
         "콘솔 플로팅 윈도우 및 해당 Activity 윈도우가 두 손가락으로 글꼴 크기 조정 지원",
-        "http 모듈 관련 메서드가 타임아웃 파라미터 (timeout) 지원",
+        "http 모듈 관련 메서드는 타임아웃 옵션 매개변수 (timeout) 를 지원",
         "Gradle 빌드 스크립트가 JDK 버전 강제 다운그레이드를 지원 (fallback)",
         "Gradle 빌드 스크립트가 플랫폼 유형 및 버전에 따라 자동으로 적합한 빌드 도구 버전을 선택 (한정된 범위 내에서)"
       ],
