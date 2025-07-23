@@ -160,29 +160,32 @@ class LauncherIconPreference : MaterialListPreference, SharedPreferences.OnShare
         )
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
             ctx.getSystemService(ShortcutManager::class.java)?.let { sm ->
-                sm.pinnedShortcuts.mapNotNull { shortcutInfo ->
-                    ShortcutInfo.Builder(ctx, shortcutInfo.id).apply {
-                        shortcutInfo.intent?.let {
-                            it.component?.let { component ->
-                                setActivity(ComponentName(component.packageName, component.className))
+                sm.pinnedShortcuts
+                    .filterNot { it.isDeclaredInManifest }
+                    .filterNot { Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && it.isImmutable }
+                    .mapNotNull { shortcutInfo ->
+                        ShortcutInfo.Builder(ctx, shortcutInfo.id).apply {
+                            shortcutInfo.intent?.let {
+                                it.component?.let { component ->
+                                    setActivity(ComponentName(component.packageName, component.className))
+                                } ?: run {
+                                    setActivity(ComponentName(ctx, ShortcutActivity::class.java))
+                                }
+                                setIntent(it)
                             } ?: run {
                                 setActivity(ComponentName(ctx, ShortcutActivity::class.java))
+                                setIntent(Intent(ctx, ShortcutActivity::class.java))
                             }
-                            setIntent(it)
-                        } ?: run {
-                            setActivity(ComponentName(ctx, ShortcutActivity::class.java))
-                            setIntent(Intent(ctx, ShortcutActivity::class.java))
-                        }
-                        (shortcutInfo.shortLabel ?: shortcutInfo.longLabel)?.let {
-                            setShortLabel(it)
-                        }
-                        (shortcutInfo.longLabel ?: shortcutInfo.shortLabel)?.let {
-                            setLongLabel(it)
-                        }
-                    }.build()
-                }.takeUnless { it.isEmpty() }?.let { toUpdate ->
-                    sm.updateShortcuts(toUpdate)
-                }
+                            (shortcutInfo.shortLabel ?: shortcutInfo.longLabel)?.let {
+                                setShortLabel(it)
+                            }
+                            (shortcutInfo.longLabel ?: shortcutInfo.shortLabel)?.let {
+                                setLongLabel(it)
+                            }
+                        }.build()
+                    }.takeUnless { it.isEmpty() }?.let { toUpdate ->
+                        sm.updateShortcuts(toUpdate)
+                    }
             }
         }
 

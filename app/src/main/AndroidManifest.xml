@@ -231,6 +231,10 @@
 
             </intent-filter>
 
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/app_shortcuts" />
+
         </activity-alias>
 
         <activity-alias
@@ -247,6 +251,10 @@
                 <category android:name="${intentCategory}" />
 
             </intent-filter>
+
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/app_shortcuts" />
 
         </activity-alias>
 
