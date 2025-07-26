@@ -374,7 +374,8 @@ dependencies /* MLKit */ {
 
 dependencies /* OpenCC */ {
     // OpenCC
-    implementation("com.github.qichuan:android-opencc:1.2.0")
+    // implementation("com.github.qichuan:android-opencc:1.2.0")
+    implementation("com.github.brooklet:android-opencc:1.2.2")
 }
 
 dependencies /* Auto.js Extensions */ {
