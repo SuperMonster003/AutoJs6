@@ -209,8 +209,7 @@
         <activity
             android:name="org.autojs.autojs.ui.splash.SplashActivity"
             android:exported="true"
-            android:theme="@style/AppTheme.Splash"
-            >
+            android:theme="@style/AppTheme.Splash">
             <meta-data
                 android:name="android.app.shortcuts"
                 android:resource="@xml/app_shortcuts" />
@@ -747,6 +746,15 @@
         <meta-data
             android:name="moe.shizuku.client.V3_SUPPORT"
             android:value="true" />
+
+        <!-- @Hint by SuperMonster003 on Jul 25, 2025. -->
+        <!--  ! -->
+        <!--  ! This provider is explicitly excluded and manually initialized in org.autojs.autojs.App. -->
+        <!--  ! zh-CN: 此 provider 被显式排除, 并在 org.autojs.autojs.App 手动初始化. -->
+        <provider
+            android:name="com.google.mlkit.common.internal.MlKitInitProvider"
+            android:authorities="${applicationId}.mlkitinitprovider"
+            tools:node="remove" />
 
     </application>
 
