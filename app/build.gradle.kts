@@ -7,10 +7,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.io.FileInputStream
 import java.io.FileNotFoundException
 import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import java.util.Properties
-import java.util.TimeZone
+import java.util.*
 import java.util.zip.CRC32
 import kotlin.text.RegexOption.IGNORE_CASE
 
@@ -133,7 +130,8 @@ dependencies /* Unclassified */ {
     implementation("androidx.preference:preference-ktx:1.2.1")
 
     // RootShell
-    implementation("com.github.Stericson:RootShell:1.6")
+    // implementation("com.github.Stericson:RootShell:1.6")
+    implementation(project(":libs:root-shell-1.6"))
 
     // JDeferred
     implementation("org.jdeferred:jdeferred-android-aar:1.2.6")

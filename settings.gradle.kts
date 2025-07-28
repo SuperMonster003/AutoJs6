@@ -29,6 +29,8 @@ private val libs = listOf(
 
     "markwon-core-4.6.2",
     "markwon-syntax-highlight-4.6.2",
+
+    "root-shell-1.6",
 )
 
 include(
