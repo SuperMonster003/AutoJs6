@@ -47,7 +47,7 @@ class Loopers(val scriptRuntime: ScriptRuntime) : MessageQueue.IdleHandler {
                 synchronized(mLock) {
                     try {
                         try {
-                        mLock.wait()
+                            mLock.wait()
                         } finally {
                             mLock.notify()
                         }
@@ -129,7 +129,7 @@ class Loopers(val scriptRuntime: ScriptRuntime) : MessageQueue.IdleHandler {
         } else {
             if (!shouldQuitLooper()) return true
         }
-                looper.quit()
+        looper.quit()
         return true
     }
 
@@ -151,9 +151,9 @@ class Loopers(val scriptRuntime: ScriptRuntime) : MessageQueue.IdleHandler {
                 do if (!iterator.hasNext()) return true
                 while (iterator.next().shouldQuit())
 
-                        return false
-                    }
-                }
+                return false
+            }
+        }
     }
 
     private fun initServantThread() {

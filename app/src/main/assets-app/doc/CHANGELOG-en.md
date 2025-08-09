@@ -299,7 +299,7 @@
 * `Fix` Issue where packaged applications cannot display and print some exception messages
 * `Fix` Issue where selecting application icon on packaging application page might show empty icon
 * `Fix` Context not initialized exception when packaging application includes MLKit Google OCR library
-* `Fix` ocr.<u>mlkit/ocr</u>.<u>recognizeText/detect</u> methods not working
+* `Fix` ocr.recognizeText/detect methods not working
 * `Fix` Mismatch between displayed language and application setting language for some texts (such as log page)
 * `Fix` Text overflow issue in home page drawer switch items for some languages
 * `Fix` Issue where accessibility service automatically closes immediately after being enabled on some devices without any prompt messages _[`issue #181`](http://issues.autojs6.com/181)_
@@ -309,7 +309,7 @@
 * `Fix` Issue where app.startActivity cannot use shorthand parameters _[`issue #182`](http://issues.autojs6.com/182)_ _[`issue #188`](http://issues.autojs6.com/188)_
 * `Fix` Issue where code throws exception when imported class name conflicts with global variable using importClass _[`issue #185`](http://issues.autojs6.com/185)_
 * `Fix` Issue where accessibility service cannot be used on Android 7.x
-* `Fix` Issue where runtime.<u>loadJar/loadDex</u> methods might not work properly on Android 14 (attempted fix)
+* `Fix` Issue where runtime.loadJar/loadDex methods might not work properly on Android 14 (attempted fix)
 * `Fix` Issue where 'Layout Bounds Analysis' and 'Layout Hierarchy Analysis' are unavailable in Android system quick settings panel _[`issue #193`](http://issues.autojs6.com/193)_
 * `Fix` Issue where auto-update check might cause application [ANR](https://developer.android.com/topic/performance/vitals/anr) (attempted fix) _[`issue #186`](http://issues.autojs6.com/186)_
 * `Fix` Issue where file manager cannot return to workspace path page after clicking 'Up' button in example code folder _[`issue #129`](http://issues.autojs6.com/129)_

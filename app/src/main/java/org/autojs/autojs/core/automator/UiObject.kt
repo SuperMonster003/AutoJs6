@@ -63,7 +63,7 @@ open class UiObject(
                 // @Dubious by SuperMonster003 on May 26, 2022.
                 //  ! May lead to poor performance?
                 //  ! zh-CN: 可能导致性能不佳?
-                (0 until childCount).firstOrNull { child(it) == node } ?: -1
+                (0 until childCount).firstOrNull { getChild(it) == node } ?: -1
             } ?: 0)
         }
     }.onFailure {

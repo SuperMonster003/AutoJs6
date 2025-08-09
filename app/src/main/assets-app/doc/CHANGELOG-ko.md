@@ -299,7 +299,7 @@
 * `수정` 번들 앱이 일부 예외 메시지를 표시하지 못하고 인쇄하지 않는 문제
 * `수정` 번들 앱 페이지에서 앱 아이콘을 선택한 후 빈 아이콘이 표시될 수 있는 문제
 * `수정` 번들 앱이 MLKit Google OCR 라이브러리를 포함할 때 발생할 수 있는 초기화되지 않은 컨텍스트 예외
-* `수정` ocr.<u>mlkit/ocr</u>.<u>recognizeText/detect</u> 메소드가 작동하지 않는 문제
+* `수정` ocr.recognizeText/detect 메소드가 작동하지 않는 문제
 * `수정` 일부 텍스트 (로그 페이지 등) 의 언어가 앱 설정 언어와 일치하지 않는 문제
 * `수정` 홈페이지 드로워 스위치 항목에서 일부 언어가 글자 넘침 현상이 발생할 수 있는 문제
 * `수정` 일부 장치에서 접근성 서비스가 켜진 후 즉시 자동으로 꺼지고 아무 메시지도 표시되지 않는 문제 _[`issue #181`](http://issues.autojs6.com/181)_
@@ -309,7 +309,7 @@
 * `수정` app.startActivity 에서 약칭 매개변수를 사용할 수 없는 문제 _[`issue #182`](http://issues.autojs6.com/182)_ _[`issue #188`](http://issues.autojs6.com/188)_
 * `수정` importClass 를 사용할 때 클래스 이름이 전역 변수와 충돌하면 코드가 예외를 발생시키는 문제 _[`issue #185`](http://issues.autojs6.com/185)_
 * `수정` Android 7.x 에서 접근성 서비스를 사용할 수 없는 문제
-* `수정` Android 14 에서 runtime.<u>loadJar/loadDex</u> 메소드가 정상적으로 작동하지 않는 문제 (시도됨)
+* `수정` Android 14 에서 runtime.loadJar/loadDex 메소드가 정상적으로 작동하지 않는 문제 (시도됨)
 * `수정` 안드로이드 시스템의 빠른 설정 패널에서 "레이아웃 범위 분석" 및 "레이아웃 계층 분석"을 사용할 수 없는 문제 _[`issue #193`](http://issues.autojs6.com/193)_
 * `수정` 자동 업데이트 검사가 앱 [ANR](https://developer.android.com/topic/performance/vitals/anr) 을 유발할 수 있는 문제 (시도됨) _[`issue #186`](http://issues.autojs6.com/186)_
 * `수정` 파일 관리자에서 샘플 코드 폴더 클릭 후 '위로' 버튼을 클릭 시 작업 디렉터리 페이지로 돌아가지 않는 문제 _[`issue #129`](http://issues.autojs6.com/129)_

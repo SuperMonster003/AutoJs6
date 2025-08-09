@@ -299,7 +299,7 @@
 * `修復` 打包應用無法顯示並列印部分異常訊息的問題
 * `修復` 打包應用頁面選擇應用圖示後可能顯示空圖示的問題
 * `修復` 打包應用包含 MLKit Google OCR 庫時可能出現的上下文未初始化異常
-* `修復` ocr.<u>mlkit/ocr</u>.<u>recognizeText/detect</u> 方法無效的問題
+* `修復` ocr.recognizeText/detect 方法無效的問題
 * `修復` 部分文字 (如日誌頁面) 顯示語言與應用設定語言可能不相符的問題
 * `修復` 部分語言在主頁抽屜開關項可能出現文字溢位的問題
 * `修復` 部分裝置無障礙服務開啟後立即自動關閉且無任何提示訊息的問題 _[`issue #181`](http://issues.autojs6.com/181)_
@@ -309,7 +309,7 @@
 * `修復` app.startActivity 無法使用簡稱引數的問題 _[`issue #182`](http://issues.autojs6.com/182)_ _[`issue #188`](http://issues.autojs6.com/188)_
 * `修復` importClass 匯入的類名與全域性變數衝突時程式碼丟擲異常的問題 _[`issue #185`](http://issues.autojs6.com/185)_
 * `修復` Android 7.x 無法使用無障礙服務的問題
-* `修復` Android 14 可能無法正常使用 runtime.<u>loadJar/loadDex</u> 方法的問題 (試修)
+* `修復` Android 14 可能無法正常使用 runtime.loadJar/loadDex 方法的問題 (試修)
 * `修復` 安卓系統快速設定面板中 "佈局範圍分析" 和 "佈局層次分析" 不可用的問題 _[`issue #193`](http://issues.autojs6.com/193)_
 * `修復` 自動檢查更新功能可能導致應用 [ANR](https://developer.android.com/topic/performance/vitals/anr) 的問題 (試修) _[`issue #186`](http://issues.autojs6.com/186)_
 * `修復` 檔案管理器示例程式碼資料夾點選 "向上" 按鈕後無法回到工作路徑頁面的問題 _[`issue #129`](http://issues.autojs6.com/129)_
