@@ -299,7 +299,7 @@
 * `Corrección` Problema en el que el paquete de la aplicación no muestra o imprime ciertos mensajes de error
 * `Corrección` Problema de ícono vacío después de seleccionar el ícono de la aplicación en la página de empaquetado
 * `Corrección` Problema de excepción de contexto no inicializado al incluir la biblioteca OCR de Google MLKit en el paquete
-* `Corrección` Problema de métodos inoperativos ocr.<u>mlkit/ocr</u>.<u>recognizeText/detect</u>
+* `Corrección` Problema de métodos inoperativos ocr.recognizeText/detect
 * `Corrección` Problema en el que algunos textos (como la página de registros) no coinciden con el idioma de configuración de la aplicación
 * `Corrección` Problema de desbordamiento de texto en el interruptor del cajón de la página de inicio en ciertos idiomas
 * `Corrección` Problema de servicios de accesibilidad que se cierran inmediatamente sin ningún mensaje en ciertos dispositivos _[`issue #181`](http://issues.autojs6.com/181)_
@@ -309,7 +309,7 @@
 * `Corrección` Problema de uso de parámetros abreviados en app.startActivity _[`issue #182`](http://issues.autojs6.com/182)_ _[`issue #188`](http://issues.autojs6.com/188)_
 * `Corrección` Problema de conflicto de nombres con importClass que causa una excepción _[`issue #185`](http://issues.autojs6.com/185)_
 * `Corrección` Problema de uso inoperativo del servicio de accesibilidad en Android 7.x
-* `Corrección` Problema de uso inoperativo de runtime.<u>loadJar/loadDex</u> en Android 14 (solución tentativa)
+* `Corrección` Problema de uso inoperativo de runtime.loadJar/loadDex en Android 14 (solución tentativa)
 * `Corrección` Problema de inoperatibilidad de "análisis de rango de diseño" y "análisis de jerarquía de diseño" en el panel de configuraciones rápidas de Android _[`issue #193`](http://issues.autojs6.com/193)_
 * `Corrección` Problema de potencial ANR causado por la función de comprobación automática de actualizaciones (solución tentativa) _[`issue #186`](http://issues.autojs6.com/186)_
 * `Corrección` Problema en el gestor de archivos al regresar a la página de ruta de trabajo después de hacer clic en "hacia arriba" en la carpeta de ejemplo

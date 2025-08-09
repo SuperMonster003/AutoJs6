@@ -36,7 +36,7 @@ object PinyinCore {
 
     /**
      * @param hansArg 要转为拼音的目标字符串 (汉字).
-     * @param options 可选, 用于指定拼音风格, 是否启用多音字.
+     * @param options 可选, 用于指定拼音风格, 是否启用多音字等.
      * @return 返回的拼音列表.
      */
     fun convert(hansArg: String, options: NativeObject = newNativeObject()): MutableList<List<String>> {

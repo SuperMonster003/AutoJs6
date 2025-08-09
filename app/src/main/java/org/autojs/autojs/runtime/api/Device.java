@@ -281,8 +281,9 @@ public class Device {
     }
 
     public void cancelKeepingAwake() {
-        if (mWakeLock != null && mWakeLock.isHeld())
+        if (mWakeLock != null && mWakeLock.isHeld()) {
             mWakeLock.release();
+        }
     }
 
     public void vibrate(long millis) {

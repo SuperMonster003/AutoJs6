@@ -23,6 +23,10 @@ import org.autojs.autojs.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.extension.ArrayExtensions.toNativeArray
 import org.autojs.autojs.extension.FlexibleArray
+import org.autojs.autojs.extension.FlexibleArray.Companion.component1
+import org.autojs.autojs.extension.FlexibleArray.Companion.component2
+import org.autojs.autojs.extension.FlexibleArray.Companion.component3
+import org.autojs.autojs.extension.FlexibleArray.Companion.component4
 import org.autojs.autojs.extension.ScriptableExtensions.prop
 import org.autojs.autojs.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.pio.PFile
@@ -138,20 +142,23 @@ class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                 return ResponseWrapper(newCall.execute()).wrap()
             }
 
+            scriptRuntime.loopers.waitWhenIdle(true)
             newCall.enqueue(object : Callback {
                 override fun onResponse(call: Call, response: Response) {
                     val wrappedResponse = ResponseWrapper(response).wrap()
                     cont?.resume(wrappedResponse)
-                    if (callback is BaseFunction) withRhinoContext { cx ->
-                        callback.call(cx, callback, callback, arrayOf(wrappedResponse, null))
+                    if (callback is BaseFunction) {
+                        scriptRuntime.bridges.call(callback, callback, arrayOf(wrappedResponse, null))
                     }
+                    scriptRuntime.loopers.waitWhenIdle(false)
                 }
 
                 override fun onFailure(call: Call, e: IOException) {
                     cont?.resumeError(e)
-                    if (callback is BaseFunction) withRhinoContext { cx ->
-                        callback.call(cx, callback, callback, arrayOf(null, e))
+                    if (callback is BaseFunction) {
+                        scriptRuntime.bridges.call(callback, callback, arrayOf(null, e))
                     }
+                    scriptRuntime.loopers.waitWhenIdle(false)
                 }
             })
             cont?.await()

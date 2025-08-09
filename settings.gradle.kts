@@ -61,17 +61,11 @@ pluginManagement {
     // @Signature Pair<Gradle Version, Embedded Compatible Kotlin Version>
     // @Reference gradle-<version>-src.zip\gradle\dependency-management\kotlin-version.properties
     // @Reference https://docs.gradle.org/current/userguide/compatibility.html#kotlin
-    // @Updated by SuperMonster003 on May 12, 2025.
+    // @Updated by SuperMonster003 on Aug 9, 2025.
     val embeddedKotlin: List<Pair<String, String>> = listOf(
-
-        /* Unofficial. */
-
-        "9.0" to "2.1.21", /* May 17, 2025. */
-        "8.14" to "2.1.10",
-        "8.13" to "2.1.10",
-
-        /* Official. */
-
+        "9.0" to "2.2.0",
+        "8.14" to "2.1.10", /* Unofficial. */
+        "8.13" to "2.1.10", /* Unofficial. */
         "8.12" to "2.0.21",
         "8.11" to "2.0.20",
         "8.10" to "1.9.24",
@@ -88,13 +82,7 @@ pluginManagement {
     // @Reference https://docs.gradle.org/current/userguide/compatibility.html#java_runtime
     // @Updated by SuperMonster003 on May 12, 2025.
     val javaGradleCompatibility = listOf(
-
-        /* Unofficial. */
-
-        25 to "9.0",
-
-        /* Official. */
-
+        25 to "9.0", /* Unofficial. */
         24 to "8.14",
         23 to "8.10",
         22 to "8.8",
@@ -107,8 +95,10 @@ pluginManagement {
 
     // @Signature Pair<Android Gradle Plugin Version, Min Required Gradle Version>
     // @Reference https://developer.android.com/build/releases/gradle-plugin#updating-gradle
-    // @Updated by SuperMonster003 on May 13, 2025.
+    // @Updated by SuperMonster003 on Aug 9, 2025.
     val agpGradleCompatibility: List<Pair<String, String>> = listOf(
+        "8.12" to "8.13",
+        "8.11" to "8.13",
         "8.10" to "8.11.1",
         "8.9" to "8.11.1",
         "8.8" to "8.10.2",
@@ -125,10 +115,11 @@ pluginManagement {
     )
 
     // @Reference https://developer.android.com/reference/tools/gradle-api
-    // @Updated by SuperMonster003 on Jun 7, 2025.
+    // @Updated by SuperMonster003 on Aug 9, 2025.
     val agpReleases: List<String> = listOf(
-        "8.12.0-alpha04", /* Jun 7, 2025. */
-        "8.11.0-rc01", /* Jun 7, 2025. */
+        "8.13.0-alpha04", /* Aug 9, 2025. */
+        "8.12.0", /* Aug 9, 2025. */
+        "8.11.1", /* Aug 9, 2025. */
         "8.10.1", /* Jun 7, 2025. */
         "8.9.3", /* May 17, 2025. */
         "8.8.2",
@@ -220,18 +211,18 @@ pluginManagement {
             val androidStudio = object : Platform(
                 name = "AndroidStudio", vendor = "Google",
                 // @Reference https://developer.android.com/studio/releases#android_gradle_plugin_and_android_studio_compatibility
-                // @Updated by SuperMonster003 on May 13, 2025.
+                // @Updated by SuperMonster003 on Aug 9, 2025.
                 agpVersionMap = mapOf(
-                    "2025.1" to "8.10.1", /* Jun 7, 2025. */
-                    "2024.3" to "8.9.3", /* May 17, 2025. */
-                    "2024.2" to "8.7.3", /* Jan 13, 2025. */
-                    "2024.1" to "8.5.2", /* Aug 30, 2024. */
-                    "2023.3" to "8.4.2", /* Mar 28, 2024. */
-                    "2023.2" to "8.3.2", /* Feb 14, 2024. */
-                    "2023.1" to "8.2.2", /* Feb 6, 2024. */
-                    "2022.3" to "8.1.4", /* Mar 31, 2024. */
-                    "2022.2" to "8.0.2", /* May 26, 2023. */
-                    "2022.1" to "7.4.2", /* Mar 25, 2023. */
+                    "2025.1" to "8.11", /* Jun 7, 2025. */
+                    "2024.3" to "8.9", /* May 17, 2025. */
+                    "2024.2" to "8.7", /* Jan 13, 2025. */
+                    "2024.1" to "8.5", /* Aug 30, 2024. */
+                    "2023.3" to "8.4", /* Mar 28, 2024. */
+                    "2023.2" to "8.3", /* Feb 14, 2024. */
+                    "2023.1" to "8.2", /* Feb 6, 2024. */
+                    "2022.3" to "8.1", /* Mar 31, 2024. */
+                    "2022.2" to "8.0", /* May 26, 2023. */
+                    "2022.1" to "7.4", /* Mar 25, 2023. */
                 ),
                 // @Updated by SuperMonster003 on May 13, 2025.
                 kotlinVersionMap = mapOf(
@@ -282,8 +273,10 @@ pluginManagement {
 
             val intelliJIdea = object : Platform(
                 name = "IntelliJIdea", vendor = "Jetbrains",
-                // @Updated by SuperMonster003 on Apr 23, 2025.
+                // @Reference AGP Upgrade Assistant integrated within JetBrains IntelliJ IDEA.
+                // @Updated by SuperMonster003 on Aug 10, 2025.
                 agpVersionMap = mapOf(
+                    "2025.2" to "8.11.0", /* Aug 10, 2025. */
                     "2025.1" to "8.10.1", /* Jun 7, 2025. */
                     "2024.3.1" to "8.7.3", /* Dec 10, 2024. */
                     "2024.3" to "8.7.0-rc01", /* Nov 15, 2024. */
@@ -371,13 +364,19 @@ pluginManagement {
         )
 
         // @Reference https://github.com/google/ksp/releases
-        // @Updated by SuperMonster003 on May 13, 2025.
+        // @Updated by SuperMonster003 on Aug 9, 2025.
         val kspVersionMap = mapOf(
-            "2.2.0-RC2" to "2.0.1", /* Jun 6, 2025. */
+            "2.2.20-Beta2" to "2.0.2", /* Aug 1, 2025. */
+            "2.2.20-Beta1" to "2.0.2", /* Jul 11, 2025. */
+            "2.2.10-RC2" to "2.0.2", /* Aug 7, 2025. */
+            "2.2.10-RC" to "2.0.2", /* Jul 25, 2025. */
+            "2.2.0" to "2.0.2", /* Jun 25, 2025. */
+            "2.2.0-RC3" to "2.0.2", /* Jun 17, 2025. */
+            "2.2.0-RC2" to "2.0.2", /* Jun 11, 2025. */
             "2.2.0-RC" to "2.0.1", /* May 17, 2025. */
             "2.2.0-Beta2" to "2.0.1", /* May 2, 2025. */
             "2.2.0-Beta1" to "2.0.0", /* Apr 17, 2025. */
-            "2.1.21" to "2.0.1", /* May 17, 2025. */
+            "2.1.21" to "2.0.2", /* Jun 10, 2025. */
             "2.1.21-RC2" to "2.0.1", /* May 2, 2025. */
             "2.1.21-RC" to "2.0.0", /* Apr 18, 2025. */
             "2.1.20" to "2.0.1", /* May 1, 2025. */
@@ -385,50 +384,57 @@ pluginManagement {
             "2.1.20-RC2" to "1.0.31", /* Mar 7, 2025. */
             "2.1.20-RC" to "1.0.31", /* Feb 28, 2025. */
             "2.1.20-Beta2" to "1.0.30", /* Feb 15, 2025. */
-            "2.1.20-Beta1" to "1.0.29", /* Dec 25, 2024. */
+            "2.1.20-Beta1" to "1.0.29", /* Dec 21, 2024. */
             "2.1.10" to "1.0.31", /* Feb 28, 2025. */
+            "2.1.10-RC2" to "1.0.29", /* Jan 22, 2025. */
             "2.1.10-RC" to "1.0.29", /* Jan 10, 2025. */
             "2.1.0" to "1.0.29", /* Nov 28, 2024. */
-            "2.1.0-RC2" to "1.0.29", /* Jan 22, 2025. */
+            "2.1.0-RC2" to "1.0.28", /* Nov 20, 2024. */
             "2.1.0-RC" to "1.0.27", /* Nov 8, 2024. */
             "2.1.0-Beta2" to "1.0.26", /* Oct 26, 2024. */
-            "2.1.0-Beta1" to "1.0.25", /* Sep 25, 2024. */
+            "2.1.0-Beta1" to "1.0.25", /* Sep 19, 2024. */
             "2.0.21" to "1.0.28", /* Nov 16, 2024. */
-            "2.0.21-RC" to "1.0.25", /* Oct 4, 2024. */
-            "2.0.20" to "1.0.25", /* Sep 7, 2024. */
-            "2.0.20-RC2" to "1.0.24", /* Aug 24, 2024. */
-            "2.0.20-RC" to "1.0.24", /* Aug 8, 2024. */
-            "2.0.20-Beta2" to "1.0.23", /* Aug 8, 2024. */
-            "2.0.20-Beta1" to "1.0.22", /* Aug 8, 2024. */
-            "2.0.10" to "1.0.24", /* Aug 8, 2024. */
-            "2.0.10-RC2" to "1.0.24", /* Aug 8, 2024. */
-            "2.0.10-RC" to "1.0.23", /* Aug 8, 2024. */
-            "2.0.0" to "1.0.24", /* Aug 8, 2024. */
-            "2.0.0-RC3" to "1.0.20", /* May 24, 2024. */
-            "2.0.0-RC2" to "1.0.20", /* May 24, 2024. */
-            "2.0.0-RC1" to "1.0.20", /* May 24, 2024. */
-            "2.0.0-Beta5" to "1.0.20", /* May 24, 2024. */
-            "2.0.0-Beta4" to "1.0.19", /* May 24, 2024. */
-            "2.0.0-Beta3" to "1.0.17", /* May 24, 2024. */
-            "2.0.0-Beta2" to "1.0.16", /* May 24, 2024. */
-            "2.0.0-Beta1" to "1.0.15", /* May 24, 2024. */
-            "1.9.25" to "1.0.20", /* Aug 8, 2024. */
-            "1.9.24" to "1.0.20", /* May 14, 2024. */
-            "1.9.23" to "1.0.20", /* Apr 6, 2024. */
-            "1.9.22" to "1.0.17", /* Jan 20, 2024. */
-            "1.9.21" to "1.0.15", /* Dec 2, 2023. */
-            "1.9.20" to "1.0.14", /* Nov 9, 2023. */
+            "2.0.21-RC" to "1.0.25", /* Oct 2, 2024. */
+            "2.0.20" to "1.0.25", /* Sep 6, 2024. */
+            "2.0.20-RC2" to "1.0.24", /* Aug 14, 2024. */
+            "2.0.20-RC" to "1.0.24", /* Jul 31, 2024. */
+            "2.0.20-Beta2" to "1.0.23", /* Jul 12, 2024. */
+            "2.0.20-Beta1" to "1.0.22", /* Jun 21, 2024. */
+            "2.0.10" to "1.0.24", /* Aug 7, 2024. */
+            "2.0.10-RC2" to "1.0.24", /* Jul 30, 2024. */
+            "2.0.10-RC" to "1.0.23", /* Jul 12, 2024. */
+            "2.0.0" to "1.0.24", /* Jul 30, 2024. */
+            "2.0.0-RC3" to "1.0.20", /* May 14, 2024. */
+            "2.0.0-RC2" to "1.0.20", /* Apr 30, 2024. */
+            "2.0.0-RC1" to "1.0.20", /* Apr 11, 2024. */
+            "2.0.0-Beta5" to "1.0.20", /* Apr 5, 2024. */
+            "2.0.0-Beta4" to "1.0.19", /* Mar 8, 2024. */
+            "2.0.0-Beta3" to "1.0.17", /* Jan 20, 2024. */
+            "2.0.0-Beta2" to "1.0.16", /* Dec 20, 2023. */
+            "2.0.0-Beta1" to "1.0.15", /* Nov 28, 2023. */
+            "1.9.25" to "1.0.20", /* Jul 24, 2024. */
+            "1.9.24" to "1.0.20", /* May 8, 2024. */
+            "1.9.23" to "1.0.20", /* Apr 5, 2024. */
+            "1.9.22" to "1.0.17", /* Jan 19, 2024. */
+            "1.9.21" to "1.0.16", /* Dec 14, 2023. */
+            "1.9.20" to "1.0.14", /* Nov 3, 2023. */
             "1.9.20-RC2" to "1.0.13", /* Oct 26, 2023. */
             "1.9.20-RC" to "1.0.13", /* Oct 12, 2023. */
-            "1.9.20-Beta2" to "1.0.13", /* Sep 29, 2023. */
+            "1.9.20-Beta2" to "1.0.13", /* Sep 22, 2023. */
             "1.9.20-Beta" to "1.0.13", /* Sep 12, 2023. */
-            "1.9.10" to "1.0.13", /* Sep 11, 2023. */
-            "1.9.0" to "1.0.13", /* Aug 16, 2023. */
-            "1.9.0-RC" to "1.0.11", /* Aug 16, 2023. */
-            "1.8.21" to "1.0.11", /* Aug 16, 2023. */
-            "1.8.20-RC2" to "1.0.9", /* Aug 16, 2023. */
-            "1.8.0" to "1.0.9", /* Aug 16, 2023. */
-            "1.8.0-RC2" to "1.0.8", /* Aug 16, 2023. */
+            "1.9.10" to "1.0.13", /* Aug 24, 2023. */
+            "1.9.0" to "1.0.13", /* Aug 3, 2023. */
+            "1.9.0-RC" to "1.0.11", /* Jun 22, 2023. */
+            "1.9.0-Beta" to "1.0.11", /* May 24, 2023. */
+            "1.8.22" to "1.0.11", /* Jun 9, 2023. */
+            "1.8.21" to "1.0.11", /* Apr 27, 2023. */
+            "1.8.20" to "1.0.11", /* Apr 18, 2023. */
+            "1.8.20-RC2" to "1.0.9", /* Mar 24, 2023. */
+            "1.8.20-RC" to "1.0.9", /* Mar 9, 2023. */
+            "1.8.20-Beta" to "1.0.9", /* Feb 9, 2023. */
+            "1.8.10" to "1.0.9", /* Feb 3, 2023. */
+            "1.8.0" to "1.0.9", /* Jan 26, 2023. */
+            "1.8.0-RC2" to "1.0.8", /* Dec 21, 2022. */
         )
 
         abstract inner class Platform(

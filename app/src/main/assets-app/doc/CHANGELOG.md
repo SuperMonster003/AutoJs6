@@ -19,6 +19,7 @@
 * `修复` Android 10 UiObject#child 方法可能出现 ArrayIndexOutOfBoundsException 异常的问题 _[`issue #416`](http://issues.autojs6.com/416)_
 * `修复` 打包应用无法正常使用 Paddle OCR 与 Rapid OCR 功能的问题
 * `修复` 版本历史页面部分系统因字体差别导致统计数据显示不完整的问题
+* `修复` 部分设备无法正常初始化 MLKit Google OCR 的问题 (试修) _[`issue #8`](http://issues.autojs6.com/8#issuecomment-3117061768)_
 * `修复` ErrorDialogActivity 可能无法正常启动的问题 _[`issue #414`](http://issues.autojs6.com/414)_ _[`issue #340`](http://issues.autojs6.com/340#issuecomment-2973485826)_
 * `修复` 崩溃报告页面复制详细信息功能失效的问题
 * `优化` http 模块相关方法支持不安全选项参数 (isInsecure/insecure), 用于忽略证书相关异常 _[`issue #417`](http://issues.autojs6.com/417)_
@@ -42,6 +43,7 @@
 * `依赖` 升级 Androidx AppCompat 版本 1.7.0 -> 1.7.1
 * `依赖` 升级 Material Progressbar 版本 1.4.2 -> 1.6.1
 * `依赖` 升级 Androidx Room 版本 2.7.1 -> 2.7.2
+* `依赖` 升级 OpenCC 版本 1.2.0 -> 1.2.2
 
 # v6.6.4
 
@@ -338,7 +340,7 @@
 * `修复` 打包应用无法显示并打印部分异常消息的问题
 * `修复` 打包应用页面选择应用图标后可能显示空图标的问题
 * `修复` 打包应用包含 MLKit Google OCR 库时可能出现的上下文未初始化异常
-* `修复` ocr.<u>mlkit/ocr</u>.<u>recognizeText/detect</u> 方法无效的问题
+* `修复` ocr.recognizeText/detect 方法无效的问题
 * `修复` 部分文本 (如日志页面) 显示语言与应用设置语言可能不相符的问题
 * `修复` 部分语言在主页抽屉开关项可能出现文本溢出的问题
 * `修复` 部分设备无障碍服务开启后立即自动关闭且无任何提示消息的问题 _[`issue #181`](http://issues.autojs6.com/181)_
@@ -348,7 +350,7 @@
 * `修复` app.startActivity 无法使用简称参数的问题 _[`issue #182`](http://issues.autojs6.com/182)_ _[`issue #188`](http://issues.autojs6.com/188)_
 * `修复` importClass 导入的类名与全局变量冲突时代码抛出异常的问题 _[`issue #185`](http://issues.autojs6.com/185)_
 * `修复` Android 7.x 无法使用无障碍服务的问题
-* `修复` Android 14 可能无法正常使用 runtime.<u>loadJar/loadDex</u> 方法的问题 (试修)
+* `修复` Android 14 可能无法正常使用 runtime.loadJar/loadDex 方法的问题 (试修)
 * `修复` 安卓系统快速设置面板中 "布局范围分析" 和 "布局层次分析" 不可用的问题 _[`issue #193`](http://issues.autojs6.com/193)_
 * `修复` 自动检查更新功能可能导致应用 [ANR](https://developer.android.com/topic/performance/vitals/anr) 的问题 (试修) _[`issue #186`](http://issues.autojs6.com/186)_
 * `修复` 文件管理器示例代码文件夹点击 "向上" 按钮后无法回到工作路径页面的问题 _[`issue #129`](http://issues.autojs6.com/129)_
