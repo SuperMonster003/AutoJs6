@@ -125,15 +125,17 @@ def init_languages():
                 except ValueError:
                     return date_str                 # 日期格式异常时保持原值
 
-            maintenance_map = {
-                "data_active_maintenance_phase_tonyjiangwj_auto_js_since_date": "2019/11/21",
-                "data_active_maintenance_phase_supermonster003_autojs6_since_date": "2021/12/01",
-                "data_active_maintenance_phase_aiselp_autox_since_date": "2024/04/21",
+            since_date_map = {
+                "tonyjiangwj_auto_js": "2019/11/21",
+                "supermonster003_autojs6": "2021/12/01",
+                "aiselp_autox": "2024/04/21",
+                "ozobiozobi_autox_ozobi": "2024/10/01",
+                "autox_community_autox": "2025/03/30",
             }
 
-            # 自动遍历 merged_data, 处理所有 *_since_date 键
-            for since_key, since_date in maintenance_map.items():
-                target_key = since_key[:-len('_since_date')]   # 去掉后缀
+            # 添加 since_date 数据到 merged_data
+            for since_key, since_date in since_date_map.items():
+                target_key = f"data_active_maintenance_phase_{since_key}"
                 merged_data[target_key] = calc_years_from(since_date)
 
             # 渲染动态字符串
