@@ -153,10 +153,12 @@ open class RhinoJavaScriptEngine(private val mAndroidContext: android.content.Co
     }
 
     private inner class WrapFactory : org.mozilla.javascript.WrapFactory() {
-
+        init {
+            isJavaPrimitiveWrap = false
+        }
+  
         override fun wrap(cx: Context, scope: Scriptable, obj: Any?, staticType: Class<*>?): Any? {
             return when {
-                obj is String -> runtime.bridges.toString(obj.toString())
                 staticType == UiObjectCollection::class.java -> runtime.bridges.asArray(obj)
                 else -> super.wrap(cx, scope, obj, staticType)
             }
