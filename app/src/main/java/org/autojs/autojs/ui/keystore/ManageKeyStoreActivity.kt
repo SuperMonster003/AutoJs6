@@ -7,7 +7,6 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.annotation.StringRes
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -38,9 +37,7 @@ class ManageKeyStoreActivity : BaseActivity() {
 
     companion object {
         fun startActivity(context: Context) {
-            Intent(context, ManageKeyStoreActivity::class.java).apply {}.also {
-                ContextCompat.startActivity(context, it, null)
-            }
+            context.startActivity(Intent(context, ManageKeyStoreActivity::class.java))
         }
     }
 

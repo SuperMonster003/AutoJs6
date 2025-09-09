@@ -206,9 +206,9 @@ class UiSelector : UiGlobalSelector {
     public override fun idStartsWith(prefix: String): UiGlobalSelector {
         if (!prefix.contains(":")) {
             addFilter(object : Filter {
-                override fun filter(nodeInfo: UiObject): Boolean {
+                override fun filter(node: UiObject): Boolean {
                     val fullIdPrefix = mAccessibilityBridge.getInfoProvider().latestPackage + ":id/" + prefix
-                    val id = nodeInfo.getViewIdResourceName()
+                    val id = node.getViewIdResourceName()
                     return id != null && id.startsWith(fullIdPrefix)
                 }
 

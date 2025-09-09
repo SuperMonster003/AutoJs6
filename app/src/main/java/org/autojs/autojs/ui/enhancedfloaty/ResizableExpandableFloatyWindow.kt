@@ -47,7 +47,7 @@ open class ResizableExpandableFloatyWindow(private var floaty: ResizableExpandab
         val windowView = View.inflate(service, R.layout.ef_expandable_floaty_container, null).apply {
             isFocusableInTouchMode = true
         }
-        mViewSwitcher = windowView.findViewById<ViewSwitcher?>(R.id.container).also { switcher ->
+        mViewSwitcher = windowView.findViewById<ViewSwitcher>(R.id.container).also { switcher ->
             switcher.measureAllChildren = false
             ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).let { params ->
                 switcher.addView(mCollapsedView, params)

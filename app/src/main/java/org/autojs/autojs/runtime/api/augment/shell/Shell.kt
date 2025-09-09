@@ -400,7 +400,7 @@ class Shell(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntim
 
         data class CommandArgumentsData(val arguments: String = "", val withRoot: Boolean = false, val withExit: Boolean = false)
 
-        data class CommandData(val command: String, @IntRange(0, 1) val withRoot: Int = 0)
+        data class CommandData(val command: String, val withRoot: Int = 0)
 
     }
 

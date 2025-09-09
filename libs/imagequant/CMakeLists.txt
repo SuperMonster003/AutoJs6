@@ -26,7 +26,8 @@ target_include_directories(pngquant_bridge PRIVATE
     external/libpng)
 
 target_link_libraries(pngquant_bridge
+    jnigraphics         # Android NDK 库，用于从本地代码访问位图像素
     imagequant          # libimagequant 静态库
     png_static          # libpng 静态库
-    ${ZLIB_LIB}         # zlib.so
-    log)                # __android_log_print
+    ${ZLIB_LIB}         # zlib.so - libpng 使用的压缩库
+    log)                # Android 日志库，用于本地代码调试

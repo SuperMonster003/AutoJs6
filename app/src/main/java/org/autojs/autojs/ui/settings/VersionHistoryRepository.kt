@@ -88,7 +88,7 @@ class VersionHistoryRepository {
 
         private val regexValidMarkdownVersion = Regex("""^#\s+v[\d.]+\S*""")
 
-        enum class Category(@StringRes val labelRes: Int, val priority: Int) {
+        enum class Category(val labelRes: Int, val priority: Int) {
             HINT(R.string.changelog_label_hint, -2),
             FEATURE(R.string.changelog_label_feature, 3),
             FIX(R.string.changelog_label_fix, 2),
