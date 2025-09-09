@@ -32,7 +32,7 @@ class RoundCheckboxWithText : LinearLayout {
 
         mCheckbox = findViewById<CheckBox>(R.id.checkbox).also { it.isChecked = isChecked }
         mTextView = findViewById<TextView>(R.id.text).also { it.text = text }
-        mWrapper = findViewById<LinearLayout?>(R.id.wrapper).also {
+        mWrapper = findViewById<LinearLayout>(R.id.wrapper).also {
             it.setOnClickListener { if (isEnabled) mCheckbox.toggle() }
         }
     }

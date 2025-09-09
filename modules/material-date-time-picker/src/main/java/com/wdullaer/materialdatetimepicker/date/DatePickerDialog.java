@@ -56,6 +56,7 @@ import java.util.TimeZone;
 /**
  * Dialog allowing users to select a date.
  */
+@SuppressWarnings("unchecked")
 public class DatePickerDialog extends AppCompatDialogFragment implements
         OnClickListener, DatePickerController {
 
@@ -321,7 +322,6 @@ public class DatePickerDialog extends AppCompatDialogFragment implements
             currentView = savedInstanceState.getInt(KEY_CURRENT_VIEW);
             listPosition = savedInstanceState.getInt(KEY_LIST_POSITION);
             listPositionOffset = savedInstanceState.getInt(KEY_LIST_POSITION_OFFSET);
-            //noinspection unchecked
             highlightedDays = (HashSet<Calendar>) savedInstanceState.getSerializable(KEY_HIGHLIGHTED_DAYS);
             mThemeDark = savedInstanceState.getBoolean(KEY_THEME_DARK);
             mThemeDarkChanged = savedInstanceState.getBoolean(KEY_THEME_DARK_CHANGED);

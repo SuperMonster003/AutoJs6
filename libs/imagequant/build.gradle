@@ -40,7 +40,11 @@ android {
         externalNativeBuild {
             cmake {
                 cppFlags "-std=c++17"
-                cFlags "-ljnigraphics"
+
+                // @Hint by SuperMonster003 on Aug 28, 2025.
+                //  ! Moved into `target_link_libraries(pngquant_bridge ...)` in `CMakeLists.txt`.
+                //  ! zh-CN: 移至 `CMakeLists.txt` 文件 `target_link_libraries(pngquant_bridge ...)` 代码中.
+                //  # cFlags "-ljnigraphics"
             }
         }
 
