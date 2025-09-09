@@ -66,7 +66,7 @@
   "li_major_changes_multilingual_support": "多言語対応 [ 西 / 仏 / 露 / 阿 / 日 / 韓 / 英 / 簡中 / 繁中 / ... ]",
   "li_major_changes_new_modules": "新モジュール [ [base64](https://docs.autojs6.com/#/base64) / [crypto](https://docs.autojs6.com/#/crypto) / [sqlite](https://docs.autojs6.com/#/sqlite) / [i18n](https://docs.autojs6.com/#/i18n) / [notice](https://docs.autojs6.com/#/notice) / [ocr](https://docs.autojs6.com/#/ocr) / [opencc](https://docs.autojs6.com/#/opencc) / [qrcode](https://docs.autojs6.com/#/qrcode) / [shizuku](https://docs.autojs6.com/#/shizuku) / ... ]",
   "li_major_changes_night_mode_support": "ナイトモード対応 [ 設定ページ / ドキュメントページ / レイアウト分析ページ / 浮動ウィンドウ / ... ]",
-  "li_major_changes_rhino_engine_upgrade": "[Rhino](https://github.com/mozilla/rhino/)エンジンが [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) から {{ latest_rhino_engine_name_with_github_lineno_address }} にアップグレードされました",
+  "li_major_changes_rhino_engine_upgrade": "[Rhino](https://github.com/mozilla/rhino/)エンジンが [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) から {{ latest_rhino_engine_name_with_github_lineno_address }} ({{ var_date_rhino_engine_latest_committed }} 更新) にアップグレードされました",
   "li_major_changes_shizuku_adb_privileges_support": "[Shizuku](https://shizuku.rikka.app/introduction/)経由でADB特権を取得し, システムAPIを使用可能",
   "li_major_changes_theme_color_support": "テーマカラーの適応 [ グループ化 / ロケーション / 検索 / 履歴 / 明るさとコントラストの自動適応 / ... ]",
   "li_major_changes_vscode_plugin_support": "[VSCodeプラグイン](http://vscext-project.autojs6.com)がクライアント (LAN)とサーバ (LAN/ADB)接続方法をサポート",

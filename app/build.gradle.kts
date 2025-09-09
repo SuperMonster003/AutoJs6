@@ -43,7 +43,13 @@ dependencies /* Unclassified */ {
     implementation(kotlin("reflect"))
 
     // Androidx Core
-    implementation("androidx.core:core-ktx:1.16.0")
+    implementation("androidx.core:core-ktx") {
+        because("Compatibility for Android Gradle plugin 8.2.2")
+        version {
+            strictly("1.15.0")
+            because("Exception on newer versions: Dependency 'androidx.core:core:1.16.0' requires Android Gradle plugin 8.6.0 or higher")
+        }
+    }
 
     // LeakCanary
     debugImplementation("com.squareup.leakcanary:leakcanary-android:2.14")
@@ -74,7 +80,7 @@ dependencies /* Unclassified */ {
     implementation("de.psdev.licensesdialog:licensesdialog:2.2.0")
 
     // Apache Commons
-    implementation("org.apache.commons:commons-lang3:3.17.0")
+    implementation("org.apache.commons:commons-lang3:3.18.0")
 
     // Retrofit
     implementation("com.squareup.retrofit2:retrofit:2.12.0")
@@ -657,6 +663,7 @@ android {
         }
     }
 
+    @Suppress("DEPRECATION")
     kotlinOptions {
         jvmTarget = versions.javaVersion.toString()
         // freeCompilerArgs = listOf("-Xjvm-default=all-compatibility")
@@ -857,7 +864,7 @@ class Versions(filePath: String) {
             }
         }
     private val javaVersionMinSuggested: Int = properties["JAVA_VERSION_MIN_SUGGESTED"].let { it as String }.toInt()
-    private val javaVersionMinRadical: Int = properties["JAVA_VERSION_MIN_RADICAL"].let { it as String }.toInt()
+    private val javaVersionMaxSupported: Int = properties["JAVA_VERSION_MAX_SUPPORTED"].let { it as String }.toInt()
     private val javaVersionRaw = properties["JAVA_VERSION"] as String
     private var javaVersionInfoSuffix = ""
 
@@ -920,15 +927,15 @@ class Versions(filePath: String) {
         if (currentVersionInt < javaVersionMinSuggested) {
             logger.error(
                 "It is recommended to upgrade current Gradle JDK version ${JavaVersion.current()} to $javaVersionMinSuggested or higher${
-                    if (javaVersionMinRadical > 0) " (but lower than $javaVersionMinRadical)" else ""
+                    if (javaVersionMaxSupported > 0) " (but not higher than $javaVersionMaxSupported)" else ""
                 }."
             )
         }
-        if (javaVersionMinRadical in 1..currentVersionInt) {
+        if (currentVersionInt > javaVersionMaxSupported) {
             logger.error(
                 "It is recommended to downgrade current Gradle JDK version $currentVersionInt " +
-                        "to ${javaVersionMinRadical - 1}${if (javaVersionMinRadical - 1 > javaVersionMinSuggested) " or lower (but not lower than $javaVersionMinSuggested)" else ""}, " +
-                        "as Gradle may be not compatible with JDK $javaVersionMinRadical${if (currentVersionInt > javaVersionMinRadical) " (and above)" else ""} for now."
+                        "to $javaVersionMaxSupported${if (javaVersionMaxSupported > javaVersionMinSuggested) " or lower (but not lower than $javaVersionMinSuggested)" else ""}, " +
+                        "as Gradle may be not compatible with JDK $currentVersionInt for now."
             )
         }
     }
@@ -939,7 +946,7 @@ class Versions(filePath: String) {
         val infoVerName = "Version name: $appVersionName"
         val infoVerCode = "Version code: ${if (isBuildNumberAutoIncremented) "${appVersionCode + 1} [auto-incremented]" else appVersionCode}"
         val infoVerSdk = "SDK versions: min [$sdkVersionMin] / target [$sdkVersionTarget] / compile [$sdkVersionCompile]"
-        val infoVerJava = "Java version: $javaVersion$javaVersionInfoSuffix"
+        val infoVerJava = "Java version: $javaVersion${if (gradle.extra.has("isHideConsoleInfoHintSuffix") && gradle.extra.get("isHideConsoleInfoHintSuffix") == true) "" else javaVersionInfoSuffix}"
 
         val maxLength = arrayOf(title, infoVerName, infoVerCode, infoVerSdk, infoVerJava).maxOf { it.length }
 
