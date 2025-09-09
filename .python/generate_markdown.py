@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import locale
-import sys
 
 # 设置语言环境为 UTF-8
 locale.setlocale(locale.LC_ALL, '')
@@ -8,9 +7,6 @@ encoding = locale.getpreferredencoding()
 if encoding.lower() != 'utf-8':
     # 强制使用 UTF-8 编码
     locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
-    # 如果 locale 无法设置, 使用以下方式
-    # sys.stdout.reconfigure(encoding='utf-8')
-    # sys.stderr.reconfigure(encoding='utf-8')
 
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 from collections import defaultdict
@@ -53,7 +49,101 @@ env = Environment(
     undefined=StrictUndefined,
 )
 
-# 读取模板文件
+# 从 version.properties 读取 JDK 相关限制, 以便注入到 merged_data
+def _load_version_properties(props_path: str) -> dict:
+    props = {}
+    try:
+        with open(props_path, 'r', encoding='utf-8') as f:
+            for raw in f.read().splitlines():
+                line = raw.strip()
+                if not line or line.startswith('#') or line.startswith('!'):
+                    continue
+                sep = line.find('=')
+                if sep <= 0:
+                    continue
+                key = line[:sep].strip()
+                val = line[sep + 1 :].strip()
+                props[key] = val
+    except FileNotFoundError:
+        print(f'[warn] version.properties not found at {props_path}, skip injecting JDK constraints')
+    except Exception as e:
+        print(f'[warn] Failed to read version.properties: {e}')
+    return props
+
+_version_props_path = os.path.join(project_root_dir, 'version.properties')
+_version_props = _load_version_properties(_version_props_path)
+
+_jdk_min_supported = _version_props.get('JAVA_VERSION_MIN_SUPPORTED')
+_jdk_min_suggested = _version_props.get('JAVA_VERSION_MIN_SUGGESTED')
+_jdk_max_supported = _version_props.get('JAVA_VERSION_MAX_SUPPORTED')
+_android_studio_min_supported = _version_props.get('MIN_SUPPORTED_ANDROID_STUDIO_IDE_VERSION')
+_intellij_idea_min_supported = _version_props.get('MIN_SUPPORTED_INTELLIJ_IDEA_IDE_VERSION')
+
+# 在加载模板前, 先更新模板中的 Android Studio 与 IntelliJ IDEA Badge 版本
+def update_readme_badge_versions():
+    """
+    读取 .readme/template_readme.md, 将 Android Studio 与 IntelliJ IDEA 的徽标版本替换为
+    version.properties 中的最小支持版本:
+      - MIN_SUPPORTED_ANDROID_STUDIO_IDE_VERSION
+      - MIN_SUPPORTED_INTELLIJ_IDEA_IDE_VERSION
+    """
+    template_path = os.path.join(readme_root_dir, 'template_readme.md')
+    try:
+        with open(template_path, 'r', encoding='utf-8') as f:
+            data = f.read()
+    except FileNotFoundError:
+        print(f'[warn] template_readme.md not found at {template_path}, skip badge update')
+        return
+    except Exception as e:
+        print(f'[warn] Failed to read template_readme.md: {e}')
+        return
+
+    # 与原逻辑等价的正则片段
+    prefix = r'<img\s[^>]*?src="https://img\.shields\.io/badge/'
+    android_fragment = r'android(?:%20|\s)studio'
+    idea_fragment = r'intellij(?:%20|\s)idea'
+    # 捕获 2024.1 或 2024.1.2 这类版本, 末尾带一个 '+'
+    version_group = r'.*?-([0-9]{4}\.[0-9]+(?:\.[0-9]+)?)\+'
+
+    re_android = re.compile(prefix + android_fragment + version_group, re.IGNORECASE)
+    re_idea = re.compile(prefix + idea_fragment + version_group, re.IGNORECASE)
+
+    original = data
+
+    if _android_studio_min_supported:
+        def _repl_android(m):
+            old = m.group(1)
+            if old != _android_studio_min_supported:
+                return m.group(0).replace(old, _android_studio_min_supported)
+            return m.group(0)
+        data = re_android.sub(_repl_android, data)
+
+    if _intellij_idea_min_supported:
+        def _repl_idea(m):
+            old = m.group(1)
+            if old != _intellij_idea_min_supported:
+                return m.group(0).replace(old, _intellij_idea_min_supported)
+            return m.group(0)
+        data = re_idea.sub(_repl_idea, data)
+
+    if data == original:
+        return
+
+    try:
+        with open(template_path, 'w', encoding='utf-8') as f:
+            f.write(data)
+            print(f'Updated badge(s) in {template_path}')
+    except Exception as e:
+        print(f'[warn] Failed to write template_readme.md: {e}')
+
+# 执行模板内徽标版本更新, 并清空 Jinja2 缓存后再获取模板
+update_readme_badge_versions()
+try:
+    env.cache.clear()  # 确保重新读取更新后的模板文件
+except Exception:
+    pass
+
+# 读取模板文件 (在更新徽标版本之后)
 template_readme = env.get_template('template_readme.md')
 template_changelog = env.get_template('template_changelog.md')
 
@@ -110,6 +200,14 @@ def init_languages():
 
             # 合并共用 JSON 数据
             merged_data = {**common_data, **processed_data}
+
+            # 注入 JDK 版本约束 (来自 version.properties)
+            if _jdk_min_supported is not None:
+                merged_data['jdk_min_supported'] = str(_jdk_min_supported)
+            if _jdk_min_suggested is not None:
+                merged_data['jdk_min_suggested'] = str(_jdk_min_suggested)
+            if _jdk_max_supported is not None:
+                merged_data['jdk_max_supported'] = str(_jdk_max_supported)
 
             # 处理日期转换标记
             for key, value in merged_data.items():
