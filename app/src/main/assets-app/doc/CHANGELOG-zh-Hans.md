@@ -6,14 +6,18 @@
 
 # v6.7.0
 
-###### 2025/07/22
+###### 2025/09/10
 
 * `新增` zip 模块, 用于文件压缩与解压缩操作 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (参阅 项目文档 > [Zip](https://docs.autojs6.com/#/zip))
 * `新增` mediainfo 模块, 用于查看媒体文件的详细信息 (参阅 项目文档 > [媒体信息](https://docs.autojs6.com/#/mediainfo))
 * `新增` UiObject#isShifted 方法, 用于检测控件位置变化
 * `新增` 设置页面支持应用启动器图标设置选项 _[`issue #405`](http://issues.autojs6.com/405)_
+* `新增` JS 脚本工具 (run-scrapers.mjs) 用于自动更新 Gradle 构建脚本锚点数据/README 通用数据/README 模板数据
+* `修复` isJavaClass/isJavaPackage 等全局方法无效的问题
 * `修复` 使用 XML 语法将 JavaScript 表达式作为属性值时, this 对象可能出现指向错误的问题
-* `修复` 调用 images.requestScreenCapture 时用户取消授权可能导致应用崩溃的问题
+* `修复` canvas 元素控件 setMaxFps 方法内部帧率计算错误
+* `修复` images.concat 方法纵向拼接时宽度值计算错误
+* `修复` images.requestScreenCapture 方法调用时用户取消授权可能导致应用崩溃的问题
 * `修复` images 部分相关方法出现异常时 oneShot 标记功能失效的问题 _[`issue #372`](http://issues.autojs6.com/372)_
 * `修复` images 部分相关方法可能引发内存泄露的问题 _[`issue #372`](http://issues.autojs6.com/372)_
 * `修复` Android 10 UiObject#child 方法可能出现 ArrayIndexOutOfBoundsException 异常的问题 _[`issue #416`](http://issues.autojs6.com/416)_
@@ -28,9 +32,10 @@
 * `优化` 文件管理器浮动按钮展开后点击菜单项时优化菜单收起时机
 * `优化` 崩溃报告页面支持双指缩放调整字体大小并添加常用功能按钮
 * `优化` 应用启动器图标支持自适应图标特性 _[`issue #405`](http://issues.autojs6.com/405)_
-* `依赖` 附加 Androidx Core (KTX) 版本 1.16.0
-* `依赖` 升级 Gradle 版本 8.14 -> 8.14.2
-* `依赖` 升级 Apache Commons 版本 3.16.0 -> 3.17.0
+* `优化` Gradle 构建脚本提升 7z 格式文件的解压效率
+* `依赖` 附加 Androidx Core (KTX) 版本 1.15.0
+* `依赖` 升级 Gradle 版本 8.14 -> 8.14.3
+* `依赖` 升级 Apache Commons 版本 3.16.0 -> 3.18.0
 * `依赖` 升级 Retrofit2 Retrofit 版本 2.11.0 -> 2.12.0
 * `依赖` 升级 Retrofit2 Converter Gson 版本 2.11.0 -> 2.12.0
 * `依赖` 升级 Retrofit2 RxJava2 版本 2.11.0 -> 2.12.0
