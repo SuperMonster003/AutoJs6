@@ -76,7 +76,7 @@ En la tabla, Auto.js Pro 7/8/9 son versiones pagas, mientras que las demás son 
 
 En la tabla, los datos de la columna `Fecha de finalización del desarrollo` que contienen corchetes (`[]`) indican que el proyecto de código abierto no está temporalmente accesible.
 
-En la tabla, los datos de la columna `Mantenimiento activo` que contienen paréntesis angulares (`<>`) se han calculado hasta 9 de September de 2025.
+En la tabla, los datos de la columna `Mantenimiento activo` que contienen paréntesis angulares (`<>`) se han calculado hasta 10 de September de 2025.
 
 ******
 
@@ -133,7 +133,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * Adaptation des couleurs du thème [ Groupement / Localisation / Recherche / Historique / Adaptation automatique de la luminosité et du contraste / ... ]
 * Soporte para modo nocturno en varias páginas [ página de configuración / página de documentación / página de análisis de diseño / ventana flotante / ... ]
 * El [complemento de VSCode](http://vscext-project.autojs6.com) soporta conexiones cliente (LAN) y servidor (LAN/ADB)
-* El motor [Rhino](https://github.com/mozilla/rhino/) se ha actualizado de [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) a [v1.8.1-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3) (actualizado el 11 de April de 2025)
+* El motor [Rhino](https://github.com/mozilla/rhino/) se ha actualizado de [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) a [v1.8.1-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3) (actualizado el 10 de September de 2025)
     * Soporte para secuencias de escape de [puntos de código](https://developer.mozilla.org/zh-CN/docs/Glossary/Code_point) Unicode [ plano suplementario](https://zh.wikipedia.org/wiki/Unicode%E5%AD%97%E7%AC%A6%E5%B9%B3%E9%9D%A2%E6%98%A0%E5%B0%84#%E7%AC%AC%E4%B8%80%E8%BC%94%E5%8A%A9%E5%B9%B3%E9%9D%A2)
        ```javascript
        '\u{1D160}'; /* significa "𝅘𝅥𝅮", método tradicional: '\uD834\uDD60'. */
@@ -363,7 +363,7 @@ Marca `Show Package Details (Mostrar detalles del paquete)`, haz clic en NDK y C
 
 La versión mínima requerida del `JDK (Kit de Desarrollo de Java)` para el proyecto AutoJs6 es `17`, pero se recomienda usar una versión no inferior a `21`.
 
-Hasta el 9 de September de 2025, AutoJs6 soporta hasta la versión `24` de JDK.
+Hasta el 10 de September de 2025, AutoJs6 soporta hasta la versión `24` de JDK.
 
 > Nota: Si el sistema ya tiene instalado JDK y cumple con los requisitos anteriores, puedes omitir esta sección.
 

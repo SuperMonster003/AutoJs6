@@ -76,7 +76,7 @@ Auto.js Pro 7/8/9 in the table are paid versions, and the rest are free open-sou
 
 In the table, data in the `Development End Date` column that contains square brackets (`[]`) indicates that the open-source project is temporarily inaccessible.
 
-In the table, data in the `Active Maintenance` column that contains angle brackets (`<>`) is calculated up to Sep 9, 2025.
+In the table, data in the `Active Maintenance` column that contains angle brackets (`<>`) is calculated up to Sep 10, 2025.
 
 ******
 
@@ -133,7 +133,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * Theme color adaptation [ Grouping / Location / Search / History / Automatic Adaptation of Brightness and Contrast / ... ]
 * Night mode adaptation [ Settings page / Documentation page / Layout analysis page / Floating window / ... ]
 * [VSCode plugin](http://vscext-project.autojs6.com) supports both client (LAN) and server (LAN/ADB) connection methods
-* [Rhino](https://github.com/mozilla/rhino/) engine upgraded from [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) to [v1.8.1-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3) (Updated on Apr 11, 2025)
+* [Rhino](https://github.com/mozilla/rhino/) engine upgraded from [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) to [v1.8.1-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3) (Updated on Sep 10, 2025)
     * Unicode [code point](https://developer.mozilla.org/en-US/docs/Glossary/Code_point) escape support for [supplementary plane](https://en.wikipedia.org/wiki/Plane_(Unicode)#Supplementary_Multilingual_Plane) characters
        ```javascript
        '\u{1D160}'; /* stands for "𝅘𝅥𝅮", traditional method: '\uD834\uDD60'. */
@@ -363,7 +363,7 @@ Check `Show Package Details`, click NDK and CMake respectively to ensure the cor
 
 The `JDK (Java Development Kit)` version required for the AutoJs6 project should be at least `17`, but `21` or higher is recommended.
 
-As of Sep 9, 2025, AutoJs6 supports up to version `24` of the JDK.
+As of Sep 10, 2025, AutoJs6 supports up to version `24` of the JDK.
 
 > Note: If the JDK is already installed on the computer system and the version meets the above requirements, this section can be skipped.
 

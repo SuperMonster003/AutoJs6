@@ -685,9 +685,17 @@ object RhinoUtils {
     fun js_object_getOwnPropertyNames(o: Scriptable): NativeArray = withRhinoContext { cx ->
         val topLevel = ImporterTopLevel(cx)
         val obj = ensureScriptableObject(toObject(cx, topLevel, o))
-        val ids = obj.getIds(true, false)
-        ids.indices.forEach { i -> ids[i] = toString(ids[i]) }
-        cx.newArray(topLevel, ids) as NativeArray
+        // val ids = obj.getIds(true, false)
+        // ids.indices.forEach { i -> ids[i] = toString(ids[i]) }
+        // cx.newArray(topLevel, ids) as NativeArray
+        try {
+            val map = obj.startCompoundOp(false)
+            val ids = obj.getIds(map, true, false)
+            ids.indices.forEach { i -> ids[i] = toString(ids[i]) }
+            cx.newArray(topLevel, ids) as NativeArray
+        } catch (_: Exception) {
+            cx.newArray(topLevel, emptyArray()) as NativeArray
+        }
     }
 
     @JvmStatic
@@ -857,6 +865,7 @@ object RhinoUtils {
 
     @JvmStatic
     fun newNativeArray(array: Array<Any?>) = initNativeArrayPrototype(NativeArray(array))
+
     @JvmStatic
     fun hashCodeOfScriptable(other: Any?): Int? {
         if (other !is Scriptable) return null

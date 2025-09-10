@@ -79,7 +79,7 @@ open class RhinoJavaScriptEngine(private val scriptRuntime: ScriptRuntime, priva
             return if (hasFeature(ScriptConfig.FEATURE_CONTINUATION)) {
                 context.executeScriptWithContinuations(script, scriptable)
             } else {
-                script.exec(context, scriptable)
+                script.exec(context, scriptable, scriptable)
             }
         } catch (e: IOException) {
             throw UncheckedIOException(e)
@@ -116,7 +116,7 @@ open class RhinoJavaScriptEngine(private val scriptRuntime: ScriptRuntime, priva
                 context.executeScriptWithContinuations(initScript, scriptable)
             }.getOrElse { e ->
                 if (e.message?.contains("Script argument was not a script or was not created by interpreted mode") == true) {
-                    initScript.exec(context, scriptable)
+                    initScript.exec(context, scriptable, scriptable)
                 } else throw e
             }.let { export ->
                 when (export) {
