@@ -10,6 +10,7 @@ const __dirname = path.dirname(__filename);
 
 // 待执行脚本 (顺序可按需调整)
 const SCRIPT_LIST = [
+    'scrape-and-inject-latest-gradle-wrapper.mjs',
     'scrape-and-inject-agp-releases.mjs',
     'scrape-and-inject-android-studio-agp-version-map.mjs',
     'scrape-and-inject-android-studio-codename_maps.mjs',
@@ -57,7 +58,7 @@ function formatDuration(ms) {
 }
 
 /**
- * @param {import("fs").PathLike} filePath
+ * @param {import('fs').PathLike} filePath
  * @return {Promise<boolean>}
  */
 async function ensureExists(filePath) {
