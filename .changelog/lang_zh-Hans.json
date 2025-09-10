@@ -27,7 +27,8 @@
         "内置模块相关方法实参类型的异常消息增加类型摘要信息",
         "文件管理器浮动按钮展开后点击菜单项时优化菜单收起时机",
         "崩溃报告页面支持双指缩放调整字体大小并添加常用功能按钮",
-        "应用启动器图标支持自适应图标特性 _[`issue #405`](http://issues.autojs6.com/405)_"
+        "应用启动器图标支持自适应图标特性 _[`issue #405`](http://issues.autojs6.com/405)_",
+        "Gradle 构建脚本提升 7z 格式文件的解压效率"
       ],
       "dependency": [
         "附加 Androidx Core (KTX) 版本 1.15.0",
@@ -57,6 +58,7 @@
         "util.dpToPx/spToPx/pxToDp/pxToSp 方法, 用于像素单位转换"
       ],
       "fix": [
+        "isJavaClass/isJavaPackage 等全局方法无效的问题",
         "屏幕旋转至横向时子标题可能显示不完整的问题",
         "屏幕旋转至横向时部分页面内容被侧边导航栏遮挡的问题",
         "Android 15 部分页面状态栏背景着色区域不完整的问题 _[`issue #398`](http://issues.autojs6.com/398)_",
