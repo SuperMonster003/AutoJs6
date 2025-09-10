@@ -51,7 +51,7 @@ class JsCanvasView : TextureView, TextureView.SurfaceTextureListener {
     }
 
     fun setMaxFps(maxFps: Int) {
-        mTimePerDraw = (if (maxFps <= 0) 0L else 100L / maxFps)
+        mTimePerDraw = if (maxFps <= 0) 0L else 1000L / maxFps
     }
 
     @Synchronized
