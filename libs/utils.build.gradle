@@ -1,9 +1,11 @@
+import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry
+import org.apache.commons.compress.archivers.sevenz.SevenZFile
+
 import java.nio.ByteBuffer
 import java.nio.channels.FileChannel
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 import java.util.zip.ZipFile
-import org.apache.commons.compress.archivers.sevenz.SevenZFile
 
 ext.Utils = Utils
 
@@ -282,9 +284,7 @@ class Utils {
             def title = "Extract the archive file for \"${project.ext["projectName"]}\" Gradle project"
             def srcInfo = "Source: $cacheFile"
             def destInfo = "Destination: $destFile"
-            def hintInfo = cacheFileExtensionName == "7z" ? [
-                    "Extracting \"7z\" archive file may take some time to complete.",
-            ] : []
+            def hintInfo = []
 
             def maxLength = [
                     [title, srcInfo, destInfo].max { it.length() },
@@ -530,58 +530,48 @@ class Utils {
         }
 
         private void handleSevenZip() {
-            def shouldPrintProgress = project.ext["platform"]["shouldPrintProgress"] == true
+            boolean shouldPrintProgress = project.ext["platform"]["shouldPrintProgress"] == true
 
-            def sevenZFileForTotalSize = new SevenZFile.Builder().setFile(cacheFile).get()
-            def entry
-            def entries = []
-            def totalExtractedSize = 0L
-
-            def sourceDirPath = new File(sourceDir).path
+            String sourceDirPath = new File(sourceDir).path
             if (sourceDirPath.startsWith(File.separator)) sourceDirPath = sourceDirPath.substring(1)
 
-            while ((entry = sevenZFileForTotalSize.getNextEntry()) != null) {
-                def entryName = new File(entry.name).path
-                if (entryName.startsWith(sourceDirPath)) {
-                    entries.add(entry)
-                    totalExtractedSize += entry.size
-                }
+            SevenZFile sevenZFile = new SevenZFile.Builder().setFile(cacheFile).get()
+            List<SevenZArchiveEntry> allEntries = sevenZFile.getEntries()
+
+            List<SevenZArchiveEntry> targetEntries = allEntries.findAll { it.name.startsWith(sourceDirPath) }
+
+            int entriesCount = targetEntries.size()
+            long totalExtractedSize = 0L
+            for (SevenZArchiveEntry entry : targetEntries) {
+                totalExtractedSize += entry.size
             }
 
-            sevenZFileForTotalSize.close()
-
-            def sevenZFile = new SevenZFile.Builder().setFile(cacheFile).get()
-
-            int totalEntries = entries.size()
             int processedEntries = 0
+            byte[] buffer = new byte[64 * 1024]
 
-            while ((entry = sevenZFile.getNextEntry()) != null) {
-                def entryName = new File(entry.name).path
-                if (entryName.startsWith(sourceDirPath)) {
-                    File outFile = project.file(new File(tempOutFile, entryName.substring(sourceDirPath.length())))
-                    if (entry.isDirectory()) {
-                        outFile.mkdirs()
-                    } else {
-                        outFile.parentFile.mkdirs()
-                        outFile.withOutputStream { outputStream ->
-                            sevenZFile.getInputStream(entry).withCloseable { entryInputStream ->
-                                byte[] buffer = new byte[8192]
-                                int bytesRead
-                                while ((bytesRead = entryInputStream.read(buffer)) != -1) {
-                                    outputStream.write(buffer, 0, bytesRead)
-                                }
+            for (SevenZArchiveEntry entry : targetEntries) {
+                File outFile = project.file(new File(tempOutFile, new File(entry.name).path.substring(sourceDirPath.length())))
+                if (entry.isDirectory()) {
+                    outFile.mkdirs()
+                } else {
+                    outFile.parentFile.mkdirs()
+                    try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(outFile))) {
+                        sevenZFile.getInputStream(entry).withCloseable { entryInputStream ->
+                            int bytesRead
+                            while ((bytesRead = entryInputStream.read(buffer)) != -1) {
+                                bos.write(buffer, 0, bytesRead)
                             }
                         }
                     }
-
-                    if (shouldPrintProgress) {
-                        double progress = (processedEntries * 100.0 / totalEntries)
-                        String progressBar = generateProgressBar(progress)
-                        print String.format("\rExtracting... [ %s ] %.2f%%", progressBar, progress)
-                        System.out.flush()
-                    }
-                    processedEntries++
                 }
+
+                if (shouldPrintProgress) {
+                    double progress = (processedEntries * 100.0 / entriesCount)
+                    String progressBar = generateProgressBar(progress)
+                    print String.format("\rExtracting... [ %s ] %.2f%%", progressBar, progress)
+                    System.out.flush()
+                }
+                processedEntries++
             }
 
             String formattedUncompressedSize = formatFileSize(totalExtractedSize)
