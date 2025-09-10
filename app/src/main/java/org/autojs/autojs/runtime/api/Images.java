@@ -185,7 +185,7 @@ public class Images {
             width = imgA.getWidth() + imgB.getWidth();
             height = Math.max(imgA.getHeight(), imgB.getHeight());
         } else {
-            width = Math.max(imgA.getWidth(), imgB.getHeight());
+            width = Math.max(imgA.getWidth(), imgB.getWidth());
             height = imgA.getHeight() + imgB.getHeight();
         }
         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
