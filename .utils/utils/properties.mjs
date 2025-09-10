@@ -3,6 +3,7 @@
 import * as fs from 'node:fs';
 import * as fsp from 'node:fs/promises';
 import { compareVersionStrings } from './versioning.mjs';
+import { generatePropertiesFileTimestamp } from './date.mjs';
 
 /**
  * @param {string} str
@@ -50,6 +51,80 @@ function unescapeProperty(str) {
             default:
                 // 未知转义, 保留第二个字符
                 out += next;
+        }
+    }
+    return out;
+}
+
+/**
+ * 将 JS 字符串按 .properties 规范转义 (store 格式)
+ * - 转义: backslash, 空白/控制字符, 分隔符 (= :), 注释首字符 (# !)
+ * - 非 ASCII 均编码为 \uXXXX (与 java.util.Properties.store 对齐)
+ * @param {string} str
+ * @param {boolean} isKey
+ * @returns {string}
+ */
+function escapeProperty(str, isKey) {
+    if (!str) return '';
+    let out = '';
+    for (let i = 0; i < str.length; i++) {
+        const ch = str[i];
+        const code = ch.codePointAt(0);
+        // 统一处理非 ASCII 或控制字符
+        if (code < 0x20 || code > 0x7e) {
+            if (ch === '\t') {
+                out += '\\t';
+                continue;
+            }
+            if (ch === '\n') {
+                out += '\\n';
+                continue;
+            }
+            if (ch === '\r') {
+                out += '\\r';
+                continue;
+            }
+            if (ch === '\f') {
+                out += '\\f';
+                continue;
+            }
+            // 其他非 ASCII -> \uXXXX
+            const hex = code.toString(16).padStart(4, '0');
+            out += '\\u' + hex.slice(-4);
+            continue;
+        }
+        switch (ch) {
+            case '\\':
+                out += '\\\\';
+                break;
+            case '=':
+            case ':':
+                // 在 key 和 value 中都转义, 保证兼容性
+                out += '\\' + ch;
+                break;
+            case ' ':
+                // key 中任意空格需要转义; value 的前导空格需要转义
+                if (isKey || out === '') out += '\\ ';
+                else out += ' ';
+                break;
+            case '\t':
+            case '\n':
+            case '\r':
+            case '\f':
+                // 已在上方控制字符分支处理, 这里冗余保护
+                out += ch === '\t' ? '\\t'
+                    : ch === '\n' ? '\\n'
+                        : ch === '\r' ? '\\r'
+                            : '\\f';
+                break;
+            case '#':
+            case '!':
+                // 作为 key 时或 value 的首字符, 为避免被解析为注释, 需转义
+                if (isKey || out === '') out += '\\' + ch;
+                else out += ch;
+                break;
+            default:
+                out += ch;
         }
     }
     return out;
@@ -156,6 +231,48 @@ export async function readProperties(filePath = '../version.properties', { encod
 export function readPropertiesSync(filePath = '../version.properties', { encoding = 'utf8' } = {}) {
     const text = fs.readFileSync(filePath, { encoding });
     return parseProperties(text);
+}
+
+/**
+ * @param {string} [filePath='../version.properties']]
+ * @param {Object<string,string>} [props={}]
+ * @param {Object} options
+ * @param {BufferEncoding} [options.encoding='utf8']
+ * @return {Promise<void>}
+ */
+export async function writeProperties(filePath = '../version.properties', props = {}, { encoding = 'utf8' } = {}) {
+    const lines = [];
+    for (const key in props) {
+        const value = props[key];
+        if (value == null) continue;
+        const k = escapeProperty(String(key), true);
+        const v = escapeProperty(String(value), false);
+        lines.push(`${k}=${v}`);
+    }
+    lines.unshift(generatePropertiesFileTimestamp());
+    const text = lines.join('\n') + '\n';
+    return fsp.writeFile(filePath, text, { encoding });
+}
+
+/**
+ * @param {string} [filePath='../version.properties']]
+ * @param {Object<string,string>} [props={}]
+ * @param {Object} options
+ * @param {BufferEncoding} [options.encoding='utf8']
+ * @return {void}
+ */
+export function writePropertiesSync(filePath = '../version.properties', props = {}, { encoding = 'utf8' } = {}) {
+    const lines = [];
+    for (const key in props) {
+        const value = props[key];
+        if (value == null) continue;
+        const k = escapeProperty(String(key), true);
+        const v = escapeProperty(String(value), false);
+        lines.push(`${k}=${v}`);
+    }
+    lines.unshift(generatePropertiesFileTimestamp());
+    const text = lines.join('\n') + '\n';
+    return fs.writeFileSync(filePath, text, { encoding });
 }
 
 /**
