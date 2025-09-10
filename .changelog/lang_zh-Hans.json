@@ -10,6 +10,7 @@
         "JS 脚本工具 (run-scrapers.mjs) 用于自动更新 Gradle 构建脚本锚点数据/README 通用数据/README 模板数据"
       ],
       "fix": [
+        "isJavaClass/isJavaPackage 等全局方法无效的问题",
         "使用 XML 语法将 JavaScript 表达式作为属性值时, this 对象可能出现指向错误的问题",
         "调用 images.requestScreenCapture 时用户取消授权可能导致应用崩溃的问题",
         "images 部分相关方法出现异常时 oneShot 标记功能失效的问题 _[`issue #372`](http://issues.autojs6.com/372)_",
@@ -58,7 +59,6 @@
         "util.dpToPx/spToPx/pxToDp/pxToSp 方法, 用于像素单位转换"
       ],
       "fix": [
-        "isJavaClass/isJavaPackage 等全局方法无效的问题",
         "屏幕旋转至横向时子标题可能显示不完整的问题",
         "屏幕旋转至横向时部分页面内容被侧边导航栏遮挡的问题",
         "Android 15 部分页面状态栏背景着色区域不完整的问题 _[`issue #398`](http://issues.autojs6.com/398)_",
