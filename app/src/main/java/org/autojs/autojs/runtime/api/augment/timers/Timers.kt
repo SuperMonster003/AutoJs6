@@ -4,13 +4,17 @@ import org.autojs.autojs.AutoJs
 import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.extension.FlexibleArray
+import org.autojs.autojs.extension.FlexibleArray.Companion.component1
+import org.autojs.autojs.extension.FlexibleArray.Companion.component2
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.exception.ShouldNeverHappenException
+import org.autojs.autojs.util.RhinoUtils.NOT_CONSTRUCTABLE
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED
 import org.autojs.autojs.util.RhinoUtils.coerceFunction
 import org.autojs.autojs.util.RhinoUtils.coerceLongNumber
 import org.autojs.autojs.util.RhinoUtils.coerceNumber
+import org.autojs.autojs.util.RhinoUtils.newBaseFunction
 import org.autojs.autojs6.R
 import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.Undefined
@@ -103,8 +107,15 @@ open class Timers(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun keepAlive(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Double = ensureArgumentsAtMost(args, 1) {
-            val (internal) = it
-            setInterval(scriptRuntime, arrayOf(BaseFunction(), coerceNumber(internal, 10_000)))
+            val (timeoutRaw) = it
+            when (val timeout = coerceLongNumber(timeoutRaw, 0).coerceAtLeast(0)) {
+                0L -> scriptRuntime.timers.setInterval(newBaseFunction("callback", {
+                    /* Empty body. */
+                }, NOT_CONSTRUCTABLE), 10_000)
+                else -> scriptRuntime.timers.setTimeout(newBaseFunction("callback", {
+                    /* Empty body. */
+                }, NOT_CONSTRUCTABLE), timeout)
+            }
         }
 
         @JvmStatic
