@@ -126,12 +126,12 @@ pluginManagement {
     // @AnchorBegin ANDROID_GRADLE_PLUGIN_RELEASES_LIST
     // @Script /.utils/scrape-and-inject-agp-releases.mjs
     // @Reference https://developer.android.com/reference/tools/gradle-api
-    // @Updated by SuperMonster003 on Sep 5, 2025.
+    // @Updated by SuperMonster003 on Sep 12, 2025.
     val agpReleases = listOf(
-        "9.0.0-alpha04",
+        "9.0.0-alpha05",
         "8.13.0",
-        "8.12.2",
-        "8.11.1",
+        "8.12.3",
+        "8.11.2",
         "8.10.1",
         "8.9.3",
         "8.8.2",
@@ -211,6 +211,30 @@ pluginManagement {
     }
 
     val utils = object {
+
+        private val SUFFIX_PRIORITY: Map<String, Int> = mapOf(
+            // 早期/快照
+            "canary" to 1, "nightly" to 1, "snapshot" to 1, "dev" to 1,
+            "pre-alpha" to 2, "prealpha" to 2, "preview" to 2, "eap" to 2, "milestone" to 2,
+            "alpha" to 3,
+            "beta" to 4,
+            "rc" to 5,
+            // 稳定/正式
+            "" to 10, "stable" to 10, "ga" to 10, "final" to 10, "release" to 10, "lts" to 10
+        )
+
+        private fun normalizeSuffixName(raw: String?): String {
+            val n = (raw ?: "").trim().lowercase()
+            return when (n) {
+                "a" -> "alpha"
+                "b" -> "beta"
+                "cr" -> "rc"
+                "m" -> "milestone"
+                "pre" -> "preview"
+                else -> n
+            }
+        }
+
         fun compareVersionStrings(v1: String, v2: String): Int {
             val (ver1Numbers, ver1Suffix) = toVersionParts(v1)
             val (ver2Numbers, ver2Suffix) = toVersionParts(v2)
@@ -229,27 +253,43 @@ pluginManagement {
         }
 
         fun compareVersionSuffix(suffix1: Pair<String, Int>, suffix2: Pair<String, Int>): Int {
-            val suffixPriority = mapOf("" to 10, "Alpha" to 1, "Beta" to 2, "RC" to 5)
-            val (suffixName1, suffixNumber1) = suffix1
-            val (suffixName2, suffixNumber2) = suffix2
-            val priority1 = suffixPriority[suffixName1] ?: Int.MAX_VALUE
-            val priority2 = suffixPriority[suffixName2] ?: Int.MAX_VALUE
-            return priority1.compareTo(priority2).takeIf { it != 0 } ?: suffixNumber1.compareTo(suffixNumber2)
+            val (name1Raw, num1) = suffix1
+            val (name2Raw, num2) = suffix2
+            val name1 = normalizeSuffixName(name1Raw)
+            val name2 = normalizeSuffixName(name2Raw)
+
+            val p1 = SUFFIX_PRIORITY[name1] ?: Int.MAX_VALUE
+            val p2 = SUFFIX_PRIORITY[name2] ?: Int.MAX_VALUE
+
+            val byPriority = p1.compareTo(p2)
+            if (byPriority != 0) return byPriority
+            return num1.compareTo(num2)
         }
 
         fun toVersionParts(version: String): Pair<List<Int>, Pair<String, Int>> {
-            val parts = version.split(Regex("[+-]"))
-            val numberParts = parts[0].split('.').map {
+            // 支持: 1.2.3-rc1 / 1.2.3 RC 1 / 1.2.3-Alpha / 1.2.3.m2 / 1.2.3_preview-2 等
+            // 以第一个空白/加号/连字符分隔数字部分与后缀部分
+            val split = version.split(Regex("[\\s+\\-]"), limit = 2)
+            val numberStr = split[0]
+            val numberParts = numberStr.split('.').map {
                 it.toIntOrNull() ?: throw IllegalArgumentException("Invalid version part: '$it' in version: '$version'")
             }
 
-            val suffixPattern = Regex("([A-Za-z]+)(\\d*)|([A-Za-z]*)(\\d+)")
-            val suffixMatch = suffixPattern.matchEntire(parts.getOrElse(1) { "" }) ?: return numberParts to ("" to 0)
+            val suffixStr = split.getOrNull(1)?.trim().orEmpty()
+            if (suffixStr.isEmpty()) return numberParts to ("" to 0)
 
-            val suffixName = suffixMatch.groupValues[1] // "Alpha", "Beta", "RC" or empty string
-            val suffixNumber = suffixMatch.groupValues[2].toIntOrNull() ?: 1 // Default to 1 for suffixes like "Alpha", "Beta", "RC"
+            // 更宽松的匹配: 名称 + 可选分隔符 + 可选数字; 或 空名称 + 数字 (极少见)
+            // 分隔符允许: 空格 . _ -
+            val regex = Regex("([A-Za-z]+)[\\s._-]*(\\d*)|([A-Za-z]*)[\\s._-]*(\\d+)", RegexOption.IGNORE_CASE)
+            val m = regex.matchEntire(suffixStr) ?: return numberParts to ("" to 0)
 
-            return numberParts to (suffixName to suffixNumber)
+            val rawName = (m.groups[1]?.value ?: m.groups[3]?.value).orEmpty()
+            val rawNum = (m.groups[2]?.value ?: m.groups[4]?.value).orEmpty()
+
+            val normName = normalizeSuffixName(rawName)
+            val suffixNum = rawNum.toIntOrNull() ?: if (normName.isNotEmpty()) 1 else 0
+
+            return numberParts to (normName to suffixNum)
         }
 
         fun parseAndroidStudioBuildToVersion(): String? {
@@ -257,9 +297,11 @@ pluginManagement {
             val build = providers.gradleProperty("android.studio.version")
                 .orElse(providers.systemProperty("android.studio.version"))
                 .orNull ?: return null
+
             val parts = build.split('.')
             val baseStr = parts.getOrNull(0) ?: return null
             val base = baseStr.toIntOrNull() ?: return null
+
             val year = 2000 + base / 10
             val minor = base % 10
 
@@ -472,8 +514,9 @@ pluginManagement {
         // @AnchorBegin KSP_VERSION_MAP
         // @Script /.utils/scrape-and-inject-ksp-releases.mjs
         // @Reference https://github.com/google/ksp/releases
-        // @Updated by SuperMonster003 on Sep 4, 2025.
+        // @Updated by SuperMonster003 on Sep 12, 2025.
         val kspVersionMap = mapOf(
+            "2.2.20" to "2.0.3", /* Sep 12, 2025. */
             "2.2.20-RC2" to "2.0.2", /* Sep 4, 2025. */
             "2.2.20-RC" to "2.0.2", /* Aug 20, 2025. */
             "2.2.20-Beta2" to "2.0.2", /* Aug 1, 2025. */
