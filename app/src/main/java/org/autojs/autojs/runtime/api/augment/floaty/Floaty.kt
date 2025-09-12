@@ -6,6 +6,7 @@ import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.core.floaty.BaseResizableFloatyWindow
 import org.autojs.autojs.core.ui.ViewExtras
 import org.autojs.autojs.extension.AnyExtensions.isJsNullish
+import org.autojs.autojs.extension.AnyExtensions.isJsString
 import org.autojs.autojs.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.extension.FlexibleArray
 import org.autojs.autojs.extension.ScriptableExtensions.defineProp
@@ -93,13 +94,13 @@ class Floaty(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         }
 
         private fun wrap(scriptRuntime: ScriptRuntime, windowFunction: (supplier: BaseResizableFloatyWindow.ViewSupplier) -> JsWindow, xml: Any?): ProxyJavaObject {
-            require(xml is XML) { "Argument xml ${xml.jsBrief()} is invalid for Floaty#wrap" }
+            require(xml is XML || xml.isJsString()) { "Argument xml ${xml.jsBrief()} is invalid for Floaty#wrap" }
             val storage = mutableMapOf<String, Any?>()
             val layoutInflater = scriptRuntime.ui.layoutInflater
             val window = windowFunction(object : BaseResizableFloatyWindow.ViewSupplier {
                 override fun inflate(context: AndroidContext, parent: ViewGroup?): View {
                     layoutInflater.context = context
-                    return layoutInflater.inflate(toXMLString(xml), parent, true)
+                    return layoutInflater.inflate(toXMLString(xml!!), parent, true)
                 }
             })
             val getter = fun(args: Array<out Any?>): Any? {
