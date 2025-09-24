@@ -3,18 +3,19 @@
 import com.android.build.gradle.internal.api.ApplicationVariantImpl
 import com.android.build.gradle.internal.api.BaseVariantOutputImpl
 import org.gradle.kotlin.dsl.support.uppercaseFirstChar
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import java.io.FileInputStream
-import java.io.FileNotFoundException
-import java.text.SimpleDateFormat
-import java.util.*
-import java.util.zip.CRC32
+import java.util.Locale.getDefault
 import kotlin.text.RegexOption.IGNORE_CASE
 
-val globalApplicationId = "org.autojs.autojs6"
+plugins {
+    id("org.autojs.build.utils")
+    id("org.autojs.build.versions")
+    id("org.autojs.build.signs")
+    id("com.android.application")
+    id("com.google.devtools.ksp")
+    id("org.jetbrains.kotlin.android") /* kotlin("android") */
+}
 
-val sign = Sign("$rootDir/sign.properties")
-val versions = Versions("$rootDir/version.properties")
+val globalApplicationId = "org.autojs.autojs6"
 
 val flavorDimension = "channel"
 val flavorNameApp = "app"
@@ -22,18 +23,13 @@ val flavorNameInrt = "inrt"
 val buildTypeDebug = "debug"
 val buildTypeRelease = "release"
 val buildActionAssemble = "assemble"
-val templateName = "template"
 
 val taskNames = gradle.startParameter.taskNames
 val isAppAssembleTaskRequested = taskNames.any { it.contains(Regex("^(:?$flavorNameApp:)?$buildActionAssemble", IGNORE_CASE)) }
 val isInrtAssembleTaskRequested = taskNames.any { it.contains(Regex("^(:?$flavorNameApp:)?$buildActionAssemble$flavorNameInrt", IGNORE_CASE)) }
 val isInrtTaskRequested = taskNames.any { it.contains(flavorNameInrt, true) }
 
-plugins {
-    id("com.android.application")
-    id("com.google.devtools.ksp")
-    id("org.jetbrains.kotlin.android") /* kotlin("android") */
-}
+utils.registerTemplateApkCopy(project)
 
 dependencies /* Unclassified */ {
     // Compose
@@ -52,67 +48,66 @@ dependencies /* Unclassified */ {
     }
 
     // LeakCanary
-    debugImplementation("com.squareup.leakcanary:leakcanary-android:2.14")
+    debugImplementation(libs.leakcanary)
 
     // Android supports
-    implementation("androidx.cardview:cardview:1.0.0")
-    implementation("androidx.multidex:multidex:2.0.1")
+    implementation(libs.cardview)
+    implementation(libs.multidex)
 
     // Material Components
-    implementation("com.google.android.material:material:1.12.0")
+    implementation(libs.material)
 
     // SwipeRefreshLayout
-    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+    implementation(libs.swiperefreshlayout)
 
     // ConstraintLayout
-    implementation("androidx.constraintlayout:constraintlayout:2.2.1")
+    implementation(libs.constraintlayout)
 
     // FlexboxLayout
-    implementation("com.google.android.flexbox:flexbox:3.0.0")
+    implementation(libs.flexbox)
 
     // Common Markdown
-    implementation("com.github.atlassian:commonmark-java:commonmark-parent-0.9.0")
+    implementation(libs.commonmark)
 
     // Flexmark Java HTML to Markdown Extensible Converter
-    implementation("com.vladsch.flexmark:flexmark-html2md-converter:0.64.8")
+    implementation(libs.flexmark.html2md)
 
     // Licenses Dialog
-    implementation("de.psdev.licensesdialog:licensesdialog:2.2.0")
+    implementation(libs.licensesdialog)
 
     // Apache Commons
-    implementation("org.apache.commons:commons-lang3:3.18.0")
+    implementation(libs.commons.lang3)
 
     // Retrofit
-    implementation("com.squareup.retrofit2:retrofit:2.12.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.12.0")
-    implementation("com.squareup.retrofit2:adapter-rxjava2:2.12.0")
-    implementation("com.jakewharton.retrofit:retrofit2-kotlin-coroutines-adapter:0.9.2")
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.gson)
+    implementation(libs.retrofit.adapter.rxjava2)
+    implementation(libs.retrofit2.kotlin.coroutines.adapter)
 
     // Glide
-    implementation("com.github.bumptech.glide:glide:4.16.0")
-    ksp("com.github.bumptech.glide:ksp:4.16.0")
+    implementation(libs.glide)
+    ksp(libs.glide.ksp)
 
     // Joda Time
-    implementation("joda-time:joda-time:2.14.0")
+    implementation(libs.joda.time)
 
-    // Flurry
-    implementation("com.flurry.android:analytics:14.4.0")
+    // Analytics
+    implementation(libs.analytics)
 
     // Bugly
     implementation(project(":libs:com.tencent.bugly.crashreport-4.0.4"))
 
     // OkHttp
-    // implementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.12")
-    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation(libs.okhttp)
 
     // Webkit
-    implementation("androidx.webkit:webkit:1.14.0")
+    implementation(libs.webkit)
 
     // Gson
-    implementation("com.google.code.gson:gson:2.13.1")
+    implementation(libs.gson)
 
     // Zip4j
-    implementation("net.lingala.zip4j:zip4j:2.11.5")
+    implementation(libs.zip4j)
 
     // Log4j
     // FIXME by SuperMonster003 on Aug 14, 2024.
@@ -135,30 +130,30 @@ dependencies /* Unclassified */ {
     //  ! - CVE-2019-17571, 评分: 9.8
     //  ! 但 log4j 第二版本要求安卓 API 级别不低于 26,
     //  ! 与最低 API 级别为 24 的当前项目无法兼容.
-    implementation("log4j:log4j:1.2.17")
+    implementation(libs.log4j)
 
     // Android Logging Log4j
-    implementation("de.mindpipe.android:android-logging-log4j:1.0.3")
+    implementation(libs.android.logging.log4j)
 
     // Preference
-    implementation("androidx.preference:preference-ktx:1.2.1")
+    implementation(libs.preference.ktx)
 
     // RootShell
     // implementation("com.github.Stericson:RootShell:1.6")
     implementation(project(":libs:root-shell-1.6"))
 
     // JDeferred
-    implementation("org.jdeferred:jdeferred-android-aar:1.2.6")
+    implementation(libs.jdeferred)
 
     // Rx
-    implementation("io.reactivex.rxjava2:rxjava:2.2.21")
-    implementation("io.reactivex.rxjava2:rxandroid:2.1.1@aar")
+    implementation(libs.rxjava)
+    implementation(libs.rxandroid)
 
     // Device Names
-    implementation("com.jaredrummler:android-device-names:2.1.1")
+    implementation(libs.android.device.names)
 
     // Version Compare
-    implementation("io.github.g00fy2:versioncompare:1.5.0")
+    implementation(libs.versioncompare)
 
     // Terminal Emulator
     implementation(project(":libs:jackpal.androidterm.libtermexec-1.0"))
@@ -209,18 +204,18 @@ dependencies /* Unclassified */ {
     implementation(files("$rootDir/libs/javamail-android/mail.jar"))
 
     // Shizuku
-    implementation("dev.rikka.shizuku:api:13.1.5")
-    implementation("dev.rikka.shizuku:provider:13.1.5")
+    implementation(libs.shizuku.api)
+    implementation(libs.shizuku.provider)
 
     // ARSCLib
-    implementation("io.github.reandroid:ARSCLib:1.3.5")
+    implementation(libs.arsclib)
 
     // Toaster
-    implementation("com.github.getActivity:Toaster:12.6")
-    implementation("com.github.getActivity:EasyWindow:10.3")
+    implementation(libs.toaster)
+    implementation(libs.easywindow)
 
     // Pinyin4j
-    implementation("com.belerweb:pinyin4j:2.5.1")
+    implementation(libs.pinyin4j)
 
     // Jieba Analysis (zh-CN: 结巴分词)
     // implementation("com.huaban:jieba-analysis:1.0.2")
@@ -230,9 +225,9 @@ dependencies /* Unclassified */ {
     implementation(files("$rootDir/libs/tiny-sign-0.9.jar"))
 
     // Room
-    implementation("androidx.room:room-runtime:2.7.2")
-    implementation("androidx.room:room-ktx:2.7.2")
-    ksp("androidx.room:room-compiler:2.7.2")
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    ksp(libs.room.compiler)
 
     // ApkSig
     // implementation("com.android.tools.build:apksig:8.7.3")
@@ -240,21 +235,21 @@ dependencies /* Unclassified */ {
     // ApkSigner
     implementation(project(":modules:apk-signer"))
 
-    // Spongy Castle
-    implementation("com.madgag.spongycastle:prov:1.58.0.0")
+    // Prov
+    implementation(libs.prov)
 
     // MQTT
-    implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.1.0")
-    implementation("org.eclipse.paho:org.eclipse.paho.android.service:1.1.1")
+    implementation(libs.paho.client.mqttv3)
+    implementation(libs.paho.android.service)
 
     // Jsoup
-    implementation("org.jsoup:jsoup:1.20.1")
+    implementation(libs.jsoup)
 
     // Material Date Time Picker
     implementation(project(":modules:material-date-time-picker"))
 
     // ICU4J
-    implementation("com.ibm.icu:icu4j:77.1")
+    implementation(libs.icu4j)
 }
 
 dependencies /* MIME */ {
@@ -270,22 +265,22 @@ dependencies /* MIME */ {
 }
 
 dependencies /* Test */ {
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test:runner:1.6.2")
-    androidTestImplementation("org.junit.jupiter:junit-jupiter:5.13.0")
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.test.runner)
+    androidTestImplementation(libs.junit.jupiter)
 }
 
 dependencies /* Annotations */ {
     // Android Annotations
-    implementation("org.androidannotations:androidannotations-api:4.8.0")
-    implementation("androidx.annotation:annotation:1.9.1")
-    ksp("org.androidannotations:androidannotations:4.8.0")
+    implementation(libs.androidannotations.api)
+    implementation(libs.annotation)
+    ksp(libs.androidannotations)
 
     // JCIP Annotations
-    implementation("net.jcip:jcip-annotations:1.0")
+    implementation(libs.jcip.annotations)
 
     // EventBus
-    implementation("org.greenrobot:eventbus:3.3.1")
+    implementation(libs.eventbus)
 }
 
 dependencies /* AppCompat */ {
@@ -295,7 +290,7 @@ dependencies /* AppCompat */ {
     //  ! zh-CN:
     //  ! 查看 Appcompat 库的发行版本,
     //  ! 可访问 https://developer.android.com/jetpack/androidx/releases/appcompat.
-    implementation("androidx.appcompat:appcompat:1.7.1")
+    implementation(libs.appcompat)
 
     // AppCompat for legacy views (such as JsTextViewLegacy)
     implementation(project(":libs:androidx.appcompat-1.0.2")) {
@@ -319,7 +314,7 @@ dependencies /* Material Dialogs */ {
     //  #     implementation("com.afollestad.material-dialogs:commons", cfg)
     //  # }
     implementation(project(":modules:material-dialogs"))
-    implementation("me.zhanghai.android.materialprogressbar:library:1.6.1")
+    implementation(libs.materialprogressbar)
 }
 
 dependencies /* Layout */ {
@@ -328,7 +323,7 @@ dependencies /* Layout */ {
     implementation(project(":libs:expandable-layout-1.6.0"))
 
     // Expandable RecyclerView
-    implementation("com.bignerdranch.android:expandablerecyclerview:3.0.0-RC1")
+    implementation(libs.expandablerecyclerview)
 
     // Flexible Divider
     // implementation("com.yqritc:recyclerview-flexibledivider:1.4.0")
@@ -337,13 +332,13 @@ dependencies /* Layout */ {
 
 dependencies /* View */ {
     // RoundedImageView
-    implementation("com.makeramen:roundedimageview:2.3.0")
+    implementation(libs.roundedimageview)
 
     // CircleImageView
-    implementation("de.hdodenhof:circleimageview:3.1.0")
+    implementation(libs.circleimageview)
 
     // Animated SVG
-    implementation("com.jaredrummler:animated-svg-view:1.0.6")
+    implementation(libs.animated.svg.view)
 }
 
 dependencies /* GitHub API */ {
@@ -353,7 +348,7 @@ dependencies /* GitHub API */ {
         because("Compatibility for Android API Level < 26 (Android 8.0) [O]")
         version {
             strictly("2.8.0")
-            because("Exception on newer versions: 'NoClassDefFoundError: org.apache.commons.io.IOUtils'")
+            because("Exception on newer versions: 'NoClassDefFoundError: org.apache.commons.io.IObuildUtils'")
         }
     }
 
@@ -372,16 +367,16 @@ dependencies /* GitHub API */ {
 
 dependencies /* MLKit */ {
     // OCR
-    implementation("com.google.mlkit:text-recognition-chinese:16.0.1")
+    implementation(libs.text.recognition.chinese)
 
     // Barcode
-    implementation("com.google.mlkit:barcode-scanning:17.3.0")
+    implementation(libs.barcode.scanning)
 }
 
 dependencies /* OpenCC */ {
     // OpenCC
     // implementation("com.github.qichuan:android-opencc:1.2.0")
-    implementation("com.github.brooklet:android-opencc:1.2.2")
+    implementation(libs.opencc)
 }
 
 dependencies /* Auto.js Extensions */ {
@@ -402,8 +397,8 @@ dependencies /* Auto.js Extensions */ {
     //  # implementation(project(":libs:Auto.js-ApkBuilder-1.0.3"))
 
     // Extracted from com.github.hyb1996:MutableTheme:1.0.0
-    implementation("androidx.recyclerview:recyclerview:1.4.0")
-    implementation("com.github.ozodrukh:CircularReveal:2.0.1")
+    implementation(libs.recyclerview)
+    implementation(libs.circularreveal)
     // @Legacy com.jrummyapps:colorpicker:2.1.7
     // @Integrated by SuperMonster003 on Mar 25, 2025.
     //  # implementation("com.jaredrummler:colorpicker:1.1.0")
@@ -457,7 +452,7 @@ android {
 
         multiDexEnabled = true
 
-        buildConfigField("String", "VERSION_DATE", "\"${Utils.getDateString("MMM d, yyyy", "GMT+08:00")}\"")
+        buildConfigField("String", "VERSION_DATE", "\"${utils.getDateString("MMM d, yyyy", "GMT+08:00")}\"")
         buildConfigField("String", "VSCODE_EXT_REQUIRED_VERSION", "\"${versions.vscodeExtRequiredVersion}\"")
         buildConfigField("boolean", "is${flavorNameInrt.uppercaseFirstChar()}", "false")
 
@@ -520,47 +515,6 @@ android {
             //  ! https://github.com/kkevsekk1/AutoX/blob/a6d482189291b460c3be60970b74c5321d26e457/inrt/build.gradle.kts#L93
             // noinspection ChromeOsAbiSupport
             ndk.abiFilters += ""
-
-            gradle.taskGraph.whenReady(object : Action<TaskExecutionGraph> {
-                override fun execute(taskGraph: TaskExecutionGraph) {
-                    val taskName = "$buildActionAssemble${flavorNameInrt.uppercaseFirstChar()}${buildTypeRelease.uppercaseFirstChar()}"
-                    project.getTasksByName(taskName, true)
-                        .firstOrNull()
-                        ?.doLast {
-                            copy {
-                                val src = "build/outputs/apk/$flavorNameInrt/$buildTypeRelease"
-
-                                // @Reference to LZX284 (https://github.com/LZX284) by SuperMonster003 on Nov 16, 2023.
-                                val dst = "src/main/assets-$flavorNameApp"
-
-                                val ext = Utils.FILE_EXTENSION_APK
-
-                                if (!file(src).isDirectory) {
-                                    return@copy
-                                }
-
-                                from(src); into(dst)
-
-                                val verName = versionName?.replace(Regex("\\s"), "-")?.lowercase()
-
-                                /* e.g. inrt-v6.4.0-beta-universal.apk */
-                                val srcFileName = "$flavorNameInrt-v$verName-universal.$ext".also {
-                                    if (!file(File(src, it)).exists()) {
-                                        throw GradleException("Source file \"${file(File(src, it))}\" doesn't exist")
-                                    }
-                                }
-
-                                val dstFileName = "$templateName.$ext"
-                                val isOverridden = file(File(dst, dstFileName)).exists()
-                                include(srcFileName)
-                                rename(srcFileName, dstFileName)
-                                println("Source: ${file(File(src, srcFileName))}")
-                                println("Destination: ${file(File(dst, dstFileName))}${if (isOverridden) " [overridden]" else ""}")
-                            }
-                        }
-                        ?: println("$taskName doesn't exist in project ${project.name}")
-                }
-            })
         }
 
         androidResources {
@@ -676,12 +630,12 @@ android {
     }
 
     signingConfigs {
-        if (sign.isValid) {
+        if (signs.isValid) {
             create(buildTypeRelease) {
-                storeFile = sign.properties["storeFile"]?.let { file(it as String) }
-                keyPassword = sign.properties["keyPassword"] as String
-                keyAlias = sign.properties["keyAlias"] as String
-                storePassword = sign.properties["storePassword"] as String
+                storeFile = signs.properties["storeFile"]?.let { file(it as String) }
+                keyPassword = signs.properties["keyPassword"] as String
+                keyAlias = signs.properties["keyAlias"] as String
+                storePassword = signs.properties["storePassword"] as String
             }
         }
     }
@@ -691,7 +645,7 @@ android {
             getDefaultProguardFile("proguard-android.txt"),
             "proguard-rules.pro",
         )
-        val niceSigningConfig = takeIf { sign.isValid }?.let {
+        val niceSigningConfig = takeIf { signs.isValid }?.let {
             signingConfigs.getByName(buildTypeRelease)
         }
         debug {
@@ -709,10 +663,12 @@ android {
     buildFeatures {
         aidl = true
         viewBinding = true
+
         // @Hint by SuperMonster003 on Aug 14, 2023.
         //  ! Substitution of "android.defaults.buildfeatures.buildconfig=true"
         //  ! zh-CN: "android.defaults.buildfeatures.buildconfig=true" 的替代方案
         buildConfig = true
+
         // @Archived by SuperMonster003 on Sep 23, 2024.
         //  ! Jetpack Compose
         //  # compose = true
@@ -750,7 +706,14 @@ android {
         }
 
         outputs.map { it as BaseVariantOutputImpl }.forEach {
-            it.outputFileName = Utils.getOutputFileName(this@all as ApplicationVariantImpl, it)
+            it.outputFileName = run {
+                val variant = this@all as ApplicationVariantImpl
+                val autojs = variant.applicationId.replace("^.+\\.(.+)$".toRegex(), "$1") // e.g. autojs6
+                val version = variant.versionName.replace("\\s".toRegex(), "-") // e.g. 6.1.0
+                val architecture = it.getFilter("ABI") ?: "universal"
+                val extension = utils.FILE_EXTENSION_APK
+                "$autojs-v$version-$architecture.$extension".lowercase(getDefault())
+            }
         }
     }
 
@@ -792,7 +755,7 @@ tasks {
         listOf(flavorNameApp, flavorNameInrt).forEach { flavorName ->
             val src = "$flavorName/$buildTypeRelease"
             val dst = "${src}s"
-            val ext = Utils.FILE_EXTENSION_APK
+            val ext = utils.FILE_EXTENSION_APK
 
             if (!file(src).isDirectory) {
                 return@forEach
@@ -801,7 +764,7 @@ tasks {
             from(src); into(dst); include("*.$ext")
 
             rename { name ->
-                Utils.digestCRC32(file("${src}/$name")).let { digest ->
+                utils.digestCRC32(file("${src}/$name")).let { digest ->
                     name.replace(Regex("^(.+?)(\\.$ext)$"), "$1-$digest$2")
                 }
             }
@@ -813,232 +776,4 @@ tasks {
 
 extra {
     versions.handleIfNeeded(project, flavorNameApp, listOf(buildTypeDebug, buildTypeRelease))
-}
-
-gradle.beforeProject {
-    extensions.extraProperties["compileSdk"] = versions.sdkVersionCompile
-    extensions.extraProperties["minSdk"] = versions.sdkVersionMin
-    extensions.extraProperties["targetSdk"] = versions.sdkVersionTarget
-}
-
-class Sign(filePath: String) {
-
-    var isValid = false
-        private set
-
-    val properties = Properties().also { props ->
-        File(filePath).takeIf { it.exists() }?.let {
-            props.load(FileInputStream(it))
-            isValid = props.isNotEmpty()
-        }
-    }
-
-}
-
-class Versions(filePath: String) {
-
-    private val properties = Properties()
-    private val file = File(filePath).apply {
-        if (!canRead()) {
-            throw FileNotFoundException("Cannot read file '$filePath'")
-        }
-        properties.load(FileInputStream(this))
-    }
-
-    val sdkVersionMin = properties["MIN_SDK_VERSION"].let { it as String }.toInt()
-    val sdkVersionTarget = properties["TARGET_SDK_VERSION"].let { it as String }.toInt()
-    val sdkVersionTargetInrt = properties["TARGET_SDK_VERSION_INRT"].let { it as String }.toInt()
-    val sdkVersionCompile = properties["COMPILE_SDK_VERSION"].let { it as String }.toInt()
-    val appVersionName = properties["VERSION_NAME"] as String
-    val appVersionCode = properties["VERSION_BUILD"].let { it as String }.toInt()
-    val vscodeExtRequiredVersion = properties["VSCODE_EXT_REQUIRED_VERSION"] as String
-
-    private val currentVersionInt = JavaVersion.current().majorVersion.toInt()
-
-    private val javaVersionMinSupported: Int = properties["JAVA_VERSION_MIN_SUPPORTED"]
-        .let { it as String }.toInt()
-        .also {
-            if (currentVersionInt < it) {
-                throw GradleException(
-                    "Current Gradle JDK version ${JavaVersion.current()} does not meet " +
-                            "the minimum requirement which $it is needed."
-                )
-            }
-        }
-    private val javaVersionMinSuggested: Int = properties["JAVA_VERSION_MIN_SUGGESTED"].let { it as String }.toInt()
-    private val javaVersionMaxSupported: Int = properties["JAVA_VERSION_MAX_SUPPORTED"].let { it as String }.toInt()
-    private val javaVersionRaw = properties["JAVA_VERSION"] as String
-    private var javaVersionInfoSuffix = ""
-
-    val javaVersion: JavaVersion by lazy {
-        val javaVersionInt = determineJavaVersion()
-        gradle.beforeProject {
-            extensions.extraProperties["javaVersion"] = javaVersionInt
-        }
-        JavaVersion.toVersion(javaVersionInt)
-    }
-
-    private fun determineJavaVersion(): Int {
-        if (gradle.extra.has("javaVersionOverriddenByUser")) {
-            (gradle.extra.get("javaVersionOverriddenByUser") as? Int)?.let {
-                javaVersionInfoSuffix += " [user-specified]"
-                return it
-            }
-        }
-
-        var versionInt = javaVersionRaw.toInt()
-        var isJvmCoercive = false
-
-        while (versionInt > javaVersionMinSupported) {
-            if (JvmTarget.values().any { it.name.contains(Regex("_$versionInt$")) }) {
-                break
-            }
-            versionInt -= 1
-            isJvmCoercive = true
-        }
-
-        if (isJvmCoercive) {
-            javaVersionInfoSuffix += " [coercive-jvm-downgraded]"
-        }
-
-        if (versionInt > currentVersionInt) {
-            versionInt = currentVersionInt
-            javaVersionInfoSuffix += " [consistent-downgraded]"
-        }
-
-        if (gradle.extra.has("javaVersionCoercedByGradle")) {
-            (gradle.extra["javaVersionCoercedByGradle"] as? Int)?.let {
-                if (versionInt > it) {
-                    versionInt = it
-                    javaVersionInfoSuffix += " [coercive-gradle-downgraded]"
-                }
-            }
-        }
-        return versionInt
-    }
-
-    private var isBuildNumberAutoIncremented = false
-    private val minBuildTimeGap = Utils.hours2Millis(0.75)
-
-    private val isBuildGapEnough
-        get() = properties["BUILD_TIME"]?.let {
-            Date().time - (it as String).toLong() > minBuildTimeGap
-        } == true
-
-    init {
-        if (currentVersionInt < javaVersionMinSuggested) {
-            logger.error(
-                "It is recommended to upgrade current Gradle JDK version ${JavaVersion.current()} to $javaVersionMinSuggested or higher${
-                    if (javaVersionMaxSupported > 0) " (but not higher than $javaVersionMaxSupported)" else ""
-                }."
-            )
-        }
-        if (currentVersionInt > javaVersionMaxSupported) {
-            logger.error(
-                "It is recommended to downgrade current Gradle JDK version $currentVersionInt " +
-                        "to $javaVersionMaxSupported${if (javaVersionMaxSupported > javaVersionMinSuggested) " or lower (but not lower than $javaVersionMinSuggested)" else ""}, " +
-                        "as Gradle may be not compatible with JDK $currentVersionInt for now."
-            )
-        }
-    }
-
-    fun showInfo() {
-        val title = "Version information for AutoJs6 app library"
-
-        val infoVerName = "Version name: $appVersionName"
-        val infoVerCode = "Version code: ${if (isBuildNumberAutoIncremented) "${appVersionCode + 1} [auto-incremented]" else appVersionCode}"
-        val infoVerSdk = "SDK versions: min [$sdkVersionMin] / target [$sdkVersionTarget] / compile [$sdkVersionCompile]"
-        val infoVerJava = "Java version: $javaVersion${if (gradle.extra.has("isHideConsoleInfoHintSuffix") && gradle.extra.get("isHideConsoleInfoHintSuffix") == true) "" else javaVersionInfoSuffix}"
-
-        val maxLength = arrayOf(title, infoVerName, infoVerCode, infoVerSdk, infoVerJava).maxOf { it.length }
-
-        arrayOf(
-            "=".repeat(maxLength),
-            title,
-            "-".repeat(maxLength),
-            infoVerName,
-            infoVerCode,
-            infoVerSdk,
-            infoVerJava,
-            "=".repeat(maxLength),
-            "",
-        ).forEach { println(it) }
-    }
-
-    fun handleIfNeeded(project: Project, flavorName: String, targetBuildType: List<String>) {
-        project.gradle.taskGraph.whenReady(object : Action<TaskExecutionGraph> {
-            override fun execute(taskGraph: TaskExecutionGraph) {
-                for (buildType in targetBuildType) {
-                    if (taskGraph.hasTask(Utils.getAssembleFullTaskName(project.name, flavorName, buildType))) {
-                        return appendToTask(project, flavorName, buildType)
-                    }
-                }
-                return showInfo()
-            }
-        })
-    }
-
-    private fun appendToTask(project: Project, flavorName: String, buildType: String) {
-        project.tasks.getByName(Utils.getAssembleTaskName(flavorName, buildType)).doLast {
-            updateProperties()
-            println()
-            showInfo()
-        }
-    }
-
-    private fun updateProperties() {
-        if (isBuildGapEnough) {
-            val isBuildAppRelease = gradle.startParameter.taskNames.any {
-                it.contains(Regex("^(:?$flavorNameApp:)?$buildActionAssemble($flavorNameApp|$flavorNameInrt)$buildTypeRelease", IGNORE_CASE))
-            }
-            if (!isBuildAppRelease) {
-                properties["VERSION_BUILD"] = "${appVersionCode + 1}"
-                isBuildNumberAutoIncremented = true
-            }
-        }
-        properties["BUILD_TIME"] = "${Date().time}"
-        properties.store(file.writer(), null)
-    }
-
-}
-
-object Utils {
-
-    const val FILE_EXTENSION_APK = "apk"
-
-    fun hours2Millis(hour: Double) = hour * 3.6e6
-
-    fun getDateString(format: String, zone: String): String {
-        // e.g. May 23, 2011
-        return SimpleDateFormat(format).apply { timeZone = TimeZone.getTimeZone(zone) }.format(Date())
-    }
-
-    fun getOutputFileName(variant: ApplicationVariantImpl, output: BaseVariantOutputImpl): String {
-        val autojs = variant.applicationId.replace("^.+\\.(.+)$".toRegex(), "$1") // e.g. autojs6
-        val version = variant.versionName.replace("\\s".toRegex(), "-") // e.g. 6.1.0
-        val architecture = output.getFilter("ABI") ?: "universal"
-        val extension = FILE_EXTENSION_APK
-
-        return "$autojs-v$version-$architecture.$extension".lowercase(Locale.getDefault())
-    }
-
-    fun getAssembleTaskName(flavorName: String, buildType: String) = "assemble${capitalize(flavorName)}${capitalize(buildType)}"
-
-    fun getAssembleFullTaskName(projectName: String, flavorName: String, buildType: String) = ":$projectName:${getAssembleTaskName(flavorName, buildType)}"
-
-    fun digestCRC32(file: File): String {
-        val fis = FileInputStream(file)
-        val buffer = ByteArray(4096)
-        var read: Int
-
-        return CRC32().let { o ->
-            while (fis.read(buffer).also { read = it } > 0) {
-                o.update(buffer, 0, read)
-            }
-            String.format("%08x", o.value)
-        }
-    }
-
-    private fun capitalize(s: String) = "${s[0].uppercase(Locale.getDefault())}${s.substring(1)}"
-
 }

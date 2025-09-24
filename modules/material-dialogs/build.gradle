@@ -1,4 +1,5 @@
 plugins {
+    id 'org.autojs.build.versions'
     id 'com.android.library'
     id 'kotlin-android'
 }
@@ -6,11 +7,11 @@ plugins {
 android {
     namespace = 'com.afollestad.materialdialogs'
 
-    compileSdk = project.ext.compileSdk
+    compileSdk = versions.sdkVersionCompile
 
     defaultConfig {
-        minSdk = project.ext.minSdk
-        targetSdk = project.ext.targetSdk
+        minSdk = versions.sdkVersionMin
+        targetSdk = versions.sdkVersionTarget
 
         versionName '0.9.6.0'
         versionCode 179

@@ -36,7 +36,8 @@
         "崩溃报告页面支持双指缩放调整字体大小并添加常用功能按钮",
         "应用启动器图标支持自适应图标特性 _[`issue #405`](http://issues.autojs6.com/405)_",
         "Gradle 构建脚本提升 7z 格式文件的解压效率",
-        "使用版本目录 (Version Catalogs) 集中管理 Gradle 依赖和插件版本"
+        "使用版本目录 (Version Catalogs) 集中管理 Gradle 依赖和插件版本",
+        "模块化 Gradle 脚本, 将共享构建逻辑迁移至 buildSrc 并抽象为约定插件"
       ],
       "dependency": [
         "本地化 Root Shell 版本 1.6",

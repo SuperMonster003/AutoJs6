@@ -1,15 +1,16 @@
 plugins {
+    id 'org.autojs.build.versions'
     id 'com.android.library'
     id 'kotlin-android'
 }
 
 android {
     namespace 'net.dongliu.apk.parser'
-    compileSdk = project.ext.compileSdk
+    compileSdk = versions.sdkVersionCompile
 
     defaultConfig {
-        minSdk = project.ext.minSdk
-        targetSdk = project.ext.targetSdk
+        minSdk = versions.sdkVersionMin
+        targetSdk = versions.sdkVersionTarget
 
         versionName '6'
 

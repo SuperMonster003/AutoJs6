@@ -1,23 +1,24 @@
-apply plugin: 'com.android.library'
-apply plugin: 'org.jetbrains.kotlin.android'
-apply from: '../utils.build.gradle'
+plugins {
+    id 'org.autojs.build.utils'
+    id 'org.autojs.build.properties'
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
+}
 
 ext {
     projectName = "Image Quantization"
 }
 
-def versions = Utils.newVersions(project)
-
 def versionMap = [
         "libimagequant": "2.17.0",
         "libpng"       : "1.6.49",
 
-        "MIN_SDK"      : versions["MIN_SDK"] as Integer,
-        "COMPILE_SDK"  : versions["COMPILE_SDK"] as Integer,
-        "TARGET_SDK"   : versions["TARGET_SDK"] as Integer,
+        "MIN_SDK"      : props["MIN_SDK"] as Integer,
+        "COMPILE_SDK"  : props["COMPILE_SDK"] as Integer,
+        "TARGET_SDK"   : props["TARGET_SDK"] as Integer,
 
-        "NDK"          : versions["IMAGE_QUANT/NDK"],
-        "CMAKE"        : versions["IMAGE_QUANT/CMAKE"],
+        "NDK"          : props["IMAGE_QUANT/NDK"],
+        "CMAKE"        : props["IMAGE_QUANT/CMAKE"],
 ]
 
 def nameMap = [
@@ -25,6 +26,13 @@ def nameMap = [
         "NDK"    : "NDK",
         "CMAKE"  : "Cmake",
 ]
+
+utils.configureLibraryLifecycleHooks(project, nameMap.PROJECT, [
+        "libimagequant",
+        "libpng",
+        "NDK",
+        "CMAKE",
+].collect { "${nameMap[it] ?: it}: ${versionMap[it]}" }, Collections.emptyList(), null, [".cxx"])
 
 android {
 
@@ -75,20 +83,5 @@ android {
             version versionMap.CMAKE
         }
     }
-}
 
-clean.doFirst {
-    delete project.layout.buildDirectory
-    ['.cxx'].forEach { delete file(it) }
-}
-
-gradle.taskGraph.whenReady { taskGraph ->
-    if (taskGraph.allTasks.any { it.name == "clean" }) return
-
-    Utils.newFormatted("Version information for ${nameMap.PROJECT} Library", [
-            "libimagequant",
-            "libpng",
-            "NDK",
-            "CMAKE",
-    ].collect { "${nameMap[it] ?: it}: ${versionMap[it]}" }).print()
 }
