@@ -324,13 +324,15 @@ dependencies /* Material Dialogs */ {
 
 dependencies /* Layout */ {
     // Expandable Layout
-    implementation("com.github.aakira:expandable-layout:1.6.0")
+    // implementation("com.github.aakira:expandable-layout:1.6.0")
+    implementation(project(":libs:expandable-layout-1.6.0"))
 
     // Expandable RecyclerView
     implementation("com.bignerdranch.android:expandablerecyclerview:3.0.0-RC1")
 
     // Flexible Divider
-    implementation("com.yqritc:recyclerview-flexibledivider:1.4.0")
+    // implementation("com.yqritc:recyclerview-flexibledivider:1.4.0")
+    implementation(project(":libs:recyclerview-flexibledivider-1.4.0"))
 }
 
 dependencies /* View */ {
