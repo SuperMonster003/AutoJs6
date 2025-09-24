@@ -10,18 +10,17 @@
  * @property {string} link.checksums
  */
 
-import { load } from 'cheerio';
+import * as cheerio from 'cheerio';
 import { fileURLToPath } from 'node:url';
 
 const LINK_PREFIX = 'https://gradle.org';
 const URL = `${LINK_PREFIX}/releases`;
 
 /**
- * @return {Promise<GradleRelease[]>}
+ * @returns {Promise<GradleRelease[]>}
  */
 export async function fetchGradleReleases() {
-    const html = await fetch(URL).then(r => r.text());
-    const $ = load(html);
+    const $ = cheerio.load(await fetch(URL).then(r => r.text()));
 
     const contents = $('.resources-contents').filter((_, el) => {
         return $(el).find('.u-text-with-icon').length > 0;
@@ -66,7 +65,8 @@ async function main() {
     })));
 }
 
-// 判断是否为直接执行该文件
+// Determine if this file is being run directly.
+// zh-CN: 判断是否为直接执行该文件.
 if (fileURLToPath(import.meta.url) === process.argv[1]) {
     main().catch(err => {
         console.error(err);

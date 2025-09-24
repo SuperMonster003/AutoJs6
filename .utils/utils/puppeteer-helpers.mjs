@@ -1,9 +1,87 @@
 // utils/puppeteer-helpers.mjs
 
 /** @typedef {import('puppeteer').Page} Page */
+/** @typedef {string | RegExp | ((s: string) => boolean)} FindTargetRowsFilter */
+/** @typedef {string} TableDataStructureItemName */
+/** @typedef {RegExp | ((s: string) => boolean | string)} TableDataStructureItem */
+/** @typedef {string | RegExp | ((s: string) => boolean | string)} TableDataStructureItemForPageEvaluate */
+/**
+ * @typedef {object} FindTargetRowsOptions
+ * @property {string} [tableSelector='table']
+ * @property {{ [selector: string]: FindTargetRowsFilter | FindTargetRowsFilter[] }}[tableFilter={}]
+ * @property {string} [tableRowSelector='tbody tr']
+ * @property {string} [tableDataSelector='td']
+ * @property {Array<{ [dataItemName: TableDataStructureItemName]: TableDataStructureItem } | TableDataStructureItemName>} [tableDataStructure=[]]
+ */
+/**
+ * @typedef {object} FindTargetRowsOptionsForPageEvaluate
+ * @property {string} [tableSelector='table']
+ * @property {{ [selector: string]: FindTargetRowsFilter | FindTargetRowsFilter[] }}[tableFilter={}]
+ * @property {string} [tableRowSelector='tbody tr']
+ * @property {string} [tableDataSelector='td']
+ * @property {Array<{ [dataItemName: TableDataStructureItemName]: TableDataStructureItemForPageEvaluate } | TableDataStructureItemName>} [tableDataStructure=[]]
+ */
+/**
+ * @typedef {object} PuppeteerOptions
+ * @property {string} url
+ * @property {number} [pageGoToTimeout=120000]
+ * @property {number} [findTargetRowsTimeout=30000]
+ */
 
 import puppeteer from 'puppeteer';
 import { sleep } from './async.mjs';
+
+const REGEX_ID_FOR_PAGE_EVALUATE = ':RegExp:';
+const FUNCTION_ID_FOR_PAGE_EVALUATE = ':Function:';
+
+/**
+ * @param {RegExp} regex
+ * @returns {string}
+ */
+function encodeRegexTag(regex) {
+    const flags = regex.flags.split('').sort().join('');
+    return `${REGEX_ID_FOR_PAGE_EVALUATE}${flags ? `${flags}:` : ''}${regex.source}`;
+}
+
+/**
+ * @param {FindTargetRowsOptions} options
+ * @returns {FindTargetRowsOptionsForPageEvaluate}
+ */
+function toEncodedRegexTagOptions(options) {
+    /**
+     * @param {Object} obj
+     * @returns {Object}
+     */
+    function traverse(obj) {
+        if (!obj) return obj;
+        if (typeof obj !== 'object' && typeof obj !== 'function') return obj;
+
+        for (const key in obj) {
+            const value = obj[key];
+
+            if (value instanceof RegExp) {
+                obj[key] = encodeRegexTag(value);
+            } else if (typeof value === 'function') {
+                obj[key] = `${FUNCTION_ID_FOR_PAGE_EVALUATE}${value.toString()}`;
+            } else if (Array.isArray(value)) {
+                obj[key] = value.map(item => {
+                    if (item instanceof RegExp) {
+                        return encodeRegexTag(item);
+                    }
+                    if (typeof item === 'function') {
+                        return `${FUNCTION_ID_FOR_PAGE_EVALUATE}${item.toString()}`;
+                    }
+                    return traverse(item);
+                });
+            } else if (typeof value === 'object') {
+                traverse(value);
+            }
+        }
+        return obj;
+    }
+
+    return structuredClone(traverse(options));
+}
 
 /**
  * @param {Page} page
@@ -27,20 +105,15 @@ export async function autoScroll(page) {
 }
 
 /**
- * @typedef {object} FindTargetRowsOptions
- * @property {string} [tableSelector='table']
- * @property {{ [selector: string]: string | string[] }}[tableFilter={}]
- * @property {string} [tableRowSelector='tbody tr']
- * @property {string} [tableDataSelector='td']
- * @property {Array<{ [dataItemName: string]: string } | string>} [tableDataStructure=[]]
- */
-/**
  * @param {Page} page
  * @param {FindTargetRowsOptions} [options={}]
  * @returns {Promise<Array<{ [dataItemName: string]: (string | null) }>>}
  */
 async function findTargetRowsWithPage(page, options = {}) {
-    return await page.evaluate((options) => {
+    /** @type {FindTargetRowsOptionsForPageEvaluate} */
+    const opts = toEncodedRegexTagOptions(options);
+    return await page.evaluate((options, consts) => {
+        const regex = new RegExp(consts.regexId + String.raw`(?:(\w+):)?(.+)`);
         const targets = Array.from(document.querySelectorAll(options.tableSelector ?? 'table'));
         const target = targets.find(t => {
             for (const [ selector, filter ] of Object.entries(options.tableFilter ?? {})) {
@@ -48,37 +121,45 @@ async function findTargetRowsWithPage(page, options = {}) {
                 if (Array.isArray(filter)) {
                     if (!filter.some(f => elements.some(e => {
                         if (typeof f === 'string') {
-                            if (!f.startsWith(':RegExp:')) {
-                                return e.textContent.trim() === f;
+                            if (f.startsWith(consts.regexId)) {
+                                const [ _, flags, pattern ] = f.match(regex);
+                                const re = new RegExp(pattern, flags);
+                                return re.test(e.textContent.trim());
                             }
-                            const [ _, flags, pattern ] = f.match(/:RegExp:(?:(\w+):)?(.+)/);
-                            const re = new RegExp(pattern, flags);
-                            return re.test(e.textContent.trim());
+                            if (f.startsWith(consts.functionId)) {
+                                const src = f.replace(consts.functionId, '');
+                                const fn = new Function(`return ${src}`)();
+                                return Boolean(fn(e.textContent.trim()));
+                            }
+                            return e.textContent.trim() === f;
                         }
                         throw TypeError(`Unknown type of filter (${f})`);
                     }))) {
                         return false;
                     }
-                } else {
-                    if (!elements.some(e => {
-                        if (typeof filter === 'string') {
-                            if (!filter.startsWith(':RegExp:')) {
-                                return e.textContent.trim() === filter;
-                            }
-                            const [ _, flags, pattern ] = filter.match(/:RegExp:(?:(\w+):)?(.+)/);
-                            const re = new RegExp(pattern, flags);
-                            return re.test(e.textContent.trim());
-                        }
+                } else if (!elements.some(e => {
+                    if (typeof filter !== 'string') {
                         throw TypeError(`Unknown type of filter (${filter})`);
-                    })) {
-                        return false;
                     }
+                    if (filter.startsWith(consts.regexId)) {
+                        const [ _, flags, pattern ] = filter.match(regex);
+                        const re = new RegExp(pattern, flags);
+                        return re.test(e.textContent.trim());
+                    }
+                    if (filter.startsWith(consts.functionId)) {
+                        const src = filter.replace(consts.functionId, '');
+                        const fn = new Function(`return ${src}`)();
+                        return Boolean(fn(e.textContent.trim()));
+                    }
+                    return e.textContent.trim() === filter;
+                })) {
+                    return false;
                 }
             }
             return true;
         });
         if (!target) {
-            throw Error('No target table found');
+            throw new Error('No target table found');
         }
 
         const tableRows = Array.from(target.querySelectorAll(options.tableRowSelector ?? 'tbody tr'));
@@ -88,60 +169,71 @@ async function findTargetRowsWithPage(page, options = {}) {
             const tds = Array.from(tr.querySelectorAll(options.tableDataSelector ?? 'td'));
             const tableDataStructure = options.tableDataStructure ?? [];
             if (tds.length === 0 || tableDataStructure.length === 0) return null;
-            if (options.tableDataStructure.length > tds.length) {
-                throw Error(`Table data size (${tds.length}) is less than table data structure (${options.tableDataStructure.length})`);
+            if (tableDataStructure.length > tds.length) {
+                throw new Error(`Table data size (${tds.length}) is less than table data structure (${tableDataStructure.length})`);
             }
-            for (let i = 0; i < options.tableDataStructure.length; i++) {
-                const o = options.tableDataStructure[i];
+            for (let i = 0; i < tableDataStructure.length; i++) {
+                const o = tableDataStructure[i];
                 let dataItemName = null;
-                let dataItemFilter = null;
+                let dataItemChecker = null;
                 if (typeof o === 'string') {
                     dataItemName = o;
                 } else if (typeof o === 'object' && o !== null) {
                     if (Object.keys(o).length !== 1) {
-                        throw Error(`Table data structure (${options.tableDataStructure}) must be a string or an object with only one key`);
+                        throw new Error(`Table data structure (${tableDataStructure}) must be a string or an object with only one key`);
                     }
                     dataItemName = Object.keys(o)[0];
-                    dataItemFilter = o[dataItemName];
+                    dataItemChecker = o[dataItemName];
                 } else {
-                    throw Error(`Unknown type of table data structure (${options.tableDataStructure})`);
+                    throw new Error(`Unknown type of table data structure (${o})`);
                 }
                 const dataItemValueRaw = tds[i].textContent.trim();
-                if (dataItemFilter == null) {
+                if (!dataItemChecker) {
                     tableData[dataItemName] = dataItemValueRaw;
-                } else if (typeof dataItemFilter === 'string') {
-                    if (!dataItemFilter.startsWith(':RegExp:')) {
-                        tableData[dataItemName] = dataItemValueRaw === dataItemFilter ? dataItemValueRaw : null;
-                    } else {
-                        const [ _, flags, pattern ] = dataItemFilter.match(/:RegExp:(?:(\w+):)?(.+)/);
+                    continue;
+                }
+                if (typeof dataItemChecker === 'string') {
+                    if (dataItemChecker.startsWith(consts.regexId)) {
+                        const [ _, flags, pattern ] = dataItemChecker.match(regex);
                         const re = new RegExp(pattern, flags);
                         tableData[dataItemName] = dataItemValueRaw.match(re)?.[0] ?? null;
+                        continue;
+                    }
+                    if (dataItemChecker.startsWith(consts.functionId)) {
+                        const src = dataItemChecker.replace(consts.functionId, '');
+                        const fn = new Function(`return ${src}`)();
+                        const result = fn(dataItemValueRaw);
+                        if (typeof result === 'boolean') {
+                            tableData[dataItemName] = result ? dataItemValueRaw : null;
+                            continue;
+                        }
+                        if (typeof result === 'string') {
+                            tableData[dataItemName] = result;
+                            continue;
+                        }
+                        throw new Error(`Function ${fn.name} must return a boolean or a string`);
                     }
                 }
+                throw new Error(`Unknown type of data item checker (${dataItemChecker})`);
             }
             tableDataList.push(tableData);
         });
         return tableDataList;
-    }, options);
+    }, opts, {
+        regexId: REGEX_ID_FOR_PAGE_EVALUATE,
+        functionId: FUNCTION_ID_FOR_PAGE_EVALUATE,
+    });
 }
 
 /**
- * @typedef {object} PuppeteerOptions
- * @property {string} url
- * @property {number} [pageGoToTimeout=120000]
- * @property {number} [findTargetRowsTimeout=30000]
- */
-/**
  * @param {FindTargetRowsOptions & PuppeteerOptions} options
- * @returns {Promise<Array<{[dataItemName: string]: string | null}>>}
+ * @returns {Promise<Array<{ [dataItemName: string]: (string | null) }>>}
  */
 export async function findTargetRows(options) {
     const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
     try {
         await page.goto(options.url, { waitUntil: 'networkidle0', timeout: options.pageGoToTimeout ?? 120000 });
-
-        // 页面为懒加载: 滚动并多次尝试, 直到目标表格出现或超时
         let rows = null;
         const deadline = Date.now() + (options.findTargetRowsTimeout ?? 30000);
         while (Date.now() < deadline) {

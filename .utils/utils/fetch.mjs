@@ -2,17 +2,21 @@
 
 /** @typedef {import('@octokit/types').Endpoints['GET /repos/{owner}/{repo}/commits']['response']['data']} CommitsData */
 
-import fetch from 'node-fetch';
 import * as dotenv from 'dotenv';
+import * as https from 'https';
+import nodeFetch from 'node-fetch';
+import { buildUrl } from './format.mjs';
 import { toYYYYMMDD } from './date.mjs';
 
 dotenv.config({ path: '../.env', quiet: true });
 
 /**
- * 获取远程文件真实大小.
+ * Get the actual size of a remote file.<br>
+ * zh-CN: 获取远程文件真实大小.
  *
  * @param {string} url
- * @param {{timeout?: number}} [options]
+ * @param {Object} [options]
+ * @param {number} [options.timeout=30000]
  * @returns {Promise<number | null>}
  */
 export async function getRemoteFileSizeBytes(url, { timeout = 30000 } = {}) {
@@ -21,10 +25,11 @@ export async function getRemoteFileSizeBytes(url, { timeout = 30000 } = {}) {
         'accept': '*/*',
     };
 
-    // 1) 尝试 HEAD
+    // Attempt HEAD.
+    // zh-CN: 尝试 HEAD.
 
     try {
-        const res = await fetch(url, {
+        const res = await nodeFetch(url, {
             method: 'HEAD',
             redirect: 'follow',
             headers,
@@ -37,7 +42,8 @@ export async function getRemoteFileSizeBytes(url, { timeout = 30000 } = {}) {
         /* Ignored. */
     }
 
-    // 2) 尝试 Range GET (bytes=0-0), 从 Content-Range 解析总长度
+    // Attempt Range GET (bytes=0-0), parse total length from Content-Range.
+    // zh-CN: 尝试 Range GET (bytes=0-0), 从 Content-Range 解析总长度.
 
     try {
         const ac = new AbortController();
@@ -56,7 +62,8 @@ export async function getRemoteFileSizeBytes(url, { timeout = 30000 } = {}) {
                 const m = /bytes\s+\d+-\d+\/(\d+)/i.exec(cr);
                 if (m) return Number(m[1]);
             }
-            // 退化: 仍然尝试 content-length
+            // Fallback, still try content-length.
+            // zh-CN: 退化, 仍然尝试 content-length.
             const len = res.headers.get('content-length');
             if (len && /^\d+$/.test(len)) return Number(len);
         }
@@ -70,12 +77,12 @@ export async function getRemoteFileSizeBytes(url, { timeout = 30000 } = {}) {
 /**
  * @param {string} owner
  * @param {string} repo
- * @return {Promise<string>}
+ * @returns {Promise<string>}
  */
 export async function getLatestCommitDate(owner, repo) {
-    const token = process.env.GITHUB_TOKEN; // 可选：避免频繁请求受限
     const url = `https://api.github.com/repos/${owner}/${repo}/commits?per_page=1`;
 
+    const token = process.env.GITHUB_TOKEN;
     /** @type {import('node-fetch').HeadersInit} */
     const headers = {
         accept: 'application/vnd.github+json',
@@ -85,16 +92,63 @@ export async function getLatestCommitDate(owner, repo) {
     const res = await fetch(url, { headers });
 
     if (!res.ok) {
-        throw new Error(`GitHub API 请求失败: ${res.status} ${res.statusText}`);
+        throw new Error(`GitHub API request failed: ${res.status} ${res.statusText}`);
     }
 
     const data = /** @type {CommitsData} */ await res.json();
     const latest = Array.isArray(data) ? data[0] : null;
-    if (!latest?.commit) throw new Error('未获取到最新提交');
+    if (!latest?.commit) throw new Error('Failed to get latest commit');
 
-    // 优先使用 committer 的提交时间，fallback 到 author
     const iso = latest.commit.committer?.date ?? latest.commit.author?.date;
-    if (!iso) throw new Error('提交对象缺少日期字段');
+    if (!iso) throw new Error('Commit object missing date field');
 
     return toYYYYMMDD(iso);
+}
+
+/**
+ * @param {string} url
+ * @param {Object} [options={}]
+ * @param {Object<string, any>} [options.query={}]
+ * @param {import('http').OutgoingHttpHeaders} [options.headers={}]
+ * @param {number} [options.timeout=15000]
+ * @returns {Promise<*>}
+ */
+export function httpFetch(url, options = {}) {
+    return new Promise((resolve, reject) => {
+        const opts = {
+            method: 'GET',
+            headers: options.headers ?? {},
+            timeout: options.timeout ?? 15000,
+        };
+        const niceUrl = options.query ? buildUrl(url, options.query) : url;
+        const req = https.request(niceUrl, opts, (res) => {
+            const { statusCode } = res;
+            const chunks = [];
+            res.on('data', (d) => chunks.push(d));
+            res.on('end', () => {
+                if (statusCode < 200 || statusCode >= 300) {
+                    return reject(`HTTP ${statusCode}`);
+                }
+                let body = null;
+                try {
+                    body = Buffer.concat(chunks).toString('utf8');
+                } catch (_) {
+                    /* Ignored. */
+                }
+                if (body == null) {
+                    throw new Error('Failed to read response body');
+                }
+                try {
+                    resolve(JSON.parse(body));
+                } catch {
+                    resolve(body);
+                }
+            });
+        });
+        req.on('error', reject);
+        req.on('timeout', () => {
+            req.destroy(new Error('Request timed out'));
+        });
+        req.end();
+    });
 }

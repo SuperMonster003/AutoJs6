@@ -1,80 +1,165 @@
 // utils/versioning.mjs
 
-const SUFFIX_PRIORITY = {
-    // 预发布 (越小越靠前)
-    'canary': 1, 'nightly': 1, 'snapshot': 1, 'dev': 1,
-    'pre-alpha': 2, 'prealpha': 2, 'preview': 2, 'eap': 2, 'milestone': 2,
-    'alpha': 3,
-    'beta': 4,
-    'rc': 5,
-    // 正式/稳定
-    '': 10, 'stable': 10, 'ga': 10, 'final': 10, 'release': 10, 'lts': 10,
-};
+const PRIORITY_STABLE = 100;
+
+const SUFFIX_PRIORITY = Object.fromEntries([
+
+    [ [ 'canary', 'nightly', 'snapshot', 'dev', 'experimental', 'dev-experimental', 'wip', 'prototype' ], 5 ],
+    [ [ 'pre-alpha', 'preview', 'tech-preview', 'eap', 'milestone' ], 10 ],
+    [ [ 'alpha' ], 15 ],
+    [ [ 'beta' ], 20 ],
+    [ [ 'rc', 'ga-candidate' ], 25 ],
+    [ [ '', 'stable', 'ga', 'final', 'release', 'lts', 'rtm', 'sp', 'patch', 'maintenance' ], PRIORITY_STABLE ],
+
+].map((/** @type {[string[], number]} */ [ suffixes, priority ]) => {
+    return suffixes.map(suffix => [ suffix, priority ]);
+}).flat());
 
 /**
- * 统一后缀别名到规范键.
+ * @param {string} v1
+ * @param {string} v2
+ * @returns {number}
+ */
+export function compareVersionStrings(v1, v2) {
+    const [ n1, s1 ] = toVersionParts(v1);
+    const [ n2, s2 ] = toVersionParts(v2);
+    return compareVersionParts(n1, n2) || compareVersionSuffix(s1, s2);
+}
+
+/**
+ * @param {string} v1
+ * @param {string} v2
+ * @returns {number}
+ */
+export function compareVersionStringsDescending(v1, v2) {
+    const [ n1, s1 ] = toVersionParts(v1);
+    const [ n2, s2 ] = toVersionParts(v2);
+    return compareVersionParts(n2, n1) || compareVersionSuffix(s2, s1);
+}
+
+/**
+ * @param {string} version
+ * @returns {boolean}
+ */
+export function isVersionStable(version) {
+    const [ _, [ suffixName ] ] = toVersionParts(version);
+    return getSuffixPriority(suffixName) === PRIORITY_STABLE;
+}
+
+/**
+ * @param {string} version
+ * @param {Object} options
+ * @param {string} [options.min]
+ * @param {string} [options.max]
+ * @returns {boolean}
+ */
+export function isVersionInRange(version, { min, max } = {}) {
+    return (min == null || compareVersionStrings(version, min) >= 0)
+        && (max == null || compareVersionStrings(version, max) <= 0);
+}
+
+/**
+ * @param {string} suffix
+ * @returns {number}
+ */
+function getSuffixPriority(suffix) {
+    return SUFFIX_PRIORITY[normalizeSuffixName(suffix)] ?? Number.MAX_SAFE_INTEGER;
+}
+
+/**
+ * Normalize suffix aliases to standard keys.<br>
+ * zh-CN: 统一后缀别名到规范键.
  *
  * @param {string} nameRaw
- * @return {string}
+ * @returns {string}
  */
 function normalizeSuffixName(nameRaw) {
-    const n = String(nameRaw || '').toLowerCase();
+    const n = String(nameRaw || '').toLowerCase().replaceAll('_', '-');
     switch (n) {
         case 'a':
             return 'alpha';
         case 'b':
             return 'beta';
+        case 'exp':
+            return 'experimental';
         case 'cr':
+        case 'release-candidate':
             return 'rc';
+        case 'general-availability':
+            return 'ga';
         case 'm':
             return 'milestone';
         case 'pre':
+        case 'prev':
             return 'preview';
-        case 'canary':
-        case 'nightly':
-        case 'snapshot':
-        case 'dev':
-        case 'pre-alpha':
         case 'prealpha':
-        case 'preview':
-        case 'eap':
-        case 'milestone':
-        case 'alpha':
-        case 'beta':
-        case 'rc':
-        case 'stable':
-        case 'ga':
-        case 'final':
-        case 'release':
-        case 'lts':
-            return n;
+            return 'pre-alpha';
+        case 'proto':
+            return 'prototype';
         default:
-            return n; // 未知后缀维持原样, 优先级将落在默认分支
+            return n;
     }
 }
 
 /**
+ * @example [ numberPart[], [ suffixName, suffixNumber ] ]
+ * // All results below will be: [ [ 4, 1, 1 ], [ 'alpha', 2 ] ].
+ *
+ * toVersionParts('4.1.1 Alpha2');
+ * toVersionParts('4.1.1 alpha2');
+ * toVersionParts('4.1.1alpha2');
+ * toVersionParts('4.1.1alpha 2');
+ * toVersionParts('4.1.1 alpha 2');
+ * toVersionParts('4.1.1-alpha2');
+ * toVersionParts('4.1.1-alpha-2');
+ * toVersionParts('4.1.1 - alpha 2');
+ * toVersionParts('4.1.1_alpha_2');
+ * toVersionParts('4.1.1a2');
+ *
+ * // All results below will be: [ [ 2024, 3, 2 ], [ 'beta', 1 ] ].
+ *
+ * toVersionParts('2024.3.2 Beta');
+ * toVersionParts('2024.3.2 Beta1');
+ * toVersionParts('2024.3.2 Beta01');
+ * toVersionParts('2024.3.2 Beta.1');
+ * toVersionParts('2024.3.2beta1');
+ * toVersionParts('2024.3.2b1');
+ * toVersionParts('2024.3.2b');
+ *
  * @param {string} version
- * @return { [number[], [string, number]]}
+ * @returns { [number[], [string, number]] }
  */
-export function toVersionParts(version) {
-    const parts = version.split(/[\s+-]/);
-    const numberParts = parts[0].split('.').map(part => {
-        const num = parseInt(String(part), 10);
+function toVersionParts(version) {
+    const ver = version.trim();
+    const parts = ver.split(/[\s_+-]+/);
+    const numberParts = parts[0].split('.').map((partRaw, idx, arr) => {
+        const part = String(partRaw);
+        if (idx === arr.length - 1) {
+            const matched = part.match(/^\d+([A-Za-z]+)(\d*)$/);
+            if (matched) {
+                const suffix = matched[1];
+                const suffixNum = matched[2];
+                if (suffixNum) {
+                    parts.splice(1, 0, suffix, suffixNum);
+                } else {
+                    parts.splice(1, 0, suffix);
+                }
+            }
+        }
+        const num = parseInt(part, 10);
         if (Number.isNaN(num)) {
-            throw new Error(`Invalid version part: '${part}' in version: '${version}'`);
+            throw new Error(`Invalid version part: '${part}' in version: '${ver}'`);
         }
         return num;
     });
 
-    // 解析后缀, 支持 rc1 / rc 1 / rc.1 / RC1 等; 默认数字为 1
     const suffixPattern = /([A-Za-z]+)[\s._-]*(\d*)|([A-Za-z]*)[\s._-]*(\d+)/;
-    const suffixStr = parts[1] || '';
+    const suffixStr = parts.slice(1).join('') || '';
     const m = suffixStr.match(suffixPattern);
     if (!m) return [ numberParts, [ '', 0 ] ];
 
-    const rawName = (m[1] ?? m[3] ?? '');
-    const rawNum = (m[2] ?? m[4] ?? '');
+    const rawName = m[1] ?? m[3] ?? '';
+    const rawNum = m[2] ?? m[4] ?? '';
     const suffixName = normalizeSuffixName(rawName);
     const suffixNumberParsed = parseInt(rawNum || '1', 10);
     const suffixNumber = Number.isNaN(suffixNumberParsed) ? 1 : suffixNumberParsed;
@@ -84,9 +169,9 @@ export function toVersionParts(version) {
 /**
  * @param {number[]} a
  * @param {number[]} b
- * @return {number}
+ * @returns {number}
  */
-export function compareVersionParts(a, b) {
+function compareVersionParts(a, b) {
     const max = Math.max(a.length, b.length);
     for (let i = 0; i < max; i++) {
         const x = a[i] ?? 0;
@@ -99,62 +184,14 @@ export function compareVersionParts(a, b) {
 /**
  * @param {[string, number]} s1
  * @param {[string, number]} s2
- * @return {number}
+ * @returns {number}
  */
-export function compareVersionSuffix(s1, s2) {
+function compareVersionSuffix(s1, s2) {
     const [ name1Raw, num1 ] = s1;
     const [ name2Raw, num2 ] = s2;
-    const name1 = normalizeSuffixName(name1Raw);
-    const name2 = normalizeSuffixName(name2Raw);
-    const p1 = SUFFIX_PRIORITY[name1] ?? Number.MAX_SAFE_INTEGER;
-    const p2 = SUFFIX_PRIORITY[name2] ?? Number.MAX_SAFE_INTEGER;
+    const p1 = getSuffixPriority(name1Raw);
+    const p2 = getSuffixPriority(name2Raw);
     if (p1 !== p2) return p1 > p2 ? 1 : -1;
     if (num1 !== num2) return num1 > num2 ? 1 : -1;
     return 0;
-}
-
-/**
- * @param {string} v1
- * @param {string} v2
- * @return {number}
- */
-export function compareVersionStrings(v1, v2) {
-    const [ n1, s1 ] = toVersionParts(v1);
-    const [ n2, s2 ] = toVersionParts(v2);
-    const cmp = compareVersionParts(n1, n2);
-    return cmp !== 0 ? cmp : compareVersionSuffix(s1, s2);
-}
-
-/**
- * @param {string} v1
- * @param {string} v2
- * @return {number}
- */
-export function compareVersionStringsDescending(v1, v2) {
-    const [ n1, s1 ] = toVersionParts(v1);
-    const [ n2, s2 ] = toVersionParts(v2);
-    const cmp = compareVersionParts(n2, n1);
-    return cmp !== 0 ? cmp : compareVersionSuffix(s2, s1);
-}
-
-/**
- * @param {string} v
- * @return {boolean}
- */
-export function isVersionStable(v) {
-    const [ _, [ suffixName ] ] = toVersionParts(v);
-    const normalizedName = normalizeSuffixName(suffixName);
-    return (SUFFIX_PRIORITY[normalizedName] ?? Number.MAX_SAFE_INTEGER) === 10;
-}
-
-/**
- * @param {string} v
- * @param {Object} options
- * @param {string} [options.min]
- * @param {string} [options.max]
- * @return {boolean}
- */
-export function isVersionInRange(v, { min, max } = {}) {
-    return (min == null || compareVersionStrings(v, min) >= 0)
-        && (max == null || compareVersionStrings(v, max) <= 0);
 }

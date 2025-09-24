@@ -1,15 +1,18 @@
 // utils/date.mjs
 
 /**
+ * @example string
+ * "Aug 23, 2025"
  * @param {Date} [date=new Date()]
  * @returns {string}
  */
 export function toUpdatedStamp(date = new Date()) {
-    /* e.g. "Aug 23, 2025". */
     return date.toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
 /**
+ * @example string
+ * "2025/09/20"
  * @param {string} [dateText='']
  * @returns {string | null}
  */
@@ -23,11 +26,17 @@ export function toYYYYMMDD(dateText = '') {
 }
 
 /**
- * 生成 .properties 文件头部注释时间戳.
- * 形如: "#Thu Aug 28 12:05:55 CST 2025" (Properties.store 风格, en-US + short tz)
+ * Generate timestamp for .properties file header comment.<br>
+ * Note: The timezone abbreviation depends on runtime environment, may display as GMT+08/PDT etc.<br>
+ * zh-CN:<br>
+ * 生成 .properties 文件头部注释时间戳.<br>
  * 注: 时区缩写依赖运行环境, 可能显示为 GMT+08/PDT 等.
+ *
+ * @example string
+ * "#ThuAug 28 12:05:55 CST 2025"
+ *
  * @param {Date} [date=new Date()]
- * @param {string} [timeZone="Asia/Shanghai"] 可选时区, 如 "Asia/Shanghai"
+ * @param {string} [timeZone="Asia/Shanghai"]
  * @returns {string}
  */
 export function generatePropertiesFileTimestamp(date = new Date(), timeZone) {
@@ -43,11 +52,15 @@ export function generatePropertiesFileTimestamp(date = new Date(), timeZone) {
         timeZoneName: 'short',
         ...(timeZone ? { timeZone } : { timeZone: 'Asia/Shanghai' }),
     });
+    /**
+     * @example Intl.DateTimeFormatOptions
+     * { weekday: 'Thu', month:'Aug', day:'28', hour:'12', minute:'05', second:'55', timeZoneName:'CST', year:'2025' }
+     * @type {Intl.DateTimeFormatOptions}
+     */
     const parts = fmt.formatToParts(date).reduce((acc, p) => {
         acc[p.type] = p.value;
         return acc;
-    }, /** @type {Object<string, string>} */ ({}));
-    // parts 示例: { weekday: 'Thu', month:'Aug', day:'28', hour:'12', minute:'05', second:'55', timeZoneName:'CST', year:'2025' }
+    }, {});
     const stamp = `${parts.weekday} ${parts.month} ${parts.day} ${parts.hour}:${parts.minute}:${parts.second} ${parts.timeZoneName} ${parts.year}`;
     return `#${stamp}`;
 }

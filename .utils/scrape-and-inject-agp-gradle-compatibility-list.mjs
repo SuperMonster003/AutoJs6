@@ -1,9 +1,9 @@
 // scrape-and-inject-agp-gradle-compatibility-list.mjs
 
-import { getMinSupportedAgpVersion, getMinSupportedGradleVersion } from './utils/properties.mjs';
 import { compareVersionStrings } from './utils/versioning.mjs';
-import { updateAnchoredListInFile } from './utils/anchors.mjs';
 import { findTargetRows } from './utils/puppeteer-helpers.mjs';
+import { getMinSupportedAgpVersion, getMinSupportedGradleVersion } from './utils/properties.mjs';
+import { updateAnchoredListInFile } from './utils/anchors.mjs';
 
 const URL = 'https://developer.android.com/build/releases/gradle-plugin#updating-gradle';
 
@@ -13,8 +13,8 @@ const URL = 'https://developer.android.com/build/releases/gradle-plugin#updating
         tableSelector: '.devsite-table-wrapper table',
         tableFilter: {
             'tr th': [
-                `:RegExp:i:${/Plugin version/.source}`,
-                `:RegExp:i:${/Minimum required Gradle version/.source}`,
+                /Plugin version/i,
+                /Minimum required Gradle version/i,
             ],
         },
         tableRowSelector: 'tbody tr',
@@ -39,7 +39,7 @@ const URL = 'https://developer.android.com/build/releases/gradle-plugin#updating
         lines: Object.entries(map)
             .sort((a, b) => compareVersionStrings(b[0], a[0]))
             .map(([ pluginVersion, gradleVersion ]) => `"${pluginVersion}" to "${gradleVersion}",`),
-        updatedLabel: 'AGP 与 Gradle 兼容性映射',
+        updatedLabel: 'AGP and Gradle compatibility list',
     });
 })().catch(err => {
     console.error(err);

@@ -1,45 +1,39 @@
 // fetch-and-parse-android-studio-agp-compatibility-table.mjs
 
-import fetch from 'node-fetch';
-import { load } from 'cheerio';
 import { fileURLToPath } from 'node:url';
+import { findTargetRows } from './utils/puppeteer-helpers.mjs';
 
 const URL = 'https://developer.android.com/studio/releases#android_gradle_plugin_and_android_studio_compatibility';
 
 /**
- * @return {Promise<Array<{ studioVersion: string, agpRange: string }>>}
+ * @param {string} s
+ * @returns {string}
+ */
+const normalize = (s) => s.trim().replace(/\s+/g, ' ');
+
+/**
+ * @returns {Promise<Array<{ studioVersion: string, agpRange: string }>>}
  */
 export async function fetchStudioAgpTable() {
-    const html = await fetch(URL).then(r => r.text());
-    const $ = load(html);
-
-    const targetTable = $('table').filter((_, el) => {
-        let text = $(el).find('th').first().text();
-        return /Android Studio version/i.test(text);
+    // @ts-ignore
+    return findTargetRows({
+        url: URL,
+        tableFilter: {
+            th: /Android Studio version/i,
+        },
+        tableDataStructure: [
+            { 'studioVersion': normalize },
+            { 'agpRange': normalize },
+        ],
     });
-
-    if (!targetTable.length) {
-        throw new Error('未找到目标表格, 页面结构可能已变更');
-    }
-
-    const rows = [];
-    targetTable.find('tbody tr').each((_, tr) => {
-        const cells = $(tr).find('td').map((_, td) => {
-            return $(td).text().trim().replace(/\s+/g, ' ');
-        }).get();
-        if (cells.length < 2) return;
-        const [ studioVersion, agpRange ] = cells;
-        rows.push({ studioVersion, agpRange });
-    });
-
-    return rows;
 }
 
 async function main() {
     console.table(await fetchStudioAgpTable());
 }
 
-// 判断是否为直接执行该文件
+// Determine if this file is being run directly.
+// zh-CN: 判断是否为直接执行该文件.
 if (fileURLToPath(import.meta.url) === process.argv[1]) {
     main().catch(err => {
         console.error(err);

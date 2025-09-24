@@ -1,33 +1,51 @@
 // fetch-and-parse-android-studio-latest-stable-version.mjs
 
-import { load } from 'cheerio';
+/** @typedef {'exe' | 'zip' | 'tar' | 'other'} StableArchiveItemKind */
+/**
+ * @typedef {Object} StableArchiveItem
+ * @property {string} platform
+ * @property {string} filename
+ * @property {string} size
+ * @property {string} sha256
+ * @property {string | null} url
+ * @property {StableArchiveItemKind} kind
+ */
+
+import * as cheerio from 'cheerio';
+import { bytes2GiB } from './utils/format.mjs';
 import { fileURLToPath } from 'node:url';
+import { getRemoteFileSizeBytes } from './utils/fetch.mjs';
 
 const URL = 'https://developer.android.com/studio?hl=en';
 
 /**
  * @param {string} s
- * @return {string}
+ * @returns {string}
  */
-function norm(s) {
-    return (s ?? '').replace(/\s+/g, ' ').trim();
-}
+const normalize = (s) => (s ?? '').replace(/\s+/g, ' ').trim();
 
 /**
  * @param {string} filename
- * @return {string | null}
+ * @param {string} kind
+ * @returns {string | null}
  */
-function buildDownloadUrlFromFilename(filename) {
-    // 例: android-studio-2025.1.2.13-windows.exe
+function buildDownloadUrlFromFilename(filename, kind) {
     const m = /android-studio-([\d.]+)-/.exec(filename);
     if (!m) return null;
     const version = m[1];
-    return `https://redirector.gvt1.com/edgedl/android/studio/install/${version}/${filename}`;
+    const urlType = {
+        'exe': 'install',
+        'zip': 'ide-zips',
+        'tar': 'ide-zips',
+    }[kind];
+    if (!urlType) {
+        throw new Error(`Unsupported kind: ${kind}`);
+    }
+    return `https://redirector.gvt1.com/edgedl/android/studio/${urlType}/${version}/${filename}`;
 }
-
 /**
  * @param {string} url
- * @return {Promise<string>}
+ * @returns {Promise<string>}
  */
 async function fetchHtml(url) {
     const res = await fetch(url, {
@@ -41,95 +59,71 @@ async function fetchHtml(url) {
 }
 
 /**
- * @typedef {'exe' | 'zip' | 'other'} RowKind
- */
-
-/**
- * @typedef {Object} Row
- * @property {string} platform
- * @property {string} filename
- * @property {string} size
- * @property {string} sha256
- * @property {string | null} url
- * @property {RowKind} kind
- */
-/**
  * @param {string} html
- * @return {Row[]}
+ * @returns {Promise<StableArchiveItem[]>}
  */
-function parseWindowsRowsFromHtml(html) {
-    const $ = load(html);
+async function parseItemsFromHtml(html) {
+    const $ = cheerio.load(html);
     const rows = [];
 
     /** @type {import('cheerio').Cheerio<import('domhandler').Element>} */
     const tableRows = $('table.download tbody tr');
-    tableRows.each((_, tr) => {
+    await Promise.all(Array.from(tableRows).map(async tr => {
         const tds = $(tr).find('td');
         if (tds.length !== 4) return;
 
-        const platform = norm($(tds[0]).text());
-        if (!/windows/i.test(platform)) return;
+        const platform = normalize($(tds[0]).text());
+        if (!/windows|linux/i.test(platform)) return;
 
         const btn = $(tds[1]).find('button.devsite-dialog-button').first();
-        const filename = norm(btn.text());
+        const filename = normalize(btn.text());
         if (!filename || !filename.includes('android-studio')) return;
 
-        const size = norm($(tds[2]).text());
-        const sha256 = norm($(tds[3]).text());
-        const url = buildDownloadUrlFromFilename(filename);
+        const sha256 = normalize($(tds[3]).text());
 
-        rows.push({
-            platform,
-            filename,
-            size,
-            sha256,
-            url,
-            kind: filename.endsWith('.exe')
-                ? 'exe'
-                : filename.endsWith('.zip')
-                    ? 'zip'
-                    : 'other',
-        });
-    });
+        // @formatter:off
+        const kind = filename.match(/\.exe$/) ? 'exe'
+                   : filename.match(/\.zip$/) ? 'zip'
+                   : filename.match(/\.tar(\.gz)?$/) ? 'tar'
+                   : 'other';
+        // @formatter:on
 
+        const url = buildDownloadUrlFromFilename(filename, kind);
+        const bytes = await getRemoteFileSizeBytes(url);
+        const size = bytes2GiB(bytes);
+        rows.push({ platform, filename, size, sha256, url, kind });
+    }))
     return rows
-        .filter(r => r.kind === 'exe' || r.kind === 'zip')
-        .sort((a) => a.kind === 'exe' ? -1 : 1);
+        .filter(r => r.kind === 'exe' || r.kind === 'zip' || r.kind === 'tar')
+        .sort((_, b) => b.kind === 'exe' ? 1 : b.kind === 'zip' ? 1 : -1);
 }
 
 /**
- * 导出: 获取最新稳定版 Windows 的下载信息 (exe 与 zip)
- * 返回形如:
- * [
- *   { platform, filename, size, sha256, url, kind: 'exe' },
- *   { platform, filename, size, sha256, url, kind: 'zip' }
- * ]
+ * Export: Get download information for the latest stable archives (exe, zip, tar)<br>
+ * Returns array like: [ { platform, filename, size, sha256, url, kind: 'exe'|'zip'|'tar' } ]<br>
+ * zh-CN:<br>
+ * 导出: 获取最新稳定版档案的下载信息 (exe, zip, tar)<br>
+ * 返回形如: [ { platform, filename, size, sha256, url, kind: 'exe'|'zip'|'tar' } ]
  *
  * @param {string} [sourceUrl=URL]
- * @returns {Promise<Row[]>}
+ * @returns {Promise<StableArchiveItem[]>}
  */
-export async function getLatestStableWindows(sourceUrl = URL) {
+export async function getLatestStableArchives(sourceUrl = URL) {
     const html = await fetchHtml(sourceUrl);
-    const rows = parseWindowsRowsFromHtml(html);
-    if (!rows.length) {
-        throw new Error('未在页面中找到 Windows 稳定版下载条目');
+    const items = await parseItemsFromHtml(html);
+    if (!items.length) {
+        throw new Error('No latest stable archives found in the page');
     }
-    return rows;
+    return items;
 }
 
-// CLI 模式: 直接运行则打印结果; 被 import 时不执行
 async function main() {
-    const rows = await getLatestStableWindows(URL);
-    for (const r of rows) {
-        console.log(`${r.kind.toUpperCase()}:`);
-        console.log(`  filename : ${r.filename}`);
-        console.log(`  size     : ${r.size}`);
-        console.log(`  sha256   : ${r.sha256}`);
-        console.log(`  url      : ${r.url}`);
-    }
+    const items = await getLatestStableArchives(URL);
+    console.table(items.map(({ filename, size, url, sha256 }) => ({ filename, size, url, sha256 })));
 }
 
-// 判断是否为直接执行该文件
+// Determine if this file is being run directly.
+// zh-CN: 判断是否为直接执行该文件.
 if (fileURLToPath(import.meta.url) === process.argv[1]) {
     main().catch(err => {
         console.error(err);

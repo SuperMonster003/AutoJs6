@@ -1,107 +1,67 @@
 // scrape-and-inject-ksp-releases.mjs
 
 /** @typedef {import('@octokit/types').Endpoints['GET /repos/{owner}/{repo}/releases']['response']['data']} ReleasesData */
-
-import * as https from 'https';
-import { updateAnchoredMapInFile } from './utils/anchors.mjs';
-import { toUpdatedStamp } from './utils/date.mjs';
-
-/**
- * @param {string} url
- * @param {Object} [options={}]
- * @param {import("http").OutgoingHttpHeaders} [options.headers={}]
- * @param {number} [options.timeout=15000]
- * @return {Promise<ReleasesData>}
- */
-function httpsGetJson(url, options = {}) {
-    return new Promise((resolve, reject) => {
-        const req = https.request(
-            url,
-            {
-                method: 'GET',
-                headers: {
-                    'User-Agent': 'node',
-                    'Accept': 'application/vnd.github+json',
-                    ...(options.headers || {}),
-                },
-                timeout: options.timeout || 15000,
-            },
-            (res) => {
-                const { statusCode } = res;
-                const chunks = [];
-
-                res.on('data', (d) => chunks.push(d));
-                res.on('end', () => {
-                    const body = Buffer.concat(chunks).toString('utf8');
-
-                    if (statusCode < 200 || statusCode >= 300) {
-                        return reject(
-                            new Error(`HTTP ${statusCode}: ${body.slice(0, 200)}`),
-                        );
-                    }
-
-                    try {
-                        const json = /** @type {ReleasesData} */ JSON.parse(body);
-                        resolve(json);
-                    } catch (e) {
-                        reject(new Error(`JSON parse error: ${e.message}`));
-                    }
-                });
-            },
-        );
-
-        req.on('error', reject);
-        req.on('timeout', () => {
-            req.destroy(new Error('Request timed out'));
-        });
-        req.end();
-    });
-}
-
 /**
  * @typedef {Object} KspRelease
  * @property {string} version
  * @property {string} name
  * @property {string} publishedAt
  */
+
+import * as fsp from 'node:fs/promises';
+import { httpFetch } from './utils/fetch.mjs';
+import { readProperties } from './utils/properties.mjs';
+import { toUpdatedStamp } from './utils/date.mjs';
+import { updateAnchoredMapInFile } from './utils/anchors.mjs';
+
+const URL = 'https://api.github.com/repos/google/ksp/releases';
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+
 /**
- * @return {Promise<KspRelease[]>}
+ * @returns {Promise<KspRelease[]>}
  */
 async function fetchKspReleases() {
-    const base = 'https://api.github.com/repos/google/ksp/releases';
-    const perPage = 100;
-    let page = 1;
-    let reached = false;
+    /** @type {import('http').OutgoingHttpHeaders} */
+    const headers = {
+        'accept': 'application/vnd.github+json',
+        'user-agent': 'node',
+        ...(GITHUB_TOKEN ? { 'authorization': `Bearer ${GITHUB_TOKEN}` } : {}),
+    };
+    const minToCheck = await getMinKotlinVersionToCheck();
     const out = [];
 
-    /** @type {import("http").OutgoingHttpHeaders} */
-    const headers = {};
-    if (process.env.GITHUB_TOKEN) {
-        headers.authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
-    }
+    let page = 1;
+    let reached = false;
 
     while (!reached) {
-        const url = `${base}?per_page=${perPage}&page=${page}`;
-        const releases = await httpsGetJson(url, { headers });
+        const query = { per_page: 100, page };
+        /** @type {ReleasesData} */
+        const releases = await httpFetch(URL, { query, headers });
+
         if (!Array.isArray(releases) || releases.length === 0) break;
 
         for (const release of releases) {
             const tag = String(release.tag_name || '').trim();
-            // 记录
             out.push({
                 version: tag,
                 name: release.name,
                 publishedAt: release.published_at,
             });
 
-            // 判断是否已到达目标最旧版本（含）
             const parts = tag.split('-');
-            if (parts.length >= 2) {
-                const kspVer = parts.slice(0, -1).join('-');
-                if (kspVer === '1.8.0-RC2') {
-                    reached = true;
-                    break;
-                }
+            if (parts.length < 2) continue;
+            /**
+             * @example string
+             * "2.2.20-2.0.3" -> "2.2.20"
+             * "1.9.10-1.0.13" -> "1.9.10"
+             * "2.2.20-RC2-2.0.2" -> "2.2.20-RC2"
+             * "1.9.20-RC-1.0.13" -> "1.9.20-RC"
+             * @type {string}
+             */
+            const kotlinVer = parts.slice(0, -1).join('-');
+            if (kotlinVer === minToCheck) {
+                reached = true;
+                break;
             }
         }
 
@@ -112,41 +72,68 @@ async function fetchKspReleases() {
     return out;
 }
 
+async function getMinKotlinVersionToCheck() {
+    const raw = await fsp.readFile('../settings.gradle.kts', 'utf8');
+    const tag = 'GRADLE_KOTLIN_COMPATIBILITY_LIST';
+    const beginIndex = raw.indexOf(`@AnchorBegin ${tag}`);
+    const endIndex = raw.indexOf(`@AnchorEnd ${tag}`);
+
+    if (beginIndex !== -1 && endIndex !== -1) {
+        const props = await readProperties();
+        const minGradle = props['MIN_SUPPORTED_GRADLE_VERSION'];
+
+        const lines = raw.slice(beginIndex + tag.length + 1, endIndex).split('\n');
+        for (const line of lines) {
+            const m = /^"(\d+(?:\.\d+)+)" to "(\d+(?:\.\d+)+)",/.exec(line.trim());
+            if (m) {
+                const [ _, gradleVersion, kotlinVersion ] = m;
+                if (gradleVersion === minGradle) {
+                    return kotlinVersion;
+                }
+            }
+        }
+    }
+    throw new Error(`Failed to find the minimum Kotlin version to check in settings.gradle.kts`);
+}
+
 /**
  * @param {KspRelease[]} releases
- * @return {string[]}
+ * @returns {string[]}
  */
 function parseReleases(releases) {
     if (!Array.isArray(releases)) return [];
 
-    // 先根据 KSP 版本去重，保留发布时间最新的一条
-    /** @type {Map<string, { kotlinVer: string, date: Date }>} */
-    const latestByKsp = new Map(); // kspVer -> { kotlinVer, date }
+    // De-duplicate by Kotlin version, keep the latest one by release date.
+    // zh-CN: 根据 Kotlin 版本去重, 保留发布时间最新的一条.
+
+    /** @type {Map<string, { kspVer: string, date: Date }>} */
+    const latestByKotlin = new Map();
     for (const r of releases) {
         const rawVer = String(r.version || '').trim();
         const parts = rawVer.split('-');
-        if (parts.length < 2) continue; // 跳过无效项
+        if (parts.length < 2) continue;
 
-        const kotlinVer = parts.pop();
-        const kspVer = parts.join('-');
+        const kspVer = parts.pop();
+        const KotlinVer = parts.join('-');
 
         const d = new Date(r.publishedAt);
         if (Number.isNaN(d.getTime())) continue;
 
-        const prev = latestByKsp.get(kspVer);
+        const prev = latestByKotlin.get(KotlinVer);
         if (!prev || d > prev.date) {
-            latestByKsp.set(kspVer, { kotlinVer, date: d });
+            latestByKotlin.set(KotlinVer, { kspVer, date: d });
         }
     }
 
     /**
-     * 解析 KSP 版本用于排序.
+     * Parse Kotlin version for sorting.<br>
+     * zh-CN: 解析 Kotlin 版本用于排序.
      *
-     * @param {string} ksp
-     * @return {{ baseNums: number[], rank: number, qName: string, qNum: number }}
+     * @param {string} kotlinVer
+     * @returns {{ baseNums: number[], rank: number, qName: string, qNum: number }}
      */
-    function parseKspVer(ksp) {
-        const [ base, qualifierRaw = '' ] = ksp.split('-', 2);
+    function parseKotlinVer(kotlinVer) {
+        const [ base, qualifierRaw = '' ] = kotlinVer.split('-', 2);
         const baseNums = base.split('.').map((n) => parseInt(String(n), 10) || 0);
 
         let qName = '';
@@ -161,7 +148,6 @@ function parseReleases(releases) {
             }
         }
 
-        // 等级：稳定版 > RC > Beta > 其他
         const rankMap = { '': 3, RC: 2, BETA: 1 };
         const rank = Object.prototype.hasOwnProperty.call(rankMap, qName) ? rankMap[qName] : 0;
 
@@ -171,54 +157,45 @@ function parseReleases(releases) {
     /**
      * @param {number[]} aNums
      * @param {number[]} bNums
-     * @return {number}
+     * @returns {number}
      */
     function cmpBaseDesc(aNums, bNums) {
         const len = Math.max(aNums.length, bNums.length);
         for (let i = 0; i < len; i++) {
             const av = aNums[i] ?? 0;
             const bv = bNums[i] ?? 0;
-            if (av !== bv) return bv - av; // 降序
+            if (av !== bv) return bv - av;
         }
         return 0;
     }
 
-    // 转为数组并按 KSP 版本降序排列
-    /**
-     * @type {Array<{ kspVer: string, kotlinVer: string, date: Date, parsed: { baseNums: number[], rank: number, qName: string, qNum: number } }>}
-     */
-    const items = Array.from(latestByKsp.entries())
-        .map(([ kspVer, v ]) => {
-            const parsed = parseKspVer(kspVer);
-            return { kspVer, kotlinVer: v.kotlinVer, date: v.date, parsed };
+    return Array.from(latestByKotlin.entries())
+        .map(([ kotlinVer, v ]) => {
+            const parsed = parseKotlinVer(kotlinVer);
+            return { kotlinVer, kspVer: v.kspVer, date: v.date, parsed };
         })
         .sort((a, b) => {
-            // 1) 基础版本号降序
-            let c = cmpBaseDesc(a.parsed.baseNums, b.parsed.baseNums);
+            const c = cmpBaseDesc(a.parsed.baseNums, b.parsed.baseNums);
             if (c !== 0) return c;
-            // 2) 级别降序（稳定版 > RC > Beta > 其他）
             if (a.parsed.rank !== b.parsed.rank) return b.parsed.rank - a.parsed.rank;
-            // 3) 同级别数字降序（RC2 > RC1；Beta2 > Beta1；无数字视为 0）
             if (a.parsed.qNum !== b.parsed.qNum) return b.parsed.qNum - a.parsed.qNum;
-            // 4) 兜底，限定词字典序降序（稳定排序用）
             if (a.parsed.qName !== b.parsed.qName) return a.parsed.qName < b.parsed.qName ? 1 : -1;
-            // 5) 仍然相同则按日期降序（保险）
             return b.date.getTime() - a.date.getTime();
+        })
+        .map(({ kotlinVer, kspVer, date }) => {
+            return `"${kotlinVer}" to "${kspVer}", /* ${(toUpdatedStamp(date))}. */`;
         });
-
-    return items.map(({ kspVer, kotlinVer, date }) => {
-        const dateStr = toUpdatedStamp(date);
-        return `"${kspVer}" to "${kotlinVer}", /* ${dateStr}. */`;
-    });
 }
 
-fetchKspReleases()
-    .then(async (releases) => {
-        await updateAnchoredMapInFile('../settings.gradle.kts', {
-            anchorTag: 'KSP_VERSION_MAP',
-            mapName: 'kspVersionMap',
-            lines: parseReleases(releases).map(l => `${l}`),
-            updatedLabel: 'KSP 发行版本映射',
-        });
-    })
-    .catch((error) => console.error('Failed to fetch KSP releases:', error));
+(async function main() {
+    const releases = await fetchKspReleases();
+    await updateAnchoredMapInFile('../settings.gradle.kts', {
+        anchorTag: 'KSP_VERSION_MAP',
+        mapName: 'kspVersionMap',
+        lines: parseReleases(releases),
+        updatedLabel: 'KSP releases version map',
+    });
+})().catch((err) => {
+    console.error('Failed to fetch KSP releases:', err);
+    process.exitCode = 1;
+});

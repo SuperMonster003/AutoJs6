@@ -6,6 +6,105 @@ import { compareVersionStrings } from './versioning.mjs';
 import { generatePropertiesFileTimestamp } from './date.mjs';
 
 /**
+ * Convert JS string to .properties format escaping rules (store format)
+ * - Escape: backslash, whitespace/control chars, delimiters (= :), comment chars (# !)
+ * - All non-ASCII chars are encoded as \uXXXX (aligned with java.util.Properties.store)<br>
+ * zh-CN:<br>
+ * 将 JS 字符串按 .properties 规范转义 (store 格式)
+ * - 转义: backslash, 空白/控制字符, 分隔符 (= :), 注释首字符 (# !)
+ * - 非 ASCII 均编码为 \uXXXX (与 java.util.Properties.store 对齐)
+ *
+ * @example string
+ * escapeProperty('https://www.example.com'); // 'https\://www.example.com'
+ * escapeProperty('a==b'); // 'a\=\=b'
+ * escapeProperty('\n\r\t\f'); // '\n\r\t\f'
+ *
+ * escapeProperty('#comment', true); // \#comment
+ * escapeProperty('#comment', false); // \#comment
+ * escapeProperty('comment#today', true); // comment\#today
+ * escapeProperty('comment#today', false); // comment#today
+ *
+ * escapeProperty(' comment', true); // \ comment
+ * escapeProperty(' comment', false); // \ comment
+ * escapeProperty('comment today', true); // comment\ today
+ * escapeProperty('comment today', false); // comment today
+ *
+ * @param {string} str
+ * @param {boolean} isKey
+ * @returns {string}
+ */
+function escapeProperty(str, isKey) {
+    if (!str) return '';
+    let out = '';
+    for (let i = 0; i < str.length; i++) {
+        const ch = str[i];
+        const code = ch.codePointAt(0);
+        // Handle non-ASCII or control chars uniformly.
+        // zh-CN: 统一处理非 ASCII 或控制字符.
+        if (code < 0x20 || code > 0x7e) {
+            if (ch === '\t') {
+                out += '\\t';
+                continue;
+            }
+            if (ch === '\n') {
+                out += '\\n';
+                continue;
+            }
+            if (ch === '\r') {
+                out += '\\r';
+                continue;
+            }
+            if (ch === '\f') {
+                out += '\\f';
+                continue;
+            }
+            // 其他非 ASCII -> \uXXXX
+            const hex = code.toString(16).padStart(4, '0');
+            out += '\\u' + hex.slice(-4);
+            continue;
+        }
+        switch (ch) {
+            case '\\':
+                out += '\\\\';
+                break;
+            case '=':
+            case ':':
+                // Escape both key and value for compatibility.
+                // zh-CN: 在 key 和 value 中都转义, 保证兼容性.
+                out += '\\' + ch;
+                break;
+            case ' ':
+                // Spaces in key need to be escaped; leading spaces in value need to be escaped.
+                // zh-CN: key 中任意空格需要转义; value 的前导空格需要转义.
+                if (isKey || out === '') out += '\\ ';
+                else out += ' ';
+                break;
+            case '\t':
+            case '\n':
+            case '\r':
+            case '\f':
+                // Redundant protection, control chars have been handled above.
+                // zh-CN: 冗余保护, 已在上方控制字符分支处理.
+                out += ch === '\t' ? '\\t'
+                    : ch === '\n' ? '\\n'
+                        : ch === '\r' ? '\\r'
+                            : '\\f';
+                break;
+            case '#':
+            case '!':
+                // When used as key or as first char of value, need to escape to avoid being parsed as comment.
+                // zh-CN: 作为 key 时或 value 的首字符, 为避免被解析为注释, 需转义.
+                if (isKey || out === '') out += '\\' + ch;
+                else out += ch;
+                break;
+            default:
+                out += ch;
+        }
+    }
+    return out;
+}
+
+/**
  * @param {string} str
  * @returns {string}
  */
@@ -37,7 +136,8 @@ function unescapeProperty(str) {
                     out += String.fromCharCode(parseInt(hex, 16));
                     i += 4;
                 } else {
-                    // 非法 \u 序列, 按字面量保留
+                    // Illegal \u sequence, keep as literal.
+                    // zh-CN: 非法 \u 序列, 按字面量保留.
                     out += '\\u';
                 }
                 break;
@@ -49,82 +149,9 @@ function unescapeProperty(str) {
                 out += next;
                 break;
             default:
-                // 未知转义, 保留第二个字符
+                // Unknown escape sequence, keep (but without the preceding "\").
+                // zh-CN: 未知转义, 保留 (但不包含前面的 "\").
                 out += next;
-        }
-    }
-    return out;
-}
-
-/**
- * 将 JS 字符串按 .properties 规范转义 (store 格式)
- * - 转义: backslash, 空白/控制字符, 分隔符 (= :), 注释首字符 (# !)
- * - 非 ASCII 均编码为 \uXXXX (与 java.util.Properties.store 对齐)
- * @param {string} str
- * @param {boolean} isKey
- * @returns {string}
- */
-function escapeProperty(str, isKey) {
-    if (!str) return '';
-    let out = '';
-    for (let i = 0; i < str.length; i++) {
-        const ch = str[i];
-        const code = ch.codePointAt(0);
-        // 统一处理非 ASCII 或控制字符
-        if (code < 0x20 || code > 0x7e) {
-            if (ch === '\t') {
-                out += '\\t';
-                continue;
-            }
-            if (ch === '\n') {
-                out += '\\n';
-                continue;
-            }
-            if (ch === '\r') {
-                out += '\\r';
-                continue;
-            }
-            if (ch === '\f') {
-                out += '\\f';
-                continue;
-            }
-            // 其他非 ASCII -> \uXXXX
-            const hex = code.toString(16).padStart(4, '0');
-            out += '\\u' + hex.slice(-4);
-            continue;
-        }
-        switch (ch) {
-            case '\\':
-                out += '\\\\';
-                break;
-            case '=':
-            case ':':
-                // 在 key 和 value 中都转义, 保证兼容性
-                out += '\\' + ch;
-                break;
-            case ' ':
-                // key 中任意空格需要转义; value 的前导空格需要转义
-                if (isKey || out === '') out += '\\ ';
-                else out += ' ';
-                break;
-            case '\t':
-            case '\n':
-            case '\r':
-            case '\f':
-                // 已在上方控制字符分支处理, 这里冗余保护
-                out += ch === '\t' ? '\\t'
-                    : ch === '\n' ? '\\n'
-                        : ch === '\r' ? '\\r'
-                            : '\\f';
-                break;
-            case '#':
-            case '!':
-                // 作为 key 时或 value 的首字符, 为避免被解析为注释, 需转义
-                if (isKey || out === '') out += '\\' + ch;
-                else out += ch;
-                break;
-            default:
-                out += ch;
         }
     }
     return out;
@@ -134,24 +161,28 @@ function escapeProperty(str, isKey) {
  * @param {string} text
  * @returns {Object<string, string>}
  */
-export function parseProperties(text) {
+function parseProperties(text) {
     const props = Object.create(null);
     if (!text) return props;
 
     const lines = [];
     const rawLines = text.split(/\r?\n/);
 
-    // 合并续行 (以反斜杠结尾且反斜杠未被转义)
+    // Merge continuation lines (lines ending with an unescaped backslash).
+    // zh-CN: 合并续行 (以反斜杠结尾且反斜杠未被转义).
     for (let i = 0; i < rawLines.length; i++) {
         let line = rawLines[i];
         if (line == null) continue;
 
-        // 去除行尾 CR (兼容 \r\n 已 split 的情况, 一般无需此步)
+        // Remove trailing CR (for \r\n already split cases, usually not needed).
+        // zh-CN: 去除行尾 CR (兼容 \r\n 已 split 的情况, 一般无需此步).
         line = line.replace(/\r$/, '');
 
-        // 合并续行
+        // Merge continuation lines.
+        // zh-CN: 合并续行.
         while (true) {
-            // 统计结尾连续反斜杠数量, 奇数表示续行
+            // Count consecutive backslashes at end, odd number indicates continuation.
+            // zh-CN: 统计结尾连续反斜杠数量, 奇数表示续行.
             let backslashes = 0;
             for (let j = line.length - 1; j >= 0 && line[j] === '\\'; j--) backslashes++;
             const isContinuation = backslashes % 2 === 1;
@@ -159,7 +190,8 @@ export function parseProperties(text) {
             if (!isContinuation) break;
             const next = rawLines[++i];
             if (next == null) break;
-            // 去掉一个续行用的反斜杠, 再拼接后续行, 续行处按规范会吞掉换行
+            // Remove one continuation backslash, append next line, newline is discarded at continuation point per spec.
+            // zh-CN: 去掉一个续行用的反斜杠, 再拼接后续行, 续行处按规范会吞掉换行.
             line = line.slice(0, -1) + next;
         }
         lines.push(line);
@@ -169,12 +201,14 @@ export function parseProperties(text) {
         const line = raw.trim();
         if (!line || line.startsWith('#') || line.startsWith('!')) continue;
 
-        // 键值分隔: 第一个 =/: 或未转义空白
+        // Key-value separator: first =/: or unescaped whitespace.
+        // zh-CN: 键值分隔: 第一个 =/: 或未转义空白.
         let key = '';
         let value = '';
         let sepIdx = -1;
 
-        // 逐字符扫描, 识别未转义的分隔符
+        // Scan character by character to identify unescaped separators.
+        // zh-CN: 逐字符扫描, 识别未转义的分隔符.
         let escaped = false;
         for (let i = 0; i < line.length; i++) {
             const ch = line[i];
@@ -196,13 +230,16 @@ export function parseProperties(text) {
         } else {
             key = line.slice(0, sepIdx);
             value = line.slice(sepIdx + 1);
-            // 如果分隔符是空白, value 应该从第一个非空白处开始
+            // If separator is whitespace, value should start from first non-whitespace.
+            // zh-CN: 如果分隔符是空白, value 应该从第一个非空白处开始.
             if (/^\s$/.test(line[sepIdx])) {
                 value = value.replace(/^\s+/, '');
             }
         }
 
-        key = key.replace(/\s+$/, ''); // 规范里 key 前部空白可作为分隔符, 末尾空白需要去掉
+        // In spec, leading whitespace in key can be separator, trailing whitespace should be removed.
+        // zh-CN: 规范里 key 前部空白可作为分隔符, 末尾空白需要去掉.
+        key = key.replace(/\s+$/, '');
         const k = unescapeProperty(key);
         const v = unescapeProperty(value.trim());
 
@@ -238,7 +275,7 @@ export function readPropertiesSync(filePath = '../version.properties', { encodin
  * @param {Object<string,string>} [props={}]
  * @param {Object} options
  * @param {BufferEncoding} [options.encoding='utf8']
- * @return {Promise<void>}
+ * @returns {Promise<void>}
  */
 export async function writeProperties(filePath = '../version.properties', props = {}, { encoding = 'utf8' } = {}) {
     const lines = [];
@@ -259,7 +296,7 @@ export async function writeProperties(filePath = '../version.properties', props 
  * @param {Object<string,string>} [props={}]
  * @param {Object} options
  * @param {BufferEncoding} [options.encoding='utf8']
- * @return {void}
+ * @returns {void}
  */
 export function writePropertiesSync(filePath = '../version.properties', props = {}, { encoding = 'utf8' } = {}) {
     const lines = [];
@@ -289,7 +326,10 @@ export function getMinSupportedAgpVersion(filePath = '../version.properties', { 
             minSupportedVersion = value;
         }
     });
-    return minSupportedVersion ?? '8.0';
+    if (!minSupportedVersion) {
+        throw new Error('Could not determine minSupportedAgpVersion from "version.properties" file');
+    }
+    return minSupportedVersion;
 }
 
 /**
@@ -306,7 +346,10 @@ export function getMinSupportedGradleVersion(filePath = '../version.properties',
             minSupportedVersion = value;
         }
     });
-    return minSupportedVersion ?? '8.0';
+    if (!minSupportedVersion) {
+        throw new Error('Could not determine minSupportedGradleVersion from "version.properties" file');
+    }
+    return minSupportedVersion;
 }
 
 /**
@@ -323,29 +366,40 @@ export function getMinSupportedJavaVersionInt(filePath = '../version.properties'
  * @param {string} [filePath='../version.properties']
  * @param {Object} options
  * @param {BufferEncoding} [options.encoding='utf8']
- * @returns {{ currentJavaVersionInt: number, minSupportedJavaVersionInt: number, minSuggestedJavaVersionInt: number, maxSupportedJavaVersionInt: number }}
+ * @returns {{ minSupportedJavaVersionInt: number, minSuggestedJavaVersionInt: number, maxSupportedJavaVersionInt: number }}
  */
 export function getJavaVersionInfo(filePath = '../version.properties', { encoding = 'utf8' } = {}) {
-    let currentVersion = 0;
-    let minSuggestedVersion = 19;
-    let minSupportedVersion = 17;
-    let maxSupportedVersion = 0;
+    let minSuggestedVer = Infinity;
+    let minSupportedVer = Infinity;
+    let maxSupportedVer = -Infinity;
+
     Object.entries(readPropertiesSync(filePath, { encoding })).forEach(([ key, value ]) => {
-        const versionNumber = parseInt(value, 10);
-        if (/^java.version$/i.test(key)) {
-            currentVersion = Math.max(currentVersion, versionNumber);
-        } else if (/java.version.*min.suggested|min.suggested.*java.version/i.test(key)) {
-            minSuggestedVersion = Math.min(minSuggestedVersion, versionNumber);
+        const currentVer = parseInt(value, 10);
+        if (/java.version.*min.suggested|min.suggested.*java.version/i.test(key)) {
+            minSuggestedVer = Math.min(minSuggestedVer, currentVer);
         } else if (/java.version.*min.supported|min.supported.*java.version/i.test(key)) {
-            minSupportedVersion = Math.min(minSupportedVersion, versionNumber);
+            minSupportedVer = Math.min(minSupportedVer, currentVer);
         } else if (/java.version.*max.supported|max.supported.*java.version/i.test(key)) {
-            maxSupportedVersion = Math.max(maxSupportedVersion, versionNumber);
+            maxSupportedVer = Math.max(maxSupportedVer, currentVer);
         }
     });
+
+    /**
+     * @param {number} target
+     * @param {string} variableName
+     * @throws {Error}
+     */
+    const validate = (target, variableName) => {
+        if (!isFinite(target)) throw new Error(`Could not determine ${variableName} from "version.properties" file`);
+    };
+
+    validate(minSuggestedVer, 'minSuggestedJavaVersionInt');
+    validate(minSupportedVer, 'minSupportedJavaVersionInt');
+    validate(maxSupportedVer, 'maxSupportedJavaVersionInt');
+
     return {
-        currentJavaVersionInt: currentVersion,
-        minSuggestedJavaVersionInt: minSuggestedVersion,
-        minSupportedJavaVersionInt: minSupportedVersion,
-        maxSupportedJavaVersionInt: maxSupportedVersion,
+        minSuggestedJavaVersionInt: minSuggestedVer,
+        minSupportedJavaVersionInt: minSupportedVer,
+        maxSupportedJavaVersionInt: maxSupportedVer,
     };
 }

@@ -1,14 +1,14 @@
 // scrape-and-inject-rhino-engine-data.mjs
 
-import { getLatestCommitDate } from './utils/fetch.mjs';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { getLatestCommitDate } from './utils/fetch.mjs';
 
 const URL = 'https://raw.githubusercontent.com/SuperMonster003/Rhino-For-AutoJs6/refs/heads/master/gradle.properties';
 
 /**
  * @param {string} latestVersion
- * @return {Promise<void>}
+ * @returns {Promise<void>}
  */
 async function updateTemplateReadmeRhinoBadge(latestVersion) {
     const templateReadmePath = path.resolve(process.cwd(), '../.readme/template_readme.md');
@@ -19,18 +19,18 @@ async function updateTemplateReadmeRhinoBadge(latestVersion) {
     if (oldVersion !== latestVersion) {
         const updatedFileContent = fileContent.replace(rhinoBadgeRegex, `$1${latestVersion.replaceAll('-', '--')}$3`);
         fs.writeFileSync(templateReadmePath, updatedFileContent, 'utf8');
-        console.log('[template_readme.md] 已更新 (Rhino 徽标版本)');
+        console.log('[template_readme.md] Updated (Rhino badge version)');
         console.log(`-- ${oldVersion}`);
         console.log(`-> ${latestVersion}`);
     } else {
-        // console.log('[template_readme.md] 无需更新 (Rhino 徽标版本)');
+        // console.log('[template_readme.md] No update needed (Rhino badge version)');
     }
 }
 
 /**
  * @param {string} latestVersion
  * @param {number} linenoOfLatestVersion
- * @return {Promise<void>}
+ * @returns {Promise<void>}
  */
 async function updateCommonJsonWithRhinoData(latestVersion, linenoOfLatestVersion) {
     const commonJsonPath = path.resolve(process.cwd(), '../.readme/common.json');
@@ -42,16 +42,20 @@ async function updateCommonJsonWithRhinoData(latestVersion, linenoOfLatestVersio
     const addressJsonValue = `[v${latestVersion}](${addressPrefix}${addressSuffix})`;
     const latestCommitValue = await getLatestCommitDate('SuperMonster003', 'Rhino-For-AutoJs6');
 
+    const toUpdateKeys = {
+        address: 'latest_rhino_engine_name_with_github_lineno_address',
+        date: 'var_date_rhino_engine_latest_committed',
+    };
     const updatedCommon = {
         ...commonObj,
-        latest_rhino_engine_name_with_github_lineno_address: addressJsonValue,
-        var_date_rhino_engine_latest_committed: latestCommitValue,
+        [toUpdateKeys.address]: addressJsonValue,
+        [toUpdateKeys.date]: latestCommitValue,
     };
 
     if (JSON.stringify(updatedCommon) !== JSON.stringify(commonObj)) {
         fs.writeFileSync(commonJsonPath, JSON.stringify(updatedCommon, null, 2), 'utf8');
-        console.log('[common.json] 已更新 (Rhino 数据)');
-        [ 'latest_rhino_engine_name_with_github_lineno_address', 'var_date_rhino_engine_latest_committed' ].forEach(key => {
+        console.log('[common.json] Updated (Rhino information)');
+        Object.values(toUpdateKeys).forEach(key => {
             if (key in updatedCommon && key in commonObj && updatedCommon[key] !== commonObj[key]) {
                 console.log(`## ${key}`);
                 console.log(`-- ${commonObj[key]}`);
@@ -59,11 +63,11 @@ async function updateCommonJsonWithRhinoData(latestVersion, linenoOfLatestVersio
             }
         });
     } else {
-        // console.log('[common.json] 无需更新 (Rhino 数据)');
+        // console.log('[common.json] No update needed (Rhino information)');
     }
 }
 
-async function main() {
+(async function main() {
     const response = await fetch(URL);
     const text = await response.text();
     const lines = text.split('\n');
@@ -72,9 +76,7 @@ async function main() {
 
     await updateTemplateReadmeRhinoBadge(latestVersion);
     await updateCommonJsonWithRhinoData(latestVersion, linenoOfLatestVersion);
-}
-
-main().catch(err => {
+})().catch(err => {
     console.error(err);
     process.exitCode = 1;
 });
