@@ -144,8 +144,8 @@ dependencies {
 
     implementation project(path: ":libs:org.opencv-${versionMap.OPENCV}")
 
-    implementation 'androidx.core:core-ktx:1.13.1'
-    implementation "androidx.preference:preference-ktx:1.2.1"
+    implementation libs.core.ktx
+    implementation libs.preference.ktx
 
 }
 

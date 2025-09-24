@@ -44,14 +44,14 @@ repositories {
 }
 
 dependencies {
-    implementation 'androidx.appcompat:appcompat:1.7.0'
-    implementation 'androidx.recyclerview:recyclerview:1.4.0'
+    implementation libs.appcompat
+    implementation libs.recyclerview
 
-    testImplementation 'junit:junit:4.13.2'
-    testImplementation 'com.pholser:junit-quickcheck-core:0.9.2'
-    testImplementation 'com.pholser:junit-quickcheck-generators:0.9.1'
+    testImplementation libs.junit
+    testImplementation libs.junit.quickcheck.core
+    testImplementation libs.junit.quickcheck.generators
 
-    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
-    androidTestImplementation 'androidx.test:runner:1.6.2'
-    androidTestImplementation 'androidx.test:rules:1.6.1'
+    androidTestImplementation libs.test.ext.junit
+    androidTestImplementation libs.test.runner
+    androidTestImplementation libs.test.rules
 }

@@ -37,6 +37,6 @@ repositories {
 }
 
 dependencies {
-    implementation 'androidx.appcompat:appcompat:1.7.0'
-    implementation 'androidx.preference:preference-ktx:1.2.1'
+    implementation libs.appcompat
+    implementation libs.preference.ktx
 }

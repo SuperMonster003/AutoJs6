@@ -39,8 +39,8 @@ repositories {
 }
 
 dependencies {
-    implementation 'androidx.appcompat:appcompat:1.7.0'
-    implementation 'com.google.android.material:material:1.12.0'
+    implementation libs.appcompat
+    implementation libs.material
 
     // @Hint by SuperMonster003 on Mar 14, 2025.
     //  ! Dependency "prov" contains "core" (zh-CN: 依赖 "prov" 已包含 "core"):
@@ -48,9 +48,9 @@ dependencies {
     //  ! |         +--- com.madgag.spongycastle:core:1.58.0.0
     //  ! |         \--- junit:junit:4.12 (*)
     //  # implementation("com.madgag.spongycastle:core:1.58.0.0")
-    implementation("com.madgag.spongycastle:prov:1.58.0.0")
+    implementation(libs.prov)
 
-    testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
+    testImplementation libs.junit
+    androidTestImplementation libs.test.ext.junit
+    androidTestImplementation libs.test.espresso.core
 }
