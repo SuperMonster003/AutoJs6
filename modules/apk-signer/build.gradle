@@ -1,5 +1,6 @@
 plugins {
     id 'org.autojs.build.versions'
+    id 'org.autojs.build.jvm-convention'
     id 'com.android.library'
     id 'kotlin-android'
 }
@@ -16,15 +17,6 @@ android {
         versionCode 11
 
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.toVersion(project.ext.javaVersion)
-        targetCompatibility = JavaVersion.toVersion(project.ext.javaVersion)
-    }
-
-    kotlinOptions {
-        jvmTarget = project.ext.javaVersion
     }
 
     sourceSets {

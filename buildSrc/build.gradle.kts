@@ -52,6 +52,14 @@ gradlePlugin {
                 t.description = "Provides properties helpers."
             }
         })
+        create("jvmConvention", object : Action<PluginDeclaration> {
+            override fun execute(t: PluginDeclaration) {
+                t.id = "org.autojs.build.jvm-convention"
+                t.implementationClass = "org.autojs.build.JvmConventionPlugin"
+                t.displayName = "AutoJs6 JVM Convention Plugin"
+                t.description = "Configures Java/Kotlin targets for Android modules using central Versions."
+            }
+        })
     }
 }
 

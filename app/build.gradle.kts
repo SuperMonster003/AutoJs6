@@ -10,6 +10,7 @@ plugins {
     id("org.autojs.build.utils")
     id("org.autojs.build.versions")
     id("org.autojs.build.signs")
+    id("org.autojs.build.jvm-convention")
     id("com.android.application")
     id("com.google.devtools.ksp")
     id("org.jetbrains.kotlin.android") /* kotlin("android") */
@@ -567,8 +568,6 @@ android {
 
     compileOptions {
         isCoreLibraryDesugaringEnabled = true
-        sourceCompatibility = versions.javaVersion
-        targetCompatibility = versions.javaVersion
     }
 
     // @Hint by SuperMonster003 on Sep 25, 2024.
@@ -617,12 +616,6 @@ android {
             excludes += "*"
             useLegacyPackaging = true
         }
-    }
-
-    @Suppress("DEPRECATION")
-    kotlinOptions {
-        jvmTarget = versions.javaVersion.toString()
-        // freeCompilerArgs = listOf("-Xjvm-default=all-compatibility")
     }
 
     lint {
@@ -743,12 +736,6 @@ tasks {
         //  ! Comment or remove this option if you are tired of plenty of warnings. :)
         //  ! zh-CN: 注释或移除此选项可避免过多警告消息造成的困扰. [笑脸符号]
         // options.compilerArgs.addAll(listOf("-Xlint:deprecation", "-Xlint:unchecked"))
-    }
-
-    withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-        // @Archived by SuperMonster003 on Aug 14, 2024.
-        //  # kotlinOptions { jvmTarget = versions.javaVersion.toString() }
-        compilerOptions { jvmTarget.set(JvmTarget.valueOf("JVM_${versions.javaVersion}")) }
     }
 
     register<Copy>("appendDigestToReleasedFiles") {

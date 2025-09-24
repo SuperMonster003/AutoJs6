@@ -1,6 +1,7 @@
 plugins {
     id 'org.autojs.build.utils'
     id 'org.autojs.build.properties'
+    id 'org.autojs.build.jvm-convention'
     id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
 }
@@ -66,15 +67,6 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.toVersion(project.ext.javaVersion)
-        targetCompatibility = JavaVersion.toVersion(project.ext.javaVersion)
-    }
-
-    kotlinOptions {
-        jvmTarget = project.ext.javaVersion
     }
 
     externalNativeBuild {
