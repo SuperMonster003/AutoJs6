@@ -24,8 +24,9 @@ async function main() {
     const latestRows = await getLatestStableWindows(); // [{kind, filename, sha256, url, size, ...}]
     const latestExe = latestRows.find(x => x.kind === 'exe');
     const latestZip = latestRows.find(x => x.kind === 'zip');
-    if (!latestExe || !latestZip) {
-        throw new Error('最新稳定版条目缺少 Windows EXE 或 ZIP');
+    const latestTar = latestRows.find(x => x.kind === 'tar');
+    if (!latestExe || !latestZip || !latestTar) {
+        throw new Error('最新稳定版条目缺少 Windows EXE/ZIP 或 TAR');
     }
 
     /**
@@ -65,14 +66,17 @@ async function main() {
     };
     const exeItem = pickWinItem('-windows.exe');
     const zipItem = pickWinItem('-windows.zip');
+    const tarItem = pickWinItem('-linux.tar.gz');
 
     // 查询真实文件大小 (并发获取), 格式化为 GiB
-    const [ exeBytes, zipBytes ] = await Promise.all([
+    const [ exeBytes, zipBytes, tarBytes ] = await Promise.all([
         exeItem ? getRemoteFileSizeBytes(exeItem.url) : Promise.resolve(null),
         zipItem ? getRemoteFileSizeBytes(zipItem.url) : Promise.resolve(null),
+        tarItem ? getRemoteFileSizeBytes(tarItem.url) : Promise.resolve(null),
     ]);
     if (exeItem) exeItem.sizeGiB = bytes2GiB(exeBytes);
     if (zipItem) zipItem.sizeGiB = bytes2GiB(zipBytes);
+    if (tarItem) tarItem.sizeGiB = bytes2GiB(tarBytes);
 
     // 准备写回 common.json 所需字段
     const latestVersionName = matchedArc.title.trim(); // 例: "Android Studio Narwhal Feature Drop | 2025.1.2"
@@ -100,6 +104,9 @@ async function main() {
         android_studio_latest_recommended_file_name_of_zip: zipItem.filename,
         android_studio_latest_recommended_download_address_of_zip: zipItem.url,
         android_studio_latest_recommended_file_size_of_zip: zipItem.sizeGiB ?? commonObj.android_studio_latest_recommended_file_size_of_zip,
+        android_studio_latest_recommended_file_name_of_tar: tarItem.filename,
+        android_studio_latest_recommended_download_address_of_tar: tarItem.url,
+        android_studio_latest_recommended_file_size_of_tar: tarItem.sizeGiB ?? commonObj.android_studio_latest_recommended_file_size_of_tar,
     };
 
     if (JSON.stringify(updatedCommon) !== JSON.stringify(commonObj)) {
