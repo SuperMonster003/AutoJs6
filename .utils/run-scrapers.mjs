@@ -34,7 +34,8 @@ const childProcessOutput = [];
  * @returns {string}
  */
 function getScriptProgressMessage(scripts, idx) {
-    return `[${idx + 1}/${scripts.length}] ${scripts[idx].name}`;
+    const order = `${idx + 1}`.padStart(`${scripts.length}`.length, '0');
+    return `[${order}/${scripts.length}] ${scripts[idx].name}`;
 }
 
 /**

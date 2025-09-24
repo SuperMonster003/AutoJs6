@@ -509,6 +509,7 @@ pluginManagement {
             Classpath(id = "org.apache.commons:commons-compress", version = "toml:commons-compress"),
             Classpath(id = "org.tukaani:xz", version = "toml:xz"),
             Plugin(id = "com.google.devtools.ksp", version = overriddenKspVersion ?: "auto:ksp"),
+            Plugin(id = "org.gradle.toolchains.foojay-resolver-convention", version = "toml:foojay-resolver-convention"),
         )
 
         // @AnchorBegin KSP_VERSION_MAP
@@ -986,4 +987,11 @@ pluginManagement {
         set("isHideConsoleInfoHintSuffix", config.isHideConsoleInfoHintSuffix)
     }
 
+}
+
+plugins {
+    // @Hint by SuperMonster003 on Sep 14, 2025.
+    //  ! Enable JDK auto-resolution/download capability for build modules.
+    //  ! zh-CN: 让构建模块具备 JDK 自动解析/下载能力.
+    id("org.gradle.toolchains.foojay-resolver-convention")
 }
