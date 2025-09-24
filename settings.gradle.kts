@@ -31,6 +31,8 @@ private val libs = listOf(
     "markwon-syntax-highlight-4.6.2",
 
     "root-shell-1.6",
+    "expandable-layout-1.6.0",
+    "recyclerview-flexibledivider-1.4.0"
 )
 
 include(

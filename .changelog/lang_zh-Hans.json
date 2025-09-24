@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.7.0": {
-      "released_date": "2025/09/10",
+      "released_date": "2025/09/24",
       "feature": [
         "zip 模块, 用于文件压缩与解压缩操作 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (参阅 项目文档 > [Zip](https://docs.autojs6.com/#/zip))",
         "mediainfo 模块, 用于查看媒体文件的详细信息 (参阅 项目文档 > [媒体信息](https://docs.autojs6.com/#/mediainfo))",
@@ -36,6 +36,9 @@
         "Gradle 构建脚本提升 7z 格式文件的解压效率"
       ],
       "dependency": [
+        "本地化 Root Shell 版本 1.6",
+        "本地化 Expandable Layout 版本 1.6.0",
+        "本地化 Recyclerview Flexible Divider 版本 1.4.0",
         "附加 Androidx Core (KTX) 版本 1.15.0",
         "升级 Gradle 版本 8.14 -> 8.14.3",
         "升级 Apache Commons 版本 3.16.0 -> 3.18.0",
