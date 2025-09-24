@@ -50,7 +50,7 @@
     Object.setPrototypeOf(ResultAdapter, {
         /**
          * @param {org.autojs.autojs.runtime.api.ScriptPromiseAdapter} promiseAdapter
-         * @return {Promise<unknown>}
+         * @returns {Promise<unknown>}
          */
         promise(promiseAdapter) {
             return new Promise((resolve, reject) => {
@@ -61,7 +61,7 @@
         },
         /**
          * @param {Promise<unknown> | org.autojs.autojs.runtime.api.ScriptPromiseAdapter} promise
-         * @return {*}
+         * @returns {*}
          */
         wait(promise) {
             if (!(promise instanceof Promise)) {

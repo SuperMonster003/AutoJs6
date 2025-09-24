@@ -222,6 +222,7 @@ class Files(private val scriptRuntime: ScriptRuntime) {
     }
 
     companion object {
+        @JvmStatic
         fun join(parent: String?, vararg child: String?): String {
             return PFiles.join(parent, *child)
         }

@@ -6,14 +6,17 @@
 
 # v6.7.0
 
-###### 2025/09/10
+###### 2025/09/24
 
 * `新增` zip 模块, 用于文件压缩与解压缩操作 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (参阅 项目文档 > [Zip](https://docs.autojs6.com/#/zip))
 * `新增` mediainfo 模块, 用于查看媒体文件的详细信息 (参阅 项目文档 > [媒体信息](https://docs.autojs6.com/#/mediainfo))
 * `新增` UiObject#isShifted 方法, 用于检测控件位置变化
+* `新增` structuredClone 全局方法, 用于深拷贝 JavaScript 对象 (参阅 [MDN](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/structuredClone))
 * `新增` 设置页面支持应用启动器图标设置选项 _[`issue #405`](http://issues.autojs6.com/405)_
 * `新增` JS 脚本工具 (run-scrapers.mjs) 用于自动更新 Gradle 构建脚本锚点数据/README 通用数据/README 模板数据
 * `修复` isJavaClass/isJavaPackage 等全局方法无效的问题
+* `修复` timers.keepAlive 方法 timeout 参数功能无效的问题
+* `修复` floaty.window/rawWindow 方法无法接受字符串参数的问题
 * `修复` 使用 XML 语法将 JavaScript 表达式作为属性值时, this 对象可能出现指向错误的问题
 * `修复` canvas 元素控件 setMaxFps 方法内部帧率计算错误
 * `修复` images.concat 方法纵向拼接时宽度值计算错误
@@ -26,6 +29,7 @@
 * `修复` 部分设备无法正常初始化 MLKit Google OCR 的问题 (试修) _[`issue #8`](http://issues.autojs6.com/8#issuecomment-3117061768)_
 * `修复` ErrorDialogActivity 可能无法正常启动的问题 _[`issue #414`](http://issues.autojs6.com/414)_ _[`issue #340`](http://issues.autojs6.com/340#issuecomment-2973485826)_
 * `修复` 崩溃报告页面复制详细信息功能失效的问题
+* `修复` 构建工具启用 isCleanup[Paddle/Rapid]Ocr 配置选项时无法正常完成 Rebuild Project 任务的问题
 * `优化` http 模块相关方法支持不安全选项参数 (isInsecure/insecure), 用于忽略证书相关异常 _[`issue #417`](http://issues.autojs6.com/417)_
 * `优化` android.graphics.Paint#setColor 支持正常解析 ColorInt/ColorHex/ColorName 等颜色参数
 * `优化` 内置模块相关方法实参类型的异常消息增加类型摘要信息
@@ -33,6 +37,12 @@
 * `优化` 崩溃报告页面支持双指缩放调整字体大小并添加常用功能按钮
 * `优化` 应用启动器图标支持自适应图标特性 _[`issue #405`](http://issues.autojs6.com/405)_
 * `优化` Gradle 构建脚本提升 7z 格式文件的解压效率
+* `优化` 使用版本目录 (Version Catalogs) 集中管理 Gradle 依赖和插件版本
+* `优化` 模块化 Gradle 脚本, 将共享构建逻辑迁移至 buildSrc 并抽象为约定插件
+* `优化` 使用 Toolchain 替代 sourceCompatibility/targetCompatibility 以降低构建环境差异
+* `依赖` 本地化 Root Shell 版本 1.6
+* `依赖` 本地化 Expandable Layout 版本 1.6.0
+* `依赖` 本地化 Recyclerview Flexible Divider 版本 1.4.0
 * `依赖` 附加 Androidx Core (KTX) 版本 1.15.0
 * `依赖` 升级 Gradle 版本 8.14 -> 8.14.3
 * `依赖` 升级 Apache Commons 版本 3.16.0 -> 3.18.0
