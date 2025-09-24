@@ -57,7 +57,7 @@ object SevenZExtractor {
                 }
 
                 // Remove leading separator to avoid being treated as absolute path.
-                // zh-CN: // 去掉前导分隔符, 避免被当作绝对路径.
+                // zh-CN: 去掉前导分隔符, 避免被当作绝对路径.
                 while (relative.startsWith("/") || relative.startsWith("\\")) {
                     relative = relative.substring(1)
                 }

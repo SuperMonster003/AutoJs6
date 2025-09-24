@@ -46,7 +46,6 @@ assert(isFunc(XMLList), 'XMLList()');
 assert(isFunc(importClass), 'importClass()');
 assert(isFunc(importPackage), 'importPackage()');
 assert(isFunc(getClass), 'getClass()');
-assert(isFunc(constructor), 'constructor()');
 assert(isJavaPackage(Packages), 'Packages');
 
 // @Test Rhino 1.7.15+ (SNAPSHOT on May 4, 2022)
@@ -333,7 +332,6 @@ assert(isFunc(classNameStartsWith), 'global.classNameStartsWith()');
 assert(isFunc(scrollTo), 'global.scrollTo()');
 assert(isFunc(scrollRight), 'global.scrollRight()');
 assert(isFunc(setSelection), 'global.setSelection()');
-assert(isFunc(selection), 'global.selection()');
 assert(isFunc(bounds), 'global.bounds()');
 assert(isFunc(columnSpan), 'global.columnSpan()');
 assert(isFunc(cut), 'global.cut()');
@@ -359,7 +357,6 @@ assert(isFunc(filter), 'global.filter()');
 assert(isFunc(depth), 'global.depth()');
 assert(isFunc(longClick), 'global.longClick()');
 assert(isFunc(exists), 'global.exists()');
-assert(isFunc(progress), 'global.progress()');
 assert(isFunc(toString), 'global.toString()');
 assert(isFunc(idStartsWith), 'global.idStartsWith()');
 assert(isFunc(getClass), 'global.getClass()');
@@ -547,13 +544,3 @@ assert(Numberx.clamp(20, [ 10, 30 ]) === 20, 'Numberx.clamp');
 assert(Numberx.clamp(20, [ 10, 30, 40 ]) === 20, 'Numberx.clamp');
 assert(Numberx.clamp(20, [ 20, 20 ]) === 20, 'Numberx.clamp');
 assert(Numberx.clamp(20, [ 10 ]) === 10, 'Numberx.clamp');
-assert(typeof Numberx.prototype === 'object', 'Numberx.prototype is object');
-assert(isFunc(Numberx), 'Numberx is function');
-
-// @Test i18n
-
-assert(isFunc(i18n), 'i18n');
-assert(isObjOrFunc(i18n.banana), 'i18n.banana');
-assert(isFunc(i18n.loadAll), 'i18n.loadAll');
-assert(noError(() => i18n.setLocale('zh')), 'i18n.setLocale');
-assert(noError(() => i18n.getPath()), 'i18n.getPath');

@@ -57,7 +57,7 @@ function sh_konquerorExec(s) {
  DOM element started by the tag. End tags do not have this property.
  @param  inputString  a text string
  @param  language  a language definition object
- @return  an array of tag objects
+ @returns  an array of tag objects
  */
 function sh_highlightString(inputString, language) {
     if (/Konqueror/.test(navigator.userAgent)) {
@@ -313,7 +313,7 @@ function sh_extractTagsFromNodeList(nodeList, result) {
  the tag objects.
  @param  element  a DOM element
  @param  tags  an empty array; the extracted tag objects will be returned in it
- @return  the text of the element
+ @returns  the text of the element
  @see  sh_highlightString
  */
 function sh_extractTags(element, tags) {
@@ -386,7 +386,7 @@ function sh_mergeTags(originalTags, highlightTags) {
  Inserts tags into text.
  @param  tags  an array of tag objects
  @param  text  a string representing the text
- @return  a DOM DocumentFragment representing the resulting HTML
+ @returns  a DOM DocumentFragment representing the resulting HTML
  */
 function sh_insertTags(tags, text) {
     var doc = document;
