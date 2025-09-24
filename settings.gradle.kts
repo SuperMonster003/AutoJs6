@@ -61,19 +61,16 @@ pluginManagement {
     val overriddenKspVersion: String? = null
 
     val versionProperties = java.util.Properties().apply {
-        load(java.io.FileInputStream("$rootDir/version.properties"))
+        rootDir.resolve("version.properties").inputStream().use { load(it) }
     }
 
-    // @AnchorBegin EMBEDDED_KOTLIN_LIST
-    // @Script /.utils/scrape-and-inject-embedded-kotlin-list.mjs
-    // @Signature Pair<Gradle Version, Embedded Compatible Kotlin Version>
-    // @Reference gradle-<version>-src.zip\gradle\dependency-management\kotlin-version.properties
+    // @AnchorBegin GRADLE_KOTLIN_COMPATIBILITY_LIST
+    // @Script /.utils/scrape-and-inject-gradle-kotlin-compatibility-list.mjs
+    // @Signature Pair<Gradle Version, Max Supported Kotlin Version>
     // @Reference https://docs.gradle.org/current/userguide/compatibility.html#kotlin
-    // @Updated by SuperMonster003 on Aug 9, 2025.
-    val embeddedKotlin = listOf(
-        "9.0" to "2.2.0",
-        "8.14" to "2.1.10", /* Unofficial. */
-        "8.13" to "2.1.10", /* Unofficial. */
+    // @Updated by SuperMonster003 on Sep 18, 2025.
+    val gradleKotlinCompatibility = listOf(
+        "9.0.0" to "2.2.0",
         "8.12" to "2.0.21",
         "8.11" to "2.0.20",
         "8.10" to "1.9.24",
@@ -84,15 +81,16 @@ pluginManagement {
         "8.3" to "1.9.0",
         "8.2" to "1.8.20",
     )
-    // @AnchorEnd EMBEDDED_KOTLIN_LIST
+    // @AnchorEnd GRADLE_KOTLIN_COMPATIBILITY_LIST
 
     // @AnchorBegin JAVA_GRADLE_COMPATIBILITY_LIST
     // @Script /.utils/scrape-java-gradle-compatibility-map.mjs
     // @Signature Pair<Supported Java Version, Min Required Gradle Version>
     // @Reference https://docs.gradle.org/current/userguide/compatibility.html#java_runtime
-    // @Updated by SuperMonster003 on May 12, 2025.
+    // @Updated by SuperMonster003 on Sep 18, 2025.
     val javaGradleCompatibility = listOf(
-        25 to "9.0", /* Unofficial. */
+        26 to "N/A",
+        25 to "9.1",
         24 to "8.14",
         23 to "8.10",
         22 to "8.8",
@@ -128,9 +126,9 @@ pluginManagement {
     // @AnchorBegin ANDROID_GRADLE_PLUGIN_RELEASES_LIST
     // @Script /.utils/scrape-and-inject-agp-releases.mjs
     // @Reference https://developer.android.com/reference/tools/gradle-api
-    // @Updated by SuperMonster003 on Sep 12, 2025.
+    // @Updated by SuperMonster003 on Sep 23, 2025.
     val agpReleases = listOf(
-        "9.0.0-alpha05",
+        "9.0.0-alpha06",
         "8.13.0",
         "8.12.3",
         "8.11.2",
@@ -215,13 +213,11 @@ pluginManagement {
     val utils = object {
 
         private val SUFFIX_PRIORITY: Map<String, Int> = mapOf(
-            // 早期/快照
             "canary" to 1, "nightly" to 1, "snapshot" to 1, "dev" to 1,
             "pre-alpha" to 2, "prealpha" to 2, "preview" to 2, "eap" to 2, "milestone" to 2,
             "alpha" to 3,
             "beta" to 4,
             "rc" to 5,
-            // 稳定/正式
             "" to 10, "stable" to 10, "ga" to 10, "final" to 10, "release" to 10, "lts" to 10
         )
 
@@ -269,8 +265,7 @@ pluginManagement {
         }
 
         fun toVersionParts(version: String): Pair<List<Int>, Pair<String, Int>> {
-            // 支持: 1.2.3-rc1 / 1.2.3 RC 1 / 1.2.3-Alpha / 1.2.3.m2 / 1.2.3_preview-2 等
-            // 以第一个空白/加号/连字符分隔数字部分与后缀部分
+            // e.g. "1.2.3-rc1" / "1.2.3 RC 1" / "1.2.3-Alpha" / "1.2.3.m2" / "1.2.3_preview-2".
             val split = version.split(Regex("[\\s+\\-]"), limit = 2)
             val numberStr = split[0]
             val numberParts = numberStr.split('.').map {
@@ -280,8 +275,6 @@ pluginManagement {
             val suffixStr = split.getOrNull(1)?.trim().orEmpty()
             if (suffixStr.isEmpty()) return numberParts to ("" to 0)
 
-            // 更宽松的匹配: 名称 + 可选分隔符 + 可选数字; 或 空名称 + 数字 (极少见)
-            // 分隔符允许: 空格 . _ -
             val regex = Regex("([A-Za-z]+)[\\s._-]*(\\d*)|([A-Za-z]*)[\\s._-]*(\\d+)", RegexOption.IGNORE_CASE)
             val m = regex.matchEntire(suffixStr) ?: return numberParts to ("" to 0)
 
@@ -362,8 +355,9 @@ pluginManagement {
                 // @AnchorBegin ANDROID_STUDIO_CODENAME_VERSION_MAP
                 // @Script /.utils/scrape-and-inject-android-studio-codename_maps.mjs
                 // @Reference https://developer.android.com/studio/archive?hl=en
-                // @Updated by SuperMonster003 on Sep 5, 2025.
+                // @Updated by SuperMonster003 on Sep 23, 2025.
                 codenameVersionMap = mapOf(
+                    "2025.2" to "O",
                     "2025.1" to "N",
                     "2024.3" to "M",
                     "2024.2" to "L",
@@ -387,8 +381,9 @@ pluginManagement {
                 // @AnchorBegin ANDROID_STUDIO_CODENAME_MAP
                 // @Script /.utils/scrape-and-inject-android-studio-codename_maps.mjs
                 // @Reference https://developer.android.com/studio/archive?hl=en
-                // @Updated by SuperMonster003 on Apr 11, 2025.
+                // @Updated by SuperMonster003 on Sep 23, 2025.
                 codenameMap = mapOf(
+                    "O" to "Otter", /* Born on Sep 22, 2025. */
                     "N" to "Narwhal", /* Born on Mar 19, 2025. */
                     "M" to "Meerkat", /* Born on Nov 12, 2024. */
                     "L" to "Ladybug", /* Born on Jul 15, 2024. */
@@ -427,9 +422,10 @@ pluginManagement {
             val intelliJIdea = object : Platform(
                 name = "IntelliJIdea", vendor = "Jetbrains",
                 // @Reference AGP Upgrade Assistant integrated within JetBrains IntelliJ IDEA.
-                // @Updated by SuperMonster003 on Aug 10, 2025. (Manual)
+                // @Updated by SuperMonster003 on Aug 20, 2025. (Manual)
                 agpVersionMap = mapOf(
-                    "2025.2" to "8.11.1",
+                    "2025.2.2" to "8.12.0",
+                    "2025.2.1" to "8.11.1",
                     "2025.1" to "8.10.1",
                     "2024.3" to "8.7.3",
                     "2024.2" to "8.5.2",
@@ -510,6 +506,8 @@ pluginManagement {
         val libs = listOf(
             Classpath(id = "com.android.tools.build:gradle", version = overriddenAgpVersion ?: "auto:agp"),
             Classpath(id = "org.jetbrains.kotlin:kotlin-gradle-plugin", version = overriddenKotlinVersion ?: "auto:kotlin"),
+            Classpath(id = "org.apache.commons:commons-compress", version = "toml:commons-compress"),
+            Classpath(id = "org.tukaani:xz", version = "toml:xz"),
             Plugin(id = "com.google.devtools.ksp", version = overriddenKspVersion ?: "auto:ksp"),
         )
 
@@ -585,12 +583,6 @@ pluginManagement {
             "1.8.22" to "1.0.11", /* Jun 9, 2023. */
             "1.8.21" to "1.0.11", /* Apr 27, 2023. */
             "1.8.20" to "1.0.11", /* Apr 18, 2023. */
-            "1.8.20-RC2" to "1.0.9", /* Mar 24, 2023. */
-            "1.8.20-RC" to "1.0.9", /* Mar 9, 2023. */
-            "1.8.20-Beta" to "1.0.9", /* Feb 9, 2023. */
-            "1.8.10" to "1.0.9", /* Feb 3, 2023. */
-            "1.8.0" to "1.0.9", /* Jan 26, 2023. */
-            "1.8.0-RC2" to "1.0.8", /* Dec 21, 2022. */
         )
         // @AnchorEnd KSP_VERSION_MAP
 
@@ -672,6 +664,7 @@ pluginManagement {
 
         val specified = "specified"
         val auto = "auto"
+        val toml = "toml"
 
         val fallbackSuffix = " [$fallback]"
         val upgradedSuffix = " [$upgraded]"
@@ -679,6 +672,7 @@ pluginManagement {
         val nearestLowerMatchedSuffix = " [$nearestLowerMatched]"
         val autoSpecifiedSuffix = " [$auto-$specified]"
         val userSpecifiedSuffix = " [user-$specified]"
+        val tomlSpecifiedSuffix = " [toml-$specified]"
 
     }
 
@@ -748,23 +742,23 @@ pluginManagement {
 
                 override fun refinedBestMatchingValue(bestMatchingValue: String?): String? {
                     val currentGradleVersion = gradle.gradleVersion.toGradleVersion()
-                    val embeddedMin = embeddedKotlin
+                    val kotlinMin = gradleKotlinCompatibility
                         .filter { (gradleMin, _) -> currentGradleVersion >= gradleMin.toGradleVersion() }
                         .maxByOrNull { it.first.toGradleVersion() }
                         ?.second
                     return when {
-                        embeddedMin == null -> bestMatchingValue
+                        kotlinMin == null -> bestMatchingValue
                         bestMatchingValue == null -> {
                             bestMatchingOperationHintSuffix += identifier.autoSpecifiedSuffix
-                            embeddedMin
+                            kotlinMin
                         }
-                        bestMatchingValue.toGradleVersion() < embeddedMin.toGradleVersion() -> {
+                        bestMatchingValue.toGradleVersion() < kotlinMin.toGradleVersion() -> {
                             bestMatchingOperationHintSuffix += identifier.upgradedSuffix
-                            embeddedMin
+                            kotlinMin
                         }
-                        bestMatchingValue.toGradleVersion() > embeddedMin.toGradleVersion() -> {
+                        bestMatchingValue.toGradleVersion() > kotlinMin.toGradleVersion() -> {
                             bestMatchingOperationHintSuffix += identifier.downgradedSuffix
-                            embeddedMin
+                            kotlinMin
                         }
                         else -> bestMatchingValue
                     }
@@ -803,11 +797,34 @@ pluginManagement {
             },
         )
 
+        private val toml: Map<String, String> = run {
+            val lines = file("gradle/libs.versions.toml").also {
+                require(it.isFile) { "File $it doesn't exist" }
+            }.readLines()
+            val versions = mutableMapOf<String, String>()
+            var inVersions = false
+            val keyValuePattern = Regex("""^\s*([A-Za-z0-9._-]+)\s*=\s*"(.*?)"\s*(#.*)?$""")
+            for (raw in lines) {
+                val line = raw.trim()
+                if (line.isEmpty() || line.startsWith("#")) continue
+                if (line.startsWith("[")) {
+                    inVersions = line == "[versions]"
+                    continue
+                }
+                if (!inVersions) continue
+                keyValuePattern.find(line)?.let { m ->
+                    val (_, key, value) = m.groupValues
+                    versions[key] = value
+                }
+            }
+            return@run versions
+        }
+
         val classpath = config.libs.filterIsInstance<Classpath>().map { lib ->
             var suffix = ""
             val version: String = when {
                 lib.version.startsWith("${identifier.auto}:") -> {
-                    val mapType = lib.version.substring("${identifier.auto}:".length)
+                    val mapType = lib.version.removePrefix("${identifier.auto}:")
                     val ver = when (mapType) {
                         "agp" -> versions.agp
                         "kotlin" -> versions.kotlin
@@ -818,6 +835,11 @@ pluginManagement {
                     } ?: ver.fallbackVersion?.also {
                         suffix += identifier.fallbackSuffix
                     } ?: consts.DEFAULT_VERSION
+                }
+                lib.version.startsWith("${identifier.toml}:") -> {
+                    toml.getValue(lib.version.removePrefix("${identifier.toml}:")).also {
+                        suffix += identifier.tomlSpecifiedSuffix
+                    }
                 }
                 else -> lib.version.also {
                     suffix += identifier.userSpecifiedSuffix
@@ -836,10 +858,15 @@ pluginManagement {
             var suffix = ""
             val version: String = when {
                 lib.version.startsWith("${identifier.auto}:") -> {
-                    val automator = pluginVersionAutomatorMap[lib.version.substring("${identifier.auto}:".length)]!!
+                    val automator = pluginVersionAutomatorMap.getValue(lib.version.removePrefix("${identifier.auto}:"))
                     val result = automator.invoke(config.kspVersionMap)
                     result["suffix"]?.let { s -> suffix += s }
                     result["version"] ?: throw Exception("Unknown version for plugin ${lib.id}")
+                }
+                lib.version.startsWith("${identifier.toml}:") -> {
+                    toml.getValue(lib.version.removePrefix("${identifier.toml}:")).also {
+                        suffix += identifier.tomlSpecifiedSuffix
+                    }
                 }
                 else -> {
                     suffix += identifier.userSpecifiedSuffix
@@ -923,17 +950,19 @@ pluginManagement {
 
     }
 
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+        google()
+    }
+
     buildscript {
         repositories {
             mavenCentral()
             google()
         }
-        dependencies /* Android/Kotlin Gradle Plugin. */  {
+        dependencies {
             notations.classpath.forEach { classpath(it) }
-        }
-        dependencies /* Apache Compress for utils.build.gradle module. */ {
-            classpath("org.apache.commons:commons-compress:1.28.0")
-            classpath("org.tukaani:xz:1.10")
         }
     }
 
@@ -951,28 +980,10 @@ pluginManagement {
     }
 
     gradle.extra.apply {
+        set("platform", platform)
         set("isCleanupPaddleOcr", config.isCleanupPaddleOcr)
         set("isCleanupRapidOcr", config.isCleanupRapidOcr)
         set("isHideConsoleInfoHintSuffix", config.isHideConsoleInfoHintSuffix)
     }
 
-    gradle.beforeProject {
-        extensions.extraProperties["kotlinVersion"] = notations.classpath.find {
-            it.contains("kotlin-gradle-plugin")
-        }?.substringAfterLast(":") ?: config.fallbackKotlinVersion
-        extensions.extraProperties["platform"] = platform
-    }
-
-}
-
-dependencyResolutionManagement {
-    repositories {
-        google()
-        mavenCentral()
-    }
-    versionCatalogs {
-        create("libs") {
-            from(files("./gradle/libs.versions.toml"))
-        }
-    }
 }

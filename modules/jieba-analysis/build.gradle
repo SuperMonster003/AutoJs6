@@ -1,15 +1,16 @@
 plugins {
+    id 'org.autojs.build.versions'
     id 'com.android.library'
     id 'kotlin-android'
 }
 
 android {
     namespace = 'com.huaban.jieba'
-    compileSdk = project.ext.compileSdk
+    compileSdk = versions.sdkVersionCompile
 
     defaultConfig {
-        minSdk = project.ext.minSdk
-        targetSdk = project.ext.targetSdk
+        minSdk = versions.sdkVersionMin
+        targetSdk = versions.sdkVersionTarget
 
         group = 'com.huaban'
         versionName = '1.0.3-SNAPSHOT (Optimized for AutoJs6)'

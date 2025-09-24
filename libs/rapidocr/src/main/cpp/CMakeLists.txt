@@ -4,7 +4,8 @@ project(RapidOcr)
 
 # OnnxRuntime
 
-include(${CMAKE_CURRENT_SOURCE_DIR}/../onnxruntime-shared/OnnxRuntimeWrapper.cmake)
+get_filename_component(MODULE_DIR "${CMAKE_CURRENT_LIST_DIR}/../../.." ABSOLUTE)
+include(${MODULE_DIR}/src/main/onnxruntime-shared/OnnxRuntimeWrapper.cmake)
 find_package(OnnxRuntime REQUIRED)
 if (OnnxRuntime_FOUND)
     message(STATUS "OnnxRuntime_LIBS: ${OnnxRuntime_LIBS}")
@@ -15,7 +16,7 @@ endif (OnnxRuntime_FOUND)
 
 ## opencv 库
 
-set(OpenCV_DIR "${CMAKE_SOURCE_DIR}/../../sdk/native/jni")
+set(OpenCV_DIR "${MODULE_DIR}/src/sdk/native/jni")
 find_package(OpenCV REQUIRED)
 if (OpenCV_FOUND)
     message(STATUS "OpenCV_LIBS: ${OpenCV_LIBS}")

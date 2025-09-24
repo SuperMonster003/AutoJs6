@@ -10,10 +10,11 @@ cmake_minimum_required(VERSION 3.4.1)
 # CMake builds them for you. Gradle automatically packages shared libraries with
 # your APK.
 
-set(PaddleLite_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../PaddleLite")
+get_filename_component(MODULE_DIR "${CMAKE_CURRENT_LIST_DIR}/../../.." ABSOLUTE)
+set(PaddleLite_DIR "${MODULE_DIR}/PaddleLite")
 include_directories(${PaddleLite_DIR}/cxx/include)
 
-set(OpenCV_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../src/sdk/native/jni")
+set(OpenCV_DIR "${MODULE_DIR}/src/sdk/native/jni")
 message(STATUS "opencv dir: ${OpenCV_DIR}")
 find_package(OpenCV REQUIRED)
 message(STATUS "OpenCV libraries: ${OpenCV_LIBS}")

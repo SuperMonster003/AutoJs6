@@ -6,25 +6,24 @@
  * Modified by SuperMonster003 as of Sep 4, 2023.
  */
 
-apply {
-    plugin 'com.android.library'
-    plugin 'org.jetbrains.kotlin.android'
-    from '../utils.build.gradle'
+plugins {
+    id 'org.autojs.build.utils'
+    id 'org.autojs.build.properties'
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
 }
 
 ext {
     projectName = "Paddle OCR"
 }
 
-def versions = Utils.newVersions(project)
-
 def versionMap = [
-        "MIN_SDK"    : versions["MIN_SDK"] as Integer,
-        "COMPILE_SDK": versions["COMPILE_SDK"] as Integer,
-        "TARGET_SDK" : versions["TARGET_SDK"] as Integer,
-        "NDK"        : versions["PADDLE_OCR/NDK"],
-        "CMAKE"      : versions["PADDLE_OCR/CMAKE"],
-        "OPENCV"     : versions["PADDLE_OCR/OPENCV"],
+        "MIN_SDK"    : props["MIN_SDK"] as Integer,
+        "COMPILE_SDK": props["COMPILE_SDK"] as Integer,
+        "TARGET_SDK" : props["TARGET_SDK"] as Integer,
+        "NDK"        : props["PADDLE_OCR/NDK"],
+        "CMAKE"      : props["PADDLE_OCR/CMAKE"],
+        "OPENCV"     : props["PADDLE_OCR/OPENCV"],
 ]
 
 def nameMap = [
@@ -43,11 +42,17 @@ def libsToDeploy = [
         //  ! Download the archive for source code of OpenCV (defaults to 4.2.0).
         //  ! Not matching the version in Auto.js (e.g., 4.8.0) will cause conflicts.
         //  ! Adjust the corresponding content in version.properties as needed.
-        Utils.newLibDeployer(project, nameMap.OPENCV, "https://github.com/opencv/opencv/releases/download" +
+        utils.newLibDeployer(project, nameMap.OPENCV, "https://github.com/opencv/opencv/releases/download" +
                 "/${versionMap.OPENCV}/opencv-${versionMap.OPENCV}-android-sdk.zip")
                 .setSourceDir("/OpenCV-android-sdk/sdk/native/")
                 .setDestDir("/src/sdk/native/")
 ]
+
+utils.configureLibraryLifecycleHooks(project, nameMap.PROJECT, [
+        "OPENCV",
+        "NDK",
+        "CMAKE",
+].collect { "${nameMap[it]}: ${versionMap[it]}" }, libsToDeploy, "isCleanupPaddleOcr", [".cxx"])
 
 android {
 
@@ -147,26 +152,4 @@ dependencies {
     implementation libs.core.ktx
     implementation libs.preference.ktx
 
-}
-
-clean.doFirst {
-    delete project.layout.buildDirectory
-    ['.cxx'].forEach { delete file(it) }
-    if (gradle.ext["isCleanupPaddleOcr"] as Boolean) {
-        libsToDeploy.forEach { it.clean() }
-    } else {
-        println("The library files of ${project.ext["projectName"]} won't be cleaned up due to the configuration")
-    }
-}
-
-gradle.taskGraph.whenReady { taskGraph ->
-    if (taskGraph.allTasks.every { it.name == "clean" }) return
-
-    Utils.newFormatted("Version information for ${nameMap.PROJECT} library", [
-            "OPENCV",
-            "NDK",
-            "CMAKE",
-    ].collect { "${nameMap[it]}: ${versionMap[it]}" }).print()
-
-    libsToDeploy.forEach { it.deploy() }
 }
