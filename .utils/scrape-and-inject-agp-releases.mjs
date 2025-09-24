@@ -1,8 +1,8 @@
 // scrape-and-inject-agp-releases.mjs
 
 import * as cheerio from 'cheerio';
-import { getMinSupportedAgpVersion } from './utils/properties.mjs';
 import { compareVersionStrings, compareVersionStringsDescending } from './utils/versioning.mjs';
+import { getMinSupportedAgpVersion } from './utils/properties.mjs';
 import { updateAnchoredListInFile } from './utils/anchors.mjs';
 
 const URL = 'https://developer.android.com/reference/tools/gradle-api';
@@ -19,14 +19,16 @@ const URL = 'https://developer.android.com/reference/tools/gradle-api';
         }
     });
     const minSupportedVersion = getMinSupportedAgpVersion();
-    const agpList = Array.from(results).filter(v => compareVersionStrings(v, minSupportedVersion) >= 0).sort(compareVersionStringsDescending);
+    const agpList = Array.from(results)
+        .filter(v => compareVersionStrings(v, minSupportedVersion) >= 0)
+        .sort(compareVersionStringsDescending);
     await updateAnchoredListInFile('../settings.gradle.kts', {
         anchorTag: 'ANDROID_GRADLE_PLUGIN_RELEASES_LIST',
         listName: 'agpReleases',
         lines: agpList.map(v => `"${v}",`),
-        updatedLabel: 'AGP 发行版本数据',
+        updatedLabel: 'AGP releases list',
     });
-})().catch((e) => {
-    console.error('Failed to fetch AGP releases:', e)
+})().catch(err => {
+    console.error('Failed to fetch AGP releases:', err);
     process.exit(1);
-})
+});

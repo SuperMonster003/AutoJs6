@@ -1,20 +1,20 @@
 // scrape-and-inject-latest-gradle-wrapper.mjs
 
+/** @typedef {import('./fetch-and-parse-gradle-releases.mjs').GradleRelease} GradleRelease */
 /**
- * @typedef {Object} Config
+ * @typedef {Object} GradleReleaseConfig
  * @property {number | string | null} [majorVersionLimit=null]
  * @property {'bin' | 'all'} [format='bin']
  */
-/** @typedef {import('./fetch-and-parse-gradle-releases.mjs').GradleRelease} GradleRelease */
 
-import { fetchGradleReleases } from './fetch-and-parse-gradle-releases.mjs';
 import { compareVersionStrings } from './utils/versioning.mjs';
+import { fetchGradleReleases } from './fetch-and-parse-gradle-releases.mjs';
 import { readPropertiesSync, writePropertiesSync } from './utils/properties.mjs';
 
 const KEY = 'distributionUrl';
 const URL_PREFIX = 'https://services.gradle.org/distributions';
 
-/** @type {Config} */
+/** @type {GradleReleaseConfig} */
 const config = {
     // @Hint by SuperMonster003 on Sep 10, 2025.
     //  ! Limit major version to 8.x.x, to:
@@ -41,7 +41,7 @@ function isVersionLimited() {
 /**
  * @param {GradleRelease[]} releases
  * @param {string} majorVersionLimit
- * @return {GradleRelease}
+ * @returns {GradleRelease}
  */
 function getLatestRelease(releases, majorVersionLimit) {
     const limitedRelease = releases
@@ -55,7 +55,7 @@ function getLatestRelease(releases, majorVersionLimit) {
 
 /**
  * @param {string} latestGradleVersion
- * @return {string}
+ * @returns {string}
  */
 function getLatestGradleUrl(latestGradleVersion) {
     const format = config.format ?? 'bin';
@@ -67,10 +67,11 @@ function getLatestGradleUrl(latestGradleVersion) {
  * @param {string} data.latestGradleVersion
  * @param {string} data.latestGradleUrl
  * @param {string} data.majorVersionLimit
- * @return {Promise<void>}
+ * @returns {Promise<void>}
  */
 async function updateGradleWrapperFileContent({ latestGradleVersion, latestGradleUrl, majorVersionLimit }) {
-    const path = '../gradle/wrapper/gradle-wrapper.properties';
+    const fileName = 'gradle-wrapper.properties';
+    const path = '../gradle/wrapper/' + fileName;
     const messages = [];
     const props = readPropertiesSync(path);
     let propUrl = props[KEY];
@@ -87,21 +88,21 @@ async function updateGradleWrapperFileContent({ latestGradleVersion, latestGradl
     }
 
     if (compareVersionStrings(propVersion, majorVersionLimit) > 0) {
-        const suffix = ` (降级, 受限于 "${config.majorVersionLimit}")`;
+        const suffix = ` (downgrade, limited by "${config.majorVersionLimit}")`;
         messages.push(`-- ${propUrl}\n-> ${latestGradleUrl}${suffix}`);
         props[KEY] = propUrl.replace(re, `$1${latestGradleVersion}$3`);
     } else if (compareVersionStrings(propVersion, latestGradleVersion) < 0) {
-        const suffix = isVersionLimited() ? ` (升级, 但受限于 "${config.majorVersionLimit}")` : ` (升级)`;
+        const suffix = isVersionLimited() ? ` (upgrade, but limited by "${config.majorVersionLimit}")` : ` (upgrade)`;
         messages.push(`-- ${propUrl}\n-> ${latestGradleUrl}${suffix}`);
         props[KEY] = propUrl.replace(re, `$1${latestGradleVersion}$3`);
     }
 
     if (messages.length > 0) {
         writePropertiesSync(path, props);
-        console.log('[gradle-wrapper.properties] 已更新 (Gradle 版本)');
+        console.log(`[${fileName}] Updated (Gradle version)`);
         messages.forEach((message) => console.log(message));
     } else {
-        // console.log('[gradle-wrapper.properties] 无需更新 (Gradle 版本)');
+        // console.log(`[${fileName}] No update needed (Gradle version)`);
     }
 }
 
@@ -132,7 +133,7 @@ function parseMajorVersionLimit() {
     await updateGradleWrapperFileContent({
         latestGradleVersion, latestGradleUrl, majorVersionLimit,
     });
-})().catch((e) => {
-    console.error('Failed to scrape or inject latest Gradle wrapper:', e);
+})().catch(err => {
+    console.error('Failed to scrape or inject latest Gradle wrapper:', err);
     process.exit(1);
 });

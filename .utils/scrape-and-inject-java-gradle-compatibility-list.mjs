@@ -1,13 +1,13 @@
 // scrape-and-inject-java-gradle-compatibility-list.mjs
 
+import { findTargetRows } from './utils/puppeteer-helpers.mjs';
 import { getMinSupportedJavaVersionInt } from './utils/properties.mjs';
 import { updateAnchoredListInFile } from './utils/anchors.mjs';
-import { findTargetRows } from './utils/puppeteer-helpers.mjs';
 
 const URL = 'https://docs.gradle.org/current/userguide/compatibility.html#java_runtime';
 
 const unofficialGradleCompatibilityList = {
-    25: '9.0',
+    // 25: '9.0',
 };
 
 (async function main() {
@@ -15,25 +15,23 @@ const unofficialGradleCompatibilityList = {
         url: URL,
         tableSelector: 'table.tableblock',
         tableFilter: {
-            'caption': `:RegExp:i:${/java compatibility/.source}`,
+            caption: /java compatibility/i,
         },
         tableRowSelector: 'tbody tr',
         tableDataSelector: 'td',
         tableDataStructure: [
-            { 'java': `:RegExp:${/^\d+$/.source}` },
-            { 'toolchain': `:RegExp:${/^N\/A$|\d+\.\d+/.source}` },
-            { 'gradle': `:RegExp:${/^N\/A$|\d+\.\d+/.source}` },
+            { java: /^\d+$/ },
+            { toolchain: /^N\/A$|\d+\.\d+/ },
+            { gradle: /^N\/A$|\d+\.\d+/ },
         ],
     });
-    /**
-     * @type {{ [javaInt: string]: string }}
-     */
+    /** @type {{ [javaInt: string]: string }} */
     const map = {};
     const minSupportedJavaVersionInt = getMinSupportedJavaVersionInt();
     for (const { java, gradle } of rows) {
         const javaInt = parseInt(java);
         if (Number.isNaN(javaInt)) {
-            throw Error(`Invalid java version int: ${java}`);
+            throw Error(`Invalid java version int: "${java}"`);
         }
         if (javaInt >= minSupportedJavaVersionInt) {
             map[javaInt] = gradle;
@@ -54,7 +52,7 @@ const unofficialGradleCompatibilityList = {
                 }
                 return `${java} to "${gradle}",`;
             }),
-        updatedLabel: 'Java 与 Gradle 兼容性映射',
+        updatedLabel: 'Java and Gradle compatibility list',
     });
 })().catch(err => {
     console.error(err);

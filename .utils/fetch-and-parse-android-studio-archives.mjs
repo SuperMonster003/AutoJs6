@@ -1,8 +1,10 @@
-import { fileURLToPath } from 'node:url';
+// fetch-and-parse-android-studio-archives.mjs
+
 import puppeteer from 'puppeteer';
-import { sleep } from './utils/async.mjs';
 import { compareVersionStrings, isVersionStable } from './utils/versioning.mjs';
+import { fileURLToPath } from 'node:url';
 import { readPropertiesSync } from './utils/properties.mjs';
+import { sleep } from './utils/async.mjs';
 
 /** @typedef {import('puppeteer').Page} Page */
 /** @typedef {import('puppeteer').Frame} Frame */
@@ -20,51 +22,64 @@ import { readPropertiesSync } from './utils/properties.mjs';
  */
 
 const URL = 'https://developer.android.com/studio/archive?hl=en';
+const SELECTOR_PRIMARY_BUTTON = 'button.button-primary';
+const SELECTOR_DEVSITE_EXPANDABLE = 'devsite-expandable';
 
 /**
- * 在所有 frame (含主文档) 中查找 "同意" 按钮.
+ * Find "agree" button in frame (including main document).<br>
+ * zh-CN: 在所有 frame (含主文档) 中查找 "同意" 按钮.
  *
  * @param {Page} page
  * @param {number} [timeoutMs=30000]
- * @returns {Promise<{handle: ElementHandle<HTMLButtonElement>, frame: Frame}>}
+ * @returns {Promise<{ handle: ElementHandle<HTMLButtonElement>, frame: Frame }>}
  */
 async function waitAndFindAgreeButton(page, timeoutMs = 30000) {
-    const deadline = Date.now() + timeoutMs;
-    const selector = 'button.button-primary';
+    /**
+     * @param {string | null} s
+     * @returns {boolean}
+     */
+    const containsAgreementText = (s) => s && /\b(?:i\s*agree|agree\s*to\s*the\s*terms|^agree$)/i.test(s.trim());
 
+    const deadline = Date.now() + timeoutMs;
     while (Date.now() < deadline) {
 
-        // 1) 先尝试主文档
+        // Attempt main document.
+        // zh-CN: 尝试主文档.
 
-        const mainBtn = await page.$$(selector);
-        for (const h of mainBtn) {
-            const txt = await page.evaluate(el => (el.textContent || '').trim().toLowerCase(), h);
-            if (txt.includes('agree')) return { handle: h, frame: page.mainFrame() };
+        const btnList = await page.$$(SELECTOR_PRIMARY_BUTTON);
+        for (const btn of btnList) {
+            const txt = await page.evaluate(el => el.textContent, btn);
+            if (containsAgreementText(txt)) {
+                return { handle: btn, frame: page.mainFrame() };
+            }
         }
 
-        // 2) 再查所有子 frame
+        // Check all sub-frame.
+        // zh-CN: 检查所有子 frame.
 
         const frames = page.frames();
         for (const f of frames) {
             /** @type {ElementHandle<HTMLButtonElement>} */
-            const btn = await f.$(selector);
+            const btn = await f.$(SELECTOR_PRIMARY_BUTTON);
             if (!btn) continue;
-            const txt = await f.evaluate(el => (el.textContent || '').trim().toLowerCase(), btn);
-            if (txt.includes('i agree') || txt.includes('agree to the terms') || txt === 'agree') {
+            const txt = await f.evaluate(el => el.textContent, btn);
+            if (containsAgreementText(txt)) {
                 return { handle: btn, frame: f };
             }
         }
 
-        // 3) 触发懒加载: 轻微滚动几次
+        // Trigger lazy-loading: scroll slightly several times.
+        // zh-CN: 触发懒加载, 轻微滚动几次.
 
         await page.evaluate(() => window.scrollBy(0, 600));
-        await sleep(250);
+        await sleep(300);
     }
-    throw new Error('未在任何文档中找到 "同意" 按钮 (超时)');
+    throw new Error('Unable to find "agree" button in any document (timeout)');
 }
 
 /**
- * 在所有 frame 中等待某个选择器出现, 并返回该 frame.
+ * Wait for a selector to appear in any frame and return that frame.<br>
+ * zh-CN: 在所有 frame 中等待某个选择器出现, 并返回该 frame.
  *
  * @param {Page} page
  * @param {string} selector
@@ -75,16 +90,17 @@ async function waitForFrameWithSelector(page, selector, timeoutMs = 30000) {
     const deadline = Date.now() + timeoutMs;
     while (Date.now() < deadline) {
         for (const f of page.frames()) {
-            const el = await f.$(selector);
-            if (el) return f;
+            if (await f.$(selector)) {
+                return f;
+            }
         }
-        await sleep(250);
+        await sleep(300);
     }
-    throw new Error(` 未在任何 frame 中找到选择器: ${selector}`);
+    throw new Error(`Could not find selector "${selector}" in any frame`);
 }
 
 /**
- * @return {Promise<ArchiveItem[]>}
+ * @returns {Promise<ArchiveItem[]>}
  */
 export async function getAndroidStudioArchives() {
     const browser = await puppeteer.launch({
@@ -99,74 +115,68 @@ export async function getAndroidStudioArchives() {
     await page.setUserAgent('Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36');
     await page.goto(URL, { waitUntil: 'networkidle2', timeout: 60000 });
 
-    // 滚动到下载区域, 促发懒加载 (有助于注入承载 "同意" 按钮的 iframe)
+    // Scroll to download area, trigger lazy loading (helpful for injecting iframe containing "agree" button).
+    // zh-CN: 滚动到下载区域, 触发懒加载 (有助于注入承载 "同意" 按钮的 iframe).
     await page.evaluate(() => {
         const anchor = document.querySelector('#downloads')
             || Array.from(document.querySelectorAll('h2, h3'))
-                .find(h => /download|archive/i.test(h.textContent || ''));
+                .find(h => /download|archive/i.test(h.textContent ?? ''));
         if (anchor) anchor.scrollIntoView({ behavior: 'instant', block: 'start' });
     });
-    await sleep(500);
+    await sleep(300);
 
-    // 等待并点击 "同意" 按钮
     try {
         const { handle, frame } = await waitAndFindAgreeButton(page, 30000);
-        await frame.waitForSelector('button.button-primary', { visible: true, timeout: 15000 }).catch(() => {
-        });
+        await frame.waitForSelector(SELECTOR_PRIMARY_BUTTON, { visible: true, timeout: 15000 }).catch(_ => null);
         await handle.click();
     } catch (e) {
-        console.log('未检测到协议或已同意, 继续解析...');
+        console.log('No protocol detected or already agreed, continuing parsing...');
     }
 
-    // 同意后不要在主文档等待; 改为在包含内容的 frame 里等待 devsite-expandable
-    // 若首次未出现, 尝试轻微滚动以触发懒加载, 再次检查
+    // Don't wait in main document after agreeing; wait for devsite-expandable in content frame instead.
+    // If not found initially, try slightly scrolling to trigger lazy loading and check again.
+    // zh-CN:
+    // 同意后不要在主文档等待; 改为在包含内容的 frame 里等待 devsite-expandable.
+    // 若首次未出现, 尝试轻微滚动以触发懒加载, 再次检查.
+
     /** @type {Frame} */
     let contentFrame;
     try {
-        contentFrame = await waitForFrameWithSelector(page, 'devsite-expandable', 20000);
+        contentFrame = await waitForFrameWithSelector(page, SELECTOR_DEVSITE_EXPANDABLE, 20000);
     } catch {
-        // 尝试滚动触发
+        // Attempt to trigger loading by scrolling. (zh-CN: 尝试滚动触发.)
         for (let i = 0; i < 8; i++) {
             await page.evaluate(() => window.scrollBy(0, 800));
-            await sleep(250);
+            await sleep(300);
         }
-        // 再次寻找
-        contentFrame = await waitForFrameWithSelector(page, 'devsite-expandable', 20000);
+        // Check again. (zh-CN: 再次检查.)
+        contentFrame = await waitForFrameWithSelector(page, SELECTOR_DEVSITE_EXPANDABLE, 20000);
+    }
+    if (!contentFrame) {
+        throw new Error('Failed to find content frame');
     }
 
-    /**
-     * @type {ArchiveItem[]}
-     */
-    const archives = await contentFrame.$$eval('devsite-expandable', nodes => {
-
-        // 从内容 frame 中直接抽取 devsite-expandable 数据
-
-        /**
-         * @param {Node | null} el
-         * @returns {string}
-         */
-        const pickText = el => (el?.textContent || '').trim();
-
+    /** @type {ArchiveItem[]} */
+    const archives = await contentFrame.$$eval(SELECTOR_DEVSITE_EXPANDABLE, nodes => {
+        const pickText = (/** @type {Node | null} */ el) => String(el?.textContent ?? '').trim();
         return nodes.map(n => {
             /** @type {Node} */
-            const titleEl = n.querySelector('.expand-control');
-            const title = pickText(titleEl?.childNodes?.[0]); // 不含日期的主标题
+            const titleElement = n.querySelector('.expand-control');
+            const title = pickText(titleElement?.childNodes?.[0] ?? null);
             const date = pickText(n.querySelector('.expand-control span'))
                 .replace(/^([A-Z][a-z]{2})[a-z]*( \d+, \d+)$/, '$1$2');
             /** @type {Element[]} */
-            const linkEls = Array.from(n.querySelectorAll('.downloads a[href]'));
-            const links = linkEls.map(a => ({
+            const linkElements = Array.from(n.querySelectorAll('.downloads a[href]'));
+            const links = linkElements.map(a => ({
                 text: pickText(a),
-                href: a.getAttribute('href') || '',
+                href: a.getAttribute('href') ?? '',
             }));
 
-            // 收集 checksums (在 .downloads 文本中)
+            /** @type {{ [filename: string]: string }} */
+            const checksums = {};
             /** @type {HTMLElement} */
             const downloadsElement = n.querySelector('.downloads');
             const bodyText = (downloadsElement?.innerText || '').trim();
-            /** @type {{[filename: string]: string}} */
-            const checksums = {};
-            // 行格式: <sha256> <filename>
             bodyText.split('\n').forEach(line => {
                 const m = /^\s*([a-f0-9]{64})\s+(.+?)\s*$/.exec(line);
                 if (m) {
@@ -175,11 +185,8 @@ export async function getAndroidStudioArchives() {
                 }
             });
 
-            // 解析版本号 (2025.1.2 等), 优先从标题中提取
-            let version = null;
-            const vm = title.match(/\d{2,}\.\d+(?:\.\d+)?/);
-            if (vm) version = vm[0];
-
+            /* e.g. "2025.1.3". */
+            const version = title.match(/\d{2,}\.\d+(?:\.\d+)?/)?.[0] ?? null;
             return { title, date, version, links, checksums };
         });
     });
@@ -211,7 +218,8 @@ async function main() {
     console.table(results);
 }
 
-// 判断是否为直接执行该文件
+// Determine if this file is being run directly.
+// zh-CN: 判断是否为直接执行该文件.
 if (fileURLToPath(import.meta.url) === process.argv[1]) {
     await main().catch((err) => {
         console.error(err);
