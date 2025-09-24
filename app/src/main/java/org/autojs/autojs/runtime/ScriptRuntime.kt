@@ -433,6 +433,8 @@ class ScriptRuntime private constructor(builder: Builder) {
 
     private val js_array_observe_min by lazy { rhinoRequire("array-observe.min") as BaseFunction }
 
+    private val js_structured_clone by lazy { rhinoRequire("structured-clone.min") as BaseFunction }
+
     private val js_mod_continuation by lazy { rhinoRequire("continuation") as ScriptableObject }
 
     private val js_mod_internal by lazy { rhinoRequire("internal") as ScriptableObject }
@@ -490,6 +492,8 @@ class ScriptRuntime private constructor(builder: Builder) {
         //  ! zh-CN: "object observe" 需要先于 "array observe".
         callFunction(this, js_object_observe_lite_min, topLevelScope, topLevelScope, arrayOf(topLevelScope))
         callFunction(this, js_array_observe_min, topLevelScope, topLevelScope, arrayOf(topLevelScope))
+
+        callFunction(this, js_structured_clone, topLevelScope, topLevelScope, arrayOf(topLevelScope))
 
         if (Pref.isExtendingJsBuildInObjectsEnabled) Jsox.extendAllRhinoWithRuntime(this)
 
