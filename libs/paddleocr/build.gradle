@@ -160,7 +160,7 @@ clean.doFirst {
 }
 
 gradle.taskGraph.whenReady { taskGraph ->
-    if (taskGraph.allTasks.any { it.name == "clean" }) return
+    if (taskGraph.allTasks.every { it.name == "clean" }) return
 
     Utils.newFormatted("Version information for ${nameMap.PROJECT} library", [
             "OPENCV",
