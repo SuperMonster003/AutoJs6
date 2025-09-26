@@ -1,6 +1,6 @@
 package org.autojs.autojs.util;
 
-import static org.autojs.autojs.util.StringUtils.getStringByLocal;
+import static org.autojs.autojs.util.StringUtils.getStringByLanguageTag;
 import static org.autojs.autojs.util.StringUtils.key;
 import static org.autojs.autojs.util.StringUtils.str;
 
@@ -22,9 +22,9 @@ public class RootUtils {
     private static String runtimeOverriddenRootMode = RootMode.AUTO_DETECT.key;
 
     public enum RootMode {
-        FORCE_ROOT(key(R.string.key_root_mode_force_root), getStringByLocal(R.string.entry_root_mode_force_root, "en")),
-        FORCE_NON_ROOT(key(R.string.key_root_mode_force_non_root), getStringByLocal(R.string.entry_root_mode_force_non_root, "en")),
-        AUTO_DETECT(key(R.string.key_root_mode_auto_detect), getStringByLocal(R.string.entry_root_mode_auto_detect, "en"));
+        FORCE_ROOT(key(R.string.key_root_mode_force_root), getStringByLanguageTag(R.string.entry_root_mode_force_root, "en")),
+        FORCE_NON_ROOT(key(R.string.key_root_mode_force_non_root), getStringByLanguageTag(R.string.entry_root_mode_force_non_root, "en")),
+        AUTO_DETECT(key(R.string.key_root_mode_auto_detect), getStringByLanguageTag(R.string.entry_root_mode_auto_detect, "en"));
 
         public final String key;
 

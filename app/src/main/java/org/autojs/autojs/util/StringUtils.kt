@@ -184,9 +184,9 @@ object StringUtils {
     }
 
     @JvmStatic
-    fun getStringByLocal(id: Int, locale: String): String {
+    fun getStringByLanguageTag(id: Int, locale: String): String {
         val configuration = Configuration(globalAppContext.resources.configuration)
-        configuration.setLocale(Locale(locale))
+        configuration.setLocale(Locale.forLanguageTag(locale))
         return globalAppContext.createConfigurationContext(configuration).resources.getString(id)
     }
 

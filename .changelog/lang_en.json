@@ -155,7 +155,7 @@
       ],
       "dependency": [
         "Added Eclipse Paho Client Mqttv3 version 1.1.0 _[`issue #330`](http://issues.autojs6.com/330)_",
-        "Upgraded Gradle Compile version from 34 to 35",
+        "Upgraded Android SDK version from 34 to 35",
         "Upgraded Gradle from 8.12 to 8.14-rc-1",
         "Upgraded Rhino from 1.8.0-SNAPSHOT to 1.8.1-SNAPSHOT",
         "Upgraded Androidx Recyclerview from 1.3.2 to 1.4.0",
@@ -466,8 +466,8 @@
       "dependency": [
         "Added Rikka Shizuku version 13.1.5",
         "Added MLKit Barcode Scanning version 17.2.0",
+        "Upgraded Android SDK version from 33 -> 34",
         "Upgraded OpenCV version from 4.5.5 -> 4.8.0 (Ref to [TonyJiangWJ](https://github.com/TonyJiangWJ))",
-        "Upgraded Gradle Compile version from 33 -> 34",
         "Upgraded Gradle version from 8.3-rc-1 -> 8.4-rc-3",
         "Upgraded Apache Commons Lang3 version from 3.12.0 -> 3.13.0",
         "Upgraded Glide version from 4.15.1 -> 4.16.0",
@@ -770,10 +770,10 @@
         "Redesigned global colors object and added support for HSV / HSL and other color modes (refer to project documentation > [Color](https://docs.autojs6.com/#/color))"
       ],
       "dependency": [
-        "Upgraded Gradle Compile version 32 -> 33",
         "Localized Android Job version 1.4.3",
         "Localized Android Plugin Client SDK For Locale version 9.0.0",
         "Localized GitHub API version 1.306",
+        "Upgraded Android SDK version 32 -> 33",
         "Added JCIP Annotations version 1.0",
         "Added Androidx WebKit version 1.5.0",
         "Added Commons IO version 2.8.0",
@@ -916,6 +916,7 @@
       "dependency": [
         "Added Zeugma Solutions LocaleHelper version 1.5.1",
         "Downgraded Android Material version 1.6.0-alpha02 -> 1.5.0",
+        "Upgraded Android SDK version 31 -> 32",
         "Upgraded Kotlinx Coroutines version 1.6.0-native-mt -> 1.6.0",
         "Upgraded OpenCV version 3.4.3 -> 4.5.4 -> 4.5.5 (Ref to [TonyJiangWJ](https://github.com/TonyJiangWJ))",
         "Upgraded OkHttp3 version 3.10.0 -> 5.0.0-alpha.4 -> 5.0.0-alpha.6",
@@ -923,7 +924,6 @@
         "Upgraded Auto.js-ApkBuilder version 1.0.1 -> 1.0.3",
         "Upgraded Glide Compiler version 4.12.0 -> 4.13.1",
         "Upgraded Gradle release version 7.4-rc-2 -> 7.4.1",
-        "Upgraded Gradle Compile version 31 -> 32",
         "Upgraded Gson version 2.8.9 -> 2.9.0"
       ]
     },
@@ -1010,6 +1010,7 @@
         "Localized MutableTheme version 1.0.0",
         "Added Androidx Preference version 1.1.1",
         "Added SwipeRefreshLayout version 1.1.0",
+        "Upgraded Android SDK version 28 -> 30 -> 31",
         "Upgraded Android Analytics version 7.0.0 -> 13.1.0",
         "Upgraded Android Annotations version 4.5.2 -> 4.8.0",
         "Upgraded Gradle build tools version 3.2.1 -> 4.1.0 -> 7.0.3 -> 7.2.0-alpha04",
@@ -1024,7 +1025,6 @@
         "Upgraded Eventbus version 3.0.0 -> 3.2.0",
         "Upgraded Glide Compiler version 4.8.0 -> 4.12.0 -> 4.12.0",
         "Upgraded Gradle Build Tool version 29.0.2 -> 30.0.2",
-        "Upgraded Gradle Compile version 28 -> 30 -> 31",
         "Upgraded Gradle release version 4.10.2 -> 6.5 -> 7.0.2 -> 7.3",
         "Upgraded Groovy-Json plugin version 3.0.7 -> 3.0.8",
         "Upgraded Gson version 2.8.2 -> 2.8.9",

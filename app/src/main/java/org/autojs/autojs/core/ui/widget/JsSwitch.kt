@@ -20,7 +20,7 @@ open class JsSwitch : SwitchCompat {
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
     override fun setOnCheckedChangeListener(listener: OnCheckedChangeListener?) {
-        super.setOnCheckedChangeListener { buttonView: CompoundButton?, isChecked: Boolean ->
+        super.setOnCheckedChangeListener { buttonView: CompoundButton, isChecked: Boolean ->
             if (!mIgnoreCheckedChange) {
                 listener?.onCheckedChanged(buttonView, isChecked)
             }
