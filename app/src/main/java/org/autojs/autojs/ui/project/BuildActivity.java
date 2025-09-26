@@ -932,7 +932,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         ProjectConfig projectConfig;
         if (mProjectConfig != null) {
             projectConfig = mProjectConfig
-                    .excludeDir(new File(mSource, mProjectConfig.getBuildDir()))
+                    .excludeDir(mProjectConfig.getBuildDir())
                     .setSourcePath(mSource)
                     .setIconPath(mProjectConfig.getIconPath() == null ? null : new File(mSource, mProjectConfig.getIconPath()).getPath());
         } else {

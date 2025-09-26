@@ -170,7 +170,7 @@ public class ProjectConfig {
             @With(value = "ignoredDirs", target = {"AutoJs4", "AutoX"}),
             @With(value = "ignore", target = {"Unknown"}),
     })
-    private final List<File> mExcludedDirs = new ArrayList<>();
+    private final List<String> mExcludedDirs = new ArrayList<>();
 
     @Nullable
     private transient String mSourcePath = null;
@@ -231,27 +231,27 @@ public class ProjectConfig {
         LaunchConfig launchConfig = new LaunchConfig();
         BuildInfo buildInfo = new BuildInfo();
 
-        Pattern namePattern = Pattern.compile(stringPattern("name"));
-        Pattern versionNamePattern = Pattern.compile(stringPattern("versionName"));
-        Pattern versionCodePattern = Pattern.compile(numberPattern("versionCode"));
-        Pattern packageNamePattern = Pattern.compile(stringPattern("packageName"));
-        Pattern mainPattern = Pattern.compile(stringPattern("main"));
-        Pattern iconPattern = Pattern.compile(stringPattern("icon"));
+        Pattern namePattern = Pattern.compile(stringPattern("name"), Pattern.CASE_INSENSITIVE);
+        Pattern versionNamePattern = Pattern.compile(stringPattern("versionName"), Pattern.CASE_INSENSITIVE);
+        Pattern versionCodePattern = Pattern.compile(numberPattern("versionCode"), Pattern.CASE_INSENSITIVE);
+        Pattern packageNamePattern = Pattern.compile(stringPattern("packageName"), Pattern.CASE_INSENSITIVE);
+        Pattern mainPattern = Pattern.compile(stringPattern("main"), Pattern.CASE_INSENSITIVE);
+        Pattern iconPattern = Pattern.compile(stringPattern("icon"), Pattern.CASE_INSENSITIVE);
 
-        Pattern assetsPattern = Pattern.compile(listPattern("asset"));
-        Pattern abisPattern = Pattern.compile(listPattern("abi"));
-        Pattern libsPattern = Pattern.compile(listPattern("lib"));
-        Pattern useFeaturesPattern = Pattern.compile(listPattern("useFeature"));
+        Pattern assetsPattern = Pattern.compile(listPattern("asset"), Pattern.CASE_INSENSITIVE);
+        Pattern abisPattern = Pattern.compile(listPattern("abi"), Pattern.CASE_INSENSITIVE);
+        Pattern libsPattern = Pattern.compile(listPattern("lib"), Pattern.CASE_INSENSITIVE);
+        Pattern useFeaturesPattern = Pattern.compile(listPattern("useFeature"), Pattern.CASE_INSENSITIVE);
 
-        Pattern buildTimePattern = Pattern.compile(numberPattern("buildTime"));
-        Pattern buildNumberPattern = Pattern.compile(numberPattern("buildNumber"));
-        Pattern buildIdPattern = Pattern.compile(stringPattern("buildId"));
+        Pattern buildTimePattern = Pattern.compile(numberPattern("buildTime"), Pattern.CASE_INSENSITIVE);
+        Pattern buildNumberPattern = Pattern.compile(numberPattern("buildNumber"), Pattern.CASE_INSENSITIVE);
+        Pattern buildIdPattern = Pattern.compile(stringPattern("buildId"), Pattern.CASE_INSENSITIVE);
 
-        Pattern launchConfigHideLogsPattern = Pattern.compile(booleanPattern("hideLogs"));
-        Pattern launchConfigLogsVisiblePattern = Pattern.compile(booleanPattern("logsVisible"));
+        Pattern launchConfigHideLogsPattern = Pattern.compile(booleanPattern("hideLogs"), Pattern.CASE_INSENSITIVE);
+        Pattern launchConfigLogsVisiblePattern = Pattern.compile(booleanPattern("logsVisible"), Pattern.CASE_INSENSITIVE);
 
-        Pattern launchConfigDisplaySplashPattern = Pattern.compile(booleanPattern("displaySplash"));
-        Pattern launchConfigSplashVisiblePattern = Pattern.compile(booleanPattern("splashVisible"));
+        Pattern launchConfigDisplaySplashPattern = Pattern.compile(booleanPattern("displaySplash"), Pattern.CASE_INSENSITIVE);
+        Pattern launchConfigSplashVisiblePattern = Pattern.compile(booleanPattern("splashVisible"), Pattern.CASE_INSENSITIVE);
 
         setFieldIfMatches(namePattern, s, projectConfig::setName);
         setFieldIfMatches(versionNamePattern, s, projectConfig::setVersionName);
@@ -293,7 +293,7 @@ public class ProjectConfig {
     @NotNull
     @Language("RegExp")
     private static String listPattern(String name) {
-        return "\"" + parseNamePattern(name) + "(s|List)?\"\\s*:\\s*\\[([^\"]*)]";
+        return "\"" + parseNamePattern(name) + "(?:s|list)?\"\\s*:\\s*\\[\\s*(\"(?:\\\\.|[^\"\\\\])*\")(?:\\s*,\\s*\"(?:\\\\.|[^\"\\\\])*\")*\\s*]";
     }
 
     @NotNull
@@ -316,7 +316,7 @@ public class ProjectConfig {
 
     @NotNull
     private static String parseNamePattern(String name) {
-        return Pattern.quote(name.replaceAll("(?<=[a-z])([A-Z]+)", "(?:$1|_$1)"));
+        return name.replaceAll("(?<=[a-z])([A-Z]+)", "(?:$1|_$1)");
     }
 
     private static void setFieldIfMatches(Pattern pattern, String s, java.util.function.Consumer<String> setter) {
@@ -347,7 +347,12 @@ public class ProjectConfig {
             if (content == null) {
                 setter.accept(Collections.emptyList());
             } else {
-                List<String> list = Arrays.asList(content.split("\\s*,\\s*"));
+                List<String> list = Arrays.stream(content.split("\\s*,\\s*")).map(str -> {
+                    if (str.startsWith("\"") && str.endsWith("\"")) {
+                        return str.substring(1, str.length() - 1);
+                    }
+                    return str;
+                }).collect(Collectors.toList());
                 setter.accept(list);
             }
         }
@@ -552,11 +557,24 @@ public class ProjectConfig {
     //  # }
 
     public List<File> getExcludedDirs() {
-        return mExcludedDirs;
+        return mExcludedDirs.stream().map(dir -> {
+            if (dir.endsWith("/")) {
+                dir = dir.substring(0, dir.length() - 1);
+            }
+            if (mSourcePath == null) {
+                throw new IllegalStateException("Source path is not set");
+            }
+            if (dir.startsWith(mSourcePath)) {
+                return new File(dir);
+            }
+            return new File(mSourcePath, dir);
+        }).distinct().collect(Collectors.toList());
     }
 
-    public ProjectConfig excludeDir(File dirToExclude) {
-        mExcludedDirs.add(dirToExclude);
+    public ProjectConfig excludeDir(String dirToExclude) {
+        if (!mExcludedDirs.contains(dirToExclude)) {
+            mExcludedDirs.add(dirToExclude);
+        }
         return this;
     }
 
