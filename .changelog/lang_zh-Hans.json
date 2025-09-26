@@ -21,6 +21,7 @@
         "images 部分相关方法出现异常时 oneShot 标记功能失效的问题 _[`issue #372`](http://issues.autojs6.com/372)_",
         "images 部分相关方法可能引发内存泄露的问题 _[`issue #372`](http://issues.autojs6.com/372)_",
         "Android 10 UiObject#child 方法可能出现 ArrayIndexOutOfBoundsException 异常的问题 _[`issue #416`](http://issues.autojs6.com/416)_",
+        "运行项目时 project.json 配置参数无法正常解析的问题",
         "打包应用无法正常使用 Paddle OCR 与 Rapid OCR 功能的问题",
         "版本历史页面部分系统因字体差别导致统计数据显示不完整的问题",
         "部分设备无法正常初始化 MLKit Google OCR 的问题 (试修) _[`issue #8`](http://issues.autojs6.com/8#issuecomment-3117061768)_",
