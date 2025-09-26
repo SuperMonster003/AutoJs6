@@ -140,9 +140,15 @@ async function updateLatestArchiveInfo(archives) {
     if (JSON.stringify(updatedCommon) !== JSON.stringify(commonObj)) {
         await fsp.writeFile(commonJsonPath, JSON.stringify(updatedCommon, null, 2), 'utf8');
         console.log('[common.json] Updated (Android Studio information)');
-        if (commonObj.android_studio_latest_recommended_version_name !== updatedCommon.android_studio_latest_recommended_version_name) {
-            console.log(`-- '${commonObj.android_studio_latest_recommended_version_name}'`);
-            console.log(`-> '${updatedCommon.android_studio_latest_recommended_version_name}'`);
+        const from = commonObj.android_studio_latest_recommended_version_name;
+        const to = updatedCommon.android_studio_latest_recommended_version_name;
+        if (from !== to) {
+            const maxLength = Math.max(...[ from, to ].map(s => s.length + 5));
+            const SEP_EQ = '='.repeat(maxLength);
+            console.log(SEP_EQ);
+            console.log(`-- "${from}"`);
+            console.log(`-> "${to}"`);
+            console.log(SEP_EQ);
         }
     } else {
         // console.log('[common.json] No update needed (Android Studio information)');

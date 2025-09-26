@@ -68,19 +68,24 @@ async function updateVersionInGradleSettings(newVersion) {
     const raw = await fsp.readFile(filePath, 'utf8');
 
     // e.g. `foojay-resolver-convention = "0.9.0"`.
-    const re = /(foojay.resolver.convention\s*=\s*")(\d+(?:\.\d+)+)(?=")/;
+    const re = /(foojay.resolver.convention\s*=\s*)"(\d+(?:\.\d+)+)(?=")/;
 
     const matched = raw.match(re);
     if (!matched) {
         throw new Error(`Cannot determine the location of ${pluginLabel} plugin information`);
     }
-    const oldVersion = matched[2];
-    if (oldVersion !== newVersion) {
-        const updated = raw.replace(re, `$1${newVersion}`);
+    const from = matched[2]; // oldVersion
+    const to = newVersion;
+    if (from !== to) {
+        const updated = raw.replace(re, `$1${to}`);
         await fsp.writeFile(filePath, updated, 'utf8');
+        const maxLength = Math.max(...[ from, to ].map(s => s.length + 5));
+        const SEP_EQ = '='.repeat(maxLength);
         console.log(`[${filename}] Updated (${updatedLabel})`);
-        console.log(`-- ${oldVersion}`);
-        console.log(`-> ${newVersion}`);
+        console.log(SEP_EQ);
+        console.log(`-- ${matched[1]}"${from}"`);
+        console.log(`-> ${matched[1]}"${to}"`);
+        console.log(SEP_EQ);
     } else {
         // console.log(`[${filename}] No update needed (${updatedLabel})`);
     }

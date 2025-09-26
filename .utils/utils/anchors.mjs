@@ -16,6 +16,7 @@ import * as fsp from 'node:fs/promises';
 import * as path from 'node:path';
 import { escapeRegExp } from './format.mjs';
 import { toUpdatedStamp } from './date.mjs';
+import { printDifferences } from './print.mjs';
 
 /**
  * @param {string} s
@@ -32,7 +33,7 @@ const normalize = (s) => String(s).replace(/\s+/g, '');
  * @param {(block: string) => { newBlock: string, changed: boolean }} replaceBlockFn
  * @returns {{ src: string, changed: boolean }}
  */
-export function replaceInAnchoredBlock(src, anchorTag, replaceBlockFn) {
+function replaceInAnchoredBlock(src, anchorTag, replaceBlockFn) {
     const beginTag = `// @AnchorBegin ${anchorTag}`;
     const endTag = `// @AnchorEnd ${anchorTag}`;
 
@@ -66,7 +67,7 @@ export function replaceInAnchoredBlock(src, anchorTag, replaceBlockFn) {
  * @param {(date?: Date) => string} [options.toUpdatedStamp=toUpdatedStamp]
  * @returns {{ src: string, changed: boolean }}
  */
-export function replaceAnchoredMapBlock(src, {
+function replaceAnchoredMapBlock(src, {
     anchorTag,
     mapName,
     lines,
@@ -111,7 +112,7 @@ export function replaceAnchoredMapBlock(src, {
  * @param {(date?: Date) => string} [options.toUpdatedStamp=toUpdatedStamp]
  * @returns {{ src: string, changed: boolean }}
  */
-export function replaceAnchoredListBlock(src, {
+function replaceAnchoredListBlock(src, {
     anchorTag,
     listName,
     lines,
@@ -149,7 +150,7 @@ export function replaceAnchoredListBlock(src, {
  * @param {number} [options.linesIndent=4]
  * @param {string} [options.updatedLabel='']
  * @param {(date?: Date) => string} [options.toUpdatedStamp=toUpdatedStamp]
- * @param {Console} [options.logger=console]
+ * @param {RegExp} [options.regexForKeyMatching=null]
  * @returns {Promise<{ changed: boolean, content: string }>}
  */
 export async function updateAnchoredMapInFile(filePath, {
@@ -159,7 +160,7 @@ export async function updateAnchoredMapInFile(filePath, {
     linesIndent = 4,
     updatedLabel = '',
     toUpdatedStamp: toStamp = toUpdatedStamp,
-    logger = console,
+    regexForKeyMatching = null,
 }) {
     const filename = path.basename(filePath);
     const raw = await fsp.readFile(filePath, 'utf8');
@@ -167,9 +168,10 @@ export async function updateAnchoredMapInFile(filePath, {
 
     if (changed) {
         await fsp.writeFile(filePath, updated, 'utf8');
-        logger.log(`[${filename}] Updated` + (updatedLabel ? ` (${updatedLabel})` : ''));
+        console.log(`[${filename}] Updated` + (updatedLabel ? ` (${updatedLabel})` : ''));
+        printDifferences(raw, updated, { regexForKeyMatching });
     } else {
-        // logger.log(`[${filename}] No update needed` + (updatedLabel ? ` (${updatedLabel})` : ''));
+        // console.log(`[${filename}] No update needed` + (updatedLabel ? ` (${updatedLabel})` : ''));
     }
     return { changed, content: updated };
 }
@@ -183,7 +185,7 @@ export async function updateAnchoredMapInFile(filePath, {
  * @param {number} [options.linesIndent=4]
  * @param {string} [options.updatedLabel='']
  * @param {(date?: Date) => string} [options.toUpdatedStamp=toUpdatedStamp]
- * @param {Console} [options.logger=console]
+ * @param {RegExp} [options.regexForKeyMatching=null]
  * @returns {Promise<{ changed: boolean, content: string }>}
  */
 export async function updateAnchoredListInFile(filePath, {
@@ -193,7 +195,7 @@ export async function updateAnchoredListInFile(filePath, {
     linesIndent = 4,
     updatedLabel = '',
     toUpdatedStamp: toStamp = toUpdatedStamp,
-    logger = console,
+    regexForKeyMatching = null,
 }) {
     const filename = path.basename(filePath);
     const raw = await fsp.readFile(filePath, 'utf8');
@@ -201,9 +203,10 @@ export async function updateAnchoredListInFile(filePath, {
 
     if (changed) {
         await fsp.writeFile(filePath, updated, 'utf8');
-        logger.log(`[${filename}] Updated` + (updatedLabel ? ` (${updatedLabel})` : ''));
+        console.log(`[${filename}] Updated` + (updatedLabel ? ` (${updatedLabel})` : ''));
+        printDifferences(raw, updated, { regexForKeyMatching });
     } else {
-        // logger.log(`[${filename}] No update needed` + (updatedLabel ? ` (${updatedLabel})` : ''));
+        // console.log(`[${filename}] No update needed` + (updatedLabel ? ` (${updatedLabel})` : ''));
     }
     return { changed, content: updated };
 }
@@ -217,16 +220,19 @@ export async function updateAnchoredListInFile(filePath, {
  * @param {AnchoredBlockUpdateOption[]} optionList
  * @param {Object} [extraOptions={}]
  * @param {(date?: Date) => string} [extraOptions.toUpdatedStamp=toUpdatedStamp]
- * @param {Console} [extraOptions.logger=console]
+ * @param {RegExp} [extraOptions.regexForKeyMatching=null]
  * @returns {Promise<{ changed: boolean, content: string }>}
  */
 export async function batchUpdateAnchoredBlocks(filePath, optionList, {
     toUpdatedStamp: toStamp = toUpdatedStamp,
-    logger = console,
+    regexForKeyMatching = null,
 } = {}) {
     const filename = path.basename(filePath);
+
     let raw = await fsp.readFile(filePath, 'utf8');
     let changedAny = false;
+    let updated = null;
+    let updatedLabel = null;
 
     for (const opt of optionList) {
         let res = { src: raw, changed: false };
@@ -250,21 +256,23 @@ export async function batchUpdateAnchoredBlocks(filePath, optionList, {
         } else if (opt.type === 'custom' && typeof opt.replacer === 'function') {
             res = replaceInAnchoredBlock(raw, opt.anchorTag, (block) => opt.replacer(block, { toUpdatedStamp: toStamp }));
         } else {
-            logger.warn(`[${filename}] Unknown operation type or missing parameters:`, opt);
+            console.warn(`[${filename}] Unknown operation type or missing parameters:`, opt);
             continue;
         }
 
         if (res.changed) {
             changedAny = true;
-            raw = res.src;
-            logger.log(`[${filename}] Updated (${opt.updatedLabel ?? opt.anchorTag})`);
-        } else {
-            // logger.log(`[${filename}] No update needed (${op['updatedLabel'] ?? op.anchorTag})`);
+            updated = res.src;
+            updatedLabel = opt.updatedLabel;
         }
     }
 
     if (changedAny) {
-        await fsp.writeFile(filePath, raw, 'utf8');
+        await fsp.writeFile(filePath, updated, 'utf8');
+        console.log(`[${filename}] Updated` + (updatedLabel ? ` (${updatedLabel})` : ''));
+        printDifferences(raw, updated, { regexForKeyMatching });
+    } else {
+        // console.log(`[${filename}] No update needed (${op['updatedLabel'] ?? op.anchorTag})`);
     }
-    return { changed: changedAny, content: raw };
+    return { changed: changedAny, content: changedAny ? updated : raw };
 }

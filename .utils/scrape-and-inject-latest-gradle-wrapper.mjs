@@ -99,8 +99,18 @@ async function updateGradleWrapperFileContent({ latestGradleVersion, latestGradl
 
     if (messages.length > 0) {
         writePropertiesSync(path, props);
+        const maxLength = Math.max(...messages.join('\n').split('\n').map(s => s.length));
+        const SEP_EQ = '='.repeat(maxLength);
+        const SEP_DASH = '-'.repeat(maxLength);
         console.log(`[${fileName}] Updated (Gradle version)`);
-        messages.forEach((message) => console.log(message));
+        console.log(SEP_EQ);
+        messages.forEach((msg, idx) => {
+            console.log(msg);
+            if (idx !== messages.length - 1) {
+                console.log(SEP_DASH);
+            }
+        });
+        console.log(SEP_EQ);
     } else {
         // console.log(`[${fileName}] No update needed (Gradle version)`);
     }

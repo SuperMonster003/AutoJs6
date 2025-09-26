@@ -362,7 +362,8 @@ export async function fetchStatistics(concurrency = 6) {
         byAuthor.set(user.login, entry);
     }
 
-    // 按最近提交倒序
+    // Sort by latest commit in descending order.
+    // zh-CN: 按最近提交倒序.
     const entries = Array.from(byAuthor.values()).sort((a, b) => {
         const da = a.latestCommitAt ? new Date(a.latestCommitAt).getTime() : 0;
         const db = b.latestCommitAt ? new Date(b.latestCommitAt).getTime() : 0;
