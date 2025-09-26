@@ -45,6 +45,7 @@
         "本地化 Expandable Layout 版本 1.6.0",
         "本地化 Recyclerview Flexible Divider 版本 1.4.0",
         "附加 Androidx Core (KTX) 版本 1.15.0",
+        "升级 Android SDK 版本 35 -> 36",
         "升级 Gradle 版本 8.14 -> 8.14.3",
         "升级 Apache Commons 版本 3.16.0 -> 3.18.0",
         "升级 Retrofit2 Retrofit 版本 2.11.0 -> 2.12.0",
@@ -217,7 +218,7 @@
       ],
       "dependency": [
         "附加 Eclipse Paho Client Mqttv3 版本 1.1.0 _[`issue #330`](http://issues.autojs6.com/330)_",
-        "升级 Gradle Compile 版本 34 -> 35",
+        "升级 Android SDK 版本 34 -> 35",
         "升级 Gradle 版本 8.12 -> 8.14-rc-1",
         "升级 Rhino 版本 1.8.0-SNAPSHOT -> 1.8.1-SNAPSHOT",
         "升级 Androidx Recyclerview 版本 1.3.2 -> 1.4.0",
@@ -528,8 +529,8 @@
       "dependency": [
         "附加 Rikka Shizuku 版本 13.1.5",
         "附加 MLKit Barcode Scanning 版本 17.2.0",
+        "升级 Android SDK 版本 33 -> 34",
         "升级 OpenCV 版本 4.5.5 -> 4.8.0 (Ref to [TonyJiangWJ](https://github.com/TonyJiangWJ))",
-        "升级 Gradle Compile 版本 33 -> 34",
         "升级 Gradle 版本 8.3-rc-1 -> 8.4-rc-3",
         "升级 Apache Commons Lang3 版本 3.12.0 -> 3.13.0",
         "升级 Glide 版本 4.15.1 -> 4.16.0",
@@ -832,10 +833,10 @@
         "重新设计 colors 全局对象并增加 HSV / HSL 等色彩模式支持 (参阅 项目文档 > [颜色](https://docs.autojs6.com/#/color))"
       ],
       "dependency": [
-        "升级 Gradle Compile 版本 32 -> 33",
         "本地化 Android Job 版本 1.4.3",
         "本地化 Android Plugin Client SDK For Locale 版本 9.0.0",
         "本地化 GitHub API 版本 1.306",
+        "升级 Android SDK 版本 32 -> 33",
         "附加 JCIP Annotations 版本 1.0",
         "附加 Androidx WebKit 版本 1.5.0",
         "附加 Commons IO 版本 2.8.0",
@@ -978,6 +979,7 @@
       "dependency": [
         "附加 Zeugma Solutions LocaleHelper 版本 1.5.1",
         "降级 Android Material 版本 1.6.0-alpha02 -> 1.5.0",
+        "升级 Android SDK 版本 31 -> 32",
         "升级 Kotlinx Coroutines 版本 1.6.0-native-mt -> 1.6.0",
         "升级 OpenCV 版本 3.4.3 -> 4.5.4 -> 4.5.5 (Ref to [TonyJiangWJ](https://github.com/TonyJiangWJ))",
         "升级 OkHttp3 版本 3.10.0 -> 5.0.0-alpha.4 -> 5.0.0-alpha.6",
@@ -985,7 +987,6 @@
         "升级 Auto.js-ApkBuilder 版本 1.0.1 -> 1.0.3",
         "升级 Glide Compiler 版本 4.12.0 -> 4.13.1",
         "升级 Gradle 发行版本 7.4-rc-2 -> 7.4.1",
-        "升级 Gradle Compile 版本 31 -> 32",
         "升级 Gson 版本 2.8.9 -> 2.9.0"
       ]
     },
@@ -1072,6 +1073,7 @@
         "本地化 MutableTheme 版本 1.0.0",
         "附加 Androidx Preference 版本 1.1.1",
         "附加 SwipeRefreshLayout 版本 1.1.0",
+        "升级 Android SDK 版本 28 -> 30 -> 31",
         "升级 Android Analytics 版本 7.0.0 -> 13.1.0",
         "升级 Android Annotations 版本 4.5.2 -> 4.8.0",
         "升级 Gradle 构建工具版本 3.2.1 -> 4.1.0 -> 7.0.3 -> 7.2.0-alpha04",
@@ -1086,7 +1088,6 @@
         "升级 Eventbus 版本 3.0.0 -> 3.2.0",
         "升级 Glide Compiler 版本 4.8.0 -> 4.12.0 -> 4.12.0",
         "升级 Gradle Build Tool 版本 29.0.2 -> 30.0.2",
-        "升级 Gradle Compile 版本 28 -> 30 -> 31",
         "升级 Gradle 发行版本 4.10.2 -> 6.5 -> 7.0.2 -> 7.3",
         "升级 Groovy-Json 插件版本 3.0.7 -> 3.0.8",
         "升级 Gson 版本 2.8.2 -> 2.8.9",

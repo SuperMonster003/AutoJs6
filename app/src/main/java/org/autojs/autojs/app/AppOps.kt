@@ -24,10 +24,10 @@ object AppOps {
                         .invoke(manager, permission, uid, packageName)
                 }
                 else -> permission.toString().let {
+                    @Suppress("DEPRECATION")
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                         manager.unsafeCheckOpNoThrow(it, uid, packageName)
                     } else {
-                        @Suppress("DEPRECATION")
                         manager.checkOpNoThrow(it, uid, packageName)
                     }
                 }

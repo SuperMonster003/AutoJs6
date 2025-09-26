@@ -155,7 +155,7 @@
       ],
       "dependency": [
         "Añadido Eclipse Paho Client Mqttv3 versión 1.1.0 _[`issue #330`](http://issues.autojs6.com/330)_",
-        "Actualizado la versión de Gradle Compile de 34 a 35",
+        "Actualizado la versión de Android SDK de 34 a 35",
         "Actualizado Gradle de 8.12 a 8.14-rc-1",
         "Actualizado Rhino de 1.8.0-SNAPSHOT a 1.8.1-SNAPSHOT",
         "Actualizado Androidx Recyclerview de 1.3.2 a 1.4.0",
@@ -466,8 +466,8 @@
       "dependency": [
         "Versión Rikka Shizuku 13.1.5 adjunta",
         "Versión MLKit Barcode Scanning 17.2.0 adjunta",
+        "Actualización de versión de Android SDK de 33 a 34",
         "Actualización de versión de OpenCV de 4.5.5 a 4.8.0 (Ref a [TonyJiangWJ](https://github.com/TonyJiangWJ))",
-        "Actualización de versión de compilación Gradle de 33 a 34",
         "Actualización de versión de Gradle de 8.3-rc-1 a 8.4-rc-3",
         "Actualización de versión de Apache Commons Lang3 de 3.12.0 a 3.13.0",
         "Actualización de versión de Glide de 4.15.1 a 4.16.0",
@@ -770,10 +770,10 @@
         "Rediseñar el objeto global colors e incluir el soporte de modos de color HSV / HSL (consultar documentos del proyecto > [Colores](https://docs.autojs6.com/#/color))."
       ],
       "dependency": [
-        "Actualización de Gradle Compile versión 32 a 33",
         "Localización de la versión 1.4.3 de Android Job",
         "Localización del Plugin SDK para Locale versión 9.0.0 de Android",
         "Localización de GitHub API versión 1.306",
+        "Actualización de Android SDK versión 32 a 33",
         "Añadida la versión 1.0 de JCIP Annotations",
         "Añadida la versión 1.5.0 de Androidx WebKit",
         "Añadida la versión 2.8.0 de Commons IO",
@@ -916,6 +916,7 @@
       "dependency": [
         "Añadida la versión 1.5.1 de Zeugma Solutions LocaleHelper",
         "Degradación de la versión de Android Material de 1.6.0-alpha02 a 1.5.0",
+        "Actualización de las herramientas de Android SDK de la versión 31 a 32",
         "Actualización de Kotlinx Coroutines de la versión 1.6.0-native-mt a 1.6.0",
         "Actualización de OpenCV de la versión 3.4.3 a 4.5.4 y a 4.5.5 (gracias a [TonyJiangWJ](https://github.com/TonyJiangWJ))",
         "Actualización de OkHttp3 de la versión 3.10.0 a 5.0.0-alpha.4 y a 5.0.0-alpha.6",
@@ -923,7 +924,6 @@
         "Actualización de Auto.js-ApkBuilder de la versión 1.0.1 a 1.0.3",
         "Actualización del compilador de Glide de la versión 4.12.0 a 4.13.1",
         "Actualización de Gradle de la versión 7.4-rc-2 a 7.4.1",
-        "Actualización de las herramientas de Gradle Compile de la versión 31 a 32",
         "Actualización de Gson de la versión 2.8.9 a 2.9.0"
       ]
     },
@@ -1010,6 +1010,7 @@
         "Localización de MutableTheme versión 1.0.0",
         "Añadida Androidx Preference versión 1.1.1",
         "Añadido SwipeRefreshLayout versión 1.1.0",
+        "Actualización de Android SDK de la versión 28 -> 30 -> 31",
         "Actualización de Android Analytics de la versión 7.0.0 -> 13.1.0",
         "Actualización de Android Annotations de la versión 4.5.2 -> 4.8.0",
         "Actualización de las herramientas de construcción de Gradle de la versión 3.2.1 -> 4.1.0 -> 7.0.3 -> 7.2.0-alpha04",
@@ -1024,7 +1025,6 @@
         "Actualización de Eventbus de la versión 3.0.0 -> 3.2.0",
         "Actualización del compilador de Glide de la versión 4.8.0 -> 4.12.0 -> 4.12.0",
         "Actualización de las herramientas de construcción de Gradle de la versión 29.0.2 -> 30.0.2",
-        "Actualización de Gradle Compile de la versión 28 -> 30 -> 31",
         "Actualización de Gradle de la versión 4.10.2 -> 6.5 -> 7.0.2 -> 7.3",
         "Actualización del plugin Groovy-Json de la versión 3.0.7 -> 3.0.8",
         "Actualización de Gson de la versión 2.8.2 -> 2.8.9",

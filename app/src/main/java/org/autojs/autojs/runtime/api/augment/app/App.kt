@@ -953,15 +953,16 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             o.deleteProp("package")
 
             if (!packageNameRaw.isJsNullish()) {
-                val packageName = when (packageNameRaw) {
-                    is PresetApp -> packageNameRaw.packageName
-                    else -> when (val packageNameStr = coerceString(packageNameRaw)) {
+                val packageName = when (val raw = packageNameRaw) {
+                    is PresetApp -> raw.packageName
+                    else -> when (val packageNameStr = coerceString(raw)) {
                         in presetPackageNames -> presetPackageNames[packageNameStr]!!
                         else -> packageNameStr
                     }
                 }
                 if (packageName != packageNameRaw) {
                     o.defineProp("packageName", packageName).also {
+                        @Suppress("AssignedValueIsNeverRead")
                         packageNameRaw = packageName
                     }
                 }

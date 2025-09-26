@@ -155,7 +155,7 @@
       ],
       "dependency": [
         "Eclipse Paho Client Mqttv3 バージョン 1.1.0 を追加 _[`issue #330`](http://issues.autojs6.com/330)_",
-        "Gradle Compile のバージョンを 34 から 35 に更新",
+        "Android SDK のバージョンを 34 から 35 に更新",
         "Gradle を 8.12 から 8.14-rc-1 に更新",
         "Rhino を 1.8.0-SNAPSHOT から 1.8.1-SNAPSHOT に更新",
         "Androidx Recyclerview を 1.3.2 から 1.4.0 に更新",
@@ -466,8 +466,8 @@
       "dependency": [
         "Rikka Shizuku バージョン 13.1.5 を追加",
         "MLKit Barcode Scanning バージョン 17.2.0 を追加",
+        "Android SDK バージョンのアップグレード 33 -> 34",
         "OpenCV バージョンのアップグレード 4.5.5 -> 4.8.0 (Ref to [TonyJiangWJ](https://github.com/TonyJiangWJ))",
-        "Gradle Compile バージョンのアップグレード 33 -> 34",
         "Gradle バージョンのアップグレード 8.3-rc-1 -> 8.4-rc-3",
         "Apache Commons Lang3 バージョンのアップグレード 3.12.0 -> 3.13.0",
         "Glide バージョンのアップグレード 4.15.1 -> 4.16.0",
@@ -770,10 +770,10 @@
         "colors グローバルオブジェクトを再設計し, HSV/HSL などのカラーモードをサポート (プロジェクトドキュメントを参照 > [カラー](https://docs.autojs6.com/#/color))"
       ],
       "dependency": [
-        "Gradle Compile バージョンを 32 -> 33 にアップグレード",
         "ローカライズされた Android Job バージョン 1.4.3",
         "ローカライズされた Android Plugin Client SDK For Locale バージョン 9.0.0",
         "ローカライズされた GitHub API バージョン 1.306",
+        "Android SDK バージョンを 32 -> 33 にアップグレード",
         "追加された JCIP Annotations バージョン 1.0",
         "追加された Androidx WebKit バージョン 1.5.0",
         "追加された Commons IO バージョン 2.8.0",
@@ -916,6 +916,7 @@
       "dependency": [
         "Zeugma Solutions LocaleHelper バージョン 1.5.1 を追加",
         "Android Material バージョン 1.6.0-alpha02 -> 1.5.0 にダウングレード",
+        "Android SDK バージョン 31 -> 32 にアップグレード",
         "Kotlinx Coroutines バージョン 1.6.0-native-mt -> 1.6.0 にアップグレード",
         "OpenCV バージョン 3.4.3 -> 4.5.4 -> 4.5.5 にアップグレード (Ref to [TonyJiangWJ](https://github.com/TonyJiangWJ))",
         "OkHttp3 バージョン 3.10.0 -> 5.0.0-alpha.4 -> 5.0.0-alpha.6 にアップグレード",
@@ -923,7 +924,6 @@
         "Auto.js-ApkBuilder バージョン 1.0.1 -> 1.0.3 にアップグレード",
         "Glide Compiler バージョン 4.12.0 -> 4.13.1 にアップグレード",
         "Gradle リリースバージョン 7.4-rc-2 -> 7.4.1 にアップグレード",
-        "Gradle コンパイルバージョン 31 -> 32 にアップグレード",
         "Gson バージョン 2.8.9 -> 2.9.0 にアップグレード"
       ]
     },
@@ -1010,6 +1010,7 @@
         "ローカライズ MutableTheme バージョン 1.0.0",
         "追加 Androidx Preference バージョン 1.1.1",
         "追加 SwipeRefreshLayout バージョン 1.1.0",
+        "アップグレード Android SDK バージョン 28 -> 30 -> 31",
         "アップグレード Android Analytics バージョン 7.0.0 -> 13.1.0",
         "アップグレード Android Annotations バージョン 4.5.2 -> 4.8.0",
         "アップグレード Gradle ビルドツールバージョン 3.2.1 -> 4.1.0 -> 7.0.3 -> 7.2.0-alpha04",
@@ -1024,7 +1025,6 @@
         "アップグレード Eventbus バージョン 3.0.0 -> 3.2.0",
         "アップグレード Glide Compiler バージョン 4.8.0 -> 4.12.0 -> 4.12.0",
         "アップグレード Gradle Build Tool バージョン 29.0.2 -> 30.0.2",
-        "アップグレード Gradle Compile バージョン 28 -> 30 -> 31",
         "アップグレード Gradle リリースバージョン 4.10.2 -> 6.5 -> 7.0.2 -> 7.3",
         "アップグレード Groovy-Json プラグインバージョン 3.0.7 -> 3.0.8",
         "アップグレード Gson バージョン 2.8.2 -> 2.8.9",

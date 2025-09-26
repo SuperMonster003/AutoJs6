@@ -155,7 +155,7 @@
       ],
       "dependency": [
         "Eclipse Paho Client Mqttv3 버전 1.1.0 추가 _[`issue #330`](http://issues.autojs6.com/330)_",
-        "Gradle Compile 버전을 34 에서 35 로 업데이트",
+        "Android SDK 버전을 34 에서 35 로 업데이트",
         "Gradle 을 8.12 에서 8.14-rc-1 로 업데이트",
         "Rhino 를 1.8.0-SNAPSHOT 에서 1.8.1-SNAPSHOT 으로 업데이트",
         "Androidx Recyclerview 를 1.3.2 에서 1.4.0 으로 업데이트",
@@ -466,8 +466,8 @@
       "dependency": [
         "Rikka Shizuku 버전 13.1.5 추가",
         "MLKit Barcode Scanning 버전 17.2.0 추가",
+        "Android SDK 버전 33 -> 34 로 업그레이드",
         "OpenCV 버전 4.5.5 -> 4.8.0 으로 업그레이드 (Ref to [TonyJiangWJ](https://github.com/TonyJiangWJ))",
-        "Gradle Compile 버전 33 -> 34 로 업그레이드",
         "Gradle 버전 8.3-rc-1 -> 8.4-rc-3 로 업그레이드",
         "Apache Commons Lang3 버전 3.12.0 -> 3.13.0 으로 업그레이드",
         "Glide 버전 4.15.1 -> 4.16.0 으로 업그레이드",
@@ -770,10 +770,10 @@
         "colors 전역 객체 재설계 및 HSV / HSL 등 색상 모드 지원 추가 (프로젝트 문서 참조 > [컬러](https://docs.autojs6.com/#/color))"
       ],
       "dependency": [
-        "Gradle Compile 버전 32 -> 33 업그레이드",
         "로컬화된 Android Job 버전 1.4.3",
         "로컬화된 Android Plugin Client SDK For Locale 버전 9.0.0",
         "로컬화된 GitHub API 버전 1.306",
+        "Android SDK 버전 32 -> 33 업그레이드",
         "JCIP Annotations 부가 추가 버전 1.0",
         "Androidx WebKit 부가 추가 버전 1.5.0",
         "Commons IO 부가 추가 버전 2.8.0",
@@ -916,6 +916,7 @@
       "dependency": [
         "Zeugma Solutions LocaleHelper 버전 1.5.1 추가",
         "Android Material 버전 1.6.0-alpha02 -> 1.5.0 다운그레이드",
+        "Android SDK 버전 31 -> 32 업그레이드",
         "Kotlinx Coroutines 버전 1.6.0-native-mt -> 1.6.0 업그레이드",
         "OpenCV 버전 3.4.3 -> 4.5.4 -> 4.5.5 (Ref to [TonyJiangWJ](https://github.com/TonyJiangWJ)) 업그레이드",
         "OkHttp3 버전 3.10.0 -> 5.0.0-alpha.4 -> 5.0.0-alpha.6 업그레이드",
@@ -923,7 +924,6 @@
         "Auto.js-ApkBuilder 버전 1.0.1 -> 1.0.3 업그레이드",
         "Glide Compiler 버전 4.12.0 -> 4.13.1 업그레이드",
         "Gradle 릴리스 버전 7.4-rc-2 -> 7.4.1 업그레이드",
-        "Gradle Compile 버전 31 -> 32 업그레이드",
         "Gson 버전 2.8.9 -> 2.9.0 업그레이드"
       ]
     },
@@ -1006,6 +1006,7 @@
         "중복된 로컬 라이브러리 파일을 분리 및 제거"
       ],
       "dependency": [
+        "Android SDK 버전 업그레이드 28 -> 30 -> 31",
         "CrashReport 버전 로컬라이제이션 2.6.6",
         "MutableTheme 버전 로컬라이제이션 1.0.0",
         "Androidx Preference 버전 추가 1.1.1",
@@ -1024,7 +1025,6 @@
         "Eventbus 버전 업그레이드 3.0.0 -> 3.2.0",
         "Glide Compiler 버전 업그레이드 4.8.0 -> 4.12.0 -> 4.12.0",
         "Gradle Build Tool 버전 업그레이드 29.0.2 -> 30.0.2",
-        "Gradle Compile 버전 업그레이드 28 -> 30 -> 31",
         "Gradle 릴리즈 버전 업그레이드 4.10.2 -> 6.5 -> 7.0.2 -> 7.3",
         "Groovy-Json 플러그인 버전 업그레이드 3.0.7 -> 3.0.8",
         "Gson 버전 업그레이드 2.8.2 -> 2.8.9",

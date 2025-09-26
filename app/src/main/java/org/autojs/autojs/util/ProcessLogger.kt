@@ -13,9 +13,11 @@ object ProcessLogger {
 
     private val buffer = StringBuilder()
 
-    /* 用 SharedFlow 推送 "增量行". */
-    private val _flow = MutableSharedFlow<String>(extraBufferCapacity = 64)
-    val flow: SharedFlow<String> = _flow.asSharedFlow()
+    // Use SharedFlow to broadcast "incremental lines".
+    // zh-CN: 用 SharedFlow 推送 "增量行".
+    private val internalFlow = MutableSharedFlow<String>(extraBufferCapacity = 64)
+
+    val flow: SharedFlow<String> = internalFlow.asSharedFlow()
 
     @Synchronized
     fun dump(): String = buffer.toString()
@@ -28,7 +30,7 @@ object ProcessLogger {
         val suffix = if (buffer.isNotEmpty()) "\n" else ""
         val line = "$suffix${sdf.format(Date())}: $msg"
         buffer.append(line)
-        _flow.tryEmit(line)
+        internalFlow.tryEmit(line)
     }
 
 }

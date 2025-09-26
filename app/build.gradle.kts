@@ -14,6 +14,13 @@ plugins {
     id("com.android.application")
     id("com.google.devtools.ksp")
     id("org.jetbrains.kotlin.android") /* kotlin("android") */
+    id("idea")
+}
+
+idea {
+    module {
+        excludeDirs.add(file("$rootDir/app/src/main/java/com/stardust/"))
+    }
 }
 
 val globalApplicationId = "org.autojs.autojs6"
@@ -40,13 +47,10 @@ dependencies /* Unclassified */ {
     implementation(kotlin("reflect"))
 
     // Androidx Core
-    implementation("androidx.core:core-ktx") {
-        because("Compatibility for Android Gradle plugin 8.2.2")
-        version {
-            strictly("1.15.0")
-            because("Exception on newer versions: Dependency 'androidx.core:core:1.16.0' requires Android Gradle plugin 8.6.0 or higher")
-        }
-    }
+    implementation(libs.core.ktx)
+
+    // Local Broadcast Manager
+    implementation(libs.localbroadcastmanager)
 
     // LeakCanary
     debugImplementation(libs.leakcanary)
@@ -343,27 +347,21 @@ dependencies /* View */ {
 }
 
 dependencies /* GitHub API */ {
+    // GitHub API
     implementation(files("$rootDir/libs/github-api-1.306.jar"))
 
-    implementation("commons-io:commons-io") {
-        because("Compatibility for Android API Level < 26 (Android 8.0) [O]")
-        version {
-            strictly("2.8.0")
-            because("Exception on newer versions: 'NoClassDefFoundError: org.apache.commons.io.IObuildUtils'")
-        }
-    }
+    // Commons IO
+    // @Hint by SuperMonster003 on Sep 25, 2025.
+    //  ! Strict version: "2.8.0".
+    //  ! Compatibility for Android API Level < 26 (Android 8.0) [O].
+    //  ! Exception on newer versions: 'NoClassDefFoundError: org.apache.commons.io.IObuildUtils'.
+    implementation(libs.commons.io)
 
-    implementation("com.fasterxml.jackson.core:jackson-databind") {
-        because("Compatibility for Android API Level < 26 (Android 8.0) [O]")
-        version {
-            strictly("2.13.4.2")
-            because("Exception on 2.14.x: 'No virtual method getParameterCount()I in class Ljava/lang/reflect/Method'")
-        }
-    }
+    // Jackson Databind
+    implementation(libs.jackson.databind)
 
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4") {
-        because("Compatibility of java.time.* for Android API Level < 26 (Android 8.0) [O]")
-    }
+    // Desugar
+    coreLibraryDesugaring(libs.desugar)
 }
 
 dependencies /* MLKit */ {

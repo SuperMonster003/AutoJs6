@@ -537,7 +537,7 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
                 val normalizedQuery = normalizeForMatching(searchTerm)
                 colorItems.filter { colorItem ->
                     val colorHex = String.format("#%06X", 0xFFFFFF and getColor(colorItem.colorRes))
-                    val enName by lazy { getLocalizedString(this@ColorSelectBaseActivity, colorItem.nameRes, Locale("en")) }
+                    val enName by lazy { getLocalizedString(this@ColorSelectBaseActivity, colorItem.nameRes, Locale.forLanguageTag("en")) }
                     val localizedName by lazy { getString(colorItem.nameRes) }
                     when {
                         searchTerm.startsWith("#") -> {
@@ -569,6 +569,9 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
     }
 
     private fun normalizeForMatching(input: String): String {
+        // Remove all non-letter and non-digit characters (e.g. spaces/brackets/slashes etc.).
+        // \p{L} matches any letter character in any language, \p{N} matches any digit.
+        // zh-CN:
         // 去掉所有非字母或数字字符 (例如空格/括号/斜线等).
         // \p{L} 表示任何语言的字母字符, \p{N} 表示数字.
         return input.replace("[^\\p{L}\\p{N}]+".toRegex(), "")
@@ -586,8 +589,11 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
     }
 
     private fun extractPatternFromQuery(query: String): String {
-        // 假设已检查过 isRegexSearch() == true
-        // 去掉最前和最后的斜杠
+        // Assuming isRegexSearch() == true has been checked.
+        // Remove the leading and trailing slashes.
+        // zh-CN:
+        // 假设已检查过 isRegexSearch() == true.
+        // 去掉最前和最后的斜杠.
         return query.substring(1, query.length - 1)
     }
 

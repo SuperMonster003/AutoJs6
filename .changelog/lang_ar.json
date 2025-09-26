@@ -155,7 +155,7 @@
       ],
       "dependency": [
         "تمت إضافة إصدار Eclipse Paho Client Mqttv3 1.1.0 _[`issue #330`](http://issues.autojs6.com/330)_",
-        "ترقية إصدار Gradle Compile من 34 إلى 35",
+        "ترقية إصدار Android SDK من 34 إلى 35",
         "ترقية Gradle من 8.12 إلى 8.14-rc-1",
         "ترقية Rhino من 1.8.0-SNAPSHOT إلى 1.8.1-SNAPSHOT",
         "ترقية Androidx Recyclerview من 1.3.2 إلى 1.4.0",
@@ -466,8 +466,8 @@
       "dependency": [
         "إضافة إصدار Rikka Shizuku 13.1.5",
         "إضافة إصدار MLKit Barcode Scanning 17.2.0",
+        "ترقية إصدار Android SDK من 33 إلى 34",
         "ترقية إصدار OpenCV من 4.5.5 إلى 4.8.0 (المرجع [TonyJiangWJ](https://github.com/TonyJiangWJ))",
-        "ترقية إصدار Gradle Compile من 33 إلى 34",
         "ترقية إصدار Gradle من 8.3-rc-1 إلى 8.4-rc-3",
         "ترقية إصدار Apache Commons Lang3 من 3.12.0 إلى 3.13.0",
         "ترقية إصدار Glide من 4.15.1 إلى 4.16.0",
@@ -770,10 +770,10 @@
         "إعادة تصميم كيانات colors العالمية وإضافة دعم أنماط الألوان مثل HSV / HSL (راجع وثائق المشروع > [الألوان](https://docs.autojs6.com/#/color))"
       ],
       "dependency": [
-        "ترقية إصدار Gradle Compile 32 -> 33",
         "محلية النسخة 1.4.3 من Android Job",
         "محلية النسخة 9.0.0 من Android Plugin Client SDK For Locale",
         "محلية النسخة 1.306 من GitHub API",
+        "ترقية إصدار Android SDK 32 -> 33",
         "إضافة تعليقات JCIP نسخة 1.0",
         "إضافة Androidx WebKit نسخة 1.5.0",
         "إضافة Commons IO نسخة 2.8.0",
@@ -916,6 +916,7 @@
       "dependency": [
         "إضافة Zeugma Solutions LocaleHelper الإصدار 1.5.1",
         "خفض إصدار Android Material من 1.6.0-alpha02 إلى 1.5.0",
+        "ترقية Android SDK من الإصدار 31 إلى 32",
         "ترقية Kotlinx Coroutines من الإصدار 1.6.0-native-mt إلى 1.6.0",
         "ترقية OpenCV من الإصدار 3.4.3 إلى 4.5.4 و 4.5.5 (مرجع إلى [TonyJiangWJ](https://github.com/TonyJiangWJ))",
         "ترقية OkHttp3 من الإصدار 3.10.0 إلى 5.0.0-alpha.4 وإلى 5.0.0-alpha.6",
@@ -923,7 +924,6 @@
         "ترقية Auto.js-ApkBuilder من الإصدار 1.0.1 إلى 1.0.3",
         "ترقية Glide Compiler من الإصدار 4.12.0 إلى 4.13.1",
         "ترقية إصدار توزيع Gradle من 7.4-rc-2 إلى 7.4.1",
-        "ترقية Gradle Compile من الإصدار 31 إلى 32",
         "ترقية Gson من الإصدار 2.8.9 إلى 2.9.0"
       ]
     },
@@ -1010,6 +1010,7 @@
         "تحلية MutableTheme محليًا إلى النسخة 1.0.0",
         "إضافة Androidx Preference النسخة 1.1.1",
         "إضافة SwipeRefreshLayout النسخة 1.1.0",
+        "ترقية Android SDK من النسخة 28 إلى 30 إلى 31",
         "ترقية نسخة Android Analytics من 7.0.0 إلى 13.1.0",
         "ترقية نسخة Android Annotations من 4.5.2 إلى 4.8.0",
         "ترقية أدوات بناء Gradle من النسخة 3.2.1 إلى 4.1.0 إلى 7.0.3 إلى 7.2.0-alpha04",
@@ -1024,7 +1025,6 @@
         "ترقية نسخة Eventbus من 3.0.0 إلى 3.2.0",
         "ترقية نسخة Glide Compiler من 4.8.0 إلى 4.12.0 إلى 4.12.0",
         "ترقية أدوات بناء Gradle من النسخة 29.0.2 إلى 30.0.2",
-        "ترقية Gradle Compile من النسخة 28 إلى 30 إلى 31",
         "ترقية النسخة Gradle أصدرت من 4.10.2 إلى 6.5 إلى 7.0.2 إلى 7.3",
         "ترقية مكون الإضافي Groovy-Json من النسخة 3.0.7 إلى 3.0.8",
         "ترقية نسخة Gson من 2.8.2 إلى 2.8.9",

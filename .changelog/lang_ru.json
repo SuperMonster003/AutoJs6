@@ -155,7 +155,7 @@
       ],
       "dependency": [
         "Добавлен Eclipse Paho Client Mqttv3 версии 1.1.0 _[`issue #330`](http://issues.autojs6.com/330)_",
-        "Обновлена версия Gradle Compile с 34 до 35",
+        "Обновлена версия Android SDK с 34 до 35",
         "Обновлён Gradle с 8.12 до 8.14-rc-1",
         "Обновлён Rhino с 1.8.0-SNAPSHOT до 1.8.1-SNAPSHOT",
         "Обновлён Androidx Recyclerview с 1.3.2 до 1.4.0",
@@ -466,8 +466,8 @@
       "dependency": [
         "Добавлена версия Rikka Shizuku 13.1.5",
         "Добавлена версия MLKit Barcode Scanning 17.2.0",
+        "Обновление версии Android SDK с 33 до 34",
         "Обновление версии OpenCV с 4.5.5 до 4.8.0 (Ref to [TonyJiangWJ](https://github.com/TonyJiangWJ))",
-        "Обновление версии Gradle Compile с 33 до 34",
         "Обновление версии Gradle с 8.3-rc-1 до 8.4-rc-3",
         "Обновление версии Apache Commons Lang3 с 3.12.0 до 3.13.0",
         "Обновление версии Glide с 4.15.1 до 4.16.0",
@@ -770,10 +770,10 @@
         "Переработка глобального объекта colors и добавление поддержки цветовых режимов HSV / HSL (см. проектную документацию > [цвета](https://docs.autojs6.com/#/color))"
       ],
       "dependency": [
-        "Обновление версии сборщика Gradle с 32 до 33",
         "Локализация версии Android Job до 1.4.3",
         "Локализация версии Android Plugin Client SDK For Locale до 9.0.0",
         "Локализация версии GitHub API до 1.306",
+        "Обновление версии Android SDK с 32 до 33",
         "Добавлена версия JCIP Annotations 1.0",
         "Добавлена версия androidx WebKit 1.5.0",
         "Добавлена версия Commons IO 2.8.0",
@@ -916,6 +916,7 @@
       "dependency": [
         "Добавлен Zeugma Solutions LocaleHelper версии 1.5.1",
         "Понижена версия Android Material до 1.6.0-alpha02 -> 1.5.0",
+        "Обновлен Android SDK до версии 31 -> 32",
         "Обновлены Kotlinx Coroutines до версии 1.6.0-native-mt -> 1.6.0",
         "Обновлен OpenCV до версии 3.4.3 -> 4.5.4 -> 4.5.5 (Ref to [TonyJiangWJ](https://github.com/TonyJiangWJ))",
         "Обновлен OkHttp3 до версии 3.10.0 -> 5.0.0-alpha.4 -> 5.0.0-alpha.6",
@@ -923,7 +924,6 @@
         "Обновлен Auto.js-ApkBuilder до версии 1.0.1 -> 1.0.3",
         "Обновлен Glide Compiler до версии 4.12.0 -> 4.13.1",
         "Обновлен Gradle выпуск до версии 7.4-rc-2 -> 7.4.1",
-        "Обновлен Gradle Compile до версии 31 -> 32",
         "Обновлен Gson до версии 2.8.9 -> 2.9.0"
       ]
     },
@@ -1006,6 +1006,7 @@
         "Рефакторинг и удаление повторяющихся локальных библиотек"
       ],
       "dependency": [
+        "Обновление версии Android SDK с 28 до 30 и до 31",
         "Локализованная версия CrashReport 2.6.6",
         "Локализованная версия MutableTheme 1.0.0",
         "Добавлена версия Androidx Preference 1.1.1",
@@ -1024,7 +1025,6 @@
         "Обновление версии Eventbus с 3.0.0 до 3.2.0",
         "Обновление версии Glide Compiler с 4.8.0 до 4.12.0",
         "Обновление версии Gradle Build Tool с 29.0.2 до 30.0.2",
-        "Обновление версии Gradle Compile с 28 до 30 и до 31",
         "Обновление версии Gradle с 4.10.2 до 6.5, затем до 7.0.2 и до 7.3",
         "Обновление версии плагина Groovy-Json с 3.0.7 до 3.0.8",
         "Обновление версии Gson с 2.8.2 до 2.8.9",
