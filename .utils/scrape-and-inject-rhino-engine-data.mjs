@@ -19,9 +19,15 @@ async function updateTemplateReadmeRhinoBadge(latestVersion) {
     if (oldVersion !== latestVersion) {
         const updatedFileContent = fileContent.replace(rhinoBadgeRegex, `$1${latestVersion.replaceAll('-', '--')}$3`);
         fs.writeFileSync(templateReadmePath, updatedFileContent, 'utf8');
+        const from = oldVersion;
+        const to = latestVersion;
+        const maxLength = Math.max(...[ from, to ].map(s => s.length + 5));
+        const SEP_EQ = '='.repeat(maxLength);
         console.log('[template_readme.md] Updated (Rhino badge version)');
-        console.log(`-- ${oldVersion}`);
-        console.log(`-> ${latestVersion}`);
+        console.log(SEP_EQ);
+        console.log(`-- "${from}"`);
+        console.log(`-> "${to}"`);
+        console.log(SEP_EQ);
     } else {
         // console.log('[template_readme.md] No update needed (Rhino badge version)');
     }
@@ -54,14 +60,28 @@ async function updateCommonJsonWithRhinoData(latestVersion, linenoOfLatestVersio
 
     if (JSON.stringify(updatedCommon) !== JSON.stringify(commonObj)) {
         fs.writeFileSync(commonJsonPath, JSON.stringify(updatedCommon, null, 2), 'utf8');
-        console.log('[common.json] Updated (Rhino information)');
-        Object.values(toUpdateKeys).forEach(key => {
+        const toPrint = Object.values(toUpdateKeys).map((key) => {
             if (key in updatedCommon && key in commonObj && updatedCommon[key] !== commonObj[key]) {
-                console.log(`## ${key}`);
-                console.log(`-- ${commonObj[key]}`);
-                console.log(`-> ${updatedCommon[key]}`);
+                return [
+                    `## ${key}`,
+                    `-- "${commonObj[key]}"`,
+                    `-> "${updatedCommon[key]}"`,
+                ].join('\n');
+            }
+            return null;
+        }).filter(Boolean);
+        const maxLength = Math.max(...toPrint.join('\n').split('\n').map(s => s.length));
+        const SEP_EQ = '='.repeat(maxLength);
+        const SEP_DASH = '-'.repeat(maxLength);
+        console.log('[common.json] Updated (Rhino information)');
+        console.log(SEP_EQ);
+        toPrint.forEach((s, i) => {
+            console.log(s);
+            if (i !== toPrint.length - 1) {
+                console.log(SEP_DASH);
             }
         });
+        console.log(SEP_EQ);
     } else {
         // console.log('[common.json] No update needed (Rhino information)');
     }

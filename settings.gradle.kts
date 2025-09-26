@@ -126,9 +126,9 @@ pluginManagement {
     // @AnchorBegin ANDROID_GRADLE_PLUGIN_RELEASES_LIST
     // @Script /.utils/scrape-and-inject-agp-releases.mjs
     // @Reference https://developer.android.com/reference/tools/gradle-api
-    // @Updated by SuperMonster003 on Sep 23, 2025.
+    // @Updated by SuperMonster003 on Sep 26, 2025.
     val agpReleases = listOf(
-        "9.0.0-alpha06",
+        "9.0.0-alpha07",
         "8.13.0",
         "8.12.3",
         "8.11.2",

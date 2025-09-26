@@ -174,20 +174,23 @@ async function main() {
         const res = await runOne({ nodePath: opts.nodePath, scriptPath: script.abs, cwd: utilsDir });
         const endLine = `${startLine} (${formatDuration(res.ms)})`;
 
+        const lineCountToMove = childProcessOutput.map(chunk => `${chunk}`).join('').split('\n').length;
+
         if (res.code === 0) {
             childProcessOutput.forEach((chunk) => {
                 process.stdout.write(chunk);
             });
-            readline.moveCursor(process.stdout, 0, -childProcessOutput.length - 1);
+            readline.moveCursor(process.stdout, 0, -lineCountToMove);
+            readline.clearLine(process.stdout, 0);
             process.stdout.write(`\r${endLine}`);
-            readline.moveCursor(process.stdout, 0, childProcessOutput.length + 2);
+            readline.moveCursor(process.stdout, 0, lineCountToMove + 1);
             process.stdout.write('\r');
             results.push({ ...res, name: script.name });
             childProcessOutput.splice(0, childProcessOutput.length);
         } else {
-            readline.moveCursor(process.stdout, 0, -childProcessOutput.length - 1);
-            process.stdout.write(`\r${endLine} [code: ${res.code}]`);
-            process.stdout.write('\n');
+            // readline.moveCursor(process.stdout, 0, -childProcessOutput.length - 1);
+            // process.stdout.write(`\r${endLine} [code: ${res.code}]`);
+            // process.stdout.write('\n');
             results.push({ ...res, name: script.name });
             break;
         }
