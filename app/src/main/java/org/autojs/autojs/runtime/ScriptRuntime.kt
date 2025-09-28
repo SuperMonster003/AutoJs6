@@ -158,6 +158,7 @@ import org.autojs.autojs.runtime.api.Threads as ApiThreads
 import org.autojs.autojs.runtime.api.Timers as ApiTimers
 import org.autojs.autojs.runtime.api.Toaster as ApiToaster
 import org.autojs.autojs.runtime.api.UI as ApiUI
+import org.autojs.autojs.runtime.api.Util as ApiUtil
 import org.autojs.autojs.runtime.api.augment.autojs.Version as AutojsVersion
 import org.autojs.autojs.runtime.api.augment.global.Legacy as GlobalLegacy
 import org.autojs.autojs.runtime.api.augment.notice.Channel as NoticeChannel
@@ -240,6 +241,10 @@ class ScriptRuntime private constructor(builder: Builder) {
     @JvmField
     @ScriptVariable
     val ui: ApiUI
+
+    @JvmField
+    @ScriptVariable
+    val util: ApiUtil
 
     @JvmField
     @ScriptVariable
@@ -453,6 +458,7 @@ class ScriptRuntime private constructor(builder: Builder) {
         floaty = ApiFloaty(uiHandler, this)
 
         ui = ApiUI(mUiHandlerAppContext, this)
+        util = ApiUtil(mUiHandlerAppContext, this)
         images = ApiImages(mUiHandlerAppContext, this)
         device = ApiDevice(mUiHandlerAppContext)
         media = ApiMedia(mUiHandlerAppContext, this)
@@ -711,7 +717,7 @@ class ScriptRuntime private constructor(builder: Builder) {
         Global(this).assignWithGlobal(target, topLevelScope, GlobalClasses)
         GlobalLegacy(this).assignWithGlobal(target, topLevelScope)
         IsNullish.augmentWithGlobal(target, topLevelScope, false)
-        Util.augmentWithGlobal(target, topLevelScope, true).apply {
+        Util.augmentWithGlobal(target, topLevelScope, util, true).apply {
             UtilJava.augmentWithGlobal(this, topLevelScope, false)
             UtilVersion.augmentWithGlobal(this, topLevelScope, false)
             UtilVersionCodes.augmentWithGlobal(this, topLevelScope, VersionCodesInfo.obj, false)
