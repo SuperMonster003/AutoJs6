@@ -154,7 +154,7 @@
         "README.md を改善し, プロジェクトのビルドおよび実行方法のドキュメントを充実 _[`issue #344`](http://issues.autojs6.com/344)_"
       ],
       "dependency": [
-        "Eclipse Paho Client Mqttv3 バージョン 1.1.0 を追加 _[`issue #330`](http://issues.autojs6.com/330)_",
+        "Eclipse Paho Client Mqtt V3 バージョン 1.1.0 を追加 _[`issue #330`](http://issues.autojs6.com/330)_",
         "Android SDK のバージョンを 34 から 35 に更新",
         "Gradle を 8.12 から 8.14-rc-1 に更新",
         "Rhino を 1.8.0-SNAPSHOT から 1.8.1-SNAPSHOT に更新",
@@ -299,7 +299,7 @@
         "追加 EasyWindow (for Toaster) バージョン 10.3",
         "Gradle バージョンを 8.5 -> 8.11.1 にアップグレード",
         "Rhino バージョン 1.7.15-SNAPSHOT -> 1.8.0-SNAPSHOT にアップグレード",
-        "Android Material Lang3 バージョン 1.10.0 -> 1.12.0 にアップグレード",
+        "Android Material バージョン 1.10.0 -> 1.12.0 にアップグレード",
         "Androidx Annotation バージョン 1.7.0 -> 1.9.1 にアップグレード",
         "Androidx AppCompat バージョン 1.6.1 -> 1.7.0 にアップグレード",
         "Androidx WebKit バージョン 1.8.0 -> 1.12.1 にアップグレード",

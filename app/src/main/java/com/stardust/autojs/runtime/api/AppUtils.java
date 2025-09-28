@@ -7,7 +7,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import androidx.annotation.Nullable;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+// import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import android.util.Log;
 
@@ -52,7 +52,8 @@ public class AppUtils {
 
     @ScriptInterface
     public void sendLocalBroadcastSync(Intent intent) {
-        LocalBroadcastManager.getInstance(mContext).sendBroadcastSync(intent);
+        // LocalBroadcastManager.getInstance(mContext).sendBroadcastSync(intent);
+        throw new UnsupportedOperationException("This method has been obsoleted as LocalBroadcastManager is deprecated");
     }
 
     @ScriptInterface

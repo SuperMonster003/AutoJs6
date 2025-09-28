@@ -154,7 +154,7 @@
         "README.md 를 개선하여 프로젝트 빌드 및 실행 방법에 대한 문서를 보강 _[`issue #344`](http://issues.autojs6.com/344)_"
       ],
       "dependency": [
-        "Eclipse Paho Client Mqttv3 버전 1.1.0 추가 _[`issue #330`](http://issues.autojs6.com/330)_",
+        "Eclipse Paho Client Mqtt V3 버전 1.1.0 추가 _[`issue #330`](http://issues.autojs6.com/330)_",
         "Android SDK 버전을 34 에서 35 로 업데이트",
         "Gradle 을 8.12 에서 8.14-rc-1 로 업데이트",
         "Rhino 를 1.8.0-SNAPSHOT 에서 1.8.1-SNAPSHOT 으로 업데이트",
@@ -299,7 +299,7 @@
         "EasyWindow (for Toaster) 버전 10.3 추가",
         "Gradle 버전 8.5 -> 8.11.1 업그레이드",
         "Rhino 버전 1.7.15-SNAPSHOT 에서 1.8.0-SNAPSHOT 으로 업그레이드",
-        "Android Material Lang3 버전 1.10.0 에서 1.12.0 으로 업그레이드",
+        "Android Material 버전 1.10.0 에서 1.12.0 으로 업그레이드",
         "Androidx Annotation 버전 1.7.0 에서 1.9.1 으로 업그레이드",
         "Androidx AppCompat 버전 1.6.1 에서 1.7.0 으로 업그레이드",
         "Androidx WebKit 버전 1.8.0 에서 1.12.1 으로 업그레이드",

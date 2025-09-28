@@ -44,7 +44,7 @@ import java.util.*
  * Created by Stardust on Apr 2, 2017.
  * Modified by SuperMonster003 as of May 26, 2022.
  */
-open class RhinoJavaScriptEngine(private val scriptRuntime: ScriptRuntime, private val androidContext: android.content.Context) : JavaScriptEngine() {
+open class RhinoJavaScriptEngine(private val androidContext: android.content.Context) : JavaScriptEngine() {
 
     private val mWrapFactory = WrapFactory()
     val context: Context = enterContext()

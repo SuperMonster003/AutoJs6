@@ -26,8 +26,8 @@ public class LoopBasedJavaScriptEngine extends RhinoJavaScriptEngine {
     private Handler mHandler;
     private boolean mLooping = false;
 
-    public LoopBasedJavaScriptEngine(ScriptRuntime scriptRuntime, Context context) {
-        super(scriptRuntime, context);
+    public LoopBasedJavaScriptEngine(Context context) {
+        super(context);
     }
 
     public interface ExecuteCallback {

@@ -154,7 +154,7 @@
         "Amélioration du README.md pour mieux documenter la construction et l'exécution du projet _[`issue #344`](http://issues.autojs6.com/344)_"
       ],
       "dependency": [
-        "Ajout d'Eclipse Paho Client Mqttv3 version 1.1.0 _[`issue #330`](http://issues.autojs6.com/330)_",
+        "Ajout d'Eclipse Paho Client Mqtt V3 version 1.1.0 _[`issue #330`](http://issues.autojs6.com/330)_",
         "Mise à jour de la version de Android SDK de 34 à 35",
         "Mise à jour de Gradle de 8.12 à 8.14-rc-1",
         "Mise à jour de Rhino de 1.8.0-SNAPSHOT à 1.8.1-SNAPSHOT",
@@ -299,7 +299,7 @@
         "Inclure la version 10.3 de EasyWindow (pour Toaster)",
         "Mettre à niveau la version 8.5 de Gradle -> 8.11.1 ",
         "Mettre à niveau la version 1.7.15-SNAPSHOT de Rhino -> 1.8.0-SNAPSHOT",
-        "Mettre à niveau la version 1.10.0 d'Android Material Lang3 -> 1.12.0",
+        "Mettre à niveau la version 1.10.0 d'Android Material -> 1.12.0",
         "Mettre à niveau la version 1.7.0 d'Androidx Annotation -> 1.9.1",
         "Mettre à niveau la version 1.6.1 d'Androidx AppCompat -> 1.7.0",
         "Mettre à niveau la version 1.8.0 d'Androidx WebKit -> 1.12.1",

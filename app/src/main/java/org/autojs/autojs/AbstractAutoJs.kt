@@ -60,8 +60,8 @@ abstract class AbstractAutoJs protected constructor(val application: Application
         scriptEngineManager.registerEngine(JavaScriptSource.ENGINE) {
             val rt = createRuntime()
             when (isInrt) {
-                true -> LoopBasedJavaScriptEngineWithDecryption(rt, applicationContext)
-                else -> LoopBasedJavaScriptEngine(rt, applicationContext)
+                true -> LoopBasedJavaScriptEngineWithDecryption(applicationContext)
+                else -> LoopBasedJavaScriptEngine(applicationContext)
             }.also { it.runtime = rt }
         }
         initContextFactory()
