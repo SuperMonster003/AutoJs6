@@ -2,18 +2,21 @@ package org.autojs.autojs
 
 import android.annotation.SuppressLint
 import android.app.Application
-import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.util.Log
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import org.autojs.autojs.core.accessibility.AccessibilityTool
 import org.autojs.autojs.core.accessibility.Capture
 import org.autojs.autojs.core.accessibility.LayoutInspector.CaptureAvailableListener
 import org.autojs.autojs.core.console.GlobalConsole
 import org.autojs.autojs.execution.ScriptExecutionGlobalListener
 import org.autojs.autojs.external.fileprovider.AppFileProvider
+import org.autojs.autojs.ipc.LayoutInspectEvent
+import org.autojs.autojs.ipc.LayoutInspectEventBus
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.AppUtils
 import org.autojs.autojs.runtime.api.AppUtils.Companion.ActivityShortForm
@@ -39,37 +42,52 @@ open class AutoJs(appContext: Application) : AbstractAutoJs(appContext) {
 
     private val mA11yTool = AccessibilityTool(appContext)
 
+    private val mJob = Job()
+    private val mScope = CoroutineScope(Dispatchers.Main.immediate + mJob)
+
     init {
         scriptEngineService.registerGlobalScriptExecutionListener(ScriptExecutionGlobalListener())
 
-        LocalBroadcastManager.getInstance(appContext).registerReceiver(object : BroadcastReceiver() {
-            override fun onReceive(context: Context, intent: Intent) {
-                try {
-                    val action = intent.action ?: return
-                    when {
-                        action.equals(LayoutBoundsFloatyWindow::class.java.name, true) -> {
-                            mA11yTool.ensureService()
-                            capture(object : LayoutInspectFloatyWindow {
-                                override fun create(capture: Capture) = LayoutBoundsFloatyWindow(capture, context, true)
-                            })
-                        }
-                        action.equals(LayoutHierarchyFloatyWindow::class.java.name, true) -> {
-                            mA11yTool.ensureService()
-                            capture(object : LayoutInspectFloatyWindow {
-                                override fun create(capture: Capture) = LayoutHierarchyFloatyWindow(capture, context, true)
-                            })
-                        }
+        // @Archived by SuperMonster003 on Sep 27, 2025.
+        //  ! LocalBroadcastManager is deprecated.
+        //  ! zh-CN: LocalBroadcastManager 已被弃用.
+        //  # LocalBroadcastManager.getInstance(appContext).registerReceiver(object : BroadcastReceiver() {
+        //  #     override fun onReceive(context: Context, intent: Intent) {
+        //  #         ... ...
+        //  #         val action = intent.action ?: return
+        //  #         when {
+        //  #             action.equals(LayoutBoundsFloatyWindow::class.java.name, true) -> { ... ... }
+        //  #             action.equals(LayoutHierarchyFloatyWindow::class.java.name, true) -> { ... ... }
+        //  #         }
+        //  #         ... ...
+        //  #     }
+        //  # }, IntentFilter().apply {
+        //  #     addAction(LayoutBoundsFloatyWindow::class.java.name)
+        //  #     addAction(LayoutHierarchyFloatyWindow::class.java.name)
+        //  # })
+
+        LayoutInspectEventBus.events.onEach { event ->
+            try {
+                when (event) {
+                    LayoutInspectEvent.ShowLayoutBounds -> {
+                        mA11yTool.ensureService()
+                        capture(object : LayoutInspectFloatyWindow {
+                            override fun create(capture: Capture) = LayoutBoundsFloatyWindow(capture, appContext, true)
+                        })
                     }
-                } catch (e: Exception) {
-                    if (isBackgroundThread()) {
-                        throw e
+                    LayoutInspectEvent.ShowLayoutHierarchy -> {
+                        mA11yTool.ensureService()
+                        capture(object : LayoutInspectFloatyWindow {
+                            override fun create(capture: Capture) = LayoutHierarchyFloatyWindow(capture, appContext, true)
+                        })
                     }
                 }
+            } catch (e: Exception) {
+                if (isBackgroundThread()) {
+                    throw e
+                }
             }
-        }, IntentFilter().apply {
-            addAction(LayoutBoundsFloatyWindow::class.java.name)
-            addAction(LayoutHierarchyFloatyWindow::class.java.name)
-        })
+        }.launchIn(mScope)
     }
 
     private interface LayoutInspectFloatyWindow {
@@ -129,6 +147,10 @@ open class AutoJs(appContext: Application) : AbstractAutoJs(appContext) {
             BroadcastShortForm.INSPECT_LAYOUT_BOUNDS, BroadcastShortForm.LAYOUT_BOUNDS, BroadcastShortForm.BOUNDS,
             BroadcastShortForm.INSPECT_LAYOUT_HIERARCHY, BroadcastShortForm.LAYOUT_HIERARCHY, BroadcastShortForm.HIERARCHY,
         ).forEach { putProperty(it.fullName, it.className) }
+    }
+
+    fun clear() {
+        mJob.cancel()
     }
 
     companion object {

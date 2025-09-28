@@ -1,10 +1,5 @@
 [versions]
 
-#deprecated   : Will be removed in the future
-#substitution : LiveData or SharedFlow
-#since        : Sep 25, 2025 (by SuperMonster003)
-localbroadcastmanager = "1.1.0"
-
 #strictly : 4.12.0
 #purpose  : Compatibility for kotlin 2.0.x (e.g. 2.0.21)
 #because  : Version 5.0.0+ requires kotlin 2.2.0+
@@ -37,7 +32,7 @@ jackson-databind = "2.13.4.2"
 log4j = "1.2.17"
 
 #purpose : Compatibility of java.time.* for Android API Level < 26 (Android 8.0) [O]
-desugar = "2.0.4"
+desugar = "2.1.5"
 
 analytics = "14.4.0"
 android-device-names = "2.1.1"
@@ -151,7 +146,6 @@ junit-quickcheck-core = { module = "com.pholser:junit-quickcheck-core", version.
 junit-quickcheck-generators = { module = "com.pholser:junit-quickcheck-generators", version.ref = "junit-quickcheck-generators" }
 leakcanary = { module = "com.squareup.leakcanary:leakcanary-android", version.ref = "leakcanary" }
 licensesdialog = { module = "de.psdev.licensesdialog:licensesdialog", version.ref = "licensesdialog" }
-localbroadcastmanager = { module = "androidx.localbroadcastmanager:localbroadcastmanager", version.ref = "localbroadcastmanager" }
 log4j = { module = "log4j:log4j", version.ref = "log4j" }
 material = { module = "com.google.android.material:material", version.ref = "material" }
 materialprogressbar = { module = "me.zhanghai.android.materialprogressbar:library", version.ref = "materialprogressbar" }

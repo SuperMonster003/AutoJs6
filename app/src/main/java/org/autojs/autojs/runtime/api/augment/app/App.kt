@@ -2,16 +2,26 @@ package org.autojs.autojs.runtime.api.augment.app
 
 import android.content.Intent
 import android.net.Uri
+import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.core.net.toUri
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.extension.FlexibleArray
 import org.autojs.autojs.extension.ScriptableExtensions.defineProp
+import org.autojs.autojs.extension.ScriptableExtensions.deleteProp
 import org.autojs.autojs.extension.ScriptableExtensions.prop
 import org.autojs.autojs.extension.ScriptableObjectExtensions.inquire
+import org.autojs.autojs.external.receiver.BaseBroadcastReceiver
+import org.autojs.autojs.ipc.LayoutInspectEventBus
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.AppUtils.Companion.ActivityShortForm
 import org.autojs.autojs.runtime.api.AppUtils.Companion.BroadcastShortForm
@@ -20,6 +30,8 @@ import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.shell.Shell
 import org.autojs.autojs.runtime.exception.ShouldNeverHappenException
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
+import org.autojs.autojs.timing.IntentTask
+import org.autojs.autojs.timing.TimedTaskManager
 import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED
 import org.autojs.autojs.util.RhinoUtils.coerceBoolean
@@ -32,13 +44,10 @@ import org.autojs.autojs.util.RootUtils
 import org.autojs.autojs6.BuildConfig
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeObject
-import org.mozilla.javascript.ScriptableObject.PERMANENT
 import org.mozilla.javascript.Undefined
 import java.io.File
 import java.net.URI
 import org.autojs.autojs.util.App as PresetApp
-import androidx.core.net.toUri
-import org.autojs.autojs.extension.ScriptableExtensions.deleteProp
 
 @Suppress("unused", "UNUSED_PARAMETER")
 class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
@@ -423,15 +432,14 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         fun sendBroadcast(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsOnlyOne(args) { o ->
             when (o) {
                 is String -> {
-                    runCatching {
-                        sendLocalBroadcastSyncInternal(intentRhinoWithRuntime(scriptRuntime, newNativeObject().also {
-                            val value = BroadcastShortForm.valueOf(o.uppercase()).className
-                            it.defineProp("action", value, PERMANENT)
-                        }))
-                    }.getOrElse {
-                        when (it) {
-                            is WrappedIllegalArgumentException -> throw WrappedIllegalArgumentException("Broadcast short form $o cannot be found")
-                            else -> throw it
+                    CoroutineScope(Dispatchers.Main).launch {
+                        when (BroadcastShortForm.valueOf(o.uppercase())) {
+                            BroadcastShortForm.INSPECT_LAYOUT_BOUNDS -> LayoutInspectEventBus.showLayoutBounds()
+                            BroadcastShortForm.LAYOUT_BOUNDS -> LayoutInspectEventBus.showLayoutBounds()
+                            BroadcastShortForm.BOUNDS -> LayoutInspectEventBus.showLayoutBounds()
+                            BroadcastShortForm.INSPECT_LAYOUT_HIERARCHY -> LayoutInspectEventBus.showLayoutHierarchy()
+                            BroadcastShortForm.LAYOUT_HIERARCHY -> LayoutInspectEventBus.showLayoutHierarchy()
+                            BroadcastShortForm.HIERARCHY -> LayoutInspectEventBus.showLayoutHierarchy()
                         }
                     }
                 }
@@ -459,7 +467,35 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
         @JvmStatic
         fun sendLocalBroadcastSyncInternal(intent: Intent?) {
-            intent?.let { LocalBroadcastManager.getInstance(globalContext).sendBroadcastSync(it) }
+
+            // @Archived by SuperMonster003 on Sep 27, 2025.
+            //  ! LocalBroadcastManager is deprecated.
+            //  ! zh-CN: LocalBroadcastManager 已被弃用.
+            //  # intent?.let { LocalBroadcastManager.getInstance(globalContext).sendBroadcastSync(it) }
+
+            intent?.action?.let { action ->
+                try {
+                    // Get tasks synchronously in background thread, then execute in main thread.
+                    // zh-CN: 在后台线程同步获取任务, 再回到主线程执行.
+                    val mainHandler = Handler(Looper.getMainLooper())
+                    Schedulers.io().scheduleDirect {
+                        try {
+                            val task = TimedTaskManager.getIntentTaskOfAction(action)
+                                .firstOrError()
+                                .blockingGet()
+                            task?.let {
+                                mainHandler.post {
+                                    BaseBroadcastReceiver.runTask(globalContext, intent, it)
+                                }
+                            }
+                        } catch (e: Throwable) {
+                            e.printStackTrace()
+                        }
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
         }
 
         @JvmStatic

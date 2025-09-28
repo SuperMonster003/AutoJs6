@@ -420,7 +420,9 @@ class TimedTaskSettingActivity : BaseActivity() {
         val task = IntentTask().apply {
             action = actionString
             scriptPath = mScriptFile.path
-            isLocal = actionString == DynamicBroadcastReceivers.ACTION_STARTUP
+            if (actionString == DynamicBroadcastReceivers.ACTION_STARTUP) {
+                isLocal = true
+            }
         }
         when (val intentTask = mIntentTask) {
             null -> {

@@ -2,7 +2,6 @@ package org.autojs.autojs
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
@@ -11,7 +10,6 @@ import android.os.Build
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.multidex.MultiDexApplication
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomViewTarget
@@ -21,6 +19,7 @@ import com.google.mlkit.common.sdkinternal.MlKitContext
 import com.hjq.toast.Toaster
 import com.tencent.bugly.Bugly
 import com.tencent.bugly.crashreport.CrashReport
+import io.reactivex.android.schedulers.AndroidSchedulers
 import org.autojs.autojs.apkbuilder.ApkBuilder
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.pref.Pref
@@ -28,6 +27,7 @@ import org.autojs.autojs.core.ui.inflater.ImageLoader
 import org.autojs.autojs.core.ui.inflater.util.Drawables
 import org.autojs.autojs.event.GlobalKeyObserver
 import org.autojs.autojs.external.receiver.DynamicBroadcastReceivers
+import org.autojs.autojs.ipc.InAppEventBus
 import org.autojs.autojs.leakcanary.LeakCanarySetup
 import org.autojs.autojs.pluginclient.DevPluginService
 import org.autojs.autojs.runtime.api.augment.ocr.Ocr
@@ -86,7 +86,7 @@ class App : MultiDexApplication() {
         if (!BuildConfig.DEBUG) {
             @Suppress("SpellCheckingInspection")
             FlurryAgent.Builder()
-                .withLogEnabled(BuildConfig.DEBUG)
+                .withLogEnabled(false)
                 .build(this, "D42MH48ZN4PJC5TKNYZD")
         }
     }
@@ -94,9 +94,9 @@ class App : MultiDexApplication() {
     private fun setUpDebugEnvironment() {
         Bugly.isDev = false
         val crashHandler = CrashHandler(CrashReportActivity::class.java)
-
-        val strategy = CrashReport.UserStrategy(applicationContext)
-        strategy.setCrashHandleCallback(crashHandler)
+        val strategy = CrashReport.UserStrategy(applicationContext).apply {
+            crashHandleCallback = crashHandler
+        }
 
         CrashReport.initCrashReport(applicationContext, BUGLY_APP_ID, false, strategy)
 
@@ -128,27 +128,44 @@ class App : MultiDexApplication() {
     private fun initDynamicBroadcastReceivers() {
         dynamicBroadcastReceivers = DynamicBroadcastReceivers(this)
         val localActions = ArrayList<String>()
-        val actions = ArrayList<String>()
+        val systemActions = ArrayList<String>()
         TimedTaskManager.allIntentTasks
             .filter { task -> task.action != null }
             .doOnComplete {
                 if (localActions.isNotEmpty()) {
                     dynamicBroadcastReceivers.register(localActions, true)
                 }
-                if (actions.isNotEmpty()) {
-                    dynamicBroadcastReceivers.register(actions, false)
+                if (systemActions.isNotEmpty()) {
+                    dynamicBroadcastReceivers.register(systemActions, false)
                 }
-                LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(
-                    Intent(
-                        DynamicBroadcastReceivers.ACTION_STARTUP
-                    )
-                )
+
+                // @Archived by SuperMonster003 on Sep 27, 2025.
+                //  ! LocalBroadcastManager is deprecated.
+                //  ! zh-CN: LocalBroadcastManager 已被弃用.
+                //  # Intent(DynamicBroadcastReceivers.ACTION_STARTUP).let {
+                //  #     LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(it)
+                //  # }
+
+                // @Hint by JetBrains AI Assistant on Sep 27, 2025.
+                //  ! Why schedule on next main-loop tick?
+                //  ! Post the emit to the next frame on the main thread to avoid a race where
+                //  ! the SharedFlow collectors (registered via launchIn on Main) are not yet active
+                //  ! at the exact moment of emission. Emitting in the next loop ensures all
+                //  ! subscriptions are set up, preventing event loss when replay=0.
+                //  ! zh-CN:
+                //  ! 为什么要在主线程的下一帧再触发?
+                //  ! 将触发放到主线程消息队列的下一轮执行, 避免 "先发后订" 的竞态:
+                //  ! 订阅 (launchIn(Main)) 尚未真正激活时如果立即发送, replay=0 会丢事件.
+                //  ! 下一帧再发可以确保收集器已就绪, 从而可靠接收启动事件.
+                AndroidSchedulers.mainThread().scheduleDirect {
+                    InAppEventBus.tryEmit(DynamicBroadcastReceivers.ACTION_STARTUP)
+                }
             }
             .subscribe({
                 if (it.isLocal) {
                     localActions.add(it.action)
                 } else {
-                    actions.add(it.action)
+                    systemActions.add(it.action)
                 }
             }, { it.printStackTrace() })
 
@@ -233,6 +250,11 @@ class App : MultiDexApplication() {
         EventBus.getDefault().post(newConfig)
         FloatyWindowManger.getCircularMenu()?.savePosition(newConfig)
         super.onConfigurationChanged(newConfig)
+    }
+
+    fun clear() {
+        dynamicBroadcastReceivers.unregisterAll()
+        InAppEventBus.clear()
     }
 
     companion object {
