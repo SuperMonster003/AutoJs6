@@ -89,10 +89,6 @@ object Util : Augmentable() {
         ::deprecate.name,
         ::debuglog.name,
         ::log.name,
-        ::`class`.name,
-        ::getClass.name,
-        ::className.name,
-        ::getClassName.name,
         ::checkStringArgument.name,
         ::assureStringStartsWith.name,
         ::assureStringEndsWith.name,
@@ -459,40 +455,6 @@ object Util : Augmentable() {
     }
 
     @JvmStatic
-    @RhinoSingletonFunctionInterface
-    fun `class`(args: Array<out Any?>): Scriptable = ensureArgumentsOnlyOne(args) { o ->
-        require(o != null) { "Argument \"o\" ${o.jsBrief()} for util.class must be non-null" }
-        getClassInternal(o)
-    }
-
-    @JvmStatic
-    @RhinoSingletonFunctionInterface
-    fun getClass(args: Array<out Any?>): Scriptable = ensureArgumentsOnlyOne(args) { o ->
-        require(o != null) { "Argument \"o\" ${o.jsBrief()} for util.getClass must be non-null" }
-        getClassInternal(o)
-    }
-
-    @JvmStatic
-    @RhinoSingletonFunctionInterface
-    fun className(args: Array<out Any?>): String = ensureArgumentsOnlyOne(args) {
-        when (it) {
-            null -> throw WrappedIllegalArgumentException("Argument \"o\" ${it.jsBrief()} for util.className must be non-null")
-            is Class<*> -> it.name
-            else -> it.javaClass.name
-        }
-    }
-
-    @JvmStatic
-    @RhinoSingletonFunctionInterface
-    fun getClassName(args: Array<out Any?>): String = ensureArgumentsOnlyOne(args) {
-        when (it) {
-            null -> throw WrappedIllegalArgumentException("Argument \"o\" ${it.jsBrief()} for util.getClassName must be non-null")
-            is Class<*> -> it.name
-            else -> it.javaClass.name
-        }
-    }
-
-    @JvmStatic
     @Deprecated("Deprecated in Java", ReplaceWith("checkStringArgument(args)"))
     @RhinoSingletonFunctionInterface
     fun checkStringParam(args: Array<out Any?>): Boolean = checkStringArgument(args)
@@ -767,11 +729,6 @@ object Util : Augmentable() {
     fun pxToSp(args: Array<out Any?>): Double = ensureArgumentsOnlyOne(args) {
         coerceNumber(DisplayUtils.pxToSp(coerceFloatNumber(it)))
     }
-
-    private fun getClassInternal(o: Any): Scriptable = when (o) {
-        is Class<*> -> o
-        else -> o.javaClass
-    }.let { cls -> withRhinoContext { cx -> cx.wrapFactory.wrapJavaClass(cx, ImporterTopLevel(cx), cls) } }
 
     internal class RegularFunction(private val func: BaseFunction) : BaseFunction() {
 
