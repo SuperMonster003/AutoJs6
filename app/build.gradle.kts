@@ -49,9 +49,6 @@ dependencies /* Unclassified */ {
     // Androidx Core
     implementation(libs.core.ktx)
 
-    // Local Broadcast Manager
-    implementation(libs.localbroadcastmanager)
-
     // LeakCanary
     debugImplementation(libs.leakcanary)
 
@@ -427,6 +424,12 @@ dependencies /* Archived */ {
     //  ! It was ever imported and used for MediaType constants.
     //  ! zh-CN: 曾用于 MediaType 常量的导入及使用.
     // implementation("javax.ws.rs:javax.ws.rs-api:2.1.1")
+
+    // Local Broadcast Manager
+    // @Comment by SuperMonster003 on Sep 27, 2025.
+    //  ! Deprecated. Chould by replaced with LiveData or SharedFlow.
+    //  ! zh-CN: 已弃用. 可用 LiveData 或 SharedFlow 替代.
+    // implementation(libs.localbroadcastmanager)
 }
 
 dependencies /* Reserved for auto append by IDE */ {

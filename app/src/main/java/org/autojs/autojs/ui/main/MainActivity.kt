@@ -24,6 +24,7 @@ import com.google.android.material.tabs.TabLayout
 import com.huaban.analysis.jieba.CharsDictionaryDatabase
 import com.huaban.analysis.jieba.PhrasesDictionaryDatabase
 import com.huaban.analysis.jieba.WordDictionaryDatabase
+import org.autojs.autojs.App
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.app.FragmentPagerAdapterBuilder
 import org.autojs.autojs.app.FragmentPagerAdapterBuilder.StoredFragmentPagerAdapter
@@ -318,6 +319,9 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
         ScreenCapturerForegroundService.stopService()
 
         AutoJs.instance.scriptEngineService.stopAll()
+        AutoJs.instance.clear()
+
+        App.app.clear()
 
         WordDictionaryDatabase.getInstance(applicationContext).close()
         CharsDictionaryDatabase.getInstance(applicationContext).close()

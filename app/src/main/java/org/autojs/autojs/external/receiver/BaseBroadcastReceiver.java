@@ -36,7 +36,7 @@ public class BaseBroadcastReceiver extends BroadcastReceiver {
         }
     }
 
-    static void runTask(Context context, Intent intent, IntentTask task) {
+    public static void runTask(Context context, Intent intent, IntentTask task) {
         Log.d(LOG_TAG, "runTask: action = " + intent.getAction() + ", script = " + task.getScriptPath());
         ScriptFile file = new ScriptFile(task.getScriptPath());
         ExecutionConfig config = new ExecutionConfig();
