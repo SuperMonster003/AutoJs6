@@ -4,14 +4,13 @@ import android.content.Context
 import org.autojs.autojs.engine.LoopBasedJavaScriptEngine
 import org.autojs.autojs.engine.encryption.ScriptEncryption
 import org.autojs.autojs.pio.PFiles
-import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.script.EncryptedScriptFileHeader
 import org.autojs.autojs.script.EncryptedScriptFileHeader.BLOCK_SIZE
 import org.autojs.autojs.script.JavaScriptFileSource
 import org.autojs.autojs.script.ScriptSource
 import org.autojs.autojs.script.StringScriptSource
 
-class LoopBasedJavaScriptEngineWithDecryption(scriptRuntime: ScriptRuntime, context: Context) : LoopBasedJavaScriptEngine(scriptRuntime, context) {
+class LoopBasedJavaScriptEngineWithDecryption(context: Context) : LoopBasedJavaScriptEngine(context) {
 
     override fun execute(source: ScriptSource?, callback: ExecuteCallback?) {
         if (source is JavaScriptFileSource) {

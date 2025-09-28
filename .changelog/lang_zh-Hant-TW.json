@@ -154,7 +154,7 @@
         "README.md 完善專案構建與執行相關內容 _[`issue #344`](http://issues.autojs6.com/344)_"
       ],
       "dependency": [
-        "附加 Eclipse Paho Client Mqttv3 版本 1.1.0 _[`issue #330`](http://issues.autojs6.com/330)_",
+        "附加 Eclipse Paho Client Mqtt V3 版本 1.1.0 _[`issue #330`](http://issues.autojs6.com/330)_",
         "升級 Android SDK 版本 34 -> 35",
         "升級 Gradle 版本 8.12 -> 8.14-rc-1",
         "升級 Rhino 版本 1.8.0-SNAPSHOT -> 1.8.1-SNAPSHOT",
@@ -299,7 +299,7 @@
         "附加 EasyWindow (for Toaster) 版本 10.3",
         "升級 Gradle 版本 8.5 -> 8.11.1",
         "升級 Rhino 版本 1.7.15-SNAPSHOT -> 1.8.0-SNAPSHOT",
-        "升級 Android Material Lang3 版本 1.10.0 -> 1.12.0",
+        "升級 Android Material 版本 1.10.0 -> 1.12.0",
         "升級 Androidx Annotation 版本 1.7.0 -> 1.9.1",
         "升級 Androidx AppCompat 版本 1.6.1 -> 1.7.0",
         "升級 Androidx WebKit 版本 1.8.0 -> 1.12.1",

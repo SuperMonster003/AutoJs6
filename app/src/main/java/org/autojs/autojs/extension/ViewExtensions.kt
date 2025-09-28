@@ -31,12 +31,16 @@ object ViewExtensions {
     }
 
     val Toolbar.titleView: TextView?
-        get() = this.findViewById(com.google.android.material.R.id.action_bar_title)
-            ?: Toolbar::class.java.getDeclaredField("mTitleTextView").apply { isAccessible = true }.get(this@titleView) as TextView?
+        get() = this.findViewById(androidx.appcompat.R.id.action_bar_title)
+            ?: runCatching {
+                Toolbar::class.java.getDeclaredField("mTitleTextView").apply { isAccessible = true }.get(this@titleView) as TextView?
+            }.getOrNull()
 
     val Toolbar.subtitleView: TextView?
-        get() = this.findViewById(com.google.android.material.R.id.action_bar_subtitle)
-            ?: Toolbar::class.java.getDeclaredField("mSubtitleTextView").apply { isAccessible = true }.get(this@subtitleView) as TextView?
+        get() = this.findViewById(androidx.appcompat.R.id.action_bar_subtitle)
+            ?: runCatching {
+                Toolbar::class.java.getDeclaredField("mSubtitleTextView").apply { isAccessible = true }.get(this@subtitleView) as TextView?
+            }.getOrNull()
 
     @JvmStatic
     fun Toolbar.setOnTitleViewClickListener(l: View.OnClickListener?) {
