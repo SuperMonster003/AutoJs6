@@ -17,5 +17,5 @@ ui.layout(
         <text autoLink="web" margin="8">网址 www.baidu.com, 邮箱 example@qq.com 等</text>
         <text autoLink="email" margin="8">网址 www.baidu.com, 邮箱 example@qq.com 等</text>
         <text autoLink="all" margin="8">网址 www.baidu.com, 邮箱 example@qq.com 等</text>
-    </vertical>
+    </vertical>,
 );

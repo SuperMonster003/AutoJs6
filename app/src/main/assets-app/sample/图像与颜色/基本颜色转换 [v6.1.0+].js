@@ -8,7 +8,7 @@ let cA = colors.alpha(color);
 
 console.log(`Color string: ${color}`);
 console.log(`Color int: ${colorInt}`);
-console.log(`Color rgba: [ ${[`R: ${cR}`, `G: ${cG}`, `B: ${cB}`, `A: ${cA}`].join(', ')} ]`);
+console.log(`Color rgba: [ ${[ `R: ${cR}`, `G: ${cG}`, `B: ${cB}`, `A: ${cA}` ].join(', ')} ]`);
 
 let test = o => console.log(`Test instance ${o ? `passed` : `failed`}`);
 

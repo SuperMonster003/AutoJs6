@@ -28,7 +28,9 @@ import android.util.Log;
 import java.lang.reflect.Method;
 
 public class SettingsCompat {
+
     private static final String TAG = "ezy-settings-compat";
+    private final static String HUAWEI_PACKAGE = "com.huawei.systemmanager";
 
     public static boolean canDrawOverlays(Context context) {
         return Settings.canDrawOverlays(context);
@@ -109,8 +111,6 @@ public class SettingsCompat {
         return startSafely(context, intent);
     }
 
-    private final static String HUAWEI_PACKAGE = "com.huawei.systemmanager";
-
     // 华为
     private static boolean manageDrawOverlaysForEmui(Context context) {
         Intent intent = new Intent();
@@ -130,7 +130,7 @@ public class SettingsCompat {
 
     // VIVO
     private static boolean manageDrawOverlaysForVivo(Context context) {
-        // 不支持直接到达悬浮窗设置页，只能到 i管家 首页
+        // 不支持直接到达悬浮窗设置页, 只能到 i 管家 首页
         Intent intent = new Intent("com.iqoo.secure");
         intent.setClassName("com.iqoo.secure", "com.iqoo.secure.MainActivity");
         // com.iqoo.secure.ui.phoneoptimize.SoftwareManagerActivity

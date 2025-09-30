@@ -99,7 +99,7 @@ ui.todoList.on('item_long_click', function (e, item, i, itemView, listView) {
     e.consumed = true;
 });
 
-//当离开本界面时保存todoList
+// 当离开本界面时保存todoList
 ui.emitter.on('pause', () => {
     storage.put('items', todoList);
 });

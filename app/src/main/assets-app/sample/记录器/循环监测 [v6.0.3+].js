@@ -1,4 +1,4 @@
-const KEY = "wait_for_test";
+const KEY = 'wait_for_test';
 const timeout = 3; // seconds
 
 toast(`${timeout} seconds counting down...`, 'l');

@@ -1,2 +1,2 @@
-KeyCode("KEYCODE_POWER");
-//或者 KeyCode(26);
+// 或者 KeyCode(26);
+KeyCode('KEYCODE_POWER');

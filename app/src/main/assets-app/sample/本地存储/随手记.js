@@ -16,6 +16,3 @@ if (!isNullish(content)) {
 ui.save.click(() => {
     storage.put('content', ui.content.text());
 });
-
-
-

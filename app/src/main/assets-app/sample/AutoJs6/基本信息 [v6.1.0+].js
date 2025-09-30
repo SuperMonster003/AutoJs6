@@ -1,6 +1,6 @@
-let {versionName, versionCode, versionDate} = autojs;
-Object.entries({versionName, versionCode, versionDate}).forEach((entry) => {
-    let [key, value] = entry;
+let { versionName, versionCode, versionDate } = autojs;
+Object.entries({ versionName, versionCode, versionDate }).forEach((entry) => {
+    let [ key, value ] = entry;
     console.log(`${key}: ${value}`);
 });
 

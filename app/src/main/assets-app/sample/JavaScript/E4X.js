@@ -140,10 +140,10 @@ var order = <order id = "123456" timestamp="Mon Mar 10 2003 16:03:25 GMT-0800 (P
 print("The order id is:" + order.@id);
 
 // get all the child elements from the order element
-print("The children of the order are:\n" + order.*); 
+print("The children of the order are:\n" + order.*);
 
 // get the list of all item descriptions
-print("The order descriptions are:\n" + order.item.description); 
+print("The order descriptions are:\n" + order.item.description);
 
 
 // get second item by numeric index
@@ -176,7 +176,7 @@ print("All the employee names are:\n" + e..name);
 print("The employee named Joe is:\n" + e.employee.(name == "Joe"));
 
 // employees with id's 1 & 2
-print("Employees with ids 1 & 2:\n" + e.employee.(@id == 1 || @id == 2)); 
+print("Employees with ids 1 & 2:\n" + e.employee.(@id == 1 || @id == 2));
 
 // name of employee with id 1
 print("Name of the the employee with ID=1: " + e.employee.(@id == 1).name);
@@ -184,7 +184,3 @@ print("Name of the the employee with ID=1: " + e.employee.(@id == 1).name);
 print("----------------------------------------");
 
 openConsole();
-
-
-
-

@@ -47,7 +47,7 @@ let iconMap = {};
 ui.apps.setDataSource(appList);
 
 ui.apps.on('item_click', item => {
-    new com.afollestad.materialdialogs.MaterialDialog.Builder(context).limitIconToDefaultSize()
+    new com.afollestad.materialdialogs.MaterialDialog.Builder(context).limitIconToDefaultSize();
     dialogs.build({
         title: '应用信息',
         icon: item.icon,

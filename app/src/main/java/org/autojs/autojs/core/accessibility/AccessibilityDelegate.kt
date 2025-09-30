@@ -9,9 +9,7 @@ import android.view.accessibility.AccessibilityEvent
 interface AccessibilityDelegate {
 
     /**
-     * 返回调用onAccessibilityEvent时的EventType的集合。如果需要对所有EventType都有效，返回null。
-     *
-     * @return
+     * 返回调用 onAccessibilityEvent 时的 EventType 的集合. 如果需要对所有 EventType 都有效, 返回 null.
      */
     val eventTypes: Set<Int>?
 

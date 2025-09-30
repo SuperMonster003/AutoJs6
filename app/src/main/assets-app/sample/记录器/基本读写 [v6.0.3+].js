@@ -1,4 +1,4 @@
-const KEY = "key_test";
+const KEY = 'key_test';
 
 recorder.save(KEY);
 

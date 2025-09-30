@@ -1,1 +1,1 @@
-shell("am kill-all", true);
+shell('am kill-all', true);
