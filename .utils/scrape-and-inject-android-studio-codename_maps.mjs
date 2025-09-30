@@ -1,14 +1,5 @@
 // scrape-and-inject-android-studio-codename_maps.mjs
 
-/** @typedef {import('puppeteer').Page} Page */
-/** @typedef {import('puppeteer').Frame} Frame */
-/** @typedef {import('./fetch-and-parse-android-studio-latest-stable-version.mjs').StableArchiveItem} Row */
-/** @typedef {import('./fetch-and-parse-android-studio-archives.mjs').ArchiveItem} ArchiveItem */
-/**
- * @template {Node} T
- * @typedef {import('puppeteer').ElementHandle<T>} ElementHandle
- */
-
 import * as fsp from 'node:fs/promises';
 import * as path from 'node:path';
 import { batchUpdateAnchoredBlocks } from './utils/anchors.mjs';
@@ -47,7 +38,7 @@ const manualCodenameOverrides = {};
  * complete and update common.json.<br>
  * zh-CN: 用 "最新稳定版" 的校验和/文件名, 在归档中定位条目, 补全并更新 common.json.
  *
- * @param {ArchiveItem[]} archives
+ * @param {AndroidStudioArchiveItem[]} archives
  * @returns {Promise<void>}
  */
 async function updateLatestArchiveInfo(archives) {
@@ -63,9 +54,9 @@ async function updateLatestArchiveInfo(archives) {
      * Search the archive: first try to match by sha256, then by filename.<br>
      * zh-CN: 在归档中查找: 优先用 sha256 命中, 其次用文件名.
      *
-     * @param {ArchiveItem[]} rows
-     * @param {Row} target
-     * @returns {ArchiveItem | null}
+     * @param {AndroidStudioArchiveItem[]} rows
+     * @param {AndroidStudioStableArchiveItem} target
+     * @returns {AndroidStudioArchiveItem | null}
      */
     const matchArchive = (rows, target) => {
         for (const arc of rows) {
@@ -159,7 +150,7 @@ async function updateLatestArchiveInfo(archives) {
  * Summarize codename-to-version mappings and codename first release dates.<br>
  * zh-CN: 汇总代号版本映射以及代号的首发日期.
  *
- * @param {ArchiveItem[]} archives
+ * @param {AndroidStudioArchiveItem[]} archives
  */
 function getCodenameMapLinesInfo(archives) {
 

@@ -1,33 +1,5 @@
 // utils/puppeteer-helpers.mjs
 
-/** @typedef {import('puppeteer').Page} Page */
-/** @typedef {string | RegExp | ((s: string) => boolean)} FindTargetRowsFilter */
-/** @typedef {string} TableDataStructureItemName */
-/** @typedef {RegExp | ((s: string) => boolean | string)} TableDataStructureItem */
-/** @typedef {string | RegExp | ((s: string) => boolean | string)} TableDataStructureItemForPageEvaluate */
-/**
- * @typedef {object} FindTargetRowsOptions
- * @property {string} [tableSelector='table']
- * @property {{ [selector: string]: FindTargetRowsFilter | FindTargetRowsFilter[] }}[tableFilter={}]
- * @property {string} [tableRowSelector='tbody tr']
- * @property {string} [tableDataSelector='td']
- * @property {Array<{ [dataItemName: TableDataStructureItemName]: TableDataStructureItem } | TableDataStructureItemName>} [tableDataStructure=[]]
- */
-/**
- * @typedef {object} FindTargetRowsOptionsForPageEvaluate
- * @property {string} [tableSelector='table']
- * @property {{ [selector: string]: FindTargetRowsFilter | FindTargetRowsFilter[] }}[tableFilter={}]
- * @property {string} [tableRowSelector='tbody tr']
- * @property {string} [tableDataSelector='td']
- * @property {Array<{ [dataItemName: TableDataStructureItemName]: TableDataStructureItemForPageEvaluate } | TableDataStructureItemName>} [tableDataStructure=[]]
- */
-/**
- * @typedef {object} PuppeteerOptions
- * @property {string} url
- * @property {number} [pageGoToTimeout=120000]
- * @property {number} [findTargetRowsTimeout=30000]
- */
-
 import puppeteer from 'puppeteer';
 import { sleep } from './async.mjs';
 

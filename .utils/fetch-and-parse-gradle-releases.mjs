@@ -1,15 +1,5 @@
 // fetch-and-parse-gradle-releases.mjs
 
-/**
- * @typedef {Object} GradleRelease
- * @property {string} versionName
- * @property {string} releaseDate
- * @property {Object} link
- * @property {string} link.bin
- * @property {string} link.all
- * @property {string} link.checksums
- */
-
 import * as cheerio from 'cheerio';
 import { fileURLToPath } from 'node:url';
 

@@ -1,7 +1,5 @@
 // utils/fetch.mjs
 
-/** @typedef {import('@octokit/types').Endpoints['GET /repos/{owner}/{repo}/commits']['response']['data']} CommitsData */
-
 import * as dotenv from 'dotenv';
 import * as https from 'https';
 import nodeFetch from 'node-fetch';

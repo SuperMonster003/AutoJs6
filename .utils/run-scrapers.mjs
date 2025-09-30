@@ -1,11 +1,5 @@
 // run-scrapers.mjs
 
-/**
- * @typedef {Object} ScriptItem
- * @property {string} name
- * @property {string} abs
- */
-
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as readline from 'node:readline';

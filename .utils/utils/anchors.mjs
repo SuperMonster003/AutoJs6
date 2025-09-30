@@ -1,17 +1,5 @@
 // utils/anchors.mjs
 
-/**
- * @typedef {Object} AnchoredBlockUpdateOption
- * @property {'map' | 'list' | 'custom'} type
- * @property {string} anchorTag
- * @property {string} [mapName]
- * @property {string} [listName]
- * @property {string[]} lines
- * @property {number} [linesIndent=4]
- * @property {string} [updatedLabel]
- * @property {(srcInBlock: string, options: { toUpdatedStamp?: (date?: Date) => string }) => { newBlock: string, changed: boolean }} [replacer]
- */
-
 import * as fsp from 'node:fs/promises';
 import * as path from 'node:path';
 import { escapeRegExp } from './format.mjs';
