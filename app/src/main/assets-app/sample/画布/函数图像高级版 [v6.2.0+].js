@@ -1,7 +1,7 @@
 'ui';
 
 (/* @IIFE */ () => {
-    //ui布局为一块画布和一些函数调整控件
+    // ui 布局为一块画布和一些函数调整控件
     ui.layout(
         <vertical>
             <linear>
@@ -10,7 +10,7 @@
             </linear>
             <linear>
                 <button id="left" text="←" layout_weight="1"/>
-                <button id="right" text="→" layout_weight="1"/>
+                <button id="right" text="->" layout_weight="1"/>
                 <button id="up" text="↓" layout_weight="1"/>
                 <button id="down" text="↑" layout_weight="1"/>
                 <button id="zoom_in" text="+" layout_weight="1"/>
@@ -20,17 +20,17 @@
         </vertical>,
     );
 
-    //函数表达式
+    // 函数表达式
     var f = 'x*x+3*x-4';
 
-    //绘制区间
+    // 绘制区间
     var minX = -5;
     var maxX = 5;
     var minY;
     var h = 1;
     var w = 1;
 
-    //画笔
+    // 画笔
     var paint = new Paint();
     paint.setStrokeWidth(2);
 
@@ -40,18 +40,18 @@
         if (minY === undefined) {
             minY = -(maxX - minX) * h / w / 2;
         }
-        //计算y轴区间上限
+        // 计算 y 轴区间上限
         var maxY = minY + (maxX - minX) * h / w;
-        //设置画笔颜色为黑色
+        // 设置画笔颜色为黑色
         colors.setPaintColor(paint, '#000000');
-        //绘制两个坐标轴
+        // 绘制两个坐标轴
         var x0 = parseInt(-minX / (maxX - minX) * w);
         canvas.drawLine(x0, 0, x0, h, paint);
         var y0 = parseInt(h + minY / (maxY - minY) * h);
         canvas.drawLine(0, y0, w, y0, paint);
-        //设置画笔颜色为红色
+        // 设置画笔颜色为红色
         colors.setPaintColor(paint, '#ff0000');
-        //绘制图像
+        // 绘制图像
         for (var i = 0; i < w; i++) {
             var x = minX + i / w * (maxX - minX);
             var y = eval(f);

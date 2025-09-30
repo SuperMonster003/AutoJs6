@@ -24,7 +24,7 @@
 
     let atl = new AsyncThreadLock();
 
-    ///////XMLHttpRequest对象
+    // XMLHttpRequest 对象
     let XMLHttpRequest = function () {
         this.responseType = 'text';
         this.timeout = 0;
@@ -80,7 +80,7 @@
             return body.byteStream();
         },
         parser: function (type, xhr, body) {
-            //log('resType:', type)
+            // log('resType:', type)
             const fn = this[type.toLowerCase()] || this['text'];
             xhr._setReadyState(3);
             const data = fn.call(this, xhr, body);
@@ -104,7 +104,7 @@
             this._requestData.url.username(user).password(password);
         }
         this._setReadyState(1);
-        //log(arguments)
+        // log(arguments)
     };
     XMLHttpRequest.prototype.send = function (body) {
         atl.addTask();
@@ -202,25 +202,25 @@
         let type = xhr._requestData.headers.get('content-type');
         const method = xhr._requestData.method.toLowerCase();
         const url = xhr._requestData.url;
-        //需要请求体的http方法
+        // 需要请求体的 http 方法
         const dataMethod = [ 'post', 'put', 'patch', 'delete' ];
         if (type === 'application/x-www-form-urlencoded') type = null;
         if (dataMethod.some(val => val === method)) {
             if (body instanceof RequestBody) return body;
             if (body instanceof FormData) {
-                //表单对象
+                // 表单对象
                 return body._toRequseBody();
             } else if (body instanceof Blob) {
-                //Blob对象
+                // Blob 对象
                 return RequestBody.create(MediaType.parse(type || body.type), body._file);
             } else if (body instanceof InputStream) {
-                //java输入流
+                // java 输入流
                 return RequestBody.create(MediaType.parse(type || 'application/octet-stream'), body);
             } else if (typeof body === 'string') {
-                //字符串
+                // 字符串
                 return RequestBody.create(MediaType.parse(type || 'text/plain'), body);
             } else if (body) {
-                //json
+                // json
                 return RequestBody.create(MediaType.parse('application/json'), JSON.stringify(body));
             }
             return RequestBody.create(MediaType.parse('text/plain'), '');

@@ -31,8 +31,8 @@
     // 创建检测器
     let predictor = new Predictor();
 
-    // predictor.cpuThreadNum = 4 // 可以自定义使用CPU的线程数
-    // predictor.checkModelLoaded = false // 可以自定义是否需要校验模型是否成功加载 默认开启 使用内置Base64图片进行校验 识别测试文本来校验模型是否加载成功
+    // predictor.cpuThreadNum = 4 // 可以自定义使用 CPU 的线程数
+    // predictor.checkModelLoaded = false // 可以自定义是否需要校验模型是否成功加载 默认开启 使用内置 Base64 图片进行校验 识别测试文本来校验模型是否加载成功
 
     // 初始化模型 首次运行时会比较耗时
     let loading = threads.disposable();
@@ -41,11 +41,11 @@
     threads.start(function () {
         loading.setAndNotify(predictor.init(context, useSlim));
         // loading.setAndNotify(predictor.init(context)) 为默认不使用精简版
-        // 内置默认 modelPath 为 models/ocr_v3_for_cpu，初始化自定义模型请写绝对路径否则无法获取到
+        // 内置默认 modelPath 为 models/ocr_v3_for_cpu, 初始化自定义模型请写绝对路径否则无法获取到
         // 内置默认 labelPath 为 labels/ppocr_keys_v1.txt
         // let modelPath = files.path('./models/customize') // 指定自定义模型路径
-        // let labelPath = files.path('./models/customize') // 指定自定义label路径
-        // 使用自定义模型时det rec cls三个模型文件名称需要手动指定
+        // let labelPath = files.path('./models/customize') // 指定自定义 label 路径
+        // 使用自定义模型时 det rec cls 三个模型文件名称需要手动指定
         // predictor.detModelFilename = 'det_opt.nb'
         // predictor.recModelFilename = 'rec_opt.nb'
         // predictor.clsModelFilename = 'cls_opt.nb'
@@ -53,7 +53,7 @@
     });
     let loadSuccess = loading.blockedGet();
     if (!loadSuccess) {
-        toastLog('初始化ocr失败');
+        toastLog('初始化 ocr 失败');
         exit();
     }
 
@@ -64,7 +64,7 @@
     let capturing = true;
 
     /**
-     * 截图并识别OCR文本信息
+     * 截图并识别 OCR 文本信息
      */
     function captureAndOcr() {
         capturing = true;
@@ -75,7 +75,7 @@
         }
         let start = new Date();
         result = predictor.runOcr(img.getBitmap());
-        toastLog(`耗时${new Date() - start}ms`);
+        toastLog(`耗时 ${new Date() - start}ms`);
         capturing = false;
     }
 
@@ -152,7 +152,7 @@
         /* Empty body. */
     }, 10000);
     events.on('exit', () => {
-        // 标记停止 避免canvas导致闪退
+        // 标记停止 避免 canvas 导致闪退
         running = false;
         // 撤销监听
         window.canvas.removeAllListeners();

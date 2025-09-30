@@ -22,7 +22,7 @@ public class OCRPredictorNative {
     public static void loadLibrary() throws RuntimeException {
         if (!isSOLoaded.get() && isSOLoaded.compareAndSet(false, true)) {
             try {
-                // 可能和AJ中的OpenCV冲突，直接初始化一遍
+                // 可能和 AJ 中的 OpenCV 冲突, 直接初始化一遍
                 OpenCVLoader.initDebug();
                 System.loadLibrary("Native");
             } catch (Throwable e) {

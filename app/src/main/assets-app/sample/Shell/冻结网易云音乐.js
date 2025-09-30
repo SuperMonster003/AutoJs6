@@ -1,1 +1,1 @@
-shell("pm disable com.netease.cloudmusic", true);
+shell('pm disable com.netease.cloudmusic', true);

@@ -11,12 +11,12 @@ let _ = {
     textSize: 16,
     inputHint: '输入要检索的内容',
     sampleTitle: '检索示例',
-    samples: ['30', 'R', 'Android 11', 'oreo', 'pie', 'cookie', 'nougat', 'jelly bean',
+    samples: [ '30', 'R', 'Android 11', 'oreo', 'pie', 'cookie', 'nougat', 'jelly bean',
         '7.1.1', '7.1', '8.0', '8', '2022', '2022 Mar', '2022 March', '2022 3', '2022/3',
         '2022/03', 'Mar 2022', 'March 2022', 'Mar, 2022', 'March, 2022', '2022 Mar 07',
         '2022 Mar 7', '2022 March 7', '2022 3 7', '2022/3/7', '2022/3/07', '2022/03/07',
-        'Mar 7 2022', 'March 7 2022', 'Mar 7, 2022', 'March 7, 2022'],
-    infoKeys: ['versionCode', 'apiLevel', 'platformVersion', 'releaseName', 'internalCodename', 'releaseDate'],
+        'Mar 7 2022', 'March 7 2022', 'Mar 7, 2022', 'March 7, 2022' ],
+    infoKeys: [ 'versionCode', 'apiLevel', 'platformVersion', 'releaseName', 'internalCodename', 'releaseDate' ],
 };
 
 let $ = {

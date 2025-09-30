@@ -1,9 +1,9 @@
 let MAX_LENGTH_TO_PRINT = 3000;
 
-let url = 'https://www.npmjs.com';
+let url = 'https://github.com';
 let res = http.get(url);
 if (res.statusCode !== 200) {
-    toast(`请求失败: ${res.statusMessage}`);
+    toast(`请求失败 [${res.statusCode}]: "${res.statusMessage}"`);
     exit();
 }
 let str = res.body.string();

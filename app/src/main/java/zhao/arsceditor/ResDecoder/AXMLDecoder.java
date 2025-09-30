@@ -28,17 +28,17 @@ import zhao.arsceditor.ResDecoder.IO.LEDataOutputStream;
 
 public class AXMLDecoder {
 
-    // AXML文件头
+    // AXML 文件头
     private static final int AXML_CHUNK_TYPE = 0x00080003;
     // 字符串常量池类
     public StringBlock mTableStrings;
     // 二进制文件输入流
     private final LEDataInputStream mIn;
-    // 二进制文件输入流2
+    // 二进制文件输入流 2
     private LEDataInputStream mIn2;
     // chunkSize
     private int chunkSize;
-    // AXML文件数据的字节数组
+    // AXML 文件数据的字节数组
     private static byte[] bytes;
 
     // 构造函数
@@ -77,18 +77,18 @@ public class AXMLDecoder {
 
     private void write(List<String> stringlist_src, List<String> stringlist_tar, LEDataOutputStream lmOut)
             throws IOException {
-        // 排序列表中的字符串，以方便一一写入
+        // 排序列表中的字符串, 以方便一一写入
         for (int i = 0; i < stringlist_src.size(); i++)
             mTableStrings.sortStringBlock(stringlist_src.get(i), stringlist_tar.get(i));
         // 先将字符串数据写入到一个临时的流中
         ByteArrayOutputStream mStrings = mTableStrings.writeString(mTableStrings.getList());
         // 写入文件头
         lmOut.writeInt(AXML_CHUNK_TYPE);
-        // 写入chunkSize
+        // 写入 chunkSize
         lmOut.writeInt(chunkSize + (mStrings.size() - mTableStrings.m_strings.length));
         // 写入字符串常量池
         mTableStrings.writeFully(lmOut, mStrings);
-        // 创建二进制文件输入流对象2，用来写入余下的内容
+        // 创建二进制文件输入流对象 2, 用来写入余下的内容
         mIn2 = new LEDataInputStream(new ByteArrayInputStream(bytes));
         // 写入剩下的数据
         int num;

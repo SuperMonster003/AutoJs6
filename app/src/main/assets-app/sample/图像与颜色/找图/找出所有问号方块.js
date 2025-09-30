@@ -1,9 +1,8 @@
-
-var superMario = images.read("./super_mario.jpg");
-var block = images.read("./block.png");
+var superMario = images.read('./super_mario.jpg');
+var block = images.read('./block.png');
 
 var result = images.matchTemplate(superMario, block, {
-    threshold: 0.8
+    threshold: 0.8,
 }).matches;
 toastLog(result);
 

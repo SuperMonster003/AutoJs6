@@ -5,7 +5,7 @@
 
 ui.layout(<vertical>
     <video id="video" src="@raw/text_tool" controller></video>
-    <button id="video_btn" text="play" isColored bg="teal-600" />
+    <button id="video_btn" text="play" isColored bg="teal-600"/>
 </vertical>);
 
 /** @type {JsButton} */

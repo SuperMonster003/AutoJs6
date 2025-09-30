@@ -244,7 +244,7 @@ object Pinyin : Augmentable(), Invokable {
 
         for (char in input) {
             val isChinese = chineseRegex.matches(char.toString())
-            // 如果字符类型（中文或非中文）发生切换，保存当前分组
+            // 如果字符类型 (中文或非中文) 发生切换, 保存当前分组
             if (isChinese != isLastChinese) {
                 result.add(tempGroup.toString()) // 添加当前分组
                 tempGroup = StringBuilder() // 重置分组

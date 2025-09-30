@@ -32,30 +32,30 @@ ui.layout(
     <frame>
         <vertical>
             <appbar>
-                <toolbar id="toolbar" title="TODO" />
+                <toolbar id="toolbar" title="TODO"/>
             </appbar>
-            <button id="selectAll" text="全部完成" isColored margin="6 4" />
+            <button id="selectAll" text="全部完成" isColored margin="6 4"/>
             <list id="todoList">
                 <card w="*" h="70" margin="10 5" cardCornerRadius="2dp"
                       cardElevation="1dp" foreground="?selectableItemBackground">
                     <horizontal gravity="center_vertical">
-                        <view bg="{{this.color}}" h="*" w="10" />
+                        <view bg="{{this.color}}" h="*" w="10"/>
                         <vertical padding="10 8" h="auto" w="0" layout_weight="1">
-                            <text id="title" text="{{this.title}}" textColor="blue-grey-900" textSize="16sp" maxLines="1" paddingBottom="4dp" />
-                            <text text="{{this.summary}}" textColor="blue-grey-300" textSize="14sp" maxLines="1" />
+                            <text id="title" text="{{this.title}}" textColor="blue-grey-900" textSize="16sp" maxLines="1" paddingBottom="4dp"/>
+                            <text text="{{this.summary}}" textColor="blue-grey-300" textSize="14sp" maxLines="1"/>
                         </vertical>
-                        <checkbox id="done" marginLeft="4" marginRight="6" checked="{{this.done}}" tint="blue-grey-500,pink-300" />
+                        <checkbox id="done" marginLeft="4" marginRight="6" checked="{{this.done}}" tint="blue-grey-500,pink-300"/>
                     </horizontal>
                 </card>
             </list>
         </vertical>
         <fab id="add" w="auto" h="auto" src="@drawable/ic_add_black_48dp"
-             margin="16" layout_gravity="bottom|right" tint="white" backgroundTint="orange-800" />
+             margin="16" layout_gravity="bottom|right" tint="white" backgroundTint="orange-800"/>
     </frame>,
 );
 
 // 从 storage 获取待办事项列表
-let todoList = storage.get('items', [{
+let todoList = storage.get('items', [ {
     title: '写操作系统作业',
     summary: '明天第 1 - 2 节',
     color: 'red-500',
@@ -75,7 +75,7 @@ let todoList = storage.get('items', [{
     summary: '2031 年 5 月',
     color: '#2196f3',
     done: false,
-}]);
+} ]);
 
 ui.statusBarColor(themeColor);
 ui['toolbar'].attr('bg', themeColor);

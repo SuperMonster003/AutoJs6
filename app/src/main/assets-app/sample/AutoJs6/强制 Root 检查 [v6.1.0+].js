@@ -8,21 +8,21 @@ console.log(`Root access: ${autojs.isRootAvailable()}`);
 // 1 or true or 'root' (force set root mode)
 // zh-CN: 1 或 true 或 'root' (强制设置 Root 模式)
 autojs.setRootMode(true);
-console.log(`setRootMode(true)`)
+console.log(`setRootMode(true)`);
 // true
 console.log(`Root access: ${autojs.isRootAvailable()}`);
 
 // 0 or false or 'non-root' (force set non-root mode)
 // zh-CN: 0 或 false 或 'non-root' (强制设置非 Root 模式)
 autojs.setRootMode(false);
-console.log(`setRootMode(false)`)
+console.log(`setRootMode(false)`);
 // false
 console.log(`Root access: ${autojs.isRootAvailable()}`);
 
 // -1 or 'auto' (auto detect)
 // zh-CN: -1 或 'auto' (自动检测 Root 模式)
 autojs.setRootMode('auto');
-console.log(`setRootMode(auto)`)
+console.log(`setRootMode(auto)`);
 // depends on system again
 // zh-CN: 再次取决于系统检测结果
 console.log(`Root access: ${autojs.isRootAvailable()}`);

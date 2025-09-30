@@ -34,14 +34,14 @@ abstract class DictionaryDatabase internal constructor(context: Context): Closea
         val storedMd5 = prefs.getString(md5Key, null)
         val currentMd5 by lazy { dbFile.md5() }
 
-        // 如果数据库文件存在，检查 MD5
+        // 如果数据库文件存在, 检查 MD5
         if (dbFile.exists()) {
             if (storedMd5 != null && storedMd5 == currentMd5) {
-                if (!shouldForciblyCopyDatabase) return // 文件有效，无需复制或解压
+                if (!shouldForciblyCopyDatabase) return // 文件有效, 无需复制或解压
             }
         }
 
-        // 数据文件不存在或 MD5 不匹配，重新复制
+        // 数据文件不存在或 MD5 不匹配, 重新复制
         dbFile.parentFile?.mkdirs()
         context.assets.open(compressedDatabaseName).use { compressedInputStream ->
             GZIPInputStream(compressedInputStream).use { gzipStream -> // 解压

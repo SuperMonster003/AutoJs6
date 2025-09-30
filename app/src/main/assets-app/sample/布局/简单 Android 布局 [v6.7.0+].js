@@ -9,7 +9,7 @@ ui.layout(
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:format24Hour="HH:mm"
-        android:textSize="36sp" />,
+        android:textSize="36sp"/>,
 );
 
 /* 1 秒钟后应用自定义样式. */
@@ -22,7 +22,9 @@ setTimeout(() => {
     ui.statusBarIconLightBy(themeColor);
 
     ui.navigationBarColor(themeColor);
-    ui.navigationBarIconLightBy(themeColor);
+    if (util.version.sdkInt >= util.versionCodes.O) {
+        ui.navigationBarIconLightBy(themeColor);
+    }
 
     /** @type {JsTextClock} */
     let textClockView = ui['text_clock'];

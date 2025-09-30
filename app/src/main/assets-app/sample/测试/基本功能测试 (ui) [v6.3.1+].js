@@ -40,7 +40,7 @@ Promise.resolve().then(() => {
 
 // @Test dialogs
 
-assert(noError(() => dialogs.build({customView: '<vertical><vertical/></vertical>'}).show().dismiss()), 'dialogs.build()');
+assert(noError(() => dialogs.build({ customView: '<vertical><vertical/></vertical>' }).show().dismiss()), 'dialogs.build()');
 
 // @Test threads
 

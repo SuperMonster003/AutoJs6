@@ -529,7 +529,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         mVerifiedKeyStoresView.setAdapter(adapter);
 
         mKeyStoreViewModel.getVerifiedKeyStores().observe(this, keyStores -> {
-            // 清空现有的选项，但保留第一个元素，即默认密钥库
+            // 清空现有的选项, 但保留第一个元素, 即默认密钥库
             if (verifiedKeyStores.size() > 1) {
                 verifiedKeyStores.subList(1, verifiedKeyStores.size()).clear();
             }
