@@ -1,31 +1,5 @@
 // fetch-and-parse-autojs6-merged-pr-commits-statistics.mjs
 
-/** @typedef {import('@octokit/types').Endpoints['GET /repos/{owner}/{repo}/pulls']['response']['data']} PullsData */
-/** @typedef {import('@octokit/types').Endpoints['GET /repos/{owner}/{repo}/pulls/{pull_number}/commits']['response']['data']} PullCommitsData */
-/**
- * @typedef {Object} UserProfile
- * @property {string} login
- * @property {string | null} name
- */
-/**
- * @typedef {Object} StatisticsEntry
- * @property {string} login
- * @property {string | null} name
- * @property {string} htmlUrl
- * @property {number} totalCommitsInMergedPRs
- * @property {string | null} latestCommitAt
- */
-/**
- * @typedef {Object} DebugRecord
- * @property {string} sha
- * @property {boolean} belongs
- * @property {string | null} author_login
- * @property {string | null} committer_login
- * @property {string | null} author_name
- * @property {string | null} author_email
- * @property {string | null} time
- */
-
 import * as dotenv from 'dotenv';
 import { fileURLToPath } from 'node:url';
 import { httpFetch } from './utils/fetch.mjs';

@@ -6,21 +6,6 @@ import { fileURLToPath } from 'node:url';
 import { readPropertiesSync } from './utils/properties.mjs';
 import { sleep } from './utils/async.mjs';
 
-/** @typedef {import('puppeteer').Page} Page */
-/** @typedef {import('puppeteer').Frame} Frame */
-/**
- * @template {Node} T
- * @typedef {import('puppeteer').ElementHandle<T>} ElementHandle
- */
-/**
- * @typedef {Object} ArchiveItem
- * @property {string} title
- * @property {string} date
- * @property {string | null} version
- * @property {{ text: string, href: string }[]} links
- * @property {{ [filename: string]: string }} checksums
- */
-
 const URL = 'https://developer.android.com/studio/archive?hl=en';
 const SELECTOR_PRIMARY_BUTTON = 'button.button-primary';
 const SELECTOR_DEVSITE_EXPANDABLE = 'devsite-expandable';
@@ -100,7 +85,7 @@ async function waitForFrameWithSelector(page, selector, timeoutMs = 30000) {
 }
 
 /**
- * @returns {Promise<ArchiveItem[]>}
+ * @returns {Promise<AndroidStudioArchiveItem[]>}
  */
 export async function getAndroidStudioArchives() {
     const browser = await puppeteer.launch({
@@ -156,7 +141,7 @@ export async function getAndroidStudioArchives() {
         throw new Error('Failed to find content frame');
     }
 
-    /** @type {ArchiveItem[]} */
+    /** @type {AndroidStudioArchiveItem[]} */
     const archives = await contentFrame.$$eval(SELECTOR_DEVSITE_EXPANDABLE, nodes => {
         const pickText = (/** @type {Node | null} */ el) => String(el?.textContent ?? '').trim();
         return nodes.map(n => {

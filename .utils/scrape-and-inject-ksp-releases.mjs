@@ -1,13 +1,5 @@
 // scrape-and-inject-ksp-releases.mjs
 
-/** @typedef {import('@octokit/types').Endpoints['GET /repos/{owner}/{repo}/releases']['response']['data']} ReleasesData */
-/**
- * @typedef {Object} KspRelease
- * @property {string} version
- * @property {string} name
- * @property {string} publishedAt
- */
-
 import * as fsp from 'node:fs/promises';
 import { httpFetch } from './utils/fetch.mjs';
 import { readProperties } from './utils/properties.mjs';

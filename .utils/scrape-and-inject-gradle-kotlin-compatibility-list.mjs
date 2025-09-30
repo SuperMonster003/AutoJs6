@@ -1,7 +1,5 @@
 // scrape-and-inject-gradle-kotlin-compatibility-list.mjs
 
-/** @typedef {import('puppeteer').Page} Page */
-
 import { findTargetRows } from './utils/puppeteer-helpers.mjs';
 import { compareVersionStrings } from './utils/versioning.mjs';
 import { getMinSupportedGradleVersion } from './utils/properties.mjs';

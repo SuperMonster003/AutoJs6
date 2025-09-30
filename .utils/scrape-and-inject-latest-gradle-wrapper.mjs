@@ -1,12 +1,5 @@
 // scrape-and-inject-latest-gradle-wrapper.mjs
 
-/** @typedef {import('./fetch-and-parse-gradle-releases.mjs').GradleRelease} GradleRelease */
-/**
- * @typedef {Object} GradleReleaseConfig
- * @property {number | string | null} [majorVersionLimit=null]
- * @property {'bin' | 'all'} [format='bin']
- */
-
 import { compareVersionStrings } from './utils/versioning.mjs';
 import { fetchGradleReleases } from './fetch-and-parse-gradle-releases.mjs';
 import { readPropertiesSync, writePropertiesSync } from './utils/properties.mjs';

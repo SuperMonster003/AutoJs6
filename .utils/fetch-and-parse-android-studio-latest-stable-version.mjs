@@ -1,16 +1,5 @@
 // fetch-and-parse-android-studio-latest-stable-version.mjs
 
-/** @typedef {'exe' | 'zip' | 'tar' | 'other'} StableArchiveItemKind */
-/**
- * @typedef {Object} StableArchiveItem
- * @property {string} platform
- * @property {string} filename
- * @property {string} size
- * @property {string} sha256
- * @property {string | null} url
- * @property {StableArchiveItemKind} kind
- */
-
 import * as cheerio from 'cheerio';
 import { bytes2GiB } from './utils/format.mjs';
 import { fileURLToPath } from 'node:url';
@@ -43,6 +32,7 @@ function buildDownloadUrlFromFilename(filename, kind) {
     }
     return `https://redirector.gvt1.com/edgedl/android/studio/${urlType}/${version}/${filename}`;
 }
+
 /**
  * @param {string} url
  * @returns {Promise<string>}
@@ -60,7 +50,7 @@ async function fetchHtml(url) {
 
 /**
  * @param {string} html
- * @returns {Promise<StableArchiveItem[]>}
+ * @returns {Promise<AndroidStudioStableArchiveItem[]>}
  */
 async function parseItemsFromHtml(html) {
     const $ = cheerio.load(html);
@@ -106,7 +96,7 @@ async function parseItemsFromHtml(html) {
  * 返回形如: [ { platform, filename, size, sha256, url, kind: 'exe'|'zip'|'tar' } ]
  *
  * @param {string} [sourceUrl=URL]
- * @returns {Promise<StableArchiveItem[]>}
+ * @returns {Promise<AndroidStudioStableArchiveItem[]>}
  */
 export async function getLatestStableArchives(sourceUrl = URL) {
     const html = await fetchHtml(sourceUrl);
