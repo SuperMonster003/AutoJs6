@@ -165,10 +165,11 @@ public class ProjectConfig {
     })
     private List<String> mFeatures = new ArrayList<>();
 
-    @SerializedName("excludedDirs")
+    @SerializedName("excludeDirs")
     @SerializedNameCompatible(with = {
             @With(value = "ignoredDirs", target = {"AutoJs4", "AutoX"}),
             @With(value = "ignore", target = {"Unknown"}),
+            @With(value = "excludedDirs"),
     })
     private final List<String> mExcludedDirs = new ArrayList<>();
 
