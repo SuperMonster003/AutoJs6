@@ -1,28 +1,28 @@
 plugins {
-    id 'org.autojs.build.versions'
-    id 'org.autojs.build.jvm-convention'
-    id 'com.android.library'
-    id 'kotlin-android'
+    id("org.autojs.build.versions")
+    id("org.autojs.build.jvm-convention")
+    id("com.android.library")
+    id("kotlin-android")
 }
 
 android {
-    namespace = 'com.mcal.apksigner'
+    namespace = "com.mcal.apksigner"
+    version = "1.1-template (11)"
     compileSdk = versions.sdkVersionCompile
 
     defaultConfig {
         minSdk = versions.sdkVersionMin
-        targetSdk = versions.sdkVersionTarget
-
-        versionName '1.1-template'
-        versionCode 11
-
-        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     sourceSets {
-        main {
-            java.srcDirs = ['src/main/java']
+        getByName("main") {
+            java.srcDirs("src/main/java")
         }
+    }
+
+    lint {
+        targetSdk = versions.sdkVersionTarget
     }
 }
 
@@ -32,8 +32,8 @@ repositories {
 }
 
 dependencies {
-    implementation libs.appcompat
-    implementation libs.material
+    implementation(libs.appcompat)
+    implementation(libs.material)
 
     // @Hint by SuperMonster003 on Mar 14, 2025.
     //  ! Dependency "prov" contains "core" (zh-CN: 依赖 "prov" 已包含 "core"):
@@ -43,7 +43,7 @@ dependencies {
     //  # implementation("com.madgag.spongycastle:core:1.58.0.0")
     implementation(libs.prov)
 
-    testImplementation libs.junit
-    androidTestImplementation libs.test.ext.junit
-    androidTestImplementation libs.test.espresso.core
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.test.ext.junit)
+    androidTestImplementation(libs.test.espresso.core)
 }
