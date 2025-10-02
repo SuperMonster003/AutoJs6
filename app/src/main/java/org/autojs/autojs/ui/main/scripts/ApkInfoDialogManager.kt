@@ -79,6 +79,7 @@ object ApkInfoDialogManager {
         scope.launch {
             val apkInfoDeferred = async(Dispatchers.IO) { getApkInfo(apkFile) }
             val packageInfoDeferred = async(Dispatchers.IO) { getPackageInfo(packageManager, apkFilePath) }
+            val sysBasicDeferred = async(Dispatchers.IO) { getBasicInfoFromPackageArchive(context, apkFilePath) }
 
             val firstPackageName: String? = select {
                 apkInfoDeferred.onAwait { it?.packageName }
@@ -114,6 +115,13 @@ object ApkInfoDialogManager {
             dialog.setCopyableTextIfAbsent(binding.deviceSdkValue, "${Build.VERSION.SDK_INT}")
             dialog.setCopyableTextIfAbsent(binding.fileSizeValue, this) { PFiles.getHumanReadableSize(apkFile.length()) }
             dialog.setCopyableTextIfAbsent(binding.signatureSchemeValue, this) { getApkSignatureInfo(apkFile) }
+
+            withContext(Dispatchers.Main) {
+                val sys = sysBasicDeferred.await()
+                dialog.setCopyableTextIfAbsent(binding.labelNameValue, sys?.label)
+                dialog.setCopyableTextIfAbsent(binding.minSdkValue, sys?.minSdk?.toString())
+                dialog.setCopyableTextIfAbsent(binding.targetSdkValue, sys?.targetSdk?.toString())
+            }
 
             launch(Dispatchers.IO) {
                 val apkInfo = apkInfoDeferred.await()
@@ -254,6 +262,26 @@ object ApkInfoDialogManager {
             ).takeUnless { it.isEmpty() }?.joinToString(" + ")
         }
     }.getOrNull()
+
+    private fun getBasicInfoFromPackageArchive(context: Context, apkPath: String): SysBasicInfo? = runCatching {
+        val pm = context.packageManager
+        val pi = pm.getPackageArchiveInfo(apkPath, GET_META_DATA) ?: return@runCatching null
+        val ai = pi.applicationInfo?.apply {
+            sourceDir = apkPath
+            publicSourceDir = apkPath
+        }
+        SysBasicInfo(
+            label = ai?.loadLabel(pm)?.toString(),
+            minSdk = this.runCatching { ai?.minSdkVersion }.getOrNull()?.takeIf { it != 0 },
+            targetSdk = ai?.targetSdkVersion?.takeIf { it != 0 },
+        )
+    }.getOrNull()
+
+    private data class SysBasicInfo(
+        val label: String?,
+        val minSdk: Int?,
+        val targetSdk: Int?,
+    )
 
     private data class ApkInfo(
         val label: String?,

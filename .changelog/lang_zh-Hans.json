@@ -28,6 +28,7 @@
         "部分设备无法正常初始化 MLKit Google OCR 的问题 (试修) _[`issue #8`](http://issues.autojs6.com/8#issuecomment-3117061768)_",
         "ErrorDialogActivity 可能无法正常启动的问题 _[`issue #414`](http://issues.autojs6.com/414)_ _[`issue #340`](http://issues.autojs6.com/340#issuecomment-2973485826)_",
         "崩溃报告页面复制详细信息功能失效的问题",
+        "APK 文件类型信息对话框可能无法获取应用名称及 SDK 信息的问题",
         "构建工具启用 isCleanup[Paddle/Rapid]Ocr 配置选项时无法正常完成 Rebuild Project 任务的问题"
       ],
       "improvement": [

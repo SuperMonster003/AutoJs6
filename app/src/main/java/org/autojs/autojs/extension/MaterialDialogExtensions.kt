@@ -31,7 +31,7 @@ object MaterialDialogExtensions {
     @JvmStatic
     @JvmOverloads
     fun MaterialDialog.makeTextCopyable(textView: TextView?, textValue: String? = textView?.text?.toString()) {
-        if (textValue != null) {
+        if (!textValue.isNullOrBlank()) {
             val context = this.context
             textView?.setOnClickListener {
                 ClipboardUtils.setClip(context, textValue)
@@ -45,10 +45,17 @@ object MaterialDialogExtensions {
     }
 
     fun MaterialDialog.setCopyableTextIfAbsent(textView: TextView, textValue: String?, suffix: String? = null) {
-        if (textView.text == context.getString(R.string.ellipsis_six)) {
-            textView.text = textValue.takeUnless { it.isNullOrBlank() }?.let { it + (suffix ?: "") } ?: context.getString(R.string.text_unknown)
+        when {
+            textValue.isNullOrBlank() -> {
+                if (textView.isNullOrBlank() || textView.isEllipsisSix()) {
+                    textView.setUnknown()
+                }
+            }
+            textView.isNullOrBlank() || textView.isEllipsisSix() || textView.isUnknown() -> {
+                textView.text = textValue + (suffix ?: "")
+                this.makeTextCopyable(textView, textValue)
+            }
         }
-        this.makeTextCopyable(textView, textValue)
     }
 
     fun MaterialDialog.setCopyableTextIfAbsent(textView: TextView, scope: CoroutineScope, f: () -> String?) {
@@ -65,8 +72,15 @@ object MaterialDialogExtensions {
     }
 
     fun MaterialDialog.setCopyableText(textView: TextView, textValue: String?) {
-        textView.text = textValue.takeUnless { it.isNullOrBlank() } ?: context.getString(R.string.text_unknown)
-        this.makeTextCopyable(textView, textValue)
+        when {
+            textValue.isNullOrBlank() -> {
+                textView.setUnknown()
+            }
+            else -> {
+                textView.text = textValue
+                this.makeTextCopyable(textView, textValue)
+            }
+        }
     }
 
     @JvmStatic
@@ -78,5 +92,10 @@ object MaterialDialogExtensions {
     fun MaterialDialog.Builder.widgetThemeColor() = also {
         it.widgetColor(ThemeColorHelper.getThemeColorStateList(context))
     }
+
+    private fun TextView.setUnknown() = setText(R.string.text_unknown)
+    private fun TextView.isUnknown() = text == context.getString(R.string.text_unknown)
+    private fun TextView.isEllipsisSix() = text == context.getString(R.string.ellipsis_six)
+    private fun TextView.isNullOrBlank() = text.isNullOrBlank()
 
 }
