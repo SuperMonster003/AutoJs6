@@ -1,9 +1,9 @@
-// scrape-and-inject-agp-releases.mjs
+// scrape-and-inject-agp-releases-list.mjs
 
 import * as cheerio from 'cheerio';
-import { compareVersionStrings, compareVersionStringsDescending } from './utils/versioning.mjs';
+import { compareVersionStrings } from './utils/versioning.mjs';
 import { getMinSupportedAgpVersion } from './utils/properties.mjs';
-import { updateAnchoredListInFile } from './utils/anchors.mjs';
+import { updateGradleListData } from './utils/update-helper.mjs';
 
 const URL = 'https://developer.android.com/reference/tools/gradle-api';
 
@@ -19,14 +19,10 @@ const URL = 'https://developer.android.com/reference/tools/gradle-api';
         }
     });
     const minSupportedVersion = getMinSupportedAgpVersion();
-    const agpList = Array.from(results)
-        .filter(v => compareVersionStrings(v, minSupportedVersion) >= 0)
-        .sort(compareVersionStringsDescending);
-    await updateAnchoredListInFile('../settings.gradle.kts', {
-        anchorTag: 'ANDROID_GRADLE_PLUGIN_RELEASES_LIST',
-        listName: 'agpReleases',
-        lines: agpList.map(v => `"${v}",`),
-        updatedLabel: 'AGP releases list',
+    const agpList = new Set(Array.from(results).filter(v => compareVersionStrings(v, minSupportedVersion) >= 0));
+    await updateGradleListData('agp-releases', agpList, {
+        label: 'AGP releases list',
+        sort: 'descending.as.version',
     });
 })().catch(err => {
     console.error('Failed to fetch AGP releases:', err);

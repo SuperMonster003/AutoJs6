@@ -1,14 +1,10 @@
-// scrape-and-inject-java-gradle-compatibility-list.mjs
+// scrape-and-inject-java-gradle-compatibility-map.mjs
 
 import { findTargetRows } from './utils/puppeteer-helpers.mjs';
 import { getMinSupportedJavaVersionInt } from './utils/properties.mjs';
-import { updateAnchoredListInFile } from './utils/anchors.mjs';
+import { updateGradleMapData } from './utils/update-helper.mjs';
 
 const URL = 'https://docs.gradle.org/current/userguide/compatibility.html#java_runtime';
-
-const unofficialGradleCompatibilityList = {
-    // 25: '9.0',
-};
 
 (async function main() {
     const rows = await findTargetRows({
@@ -25,8 +21,7 @@ const unofficialGradleCompatibilityList = {
             { gradle: /^N\/A$|\d+\.\d+/ },
         ],
     });
-    /** @type {{ [javaInt: string]: string }} */
-    const map = {};
+    const map = new Map();
     const minSupportedJavaVersionInt = getMinSupportedJavaVersionInt();
     for (const { java, gradle } of rows) {
         const javaInt = parseInt(java);
@@ -34,25 +29,12 @@ const unofficialGradleCompatibilityList = {
             throw Error(`Invalid java version int: "${java}"`);
         }
         if (javaInt >= minSupportedJavaVersionInt) {
-            map[javaInt] = gradle;
+            map.set(`${javaInt}`, gradle);
         }
     }
-
-    await updateAnchoredListInFile('../settings.gradle.kts', {
-        anchorTag: 'JAVA_GRADLE_COMPATIBILITY_LIST',
-        listName: 'javaGradleCompatibility',
-        lines: Object.entries(map)
-            .sort((a, b) => Number(b[0]) - Number(a[0]))
-            .map(([ java, gradle ]) => {
-                if (gradle === 'N/A') {
-                    const unofficialGradleVersion = unofficialGradleCompatibilityList[java];
-                    if (unofficialGradleVersion) {
-                        return `${java} to "${unofficialGradleVersion}", /* Unofficial. */`;
-                    }
-                }
-                return `${java} to "${gradle}",`;
-            }),
-        updatedLabel: 'Java and Gradle compatibility list',
+    await updateGradleMapData('java-gradle-compat', map, {
+        label: 'Java and Gradle compatibility map',
+        sort: 'key.descending.as.number',
     });
 })().catch(err => {
     console.error(err);

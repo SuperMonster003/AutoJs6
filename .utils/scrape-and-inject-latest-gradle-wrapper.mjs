@@ -2,7 +2,7 @@
 
 import { compareVersionStrings } from './utils/versioning.mjs';
 import { fetchGradleReleases } from './fetch-and-parse-gradle-releases.mjs';
-import { readPropertiesSync, writePropertiesSync } from './utils/properties.mjs';
+import { readPropertiesSync, writePropertiesSyncWithMap } from './utils/properties.mjs';
 
 const KEY = 'distributionUrl';
 const URL_PREFIX = 'https://services.gradle.org/distributions';
@@ -67,7 +67,7 @@ async function updateGradleWrapperFileContent({ latestGradleVersion, latestGradl
     const path = '../gradle/wrapper/' + fileName;
     const messages = [];
     const props = readPropertiesSync(path);
-    let propUrl = props[KEY];
+    let propUrl = props.get(KEY);
     if (!propUrl) {
         propUrl = latestGradleUrl;
         messages.push(`Append: ${KEY}=${propUrl}`);
@@ -91,7 +91,7 @@ async function updateGradleWrapperFileContent({ latestGradleVersion, latestGradl
     }
 
     if (messages.length > 0) {
-        writePropertiesSync(path, props);
+        writePropertiesSyncWithMap(path, props);
         const maxLength = Math.max(...messages.join('\n').split('\n').map(s => s.length));
         const SEP_EQ = '='.repeat(maxLength);
         const SEP_DASH = '-'.repeat(maxLength);

@@ -24,7 +24,7 @@ const findCommonSet = (a1, a2) => {
  * @param {RegExp} [options.regexForKeyMatching]
  * @return {void}
  */
-export function printDifferences(src, other, options = {}) {
+export function printLinesDiffs(src, other, options = {}) {
     const leftRaw = extractConcernedLines(src);
     const rightRaw = extractConcernedLines(other);
     const commonSet = findCommonSet(leftRaw, rightRaw);
@@ -133,4 +133,28 @@ export function printDifferences(src, other, options = {}) {
             console.log(SEP_EQ);
         }
     });
+}
+
+/**
+ * @param {Map<string,string>} src
+ * @param {Map<string,string>} other
+ */
+export function printMapDiffs(src, other) {
+    printLinesDiffs(mapToLines(src), mapToLines(other));
+}
+
+/**
+ * @param {string[]} src
+ * @param {string[]} other
+ */
+export function printListDiffs(src, other) {
+    printLinesDiffs(src.join('\n'), other.join('\n'));
+}
+
+/**
+ * @param {Map<string,string>} map
+ * @returns {string}
+ */
+function mapToLines(map) {
+    return Array.from(map.entries()).map(([ k, v ]) => `"${k}" to "${v}"`).join('\n');
 }
