@@ -9,15 +9,15 @@ import { spawn } from 'node:child_process';
 const SCRIPT_LIST = [
     'scrape-and-update-readme-template-contributors-table.mjs',
     'scrape-and-update-foojay-resolver-version.mjs',
-    'scrape-and-inject-latest-gradle-wrapper.mjs',
-    'scrape-and-inject-agp-releases.mjs',
-    'scrape-and-inject-android-studio-agp-version-map.mjs',
-    'scrape-and-inject-android-studio-codename_maps.mjs',
-    'scrape-and-inject-gradle-kotlin-compatibility-list.mjs',
-    'scrape-and-inject-ksp-releases.mjs',
-    'scrape-and-inject-agp-gradle-compatibility-list.mjs',
-    'scrape-and-inject-java-gradle-compatibility-list.mjs',
     'scrape-and-inject-rhino-engine-data.mjs',
+    'scrape-and-inject-latest-gradle-wrapper.mjs',
+    'scrape-and-inject-gradle-kotlin-compatibility-map.mjs',
+    'scrape-and-inject-android-studio-codename-maps.mjs',
+    'scrape-and-inject-android-studio-agp-version-map.mjs',
+    'scrape-and-inject-java-gradle-compatibility-map.mjs',
+    'scrape-and-inject-agp-gradle-compatibility-map.mjs',
+    'scrape-and-inject-agp-releases-list.mjs',
+    'scrape-and-inject-ksp-releases-map.mjs',
 ];
 
 const childProcessOutput = [];

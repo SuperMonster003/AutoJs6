@@ -7,32 +7,43 @@ type ReleasesData = import('@octokit/types').Endpoints['GET /repos/{owner}/{repo
 type PullsData = import('@octokit/types').Endpoints['GET /repos/{owner}/{repo}/pulls']['response']['data'];
 type PullCommitsData = import('@octokit/types').Endpoints['GET /repos/{owner}/{repo}/pulls/{pull_number}/commits']['response']['data'];
 
-type AndroidStudioStableArchiveItemKind = 'exe' | 'zip' | 'tar' | 'other';
-
 type FindTargetRowsFilter = string | RegExp | ((s: string) => boolean);
 
 type TableDataStructureItemName = string;
 type TableDataStructureItem = RegExp | ((s: string) => boolean | string);
 type TableDataStructureItemForPageEvaluate = string | RegExp | ((s: string) => boolean | string);
 
-interface AndroidStudioArchiveItem {
-    title: string;
-    date: string;
-    version: string | null;
-    links: Array<{
-        text: string;
-        href: string;
-    }>;
-    checksums: { [filename: string]: string };
+interface AndroidStudioRelease {
+    content: {
+        item: AndroidStudioReleaseItem[];
+    };
+    version: number;
 }
 
-interface AndroidStudioStableArchiveItem {
-    platform: string;
-    filename: string;
+interface AndroidStudioReleaseItem {
+    /** @example 'September 29, 2025' */
+    date: string;
+    /** @example '251.27812.49' */
+    platformBuild: string;
+    download: AndroidStudioReleaseDownloadItem[];
+    /** @example 'AI-251.27812.49.2514.14171003' */
+    build: string;
+    /** @example '2025.1.5' */
+    platformVersion: string;
+    /** @example 'Android Studio Narwhal 4 Feature Drop | 2025.1.4 RC 2' */
+    name: string;
+    channel: 'Preview' | 'Canary' | 'Beta' | 'RC' | 'Release' | 'Patch';
+    /** @example '2025.1.4.7' */
+    version: string;
+}
+
+interface AndroidStudioReleaseDownloadItem {
+    /** @example '1.4 GB' */
     size: string;
-    sha256: string;
-    url: string | null;
-    kind: AndroidStudioStableArchiveItemKind;
+    /** @example 'https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2025.1.4.7/android-studio-2025.1.4.7-windows.zip' */
+    link: string;
+    /** @example '91b48f1561cda0387e7499fa7e425908aa5f1235ce36aec1383fa7091f5c242a' */
+    checksum: string;
 }
 
 interface FindTargetRowsOptionsBase {
@@ -114,13 +125,38 @@ interface ScriptItem {
     abs: string;
 }
 
-interface AnchoredBlockUpdateOption {
-    type: 'map' | 'list' | 'custom';
-    anchorTag: string;
-    mapName?: string;
-    listName?: string;
-    lines: string[];
-    linesIndent?: number;
-    updatedLabel?: string;
-    replacer?: (srcInBlock: string, options: { toUpdatedStamp?: (date?: Date) => string }) => { newBlock: string, changed: boolean };
+interface GradleMapUpdateOptions extends GradleDataUpdateOptions, GradleMapRwOptions {
+    /* Empty body. */
+}
+
+interface GradleListUpdateOptions extends GradleDataUpdateOptions, GradleListRwOptions {
+    /* Empty body. */
+}
+
+interface GradleLinesUpdateOptions extends GradleDataUpdateOptions {
+    /* Empty body. */
+}
+
+interface GradleDataUpdateOptions extends GradleDataRwOptions {
+    label?: string
+}
+
+interface GradleMapRwOptions extends GradleDataRwOptions, MapSortable {
+    /* Empty body. */
+}
+
+interface GradleListRwOptions extends GradleDataRwOptions, ListSortable {
+    /* Empty body. */
+}
+
+interface GradleDataRwOptions {
+    encoding?: BufferEncoding;
+}
+
+interface MapSortable {
+    sort?: `${'key' | 'value'}.${'ascending' | 'descending'}` | `${'key' | 'value'}.${'ascending' | 'descending'}.as.${'string' | 'version' | 'number'}`;
+}
+
+interface ListSortable {
+    sort?: `${'ascending' | 'descending'}` | `${'ascending' | 'descending'}.as.${'string' | 'version' | 'number'}`;
 }

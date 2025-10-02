@@ -4,6 +4,7 @@ import * as fs from 'node:fs';
 import * as fsp from 'node:fs/promises';
 import { compareVersionStrings } from './versioning.mjs';
 import { generatePropertiesFileTimestamp } from './date.mjs';
+import { sortByMap } from './sorting.mjs';
 
 /**
  * Convert JS string to .properties format escaping rules (store format)
@@ -159,10 +160,11 @@ function unescapeProperty(str) {
 
 /**
  * @param {string} text
- * @returns {Object<string, string>}
+ * @param {MapSortable['sort']} [sortingPattern=null]
+ * @returns {Map<string, string>}
  */
-function parseProperties(text) {
-    const props = Object.create(null);
+export function parseProperties(text, sortingPattern = null) {
+    const props = new Map();
     if (!text) return props;
 
     const lines = [];
@@ -243,72 +245,112 @@ function parseProperties(text) {
         const k = unescapeProperty(key);
         const v = unescapeProperty(value.trim());
 
-        if (k) props[k] = v;
+        if (k) props.set(k, v);
     }
-    return props;
+    return new Map(sortByMap(props.entries(), sortingPattern));
 }
 
 /**
  * @param {string} [filePath='../version.properties']
- * @param {Object} options
- * @param {BufferEncoding} [options.encoding='utf8']
- * @returns {Promise<Object<string, string>>}
+ * @param {GradleMapRwOptions} [options={}]
+ * @returns {Promise<Map<string, string>>}
  */
-export async function readProperties(filePath = '../version.properties', { encoding = 'utf8' } = {}) {
+export async function readProperties(filePath = '../version.properties', { encoding = 'utf8', sort = null } = {}) {
     const text = await fsp.readFile(filePath, { encoding });
-    return parseProperties(text);
+    return parseProperties(text, sort);
 }
 
 /**
  * @param {string} [filePath='../version.properties']
- * @param {Object} options
- * @param {BufferEncoding} [options.encoding='utf8']
- * @returns {Object<string, string>}
+ * @param {GradleMapRwOptions} [options={}]
+ * @returns {Map<string, string>}
  */
-export function readPropertiesSync(filePath = '../version.properties', { encoding = 'utf8' } = {}) {
+export function readPropertiesSync(filePath = '../version.properties', { encoding = 'utf8', sort = null } = {}) {
     const text = fs.readFileSync(filePath, { encoding });
-    return parseProperties(text);
+    return parseProperties(text, sort);
 }
 
 /**
- * @param {string} [filePath='../version.properties']]
- * @param {Object<string,string>} [props={}]
- * @param {Object} options
- * @param {BufferEncoding} [options.encoding='utf8']
+ * @param {string} [filePath='../version.properties']
+ * @param {Map<string,string>} [map={}]
+ * @param {GradleMapRwOptions} [options={}]
  * @returns {Promise<void>}
  */
-export async function writeProperties(filePath = '../version.properties', props = {}, { encoding = 'utf8' } = {}) {
+export async function writePropertiesWithMap(filePath = '../version.properties', map = new Map(), { encoding = 'utf8', sort = null } = {}) {
     const lines = [];
-    for (const key in props) {
-        const value = props[key];
-        if (value == null) continue;
+    sortByMap(map.entries(), sort).forEach(([ key, value ]) => {
+        if (value == null) return;
         const k = escapeProperty(String(key), true);
         const v = escapeProperty(String(value), false);
         lines.push(`${k}=${v}`);
-    }
+    });
     lines.unshift(generatePropertiesFileTimestamp());
     const text = lines.join('\n') + '\n';
     return fsp.writeFile(filePath, text, { encoding });
 }
 
 /**
- * @param {string} [filePath='../version.properties']]
- * @param {Object<string,string>} [props={}]
- * @param {Object} options
- * @param {BufferEncoding} [options.encoding='utf8']
+ * @param {string} [filePath='../version.properties']
+ * @param {Map<string,string>} [map={}]
+ * @param {GradleMapRwOptions} [options={}]
  * @returns {void}
  */
-export function writePropertiesSync(filePath = '../version.properties', props = {}, { encoding = 'utf8' } = {}) {
+export function writePropertiesSyncWithMap(filePath = '../version.properties', map = new Map(), { encoding = 'utf8', sort = null } = {}) {
     const lines = [];
-    for (const key in props) {
-        const value = props[key];
-        if (value == null) continue;
+    sortByMap(map.entries(), sort).forEach(([ key, value ]) => {
+        if (value == null) return;
         const k = escapeProperty(String(key), true);
         const v = escapeProperty(String(value), false);
         lines.push(`${k}=${v}`);
-    }
+    });
     lines.unshift(generatePropertiesFileTimestamp());
     const text = lines.join('\n') + '\n';
+    return fs.writeFileSync(filePath, text, { encoding });
+}
+
+/**
+ * @param {string} [filePath='../version.properties']
+ * @param {string[]} [lines=[]]
+ * @param {GradleDataRwOptions} [options={}]
+ * @returns {Promise<void>}
+ */
+export async function writePropertiesWithLines(filePath = '../version.properties', lines = [], { encoding = 'utf8' } = {}) {
+    const results = [];
+    lines.forEach((line) => {
+        if (line.startsWith('#') || line.startsWith('!')) {
+            results.push(line);
+        }
+        const [ key, value ] = parseProperties(line).entries().next().value || [];
+        if (value == null) return;
+        const k = escapeProperty(String(key), true);
+        const v = escapeProperty(String(value), false);
+        results.push(`${k}=${v}`);
+    });
+    results.unshift(generatePropertiesFileTimestamp());
+    const text = results.join('\n') + '\n';
+    return fsp.writeFile(filePath, text, { encoding });
+}
+
+/**
+ * @param {string} [filePath='../version.properties']
+ * @param {string[]} [lines=[]]
+ * @param {GradleDataRwOptions} [options={}]
+ * @returns {void}
+ */
+export function writePropertiesSyncWithLines(filePath = '../version.properties', lines = [], { encoding = 'utf8' } = {}) {
+    const results = [];
+    lines.forEach((line) => {
+        if (line.startsWith('#') || line.startsWith('!')) {
+            results.push(line);
+        }
+        const [ key, value ] = parseProperties(line).entries().next().value || [];
+        if (value == null) return;
+        const k = escapeProperty(String(key), true);
+        const v = escapeProperty(String(value), false);
+        results.push(`${k}=${v}`);
+    });
+    results.unshift(generatePropertiesFileTimestamp());
+    const text = results.join('\n') + '\n';
     return fs.writeFileSync(filePath, text, { encoding });
 }
 
@@ -320,7 +362,7 @@ export function writePropertiesSync(filePath = '../version.properties', props = 
  */
 export function getMinSupportedAgpVersion(filePath = '../version.properties', { encoding = 'utf8' } = {}) {
     let minSupportedVersion = null;
-    Object.entries(readPropertiesSync(filePath, { encoding })).forEach(([ key, value ]) => {
+    Array.from(readPropertiesSync(filePath, { encoding }).entries()).forEach(([ key, value ]) => {
         if (!/agp.version.*min.supported|min.supported.*agp.version/i.test(key)) return;
         if (minSupportedVersion === null || compareVersionStrings(value, minSupportedVersion) < 0) {
             minSupportedVersion = value;
@@ -340,7 +382,7 @@ export function getMinSupportedAgpVersion(filePath = '../version.properties', { 
  */
 export function getMinSupportedGradleVersion(filePath = '../version.properties', { encoding = 'utf8' } = {}) {
     let minSupportedVersion = null;
-    Object.entries(readPropertiesSync(filePath, { encoding })).forEach(([ key, value ]) => {
+    Array.from(readPropertiesSync(filePath, { encoding }).entries()).forEach(([ key, value ]) => {
         if (!/gradle.version.*min.supported|min.supported.*gradle.version/i.test(key)) return;
         if (minSupportedVersion === null || compareVersionStrings(value, minSupportedVersion) < 0) {
             minSupportedVersion = value;
@@ -373,7 +415,7 @@ export function getJavaVersionInfo(filePath = '../version.properties', { encodin
     let minSupportedVer = Infinity;
     let maxSupportedVer = -Infinity;
 
-    Object.entries(readPropertiesSync(filePath, { encoding })).forEach(([ key, value ]) => {
+    Array.from(readPropertiesSync(filePath, { encoding }).entries()).forEach(([ key, value ]) => {
         const currentVer = parseInt(value, 10);
         if (/java.version.*min.suggested|min.suggested.*java.version/i.test(key)) {
             minSuggestedVer = Math.min(minSuggestedVer, currentVer);

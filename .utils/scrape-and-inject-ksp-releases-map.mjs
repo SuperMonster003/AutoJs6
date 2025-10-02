@@ -1,10 +1,10 @@
-// scrape-and-inject-ksp-releases.mjs
+// scrape-and-inject-ksp-releases-map.mjs
+// after: [ scrape-and-inject-gradle-kotlin-compatibility-map.mjs ]
 
-import * as fsp from 'node:fs/promises';
 import { httpFetch } from './utils/fetch.mjs';
-import { readProperties } from './utils/properties.mjs';
+import { readPropertiesSync } from './utils/properties.mjs';
 import { toUpdatedStamp } from './utils/date.mjs';
-import { updateAnchoredMapInFile } from './utils/anchors.mjs';
+import { updateGradleLinesData } from './utils/update-helper.mjs';
 
 const URL = 'https://api.github.com/repos/google/ksp/releases';
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
@@ -65,26 +65,9 @@ async function fetchKspReleases() {
 }
 
 async function getMinKotlinVersionToCheck() {
-    const raw = await fsp.readFile('../settings.gradle.kts', 'utf8');
-    const tag = 'GRADLE_KOTLIN_COMPATIBILITY_LIST';
-    const beginIndex = raw.indexOf(`@AnchorBegin ${tag}`);
-    const endIndex = raw.indexOf(`@AnchorEnd ${tag}`);
-
-    if (beginIndex !== -1 && endIndex !== -1) {
-        const props = await readProperties();
-        const minGradle = props['MIN_SUPPORTED_GRADLE_VERSION'];
-
-        const lines = raw.slice(beginIndex + tag.length + 1, endIndex).split('\n');
-        for (const line of lines) {
-            const m = /^"(\d+(?:\.\d+)+)" to "(\d+(?:\.\d+)+)",/.exec(line.trim());
-            if (m) {
-                const [ _, gradleVersion, kotlinVersion ] = m;
-                if (gradleVersion === minGradle) {
-                    return kotlinVersion;
-                }
-            }
-        }
-    }
+    const minGradle = readPropertiesSync('../version.properties').get('MIN_SUPPORTED_GRADLE_VERSION');
+    const mapElement = readPropertiesSync('../gradle/data/gradle-kotlin-compat.properties').get(minGradle);
+    if (mapElement) return mapElement;
     throw new Error(`Failed to find the minimum Kotlin version to check in settings.gradle.kts`);
 }
 
@@ -175,17 +158,16 @@ function parseReleases(releases) {
             return b.date.getTime() - a.date.getTime();
         })
         .map(({ kotlinVer, kspVer, date }) => {
-            return `"${kotlinVer}" to "${kspVer}", /* ${(toUpdatedStamp(date))}. */`;
-        });
+            return [ `#${toUpdatedStamp(date)}`, `${kotlinVer}=${kspVer}` ];
+        })
+        .flat(1);
 }
 
 (async function main() {
     const releases = await fetchKspReleases();
-    await updateAnchoredMapInFile('../settings.gradle.kts', {
-        anchorTag: 'KSP_VERSION_MAP',
-        mapName: 'kspVersionMap',
-        lines: parseReleases(releases),
-        updatedLabel: 'KSP releases version map',
+    const lines = parseReleases(releases);
+    await updateGradleLinesData('ksp-releases', lines, {
+        label: 'KSP releases version map',
     });
 })().catch((err) => {
     console.error('Failed to fetch KSP releases:', err);
