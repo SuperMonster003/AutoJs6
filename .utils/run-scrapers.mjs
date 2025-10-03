@@ -2,13 +2,14 @@
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import * as process from 'node:process';
 import * as readline from 'node:readline';
+import stringWidth from 'string-width';
+import stripAnsi from 'strip-ansi';
 import { fileURLToPath } from 'node:url';
 import { spawn } from 'node:child_process';
 
 const SCRIPT_LIST = [
-    'scrape-and-update-readme-template-contributors-table.mjs',
-    'scrape-and-update-foojay-resolver-version.mjs',
     'scrape-and-inject-rhino-engine-data.mjs',
     'scrape-and-inject-latest-gradle-wrapper.mjs',
     'scrape-and-inject-gradle-kotlin-compatibility-map.mjs',
@@ -18,19 +19,13 @@ const SCRIPT_LIST = [
     'scrape-and-inject-agp-gradle-compatibility-map.mjs',
     'scrape-and-inject-agp-releases-list.mjs',
     'scrape-and-inject-ksp-releases-map.mjs',
+    'scrape-and-update-foojay-resolver-version.mjs',
+    'scrape-and-update-readme-template-contributors-table.mjs',
 ];
 
 const childProcessOutput = [];
 
-/**
- * @param {ScriptItem[]} scripts
- * @param {number} idx
- * @returns {string}
- */
-function getScriptProgressMessage(scripts, idx) {
-    const order = `${idx + 1}`.padStart(`${scripts.length}`.length, '0');
-    return `[${order}/${scripts.length}] ${scripts[idx].name}`;
-}
+const cols = () => process.stdout.columns || 80;
 
 /**
  * Parse CLI arguments.<br>
@@ -75,6 +70,36 @@ function ensureExists(filePath) {
     } catch {
         return false;
     }
+}
+
+/**
+ * @param {ScriptItem[]} scripts
+ * @param {number} idx
+ * @param {string} [extra='']
+ * @returns {string}
+ */
+function oneLineHeader(scripts, idx, extra = '') {
+    const total = scripts.length;
+    const order = `${idx + 1}`.padStart(`${total}`.length, '0');
+    const base = scripts[idx].name;
+    const suffix = extra ? ` (${extra})` : '';
+    const core = `[${order}/${total}] ${base}${suffix}`;
+    const width = cols();
+    if (core.length <= width) return core;
+    const ellipsis = ' ... ';
+    const keep = Math.max(4, width - ellipsis.length);
+    const left = Math.ceil(keep / 2);
+    const right = Math.floor(keep / 2);
+    return core.slice(0, left) + ellipsis + core.slice(core.length - right);
+}
+
+/**
+ * @param {string} text
+ * @returns {number}
+ */
+function visualRowsOf(text) {
+    const width = stringWidth(stripAnsi(text).replace(/\r?\n$/, ''));
+    return Math.max(1, Math.ceil(width / Math.max(1, cols())));
 }
 
 /**
@@ -141,7 +166,7 @@ async function main() {
     const lineLength = Math.min(Math.max(
         title.length,
         ...exhibitionItems.map(s => s.length - 1),
-    ) + 2, process.stdout.columns || 80);
+    ) + 2, cols());
     const lineDouble = '='.repeat(lineLength);
     const lineSingle = '-'.repeat(lineLength);
 
@@ -161,14 +186,16 @@ async function main() {
     const results = [];
     for (let i = 0; i < scripts.length; i++) {
         const script = scripts[i];
-        const startLine = getScriptProgressMessage(scripts, i);
+        const startLine = oneLineHeader(scripts, i);
 
         process.stdout.write(`\r${startLine}\n`);
 
         const res = await runOne({ nodePath: opts.nodePath, scriptPath: script.abs, cwd: utilsDir });
-        const endLine = `${startLine} (${formatDuration(res.ms)})`;
+        const endLine = oneLineHeader(scripts, i, formatDuration(res.ms));
 
-        const lineCountToMove = childProcessOutput.map(chunk => `${chunk}`).join('').split('\n').length;
+        const lineCountToMove = childProcessOutput.map(chunk => `${chunk}`).join('').split('\n').reduce((acc, line) => {
+            return acc + visualRowsOf(line)
+        }, 0);
 
         if (res.code === 0) {
             childProcessOutput.forEach((chunk) => {
@@ -177,10 +204,10 @@ async function main() {
             readline.moveCursor(process.stdout, 0, -lineCountToMove);
             readline.clearLine(process.stdout, 0);
             process.stdout.write(`\r${endLine}`);
-            readline.moveCursor(process.stdout, 0, lineCountToMove + 1);
-            process.stdout.write('\r');
+            readline.moveCursor(process.stdout, 0, lineCountToMove);
+            process.stdout.write('\n');
             results.push({ ...res, name: script.name });
-            childProcessOutput.splice(0, childProcessOutput.length);
+            childProcessOutput.splice(0);
         } else {
             // readline.moveCursor(process.stdout, 0, -childProcessOutput.length - 1);
             // process.stdout.write(`\r${endLine} [code: ${res.code}]`);
@@ -195,7 +222,7 @@ async function main() {
     const failed = results.filter(r => r.code !== 0);
     if (failed.length === 0) {
         const title = 'All tasks completed successfully';
-        const lineLength = Math.min(Math.max(title.length) + 1, process.stdout.columns || 80);
+        const lineLength = Math.min(Math.max(title.length) + 1, cols());
         const line = '='.repeat(lineLength);
         console.log(line);
         console.log(` ${title}`);
@@ -210,7 +237,7 @@ async function main() {
         const lineLength = Math.min(Math.max(
             title.length,
             ...messages.map(s => s.length - 1),
-        ) + 2, process.stdout.columns || 80);
+        ) + 2, cols());
         const lineDouble = '='.repeat(lineLength);
         const lineSingle = '-'.repeat(lineLength);
         console.log(lineDouble);

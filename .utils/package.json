@@ -2,10 +2,12 @@
   "type": "module",
   "dependencies": {
     "cheerio": "^1.1.2",
+    "domhandler": "^5.0.3",
+    "dotenv": "^17.2.2",
     "node-fetch": "^3.3.2",
     "puppeteer": "^24.17.1",
-    "domhandler": "^5.0.3",
-    "dotenv": "^17.2.2"
+    "string-width": "^8.1.0",
+    "strip-ansi": "^7.1.2"
   },
   "devDependencies": {
     "@octokit/types": "^14.1.0"
