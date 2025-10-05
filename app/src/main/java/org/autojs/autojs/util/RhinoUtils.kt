@@ -127,7 +127,7 @@ object RhinoUtils {
     fun callFunction(scriptRuntime: ScriptRuntime?, obj: Scriptable, name: String, paramsToFunction: Array<Any?>): Any? {
         val property = obj.prop(name)
         if (property == NOT_FOUND) throw IllegalArgumentException("Property $name not found on $obj")
-        if (property !is BaseFunction) throw IllegalArgumentException("Property $name on $obj must be a BaseFunction")
+        if (property !is BaseFunction) throw IllegalArgumentException("Property $name on $obj must be a BaseFunction instead of ${property.jsBrief()}")
         return callFunction(scriptRuntime, property, obj, obj, paramsToFunction)
     }
 

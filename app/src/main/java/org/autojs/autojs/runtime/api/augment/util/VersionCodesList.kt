@@ -3,6 +3,8 @@ package org.autojs.autojs.runtime.api.augment.util
 import android.os.Build
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
+import org.mozilla.javascript.ScriptableObject.PERMANENT
+import org.mozilla.javascript.ScriptableObject.READONLY
 
 object VersionCodesInfo {
 
@@ -55,7 +57,7 @@ object VersionCodesInfo {
         for ((versionCode, infoList) in raw) {
             val (releaseName, internalCodename, platformVersion, apiLevel, releaseDate) = infoList
             val info = VersionCodes.Info(versionCode, releaseName, internalCodename, platformVersion, apiLevel, releaseDate)
-            obj.put(versionCode, obj, info.toNativeObject())
+            obj.defineProperty(versionCode, { info.toNativeObject() }, null, READONLY or PERMANENT)
             list += info
         }
     }

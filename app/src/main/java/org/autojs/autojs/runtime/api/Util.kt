@@ -1,9 +1,8 @@
 package org.autojs.autojs.runtime.api
 
 import org.autojs.autojs.extension.AnyExtensions.jsBrief
-import org.autojs.autojs.runtime.ScriptRuntime
 
-class Util(private val context: android.content.Context, private val scriptRuntime: ScriptRuntime) {
+object Util {
 
     fun `class`(o: Any?) = getClassInternal(o, "class")
 

@@ -41,6 +41,7 @@ import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.Scriptable.NOT_FOUND
+import org.mozilla.javascript.ScriptableObject.DONTENUM
 import java.util.function.Supplier
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -83,8 +84,10 @@ object Colors : Augmentable(), SimpleGetterProxy {
         colorMap
     }
 
+    private val allForNativeObject by lazy { all.toNativeObject() }
+
     override val selfAssignmentFunctions = listOf(
-        "toString",
+        "toString" to AS_FUNCTIONAL_TO_STRING,
         ::toInt.name,
         ::toHex.name,
         ::toFullHex.name,
@@ -150,8 +153,8 @@ object Colors : Augmentable(), SimpleGetterProxy {
         table::class.java.simpleName.lowercase() to table
     }
 
-    override val selfAssignmentGetters = listOf<Pair<String, Supplier<Any?>>>(
-        "all" to Supplier { all.toNativeObject() },
+    override val selfAssignmentGetters = listOf(
+        "all" to Supplier { allForNativeObject } to DONTENUM,
     )
 
     @JvmStatic

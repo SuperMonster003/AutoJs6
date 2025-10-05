@@ -10,6 +10,9 @@ import org.autojs.autojs.extension.FlexibleArray.Companion.component1
 import org.autojs.autojs.extension.FlexibleArray.Companion.component2
 import org.autojs.autojs.extension.NumberExtensions.jsString
 import org.autojs.autojs.extension.ScriptableExtensions.prop
+import org.autojs.autojs.rhino.ProxyObject
+import org.autojs.autojs.rhino.ProxyObject.Companion.AUGMENTED_CUSTOM_TO_STRING_KEY
+import org.autojs.autojs.rhino.ProxyObject.Companion.AUGMENTED_OBJECT_KEY
 import org.autojs.autojs.rhino.ProxyObject.Companion.PROXY_GETTER_KEY
 import org.autojs.autojs.rhino.ProxyObject.Companion.PROXY_SETTER_KEY
 import org.autojs.autojs.runtime.api.StringReadable
@@ -17,8 +20,8 @@ import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.Invokable
 import org.autojs.autojs.runtime.api.augment.global.Species.isErrorRhino
 import org.autojs.autojs.runtime.api.augment.global.Species.isJavaObjectRhino
-import org.autojs.autojs.runtime.api.augment.global.Species.isObjectRhino
 import org.autojs.autojs.runtime.api.augment.global.Species.isStringRhino
+import org.autojs.autojs.runtime.api.augment.util.Util.isReferenceRhino
 import org.autojs.autojs.runtime.exception.ShouldNeverHappenException
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.RhinoUtils
@@ -35,10 +38,12 @@ import org.autojs.autojs.util.RhinoUtils.js_object_keys
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.Context
+import org.mozilla.javascript.MemberBox
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeDate
 import org.mozilla.javascript.NativeError
 import org.mozilla.javascript.NativeJavaClass
+import org.mozilla.javascript.NativeJavaMethod
 import org.mozilla.javascript.NativeJavaPackage
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.Scriptable
@@ -75,7 +80,6 @@ object Inspect : Augmentable(), Invokable {
      * SGR (Select Graphic Rendition) parameters
      * @see <a href="https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_(Select_Graphic_Rendition)_parameters">"ANSI escape code" on Wikipedia (en)</a>
      */
-    @Suppress("SpellCheckingInspection")
     private val srg = object {
         val fg = object {
             val BLACK = 30
@@ -306,21 +310,58 @@ object Inspect : Augmentable(), Invokable {
         if (value is NativeJavaClass) return value.toString()
         if (value.javaClass.isArray) return javaArrayToString(value)
         if (value !is ScriptableObject) return Context.toString(value)
+        if (value is ProxyObject) return formatValue(ctx, value[AUGMENTED_OBJECT_KEY], recurseTimes)
 
         // @Hint by SuperMonster003 on Apr 16, 2024.
         //  ! Check if the object has a custom overwritten toString() method.
         //  ! zh-CN: 检查对象是否有自定义的 toString() 覆写方法.
-        if (isObjectRhino(value)) {
-            var tmp: Scriptable = value
-            val objectPrototype by lazy { ScriptableObject.getObjectPrototype(value) }
-            do {
-                if (js_object_hasOwnProperty(tmp, "toString")) {
-                    if ((tmp.prop("toString") as? BaseFunction)?.arity == 0) {
-                        return callToStringFunction(value)
-                    }
+        if (isReferenceRhino(value)) {
+            var cur: Scriptable = value
+            val objProtoForJs: Scriptable? = ScriptableObject.getObjectPrototype(cur)
+            val objProtoForAugmentable: Scriptable = RhinoUtils.objectPrototype
+            val arrProtoForAugmentable: Scriptable = RhinoUtils.arrayPrototype
+            val funcProtoForAugmentable: Scriptable = RhinoUtils.functionPrototype
+            var owner: Scriptable? = null
+            while (true) {
+                if (js_object_hasOwnProperty(cur, "toString")) {
+                    owner = cur
+                    break
                 }
-                tmp = tmp.prototype ?: break
-            } while (tmp != objectPrototype)
+                cur = cur.prototype ?: break
+            }
+            if (js_object_hasOwnProperty(cur, AUGMENTED_CUSTOM_TO_STRING_KEY)) {
+                // Augmentable's custom toString method with special functionality (like Colors.toString)
+                // is not involved in custom determination.
+                // zh-CN: Augmentable 自定义的具有特殊功能的 toString 方法 (如 Colors.toString), 不参与自定义判定.
+            } else if (owner != null) {
+                val fn = owner["toString"]
+                val isCustom = run {
+                    if (isJavaObjectToString(fn)) {
+                        // Standard Java Object#toString or equivalent implementation, skip custom check.
+                        // zh-CN: 标准 Java Object#toString 或等价实现, 视为未自定义, 跳过自定义判定.
+                        return@run false
+                    }
+                    if (fn === objProtoForJs?.get("toString")) {
+                        // Standard JavaScript Object.prototype.toString or equivalent implementation, skip custom check.
+                        // zh-CN: 标准 JavaScript Object.prototype.toString 或等价实现, 视为未自定义, 跳过自定义判定.
+                        return@run false
+                    }
+                    val augmentableToStringList = listOf(
+                        objProtoForAugmentable["toString"],
+                        arrProtoForAugmentable["toString"],
+                        funcProtoForAugmentable["toString"],
+                    )
+                    if (fn in augmentableToStringList) {
+                        // Terminal toString in Augmentable prototype chain, skip custom check.
+                        // zh-CN: Augmentable 原型链终端的 toString, 不参与自定义判定.
+                        return@run false
+                    }
+                    return@run fn is BaseFunction && fn.arity == 0
+                }
+                if (isCustom) {
+                    return callToStringFunction(value)
+                }
+            }
         }
 
         // Look up the keys of the object.
@@ -328,7 +369,6 @@ object Inspect : Augmentable(), Invokable {
         val visibleKeys = newNativeObject().also { o ->
             keys.forEach { o.put(Context.toString(it), o, true) }
         }
-
         if (ctx.showHidden) {
             keys = js_object_getOwnPropertyNames(value)
         }
@@ -417,6 +457,18 @@ object Inspect : Augmentable(), Invokable {
         ctx.seen.removeLastOrNull()
 
         return reduceToSingleString(output, base, braces)
+    }
+
+    private fun isJavaObjectToString(fn: Any?): Boolean {
+        if (fn !is NativeJavaMethod) return false
+        val methods: Array<out MemberBox> = fn.methods
+        return methods.any { mb ->
+            val m = mb.method()
+            m.name == "toString" &&
+                    m.parameterCount == 0 &&
+                    m.returnType == String::class.java &&
+                    m.declaringClass == Any::class.java
+        }
     }
 
     private fun toJavaObjectString(value: Any) = "[JavaObject: ${value.javaClass.name}@${Integer.toHexString(value.hashCode())}]"

@@ -20,10 +20,10 @@ import org.mozilla.javascript.Scriptable
 class MorseCodeNativeObject(val parser: MorseCodeParser) : NativeObject(), StringReadable {
 
     private val mFunctionNames = arrayOf(
+        "toString",
         ::getPattern.name,
         ::getCode.name,
         ::vibrate.name,
-        "toString",
     )
 
     init {

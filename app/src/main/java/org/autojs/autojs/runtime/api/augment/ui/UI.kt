@@ -123,10 +123,10 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         ::keepScreenOn.name,
     )
 
-    override val selfAssignmentGetters = listOf<Pair<String, Supplier<Any?>>>(
+    override val selfAssignmentGetters = listOf(
         "R" to Supplier { scriptRuntime.topLevelScope.prop("R").jsUnwrapped() },
         "__widgets__" to Supplier { scriptRuntime.ui.widgets },
-        "root" to Supplier {
+        "root" to Supplier<Any?> {
             val activity = getActivity(scriptRuntime)
             (activity as? ScriptExecuteActivity)?.findViewById(android.R.id.content)
         },

@@ -120,7 +120,6 @@ object WrappedShizuku {
         false.also { if (e.message?.contains(Regex("binder .+n[o']t been received", RegexOption.IGNORE_CASE)) == false) e.printStackTrace() }
     }
 
-    @JvmStatic
     @ScriptInterface
     fun isOperational(): Boolean = isRunning() && hasPermission()
 
@@ -131,11 +130,10 @@ object WrappedShizuku {
     fun requestPermission() = Shizuku.requestPermission(mRequestCode)
 
     @ScriptInterface
-    fun config(isRequest: Boolean?) = config(GlobalAppContext.get(), isRequest)
-
-    @ScriptInterface
     @JvmOverloads
-    fun config(context: Context, isRequest: Boolean? = null): Intent? = getLaunchIntent(context)?.also {
+    fun config(isRequest: Boolean? = null) = configWithContext(GlobalAppContext.get(), isRequest)
+
+    fun configWithContext(context: Context, isRequest: Boolean? = null): Intent? = getLaunchIntent(context)?.also {
         context.startActivity(it)
         val message = when (isRequest) {
             true -> "${context.getString(R.string.text_grant_autojs6_access_in_shizuku_app)} (${context.getString(R.string.text_shizuku_service_may_need_to_be_run_first)})"

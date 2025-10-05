@@ -74,6 +74,12 @@ open class ProxyObject() : NativeObject() {
         val PROXY_OBJECT_KEY = "__proxy__"
 
         @JvmField
+        val AUGMENTED_OBJECT_KEY = "__augmented__"
+
+        @JvmField
+        val AUGMENTED_CUSTOM_TO_STRING_KEY = "__augmented_custom_to_string__"
+
+        @JvmField
         val PROXY_SETTER_KEY = "set"
 
         @JvmField

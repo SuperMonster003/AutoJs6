@@ -58,7 +58,7 @@ class Global(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
     )
 
     override val selfAssignmentFunctions = listOf(
-        "toString",
+        "toString" to AS_LITERAL_TO_STRING,
         ::TODO.name,
         ::isUiThread.name,
         ::isJavaObject.name,

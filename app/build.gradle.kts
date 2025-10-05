@@ -19,7 +19,11 @@ plugins {
 
 idea {
     module {
-        excludeDirs.add(file("$rootDir/app/src/main/java/com/stardust/"))
+        excludeDirs.addAll(listOf(
+            file("$rootDir/app/src/main/java/com/stardust/"),
+            file("$rootDir/app/src/main/assets/modules/obsolete/"),
+            file("$rootDir/app/src/main/assets-app/js-beautify/"),
+        ))
     }
 }
 
