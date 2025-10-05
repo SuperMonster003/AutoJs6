@@ -24,7 +24,7 @@ class ShizukuPermission(override val context: Context) : PermissionItemHelper {
                 } catch (e: Throwable) {
                     e.printStackTrace()
                 }
-                WrappedShizuku.config(context, true)?.let { true }
+                WrappedShizuku.configWithContext(context, true)?.let { true }
                     ?: ViewUtils.showToast(context, R.string.error_failed_to_grant_shizuku_access).let { false }
             }
         }
@@ -34,7 +34,7 @@ class ShizukuPermission(override val context: Context) : PermissionItemHelper {
         return when {
             !WrappedShizuku.isInstalled(context) -> false.also { ViewUtils.showToast(context, R.string.error_shizuku_is_not_installed) }
             Shizuku.isPreV11() -> false.also { ViewUtils.showToast(context, R.string.error_shizuku_version_is_not_supported) }
-            else -> WrappedShizuku.config(context, false)?.let { true }
+            else -> WrappedShizuku.configWithContext(context, false)?.let { true }
                 ?: ViewUtils.showToast(context, R.string.error_failed_to_revoke_shizuku_access).let { false }
         }
     }

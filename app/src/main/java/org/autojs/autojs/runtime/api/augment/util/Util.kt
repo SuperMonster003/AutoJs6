@@ -62,6 +62,7 @@ import org.mozilla.javascript.ScriptRuntime as RhinoScriptRuntime
 object Util : Augmentable() {
 
     override val selfAssignmentFunctions = listOf(
+        ::__assignFunctions__.name to (READONLY or DONTENUM or PERMANENT),
         ::isArray.name,
         ::isBoolean.name,
         ::isNull.name,
@@ -84,7 +85,6 @@ object Util : Augmentable() {
         ::isEmptyObject.name,
         ::unwrapJavaObject.name,
         ::extend.name,
-        ::__assignFunctions__.name,
         ::format.name,
         ::deprecate.name,
         ::debuglog.name,

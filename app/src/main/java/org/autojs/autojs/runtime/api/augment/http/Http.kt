@@ -65,7 +65,7 @@ import java.net.URI
 class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
     override val selfAssignmentProperties = listOf(
-        "__okhttp__" to scriptRuntime.http.okhttp to DONTENUM
+        "__okhttp__" to scriptRuntime.http.okhttp to (READONLY or DONTENUM or PERMANENT)
     )
 
     override val selfAssignmentFunctions = listOf(

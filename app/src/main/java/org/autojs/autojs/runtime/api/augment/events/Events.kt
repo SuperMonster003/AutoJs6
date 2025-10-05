@@ -20,12 +20,15 @@ import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeJavaMethod
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
+import org.mozilla.javascript.ScriptableObject.DONTENUM
+import org.mozilla.javascript.ScriptableObject.PERMANENT
+import org.mozilla.javascript.ScriptableObject.READONLY
 import java.lang.reflect.Modifier
 
 class Events(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
     override val selfAssignmentFunctions = listOf(
-        ::__asEmitter__.name,
+        ::__asEmitter__.name to (READONLY or DONTENUM or PERMANENT),
     )
 
     companion object : FlexibleArray() {

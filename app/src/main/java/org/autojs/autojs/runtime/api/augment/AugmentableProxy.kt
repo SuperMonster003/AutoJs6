@@ -1,8 +1,11 @@
 package org.autojs.autojs.runtime.api.augment
 
+import org.autojs.autojs.extension.FlexibleArray.Companion.component1
+import org.autojs.autojs.extension.FlexibleArray.Companion.component2
 import org.autojs.autojs.extension.ScriptableExtensions.defineProp
 import org.autojs.autojs.extension.ScriptableExtensions.prop
 import org.autojs.autojs.rhino.ProxyObject
+import org.autojs.autojs.rhino.ProxyObject.Companion.AUGMENTED_OBJECT_KEY
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED
@@ -70,8 +73,9 @@ open class AugmentableProxy(private val scriptRuntime: ScriptRuntime) : Augmenta
         return NOT_FOUND
     }
 
-    open fun getCore(augmented: ScriptableObject, key: String): Any? {
-        return when (val value = augmented.prop(key)) {
+    open fun getCore(augmented: ScriptableObject, key: String): Any? = when (key) {
+        AUGMENTED_OBJECT_KEY -> augmented
+        else -> when (val value = augmented.prop(key)) {
             is BaseFunction -> when {
                 // @Hint by SuperMonster003 on Nov 6, 2024.
                 //  ! Indicated that `key` is not defined in `augmented`

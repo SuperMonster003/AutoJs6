@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.7.0": {
-      "released_date": "2025/10/02",
+      "released_date": "2025/10/05",
       "feature": [
         "zip 模块, 用于文件压缩与解压缩操作 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (参阅 项目文档 > [Zip](https://docs.autojs6.com/#/zip))",
         "mediainfo 模块, 用于查看媒体文件的详细信息 (参阅 项目文档 > [媒体信息](https://docs.autojs6.com/#/mediainfo))",
@@ -15,6 +15,7 @@
         "timers.keepAlive 方法 timeout 参数功能无效的问题",
         "floaty.window/rawWindow 方法无法接受字符串参数的问题",
         "util.class[Name]/getClass[Name] 可能返回错误结果的问题",
+        "部分全局对象可能丢失 JavaScript 原型属性及方法的问题",
         "使用 XML 语法将 JavaScript 表达式作为属性值时, this 对象可能出现指向错误的问题",
         "canvas 元素控件 setMaxFps 方法内部帧率计算错误",
         "images.concat 方法纵向拼接时宽度值计算错误",
@@ -32,6 +33,7 @@
         "构建工具启用 isCleanup[Paddle/Rapid]Ocr 配置选项时无法正常完成 Rebuild Project 任务的问题"
       ],
       "improvement": [
+        "console.log 等方法打印全局对象 (images, app, ocr 等) 时支持显示详细信息",
         "http 模块相关方法支持不安全选项参数 (isInsecure/insecure), 用于忽略证书相关异常 _[`issue #417`](http://issues.autojs6.com/417)_",
         "android.graphics.Paint#setColor 支持正常解析 ColorInt/ColorHex/ColorName 等颜色参数",
         "内置模块相关方法实参类型的异常消息增加类型摘要信息",

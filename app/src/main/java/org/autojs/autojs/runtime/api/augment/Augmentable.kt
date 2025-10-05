@@ -5,9 +5,11 @@ import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.extension.FlexibleArray
+import org.autojs.autojs.extension.FlexibleArray.Companion.component1
 import org.autojs.autojs.extension.ScriptableExtensions.defineProp
 import org.autojs.autojs.extension.ScriptableExtensions.prop
 import org.autojs.autojs.rhino.ProxyObject
+import org.autojs.autojs.rhino.ProxyObject.Companion.AUGMENTED_CUSTOM_TO_STRING_KEY
 import org.autojs.autojs.rhino.ProxyObject.Companion.PROXY_GETTER_KEY
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.events.Events
@@ -118,8 +120,9 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : F
     /**
      * List element cases: <br>
      * - <1> - name to getter
+     * - <2> - name to getter to attributes
      */
-    open val selfAssignmentGetters = listOf<Pair<String, Supplier<Any?>>>()
+    open val selfAssignmentGetters = listOf<Any>()
 
     /**
      * List element cases: <br>
@@ -264,17 +267,19 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : F
             objProtoList += Events.__asEmitter__(scriptRuntime, emptyArray())
         }
 
-        objProtoList.forEachIndexed { index, prototypeObject -> augmentPrototypesAt(index, newObj, prototypeObject) }
-        scopeProtoList.forEachIndexed { index, prototypeObject -> augmentPrototypesAt(index, global, prototypeObject) }
+        val newObjOriginalPrototype = newObj.prototype
+        objProtoList.forEachIndexed { index, prototypeObject -> augmentPrototypesAt(index, newObj, prototypeObject, newObjOriginalPrototype) }
+        val globalOriginalPrototype = global.prototype
+        scopeProtoList.forEachIndexed { index, prototypeObject -> augmentPrototypesAt(index, global, prototypeObject, globalOriginalPrototype) }
     }
 
-    private fun augmentPrototypesAt(index: Int, o: ScriptableObject, proto: Scriptable) {
+    private fun augmentPrototypesAt(index: Int, o: ScriptableObject, proto: Scriptable, originalProto: Scriptable?) {
         when (index) {
-            0 -> o.prototype = proto
-            1 -> o.prototype.prototype = proto
-            2 -> o.prototype.prototype.prototype = proto
-            3 -> o.prototype.prototype.prototype.prototype = proto
-            4 -> o.prototype.prototype.prototype.prototype.prototype = proto
+            0 -> o.prototype = proto.apply { prototype = originalProto }
+            1 -> o.prototype.prototype = proto.apply { prototype = originalProto }
+            2 -> o.prototype.prototype.prototype = proto.apply { prototype = originalProto }
+            3 -> o.prototype.prototype.prototype.prototype = proto.apply { prototype = originalProto }
+            4 -> o.prototype.prototype.prototype.prototype.prototype = proto.apply { prototype = originalProto }
             else -> throw RuntimeException("Augmentation can only be applied to no more than $index targets")
         }
     }
@@ -372,6 +377,9 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : F
                         if (flag and AS_GLOBAL != 0) {
                             globalFunctions += name to alias to (PERMANENT or refineAttributes(flag))
                         }
+                        if (flag and AS_FUNCTIONAL_TO_STRING != 0) {
+                            targetFunctions += AUGMENTED_CUSTOM_TO_STRING_KEY to AUGMENTED_CUSTOM_TO_STRING_KEY to (DONTENUM or PERMANENT or refineAttributes(flag))
+                        }
                     }
                 }
                 else -> throw WrappedIllegalArgumentException("Unknown function element ${item.jsBrief()} for selfAssignmentFunctions")
@@ -381,8 +389,7 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : F
             when (item) {
                 is String -> globalFunctions += item to item to PERMANENT
                 is Pair<*, *> -> {
-                    val first = item.first
-                    val second = item.second
+                    val (first, second) = item
                     val name: String
                     val aliasList = mutableListOf<String>()
                     var flag = 0
@@ -474,33 +481,62 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : F
                     throw WrappedRuntimeException(niceMessage)
                 }
             }, NOT_CONSTRUCTABLE)
-            destination.defineProperty(funcNameAlias, f, attributes)
+            destination.defineWith(funcNameAlias, f, attributes)
         }
     }
 
+    @Suppress("UnnecessaryVariable", "UNCHECKED_CAST")
     private fun augmentGettersAndSetters(target: ScriptableObject, global: ScriptableObject) {
-        selfAssignmentGetters.forEach { pair ->
-            val (name, getter) = pair
-            target.defineProperty(name, getter, null, PERMANENT)
+        selfAssignmentGetters.forEach { item ->
+            when (item) {
+                is Pair<*, *> -> {
+                    val (first, second) = item
+                    when (first) {
+                        is String -> {
+                            val name = first
+                            when (val getter = second) {
+                                is Supplier<*> -> {
+                                    target.defineWith(name, getter as Supplier<Any?>, null, PERMANENT)
+                                }
+                                else -> throw WrappedIllegalArgumentException("Unknown second element ${second.jsBrief()} for selfAssignmentGetters")
+                            }
+                        }
+                        is Pair<*, *> -> {
+                            val (name, getter) = first
+                            require(name is String) {
+                                throw WrappedIllegalArgumentException("First element of pair must be a String for selfAssignmentGetters")
+                            }
+                            when (val attributes = second) {
+                                is Int -> {
+                                    target.defineWith(name, getter as Supplier<Any?>, null, refineAttributes(attributes))
+                                }
+                                else -> throw WrappedIllegalArgumentException("Unknown second element ${second.jsBrief()} for selfAssignmentGetters")
+                            }
+                        }
+                        else -> throw WrappedIllegalArgumentException("Unknown item ${item.jsBrief()} for selfAssignmentGetters")
+                    }
+                }
+                else -> throw WrappedIllegalArgumentException("Unknown item ${item.jsBrief()} for selfAssignmentGetters")
+            }
         }
         selfAssignmentGettersAndSetters.forEach { triple ->
             val (name, getter, setter) = triple
-            target.defineProperty(name, getter, setter, PERMANENT)
+            target.defineWith(name, getter, setter, PERMANENT)
         }
         globalAssignmentGetters.forEach { pair ->
             val (name, getter) = pair
-            global.defineProperty(name, getter, null, PERMANENT)
+            global.defineWith(name, getter, null, PERMANENT)
         }
     }
 
     private fun augmentJavaClasses(target: ScriptableObject, global: ScriptableObject) {
         selfAssignmentJavaClasses.forEach { pair ->
             val (name, clazz) = pair
-            target.defineProperty(name, NativeJavaClass(global, clazz.java), PERMANENT)
+            target.defineWith(name, NativeJavaClass(global, clazz.java), PERMANENT)
         }
         globalAssignmentJavaClasses.forEach { pair ->
             val (name, clazz) = pair
-            global.defineProperty(name, NativeJavaClass(global, clazz.java), PERMANENT)
+            global.defineWith(name, NativeJavaClass(global, clazz.java), PERMANENT)
         }
     }
 
@@ -512,13 +548,43 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : F
 
     companion object : FlexibleArray() {
 
-        const val AS_GLOBAL = 0x1000
-        const val AS_IGNORED = 0x2000
+        // @Caution by SuperMonster003 on Oct 5, 2025.
+        //  ! These constants are "bit flags", each value is a power of 2, with only one bit being 1 in binary.
+        //  ! They can be combined using `bitwise OR (|)` and checked using `bitwise AND (&)` without interference.
+        //  ! Do not modify them to the form 0x0101/0x0102/0x0103/0x0104/...,
+        //  ! to avoid flag overlap causing combination and detection logic to fail,
+        //  ! e.g. `flags & AS_GLOBAL` may give false results.
+        //  ! zh-CN:
+        //  ! 这些常量是 "位标志" (bit flags), 每个值都是二的幂, 二进制中仅有一位为 1.
+        //  ! 可用 `按位或 (|)` 进行组合, `按位与 (&)` 进行检测, 互不干扰.
+        //  ! 不可将其修改为 0x0101/0x0102/0x0103/0x0104/... 的形式,
+        //  ! 以避免标志重叠造成组合与检测逻辑失效, 如 `flags & AS_GLOBAL` 可能出现误判.
+        //  !
+        const val AS_GLOBAL = 0x0100
+        const val AS_IGNORED = 0x0200
+        const val AS_LITERAL_TO_STRING = 0x0400
+        const val AS_FUNCTIONAL_TO_STRING = 0x0800
 
         val globalContext: Context
             get() = GlobalAppContext.get()
 
         fun refineAttributes(attributes: Int) = attributes and (READONLY or DONTENUM or PERMANENT or UNINITIALIZED_CONST)
+
+        private fun isInternalName(value: String) = value.startsWith("__") && value.endsWith("__")
+
+        private fun ScriptableObject.defineWith(name: String, getter: Supplier<Any?>, setter: Consumer<Any?>?, attributes: Int) {
+            when (isInternalName(name)) {
+                true -> this.defineProperty(name, getter, setter, DONTENUM or attributes)
+                else -> this.defineProperty(name, getter, setter, attributes)
+            }
+        }
+
+        private fun ScriptableObject.defineWith(name: String, value: Any?, attributes: Int) {
+            when (isInternalName(name)) {
+                true -> this.defineProperty(name, value, DONTENUM or attributes)
+                else -> this.defineProperty(name, value, attributes)
+            }
+        }
 
     }
 

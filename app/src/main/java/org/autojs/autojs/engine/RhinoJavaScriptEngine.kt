@@ -30,7 +30,9 @@ import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.Script
 import org.mozilla.javascript.Scriptable
+import org.mozilla.javascript.ScriptableObject.DONTENUM
 import org.mozilla.javascript.ScriptableObject.PERMANENT
+import org.mozilla.javascript.ScriptableObject.READONLY
 import org.mozilla.javascript.commonjs.module.RequireBuilder
 import org.mozilla.javascript.commonjs.module.provider.SoftCachingModuleScriptProvider
 import java.io.File
@@ -103,7 +105,7 @@ open class RhinoJavaScriptEngine(private val androidContext: android.content.Con
 
     override fun init() {
         thread = Thread.currentThread()
-        scriptable.defineProp("__engine__", this)
+        scriptable.defineProp("__engine__", this, READONLY or DONTENUM or PERMANENT)
         initRequireBuilder(context, scriptable)
 
         runtime.withTimeConsuming("runtime-init-prologue") {

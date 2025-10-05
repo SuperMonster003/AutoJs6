@@ -31,7 +31,7 @@ import org.opencv.core.Rect as OpencvRect
 class Ocr(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), Invokable {
 
     override val selfAssignmentFunctions = listOf(
-        "toString",
+        "toString" to AS_LITERAL_TO_STRING,
         ::tap.name,
         ::recognizeText.name,
         ::detect.name,

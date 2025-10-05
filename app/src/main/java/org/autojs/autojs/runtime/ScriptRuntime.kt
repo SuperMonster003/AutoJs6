@@ -458,7 +458,7 @@ class ScriptRuntime private constructor(builder: Builder) {
         floaty = ApiFloaty(uiHandler, this)
 
         ui = ApiUI(mUiHandlerAppContext, this)
-        util = ApiUtil(mUiHandlerAppContext, this)
+        util = ApiUtil
         images = ApiImages(mUiHandlerAppContext, this)
         device = ApiDevice(mUiHandlerAppContext)
         media = ApiMedia(mUiHandlerAppContext, this)

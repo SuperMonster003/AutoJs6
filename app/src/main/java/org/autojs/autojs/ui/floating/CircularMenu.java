@@ -217,7 +217,7 @@ public class CircularMenu implements Recorder.OnStateChangedListener, LayoutInsp
     }
 
     private void applyComponentInformation() {
-        if (WrappedShizuku.isOperational() && WrappedShizuku.service != null) {
+        if (WrappedShizuku.INSTANCE.isOperational() && WrappedShizuku.service != null) {
             try {
                 mRunningPackage = WrappedShizuku.service.currentPackage();
                 mRunningActivity = WrappedShizuku.service.currentActivity();
