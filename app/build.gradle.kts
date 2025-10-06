@@ -101,7 +101,7 @@ dependencies /* Unclassified */ {
     implementation(libs.analytics)
 
     // Bugly
-    implementation(project(":libs:com.tencent.bugly.crashreport-4.0.4"))
+    implementation(project(":libs:com-tencent-bugly-crashreport-4_0_4"))
 
     // OkHttp
     implementation(libs.okhttp)
@@ -146,7 +146,7 @@ dependencies /* Unclassified */ {
 
     // RootShell
     // implementation("com.github.Stericson:RootShell:1.6")
-    implementation(project(":libs:root-shell-1.6"))
+    implementation(project(":libs:root-shell-1_6"))
 
     // JDeferred
     implementation(libs.jdeferred)
@@ -162,16 +162,16 @@ dependencies /* Unclassified */ {
     implementation(libs.versioncompare)
 
     // Terminal Emulator
-    implementation(project(":libs:jackpal.androidterm.libtermexec-1.0"))
-    implementation(project(":libs:jackpal.androidterm.emulatorview-1.0.42"))
-    implementation(project(":libs:jackpal.androidterm-1.0.70"))
+    implementation(project(":libs:jackpal-androidterm-libtermexec-1_0"))
+    implementation(project(":libs:jackpal-androidterm-emulatorview-1_0_42"))
+    implementation(project(":libs:jackpal-androidterm-1_0_70"))
 
     // Dex
-    implementation(files("$rootDir/libs/com.android.dx-1.14.jar"))
-    implementation(files("$rootDir/libs/com.legacy.android.dx-1.7.0.jar"))
+    implementation(files("$rootDir/libs/com-android-dx-1_14.jar"))
+    implementation(files("$rootDir/libs/com-legacy-android-dx-1_7_0.jar"))
 
     // OpenCV
-    implementation(project(":libs:org.opencv-4.8.0"))
+    implementation(project(":libs:org-opencv-4_8_0"))
 
     // PaddleOCR
     implementation(project(":libs:paddleocr"))
@@ -183,7 +183,7 @@ dependencies /* Unclassified */ {
     implementation(project(":libs:imagequant"))
 
     // Android Job
-    implementation(project(":libs:android-job-simplified-1.4.3"))
+    implementation(project(":libs:android-job-simplified-1_4_3"))
 
     // APK Parser
     // implementation("com.jaredrummler:apk-parser:1.0.2")
@@ -191,18 +191,18 @@ dependencies /* Unclassified */ {
     implementation(project(":modules:apk-parser"))
 
     // Prism4j
-    implementation(files("$rootDir/libs/prism4j-2.0.0.jar"))
-    implementation(files("$rootDir/libs/prism4j-bundler-2.0.0.jar"))
-    implementation(project(":libs:markwon-core-4.6.2"))
-    implementation(project(":libs:markwon-syntax-highlight-4.6.2"))
+    implementation(files("$rootDir/libs/prism4j-2_0_0.jar"))
+    implementation(files("$rootDir/libs/prism4j-bundler-2_0_0.jar"))
+    implementation(project(":libs:markwon-core-4_6_2"))
+    implementation(project(":libs:markwon-syntax-highlight-4_6_2"))
 
     // Rhino
-    implementation(files("$rootDir/libs/org.mozilla.rhino-1.8.1-SNAPSHOT.jar"))
+    implementation(files("$rootDir/libs/org-mozilla-rhino-1_8_1-SNAPSHOT.jar"))
 
     // Tasker Plugin
-    implementation(project(":libs:android-spackle-9.0.0"))
-    implementation(project(":libs:android-assertion-9.0.0"))
-    implementation(project(":libs:android-plugin-client-sdk-for-locale-9.0.0"))
+    implementation(project(":libs:android-spackle-9_0_0"))
+    implementation(project(":libs:android-assertion-9_0_0"))
+    implementation(project(":libs:android-plugin-client-sdk-for-locale-9_0_0"))
 
     // JavaMail for Android
     implementation(files("$rootDir/libs/javamail-android/activation.jar"))
@@ -228,7 +228,7 @@ dependencies /* Unclassified */ {
     implementation(project(":modules:jieba-analysis"))
 
     // Tiny Sign
-    implementation(files("$rootDir/libs/tiny-sign-0.9.jar"))
+    implementation(files("$rootDir/libs/tiny-sign-0_9.jar"))
 
     // Room
     implementation(libs.room.runtime)
@@ -267,7 +267,7 @@ dependencies /* MIME */ {
 
     // MIME Util
     // implementation("eu.medsea.mimeutil:mime-util:2.1.3")
-    implementation(files("$rootDir/libs/mime-util-2.1.3.jar"))
+    implementation(files("$rootDir/libs/mime-util-2_1_3.jar"))
 }
 
 dependencies /* Test */ {
@@ -299,7 +299,7 @@ dependencies /* AppCompat */ {
     implementation(libs.appcompat)
 
     // AppCompat for legacy views (such as JsTextViewLegacy)
-    implementation(project(":libs:androidx.appcompat-1.0.2")) {
+    implementation(project(":libs:androidx-appcompat-1_0_2")) {
         setVersion("1.0.2")
     }
 }
@@ -326,14 +326,14 @@ dependencies /* Material Dialogs */ {
 dependencies /* Layout */ {
     // Expandable Layout
     // implementation("com.github.aakira:expandable-layout:1.6.0")
-    implementation(project(":libs:expandable-layout-1.6.0"))
+    implementation(project(":libs:expandable-layout-1_6_0"))
 
     // Expandable RecyclerView
     implementation(libs.expandablerecyclerview)
 
     // Flexible Divider
     // implementation("com.yqritc:recyclerview-flexibledivider:1.4.0")
-    implementation(project(":libs:recyclerview-flexibledivider-1.4.0"))
+    implementation(project(":libs:recyclerview-flexibledivider-1_4_0"))
 }
 
 dependencies /* View */ {
@@ -349,7 +349,7 @@ dependencies /* View */ {
 
 dependencies /* GitHub API */ {
     // GitHub API
-    implementation(files("$rootDir/libs/github-api-1.306.jar"))
+    implementation(files("$rootDir/libs/github-api-1_306.jar"))
 
     // Commons IO
     // @Hint by SuperMonster003 on Sep 25, 2025.
@@ -394,7 +394,7 @@ dependencies /* Auto.js Extensions */ {
 
     // Auto.js APK Builder
     // @Integrated by SuperMonster003 on Mar 30, 2023.
-    //  # implementation(project(":libs:Auto.js-ApkBuilder-1.0.3"))
+    //  # implementation(project(":libs:Autojs-ApkBuilder-1_0_3"))
 
     // Extracted from com.github.hyb1996:MutableTheme:1.0.0
     implementation(libs.recyclerview)
