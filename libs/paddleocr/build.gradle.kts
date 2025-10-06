@@ -163,7 +163,7 @@ android {
 
 dependencies {
     implementation(fileTree(mapOf("include" to listOf("*.jar"), "dir" to "libs")))
-    implementation(project(mapOf("path" to ":libs:org.opencv-${versionMap["OPENCV"]}")))
+    implementation(project(mapOf("path" to ":libs:org-opencv-${versionMap["OPENCV"]}".replace(".", "_"))))
     implementation(libs.core.ktx)
     implementation(libs.preference.ktx)
 }

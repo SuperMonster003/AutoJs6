@@ -10,29 +10,29 @@ private val modules = listOf(
 )
 
 private val libs = listOf(
-    "android-job-simplified-1.4.3",
-    "androidx.appcompat-1.0.2",
-    "apk-parser-1.0.2",
-    "com.tencent.bugly.crashreport-4.0.4",
-    "org.opencv-4.8.0",
+    "android-job-simplified-1_4_3",
+    "androidx-appcompat-1_0_2",
+    "apk-parser-1_0_2",
+    "com-tencent-bugly-crashreport-4_0_4",
+    "org-opencv-4_8_0",
     "paddleocr",
     "rapidocr",
     "imagequant",
 
-    "jackpal.androidterm-1.0.70",
-    "jackpal.androidterm.emulatorview-1.0.42",
-    "jackpal.androidterm.libtermexec-1.0",
+    "jackpal-androidterm-1_0_70",
+    "jackpal-androidterm-emulatorview-1_0_42",
+    "jackpal-androidterm-libtermexec-1_0",
 
-    "android-spackle-9.0.0",
-    "android-assertion-9.0.0",
-    "android-plugin-client-sdk-for-locale-9.0.0",
+    "android-spackle-9_0_0",
+    "android-assertion-9_0_0",
+    "android-plugin-client-sdk-for-locale-9_0_0",
 
-    "markwon-core-4.6.2",
-    "markwon-syntax-highlight-4.6.2",
+    "markwon-core-4_6_2",
+    "markwon-syntax-highlight-4_6_2",
 
-    "root-shell-1.6",
-    "expandable-layout-1.6.0",
-    "recyclerview-flexibledivider-1.4.0"
+    "root-shell-1_6",
+    "expandable-layout-1_6_0",
+    "recyclerview-flexibledivider-1_4_0"
 )
 
 include(
@@ -799,3 +799,9 @@ plugins {
     //  ! zh-CN: 让构建模块具备 JDK 自动解析/下载能力.
     id("org.gradle.toolchains.foojay-resolver-convention")
 }
+
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+
+includeBuild("build-logic")
+
+rootProject.name = "AutoJs6"
