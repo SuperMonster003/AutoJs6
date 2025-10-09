@@ -20,6 +20,7 @@ const SCRIPT_LIST = [
     'scrape-and-inject-agp-releases-list.mjs',
     'scrape-and-inject-ksp-releases-map.mjs',
     'scrape-and-update-foojay-resolver-version.mjs',
+    'scrape-and-update-android-releases.mjs',
     'scrape-and-update-readme-template-contributors-table.mjs',
 ];
 
