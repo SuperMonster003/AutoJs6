@@ -1,3 +1,6 @@
+type Cheerio<T> = import('cheerio').Cheerio<T>;
+type DomElement = import('domhandler').Element;
+
 type Page = import('puppeteer').Page;
 type Frame = import('puppeteer').Frame;
 type ElementHandle<T extends Node> = import('puppeteer').ElementHandle<T>;
@@ -12,6 +15,18 @@ type FindTargetRowsFilter = string | RegExp | ((s: string) => boolean);
 type TableDataStructureItemName = string;
 type TableDataStructureItem = RegExp | ((s: string) => boolean | string);
 type TableDataStructureItemForPageEvaluate = string | RegExp | ((s: string) => boolean | string);
+
+interface AndroidReleaseWiki {
+    RELEASE_NAME: string;
+    INTERNAL_CODENAME: string;
+    PLATFORM_VERSION: string;
+    API_LEVEL: number;
+    RELEASE_DATE: string;
+}
+
+interface AndroidReleaseCsv extends AndroidReleaseWiki {
+    VERSION_CODE: string;
+}
 
 interface AndroidStudioRelease {
     content: {
