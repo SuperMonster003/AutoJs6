@@ -6,4 +6,3 @@
 /src/main/assets/modules/obsolete/
 
 **/*.bak.java
-gradle-util-*.js

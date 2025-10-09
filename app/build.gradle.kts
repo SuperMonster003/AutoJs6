@@ -405,6 +405,11 @@ dependencies /* Auto.js Extensions */ {
     implementation(project(":modules:color-picker"))
 }
 
+dependencies /* Build Logic */ {
+    // Version Codes Generator
+    ksp(libs.ksp.version.codes.processor)
+}
+
 dependencies /* Archived */ {
     // Kotlin
     // @Comment by SuperMonster003 on May 19, 2022.

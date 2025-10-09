@@ -66,14 +66,22 @@ object Utils {
     }
 
     /**
-     * 统一 "版本信息打印 + 部署 + 清理" 生命周期钩子.
+     * Unified lifecycle hooks for "version info printing + deployment + cleanup".
      *
-     * @param project              当前模块 Project
-     * @param projectDisplayName   用于打印的项目展示名 (默认用模块名)
-     * @param versionLines         版本信息行 (如 ["OpenCV: 4.2.0", "NDK: 21.1.6352462"])
-     * @param libsToDeploy         需要部署/清理的 LibDeployer 列表
-     * @param cleanupFlagKey       gradle.ext 的布尔开关键 (如 "isCleanupPaddleOcr"), null 表示不参与清理逻辑
-     * @param extraFilesToDeleteOnClean clean 时额外需删除的相对路径
+     * zh-CN: 统一 "版本信息打印 + 部署 + 清理" 生命周期钩子.
+     *
+     * @param project Current module Project.<br>
+     *                zh-CN: 当前模块 Project.
+     * @param projectDisplayName Project display name for printing (defaults to module name).<br>
+     *                           zh-CN: 用于打印的项目展示名 (默认用模块名).
+     * @param versionLines Version information lines (e.g. ["OpenCV: 4.2.0", "NDK: 21.1.6352462"]).<br>
+     *                     zh-CN: 版本信息行 (如 ["OpenCV: 4.2.0", "NDK: 21.1.6352462"]).
+     * @param libsToDeploy List of LibDeployer objects that need to be deployed/cleaned.<br>
+     *                     zh-CN: 需要部署/清理的 LibDeployer 列表.
+     * @param cleanupFlagKey Boolean switch key in gradle.ext (e.g. "isCleanupPaddleOcr"), null means not participating in cleanup logic.<br>
+     *                       zh-CN: gradle.ext 的布尔开关键 (如 "isCleanupPaddleOcr"), null 表示不参与清理逻辑.
+     * @param extraFilesToDeleteOnClean Additional relative paths to delete during clean.<br>
+     *                                  zh-CN: clean 时额外需删除的相对路径.
      */
     @JvmOverloads
     fun configureLibraryLifecycleHooks(
@@ -87,10 +95,12 @@ object Utils {
         val gradle = project.gradle
         val onlyClean = AtomicBoolean(false)
 
-        // 单一监听器: 既判断 "是否纯 clean", 也负责非 clean 流程的打印与部署
+        // Single listener: both determines "is pure clean"
+        // and handles non-clean flow printing and deployment.
+        // zh-CN: 单一监听器: 既判断 "是否纯 clean", 也负责非 clean 流程的打印与部署.
         gradle.taskGraph.addTaskExecutionGraphListener { graph ->
-            val all = graph.allTasks
-            val isOnlyClean = all.isNotEmpty() && all.all { it.name.contains("clean", ignoreCase = true) }
+            val tasks = graph.allTasks
+            val isOnlyClean = tasks.isNotEmpty() && tasks.all { it.name.contains("clean", ignoreCase = true) }
             onlyClean.set(isOnlyClean)
 
             if (!isOnlyClean) {
@@ -103,7 +113,8 @@ object Utils {
             }
         }
 
-        // clean 钩子 (显式 Java SAM, 避免 Kotlin/Groovy 重载歧义)
+        // "clean" hooks (explicit Java SAM to avoid Kotlin/Groovy overload ambiguity).
+        // zh-CN: "clean" 钩子 (显式 Java SAM, 避免 Kotlin/Groovy 重载歧义).
         @Suppress("ObjectLiteralToLambda")
         project.tasks.named("clean").configure(object : Action<Task> {
             override fun execute(cleanTask: Task) {
@@ -113,7 +124,8 @@ object Utils {
                         project.delete(project.file(rel))
                     }
 
-                    // 未提供开关键则直接跳过清理逻辑
+                    // Skip the cleanup logic if no cleanup flag key is provided.
+                    // zh-CN: 未提供开关键则直接跳过清理逻辑.
                     val key = cleanupFlagKey ?: return@doFirst
                     val cleanupEnabled = gradle.extra.require<Boolean>(key)
                     if (cleanupEnabled && onlyClean.get()) {
@@ -128,14 +140,22 @@ object Utils {
     }
 
     /**
-     * 注册模板 APK 拷贝: 在指定 assemble 任务完成后, 将 universal APK 拷贝为 assets 模板.
+     * Register template APK copying: After the specified assemble task is completed, copy universal APK as assets template.
      *
-     * @param project    当前模块 Project
-     * @param taskName   构建任务名 (如 "assembleInrtRelease")
-     * @param srcDir     APK 输出目录 (如 "build/outputs/apk/inrt/release")
-     * @param destDir    目标目录 (如 "src/main/assets-app")
-     * @param templateApkName 模板文件名 (如 "template.apk")
-     * @param universalNameFn 从版本名得出源 APK 名的函数 (默认 inrt-v<ver>-universal.apk)
+     * zh-CN: 注册模板 APK 拷贝: 在指定 assemble 任务完成后, 将 universal APK 拷贝为 assets 模板.
+     *
+     * @param project Current module Project.<br>
+     *                zh-CN: 当前模块 Project.
+     * @param taskName Build task name (like "assembleInrtRelease").<br>
+     *                 zh-CN: 构建任务名 (如 "assembleInrtRelease").
+     * @param srcDir APK output directory (like "build/outputs/apk/inrt/release").<br>
+     *               zh-CN: APK 输出目录 (如 "build/outputs/apk/inrt/release").
+     * @param destDir Target directory (like "src/main/assets-app").<br>
+     *                zh-CN: 目标目录 (如 "src/main/assets-app").
+     * @param templateApkName Template file name (like "template.apk").<br>
+     *                        zh-CN: 模板文件名 (如 "template.apk").
+     * @param universalNameFn Function to derive source APK name from version name (default inrt-v<ver>-universal.apk).<br>
+     *                        zh-CN: 从版本名得出源 APK 名的函数 (默认 inrt-v<ver>-universal.apk).
      */
     @JvmOverloads
     fun registerTemplateApkCopy(
@@ -149,7 +169,8 @@ object Utils {
         val versions = newVersions(project)
         val versionName = versions.appVersionName
 
-        // 待所有项目评估完成后再定位并配置任务, 避免早期查找不到任务
+        // Wait for all projects to be evaluated before locating and configuring tasks to avoid early lookup failure.
+        // zh-CN: 待所有项目评估完成后再定位并配置任务, 避免早期查找不到任务.
         project.gradle.projectsEvaluated {
             val assembleTask = project.tasks.findByName(taskName)
             if (assembleTask == null) {
@@ -207,15 +228,21 @@ object Utils {
 
     private fun capitalize(s: String) = "${s[0].uppercase(Locale.getDefault())}${s.substring(1)}"
 
-    /**
-     * 统一为 Android 模块配置 Java/Kotlin 的目标版本:
-     * - Android.compileOptions.sourceCompatibility/targetCompatibility = versions.javaVersion
-     * - Kotlin 编译任务的 jvmTarget = versions.javaVersion 对应级别
-     *
-     * 注意:
-     * - Android 扩展在 projectsEvaluated 后稳定可得
-     * - Kotlin 任务用 tasks.configureEach 动态配置, 任务何时创建都能命中
-     */
+    // Configure Java/Kotlin target version uniformly for Android modules:
+    // - Android.compileOptions.sourceCompatibility/targetCompatibility = versions.javaVersion 
+    // - Kotlin compile tasks jvmTarget = versions.javaVersion level
+    // Note:
+    // - Android extension is stably available after projectsEvaluated
+    // - Kotlin tasks use tasks.configureEach for dynamic configuration to catch whenever tasks are created
+    //
+    // zh-CN:
+    //
+    // 统一为 Android 模块配置 Java/Kotlin 的目标版本:
+    // - Android.compileOptions.sourceCompatibility/targetCompatibility = versions.javaVersion
+    // - Kotlin 编译任务的 jvmTarget = versions.javaVersion 对应级别
+    // 注意:
+    // - Android 扩展在 projectsEvaluated 后稳定可得
+    // - Kotlin 任务用 tasks.configureEach 动态配置, 任务何时创建都能命中
     @JvmStatic
     fun configureJvmForAndroidModule(project: Project) {
         val versions = newVersions(project)
@@ -224,11 +251,15 @@ object Utils {
         val installer = {
             project.logInfo("[JvmConv] Detected Android plugin in module='${project.path}', installing configuration")
 
-            // A) Java: 使用 Toolchain (模块级 + 任务级), 不要设置 --release
+            // Java: Use Toolchain (module-level + task-level), do not set --release.
+            // zh-CN: Java: 使用 Toolchain (模块级 + 任务级), 不要设置 --release.
+
             configureJavaToolchainLanguageLevel(project, versions.javaVersionInt)
             configureJavaToolchainForAllJavaCompile(project, versions.javaVersionInt)
 
-            // B) Kotlin: 继续懒配置设置 jvmTarget (你之前已验证成功)
+            // Kotlin: Continue lazy configuration to set jvmTarget.
+            // zh-CN: Kotlin: 继续懒配置设置 jvmTarget.
+
             configureKotlinJvmTargetLazily(project, versions)
 
             project.logInfo("[JvmConv] Installed Java toolchain (module+tasks) and Kotlin jvmTarget for '${project.path}'")
@@ -238,7 +269,8 @@ object Utils {
         project.plugins.withId("com.android.library") { installer() }
     }
 
-    // 模块级 Toolchain: 让 AGP/Gradle 知道本模块应使用的 JDK 语言级别
+    // Module-level toolchain: Let AGP/Gradle know which JDK language level should be used for this module.
+    // zh-CN: 模块级 Toolchain: 让 AGP/Gradle 知道本模块应使用的 JDK 语言级别.
     private fun configureJavaToolchainLanguageLevel(project: Project, target: Int) {
         val javaExt = project.extensions.findByType(JavaPluginExtension::class.java)
         if (javaExt == null) {
@@ -254,7 +286,8 @@ object Utils {
         }
     }
 
-    // 任务级 Toolchain: 对所有 JavaCompile 指定 javaCompiler, 且不要设置 --release (AGP 禁止)
+    // Task-level Toolchain: Specify javaCompiler for all JavaCompile tasks, without setting --release (prohibited by AGP).
+    // zh-CN: 任务级 Toolchain: 对所有 JavaCompile 指定 javaCompiler, 且不要设置 --release (AGP 禁止).
     private fun configureJavaToolchainForAllJavaCompile(project: Project, target: Int) {
         val toolchains = runCatching {
             project.extensions.getByType(JavaToolchainService::class.java)
@@ -272,17 +305,20 @@ object Utils {
                 }.onFailure {
                     project.logError("[JvmConv] '${t.path}' set javaCompiler(toolchain) failed: ${it.message}", it)
                 }
-
-                // 不要设置 t.options.release, AGP 会报错阻止
-                // 也不强制改写 sourceCompatibility/targetCompatibility, 交给 AGP + toolchain 统一管理
             }
         })
     }
 
-    // 为 KotlinCompile 任务设置 jvmTarget: 使用 configureEach, 任务实现时自动应用; 兼容新旧 API
+    // Configure jvmTarget for KotlinCompile tasks:
+    // Use configureEach for lazy configuration on task creation;
+    // Compatible with old and new APIs.
+    // zh-CN:
+    // 为 KotlinCompile 任务设置 jvmTarget:
+    // 使用 configureEach, 任务实现时自动应用;
+    // 兼容新旧 API.
     private fun configureKotlinJvmTargetLazily(project: Project, versions: Versions) {
-        val desiredStr = versions.javaVersionString         // 例如 "22"
-        val desiredEnumName = "JVM_${desiredStr}"           // 例如 "JVM_22"
+        val desiredStr = versions.javaVersionString // e.g. "22"
+        val desiredEnumName = "JVM_${desiredStr}" // e.g. "JVM_22"
         project.logInfo("[JvmConv] Will configure Kotlin jvmTarget lazily to '$desiredEnumName' in '${project.path}'")
 
         project.tasks.configureEach(object : Action<Task> {
@@ -291,7 +327,8 @@ object Utils {
 
                 project.logInfo("[JvmConv] <KotlinTask> '${task.path}' class='${task.javaClass.name}'")
 
-                // 优先尝试 Kotlin 2.x: compilerOptions.jvmTarget(Property<JvmTarget>)
+                // Try Kotlin 2.x first: compilerOptions.jvmTarget(Property<JvmTarget>).
+                // zh-CN: 优先尝试 Kotlin 2.x: compilerOptions.jvmTarget(Property<JvmTarget>).
                 val compilerOptions = runCatching {
                     task.javaClass.methods.firstOrNull { it.name == "getCompilerOptions" && it.parameterTypes.isEmpty() }
                         ?.also { project.logInfo("[JvmConv] '${task.path}' found method: ${it.toGenericString()}") }
@@ -344,7 +381,8 @@ object Utils {
                     project.logWarn("[JvmConv] '${task.path}' compilerOptions not found, trying legacy kotlinOptions")
                 }
 
-                // 兼容旧 API: kotlinOptions.setJvmTarget(String)
+                // Fallback to legacy API: kotlinOptions.setJvmTarget(String).
+                // zh-CN: 兼容旧 API: kotlinOptions.setJvmTarget(String).
                 val kotlinOptions = runCatching {
                     task.javaClass.methods.firstOrNull { it.name == "getKotlinOptions" && it.parameterTypes.isEmpty() }
                         ?.also { project.logInfo("[JvmConv] '${task.path}' found method: ${it.toGenericString()}") }
