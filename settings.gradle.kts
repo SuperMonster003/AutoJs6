@@ -1,5 +1,12 @@
 @file:Suppress("SpellCheckingInspection")
 
+
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+
+rootProject.name = "root"
+
+includeBuild("build-logic")
+
 private val modules = listOf(
     "jieba-analysis",
     "apk-signer",
@@ -129,7 +136,7 @@ pluginManagement {
 
     data class Classpath(val id: String, val version: String)
 
-    data class Plugin(val id: String, val version: String, val isApply: Boolean = false)
+    data class Plugin(val id: String, val version: String, val isApply: Boolean = false, val share: Boolean = false)
 
     class Formatted(title: String, private val contents: Collection<String> = emptyList(), subtitle: String? = null, footers: Collection<String> = emptyList()) {
         private val formattedOutput = run {
@@ -390,8 +397,8 @@ pluginManagement {
             Classpath(id = "org.jetbrains.kotlin:kotlin-gradle-plugin", version = overriddenKotlinVersion ?: "auto:kotlin"),
             Classpath(id = "org.apache.commons:commons-compress", version = "toml:commons-compress"),
             Classpath(id = "org.tukaani:xz", version = "toml:xz"),
-            Plugin(id = "com.google.devtools.ksp", version = overriddenKspVersion ?: "auto:ksp"),
-            Plugin(id = "org.gradle.toolchains.foojay-resolver-convention", version = "toml:foojay-resolver-convention"),
+            Plugin(id = "com.google.devtools.ksp", version = overriddenKspVersion ?: "auto:ksp", share = true),
+            Plugin(id = "org.gradle.toolchains.foojay-resolver-convention", version = "toml:foojay-resolver-convention", share = true),
         )
 
         abstract inner class Platform(
@@ -676,6 +683,9 @@ pluginManagement {
                     lib.version
                 }
             }
+            if (lib.share) {
+                System.setProperty(lib.id, version)
+            }
             console.versionInfo += "Plugin: \"${lib.id}:$version\"${if (config.isHideConsoleInfoHintSuffix) "" else suffix}"
             mapOf("id" to lib.id, "version" to version, "isApply" to lib.isApply)
         }
@@ -799,9 +809,3 @@ plugins {
     //  ! zh-CN: 让构建模块具备 JDK 自动解析/下载能力.
     id("org.gradle.toolchains.foojay-resolver-convention")
 }
-
-enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
-
-includeBuild("build-logic")
-
-rootProject.name = "AutoJs6"
