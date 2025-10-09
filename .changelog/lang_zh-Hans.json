@@ -46,6 +46,7 @@
         "Gradle 构建脚本支持自动生成 VersionCodesList 类所需数据以降低脚本启动延迟",
         "使用版本目录 (Version Catalogs) 集中管理 Gradle 依赖和插件版本",
         "模块化 Gradle 构建脚本, 将共享构建逻辑迁移至 buildSrc 并抽象为约定插件",
+        "使用 Gradle 约定插件简化本地 AAR 库加载逻辑",
         "使用 Toolchain 替代 sourceCompatibility/targetCompatibility 以降低构建环境差异"
       ],
       "dependency": [

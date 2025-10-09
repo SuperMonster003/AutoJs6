@@ -1,9 +1,7 @@
-"expandable-layout-1.6.0.aar"
-    .let { path ->
-        rootProject.extra["configurationName"].toString().let { name ->
-            configurations.maybeCreate(name)
-            file(path).takeIf { it.exists() }?.also {
-                artifacts.add(name, it)
-            } ?: throw Exception("File not found: \"$path\"")
-        }
-    }
+plugins {
+    id("org.autojs.build.local-arr-register-convention")
+}
+
+localAars {
+    files += "expandable-layout-1.6.0.aar"
+}
