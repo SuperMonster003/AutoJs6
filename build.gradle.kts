@@ -4,8 +4,6 @@
 //  ! Blocks "buildscript" and "plugins" have been moved to "settings.gradle.kts".
 //  ! zh-CN: 代码块 "buildscript" 以及 "plugins" 已迁移至 "settings.gradle.kts".
 
-extra["configurationName"] = "default"
-
 allprojects {
     repositories {
         mavenCentral()
