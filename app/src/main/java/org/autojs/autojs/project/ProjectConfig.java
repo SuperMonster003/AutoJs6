@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
@@ -256,7 +257,7 @@ public class ProjectConfig {
 
         setFieldIfMatches(namePattern, s, projectConfig::setName);
         setFieldIfMatches(versionNamePattern, s, projectConfig::setVersionName);
-        setFieldForIntIfMatches(versionCodePattern, s, projectConfig::setVersionCode);
+        setFieldForDoubleIfMatches(versionCodePattern, s, versionCode -> projectConfig.setVersionCode((int) versionCode));
         setFieldIfMatches(packageNamePattern, s, projectConfig::setPackageName);
         setFieldIfMatches(mainPattern, s, projectConfig::setMainScriptFileName);
         setFieldIfMatches(iconPattern, s, projectConfig::setIconPath);
@@ -266,8 +267,8 @@ public class ProjectConfig {
         setListIfMatches(libsPattern, s, projectConfig::setLibs);
         setListIfMatches(useFeaturesPattern, s, projectConfig::setFeatures);
 
-        setFieldForIntIfMatches(buildTimePattern, s, buildInfo::setBuildTime);
-        setFieldForIntIfMatches(buildNumberPattern, s, buildInfo::setBuildNumber);
+        setFieldForDoubleIfMatches(buildTimePattern, s, buildTime -> buildInfo.setBuildTime((long) buildTime));
+        setFieldForDoubleIfMatches(buildNumberPattern, s, buildNumber -> buildInfo.setBuildNumber((long) buildNumber));
         setFieldIfMatches(buildIdPattern, s, buildInfo::setBuildId);
 
         setFieldForBooleanIfMatches(launchConfigHideLogsPattern, s, value -> launchConfig.setLogsVisible(!value));
@@ -327,17 +328,17 @@ public class ProjectConfig {
         }
     }
 
-    private static void setFieldForIntIfMatches(Pattern pattern, String s, java.util.function.IntConsumer setter) {
+    private static void setFieldForDoubleIfMatches(Pattern pattern, String s, java.util.function.DoubleConsumer setter) {
         Matcher matcher = pattern.matcher(s);
         if (matcher.find()) {
-            setter.accept(Integer.parseInt(matcher.group(1)));
+            setter.accept(Double.parseDouble(Objects.requireNonNull(matcher.group(1))));
         }
     }
 
     private static void setFieldForBooleanIfMatches(Pattern pattern, String s, java.util.function.Consumer<Boolean> setter) {
         Matcher matcher = pattern.matcher(s);
         if (matcher.find()) {
-            setter.accept(Boolean.getBoolean(matcher.group(1)));
+            setter.accept(Boolean.getBoolean(Objects.requireNonNull(matcher.group(1))));
         }
     }
 

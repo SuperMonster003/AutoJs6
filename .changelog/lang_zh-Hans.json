@@ -28,6 +28,7 @@
         "images 部分相关方法可能引发内存泄露的问题 _[`issue #372`](http://issues.autojs6.com/372)_",
         "Android 10 UiObject#child 方法可能出现 ArrayIndexOutOfBoundsException 异常的问题 _[`issue #416`](http://issues.autojs6.com/416)_",
         "运行项目时 project.json 配置参数无法正常解析的问题",
+        "修复项目配置文件中构建版本号或构建时间出现较大数字时可能导致应用崩溃的问题",
         "频繁获取或重建 ImageReader 时可能因缓冲区暂无可用帧导致应用崩溃的问题",
         "打包应用无法正常使用 Paddle OCR 与 Rapid OCR 功能的问题",
         "版本历史页面部分系统因字体差别导致统计数据显示不完整的问题",
