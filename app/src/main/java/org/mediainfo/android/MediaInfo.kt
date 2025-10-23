@@ -17,9 +17,10 @@ package org.mediainfo.android
 class MediaInfo {
 
     private var mIsCanceled: Int = 0
+    private var mIsAvailable = false
 
     init {
-        System.loadLibrary("mediainfo")
+        mIsAvailable = runCatching { System.loadLibrary("mediainfo") }.isSuccess
     }
 
     /**
@@ -30,8 +31,8 @@ class MediaInfo {
      * @param parameter Parameter you are looking for in the stream (codec, width, bitrate, ...), in integer format
      * @return a string about information you search, an empty string if there is a problem.
      */
-    fun get(filename: String, streamKind: StreamKind, streamNum: Int, parameter: Int): String {
-        return getById(filename, streamKind.ordinal, streamNum, parameter /* InfoKind.TEXT */)
+    fun get(filename: String, streamKind: StreamKind, streamNum: Int, parameter: Int): String = checkAvailability {
+        getById(filename, streamKind.ordinal, streamNum, parameter /* InfoKind.TEXT */)
     }
 
     /**
@@ -43,8 +44,8 @@ class MediaInfo {
      * @param infoKind Kind of information you want about the parameter (the text, the measure, the help, ...)
      * @return a string about information you search, an empty string if there is a problem.
      */
-    fun get(filename: String, streamKind: StreamKind, streamNum: Int, parameter: Int, infoKind: InfoKind): String {
-        return getByIdDetail(filename, streamKind.ordinal, streamNum, parameter, infoKind.ordinal)
+    fun get(filename: String, streamKind: StreamKind, streamNum: Int, parameter: Int, infoKind: InfoKind): String = checkAvailability {
+        getByIdDetail(filename, streamKind.ordinal, streamNum, parameter, infoKind.ordinal)
     }
 
     /**
@@ -55,8 +56,8 @@ class MediaInfo {
      * @param parameter Parameter you are looking for in the stream (codec, width, bitrate, ...), in string format ("Codec", "Width", ...)
      * @return a string about information you search, an empty string if there is a problem
      */
-    fun get(filename: String, streamKind: StreamKind, streamNum: Int, parameter: String): String {
-        return getByName(filename, streamKind.ordinal, streamNum, parameter /* InfoKind.TEXT, InfoKind.NAME */)
+    fun get(filename: String, streamKind: StreamKind, streamNum: Int, parameter: String): String = checkAvailability {
+        getByName(filename, streamKind.ordinal, streamNum, parameter /* InfoKind.TEXT, InfoKind.NAME */)
     }
 
     /**
@@ -68,8 +69,8 @@ class MediaInfo {
      * @param infoKind Kind of information you want about the parameter (the text, the measure, the help, ...)
      * @return a string about information you search, an empty string if there is a problem.
      */
-    fun get(filename: String, streamKind: StreamKind, streamNum: Int, parameter: String, infoKind: InfoKind): String {
-        return getByNameDetail(filename, streamKind.ordinal, streamNum, parameter, infoKind.ordinal, InfoKind.NAME.ordinal)
+    fun get(filename: String, streamKind: StreamKind, streamNum: Int, parameter: String, infoKind: InfoKind): String = checkAvailability {
+        getByNameDetail(filename, streamKind.ordinal, streamNum, parameter, infoKind.ordinal, InfoKind.NAME.ordinal)
     }
 
     /**
@@ -82,8 +83,8 @@ class MediaInfo {
      * @param searchKind Where to look for the parameter
      * @return a string about information you search, an empty string if there is a problem.
      */
-    fun get(filename: String, streamKind: StreamKind, streamNum: Int, parameter: String, infoKind: InfoKind, searchKind: InfoKind): String {
-        return getByNameDetail(filename, streamKind.ordinal, streamNum, parameter, infoKind.ordinal, searchKind.ordinal)
+    fun get(filename: String, streamKind: StreamKind, streamNum: Int, parameter: String, infoKind: InfoKind, searchKind: InfoKind): String = checkAvailability {
+        getByNameDetail(filename, streamKind.ordinal, streamNum, parameter, infoKind.ordinal, searchKind.ordinal)
     }
 
     /**
@@ -92,8 +93,8 @@ class MediaInfo {
      * @param streamKind Kind of Stream (general, video, audio, ...)
      * @return number of streams of the given stream kind
      */
-    fun countGet(filename: String, streamKind: StreamKind): Int {
-        return countGet(filename, streamKind.ordinal, -1)
+    fun countGet(filename: String, streamKind: StreamKind): Int = checkAvailability {
+        countGet(filename, streamKind.ordinal, -1)
     }
 
     /**
@@ -103,21 +104,19 @@ class MediaInfo {
      * @param streamNumber Stream number in Kind of stream
      * @return number of streams of the given stream kind
      */
-    fun countGet(filename: String, streamKind: StreamKind, streamNumber: Int): Int {
-        return countGet(filename, streamKind.ordinal, streamNumber)
+    fun countGet(filename: String, streamKind: StreamKind, streamNumber: Int): Int = checkAvailability {
+        countGet(filename, streamKind.ordinal, streamNumber)
     }
 
-    fun getMI(filename: String): String {
-        return getMediaInfo(filename)
+    fun getMI(filename: String): String = checkAvailability {
+        getMediaInfo(filename)
     }
 
-    fun getMIOption(param: String): String {
-        return getMediaInfoOption(param)
+    fun getMIOption(param: String): String = checkAvailability {
+        getMediaInfoOption(param)
     }
 
-    fun getIsCanceled() = mIsCanceled
-
-    fun getMediaInfoTrimmed(filename: String): String {
+    fun getMediaInfoTrimmed(filename: String): String = checkAvailability {
         var result = getMediaInfo(filename)
 
         replaceMap.forEach { map ->
@@ -129,12 +128,16 @@ class MediaInfo {
         result.split("\n").forEach { s ->
             countSpacesBeforeColon(s).let { if (maxWhitespaceToTrim == 0 || it in 1..maxWhitespaceToTrim) maxWhitespaceToTrim = it }
         }
-        return result.split("\n")
+        result.split("\n")
             .joinToString("\n") {
                 trimSpacesBeforeColon(it, maxOf(0, maxWhitespaceToTrim - 1))
                     .replace(Regex("^[A-Z][a-z]+$"), "# $0")
             }
     }
+
+    fun isCanceled() = mIsCanceled
+
+    fun isAvailable() = mIsAvailable
 
     private fun countSpacesBeforeColon(input: String): Int {
         val index = input.indexOf(':')
@@ -173,6 +176,11 @@ class MediaInfo {
     private external fun getByNameDetail(filename: String, streamKind: Int, streamNum: Int, parameter: String, kindOfInfo: Int, kindOfSearch: Int): String
 
     private external fun countGet(filename: String, streamKind: Int, streamNum: Int): Int
+
+    private fun <R> checkAvailability(func: () -> R): R {
+        require(mIsAvailable) { "MediaInfo library is not available" }
+        return func()
+    }
 
     // @Remark
     //  ! Don't change it carelessly. This order is from MediaInfo_Const.h
