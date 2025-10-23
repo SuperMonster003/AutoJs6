@@ -9,7 +9,6 @@ import com.tencent.bugly.crashreport.CrashReport.CrashHandleCallback
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.accessibility.AccessibilityService
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs6.BuildConfig
 import org.mozilla.javascript.RhinoException
 import java.lang.Thread.UncaughtExceptionHandler
@@ -46,12 +45,13 @@ class CrashHandler(private val errorReportClass: Class<*>) : CrashHandleCallback
 
     override fun uncaughtException(thread: Thread, ex: Throwable) {
         Log.e(TAG, "Uncaught Exception", ex)
-        ScriptRuntime.popException(ex.message ?: "Uncaught Exception")
+        // ScriptRuntime.popException(ex.message ?: "Uncaught Exception")
         val latestMessage = ex.message ?: "[ No error message ]"
         if (mCachedExceptionMessage.size > 4) {
             if (mCachedExceptionMessage.all { it.get()?.message == latestMessage } || mCachedExceptionMessage.size > 20) {
                 ScriptRuntime.popException(latestMessage)
-                ClipboardUtils.setClip(GlobalAppContext.get(), ex.stackTraceToString())
+                // ClipboardUtils.setClip(GlobalAppContext.get(), ex.stackTraceToString())
+                startCrashReportActivity("Uncaught Exception", ex.stackTraceToString())
                 exitProcess(1)
             }
         }

@@ -29,6 +29,7 @@ import org.autojs.autojs.external.receiver.DynamicBroadcastReceivers
 import org.autojs.autojs.ipc.InAppEventBus
 import org.autojs.autojs.leakcanary.LeakCanarySetup
 import org.autojs.autojs.pluginclient.DevPluginService
+import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.timing.TimedTaskManager
 import org.autojs.autojs.timing.TimedTaskScheduler
 import org.autojs.autojs.tool.CrashHandler
@@ -58,21 +59,31 @@ class App : MultiDexApplication() {
 
         GlobalAppContext.set(this)
         instance = WeakReference(this)
-        devPluginService = DevPluginService(this)
 
-        setUpStaticsTool()
-        setUpDebugEnvironment()
-        setUpLeakCanary()
+        when {
+            ":crash_report".matchesProcessNameSuffix() -> {
+                ThemeColorManager.init()
+                setUpDefaultNightMode()
+            }
+            else /* Main process. */ -> {
+                devPluginService = DevPluginService(this)
 
-        AutoJs.initInstance(this)
-        GlobalKeyObserver.initIfNeeded(applicationContext)
-        setupDrawableImageLoader()
-        TimedTaskScheduler.init(this)
-        initDynamicBroadcastReceivers()
-        initMlKitContext()
-        Toaster.init(this)
+                setUpStaticsTool()
+                setUpDebugEnvironment()
+                setUpLeakCanary()
 
-        setUpDefaultNightMode()
+                AutoJs.initInstance(this)
+                GlobalKeyObserver.initIfNeeded(applicationContext)
+                setupDrawableImageLoader()
+                TimedTaskScheduler.init(this)
+                initDynamicBroadcastReceivers()
+                initMlKitContext()
+                Toaster.init(this)
+
+                ThemeColorManager.init()
+                setUpDefaultNightMode()
+            }
+        }
     }
 
     override fun attachBaseContext(base: Context) {
@@ -262,6 +273,10 @@ class App : MultiDexApplication() {
 
         val app: App
             get() = instance.get()!!
+
+        private fun String.matchesProcessNameSuffix(): Boolean {
+            return getProcessNameCompat().endsWith(this)
+        }
 
         fun getProcessNameCompat(): String {
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) getProcessName() else {

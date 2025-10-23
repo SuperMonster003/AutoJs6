@@ -55,7 +55,7 @@ class CrashReportActivity : BaseActivity() {
         binding.restart.setOnClickListener { restart() }
         binding.exit.setOnClickListener { exit() }
 
-        savedInstanceState ?: copy()
+        // savedInstanceState ?: copy()
     }
 
     @Deprecated("Deprecated in Java")

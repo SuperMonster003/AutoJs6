@@ -82,7 +82,6 @@ abstract class AbstractAutoJs protected constructor(val application: Application
         addAccessibilityServiceDelegates()
         registerActivityLifecycleCallbacks()
         WrappedShizuku.onCreate()
-        ThemeColorManager.init()
     }
 
     private fun initContextFactory() {
