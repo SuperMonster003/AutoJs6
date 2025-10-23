@@ -223,11 +223,8 @@
             android:targetActivity="org.autojs.autojs.ui.splash.SplashActivity">
 
             <intent-filter>
-
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="${intentCategory}" />
-
             </intent-filter>
 
             <meta-data
@@ -244,11 +241,8 @@
             android:targetActivity="org.autojs.autojs.ui.splash.SplashActivity">
 
             <intent-filter>
-
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="${intentCategory}" />
-
             </intent-filter>
 
             <meta-data
@@ -281,11 +275,8 @@
             android:taskAffinity="org.autojs.autojs.external.shortcut.ShortcutActivity"
             android:theme="@android:style/Theme.NoDisplay">
             <intent-filter>
-
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.DEFAULT" />
-
             </intent-filter>
         </activity>
 
@@ -321,8 +312,18 @@
             android:name="org.autojs.autojs.ui.settings.DeveloperOptionsActivity"
             android:theme="@style/AppTheme.Settings" />
 
-        <!-- <activity android:name="org.autojs.autojs.ui.error.CrashReportActivity" android:process=":crash_report"/> -->
-        <activity android:name="org.autojs.autojs.ui.error.CrashReportActivity" />
+        <activity
+            android:name="org.autojs.autojs.ui.error.CrashReportActivity"
+            android:process=":crash_report"
+            android:exported="false"
+            android:launchMode="singleTask"
+            android:taskAffinity="${applicationId}.crash_report"
+            android:excludeFromRecents="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
 
         <activity
             android:name="org.autojs.autojs.external.tasker.TaskerScriptEditActivity"
@@ -378,11 +379,8 @@
             </intent-filter>
 
             <intent-filter>
-
                 <action android:name="android.intent.action.CREATE_SHORTCUT" />
-
                 <category android:name="android.intent.category.DEFAULT" />
-
             </intent-filter>
 
         </activity>
@@ -449,73 +447,41 @@
             android:exported="false">
 
             <intent-filter>
-
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
-
                 <action android:name="android.intent.action.QUICKBOOT_POWERON" />
-
                 <action android:name="android.intent.action.TIME_SET" />
-
                 <action android:name="android.intent.action.TIMEZONE_CHANGED" />
-
                 <action android:name="android.intent.action.UID_REMOVED" />
-
                 <action android:name="android.intent.action.ACTION_POWER_CONNECTED" />
-
                 <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED" />
-
                 <action android:name="android.intent.action.ACTION_SHUTDOWN" />
-
                 <action android:name="android.intent.action.ACTION_BATTERY_CHANGED" />
-
                 <action android:name="android.intent.action.DATE_CHANGED" />
-
                 <action android:name="android.intent.action.DREAMING_STARTED" />
-
                 <action android:name="android.intent.action.DREAMING_STOPPED" />
-
                 <action android:name="android.intent.action.HEADSET_PLUG" />
-
                 <action android:name="android.intent.action.INPUT_METHOD_CHANGED" />
-
                 <action android:name="android.intent.action.LOCALE_CHANGED" />
-
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
-
                 <action android:name="android.intent.action.MEDIA_CHECKING" />
-
                 <action android:name="android.intent.action.MEDIA_MOUNTED" />
-
                 <action android:name="android.intent.action.PACKAGE_FIRST_LAUNCH" />
-
                 <action android:name="android.intent.action.PROVIDER_CHANGED" />
-
                 <action android:name="android.intent.action.WALLPAPER_CHANGED" />
-
                 <action android:name="android.intent.action.USER_UNLOCKED" />
-
                 <action android:name="android.intent.action.USER_PRESENT" />
-
                 <action
                     android:name="android.net.conn.CONNECTIVITY_CHANGE"
                     tools:ignore="BatteryLife" />
-
             </intent-filter>
 
             <intent-filter>
-
                 <action android:name="android.intent.action.PACKAGE_ADDED" />
-
                 <action android:name="android.intent.action.PACKAGE_CHANGED" />
-
                 <action android:name="android.intent.action.PACKAGE_DATA_CLEARED" />
-
                 <action android:name="android.intent.action.PACKAGE_REMOVED" />
-
                 <action android:name="android.intent.action.PACKAGE_RESTARTED" />
-
                 <data android:scheme="package" />
-
             </intent-filter>
 
         </receiver>
@@ -539,23 +505,14 @@
             android:exported="true"
             android:label="@string/text_edit_script">
             <intent-filter>
-
                 <action android:name="android.intent.action.VIEW" />
-
                 <action android:name="android.intent.action.EDIT" />
-
                 <category android:name="android.intent.category.DEFAULT" />
-
                 <category android:name="android.intent.category.BROWSABLE" />
-
                 <data android:scheme="file" />
-
                 <data android:scheme="content" />
-
                 <data android:mimeType="application/x-javascript" />
-
                 <data android:mimeType="text/plain" />
-
             </intent-filter>
         </activity>
 
@@ -566,23 +523,14 @@
             android:taskAffinity="org.autojs.autojs.external.open.RunIntentActivity"
             android:theme="@android:style/Theme.NoDisplay">
             <intent-filter>
-
                 <action android:name="android.intent.action.VIEW" />
-
                 <action android:name="android.intent.action.EDIT" />
-
                 <category android:name="android.intent.category.DEFAULT" />
-
                 <category android:name="android.intent.category.BROWSABLE" />
-
                 <data android:scheme="file" />
-
                 <data android:scheme="content" />
-
                 <data android:mimeType="application/x-javascript" />
-
                 <data android:mimeType="text/plain" />
-
             </intent-filter>
         </activity>
 
@@ -592,23 +540,14 @@
             android:label="@string/text_import_script"
             android:theme="@style/AppTheme.Transparent">
             <intent-filter>
-
                 <action android:name="android.intent.action.VIEW" />
-
                 <action android:name="android.intent.action.EDIT" />
-
                 <category android:name="android.intent.category.DEFAULT" />
-
                 <category android:name="android.intent.category.BROWSABLE" />
-
                 <data android:scheme="file" />
-
                 <data android:scheme="content" />
-
                 <data android:mimeType="application/x-javascript" />
-
                 <data android:mimeType="text/plain" />
-
             </intent-filter>
         </activity>
 

@@ -38,10 +38,9 @@ public class ErrorDialogActivity extends BaseActivity {
                 .content(message)
                 .positiveText(positiveButtonText)
                 .positiveColorRes(R.color.dialog_button_default)
-                .cancelable(true)
-                .canceledOnTouchOutside(true)
+                .cancelable(false)
+                .canceledOnTouchOutside(false)
                 .onPositive((dialog, which) -> finish())
-                .dismissListener(dialog -> finish())
                 .show();
 
         MaterialDialogExtensions.makeTextCopyable(materialDialog, materialDialog.getContentView());
