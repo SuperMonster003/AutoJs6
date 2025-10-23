@@ -20,7 +20,6 @@ import com.hjq.toast.Toaster
 import com.tencent.bugly.Bugly
 import com.tencent.bugly.crashreport.CrashReport
 import io.reactivex.android.schedulers.AndroidSchedulers
-import org.autojs.autojs.apkbuilder.ApkBuilder
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.core.ui.inflater.ImageLoader
@@ -30,7 +29,6 @@ import org.autojs.autojs.external.receiver.DynamicBroadcastReceivers
 import org.autojs.autojs.ipc.InAppEventBus
 import org.autojs.autojs.leakcanary.LeakCanarySetup
 import org.autojs.autojs.pluginclient.DevPluginService
-import org.autojs.autojs.runtime.api.augment.ocr.Ocr
 import org.autojs.autojs.timing.TimedTaskManager
 import org.autojs.autojs.timing.TimedTaskScheduler
 import org.autojs.autojs.tool.CrashHandler
@@ -172,7 +170,6 @@ class App : MultiDexApplication() {
     }
 
     private fun initMlKitContext() {
-        ApkBuilder.Libs.MLKIT_OCR.ensureLibFiles(Ocr.Companion.OcrMode.MLKIT.value)
         MlKitContext.initializeIfNeeded(this)
     }
 
