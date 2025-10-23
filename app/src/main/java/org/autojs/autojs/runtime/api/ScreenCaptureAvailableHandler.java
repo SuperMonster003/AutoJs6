@@ -24,6 +24,7 @@ public record ScreenCaptureAvailableHandler(ScriptRuntime scriptRuntime, Images.
 
     @Override
     public void onCaptureAvailable(Image image) {
+        if (image == null) return;
         Images.setImageCaptureCallback(scriptRuntime, listener, image);
     }
 }

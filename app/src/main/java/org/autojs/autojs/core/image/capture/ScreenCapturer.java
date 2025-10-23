@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
+import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
 import android.media.Image;
 import android.media.ImageReader;
@@ -123,7 +124,7 @@ public class ScreenCapturer {
             }, mHandler);
         }
 
-        mVirtualDisplay = mMediaProjection.createVirtualDisplay(ScreenCapturer.class.getSimpleName(), width, height, screenDensity, 16, mImageReader.getSurface(), null, null);
+        mVirtualDisplay = mMediaProjection.createVirtualDisplay(ScreenCapturer.class.getSimpleName(), width, height, screenDensity, DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR, mImageReader.getSurface(), null, null);
     }
 
     private void refreshImageReader(int width, int height) {
@@ -167,10 +168,16 @@ public class ScreenCapturer {
     }
 
     public void setImageListenerAsync(ImageReader imageReader) {
-        if (mOnScreenCaptureAvailableListener != null) {
-            Image acquireLatestImage = imageReader.acquireLatestImage();
-            mOnScreenCaptureAvailableListener.onCaptureAvailable(acquireLatestImage);
-            acquireLatestImage.close();
+        var listener = mOnScreenCaptureAvailableListener;
+        if (listener == null) return;
+        try (Image img = imageReader.acquireLatestImage()) {
+            // acquireLatestImage may return null (no available frames/competition/switching).
+            // zh-CN: acquireLatestImage 可能返回 null (无可用帧/竞争/切换中).
+            if (img == null) return;
+            listener.onCaptureAvailable(img);
+        } catch (IllegalStateException e) {
+            // Ignore the current frame if ImageReader/VirtualDisplay is switching or closed.
+            // zh-CN: 当 ImageReader/VirtualDisplay 正在切换或已关闭时可能抛出, 忽略本帧.
         }
     }
 

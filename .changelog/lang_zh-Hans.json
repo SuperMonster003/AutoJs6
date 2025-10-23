@@ -1,11 +1,12 @@
 {
   "$data": {
     "v6.7.0": {
-      "released_date": "2025/10/09",
+      "released_date": "2025/10/19",
       "feature": [
         "zip 模块, 用于文件压缩与解压缩操作 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (参阅 项目文档 > [Zip](https://docs.autojs6.com/#/zip))",
         "mediainfo 模块, 用于查看媒体文件的详细信息 (参阅 项目文档 > [媒体信息](https://docs.autojs6.com/#/mediainfo))",
         "UiObject#isShifted 方法, 用于检测控件位置变化",
+        "s13n.bytes 方法, 用于标准化点对象及时长对象 (参阅 项目文档 > [标准化](https://docs.autojs6.com/#/s13n))",
         "structuredClone 全局方法, 用于深拷贝 JavaScript 对象 (参阅 [MDN](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/structuredClone))",
         "设置页面支持应用启动器图标设置选项 _[`issue #405`](http://issues.autojs6.com/405)_",
         "Scrapers 工具 (run-scrapers.mjs) 用于自动更新 Gradle 构建脚本结构化数据/README 通用数据/README 模板数据等"
@@ -15,6 +16,7 @@
         "timers.keepAlive 方法 timeout 参数功能无效的问题",
         "floaty.window/rawWindow 方法无法接受字符串参数的问题",
         "util.class[Name]/getClass[Name] 可能返回错误结果的问题",
+        "无法使用 console/toast 等方法显示 BigInt 数据类型的问题",
         "部分全局对象可能丢失 JavaScript 原型属性及方法的问题",
         "使用 XML 语法将 JavaScript 表达式作为属性值时, this 对象可能出现指向错误的问题",
         "canvas 元素控件 setMaxFps 方法内部帧率计算错误",
@@ -24,6 +26,7 @@
         "images 部分相关方法可能引发内存泄露的问题 _[`issue #372`](http://issues.autojs6.com/372)_",
         "Android 10 UiObject#child 方法可能出现 ArrayIndexOutOfBoundsException 异常的问题 _[`issue #416`](http://issues.autojs6.com/416)_",
         "运行项目时 project.json 配置参数无法正常解析的问题",
+        "频繁获取或重建 ImageReader 时可能因缓冲区暂无可用帧导致应用崩溃的问题",
         "打包应用无法正常使用 Paddle OCR 与 Rapid OCR 功能的问题",
         "版本历史页面部分系统因字体差别导致统计数据显示不完整的问题",
         "部分设备无法正常初始化 MLKit Google OCR 的问题 (试修) _[`issue #8`](http://issues.autojs6.com/8#issuecomment-3117061768)_",
