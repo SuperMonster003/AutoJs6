@@ -2,13 +2,15 @@ package org.autojs.autojs.runtime.api.augment.util
 
 import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.core.automator.UiObjectCollection
+import org.autojs.autojs.extension.AnyExtensions.isJsBoolean
 import org.autojs.autojs.extension.AnyExtensions.isJsNonNullObject
 import org.autojs.autojs.extension.AnyExtensions.isJsNullish
+import org.autojs.autojs.extension.AnyExtensions.isJsNumber
+import org.autojs.autojs.extension.AnyExtensions.isJsString
 import org.autojs.autojs.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.extension.ArrayExtensions.toNativeObject
 import org.autojs.autojs.extension.FlexibleArray.Companion.component1
 import org.autojs.autojs.extension.FlexibleArray.Companion.component2
-import org.autojs.autojs.extension.NumberExtensions.jsString
 import org.autojs.autojs.extension.ScriptableExtensions.prop
 import org.autojs.autojs.rhino.ProxyObject
 import org.autojs.autojs.rhino.ProxyObject.Companion.AUGMENTED_CUSTOM_TO_STRING_KEY
@@ -577,7 +579,7 @@ object Inspect : Augmentable(), Invokable {
             // For some reason, typeof null is "object", so special case here.
             ctx.stylize("null", "null")
         }
-        value is String -> {
+        value.isJsString() -> {
             val content = Context.toString(js_json_stringify(value))
                 .removeSurrounding("\"")
                 .replace(Regex("'"), "\\\'")
@@ -594,10 +596,10 @@ object Inspect : Augmentable(), Invokable {
 
             ctx.stylize(content, "string")
         }
-        value is Number -> {
-            ctx.stylize(value.jsString, "number")
+        value.isJsNumber() -> {
+            ctx.stylize(value.toString(), "number")
         }
-        value is Boolean -> {
+        value.isJsBoolean() -> {
             ctx.stylize(Context.toString(value), "boolean")
         }
         else -> null
