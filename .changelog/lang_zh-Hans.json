@@ -16,6 +16,7 @@
         "timers.keepAlive 方法 timeout 参数功能无效的问题",
         "floaty.window/rawWindow 方法无法接受字符串参数的问题",
         "util.class[Name]/getClass[Name] 可能返回错误结果的问题",
+        "threads.disposable() 返回的对象在存取数据时可能被意外装箱的问题 _[`issue #435`](http://issues.autojs6.com/435)_",
         "无法使用 console/toast 等方法显示 BigInt 数据类型的问题",
         "部分全局对象可能丢失 JavaScript 原型属性及方法的问题",
         "使用 XML 语法将 JavaScript 表达式作为属性值时, this 对象可能出现指向错误的问题",
