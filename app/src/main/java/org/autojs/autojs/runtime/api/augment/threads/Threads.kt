@@ -28,6 +28,7 @@ class Threads(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         ::interrupt.name,
         ::start.name,
         ::pool.name,
+        ::disposable.name,
     )
 
     override val globalAssignmentFunctions = listOf(
@@ -77,6 +78,12 @@ class Threads(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             val (func, lock) = it
             require(func is BaseFunction) { "Argument \"func\" ${func.jsBrief()} for global.sync must be a JavaScript Function" }
             Synchronizer(func, lock)
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun disposable(scriptRuntime: ScriptRuntime, args: Array<out Any?>): VolatileDisposeNativeObject = ensureArgumentsIsEmpty(args) {
+            VolatileDisposeNativeObject()
         }
 
     }
