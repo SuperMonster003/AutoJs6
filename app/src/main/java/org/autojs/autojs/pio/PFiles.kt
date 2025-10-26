@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.res.AssetManager
 import android.text.TextUtils
 import org.autojs.autojs.app.GlobalAppContext
-import org.autojs.autojs.core.pref.Language
+import org.autojs.autojs.runtime.api.augment.converter.core.Bytes
 import org.autojs.autojs.tool.Func1
 import org.autojs.autojs.util.EnvironmentUtils
 import org.autojs.autojs.util.FileUtils
@@ -19,8 +19,6 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.nio.charset.Charset
-import kotlin.math.ln
-import kotlin.math.pow
 
 /**
  * Created by Stardust on Apr 1, 2017.
@@ -60,14 +58,9 @@ object PFiles {
     @JvmStatic
     fun create(path: String): Boolean {
         val f = File(path)
-        return if (path.endsWith(separator)) {
-            f.mkdir()
-        } else {
-            try {
-                f.createNewFile()
-            } catch (e: IOException) {
-                false
-            }
+        return when {
+            path.endsWith(separator) -> f.mkdir()
+            else -> runCatching { f.createNewFile() }.isSuccess
         }
     }
 
@@ -95,7 +88,7 @@ object PFiles {
     fun ensureDir(path: String): Boolean {
         val i = path.lastIndexOf(separator)
         return if (i >= 0) {
-            val folder = path.substring(0, i)
+            val folder = path.take(i)
             val file = File(folder)
             file.exists() || file.mkdirs()
         } else false
@@ -355,7 +348,7 @@ object PFiles {
         val fileName = getName(filePath)
         var b = fileName.lastIndexOf('.')
         if (b < 0) b = fileName.length
-        return fileName.substring(0, b)
+        return fileName.take(b)
     }
 
     fun copyAssetToTmpFile(context: Context, path: String): File {
@@ -450,14 +443,18 @@ object PFiles {
     }
 
     @JvmStatic
-    fun getHumanReadableSize(bytes: Long): String {
-        val unit = 1024
-        if (bytes < unit) return "$bytes B"
-        val exp = (ln(bytes.toDouble()) / ln(unit.toDouble())).toInt()
-
-        @Suppress("SpellCheckingInspection")
-        val pre = "KMGTPE".substring(exp - 1, exp)
-        return String.format(Language.getPrefLanguage().locale, "%.1f %sB", bytes / unit.toDouble().pow(exp.toDouble()), pre)
+    @JvmOverloads
+    fun getHumanReadableSize(bytes: Long, useIecIdentifier: Boolean = false): String {
+        return Bytes.string(
+            source = bytes.toDouble(),
+            fromUnit = "B",
+            toUnit = "AUTO",
+            useIecIdentifier = useIecIdentifier,
+            useSpace = true,
+            fractionDigits = 1,
+            trimTrailingZero = false,
+            signature = "PFiles.getHumanReadableSize",
+        )
     }
 
     @JvmStatic
@@ -511,10 +508,6 @@ object PFiles {
 
     @JvmStatic
     fun closeSilently(closeable: Closeable?) {
-        try {
-            closeable?.close()
-        } catch (ignored: IOException) {
-            /* Ignored. */
-        }
+        runCatching { closeable?.close() }
     }
 }

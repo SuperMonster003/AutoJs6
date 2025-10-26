@@ -2,11 +2,8 @@ package org.autojs.autojs.runtime.api.augment.util
 
 import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.core.automator.UiObjectCollection
-import org.autojs.autojs.extension.AnyExtensions.isJsBoolean
 import org.autojs.autojs.extension.AnyExtensions.isJsNonNullObject
 import org.autojs.autojs.extension.AnyExtensions.isJsNullish
-import org.autojs.autojs.extension.AnyExtensions.isJsNumber
-import org.autojs.autojs.extension.AnyExtensions.isJsString
 import org.autojs.autojs.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.extension.ArrayExtensions.toNativeObject
 import org.autojs.autojs.extension.FlexibleArray.Companion.component1
@@ -261,7 +258,13 @@ object Inspect : Augmentable(), Invokable {
     private fun formatValue(ctx: Ctx, `val`: Any?, recurseTimes: Int?): String {
         var value = `val`
 
-        while (value is Wrapper) value = value.unwrap()
+        while (value is Wrapper) {
+            val unwrapped = value.unwrap()
+            if (unwrapped is Number) {
+                return callToStringFunction(value as Scriptable)
+            }
+            value = unwrapped
+        }
 
         if (value is TopLevel) return "[object ${value.className}]"
 
@@ -579,7 +582,7 @@ object Inspect : Augmentable(), Invokable {
             // For some reason, typeof null is "object", so special case here.
             ctx.stylize("null", "null")
         }
-        value.isJsString() -> {
+        value is String -> {
             val content = Context.toString(js_json_stringify(value))
                 .removeSurrounding("\"")
                 .replace(Regex("'"), "\\\'")
@@ -590,16 +593,15 @@ object Inspect : Augmentable(), Invokable {
             //  ! to make a string quoted by single quotation marks.
             //  ! zh-CN:
             //  ! 我认为将字符串用单引号包裹起来并不是一个好主意.
-            //  ! PS: 我认为不应该翻译为 "我不认为...". :)
             //  !
             //  # ctx.stylize("'$content'", "string")
 
             ctx.stylize(content, "string")
         }
-        value.isJsNumber() -> {
+        value is Number -> {
             ctx.stylize(value.toString(), "number")
         }
-        value.isJsBoolean() -> {
+        value is Boolean -> {
             ctx.stylize(Context.toString(value), "boolean")
         }
         else -> null

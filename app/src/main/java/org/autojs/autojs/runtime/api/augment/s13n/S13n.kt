@@ -1,10 +1,15 @@
+@file:Suppress("MayBeConstant")
+
 package org.autojs.autojs.runtime.api.augment.s13n
 
+import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoSingletonFunctionInterface
 import org.autojs.autojs.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.extension.AnyExtensions.isJsObject
+import org.autojs.autojs.extension.AnyExtensions.isJsString
 import org.autojs.autojs.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.extension.ScriptableExtensions.prop
+import org.autojs.autojs.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.colors.Colors
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
@@ -25,6 +30,7 @@ import kotlin.math.roundToInt
 import kotlin.reflect.full.declaredMemberFunctions
 import kotlin.text.RegexOption.IGNORE_CASE
 import android.graphics.Point as AndroidPoint
+import org.autojs.autojs.runtime.api.augment.converter.core.Bytes as CoreBytes
 import org.opencv.core.Point as OpencvPoint
 
 object S13n : Augmentable() {
@@ -60,6 +66,7 @@ object S13n : Augmentable() {
         ::throwable.name,
         ::point.name,
         ::time.name,
+        ::bytes.name,
     )
 
     @JvmStatic
@@ -139,7 +146,7 @@ object S13n : Augmentable() {
         } ?: when {
             arg1.isJsObject() -> {
                 val options = arg1 as ScriptableObject
-                time(arrayOf(source, options.prop("fromUnit"), options.prop("toUnit")))
+                time(arrayOf(source, options.inquire("fromUnit"), options.inquire("toUnit")))
             }
             else -> {
                 val num = coerceNumber(source, NaN).also { require(!it.isNaN()) { "Failed to make ${arg0.jsBrief()} a number time being" } }
@@ -158,6 +165,47 @@ object S13n : Augmentable() {
             }
         }
     }
+
+    @JvmStatic
+    @RhinoSingletonFunctionInterface
+    fun bytes(args: Array<out Any?>): Any = ensureArgumentsLengthInRange(args, 1..2) { argList ->
+        val (arg0, arg1) = argList
+
+        when (argList.size) {
+            2 -> when {
+                arg1.isJsString() -> listOf("source", "fromUnit").forBytes(source = arg0, fromUnit = arg1)
+                else -> throw WrappedIllegalArgumentException("Invalid argument[1] ${arg1.jsBrief()} for $key.bytes")
+            }
+            1 -> listOf("source").forBytes(source = arg0)
+            else -> throw WrappedIllegalArgumentException("Invalid arguments length ${argList.size} for $key.bytes")
+        }
+    }
+
+    @JvmStatic
+    @JvmOverloads
+    @RhinoFunctionBody
+    fun bytesRhino(
+        source: Any? = null, /* Double */
+        fromUnit: Any? = null, /* String */
+        funcSignature: List<String> = emptyList(),
+    ): Any {
+        val signature = when {
+            funcSignature.isNotEmpty() -> "$key.bytes(${funcSignature.joinToString(", ")})"
+            else -> "$key.bytes()"
+        }
+        return CoreBytes.numberRhino(
+            source = source,
+            fromUnit = fromUnit,
+            toUnit = "B",
+            fractionDigits = 0,
+            signature = signature,
+        )
+    }
+
+    private fun List<String>.forBytes(
+        source: Any? = null, /* Double */
+        fromUnit: Any? = null, /* String */
+    ) = bytesRhino(source, fromUnit, this)
 
     private fun getTimeUnitSourceObject(unit: Any?): TimeUnit = when (unit) {
         is TimeUnit -> unit

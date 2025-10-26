@@ -51,6 +51,7 @@ import org.mozilla.javascript.Wrapper
 import org.mozilla.javascript.json.JsonParser
 import java.io.Serializable
 import java.lang.reflect.InvocationTargetException
+import java.math.BigInteger
 import kotlin.math.floor
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
@@ -65,6 +66,23 @@ object RhinoUtils {
     const val NOT_CONSTRUCTABLE = 0x02
     const val DEFAULT_CALLER = 0x03
     const val DEFAULT_CONSTRUCTOR = 0x04
+
+    /** [Long]: 2^53 - 1. */
+    const val MAX_SAFE_INT_IEEE754_L = 9_007_199_254_740_991L
+    /** [Long]: -(2^53 - 1). */
+    const val MIN_SAFE_INT_IEEE754_L = -9_007_199_254_740_991L
+    /** [Double]: 2^53 - 1. */
+    const val MAX_SAFE_INT_IEEE754_D = 9_007_199_254_740_991.0
+    /** [Double]: -(2^53 - 1). */
+    const val MIN_SAFE_INT_IEEE754_D = -9_007_199_254_740_991.0
+    /** [java.math.BigDecimal]: 2^53 - 1. */
+    val MAX_SAFE_INT_IEEE754_BD = MAX_SAFE_INT_IEEE754_D.toBigDecimal()
+    /** [java.math.BigDecimal]: -(2^53 - 1). */
+    val MIN_SAFE_INT_IEEE754_BD = MIN_SAFE_INT_IEEE754_D.toBigDecimal()
+    /** [java.math.BigInteger]: 2^53 - 1. */
+    val MAX_SAFE_INT_IEEE754_BI = MAX_SAFE_INT_IEEE754_L.toBigInteger()
+    /** [java.math.BigInteger]: -(2^53 - 1). */
+    val MIN_SAFE_INT_IEEE754_BI = MIN_SAFE_INT_IEEE754_L.toBigInteger()
 
     private val TAG = RhinoUtils::class.java.simpleName
 
@@ -274,8 +292,8 @@ object RhinoUtils {
 
     @JvmStatic
     fun unwrap(o: Any?): Any? = when (o) {
-        is String -> o
-        is ConsString -> o.toString()
+        is String, is ConsString -> Context.toString(o)
+        is BigInteger -> o
         is Number -> Context.toNumber(o)
         is Boolean -> Context.toBoolean(o)
         is Wrapper -> unwrap(o.unwrap())

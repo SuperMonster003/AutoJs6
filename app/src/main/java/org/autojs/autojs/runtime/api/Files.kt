@@ -192,8 +192,9 @@ class Files(private val scriptRuntime: ScriptRuntime) {
         return PFiles.isEmptyDir(path(path))
     }
 
-    fun getHumanReadableSize(bytes: Long): String {
-        return PFiles.getHumanReadableSize(bytes)
+    @JvmOverloads
+    fun getHumanReadableSize(bytes: Long, useIecIdentifier: Boolean = false): String {
+        return PFiles.getHumanReadableSize(bytes, useIecIdentifier)
     }
 
     fun getSimplifiedPath(path: String?): String {
