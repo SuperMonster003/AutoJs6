@@ -6,17 +6,32 @@
 
 # v6.7.0
 
-###### 2025/09/24
+###### 2025/10/26
 
+* `新增` cvt 模块, 用于数据单位转换 (参阅 项目文档 > [单位转换](https://docs.autojs6.com/#/cvt))
+* `新增` fmt 模块, 用于数据格式化 (参阅 项目文档 > [格式化](https://docs.autojs6.com/#/fmt))
 * `新增` zip 模块, 用于文件压缩与解压缩操作 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (参阅 项目文档 > [Zip](https://docs.autojs6.com/#/zip))
 * `新增` mediainfo 模块, 用于查看媒体文件的详细信息 (参阅 项目文档 > [媒体信息](https://docs.autojs6.com/#/mediainfo))
+* `新增` cvt.bytes 方法, 用于字节数据单位转换 (参阅 项目文档 > [单位转换](https://docs.autojs6.com/#/cvt))
+* `新增` fmt.bytes 方法, 用于字节数据格式化 (参阅 项目文档 > [数据格式化](https://docs.autojs6.com/#/fmt))
+* `新增` s13n.bytes 方法, 用于标准化字节数据 (参阅 项目文档 > [标准化](https://docs.autojs6.com/#/s13n))
 * `新增` UiObject#isShifted 方法, 用于检测控件位置变化
+* `新增` device.getSharedDeviceId 方法, 用于跨应用获取统一共享设备 ID _[`issue #455`](http://issues.autojs6.com/455)_
+* `新增` http 模块请求相关方法获取的 body 对象增加 stream/saveToFile/close 方法 _[`issue #452`](http://issues.autojs6.com/452)_
+* `新增` http 模块请求相关方法支持缓存控制选项参数 (cacheBody/bodyCacheThresholdBytes)
+* `新增` http 模块请求相关方法支持不安全选项参数 (isInsecure/insecure), 用于忽略证书相关异常 _[`issue #417`](http://issues.autojs6.com/417)_
+* `新增` http 模块请求相关方法支持 options.client 选项, 用于配置 OkHttpClient.Builder (如 followRedirects 等) _[`issue #454`](http://issues.autojs6.com/454)_
 * `新增` structuredClone 全局方法, 用于深拷贝 JavaScript 对象 (参阅 [MDN](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/structuredClone))
 * `新增` 设置页面支持应用启动器图标设置选项 _[`issue #405`](http://issues.autojs6.com/405)_
-* `新增` JS 脚本工具 (run-scrapers.mjs) 用于自动更新 Gradle 构建脚本锚点数据/README 通用数据/README 模板数据
+* `新增` Scrapers 工具 (run-scrapers.mjs) 用于自动更新 Gradle 构建脚本结构化数据/README 通用数据/README 模板数据等
 * `修复` isJavaClass/isJavaPackage 等全局方法无效的问题
 * `修复` timers.keepAlive 方法 timeout 参数功能无效的问题
 * `修复` floaty.window/rawWindow 方法无法接受字符串参数的问题
+* `修复` util.class[Name]/getClass[Name] 可能返回错误结果的问题
+* `修复` threads.disposable() 返回的对象在存取数据时可能被意外装箱的问题 _[`issue #435`](http://issues.autojs6.com/435)_
+* `修复` console/toast 等方法显示 Java Double 时可能丢失末尾零的问题
+* `修复` 无法使用 console/toast 等方法显示 BigInt 数据类型的问题
+* `修复` 部分全局对象可能丢失 JavaScript 原型属性及方法的问题
 * `修复` 使用 XML 语法将 JavaScript 表达式作为属性值时, this 对象可能出现指向错误的问题
 * `修复` canvas 元素控件 setMaxFps 方法内部帧率计算错误
 * `修复` images.concat 方法纵向拼接时宽度值计算错误
@@ -24,40 +39,51 @@
 * `修复` images 部分相关方法出现异常时 oneShot 标记功能失效的问题 _[`issue #372`](http://issues.autojs6.com/372)_
 * `修复` images 部分相关方法可能引发内存泄露的问题 _[`issue #372`](http://issues.autojs6.com/372)_
 * `修复` Android 10 UiObject#child 方法可能出现 ArrayIndexOutOfBoundsException 异常的问题 _[`issue #416`](http://issues.autojs6.com/416)_
+* `修复` 运行项目时 project.json 配置参数无法正常解析的问题
+* `修复` 修复项目配置文件中构建版本号或构建时间出现较大数字时可能导致应用崩溃的问题
+* `修复` 频繁获取或重建 ImageReader 时可能因缓冲区暂无可用帧导致应用崩溃的问题
 * `修复` 打包应用无法正常使用 Paddle OCR 与 Rapid OCR 功能的问题
 * `修复` 版本历史页面部分系统因字体差别导致统计数据显示不完整的问题
 * `修复` 部分设备无法正常初始化 MLKit Google OCR 的问题 (试修) _[`issue #8`](http://issues.autojs6.com/8#issuecomment-3117061768)_
-* `修复` ErrorDialogActivity 可能无法正常启动的问题 _[`issue #414`](http://issues.autojs6.com/414)_ _[`issue #340`](http://issues.autojs6.com/340#issuecomment-2973485826)_
+* `修复` ErrorDialogActivity 可能无法正常启动或短时间自动消失的问题 _[`issue #414`](http://issues.autojs6.com/414)_ _[`issue #340`](http://issues.autojs6.com/340#issuecomment-2973485826)_
 * `修复` 崩溃报告页面复制详细信息功能失效的问题
+* `修复` APK 文件类型信息对话框可能无法获取应用名称及 SDK 信息的问题
 * `修复` 构建工具启用 isCleanup[Paddle/Rapid]Ocr 配置选项时无法正常完成 Rebuild Project 任务的问题
-* `优化` http 模块相关方法支持不安全选项参数 (isInsecure/insecure), 用于忽略证书相关异常 _[`issue #417`](http://issues.autojs6.com/417)_
+* `优化` console.log 等方法打印全局对象 (images, app, ocr 等) 时支持显示详细信息
 * `优化` android.graphics.Paint#setColor 支持正常解析 ColorInt/ColorHex/ColorName 等颜色参数
 * `优化` 内置模块相关方法实参类型的异常消息增加类型摘要信息
 * `优化` 文件管理器浮动按钮展开后点击菜单项时优化菜单收起时机
 * `优化` 崩溃报告页面支持双指缩放调整字体大小并添加常用功能按钮
 * `优化` 应用启动器图标支持自适应图标特性 _[`issue #405`](http://issues.autojs6.com/405)_
+* `优化` 使用 LiveData 及 SharedFlow 替代已弃用的 LocalBroadcastManager
 * `优化` Gradle 构建脚本提升 7z 格式文件的解压效率
+* `优化` Gradle 构建脚本支持获取详细的 Android Studio IDE 版本 (如 "2025.1.4.7")
+* `优化` Gradle 构建脚本支持自动生成 VersionCodesList 类所需数据以降低脚本启动延迟
 * `优化` 使用版本目录 (Version Catalogs) 集中管理 Gradle 依赖和插件版本
-* `优化` 模块化 Gradle 脚本, 将共享构建逻辑迁移至 buildSrc 并抽象为约定插件
+* `优化` 模块化 Gradle 构建脚本, 将共享构建逻辑迁移至 buildSrc 并抽象为约定插件
+* `优化` 使用 Gradle 约定插件简化本地 AAR 库加载逻辑
 * `优化` 使用 Toolchain 替代 sourceCompatibility/targetCompatibility 以降低构建环境差异
 * `依赖` 本地化 Root Shell 版本 1.6
 * `依赖` 本地化 Expandable Layout 版本 1.6.0
 * `依赖` 本地化 Recyclerview Flexible Divider 版本 1.4.0
 * `依赖` 附加 Androidx Core (KTX) 版本 1.15.0
+* `依赖` 升级 Android SDK 版本 35 -> 36
 * `依赖` 升级 Gradle 版本 8.14 -> 8.14.3
+* `依赖` 升级 Desugar JDK Libs 版本 2.0.4 -> 2.1.5
+* `依赖` 升级 Android Material 版本 1.12.0 -> 1.13.0
+* `依赖` 升级 Androidx AppCompat 版本 1.7.0 -> 1.7.1
+* `依赖` 升级 Androidx Room 版本 2.7.1 -> 2.7.2
+* `依赖` 升级 Androidx WebKit 版本 1.13.0 -> 1.14.0
+* `依赖` 升级 Material Progressbar 版本 1.4.2 -> 1.6.1
 * `依赖` 升级 Apache Commons 版本 3.16.0 -> 3.18.0
 * `依赖` 升级 Retrofit2 Retrofit 版本 2.11.0 -> 2.12.0
 * `依赖` 升级 Retrofit2 Converter Gson 版本 2.11.0 -> 2.12.0
 * `依赖` 升级 Retrofit2 RxJava2 版本 2.11.0 -> 2.12.0
 * `依赖` 升级 Joda Time 版本 2.12.7 -> 2.14.0
-* `依赖` 升级 Androidx WebKit 版本 1.13.0 -> 1.14.0
 * `依赖` 升级 Gson 版本 2.11.0 -> 2.13.1
 * `依赖` 升级 ARSCLib 版本 1.3.1 -> 1.3.5
 * `依赖` 升级 Jsoup 版本 1.19.1 -> 1.20.1
 * `依赖` 升级 Junit Jupiter 版本 5.10.3 -> 5.13.0
-* `依赖` 升级 Androidx AppCompat 版本 1.7.0 -> 1.7.1
-* `依赖` 升级 Material Progressbar 版本 1.4.2 -> 1.6.1
-* `依赖` 升级 Androidx Room 版本 2.7.1 -> 2.7.2
 * `依赖` 升级 OpenCC 版本 1.2.0 -> 1.2.2
 
 # v6.6.4
@@ -195,8 +221,8 @@
 * `优化` files.path 及相关方法传入空值路径参数时的兼容性
 * `优化` 同步最新的 Rhino 引擎官方上游代码并进行必要的代码适配
 * `优化` README.md 完善项目构建与运行相关内容 _[`issue #344`](http://issues.autojs6.com/344)_
-* `依赖` 附加 Eclipse Paho Client Mqttv3 版本 1.1.0 _[`issue #330`](http://issues.autojs6.com/330)_
-* `依赖` 升级 Gradle Compile 版本 34 -> 35
+* `依赖` 附加 Eclipse Paho Client Mqtt V3 版本 1.1.0 _[`issue #330`](http://issues.autojs6.com/330)_
+* `依赖` 升级 Android SDK 版本 34 -> 35
 * `依赖` 升级 Gradle 版本 8.12 -> 8.14-rc-1
 * `依赖` 升级 Rhino 版本 1.8.0-SNAPSHOT -> 1.8.1-SNAPSHOT
 * `依赖` 升级 Androidx Recyclerview 版本 1.3.2 -> 1.4.0
@@ -325,7 +351,7 @@
 * `依赖` 附加 EasyWindow (for Toaster) 版本 10.3
 * `依赖` 升级 Gradle 版本 8.5 -> 8.11.1
 * `依赖` 升级 Rhino 版本 1.7.15-SNAPSHOT -> 1.8.0-SNAPSHOT
-* `依赖` 升级 Android Material Lang3 版本 1.10.0 -> 1.12.0
+* `依赖` 升级 Android Material 版本 1.10.0 -> 1.12.0
 * `依赖` 升级 Androidx Annotation 版本 1.7.0 -> 1.9.1
 * `依赖` 升级 Androidx AppCompat 版本 1.6.1 -> 1.7.0
 * `依赖` 升级 Androidx WebKit 版本 1.8.0 -> 1.12.1
@@ -470,8 +496,8 @@
 * `优化` 适配 VSCode 插件 1.0.7
 * `依赖` 附加 Rikka Shizuku 版本 13.1.5
 * `依赖` 附加 MLKit Barcode Scanning 版本 17.2.0
+* `依赖` 升级 Android SDK 版本 33 -> 34
 * `依赖` 升级 OpenCV 版本 4.5.5 -> 4.8.0 (Ref to [TonyJiangWJ](https://github.com/TonyJiangWJ))
-* `依赖` 升级 Gradle Compile 版本 33 -> 34
 * `依赖` 升级 Gradle 版本 8.3-rc-1 -> 8.4-rc-3
 * `依赖` 升级 Apache Commons Lang3 版本 3.12.0 -> 3.13.0
 * `依赖` 升级 Glide 版本 4.15.1 -> 4.16.0
@@ -744,10 +770,10 @@
 * `优化` 提升 console.show 显示的日志浮动窗口文字亮度以增强内容辨识度
 * `优化` ImageWrapper#saveTo 支持相对路径保存图像文件
 * `优化` 重新设计 colors 全局对象并增加 HSV / HSL 等色彩模式支持 (参阅 项目文档 > [颜色](https://docs.autojs6.com/#/color))
-* `依赖` 升级 Gradle Compile 版本 32 -> 33
 * `依赖` 本地化 Android Job 版本 1.4.3
 * `依赖` 本地化 Android Plugin Client SDK For Locale 版本 9.0.0
 * `依赖` 本地化 GitHub API 版本 1.306
+* `依赖` 升级 Android SDK 版本 32 -> 33
 * `依赖` 附加 JCIP Annotations 版本 1.0
 * `依赖` 附加 Androidx WebKit 版本 1.5.0
 * `依赖` 附加 Commons IO 版本 2.8.0
@@ -869,6 +895,7 @@
 * `优化` 转移打包插件下载地址 GitHub -> JsDelivr
 * `依赖` 附加 Zeugma Solutions LocaleHelper 版本 1.5.1
 * `依赖` 降级 Android Material 版本 1.6.0-alpha02 -> 1.5.0
+* `依赖` 升级 Android SDK 版本 31 -> 32
 * `依赖` 升级 Kotlinx Coroutines 版本 1.6.0-native-mt -> 1.6.0
 * `依赖` 升级 OpenCV 版本 3.4.3 -> 4.5.4 -> 4.5.5 (Ref to [TonyJiangWJ](https://github.com/TonyJiangWJ))
 * `依赖` 升级 OkHttp3 版本 3.10.0 -> 5.0.0-alpha.4 -> 5.0.0-alpha.6
@@ -876,7 +903,6 @@
 * `依赖` 升级 Auto.js-ApkBuilder 版本 1.0.1 -> 1.0.3
 * `依赖` 升级 Glide Compiler 版本 4.12.0 -> 4.13.1
 * `依赖` 升级 Gradle 发行版本 7.4-rc-2 -> 7.4.1
-* `依赖` 升级 Gradle Compile 版本 31 -> 32
 * `依赖` 升级 Gson 版本 2.8.9 -> 2.9.0
 
 # v6.0.2
@@ -947,6 +973,7 @@
 * `依赖` 本地化 MutableTheme 版本 1.0.0
 * `依赖` 附加 Androidx Preference 版本 1.1.1
 * `依赖` 附加 SwipeRefreshLayout 版本 1.1.0
+* `依赖` 升级 Android SDK 版本 28 -> 30 -> 31
 * `依赖` 升级 Android Analytics 版本 7.0.0 -> 13.1.0
 * `依赖` 升级 Android Annotations 版本 4.5.2 -> 4.8.0
 * `依赖` 升级 Gradle 构建工具版本 3.2.1 -> 4.1.0 -> 7.0.3 -> 7.2.0-alpha04
@@ -961,7 +988,6 @@
 * `依赖` 升级 Eventbus 版本 3.0.0 -> 3.2.0
 * `依赖` 升级 Glide Compiler 版本 4.8.0 -> 4.12.0 -> 4.12.0
 * `依赖` 升级 Gradle Build Tool 版本 29.0.2 -> 30.0.2
-* `依赖` 升级 Gradle Compile 版本 28 -> 30 -> 31
 * `依赖` 升级 Gradle 发行版本 4.10.2 -> 6.5 -> 7.0.2 -> 7.3
 * `依赖` 升级 Groovy-Json 插件版本 3.0.7 -> 3.0.8
 * `依赖` 升级 Gson 版本 2.8.2 -> 2.8.9

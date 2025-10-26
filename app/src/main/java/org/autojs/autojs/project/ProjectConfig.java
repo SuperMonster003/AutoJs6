@@ -4,10 +4,12 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.text.TextUtils;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.Strictness;
 import com.google.gson.annotations.SerializedName;
 import org.autojs.autojs.annotation.DeserializedMethodName;
 import org.autojs.autojs.annotation.SerializedNameCompatible;
@@ -15,11 +17,13 @@ import org.autojs.autojs.annotation.SerializedNameCompatible.With;
 import org.autojs.autojs.apkbuilder.keystore.KeyStore;
 import org.autojs.autojs.model.explorer.ExplorerPage;
 import org.autojs.autojs.pio.PFiles;
+import org.autojs.autojs.pio.UncheckedIOException;
 import org.autojs.autojs.util.JsonUtils;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -38,38 +42,40 @@ import java.util.stream.Collectors;
 public class ProjectConfig {
 
     public static final String CONFIG_FILE_NAME = "project.json";
-
     public static final String DEFAULT_MAIN_SCRIPT_FILE_NAME = "main.js";
-
+    private static final String TAG = "ProjectConfig";
     private static final Gson sGson = new GsonBuilder()
             .registerTypeAdapter(ProjectConfig.class, new JsonUtils.FuzzyDeserializer<ProjectConfig>())
             .registerTypeAdapter(LaunchConfig.class, new JsonUtils.FuzzyDeserializer<LaunchConfig>())
             .registerTypeAdapter(ScriptConfig.class, new JsonUtils.FuzzyDeserializer<ScriptConfig>())
             .registerTypeAdapter(BuildInfo.class, new JsonUtils.FuzzyDeserializer<BuildInfo>())
+            .setStrictness(Strictness.LENIENT)
             .setPrettyPrinting()
             .create();
-
+    @SerializedName("excludeDirs")
+    @SerializedNameCompatible(with = {
+            @With(value = "ignoredDirs", target = {"AutoJs4", "AutoX"}),
+            @With(value = "ignore", target = {"Unknown"}),
+            @With(value = "excludedDirs"),
+    })
+    private final List<String> mExcludedDirs = new ArrayList<>();
     @SerializedName("name")
     @SerializedNameCompatible(with = {
             @With(value = "projectName"),
     })
     private String mName;
-
     @SerializedName("versionName")
     @SerializedNameCompatible(with = {
             @With(value = "version"),
     })
     private String mVersionName;
-
     @SerializedName("versionCode")
     private int mVersionCode = 1;
-
     @SerializedName("packageName")
     @SerializedNameCompatible(with = {
             @With(value = "package"),
     })
     private String mPackageName;
-
     @SerializedName("main")
     @SerializedNameCompatible(with = {
             @With(value = "mainName"),
@@ -81,7 +87,6 @@ public class ProjectConfig {
             @With(value = "mainFileName"),
     })
     private String mMainScriptFileName = DEFAULT_MAIN_SCRIPT_FILE_NAME;
-
     @Nullable
     @SerializedName(value = "assets")
     @SerializedNameCompatible(with = {
@@ -89,27 +94,22 @@ public class ProjectConfig {
             @With(value = "assetList"),
     })
     private List<String> mAssets = new ArrayList<>();
-
     @SerializedName("launchConfig")
     @SerializedNameCompatible(with = {
             @With(value = "launch"),
     })
     private LaunchConfig mLaunchConfig = new LaunchConfig();
-
     @SerializedName("build")
     @SerializedNameCompatible(with = {
             @With(value = "buildInfo"),
     })
     private BuildInfo mBuildInfo = new BuildInfo();
-
     @SerializedName("icon")
     @SerializedNameCompatible(with = {
             @With(value = "iconPath"),
     })
     private String mIconPath;
-
     private transient Callable<Bitmap> mIconBitmapGetter;
-
     @Nullable
     @SerializedName(value = "abis")
     @SerializedNameCompatible(with = {
@@ -117,7 +117,6 @@ public class ProjectConfig {
             @With(value = "abiList"),
     })
     private List<String> mAbis = new ArrayList<>();
-
     @Nullable
     @SerializedName(value = "libs")
     @SerializedNameCompatible(with = {
@@ -125,14 +124,12 @@ public class ProjectConfig {
             @With(value = "libList"),
     })
     private List<String> mLibs = new ArrayList<>();
-
     @SerializedName("permissions")
     @SerializedNameCompatible(with = {
             @With(value = "permission"),
             @With(value = "permissionList"),
     })
     private List<String> mPermissions = new ArrayList<>();
-
     @SerializedName("signatureScheme")
     @SerializedNameCompatible(with = {
             @With(value = "signatureSchemes"),
@@ -140,9 +137,6 @@ public class ProjectConfig {
     })
     @DeserializedMethodName(method = "normalizeSignatureScheme", parameterTypes = {String.class})
     private String mSignatureScheme = "V1 + V2";
-
-    @Nullable
-    private transient KeyStore mKeyStore = null;
 
     // @Commented by SuperMonster003 on Jan 20, 2025.
     //  ! Unused config options: "scripts".
@@ -155,7 +149,8 @@ public class ProjectConfig {
     //  #         @With(value = "scripts", target = {"AutoJs4", "AutoX"}),
     //  # })
     //  # private final Map<String, ScriptConfig> mScriptConfigs = new HashMap<>();
-
+    @Nullable
+    private transient KeyStore mKeyStore = null;
     @SerializedName(value = "useFeatures")
     @SerializedNameCompatible(with = {
             @With(value = "useFeature"),
@@ -165,15 +160,6 @@ public class ProjectConfig {
             @With(value = "featureList"),
     })
     private List<String> mFeatures = new ArrayList<>();
-
-    @SerializedName("excludeDirs")
-    @SerializedNameCompatible(with = {
-            @With(value = "ignoredDirs", target = {"AutoJs4", "AutoX"}),
-            @With(value = "ignore", target = {"Unknown"}),
-            @With(value = "excludedDirs"),
-    })
-    private final List<String> mExcludedDirs = new ArrayList<>();
-
     @Nullable
     private transient String mSourcePath = null;
 
@@ -218,12 +204,28 @@ public class ProjectConfig {
         try {
             fileContents = PFiles.read(path);
             return fromJson(fileContents);
+        } catch (UncheckedIOException e) {
+            if (e.getCause() instanceof FileNotFoundException) {
+                return null;
+            }
+            throw e;
         } catch (Exception e1) {
+            Log.d(TAG, "Failed to read json from file: " + path + " (" + e1.getMessage() + ")");
             if (fileContents == null) return null;
             try {
-                return fromJson(JsonUtils.repairJson(fileContents));
+                ProjectConfig repaired = fromJson(JsonUtils.repairJson(fileContents));
+                Log.d(TAG, "Successfully read repaired json from file: " + path);
+                return repaired;
             } catch (Exception e2) {
-                return tryReadCrucialData(fileContents, path);
+                Log.d(TAG, "Failed to read repaired json from file: " + path + " (" + e2.getMessage() + ")");
+                try {
+                    ProjectConfig crucialData = tryReadCrucialData(fileContents, path);
+                    Log.d(TAG, "Successfully read crucial data from file: " + path);
+                    return crucialData;
+                } catch (Exception e3) {
+                    Log.d(TAG, "Failed to read crucial data from file: " + path + " (" + e3.getMessage() + ")");
+                    return null;
+                }
             }
         }
     }
@@ -381,6 +383,19 @@ public class ProjectConfig {
         return PFiles.join(projectDir, CONFIG_FILE_NAME);
     }
 
+    public static String normalizeSignatureScheme(String input) {
+        Pattern pattern = Pattern.compile("v\\d+", Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(input);
+        Set<String> matches = new HashSet<>();
+        while (matcher.find()) {
+            matches.add(matcher.group().toUpperCase());
+        }
+        if (matches.isEmpty()) {
+            return input.trim();
+        }
+        return matches.stream().sorted().collect(Collectors.joining(" + "));
+    }
+
     public BuildInfo getBuildInfo() {
         return mBuildInfo;
     }
@@ -439,11 +454,6 @@ public class ProjectConfig {
         return mMainScriptFileName;
     }
 
-    public ProjectConfig setMainScriptFileName(String mainScriptFileName) {
-        mMainScriptFileName = mainScriptFileName;
-        return this;
-    }
-
     // @Commented by SuperMonster003 on Jan 20, 2025.
     //  ! Unused config options: "scripts".
     //  ! zh-CN: 未使用的配置选项: "scripts".
@@ -451,11 +461,20 @@ public class ProjectConfig {
     //  #     return mScriptConfigs;
     //  # }
 
+    public ProjectConfig setMainScriptFileName(String mainScriptFileName) {
+        mMainScriptFileName = mainScriptFileName;
+        return this;
+    }
+
     public List<String> getAssets() {
         if (mAssets == null) {
             mAssets = Collections.emptyList();
         }
         return mAssets;
+    }
+
+    public void setAssets(List<String> assets) {
+        mAssets = assets;
     }
 
     public boolean addAsset(String assetRelativePath) {
@@ -469,10 +488,6 @@ public class ProjectConfig {
         }
         mAssets.add(assetRelativePath);
         return true;
-    }
-
-    public void setAssets(List<String> assets) {
-        mAssets = assets;
     }
 
     public LaunchConfig getLaunchConfig() {
@@ -539,10 +554,6 @@ public class ProjectConfig {
         return mFeatures;
     }
 
-    public void setFeatures(@NonNull List<String> features) {
-        mFeatures = features;
-    }
-
     // @Commented by SuperMonster003 on Jan 20, 2025.
     //  ! Unused config options: "scripts".
     //  ! zh-CN: 未使用的配置选项: "scripts".
@@ -557,6 +568,10 @@ public class ProjectConfig {
     //  #     scriptConfig.setFeatures(combinedFeatures);
     //  #     return scriptConfig;
     //  # }
+
+    public void setFeatures(@NonNull List<String> features) {
+        mFeatures = features;
+    }
 
     public List<File> getExcludedDirs() {
         return mExcludedDirs.stream().map(dir -> {
@@ -607,20 +622,6 @@ public class ProjectConfig {
         mSignatureScheme = normalizeSignatureScheme(signatureScheme);
         return this;
     }
-
-    public static String normalizeSignatureScheme(String input) {
-        Pattern pattern = Pattern.compile("v\\d+", Pattern.CASE_INSENSITIVE);
-        Matcher matcher = pattern.matcher(input);
-        Set<String> matches = new HashSet<>();
-        while (matcher.find()) {
-            matches.add(matcher.group().toUpperCase());
-        }
-        if (matches.isEmpty()) {
-            return input.trim();
-        }
-        return matches.stream().sorted().collect(Collectors.joining(" + "));
-    }
-
 
     @Nullable
     public KeyStore getKeyStore() {

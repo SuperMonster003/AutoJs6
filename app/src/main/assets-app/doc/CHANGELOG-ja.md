@@ -139,8 +139,8 @@
 * `改善` files.path および関連メソッドが, null のパス指定時にも適切に動作するよう改善
 * `改善` 最新の公式 Rhino エンジンへの同期およびコードの調整
 * `改善` README.md を改善し, プロジェクトのビルドおよび実行方法のドキュメントを充実 _[`issue #344`](http://issues.autojs6.com/344)_
-* `依存関係` Eclipse Paho Client Mqttv3 バージョン 1.1.0 を追加 _[`issue #330`](http://issues.autojs6.com/330)_
-* `依存関係` Gradle Compile のバージョンを 34 から 35 に更新
+* `依存関係` Eclipse Paho Client Mqtt V3 バージョン 1.1.0 を追加 _[`issue #330`](http://issues.autojs6.com/330)_
+* `依存関係` Android SDK のバージョンを 34 から 35 に更新
 * `依存関係` Gradle を 8.12 から 8.14-rc-1 に更新
 * `依存関係` Rhino を 1.8.0-SNAPSHOT から 1.8.1-SNAPSHOT に更新
 * `依存関係` Androidx Recyclerview を 1.3.2 から 1.4.0 に更新
@@ -269,7 +269,7 @@
 * `依存関係` 追加 EasyWindow (for Toaster) バージョン 10.3
 * `依存関係` Gradle バージョンを 8.5 -> 8.11.1 にアップグレード
 * `依存関係` Rhino バージョン 1.7.15-SNAPSHOT -> 1.8.0-SNAPSHOT にアップグレード
-* `依存関係` Android Material Lang3 バージョン 1.10.0 -> 1.12.0 にアップグレード
+* `依存関係` Android Material バージョン 1.10.0 -> 1.12.0 にアップグレード
 * `依存関係` Androidx Annotation バージョン 1.7.0 -> 1.9.1 にアップグレード
 * `依存関係` Androidx AppCompat バージョン 1.6.1 -> 1.7.0 にアップグレード
 * `依存関係` Androidx WebKit バージョン 1.8.0 -> 1.12.1 にアップグレード
@@ -414,8 +414,8 @@
 * `改善` VSCode プラグイン 1.0.7 に適応
 * `依存関係` Rikka Shizuku バージョン 13.1.5 を追加
 * `依存関係` MLKit Barcode Scanning バージョン 17.2.0 を追加
+* `依存関係` Android SDK バージョンのアップグレード 33 -> 34
 * `依存関係` OpenCV バージョンのアップグレード 4.5.5 -> 4.8.0 (Ref to [TonyJiangWJ](https://github.com/TonyJiangWJ))
-* `依存関係` Gradle Compile バージョンのアップグレード 33 -> 34
 * `依存関係` Gradle バージョンのアップグレード 8.3-rc-1 -> 8.4-rc-3
 * `依存関係` Apache Commons Lang3 バージョンのアップグレード 3.12.0 -> 3.13.0
 * `依存関係` Glide バージョンのアップグレード 4.15.1 -> 4.16.0
@@ -688,10 +688,10 @@
 * `改善` console.show が表示するログの Floating ウィンドウの文字の明るさを向上させ, 内容の識別度を高める
 * `改善` ImageWrapper#saveTo が相対パスで画像ファイルを保存サポート
 * `改善` colors グローバルオブジェクトを再設計し, HSV/HSL などのカラーモードをサポート (プロジェクトドキュメントを参照 > [カラー](https://docs.autojs6.com/#/color))
-* `依存関係` Gradle Compile バージョンを 32 -> 33 にアップグレード
 * `依存関係` ローカライズされた Android Job バージョン 1.4.3
 * `依存関係` ローカライズされた Android Plugin Client SDK For Locale バージョン 9.0.0
 * `依存関係` ローカライズされた GitHub API バージョン 1.306
+* `依存関係` Android SDK バージョンを 32 -> 33 にアップグレード
 * `依存関係` 追加された JCIP Annotations バージョン 1.0
 * `依存関係` 追加された Androidx WebKit バージョン 1.5.0
 * `依存関係` 追加された Commons IO バージョン 2.8.0
@@ -813,6 +813,7 @@
 * `改善` パッケージプラグインのダウンロード先を GitHub から JsDelivr に移行
 * `依存関係` Zeugma Solutions LocaleHelper バージョン 1.5.1 を追加
 * `依存関係` Android Material バージョン 1.6.0-alpha02 -> 1.5.0 にダウングレード
+* `依存関係` Android SDK バージョン 31 -> 32 にアップグレード
 * `依存関係` Kotlinx Coroutines バージョン 1.6.0-native-mt -> 1.6.0 にアップグレード
 * `依存関係` OpenCV バージョン 3.4.3 -> 4.5.4 -> 4.5.5 にアップグレード (Ref to [TonyJiangWJ](https://github.com/TonyJiangWJ))
 * `依存関係` OkHttp3 バージョン 3.10.0 -> 5.0.0-alpha.4 -> 5.0.0-alpha.6 にアップグレード
@@ -820,7 +821,6 @@
 * `依存関係` Auto.js-ApkBuilder バージョン 1.0.1 -> 1.0.3 にアップグレード
 * `依存関係` Glide Compiler バージョン 4.12.0 -> 4.13.1 にアップグレード
 * `依存関係` Gradle リリースバージョン 7.4-rc-2 -> 7.4.1 にアップグレード
-* `依存関係` Gradle コンパイルバージョン 31 -> 32 にアップグレード
 * `依存関係` Gson バージョン 2.8.9 -> 2.9.0 にアップグレード
 
 # v6.0.2
@@ -891,6 +891,7 @@
 * `依存関係` ローカライズ MutableTheme バージョン 1.0.0
 * `依存関係` 追加 Androidx Preference バージョン 1.1.1
 * `依存関係` 追加 SwipeRefreshLayout バージョン 1.1.0
+* `依存関係` アップグレード Android SDK バージョン 28 -> 30 -> 31
 * `依存関係` アップグレード Android Analytics バージョン 7.0.0 -> 13.1.0
 * `依存関係` アップグレード Android Annotations バージョン 4.5.2 -> 4.8.0
 * `依存関係` アップグレード Gradle ビルドツールバージョン 3.2.1 -> 4.1.0 -> 7.0.3 -> 7.2.0-alpha04
@@ -905,7 +906,6 @@
 * `依存関係` アップグレード Eventbus バージョン 3.0.0 -> 3.2.0
 * `依存関係` アップグレード Glide Compiler バージョン 4.8.0 -> 4.12.0 -> 4.12.0
 * `依存関係` アップグレード Gradle Build Tool バージョン 29.0.2 -> 30.0.2
-* `依存関係` アップグレード Gradle Compile バージョン 28 -> 30 -> 31
 * `依存関係` アップグレード Gradle リリースバージョン 4.10.2 -> 6.5 -> 7.0.2 -> 7.3
 * `依存関係` アップグレード Groovy-Json プラグインバージョン 3.0.7 -> 3.0.8
 * `依存関係` アップグレード Gson バージョン 2.8.2 -> 2.8.9
