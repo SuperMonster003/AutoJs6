@@ -17,6 +17,7 @@ import org.mozilla.javascript.NativeError
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.UniqueTag.NOT_FOUND
 import org.mozilla.javascript.Wrapper
+import java.math.BigInteger
 
 object AnyExtensions {
 
@@ -82,8 +83,8 @@ object AnyExtensions {
     fun <T> T?.jsSanitize() = if (this.isJsNullish()) null else this
 
     fun Any?.jsUnwrapped(): Any? = when (this) {
-        is String -> this
-        is ConsString -> this.toString()
+        is String, is ConsString -> Context.toString(this)
+        is BigInteger -> this
         is Number -> Context.toNumber(this)
         is Boolean -> Context.toBoolean(this)
         is Wrapper -> this.unwrap().jsUnwrapped()

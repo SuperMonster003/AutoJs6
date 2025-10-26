@@ -44,6 +44,7 @@ import org.autojs.autojs.runtime.api.augment.colors.Color
 import org.autojs.autojs.runtime.api.augment.colors.Colors
 import org.autojs.autojs.runtime.api.augment.console.Console
 import org.autojs.autojs.runtime.api.augment.continuation.Continuation
+import org.autojs.autojs.runtime.api.augment.converter.Converter
 import org.autojs.autojs.runtime.api.augment.cryptyo.Crypto
 import org.autojs.autojs.runtime.api.augment.device.Device
 import org.autojs.autojs.runtime.api.augment.dialogs.Dialogs
@@ -52,6 +53,7 @@ import org.autojs.autojs.runtime.api.augment.events.Events
 import org.autojs.autojs.runtime.api.augment.events.Keys
 import org.autojs.autojs.runtime.api.augment.files.Files
 import org.autojs.autojs.runtime.api.augment.floaty.Floaty
+import org.autojs.autojs.runtime.api.augment.formatter.Formatter
 import org.autojs.autojs.runtime.api.augment.global.Global
 import org.autojs.autojs.runtime.api.augment.global.GlobalClasses
 import org.autojs.autojs.runtime.api.augment.global.IsNullish
@@ -160,6 +162,8 @@ import org.autojs.autojs.runtime.api.Toaster as ApiToaster
 import org.autojs.autojs.runtime.api.UI as ApiUI
 import org.autojs.autojs.runtime.api.Util as ApiUtil
 import org.autojs.autojs.runtime.api.augment.autojs.Version as AutojsVersion
+import org.autojs.autojs.runtime.api.augment.converter.Bytes as BytesCvt
+import org.autojs.autojs.runtime.api.augment.formatter.Bytes as BytesFmt
 import org.autojs.autojs.runtime.api.augment.global.Legacy as GlobalLegacy
 import org.autojs.autojs.runtime.api.augment.notice.Channel as NoticeChannel
 import org.autojs.autojs.runtime.api.augment.util.Inspect as UtilInspect
@@ -714,20 +718,20 @@ class ScriptRuntime private constructor(builder: Builder) {
 
     private fun augment(target: ScriptableObject) {
 
-        Global(this).assignWithGlobal(target, topLevelScope, GlobalClasses)
-        GlobalLegacy(this).assignWithGlobal(target, topLevelScope)
-        IsNullish.augmentWithGlobal(target, topLevelScope, false)
-        Util.augmentWithGlobal(target, topLevelScope, util, true).apply {
-            UtilJava.augmentWithGlobal(this, topLevelScope, false)
-            UtilVersion.augmentWithGlobal(this, topLevelScope, false)
-            UtilVersionCodes.augmentWithGlobal(this, topLevelScope, VersionCodesInfo.obj, false)
-            UtilInspect.augmentWithGlobal(this, topLevelScope, false)
-            UtilMorseCode.augmentWithGlobal(this, topLevelScope, false)
+        Global(this).assignWithRuntime(target, this, GlobalClasses)
+        GlobalLegacy(this).assignWithRuntime(target, this)
+        IsNullish.augmentWithRuntime(target, this, false)
+        Util.augmentWithRuntime(target, this, util, true).also { util ->
+            UtilJava.augmentWithRuntime(util, this, false)
+            UtilVersion.augmentWithRuntime(util, this, false)
+            UtilVersionCodes.augmentWithRuntime(util, this, VersionCodesInfo.obj, false)
+            UtilInspect.augmentWithRuntime(util, this, false)
+            UtilMorseCode.augmentWithRuntime(util, this, false)
         }
-        Species.augmentWithGlobal(target, topLevelScope, true)
+        Species.augmentWithRuntime(target, this, true)
         App(this).augment(target, app, true).also { augmentedApp = it }
-        Autojs(this).augment(target, true).also { augmentedAutojs = it }.apply {
-            AutojsVersion.augmentWithGlobal(this, topLevelScope, false)
+        Autojs(this).augment(target, true).also { augmentedAutojs = it }.also { autojs ->
+            AutojsVersion.augmentWithRuntime(autojs, this, false)
         }
         Shell(this).augment(target, true)
         Timers(this).augment(target, timers, true)
@@ -735,26 +739,32 @@ class ScriptRuntime private constructor(builder: Builder) {
         Automator(this).augment(target, true)
         Selector(this).augment(target, true, READONLY)
         Events(this).augment(target, events, true)
-        Keys.augmentWithGlobal(target, topLevelScope, true)
+        Keys.augmentWithRuntime(target, this, true)
         Images(this).augment(target, true)
-        Ocr(this).augment(target, true).apply {
-            OcrMLKit(this@ScriptRuntime).augment(this, false).also { augmentedOcrMLKit = it }
-            OcrPaddle(this@ScriptRuntime).augment(this, false).also { augmentedOcrPaddle = it }
-            OcrRapid(this@ScriptRuntime).augment(this, false).also { augmentedOcrRapid = it }
+        Ocr(this).augment(target, true).also { ocr ->
+            OcrMLKit(this).augment(ocr, false).also { augmentedOcrMLKit = it }
+            OcrPaddle(this).augment(ocr, false).also { augmentedOcrPaddle = it }
+            OcrRapid(this).augment(ocr, false).also { augmentedOcrRapid = it }
         }
         Barcode(this).augment(target, true)
         QrCode(this).augment(target, true)
         Threads(this).augment(target, threads, true)
         UI(this).proxying(target, ui, true)
-        Colors.augmentWithGlobal(target, topLevelScope, listOf(colors, Colors), true)
-        Color.augmentWithGlobal(target, topLevelScope, false)
+        Colors.augmentWithRuntime(target, this, listOf(colors, Colors), true)
+        Color.augmentWithRuntime(target, this, false)
         Tasks(this).augment(target, true)
         Dialogs(this).augment(target, true)
         Continuation(this).augment(target, js_mod_continuation, true, READONLY)
         Http(this).augment(target, http, true)
         Web(this).augment(target, true)
         WebSocket(this).augment(target, WebSocketFields, false)
-        S13n.augmentWithGlobal(target, topLevelScope, true)
+        S13n.augmentWithRuntime(target, this, true)
+        Converter.augmentWithRuntime(target, this, true).also { cvt ->
+            BytesCvt.augmentWithRuntime(cvt, this, false)
+        }
+        Formatter.augmentWithRuntime(target, this, true).also { fmt ->
+            BytesFmt.augmentWithRuntime(fmt, this, false)
+        }
         Console(this).proxying(target, console, true).also { consoleProxyObject = it }
         Plugins(this).augment(target, true)
         Arrayx(this).augment(target, false)
@@ -762,29 +772,29 @@ class ScriptRuntime private constructor(builder: Builder) {
         Mathx(this).augment(target, false)
         Jsox(this).augment(target, true)
         Files(this).augment(target, files, true)
-        Crypto.augmentWithGlobal(target, topLevelScope, CoreCrypto, true)
+        Crypto.augmentWithRuntime(target, this, CoreCrypto, true)
         RootAutomator(this).augment(target, false)
         Engines(this).augment(target, true)
         Floaty(this).augment(target, true)
-        Storages.augmentWithGlobal(target, topLevelScope, true)
+        Storages.augmentWithRuntime(target, this, true)
         Device(this).augment(target, device, true)
         Recorder(this).augment(target, recorder, true)
         Toast(this).augment(target, true)
-        Media.augmentWithGlobal(target, topLevelScope, media, true)
-        Sensors.augmentWithGlobal(target, topLevelScope, sensors, true)
-        Base64.augmentWithGlobal(target, topLevelScope, true)
-        Notice(this).augment(target, true).apply {
-            NoticeChannel(this@ScriptRuntime).augment(this, false)
+        Media.augmentWithRuntime(target, this, media, true)
+        Sensors.augmentWithRuntime(target, this, sensors, true)
+        Base64.augmentWithRuntime(target, this, true)
+        Notice(this).augment(target, true).also { notice ->
+            NoticeChannel(this).augment(notice, false)
         }
         Shizuku(this).augment(target, shizuku, true)
-        OpenCC.augmentWithGlobal(target, topLevelScope, true)
+        OpenCC.augmentWithRuntime(target, this, true)
         Mime(this).augment(target, mime, true)
         SysProps(this).augment(target, true)
         SQLite(this).augment(target, true)
         Zip(this).augment(target, true)
-        NanoID.augmentWithGlobal(target, topLevelScope, true)
-        Pinyin.augmentWithGlobal(target, topLevelScope, true)
-        Pinyin4j.augmentWithGlobal(target, topLevelScope, true)
+        NanoID.augmentWithRuntime(target, this, true)
+        Pinyin.augmentWithRuntime(target, this, true)
+        Pinyin4j.augmentWithRuntime(target, this, true)
         Mediainfo(this).augment(target, true)
 
         augmentedApp.defineProp(Autojs::class.java.simpleName.lowercase(), augmentedAutojs)

@@ -40,7 +40,13 @@ import org.autojs.autojs.util.RhinoUtils.withRhinoContext
 import org.autojs.autojs.util.StringUtils.lowercaseFirstChar
 import org.autojs.autojs.util.StringUtils.uppercaseFirstChar
 import org.autojs.autojs6.R
-import org.mozilla.javascript.*
+import org.mozilla.javascript.BaseFunction
+import org.mozilla.javascript.Context
+import org.mozilla.javascript.NativeArray
+import org.mozilla.javascript.NativeError
+import org.mozilla.javascript.NativeObject
+import org.mozilla.javascript.ScriptableObject
+import org.mozilla.javascript.Undefined
 
 @Suppress("unused", "UNUSED_PARAMETER")
 class Console(scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRuntime) {
@@ -226,38 +232,38 @@ class Console(scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRuntime) {
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun log(scriptRuntime: ScriptRuntime, args: Array<out Any?>) = unwrapArguments(args) {
-            scriptRuntime.console.log(Util.formatRhino(*it))
+        fun log(scriptRuntime: ScriptRuntime, args: Array<out Any?>) {
+            return scriptRuntime.console.log(Util.formatRhino(*args))
         }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun verbose(scriptRuntime: ScriptRuntime, args: Array<out Any?>) = unwrapArguments(args) {
-            scriptRuntime.console.verbose(Util.formatRhino(*it))
+        fun verbose(scriptRuntime: ScriptRuntime, args: Array<out Any?>) {
+            return scriptRuntime.console.verbose(Util.formatRhino(*args))
         }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun info(scriptRuntime: ScriptRuntime, args: Array<out Any?>) = unwrapArguments(args) {
-            scriptRuntime.console.info(Util.formatRhino(*it))
+        fun info(scriptRuntime: ScriptRuntime, args: Array<out Any?>) {
+            return scriptRuntime.console.info(Util.formatRhino(*args))
         }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun warn(scriptRuntime: ScriptRuntime, args: Array<out Any?>) = unwrapArguments(args) {
-            scriptRuntime.console.warn(Util.formatRhino(*it))
+        fun warn(scriptRuntime: ScriptRuntime, args: Array<out Any?>) {
+            return scriptRuntime.console.warn(Util.formatRhino(*args))
         }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun error(scriptRuntime: ScriptRuntime, args: Array<out Any?>) = unwrapArguments(args) {
-            scriptRuntime.console.error(Util.formatRhino(*it))
+        fun error(scriptRuntime: ScriptRuntime, args: Array<out Any?>) {
+            return scriptRuntime.console.error(Util.formatRhino(*args))
         }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun print(scriptRuntime: ScriptRuntime, args: Array<out Any?>) = unwrapArguments(args) {
-            scriptRuntime.console.print(Log.DEBUG, Util.formatRhino(*it))
+        fun print(scriptRuntime: ScriptRuntime, args: Array<out Any?>) {
+            return scriptRuntime.console.print(Log.DEBUG, Util.formatRhino(*args))
         }
 
         @JvmStatic

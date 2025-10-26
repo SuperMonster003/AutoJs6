@@ -138,19 +138,19 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : F
 
     fun originateKeyName() = also { mIsOriginalKeyName = true }
 
-    fun augmentWithGlobal(target: Scriptable, specifiedGlobal: ScriptableObject, withDollarPrefix: Boolean = true, additionalAttributes: Int = 0): ScriptableObject {
-        return augment(target, withDollarPrefix, additionalAttributes, specifiedGlobal)
+    fun augmentWithRuntime(target: Scriptable, specifiedRuntime: ScriptRuntime, withDollarPrefix: Boolean = true, additionalAttributes: Int = 0): ScriptableObject {
+        return augment(target, withDollarPrefix, additionalAttributes, specifiedRuntime)
     }
 
-    fun augmentWithGlobal(target: Scriptable, specifiedGlobal: ScriptableObject, proto: Any, withDollarPrefix: Boolean = true, additionalAttributes: Int = 0): ScriptableObject {
-        return augment(target, proto, withDollarPrefix, additionalAttributes, specifiedGlobal)
+    fun augmentWithRuntime(target: Scriptable, specifiedRuntime: ScriptRuntime, proto: Any, withDollarPrefix: Boolean = true, additionalAttributes: Int = 0): ScriptableObject {
+        return augment(target, proto, withDollarPrefix, additionalAttributes, specifiedRuntime)
     }
 
-    fun augment(target: Scriptable, withDollarPrefix: Boolean = true, additionalAttributes: Int = 0, specifiedGlobal: ScriptableObject? = null): ScriptableObject {
-        return augment(target, emptyList<Any>(), withDollarPrefix, additionalAttributes, specifiedGlobal)
+    fun augment(target: Scriptable, withDollarPrefix: Boolean = true, additionalAttributes: Int = 0, specifiedRuntime: ScriptRuntime? = null): ScriptableObject {
+        return augment(target, emptyList<Any>(), withDollarPrefix, additionalAttributes, specifiedRuntime)
     }
 
-    fun augment(target: Scriptable, proto: Any, withDollarPrefix: Boolean = true, additionalAttributes: Int = 0, specifiedGlobal: ScriptableObject? = null): ScriptableObject {
+    fun augment(target: Scriptable, proto: Any, withDollarPrefix: Boolean = true, additionalAttributes: Int = 0, specifiedRuntime: ScriptRuntime? = null): ScriptableObject {
         val callFunc: (args: Array<out Any?>) -> Any? = { args ->
             try {
                 (this as Invokable).invoke(*args)
@@ -191,7 +191,7 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : F
             else -> RhinoUtils.newObject(target)
         }
 
-        assign(newObj, proto, specifiedGlobal)
+        assign(newObj, proto, specifiedRuntime)
 
         val keys = mutableListOf(key)
         if (withDollarPrefix) keys += "\$$key"
@@ -203,17 +203,17 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : F
         return newObj
     }
 
-    fun assignWithGlobal(target: ScriptableObject, specifiedGlobal: ScriptableObject, proto: Any? = null) {
-        assign(target, proto, specifiedGlobal)
+    fun assignWithRuntime(target: ScriptableObject, specifiedRuntime: ScriptRuntime, proto: Any? = null) {
+        assign(target, proto, specifiedRuntime)
     }
 
     /**
      * When the subclass calls assign, the value of key will be ignored.
      * zh-CN: 子类调用 assign 时将忽略 key 的值.
      */
-    fun assign(target: ScriptableObject, proto: Any? = null, specifiedGlobal: ScriptableObject? = null) {
+    fun assign(target: ScriptableObject, proto: Any? = null, specifiedRuntime: ScriptRuntime? = null) {
 
-        val global: ScriptableObject = specifiedGlobal ?: scriptRuntime?.topLevelScope ?: ScriptableObject.getTopLevelScope(target) as ScriptableObject
+        val global: ScriptableObject = (specifiedRuntime ?: scriptRuntime)?.topLevelScope ?: ScriptableObject.getTopLevelScope(target) as ScriptableObject
 
         val protos = when (proto) {
             null -> emptyList()
