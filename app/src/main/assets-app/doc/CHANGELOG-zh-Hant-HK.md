@@ -139,8 +139,8 @@
 * `優化` files.path 及相關方法傳入空值路徑參數時的兼容性
 * `優化` 同步最新的 Rhino 引擎官方上游代碼並進行必要的代碼適配
 * `優化` README.md 完善項目構建與運行相關內容 _[`issue #344`](http://issues.autojs6.com/344)_
-* `依賴` 附加 Eclipse Paho Client Mqttv3 版本 1.1.0 _[`issue #330`](http://issues.autojs6.com/330)_
-* `依賴` 升級 Gradle Compile 版本 34 -> 35
+* `依賴` 附加 Eclipse Paho Client Mqtt V3 版本 1.1.0 _[`issue #330`](http://issues.autojs6.com/330)_
+* `依賴` 升級 Android SDK 版本 34 -> 35
 * `依賴` 升級 Gradle 版本 8.12 -> 8.14-rc-1
 * `依賴` 升級 Rhino 版本 1.8.0-SNAPSHOT -> 1.8.1-SNAPSHOT
 * `依賴` 升級 Androidx Recyclerview 版本 1.3.2 -> 1.4.0
@@ -269,7 +269,7 @@
 * `依賴` 附加 EasyWindow (for Toaster) 版本 10.3
 * `依賴` 升級 Gradle 版本 8.5 -> 8.11.1
 * `依賴` 升級 Rhino 版本 1.7.15-SNAPSHOT -> 1.8.0-SNAPSHOT
-* `依賴` 升級 Android Material Lang3 版本 1.10.0 -> 1.12.0
+* `依賴` 升級 Android Material 版本 1.10.0 -> 1.12.0
 * `依賴` 升級 Androidx Annotation 版本 1.7.0 -> 1.9.1
 * `依賴` 升級 Androidx AppCompat 版本 1.6.1 -> 1.7.0
 * `依賴` 升級 Androidx WebKit 版本 1.8.0 -> 1.12.1
@@ -414,8 +414,8 @@
 * `優化` 適配 VSCode 插件 1.0.7
 * `依賴` 附加 Rikka Shizuku 版本 13.1.5
 * `依賴` 附加 MLKit Barcode Scanning 版本 17.2.0
+* `依賴` 升級 Android SDK 版本 33 -> 34
 * `依賴` 升級 OpenCV 版本 4.5.5 -> 4.8.0 (Ref to [TonyJiangWJ](https://github.com/TonyJiangWJ))
-* `依賴` 升級 Gradle Compile 版本 33 -> 34
 * `依賴` 升級 Gradle 版本 8.3-rc-1 -> 8.4-rc-3
 * `依賴` 升級 Apache Commons Lang3 版本 3.12.0 -> 3.13.0
 * `依賴` 升級 Glide 版本 4.15.1 -> 4.16.0
@@ -688,10 +688,10 @@
 * `優化` 提升 console.show 顯示的日誌浮動窗口文字亮度以增強內容辨識度
 * `優化` ImageWrapper#saveTo 支持相對路徑保存圖像文件
 * `優化` 重新設計 colors 全局對象並增加 HSV / HSL 等色彩模式支持 (參閲 項目文檔 > [顏色](https://docs.autojs6.com/#/color))
-* `依賴` 升級 Gradle Compile 版本 32 -> 33
 * `依賴` 本地化 Android Job 版本 1.4.3
 * `依賴` 本地化 Android Plugin Client SDK For Locale 版本 9.0.0
 * `依賴` 本地化 GitHub API 版本 1.306
+* `依賴` 升級 Android SDK 版本 32 -> 33
 * `依賴` 附加 JCIP Annotations 版本 1.0
 * `依賴` 附加 Androidx WebKit 版本 1.5.0
 * `依賴` 附加 Commons IO 版本 2.8.0
@@ -813,6 +813,7 @@
 * `優化` 轉移打包插件下載地址 GitHub -> JsDelivr
 * `依賴` 附加 Zeugma Solutions LocaleHelper 版本 1.5.1
 * `依賴` 降級 Android Material 版本 1.6.0-alpha02 -> 1.5.0
+* `依賴` 升級 Android SDK 版本 31 -> 32
 * `依賴` 升級 Kotlinx Coroutines 版本 1.6.0-native-mt -> 1.6.0
 * `依賴` 升級 OpenCV 版本 3.4.3 -> 4.5.4 -> 4.5.5 (Ref to [TonyJiangWJ](https://github.com/TonyJiangWJ))
 * `依賴` 升級 OkHttp3 版本 3.10.0 -> 5.0.0-alpha.4 -> 5.0.0-alpha.6
@@ -820,7 +821,6 @@
 * `依賴` 升級 Auto.js-ApkBuilder 版本 1.0.1 -> 1.0.3
 * `依賴` 升級 Glide Compiler 版本 4.12.0 -> 4.13.1
 * `依賴` 升級 Gradle 發行版本 7.4-rc-2 -> 7.4.1
-* `依賴` 升級 Gradle Compile 版本 31 -> 32
 * `依賴` 升級 Gson 版本 2.8.9 -> 2.9.0
 
 # v6.0.2
@@ -891,6 +891,7 @@
 * `依賴` 本地化 MutableTheme 版本 1.0.0
 * `依賴` 附加 Androidx Preference 版本 1.1.1
 * `依賴` 附加 SwipeRefreshLayout 版本 1.1.0
+* `依賴` 升級 Android SDK 版本 28 -> 30 -> 31
 * `依賴` 升級 Android Analytics 版本 7.0.0 -> 13.1.0
 * `依賴` 升級 Android Annotations 版本 4.5.2 -> 4.8.0
 * `依賴` 升級 Gradle 構建工具版本 3.2.1 -> 4.1.0 -> 7.0.3 -> 7.2.0-alpha04
@@ -905,7 +906,6 @@
 * `依賴` 升級 Eventbus 版本 3.0.0 -> 3.2.0
 * `依賴` 升級 Glide Compiler 版本 4.8.0 -> 4.12.0 -> 4.12.0
 * `依賴` 升級 Gradle Build Tool 版本 29.0.2 -> 30.0.2
-* `依賴` 升級 Gradle Compile 版本 28 -> 30 -> 31
 * `依賴` 升級 Gradle 發行版本 4.10.2 -> 6.5 -> 7.0.2 -> 7.3
 * `依賴` 升級 Groovy-Json 插件版本 3.0.7 -> 3.0.8
 * `依賴` 升級 Gson 版本 2.8.2 -> 2.8.9

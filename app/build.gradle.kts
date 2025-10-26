@@ -36,7 +36,7 @@ val buildTypeDebug = "debug"
 val buildTypeRelease = "release"
 val buildActionAssemble = "assemble"
 
-val taskNames = gradle.startParameter.taskNames
+val taskNames: List<String> = gradle.startParameter.taskNames
 val isAppAssembleTaskRequested = taskNames.any { it.contains(Regex("^(:?$flavorNameApp:)?$buildActionAssemble", IGNORE_CASE)) }
 val isInrtAssembleTaskRequested = taskNames.any { it.contains(Regex("^(:?$flavorNameApp:)?$buildActionAssemble$flavorNameInrt", IGNORE_CASE)) }
 val isInrtTaskRequested = taskNames.any { it.contains(flavorNameInrt, true) }
@@ -50,7 +50,7 @@ dependencies /* Unclassified */ {
     // Kotlin reflect
     implementation(kotlin("reflect"))
 
-    // Androidx Core
+    // AndroidX Core
     implementation(libs.core.ktx)
 
     // LeakCanary

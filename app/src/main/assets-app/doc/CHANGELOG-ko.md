@@ -139,8 +139,8 @@
 * `개선` files.path 및 관련 메서드가 null 경로일 경우에도 적절하게 처리되도록 개선
 * `개선` 최신 공식 Rhino 엔진과의 동기화 및 코드 조정
 * `개선` README.md 를 개선하여 프로젝트 빌드 및 실행 방법에 대한 문서를 보강 _[`issue #344`](http://issues.autojs6.com/344)_
-* `의존성` Eclipse Paho Client Mqttv3 버전 1.1.0 추가 _[`issue #330`](http://issues.autojs6.com/330)_
-* `의존성` Gradle Compile 버전을 34 에서 35 로 업데이트
+* `의존성` Eclipse Paho Client Mqtt V3 버전 1.1.0 추가 _[`issue #330`](http://issues.autojs6.com/330)_
+* `의존성` Android SDK 버전을 34 에서 35 로 업데이트
 * `의존성` Gradle 을 8.12 에서 8.14-rc-1 로 업데이트
 * `의존성` Rhino 를 1.8.0-SNAPSHOT 에서 1.8.1-SNAPSHOT 으로 업데이트
 * `의존성` Androidx Recyclerview 를 1.3.2 에서 1.4.0 으로 업데이트
@@ -269,7 +269,7 @@
 * `의존성` EasyWindow (for Toaster) 버전 10.3 추가
 * `의존성` Gradle 버전 8.5 -> 8.11.1 업그레이드
 * `의존성` Rhino 버전 1.7.15-SNAPSHOT 에서 1.8.0-SNAPSHOT 으로 업그레이드
-* `의존성` Android Material Lang3 버전 1.10.0 에서 1.12.0 으로 업그레이드
+* `의존성` Android Material 버전 1.10.0 에서 1.12.0 으로 업그레이드
 * `의존성` Androidx Annotation 버전 1.7.0 에서 1.9.1 으로 업그레이드
 * `의존성` Androidx AppCompat 버전 1.6.1 에서 1.7.0 으로 업그레이드
 * `의존성` Androidx WebKit 버전 1.8.0 에서 1.12.1 으로 업그레이드
@@ -414,8 +414,8 @@
 * `개선` VSCode 플러그인 1.0.7 에 적응
 * `의존성` Rikka Shizuku 버전 13.1.5 추가
 * `의존성` MLKit Barcode Scanning 버전 17.2.0 추가
+* `의존성` Android SDK 버전 33 -> 34 로 업그레이드
 * `의존성` OpenCV 버전 4.5.5 -> 4.8.0 으로 업그레이드 (Ref to [TonyJiangWJ](https://github.com/TonyJiangWJ))
-* `의존성` Gradle Compile 버전 33 -> 34 로 업그레이드
 * `의존성` Gradle 버전 8.3-rc-1 -> 8.4-rc-3 로 업그레이드
 * `의존성` Apache Commons Lang3 버전 3.12.0 -> 3.13.0 으로 업그레이드
 * `의존성` Glide 버전 4.15.1 -> 4.16.0 으로 업그레이드
@@ -688,10 +688,10 @@
 * `개선` console.show 로그 플로팅 창 텍스트 밝기 개선하여 내용 식별성 향상
 * `개선` ImageWrapper#saveTo 상대 경로로 이미지 파일 저장 지원
 * `개선` colors 전역 객체 재설계 및 HSV / HSL 등 색상 모드 지원 추가 (프로젝트 문서 참조 > [컬러](https://docs.autojs6.com/#/color))
-* `의존성` Gradle Compile 버전 32 -> 33 업그레이드
 * `의존성` 로컬화된 Android Job 버전 1.4.3
 * `의존성` 로컬화된 Android Plugin Client SDK For Locale 버전 9.0.0
 * `의존성` 로컬화된 GitHub API 버전 1.306
+* `의존성` Android SDK 버전 32 -> 33 업그레이드
 * `의존성` JCIP Annotations 부가 추가 버전 1.0
 * `의존성` Androidx WebKit 부가 추가 버전 1.5.0
 * `의존성` Commons IO 부가 추가 버전 2.8.0
@@ -813,6 +813,7 @@
 * `개선` 번들 플러그인 다운로드 주소 GitHub -> JsDelivr 로 이전
 * `의존성` Zeugma Solutions LocaleHelper 버전 1.5.1 추가
 * `의존성` Android Material 버전 1.6.0-alpha02 -> 1.5.0 다운그레이드
+* `의존성` Android SDK 버전 31 -> 32 업그레이드
 * `의존성` Kotlinx Coroutines 버전 1.6.0-native-mt -> 1.6.0 업그레이드
 * `의존성` OpenCV 버전 3.4.3 -> 4.5.4 -> 4.5.5 (Ref to [TonyJiangWJ](https://github.com/TonyJiangWJ)) 업그레이드
 * `의존성` OkHttp3 버전 3.10.0 -> 5.0.0-alpha.4 -> 5.0.0-alpha.6 업그레이드
@@ -820,7 +821,6 @@
 * `의존성` Auto.js-ApkBuilder 버전 1.0.1 -> 1.0.3 업그레이드
 * `의존성` Glide Compiler 버전 4.12.0 -> 4.13.1 업그레이드
 * `의존성` Gradle 릴리스 버전 7.4-rc-2 -> 7.4.1 업그레이드
-* `의존성` Gradle Compile 버전 31 -> 32 업그레이드
 * `의존성` Gson 버전 2.8.9 -> 2.9.0 업그레이드
 
 # v6.0.2
@@ -887,6 +887,7 @@
 * `개선` ResourceMonitor 에서 ReentrantLock 사용 안전성 개선 (참조 [TonyJiangWJ](https://github.com/TonyJiangWJ))
 * `개선` Maven Central 등의 저장소를 사용하여 JCenter 저장소 대체
 * `개선` 중복된 로컬 라이브러리 파일을 분리 및 제거
+* `의존성` Android SDK 버전 업그레이드 28 -> 30 -> 31
 * `의존성` CrashReport 버전 로컬라이제이션 2.6.6
 * `의존성` MutableTheme 버전 로컬라이제이션 1.0.0
 * `의존성` Androidx Preference 버전 추가 1.1.1
@@ -905,7 +906,6 @@
 * `의존성` Eventbus 버전 업그레이드 3.0.0 -> 3.2.0
 * `의존성` Glide Compiler 버전 업그레이드 4.8.0 -> 4.12.0 -> 4.12.0
 * `의존성` Gradle Build Tool 버전 업그레이드 29.0.2 -> 30.0.2
-* `의존성` Gradle Compile 버전 업그레이드 28 -> 30 -> 31
 * `의존성` Gradle 릴리즈 버전 업그레이드 4.10.2 -> 6.5 -> 7.0.2 -> 7.3
 * `의존성` Groovy-Json 플러그인 버전 업그레이드 3.0.7 -> 3.0.8
 * `의존성` Gson 버전 업그레이드 2.8.2 -> 2.8.9

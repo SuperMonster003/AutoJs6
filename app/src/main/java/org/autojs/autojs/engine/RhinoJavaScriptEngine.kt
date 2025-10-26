@@ -105,6 +105,7 @@ open class RhinoJavaScriptEngine(private val androidContext: android.content.Con
 
     override fun init() {
         thread = Thread.currentThread()
+        scriptable.defineProp("global", scriptable, PERMANENT)
         scriptable.defineProp("__engine__", this, READONLY or DONTENUM or PERMANENT)
         initRequireBuilder(context, scriptable)
 
@@ -114,7 +115,6 @@ open class RhinoJavaScriptEngine(private val androidContext: android.content.Con
 
         mInitScript.withTimeConsuming("script-init") { initScript ->
             runCatching {
-                scriptable.defineProp("global", scriptable, PERMANENT)
                 context.executeScriptWithContinuations(initScript, scriptable)
             }.getOrElse { e ->
                 if (e.message?.contains("Script argument was not a script or was not created by interpreted mode") == true) {
@@ -189,7 +189,7 @@ open class RhinoJavaScriptEngine(private val androidContext: android.content.Con
         val rhinoAndroidHelper = RhinoAndroidHelper(androidContext)
         val enterContext = try {
             rhinoAndroidHelper.enterContext()
-        } catch (e: SecurityException) {
+        } catch (_: SecurityException) {
             rhinoAndroidHelper.contextFactory.enterContext()
         }
         return enterContext.also { setupContext(it) }

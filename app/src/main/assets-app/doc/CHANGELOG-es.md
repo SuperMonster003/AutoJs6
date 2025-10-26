@@ -139,8 +139,8 @@
 * `Mejora` Mejora en la compatibilidad de files.path y métodos relacionados al recibir rutas nulas
 * `Mejora` Sincronización con la última versión oficial del motor Rhino y adaptación necesaria del código
 * `Mejora` Mejoras en el README.md para documentar la construcción y ejecución del proyecto _[`issue #344`](http://issues.autojs6.com/344)_
-* `Dependencia` Añadido Eclipse Paho Client Mqttv3 versión 1.1.0 _[`issue #330`](http://issues.autojs6.com/330)_
-* `Dependencia` Actualizado la versión de Gradle Compile de 34 a 35
+* `Dependencia` Añadido Eclipse Paho Client Mqtt V3 versión 1.1.0 _[`issue #330`](http://issues.autojs6.com/330)_
+* `Dependencia` Actualizado la versión de Android SDK de 34 a 35
 * `Dependencia` Actualizado Gradle de 8.12 a 8.14-rc-1
 * `Dependencia` Actualizado Rhino de 1.8.0-SNAPSHOT a 1.8.1-SNAPSHOT
 * `Dependencia` Actualizado Androidx Recyclerview de 1.3.2 a 1.4.0
@@ -269,7 +269,7 @@
 * `Dependencia` Incluir la versión 10.3 de EasyWindow (para Toaster)
 * `Dependencia` Actualización de versión de Gradle de 8.5 a 8.11.1
 * `Dependencia` Actualizar la versión 1.7.15-SNAPSHOT de Rhino -> 1.8.0-SNAPSHOT
-* `Dependencia` Actualizar la versión 1.10.0 de Android Material Lang3 -> 1.12.0
+* `Dependencia` Actualizar la versión 1.10.0 de Android Material -> 1.12.0
 * `Dependencia` Actualizar la versión 1.7.0 de Androidx Annotation -> 1.9.1
 * `Dependencia` Actualizar la versión 1.6.1 de Androidx AppCompat -> 1.7.0
 * `Dependencia` Actualizar la versión 1.8.0 de Androidx WebKit -> 1.12.1
@@ -414,8 +414,8 @@
 * `Mejora` Compatibilidad con plugin VSCode 1.0.7
 * `Dependencia` Versión Rikka Shizuku 13.1.5 adjunta
 * `Dependencia` Versión MLKit Barcode Scanning 17.2.0 adjunta
+* `Dependencia` Actualización de versión de Android SDK de 33 a 34
 * `Dependencia` Actualización de versión de OpenCV de 4.5.5 a 4.8.0 (Ref a [TonyJiangWJ](https://github.com/TonyJiangWJ))
-* `Dependencia` Actualización de versión de compilación Gradle de 33 a 34
 * `Dependencia` Actualización de versión de Gradle de 8.3-rc-1 a 8.4-rc-3
 * `Dependencia` Actualización de versión de Apache Commons Lang3 de 3.12.0 a 3.13.0
 * `Dependencia` Actualización de versión de Glide de 4.15.1 a 4.16.0
@@ -688,10 +688,10 @@
 * `Mejora` Aumentar el brillo del texto en el log de ventana flotante que muestra console.show para mejorar la legibilidad del contenido.
 * `Mejora` ImageWrapper#saveTo admite guardar archivos de imagen en rutas relativas.
 * `Mejora` Rediseñar el objeto global colors e incluir el soporte de modos de color HSV / HSL (consultar documentos del proyecto > [Colores](https://docs.autojs6.com/#/color)).
-* `Dependencia` Actualización de Gradle Compile versión 32 a 33
 * `Dependencia` Localización de la versión 1.4.3 de Android Job
 * `Dependencia` Localización del Plugin SDK para Locale versión 9.0.0 de Android
 * `Dependencia` Localización de GitHub API versión 1.306
+* `Dependencia` Actualización de Android SDK versión 32 a 33
 * `Dependencia` Añadida la versión 1.0 de JCIP Annotations
 * `Dependencia` Añadida la versión 1.5.0 de Androidx WebKit
 * `Dependencia` Añadida la versión 2.8.0 de Commons IO
@@ -813,6 +813,7 @@
 * `Mejora` Cambio de dirección de descarga de plugins empaquetados de GitHub a JsDelivr
 * `Dependencia` Añadida la versión 1.5.1 de Zeugma Solutions LocaleHelper
 * `Dependencia` Degradación de la versión de Android Material de 1.6.0-alpha02 a 1.5.0
+* `Dependencia` Actualización de las herramientas de Android SDK de la versión 31 a 32
 * `Dependencia` Actualización de Kotlinx Coroutines de la versión 1.6.0-native-mt a 1.6.0
 * `Dependencia` Actualización de OpenCV de la versión 3.4.3 a 4.5.4 y a 4.5.5 (gracias a [TonyJiangWJ](https://github.com/TonyJiangWJ))
 * `Dependencia` Actualización de OkHttp3 de la versión 3.10.0 a 5.0.0-alpha.4 y a 5.0.0-alpha.6
@@ -820,7 +821,6 @@
 * `Dependencia` Actualización de Auto.js-ApkBuilder de la versión 1.0.1 a 1.0.3
 * `Dependencia` Actualización del compilador de Glide de la versión 4.12.0 a 4.13.1
 * `Dependencia` Actualización de Gradle de la versión 7.4-rc-2 a 7.4.1
-* `Dependencia` Actualización de las herramientas de Gradle Compile de la versión 31 a 32
 * `Dependencia` Actualización de Gson de la versión 2.8.9 a 2.9.0
 
 # v6.0.2
@@ -891,6 +891,7 @@
 * `Dependencia` Localización de MutableTheme versión 1.0.0
 * `Dependencia` Añadida Androidx Preference versión 1.1.1
 * `Dependencia` Añadido SwipeRefreshLayout versión 1.1.0
+* `Dependencia` Actualización de Android SDK de la versión 28 -> 30 -> 31
 * `Dependencia` Actualización de Android Analytics de la versión 7.0.0 -> 13.1.0
 * `Dependencia` Actualización de Android Annotations de la versión 4.5.2 -> 4.8.0
 * `Dependencia` Actualización de las herramientas de construcción de Gradle de la versión 3.2.1 -> 4.1.0 -> 7.0.3 -> 7.2.0-alpha04
@@ -905,7 +906,6 @@
 * `Dependencia` Actualización de Eventbus de la versión 3.0.0 -> 3.2.0
 * `Dependencia` Actualización del compilador de Glide de la versión 4.8.0 -> 4.12.0 -> 4.12.0
 * `Dependencia` Actualización de las herramientas de construcción de Gradle de la versión 29.0.2 -> 30.0.2
-* `Dependencia` Actualización de Gradle Compile de la versión 28 -> 30 -> 31
 * `Dependencia` Actualización de Gradle de la versión 4.10.2 -> 6.5 -> 7.0.2 -> 7.3
 * `Dependencia` Actualización del plugin Groovy-Json de la versión 3.0.7 -> 3.0.8
 * `Dependencia` Actualización de Gson de la versión 2.8.2 -> 2.8.9

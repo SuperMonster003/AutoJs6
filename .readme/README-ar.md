@@ -59,17 +59,17 @@
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/TonyJiangWJ/Auto.js/commit/268ec8895bbfa28fc7715154eb15b1c1eaaefd14#diff-5e01f7d37a66e4ca03deefc205d8e7008661cdd0284a05aaba1858e6b7bf9103R2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2017/01/27`</span> | <span style="word-break:keep-all;white-space:nowrap">`2020/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 8</span> | <span style="word-break:keep-all;white-space:nowrap">AutoJsPro</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/10/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2021/07/24`</span> | <span style="word-break:keep-all;white-space:nowrap">1.78</span> |
-| <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/TonyJiangWJ/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js&#160;M](https://github.com/TonyJiangWJ/Auto.js/commit/268ec8895bbfa28fc7715154eb15b1c1eaaefd14#diff-5e01f7d37a66e4ca03deefc205d8e7008661cdd0284a05aaba1858e6b7bf9103R2)</span> | <span style="word-break:keep-all;white-space:nowrap">[TonyJiangWJ](https://github.com/TonyJiangWJ)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/11/21`</span> | <span style="word-break:keep-all;white-space:nowrap">-</span> | <span style="word-break:keep-all;white-space:nowrap">< 5.85 ></span> |
+| <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/TonyJiangWJ/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js&#160;M](https://github.com/TonyJiangWJ/Auto.js/commit/268ec8895bbfa28fc7715154eb15b1c1eaaefd14#diff-5e01f7d37a66e4ca03deefc205d8e7008661cdd0284a05aaba1858e6b7bf9103R2)</span> | <span style="word-break:keep-all;white-space:nowrap">[TonyJiangWJ](https://github.com/TonyJiangWJ)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/11/21`</span> | <span style="word-break:keep-all;white-space:nowrap">-</span> | <span style="word-break:keep-all;white-space:nowrap">< 5.93 ></span> |
 | <span style="word-break:keep-all;white-space:nowrap">[AutoX](https://github.com/kkevsekk1/AutoX)</span> | <span style="white-space:pre">[Autox.js](https://github.com/kkevsekk1/AutoX/commit/8143e4ed893d4af05d22aa791b83a962f9959873#diff-5e01f7d37a66e4ca03deefc205d8e7008661cdd0284a05aaba1858e6b7bf9103R2)</span> | <span style="word-break:keep-all;white-space:nowrap">[kkevsekk1](https://github.com/kkevsekk1)</span> | <span style="word-break:keep-all;white-space:nowrap">`2020/07/24`</span> | <span style="word-break:keep-all;white-space:nowrap">[ `2025/01/07` ]</span> | <span style="word-break:keep-all;white-space:nowrap">4.46</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js Pro 9](https://pro.autojs.org/)</span> | <span style="word-break:keep-all;white-space:nowrap">AutoJsPro</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2021/03/28`</span> | <span style="word-break:keep-all;white-space:nowrap">`2023/02/09`</span> | <span style="word-break:keep-all;white-space:nowrap">1.87</span> |
-| <span style="word-break:keep-all;white-space:nowrap">[AutoJs6](https://github.com/SuperMonster003/AutoJs6)</span> | <span style="word-break:keep-all;white-space:nowrap">[AutoJs6](https://github.com/SuperMonster003/AutoJs6/commit/a8ce1b9acb541e9736c33134be3194c3148a15a3#diff-833a46a97033e77558372a2dce103fd6fee29aaaa899f610022a7aece592ee7bR27)</span> | <span style="word-break:keep-all;white-space:nowrap">[SuperMonster003](https://github.com/SuperMonster003)</span> | <span style="word-break:keep-all;white-space:nowrap">`2021/12/01`</span> | <span style="word-break:keep-all;white-space:nowrap">-</span> | <span style="word-break:keep-all;white-space:nowrap">< 3.82 ></span> |
+| <span style="word-break:keep-all;white-space:nowrap">[AutoJs6](https://github.com/SuperMonster003/AutoJs6)</span> | <span style="word-break:keep-all;white-space:nowrap">[AutoJs6](https://github.com/SuperMonster003/AutoJs6/commit/a8ce1b9acb541e9736c33134be3194c3148a15a3#diff-833a46a97033e77558372a2dce103fd6fee29aaaa899f610022a7aece592ee7bR27)</span> | <span style="word-break:keep-all;white-space:nowrap">[SuperMonster003](https://github.com/SuperMonster003)</span> | <span style="word-break:keep-all;white-space:nowrap">`2021/12/01`</span> | <span style="word-break:keep-all;white-space:nowrap">-</span> | <span style="word-break:keep-all;white-space:nowrap">< 3.90 ></span> |
 | <span style="word-break:keep-all;white-space:nowrap">[autojs4](https://github.com/blackcd318/autojs4)</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[blackcd318](https://github.com/blackcd318)</span> | <span style="word-break:keep-all;white-space:nowrap">`2021/12/15`</span> | <span style="word-break:keep-all;white-space:nowrap">`2023/07/31`</span> | <span style="word-break:keep-all;white-space:nowrap">1.62</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[AutoX](https://github.com/kkevsekk1/AutoX)</span> | <span style="white-space:pre">[Autox.js&#160;v6](https://github.com/kkevsekk1/AutoX/commit/8b6776cff8b0fca4be4a52719b7d7d07c0a058f3#diff-51a0b488f963eb0be6c6599bf5df497313877cf5bdff3950807373912ac1cdc9R130)</span> | <span style="word-break:keep-all;white-space:nowrap">[wilinz](https://github.com/wilinz) / [aiselp](https://github.com/aiselp)</span> | <span style="word-break:keep-all;white-space:nowrap">`2022/05/26`</span> | <span style="word-break:keep-all;white-space:nowrap">[ `2025/01/07` ]</span> | <span style="word-break:keep-all;white-space:nowrap">2.62</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[openautojs](https://github.com/openautojs/openautojs)</span> | <span style="white-space:pre">[OpenAuto.js](https://github.com/openautojs/openautojs/commit/a11feaad025154de9b453ba70b49e94a6ca8b48a#diff-7d757295fcec3b37c258337e048644c258233d79259152e77baa6d36bb0ec418R2)</span> | <span style="word-break:keep-all;white-space:nowrap">[openautojs](https://github.com/openautojs)</span> | <span style="word-break:keep-all;white-space:nowrap">`2023/02/17`</span> | <span style="word-break:keep-all;white-space:nowrap">`2023/04/16`</span> | <span style="word-break:keep-all;white-space:nowrap">0.16</span> |
-| <span style="word-break:keep-all;white-space:nowrap">[AutoJs4](https://github.com/SuperMonster003/AutoJs4)</span> | <span style="word-break:keep-all;white-space:nowrap">[AutoJs4](https://github.com/SuperMonster003/AutoJs4/commit/8de11699b608be1c1f49f0f10e2e2826f8c77978)</span> | <span style="word-break:keep-all;white-space:nowrap">[SuperMonster003](https://github.com/SuperMonster003)</span> | <span style="word-break:keep-all;white-space:nowrap">`2023/04/11`</span> | <span style="word-break:keep-all;white-space:nowrap">-</span> | <span style="word-break:keep-all;white-space:nowrap">< 2.46 ></span> |
-| <span style="word-break:keep-all;white-space:nowrap">[AutoX](https://github.com/aiselp/AutoX)</span> | <span style="white-space:pre">[Autox.js&#160;v7](https://github.com/aiselp/AutoX/commit/484491fd5fe12b8203d0b09c181eb0f471c0ea9f#diff-8cff73265af19c059547b76aca8882cbaa3209291406f52df1dafbbc78e80c46R120)</span> | <span style="word-break:keep-all;white-space:nowrap">[aiselp](https://github.com/aiselp)</span> | <span style="word-break:keep-all;white-space:nowrap">`2024/04/21`</span> | <span style="word-break:keep-all;white-space:nowrap">-</span> | <span style="word-break:keep-all;white-space:nowrap">< 1.43 ></span> |
-| <span style="word-break:keep-all;white-space:nowrap">[Autoxjs_v6_ozobi](https://github.com/ozobiozobi/Autoxjs_v6_ozobi)</span> | <span style="white-space:pre">[Autox.js&#160;v6_ozobi](https://github.com/ozobiozobi/Autoxjs_v6_ozobi/blob/a651d02246e09cfbbfa87e6eaccf900fab/app/build.gradle.kts#L143)</span> | <span style="word-break:keep-all;white-space:nowrap">[ozobiozobi](https://github.com/ozobiozobi)</span> | <span style="word-break:keep-all;white-space:nowrap">`2024/10/01`</span> | <span style="word-break:keep-all;white-space:nowrap">-</span> | <span style="word-break:keep-all;white-space:nowrap">< 0.98 ></span> |
-| <span style="word-break:keep-all;white-space:nowrap">[AutoX](https://github.com/autox-community/AutoX)</span> | <span style="white-space:pre">[Autox.js&#160;v6](https://github.com/autox-community/AutoX/commit/8b6776cff8b0fca4be4a52719b7d7d07c0a058f3#diff-51a0b488f963eb0be6c6599bf5df497313877cf5bdff3950807373912ac1cdc9R130)</span> | <span style="word-break:keep-all;white-space:nowrap">[autox-community](https://github.com/autox-community)</span> | <span style="word-break:keep-all;white-space:nowrap">`2025/03/30`</span> | <span style="word-break:keep-all;white-space:nowrap">-</span> | <span style="word-break:keep-all;white-space:nowrap">< 0.49 ></span> |
+| <span style="word-break:keep-all;white-space:nowrap">[AutoJs4](https://github.com/SuperMonster003/AutoJs4)</span> | <span style="word-break:keep-all;white-space:nowrap">[AutoJs4](https://github.com/SuperMonster003/AutoJs4/commit/8de11699b608be1c1f49f0f10e2e2826f8c77978)</span> | <span style="word-break:keep-all;white-space:nowrap">[SuperMonster003](https://github.com/SuperMonster003)</span> | <span style="word-break:keep-all;white-space:nowrap">`2023/04/11`</span> | <span style="word-break:keep-all;white-space:nowrap">-</span> | <span style="word-break:keep-all;white-space:nowrap">< 2.55 ></span> |
+| <span style="word-break:keep-all;white-space:nowrap">[AutoX](https://github.com/aiselp/AutoX)</span> | <span style="white-space:pre">[Autox.js&#160;v7](https://github.com/aiselp/AutoX/commit/484491fd5fe12b8203d0b09c181eb0f471c0ea9f#diff-8cff73265af19c059547b76aca8882cbaa3209291406f52df1dafbbc78e80c46R120)</span> | <span style="word-break:keep-all;white-space:nowrap">[aiselp](https://github.com/aiselp)</span> | <span style="word-break:keep-all;white-space:nowrap">`2024/04/21`</span> | <span style="word-break:keep-all;white-space:nowrap">-</span> | <span style="word-break:keep-all;white-space:nowrap">< 1.52 ></span> |
+| <span style="word-break:keep-all;white-space:nowrap">[Autoxjs_v6_ozobi](https://github.com/ozobiozobi/Autoxjs_v6_ozobi)</span> | <span style="white-space:pre">[Autox.js&#160;v6_ozobi](https://github.com/ozobiozobi/Autoxjs_v6_ozobi/blob/a651d02246e09cfbbfa87e6eaccf900fab/app/build.gradle.kts#L143)</span> | <span style="word-break:keep-all;white-space:nowrap">[ozobiozobi](https://github.com/ozobiozobi)</span> | <span style="word-break:keep-all;white-space:nowrap">`2024/10/01`</span> | <span style="word-break:keep-all;white-space:nowrap">-</span> | <span style="word-break:keep-all;white-space:nowrap">< 1.07 ></span> |
+| <span style="word-break:keep-all;white-space:nowrap">[AutoX](https://github.com/autox-community/AutoX)</span> | <span style="white-space:pre">[Autox.js&#160;v6](https://github.com/autox-community/AutoX/commit/8b6776cff8b0fca4be4a52719b7d7d07c0a058f3#diff-51a0b488f963eb0be6c6599bf5df497313877cf5bdff3950807373912ac1cdc9R130)</span> | <span style="word-break:keep-all;white-space:nowrap">[autox-community](https://github.com/autox-community)</span> | <span style="word-break:keep-all;white-space:nowrap">`2025/03/30`</span> | <span style="word-break:keep-all;white-space:nowrap">-</span> | <span style="word-break:keep-all;white-space:nowrap">< 0.58 ></span> |
 
 التواريخ في الجدول هي تقديرات وقد تختلف عن الواقع.
 
@@ -77,7 +77,7 @@
 
 في الجدول، تشير البيانات في العمود `تاريخ نهاية التطوير` التي تحتوي على أقواس مربعة (`[]`) إلى أن مشروع المصدر المفتوح غير متاح مؤقتًا.
 
-في الجدول، يتم احتساب البيانات في العمود `فترة الصيانة النشطة` التي تحتوي على أقواس زاوية (`<>`) حتى 24 September 2025.
+في الجدول، يتم احتساب البيانات في العمود `فترة الصيانة النشطة` التي تحتوي على أقواس زاوية (`<>`) حتى 26 October 2025.
 
 ******
 
@@ -134,25 +134,25 @@
 * تكييف ألوان الموضوع [ التجميع / الموقع / البحث / السجل / التكييف التلقائي للسطوع والتباين / ... ]
 * دعم وضع الليل [ صفحة الإعدادات / صفحة الوثائق / صفحة تحليل التخطيط / النافذة العائمة / ... ]
 * دعم الاتصال بـ [المكون الإضافي لـ VSCode](http://vscext-project.autojs6.com) بطرق الاتصال عبر الشبكة المحلية (LAN) و ADB
-* تم ترقية محرك [Rhino](https://github.com/mozilla/rhino/) من [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) إلى [v1.8.1-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3) (تم التحديث في 10 September 2025)
+* تم ترقية محرك [Rhino](https://github.com/mozilla/rhino/) من [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) إلى [v1.8.1-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3) (تم التحديث في 5 October 2025)
     * دعم هروب نقطة الرمز Unicode [للأحرف متعددة المستويات](https://zh.wikipedia.org/wiki/Unicode%E5%AD%97%E7%AC%A6%E5%B9%B3%E9%9D%A2%E6%98%A0%E5%B0%84#%E7%AC%AC%E4%B8%80%E8%BC%94%E5%8A%A9%E5%B9%B3%E9%9D%A2)
-       ```javascript
+       ```js
        '\u{1D160}'; /* تمثل "𝅘𝅥𝅮", طريقة تقليدية: '\uD834\uDD60'. */
        ```
     * دعم [Object.values()](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/values)
-       ```javascript
+       ```js
        Object.values({name: 'Max', age: 4}); // ['max', 4]
        ```
     * دعم [Array.prototype.includes()](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/includes)
-       ```javascript
+       ```js
        [10, 20, NaN].includes(20); // true
        ```
     * دعم [BigInt](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/BigInt)
-       ```javascript
+       ```ts
        typeof 567n === 'bigint'; // true
        ```
     * دعم [القوالب النصية](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Template_literals)
-       ```javascript
+       ```js
        `Lucky number: ${(Math.random() * 100).toFixed(0)}`
        ```
     * عرض [المزيد من الميزات الجديدة](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/RHINO.md) لمحرك Rhino
@@ -308,13 +308,13 @@
 
 #### تحضير Android Studio
 
-قم بتنزيل إصدار `Android Studio Narwhal 3 Feature Drop | 2025.1.3` (حدد أحدها حسب الحاجة):
+قم بتنزيل إصدار `Android Studio Narwhal 4 Feature Drop | 2025.1.4` (حدد أحدها حسب الحاجة):
 
-- [android-studio-2025.1.3.7-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2025.1.3.7/android-studio-2025.1.3.7-windows.exe) (1.33 GiB)
-- [android-studio-2025.1.3.7-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2025.1.3.7/android-studio-2025.1.3.7-windows.zip) (1.34 GiB)
-- [android-studio-2025.1.3.7-linux.tar.gz](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2025.1.3.7/android-studio-2025.1.3.7-linux.tar.gz) (1.37 GiB)
+- [android-studio-2025.1.4.8-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2025.1.4.8/android-studio-2025.1.4.8-windows.exe) (1.30 GiB)
+- [android-studio-2025.1.4.8-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2025.1.4.8/android-studio-2025.1.4.8-windows.zip) (1.31 GiB)
+- [android-studio-2025.1.4.8-linux.tar.gz](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2025.1.4.8/android-studio-2025.1.4.8-linux.tar.gz) (1.34 GiB)
 
-> ملاحظة: تاريخ الإصدار بالنسخة المذكورة أعلاه هو 2 September 2025. إذا كنت بحاجة إلى تنزيل إصدار آخر، أو إذا كان الرابط المذكور غير صالح، يمكنك زيارة [أرشيف إصدارات Android Studio](https://developer.android.com/studio/archive?hl=en).
+> ملاحظة: تاريخ الإصدار بالنسخة المذكورة أعلاه هو 9 October 2025. إذا كنت بحاجة إلى تنزيل إصدار آخر، أو إذا كان الرابط المذكور غير صالح، يمكنك زيارة [أرشيف إصدارات Android Studio](https://developer.android.com/studio/archive?hl=en).
 
 قم بتثبيت أو فك ضغط الملف المذكور سابقًا، ثم قم بتشغيل برنامج Android Studio (مثل `"D:\android-studio\bin\studio64.exe"`).
 
@@ -365,7 +365,7 @@ File (ملف) | Settings (إعدادات) | Appearance & Behavior (المظهر 
 
 يعتمد مشروع AutoJs6 على إصدار `JDK (مجموعة تطوير جافا)` بإصدار لا يقل عن `17`، ولكن يفضل الإصدار الذي لا يقل عن `21`.
 
-اعتبارًا من 24 September 2025، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `24`.
+اعتبارًا من 26 October 2025، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `24`.
 
 > ملاحظة: إذا كان نظام الكمبيوتر يحتوي على JDK والإصدار يفي بالمتطلبات المذكورة أعلاه، فيمكنك تخطي هذا القسم.
 

@@ -30,7 +30,6 @@ import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.shortcut.AppsIconSelectActivity
 import org.autojs.autojs.ui.widget.SimpleTextWatcher
 import org.autojs.autojs.util.ViewUtils
-import org.autojs.autojs.util.ViewUtils.showToast
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ActivityProjectConfigBinding
 import java.io.File
@@ -157,12 +156,18 @@ class ProjectConfigActivity : BaseActivity() {
         if (!checkInputs()) {
             return
         }
-        syncProjectConfig()
+        try {
+            syncProjectConfig()
+        } catch (e: Throwable) {
+            e.printStackTrace()
+            ViewUtils.showToast(this, e.message, true)
+            return
+        }
         if (mIconBitmap != null) {
             saveIcon(mIconBitmap!!)
                 .subscribe({ saveProjectConfig() }) { e: Throwable ->
                     e.printStackTrace()
-                    showToast(this, e.message, true)
+                    ViewUtils.showToast(this, e.message, true)
                 }
         } else {
             saveProjectConfig()
@@ -179,7 +184,7 @@ class ProjectConfigActivity : BaseActivity() {
                     finish()
                 }) { e: Throwable ->
                     e.printStackTrace()
-                    showToast(this, e.message, true)
+                    ViewUtils.showToast(this, e.message, true)
                 }
         } else {
             Observable.fromCallable {
@@ -197,7 +202,7 @@ class ProjectConfigActivity : BaseActivity() {
                     finish()
                 }) { e: Throwable ->
                     e.printStackTrace()
-                    showToast(this, e.message, true)
+                    ViewUtils.showToast(this, e.message, true)
                 }
         }
     }
@@ -209,7 +214,15 @@ class ProjectConfigActivity : BaseActivity() {
     private fun syncProjectConfig() {
         mProjectConfig!!.let {
             it.name = mAppName.text.toString()
-            it.versionCode = mVersionCode.text.toString().toInt()
+            it.versionCode = mVersionCode.text.toString().toDouble().let { vc ->
+                require (vc in Int.MIN_VALUE.toDouble() .. Int.MAX_VALUE.toDouble()) {
+                    "\"${getString(R.string.text_version_code)}\" $vc is out of range of Int type"
+                }
+                require (vc % 1 == 0.0) {
+                    "\"${getString(R.string.text_version_code)}\" should be an integer instead of $vc"
+                }
+                vc.toInt()
+            }
             it.versionName = mVersionName.text.toString()
             it.mainScriptFileName = mMainFileName.text.toString()
             it.packageName = mPackageName.text.toString()

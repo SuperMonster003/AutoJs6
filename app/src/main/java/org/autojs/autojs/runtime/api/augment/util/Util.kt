@@ -21,8 +21,8 @@ import org.autojs.autojs.extension.AnyExtensions.isJsUndefined
 import org.autojs.autojs.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.extension.FlexibleArray
 import org.autojs.autojs.extension.NumberExtensions.jsString
-import org.autojs.autojs.extension.ScriptableExtensions.prop
 import org.autojs.autojs.extension.ScriptableExtensions.defineProp
+import org.autojs.autojs.extension.ScriptableExtensions.prop
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.global.Species
 import org.autojs.autojs.runtime.api.augment.util.Inspect.inspectRhino
@@ -739,7 +739,7 @@ object Util : Augmentable() {
         companion object : FlexibleArray() {
             @JvmStatic
             @RhinoStandardFunctionInterface
-            fun toString(cx: Context, thisObj: Scriptable, args: Array<Any?>, funObj: Function) = ensureArgumentsIsEmpty(args) {
+            fun toString(cx: Context, thisObj: Scriptable, args: Array<Any?>, funObj: Function): String = ensureArgumentsIsEmpty(args) {
                 when (thisObj) {
                     is RegularFunction -> callToStringFunction(thisObj.func)
                     else -> callToStringFunction(thisObj)
