@@ -9,8 +9,8 @@ import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.ScreenMetrics
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.util.MorseCode
-import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.runtime.exception.ShouldNeverHappenException
+import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.DeviceUtils
 import org.autojs.autojs.util.NetworkUtils
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED
@@ -19,6 +19,7 @@ import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.Undefined
 import java.util.function.Supplier
 import org.autojs.autojs.runtime.api.Device as ApiDevice
+import androidx.core.net.toUri
 
 @Suppress("unused", "UNUSED_PARAMETER")
 class Device(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
@@ -36,6 +37,7 @@ class Device(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         ::isActiveNetworkMetered.name,
         ::isConnectedOrConnecting.name,
         ::isWifiAvailable.name,
+        ::getSharedDeviceId.name,
     )
 
     override val selfAssignmentGetters = listOf<Pair<String, Supplier<Any?>>>(
@@ -191,6 +193,17 @@ class Device(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @RhinoRuntimeFunctionInterface
         fun isWifiAvailable(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsIsEmpty(args) {
             NetworkUtils.isWifiAvailable()
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun getSharedDeviceId(scriptRuntime: ScriptRuntime, args: Array<out Any?>): String? = ensureArgumentsIsEmpty(args) {
+            // val b = globalContext.contentResolver.call("content://org.autojs.autojs6.deviceid.provider".toUri(), "getDeviceId", null, null)
+            // b?.getString("device_id")
+            val uri = "content://org.autojs.autojs6.deviceid.provider/v1/device_id".toUri()
+            globalContext.contentResolver.query(uri, arrayOf("device_id"), null, null, null)?.use { c ->
+                if (c.moveToFirst()) c.getString(0) else null
+            }
         }
 
         private fun toVibrateTimingElement(it: Any?): Long {
