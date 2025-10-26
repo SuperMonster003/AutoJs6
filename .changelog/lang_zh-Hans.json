@@ -15,6 +15,7 @@
         "http 模块请求相关方法获取的 body 对象增加 stream/saveToFile/close 方法 _[`issue #452`](http://issues.autojs6.com/452)_",
         "http 模块请求相关方法支持缓存控制选项参数 (cacheBody/bodyCacheThresholdBytes)",
         "http 模块请求相关方法支持不安全选项参数 (isInsecure/insecure), 用于忽略证书相关异常 _[`issue #417`](http://issues.autojs6.com/417)_",
+        "http 模块请求相关方法支持 options.client 选项, 用于配置 OkHttpClient.Builder (如 followRedirects 等) _[`issue #454`](http://issues.autojs6.com/454)_",
         "structuredClone 全局方法, 用于深拷贝 JavaScript 对象 (参阅 [MDN](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/structuredClone))",
         "设置页面支持应用启动器图标设置选项 _[`issue #405`](http://issues.autojs6.com/405)_",
         "Scrapers 工具 (run-scrapers.mjs) 用于自动更新 Gradle 构建脚本结构化数据/README 通用数据/README 模板数据等"
