@@ -1,3 +1,5 @@
+@file:Suppress("MayBeConstant")
+
 package org.autojs.autojs.runtime.api.augment.http
 
 import android.webkit.MimeTypeMap
@@ -21,6 +23,7 @@ import org.autojs.autojs.core.http.MutableOkHttp
 import org.autojs.autojs.extension.AnyExtensions.isJsFunction
 import org.autojs.autojs.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.extension.AnyExtensions.jsBrief
+import org.autojs.autojs.extension.AnyExtensions.toRuntimePath
 import org.autojs.autojs.extension.ArrayExtensions.toNativeArray
 import org.autojs.autojs.extension.FlexibleArray
 import org.autojs.autojs.extension.FlexibleArray.Companion.component1
@@ -33,9 +36,11 @@ import org.autojs.autojs.pio.PFile
 import org.autojs.autojs.pio.PFileInterface
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.Mime
+import org.autojs.autojs.runtime.api.StringReadable
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.continuation.Continuation
 import org.autojs.autojs.runtime.api.augment.continuation.Creator
+import org.autojs.autojs.runtime.api.augment.converter.core.Bytes
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED
@@ -58,7 +63,10 @@ import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject.DONTENUM
 import org.mozilla.javascript.ScriptableObject.PERMANENT
 import org.mozilla.javascript.ScriptableObject.READONLY
+import org.mozilla.javascript.Undefined
 import java.io.IOException
+import java.io.InputStream
+import java.io.OutputStream
 import java.net.URI
 
 @Suppress("unused", "UNUSED_PARAMETER")
@@ -89,6 +97,8 @@ class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         private const val KEY_BODY = "body"
         private const val KEY_TIMEOUT = "timeout"
         private const val KEY_MAX_RETRIES = "maxRetries"
+        private const val KEY_CACHE_BODY = "cacheBody"
+        private const val KEY_BODY_CACHE_THRESHOLD_BYTES = "bodyCacheThresholdBytes"
 
         private val DEFAULT_CONTENT_TYPE = Mime.APPLICATION_X_WWW_FORM_URLENCODED
 
@@ -98,19 +108,25 @@ class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @JvmField
         val DEFAULT_MAX_RETRIES = MutableOkHttp.DEFAULT_MAX_RETRIES
 
+        @JvmField
+        val DEFAULT_CACHE_BODY = false
+
+        @JvmField
+        val DEFAULT_BODY_CACHE_THRESHOLD_BYTES = 8L * 1024 * 1024
+
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun buildRequest(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Request = ensureArgumentsLengthInRange(args, 1..2) {
             val (url, options) = it
-            buildRequestRhino(url, options)
+            buildRequestRhinoWithRuntime(scriptRuntime, url, options)
         }
 
         @JvmStatic
         @JvmOverloads
         @RhinoFunctionBody
-        fun buildRequestRhino(url: Any?, options: Any? = null): Request = when {
-            options.isJsNullish() -> RequestBuilder(url).build()
-            options is NativeObject -> RequestBuilder(url, options).build()
+        fun buildRequestRhinoWithRuntime(scriptRuntime: ScriptRuntime, url: Any?, options: Any? = null): Request = when {
+            options.isJsNullish() -> RequestBuilder(scriptRuntime, url).build()
+            options is NativeObject -> RequestBuilder(scriptRuntime, url, options).build()
             else -> throw WrappedIllegalArgumentException("Argument options ${options.jsBrief()} must be a JavaScript Object")
         }
 
@@ -136,16 +152,19 @@ class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             scriptRuntime.http.okhttp.maxRetries = coerceIntNumber(opt.prop(KEY_MAX_RETRIES), DEFAULT_MAX_RETRIES)
             scriptRuntime.http.okhttp.isInsecure = opt.inquire(listOf("isInsecure", "insecure"), ::coerceBoolean, false)
 
-            val newCall = scriptRuntime.http.client().newCall(buildRequestRhino(url, options))
+            val cacheBody = opt.inquire(listOf(KEY_CACHE_BODY), ::coerceBoolean, DEFAULT_CACHE_BODY)
+            val cacheThreshold = coerceLongNumber(opt.prop(KEY_BODY_CACHE_THRESHOLD_BYTES), DEFAULT_BODY_CACHE_THRESHOLD_BYTES)
+
+            val newCall = scriptRuntime.http.client().newCall(buildRequestRhinoWithRuntime(scriptRuntime, url, options))
 
             if (!callback.isJsFunction() && cont == null) {
-                return ResponseWrapper(newCall.execute()).wrap()
+                return ResponseWrapper(scriptRuntime, newCall.execute(), cacheBody, cacheThreshold).wrap()
             }
 
             scriptRuntime.loopers.waitWhenIdle(true)
             newCall.enqueue(object : Callback {
                 override fun onResponse(call: Call, response: Response) {
-                    val wrappedResponse = ResponseWrapper(response).wrap()
+                    val wrappedResponse = ResponseWrapper(scriptRuntime, response, cacheBody, cacheThreshold).wrap()
                     cont?.resume(wrappedResponse)
                     if (callback is BaseFunction) {
                         scriptRuntime.bridges.call(callback, callback, arrayOf(wrappedResponse, null))
@@ -257,8 +276,12 @@ class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             }
         }
 
-        private class ResponseWrapper(private val res: Response) {
-
+        private class ResponseWrapper(
+            private val scriptRuntime: ScriptRuntime,
+            private val res: Response,
+            private val cacheBody: Boolean,
+            private val cacheThresholdBytes: Long,
+        ) {
             private val mRequest = res.request
 
             var resBodyString: String? = null
@@ -281,8 +304,8 @@ class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                 // or returned from Call.execute.
                 val resBody = res.body!!
 
-                return ResponseBodyNativeObject(resBody, this).also {
-                    it.defineFunctionProperties(arrayOf("string", "bytes", "json"), it.javaClass, READONLY or PERMANENT)
+                return ResponseBodyNativeObject(scriptRuntime, resBody, this, cacheBody, cacheThresholdBytes).also {
+                    it.defineFunctionProperties(arrayOf("string", "bytes", "json", "stream", "saveToFile", "close"), it.javaClass, READONLY or PERMANENT)
                     it.defineProperty(KEY_CONTENT_TYPE, { resBody.contentType() }, null, READONLY or PERMANENT)
                 }
             }
@@ -312,11 +335,91 @@ class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
         }
 
-        @Suppress("unused")
-        private class ResponseBodyNativeObject(val resBody: ResponseBody, val responseWrapper: ResponseWrapper) : NativeObject() {
+        class HttpSaveResult @JvmOverloads constructor(
+            private val resultCode: Int,
+            private val outPath: String?,
+            private val bytesCopied: Long,
+            private val error: Throwable? = null,
+        ) : NativeObject(), StringReadable {
 
             init {
                 RhinoUtils.initNativeObjectPrototype(this)
+                defineProperty("code", { resultCode }, null, READONLY or PERMANENT)
+                defineProperty("path", { outPath }, null, READONLY or PERMANENT)
+                defineProperty("bytesCopied", { bytesCopied }, null, READONLY or PERMANENT)
+                defineProperty("success", { resultCode == RESULT_OK }, null, READONLY or PERMANENT)
+                defineProperty("error", { error }, null, READONLY or PERMANENT)
+                defineFunctionProperties(arrayOf("isSuccess"), javaClass, READONLY or PERMANENT)
+            }
+
+            override fun toStringReadable(): String = listOf(
+                "${HttpSaveResult::class.java.simpleName} {",
+                "  code: ${resultCode},",
+                "  bytesCopied: $bytesCopied (${Bytes.string(bytesCopied.toDouble(), useSpace = true, strict = true)}),",
+                "  path: '${outPath}',",
+                "  error: ${error?.message?.take(256)?.let { "'$it'" }},",
+                "}",
+            ).joinToString("\n")
+
+            companion object {
+
+                @JvmField
+                val RESULT_OK = 0
+
+                private const val RESULT_FAILED_GENERIC = -1
+
+                fun ok(path: String, bytesCopied: Long) =
+                    HttpSaveResult(RESULT_OK, path, bytesCopied, null)
+
+                fun fail(path: String?, bytesCopied: Long, e: Throwable?) =
+                    HttpSaveResult(RESULT_FAILED_GENERIC, path, bytesCopied, e)
+
+                @JvmStatic
+                @RhinoStandardFunctionInterface
+                fun isSuccess(cx: Context, thisObj: Scriptable, args: Array<Any?>, funObj: Function): Boolean = ensureArgumentsIsEmpty(args) {
+                    val o = thisObj as HttpSaveResult
+                    o.resultCode == RESULT_OK
+                }
+
+            }
+        }
+
+        @Suppress("unused")
+        private class ResponseBodyNativeObject(
+            val scriptRuntime: ScriptRuntime,
+            val resBody: ResponseBody,
+            val responseWrapper: ResponseWrapper,
+            private val cacheBody: Boolean,
+            private val cacheThresholdBytes: Long,
+        ) : NativeObject() {
+
+            init {
+                RhinoUtils.initNativeObjectPrototype(this)
+            }
+
+            // Record whether it has been explicitly closed.
+            // zh-CN: 记录是否已显式关闭.
+            @Volatile
+            private var closed = false
+
+            private fun ensureOpen() {
+                if (closed) throw IllegalStateException("Response body already closed")
+            }
+
+            private fun autoCloseIfNeeded() {
+                // Close immediately after reading the complete content to avoid resource leaks;
+                // stream() close is handled by the caller.
+                // zh-CN: 读取完整内容后立即关闭, 避免资源泄露; stream() 由调用者负责 close().
+                if (!closed) {
+                    runCatching { resBody.close() }
+                    closed = true
+                }
+            }
+
+            private fun shouldCache(lengthHint: Long?): Boolean {
+                if (!cacheBody) return false
+                if (lengthHint == null || lengthHint < 0) return true
+                return lengthHint <= cacheThresholdBytes
             }
 
             companion object : FlexibleArray() {
@@ -325,32 +428,120 @@ class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                 @RhinoStandardFunctionInterface
                 fun string(cx: Context, thisObj: Scriptable, args: Array<Any?>, funObj: Function): String = ensureArgumentsIsEmpty(args) {
                     val o = thisObj as ResponseBodyNativeObject
-                    o.responseWrapper.resBodyString ?: o.resBody.string().also { o.responseWrapper.resBodyString = it }
+                    o.responseWrapper.resBodyString?.let { return@ensureArgumentsIsEmpty it }
+                    o.ensureOpen()
+                    val contentLength = runCatching {
+                        o.resBody.contentLength()
+                    }.getOrDefault(-1L)
+                    val str = o.resBody.string()
+                    if (o.shouldCache(contentLength)) {
+                        o.responseWrapper.resBodyString = str
+                    }
+                    // string() can safely close after consuming the stream.
+                    // zh-CN: string() 消费流后可安全关闭.
+                    o.autoCloseIfNeeded()
+                    return@ensureArgumentsIsEmpty str
                 }
 
                 @JvmStatic
                 @RhinoStandardFunctionInterface
                 fun bytes(cx: Context, thisObj: Scriptable, args: Array<Any?>, funObj: Function): ByteArray = ensureArgumentsIsEmpty(args) {
                     val o = thisObj as ResponseBodyNativeObject
-                    o.responseWrapper.resBodyBytes ?: o.resBody.bytes().also { o.responseWrapper.resBodyBytes = it }
+                    o.responseWrapper.resBodyBytes?.let { return@ensureArgumentsIsEmpty it }
+                    o.ensureOpen()
+                    val contentLength = runCatching {
+                        o.resBody.contentLength()
+                    }.getOrDefault(-1L)
+                    val data = o.resBody.bytes()
+                    if (o.shouldCache(contentLength)) {
+                        o.responseWrapper.resBodyBytes = data
+                    }
+                    // bytes() 消费流后可安全关闭
+                    o.autoCloseIfNeeded()
+                    return@ensureArgumentsIsEmpty data
                 }
 
                 @JvmStatic
                 @RhinoStandardFunctionInterface
                 fun json(cx: Context, thisObj: Scriptable, args: Array<Any?>, funObj: Function): Any? = ensureArgumentsIsEmpty(args) {
                     val str = string(cx, thisObj, args, funObj)
-                    try {
-                        js_json_parse(str)
-                    } catch (_: Exception) {
+                    runCatching {
+                        return@ensureArgumentsIsEmpty js_json_parse(str)
+                    }.onFailure {
                         throw IllegalStateException("Failed to parse JSON. Body string may be not in JSON format")
                     }
                 }
 
+                @JvmStatic
+                @RhinoStandardFunctionInterface
+                fun stream(cx: Context, thisObj: Scriptable, args: Array<Any?>, funObj: Function): InputStream = ensureArgumentsIsEmpty(args) {
+                    val o = thisObj as ResponseBodyNativeObject
+                    o.ensureOpen()
+                    // Don't auto-close; let the caller handle it, supporting streaming copy.
+                    // zh-CN: 不自动关闭; 交给调用者处理, 支持流式拷贝.
+                    o.resBody.byteStream()
+                }
+
+                // Save directly to file (avoid loading large responses into memory).
+                // zh-CN: 直接保存到文件 (避免将大型响应加载到内存中).
+                @JvmStatic
+                @RhinoStandardFunctionInterface
+                fun saveToFile(cx: Context, thisObj: Scriptable, args: Array<Any?>, funObj: Function): HttpSaveResult = ensureArgumentsLengthInRange(args, 1..2) { argList ->
+                    val o = thisObj as ResponseBodyNativeObject
+                    o.ensureOpen()
+
+                    val (pathRaw, bufSizeRaw) = argList
+                    val path = coerceString(pathRaw, "").toRuntimePath(o.scriptRuntime)
+                    val bufSize = coerceIntNumber(bufSizeRaw, 0).let {
+                        if (it > 0) it else 8192
+                    }
+
+                    val file = PFile(path)
+                    val isDirectory = file.isDirectory || path.endsWith("/")
+                    if (isDirectory) {
+                        throw WrappedIllegalArgumentException("Path \"$path\" must be a file path instead of a directory path")
+                    }
+                    val buffer = ByteArray(bufSize)
+                    var copied = 0L
+                    var input: InputStream? = null
+                    var output: OutputStream? = null
+                    return@ensureArgumentsLengthInRange try {
+                        input = o.resBody.byteStream()
+                        output = file.outputStream()
+                        while (true) {
+                            val read = input.read(buffer)
+                            if (read == -1) break
+                            output.write(buffer, 0, read)
+                            copied += read
+                        }
+                        output.flush()
+                        HttpSaveResult.ok(path, copied)
+                    } catch (e: Throwable) {
+                        HttpSaveResult.fail(path, copied, e)
+                    } finally {
+                        runCatching { input?.close() }
+                        runCatching { output?.close() }
+                        o.autoCloseIfNeeded()
+                    }
+                }
+
+                // Explicit close.
+                // zh-CN: 显式关闭.
+                @JvmStatic
+                @RhinoStandardFunctionInterface
+                fun close(cx: Context, thisObj: Scriptable, args: Array<Any?>, funObj: Function): Undefined = ensureArgumentsIsEmpty(args) {
+                    val o = thisObj as ResponseBodyNativeObject
+                    if (!o.closed) {
+                        runCatching { o.resBody.close() }
+                        o.closed = true
+                    }
+                    UNDEFINED
+                }
             }
 
         }
 
-        private class RequestBuilder(private val url: Any?, options: NativeObject = newNativeObject()) {
+        private class RequestBuilder(private val scriptRuntime: ScriptRuntime, private val url: Any?, options: NativeObject = newNativeObject()) {
 
             private val mRequest = Request.Builder()
             private val mRequestBuilderHelper = RequestBuilderHelper(options)
@@ -358,7 +549,7 @@ class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             fun build(): Request {
                 mRequest.url(mRequestBuilderHelper.getUrl(coerceString(url)))
                 mRequestBuilderHelper.setHeaders(mRequest)
-                mRequestBuilderHelper.setMethod(mRequest)
+                mRequestBuilderHelper.setMethod(scriptRuntime, mRequest)
                 return mRequest.build()
             }
 
@@ -385,7 +576,7 @@ class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                 }
             }
 
-            fun setMethod(request: Request.Builder) {
+            fun setMethod(scriptRuntime: ScriptRuntime, request: Request.Builder) {
                 val method = coerceString(options.prop(KEY_METHOD))
                 // require(method is String) { "Property method is required for header options" }
                 when {
@@ -393,7 +584,7 @@ class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                         request.method(method, parseBody())
                     }
                     !options.prop(KEY_FILES).isJsNullish() -> {
-                        request.method(method, parseMultipart())
+                        request.method(method, parseMultipart(scriptRuntime))
                     }
                     else -> {
                         request.method(method, null)
@@ -422,7 +613,7 @@ class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                 else -> throw WrappedIllegalArgumentException("Unknown type of body for header options")
             }
 
-            fun parseMultipart(): MultipartBody {
+            fun parseMultipart(scriptRuntime: ScriptRuntime): MultipartBody {
                 val builder = MultipartBody.Builder().setType(MultipartBody.FORM)
 
                 val files = options.prop(KEY_FILES)
@@ -438,14 +629,14 @@ class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                         is NativeArray -> when (value.length) {
                             2L -> {
                                 val (fileName, path) = value
-                                val file = if (path is URI) PFile(path) else PFile(coerceString(path))
+                                val file = if (path is URI) PFile(path) else PFile(path.toRuntimePath(scriptRuntime))
                                 val mimeType = parseMimeType(file.extension)
                                 val requestBody = file.asRequestBody(mimeType.toMediaTypeOrNull())
                                 processFile(builder, key, fileName, requestBody)
                             }
                             3L -> {
                                 val (fileName, mimeType, path) = value
-                                val file = if (path is URI) PFile(path) else PFile(coerceString(path))
+                                val file = if (path is URI) PFile(path) else PFile(path.toRuntimePath(scriptRuntime))
                                 val requestBody = file.asRequestBody(coerceString(mimeType).toMediaTypeOrNull())
                                 processFile(builder, key, fileName, requestBody)
                             }
@@ -457,7 +648,7 @@ class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                         }
                         is PFileInterface -> {
                             val path = value.path
-                            val file = PFile(path)
+                            val file = PFile(path.toRuntimePath(scriptRuntime))
                             val fileName = file.name
                             val mimeType = parseMimeType(file.extension)
                             val requestBody = file.asRequestBody(mimeType.toMediaTypeOrNull())
