@@ -29,6 +29,14 @@ class ScriptBridges : IScriptBridges {
         this.engine = engine
     }
 
+    fun setJavaPrimitiveWrap(b: Boolean) = useJsContext {
+        it.wrapFactory.isJavaPrimitiveWrap = b
+    }
+
+    fun isJavaPrimitiveWrap(): Boolean = useJsContext {
+        it.wrapFactory.isJavaPrimitiveWrap
+    }
+
     override fun call(func: BaseFunction, target: Any?, args: Array<*>) = useJsContext { cx ->
         val scope = func.parentScope
         val niceScope = scope ?: ImporterTopLevel(cx)

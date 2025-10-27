@@ -1065,5 +1065,8 @@
     <string name="text_write_secure_settings">보안 설정을 작성하십시오</string>
     <string name="text_write_secure_settings_description">애플리케이션이 읽을 수 있지만 쓸 수없는 시스템 환경 설정을 포함하는 보안 시스템 설정.\n이들은 사용자가 시스템 앱의 UI 를 통해 명시 적으로 수정 해야하는 선호도입니다.\n보안 시스템 설정 권한을 사용하면 일반 애플리케이션이 보안 설정 (예: 접근성 서비스)을 직접 수정할 수 있습니다.</string>
     <string name="text_write_system_settings">시스템 설정을 작성하십시오</string>
+    <string name="description_rhino_java_primitive_wrap">스위치 활성화(기본값): Java 메서드가 반환하는 Number/Boolean/Character 값은 Java 객체로 래핑되어 스크립트에 노출됩니다(String 제외). typeof 는 \"object\", species 는 \"JavaObject\"이며, Java 메서드 호출이 가능해 Java의 정밀한 타입 특성과 오버로드 해석을 보존하는 데 도움이 됩니다.\n\n스위치 비활성화: 위 타입들을 더 이상 래핑하지 않고 JavaScript 원시 값(number/boolean/한 글자 문자열)으로 직접 노출합니다. typeof 는 해당 JavaScript 타입이 되며, JavaScript의 의미론/생태계에 더 가깝습니다. 필요 시 new 키워드로 Java 래퍼를 명시적으로 생성할 수 있습니다(예: new java.lang.Boolean(true)).\n\n참고: http://issues.autojs6.com/435</string>
+    <string name="summary_rhino_java_primitive_wrap">Java 원시 타입이 스크립트에서 Java 객체로 래핑됩니다</string>
+    <string name="text_rhino_java_primitive_wrap">Java 원시 타입 래핑</string>
 
 </resources>

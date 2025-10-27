@@ -2,9 +2,11 @@ package org.autojs.autojs.rhino
 
 import android.util.Log
 import org.autojs.autojs.core.automator.UiObjectCollection
+import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.runtime.ScriptBridges
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.util.RhinoUtils.isBackgroundThread
+import org.autojs.autojs6.R
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.ContextFactory
 import org.mozilla.javascript.Scriptable
@@ -16,10 +18,6 @@ import java.util.concurrent.atomic.AtomicInteger
  * Created by Stardust on Apr 5, 2017.
  */
 open class AndroidContextFactory(private val cacheDirectory: File) : ContextFactory() {
-    companion object {
-        private val TAG: String = AndroidContextFactory::class.java.simpleName
-        private val bridges = ScriptBridges()
-    }
 
     private val mContextCount = AtomicInteger()
     private val wrapFactory = WrapFactory()
@@ -74,10 +72,24 @@ open class AndroidContextFactory(private val cacheDirectory: File) : ContextFact
     }
 
     open class WrapFactory : org.mozilla.javascript.WrapFactory() {
+
+        init {
+            isJavaPrimitiveWrap = Pref.getBoolean(R.string.key_rhino_java_primitive_wrap, R.bool.pref_rhino_java_primitive_wrap)
+        }
+
         override fun wrap(cx: Context, scope: Scriptable, obj: Any?, staticType: Class<*>?): Any? = when {
             obj is String -> bridges.toString(obj.toString())
             staticType == UiObjectCollection::class.java -> (obj as? UiObjectCollection)?.let { bridges.asArray(it) } ?: UiObjectCollection.EMPTY
             else -> super.wrap(cx, scope, obj, staticType)
         }
+
     }
+
+    companion object {
+
+        private val TAG: String = AndroidContextFactory::class.java.simpleName
+        private val bridges = ScriptBridges()
+
+    }
+
 }

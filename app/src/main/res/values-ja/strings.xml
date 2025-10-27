@@ -1064,5 +1064,8 @@
     <string name="text_write_secure_settings">セキュリティ設定の書き込み</string>
     <string name="text_write_secure_settings_description">アプリケーションが読み取ることはできるが, 書き込むことはできないシステム環境設定を含む, 安全なシステム設定です.\nこれは, ユーザーがシステムアプリの UI を通じて明示的に変更する必要がある環境設定のためのものです.\nセキュアなシステム設定を許可すると, 通常のアプリケーションはセキュアな設定 (アクセシビリティサービスなど) を直接変更できるようになります</string>
     <string name="text_write_system_settings">システム設定の書き込み</string>
+    <string name="description_rhino_java_primitive_wrap">スイッチ有効 (デフォルト): Java メソッドが返す Number/Boolean/Character は Java オブジェクトとしてラップされ/スクリプトに公開されます (String は除外). typeof は \"object\"/species は \"JavaObject\". Java のメソッドを呼び出せるため/Java の厳密な型特性やオーバーロード解決を保持しやすくなります.\n\n スイッチ無効: 上記の型はラップされず/JavaScript のプリミティブ値 (number/boolean/1 文字の文字列) として直接公開されます. typeof は対応する JavaScript 型となり/JavaScript のセマンティクス／エコシステムにより沿います. 必要なら new によって明示的に Java ラッパーを生成できます (例: new java.lang.Boolean(true)).\n\n 参照: http://issues.autojs6.com/435</string>
+    <string name="summary_rhino_java_primitive_wrap">Java のプリミティブ型はスクリプト内で Java オブジェクトとしてラップされます</string>
+    <string name="text_rhino_java_primitive_wrap">Java プリミティブ型のラップ</string>
 
 </resources>

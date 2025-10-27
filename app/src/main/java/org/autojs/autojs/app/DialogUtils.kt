@@ -6,6 +6,7 @@ import android.content.ContextWrapper
 import android.content.DialogInterface
 import android.os.Build
 import android.os.Looper
+import android.text.util.Linkify
 import android.view.Gravity
 import android.view.KeyEvent
 import android.view.View
@@ -109,7 +110,13 @@ object DialogUtils {
                                     .positiveText(R.string.dialog_button_dismiss)
                                     .positiveColorRes(R.color.dialog_button_default)
                                     .build()
-                                    .also { preference.longClickPromptMoreDialogHandler(it) }
+                                    .also {
+                                        preference.longClickPromptMoreDialogHandler(it)
+                                        it.contentView?.apply {
+                                            autoLinkMask = Linkify.WEB_URLS
+                                            text = text
+                                        }
+                                    }
                                     .show()
                             }
                         }
@@ -119,7 +126,13 @@ object DialogUtils {
                     .onPositive { dialog, _ -> dialog.dismiss() }
                     .autoDismiss(false)
                     .build()
-                    .also { preference.longClickPromptDialogHandler(it) }
+                    .also {
+                        preference.longClickPromptDialogHandler(it)
+                        it.contentView?.apply {
+                            autoLinkMask = Linkify.WEB_URLS
+                            text = text
+                        }
+                    }
                     .show()
                 true
             } ?: false

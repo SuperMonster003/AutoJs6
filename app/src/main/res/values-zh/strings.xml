@@ -1061,5 +1061,8 @@
     <string name="text_write_secure_settings">修改安全设置</string>
     <string name="text_write_secure_settings_description">安全设置包含应用程序可读但不可写入的设置选项, 这些选项只能由 UI 或系统级别应用修改.\n被授予 \"修改安全设置权限\" 后, 普通应用可直接修改上述安全设置 (例如无障碍服务).</string>
     <string name="text_write_system_settings">修改系统设置</string>
+    <string name="description_rhino_java_primitive_wrap">开关启用 (默认): 将 Java 方法返回的 Number/Boolean/Character 包装为 Java 对象暴露到脚本 (String 除外). typeof 为 \"object\", species 为 \"JavaObject\", 可访问这些对象的 Java 方法, 利于保留 Java 精确类型特征与方法重载行为.\n\n开关禁用: 不再包装上述类型, 直接作为 JavaScript 基元值 (number/boolean/单字符字符串). typeof 为相应 JavaScript 类型, 更贴近 JavaScript 语义与生态. 但仍可通过 new 关键字显式声明一个 Java 包装类型, 如 new java.lang.Boolean(true).\n\n参阅: http://issues.autojs6.com/435</string>
+    <string name="summary_rhino_java_primitive_wrap">Java 原始类型在脚本中将被包装为对应的 Java 对象</string>
+    <string name="text_rhino_java_primitive_wrap">Java 原始类型包装</string>
 
 </resources>

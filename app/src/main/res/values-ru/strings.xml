@@ -1063,5 +1063,8 @@
     <string name="text_write_secure_settings">Параметры безопасности записи</string>
     <string name="text_write_secure_settings_description">Настройки безопасности системы, содержащие системные предпочтения, которые приложения могут читать, но не имеют права записывать.\nОни предназначены для параметров, которые пользователь должен явно изменить через пользовательский интерфейс системного приложения.\nПри наличии разрешения на безопасные системные настройки обычные приложения могут напрямую изменять безопасные настройки (например, служба доступности).</string>
     <string name="text_write_system_settings">Запись системных настроек</string>
+    <string name="description_rhino_java_primitive_wrap">Переключатель включён (по умолчанию): значения, возвращаемые методами Java типов Number/Boolean/Character, оборачиваются в объекты Java и доступны в скрипте (String исключается). typeof = \"object\", species = \"JavaObject\"; доступны методы Java, что помогает сохранять точные типовые характеристики Java и корректную резолюцию перегрузок.\n\nПереключатель выключен: перечисленные типы больше не оборачиваются и передаются напрямую как примитивы JavaScript (number/boolean/строка из одного символа). typeof соответствует соответствующему типу JavaScript, что ближе к семантике/экосистеме JavaScript. При необходимости можно явно создать Java‑обёртку через new, например new java.lang.Boolean(true).\n\nСм.: http://issues.autojs6.com/435</string>
+    <string name="summary_rhino_java_primitive_wrap">Примитивы Java в скрипте будут обёрнуты в объекты Java</string>
+    <string name="text_rhino_java_primitive_wrap">Обёртка примитивов Java</string>
 
 </resources>

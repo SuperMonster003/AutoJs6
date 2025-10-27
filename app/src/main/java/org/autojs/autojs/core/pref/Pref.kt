@@ -273,6 +273,9 @@ object Pref {
     fun getBoolean(@KeyRes keyRes: Int, defValue: Boolean) = getBoolean(key(keyRes), defValue)
 
     @JvmStatic
+    fun getBoolean(@KeyRes keyRes: Int, @KeyRes defValue: Int) = getBoolean(key(keyRes), resources.getBoolean(defValue))
+
+    @JvmStatic
     fun getBoolean(key: String, defValue: Boolean) = sPref.getBoolean(key, defValue)
 
     @JvmStatic

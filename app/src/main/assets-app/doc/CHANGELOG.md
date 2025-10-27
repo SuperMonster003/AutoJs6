@@ -6,7 +6,7 @@
 
 # v6.7.0
 
-###### 2025/10/26
+###### 2025/10/27
 
 * `新增` cvt 模块, 用于数据单位转换 (参阅 项目文档 > [单位转换](https://docs.autojs6.com/#/cvt))
 * `新增` fmt 模块, 用于数据格式化 (参阅 项目文档 > [格式化](https://docs.autojs6.com/#/fmt))
@@ -21,8 +21,10 @@
 * `新增` http 模块请求相关方法支持缓存控制选项参数 (cacheBody/bodyCacheThresholdBytes)
 * `新增` http 模块请求相关方法支持不安全选项参数 (isInsecure/insecure), 用于忽略证书相关异常 _[`issue #417`](http://issues.autojs6.com/417)_
 * `新增` http 模块请求相关方法支持 options.client 选项, 用于配置 OkHttpClient.Builder (如 followRedirects 等) _[`issue #454`](http://issues.autojs6.com/454)_
+* `新增` runtime.(set/is)JavaPrimitiveWrap 方法, 用于设置或获取 Java 原始类型包装策略 _[`issue #435`](http://issues.autojs6.com/435)_
 * `新增` structuredClone 全局方法, 用于深拷贝 JavaScript 对象 (参阅 [MDN](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/structuredClone))
-* `新增` 设置页面支持应用启动器图标设置选项 _[`issue #405`](http://issues.autojs6.com/405)_
+* `新增` 设置页面支持 "应用启动器图标" 设置选项 _[`issue #405`](http://issues.autojs6.com/405)_
+* `新增` 设置页面支持 "Java 原始类型包装" 设置选项 _[`issue #435`](http://issues.autojs6.com/435)_
 * `新增` Scrapers 工具 (run-scrapers.mjs) 用于自动更新 Gradle 构建脚本结构化数据/README 通用数据/README 模板数据等
 * `修复` isJavaClass/isJavaPackage 等全局方法无效的问题
 * `修复` timers.keepAlive 方法 timeout 参数功能无效的问题

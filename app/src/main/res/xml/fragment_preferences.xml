@@ -205,6 +205,14 @@
             app:summary="@string/summary_extending_js_build_in_objects"
             app:longClickPrompt="@string/description_extending_js_build_in_objects" />
 
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_rhino_java_primitive_wrap"
+            app:defaultValue="@bool/pref_rhino_java_primitive_wrap"
+            app:title="@string/text_rhino_java_primitive_wrap"
+            app:summary="@string/summary_rhino_java_primitive_wrap"
+            app:longClickPrompt="@string/description_rhino_java_primitive_wrap" />
+
     </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
 
     <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
