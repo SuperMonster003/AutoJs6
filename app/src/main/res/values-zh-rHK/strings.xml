@@ -1061,5 +1061,8 @@
     <string name="text_write_secure_settings">修改安全設置</string>
     <string name="text_write_secure_settings_description">安全設置包含應用程序可讀但不可寫入的設置選項, 這些選項只能由 UI 或系統級別應用修改.\n被授予 \"修改安全設置權限\" 後, 普通應用可直接修改上述安全設置 (例如無障礙服務).</string>
     <string name="text_write_system_settings">修改系統設置</string>
+    <string name="description_rhino_java_primitive_wrap">開關啓用 (默認): 將 Java 方法返回的 Number/Boolean/Character 包裝為 Java 對象暴露到腳本 (String 除外). typeof 為 \"object\", species 為 \"JavaObject\", 可訪問這些對象的 Java 方法, 利於保留 Java 精確類型特徵與方法重載行為.\n\n開關禁用: 不再包裝上述類型, 直接作為 JavaScript 基元值 (number/boolean/單字符字符串). typeof 為相應 JavaScript 類型, 更貼近 JavaScript 語義與生態. 但仍可通過 new 關鍵字顯式聲明一個 Java 包裝類型, 如 new java.lang.Boolean(true).\n\n參閲: http://issues.autojs6.com/435</string>
+    <string name="summary_rhino_java_primitive_wrap">Java 原始類型在腳本中將被包裝為對應的 Java 對象</string>
+    <string name="text_rhino_java_primitive_wrap">Java 原始類型包裝</string>
 
 </resources>

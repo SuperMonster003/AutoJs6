@@ -133,6 +133,7 @@
     <string name="key_pref_bundle_default_item" translatable="false">key_$_pref_bundle_default_item</string>
     <string name="key_pref_bundle_disabled_items" translatable="false">key_$_pref_bundle_disabled_items</string>
     <string name="key_record_toast" translatable="false">key_$_record_toast</string>
+    <string name="key_rhino_java_primitive_wrap" translatable="false">key_$_rhino_java_primitive_wrap</string>
     <string name="key_root_mode" translatable="false">key_$_root_mode</string>
     <string name="key_root_mode_auto_detect" translatable="false">key_$_root_mode_auto_detect</string>
     <string name="key_root_mode_force_non_root" translatable="false">key_$_root_mode_force_non_root</string>
@@ -1295,5 +1296,8 @@
     <string name="text_write_secure_settings">Write security settings</string>
     <string name="text_write_secure_settings_description">Secure system settings, containing system preferences that applications can read but are not allowed to write.\nThese are for preferences that the user must explicitly modify through the UI of a system app.\nWith secure system settings permission, normal applications can directly modify the secure settings (such as accessibility service).</string>
     <string name="text_write_system_settings">Write system settings</string>
+    <string name="description_rhino_java_primitive_wrap">Switch ON (default): results of Java methods that are instances of Number/Boolean/Character are wrapped as Java objects and exposed to scripts (String excluded). typeof is \"object\", species is \"JavaObject\"; Java methods remain accessible, which helps retain precise Java type traits and overload resolution.\n\nSwitch OFF: the above types are no longer wrapped and are exposed directly as JavaScript primitives (number/boolean/one‑character string). typeof is the corresponding JavaScript type, aligning better with JavaScript semantics and ecosystem. You can still explicitly create a Java wrapper via new, e.g. new java.lang.Boolean(true).\n\nSee: http://issues.autojs6.com/435</string>
+    <string name="summary_rhino_java_primitive_wrap">Java primitive types will be wrapped as Java objects in scripts</string>
+    <string name="text_rhino_java_primitive_wrap">Java primitive wrapping</string>
 
 </resources>

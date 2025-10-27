@@ -381,6 +381,10 @@ class ScriptRuntime private constructor(builder: Builder) {
     @ScriptInterface
     val mediaInfo = MediaInfo()
 
+    var isJavaPrimitiveWrap
+        get() = bridges.isJavaPrimitiveWrap()
+        set(b) = bridges.setJavaPrimitiveWrap(b)
+
     private lateinit var augmentedApp: ScriptableObject
 
     private lateinit var augmentedAutojs: ScriptableObject
