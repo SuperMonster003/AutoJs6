@@ -289,7 +289,7 @@ class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         }
 
         private fun MutableOkHttp.applyOkHttpClientBuilder(opt: NativeObject) {
-            val clientProp = opt.prop(KEY_CLIENT)
+            val clientProp = opt.prop(KEY_CLIENT).takeUnless { it.isJsNullish() }
             require(clientProp is NativeObject?) { "Argument \"client\" ${clientProp.jsBrief()} for http.request must be a JavaScript Object" }
             clientProp ?: return
 
