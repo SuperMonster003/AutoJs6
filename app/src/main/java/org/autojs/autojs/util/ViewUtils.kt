@@ -10,6 +10,7 @@ import android.content.ContextWrapper
 import android.content.res.Configuration
 import android.content.res.Configuration.UI_MODE_NIGHT_MASK
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import android.content.res.Resources
 import android.graphics.ColorFilter
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
@@ -64,14 +65,6 @@ import kotlin.math.roundToInt
 @Suppress("unused")
 object ViewUtils {
 
-    enum class MODE(val key: String) {
-        DAY(key(R.string.key_night_mode_always_off)),
-        NIGHT(key(R.string.key_night_mode_always_on)),
-        FOLLOW(key(R.string.key_night_mode_follow_system)),
-        NULL(key(R.string.key_night_mode_null)),
-        ;
-    }
-
     private const val TAG_STATUS_BAR_SCRIM = "status_bar_scrim"
 
     @JvmStatic
@@ -103,47 +96,78 @@ object ViewUtils {
         return view.findViewById(resId)
     }
 
-    // FIXME by Stardust on Jan 23, 2018.
-    //  ! Not working in some devices.
-    //  ! https://github.com/hyb1996/Auto.js/issues/268
-    //  ! zh-CN (translated by SuperMonster003 on Jul 29, 2024):
-    //  ! 在一些设备上无法正常获取结果.
-    //  ! 参阅: https://github.com/hyb1996/Auto.js/issues/268
-    @SuppressLint("InternalInsetResource", "DiscouragedApi")
     @JvmStatic
     @JvmOverloads
-    fun getStatusBarHeightByDimen(context: Context, withFallback: Boolean = true): Int {
-        val resourceId = context.resources.getIdentifier("status_bar_height", "dimen", "android")
-        val dimenStatusBarHeight = when (resourceId > 0) {
-            true -> context.resources.getDimensionPixelSize(resourceId)
-            else -> 0
-        }
-        return when {
-            dimenStatusBarHeight > 0 -> dimenStatusBarHeight
-            withFallback -> TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24f, context.resources.displayMetrics).toInt()
-            else -> 0
-        }
+    fun getStatusBarHeight(context: Context, withFallback: Boolean = true): Int {
+        val window = getWindowForContext(context)
+
+        // [1] Status bar height solution based on WindowInsets, compatible with display cutout.
+        // zh-CN: 基于 WindowInsets 的状态栏高度方案, 兼容刘海 (display cutout).
+
+        val insetsTop = window?.decorView?.let { decor ->
+            ViewCompat.getRootWindowInsets(decor)?.let { insets ->
+                val statusTop = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
+                val cutoutTop = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    insets.displayCutout?.safeInsetTop ?: 0
+                } else 0
+                maxOf(statusTop, cutoutTop)
+            }
+        } ?: 0
+        if (insetsTop > 0) return insetsTop
+
+        // [2] Visible area top solution, may be 0 in some fullscreen/immersive modes.
+        // zh-CN: 可见区域 top 方案, 在某些全屏/沉浸式下可能为 0.
+
+        val rectTop = window?.decorView?.let { decor ->
+            Rect().also { rect -> decor.getWindowVisibleDisplayFrame(rect) }.top
+        } ?: 0
+        if (rectTop > 0) return rectTop
+
+        // [3] Internal dimen solution, only as an estimate.
+        // zh-CN: 内部 dimen 方案, 仅作为估值.
+
+        if (withFallback) return getStatusBarHeightByDimen(context)
+
+        // [4] Finally return 0, no constant forced.
+        // zh-CN: 最终返回 0, 不强制指定常量.
+
+        return 0
     }
 
     @JvmStatic
     @JvmOverloads
-    fun getStatusBarHeightByWindow(context: Context, withFallback: Boolean = true): Int {
-        val windowStatusBarHeight = getWindowForContext(context)?.decorView?.let { decorView ->
-            Rect().also { rect ->
-                decorView.getWindowVisibleDisplayFrame(rect)
-            }.top
+    fun getNavigationBarHeight(context: Context, withFallback: Boolean = true): Int {
+        val window = getWindowForContext(context)
+
+        // [1] Status bar height solution based on WindowInsets.
+        // zh-CN: 基于 WindowInsets 的状态栏高度方案.
+
+        val maxInsets = window?.decorView?.let { decor ->
+            ViewCompat.getRootWindowInsets(decor)
+                ?.getInsets(WindowInsetsCompat.Type.navigationBars())
+                ?.let { insets ->
+                    // Compatible with horizontal screen navigation bars: take the maximum value of bottom/left/right.
+                    // zh-CN: 兼容横屏左右侧导航栏: 取 bottom/left/right 最大值.
+                    maxOf(insets.bottom, insets.left, insets.right)
+                }
         } ?: 0
-        return when {
-            windowStatusBarHeight > 0 -> windowStatusBarHeight
-            withFallback -> TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24f, context.resources.displayMetrics).toInt()
-            else -> 0
-        }
+        if (maxInsets > 0) return maxInsets
+
+        // [2] Internal dimen solution, only as an estimate.
+        // zh-CN: 内部 dimen 方案, 仅作为估值.
+
+        if (withFallback) return getNavigationBarHeightByDimen(context)
+
+        // [3] Finally return 0, no constant forced.
+        // zh-CN: 最终返回 0, 不强制指定常量.
+
+        return 0
     }
 
     fun getTitleBarHeight(context: Context): Int {
         val window = getWindowForContext(context)
         val contentViewTop = window?.findViewById<View>(Window.ID_ANDROID_CONTENT)?.top ?: 0
-        return contentViewTop - getStatusBarHeightByWindow(context)
+        return contentViewTop - getStatusBarHeight(context)
     }
 
     fun getScreenHeight(activity: Activity) = DisplayMetrics().let { metrics ->
@@ -307,7 +331,7 @@ object ViewUtils {
             val navBarOverlay = View(activity).apply {
                 layoutParams = FrameLayout.LayoutParams(
                     MATCH_PARENT,
-                    navBarInsets.bottom, // 导航栏高度
+                    navBarInsets.bottom, // Navigation bar height. (zh-CN: 导航栏高度.)
                 ).apply { gravity = Gravity.BOTTOM }
                 setBackgroundColor(color)
             }
@@ -652,10 +676,12 @@ object ViewUtils {
     }
 
     /**
-     * 显示软键盘.
+     * Show soft keyboard. (zh-CN: 显示软键盘.)
      *
-     * @param target 需要获取输入的视图 (如 EditText)
-     * @param useForced 是否使用 SHOW_FORCED 方式强制弹出, 默认 false, 代表由系统自行判断
+     * @param target The view that needs input (like EditText).
+     *               zh-CN: @param target 需要获取输入的视图 (如 EditText).
+     * @param useForced Whether to use SHOW_FORCED to force showing, default false, let system decide.
+     *                  zh-CN: @param useForced 是否使用 SHOW_FORCED 方式强制弹出, 默认 false, 代表由系统自行判断.
      */
     @JvmStatic
     @JvmOverloads
@@ -675,14 +701,163 @@ object ViewUtils {
     }
 
     /**
-     * 隐藏软键盘.
+     * Hide soft keyboard. (zh-CN: 隐藏软键盘.)
      *
-     * @param target 当前持有输入焦点的视图, 也可以是任意位于同一窗口的 View
+     * @param target The view currently holding input focus, or any view in the same window.
+     *               zh-CN: @param target 当前持有输入焦点的视图, 也可以是任意位于同一窗口的 View.
      */
     @JvmStatic
     fun hideSoftInput(target: View) {
         val imm = target.context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager ?: return
         imm.hideSoftInputFromWindow(target.windowToken, 0)
+    }
+
+    // @Comment by SuperMonster003 on Oct 29, 2025.
+    //  ! Replaced with getStatusBarHeightByWindow and improved getStatusBarHeightByDimen methods.
+    //  ! zh-CN: 已替换为 getStatusBarHeightByWindow 和已改进的 getStatusBarHeightByDimen 方法.
+    // FIXME by Stardust on Jan 23, 2018.
+    //  ! Not working in some devices.
+    //  ! https://github.com/hyb1996/Auto.js/issues/268
+    //  ! zh-CN (translated by SuperMonster003 on Jul 29, 2024):
+    //  ! 在一些设备上无法正常获取结果.
+    //  ! 参阅: https://github.com/hyb1996/Auto.js/issues/268
+    //  # @SuppressLint("InternalInsetResource", "DiscouragedApi")
+    //  # @JvmStatic
+    //  # @JvmOverloads
+    //  # fun getStatusBarHeightByDimen(context: Context, withFallback: Boolean = true): Int {
+    //  #     val resourceId = context.resources.getIdentifier("status_bar_height", "dimen", "android")
+    //  #     val dimenStatusBarHeight = when (resourceId > 0) {
+    //  #         true -> context.resources.getDimensionPixelSize(resourceId)
+    //  #         else -> 0
+    //  #     }
+    //  #     return when {
+    //  #         dimenStatusBarHeight > 0 -> dimenStatusBarHeight
+    //  #         withFallback -> TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24f, context.resources.displayMetrics).toInt()
+    //  #         else -> 0
+    //  #     }
+    //  # }
+    private fun getStatusBarHeightByDimen(context: Context, withComputedOnPreR: Boolean = true): Int {
+        val res = context.resources
+
+        // [1] Priority read from internal dimen to try to cover portrait/landscape differences.
+        // zh-CN: 优先从内部 dimen 读取, 尽量覆盖横竖屏差异.
+
+        val isLandscape = res.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+        val dimenNameCandidates = when (isLandscape) {
+            true -> listOf("status_bar_height_landscape", "status_bar_height", "status_bar_height_default", "status_bar_height_portrait")
+            else -> listOf("status_bar_height_portrait", "status_bar_height", "status_bar_height_default", "status_bar_height_landscape")
+        }
+
+        val dimenHeight = dimenNameCandidates.asSequence().map { res.queryDimen(it) }.firstOrNull { it > 0 } ?: 0
+        if (dimenHeight > 0) return dimenHeight
+
+        // [2] Try to estimate using DisplayMetrics on pre-Android R.
+        // zh-CN: 在 Android R 以下, 尝试用 DisplayMetrics 估算.
+
+        if (!withComputedOnPreR) return 0
+        val (_, systemUiHeightInset) = getSystemUiInsetsOnPreR(context) ?: return 0
+
+        // Navigation bar estimated value.
+        // zh-CN: 导航栏估算值.
+        val navBar = getNavigationBarHeightByDimen(context, false).coerceAtLeast(0)
+
+        // "Status bar height" is approximately "vertical system area height" minus "navigation bar height".
+        // zh-CN: "状态栏高度" 近似视为 "垂直系统区域高度" 减去 "导航栏高度".
+        val statusGuess = (systemUiHeightInset - navBar).coerceAtLeast(0)
+
+        // Prevent abnormal values (status bar usually not exceeding 48dp).
+        // zh-CN: 防止异常值 (状态栏通常不超过 48dp).
+        val maxReasonable = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 48f, res.displayMetrics).toInt()
+
+        if (statusGuess in 1..maxReasonable) return statusGuess
+
+        // [3] Finally return 0, no constant forced.
+        // zh-CN: 最终返回 0, 仅依赖 context 且不强制指定常量.
+
+        return 0
+    }
+
+    @SuppressLint("InternalInsetResource", "DiscouragedApi")
+    private fun getNavigationBarHeightByDimen(context: Context, withComputedOnPreR: Boolean = true): Int {
+        val res = context.resources
+
+        // [1] If system declares not to show navigation bar, return 0 early (non-public resource, may be inaccurate).
+        // zh-CN: 如果系统声明不显示导航栏, 尽早返回 0 (非公开资源, 可能不准确).
+
+        val showNavResId = res.getIdentifier("config_showNavigationBar", "bool", "android")
+        if (showNavResId > 0) runCatching {
+            if (!res.getBoolean(showNavResId)) return 0
+        }
+
+        // [2] Priority read from internal dimen to try to cover portrait/landscape differences.
+        // zh-CN: 优先从内部 dimen 读取, 尽量覆盖横竖屏差异.
+
+        val isLandscape = res.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+        val dimenNameCandidates = when (isLandscape) {
+            true -> listOf("navigation_bar_height_landscape", "navigation_bar_height", "navigation_bar_height_portrait")
+            else -> listOf("navigation_bar_height_portrait", "navigation_bar_height", "navigation_bar_height_landscape")
+        }
+
+        val dimenHeight = dimenNameCandidates.asSequence().map { res.queryDimen(it) }.firstOrNull { it > 0 } ?: 0
+        if (dimenHeight > 0) return dimenHeight
+
+        // [3] Try to estimate using DisplayMetrics on pre-Android R.
+        // zh-CN: 在 Android R 以下, 尝试用 DisplayMetrics 估算.
+
+        if (!withComputedOnPreR) return 0
+        val (systemUiWidthInset, systemUiHeightInset) = getSystemUiInsetsOnPreR(context) ?: return 0
+
+        // Status bar estimated value.
+        // zh-CN: 状态栏估算值.
+        val statusBar = getStatusBarHeightByDimen(context, false)
+
+        val bottomNavGuess = (systemUiHeightInset - statusBar).coerceAtLeast(0)
+        val sideNavGuess = systemUiWidthInset.coerceAtLeast(0)
+
+        // A navigation bar will be more likely on the side in landscape, and more likely on the bottom in portrait.
+        // zh-CN: 导航栏横屏更可能在侧边, 竖屏更可能在底部.
+        val computed = maxOf(bottomNavGuess, sideNavGuess)
+
+        // Prevent abnormal values (navigation bar usually not exceeding 96dp).
+        // zh-CN: 防止异常值 (导航栏通常不超过 96dp).
+        val maxReasonable = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 96f, res.displayMetrics).toInt()
+
+        if (computed in 1..maxReasonable) return computed
+
+        // [4] Finally return 0, no constant forced.
+        // zh-CN: 最终返回 0, 仅依赖 context 且不强制指定常量.
+
+        return 0
+    }
+
+    @SuppressLint("InternalInsetResource", "DiscouragedApi")
+    private fun Resources.queryDimen(name: String, def: (() -> Number)? = null): Int = runCatching {
+        val id = this.getIdentifier(name, "dimen", "android")
+        return if (id > 0) this.getDimensionPixelSize(id) else 0
+    }.getOrDefault(def?.invoke()?.toInt() ?: 0)
+
+    @Suppress("DEPRECATION")
+    private fun getSystemUiInsetsOnPreR(context: Context): Pair<Int, Int>? {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) return null
+        val wm = context.getSystemService(Context.WINDOW_SERVICE) as? WindowManager ?: return null
+        val display = wm.defaultDisplay ?: return null
+
+        val real = DisplayMetrics().also { display.getRealMetrics(it) }
+        val usable = DisplayMetrics().also { display.getMetrics(it) }
+
+        val systemUiWidthInset = (real.widthPixels - usable.widthPixels).coerceAtLeast(0)
+        val systemUiHeightInset = (real.heightPixels - usable.heightPixels).coerceAtLeast(0)
+
+        return Pair(systemUiWidthInset, systemUiHeightInset)
+    }
+
+    enum class MODE(val key: String) {
+
+        DAY(key(R.string.key_night_mode_always_off)),
+        NIGHT(key(R.string.key_night_mode_always_on)),
+        FOLLOW(key(R.string.key_night_mode_follow_system)),
+        NULL(key(R.string.key_night_mode_null)),
+        ;
     }
 
     class AutoNightMode {
@@ -704,7 +879,7 @@ object ViewUtils {
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    class TextSizeScaleDetector(context: Context, textView: TextView) :ScaleGestureDetector(context, TextSizeScaleListener(textView)) {
+    class TextSizeScaleDetector(context: Context, textView: TextView) : ScaleGestureDetector(context, TextSizeScaleListener(textView)) {
 
         init {
             textView.apply {
@@ -726,7 +901,6 @@ object ViewUtils {
 
     }
 
-    // Scaling & Text Size Handling
     private class TextSizeScaleListener(private val textView: TextView) : ScaleGestureDetector.SimpleOnScaleGestureListener() {
 
         private val mMinTextSize = 4.0f

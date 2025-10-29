@@ -135,8 +135,11 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
             (activity as? ScriptExecuteActivity)?.eventEmitter
         },
         "statusBarHeight" to Supplier {
-            ViewUtils.getStatusBarHeightByDimen(globalContext)
+            ViewUtils.getStatusBarHeight(globalContext)
         },
+        "navigationBarHeight" to Supplier {
+            ViewUtils.getNavigationBarHeight(globalContext)
+        }
     )
 
     init {
