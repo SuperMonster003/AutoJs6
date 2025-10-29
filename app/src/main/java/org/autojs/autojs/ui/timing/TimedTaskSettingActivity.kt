@@ -5,7 +5,6 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.ConnectivityManager
 import android.os.Bundle
-import android.os.PowerManager
 import android.provider.Settings
 import android.text.TextUtils
 import android.util.Log
@@ -34,7 +33,9 @@ import org.autojs.autojs.execution.ExecutionConfig.CREATOR.default
 import org.autojs.autojs.external.ScriptIntents
 import org.autojs.autojs.external.receiver.DynamicBroadcastReceivers
 import org.autojs.autojs.model.script.ScriptFile
+import org.autojs.autojs.permission.IgnoreBatteryOptimizationsPermission
 import org.autojs.autojs.theme.ThemeColorHelper
+import org.autojs.autojs.timing.ExactAlarmPermissionHelper
 import org.autojs.autojs.timing.IntentTask
 import org.autojs.autojs.timing.TaskReceiver
 import org.autojs.autojs.timing.TimedTask
@@ -351,35 +352,49 @@ class TimedTaskSettingActivity : BaseActivity() {
         return true
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == R.id.action_done) {
-            if ((getSystemService(POWER_SERVICE) as PowerManager).isIgnoringBatteryOptimizations(packageName)) {
-                createOrUpdateTask()
-                return true
+    override fun onOptionsItemSelected(item: MenuItem): Boolean = when (item.itemId) {
+        R.id.action_done -> when {
+            !IgnoreBatteryOptimizationsPermission(this).has() -> {
+                try {
+                    @SuppressLint("BatteryLife")
+                    val intent = Intent()
+                        .setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+                        .setData("package:$packageName".toUri())
+                    @Suppress("DEPRECATION")
+                    startActivityForResult(intent, REQUEST_CODE_IGNORE_BATTERY)
+                } catch (e: ActivityNotFoundException) {
+                    e.printStackTrace()
+                    createOrUpdateTask()
+                }
             }
-            try {
-                @SuppressLint("BatteryLife")
-                val intent = Intent()
-                    .setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
-                    .setData("package:$packageName".toUri())
-                @Suppress("DEPRECATION")
-                startActivityForResult(intent, REQUEST_CODE_IGNORE_BATTERY)
-            } catch (e: ActivityNotFoundException) {
-                e.printStackTrace()
+            !ExactAlarmPermissionHelper.canScheduleExactAlarms(this) -> {
+                try {
+                    val intent = Intent()
+                        .setAction(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
+                        .setData("package:$packageName".toUri())
+                    @Suppress("DEPRECATION")
+                    startActivityForResult(intent, REQUEST_CODE_SCHEDULE_EXACT_ALARM)
+                } catch (e: ActivityNotFoundException) {
+                    e.printStackTrace()
+                    createOrUpdateTask()
+                }
+            }
+            else -> {
                 createOrUpdateTask()
             }
-            return true
-        }
-        return super.onOptionsItemSelected(item)
+        }.let { true }
+        else -> super.onOptionsItemSelected(item)
     }
 
     @Suppress("OVERRIDE_DEPRECATION")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == REQUEST_CODE_IGNORE_BATTERY) {
-            Log.d(LOG_TAG, "result code = $requestCode")
-            createOrUpdateTask()
+        when (requestCode) {
+            REQUEST_CODE_IGNORE_BATTERY, REQUEST_CODE_SCHEDULE_EXACT_ALARM -> {
+                Log.d(LOG_TAG, "result code = $requestCode")
+                createOrUpdateTask()
+            }
+            else -> super.onActivityResult(requestCode, resultCode, data)
         }
-        super.onActivityResult(requestCode, resultCode, data)
     }
 
     private fun createOrUpdateTask() {
@@ -447,6 +462,7 @@ class TimedTaskSettingActivity : BaseActivity() {
         private val DATE_FORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd")
 
         private const val REQUEST_CODE_IGNORE_BATTERY = 27101
+        private const val REQUEST_CODE_SCHEDULE_EXACT_ALARM = 27102
         private const val LOG_TAG = "TimedTaskSettings"
 
         @JvmField

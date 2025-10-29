@@ -76,26 +76,17 @@
             app:summary="@string/summary_text_launcher_shortcuts"
             app:longClickPrompt="@string/description_launcher_shortcuts" />
 
-        <org.autojs.autojs.ui.settings.WorkingDirectoryPreference
-            app:layout="@layout/preference_custom"
-            app:key="@string/key_change_working_dir"
-            app:title="@string/text_change_working_dir"
-            app:longClickPrompt="@string/description_change_working_dir_preference" />
-
-        <org.autojs.autojs.ui.settings.RootModePreference
-            app:layout="@layout/preference_custom"
-            app:key="@string/key_root_mode"
-            app:title="@string/text_root_mode_title"
-            app:itemKeys="@array/keys_root_mode"
-            app:itemValues="@array/values_root_mode"
-            app:itemDefaultKey="@string/key_root_mode_auto_detect"
-            app:longClickPrompt="@string/description_root_mode_preference" />
-
     </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
 
     <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
         app:layout="@layout/preference_category_custom"
         app:title="@string/text_file_explorer">
+
+        <org.autojs.autojs.ui.settings.WorkingDirectoryPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_change_working_dir"
+            app:title="@string/text_working_dir_path"
+            app:longClickPrompt="@string/description_change_working_dir_preference" />
 
         <org.autojs.autojs.ui.settings.HiddenFilesPreference
             app:layout="@layout/preference_custom"
@@ -110,10 +101,26 @@
             app:layout="@layout/preference_custom"
             app:key="@string/key_file_extensions"
             app:title="@string/text_file_extensions_title"
-            app:itemValues="@array/values_file_extensions"
             app:itemKeys="@array/keys_file_extensions"
+            app:itemValues="@array/values_file_extensions"
             app:itemDefaultKey="@string/default_key_file_extensions"
             app:longClickPrompt="@string/description_file_extensions_preference" />
+
+    </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
+
+    <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
+        app:layout="@layout/preference_category_custom"
+        app:title="@string/text_timed_task">
+
+        <org.autojs.autojs.ui.settings.TimedTaskBackendPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_timed_task_backend"
+            app:title="@string/title_timed_task_backend"
+            app:itemKeys="@array/keys_timed_task_backend"
+            app:itemValues="@array/values_timed_task_backend"
+            app:itemDefaultKey="@string/default_key_timed_task_backend"
+            app:longClickPrompt="@string/description_timed_task_backend"
+            app:longClickPromptMore="@string/description_timed_task_backend_more"/>
 
     </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
 
@@ -161,6 +168,15 @@
             app:defaultValue="@bool/pref_guard_mode"
             app:title="@string/text_guard_mode"
             app:summary="@string/summary_guard_mode" />
+
+        <org.autojs.autojs.ui.settings.RootModePreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_root_mode"
+            app:title="@string/text_root_mode_title"
+            app:itemKeys="@array/keys_root_mode"
+            app:itemValues="@array/values_root_mode"
+            app:itemDefaultKey="@string/key_root_mode_auto_detect"
+            app:longClickPrompt="@string/description_root_mode_preference" />
 
     </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
 

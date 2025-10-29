@@ -4,16 +4,15 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import io.reactivex.Flowable;
+import io.reactivex.Observable;
+import io.reactivex.schedulers.Schedulers;
+import io.reactivex.subjects.PublishSubject;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Callable;
-
-import io.reactivex.Flowable;
-import io.reactivex.Observable;
-import io.reactivex.schedulers.Schedulers;
-import io.reactivex.subjects.PublishSubject;
 
 public abstract class Database<M extends BaseModel> {
 
@@ -148,26 +147,22 @@ public abstract class Database<M extends BaseModel> {
         return new String[]{String.valueOf(value)};
     }
 
-    private static class CursorIterator implements Iterator<Cursor> {
-
-        private final Cursor mCursor;
-
-        private CursorIterator(Cursor cursor) {
-            mCursor = cursor;
-        }
+    private record CursorIterator(Cursor cursor) implements Iterator<Cursor> {
 
         @Override
         public boolean hasNext() {
-            boolean next = mCursor.moveToNext();
+            boolean next = cursor.moveToNext();
             if (!next) {
-                mCursor.close();
+                cursor.close();
             }
             return next;
         }
 
         @Override
         public Cursor next() {
-            return mCursor;
+            return cursor;
         }
+
     }
+
 }

@@ -26,6 +26,7 @@
     <string name="default_key_hidden_files" translatable="false">@string/key_hidden_files_not_show</string>
     <string name="default_key_keep_screen_on_when_in_foreground" translatable="false">@string/key_keep_screen_on_when_in_foreground_disabled</string>
     <string name="default_key_root_record_out_file_type" translatable="false">@string/key_root_record_out_file_type_binary</string>
+    <string name="default_key_timed_task_backend" translatable="false">@string/key_timed_task_backend_alarm</string>
     <string name="default_main_file_name" translatable="false">main.js</string>
     <string name="developer_full_name" translatable="false">SuperMonster003</string>
     <string name="developer_nickname" translatable="false">SuperMonster003</string>
@@ -148,6 +149,10 @@
     <string name="key_theme_color_accent" translatable="false">key_$_theme_color_accent</string>
     <string name="key_theme_color_primary" translatable="false">key_$_theme_color_primary</string>
     <string name="key_theme_color_primary_dark" translatable="false">key_$_theme_color_primary_dark</string>
+    <string name="key_timed_task_backend" translatable="false">key_$_timed_task_backend</string>
+    <string name="key_timed_task_backend_alarm" translatable="false">key_$_timed_task_backend_alarm</string>
+    <string name="key_timed_task_backend_job" translatable="false">key_$_timed_task_backend_job</string>
+    <string name="key_timed_task_backend_work" translatable="false">key_$_timed_task_backend_work</string>
     <string name="key_updates_checked_states_cleared" translatable="false">key_$_updates_checked_states_cleared</string>
     <string name="key_use_volume_control_record" translatable="false">key_$_use_volume_control_record</string>
     <string name="key_use_volume_control_running" translatable="false">key_$_use_volume_control_running</string>
@@ -385,6 +390,9 @@
     <string name="entry_root_mode_force_root">Force set root mode</string>
     <string name="entry_root_record_out_file_type_binary">Binary type (non-editable)</string>
     <string name="entry_root_record_out_file_type_js">JavaScript type (editable)</string>
+    <string name="entry_timed_task_backend_alarm" translatable="false">AlarmManager</string>
+    <string name="entry_timed_task_backend_work" translatable="false">WorkManager</string>
+    <string name="entry_timed_task_backend_job" translatable="false">JobScheduler</string>
     <string name="error_a_runtime_has_been_set">A runtime has been set</string>
     <string name="error_abandoned_method">Method %s has been abandoned and should not be used</string>
     <string name="error_action_cannot_be_completed_with_negative_coordinate">The \"%1$s\" operation cannot be completed because the parameter contains negative coordinate values (%2$d, %3$d)</string>
@@ -705,7 +713,7 @@
     <string name="text_clear_pre_execute_script">Clear pre-execute script</string>
     <string name="text_clear_updates_checked_states">Clear updates checked states</string>
     <string name="text_click_item_to_remove">Click the item to remove</string>
-    <string name="text_click_ok_to_go_to_access_settings">Click \"OK\" to go to settings</string>
+    <string name="text_click_ok_to_go_to_settings">Click \"OK\" to go to settings</string>
     <string name="text_click_too_frequently">Frequent operation</string>
     <string name="text_client_mode">Client mode</string>
     <string name="text_clone_color_library">Clone a color library</string>
@@ -1299,5 +1307,10 @@
     <string name="description_rhino_java_primitive_wrap">Switch ON (default): results of Java methods that are instances of Number/Boolean/Character are wrapped as Java objects and exposed to scripts (String excluded). typeof is \"object\", species is \"JavaObject\"; Java methods remain accessible, which helps retain precise Java type traits and overload resolution.\n\nSwitch OFF: the above types are no longer wrapped and are exposed directly as JavaScript primitives (number/boolean/one‑character string). typeof is the corresponding JavaScript type, aligning better with JavaScript semantics and ecosystem. You can still explicitly create a Java wrapper via new, e.g. new java.lang.Boolean(true).\n\nSee: http://issues.autojs6.com/435</string>
     <string name="summary_rhino_java_primitive_wrap">Java primitive types will be wrapped as Java objects in scripts</string>
     <string name="text_rhino_java_primitive_wrap">Java primitive wrapping</string>
+    <string name="title_timed_task_backend">Timed task scheduling engine</string>
+    <string name="description_timed_task_backend">Controls the underlying mechanism for triggering scripts on a schedule.\n\nAlarmManager: With the “Allow setting alarms and reminders” permission granted, scheduled tasks can fire closer to the exact time.\nWorkManager: System-friendly; suitable for non-critical tasks that can tolerate some delay.\nJobScheduler: Legacy implementation kept for compatibility; higher chance of delays.</string>
+    <string name="failed_to_go_to_access_settings">Failed to open the settings page</string>
+    <string name="text_allow_setting_alarms_and_reminders_is_recommended">Granting the “Allow setting alarms and reminders” permission is recommended to help tasks run as punctually as possible even when the screen is off or the device is idle</string>
+    <string name="description_timed_task_backend_more">Use cases and differences:\n\n1) AlarmManager\nBest for time-sensitive tasks, e.g., [reminders/strictly scheduled scripts/...].\nOn Android 12+ with the “Allow setting alarms and reminders” permission, tasks can run more on time even when the screen is off or the device is idle.\nWithout it, the system may degrade exactness or delay execution.\n\n2) WorkManager\nBest for tasks that don’t require strict timing, e.g., [non-critical sync/cleanup/statistics/...].\nScheduling depends on [battery/network/charging/idle policies/...], so execution may be postponed when the screen is off or idle.\nWhile it can’t guarantee exact timing, it excels at [reliable completion/retries/chaining/unique work de-duplication].\n\n3) JobScheduler\nHistorical implementation for compatibility.\nOn newer Android versions, tasks may be delayed more noticeably.\nGenerally not recommended unless required for compatibility.</string>
 
 </resources>

@@ -18,8 +18,9 @@
         "http 模块请求相关方法支持 options.client 选项, 用于配置 OkHttpClient.Builder (如 followRedirects 等) _[`issue #454`](http://issues.autojs6.com/454)_",
         "runtime.(set/is)JavaPrimitiveWrap 方法, 用于设置或获取 Java 原始类型包装策略 _[`issue #435`](http://issues.autojs6.com/435)_",
         "structuredClone 全局方法, 用于深拷贝 JavaScript 对象 (参阅 [MDN](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/structuredClone))",
-        "设置页面支持 \"应用启动器图标\" 设置选项 _[`issue #405`](http://issues.autojs6.com/405)_",
-        "设置页面支持 \"Java 原始类型包装\" 设置选项 _[`issue #435`](http://issues.autojs6.com/435)_",
+        "设置页面增加 \"Java 原始类型包装\" 设置选项 _[`issue #435`](http://issues.autojs6.com/435)_",
+        "设置页面增加 \"定时任务调度引擎\" 设置选项, 支持 AlarmManager/WorkManager/JobScheduler _[`issue #457`](http://issues.autojs6.com/457)_ _[`issue #388`](http://issues.autojs6.com/388)_ _[`issue #163`](http://issues.autojs6.com/163)_ _[`issue #53`](http://issues.autojs6.com/53)_ _[`issue #21`](http://issues.autojs6.com/21)_",
+        "设置页面增加 \"应用启动器图标\" 设置选项, 支持自适应图标/透明背景图标 _[`issue #405`](http://issues.autojs6.com/405)_",
         "Scrapers 工具 (run-scrapers.mjs) 用于自动更新 Gradle 构建脚本结构化数据/README 通用数据/README 模板数据等"
       ],
       "fix": [
@@ -70,6 +71,7 @@
         "本地化 Expandable Layout 版本 1.6.0",
         "本地化 Recyclerview Flexible Divider 版本 1.4.0",
         "附加 Androidx Core (KTX) 版本 1.15.0",
+        "附加 Androidx Work Runtime 版本 2.11.0",
         "升级 Android SDK 版本 35 -> 36",
         "升级 Gradle 版本 8.14 -> 8.14.3",
         "升级 Desugar JDK Libs 版本 2.0.4 -> 2.1.5",

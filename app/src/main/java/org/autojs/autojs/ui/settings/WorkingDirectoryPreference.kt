@@ -68,7 +68,7 @@ class WorkingDirectoryPreference : MaterialPreference {
         }
 
         override fun build(): MaterialDialog = MaterialDialog.Builder(context)
-            .title(R.string.text_change_working_dir)
+            .title(R.string.text_working_dir_path)
             .customView(R.layout.pref_working_directory, false)
             .neutralText(R.string.dialog_button_history)
             .neutralColorRes(R.color.dialog_button_hint)

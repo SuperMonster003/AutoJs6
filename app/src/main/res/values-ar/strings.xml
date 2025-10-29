@@ -474,7 +474,7 @@
     <string name="text_clear_pre_execute_script">مسح السيناريو قبل التنفيذ</string>
     <string name="text_clear_updates_checked_states">تحديثات مسح الحالات التي تم فحصها</string>
     <string name="text_click_item_to_remove">انقر فوق العنصر لإزالته</string>
-    <string name="text_click_ok_to_go_to_access_settings">انقر فوق \"نعم\" للانتقال إلى الإعدادات</string>
+    <string name="text_click_ok_to_go_to_settings">انقر فوق \"نعم\" للانتقال إلى الإعدادات</string>
     <string name="text_click_too_frequently">التشغيل المتكرر</string>
     <string name="text_client_mode">وضع العميل</string>
     <string name="text_clone_color_library">استنساخ مكتبة ألوان</string>
@@ -1068,5 +1068,10 @@
     <string name="description_rhino_java_primitive_wrap">عند تفعيل المفتاح (الوضع الافتراضي): سيتم تغليف القيم المُعادة من أساليب Java من الأنواع Number/Boolean/Character ككائنات Java وإتاحتها للسكريبت (باستثناء String). ستكون typeof هي \"object\" و species هي \"JavaObject\"، ويمكن استدعاء أساليب Java، مما يساعد على الحفاظ على خصائص الأنواع الدقيقة في Java وحل زيادة التحميل (overload).\n\nعند إيقاف المفتاح: لن تُغلف الأنواع المذكورة، وستُعرض مباشرة كقيم أولية في JavaScript (number/boolean/سلسلة ذات حرف واحد). ستكون typeof هي نوع JavaScript الموافق، وهو أقرب لدلالات ونظام JavaScript البيئي. لا يزال بالإمكان إعلان مغلّف Java صراحةً باستخدام new، مثل new java.lang.Boolean(true).\n\nانظر: http://issues.autojs6.com/435</string>
     <string name="summary_rhino_java_primitive_wrap">ستُغلَّف الأنواع البدائية في Java ككائنات Java داخل السكربت</string>
     <string name="text_rhino_java_primitive_wrap">تغليف الأنواع البدائية في Java</string>
+    <string name="title_timed_task_backend">محرك جدولة المهام المؤقتة</string>
+    <string name="description_timed_task_backend">يتحكم في الآلية الأساسية لتشغيل السكربتات بشكل مجدول.\n\nAlarmManager: عبر منح إذن \"السماح بتعيين المنبّهات والتذكيرات\" يمكن أن تصبح المهام أقرب إلى التنفيذ في الوقت المحدد.\nWorkManager: صديق للنظام؛ مناسب للمهام غير الحرجة التي تتحمل بعض التأخير.\nJobScheduler: تنفيذ قديم محفوظ للتوافق؛ احتمال التأخير أعلى.</string>
+    <string name="failed_to_go_to_access_settings">فشل فتح صفحة الإعدادات</string>
+    <string name="text_allow_setting_alarms_and_reminders_is_recommended">يُوصى بمنح إذن \"السماح بتعيين المنبّهات والتذكيرات\" لضمان تنفيذ المهام المجدولة بأكبر قدر ممكن من الدقة حتى عند إيقاف الشاشة أو في وضع السكون</string>
+    <string name="description_timed_task_backend_more">حالات الاستخدام والفروقات:\n\n1) AlarmManager\nمناسب للمهام الحسّاسة للتوقيت، مثل [التذكيرات/السكربتات الدقيقة التوقيت/...].\nعلى Android 12+ ومع منح إذن \"السماح بتعيين المنبّهات والتذكيرات\" يمكن التنفيذ بدقة أكبر حتى مع إيقاف الشاشة أو في وضع السكون.\nبدون الإذن قد يقلل النظام الدقة أو يؤخر التنفيذ.\n\n2) WorkManager\nمناسب للمهام التي لا تتطلب دقة زمنية صارمة مثل [مزامنة غير حرجة/تنظيف/إحصاءات/...].\nيتم الجدولة وفق [حالة البطارية/الشبكة/الشحن/سياسات السكون/...], وقد تتأخر المهام عند إيقاف الشاشة أو في وضع السكون.\nلا يضمن الدقة الزمنية لكنه يوفر مزايا في [إتمام موثوق/إعادة المحاولة عند الفشل/سلاسل المهام/إزالة التكرار].\n\n3) JobScheduler\nتنفيذ تاريخي لأغراض التوافق.\nفي إصدارات أندرويد الحديثة قد تحدث تأخيرات أكبر.\nلا يُنصح به إلا لاعتبارات التوافق.</string>
 
 </resources>

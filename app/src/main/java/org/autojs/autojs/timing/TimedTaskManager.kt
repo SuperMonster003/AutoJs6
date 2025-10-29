@@ -20,9 +20,9 @@ import org.autojs.autojs.util.Observers
  */
 object TimedTaskManager {
 
-    private val globalAppContext = GlobalAppContext.get()
-    private val mTimedTaskDatabase = TimedTaskDatabase(globalAppContext)
-    private val mIntentTaskDatabase = IntentTaskDatabase(globalAppContext)
+    private val globalAppContext by lazy { GlobalAppContext.get() }
+    private val mTimedTaskDatabase by lazy { TimedTaskDatabase(globalAppContext) }
+    private val mIntentTaskDatabase by lazy { IntentTaskDatabase(globalAppContext) }
 
     @JvmStatic
     val allTasks: Flowable<TimedTask>
@@ -96,7 +96,7 @@ object TimedTaskManager {
     @JvmStatic
     @SuppressLint("CheckResult")
     fun removeTask(timedTask: TimedTask) {
-        cancel(timedTask)
+        cancel(globalAppContext, timedTask)
         mTimedTaskDatabase.delete(timedTask)
             .subscribe(Observers.emptyConsumer()) { obj: Throwable -> obj.printStackTrace() }
     }
@@ -115,7 +115,7 @@ object TimedTaskManager {
 
     @JvmStatic
     fun removeTaskSync(timedTask: TimedTask): Boolean {
-        cancel(timedTask)
+        cancel(globalAppContext, timedTask)
         return mTimedTaskDatabase.deleteSync(timedTask) > 0
     }
 
@@ -129,7 +129,7 @@ object TimedTaskManager {
     fun updateTask(task: TimedTask) {
         mTimedTaskDatabase.update(task)
             .subscribe(Observers.emptyConsumer()) { obj: Throwable -> obj.printStackTrace() }
-        cancel(task)
+        cancel(globalAppContext, task)
         scheduleTaskIfNeeded(globalAppContext, task, false)
     }
 
@@ -137,7 +137,7 @@ object TimedTaskManager {
     @SuppressLint("CheckResult")
     fun updateTaskSync(task: TimedTask): Boolean {
         val id = mTimedTaskDatabase.updateSync(task)
-        cancel(task)
+        cancel(globalAppContext, task)
         scheduleTaskIfNeeded(globalAppContext, task, false)
         return id > 0
     }
