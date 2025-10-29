@@ -51,7 +51,7 @@ open class LayoutBoundsView : View {
 
     init {
         this.setWillNotDraw(false)
-        statusBarHeight = ViewUtils.getStatusBarHeightByWindow(context)
+        statusBarHeight = ViewUtils.getStatusBarHeight(context)
     }
 
     fun setOnNodeInfoSelectListener(onNodeInfoSelectListener: OnNodeInfoSelectListener?) {

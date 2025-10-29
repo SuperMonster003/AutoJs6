@@ -12,6 +12,7 @@
         "s13n.bytes 方法, 用于标准化字节数据 (参阅 项目文档 > [标准化](https://docs.autojs6.com/#/s13n))",
         "UiObject#isShifted 方法, 用于检测控件位置变化",
         "device.getSharedDeviceId 方法, 用于跨应用获取统一共享设备 ID _[`issue #455`](http://issues.autojs6.com/455)_",
+        "ui.navigationBarHeight 属性 (getter), 用于获取导航栏高度 _[`issue #456`](http://issues.autojs6.com/456)_",
         "http 模块请求相关方法获取的 body 对象增加 stream/saveToFile/close 方法 _[`issue #452`](http://issues.autojs6.com/452)_",
         "http 模块请求相关方法支持缓存控制选项参数 (cacheBody/bodyCacheThresholdBytes)",
         "http 模块请求相关方法支持不安全选项参数 (isInsecure/insecure), 用于忽略证书相关异常 _[`issue #417`](http://issues.autojs6.com/417)_",
@@ -51,6 +52,7 @@
         "构建工具启用 isCleanup[Paddle/Rapid]Ocr 配置选项时无法正常完成 Rebuild Project 任务的问题"
       ],
       "improvement": [
+        "ui.statusBarHeight 属性 (getter) 增强一定程度的兼容性",
         "console.log 等方法打印全局对象 (images, app, ocr 等) 时支持显示详细信息",
         "android.graphics.Paint#setColor 支持正常解析 ColorInt/ColorHex/ColorName 等颜色参数",
         "内置模块相关方法实参类型的异常消息增加类型摘要信息",
