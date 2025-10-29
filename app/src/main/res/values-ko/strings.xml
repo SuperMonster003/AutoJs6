@@ -474,7 +474,7 @@
     <string name="text_clear_pre_execute_script">사전 에코 슈트 스크립트를 지우십시오</string>
     <string name="text_clear_updates_checked_states">확인 된 상태에서 명확한 업데이트</string>
     <string name="text_click_item_to_remove">제거하려면 항목을 클릭하십시오</string>
-    <string name="text_click_ok_to_go_to_access_settings">\"확인\"을 클릭하여 설정으로 이동하십시오</string>
+    <string name="text_click_ok_to_go_to_settings">\"확인\"을 클릭하여 설정으로 이동하십시오</string>
     <string name="text_click_too_frequently">빈번한 작동</string>
     <string name="text_client_mode">클라이언트 모드</string>
     <string name="text_clone_color_library">색상 라이브러리 복제</string>
@@ -1068,5 +1068,10 @@
     <string name="description_rhino_java_primitive_wrap">스위치 활성화(기본값): Java 메서드가 반환하는 Number/Boolean/Character 값은 Java 객체로 래핑되어 스크립트에 노출됩니다(String 제외). typeof 는 \"object\", species 는 \"JavaObject\"이며, Java 메서드 호출이 가능해 Java의 정밀한 타입 특성과 오버로드 해석을 보존하는 데 도움이 됩니다.\n\n스위치 비활성화: 위 타입들을 더 이상 래핑하지 않고 JavaScript 원시 값(number/boolean/한 글자 문자열)으로 직접 노출합니다. typeof 는 해당 JavaScript 타입이 되며, JavaScript의 의미론/생태계에 더 가깝습니다. 필요 시 new 키워드로 Java 래퍼를 명시적으로 생성할 수 있습니다(예: new java.lang.Boolean(true)).\n\n참고: http://issues.autojs6.com/435</string>
     <string name="summary_rhino_java_primitive_wrap">Java 원시 타입이 스크립트에서 Java 객체로 래핑됩니다</string>
     <string name="text_rhino_java_primitive_wrap">Java 원시 타입 래핑</string>
+    <string name="title_timed_task_backend">정시 작업 스케줄링 엔진</string>
+    <string name="description_timed_task_backend">스크립트를 정해진 시간에 실행하는 기본 메커니즘을 제어합니다.\n\nAlarmManager: 시스템의 \"알람 및 알림 설정 허용\" 권한을 부여하면 보다 정확한 시각에 가깝게 실행됩니다.\nWorkManager: 시스템 친화적이며, 일정 지연을 허용할 수 있는 비중요 작업에 적합합니다.\nJobScheduler: 호환성 유지를 위해 남겨둔 구방식으로, 지연 발생 가능성이 큽니다.</string>
+    <string name="failed_to_go_to_access_settings">설정 페이지를 열지 못했습니다</string>
+    <string name="text_allow_setting_alarms_and_reminders_is_recommended">화면이 꺼져 있거나 대기 상태에서도 최대한 정시에 실행되도록, \"알람 및 알림 설정 허용\" 권한 부여를 권장합니다</string>
+    <string name="description_timed_task_backend_more">사용 시나리오 및 차이점:\n\n1. AlarmManager\n[리마인더/엄격한 정시 스크립트/...] 등 시간 정확도가 중요한 작업에 적합합니다.\nAndroid 12+ 에서 \"알람 및 알림 설정 허용\" 권한이 있으면, 화면 꺼짐/대기 중에도 비교적 정확하게 실행됩니다.\n 권한이 없으면 시스템이 정확도를 낮추거나 실행을 지연할 수 있습니다.\n\n2. WorkManager\n[비중요 동기화/정리/통계/...] 등 엄격한 정시성이 필요 없는 작업에 적합합니다.\n[배터리/네트워크/충전 상태/대기 정책/...] 에 따라 스케줄링되며, 화면 꺼짐/대기 중에는 지연될 수 있습니다.\n 시간 정확도는 보장되지 않지만, [신뢰성 있는 완료/실패 재시도/체이닝/단일 작업 중복 방지] 에 장점이 있습니다.\n\n3. JobScheduler\n 호환성 유지를 위한 기존 구현입니다.\n 신형 Android 에서는 지연이 더 커질 수 있습니다.\n 특별한 호환성 목적이 아니라면 일반적으로 권장하지 않습니다.</string>
 
 </resources>

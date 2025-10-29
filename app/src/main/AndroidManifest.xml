@@ -600,6 +600,20 @@
         <!--    </intent-filter>-->
         <!--</receiver>-->
 
+        <receiver
+            android:name="org.autojs.autojs.timing.TimedTaskAlarmReceiver"
+            android:exported="false" />
+
+        <receiver
+            android:name="org.autojs.autojs.timing.BootCompletedReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
         <activity
             android:name="org.autojs.autojs.theme.app.ColorSelectActivity"
             android:theme="@style/MtAppTheme.FullScreen" />

@@ -469,7 +469,7 @@
     <string name="text_clear_pre_execute_script">Clear pre-execute script</string>
     <string name="text_clear_updates_checked_states">Clear updates checked states</string>
     <string name="text_click_item_to_remove">Click the item to remove</string>
-    <string name="text_click_ok_to_go_to_access_settings">Click \"OK\" to go to settings</string>
+    <string name="text_click_ok_to_go_to_settings">Click \"OK\" to go to settings</string>
     <string name="text_click_too_frequently">Frequent operation</string>
     <string name="text_client_mode">Client mode</string>
     <string name="text_clone_color_library">Clone a color library</string>
@@ -1063,5 +1063,10 @@
     <string name="description_rhino_java_primitive_wrap">Switch ON (default): results of Java methods that are instances of Number/Boolean/Character are wrapped as Java objects and exposed to scripts (String excluded). typeof is \"object\", species is \"JavaObject\"; Java methods remain accessible, which helps retain precise Java type traits and overload resolution.\n\nSwitch OFF: the above types are no longer wrapped and are exposed directly as JavaScript primitives (number/boolean/one‑character string). typeof is the corresponding JavaScript type, aligning better with JavaScript semantics and ecosystem. You can still explicitly create a Java wrapper via new, e.g. new java.lang.Boolean(true).\n\nSee: http://issues.autojs6.com/435</string>
     <string name="summary_rhino_java_primitive_wrap">Java primitive types will be wrapped as Java objects in scripts</string>
     <string name="text_rhino_java_primitive_wrap">Java primitive wrapping</string>
+    <string name="title_timed_task_backend">Timed task scheduling engine</string>
+    <string name="description_timed_task_backend">Controls the underlying mechanism for triggering scripts on a schedule.\n\nAlarmManager: With the “Allow setting alarms and reminders” permission granted, scheduled tasks can fire closer to the exact time.\nWorkManager: System-friendly; suitable for non-critical tasks that can tolerate some delay.\nJobScheduler: Legacy implementation kept for compatibility; higher chance of delays.</string>
+    <string name="failed_to_go_to_access_settings">Failed to open the settings page</string>
+    <string name="text_allow_setting_alarms_and_reminders_is_recommended">Granting the “Allow setting alarms and reminders” permission is recommended to help tasks run as punctually as possible even when the screen is off or the device is idle</string>
+    <string name="description_timed_task_backend_more">Use cases and differences:\n\n1) AlarmManager\nBest for time-sensitive tasks, e.g., [reminders/strictly scheduled scripts/...].\nOn Android 12+ with the “Allow setting alarms and reminders” permission, tasks can run more on time even when the screen is off or the device is idle.\nWithout it, the system may degrade exactness or delay execution.\n\n2) WorkManager\nBest for tasks that don’t require strict timing, e.g., [non-critical sync/cleanup/statistics/...].\nScheduling depends on [battery/network/charging/idle policies/...], so execution may be postponed when the screen is off or idle.\nWhile it can’t guarantee exact timing, it excels at [reliable completion/retries/chaining/unique work de-duplication].\n\n3) JobScheduler\nHistorical implementation for compatibility.\nOn newer Android versions, tasks may be delayed more noticeably.\nGenerally not recommended unless required for compatibility.</string>
 
 </resources>

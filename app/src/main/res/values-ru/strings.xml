@@ -429,7 +429,7 @@
     <string name="text_app_version_code">Код версии приложения</string>
     <string name="text_app_version_name">Название версии приложения</string>
     <string name="text_appearance">Внешний вид</string>
-    <string name="text_at_least_one_certificate_issuer_field_is_not_empty">Необходимо заполнить хотя бы одно поле из: «Полное имя, Название организации, Организационная единица, Код страны, Штат или провинция, Город или населенный пункт, Улица»</string>
+    <string name="text_at_least_one_certificate_issuer_field_is_not_empty">Необходимо заполнить хотя бы одно поле из: "Полное имя, Название организации, Организационная единица, Код страны, Штат или провинция, Город или населенный пункт, Улица"</string>
     <string name="text_attribute">Атрибут</string>
     <string name="text_auto_check_for_updates">Автоматическая проверка обновлений</string>
     <string name="text_auto_check_for_updates_and_show_snackbar">Автоматическая проверка обновлений и отображение закуски на домашней странице</string>
@@ -472,7 +472,7 @@
     <string name="text_clear_pre_execute_script">Очистить сценарий предварительного выполнения</string>
     <string name="text_clear_updates_checked_states">Очистить состояния проверки обновлений</string>
     <string name="text_click_item_to_remove">Нажмите на элемент для удаления</string>
-    <string name="text_click_ok_to_go_to_access_settings">Нажмите \"OK\" для перехода к настройкам</string>
+    <string name="text_click_ok_to_go_to_settings">Нажмите \"OK\" для перехода к настройкам</string>
     <string name="text_click_too_frequently">Частые операции</string>
     <string name="text_client_mode">Режим клиента</string>
     <string name="text_clone_color_library">Клонировать цветовую библиотеку</string>
@@ -1066,5 +1066,10 @@
     <string name="description_rhino_java_primitive_wrap">Переключатель включён (по умолчанию): значения, возвращаемые методами Java типов Number/Boolean/Character, оборачиваются в объекты Java и доступны в скрипте (String исключается). typeof = \"object\", species = \"JavaObject\"; доступны методы Java, что помогает сохранять точные типовые характеристики Java и корректную резолюцию перегрузок.\n\nПереключатель выключен: перечисленные типы больше не оборачиваются и передаются напрямую как примитивы JavaScript (number/boolean/строка из одного символа). typeof соответствует соответствующему типу JavaScript, что ближе к семантике/экосистеме JavaScript. При необходимости можно явно создать Java‑обёртку через new, например new java.lang.Boolean(true).\n\nСм.: http://issues.autojs6.com/435</string>
     <string name="summary_rhino_java_primitive_wrap">Примитивы Java в скрипте будут обёрнуты в объекты Java</string>
     <string name="text_rhino_java_primitive_wrap">Обёртка примитивов Java</string>
+    <string name="title_timed_task_backend">Движок планирования таймерных задач</string>
+    <string name="description_timed_task_backend">Управляет базовым механизмом по расписанию запуска скриптов.\n\nAlarmManager: При выдаче разрешения "Разрешить настройку будильников и напоминаний" задачи выполняются более точно по времени.\nWorkManager: Дружелюбен к системе; подходит для некритичных задач, допускающих задержку.\nJobScheduler: Устаревшая реализация, сохранена для совместимости; вероятность задержек выше.</string>
+    <string name="failed_to_go_to_access_settings">Не удалось открыть страницу настроек</string>
+    <string name="text_allow_setting_alarms_and_reminders_is_recommended">Рекомендуется выдать разрешение "Разрешить настройку будильников и напоминаний", чтобы обеспечить максимально точный запуск задач даже при выключенном экране или в режиме ожидания</string>
+    <string name="description_timed_task_backend_more">Сценарии и отличия:\n\n1. AlarmManager\nПодходит для задач, чувствительных к точности времени, например [напоминания/строго по расписанию/...].\nВ Android 12+ при наличии разрешения "Разрешить настройку будильников и напоминаний" задачи запускаются более точно даже при выключенном экране/в ожидании.\nБез него система может понизить точность или отложить выполнение.\n\n2. WorkManager\nПодходит для задач без строгих требований к времени, например [некритичная синхронизация/очистка/статистика/...].\nПланирование учитывает [батарею/сеть/зарядку/политику сна/...], возможны задержки при выключенном экране или в ожидании.\nХотя точность не гарантируется, он силён в [надёжном завершении/повторных попытках/цепочках/дедупликации работ].\n\n3. JobScheduler\nИсторическая реализация для совместимости.\nНа новых версиях Android возможны более существенные задержки.\nНе рекомендуется, если это не необходимо ради совместимости.</string>
 
 </resources>

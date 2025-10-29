@@ -185,6 +185,9 @@ dependencies /* Unclassified */ {
     // Android Job
     implementation(project(":libs:android-job-simplified-1_4_3"))
 
+    // Androidx Work Runtime
+    implementation(libs.work.runtime)
+
     // APK Parser
     // implementation("com.jaredrummler:apk-parser:1.0.2")
     // implementation("com.github.AndroidDeveloperLB:apk-parser:6")

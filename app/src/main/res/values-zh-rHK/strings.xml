@@ -470,7 +470,7 @@
     <string name="text_clear_pre_execute_script">清空預執行腳本</string>
     <string name="text_clear_updates_checked_states">清除更新檢查狀態</string>
     <string name="text_click_item_to_remove">點擊條目可移除</string>
-    <string name="text_click_ok_to_go_to_access_settings">點擊 \"確定\" 跳轉到設置頁面</string>
+    <string name="text_click_ok_to_go_to_settings">點擊 \"確定\" 跳轉到設置頁面</string>
     <string name="text_click_too_frequently">操作頻率過快</string>
     <string name="text_client_mode">客户端模式</string>
     <string name="text_clone_color_library">克隆顏色庫</string>
@@ -1064,5 +1064,10 @@
     <string name="description_rhino_java_primitive_wrap">開關啓用 (默認): 將 Java 方法返回的 Number/Boolean/Character 包裝為 Java 對象暴露到腳本 (String 除外). typeof 為 \"object\", species 為 \"JavaObject\", 可訪問這些對象的 Java 方法, 利於保留 Java 精確類型特徵與方法重載行為.\n\n開關禁用: 不再包裝上述類型, 直接作為 JavaScript 基元值 (number/boolean/單字符字符串). typeof 為相應 JavaScript 類型, 更貼近 JavaScript 語義與生態. 但仍可通過 new 關鍵字顯式聲明一個 Java 包裝類型, 如 new java.lang.Boolean(true).\n\n參閲: http://issues.autojs6.com/435</string>
     <string name="summary_rhino_java_primitive_wrap">Java 原始類型在腳本中將被包裝為對應的 Java 對象</string>
     <string name="text_rhino_java_primitive_wrap">Java 原始類型包裝</string>
+    <string name="title_timed_task_backend">定時任務調度引擎</string>
+    <string name="description_timed_task_backend">控制腳本定時觸發的底層機制.\n\nAlarmManager: 通過申請 \"允許設置鬧鐘和提醒\" 權限, 可使定時任務的觸發更接近準時.\nWorkManager: 系統友好, 適合可接受一定延遲的非關鍵定時任務.\nJobScheduler: 舊實現, 僅用作兼容保留, 定時任務出現延遲的概率較大.</string>
+    <string name="failed_to_go_to_access_settings">跳轉設置頁面失敗</string>
+    <string name="text_allow_setting_alarms_and_reminders_is_recommended">建議授予 \"允許設置鬧鐘和提醒\" 權限以確保定時任務在息屏或待機狀態時儘可能準時執行</string>
+    <string name="description_timed_task_backend_more">使用場景與差異説明: \n\n1. AlarmManager\n適用於準時性敏感的定時任務, 如 [提醒/嚴格定時腳本/...].\n在 Android 12+ 獲取 \"允許設置鬧鐘和提醒\" 權限後, 在息屏或待機狀態時能夠較準時地執行定時任務.\n在未授予 \"允許設置鬧鐘和提醒\" 權限時, 系統可能降級為不準時或延後執行任務.\n\n2. WorkManager\n適用於不要求嚴格準時執行的定時任務, 如 [非關鍵性同步/清理/統計/...].\n根據系統 [ 電量/網絡/充電情況/待機策略/... ] 進行調度, 息屏或待機狀態時可能推遲任務執行.\n雖無法保證時間精確性, 但在 [ 可靠完成/失敗重試/鏈式執行/唯一任務去重 ] 等方面擁有獨特優勢.\n\n3. Job\n歷史實現, 為兼容保留.\n在高版本安卓系統中定時任務可能存在較大的延遲執行問題.\n除非出於兼容需要, 一般不推薦使用.</string>
 
 </resources>

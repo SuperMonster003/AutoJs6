@@ -76,7 +76,7 @@ class ManageAllFilesPermission(override val context: Context) : PermissionItemHe
                 String.format(
                     "%s\n\n%s",
                     context.getString(R.string.text_all_files_access_is_needed),
-                    context.getString(R.string.text_click_ok_to_go_to_access_settings),
+                    context.getString(R.string.text_click_ok_to_go_to_settings),
                 )
             )
             .widgetThemeColor()

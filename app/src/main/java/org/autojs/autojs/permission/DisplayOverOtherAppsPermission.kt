@@ -62,7 +62,7 @@ class DisplayOverOtherAppsPermission(override val context: Context) : Permission
                 String.format(
                     "%s\n\n%s",
                     context.getString(R.string.text_display_over_other_app_is_recommended),
-                    context.getString(R.string.text_click_ok_to_go_to_access_settings),
+                    context.getString(R.string.text_click_ok_to_go_to_settings),
                 )
             )
             .widgetThemeColor()

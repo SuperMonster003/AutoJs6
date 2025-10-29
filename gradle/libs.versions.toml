@@ -99,6 +99,7 @@ text-recognition-chinese = "16.0.1"
 toaster = "12.6"
 versioncompare = "1.5.0"
 webkit = "1.14.0"
+work-runtime = "2.11.0"
 xz = "1.10"
 zip4j = "2.11.5"
 
@@ -185,6 +186,7 @@ toaster = { module = "com.github.getActivity:Toaster", version.ref = "toaster" }
 tukaani-xz = { module = "org.tukaani:xz", version.ref = "xz" }
 versioncompare = { module = "io.github.g00fy2:versioncompare", version.ref = "versioncompare" }
 webkit = { module = "androidx.webkit:webkit", version.ref = "webkit" }
+work-runtime = { module = "androidx.work:work-runtime", version.ref = "work-runtime" }
 zip4j = { module = "net.lingala.zip4j:zip4j", version.ref = "zip4j" }
 
 [plugins]
