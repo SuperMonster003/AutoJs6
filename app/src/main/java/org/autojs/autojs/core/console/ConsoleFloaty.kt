@@ -12,10 +12,6 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.annotation.ColorInt
 import androidx.core.content.res.ResourcesCompat
-import androidx.core.graphics.alpha
-import androidx.core.graphics.blue
-import androidx.core.graphics.green
-import androidx.core.graphics.red
 import org.autojs.autojs.runtime.api.ScreenMetrics
 import org.autojs.autojs.ui.enhancedfloaty.FloatyService
 import org.autojs.autojs.ui.enhancedfloaty.ResizableExpandableFloaty.AbstractResizableExpandableFloaty
@@ -26,6 +22,7 @@ import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.FloatingConsoleExpandBinding
 import org.autojs.autojs6.databinding.FloatingWindowCollapseBinding
 import kotlin.math.roundToInt
+import androidx.core.view.isVisible
 
 /**
  * Created by Stardust on Apr 20, 2017.
@@ -124,7 +121,7 @@ class ConsoleFloaty(private val console: ConsoleImpl) : AbstractResizableExpanda
         expandedBinding.moveOrResize.let {
             it.setOnClickListener {
                 mMoveCursor?.run {
-                    if (visibility == View.VISIBLE) {
+                    if (isVisible) {
                         visibility = View.GONE
                         mResizer?.visibility = View.GONE
                     } else {
@@ -167,17 +164,18 @@ class ConsoleFloaty(private val console: ConsoleImpl) : AbstractResizableExpanda
     fun getTitle(): String = mTitleText?.toString() ?: ""
 
     fun setTitleBackgroundColor(@ColorInt color: Int) {
-        console.configurator.titleBackgroundColor = color
-        titleBarView?.apply { post { setTitleViewBackgroundColor(this, color) } }
+        console.configurator.setTitleBackgroundColor(color)
+        titleBarView?.apply { post { setTitleViewBackgroundColor(this, console.configurator.titleBackgroundColor) } }
     }
 
     fun setTitleBackgroundTint(tint: Int) {
-        setTitleBackgroundColor(Color.argb(console.configurator.titleBackgroundColor.alpha, tint.red, tint.green, tint.blue))
+        console.configurator.setTitleBackgroundTint(tint)
+        titleBarView?.apply { post { setTitleViewBackgroundColor(this, console.configurator.titleBackgroundColor) } }
     }
 
     fun setTitleBackgroundAlpha(alpha: Int) {
-        val bg = console.configurator.titleBackgroundColor
-        setTitleBackgroundColor(Color.argb(parseAlpha(alpha), bg.red, bg.green, bg.blue))
+        console.configurator.setTitleBackgroundAlpha(alpha)
+        titleBarView?.apply { post { setTitleViewBackgroundColor(this, console.configurator.titleBackgroundColor) } }
     }
 
     fun setTitleIconsTint(color: Int) {
@@ -203,11 +201,6 @@ class ConsoleFloaty(private val console: ConsoleImpl) : AbstractResizableExpanda
 
     private fun setTitleViewBackgroundColor(view: LinearLayout, color: Int) {
         view.background = DrawableUtils.setDrawableColorFilterSrc(view.background, color)
-    }
-
-    private fun parseAlpha(alpha: Int) = when {
-        alpha < 0 -> console.configurator.titleBackgroundColor.alpha
-        else -> alpha
     }
 
     internal fun setCloseButton(resId: Int) {

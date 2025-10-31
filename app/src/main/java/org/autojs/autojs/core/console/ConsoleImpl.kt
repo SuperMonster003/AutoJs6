@@ -388,15 +388,15 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
                 isShowing = true
                 configurator.title?.let { setTitle(it) }
                 configurator.position?.run { setPosition(x, y, true) }
-                setGravity(configurator.gravity)
+                setGravity(getGravity())
                 configurator.titleTextSize?.let { setTitleTextSize(it) }
                 configurator.titleTextColor?.let { setTitleTextColor(it) }
-                setTitleBackgroundColor(configurator.titleBackgroundColor)
+                setTitleBackgroundColor(getTitleBackgroundColor())
                 configurator.titleIconsTint?.let { setTitleIconsTint(it) }
                 configurator.contentTextSize?.let { setContentTextSize(it) }
                 configurator.contentTextColors?.let { setContentTextColors(it) }
-                setContentBackgroundColor(configurator.contentBackgroundColor)
-                setTouchable(configurator.isTouchable)
+                setContentBackgroundColor(getContentBackgroundColor())
+                setTouchable(isTouchable())
                 mLockWindowCreated.wait(mDefaultSafeDelay)
             }
         }
@@ -603,7 +603,7 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
 
     @ScriptInterface
     fun setTitleBackgroundColor(@ColorInt color: Int) = runWithWindow({ configurator.setTitleBackgroundColor(color) }) {
-        mConsoleFloaty.setTitleBackgroundColor(color)
+        mConsoleFloaty.setTitleBackgroundColor(getTitleBackgroundColor())
     }
 
     @ScriptInterface
@@ -647,7 +647,7 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
 
     @ScriptInterface
     fun setContentBackgroundColor(@ColorInt color: Int) = runWithWindow({ configurator.setContentBackgroundColor(color) }) {
-        setContentViewBackgroundColor(getFloatingConsoleView(), color)
+        setContentViewBackgroundColor(getFloatingConsoleView(), getContentBackgroundColor())
     }
 
     @ScriptInterface
@@ -655,18 +655,12 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
 
     @ScriptInterface
     fun setContentBackgroundTint(@ColorInt tint: Int) = runWithWindow({ configurator.setContentBackgroundTint(tint) }) {
-        val alpha = configurator.contentBackgroundColor.alpha
-        val niceAlpha = parseAlpha(alpha, R.color.floating_console_content_bg)
-        val color = Color.argb(niceAlpha, tint.red, tint.green, tint.blue)
-        setContentViewBackgroundColor(getFloatingConsoleView(), color)
+        setContentViewBackgroundColor(getFloatingConsoleView(), getContentBackgroundColor())
     }
 
     @ScriptInterface
     fun setContentBackgroundAlpha(alpha: Int) = runWithWindow({ configurator.setContentBackgroundAlpha(alpha) }) {
-        val bg = configurator.contentBackgroundColor
-        val niceAlpha = parseAlpha(alpha, R.color.floating_console_content_bg)
-        val color = Color.argb(niceAlpha, bg.red, bg.green, bg.blue)
-        setContentViewBackgroundColor(getFloatingConsoleView(), color)
+        setContentViewBackgroundColor(getFloatingConsoleView(), getContentBackgroundColor())
     }
 
     @ScriptInterface
@@ -851,8 +845,17 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
             private set
 
         @Volatile
-        var titleBackgroundColor: Int = context.getColor(R.color.floating_console_title_bar_bg)
-            internal set
+        private var internalTitleBackgroundColor: Int? = null
+
+        @Volatile
+        private var internalTitleBackgroundAlpha: Int? = null
+
+        @Volatile
+        private var internalTitleBackgroundTint: Int? = null
+
+        val titleBackgroundColor: Int
+            get() = (internalTitleBackgroundColor ?: context.getColor(R.color.floating_console_title_bar_bg))
+                .calibrateWith(internalTitleBackgroundAlpha, internalTitleBackgroundTint)
 
         @Volatile
         var titleIconsTint: Int? = null
@@ -867,8 +870,17 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
             private set
 
         @Volatile
-        var contentBackgroundColor: Int = context.getColor(R.color.floating_console_content_bg)
-            private set
+        private var internalContentBackgroundColor: Int? = null
+
+        @Volatile
+        private var internalContentBackgroundAlpha: Int? = null
+
+        @Volatile
+        private var internalContentBackgroundTint: Int? = null
+
+        val contentBackgroundColor: Int
+            get() = (internalContentBackgroundColor ?: context.getColor(R.color.floating_console_content_bg))
+                .calibrateWith(internalContentBackgroundAlpha, internalContentBackgroundTint)
 
         @Volatile
         var isTouchable: Boolean = true
@@ -907,16 +919,15 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
         }
 
         fun setTitleBackgroundColor(color: Int) = also {
-            titleBackgroundColor = color
+            internalTitleBackgroundColor = color
         }
 
         fun setTitleBackgroundTint(tint: Int) = also {
-            titleBackgroundColor = titleBackgroundColor.run { Color.argb(alpha, tint.red, tint.green, tint.blue) }
+            internalTitleBackgroundTint = tint
         }
 
         fun setTitleBackgroundAlpha(alpha: Int) = also {
-            val niceAlpha = parseAlpha(alpha, R.color.floating_console_title_bar_bg)
-            titleBackgroundColor = titleBackgroundColor.run { Color.argb(niceAlpha, red, green, blue) }
+            internalTitleBackgroundAlpha = parseAlpha(alpha, R.color.floating_console_title_bar_bg)
         }
 
         fun setTitleIconsTint(color: Int) = also {
@@ -932,16 +943,15 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
         }
 
         fun setContentBackgroundColor(color: Int) = also {
-            contentBackgroundColor = color
+            internalContentBackgroundColor = color
         }
 
         fun setContentBackgroundTint(tint: Int) {
-            contentBackgroundColor = contentBackgroundColor.run { Color.argb(alpha, tint.red, tint.green, tint.blue) }
+            internalContentBackgroundTint = tint
         }
 
         fun setContentBackgroundAlpha(alpha: Int) = also {
-            val niceAlpha = parseAlpha(alpha, R.color.floating_console_content_bg)
-            contentBackgroundColor = contentBackgroundColor.run { Color.argb(niceAlpha, red, green, blue) }
+            internalContentBackgroundAlpha = parseAlpha(alpha, R.color.floating_console_content_bg)
         }
 
         fun setTextSize(size: Float) = also {
@@ -987,6 +997,27 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
             isTouchable = !touchThrough
         }
 
+        fun clearStates() {
+            size = null
+            position = null
+            gravity = DEFAULT_GRAVITY
+            title = null
+            titleTextSize = null
+            titleTextColor = null
+            internalTitleBackgroundColor = null
+            internalTitleBackgroundAlpha = null
+            internalTitleBackgroundTint = null
+            internalContentBackgroundColor = null
+            internalContentBackgroundAlpha = null
+            internalContentBackgroundTint = null
+            titleIconsTint = null
+            contentTextSize = null
+            contentTextColors = null
+            isTouchable = true
+            isExitOnClose = false
+            exitOnCloseTimeout = DEFAULT_EXIT_ON_CLOSE_TIMEOUT
+        }
+
         internal fun initExitOnClose() {
             setExitOnClose(false)
             exitOnCloseTimeout = DEFAULT_EXIT_ON_CLOSE_TIMEOUT
@@ -994,6 +1025,13 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
 
         @JvmOverloads
         fun show(isReset: Boolean = false) = this@ConsoleImpl.show(isReset)
+
+        private fun Int.calibrateWith(alpha: Int?, tint: Int?): Int {
+            var result = this
+            alpha?.let { desired -> result = Color.argb(desired, result.red, result.green, result.blue) }
+            tint?.let { desired -> result = Color.argb(result.alpha, desired.red, desired.green, desired.blue) }
+            return result
+        }
 
     }
 

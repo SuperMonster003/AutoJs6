@@ -10,6 +10,8 @@ import org.autojs.autojs.core.console.ConsoleImpl.Companion.DEFAULT_EXIT_ON_CLOS
 import org.autojs.autojs.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.extension.FlexibleArray
+import org.autojs.autojs.extension.FlexibleArray.Companion.component1
+import org.autojs.autojs.extension.FlexibleArray.Companion.component2
 import org.autojs.autojs.extension.ScriptableExtensions.hasProp
 import org.autojs.autojs.extension.ScriptableExtensions.prop
 import org.autojs.autojs.extension.ScriptableObjectExtensions.inquire
@@ -300,7 +302,9 @@ class Console(scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRuntime) {
         @RhinoRuntimeFunctionInterface
         fun build(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ConsoleImpl.Configurator = ensureArgumentsAtMost(args, 1) {
             val (options) = it
-            val configurator = scriptRuntime.console.configurator
+            val configurator = scriptRuntime.console.configurator.apply {
+                clearStates()
+            }
             val opt = coerceObject(options, newNativeObject())
 
             opt.entries.forEach { entry ->
