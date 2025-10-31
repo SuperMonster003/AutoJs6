@@ -30,6 +30,8 @@
         "floaty.window/rawWindow 方法无法接受字符串参数的问题",
         "util.class[Name]/getClass[Name] 可能返回错误结果的问题",
         "threads.disposable() 返回的对象在存取数据时可能被意外装箱的问题 _[`issue #435`](http://issues.autojs6.com/435)_",
+        "console.build 方法多次调用时, 日志浮动窗口样式选项未能正常重置的问题",
+        "console.build 方法的 (title/content)BackgroundColor 选项导致透明度或着色选项被覆盖的问题 _[`issue #458`](http://issues.autojs6.com/458)_",
         "console/toast 等方法显示 Java Double 时可能丢失末尾零的问题",
         "无法使用 console/toast 等方法显示 BigInt 数据类型的问题",
         "部分全局对象可能丢失 JavaScript 原型属性及方法的问题",
