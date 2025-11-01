@@ -74,7 +74,4 @@ interface Console {
     @ScriptInterface
     fun setTouchable(touchable: Boolean)
 
-    @ScriptInterface
-    fun rawInput(): String?
-
 }

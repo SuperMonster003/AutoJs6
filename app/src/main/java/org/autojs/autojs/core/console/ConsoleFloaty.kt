@@ -12,6 +12,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.annotation.ColorInt
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.view.isVisible
 import org.autojs.autojs.runtime.api.ScreenMetrics
 import org.autojs.autojs.ui.enhancedfloaty.FloatyService
 import org.autojs.autojs.ui.enhancedfloaty.ResizableExpandableFloaty.AbstractResizableExpandableFloaty
@@ -22,7 +23,6 @@ import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.FloatingConsoleExpandBinding
 import org.autojs.autojs6.databinding.FloatingWindowCollapseBinding
 import kotlin.math.roundToInt
-import androidx.core.view.isVisible
 
 /**
  * Created by Stardust on Apr 20, 2017.
@@ -143,7 +143,6 @@ class ConsoleFloaty(private val console: ConsoleImpl) : AbstractResizableExpanda
     private fun setUpConsole(window: ResizableExpandableFloatyWindow) {
         expandedBinding.console.apply {
             setConsole(console)
-            setWindow(window)
         }
         initConsoleTitleBar(window)
     }
@@ -204,8 +203,13 @@ class ConsoleFloaty(private val console: ConsoleImpl) : AbstractResizableExpanda
     }
 
     internal fun setCloseButton(resId: Int) {
-        mCloseButton?.apply {
-            post { setImageDrawable(ResourcesCompat.getDrawable(console.uiHandler.applicationContext.resources, resId, null)) }
+        mCloseButton?.let {
+            val res = console.uiHandler.applicationContext.resources
+            val padding = (7 * res.displayMetrics.density).toInt()
+            it.post {
+                it.setImageDrawable(ResourcesCompat.getDrawable(res, resId, null))
+                it.setPadding(padding, padding, padding, padding)
+            }
         }
     }
 

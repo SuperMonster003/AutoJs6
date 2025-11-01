@@ -81,7 +81,7 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
     }
 
     private void init(AttributeSet attrs) {
-        inflate(getContext(), R.layout.console_view, this);
+        inflate(getContext(), R.layout.console_view_legacy, this);
         if (attrs != null) {
             TypedArray typedArray = getContext().obtainStyledAttributes(attrs, R.styleable.ConsoleView);
             for (Map.Entry<Integer, Integer> attr : ATTRS.entrySet()) {
