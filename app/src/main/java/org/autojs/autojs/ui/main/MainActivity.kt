@@ -8,7 +8,6 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.os.Process
 import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
@@ -21,17 +20,11 @@ import androidx.fragment.app.Fragment
 import androidx.viewpager.widget.ViewPager
 import androidx.viewpager.widget.ViewPager.SimpleOnPageChangeListener
 import com.google.android.material.tabs.TabLayout
-import com.huaban.analysis.jieba.CharsDictionaryDatabase
-import com.huaban.analysis.jieba.PhrasesDictionaryDatabase
-import com.huaban.analysis.jieba.WordDictionaryDatabase
-import org.autojs.autojs.App
-import org.autojs.autojs.AutoJs
 import org.autojs.autojs.app.FragmentPagerAdapterBuilder
 import org.autojs.autojs.app.FragmentPagerAdapterBuilder.StoredFragmentPagerAdapter
 import org.autojs.autojs.app.OnActivityResultDelegate
 import org.autojs.autojs.app.OnActivityResultDelegate.DelegateHost
 import org.autojs.autojs.core.accessibility.AccessibilityTool
-import org.autojs.autojs.core.image.capture.ScreenCapturerForegroundService
 import org.autojs.autojs.core.permission.RequestPermissionCallbacks
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.event.BackPressedHandler
@@ -50,7 +43,6 @@ import org.autojs.autojs.theme.widget.ThemeColorFloatingActionButton
 import org.autojs.autojs.theme.widget.ThemeColorToolbar
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.doc.DocumentationFragment
-import org.autojs.autojs.ui.enhancedfloaty.FloatyService
 import org.autojs.autojs.ui.explorer.ExplorerView
 import org.autojs.autojs.ui.floating.FloatyWindowManger
 import org.autojs.autojs.ui.log.LogActivity
@@ -305,33 +297,9 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
         }
     }
 
-    fun rebirth() {
-        packageManager.getLaunchIntentForPackage(packageName)?.let {
-            startActivity(Intent.makeRestartActivityTask(it.component))
-        }
-        exitCompletely()
-    }
-
-    fun exitCompletely() {
-        FloatyWindowManger.hideCircularMenuAndSaveState()
-
-        FloatyService.stopService()
-        ScreenCapturerForegroundService.stopService()
-
-        AutoJs.instance.scriptEngineService.stopAll()
-        AutoJs.instance.clear()
-
-        App.app.clear()
-
-        WordDictionaryDatabase.getInstance(applicationContext).close()
-        CharsDictionaryDatabase.getInstance(applicationContext).close()
-        PhrasesDictionaryDatabase.getInstance(applicationContext).close()
-
+    fun beforeExit() {
         mA11yTool.stopService(false)
         mForeGroundService.stopIfNeeded()
-        WrappedShizuku.onDestroy()
-
-        Process.killProcess(Process.myPid())
     }
 
     @Suppress("OVERRIDE_DEPRECATION")

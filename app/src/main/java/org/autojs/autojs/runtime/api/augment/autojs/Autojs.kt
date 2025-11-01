@@ -1,39 +1,41 @@
 package org.autojs.autojs.runtime.api.augment.autojs
 
-import org.autojs.autojs.rhino.ProxyObject
-import org.autojs.autojs.rhino.ProxyObject.Companion.PROXY_GETTER_KEY
-import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.Augmentable
-import org.autojs.autojs.util.RhinoUtils.NOT_CONSTRUCTABLE
-import org.autojs.autojs.util.RhinoUtils.coerceString
-import org.autojs.autojs.util.RhinoUtils.newBaseFunction
-import org.mozilla.javascript.BaseFunction
-import org.mozilla.javascript.NativeObject
-import org.mozilla.javascript.Scriptable
-import java.util.function.Supplier
 import android.Manifest
-import org.autojs.autojs6.BuildConfig
 import android.content.pm.PackageManager
-import org.autojs.autojs.util.RootUtils
-import org.autojs.autojs.util.RootUtils.RootMode
 import android.provider.Settings
 import android.provider.Settings.System
 import org.autojs.autojs.annotation.RhinoSingletonFunctionInterface
 import org.autojs.autojs.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.extension.FlexibleArray
-import org.autojs.autojs.extension.ScriptableExtensions.prop
 import org.autojs.autojs.extension.ScriptableExtensions.defineProp
+import org.autojs.autojs.extension.ScriptableExtensions.prop
+import org.autojs.autojs.rhino.ProxyObject
+import org.autojs.autojs.rhino.ProxyObject.Companion.PROXY_GETTER_KEY
+import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.ScreenMetrics
+import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.util.Util.checkStringArgument
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.theme.ThemeColorManager
+import org.autojs.autojs.util.IntentUtils
+import org.autojs.autojs.util.RhinoUtils.NOT_CONSTRUCTABLE
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED
 import org.autojs.autojs.util.RhinoUtils.coerceIntNumber
+import org.autojs.autojs.util.RhinoUtils.coerceString
+import org.autojs.autojs.util.RhinoUtils.newBaseFunction
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
+import org.autojs.autojs.util.RhinoUtils.undefined
+import org.autojs.autojs.util.RootUtils
+import org.autojs.autojs.util.RootUtils.RootMode
+import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
+import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.Context
+import org.mozilla.javascript.NativeObject
+import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.Undefined
 import java.util.*
+import java.util.function.Supplier
 import android.content.Context as AndroidContext
 
 class Autojs(private val scriptRuntime: ScriptRuntime) : Augmentable() {
@@ -77,6 +79,8 @@ class Autojs(private val scriptRuntime: ScriptRuntime) : Augmentable() {
         ::canDisplayOverOtherApps.name,
         ::getLanguage.name,
         ::getLanguageTag.name,
+        ::restart.name,
+        ::exit.name,
     )
 
     override val selfAssignmentGetters = listOf<Pair<String, Supplier<Any?>>>(
@@ -196,6 +200,18 @@ class Autojs(private val scriptRuntime: ScriptRuntime) : Augmentable() {
         @RhinoSingletonFunctionInterface
         fun getLanguageTag(args: Array<out Any?>): String = ensureArgumentsIsEmpty(args) {
             getLanguage(arrayOf()).toLanguageTag()
+        }
+
+        @JvmStatic
+        @RhinoSingletonFunctionInterface
+        fun restart(args: Array<out Any?>): Undefined = ensureArgumentsIsEmpty(args) {
+            undefined { IntentUtils.App.restart(globalContext) }
+        }
+
+        @JvmStatic
+        @RhinoSingletonFunctionInterface
+        fun exit(args: Array<out Any?>): Undefined = ensureArgumentsIsEmpty(args) {
+            undefined { IntentUtils.App.exit(globalContext) }
         }
 
     }
