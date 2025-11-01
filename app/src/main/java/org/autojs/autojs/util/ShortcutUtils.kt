@@ -1,7 +1,6 @@
 package org.autojs.autojs.util
 
 import android.app.PendingIntent
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ShortcutInfo
