@@ -22,6 +22,7 @@ import androidx.core.graphics.alpha
 import androidx.core.graphics.blue
 import androidx.core.graphics.green
 import androidx.core.graphics.red
+import androidx.core.view.doOnLayout
 import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.annotation.ScriptInterface
@@ -32,7 +33,6 @@ import org.autojs.autojs.permission.DisplayOverOtherAppsPermission
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.AbstractConsole
 import org.autojs.autojs.runtime.api.Mime
-import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.tool.UiHandler
 import org.autojs.autojs.ui.common.NotAskAgainDialog
 import org.autojs.autojs.ui.enhancedfloaty.FloatyService
@@ -48,8 +48,6 @@ import org.opencv.core.Point
 import org.opencv.core.Size
 import java.io.IOException
 import java.lang.ref.WeakReference
-import java.util.concurrent.ArrayBlockingQueue
-import java.util.concurrent.BlockingQueue
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.ceil
 import kotlin.math.pow
@@ -63,17 +61,8 @@ import android.graphics.Point as AndroidPoint
  */
 open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
 
-    private val lock = Object()
+    private val applicationContext = uiHandler.applicationContext
 
-    var configurator = Configurator()
-
-    val logEntries = ArrayList<LogEntry>()
-
-    @Volatile
-    var isShowing = false
-        private set
-
-    private val mDefaultSafeDelay: Long = 360
     private val mSafeSizeToSend: Int = 2.0.pow(16).toInt()
     private val mSafeSizeToCopy: Int = 2.0.pow(19).toInt()
 
@@ -83,31 +72,30 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
     @get:Synchronized
     private var mCountDownTimer: CountDownTimer? = null
 
-    private var mFloatyWindow: ResizableExpandableFloatyWindow? = null
+    private val mIdCounter = AtomicInteger(0)
+    private val mConsoleFloaty = ConsoleFloaty(this)
+    private val mFloatyWindow = ResizableExpandableFloatyWindow(mConsoleFloaty)
+    private val mDisplayOverOtherAppsPerm = DisplayOverOtherAppsPermission(applicationContext)
+
+    private var mStage = Stage.INIT
+    private val mPendingMutations = ArrayDeque<Mutation>()
+    private var mIsDraining = false
 
     private val context: Context
-        get() = mConsoleView?.get()?.context ?: uiHandler.applicationContext
-
-    private val mLockWindowShow = Object()
-    private val mLockWindowCreated = Object()
-    private val mLockConsoleView = Object()
-    private val mIdCounter = AtomicInteger(0)
-    private val mConsoleFloaty: ConsoleFloaty
-    private val mInput: BlockingQueue<String> = ArrayBlockingQueue(1)
-    private val mDisplayOverOtherAppsPerm = DisplayOverOtherAppsPermission(uiHandler.applicationContext)
+        get() = mConsoleView?.get()?.context ?: applicationContext
 
     private val logEntriesJoint
         get() = synchronized(logEntries) {
             logEntries.joinToString("\n") { it.content }
         }
 
-    init {
-        synchronized(mLockWindowCreated) {
-            mConsoleFloaty = ConsoleFloaty(this)
-            mFloatyWindow = ResizableExpandableFloatyWindow(mConsoleFloaty)
-            mLockWindowCreated.notify()
-        }
-    }
+    val configurator = Configurator()
+
+    val logEntries = ArrayList<LogEntry>()
+
+    @Volatile
+    var isShowing = false
+        private set
 
     override fun setTitle(title: CharSequence?) {
         val niceTitle = title ?: ""
@@ -117,11 +105,6 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
 
     fun getTitle() = mConsoleFloaty.getTitle()
 
-    // TODO by SuperMonster003 on Oct 24, 2024.
-    //  ! Add an option in preferences,
-    //  ! such as "Show detailed error stack trace in console".
-    //  ! zh-CN:
-    //  ! 增加设置选项, 如 "控制台打印详细的错误堆栈信息".
     override fun error(data: Any?, vararg formatArgs: Any?) {
         var niceData = data
         if (niceData is Throwable) {
@@ -148,29 +131,19 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
         }
     }
 
-    @ScriptInterface
-    override fun rawInput(): String? {
-        if (getFloatingConsoleView() == null) {
-            if (!isShowing) show()
-            waitForConsoleView()
-        }
-        getFloatingConsoleView()?.showEditText()
-        return try {
-            mInput.take()
-        } catch (_: InterruptedException) {
-            throw ScriptInterruptedException()
-        }
-    }
-
-    @ScriptInterface
-    fun rawInput(data: Any?, vararg param: Any?) = rawInput().also { log(data, *param) }
-
     fun setConsoleView(consoleView: ConsoleView?) {
         consoleView.let {
             mConsoleView = WeakReference(it)
             addLogListener(it)
         }
-        synchronized(mLockConsoleView) { mLockConsoleView.notify() }
+        // Stage advancement: View available.
+        // zh-CN: 阶段推进: 视图可用.
+        advanceStage(Stage.VIEW_ATTACHED)
+        // First frame layout completion advancement.
+        // zh-CN: 首帧布局完成推进.
+        (getFloatingConsoleView() ?: consoleView)?.doOnLayout {
+            advanceStage(Stage.LAYOUT_DONE)
+        }
     }
 
     fun printAllStackTrace(t: Throwable) {
@@ -314,7 +287,7 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
             putExtra(Intent.EXTRA_TEXT, message)
             type = Mime.TEXT_PLAIN
         }
-        uiHandler.applicationContext.startActivity(Intent.createChooser(sendIntent, null).apply {
+        applicationContext.startActivity(Intent.createChooser(sendIntent, null).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         })
     }
@@ -363,47 +336,61 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
         setCloseButton(R.drawable.ic_close_white_24dp)
         if (isReset) clearStates()
 
-        synchronized(mLockWindowShow) {
-            if (!mDisplayOverOtherAppsPerm.has()) {
-                mDisplayOverOtherAppsPerm.config()
-                ViewUtils.showToast(context, R.string.error_no_display_over_other_apps_permission)
-                return
-            }
-            if (isReset) reset()
-            if (isShowing) return
+        if (!mDisplayOverOtherAppsPerm.has()) {
+            mDisplayOverOtherAppsPerm.config()
+            ViewUtils.showToast(context, R.string.error_no_display_over_other_apps_permission)
+            return
+        }
+        if (isReset) reset()
+        if (isShowing) return
 
-            runWithWindow({ startFloatyService() }) {
-                try {
-                    FloatyService.addWindow(mFloatyWindow)
-                    configurator.size?.let { FloatyService.setInitialMeasure(it) }
-                    setTitleBarGestureListener()
-                    // SecurityException: https://github.com/hyb1996-guest/AutoJsIssueReport/issues/4781
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    ScriptRuntime.popException(e.message)
-                    ViewUtils.showToast(context, R.string.error_no_display_over_other_apps_permission)
+        // Reset stage.
+        // zh-CN: 重置阶段.
+        mStage = Stage.INIT
+
+        startFloatyService()
+        uiHandler.post {
+            try {
+                FloatyService.addWindow(mFloatyWindow)
+                configurator.size?.let { FloatyService.setInitialMeasure(it) }
+                setTitleBarGestureListener()
+
+                // Window created.
+                // zh-CN: 窗口已创建.
+                advanceStage(Stage.WINDOW_CREATED)
+
+                mFloatyWindow.addOnViewAttachedTask {
+                    // View attached -> VIEW_ATTACHED .
+                    // zh-CN: 视图 attach -> VIEW_ATTACHED.
+                    advanceStage(Stage.VIEW_ATTACHED)
+                    // First frame layout -> LAYOUT_DONE.
+                    // zh-CN: 首帧布局 -> LAYOUT_DONE.
+                    mConsoleFloaty.expandedView?.doOnLayout { advanceStage(Stage.LAYOUT_DONE) }
                 }
-            }
-            synchronized(mLockWindowCreated) {
-                isShowing = true
-                configurator.title?.let { setTitle(it) }
-                configurator.position?.run { setPosition(x, y, true) }
-                setGravity(getGravity())
-                configurator.titleTextSize?.let { setTitleTextSize(it) }
-                configurator.titleTextColor?.let { setTitleTextColor(it) }
-                setTitleBackgroundColor(getTitleBackgroundColor())
-                configurator.titleIconsTint?.let { setTitleIconsTint(it) }
-                configurator.contentTextSize?.let { setContentTextSize(it) }
-                configurator.contentTextColors?.let { setContentTextColors(it) }
-                setContentBackgroundColor(getContentBackgroundColor())
-                setTouchable(isTouchable())
-                mLockWindowCreated.wait(mDefaultSafeDelay)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                ScriptRuntime.popException(e.message)
+                ViewUtils.showToast(context, R.string.error_no_display_over_other_apps_permission)
             }
         }
+
+        isShowing = true
+
+        configurator.title?.let { setTitle(it) }
+        configurator.position?.run { setPosition(x, y, true) }
+        setGravity(getGravity())
+        configurator.titleTextSize?.let { setTitleTextSize(it) }
+        configurator.titleTextColor?.let { setTitleTextColor(it) }
+        setTitleBackgroundColor(getTitleBackgroundColor())
+        configurator.titleIconsTint?.let { setTitleIconsTint(it) }
+        configurator.contentTextSize?.let { setContentTextSize(it) }
+        configurator.contentTextColors?.let { setContentTextColors(it) }
+        setContentBackgroundColor(getContentBackgroundColor())
+        setTouchable(isTouchable())
     }
 
     private fun setTitleBarGestureListener() {
-        mFloatyWindow?.windowBridge?.let { windowBridge ->
+        mFloatyWindow.windowBridge?.let { windowBridge ->
             mConsoleFloaty.titleBarView?.let { view ->
                 DragGesture(windowBridge, view).apply { pressedAlpha = 1.0f }
             }
@@ -413,17 +400,17 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
     private fun clearStates() {
         FloatyService.setInitialMeasure(null)
         mConsoleFloaty.clearStates()
-        mFloatyWindow?.clearOnViewAttachedTask()
-        configurator = Configurator()
+        mFloatyWindow.clearOnViewAttachedTask()
+        configurator.clearStates()
     }
 
     fun reset() {
         if (isShowing) {
             hide(true)
-            uiHandler.postDelayed({
+            uiHandler.post {
                 clearStates()
                 show()
-            }, mDefaultSafeDelay)
+            }
         } else {
             clearStates()
         }
@@ -437,17 +424,17 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
     }
 
     private fun startFloatyService() {
-        uiHandler.applicationContext.startService(Intent(uiHandler.applicationContext, FloatyService::class.java))
+        applicationContext.startService(Intent(applicationContext, FloatyService::class.java))
     }
 
     @ScriptInterface
     override fun hide() = hide(false)
 
-    private fun hide(ignoreSavingStates: Boolean) = runWithWindow {
-        synchronized(mLockWindowShow) {
+    private fun hide(ignoreSavingStates: Boolean) {
+        uiHandler.post {
             try {
                 if (!ignoreSavingStates) saveStates()
-                mFloatyWindow!!.close()
+                mFloatyWindow.close()
             } catch (_: IllegalArgumentException) {
                 /* Ignored. */
             }
@@ -455,12 +442,12 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
         }
     }
 
-    private fun saveStates() = runWithWindow {
+    private fun saveStates() = uiHandler.post {
         // @Hint by SuperMonster003 on Feb 9, 2024.
         //  ! Position and size need to be saved as user may cause their changes.
         //  ! zh-CN: 需要保存位置和大小, 因为用户可能会改变它们.
 
-        val bridge = mFloatyWindow!!.windowBridge ?: return@runWithWindow
+        val bridge = mFloatyWindow.windowBridge ?: return@post
 
         configurator.setPosition(bridge.x.toDouble(), bridge.y.toDouble())
         configurator.setGravity(Gravity.NO_GRAVITY)
@@ -468,8 +455,9 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
     }
 
     @ScriptInterface
-    override fun setSize(w: Double, h: Double) = runWithWindow({ configurator.setSize(w, h) }) {
-        trySetting {
+    override fun setSize(w: Double, h: Double) {
+        configurator.setSize(w, h)
+        enqueueMutation(Stage.VIEW_ATTACHED) {
             mConsoleFloaty.expandedView?.let {
                 ViewUtils.setViewMeasure(it, w.toInt(), h.toInt())
             }
@@ -487,9 +475,10 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
     fun setTouchable() = setTouchable(DEFAULT_TOUCHABLE)
 
     @ScriptInterface
-    override fun setTouchable(touchable: Boolean) = runWithWindow({ configurator.setTouchable(touchable) }) {
-        trySetting {
-            mFloatyWindow!!.setTouchable(touchable)
+    override fun setTouchable(touchable: Boolean) {
+        configurator.setTouchable(touchable)
+        enqueueMutation(Stage.WINDOW_CREATED) {
+            mFloatyWindow.setTouchable(touchable)
         }
     }
 
@@ -516,31 +505,44 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
     @ScriptInterface
     override fun setPosition(x: Double, y: Double) = setPosition(x, y, false)
 
-    private fun setPosition(x: Double, y: Double, isSaveGravity: Boolean) = runWithWindow({
+    private fun setPosition(x: Double, y: Double, shouldSaveGravity: Boolean) {
         configurator.setPosition(x, y)
-        if (!isSaveGravity) {
+        if (!shouldSaveGravity) {
             configurator.setGravity(Gravity.NO_GRAVITY)
         }
-    }) {
-        trySetting { mFloatyWindow!!.windowBridge?.updatePosition(x.toInt(), y.toInt()) }
+        // Wait for VIEW_ATTACHED before setting to avoid attach backfill override.
+        // zh-CN: 等待 VIEW_ATTACHED 再设置, 避免 attach 回填覆盖.
+        enqueueMutation(Stage.VIEW_ATTACHED) {
+            mFloatyWindow.windowBridge?.updatePosition(x.toInt(), y.toInt())
+        }
+        // After first frame layout is complete, if gravity is not set and position is overwritten, set position again to avoid layout backfill override.
+        // zh-CN: 首帧布局完成后, 若未设置重力且位置被改写, 再设置一次位置, 避免 layout 回填覆盖.
+        enqueueMutation(Stage.LAYOUT_DONE) {
+            val bridge = mFloatyWindow.windowBridge ?: return@enqueueMutation
+            if (configurator.gravity == Gravity.NO_GRAVITY) {
+                val needFix = bridge.x != x.toInt() || bridge.y != y.toInt()
+                if (needFix) bridge.updatePosition(x.toInt(), y.toInt())
+            }
+        }
     }
 
     @ScriptInterface
     fun getPosition(): Point {
         return mFloatyWindow.let { floatyWindow ->
-            floatyWindow?.windowBridge ?: return Point()
+            floatyWindow.windowBridge ?: return Point()
             Point(floatyWindow.windowBridge!!.x.toDouble(), floatyWindow.windowBridge!!.y.toDouble())
         }
     }
 
     @SuppressLint("RtlHardcoded")
     @ScriptInterface
-    fun setGravity(gravity: Int) = runWithWindow({ configurator.setGravity(gravity) }) {
-        trySetting {
-            if (gravity <= Gravity.NO_GRAVITY) return@trySetting
-            val bridge = mFloatyWindow!!.windowBridge ?: return@trySetting
+    fun setGravity(gravity: Int) {
+        configurator.setGravity(gravity)
+        enqueueMutation(Stage.LAYOUT_DONE) {
+            if (gravity <= Gravity.NO_GRAVITY) return@enqueueMutation
+            val bridge = mFloatyWindow.windowBridge ?: return@enqueueMutation
 
-            val isLtr = mFloatyWindow!!.windowView!!.layoutDirection == View.LAYOUT_DIRECTION_LTR
+            val isLtr = mFloatyWindow.windowView!!.layoutDirection == View.LAYOUT_DIRECTION_LTR
             val w = if (bridge.width > 0) bridge.width else mConsoleFloaty.defaultViewWidth.roundToInt()
             val h = if (bridge.height > 0) bridge.height else mConsoleFloaty.defaultViewHeight.roundToInt()
             val pt = AndroidPoint(
@@ -586,58 +588,82 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
     fun getGravity() = configurator.gravity
 
     @ScriptInterface
-    fun setTitleTextSize(size: Float) = runWithWindow({ configurator.setTitleTextSize(size) }) {
-        mConsoleFloaty.setTitleTextSize(size)
+    fun setTitleTextSize(size: Float) {
+        configurator.setTitleTextSize(size)
+        uiHandler.post {
+            mConsoleFloaty.setTitleTextSize(size)
+        }
     }
 
     @ScriptInterface
     fun getTitleTextSize() = mConsoleFloaty.getTitleTextSize()
 
     @ScriptInterface
-    fun setTitleTextColor(color: Int) = runWithWindow({ configurator.setTitleTextColor(color) }) {
-        mConsoleFloaty.setTitleTextColor(color)
+    fun setTitleTextColor(color: Int) {
+        configurator.setTitleTextColor(color)
+        uiHandler.post {
+            mConsoleFloaty.setTitleTextColor(color)
+        }
     }
 
     @ScriptInterface
     fun getTitleTextColor() = mConsoleFloaty.getTitleTextColor()
 
     @ScriptInterface
-    fun setTitleBackgroundColor(@ColorInt color: Int) = runWithWindow({ configurator.setTitleBackgroundColor(color) }) {
-        mConsoleFloaty.setTitleBackgroundColor(getTitleBackgroundColor())
+    fun setTitleBackgroundColor(@ColorInt color: Int) {
+        configurator.setTitleBackgroundColor(color)
+        uiHandler.post {
+            mConsoleFloaty.setTitleBackgroundColor(getTitleBackgroundColor())
+        }
     }
 
     @ScriptInterface
     fun getTitleBackgroundColor() = configurator.titleBackgroundColor
 
     @ScriptInterface
-    fun setTitleBackgroundTint(@ColorInt tint: Int) = runWithWindow({ configurator.setTitleBackgroundTint(tint) }) {
-        mConsoleFloaty.setTitleBackgroundTint(tint)
+    fun setTitleBackgroundTint(@ColorInt tint: Int) {
+        configurator.setTitleBackgroundTint(tint)
+        uiHandler.post {
+            mConsoleFloaty.setTitleBackgroundTint(tint)
+        }
     }
 
     @ScriptInterface
-    fun setTitleBackgroundAlpha(alpha: Int) = runWithWindow({ configurator.setTitleBackgroundAlpha(alpha) }) {
-        mConsoleFloaty.setTitleBackgroundAlpha(alpha)
+    fun setTitleBackgroundAlpha(alpha: Int) {
+        configurator.setTitleBackgroundAlpha(alpha)
+        uiHandler.post {
+            mConsoleFloaty.setTitleBackgroundAlpha(alpha)
+        }
     }
 
     @ScriptInterface
     fun resetTitleBackgroundAlpha() = setTitleBackgroundAlpha(-1)
 
     @ScriptInterface
-    fun setTitleIconsTint(color: Int) = runWithWindow({ configurator.setTitleIconsTint(color) }) {
-        mConsoleFloaty.setTitleIconsTint(color)
+    fun setTitleIconsTint(color: Int) {
+        configurator.setTitleIconsTint(color)
+        uiHandler.post {
+            mConsoleFloaty.setTitleIconsTint(color)
+        }
     }
 
     @ScriptInterface
-    fun setContentTextSize(size: Float) = runWithWindow({ configurator.setContentTextSize(size) }) {
-        getFloatingConsoleView()?.textSize = size
+    fun setContentTextSize(size: Float) {
+        configurator.setContentTextSize(size)
+        uiHandler.post {
+            getFloatingConsoleView()?.textSize = size
+        }
     }
 
     @ScriptInterface
     fun getContentTextSize() = getFloatingConsoleView()?.textSize ?: 0f
 
     @ScriptInterface
-    fun setContentTextColors(colors: Array<out Int?>) = runWithWindow({ configurator.setContentTextColors(colors) }) {
-        getFloatingConsoleView()?.setTextColors(colors)
+    fun setContentTextColors(colors: Array<out Int?>) {
+        configurator.setContentTextColors(colors)
+        uiHandler.post {
+            getFloatingConsoleView()?.setTextColors(colors)
+        }
     }
 
     @ScriptInterface
@@ -646,21 +672,30 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
     }
 
     @ScriptInterface
-    fun setContentBackgroundColor(@ColorInt color: Int) = runWithWindow({ configurator.setContentBackgroundColor(color) }) {
-        setContentViewBackgroundColor(getFloatingConsoleView(), getContentBackgroundColor())
+    fun setContentBackgroundColor(@ColorInt color: Int) {
+        configurator.setContentBackgroundColor(color)
+        uiHandler.post {
+            setContentViewBackgroundColor(getFloatingConsoleView(), getContentBackgroundColor())
+        }
     }
 
     @ScriptInterface
     fun getContentBackgroundColor() = configurator.contentBackgroundColor
 
     @ScriptInterface
-    fun setContentBackgroundTint(@ColorInt tint: Int) = runWithWindow({ configurator.setContentBackgroundTint(tint) }) {
-        setContentViewBackgroundColor(getFloatingConsoleView(), getContentBackgroundColor())
+    fun setContentBackgroundTint(@ColorInt tint: Int) {
+        configurator.setContentBackgroundTint(tint)
+        enqueueMutation(Stage.VIEW_ATTACHED) {
+            setContentViewBackgroundColor(getFloatingConsoleView(), getContentBackgroundColor())
+        }
     }
 
     @ScriptInterface
-    fun setContentBackgroundAlpha(alpha: Int) = runWithWindow({ configurator.setContentBackgroundAlpha(alpha) }) {
-        setContentViewBackgroundColor(getFloatingConsoleView(), getContentBackgroundColor())
+    fun setContentBackgroundAlpha(alpha: Int) {
+        configurator.setContentBackgroundAlpha(alpha)
+        enqueueMutation(Stage.VIEW_ATTACHED) {
+            setContentViewBackgroundColor(getFloatingConsoleView(), getContentBackgroundColor())
+        }
     }
 
     @ScriptInterface
@@ -719,11 +754,9 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
         else -> configurator.exitOnCloseTimeout
     }
 
-    fun submitInput(input: CharSequence) = mInput.offer(input.toString())
+    fun expand() = uiHandler.post { mFloatyWindow.expand() }
 
-    fun expand() = uiHandler.post { mFloatyWindow?.expand() }
-
-    fun collapse() = uiHandler.post { mFloatyWindow?.collapse() }
+    fun collapse() = uiHandler.post { mFloatyWindow.collapse() }
 
     @JvmOverloads
     fun hideDelayed(exitOnCloseTimeout: Long = configurator.exitOnCloseTimeout) {
@@ -734,6 +767,9 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
                     if (!isShowing) {
                         cancel()
                     } else when (/* remaining = */ ceil(millisUntilFinished / 1.0e3).toInt()) {
+                        9 -> setCloseButton(R.drawable.ic_looks_9_white_48dp)
+                        8 -> setCloseButton(R.drawable.ic_looks_8_white_48dp)
+                        7 -> setCloseButton(R.drawable.ic_looks_7_white_48dp)
                         6 -> setCloseButton(R.drawable.ic_looks_6_white_48dp)
                         5 -> setCloseButton(R.drawable.ic_looks_5_white_48dp)
                         4 -> setCloseButton(R.drawable.ic_looks_4_white_48dp)
@@ -759,45 +795,7 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
 
     private fun getFloatingConsoleView() = mConsoleView?.get() as? FloatingConsoleView
 
-    private fun waitForConsoleView() {
-        synchronized(mLockConsoleView) {
-            try {
-                mLockConsoleView.wait()
-            } catch (_: InterruptedException) {
-                throw ScriptInterruptedException()
-            }
-        }
-    }
-
     private fun setCloseButton(resId: Int) = mConsoleFloaty.setCloseButton(resId)
-
-    private fun runWithWindow(r: Runnable) {
-        mFloatyWindow ?: return
-        uiHandler.post(r)
-    }
-
-    private fun runWithWindow(initializer: () -> Unit, r: Runnable) {
-        initializer()
-        runWithWindow(r)
-    }
-
-    private fun trySetting(setter: () -> Unit) {
-        val f = Runnable {
-            synchronized(lock) {
-                var retries = 5
-                while (retries-- > 0) {
-                    try {
-                        setter()
-                        break
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
-                    runCatching { Thread.sleep(mDefaultSafeDelay) }
-                }
-            }
-        }
-        if (isShowing) f.run() else mFloatyWindow!!.addOnViewAttachedTask { f.run() }
-    }
 
     private fun setContentViewBackgroundColor(view: FloatingConsoleView?, color: Int) {
         view?.apply { background = DrawableUtils.setDrawableColorFilterSrc(background, color) }
@@ -807,6 +805,46 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
         alpha < 0 -> context.getColor(defaultRes).alpha
         else -> alpha
     }
+
+    private fun advanceStage(newStage: Stage) {
+        if (newStage.ordinal <= mStage.ordinal) return
+        mStage = newStage
+        drainMutations()
+    }
+
+    private fun enqueueMutation(required: Stage, action: () -> Unit) {
+        uiHandler.post {
+            if (mStage.ordinal >= required.ordinal) {
+                runCatching { action() }.onFailure { it.printStackTrace() }
+            } else {
+                mPendingMutations.addLast(Mutation(required, action))
+            }
+        }
+    }
+
+    private fun drainMutations() {
+        if (mIsDraining) return
+        mIsDraining = true
+        try {
+            while (mPendingMutations.isNotEmpty()) {
+                val m = mPendingMutations.first()
+                if (mStage.ordinal >= m.required.ordinal) {
+                    mPendingMutations.removeFirst()
+                    runCatching { m.action() }.onFailure { it.printStackTrace() }
+                } else break
+            }
+        } finally {
+            mIsDraining = false
+        }
+    }
+
+    /**
+     * Lock-free phased mutation queue.
+     * zh-CN: 无锁阶段化变更队列.
+     */
+    private enum class Stage { INIT, WINDOW_CREATED, VIEW_ATTACHED, LAYOUT_DONE }
+
+    private data class Mutation(val required: Stage, val action: () -> Unit)
 
     interface LogListener {
         fun onNewLog(logEntry: LogEntry?)

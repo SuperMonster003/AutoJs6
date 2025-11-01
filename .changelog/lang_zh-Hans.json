@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.7.0": {
-      "released_date": "2025/10/27",
+      "released_date": "2025/11/01",
       "feature": [
         "cvt 模块, 用于数据单位转换 (参阅 项目文档 > [单位转换](https://docs.autojs6.com/#/cvt))",
         "fmt 模块, 用于数据格式化 (参阅 项目文档 > [格式化](https://docs.autojs6.com/#/fmt))",
@@ -58,6 +58,8 @@
         "console.log 等方法打印全局对象 (images, app, ocr 等) 时支持显示详细信息",
         "android.graphics.Paint#setColor 支持正常解析 ColorInt/ColorHex/ColorName 等颜色参数",
         "内置模块相关方法实参类型的异常消息增加类型摘要信息",
+        "控制台浮动窗口倒计时起始值由 6 秒增加到 9 秒",
+        "控制台浮动窗口内部实现进行无锁化及队列化处理以提升其参数设置效率与成功率",
         "文件管理器浮动按钮展开后点击菜单项时优化菜单收起时机",
         "崩溃报告页面支持双指缩放调整字体大小并添加常用功能按钮",
         "应用启动器图标支持自适应图标特性 _[`issue #405`](http://issues.autojs6.com/405)_",

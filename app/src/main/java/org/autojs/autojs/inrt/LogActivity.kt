@@ -32,7 +32,6 @@ class LogActivity : BaseActivity() {
             }
             binding.console.apply {
                 setConsole(AutoJs.instance.globalConsole as ConsoleImpl)
-                findViewById<View>(R.id.input_container).visibility = View.GONE
             }
         }
     }

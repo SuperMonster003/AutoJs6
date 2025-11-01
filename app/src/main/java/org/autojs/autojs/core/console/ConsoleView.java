@@ -11,10 +11,7 @@ import android.view.LayoutInflater;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -22,7 +19,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import org.autojs.autojs.theme.ThemeColorHelper;
 import org.autojs.autojs.tool.MapBuilder;
-import org.autojs.autojs.ui.enhancedfloaty.ResizableExpandableFloatyWindow;
 import org.autojs.autojs.ui.log.LogActivity;
 import org.autojs.autojs.util.DisplayUtils;
 import org.autojs.autojs.util.ViewUtils;
@@ -45,9 +41,6 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
     private ConsoleImpl mConsole;
     private WeakReference<LogActivity> mLogActivity = null;
     private RecyclerView mLogListRecyclerView;
-    private EditText mEditText;
-    private LinearLayout mInputContainer;
-    private ResizableExpandableFloatyWindow mWindow;
     private boolean mShouldStopRefresh = false;
     private final ArrayList<ConsoleImpl.LogEntry> mLogEntries = new ArrayList<>();
 
@@ -128,9 +121,6 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
             mScaleGestureDetector.onTouchEvent(event);
             return !mScaleGestureDetector.isInProgress() && super.onTouchEvent(event);
         });
-
-        initEditText();
-        initSubmitButton();
 
         if (isExcludeFromNavigationBar) {
             ViewUtils.excludePaddingClippableViewFromBottomNavigationBar(mLogListRecyclerView);
@@ -249,44 +239,9 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
                 .build();
     }
 
-    private void initSubmitButton() {
-        final Button submit = findViewById(R.id.submit);
-        submit.setOnClickListener(v -> {
-            CharSequence input = mEditText.getText();
-            submitInput(input);
-        });
-    }
-
-    private void submitInput(CharSequence input) {
-        if (android.text.TextUtils.isEmpty(input)) {
-            return;
-        }
-        if (mConsole.submitInput(input)) {
-            mEditText.setText("");
-        }
-    }
-
-    private void initEditText() {
-        mEditText = findViewById(R.id.input);
-        mEditText.setFocusableInTouchMode(true);
-        mInputContainer = findViewById(R.id.input_container);
-        OnClickListener listener = v -> {
-            if (mWindow != null) {
-                mWindow.requestWindowFocus();
-                mEditText.requestFocus();
-            }
-        };
-        mEditText.setOnClickListener(listener);
-        mInputContainer.setOnClickListener(listener);
-    }
-
     public void setConsole(ConsoleImpl console) {
         mConsole = console;
         mConsole.setConsoleView(this);
-    }
-
-    public void setInputContainerVisibility(int visibility) {
-        mInputContainer.setVisibility(visibility);
     }
 
     public void setLogActivity(LogActivity activity) {
@@ -359,18 +314,6 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
             Objects.requireNonNull(mLogListRecyclerView.getAdapter()).notifyItemRangeInserted(oldSize, size - 1);
             mLogListRecyclerView.scrollToPosition(size - 1);
         }
-    }
-
-    public void setWindow(ResizableExpandableFloatyWindow window) {
-        mWindow = window;
-    }
-
-    public void showEditText() {
-        post(() -> {
-            mWindow.requestWindowFocus();
-            // mInputContainer.setVisibility(VISIBLE);
-            mEditText.requestFocus();
-        });
     }
 
     private class ViewHolder extends RecyclerView.ViewHolder {

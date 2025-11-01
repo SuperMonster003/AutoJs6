@@ -43,7 +43,7 @@
                         android:paddingBottom="8dp"
                         android:paddingStart="8dp"
                         android:paddingEnd="8dp"
-                        android:paddingTop="24dp"
+                        android:paddingTop="20dp"
                         android:scaleType="center"
                         android:src="@drawable/ic_remove_white_24dp"
                         app:tint="@android:color/white" />
