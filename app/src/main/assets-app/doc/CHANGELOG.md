@@ -6,7 +6,7 @@
 
 # v6.7.0
 
-###### 2025/10/27
+###### 2025/11/01
 
 * `新增` cvt 模块, 用于数据单位转换 (参阅 项目文档 > [单位转换](https://docs.autojs6.com/#/cvt))
 * `新增` fmt 模块, 用于数据格式化 (参阅 项目文档 > [格式化](https://docs.autojs6.com/#/fmt))
@@ -15,22 +15,27 @@
 * `新增` cvt.bytes 方法, 用于字节数据单位转换 (参阅 项目文档 > [单位转换](https://docs.autojs6.com/#/cvt))
 * `新增` fmt.bytes 方法, 用于字节数据格式化 (参阅 项目文档 > [数据格式化](https://docs.autojs6.com/#/fmt))
 * `新增` s13n.bytes 方法, 用于标准化字节数据 (参阅 项目文档 > [标准化](https://docs.autojs6.com/#/s13n))
-* `新增` UiObject#isShifted 方法, 用于检测控件位置变化
 * `新增` device.getSharedDeviceId 方法, 用于跨应用获取统一共享设备 ID _[`issue #455`](http://issues.autojs6.com/455)_
+* `新增` ui.navigationBarHeight 属性 (getter), 用于获取导航栏高度 _[`issue #456`](http://issues.autojs6.com/456)_
 * `新增` http 模块请求相关方法获取的 body 对象增加 stream/saveToFile/close 方法 _[`issue #452`](http://issues.autojs6.com/452)_
 * `新增` http 模块请求相关方法支持缓存控制选项参数 (cacheBody/bodyCacheThresholdBytes)
 * `新增` http 模块请求相关方法支持不安全选项参数 (isInsecure/insecure), 用于忽略证书相关异常 _[`issue #417`](http://issues.autojs6.com/417)_
 * `新增` http 模块请求相关方法支持 options.client 选项, 用于配置 OkHttpClient.Builder (如 followRedirects 等) _[`issue #454`](http://issues.autojs6.com/454)_
 * `新增` runtime.(set/is)JavaPrimitiveWrap 方法, 用于设置或获取 Java 原始类型包装策略 _[`issue #435`](http://issues.autojs6.com/435)_
+* `新增` autojs.(restart/exit) 方法, 用于重启或退出 AutoJs6 应用
+* `新增` UiObject#isShifted 方法, 用于检测控件位置变化
 * `新增` structuredClone 全局方法, 用于深拷贝 JavaScript 对象 (参阅 [MDN](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/structuredClone))
-* `新增` 设置页面支持 "应用启动器图标" 设置选项 _[`issue #405`](http://issues.autojs6.com/405)_
-* `新增` 设置页面支持 "Java 原始类型包装" 设置选项 _[`issue #435`](http://issues.autojs6.com/435)_
+* `新增` 设置页面增加 "Java 原始类型包装" 设置选项 _[`issue #435`](http://issues.autojs6.com/435)_
+* `新增` 设置页面增加 "定时任务调度引擎" 设置选项, 支持 AlarmManager/WorkManager/JobScheduler _[`issue #457`](http://issues.autojs6.com/457)_ _[`issue #388`](http://issues.autojs6.com/388)_ _[`issue #163`](http://issues.autojs6.com/163)_ _[`issue #53`](http://issues.autojs6.com/53)_ _[`issue #21`](http://issues.autojs6.com/21)_
+* `新增` 设置页面增加 "应用启动器图标" 设置选项, 支持自适应图标/透明背景图标 _[`issue #405`](http://issues.autojs6.com/405)_
 * `新增` Scrapers 工具 (run-scrapers.mjs) 用于自动更新 Gradle 构建脚本结构化数据/README 通用数据/README 模板数据等
 * `修复` isJavaClass/isJavaPackage 等全局方法无效的问题
 * `修复` timers.keepAlive 方法 timeout 参数功能无效的问题
 * `修复` floaty.window/rawWindow 方法无法接受字符串参数的问题
 * `修复` util.class[Name]/getClass[Name] 可能返回错误结果的问题
 * `修复` threads.disposable() 返回的对象在存取数据时可能被意外装箱的问题 _[`issue #435`](http://issues.autojs6.com/435)_
+* `修复` console.build 方法多次调用时, 日志浮动窗口样式选项未能正常重置的问题
+* `修复` console.build 方法的 (title/content)BackgroundColor 选项导致透明度或着色选项被覆盖的问题 _[`issue #458`](http://issues.autojs6.com/458)_
 * `修复` console/toast 等方法显示 Java Double 时可能丢失末尾零的问题
 * `修复` 无法使用 console/toast 等方法显示 BigInt 数据类型的问题
 * `修复` 部分全局对象可能丢失 JavaScript 原型属性及方法的问题
@@ -51,9 +56,12 @@
 * `修复` 崩溃报告页面复制详细信息功能失效的问题
 * `修复` APK 文件类型信息对话框可能无法获取应用名称及 SDK 信息的问题
 * `修复` 构建工具启用 isCleanup[Paddle/Rapid]Ocr 配置选项时无法正常完成 Rebuild Project 任务的问题
+* `优化` ui.statusBarHeight 属性 (getter) 增强一定程度的兼容性
 * `优化` console.log 等方法打印全局对象 (images, app, ocr 等) 时支持显示详细信息
 * `优化` android.graphics.Paint#setColor 支持正常解析 ColorInt/ColorHex/ColorName 等颜色参数
 * `优化` 内置模块相关方法实参类型的异常消息增加类型摘要信息
+* `优化` 控制台浮动窗口倒计时起始值由 6 秒增加到 9 秒
+* `优化` 控制台浮动窗口内部实现进行无锁化及队列化处理以提升其参数设置效率与成功率
 * `优化` 文件管理器浮动按钮展开后点击菜单项时优化菜单收起时机
 * `优化` 崩溃报告页面支持双指缩放调整字体大小并添加常用功能按钮
 * `优化` 应用启动器图标支持自适应图标特性 _[`issue #405`](http://issues.autojs6.com/405)_
@@ -69,6 +77,7 @@
 * `依赖` 本地化 Expandable Layout 版本 1.6.0
 * `依赖` 本地化 Recyclerview Flexible Divider 版本 1.4.0
 * `依赖` 附加 Androidx Core (KTX) 版本 1.15.0
+* `依赖` 附加 Androidx Work Runtime 版本 2.11.0
 * `依赖` 升级 Android SDK 版本 35 -> 36
 * `依赖` 升级 Gradle 版本 8.14 -> 8.14.3
 * `依赖` 升级 Desugar JDK Libs 版本 2.0.4 -> 2.1.5
