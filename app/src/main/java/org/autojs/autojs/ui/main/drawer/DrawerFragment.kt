@@ -39,6 +39,8 @@ import org.autojs.autojs.ui.main.MainActivity
 import org.autojs.autojs.ui.settings.AboutActivity
 import org.autojs.autojs.ui.settings.PreferencesActivity
 import org.autojs.autojs.util.DisplayUtils
+import org.autojs.autojs.util.IntentUtils.App.exit
+import org.autojs.autojs.util.IntentUtils.App.restart
 import org.autojs.autojs.util.NetworkUtils
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.MODE
@@ -414,8 +416,8 @@ open class DrawerFragment : Fragment() {
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             )
         }
-        binding.restart.setOnClickListener { mActivity.rebirth() }
-        binding.exit.setOnClickListener { mActivity.exitCompletely() }
+        binding.restart.setOnClickListener { restart(mActivity, mActivity::beforeExit) }
+        binding.exit.setOnClickListener { exit(mActivity, mActivity::beforeExit) }
     }
 
     override fun onResume() {

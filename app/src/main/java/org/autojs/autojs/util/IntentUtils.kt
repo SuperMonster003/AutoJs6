@@ -1,17 +1,31 @@
 package org.autojs.autojs.util
 
+import android.app.AlarmManager
+import android.app.PendingIntent
 import android.content.ActivityNotFoundException
 import android.content.Context
+import android.content.Context.ALARM_SERVICE
 import android.content.Intent
 import android.net.Uri
+import android.os.Process
+import android.os.SystemClock
 import android.provider.OpenableColumns
 import android.provider.Settings
 import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import com.google.android.material.snackbar.Snackbar
+import com.huaban.analysis.jieba.CharsDictionaryDatabase
+import com.huaban.analysis.jieba.PhrasesDictionaryDatabase
+import com.huaban.analysis.jieba.WordDictionaryDatabase
+import org.autojs.autojs.AutoJs
+import org.autojs.autojs.core.image.capture.ScreenCapturerForegroundService
 import org.autojs.autojs.external.fileprovider.AppFileProvider
 import org.autojs.autojs.runtime.api.Mime
+import org.autojs.autojs.runtime.api.WrappedShizuku
+import org.autojs.autojs.ui.enhancedfloaty.FloatyService
+import org.autojs.autojs.ui.floating.FloatyWindowManger
 import org.autojs.autojs6.R
 import java.io.File
 
@@ -312,6 +326,64 @@ object IntentUtils {
     interface ExceptionHolder {
         fun show(message: String? = null)
         fun show(messageRes: Int)
+    }
+
+    object App {
+
+        @JvmStatic
+        @JvmOverloads
+        fun restart(context: Context, extraActions: (() -> Unit)? = null) {
+            val launchIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            }
+
+            when (context) {
+                is AppCompatActivity -> {
+                    context.startActivity(launchIntent)
+                }
+                else -> {
+                    val pendingIntent = PendingIntent.getActivity(
+                        /* context = */ context,
+                        /* requestCode = */ 1001,
+                        /* intent = */ launchIntent,
+                        /* flags = */ PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+                    )
+                    val am = context.getSystemService(ALARM_SERVICE) as AlarmManager
+                    am.setExactAndAllowWhileIdle(
+                        /* type = */ AlarmManager.ELAPSED_REALTIME,
+                        /* triggerAtMillis = */ SystemClock.elapsedRealtime() + 300L,
+                        /* operation = */ pendingIntent,
+                    )
+                }
+            }
+
+            exit(context, extraActions)
+        }
+
+        @JvmStatic
+        @JvmOverloads
+        fun exit(context: Context, extraActions: (() -> Unit)? = null) {
+            FloatyWindowManger.hideCircularMenuAndSaveState()
+
+            FloatyService.stopService()
+            ScreenCapturerForegroundService.stopService()
+
+            AutoJs.instance.scriptEngineService.stopAll()
+            AutoJs.instance.clear()
+
+            org.autojs.autojs.App.app.clear()
+
+            WordDictionaryDatabase.getInstance(context.applicationContext).close()
+            CharsDictionaryDatabase.getInstance(context.applicationContext).close()
+            PhrasesDictionaryDatabase.getInstance(context.applicationContext).close()
+
+            WrappedShizuku.onDestroy()
+
+            extraActions?.invoke()
+
+            Process.killProcess(Process.myPid())
+        }
+
     }
 
 }
