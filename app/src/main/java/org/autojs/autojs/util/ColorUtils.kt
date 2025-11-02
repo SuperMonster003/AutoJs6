@@ -14,6 +14,7 @@ import org.autojs.autojs.core.image.ColorTable
 import org.autojs.autojs.theme.ThemeColor
 import org.autojs.autojs.theme.ThemeColorManager
 import java.math.RoundingMode
+import kotlin.math.abs
 import kotlin.math.roundToInt
 import kotlin.text.RegexOption.IGNORE_CASE
 
@@ -48,11 +49,18 @@ object ColorUtils {
 
     @JvmStatic
     @JvmOverloads
-    fun toUnit8(component: Double, takeNumOneAsPercent: Boolean = false) = when {
-        component < 1 -> (component * 255).roundToInt()
-        component == 1.0 && takeNumOneAsPercent -> 255
-        else -> 255.coerceAtMost(component.roundToInt())
+    fun toUint8(component: Double, takeNumOneAsPercent: Boolean = false): Int {
+        val epsilon = 1e-9
+        return when {
+            component == -1.0 -> 255
+            component < 1.0 - epsilon -> (component * 255.0).roundToInt().coerceIn(0, 255)
+            abs(component - 1.0) <= epsilon -> if (takeNumOneAsPercent) 255 else 1
+            else -> component.roundToInt().coerceIn(0, 255)
+        }
     }
+
+    @JvmStatic
+    fun toFraction(value: Number) = value.toDouble().coerceIn(0.0, 255.0) / 255.0
 
     @JvmStatic
     fun toInt(num: Number) = toInt(toHex(num))
