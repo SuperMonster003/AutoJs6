@@ -13,9 +13,13 @@ import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.content.res.Resources
 import android.graphics.ColorFilter
 import android.graphics.PorterDuff
+import android.graphics.PorterDuff.Mode.SRC_IN
 import android.graphics.PorterDuffColorFilter
 import android.graphics.Rect
+import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
+import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.ShapeDrawable
 import android.os.Build
 import android.os.Looper
 import android.util.DisplayMetrics
@@ -42,6 +46,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
+import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -94,6 +99,33 @@ object ViewUtils {
     @Suppress("FunctionName")
     fun <V : View?> `$`(view: View, @IdRes resId: Int): V {
         return view.findViewById(resId)
+    }
+
+    @JvmStatic
+    @JvmOverloads
+    fun setBackgroundColor(view: View?, color: Int, reAssignment: Boolean = true) {
+        view ?: return
+        val bg = view.background?.mutate()
+        when (bg) {
+            is GradientDrawable -> {
+                bg.clearColorFilter()
+                bg.setColor(color)
+            }
+            is ShapeDrawable -> {
+                bg.clearColorFilter()
+                bg.paint.color = color
+            }
+            is ColorDrawable -> {
+                bg.clearColorFilter()
+                bg.color = color
+            }
+            else -> bg?.let {
+                it.clearColorFilter()
+                DrawableCompat.setTintMode(it, SRC_IN)
+                DrawableCompat.setTint(it, color)
+            }
+        }
+        if (reAssignment) view.background = bg
     }
 
     @JvmStatic

@@ -3,7 +3,7 @@ package org.autojs.autojs.core.console
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
+import android.content.res.ColorStateList
 import android.net.Uri
 import android.os.CountDownTimer
 import android.util.Log
@@ -18,13 +18,11 @@ import android.view.Gravity.START
 import android.view.Gravity.TOP
 import android.view.View
 import androidx.annotation.ColorInt
-import androidx.core.graphics.alpha
-import androidx.core.graphics.blue
-import androidx.core.graphics.green
-import androidx.core.graphics.red
+import androidx.core.view.ViewCompat
 import androidx.core.view.doOnLayout
 import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
+import org.autojs.autojs.annotation.OmniColor
 import org.autojs.autojs.annotation.ScriptInterface
 import org.autojs.autojs.core.pref.Language
 import org.autojs.autojs.core.ui.inflater.util.Gravities
@@ -33,13 +31,14 @@ import org.autojs.autojs.permission.DisplayOverOtherAppsPermission
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.AbstractConsole
 import org.autojs.autojs.runtime.api.Mime
+import org.autojs.autojs.runtime.api.augment.colors.Colors
 import org.autojs.autojs.tool.UiHandler
 import org.autojs.autojs.ui.common.NotAskAgainDialog
 import org.autojs.autojs.ui.enhancedfloaty.FloatyService
 import org.autojs.autojs.ui.enhancedfloaty.ResizableExpandableFloatyWindow
 import org.autojs.autojs.ui.enhancedfloaty.gesture.DragGesture
 import org.autojs.autojs.util.ClipboardUtils
-import org.autojs.autojs.util.DrawableUtils
+import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
@@ -381,11 +380,19 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
         setGravity(getGravity())
         configurator.titleTextSize?.let { setTitleTextSize(it) }
         configurator.titleTextColor?.let { setTitleTextColor(it) }
+
+        setTitleBackgroundAlpha(getTitleBackgroundAlpha())
+        setTitleBackgroundTint(getTitleBackgroundTint())
         setTitleBackgroundColor(getTitleBackgroundColor())
+
         configurator.titleIconsTint?.let { setTitleIconsTint(it) }
         configurator.contentTextSize?.let { setContentTextSize(it) }
         configurator.contentTextColors?.let { setContentTextColors(it) }
+
+        setContentBackgroundAlpha(getContentBackgroundAlpha())
+        setContentBackgroundTint(getContentBackgroundTint())
         setContentBackgroundColor(getContentBackgroundColor())
+
         setTouchable(isTouchable())
     }
 
@@ -582,10 +589,13 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
     }
 
     @ScriptInterface
+    fun getGravity() = configurator.gravity
+
+    @ScriptInterface
     fun setGravity(gravity: String) = setGravity(Gravities.parse(gravity))
 
     @ScriptInterface
-    fun getGravity() = configurator.gravity
+    fun getTitleTextSize() = mConsoleFloaty.getTitleTextSize()
 
     @ScriptInterface
     fun setTitleTextSize(size: Float) {
@@ -596,7 +606,7 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
     }
 
     @ScriptInterface
-    fun getTitleTextSize() = mConsoleFloaty.getTitleTextSize()
+    fun getTitleTextColor() = mConsoleFloaty.getTitleTextColor()
 
     @ScriptInterface
     fun setTitleTextColor(color: Int) {
@@ -607,45 +617,53 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
     }
 
     @ScriptInterface
-    fun getTitleTextColor() = mConsoleFloaty.getTitleTextColor()
+    fun getTitleBackgroundColor() = configurator.titleBackgroundColor
 
     @ScriptInterface
     fun setTitleBackgroundColor(@ColorInt color: Int) {
         configurator.setTitleBackgroundColor(color)
-        uiHandler.post {
-            mConsoleFloaty.setTitleBackgroundColor(getTitleBackgroundColor())
+        enqueueMutation(Stage.VIEW_ATTACHED) {
+            mConsoleFloaty.titleBarView?.let { view ->
+                ViewUtils.setBackgroundColor(view, configurator.titleBackgroundColor)
+            }
         }
     }
 
     @ScriptInterface
-    fun getTitleBackgroundColor() = configurator.titleBackgroundColor
+    fun getTitleBackgroundTint() = configurator.titleBackgroundTint
 
     @ScriptInterface
-    fun setTitleBackgroundTint(@ColorInt tint: Int) {
+    fun setTitleBackgroundTint(@ColorInt tint: Int?) {
         configurator.setTitleBackgroundTint(tint)
-        uiHandler.post {
-            mConsoleFloaty.setTitleBackgroundTint(tint)
+        enqueueMutation(Stage.VIEW_ATTACHED) {
+            mConsoleFloaty.setTitleBackgroundTint(configurator.titleBackgroundTint)
         }
     }
 
     @ScriptInterface
-    fun setTitleBackgroundAlpha(alpha: Int) {
+    fun getTitleBackgroundAlpha() = configurator.titleBackgroundAlpha
+
+    @ScriptInterface
+    fun setTitleBackgroundAlpha(alpha: Double?) {
         configurator.setTitleBackgroundAlpha(alpha)
-        uiHandler.post {
-            mConsoleFloaty.setTitleBackgroundAlpha(alpha)
+        enqueueMutation(Stage.VIEW_ATTACHED) {
+            mConsoleFloaty.setTitleBackgroundAlpha(configurator.titleBackgroundAlpha.toFloat())
         }
     }
 
     @ScriptInterface
-    fun resetTitleBackgroundAlpha() = setTitleBackgroundAlpha(-1)
+    fun resetTitleBackgroundAlpha() = setTitleBackgroundAlpha(DEFAULT_ALPHA)
 
     @ScriptInterface
-    fun setTitleIconsTint(color: Int) {
+    fun setTitleIconsTint(color: Int?) {
         configurator.setTitleIconsTint(color)
-        uiHandler.post {
+        enqueueMutation(Stage.VIEW_ATTACHED) {
             mConsoleFloaty.setTitleIconsTint(color)
         }
     }
+
+    @ScriptInterface
+    fun getContentTextSize() = getFloatingConsoleView()?.textSize ?: 0f
 
     @ScriptInterface
     fun setContentTextSize(size: Float) {
@@ -656,7 +674,9 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
     }
 
     @ScriptInterface
-    fun getContentTextSize() = getFloatingConsoleView()?.textSize ?: 0f
+    fun getContentTextColors(): Map<Int, Int> {
+        return getFloatingConsoleView()?.textColors ?: emptyMap()
+    }
 
     @ScriptInterface
     fun setContentTextColors(colors: Array<out Int?>) {
@@ -667,39 +687,43 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
     }
 
     @ScriptInterface
-    fun getContentTextColors(): Map<Int, Int> {
-        return getFloatingConsoleView()?.textColors ?: emptyMap()
-    }
+    fun getContentBackgroundColor() = configurator.contentBackgroundColor
 
     @ScriptInterface
     fun setContentBackgroundColor(@ColorInt color: Int) {
         configurator.setContentBackgroundColor(color)
-        uiHandler.post {
-            setContentViewBackgroundColor(getFloatingConsoleView(), getContentBackgroundColor())
+        enqueueMutation(Stage.VIEW_ATTACHED) {
+            ViewUtils.setBackgroundColor(getFloatingConsoleView(), configurator.contentBackgroundColor)
         }
     }
 
     @ScriptInterface
-    fun getContentBackgroundColor() = configurator.contentBackgroundColor
+    fun getContentBackgroundTint() = configurator.contentBackgroundTint
 
     @ScriptInterface
-    fun setContentBackgroundTint(@ColorInt tint: Int) {
+    fun setContentBackgroundTint(@ColorInt tint: Int?) {
         configurator.setContentBackgroundTint(tint)
         enqueueMutation(Stage.VIEW_ATTACHED) {
-            setContentViewBackgroundColor(getFloatingConsoleView(), getContentBackgroundColor())
+            val view = getFloatingConsoleView() ?: return@enqueueMutation
+            view.background?.mutate()?.clearColorFilter()
+            val tint = configurator.contentBackgroundTint
+            ViewCompat.setBackgroundTintList(view, tint?.let { ColorStateList.valueOf(it) })
         }
     }
 
     @ScriptInterface
-    fun setContentBackgroundAlpha(alpha: Int) {
+    fun getContentBackgroundAlpha() = configurator.contentBackgroundAlpha
+
+    @ScriptInterface
+    fun setContentBackgroundAlpha(alpha: Double?) {
         configurator.setContentBackgroundAlpha(alpha)
         enqueueMutation(Stage.VIEW_ATTACHED) {
-            setContentViewBackgroundColor(getFloatingConsoleView(), getContentBackgroundColor())
+            getFloatingConsoleView()?.background?.mutate()?.alpha = ColorUtils.toUint8(configurator.contentBackgroundAlpha, true)
         }
     }
 
     @ScriptInterface
-    fun resetContentBackgroundAlpha() = setContentBackgroundAlpha(-1)
+    fun resetContentBackgroundAlpha() = setContentBackgroundAlpha(DEFAULT_ALPHA)
 
     @ScriptInterface
     fun setTextSize(size: Float) {
@@ -726,7 +750,7 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
     }
 
     @ScriptInterface
-    fun setBackgroundAlpha(alpha: Int) {
+    fun setBackgroundAlpha(alpha: Double?) {
         setTitleBackgroundAlpha(alpha)
         setContentBackgroundAlpha(alpha)
     }
@@ -760,7 +784,7 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
 
     @JvmOverloads
     fun hideDelayed(exitOnCloseTimeout: Long = configurator.exitOnCloseTimeout) {
-        configurator.initExitOnClose()
+        configurator.resetExitOnClose()
         uiHandler.post {
             mCountDownTimer = object : CountDownTimer(exitOnCloseTimeout, 500) {
                 override fun onTick(millisUntilFinished: Long) {
@@ -797,14 +821,7 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
 
     private fun setCloseButton(resId: Int) = mConsoleFloaty.setCloseButton(resId)
 
-    private fun setContentViewBackgroundColor(view: FloatingConsoleView?, color: Int) {
-        view?.apply { background = DrawableUtils.setDrawableColorFilterSrc(background, color) }
-    }
-
-    private fun parseAlpha(alpha: Int, defaultRes: Int) = when {
-        alpha < 0 -> context.getColor(defaultRes).alpha
-        else -> alpha
-    }
+    private fun parseAlpha(alpha: Double?) = ColorUtils.toUint8(alpha ?: DEFAULT_ALPHA, true) / 255.0
 
     private fun advanceStage(newStage: Stage) {
         if (newStage.ordinal <= mStage.ordinal) return
@@ -883,17 +900,14 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
             private set
 
         @Volatile
-        private var internalTitleBackgroundColor: Int? = null
+        var titleBackgroundColor: Int = context.getColor(DEFAULT_TITLE_BAR_BG_COLOR_RES)
 
         @Volatile
-        private var internalTitleBackgroundAlpha: Int? = null
+        var titleBackgroundAlpha: Double = DEFAULT_ALPHA
+            private set
 
         @Volatile
-        private var internalTitleBackgroundTint: Int? = null
-
-        val titleBackgroundColor: Int
-            get() = (internalTitleBackgroundColor ?: context.getColor(R.color.floating_console_title_bar_bg))
-                .calibrateWith(internalTitleBackgroundAlpha, internalTitleBackgroundTint)
+        var titleBackgroundTint: Int? = null
 
         @Volatile
         var titleIconsTint: Int? = null
@@ -908,20 +922,17 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
             private set
 
         @Volatile
-        private var internalContentBackgroundColor: Int? = null
+        var contentBackgroundColor: Int = context.getColor(DEFAULT_CONTENT_BG_COLOR_RES)
 
         @Volatile
-        private var internalContentBackgroundAlpha: Int? = null
+        var contentBackgroundAlpha: Double = DEFAULT_ALPHA
+            private set
 
         @Volatile
-        private var internalContentBackgroundTint: Int? = null
-
-        val contentBackgroundColor: Int
-            get() = (internalContentBackgroundColor ?: context.getColor(R.color.floating_console_content_bg))
-                .calibrateWith(internalContentBackgroundAlpha, internalContentBackgroundTint)
+        var contentBackgroundTint: Int? = null
 
         @Volatile
-        var isTouchable: Boolean = true
+        var isTouchable: Boolean = DEFAULT_TOUCHABLE
             private set
 
         @Volatile
@@ -940,8 +951,8 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
             position = Point(x, y)
         }
 
-        fun setGravity(gravity: Int) = also {
-            this.gravity = gravity
+        fun setGravity(gravity: Int?) = also {
+            this.gravity = gravity ?: DEFAULT_GRAVITY
         }
 
         fun setTitle(title: CharSequence?) = also {
@@ -952,44 +963,44 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
             titleTextSize = size
         }
 
-        fun setTitleTextColor(color: Int) = also {
-            titleTextColor = color
+        fun setTitleTextColor(@OmniColor color: Any?) = also {
+            titleTextColor = color?.let { Colors.toIntRhino(it) }
         }
 
-        fun setTitleBackgroundColor(color: Int) = also {
-            internalTitleBackgroundColor = color
+        fun setTitleBackgroundColor(@OmniColor color: Any?) = also {
+            titleBackgroundColor = color?.let { Colors.toIntRhino(it) } ?: context.getColor(DEFAULT_TITLE_BAR_BG_COLOR_RES)
         }
 
-        fun setTitleBackgroundTint(tint: Int) = also {
-            internalTitleBackgroundTint = tint
+        fun setTitleBackgroundTint(@OmniColor tint: Any?) = also {
+            titleBackgroundTint = tint?.let { Colors.toIntRhino(it) }
         }
 
-        fun setTitleBackgroundAlpha(alpha: Int) = also {
-            internalTitleBackgroundAlpha = parseAlpha(alpha, R.color.floating_console_title_bar_bg)
+        fun setTitleBackgroundAlpha(alpha: Double?) = also {
+            titleBackgroundAlpha = parseAlpha(alpha)
         }
 
-        fun setTitleIconsTint(color: Int) = also {
-            titleIconsTint = color
+        fun setTitleIconsTint(@OmniColor color: Any?) = also {
+            titleIconsTint = color?.let { Colors.toIntRhino(it) }
         }
 
         fun setContentTextSize(size: Float) = also {
             contentTextSize = size
         }
 
-        fun setContentTextColors(colors: Array<out Int?>) = also {
-            contentTextColors = colors
+        fun setContentTextColors(colors: Array<out @OmniColor Any?>) = also {
+            contentTextColors = colors.map { it?.let { Colors.toIntRhino(it) } }.toTypedArray()
         }
 
-        fun setContentBackgroundColor(color: Int) = also {
-            internalContentBackgroundColor = color
+        fun setContentBackgroundColor(@OmniColor color: Any?) = also {
+            contentBackgroundColor = color.let { Colors.toIntRhino(it) }
         }
 
-        fun setContentBackgroundTint(tint: Int) {
-            internalContentBackgroundTint = tint
+        fun setContentBackgroundTint(@OmniColor tint: Any?) {
+            contentBackgroundTint = tint?.let { Colors.toIntRhino(it) }
         }
 
-        fun setContentBackgroundAlpha(alpha: Int) = also {
-            internalContentBackgroundAlpha = parseAlpha(alpha, R.color.floating_console_content_bg)
+        fun setContentBackgroundAlpha(alpha: Double?) = also {
+            contentBackgroundAlpha = parseAlpha(alpha)
         }
 
         fun setTextSize(size: Float) = also {
@@ -997,22 +1008,22 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
             setContentTextSize(size)
         }
 
-        fun setTextColor(color: Int) = also {
+        fun setTextColor(@OmniColor color: Any?) = also {
             setTitleTextColor(color)
             setContentTextColors(Array(6) { color })
         }
 
-        fun setBackgroundColor(color: Int) = also {
+        fun setBackgroundColor(@OmniColor color: Any?) = also {
             setTitleBackgroundColor(color)
             setContentBackgroundColor(color)
         }
 
-        fun setBackgroundTint(color: Int) = also {
+        fun setBackgroundTint(@OmniColor color: Any?) = also {
             setTitleBackgroundTint(color)
             setContentBackgroundTint(color)
         }
 
-        fun setBackgroundAlpha(alpha: Int) = also {
+        fun setBackgroundAlpha(alpha: Double?) = also {
             setTitleBackgroundAlpha(alpha)
             setContentBackgroundAlpha(alpha)
         }
@@ -1042,34 +1053,27 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
             title = null
             titleTextSize = null
             titleTextColor = null
-            internalTitleBackgroundColor = null
-            internalTitleBackgroundAlpha = null
-            internalTitleBackgroundTint = null
-            internalContentBackgroundColor = null
-            internalContentBackgroundAlpha = null
-            internalContentBackgroundTint = null
+            titleBackgroundColor = context.getColor(DEFAULT_TITLE_BAR_BG_COLOR_RES)
+            titleBackgroundAlpha = DEFAULT_ALPHA
+            titleBackgroundTint = null
+            contentBackgroundColor = context.getColor(DEFAULT_CONTENT_BG_COLOR_RES)
+            contentBackgroundAlpha = DEFAULT_ALPHA
+            contentBackgroundTint = null
             titleIconsTint = null
             contentTextSize = null
             contentTextColors = null
-            isTouchable = true
+            isTouchable = DEFAULT_TOUCHABLE
             isExitOnClose = false
             exitOnCloseTimeout = DEFAULT_EXIT_ON_CLOSE_TIMEOUT
         }
 
-        internal fun initExitOnClose() {
+        internal fun resetExitOnClose() {
             setExitOnClose(false)
             exitOnCloseTimeout = DEFAULT_EXIT_ON_CLOSE_TIMEOUT
         }
 
         @JvmOverloads
         fun show(isReset: Boolean = false) = this@ConsoleImpl.show(isReset)
-
-        private fun Int.calibrateWith(alpha: Int?, tint: Int?): Int {
-            var result = this
-            alpha?.let { desired -> result = Color.argb(desired, result.red, result.green, result.blue) }
-            tint?.let { desired -> result = Color.argb(result.alpha, desired.red, desired.green, desired.blue) }
-            return result
-        }
 
     }
 
@@ -1078,11 +1082,15 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
         private val TAG = ConsoleImpl::class.java.simpleName
 
         const val DEFAULT_TITLE = ""
+        const val DEFAULT_ALPHA = 1.0
         const val DEFAULT_TOUCHABLE = true
         const val DEFAULT_TOUCH_THROUGH = true
         const val DEFAULT_GRAVITY = Gravity.NO_GRAVITY
         const val DEFAULT_EXIT_ON_CLOSE_TIMEOUT = 5000L
         const val DEFAULT_EXIT_ON_CLOSE = true
+
+        val DEFAULT_TITLE_BAR_BG_COLOR_RES = R.color.floating_console_title_bar_bg
+        val DEFAULT_CONTENT_BG_COLOR_RES = R.color.floating_console_content_bg
 
     }
 

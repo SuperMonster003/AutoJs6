@@ -21,7 +21,6 @@ import org.autojs.autojs.runtime.api.augment.AugmentableProxy
 import org.autojs.autojs.runtime.api.augment.s13n.S13n
 import org.autojs.autojs.runtime.api.augment.util.Util
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
-import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.ConsoleUtils
 import org.autojs.autojs.util.DisplayUtils
 import org.autojs.autojs.util.RhinoUtils.NOT_CONSTRUCTABLE
@@ -302,9 +301,7 @@ class Console(scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRuntime) {
         @RhinoRuntimeFunctionInterface
         fun build(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ConsoleImpl.Configurator = ensureArgumentsAtMost(args, 1) {
             val (options) = it
-            val configurator = scriptRuntime.console.configurator.apply {
-                clearStates()
-            }
+            val configurator = scriptRuntime.console.configurator
             val opt = coerceObject(options, newNativeObject())
 
             opt.entries.forEach { entry ->
@@ -390,21 +387,21 @@ class Console(scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRuntime) {
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun setTitleBackgroundTint(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ProxyObject = ensureArgumentsOnlyOne(args) {
-            scriptRuntime.console.setTitleBackgroundTint(S13n.color(arrayOf(it)))
+            scriptRuntime.console.setTitleBackgroundTint(it?.let { S13n.color(arrayOf(it)) })
             scriptRuntime.consoleProxyObject
         }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun setTitleBackgroundAlpha(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ProxyObject = ensureArgumentsOnlyOne(args) {
-            scriptRuntime.console.setTitleBackgroundAlpha(ColorUtils.toUnit8(coerceNumber(it, 1.0), true))
+            scriptRuntime.console.setTitleBackgroundAlpha(coerceNumber(it, 1.0))
             scriptRuntime.consoleProxyObject
         }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun setTitleIconsTint(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ProxyObject = ensureArgumentsOnlyOne(args) {
-            scriptRuntime.console.setTitleIconsTint(S13n.color(arrayOf(it)))
+            scriptRuntime.console.setTitleIconsTint(it?.let { S13n.color(arrayOf(it)) })
             scriptRuntime.consoleProxyObject
         }
 
@@ -458,14 +455,14 @@ class Console(scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRuntime) {
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun setContentBackgroundTint(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ProxyObject = ensureArgumentsOnlyOne(args) {
-            scriptRuntime.console.setContentBackgroundTint(S13n.color(arrayOf(it)))
+            scriptRuntime.console.setContentBackgroundTint(it?.let { S13n.color(arrayOf(it)) })
             scriptRuntime.consoleProxyObject
         }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun setContentBackgroundAlpha(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ProxyObject = ensureArgumentsOnlyOne(args) {
-            scriptRuntime.console.setContentBackgroundAlpha(ColorUtils.toUnit8(coerceNumber(it, 1.0), true))
+            scriptRuntime.console.setContentBackgroundAlpha(coerceNumber(it, 1.0))
             scriptRuntime.consoleProxyObject
         }
 
@@ -500,7 +497,7 @@ class Console(scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRuntime) {
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun setBackgroundAlpha(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ProxyObject = ensureArgumentsOnlyOne(args) {
-            scriptRuntime.console.setBackgroundAlpha(ColorUtils.toUnit8(coerceNumber(it, 1.0), true))
+            scriptRuntime.console.setBackgroundAlpha(coerceNumber(it, 1.0))
             scriptRuntime.consoleProxyObject
         }
 
