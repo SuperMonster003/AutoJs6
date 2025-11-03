@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.content.res.Resources
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import com.google.gson.Gson
 import org.autojs.autojs.App.Companion.app
@@ -200,12 +201,12 @@ object Pref {
     fun refreshLastUpdatesAutoCheckedTimestamp() = updateTimestamp(R.string.key_last_updates_auto_checked)
 
     @JvmStatic
-    fun clearUpdatesCheckedStates() = sPref.edit()
-        .remove(key(R.string.key_last_no_newer_updates))
-        .remove(key(R.string.key_last_updates_postponed))
-        .remove(key(R.string.key_last_updates_checked))
-        .remove(key(R.string.key_last_updates_auto_checked))
-        .apply()
+    fun clearUpdatesCheckedStates() = sPref.edit {
+        remove(key(R.string.key_last_no_newer_updates))
+            .remove(key(R.string.key_last_updates_postponed))
+            .remove(key(R.string.key_last_updates_checked))
+            .remove(key(R.string.key_last_updates_auto_checked))
+    }
 
     @JvmStatic
     fun shouldStartA11yServiceWithRoot() = getBoolean(
@@ -240,7 +241,10 @@ object Pref {
     fun putString(@KeyRes keyRes: Int, value: String?) = putString(key(keyRes), value)
 
     @JvmStatic
-    fun putString(key: String, value: String?) = sPref.edit().putString(key, value).apply()
+    fun putString(key: String, value: String?) = sPref.edit { putString(key, value) }
+
+    @JvmStatic
+    fun putStringSync(key: String, value: String?) = sPref.edit(commit = true) { putString(key, value) }
 
     @JvmStatic
     fun getString(@KeyRes keyRes: Int, @KeyRes defKeyRes: Int): String = sPref.getString(key(keyRes), key(defKeyRes))!!
@@ -264,10 +268,10 @@ object Pref {
     fun putBooleanSync(@KeyRes keyRes: Int, value: Boolean) = putBooleanSync(key(keyRes), value)
 
     @JvmStatic
-    fun putBoolean(key: String, value: Boolean) = sPref.edit().putBoolean(key, value).apply()
+    fun putBoolean(key: String, value: Boolean) = sPref.edit { putBoolean(key, value) }
 
     @JvmStatic
-    fun putBooleanSync(key: String, value: Boolean) = sPref.edit().putBoolean(key, value).commit()
+    fun putBooleanSync(key: String, value: Boolean) = sPref.edit(commit = true) { putBoolean(key, value) }
 
     @JvmStatic
     fun getBoolean(@KeyRes keyRes: Int, defValue: Boolean) = getBoolean(key(keyRes), defValue)
@@ -282,16 +286,16 @@ object Pref {
     fun putInt(@KeyRes keyRes: Int, value: Int) = putInt(key(keyRes), value)
 
     @JvmStatic
-    fun putInt(key: String, value: Int) = sPref.edit().putInt(key, value).apply()
+    fun putInt(key: String, value: Int) = sPref.edit { putInt(key, value) }
 
     @JvmStatic
-    fun putIntSync(key: String, value: Int) = sPref.edit().putInt(key, value).commit()
+    fun putIntSync(key: String, value: Int) = sPref.edit(commit = true) { putInt(key, value) }
 
     @JvmStatic
-    fun putFloat(key: String, value: Float) = sPref.edit().putFloat(key, value).apply()
+    fun putFloat(key: String, value: Float) = sPref.edit { putFloat(key, value) }
 
     @JvmStatic
-    fun putFloatSync(key: String, value: Float) = sPref.edit().putFloat(key, value).commit()
+    fun putFloatSync(key: String, value: Float) = sPref.edit(commit = true) { putFloat(key, value) }
 
     @JvmStatic
     fun getInt(@KeyRes keyRes: Int, defValue: Int): Int = getInt(key(keyRes), defValue)
@@ -303,13 +307,13 @@ object Pref {
     fun getFloat(key: String, defValue: Float): Float = sPref.getFloat(key, defValue)
 
     @JvmStatic
-    fun putLong(@KeyRes keyRes: Int, value: Long) = sPref.edit().putLong(key(keyRes), value).apply()
+    fun putLong(@KeyRes keyRes: Int, value: Long) = sPref.edit { putLong(key(keyRes), value) }
 
     @JvmStatic
     fun getLong(@KeyRes keyRes: Int, defValue: Long) = sPref.getLong(key(keyRes), defValue)
 
     @JvmStatic
-    fun putStringSet(@KeyRes keyRes: Int, values: MutableSet<String>) = sPref.edit().putStringSet(key(keyRes), values).apply()
+    fun putStringSet(@KeyRes keyRes: Int, values: MutableSet<String>) = sPref.edit { putStringSet(key(keyRes), values) }
 
     @JvmStatic
     fun getStringSet(@KeyRes keyRes: Int, defValues: MutableSet<String>?): MutableSet<String>? = sPref.getStringSet(key(keyRes), defValues)
@@ -324,7 +328,7 @@ object Pref {
     fun containsKey(key: String): Boolean = sPref.all.containsKey(key)
 
     @JvmStatic
-    fun remove(key: String) = sPref.edit().remove(key).apply()
+    fun remove(key: String) = sPref.edit { remove(key) }
 
     @JvmStatic
     fun getLinkedHashSet(@KeyRes keyRes: Int): LinkedHashSet<String> = when {

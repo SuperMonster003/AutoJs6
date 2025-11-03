@@ -4,9 +4,13 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.provider.Settings
 import android.provider.Settings.System
-import org.autojs.autojs.annotation.RhinoSingletonFunctionInterface
+import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.extension.AnyExtensions.isJsNullish
+import org.autojs.autojs.extension.AnyExtensions.isJsString
+import org.autojs.autojs.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.extension.FlexibleArray
+import org.autojs.autojs.extension.FlexibleArray.Companion.component1
+import org.autojs.autojs.extension.FlexibleArray.Companion.component2
 import org.autojs.autojs.extension.ScriptableExtensions.defineProp
 import org.autojs.autojs.extension.ScriptableExtensions.prop
 import org.autojs.autojs.rhino.ProxyObject
@@ -17,6 +21,7 @@ import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.util.Util.checkStringArgument
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.theme.ThemeColorManager
+import org.autojs.autojs.util.FileUtils
 import org.autojs.autojs.util.IntentUtils
 import org.autojs.autojs.util.RhinoUtils.NOT_CONSTRUCTABLE
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED
@@ -24,7 +29,6 @@ import org.autojs.autojs.util.RhinoUtils.coerceIntNumber
 import org.autojs.autojs.util.RhinoUtils.coerceString
 import org.autojs.autojs.util.RhinoUtils.newBaseFunction
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
-import org.autojs.autojs.util.RhinoUtils.undefined
 import org.autojs.autojs.util.RootUtils
 import org.autojs.autojs.util.RootUtils.RootMode
 import org.autojs.autojs6.BuildConfig
@@ -38,7 +42,8 @@ import java.util.*
 import java.util.function.Supplier
 import android.content.Context as AndroidContext
 
-class Autojs(private val scriptRuntime: ScriptRuntime) : Augmentable() {
+@Suppress("unused")
+class Autojs(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
     private val mCachedR = mutableMapOf<String, NativeObject>()
 
@@ -103,32 +108,32 @@ class Autojs(private val scriptRuntime: ScriptRuntime) : Augmentable() {
     companion object : FlexibleArray() {
 
         @JvmStatic
-        @RhinoSingletonFunctionInterface
-        fun isScreenPortrait(args: Array<out Any?>): Boolean = ensureArgumentsIsEmpty(args) {
+        @RhinoRuntimeFunctionInterface
+        fun isScreenPortrait(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsIsEmpty(args) {
             ScreenMetrics.isScreenPortrait
         }
 
         @JvmStatic
-        @RhinoSingletonFunctionInterface
-        fun isScreenLandscape(args: Array<out Any?>): Boolean = ensureArgumentsIsEmpty(args) {
+        @RhinoRuntimeFunctionInterface
+        fun isScreenLandscape(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsIsEmpty(args) {
             ScreenMetrics.isScreenLandscape
         }
 
         @JvmStatic
-        @RhinoSingletonFunctionInterface
-        fun isRootAvailable(args: Array<out Any?>): Boolean = ensureArgumentsIsEmpty(args) {
+        @RhinoRuntimeFunctionInterface
+        fun isRootAvailable(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsIsEmpty(args) {
             RootUtils.isRootAvailable()
         }
 
         @JvmStatic
-        @RhinoSingletonFunctionInterface
-        fun getRootMode(args: Array<out Any?>): RootMode = ensureArgumentsIsEmpty(args) {
+        @RhinoRuntimeFunctionInterface
+        fun getRootMode(scriptRuntime: ScriptRuntime, args: Array<out Any?>): RootMode = ensureArgumentsIsEmpty(args) {
             RootUtils.getRootMode()
         }
 
         @JvmStatic
-        @RhinoSingletonFunctionInterface
-        fun setRootMode(args: Array<out Any?>): Undefined = ensureArgumentsLengthInRange(args, 1..2) {
+        @RhinoRuntimeFunctionInterface
+        fun setRootMode(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsLengthInRange(args, 1..2) {
             val (modeArg, isWriteIntoPrefArg) = it
 
             val isWriteIntoPref = when {
@@ -173,45 +178,71 @@ class Autojs(private val scriptRuntime: ScriptRuntime) : Augmentable() {
         }
 
         @JvmStatic
-        @RhinoSingletonFunctionInterface
-        fun canModifySystemSettings(args: Array<out Any?>): Boolean = ensureArgumentsIsEmpty(args) {
+        @RhinoRuntimeFunctionInterface
+        fun canModifySystemSettings(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsIsEmpty(args) {
             System.canWrite(globalContext)
         }
 
         @JvmStatic
-        @RhinoSingletonFunctionInterface
-        fun canWriteSecureSettings(args: Array<out Any?>): Boolean = ensureArgumentsIsEmpty(args) {
+        @RhinoRuntimeFunctionInterface
+        fun canWriteSecureSettings(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsIsEmpty(args) {
             globalContext.checkCallingOrSelfPermission(Manifest.permission.WRITE_SECURE_SETTINGS) == PackageManager.PERMISSION_GRANTED
         }
 
         @JvmStatic
-        @RhinoSingletonFunctionInterface
-        fun canDisplayOverOtherApps(args: Array<out Any?>): Boolean = ensureArgumentsIsEmpty(args) {
+        @RhinoRuntimeFunctionInterface
+        fun canDisplayOverOtherApps(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsIsEmpty(args) {
             Settings.canDrawOverlays(globalContext)
         }
 
         @JvmStatic
-        @RhinoSingletonFunctionInterface
-        fun getLanguage(args: Array<out Any?>): Locale = ensureArgumentsIsEmpty(args) {
+        @RhinoRuntimeFunctionInterface
+        fun getLanguage(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Locale = ensureArgumentsIsEmpty(args) {
             org.autojs.autojs.core.pref.Language.getPrefLanguage().locale
         }
 
         @JvmStatic
-        @RhinoSingletonFunctionInterface
-        fun getLanguageTag(args: Array<out Any?>): String = ensureArgumentsIsEmpty(args) {
-            getLanguage(arrayOf()).toLanguageTag()
+        @RhinoRuntimeFunctionInterface
+        fun getLanguageTag(scriptRuntime: ScriptRuntime, args: Array<out Any?>): String = ensureArgumentsIsEmpty(args) {
+            getLanguage(scriptRuntime, arrayOf()).toLanguageTag()
         }
 
         @JvmStatic
-        @RhinoSingletonFunctionInterface
-        fun restart(args: Array<out Any?>): Undefined = ensureArgumentsIsEmpty(args) {
-            undefined { IntentUtils.App.restart(globalContext) }
+        @RhinoRuntimeFunctionInterface
+        fun restart(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsAtMost(args, 1) { argList ->
+            val (scripts) = argList
+            when {
+                scripts.isJsNullish() -> IntentUtils.App.restart(globalContext)
+                scripts.isJsString() -> IntentUtils.App.restart(globalContext, scriptsAfterRestart = listOf(coerceString(scripts).normalizeScriptName(scriptRuntime)))
+                scripts is List<*> -> IntentUtils.App.restart(globalContext, scriptsAfterRestart = scripts.normalizeScriptNames(scriptRuntime))
+                else -> throw WrappedIllegalArgumentException("Argument \"scriptsAfterRestart\" ${scripts.jsBrief()} is invalid for autojs.restart")
+            }
+            UNDEFINED
         }
 
         @JvmStatic
-        @RhinoSingletonFunctionInterface
-        fun exit(args: Array<out Any?>): Undefined = ensureArgumentsIsEmpty(args) {
-            undefined { IntentUtils.App.exit(globalContext) }
+        @RhinoRuntimeFunctionInterface
+        fun exit(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsAtMost(args, 1) { argList ->
+            val (scripts) = argList
+            when {
+                scripts.isJsNullish() -> IntentUtils.App.exit(globalContext)
+                scripts.isJsString() -> IntentUtils.App.exit(globalContext, scriptsAfterRestart = listOf(coerceString(scripts).normalizeScriptName(scriptRuntime)))
+                scripts is List<*> -> IntentUtils.App.exit(globalContext, scriptsAfterRestart = scripts.normalizeScriptNames(scriptRuntime))
+                else -> throw WrappedIllegalArgumentException("Argument \"scriptsAfterRestart\" ${scripts.jsBrief()} is invalid for autojs.exit")
+            }
+            UNDEFINED
+        }
+
+        private fun String.normalizeScriptName(scriptRuntime: ScriptRuntime): String {
+            val jsExt = FileUtils.TYPE.JAVASCRIPT.extensionWithDot
+            return when (val s = this.trim()) {
+                "@" -> scriptRuntime.engines.myEngine().source.fullPath
+                else -> s.let { if (it.endsWith(jsExt)) it else "$it$jsExt" }
+            }
+        }
+
+        private fun List<Any?>.normalizeScriptNames(scriptRuntime: ScriptRuntime): List<String> {
+            return this.mapNotNull { it?.toString()?.normalizeScriptName(scriptRuntime) }
         }
 
     }

@@ -94,8 +94,8 @@ class DynamicBroadcastReceivers(private val context: Context) {
         }
         mReceiverRegistries.clear()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            context.unregisterReceiver(mDefaultActionReceiver)
-            context.unregisterReceiver(mPackageActionReceiver)
+            runCatching { context.unregisterReceiver(mDefaultActionReceiver) }
+            runCatching { context.unregisterReceiver(mPackageActionReceiver) }
         }
     }
 

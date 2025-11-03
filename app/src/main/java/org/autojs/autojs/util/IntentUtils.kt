@@ -1,5 +1,6 @@
 package org.autojs.autojs.util
 
+import android.app.ActivityManager
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.ActivityNotFoundException
@@ -7,7 +8,6 @@ import android.content.Context
 import android.content.Context.ALARM_SERVICE
 import android.content.Intent
 import android.net.Uri
-import android.os.Process
 import android.os.SystemClock
 import android.provider.OpenableColumns
 import android.provider.Settings
@@ -15,19 +15,33 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
+import androidx.work.Constraints
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.Worker
+import androidx.work.WorkerParameters
+import com.afollestad.materialdialogs.MaterialDialog
 import com.google.android.material.snackbar.Snackbar
 import com.huaban.analysis.jieba.CharsDictionaryDatabase
 import com.huaban.analysis.jieba.PhrasesDictionaryDatabase
 import com.huaban.analysis.jieba.WordDictionaryDatabase
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.core.image.capture.ScreenCapturerForegroundService
+import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.external.fileprovider.AppFileProvider
+import org.autojs.autojs.model.script.ScriptFile
 import org.autojs.autojs.runtime.api.Mime
 import org.autojs.autojs.runtime.api.WrappedShizuku
 import org.autojs.autojs.ui.enhancedfloaty.FloatyService
 import org.autojs.autojs.ui.floating.FloatyWindowManger
+import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs6.R
 import java.io.File
+import java.io.FileNotFoundException
+import java.util.concurrent.TimeUnit
+import kotlin.system.exitProcess
 
 object IntentUtils {
 
@@ -330,39 +344,56 @@ object IntentUtils {
 
     object App {
 
+        private const val UNIQUE_REQUEST_CODE = 1001
+
         @JvmStatic
         @JvmOverloads
-        fun restart(context: Context, extraActions: (() -> Unit)? = null) {
-            val launchIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-            }
+        fun restart(context: Context, beforeExit: (() -> Unit)? = null, scriptsAfterRestart: List<String>? = null) {
+            val launchIntent = getLaunchIntent(context)
+                ?: throw RuntimeException("Failed to create launch intent for AutoJs6")
 
             when (context) {
                 is AppCompatActivity -> {
                     context.startActivity(launchIntent)
                 }
                 else -> {
-                    val pendingIntent = PendingIntent.getActivity(
-                        /* context = */ context,
-                        /* requestCode = */ 1001,
-                        /* intent = */ launchIntent,
-                        /* flags = */ PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-                    )
-                    val am = context.getSystemService(ALARM_SERVICE) as AlarmManager
-                    am.setExactAndAllowWhileIdle(
-                        /* type = */ AlarmManager.ELAPSED_REALTIME,
-                        /* triggerAtMillis = */ SystemClock.elapsedRealtime() + 300L,
-                        /* operation = */ pendingIntent,
-                    )
+                    val delay = TimeUnit.MILLISECONDS.toMillis(300)
+                    val triggerAtMillis = SystemClock.elapsedRealtime() + delay
+                    runCatching tryWithAlarmManager@{
+                        val pendingIntent = PendingIntent.getActivity(
+                            /* context = */ context,
+                            /* requestCode = */ UNIQUE_REQUEST_CODE,
+                            /* intent = */ launchIntent,
+                            /* flags = */ PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+                        )
+                        val am = context.getSystemService(ALARM_SERVICE) as AlarmManager
+                        am.cancel(pendingIntent)
+                        am.setExactAndAllowWhileIdle(
+                            /* type = */ AlarmManager.ELAPSED_REALTIME,
+                            /* triggerAtMillis = */ triggerAtMillis,
+                            /* operation = */ pendingIntent,
+                        )
+                    }.onFailure tryWithWorkManager@{
+                        it.printStackTrace()
+                        val request = OneTimeWorkRequestBuilder<RestartWorker>()
+                            .setInitialDelay(delay, TimeUnit.MILLISECONDS)
+                            .setConstraints(Constraints.NONE)
+                            .build()
+                        WorkManager.getInstance(context).enqueueUniqueWork(
+                            uniqueWorkName = "work-task-restart-autojs6",
+                            existingWorkPolicy = ExistingWorkPolicy.REPLACE,
+                            request = request,
+                        )
+                    }
                 }
             }
 
-            exit(context, extraActions)
+            exit(context, beforeExit, scriptsAfterRestart)
         }
 
         @JvmStatic
         @JvmOverloads
-        fun exit(context: Context, extraActions: (() -> Unit)? = null) {
+        fun exit(context: Context, beforeExit: (() -> Unit)? = null, scriptsAfterRestart: List<String>? = null) {
             FloatyWindowManger.hideCircularMenuAndSaveState()
 
             FloatyService.stopService()
@@ -379,9 +410,119 @@ object IntentUtils {
 
             WrappedShizuku.onDestroy()
 
-            extraActions?.invoke()
+            beforeExit?.invoke()
 
-            Process.killProcess(Process.myPid())
+            if (!scriptsAfterRestart.isNullOrEmpty()) {
+                Pref.putStringSync(key(R.string.key_scripts_after_app_restart), scriptsAfterRestart.joinToString("\n") { it.trim() })
+            }
+
+            finishAllAppTasksSafely(context)
+
+            exitProcess(0)
+        }
+
+        private fun getLaunchIntent(context: Context): Intent? {
+            val appCtx = context.applicationContext
+            val pkgName = appCtx.packageName
+            return appCtx.packageManager.getLaunchIntentForPackage(pkgName)?.apply {
+                setAction("$pkgName.action.RESTART_UNIQUE")
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            }
+        }
+
+        private fun finishAllAppTasksSafely(context: Context) {
+            // Use AppTask API to remove all task stacks of the current application (AutoJs6).
+            // zh-CN: 使用 AppTask API 移除当前应用 (AutoJs6) 的所有任务栈.
+            runCatching {
+                val am = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+                am.appTasks?.forEach { it.runCatching { finishAndRemoveTask() } }
+            }
+        }
+
+        @JvmStatic
+        fun runAfterRestartIfNeeded(activity: AppCompatActivity) {
+            val prefKey = key(R.string.key_scripts_after_app_restart)
+            val prefValue = Pref.getStringOrNull(prefKey) ?: return
+            val scripts = prefValue.split("\n").filter { it.isNotBlank() }
+
+            val workingDir = WorkingDirectoryUtils.path
+            val scriptsFailedToRun = mutableMapOf<String, String>()
+
+            try {
+                activity.runOnUiThread {
+                    scripts.forEach { script ->
+                        try {
+                            val file = script.toScriptFile(workingDir)
+                            when {
+                                file.exists() -> AutoJs.instance.scriptEngineService.execute(
+                                    /* source = */ ScriptFile(file.absolutePath).toSource(),
+                                    /* config = */ ExecutionConfig(workingDir),
+                                )
+                                else -> throw FileNotFoundException(file.absolutePath)
+                            }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            scriptsFailedToRun[script.toScriptFile(workingDir).absolutePath] = e.stackTraceToString()
+                        }
+                    }
+                }
+            } finally {
+                Pref.remove(prefKey)
+            }
+
+            if (scriptsFailedToRun.isEmpty()) return
+
+            val size = scriptsFailedToRun.size
+            val summary = activity.resources.getQuantityString(R.plurals.text_items_total_sum_with_colon, size, size)
+            val hint = activity.getString(R.string.text_click_item_to_show_details)
+            MaterialDialog.Builder(activity)
+                .title(R.string.error_failed_to_run_script)
+                .content("$summary\n\n$hint")
+                .items(scriptsFailedToRun.map { it.key })
+                .itemsCallback { _, _, _, text ->
+                    val stackTrace = scriptsFailedToRun[text]
+                    val content = "$text\n\n$stackTrace"
+                    MaterialDialog.Builder(activity)
+                        .title(R.string.text_details)
+                        .content(content)
+                        .neutralText(R.string.dialog_button_copy)
+                        .neutralColorRes(R.color.dialog_button_hint)
+                        .onNeutral { d, _ ->
+                            ClipboardUtils.setClip(activity, content)
+                            ViewUtils.showSnack(d.view, R.string.text_already_copied_to_clip, false)
+                        }
+                        .positiveText(R.string.dialog_button_dismiss)
+                        .onPositive { d, _ -> d.dismiss() }
+                        .autoDismiss(false)
+                        .show()
+                }
+                .positiveText(R.string.dialog_button_dismiss)
+                .onPositive { dialog, _ -> dialog.dismiss() }
+                .cancelable(false)
+                .autoDismiss(false)
+                .show()
+        }
+
+        private fun String.toScriptFile(workingDir: String): File {
+            val file = when (this.endsWith(FileUtils.TYPE.JAVASCRIPT.extensionWithDot)) {
+                true -> this
+                else -> this + FileUtils.TYPE.JAVASCRIPT.extensionWithDot
+            }.let { File(it) }
+            return when {
+                file.exists() -> file
+                file.absolutePath.startsWith(workingDir.removeSuffix("/")) -> file
+                file.path.startsWith("\$remote/") -> file
+                else -> File(workingDir, file.path)
+            }
+        }
+
+        class RestartWorker(context: Context, params: WorkerParameters) : Worker(context, params) {
+            override fun doWork(): Result = when {
+                runCatching { applicationContext.startActivity(getLaunchIntent(applicationContext)) }.isSuccess -> {
+                    Result.success()
+                }
+                else -> Result.failure()
+            }
         }
 
     }
