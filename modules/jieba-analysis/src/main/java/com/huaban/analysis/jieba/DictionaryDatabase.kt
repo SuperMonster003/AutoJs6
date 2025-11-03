@@ -26,7 +26,9 @@ abstract class DictionaryDatabase internal constructor(context: Context): Closea
         SQLiteDatabase.openDatabase(context.getDatabasePath(databaseName).absolutePath, null, SQLiteDatabase.OPEN_READONLY)
     }
 
-    override fun close() = database.close()
+    override fun close() {
+        runCatching { database.close() }
+    }
 
     private fun copyDatabaseWithCompressionAndMd5(context: Context) {
         val dbFile = File(context.getDatabasePath(databaseName).path)

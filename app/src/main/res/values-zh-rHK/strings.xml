@@ -1068,6 +1068,7 @@
     <string name="description_timed_task_backend">控制腳本定時觸發的底層機制.\n\nAlarmManager: 通過申請 \"允許設置鬧鐘和提醒\" 權限, 可使定時任務的觸發更接近準時.\nWorkManager: 系統友好, 適合可接受一定延遲的非關鍵定時任務.\nJobScheduler: 舊實現, 僅用作兼容保留, 定時任務出現延遲的概率較大.</string>
     <string name="failed_to_go_to_access_settings">跳轉設置頁面失敗</string>
     <string name="text_allow_setting_alarms_and_reminders_is_recommended">建議授予 \"允許設置鬧鐘和提醒\" 權限以確保定時任務在息屏或待機狀態時儘可能準時執行</string>
-    <string name="description_timed_task_backend_more">使用場景與差異説明: \n\n1. AlarmManager\n適用於準時性敏感的定時任務, 如 [提醒/嚴格定時腳本/...].\n在 Android 12+ 獲取 \"允許設置鬧鐘和提醒\" 權限後, 在息屏或待機狀態時能夠較準時地執行定時任務.\n在未授予 \"允許設置鬧鐘和提醒\" 權限時, 系統可能降級為不準時或延後執行任務.\n\n2. WorkManager\n適用於不要求嚴格準時執行的定時任務, 如 [非關鍵性同步/清理/統計/...].\n根據系統 [ 電量/網絡/充電情況/待機策略/... ] 進行調度, 息屏或待機狀態時可能推遲任務執行.\n雖無法保證時間精確性, 但在 [ 可靠完成/失敗重試/鏈式執行/唯一任務去重 ] 等方面擁有獨特優勢.\n\n3. Job\n歷史實現, 為兼容保留.\n在高版本安卓系統中定時任務可能存在較大的延遲執行問題.\n除非出於兼容需要, 一般不推薦使用.</string>
+    <string name="description_timed_task_backend_more" tools:ignore="TypographyEllipsis">使用場景與差異説明: \n\n1. AlarmManager\n適用於準時性敏感的定時任務, 如 [提醒/嚴格定時腳本/...].\n在 Android 12+ 獲取 \"允許設置鬧鐘和提醒\" 權限後, 在息屏或待機狀態時能夠較準時地執行定時任務.\n在未授予 \"允許設置鬧鐘和提醒\" 權限時, 系統可能降級為不準時或延後執行任務.\n\n2. WorkManager\n適用於不要求嚴格準時執行的定時任務, 如 [非關鍵性同步/清理/統計/...].\n根據系統 [ 電量/網絡/充電情況/待機策略/... ] 進行調度, 息屏或待機狀態時可能推遲任務執行.\n雖無法保證時間精確性, 但在 [ 可靠完成/失敗重試/鏈式執行/唯一任務去重 ] 等方面擁有獨特優勢.\n\n3. Job\n歷史實現, 為兼容保留.\n在高版本安卓系統中定時任務可能存在較大的延遲執行問題.\n除非出於兼容需要, 一般不推薦使用.</string>
+    <string name="text_click_item_to_show_details">點擊條目可查看詳情</string>
 
 </resources>

@@ -53,6 +53,7 @@ import org.autojs.autojs.ui.main.task.TaskManagerFragment
 import org.autojs.autojs.ui.settings.PreferencesActivity
 import org.autojs.autojs.ui.widget.DrawerAutoClose
 import org.autojs.autojs.ui.widget.SearchViewItem
+import org.autojs.autojs.util.IntentUtils
 import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs.util.UpdateUtils
 import org.autojs.autojs.util.ViewUtils
@@ -147,6 +148,7 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
     override fun onPostResume() {
         recreateIfNeeded()
         UpdateUtils.autoCheckForUpdatesIfNeededWithSnackbar(this)
+        IntentUtils.App.runAfterRestartIfNeeded(this)
         super.onPostResume()
     }
 
