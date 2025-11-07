@@ -147,7 +147,6 @@ object IntentUtils {
         false
     }
 
-
     @JvmStatic
     @JvmOverloads
     fun getUriOfFile(context: Context, path: String?, fileProviderAuthority: String? = AppFileProvider.AUTHORITY): Uri {

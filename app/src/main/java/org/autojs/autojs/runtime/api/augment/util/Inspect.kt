@@ -323,6 +323,8 @@ object Inspect : Augmentable(), Invokable {
         if (isReferenceRhino(value)) {
             var cur: Scriptable = value
             val objProtoForJs: Scriptable? = ScriptableObject.getObjectPrototype(cur)
+            val arrProtoForJs: Scriptable? = ScriptableObject.getArrayPrototype(cur)
+            val funcProtoForJs: Scriptable? = ScriptableObject.getFunctionPrototype(cur)
             val objProtoForAugmentable: Scriptable = RhinoUtils.objectPrototype
             val arrProtoForAugmentable: Scriptable = RhinoUtils.arrayPrototype
             val funcProtoForAugmentable: Scriptable = RhinoUtils.functionPrototype
@@ -346,9 +348,9 @@ object Inspect : Augmentable(), Invokable {
                         // zh-CN: 标准 Java Object#toString 或等价实现, 视为未自定义, 跳过自定义判定.
                         return@run false
                     }
-                    if (fn === objProtoForJs?.get("toString")) {
-                        // Standard JavaScript Object.prototype.toString or equivalent implementation, skip custom check.
-                        // zh-CN: 标准 JavaScript Object.prototype.toString 或等价实现, 视为未自定义, 跳过自定义判定.
+                    if (fn === objProtoForJs?.get("toString") || fn === arrProtoForJs?.get("toString") || fn === funcProtoForJs?.get("toString")) {
+                        // Standard JavaScript (Object/Array/Function).prototype.toString or equivalent implementation, skip custom check.
+                        // zh-CN: 标准 JavaScript (Object/Array/Function).prototype.toString 或等价实现, 视为未自定义, 跳过自定义判定.
                         return@run false
                     }
                     val augmentableToStringList = listOf(
@@ -599,7 +601,7 @@ object Inspect : Augmentable(), Invokable {
             ctx.stylize(content, "string")
         }
         value is Number -> {
-            ctx.stylize(value.toString(), "number")
+            ctx.stylize(Context.toString(value), "number")
         }
         value is Boolean -> {
             ctx.stylize(Context.toString(value), "boolean")

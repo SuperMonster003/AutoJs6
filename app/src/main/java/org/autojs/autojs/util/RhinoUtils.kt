@@ -69,18 +69,25 @@ object RhinoUtils {
 
     /** [Long]: 2^53 - 1. */
     const val MAX_SAFE_INT_IEEE754_L = 9_007_199_254_740_991L
+
     /** [Long]: -(2^53 - 1). */
     const val MIN_SAFE_INT_IEEE754_L = -9_007_199_254_740_991L
+
     /** [Double]: 2^53 - 1. */
     const val MAX_SAFE_INT_IEEE754_D = 9_007_199_254_740_991.0
+
     /** [Double]: -(2^53 - 1). */
     const val MIN_SAFE_INT_IEEE754_D = -9_007_199_254_740_991.0
+
     /** [java.math.BigDecimal]: 2^53 - 1. */
     val MAX_SAFE_INT_IEEE754_BD = MAX_SAFE_INT_IEEE754_D.toBigDecimal()
+
     /** [java.math.BigDecimal]: -(2^53 - 1). */
     val MIN_SAFE_INT_IEEE754_BD = MIN_SAFE_INT_IEEE754_D.toBigDecimal()
+
     /** [java.math.BigInteger]: 2^53 - 1. */
     val MAX_SAFE_INT_IEEE754_BI = MAX_SAFE_INT_IEEE754_L.toBigInteger()
+
     /** [java.math.BigInteger]: -(2^53 - 1). */
     val MIN_SAFE_INT_IEEE754_BI = MIN_SAFE_INT_IEEE754_L.toBigInteger()
 
