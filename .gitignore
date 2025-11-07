@@ -5,6 +5,7 @@
 *.jks
 *.log
 *.ffs_db
+*.patch
 
 .DS_Store
 .externalNativeBuild

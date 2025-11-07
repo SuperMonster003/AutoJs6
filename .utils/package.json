@@ -5,7 +5,7 @@
     "domhandler": "^5.0.3",
     "dotenv": "^17.2.2",
     "node-fetch": "^3.3.2",
-    "puppeteer": "^24.17.1",
+    "puppeteer": "^24.29.0",
     "string-width": "^8.1.0",
     "strip-ansi": "^7.1.2"
   },
