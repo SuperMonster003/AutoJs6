@@ -62,7 +62,7 @@ class Notice(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
                 require(argList.size <= 2) {
                     "Arguments length ${argList.size} shouldn't be greater than 2 for notice with builder"
                 }
-                require(argList.size <= 1 && (arg1.isJsNullish() || arg1 is NativeObject)) {
+                require(arg1.isJsNullish() || arg1 is NativeObject) {
                     "Argument options ${arg1.jsBrief()} must be a JavaScript Object for notice with builder"
                 }
 
@@ -106,7 +106,7 @@ class Notice(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
                 require(argList.size <= 2) {
                     "Arguments length ${argList.size} shouldn't be greater than 2 for notice with content"
                 }
-                require(argList.size <= 1 && (arg1.isJsNullish() || arg1 is NativeObject)) {
+                require(arg1.isJsNullish() || arg1 is NativeObject) {
                     "Argument options ${arg1.jsBrief()} must be a JavaScript Object for notice with content"
                 }
 
@@ -126,7 +126,7 @@ class Notice(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
                 require(argList.size <= 3) {
                     "Arguments length ${argList.size} shouldn't be greater than 3 for notice with title and content"
                 }
-                require(argList.size <= 2 && (arg2.isJsNullish() || arg2 is NativeObject)) {
+                require(arg2.isJsNullish() || arg2 is NativeObject) {
                     "Argument options ${arg2.jsBrief()} must be a JavaScript Object for notice with title and content"
                 }
 
