@@ -26,6 +26,7 @@
         "Scrapers 工具 (run-scrapers.mjs) 用于自动更新 Gradle 构建脚本结构化数据/README 通用数据/README 模板数据等"
       ],
       "fix": [
+        "notice 方法参数数量及类型限制错误 _[`issue #462`](http://issues.autojs6.com/462)_",
         "isJavaClass/isJavaPackage 等全局方法无效的问题",
         "timers.keepAlive 方法 timeout 参数功能无效的问题",
         "floaty.window/rawWindow 方法无法接受字符串参数的问题",
