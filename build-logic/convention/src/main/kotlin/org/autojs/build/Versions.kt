@@ -2,7 +2,6 @@ package org.autojs.build
 
 import org.autojs.build.Utils.getOrNull
 import org.gradle.api.Action
-import org.gradle.api.GradleException
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.execution.TaskExecutionGraph
@@ -10,7 +9,6 @@ import org.gradle.kotlin.dsl.extra
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.util.*
-import kotlin.properties.Delegates
 import kotlin.text.RegexOption.IGNORE_CASE
 
 class Versions @JvmOverloads constructor(
@@ -18,14 +16,15 @@ class Versions @JvmOverloads constructor(
     filePath: String = "${project.rootDir}/version.properties",
 ) {
     private val gradle = project.gradle
-    private val logger = project.logger
-
-    private val currentVersionInt = JavaVersion.current().majorVersion.toInt()
 
     private val bp = BuildProperties.loadFrom(filePath)
 
-    private val javaVersionMinSuggested: Int = bp.requireInt("JAVA_VERSION_MIN_SUGGESTED")
+    private val javaVersionCurrentInt = JavaVersion.current().majorVersion.toInt()
+    private val javaVersionMinSupported: Int = bp.requireInt("JAVA_VERSION_MIN_SUPPORTED")
     private val javaVersionMaxSupported: Int = bp.requireInt("JAVA_VERSION_MAX_SUPPORTED")
+
+    private val javaVersionInt: Int = System.getProperty("gradle.java.version.select").toInt()
+    private val javaVersionInfoSuffix: String = System.getProperty("gradle.java.version.suffix", "")
 
     private var isBuildNumberAutoIncremented = false
     private val minBuildTimeGap = Utils.hours2Millis(0.75)
@@ -41,92 +40,11 @@ class Versions @JvmOverloads constructor(
     val appVersionCode = bp.requireInt("VERSION_BUILD")
     val vscodeExtRequiredVersion = bp.requireString("VSCODE_EXT_REQUIRED_VERSION")
 
-    private val javaVersionMinSupported: Int = bp.requireInt("JAVA_VERSION_MIN_SUPPORTED")
-
-    var javaVersionInt by Delegates.notNull<Int>()
-    var javaVersionInfoSuffix by Delegates.notNull<String>()
-
     val javaVersion: JavaVersion
         get() = JavaVersion.toVersion(javaVersionInt)
 
     val javaVersionString: String
         get() = javaVersion.toString()
-
-    init {
-        validateCurrentVersion()
-        determineJavaVersion().also { (javaVersionInt, javaVersionInfoSuffix) ->
-            this.javaVersionInt = javaVersionInt
-            this.javaVersionInfoSuffix = javaVersionInfoSuffix
-        }
-    }
-
-    private fun validateCurrentVersion() {
-        if (gradle.extra.getOrNull<Boolean>(VALIDATED_EXTRA_KEY) == true) {
-            return
-        }
-        if (currentVersionInt < javaVersionMinSupported) {
-            throw GradleException("Current Gradle JDK version [$currentVersionInt] does not meet the minimum requirement which [$javaVersionMinSupported] is needed.")
-        }
-        if (currentVersionInt < javaVersionMinSuggested) {
-            val suffix = if (javaVersionMaxSupported > 0) " (but not higher than [$javaVersionMaxSupported])" else ""
-            logger.error("It is recommended to upgrade current Gradle JDK version [$currentVersionInt] to [$javaVersionMinSuggested] or higher$suffix.")
-        }
-        if (currentVersionInt > javaVersionMaxSupported) {
-            val suffix = if (javaVersionMaxSupported > javaVersionMinSuggested) " or lower (but not lower than [$javaVersionMinSuggested])" else ""
-            logger.error("It is recommended to downgrade current Gradle JDK version [$currentVersionInt] to [$javaVersionMaxSupported]$suffix, as Gradle may be not compatible with JDK [$currentVersionInt] for now.")
-        }
-        gradle.extra.set(VALIDATED_EXTRA_KEY, true)
-    }
-
-    private fun determineJavaVersion(): Pair<Int, String> {
-        var javaVersionInfoSuffix = ""
-
-        gradle.extra.getOrNull<Int>("javaVersionOverriddenByUser")?.let {
-            javaVersionInfoSuffix += " [user-specified]"
-            return it to javaVersionInfoSuffix
-        }
-
-        var versionInt = JavaVersion.current().majorVersion.toInt()
-
-        run tryAdjustJavaVersionByKotlinJvmTarget@{
-            var isJvmCoercive = false
-
-            while (versionInt > javaVersionMinSupported) {
-                if (isJvmTargetAvailable(versionInt)) {
-                    break
-                }
-                versionInt -= 1
-                isJvmCoercive = true
-            }
-
-            if (isJvmCoercive) {
-                javaVersionInfoSuffix += " [coercive-jvm-downgraded]"
-            }
-        }
-
-        gradle.extra.getOrNull<Int>("javaVersionCoercedByGradle")?.let {
-            if (versionInt > it) {
-                versionInt = it
-                javaVersionInfoSuffix += " [coercive-gradle-downgraded]"
-            }
-        }
-        return versionInt to javaVersionInfoSuffix
-    }
-
-    private fun isJvmTargetAvailable(target: Int): Boolean {
-        try {
-            // Weak dependency with Kotlin plugin: Use reflection to check if JvmTarget is available;
-            // if reflection fails, treat it as available (to avoid incorrect downgrading).
-            // zh-CN: 与 Kotlin 插件弱依赖: 反射判断 JvmTarget 是否可用; 反射失败则视为可用 (避免误降级).
-            val cls = Class.forName("org.jetbrains.kotlin.gradle.dsl.JvmTarget")
-            cls.enumConstants?.let { values ->
-                return values.any { it?.toString().equals("JVM_$target", true) }
-            }
-        } catch (e: Throwable) {
-            logger.error("Failed to check JVM target availability: $e")
-        }
-        return true
-    }
 
     operator fun get(propertyName: String) = bp[propertyName]
 
@@ -138,6 +56,7 @@ class Versions @JvmOverloads constructor(
         val infoVerName = "Version name: $appVersionName"
         val infoVerCode = "Version code: ${if (isBuildNumberAutoIncremented) "${appVersionCode + 1} [auto-incremented]" else appVersionCode}"
         val infoVerSdk = "SDK versions: min [$sdkVersionMin] / target [$sdkVersionTarget] / compile [$sdkVersionCompile]"
+        val infoVerJdk = "JDK versions: min [$javaVersionMinSupported] / select [$javaVersionInt] / current [$javaVersionCurrentInt] / max [$javaVersionMaxSupported]"
         val infoVerJava = "Java version: $javaVersion${
             when {
                 gradle.extra.getOrNull<Boolean>("isHideConsoleInfoHintSuffix") == true -> ""
@@ -145,7 +64,7 @@ class Versions @JvmOverloads constructor(
             }
         }"
 
-        val maxLength = arrayOf(title, infoVerName, infoVerCode, infoVerSdk, infoVerJava).maxOf { it.length }
+        val maxLength = arrayOf(title, infoVerName, infoVerCode, infoVerSdk, infoVerJdk, infoVerJava).maxOf { it.length }
 
         arrayOf(
             "=".repeat(maxLength),
@@ -154,6 +73,7 @@ class Versions @JvmOverloads constructor(
             infoVerName,
             infoVerCode,
             infoVerSdk,
+            infoVerJdk,
             infoVerJava,
             "=".repeat(maxLength),
             "",
@@ -201,10 +121,6 @@ class Versions @JvmOverloads constructor(
         FileOutputStream(propsPath).use { out ->
             props.store(out, null)
         }
-    }
-
-    companion object {
-        private const val VALIDATED_EXTRA_KEY = "org.autojs.build.Versions.currentValidated"
     }
 
 }
