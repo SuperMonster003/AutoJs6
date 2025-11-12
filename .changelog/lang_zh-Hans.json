@@ -41,6 +41,7 @@
         "canvas 元素控件 setMaxFps 方法内部帧率计算错误",
         "images.concat 方法纵向拼接时宽度值计算错误",
         "images.requestScreenCapture 方法调用时用户取消授权可能导致应用崩溃的问题",
+        "images 部分方法使用区域参数时 1 被误解析为百分比的问题",
         "images 部分相关方法出现异常时 oneShot 标记功能失效的问题 _[`issue #372`](http://issues.autojs6.com/372)_",
         "images 部分相关方法可能引发内存泄露的问题 _[`issue #372`](http://issues.autojs6.com/372)_",
         "Android 10 UiObject#child 方法可能出现 ArrayIndexOutOfBoundsException 异常的问题 _[`issue #416`](http://issues.autojs6.com/416)_",

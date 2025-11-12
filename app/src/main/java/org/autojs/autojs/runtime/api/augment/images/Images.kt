@@ -13,6 +13,7 @@ import org.autojs.autojs.core.image.ImageWrapper
 import org.autojs.autojs.core.image.capture.ScreenCapturer
 import org.autojs.autojs.extension.AnyExtensions.isJsArray
 import org.autojs.autojs.extension.AnyExtensions.isJsNullish
+import org.autojs.autojs.extension.AnyExtensions.isJsNumber
 import org.autojs.autojs.extension.AnyExtensions.isJsString
 import org.autojs.autojs.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.extension.AnyExtensions.jsSpecies
@@ -562,9 +563,9 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
                 /* Mat (矩阵) 对象. */
                 val mat = AutoJsMat()
                 /* sigmaX. */
-                val x = parseNumber(sigmaX).toDouble()
+                val x = parseNumber(sigmaX)
                 /* sigmaY. */
-                val y = parseNumber(sigmaY).toDouble()
+                val y = parseNumber(sigmaY)
                 /* 边缘点插值类型. */
                 val borderType = parseBorderType(type)
                 /* 高斯模糊. */
@@ -584,9 +585,9 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             try {
                 initOpenCvIfNeeded()
                 val mat = AutoJsMat()
-                val dValue = parseNumber(d, 0)
-                val sigmaColorValue = parseNumber(sigmaColor, 40).toDouble()
-                val sigmaSpaceValue = parseNumber(sigmaSpace, 20).toDouble()
+                val dValue = parseIntNumber(d, 0)
+                val sigmaColorValue = parseNumber(sigmaColor, 40)
+                val sigmaSpaceValue = parseNumber(sigmaSpace, 20)
                 Imgproc.bilateralFilter(image.mat, mat, dValue, sigmaColorValue, sigmaSpaceValue, parseBorderType(borderType))
                 matToImage(scriptRuntime, arrayOf(mat))
             } finally {
@@ -638,12 +639,12 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
                     mat,
                     circles,
                     Imgproc.CV_HOUGH_GRADIENT,
-                    parseNumber(options.prop("dp"), 1).toDouble(),
-                    parseNumber(options.prop("minDst")) { grayImage.height / 8 }.toDouble(),
-                    parseNumber(options.prop("param1"), 100).toDouble(),
-                    parseNumber(options.prop("param2"), 100).toDouble(),
-                    parseNumber(options.prop("minRadius"), 0),
-                    parseNumber(options.prop("maxRadius"), 0),
+                    parseNumber(options.prop("dp"), 1),
+                    parseNumber(options.prop("minDst")) { grayImage.height / 8 },
+                    parseNumber(options.prop("param1"), 100),
+                    parseNumber(options.prop("param2"), 100),
+                    parseIntNumber(options.prop("minRadius"), 0),
+                    parseIntNumber(options.prop("maxRadius"), 0),
                 )
                 for (i in 0 until circles.rows()) {
                     for (j in 0 until circles.cols()) {
@@ -793,7 +794,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
                 initOpenCvIfNeeded()
                 val pixel = pixel(scriptRuntime, arrayOf(image, coerceIntNumber(x), coerceIntNumber(y)))
                 return ColorDetector
-                    .get(Colors.toIntRhino(color), coerceString(algorithm, DEFAULT_COLOR_ALGORITHM), parseNumber(threshold, DEFAULT_COLOR_THRESHOLD))
+                    .get(Colors.toIntRhino(color), coerceString(algorithm, DEFAULT_COLOR_ALGORITHM), parseIntNumber(threshold, DEFAULT_COLOR_THRESHOLD))
                     .detectColor(Colors.redRhino(pixel).roundToInt(), Colors.greenRhino(pixel).roundToInt(), Colors.blueRhino(pixel).roundToInt())
             } finally {
                 ApiImages.shoot(imageRef)
@@ -1055,7 +1056,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
                         val weakThreshold = parseWeakThreshold(opt, 0.6).toFloat()
                         val threshold = parseThreshold(opt, 0.9).toFloat()
                         val region = buildRegionInternal(image, opt.prop("region").takeUnless { it.isJsNullish() } ?: listOf(/* x = */ xOrOptions, y, width, height))
-                        val level = parseNumber(opt.prop("level"), -1)
+                        val level = parseIntNumber(opt.prop("level"), -1)
                         scriptRuntime.images.findImage(image, template, weakThreshold, threshold, region, level)
                     }
                 }
@@ -1098,8 +1099,8 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
                 val weakThreshold = parseWeakThreshold(opt, 0.6).toFloat()
                 val threshold = parseThreshold(opt, 0.9).toFloat()
                 val region = opt.inquire("region") { region -> buildRegionInternal(image, region) }
-                val level = parseNumber(opt.prop("level"), -1)
-                val max = parseNumber(opt.prop("max"), 5)
+                val level = parseIntNumber(opt.prop("level"), -1)
+                val max = parseIntNumber(opt.prop("max"), 5)
                 val useTransparentMask = when {
                     opt.hasProp("useTransparentMask") -> coerceBoolean(opt.prop("useTransparentMask"))
                     opt.hasProp("transparentMask") -> /* @Compatible with Auto.js Pro. */ coerceBoolean(opt.prop("transparentMask"))
@@ -1481,7 +1482,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
                 val (matA, matB) = matPair
                 val opt = options as? NativeObject ?: newNativeObject()
                 val metric = opt.inquire("metric", ::coerceStringLowercase, DEFAULT_IMAGE_SIMILARITY_METRIC)
-                val similarityMethod = kotlin.runCatching {
+                val similarityMethod = runCatching {
                     ImageSimilarity::class.java.getDeclaredMethod(metric, OpencvMat::class.java, OpencvMat::class.java)
                 }.getOrElse { throw WrappedIllegalArgumentException("Unknown similarity metric: $metric") }
                 if (similarityMethod.returnType != Double::class.java && similarityMethod.returnType != java.lang.Double::class.java) {
@@ -1576,26 +1577,36 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             return rtImages.requestScreenCapture(orientation, width, height, isAsync)
         }
 
-        private fun parseScreenMetric(reference: Int, dimension: Int) = when (reference) {
-            -1 -> dimension
-            in 1 downTo 0 -> dimension * reference
-            else -> reference
+        private fun parseScreenMetric(reference: Double, dimension: Int): Int = when (reference) {
+            -1.0 -> dimension
+            in 0.0..<1.0 -> (dimension * reference).roundToInt()
+            else -> reference.roundToInt()
         }
 
-        private fun parseNumber(x: Any?, def: Any? = null) = coerceIntNumber(x, coerceIntNumber(if (def.isJsNullish()) 0 else def))
+        private fun parseIntNumber(x: Any?, def: Any? = null): Int {
+            return parseNumber(x, def).roundToInt()
+        }
 
-        private fun parseNumber(x: Any?, def: () -> Any?): Int {
+        private fun parseNumber(x: Any?, def: Any? = null): Double {
+            return coerceNumber(x, coerceNumber(if (def.isJsNullish()) 0 else def))
+        }
+
+        private fun parseIntNumber(x: Any?, def: () -> Any?): Int {
+            return parseNumber(x, def).roundToInt()
+        }
+
+        private fun parseNumber(x: Any?, def: () -> Any?): Double {
             val tmp = coerceNumber(x, Double.NaN)
             return when {
                 tmp.isNaN() -> def.invoke().let { result ->
-                    if (result.isJsNullish()) 0 else coerceIntNumber(result)
+                    if (result.isJsNullish()) 0.0 else coerceNumber(result)
                 }
-                else -> tmp.roundToInt()
+                else -> tmp
             }
         }
 
         private fun coerceIn(num: Double?, minValue: Double, maxValue: Double, defValue: Double = 0.0): Double {
-            return parseNumber(num, defValue).toDouble().coerceIn(minValue, maxValue)
+            return parseNumber(num, defValue).coerceIn(minValue, maxValue)
         }
 
         private fun parseSize(size: Any?): OpencvSize {
@@ -1672,57 +1683,54 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @SuppressLint("RtlHardcoded")
         private fun directionToGravityToConcat(direction: Any?): Int = when {
             direction.isJsNullish() -> Gravity.END
-            else -> when (coerceString(direction).lowercase()) {
-                "left" -> Gravity.LEFT
-                "top" -> Gravity.TOP
-                "bottom" -> Gravity.BOTTOM
-                "right" -> Gravity.RIGHT
-                "start" -> Gravity.START
-                "end" -> Gravity.END
-                else -> throw WrappedIllegalArgumentException("Unknown image concat direction: $direction")
+            direction.isJsString() -> {
+                val s = coerceString(direction).uppercase().replace("-", "_")
+                Gravity::class.java.getField(s).getInt(null)
             }
+            direction.isJsNumber() -> coerceIntNumber(direction)
+            else -> throw WrappedIllegalArgumentException("Unknown image concat direction: ${direction.jsBrief()}")
         }
 
-        private fun parseBorderType(o: Any?): Int {
-            var border = o
-            if (o is String) {
-                border = when {
-                    o.startsWith("BORDER_", true) -> o
-                    else -> "BORDER_$o"
-                }.uppercase()
+        private fun parseBorderType(o: Any?): Int = when {
+            o.isJsNullish() -> OpencvCore.BORDER_DEFAULT
+            o.isJsString() -> {
+                val s = coerceString(o)
+                val name = when {
+                    s.startsWith("BORDER_", true) -> s
+                    else -> "BORDER_$s"
+                }.uppercase().replace("-", "_")
+                OpencvCore::class.java.getField(name).getInt(null)
             }
-            return when {
-                border.isJsNullish() -> OpencvCore.BORDER_DEFAULT
-                else -> OpencvCore::class.java.getField(coerceString(border)).getInt(null)
-            }
+            o.isJsNumber() -> coerceIntNumber(o)
+            else -> throw WrappedIllegalArgumentException("Unknown border type: ${o.jsBrief()}")
         }
 
-        private fun parseThresholdType(o: Any?): Int {
-            var threshold = o
-            if (o is String) {
-                threshold = when {
-                    o.startsWith("THRESH_", true) -> o
-                    else -> "THRESH_$o"
-                }.uppercase()
+        private fun parseThresholdType(o: Any?): Int = when {
+            o.isJsNullish() -> Imgproc.THRESH_BINARY
+            o.isJsString() -> {
+                val s = coerceString(o)
+                val name = when {
+                    s.startsWith("THRESH_", true) -> s
+                    else -> "THRESH_$s"
+                }.uppercase().replace("-", "_")
+                Imgproc::class.java.getField(name).getInt(null)
             }
-            return when {
-                threshold.isJsNullish() -> Imgproc.THRESH_BINARY
-                else -> Imgproc::class.java.getField(coerceString(threshold)).getInt(null)
-            }
+            o.isJsNumber() -> coerceIntNumber(o)
+            else -> throw WrappedIllegalArgumentException("Unknown threshold type: ${o.jsBrief()}")
         }
 
-        private fun parseInterpolation(o: Any?): Int {
-            var interpolation = o
-            if (o is String) {
-                interpolation = when {
-                    o.startsWith("INTER_", true) -> o
-                    else -> "INTER_$o"
-                }.uppercase()
+        private fun parseInterpolation(o: Any?): Int = when {
+            o.isJsNullish() -> Imgproc.INTER_LINEAR
+            o.isJsString() -> {
+                val s = coerceString(o)
+                val name = when {
+                    s.startsWith("INTER_", true) -> s
+                    else -> "INTER_$s"
+                }.uppercase().replace("-", "_")
+                Imgproc::class.java.getField(name).getInt(null)
             }
-            return when {
-                interpolation.isJsNullish() -> Imgproc.INTER_LINEAR
-                else -> Imgproc::class.java.getField(coerceString(interpolation)).getInt(null)
-            }
+            o.isJsNumber() -> coerceIntNumber(o)
+            else -> throw WrappedIllegalArgumentException("Unknown image interpolation: ${o.jsBrief()}")
         }
 
         // @Reference to module __images__.js from Auto.js Pro 9.3.11 by SuperMonster003 on Dec 19, 2023.
@@ -1732,10 +1740,10 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
                 when (method.uppercase()) {
                     "SIFT" -> ImageFeatureMatching.FEATURE_MATCHING_METHOD_SIFT
                     "ORB" -> ImageFeatureMatching.FEATURE_MATCHING_METHOD_ORB
-                    else -> throw Error("Unknown method: $method")
+                    else -> throw WrappedIllegalArgumentException("Unknown method: ${method.jsBrief()}")
                 }
             }
-            else -> throw Error("Non-recognized method: $method")
+            else -> throw WrappedIllegalArgumentException("Non-recognized method: ${method.jsBrief()}")
         }
 
         // @Reference to module __images__.js from Auto.js Pro 9.3.11 by SuperMonster003 on Dec 19, 2023.
