@@ -127,6 +127,7 @@ pluginManagement {
             putAll(gradle.startParameter.projectProperties)
         }.filterKeys { key ->
             return@filterKeys key is String
+                    && key.startsWith("gradle.").not()
                     && key !in unconcernedKeys
                     && key.split(Regex("\\W")).any { it in concernedKeyWords }
                     && key.split(Regex("\\W")).none { it in unconcernedKeyWords }
@@ -421,15 +422,15 @@ pluginManagement {
                     || systemProperties.vendorName?.contains(vendor, true) == true
 
             fun ensureMinimalGradleJdkVersion() {
-                val minVer = versionProps["JAVA_VERSION_MIN_SUPPORTED"].let { it as String }.toInt()
+                val javaVersionMinSupported = versionProps["JAVA_VERSION_MIN_SUPPORTED"].let { it as String }.toInt()
 
-                if (JavaVersion.current().majorVersion.toInt() < minVer) {
+                if (JavaVersion.current().majorVersion.toInt() < javaVersionMinSupported) {
                     Formatted(
                         "Current Gradle JDK version ${JavaVersion.current()} does not meet " +
-                                "the minimum requirement which $minVer is needed",
+                                "the minimum requirement which $javaVersionMinSupported is needed",
                         mutableListOf<String>().apply {
                             gradleSettingsName?.let { add("Settings path: File | Settings | Build, Execution, Deployment | Build Tools | Gradle") }
-                            add("Change \"${gradleSettingsName ?: "Gradle JDK"}\" to $minVer at the least")
+                            add("Change \"${gradleSettingsName ?: "Gradle JDK"}\" to $javaVersionMinSupported at the least")
                         }
                     ).throwException()
                 }
@@ -655,8 +656,8 @@ pluginManagement {
                 }
             }
             if (lib.id == "com.android.tools.build:gradle") {
-                gradle.extra.set("javaVersionCoercedByGradle", getMaxSupportedJavaVersion(version))
-                gradle.extra.set("javaVersionOverriddenByUser", overriddenJavaVersion)
+                System.setProperty("gradle.java.version.coerced.by.gradle", "${getMaxSupportedJavaVersion(version)}")
+                System.setProperty("gradle.java.version.overridden.by.user", "$overriddenJavaVersion")
             }
             "${lib.id}:$version".also { notation ->
                 console.versionInfo += "Classpath: \"$notation\"${if (config.isHideConsoleInfoHintSuffix) "" else suffix}"

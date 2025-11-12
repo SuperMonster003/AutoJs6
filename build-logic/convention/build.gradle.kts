@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     `kotlin-dsl` /* kotlin("jvm") */
     `java-gradle-plugin`
@@ -56,7 +58,25 @@ gradlePlugin {
     }
 }
 
-(gradle.extra["jdk"] as Int).let { jdk ->
-    kotlin { jvmToolchain(jdk) }
-    java { toolchain.languageVersion.set(JavaLanguageVersion.of(jdk)) }
+System.getProperty("gradle.java.version.select").toInt().let { jdk ->
+    java {
+        toolchain {
+            languageVersion.set(JavaLanguageVersion.of(jdk))
+        }
+    }
+    kotlin {
+        jvmToolchain(jdk)
+    }
+}
+
+System.getProperty("gradle.jvm.target.effective").let { jvm ->
+    java {
+        sourceCompatibility = JavaVersion.toVersion(jvm)
+        targetCompatibility = JavaVersion.toVersion(jvm)
+    }
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.fromTarget(jvm))
+        }
+    }
 }

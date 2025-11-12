@@ -83,11 +83,11 @@ async function updateGradleWrapperFileContent({ latestGradleVersion, latestGradl
     if (compareVersionStrings(propVersion, majorVersionLimit) > 0) {
         const suffix = ` (downgrade, limited by "${config.majorVersionLimit}")`;
         messages.push(`-- ${propUrl}\n-> ${latestGradleUrl}${suffix}`);
-        props[KEY] = propUrl.replace(re, `$1${latestGradleVersion}$3`);
+        props.set(KEY, propUrl.replace(re, `$1${latestGradleVersion}$3`));
     } else if (compareVersionStrings(propVersion, latestGradleVersion) < 0) {
         const suffix = isVersionLimited() ? ` (upgrade, but limited by "${config.majorVersionLimit}")` : ` (upgrade)`;
         messages.push(`-- ${propUrl}\n-> ${latestGradleUrl}${suffix}`);
-        props[KEY] = propUrl.replace(re, `$1${latestGradleVersion}$3`);
+        props.set(KEY, propUrl.replace(re, `$1${latestGradleVersion}$3`));
     }
 
     if (messages.length > 0) {

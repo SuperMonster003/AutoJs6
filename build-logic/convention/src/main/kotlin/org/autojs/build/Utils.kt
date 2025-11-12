@@ -1,6 +1,7 @@
 package org.autojs.build
 
 import org.gradle.api.Action
+import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.CopySpec
@@ -251,16 +252,16 @@ object Utils {
         val installer = {
             project.logInfo("[JvmConv] Detected Android plugin in module='${project.path}', installing configuration")
 
-            // Java: Use Toolchain (module-level + task-level), do not set --release.
-            // zh-CN: Java: 使用 Toolchain (模块级 + 任务级), 不要设置 --release.
+            System.getProperty("gradle.java.version.select").let { ver ->
+                configureJavaToolchainLanguageLevel(project, ver)
+                configureJavaToolchainForAllJavaCompile(project, ver)
+                configureKotlinJvmToolchain(project, ver)
+            }
 
-            configureJavaToolchainLanguageLevel(project, versions.javaVersionInt)
-            configureJavaToolchainForAllJavaCompile(project, versions.javaVersionInt)
-
-            // Kotlin: Continue lazy configuration to set jvmTarget.
-            // zh-CN: Kotlin: 继续懒配置设置 jvmTarget.
-
-            configureKotlinJvmTargetLazily(project, versions)
+            System.getProperty("gradle.jvm.target.effective").let { ver ->
+                configureAndroidCompileOptions(project, ver)
+                configureKotlinJvmTargetLazily(project, ver)
+            }
 
             project.logInfo("[JvmConv] Installed Java toolchain (module+tasks) and Kotlin jvmTarget for '${project.path}'")
         }
@@ -271,7 +272,7 @@ object Utils {
 
     // Module-level toolchain: Let AGP/Gradle know which JDK language level should be used for this module.
     // zh-CN: 模块级 Toolchain: 让 AGP/Gradle 知道本模块应使用的 JDK 语言级别.
-    private fun configureJavaToolchainLanguageLevel(project: Project, target: Int) {
+    private fun configureJavaToolchainLanguageLevel(project: Project, target: String) {
         val javaExt = project.extensions.findByType(JavaPluginExtension::class.java)
         if (javaExt == null) {
             project.logWarn("[JvmConv] JavaPluginExtension not found in '${project.path}', skip module-level toolchain")
@@ -286,9 +287,24 @@ object Utils {
         }
     }
 
+    private fun configureKotlinJvmToolchain(project: Project, target: String) {
+        project.plugins.withId("org.jetbrains.kotlin.android") {
+            project.extensions.findByName("kotlin")?.let { kotlinExt ->
+                runCatching {
+                    kotlinExt.javaClass.getMethod("jvmToolchain", Int::class.java)
+                        .invoke(kotlinExt, target.toInt())
+                }.onSuccess {
+                    project.logInfo("[JvmConv] Kotlin jvmToolchain set to $target for '${project.path}'")
+                }.onFailure {
+                    project.logError("[JvmConv] Set Kotlin jvmToolchain failed on '${project.path}': ${it.message}", it)
+                }
+            }
+        }
+    }
+
     // Task-level Toolchain: Specify javaCompiler for all JavaCompile tasks, without setting --release (prohibited by AGP).
     // zh-CN: 任务级 Toolchain: 对所有 JavaCompile 指定 javaCompiler, 且不要设置 --release (AGP 禁止).
-    private fun configureJavaToolchainForAllJavaCompile(project: Project, target: Int) {
+    private fun configureJavaToolchainForAllJavaCompile(project: Project, target: String) {
         val toolchains = runCatching {
             project.extensions.getByType(JavaToolchainService::class.java)
         }.onFailure {
@@ -309,6 +325,37 @@ object Utils {
         })
     }
 
+    // 将 Android 的 compileOptions.sourceCompatibility/targetCompatibility 设置为给定目标 (如 "24"), 确保与 Kotlin 一致
+    // zh-CN: 使用反射避免对 AGP 具体类型的直接依赖; 兼容 application/library.
+    private fun configureAndroidCompileOptions(project: Project, target: String) {
+        val androidExt = project.extensions.findByName("android") ?: run {
+            project.logWarn("[JvmConv] Android extension not found in '${project.path}', skip compileOptions alignment")
+            return
+        }
+        runCatching {
+            val compileOptions = androidExt.javaClass.methods
+                .firstOrNull { it.name == "getCompileOptions" && it.parameterTypes.isEmpty() }
+                ?.invoke(androidExt) ?: return@runCatching project.logWarn("[JvmConv] compileOptions not found on android extension for '${project.path}'")
+
+            val javaVersionClass = Class.forName("org.gradle.api.JavaVersion")
+            val javaVersion = JavaVersion.toVersion(target)
+
+            val setSource = compileOptions.javaClass.methods.firstOrNull {
+                it.name == "setSourceCompatibility" && it.parameterTypes.size == 1 && it.parameterTypes[0] == javaVersionClass
+            } ?: throw IllegalStateException("setSourceCompatibility(JavaVersion) not found")
+            val setTarget = compileOptions.javaClass.methods.firstOrNull {
+                it.name == "setTargetCompatibility" && it.parameterTypes.size == 1 && it.parameterTypes[0] == javaVersionClass
+            } ?: throw IllegalStateException("setTargetCompatibility(JavaVersion) not found")
+
+            setSource.invoke(compileOptions, javaVersion)
+            setTarget.invoke(compileOptions, javaVersion)
+
+            project.logInfo("[JvmConv] Android compileOptions source/target set to Java $target for '${project.path}'")
+        }.onFailure {
+            project.logError("[JvmConv] Configure Android compileOptions failed on '${project.path}': ${it.message}", it)
+        }
+    }
+
     // Configure jvmTarget for KotlinCompile tasks:
     // Use configureEach for lazy configuration on task creation;
     // Compatible with old and new APIs.
@@ -316,8 +363,8 @@ object Utils {
     // 为 KotlinCompile 任务设置 jvmTarget:
     // 使用 configureEach, 任务实现时自动应用;
     // 兼容新旧 API.
-    private fun configureKotlinJvmTargetLazily(project: Project, versions: Versions) {
-        val desiredStr = versions.javaVersionString // e.g. "22"
+    private fun configureKotlinJvmTargetLazily(project: Project, target: String) {
+        val desiredStr = target // e.g. "22"
         val desiredEnumName = "JVM_${desiredStr}" // e.g. "JVM_22"
         project.logInfo("[JvmConv] Will configure Kotlin jvmTarget lazily to '$desiredEnumName' in '${project.path}'")
 
