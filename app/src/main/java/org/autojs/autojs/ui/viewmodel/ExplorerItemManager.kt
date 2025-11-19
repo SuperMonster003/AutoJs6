@@ -104,7 +104,7 @@ class ExplorerItemManager(private val mContext: Context) {
         }
     }
 
-    private fun <T> remove(list: ArrayList<*>, o: T): Int {
+    private fun <T> remove(list: ArrayList<T>, o: T): Int {
         return list.indexOf(o).also { i ->
             list.takeUnless { i < 0 }?.removeAt(i)
         }

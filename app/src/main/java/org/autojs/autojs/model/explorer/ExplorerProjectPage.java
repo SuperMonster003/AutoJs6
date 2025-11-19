@@ -8,6 +8,11 @@ import java.io.File;
 public class ExplorerProjectPage extends ExplorerDirPage {
     private final ProjectConfig mProjectConfig;
 
+    public ExplorerProjectPage(PFile file, ExplorerPage parent) {
+        super(file, parent);
+        mProjectConfig = ProjectConfig.fromFile(file);
+    }
+
     public ExplorerProjectPage(PFile file, ExplorerPage parent, ProjectConfig projectConfig) {
         super(file, parent);
         mProjectConfig = projectConfig;

@@ -27,6 +27,7 @@ import org.autojs.autojs.model.explorer.Explorer;
 import org.autojs.autojs.model.explorer.ExplorerDirPage;
 import org.autojs.autojs.model.explorer.ExplorerFileItem;
 import org.autojs.autojs.model.explorer.ExplorerPage;
+import org.autojs.autojs.model.explorer.ExplorerProjectPage;
 import org.autojs.autojs.model.explorer.Explorers;
 import org.autojs.autojs.model.sample.SampleFile;
 import org.autojs.autojs.model.script.ScriptFile;
@@ -35,6 +36,7 @@ import org.autojs.autojs.network.download.DownloadManager;
 import org.autojs.autojs.pio.PFile;
 import org.autojs.autojs.pio.PFiles;
 import org.autojs.autojs.pio.UncheckedIOException;
+import org.autojs.autojs.project.ProjectConfig;
 import org.autojs.autojs.storage.file.TmpScriptFiles;
 import org.autojs.autojs.ui.filechooser.FileChooserDialogBuilder;
 import org.autojs.autojs.ui.shortcut.ShortcutCreateActivity;
@@ -421,13 +423,14 @@ public class ScriptOperations {
 
     public void deleteWithoutConfirm(final ScriptFile scriptFile) {
         boolean isDir = scriptFile.isDirectory();
+        boolean isProject = ProjectConfig.isProject(scriptFile);
         Observable.fromPublisher((Publisher<Boolean>) s -> s.onNext(PFiles.deleteRecursively(scriptFile)))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(deleted -> {
                     if (deleted) {
                         showMessage(R.string.text_already_deleted);
-                        notifyFileRemoved(isDir, scriptFile);
+                        notifyFileRemoved(isProject, isDir, scriptFile);
                     } else {
                         showMessage(R.string.text_failed_to_delete);
                     }
@@ -440,8 +443,10 @@ public class ScriptOperations {
         showMessage(R.string.text_done);
     }
 
-    private void notifyFileRemoved(boolean isDir, ScriptFile scriptFile) {
-        if (isDir) {
+    private void notifyFileRemoved(boolean isProject, boolean isDir, ScriptFile scriptFile) {
+        if (isProject) {
+            mExplorer.notifyItemRemoved(new ExplorerProjectPage(scriptFile, mExplorerPage));
+        } else if (isDir) {
             mExplorer.notifyItemRemoved(new ExplorerDirPage(scriptFile, mExplorerPage));
         } else {
             mExplorer.notifyItemRemoved(new ExplorerFileItem(scriptFile, mExplorerPage));
@@ -504,8 +509,8 @@ public class ScriptOperations {
     private class InputCallback implements MaterialDialog.InputCallback {
 
         private final String mExcluded;
-        private boolean mIsFirstTextChanged = true;
         private final String mExtension;
+        private boolean mIsFirstTextChanged = true;
 
         InputCallback(@Nullable String ext, @Nullable String excluded) {
             mExtension = ext == null ? null : "." + ext;
