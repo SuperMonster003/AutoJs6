@@ -199,7 +199,11 @@ public class ProjectConfig {
     }
 
     @Nullable
-    public static ProjectConfig fromFile(String path) {
+    public static ProjectConfig fromFile(File file) {
+        return fromFilePath(file.getPath());
+    }
+
+    public static ProjectConfig fromFilePath(String path) {
         String fileContents = null;
         try {
             fileContents = PFiles.read(path);
@@ -369,14 +373,21 @@ public class ProjectConfig {
         //  ! zh-CN: 无论 project.json 是否包含必要信息或是否可以正常解析, 都认为是一个有效项目.
         //  !
         //  # return fromProjectDir(page.getPath()) != null;
-        String path = page.getPath();
+        return isProject(page.getPath());
+    }
+
+    public static boolean isProject(File file) {
+        return isProject(file.getPath());
+    }
+
+    public static boolean isProject(String path) {
         String pathname = configFileOfDir(path);
         return new File(pathname).exists();
     }
 
     @Nullable
     public static ProjectConfig fromProjectDir(String path) {
-        return fromFile(configFileOfDir(path));
+        return fromFilePath(configFileOfDir(path));
     }
 
     public static String configFileOfDir(String projectDir) {

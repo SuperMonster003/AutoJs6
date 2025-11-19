@@ -124,8 +124,9 @@ public class ExplorerProjectToolbar extends CardView {
             return;
         }
         ExplorerItem item = event.getItem();
-        if ((event.getAction() == ExplorerChangeEvent.ALL)
-                || (item != null && mDirectory.getPath().equals(item.getPath()))) {
+        if (event.getAction() == ExplorerChangeEvent.ALL) {
+            refresh();
+        } else if (item != null && mDirectory.getPath().equals(item.getPath())) {
             refresh();
         }
     }
