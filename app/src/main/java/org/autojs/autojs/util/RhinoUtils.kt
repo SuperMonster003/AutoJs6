@@ -6,7 +6,6 @@ import android.content.Intent
 import android.os.Handler
 import android.os.Looper
 import android.os.Parcelable
-import android.util.Log
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.core.automator.UiObjectCollection
 import org.autojs.autojs.extension.AnyExtensions.isJsNullish
@@ -187,7 +186,6 @@ object RhinoUtils {
     }
 
     @JvmStatic
-    @Throws(NoSuchMethodException::class, InvocationTargetException::class, IllegalAccessException::class)
     fun callFunction(scriptRuntime: ScriptRuntime?, func: BaseFunction, scope: Scriptable?, thisObj: Scriptable?, args: Array<Any?>): Any? = withRhinoContext { cx ->
         try {
             val niceScope = scope ?: cx.initStandardObjects()
@@ -195,17 +193,23 @@ object RhinoUtils {
                 RhinoScriptRuntime.hasTopCall(cx) -> func.call(cx, niceScope, thisObj, args)
                 else -> RhinoScriptRuntime.doTopCall(func, cx, niceScope, thisObj, args, false)
             }
-        } catch (e: ScriptInterruptedException) {
-            e.message?.let { Log.v(TAG, it) }
+        } catch (e: InterruptedException) {
+            throw ScriptInterruptedException(e)
         } catch (e: ContinuationPending) {
             throw e
         } catch (e: Throwable) {
             e.printStackTrace()
             when {
                 isMainThread() -> {
-                    scriptRuntime?.exit(e) ?: throw WrappedRuntimeException(e)
+                    scriptRuntime?.exit(e) ?: when (e) {
+                        is ScriptInterruptedException -> throw e
+                        else -> throw WrappedRuntimeException(e)
+                    }
                 }
-                else -> throw WrappedRuntimeException(e)
+                else -> when (e) {
+                    is ScriptInterruptedException -> throw e
+                    else -> throw WrappedRuntimeException(e)
+                }
             }
         }
     }
@@ -591,15 +595,15 @@ object RhinoUtils {
     @Suppress("UnnecessaryVariable")
     @JvmStatic
     fun js_object_assign(tar: Scriptable?, src: Scriptable?): Scriptable = withRhinoContext { cx ->
-        val topeLevelScope = ImporterTopLevel(cx)
+        val topLevelScope = ImporterTopLevel(cx)
         val targetObj = when (tar != null) {
-            true -> toObject(cx, topeLevelScope, tar)
-            else -> toObject(cx, topeLevelScope, UNDEFINED)
+            true -> toObject(cx, topLevelScope, tar)
+            else -> toObject(cx, topLevelScope, UNDEFINED)
         }
         if (src.isJsNullish()) {
             return@withRhinoContext targetObj
         }
-        val sourceObj = toObject(cx, topeLevelScope, src)
+        val sourceObj = toObject(cx, topLevelScope, src)
         for (key in sourceObj.ids) {
             when (key) {
                 is Int -> {

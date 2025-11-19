@@ -155,6 +155,9 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : F
             try {
                 (this as Invokable).invoke(*args)
             } catch (e: Exception) {
+                if (ScriptInterruptedException.causedByInterrupt(e)) {
+                    throw e
+                }
                 val message = e.message?.let { msg ->
                     when {
                         msg.contains("\n") -> {
@@ -460,7 +463,7 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : F
                     }.also { it.printStackTrace() }
 
                     if (ScriptInterruptedException.causedByInterrupt(e)) {
-                        throw e
+                        throw ScriptInterruptedException(e)
                     }
                     val funcNameSuffix = if (funcName != funcNameAlias) " (${globalContext.getString(R.string.text_alias)}: $funcNameAlias)" else ""
                     val methodDescription = "$key.$funcName$funcNameSuffix"
