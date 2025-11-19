@@ -32,9 +32,18 @@ public class InputEventObserver {
 
     public static InputEventObserver getGlobal(Context context) {
         if (sGlobal == null) {
+            // noinspection UnnecessaryLocalVariable
             InputEventObserver observer = new InputEventObserver(context);
             sGlobal = observer;
-            observer.observe();
+            // @Hint by SuperMonster003 on Nov 16, 2025.
+            //  ! If calling observe() here, it will synchronously create a Shell
+            //  ! and block the main thread during app startup.
+            //  ! Changed to lazy initialization, asynchronously call ensureObservedAsync()
+            //  ! at appropriate time (like in GlobalKeyObserver constructor).
+            //  ! zh-CN:
+            //  ! 如果在此处调用 observe(), 会在应用启动时同步创建 Shell 并阻塞主线程.
+            //  ! 修改为懒初始化, 在适当时机 (如 GlobalKeyObserver 构造函数中) 异步调用 ensureObservedAsync().
+            //  # observer.observe();
         }
         return sGlobal;
     }
@@ -107,6 +116,25 @@ public class InputEventObserver {
             }
 
         });
+    }
+
+    // Ensure lazy start observation in background thread
+    // to avoid blocking the main thread/app startup.
+    // zh-CN: 确保在后台线程懒启动观察, 避免在主线程/应用启动期阻塞.
+    public void ensureObservedAsync() {
+        if (mShell != null) return;
+        synchronized (this) {
+            if (mShell != null) return;
+            new Thread(() -> {
+                try {
+                    observe();
+                } catch (Throwable ignored) {
+                    // Do not throw exceptions to main thread to avoid affecting first screen;
+                    // specific errors will be handled at the usage point.
+                    // zh-CN: 启动失败时不抛到主线程, 避免影响首屏; 具体错误在使用处再处理.
+                }
+            }, "InputEventObserver-Init").start();
+        }
     }
 
     public void onInputEvent(String eventStr) {

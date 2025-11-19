@@ -1,6 +1,7 @@
 package org.autojs.autojs.event;
 
 import android.content.Context;
+import android.os.Handler;
 import android.util.Log;
 import android.view.KeyEvent;
 import org.autojs.autojs.AutoJs;
@@ -31,7 +32,11 @@ public class GlobalKeyObserver implements OnKeyListener, ShellKeyObserver.KeyLis
         AccessibilityService.Companion.getStickOnKeyObserver().addListener(this);
         ShellKeyObserver observer = new ShellKeyObserver();
         observer.setKeyListener(this);
-        InputEventObserver.getGlobal(applicationContext).addListener(observer);
+        InputEventObserver io = InputEventObserver.getGlobal(applicationContext);
+        io.addListener(observer);
+        // Starts getevent asynchronously with a delay to avoid blocking the first frame.
+        // zh-CN: 将底层 getevent 的启动改为异步, 并稍作延迟, 避免阻塞首帧.
+        new Handler(applicationContext.getMainLooper()).postDelayed(io::ensureObservedAsync, 240);
     }
 
     public static void initIfNeeded(Context applicationContext) {
