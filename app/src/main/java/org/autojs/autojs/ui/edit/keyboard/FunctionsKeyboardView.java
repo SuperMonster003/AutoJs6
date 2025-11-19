@@ -20,7 +20,6 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.autojs.autojs.groundwork.WrapContentGridLayoutManger;
 import org.autojs.autojs.model.indices.Module;
 import org.autojs.autojs.model.indices.Modules;
 import org.autojs.autojs.model.indices.Property;
@@ -95,8 +94,7 @@ public class FunctionsKeyboardView extends FrameLayout {
 
     private void initPropertiesView(FunctionsKeyboardViewBinding binding) {
         mPropertiesView = binding.properties;
-        WrapContentGridLayoutManger manager = new WrapContentGridLayoutManger(getContext(), SPAN_COUNT);
-        manager.setDebugInfo("FunctionsKeyboardView");
+        GridLayoutManager manager = new GridLayoutManager(getContext(), SPAN_COUNT);
         mPropertiesView.setLayoutManager(manager);
         mPropertiesView.setAdapter(new PropertiesAdapter());
         manager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {

@@ -14,7 +14,6 @@ import androidx.annotation.Nullable;
 import androidx.core.content.pm.ShortcutManagerCompat;
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.tencent.bugly.crashreport.BuglyLog;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.internal.functions.ObjectHelper;
@@ -450,7 +449,7 @@ public class ScriptOperations {
     }
 
     public Observable<ScriptFile> download(String url) {
-        BuglyLog.i(LOG_TAG, "dir = " + WorkingDirectoryUtils.getPath() + ", sdcard = " + Environment.getExternalStorageDirectory() + ", url = " + url);
+        Log.i(LOG_TAG, "dir = " + WorkingDirectoryUtils.getPath() + ", sdcard = " + Environment.getExternalStorageDirectory() + ", url = " + url);
         String fileName = DownloadManager.parseFileNameLocally(url);
         return new FileChooserDialogBuilder(mContext)
                 .title(R.string.text_save_to)

@@ -29,7 +29,6 @@ import org.autojs.autojs.core.pref.Pref.putLinkedList
 import org.autojs.autojs.core.pref.Pref.putString
 import org.autojs.autojs.core.pref.Pref.remove
 import org.autojs.autojs.extension.ViewExtensions.setForceShowIconCompat
-import org.autojs.autojs.groundwork.WrapContentGridLayoutManger
 import org.autojs.autojs.model.explorer.Explorer
 import org.autojs.autojs.model.explorer.ExplorerChangeEvent
 import org.autojs.autojs.model.explorer.ExplorerDirPage
@@ -142,8 +141,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                 this.explorerItemListView = it
                 it.adapter = mExplorerAdapter
                 it.setHasFixedSize(true)
-                it.layoutManager = WrapContentGridLayoutManger(this.context, 2).also { manager ->
-                    manager.setDebugInfo(ExplorerView::class.java.simpleName)
+                it.layoutManager = GridLayoutManager(this.context, 2).also { manager ->
                     manager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
                         override fun getSpanSize(position: Int) = when {
                             position > positionOfCategoryDir && position < positionOfCategoryFile() -> {
