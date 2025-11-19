@@ -79,10 +79,14 @@
     <string name="description_manage_ignored_updates_preference">Click to view or manage list items.\nLong press to remove the list item.</string>
     <string name="description_night_mode_preference">Night mode (also known as Dark theme) applies to both the Android system UI and apps running on the device, which improves visibility for users with low vision and those who are sensitive to bright light, and makes it easier for anyone to use a device in a low-light environment.\n\nFollow system: AutoJs6 has Night mode settings same as Android system\nAlways on: AutoJs6 keeps Night mode on (regardless of Android system settings)\nAlways off: AutoJs6 keeps Night mode off (regardless of Android system settings)\n\nNote: Follow system option is only for Android API Level 28 (Android 9) [P] and above.</string>
     <string name="description_night_mode_preference_more">To enable Night mode in Android system:\n- Android API Level 29 (Android 10) [Q] and above: Settings -> Display -> Theme.\n- Android API Level 28 (Android 9) [P]: Developer options -> Night mode.\n\nThe following conditions must to met for applying a Night mode (Dark theme) to web-based content using a WebView component (like AutoJs6 documentation page):\n1. Android System WebView (or browsers like Google Chrome):\n- Android API Level 29 (Android 10) [Q] and above: version >= 76\n- Android API Level 28 (Android 9) [P]: version >= 105\n2. Web-based content in WebView component is adapted to Dark theme (by CSS or Android XML resources and so forth)</string>
+    <string name="description_restart_strategy">The restart strategy only affects the restart button in the home page drawer.\n\nQuick restart: Quickly restarts the app. If the restart fails or unexpected situations occur, try switching to \"Scheduled restart\".\nScheduled restart: Sets up a short-timed task in advance. After the app stops, it will start again on schedule to achieve app restart.</string>
+    <string name="description_rhino_java_primitive_wrap">Switch ON (default): results of Java methods that are instances of Number/Boolean/Character are wrapped as Java objects and exposed to scripts (String excluded). typeof is \"object\", species is \"JavaObject\"; Java methods remain accessible, which helps retain precise Java type traits and overload resolution.\n\nSwitch OFF: the above types are no longer wrapped and are exposed directly as JavaScript primitives (number/boolean/one‑character string). typeof is the corresponding JavaScript type, aligning better with JavaScript semantics and ecosystem. You can still explicitly create a Java wrapper via new, e.g. new java.lang.Boolean(true).\n\nSee: http://issues.autojs6.com/435</string>
     <string name="description_root_mode_preference">If you have exotic root or abnormal state for root access, you can force set root to root or non-root.</string>
     <string name="description_root_record_out_file_type_preference">Binary type: non-editable, with the file extension \"auto\"\nJavaScript type: can be edited or copied directly, with the file extension \"js\"</string>
     <string name="description_stable_mode">Stable mode makes it more stable when getting layout bounds, but some results may be ignored.\nA11y service\'s restart required.</string>
     <string name="description_theme_color_preference">Theme color is applied to widgets including but not limited to the following ones:\nStatus bar\nAppbar\nFile icon\nTask item icon\nFAB\nSettings category title\nSwitch button\n\nNote: As of AutoJs6 version 6.2.0, there has been no difference between primary color, primary dark color and accent color yet.</string>
+    <string name="description_timed_task_backend">Controls the underlying mechanism for triggering scripts on a schedule.\n\nAlarmManager: With the “Allow setting alarms and reminders” permission granted, scheduled tasks can fire closer to the exact time.\nWorkManager: System-friendly; suitable for non-critical tasks that can tolerate some delay.\nJobScheduler: Legacy implementation kept for compatibility; higher chance of delays.</string>
+    <string name="description_timed_task_backend_more" tools:ignore="TypographyEllipsis">Use cases and differences:\n\n1. AlarmManager\nBest for time-sensitive tasks, e.g., [reminders/strictly scheduled scripts/...].\nOn Android 12+ with the “Allow setting alarms and reminders” permission, tasks can run more on time even when the screen is off or the device is idle.\nWithout it, the system may degrade exactness or delay execution.\n\n2. WorkManager\nBest for tasks that don’t require strict timing, e.g., [non-critical sync/cleanup/statistics/...].\nScheduling depends on [battery/network/charging/idle policies/...], so execution may be postponed when the screen is off or idle.\nWhile it can’t guarantee exact timing, it excels at [reliable completion/retries/chaining/unique work de-duplication].\n\n3. JobScheduler\nHistorical implementation for compatibility.\nOn newer Android versions, tasks may be delayed more noticeably.\nGenerally not recommended unless required for compatibility.</string>
     <string name="description_version_histories_preference">View the release version history and key category statistics of AutoJs6 on GitHub.</string>
     <string name="dialog_button_back">@string/text_back</string>
     <string name="dialog_button_cancel">Cancel</string>
@@ -144,6 +148,8 @@
     <string name="entry_night_mode_always_off">Always off</string>
     <string name="entry_night_mode_always_on">Always on</string>
     <string name="entry_night_mode_follow_system">Follow system</string>
+    <string name="entry_restart_strategy_quick">Quick restart</string>
+    <string name="entry_restart_strategy_scheduled">Scheduled restart</string>
     <string name="entry_root_mode_auto_detect">Auto detect root access</string>
     <string name="entry_root_mode_force_non_root">Force set non-root mode</string>
     <string name="entry_root_mode_force_root">Force set root mode</string>
@@ -190,6 +196,7 @@
     <string name="error_failed_to_call_method">Failed to call method "%s"</string>
     <string name="error_failed_to_call_method_with_cause"><![CDATA[Failed to call method "%1$s": [ %2$s ]]]></string>
     <string name="error_failed_to_convert_into_drawable">Failed to convert value %s into a Drawable</string>
+    <string name="error_failed_to_go_to_access_settings">Failed to open the settings page</string>
     <string name="error_failed_to_grant_shizuku_access">Failed to grant Shizuku access</string>
     <string name="error_failed_to_instantiate">Failed to instantiate "%s"</string>
     <string name="error_failed_to_instantiate_with_cause"><![CDATA[Failed to instantiate "%1$s": [ %2$s ]]]></string>
@@ -347,6 +354,7 @@
     <string name="summary_post_notifications_permission_inrt">Allow the application to create and send notifications</string>
     <string name="summary_pre_execute_script">Execute before the script file</string>
     <string name="summary_record_prompt">Show message when starting or stopping recording a script</string>
+    <string name="summary_rhino_java_primitive_wrap">Java primitive types will be wrapped as Java objects in scripts</string>
     <string name="summary_stable_mode">More stable layout analysis but worse code compatibility (a11y service restarting needed)</string>
     <string name="summary_text_launcher_shortcuts">Add shortcuts to launcher</string>
     <string name="summary_use_volume_control_record">Start or stop recording controlled by “Volume Down” key when floating button is showing</string>
@@ -383,6 +391,7 @@
     <string name="text_all_histories">All histories</string>
     <string name="text_all_histories_cleared">All histories have been cleared</string>
     <string name="text_all_items_cleared">All items have been cleared</string>
+    <string name="text_allow_setting_alarms_and_reminders_is_recommended">Granting the “Allow setting alarms and reminders” permission is recommended to help tasks run as punctually as possible even when the screen is off or the device is idle</string>
     <string name="text_already_copied_to_clip">Copied to clipboard</string>
     <string name="text_already_copied_to_clip_but_only_latest_few_items">Already copied to clipboard (only latest %d items)</string>
     <string name="text_already_created">Created</string>
@@ -415,6 +424,7 @@
     <string name="text_app_name_parallel_space">Parallel Space</string>
     <string name="text_app_name_qqmusic">QQMusic</string>
     <string name="text_app_name_wechat">WeChat</string>
+    <string name="text_app_restarting" tools:ignore="TypographyEllipsis">App restarting...</string>
     <string name="text_app_shortcut_disabled">This shortcut is disabled</string>
     <string name="text_app_shortcut_docs_long_label">AutoJs6 Docs</string>
     <string name="text_app_shortcut_docs_short_label">Docs</string>
@@ -469,6 +479,7 @@
     <string name="text_clear_pre_execute_script">Clear pre-execute script</string>
     <string name="text_clear_updates_checked_states">Clear updates checked states</string>
     <string name="text_click_item_to_remove">Click the item to remove</string>
+    <string name="text_click_item_to_show_details">Click an item to view details</string>
     <string name="text_click_ok_to_go_to_settings">Click \"OK\" to go to settings</string>
     <string name="text_click_too_frequently">Frequent operation</string>
     <string name="text_client_mode">Client mode</string>
@@ -912,8 +923,10 @@
     <string name="text_reset_to_initial_content">Reset initially</string>
     <string name="text_reset_to_initial_content_only_for_assets">Reset is only for samples</string>
     <string name="text_restart">Restart</string>
+    <string name="text_restart_strategy">Restart strategy</string>
     <string name="text_result">Result</string>
     <string name="text_revoke_autojs6_access_in_shizuku_app">Revoke AutoJs6 access in Shizuku app</string>
+    <string name="text_rhino_java_primitive_wrap">Java primitive wrapping</string>
     <string name="text_root_mode_title">Force set root check</string>
     <string name="text_run">Run</string>
     <string name="text_run_on_battery_change">On battery changed</string>
@@ -1003,6 +1016,7 @@
     <string name="text_theme_color">Theme color</string>
     <string name="text_time">Time</string>
     <string name="text_timed_task">Timed task</string>
+    <string name="text_timed_task_backend_title">Timed task scheduling engine</string>
     <string name="text_timed_task_timing">Timing</string>
     <string name="text_tools">Tools</string>
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">The transparent background launcher icon may be automatically masked or given a background by the system, so the actual effect may vary across different devices</string>
@@ -1060,14 +1074,5 @@
     <string name="text_write_secure_settings">Write security settings</string>
     <string name="text_write_secure_settings_description">Secure system settings, containing system preferences that applications can read but are not allowed to write.\nThese are for preferences that the user must explicitly modify through the UI of a system app.\nWith secure system settings permission, normal applications can directly modify the secure settings (such as accessibility service).</string>
     <string name="text_write_system_settings">Write system settings</string>
-    <string name="description_rhino_java_primitive_wrap">Switch ON (default): results of Java methods that are instances of Number/Boolean/Character are wrapped as Java objects and exposed to scripts (String excluded). typeof is \"object\", species is \"JavaObject\"; Java methods remain accessible, which helps retain precise Java type traits and overload resolution.\n\nSwitch OFF: the above types are no longer wrapped and are exposed directly as JavaScript primitives (number/boolean/one‑character string). typeof is the corresponding JavaScript type, aligning better with JavaScript semantics and ecosystem. You can still explicitly create a Java wrapper via new, e.g. new java.lang.Boolean(true).\n\nSee: http://issues.autojs6.com/435</string>
-    <string name="summary_rhino_java_primitive_wrap">Java primitive types will be wrapped as Java objects in scripts</string>
-    <string name="text_rhino_java_primitive_wrap">Java primitive wrapping</string>
-    <string name="title_timed_task_backend">Timed task scheduling engine</string>
-    <string name="description_timed_task_backend">Controls the underlying mechanism for triggering scripts on a schedule.\n\nAlarmManager: With the “Allow setting alarms and reminders” permission granted, scheduled tasks can fire closer to the exact time.\nWorkManager: System-friendly; suitable for non-critical tasks that can tolerate some delay.\nJobScheduler: Legacy implementation kept for compatibility; higher chance of delays.</string>
-    <string name="failed_to_go_to_access_settings">Failed to open the settings page</string>
-    <string name="text_allow_setting_alarms_and_reminders_is_recommended">Granting the “Allow setting alarms and reminders” permission is recommended to help tasks run as punctually as possible even when the screen is off or the device is idle</string>
-    <string name="description_timed_task_backend_more" tools:ignore="TypographyEllipsis">Use cases and differences:\n\n1. AlarmManager\nBest for time-sensitive tasks, e.g., [reminders/strictly scheduled scripts/...].\nOn Android 12+ with the “Allow setting alarms and reminders” permission, tasks can run more on time even when the screen is off or the device is idle.\nWithout it, the system may degrade exactness or delay execution.\n\n2. WorkManager\nBest for tasks that don’t require strict timing, e.g., [non-critical sync/cleanup/statistics/...].\nScheduling depends on [battery/network/charging/idle policies/...], so execution may be postponed when the screen is off or idle.\nWhile it can’t guarantee exact timing, it excels at [reliable completion/retries/chaining/unique work de-duplication].\n\n3. JobScheduler\nHistorical implementation for compatibility.\nOn newer Android versions, tasks may be delayed more noticeably.\nGenerally not recommended unless required for compatibility.</string>
-    <string name="text_click_item_to_show_details">Click an item to view details</string>
 
 </resources>

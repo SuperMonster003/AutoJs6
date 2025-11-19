@@ -82,10 +82,14 @@
     <string name="description_manage_ignored_updates_preference">Pulse para ver o gestionar los elementos de la lista.\nHaga una pulsación larga para eliminar el elemento de la lista.</string>
     <string name="description_night_mode_preference">El modo nocturno (también conocido como tema oscuro) se aplica tanto a la interfaz de usuario del sistema Android como a las aplicaciones que se ejecutan en el dispositivo, lo que mejora la visibilidad para los usuarios con baja visión y los que son sensibles a la luz brillante, y facilita el uso de un dispositivo en un entorno con poca luz.\n\nSistema de seguimiento: AutoJs6 tiene ajustes de modo nocturno iguales a los del sistema Android\nSiempre activado: AutoJs6 mantiene activado el modo Noche (independientemente de la configuración del sistema Android)\nSiempre desactivado: AutoJs6 mantiene el modo nocturno desactivado (independientemente de la configuración del sistema Android)\n\nNota: La opción de seguir el sistema es sólo para el nivel 28 de la API de Android (Android 9) [P] y superior.</string>
     <string name="description_night_mode_preference_more">Para activar el modo nocturno en el sistema Android:\n- Android API Level 29 (Android 10) [Q] y superior: Ajustes -> Pantalla -> Tema.\n- Android API Level 28 (Android 9) [P]: Opciones de desarrollador -> Modo nocturno.\n\nLas siguientes condiciones deben cumplirse para aplicar un modo nocturno (tema oscuro) al contenido basado en la web utilizando un componente WebView (como la página de documentación de AutoJs6):\n1. Sistema Android WebView (o navegadores como Google Chrome):\n- Android API Level 29 (Android 10) [Q] y superior: versión >= 76\n- Android API Level 28 (Android 9) [P]: versión >= 105\n2. El contenido basado en la web en el componente WebView se adapta al tema oscuro (mediante CSS o recursos XML de Android, etc.)</string>
+    <string name="description_restart_strategy">La estrategia de reinicio solo afecta al botón de reinicio del cajón de la página principal.\n\nReinicio rápido: reinicia rápidamente la app. Si el reinicio falla o ocurre alguna situación inesperada, prueba cambiar a \"Reinicio programado\".\nReinicio programado: configura de antemano una tarea de corta duración. Después de que la app se detenga, se iniciará de nuevo según lo programado para lograr el reinicio de la app.</string>
+    <string name="description_rhino_java_primitive_wrap">Con el interruptor activado (predeterminado): los valores devueltos por métodos Java de tipo Number/Boolean/Character se envuelven como objetos Java y se exponen al script (String excluido). typeof es \"object\", species es \"JavaObject\"; se pueden invocar métodos de Java, lo que ayuda a conservar las características de tipo precisas de Java y la resolución de sobrecargas.\n\nCon el interruptor desactivado: no se envuelven los tipos anteriores y se exponen directamente como primitivos de JavaScript (number/boolean/cadena de un solo carácter). typeof corresponde al tipo de JavaScript respectivo, más acorde con la semántica/ecosistema de JavaScript. Aun así, puede declarar explícitamente un envoltorio de Java con new, por ejemplo new java.lang.Boolean(true).\n\nConsulte: http://issues.autojs6.com/435</string>
     <string name="description_root_mode_preference">Si tiene una raíz exótica o un estado anormal para el acceso a la raíz, puede forzar el establecimiento de la raíz a raíz o no raíz.</string>
     <string name="description_root_record_out_file_type_preference">Tipo binario: no editable, con la extensión de archivo \"auto\"\nTipo JavaScript: se puede editar o copiar directamente, con la extensión de archivo \"js\"</string>
     <string name="description_stable_mode">El modo estable hace que sea más estable al obtener los límites de diseño, pero algunos resultados pueden ser ignorados.\nEs necesario reiniciar el servicio de accesibilidad.</string>
     <string name="description_theme_color_preference">El color del tema se aplica a los widgets, incluidos, entre otros, los siguientes\nBarra de estado\nBarra de aplicaciones\nIcono de archivo\nIcono de elemento de tarea\nFAB\nTítulo de la categoría de ajustes\nBotón de cambio\n\nNota: A partir de la versión 6.2.0 de AutoJs6, todavía no hay diferencia entre el color primario, el color primario oscuro y el color de acento.</string>
+    <string name="description_timed_task_backend">Controla el mecanismo subyacente para activar scripts de forma programada.\n\nAlarmManager: Mediante la concesión del permiso \"Permitir configurar alarmas y recordatorios\", las tareas programadas pueden dispararse con mayor puntualidad.\nWorkManager: Amigable con el sistema; adecuado para tareas no críticas que toleran cierta demora.\nJobScheduler: Implementación antigua, mantenida por compatibilidad; la ejecución puede retrasarse con mayor probabilidad.</string>
+    <string name="description_timed_task_backend_more" tools:ignore="TypographyEllipsis">Escenarios de uso y diferencias:\n\n1. AlarmManager\nAdecuado para tareas sensibles a la puntualidad, p. ej., [recordatorios/scripts estrictamente programados/...].\nEn Android 12+ y con el permiso \"Permitir configurar alarmas y recordatorios\", puede ejecutar tareas de forma más puntual con la pantalla apagada o en estado de espera.\nSin dicho permiso, el sistema puede degradar la exactitud o retrasar la ejecución.\n\n2. WorkManager\nAdecuado para tareas que no requieren estricta puntualidad, p. ej., [sincronización no crítica/limpieza/estadísticas/...].\nSe programa según [batería/red/carga/estrategias de reposo/...], por lo que puede posponer la ejecución con la pantalla apagada o en espera.\nAunque no garantiza precisión temporal, tiene ventajas en [finalización fiable/reintentos en caso de fallo/encadenamiento/deduplicación de trabajos].\n\n3. JobScheduler\nImplementación histórica para compatibilidad.\nEn versiones recientes de Android, las tareas pueden experimentar mayores retrasos.\nPor lo general, no se recomienda salvo por motivos de compatibilidad.</string>
     <string name="description_version_histories_preference">Ver el historial de versiones publicadas de AutoJs6 en GitHub y las estadísticas de las categorías importantes.</string>
     <string name="dialog_button_back">@string/text_back</string>
     <string name="dialog_button_cancel">Cancelar</string>
@@ -147,6 +151,8 @@
     <string name="entry_night_mode_always_off">Siempre desactivado</string>
     <string name="entry_night_mode_always_on">Siempre activado</string>
     <string name="entry_night_mode_follow_system">Seguir el sistema</string>
+    <string name="entry_restart_strategy_quick">Reinicio rápido</string>
+    <string name="entry_restart_strategy_scheduled">Reinicio programado</string>
     <string name="entry_root_mode_auto_detect">Detectar automáticamente el acceso root</string>
     <string name="entry_root_mode_force_non_root">Forzar el modo no root</string>
     <string name="entry_root_mode_force_root">Forzar el modo raíz</string>
@@ -193,6 +199,7 @@
     <string name="error_failed_to_call_method">Fallo al llamar al método \"%s\"</string>
     <string name="error_failed_to_call_method_with_cause"><![CDATA[Error al llamar al método \"%1$s\": [ %2$s ]]]></string>
     <string name="error_failed_to_convert_into_drawable">Fallo al convertir el valor %s en un Dibujable</string>
+    <string name="error_failed_to_go_to_access_settings">No se pudo abrir la página de ajustes</string>
     <string name="error_failed_to_grant_shizuku_access">Fallo en la concesión de permisos Shizuku</string>
     <string name="error_failed_to_instantiate">Error al instanciar \"%s\"</string>
     <string name="error_failed_to_instantiate_with_cause"><![CDATA[Error al instanciar \"%1$s\": [ %2$s ]]]></string>
@@ -350,6 +357,7 @@
     <string name="summary_post_notifications_permission_inrt">Permitir que la aplicación cree y envíe notificaciones</string>
     <string name="summary_pre_execute_script">Ejecutar antes del archivo de script</string>
     <string name="summary_record_prompt">Mostrar mensaje al iniciar o detener la grabación de un guion</string>
+    <string name="summary_rhino_java_primitive_wrap">Los tipos primitivos de Java se envolverán como objetos Java en los scripts</string>
     <string name="summary_stable_mode">Análisis de diseño más estable pero peor compatibilidad de código (se necesita reiniciar el servicio de accesibilidad)</string>
     <string name="summary_text_launcher_shortcuts">Añadir accesos directos al lanzador</string>
     <string name="summary_use_volume_control_record">Iniciar o detener la grabación controlada por la tecla de bajar el volumen cuando se muestra el botón flotante</string>
@@ -386,6 +394,7 @@
     <string name="text_all_histories">Todos los historiales</string>
     <string name="text_all_histories_cleared">Todos los historiales han sido borrados</string>
     <string name="text_all_items_cleared">Todos los elementos han sido borrados</string>
+    <string name="text_allow_setting_alarms_and_reminders_is_recommended">Se recomienda conceder el permiso \"Permitir configurar alarmas y recordatorios\" para asegurar que las tareas programadas se ejecuten lo más puntualmente posible incluso con la pantalla apagada o en espera</string>
     <string name="text_already_copied_to_clip">Copiado en el portapapeles</string>
     <string name="text_already_copied_to_clip_but_only_latest_few_items">Ya se ha copiado en el portapapeles (sólo los últimos %d elementos)</string>
     <string name="text_already_created">Creado</string>
@@ -418,6 +427,7 @@
     <string name="text_app_name_parallel_space">Parallel Space</string>
     <string name="text_app_name_qqmusic">QQMusic</string>
     <string name="text_app_name_wechat">WeChat</string>
+    <string name="text_app_restarting" tools:ignore="TypographyEllipsis">Reiniciando la app...</string>
     <string name="text_app_shortcut_disabled">Este acceso directo está desactivado</string>
     <string name="text_app_shortcut_docs_long_label">AutoJs6 Docs</string>
     <string name="text_app_shortcut_docs_short_label">Docs</string>
@@ -472,6 +482,7 @@
     <string name="text_clear_pre_execute_script">Borrar script de pre-ejecución</string>
     <string name="text_clear_updates_checked_states">Borrar los estados de comprobación de las actualizaciones</string>
     <string name="text_click_item_to_remove">Haga clic en el elemento a eliminar</string>
+    <string name="text_click_item_to_show_details">Toca un elemento para ver los detalles</string>
     <string name="text_click_ok_to_go_to_settings">Haga clic en \"Aceptar\" para ir a la configuración</string>
     <string name="text_click_too_frequently">Funcionamiento frecuente</string>
     <string name="text_client_mode">Modo cliente</string>
@@ -915,8 +926,10 @@
     <string name="text_reset_to_initial_content">Restablecer inicialmente</string>
     <string name="text_reset_to_initial_content_only_for_assets">El restablecimiento es sólo para las muestras</string>
     <string name="text_restart">Reiniciar</string>
+    <string name="text_restart_strategy">Estrategia de reinicio</string>
     <string name="text_result">Resultado</string>
     <string name="text_revoke_autojs6_access_in_shizuku_app">Revocar privilegios de AutoJs6 en una aplicación Shizuku</string>
+    <string name="text_rhino_java_primitive_wrap">Envoltorio de primitivos de Java</string>
     <string name="text_root_mode_title">Forzar la comprobación de root</string>
     <string name="text_run">Ejecutar</string>
     <string name="text_run_on_battery_change">Al cambiar la batería</string>
@@ -1006,6 +1019,7 @@
     <string name="text_theme_color">Color del tema</string>
     <string name="text_time">Tiempo</string>
     <string name="text_timed_task">Tarea cronometrada</string>
+    <string name="text_timed_task_backend_title">Motor de programación de tareas temporizadas</string>
     <string name="text_timed_task_timing">Cronometraje</string>
     <string name="text_tools">Herramientas</string>
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">El ícono de iniciador con fondo transparente puede ser enmascarado automáticamente o recibir un fondo por parte del sistema, por lo que el efecto real puede variar entre dispositivos</string>
@@ -1063,14 +1077,5 @@
     <string name="text_write_secure_settings">Escribir la configuración de seguridad</string>
     <string name="text_write_secure_settings_description">Ajustes de seguridad del sistema, que contienen preferencias del sistema que las aplicaciones pueden leer pero no pueden escribir.\nSe trata de preferencias que el usuario debe modificar explícitamente a través de la interfaz de usuario de una aplicación del sistema.\nCon el permiso de configuración segura del sistema, las aplicaciones normales pueden modificar directamente la configuración segura (como el servicio de accesibilidad).</string>
     <string name="text_write_system_settings">Escribir la configuración del sistema</string>
-    <string name="description_rhino_java_primitive_wrap">Con el interruptor activado (predeterminado): los valores devueltos por métodos Java de tipo Number/Boolean/Character se envuelven como objetos Java y se exponen al script (String excluido). typeof es \"object\", species es \"JavaObject\"; se pueden invocar métodos de Java, lo que ayuda a conservar las características de tipo precisas de Java y la resolución de sobrecargas.\n\nCon el interruptor desactivado: no se envuelven los tipos anteriores y se exponen directamente como primitivos de JavaScript (number/boolean/cadena de un solo carácter). typeof corresponde al tipo de JavaScript respectivo, más acorde con la semántica/ecosistema de JavaScript. Aun así, puede declarar explícitamente un envoltorio de Java con new, por ejemplo new java.lang.Boolean(true).\n\nConsulte: http://issues.autojs6.com/435</string>
-    <string name="summary_rhino_java_primitive_wrap">Los tipos primitivos de Java se envolverán como objetos Java en los scripts</string>
-    <string name="text_rhino_java_primitive_wrap">Envoltorio de primitivos de Java</string>
-    <string name="title_timed_task_backend">Motor de programación de tareas temporizadas</string>
-    <string name="description_timed_task_backend">Controla el mecanismo subyacente para activar scripts de forma programada.\n\nAlarmManager: Mediante la concesión del permiso \"Permitir configurar alarmas y recordatorios\", las tareas programadas pueden dispararse con mayor puntualidad.\nWorkManager: Amigable con el sistema; adecuado para tareas no críticas que toleran cierta demora.\nJobScheduler: Implementación antigua, mantenida por compatibilidad; la ejecución puede retrasarse con mayor probabilidad.</string>
-    <string name="failed_to_go_to_access_settings">No se pudo abrir la página de ajustes</string>
-    <string name="text_allow_setting_alarms_and_reminders_is_recommended">Se recomienda conceder el permiso \"Permitir configurar alarmas y recordatorios\" para asegurar que las tareas programadas se ejecuten lo más puntualmente posible incluso con la pantalla apagada o en espera</string>
-    <string name="description_timed_task_backend_more" tools:ignore="TypographyEllipsis">Escenarios de uso y diferencias:\n\n1. AlarmManager\nAdecuado para tareas sensibles a la puntualidad, p. ej., [recordatorios/scripts estrictamente programados/...].\nEn Android 12+ y con el permiso \"Permitir configurar alarmas y recordatorios\", puede ejecutar tareas de forma más puntual con la pantalla apagada o en estado de espera.\nSin dicho permiso, el sistema puede degradar la exactitud o retrasar la ejecución.\n\n2. WorkManager\nAdecuado para tareas que no requieren estricta puntualidad, p. ej., [sincronización no crítica/limpieza/estadísticas/...].\nSe programa según [batería/red/carga/estrategias de reposo/...], por lo que puede posponer la ejecución con la pantalla apagada o en espera.\nAunque no garantiza precisión temporal, tiene ventajas en [finalización fiable/reintentos en caso de fallo/encadenamiento/deduplicación de trabajos].\n\n3. JobScheduler\nImplementación histórica para compatibilidad.\nEn versiones recientes de Android, las tareas pueden experimentar mayores retrasos.\nPor lo general, no se recomienda salvo por motivos de compatibilidad.</string>
-    <string name="text_click_item_to_show_details">Toca un elemento para ver los detalles</string>
 
 </resources>

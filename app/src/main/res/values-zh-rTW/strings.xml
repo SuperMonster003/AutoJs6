@@ -80,10 +80,14 @@
     <string name="description_manage_ignored_updates_preference">點選可檢視或管理列表項.\n長按可移除列表項.</string>
     <string name="description_night_mode_preference">夜間模式, 亦稱 [ 暗黑模式 / 深色主題 ] 等.\n夜間模式應用於安卓系統 UI (如通知欄和導航欄) 及 AutoJs6 應用頁面.\n夜間模式可提升裝置在低光環境下的易用性, 同時有助於提升弱視或光敏感使用者的視覺體驗.\n\n跟隨系統: AutoJs6 與安卓作業系統的夜間模式設定一致\n總是開啟: AutoJs6 保持開啟夜間模式 (忽略作業系統設定)\n總是關閉: AutoJs6 保持關閉夜間模式 (忽略作業系統設定)\n\n注: 跟隨系統功能僅支援安卓 API 級別 28 (安卓 9) [P] 及以上作業系統.</string>
     <string name="description_night_mode_preference_more">啟用安卓系統的夜間模式:\n- API 級別 29 (安卓 10) [Q] 及以上: 透過 [ 設定 -> 顯示 -> 主題 ] 開啟.\n- API 級別 28 (安卓 9) [P]: 透過 [ 開發者選項 -> 夜間模式 ] 開啟.\n\n對於基於 WebView 元件的內容 (如 AutoJs6 的文件頁面), 夜間模式支援需要滿足以下條件:\n1. WebView (或 Google Chrome 等瀏覽器) 版本要求:\n- API 級別 29 (安卓 10) [Q] 及以上: 版本不低於 76\n- API 級別 28 (安卓 9) [P]: 版本不低於 105\n2. WebView 元件頁面內容可適配夜間模式 (透過 CSS 或 安卓 XML 資源等方式實現)</string>
+    <string name="description_restart_strategy">重啟策略僅作用於主頁抽屜欄的重啟按鈕.\n\n快速重啟: 快速重啟應用, 如果重啟失敗或出現非預期情況, 可嘗試切換至 \"計劃重啟\".\n計劃重啟: 提前設定一個短時定時任務, 應用停止後會再次定時啟動, 以實現應用重啟.</string>
+    <string name="description_rhino_java_primitive_wrap">開關啟用 (預設): 將 Java 方法返回的 Number/Boolean/Character 包裝為 Java 物件暴露到指令碼 (String 除外). typeof 為 \"object\", species 為 \"JavaObject\", 可訪問這些物件的 Java 方法, 利於保留 Java 精確型別特徵與方法過載行為.\n\n開關禁用: 不再包裝上述型別, 直接作為 JavaScript 基元值 (number/boolean/單字元字串). typeof 為相應 JavaScript 型別, 更貼近 JavaScript 語義與生態. 但仍可透過 new 關鍵字顯式宣告一個 Java 包裝型別, 如 new java.lang.Boolean(true).\n\n參閱: http://issues.autojs6.com/435</string>
     <string name="description_root_mode_preference">如果裝置使用非常規 Root 方式或 Root 許可權檢測結果異常, 可設定 \"強制 Root 模式\" 或 \"強制非 Root 模式\".</string>
     <string name="description_root_record_out_file_type_preference">二進位制檔案: 不可編輯, 副檔名為 \"auto\"\nJavaScript 檔案: 可編輯或直接複製, 副檔名為 \"js\"</string>
     <string name="description_stable_mode">穩定模式省略佈局細節, 指令碼分析佈局時更穩定, 但可能影響獲取的控制元件總量.\n需重啟無障礙服務.</string>
     <string name="description_theme_color_preference">主題色的應用範圍包括但不限於以下部件:\n系統通知欄\n應用欄 (AppBar)\n檔案圖示\n任務項圖示\n浮動操作按鈕 (FAB)\n設定頁面類別標題\n按鈕開關\n\n注: 截至 6.2.0 版本, AutoJs6 主題色暫未對 [ 主要色 (Primary Color) / 主要暗色 (Primary Dark Color) / 強調色 (Accent Color) ] 作出區分.</string>
+    <string name="description_timed_task_backend">控制指令碼定時觸發的底層機制.\n\nAlarmManager: 透過申請 \"允許設定鬧鐘和提醒\" 許可權, 可使定時任務的觸發更接近準時.\nWorkManager: 系統友好, 適合可接受一定延遲的非關鍵定時任務.\nJobScheduler: 舊實現, 僅用作相容保留, 定時任務出現延遲的機率較大.</string>
+    <string name="description_timed_task_backend_more" tools:ignore="TypographyEllipsis">使用場景與差異說明: \n\n1. AlarmManager\n適用於準時性敏感的定時任務, 如 [提醒/嚴格定時指令碼/...].\n在 Android 12+ 獲取 \"允許設定鬧鐘和提醒\" 許可權後, 在息屏或待機狀態時能夠較準時地執行定時任務.\n在未授予 \"允許設定鬧鐘和提醒\" 許可權時, 系統可能降級為不準時或延後執行任務.\n\n2. WorkManager\n適用於不要求嚴格準時執行的定時任務, 如 [非關鍵性同步/清理/統計/...].\n根據系統 [ 電量/網路/充電情況/待機策略/... ] 進行排程, 息屏或待機狀態時可能推遲任務執行.\n雖無法保證時間精確性, 但在 [ 可靠完成/失敗重試/鏈式執行/唯一任務去重 ] 等方面擁有獨特優勢.\n\n3. Job\n歷史實現, 為相容保留.\n在高版本安卓系統中定時任務可能存在較大的延遲執行問題.\n除非出於相容需要, 一般不推薦使用.</string>
     <string name="description_version_histories_preference">檢視 AutoJs6 在 GitHub 發行版本的歷史更新記錄及重要分類的統計資料.</string>
     <string name="dialog_button_back">@string/text_back</string>
     <string name="dialog_button_cancel">取消</string>
@@ -145,6 +149,8 @@
     <string name="entry_night_mode_always_off">總是關閉</string>
     <string name="entry_night_mode_always_on">總是開啟</string>
     <string name="entry_night_mode_follow_system">跟隨系統</string>
+    <string name="entry_restart_strategy_quick">快速重啟</string>
+    <string name="entry_restart_strategy_scheduled">計劃重啟</string>
     <string name="entry_root_mode_auto_detect">自動檢測 Root 許可權</string>
     <string name="entry_root_mode_force_non_root">強制非 Root 模式</string>
     <string name="entry_root_mode_force_root">強制 Root 模式</string>
@@ -191,6 +197,7 @@
     <string name="error_failed_to_call_method">方法 \"%s\" 呼叫失敗</string>
     <string name="error_failed_to_call_method_with_cause"><![CDATA[方法 \"%1$s\" 呼叫失敗: [ %2$s ]]]></string>
     <string name="error_failed_to_convert_into_drawable">無法將值 %s 轉換為 Drawable 例項</string>
+    <string name="error_failed_to_go_to_access_settings">跳轉設定頁面失敗</string>
     <string name="error_failed_to_grant_shizuku_access">Shizuku 許可權授予失敗</string>
     <string name="error_failed_to_instantiate">例項 \"%s\" 建立失敗</string>
     <string name="error_failed_to_instantiate_with_cause"><![CDATA[例項 \"%1$s\" 建立失敗: [ %2$s ]]]></string>
@@ -348,6 +355,7 @@
     <string name="summary_post_notifications_permission_inrt">允許應用建立併發送通知</string>
     <string name="summary_pre_execute_script">在指令碼檔案之前執行</string>
     <string name="summary_record_prompt">錄製開始及停止時顯示提示訊息</string>
+    <string name="summary_rhino_java_primitive_wrap">Java 原始型別在指令碼中將被包裝為對應的 Java 物件</string>
     <string name="summary_stable_mode">增強佈局分析穩定性但降低程式碼相容性 (需重啟無障礙服務)</string>
     <string name="summary_text_launcher_shortcuts">新增快捷方式到啟動器</string>
     <string name="summary_use_volume_control_record">按 \"音量減\" 鍵開始或停止指令碼錄製 (需開啟浮動按鈕)</string>
@@ -384,6 +392,7 @@
     <string name="text_all_histories">全部歷史記錄</string>
     <string name="text_all_histories_cleared">歷史記錄已清空</string>
     <string name="text_all_items_cleared">全部記錄已清空</string>
+    <string name="text_allow_setting_alarms_and_reminders_is_recommended">建議授予 \"允許設定鬧鐘和提醒\" 許可權以確保定時任務在息屏或待機狀態時儘可能準時執行</string>
     <string name="text_already_copied_to_clip">已複製到剪貼簿</string>
     <string name="text_already_copied_to_clip_but_only_latest_few_items">已複製到剪貼簿 (僅最新的 %d 個條目)</string>
     <string name="text_already_created">已建立</string>
@@ -416,6 +425,7 @@
     <string name="text_app_name_parallel_space">平行空間(原雙開大師)</string>
     <string name="text_app_name_qqmusic">QQ 音樂</string>
     <string name="text_app_name_wechat">微信</string>
+    <string name="text_app_restarting" tools:ignore="TypographyEllipsis">應用重啟中...</string>
     <string name="text_app_shortcut_disabled">此快捷方式已禁用</string>
     <string name="text_app_shortcut_docs_long_label">AutoJs6 文件</string>
     <string name="text_app_shortcut_docs_short_label">文件</string>
@@ -470,6 +480,7 @@
     <string name="text_clear_pre_execute_script">清空預執行指令碼</string>
     <string name="text_clear_updates_checked_states">清除更新檢查狀態</string>
     <string name="text_click_item_to_remove">點選條目可移除</string>
+    <string name="text_click_item_to_show_details">點選條目可檢視詳情</string>
     <string name="text_click_ok_to_go_to_settings">點選 \"確定\" 跳轉到設定頁面</string>
     <string name="text_click_too_frequently">操作頻率過快</string>
     <string name="text_client_mode">客戶端模式</string>
@@ -913,8 +924,10 @@
     <string name="text_reset_to_initial_content">重置為初始內容</string>
     <string name="text_reset_to_initial_content_only_for_assets">只能重置示例程式碼檔案</string>
     <string name="text_restart">重啟</string>
+    <string name="text_restart_strategy">重啟策略</string>
     <string name="text_result">結果</string>
     <string name="text_revoke_autojs6_access_in_shizuku_app">在 Shizuku 應用中撤銷 AutoJs6 許可權</string>
+    <string name="text_rhino_java_primitive_wrap">Java 原始型別包裝</string>
     <string name="text_root_mode_title">強制 Root 許可權檢查</string>
     <string name="text_run">執行</string>
     <string name="text_run_on_battery_change">電量變化時</string>
@@ -1004,6 +1017,7 @@
     <string name="text_theme_color">主題色</string>
     <string name="text_time">時間</string>
     <string name="text_timed_task">定時任務</string>
+    <string name="text_timed_task_backend_title">定時任務排程引擎</string>
     <string name="text_timed_task_timing">定時</string>
     <string name="text_tools">工具</string>
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">透明背景啟動器圖示可能被系統自動新增遮罩或背景, 因此不同裝置的實際效果與預期可能不完全一致</string>
@@ -1061,14 +1075,5 @@
     <string name="text_write_secure_settings">修改安全設定</string>
     <string name="text_write_secure_settings_description">安全設定包含應用程式可讀但不可寫入的設定選項, 這些選項只能由 UI 或系統級別應用修改.\n被授予 \"修改安全設定許可權\" 後, 普通應用可直接修改上述安全設定 (例如無障礙服務).</string>
     <string name="text_write_system_settings">修改系統設定</string>
-    <string name="description_rhino_java_primitive_wrap">開關啟用 (預設): 將 Java 方法返回的 Number/Boolean/Character 包裝為 Java 物件暴露到指令碼 (String 除外). typeof 為 \"object\", species 為 \"JavaObject\", 可訪問這些物件的 Java 方法, 利於保留 Java 精確型別特徵與方法過載行為.\n\n開關禁用: 不再包裝上述型別, 直接作為 JavaScript 基元值 (number/boolean/單字元字串). typeof 為相應 JavaScript 型別, 更貼近 JavaScript 語義與生態. 但仍可透過 new 關鍵字顯式宣告一個 Java 包裝型別, 如 new java.lang.Boolean(true).\n\n參閱: http://issues.autojs6.com/435</string>
-    <string name="summary_rhino_java_primitive_wrap">Java 原始型別在指令碼中將被包裝為對應的 Java 物件</string>
-    <string name="text_rhino_java_primitive_wrap">Java 原始型別包裝</string>
-    <string name="title_timed_task_backend">定時任務排程引擎</string>
-    <string name="description_timed_task_backend">控制指令碼定時觸發的底層機制.\n\nAlarmManager: 透過申請 \"允許設定鬧鐘和提醒\" 許可權, 可使定時任務的觸發更接近準時.\nWorkManager: 系統友好, 適合可接受一定延遲的非關鍵定時任務.\nJobScheduler: 舊實現, 僅用作相容保留, 定時任務出現延遲的機率較大.</string>
-    <string name="failed_to_go_to_access_settings">跳轉設定頁面失敗</string>
-    <string name="text_allow_setting_alarms_and_reminders_is_recommended">建議授予 \"允許設定鬧鐘和提醒\" 許可權以確保定時任務在息屏或待機狀態時儘可能準時執行</string>
-    <string name="description_timed_task_backend_more" tools:ignore="TypographyEllipsis">使用場景與差異說明: \n\n1. AlarmManager\n適用於準時性敏感的定時任務, 如 [提醒/嚴格定時指令碼/...].\n在 Android 12+ 獲取 \"允許設定鬧鐘和提醒\" 許可權後, 在息屏或待機狀態時能夠較準時地執行定時任務.\n在未授予 \"允許設定鬧鐘和提醒\" 許可權時, 系統可能降級為不準時或延後執行任務.\n\n2. WorkManager\n適用於不要求嚴格準時執行的定時任務, 如 [非關鍵性同步/清理/統計/...].\n根據系統 [ 電量/網路/充電情況/待機策略/... ] 進行排程, 息屏或待機狀態時可能推遲任務執行.\n雖無法保證時間精確性, 但在 [ 可靠完成/失敗重試/鏈式執行/唯一任務去重 ] 等方面擁有獨特優勢.\n\n3. Job\n歷史實現, 為相容保留.\n在高版本安卓系統中定時任務可能存在較大的延遲執行問題.\n除非出於相容需要, 一般不推薦使用.</string>
-    <string name="text_click_item_to_show_details">點選條目可檢視詳情</string>
 
 </resources>
