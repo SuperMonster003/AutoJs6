@@ -2,12 +2,12 @@ package org.autojs.autojs.ui.widget
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.util.AttributeSet
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.FrameLayout
+import androidx.core.net.toUri
 import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.runtime.api.Mime
 import org.autojs.autojs.util.TextUtils.markdownToHtml
@@ -16,6 +16,7 @@ import org.autojs.autojs.util.TextUtils.markdownToHtml
  * Created by Stardust on Mar 5, 2017.
  * Transformed by SuperMonster003 on May 25, 2023.
  */
+@Suppress("OVERRIDE_DEPRECATION")
 class CommonMarkdownView : WebView {
 
     interface OnPageFinishedListener {
@@ -52,7 +53,7 @@ class CommonMarkdownView : WebView {
 
             @Deprecated("Deprecated in Java")
             override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
-                context.startActivity(Intent(Intent.ACTION_VIEW).setData(Uri.parse(url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                context.startActivity(Intent(Intent.ACTION_VIEW).setData(url.toUri()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
                 return true
             }
         }

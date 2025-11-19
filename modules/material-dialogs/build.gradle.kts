@@ -20,7 +20,6 @@ android {
         targetSdk = versions.sdkVersionTarget
         abortOnError = false
     }
-
 }
 
 repositories {
