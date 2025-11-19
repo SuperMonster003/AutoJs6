@@ -8,11 +8,14 @@ import kotlin.math.abs
 /**
  * Represents a result from Optical Character Recognition (OCR) processing.
  *
- * @property label The recognized text label.
+ * @property text The recognized text.
  * @property confidence The confidence score of the recognition, ranging from 0 (least confident) to 1 (most confident).
  * @property bounds The bounding box coordinates of the recognized text region.
  */
-class OcrResult(@JvmField val label: String, @JvmField val confidence: Float, @JvmField val bounds: Rect) : Comparable<OcrResult> {
+class OcrResult(@JvmField val text: String, @JvmField val confidence: Float, @JvmField val bounds: Rect) : Comparable<OcrResult> {
+
+    @JvmField
+    val label: String = text
 
     override fun compareTo(other: OcrResult): Int {
         // 上下差距小于二分之一的高度 判定为同一行
@@ -27,6 +30,6 @@ class OcrResult(@JvmField val label: String, @JvmField val confidence: Float, @J
 
     override fun toString() =
         "${OcrResult::class.java.simpleName}@${Integer.toHexString(hashCode())}" +
-        "{label=$label, confidence=$confidence, bounds=$bounds}"
+        "{text=$text, confidence=$confidence, bounds=$bounds}"
 
 }

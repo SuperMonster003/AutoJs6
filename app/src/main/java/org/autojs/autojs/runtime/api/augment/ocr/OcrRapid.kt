@@ -26,20 +26,20 @@ class OcrRapid(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRun
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun recognizeText(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeArray = ensureArgumentsAtMost(args, 3) {
-            Ocr.commonRecognizeText(scriptRuntime, OcrMode.RAPID, *it)
+        fun recognizeText(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeArray = ensureArgumentsAtMost(args, 3) { argList ->
+            Ocr.recognizeTextWith(scriptRuntime, OcrMode.RAPID, argList)
         }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun detect(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeArray = ensureArgumentsAtMost(args, 3) {
-            Ocr.commonDetect(scriptRuntime, OcrMode.RAPID, *it)
+        fun detect(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeArray = ensureArgumentsAtMost(args, 3) { argList ->
+            Ocr.detectWith(scriptRuntime, OcrMode.RAPID, argList)
         }
 
         // @Hint by SuperMonster003 on Nov 1, 2024.
         //  ! Reserved param `options`.
         //  ! zh-CN: 预留参数 `options`.
-        fun recognizeTextInternal(scriptRuntime: ScriptRuntime, image: ImageWrapper, @Suppress("UNUSED_PARAMETER") options: NativeObject): List<String> {
+        fun recognizeTextImpl(scriptRuntime: ScriptRuntime, image: ImageWrapper, @Suppress("UNUSED_PARAMETER") options: NativeObject): List<String> {
             ApkBuilder.Libs.RAPID_OCR.ensureLibFiles(OcrMode.RAPID.value)
             return scriptRuntime.ocrRapid.recognizeText(image)
         }
@@ -47,7 +47,7 @@ class OcrRapid(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRun
         // @Hint by SuperMonster003 on Nov 1, 2024.
         //  ! Reserved param `options`.
         //  ! zh-CN: 预留参数 `options`.
-        fun detectInternal(scriptRuntime: ScriptRuntime, image: ImageWrapper, @Suppress("UNUSED_PARAMETER") options: NativeObject): List<OcrResult> {
+        fun detectImpl(scriptRuntime: ScriptRuntime, image: ImageWrapper, @Suppress("UNUSED_PARAMETER") options: NativeObject): List<OcrResult> {
             ApkBuilder.Libs.RAPID_OCR.ensureLibFiles(OcrMode.RAPID.value)
             return scriptRuntime.ocrRapid.detect(image)
         }
