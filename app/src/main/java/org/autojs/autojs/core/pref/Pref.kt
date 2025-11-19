@@ -83,7 +83,7 @@ object Pref {
         )
 
     @JvmStatic
-    val isAutoCheckForUpdatesEnabled: Boolean
+    val isAutoCheckForUpdatesEnabled
         get() = getBoolean(
             R.string.key_auto_check_for_updates,
             resources.getBoolean(R.bool.pref_auto_check_for_updates),
@@ -141,6 +141,10 @@ object Pref {
             R.string.key_gesture_observing,
             resources.getBoolean(R.bool.pref_gesture_observing)
         )
+
+    @JvmStatic
+    val isQuickRestartEnabled
+        get() = getString(R.string.key_restart_strategy, key(R.string.default_key_restart_strategy)) == key(R.string.key_restart_strategy_quick)
 
     @JvmStatic
     val isHiddenFilesShown

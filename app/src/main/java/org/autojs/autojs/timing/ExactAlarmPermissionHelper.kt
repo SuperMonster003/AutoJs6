@@ -51,7 +51,7 @@ object ExactAlarmPermissionHelper {
             .onPositive { dialog, _ ->
                 when {
                     requestExactAlarmPermission(context) -> dialog.dismiss()
-                    else -> ViewUtils.showSnack(dialog.view, R.string.failed_to_go_to_access_settings, true)
+                    else -> ViewUtils.showSnack(dialog.view, R.string.error_failed_to_go_to_access_settings, true)
                 }
             }
             .cancelable(false)

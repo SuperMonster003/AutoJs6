@@ -24,6 +24,7 @@
         "设置页面增加 \"Java 原始类型包装\" 设置选项 _[`issue #435`](http://issues.autojs6.com/435)_",
         "设置页面增加 \"定时任务调度引擎\" 设置选项, 支持 AlarmManager/WorkManager/JobScheduler _[`issue #457`](http://issues.autojs6.com/457)_ _[`issue #388`](http://issues.autojs6.com/388)_ _[`issue #163`](http://issues.autojs6.com/163)_ _[`issue #53`](http://issues.autojs6.com/53)_ _[`issue #21`](http://issues.autojs6.com/21)_",
         "设置页面增加 \"应用启动器图标\" 设置选项, 支持自适应图标/透明背景图标 _[`issue #405`](http://issues.autojs6.com/405)_",
+        "设置页面增加 \"重启策略\" 设置选项, 用于设置主页抽屉栏重启按钮是否使用快速重启策略",
         "Scrapers 工具 (run-scrapers.mjs) 用于自动更新 Gradle 构建脚本结构化数据/README 通用数据/README 模板数据等"
       ],
       "fix": [

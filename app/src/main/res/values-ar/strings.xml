@@ -84,10 +84,14 @@
     <string name="description_manage_ignored_updates_preference">انقر لعرض أو إدارة عناصر القائمة.\nاضغط لفترة طويلة لإزالة عنصر القائمة.</string>
     <string name="description_night_mode_preference">ينطبق الوضع الليلي (المعروف أيضًا باسم Dark theme) على كل من واجهة مستخدم نظام Android والتطبيقات التي تعمل على الجهاز ، مما يحسن الرؤية للمستخدمين ضعاف البصر وأولئك الذين لديهم حساسية للضوء الساطع ، ويسهل على أي شخص استخدام الجهاز. في بيئة الإضاءة المنخفضة.\n\nنظام المتابعة: يحتوي AutoJs6 على إعدادات الوضع الليلي مثل نظام Android\nيعمل دائمًا: يحافظ AutoJs6 على تشغيل الوضع الليلي (بغض النظر عن إعدادات نظام Android)\nإيقاف التشغيل دائمًا: يقوم AutoJs6 بإيقاف تشغيل الوضع الليلي (بغض النظر عن إعدادات نظام Android)\n\nملاحظة: خيار متابعة النظام متاح فقط لـ Android API Level 28 (Android 9) [P] وما فوق.</string>
     <string name="description_night_mode_preference_more">لتمكين الوضع الليلي في نظام Android:\n- Android API المستوى 29 (Android 10) [Q] وما فوق: الإعدادات -> العرض -> المظهر.\n- Android API المستوى 28 (Android 9) [P]: خيارات المطور -> الوضع الليلي.\n\nيجب استيفاء الشروط التالية لتطبيق الوضع الليلي (المظهر الداكن) على المحتوى المستند إلى الويب باستخدام مكون WebView (مثل صفحة وثائق AutoJs6):\n1.عرض ويب نظام Android (أو متصفحات مثل Google Chrome):\n- Android API المستوى 29 (Android 10) [Q] وما فوق: الإصدار> = 76\n- مستوى واجهة برمجة تطبيقات Android 28 (Android 9) [P]: الإصدار> = 105\n2. تم تكييف المحتوى المستند إلى الويب في مكون WebView مع المظهر الداكن (عن طريق موارد CSS أو Android XML وما إلى ذلك)</string>
+    <string name="description_restart_strategy">تؤثر استراتيجية إعادة التشغيل فقط في زر إعادة التشغيل في درج الصفحة الرئيسية.\n\nإعادة تشغيل سريعة: تعيد تشغيل التطبيق بسرعة. إذا فشلت عملية إعادة التشغيل أو حدثت حالات غير متوقعة، جرّب التبديل إلى \"إعادة تشغيل مجدولة\".\nإعادة تشغيل مجدولة: تُعدّ مسبقًا مهمة مؤقتة قصيرة. بعد إيقاف التطبيق، سيبدأ مرة أخرى وفق الجدول لتنفيذ إعادة التشغيل.</string>
+    <string name="description_rhino_java_primitive_wrap">عند تفعيل المفتاح (الوضع الافتراضي): سيتم تغليف القيم المُعادة من أساليب Java من الأنواع Number/Boolean/Character ككائنات Java وإتاحتها للسكريبت (باستثناء String). ستكون typeof هي \"object\" و species هي \"JavaObject\"، ويمكن استدعاء أساليب Java، مما يساعد على الحفاظ على خصائص الأنواع الدقيقة في Java وحل زيادة التحميل (overload).\n\nعند إيقاف المفتاح: لن تُغلف الأنواع المذكورة، وستُعرض مباشرة كقيم أولية في JavaScript (number/boolean/سلسلة ذات حرف واحد). ستكون typeof هي نوع JavaScript الموافق، وهو أقرب لدلالات ونظام JavaScript البيئي. لا يزال بالإمكان إعلان مغلّف Java صراحةً باستخدام new، مثل new java.lang.Boolean(true).\n\nانظر: http://issues.autojs6.com/435</string>
     <string name="description_root_mode_preference">إذا كان لديك جذر غريب أو حالة غير طبيعية للوصول إلى الجذر ، فيمكنك إجبار الجذر على الجذر أو غير الجذر.</string>
     <string name="description_root_record_out_file_type_preference">النوع الثنائي: غير قابل للتحرير ، بامتداد الملف \"تلقائي\"\nنوع جافا سكريبت: يمكن تحريره أو نسخه مباشرة بامتداد الملف \"js\"</string>
     <string name="description_stable_mode">يجعل الوضع المستقر أكثر استقرارًا عند الحصول على حدود تخطيط ، ولكن قد يتم تجاهل بعض النتائج.\nإعادة تشغيل خدمة الوصول المطلوبة.</string>
     <string name="description_theme_color_preference">يتم تطبيق لون النسق على عناصر واجهة المستخدم بما في ذلك على سبيل المثال لا الحصر العناصر التالية:\nشريط الحالة\nAppbar\nرمز الملف\nرمز عنصر المهمة\nفاب\nعنوان فئة الإعدادات\nزر التغيير\n\nملاحظة: اعتبارًا من الإصدار 6.2.0 من AutoJs6 ، لم يكن هناك فرق بين اللون الأساسي واللون الأساسي الداكن ولون التمييز حتى الآن.</string>
+    <string name="description_timed_task_backend">يتحكم في الآلية الأساسية لتشغيل السكربتات بشكل مجدول.\n\nAlarmManager: عبر منح إذن \"السماح بتعيين المنبّهات والتذكيرات\" يمكن أن تصبح المهام أقرب إلى التنفيذ في الوقت المحدد.\nWorkManager: صديق للنظام؛ مناسب للمهام غير الحرجة التي تتحمل بعض التأخير.\nJobScheduler: تنفيذ قديم محفوظ للتوافق؛ احتمال التأخير أعلى.</string>
+    <string name="description_timed_task_backend_more" tools:ignore="TypographyEllipsis">حالات الاستخدام والفروقات:\n\n1. AlarmManager\nمناسب للمهام الحسّاسة للتوقيت، مثل [التذكيرات/السكربتات الدقيقة التوقيت/...].\nعلى Android 12+ ومع منح إذن \"السماح بتعيين المنبّهات والتذكيرات\" يمكن التنفيذ بدقة أكبر حتى مع إيقاف الشاشة أو في وضع السكون.\nبدون الإذن قد يقلل النظام الدقة أو يؤخر التنفيذ.\n\n2. WorkManager\nمناسب للمهام التي لا تتطلب دقة زمنية صارمة مثل [مزامنة غير حرجة/تنظيف/إحصاءات/...].\nيتم الجدولة وفق [حالة البطارية/الشبكة/الشحن/سياسات السكون/...], وقد تتأخر المهام عند إيقاف الشاشة أو في وضع السكون.\nلا يضمن الدقة الزمنية لكنه يوفر مزايا في [إتمام موثوق/إعادة المحاولة عند الفشل/سلاسل المهام/إزالة التكرار].\n\n3. JobScheduler\nتنفيذ تاريخي لأغراض التوافق.\nفي إصدارات أندرويد الحديثة قد تحدث تأخيرات أكبر.\nلا يُنصح به إلا لاعتبارات التوافق.</string>
     <string name="description_version_histories_preference">عرض سجل إصدارات AutoJs6 على GitHub وإحصاءات الفئات الرئيسية.</string>
     <string name="dialog_button_back">@string/text_back</string>
     <string name="dialog_button_cancel">يلغي</string>
@@ -149,6 +153,8 @@
     <string name="entry_night_mode_always_off">دائما خارج</string>
     <string name="entry_night_mode_always_on">دائما متاح</string>
     <string name="entry_night_mode_follow_system">اتبع النظام</string>
+    <string name="entry_restart_strategy_quick">إعادة تشغيل سريعة</string>
+    <string name="entry_restart_strategy_scheduled">إعادة تشغيل مجدولة</string>
     <string name="entry_root_mode_auto_detect">تلقائي اكتشاف الوصول إلى الجذر</string>
     <string name="entry_root_mode_force_non_root">ضبط وضع غير الجذر</string>
     <string name="entry_root_mode_force_root">وضع الجذر تعيين القوة</string>
@@ -195,6 +201,7 @@
     <string name="error_failed_to_call_method">فشل استدعاء الأسلوب \"%s\"</string>
     <string name="error_failed_to_call_method_with_cause"><![CDATA[فشل استدعاء الأسلوب \"%1$s\": [ %2$s ]]]></string>
     <string name="error_failed_to_convert_into_drawable">فشل تحويل القيمة %s إلى قابل للرسم</string>
+    <string name="error_failed_to_go_to_access_settings">فشل فتح صفحة الإعدادات</string>
     <string name="error_failed_to_grant_shizuku_access">فشل منح Shizuku حق الوصول</string>
     <string name="error_failed_to_instantiate">فشل إنشاء المثيل \"%s\"</string>
     <string name="error_failed_to_instantiate_with_cause"><![CDATA[فشل إنشاء المثيل \"%1$s\": [ %2$s ]]]></string>
@@ -352,6 +359,7 @@
     <string name="summary_post_notifications_permission_inrt">السماح للتطبيق بإنشاء وإرسال الإشعارات</string>
     <string name="summary_pre_execute_script">تنفيذ قبل ملف البرنامج النصي</string>
     <string name="summary_record_prompt">إظهار الرسالة عند بدء أو إيقاف تسجيل البرنامج النصي</string>
+    <string name="summary_rhino_java_primitive_wrap">ستُغلَّف الأنواع البدائية في Java ككائنات Java داخل السكربت</string>
     <string name="summary_stable_mode">تحليل تخطيط أكثر استقرارًا ولكن توافق رمز أسوأ (إعادة تشغيل خدمة إمكانية الوصول المطلوبة)</string>
     <string name="summary_text_launcher_shortcuts">أضف اختصارات إلى المشغل</string>
     <string name="summary_use_volume_control_record">ابدأ أو توقف عن التسجيل الذي يتم التحكم فيه بواسطة مفتاح خفض مستوى الصوت عند عرض الزر العائم</string>
@@ -388,6 +396,7 @@
     <string name="text_all_histories">جميع السجلات</string>
     <string name="text_all_histories_cleared">تم مسح جميع السجلات</string>
     <string name="text_all_items_cleared">تم مسح جميع العناصر</string>
+    <string name="text_allow_setting_alarms_and_reminders_is_recommended">يُوصى بمنح إذن \"السماح بتعيين المنبّهات والتذكيرات\" لضمان تنفيذ المهام المجدولة بأكبر قدر ممكن من الدقة حتى عند إيقاف الشاشة أو في وضع السكون</string>
     <string name="text_already_copied_to_clip">نسخ إلى الحافظة</string>
     <string name="text_already_copied_to_clip_but_only_latest_few_items">تم النسخ بالفعل إلى الحافظة (فقط أحدث %d عنصر)</string>
     <string name="text_already_created">مخلوق</string>
@@ -420,6 +429,7 @@
     <string name="text_app_name_parallel_space">مساحة موازية</string>
     <string name="text_app_name_qqmusic">qqmusic</string>
     <string name="text_app_name_wechat">WeChat</string>
+    <string name="text_app_restarting" tools:ignore="TypographyEllipsis">جارٍ إعادة تشغيل التطبيق...</string>
     <string name="text_app_shortcut_disabled">تم تعطيل هذا الاختصار</string>
     <string name="text_app_shortcut_docs_long_label">AutoJs6 توثيق</string>
     <string name="text_app_shortcut_docs_short_label">توثيق</string>
@@ -474,6 +484,7 @@
     <string name="text_clear_pre_execute_script">مسح السيناريو قبل التنفيذ</string>
     <string name="text_clear_updates_checked_states">تحديثات مسح الحالات التي تم فحصها</string>
     <string name="text_click_item_to_remove">انقر فوق العنصر لإزالته</string>
+    <string name="text_click_item_to_show_details">اضغط على العنصر لعرض التفاصيل</string>
     <string name="text_click_ok_to_go_to_settings">انقر فوق \"نعم\" للانتقال إلى الإعدادات</string>
     <string name="text_click_too_frequently">التشغيل المتكرر</string>
     <string name="text_client_mode">وضع العميل</string>
@@ -917,8 +928,10 @@
     <string name="text_reset_to_initial_content">إعادة تعيين في البداية</string>
     <string name="text_reset_to_initial_content_only_for_assets">إعادة التعيين هي فقط للعينات</string>
     <string name="text_restart">إعادة بدء</string>
+    <string name="text_restart_strategy">استراتيجية إعادة التشغيل</string>
     <string name="text_result">نتيجة</string>
     <string name="text_revoke_autojs6_access_in_shizuku_app">قم بإلغاء الوصول إلى AutoJs6 في تطبيق Shizuku</string>
+    <string name="text_rhino_java_primitive_wrap">تغليف الأنواع البدائية في Java</string>
     <string name="text_root_mode_title">فحص الجذر مجموعة القوة</string>
     <string name="text_run">يجري</string>
     <string name="text_run_on_battery_change">على البطارية تغيرت</string>
@@ -1008,6 +1021,7 @@
     <string name="text_theme_color">لون الموضوع</string>
     <string name="text_time">زمن</string>
     <string name="text_timed_task">مهمة توقيت</string>
+    <string name="text_timed_task_backend_title">محرك جدولة المهام المؤقتة</string>
     <string name="text_timed_task_timing">توقيت</string>
     <string name="text_tools">أدوات</string>
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">قد يتم تلقائيًا إخفاء رمز المشغّل بخلفية شفافة أو إضافة خلفية إليه بواسطة النظام, لذلك قد يختلف التأثير الفعلي بين الأجهزة المختلفة</string>
@@ -1065,14 +1079,5 @@
     <string name="text_write_secure_settings">اكتب إعدادات الأمان</string>
     <string name="text_write_secure_settings_description">إعدادات النظام الآمنة ، التي تحتوي على تفضيلات النظام التي يمكن أن تقرأها التطبيقات ولكن لا يُسمح لها بالكتابة.\nهذه هي لتفضيلات يجب على المستخدم تعديلها بشكل صريح من خلال واجهة المستخدم لتطبيق النظام.\nمع إذن إعدادات النظام الآمن ، يمكن للتطبيقات العادية تعديل الإعدادات الآمنة مباشرة (مثل خدمة إمكانية الوصول).</string>
     <string name="text_write_system_settings">كتابة إعدادات النظام</string>
-    <string name="description_rhino_java_primitive_wrap">عند تفعيل المفتاح (الوضع الافتراضي): سيتم تغليف القيم المُعادة من أساليب Java من الأنواع Number/Boolean/Character ككائنات Java وإتاحتها للسكريبت (باستثناء String). ستكون typeof هي \"object\" و species هي \"JavaObject\"، ويمكن استدعاء أساليب Java، مما يساعد على الحفاظ على خصائص الأنواع الدقيقة في Java وحل زيادة التحميل (overload).\n\nعند إيقاف المفتاح: لن تُغلف الأنواع المذكورة، وستُعرض مباشرة كقيم أولية في JavaScript (number/boolean/سلسلة ذات حرف واحد). ستكون typeof هي نوع JavaScript الموافق، وهو أقرب لدلالات ونظام JavaScript البيئي. لا يزال بالإمكان إعلان مغلّف Java صراحةً باستخدام new، مثل new java.lang.Boolean(true).\n\nانظر: http://issues.autojs6.com/435</string>
-    <string name="summary_rhino_java_primitive_wrap">ستُغلَّف الأنواع البدائية في Java ككائنات Java داخل السكربت</string>
-    <string name="text_rhino_java_primitive_wrap">تغليف الأنواع البدائية في Java</string>
-    <string name="title_timed_task_backend">محرك جدولة المهام المؤقتة</string>
-    <string name="description_timed_task_backend">يتحكم في الآلية الأساسية لتشغيل السكربتات بشكل مجدول.\n\nAlarmManager: عبر منح إذن \"السماح بتعيين المنبّهات والتذكيرات\" يمكن أن تصبح المهام أقرب إلى التنفيذ في الوقت المحدد.\nWorkManager: صديق للنظام؛ مناسب للمهام غير الحرجة التي تتحمل بعض التأخير.\nJobScheduler: تنفيذ قديم محفوظ للتوافق؛ احتمال التأخير أعلى.</string>
-    <string name="failed_to_go_to_access_settings">فشل فتح صفحة الإعدادات</string>
-    <string name="text_allow_setting_alarms_and_reminders_is_recommended">يُوصى بمنح إذن \"السماح بتعيين المنبّهات والتذكيرات\" لضمان تنفيذ المهام المجدولة بأكبر قدر ممكن من الدقة حتى عند إيقاف الشاشة أو في وضع السكون</string>
-    <string name="description_timed_task_backend_more" tools:ignore="TypographyEllipsis">حالات الاستخدام والفروقات:\n\n1. AlarmManager\nمناسب للمهام الحسّاسة للتوقيت، مثل [التذكيرات/السكربتات الدقيقة التوقيت/...].\nعلى Android 12+ ومع منح إذن \"السماح بتعيين المنبّهات والتذكيرات\" يمكن التنفيذ بدقة أكبر حتى مع إيقاف الشاشة أو في وضع السكون.\nبدون الإذن قد يقلل النظام الدقة أو يؤخر التنفيذ.\n\n2. WorkManager\nمناسب للمهام التي لا تتطلب دقة زمنية صارمة مثل [مزامنة غير حرجة/تنظيف/إحصاءات/...].\nيتم الجدولة وفق [حالة البطارية/الشبكة/الشحن/سياسات السكون/...], وقد تتأخر المهام عند إيقاف الشاشة أو في وضع السكون.\nلا يضمن الدقة الزمنية لكنه يوفر مزايا في [إتمام موثوق/إعادة المحاولة عند الفشل/سلاسل المهام/إزالة التكرار].\n\n3. JobScheduler\nتنفيذ تاريخي لأغراض التوافق.\nفي إصدارات أندرويد الحديثة قد تحدث تأخيرات أكبر.\nلا يُنصح به إلا لاعتبارات التوافق.</string>
-    <string name="text_click_item_to_show_details">اضغط على العنصر لعرض التفاصيل</string>
 
 </resources>

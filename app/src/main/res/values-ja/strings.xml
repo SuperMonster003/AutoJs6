@@ -83,10 +83,14 @@
     <string name="description_manage_ignored_updates_preference">クリックすると, リストアイテムを表示または管理できます.\nリストアイテムを削除するには, 長押しします</string>
     <string name="description_night_mode_preference">ナイトモード (ダークテーマとも呼ばれる) は, Android システムの UI と端末上で動作するアプリケーションの両方に適用され, 弱視のユーザーや明るい光に敏感なユーザーの視認性を向上させ, 誰でも簡単に暗い環境下で端末を使用できるようにします.\n\nフォローシステム AutoJs6 では, Android と同じ Night モードが設定できます.\n常にオン Android のシステム設定に関係なく, 常に Night モードが ON になります.\n常にオフ Android のシステム設定に関係なく, AutoJs6 はナイトモードをオフにします.\n\n注: Follow system オプションは, Android API Level 28 (Android 9) [P] 以上の場合のみです</string>
     <string name="description_night_mode_preference_more">Android システムでナイトモードを有効にするには\n- Android API Level 29 (Android 10) [Q] 以上の場合: [設定] -> [ディスプレイ] -> [テーマ].\n- Android API Level 28 (Android 9) [P]: [開発者向けオプション] -> [ナイトモード].\n\nWebView コンポーネント (AutoJs6 のドキュメントページなど) を使って, Web ベースのコンテンツにナイトモード (ダークテーマ) を適用するには, 以下の条件を満たす必要があります.\n1. Android System WebView (または Google Chrome のようなブラウザ) .\n- Android API Level 29 (Android 10) [Q] 以上: バージョン >= 76\n- Android API Level 28 (Android 9) [P]: バージョン >= 105\n2. WebView コンポーネントの Web ベースのコンテンツは, Dark テーマに適合している (CSS や Android XML リソースなどによる)</string>
+    <string name="description_restart_strategy">再起動戦略はホームページのドロワーにある再起動ボタンにのみ適用されます.\n\nクイック再起動: アプリをすばやく再起動します. 再起動に失敗したり予期しない状況が発生した場合は/\"スケジュール再起動\" に切り替えてください.\nスケジュール再起動: あらかじめ短時間のタイマーを設定します. アプリが停止した後/スケジュールに従って再度起動し/アプリの再起動を実現します.</string>
+    <string name="description_rhino_java_primitive_wrap">スイッチ有効 (デフォルト): Java メソッドが返す Number/Boolean/Character は Java オブジェクトとしてラップされ/スクリプトに公開されます (String は除外). typeof は \"object\"/species は \"JavaObject\". Java のメソッドを呼び出せるため/Java の厳密な型特性やオーバーロード解決を保持しやすくなります.\n\nスイッチ無効: 上記の型はラップされず/JavaScript のプリミティブ値 (number/boolean/1 文字の文字列) として直接公開されます. typeof は対応する JavaScript 型となり/JavaScript のセマンティクス／エコシステムにより沿います. 必要なら new によって明示的に Java ラッパーを生成できます (例: new java.lang.Boolean(true)).\n\n参照: http://issues.autojs6.com/435</string>
     <string name="description_root_mode_preference">異国の root や root アクセスに異常がある場合, root を強制的に root または non-root に設定することができます</string>
     <string name="description_root_record_out_file_type_preference">バイナリタイプ: 編集不可, ファイル拡張子は \"auto\"\nJavaScript タイプ: 直接編集またはコピー可能, ファイル拡張子は \"js\"</string>
     <string name="description_stable_mode">安定モードにするとレイアウト境界を取得する際に安定しますが, 一部の結果が無視されることがあります.\nアクセシビリティサービスの再起動が必要です</string>
     <string name="description_theme_color_preference">テーマカラーは, 以下のウィジェットに適用されますが, これに限定されるものではありません.\nステータスバー\nアプリバー\nファイルアイコン\nタスクアイテムアイコン\nファブ\n設定カテゴリのタイトル\nスイッチボタン\n\n注: AutoJs6 バージョン 6.2.0 では, 原色, 原色暗色, アクセントカラーの区別はまだありません</string>
+    <string name="description_timed_task_backend">スクリプトを定時で起動するための基盤メカニズムを制御します.\n\nAlarmManager: システムの \"アラームとリマインダーの設定を許可\" 権限を付与すると/より正確な時刻での実行に近づきます.\nWorkManager: システムに優しく/一定の遅延を許容できる非重要タスクに適しています.\nJobScheduler: 旧来の実装で互換性のために残されていますが/遅延が発生しやすいです.</string>
+    <string name="description_timed_task_backend_more" tools:ignore="TypographyEllipsis">利用シーンと違い: \n\n1. AlarmManager\n[リマインダー/厳密な時刻のスクリプト/...] など/時刻精度が重要なタスクに適しています.\nAndroid 12 以降で \"アラームとリマインダーの設定を許可\" 権限がある場合/画面消灯/待機中でも比較的正確に実行されます.\n権限がない場合/システムにより不正確または遅延実行になる可能性があります.\n\n2. WorkManager\n[非重要な同期/クリーンアップ/統計/...] など/厳密な時刻精度を必要としないタスクに適しています.\n[バッテリー/ネットワーク/充電状況/待機ポリシー/...] に応じてスケジューリングされ/消灯/待機中は実行が遅れることがあります.\n時間精度は保証されませんが/[確実な完了/失敗時の再試行/チェーン実行/一意タスクの重複排除] に強みがあります.\n\n3. JobScheduler\n互換性維持のための歴史的実装です.\n新しい Android では遅延が大きくなりやすい傾向があります.\n互換性の必要がない限り/通常は非推奨です.</string>
     <string name="description_version_histories_preference">GitHub 上の AutoJs6 のリリース版変更履歴と主要カテゴリの統計データを確認する.</string>
     <string name="dialog_button_back">@string/text_back</string>
     <string name="dialog_button_cancel">取消</string>
@@ -148,6 +152,8 @@
     <string name="entry_night_mode_always_off">常にオフ</string>
     <string name="entry_night_mode_always_on">常にオン</string>
     <string name="entry_night_mode_follow_system">システムに従う</string>
+    <string name="entry_restart_strategy_quick">クイック再起動</string>
+    <string name="entry_restart_strategy_scheduled">スケジュール再起動</string>
     <string name="entry_root_mode_auto_detect">ルートアクセスを自動検出</string>
     <string name="entry_root_mode_force_non_root">非ルートモードを強制的に設定する</string>
     <string name="entry_root_mode_force_root">強制的にルートモードにする</string>
@@ -194,6 +200,7 @@
     <string name="error_failed_to_call_method">メソッド \"%s\" の呼び出しに失敗しました</string>
     <string name="error_failed_to_call_method_with_cause"><![CDATA[メソッド \"%1$s\" の呼び出しに失敗しました: [ %2$s ]]]></string>
     <string name="error_failed_to_convert_into_drawable">値 %s を Drawable に変換するのに失敗しました</string>
+    <string name="error_failed_to_go_to_access_settings">設定画面を開けませんでした</string>
     <string name="error_failed_to_grant_shizuku_access">Shizuku の権限付与に失敗しました</string>
     <string name="error_failed_to_instantiate">\"%s\" のインスタンス化に失敗しました</string>
     <string name="error_failed_to_instantiate_with_cause"><![CDATA[インスタンス化 \"%1$s\" に失敗しました: [ %2$s ]]]></string>
@@ -351,6 +358,7 @@
     <string name="summary_post_notifications_permission_inrt">アプリが通知を作成して送信することを許可する</string>
     <string name="summary_pre_execute_script">スクリプトファイルの前に実行する</string>
     <string name="summary_record_prompt">スクリプトの録音を開始または停止するときにメッセージを表示する</string>
+    <string name="summary_rhino_java_primitive_wrap">Java のプリミティブ型はスクリプト内で Java オブジェクトとしてラップされます</string>
     <string name="summary_stable_mode">レイアウト解析はより安定するが, コードの互換性は低下 (アクセシビリティ・サービスの再起動が必要)</string>
     <string name="summary_text_launcher_shortcuts">ランチャーへのショートカットの追加</string>
     <string name="summary_use_volume_control_record">フローティングボタンが表示されているときに, \"Volume Down\" キーで録画の開始/停止を制御できるようになりました</string>
@@ -387,6 +395,7 @@
     <string name="text_all_histories">すべての履歴</string>
     <string name="text_all_histories_cleared">すべての履歴がクリアされました</string>
     <string name="text_all_items_cleared">すべての項目を削除しました</string>
+    <string name="text_allow_setting_alarms_and_reminders_is_recommended">画面消灯中や待機時でもできるだけ正確に実行できるよう/[アラームとリマインダーの設定を許可] 権限の付与を推奨します</string>
     <string name="text_already_copied_to_clip">クリップボードにコピーされる</string>
     <string name="text_already_copied_to_clip_but_only_latest_few_items">既にクリップボードにコピーされました (最新の %d アイテムのみ)</string>
     <string name="text_already_created">作成</string>
@@ -419,6 +428,7 @@
     <string name="text_app_name_parallel_space">平行空間</string>
     <string name="text_app_name_qqmusic">QQMusic</string>
     <string name="text_app_name_wechat">ウィーチャット</string>
+    <string name="text_app_restarting" tools:ignore="TypographyEllipsis">アプリを再起動しています...</string>
     <string name="text_app_shortcut_disabled">このショートカットは無効です</string>
     <string name="text_app_shortcut_docs_long_label">AutoJs6 文書</string>
     <string name="text_app_shortcut_docs_short_label">文書</string>
@@ -473,6 +483,7 @@
     <string name="text_clear_pre_execute_script">実行前スクリプトのクリア</string>
     <string name="text_clear_updates_checked_states">アップデートのチェック状態をクリアする</string>
     <string name="text_click_item_to_remove">削除する項目をクリックします</string>
+    <string name="text_click_item_to_show_details">項目をタップして詳細を表示します</string>
     <string name="text_click_ok_to_go_to_settings">\"OK\" をクリックすると設定に進みます</string>
     <string name="text_click_too_frequently">頻繁に行う操作</string>
     <string name="text_client_mode">クライアントモード</string>
@@ -916,8 +927,10 @@
     <string name="text_reset_to_initial_content">初期リセット</string>
     <string name="text_reset_to_initial_content_only_for_assets">リセットはサンプルのみ</string>
     <string name="text_restart">再起動</string>
+    <string name="text_restart_strategy">再起動戦略</string>
     <string name="text_result">結果</string>
     <string name="text_revoke_autojs6_access_in_shizuku_app">Shizuku アプリケーションで AutoJs6 権限を取り消す</string>
+    <string name="text_rhino_java_primitive_wrap">Java プリミティブ型のラップ</string>
     <string name="text_root_mode_title">強制的に root にするチェック</string>
     <string name="text_run">実行</string>
     <string name="text_run_on_battery_change">バッテリー交換時</string>
@@ -1007,6 +1020,7 @@
     <string name="text_theme_color">テーマカラー</string>
     <string name="text_time">時間</string>
     <string name="text_timed_task">時間指定タスク</string>
+    <string name="text_timed_task_backend_title">定時タスクのスケジューリングエンジン</string>
     <string name="text_timed_task_timing">タイミング</string>
     <string name="text_tools">ツール</string>
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">透過背景ランチャーアイコンはシステムによって自動的にマスクされたり背景が追加されたりする場合があるため, 実際の効果はデバイスによって異なる場合があります</string>
@@ -1064,14 +1078,5 @@
     <string name="text_write_secure_settings">セキュリティ設定の書き込み</string>
     <string name="text_write_secure_settings_description">アプリケーションが読み取ることはできるが, 書き込むことはできないシステム環境設定を含む, 安全なシステム設定です.\nこれは, ユーザーがシステムアプリの UI を通じて明示的に変更する必要がある環境設定のためのものです.\nセキュアなシステム設定を許可すると, 通常のアプリケーションはセキュアな設定 (アクセシビリティサービスなど) を直接変更できるようになります</string>
     <string name="text_write_system_settings">システム設定の書き込み</string>
-    <string name="description_rhino_java_primitive_wrap">スイッチ有効 (デフォルト): Java メソッドが返す Number/Boolean/Character は Java オブジェクトとしてラップされ/スクリプトに公開されます (String は除外). typeof は \"object\"/species は \"JavaObject\". Java のメソッドを呼び出せるため/Java の厳密な型特性やオーバーロード解決を保持しやすくなります.\n\n スイッチ無効: 上記の型はラップされず/JavaScript のプリミティブ値 (number/boolean/1 文字の文字列) として直接公開されます. typeof は対応する JavaScript 型となり/JavaScript のセマンティクス／エコシステムにより沿います. 必要なら new によって明示的に Java ラッパーを生成できます (例: new java.lang.Boolean(true)).\n\n 参照: http://issues.autojs6.com/435</string>
-    <string name="summary_rhino_java_primitive_wrap">Java のプリミティブ型はスクリプト内で Java オブジェクトとしてラップされます</string>
-    <string name="text_rhino_java_primitive_wrap">Java プリミティブ型のラップ</string>
-    <string name="title_timed_task_backend">定時タスクのスケジューリングエンジン</string>
-    <string name="description_timed_task_backend">スクリプトを定時で起動するための基盤メカニズムを制御します.\n\nAlarmManager: システムの \"アラームとリマインダーの設定を許可\" 権限を付与すると/より正確な時刻での実行に近づきます.\nWorkManager: システムに優しく/一定の遅延を許容できる非重要タスクに適しています.\nJobScheduler: 旧来の実装で互換性のために残されていますが/遅延が発生しやすいです.</string>
-    <string name="failed_to_go_to_access_settings">設定画面を開けませんでした</string>
-    <string name="text_allow_setting_alarms_and_reminders_is_recommended">画面消灯中や待機時でもできるだけ正確に実行できるよう/[アラームとリマインダーの設定を許可] 権限の付与を推奨します</string>
-    <string name="description_timed_task_backend_more" tools:ignore="TypographyEllipsis">利用シーンと違い: \n\n1. AlarmManager\n[リマインダー/厳密な時刻のスクリプト/...] など/時刻精度が重要なタスクに適しています.\nAndroid 12 以降で \"アラームとリマインダーの設定を許可\" 権限がある場合/画面消灯/待機中でも比較的正確に実行されます.\n権限がない場合/システムにより不正確または遅延実行になる可能性があります.\n\n2. WorkManager\n[非重要な同期/クリーンアップ/統計/...] など/厳密な時刻精度を必要としないタスクに適しています.\n[バッテリー/ネットワーク/充電状況/待機ポリシー/...] に応じてスケジューリングされ/消灯/待機中は実行が遅れることがあります.\n時間精度は保証されませんが/[確実な完了/失敗時の再試行/チェーン実行/一意タスクの重複排除] に強みがあります.\n\n3. JobScheduler\n互換性維持のための歴史的実装です.\n新しい Android では遅延が大きくなりやすい傾向があります.\n互換性の必要がない限り/通常は非推奨です.</string>
-    <string name="text_click_item_to_show_details">項目をタップして詳細を表示します</string>
 
 </resources>

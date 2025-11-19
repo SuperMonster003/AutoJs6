@@ -351,43 +351,53 @@ object IntentUtils {
             val launchIntent = getLaunchIntent(context)
                 ?: throw RuntimeException("Failed to create launch intent for AutoJs6")
 
-            when (context) {
-                is AppCompatActivity -> {
-                    context.startActivity(launchIntent)
-                }
-                else -> {
-                    val delay = TimeUnit.MILLISECONDS.toMillis(300)
-                    val triggerAtMillis = SystemClock.elapsedRealtime() + delay
-                    runCatching tryWithAlarmManager@{
-                        val pendingIntent = PendingIntent.getActivity(
-                            /* context = */ context,
-                            /* requestCode = */ UNIQUE_REQUEST_CODE,
-                            /* intent = */ launchIntent,
-                            /* flags = */ PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-                        )
-                        val am = context.getSystemService(ALARM_SERVICE) as AlarmManager
-                        am.cancel(pendingIntent)
-                        am.setExactAndAllowWhileIdle(
-                            /* type = */ AlarmManager.ELAPSED_REALTIME,
-                            /* triggerAtMillis = */ triggerAtMillis,
-                            /* operation = */ pendingIntent,
-                        )
-                    }.onFailure tryWithWorkManager@{
-                        it.printStackTrace()
-                        val request = OneTimeWorkRequestBuilder<RestartWorker>()
-                            .setInitialDelay(delay, TimeUnit.MILLISECONDS)
-                            .setConstraints(Constraints.NONE)
-                            .build()
-                        WorkManager.getInstance(context).enqueueUniqueWork(
-                            uniqueWorkName = "work-task-restart-autojs6",
-                            existingWorkPolicy = ExistingWorkPolicy.REPLACE,
-                            request = request,
-                        )
-                    }
-                }
+            if (context is AppCompatActivity && Pref.isQuickRestartEnabled) {
+                // When clicking the "Restart" button in the main drawer,
+                // if "Quick Restart" is enabled, the context.startActivity method will be called.
+                // zh-CN: 主页抽屉 "重启" 按钮点击时, 如果启用了 "快速重启", 则调用 context.startActivity 方法.
+                context.startActivity(launchIntent)
+            } else {
+                // All scripts will call the scheduleAppLaunch method.
+                // zh-CM: 脚本一律调用 scheduleAppLaunch 方法.
+                scheduleAppLaunch(context, launchIntent)
+            }
+
+            if (context is AppCompatActivity && !Pref.isQuickRestartEnabled) {
+                ViewUtils.showToast(context, R.string.text_app_restarting, true)
             }
 
             exit(context, beforeExit, scriptsAfterRestart)
+        }
+
+        private fun scheduleAppLaunch(context: Context, launchIntent: Intent) {
+            val delay = TimeUnit.MILLISECONDS.toMillis(300)
+            val triggerAtMillis = SystemClock.elapsedRealtime() + delay
+            runCatching tryWithAlarmManager@{
+                val pendingIntent = PendingIntent.getActivity(
+                    /* context = */ context,
+                    /* requestCode = */ UNIQUE_REQUEST_CODE,
+                    /* intent = */ launchIntent,
+                    /* flags = */ PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+                )
+                val am = context.getSystemService(ALARM_SERVICE) as AlarmManager
+                am.cancel(pendingIntent)
+                am.setExactAndAllowWhileIdle(
+                    /* type = */ AlarmManager.ELAPSED_REALTIME,
+                    /* triggerAtMillis = */ triggerAtMillis,
+                    /* operation = */ pendingIntent,
+                )
+            }.onFailure tryWithWorkManager@{
+                it.printStackTrace()
+                val request = OneTimeWorkRequestBuilder<RestartWorker>()
+                    .setInitialDelay(delay, TimeUnit.MILLISECONDS)
+                    .setConstraints(Constraints.NONE)
+                    .build()
+                WorkManager.getInstance(context).enqueueUniqueWork(
+                    uniqueWorkName = "work-task-restart-autojs6",
+                    existingWorkPolicy = ExistingWorkPolicy.REPLACE,
+                    request = request,
+                )
+            }
         }
 
         @JvmStatic
@@ -415,7 +425,15 @@ object IntentUtils {
                 Pref.putStringSync(key(R.string.key_scripts_after_app_restart), scriptsAfterRestart.joinToString("\n") { it.trim() })
             }
 
-            finishAllAppTasksSafely(context)
+            if (context is AppCompatActivity && Pref.isQuickRestartEnabled) {
+                // When clicking the "Restart" button in the main drawer,
+                // if "Quick Restart" is enabled, the finishAllAppTasksSafely method will not be called.
+                // zh-CN: 主页抽屉 "重启" 按钮点击时, 如果启用了 "快速重启", 则不调用 finishAllAppTasksSafely 方法.
+            } else {
+                // All scripts will call the finishAllAppTasksSafely method.
+                // zh-CM: 脚本一律调用 finishAllAppTasksSafely 方法.
+                finishAllAppTasksSafely(context)
+            }
 
             exitProcess(0)
         }

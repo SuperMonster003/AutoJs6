@@ -12,7 +12,7 @@
             app:title="@string/text_app_language"
             app:itemKeys="@array/keys_app_language"
             app:itemValues="@array/values_app_language"
-            app:itemDefaultKey="@string/key_app_language_auto"
+            app:itemDefaultKey="@string/default_key_app_language"
             app:neutralText="@string/dialog_button_system_settings"
             app:neutralTextShort="@string/dialog_button_system_settings_simplified"
             app:longClickPrompt="@string/description_app_language_preference"
@@ -24,7 +24,7 @@
             app:title="@string/text_night_mode"
             app:itemKeys="@array/keys_night_mode"
             app:itemValues="@array/values_night_mode"
-            app:itemDefaultKey="@string/key_night_mode_follow_system"
+            app:itemDefaultKey="@string/default_key_night_mode"
             app:longClickPrompt="@string/description_night_mode_preference"
             app:longClickPromptMore="@string/description_night_mode_preference_more" />
 
@@ -40,7 +40,7 @@
             app:title="@string/text_keep_screen_on_when_in_foreground"
             app:itemKeys="@array/keys_keep_screen_on_when_in_foreground"
             app:itemValues="@array/values_keep_screen_on_when_in_foreground"
-            app:itemDefaultKey="@string/key_keep_screen_on_when_in_foreground_disabled"
+            app:itemDefaultKey="@string/default_key_keep_screen_on_when_in_foreground"
             app:longClickPrompt="@string/description_keep_screen_on_when_in_foreground_preference" />
 
     </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
@@ -55,10 +55,19 @@
             app:title="@string/text_documentation_source"
             app:itemKeys="@array/keys_documentation_source"
             app:itemValues="@array/values_documentation_source"
-            app:itemDefaultKey="@string/key_documentation_source_local"
+            app:itemDefaultKey="@string/default_key_documentation_source"
             app:onConfirmPrompt="@string/prompt_restart_is_needed_for_docs_source_switch"
             app:longClickPrompt="@string/description_documentation_source_preference"
             app:longClickPromptMore="@string/description_documentation_source_preference_more" />
+
+        <org.autojs.autojs.theme.preference.MaterialListPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_restart_strategy"
+            app:title="@string/text_restart_strategy"
+            app:itemKeys="@array/keys_restart_strategy"
+            app:itemValues="@array/values_restart_strategy"
+            app:itemDefaultKey="@string/default_key_restart_strategy"
+            app:longClickPrompt="@string/description_restart_strategy" />
 
         <org.autojs.autojs.ui.settings.LauncherIconPreference
             app:layout="@layout/preference_custom"
@@ -66,7 +75,7 @@
             app:title="@string/text_launcher_icon_title"
             app:itemKeys="@array/keys_launcher_icon"
             app:itemValues="@array/values_launcher_icon"
-            app:itemDefaultKey="@string/key_launcher_icon_adaptive"
+            app:itemDefaultKey="@string/default_key_launcher_icon"
             app:longClickPrompt="@string/description_launcher_icon_preference" />
 
         <org.autojs.autojs.ui.settings.LauncherShortcutsPreference
@@ -115,7 +124,7 @@
         <org.autojs.autojs.ui.settings.TimedTaskBackendPreference
             app:layout="@layout/preference_custom"
             app:key="@string/key_timed_task_backend"
-            app:title="@string/title_timed_task_backend"
+            app:title="@string/text_timed_task_backend_title"
             app:itemKeys="@array/keys_timed_task_backend"
             app:itemValues="@array/values_timed_task_backend"
             app:itemDefaultKey="@string/default_key_timed_task_backend"
@@ -175,7 +184,7 @@
             app:title="@string/text_root_mode_title"
             app:itemKeys="@array/keys_root_mode"
             app:itemValues="@array/values_root_mode"
-            app:itemDefaultKey="@string/key_root_mode_auto_detect"
+            app:itemDefaultKey="@string/default_key_root_mode"
             app:longClickPrompt="@string/description_root_mode_preference" />
 
     </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>

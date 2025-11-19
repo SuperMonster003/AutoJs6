@@ -60,6 +60,16 @@
         <item>@string/entry_app_language_ar</item>
     </string-array>
 
+    <string-array name="keys_restart_strategy">
+        <item>@string/key_restart_strategy_quick</item>
+        <item>@string/key_restart_strategy_scheduled</item>
+    </string-array>
+
+    <string-array name="values_restart_strategy">
+        <item>@string/entry_restart_strategy_quick</item>
+        <item>@string/entry_restart_strategy_scheduled</item>
+    </string-array>
+
     <string-array name="keys_launcher_icon">
         <item>@string/key_launcher_icon_adaptive</item>
         <item>@string/key_launcher_icon_transparent_background</item>
