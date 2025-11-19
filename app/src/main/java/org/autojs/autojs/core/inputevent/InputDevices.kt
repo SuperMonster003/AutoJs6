@@ -45,9 +45,11 @@ object InputDevices {
                         val result = ProcessShell.execCommand(cmd, true)
                         if (result.code == 0) return@run result.result
                     }
-                    if (WrappedShizuku.isOperational()) {
-                        val result = WrappedShizuku.execCommand(cmd)
-                        if (result.code == 0) return@run result.result
+                    if (WrappedShizuku.isRunning()) {
+                        runCatching {
+                            val result = WrappedShizuku.execCommand(cmd)
+                            if (result.code == 0) return@run result.result
+                        }
                     }
                     return -1
                 }
