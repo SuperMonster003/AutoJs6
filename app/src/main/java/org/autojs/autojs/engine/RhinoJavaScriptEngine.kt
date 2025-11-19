@@ -94,6 +94,7 @@ open class RhinoJavaScriptEngine(private val androidContext: android.content.Con
     override fun forceStop() {
         Log.d(TAG, "forceStop: interrupt Thread: $thread")
         thread.interrupt()
+        runtime.cancelScriptJobs()
     }
 
     @Synchronized
