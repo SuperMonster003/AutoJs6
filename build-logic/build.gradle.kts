@@ -22,9 +22,15 @@ run determineBuildLogicJdk@{
         requireNotNull(it) { "version.properties does not contain \"$key\"" }
     }.toInt()
 
-    val javaVersionMinSupported = props.requireIntProperty("JAVA_VERSION_MIN_SUPPORTED")
-    val javaVersionMaxSupported = props.requireIntProperty("JAVA_VERSION_MAX_SUPPORTED")
-    val javaVersionMinSuggested = props.requireIntProperty("JAVA_VERSION_MIN_SUGGESTED")
+    val javaVersionMinSupported = props.requireIntProperty("JAVA_VERSION_MIN_SUPPORTED").also {
+        System.setProperty("gradle.java.version.min.supported", "$it")
+    }
+    val javaVersionMaxSupported = props.requireIntProperty("JAVA_VERSION_MAX_SUPPORTED").also {
+        System.setProperty("gradle.java.version.max.supported", "$it")
+    }
+    val javaVersionMinSuggested = props.requireIntProperty("JAVA_VERSION_MIN_SUGGESTED").also {
+        System.setProperty("gradle.java.version.min.suggested", "$it")
+    }
 
     val javaVersionCurrentInt = JavaVersion.current().majorVersion.toInt()
 

@@ -51,7 +51,7 @@ class Versions @JvmOverloads constructor(
     operator fun get(propertyInfo: List<String>) = bp[propertyInfo]
 
     fun showInfo() {
-        val title = "Version information for AutoJs6 app library"
+        val title = "Version information for ${project.rootProject.name} app library"
 
         val infoVerName = "Version name: $appVersionName"
         val infoVerCode = "Version code: ${if (isBuildNumberAutoIncremented) "${appVersionCode + 1} [auto-incremented]" else appVersionCode}"
