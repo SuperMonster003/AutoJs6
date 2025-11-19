@@ -19,9 +19,9 @@ import android.widget.ImageView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.autojs.autojs.groundwork.WrapContentGridLayoutManger;
 import org.autojs.autojs.runtime.api.Mime;
 import org.autojs.autojs.ui.BaseActivity;
 import org.autojs.autojs.util.ViewUtils;
@@ -65,8 +65,7 @@ public class AppsIconSelectActivity extends BaseActivity {
 
         ViewUtils.excludePaddingClippableViewFromBottomNavigationBar(mAppsRecyclerView);
 
-        WrapContentGridLayoutManger manager = new WrapContentGridLayoutManger(this, 5);
-        manager.setDebugInfo("IconSelectView");
+        GridLayoutManager manager = new GridLayoutManager(this, 5);
         mAppsRecyclerView.setLayoutManager(manager);
 
         loadApps();

@@ -105,7 +105,6 @@ zip4j = "2.11.5"
 
 [libraries]
 
-analytics = { module = "com.flurry.android:analytics", version.ref = "analytics" }
 android-device-names = { module = "com.jaredrummler:android-device-names", version.ref = "android-device-names" }
 android-logging-log4j = { module = "de.mindpipe.android:android-logging-log4j", version.ref = "android-logging-log4j" }
 androidannotations = { module = "org.androidannotations:androidannotations", version.ref = "androidannotations" }

@@ -14,11 +14,8 @@ import androidx.multidex.MultiDexApplication
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomViewTarget
 import com.bumptech.glide.request.transition.Transition
-import com.flurry.android.FlurryAgent
 import com.google.mlkit.common.sdkinternal.MlKitContext
 import com.hjq.toast.Toaster
-import com.tencent.bugly.Bugly
-import com.tencent.bugly.crashreport.CrashReport
 import io.reactivex.android.schedulers.AndroidSchedulers
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.pref.Pref
@@ -36,7 +33,6 @@ import org.autojs.autojs.tool.CrashHandler
 import org.autojs.autojs.ui.error.CrashReportActivity
 import org.autojs.autojs.ui.floating.FloatyWindowManger
 import org.autojs.autojs.util.ViewUtils
-import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import org.greenrobot.eventbus.EventBus
 import java.lang.ref.WeakReference
@@ -68,7 +64,6 @@ class App : MultiDexApplication() {
             else /* Main process. */ -> {
                 devPluginService = DevPluginService(this)
 
-                setUpStaticsTool()
                 setUpDebugEnvironment()
                 setUpLeakCanary()
 
@@ -91,25 +86,8 @@ class App : MultiDexApplication() {
         Log.d("Shizuku", "${App::class.java.simpleName} attachBaseContext | Process=${getProcessNameCompat()}")
     }
 
-    private fun setUpStaticsTool() {
-        if (!BuildConfig.DEBUG) {
-            @Suppress("SpellCheckingInspection")
-            FlurryAgent.Builder()
-                .withLogEnabled(false)
-                .build(this, "D42MH48ZN4PJC5TKNYZD")
-        }
-    }
-
     private fun setUpDebugEnvironment() {
-        Bugly.isDev = false
         val crashHandler = CrashHandler(CrashReportActivity::class.java)
-        val strategy = CrashReport.UserStrategy(applicationContext).apply {
-            crashHandleCallback = crashHandler
-        }
-
-        CrashReport.initCrashReport(applicationContext, BUGLY_APP_ID, false, strategy)
-
-        crashHandler.setBuglyHandler(Thread.getDefaultUncaughtExceptionHandler())
         Thread.setDefaultUncaughtExceptionHandler(crashHandler)
     }
 
@@ -266,8 +244,6 @@ class App : MultiDexApplication() {
     }
 
     companion object {
-
-        private const val BUGLY_APP_ID = "19b3607b53"
 
         private lateinit var instance: WeakReference<App>
 

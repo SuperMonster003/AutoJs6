@@ -3,7 +3,6 @@
 import com.android.build.gradle.internal.api.ApplicationVariantImpl
 import com.android.build.gradle.internal.api.BaseVariantOutputImpl
 import org.gradle.kotlin.dsl.support.uppercaseFirstChar
-import java.util.Locale.getDefault
 import kotlin.text.RegexOption.IGNORE_CASE
 
 plugins {
@@ -96,12 +95,6 @@ dependencies /* Unclassified */ {
 
     // Joda Time
     implementation(libs.joda.time)
-
-    // Analytics
-    implementation(libs.analytics)
-
-    // Bugly
-    implementation(project(":libs:com-tencent-bugly-crashreport-4_0_4"))
 
     // OkHttp
     implementation(libs.okhttp)
@@ -718,7 +711,7 @@ android {
                 val version = variant.versionName.replace("\\s".toRegex(), "-") // e.g. 6.1.0
                 val architecture = it.getFilter("ABI") ?: "universal"
                 val extension = utils.FILE_EXTENSION_APK
-                "$autojs-v$version-$architecture.$extension".lowercase(getDefault())
+                "$autojs-v$version-$architecture.$extension".lowercase()
             }
         }
     }

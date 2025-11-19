@@ -19,7 +19,6 @@ private val libs = listOf(
     "android-job-simplified-1_4_3",
     "androidx-appcompat-1_0_2",
     "apk-parser-1_0_2",
-    "com-tencent-bugly-crashreport-4_0_4",
     "org-opencv-4_8_0",
     "paddleocr",
     "rapidocr",

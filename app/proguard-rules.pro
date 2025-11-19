@@ -119,12 +119,6 @@
     java.lang.Object readResolve();
 }
 
--keepattributes EnclosingMethod,Signature
-
-# Required to preserve the Flurry SDK
-
--keep class com.flurry.** { *; }
--dontwarn com.flurry.**
 -keepattributes *Annotation*,EnclosingMethod,Signature
 
 -keepclasseswithmembers class * {
@@ -151,11 +145,6 @@
 -keepnames class * implements android.os.Parcelable {
     public static final ** CREATOR;
 }
-
-# Bugly
-
--dontwarn com.tencent.bugly.**
--keep public class com.tencent.bugly.**{*;}
 
 # Toaster
 
