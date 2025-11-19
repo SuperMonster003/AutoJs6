@@ -36,7 +36,7 @@ class OcrRapid {
 
             // 创建 OcrResult 对象
             OcrResult(
-                label = block.text,
+                text = block.text,
                 confidence = block.boxScore,
                 bounds = rect,
             )
