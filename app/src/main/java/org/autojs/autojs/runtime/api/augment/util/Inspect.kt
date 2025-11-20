@@ -9,6 +9,7 @@ import org.autojs.autojs.extension.ArrayExtensions.toNativeObject
 import org.autojs.autojs.extension.FlexibleArray.Companion.component1
 import org.autojs.autojs.extension.FlexibleArray.Companion.component2
 import org.autojs.autojs.extension.ScriptableExtensions.prop
+import org.autojs.autojs.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.rhino.ProxyObject
 import org.autojs.autojs.rhino.ProxyObject.Companion.AUGMENTED_CUSTOM_TO_STRING_KEY
 import org.autojs.autojs.rhino.ProxyObject.Companion.AUGMENTED_OBJECT_KEY
@@ -27,6 +28,8 @@ import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.callFunction
 import org.autojs.autojs.util.RhinoUtils.callPrototypeFunction
 import org.autojs.autojs.util.RhinoUtils.callToStringFunction
+import org.autojs.autojs.util.RhinoUtils.coerceBoolean
+import org.autojs.autojs.util.RhinoUtils.coerceIntNumber
 import org.autojs.autojs.util.RhinoUtils.javaArrayToString
 import org.autojs.autojs.util.RhinoUtils.js_array_isArray
 import org.autojs.autojs.util.RhinoUtils.js_json_stringify
@@ -52,8 +55,8 @@ import org.mozilla.javascript.TopLevel.Builtins
 import org.mozilla.javascript.Undefined.isUndefined
 import org.mozilla.javascript.Wrapper
 import org.mozilla.javascript.regexp.NativeRegExp
+import java.util.*
 import java.util.function.Supplier
-import kotlin.math.roundToInt
 
 /**
  * Created by SuperMonster003 on Jun 10, 2024.
@@ -206,6 +209,8 @@ object Inspect : Augmentable(), Invokable {
         "null" to "bold",
     )
 
+    private val DIGITS_REGEX = Regex("\\d+")
+
     /**
      * Echos the value of a value. Trys to print the value out
      * in the best way possible given the different types.
@@ -222,34 +227,46 @@ object Inspect : Augmentable(), Invokable {
         val opt = when {
             options.isJsNullish() -> Options()
             options is NativeObject -> Options().also { opt ->
-                val optionShowHidden = options.prop("showHidden")
-                if (!optionShowHidden.isJsNullish()) {
-                    opt.showHidden = Context.toBoolean(optionShowHidden)
-                }
-                val optionDepth = options.prop("depth")
-                if (!optionDepth.isJsNullish()) {
-                    opt.depth = Context.toNumber(optionDepth).roundToInt()
-                }
-                val optionColors = options.prop("colors")
-                if (!optionColors.isJsNullish()) {
-                    opt.colors = Context.toBoolean(optionColors)
-                }
+                options.inquire("showHidden", transformer = ::coerceBoolean)?.let { opt.showHidden = it }
+                options.inquire("depth", transformer = ::coerceIntNumber)?.let { opt.depth = it }
+                options.inquire("colors", transformer = ::coerceBoolean)?.let { opt.colors = it }
+                options.inquire("maxArrayItems", transformer = ::coerceIntNumber)?.let { opt.maxArrayItems = it }
+                options.inquire("maxObjectKeys", transformer = ::coerceIntNumber)?.let { opt.maxObjectKeys = it }
+                options.inquire("maxStringLength", transformer = ::coerceIntNumber)?.let { opt.maxStringLength = it }
+                options.inquire("customInspect", transformer = ::coerceBoolean)?.let { opt.customInspect = it }
             }
             else -> throw WrappedIllegalArgumentException("Argument \"options\" ${options.jsBrief()} for util.inspect must be a JavaScript Object")
         }
-        val ctx = Ctx().also {
-            it.showHidden = opt.showHidden
-            it.depth = opt.depth
-            it.colors = opt.colors
-            it.stylize = when (it.colors) {
-                true -> { str, styleType ->
-                    styles[styleType]?.let { style ->
-                        colors[style]?.let { color ->
-                            color.joinToString(str) { c -> "\u001b[${c}m" }
-                        } ?: throw WrappedIllegalArgumentException("Invalid style type: $styleType")
-                    } ?: str
+        val ctx = Ctx().also { c ->
+            opt.showHidden?.let { c.showHidden = it }
+            opt.depth?.let { c.depth = it }
+            opt.colors?.let { c.colors = it }
+            opt.customInspect?.let { c.customInspect = it }
+            opt.maxArrayItems?.let { c.maxArrayItems = it }
+            opt.maxObjectKeys?.let { c.maxObjectKeys = it }
+            opt.maxStringLength?.let { c.maxStringLength = it }
+
+            // Pre-compute style cache to avoid constructing escape sequences every time during stylize.
+            // zh-CN: 预计算样式缓存, 避免每次 stylize 都构造转义序列.
+            if (c.colors) {
+                val cache = HashMap<String, Pair<String, String>>(styles.size)
+                styles.forEach { (styleType, colorName) ->
+                    colors[colorName]?.let { codes ->
+                        val prefix = "\u001b[${codes.first()}m"
+                        val suffix = "\u001b[${codes.last()}m"
+                        cache[styleType] = prefix to suffix
+                    }
                 }
-                else -> { str, _ -> str }
+                c.styleCache = cache
+                c.stylize = { str, styleType ->
+                    run {
+                        val st = styleType ?: return@run str
+                        val pair = c.styleCache[st] ?: return@run str
+                        pair.first + str + pair.second
+                    }
+                }
+            } else {
+                c.stylize = { str, _ -> str }
             }
         }
         return formatValue(ctx, obj, ctx.depth)
@@ -272,12 +289,16 @@ object Inspect : Augmentable(), Invokable {
 
         if (value is Scriptable && value !is NativeJavaPackage) runCatching {
             (value.prop(StringReadable.KEY) as? BaseFunction)?.let { f ->
-                return Context.toString(callFunction(f, null, value, arrayOf()))
+                val value = Context.toString(callFunction(f, null, value, arrayOf()))
+                return formatValue(ctx, value, recurseTimes)
             }
         }
 
         // Provide a hook for user-specified inspect functions.
-        // Check that value is an object with an inspect function on it
+        // Check that value is an object with an inspect function on it.
+        // zh-CN:
+        // 为用户指定的 inspect 函数提供一个钩子.
+        // 检查 value 是否为带有 inspect 函数的对象.
 
         // noinspection JSIncompatibleTypesComparison
         if (ctx.customInspect && value is Scriptable && value.isJsNonNullObject()) {
@@ -285,7 +306,7 @@ object Inspect : Augmentable(), Invokable {
             if (inspectFunc is BaseFunction) {
                 val ret = callFunction(inspectFunc, null, value, arrayOf(recurseTimes, ctx))
                 return when {
-                    isStringRhino(ret) -> Context.toString(ret)
+                    isStringRhino(ret) -> formatValue(ctx, Context.toString(ret), recurseTimes)
                     else -> formatValue(ctx, ret, recurseTimes)
                 }
             }
@@ -301,8 +322,15 @@ object Inspect : Augmentable(), Invokable {
             }
         }
 
-        // Primitive types cannot have properties
+        // Primitive types cannot have properties.
+        // zh-CN: 原始类型不能有属性.
         formatPrimitive(ctx, value).takeUnless { it.isJsNullish() }?.let {
+            // String truncation (avoid huge overhead caused by overlong strings).
+            // zh-CN: 字符串截断 (避免超长字符串造成巨大开销).
+            if (value is String && ctx.maxStringLength > 0 && it.length > ctx.maxStringLength) {
+                val cut = it.substring(0, ctx.maxStringLength)
+                return ctx.stylize("$cut... (${it.length - cut.length} more chars)", "string")
+            }
             return Context.toString(it)
         }
 
@@ -314,7 +342,7 @@ object Inspect : Augmentable(), Invokable {
         if (value is NativeJavaPackage) return value.toString()
         if (value is NativeJavaClass) return value.toString()
         if (value.javaClass.isArray) return javaArrayToString(value)
-        if (value !is ScriptableObject) return Context.toString(value)
+        if (value !is ScriptableObject) return formatValue(ctx, Context.toString(value), recurseTimes)
         if (value is ProxyObject) return formatValue(ctx, value[AUGMENTED_OBJECT_KEY], recurseTimes)
 
         // @Hint by SuperMonster003 on Apr 16, 2024.
@@ -372,6 +400,7 @@ object Inspect : Augmentable(), Invokable {
         }
 
         // Look up the keys of the object.
+        // zh-CN: 查找对象的键.
         var keys: NativeArray = js_object_keys(value)
         val visibleKeys = newNativeObject().also { o ->
             keys.forEach { o.put(Context.toString(it), o, true) }
@@ -380,13 +409,15 @@ object Inspect : Augmentable(), Invokable {
             keys = js_object_getOwnPropertyNames(value)
         }
 
-        // IE doesn't make error fields non-enumerable
-        // http://msdn.microsoft.com/en-us/library/ie/dww52sbt(v=vs.94).aspx
+        // IE doesn't make error fields non-enumerable.
+        // zh-CN: IE 不会使错误字段不可枚举.
+        // @Reference to http://msdn.microsoft.com/en-us/library/ie/dww52sbt(v=vs.94).aspx
         if (isErrorRhino(value) && (keys.contains("message") || keys.contains("description"))) {
             return formatError(value)
         }
 
         // Some type of object without properties can be shortcut.
+        // zh-CN: 某些没有属性的对象类型可以简化处理.
         if (keys.isEmpty) {
             when (value) {
                 is BaseFunction -> return formatBaseFunction(ctx, value)
@@ -400,28 +431,33 @@ object Inspect : Augmentable(), Invokable {
         var array = false
         var braces = listOf("{", "}")
 
-        // Make Array say that they are Array
+        // Make Array say that they are Array.
+        // zh-CN: 让数组表明它们是数组.
         if (js_array_isArray(value)) {
             array = true
             braces = listOf("[", "]")
         }
 
-        // Make functions say that they are functions
+        // Make functions say that they are functions.
+        // zh-CN: 让函数表明它们是函数.
         if (value is BaseFunction) {
             base = " ${getBaseFunctionFormattedName(value)}"
         }
 
-        // Make RegExps say that they are RegExps
+        // Make RegExps say that they are RegExps.
+        // zh-CN: 让正则表达式表明它们是正则表达式.
         if (value is NativeRegExp) {
             base = " ${getRegExpFormattedName(value)}"
         }
 
-        // Make dates with properties first say the date
+        // Make dates with properties first say the date.
+        // zh-CN: 让带属性的日期先说明它们是日期.
         if (value is NativeDate) {
             base = " ${getDateFormattedName(value, true)}"
         }
 
-        // Make error with a message first say the error
+        // Make error with a message first say the error.
+        // zh-CN: 让带消息的错误先说明它们是错误.
         if (value is NativeError) {
             base = " ${getErrorFormattedName(value)}"
         }
@@ -437,13 +473,21 @@ object Inspect : Augmentable(), Invokable {
             }
         }
 
+        // Identity-based collection, O(1) contains/add.
+        // zh-CN: 基于身份的集合, O(1) contains/add.
         ctx.seen.add(value)
 
         val output: List<String> = if (array) {
             formatArray(ctx, value as NativeArray, recurseTimes, visibleKeys, keys)
         } else {
             try {
-                keys.map { key -> formatProperty(ctx, value, recurseTimes, visibleKeys, Context.toString(key), false) }
+                // Object properties limit.
+                // zh-CN: 对象属性上限.
+                val limit = if (ctx.maxObjectKeys > 0) ctx.maxObjectKeys else Int.MAX_VALUE
+                keys.asSequence()
+                    .take(limit)
+                    .map { key -> formatProperty(ctx, value, recurseTimes, visibleKeys, Context.toString(key), false) }
+                    .toList()
             } catch (err: Exception) {
                 if (isJavaObjectRhino(value)) {
                     RhinoUtils.unwrap(value).let {
@@ -453,15 +497,18 @@ object Inspect : Augmentable(), Invokable {
                     }
                     return toJavaObjectString(value)
                 }
-                return try {
+                val value = try {
                     Context.toString(value).ifEmpty { "" }
                 } catch (e: Exception) {
                     Context.toString(callPrototypeFunction(Builtins.Object, "toString", value))
                 }
+                return formatValue(ctx, value, recurseTimes)
             }
         }
 
-        ctx.seen.removeLastOrNull()
+        // With Set, just remove directly.
+        // zh-CN: 与 Set 搭配, 直接移除即可.
+        ctx.seen.remove(value)
 
         return reduceToSingleString(output, base, braces)
     }
@@ -484,16 +531,54 @@ object Inspect : Augmentable(), Invokable {
 
     private fun formatArray(ctx: Ctx, value: NativeArray, recurseTimes: Int?, visibleKeys: NativeObject, keys: NativeArray): List<String> {
         val output = mutableListOf<String>()
-        for (i in 0 until value.length) {
+
+        // Array elements upper limit display (head/tail summary).
+        // zh-CN: 数组元素上限显示 (head/tail 摘要).
+        val len = value.length.toInt()
+        val max = if (ctx.maxArrayItems > 0) ctx.maxArrayItems else Int.MAX_VALUE
+        // First 100.
+        // zh-CN: 前 100.
+        val head = minOf(len, minOf(max, 100))
+        val tail = when {
+            // When exceeding, show last 20.
+            // zh-CN: 多出时, 末尾展示 20.
+            len > max -> minOf(20, max - head).coerceAtLeast(0)
+            else -> 0
+        }
+
+        // Show head first.
+        // zh-CN: 先展示 head.
+        for (i in 0 until head) {
             val key = Context.toString(i)
             output += when (js_object_hasOwnProperty(value, key)) {
                 true -> formatProperty(ctx, value, recurseTimes, visibleKeys, key, true)
                 else -> ""
             }
         }
+
+        // Middle summary.
+        // zh-CN: 中间摘要.
+        if (len > head + tail) {
+            val omitted = len - head - tail
+            output += ctx.stylize("... $omitted more items ...", "special")
+        }
+
+        // Then show tail.
+        // zh-CN: 再展示 tail.
+        for (i in (len - tail) until len) {
+            if (i < head) continue
+            val key = Context.toString(i)
+            output += when (js_object_hasOwnProperty(value, key)) {
+                true -> formatProperty(ctx, value, recurseTimes, visibleKeys, key, true)
+                else -> ""
+            }
+        }
+
+        // Append non-numeric keys.
+        // zh-CN: 补充非数字键.
         keys.forEach { key ->
             val niceKey = Context.toString(key)
-            if (!niceKey.matches(Regex("\\d+"))) {
+            if (!DIGITS_REGEX.matches(niceKey)) {
                 output.add(formatProperty(ctx, value, recurseTimes, visibleKeys, niceKey, true))
             }
         }
@@ -524,11 +609,16 @@ object Inspect : Augmentable(), Invokable {
         }
 
         if (str.isEmpty()) {
-            if (ctx.seen.indexOf(desc.prop("value")) < 0) {
+            val v = desc.prop("value")
+            // Use identity Set to detect cycles, avoid O(n) indexOf.
+            // zh-CN: 使用身份 Set 检测循环, 避免 O(n) indexOf.
+            if (v is ScriptableObject && ctx.seen.contains(v)) {
+                str = ctx.stylize("[Circular]", "special")
+            } else {
                 str = if (recurseTimes == null) {
-                    formatValue(ctx, desc.prop("value"), null)
+                    formatValue(ctx, v, null)
                 } else {
-                    formatValue(ctx, desc.prop("value"), recurseTimes - 1)
+                    formatValue(ctx, v, recurseTimes - 1)
                 }
                 if (str.contains("\n")) {
                     str = if (array) {
@@ -537,12 +627,10 @@ object Inspect : Augmentable(), Invokable {
                         str.split("\n").joinToString("\n") { "   $it" }
                     }
                 }
-            } else {
-                str = ctx.stylize("[Circular]", "special")
             }
         }
         if (name.isJsNullish()) {
-            if (array && key.matches(Regex("\\d+"))) {
+            if (array && DIGITS_REGEX.matches(key)) {
                 return str
             }
             name = Context.toString(js_json_stringify(key))
@@ -637,9 +725,13 @@ object Inspect : Augmentable(), Invokable {
     }
 
     class Options {
-        var colors = false
-        var depth: Int = 2
-        var showHidden = false
+        var colors: Boolean? = null
+        var depth: Int? = null
+        var showHidden: Boolean? = null
+        var customInspect: Boolean? = null
+        var maxArrayItems: Int? = null
+        var maxObjectKeys: Int? = null
+        var maxStringLength: Int? = null
     }
 
     class Ctx {
@@ -647,7 +739,18 @@ object Inspect : Augmentable(), Invokable {
         var depth: Int = 2
         var showHidden = false
         var customInspect = false
-        val seen = mutableListOf<ScriptableObject>()
+        var maxArrayItems: Int = 10_000
+        var maxObjectKeys: Int = 10_000
+        var maxStringLength: Int = 100_000
+
+        // Identity-based collection to avoid O(n^2).
+        // zh-CN: 以对象身份比较的集合, 避免 O(n^2).
+        val seen: MutableSet<ScriptableObject> = Collections.newSetFromMap(IdentityHashMap())
+
+        // Pre-compute style cache to avoid constructing escape sequences every time during stylize.
+        // zh-CN: 预计算样式缓存, 避免每次 stylize 都构造转义序列.
+        var styleCache: Map<String, Pair<String, String>> = emptyMap()
+
         lateinit var stylize: (str: String, styleType: String?) -> String
     }
 

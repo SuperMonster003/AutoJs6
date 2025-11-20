@@ -20,6 +20,9 @@ import org.autojs.autojs.extension.AnyExtensions.isJsSymbol
 import org.autojs.autojs.extension.AnyExtensions.isJsUndefined
 import org.autojs.autojs.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.extension.FlexibleArray
+import org.autojs.autojs.extension.FlexibleArray.Companion.component1
+import org.autojs.autojs.extension.FlexibleArray.Companion.component2
+import org.autojs.autojs.extension.FlexibleArray.Companion.component3
 import org.autojs.autojs.extension.NumberExtensions.jsString
 import org.autojs.autojs.extension.ScriptableExtensions.defineProp
 import org.autojs.autojs.extension.ScriptableExtensions.prop
@@ -343,31 +346,101 @@ object Util : Augmentable() {
     @JvmStatic
     @RhinoFunctionBody
     fun formatRhino(vararg args: Any?): String {
-        var index = 1
         if (args.isEmpty()) return ""
 
-        val first = args.first()
-        if (first !is String) return args.joinToString(" ") { inspectRhino(it) }
+        val first = args[0]
+        if (first !is String) {
+            return args.joinToString(" ") { inspectRhino(it) }
+        }
 
-        var str = first.replace(Regex("%[sdj%]")) { matchResult ->
-            if (matchResult.value == "%%") return@replace "%"
-            if (index >= args.size) return@replace matchResult.value
+        val argsSize = args.size
+        var index = 1
+        val fmt = first
+        val len = fmt.length
+        // Estimate some margin to reduce expansion.
+        // zh-CN: 预估一些余量, 减少扩容.
+        val sb = StringBuilder(len + 16)
 
-            when (matchResult.value) {
-                "%s" -> Context.toString(args[index++])
-                "%d" -> Context.toNumber(args[index++]).jsString
-                "%j" -> try {
-                    Context.toString(js_json_stringify(args[index++]))
-                } catch (e: Exception) {
-                    "[Circular]"
+        var i = 0
+        while (i < len) {
+            val ch = fmt[i]
+            if (ch != '%') {
+                sb.append(ch)
+                i++
+                continue
+            }
+
+            // '%' at last char -> append '%'.
+            if (i + 1 >= len) {
+                sb.append('%')
+                i++
+                continue
+            }
+
+            when (val spec = fmt[i + 1]) {
+                '%' -> {
+                    sb.append('%')
+                    i += 2
                 }
-                else -> matchResult.value
+                's' -> {
+                    if (index >= argsSize) {
+                        // Keep the placeholder as is when no corresponding parameter exists.
+                        // zh-CN: 没有对应参数, 保持占位符原样.
+                        sb.append('%').append('s')
+                    } else {
+                        sb.append(Context.toString(args[index++]))
+                    }
+                    i += 2
+                }
+                'd' -> {
+                    if (index >= argsSize) {
+                        sb.append('%').append('d')
+                    } else {
+                        sb.append(Context.toNumber(args[index++]).jsString)
+                    }
+                    i += 2
+                }
+                'j' -> {
+                    if (index >= argsSize) {
+                        sb.append('%').append('j')
+                    } else {
+                        try {
+                            sb.append(Context.toString(js_json_stringify(args[index++])))
+                        } catch (_: Throwable) {
+                            sb.append("[Circular]")
+                        }
+                    }
+                    i += 2
+                }
+                else -> {
+                    // Keep unknown placeholders as is.
+                    // zh-CN: 未知占位符, 按原样输出.
+                    sb.append('%').append(spec)
+                    i += 2
+                }
             }
         }
 
-        args.copyOfRange(index, args.size).forEach { x -> str += " ${inspectRhino(x)}" }
+        val formatted = inspectRhino(sb.toString())
 
-        return str
+        return when {
+            index >= argsSize -> formatted
+            else -> {
+                // Append remaining parameters, separated by spaces.
+                // zh-CN: 追加剩余参数, 以空格分隔.
+                val out = StringBuilder(formatted.length + 1 + (argsSize - index) * 8)
+                out.append(formatted)
+                out.append(' ')
+                // Append the first one first, then add spaces for the rest to avoid checking leading spaces in the loop.
+                // zh-CN: 为避免在循环中判断前导空格, 这里先追加第一个, 再对剩余的加空格.
+                out.append(inspectRhino(args[index++]))
+                while (index < argsSize) {
+                    out.append(' ')
+                    out.append(inspectRhino(args[index++]))
+                }
+                out.toString()
+            }
+        }
     }
 
     @JvmStatic
