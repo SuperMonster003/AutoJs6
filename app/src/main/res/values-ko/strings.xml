@@ -932,7 +932,7 @@
     <string name="text_result">결과</string>
     <string name="text_revoke_autojs6_access_in_shizuku_app">Shizuku 애플리케이션에서 AutoJs6 권한 취소하기</string>
     <string name="text_rhino_java_primitive_wrap">Java 원시 타입 래핑</string>
-    <string name="text_root_mode_title">강제 설정 루트 검사</string>
+    <string name="text_root_mode_title">루트 권한 확인</string>
     <string name="text_run">운영</string>
     <string name="text_run_on_battery_change">배터리가 변경되었습니다</string>
     <string name="text_run_on_boot">부팅</string>

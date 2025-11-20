@@ -931,7 +931,7 @@
     <string name="text_result">結果</string>
     <string name="text_revoke_autojs6_access_in_shizuku_app">Shizuku アプリケーションで AutoJs6 権限を取り消す</string>
     <string name="text_rhino_java_primitive_wrap">Java プリミティブ型のラップ</string>
-    <string name="text_root_mode_title">強制的に root にするチェック</string>
+    <string name="text_root_mode_title">Root 権限の確認</string>
     <string name="text_run">実行</string>
     <string name="text_run_on_battery_change">バッテリー交換時</string>
     <string name="text_run_on_boot">起動したとき</string>

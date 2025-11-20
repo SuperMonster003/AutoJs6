@@ -15,6 +15,8 @@ import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.extension.FlexibleArray
+import org.autojs.autojs.extension.FlexibleArray.Companion.component1
+import org.autojs.autojs.extension.FlexibleArray.Companion.component2
 import org.autojs.autojs.extension.ScriptableExtensions.defineProp
 import org.autojs.autojs.extension.ScriptableExtensions.deleteProp
 import org.autojs.autojs.extension.ScriptableExtensions.prop
@@ -22,10 +24,14 @@ import org.autojs.autojs.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.external.receiver.BaseBroadcastReceiver
 import org.autojs.autojs.ipc.LayoutInspectEventBus
 import org.autojs.autojs.runtime.ScriptRuntime
+import org.autojs.autojs.runtime.api.AbstractShell
 import org.autojs.autojs.runtime.api.AppUtils.Companion.ActivityShortForm
 import org.autojs.autojs.runtime.api.AppUtils.Companion.BroadcastShortForm
 import org.autojs.autojs.runtime.api.WrappedShizuku
 import org.autojs.autojs.runtime.api.augment.Augmentable
+import org.autojs.autojs.runtime.api.augment.app.App.Companion.ShellAction.Companion.toFallbackShellAction
+import org.autojs.autojs.runtime.api.augment.app.App.Companion.ShellAction.Companion.toRootShellAction
+import org.autojs.autojs.runtime.api.augment.app.App.Companion.ShellAction.Companion.toShizukuShellAction
 import org.autojs.autojs.runtime.api.augment.shell.Shell
 import org.autojs.autojs.runtime.exception.ShouldNeverHappenException
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
@@ -82,6 +88,8 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         ::launchDualSettings.name to AS_GLOBAL,
         ::openAppSetting.name to AS_GLOBAL,
         ::openDualAppSetting.name to AS_GLOBAL,
+        ::isInstalled.name to AS_GLOBAL,
+        ::isDualInstalled.name to AS_GLOBAL,
         ::uninstall.name to AS_GLOBAL,
         ::uninstallDual.name to AS_GLOBAL,
         ::viewFile.name,
@@ -140,13 +148,13 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                     options is NativeObject -> obj.configure(scriptRuntime, options).let { configuredIntent ->
                         when {
                             checkDualProperty(options) -> startDualActivity(scriptRuntime, args)
-                            checkRootProperty(options) && RootUtils.isRootAvailable() -> {
-                                val tmpIntent = configuredIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                Shell.execCommand(scriptRuntime, arrayOf<Any>("am start ${intentToShellRhino(tmpIntent)}", /* withRoot = */ true)).throwIfError()
-                            }
-                            checkShizukuProperty(options) && WrappedShizuku.isOperational() -> {
+                            checkShizukuProperty(options) -> {
                                 val tmpIntent = configuredIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                                 WrappedShizuku.execCommand("am start ${intentToShellRhino(tmpIntent)}").throwIfError()
+                            }
+                            checkRootProperty(options) -> {
+                                val tmpIntent = configuredIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                Shell.execCommand(scriptRuntime, arrayOf<Any>("am start ${intentToShellRhino(tmpIntent)}", /* withRoot = */ true)).throwIfError()
                             }
                             else -> startActivityWithGlobalContext(configuredIntent)
                         }
@@ -165,14 +173,14 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                     }
                     when {
                         checkDualProperty(opt) -> startDualActivity(scriptRuntime, args)
-                        checkRootProperty(opt) && RootUtils.isRootAvailable() -> {
-                            val tmpIntent = intentRhinoWithRuntime(scriptRuntime, opt).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
-                            Shell.execCommand(scriptRuntime, arrayOf<Any>("am start ${intentToShellRhino(tmpIntent)}", /* withRoot = */ true)).throwIfError()
-                        }
-                        checkShizukuProperty(opt) && WrappedShizuku.isOperational() -> {
+                        checkShizukuProperty(opt) -> {
                             val tmpIntent = intentRhinoWithRuntime(scriptRuntime, opt).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
                             val intentCommand = intentToShellRhino(tmpIntent)
                             WrappedShizuku.execCommand("am start $intentCommand").throwIfError()
+                        }
+                        checkRootProperty(opt) -> {
+                            val tmpIntent = intentRhinoWithRuntime(scriptRuntime, opt).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
+                            Shell.execCommand(scriptRuntime, arrayOf<Any>("am start ${intentToShellRhino(tmpIntent)}", /* withRoot = */ true)).throwIfError()
                         }
                         else -> startActivityWithGlobalContext(scriptRuntime, opt)
                     }
@@ -775,12 +783,13 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @RhinoRuntimeFunctionInterface
         fun kill(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsLength(args, 1) { argList ->
             val packageName = getPackageName(scriptRuntime, argList) ?: return@ensureArgumentsLength false
-            val command = "am force-stop $packageName"
-            when {
-                RootUtils.isRootAvailable() -> Shell.execCommand(scriptRuntime, arrayOf<Any>(command, /* withRoot = */ true))
-                WrappedShizuku.isOperational() -> WrappedShizuku.execCommand(command)
-                else -> Shell.execCommand(scriptRuntime, arrayOf<Any>(command, /* withRoot = */ false))
-            }.code == 0
+            with("am force-stop $packageName") {
+                listOf(
+                    toShizukuShellAction(),
+                    toRootShellAction(scriptRuntime),
+                    toFallbackShellAction(scriptRuntime),
+                ).first { it.condition() }.execute().code == 0
+            }
         }
 
         // @Hint by SuperMonster003 on Oct 30, 2024.
@@ -792,7 +801,30 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         fun killDual(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsLength(args, 1) { argList ->
             val packageName = getPackageName(scriptRuntime, argList) ?: return@ensureArgumentsLength false
             val command = "am force-stop $packageName"
-            runCatching { execCommandForDualUser(scriptRuntime, command, RootUtils.isRootAvailable(), WrappedShizuku.isOperational()) }.isSuccess
+            runCatching { execCommandForDualUser(scriptRuntime, command) }.isSuccess
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun isInstalled(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsOnlyOne(args) { o ->
+            val packageName = getPackageName(scriptRuntime, arrayOf(o)) ?: return@ensureArgumentsOnlyOne false
+            scriptRuntime.app.isInstalled(packageName)
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun isDualInstalled(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsOnlyOne(args) { o ->
+            val packageName = getPackageName(scriptRuntime, arrayOf(o)) ?: return@ensureArgumentsOnlyOne false
+            isDualInstalledInternal(scriptRuntime, packageName)
+        }
+
+        private fun isDualInstalledInternal(scriptRuntime: ScriptRuntime, packageName: String): Boolean {
+            val command = "cmd package list packages %USER_ID% $packageName"
+            return runCatching {
+                execCommandForDualUser(scriptRuntime, command)?.let { result ->
+                    result.code == 0 && result.result.contains("package:$packageName")
+                } ?: false
+            }.getOrElse { false }
         }
 
         private fun parseClassName(o: NativeObject): String {
@@ -890,16 +922,16 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             val intent = intentRhinoWithRuntime(scriptRuntime, o).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
             val command = "am start ${intentToShellRhino(intent)}"
             when (o) {
-                is NativeObject -> {
-                    val withRoot = o.inquire("root", ::coerceBoolean, true)
-                    val withShizuku = o.inquire("shizuku", ::coerceBoolean, true)
-                    execCommandForDualUser(scriptRuntime, command, withRoot, withShizuku)
-                }
+                is NativeObject -> execCommandForDualUser(scriptRuntime, command, o)
                 else -> execCommandForDualUser(scriptRuntime, command)
             }
         }
 
-        private fun execCommandForDualUser(scriptRuntime: ScriptRuntime, command: String, withRoot: Boolean = true, withShizuku: Boolean = true) {
+        private fun execCommandForDualUser(
+            scriptRuntime: ScriptRuntime,
+            command: String,
+            options: NativeObject? = null,
+        ): AbstractShell.Result? {
             val userManager = globalContext.getSystemService(Class.forName("android.os.UserManager"))
 
             val getUserProfilesMethod = userManager.javaClass.getDeclaredMethod("getUserProfiles")
@@ -911,19 +943,46 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
             val userHandleClass = Class.forName("android.os.UserHandle")
             val getIdentifierMethod = userHandleClass.getDeclaredMethod("getIdentifier")
-            val processUserIdentifier = getIdentifierMethod.invoke(processUserHandle) as Int
+            val currentUserId = getIdentifierMethod.invoke(processUserHandle) as Int
 
+            var lastResult: AbstractShell.Result? = null
+
+            @Suppress("LocalVariableName")
             for (userHandle in userProfiles) {
-                val currentUserIdentifier = getIdentifierMethod.invoke(userHandle) as Int
-                if (currentUserIdentifier != processUserIdentifier) {
-                    val niceCommand = "$command --user $currentUserIdentifier"
-                    when {
-                        withRoot && RootUtils.isRootAvailable() -> Shell.execCommand(scriptRuntime, arrayOf<Any>(niceCommand, /* withRoot = */ true))
-                        withShizuku && WrappedShizuku.isOperational() -> WrappedShizuku.execCommand(niceCommand)
-                        else -> Shell.execCommand(scriptRuntime, arrayOf<Any>(niceCommand, /* withRoot = */ false))
-                    }.throwIfError()
+                val uid = getIdentifierMethod.invoke(userHandle) as Int
+                if (uid == currentUserId) continue
+
+                val cmd = when {
+                    command.contains("%USER_ID%") -> command.replace("%USER_ID%", "--user $uid")
+                    Regex("""\s--user\s+\d+""").containsMatchIn(command) -> command
+                    else -> "$command --user $uid"
+                }
+
+                val shizuku = cmd.toShizukuShellAction()
+                val root = cmd.toRootShellAction(scriptRuntime)
+                val fallback = cmd.toFallbackShellAction(scriptRuntime)
+
+                val SRF = listOf(shizuku, root, fallback)
+                val RSF = listOf(root, shizuku, fallback)
+
+                val actions = when (options) {
+                    is NativeObject -> {
+                        val preferShizuku = options.prop("shizuku").takeUnless { it.isJsNullish() }?.let { coerceBoolean(it) }
+                        val preferRoot = options.prop("root").takeUnless { it.isJsNullish() }?.let { coerceBoolean(it) }
+                        when (preferShizuku) {
+                            null -> if (preferRoot == true) RSF else SRF
+                            true -> SRF
+                            else -> if (preferRoot == false) SRF else RSF
+                        }
+                    }
+                    else -> SRF
+                }
+
+                if (actions.first { it.condition() }.execute().also { lastResult = it }.code == 0) {
+                    break
                 }
             }
+            return lastResult?.apply { throwIfError() }
         }
 
         private fun getAppByAliasRhino(o: Any?): PresetApp? {
@@ -953,11 +1012,11 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             })
         }
 
-        private fun checkRootProperty(o: NativeObject) = o.inquire("root", ::coerceBoolean, false)
+        private fun checkDualProperty(o: NativeObject) = o.inquire("dual", ::coerceBoolean, false)
 
         private fun checkShizukuProperty(o: NativeObject) = o.inquire("shizuku", ::coerceBoolean, false) && WrappedShizuku.isOperational()
 
-        private fun checkDualProperty(o: NativeObject) = o.inquire("dual", ::coerceBoolean, false)
+        private fun checkRootProperty(o: NativeObject) = o.inquire("root", ::coerceBoolean, false) && RootUtils.isRootAvailable()
 
         private fun Intent.configure(scriptRuntime: ScriptRuntime, o: NativeObject): Intent {
             val intent = this
@@ -1053,6 +1112,18 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             }
 
             return intent
+        }
+
+        private data class ShellAction(val cmd: String, val condition: () -> Boolean, private val action: (cmd: String) -> AbstractShell.Result) {
+
+            fun execute() = action(cmd)
+
+            companion object {
+                fun String.toShizukuShellAction() = ShellAction(this, { WrappedShizuku.isOperational() }, { WrappedShizuku.execCommand(it) })
+                fun String.toRootShellAction(scriptRuntime: ScriptRuntime) = ShellAction(this, { RootUtils.isRootAvailable() }, { Shell.execCommand(scriptRuntime, arrayOf<Any>(it, /* withRoot = */ true)) })
+                fun String.toFallbackShellAction(scriptRuntime: ScriptRuntime) = ShellAction(this, { true }, { Shell.execCommand(scriptRuntime, arrayOf<Any>(it, /* withRoot = */ false)) })
+            }
+
         }
 
     }

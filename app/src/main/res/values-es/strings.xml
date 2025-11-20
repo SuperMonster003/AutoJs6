@@ -930,7 +930,7 @@
     <string name="text_result">Resultado</string>
     <string name="text_revoke_autojs6_access_in_shizuku_app">Revocar privilegios de AutoJs6 en una aplicación Shizuku</string>
     <string name="text_rhino_java_primitive_wrap">Envoltorio de primitivos de Java</string>
-    <string name="text_root_mode_title">Forzar la comprobación de root</string>
+    <string name="text_root_mode_title">Comprobación de acceso root</string>
     <string name="text_run">Ejecutar</string>
     <string name="text_run_on_battery_change">Al cambiar la batería</string>
     <string name="text_run_on_boot">Al arrancar</string>
