@@ -932,7 +932,7 @@
     <string name="text_result">نتيجة</string>
     <string name="text_revoke_autojs6_access_in_shizuku_app">قم بإلغاء الوصول إلى AutoJs6 في تطبيق Shizuku</string>
     <string name="text_rhino_java_primitive_wrap">تغليف الأنواع البدائية في Java</string>
-    <string name="text_root_mode_title">فحص الجذر مجموعة القوة</string>
+    <string name="text_root_mode_title">التحقق من صلاحيات الروت</string>
     <string name="text_run">يجري</string>
     <string name="text_run_on_battery_change">على البطارية تغيرت</string>
     <string name="text_run_on_boot">على التمهيد</string>

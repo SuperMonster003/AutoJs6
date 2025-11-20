@@ -928,7 +928,7 @@
     <string name="text_result">結果</string>
     <string name="text_revoke_autojs6_access_in_shizuku_app">在 Shizuku 應用中撤銷 AutoJs6 許可權</string>
     <string name="text_rhino_java_primitive_wrap">Java 原始型別包裝</string>
-    <string name="text_root_mode_title">強制 Root 許可權檢查</string>
+    <string name="text_root_mode_title">Root 許可權檢查</string>
     <string name="text_run">執行</string>
     <string name="text_run_on_battery_change">電量變化時</string>
     <string name="text_run_on_boot">開機時</string>

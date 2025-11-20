@@ -1181,7 +1181,7 @@
     <string name="text_result">Result</string>
     <string name="text_revoke_autojs6_access_in_shizuku_app">Revoke AutoJs6 access in Shizuku app</string>
     <string name="text_rhino_java_primitive_wrap">Java primitive wrapping</string>
-    <string name="text_root_mode_title">Force set root check</string>
+    <string name="text_root_mode_title">Root access check</string>
     <string name="text_run">Run</string>
     <string name="text_run_on_battery_change">On battery changed</string>
     <string name="text_run_on_boot">On booted</string>
