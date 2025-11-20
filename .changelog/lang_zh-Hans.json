@@ -69,6 +69,7 @@
         "android.graphics.Paint#setColor 支持正常解析 ColorInt/ColorHex/ColorName 等颜色参数",
         "app.launchDual/startDualActivity 等方法提升执行效率并增强兼容性",
         "内置模块相关方法实参类型的异常消息增加类型摘要信息",
+        "控制台相关方法打印巨型数据时根据上限适当省略部分内容以降低打印耗时",
         "控制台浮动窗口倒计时起始值由 6 秒增加到 9 秒",
         "控制台浮动窗口内部实现进行无锁化及队列化处理以提升其参数设置效率与成功率",
         "控制台浮动窗口背景色彩行为相关 API (透明度/着色/基色) 更符合安卓设计规范 _[`issue #458`](http://issues.autojs6.com/458)_",
