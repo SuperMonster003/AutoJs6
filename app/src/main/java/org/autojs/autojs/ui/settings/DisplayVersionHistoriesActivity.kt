@@ -35,7 +35,7 @@ import org.autojs.autojs.ui.settings.VersionHistoryRepository.Companion.Category
 import org.autojs.autojs.ui.settings.VersionHistoryRepository.Companion.DEFAULT_FILTER
 import org.autojs.autojs.ui.settings.VersionHistoryRepository.Companion.DEFAULT_VERSION_NAME
 import org.autojs.autojs.util.ProcessLogger
-import org.autojs.autojs.util.ViewUtils
+import org.autojs.autojs.util.ViewUtils.excludePaddingClippableViewFromBottomNavigationBar
 import org.autojs.autojs.util.ViewUtils.setMenuIconsColorByThemeColorLuminance
 import org.autojs.autojs.util.ViewUtils.setNavigationIconColorByThemeColorLuminance
 import org.autojs.autojs6.R
@@ -73,7 +73,7 @@ class DisplayVersionHistoriesActivity : BaseActivity() {
                 addDuration = 200
                 supportsChangeAnimations = false
             }
-            ViewUtils.excludePaddingClippableViewFromBottomNavigationBar(it)
+            it.excludePaddingClippableViewFromBottomNavigationBar()
         }
 
         lifecycleScope.launch {

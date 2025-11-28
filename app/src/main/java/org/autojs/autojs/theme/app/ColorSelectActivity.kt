@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import org.autojs.autojs.util.ViewUtils
+import org.autojs.autojs.util.ViewUtils.excludePaddingClippableViewFromBottomNavigationBar
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.MtActivityColorSelectBinding
 
@@ -45,7 +45,7 @@ class ColorSelectActivity : ColorSelectBaseActivity() {
         mColorSettingRecyclerView = colorSettingRecyclerView.apply {
             setUpSelectedPosition(currentColor)
             setOnItemClickListener(mOnItemClickListener)
-            ViewUtils.excludePaddingClippableViewFromBottomNavigationBar(this)
+            excludePaddingClippableViewFromBottomNavigationBar()
         }
     }
 

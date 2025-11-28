@@ -3,10 +3,8 @@ package androidx.recyclerview.widget;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.EdgeEffect;
-
 import androidx.annotation.Nullable;
 import androidx.core.widget.EdgeEffectCompat;
-
 import org.autojs.autojs.theme.ThemeColor;
 import org.autojs.autojs.theme.ThemeColorManager;
 import org.autojs.autojs.theme.ThemeColorMutable;
@@ -15,12 +13,19 @@ import java.lang.reflect.Field;
 
 /**
  * Created by Stardust on Aug 14, 2016.
+ * Modified by SuperMonster003 as of Dec 1, 2021.
  */
 public class ThemeColorRecyclerView extends RecyclerView implements ThemeColorMutable {
 
-    private Field mLeftGlowField, mTopGlowField, mRightGlowField, mBottomGlowField;
-    private Field mEdgeEffectField;
     private int mColorPrimary;
+
+    private Field mLeftGlowField;
+    private Field mTopGlowField;
+    private Field mRightGlowField;
+    private Field mBottomGlowField;
+
+    private Field mEdgeEffectField;
+
     private boolean hasAppliedThemeColorLeft;
     private boolean hasAppliedThemeColorTop;
     private boolean hasAppliedThemeColorRight;
@@ -44,8 +49,9 @@ public class ThemeColorRecyclerView extends RecyclerView implements ThemeColorMu
     private boolean applyThemeColor(Field edgeEffectCompatField) {
         try {
             EdgeEffectCompat edgeEffectCompat = (EdgeEffectCompat) edgeEffectCompatField.get(this);
-            if (edgeEffectCompat != null)
+            if (edgeEffectCompat != null) {
                 return setEdgeEffectColor(edgeEffectCompat, mColorPrimary);
+            }
         } catch (Exception ignored) {
             /* Ignored. */
         }
@@ -67,12 +73,29 @@ public class ThemeColorRecyclerView extends RecyclerView implements ThemeColorMu
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        // android:fadeScrollbars="true"
+        // setScrollbarFadingEnabled(true);
+
+        // android:scrollbarDefaultDelayBeforeFade="600"
+        // setScrollBarDefaultDelayBeforeFade(600);
+
+        // android:scrollbarFadeDuration="500"
+        // setScrollBarFadeDuration(500);
+
+        // android:scrollbars="vertical"
+        // setVerticalScrollBarEnabled(true);
+
+        // To ensure scrollbar fading works properly.
+        // setFadingEdgeLength(0);
+
         ThemeColorManager.add(this);
     }
 
     private boolean setEdgeEffectColor(EdgeEffectCompat compat, int color) {
-        if (compat == null)
+        if (compat == null) {
             return false;
+        }
         try {
             EdgeEffect edgeEffect = (EdgeEffect) mEdgeEffectField.get(compat);
             if (edgeEffect != null) {
@@ -86,40 +109,40 @@ public class ThemeColorRecyclerView extends RecyclerView implements ThemeColorMu
 
     @Override
     public void setThemeColor(ThemeColor color) {
-        if (color.colorPrimary == mColorPrimary)
+        if (color.colorPrimary == mColorPrimary) {
             return;
+        }
         mColorPrimary = color.colorPrimary;
         invalidateGlows();
     }
 
     void invalidateGlows() {
         super.invalidateGlows();
-        hasAppliedThemeColorBottom = hasAppliedThemeColorLeft = hasAppliedThemeColorRight = hasAppliedThemeColorTop = false;
+        hasAppliedThemeColorLeft = false;
+        hasAppliedThemeColorTop = false;
+        hasAppliedThemeColorRight = false;
+        hasAppliedThemeColorBottom = false;
     }
 
     void ensureLeftGlow() {
         super.ensureLeftGlow();
-        if (!hasAppliedThemeColorLeft)
-            hasAppliedThemeColorLeft = applyThemeColor(mLeftGlowField);
-    }
-
-    void ensureRightGlow() {
-        super.ensureLeftGlow();
-        if (!hasAppliedThemeColorRight)
-            hasAppliedThemeColorRight = applyThemeColor(mRightGlowField);
+        hasAppliedThemeColorLeft = hasAppliedThemeColorLeft || applyThemeColor(mLeftGlowField);
     }
 
     void ensureTopGlow() {
         super.ensureTopGlow();
-        if (!hasAppliedThemeColorTop)
-            hasAppliedThemeColorTop = applyThemeColor(mTopGlowField);
+        hasAppliedThemeColorTop = hasAppliedThemeColorTop || applyThemeColor(mTopGlowField);
 
+    }
+
+    void ensureRightGlow() {
+        super.ensureLeftGlow();
+        hasAppliedThemeColorRight = hasAppliedThemeColorRight || applyThemeColor(mRightGlowField);
     }
 
     void ensureBottomGlow() {
         super.ensureBottomGlow();
-        if (!hasAppliedThemeColorBottom)
-            hasAppliedThemeColorBottom = applyThemeColor(mBottomGlowField);
+        hasAppliedThemeColorBottom = hasAppliedThemeColorBottom || applyThemeColor(mBottomGlowField);
     }
 
 }

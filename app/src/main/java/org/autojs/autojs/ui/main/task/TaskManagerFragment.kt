@@ -12,7 +12,7 @@ import org.autojs.autojs.ui.fragment.BindingDelegates.viewBinding
 import org.autojs.autojs.ui.main.ViewPagerFragment
 import org.autojs.autojs.ui.main.ViewStatesManageable
 import org.autojs.autojs.ui.widget.SimpleAdapterDataObserver
-import org.autojs.autojs.util.ViewUtils
+import org.autojs.autojs.util.ViewUtils.excludePaddingClippableViewFromBottomNavigationBar
 import org.autojs.autojs6.databinding.FragmentTaskManagerBinding
 
 /**
@@ -50,7 +50,7 @@ open class TaskManagerFragment : ViewPagerFragment(45), ViewStatesManageable {
                     recyclerView.postDelayed({ refreshLayout.isRefreshing = false }, 800)
                 }
             }
-            ViewUtils.excludePaddingClippableViewFromBottomNavigationBar(recyclerView)
+            recyclerView.excludePaddingClippableViewFromBottomNavigationBar()
         }
         restoreViewStates()
     }

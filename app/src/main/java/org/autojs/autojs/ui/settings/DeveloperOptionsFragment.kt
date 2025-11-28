@@ -3,7 +3,7 @@ package org.autojs.autojs.ui.settings
 import android.os.Bundle
 import android.view.View
 import androidx.preference.PreferenceFragmentCompat
-import org.autojs.autojs.util.ViewUtils
+import org.autojs.autojs.util.ViewUtils.excludePaddingClippableViewFromBottomNavigationBar
 import org.autojs.autojs6.R
 
 class DeveloperOptionsFragment : PreferenceFragmentCompat() {
@@ -14,7 +14,7 @@ class DeveloperOptionsFragment : PreferenceFragmentCompat() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        ViewUtils.excludePaddingClippableViewFromBottomNavigationBar(listView)
+        listView.excludePaddingClippableViewFromBottomNavigationBar()
     }
 
 }

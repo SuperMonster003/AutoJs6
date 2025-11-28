@@ -17,6 +17,7 @@ import org.autojs.autojs.extension.ViewExtensions.setOnTitleViewClickListener
 import org.autojs.autojs.theme.ThemeChangeNotifier
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.util.ViewUtils
+import org.autojs.autojs.util.ViewUtils.excludePaddingClippableViewFromBottomNavigationBar
 import org.autojs.autojs.util.ViewUtils.setMenuIconsColorByColorLuminance
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.MtActivityColorLibrariesBinding
@@ -65,7 +66,7 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
             it.layoutManager = LinearLayoutManager(this)
             it.adapter = libraryAdapter
             it.addItemDecoration(DividerItemDecoration(this, VERTICAL))
-            ViewUtils.excludePaddingClippableViewFromBottomNavigationBar(it)
+            it.excludePaddingClippableViewFromBottomNavigationBar()
         }
     }
 

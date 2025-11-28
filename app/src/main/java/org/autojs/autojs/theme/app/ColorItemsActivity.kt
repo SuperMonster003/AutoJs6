@@ -34,6 +34,7 @@ import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.PresetColorL
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.presetColorLibraries
 import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.ViewUtils
+import org.autojs.autojs.util.ViewUtils.excludePaddingClippableViewFromBottomNavigationBar
 import org.autojs.autojs.util.ViewUtils.onceGlobalLayout
 import org.autojs.autojs.util.ViewUtils.setMenuIconsColorByColorLuminance
 import org.autojs.autojs6.R
@@ -91,7 +92,7 @@ class ColorItemsActivity : ColorSelectBaseActivity() {
             it.adapter = ColorItemAdapter(library.colors).also { mAdapter = it }
 
             it.addItemDecoration(DividerItemDecoration(this, VERTICAL))
-            ViewUtils.excludePaddingClippableViewFromBottomNavigationBar(it)
+            it.excludePaddingClippableViewFromBottomNavigationBar()
 
             setUpSelectedPosition(mAdapter)
 

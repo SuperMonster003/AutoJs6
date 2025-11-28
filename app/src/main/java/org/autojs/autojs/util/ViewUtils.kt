@@ -374,7 +374,8 @@ object ViewUtils {
 
     @JvmStatic
     @JvmOverloads
-    fun excludeFloatingActionButtonFromBottomNavigationBar(fab: FloatingActionButton, extraMarginBottomDp: Float = 16F) {
+    fun FloatingActionButton.excludeFloatingActionButtonFromBottomNavigationBar(extraMarginBottomDp: Float = 16F) {
+        val fab = this
         ViewCompat.setOnApplyWindowInsetsListener(fab) { view, insets ->
             val bottomInset = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
             view.layoutParams.runCatching {
@@ -387,7 +388,8 @@ object ViewUtils {
 
     @JvmStatic
     @JvmOverloads
-    fun excludePaddingClippableViewFromBottomNavigationBar(view: View, extraPaddingBottomDp: Float = 0F, clipToPadding: Boolean = false) {
+    fun View.excludePaddingClippableViewFromBottomNavigationBar(extraPaddingBottomDp: Float = 0F, clipToPadding: Boolean = false) {
+        val view = this
         ViewCompat.setOnApplyWindowInsetsListener(view) { _, insets ->
             val bottomInset = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
             view.setPadding(0, 0, 0, DisplayUtils.dpToPx(extraPaddingBottomDp).roundToInt() + bottomInset)
@@ -397,7 +399,8 @@ object ViewUtils {
     }
 
     @JvmStatic
-    fun excludeContentViewFromHorizontalNavigationBar(activity: Activity) {
+    fun Activity.excludeContentViewFromHorizontalNavigationBar() {
+        val activity = this
         val contentView = activity.findViewById<View?>(android.R.id.content) ?: return
         ViewCompat.setOnApplyWindowInsetsListener(contentView) { v, insets ->
             val sysInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())

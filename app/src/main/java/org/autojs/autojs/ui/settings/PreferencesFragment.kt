@@ -3,7 +3,7 @@ package org.autojs.autojs.ui.settings
 import android.os.Bundle
 import android.view.View
 import androidx.preference.PreferenceFragmentCompat
-import org.autojs.autojs.util.ViewUtils
+import org.autojs.autojs.util.ViewUtils.excludePaddingClippableViewFromBottomNavigationBar
 import org.autojs.autojs6.R
 
 class PreferencesFragment : PreferenceFragmentCompat() {
@@ -16,7 +16,7 @@ class PreferencesFragment : PreferenceFragmentCompat() {
         super.onViewCreated(view, savedInstanceState)
         listView.isHorizontalScrollBarEnabled = false
         listView.isVerticalScrollBarEnabled = false
-        ViewUtils.excludePaddingClippableViewFromBottomNavigationBar(listView)
+        listView.excludePaddingClippableViewFromBottomNavigationBar()
     }
 
 }

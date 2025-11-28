@@ -6,7 +6,7 @@ import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.inflater.util.Dimensions
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.util.ColorUtils
-import org.autojs.autojs.util.ViewUtils
+import org.autojs.autojs.util.ViewUtils.excludeFloatingActionButtonFromBottomNavigationBar
 
 /**
  * Modified by SuperMonster003 as of Jan 21, 2023.
@@ -27,7 +27,7 @@ open class FloatingActionButtonAttributes(scriptRuntime: ScriptRuntime, resource
         registerAttrs(arrayOf("backgroundTint", "bgTint")) { view.backgroundTintList = ColorUtils.toColorStateList(view, it) }
         registerAttr("ensureMinTouchTargetSize") { view.setEnsureMinTouchTargetSize(it.toBoolean()) }
         registerAttr("maxImageSize") { view.setMaxImageSize(it.toInt()) }
-        registerAttr("excludeFromNavigationBar") { ViewUtils.excludeFloatingActionButtonFromBottomNavigationBar(view) }
+        registerAttr("excludeFromNavigationBar") { view.excludeFloatingActionButtonFromBottomNavigationBar() }
     }
 
 }

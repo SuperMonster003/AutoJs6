@@ -23,6 +23,8 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.util.ViewUtils
+import org.autojs.autojs.util.ViewUtils.excludeFloatingActionButtonFromBottomNavigationBar
+import org.autojs.autojs.util.ViewUtils.excludePaddingClippableViewFromBottomNavigationBar
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ActivityDisplayScrollableContentBinding
 
@@ -58,7 +60,7 @@ abstract class BaseDisplayContentActivity : BaseActivity() {
         internalFabView = binding.fab.apply {
             if (internalMenuResource > 0) {
                 setOnClickListener { view -> showPopupMenu(view, internalTextView) }
-                ViewUtils.excludeFloatingActionButtonFromBottomNavigationBar(this)
+                excludeFloatingActionButtonFromBottomNavigationBar()
                 visibility = View.VISIBLE
             }
         }
@@ -66,7 +68,7 @@ abstract class BaseDisplayContentActivity : BaseActivity() {
         val scaleGestureDetector = ViewUtils.TextSizeScaleDetector(this, internalTextView)
 
         val innerScrollView = binding.innerScrollView.also {
-            ViewUtils.excludePaddingClippableViewFromBottomNavigationBar(it)
+            it.excludePaddingClippableViewFromBottomNavigationBar()
             it.setOnTouchListener { view, event ->
                 when (event.pointerCount) {
                     2 -> {

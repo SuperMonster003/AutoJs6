@@ -57,6 +57,7 @@ import org.autojs.autojs.util.IntentUtils
 import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs.util.UpdateUtils
 import org.autojs.autojs.util.ViewUtils
+import org.autojs.autojs.util.ViewUtils.excludeFloatingActionButtonFromBottomNavigationBar
 import org.autojs.autojs.util.ViewUtils.onceGlobalLayout
 import org.autojs.autojs.util.ViewUtils.setMenuIconsColorByThemeColorLuminance
 import org.autojs.autojs.util.ViewUtils.setNavigationIconColorByThemeColorLuminance
@@ -120,7 +121,7 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
             val drawerLayout = it.drawerLayout
             setContentView(it.root)
             mViewPager = it.viewpager
-            mFab = it.fab.apply { ViewUtils.excludeFloatingActionButtonFromBottomNavigationBar(this) }
+            mFab = it.fab.apply { excludeFloatingActionButtonFromBottomNavigationBar() }
             mTab = it.tab
             mToolbar = it.toolbar
             addViewBackground(it.appBar)

@@ -1,11 +1,9 @@
 package org.autojs.autojs.ui.timing
 
-import android.annotation.SuppressLint
-import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.ConnectivityManager
+import android.os.Build
 import android.os.Bundle
-import android.provider.Settings
 import android.text.TextUtils
 import android.util.Log
 import android.view.Menu
@@ -22,7 +20,6 @@ import android.widget.TextView
 import android.widget.TimePicker
 import androidx.appcompat.widget.Toolbar
 import androidx.core.graphics.Insets
-import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.forEach
@@ -35,7 +32,8 @@ import org.autojs.autojs.external.receiver.DynamicBroadcastReceivers
 import org.autojs.autojs.model.script.ScriptFile
 import org.autojs.autojs.permission.IgnoreBatteryOptimizationsPermission
 import org.autojs.autojs.theme.ThemeColorHelper
-import org.autojs.autojs.timing.ExactAlarmPermissionHelper
+import org.autojs.autojs.timing.ExactAlarmPermissionHelper.canScheduleExactAlarms
+import org.autojs.autojs.timing.ExactAlarmPermissionHelper.requestExactAlarmPermission
 import org.autojs.autojs.timing.IntentTask
 import org.autojs.autojs.timing.TaskReceiver
 import org.autojs.autojs.timing.TimedTask
@@ -47,6 +45,7 @@ import org.autojs.autojs.timing.TimedTaskManager.updateTask
 import org.autojs.autojs.tool.MapBuilder
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.util.ViewUtils
+import org.autojs.autojs.util.ViewUtils.excludePaddingClippableViewFromBottomNavigationBar
 import org.autojs.autojs.util.ViewUtils.setMenuIconsColorByThemeColorLuminance
 import org.autojs.autojs.util.ViewUtils.showToast
 import org.autojs.autojs6.R
@@ -140,7 +139,7 @@ class TimedTaskSettingActivity : BaseActivity() {
 
         setUpTaskSettings()
 
-        ViewUtils.excludePaddingClippableViewFromBottomNavigationBar(binding.scrollView)
+        binding.scrollView.excludePaddingClippableViewFromBottomNavigationBar()
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, insets ->
             val sysBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -353,36 +352,20 @@ class TimedTaskSettingActivity : BaseActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean = when (item.itemId) {
-        R.id.action_done -> when {
-            !IgnoreBatteryOptimizationsPermission(this).has() -> {
-                try {
-                    @SuppressLint("BatteryLife")
-                    val intent = Intent()
-                        .setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
-                        .setData("package:$packageName".toUri())
-                    @Suppress("DEPRECATION")
-                    startActivityForResult(intent, REQUEST_CODE_IGNORE_BATTERY)
-                } catch (e: ActivityNotFoundException) {
-                    e.printStackTrace()
-                    createOrUpdateTask()
+        R.id.action_done -> run {
+            IgnoreBatteryOptimizationsPermission(this).let {
+                if (!it.has() && it.request()) {
+                    return@run true
                 }
             }
-            !ExactAlarmPermissionHelper.canScheduleExactAlarms(this) -> {
-                try {
-                    val intent = Intent()
-                        .setAction(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
-                        .setData("package:$packageName".toUri())
-                    @Suppress("DEPRECATION")
-                    startActivityForResult(intent, REQUEST_CODE_SCHEDULE_EXACT_ALARM)
-                } catch (e: ActivityNotFoundException) {
-                    e.printStackTrace()
-                    createOrUpdateTask()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                if (!canScheduleExactAlarms(this) && requestExactAlarmPermission(this)) {
+                    return@run true
                 }
             }
-            else -> {
-                createOrUpdateTask()
-            }
-        }.let { true }
+            createOrUpdateTask()
+            return@run true
+        }
         else -> super.onOptionsItemSelected(item)
     }
 
