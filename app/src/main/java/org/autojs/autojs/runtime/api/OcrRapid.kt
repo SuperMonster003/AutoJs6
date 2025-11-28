@@ -1,11 +1,10 @@
 package org.autojs.autojs.runtime.api
 
-import android.graphics.Bitmap
 import android.graphics.Rect
+import androidx.core.graphics.createBitmap
 import com.benjaminwan.ocrlibrary.TextBlock
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.core.image.ImageWrapper
-import java.util.ArrayList
 import com.benjaminwan.ocrlibrary.OcrResult as RapidOcrResult
 
 class OcrRapid {
@@ -47,7 +46,7 @@ class OcrRapid {
         return detectRaw(image).textBlocks.map { it.text }
     }
 
-    private fun OcrRapid.detectRaw(image: ImageWrapper?): RapidOcrResult {
+    private fun detectRaw(image: ImageWrapper?): RapidOcrResult {
         image ?: return mEmptyOcrResult
         val bitmap = image.bitmap
         if (bitmap.isRecycled) {
@@ -67,6 +66,6 @@ class OcrRapid {
         )
     }
 
-    private fun newEmptyOutputBitmap() = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+    private fun newEmptyOutputBitmap() = createBitmap(1, 1)
 
 }

@@ -16,6 +16,8 @@ import org.autojs.autojs.model.explorer.Explorers
 import org.autojs.autojs.ui.edit.EditorView
 import org.autojs.autojs.ui.explorer.ExplorerView
 import org.autojs.autojs.util.ViewUtils
+import org.autojs.autojs.util.ViewUtils.excludeContentViewFromHorizontalNavigationBar
+import org.autojs.autojs.util.ViewUtils.excludePaddingClippableViewFromBottomNavigationBar
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ActivityTaskerEditBinding
 import org.json.JSONException
@@ -40,8 +42,8 @@ class TaskPrefEditActivity : AbstractAppCompatPluginActivity() {
         binding.editScript.setOnClickListener { editPreExecuteScript() }
 
         ViewUtils.setToolbarAsBack(this, R.string.text_please_choose_a_script)
-        ViewUtils.excludeContentViewFromHorizontalNavigationBar(this)
-        ViewUtils.excludePaddingClippableViewFromBottomNavigationBar(binding.scriptList)
+        this.excludeContentViewFromHorizontalNavigationBar()
+        binding.scriptList.excludePaddingClippableViewFromBottomNavigationBar()
         initScriptListRecyclerView()
     }
 

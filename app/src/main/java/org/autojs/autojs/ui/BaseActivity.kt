@@ -17,6 +17,7 @@ import org.autojs.autojs.theme.ThemeChangeNotifier
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.util.LocaleUtils
 import org.autojs.autojs.util.ViewUtils
+import org.autojs.autojs.util.ViewUtils.excludeContentViewFromHorizontalNavigationBar
 import org.autojs.autojs6.R
 
 /**
@@ -38,7 +39,7 @@ abstract class BaseActivity : AppCompatActivity() {
         ViewUtils.appendSystemUiVisibility(this, SYSTEM_UI_FLAG_LAYOUT_STABLE or SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION)
 
         if (handleContentViewFromHorizontalNavigationBarAutomatically) {
-            ViewUtils.excludeContentViewFromHorizontalNavigationBar(this)
+            this.excludeContentViewFromHorizontalNavigationBar()
         }
 
         if (handleNavigationBarContrastEnforcedAutomatically) {

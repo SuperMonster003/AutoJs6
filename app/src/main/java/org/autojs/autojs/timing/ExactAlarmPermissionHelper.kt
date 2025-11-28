@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.provider.Settings
+import androidx.annotation.RequiresApi
 import androidx.core.net.toUri
 import org.autojs.autojs.extension.MaterialDialogExtensions.widgetThemeColor
 import org.autojs.autojs.ui.common.NotAskAgainDialog
@@ -14,14 +15,13 @@ import org.autojs.autojs6.R
 
 object ExactAlarmPermissionHelper {
 
-    fun isExactAlarmRuntimeGateRequired() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-
+    @RequiresApi(Build.VERSION_CODES.S)
     fun canScheduleExactAlarms(context: Context): Boolean {
-        if (!isExactAlarmRuntimeGateRequired()) return true
         val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         return am.canScheduleExactAlarms()
     }
 
+    @RequiresApi(Build.VERSION_CODES.S)
     fun requestExactAlarmPermission(context: Context): Boolean {
         val intent = Intent()
             .setAction(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
@@ -32,6 +32,7 @@ object ExactAlarmPermissionHelper {
     // Check canScheduleExactAlarms permission and prompt user if needed.
     // zh-CN: 在此检查 canScheduleExactAlarms 并按需提示用户打开权限.
     fun checkExactAlarmPermission(context: Context) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return
         if (canScheduleExactAlarms(context)) return
         NotAskAgainDialog.Builder(context, key(R.string.key_timed_task_backend_alarm))
             .title(R.string.text_prompt)

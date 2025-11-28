@@ -5,7 +5,7 @@ import org.autojs.autojs.util.StringUtils.str
 import org.autojs.autojs.util.UpdateUtils.isVersionIgnored
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
-import kotlin.math.roundToInt
+import kotlin.math.roundToLong
 
 /**
  * Created by Stardust on Sep 20, 2017.
@@ -16,7 +16,7 @@ class VersionInfo : ExtendedVersionInfo {
     var versionName: String = ""
         private set
 
-    var versionCode = 0
+    var versionCode = 0L
         private set
 
     val isNewer: Boolean
@@ -43,7 +43,7 @@ class VersionInfo : ExtendedVersionInfo {
                 Log.d(TAG, "versionName: $versionName")
             }
             if (versionCode <= 0 && line.contains(regexVersionCode)) {
-                versionCode = regexVersionCode.find(line)?.groupValues?.get(1)?.toDouble()?.roundToInt() ?: -1
+                versionCode = regexVersionCode.find(line)?.groupValues?.get(1)?.toDouble()?.roundToLong() ?: -1L
                 Log.d(TAG, "versionCode: $versionCode")
             }
             if (versionName.isNotBlank() && versionCode > 0) {
@@ -52,7 +52,7 @@ class VersionInfo : ExtendedVersionInfo {
         }
     }
 
-    constructor(versionName: String, versionCode: Int) {
+    constructor(versionName: String, versionCode: Long) {
         this.versionName = versionName
         this.versionCode = versionCode
     }
@@ -94,13 +94,13 @@ class VersionInfo : ExtendedVersionInfo {
             val indexForVersionName = 0
             val indexForVersionCode = 1
             var versionName: String? = null
-            var versionCode = -1
+            var versionCode = -1L
             val split = summary.toString().split(" ".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
             for (i in split.indices) {
                 if (i == indexForVersionName) {
                     versionName = split[i]
                 } else if (i == indexForVersionCode) {
-                    versionCode = split[i].replace("[()]".toRegex(), "").toInt()
+                    versionCode = split[i].replace("[()]".toRegex(), "").toLong()
                 }
             }
             return SimpleVersionInfo(versionName, versionCode)

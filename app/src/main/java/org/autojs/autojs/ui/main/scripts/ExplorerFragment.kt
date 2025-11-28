@@ -32,7 +32,7 @@ import org.autojs.autojs.ui.widget.ScrollAwareFABBehavior
 import org.autojs.autojs.util.IntentUtils
 import org.autojs.autojs.util.IntentUtils.SnackExceptionHolder
 import org.autojs.autojs.util.IntentUtils.ToastExceptionHolder
-import org.autojs.autojs.util.ViewUtils
+import org.autojs.autojs.util.ViewUtils.excludePaddingClippableViewFromBottomNavigationBar
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.FragmentExplorerBinding
 import org.greenrobot.eventbus.EventBus
@@ -73,7 +73,7 @@ class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListen
                     }
                 }
             })
-            explorerView.explorerItemListView?.let { ViewUtils.excludePaddingClippableViewFromBottomNavigationBar(it) }
+            explorerView.explorerItemListView?.excludePaddingClippableViewFromBottomNavigationBar()
         }
         (activity as? MainActivity)?.apply {
             val tabLayout: TabLayout = findViewById(R.id.tab)

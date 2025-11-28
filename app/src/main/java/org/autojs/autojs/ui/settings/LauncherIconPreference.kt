@@ -123,7 +123,7 @@ class LauncherIconPreference : MaterialListPreference, SharedPreferences.OnShare
                             ViewUtils.showSnack(dialog.view, R.string.text_already_copied_to_clip, false)
                         }
                     }
-                    neutralText(R.string.dialog_button_copy)
+                    neutralText(R.string.text_copy_all)
                     neutralColorRes(R.color.dialog_button_hint)
                     onNeutral { dialog, _ ->
                         ClipboardUtils.setClip(context, shortcuts.joinToString("\n"))

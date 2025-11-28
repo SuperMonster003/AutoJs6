@@ -129,7 +129,7 @@
             app:itemValues="@array/values_timed_task_backend"
             app:itemDefaultKey="@string/default_key_timed_task_backend"
             app:longClickPrompt="@string/description_timed_task_backend"
-            app:longClickPromptMore="@string/description_timed_task_backend_more"/>
+            app:longClickPromptMore="@string/description_timed_task_backend_more" />
 
     </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
 
