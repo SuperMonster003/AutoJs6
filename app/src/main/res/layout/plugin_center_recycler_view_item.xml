@@ -1,0 +1,317 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?selectableItemBackground"
+    android:gravity="center_vertical"
+    android:orientation="vertical"
+    android:padding="8dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/icon"
+            android:layout_width="@dimen/plugin_center_item_side_length"
+            android:layout_height="@dimen/plugin_center_item_side_length"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_app_shortcut_plugin_center_adaptive_foreground"
+            app:civ_border_color="@color/plugin_center_item_icon_border"
+            app:civ_border_width="@dimen/plugin_center_item_icon_border_width"
+            tools:src="@drawable/ic_plugin_paddle_ocr" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:gravity="center_vertical"
+            android:orientation="vertical">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/title"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="middle"
+                    android:maxLines="1"
+                    android:textColor="@color/text_color_primary"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toStartOf="@+id/updatable_badge"
+                    app:layout_constraintHorizontal_bias="0"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_goneMarginEnd="0dp"
+                    tools:text="Paddle OCR (PP-OCRv5)" />
+
+                <FrameLayout
+                    android:id="@+id/updatable_badge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:visibility="visible">
+
+                    <TextView
+                        android:id="@+id/updatable_badge_text"
+                        android:layout_width="@dimen/plugin_center_item_side_length"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:padding="2sp"
+                        android:textColor="#03A5EF"
+                        android:textSize="12sp"
+                        android:text="@string/text_updatable" />
+
+                </FrameLayout>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:baselineAligned="false"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/version_info"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:textColor="@color/text_color_primary"
+                        android:textSize="13sp"
+                        tools:text="v0.1.0 (17) | 2025/11/21" />
+
+                    <TextView
+                        android:id="@+id/version_info_for_update"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:textColor="#03A5EF"
+                        android:textSize="13sp"
+                        android:visibility="gone"
+                        tools:text="v0.1.1 (22) | 2025/11/23"
+                        tools:visibility="visible" />
+
+                    <TextView
+                        android:id="@+id/author"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:textColor="@color/text_color_primary"
+                        android:textSize="13sp"
+                        tools:text="SuperMonster003" />
+
+                </LinearLayout>
+
+                <FrameLayout
+                    android:layout_width="@dimen/plugin_center_item_side_length"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center">
+
+                    <org.autojs.autojs.theme.widget.ThemeColorSwitch
+                        android:id="@+id/sw"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:checked="true"
+                        android:layout_gravity="center" />
+
+                </FrameLayout>
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/description"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:textColor="@color/text_color_primary_alpha_70"
+                android:textSize="12sp"
+                tools:text="百度飞桨光学字符识别插件" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.2dp"
+        android:layout_marginVertical="8dp"
+        android:background="@color/divider_app_settings_list" />
+
+    <LinearLayout
+        android:id="@+id/ll_actions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:baselineAligned="false"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:id="@+id/btn_delete"
+            android:layout_width="wrap_content"
+            android:minWidth="@dimen/plugin_center_item_side_length"
+            android:layout_height="wrap_content"
+            android:background="?selectableItemBackground"
+            android:paddingHorizontal="6dp"
+            android:paddingVertical="4dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:layout_marginEnd="4dp"
+                android:contentDescription="@string/text_uninstall"
+                android:src="@drawable/ic_delete_forever_black_48dp"
+                app:tint="@color/text_color_primary_alpha_50" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:maxLines="1"
+                android:text="@string/text_uninstall"
+                android:textColor="@color/text_color_primary"
+                android:textSize="13sp"
+                android:translationY="-0.5dp" />
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="18dp"
+            android:layout_weight="1" />
+
+        <LinearLayout
+            android:id="@+id/btn_update"
+            android:layout_width="wrap_content"
+            android:minWidth="@dimen/plugin_center_item_side_length"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:background="?selectableItemBackground"
+            android:paddingHorizontal="6dp"
+            android:paddingVertical="4dp"
+            tools:backgroundTint="#03A5EF"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:layout_marginEnd="4dp"
+                android:contentDescription="@string/text_update"
+                android:src="@drawable/ic_cloud_download_black_48dp"
+                app:tint="@color/text_color_primary_alpha_20"
+                tools:tint="#03A5EF" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:maxLines="1"
+                android:text="@string/text_update"
+                android:textColor="@color/text_color_primary_alpha_30"
+                android:textSize="13sp"
+                android:translationY="-0.5dp"
+                tools:textColor="#03A5EF" />
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="18dp"
+            android:layout_weight="1" />
+
+        <LinearLayout
+            android:id="@+id/btn_settings"
+            android:layout_width="wrap_content"
+            android:minWidth="@dimen/plugin_center_item_side_length"
+            android:layout_height="wrap_content"
+            android:background="?selectableItemBackground"
+            android:paddingHorizontal="6dp"
+            android:paddingVertical="4dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:layout_marginEnd="4dp"
+                android:layout_gravity="center"
+                android:contentDescription="@string/text_settings"
+                android:src="@drawable/ic_circular_menu_settings"
+                app:tint="@color/text_color_primary_alpha_20" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:maxLines="1"
+                android:text="@string/text_settings"
+                android:textColor="@color/text_color_primary_alpha_30"
+                android:textSize="13sp"
+                android:translationY="-0.5dp" />
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="18dp"
+            android:layout_weight="1" />
+
+        <LinearLayout
+            android:id="@+id/btn_details"
+            android:layout_width="wrap_content"
+            android:minWidth="@dimen/plugin_center_item_side_length"
+            android:layout_height="wrap_content"
+            android:background="?selectableItemBackground"
+            android:paddingHorizontal="6dp"
+            android:paddingVertical="4dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:layout_marginEnd="4dp"
+                android:contentDescription="@string/text_details"
+                android:src="@drawable/ic_info_black_48dp"
+                app:tint="@color/text_color_primary_alpha_50" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:maxLines="1"
+                android:text="@string/text_details"
+                android:textColor="@color/text_color_primary"
+                android:textSize="13sp"
+                android:translationY="-0.5dp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

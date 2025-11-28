@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    <androidx.recyclerview.widget.ThemeColorRecyclerView
+        android:id="@+id/plugin_center_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fadeScrollbars="true"
+        android:scrollbarDefaultDelayBeforeFade="600"
+        android:scrollbarFadeDuration="500"
+        android:scrollbars="vertical" />
+
+</FrameLayout>

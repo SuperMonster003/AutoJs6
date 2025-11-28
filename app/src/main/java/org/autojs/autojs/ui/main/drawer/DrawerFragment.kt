@@ -2,7 +2,6 @@ package org.autojs.autojs.ui.main.drawer
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -15,6 +14,7 @@ import org.autojs.autojs.app.tool.FloatingButtonTool
 import org.autojs.autojs.app.tool.JsonSocketClientTool
 import org.autojs.autojs.app.tool.JsonSocketServerTool
 import org.autojs.autojs.core.accessibility.AccessibilityTool
+import org.autojs.autojs.core.plugin.center.PluginCenterActivity
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.permission.DisplayOverOtherAppsPermission
 import org.autojs.autojs.permission.IgnoreBatteryOptimizationsPermission
@@ -410,12 +410,8 @@ open class DrawerFragment : Fragment() {
     }
 
     private fun setupListeners() {
-        binding.settings.setOnClickListener { view ->
-            startActivity(
-                Intent(view.context, PreferencesActivity::class.java)
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            )
-        }
+        binding.settings.setOnClickListener { PreferencesActivity.launch(it.context) }
+        binding.pluginCenter.setOnClickListener { PluginCenterActivity.startActivity(it.context) }
         binding.restart.setOnClickListener { restart(mActivity, mActivity::beforeExit) }
         binding.exit.setOnClickListener { exit(mActivity, mActivity::beforeExit) }
     }
