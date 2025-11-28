@@ -29,6 +29,7 @@ sync.ffs_db
 /build/
 /libs/**/build/
 /modules/**/build/
+/plugin-api/**/build/
 /captures/
 /release/
 /releases/

@@ -20,7 +20,6 @@ private val libs = listOf(
     "androidx-appcompat-1_0_2",
     "apk-parser-1_0_2",
     "org-opencv-4_8_0",
-    "paddleocr",
     "rapidocr",
     "imagequant",
 
@@ -40,14 +39,23 @@ private val libs = listOf(
     "recyclerview-flexibledivider-1_4_0"
 )
 
+private val pluginApi = listOf(
+    "paddle-ocr",
+)
+
 include(
     ":app",
     *modules.map { ":modules:$it" }.toTypedArray(),
     *libs.map { ":libs:$it" }.toTypedArray(),
+    *pluginApi.map { ":plugin-api:$it" }.toTypedArray(),
 )
 
 modules.forEach {
     project(":modules:$it").projectDir = File("modules", it)
+}
+
+pluginApi.forEach {
+    project(":plugin-api:$it").projectDir = File("plugin-api", it)
 }
 
 pluginManagement {

@@ -126,6 +126,10 @@
         android:protectionLevel="signature"
         tools:ignore="ProtectedPermissions" />
 
+    <uses-permission
+        android:name="org.autojs.permission.PLUGIN"
+        android:protectionLevel="normal" />
+
     <!-- 非 AutoJs6 运行必需, 不会主动申请, 脚本可自行申请 -->
 
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
