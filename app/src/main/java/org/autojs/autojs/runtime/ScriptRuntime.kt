@@ -3,6 +3,9 @@ package org.autojs.autojs.runtime
 import android.content.Context
 import android.os.Build
 import android.util.Log
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.annotation.ScriptInterface
 import org.autojs.autojs.annotation.ScriptVariable
@@ -128,6 +131,7 @@ import java.io.PrintWriter
 import java.io.StringWriter
 import java.lang.ref.WeakReference
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.coroutines.cancellation.CancellationException
 import org.autojs.autojs.core.accessibility.UiSelector as CoreUiSelector
 import org.autojs.autojs.core.crypto.Crypto as CoreCrypto
 import org.autojs.autojs.core.image.Colors as CoreColors
@@ -149,7 +153,6 @@ import org.autojs.autojs.runtime.api.Mime as ApiMime
 import org.autojs.autojs.runtime.api.Notice as ApiNotice
 import org.autojs.autojs.runtime.api.Ocr as ApiOcr
 import org.autojs.autojs.runtime.api.OcrMLKit as ApiOcrMLKit
-import org.autojs.autojs.runtime.api.OcrPaddle as ApiOcrPaddle
 import org.autojs.autojs.runtime.api.OcrRapid as ApiOcrRapid
 import org.autojs.autojs.runtime.api.Plugins as ApiPlugins
 import org.autojs.autojs.runtime.api.Recorder as ApiRecorder
@@ -179,6 +182,10 @@ import org.autojs.autojs.runtime.api.augment.util.VersionCodes as UtilVersionCod
  */
 @Suppress("unused", "PropertyName", "PrivatePropertyName")
 class ScriptRuntime private constructor(builder: Builder) {
+
+    private val mJob = SupervisorJob()
+    val coroutineScope = CoroutineScope(Dispatchers.Default + mJob)
+    val coroutineContext = coroutineScope.coroutineContext
 
     private var mUiHandlerAppContext: Context
     private var mRootShell: AbstractShell? = null
@@ -337,10 +344,6 @@ class ScriptRuntime private constructor(builder: Builder) {
 
     @JvmField
     @ScriptVariable
-    val ocrPaddle: ApiOcrPaddle
-
-    @JvmField
-    @ScriptVariable
     val ocrRapid: ApiOcrRapid
 
     @JvmField
@@ -474,7 +477,6 @@ class ScriptRuntime private constructor(builder: Builder) {
 
         http = ApiHttp()
         ocrMLKit = ApiOcrMLKit()
-        ocrPaddle = ApiOcrPaddle()
         ocrRapid = ApiOcrRapid()
         barcode = ApiBarcode()
 
@@ -579,6 +581,10 @@ class ScriptRuntime private constructor(builder: Builder) {
     @Deprecated("ScriptRuntime#stop is deprecated", ReplaceWith("exit()"))
     fun stop() = exit()
 
+    fun cancelScriptJobs() {
+        mJob.cancel(CancellationException(mUiHandlerAppContext.getString(R.string.error_script_is_on_exiting)))
+    }
+
     fun onExit() {
         Log.d(TAG, "on exit")
         this.isExiting = true
@@ -620,7 +626,6 @@ class ScriptRuntime private constructor(builder: Builder) {
         ignoresException({ images.releaseScreenCapturer() })
         ignoresException({ images.stopScreenCapturerForegroundService() })
         ignoresException({ ocrMLKit.release() })
-        ignoresException({ ocrPaddle.release() })
         ignoresException({ sensors.unregisterAll() })
         ignoresException({ timers.recycle() })
         ignoresException({ ui.recycle() })

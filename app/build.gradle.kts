@@ -166,9 +166,6 @@ dependencies /* Unclassified */ {
     // OpenCV
     implementation(project(":libs:org-opencv-4_8_0"))
 
-    // PaddleOCR
-    implementation(project(":libs:paddleocr"))
-
     // RapidOCR
     implementation(project(":libs:rapidocr"))
 
@@ -252,6 +249,9 @@ dependencies /* Unclassified */ {
 
     // ICU4J
     implementation(libs.icu4j)
+
+    // Plugin API: Paddle OCR
+    implementation(project(":plugin-api:paddle-ocr"))
 }
 
 dependencies /* MIME */ {

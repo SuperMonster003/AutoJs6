@@ -4,7 +4,7 @@ import kotlinx.coroutines.runBlocking
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.apkbuilder.ApkBuilder
 import org.autojs.autojs.core.image.ImageWrapper
-import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
+import org.autojs.autojs.core.plugin.ocr.PaddleOcrPluginHost
 import org.autojs.autojs.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.OcrResult
@@ -14,6 +14,7 @@ import org.autojs.autojs.runtime.api.augment.ocr.Ocr.Companion.OcrMode
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.RhinoUtils.coerceBoolean
 import org.autojs.autojs.util.RhinoUtils.coerceIntNumber
+import org.autojs.plugin.paddle.ocr.OcrOptions
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeObject
 
@@ -48,30 +49,33 @@ class OcrPaddle(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRu
         }
 
         fun recognizeTextImpl(scriptRuntime: ScriptRuntime, image: ImageWrapper, options: NativeObject): List<String> {
-            return performOcr(scriptRuntime, image, options).map {
-                it.text
-            }
-        }
-
-        fun detectImpl(scriptRuntime: ScriptRuntime, image: ImageWrapper, options: NativeObject): List<OcrResult> {
-            return performOcr(scriptRuntime, image, options).map {
-                OcrResult(it.text, it.confidence, it.bounds)
-            }
-        }
-
-        private fun performOcr(scriptRuntime: ScriptRuntime, image: ImageWrapper, options: NativeObject): List<org.autojs.plugin.ocr.OcrResult> {
             ApkBuilder.Libs.PADDLE_OCR.ensureLibFiles(OcrMode.PADDLE.value)
             val (cpuThreadNum, useSlim, useOpenCL) = getOcrOptions(options)
-            val ocrOptions = org.autojs.plugin.ocr.OcrOptions().apply {
-                this.threads = cpuThreadNum
+            val ocrOptions = OcrOptions().apply {
+                this.cpuThreadNum = cpuThreadNum
                 this.useSlim = useSlim
                 this.useOpenCL = useOpenCL
             }
             return runBlocking(scriptRuntime.coroutineContext) {
-                val target = OcrPluginHost.select(globalContext)
+                val target = PaddleOcrPluginHost.select(globalContext)
                     ?: throw WrappedIllegalArgumentException("No Paddle OCR plugin matched")
-                OcrPluginHost.detect(globalContext, target, image.bitmap, ocrOptions)
+                PaddleOcrPluginHost.recognizeText(globalContext, target, image.bitmap, ocrOptions)
             }
+        }
+
+        fun detectImpl(scriptRuntime: ScriptRuntime, image: ImageWrapper, options: NativeObject): List<OcrResult> {
+            ApkBuilder.Libs.PADDLE_OCR.ensureLibFiles(OcrMode.PADDLE.value)
+            val (cpuThreadNum, useSlim, useOpenCL) = getOcrOptions(options)
+            val ocrOptions = OcrOptions().apply {
+                this.cpuThreadNum = cpuThreadNum
+                this.useSlim = useSlim
+                this.useOpenCL = useOpenCL
+            }
+            return runBlocking(scriptRuntime.coroutineContext) {
+                val target = PaddleOcrPluginHost.select(globalContext)
+                    ?: throw WrappedIllegalArgumentException("No Paddle OCR plugin matched")
+                PaddleOcrPluginHost.detect(globalContext, target, image.bitmap, ocrOptions)
+            }.map { OcrResult(it.text, it.confidence, it.bounds) }
         }
 
         private fun getOcrOptions(options: NativeObject): OcrOptions {
