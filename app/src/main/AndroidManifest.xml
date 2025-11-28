@@ -35,9 +35,15 @@
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="29" />
 
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
-    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
-    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+    <uses-permission
+        android:name="android.permission.READ_MEDIA_IMAGES"
+        tools:ignore="SelectedPhotoAccess" />
+    <uses-permission
+        android:name="android.permission.READ_MEDIA_VIDEO"
+        tools:ignore="SelectedPhotoAccess" />
+    <uses-permission
+        android:name="android.permission.READ_MEDIA_AUDIO"
+        tools:ignore="SelectedPhotoAccess" />
 
     <uses-permission
         android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
@@ -322,8 +328,7 @@
             android:exported="false"
             android:launchMode="singleTask"
             android:taskAffinity="${applicationId}.crash_report"
-            android:excludeFromRecents="true">
-        </activity>
+            android:excludeFromRecents="true" />
 
         <activity
             android:name="org.autojs.autojs.external.tasker.TaskerScriptEditActivity"
@@ -625,6 +630,10 @@
         <activity
             android:name="org.autojs.autojs.theme.app.ColorItemsActivity"
             android:theme="@style/MtAppTheme.FullScreen" />
+
+        <activity
+            android:name="org.autojs.autojs.core.plugin.center.PluginCenterActivity"
+            android:theme="@style/AppTheme.Settings" />
 
         <activity
             android:name="org.autojs.autojs.execution.ScriptExecuteActivity"

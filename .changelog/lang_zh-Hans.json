@@ -1,8 +1,9 @@
 {
   "$data": {
     "v6.7.0": {
-      "released_date": "2025/11/20",
+      "released_date": "2025/11/28",
       "feature": [
+        "插件中心功能, 支持插件的安装/卸载/更新等操作 (入口: 主页抽屉按钮)",
         "cvt 模块, 用于数据单位转换 (参阅 项目文档 > [单位转换](https://docs.autojs6.com/#/cvt))",
         "fmt 模块, 用于数据格式化 (参阅 项目文档 > [格式化](https://docs.autojs6.com/#/fmt))",
         "zip 模块, 用于文件压缩与解压缩操作 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (参阅 项目文档 > [Zip](https://docs.autojs6.com/#/zip))",
@@ -26,6 +27,7 @@
         "设置页面增加 \"定时任务调度引擎\" 设置选项, 支持 AlarmManager/WorkManager/JobScheduler _[`issue #457`](http://issues.autojs6.com/457)_ _[`issue #388`](http://issues.autojs6.com/388)_ _[`issue #163`](http://issues.autojs6.com/163)_ _[`issue #53`](http://issues.autojs6.com/53)_ _[`issue #21`](http://issues.autojs6.com/21)_",
         "设置页面增加 \"应用启动器图标\" 设置选项, 支持自适应图标/透明背景图标 _[`issue #405`](http://issues.autojs6.com/405)_",
         "设置页面增加 \"重启策略\" 设置选项, 用于设置主页抽屉栏重启按钮是否使用快速重启策略",
+        "设置页面启动器快捷方式增加 \"插件\" 选项, 用于通过快捷方式跳转到插件中心页面",
         "Scrapers 工具 (run-scrapers.mjs) 用于自动更新 Gradle 构建脚本结构化数据/README 通用数据/README 模板数据等"
       ],
       "fix": [

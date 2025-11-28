@@ -1075,5 +1075,14 @@
     <string name="text_write_secure_settings">修改安全设置</string>
     <string name="text_write_secure_settings_description">安全设置包含应用程序可读但不可写入的设置选项, 这些选项只能由 UI 或系统级别应用修改.\n被授予 \"修改安全设置权限\" 后, 普通应用可直接修改上述安全设置 (例如无障碍服务).</string>
     <string name="text_write_system_settings">修改系统设置</string>
+    <string name="text_update">更新</string>
+    <string name="text_plugin_center">插件中心</string>
+    <string name="text_plugins">插件</string>
+    <string name="text_updatable">可更新</string>
+    <string name="text_uninstall">卸载</string>
+    <string name="text_app_shortcut_plugin_center_long_label">AutoJs6 插件中心</string>
+    <string name="text_app_shortcut_plugin_center_short_label">插件</string>
+    <string name="text_click_icon_to_add_launcher_shortcut">点击图标添加启动器快捷方式</string>
+    <string name="text_click_other_areas_to_exit_selection">点击其他区域退出选择</string>
 
 </resources>

@@ -1079,5 +1079,14 @@
     <string name="text_write_secure_settings">اكتب إعدادات الأمان</string>
     <string name="text_write_secure_settings_description">إعدادات النظام الآمنة ، التي تحتوي على تفضيلات النظام التي يمكن أن تقرأها التطبيقات ولكن لا يُسمح لها بالكتابة.\nهذه هي لتفضيلات يجب على المستخدم تعديلها بشكل صريح من خلال واجهة المستخدم لتطبيق النظام.\nمع إذن إعدادات النظام الآمن ، يمكن للتطبيقات العادية تعديل الإعدادات الآمنة مباشرة (مثل خدمة إمكانية الوصول).</string>
     <string name="text_write_system_settings">كتابة إعدادات النظام</string>
+    <string name="text_update">Update</string>
+    <string name="text_plugin_center">Plugin center</string>
+    <string name="text_plugins">Plugins</string>
+    <string name="text_updatable">Updatable</string>
+    <string name="text_uninstall">Uninstall</string>
+    <string name="text_app_shortcut_plugin_center_long_label">AutoJs6 Plugin Center</string>
+    <string name="text_app_shortcut_plugin_center_short_label">Plugins</string>
+    <string name="text_click_icon_to_add_launcher_shortcut">Click icon to add launcher shortcut</string>
+    <string name="text_click_other_areas_to_exit_selection">Click other areas to exit selection</string>
 
 </resources>

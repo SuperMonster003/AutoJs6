@@ -1077,5 +1077,14 @@
     <string name="text_write_secure_settings">Параметры безопасности записи</string>
     <string name="text_write_secure_settings_description">Настройки безопасности системы, содержащие системные предпочтения, которые приложения могут читать, но не имеют права записывать.\nОни предназначены для параметров, которые пользователь должен явно изменить через пользовательский интерфейс системного приложения.\nПри наличии разрешения на безопасные системные настройки обычные приложения могут напрямую изменять безопасные настройки (например, служба доступности).</string>
     <string name="text_write_system_settings">Запись системных настроек</string>
+    <string name="text_update">Update</string>
+    <string name="text_plugin_center">Plugin center</string>
+    <string name="text_plugins">Plugins</string>
+    <string name="text_updatable">Updatable</string>
+    <string name="text_uninstall">Uninstall</string>
+    <string name="text_app_shortcut_plugin_center_long_label">AutoJs6 Plugin Center</string>
+    <string name="text_app_shortcut_plugin_center_short_label">Plugins</string>
+    <string name="text_click_icon_to_add_launcher_shortcut">Click icon to add launcher shortcut</string>
+    <string name="text_click_other_areas_to_exit_selection">Click other areas to exit selection</string>
 
 </resources>

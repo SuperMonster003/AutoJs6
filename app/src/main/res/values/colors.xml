@@ -24,6 +24,7 @@
     <color name="day_night_alpha_70">#B3212121</color>
     <color name="day_night_alpha_60">#9A212121</color>
     <color name="day_night_alpha_50">#80212121</color>
+    <color name="day_night_alpha_40">#66212121</color>
     <color name="day_night_alpha_30">#4D212121</color>
     <color name="day_night_alpha_20">#33212121</color>
     <color name="night_day">@color/night</color>
@@ -35,7 +36,11 @@
     <color name="text_color_primary">@color/day_night</color>
     <color name="text_color_primary_full">@color/day_night_full</color>
     <color name="text_color_primary_alpha_70">@color/day_night_alpha_70</color>
-    <color name="text_color_secondly">#9DA0A2</color>
+    <color name="text_color_primary_alpha_50">@color/day_night_alpha_50</color>
+    <color name="text_color_primary_alpha_40">@color/day_night_alpha_40</color>
+    <color name="text_color_primary_alpha_30">@color/day_night_alpha_30</color>
+    <color name="text_color_primary_alpha_20">@color/day_night_alpha_20</color>
+    <color name="text_color_secondary">#9DA0A2</color>
     <color name="black_alpha_40">#66000000</color>
     <color name="black_alpha_44">#70000000</color>
 
@@ -129,6 +134,7 @@
     <color name="github_avatar_border">#261B1F24</color>
     <color name="github_color_fg_default">#24292F</color>
     <color name="github_color_fg_muted">#57606A</color>
+    <color name="plugin_center_item_icon_border">#261B1F24</color>
     <color name="tint_1st_developer_identifier">#2B7A85</color>
     <color name="tint_2nd_developer_identifier">#CC7A34</color>
 

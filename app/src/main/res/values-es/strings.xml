@@ -1077,5 +1077,14 @@
     <string name="text_write_secure_settings">Escribir la configuración de seguridad</string>
     <string name="text_write_secure_settings_description">Ajustes de seguridad del sistema, que contienen preferencias del sistema que las aplicaciones pueden leer pero no pueden escribir.\nSe trata de preferencias que el usuario debe modificar explícitamente a través de la interfaz de usuario de una aplicación del sistema.\nCon el permiso de configuración segura del sistema, las aplicaciones normales pueden modificar directamente la configuración segura (como el servicio de accesibilidad).</string>
     <string name="text_write_system_settings">Escribir la configuración del sistema</string>
+    <string name="text_update">Update</string>
+    <string name="text_plugin_center">Plugin center</string>
+    <string name="text_plugins">Plugins</string>
+    <string name="text_updatable">Updatable</string>
+    <string name="text_uninstall">Uninstall</string>
+    <string name="text_app_shortcut_plugin_center_long_label">AutoJs6 Plugin Center</string>
+    <string name="text_app_shortcut_plugin_center_short_label">Plugins</string>
+    <string name="text_click_icon_to_add_launcher_shortcut">Click icon to add launcher shortcut</string>
+    <string name="text_click_other_areas_to_exit_selection">Click other areas to exit selection</string>
 
 </resources>

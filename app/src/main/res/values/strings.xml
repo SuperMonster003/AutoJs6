@@ -54,6 +54,7 @@
     <string name="format_dialog_progress_number_format_mega_bytes" translatable="false">%.2fMB/%.2fMB</string>
     <string name="id_launcher_shortcut_docs" translatable="false">shortcut_$_docs</string>
     <string name="id_launcher_shortcut_log" translatable="false">shortcut_$_log</string>
+    <string name="id_launcher_shortcut_plugin_center" translatable="false">shortcut_$_plugin_center</string>
     <string name="id_launcher_shortcut_settings" translatable="false">shortcut_$_settings</string>
     <string name="key_a11y_service" translatable="false">key_$_a11y_service</string>
     <string name="key_about_app_and_developer" translatable="false">key_$_about_app_and_developer</string>
@@ -1328,5 +1329,14 @@
     <string name="text_write_secure_settings">Write security settings</string>
     <string name="text_write_secure_settings_description">Secure system settings, containing system preferences that applications can read but are not allowed to write.\nThese are for preferences that the user must explicitly modify through the UI of a system app.\nWith secure system settings permission, normal applications can directly modify the secure settings (such as accessibility service).</string>
     <string name="text_write_system_settings">Write system settings</string>
+    <string name="text_update">Update</string>
+    <string name="text_plugin_center">Plugin center</string>
+    <string name="text_plugins">Plugins</string>
+    <string name="text_updatable">Updatable</string>
+    <string name="text_uninstall">Uninstall</string>
+    <string name="text_app_shortcut_plugin_center_long_label">AutoJs6 Plugin Center</string>
+    <string name="text_app_shortcut_plugin_center_short_label">Plugins</string>
+    <string name="text_click_icon_to_add_launcher_shortcut">Click icon to add launcher shortcut</string>
+    <string name="text_click_other_areas_to_exit_selection">Click other areas to exit selection</string>
 
 </resources>

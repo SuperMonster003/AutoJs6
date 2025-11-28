@@ -4,6 +4,8 @@
     <dimen name="about_item_avatar_side_length_compat">42dp</dimen>
     <dimen name="about_item_avatar_side_length_land">60dp</dimen>
     <dimen name="about_item_avatar_side_length_land_compact">54dp</dimen>
+    <dimen name="plugin_center_item_side_length">64dp</dimen>
+    <dimen name="plugin_center_item_icon_border_width">1dp</dimen>
     <dimen name="content_inset">16dp</dimen>
     <dimen name="divider_drawer_menu_group">6dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
