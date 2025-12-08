@@ -132,8 +132,11 @@ public class DevPluginResponseHandler implements Handler {
             if (message == null) {
                 ViewUtils.showToast(mContext, R.string.text_invalid_project, true);
             } else {
-                // 使用 ErrorDialogActivity 代替直接显示 MaterialDialog
-                // 这样可以避免在非UI线程或Activity不可见状态下调用对话框的问题
+                // Use ErrorDialogActivity instead of showing MaterialDialog directly
+                // This avoids issues when calling dialogs from non-UI threads or when Activity is not visible.
+                // zh-CN:
+                // 使用 ErrorDialogActivity 代替直接显示 MaterialDialog,
+                // 这样可以避免在非 UI 线程或 Activity 不可见状态下调用对话框的问题.
                 ErrorDialogActivity.showErrorDialog(
                         mContext.getApplicationContext(),
                         R.string.text_invalid_project,

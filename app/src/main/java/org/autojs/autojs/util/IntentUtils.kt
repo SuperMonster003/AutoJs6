@@ -358,7 +358,7 @@ object IntentUtils {
                 context.startActivity(launchIntent)
             } else {
                 // All scripts will call the scheduleAppLaunch method.
-                // zh-CM: 脚本一律调用 scheduleAppLaunch 方法.
+                // zh-CN: 脚本一律调用 scheduleAppLaunch 方法.
                 scheduleAppLaunch(context, launchIntent)
             }
 
@@ -431,7 +431,7 @@ object IntentUtils {
                 // zh-CN: 主页抽屉 "重启" 按钮点击时, 如果启用了 "快速重启", 则不调用 finishAllAppTasksSafely 方法.
             } else {
                 // All scripts will call the finishAllAppTasksSafely method.
-                // zh-CM: 脚本一律调用 finishAllAppTasksSafely 方法.
+                // zh-CN: 脚本一律调用 finishAllAppTasksSafely 方法.
                 finishAllAppTasksSafely(context)
             }
 

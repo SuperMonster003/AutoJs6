@@ -54,15 +54,13 @@ class ColorSelectActivity : ColorSelectBaseActivity() {
         return super.onCreateOptionsMenu(menu)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.action_toggle_color_select_layout -> {
-                isLegacyLayout = false
-                startActivity(this, isToggled = true)
-                true
-            }
+    override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
+        R.id.action_toggle_color_select_layout -> {
+            isLegacyLayout = false
+            startActivity(this, isToggled = true)
+            true
         }
-        return super.onOptionsItemSelected(item)
+        else -> super.onOptionsItemSelected(item)
     }
 
 }

@@ -248,7 +248,7 @@ async function getPRCommitStatsByAuthor(pr) {
  * zh-CN: 要处理的输入项列表.
  * @param {number} limit
  * Maximum concurrency (>=1).<br>
- * zh=CN: 最大并发数 (>=1).
+ * zh-CN: 最大并发数 (>=1).
  * @param {(item: Item, idx: number) => Promise<MapperResult>} mapper
  * Async function to process one item.<br>
  * zh-CN: 处理单个项的异步函数.

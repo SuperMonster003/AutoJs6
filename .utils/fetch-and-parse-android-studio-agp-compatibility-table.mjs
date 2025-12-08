@@ -18,6 +18,9 @@ export async function fetchStudioAgpTable() {
     // @ts-ignore
     return findTargetRows({
         url: URL,
+        expandBeforeFinding: {
+            toggleSelector: 'a.exw-control',
+        },
         tableFilter: {
             th: /Android Studio version/i,
         },
