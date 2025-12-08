@@ -253,13 +253,13 @@ public class DownloadManager {
         }
     }
 
-    private String getProgressKiloBytesFormat(Context context, float readKiloBytes, float totalKiloBytes) {
+    public static String getProgressKiloBytesFormat(Context context, float readKiloBytes, float totalKiloBytes) {
         return String.format(Language.getPrefLanguage().getLocale(),
                 context.getString(R.string.format_dialog_progress_number_format_kilo_bytes),
                 readKiloBytes, totalKiloBytes);
     }
 
-    private String getProgressMegaBytesFormat(Context context, float readMegaBytes, float totalMegaBytes) {
+    public static String getProgressMegaBytesFormat(Context context, float readMegaBytes, float totalMegaBytes) {
         return String.format(Language.getPrefLanguage().getLocale(),
                 context.getString(R.string.format_dialog_progress_number_format_mega_bytes),
                 readMegaBytes, totalMegaBytes);

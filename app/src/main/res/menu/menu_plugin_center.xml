@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:popupTheme="@style/Widget.AppCompat.PopupMenu">
+
+    <item
+        android:icon="@drawable/ic_add_black_48dp"
+        android:title="@string/text_install"
+        app:showAsAction="always">
+
+        <menu>
+
+            <item
+                android:id="@+id/action_install_from_local_file"
+                android:title="@string/text_install_from_local_file" />
+
+            <item
+                android:id="@+id/action_install_from_url"
+                android:title="@string/text_install_from_url" />
+
+        </menu>
+
+    </item>
+
+    <item
+        android:id="@+id/action_search"
+        android:icon="@drawable/ic_search_smaller_black_48dp"
+        android:title="@string/text_search"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/action_sort"
+        android:title="@string/text_sort"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_filter"
+        android:title="@string/text_filter"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_global_settings"
+        android:title="@string/text_global_settings"
+        app:showAsAction="never" />
+
+</menu>

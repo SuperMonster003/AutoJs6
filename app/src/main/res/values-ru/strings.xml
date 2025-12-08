@@ -110,6 +110,7 @@
     <string name="dialog_button_open_color_palette">Открыть палитру</string>
     <string name="dialog_button_quit">Выйти</string>
     <string name="dialog_button_remove">Удалить</string>
+    <string name="dialog_button_retrieve">Получить</string>
     <string name="dialog_button_retry">Повторная попытка</string>
     <string name="dialog_button_save">Сохранить</string>
     <string name="dialog_button_system_settings">Системные настройки</string>
@@ -301,6 +302,7 @@
     <string name="hint_long_click_run_to_debug">Длительное нажатие кнопки \"Выполнить\" для отладки</string>
     <string name="hint_loop_delay">Задержка перед циклом</string>
     <string name="hint_loop_times">0 для бесконечного цикла</string>
+    <string name="instruction_install_plugin_from_url">Введите URL, указывающий на удалённый плагин.\nНапример: \"https://example.com/plugin.apk\".</string>
     <string name="label_latest_used_time">Последнее использование: %1$s</string>
     <string name="logger_ver_history_blob_thread_failure">Поток \"blob\" неудачен</string>
     <string name="logger_ver_history_blob_thread_success">Поток \"blob\" успешен, запись офлайн-кеша</string>
@@ -337,7 +339,17 @@
     <string name="mt_custom">Пользовательский</string>
     <string name="no_apk_builder_plugin">APK Builder не установлен</string>
     <string name="no_root_access_for_record">AutoJs6 не имеет root-доступа для записи скрипта</string>
+    <string name="plugin_item_info_author">Автор</string>
+    <string name="plugin_item_info_collaborators">Соавторы</string>
+    <string name="plugin_item_info_first_install_time">Перв. устан.</string>
+    <string name="plugin_item_info_installed_version">Уст. вер.</string>
+    <string name="plugin_item_info_last_install_time">Посл. устан.</string>
+    <string name="plugin_item_info_last_uninstall_time">Посл. удал.</string>
+    <string name="plugin_item_info_last_update_time">Посл. обновл.</string>
+    <string name="plugin_item_info_package_size">Размер пакета</string>
+    <string name="plugin_item_info_updatable_version">Обновл. вер.</string>
     <string name="prompt_add_ignored_version">Вы уверены, что игнорируете текущую версию обновления?\nВы можете управлять всеми игнорируемыми версиями в настройках приложения.</string>
+    <string name="prompt_file_may_not_be_a_valid_plugin_package_with_uri">Текущий файл может быть недействительным пакетом плагина. Продолжить установку?\n\nURI: \"%1$s\"</string>
     <string name="prompt_restart_is_needed_for_docs_source_switch">Для применения новых настроек требуется перезапуск приложения</string>
     <string name="prompt_restart_may_be_needed_for_language_switch">Перезапуск приложения может потребоваться для того, чтобы язык применялся как положено</string>
     <string name="screen_capturer_foreground_notification_channel_name">Служба захвата экрана на переднем плане</string>
@@ -433,6 +445,8 @@
     <string name="text_app_shortcut_docs_short_label">документы</string>
     <string name="text_app_shortcut_log_long_label">AutoJs6 Журнал</string>
     <string name="text_app_shortcut_log_short_label">Журнал</string>
+    <string name="text_app_shortcut_plugin_center_long_label">AutoJs6 Plugin Center</string>
+    <string name="text_app_shortcut_plugin_center_short_label">Plugins</string>
     <string name="text_app_shortcut_settings_long_label">AutoJs6 Настройки</string>
     <string name="text_app_shortcut_settings_short_label">Настройки</string>
     <string name="text_app_source_code">Исходный код</string>
@@ -481,9 +495,11 @@
     <string name="text_clear_file_selection">Очистить выбор файла</string>
     <string name="text_clear_pre_execute_script">Очистить сценарий предварительного выполнения</string>
     <string name="text_clear_updates_checked_states">Очистить состояния проверки обновлений</string>
+    <string name="text_click_icon_to_add_launcher_shortcut">Click icon to add launcher shortcut</string>
     <string name="text_click_item_to_remove">Нажмите на элемент для удаления</string>
     <string name="text_click_item_to_show_details">Нажмите на пункт, чтобы просмотреть подробности</string>
     <string name="text_click_ok_to_go_to_settings">Нажмите \"OK\" для перехода к настройкам</string>
+    <string name="text_click_other_areas_to_exit_selection">Click other areas to exit selection</string>
     <string name="text_click_too_frequently">Частые операции</string>
     <string name="text_client_mode">Режим клиента</string>
     <string name="text_clone_color_library">Клонировать цветовую библиотеку</string>
@@ -540,6 +556,7 @@
     <string name="text_delete">Удалить</string>
     <string name="text_delete_all">Удалить все</string>
     <string name="text_delete_line">Удалить строку</string>
+    <string name="text_description">Описание</string>
     <string name="text_details">Детали</string>
     <string name="text_developer_details_under_development">Детали разработчика находятся в стадии разработки</string>
     <string name="text_developer_options">Параметры разработчика</string>
@@ -553,6 +570,7 @@
     <string name="text_device_screen_resolution">Разрешение экрана устройства</string>
     <string name="text_directly_download">Загрузить сейчас</string>
     <string name="text_directory">Каталог</string>
+    <string name="text_disabled">Отключено</string>
     <string name="text_display_over_other_app">Отображать поверх других приложений</string>
     <string name="text_display_over_other_app_is_recommended">Разрешение \"Отображать поверх других приложений\" рекомендуется для правильного отображения всех виджетов.</string>
     <string name="text_disposable_task">Одноразовая задача</string>
@@ -585,6 +603,8 @@
     <string name="text_enable_a11y_service_with_root_access_timeout">Включить службу доступности с корневым доступом по таймеру</string>
     <string name="text_enable_a11y_service_with_secure_settings_automatically">Автоматическое включение службы доступности с безопасными настройками</string>
     <string name="text_enable_a11y_service_with_secure_settings_timeout">Включить службу доступа с безопасными настройками по таймеру</string>
+    <string name="text_enable_plugin">Включить плагин</string>
+    <string name="text_enabled">Включено</string>
     <string name="text_error">Ошибка</string>
     <string name="text_error_copy_file" formatted="true">Не удалось скопировать файл: %s</string>
     <string name="text_error_report">Отчет об ошибке</string>
@@ -615,10 +635,12 @@
     <string name="text_failed_to_grant_access">Не удалось предоставить доступ</string>
     <string name="text_failed_to_grant_draw_overlays_permission">Не удалось предоставить разрешение на отображение поверх других приложений</string>
     <string name="text_failed_to_import">Не удалось импортировать</string>
+    <string name="text_failed_to_install">Не удалось установить</string>
     <string name="text_failed_to_locate">Не удалось найти</string>
     <string name="text_failed_to_login">Не удалось войти в систему</string>
     <string name="text_failed_to_register">Не удалось зарегистрироваться</string>
     <string name="text_failed_to_report">Не удалось отправить</string>
+    <string name="text_failed_to_retrieve">Не удалось получить</string>
     <string name="text_failed_to_save_remote_project_to_local_storage">Не удалось сохранить удаленный проект в локальное хранилище</string>
     <string name="text_failed_to_send_log_entries">Не удалось отправить записи журнала</string>
     <string name="text_failed_to_write_file">Не удалось записать файл</string>
@@ -635,6 +657,7 @@
     <string name="text_filename_cannot_contain_invalid_character">Имя файла не может содержать следующие символы: \\ / : * ? &quot; &lt; &gt; |</string>
     <string name="text_filename_is_too_long">Имя файла слишком длинное</string>
     <string name="text_files_transfer">Передача файлов</string>
+    <string name="text_filter">Фильтр</string>
     <string name="text_find">Найти</string>
     <string name="text_find_java_classes">Найти классы Java</string>
     <string name="text_find_next_simplified">Следу</string>
@@ -653,6 +676,7 @@
     <string name="text_generated_code">Сгенерированный код</string>
     <string name="text_getting_release_notes" tools:ignore="TypographyEllipsis">Извлечение заметок о выпуске...</string>
     <string name="text_github_backup_url_used">Использован URL-адрес резервной копии</string>
+    <string name="text_global_settings">Глобальные настройки</string>
     <string name="text_go_to_settings">Перейдите в \"Настройки\"</string>
     <string name="text_grant_autojs6_access_in_shizuku_app">Предоставление привилегий AutoJs6 в приложении Shizuku</string>
     <string name="text_granted">Разрешено</string>
@@ -680,6 +704,10 @@
     <string name="text_inspect_layout_bounds">Осмотр границ макета</string>
     <string name="text_inspect_layout_hierarchy">Проверить иерархию макета</string>
     <string name="text_install">Установить</string>
+    <string name="text_install_from_local_file">Установить из \"Локального файла\"</string>
+    <string name="text_install_from_url">Установить из \"URL\"</string>
+    <string name="text_install_plugin_from_url">Установить плагин из \"URL\"</string>
+    <string name="text_installable">Устанавливаемый</string>
     <string name="text_invalid_character_is_removed">Недопустимый символ удален</string>
     <string name="text_invalid_package_name">Неверное имя пакета</string>
     <string name="text_invalid_project">Неверный проект</string>
@@ -699,6 +727,7 @@
     <string name="text_key_store_has_not_been_verified">Хранилище ключей не подтверждено</string>
     <string name="text_key_store_password">Пароль хранилища ключей</string>
     <string name="text_label_name">Метка</string>
+    <string name="text_label_state">Состояние</string>
     <string name="text_last_updates_checked_time">Последняя проверка: %s</string>
     <string name="text_latest_activity">Последняя активность</string>
     <string name="text_latest_package">Последний пакет</string>
@@ -877,6 +906,9 @@
     <string name="text_please_input_name">Имя ввода</string>
     <string name="text_please_wait" tools:ignore="TypographyEllipsis">Пожалуйста, подождите...</string>
     <string name="text_please_wait_a_moment_before_trying_again" tools:ignore="TypographyEllipsis">Пожалуйста, повторите попытку позже...</string>
+    <string name="text_plugin_center">Plugin center</string>
+    <string name="text_plugin_details">Сведения о плагине</string>
+    <string name="text_plugins">Plugins</string>
     <string name="text_pointer_location">Расположение указателя</string>
     <string name="text_pointer_location_toggle_failed_with_hint">Переключение \"Расположение указателя\" не удалось.\nТребуется корневой доступ.</string>
     <string name="text_post_notifications_permission">почтовые уведомления</string>
@@ -992,6 +1024,7 @@
     <string name="text_signature_scheme">Схема подписи</string>
     <string name="text_size">Размер</string>
     <string name="text_some_items_exported">Экспортировано %d элементов</string>
+    <string name="text_sort">Сортировать</string>
     <string name="text_source_file_path">Путь к исходному коду</string>
     <string name="text_special_permissions">Специальные разрешения</string>
     <string name="text_stable_mode">Стабильный режим</string>
@@ -1033,8 +1066,11 @@
     <string name="text_under_development_title">@string/text_under_development</string>
     <string name="text_undo">Отозвать</string>
     <string name="text_undo_simplified">Верни</string>
+    <string name="text_uninstall">Uninstall</string>
     <string name="text_unknown">Неизвестно</string>
     <string name="text_unverified">Не подтверждено</string>
+    <string name="text_updatable">Updatable</string>
+    <string name="text_update">Update</string>
     <string name="text_updates">Обновления</string>
     <string name="text_updates_checked_states_cleared">Обновления проверенные состояния очищены</string>
     <string name="text_updates_snack_bar_act_later">Позже</string>
@@ -1077,14 +1113,8 @@
     <string name="text_write_secure_settings">Параметры безопасности записи</string>
     <string name="text_write_secure_settings_description">Настройки безопасности системы, содержащие системные предпочтения, которые приложения могут читать, но не имеют права записывать.\nОни предназначены для параметров, которые пользователь должен явно изменить через пользовательский интерфейс системного приложения.\nПри наличии разрешения на безопасные системные настройки обычные приложения могут напрямую изменять безопасные настройки (например, служба доступности).</string>
     <string name="text_write_system_settings">Запись системных настроек</string>
-    <string name="text_update">Update</string>
-    <string name="text_plugin_center">Plugin center</string>
-    <string name="text_plugins">Plugins</string>
-    <string name="text_updatable">Updatable</string>
-    <string name="text_uninstall">Uninstall</string>
-    <string name="text_app_shortcut_plugin_center_long_label">AutoJs6 Plugin Center</string>
-    <string name="text_app_shortcut_plugin_center_short_label">Plugins</string>
-    <string name="text_click_icon_to_add_launcher_shortcut">Click icon to add launcher shortcut</string>
-    <string name="text_click_other_areas_to_exit_selection">Click other areas to exit selection</string>
+    <string name="text_integrity_verification_failed">Сбой проверки целостности</string>
+    <string name="text_sha256_mismatch_multiline_expected_actual">Несовпадение SHA-256.\n\nОжидалось: %1$s\nФактически: %2$s</string>
+    <string name="error_no_available_url_provided_for_current_plugin">Для текущего плагина не указан доступный URL-адрес</string>
 
 </resources>

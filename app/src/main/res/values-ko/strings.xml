@@ -112,6 +112,7 @@
     <string name="dialog_button_open_color_palette">팔레트 열기</string>
     <string name="dialog_button_quit">그만두다</string>
     <string name="dialog_button_remove">제거하다</string>
+    <string name="dialog_button_retrieve">가져오기</string>
     <string name="dialog_button_retry">다시 해 보다</string>
     <string name="dialog_button_save">구하다</string>
     <string name="dialog_button_system_settings">환경 설정</string>
@@ -303,6 +304,7 @@
     <string name="hint_long_click_run_to_debug">\"실행\" 버튼을 긴 클릭하여 디버그를 클릭하십시오</string>
     <string name="hint_loop_delay">루프 전 지연</string>
     <string name="hint_loop_times">무한 루프의 경우 0</string>
+    <string name="instruction_install_plugin_from_url">원격 플러그인 주소를 가리키는 URL을 입력하세요.\n예: \"https://example.com/plugin.apk\"</string>
     <string name="label_latest_used_time">최종 사용: %1$s</string>
     <string name="logger_ver_history_blob_thread_failure">\"Blob\" 스레드 요청 실패</string>
     <string name="logger_ver_history_blob_thread_success">\"Blob\" 스레드 요청 성공, 오프라인 캐시 기록</string>
@@ -339,7 +341,17 @@
     <string name="mt_custom">관습</string>
     <string name="no_apk_builder_plugin">APK 빌더가 설치되지 않았습니다</string>
     <string name="no_root_access_for_record">AutoJs6 에는 스크립트를 기록 할 루트 액세스가 없습니다</string>
+    <string name="plugin_item_info_author">제작자</string>
+    <string name="plugin_item_info_collaborators">협력자</string>
+    <string name="plugin_item_info_first_install_time">최초 설치</string>
+    <string name="plugin_item_info_installed_version">설치 버전</string>
+    <string name="plugin_item_info_last_install_time">마지막 설치</string>
+    <string name="plugin_item_info_last_uninstall_time">마지막 제거</string>
+    <string name="plugin_item_info_last_update_time">마지막 업데이트</string>
+    <string name="plugin_item_info_package_size">패키지 크기</string>
+    <string name="plugin_item_info_updatable_version">업데이트 가능</string>
     <string name="prompt_add_ignored_version">현재 업데이트 버전을 무시해야합니까?\n앱 설정으로 무시 된 버전을 모두 관리 할 수 있습니다.</string>
+    <string name="prompt_file_may_not_be_a_valid_plugin_package_with_uri">현재 파일이 유효한 플러그인 패키지가 아닐 수 있습니다. 설치를 계속하시겠습니까?\n\nURI: \"%1$s\"</string>
     <string name="prompt_restart_is_needed_for_docs_source_switch">새로운 설정을 적용하려면 앱 재시작이 필요합니다</string>
     <string name="prompt_restart_may_be_needed_for_language_switch">예상대로 언어를 적용하려면 앱 재시작이 필요할 수 있습니다.</string>
     <string name="screen_capturer_foreground_notification_channel_name">스크린 캡처 전경 서비스</string>
@@ -435,6 +447,8 @@
     <string name="text_app_shortcut_docs_short_label">문서</string>
     <string name="text_app_shortcut_log_long_label">AutoJs6 통나무</string>
     <string name="text_app_shortcut_log_short_label">통나무</string>
+    <string name="text_app_shortcut_plugin_center_long_label">AutoJs6 Plugin Center</string>
+    <string name="text_app_shortcut_plugin_center_short_label">Plugins</string>
     <string name="text_app_shortcut_settings_long_label">AutoJs6 설정</string>
     <string name="text_app_shortcut_settings_short_label">설정</string>
     <string name="text_app_source_code">소스 코드</string>
@@ -483,9 +497,11 @@
     <string name="text_clear_file_selection">파일 선택을 지우십시오</string>
     <string name="text_clear_pre_execute_script">사전 에코 슈트 스크립트를 지우십시오</string>
     <string name="text_clear_updates_checked_states">확인 된 상태에서 명확한 업데이트</string>
+    <string name="text_click_icon_to_add_launcher_shortcut">Click icon to add launcher shortcut</string>
     <string name="text_click_item_to_remove">제거하려면 항목을 클릭하십시오</string>
     <string name="text_click_item_to_show_details">항목을 탭하면 자세한 정보를 볼 수 있습니다</string>
     <string name="text_click_ok_to_go_to_settings">\"확인\"을 클릭하여 설정으로 이동하십시오</string>
+    <string name="text_click_other_areas_to_exit_selection">Click other areas to exit selection</string>
     <string name="text_click_too_frequently">빈번한 작동</string>
     <string name="text_client_mode">클라이언트 모드</string>
     <string name="text_clone_color_library">색상 라이브러리 복제</string>
@@ -542,6 +558,7 @@
     <string name="text_delete">삭제</string>
     <string name="text_delete_all">모두 삭제</string>
     <string name="text_delete_line">라인 삭제</string>
+    <string name="text_description">설명</string>
     <string name="text_details">세부</string>
     <string name="text_developer_details_under_development">개발자 세부 사항이 개발 중입니다</string>
     <string name="text_developer_options">개발자 옵션</string>
@@ -555,6 +572,7 @@
     <string name="text_device_screen_resolution">기기 화면 해상도</string>
     <string name="text_directly_download">지금 다운로드하십시오</string>
     <string name="text_directory">예배 규칙서</string>
+    <string name="text_disabled">비활성화됨</string>
     <string name="text_display_over_other_app">다른 앱에 표시됩니다</string>
     <string name="text_display_over_other_app_is_recommended">\"다른 앱 위의 디스플레이\"권한은 모든 위젯을 올바르게 표시하는 것이 좋습니다.</string>
     <string name="text_disposable_task">일회용 작업</string>
@@ -587,6 +605,8 @@
     <string name="text_enable_a11y_service_with_root_access_timeout">루트 액세스 시간이 초과 된 접근성 서비스를 활성화하십시오</string>
     <string name="text_enable_a11y_service_with_secure_settings_automatically">안전한 설정을 통해 접근성 서비스를 자동으로 활성화하십시오</string>
     <string name="text_enable_a11y_service_with_secure_settings_timeout">안전한 설정 시간이 초과되는 접근성 서비스를 활성화하십시오</string>
+    <string name="text_enable_plugin">플러그인 활성화</string>
+    <string name="text_enabled">활성화됨</string>
     <string name="text_error">오류</string>
     <string name="text_error_copy_file" formatted="true">파일을 복사하지 못했습니다: %s</string>
     <string name="text_error_report">버그 보고서</string>
@@ -617,10 +637,12 @@
     <string name="text_failed_to_grant_access">액세스 권한을 부여하지 못했습니다</string>
     <string name="text_failed_to_grant_draw_overlays_permission">다른 앱 권한을 통해 디스플레이를 부여하지 못했습니다</string>
     <string name="text_failed_to_import">가져 오지 못했습니다</string>
+    <string name="text_failed_to_install">설치 실패</string>
     <string name="text_failed_to_locate">찾을 수 없음</string>
     <string name="text_failed_to_login">로그인 실패</string>
     <string name="text_failed_to_register">등록하지 못했습니다</string>
     <string name="text_failed_to_report">제출하지 못했습니다</string>
+    <string name="text_failed_to_retrieve">가져오기 실패</string>
     <string name="text_failed_to_save_remote_project_to_local_storage">원격 프로젝트를 로컬 저장소에 저장하지 못했습니다</string>
     <string name="text_failed_to_send_log_entries">로그 항목을 보내지 못했습니다</string>
     <string name="text_failed_to_write_file">파일을 쓰지 못했습니다</string>
@@ -637,6 +659,7 @@
     <string name="text_filename_cannot_contain_invalid_character">파일 이름에 다음 문자를 포함할 수 없습니다: \\ / : * ? &quot; &lt; &gt; |</string>
     <string name="text_filename_is_too_long">파일 이름이 너무 깁니다</string>
     <string name="text_files_transfer">파일 전송</string>
+    <string name="text_filter">필터</string>
     <string name="text_find">찾다</string>
     <string name="text_find_java_classes">Java 클래스를 찾으십시오</string>
     <string name="text_find_next_simplified">다음을</string>
@@ -655,6 +678,7 @@
     <string name="text_generated_code">생성 된 코드</string>
     <string name="text_getting_release_notes" tools:ignore="TypographyEllipsis">릴리스 노트 검색 ...</string>
     <string name="text_github_backup_url_used">백업 URL 이 사용되었습니다</string>
+    <string name="text_global_settings">전역 설정</string>
     <string name="text_go_to_settings">설정으로 바로 가기\"</string>
     <string name="text_grant_autojs6_access_in_shizuku_app">Shizuku 애플리케이션에서 AutoJs6 권한 부여하기</string>
     <string name="text_granted">부여된</string>
@@ -682,6 +706,10 @@
     <string name="text_inspect_layout_bounds">레이아웃 경계를 검사하십시오</string>
     <string name="text_inspect_layout_hierarchy">레이아웃 계층 구조를 검사하십시오</string>
     <string name="text_install">설치</string>
+    <string name="text_install_from_local_file">\"로컬 파일\"에서 설치</string>
+    <string name="text_install_from_url">\"URL\"에서 설치</string>
+    <string name="text_install_plugin_from_url">\"URL\"에서 플러그인 설치</string>
+    <string name="text_installable">설치 가능</string>
     <string name="text_invalid_character_is_removed">잘못된 문자가 제거되었습니다</string>
     <string name="text_invalid_package_name">잘못된 패키지 이름</string>
     <string name="text_invalid_project">잘못된 프로젝트</string>
@@ -701,6 +729,7 @@
     <string name="text_key_store_has_not_been_verified">키 저장소가 확인되지 않았습니다</string>
     <string name="text_key_store_password">키 저장소 비밀번호</string>
     <string name="text_label_name">이름</string>
+    <string name="text_label_state">상태</string>
     <string name="text_last_updates_checked_time">마지막으로 확인 된: %s</string>
     <string name="text_latest_activity">최신 활동</string>
     <string name="text_latest_package">최신 패키지</string>
@@ -879,6 +908,9 @@
     <string name="text_please_input_name">입력 이름</string>
     <string name="text_please_wait" tools:ignore="TypographyEllipsis">잠시만 기다려주세요...</string>
     <string name="text_please_wait_a_moment_before_trying_again" tools:ignore="TypographyEllipsis">잠시 후 다시 시도해 주세요...</string>
+    <string name="text_plugin_center">Plugin center</string>
+    <string name="text_plugin_details">플러그인 상세</string>
+    <string name="text_plugins">Plugins</string>
     <string name="text_pointer_location">포인터 위치</string>
     <string name="text_pointer_location_toggle_failed_with_hint">\"포인터 위치\"토글이 실패했습니다.\n루트 액세스가 필요합니다.</string>
     <string name="text_post_notifications_permission">게시물 알림</string>
@@ -994,6 +1026,7 @@
     <string name="text_signature_scheme">서명 스킴</string>
     <string name="text_size">크기</string>
     <string name="text_some_items_exported">내보낸 %d 항목</string>
+    <string name="text_sort">정렬</string>
     <string name="text_source_file_path">소스 코드 경로</string>
     <string name="text_special_permissions">특수 권한</string>
     <string name="text_stable_mode">안정적인 모드</string>
@@ -1035,8 +1068,11 @@
     <string name="text_under_development_title">@string/text_under_development</string>
     <string name="text_undo">실행 취소</string>
     <string name="text_undo_simplified">뒤</string>
+    <string name="text_uninstall">Uninstall</string>
     <string name="text_unknown">알 수 없음</string>
     <string name="text_unverified">미확인</string>
+    <string name="text_updatable">Updatable</string>
+    <string name="text_update">Update</string>
     <string name="text_updates">업데이트</string>
     <string name="text_updates_checked_states_cleared">확인 된 상태가 지워졌습니다</string>
     <string name="text_updates_snack_bar_act_later">나중</string>
@@ -1079,14 +1115,8 @@
     <string name="text_write_secure_settings">보안 설정을 작성하십시오</string>
     <string name="text_write_secure_settings_description">애플리케이션이 읽을 수 있지만 쓸 수없는 시스템 환경 설정을 포함하는 보안 시스템 설정.\n이들은 사용자가 시스템 앱의 UI 를 통해 명시 적으로 수정 해야하는 선호도입니다.\n보안 시스템 설정 권한을 사용하면 일반 애플리케이션이 보안 설정 (예: 접근성 서비스)을 직접 수정할 수 있습니다.</string>
     <string name="text_write_system_settings">시스템 설정을 작성하십시오</string>
-    <string name="text_update">Update</string>
-    <string name="text_plugin_center">Plugin center</string>
-    <string name="text_plugins">Plugins</string>
-    <string name="text_updatable">Updatable</string>
-    <string name="text_uninstall">Uninstall</string>
-    <string name="text_app_shortcut_plugin_center_long_label">AutoJs6 Plugin Center</string>
-    <string name="text_app_shortcut_plugin_center_short_label">Plugins</string>
-    <string name="text_click_icon_to_add_launcher_shortcut">Click icon to add launcher shortcut</string>
-    <string name="text_click_other_areas_to_exit_selection">Click other areas to exit selection</string>
+    <string name="text_integrity_verification_failed">무결성 검증에 실패했습니다</string>
+    <string name="text_sha256_mismatch_multiline_expected_actual">SHA-256 값이 일치하지 않습니다.\n\n예상: %1$s\n실제: %2$s</string>
+    <string name="error_no_available_url_provided_for_current_plugin">현재 플러그인에 사용 가능한 URL 이 제공되지 않았습니다</string>
 
 </resources>

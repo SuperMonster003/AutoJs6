@@ -8,6 +8,7 @@ import kotlinx.coroutines.withContext
 import org.autojs.autojs.core.plugin.ocr.PaddleOcrPluginHost
 import org.autojs.autojs6.R
 import org.autojs.plugin.paddle.ocr.PluginInfo
+import java.io.File
 
 /**
  * Local installed plugin discovery (based on existing PaddleOcrPluginHost.discover).
@@ -23,8 +24,9 @@ class InstalledPluginRepository {
         val author: String?,
         val versionName: String,
         val versionCode: Long?,
-        val installTime: Long?,
-        val updateTime: Long?,
+        val packageSize: Long,
+        val firstInstallTime: Long?,
+        val lastUpdateTime: Long?,
         val icon: Drawable?,
         val pluginInfo: PluginInfo?,
     )
@@ -45,6 +47,16 @@ class InstalledPluginRepository {
             val versionCode = pkgInfo?.let { PackageInfoCompat.getLongVersionCode(it) } ?: d.pluginInfo?.versionCode
             val firstInstallTime = pkgInfo?.firstInstallTime
             val lastUpdateTime = pkgInfo?.lastUpdateTime
+            val packageSize = run calcPackageSize@{
+                val baseApkSize = appInfo?.publicSourceDir?.let { File(it).length() }
+                    ?: appInfo?.sourceDir?.let { File(it).length() }
+                val splitApkTotalSize = when {
+                    appInfo?.splitPublicSourceDirs != null -> appInfo.splitPublicSourceDirs!!.sumOf { File(it).length() }
+                    appInfo?.splitSourceDirs != null -> appInfo.splitSourceDirs!!.sumOf { File(it).length() }
+                    else -> 0L
+                }
+                baseApkSize?.let { it + splitApkTotalSize } ?: 0L
+            }
 
             InstalledPlugin(
                 packageName = packageName,
@@ -53,8 +65,9 @@ class InstalledPluginRepository {
                 author = d.pluginInfo?.author,
                 versionName = versionName,
                 versionCode = versionCode,
-                installTime = firstInstallTime,
-                updateTime = lastUpdateTime,
+                packageSize = packageSize,
+                firstInstallTime = firstInstallTime,
+                lastUpdateTime = lastUpdateTime,
                 icon = icon,
                 pluginInfo = d.pluginInfo,
             )

@@ -111,6 +111,7 @@
     <string name="dialog_button_open_color_palette">パレットを開く</string>
     <string name="dialog_button_quit">終了する</string>
     <string name="dialog_button_remove">削除</string>
+    <string name="dialog_button_retrieve">取得</string>
     <string name="dialog_button_retry">再試行</string>
     <string name="dialog_button_save">保存する</string>
     <string name="dialog_button_system_settings">システム設定</string>
@@ -302,6 +303,7 @@
     <string name="hint_long_click_run_to_debug">実行」ボタン長押しでデバッグ</string>
     <string name="hint_loop_delay">ループ前の遅延時間</string>
     <string name="hint_loop_times">無限ループの場合は 0</string>
+    <string name="instruction_install_plugin_from_url">リモートプラグインの URL を入力してください. \n例: \"https://example.com/plugin.apk\"</string>
     <string name="label_latest_used_time">最終使用時: %1$s</string>
     <string name="logger_ver_history_blob_thread_failure">\"Blob\" スレッドが失敗</string>
     <string name="logger_ver_history_blob_thread_success">\"Blob\" スレッドが成功、オフラインキャッシュを書き込み</string>
@@ -338,7 +340,17 @@
     <string name="mt_custom">カスタム</string>
     <string name="no_apk_builder_plugin">APK Builder がインストールされていない</string>
     <string name="no_root_access_for_record">AutoJs6 にスクリプトを記録するためのルートアクセス権がない</string>
+    <string name="plugin_item_info_author">作者</string>
+    <string name="plugin_item_info_collaborators">協力者</string>
+    <string name="plugin_item_info_first_install_time">初回インストール</string>
+    <string name="plugin_item_info_installed_version">インストール済み Ver.</string>
+    <string name="plugin_item_info_last_install_time">最終インストール</string>
+    <string name="plugin_item_info_last_uninstall_time">最終アンインストール</string>
+    <string name="plugin_item_info_last_update_time">最終更新</string>
+    <string name="plugin_item_info_package_size">パッケージサイズ</string>
+    <string name="plugin_item_info_updatable_version">更新可 Ver.</string>
     <string name="prompt_add_ignored_version">現在のアップデートバージョンを無視して大丈夫ですか?\n無視したバージョンは, アプリの設定で管理することができます</string>
+    <string name="prompt_file_may_not_be_a_valid_plugin_package_with_uri">このファイルは有効なプラグインパッケージではない可能性があります. インストールを続行しますか?\n\nURI: \"%1$s\"</string>
     <string name="prompt_restart_is_needed_for_docs_source_switch">新しい設定を適用するには, アプリの再起動が必要です</string>
     <string name="prompt_restart_may_be_needed_for_language_switch">言語を正しく適用するために, アプリの再起動が必要な場合があります</string>
     <string name="screen_capturer_foreground_notification_channel_name">スクリーンキャプチャーのフォアグラウンドサービス</string>
@@ -434,6 +446,8 @@
     <string name="text_app_shortcut_docs_short_label">文書</string>
     <string name="text_app_shortcut_log_long_label">AutoJs6 ログ</string>
     <string name="text_app_shortcut_log_short_label">ログ</string>
+    <string name="text_app_shortcut_plugin_center_long_label">AutoJs6 Plugin Center</string>
+    <string name="text_app_shortcut_plugin_center_short_label">Plugins</string>
     <string name="text_app_shortcut_settings_long_label">AutoJs6 設定</string>
     <string name="text_app_shortcut_settings_short_label">設定</string>
     <string name="text_app_source_code">ソースコード</string>
@@ -482,9 +496,11 @@
     <string name="text_clear_file_selection">ファイル選択の解除</string>
     <string name="text_clear_pre_execute_script">実行前スクリプトのクリア</string>
     <string name="text_clear_updates_checked_states">アップデートのチェック状態をクリアする</string>
+    <string name="text_click_icon_to_add_launcher_shortcut">Click icon to add launcher shortcut</string>
     <string name="text_click_item_to_remove">削除する項目をクリックします</string>
     <string name="text_click_item_to_show_details">項目をタップして詳細を表示します</string>
     <string name="text_click_ok_to_go_to_settings">\"OK\" をクリックすると設定に進みます</string>
+    <string name="text_click_other_areas_to_exit_selection">Click other areas to exit selection</string>
     <string name="text_click_too_frequently">頻繁に行う操作</string>
     <string name="text_client_mode">クライアントモード</string>
     <string name="text_clone_color_library">カラーライブラリを複製</string>
@@ -541,6 +557,7 @@
     <string name="text_delete">削除</string>
     <string name="text_delete_all">すべて削除</string>
     <string name="text_delete_line">行削除</string>
+    <string name="text_description">説明</string>
     <string name="text_details">詳細</string>
     <string name="text_developer_details_under_development">デベロッパーの詳細については, 現在開発中です</string>
     <string name="text_developer_options">デベロッパーオプション</string>
@@ -554,6 +571,7 @@
     <string name="text_device_screen_resolution">デバイスの画面解像度</string>
     <string name="text_directly_download">今すぐダウンロード</string>
     <string name="text_directory">ディレクトリ</string>
+    <string name="text_disabled">無効</string>
     <string name="text_display_over_other_app">他のアプリの上に表示する</string>
     <string name="text_display_over_other_app_is_recommended">すべてのウィジェットを正しく表示するために, \"Display over other apps\" パーミッションの使用を推奨します</string>
     <string name="text_disposable_task">使い捨てタスク</string>
@@ -586,6 +604,8 @@
     <string name="text_enable_a11y_service_with_root_access_timeout">ルートアクセスがタイムアウトした状態でアクセシビリティサービスを有効にする</string>
     <string name="text_enable_a11y_service_with_secure_settings_automatically">セキュアな設定でアクセシビリティサービスを自動的に有効にする</string>
     <string name="text_enable_a11y_service_with_secure_settings_timeout">セキュアな設定でアクセシビリティサービスを有効化するとタイムアウトする</string>
+    <string name="text_enable_plugin">プラグインを有効化</string>
+    <string name="text_enabled">有効</string>
     <string name="text_error">エラー</string>
     <string name="text_error_copy_file" formatted="true">ファイルのコピーに失敗しました. %s</string>
     <string name="text_error_report">バグレポート</string>
@@ -616,10 +636,12 @@
     <string name="text_failed_to_grant_access">アクセス権の付与に失敗しました</string>
     <string name="text_failed_to_grant_draw_overlays_permission">他のアプリの上に表示する権限の付与に失敗しました</string>
     <string name="text_failed_to_import">インポートに失敗しました</string>
+    <string name="text_failed_to_install">インストールに失敗</string>
     <string name="text_failed_to_locate">見つかりませんでした</string>
     <string name="text_failed_to_login">ログインに失敗しました</string>
     <string name="text_failed_to_register">登録の失敗</string>
     <string name="text_failed_to_report">投稿の失敗</string>
+    <string name="text_failed_to_retrieve">取得に失敗</string>
     <string name="text_failed_to_save_remote_project_to_local_storage">リモートプロジェクトをローカルストレージに保存できませんでした</string>
     <string name="text_failed_to_send_log_entries">ログ・エントリの送信に失敗しました</string>
     <string name="text_failed_to_write_file">ファイルの書き込みに失敗しました</string>
@@ -636,6 +658,7 @@
     <string name="text_filename_cannot_contain_invalid_character">ファイル名に以下の文字を含めることはできません: \\ / : * ? &quot; &lt; &gt; |</string>
     <string name="text_filename_is_too_long">ファイル名が長すぎます</string>
     <string name="text_files_transfer">ファイルの転送</string>
+    <string name="text_filter">フィルター</string>
     <string name="text_find">検索</string>
     <string name="text_find_java_classes">Java クラスの検索</string>
     <string name="text_find_next_simplified">次へ</string>
@@ -654,6 +677,7 @@
     <string name="text_generated_code">生成されたコード</string>
     <string name="text_getting_release_notes" tools:ignore="TypographyEllipsis">リリースノートの取得中...</string>
     <string name="text_github_backup_url_used">バックアップ URL を使用しました</string>
+    <string name="text_global_settings">グローバル設定</string>
     <string name="text_go_to_settings">\"設定\" に進む</string>
     <string name="text_grant_autojs6_access_in_shizuku_app">Shizuku アプリケーションで AutoJs6 権限を付与する</string>
     <string name="text_granted">許可する</string>
@@ -681,6 +705,10 @@
     <string name="text_inspect_layout_bounds">レイアウト境界の検査</string>
     <string name="text_inspect_layout_hierarchy">レイアウト階層の検査</string>
     <string name="text_install">インストール</string>
+    <string name="text_install_from_local_file">\"ローカルファイル\" からインストール</string>
+    <string name="text_install_from_url">\"URL\" からインストール</string>
+    <string name="text_install_plugin_from_url">\"URL\" からプラグインをインストール</string>
+    <string name="text_installable">インストール可</string>
     <string name="text_invalid_character_is_removed">無効な文字が削除されました</string>
     <string name="text_invalid_package_name">パッケージ名が無効です</string>
     <string name="text_invalid_project">プロジェクトが無効です</string>
@@ -700,6 +728,7 @@
     <string name="text_key_store_has_not_been_verified">キーストアは確認されていません</string>
     <string name="text_key_store_password">キーストアのパスワード</string>
     <string name="text_label_name">ラベル</string>
+    <string name="text_label_state">状態</string>
     <string name="text_last_updates_checked_time">最終チェック: %s</string>
     <string name="text_latest_activity">最新の活動</string>
     <string name="text_latest_package">最新のパッケージ</string>
@@ -878,6 +907,9 @@
     <string name="text_please_input_name">入力名</string>
     <string name="text_please_wait" tools:ignore="TypographyEllipsis">しばらくお待ちください...</string>
     <string name="text_please_wait_a_moment_before_trying_again" tools:ignore="TypographyEllipsis">しばらくしてからもう一度お試しください...</string>
+    <string name="text_plugin_center">Plugin center</string>
+    <string name="text_plugin_details">プラグイン詳細</string>
+    <string name="text_plugins">Plugins</string>
     <string name="text_pointer_location">ポインターの位置</string>
     <string name="text_pointer_location_toggle_failed_with_hint">トグル「ポインターの位置」に失敗しました.\nroot 権限が必要です</string>
     <string name="text_post_notifications_permission">ゆうびんけいほう</string>
@@ -993,6 +1025,7 @@
     <string name="text_signature_scheme">署名スキーム</string>
     <string name="text_size">サイズ</string>
     <string name="text_some_items_exported">エクスポートされた項目 %d</string>
+    <string name="text_sort">並べ替え</string>
     <string name="text_source_file_path">ソースコードのパス</string>
     <string name="text_special_permissions">特殊な権限</string>
     <string name="text_stable_mode">安定モード</string>
@@ -1034,8 +1067,11 @@
     <string name="text_under_development_title">@string/text_under_development</string>
     <string name="text_undo">元に戻す</string>
     <string name="text_undo_simplified">戻る</string>
+    <string name="text_uninstall">Uninstall</string>
     <string name="text_unknown">不明</string>
     <string name="text_unverified">未確認</string>
+    <string name="text_updatable">Updatable</string>
+    <string name="text_update">Update</string>
     <string name="text_updates">アップデート</string>
     <string name="text_updates_checked_states_cleared">更新のチェック状態を解除</string>
     <string name="text_updates_snack_bar_act_later">後日</string>
@@ -1078,14 +1114,8 @@
     <string name="text_write_secure_settings">セキュリティ設定の書き込み</string>
     <string name="text_write_secure_settings_description">アプリケーションが読み取ることはできるが, 書き込むことはできないシステム環境設定を含む, 安全なシステム設定です.\nこれは, ユーザーがシステムアプリの UI を通じて明示的に変更する必要がある環境設定のためのものです.\nセキュアなシステム設定を許可すると, 通常のアプリケーションはセキュアな設定 (アクセシビリティサービスなど) を直接変更できるようになります</string>
     <string name="text_write_system_settings">システム設定の書き込み</string>
-    <string name="text_update">Update</string>
-    <string name="text_plugin_center">Plugin center</string>
-    <string name="text_plugins">Plugins</string>
-    <string name="text_updatable">Updatable</string>
-    <string name="text_uninstall">Uninstall</string>
-    <string name="text_app_shortcut_plugin_center_long_label">AutoJs6 Plugin Center</string>
-    <string name="text_app_shortcut_plugin_center_short_label">Plugins</string>
-    <string name="text_click_icon_to_add_launcher_shortcut">Click icon to add launcher shortcut</string>
-    <string name="text_click_other_areas_to_exit_selection">Click other areas to exit selection</string>
+    <string name="text_integrity_verification_failed">整合性の検証に失敗しました</string>
+    <string name="text_sha256_mismatch_multiline_expected_actual">SHA-256 が一致しません.\n\n期待値: %1$s\n実際: %2$s</string>
+    <string name="error_no_available_url_provided_for_current_plugin">現在のプラグインに利用可能な URL は提供されていません</string>
 
 </resources>

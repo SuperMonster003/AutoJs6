@@ -12,7 +12,7 @@ parcelable PluginInfo {
     long versionCode;
     @nullable String versionDate;
 
-    /** @example "paddle-ocr-v5" */
+    /** @example "paddle-ocr-pp-ocrv5" */
     @nullable String id;
     /** @sample "paddle-ocr" */
     @nullable String engine;

@@ -99,7 +99,7 @@ object PaddleOcrPluginHost {
 
     suspend fun select(
         context: Context,
-        // e.g. "paddle-ocr-v5"
+        // e.g. "paddle-ocr-pp-ocrv5"
         engineId: String? = null,
         // e.g. "paddle-ocr"
         engine: String? = null,

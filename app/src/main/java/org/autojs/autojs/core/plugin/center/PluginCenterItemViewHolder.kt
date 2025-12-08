@@ -1,8 +1,6 @@
 package org.autojs.autojs.core.plugin.center
 
 import android.content.res.ColorStateList
-import android.graphics.ColorMatrix
-import android.graphics.ColorMatrixColorFilter
 import android.graphics.PorterDuff
 import android.view.View
 import android.widget.ImageView
@@ -17,12 +15,16 @@ import de.hdodenhof.circleimageview.CircleImageView
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.ViewUtils
+import org.autojs.autojs.util.ViewUtils.colorFilterWithDesaturateOrNull
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.PluginCenterRecyclerViewItemBinding
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 
-class PluginCenterItemViewHolder(itemViewBinding: PluginCenterRecyclerViewItemBinding) : RecyclerView.ViewHolder(itemViewBinding.root) {
+class PluginCenterItemViewHolder(
+    itemViewBinding: PluginCenterRecyclerViewItemBinding,
+    private val listener: PluginCenterItemAdapter.Listener,
+) : RecyclerView.ViewHolder(itemViewBinding.root) {
 
     private val context = itemViewBinding.root.context
 
@@ -51,7 +53,11 @@ class PluginCenterItemViewHolder(itemViewBinding: PluginCenterRecyclerViewItemBi
     private val btnSettingsView = itemViewBinding.btnSettings
     private val btnDetailsView = itemViewBinding.btnDetails
 
+    private lateinit var currentItem: PluginCenterItem
+
     fun bind(item: PluginCenterItem) {
+        currentItem = item
+
         item.icon?.let { iconView.setImageDrawable(it) } ?: AppCompatResources.getDrawable(
             iconView.context,
             R.drawable.ic_plugin_center_default
@@ -61,48 +67,67 @@ class PluginCenterItemViewHolder(itemViewBinding: PluginCenterRecyclerViewItemBi
             iconView.setImageDrawable(d)
         } ?: iconView.setImageResource(R.mipmap.ic_app_shortcut_plugin_center_adaptive_round)
 
+        switchView.setOnCheckedChangeListener(null)
         switchView.isChecked = item.isEnabled
 
         titleView.text = item.title
-        versionInfoView.text = formatVersionInfo(item.versionName, item.versionCode, item.versionDate)
+        versionInfoView.text = item.versionSummary
         authorView.text = item.author
         descriptionView.text = item.description
 
-        btnDeleteView.setButtonState(true) {
-            ViewUtils.showToast(context, R.string.text_under_development)
+        if (item.isInstalled) {
+            btnDeleteView.setButtonState(true) {
+                listener.onUninstall(currentItem)
+            }
+        } else {
+            btnDeleteView.setButtonState(false)
         }
-        if (item.isUpdatable) {
+
+        if (item.isInstalled && item.isUpdatable) {
             updatableBadgeView.isVisible = true
             versionInfoForUpdateView.isVisible = true
-            versionInfoForUpdateView.text = formatVersionInfo(item.versionName, item.versionCode?.let { it + 16 }, item.versionDate?.let {
+
+            // test
+            val updatableVersionName = item.versionName.also {
+                item.updatableVersionName = it
+            }
+            // test
+            val updatableVersionCode = item.versionCode?.let { it + 16 }?.also {
+                item.updatableVersionCode = it
+            }
+            // test
+            val updatableVersionDate = item.versionDate?.let {
                 DateTime.parse(it).plusDays(3).toString("yyyy-MM-dd")
-            })
+            }?.also {
+                item.updatableVersionDate = it
+            }
+
+            versionInfoForUpdateView.text = formatVersionInfo(updatableVersionName, updatableVersionCode, updatableVersionDate)
             btnUpdateView.setButtonState(true) {
                 ViewUtils.showToast(context, R.string.text_under_development)
             }
         } else {
             updatableBadgeView.isVisible = false
             versionInfoForUpdateView.isVisible = false
-            btnUpdateView.setButtonState(false) {
-                ViewUtils.showToast(context, R.string.text_unavailable)
-            }
+            btnUpdateView.setButtonState(false)
         }
+
         if (item.settings != null) {
             btnSettingsView.setButtonState(true) {
                 ViewUtils.showToast(context, R.string.text_under_development)
             }
         } else {
-            btnSettingsView.setButtonState(false) {
-                ViewUtils.showToast(context, R.string.text_unavailable)
-            }
+            btnSettingsView.setButtonState(false)
         }
+
         btnDetailsView.setButtonState(true) {
-            ViewUtils.showToast(context, R.string.text_under_development)
+            listener.onDetails(currentItem)
         }
 
         applyUiBySwitch(switchView.isChecked, item)
 
         switchView.setOnCheckedChangeListener { _, isChecked ->
+            listener.onToggleEnable(currentItem, isChecked)
             applyUiBySwitch(isChecked, item)
         }
     }
@@ -119,8 +144,8 @@ class PluginCenterItemViewHolder(itemViewBinding: PluginCenterRecyclerViewItemBi
         }
     }
 
-    private fun LinearLayout.setButtonState(enabled: Boolean, onClickListener: View.OnClickListener) {
-        isEnabled = enabled
+    private fun LinearLayout.setButtonState(enabled: Boolean, onClickListener: View.OnClickListener? = null) {
+        this.isEnabled = enabled
         this.setOnClickListener(onClickListener)
     }
 
@@ -130,7 +155,11 @@ class PluginCenterItemViewHolder(itemViewBinding: PluginCenterRecyclerViewItemBi
         val colorPrimaryA30 = context.getColor(R.color.text_color_primary_alpha_30)
         val colorPrimaryA20 = context.getColor(R.color.text_color_primary_alpha_20)
 
-        btnDeleteView.setActionColors(iconColor = colorPrimaryA50, textColor = colorPrimary)
+        if (btnDeleteView.isEnabled) {
+            btnDeleteView.setActionColors(iconColor = colorPrimaryA50, textColor = colorPrimary)
+        } else {
+            btnDeleteView.setActionColors(iconColor = colorPrimaryA20, textColor = colorPrimaryA30)
+        }
 
         if (btnUpdateView.isEnabled) {
             if (isOn) {
@@ -158,20 +187,7 @@ class PluginCenterItemViewHolder(itemViewBinding: PluginCenterRecyclerViewItemBi
             updatableBadgeTextView.setTextColor(colorPrimary)
         }
 
-        if (isOn) {
-            iconView.colorFilter = null
-        } else {
-            // Construct the desaturation matrix.
-            // zh-CN: 构造灰度矩阵.
-            val desaturate = ColorMatrix().apply { setSaturation(0f) }
-            // Construct the alpha scaling matrix.
-            // zh-CN: 构造透明度缩放矩阵.
-            val alphaMatrix = ColorMatrix().apply { setScale(1f, 1f, 1f, 0.5f) }
-            // Concatenate: first desaturate, then apply alpha.
-            // zh-CN: 叠加: 先灰度, 再透明度.
-            desaturate.postConcat(alphaMatrix)
-            iconView.colorFilter = ColorMatrixColorFilter(desaturate)
-        }
+        iconView.colorFilterWithDesaturateOrNull(isOn, 0.5F)
     }
 
     private fun LinearLayout.setActionColors(iconColor: Int, textColor: Int) {

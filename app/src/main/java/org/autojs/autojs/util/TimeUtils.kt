@@ -32,7 +32,7 @@ object TimeUtils {
 
     @JvmStatic
     @JvmOverloads
-    fun formatTimestamp(ts: Long, pattern: String = "yyyy/MM/dd HH:mm"): String {
+    fun formatTimestamp(ts: Long, pattern: String = "yyyy-MM-dd HH:mm"): String {
         val dt = DateTime(ts)
         val fmt = DateTimeFormat.forPattern(pattern)
         return fmt.print(dt)

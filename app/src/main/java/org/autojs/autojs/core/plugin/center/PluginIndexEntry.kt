@@ -16,12 +16,16 @@ data class PluginIndexEntry(
     val engine: String? = null,
     /** @sample "v5" */
     val variant: String? = null,
-    /** @sample "paddle-ocr-v5" */
+    /** @sample "paddle-ocr-pp-ocrv5" */
     val engineId: String? = null,
 
     val versionName: String,
     val versionCode: Long? = null,
     val versionDate: String? = null,
+
+    val apkUrl: String? = null,
+    val apkSha256: String? = null,
+    val apkSizeBytes: Long? = null,
 
     val tags: List<String> = emptyList(),
 )

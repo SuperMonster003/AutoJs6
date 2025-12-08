@@ -32,15 +32,16 @@ import org.autojs.autojs.runtime.api.AppUtils
 import org.autojs.autojs.util.IntentUtils
 import org.autojs.autojs.util.IntentUtils.ToastExceptionHolder
 import org.autojs.autojs6.R
-import org.autojs.autojs6.databinding.ApkFileInfoDialogListItemBinding
+import org.autojs.autojs6.databinding.ApkFileInfoDialogItemsBinding
 import java.io.File
 
 object ApkInfoDialogManager {
 
     @JvmStatic
+    @JvmOverloads
     @SuppressLint("SetTextI18n")
-    fun showApkInfoDialog(context: Context, apkFile: File) {
-        val binding = ApkFileInfoDialogListItemBinding.inflate(LayoutInflater.from(context))
+    fun showApkInfoDialog(context: Context, apkFile: File, builderApplier: (MaterialDialog.Builder.() -> Unit)? = null) {
+        val binding = ApkFileInfoDialogItemsBinding.inflate(LayoutInflater.from(context))
 
         // Create an independent Scope for the Dialog, bind its lifecycle with the Dialog.
         // zh-CN: 针对 Dialog 独立创建一个 Scope, 生命周期与 Dialog 绑定.
@@ -70,6 +71,7 @@ object ApkInfoDialogManager {
             .negativeColorRes(R.color.dialog_button_default)
             .neutralColorRes(R.color.dialog_button_hint)
             .onNegative { materialDialog, _ -> materialDialog.dismiss() }
+            .also { builder -> builderApplier?.invoke(builder) }
             .show()
             .apply {
                 makeTextCopyable { titleView }
@@ -192,7 +194,7 @@ object ApkInfoDialogManager {
         packageManager.getPackageArchiveInfo(apkFilePath, GET_META_DATA)
     }.getOrNull()
 
-    private fun restoreEssentialViews(binding: ApkFileInfoDialogListItemBinding, context: Context) {
+    private fun restoreEssentialViews(binding: ApkFileInfoDialogItemsBinding, context: Context) {
         listOf(
             Triple(binding.labelNameLabel, binding.labelNameColon, binding.labelNameValue) to R.string.text_label_name,
             Triple(binding.packageNameLabel, binding.packageNameColon, binding.packageNameValue) to R.string.apk_info_package_name,
@@ -211,7 +213,7 @@ object ApkInfoDialogManager {
         }
     }
 
-    private fun updateGuidelines(binding: ApkFileInfoDialogListItemBinding) {
+    private fun updateGuidelines(binding: ApkFileInfoDialogItemsBinding) {
         val filteredBindings = listOf(
             binding.labelNameLabel to binding.labelNameGuideline,
             binding.packageNameLabel to binding.packageNameGuideline,
