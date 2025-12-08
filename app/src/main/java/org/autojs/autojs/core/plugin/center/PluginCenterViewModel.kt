@@ -19,6 +19,7 @@ class PluginCenterViewModel : ViewModel() {
 
     private val indexRepo = PluginIndexRepository()
     private val installedRepo = InstalledPluginRepository()
+    private val enableStore = PluginEnableStore()
 
     private val _items = MutableStateFlow<List<PluginCenterItem>>(emptyList())
     val items: StateFlow<List<PluginCenterItem>> = _items
@@ -47,7 +48,21 @@ class PluginCenterViewModel : ViewModel() {
                 .map { local -> toPluginCenterItem(context, index = null, local = local) }
 
             _items.value = fromIndex + extraLocals
+
+            // Refresh dialog if showing when returning to the page.
+            // zh-CN: 返回页面时, 对话框如果正在显示则刷新.
+            PluginInfoDialogManager.refreshIfShowing(context, _items.value)
         }
+    }
+
+    fun setEnabled(context: Context, packageName: String, enabled: Boolean) {
+        enableStore.setEnabled(context, packageName, enabled)
+        // Update in-memory state too, to avoid a second full refresh.
+        // zh-CN: 内存态也更新, 避免二次全量刷新.
+        _items.value = _items.value.map {
+            if (it.packageName == packageName) it.copy(isEnabled = enabled) else it
+        }
+        PluginInfoDialogManager.refreshIfShowing(context, _items.value)
     }
 
     private fun toPluginCenterItem(context: Context, index: PluginIndexEntry?, local: InstalledPluginRepository.InstalledPlugin?): PluginCenterItem {
@@ -58,25 +73,34 @@ class PluginCenterViewModel : ViewModel() {
         val collaborators = index?.collaborators ?: emptyList()
 
         val versionName = local?.versionName ?: index?.versionName ?: context.getString(R.string.text_unknown)
-        val localCode = local?.versionCode
-        val indexCode = index?.versionCode
-
         val isInstalled = local != null
-        val isUpdatable = isInstalled && (indexCode != null && indexCode > (localCode ?: -1))
+        val enabled = enableStore.isEnabled(context, packageName, defaultEnabled = isInstalled)
 
         return PluginCenterItem(
-            packageName = packageName,
             title = title,
-            description = description,
+            packageName = packageName,
+            versionName = versionName,
+            versionCode = local?.versionCode ?: index?.versionCode,
+            // TODO M1: 显示索引日期; 仅本地项时可为空.
+            versionDate = index?.versionDate,
+            updatableVersionName = index?.versionName,
+            updatableVersionCode = index?.versionCode,
+            updatableVersionDate = index?.versionDate,
             author = author,
             collaborators = collaborators,
-            versionName = versionName,
-            versionCode = localCode ?: indexCode,
-            versionDate = index?.versionDate, // M1: 显示索引日期; 仅本地项时可为空
-            isEnabled = true,                 // M1: 先统一 true, M2 再接入启用状态持久化
-            isUpdatable = isUpdatable,
-            icon = local?.icon,               // 已安装优先用应用图标; 未安装走默认占位图
-            settings = null,                  // M1 暂不接入单插件设置入口
+            description = description,
+            packageSize = local?.packageSize ?: 0,
+            installableApkUrl = index?.apkUrl,
+            installableApkSha256 = index?.apkSha256,
+            installableApkSizeBytes = index?.apkSizeBytes,
+            // TODO 已安装优先用应用图标; 未安装走默认占位图.
+            icon = local?.icon,
+            isEnabled = enabled,
+            isInstalled = isInstalled,
+            firstInstallTime = local?.firstInstallTime,
+            lastUpdateTime = local?.lastUpdateTime,
+            // TODO M1 暂不接入单插件设置入口.
+            settings = null,
         )
     }
 }

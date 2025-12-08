@@ -108,6 +108,7 @@
     <string name="dialog_button_open_color_palette">開啟調色盤</string>
     <string name="dialog_button_quit">放棄</string>
     <string name="dialog_button_remove">移除</string>
+    <string name="dialog_button_retrieve">獲取</string>
     <string name="dialog_button_retry">重試</string>
     <string name="dialog_button_save">儲存</string>
     <string name="dialog_button_system_settings">系統設定</string>
@@ -299,6 +300,7 @@
     <string name="hint_long_click_run_to_debug">長按 \"執行\" 圖示可啟動除錯</string>
     <string name="hint_loop_delay">開始迴圈前的延遲</string>
     <string name="hint_loop_times">0 表示無限迴圈</string>
+    <string name="instruction_install_plugin_from_url">輸入一個指向遠端外掛地址的 URL.\n例如 \"https://example.com/plugin.apk\".</string>
     <string name="label_latest_used_time">最近使用: %1$s</string>
     <string name="logger_ver_history_blob_thread_failure">執行緒 "blob" 請求失敗</string>
     <string name="logger_ver_history_blob_thread_success">執行緒 "blob" 請求成功, 寫入離線快取</string>
@@ -335,7 +337,17 @@
     <string name="mt_custom">自定義</string>
     <string name="no_apk_builder_plugin">打包外掛未安裝</string>
     <string name="no_root_access_for_record">AutoJs6 無 root 許可權, 無法錄製指令碼</string>
+    <string name="plugin_item_info_author">開發者</string>
+    <string name="plugin_item_info_collaborators">合作者</string>
+    <string name="plugin_item_info_first_install_time">首次安裝</string>
+    <string name="plugin_item_info_installed_version">已安裝版本</string>
+    <string name="plugin_item_info_last_install_time">最近安裝</string>
+    <string name="plugin_item_info_last_uninstall_time">最近解除安裝</string>
+    <string name="plugin_item_info_last_update_time">最近更新</string>
+    <string name="plugin_item_info_package_size">安裝包大小</string>
+    <string name="plugin_item_info_updatable_version">可更新版本</string>
     <string name="prompt_add_ignored_version">確定忽略當前更新版本嗎?\n在應用設定中可管理已忽略的所有版本.</string>
+    <string name="prompt_file_may_not_be_a_valid_plugin_package_with_uri">當前檔案可能不是有效的外掛包, 是否繼續安裝?\n\nURI: \"%1$s\"</string>
     <string name="prompt_restart_is_needed_for_docs_source_switch">需要重啟應用才能完成文件源切換</string>
     <string name="prompt_restart_may_be_needed_for_language_switch">部分內容可能需要重啟應用才能完成語言切換</string>
     <string name="screen_capturer_foreground_notification_channel_name">螢幕捕獲器前臺服務</string>
@@ -431,6 +443,8 @@
     <string name="text_app_shortcut_docs_short_label">文件</string>
     <string name="text_app_shortcut_log_long_label">AutoJs6 日誌</string>
     <string name="text_app_shortcut_log_short_label">日誌</string>
+    <string name="text_app_shortcut_plugin_center_long_label">AutoJs6 Plugin Center</string>
+    <string name="text_app_shortcut_plugin_center_short_label">Plugins</string>
     <string name="text_app_shortcut_settings_long_label">AutoJs6 設定</string>
     <string name="text_app_shortcut_settings_short_label">設定</string>
     <string name="text_app_source_code">軟體原始碼</string>
@@ -479,9 +493,11 @@
     <string name="text_clear_file_selection">清空檔案選擇</string>
     <string name="text_clear_pre_execute_script">清空預執行指令碼</string>
     <string name="text_clear_updates_checked_states">清除更新檢查狀態</string>
+    <string name="text_click_icon_to_add_launcher_shortcut">Click icon to add launcher shortcut</string>
     <string name="text_click_item_to_remove">點選條目可移除</string>
     <string name="text_click_item_to_show_details">點選條目可檢視詳情</string>
     <string name="text_click_ok_to_go_to_settings">點選 \"確定\" 跳轉到設定頁面</string>
+    <string name="text_click_other_areas_to_exit_selection">Click other areas to exit selection</string>
     <string name="text_click_too_frequently">操作頻率過快</string>
     <string name="text_client_mode">客戶端模式</string>
     <string name="text_clone_color_library">克隆顏色庫</string>
@@ -538,6 +554,7 @@
     <string name="text_delete">刪除</string>
     <string name="text_delete_all">刪除全部</string>
     <string name="text_delete_line">刪除行</string>
+    <string name="text_description">描述</string>
     <string name="text_details">詳情</string>
     <string name="text_developer_details_under_development" tools:ignore="TypographyEllipsis">\"開發者詳情\" 正在開發中...</string>
     <string name="text_developer_options">開發者選項</string>
@@ -551,6 +568,7 @@
     <string name="text_device_screen_resolution">裝置螢幕解析度</string>
     <string name="text_directly_download">直接下載</string>
     <string name="text_directory">資料夾</string>
+    <string name="text_disabled">已禁用</string>
     <string name="text_display_over_other_app">顯示在其他應用上層</string>
     <string name="text_display_over_other_app_is_recommended">建議授予 \"顯示在其他應用上層\" 許可權以確保應用視窗元件正常顯示</string>
     <string name="text_disposable_task">一次性任務</string>
@@ -583,6 +601,8 @@
     <string name="text_enable_a11y_service_with_root_access_timeout">使用 root 許可權啟用無障礙服務超時</string>
     <string name="text_enable_a11y_service_with_secure_settings_automatically">使用修改安全設定許可權自動啟用無障礙服務</string>
     <string name="text_enable_a11y_service_with_secure_settings_timeout">使用修改安全設定許可權啟用無障礙服務超時</string>
+    <string name="text_enable_plugin">啟用外掛</string>
+    <string name="text_enabled">已啟用</string>
     <string name="text_error">錯誤</string>
     <string name="text_error_copy_file">檔案複製失敗: %s</string>
     <string name="text_error_report">錯誤報告</string>
@@ -613,10 +633,12 @@
     <string name="text_failed_to_grant_access">授權失敗</string>
     <string name="text_failed_to_grant_draw_overlays_permission">顯示在其他應用上層許可權授予失敗</string>
     <string name="text_failed_to_import">匯入失敗</string>
+    <string name="text_failed_to_install">安裝失敗</string>
     <string name="text_failed_to_locate">定位失敗</string>
     <string name="text_failed_to_login">登入失敗</string>
     <string name="text_failed_to_register">註冊失敗</string>
     <string name="text_failed_to_report">提交失敗</string>
+    <string name="text_failed_to_retrieve">獲取失敗</string>
     <string name="text_failed_to_save_remote_project_to_local_storage">無法儲存遠端專案至本地</string>
     <string name="text_failed_to_send_log_entries">日誌條目傳送失敗</string>
     <string name="text_failed_to_write_file">檔案寫入失敗</string>
@@ -633,6 +655,7 @@
     <string name="text_filename_cannot_contain_invalid_character">檔案名稱不能包含以下字符: \\ / : * ? &quot; &lt; &gt; |</string>
     <string name="text_filename_is_too_long">檔案名稱太長</string>
     <string name="text_files_transfer">檔案遷移</string>
+    <string name="text_filter">篩選</string>
     <string name="text_find">查詢</string>
     <string name="text_find_java_classes">搜尋 Java 類</string>
     <string name="text_find_next_simplified">下一個</string>
@@ -651,6 +674,7 @@
     <string name="text_generated_code">已生成程式碼</string>
     <string name="text_getting_release_notes" tools:ignore="TypographyEllipsis">正在獲取版本資訊...</string>
     <string name="text_github_backup_url_used">備用 URL 已使用</string>
+    <string name="text_global_settings">全域性設定</string>
     <string name="text_go_to_settings">開啟 \"設定\"</string>
     <string name="text_grant_autojs6_access_in_shizuku_app">在 Shizuku 應用中授予 AutoJs6 許可權</string>
     <string name="text_granted">已授予</string>
@@ -678,6 +702,10 @@
     <string name="text_inspect_layout_bounds">佈局範圍分析</string>
     <string name="text_inspect_layout_hierarchy">佈局層次分析</string>
     <string name="text_install">安裝</string>
+    <string name="text_install_from_local_file">從 \"本地檔案\" 安裝</string>
+    <string name="text_install_from_url">從 \"URL\" 安裝</string>
+    <string name="text_install_plugin_from_url">從 \"URL\" 安裝外掛</string>
+    <string name="text_installable">可安裝</string>
     <string name="text_invalid_character_is_removed">無效字元已被移除</string>
     <string name="text_invalid_package_name">無效包名</string>
     <string name="text_invalid_project">無效專案</string>
@@ -697,6 +725,7 @@
     <string name="text_key_store_has_not_been_verified">密鑰尚未驗證</string>
     <string name="text_key_store_password">密鑰庫密碼</string>
     <string name="text_label_name">名稱</string>
+    <string name="text_label_state">狀態</string>
     <string name="text_last_updates_checked_time">上次檢查: %s</string>
     <string name="text_latest_activity">最近活動</string>
     <string name="text_latest_package">最近包名</string>
@@ -875,6 +904,9 @@
     <string name="text_please_input_name">請輸入名稱</string>
     <string name="text_please_wait" tools:ignore="TypographyEllipsis">請稍候...</string>
     <string name="text_please_wait_a_moment_before_trying_again" tools:ignore="TypographyEllipsis">請稍後再嘗試此操作...</string>
+    <string name="text_plugin_center">Plugin center</string>
+    <string name="text_plugin_details">外掛詳情</string>
+    <string name="text_plugins">Plugins</string>
     <string name="text_pointer_location">指標位置</string>
     <string name="text_pointer_location_toggle_failed_with_hint">切換 \"指標位置\" 顯示狀態失敗\n可能缺少 root 許可權</string>
     <string name="text_post_notifications_permission">釋出通知許可權</string>
@@ -990,6 +1022,7 @@
     <string name="text_signature_scheme">簽名方案</string>
     <string name="text_size">大小</string>
     <string name="text_some_items_exported">已匯出 %d 個條目</string>
+    <string name="text_sort">排序</string>
     <string name="text_source_file_path">原始碼路徑</string>
     <string name="text_special_permissions">特殊許可權</string>
     <string name="text_stable_mode">穩定模式</string>
@@ -1031,8 +1064,11 @@
     <string name="text_under_development_title">@string/text_under_development</string>
     <string name="text_undo">撤銷</string>
     <string name="text_undo_simplified">撤銷</string>
+    <string name="text_uninstall">Uninstall</string>
     <string name="text_unknown">未知</string>
     <string name="text_unverified">未驗證</string>
+    <string name="text_updatable">Updatable</string>
+    <string name="text_update">Update</string>
     <string name="text_updates">更新</string>
     <string name="text_updates_checked_states_cleared">更新檢查狀態已清除</string>
     <string name="text_updates_snack_bar_act_later">稍後提示</string>
@@ -1075,14 +1111,8 @@
     <string name="text_write_secure_settings">修改安全設定</string>
     <string name="text_write_secure_settings_description">安全設定包含應用程式可讀但不可寫入的設定選項, 這些選項只能由 UI 或系統級別應用修改.\n被授予 \"修改安全設定許可權\" 後, 普通應用可直接修改上述安全設定 (例如無障礙服務).</string>
     <string name="text_write_system_settings">修改系統設定</string>
-    <string name="text_update">Update</string>
-    <string name="text_plugin_center">Plugin center</string>
-    <string name="text_plugins">Plugins</string>
-    <string name="text_updatable">Updatable</string>
-    <string name="text_uninstall">Uninstall</string>
-    <string name="text_app_shortcut_plugin_center_long_label">AutoJs6 Plugin Center</string>
-    <string name="text_app_shortcut_plugin_center_short_label">Plugins</string>
-    <string name="text_click_icon_to_add_launcher_shortcut">Click icon to add launcher shortcut</string>
-    <string name="text_click_other_areas_to_exit_selection">Click other areas to exit selection</string>
+    <string name="text_integrity_verification_failed">完整性驗證失敗</string>
+    <string name="text_sha256_mismatch_multiline_expected_actual">SHA-256 驗證不一致.\n\n期望值: %1$s\n實際值: %2$s</string>
+    <string name="error_no_available_url_provided_for_current_plugin">當前外掛未提供可用的 URL</string>
 
 </resources>

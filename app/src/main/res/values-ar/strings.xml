@@ -112,6 +112,7 @@
     <string name="dialog_button_open_color_palette">فتح لوحة الألوان</string>
     <string name="dialog_button_quit">يترك</string>
     <string name="dialog_button_remove">إزالة</string>
+    <string name="dialog_button_retrieve">جلب</string>
     <string name="dialog_button_retry">إعادة المحاولة</string>
     <string name="dialog_button_save">يحفظ</string>
     <string name="dialog_button_system_settings">اعدادات النظام</string>
@@ -303,6 +304,7 @@
     <string name="hint_long_click_run_to_debug">انقر الطويل على زر \"تشغيل\" لتصحيح الأخطاء</string>
     <string name="hint_loop_delay">تأخير قبل الحلقة</string>
     <string name="hint_loop_times">0 للحلقة اللانهائية</string>
+    <string name="instruction_install_plugin_from_url">أدخل عنوان URL يشير إلى ملحق (Plugin) بعيد.\nمثال: \"https://example.com/plugin.apk\".</string>
     <string name="label_latest_used_time">آخر استخدام: %1$s</string>
     <string name="logger_ver_history_blob_thread_failure">فشل خيط \"blob"\</string>
     <string name="logger_ver_history_blob_thread_success">نجح خيط \"blob"\ وجرى حفظ التخزين المؤقت دون اتصال</string>
@@ -339,7 +341,17 @@
     <string name="mt_custom">العادة</string>
     <string name="no_apk_builder_plugin">لم يتم تثبيت منشئ APK</string>
     <string name="no_root_access_for_record">لا يتمتع AutoJs6 بالوصول إلى الجذر لتسجيل البرنامج النصي</string>
+    <string name="plugin_item_info_author">المؤلف</string>
+    <string name="plugin_item_info_collaborators">المتعاونون</string>
+    <string name="plugin_item_info_first_install_time">أول تثبيت</string>
+    <string name="plugin_item_info_installed_version">الإصدار المثبّت</string>
+    <string name="plugin_item_info_last_install_time">آخر تثبيت</string>
+    <string name="plugin_item_info_last_uninstall_time">آخر إزالة</string>
+    <string name="plugin_item_info_last_update_time">آخر تحديث</string>
+    <string name="plugin_item_info_package_size">حجم الحزمة</string>
+    <string name="plugin_item_info_updatable_version">إصدار متاح</string>
     <string name="prompt_add_ignored_version">هل أنت متأكد من تجاهل إصدار التحديث الحالي؟\nيمكنك إدارة جميع الإصدارات التي تم تجاهلها بواسطة إعدادات التطبيق.</string>
+    <string name="prompt_file_may_not_be_a_valid_plugin_package_with_uri">قد لا يكون الملف الحالي حزمة ملحق صالحة. هل تريد المتابعة بالتثبيت؟\n\nURI: \"%1$s\"</string>
     <string name="prompt_restart_is_needed_for_docs_source_switch">هناك حاجة إلى إعادة تشغيل التطبيق لتطبيق إعدادات جديدة</string>
     <string name="prompt_restart_may_be_needed_for_language_switch">قد تكون هناك حاجة إلى إعادة تشغيل التطبيق لجعل اللغة مطبقًا كما هو متوقع</string>
     <string name="screen_capturer_foreground_notification_channel_name">شاشة كابتوري فريجرونيد خدمة</string>
@@ -435,6 +447,8 @@
     <string name="text_app_shortcut_docs_short_label">توثيق</string>
     <string name="text_app_shortcut_log_long_label">AutoJs6 سجل</string>
     <string name="text_app_shortcut_log_short_label">سجل</string>
+    <string name="text_app_shortcut_plugin_center_long_label">AutoJs6 Plugin Center</string>
+    <string name="text_app_shortcut_plugin_center_short_label">Plugins</string>
     <string name="text_app_shortcut_settings_long_label">AutoJs6 إعدادات</string>
     <string name="text_app_shortcut_settings_short_label">إعدادات</string>
     <string name="text_app_source_code">مصدر الرمز</string>
@@ -483,9 +497,11 @@
     <string name="text_clear_file_selection">مسح اختيار الملف</string>
     <string name="text_clear_pre_execute_script">مسح السيناريو قبل التنفيذ</string>
     <string name="text_clear_updates_checked_states">تحديثات مسح الحالات التي تم فحصها</string>
+    <string name="text_click_icon_to_add_launcher_shortcut">Click icon to add launcher shortcut</string>
     <string name="text_click_item_to_remove">انقر فوق العنصر لإزالته</string>
     <string name="text_click_item_to_show_details">اضغط على العنصر لعرض التفاصيل</string>
     <string name="text_click_ok_to_go_to_settings">انقر فوق \"نعم\" للانتقال إلى الإعدادات</string>
+    <string name="text_click_other_areas_to_exit_selection">Click other areas to exit selection</string>
     <string name="text_click_too_frequently">التشغيل المتكرر</string>
     <string name="text_client_mode">وضع العميل</string>
     <string name="text_clone_color_library">استنساخ مكتبة ألوان</string>
@@ -542,6 +558,7 @@
     <string name="text_delete">حذف</string>
     <string name="text_delete_all">حذف الكل</string>
     <string name="text_delete_line">حذف الخط</string>
+    <string name="text_description">الوصف</string>
     <string name="text_details">تفاصيل</string>
     <string name="text_developer_details_under_development">تفاصيل المطور قيد التطوير</string>
     <string name="text_developer_options">خيارات للمطور</string>
@@ -555,6 +572,7 @@
     <string name="text_device_screen_resolution">دقّة شاشة الجهاز</string>
     <string name="text_directly_download">التحميل الان</string>
     <string name="text_directory">الدليل</string>
+    <string name="text_disabled">معطّل</string>
     <string name="text_display_over_other_app">عرض على تطبيقات أخرى</string>
     <string name="text_display_over_other_app_is_recommended">يوصى بإذن \"العرض عبر التطبيقات الأخرى\" لعرض جميع عناصر واجهة المستخدم بشكل صحيح</string>
     <string name="text_disposable_task">مهمة يمكن التخلص منها</string>
@@ -587,6 +605,8 @@
     <string name="text_enable_a11y_service_with_root_access_timeout">تمكين خدمة إمكانية الوصول مع توقيت الوصول إلى الجذر</string>
     <string name="text_enable_a11y_service_with_secure_settings_automatically">تمكين خدمة إمكانية الوصول مع إعدادات آمنة تلقائيًا</string>
     <string name="text_enable_a11y_service_with_secure_settings_timeout">تمكين خدمة إمكانية الوصول مع إعدادات آمنة</string>
+    <string name="text_enable_plugin">تفعيل الملحق</string>
+    <string name="text_enabled">مفعّل</string>
     <string name="text_error">خطأ</string>
     <string name="text_error_copy_file" formatted="true">فشل نسخ الملف: %s</string>
     <string name="text_error_report">تقرير الشوائب</string>
@@ -617,10 +637,12 @@
     <string name="text_failed_to_grant_access">فشل في منح الوصول</string>
     <string name="text_failed_to_grant_draw_overlays_permission">فشل في منح الشاشة على إذن التطبيقات الأخرى</string>
     <string name="text_failed_to_import">فشل في الاستيراد</string>
+    <string name="text_failed_to_install">فشل التثبيت</string>
     <string name="text_failed_to_locate">فشل في تحديد الموقع</string>
     <string name="text_failed_to_login">فشل في تسجيل الدخول</string>
     <string name="text_failed_to_register">فشل في تسجيل</string>
     <string name="text_failed_to_report">فشل في تقديم</string>
+    <string name="text_failed_to_retrieve">فشل الجلب</string>
     <string name="text_failed_to_save_remote_project_to_local_storage">فشل حفظ المشروع البعيد في التخزين المحلي</string>
     <string name="text_failed_to_send_log_entries">فشل في إرسال إدخالات السجل</string>
     <string name="text_failed_to_write_file">فشل في كتابة الملف</string>
@@ -637,6 +659,7 @@
     <string name="text_filename_cannot_contain_invalid_character">اسم الملف لا يمكن أن يحتوي على أي من الأحرف التالية: \\ / : * ? &quot; &lt; &gt; |</string>
     <string name="text_filename_is_too_long">اسم الملف طويل جدًا</string>
     <string name="text_files_transfer">نقل الملفات</string>
+    <string name="text_filter">تصفية</string>
     <string name="text_find">تجد</string>
     <string name="text_find_java_classes">العثور على فصول جافا</string>
     <string name="text_find_next_simplified">التالي</string>
@@ -655,6 +678,7 @@
     <string name="text_generated_code">رمز تم إنشاؤه</string>
     <string name="text_getting_release_notes" tools:ignore="TypographyEllipsis">استرداد ملاحظات الإصدار ...</string>
     <string name="text_github_backup_url_used">تم استخدام عنوان URL للنسخ الاحتياطي</string>
+    <string name="text_global_settings">إعدادات عامة</string>
     <string name="text_go_to_settings">اذهب للاعدادات\"</string>
     <string name="text_grant_autojs6_access_in_shizuku_app">منح الوصول إلى AutoJs6 في تطبيق Shizuku</string>
     <string name="text_granted">ممنوح</string>
@@ -682,6 +706,10 @@
     <string name="text_inspect_layout_bounds">فحص حدود التصميم</string>
     <string name="text_inspect_layout_hierarchy">فحص التسلسل الهرمي للتخطيط</string>
     <string name="text_install">تثبيت</string>
+    <string name="text_install_from_local_file">التثبيت من \"ملف محلي\"</string>
+    <string name="text_install_from_url">التثبيت من \"URL\"</string>
+    <string name="text_install_plugin_from_url">تثبيت الملحق من \"URL\"</string>
+    <string name="text_installable">قابل للتثبيت</string>
     <string name="text_invalid_character_is_removed">تمت إزالة حرف غير صالح</string>
     <string name="text_invalid_package_name">اسم الحزمة غير صالح</string>
     <string name="text_invalid_project">مشروع غير صالح</string>
@@ -701,6 +729,7 @@
     <string name="text_key_store_has_not_been_verified">لم يتم التحقق من المخزن</string>
     <string name="text_key_store_password">كلمة مرور مخزن المفاتيح</string>
     <string name="text_label_name">ملصق</string>
+    <string name="text_label_state">الحالة</string>
     <string name="text_last_updates_checked_time">آخر فحص: %s</string>
     <string name="text_latest_activity">النشاط الاخير</string>
     <string name="text_latest_package">أحدث حزمة</string>
@@ -879,6 +908,9 @@
     <string name="text_please_input_name">اسم الإدخال</string>
     <string name="text_please_wait" tools:ignore="TypographyEllipsis">الرجاء الانتظار...</string>
     <string name="text_please_wait_a_moment_before_trying_again" tools:ignore="TypographyEllipsis">يرجى المحاولة مرة أخرى لاحقًا...</string>
+    <string name="text_plugin_center">Plugin center</string>
+    <string name="text_plugin_details">تفاصيل الملحق</string>
+    <string name="text_plugins">Plugins</string>
     <string name="text_pointer_location">موقع المؤشر</string>
     <string name="text_pointer_location_toggle_failed_with_hint">فشل تبديل \"موقع المؤشر\".\nالوصول إلى الجذر مطلوب.</string>
     <string name="text_post_notifications_permission">نشر الإخطارات</string>
@@ -994,6 +1026,7 @@
     <string name="text_signature_scheme">خطة التوقيع</string>
     <string name="text_size">مقاس</string>
     <string name="text_some_items_exported">تم تصدير %d من العناصر</string>
+    <string name="text_sort">فرز</string>
     <string name="text_source_file_path">مسار رمز المصدر</string>
     <string name="text_special_permissions">أذونات خاصة</string>
     <string name="text_stable_mode">وضع مستقر</string>
@@ -1035,8 +1068,11 @@
     <string name="text_under_development_title">@string/text_under_development</string>
     <string name="text_undo">الغاء التحميل</string>
     <string name="text_undo_simplified">ينسحب</string>
+    <string name="text_uninstall">Uninstall</string>
     <string name="text_unknown">غير معروف</string>
     <string name="text_unverified">لم يتم التحقق</string>
+    <string name="text_updatable">Updatable</string>
+    <string name="text_update">Update</string>
     <string name="text_updates">التحديثات</string>
     <string name="text_updates_checked_states_cleared">تم مسح الحالات التي تم فحصها</string>
     <string name="text_updates_snack_bar_act_later">في وقت لاحق</string>
@@ -1079,14 +1115,8 @@
     <string name="text_write_secure_settings">اكتب إعدادات الأمان</string>
     <string name="text_write_secure_settings_description">إعدادات النظام الآمنة ، التي تحتوي على تفضيلات النظام التي يمكن أن تقرأها التطبيقات ولكن لا يُسمح لها بالكتابة.\nهذه هي لتفضيلات يجب على المستخدم تعديلها بشكل صريح من خلال واجهة المستخدم لتطبيق النظام.\nمع إذن إعدادات النظام الآمن ، يمكن للتطبيقات العادية تعديل الإعدادات الآمنة مباشرة (مثل خدمة إمكانية الوصول).</string>
     <string name="text_write_system_settings">كتابة إعدادات النظام</string>
-    <string name="text_update">Update</string>
-    <string name="text_plugin_center">Plugin center</string>
-    <string name="text_plugins">Plugins</string>
-    <string name="text_updatable">Updatable</string>
-    <string name="text_uninstall">Uninstall</string>
-    <string name="text_app_shortcut_plugin_center_long_label">AutoJs6 Plugin Center</string>
-    <string name="text_app_shortcut_plugin_center_short_label">Plugins</string>
-    <string name="text_click_icon_to_add_launcher_shortcut">Click icon to add launcher shortcut</string>
-    <string name="text_click_other_areas_to_exit_selection">Click other areas to exit selection</string>
+    <string name="text_integrity_verification_failed">فشل التحقق من السلامة</string>
+    <string name="text_sha256_mismatch_multiline_expected_actual">عدم تطابق SHA-256.\n\nالمتوقّع: %1$s\nالفعلي: %2$s</string>
+    <string name="error_no_available_url_provided_for_current_plugin">لم يتم توفير عنوان URL متاح للملحق الحالي</string>
 
 </resources>

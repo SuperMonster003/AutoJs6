@@ -8,7 +8,7 @@ import android.content.Context
 class PluginIndexRepository {
 
     suspend fun fetchOfficialIndex(context: Context): List<PluginIndexEntry> {
-        // M1 先预置 1 条官方样例 "Paddle OCR (PP-OCRv5)", 便于与本地已安装合并显示.
+        // TODO M1 先预置 1 条官方样例 "Paddle OCR (PP-OCRv5)", 便于与本地已安装合并显示.
         return listOf(
             PluginIndexEntry(
                 packageName = "io.github.supermonster003.autojs6.plugin.paddleocr.v5",
@@ -19,11 +19,16 @@ class PluginIndexRepository {
                 versionName = "0.1.0",
                 versionCode = 17L,
                 versionDate = "2025-11-21",
-                iconUrl = null, // M1 暂不拉网图标, 使用应用图标或默认图标.
+                // TODO M1 若索引的下载地址/哈希/尺寸未知, 则先设置为 null.
+                apkUrl = null,
+                apkSha256 = null,
+                apkSizeBytes = null,
+                // TODO M1 暂不拉网图标, 使用应用图标或默认图标.
+                iconUrl = null,
                 tags = listOf("official", "ocr", "paddle", "v5"),
                 engine = "paddle-ocr",
                 variant = "v5",
-                engineId = "paddle-ocr-v5",
+                engineId = "paddle-ocr-pp-ocrv5",
             ),
         )
     }

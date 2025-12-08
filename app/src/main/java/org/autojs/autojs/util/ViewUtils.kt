@@ -11,11 +11,20 @@ import android.content.res.Configuration
 import android.content.res.Configuration.UI_MODE_NIGHT_MASK
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.content.res.Resources
+import android.graphics.Bitmap
+import android.graphics.BitmapShader
+import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.ColorFilter
+import android.graphics.ColorMatrix
+import android.graphics.ColorMatrixColorFilter
+import android.graphics.Paint
 import android.graphics.PorterDuff
 import android.graphics.PorterDuff.Mode.SRC_IN
 import android.graphics.PorterDuffColorFilter
 import android.graphics.Rect
+import android.graphics.Shader
+import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
@@ -61,6 +70,7 @@ import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs6.R
 import kotlin.math.floor
+import kotlin.math.min
 import kotlin.math.roundToInt
 
 /**
@@ -623,6 +633,76 @@ object ViewUtils {
         this.setColorsByColorLuminance(context, ThemeColorManager.colorPrimary)
     }
 
+    fun ImageView.colorFilterWithDesaturateOrNull(isOn: Boolean, alpha: Float = 0.5F) {
+        if (isOn) {
+            this.colorFilter = null
+        } else {
+            this.colorFilterWithDesaturate(alpha)
+        }
+    }
+
+    fun ImageView.colorFilterWithDesaturate(alpha: Float = 0.5F) {
+        // Construct the desaturation matrix.
+        // zh-CN: 构造灰度矩阵.
+        val desaturate = ColorMatrix().apply { setSaturation(0f) }
+        // Construct the alpha scaling matrix.
+        // zh-CN: 构造透明度缩放矩阵.
+        val alphaMatrix = ColorMatrix().apply { setScale(1f, 1f, 1f, 0.5f) }
+        // Concatenate: first desaturate, then apply alpha.
+        // zh-CN: 叠加: 先灰度, 再透明度.
+        desaturate.postConcat(alphaMatrix)
+        this.colorFilter = ColorMatrixColorFilter(desaturate)
+    }
+
+    @JvmStatic
+    fun Drawable.toCircular(
+        context: Context,
+        sizePx: Int,
+        borderWidthPx: Int = 0,
+        borderColor: Int = Color.TRANSPARENT,
+    ): Drawable {
+        val src = this
+        val bmp = Bitmap.createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bmp)
+
+        // First stretch/center draw the source drawable to sizePx * sizePx bitmap.
+        // zh-CN: 先把源 drawable 拉伸/居中绘制到 sizePx * sizePx 的位图上.
+        val tmp = Bitmap.createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_8888)
+        Canvas(tmp).apply {
+            val w = src.intrinsicWidth.takeIf { it > 0 } ?: sizePx
+            val h = src.intrinsicHeight.takeIf { it > 0 } ?: sizePx
+            val scale = min(sizePx / w.toFloat(), sizePx / h.toFloat())
+            val dw = (w * scale).roundToInt()
+            val dh = (h * scale).roundToInt()
+            val left = (sizePx - dw) / 2
+            val top = (sizePx - dh) / 2
+            src.setBounds(left, top, left + dw, top + dh)
+            src.draw(this)
+        }
+
+        // Draw circle using BitmapShader.
+        // zh-CN: 用 BitmapShader 画圆.
+        val shader = BitmapShader(tmp, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP)
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.DITHER_FLAG).apply {
+            this.shader = shader
+        }
+        val radius = sizePx / 2f
+        val contentRadius = radius - borderWidthPx.coerceAtLeast(0)
+        canvas.drawCircle(radius, radius, contentRadius, paint)
+
+        // Optional stroke.
+        // zh-CN: 可选描边.
+        if (borderWidthPx > 0) {
+            val stroke = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                style = Paint.Style.STROKE
+                color = borderColor
+                strokeWidth = borderWidthPx.toFloat()
+            }
+            canvas.drawCircle(radius, radius, radius - borderWidthPx / 2f, stroke)
+        }
+    
+        return BitmapDrawable(context.resources, bmp)
+    }
     @JvmStatic
     fun setSearchViewColorsByColorLuminance(context: Context, searchView: SearchView, aimColor: Int) {
         searchView.setColorsByColorLuminance(context, aimColor)

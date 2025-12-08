@@ -110,6 +110,7 @@
     <string name="dialog_button_open_color_palette">Abrir paleta</string>
     <string name="dialog_button_quit">Salir</string>
     <string name="dialog_button_remove">Eliminar</string>
+    <string name="dialog_button_retrieve">Obtener</string>
     <string name="dialog_button_retry">Reintentar</string>
     <string name="dialog_button_save">Guardar</string>
     <string name="dialog_button_system_settings">Configuración del sistema</string>
@@ -301,6 +302,7 @@
     <string name="hint_long_click_run_to_debug">Haga un clic largo en el botón \"Ejecutar\" para depurar</string>
     <string name="hint_loop_delay">Retraso antes del bucle</string>
     <string name="hint_loop_times">0 para bucle infinito</string>
+    <string name="instruction_install_plugin_from_url">Introduce una URL que apunte a la dirección de un complemento remoto.\nPor ejemplo, \"https://example.com/plugin.apk\".</string>
     <string name="label_latest_used_time">Último uso: %1$s</string>
     <string name="logger_ver_history_blob_thread_failure">Hilo \"blob\" fallido</string>
     <string name="logger_ver_history_blob_thread_success">Hilo \"blob\" exitoso, escribiendo caché sin conexión</string>
@@ -337,7 +339,17 @@
     <string name="mt_custom">Personalizado</string>
     <string name="no_apk_builder_plugin">APK Builder no está instalado</string>
     <string name="no_root_access_for_record">AutoJs6 no tiene acceso a la raíz para grabar un script</string>
+    <string name="plugin_item_info_author">Autor</string>
+    <string name="plugin_item_info_collaborators">Colaboradores</string>
+    <string name="plugin_item_info_first_install_time">Primera inst.</string>
+    <string name="plugin_item_info_installed_version">Vers. inst.</string>
+    <string name="plugin_item_info_last_install_time">Última inst.</string>
+    <string name="plugin_item_info_last_uninstall_time">Última desinst.</string>
+    <string name="plugin_item_info_last_update_time">Última act.</string>
+    <string name="plugin_item_info_package_size">Tamaño paquete</string>
+    <string name="plugin_item_info_updatable_version">Vers. actualiz.</string>
     <string name="prompt_add_ignored_version">¿Está seguro de ignorar la versión actual de la actualización?\nPuedes gestionar todas las versiones ignoradas en los ajustes de la aplicación.</string>
+    <string name="prompt_file_may_not_be_a_valid_plugin_package_with_uri">El archivo actual puede no ser un paquete de complemento válido. ¿Deseas continuar con la instalación?\n\nURI: \"%1$s\"</string>
     <string name="prompt_restart_is_needed_for_docs_source_switch">Es necesario reiniciar la aplicación para aplicar los nuevos ajustes</string>
     <string name="prompt_restart_may_be_needed_for_language_switch">Puede ser necesario reiniciar la aplicación para que el idioma se aplique como se espera</string>
     <string name="screen_capturer_foreground_notification_channel_name">Servicio de primer plano del capturador de pantalla</string>
@@ -433,6 +445,8 @@
     <string name="text_app_shortcut_docs_short_label">Docs</string>
     <string name="text_app_shortcut_log_long_label">AutoJs6 Registrar</string>
     <string name="text_app_shortcut_log_short_label">Registrar</string>
+    <string name="text_app_shortcut_plugin_center_long_label">AutoJs6 Plugin Center</string>
+    <string name="text_app_shortcut_plugin_center_short_label">Plugins</string>
     <string name="text_app_shortcut_settings_long_label">AutoJs6 Configuración</string>
     <string name="text_app_shortcut_settings_short_label">Configuración</string>
     <string name="text_app_source_code">Código fuente</string>
@@ -481,9 +495,11 @@
     <string name="text_clear_file_selection">Borrar selección de archivos</string>
     <string name="text_clear_pre_execute_script">Borrar script de pre-ejecución</string>
     <string name="text_clear_updates_checked_states">Borrar los estados de comprobación de las actualizaciones</string>
+    <string name="text_click_icon_to_add_launcher_shortcut">Click icon to add launcher shortcut</string>
     <string name="text_click_item_to_remove">Haga clic en el elemento a eliminar</string>
     <string name="text_click_item_to_show_details">Toca un elemento para ver los detalles</string>
     <string name="text_click_ok_to_go_to_settings">Haga clic en \"Aceptar\" para ir a la configuración</string>
+    <string name="text_click_other_areas_to_exit_selection">Click other areas to exit selection</string>
     <string name="text_click_too_frequently">Funcionamiento frecuente</string>
     <string name="text_client_mode">Modo cliente</string>
     <string name="text_clone_color_library">Clonar biblioteca de colores</string>
@@ -540,6 +556,7 @@
     <string name="text_delete">Borrar</string>
     <string name="text_delete_all">Eliminar todo</string>
     <string name="text_delete_line">Borrar línea</string>
+    <string name="text_description">Descripción</string>
     <string name="text_details">Detalles</string>
     <string name="text_developer_details_under_development">Los detalles del desarrollador están en desarrollo</string>
     <string name="text_developer_options">Opciones del desarrollador</string>
@@ -553,6 +570,7 @@
     <string name="text_device_screen_resolution">Resolución de pantalla del dispositivo</string>
     <string name="text_directly_download">Descargar ahora</string>
     <string name="text_directory">Directorio</string>
+    <string name="text_disabled">Desactivado</string>
     <string name="text_display_over_other_app">Mostrar sobre otras aplicaciones</string>
     <string name="text_display_over_other_app_is_recommended">Se recomienda el permiso \"Mostrar sobre otras aplicaciones\" para que todos los widgets se muestren correctamente</string>
     <string name="text_disposable_task">Tarea desechable</string>
@@ -585,6 +603,8 @@
     <string name="text_enable_a11y_service_with_root_access_timeout">Habilitar el servicio de accesibilidad con acceso a la raíz con tiempo de espera</string>
     <string name="text_enable_a11y_service_with_secure_settings_automatically">Habilitar el servicio de accesibilidad con configuración segura automáticamente</string>
     <string name="text_enable_a11y_service_with_secure_settings_timeout">Habilitación del servicio de accesibilidad con configuración segura agotada</string>
+    <string name="text_enable_plugin">Activar complemento</string>
+    <string name="text_enabled">Activado</string>
     <string name="text_error">Error</string>
     <string name="text_error_copy_file" formatted="true">No se ha podido copiar el archivo: %s</string>
     <string name="text_error_report">Informe de error</string>
@@ -615,10 +635,12 @@
     <string name="text_failed_to_grant_access">Fallo al conceder el acceso</string>
     <string name="text_failed_to_grant_draw_overlays_permission">Fallo al conceder el permiso de visualización sobre otras aplicaciones</string>
     <string name="text_failed_to_import">Fallo en la importación</string>
+    <string name="text_failed_to_install">Error al instalar</string>
     <string name="text_failed_to_locate">No se pudo localizar</string>
     <string name="text_failed_to_login">Fallo en el inicio de sesión</string>
     <string name="text_failed_to_register">Fallo en el registro</string>
     <string name="text_failed_to_report">Fallo al enviar</string>
+    <string name="text_failed_to_retrieve">Error al obtener</string>
     <string name="text_failed_to_save_remote_project_to_local_storage">Error al guardar el proyecto remoto en el almacenamiento local</string>
     <string name="text_failed_to_send_log_entries">Error al enviar entradas de registro</string>
     <string name="text_failed_to_write_file">Fallo al escribir el archivo</string>
@@ -635,6 +657,7 @@
     <string name="text_filename_cannot_contain_invalid_character">El nombre del archivo no puede contener ninguno de los siguientes caracteres: \\ / : * ? &quot; &lt; &gt; |</string>
     <string name="text_filename_is_too_long">El nombre del archivo es demasiado largo</string>
     <string name="text_files_transfer">Transferencia de archivos</string>
+    <string name="text_filter">Filtrar</string>
     <string name="text_find">Buscar</string>
     <string name="text_find_java_classes">Buscar clases Java</string>
     <string name="text_find_next_simplified">Sigui</string>
@@ -653,6 +676,7 @@
     <string name="text_generated_code">Código generado</string>
     <string name="text_getting_release_notes" tools:ignore="TypographyEllipsis">Recuperando las notas de la versión...</string>
     <string name="text_github_backup_url_used">Se ha utilizado la URL de copia de seguridad</string>
+    <string name="text_global_settings">Ajustes globales</string>
     <string name="text_go_to_settings">Ir a \"Configuración\"</string>
     <string name="text_grant_autojs6_access_in_shizuku_app">Conceder privilegios AutoJs6 en una aplicación Shizuku</string>
     <string name="text_granted">Concedido</string>
@@ -680,6 +704,10 @@
     <string name="text_inspect_layout_bounds">Inspeccionar los límites del diseño</string>
     <string name="text_inspect_layout_hierarchy">Inspeccionar la jerarquía del diseño</string>
     <string name="text_install">Instalar</string>
+    <string name="text_install_from_local_file">Instalar desde \"Archivo local\"</string>
+    <string name="text_install_from_url">Instalar desde \"URL\"</string>
+    <string name="text_install_plugin_from_url">Instalar complemento desde \"URL\"</string>
+    <string name="text_installable">Instalable</string>
     <string name="text_invalid_character_is_removed">Carácter inválido ha sido removido</string>
     <string name="text_invalid_package_name">Nombre de paquete no válido</string>
     <string name="text_invalid_project">Proyecto no válido</string>
@@ -699,6 +727,7 @@
     <string name="text_key_store_has_not_been_verified">El almacén de claves no ha sido verificado</string>
     <string name="text_key_store_password">Contraseña del almacén de claves</string>
     <string name="text_label_name">Etiqueta</string>
+    <string name="text_label_state">Estado</string>
     <string name="text_last_updates_checked_time">Última comprobación: %s</string>
     <string name="text_latest_activity">Última actividad</string>
     <string name="text_latest_package">Último paquete</string>
@@ -877,6 +906,9 @@
     <string name="text_please_input_name">Nombre de entrada</string>
     <string name="text_please_wait" tools:ignore="TypographyEllipsis">Por favor, espere...</string>
     <string name="text_please_wait_a_moment_before_trying_again" tools:ignore="TypographyEllipsis">Por favor, inténtalo de nuevo más tarde...</string>
+    <string name="text_plugin_center">Plugin center</string>
+    <string name="text_plugin_details">Detalles del complemento</string>
+    <string name="text_plugins">Plugins</string>
     <string name="text_pointer_location">Ubicación del puntero</string>
     <string name="text_pointer_location_toggle_failed_with_hint">Falló la conmutación de la \"ubicación del puntero\".\nSe requiere acceso a la raíz.</string>
     <string name="text_post_notifications_permission">Notificaciones postales</string>
@@ -992,6 +1024,7 @@
     <string name="text_signature_scheme">Esquema de firma</string>
     <string name="text_size">Tamaño</string>
     <string name="text_some_items_exported">%d elementos exportados</string>
+    <string name="text_sort">Ordenar</string>
     <string name="text_source_file_path">Ruta del código fuente</string>
     <string name="text_special_permissions">Permisos especiales</string>
     <string name="text_stable_mode">Modo estable</string>
@@ -1033,8 +1066,11 @@
     <string name="text_under_development_title">@string/text_under_development</string>
     <string name="text_undo">Revocar</string>
     <string name="text_undo_simplified">Revoc</string>
+    <string name="text_uninstall">Uninstall</string>
     <string name="text_unknown">Desconocido</string>
     <string name="text_unverified">No verificado</string>
+    <string name="text_updatable">Updatable</string>
+    <string name="text_update">Update</string>
     <string name="text_updates">Actualizaciones</string>
     <string name="text_updates_checked_states_cleared">Actualizaciones comprobadas estados borrados</string>
     <string name="text_updates_snack_bar_act_later">Más adelante</string>
@@ -1077,14 +1113,8 @@
     <string name="text_write_secure_settings">Escribir la configuración de seguridad</string>
     <string name="text_write_secure_settings_description">Ajustes de seguridad del sistema, que contienen preferencias del sistema que las aplicaciones pueden leer pero no pueden escribir.\nSe trata de preferencias que el usuario debe modificar explícitamente a través de la interfaz de usuario de una aplicación del sistema.\nCon el permiso de configuración segura del sistema, las aplicaciones normales pueden modificar directamente la configuración segura (como el servicio de accesibilidad).</string>
     <string name="text_write_system_settings">Escribir la configuración del sistema</string>
-    <string name="text_update">Update</string>
-    <string name="text_plugin_center">Plugin center</string>
-    <string name="text_plugins">Plugins</string>
-    <string name="text_updatable">Updatable</string>
-    <string name="text_uninstall">Uninstall</string>
-    <string name="text_app_shortcut_plugin_center_long_label">AutoJs6 Plugin Center</string>
-    <string name="text_app_shortcut_plugin_center_short_label">Plugins</string>
-    <string name="text_click_icon_to_add_launcher_shortcut">Click icon to add launcher shortcut</string>
-    <string name="text_click_other_areas_to_exit_selection">Click other areas to exit selection</string>
+    <string name="text_sha256_mismatch_multiline_expected_actual">Discordancia de SHA-256.\n\nEsperado: %1$s\nReal: %2$s</string>
+    <string name="text_integrity_verification_failed">La verificación de integridad falló</string>
+    <string name="error_no_available_url_provided_for_current_plugin">No se proporcionó ninguna URL disponible para el complemento actual</string>
 
 </resources>

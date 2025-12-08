@@ -100,7 +100,7 @@ object Pref {
                 return null
             }
             val dt = DateTime(ts)
-            val fmt = DateTimeFormat.forPattern("yyyy/MM/dd HH:mm")
+            val fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm")
             return fmt.print(dt)
         }
 
@@ -314,7 +314,13 @@ object Pref {
     fun putLong(@KeyRes keyRes: Int, value: Long) = sPref.edit { putLong(key(keyRes), value) }
 
     @JvmStatic
+    fun putLong(key: String, value: Long) = sPref.edit { putLong(key, value) }
+
+    @JvmStatic
     fun getLong(@KeyRes keyRes: Int, defValue: Long) = sPref.getLong(key(keyRes), defValue)
+
+    @JvmStatic
+    fun getLong(key: String, defValue: Long) = sPref.getLong(key, defValue)
 
     @JvmStatic
     fun putStringSet(@KeyRes keyRes: Int, values: MutableSet<String>) = sPref.edit { putStringSet(key(keyRes), values) }

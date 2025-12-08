@@ -87,6 +87,7 @@
     <color name="dialog_button_finish">#009624</color>
     <color name="dialog_button_hint">#0DA798</color>
     <color name="dialog_button_reset">#A1887F</color>
+    <color name="dialog_button_not_recommended">#A1887F</color>
     <color name="dialog_button_success">@color/dialog_button_finish</color>
     <color name="dialog_button_unavailable">#BDBDBD</color>
     <color name="dialog_button_warn">#F57C00</color>

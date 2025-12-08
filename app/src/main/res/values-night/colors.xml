@@ -33,6 +33,7 @@
     <color name="dialog_button_attraction">#C7A4FF</color>
     <color name="dialog_button_hint">#0DA798</color>
     <color name="dialog_button_reset">#BCAAA4</color>
+    <color name="dialog_button_not_recommended">#BCAAA4</color>
     <color name="dialog_button_unavailable">@color/md_gray_700</color>
     <color name="dialog_button_finish">#009624</color>
     <color name="dialog_button_success">@color/dialog_button_finish</color>
