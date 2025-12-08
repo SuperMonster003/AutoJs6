@@ -226,7 +226,7 @@ class ConsoleFloaty(private val console: ConsoleImpl) : AbstractResizableExpanda
     internal fun setCloseButton(resId: Int) {
         mCloseButton?.let {
             val res = console.uiHandler.applicationContext.resources
-            val padding = (7 * res.displayMetrics.density).toInt()
+            val padding = (7 * res.displayMetrics.density).roundToInt()
             it.post {
                 it.setImageDrawable(ResourcesCompat.getDrawable(res, resId, null))
                 it.setPadding(padding, padding, padding, padding)

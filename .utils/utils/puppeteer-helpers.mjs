@@ -56,6 +56,66 @@ function toEncodedRegexTagOptions(options) {
 }
 
 /**
+ * Try to click the "Expand" control before searching for the table.
+ * zh-CN: 在查找表格前尝试点击 "展开" 控件.
+ *
+ * @param {import('puppeteer').Page} page
+ * @param {FindTargetRowsOptions & PuppeteerOptions} options
+ * @returns {Promise<number>} Actual number of clicks. (zh-CN: 实际点击次数.)
+ */
+async function expandContentIfNeeded(page, options) {
+    const configs = options.expandBeforeFinding;
+    if (!configs) return 0;
+
+    /** @type {ExpandBeforeFindingOptions[]} */
+    const list = Array.isArray(configs) ? configs : [ configs ];
+
+    let totalClicked = 0;
+    for (const cfg of list) {
+        if (!cfg || !cfg.toggleSelector) continue;
+        const {
+            containerSelector,
+            toggleSelector,
+            expandedAttr = 'aria-expanded',
+            expandedValue = 'true',
+            maxClicks = Infinity,
+        } = cfg;
+
+        const containerHandle = containerSelector ? await page.$(containerSelector) : null;
+        const toggles = containerHandle
+            ? await containerHandle.$$(toggleSelector)
+            : await page.$$(toggleSelector);
+
+        let clicked = 0;
+        for (const toggle of toggles) {
+            if (clicked >= maxClicks) break;
+            const isExpanded = await toggle.evaluate((el, attr, val) => {
+                const cur = el.getAttribute(attr);
+                return cur === val;
+            }, expandedAttr, expandedValue);
+            if (!isExpanded) {
+                try {
+                    await toggle.click({ delay: 10 });
+                    clicked++;
+                    totalClicked++;
+                    await sleep(200);
+                } catch {
+                    /* Ignored. */
+                }
+            }
+        }
+        if (containerHandle) {
+            try {
+                await containerHandle.dispose();
+            } catch {
+                /* Ignored. */
+            }
+        }
+    }
+    return totalClicked;
+}
+
+/**
  * @param {Page} page
  * @returns {Promise<void>}
  */
@@ -87,7 +147,7 @@ async function findTargetRowsWithPage(page, options = {}) {
     return await page.evaluate((options, consts) => {
         const regex = new RegExp(consts.regexId + String.raw`(?:(\w+):)?(.+)`);
         const targets = Array.from(document.querySelectorAll(options.tableSelector ?? 'table'));
-        const target = targets.find(t => {
+        const filteredTargets = targets.filter(t => {
             for (const [ selector, filter ] of Object.entries(options.tableFilter ?? {})) {
                 const elements = Array.from(t.querySelectorAll(selector));
                 if (Array.isArray(filter)) {
@@ -130,11 +190,11 @@ async function findTargetRowsWithPage(page, options = {}) {
             }
             return true;
         });
-        if (!target) {
+        if (!filteredTargets.length) {
             throw new Error('No target table found');
         }
 
-        const tableRows = Array.from(target.querySelectorAll(options.tableRowSelector ?? 'tbody tr'));
+        const tableRows = filteredTargets.map(target => Array.from(target.querySelectorAll(options.tableRowSelector ?? 'tbody tr'))).flat(1);
         const tableDataList = [];
         tableRows.forEach((tr) => {
             const tableData = {};
@@ -209,8 +269,11 @@ export async function findTargetRows(options) {
         let rows = null;
         const deadline = Date.now() + (options.findTargetRowsTimeout ?? 30000);
         while (Date.now() < deadline) {
+            await expandContentIfNeeded(page, options);
+
             rows = await findTargetRowsWithPage(page, options);
             if (rows && rows.length) break;
+
             await autoScroll(page);
             await sleep(300);
         }

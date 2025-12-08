@@ -116,6 +116,8 @@ class MediaInfo {
         getMediaInfoOption(param)
     }
 
+    fun getIsCanceled() = mIsCanceled
+
     fun getMediaInfoTrimmed(filename: String): String = checkAvailability {
         var result = getMediaInfo(filename)
 
@@ -141,7 +143,7 @@ class MediaInfo {
 
     private fun countSpacesBeforeColon(input: String): Int {
         val index = input.indexOf(':')
-        if (index == -1) return 0 // 如果没有冒号, 则返回0
+        if (index == -1) return 0
 
         var count = 0
         for (i in index - 1 downTo 0) {

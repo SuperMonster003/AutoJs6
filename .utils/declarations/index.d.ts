@@ -76,6 +76,49 @@ interface FindTargetRowsOptionsBase {
 interface FindTargetRowsOptions extends FindTargetRowsOptionsBase {
     /** @default [] */
     tableDataStructure?: Array<{ [dataItemName: TableDataStructureItemName]: TableDataStructureItem } | TableDataStructureItemName>;
+
+    /**
+     * Configuration for "expand" actions needed before searching the table.
+     * Example: { toggleSelector: 'a.exw-control' } will click Devsite's collapsible controls.
+     * zh-CN:
+     * 在查找表格前需要进行的 "展开" 动作配置.
+     * 示例: { toggleSelector: 'a.exw-control' } 将点击 Devsite 的可折叠控件.
+     */
+    expandBeforeFinding?: ExpandBeforeFindingOptions | ExpandBeforeFindingOptions[];
+}
+
+interface ExpandBeforeFindingOptions {
+    /**
+     * Optional container selector to limit the scope of operation.
+     * zh-CN: 限定作用范围容器选择器, 可选.
+     */
+    containerSelector?: string;
+    /**
+     * Selector for the "expand/collapse" button or toggle that needs to be clicked (required).
+     * zh-CN: 需要点击的 "展开/折叠" 按钮或开关的选择器 (必填).
+     */
+    toggleSelector: string;
+    /**
+     * Attribute name to determine if expanded, defaults to 'aria-expanded'.
+     * zh-CN: 判定已展开的属性名, 默认 'aria-expanded'.
+     *
+     * @default 'aria-expanded'
+     */
+    expandedAttr?: string;
+    /**
+     * Attribute value to determine if expanded, defaults to 'true'.
+     * zh-CN: 判定已展开的属性值, 默认 'true'.
+     *
+     * @default 'true'
+     */
+    expandedValue?: string;
+    /**
+     * Maximum number of targets to click, no limit by default.
+     * zh-CN: 最多点击的目标数量, 默认无限制.
+     *
+     * @default Infinity
+     */
+    maxClicks?: number;
 }
 
 interface FindTargetRowsOptionsForPageEvaluate extends FindTargetRowsOptionsBase {

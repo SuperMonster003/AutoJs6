@@ -23,7 +23,7 @@ import org.autojs.autojs.util.IntentUtils.SnackExceptionHolder
 import org.autojs.autojs.util.StringUtils
 import org.autojs.autojs.util.StringUtils.dropBom
 import org.autojs.autojs6.R
-import org.autojs.autojs6.databinding.EditableFileInfoDialogListItemBinding
+import org.autojs.autojs6.databinding.EditableFileInfoDialogItemsBinding
 import java.io.File
 import java.nio.charset.Charset
 import java.nio.file.Files
@@ -40,7 +40,7 @@ object EditableFileInfoDialogManager {
                 .show()
             return
         }
-        val binding = EditableFileInfoDialogListItemBinding.inflate(LayoutInflater.from(context))
+        val binding = EditableFileInfoDialogItemsBinding.inflate(LayoutInflater.from(context))
 
         val textUnknown = context.getString(R.string.text_unknown)
 
@@ -119,7 +119,7 @@ object EditableFileInfoDialogManager {
         }
     }
 
-    private fun updateGuidelines(binding: EditableFileInfoDialogListItemBinding) {
+    private fun updateGuidelines(binding: EditableFileInfoDialogItemsBinding) {
         val bindings = listOf(
             binding.filePathLabel to binding.filePathGuideline,
             binding.fileSizeLabel to binding.fileSizeGuideline,
