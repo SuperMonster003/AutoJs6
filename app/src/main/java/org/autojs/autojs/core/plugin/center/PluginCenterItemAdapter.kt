@@ -35,6 +35,7 @@ class PluginCenterItemAdapter(
         fun onToggleEnable(item: PluginCenterItem, enabled: Boolean)
         fun onUninstall(item: PluginCenterItem)
         fun onDetails(item: PluginCenterItem)
+        fun onUpdate(item: PluginCenterItem)
     }
 
 }

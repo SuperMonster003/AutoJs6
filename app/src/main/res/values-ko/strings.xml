@@ -1118,5 +1118,8 @@
     <string name="text_integrity_verification_failed">무결성 검증에 실패했습니다</string>
     <string name="text_sha256_mismatch_multiline_expected_actual">SHA-256 값이 일치하지 않습니다.\n\n예상: %1$s\n실제: %2$s</string>
     <string name="error_no_available_url_provided_for_current_plugin">현재 플러그인에 사용 가능한 URL 이 제공되지 않았습니다</string>
+    <string name="text_failed_to_update">업데이트 실패</string>
+    <string name="text_confirm_to_uninstall">정말 제거하시겠습니까?</string>
+    <string name="dialog_button_exception_details">자세히</string>
 
 </resources>

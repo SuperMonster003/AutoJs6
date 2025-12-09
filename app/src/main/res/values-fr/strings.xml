@@ -1116,5 +1116,8 @@
     <string name="text_integrity_verification_failed">Échec de la vérification de l\'intégrité</string>
     <string name="text_sha256_mismatch_multiline_expected_actual">Incohérence du SHA-256.\n\nAttendu : %1$s\nObtenu : %2$s</string>
     <string name="error_no_available_url_provided_for_current_plugin">Aucune URL disponible n\'a été fournie pour le plug-in actuel</string>
+    <string name="text_failed_to_update">Échec de la mise à jour</string>
+    <string name="text_confirm_to_uninstall">Voulez-vous vraiment désinstaller ?</string>
+    <string name="dialog_button_exception_details">Détails</string>
 
 </resources>

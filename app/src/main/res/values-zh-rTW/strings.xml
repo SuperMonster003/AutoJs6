@@ -1114,5 +1114,8 @@
     <string name="text_integrity_verification_failed">完整性驗證失敗</string>
     <string name="text_sha256_mismatch_multiline_expected_actual">SHA-256 驗證不一致.\n\n期望值: %1$s\n實際值: %2$s</string>
     <string name="error_no_available_url_provided_for_current_plugin">當前外掛未提供可用的 URL</string>
+    <string name="text_failed_to_update">更新失敗</string>
+    <string name="text_confirm_to_uninstall">是否確定解除安裝</string>
+    <string name="dialog_button_exception_details">異常詳情</string>
 
 </resources>

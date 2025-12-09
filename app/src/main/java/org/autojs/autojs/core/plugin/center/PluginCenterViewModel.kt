@@ -12,7 +12,7 @@ import org.autojs.autojs6.R
 /**
  * Loads both index plugins and locally installed plugins,
  * merging them into a PluginCenterItem list.
- * 
+ *
  * zh-CN: 统一加载索引插件与本地已安装插件, 合并为 PluginCenterItem 列表.
  */
 class PluginCenterViewModel : ViewModel() {
@@ -34,15 +34,15 @@ class PluginCenterViewModel : ViewModel() {
 
             val installedByPkg = installed.associateBy { it.packageName }
 
-            // 1. Use index to drive UI first (ensuring "installable but not installed" items are displayed).
-            // 1. [ zh-CN ] 优先用索引驱动 UI (确保 "未安装但可安装" 的项也能显示).
+            // Use index to drive UI, to display installable and updatable items.
+            // zh-CN: 用索引驱动 UI, 展示可安装及可更新的项.
             val fromIndex = indexEntries.map { e ->
                 val local = installedByPkg[e.packageName]
                 toPluginCenterItem(context, index = e, local = local)
             }
 
-            // 2. Add items that "exist locally but not in index" (third-party or not indexed yet).
-            // 2. [ zh-CN ] 补充 "本地存在但索引里暂时没有" 的项 (第三方或暂未入索引).
+            // Add items that "exist locally but not in index" (third-party or not indexed yet).
+            // zh-CN: 补充 "本地存在但索引里暂时没有" 的项 (第三方或暂未入索引).
             val extraLocals = installed
                 .filter { ins -> indexEntries.none { it.packageName == ins.packageName } }
                 .map { local -> toPluginCenterItem(context, index = null, local = local) }
@@ -57,8 +57,6 @@ class PluginCenterViewModel : ViewModel() {
 
     fun setEnabled(context: Context, packageName: String, enabled: Boolean) {
         enableStore.setEnabled(context, packageName, enabled)
-        // Update in-memory state too, to avoid a second full refresh.
-        // zh-CN: 内存态也更新, 避免二次全量刷新.
         _items.value = _items.value.map {
             if (it.packageName == packageName) it.copy(isEnabled = enabled) else it
         }
@@ -72,20 +70,31 @@ class PluginCenterViewModel : ViewModel() {
         val author = local?.author ?: index?.author
         val collaborators = index?.collaborators ?: emptyList()
 
-        val versionName = local?.versionName ?: index?.versionName ?: context.getString(R.string.text_unknown)
+        val versionNameLocal = local?.versionName ?: index?.versionName ?: context.getString(R.string.text_unknown)
+        val versionCodeLocal = local?.versionCode
         val isInstalled = local != null
+
+        // Mark as updatable and populate update target information only when "installed and index version is higher".
+        // zh-CN: 仅当 "已安装且索引版本更高" 时, 标记可更新, 并填充可更新目标信息.
+        val (updatableName, updatableCode, updatableDate) = run {
+            val defaultVersionInfo = Triple(null, null, null)
+            versionCodeLocal ?: return@run defaultVersionInfo
+            val versionCodeIndex = index?.versionCode ?: return@run defaultVersionInfo
+            if (versionCodeIndex <= versionCodeLocal) return@run defaultVersionInfo
+            Triple(index.versionName, index.versionCode, index.versionDate)
+        }
+
         val enabled = enableStore.isEnabled(context, packageName, defaultEnabled = isInstalled)
 
         return PluginCenterItem(
             title = title,
             packageName = packageName,
-            versionName = versionName,
-            versionCode = local?.versionCode ?: index?.versionCode,
-            // TODO M1: 显示索引日期; 仅本地项时可为空.
+            versionName = versionNameLocal,
+            versionCode = versionCodeLocal ?: index?.versionCode,
             versionDate = index?.versionDate,
-            updatableVersionName = index?.versionName,
-            updatableVersionCode = index?.versionCode,
-            updatableVersionDate = index?.versionDate,
+            updatableVersionName = updatableName,
+            updatableVersionCode = updatableCode,
+            updatableVersionDate = updatableDate,
             author = author,
             collaborators = collaborators,
             description = description,

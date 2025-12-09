@@ -1117,5 +1117,8 @@
     <string name="text_integrity_verification_failed">整合性の検証に失敗しました</string>
     <string name="text_sha256_mismatch_multiline_expected_actual">SHA-256 が一致しません.\n\n期待値: %1$s\n実際: %2$s</string>
     <string name="error_no_available_url_provided_for_current_plugin">現在のプラグインに利用可能な URL は提供されていません</string>
+    <string name="text_failed_to_update">更新に失敗しました</string>
+    <string name="text_confirm_to_uninstall">アンインストールしてもよろしいですか?</string>
+    <string name="dialog_button_exception_details">詳細</string>
 
 </resources>

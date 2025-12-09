@@ -50,8 +50,8 @@
     <string name="entry_app_language_zh_hant_hk" translatable="false">繁體中文 (香港)</string>
     <string name="entry_app_language_zh_hant_tw" translatable="false">繁體中文 (台灣)</string>
     <string name="format_default_package_name" formatted="true" translatable="false">org.autojs.autojs6.%s</string>
-    <string name="format_dialog_progress_number_format_kilo_bytes" translatable="false">%.1fKB/%.1fKB</string>
-    <string name="format_dialog_progress_number_format_mega_bytes" translatable="false">%.2fMB/%.2fMB</string>
+    <string name="format_dialog_progress_number_format_kilo_bytes" translatable="false">%.1fKiB/%.1fKiB</string>
+    <string name="format_dialog_progress_number_format_mega_bytes" translatable="false">%.2fMiB/%.2fMiB</string>
     <string name="id_launcher_shortcut_docs" translatable="false">shortcut_$_docs</string>
     <string name="id_launcher_shortcut_log" translatable="false">shortcut_$_log</string>
     <string name="id_launcher_shortcut_plugin_center" translatable="false">shortcut_$_plugin_center</string>
@@ -1369,5 +1369,8 @@
     <string name="text_integrity_verification_failed">Integrity verification failed</string>
     <string name="text_sha256_mismatch_multiline_expected_actual">SHA-256 mismatch.\n\nExpected: %1$s\nActual: %2$s</string>
     <string name="error_no_available_url_provided_for_current_plugin">No available URL provided for current plugin</string>
+    <string name="text_failed_to_update">Failed to update</string>
+    <string name="text_confirm_to_uninstall">Are you sure to uninstall?</string>
+    <string name="dialog_button_exception_details">Details</string>
 
 </resources>

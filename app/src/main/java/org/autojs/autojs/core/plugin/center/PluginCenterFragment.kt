@@ -14,6 +14,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.DividerItemDecoration.VERTICAL
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.afollestad.materialdialogs.MaterialDialog
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.autojs.autojs.util.ViewUtils.excludePaddingClippableViewFromBottomNavigationBar
@@ -48,13 +49,41 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
             }
 
             override fun onUninstall(item: PluginCenterItem) {
-                val uri = Uri.parse("package:${item.packageName}")
-                val intent = Intent(Intent.ACTION_DELETE, uri)
-                uninstallLauncher.launch(intent)
+                MaterialDialog.Builder(context)
+                    .title(R.string.text_prompt)
+                    .content(R.string.text_confirm_to_uninstall)
+                    .negativeText(R.string.dialog_button_cancel)
+                    .neutralColorRes(R.color.dialog_button_default)
+                    .positiveText(R.string.dialog_button_confirm)
+                    .positiveColorRes(R.color.dialog_button_caution)
+                    .onPositive { _, _ ->
+                        val uri = Uri.parse("package:${item.packageName}")
+                        val intent = Intent(Intent.ACTION_DELETE, uri)
+                        uninstallLauncher.launch(intent)
+                    }
+                    .show()
             }
 
             override fun onDetails(item: PluginCenterItem) {
                 PluginInfoDialogManager.showPluginInfoDialog(contextRef, item)
+            }
+
+            override fun onUpdate(item: PluginCenterItem) {
+                val url = item.installableApkUrl
+                when {
+                    url.isNullOrBlank() -> MaterialDialog.Builder(contextRef)
+                        .title(R.string.text_failed_to_update)
+                        .content(R.string.error_no_available_url_provided_for_current_plugin)
+                        .positiveText(R.string.dialog_button_dismiss)
+                        .show()
+                    else -> viewLifecycleOwner.lifecycleScope.launch {
+                        PluginInstaller.installFromUrlWithPrompt(
+                            context = contextRef,
+                            url = url,
+                            expectedSha256 = item.installableApkSha256,
+                        )
+                    }
+                }
             }
         })
 

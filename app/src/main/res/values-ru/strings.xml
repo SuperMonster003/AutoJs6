@@ -1116,5 +1116,8 @@
     <string name="text_integrity_verification_failed">Сбой проверки целостности</string>
     <string name="text_sha256_mismatch_multiline_expected_actual">Несовпадение SHA-256.\n\nОжидалось: %1$s\nФактически: %2$s</string>
     <string name="error_no_available_url_provided_for_current_plugin">Для текущего плагина не указан доступный URL-адрес</string>
+    <string name="text_failed_to_update">Не удалось обновить</string>
+    <string name="text_confirm_to_uninstall">Вы действительно хотите удалить?</string>
+    <string name="dialog_button_exception_details">Детали</string>
 
 </resources>

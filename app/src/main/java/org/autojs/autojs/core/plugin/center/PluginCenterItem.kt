@@ -1,6 +1,11 @@
 package org.autojs.autojs.core.plugin.center
 
+import android.content.Context
+import android.content.Intent
 import android.graphics.drawable.Drawable
+import androidx.core.net.toUri
+import com.afollestad.materialdialogs.MaterialDialog
+import org.autojs.autojs6.R
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 
@@ -37,8 +42,12 @@ data class PluginCenterItem(
     val versionSummary: String
         get() = formatVersionInfo(versionName, versionCode, versionDate)
 
-    val updatableVersionSummary: String?
-        get() = updatableVersionName?.let { formatVersionInfo(it, updatableVersionCode, updatableVersionDate) }
+    val updatableVersionSummary: String
+        get() = formatVersionInfo(
+            updatableVersionName ?: versionName,
+            updatableVersionCode ?: versionCode,
+            updatableVersionDate,
+        )
 
     val isUpdatable: Boolean
         get() = updatableVersionName != null
@@ -61,6 +70,25 @@ data class PluginCenterItem(
             code?.let { append(" ($it)") }
             date?.let { append(" | $it") }
         }
+    }
+
+    fun uninstall(context: Context) {
+        context.startActivity(Intent(Intent.ACTION_DELETE, "package:$packageName".toUri()))
+    }
+
+    fun uninstallWithPrompt(context: Context, dialog: MaterialDialog? = null) {
+        MaterialDialog.Builder(context)
+            .title(R.string.text_prompt)
+            .content(R.string.text_confirm_to_uninstall)
+            .negativeText(R.string.dialog_button_cancel)
+            .neutralColorRes(R.color.dialog_button_default)
+            .positiveText(R.string.dialog_button_confirm)
+            .positiveColorRes(R.color.dialog_button_caution)
+            .onPositive { _, _ ->
+                runCatching { uninstall(context) }
+                dialog?.dismiss()
+            }
+            .show()
     }
 
 }

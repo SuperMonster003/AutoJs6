@@ -2,7 +2,6 @@ package org.autojs.autojs.core.plugin.center
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Intent
 import android.graphics.PorterDuff
 import android.view.LayoutInflater
 import android.view.View.MeasureSpec.UNSPECIFIED
@@ -10,7 +9,6 @@ import android.widget.TextView
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.graphics.drawable.DrawableCompat
-import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
@@ -72,6 +70,7 @@ object PluginInfoDialogManager {
             lastInstallTime = item.lastInstallTime,
             lastUninstallTime = item.lastUninstallTime,
             apkUrl = item.installableApkUrl,
+            sha256 = item.installableApkSha256,
         )
         showPluginInfoDialogInternal(context, item, info)
     }
@@ -93,6 +92,8 @@ object PluginInfoDialogManager {
             updatableVersion = item.updatableVersionSummary,
             firstInstallTime = item.firstInstallTime,
             lastUpdateTime = item.lastUpdateTime,
+            apkUrl = item.installableApkUrl,
+            sha256 = item.installableApkSha256,
         )
         showPluginInfoDialogInternal(context, item, info)
     }
@@ -114,34 +115,50 @@ object PluginInfoDialogManager {
                         positiveText(R.string.text_install)
                         positiveColorRes(R.color.dialog_button_attraction)
                         onPositive { d, _ ->
-                            info.apkUrl?.let { url ->
-                                d.dismiss()
-                                CoroutineScope(Dispatchers.IO).launch {
-                                    PluginInstaller.installFromUrlWithPrompt(context, url, item.installableApkSha256)
+                            val url = info.apkUrl
+                            when {
+                                url.isNullOrBlank() -> {
+                                    MaterialDialog.Builder(context)
+                                        .title(R.string.text_failed_to_install)
+                                        .content(R.string.error_no_available_url_provided_for_current_plugin)
+                                        .positiveText(R.string.dialog_button_dismiss)
+                                        .show()
+                                    val positiveButton = d.getActionButton(DialogAction.POSITIVE)
+                                    positiveButton.setTextColor(d.context.getColor(R.color.dialog_button_unavailable))
                                 }
-                            } ?: run {
-                                val positiveButton = d.getActionButton(DialogAction.POSITIVE)
-                                positiveButton.setTextColor(d.context.getColor(R.color.dialog_button_unavailable))
-                                MaterialDialog.Builder(d.context)
-                                    .title(R.string.text_failed_to_install)
-                                    .content(d.context.getString(R.string.error_no_available_url_provided_for_current_plugin))
+                                else -> {
+                                    d.dismiss()
+                                    CoroutineScope(Dispatchers.IO).launch {
+                                        PluginInstaller.installFromUrlWithPrompt(context, url, info.sha256)
+                                    }
+                                }
                             }
                         }
                     }
                     is PluginInfoInstalled -> {
                         positiveText(R.string.text_uninstall)
                         positiveColorRes(R.color.dialog_button_warn)
-                        onPositive { d, _ ->
-                            // TODO 确定卸载对话框.
-                            d.dismiss()
-                            context.startActivity(Intent(Intent.ACTION_DELETE, "package:${item.packageName}".toUri()))
-                        }
+                        onPositive { d, _ -> item.uninstallWithPrompt(context, d) }
                         if (item.isUpdatable) {
                             neutralText(R.string.text_update)
                             neutralColorRes(R.color.dialog_button_attraction)
                             onNeutral { d, _ ->
-                                d.dismiss()
-                                // TODO 后续实现更新逻辑 (下载新包 -> 安装).
+                                val url = info.apkUrl
+                                when {
+                                    url.isNullOrBlank() -> {
+                                        MaterialDialog.Builder(context)
+                                            .title(R.string.text_failed_to_update)
+                                            .content(R.string.error_no_available_url_provided_for_current_plugin)
+                                            .positiveText(R.string.dialog_button_dismiss)
+                                            .show()
+                                    }
+                                    else -> {
+                                        d.dismiss()
+                                        CoroutineScope(Dispatchers.IO).launch {
+                                            PluginInstaller.installFromUrlWithPrompt(context, url, info.sha256)
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -194,17 +211,17 @@ object PluginInfoDialogManager {
             }
         }
 
-        // Installable package: If the index does not provide size, try to HEAD request to get it, update display after success.
-        // zh-CN: 可安装包: 若索引未给 size, 尝试 HEAD 获取, 成功后更新显示.
-        if (info is PluginInfoInstallable && info.packageSize <= 0 && !info.apkUrl.isNullOrBlank()) {
-            // Asynchronously probe the size and refresh the view.
-            // zh-CN: 异步探测大小并刷新视图.
-            CoroutineScope(Dispatchers.IO).launch {
-                val size = PluginInstaller.probeContentLength(info.apkUrl)
-                if (size != null && size > 0 && currentDialog?.get() === dialog) {
-                    // TODO 更新当前 item 的 "可安装包大小" 仅用于对话框展示 (持久化可留到 M2).
-                    withContext(Dispatchers.Main) {
-                        dialog.setCopyableTextIfAbsent(binding.pluginItemInfoPackageSizeValue, formatSize(size))
+        // If the index does not provide size, try to HEAD request to get it, update display after success.
+        // zh-CN: 若索引未给 size, 尝试 HEAD 获取, 成功后更新显示.
+        if (info.packageSize <= 0) {
+            info.apkUrl.takeUnless { it.isNullOrBlank() }?.let { url ->
+                CoroutineScope(Dispatchers.IO).launch {
+                    val size = PluginInstaller.probeContentLength(url)
+                    if (size != null && size > 0 && currentDialog?.get() === dialog) {
+                        // TODO 更新当前 item 的 "可安装包大小" 仅用于对话框展示 (持久化可留到 M2).
+                        withContext(Dispatchers.Main) {
+                            dialog.setCopyableTextIfAbsent(binding.pluginItemInfoPackageSizeValue, formatSize(size))
+                        }
                     }
                 }
             }
@@ -300,6 +317,8 @@ object PluginInfoDialogManager {
         val collaborators: List<String>
         val description: String
         val packageSize: Long
+        val apkUrl: String?
+        val sha256: String?
     }
 
     private data class PluginInfoInstallable(
@@ -311,7 +330,8 @@ object PluginInfoDialogManager {
         override val collaborators: List<String>,
         override val description: String,
         override val packageSize: Long,
-        val apkUrl: String?,
+        override val apkUrl: String?,
+        override val sha256: String?,
         val lastInstallTime: Long?,
         val lastUninstallTime: Long?,
     ) : PluginInfoBase
@@ -325,6 +345,8 @@ object PluginInfoDialogManager {
         override val collaborators: List<String>,
         override val description: String,
         override val packageSize: Long,
+        override val apkUrl: String?,
+        override val sha256: String?,
         val updatableVersion: String? = null,
         val firstInstallTime: Long?,
         val lastUpdateTime: Long?,

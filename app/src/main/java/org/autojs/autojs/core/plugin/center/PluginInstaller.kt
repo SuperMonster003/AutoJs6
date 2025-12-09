@@ -12,12 +12,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.network.download.DownloadManager
 import org.autojs.autojs.runtime.api.Mime
-import org.autojs.autojs.ui.error.ErrorDialogActivity
 import org.autojs.autojs.ui.main.scripts.ApkInfoDialogManager
 import org.autojs.autojs.util.FileUtils
 import org.autojs.autojs.util.FileUtils.toCacheFile
+import org.autojs.autojs.util.UpdateUtils
 import org.autojs.autojs6.R
-import org.spongycastle.pqc.math.linearalgebra.IntegerFunctions.pow
 import java.io.EOFException
 import java.io.File
 import java.io.IOException
@@ -30,14 +29,14 @@ import kotlin.math.roundToInt
 
 /**
  * Installer:
- * - Local file: Uri installation (display APK info dialog before installation)
- * - URL: Install after downloading to cache (display progress dialog during download)
- * 
+ * - Local file: Uri installation
+ * - URL: Install after downloading to cache
+ *
  * zh-CN:
- * 
+ *
  * 安装器:
- * - 本地文件: Uri 安装 (安装前显示 APK 信息对话框)
- * - URL: 下载到缓存后安装 (下载时显示进度对话框)
+ * - 本地文件: Uri 安装
+ * - URL: 下载到缓存后安装
  */
 object PluginInstaller {
 
@@ -67,11 +66,11 @@ object PluginInstaller {
             }
         }
     }.onFailure { e ->
-        ErrorDialogActivity.showErrorDialog(
-            context.applicationContext,
-            R.string.text_failed_to_install,
-            e.message ?: e.toString(),
-        )
+        MaterialDialog.Builder(context)
+            .title(R.string.text_failed_to_install)
+            .content(e.message ?: e.toString())
+            .positiveText(R.string.dialog_button_dismiss)
+            .show()
     }
 
     fun installFromFileUri(context: Context, uri: Uri) {
@@ -84,27 +83,75 @@ object PluginInstaller {
     }
 
     suspend fun installFromUrlWithPrompt(context: Context, url: String, expectedSha256: String? = null) {
-        when (val result = downloadWithProgress(context, url, expectedSha256)) {
-            is DownloadResult.Success -> installFromFileUriWithPrompt(context, result.uri)
-            is DownloadResult.Failure -> ErrorDialogActivity.showErrorDialog(
-                context,
-                result.titleRes,
-                result.message,
-            )
-            is DownloadResult.Cancelled -> {
-                // User cancelled, no need to prompt.
-                // zh-CN: 用户取消, 无需提示.
+        var attempt = 0
+        while (true) {
+            when (val result = downloadWithProgress(context, url, expectedSha256)) {
+                is DownloadResult.Success -> {
+                    installFromFileUriWithPrompt(context, result.uri)
+                    return
+                }
+                is DownloadResult.Cancelled -> {
+                    // User cancelled, no need to prompt.
+                    // zh-CN: 用户取消, 无需提示.
+                    return
+                }
+                is DownloadResult.Failure -> {
+                    val retry = showRetryDialog(context, result)
+                    if (retry) {
+                        attempt++
+                        // TODO M1: 不做自动退避, 交给用户控制重试节奏; M2 可引入指数退避/网络可用性判断
+                        continue
+                    } else {
+                        return
+                    }
+                }
             }
         }
     }
 
     suspend fun installFromUrl(context: Context, url: String, expectedSha256: String? = null) {
-        val result = downloadWithProgress(context, url, expectedSha256)
-        if (result is DownloadResult.Success) {
-            installFromFileUri(context, result.uri)
-        } else if (result is DownloadResult.Failure) {
-            ErrorDialogActivity.showErrorDialog(context, result.titleRes, result.message)
+        when (val result = downloadWithProgress(context, url, expectedSha256)) {
+            is DownloadResult.Success -> {
+                installFromFileUri(context, result.uri)
+            }
+            is DownloadResult.Failure -> {
+                MaterialDialog.Builder(context)
+                    .title(result.titleRes)
+                    .content(result.message)
+                    .positiveText(R.string.dialog_button_dismiss)
+                    .show()
+            }
+            else -> Unit
         }
+    }
+
+    private fun showRetryDialog(context: Context, failure: DownloadResult.Failure): Boolean {
+        var wantRetry = false
+        MaterialDialog.Builder(context)
+            .title(failure.titleRes)
+            .content(failure.message)
+            .neutralText(R.string.dialog_button_exception_details)
+            .neutralColorRes(R.color.dialog_button_hint)
+            .onNeutral { _, _ ->
+                MaterialDialog.Builder(context)
+                    .title(failure.titleRes)
+                    .content(failure.message)
+                    .positiveText(R.string.dialog_button_dismiss)
+                    .show()
+            }
+            .negativeText(R.string.dialog_button_quit)
+            .negativeColorRes(R.color.dialog_button_default)
+            .onNegative { d, _ -> d.dismiss() }
+            .positiveText(R.string.dialog_button_retry)
+            .positiveColorRes(R.color.dialog_button_attraction)
+            .onPositive { d, _ ->
+                wantRetry = true
+                d.dismiss()
+            }
+            .cancelable(false)
+            .autoDismiss(true)
+            .show()
+        return wantRetry
     }
 
     // Probe URL size (HEAD).
@@ -136,11 +183,29 @@ object PluginInstaller {
         val dialog = MaterialDialog.Builder(context)
             .title(R.string.text_downloading)
             .progress(false, 100, true)
-            .negativeText(R.string.text_cancel)
-            .negativeColorRes(R.color.dialog_button_default)
-            .onNegative { d, _ ->
+            .neutralText(R.string.dialog_button_download_with_browser)
+            .neutralColorRes(R.color.dialog_button_hint)
+            .onNeutral { d, _ ->
+                MaterialDialog.Builder(context)
+                    .title(R.string.text_prompt)
+                    .content(R.string.text_download_interruption_warning)
+                    .negativeText(R.string.dialog_button_back)
+                    .negativeColorRes(R.color.dialog_button_hint)
+                    .positiveText(R.string.dialog_button_continue)
+                    .positiveColorRes(R.color.dialog_button_caution)
+                    .onPositive { _, _ ->
+                        d.getActionButton(DialogAction.POSITIVE).performClick()
+                        UpdateUtils.openUrl(context, url)
+                    }
+                    .cancelable(false)
+                    .build()
+                    .show()
+            }
+            .positiveText(R.string.dialog_button_cancel_download)
+            .positiveColorRes(R.color.dialog_button_default)
+            .onPositive { d, _ ->
                 cancelFlag.set(true)
-                d.getActionButton(DialogAction.NEGATIVE).isEnabled = false
+                d.getActionButton(DialogAction.POSITIVE).isEnabled = false
             }
             .cancelable(false)
             .autoDismiss(false)
@@ -168,6 +233,16 @@ object PluginInstaller {
                 if (code !in 200..299) throw HttpStatusException(code, conn.responseMessage ?: "HTTP error")
                 val total = conn.contentLengthLong.takeIf { it > 0 } ?: -1L
 
+                if (total > 0) {
+                    dialog.setProgressNumberFormat(
+                        DownloadManager.getProgressMegaBytesFormat(
+                            context,
+                            /* downloadedMiB */ 0f,
+                            /* totalMiB */ total / (1024f * 1024f),
+                        )
+                    )
+                }
+
                 conn.inputStream.use { input ->
                     val md = MessageDigest.getInstance("SHA-256")
                     DigestInputStream(input, md).use { din ->
@@ -183,15 +258,24 @@ object PluginInstaller {
                                 fos.write(buf, 0, read)
                                 downloaded += read
                                 val now = System.currentTimeMillis()
+
                                 if (total > 0 && (now - lastUpdateTs > 80)) {
                                     val pct = ((downloaded * 100f) / total).coerceIn(0f, 100f)
                                     withContext(Dispatchers.Main) {
-                                        dialog.setProgressNumberFormat(DownloadManager.getProgressMegaBytesFormat(
-                                            context,
-                                            downloaded.toFloat() / pow(2, 20),
-                                            total.toFloat() / pow(2, 20),
-                                        ))
+                                        dialog.setProgressNumberFormat(
+                                            DownloadManager.getProgressMegaBytesFormat(
+                                                context,
+                                                downloaded / (1024f * 1024f),
+                                                total / (1024f * 1024f),
+                                            )
+                                        )
                                         dialog.setProgress(pct.roundToInt())
+                                    }
+                                    lastUpdateTs = now
+                                } else if (total <= 0 && (now - lastUpdateTs > 300)) {
+                                    withContext(Dispatchers.Main) {
+                                        val cur = dialog.currentProgress
+                                        dialog.setProgress((cur + 1).coerceAtMost(99))
                                     }
                                     lastUpdateTs = now
                                 }
@@ -215,7 +299,10 @@ object PluginInstaller {
         } catch (he: HttpStatusException) {
             return DownloadResult.Failure(R.string.text_failed_to_retrieve, "HTTP ${he.code}: ${he.message}")
         } catch (me: ChecksumMismatchException) {
-            return DownloadResult.Failure(R.string.text_integrity_verification_failed, context.getString(R.string.text_sha256_mismatch_multiline_expected_actual, me.expected, me.actual))
+            return DownloadResult.Failure(
+                R.string.text_integrity_verification_failed,
+                context.getString(R.string.text_sha256_mismatch_multiline_expected_actual, me.expected, me.actual),
+            )
         } catch (ioe: EOFException) {
             return DownloadResult.Failure(R.string.text_failed_to_retrieve, "Unexpected EOF: ${ioe.message}")
         } catch (ioe: IOException) {
@@ -236,6 +323,7 @@ object PluginInstaller {
     }
 
     private data class HttpStatusException(val code: Int, override val message: String) : RuntimeException(message)
+
     private data class ChecksumMismatchException(val expected: String, val actual: String) : RuntimeException("sha256 mismatch")
 
     sealed interface DownloadResult {
@@ -243,4 +331,5 @@ object PluginInstaller {
         data class Failure(val titleRes: Int, val message: String) : DownloadResult
         data object Cancelled : DownloadResult
     }
+
 }
