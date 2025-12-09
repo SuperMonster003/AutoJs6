@@ -1113,5 +1113,8 @@
     <string name="text_integrity_verification_failed">Integrity verification failed</string>
     <string name="text_sha256_mismatch_multiline_expected_actual">SHA-256 mismatch.\n\nExpected: %1$s\nActual: %2$s</string>
     <string name="error_no_available_url_provided_for_current_plugin">No available URL provided for current plugin</string>
+    <string name="text_failed_to_update">Failed to update</string>
+    <string name="text_confirm_to_uninstall">Are you sure to uninstall?</string>
+    <string name="dialog_button_exception_details">Details</string>
 
 </resources>

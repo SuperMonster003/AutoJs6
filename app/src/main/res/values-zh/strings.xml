@@ -1114,5 +1114,8 @@
     <string name="text_integrity_verification_failed">完整性验证失败</string>
     <string name="text_sha256_mismatch_multiline_expected_actual">SHA-256 验证不一致.\n\n期望值: %1$s\n实际值: %2$s</string>
     <string name="error_no_available_url_provided_for_current_plugin">当前插件未提供可用的 URL</string>
+    <string name="text_failed_to_update">更新失败</string>
+    <string name="text_confirm_to_uninstall">是否确定卸载</string>
+    <string name="dialog_button_exception_details">异常详情</string>
 
 </resources>

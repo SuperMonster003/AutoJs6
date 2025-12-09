@@ -1118,5 +1118,8 @@
     <string name="text_integrity_verification_failed">فشل التحقق من السلامة</string>
     <string name="text_sha256_mismatch_multiline_expected_actual">عدم تطابق SHA-256.\n\nالمتوقّع: %1$s\nالفعلي: %2$s</string>
     <string name="error_no_available_url_provided_for_current_plugin">لم يتم توفير عنوان URL متاح للملحق الحالي</string>
+    <string name="text_failed_to_update">فشل التحديث</string>
+    <string name="text_confirm_to_uninstall">هل تريد بالتأكيد إلغاء التثبيت؟</string>
+    <string name="dialog_button_exception_details">تفاصيل</string>
 
 </resources>

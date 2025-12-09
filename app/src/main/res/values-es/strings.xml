@@ -1116,5 +1116,8 @@
     <string name="text_sha256_mismatch_multiline_expected_actual">Discordancia de SHA-256.\n\nEsperado: %1$s\nReal: %2$s</string>
     <string name="text_integrity_verification_failed">La verificación de integridad falló</string>
     <string name="error_no_available_url_provided_for_current_plugin">No se proporcionó ninguna URL disponible para el complemento actual</string>
+    <string name="text_failed_to_update">Error al actualizar</string>
+    <string name="text_confirm_to_uninstall">¿Seguro que deseas desinstalar?</string>
+    <string name="dialog_button_exception_details">Detalles</string>
 
 </resources>

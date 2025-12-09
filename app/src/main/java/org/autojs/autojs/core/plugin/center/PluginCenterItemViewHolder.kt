@@ -18,8 +18,6 @@ import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.colorFilterWithDesaturateOrNull
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.PluginCenterRecyclerViewItemBinding
-import org.joda.time.DateTime
-import org.joda.time.format.DateTimeFormat
 
 class PluginCenterItemViewHolder(
     itemViewBinding: PluginCenterRecyclerViewItemBinding,
@@ -83,32 +81,15 @@ class PluginCenterItemViewHolder(
             btnDeleteView.setButtonState(false)
         }
 
-        if (item.isInstalled && item.isUpdatable) {
-            updatableBadgeView.isVisible = true
-            versionInfoForUpdateView.isVisible = true
-
-            // test
-            val updatableVersionName = item.versionName.also {
-                item.updatableVersionName = it
-            }
-            // test
-            val updatableVersionCode = item.versionCode?.let { it + 16 }?.also {
-                item.updatableVersionCode = it
-            }
-            // test
-            val updatableVersionDate = item.versionDate?.let {
-                DateTime.parse(it).plusDays(3).toString("yyyy-MM-dd")
-            }?.also {
-                item.updatableVersionDate = it
-            }
-
-            versionInfoForUpdateView.text = formatVersionInfo(updatableVersionName, updatableVersionCode, updatableVersionDate)
+        val showUpdate = item.isInstalled && item.isUpdatable
+        updatableBadgeView.isVisible = showUpdate
+        versionInfoForUpdateView.isVisible = showUpdate
+        if (showUpdate) {
+            versionInfoForUpdateView.text = item.updatableVersionSummary
             btnUpdateView.setButtonState(true) {
-                ViewUtils.showToast(context, R.string.text_under_development)
+                listener.onUpdate(currentItem)
             }
         } else {
-            updatableBadgeView.isVisible = false
-            versionInfoForUpdateView.isVisible = false
             btnUpdateView.setButtonState(false)
         }
 
@@ -129,18 +110,6 @@ class PluginCenterItemViewHolder(
         switchView.setOnCheckedChangeListener { _, isChecked ->
             listener.onToggleEnable(currentItem, isChecked)
             applyUiBySwitch(isChecked, item)
-        }
-    }
-
-    private fun formatVersionInfo(versionName: String, versionCode: Long?, versionDate: String?): String {
-        val code = versionCode?.takeIf { it > 0 }
-        val date = versionDate?.runCatching {
-            DateTimeFormat.forPattern("yyyy-MM-dd").print(DateTime.parse(this))
-        }?.getOrNull()
-        return buildString {
-            append(versionName)
-            code?.let { append(" ($it)") }
-            date?.let { append(" | $it") }
         }
     }
 

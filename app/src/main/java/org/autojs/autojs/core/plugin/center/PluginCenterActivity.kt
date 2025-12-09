@@ -13,7 +13,6 @@ import com.afollestad.materialdialogs.MaterialDialog
 import kotlinx.coroutines.launch
 import org.autojs.autojs.extension.MaterialDialogExtensions.widgetThemeColor
 import org.autojs.autojs.ui.BaseActivity
-import org.autojs.autojs.ui.error.ErrorDialogActivity
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.setMenuIconsColorByThemeColorLuminance
 import org.autojs.autojs.util.ViewUtils.setNavigationIconColorByThemeColorLuminance
@@ -74,15 +73,16 @@ class PluginCenterActivity : BaseActivity() {
                                 positiveButton.setOnClickListener {
                                     d.dismiss()
                                     val url = input.trim().toString()
+                                    val context = this@PluginCenterActivity
                                     lifecycleScope.launch {
                                         runCatching {
-                                            PluginInstaller.installFromUrlWithPrompt(this@PluginCenterActivity, url)
+                                            PluginInstaller.installFromUrlWithPrompt(context, url)
                                         }.onFailure { e ->
-                                            ErrorDialogActivity.showErrorDialog(
-                                                this@PluginCenterActivity,
-                                                R.string.text_failed_to_retrieve,
-                                                e.message ?: e.toString(),
-                                            )
+                                            MaterialDialog.Builder(context)
+                                                .title(R.string.text_failed_to_retrieve)
+                                                .content(e.message ?: e.toString())
+                                                .positiveText(R.string.dialog_button_dismiss)
+                                                .show()
                                         }
                                     }
                                 }

@@ -16,9 +16,9 @@ class PluginIndexRepository {
                 description = "百度飞桨光学字符识别插件",
                 author = "SuperMonster003",
                 collaborators = emptyList(),
-                versionName = "0.1.0",
-                versionCode = 17L,
-                versionDate = "2025-11-21",
+                versionName = "0.1.5",
+                versionCode = 15L,
+                versionDate = "2025-11-25",
                 // TODO M1 若索引的下载地址/哈希/尺寸未知, 则先设置为 null.
                 apkUrl = null,
                 apkSha256 = null,
