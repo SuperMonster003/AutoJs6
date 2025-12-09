@@ -47,6 +47,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
+import java.util.IllformedLocaleException;
 
 /**
  * Common Apk Parser methods.
@@ -332,9 +333,17 @@ public abstract class AbstractApkFile implements Closeable {
         }
         final ByteBuffer buffer = ByteBuffer.wrap(data);
         final ResourceTableParser resourceTableParser = new ResourceTableParser(buffer);
-        resourceTableParser.parse();
-        this.resourceTable = resourceTableParser.getResourceTable();
-        this.locales = resourceTableParser.locales;
+        try {
+            resourceTableParser.parse();
+            this.resourceTable = resourceTableParser.getResourceTable();
+            this.locales = resourceTableParser.locales;
+        } catch (final IllformedLocaleException | IllegalArgumentException e) {
+            // 容错回退: 当资源表中的语言/地区字段不合法或解析实现不兼容时，
+            // 退化为无资源表模式，允许后续 Manifest 解析继续进行。
+            this.resourceTable = new ResourceTable(null);
+            this.locales = Collections.emptySet();
+            // 如需记录日志，可在此处接入项目日志系统；为保持通用性，此处不抛出异常
+        }
     }
 
     /**

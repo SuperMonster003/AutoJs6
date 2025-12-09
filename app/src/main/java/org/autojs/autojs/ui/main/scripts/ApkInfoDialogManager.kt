@@ -6,6 +6,7 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.GET_META_DATA
 import android.os.Build
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View.MeasureSpec.UNSPECIFIED
 import androidx.appcompat.content.res.AppCompatResources
@@ -36,6 +37,8 @@ import org.autojs.autojs6.databinding.ApkFileInfoDialogItemsBinding
 import java.io.File
 
 object ApkInfoDialogManager {
+
+    private const val TAG = "ApkInfoDialogManager"
 
     @JvmStatic
     @JvmOverloads
@@ -179,7 +182,11 @@ object ApkInfoDialogManager {
 
     private fun getApkInfo(apkFile: File): ApkInfo? = runCatching {
         ApkFile(apkFile).use { parser ->
-            val meta = runCatching { parser.apkMeta }.getOrNull()
+            val meta = runCatching { parser.apkMeta }
+                .onFailure {
+                    Log.d(TAG, "Failed to parse apk meta: ${apkFile.absolutePath}", it)
+                }
+                .getOrNull()
             val label = meta?.label
             val packageName = meta?.packageName
             val minSdkVersion = meta?.minSdkVersion?.toIntOrNull()
