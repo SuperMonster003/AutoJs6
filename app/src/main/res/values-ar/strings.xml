@@ -1121,5 +1121,15 @@
     <string name="text_failed_to_update">فشل التحديث</string>
     <string name="text_confirm_to_uninstall">هل تريد بالتأكيد إلغاء التثبيت؟</string>
     <string name="dialog_button_exception_details">تفاصيل</string>
+    <string name="error_failed_to_load_plugins_with_reason">فشل تحميل المكونات الإضافية.\nالسبب: %1$s.</string>
+    <string name="text_retrieving_plugin_list_data" tools:ignore="TypographyEllipsis">جارٍ جلب بيانات قائمة المكونات الإضافية...</string>
+    <string name="text_no_plugins_installed_hint">لا توجد حاليًا أي مكونات إضافية مثبتة.\nانقر على زر \"+\" لتثبيت المكونات الإضافية.</string>
+    <string name="text_unknown_author_for_plugin">مؤلف غير معروف</string>
+    <string name="text_unknown_description_for_plugin">وصف غير معروف</string>
+    <string name="text_unknown_version_for_plugin">إصدار غير معروف</string>
+    <string name="text_unknown_title_for_plugin">عنوان غير معروف</string>
+    <string name="error_specified_autojs6_version_number_must_be_greater_than_461">يجب أن يكون رقم إصدار AutoJs6 المحدد أكبر من 461</string>
+    <string name="error_autojs6_version_number_must_not_be_lower_than_num">يجب ألا يكون رقم إصدار AutoJs6 أقل من %1$s</string>
+    <string name="error_autojs6_version_must_not_be_lower_than_ver">يجب ألا يكون إصدار AutoJs6 أقل من %1$s</string>
 
 </resources>

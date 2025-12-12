@@ -1,10 +1,12 @@
 package org.autojs.autojs.core.plugin.center
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.autojs.autojs6.R
@@ -13,7 +15,19 @@ import org.autojs.autojs6.R
  * Loads both index plugins and locally installed plugins,
  * merging them into a PluginCenterItem list.
  *
- * zh-CN: 统一加载索引插件与本地已安装插件, 合并为 PluginCenterItem 列表.
+ * Behavior strategy:
+ * - First load local plugins and immediately push the list (local priority).
+ * - Then load the index in the background, merge with local plugins and push again after success.
+ * - If local discovery fails, notify UI to show a dialog and exit Activity through fatalError.
+ *
+ * zh-CN:
+ *
+ * 统一加载索引插件与本地已安装插件, 合并为 PluginCenterItem 列表.
+ *
+ * 行为策略:
+ * - 先加载本地插件并立即推送列表 (本地优先).
+ * - 紧接着在后台加载索引, 成功后与本地合并再推送一次.
+ * - 若本地发现失败, 通过 fatalError 通知 UI 弹窗并退出 Activity.
  */
 class PluginCenterViewModel : ViewModel() {
 
@@ -24,33 +38,91 @@ class PluginCenterViewModel : ViewModel() {
     private val _items = MutableStateFlow<List<PluginCenterItem>>(emptyList())
     val items: StateFlow<List<PluginCenterItem>> = _items
 
-    fun load(context: Context) {
-        viewModelScope.launch {
-            val idxDeferred = async { runCatching { indexRepo.fetchOfficialIndex(context) }.getOrElse { emptyList() } }
-            val insDeferred = async { runCatching { installedRepo.discoverInstalled(context) }.getOrElse { emptyList() } }
+    // Whether index loading is completed (includes "success/failure/empty" results, only means "no longer loading").
+    // zh-CN: 索引加载是否已完成 (包含 "成功/失败/空" 三种结果, 仅代表 "不再加载").
+    private val _indexLoaded = MutableStateFlow(false)
+    val indexLoaded: StateFlow<Boolean> = _indexLoaded
 
-            val indexEntries = idxDeferred.await()
-            val installed = insDeferred.await()
+    // Fatal exception discovered locally (requires user notification and Activity exit).
+    // zh-CN: 本地发现的致命异常 (需要提示用户并退出 Activity).
+    private val _fatalError = MutableSharedFlow<String>(extraBufferCapacity = 1)
+    val fatalError: SharedFlow<String> = _fatalError
+
+    /**
+     * Load plugin list.
+     *
+     * zh-CN: 加载插件列表.
+     *
+     * @param forceRefreshIndex Whether to force refresh index.
+     * - false: Use 1 minute throttling + ETag/backoff (normal page entry).
+     * - true: Attempt to refresh index every time (still respects backoff window, for pull-to-refresh usage).
+     *
+     * zh-CN: 是否强制刷新索引.
+     * - false: 使用 1 分钟节流 + ETag/退避 (普通进入页面).
+     * - true: 每次都尝试刷新索引 (仍遵守退避窗口, 供下拉刷新使用).
+     */
+    fun load(context: Context, forceRefreshIndex: Boolean = false) {
+        Log.d(TAG, "load: forceRefreshIndex = $forceRefreshIndex")
+        viewModelScope.launch {
+            _indexLoaded.value = false
+
+            // First load local plugins (local priority).
+            // zh-CN: 先加载本地插件 (本地优先).
+            val installed = runCatching {
+                installedRepo.discoverInstalled(context)
+            }.onFailure { e ->
+                // Treat "local discovery" failure as a serious exception.
+                // zh-CN: 将 "本地发现" 失败视为严重异常.
+                val message = context.getString(
+                    R.string.error_failed_to_load_plugins_with_reason,
+                    e.message ?: e.toString(),
+                )
+                _fatalError.tryEmit(message)
+            }.getOrNull() ?: run {
+                // Do not continue subsequent logic when unable to obtain local list.
+                // zh-CN: 无法获取本地列表时不再继续后续逻辑.
+                _items.value = emptyList()
+                _indexLoaded.value = true
+                return@launch
+            }
+
+            // Render list using "local only".
+            // zh-CN: 使用 "仅本地" 渲染列表.
+            val onlyLocalItems = installed.mapNotNull { local ->
+                toPluginCenterItem(context, index = null, local = local)
+            }
+            _items.value = onlyLocalItems
+
+            // Asynchronously load index and merge.
+            // zh-CN: 异步加载索引并合并.
+            val indexEntries = runCatching {
+                indexRepo.fetchOfficialIndex(context, forceRefresh = forceRefreshIndex)
+            }.onFailure {
+                // Index fetch exception is not fatal, just log it.
+                // zh-CN: 索引获取异常不算致命, 使用日志记录即可.
+                Log.w(TAG, "fetchOfficialIndex failed: ${it.message}")
+            }.getOrElse { emptyList() }
 
             val installedByPkg = installed.associateBy { it.packageName }
 
-            // Use index to drive UI, to display installable and updatable items.
-            // zh-CN: 用索引驱动 UI, 展示可安装及可更新的项.
-            val fromIndex = indexEntries.map { e ->
+            // Use index to drive UI, showing installable/updatable.
+            // zh-CN: 用索引驱动 UI, 展示 installable/updatable.
+            val fromIndex = indexEntries.mapNotNull { e ->
                 val local = installedByPkg[e.packageName]
                 toPluginCenterItem(context, index = e, local = local)
             }
 
-            // Add items that "exist locally but not in index" (third-party or not indexed yet).
-            // zh-CN: 补充 "本地存在但索引里暂时没有" 的项 (第三方或暂未入索引).
+            // Supplement plugins that "exist locally but not in index" (third-party/not yet in index).
+            // zh-CN: 补充 "本地有但索引没有" 的插件 (第三方/暂未入索引).
             val extraLocals = installed
                 .filter { ins -> indexEntries.none { it.packageName == ins.packageName } }
-                .map { local -> toPluginCenterItem(context, index = null, local = local) }
+                .mapNotNull { local -> toPluginCenterItem(context, index = null, local = local) }
 
             _items.value = fromIndex + extraLocals
+            _indexLoaded.value = true
 
-            // Refresh dialog if showing when returning to the page.
-            // zh-CN: 返回页面时, 对话框如果正在显示则刷新.
+            // When returning to the page, refresh if the details dialog is being displayed.
+            // zh-CN: 返回页面时, 若详情对话框正在显示则刷新.
             PluginInfoDialogManager.refreshIfShowing(context, _items.value)
         }
     }
@@ -63,10 +135,12 @@ class PluginCenterViewModel : ViewModel() {
         PluginInfoDialogManager.refreshIfShowing(context, _items.value)
     }
 
-    private fun toPluginCenterItem(context: Context, index: PluginIndexEntry?, local: InstalledPluginRepository.InstalledPlugin?): PluginCenterItem {
-        val packageName = local?.packageName ?: index?.packageName.orEmpty()
+    private fun toPluginCenterItem(context: Context, index: PluginIndexEntry?, local: InstalledPluginRepository.InstalledPlugin?): PluginCenterItem? {
+        val packageName = local?.packageName ?: index?.packageName
+        if (packageName.isNullOrBlank()) return null
+
         val title = local?.title ?: index?.title ?: packageName
-        val description = local?.description ?: index?.description.orEmpty()
+        val description = local?.description ?: index?.description
         val author = local?.author ?: index?.author
         val collaborators = index?.collaborators ?: emptyList()
 
@@ -74,10 +148,10 @@ class PluginCenterViewModel : ViewModel() {
         val versionCodeLocal = local?.versionCode
         val isInstalled = local != null
 
-        // Mark as updatable and populate update target information only when "installed and index version is higher".
+        // Only mark as updatable when "installed and index version is higher", and fill in updatable target information.
         // zh-CN: 仅当 "已安装且索引版本更高" 时, 标记可更新, 并填充可更新目标信息.
         val (updatableName, updatableCode, updatableDate) = run {
-            val defaultVersionInfo = Triple(null, null, null)
+            val defaultVersionInfo = Triple<String?, Long?, String?>(null, null, null)
             versionCodeLocal ?: return@run defaultVersionInfo
             val versionCodeIndex = index?.versionCode ?: return@run defaultVersionInfo
             if (versionCodeIndex <= versionCodeLocal) return@run defaultVersionInfo
@@ -112,4 +186,9 @@ class PluginCenterViewModel : ViewModel() {
             settings = null,
         )
     }
+
+    companion object {
+        private const val TAG = "PluginCenterViewModel"
+    }
+
 }

@@ -1119,5 +1119,15 @@
     <string name="text_failed_to_update">Échec de la mise à jour</string>
     <string name="text_confirm_to_uninstall">Voulez-vous vraiment désinstaller ?</string>
     <string name="dialog_button_exception_details">Détails</string>
+    <string name="error_failed_to_load_plugins_with_reason">Échec du chargement des plugins.\nRaison : %1$s.</string>
+    <string name="text_retrieving_plugin_list_data" tools:ignore="TypographyEllipsis">Récupération des données de la liste des plugins...</string>
+    <string name="text_no_plugins_installed_hint">Aucun plugin n\'est actuellement installé.\nCliquez sur le bouton \"+\" pour installer des plugins.</string>
+    <string name="text_unknown_author_for_plugin">Auteur Inconnu</string>
+    <string name="text_unknown_description_for_plugin">Description Inconnue</string>
+    <string name="text_unknown_version_for_plugin">Version Inconnue</string>
+    <string name="text_unknown_title_for_plugin">Titre Inconnu</string>
+    <string name="error_specified_autojs6_version_number_must_be_greater_than_461">Le numéro de version AutoJs6 spécifié doit être supérieur à 461</string>
+    <string name="error_autojs6_version_number_must_not_be_lower_than_num">Le numéro de version d\'AutoJs6 ne doit pas être inférieur à %1$s</string>
+    <string name="error_autojs6_version_must_not_be_lower_than_ver">La version d\'AutoJs6 ne doit pas être inférieure à %1$s</string>
 
 </resources>

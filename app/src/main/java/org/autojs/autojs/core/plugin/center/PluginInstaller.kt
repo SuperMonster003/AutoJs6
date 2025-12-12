@@ -9,13 +9,16 @@ import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.network.download.DownloadManager
 import org.autojs.autojs.runtime.api.Mime
 import org.autojs.autojs.ui.main.scripts.ApkInfoDialogManager
+import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.FileUtils
 import org.autojs.autojs.util.FileUtils.toCacheFile
 import org.autojs.autojs.util.UpdateUtils
+import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 import java.io.EOFException
 import java.io.File
@@ -83,27 +86,20 @@ object PluginInstaller {
     }
 
     suspend fun installFromUrlWithPrompt(context: Context, url: String, expectedSha256: String? = null) {
-        var attempt = 0
-        while (true) {
-            when (val result = downloadWithProgress(context, url, expectedSha256)) {
-                is DownloadResult.Success -> {
-                    installFromFileUriWithPrompt(context, result.uri)
-                    return
-                }
-                is DownloadResult.Cancelled -> {
-                    // User cancelled, no need to prompt.
-                    // zh-CN: 用户取消, 无需提示.
-                    return
-                }
-                is DownloadResult.Failure -> {
-                    val retry = showRetryDialog(context, result)
-                    if (retry) {
-                        attempt++
-                        // TODO M1: 不做自动退避, 交给用户控制重试节奏; M2 可引入指数退避/网络可用性判断
-                        continue
-                    } else {
-                        return
-                    }
+        when (val result = downloadWithProgress(context, url, expectedSha256)) {
+            is DownloadResult.Success -> {
+                installFromFileUriWithPrompt(context, result.uri)
+            }
+            is DownloadResult.Cancelled -> {
+                // User cancelled, no need to prompt.
+                // zh-CN: 用户取消, 无需提示.
+            }
+            is DownloadResult.Failure -> {
+                // Wait for user action in the failure dialog (retry/quit).
+                // zh-CN: 等待用户在失败对话框中的操作 (重试/放弃).
+                val wantRetry = showFailureDialogAndAwaitDecision(context, result)
+                if (wantRetry) {
+                    installFromUrlWithPrompt(context, url, expectedSha256)
                 }
             }
         }
@@ -114,44 +110,19 @@ object PluginInstaller {
             is DownloadResult.Success -> {
                 installFromFileUri(context, result.uri)
             }
+            is DownloadResult.Cancelled -> {
+                // User cancelled, no need to prompt.
+                // zh-CN: 用户取消, 无需提示.
+            }
             is DownloadResult.Failure -> {
-                MaterialDialog.Builder(context)
-                    .title(result.titleRes)
-                    .content(result.message)
-                    .positiveText(R.string.dialog_button_dismiss)
-                    .show()
+                // Wait for user action in the failure dialog (retry/quit).
+                // zh-CN: 等待用户在失败对话框中的操作 (重试/放弃).
+                val wantRetry = showFailureDialogAndAwaitDecision(context, result)
+                if (wantRetry) {
+                    installFromUrl(context, url, expectedSha256)
+                }
             }
-            else -> Unit
         }
-    }
-
-    private fun showRetryDialog(context: Context, failure: DownloadResult.Failure): Boolean {
-        var wantRetry = false
-        MaterialDialog.Builder(context)
-            .title(failure.titleRes)
-            .content(failure.message)
-            .neutralText(R.string.dialog_button_exception_details)
-            .neutralColorRes(R.color.dialog_button_hint)
-            .onNeutral { _, _ ->
-                MaterialDialog.Builder(context)
-                    .title(failure.titleRes)
-                    .content(failure.message)
-                    .positiveText(R.string.dialog_button_dismiss)
-                    .show()
-            }
-            .negativeText(R.string.dialog_button_quit)
-            .negativeColorRes(R.color.dialog_button_default)
-            .onNegative { d, _ -> d.dismiss() }
-            .positiveText(R.string.dialog_button_retry)
-            .positiveColorRes(R.color.dialog_button_attraction)
-            .onPositive { d, _ ->
-                wantRetry = true
-                d.dismiss()
-            }
-            .cancelable(false)
-            .autoDismiss(true)
-            .show()
-        return wantRetry
     }
 
     // Probe URL size (HEAD).
@@ -320,6 +291,48 @@ object PluginInstaller {
         val last = url.substringAfterLast('/').substringBefore('?')
         require(last.isNotBlank()) { "Invalid url: $url" }
         return if (last.endsWith(".apk", ignoreCase = true)) last else "$last.apk"
+    }
+
+    private suspend fun showFailureDialogAndAwaitDecision(
+        context: Context,
+        result: DownloadResult.Failure,
+    ): Boolean = withContext(Dispatchers.Main) {
+        suspendCancellableCoroutine { cont ->
+            var resumed = false
+
+            fun tryResume(value: Boolean) {
+                if (resumed) return
+                resumed = true
+                if (cont.isActive) {
+                    cont.resume(value) { _, _, _ -> }
+                }
+            }
+
+            MaterialDialog.Builder(context)
+                .title(result.titleRes)
+                .content(result.message)
+                .neutralText(R.string.text_copy_all)
+                .neutralColorRes(R.color.dialog_button_hint)
+                .onNeutral { d, _ ->
+                    ClipboardUtils.setClip(context, result.message)
+                    ViewUtils.showSnack(d.view, R.string.text_already_copied_to_clip, false)
+                }
+                .negativeText(R.string.dialog_button_quit)
+                .negativeColorRes(R.color.dialog_button_default)
+                .onNegative { d, _ ->
+                    d.dismiss()
+                    tryResume(false)
+                }
+                .positiveText(R.string.dialog_button_retry)
+                .positiveColorRes(R.color.dialog_button_attraction)
+                .onPositive { d, _ ->
+                    d.dismiss()
+                    tryResume(true)
+                }
+                .cancelable(false)
+                .autoDismiss(false)
+                .show()
+        }
     }
 
     private data class HttpStatusException(val code: Int, override val message: String) : RuntimeException(message)

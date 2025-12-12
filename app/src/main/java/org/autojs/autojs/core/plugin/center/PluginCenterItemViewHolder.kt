@@ -68,10 +68,14 @@ class PluginCenterItemViewHolder(
         switchView.setOnCheckedChangeListener(null)
         switchView.isChecked = item.isEnabled
 
-        titleView.text = item.title
-        versionInfoView.text = item.versionSummary
-        authorView.text = item.author
-        descriptionView.text = item.description
+        titleView.text = item.title.takeUnless { it.isBlank() }
+            ?: "[ ${context.getString(R.string.text_unknown_title_for_plugin)} ]"
+        versionInfoView.text = item.versionSummary.takeUnless { it.isBlank() }
+            ?: "[ ${context.getString(R.string.text_unknown_version_for_plugin)} ]"
+        authorView.text = item.author.takeUnless { it.isNullOrBlank() }
+            ?: "[ ${context.getString(R.string.text_unknown_author_for_plugin)} ]"
+        descriptionView.text = item.description.takeUnless { it.isNullOrBlank() }
+            ?: "[ ${context.getString(R.string.text_unknown_description_for_plugin)} ]"
 
         if (item.isInstalled) {
             btnDeleteView.setButtonState(true) {

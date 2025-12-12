@@ -500,22 +500,22 @@ class Global(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
             when (version) {
                 is Number -> coerceNumber(version, 0).let { num ->
                     when {
-                        num.toInt() == 6 -> {
+                        num.toInt() in 2..9 -> {
                             requiresAutojsVersion(scriptRuntime, arrayOf(num.toString()))
                         }
                         else -> {
                             require(num.toInt() >= 461) {
-                                "指定的 AutoJs6 应用版本号需大于 461"
+                                globalContext.getString(R.string.error_specified_autojs6_version_number_must_be_greater_than_461)
                             }
                             require(BuildConfig.VERSION_CODE >= num.toInt()) {
-                                "AutoJs6 应用版本号需不低于 ${num.jsString}"
+                                globalContext.getString(R.string.error_autojs6_version_number_must_not_be_lower_than_num, num.jsString)
                             }
                         }
                     }
                 }
                 else -> coerceString(version).let { ver ->
                     require(Version(BuildConfig.VERSION_NAME).isAtLeast(Version(ver))) {
-                        "AutoJs6 应用版本需不低于 $ver"
+                        globalContext.getString(R.string.error_autojs6_version_must_not_be_lower_than_ver, ver)
                     }
                 }
             }

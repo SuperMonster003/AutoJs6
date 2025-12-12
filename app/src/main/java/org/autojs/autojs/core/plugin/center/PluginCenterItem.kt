@@ -20,7 +20,7 @@ data class PluginCenterItem(
     var updatableVersionDate: String? = null,
     val author: String? = null,
     val collaborators: List<String> = emptyList(),
-    val description: String,
+    val description: String? = null,
 
     // Size of installed package (aggregated base + splits), 0 for uninstalled.
     // zh-CN: 已安装包大小 (聚合 base + splits), 未安装为 0.
@@ -42,12 +42,15 @@ data class PluginCenterItem(
     val versionSummary: String
         get() = formatVersionInfo(versionName, versionCode, versionDate)
 
-    val updatableVersionSummary: String
-        get() = formatVersionInfo(
-            updatableVersionName ?: versionName,
-            updatableVersionCode ?: versionCode,
-            updatableVersionDate,
-        )
+    val updatableVersionSummary: String?
+        get() = when {
+            isUpdatable -> formatVersionInfo(
+                updatableVersionName ?: versionName,
+                updatableVersionCode ?: versionCode,
+                updatableVersionDate,
+            )
+            else -> null
+        }
 
     val isUpdatable: Boolean
         get() = updatableVersionName != null

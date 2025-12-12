@@ -1117,5 +1117,15 @@
     <string name="text_failed_to_update">更新失败</string>
     <string name="text_confirm_to_uninstall">是否确定卸载</string>
     <string name="dialog_button_exception_details">异常详情</string>
+    <string name="error_failed_to_load_plugins_with_reason">插件读取失败.\n原因: %1$s.</string>
+    <string name="text_retrieving_plugin_list_data" tools:ignore="TypographyEllipsis">正在获取插件列表数据...</string>
+    <string name="text_no_plugins_installed_hint">当前没有已安装的插件.\n可点击 \"+\" 按钮安装插件.</string>
+    <string name="text_unknown_author_for_plugin">未知开发者</string>
+    <string name="text_unknown_description_for_plugin">未知描述</string>
+    <string name="text_unknown_version_for_plugin">未知版本</string>
+    <string name="text_unknown_title_for_plugin">未知标题</string>
+    <string name="error_specified_autojs6_version_number_must_be_greater_than_461">指定的 AutoJs6 应用版本号需大于 461</string>
+    <string name="error_autojs6_version_number_must_not_be_lower_than_num">AutoJs6 应用版本号需不低于 %1$s</string>
+    <string name="error_autojs6_version_must_not_be_lower_than_ver">AutoJs6 应用版本需不低于 %1$s</string>
 
 </resources>

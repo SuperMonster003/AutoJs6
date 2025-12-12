@@ -182,7 +182,7 @@ object PaddleOcrPluginHost {
             cont.resumeWith(
                 Result.failure(
                     IllegalStateException(
-                        "bindService SecurityException: $cn. Please make sure the plugin declares <permission android:name=\"org.autojs.permission.PLUGIN\"/> and the Service uses this permission.", se
+                        "bindService SecurityException: $cn. Please make sure the plugin declares <uses-permission android:name=\"org.autojs.permission.PLUGIN\"/> and the Service uses this permission.", se
                     )
                 )
             )
