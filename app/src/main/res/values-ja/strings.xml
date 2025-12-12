@@ -1120,5 +1120,15 @@
     <string name="text_failed_to_update">更新に失敗しました</string>
     <string name="text_confirm_to_uninstall">アンインストールしてもよろしいですか?</string>
     <string name="dialog_button_exception_details">詳細</string>
+    <string name="error_failed_to_load_plugins_with_reason">プラグインの読み込みに失敗しました.\n理由: %1$s.</string>
+    <string name="text_retrieving_plugin_list_data" tools:ignore="TypographyEllipsis">プラグイン一覧のデータを取得しています...</string>
+    <string name="text_no_plugins_installed_hint">現在インストールされているプラグインはありません.\n\"+\" ボタンをタップしてプラグインをインストールしてください.</string>
+    <string name="text_unknown_author_for_plugin">不明な作者</string>
+    <string name="text_unknown_description_for_plugin">不明な説明</string>
+    <string name="text_unknown_version_for_plugin">不明なバージョン</string>
+    <string name="text_unknown_title_for_plugin">不明なタイトル</string>
+    <string name="error_specified_autojs6_version_number_must_be_greater_than_461">指定された AutoJs6 のバージョン番号は 461 より大きくなければなりません</string>
+    <string name="error_autojs6_version_number_must_not_be_lower_than_num">AutoJs6 のバージョン番号は %1$s 未満であってはなりません</string>
+    <string name="error_autojs6_version_must_not_be_lower_than_ver">AutoJs6 のバージョンは %1$s 未満であってはなりません</string>
 
 </resources>

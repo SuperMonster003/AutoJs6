@@ -1119,5 +1119,15 @@
     <string name="text_failed_to_update">Не удалось обновить</string>
     <string name="text_confirm_to_uninstall">Вы действительно хотите удалить?</string>
     <string name="dialog_button_exception_details">Детали</string>
+    <string name="error_failed_to_load_plugins_with_reason">Не удалось загрузить плагины.\nПричина: %1$s.</string>
+    <string name="text_retrieving_plugin_list_data" tools:ignore="TypographyEllipsis">Получение данных списка плагинов...</string>
+    <string name="text_no_plugins_installed_hint">В настоящее время плагины не установлены.\nНажмите кнопку \"+\" чтобы установить плагины.</string>
+    <string name="text_unknown_author_for_plugin">Неизвестный Автор</string>
+    <string name="text_unknown_description_for_plugin">Неизвестное Описание</string>
+    <string name="text_unknown_version_for_plugin">Неизвестная Версия</string>
+    <string name="text_unknown_title_for_plugin">Неизвестный Заголовок</string>
+    <string name="error_specified_autojs6_version_number_must_be_greater_than_461">Указанный номер версии AutoJs6 должен быть больше 461</string>
+    <string name="error_autojs6_version_number_must_not_be_lower_than_num">Номер версии AutoJs6 не должен быть ниже %1$s</string>
+    <string name="error_autojs6_version_must_not_be_lower_than_ver">Версия AutoJs6 не должна быть ниже %1$s</string>
 
 </resources>

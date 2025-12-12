@@ -1117,5 +1117,15 @@
     <string name="text_failed_to_update">更新失敗</string>
     <string name="text_confirm_to_uninstall">是否確定解除安裝</string>
     <string name="dialog_button_exception_details">異常詳情</string>
+    <string name="error_failed_to_load_plugins_with_reason">外掛讀取失敗.\n原因: %1$s.</string>
+    <string name="text_retrieving_plugin_list_data" tools:ignore="TypographyEllipsis">正在獲取外掛列表資料...</string>
+    <string name="text_no_plugins_installed_hint">當前沒有已安裝的外掛.\n可點選 \"+\" 按鈕安裝外掛.</string>
+    <string name="text_unknown_author_for_plugin">未知開發者</string>
+    <string name="text_unknown_description_for_plugin">未知描述</string>
+    <string name="text_unknown_version_for_plugin">未知版本</string>
+    <string name="text_unknown_title_for_plugin">未知標題</string>
+    <string name="error_specified_autojs6_version_number_must_be_greater_than_461">指定的 AutoJs6 應用版本號需大於 461</string>
+    <string name="error_autojs6_version_number_must_not_be_lower_than_num">AutoJs6 應用版本號需不低於 %1$s</string>
+    <string name="error_autojs6_version_must_not_be_lower_than_ver">AutoJs6 應用版本需不低於 %1$s</string>
 
 </resources>

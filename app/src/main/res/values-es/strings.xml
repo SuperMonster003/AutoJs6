@@ -1119,5 +1119,15 @@
     <string name="text_failed_to_update">Error al actualizar</string>
     <string name="text_confirm_to_uninstall">¿Seguro que deseas desinstalar?</string>
     <string name="dialog_button_exception_details">Detalles</string>
+    <string name="error_failed_to_load_plugins_with_reason">Error al cargar los complementos.\nMotivo: %1$s.</string>
+    <string name="text_retrieving_plugin_list_data" tools:ignore="TypographyEllipsis">Obteniendo datos de la lista de complementos...</string>
+    <string name="text_no_plugins_installed_hint">Actualmente no hay complementos instalados.\nPulsa el botón \"+\" para instalar complementos.</string>
+    <string name="text_unknown_author_for_plugin">Autor Desconocido</string>
+    <string name="text_unknown_description_for_plugin">Descripción Desconocida</string>
+    <string name="text_unknown_version_for_plugin">Versión Desconocida</string>
+    <string name="text_unknown_title_for_plugin">Título Desconocido</string>
+    <string name="error_specified_autojs6_version_number_must_be_greater_than_461">El número de versión especificado de AutoJs6 debe ser mayor que 461</string>
+    <string name="error_autojs6_version_number_must_not_be_lower_than_num">El número de versión de AutoJs6 no debe ser inferior a %1$s</string>
+    <string name="error_autojs6_version_must_not_be_lower_than_ver">La versión de AutoJs6 no debe ser inferior a %1$s</string>
 
 </resources>

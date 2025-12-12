@@ -1121,5 +1121,15 @@
     <string name="text_failed_to_update">업데이트 실패</string>
     <string name="text_confirm_to_uninstall">정말 제거하시겠습니까?</string>
     <string name="dialog_button_exception_details">자세히</string>
+    <string name="error_failed_to_load_plugins_with_reason">플러그인을 불러오지 못했습니다.\n사유: %1$s.</string>
+    <string name="text_retrieving_plugin_list_data" tools:ignore="TypographyEllipsis">플러그인 목록 데이터를 가져오는 중입니다...</string>
+    <string name="text_no_plugins_installed_hint">현재 설치된 플러그인이 없습니다.\n\"+\" 버튼을 눌러 플러그인을 설치하세요.</string>
+    <string name="text_unknown_author_for_plugin">알 수 없는 작성자</string>
+    <string name="text_unknown_description_for_plugin">알 수 없는 설명</string>
+    <string name="text_unknown_version_for_plugin">알 수 없는 버전</string>
+    <string name="text_unknown_title_for_plugin">알 수 없는 제목</string>
+    <string name="error_specified_autojs6_version_number_must_be_greater_than_461">지정된 AutoJs6 버전 번호는 461보다 커야 합니다</string>
+    <string name="error_autojs6_version_number_must_not_be_lower_than_num">AutoJs6 버전 번호는 %1$s보다 낮아서는 안 됩니다</string>
+    <string name="error_autojs6_version_must_not_be_lower_than_ver">AutoJs6 버전은 %1$s보다 낮아서는 안 됩니다</string>
 
 </resources>

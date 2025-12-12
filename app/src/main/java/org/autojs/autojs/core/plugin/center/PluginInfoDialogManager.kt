@@ -43,8 +43,8 @@ object PluginInfoDialogManager {
         val pkg = currentPackageName ?: return
         if (!dialog.isShowing) return
         val target = allItems.firstOrNull { it.packageName == pkg } ?: return
-        dialog.dismiss()
         showPluginInfoDialog(context, target)
+        dialog.dismiss()
     }
 
     @JvmStatic
@@ -128,7 +128,7 @@ object PluginInfoDialogManager {
                                 }
                                 else -> {
                                     d.dismiss()
-                                    CoroutineScope(Dispatchers.IO).launch {
+                                    CoroutineScope(Dispatchers.Main).launch {
                                         PluginInstaller.installFromUrlWithPrompt(context, url, info.sha256)
                                     }
                                 }
@@ -154,7 +154,7 @@ object PluginInfoDialogManager {
                                     }
                                     else -> {
                                         d.dismiss()
-                                        CoroutineScope(Dispatchers.IO).launch {
+                                        CoroutineScope(Dispatchers.Main).launch {
                                             PluginInstaller.installFromUrlWithPrompt(context, url, info.sha256)
                                         }
                                     }
@@ -315,7 +315,7 @@ object PluginInfoDialogManager {
         val version: String
         val author: String?
         val collaborators: List<String>
-        val description: String
+        val description: String?
         val packageSize: Long
         val apkUrl: String?
         val sha256: String?
@@ -328,7 +328,7 @@ object PluginInfoDialogManager {
         override val version: String,
         override val author: String?,
         override val collaborators: List<String>,
-        override val description: String,
+        override val description: String?,
         override val packageSize: Long,
         override val apkUrl: String?,
         override val sha256: String?,
@@ -343,7 +343,7 @@ object PluginInfoDialogManager {
         override val version: String,
         override val author: String?,
         override val collaborators: List<String>,
-        override val description: String,
+        override val description: String?,
         override val packageSize: Long,
         override val apkUrl: String?,
         override val sha256: String?,

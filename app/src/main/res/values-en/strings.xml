@@ -1116,5 +1116,15 @@
     <string name="text_failed_to_update">Failed to update</string>
     <string name="text_confirm_to_uninstall">Are you sure to uninstall?</string>
     <string name="dialog_button_exception_details">Details</string>
+    <string name="error_failed_to_load_plugins_with_reason">Failed to load plugins.\nReason: %1$s.</string>
+    <string name="text_retrieving_plugin_list_data" tools:ignore="TypographyEllipsis">Retrieving plugin list data...</string>
+    <string name="text_no_plugins_installed_hint">No plugins currently installed.\nClick the \"+\" button to install plugins.</string>
+    <string name="text_unknown_author_for_plugin">Unknown Author</string>
+    <string name="text_unknown_description_for_plugin">Unknown Description</string>
+    <string name="text_unknown_version_for_plugin">Unknown Version</string>
+    <string name="text_unknown_title_for_plugin">Unknown Title</string>
+    <string name="error_specified_autojs6_version_number_must_be_greater_than_461">Specified AutoJs6 version number must be greater than 461</string>
+    <string name="error_autojs6_version_number_must_not_be_lower_than_num">AutoJs6 version number must not be lower than %1$s</string>
+    <string name="error_autojs6_version_must_not_be_lower_than_ver">AutoJs6 version must not be lower than %1$s</string>
 
 </resources>

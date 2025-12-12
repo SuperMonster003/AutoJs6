@@ -1,15 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/plugin_center_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <org.autojs.autojs.theme.widget.ThemeColorSwipeRefreshLayout
+        android:id="@+id/plugin_center_swipe_refresh"
+        tools:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-    <androidx.recyclerview.widget.ThemeColorRecyclerView
-        android:id="@+id/plugin_center_recycler_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fadeScrollbars="true"
-        android:scrollbarDefaultDelayBeforeFade="600"
-        android:scrollbarFadeDuration="500"
-        android:scrollbars="vertical" />
+        <androidx.recyclerview.widget.ThemeColorRecyclerView
+            android:id="@+id/plugin_center_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fadeScrollbars="true"
+            android:scrollbarDefaultDelayBeforeFade="600"
+            android:scrollbarFadeDuration="500"
+            android:scrollbars="vertical" />
+
+    </org.autojs.autojs.theme.widget.ThemeColorSwipeRefreshLayout>
+
+    <TextView
+        android:id="@+id/plugin_center_empty_hint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textColor="@color/text_color_primary_alpha_70"
+        android:textSize="14sp"
+        android:lineSpacingMultiplier="1.5"
+        android:layout_gravity="center"
+        android:paddingHorizontal="24dp"
+        android:visibility="gone"
+        tools:visibility="visible"
+        tools:text="@string/text_retrieving_plugin_list_data" />
 
 </FrameLayout>
