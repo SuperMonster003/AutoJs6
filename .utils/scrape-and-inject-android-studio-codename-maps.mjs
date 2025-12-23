@@ -127,8 +127,8 @@ function getCodenameMapLinesInfo(releases) {
     const codenameFromName = (name) => {
         // Capture "Android Studio <Codename> [Feature Drop]".
         // zh-CN: 捕获 "Android Studio <Codename> [Feature Drop]".
-        const m = /Android Studio\s+(.+?)\s*(?:(\s+\d+\s+)?Feature Drop)?(?=\s*\|)/i.exec(name);
-        return m ? m[1].trim() : null;
+        const m = /Android\s+Studio\s+(.+?)(\s+\d+)?(\s+Feature Drop)?(?=\s*\|)/i.exec(name);
+        return m?.[1]?.trim();
     };
 
     /**

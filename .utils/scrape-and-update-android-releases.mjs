@@ -48,7 +48,7 @@ function updateCsv(data) {
  * @param {object} options
  * @param {boolean} [options.showIndex=false]
  * @param {{ mode: 'all' | 'not-all-numbers' | 'none', style: 'single' | 'double' }} [options.quote]
- * @param {{ key: string, compare: (a: AndroidReleaseCsv, b: AndroidReleaseCsv) => number } | { key: string, direction: 'asc' | 'desc' }} [options.sortBy]
+ * @param {{ key: string, compare?: (a: AndroidReleaseCsv, b: AndroidReleaseCsv) => number, direction?: 'asc' | 'desc' }} [options.sortBy]
  * @param {{ [key: string]: string }} [options.headerMap]
  * @param {'lower' | 'upper' | 'snake' | 'kebab' | 'title' | 'camel' | 'pascal' | null} [options.headerCase]
  * @param {string[]} [options.headers]

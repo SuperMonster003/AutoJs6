@@ -229,7 +229,10 @@ pluginManagement {
             val split = version.split(Regex("[\\s+\\-]"), limit = 2)
             val numberStr = split[0]
             val numberParts = numberStr.split('.').map {
-                it.toIntOrNull() ?: throw IllegalArgumentException("Invalid version part: '$it' in version: '$version'")
+                when {
+                    it.matches(Regex("[xyz*?]", RegexOption.IGNORE_CASE)) -> 0
+                    else -> it.toIntOrNull()
+                } ?: throw IllegalArgumentException("Invalid version part: '$it' in version: '$version'")
             }
 
             val suffixStr = split.getOrNull(1)?.trim().orEmpty()
@@ -603,11 +606,14 @@ pluginManagement {
                 }
 
                 val kspVersion = run {
-                    val ver = Version(kspReleaseProps, kotlinVersion)
+                    val ver = Version(versionMap, kotlinVersion)
                     val key = ver.bestMatchingKey ?: return@run null
                     val value = ver.bestMatchingValue ?: return@run null
                     suffix += ver.bestMatchingOperationHintSuffix
-                    "$key-$value"
+                    when {
+                        key.contains(Regex("[xyz*?]", RegexOption.IGNORE_CASE)) -> value
+                        else -> "$key-$value"
+                    }
                 }
 
                 mapOf("version" to kspVersion, "suffix" to suffix)

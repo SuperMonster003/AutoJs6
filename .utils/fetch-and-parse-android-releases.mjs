@@ -10,7 +10,7 @@ const WIKI_URL = 'https://en.wikipedia.org/wiki/Android_version_history';
 const ANDROID_VC_URL = 'https://developer.android.com/reference/android/os/Build.VERSION_CODES';
 
 const norm = (/** @type {string} */ s) => (s ?? '').trim().replace(/\s+/g, ' ');
-const trimAndNormDash = (/** @type {string} */ s) => s.replace(/\s*[\u002d\u2013\u2014]\s*/g, '-');
+const trimAndNormDash = (/** @type {string} */ s) => s.replace(/\s*[\u002d\u2013\u2014](\s*N\/A)?\s*/ig, '-');
 const stripSupportPrefix = (/** @type {string} */ s) => s.replace(/^(un)?supported:\s*/ig, '');
 const handleCsvEmptyString = (/** @type {string} */ s) => /^-?$/.test(s) ? '""' : s;
 
@@ -36,7 +36,7 @@ function quoteIfNeeded(o) {
  */
 function cleanCell(cell) {
     const cloned = cell.clone();
-    cloned.find('style,script,sup.reference').remove();
+    cloned.find('style,script,sup.reference,span.sr-only').remove();
     return cloned.text().trim().replace(/\s+/g, ' ');
 }
 
