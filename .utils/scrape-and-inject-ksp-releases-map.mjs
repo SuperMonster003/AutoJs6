@@ -10,6 +10,55 @@ const URL = 'https://api.github.com/repos/google/ksp/releases';
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 
 /**
+ * Legacy tag: "<kotlin>-<ksp>"
+ * - kotlinKey = full kotlin part
+ * - kspVer = last part
+ *
+ * KSP2 tag: "<ksp>"
+ * - kotlinKey = "<major>.<minor>.Z" (and keep qualifier if exists)
+ * - kspVer = full part
+ *
+ * @param {string} rawTag
+ * @returns {{ kotlinKey: string, kspVer: string } | null}
+ */
+function splitKspTag(rawTag) {
+    const tag = String(rawTag || '').trim();
+    if (!tag) return null;
+
+    /**
+     * @param {string} s
+     * @returns {boolean}
+     */
+    const looksLikePlainSemver = (s) => /^\d+\.\d+\.\d+(?:\.\d+)?$/.test(s);
+
+    // Legacy: "<kotlin>-<kspSemver>"
+    const parts = tag.split('-');
+    const last = parts[parts.length - 1];
+    if (parts.length >= 2 && looksLikePlainSemver(last)) {
+        return {
+            kotlinKey: parts.slice(0, -1).join('-'),
+            kspVer: last,
+        };
+    }
+
+    // KSP2: tag itself is kspVer (e.g. "2.3.4", or maybe "2.4.0-RC1") ----
+    // Parse base numbers from the first segment before '-'
+    const base = tag.split('-', 1)[0];
+    const m = /^(\d+)\.(\d+)\.(\d+)(?:\.\d+)?$/.exec(base);
+    if (!m) return null;
+
+    const major = m[1];
+    const minor = m[2];
+
+    // Keep qualifier if you want separate buckets for RC/Beta (optional)
+    const qualifier = tag.includes('-') ? tag.slice(tag.indexOf('-') + 1).trim() : '';
+    const kotlinKeyPrefix = `${major}.${minor}.Z`;
+    const kotlinKey = qualifier ? `${kotlinKeyPrefix}-${qualifier}` : kotlinKeyPrefix;
+
+    return { kotlinKey, kspVer: tag };
+}
+
+/**
  * @returns {Promise<KspRelease[]>}
  */
 async function fetchKspReleases() {
@@ -40,18 +89,10 @@ async function fetchKspReleases() {
                 publishedAt: release.published_at,
             });
 
-            const parts = tag.split('-');
-            if (parts.length < 2) continue;
-            /**
-             * @example string
-             * "2.2.20-2.0.3" -> "2.2.20"
-             * "1.9.10-1.0.13" -> "1.9.10"
-             * "2.2.20-RC2-2.0.2" -> "2.2.20-RC2"
-             * "1.9.20-RC-1.0.13" -> "1.9.20-RC"
-             * @type {string}
-             */
-            const kotlinVer = parts.slice(0, -1).join('-');
-            if (kotlinVer === minToCheck) {
+            const parsed = splitKspTag(tag);
+            if (!parsed) continue;
+
+            if (parsed.kotlinKey === minToCheck) {
                 reached = true;
                 break;
             }
@@ -76,7 +117,10 @@ async function getMinKotlinVersionToCheck() {
  * @returns {string[]}
  */
 function parseReleases(releases) {
-    if (!Array.isArray(releases)) return [];
+    if (!Array.isArray(releases)) {
+        console.warn('Failed to parse KSP releases');
+        return [];
+    }
 
     // De-duplicate by Kotlin version, keep the latest one by release date.
     // zh-CN: 根据 Kotlin 版本去重, 保留发布时间最新的一条.
@@ -85,11 +129,12 @@ function parseReleases(releases) {
     const latestByKotlin = new Map();
     for (const r of releases) {
         const rawVer = String(r.version || '').trim();
-        const parts = rawVer.split('-');
-        if (parts.length < 2) continue;
-
-        const kspVer = parts.pop();
-        const KotlinVer = parts.join('-');
+        const parsed = splitKspTag(rawVer);
+        if (!parsed) {
+            console.warn(`Failed to parse KSP tag "${rawVer}"`);
+            continue;
+        }
+        const { kotlinKey: KotlinVer, kspVer } = parsed;
 
         const d = new Date(r.publishedAt);
         if (Number.isNaN(d.getTime())) continue;
