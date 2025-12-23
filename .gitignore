@@ -35,6 +35,8 @@ sync.ffs_db
 /releases/
 /tools/
 
+/gradle/wrappers/backup/
+
 /local.properties
 /sign.properties
 /*dependecies_tree.txt

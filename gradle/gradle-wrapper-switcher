@@ -1,0 +1,161 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Repo root = directory where this script lives
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+WRAPPERS_DIR="$ROOT_DIR/gradle/wrappers"
+BACKUP_ROOT="$WRAPPERS_DIR/backup"
+
+# Parse Gradle version from gradle-wrapper.properties (distributionUrl)
+extract_version() {
+  local props="$1"
+  local url
+  url="$(grep -E '^\s*distributionUrl=' "$props" | head -n 1 | cut -d= -f2- || true)"
+  # Match: gradle-9.2.1-bin.zip / gradle-8.14.3-all.zip / gradle-9.0-rc-1-bin.zip
+  if [[ "$url" =~ gradle-([0-9A-Za-z.\-]+)-(bin|all)\.zip ]]; then
+    echo "${BASH_REMATCH[1]}"
+  else
+    echo "unknown"
+  fi
+}
+
+major_of() {
+  local v="$1"
+  # major = digits before first dot or dash
+  if [[ "$v" =~ ^([0-9]+) ]]; then
+    echo "${BASH_REMATCH[1]}"
+  else
+    echo "0"
+  fi
+}
+
+list_wrappers() {
+  shopt -s nullglob
+  local d
+  for d in "$WRAPPERS_DIR"/g[0-9]*; do
+    [[ -d "$d" ]] || continue
+    local name
+    name="$(basename "$d")"
+    [[ "$name" =~ ^g[0-9]+$ ]] || continue
+
+    local props="$d/gradle/wrapper/gradle-wrapper.properties"
+    local jar="$d/gradle/wrapper/gradle-wrapper.jar"
+    local sh="$d/gradlew"
+    local bat="$d/gradlew.bat"
+    [[ -f "$props" && -f "$jar" && -f "$sh" && -f "$bat" ]] || continue
+
+    local ver major
+    ver="$(extract_version "$props")"
+    major="$(major_of "$ver")"
+    printf "%s|%s|%s\n" "$name" "$major" "$ver"
+  done | sort -t'|' -k2,2n
+}
+
+backup_current() {
+  mkdir -p "$BACKUP_ROOT"
+  local stamp
+  stamp="$(date +%Y%m%d-%H%M%S)"
+  local dest="$BACKUP_ROOT/$stamp"
+  mkdir -p "$dest/gradle/wrapper"
+
+  # Backup only if exists
+  [[ -f "$ROOT_DIR/gradlew" ]] && cp -f "$ROOT_DIR/gradlew" "$dest/" || true
+  [[ -f "$ROOT_DIR/gradlew.bat" ]] && cp -f "$ROOT_DIR/gradlew.bat" "$dest/" || true
+  [[ -f "$ROOT_DIR/gradle/wrapper/gradle-wrapper.jar" ]] && cp -f "$ROOT_DIR/gradle/wrapper/gradle-wrapper.jar" "$dest/gradle/wrapper/" || true
+  [[ -f "$ROOT_DIR/gradle/wrapper/gradle-wrapper.properties" ]] && cp -f "$ROOT_DIR/gradle/wrapper/gradle-wrapper.properties" "$dest/gradle/wrapper/" || true
+
+  echo "Backed up current wrapper to: $dest"
+
+  # Cleanup old backups (keep last 10)
+  local backups
+  mapfile -t backups < <(ls -1dt "$BACKUP_ROOT"/*/ 2>/dev/null)
+  if [[ ${#backups[@]} -gt 10 ]]; then
+    local i
+    for ((i=10; i<${#backups[@]}; i++)); do
+      rm -rf "${backups[$i]}"
+    done
+    echo "Deleted $(( ${#backups[@]} - 10 )) old backup(s)."
+  fi
+}
+
+apply_wrapper() {
+  local wrapper_dir="$1"
+
+  # Try to stop current Gradle daemon (best-effort)
+  if [[ -x "$ROOT_DIR/gradlew" ]]; then
+    "$ROOT_DIR/gradlew" --stop >/dev/null 2>&1 || true
+  fi
+
+  backup_current
+
+  mkdir -p "$ROOT_DIR/gradle/wrapper"
+  cp -f "$wrapper_dir/gradlew" "$ROOT_DIR/gradlew"
+  cp -f "$wrapper_dir/gradlew.bat" "$ROOT_DIR/gradlew.bat"
+  cp -f "$wrapper_dir/gradle/wrapper/gradle-wrapper.jar" "$ROOT_DIR/gradle/wrapper/gradle-wrapper.jar"
+  cp -f "$wrapper_dir/gradle/wrapper/gradle-wrapper.properties" "$ROOT_DIR/gradle/wrapper/gradle-wrapper.properties"
+
+  chmod +x "$ROOT_DIR/gradlew" || true
+}
+
+usage() {
+  cat <<EOF
+Usage:
+  ./gradle-wrapper-switcher              # interactive menu
+  ./gradle-wrapper-switcher --use g9     # switch to a specific wrapper directory
+  ./gradle-wrapper-switcher --list       # list detected wrappers
+EOF
+}
+
+main() {
+  [[ -d "$WRAPPERS_DIR" ]] || { echo "Wrappers directory not found: $WRAPPERS_DIR"; exit 1; }
+
+  if [[ "${1:-}" == "--list" ]]; then
+    list_wrappers | while IFS='|' read -r name major ver; do
+      echo "$name -> Gradle $major.x ($ver)"
+    done
+    exit 0
+  fi
+
+  if [[ "${1:-}" == "--use" ]]; then
+    local target="${2:-}"
+    [[ -n "$target" ]] || { usage; exit 1; }
+    local dir="$WRAPPERS_DIR/$target"
+    [[ -d "$dir" ]] || { echo "Wrapper not found: $dir"; exit 1; }
+    apply_wrapper "$dir"
+    local ver major
+    ver="$(extract_version "$dir/gradle/wrapper/gradle-wrapper.properties")"
+    major="$(major_of "$ver")"
+    echo "Switched to: Gradle $major.x ($ver) from $target"
+    echo "Tip: In IntelliJ IDEA or Android Studio, use \"Reload All Gradle Projects\" if needed."
+    exit 0
+  fi
+
+  # interactive
+  mapfile -t items < <(list_wrappers)
+  [[ "${#items[@]}" -gt 0 ]] || { echo "No valid wrappers found under: $WRAPPERS_DIR"; exit 1; }
+
+  echo "Please choose the Gradle version to switch to:"
+  local i=1
+  local names=()
+  local line name major ver
+  for line in "${items[@]}"; do
+    IFS='|' read -r name major ver <<<"$line"
+    names+=("$name")
+    echo "$i. Gradle ${major}.x (Pinned version: $ver)"
+    i=$((i+1))
+  done
+
+  echo -n "> "
+  read -r choice
+  [[ "$choice" =~ ^[0-9]+$ ]] || { echo "Invalid selection."; exit 1; }
+  (( choice>=1 && choice<=${#names[@]} )) || { echo "Out of range."; exit 1; }
+
+  local picked="${names[$((choice-1))]}"
+  apply_wrapper "$WRAPPERS_DIR/$picked"
+  local picked_ver
+  picked_ver="$(extract_version "$WRAPPERS_DIR/$picked/gradle/wrapper/gradle-wrapper.properties")"
+  echo "Switched to: Gradle ${picked//[^0-9]/}.x (Pinned version: $picked_ver)"
+  echo "Tip: In IntelliJ IDEA or Android Studio, use \"Reload All Gradle Projects\" if needed."
+}
+
+main "$@"
