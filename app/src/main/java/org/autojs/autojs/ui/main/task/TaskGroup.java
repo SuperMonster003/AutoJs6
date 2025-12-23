@@ -39,7 +39,7 @@ public abstract class TaskGroup implements Parent<Task> {
     }
 
     public String getTitle() {
-        return mTitle;
+        return mTitle + "  [ " + mTasks.size() + " ]";
     }
 
     public abstract Context getContext();

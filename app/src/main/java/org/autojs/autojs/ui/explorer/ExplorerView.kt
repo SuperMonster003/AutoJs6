@@ -187,11 +187,15 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                 ExplorerChangeEvent.CREATE -> {
                     explorerItemManager.insertAtFront(event.newItem)
                     mExplorerAdapter.notifyItemInserted(event.newItem, 0)
+                    mExplorerAdapter.notifyItemChanged(positionOfCategoryDir)
+                    mExplorerAdapter.notifyItemChanged(positionOfCategoryFile())
                 }
                 ExplorerChangeEvent.REMOVE -> {
                     i = explorerItemManager.remove(item)
                     if (i >= 0) {
                         mExplorerAdapter.notifyItemRemoved(item, i)
+                        mExplorerAdapter.notifyItemChanged(positionOfCategoryDir)
+                        mExplorerAdapter.notifyItemChanged(positionOfCategoryFile())
                     }
                 }
             }
@@ -1077,7 +1081,9 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
         override fun bind(isDirCategory: Any, position: Int) {
             if (isDirCategory !is Boolean) return
-            binding.title.setText(if (isDirCategory) R.string.text_directory else R.string.text_file)
+            val titleRes = if (isDirCategory) R.string.text_directory else R.string.text_file
+            val count = if (isDirCategory) explorerItemManager.groupCount() else explorerItemManager.itemCount()
+            binding.title.text = "${context.getString(titleRes)}  [ $count ]"
             mIsDir = isDirCategory
             if (isDirCategory && canGoUp()) {
                 binding.goUp.visibility = VISIBLE
