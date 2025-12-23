@@ -59,7 +59,10 @@ public class TaskListRecyclerView extends ThemeColorRecyclerView {
             try {
                 int i = mRunningTaskGroup.addTask(execution);
                 if (i != -1) {
-                    post(() -> mAdapter.notifyChildInserted(0, i));
+                    post(() -> {
+                        mAdapter.notifyChildInserted(0, i);
+                        mAdapter.notifyParentChanged(0);
+                    });
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -81,6 +84,7 @@ public class TaskListRecyclerView extends ThemeColorRecyclerView {
                 final int i = mRunningTaskGroup.removeTask(execution);
                 if (i >= 0) {
                     mAdapter.notifyChildRemoved(0, i);
+                    mAdapter.notifyParentChanged(0);
                 } else {
                     refresh();
                 }
@@ -167,10 +171,12 @@ public class TaskListRecyclerView extends ThemeColorRecyclerView {
     void onTaskChange(ModelChange<?> taskChange) {
         if (taskChange.getAction() == ModelChange.INSERT) {
             mAdapter.notifyChildInserted(1, mPendingTaskGroup.addTask(taskChange.getData()));
+            mAdapter.notifyParentChanged(1);
         } else if (taskChange.getAction() == ModelChange.DELETE) {
             final int i = mPendingTaskGroup.removeTask(taskChange.getData());
             if (i >= 0) {
                 mAdapter.notifyChildRemoved(1, i);
+                mAdapter.notifyParentChanged(1);
             } else {
                 Log.w(LOG_TAG, "data inconsistent on change: " + taskChange);
                 refresh();
