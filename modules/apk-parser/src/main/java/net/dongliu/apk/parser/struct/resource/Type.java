@@ -55,7 +55,7 @@ public class Type {
             if (lang != null) {
                 // At least keep valid language.
                 // zh-CN: 至少保留合法 language.
-                tmpLocale = new Locale(lang);
+                tmpLocale = Locale.forLanguageTag(lang);
             } else {
                 tmpLocale = Locale.ROOT;
             }

@@ -29,7 +29,6 @@ import org.autojs.autojs.runtime.api.Shell
 import org.autojs.autojs.runtime.api.WrappedShizuku
 import org.autojs.autojs.script.AutoFileSource
 import org.autojs.autojs.script.JavaScriptSource
-import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.tool.UiHandler
 import org.autojs.autojs.util.StringUtils
 import org.autojs.autojs.util.ViewUtils
