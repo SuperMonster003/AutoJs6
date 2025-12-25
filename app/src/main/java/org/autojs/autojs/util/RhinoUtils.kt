@@ -728,10 +728,10 @@ object RhinoUtils {
     }
 
     @JvmStatic
-    fun js_object_getOwnPropertyDescriptor(value: ScriptableObject, key: Any): ScriptableObject? = withRhinoContext { cx ->
+    fun js_object_getOwnPropertyDescriptor(value: ScriptableObject, key: Any): ScriptableObject = withRhinoContext { cx ->
         val topLevel = ImporterTopLevel(cx)
         val obj = ensureScriptableObject(toObject(cx, topLevel, value))
-        obj.getOwnPropertyDescriptor(cx, key)
+        obj.getOwnPropertyDescriptor(cx, key).toScriptableObject(topLevel)
     }
 
     @JvmStatic
@@ -794,8 +794,6 @@ object RhinoUtils {
                     it.initStandardObjects()
                     cxRhino = it
                 }
-            @Suppress("DEPRECATION")
-            cx.optimizationLevel = -1
             cx.languageVersion = Context.VERSION_ES6
             cx.isInterpretedMode = true
             function.invoke(cx)

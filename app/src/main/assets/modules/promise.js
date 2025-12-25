@@ -5,10 +5,7 @@
  * @see https://raw.githubusercontent.com/taylorhakes/promise-polyfill/master/dist/polyfill.js
  */
 
-/**
- * @type {PromiseConstructorLike}
- */
-module.exports = (/* @IIFE */ () => {
+( /* @ModuleIIFE */ () => {
     let _ = {
         isArray(x) {
             return Boolean(x && typeof x.length !== 'undefined');
@@ -314,5 +311,8 @@ module.exports = (/* @IIFE */ () => {
         },
     });
 
-    return Promise;
+    /**
+     * @type {PromiseConstructorLike}
+     */
+    module.exports = Promise;
 })();

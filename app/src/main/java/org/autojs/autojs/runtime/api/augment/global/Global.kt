@@ -107,8 +107,6 @@ class Global(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
     override val selfAssignmentGetters = listOf<Pair<String, Supplier<Any?>>>(
         "WIDTH" to Supplier { ScreenMetrics.deviceScreenWidth },
         "HEIGHT" to Supplier { ScreenMetrics.deviceScreenHeight },
-        "Promise" to Supplier { scriptRuntime.js_Promise },
-        "ResultAdapter" to Supplier { scriptRuntime.js_ResultAdapter },
     )
 
     companion object {

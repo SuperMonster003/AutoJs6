@@ -198,7 +198,7 @@ public class ContextWrapper extends Context {
         Context.setCachingEnabled(cachingEnabled);
     }
 
-    public static DebuggableScript getDebuggableView(Script script) {
+    public static DebuggableScript getDebuggableView(ScriptOrFn<?> script) {
         return Context.getDebuggableView(script);
     }
 
