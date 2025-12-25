@@ -155,7 +155,13 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
 
     override fun onStart() {
         super.onStart()
-        WrappedShizuku.bindUserServiceIfNeeded()
+        // @Hint by SuperMonster003 on Dec 24, 2025.
+        //  ! Avoid binding Shizuku user service on app start.
+        //  ! It may spawn root user-service processes repeatedly during IDE "Run" (force-stop + relaunch).
+        //  ! zh-CN:
+        //  ! 避免在应用启动时绑定 Shizuku user service.
+        //  ! IDE "Run" (force-stop + relaunch) 期间可能反复拉起 root user-service 进程.
+        //  # WrappedShizuku.bindUserServiceIfNeeded()
     }
 
     private fun recreateIfNeeded() {

@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.7.0": {
-      "released_date": "2025/12/23",
+      "released_date": "2025/12/25",
       "feature": [
         "插件中心功能, 支持插件的安装/卸载/更新等操作 (入口: 主页抽屉按钮)",
         "cvt 模块, 用于数据单位转换 (参阅 项目文档 > [单位转换](https://docs.autojs6.com/#/cvt))",
@@ -57,6 +57,7 @@
         "项目配置文件中构建版本号或构建时间出现较大数字时可能导致应用崩溃的问题",
         "频繁获取或重建 ImageReader 时可能因缓冲区暂无可用帧导致应用崩溃的问题",
         "输入事件观察器 InputEventObserver 可能导致应用启动时明显卡顿的问题",
+        "Shizuku 用户服务进程未能正常结束导致进程堆积的问题 _[`issue #474`](http://issues.autojs6.com/474)_",
         "打包应用无法正常使用 Paddle OCR 与 Rapid OCR 功能的问题",
         "版本历史页面部分系统因字体差别导致统计数据显示不完整的问题",
         "部分设备无法正常初始化 MLKit Google OCR 的问题 (试修) _[`issue #8`](http://issues.autojs6.com/8#issuecomment-3117061768)_",

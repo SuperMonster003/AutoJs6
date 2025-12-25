@@ -3,11 +3,13 @@ package org.autojs.autojs.core.shizuku
 import android.app.ActivityManager
 import android.content.ComponentName
 import android.content.Context
+import android.os.Process
 import android.os.RemoteException
 import android.util.Log
 import androidx.annotation.Keep
 import org.autojs.autojs.runtime.api.AbstractShell
 import org.autojs.autojs.runtime.api.ProcessShell
+import kotlin.system.exitProcess
 
 class UserService : IUserService.Stub {
 
@@ -49,8 +51,22 @@ class UserService : IUserService.Stub {
      */
     override fun destroy() {
         Log.i("UserService", "destroy")
+
+        // Ensure the user service process terminates when Shizuku server requests destroy.
+        // zh-CN: 确保 Shizuku server 请求 destroy 时, user service 进程能够真正退出.
+        runCatching {
+            Process.killProcess(Process.myPid())
+        }
+
+        // Fallback to exit the process if killProcess doesn't stop it immediately.
+        // zh-CN: 如果 killProcess 未能立刻终止, 则使用 exitProcess 作为兜底退出.
+        runCatching {
+            exitProcess(0)
+        }
     }
 
+    // Exit method defined by user.
+    // zh-CN: 用户定义的退出方法.
     override fun exit() {
         destroy()
     }
