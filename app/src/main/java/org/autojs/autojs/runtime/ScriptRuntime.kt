@@ -388,11 +388,11 @@ class ScriptRuntime private constructor(builder: Builder) {
         get() = bridges.isJavaPrimitiveWrap()
         set(b) = bridges.setJavaPrimitiveWrap(b)
 
-    private lateinit var augmentedApp: ScriptableObject
-
-    private lateinit var augmentedAutojs: ScriptableObject
-
     internal lateinit var consoleProxyObject: ProxyObject
+
+    internal lateinit var augmentedApp: ScriptableObject
+
+    internal lateinit var augmentedAutojs: ScriptableObject
 
     internal lateinit var augmentedOcrMLKit: ScriptableObject
 
