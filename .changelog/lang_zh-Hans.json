@@ -33,6 +33,7 @@
       ],
       "fix": [
         "notice 方法参数数量及类型限制错误 _[`issue #462`](http://issues.autojs6.com/462)_",
+        "ui.R 属性 (getter) 无法正常使用的问题",
         "isJavaClass/isJavaPackage 等全局方法无效的问题",
         "timers.keepAlive 方法 timeout 参数功能无效的问题",
         "floaty.window/rawWindow 方法无法接受字符串参数的问题 _[`issue #467`](http://issues.autojs6.com/467)_",

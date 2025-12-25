@@ -80,7 +80,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
 
     override val key = super.key.lowercase()
 
-    private val mProperties = ConcurrentHashMap<String, Any?>()
+    private val mProperties = ConcurrentHashMap<String, Any>()
 
     private val mWidgetConstructor = object : BaseFunction() {
 
@@ -124,7 +124,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
     )
 
     override val selfAssignmentGetters = listOf(
-        "R" to Supplier { scriptRuntime.topLevelScope.prop("R").jsUnwrapped() },
+        "R" to Supplier { scriptRuntime.augmentedAutojs["R"] },
         "__widgets__" to Supplier { scriptRuntime.ui.widgets },
         "root" to Supplier<Any?> {
             val activity = getActivity(scriptRuntime)
