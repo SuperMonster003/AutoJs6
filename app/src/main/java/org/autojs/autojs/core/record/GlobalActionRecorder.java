@@ -57,10 +57,9 @@ public class GlobalActionRecorder implements Recorder.OnStateChangedListener {
         return new TouchRecorder(mContext) {
             @Override
             protected InputEventRecorder createInputEventRecorder() {
-                if (Pref.rootRecordGeneratesBinary())
-                    return new InputEventToAutoFileRecorder(mContext);
-                else
-                    return new InputEventToRootAutomatorRecorder();
+                return Pref.rootRecordGeneratesBinary()
+                        ? new InputEventToAutoFileRecorder(mContext)
+                        : new InputEventToRootAutomatorRecorder();
             }
         };
     }
@@ -86,8 +85,9 @@ public class GlobalActionRecorder implements Recorder.OnStateChangedListener {
     }
 
     public int getState() {
-        if (mTouchRecorder == null)
+        if (mTouchRecorder == null) {
             return Recorder.STATE_NOT_START;
+        }
         return mTouchRecorder.getState();
     }
 
@@ -116,10 +116,11 @@ public class GlobalActionRecorder implements Recorder.OnStateChangedListener {
         }
         if (!mDiscard) {
             String code = getCode();
-            if (code != null)
+            if (code != null) {
                 handleRecordedScript(code);
-            else
+            } else {
                 handleRecordedFile(getPath());
+            }
         }
         for (Recorder.OnStateChangedListener listener : mOnStateChangedListeners) {
             listener.onStop();
@@ -154,14 +155,13 @@ public class GlobalActionRecorder implements Recorder.OnStateChangedListener {
     }
 
     private void handleRecordedFile(final String path) {
-        if (isBackgroundThread()) {
+        if (isMainThread()) {
+            new ScriptOperations(mContext, null)
+                    .importFile(path)
+                    .subscribe();
+        } else {
             GlobalAppContext.post(() -> handleRecordedFile(path));
-            return;
         }
-        new ScriptOperations(mContext, null)
-                .importFile(path)
-                .subscribe();
-
     }
 
     private void showRecordHandleDialog(final String script) {

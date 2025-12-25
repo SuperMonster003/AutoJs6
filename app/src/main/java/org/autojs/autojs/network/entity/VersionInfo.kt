@@ -13,7 +13,7 @@ import kotlin.math.roundToLong
  */
 class VersionInfo : ExtendedVersionInfo {
 
-    var versionName: String = ""
+    var versionName = ""
         private set
 
     var versionCode = 0L
@@ -43,7 +43,7 @@ class VersionInfo : ExtendedVersionInfo {
                 Log.d(TAG, "versionName: $versionName")
             }
             if (versionCode <= 0 && line.contains(regexVersionCode)) {
-                versionCode = regexVersionCode.find(line)?.groupValues?.get(1)?.toDouble()?.roundToLong() ?: -1L
+                versionCode = regexVersionCode.find(line)?.groupValues?.get(1)?.toDoubleOrNull()?.roundToLong() ?: -1L
                 Log.d(TAG, "versionCode: $versionCode")
             }
             if (versionName.isNotBlank() && versionCode > 0) {

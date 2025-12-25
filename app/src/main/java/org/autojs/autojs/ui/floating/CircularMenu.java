@@ -51,7 +51,7 @@ import java.text.MessageFormat;
 /**
  * Created by Stardust on Oct 18, 2017.
  */
-public class CircularMenu implements Recorder.OnStateChangedListener, LayoutInspector.CaptureAvailableListener {
+public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
 
     public record StateChangeEvent(int currentState, int previousState) {
         /* Empty record body. */
@@ -67,6 +67,7 @@ public class CircularMenu implements Recorder.OnStateChangedListener, LayoutInsp
     private RoundedImageView mActionViewIcon;
     private Context mContext;
     private final GlobalActionRecorder mRecorder;
+    private final Recorder.OnStateChangedListener mRecorderStateListener;
     private CircularActionMenuBinding binding;
     private MaterialDialog mSettingsDialog;
     private MaterialDialog mLayoutInspectDialog;
@@ -90,7 +91,28 @@ public class CircularMenu implements Recorder.OnStateChangedListener, LayoutInsp
         initFloaty();
         setupWindowListeners();
         mRecorder = GlobalActionRecorder.getSingleton(context);
-        mRecorder.addOnStateChangedListener(this);
+        mRecorderStateListener = new Recorder.OnStateChangedListener() {
+            @Override
+            public void onStart() {
+                setState(STATE_RECORDING);
+            }
+
+            @Override
+            public void onStop() {
+                setState(STATE_NORMAL);
+            }
+
+            @Override
+            public void onPause() {
+                /* Empty body. */
+            }
+
+            @Override
+            public void onResume() {
+                /* Empty body. */
+            }
+        };
+        mRecorder.addOnStateChangedListener(mRecorderStateListener);
         AutoJs.getInstance().getLayoutInspector().addCaptureAvailableListener(this);
         mA11yTool = new AccessibilityTool(mContext);
     }
@@ -373,28 +395,8 @@ public class CircularMenu implements Recorder.OnStateChangedListener, LayoutInsp
             EventBus.getDefault().post(new StateChangeEvent(STATE_CLOSED, mState));
             mState = STATE_CLOSED;
         }
-        mRecorder.removeOnStateChangedListener(this);
+        mRecorder.removeOnStateChangedListener(mRecorderStateListener);
         AutoJs.getInstance().getLayoutInspector().removeCaptureAvailableListener(this);
-    }
-
-    @Override
-    public void onStart() {
-        setState(STATE_RECORDING);
-    }
-
-    @Override
-    public void onStop() {
-        setState(STATE_NORMAL);
-    }
-
-    @Override
-    public void onPause() {
-        /* Empty body. */
-    }
-
-    @Override
-    public void onResume() {
-        /* Empty body. */
     }
 
 }
