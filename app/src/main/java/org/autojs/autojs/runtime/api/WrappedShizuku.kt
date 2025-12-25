@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
+import android.os.DeadObjectException
 import android.os.IBinder
 import android.util.Log
 import org.autojs.autojs.AbstractAutoJs.Companion.isInrt
@@ -17,6 +18,7 @@ import org.autojs.autojs.util.App.SHIZUKU
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 import rikka.shizuku.Shizuku
+import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import org.autojs.autojs.runtime.api.AbstractShell.Result as ShellResult
@@ -37,18 +39,27 @@ object WrappedShizuku {
     }
     private var mHasBinder = false
 
+    private val mServiceWaiters = CopyOnWriteArrayList<CountDownLatch>()
+
     private val mUserServiceConnection: ServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(componentName: ComponentName, binder: IBinder?) {
             Log.d(TAG, "onServiceConnected: ${componentName.className}")
             if (binder?.pingBinder() == true) {
                 service = IUserService.Stub.asInterface(binder)
+
+                // Wake all waiters when binder is ready.
+                // zh-CN: 当 binder 就绪时, 唤醒所有等待者.
+                mServiceWaiters.forEach { it.countDown() }
+                mServiceWaiters.clear()
             } else {
                 Log.w(TAG, "invalid binder for $componentName received")
+                service = null
             }
         }
 
         override fun onServiceDisconnected(componentName: ComponentName) {
             Log.d(TAG, "onServiceDisconnected: ${componentName.className}")
+            service = null
         }
     }
 
@@ -87,6 +98,9 @@ object WrappedShizuku {
     }
 
     internal fun bindUserServiceIfNeeded() {
+        if (service?.asBinder()?.pingBinder() == true) {
+            return
+        }
         if (hasPermission()) {
             bindUserService()
         }
@@ -148,17 +162,41 @@ object WrappedShizuku {
 
     @ScriptInterface
     fun execCommand(context: Context, cmd: String): ShellResult {
+        return execCommandWithAutoReconnect(context, cmd, allowRetry = true)
+    }
+
+    private fun execCommandWithAutoReconnect(context: Context, cmd: String, allowRetry: Boolean): ShellResult {
         if (service == null && hasPermission()) {
+            onCreate()
+            bindUserServiceIfNeeded()
             initializeShizukuServiceAndWait(5000L)
         }
+
         val service = service ?: when {
             !hasPermission() -> R.string.error_no_permission_to_access_shizuku
             !isRunning() -> R.string.error_shizuku_service_may_be_not_running
             else -> R.string.error_unable_to_use_shizuku_service
         }.let { throw IllegalStateException(context.getString(it)) }
+
         return try {
-            ShellResult.fromJson(service.execCommand(cmd.replace(Regex("^\\s*adb\\s+shell\\s+", RegexOption.IGNORE_CASE), "")))
+            ShellResult.fromJson(
+                service.execCommand(
+                    cmd.replace(Regex("^\\s*adb\\s+shell\\s+", RegexOption.IGNORE_CASE), "")
+                )
+            )
         } catch (e: Throwable) {
+            // Reconnect and retry once when binder is dead.
+            // zh-CN: 当 binder 已死亡时, 自动重连并重试一次.
+            if (allowRetry && e is DeadObjectException) {
+                this.service = null
+                runCatching {
+                    onCreate()
+                    bindUserServiceIfNeeded()
+                    initializeShizukuServiceAndWait(5000L)
+                }
+                return execCommandWithAutoReconnect(context, cmd, allowRetry = false)
+            }
+
             ShellResult().apply {
                 code = 1
                 error = e.message ?: when {
@@ -191,17 +229,25 @@ object WrappedShizuku {
     }
 
     private fun initializeShizukuServiceAndWait(@Suppress("SameParameterValue") timeout: Long) {
-        onCreate()
-        bindUserServiceIfNeeded()
+        if (service?.asBinder()?.pingBinder() == true) {
+            return
+        }
 
         val latch = CountDownLatch(1)
-        val tmpConnection = object : ServiceConnection {
-            override fun onServiceConnected(name: ComponentName, binder: IBinder) = latch.countDown()
-            override fun onServiceDisconnected(name: ComponentName) = Unit
+        mServiceWaiters.add(latch)
+
+        // Re-check after registering waiter to avoid missing a fast onServiceConnected().
+        // zh-CN: 注册等待者后再次检查, 避免 onServiceConnected() 很快到来导致错过唤醒.
+        if (service?.asBinder()?.pingBinder() == true) {
+            mServiceWaiters.remove(latch)
+            return
         }
-        Shizuku.bindUserService(mUserServiceArgs, tmpConnection)
-        latch.await(timeout, TimeUnit.MILLISECONDS)
-        Shizuku.unbindUserService(mUserServiceArgs, tmpConnection, true)
+
+        runCatching {
+            latch.await(timeout, TimeUnit.MILLISECONDS)
+        }.also {
+            mServiceWaiters.remove(latch)
+        }
     }
 
 }
