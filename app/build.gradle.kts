@@ -241,6 +241,8 @@ dependencies /* Unclassified */ {
 
     // ICU4J
     implementation("com.ibm.icu:icu4j:77.1")
+
+    implementation("com.android.tools:r8:8.13.17")
 }
 
 dependencies /* MIME */ {
