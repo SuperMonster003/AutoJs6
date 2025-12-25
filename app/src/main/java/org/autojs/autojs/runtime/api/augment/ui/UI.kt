@@ -54,7 +54,6 @@ import org.autojs.autojs6.R
 import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeArray
-import org.mozilla.javascript.NativeFunction
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.NativeWith
 import org.mozilla.javascript.Scriptable
@@ -206,7 +205,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         override fun beforeCreateView(inflateContext: InflateContext, node: Node?, viewName: String, parent: ViewGroup?): View? {
             val widgets = scriptRuntime.ui.widgets
             if (widgets.contains(viewName)) {
-                val ctor = widgets.prop(viewName) as NativeFunction
+                val ctor = widgets.prop(viewName) as BaseFunction
                 val widget = withRhinoContext { cx ->
                     ctor.construct(cx, scriptRuntime.topLevelScope, arrayOf())
                 } as ScriptableObject

@@ -35,6 +35,7 @@ import org.mozilla.javascript.ScriptableObject.PERMANENT
 import org.mozilla.javascript.ScriptableObject.READONLY
 import org.mozilla.javascript.commonjs.module.RequireBuilder
 import org.mozilla.javascript.commonjs.module.provider.SoftCachingModuleScriptProvider
+import org.mozilla.javascript.lc.type.TypeInfo
 import java.io.File
 import java.io.IOException
 import java.io.InputStreamReader
@@ -106,13 +107,17 @@ open class RhinoJavaScriptEngine(private val androidContext: android.content.Con
 
     override fun init() {
         thread = Thread.currentThread()
-        scriptable.defineProp("global", scriptable, PERMANENT)
-        scriptable.defineProp("__engine__", this, READONLY or DONTENUM or PERMANENT)
+
         initRequireBuilder(context, scriptable)
 
         runtime.withTimeConsuming("runtime-init-prologue") {
             it.initPrologue()
         }
+
+        scriptable.defineProp("global", scriptable, PERMANENT)
+        scriptable.defineProp("__engine__", this, READONLY or DONTENUM or PERMANENT)
+        scriptable.defineProp("Promise", runtime.js_Promise, READONLY or PERMANENT)
+        scriptable.defineProp("ResultAdapter", runtime.js_ResultAdapter, READONLY or PERMANENT)
 
         mInitScript.withTimeConsuming("script-init") { initScript ->
             runCatching {
@@ -200,8 +205,7 @@ open class RhinoJavaScriptEngine(private val androidContext: android.content.Con
         if (this is AutoJsContext) {
             rhinoJavaScriptEngine = this@RhinoJavaScriptEngine
         }
-        @Suppress("DEPRECATION")
-        optimizationLevel = -1
+        isInterpretedMode = true
         languageVersion = Context.VERSION_ES6
         locale = Locale.getDefault()
         wrapFactory = mWrapFactory
@@ -209,9 +213,9 @@ open class RhinoJavaScriptEngine(private val androidContext: android.content.Con
 
     private inner class WrapFactory : AndroidContextFactory.WrapFactory() {
 
-        override fun wrapAsJavaObject(cx: Context?, scope: Scriptable, javaObject: Any?, staticType: Class<*>?): Scriptable? {
+        override fun wrapAsJavaObject(cx: Context?, scope: Scriptable, javaObject: Any?, staticType: TypeInfo): Scriptable? {
             return when (javaObject) {
-                is View -> ViewExtras.getNativeView(scope, /* view = */ javaObject, staticType, runtime)
+                is View -> ViewExtras.getNativeView(scope, /* view = */ javaObject, staticType.asClass(), runtime)
                 is Paint -> super.wrapAsJavaObject(cx, scope, RhinoPaint(javaObject), staticType)
                 else -> super.wrapAsJavaObject(cx, scope, javaObject, staticType)
             }

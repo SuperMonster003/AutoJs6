@@ -15,7 +15,7 @@
     <a href="https://developer.android.com/studio/archive"><img alt="Android Studio" src="https://img.shields.io/badge/Android%20Studio-2023.3+-B64FC8"/></a>
     <a href="https://www.jetbrains.com/idea/download/other.html"><img alt="IntelliJ IDEA" src="https://img.shields.io/badge/IntelliJ%20IDEA-2023.3+-EE4677"/></a>
     <br>
-    <a href="https://github.com/mozilla/rhino"><img alt="Rhino" src="https://img.shields.io/badge/Rhino-1.8.1--SNAPSHOT-795548"/></a>
+    <a href="https://github.com/mozilla/rhino"><img alt="Rhino" src="https://img.shields.io/badge/Rhino-2.0.0--SNAPSHOT-795548"/></a>
     <a href="https://www.jetbrains.com/?from=AutoJs6"><img alt="JetBrains supporter" src="https://img.shields.io/badge/Supporter-JetBrains-AA2786"/></a>
     <a href="http://project.autojs6.com/blob/master/LICENSE"><img alt="GitHub License" src="https://img.shields.io/github/license/SuperMonster003/AutoJs6?color=534BAE&label=License"/></a>
   </p>

@@ -99,6 +99,7 @@
         "附加 Androidx Work Runtime 版本 2.11.0",
         "升级 Android SDK 版本 35 -> 36",
         "升级 Gradle 版本 8.14 -> 8.14.3",
+        "升级 Rhino 版本 1.8.1-SNAPSHOT -> 2.0.0-SNAPSHOT",
         "升级 Desugar JDK Libs 版本 2.0.4 -> 2.1.5",
         "升级 Android Material 版本 1.12.0 -> 1.13.0",
         "升级 Androidx AppCompat 版本 1.7.0 -> 1.7.1",

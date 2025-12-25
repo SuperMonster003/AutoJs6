@@ -190,7 +190,7 @@ dependencies /* Unclassified */ {
     implementation(project(":libs:markwon-syntax-highlight-4_6_2"))
 
     // Rhino
-    implementation(files("$rootDir/libs/org-mozilla-rhino-1_8_1-SNAPSHOT.jar"))
+    implementation(files("$rootDir/libs/org-mozilla-rhino-2_0_0-SNAPSHOT.jar"))
 
     // Tasker Plugin
     implementation(project(":libs:android-spackle-9_0_0"))
