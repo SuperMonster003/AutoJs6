@@ -3,6 +3,10 @@ package org.autojs.autojs.rhino
 import android.os.Build
 import android.util.Log
 import com.android.dx.command.dexer.Main
+import com.android.tools.r8.CompilationMode
+import com.android.tools.r8.D8
+import com.android.tools.r8.D8Command
+import com.android.tools.r8.OutputMode
 import dalvik.system.DexClassLoader
 import net.lingala.zip4j.ZipFile
 import net.lingala.zip4j.exception.ZipException
@@ -84,8 +88,18 @@ class AndroidClassLoader(private val parent: ClassLoader, private val cacheDir: 
         }
     }
 
-    @Throws(IOException::class)
     fun loadJar(file: File): DexClassLoader {
+        try {
+            val dexFile = jarToDex(file, cacheDir)
+            return loadDex(dexFile)
+        } catch (e: Exception) {
+            Log.e(TAG, "loadJar: failed to load jar ${file.path}", e)
+            return loadJar1(file)
+        }
+    }
+
+    @Throws(IOException::class)
+    fun loadJar1(file: File): DexClassLoader {
         val path = file.path
         Log.d(TAG, "loadJar: jar = $path")
         if (!file.exists() || !file.canRead()) {
@@ -214,6 +228,39 @@ class AndroidClassLoader(private val parent: ClassLoader, private val cacheDir: 
     }
 
     private fun generateDexFileName(jar: File) = md5("${jar.path}_${jar.lastModified()}")
+
+    private fun jarToDex(jar: File, cacheDir: File): File {
+        val dexName = generateDexFileName(jar)
+        val dexFile = File(cacheDir, "$dexName.dex")
+        if (dexFile.exists()) {
+            return dexFile
+        }
+        val tmpOut = File(cacheDir, "${dexName}_tmp").apply { mkdirs() }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val cmd = D8Command.builder()
+                .addProgramFiles(jar.toPath())
+                .setOutput(tmpOut.toPath(), OutputMode.DexIndexed)
+                .setMode(CompilationMode.RELEASE)
+                .build()
+            D8.run(cmd)
+        } else {
+            val args = arrayOf(
+                "--output", tmpOut.absolutePath,
+                "--release",
+                jar.absolutePath
+            )
+            D8.main(args)
+        }
+        val classesDex = File(tmpOut, "classes.dex")
+        if (classesDex.exists().not()) {
+            throw IOException("R8 did not produce classes.dex")
+        }
+        if (classesDex.renameTo(dexFile).not()) {
+            dexFile.outputStream().use { out -> classesDex.inputStream().use { it.copyTo(out) } }
+        }
+        tmpOut.deleteRecursively()
+        return dexFile
+    }
 
     companion object {
 
