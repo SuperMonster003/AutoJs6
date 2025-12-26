@@ -251,7 +251,7 @@ dependencies /* Unclassified */ {
     implementation(libs.icu4j)
 
     // R8
-    implementation("com.android.tools:r8:8.13.17")
+    implementation(libs.r8)
 
     // Plugin API: Paddle OCR
     implementation(project(":plugin-api:paddle-ocr"))

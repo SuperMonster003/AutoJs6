@@ -20,12 +20,15 @@ import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
+import java.util.concurrent.ConcurrentHashMap
+import kotlin.random.Random
 import com.legacy.android.dx.command.dexer.Main as LegacyMain
 
 /**
  * Created by Stardust on Apr 5, 2017.
  * Modified by SuperMonster003 as of Jul 5, 2023.
  * Transformed by SuperMonster003 on Jul 5, 2023.
+ * Modified by LYS86 (https://github.com/LYS86) as of Dec 26, 2025.
  */
 /**
  * Create a new instance with the given parent classloader and cache directory
@@ -35,7 +38,11 @@ import com.legacy.android.dx.command.dexer.Main as LegacyMain
  */
 class AndroidClassLoader(private val parent: ClassLoader, private val cacheDir: File) : ClassLoader(), GeneratedClassLoader {
 
-    private val mDexClassLoaders = HashMap<String, DexClassLoader>()
+    private val mDexClassLoaders = ConcurrentHashMap<String, DexClassLoader>()
+
+    // Ensure per-jar conversion is thread-safe.
+    // zh-CN: 确保对同一个 jar 的转换过程线程安全.
+    private val conversionLocks = ConcurrentHashMap<String, Any>()
 
     init {
         if (cacheDir.exists()) {
@@ -88,31 +95,40 @@ class AndroidClassLoader(private val parent: ClassLoader, private val cacheDir: 
         }
     }
 
-    fun loadJar(file: File): DexClassLoader {
-        try {
-            val dexFile = jarToDex(file, cacheDir)
-            return loadDex(dexFile)
-        } catch (e: Exception) {
-            Log.e(TAG, "loadJar: failed to load jar ${file.path}", e)
-            return loadJar1(file)
+    @Throws(IOException::class, FileNotFoundException::class)
+    fun loadJar(jar: File): DexClassLoader {
+        Log.d(TAG, "loadJar: jar = ${jar.path}")
+        if (!jar.exists() || !jar.canRead()) {
+            throw FileNotFoundException(str(R.string.file_not_exist_or_readable, jar.path))
+        }
+
+        val key = generateArtifactsCacheName(jar)
+        val lock = conversionLocks.getOrPut(key) { Any() }
+
+        return synchronized(lock) {
+            runCatching {
+                jarToDexDx(jar)
+            }.recoverCatching { eDx ->
+                Log.e(TAG, "Failed: jarToDexDx", eDx)
+                jarToDexR8(jar)
+            }.getOrElse { eR8 ->
+                Log.e(TAG, "Failed: jarToDexR8", eR8)
+                throw eR8
+            }
         }
     }
 
-    @Throws(IOException::class)
-    fun loadJar1(file: File): DexClassLoader {
-        val path = file.path
-        Log.d(TAG, "loadJar: jar = $path")
-        if (!file.exists() || !file.canRead()) {
-            throw FileNotFoundException(str(R.string.file_not_exist_or_readable, path))
-        }
-        val dexFile = File(cacheDir, generateDexFileName(file))
-        if (dexFile.exists()) {
-            return loadDex(dexFile)
+    @Throws(IOException::class, FileNotFoundException::class)
+    private fun jarToDexDx(jar: File): DexClassLoader {
+        val cacheName = generateArtifactsCacheName(jar)
+        val cacheFile = File(cacheDir, "$cacheName.jar")
+        if (cacheFile.exists()) {
+            return loadDex(cacheFile)
         }
         try {
-            val classFile = generateTempFile(path, false)
+            val classFile = generateTempFile(jar.path, false)
             val zipFile = ZipFile(classFile)
-            val jarFile = ZipFile(file)
+            val jarFile = ZipFile(jar)
             for (header in jarFile.fileHeaders) {
                 if (!header.isDirectory) {
                     zipFile.addStream(jarFile.getInputStream(header), ZipParameters().apply {
@@ -120,7 +136,7 @@ class AndroidClassLoader(private val parent: ClassLoader, private val cacheDir: 
                     })
                 }
             }
-            val classLoader = dexJar(classFile, dexFile)
+            val classLoader = dexJar(classFile, cacheFile)
             if (!classFile.delete()) {
                 Log.e(TAG, "classFile.delete() failed")
             }
@@ -176,9 +192,13 @@ class AndroidClassLoader(private val parent: ClassLoader, private val cacheDir: 
         } catch (e: ClassNotFoundException) {
             throw FatalLoadingException(e)
         } finally {
-            if (classFile != null) {
-                if (!classFile.delete()) {
-                    Log.e(TAG, "classFile.delete() failed")
+            when {
+                // Treat as a temporary file that has been generated.
+                // zh-CN: 视为临时文件已生成.
+                classFile != null -> {
+                    if (!classFile.delete()) {
+                        Log.e(TAG, "classFile.delete() failed")
+                    }
                 }
             }
         }
@@ -202,9 +222,13 @@ class AndroidClassLoader(private val parent: ClassLoader, private val cacheDir: 
             }
         }
         val loader = loadDex(niceDexFile)
-        if (dexFile == null) /* is temporary file generated */ {
-            if (!niceDexFile.delete()) {
-                Log.e(TAG, "dexFile.delete() failed")
+        when (dexFile) {
+            // Treat as a temporary file that has been generated.
+            // zh-CN: 视为临时文件已生成.
+            null -> {
+                if (!niceDexFile.delete()) {
+                    Log.e(TAG, "dexFile.delete() failed")
+                }
             }
         }
         return loader
@@ -227,39 +251,74 @@ class AndroidClassLoader(private val parent: ClassLoader, private val cacheDir: 
         return file
     }
 
-    private fun generateDexFileName(jar: File) = md5("${jar.path}_${jar.lastModified()}")
+    private fun generateArtifactsCacheName(jar: File) = md5("${jar.path}_${jar.lastModified()}")
 
-    private fun jarToDex(jar: File, cacheDir: File): File {
-        val dexName = generateDexFileName(jar)
-        val dexFile = File(cacheDir, "$dexName.dex")
+    @Throws(IOException::class, FileNotFoundException::class)
+    private fun jarToDexR8(jar: File): DexClassLoader {
+        val cacheName = generateArtifactsCacheName(jar)
+
+        val dexFile = File(cacheDir, "$cacheName.dex")
+        val dexJarFile = File(cacheDir, "$cacheName.jar")
+
+        if (dexJarFile.exists()) {
+            return loadDex(dexJarFile)
+        }
         if (dexFile.exists()) {
-            return dexFile
+            return loadDex(dexFile)
         }
-        val tmpOut = File(cacheDir, "${dexName}_tmp").apply { mkdirs() }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val cmd = D8Command.builder()
-                .addProgramFiles(jar.toPath())
-                .setOutput(tmpOut.toPath(), OutputMode.DexIndexed)
-                .setMode(CompilationMode.RELEASE)
-                .build()
-            D8.run(cmd)
-        } else {
-            val args = arrayOf(
-                "--output", tmpOut.absolutePath,
-                "--release",
-                jar.absolutePath
-            )
-            D8.main(args)
+
+        val tmpOut = File(cacheDir, "${cacheName}_tmp_${System.currentTimeMillis()}_${Random.nextInt(1000, 9999)}")
+        if (!tmpOut.mkdirs()) {
+            throw IOException("Failed to create temp output directory: ${tmpOut.path}")
         }
-        val classesDex = File(tmpOut, "classes.dex")
-        if (classesDex.exists().not()) {
-            throw IOException("R8 did not produce classes.dex")
+
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val cmd = D8Command.builder()
+                    .addProgramFiles(jar.toPath())
+                    .setOutput(tmpOut.toPath(), OutputMode.DexIndexed)
+                    .setMode(CompilationMode.RELEASE)
+                    .build()
+                D8.run(cmd)
+            } else {
+                val args = arrayOf(
+                    "--output", tmpOut.absolutePath,
+                    "--release",
+                    jar.absolutePath
+                )
+                D8.main(args)
+            }
+
+            val dexFiles = tmpOut.listFiles { _, name ->
+                Regex("classes\\d*\\.dex").matches(name)
+            }?.sortedBy { it.name } ?: emptyList()
+
+            if (dexFiles.isEmpty()) {
+                throw IOException("D8 did not produce any classes*.dex")
+            }
+
+            return if (dexFiles.size == 1) {
+                val classesDex = dexFiles.first()
+                if (!classesDex.renameTo(dexFile)) {
+                    dexFile.outputStream().use { out ->
+                        classesDex.inputStream().use { it.copyTo(out) }
+                    }
+                }
+                loadDex(dexFile)
+            } else {
+                // Multi-dex output: pack all classes*.dex into a single jar for DexClassLoader.
+                // zh-CN: 多 dex 输出: 将所有 classes*.dex 打包到单个 jar 文件中供 DexClassLoader 使用.
+                val zip = ZipFile(dexJarFile)
+                dexFiles.forEach { f ->
+                    zip.addStream(f.inputStream(), ZipParameters().apply {
+                        fileNameInZip = f.name
+                    })
+                }
+                loadDex(dexJarFile)
+            }
+        } finally {
+            tmpOut.deleteRecursively()
         }
-        if (classesDex.renameTo(dexFile).not()) {
-            dexFile.outputStream().use { out -> classesDex.inputStream().use { it.copyTo(out) } }
-        }
-        tmpOut.deleteRecursively()
-        return dexFile
     }
 
     companion object {

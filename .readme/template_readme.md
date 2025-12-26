@@ -382,6 +382,7 @@ autojs6-v6.6.2-arm64-v8a-0f2a9d74.apk
 
 | <span style="word-break:keep-all;white-space:nowrap">{{ table_header_contribution_contributors }}</span> | <span style="word-break:keep-all;white-space:nowrap">{{ table_header_contribution_number_of_commits }}</span> | <span style="word-break:keep-all;white-space:nowrap">{{ table_header_contribution_recent_submissions }}</span> |
 |:------:|:------:|:------:|
+| <span style="word-break:keep-all;white-space:nowrap">[LYS86](https://github.com/LYS86) `(Lin)`</span> | <span style="word-break:keep-all;white-space:nowrap">[4](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+is%3Amerged+author%3ALYS86)</span> | <span style="word-break:keep-all;white-space:nowrap">`2025/12/26`</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[wirsnow](https://github.com/wirsnow)</span> | <span style="word-break:keep-all;white-space:nowrap">[1](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+is%3Amerged+author%3Awirsnow)</span> | <span style="word-break:keep-all;white-space:nowrap">`2025/05/19`</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[TonyJiangWJ](https://github.com/TonyJiangWJ)</span> | <span style="word-break:keep-all;white-space:nowrap">[4](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+is%3Amerged+author%3ATonyJiangWJ)</span> | <span style="word-break:keep-all;white-space:nowrap">`2025/04/24`</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[luckyloogn](https://github.com/luckyloogn)</span> | <span style="word-break:keep-all;white-space:nowrap">[3](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+is%3Amerged+author%3Aluckyloogn)</span> | <span style="word-break:keep-all;white-space:nowrap">`2024/12/31`</span> |
@@ -390,8 +391,6 @@ autojs6-v6.6.2-arm64-v8a-0f2a9d74.apk
 | <span style="word-break:keep-all;white-space:nowrap">[LZX284](https://github.com/LZX284) `(AI)`</span> | <span style="word-break:keep-all;white-space:nowrap">[7](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+is%3Amerged+author%3ALZX284)</span> | <span style="word-break:keep-all;white-space:nowrap">`2023/11/15`</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[little&#x2011;alei](https://github.com/little-alei) `(抠脚本人)`</span> | <span style="word-break:keep-all;white-space:nowrap">[12](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+is%3Amerged+author%3Alittle-alei)</span> | <span style="word-break:keep-all;white-space:nowrap">`2023/07/12`</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[aiselp](https://github.com/aiselp)</span> | <span style="word-break:keep-all;white-space:nowrap">[6](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+is%3Amerged+author%3Aaiselp)</span> | <span style="word-break:keep-all;white-space:nowrap">`2023/06/14`</span> |
-| <span style="word-break:keep-all;white-space:nowrap">[LYS86](https://github.com/LYS86) `(Lin)`</span> | <span style="word-break:keep-all;white-space:nowrap">[2](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+is%3Amerged+author%3ALYS86)</span> | <span style="word-break:keep-all;white-space:nowrap">`2023/06/03`</span> |
-
 {{ p_contribution_table_data_updated_on }}.
 
 {{ p_contribution_table_data_entries_sorted_by_recent_submissions }}.
