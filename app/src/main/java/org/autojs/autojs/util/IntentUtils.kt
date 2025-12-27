@@ -91,7 +91,6 @@ object IntentUtils {
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 .let { context.startActivity(it) }
         }
-
     } catch (e: ActivityNotFoundException) {
         exceptionHolder?.show(R.string.error_no_applications_available_for_browsing_this_link)
         // ViewUtils.showToast(context, R.string.text_no_browser, true)

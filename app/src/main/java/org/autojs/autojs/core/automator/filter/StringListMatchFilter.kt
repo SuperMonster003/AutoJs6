@@ -1,36 +1,21 @@
 package org.autojs.autojs.core.automator.filter
 
 import org.autojs.autojs.core.automator.UiObject
+import org.mozilla.javascript.regexp.NativeRegExp
 
 /**
  * Created by SuperMonster003 on Oct 17, 2022.
+ * Modified by SuperMonster003 as of Dec 27, 2025.
  */
-class StringListMatchFilter internal constructor(private val mRegex: String, private val mKeysGetter: KeysGetter) : Filter {
+class StringListMatchFilter : RegexListFilter {
 
-    // @Hint by SuperMonster003 on Oct 17, 2022.
-    //  ! Similar to JavaScript "String.prototype.match"
-    //  ! which returns the result of matching a string against a regular expression.
-    //  ! https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/match
-    //  ! https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.text/-regex/contains-match-in.html
-    //  ! https://stackoverflow.com/questions/21883629/difference-in-results-between-java-matches-vs-javascript-match
-    //  ! zh-CN:
-    //  ! 与 JavaScript 的方法 "String.prototype.match" 类似,
-    //  ! 它返回字符串与正则表达式匹配的结果.
-    //  ! 参考链接见上.
-    override fun filter(node: UiObject) = mKeysGetter.getKeys(node).any {
-        it ?: return@any false
-        val prefix = "/"
-        val suffix = "/i"
-        if (mRegex.startsWith(prefix) && mRegex.endsWith(suffix)) {
-            mRegex
-                .slice(prefix.length until mRegex.length - suffix.length)
-                .toRegex(RegexOption.IGNORE_CASE)
-                .containsMatchIn(it)
-        } else {
-            mRegex.toRegex().containsMatchIn(it)
-        }
+    override val actionName = "match"
+
+    constructor(s: String, keysGetter: KeysGetter) : super(s, keysGetter)
+    constructor(regex: NativeRegExp, keysGetter: KeysGetter) : super(regex, keysGetter)
+
+    override fun filter(node: UiObject) = keysGetter.getKeys(node).any {
+        it?.contains(compiledRegex) == true
     }
-
-    override fun toString() = "${mKeysGetter}Match(\"$mRegex\")"
 
 }

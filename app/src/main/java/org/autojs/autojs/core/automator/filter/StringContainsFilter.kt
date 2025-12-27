@@ -1,15 +1,19 @@
 package org.autojs.autojs.core.automator.filter
 
 import org.autojs.autojs.core.automator.UiObject
+import org.mozilla.javascript.regexp.NativeRegExp
 
 /**
  * Created by Stardust on Mar 9, 2017.
- * Modified by SuperMonster003 as of Nov 19, 2022.
+ * Modified by SuperMonster003 as of Dec 27, 2025.
  */
-class StringContainsFilter internal constructor(private val mContains: String, private val mKeyGetter: KeyGetter) : Filter {
+class StringContainsFilter : RegexFilter {
 
-    override fun filter(node: UiObject) = mKeyGetter.getKey(node)?.contains(mContains) ?: false
+    override val actionName = "contains"
 
-    override fun toString() = "${mKeyGetter}Contains(\"$mContains\")"
+    constructor(s: String, keyGetter: KeyGetter) : super(s, keyGetter)
+    constructor(regex: NativeRegExp, keyGetter: KeyGetter) : super(regex, keyGetter)
+
+    override fun filter(node: UiObject) = keyGetter.getKey(node)?.contains(compiledRegex) == true
 
 }

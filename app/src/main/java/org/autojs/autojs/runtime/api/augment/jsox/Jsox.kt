@@ -11,13 +11,13 @@ import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED
 import org.autojs.autojs.util.RhinoUtils.coerceString
 import org.autojs.autojs.util.RhinoUtils.flatten
-import org.autojs.autojs.util.StringUtils
 import org.autojs.autojs.util.StringUtils.lowercaseFirstChar
+import org.autojs.autojs.util.StringUtils.uppercaseFirstChar
 import org.mozilla.javascript.Undefined
 
 class Jsox(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), Invokable {
 
-    override val key = lowercaseFirstChar(javaClass.simpleName)
+    override val key = javaClass.simpleName.lowercaseFirstChar()
 
     override val selfAssignmentFunctions = listOf(
         ::extend.name,
@@ -73,7 +73,7 @@ class Jsox(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
         fun extendAllRhinoWithRuntime(scriptRuntime: ScriptRuntime): Undefined = extendRhinoWithRuntime(scriptRuntime, presetModules)
 
         private fun normalizeModuleName(name: String): String {
-            return StringUtils.uppercaseFirstChar(if (!name.endsWith('x')) "${name}x" else name)
+            return "${name.removeSuffix("x")}x".uppercaseFirstChar()
         }
 
     }
