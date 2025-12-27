@@ -559,27 +559,40 @@ open class UiObject(
                 "${lastChild() ?: ""}" == "${other.lastChild()}"
     }
 
-    fun isShifted(other: UiObject) = bounds() == other.bounds()
+    // Captures current state; refreshing it won't affect the original.
+    // zh-CN: 捕获当前状态; 刷新它不会影响原始对象.
+    fun snapshot(): UiObject {
+        val raw = unwrap()
+        val rawCopy = AccessibilityNodeInfo.obtain(raw)
+        return UiObject(rawCopy, allocator, depth, indexInParent)
+    }
 
-    fun isShifted(other: UiObject, tolerance: Double): Boolean {
-        val a = bounds()
-        val b = other.bounds()
-        return when {
-            tolerance < 0 -> throw WrappedIllegalArgumentException(
-                "Argument \"tolerance\" ${tolerance.jsBrief()} for UiObject#isShifted must be greater than or equal to 0",
-            )
-            tolerance < 1 -> (width() to height()).let { (w, h) ->
-                return@let abs(a.left - b.left) > tolerance * w
-                        || abs(a.top - b.top) > tolerance * h
-                        || abs(a.right - b.right) > tolerance * w
-                        || abs(a.bottom - b.bottom) > tolerance * h
+    @JvmOverloads
+    fun isShifted(tolerance: Double = 0.0): Boolean {
+        val probe = snapshot()
+        try {
+            val a = probe.bounds() /* Before. */
+            if (!probe.refresh()) return true
+            val b = probe.bounds() /* After. */
+            return when {
+                tolerance < 0 -> throw WrappedIllegalArgumentException(
+                    "Argument \"tolerance\" ${tolerance.jsBrief()} for UiObject#isShifted must be greater than or equal to 0",
+                )
+                tolerance < 1 -> (width() to height()).let { (w, h) ->
+                    return@let abs(a.left - b.left) > tolerance * w
+                            || abs(a.top - b.top) > tolerance * h
+                            || abs(a.right - b.right) > tolerance * w
+                            || abs(a.bottom - b.bottom) > tolerance * h
+                }
+                else -> let {
+                    return@let abs(a.left - b.left) > tolerance
+                            || abs(a.top - b.top) > tolerance
+                            || abs(a.right - b.right) > tolerance
+                            || abs(a.bottom - b.bottom) > tolerance
+                }
             }
-            else -> let {
-                return@let abs(a.left - b.left) > tolerance
-                        || abs(a.top - b.top) > tolerance
-                        || abs(a.right - b.right) > tolerance
-                        || abs(a.bottom - b.bottom) > tolerance
-            }
+        } finally {
+            probe.recycle()
         }
     }
 
