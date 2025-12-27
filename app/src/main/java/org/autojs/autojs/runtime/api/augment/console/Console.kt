@@ -220,14 +220,14 @@ class Console(scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRuntime) {
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun input(scriptRuntime: ScriptRuntime, args: Array<out Any?>) {
-            val s = "${lowercaseFirstChar(Console::class.java.simpleName)}.${::input.name}"
+            val s = "${Console::class.java.simpleName.lowercaseFirstChar()}.${::input.name}"
             throw RuntimeException(globalContext.getString(R.string.error_abandoned_method, s))
         }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun rawInput(scriptRuntime: ScriptRuntime, args: Array<out Any?>) {
-            val s = "${lowercaseFirstChar(Console::class.java.simpleName)}.${::rawInput.name}"
+            val s = "${Console::class.java.simpleName.lowercaseFirstChar()}.${::rawInput.name}"
             throw RuntimeException(globalContext.getString(R.string.error_abandoned_method, s))
         }
 
@@ -311,11 +311,11 @@ class Console(scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRuntime) {
                 val fName = listOf(
                     when {
                         Regex("^set[A-Z].*").containsMatchIn(key) -> key
-                        else -> "set${uppercaseFirstChar(key)}"
+                        else -> "set${key.uppercaseFirstChar()}"
                     },
                     when {
                         Regex("^is[A-Z].*").containsMatchIn(key) -> key
-                        else -> "is${uppercaseFirstChar(key)}"
+                        else -> "is${key.uppercaseFirstChar()}"
                     },
                 ).find { name ->
                     configurator::class.java.methods.any { method -> method.name == name }

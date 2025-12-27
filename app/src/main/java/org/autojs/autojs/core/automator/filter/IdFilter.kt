@@ -2,10 +2,11 @@ package org.autojs.autojs.core.automator.filter
 
 import org.autojs.autojs.core.accessibility.UiSelector.Companion.ID_IDENTIFIER
 import org.autojs.autojs.core.automator.UiObject
+import org.mozilla.javascript.regexp.NativeRegExp
 
 /**
  * Created by Stardust on Mar 9, 2017.
- * Modified by SuperMonster003 as of Nov 19, 2022.
+ * Modified by SuperMonster003 as of Dec 27, 2025.
  */
 object IdFilter {
 
@@ -18,17 +19,27 @@ object IdFilter {
     }
 
     @Suppress("CovariantEquals")
-    fun equals(str: String) = when (str.contains(ID_IDENTIFIER)) {
-        true -> StringEqualsFilter(str, ID_GETTER)
+    fun equals(s: String) = when (s.contains(ID_IDENTIFIER)) {
+        true -> StringEqualsFilter(s, ID_GETTER)
         else -> object : Filter {
             override fun filter(node: UiObject) = node.id()?.let { id ->
                 when (id.contains(ID_IDENTIFIER)) {
-                    true -> id.split(ID_IDENTIFIER).last() == str
-                    else -> id == str
+                    true -> id.split(ID_IDENTIFIER).last() == s
+                    else -> id == s
                 }
             } ?: false
 
-            override fun toString() = "id(\"$str\")"
+            override fun toString() = "${ID_GETTER}(\"$s\")"
+        }
+    }
+
+    @Suppress("CovariantEquals")
+    fun equals(regex: NativeRegExp): Filter {
+        return object : StringMatchesFilter(regex, ID_GETTER) {
+            override fun toString(): String {
+                val literal = JsRegexUtils.formatAsJsRegexLiteral(regex.toString())
+                return "${ID_GETTER}($literal)"
+            }
         }
     }
 
@@ -42,16 +53,19 @@ object IdFilter {
                 }
             } ?: false
 
-            override fun toString() = "idStartsWith(\"$prefix\")"
+            override fun toString() = "${ID_GETTER}StartsWith(\"$prefix\")"
         }
     }
 
     fun endsWith(suffix: String) = StringEndsWithFilter(suffix, ID_GETTER)
 
-    fun contains(contains: String) = StringContainsFilter(contains, ID_GETTER)
+    fun contains(s: String) = StringContainsFilter(s, ID_GETTER)
+    fun contains(regex: NativeRegExp) = StringContainsFilter(regex, ID_GETTER)
 
-    fun matches(regex: String) = StringMatchesFilter(regex, ID_GETTER)
+    fun matches(s: String) = StringMatchesFilter(s, ID_GETTER)
+    fun matches(regex: NativeRegExp) = StringMatchesFilter(regex, ID_GETTER)
 
-    fun match(regex: String) = StringMatchFilter(regex, ID_GETTER)
+    fun match(s: String) = StringMatchFilter(s, ID_GETTER)
+    fun match(regex: NativeRegExp) = StringMatchFilter(regex, ID_GETTER)
 
 }

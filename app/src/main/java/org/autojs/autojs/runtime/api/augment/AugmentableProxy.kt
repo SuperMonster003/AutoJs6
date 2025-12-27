@@ -30,11 +30,11 @@ open class AugmentableProxy(private val scriptRuntime: ScriptRuntime) : Augmenta
         val setterResult = listOf(
             when {
                 Regex("^set[A-Z].*").containsMatchIn(key) -> key
-                else -> "set${uppercaseFirstChar(key)}"
+                else -> "set${key.uppercaseFirstChar()}"
             },
             when {
                 Regex("^is[A-Z].*").containsMatchIn(key) -> key
-                else -> "is${uppercaseFirstChar(key)}"
+                else -> "is${key.uppercaseFirstChar()}"
             },
         ).any { setCore(augmented, it, value) }
 
@@ -62,8 +62,8 @@ open class AugmentableProxy(private val scriptRuntime: ScriptRuntime) : Augmenta
     open fun get(augmented: ScriptableObject, key: String): Any? {
         listOf(
             key,
-            "get${uppercaseFirstChar(key)}",
-            "is${uppercaseFirstChar(key)}",
+            "get${key.uppercaseFirstChar()}",
+            "is${key.uppercaseFirstChar()}",
         ).forEach {
             getCore(augmented, it).let { result ->
                 if (result != NOT_FOUND) return result

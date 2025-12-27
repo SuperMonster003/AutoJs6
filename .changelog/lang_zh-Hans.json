@@ -23,6 +23,8 @@
         "UiObject#isShifted 方法, 用于检测控件位置变化",
         "crash 全局方法, 用于测试崩溃报告页面",
         "structuredClone 全局方法, 用于深拷贝 JavaScript 对象 (参阅 [MDN](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/structuredClone))",
+        "等价系列选择器 (UiSelector#id/text/...) 及包含系列选择器 (UiSelector#xxxContains) 支持正则表达式参数",
+        "选择器的正则表达式参数支持使用标志 (i, m, s, u)",
         "设置页面增加 \"Java 原始类型包装\" 设置选项 _[`issue #435`](http://issues.autojs6.com/435)_",
         "设置页面增加 \"定时任务调度引擎\" 设置选项, 支持 AlarmManager/WorkManager/JobScheduler _[`issue #457`](http://issues.autojs6.com/457)_ _[`issue #388`](http://issues.autojs6.com/388)_ _[`issue #163`](http://issues.autojs6.com/163)_ _[`issue #53`](http://issues.autojs6.com/53)_ _[`issue #21`](http://issues.autojs6.com/21)_",
         "设置页面增加 \"应用启动器图标\" 设置选项, 支持自适应图标/透明背景图标 _[`issue #405`](http://issues.autojs6.com/405)_",

@@ -15,6 +15,10 @@ import org.autojs.autojs.extension.AnyExtensions.isJsXml
 import org.autojs.autojs.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.extension.AnyExtensions.jsUnwrapped
 import org.autojs.autojs.extension.ArrayExtensions.toNativeArray
+import org.autojs.autojs.extension.FlexibleArray.Companion.component1
+import org.autojs.autojs.extension.FlexibleArray.Companion.component2
+import org.autojs.autojs.extension.FlexibleArray.Companion.component3
+import org.autojs.autojs.extension.FlexibleArray.Companion.component4
 import org.autojs.autojs.extension.ScriptableExtensions.defineProp
 import org.autojs.autojs.extension.ScriptableExtensions.prop
 import org.autojs.autojs.extension.ScriptableObjectExtensions.inquire
@@ -36,7 +40,7 @@ import org.autojs.autojs.util.RhinoUtils.isUiThread
 import org.autojs.autojs.util.RhinoUtils.js_eval
 import org.autojs.autojs.util.RhinoUtils.newBaseFunction
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
-import org.autojs.autojs.util.StringUtils
+import org.autojs.autojs.util.StringUtils.uppercaseFirstChar
 import org.autojs.autojs6.R
 import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.Context
@@ -672,7 +676,7 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                         if (animation == "default") {
                             win.setWindowAnimations(android.R.style.Animation)
                         } else {
-                            val suffix = StringUtils.uppercaseFirstChar(animation.replace('-', '_'))
+                            val suffix = animation.replace('-', '_').uppercaseFirstChar()
                             val animationStyle = android.R.style::class.java.getDeclaredField("Animation_$suffix").getInt(null)
                             win.setWindowAnimations(animationStyle)
                         }

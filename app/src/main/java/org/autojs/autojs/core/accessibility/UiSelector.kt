@@ -48,7 +48,6 @@ import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.util.App
 import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.isMainThread
-import org.autojs.autojs.util.StringUtils.convertRegex
 import org.autojs.autojs.util.StringUtils.str
 import org.autojs.autojs6.R
 import org.mozilla.javascript.BaseFunction
@@ -83,7 +82,10 @@ open class UiSelector : UiObjectActions, StringReadable {
     }
 
     @ScriptInterface
-    fun id(str: String) = also { addFilter(IdFilter.equals(str)) }
+    fun id(s: String) = also { addFilter(IdFilter.equals(s)) }
+
+    @ScriptInterface
+    fun id(regex: NativeRegExp) = also { addFilter(IdFilter.equals(regex)) }
 
     @ScriptInterface
     fun idStartsWith(prefix: String) = also { addFilter(IdFilter.startsWith(prefix)) }
@@ -92,28 +94,34 @@ open class UiSelector : UiObjectActions, StringReadable {
     fun idEndsWith(suffix: String) = also { addFilter(IdFilter.endsWith(suffix)) }
 
     @ScriptInterface
-    fun idContains(str: String) = also { addFilter(IdFilter.contains(str)) }
+    fun idContains(s: String) = also { addFilter(IdFilter.contains(s)) }
 
     @ScriptInterface
-    @Deprecated("Deprecated in Java", ReplaceWith("idMatch(regex)"))
-    fun idMatches(regex: String) = also { addFilter(IdFilter.matches(convertRegex(regex))) }
+    fun idContains(regex: NativeRegExp) = also { addFilter(IdFilter.contains(regex)) }
+
+    @ScriptInterface
+    @Deprecated("Deprecated in Java", ReplaceWith("idMatch(s)"))
+    fun idMatches(s: String) = also { addFilter(IdFilter.matches(s)) }
 
     @ScriptInterface
     @Suppress("DEPRECATION")
     @Deprecated("Deprecated in Java", ReplaceWith("idMatch(regex)"))
-    fun idMatches(regex: NativeRegExp) = idMatches(regex.toString())
+    fun idMatches(regex: NativeRegExp) = also { addFilter(IdFilter.matches(regex)) }
 
     @ScriptInterface
-    fun idMatch(regex: String) = also { addFilter(IdFilter.match(regex)) }
+    fun idMatch(s: String) = also { addFilter(IdFilter.match(s)) }
 
     @ScriptInterface
-    fun idMatch(regex: NativeRegExp) = idMatch(convertRegex(regex.toString()))
+    fun idMatch(regex: NativeRegExp) = also { addFilter(IdFilter.match(regex)) }
 
     @ScriptInterface
     fun idHex(str: String) = also { addFilter(IdHexFilter.equals(str)) }
 
     @ScriptInterface
-    fun text(str: String) = also { addFilter(TextFilter.equals(str)) }
+    fun text(s: String) = also { addFilter(TextFilter.equals(s)) }
+
+    @ScriptInterface
+    fun text(regex: NativeRegExp) = also { addFilter(TextFilter.equals(regex)) }
 
     @ScriptInterface
     fun textStartsWith(prefix: String) = also { addFilter(TextFilter.startsWith(prefix)) }
@@ -122,25 +130,31 @@ open class UiSelector : UiObjectActions, StringReadable {
     fun textEndsWith(suffix: String) = also { addFilter(TextFilter.endsWith(suffix)) }
 
     @ScriptInterface
-    fun textContains(str: String) = also { addFilter(TextFilter.contains(str)) }
+    fun textContains(s: String) = also { addFilter(TextFilter.contains(s)) }
 
     @ScriptInterface
-    @Deprecated("Deprecated in Java", ReplaceWith("textMatch(regex)"))
-    fun textMatches(regex: String) = also { addFilter(TextFilter.matches(convertRegex(regex))) }
+    fun textContains(regex: NativeRegExp) = also { addFilter(TextFilter.contains(regex)) }
+
+    @ScriptInterface
+    @Deprecated("Deprecated in Java", ReplaceWith("textMatch(s)"))
+    fun textMatches(s: String) = also { addFilter(TextFilter.matches(s)) }
 
     @ScriptInterface
     @Suppress("DEPRECATION")
     @Deprecated("Deprecated in Java", ReplaceWith("textMatch(regex)"))
-    fun textMatches(regex: NativeRegExp) = textMatches(regex.toString())
+    fun textMatches(regex: NativeRegExp) = also { addFilter(TextFilter.matches(regex)) }
 
     @ScriptInterface
-    fun textMatch(regex: String) = also { addFilter(TextFilter.match(regex)) }
+    fun textMatch(s: String) = also { addFilter(TextFilter.match(s)) }
 
     @ScriptInterface
-    fun textMatch(regex: NativeRegExp) = textMatch(convertRegex(regex.toString()))
+    fun textMatch(regex: NativeRegExp) = also { addFilter(TextFilter.match(regex)) }
 
     @ScriptInterface
-    fun desc(str: String) = also { addFilter(DescFilter.equals(str)) }
+    fun desc(s: String) = also { addFilter(DescFilter.equals(s)) }
+
+     @ScriptInterface
+    fun desc(regex: NativeRegExp) = also { addFilter(DescFilter.equals(regex)) }
 
     @ScriptInterface
     fun descStartsWith(prefix: String) = also { addFilter(DescFilter.startsWith(prefix)) }
@@ -149,25 +163,31 @@ open class UiSelector : UiObjectActions, StringReadable {
     fun descEndsWith(suffix: String) = also { addFilter(DescFilter.endsWith(suffix)) }
 
     @ScriptInterface
-    fun descContains(str: String) = also { addFilter(DescFilter.contains(str)) }
+    fun descContains(s: String) = also { addFilter(DescFilter.contains(s)) }
+
+     @ScriptInterface
+    fun descContains(regex: NativeRegExp) = also { addFilter(DescFilter.contains(regex)) }
 
     @ScriptInterface
-    @Deprecated("Deprecated in Java", ReplaceWith("descMatch(regex)"))
-    fun descMatches(regex: String) = also { addFilter(DescFilter.matches(convertRegex(regex))) }
+    @Deprecated("Deprecated in Java", ReplaceWith("descMatch(s)"))
+    fun descMatches(s: String) = also { addFilter(DescFilter.matches(s)) }
 
     @ScriptInterface
     @Suppress("DEPRECATION")
     @Deprecated("Deprecated in Java", ReplaceWith("descMatch(regex)"))
-    fun descMatches(regex: NativeRegExp) = descMatches(regex.toString())
+    fun descMatches(regex: NativeRegExp) = also { addFilter(DescFilter.matches(regex)) }
 
     @ScriptInterface
-    fun descMatch(regex: String) = also { addFilter(DescFilter.match(regex)) }
+    fun descMatch(s: String) = also { addFilter(DescFilter.match(s)) }
 
     @ScriptInterface
-    fun descMatch(regex: NativeRegExp) = descMatch(convertRegex(regex.toString()))
+    fun descMatch(regex: NativeRegExp) = also { addFilter(DescFilter.match(regex)) }
 
     @ScriptInterface
-    fun content(str: String) = also { addFilter(ContentFilter.equals(str)) }
+    fun content(s: String) = also { addFilter(ContentFilter.equals(s)) }
+
+    @ScriptInterface
+    fun content(regex: NativeRegExp) = also { addFilter(ContentFilter.equals(regex)) }
 
     @ScriptInterface
     fun contentStartsWith(prefix: String) = also { addFilter(ContentFilter.startsWith(prefix)) }
@@ -176,25 +196,31 @@ open class UiSelector : UiObjectActions, StringReadable {
     fun contentEndsWith(suffix: String) = also { addFilter(ContentFilter.endsWith(suffix)) }
 
     @ScriptInterface
-    fun contentContains(str: String) = also { addFilter(ContentFilter.contains(str)) }
+    fun contentContains(s: String) = also { addFilter(ContentFilter.contains(s)) }
+
+     @ScriptInterface
+    fun contentContains(regex: NativeRegExp) = also { addFilter(ContentFilter.contains(regex)) }
 
     @ScriptInterface
-    @Deprecated("Deprecated in Java", ReplaceWith("contentMatch(regex)"))
-    fun contentMatches(regex: String) = also { addFilter(ContentFilter.matches(convertRegex(regex))) }
+    @Deprecated("Deprecated in Java", ReplaceWith("contentMatch(s)"))
+    fun contentMatches(s: String) = also { addFilter(ContentFilter.matches(s)) }
 
     @ScriptInterface
     @Suppress("DEPRECATION")
     @Deprecated("Deprecated in Java", ReplaceWith("contentMatch(regex)"))
-    fun contentMatches(regex: NativeRegExp) = contentMatches(regex.toString())
+    fun contentMatches(regex: NativeRegExp) = also { addFilter(ContentFilter.matches(regex)) }
 
     @ScriptInterface
-    fun contentMatch(regex: String) = also { addFilter(ContentFilter.match(regex)) }
+    fun contentMatch(s: String) = also { addFilter(ContentFilter.match(s)) }
 
     @ScriptInterface
-    fun contentMatch(regex: NativeRegExp) = contentMatch(convertRegex(regex.toString()))
+    fun contentMatch(regex: NativeRegExp) = also { addFilter(ContentFilter.match(regex)) }
 
     @ScriptInterface
-    fun className(str: String) = also { addFilter(ClassNameFilter.equals(str)) }
+    fun className(s: String) = also { addFilter(ClassNameFilter.equals(s)) }
+
+    @ScriptInterface
+    fun className(regex: NativeRegExp) = also { addFilter(ClassNameFilter.equals(regex)) }
 
     @ScriptInterface
     fun classNameStartsWith(prefix: String) = also { addFilter(ClassNameFilter.startsWith(prefix)) }
@@ -203,25 +229,31 @@ open class UiSelector : UiObjectActions, StringReadable {
     fun classNameEndsWith(suffix: String) = also { addFilter(ClassNameFilter.endsWith(suffix)) }
 
     @ScriptInterface
-    fun classNameContains(str: String) = also { addFilter(ClassNameFilter.contains(str)) }
+    fun classNameContains(s: String) = also { addFilter(ClassNameFilter.contains(s)) }
 
     @ScriptInterface
-    @Deprecated("Deprecated in Java", ReplaceWith("classNameMatch(regex)"))
-    fun classNameMatches(regex: String) = also { addFilter(ClassNameFilter.matches(convertRegex(regex))) }
+    fun classNameContains(regex: NativeRegExp) = also { addFilter(ClassNameFilter.contains(regex)) }
+
+    @ScriptInterface
+    @Deprecated("Deprecated in Java", ReplaceWith("classNameMatch(s)"))
+    fun classNameMatches(s: String) = also { addFilter(ClassNameFilter.matches(s)) }
 
     @ScriptInterface
     @Suppress("DEPRECATION")
     @Deprecated("Deprecated in Java", ReplaceWith("classNameMatch(regex)"))
-    fun classNameMatches(regex: NativeRegExp) = classNameMatches(regex.toString())
+    fun classNameMatches(regex: NativeRegExp) = also { addFilter(ClassNameFilter.matches(regex)) }
 
     @ScriptInterface
-    fun classNameMatch(regex: String) = also { addFilter(ClassNameFilter.match(regex)) }
+    fun classNameMatch(s: String) = also { addFilter(ClassNameFilter.match(s)) }
 
     @ScriptInterface
-    fun classNameMatch(regex: NativeRegExp) = classNameMatch(convertRegex(regex.toString()))
+    fun classNameMatch(regex: NativeRegExp) = also { addFilter(ClassNameFilter.match(regex)) }
 
     @ScriptInterface
-    fun packageName(str: String) = also { addFilter(PackageNameFilter.equals(str)) }
+    fun packageName(s: String) = also { addFilter(PackageNameFilter.equals(s)) }
+
+    @ScriptInterface
+    fun packageName(regex: NativeRegExp) = also { addFilter(PackageNameFilter.equals(regex)) }
 
     @ScriptInterface
     fun packageName(app: App) = also { addFilter(PackageNameFilter.equals(app.packageName)) }
@@ -233,22 +265,25 @@ open class UiSelector : UiObjectActions, StringReadable {
     fun packageNameEndsWith(suffix: String) = also { addFilter(PackageNameFilter.endsWith(suffix)) }
 
     @ScriptInterface
-    fun packageNameContains(str: String) = also { addFilter(PackageNameFilter.contains(str)) }
+    fun packageNameContains(s: String) = also { addFilter(PackageNameFilter.contains(s)) }
+
+     @ScriptInterface
+    fun packageNameContains(regex: NativeRegExp) = also { addFilter(PackageNameFilter.contains(regex)) }
 
     @ScriptInterface
-    @Deprecated("Deprecated in Java", ReplaceWith("packageNameMatch(regex)"))
-    fun packageNameMatches(regex: String) = also { addFilter(PackageNameFilter.matches(convertRegex(regex))) }
+    @Deprecated("Deprecated in Java", ReplaceWith("packageNameMatch(s)"))
+    fun packageNameMatches(s: String) = also { addFilter(PackageNameFilter.matches(s)) }
 
     @ScriptInterface
     @Suppress("DEPRECATION")
     @Deprecated("Deprecated in Java", ReplaceWith("packageNameMatch(regex)"))
-    fun packageNameMatches(regex: NativeRegExp) = packageNameMatches(regex.toString())
+    fun packageNameMatches(regex: NativeRegExp) = also { addFilter(PackageNameFilter.matches(regex)) }
 
     @ScriptInterface
-    fun packageNameMatch(regex: String) = also { addFilter(PackageNameFilter.match(regex)) }
+    fun packageNameMatch(s: String) = also { addFilter(PackageNameFilter.match(s)) }
 
     @ScriptInterface
-    fun packageNameMatch(regex: NativeRegExp) = packageNameMatch(convertRegex(regex.toString()))
+    fun packageNameMatch(regex: NativeRegExp) = also { addFilter(PackageNameFilter.match(regex)) }
 
     @ScriptInterface
     fun currentApp(app: App) = also { addFilter(AppFilter(app)) }
@@ -1019,7 +1054,7 @@ open class UiSelector : UiObjectActions, StringReadable {
                                         .invoke(tmp)
                                     is String -> tmp::class.java
                                         .getMethod(key, cString)
-                                        .invoke(tmp, value.toString())
+                                        .invoke(tmp, value)
                                     is NativeRegExp -> tmp::class.java
                                         .getMethod(key, cNativeRegExp)
                                         .invoke(tmp, value)

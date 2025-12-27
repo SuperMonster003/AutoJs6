@@ -55,7 +55,7 @@ class ColorNativeObject @JvmOverloads constructor(color: Any? = BLACK) : NativeO
         return when (name) {
             "equals", StringReadable.KEY -> true
             in mProxySetterNames -> true
-            in mProxyTowardsNames.map { "to${uppercaseFirstChar(it)}" } -> true
+            in mProxyTowardsNames.map { "to${it.uppercaseFirstChar()}" } -> true
             else -> super.has(name, start)
         }
     }
@@ -80,7 +80,7 @@ class ColorNativeObject @JvmOverloads constructor(color: Any? = BLACK) : NativeO
         }
         else -> {
             val protoName = when (name) {
-                in mProxyTowardsNames -> "to${uppercaseFirstChar(name)}"
+                in mProxyTowardsNames -> "to${name.uppercaseFirstChar()}"
                 else -> name
             }
             try {

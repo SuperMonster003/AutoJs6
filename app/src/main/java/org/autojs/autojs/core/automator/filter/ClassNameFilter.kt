@@ -1,10 +1,11 @@
 package org.autojs.autojs.core.automator.filter
 
 import org.autojs.autojs.core.automator.UiObject
+import org.mozilla.javascript.regexp.NativeRegExp
 
 /**
  * Created by Stardust on Mar 9, 2017.
- * Modified by SuperMonster003 as of Nov 19, 2022.
+ * Modified by SuperMonster003 as of Dec 27, 2025.
  */
 object ClassNameFilter {
 
@@ -59,7 +60,11 @@ object ClassNameFilter {
         else -> extendedClassNameMap[text] ?: "android.widget.$text"
     }.let { StringEqualsFilter(it, CLASS_NAME_GETTER) }
 
-    fun contains(str: String) = StringContainsFilter(str, CLASS_NAME_GETTER)
+    @Suppress("CovariantEquals")
+    fun equals(regex: NativeRegExp) = StringEqualsFilter(regex, CLASS_NAME_GETTER)
+
+    fun contains(s: String) = StringContainsFilter(s, CLASS_NAME_GETTER)
+    fun contains(regex: NativeRegExp) = StringContainsFilter(regex, CLASS_NAME_GETTER)
 
     fun startsWith(prefix: String) = when (prefix.contains(".")) {
         true -> prefix
@@ -68,8 +73,10 @@ object ClassNameFilter {
 
     fun endsWith(suffix: String) = StringEndsWithFilter(suffix, CLASS_NAME_GETTER)
 
-    fun matches(regex: String) = StringMatchesFilter(regex, CLASS_NAME_GETTER)
+    fun matches(s: String) = StringMatchesFilter(s, CLASS_NAME_GETTER)
+    fun matches(regex: NativeRegExp) = StringMatchesFilter(regex, CLASS_NAME_GETTER)
 
-    fun match(regex: String) = StringMatchFilter(regex, CLASS_NAME_GETTER)
+    fun match(s: String) = StringMatchFilter(s, CLASS_NAME_GETTER)
+    fun match(regex: NativeRegExp) = StringMatchFilter(regex, CLASS_NAME_GETTER)
 
 }

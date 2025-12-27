@@ -66,7 +66,7 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : F
     open val key: String
         get() = when {
             mIsOriginalKeyName -> javaClass.simpleName
-            else -> lowercaseFirstChar(javaClass.simpleName)
+            else -> javaClass.simpleName.lowercaseFirstChar()
         }
 
     /**
