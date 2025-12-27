@@ -28,8 +28,8 @@ class RootAutomatorNativeObject(scriptRuntime: ScriptRuntime, waitForReady: Any?
         defineProperty("__ra__", mRootAutomatorObject, READONLY or DONTENUM or PERMANENT)
     }
 
-    override fun has(name: String?): Boolean {
-        return mRootAutomatorObject.has(name) || super.has(name)
+    override fun has(name: String, start: Scriptable): Boolean {
+        return mRootAutomatorObject.has(name, start) || super.has(name, start)
     }
 
     override fun get(name: String, start: Scriptable): Any? {
