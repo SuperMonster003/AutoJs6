@@ -7,6 +7,7 @@ import android.os.Handler
 import android.os.Looper
 import android.os.Parcelable
 import org.autojs.autojs.AutoJs
+import org.autojs.autojs.annotation.RhinoStandardFunctionInterface
 import org.autojs.autojs.core.automator.UiObjectCollection
 import org.autojs.autojs.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.extension.AnyExtensions.jsBrief
@@ -50,6 +51,7 @@ import org.mozilla.javascript.Wrapper
 import org.mozilla.javascript.json.JsonParser
 import java.io.Serializable
 import java.lang.reflect.InvocationTargetException
+import java.lang.reflect.Method
 import java.math.BigInteger
 import kotlin.math.floor
 import kotlin.math.roundToInt
@@ -907,6 +909,13 @@ object RhinoUtils {
             if (hashCode is Number) return hashCode.toInt()
         }
         return null
+    }
+
+    @JvmStatic
+    fun Class<*>.getRhinoStandardFunctionMethods(): List<Method> {
+        return this.declaredMethods.filter {
+            it.isAnnotationPresent(RhinoStandardFunctionInterface::class.java)
+        }
     }
 
     class ObsoletedRhinoFunctionException(funcName: String) : Exception(
