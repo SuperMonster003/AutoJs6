@@ -11,7 +11,6 @@ import org.autojs.autojs.annotation.ScriptInterface
 import org.autojs.autojs.annotation.ScriptVariable
 import org.autojs.autojs.concurrent.VolatileDispose
 import org.autojs.autojs.core.accessibility.AccessibilityBridge
-import org.autojs.autojs.core.accessibility.AccessibilityService
 import org.autojs.autojs.core.accessibility.SimpleActionAutomator
 import org.autojs.autojs.core.accessibility.monitor.CloseableManager
 import org.autojs.autojs.core.activity.ActivityInfoProvider
@@ -177,8 +176,8 @@ import org.autojs.autojs.runtime.api.augment.util.VersionCodes as UtilVersionCod
 
 /**
  * Created by Stardust on Jan 27, 2017.
- * Modified by SuperMonster003 as of Dec 1, 2021.
- * Created by SuperMonster003 on May 24, 2024.
+ * Modified by SuperMonster003 as of Dec 29, 2025.
+ * Transformed by SuperMonster003 on May 24, 2024.
  */
 @Suppress("unused", "PropertyName", "PrivatePropertyName")
 class ScriptRuntime private constructor(builder: Builder) {
@@ -186,6 +185,8 @@ class ScriptRuntime private constructor(builder: Builder) {
     private val mJob = SupervisorJob()
     val coroutineScope = CoroutineScope(Dispatchers.Default + mJob)
     val coroutineContext = coroutineScope.coroutineContext
+    
+    val ownerId = "runtime@${System.identityHashCode(this)}"
 
     private var mUiHandlerAppContext: Context
     private var mRootShell: AbstractShell? = null
@@ -601,7 +602,12 @@ class ScriptRuntime private constructor(builder: Builder) {
         //  ! 清空无障碍事件.
         //  ! en-US (translated by SuperMonster003 on Jul 29, 2024):
         //  ! To clear accessibility event callbacks.
-        ignoresException({ AccessibilityService.clearAccessibilityEventCallback() })
+        // @Hint by SuperMonster003 on Dec 29, 2025.
+        //  ! Only clean up accessibility event callbacks registered
+        //  ! by the current script to avoid affecting other still-running scripts.
+        //  ! zh-CN: 只清理当前脚本注册的无障碍事件回调，避免影响其他仍在运行的脚本.
+        //  # ignoresException({ AccessibilityService.clearAccessibilityEventCallback() })
+        ignoresException({ automator.removeAllEventsForThisRuntime() })
 
         ignoresException({ RootUtils.resetRuntimeOverriddenRootModeState() })
 
