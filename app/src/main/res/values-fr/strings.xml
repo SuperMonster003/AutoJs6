@@ -56,7 +56,6 @@
     <string name="content_description_fab_for_display_manifest">Un bouton d\'action flottant pour afficher le manifeste</string>
     <string name="content_failed_to_determine_index_of_theme_color_item">Impossible de déterminer l\'index de l\'élément de couleur du thème</string>
     <string name="content_failed_to_locate_library_for_theme_color">Impossible de localiser la bibliothèque de couleurs pour la couleur du thème</string>
-    <string name="content_failed_to_retrieve_released_notes_of_current_language_with_zh_hans_fallback">Échec de la récupération des informations de version correspondant à la langue actuellement affichée, veuillez réessayer ultérieurement.\n\nPour l\'instant, les informations de version en \"简体中文 (zh-Hans)\" seront affichées temporairement.</string>
     <string name="content_github_feedback">Une page web sera lancée pour signaler un problème.\nUn compte pour GitHub peut être nécessaire.</string>
     <string name="content_way_of_output_for_recorded_script">Sélectionnez un mode de sortie pour le script enregistré</string>
     <string name="crash_feedback">Copier le journal de débogage ou quitter directement</string>.
@@ -205,7 +204,6 @@
     <string name="error_failed_to_instantiate">Échec de l\'instanciation de \"%s\"</string>
     <string name="error_failed_to_instantiate_with_cause"><![CDATA[Échec de l\'instanciation de \"%1$s\": [ %2$s ]]]></string>
     <string name="error_failed_to_render_content">Impossible d\'afficher le contenu</string>
-    <string name="error_failed_to_retrieve_released_notes">Échec de la récupération des informations de version</string>
     <string name="error_failed_to_retrieve_version_histories">Impossible de récupérer l\'historique des versions</string>
     <string name="error_failed_to_retrieve_version_properties_file_to_parse_version_information">Impossible de récupérer version.properties pour analyser les informations de version</string>
     <string name="error_failed_to_revoke_shizuku_access">La révocation des droits de Shizuku a échoué</string>
@@ -674,7 +672,6 @@
     <string name="text_generate">Générer</string>
     <string name="text_generate_code">Générer un code</string>
     <string name="text_generated_code">Code généré</string>
-    <string name="text_getting_release_notes" tools:ignore="TypographyEllipsis">Retrouver les release notes...</string>
     <string name="text_github_backup_url_used">L\'URL de sauvegarde a été utilisée</string>
     <string name="text_global_settings">Paramètres globaux</string>
     <string name="text_go_to_settings">Aller à \"Settings\"</string>
@@ -941,7 +938,6 @@
     <string name="text_register">Register</string>
     <string name="text_register_succeed">Enregistrement réussi</string>
     <string name="text_registering">Register</string>
-    <string name="text_release_notes">Release notes</string>
     <string name="text_remote">à distance</string>
     <string name="text_remote_file_saved_to_local_storage_successfully">Fichier distant enregistré avec succès dans la mémoire locale</string>
     <string name="text_remote_project_saved_to_local_storage_successfully">Projet distant sauvegardé avec succès dans le stockage local</string>
@@ -1129,5 +1125,17 @@
     <string name="error_specified_autojs6_version_number_must_be_greater_than_461">Le numéro de version AutoJs6 spécifié doit être supérieur à 461</string>
     <string name="error_autojs6_version_number_must_not_be_lower_than_num">Le numéro de version d\'AutoJs6 ne doit pas être inférieur à %1$s</string>
     <string name="error_autojs6_version_must_not_be_lower_than_ver">La version d\'AutoJs6 ne doit pas être inférieure à %1$s</string>
+    <string name="dialog_button_view_update">Voir la mise à jour</string>
+    <string name="content_failed_to_retrieve_changelog_of_current_language_with_zh_hans_release_notes_fallback">Impossible de récupérer le journal des modifications pour la langue actuellement affichée. Vous pouvez réessayer plus tard.\n\nLes notes de version en \"chinois simplifié (zh-Hans)\" seront affichées temporairement.</string>
+    <string name="error_failed_to_retrieve_changelog">Échec de la récupération du journal des modifications</string>
+    <string name="error_failed_to_retrieve_release_notes">Échec de la récupération des notes de version</string>
+    <string name="text_changelog">Journal des modifications</string>
+    <string name="text_release_notes">Notes de version</string>
+    <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">Récupération du journal des modifications...</string>
+    <string name="text_retrieving_release_notes" tools:ignore="TypographyEllipsis">Récupération des notes de version...</string>
+    <string name="dialog_button_view_with_browser">@string/dialog_button_download_with_browser</string>
+    <string name="text_scheduled_restart_backend">Backend</string>
+    <string name="text_scheduled_restart_start_delay">Start delay</string>
+    <string name="dialog_button_advanced_settings">Advanced</string>
 
 </resources>

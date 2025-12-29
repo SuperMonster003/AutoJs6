@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:paddingHorizontal="16dp"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="8dp"
+        android:layout_marginVertical="16dp"
+        android:text="@string/text_scheduled_restart_backend"
+        android:textColor="@color/day_night"
+        android:textSize="16sp" />
+
+    <RadioGroup
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="8dp">
+
+        <org.autojs.autojs.theme.widget.ThemeColorRadioButton
+            android:id="@+id/option_work_manager"
+            android:minHeight="@dimen/md_listitem_height"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:textSize="16sp"
+            android:hint="@string/entry_timed_task_backend_work" />
+
+        <org.autojs.autojs.theme.widget.ThemeColorRadioButton
+            android:id="@+id/option_alarm_manager"
+            android:minHeight="@dimen/md_listitem_height"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:textSize="16sp"
+            android:hint="@string/entry_timed_task_backend_alarm" />
+
+    </RadioGroup>
+
+    <TextView
+        android:id="@+id/scheduled_restart_start_delay_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="8dp"
+        android:layout_marginVertical="16dp"
+        android:text="@string/text_scheduled_restart_start_delay"
+        android:textColor="@color/day_night"
+        android:textSize="16sp" />
+
+    <org.autojs.autojs.theme.widget.ThemeColorSeekBar
+        android:id="@+id/seekBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="4dp"
+        tools:progress="10" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginHorizontal="12dp"
+        android:layout_marginBottom="4dp">
+
+        <TextView
+            android:id="@+id/scheduled_restart_start_delay_min_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:text="0"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/scheduled_restart_start_delay_max_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:text="3000"
+            android:textSize="16sp" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</LinearLayout>

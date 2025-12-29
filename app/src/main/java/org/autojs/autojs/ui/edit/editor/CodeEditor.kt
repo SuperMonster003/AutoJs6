@@ -128,8 +128,8 @@ class CodeEditor : HVScrollView {
             return if (s == e) "" else codeEditText.text?.substring(s, e) ?: ""
         }
 
-    private var mMinTextSize = context.getString(R.string.text_text_size_min_value).toInt()
-    private var mMaxTextSize = context.getString(R.string.text_text_size_max_value).toInt()
+    private var mMinTextSize = context.resources.getInteger(R.integer.editor_text_size_min_value)
+    private var mMaxTextSize = context.resources.getInteger(R.integer.editor_text_size_max_value)
     private var mTextViewRedoUndo = TextViewUndoRedo(codeEditText)
 
     private var mTheme: Theme? = null

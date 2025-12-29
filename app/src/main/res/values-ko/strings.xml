@@ -58,7 +58,6 @@
     <string name="content_description_fab_for_display_manifest">매니페스트를 표시하기 위한 플로팅 액션 버튼 위젯</string>
     <string name="content_failed_to_determine_index_of_theme_color_item">테마 색상 아이템의 인덱스를 확인할 수 없습니다</string>
     <string name="content_failed_to_locate_library_for_theme_color">테마 색상에 대한 색상 라이브러리를 찾을 수 없습니다</string>
-    <string name="content_failed_to_retrieve_released_notes_of_current_language_with_zh_hans_fallback">현재 표시 언어에 해당하는 버전 정보를 가져오지 못했습니다. 나중에 다시 시도해 주세요.\n\n현재 임시로 \"简体中文 (zh-Hans)\" 언어의 버전 정보가 표시되고 있습니다.</string>
     <string name="content_github_feedback">문제를보고하기 위해 웹 페이지가 시작됩니다.\nGitHub 에 대한 계정이 필요할 수 있습니다.</string>
     <string name="content_way_of_output_for_recorded_script">재설계된 스크립트의 출력 방법 선택</string>
     <string name="crash_feedback">디버깅 로그를 복사하거나 직접 종료하십시오</string>
@@ -207,7 +206,6 @@
     <string name="error_failed_to_instantiate">\"%s\" 인스턴스 생성에 실패했습니다</string>
     <string name="error_failed_to_instantiate_with_cause"><![CDATA[인스턴스 생성 \"%1$s\" 에 실패했습니다: [ %2$s ]]]></string>
     <string name="error_failed_to_render_content">콘텐츠 렌더링에 실패했습니다</string>
-    <string name="error_failed_to_retrieve_released_notes">버전 정보를 가져오지 못했습니다</string>
     <string name="error_failed_to_retrieve_version_histories">버전 기록을 가져올 수 없습니다</string>
     <string name="error_failed_to_retrieve_version_properties_file_to_parse_version_information">version.properties 를 가져올 수 없어 버전 정보를 분석할 수 없습니다</string>
     <string name="error_failed_to_revoke_shizuku_access">Shizuku 권한 해지에 실패했습니다</string>
@@ -676,7 +674,6 @@
     <string name="text_generate">생성하다</string>
     <string name="text_generate_code">코드를 생성합니다</string>
     <string name="text_generated_code">생성 된 코드</string>
-    <string name="text_getting_release_notes" tools:ignore="TypographyEllipsis">릴리스 노트 검색 ...</string>
     <string name="text_github_backup_url_used">백업 URL 이 사용되었습니다</string>
     <string name="text_global_settings">전역 설정</string>
     <string name="text_go_to_settings">설정으로 바로 가기\"</string>
@@ -943,7 +940,6 @@
     <string name="text_register">등록하다</string>
     <string name="text_register_succeed">등록이 성공했습니다</string>
     <string name="text_registering">등록</string>
-    <string name="text_release_notes">릴리즈 노트</string>
     <string name="text_remote">원격</string>
     <string name="text_remote_file_saved_to_local_storage_successfully">원격 파일이 로컬 저장소에 성공적으로 저장됨</string>
     <string name="text_remote_project_saved_to_local_storage_successfully">원격 프로젝트가 로컬 저장소에 성공적으로 저장되었습니다</string>
@@ -1131,5 +1127,17 @@
     <string name="error_specified_autojs6_version_number_must_be_greater_than_461">지정된 AutoJs6 버전 번호는 461보다 커야 합니다</string>
     <string name="error_autojs6_version_number_must_not_be_lower_than_num">AutoJs6 버전 번호는 %1$s보다 낮아서는 안 됩니다</string>
     <string name="error_autojs6_version_must_not_be_lower_than_ver">AutoJs6 버전은 %1$s보다 낮아서는 안 됩니다</string>
+    <string name="dialog_button_view_update">업데이트 보기</string>
+    <string name="content_failed_to_retrieve_changelog_of_current_language_with_zh_hans_release_notes_fallback">현재 표시 언어에 해당하는 변경 로그를 가져오지 못했습니다. 잠시 후 다시 시도해 주세요.\n\n현재는 임시로 \"중국어 간체 (zh-Hans)\" 릴리스 노트를 표시합니다.</string>
+    <string name="error_failed_to_retrieve_changelog">변경 로그를 가져오지 못했습니다</string>
+    <string name="error_failed_to_retrieve_release_notes">릴리스 노트를 가져오지 못했습니다</string>
+    <string name="text_changelog">변경 로그</string>
+    <string name="text_release_notes">릴리스 노트</string>
+    <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">변경 로그를 가져오는 중...</string>
+    <string name="text_retrieving_release_notes" tools:ignore="TypographyEllipsis">릴리스 노트를 가져오는 중...</string>
+    <string name="dialog_button_view_with_browser">@string/dialog_button_download_with_browser</string>
+    <string name="text_scheduled_restart_backend">Backend</string>
+    <string name="text_scheduled_restart_start_delay">Start delay</string>
+    <string name="dialog_button_advanced_settings">Advanced</string>
 
 </resources>

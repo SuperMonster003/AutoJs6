@@ -55,7 +55,6 @@
     <string name="content_description_fab_for_display_manifest">用於顯示清單內容的浮動操作按鈕控件</string>
     <string name="content_failed_to_determine_index_of_theme_color_item">無法確定主題色條目的索引值</string>
     <string name="content_failed_to_locate_library_for_theme_color">無法定位主題色所在顏色庫</string>
-    <string name="content_failed_to_retrieve_released_notes_of_current_language_with_zh_hans_fallback">獲取當前顯示語言對應的版本信息失敗, 可稍後再次嘗試.\n\n目前將臨時顯示 \"简体中文 (zh-Hans)\" 語言的版本信息.</string>
     <string name="content_github_feedback">即將跳轉到項目議題反饋 WEB 頁面.\n可能需要 GitHub 賬户以完成問題反饋.</string>
     <string name="content_way_of_output_for_recorded_script">選擇一個已錄製腳本的輸出方式</string>
     <string name="crash_feedback">可複製調試信息到剪貼板或直接退出應用</string>
@@ -203,7 +202,6 @@
     <string name="error_failed_to_instantiate">實例 \"%s\" 創建失敗</string>
     <string name="error_failed_to_instantiate_with_cause"><![CDATA[實例 \"%1$s\" 創建失敗: [ %2$s ]]]></string>
     <string name="error_failed_to_render_content">內容渲染失敗</string>
-    <string name="error_failed_to_retrieve_released_notes">獲取版本信息失敗</string>
     <string name="error_failed_to_retrieve_version_histories">獲取版本歷史失敗</string>
     <string name="error_failed_to_retrieve_version_properties_file_to_parse_version_information">獲取 version.properties 失敗, 無法解析版本信息</string>
     <string name="error_failed_to_revoke_shizuku_access">Shizuku 權限撤銷失敗</string>
@@ -672,7 +670,6 @@
     <string name="text_generate">生成</string>
     <string name="text_generate_code">生成代碼</string>
     <string name="text_generated_code">已生成代碼</string>
-    <string name="text_getting_release_notes" tools:ignore="TypographyEllipsis">正在獲取版本信息...</string>
     <string name="text_github_backup_url_used">備用 URL 已使用</string>
     <string name="text_global_settings">全局設置</string>
     <string name="text_go_to_settings">打開 \"設置\"</string>
@@ -939,7 +936,6 @@
     <string name="text_register">註冊</string>
     <string name="text_register_succeed">註冊成功</string>
     <string name="text_registering">註冊中</string>
-    <string name="text_release_notes">更新日誌</string>
     <string name="text_remote">遠程</string>
     <string name="text_remote_file_saved_to_local_storage_successfully">遠程文件已保存至本地</string>
     <string name="text_remote_project_saved_to_local_storage_successfully">遠程項目已保存至本地</string>
@@ -1127,5 +1123,17 @@
     <string name="error_specified_autojs6_version_number_must_be_greater_than_461">指定的 AutoJs6 應用版本號需大於 461</string>
     <string name="error_autojs6_version_number_must_not_be_lower_than_num">AutoJs6 應用版本號需不低於 %1$s</string>
     <string name="error_autojs6_version_must_not_be_lower_than_ver">AutoJs6 應用版本需不低於 %1$s</string>
+    <string name="dialog_button_view_update">查看更新</string>
+    <string name="content_failed_to_retrieve_changelog_of_current_language_with_zh_hans_release_notes_fallback">獲取當前顯示語言對應的更新日誌失敗, 可稍後再次嘗試.\n\n目前將臨時顯示 \"簡體中文 (zh-Hans)\" 語言的發行説明.</string>
+    <string name="error_failed_to_retrieve_changelog">獲取更新日誌失敗</string>
+    <string name="error_failed_to_retrieve_release_notes">獲取發行説明失敗</string>
+    <string name="text_changelog">更新日誌</string>
+    <string name="text_release_notes">發行説明</string>
+    <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">正在獲取更新日誌...</string>
+    <string name="text_retrieving_release_notes" tools:ignore="TypographyEllipsis">正在獲取發行説明...</string>
+    <string name="dialog_button_view_with_browser">瀏覽器查看</string>
+    <string name="text_scheduled_restart_backend">Backend</string>
+    <string name="text_scheduled_restart_start_delay">Start delay</string>
+    <string name="dialog_button_advanced_settings">Advanced</string>
 
 </resources>

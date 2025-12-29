@@ -58,7 +58,6 @@
     <string name="content_description_fab_for_display_manifest">زر عائم لعرض المحتوي الفعلي</string>
     <string name="content_failed_to_determine_index_of_theme_color_item">فشل في تحديد مؤشر عنصر لون الثيم</string>
     <string name="content_failed_to_locate_library_for_theme_color">فشل في تحديد موقع مكتبة الألوان للثيم</string>
-    <string name="content_failed_to_retrieve_released_notes_of_current_language_with_zh_hans_fallback">فشل في استرداد معلومات الإصدار للغة المعروضة حالياً، يُرجى المحاولة مرة أخرى لاحقاً.\n\nسيتم حالياً عرض معلومات الإصدار بلغة \"简体中文 (zh-Hans)\" مؤقتاً.</string>
     <string name="content_github_feedback">سيتم إطلاق صفحة ويب للإبلاغ عن مشكلة.\nقد تكون هناك حاجة إلى حساب GitHub.</string>
     <string name="content_way_of_output_for_recorded_script">اختر طريقة إخراج للنصوص المعاد تصميمها</string>
     <string name="crash_feedback">نسخ سجل الأخطاء أو الخروج مباشرة</string>
@@ -207,7 +206,6 @@
     <string name="error_failed_to_instantiate">فشل إنشاء المثيل \"%s\"</string>
     <string name="error_failed_to_instantiate_with_cause"><![CDATA[فشل إنشاء المثيل \"%1$s\": [ %2$s ]]]></string>
     <string name="error_failed_to_render_content">فشل في عرض المحتوى</string>
-    <string name="error_failed_to_retrieve_released_notes">فشل في استرداد معلومات الإصدار</string>
     <string name="error_failed_to_retrieve_version_histories">تعذّر جلب سجل الإصدارات</string>
     <string name="error_failed_to_retrieve_version_properties_file_to_parse_version_information">تعذّر جلب ملف version.properties لتحليل معلومات الإصدار</string>
     <string name="error_failed_to_revoke_shizuku_access">فشل في إلغاء وصول Shizuku</string>
@@ -676,7 +674,6 @@
     <string name="text_generate">يولد</string>
     <string name="text_generate_code">إنشاء التعليمات البرمجية</string>
     <string name="text_generated_code">رمز تم إنشاؤه</string>
-    <string name="text_getting_release_notes" tools:ignore="TypographyEllipsis">استرداد ملاحظات الإصدار ...</string>
     <string name="text_github_backup_url_used">تم استخدام عنوان URL للنسخ الاحتياطي</string>
     <string name="text_global_settings">إعدادات عامة</string>
     <string name="text_go_to_settings">اذهب للاعدادات\"</string>
@@ -943,7 +940,6 @@
     <string name="text_register">يسجل</string>
     <string name="text_register_succeed">نجح السجل</string>
     <string name="text_registering">التسجيل</string>
-    <string name="text_release_notes">ملاحظات الإصدار</string>
     <string name="text_remote">التحكم عن بعد</string>
     <string name="text_remote_file_saved_to_local_storage_successfully">تم حفظ الملف البعيد في وحدة التخزين المحلية بنجاح</string>
     <string name="text_remote_project_saved_to_local_storage_successfully">تم حفظ المشروع البعيد في وحدة التخزين المحلية بنجاح</string>
@@ -1131,5 +1127,17 @@
     <string name="error_specified_autojs6_version_number_must_be_greater_than_461">يجب أن يكون رقم إصدار AutoJs6 المحدد أكبر من 461</string>
     <string name="error_autojs6_version_number_must_not_be_lower_than_num">يجب ألا يكون رقم إصدار AutoJs6 أقل من %1$s</string>
     <string name="error_autojs6_version_must_not_be_lower_than_ver">يجب ألا يكون إصدار AutoJs6 أقل من %1$s</string>
+    <string name="dialog_button_view_update">عرض التحديث</string>
+    <string name="content_failed_to_retrieve_changelog_of_current_language_with_zh_hans_release_notes_fallback">تعذّر جلب سجل التغييرات للغة المعروضة حاليًا. يمكنك إعادة المحاولة لاحقًا.\n\nسيتم عرض ملاحظات الإصدار باللغة \"الصينية المبسطة (zh-Hans)\" مؤقتًا.</string>
+    <string name="error_failed_to_retrieve_changelog">تعذّر جلب سجل التغييرات</string>
+    <string name="error_failed_to_retrieve_release_notes">تعذّر جلب ملاحظات الإصدار</string>
+    <string name="text_changelog">سجل التغييرات</string>
+    <string name="text_release_notes">ملاحظات الإصدار</string>
+    <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">جارٍ جلب سجل التغييرات...</string>
+    <string name="text_retrieving_release_notes" tools:ignore="TypographyEllipsis">جارٍ جلب ملاحظات الإصدار...</string>
+    <string name="dialog_button_view_with_browser">@string/dialog_button_download_with_browser</string>
+    <string name="text_scheduled_restart_backend">Backend</string>
+    <string name="text_scheduled_restart_start_delay">Start delay</string>
+    <string name="dialog_button_advanced_settings">Advanced</string>
 
 </resources>

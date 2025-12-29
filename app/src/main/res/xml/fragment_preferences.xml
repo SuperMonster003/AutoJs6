@@ -60,7 +60,7 @@
             app:longClickPrompt="@string/description_documentation_source_preference"
             app:longClickPromptMore="@string/description_documentation_source_preference_more" />
 
-        <org.autojs.autojs.theme.preference.MaterialListPreference
+        <org.autojs.autojs.ui.settings.RestartStrategyPreference
             app:layout="@layout/preference_custom"
             app:key="@string/key_restart_strategy"
             app:title="@string/text_restart_strategy"

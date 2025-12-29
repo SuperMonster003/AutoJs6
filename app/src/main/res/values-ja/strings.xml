@@ -57,7 +57,6 @@
     <string name="content_description_fab_for_display_manifest">マニフェストを表示するためのフローティング操作ボタン部品</string>
     <string name="content_failed_to_determine_index_of_theme_color_item">テーマカラーアイテムのインデックスを特定できません</string>
     <string name="content_failed_to_locate_library_for_theme_color">テーマカラーのカラーパレットが見つかりません</string>
-    <string name="content_failed_to_retrieve_released_notes_of_current_language_with_zh_hans_fallback">現在表示中の言語に対応するバージョン情報の取得に失敗しました. しばらくしてから再度お試しください.\n\n現在, 一時的に \"简体中文 (zh-Hans)\" のバージョン情報を表示しています.</string>
     <string name="content_github_feedback">問題を報告するためのウェブページが起動します.\nGitHub のアカウントが必要な場合があります</string>
     <string name="content_way_of_output_for_recorded_script">回収したスクリプトの出力方法を選択する</string>
     <string name="crash_feedback">デバッグログをコピーするか, 直接終了する</string>
@@ -206,7 +205,6 @@
     <string name="error_failed_to_instantiate">\"%s\" のインスタンス化に失敗しました</string>
     <string name="error_failed_to_instantiate_with_cause"><![CDATA[インスタンス化 \"%1$s\" に失敗しました: [ %2$s ]]]></string>
     <string name="error_failed_to_render_content">コンテンツの表示に失敗しました</string>
-    <string name="error_failed_to_retrieve_released_notes">バージョン情報の取得に失敗しました</string>
     <string name="error_failed_to_retrieve_version_histories">バージョン履歴を取得できません</string>
     <string name="error_failed_to_retrieve_version_properties_file_to_parse_version_information">version.properties を取得できず, バージョン情報を解析できません</string>
     <string name="error_failed_to_revoke_shizuku_access">Shizuku 権限の取り消しに失敗しました</string>
@@ -675,7 +673,6 @@
     <string name="text_generate">生成</string>
     <string name="text_generate_code">生成されるコード</string>
     <string name="text_generated_code">生成されたコード</string>
-    <string name="text_getting_release_notes" tools:ignore="TypographyEllipsis">リリースノートの取得中...</string>
     <string name="text_github_backup_url_used">バックアップ URL を使用しました</string>
     <string name="text_global_settings">グローバル設定</string>
     <string name="text_go_to_settings">\"設定\" に進む</string>
@@ -942,7 +939,6 @@
     <string name="text_register">登録</string>
     <string name="text_register_succeed">登録に成功した</string>
     <string name="text_registering">登録中</string>
-    <string name="text_release_notes">リリースノート</string>
     <string name="text_remote">リモート</string>
     <string name="text_remote_file_saved_to_local_storage_successfully">リモート・ファイルがローカル・ストレージに正常に保存された</string>
     <string name="text_remote_project_saved_to_local_storage_successfully">リモートプロジェクトがローカルストレージに正常に保存された</string>
@@ -1130,5 +1126,17 @@
     <string name="error_specified_autojs6_version_number_must_be_greater_than_461">指定された AutoJs6 のバージョン番号は 461 より大きくなければなりません</string>
     <string name="error_autojs6_version_number_must_not_be_lower_than_num">AutoJs6 のバージョン番号は %1$s 未満であってはなりません</string>
     <string name="error_autojs6_version_must_not_be_lower_than_ver">AutoJs6 のバージョンは %1$s 未満であってはなりません</string>
+    <string name="dialog_button_view_update">更新を表示</string>
+    <string name="content_failed_to_retrieve_changelog_of_current_language_with_zh_hans_release_notes_fallback">現在表示している言語に対応する更新ログの取得に失敗しました. しばらくしてからもう一度お試しください. \n\n現在は一時的に \"簡体字中国語 (zh-Hans)\" のリリースノートを表示します.</string>
+    <string name="error_failed_to_retrieve_changelog">更新ログの取得に失敗しました</string>
+    <string name="error_failed_to_retrieve_release_notes">リリースノートの取得に失敗しました</string>
+    <string name="text_changelog">更新ログ</string>
+    <string name="text_release_notes">リリースノート</string>
+    <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">更新ログを取得しています...</string>
+    <string name="text_retrieving_release_notes" tools:ignore="TypographyEllipsis">リリースノートを取得しています...</string>
+    <string name="dialog_button_view_with_browser">@string/dialog_button_download_with_browser</string>
+    <string name="text_scheduled_restart_backend">Backend</string>
+    <string name="text_scheduled_restart_start_delay">Start delay</string>
+    <string name="dialog_button_advanced_settings">Advanced</string>
 
 </resources>

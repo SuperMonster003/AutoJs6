@@ -50,8 +50,6 @@
     <dimen name="expanded_view_initial_height">518dp</dimen>
     <dimen name="toolbar_content_inset_start_with_navigation">64dp</dimen>
     <dimen name="dimen_25dp">25dp</dimen>
-    <integer name="snackbar_text_max_lines">2</integer>
-    <integer name="layout_node_info_view_decoration_line">2</integer>
 
     <!-- Android Resources -->
 

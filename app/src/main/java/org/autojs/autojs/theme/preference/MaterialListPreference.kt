@@ -17,10 +17,11 @@ open class MaterialListPreference : MaterialDialogPreference {
     private var mItemValues: Collection<CharSequence> = emptyList()
     private var mItemDisables: Array<Int> = emptyArray()
     private var mItemDefaultKey: CharSequence? = null
-    private val mItemDefaultIndex: Int
+
+    protected val itemDefaultIndex: Int
         get() = getKeyIndex(mItemDefaultKey) ?: 0
 
-    private var itemPrefIndex: Int?
+    protected var itemPrefIndex: Int?
         get() = getKeyIndex(Pref.getStringOrNull(key))
         set(index) {
             index?.let {
@@ -31,7 +32,7 @@ open class MaterialListPreference : MaterialDialogPreference {
     private var mConfirmedPrompt: String? = null
 
     protected val entry: CharSequence?
-        get() = mItemValues.takeIf { it.isNotEmpty() }?.toList()?.get(itemPrefIndex ?: mItemDefaultIndex)
+        get() = mItemValues.takeIf { it.isNotEmpty() }?.toList()?.get(itemPrefIndex ?: itemDefaultIndex)
 
     protected val defaultEntry: CharSequence?
         get() {
@@ -93,7 +94,7 @@ open class MaterialListPreference : MaterialDialogPreference {
             builder.items(it)
             builder.choiceWidgetThemeColor()
             builder.takeIf { mItemDisables.isNotEmpty() }?.itemsDisabledIndices(*mItemDisables)
-            builder.itemsCallbackSingleChoice(itemPrefIndex ?: mItemDefaultIndex) { d, _, which, _ ->
+            builder.itemsCallbackSingleChoice(itemPrefIndex ?: itemDefaultIndex) { d, _, which, _ ->
                 if (itemPrefIndex != which) {
                     itemPrefIndex = which
                     showPrompt() ?: onChangeConfirmed(getDialog())
@@ -106,7 +107,7 @@ open class MaterialListPreference : MaterialDialogPreference {
                 builder.options(
                     listOf(
                         MaterialDialog.OptionMenuItemSpec(context.getString(R.string.dialog_button_use_default)) { dialog ->
-                            dialog.selectedIndex = mItemDefaultIndex
+                            dialog.selectedIndex = itemDefaultIndex
                         },
                     )
                 )
@@ -118,7 +119,7 @@ open class MaterialListPreference : MaterialDialogPreference {
         return keyString?.run { mItemKeys.indexOf(this).takeIf { it != -1 } }
     }
 
-    private fun showPrompt() = mConfirmedPrompt?.let { content ->
+    protected fun showPrompt() = mConfirmedPrompt?.let { content ->
         NotAskAgainDialog.Builder(prefContext, "prompt_\$_${key}")
             .title(R.string.text_prompt)
             .content(content)
@@ -131,7 +132,7 @@ open class MaterialListPreference : MaterialDialogPreference {
 
     open fun onChangeConfirmed(dialog: MaterialDialog) {
         notifyChanged()
-        getDialog().dismiss()
+        dialog.dismiss()
     }
 
 }
