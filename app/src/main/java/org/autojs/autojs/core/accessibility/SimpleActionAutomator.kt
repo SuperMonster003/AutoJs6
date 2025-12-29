@@ -34,8 +34,11 @@ import android.accessibilityservice.AccessibilityService as AndroidAccessibility
 
 /**
  * Created by Stardust on Apr 2, 2017.
+ * Modified by SuperMonster003 as of Dec 29, 2025.
  */
 class SimpleActionAutomator(private val accessibilityBridge: AccessibilityBridge, private val scriptRuntime: ScriptRuntime) {
+
+    private val mA11yEventOwnerId: String = scriptRuntime.ownerId
 
     private val mGlobalActionAutomatorRaw by lazy {
         GlobalActionAutomator(scriptRuntime.uiHandler.applicationContext, Handler(scriptRuntime.loopers.servantLooper)) {
@@ -198,12 +201,27 @@ class SimpleActionAutomator(private val accessibilityBridge: AccessibilityBridge
     //  ! zh-CN: 参考 Auto.js Pro.
     fun registerEvent(eventName: String, callback: AccessibilityEventCallback?) {
         ensureService()
-        AccessibilityService.instance?.addAccessibilityEventCallback(eventName, callback)
+        val service = AccessibilityService.instance ?: return
+
+        if (callback == null) {
+            service.removeAccessibilityEventCallback(mA11yEventOwnerId, eventName)
+            return
+        }
+        service.addAccessibilityEventCallback(mA11yEventOwnerId, eventName, callback)
     }
 
     // @Created by 抠脚本人 on Jul 10, 2023.
     fun removeEvent(eventName: String) {
-        AccessibilityService.instance?.removeAccessibilityEventCallback(eventName)
+        AccessibilityService.instance?.removeAccessibilityEventCallback(mA11yEventOwnerId, eventName)
+    }
+
+    /**
+     * Called when the script exits, only clears accessibility
+     * event listeners registered by the current script.
+     * zh-CN: 脚本退出时调用, 只清理由当前脚本注册的无障碍事件监听.
+     */
+    fun removeAllEventsForThisRuntime() {
+        AccessibilityService.instance?.removeAllAccessibilityEventCallbacks(mA11yEventOwnerId)
     }
 
     private fun performAction(simpleAction: SimpleAction): Boolean {

@@ -56,6 +56,7 @@
         "images 部分相关方法可能引发内存泄露的问题 _[`issue #372`](http://issues.autojs6.com/372)_",
         "ocr 部分重载方法可能无法正常使用的问题",
         "ocr.detect 方法获得的结果可能与 ocr.mode 不匹配的问题 _[`issue #468`](http://issues.autojs6.com/468)_",
+        "auto.registerEvent 注册的无障碍服务事件会被其他脚本误清理的问题 _[`issue #466`](http://issues.autojs6.com/466)_",
         "Android 10 UiObject#child 方法可能出现 ArrayIndexOutOfBoundsException 异常的问题 _[`issue #416`](http://issues.autojs6.com/416)_",
         "运行项目时 project.json 配置参数无法正常解析的问题",
         "项目配置文件中构建版本号或构建时间出现较大数字时可能导致应用崩溃的问题",
