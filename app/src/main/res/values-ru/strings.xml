@@ -56,7 +56,6 @@
     <string name="content_description_fab_for_display_manifest">Плавающая кнопка действий для отображения манифеста</string>
     <string name="content_failed_to_determine_index_of_theme_color_item">Не удалось определить индекс элемента цвета темы</string>
     <string name="content_failed_to_locate_library_for_theme_color">Не удалось найти цветовую библиотеку для темы</string>
-    <string name="content_failed_to_retrieve_released_notes_of_current_language_with_zh_hans_fallback">Не удалось получить информацию о версии для текущего выбранного языка, повторите попытку позже.\n\nВ данный момент временно отображается информация о версии для языка \"简体中文 (zh-Hans)\".</string>
     <string name="content_github_feedback">Для сообщения о проблеме будет открыта веб-страница.\nМожет потребоваться учетная запись на GitHub.</string>
     <string name="content_way_of_output_for_recorded_script">Выберите способ вывода для переработанных сценариев</string>
     <string name="crash_feedback">Скопируйте журнал отладки или выйдите напрямую</string>
@@ -205,7 +204,6 @@
     <string name="error_failed_to_instantiate">Ошибка создания экземпляра \"%s\"</string>
     <string name="error_failed_to_instantiate_with_cause"><![CDATA[Ошибка создания экземпляра \"%1$s\": [ %2$s ]]]></string>
     <string name="error_failed_to_render_content">Не удалось отобразить содержимое</string>
-    <string name="error_failed_to_retrieve_released_notes">Не удалось получить информацию о версии</string>
     <string name="error_failed_to_retrieve_version_histories">Не удалось получить историю версий</string>
     <string name="error_failed_to_retrieve_version_properties_file_to_parse_version_information">Не удалось получить файл version.properties для анализа информации о версии</string>
     <string name="error_failed_to_revoke_shizuku_access">Не удалось отозвать права на Shizuku</string>
@@ -674,7 +672,6 @@
     <string name="text_generate">Сгенерировать</string>
     <string name="text_generate_code">Сгенерировать код</string>
     <string name="text_generated_code">Сгенерированный код</string>
-    <string name="text_getting_release_notes" tools:ignore="TypographyEllipsis">Извлечение заметок о выпуске...</string>
     <string name="text_github_backup_url_used">Использован URL-адрес резервной копии</string>
     <string name="text_global_settings">Глобальные настройки</string>
     <string name="text_go_to_settings">Перейдите в \"Настройки\"</string>
@@ -941,7 +938,6 @@
     <string name="text_register">Регистрировать</string>
     <string name="text_register_succeed">Регистрация прошла успешно</string>
     <string name="text_registering">Регистрация</string>
-    <string name="text_release_notes">Примечания к выпуску</string>
     <string name="text_remote">удаленный</string>
     <string name="text_remote_file_saved_to_local_storage_successfully">Удаленный файл успешно сохранен в локальном хранилище</string>
     <string name="text_remote_project_saved_to_local_storage_successfully">Удаленный проект успешно сохранен в локальном хранилище</string>
@@ -1129,5 +1125,17 @@
     <string name="error_specified_autojs6_version_number_must_be_greater_than_461">Указанный номер версии AutoJs6 должен быть больше 461</string>
     <string name="error_autojs6_version_number_must_not_be_lower_than_num">Номер версии AutoJs6 не должен быть ниже %1$s</string>
     <string name="error_autojs6_version_must_not_be_lower_than_ver">Версия AutoJs6 не должна быть ниже %1$s</string>
+    <string name="dialog_button_view_update">Просмотреть обновление</string>
+    <string name="content_failed_to_retrieve_changelog_of_current_language_with_zh_hans_release_notes_fallback">Не удалось получить список изменений для текущего отображаемого языка. Попробуйте снова позже.\n\nПока что временно будут показаны примечания к выпуску на \"упрощённом китайском (zh-Hans)\".</string>
+    <string name="error_failed_to_retrieve_changelog">Не удалось получить список изменений</string>
+    <string name="error_failed_to_retrieve_release_notes">Не удалось получить примечания к выпуску</string>
+    <string name="text_changelog">Список изменений</string>
+    <string name="text_release_notes">Примечания к выпуску</string>
+    <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">Получение списка изменений...</string>
+    <string name="text_retrieving_release_notes" tools:ignore="TypographyEllipsis">Получение примечаний к выпуску...</string>
+    <string name="dialog_button_view_with_browser">@string/dialog_button_download_with_browser</string>
+    <string name="text_scheduled_restart_backend">Backend</string>
+    <string name="text_scheduled_restart_start_delay">Start delay</string>
+    <string name="dialog_button_advanced_settings">Advanced</string>
 
 </resources>

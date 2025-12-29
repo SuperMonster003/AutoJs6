@@ -5,17 +5,14 @@ import android.view.LayoutInflater;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
-
 import com.afollestad.materialdialogs.MaterialDialog;
-
-import org.autojs.autojs.theme.ThemeColorHelper;
 import org.autojs.autojs6.R;
-import org.autojs.autojs6.databinding.DialogTextSizeSettingBinding;
+import org.autojs.autojs6.databinding.DialogTextSizeSettingsBinding;
 
 /**
  * Created by Stardust on Feb 24, 2018.
+ * Modified by SuperMonster003 as of Dec 29, 2025.
  */
 public class TextSizeSettingDialogBuilder extends MaterialDialog.Builder implements SeekBar.OnSeekBarChangeListener {
 
@@ -36,13 +33,13 @@ public class TextSizeSettingDialogBuilder extends MaterialDialog.Builder impleme
     public TextSizeSettingDialogBuilder(@NonNull Context context) {
         super(context);
 
-        DialogTextSizeSettingBinding binding = DialogTextSizeSettingBinding.inflate(LayoutInflater.from(context));
+        DialogTextSizeSettingsBinding binding = DialogTextSizeSettingsBinding.inflate(LayoutInflater.from(context));
 
-        mSeekBar = binding.seekbar;
+        mSeekBar = binding.seekBar;
         mPreviewText = binding.previewText;
 
-        mMinTextSize = Integer.parseInt(context.getString(R.string.text_text_size_min_value));
-        mMaxTextSize = Integer.parseInt(context.getString(R.string.text_text_size_max_value));
+        mMinTextSize = context.getResources().getInteger(R.integer.editor_text_size_min_value);
+        mMaxTextSize = context.getResources().getInteger(R.integer.editor_text_size_max_value);
 
         LinearLayout view = binding.getRoot();
         customView(view, false);
@@ -50,11 +47,15 @@ public class TextSizeSettingDialogBuilder extends MaterialDialog.Builder impleme
 
         mSeekBar.setOnSeekBarChangeListener(this);
         mSeekBar.setMax(mMaxTextSize - mMinTextSize);
+
+        binding.textSizeMinValue.setText(String.valueOf(mMinTextSize));
+        binding.textSizeMaxValue.setText(String.valueOf(mMaxTextSize));
+
         autoDismiss(false);
 
         neutralText(R.string.dialog_button_use_default);
         neutralColorRes(R.color.dialog_button_reset);
-        onNeutral((dialog, which) -> initialValue(Integer.parseInt(getContext().getString(R.string.text_text_size_default_value))));
+        onNeutral((dialog, which) -> initialValue(getContext().getResources().getInteger(R.integer.editor_text_size_default_value)));
         negativeText(R.string.text_cancel);
         negativeColorRes(R.color.dialog_button_default);
         onNegative((dialog, which) -> dialog.dismiss());

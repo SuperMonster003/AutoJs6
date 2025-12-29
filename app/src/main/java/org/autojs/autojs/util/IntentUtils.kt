@@ -369,34 +369,52 @@ object IntentUtils {
         }
 
         private fun scheduleAppLaunch(context: Context, launchIntent: Intent) {
-            val delay = TimeUnit.MILLISECONDS.toMillis(300)
-            val triggerAtMillis = SystemClock.elapsedRealtime() + delay
-            runCatching tryWithAlarmManager@{
-                val pendingIntent = PendingIntent.getActivity(
-                    /* context = */ context,
-                    /* requestCode = */ UNIQUE_REQUEST_CODE,
-                    /* intent = */ launchIntent,
-                    /* flags = */ PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-                )
-                val am = context.getSystemService(ALARM_SERVICE) as AlarmManager
-                am.cancel(pendingIntent)
-                am.setExactAndAllowWhileIdle(
-                    /* type = */ AlarmManager.ELAPSED_REALTIME,
-                    /* triggerAtMillis = */ triggerAtMillis,
-                    /* operation = */ pendingIntent,
-                )
-            }.onFailure tryWithWorkManager@{
-                it.printStackTrace()
-                val request = OneTimeWorkRequestBuilder<RestartWorker>()
-                    .setInitialDelay(delay, TimeUnit.MILLISECONDS)
-                    .setConstraints(Constraints.NONE)
-                    .build()
-                WorkManager.getInstance(context).enqueueUniqueWork(
-                    uniqueWorkName = "work-task-restart-autojs6",
-                    existingWorkPolicy = ExistingWorkPolicy.REPLACE,
-                    request = request,
-                )
+            val delay = Pref.getInt(R.string.key_scheduled_restart_delay, context.resources.getInteger(R.integer.scheduled_restart_start_delay_default_value)).let {
+                TimeUnit.MILLISECONDS.toMillis(it.toLong())
             }
+            val triggerAtMillis = SystemClock.elapsedRealtime() + delay
+            when (Pref.isScheduledRestartPreferredWorkManager) {
+                true -> runCatching {
+                    scheduleRestartWorker(delay, context)
+                }.onFailure {
+                    it.printStackTrace()
+                    scheduleRestartAlarm(context, launchIntent, triggerAtMillis)
+                }
+                else -> runCatching {
+                    scheduleRestartAlarm(context, launchIntent, triggerAtMillis)
+                }.onFailure {
+                    it.printStackTrace()
+                    scheduleRestartWorker(delay, context)
+                }
+            }
+        }
+
+        private fun scheduleRestartWorker(delay: Long, context: Context) {
+            val request = OneTimeWorkRequestBuilder<RestartWorker>()
+                .setInitialDelay(delay, TimeUnit.MILLISECONDS)
+                .setConstraints(Constraints.NONE)
+                .build()
+            WorkManager.getInstance(context).enqueueUniqueWork(
+                uniqueWorkName = "work-task-restart-autojs6",
+                existingWorkPolicy = ExistingWorkPolicy.REPLACE,
+                request = request,
+            )
+        }
+
+        private fun scheduleRestartAlarm(context: Context, launchIntent: Intent, triggerAtMillis: Long) {
+            val pendingIntent = PendingIntent.getActivity(
+                /* context = */ context,
+                /* requestCode = */ UNIQUE_REQUEST_CODE,
+                /* intent = */ launchIntent,
+                /* flags = */ PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
+            val am = context.getSystemService(ALARM_SERVICE) as AlarmManager
+            am.cancel(pendingIntent)
+            am.setExactAndAllowWhileIdle(
+                /* type = */ AlarmManager.ELAPSED_REALTIME,
+                /* triggerAtMillis = */ triggerAtMillis,
+                /* operation = */ pendingIntent,
+            )
         }
 
         @JvmStatic

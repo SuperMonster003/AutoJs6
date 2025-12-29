@@ -24,6 +24,17 @@
     <integer name="disabled_alpha_animation_duration">100</integer>
     <integer name="dock_enter_exit_duration">250</integer>
 
+    <integer name="snackbar_text_max_lines">2</integer>
+    <integer name="layout_node_info_view_decoration_line">2</integer>
+
+    <integer name="editor_text_size_min_value">4</integer>
+    <integer name="editor_text_size_max_value">96</integer>
+    <integer name="editor_text_size_default_value">14</integer>
+
+    <integer name="scheduled_restart_start_delay_min_value">0</integer>
+    <integer name="scheduled_restart_start_delay_max_value">3000</integer>
+    <integer name="scheduled_restart_start_delay_default_value">300</integer>
+
     <integer name="date_picker_mode">1</integer>
     <integer name="time_picker_mode">1</integer>
 

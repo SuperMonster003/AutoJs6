@@ -32,6 +32,7 @@
     <string name="default_key_restart_strategy" translatable="false">@string/key_restart_strategy_quick</string>
     <string name="default_key_root_mode" translatable="false">@string/key_root_mode_auto_detect</string>
     <string name="default_key_root_record_out_file_type" translatable="false">@string/key_root_record_out_file_type_binary</string>
+    <string name="default_key_scheduled_restart_backend" translatable="false">@string/key_scheduled_restart_backend_work_manager</string>
     <string name="default_key_timed_task_backend" translatable="false">@string/key_timed_task_backend_alarm</string>
     <string name="default_main_file_name" translatable="false">main.js</string>
     <string name="developer_full_name" translatable="false">SuperMonster003</string>
@@ -144,6 +145,10 @@
     <string name="key_restart_strategy" translatable="false">key_$_restart_strategy</string>
     <string name="key_restart_strategy_quick" translatable="false">key_$_restart_strategy_quick</string>
     <string name="key_restart_strategy_scheduled" translatable="false">key_$_restart_strategy_scheduled</string>
+    <string name="key_scheduled_restart_backend" translatable="false">key_$_scheduled_restart_backend</string>
+    <string name="key_scheduled_restart_backend_alarm_manager" translatable="false">key_$_scheduled_restart_backend_alarm_manager</string>
+    <string name="key_scheduled_restart_backend_work_manager" translatable="false">key_$_scheduled_restart_backend_work_manager</string>
+    <string name="key_scheduled_restart_delay" translatable="false">key_$_scheduled_restart_delay</string>
     <string name="key_rhino_java_primitive_wrap" translatable="false">key_$_rhino_java_primitive_wrap</string>
     <string name="key_root_mode" translatable="false">key_$_root_mode</string>
     <string name="key_root_mode_auto_detect" translatable="false">key_$_root_mode_auto_detect</string>
@@ -243,9 +248,6 @@
     <string name="text_share_app" translatable="false">AutoJs6:\n&url_github_autojs6;</string>
     <string name="text_should_never_happen" translatable="false">Should never happen</string>
     <string name="text_str_colon_space_str_formatter" translatable="false">%s: %s</string>
-    <string name="text_text_size_default_value" translatable="false">14</string>
-    <string name="text_text_size_max_value" translatable="false">96</string>
-    <string name="text_text_size_min_value" translatable="false">4</string>
     <string name="uri_autojs6_download_link" translatable="false">http://download.autojs6.com</string>
     <string name="url_github_autojs6" translatable="false">&url_github_autojs6;</string>
     <string name="url_github_autojs6_issues" translatable="false">&url_github_autojs6;/issues</string>
@@ -306,7 +308,6 @@
     <string name="content_description_fab_for_display_manifest">A Floating Action Button widget for displaying the manifest</string>
     <string name="content_failed_to_determine_index_of_theme_color_item">Failed to determine the index of the theme color item</string>
     <string name="content_failed_to_locate_library_for_theme_color">Failed to locate the color library for the theme color</string>
-    <string name="content_failed_to_retrieve_released_notes_of_current_language_with_zh_hans_fallback">Failed to retrieve the release notes for the currently displayed language. Please try again later.\n\nCurrently, the release notes for \"简体中文 (zh-Hans)\" are temporarily displayed.</string>
     <string name="content_github_feedback">A web page will be launched to report an issue.\nAn account for GitHub may be needed.</string>
     <string name="content_way_of_output_for_recorded_script">Select a way of output for recorded script</string>
     <string name="crash_feedback">Copy debugging log or exit directly</string>
@@ -458,7 +459,6 @@
     <string name="error_failed_to_instantiate">Failed to instantiate "%s"</string>
     <string name="error_failed_to_instantiate_with_cause"><![CDATA[Failed to instantiate "%1$s": [ %2$s ]]]></string>
     <string name="error_failed_to_render_content">Failed to render content</string>
-    <string name="error_failed_to_retrieve_released_notes">Failed to retrieve release notes</string>
     <string name="error_failed_to_retrieve_version_histories">Failed to retrieve version histories</string>
     <string name="error_failed_to_retrieve_version_properties_file_to_parse_version_information">Failed to retrieve version.properties to parse version information</string>
     <string name="error_failed_to_revoke_shizuku_access">Failed to revoke Shizuku access</string>
@@ -927,7 +927,6 @@
     <string name="text_generate">Generate</string>
     <string name="text_generate_code">Generate code</string>
     <string name="text_generated_code">Generated code</string>
-    <string name="text_getting_release_notes" tools:ignore="TypographyEllipsis">Retrieving release notes...</string>
     <string name="text_github_backup_url_used">Backup URL has been used</string>
     <string name="text_global_settings">Global settings</string>
     <string name="text_go_to_settings">Go to \"Settings\"</string>
@@ -1194,7 +1193,6 @@
     <string name="text_register">Register</string>
     <string name="text_register_succeed">Register succeeded</string>
     <string name="text_registering">Registering</string>
-    <string name="text_release_notes">Release notes</string>
     <string name="text_remote">remote</string>
     <string name="text_remote_file_saved_to_local_storage_successfully">Remote file saved to local storage successfully</string>
     <string name="text_remote_project_saved_to_local_storage_successfully">Remote project saved to local storage successfully</string>
@@ -1382,5 +1380,17 @@
     <string name="error_specified_autojs6_version_number_must_be_greater_than_461">Specified AutoJs6 version number must be greater than 461</string>
     <string name="error_autojs6_version_number_must_not_be_lower_than_num">AutoJs6 version number must not be lower than %1$s</string>
     <string name="error_autojs6_version_must_not_be_lower_than_ver">AutoJs6 version must not be lower than %1$s</string>
+    <string name="dialog_button_view_update">View update</string>
+    <string name="content_failed_to_retrieve_changelog_of_current_language_with_zh_hans_release_notes_fallback">Failed to retrieve the changelog for the currently displayed language. You can try again later.\n\nFor now, the release notes for \"Simplified Chinese (zh-Hans)\" will be shown temporarily.</string>
+    <string name="error_failed_to_retrieve_changelog">Failed to retrieve changelog</string>
+    <string name="error_failed_to_retrieve_release_notes">Failed to retrieve release notes</string>
+    <string name="text_changelog">Changelog</string>
+    <string name="text_release_notes">Release notes</string>
+    <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">Retrieving changelog...</string>
+    <string name="text_retrieving_release_notes" tools:ignore="TypographyEllipsis">Retrieving release notes...</string>
+    <string name="dialog_button_view_with_browser">@string/dialog_button_download_with_browser</string>
+    <string name="text_scheduled_restart_backend">Backend</string>
+    <string name="text_scheduled_restart_start_delay">Start delay</string>
+    <string name="dialog_button_advanced_settings">Advanced</string>
 
 </resources>

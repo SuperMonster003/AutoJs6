@@ -147,6 +147,10 @@ object Pref {
         get() = getString(R.string.key_restart_strategy, key(R.string.default_key_restart_strategy)) == key(R.string.key_restart_strategy_quick)
 
     @JvmStatic
+    val isScheduledRestartPreferredWorkManager
+        get() = getString(R.string.key_scheduled_restart_backend, key(R.string.default_key_scheduled_restart_backend)) == key(R.string.key_scheduled_restart_backend_work_manager)
+
+    @JvmStatic
     val isHiddenFilesShown
         get() = getString(R.string.key_hidden_files, key(R.string.default_key_hidden_files)) == key(R.string.key_hidden_files_show)
 
