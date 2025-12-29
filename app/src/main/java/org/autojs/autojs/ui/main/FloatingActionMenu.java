@@ -25,6 +25,7 @@ import org.autojs.autojs6.R;
 
 /**
  * Created by Stardust on Sep 24, 2017.
+ * Modified by SuperMonster003 as of Dec 29, 2025.
  */
 public class FloatingActionMenu extends FrameLayout implements View.OnClickListener {
 
@@ -51,6 +52,8 @@ public class FloatingActionMenu extends FrameLayout implements View.OnClickListe
     private View[] mFabContainers;
     private boolean mExpanded = false;
     private OnFloatingActionButtonClickListener mOnFloatingActionButtonClickListener;
+
+    private View mToggleFab;
 
     public FloatingActionMenu(@NonNull Context context) {
         super(context);
@@ -105,6 +108,10 @@ public class FloatingActionMenu extends FrameLayout implements View.OnClickListe
 
     public void setOnFloatingActionButtonClickListener(OnFloatingActionButtonClickListener listener) {
         mOnFloatingActionButtonClickListener = listener;
+    }
+
+    public void setToggleFab(@Nullable View toggleFab) {
+        mToggleFab = toggleFab;
     }
 
     @Override
@@ -184,18 +191,61 @@ public class FloatingActionMenu extends FrameLayout implements View.OnClickListe
 
         mOverlay = new View(context) {
             private final int[] loc = new int[2];
-            private final Rect menuRect = new Rect();
+            private final Rect menuRectOnScreen = new Rect();
+            private final Rect toggleFabRectOnScreen = new Rect();
 
             @SuppressLint("ClickableViewAccessibility")
             @Override
             public boolean onTouchEvent(MotionEvent event) {
                 thisMenu.getLocationOnScreen(loc);
-                menuRect.set(loc[0], loc[1], loc[0] + thisMenu.getWidth(), loc[1] + thisMenu.getHeight());
-                if (!isInMenuButtonsArea(menuRect, event)) {
-                    var replay = MotionEvent.obtain(event);
-                    root.post(() -> activity.getWindow().getDecorView().dispatchTouchEvent(replay));
+                menuRectOnScreen.set(
+                        loc[0],
+                        loc[1],
+                        loc[0] + thisMenu.getWidth(),
+                        loc[1] + thisMenu.getHeight()
+                );
+
+                boolean hasToggleFab = (mToggleFab != null) && mToggleFab.isShown();
+                if (hasToggleFab) {
+                    mToggleFab.getLocationOnScreen(loc);
+                    toggleFabRectOnScreen.set(
+                            loc[0],
+                            loc[1],
+                            loc[0] + mToggleFab.getWidth(),
+                            loc[1] + mToggleFab.getHeight()
+                    );
+                } else {
+                    toggleFabRectOnScreen.setEmpty();
+                }
+
+                int rawX = (int) event.getRawX();
+                int rawY = (int) event.getRawY();
+
+                boolean inToggleFab = hasToggleFab && toggleFabRectOnScreen.contains(rawX, rawY);
+                if (inToggleFab) {
+                    MotionEvent forwarded = MotionEvent.obtain(event);
+                    forwarded.offsetLocation(-toggleFabRectOnScreen.left, -toggleFabRectOnScreen.top);
+                    mToggleFab.dispatchTouchEvent(forwarded);
+                    forwarded.recycle();
+                    return true;
+                }
+
+                boolean inMenu = menuRectOnScreen.contains(rawX, rawY);
+                if (inMenu) {
+                    MotionEvent forwarded = MotionEvent.obtain(event);
+                    forwarded.offsetLocation(-menuRectOnScreen.left, -menuRectOnScreen.top);
+                    thisMenu.dispatchTouchEvent(forwarded);
+                    forwarded.recycle();
+                    return true;
+                }
+
+                // Collapse for external touches, avoid breaking button click chains.
+                // zh-CN: 对外部触摸进行收起, 避免破坏按钮点击链路.
+                if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
                     collapse();
                 }
+                // Do not consume external events, pass them to lower layers such as lists for continued processing.
+                // zh-CN: 不消耗外部事件, 交给下层列表等继续处理.
                 return false;
             }
         };
@@ -205,10 +255,6 @@ public class FloatingActionMenu extends FrameLayout implements View.OnClickListe
         mOverlay.setBackgroundColor(Color.TRANSPARENT);
 
         root.addView(mOverlay);
-    }
-
-    private boolean isInMenuButtonsArea(Rect menuRect, MotionEvent event) {
-        return menuRect.contains((int) event.getRawX(), (int) event.getRawY());
     }
 
     private void hideOverlay() {

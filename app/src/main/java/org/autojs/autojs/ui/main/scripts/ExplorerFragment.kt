@@ -138,6 +138,7 @@ class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListen
             menu.layoutParams.runCatching {
                 javaClass.getField("bottomMargin").setInt(this, fab.marginBottom)
             }
+            menu.setToggleFab(fab)
             mFloatingActionMenu = menu
         }
     }
