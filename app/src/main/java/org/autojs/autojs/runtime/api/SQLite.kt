@@ -18,8 +18,8 @@ import org.mozilla.javascript.NativeObject
 
 class SQLite(private val context: Context, private val scriptRuntime: ScriptRuntime) {
 
-    fun open(name: String, version: Int, readOnly: Boolean, callback: Database.DatabaseCallback?): Database {
-        return Database(context, scriptRuntime, name, version, readOnly, callback, TypeAdapterImpl())
+    fun open(databaseFilePath: String, version: Int, readOnly: Boolean, callback: Database.DatabaseCallback?): Database {
+        return Database(context, scriptRuntime, databaseFilePath, version, readOnly, callback, TypeAdapterImpl())
     }
 
     private class TypeAdapterImpl : Database.TypeAdapter {
