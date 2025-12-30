@@ -349,7 +349,7 @@ object ViewUtils {
     }
 
     fun setNavigationBarIconLight(activity: Activity, isLight: Boolean) {
-        WindowInsetsControllerCompat(activity.window, activity.window.decorView).isAppearanceLightNavigationBars = isLight
+        WindowInsetsControllerCompat(activity.window, activity.window.decorView).isAppearanceLightNavigationBars = !isLight
     }
 
     fun setNavigationBarIconLightByColorLuminance(activity: Activity, @ColorInt referenceBackgroundColor: Int) {
