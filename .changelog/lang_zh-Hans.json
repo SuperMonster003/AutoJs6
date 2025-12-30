@@ -71,6 +71,7 @@
         "ErrorDialogActivity 可能无法正常启动或短时间自动消失的问题 _[`issue #471`](http://issues.autojs6.com/471)_ _[`issue #414`](http://issues.autojs6.com/414)_ _[`issue #340`](http://issues.autojs6.com/340#issuecomment-2973485826)_",
         "崩溃报告页面复制详细信息功能失效的问题",
         "文件管理器删除项目文件夹后 UI 未能自动刷新的问题",
+        "使用 \"三按钮\" 手势导航时导航栏前景色可能与夜间模式关联异常的问题",
         "APK 文件类型信息对话框可能无法获取应用名称及 SDK 信息的问题",
         "构建工具启用 isCleanup[Paddle/Rapid]Ocr 配置选项时无法正常完成 Rebuild Project 任务的问题"
       ],

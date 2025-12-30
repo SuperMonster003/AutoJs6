@@ -56,6 +56,9 @@ abstract class BaseActivity : AppCompatActivity() {
                 ThemeColorManager.setStatusBarBackgroundColor(this)
                 setUpStatusBarIconLightByThemeColor()
             }
+            if (handleNavigationBarContrastEnforcedAutomatically) {
+                setUpNavigationBarIconLightByNightMode()
+            }
         }
 
         // @Dubious by SuperMonster003 on Oct 28, 2024.
@@ -83,6 +86,9 @@ abstract class BaseActivity : AppCompatActivity() {
             ThemeColorManager.addActivityStatusBar(this)
             setUpStatusBarIconLightByThemeColor()
         }
+        if (handleNavigationBarContrastEnforcedAutomatically) {
+            setUpNavigationBarIconLightByNightMode()
+        }
     }
 
     override fun onResume() {
@@ -100,6 +106,10 @@ abstract class BaseActivity : AppCompatActivity() {
 
     protected fun setUpStatusBarIconLightByNightMode() {
         ViewUtils.setStatusBarIconLight(this, ViewUtils.isNightModeEnabled)
+    }
+
+    protected fun setUpNavigationBarIconLightByNightMode() {
+        ViewUtils.setNavigationBarIconLight(this, ViewUtils.isNightModeEnabled)
     }
 
     protected fun setUpStatusBarIconLightByThemeColor() {
