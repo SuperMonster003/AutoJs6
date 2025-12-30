@@ -36,10 +36,10 @@ class SQLite(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun open(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Database = ensureArgumentsLengthInRange(args, 1..3) { argList ->
-            val (name, options, callback) = argList
+            val (databaseFilePath, options, callback) = argList
 
-            val niceName = coerceString(name, "")
-            require(niceName.isNotEmpty()) { "Argument name of sqlite.open() must not be empty" }
+            val filePath = coerceString(databaseFilePath, "")
+            require(filePath.isNotEmpty()) { "Argument databaseFilePath of sqlite.open() must not be empty" }
 
             val niceOptions = if (options.isJsNullish()) newNativeObject() else options
             require(niceOptions is NativeObject) { "Argument \"options\" ${options.jsBrief()} for sqlite.open() must be a JavaScript Object" }
@@ -48,7 +48,7 @@ class SQLite(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
             require(niceCallback is DatabaseCallback?) { "Argument \"callback\" ${callback.jsBrief()} for sqlite.open() must be a DatabaseCallback" }
 
             scriptRuntime.sqlite.open(
-                name = niceName,
+                databaseFilePath = filePath,
                 version = niceOptions.inquire("version", ::coerceIntNumber, DEFAULT_VERSION),
                 readOnly = niceOptions.inquire("readOnly", ::coerceBoolean, DEFAULT_READ_ONLY),
                 callback = niceCallback,
