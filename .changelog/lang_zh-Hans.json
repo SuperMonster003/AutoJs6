@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.7.0": {
-      "released_date": "2025/12/30",
+      "released_date": "2025/12/31",
       "feature": [
         "插件中心功能, 支持插件的安装/卸载/更新等操作 (入口: 主页抽屉按钮)",
         "cvt 模块, 用于数据单位转换 (参阅 项目文档 > [单位转换](https://docs.autojs6.com/#/cvt))",
@@ -13,7 +13,8 @@
         "s13n.bytes 方法, 用于标准化字节数据 (参阅 项目文档 > [标准化](https://docs.autojs6.com/#/s13n))",
         "app.isDualInstalled 方法, 用于检测双开应用是否已安装 (需要 Shizuku 或 Root 权限) _[`issue #450`](http://issues.autojs6.com/450)_",
         "device.getSharedDeviceId 方法, 用于跨应用获取统一共享设备 ID _[`issue #455`](http://issues.autojs6.com/455)_",
-        "ui.navigationBarHeight 属性 (getter), 用于获取导航栏高度 _[`issue #456`](http://issues.autojs6.com/456)_",
+        "ui.getNavigationBarHeight 方法/navigationBarHeight 属性 (getter), 用于获取导航栏高度 _[`issue #456`](http://issues.autojs6.com/456)_",
+        "ui.getVisible(Status/Navigation)BarHeight 方法/visible(Status/Navigation)BarHeight 属性 (getter), 用于快捷获取状态栏或导航栏可见高度 _[`issue #456`](http://issues.autojs6.com/456)_",
         "http 模块请求相关方法获取的 body 对象增加 stream/saveToFile/close 等方法 _[`issue #452`](http://issues.autojs6.com/452)_",
         "http 模块请求相关方法支持缓存控制选项参数 (cacheBody/bodyCacheThresholdBytes)",
         "http 模块请求相关方法支持不安全选项参数 (isInsecure/insecure), 用于忽略证书相关异常 _[`issue #417`](http://issues.autojs6.com/417)_",
@@ -77,7 +78,7 @@
       ],
       "improvement": [
         "runtime.loadJar 方法增强兼容性 (by [LYS86](https://github.com/LYS86)) _[`pr #475`](http://pr.autojs6.com/475)_",
-        "ui.statusBarHeight 属性 (getter) 增强一定程度的兼容性",
+        "ui.getStatusBarHeight 方法/statusBarHeight 属性 (getter) 增强一定程度的兼容性",
         "console.log 等方法打印全局对象 (images, app, ocr 等) 时支持显示详细信息",
         "android.graphics.Paint#setColor 支持正常解析 ColorInt/ColorHex/ColorName 等颜色参数",
         "app.launchDual/startDualActivity 等方法提升执行效率并增强兼容性",

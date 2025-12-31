@@ -24,8 +24,13 @@ import org.autojs.autojs.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.extension.AnyExtensions.jsSanitize
 import org.autojs.autojs.extension.AnyExtensions.jsUnwrapped
+import org.autojs.autojs.extension.FlexibleArray.Companion.component1
+import org.autojs.autojs.extension.FlexibleArray.Companion.component2
+import org.autojs.autojs.extension.FlexibleArray.Companion.component3
+import org.autojs.autojs.extension.FlexibleArray.Companion.component4
 import org.autojs.autojs.extension.ScriptableExtensions.defineProp
 import org.autojs.autojs.extension.ScriptableExtensions.prop
+import org.autojs.autojs.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.rhino.ProxyObject.Companion.PROXY_GETTER_KEY
 import org.autojs.autojs.rhino.ProxyObject.Companion.PROXY_OBJECT_KEY
 import org.autojs.autojs.rhino.ProxyObject.Companion.PROXY_SETTER_KEY
@@ -43,6 +48,7 @@ import org.autojs.autojs.util.RhinoUtils.callFunction
 import org.autojs.autojs.util.RhinoUtils.coerceBoolean
 import org.autojs.autojs.util.RhinoUtils.coerceIntNumber
 import org.autojs.autojs.util.RhinoUtils.coerceLongNumber
+import org.autojs.autojs.util.RhinoUtils.coerceObject
 import org.autojs.autojs.util.RhinoUtils.coerceString
 import org.autojs.autojs.util.RhinoUtils.initNewBaseFunction
 import org.autojs.autojs.util.RhinoUtils.newBaseFunction
@@ -120,6 +126,10 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         ::findView.name,
         ::finish.name,
         ::keepScreenOn.name,
+        ::getStatusBarHeight.name,
+        ::getVisibleStatusBarHeight.name,
+        ::getNavigationBarHeight.name,
+        ::getVisibleNavigationBarHeight.name,
     )
 
     override val selfAssignmentGetters = listOf(
@@ -134,11 +144,25 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
             (activity as? ScriptExecuteActivity)?.eventEmitter
         },
         "statusBarHeight" to Supplier {
-            ViewUtils.getStatusBarHeight(globalContext)
+            val activity = getActivity(scriptRuntime)
+            val context = (activity as? ScriptExecuteActivity) ?: globalContext
+            ViewUtils.getStatusBarHeight(context)
+        },
+        "visibleStatusBarHeight" to Supplier {
+            val activity = getActivity(scriptRuntime)
+            val context = (activity as? ScriptExecuteActivity) ?: globalContext
+            ViewUtils.getStatusBarHeight(context, ignoreVisibility = false)
         },
         "navigationBarHeight" to Supplier {
-            ViewUtils.getNavigationBarHeight(globalContext)
-        }
+            val activity = getActivity(scriptRuntime)
+            val context = (activity as? ScriptExecuteActivity) ?: globalContext
+            ViewUtils.getNavigationBarHeight(context)
+        },
+        "visibleNavigationBarHeight" to Supplier {
+            val activity = getActivity(scriptRuntime)
+            val context = (activity as? ScriptExecuteActivity) ?: globalContext
+            ViewUtils.getNavigationBarHeight(context, ignoreVisibility = false)
+        },
     )
 
     init {
@@ -678,6 +702,48 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
             UNDEFINED
         }
 
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun getStatusBarHeight(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Int = ensureArgumentsAtMost(args, 1) { argList ->
+            val (options) = argList
+            val opt = coerceObject(options, newNativeObject())
+            val withComputed = opt.inquire("withComputed", ::coerceBoolean, true)
+            val withDimen = opt.inquire("withDimen", ::coerceBoolean, true)
+            val ignoreVisibility = opt.inquire("ignoreVisibility", ::coerceBoolean, true)
+            ViewUtils.getStatusBarHeight(globalContext, withComputed, withDimen, ignoreVisibility)
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun getVisibleStatusBarHeight(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Int = ensureArgumentsAtMost(args, 1) { argList ->
+            val (options) = argList
+            val opt = coerceObject(options, newNativeObject())
+            val withComputed = opt.inquire("withComputed", ::coerceBoolean, true)
+            val withDimen = opt.inquire("withDimen", ::coerceBoolean, true)
+            ViewUtils.getStatusBarHeight(globalContext, withComputed, withDimen, ignoreVisibility = false)
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun getNavigationBarHeight(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Int = ensureArgumentsAtMost(args, 1) { argList ->
+            val (options) = argList
+            val opt = coerceObject(options, newNativeObject())
+            val withComputed = opt.inquire("withComputed", ::coerceBoolean, true)
+            val withDimen = opt.inquire("withDimen", ::coerceBoolean, true)
+            val ignoreVisibility = opt.inquire("ignoreVisibility", ::coerceBoolean, true)
+            ViewUtils.getNavigationBarHeight(globalContext, withComputed, withDimen, ignoreVisibility)
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun getVisibleNavigationBarHeight(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Int = ensureArgumentsAtMost(args, 1) { argList ->
+            val (options) = argList
+            val opt = coerceObject(options, newNativeObject())
+            val withComputed = opt.inquire("withComputed", ::coerceBoolean, true)
+            val withDimen = opt.inquire("withDimen", ::coerceBoolean, true)
+            ViewUtils.getNavigationBarHeight(globalContext, withComputed, withDimen, ignoreVisibility = false)
+        }
+
         private fun initWidgetConstructor(ctor: BaseFunction) {
             val prototype = ctor.prop("prototype") as? ScriptableObject ?: newNativeObject()
             assignWidgetProperties(prototype)
@@ -699,6 +765,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
             )
         }
 
+        @Suppress("EmptyRange")
         private fun bindValueForApplyingAttribute(scriptRuntime: ScriptRuntime, value: String): String {
             val ctx = scriptRuntime.ui.bindingContext ?: return value
             val niceCtx = Context.toObject(ctx, ctx as? Scriptable ?: scriptRuntime.topLevelScope)
