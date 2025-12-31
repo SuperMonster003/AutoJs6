@@ -1,10 +1,11 @@
 package org.autojs.autojs.engine;
 
 import androidx.annotation.CallSuper;
-
 import org.autojs.autojs.execution.ScriptExecution;
+import org.autojs.autojs.execution.ScriptExecutionGlobalListener;
 import org.autojs.autojs.script.ScriptSource;
 
+import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -45,9 +46,9 @@ public interface ScriptEngine<S extends ScriptSource> {
 
     Throwable getUncaughtException();
 
-    void setId(int id);
-
     int getId();
+
+    void setId(int id);
 
     /**
      * @hide
@@ -59,6 +60,21 @@ public interface ScriptEngine<S extends ScriptSource> {
      */
     void init();
 
+    default long getStartTime() {
+        try {
+            Field field = ScriptExecutionGlobalListener.class.getDeclaredField("ENGINE_TAG_START_TIME");
+            field.setAccessible(true);
+            String tag = String.valueOf(field.get(null));
+            Object o = getTag(tag);
+            if (o instanceof Long) {
+                return (long) o;
+            }
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            /* Ignored. */
+        }
+        return 0;
+    }
+
     interface OnDestroyListener {
         void onDestroy(ScriptEngine<? extends ScriptSource> engine);
     }
@@ -66,10 +82,10 @@ public interface ScriptEngine<S extends ScriptSource> {
     abstract class AbstractScriptEngine<S extends ScriptSource> implements ScriptEngine<S> {
 
         private final Map<String, Object> mTags = new ConcurrentHashMap<>();
+        private final AtomicInteger mId = new AtomicInteger(ScriptExecution.NO_ID);
         private OnDestroyListener mOnDestroyListener;
         private volatile boolean mDestroyed = false;
         private Throwable mUncaughtException;
-        private final AtomicInteger mId = new AtomicInteger(ScriptExecution.NO_ID);
 
         @Override
         public void setTag(String key, Object value) {
@@ -122,13 +138,13 @@ public interface ScriptEngine<S extends ScriptSource> {
         }
 
         @Override
-        public void setId(int id) {
-            mId.compareAndSet(ScriptExecution.NO_ID, id);
+        public int getId() {
+            return mId.get();
         }
 
         @Override
-        public int getId() {
-            return mId.get();
+        public void setId(int id) {
+            mId.compareAndSet(ScriptExecution.NO_ID, id);
         }
 
         private static class DestroyListenerSetMoreThanOneException extends SecurityException {
