@@ -64,6 +64,7 @@
         "Android 10 UiObject#child 方法可能出现 ArrayIndexOutOfBoundsException 异常的问题 _[`issue #416`](http://issues.autojs6.com/416)_",
         "运行项目时 project.json 配置参数可能无法正常解析的问题",
         "项目打包时 project.json 的 excludedDirs 配置参数将导致配置文件解析失败的问题 _[`issue #428`](http://issues.autojs6.com/428)_",
+        "Android 7.x 可能无法正常使用打包功能的问题",
         "项目配置文件中构建版本号或构建时间出现较大数字时可能导致应用崩溃的问题",
         "频繁获取或重建 ImageReader 时可能因缓冲区暂无可用帧导致应用崩溃的问题",
         "输入事件观察器 InputEventObserver 可能导致应用启动时明显卡顿的问题",
