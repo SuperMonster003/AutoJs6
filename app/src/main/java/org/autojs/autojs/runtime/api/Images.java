@@ -1,5 +1,6 @@
 package org.autojs.autojs.runtime.api;
 
+import org.autojs.autojs.extension.AnyExtensions;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -49,6 +50,7 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -298,7 +300,15 @@ public class Images {
 
     public boolean save(@NonNull ImageWrapper image, @NonNull String path, @NonNull String format, int quality) throws IOException {
         try {
-            return saveInternal(image, path, format, quality);
+            var nicePath = AnyExtensions.toRuntimePath(path, mScriptRuntime, true);
+            var file = new File(nicePath);
+            File parentFile = file.getParentFile();
+            if (parentFile != null && !parentFile.exists()) {
+                if (!parentFile.mkdirs()) {
+                    throw new IOException("Failed to create parent directory for image save: " + parentFile.getAbsolutePath());
+                }
+            }
+            return saveInternal(image, nicePath, format, quality);
         } finally {
             shoot(image);
         }
