@@ -38,6 +38,7 @@ import java.util.stream.Collectors;
 
 /**
  * Created by Stardust on Jan 24, 2018.
+ * Modified by SuperMonster003 as of Nov 19, 2025.
  */
 public class ProjectConfig {
 

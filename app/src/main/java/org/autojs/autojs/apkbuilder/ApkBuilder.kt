@@ -9,7 +9,6 @@ import android.os.Build
 import android.util.Log
 import com.mcal.apksigner.ApkSigner
 import com.reandroid.arsc.chunk.TableBlock
-import org.apache.commons.io.FileUtils
 import org.autojs.autojs.AbstractAutoJs.Companion.isInrt
 import org.autojs.autojs.apkbuilder.keystore.AESUtils
 import org.autojs.autojs.app.GlobalAppContext
@@ -307,7 +306,16 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
 
         val defaultKeyStoreFile = File(buildPath, "default_key_store.bks")
         val tmpOutputApk = File(buildPath, "temp.apk")
-        FileUtils.copyInputStreamToFile(GlobalAppContext.get().assets.open("default_key_store.bks"), defaultKeyStoreFile)
+
+        // Replace FileUtils.copyInputStreamToFile(...).
+        // zh-CN: 替换 FileUtils.copyInputStreamToFile(...).
+        defaultKeyStoreFile.parentFile?.let { if (!it.exists()) it.mkdirs() }
+        GlobalAppContext.get().assets.open("default_key_store.bks").use { input ->
+            FileOutputStream(defaultKeyStoreFile, false).use { output ->
+                input.copyTo(output, bufferSize = 16 * 1024)
+                output.fd.sync()
+            }
+        }
 
         val signer = ApkSigner(outApkFile, tmpOutputApk).apply {
             useDefaultSignatureVersion = false
@@ -329,13 +337,15 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
             aliasPassword = AESUtils.decrypt(it.aliasPassword)
         }
 
-        // 使用 ApkSigner 重新签名
+        // Re-sign using ApkSigner.
+        // zh-CN: 使用 ApkSigner 重新签名.
         if (!signer.signRelease(keyStoreFile, password, alias, aliasPassword)) {
             throw java.lang.RuntimeException("Failed to re-sign using ApkSigner")
         }
 
         try {
-            FileUtils.copyFile(tmpOutputApk, outApkFile)
+            outApkFile.parentFile?.let { if (!it.exists()) it.mkdirs() }
+            tmpOutputApk.copyTo(outApkFile, overwrite = true)
         } catch (e: java.lang.Exception) {
             throw java.lang.RuntimeException(e)
         }
