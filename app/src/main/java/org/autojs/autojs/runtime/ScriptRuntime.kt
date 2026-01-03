@@ -42,6 +42,7 @@ import org.autojs.autojs.runtime.api.augment.automator.RootAutomator
 import org.autojs.autojs.runtime.api.augment.barcode.Barcode
 import org.autojs.autojs.runtime.api.augment.barcode.QrCode
 import org.autojs.autojs.runtime.api.augment.base64.Base64
+import org.autojs.autojs.runtime.api.augment.canvas.Canvas
 import org.autojs.autojs.runtime.api.augment.colors.Color
 import org.autojs.autojs.runtime.api.augment.colors.Colors
 import org.autojs.autojs.runtime.api.augment.console.Console
@@ -755,6 +756,7 @@ class ScriptRuntime private constructor(builder: Builder) {
         Selector(this).augment(target, true, READONLY)
         Events(this).augment(target, events, true)
         Keys.augmentWithRuntime(target, this, true)
+        Canvas(this).augment(target, false)
         Images(this).augment(target, true)
         Ocr(this).augment(target, true).also { ocr ->
             OcrMLKit(this).augment(ocr, false).also { augmentedOcrMLKit = it }
