@@ -9,6 +9,7 @@ import androidx.core.graphics.get
 import org.autojs.autojs.annotation.ScriptInterface
 import org.autojs.autojs.core.opencv.Mat
 import org.autojs.autojs.core.opencv.OpenCVHelper
+import org.autojs.autojs.extension.AnyExtensions.toRuntimePath
 import org.autojs.autojs.pio.UncheckedIOException
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.Images
@@ -19,6 +20,7 @@ import org.opencv.core.CvType
 import org.opencv.core.Size
 import org.opencv.imgcodecs.Imgcodecs
 import org.opencv.imgproc.Imgproc
+import java.io.File
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.lang.ref.WeakReference
@@ -152,7 +154,14 @@ open class ImageWrapper : Shootable<ImageWrapper> {
 
     fun saveTo(path: String): Boolean {
         ensureNotRecycled()
-        val fullPath = mScriptRuntime.files.nonNullPath(path)
+        val fullPath = path.toRuntimePath(mScriptRuntime, true)
+        val file = File(fullPath)
+        val parentFile = file.parentFile
+        if (parentFile != null && !parentFile.exists()) {
+            if (!parentFile.mkdirs()) {
+                throw RuntimeException("Failed to create directory: ${parentFile.absolutePath}")
+            }
+        }
         if (mBitmap == null) {
             if (mMat != null) {
                 return Imgcodecs.imwrite(fullPath, mMat)
@@ -162,11 +171,10 @@ open class ImageWrapper : Shootable<ImageWrapper> {
         return runCatching { saveWithBitmap(fullPath) }.isSuccess
     }
 
-    private fun saveWithBitmap(fullPath: String?) {
+    private fun saveWithBitmap(fullPath: String) {
         try {
-            fullPath ?: throw Exception("Argument \"path\" cannot be null")
-            mBitmap ?: throw Exception("Member \"bitmap\" cannot be null")
-            mBitmap!!.compress(CompressFormat.PNG, 100, FileOutputStream(fullPath))
+            val bitmap = mBitmap ?: throw Exception("Member \"bitmap\" cannot be null")
+            bitmap.compress(CompressFormat.PNG, 100, FileOutputStream(fullPath))
         } catch (e: FileNotFoundException) {
             throw UncheckedIOException(e)
         }

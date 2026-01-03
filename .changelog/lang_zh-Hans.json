@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.7.0": {
-      "released_date": "2025/12/31",
+      "released_date": "2026/01/03",
       "feature": [
         "插件中心功能, 支持插件的安装/卸载/更新等操作 (入口: 主页抽屉按钮)",
         "cvt 模块, 用于数据单位转换 (参阅 项目文档 > [单位转换](https://docs.autojs6.com/#/cvt))",
@@ -30,7 +30,7 @@
         "选择器的正则表达式参数支持使用标志 (i, m, s, u)",
         "正则表达式支持后瞻断言语法 _[`issue #464`](http://issues.autojs6.com/464)_",
         "设置页面增加 \"Java 原始类型包装\" 设置选项 _[`issue #435`](http://issues.autojs6.com/435)_",
-        "设置页面增加 \"定时任务调度引擎\" 设置选项, 支持 AlarmManager/WorkManager/JobScheduler _[`issue #457`](http://issues.autojs6.com/457)_ _[`issue #449`](http://issues.autojs6.com/449)_ _[`issue #388`](http://issues.autojs6.com/388)_ _[`issue #163`](http://issues.autojs6.com/163)_ _[`issue #53`](http://issues.autojs6.com/53)_ _[`issue #21`](http://issues.autojs6.com/21)_",
+        "设置页面增加 \"定时任务调度引擎\" 设置选项, 支持 AlarmManager/WorkManager/JobScheduler _[`issue #457`](http://issues.autojs6.com/457)_ _[`issue #434`](http://issues.autojs6.com/434)_ _[`issue #449`](http://issues.autojs6.com/449)_ _[`issue #388`](http://issues.autojs6.com/388)_ _[`issue #163`](http://issues.autojs6.com/163)_ _[`issue #53`](http://issues.autojs6.com/53)_ _[`issue #21`](http://issues.autojs6.com/21)_",
         "设置页面增加 \"应用启动器图标\" 设置选项, 支持自适应图标/透明背景图标 _[`issue #405`](http://issues.autojs6.com/405)_",
         "设置页面增加 \"重启策略\" 设置选项, 用于设置主页抽屉栏重启按钮是否使用快速重启策略",
         "设置页面启动器快捷方式增加 \"插件\" 选项, 用于通过快捷方式跳转到插件中心页面",
@@ -57,11 +57,13 @@
         "images 部分方法使用区域参数时 1 被误解析为百分比的问题",
         "images 部分相关方法出现异常时 oneShot 标记功能失效的问题 _[`issue #372`](http://issues.autojs6.com/372)_",
         "images 部分相关方法可能引发内存泄露的问题 _[`issue #372`](http://issues.autojs6.com/372)_",
+        "images.save 及 ImageWrapper#saveTo 方法传入路径不存在时无法正常写入文件的问题",
         "ocr 部分重载方法可能无法正常使用的问题",
         "ocr.detect 方法获得的结果可能与 ocr.mode 不匹配的问题 _[`issue #468`](http://issues.autojs6.com/468)_",
-        "auto.registerEvent 注册的无障碍服务事件会被其他脚本误清理的问题 _[`issue #466`](http://issues.autojs6.com/466)_",
+        "auto.registerEvent 注册的无障碍服务事件会被其他脚本误清理的问题 _[`issue #466`](http://issues.autojs6.com/466)_ _[`issue #343`](http://issues.autojs6.com/343#issuecomment-3263953918)_",
         "Android 10 UiObject#child 方法可能出现 ArrayIndexOutOfBoundsException 异常的问题 _[`issue #416`](http://issues.autojs6.com/416)_",
-        "运行项目时 project.json 配置参数无法正常解析的问题",
+        "运行项目时 project.json 配置参数可能无法正常解析的问题",
+        "项目打包时 project.json 的 excludedDirs 配置参数将导致配置文件解析失败的问题 _[`issue #428`](http://issues.autojs6.com/428)_",
         "项目配置文件中构建版本号或构建时间出现较大数字时可能导致应用崩溃的问题",
         "频繁获取或重建 ImageReader 时可能因缓冲区暂无可用帧导致应用崩溃的问题",
         "输入事件观察器 InputEventObserver 可能导致应用启动时明显卡顿的问题",
