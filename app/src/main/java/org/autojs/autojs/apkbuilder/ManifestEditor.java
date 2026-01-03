@@ -109,6 +109,10 @@ public class ManifestEditor {
                         super.onAttr(a);
                         return;
                     }
+                    if ("org.autojs.permission.PLUGIN".equals(((StringItem) a.value).data)) {
+                        this.ignore = true;
+                        return;
+                    }
                 }
                 if ("uses-permission".equals(this.name.data) && "name".equals(a.name.data) && a.value instanceof StringItem) {
                     this.ignore = !ManifestEditor.this.isPermissionRequired(((StringItem) a.value).data);
