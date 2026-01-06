@@ -36,6 +36,7 @@ import org.autojs.autojs.util.RhinoUtils.ObsoletedRhinoFunctionException
 import org.autojs.autojs.util.RhinoUtils.callToStringFunction
 import org.autojs.autojs.util.RhinoUtils.coerceFloatNumber
 import org.autojs.autojs.util.RhinoUtils.coerceNumber
+import org.autojs.autojs.util.RhinoUtils.coerceString
 import org.autojs.autojs.util.RhinoUtils.js_function_bind
 import org.autojs.autojs.util.RhinoUtils.js_json_stringify
 import org.autojs.autojs.util.RhinoUtils.js_object_create
@@ -349,13 +350,13 @@ object Util : Augmentable() {
         if (args.isEmpty()) return ""
 
         val first = args[0]
-        if (first !is String) {
+        if (!first.isJsString()) {
             return args.joinToString(" ") { inspectRhino(it) }
         }
 
         val argsSize = args.size
         var index = 1
-        val fmt = first
+        val fmt = coerceString(first)
         val len = fmt.length
         // Estimate some margin to reduce expansion.
         // zh-CN: 预估一些余量, 减少扩容.
@@ -421,7 +422,9 @@ object Util : Augmentable() {
             }
         }
 
-        val formatted = inspectRhino(sb.toString())
+        // Do NOT inspect the formatted string, otherwise control characters like '\n' will be escaped.
+        // zh-CN: 不要对格式化结果做 inspect, 否则诸如 '\n' 的控制字符会被转义.
+        val formatted = sb.toString()
 
         return when {
             index >= argsSize -> formatted
@@ -430,14 +433,17 @@ object Util : Augmentable() {
                 // zh-CN: 追加剩余参数, 以空格分隔.
                 val out = StringBuilder(formatted.length + 1 + (argsSize - index) * 8)
                 out.append(formatted)
-                out.append(' ')
-                // Append the first one first, then add spaces for the rest to avoid checking leading spaces in the loop.
-                // zh-CN: 为避免在循环中判断前导空格, 这里先追加第一个, 再对剩余的加空格.
-                out.append(inspectRhino(args[index++]))
+
                 while (index < argsSize) {
+                    val x = args[index++]
                     out.append(' ')
-                    out.append(inspectRhino(args[index++]))
+                    if (x == null || !x.isJsObject()) {
+                        out.append(Context.toString(x))
+                    } else {
+                        out.append(inspectRhino(x))
+                    }
                 }
+
                 out.toString()
             }
         }

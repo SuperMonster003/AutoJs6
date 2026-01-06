@@ -22,13 +22,13 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginBottom="2dp"
         android:background="?android:divider" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
+        android:layout_marginVertical="2dp"
         android:baselineAligned="false">
 
         <LinearLayout
@@ -58,6 +58,7 @@
                 android:text="@string/text_settings"
                 android:textColor="?android:textColorPrimary"
                 android:textSize="12sp" />
+
         </LinearLayout>
 
         <LinearLayout
@@ -87,6 +88,7 @@
                 android:text="@string/text_plugins"
                 android:textColor="?android:textColorPrimary"
                 android:textSize="12sp" />
+
         </LinearLayout>
 
         <LinearLayout
@@ -146,6 +148,7 @@
                 android:text="@string/text_exit"
                 android:textColor="?android:textColorPrimary"
                 android:textSize="12sp" />
+
         </LinearLayout>
 
     </LinearLayout>

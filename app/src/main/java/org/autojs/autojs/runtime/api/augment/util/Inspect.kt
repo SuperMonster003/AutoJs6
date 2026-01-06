@@ -342,7 +342,7 @@ object Inspect : Augmentable(), Invokable {
         if (value is NativeJavaPackage) return value.toString()
         if (value is NativeJavaClass) return value.toString()
         if (value.javaClass.isArray) return javaArrayToString(value)
-        if (value !is ScriptableObject) return formatValue(ctx, Context.toString(value), recurseTimes)
+        if (value !is ScriptableObject) return Context.toString(value)
         if (value is ProxyObject) return formatValue(ctx, value[AUGMENTED_OBJECT_KEY], recurseTimes)
 
         // @Hint by SuperMonster003 on Apr 16, 2024.
