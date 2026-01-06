@@ -1392,5 +1392,6 @@
     <string name="text_scheduled_restart_backend">Backend</string>
     <string name="text_scheduled_restart_start_delay">Start delay</string>
     <string name="dialog_button_advanced_settings">Advanced</string>
+    <string name="error_failed_to_save_project_config">Failed to save project config</string>
 
 </resources>

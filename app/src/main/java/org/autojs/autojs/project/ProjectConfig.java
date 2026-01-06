@@ -9,6 +9,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.Strictness;
 import com.google.gson.annotations.SerializedName;
 import org.autojs.autojs.annotation.DeserializedMethodName;
@@ -28,7 +30,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -38,21 +42,36 @@ import java.util.stream.Collectors;
 
 /**
  * Created by Stardust on Jan 24, 2018.
- * Modified by SuperMonster003 as of Nov 19, 2025.
+ * Modified by SuperMonster003 as of Jan 6, 2026.
  */
-public class ProjectConfig {
+public class ProjectConfig implements FuzzyDeserializer.OriginalJsonKeyAware {
 
     public static final String CONFIG_FILE_NAME = "project.json";
     public static final String DEFAULT_MAIN_SCRIPT_FILE_NAME = "main.js";
+
     private static final String TAG = "ProjectConfig";
+
+    public static final List<String> DEFAULT_PERMISSIONS = Arrays.asList(
+            "android.permission.WAKE_LOCK",
+            "android.permission.INTERNET",
+            "android.permission.WRITE_EXTERNAL_STORAGE"
+    );
+
     private static final Gson sGson = new GsonBuilder()
-            .registerTypeAdapter(ProjectConfig.class, new JsonUtils.FuzzyDeserializer<ProjectConfig>())
-            .registerTypeAdapter(LaunchConfig.class, new JsonUtils.FuzzyDeserializer<LaunchConfig>())
-            .registerTypeAdapter(ScriptConfig.class, new JsonUtils.FuzzyDeserializer<ScriptConfig>())
-            .registerTypeAdapter(BuildInfo.class, new JsonUtils.FuzzyDeserializer<BuildInfo>())
+            .registerTypeAdapter(ProjectConfig.class, new FuzzyDeserializer<ProjectConfig>())
+            .registerTypeAdapter(LaunchConfig.class, new FuzzyDeserializer<LaunchConfig>())
+            .registerTypeAdapter(ScriptConfig.class, new FuzzyDeserializer<ScriptConfig>())
+            .registerTypeAdapter(BuildInfo.class, new FuzzyDeserializer<BuildInfo>())
             .setStrictness(Strictness.LENIENT)
             .setPrettyPrinting()
             .create();
+
+    /**
+     * Remember original JSON keys to preserve them on serialization (canonicalKey -> originalKey).
+     * zh-CN: 记录原始 JSON key, 用于序列化写回时保留原 key (canonicalKey -> originalKey).
+     */
+    private final transient Map<String, String> mOriginalJsonKeys = new LinkedHashMap<>();
+
     @SerializedName("excludeDirs")
     @SerializedNameCompatible(with = {
             @With(value = "ignoredDirs", target = {"AutoJs4", "AutoX"}),
@@ -60,23 +79,28 @@ public class ProjectConfig {
             @With(value = "excludedDirs"),
     })
     private final List<String> mExcludedDirs = new ArrayList<>();
+
     @SerializedName("name")
     @SerializedNameCompatible(with = {
             @With(value = "projectName"),
     })
     private String mName;
+
     @SerializedName("versionName")
     @SerializedNameCompatible(with = {
             @With(value = "version"),
     })
     private String mVersionName;
+
     @SerializedName("versionCode")
     private int mVersionCode = 1;
+
     @SerializedName("packageName")
     @SerializedNameCompatible(with = {
             @With(value = "package"),
     })
     private String mPackageName;
+
     @SerializedName("main")
     @SerializedNameCompatible(with = {
             @With(value = "mainName"),
@@ -88,6 +112,7 @@ public class ProjectConfig {
             @With(value = "mainFileName"),
     })
     private String mMainScriptFileName = DEFAULT_MAIN_SCRIPT_FILE_NAME;
+
     @Nullable
     @SerializedName(value = "assets")
     @SerializedNameCompatible(with = {
@@ -95,22 +120,27 @@ public class ProjectConfig {
             @With(value = "assetList"),
     })
     private List<String> mAssets = new ArrayList<>();
+
     @SerializedName("launchConfig")
     @SerializedNameCompatible(with = {
             @With(value = "launch"),
     })
     private LaunchConfig mLaunchConfig = new LaunchConfig();
+
     @SerializedName("build")
     @SerializedNameCompatible(with = {
             @With(value = "buildInfo"),
     })
     private BuildInfo mBuildInfo = new BuildInfo();
+
     @SerializedName("icon")
     @SerializedNameCompatible(with = {
             @With(value = "iconPath"),
     })
     private String mIconPath;
+
     private transient Callable<Bitmap> mIconBitmapGetter;
+
     @Nullable
     @SerializedName(value = "abis")
     @SerializedNameCompatible(with = {
@@ -118,6 +148,7 @@ public class ProjectConfig {
             @With(value = "abiList"),
     })
     private List<String> mAbis = new ArrayList<>();
+
     @Nullable
     @SerializedName(value = "libs")
     @SerializedNameCompatible(with = {
@@ -125,12 +156,14 @@ public class ProjectConfig {
             @With(value = "libList"),
     })
     private List<String> mLibs = new ArrayList<>();
+
     @SerializedName("permissions")
     @SerializedNameCompatible(with = {
             @With(value = "permission"),
             @With(value = "permissionList"),
     })
-    private List<String> mPermissions = new ArrayList<>();
+    private List<String> mPermissions = new ArrayList<>(DEFAULT_PERMISSIONS);
+
     @SerializedName("signatureScheme")
     @SerializedNameCompatible(with = {
             @With(value = "signatureSchemes"),
@@ -150,8 +183,10 @@ public class ProjectConfig {
     //  #         @With(value = "scripts", target = {"AutoJs4", "AutoX"}),
     //  # })
     //  # private final Map<String, ScriptConfig> mScriptConfigs = new HashMap<>();
+
     @Nullable
     private transient KeyStore mKeyStore = null;
+
     @SerializedName(value = "useFeatures")
     @SerializedNameCompatible(with = {
             @With(value = "useFeature"),
@@ -161,6 +196,7 @@ public class ProjectConfig {
             @With(value = "featureList"),
     })
     private List<String> mFeatures = new ArrayList<>();
+
     @Nullable
     private transient String mSourcePath = null;
 
@@ -224,7 +260,7 @@ public class ProjectConfig {
             } catch (Exception e2) {
                 Log.d(TAG, "Failed to read repaired json from file: " + path + " (" + e2.getMessage() + ")");
                 try {
-                    ProjectConfig crucialData = tryReadCrucialData(fileContents, path);
+                    ProjectConfig crucialData = tryReadCrucialData(fileContents, path, false);
                     Log.d(TAG, "Successfully read crucial data from file: " + path);
                     return crucialData;
                 } catch (Exception e3) {
@@ -235,54 +271,67 @@ public class ProjectConfig {
         }
     }
 
-    private static ProjectConfig tryReadCrucialData(String s, String jsonFilePath) {
+    @SuppressWarnings("SameParameterValue")
+    private static ProjectConfig tryReadCrucialData(String s, String jsonFilePath, boolean detectConflicts) {
         ProjectConfig projectConfig = new ProjectConfig();
         LaunchConfig launchConfig = new LaunchConfig();
         BuildInfo buildInfo = new BuildInfo();
 
-        Pattern namePattern = Pattern.compile(stringPattern("name"), Pattern.CASE_INSENSITIVE);
-        Pattern versionNamePattern = Pattern.compile(stringPattern("versionName"), Pattern.CASE_INSENSITIVE);
-        Pattern versionCodePattern = Pattern.compile(numberPattern("versionCode"), Pattern.CASE_INSENSITIVE);
-        Pattern packageNamePattern = Pattern.compile(stringPattern("packageName"), Pattern.CASE_INSENSITIVE);
-        Pattern mainPattern = Pattern.compile(stringPattern("main"), Pattern.CASE_INSENSITIVE);
-        Pattern iconPattern = Pattern.compile(stringPattern("icon"), Pattern.CASE_INSENSITIVE);
+        Pattern namePattern = Pattern.compile(stringPatternWithKeyCapture("name"), Pattern.CASE_INSENSITIVE);
+        Pattern versionNamePattern = Pattern.compile(stringPatternWithKeyCapture("versionName"), Pattern.CASE_INSENSITIVE);
+        Pattern versionCodePattern = Pattern.compile(numberPatternWithKeyCapture("versionCode"), Pattern.CASE_INSENSITIVE);
+        Pattern packageNamePattern = Pattern.compile(stringPatternWithKeyCapture("packageName"), Pattern.CASE_INSENSITIVE);
+        Pattern mainPattern = Pattern.compile(stringPatternWithKeyCapture("main"), Pattern.CASE_INSENSITIVE);
+        Pattern iconPattern = Pattern.compile(stringPatternWithKeyCapture("icon"), Pattern.CASE_INSENSITIVE);
 
-        Pattern assetsPattern = Pattern.compile(listPattern("asset"), Pattern.CASE_INSENSITIVE);
-        Pattern abisPattern = Pattern.compile(listPattern("abi"), Pattern.CASE_INSENSITIVE);
-        Pattern libsPattern = Pattern.compile(listPattern("lib"), Pattern.CASE_INSENSITIVE);
-        Pattern useFeaturesPattern = Pattern.compile(listPattern("useFeature"), Pattern.CASE_INSENSITIVE);
+        Pattern assetsPattern = Pattern.compile(listPatternWithKeyCapture("asset"), Pattern.CASE_INSENSITIVE);
+        Pattern abisPattern = Pattern.compile(listPatternWithKeyCapture("abi"), Pattern.CASE_INSENSITIVE);
+        Pattern libsPattern = Pattern.compile(listPatternWithKeyCapture("lib"), Pattern.CASE_INSENSITIVE);
+        Pattern useFeaturesPattern = Pattern.compile(listPatternWithKeyCapture("useFeature"), Pattern.CASE_INSENSITIVE);
 
-        Pattern buildTimePattern = Pattern.compile(numberPattern("buildTime"), Pattern.CASE_INSENSITIVE);
-        Pattern buildNumberPattern = Pattern.compile(numberPattern("buildNumber"), Pattern.CASE_INSENSITIVE);
-        Pattern buildIdPattern = Pattern.compile(stringPattern("buildId"), Pattern.CASE_INSENSITIVE);
+        Pattern permissionsPattern = Pattern.compile(listPatternWithKeyCapture("permission"), Pattern.CASE_INSENSITIVE);
+        Pattern signatureSchemePattern = Pattern.compile(stringPatternWithKeyCapture("signatureScheme"), Pattern.CASE_INSENSITIVE);
 
-        Pattern launchConfigHideLogsPattern = Pattern.compile(booleanPattern("hideLogs"), Pattern.CASE_INSENSITIVE);
-        Pattern launchConfigLogsVisiblePattern = Pattern.compile(booleanPattern("logsVisible"), Pattern.CASE_INSENSITIVE);
+        Pattern excludeDirsPattern = Pattern.compile(listPatternWithKeyCapture("excludeDir"), Pattern.CASE_INSENSITIVE);
+        Pattern excludedDirsPattern = Pattern.compile(listPatternWithKeyCapture("excludedDir"), Pattern.CASE_INSENSITIVE);
 
-        Pattern launchConfigDisplaySplashPattern = Pattern.compile(booleanPattern("displaySplash"), Pattern.CASE_INSENSITIVE);
-        Pattern launchConfigSplashVisiblePattern = Pattern.compile(booleanPattern("splashVisible"), Pattern.CASE_INSENSITIVE);
+        Pattern buildTimePattern = Pattern.compile(numberPatternWithKeyCapture("buildTime"), Pattern.CASE_INSENSITIVE);
+        Pattern buildNumberPattern = Pattern.compile(numberPatternWithKeyCapture("buildNumber"), Pattern.CASE_INSENSITIVE);
+        Pattern buildIdPattern = Pattern.compile(stringPatternWithKeyCapture("buildId"), Pattern.CASE_INSENSITIVE);
 
-        setFieldIfMatches(namePattern, s, projectConfig::setName);
-        setFieldIfMatches(versionNamePattern, s, projectConfig::setVersionName);
-        setFieldForDoubleIfMatches(versionCodePattern, s, versionCode -> projectConfig.setVersionCode((int) versionCode));
-        setFieldIfMatches(packageNamePattern, s, projectConfig::setPackageName);
-        setFieldIfMatches(mainPattern, s, projectConfig::setMainScriptFileName);
-        setFieldIfMatches(iconPattern, s, projectConfig::setIconPath);
+        Pattern launchConfigHideLogsPattern = Pattern.compile(booleanPatternWithKeyCapture("hideLogs"), Pattern.CASE_INSENSITIVE);
+        Pattern launchConfigLogsVisiblePattern = Pattern.compile(booleanPatternWithKeyCapture("logsVisible"), Pattern.CASE_INSENSITIVE);
 
-        setListIfMatches(assetsPattern, s, projectConfig::setAssets);
-        setListIfMatches(abisPattern, s, projectConfig::setAbis);
-        setListIfMatches(libsPattern, s, projectConfig::setLibs);
-        setListIfMatches(useFeaturesPattern, s, projectConfig::setFeatures);
+        Pattern launchConfigDisplaySplashPattern = Pattern.compile(booleanPatternWithKeyCapture("displaySplash"), Pattern.CASE_INSENSITIVE);
+        Pattern launchConfigSplashVisiblePattern = Pattern.compile(booleanPatternWithKeyCapture("splashVisible"), Pattern.CASE_INSENSITIVE);
 
-        setFieldForDoubleIfMatches(buildTimePattern, s, buildTime -> buildInfo.setBuildTime((long) buildTime));
-        setFieldForDoubleIfMatches(buildNumberPattern, s, buildNumber -> buildInfo.setBuildNumber((long) buildNumber));
-        setFieldIfMatches(buildIdPattern, s, buildInfo::setBuildId);
+        setFieldIfMatchesWithKey(namePattern, s, "name", projectConfig::setName, projectConfig, detectConflicts);
+        setFieldIfMatchesWithKey(versionNamePattern, s, "versionName", projectConfig::setVersionName, projectConfig, detectConflicts);
+        setFieldForDoubleIfMatchesWithKey(versionCodePattern, s, "versionCode", versionCode -> projectConfig.setVersionCode((int) versionCode), projectConfig, detectConflicts);
+        setFieldIfMatchesWithKey(packageNamePattern, s, "packageName", projectConfig::setPackageName, projectConfig, detectConflicts);
+        setFieldIfMatchesWithKey(mainPattern, s, "main", projectConfig::setMainScriptFileName, projectConfig, detectConflicts);
+        setFieldIfMatchesWithKey(iconPattern, s, "icon", projectConfig::setIconPath, projectConfig, detectConflicts);
 
-        setFieldForBooleanIfMatches(launchConfigHideLogsPattern, s, value -> launchConfig.setLogsVisible(!value));
-        setFieldForBooleanIfMatches(launchConfigLogsVisiblePattern, s, launchConfig::setLogsVisible); /* 优先. */
+        setListIfMatchesWithKey(assetsPattern, s, "assets", projectConfig::setAssets, projectConfig, detectConflicts);
+        setListIfMatchesWithKey(abisPattern, s, "abis", projectConfig::setAbis, projectConfig, detectConflicts);
+        setListIfMatchesWithKey(libsPattern, s, "libs", projectConfig::setLibs, projectConfig, detectConflicts);
+        setListIfMatchesWithKey(useFeaturesPattern, s, "useFeatures", projectConfig::setFeatures, projectConfig, detectConflicts);
 
-        setFieldForBooleanIfMatches(launchConfigDisplaySplashPattern, s, launchConfig::setSplashVisible);
-        setFieldForBooleanIfMatches(launchConfigSplashVisiblePattern, s, launchConfig::setSplashVisible); /* 优先. */
+        setListIfMatchesWithKey(permissionsPattern, s, "permissions", projectConfig::setPermissions, projectConfig, detectConflicts);
+        setFieldIfMatchesWithKey(signatureSchemePattern, s, "signatureScheme", projectConfig::setSignatureScheme, projectConfig, detectConflicts);
+
+        setListIfMatchesWithKey(excludeDirsPattern, s, "excludeDirs", excludeDirs -> excludeDirs.forEach(projectConfig::excludeDir), projectConfig, detectConflicts);
+        setListIfMatchesWithKey(excludedDirsPattern, s, "excludeDirs", excludedDirs -> excludedDirs.forEach(projectConfig::excludeDir), projectConfig, detectConflicts);
+
+        setFieldForDoubleIfMatchesWithKey(buildTimePattern, s, "buildTime", buildTime -> buildInfo.setBuildTime((long) buildTime), projectConfig, detectConflicts);
+        setFieldForDoubleIfMatchesWithKey(buildNumberPattern, s, "buildNumber", buildNumber -> buildInfo.setBuildNumber((long) buildNumber), projectConfig, detectConflicts);
+        setFieldIfMatchesWithKey(buildIdPattern, s, "buildId", buildInfo::setBuildId, projectConfig, detectConflicts);
+
+        setFieldForBooleanIfMatchesWithKey(launchConfigHideLogsPattern, s, "hideLogs", value -> launchConfig.setLogsVisible(!value), projectConfig, detectConflicts);
+        setFieldForBooleanIfMatchesWithKey(launchConfigLogsVisiblePattern, s, "logsVisible", launchConfig::setLogsVisible, projectConfig, detectConflicts); /* 优先. */
+
+        setFieldForBooleanIfMatchesWithKey(launchConfigDisplaySplashPattern, s, "displaySplash", launchConfig::setSplashVisible, projectConfig, detectConflicts);
+        setFieldForBooleanIfMatchesWithKey(launchConfigSplashVisiblePattern, s, "splashVisible", launchConfig::setSplashVisible, projectConfig, detectConflicts); /* 优先. */
 
         if (projectConfig.getName() == null || projectConfig.getName().isBlank()) {
             if (jsonFilePath.endsWith(CONFIG_FILE_NAME)) {
@@ -301,26 +350,34 @@ public class ProjectConfig {
 
     @NotNull
     @Language("RegExp")
-    private static String listPattern(String name) {
-        return "\"" + parseNamePattern(name) + "(?:s|list)?\"\\s*:\\s*\\[\\s*(\"(?:\\\\.|[^\"\\\\])*\")(?:\\s*,\\s*\"(?:\\\\.|[^\"\\\\])*\")*\\s*]";
+    private static String listPatternWithKeyCapture(String name) {
+        // Capture both the matched key name and the list content.
+        // zh-CN: 同时捕获命中的 key 名称与数组内容.
+        return "\"(" + parseNamePattern(name) + "(?:s|list)?)\"\\s*:\\s*\\[\\s*((?:\"(?:\\\\.|[^\"\\\\])*\"\\s*,\\s*)*\"(?:\\\\.|[^\"\\\\])*\")?\\s*]";
     }
 
     @NotNull
     @Language("RegExp")
-    private static String numberPattern(String name) {
-        return "\"" + parseNamePattern(name) + "\"\\s*:\\s*\"?(\\d+)\"?";
+    private static String numberPatternWithKeyCapture(String name) {
+        // Capture both the matched key name and the numeric content.
+        // zh-CN: 同时捕获命中的 key 名称与数值内容.
+        return "\"(" + parseNamePattern(name) + ")\"\\s*:\\s*\"?(\\d+)\"?";
     }
 
     @NotNull
     @Language("RegExp")
-    private static String booleanPattern(String name) {
-        return "\"" + parseNamePattern(name) + "\"\\s*:\\s*\"?(true|false)\"?";
+    private static String booleanPatternWithKeyCapture(String name) {
+        // Capture both the matched key name and the boolean content.
+        // zh-CN: 同时捕获命中的 key 名称与布尔值内容.
+        return "\"(" + parseNamePattern(name) + ")\"\\s*:\\s*\"?(true|false)\"?";
     }
 
     @NotNull
     @Language("RegExp")
-    private static String stringPattern(String name) {
-        return "\"" + parseNamePattern(name) + "\"\\s*:\\s*\"((?:[^\"]|(?<=\\\\)\")*?)(?<!\\\\)\"";
+    private static String stringPatternWithKeyCapture(String name) {
+        // Capture both the matched key name and the string content.
+        // zh-CN: 同时捕获命中的 key 名称与字符串内容.
+        return "\"(" + parseNamePattern(name) + ")\"\\s*:\\s*\"((?:[^\"]|(?<=\\\\)\")*?)(?<!\\\\)\"";
     }
 
     @NotNull
@@ -328,42 +385,115 @@ public class ProjectConfig {
         return name.replaceAll("(?<=[a-z])([A-Z]+)", "(?:$1|_$1)");
     }
 
-    private static void setFieldIfMatches(Pattern pattern, String s, java.util.function.Consumer<String> setter) {
+    private static void setFieldIfMatchesWithKey(
+            Pattern pattern,
+            String s,
+            String canonicalKey,
+            java.util.function.Consumer<String> setter,
+            ProjectConfig recorder,
+            boolean detectConflicts
+    ) {
         Matcher matcher = pattern.matcher(s);
-        if (matcher.find()) {
-            setter.accept(matcher.group(1));
+        String lastMatchedKey = null;
+        String lastValue = null;
+        int matches = 0;
+        while (matcher.find()) {
+            matches++;
+            lastMatchedKey = matcher.group(1);
+            lastValue = matcher.group(2);
         }
+        if (matches == 0) return;
+        if (detectConflicts && matches > 1) {
+            throw new IllegalArgumentException("Conflicting keys for \"" + canonicalKey + "\" in fallback parsing");
+        }
+        recorder.recordOriginalJsonKey(canonicalKey, Objects.requireNonNull(lastMatchedKey));
+        setter.accept(lastValue);
     }
 
-    private static void setFieldForDoubleIfMatches(Pattern pattern, String s, java.util.function.DoubleConsumer setter) {
+    private static void setFieldForDoubleIfMatchesWithKey(
+            Pattern pattern,
+            String s,
+            String canonicalKey,
+            java.util.function.DoubleConsumer setter,
+            ProjectConfig recorder,
+            boolean detectConflicts
+    ) {
         Matcher matcher = pattern.matcher(s);
-        if (matcher.find()) {
-            setter.accept(Double.parseDouble(Objects.requireNonNull(matcher.group(1))));
+        String lastMatchedKey = null;
+        String lastValue = null;
+        int matches = 0;
+        while (matcher.find()) {
+            matches++;
+            lastMatchedKey = matcher.group(1);
+            lastValue = matcher.group(2);
         }
+        if (matches == 0) return;
+        if (detectConflicts && matches > 1) {
+            throw new IllegalArgumentException("Conflicting keys for \"" + canonicalKey + "\" in fallback parsing");
+        }
+        recorder.recordOriginalJsonKey(canonicalKey, Objects.requireNonNull(lastMatchedKey));
+        setter.accept(Double.parseDouble(Objects.requireNonNull(lastValue)));
     }
 
-    private static void setFieldForBooleanIfMatches(Pattern pattern, String s, java.util.function.Consumer<Boolean> setter) {
+    private static void setFieldForBooleanIfMatchesWithKey(
+            Pattern pattern,
+            String s,
+            String canonicalKey,
+            java.util.function.Consumer<Boolean> setter,
+            ProjectConfig recorder,
+            boolean detectConflicts
+    ) {
         Matcher matcher = pattern.matcher(s);
-        if (matcher.find()) {
-            setter.accept(Boolean.getBoolean(Objects.requireNonNull(matcher.group(1))));
+        String lastMatchedKey = null;
+        String lastValue = null;
+        int matches = 0;
+        while (matcher.find()) {
+            matches++;
+            lastMatchedKey = matcher.group(1);
+            lastValue = matcher.group(2);
         }
+        if (matches == 0) return;
+        if (detectConflicts && matches > 1) {
+            throw new IllegalArgumentException("Conflicting keys for \"" + canonicalKey + "\" in fallback parsing");
+        }
+        recorder.recordOriginalJsonKey(canonicalKey, Objects.requireNonNull(lastMatchedKey));
+        setter.accept(Boolean.parseBoolean(Objects.requireNonNull(lastValue)));
     }
 
-    private static void setListIfMatches(Pattern pattern, String s, java.util.function.Consumer<List<String>> setter) {
+    private static void setListIfMatchesWithKey(
+            Pattern pattern,
+            String s,
+            String canonicalKey,
+            java.util.function.Consumer<List<String>> setter,
+            ProjectConfig recorder,
+            boolean detectConflicts
+    ) {
         Matcher matcher = pattern.matcher(s);
-        if (matcher.find()) {
-            String content = matcher.group(1);
-            if (content == null) {
-                setter.accept(Collections.emptyList());
-            } else {
-                List<String> list = Arrays.stream(content.split("\\s*,\\s*")).map(str -> {
-                    if (str.startsWith("\"") && str.endsWith("\"")) {
-                        return str.substring(1, str.length() - 1);
-                    }
-                    return str;
-                }).collect(Collectors.toList());
-                setter.accept(list);
-            }
+        String lastMatchedKey = null;
+        String lastContent = null;
+        int matches = 0;
+        while (matcher.find()) {
+            matches++;
+            lastMatchedKey = matcher.group(1);
+            lastContent = matcher.group(2);
+        }
+        if (matches == 0) return;
+        if (detectConflicts && matches > 1) {
+            throw new IllegalArgumentException("Conflicting keys for \"" + canonicalKey + "\" in fallback parsing");
+        }
+
+        recorder.recordOriginalJsonKey(canonicalKey, Objects.requireNonNull(lastMatchedKey));
+
+        if (lastContent == null || lastContent.isBlank()) {
+            setter.accept(Collections.emptyList());
+        } else {
+            List<String> list = Arrays.stream(lastContent.split("\\s*,\\s*")).map(str -> {
+                if (str.startsWith("\"") && str.endsWith("\"")) {
+                    return str.substring(1, str.length() - 1);
+                }
+                return str;
+            }).collect(Collectors.toList());
+            setter.accept(list);
         }
     }
 
@@ -510,8 +640,56 @@ public class ProjectConfig {
         mLaunchConfig = launchConfig;
     }
 
-    public String toJson() {
-        return sGson.toJson(this);
+    @Override
+    public void recordOriginalJsonKey(@NonNull String canonicalKey, @NonNull String originalKey) {
+        // Always overwrite to keep the "last key wins" behavior.
+        // zh-CN: 始终覆盖, 以保持 "最后一个 key 生效" 的行为.
+        mOriginalJsonKeys.put(canonicalKey, originalKey);
+    }
+
+    public String toJson(boolean detectConflicts) {
+        // Serialize first using canonical keys, then rename keys to preserve the original ones.
+        // zh-CN: 先按 canonical key 序列化, 再重命名 key 以保留原始 key.
+        JsonElement tree = sGson.toJsonTree(this);
+        if (!tree.isJsonObject()) {
+            return sGson.toJson(this);
+        }
+
+        JsonObject obj = tree.getAsJsonObject();
+
+        // Rename canonical keys to original keys if needed.
+        // zh-CN: 如有需要, 将 canonical key 重命名为原始 key.
+        for (Map.Entry<String, String> entry : mOriginalJsonKeys.entrySet()) {
+            String canonicalKey = entry.getKey();
+            String originalKey = entry.getValue();
+
+            if (canonicalKey == null || originalKey == null) {
+                continue;
+            }
+            if (canonicalKey.equals(originalKey)) {
+                continue;
+            }
+            if (!obj.has(canonicalKey)) {
+                continue;
+            }
+
+            if (obj.has(originalKey)) {
+                // Detect or resolve conflicts depending on the flag.
+                // zh-CN: 根据开关选择检测或静默解决冲突.
+                if (detectConflicts) {
+                    throw new IllegalStateException("Conflicting keys when serializing: \"" + canonicalKey + "\" and \"" + originalKey + "\"");
+                }
+                // Keep the existing original key and drop canonical key silently.
+                // zh-CN: 静默保留原始 key, 丢弃 canonical key.
+                obj.remove(canonicalKey);
+                continue;
+            }
+
+            JsonElement value = obj.remove(canonicalKey);
+            obj.add(originalKey, value);
+        }
+
+        return sGson.toJson(obj);
     }
 
     public String getIconPath() {
@@ -618,7 +796,7 @@ public class ProjectConfig {
     }
 
     public List<String> getPermissions() {
-        return mPermissions;
+        return Objects.requireNonNullElse(mPermissions, DEFAULT_PERMISSIONS);
     }
 
     public ProjectConfig setPermissions(List<String> permissions) {

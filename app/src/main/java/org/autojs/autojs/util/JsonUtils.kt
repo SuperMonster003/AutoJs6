@@ -1,16 +1,6 @@
 package org.autojs.autojs.util
 
-import com.google.gson.JsonDeserializationContext
-import com.google.gson.JsonDeserializer
-import com.google.gson.JsonElement
-import com.google.gson.JsonObject
-import com.google.gson.annotations.SerializedName
-import org.autojs.autojs.annotation.DeserializedMethodName
-import org.autojs.autojs.annotation.SerializedNameCompatible
 import org.json.JSONTokener
-import java.lang.reflect.Field
-import java.lang.reflect.Modifier
-import java.lang.reflect.Type
 
 /**
  * Created by SuperMonster003 on Nov 20, 2024.
@@ -113,92 +103,5 @@ object JsonUtils {
      */
     @JvmStatic
     fun isValidJson(json: String) = json.isNotBlank() && runCatching { JSONTokener(json).nextValue() }.isSuccess
-
-    class FuzzyDeserializer<T> : JsonDeserializer<T> {
-
-        override fun deserialize(json: JsonElement?, typeOfT: Type?, context: JsonDeserializationContext?): T {
-            require(typeOfT is Class<*>) {
-                "Expected parameter typeOfT to be of type Class, but got: ${typeOfT?.javaClass?.name}"
-            }
-            @Suppress("UNCHECKED_CAST")
-            val clazz = typeOfT as Class<T>
-            val instance = try {
-                clazz.getDeclaredConstructor().newInstance()
-            } catch (e: Exception) {
-                throw RuntimeException("Failed to create an instance of ${clazz.name}", e)
-            }
-            if (json is JsonObject) {
-                clazz.declaredFields.forEach { processField(it, json, instance, context) }
-            }
-            return instance
-        }
-
-        private fun processField(field: Field, json: JsonObject, instance: T, context: JsonDeserializationContext?) {
-            field.isAccessible = true
-
-            val serializedNameAnnotation = field.getAnnotation(SerializedName::class.java)
-            val compatibleAnnotation = field.getAnnotation(SerializedNameCompatible::class.java)
-            val deserializedAnnotation = field.getAnnotation(DeserializedMethodName::class.java)
-
-            val sanitizedPrimaryName = sanitizeKey(serializedNameAnnotation?.value ?: field.name)
-            val sanitizedAlternateNames = serializedNameAnnotation?.alternate?.map { sanitizeKey(it) } ?: emptyList()
-            val sanitizedCompatibleNames = compatibleAnnotation?.with?.map { sanitizeKey(it.value) to it.isReversed } ?: emptyList()
-
-            val serializedNames: List<Pair<String, Boolean>> = (sanitizedAlternateNames + sanitizedPrimaryName).map { it to false } + sanitizedCompatibleNames
-
-            json.entrySet().forEach { (jsonKey, jsonValue) ->
-                val sanitizedJsonKey = sanitizeKey(jsonKey)
-                serializedNames.forEach { pair ->
-                    val (serializedKey, isReversed) = pair
-                    if (sanitizedJsonKey == serializedKey) {
-                        when {
-                            deserializedAnnotation != null -> {
-                                handleDeserializedMethod(field, instance, jsonValue, deserializedAnnotation)
-                            }
-                            field.type == Boolean::class.javaPrimitiveType || field.type == Boolean::class.java -> {
-                                if (jsonValue.isJsonPrimitive && jsonValue.asJsonPrimitive.isBoolean) {
-                                    val value = jsonValue.asBoolean
-                                    field.set(instance, if (isReversed) !value else value)
-                                }
-                            }
-                            else -> {
-                                if (!jsonValue.isJsonNull) {
-                                    val value = context?.deserialize<Any>(jsonValue, field.genericType)
-                                    field.set(instance, value)
-                                }
-                            }
-                        }
-                        return@processField
-                    }
-                }
-            }
-        }
-
-        private fun handleDeserializedMethod(field: Field, instance: T, jsonValue: JsonElement, annotation: DeserializedMethodName) {
-            require(jsonValue.isJsonPrimitive && jsonValue.asJsonPrimitive.isString) {
-                "Field with @DeserializedMethodName must map to a JSON string."
-            }
-            val methodName = annotation.method
-            val methodInput = jsonValue.asString
-            val parameterTypes = annotation.parameterTypes.map { it.java }.toTypedArray()
-            val method = runCatching {
-                instance!!::class.java.getMethod(methodName, *parameterTypes)
-            }.getOrElse { e ->
-                throw RuntimeException("Method $methodName with parameter types ${parameterTypes.contentToString()} not found in ${instance!!::class.java.name}", e)
-            }
-            try {
-                val isStatic = Modifier.isStatic(method.modifiers)
-                val result = method.invoke(instance.takeUnless { isStatic }, methodInput)
-                field.set(instance, result)
-            } catch (e: Exception) {
-                throw RuntimeException("Failed to invoke method $methodName on ${field.name}", e)
-            }
-        }
-
-        private fun sanitizeKey(key: String): String {
-            return key.replace(Regex("[^a-zA-Z0-9]"), "").lowercase()
-        }
-
-    }
 
 }

@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.7.0": {
-      "released_date": "2026/01/03",
+      "released_date": "2026/01/06",
       "feature": [
         "插件中心功能, 支持插件的安装/卸载/更新等操作 (入口: 主页抽屉按钮)",
         "cvt 模块, 用于数据单位转换 (参阅 项目文档 > [单位转换](https://docs.autojs6.com/#/cvt))",
@@ -65,7 +65,8 @@
         "运行项目时 project.json 配置参数可能无法正常解析的问题",
         "项目打包时 project.json 的 excludedDirs 配置参数将导致配置文件解析失败的问题 _[`issue #428`](http://issues.autojs6.com/428)_",
         "Android 7.x 可能无法正常使用打包功能的问题",
-        "项目配置文件中构建版本号或构建时间出现较大数字时可能导致应用崩溃的问题",
+        "脚本项目配置文件保存时原始键名可能会被修改的问题",
+        "脚本项目配置文件中构建版本号或构建时间出现较大数字时可能导致应用崩溃的问题",
         "频繁获取或重建 ImageReader 时可能因缓冲区暂无可用帧导致应用崩溃的问题",
         "输入事件观察器 InputEventObserver 可能导致应用启动时明显卡顿的问题",
         "Shizuku 用户服务进程未能正常结束导致进程堆积的问题 _[`issue #474`](http://issues.autojs6.com/474)_",
@@ -94,6 +95,8 @@
         "控制台浮动窗口背景色彩行为相关 API (透明度/着色/基色) 更符合安卓设计规范 _[`issue #458`](http://issues.autojs6.com/458)_",
         "文件管理器浮动按钮展开后点击菜单项时优化菜单收起时机",
         "文件管理器/任务面板支持显示文件/任务数量统计信息",
+        "打包应用页面默认勾选必要权限 (WAKE_LOCK/INTERNET/WRITE_EXTERNAL_STORAGE) _[`issue #397`](http://issues.autojs6.com/397)_",
+        "脚本项目配置文件保存时增加键名冲突检测机制防止键名歧义",
         "崩溃报告页面支持双指缩放调整字体大小并添加常用功能按钮",
         "应用启动器图标支持自适应图标特性 _[`issue #405`](http://issues.autojs6.com/405)_",
         "使用 LiveData 及 SharedFlow 替代已弃用的 LocalBroadcastManager",
@@ -101,7 +104,7 @@
         "Gradle 构建脚本支持获取详细的 Android Studio IDE 版本 (如 \"2025.1.4.7\")",
         "Gradle 构建脚本支持自动生成 VersionCodesList 类所需数据以降低脚本启动延迟",
         "使用版本目录 (Version Catalogs) 集中管理 Gradle 依赖和插件版本",
-        "模块化 Gradle 构建脚本, 将共享构建逻辑迁移至 buildSrc 并抽象为约定插件",
+        "模块化 Gradle 构建脚本, 将共享构建逻辑迁移至 build-logic 并抽象为约定插件",
         "使用 Gradle 约定插件简化本地 AAR 库加载逻辑",
         "使用 Toolchain 替代 sourceCompatibility/targetCompatibility 以降低构建环境差异"
       ],

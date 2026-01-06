@@ -1135,5 +1135,6 @@
     <string name="text_scheduled_restart_backend">调度引擎</string>
     <string name="text_scheduled_restart_start_delay">启动延迟</string>
     <string name="dialog_button_advanced_settings">高级设置</string>
+    <string name="error_failed_to_save_project_config">保存项目配置失败</string>
 
 </resources>

@@ -1132,8 +1132,9 @@
     <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">正在獲取更新日誌...</string>
     <string name="text_retrieving_release_notes" tools:ignore="TypographyEllipsis">正在獲取發行説明...</string>
     <string name="dialog_button_view_with_browser">瀏覽器查看</string>
-    <string name="text_scheduled_restart_backend">Backend</string>
-    <string name="text_scheduled_restart_start_delay">Start delay</string>
-    <string name="dialog_button_advanced_settings">Advanced</string>
+    <string name="text_scheduled_restart_backend">調度引擎</string>
+    <string name="text_scheduled_restart_start_delay">啓動延遲</string>
+    <string name="dialog_button_advanced_settings">高級設置</string>
+    <string name="error_failed_to_save_project_config">保存項目配置失敗</string>
 
 </resources>

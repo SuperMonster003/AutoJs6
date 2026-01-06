@@ -208,7 +208,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
                 ProjectConfig.fromProjectDir(config.sourcePath)?.let { sourceProjectConfig ->
                     sourceProjectConfig
                         .setBuildInfo(BuildInfo.generate(sourceProjectConfig.buildInfo.buildNumber + 1))
-                    File(ProjectConfig.configFileOfDir(config.sourcePath)).writeText(sourceProjectConfig.toJson())
+                    File(ProjectConfig.configFileOfDir(config.sourcePath)).writeText(sourceProjectConfig.toJson(true))
                     return@run sourceProjectConfig
                 }
             }
@@ -224,7 +224,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
                     .setBuildInfo(BuildInfo.generate(newProjectConfig.versionCode.toLong()))
                 File(buildPath, "assets/project/$CONFIG_FILE_NAME").also { file ->
                     file.parentFile?.let { parent -> if (!parent.exists()) parent.mkdirs() }
-                }.writeText(newProjectConfig.toJson())
+                }.writeText(newProjectConfig.toJson(true))
             }
 
         }

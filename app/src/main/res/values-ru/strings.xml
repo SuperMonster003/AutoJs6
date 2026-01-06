@@ -1134,8 +1134,9 @@
     <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">Получение списка изменений...</string>
     <string name="text_retrieving_release_notes" tools:ignore="TypographyEllipsis">Получение примечаний к выпуску...</string>
     <string name="dialog_button_view_with_browser">@string/dialog_button_download_with_browser</string>
-    <string name="text_scheduled_restart_backend">Backend</string>
-    <string name="text_scheduled_restart_start_delay">Start delay</string>
-    <string name="dialog_button_advanced_settings">Advanced</string>
+    <string name="text_scheduled_restart_backend">Движок</string>
+    <string name="text_scheduled_restart_start_delay">Задержка старта</string>
+    <string name="dialog_button_advanced_settings">Доп.</string>
+    <string name="error_failed_to_save_project_config">Не удалось сохранить конфигурацию проекта</string>
 
 </resources>

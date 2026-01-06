@@ -1136,8 +1136,9 @@
     <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">변경 로그를 가져오는 중...</string>
     <string name="text_retrieving_release_notes" tools:ignore="TypographyEllipsis">릴리스 노트를 가져오는 중...</string>
     <string name="dialog_button_view_with_browser">@string/dialog_button_download_with_browser</string>
-    <string name="text_scheduled_restart_backend">Backend</string>
-    <string name="text_scheduled_restart_start_delay">Start delay</string>
-    <string name="dialog_button_advanced_settings">Advanced</string>
+    <string name="text_scheduled_restart_backend">엔진</string>
+    <string name="text_scheduled_restart_start_delay">시작 지연</string>
+    <string name="dialog_button_advanced_settings">고급</string>
+    <string name="error_failed_to_save_project_config">프로젝트 설정을 저장하지 못했습니다</string>
 
 </resources>
