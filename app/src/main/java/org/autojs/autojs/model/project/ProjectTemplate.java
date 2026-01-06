@@ -25,7 +25,7 @@ public class ProjectTemplate {
     public Observable<File> newProject() {
         return Observable.fromCallable(() -> {
             mProjectDir.mkdirs();
-            PFiles.write(ProjectConfig.configFileOfDir(mProjectDir.getPath()), mProjectConfig.toJson());
+            PFiles.write(ProjectConfig.configFileOfDir(mProjectDir.getPath()), mProjectConfig.toJson(true));
             new File(mProjectDir, mProjectConfig.getMainScriptFileName()).createNewFile();
             return mProjectDir;
         })

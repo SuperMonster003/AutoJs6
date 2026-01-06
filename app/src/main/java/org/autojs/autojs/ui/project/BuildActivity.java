@@ -87,7 +87,7 @@ import static org.autojs.autojs.util.StringUtils.key;
 
 /**
  * Created by Stardust on Oct 22, 2017.
- * Modified by SuperMonster003 as of Dec 1, 2023.
+ * Modified by SuperMonster003 as of Jan 6, 2026.
  *
  * @noinspection ResultOfMethodCallIgnored
  */
@@ -553,27 +553,30 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
             checkBox.setTextSize(12);
             int marginInPixels = (int) (8 * getResources().getDisplayMetrics().density);
             checkBox.setPadding(marginInPixels, 0, 0, 0);
-            if (mProjectConfig != null) {
-                boolean checked = mProjectConfig.getPermissions().stream().anyMatch(p -> {
-                    var lc = p.toLowerCase(Locale.ROOT);
-                    var uc = p.toUpperCase(Locale.ROOT);
-                    if (p.equalsIgnoreCase(permission)) {
-                        return true;
-                    }
-                    if (permission.contains("android")) {
-                        String refined = uc.substring(uc.lastIndexOf(".") + 1).replaceAll("\\W", "_");
-                        return Objects.equals(refined, permission.substring(permission.lastIndexOf(".") + 1));
-                    }
-                    if (PERMISSION_ALIAS.containsKey(lc)) {
-                        return Objects.equals(permission, PERMISSION_ALIAS.get(lc));
-                    }
-                    return false;
-                });
-                checkBox.setChecked(checked);
-            } else {
-                checkBox.setChecked(false);
-            }
+            List<String> permissions = mProjectConfig != null
+                    ? mProjectConfig.getPermissions()
+                    : ProjectConfig.DEFAULT_PERMISSIONS;
+            boolean checked = hasPermission(permissions, permission);
+            checkBox.setChecked(checked);
             mFlexboxPermissionsView.addView(checkBox);
+        });
+    }
+
+    private boolean hasPermission(List<String> permissions, String permission) {
+        return permissions.stream().anyMatch(p -> {
+            var lc = p.toLowerCase(Locale.ROOT);
+            var uc = p.toUpperCase(Locale.ROOT);
+            if (p.equalsIgnoreCase(permission)) {
+                return true;
+            }
+            if (permission.contains("android")) {
+                String refined = uc.substring(uc.lastIndexOf(".") + 1).replaceAll("\\W", "_");
+                return Objects.equals(refined, permission.substring(permission.lastIndexOf(".") + 1));
+            }
+            if (PERMISSION_ALIAS.containsKey(lc)) {
+                return Objects.equals(permission, PERMISSION_ALIAS.get(lc));
+            }
+            return false;
         });
     }
 

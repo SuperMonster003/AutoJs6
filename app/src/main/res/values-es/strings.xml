@@ -1134,8 +1134,9 @@
     <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">Obteniendo el registro de cambios...</string>
     <string name="text_retrieving_release_notes" tools:ignore="TypographyEllipsis">Obteniendo las notas de la versión...</string>
     <string name="dialog_button_view_with_browser">@string/dialog_button_download_with_browser</string>
-    <string name="text_scheduled_restart_backend">Backend</string>
-    <string name="text_scheduled_restart_start_delay">Start delay</string>
-    <string name="dialog_button_advanced_settings">Advanced</string>
+    <string name="text_scheduled_restart_backend">Motor</string>
+    <string name="text_scheduled_restart_start_delay">Retraso de inicio</string>
+    <string name="dialog_button_advanced_settings">Avanzado</string>
+    <string name="error_failed_to_save_project_config">No se pudo guardar la configuración del proyecto</string>
 
 </resources>

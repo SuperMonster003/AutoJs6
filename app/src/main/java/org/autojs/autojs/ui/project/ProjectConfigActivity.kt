@@ -22,11 +22,11 @@ import org.autojs.autojs.model.explorer.ExplorerDirPage
 import org.autojs.autojs.model.explorer.ExplorerFileItem
 import org.autojs.autojs.model.explorer.Explorers
 import org.autojs.autojs.model.project.ProjectTemplate
-import org.autojs.autojs.pio.PFiles.ensureDir
-import org.autojs.autojs.pio.PFiles.write
+import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.project.ProjectConfig
 import org.autojs.autojs.theme.ThemeColorHelper
 import org.autojs.autojs.ui.BaseActivity
+import org.autojs.autojs.ui.error.ErrorDialogActivity
 import org.autojs.autojs.ui.shortcut.AppsIconSelectActivity
 import org.autojs.autojs.ui.widget.SimpleTextWatcher
 import org.autojs.autojs.util.ViewUtils
@@ -184,13 +184,13 @@ class ProjectConfigActivity : BaseActivity() {
                     finish()
                 }) { e: Throwable ->
                     e.printStackTrace()
-                    ViewUtils.showToast(this, e.message, true)
+                    ErrorDialogActivity.showErrorDialog(this, R.string.error_failed_to_save_project_config, e.message)
                 }
         } else {
             Observable.fromCallable {
-                write(
+                PFiles.write(
                     ProjectConfig.configFileOfDir(mDirectory!!.path),
-                    mProjectConfig!!.toJson()
+                    mProjectConfig!!.toJson(true)
                 )
                 Void.TYPE
             }
@@ -202,7 +202,7 @@ class ProjectConfigActivity : BaseActivity() {
                     finish()
                 }) { e: Throwable ->
                     e.printStackTrace()
-                    ViewUtils.showToast(this, e.message, true)
+                    ErrorDialogActivity.showErrorDialog(this, R.string.error_failed_to_save_project_config, e.message)
                 }
         }
     }
@@ -291,7 +291,7 @@ class ProjectConfigActivity : BaseActivity() {
                     iconPath = "res/logo.png"
                 }
                 val iconFile = File(mDirectory, iconPath)
-                ensureDir(iconFile.path)
+                PFiles.ensureDir(iconFile.path)
                 val fos = FileOutputStream(iconFile)
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
                 fos.close()
