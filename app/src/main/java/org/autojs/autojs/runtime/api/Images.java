@@ -1,6 +1,5 @@
 package org.autojs.autojs.runtime.api;
 
-import org.autojs.autojs.extension.AnyExtensions;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -24,8 +23,8 @@ import org.autojs.autojs.annotation.ScriptVariable;
 import org.autojs.autojs.concurrent.VolatileDispose;
 import org.autojs.autojs.core.image.CapturedImage;
 import org.autojs.autojs.core.image.ImageWrapper;
-import org.autojs.autojs.core.image.Shootable;
 import org.autojs.autojs.core.image.RhinoColorFinder;
+import org.autojs.autojs.core.image.Shootable;
 import org.autojs.autojs.core.image.TemplateMatching;
 import org.autojs.autojs.core.image.capture.ScreenCaptureRequester;
 import org.autojs.autojs.core.image.capture.ScreenCapturer;
@@ -34,6 +33,7 @@ import org.autojs.autojs.core.opencv.Mat;
 import org.autojs.autojs.core.opencv.OpenCVHelper;
 import org.autojs.autojs.core.pref.Language;
 import org.autojs.autojs.core.ui.inflater.util.Drawables;
+import org.autojs.autojs.extension.AnyExtensions;
 import org.autojs.autojs.pio.UncheckedIOException;
 import org.autojs.autojs.runtime.ScriptRuntime;
 import org.autojs.autojs.runtime.api.ImageFeatureMatching.FeatureMatchingDescriptor;
