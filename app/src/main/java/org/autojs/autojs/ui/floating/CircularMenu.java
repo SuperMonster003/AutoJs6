@@ -318,7 +318,7 @@ public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
             mLayoutInspectDialog.dismiss();
             mLayoutInspectDialog = null;
         }
-        if (!mA11yTool.isServiceRunning()) {
+        if (!mA11yTool.isRunning()) {
             if (!mA11yTool.startService(false)) {
                 ViewUtils.showToast(mContext, mContext.getString(R.string.error_no_accessibility_permission_to_capture));
                 mA11yTool.launchSettings();

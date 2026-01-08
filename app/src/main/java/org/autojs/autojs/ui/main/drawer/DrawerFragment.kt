@@ -127,7 +127,7 @@ open class DrawerFragment : Fragment() {
                 override fun refreshSubtitle(aimState: Boolean) {
                     val oldSubtitle = mAccessibilityServiceItem.subtitle
                     if (aimState) {
-                        if (mA11yTool.serviceExists() && !mA11yTool.isServiceRunning()) {
+                        if (mA11yTool.hasService() && !mA11yTool.isRunning()) {
                             mAccessibilityServiceItem.subtitle = context.getString(R.string.text_malfunctioning)
                         } else {
                             mAccessibilityServiceItem.subtitle = null

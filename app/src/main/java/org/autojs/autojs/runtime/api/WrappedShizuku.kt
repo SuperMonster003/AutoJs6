@@ -128,14 +128,17 @@ object WrappedShizuku {
     fun isInstalled(context: Context) = getLaunchIntent(context) != null
 
     @ScriptInterface
-    fun hasPermission() = try {
+    fun hasPermission() = runCatching {
         Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
-    } catch (e: Throwable) {
-        false.also { if (e.message?.contains(Regex("binder .+n[o']t been received", RegexOption.IGNORE_CASE)) == false) e.printStackTrace() }
+    }.getOrElse { e ->
+        if (e.message?.contains(Regex("binder .+n[o']t been received", RegexOption.IGNORE_CASE)) == false) {
+            e.printStackTrace()
+        }
+        return@getOrElse false
     }
 
     @ScriptInterface
-    fun isOperational(): Boolean = isRunning() && hasPermission()
+    fun isOperational() = isRunning() && hasPermission()
 
     @ScriptInterface
     fun isRunning() = mHasBinder

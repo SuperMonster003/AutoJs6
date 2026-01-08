@@ -64,7 +64,7 @@ abstract class BaseActivity : AppCompatActivity() {
         // @Dubious by SuperMonster003 on Oct 28, 2024.
         //  ! Is it property to start a11y service automatically here?
         //  ! zh-CN: 无障碍服务自启动放在这里是否合适?
-        AccessibilityTool(this).apply { if (!isServiceRunning()) startService(false) }
+        AccessibilityTool(this).apply { if (!isRunning()) startService(false) }
     }
 
     private fun setApplicationLocale(context: Context) {

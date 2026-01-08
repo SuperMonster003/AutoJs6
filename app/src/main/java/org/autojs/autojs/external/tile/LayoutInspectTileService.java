@@ -75,7 +75,7 @@ public abstract class LayoutInspectTileService extends TileService implements La
             /* Ignored. */
         }
 
-        if (mA11yTool.isServiceRunning()) {
+        if (mA11yTool.isRunning()) {
             mCapturing = true;
             captureCurrentWindowDelayed();
         } else {
