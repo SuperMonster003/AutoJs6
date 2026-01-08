@@ -1,6 +1,7 @@
 package org.autojs.autojs.runtime.api.augment.shizuku
 
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
+import org.autojs.autojs.extension.ScriptableExtensions.defineProp
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.AbstractShell
 import org.autojs.autojs.runtime.api.WrappedShizuku
@@ -8,6 +9,8 @@ import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.Invokable
 import org.autojs.autojs.runtime.api.augment.app.App
 import org.autojs.autojs.runtime.api.augment.shell.Shell
+import org.autojs.autojs.util.RhinoUtils.newNativeObject
+import java.util.function.Supplier
 
 @Suppress("unused", "UNUSED_PARAMETER")
 class Shizuku(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), Invokable {
@@ -19,6 +22,17 @@ class Shizuku(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunt
         ::currentPackage.name,
         ::currentActivity.name,
         ::currentComponent.name,
+    )
+
+    override val selfAssignmentGetters = listOf<Pair<String, Supplier<Any?>>>(
+        "state" to Supplier {
+            newNativeObject().also { o ->
+                o.defineProp("isInstalled", WrappedShizuku.isInstalled(globalContext))
+                o.defineProp("isRunning", WrappedShizuku.isRunning())
+                o.defineProp("hasPermission", WrappedShizuku.hasPermission())
+                o.defineProp("isOperational", WrappedShizuku.isOperational())
+            }
+        }
     )
 
     override fun invoke(vararg args: Any?): AbstractShell.Result = execCommand(scriptRuntime, args)

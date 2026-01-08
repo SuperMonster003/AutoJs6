@@ -21,7 +21,7 @@ import java.util.concurrent.locks.ReentrantLock
 
 /**
  * Created by Stardust on May 2, 2017.
- * Modified by SuperMonster003 as of Dec 29, 2025.
+ * Modified by SuperMonster003 as of Jan 7, 2026.
  */
 open class AccessibilityService : android.accessibilityservice.AccessibilityService() {
 
@@ -87,6 +87,10 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
         instance = this
         val type = event.eventType
 
+        // Mark service as operational when we receive the first accessibility event.
+        // zh-CN: 当收到首个无障碍事件时, 将服务标记为可工作状态.
+        markOperationalStateIfNeeded()
+
         // Snapshot callbacks to avoid holding lock while invoking user code.
         // zh-CN: 为回调建立快照, 以避免在调用用户代码时持锁.
         val callbacks: List<AccessibilityEventCallback> = synchronized(eventBoxLock) {
@@ -149,6 +153,8 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
         instance = null
         bridge = null
 
+        resetOperationalState()
+
         mEventExecutor?.shutdownNow()
         callback?.onDisconnected()
         EventBus.getDefault().post(object : AccessibilityServiceStateChangedEvent {})
@@ -183,7 +189,12 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
 
         private val LOCK = ReentrantLock()
         private val ENABLED = LOCK.newCondition()
+        private val OPERATIONAL = LOCK.newCondition()
+
         private var callback: AccessibilityServiceCallback? = null
+
+        @Volatile
+        var hasOperationalState = false
 
         var instance: AccessibilityService? = null
             private set
@@ -197,6 +208,27 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
         val stickOnKeyObserver = OnKeyListener.Observer()
 
         fun hasInstance() = instance != null
+
+        private fun markOperationalStateIfNeeded() {
+            if (hasOperationalState) return
+            LOCK.lock()
+            try {
+                if (hasOperationalState) return
+                hasOperationalState = true
+                OPERATIONAL.signalAll()
+            } finally {
+                LOCK.unlock()
+            }
+        }
+
+        private fun resetOperationalState() {
+            LOCK.lock()
+            try {
+                hasOperationalState = false
+            } finally {
+                LOCK.unlock()
+            }
+        }
 
         fun addDelegate(uniquePriority: Int, delegate: AccessibilityDelegate) {
             // @Hint by 抠脚本人 (https://github.com/little-alei) on Jul 10, 2023.
@@ -231,6 +263,30 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
                     return true
                 }
                 return ENABLED.await(timeout, TimeUnit.MILLISECONDS)
+            } catch (e: InterruptedException) {
+                e.printStackTrace()
+                return false
+            } finally {
+                LOCK.unlock()
+            }
+        }
+
+        // Wait until the service becomes operational (not only connected).
+        // zh-CN: 等待服务进入可工作状态 (不只是已连接).
+        fun waitForOperational(timeout: Long = DEFAULT_A11Y_SERVICE_START_TIMEOUT): Boolean {
+            if (hasInstance() && hasOperationalState) {
+                return true
+            }
+            LOCK.lock()
+            try {
+                if (hasInstance() && hasOperationalState) {
+                    return true
+                }
+                if (timeout == -1L) {
+                    OPERATIONAL.await()
+                    return true
+                }
+                return OPERATIONAL.await(timeout, TimeUnit.MILLISECONDS)
             } catch (e: InterruptedException) {
                 e.printStackTrace()
                 return false

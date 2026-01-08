@@ -14,6 +14,7 @@ import org.autojs.autojs.extension.ArrayExtensions.toNativeArray
 import org.autojs.autojs.extension.FlexibleArray
 import org.autojs.autojs.extension.FlexibleArray.Companion.component1
 import org.autojs.autojs.extension.FlexibleArray.Companion.component2
+import org.autojs.autojs.extension.ScriptableExtensions.defineProp
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.Invokable
@@ -22,6 +23,7 @@ import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED
 import org.autojs.autojs.util.RhinoUtils.callFunction
 import org.autojs.autojs.util.RhinoUtils.newNativeArray
+import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeArray
@@ -38,8 +40,11 @@ class Auto(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
         ::stop.name,
         ::enable.name,
         ::disable.name,
-        ::isRunning.name,
+        ::hasInstance.name,
+        ::hasService.name,
         ::exists.name,
+        ::isRunning.name,
+        ::isOperational.name,
         ::stateListener.name,
         ::registerEvent.name,
         ::registerEvents.name,
@@ -75,6 +80,14 @@ class Auto(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
         "windowRoots" to Supplier {
             scriptRuntime.accessibilityBridge.windowRoots().map { UiObject.createRoot(it) }.toNativeArray()
         },
+        "state" to Supplier {
+            newNativeObject().also { o ->
+                o.defineProp("hasInstance", accessibilityTool.hasInstance())
+                o.defineProp("hasService", accessibilityTool.hasService())
+                o.defineProp("isRunning", accessibilityTool.isRunning())
+                o.defineProp("isOperational", accessibilityTool.isOperational())
+            }
+        }
     )
 
     override fun invoke(vararg args: Any?): Any = ensureArgumentsAtMost(args, 2) {
@@ -139,14 +152,32 @@ class Auto(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun isRunning(scriptRuntime: ScriptRuntime, args: Array<out Any?>) = ensureArgumentsIsEmpty(args) {
-            accessibilityTool.isServiceRunning()
+        fun hasInstance(scriptRuntime: ScriptRuntime, args: Array<out Any?>) = ensureArgumentsIsEmpty(args) {
+            accessibilityTool.hasInstance()
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun hasService(scriptRuntime: ScriptRuntime, args: Array<out Any?>) = ensureArgumentsIsEmpty(args) {
+            accessibilityTool.hasService()
         }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun exists(scriptRuntime: ScriptRuntime, args: Array<out Any?>) = ensureArgumentsIsEmpty(args) {
-            accessibilityTool.serviceExists()
+            accessibilityTool.hasService()
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun isRunning(scriptRuntime: ScriptRuntime, args: Array<out Any?>) = ensureArgumentsIsEmpty(args) {
+            accessibilityTool.isRunning()
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun isOperational(scriptRuntime: ScriptRuntime, args: Array<out Any?>) = ensureArgumentsIsEmpty(args) {
+            accessibilityTool.isOperational()
         }
 
         @JvmStatic

@@ -22,7 +22,7 @@ public class AccessibilityBridgeImpl extends AccessibilityBridge {
 
     @Override
     public void ensureServiceStarted(boolean isForcibleRestart) {
-        if (isForcibleRestart && mA11yTool.serviceExists()) {
+        if (isForcibleRestart && mA11yTool.hasService()) {
             mA11yTool.stopService(true);
             Log.d(TAG, "isForcibleRestart");
         }
