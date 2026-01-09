@@ -5,9 +5,8 @@ interface ShowableItemHelper : DrawerMenuItemHelper {
     override val isActive: Boolean
         get() = isShowing
 
-    override fun active(): Boolean {
-        if (isShowing) return true
-        return show()
+    override fun active() {
+        showIfNeeded()
     }
 
     val isShowing: Boolean

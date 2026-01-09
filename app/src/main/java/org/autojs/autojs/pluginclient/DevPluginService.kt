@@ -4,24 +4,34 @@ import android.content.Context
 import androidx.annotation.AnyThread
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
-import io.reactivex.subjects.PublishSubject
+import io.reactivex.subjects.BehaviorSubject
+import io.reactivex.subjects.Subject
 import org.autojs.autojs.annotation.ScriptInterface
 import org.autojs.autojs.pluginclient.JsonSocket.HANDSHAKE_TIMEOUT
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.ui.main.drawer.DrawerMenuDisposableItem
+import org.autojs.autojs.util.NetworkUtils.DEFAULT_IP_ADDRESS
 import org.autojs.autojs.util.ThreadUtils
 import java.io.File
 import java.io.IOException
 import java.net.ServerSocket
+import java.net.SocketException
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * Created by Stardust on May 11, 2017.
- * Modified by SuperMonster003 as of Jan 1, 2022.
+ * Modified by SuperMonster003 as of Jan 9, 2026.
  * Transformed by SuperMonster003 on Jul 1, 2023.
  */
 class DevPluginService(val context: Context) {
 
-    class State @JvmOverloads constructor(val state: Int, val exception: Throwable? = null) {
+    class State @JvmOverloads constructor(private val state: Int, val exception: Throwable? = null) {
+
+        fun isDisconnected() = state == DISCONNECTED
+
+        fun isConnecting() = state == CONNECTING
+
+        fun isConnected() = state == CONNECTED
 
         companion object {
             const val DISCONNECTED = 0
@@ -32,13 +42,17 @@ class DevPluginService(val context: Context) {
     }
 
     object Port {
-
         const val PC_SERVER = 6347
         const val AJ_SERVER = 7347
-
     }
 
     val responseHandler = DevPluginResponseHandler(context, File(context.cacheDir, "remote_project"))
+
+    // Publish current server-side connection count.
+    // zh-CN: 发布当前服务端连接数量.
+    val serverConnectionCount = BehaviorSubject.createDefault(0)
+
+    val clientConnectionIpAddress = BehaviorSubject.createDefault(DEFAULT_IP_ADDRESS)
 
     @get:ScriptInterface
     @Volatile
@@ -50,14 +64,11 @@ class DevPluginService(val context: Context) {
     var jsonSocketServer: JsonSocketServer? = null
         private set
 
-    @Volatile
-    private var mServerSocket: ServerSocket? = null
-
     val isJsonSocketClientConnected
-        get() = jsonSocketClient != null && jsonSocketClient!!.isSocketReady
+        get() = jsonSocketClient?.isSocketReady == true
 
     val isServerSocketConnected
-        get() = mServerSocket != null && !mServerSocket!!.isClosed
+        get() = mServerSocket?.isClosed == false
 
     var isClientSocketNormallyClosed
         get() = JsonSocketClient.isClientSocketNormallyClosed
@@ -71,6 +82,17 @@ class DevPluginService(val context: Context) {
             JsonSocketServer.isServerSocketNormallyClosed = state
         }
 
+    @Volatile
+    private var mServerSocket: ServerSocket? = null
+
+    // Track all active server-side client connections.
+    // zh-CN: 跟踪所有服务端已建立的客户端连接.
+    private val mServerConnections = ConcurrentHashMap.newKeySet<JsonSocketServer>()
+
+    // Prevent duplicate server startup.
+    // zh-CN: 防止服务端重复启动.
+    private val mEnableLocalServerStarted = AtomicBoolean(false)
+
     fun disconnectJsonSocketClient() {
         try {
             jsonSocketClient?.switchOff()
@@ -81,17 +103,36 @@ class DevPluginService(val context: Context) {
 
     fun disconnectJsonSocketServer() {
         try {
+            // Close all active client connections first.
+            // zh-CN: 先关闭所有已连接客户端.
+            mServerConnections.toList().forEach { runCatching { it.close() } }
+            mServerConnections.clear()
+            serverConnectionCount.onNext(0)
+
+            // Then close listening socket.
+            // zh-CN: 然后关闭监听 socket.
             jsonSocketServer?.switchOff()
+
+            // Publish disconnected state for UI.
+            // zh-CN: 发布断开状态用于 UI 刷新.
+            JsonSocketServer.cxnState.onNext(State(State.DISCONNECTED))
         } catch (e: IOException) {
             e.printStackTrace()
         }
     }
 
     @AnyThread
-    fun connectToRemoteServer(context: Context, host: String, clientModeItem: DrawerMenuDisposableItem?) = connectToRemoteServer(context, host, clientModeItem, false)
+    fun connectToRemoteServer(
+        context: Context,
+        host: String,
+        ignoreExceptions: Boolean = false,
+    ): Observable<JsonSocketClient> {
+        // Reuse existing connection to avoid reconnect on Activity recreation.
+        // zh-CN: 复用现有连接, 避免 Activity 重建时重复连接.
+        if (isJsonSocketClientConnected) {
+            return Observable.just(jsonSocketClient)
+        }
 
-    @AnyThread
-    fun connectToRemoteServer(context: Context, host: String, clientModeItem: DrawerMenuDisposableItem?, ignoreExceptions: Boolean): Observable<JsonSocketClient> {
         try {
             var port = Port.PC_SERVER
             var ip = host
@@ -100,38 +141,46 @@ class DevPluginService(val context: Context) {
                 port = host.substring(i + 1).toInt()
                 ip = host.substring(0, i)
             }
+
+            // Show connecting subtitle immediately.
+            // zh-CN: 立即显示正在连接的 subtitle.
+            clientConnectionIpAddress.onNext("$ip ...");
+
             return Observable
                 .just(JsonSocketClient(this, context, ip, port))
                 .observeOn(Schedulers.newThread())
-                .doOnNext { jsonSocketClient ->
+                .doOnNext { client ->
                     try {
-                        clientModeItem?.subtitle = "$ip ..."
-                        this.jsonSocketClient = jsonSocketClient
-                        if (ThreadUtils.wait({ jsonSocketClient.isSocketReady }, HANDSHAKE_TIMEOUT)) {
-                            clientModeItem?.subtitle = ip
-                            this.isClientSocketNormallyClosed = false
-                            JsonSocketClient.addIntoHistories(ip)
-                            jsonSocketClient
+                        this.jsonSocketClient = client
+
+                        // Mark this instance as active before it can emit state.
+                        // zh-CN: 在该实例可能发出状态前, 将其标记为活跃实例.
+                        JsonSocketClient.activeInstanceId = client.instanceId
+
+                        if (ThreadUtils.wait({ client.isSocketReady }, HANDSHAKE_TIMEOUT)) {
+                            // Do NOT mark as connected here. Wait for hello validation in JsonSocketClient.
+                            // zh-CN: 不要在此处标记为已连接, 等待 JsonSocketClient 的 hello 校验通过.
+                            client
                                 .subscribeMessage()
                                 .monitorMessage()
                                 .sayHello()
                         } else {
-                            if (jsonSocketClient.isExtensionVersionCheckFailed || jsonSocketClient.hasErrorMessageOnHello) {
+                            if (client.isExtensionVersionCheckFailed || client.hasErrorMessageOnHello) {
                                 JsonSocketClient.addIntoHistories(ip)
-                                jsonSocketClient.switchOff()
+                                client.switchOff()
                                 return@doOnNext
                             }
                             if (!ignoreExceptions) {
-                                jsonSocketClient.onHandshakeTimeout()
+                                client.onHandshakeTimeout()
                             } else {
-                                jsonSocketClient.switchOff()
+                                client.switchOff()
                             }
                         }
                     } catch (e: IOException) {
                         if (!ignoreExceptions) {
-                            jsonSocketClient.onSocketError(e)
+                            client.onSocketError(e)
                         } else {
-                            jsonSocketClient.switchOff()
+                            client.switchOff()
                         }
                     }
                 }
@@ -147,58 +196,98 @@ class DevPluginService(val context: Context) {
     @AnyThread
     fun enableLocalServer(): Observable<JsonSocketServer> {
         return Observable
-            .just(JsonSocketServer(this, Port.AJ_SERVER))
-            .observeOn(Schedulers.newThread())
-            .doOnNext { jsonSocketServer: JsonSocketServer ->
-                do {
-                    try {
-                        this.jsonSocketServer = jsonSocketServer.apply {
-                            mServerSocket = JsonSocketServer.serverSocket
-                        }
-                        if (mServerSocket != null) {
-                            jsonSocketServer
-                                .setStateConnected()
-                                .setSocket(mServerSocket!!.accept())
-                                .subscribeMessage()
-                                .monitorMessage()
-                                .sayHello()
-                        }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        val msg = e.message ?: ""
-                        if (!msg.contains(Regex("Socket closed"))) {
-                            jsonSocketServer.onSocketError(e)
-                        }
+            .create<JsonSocketServer> { emitter ->
+
+                // Ensure only one accept loop runs at the same time.
+                // zh-CN: 确保同一时间只有一个 accept 循环在运行.
+                if (!mEnableLocalServerStarted.compareAndSet(false, true)) {
+                    jsonSocketServer?.let { emitter.onNext(it) }
+                    emitter.onComplete()
+                    return@create
+                }
+
+                JsonSocketServer(this, Port.AJ_SERVER).also {
+                    // Listening started.
+                    // zh-CN: 监听已启动.
+                    this.jsonSocketServer = it
+                    it.setStateConnected()
+                    emitter.onNext(it)
+                }
+
+                try {
+                    while (true) {
+                        val ss = JsonSocketServer.serverSocket
+                        mServerSocket = ss
+                        if (ss == null || ss.isClosed) break
+
                         try {
-                            jsonSocketServer.socket?.close()
-                        } catch (e: Exception) {
-                            e.printStackTrace()
+                            val acceptedSocket = ss.accept()
+                            // Create a dedicated connection instance per client.
+                            // zh-CN: 为每个客户端创建独立连接实例.
+                            val conn = JsonSocketServer(this, Port.AJ_SERVER).apply {
+                                setSocket(acceptedSocket)
+                                subscribeMessage()
+                                monitorMessage()
+                                sayHello()
+                            }
+
+                            mServerConnections.add(conn)
+                            serverConnectionCount.onNext(mServerConnections.size)
+
+                            emitter.onNext(conn)
+                        } catch (e: SocketException) {
+                            // Treat "Socket closed" as a normal shutdown path.
+                            // zh-CN: 将 "Socket closed" 视为正常关闭流程.
+                            if ((e.message ?: "").contains("Socket closed", true)) {
+                                break
+                            }
+                            emitter.onError(e)
+                            return@create
                         }
                     }
-                } while (mServerSocket != null)
+
+                    emitter.onComplete()
+                } finally {
+                    // Allow restarting after loop exits.
+                    // zh-CN: 循环退出后允许再次启动.
+                    mEnableLocalServerStarted.set(false)
+                }
             }
+            // Run blocking accept loop on IO scheduler to avoid ANR.
+            // zh-CN: 在 IO 调度器运行阻塞 accept 循环, 避免 ANR.
+            .subscribeOn(Schedulers.io())
     }
 
-    // FIXME by SuperMonster003 as of Dec 29, 2021.
-    //  ! Would print double (may be even more times) the amount of
-    //  ! messages on VSCode when multi connection were established.
+    internal fun onServerClientDisconnected(conn: JsonSocketServer) {
+        // Remove disconnected connection and update count.
+        // zh-CN: 移除已断开连接并更新计数.
+        mServerConnections.remove(conn)
+        serverConnectionCount.onNext(mServerConnections.size)
+    }
+
     @AnyThread
     fun print(log: String?) {
         jsonSocketClient?.writeLog(log)
-        jsonSocketServer?.writeLog(log)
+
+        // Broadcast logs to all active server-side connections.
+        // zh-CN: 向所有服务端已连接客户端广播日志.
+        mServerConnections.forEach { it.writeLog(log) }
     }
 
     companion object {
+
         const val TYPE_HELLO = "hello"
         const val TYPE_COMMAND = "command"
         const val TYPE_BYTES_COMMAND = "bytes_command"
-        fun setState(cxn: PublishSubject<State?>, state: Int) {
+
+        fun setState(cxn: Subject<State?>, state: Int) {
             cxn.onNext(State(state))
         }
 
-        fun setState(cxn: PublishSubject<State?>, state: Int, e: Throwable?) {
+        fun setState(cxn: Subject<State?>, state: Int, e: Throwable?) {
             cxn.onNext(State(state, e))
         }
+
     }
 
 }

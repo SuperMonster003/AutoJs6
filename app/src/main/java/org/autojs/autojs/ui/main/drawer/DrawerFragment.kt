@@ -9,7 +9,9 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
+import org.autojs.autojs.App
 import org.autojs.autojs.app.tool.FloatingButtonTool
 import org.autojs.autojs.app.tool.JsonSocketClientTool
 import org.autojs.autojs.app.tool.JsonSocketServerTool
@@ -54,7 +56,7 @@ import kotlin.math.roundToInt
 
 /**
  * Created by Stardust on Jan 30, 2017.
- * Modified by SuperMonster003 as of Nov 16, 2021.
+ * Modified by SuperMonster003 as of Jan 9, 2026.
  * Transformed by SuperMonster003 on Sep 19, 2022.
  */
 open class DrawerFragment : Fragment() {
@@ -185,42 +187,78 @@ open class DrawerFragment : Fragment() {
             R.string.key_floating_menu_shown,
         )
 
-        JsonSocketClientTool(mContext).apply {
-            mClientModeItem = DrawerMenuDisposableItem(this, R.drawable.ic_computer_black_48dp, R.string.text_client_mode).also {
-                setClientModeItem(it)
+        JsonSocketClientTool(mActivity).apply {
+            val devPluginService = App.app.devPluginService
+
+            val drawerItem = DrawerMenuDisposableItem(this, R.drawable.ic_computer_black_48dp, R.string.text_client_mode).also {
+                mClientModeItem = it
             }
-            setStateDisposable(
-                JsonSocketClient.cxnState
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe {
-                        if (it.state == DevPluginService.State.DISCONNECTED) {
-                            mClientModeItem.subtitle = null
-                        }
-                        consumeJsonSocketItemState(mClientModeItem, it)
-                    })
+
+            val disposable = Observable
+                .combineLatest(
+                    JsonSocketClient.cxnState,
+                    devPluginService.clientConnectionIpAddress,
+                ) { state: DevPluginService.State, ip: String ->
+                    Pair(state, ip)
+                }
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe { (state, ip) ->
+                    drawerItem.subtitle = when {
+                        state.isDisconnected() -> null
+                        else -> ip
+                    }
+                    drawerItem.setCheckedIfNeeded(state.isConnected())
+                    drawerItem.isProgress = state.isConnecting()
+                    state.exception?.let { e ->
+                        drawerItem.subtitle = null
+                        ViewUtils.showToast(mContext, e.message)
+                    }
+                }
+            setStateDisposable(disposable)
             setOnConnectionException { e: Throwable ->
-                mClientModeItem.setCheckedIfNeeded(false)
+                drawerItem.setCheckedIfNeeded(false)
                 ViewUtils.showToast(context, getString(R.string.error_connect_to_remote, e.message), true)
             }
-            setOnConnectionDialogDismissed { mClientModeItem.setCheckedIfNeeded(false) }
+            setOnConnectionDialogDismissed { drawerItem.setCheckedIfNeeded(false) }
             connectIfNotNormallyClosed()
         }
 
-        JsonSocketServerTool(mContext).apply {
-            setStateDisposable(
-                JsonSocketServer.cxnState
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe { state: DevPluginService.State ->
-                        mServerModeItem.subtitle = takeIf { state.state == DevPluginService.State.CONNECTED }?.let {
-                            NetworkUtils.getIpAddress()
+        JsonSocketServerTool(mActivity).apply {
+            val devPluginService = App.app.devPluginService
+
+            val drawerItem = DrawerMenuDisposableItem(this, R.drawable.ic_smartphone_black_48dp, R.string.text_server_mode).also {
+                mServerModeItem = it
+            }
+
+            val disposable = Observable
+                .combineLatest(
+                    JsonSocketServer.cxnState,
+                    devPluginService.serverConnectionCount,
+                ) { state: DevPluginService.State, count: Int ->
+                    Pair(state, count)
+                }
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe { (state, count) ->
+                    drawerItem.subtitle = when {
+                        state.isDisconnected() -> null
+                        else -> NetworkUtils.getIpAddress().let { ip ->
+                            when {
+                                count > 0 -> "$ip  [ ${context.getString(R.string.text_connected_count_with_colon, count)} ]"
+                                else -> ip
+                            }
                         }
-                        consumeJsonSocketItemState(mServerModeItem, state)
-                    })
+                    }
+                    drawerItem.setCheckedIfNeeded(!state.isDisconnected())
+                    drawerItem.isProgress = state.isConnecting()
+                    state.exception?.let { e ->
+                        ViewUtils.showToast(mContext, e.message)
+                    }
+                }
+            setStateDisposable(disposable)
             setOnConnectionException { e: Throwable ->
-                mServerModeItem.setCheckedIfNeeded(false)
+                drawerItem.setCheckedIfNeeded(false)
                 ViewUtils.showToast(context, getString(R.string.error_enable_server, e.message), true)
             }
-            mServerModeItem = DrawerMenuDisposableItem(this, R.drawable.ic_smartphone_black_48dp, R.string.text_server_mode)
             connectIfNotNormallyClosed()
         }
 
@@ -529,15 +567,6 @@ open class DrawerFragment : Fragment() {
         mShizukuAccessItem,
         mKeepScreenOnWhenInForegroundItem,
     ).forEach { it.sync() }
-
-    private fun consumeJsonSocketItemState(item: DrawerMenuToggleableItem, state: DevPluginService.State) {
-        item.setCheckedIfNeeded(state.state == DevPluginService.State.CONNECTED)
-        item.isProgress = state.state == DevPluginService.State.CONNECTING
-        state.exception?.let { e ->
-            item.subtitle = null
-            ViewUtils.showToast(mContext, e.message)
-        }
-    }
 
     companion object {
 

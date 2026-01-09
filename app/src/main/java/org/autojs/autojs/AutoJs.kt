@@ -26,7 +26,9 @@ import org.autojs.autojs.ui.floating.FullScreenFloatyWindow
 import org.autojs.autojs.ui.floating.layoutinspector.LayoutBoundsFloatyWindow
 import org.autojs.autojs.ui.floating.layoutinspector.LayoutHierarchyFloatyWindow
 import org.autojs.autojs.util.RhinoUtils.isBackgroundThread
-import java.util.concurrent.Executors
+import java.util.concurrent.ArrayBlockingQueue
+import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.TimeUnit
 import org.autojs.autojs.inrt.autojs.AutoJs as AutoJsInrt
 
 /**
@@ -38,7 +40,16 @@ import org.autojs.autojs.inrt.autojs.AutoJs as AutoJsInrt
 open class AutoJs(appContext: Application) : AbstractAutoJs(appContext) {
 
     // @Thank to Zen2H
-    private val mPrintExecutor = Executors.newSingleThreadExecutor()
+    // Use bounded queue to prevent log flooding from blocking the whole channel.
+    // zh-CN: 使用有界队列避免日志洪泛导致整个通道被阻塞.
+    private val mPrintExecutor = ThreadPoolExecutor(
+        1,
+        1,
+        0L,
+        TimeUnit.MILLISECONDS,
+        ArrayBlockingQueue(2048),
+        ThreadPoolExecutor.DiscardOldestPolicy(),
+    )
 
     private val mA11yTool = AccessibilityTool(appContext)
 

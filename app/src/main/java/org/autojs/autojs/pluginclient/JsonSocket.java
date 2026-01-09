@@ -1,8 +1,5 @@
 package org.autojs.autojs.pluginclient;
 
-import static java.nio.charset.StandardCharsets.ISO_8859_1;
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Build;
@@ -19,22 +16,25 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.stream.JsonReader;
-
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.subjects.PublishSubject;
+import io.reactivex.subjects.Subject;
+import okio.ByteString;
 import org.autojs.autojs.runtime.api.Device;
 import org.autojs.autojs.tool.MapBuilder;
 import org.autojs.autojs6.BuildConfig;
 import org.autojs.autojs6.R;
 import org.mozilla.javascript.NativeObject;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.StringReader;
 import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.util.Arrays;
@@ -44,62 +44,57 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.subjects.PublishSubject;
-import okio.ByteString;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 abstract public class JsonSocket extends Socket {
 
-    private static final String TAG = "JsonSocket";
-
-    protected static final HashMap<String, Bytes> sBytes = new HashMap<>();
-
-    protected static final HashMap<String, JsonObject> sRequiredBytesCommands = new HashMap<>();
-    private PublishSubject<JsonElement> mJsonElementPublishSubject;
-    private PublishSubject<Bytes> mBytesPublishSubject;
-
-    public <E> E getLast(Collection<E> c) {
-        E last = null;
-        for (E e : c) last = e;
-        return last;
-    }
-
-    private Fragment mFragment = null;
-
-    private final Context mContext;
-    private final DevPluginService mService;
-
-    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
-
-    public static final int HEADER_SIZE = 16;
+    public static final int HEADER_SIZE = 8;
     public static final int HANDSHAKE_TIMEOUT = 6400;
 
     public static final String TYPE_HELLO = DevPluginService.TYPE_HELLO;
     public static final String TYPE_COMMAND = DevPluginService.TYPE_COMMAND;
     public static final String TYPE_BYTES_COMMAND = DevPluginService.TYPE_BYTES_COMMAND;
 
-    public static class Bytes {
-        public final String md5;
-        public final ByteString byteString;
-        public final long timestamp;
+    protected static final HashMap<String, Bytes> sBytes = new HashMap<>();
+    protected static final HashMap<String, JsonObject> sRequiredBytesCommands = new HashMap<>();
 
-        public Bytes(String md5, ByteString byteString) {
-            this.md5 = md5;
-            this.byteString = byteString;
-            this.timestamp = System.currentTimeMillis();
-        }
-    }
-
-    public static class Type {
-        public static int JSON = 1;
-        public static int BYTES = 2;
-    }
+    private static final String TAG = "JsonSocket";
 
     public final android.os.Handler mHandler = new Handler(Looper.getMainLooper());
+
+    // Serialize writes to prevent interleaving between threads.
+    // zh-CN: 串行化写入, 避免多线程导致帧交错.
+    private final Object mWriteLock = new Object();
+
+    private final Context mContext;
+    private final DevPluginService mService;
+
+    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
+
+    private PublishSubject<JsonElement> mJsonElementPublishSubject;
+    private PublishSubject<Bytes> mBytesPublishSubject;
 
     public JsonSocket(DevPluginService service) {
         mService = service;
         mContext = service.getContext();
+    }
+
+    private static void readFully(InputStream in, byte[] buffer, int offset, int length) throws IOException {
+        int read;
+        int total = 0;
+        while (total < length) {
+            read = in.read(buffer, offset + total, length - total);
+            if (read < 0) {
+                throw new IOException("Stream ended unexpectedly");
+            }
+            total += read;
+        }
+    }
+
+    public <E> E getLast(Collection<E> c) {
+        E last = null;
+        for (E e : c) last = e;
+        return last;
     }
 
     protected Context getContext() {
@@ -124,12 +119,14 @@ abstract public class JsonSocket extends Socket {
     @SuppressLint("CheckResult")
     public JsonSocket subscribeMessage() {
         mJsonElementPublishSubject = PublishSubject.create();
-        mJsonElementPublishSubject.observeOn(AndroidSchedulers.mainThread());
-        mJsonElementPublishSubject.subscribe(this::onSocketData, this::onSocketError);
+        mJsonElementPublishSubject
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::onSocketData, this::onSocketError);
 
         mBytesPublishSubject = PublishSubject.create();
-        mBytesPublishSubject.observeOn(AndroidSchedulers.mainThread());
-        mBytesPublishSubject.subscribe(this::onSocketData, this::onSocketError);
+        mBytesPublishSubject
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::onSocketData, this::onSocketError);
 
         return this;
     }
@@ -180,72 +177,6 @@ abstract public class JsonSocket extends Socket {
         if (mBytesPublishSubject != null) {
             mBytesPublishSubject.onNext(new Bytes(bytes.md5().hex(), bytes));
         }
-    }
-
-    private void onMessageDispatch(char[] bytes) {
-        Log.d(TAG, "Received message total bytes: " + Arrays.toString(bytes));
-        Log.d(TAG, "Received message total length: " + bytes.length);
-
-        char[] overload;
-
-        if (mFragment != null) {
-            overload = mFragment.splice(bytes);
-        } else {
-            String header = new String(Arrays.copyOfRange(bytes, 0, HEADER_SIZE));
-
-            int dataSize = parseHeaderInt(header, 0, HEADER_SIZE - 2);
-            Log.d(TAG, "Data length from header: " + dataSize);
-            if (dataSize < 0) {
-                Log.e(TAG, "Invalid data length, ignored");
-                return;
-            }
-
-            int dataType = parseHeaderInt(header, HEADER_SIZE - 2, 2);
-            Log.d(TAG, "Data type from header: " + dataType);
-            if (dataType < 0) {
-                Log.e(TAG, "Unknown data type, ignored");
-                return;
-            }
-
-            mFragment = new Fragment(dataSize, dataType);
-            if (HEADER_SIZE > bytes.length) {
-                Log.e(TAG, "Bytes length (" + bytes.length + ") is less than header size (" + HEADER_SIZE + "), ignored");
-                return;
-            }
-            overload = mFragment.splice(Arrays.copyOfRange(bytes, HEADER_SIZE, bytes.length));
-        }
-
-        if (!mFragment.isRestored()) {
-            return;
-        }
-        char[] restored = mFragment.getRestoredBytes();
-        int type = mFragment.getAimDataType();
-        mFragment = null;
-
-        if (type == Type.JSON) {
-            onMessage(new String(charsToBytes(restored, UTF_8), UTF_8));
-        } else if (type == Type.BYTES) {
-            onMessage(ByteString.of(charsToBytes(restored, ISO_8859_1)));
-        } else {
-            Log.e(TAG, "Unknown data type (" + type + ") for message dispatching");
-            return;
-        }
-
-        if (overload != null) {
-            onMessageDispatch(overload);
-        }
-    }
-
-    private static int parseHeaderInt(String header, int offset, int length) {
-        try {
-            String s = new String(header.getBytes(UTF_8), offset, length).replaceAll("\\D", "");
-            if (!s.isEmpty()) {
-                return Integer.parseInt(s);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return -1;
     }
 
     @SuppressWarnings("SameParameterValue")
@@ -305,6 +236,9 @@ abstract public class JsonSocket extends Socket {
             writeMessageWithType(getSocket(), json, Type.JSON);
         } catch (IOException e) {
             e.printStackTrace();
+            // Fail fast on write errors to avoid half-dead connections.
+            // zh-CN: 写入出错时快速失败, 避免连接处于"半死不活"状态.
+            onSocketError(e);
         }
     }
 
@@ -313,12 +247,14 @@ abstract public class JsonSocket extends Socket {
             byte[] jsonBytes = getJsonBytes(message);
             byte[] headerBytes = getHeaderBytes(new int[]{jsonBytes.length, messageType});
 
-            OutputStream os = socket.getOutputStream();
-            BufferedOutputStream writer = new BufferedOutputStream(os);
+            synchronized (mWriteLock) {
+                OutputStream os = socket.getOutputStream();
+                BufferedOutputStream writer = new BufferedOutputStream(os);
 
-            writer.write(headerBytes);
-            writer.write(jsonBytes);
-            writer.flush();
+                writer.write(headerBytes);
+                writer.write(jsonBytes);
+                writer.flush();
+            }
         }
     }
 
@@ -333,22 +269,52 @@ abstract public class JsonSocket extends Socket {
         //  ! 这将导致产生的 MD5 散列值与在 Node.js 环境中得到的 MD5 散列值不匹配.
 
         executorService.execute(() -> {
-            // try (AutoCloseable) { ... }
-            // @Thank to Zen2H
+            // Use byte stream to read framed binary protocol reliably.
+            // zh-CN: 使用字节流读取分帧二进制协议, 提升可靠性.
             try (InputStream inputStream = socket.getInputStream();
-                 InputStreamReader inputStreamReader = new InputStreamReader(inputStream, UTF_8);
-                 BufferedReader bufferedReader = new BufferedReader(inputStreamReader)
+                 BufferedInputStream bis = new BufferedInputStream(inputStream)
             ) {
-                char[] buff = new char[2048];
-                int k;
-
                 Log.d(TAG, "bufferedReader is reading...");
-                while ((k = bufferedReader.read(buff, 0, buff.length)) > -1 && !socket.isClosed()) {
-                    Log.d(TAG, "read length: " + k);
-                    onMessageDispatch(Arrays.copyOfRange(buff, 0, k));
+
+                byte[] header = new byte[HEADER_SIZE];
+
+                while (!socket.isClosed()) {
+                    readFully(bis, header, 0, HEADER_SIZE);
+
+                    ByteBuffer hb = ByteBuffer.wrap(header).order(ByteOrder.BIG_ENDIAN);
+                    int dataSize = hb.getInt();
+                    int dataType = hb.getInt();
+
+                    Log.d(TAG, "Data length from header: " + dataSize);
+                    Log.d(TAG, "Data type from header: " + dataType);
+
+                    if (dataSize < 0) {
+                        throw new IOException("Invalid data length: " + dataSize);
+                    }
+
+                    byte[] payload = new byte[dataSize];
+                    readFully(bis, payload, 0, dataSize);
+
+                    if (dataType == Type.JSON) {
+                        onMessage(new String(payload, UTF_8));
+                    } else if (dataType == Type.BYTES) {
+                        onMessage(ByteString.of(payload));
+                    } else {
+                        throw new IOException("Unknown data type: " + dataType);
+                    }
                 }
             } catch (IOException e) {
                 e.printStackTrace();
+                // Treat "Socket closed" as a normal shutdown path.
+                // zh-CN: 将 "Socket closed" 视为正常关闭流程.
+                String message = e.getMessage();
+                if (message != null && (
+                        message.toLowerCase().contains("socket closed") ||
+                        message.toLowerCase().contains("stream ended unexpectedly")
+                )) {
+                    return;
+                }
+                onSocketError(e);
             } finally {
                 if (jsonSocket instanceof JsonSocketClient) {
                     try {
@@ -370,11 +336,11 @@ abstract public class JsonSocket extends Socket {
         return bytes;
     }
 
-    public void setState(PublishSubject<DevPluginService.State> cxn, int state) {
+    public void setState(Subject<DevPluginService.State> cxn, int state) {
         cxn.onNext(new DevPluginService.State(state));
     }
 
-    public void setState(PublishSubject<DevPluginService.State> cxn, int state, Throwable e) {
+    public void setState(Subject<DevPluginService.State> cxn, int state, Throwable e) {
         cxn.onNext(new DevPluginService.State(state, e));
     }
 
@@ -424,54 +390,21 @@ abstract public class JsonSocket extends Socket {
         return buffer.array();
     }
 
-    private static class Fragment {
+    public static class Bytes {
+        public final String md5;
+        public final ByteString byteString;
+        public final long timestamp;
 
-        private final int mAimLength;
-        private final int mAimDataType;
-
-        private char[] bytes = new char[0];
-        private int currentLength = 0;
-
-        public Fragment(int aimLength, int aimDataType) {
-            mAimLength = aimLength;
-            mAimDataType = aimDataType;
+        public Bytes(String md5, ByteString byteString) {
+            this.md5 = md5;
+            this.byteString = byteString;
+            this.timestamp = System.currentTimeMillis();
         }
+    }
 
-        public boolean isRestored() {
-            return currentLength >= mAimLength;
-        }
-
-        public char[] splice(char[] charBytes) {
-            int tempLength = currentLength + charBytes.length;
-            if (tempLength <= mAimLength) {
-                this.bytes = joinBytes(this.bytes, charBytes);
-                currentLength = currentLength + charBytes.length;
-                Log.d(TAG, "currentLength: " + currentLength + "/" + mAimLength);
-                return null;
-            }
-            int overloadLength = tempLength - mAimLength;
-            Log.w(TAG, "charBytes overloaded: " + overloadLength);
-            char[] leftPart = Arrays.copyOfRange(charBytes, 0, charBytes.length - overloadLength);
-            char[] rightPart = Arrays.copyOfRange(charBytes, charBytes.length - overloadLength, charBytes.length);
-
-            splice(leftPart);
-            return rightPart;
-        }
-
-        public char[] getRestoredBytes() {
-            return bytes;
-        }
-
-        public int getAimDataType() {
-            return mAimDataType;
-        }
-
-        private static char[] joinBytes(final char[] array1, char[] array2) {
-            char[] joinedArray = Arrays.copyOf(array1, array1.length + array2.length);
-            System.arraycopy(array2, 0, joinedArray, array1.length, array2.length);
-            return joinedArray;
-        }
-
+    public static class Type {
+        public static int JSON = 1;
+        public static int BYTES = 2;
     }
 
 }

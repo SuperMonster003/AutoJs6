@@ -13,8 +13,8 @@ open class AccessibilityService(final override val context: Context) : ServiceIt
     override val isRunning
         get() = mA11yTool.hasService() || mA11yTool.isRunning()
 
-    override fun active(): Boolean {
-        return mA11yTool.restartService(true)
+    override fun active() {
+        mA11yTool.restartService(true)
     }
 
     override fun start(): Boolean {

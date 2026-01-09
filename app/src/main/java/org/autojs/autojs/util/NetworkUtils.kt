@@ -20,10 +20,12 @@ import java.util.Locale
 
 /**
  * Created by Stardust on Apr 9, 2017.
- * Modified by SuperMonster003 as of Jun 3, 2022.
+ * Modified by SuperMonster003 as of Jan 9, 2026.
  */
 @Suppress("DEPRECATION", "unused")
 object NetworkUtils {
+
+    const val DEFAULT_IP_ADDRESS = "0.0.0.0"
 
     private val globalAppContext = GlobalAppContext.get()
 
@@ -47,7 +49,7 @@ object NetworkUtils {
     } catch (e: UnknownHostException) {
         Log.e(NetworkUtils::class.java.simpleName, "Error getting Hotspot IP address ", e)
         null
-    } ?: "0.0.0.0"
+    } ?: DEFAULT_IP_ADDRESS
 
     private fun getIpAddressByte(): ByteArray {
         val manager = globalAppContext.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
@@ -185,7 +187,7 @@ object NetworkUtils {
         } catch (ignored: Exception) {
             // for now eat exceptions
         }
-        return "0.0.0.0"
+        return DEFAULT_IP_ADDRESS
     }
 
     @JvmStatic

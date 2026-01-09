@@ -10,19 +10,16 @@ import org.autojs.autojs.app.DialogUtils
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.extension.MaterialDialogExtensions.widgetThemeColor
 import org.autojs.autojs.pluginclient.JsonSocketClient
-import org.autojs.autojs.ui.main.drawer.DrawerMenuDisposableItem
 import org.autojs.autojs.util.Observers
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 
 class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
 
-    private var mClientModeItem: DrawerMenuDisposableItem? = null
-
     override val isConnected
         get() = devPlugin.isJsonSocketClientConnected
 
-    private var isNormallyClosed
+    override var isNormallyClosed
         get() = devPlugin.isClientSocketNormallyClosed
         set(state) {
             devPlugin.isClientSocketNormallyClosed = state
@@ -30,29 +27,17 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
 
     override val isInMainThread = true
 
-    override fun connect(): Boolean {
+    override fun connect() {
         inputRemoteHost(isAutoConnect = !isNormallyClosed)
-        // @Hint by SuperMonster003 on Nov 9, 2023.
-        //  ! Method with showing a dialog always returns false.
-        //  ! zh-CN: 含对话框显示的方法总是返回 false 值.
-        return false
     }
 
-    internal fun connectIfNotNormallyClosed() {
+    override fun connectIfNotNormallyClosed() {
         if (!isNormallyClosed) connect()
     }
 
-    internal fun setClientModeItem(clientModeItem: DrawerMenuDisposableItem) {
-        mClientModeItem = clientModeItem
-    }
-
-    override fun disconnect(): Boolean {
-        mClientModeItem?.subtitle = null
-        val result = runCatching {
-            devPlugin.jsonSocketClient?.switchOff()
-        }.isSuccess
+    override fun disconnect() {
+        devPlugin.jsonSocketClient?.switchOff()
         isNormallyClosed = true
-        return result
     }
 
     override fun dispose() {
@@ -64,7 +49,7 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
         val host = Pref.getServerAddress()
         if (isAutoConnect) {
             devPlugin
-                .connectToRemoteServer(context, host, mClientModeItem, true)
+                .connectToRemoteServer(context, host, true)
                 .subscribe(Observers.emptyConsumer(), Observers.emptyConsumer())
             return
         }
@@ -87,26 +72,25 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
                         connectToRemoteServer(dialog)
                     }
                     .itemsLongCallback { dHistories, _, _, text ->
-                        false.also {
-                            MaterialDialog.Builder(context)
-                                .title(R.string.text_prompt)
-                                .content(R.string.text_confirm_to_delete)
-                                .negativeText(R.string.dialog_button_cancel)
-                                .neutralColorRes(R.color.dialog_button_default)
-                                .positiveText(R.string.dialog_button_confirm)
-                                .positiveColorRes(R.color.dialog_button_caution)
-                                .onPositive { ds, _ ->
-                                    ds.dismiss()
-                                    JsonSocketClient.removeFromHistories(text.toString())
-                                    dHistories.items?.let {
-                                        it.remove(text)
-                                        dHistories.notifyItemsChanged()
-                                        DialogUtils.toggleContentViewByItems(dHistories)
-                                        DialogUtils.toggleActionButtonAbilityByItems(dHistories, DialogAction.NEUTRAL)
-                                    }
+                        MaterialDialog.Builder(context)
+                            .title(R.string.text_prompt)
+                            .content(R.string.text_confirm_to_delete)
+                            .negativeText(R.string.dialog_button_cancel)
+                            .neutralColorRes(R.color.dialog_button_default)
+                            .positiveText(R.string.dialog_button_confirm)
+                            .positiveColorRes(R.color.dialog_button_caution)
+                            .onPositive { ds, _ ->
+                                ds.dismiss()
+                                JsonSocketClient.removeFromHistories(text.toString())
+                                dHistories.items?.let {
+                                    it.remove(text)
+                                    dHistories.notifyItemsChanged()
+                                    DialogUtils.toggleContentViewByItems(dHistories)
+                                    DialogUtils.toggleActionButtonAbilityByItems(dHistories, DialogAction.NEUTRAL)
                                 }
-                                .show()
-                        }
+                            }
+                            .show()
+                        return@itemsLongCallback false
                     }
                     .neutralText(R.string.dialog_button_clear_items)
                     .neutralColorRes(R.color.dialog_button_warn)
@@ -247,7 +231,7 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
         }
         dialog.dismiss()
         devPlugin
-            .connectToRemoteServer(context, input, mClientModeItem)
+            .connectToRemoteServer(context, input)
             .subscribe({ Pref.setServerAddress(input) }, onConnectionException)
     }
 
@@ -259,16 +243,16 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
         return Regex(regex).matches(nearest.toString()) && Regex(regex).matches(source)
     }
 
-    private fun triggerRepeatedCharacter(dialog: MaterialDialog, source: CharSequence, nearest: Char): Boolean {
-        if (isRepeatedCharacter(source, nearest, REGEX_DOT)) {
+    private fun triggerRepeatedCharacter(dialog: MaterialDialog, source: CharSequence, nearest: Char) = when {
+        isRepeatedCharacter(source, nearest, REGEX_DOT) -> {
             showSnack(dialog, R.string.error_repeated_dot_symbol)
-            return true
+            true
         }
-        if (isRepeatedCharacter(source, nearest, REGEX_COLON)) {
+        isRepeatedCharacter(source, nearest, REGEX_COLON) -> {
             showSnack(dialog, R.string.error_repeated_colon_symbol)
-            return true
+            true
         }
-        return false
+        else -> false
     }
 
     companion object {
