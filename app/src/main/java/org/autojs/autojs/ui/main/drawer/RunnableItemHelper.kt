@@ -5,9 +5,8 @@ interface RunnableItemHelper : DrawerMenuItemHelper {
     override val isActive: Boolean
         get() = isRunning
 
-    override fun active(): Boolean {
-        if (isRunning) return true
-        return launch()
+    override fun active() {
+        launchIfNeeded()
     }
 
     val isRunning: Boolean

@@ -9,6 +9,7 @@ import org.autojs.autojs.ui.main.drawer.SocketItemHelper
 
 /**
  * Created by SuperMonster003 on Jun 24, 2022.
+ * Modified by SuperMonster003 as of Jan 9, 2026.
  */
 abstract class AbstractJsonSocketTool(final override val context: Context) : SocketItemHelper {
 
@@ -22,6 +23,8 @@ abstract class AbstractJsonSocketTool(final override val context: Context) : Soc
 
     @JvmField
     protected var onConnectionDialogDismissed = DialogInterface.OnDismissListener { }
+
+    internal abstract fun connectIfNotNormallyClosed()
 
     fun setOnConnectionException(consumer: Consumer<in Throwable>) = also { onConnectionException = consumer }
 

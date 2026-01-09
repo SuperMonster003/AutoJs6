@@ -1140,5 +1140,7 @@
     <string name="text_scheduled_restart_start_delay">تأخير البدء</string>
     <string name="dialog_button_advanced_settings">متقدم</string>
     <string name="error_failed_to_save_project_config">تعذّر حفظ إعدادات المشروع</string>
+    <string name="text_connected">متصل</string>
+    <string name="text_connected_count_with_colon">متصل: %1$d</string>
 
 </resources>

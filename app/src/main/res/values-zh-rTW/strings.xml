@@ -1136,5 +1136,7 @@
     <string name="text_scheduled_restart_start_delay">啟動延遲</string>
     <string name="dialog_button_advanced_settings">高階設定</string>
     <string name="error_failed_to_save_project_config">儲存專案配置失敗</string>
+    <string name="text_connected">已連線</string>
+    <string name="text_connected_count_with_colon">已連線: %1$d</string>
 
 </resources>

@@ -1138,5 +1138,7 @@
     <string name="text_scheduled_restart_start_delay">Délai de démarrage</string>
     <string name="dialog_button_advanced_settings">Avancé</string>
     <string name="error_failed_to_save_project_config">Échec de l\'enregistrement de la configuration du projet</string>
+    <string name="text_connected">Connecté</string>
+    <string name="text_connected_count_with_colon">Connectés : %1$d</string>
 
 </resources>

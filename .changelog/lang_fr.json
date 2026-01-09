@@ -277,7 +277,7 @@
         "L'éditeur de code prend en charge la détermination intelligente de l'emplacement d'insertion lors de l'importation de classes Java et de noms de paquets",
         "Le module images prend en charge l'utilisation des chemins directement comme paramètres d'image",
         "importPackage prend en charge les paramètres de chaîne",
-        "L'adresse IP du mode serveur prend en charge l'importation du presse-papiers avec reconnaissance intelligente et conversion intelligente avec la touche espace",
+        "En mode client, l'adresse IP prend en charge l'importation depuis le presse-papiers avec reconnaissance intelligente et permet une conversion intelligente de la touche espace",
         "Le gestionnaire de fichiers prend en charge la sélection de préfixes par défaut lors de la création de nouveaux fichiers et génère automatiquement un suffixe numérique approprié",
         "Le gestionnaire de fichiers informe spécifiquement sur le message d'exception lors de l'exécution du projet _[`issue #268`](http://issues.autojs6.com/268)_",
         "Le gestionnaire de fichiers prend en charge plus de types et affiche les symboles d'icône correspondants (prend en charge plus de 800 types de fichiers)",

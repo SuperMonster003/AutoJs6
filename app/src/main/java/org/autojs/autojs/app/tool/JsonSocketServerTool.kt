@@ -4,21 +4,20 @@ import android.annotation.SuppressLint
 import android.content.Context
 import org.autojs.autojs.util.Observers
 import org.autojs.autojs.util.ViewUtils
-import java.io.IOException
 
 class JsonSocketServerTool(context: Context) : AbstractJsonSocketTool(context) {
 
     override val isConnected
         get() = devPlugin.isServerSocketConnected
 
-    private var isNormallyClosed
+    override var isNormallyClosed
         get() = devPlugin.isServerSocketNormallyClosed
         set(state) {
             devPlugin.isServerSocketNormallyClosed = state
         }
 
     @SuppressLint("CheckResult")
-    override fun connect(): Boolean {
+    override fun connect() {
         devPlugin
             .enableLocalServer()
             .subscribe(Observers.emptyConsumer()) {
@@ -27,23 +26,15 @@ class JsonSocketServerTool(context: Context) : AbstractJsonSocketTool(context) {
                 onConnectionException.accept(it)
             }
         isNormallyClosed = false
-        return true
     }
 
-    internal fun connectIfNotNormallyClosed() {
+    override fun connectIfNotNormallyClosed() {
         if (!isNormallyClosed) connect()
     }
 
-    override fun disconnect(): Boolean {
-        val result = try {
-            devPlugin.jsonSocketServer?.switchOff()
-            true
-        } catch (e: IOException) {
-            e.printStackTrace()
-            false
-        }
+    override fun disconnect() {
+        devPlugin.disconnectJsonSocketServer()
         isNormallyClosed = true
-        return result
     }
 
     override fun dispose() {

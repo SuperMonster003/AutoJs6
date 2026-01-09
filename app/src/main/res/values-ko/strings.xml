@@ -1140,5 +1140,7 @@
     <string name="text_scheduled_restart_start_delay">시작 지연</string>
     <string name="dialog_button_advanced_settings">고급</string>
     <string name="error_failed_to_save_project_config">프로젝트 설정을 저장하지 못했습니다</string>
+    <string name="text_connected">연결됨</string>
+    <string name="text_connected_count_with_colon">연결됨: %1$d</string>
 
 </resources>

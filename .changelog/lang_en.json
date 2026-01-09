@@ -277,7 +277,7 @@
         "Code editor supports intelligently determining insertion location when importing Java classes and package names",
         "images module supports using paths directly as image parameters",
         "importPackage supports string parameters",
-        "Server mode IP address supports clipboard import with intelligent recognition and smart conversion with space key",
+        "In client mode, the IP address supports smart recognition when importing from the clipboard and also supports intelligent conversion of space-key input",
         "File manager supports default prefix selection when creating new files and automatically generates appropriate numeric suffix",
         "File manager specifically informs on exception message when running project _[`issue #268`](http://issues.autojs6.com/268)_",
         "File manager supports more types and displays corresponding icon symbols (supports over 800 file types)",

@@ -5,14 +5,15 @@ interface SocketItemHelper : DrawerMenuItemHelper {
     override val isActive
         get() = isConnected
 
-    override fun active(): Boolean {
-        if (isConnected) return true
-        return connect()
+    override fun active() {
+        connectIfNeeded()
     }
 
     val isConnected: Boolean
 
-    fun connect(): Boolean
+    var isNormallyClosed: Boolean
+
+    fun connect()
 
     fun dispose()
 
@@ -20,7 +21,7 @@ interface SocketItemHelper : DrawerMenuItemHelper {
         if (!isConnected) connect()
     }
 
-    fun disconnect(): Boolean
+    fun disconnect()
 
     fun disconnectIfNeeded() {
         if (isConnected) disconnect()
@@ -28,6 +29,8 @@ interface SocketItemHelper : DrawerMenuItemHelper {
 
     override fun toggle() = toggle(!isConnected)
 
-    override fun toggle(aimState: Boolean): Boolean = if (aimState) connect() else disconnect()
+    override fun toggle(aimState: Boolean): Boolean = runCatching {
+        if (aimState) connect() else disconnect()
+    }.isSuccess
 
 }

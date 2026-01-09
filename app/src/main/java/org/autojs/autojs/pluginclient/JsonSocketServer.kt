@@ -4,11 +4,10 @@ import android.util.Log
 import androidx.annotation.MainThread
 import androidx.annotation.WorkerThread
 import com.google.gson.JsonElement
-import io.reactivex.subjects.PublishSubject
+import io.reactivex.subjects.BehaviorSubject
 import org.autojs.autojs.core.pref.Pref.getBoolean
 import org.autojs.autojs.core.pref.Pref.putBoolean
 import org.autojs.autojs.util.StringUtils.key
-import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 import java.io.IOException
 import java.net.ServerSocket
@@ -29,7 +28,13 @@ class JsonSocketServer(service: DevPluginService?, port: Int) : JsonSocket(servi
         }
     }
 
-    override fun isSocketReady() = mSocket != null && !mSocket!!.isClosed
+    override fun isSocketReady(): Boolean {
+        val s = mSocket ?: return false
+        return s.isConnected &&
+                !s.isClosed &&
+                !s.isInputShutdown &&
+                !s.isOutputShutdown
+    }
 
     private val isServerSocketSetUp
         get() = serverSocket != null && !serverSocket!!.isClosed
@@ -105,8 +110,20 @@ class JsonSocketServer(service: DevPluginService?, port: Int) : JsonSocket(servi
 
     @MainThread
     public override fun onSocketError(e: Throwable) {
+        Log.w(TAG, "onSocketError")
         e.printStackTrace()
-        ViewUtils.showToast(context, e.message)
+
+        // Close client socket and keep listening socket alive.
+        // zh-CN: 关闭客户端 socket, 保持监听 socket 存活.
+        try {
+            close()
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+        }
+
+        // Notify service to update connection count.
+        // zh-CN: 通知 service 更新连接计数.
+        service.onServerClientDisconnected(this)
     }
 
     override fun setStateConnected() = also { setState(cxnState, DevPluginService.State.CONNECTED) }
@@ -119,7 +136,10 @@ class JsonSocketServer(service: DevPluginService?, port: Int) : JsonSocket(servi
 
         private val TAG = JsonSocketServer::class.java.simpleName
 
-        val cxnState = PublishSubject.create<DevPluginService.State>()
+        // Replay latest state to new subscribers (e.g. after language change / recreation).
+        // zh-CN: 向新订阅者回放最新状态 (例如切换语言/重建后).
+        val cxnState: BehaviorSubject<DevPluginService.State> =
+            BehaviorSubject.createDefault(DevPluginService.State(DevPluginService.State.DISCONNECTED))
 
         var isServerSocketNormallyClosed
             get() = getBoolean(key(R.string.key_server_socket_normally_closed), true)

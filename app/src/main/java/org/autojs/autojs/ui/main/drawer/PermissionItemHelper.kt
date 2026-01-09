@@ -5,9 +5,8 @@ interface PermissionItemHelper : DrawerMenuItemHelper {
     override val isActive
         get() = has()
 
-    override fun active(): Boolean {
-        if (has()) return true
-        return request()
+    override fun active() {
+        requestIfNeeded()
     }
 
     fun has(): Boolean

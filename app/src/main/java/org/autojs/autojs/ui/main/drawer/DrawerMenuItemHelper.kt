@@ -15,7 +15,7 @@ interface DrawerMenuItemHelper {
     val isInMainThread: Boolean
         get() = false
 
-    fun active(): Boolean
+    fun active()
 
     fun toggle(): Boolean
 

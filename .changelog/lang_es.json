@@ -277,7 +277,7 @@
         "El editor de código admite la determinación inteligente de la ubicación de inserción al importar clases Java y nombres de paquetes",
         "El módulo images admite el uso de rutas directamente como parámetros de imagen",
         "importPackage admite parámetros de cadena",
-        "La dirección IP del modo servidor admite la importación del portapapeles con reconocimiento inteligente y conversión inteligente con la tecla de espacio",
+        "En el modo cliente, la dirección IP admite la importación desde el portapapeles con reconocimiento inteligente y permite la conversión inteligente de la tecla de espacio",
         "El administrador de archivos admite la selección de prefijos predeterminados al crear nuevos archivos y genera automáticamente el sufijo numérico apropiado",
         "El administrador de archivos informa específicamente sobre el mensaje de excepción al ejecutar el proyecto _[`issue #268`](http://issues.autojs6.com/268)_",
         "El administrador de archivos admite más tipos y muestra símbolos de icono correspondientes (admite más de 800 tipos de archivos)",
