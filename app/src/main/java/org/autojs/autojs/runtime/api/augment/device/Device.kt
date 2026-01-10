@@ -1,10 +1,14 @@
 package org.autojs.autojs.runtime.api.augment.device
 
+import android.provider.Settings
+import androidx.core.net.toUri
 import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.extension.FlexibleArray
+import org.autojs.autojs.extension.FlexibleArray.Companion.component1
+import org.autojs.autojs.extension.FlexibleArray.Companion.component2
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.ScreenMetrics
 import org.autojs.autojs.runtime.api.augment.Augmentable
@@ -14,12 +18,14 @@ import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.DeviceUtils
 import org.autojs.autojs.util.NetworkUtils
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED
+import org.autojs.autojs.util.RhinoUtils.coerceBoolean
+import org.autojs.autojs.util.ShellUtils
+import org.autojs.autojs.util.ShellUtils.PointerLocation
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.Undefined
 import java.util.function.Supplier
 import org.autojs.autojs.runtime.api.Device as ApiDevice
-import androidx.core.net.toUri
 
 @Suppress("unused", "UNUSED_PARAMETER")
 class Device(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
@@ -38,6 +44,13 @@ class Device(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         ::isConnectedOrConnecting.name,
         ::isWifiAvailable.name,
         ::getSharedDeviceId.name,
+
+        ::setPointerLocation.name,
+        ::setPointerLocationEnabled.name,
+        ::setPointerLocationDisabled.name,
+        ::isPointerLocationEnabled.name,
+        ::isPointerLocationDisabled.name,
+        ::togglePointerLocation.name,
     )
 
     override val selfAssignmentGetters = listOf<Pair<String, Supplier<Any?>>>(
@@ -49,6 +62,8 @@ class Device(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
     )
 
     companion object : FlexibleArray() {
+
+        const val KEY_POINTER_LOCATION = "pointer_location"
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
@@ -209,6 +224,70 @@ class Device(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         private fun toVibrateTimingElement(it: Any?): Long {
             return Context.toNumber(it).takeUnless { it.isNaN() }?.toLong()
                 ?: throw WrappedIllegalArgumentException("Argument $it cannot be converted as a timing element for device.${::vibrate.name}")
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun setPointerLocation(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsOnlyOne(args) {
+            val enabled = coerceBoolean(it, false)
+
+            // @Hint by SuperMonster003 on Jan 10, 2025.
+            //  ! Starting from Android API 23 (6.0) [M], in the android.provider.Settings.System source code,
+            //  ! `PRIVATE_SETTINGS.add(POINTER_LOCATION);` means that `POINTER_LOCATION` is not settable,
+            //  ! otherwise it will trigger an exception:
+            //  ! "java.lang.IllegalArgumentException: You cannot change private secure settings.".
+            //  ! zh-CN:
+            //  ! Android API 23 (6.0) [M] 起, android.provider.Settings.System 源码中,
+            //  ! `PRIVATE_SETTINGS.add(POINTER_LOCATION);` 意味着 `POINTER_LOCATION` 是不可设置的,
+            //  ! 否则会触发异常: "java.lang.IllegalArgumentException: You cannot change private secure settings.".
+            //  !
+            //  # if (SettingsCompat.canWriteSettings(globalContext)) {
+            //  #     try {
+            //  #         if (Settings.System.putInt(globalContext.contentResolver, KEY_POINTER_LOCATION, if (enabled) PointerLocation.ENABLED.value else PointerLocation.DISABLED.value)) {
+            //  #             return@ensureArgumentsOnlyOne true
+            //  #         }
+            //  #     } catch (e: Exception) {
+            //  #         if (e.message == null || !e.message!!.lowercase().contains("private secure settings")) {
+            //  #             e.printStackTrace()
+            //  #         }
+            //  #     }
+            //  # }
+
+            ShellUtils.checkPointerLocationState(globalContext, enabled) || ShellUtils.togglePointerLocation(globalContext)
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun setPointerLocationEnabled(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsIsEmpty(args) {
+            setPointerLocation(scriptRuntime, arrayOf(true))
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun setPointerLocationDisabled(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsIsEmpty(args) {
+            setPointerLocation(scriptRuntime, arrayOf(false))
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun isPointerLocationEnabled(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsIsEmpty(args) {
+            try {
+                Settings.System.getInt(globalContext.contentResolver, KEY_POINTER_LOCATION, PointerLocation.DISABLED.value) == PointerLocation.ENABLED.value
+            } catch (e: Exception) {
+                ShellUtils.checkPointerLocationState(globalContext, true)
+            }
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun isPointerLocationDisabled(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsIsEmpty(args) {
+            !isPointerLocationEnabled(scriptRuntime, args)
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun togglePointerLocation(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsIsEmpty(args) {
+            setPointerLocation(scriptRuntime, arrayOf(!isPointerLocationEnabled(scriptRuntime, args)))
         }
 
     }
