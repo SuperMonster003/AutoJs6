@@ -20,7 +20,8 @@ object ShellUtils {
         }
     }
 
-    private fun checkPointerLocationState(context: Context, aimState: Boolean) = when (aimState) {
+    @JvmStatic
+    fun checkPointerLocationState(context: Context, aimState: Boolean) = when (aimState) {
         true -> isPointerLocationEnabled(context)
         else -> isPointerLocationDisabled(context)
     }
@@ -54,7 +55,7 @@ object ShellUtils {
         WrappedShizuku.execCommand(context, command)
     }.isSuccess
 
-    private enum class PointerLocation(val value: Int) {
+    enum class PointerLocation(val value: Int) {
         ENABLED(1),
         DISABLED(0)
     }
