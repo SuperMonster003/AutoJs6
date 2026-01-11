@@ -1,5 +1,10 @@
 [versions]
 
+#deprecated   : Only retained for dependencies of certain libraries (such as MQTT)
+#substitution : LiveData or SharedFlow
+#since        : Sep 25, 2025 (by SuperMonster003)
+localbroadcastmanager = "1.1.0"
+
 #strictly : 4.12.0
 #purpose  : Compatibility for kotlin 2.0.x (e.g. 2.0.21)
 #because  : Version 5.0.0+ requires kotlin 2.2.0+
@@ -149,6 +154,7 @@ kotlin-csv-jvm = { module = "com.github.doyaaaaaken:kotlin-csv-jvm", version.ref
 ksp-version-codes-processor = { module = "logic:ksp-version-codes-processor" }
 leakcanary = { module = "com.squareup.leakcanary:leakcanary-android", version.ref = "leakcanary" }
 licensesdialog = { module = "de.psdev.licensesdialog:licensesdialog", version.ref = "licensesdialog" }
+localbroadcastmanager = { module = "androidx.localbroadcastmanager:localbroadcastmanager", version.ref = "localbroadcastmanager" }
 log4j = { module = "log4j:log4j", version.ref = "log4j" }
 material = { module = "com.google.android.material:material", version.ref = "material" }
 materialprogressbar = { module = "me.zhanghai.android.materialprogressbar:library", version.ref = "materialprogressbar" }

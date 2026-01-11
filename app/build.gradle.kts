@@ -108,7 +108,6 @@ dependencies /* Unclassified */ {
     // Zip4j
     implementation(libs.zip4j)
 
-    // Log4j
     // FIXME by SuperMonster003 on Aug 14, 2024.
     //  ! Vulnerable dependency (5 vulnerabilities) for log4j (version 1):
     //  ! - CVE-2022-23307, Score: 8.8
@@ -129,6 +128,7 @@ dependencies /* Unclassified */ {
     //  ! - CVE-2019-17571, 评分: 9.8
     //  ! 但 log4j 第二版本要求安卓 API 级别不低于 26,
     //  ! 与最低 API 级别为 24 的当前项目无法兼容.
+    // Log4j
     implementation(libs.log4j)
 
     // Android Logging Log4j
@@ -304,7 +304,6 @@ dependencies /* AppCompat */ {
 }
 
 dependencies /* Material Dialogs */ {
-    // Material Dialogs
     // TODO by SuperMonster003 on Feb 5, 2022.
     //  ! Upgrade to 3.3.0 (more difficult than expected).
     //  ! zh-CN: 升级至 3.3.0 (实际难度超出预期较多).
@@ -318,6 +317,7 @@ dependencies /* Material Dialogs */ {
     //  #     implementation("com.afollestad.material-dialogs:core", cfg)
     //  #     implementation("com.afollestad.material-dialogs:commons", cfg)
     //  # }
+    // Material Dialogs
     implementation(project(":modules:material-dialogs"))
     implementation(libs.materialprogressbar)
 }
@@ -350,11 +350,11 @@ dependencies /* GitHub API */ {
     // GitHub API
     implementation(files("$rootDir/libs/github-api-1_306.jar"))
 
-    // Commons IO
     // @Hint by SuperMonster003 on Sep 25, 2025.
     //  ! Strict version: "2.8.0".
     //  ! Compatibility for Android API Level < 26 (Android 8.0) [O].
     //  ! Exception on newer versions: 'NoClassDefFoundError: org.apache.commons.io.IObuildUtils'.
+    // Commons IO
     implementation(libs.commons.io)
 
     // Jackson Databind
@@ -410,7 +410,6 @@ dependencies /* Build Logic */ {
 }
 
 dependencies /* Archived */ {
-    // Kotlin
     // @Comment by SuperMonster003 on May 19, 2022.
     //  ! It is no longer necessary to declare a dependency on the stdlib library in any Kotlin Gradle project.
     //  ! The dependency is added by default.
@@ -419,25 +418,31 @@ dependencies /* Archived */ {
     //  ! 已无需在 Kotlin Gradle 项目中显式声明标准库 (stdlib).
     //  ! 相关依赖已默认被添加.
     //  ! 参阅 https://kotlinlang.org/docs/gradle.html#dependency-on-the-standard-library.
+    // Kotlin
     // implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.6.21")
 
-    // Google Guava
     // @Comment by SuperMonster003 on Jun 1, 2022.
     //  ! Not necessary for current project but worth keeping the trace.
     //  ! zh-CN: 于当前项目已不再需要, 但依然值得留存其踪迹 (以备不时之需).
+    // Google Guava
     // implementation("com.google.guava:guava:31.1-jre")
 
-    // Javax WS RS API (Java API for RESTful Web Services)
     // @Comment by SuperMonster003 on Apr 9, 2024.
     //  ! It was ever imported and used for MediaType constants.
     //  ! zh-CN: 曾用于 MediaType 常量的导入及使用.
+    // Javax WS RS API (Java API for RESTful Web Services)
     // implementation("javax.ws.rs:javax.ws.rs-api:2.1.1")
 
+    // @Hint by SuperMonster003 on Jan 11, 2026.
+    //  ! The AutoJs6 core project has deprecated the Local Broadcast Manager library,
+    //  ! replaced by LiveData and SharedFlow.
+    //  ! It is only retained for dependencies of certain libraries (such as MQTT).
+    //  ! zh-CN:
+    //  ! AutoJs6 核心项目已弃用 Local Broadcast Manager 库,
+    //  ! 由 LiveData 及 SharedFlow 替代.
+    //  ! 仅用于某些库 (如 MQTT) 的依赖而保留.
     // Local Broadcast Manager
-    // @Comment by SuperMonster003 on Sep 27, 2025.
-    //  ! Deprecated. Chould by replaced with LiveData or SharedFlow.
-    //  ! zh-CN: 已弃用. 可用 LiveData 或 SharedFlow 替代.
-    // implementation(libs.localbroadcastmanager)
+    implementation(libs.localbroadcastmanager)
 }
 
 dependencies /* Reserved for auto append by IDE */ {
@@ -579,12 +584,7 @@ android {
         isCoreLibraryDesugaringEnabled = true
     }
 
-    // @Hint by SuperMonster003 on Sep 25, 2024.
-    //  ! To maintain compatibility with lower versions of Gradle (such as 7.4.2).
-    //  ! zh-CN: 为了兼容低版本 Gradle (如 7.4.2).
-    //  # packaging { ... }
-    @Suppress("DEPRECATION")
-    packagingOptions {
+    packaging {
         listOf(
             "META-INF/DEPENDENCIES",
             "META-INF/LICENSE",
