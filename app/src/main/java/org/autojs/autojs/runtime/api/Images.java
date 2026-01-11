@@ -21,7 +21,6 @@ import org.autojs.autojs.AutoJs;
 import org.autojs.autojs.annotation.ScriptInterface;
 import org.autojs.autojs.annotation.ScriptVariable;
 import org.autojs.autojs.concurrent.VolatileDispose;
-import org.autojs.autojs.core.image.CapturedImage;
 import org.autojs.autojs.core.image.ImageWrapper;
 import org.autojs.autojs.core.image.RhinoColorFinder;
 import org.autojs.autojs.core.image.Shootable;
@@ -110,7 +109,7 @@ public class Images {
     private final ScreenMetrics mScreenMetrics;
     private volatile ScreenCapturer.OnScreenCaptureAvailableListener mOnScreenCaptureAvailableListener;
     private Image mPreCapture;
-    private CapturedImage mPreCaptureImage;
+    private ImageWrapper mPreCaptureImage;
     private ScreenCapturer mScreenCapturer;
     private ScreenCaptureRequester mScreenCaptureRequester;
 
@@ -271,15 +270,60 @@ public class Images {
             if (mScreenCapturer == null) {
                 throw new SecurityException(mContext.getString(R.string.error_no_screen_capture_permission));
             }
-            Image capture = mScreenCapturer.capture();
-            if (capture != mPreCapture || mPreCaptureImage == null) {
+
+            // Retry in Java side to avoid leaking transient null frames to JS.
+            // zh-CN: 在 Java 层做重试, 避免把短暂的 null 帧暴露给 JS 层.
+            Image capture = null;
+            for (int i = 0; i < 6; i++) {
+                capture = mScreenCapturer.capture();
+                if (capture != null) break;
+                try {
+                    Thread.sleep(40);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
+
+            // Optional extra small backoff for switching moments.
+            // zh-CN: 可选的额外小退避, 用于方向/应用切换瞬间.
+            if (capture == null) {
+                try {
+                    Thread.sleep(60);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+                for (int i = 0; i < 2; i++) {
+                    capture = mScreenCapturer.capture();
+                    if (capture != null) break;
+                    try {
+                        Thread.sleep(40);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        break;
+                    }
+                }
+            }
+
+            // If still no valid frame, fallback to previous cached image when possible.
+            // zh-CN: 若仍无有效帧, 尽可能回退到上一帧缓存图像.
+            if (capture == null) {
+                if (mPreCaptureImage != null && !mPreCaptureImage.isRecycled()) {
+                    // Return a clone to avoid user recycling the internal cache.
+                    // zh-CN: 返回 clone, 避免用户 recycle() 影响内部缓存.
+                    return mPreCaptureImage.clone();
+                }
+                return null;
+            }
+
+            // Recreate wrapper when image instance changed OR cached wrapper is missing OR cached wrapper was recycled.
+            // zh-CN: 当 Image 实例发生变化/缓存包装对象为空/缓存包装对象已被回收时, 重新创建包装对象.
+            if (capture != mPreCapture || mPreCaptureImage == null || mPreCaptureImage.isRecycled()) {
                 mPreCapture = capture;
                 if (mPreCaptureImage != null) {
-                    mPreCaptureImage.recycleInternal();
+                    mPreCaptureImage.recycle();
                 }
-                if (capture != null) {
-                    mPreCaptureImage = new CapturedImage(mScriptRuntime, capture);
-                }
+                mPreCaptureImage = new ImageWrapper(mScriptRuntime, capture);
             }
             return mPreCaptureImage;
         }
@@ -584,7 +628,7 @@ public class Images {
                 mPreCapture = null;
             }
             if (mPreCaptureImage != null) {
-                mPreCaptureImage.recycleInternal();
+                mPreCaptureImage.recycle();
                 mPreCaptureImage = null;
             }
             releaseScreenCaptureRequester();
