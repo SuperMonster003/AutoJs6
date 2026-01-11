@@ -139,9 +139,21 @@ open class ImageWrapper : Shootable<ImageWrapper> {
 
     constructor(scriptRuntime: ScriptRuntime, mediaImage: Image) {
         mScriptRuntime = scriptRuntime
-        mMediaImage = mediaImage.also { addToList(it) }
         mWidth = mediaImage.width
         mHeight = mediaImage.height
+
+        // Detach from ImageReader lifecycle by copying pixels immediately.
+        // zh-CN: 通过立即拷贝像素来与 ImageReader 的生命周期解耦.
+        mBitmap = toBitmap(mediaImage).also { addToList(it) }
+
+        // Close the original Image ASAP to avoid holding unstable buffers.
+        // zh-CN: 尽快关闭原始 Image, 避免持有不稳定的底层 buffer.
+        mediaImage.close()
+
+        // Keep media references null after detaching.
+        // zh-CN: 解耦后不再保留 media 引用.
+        mMediaImage = null
+        mPlane = null
     }
 
     init {

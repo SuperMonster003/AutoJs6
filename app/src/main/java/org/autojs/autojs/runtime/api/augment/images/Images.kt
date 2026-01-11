@@ -282,9 +282,9 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
                 requestScreenCapture(scriptRuntime, arrayOf())
             }
             when {
-                path.isJsNullish() -> rtImages.captureScreen() as ImageWrapper
+                path.isJsNullish() -> rtImages.captureScreen()
                 else -> rtImages.captureScreen(scriptRuntime.files.nonNullPath(coerceString(path)))
-            }
+            } ?: throw WrappedRuntimeException("Failed to capture screen image")
         }
 
         // @Reference to module __images__.js from Auto.js Pro 9.3.11 by SuperMonster003 on Dec 19, 2023.
