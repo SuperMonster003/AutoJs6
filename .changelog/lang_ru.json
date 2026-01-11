@@ -34,7 +34,8 @@
         "Метод images.downsample для понижения разрешения и создания нового ImageWrapper",
         "Метод ui.keepScreenOn для удержания экрана включённым, пока UI-страница в фокусе",
         "Свойство ui.root (getter) для получения узла «корневой контейнер содержимого окна» в макете UI",
-        "Элемент webview поддерживает макеты веб-страниц на базе JsBridge (см. [Auto.js Pro](https://g.pro.autojs.org/)) [пример: Layout > Interactive HTML / Vue2 + Vant (SFC)] _[`issue #281`](http://issues.autojs6.com/281)_"
+        "Элемент webview поддерживает макеты веб-страниц на базе JsBridge (см. [Auto.js Pro](https://g.pro.autojs.org/)) [пример: Layout > Interactive HTML / Vue2 + Vant (SFC)] _[`issue #281`](http://issues.autojs6.com/281)_",
+        "Анализ макета поддерживает скрытие элементов (автор [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #371`](http://pr.autojs6.com/371)_ _[`issue #355`](http://issues.autojs6.com/355)_"
       ],
       "fix": [
         "Онлайн-документация на вкладке Docs и в активности Docs могла перекрываться системной навигационной панелью",
@@ -60,7 +61,6 @@
         "Сборка Gradle могла падать из-за неверного размера архивного файла библиотеки _[`issue #389`](http://issues.autojs6.com/389)_"
       ],
       "improvement": [
-        "Анализ макета поддерживает скрытие элементов (автор [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #371`](http://pr.autojs6.com/371)_ _[`issue #355`](http://issues.autojs6.com/355)_",
         "В меню анализа макета добавлены градиентные разделители для группировки функций",
         "Файл project.json поддерживает опцию permissions для проектов скриптов (автор [wirsnow](https://github.com/wirsnow)) _[`pr #391`](http://pr.autojs6.com/391)_ _[`issue #362`](http://issues.autojs6.com/362)_",
         "При упаковке одного файла автоматически читаются и отмечаются заявленные разрешения установленного приложения _[`issue #362`](http://issues.autojs6.com/362)_",

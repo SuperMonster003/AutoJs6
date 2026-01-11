@@ -34,7 +34,8 @@
         "images.downsample 메서드로 해상도를 낮추고 새로운 ImageWrapper 생성",
         "ui.keepScreenOn 메서드로 UI 페이지가 포커스될 때 화면 켜짐 유지",
         "ui.root 프로퍼티 (getter) 로 UI 레이아웃 내 '윈도우 콘텐츠 루트 컨테이너' 노드를 가져옴",
-        "webview 요소가 JsBridge 기반 웹 페이지 레이아웃 지원 (참조 [Auto.js Pro](https://g.pro.autojs.org/)) [예: Layout > Interactive HTML / Vue2 + Vant (SFC)] _[`issue #281`](http://issues.autojs6.com/281)_"
+        "webview 요소가 JsBridge 기반 웹 페이지 레이아웃 지원 (참조 [Auto.js Pro](https://g.pro.autojs.org/)) [예: Layout > Interactive HTML / Vue2 + Vant (SFC)] _[`issue #281`](http://issues.autojs6.com/281)_",
+        "레이아웃 인스펙터가 요소 숨기기 지원 (기여 [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #371`](http://pr.autojs6.com/371)_ _[`issue #355`](http://issues.autojs6.com/355)_"
       ],
       "fix": [
         "Docs 탭 및 Docs 액티비티의 온라인 문서가 시스템 네비게이션 바에 가려질 수 있는 문제 수정",
@@ -60,7 +61,6 @@
         "Gradle 빌드가 라이브러리 아카이브 크기 오류로 실패할 수 있는 문제 수정 _[`issue #389`](http://issues.autojs6.com/389)_"
       ],
       "improvement": [
-        "레이아웃 인스펙터가 요소 숨기기 지원 (기여 [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #371`](http://pr.autojs6.com/371)_ _[`issue #355`](http://issues.autojs6.com/355)_",
         "레이아웃 인스펙터 메뉴에 기능 그룹화를 위한 그라데이션 구분선 추가",
         "project.json 이 스크립트 프로젝트 permissions 옵션 지원 (기여 [wirsnow](https://github.com/wirsnow)) _[`pr #391`](http://pr.autojs6.com/391)_ _[`issue #362`](http://issues.autojs6.com/362)_",
         "단일 파일 패키징 시 설치된 앱의 선언 권한을 자동 읽어 표시 _[`issue #362`](http://issues.autojs6.com/362)_",

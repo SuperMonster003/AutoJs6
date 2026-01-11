@@ -34,7 +34,8 @@
         "images.downsample 方法, 用於像素降採樣並生成新的 ImageWrapper",
         "ui.keepScreenOn 方法, 用於 UI 頁面獲取焦點時保持設備屏幕常亮",
         "ui.root 屬性 (getter), 用於獲取 UI 頁面佈局的 \"窗口內容根容器\" 節點",
-        "webview 元素支持基於 JsBridge 的 Web 頁面佈局 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) [參閱 示例代碼 > 佈局 > 可交互 HTML / Vue2 + Vant (SFC)] _[`issue #281`](http://issues.autojs6.com/281)_"
+        "webview 元素支持基於 JsBridge 的 Web 頁面佈局 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) [參閱 示例代碼 > 佈局 > 可交互 HTML / Vue2 + Vant (SFC)] _[`issue #281`](http://issues.autojs6.com/281)_",
+        "佈局分析支持控件隱藏 (by [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #371`](http://pr.autojs6.com/371)_ _[`issue #355`](http://issues.autojs6.com/355)_"
       ],
       "fix": [
         "主頁文檔標籤及文檔活動頁面顯示在線文檔時部分內容被系統導航欄遮擋的問題",
@@ -60,7 +61,6 @@
         "Gradle 構建腳本可能因獲取到無效庫檔案文件長度而導致構建失敗的問題 _[`issue #389`](http://issues.autojs6.com/389)_"
       ],
       "improvement": [
-        "佈局分析支持控件隱藏 (by [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #371`](http://pr.autojs6.com/371)_ _[`issue #355`](http://issues.autojs6.com/355)_",
         "佈局分析菜單添加漸變分隔線實現一定程度的功能分組",
         "腳本項目配置文件 project.json 支持 permissions 選項 (by [wirsnow](https://github.com/wirsnow)) _[`pr #391`](http://pr.autojs6.com/391)_ _[`issue #362`](http://issues.autojs6.com/362)_",
         "打包單文件時自動讀取並勾選已安裝應用的聲明權限 _[`issue #362`](http://issues.autojs6.com/362)_",

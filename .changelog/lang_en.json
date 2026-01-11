@@ -34,7 +34,8 @@
         "images.downsample method for pixel down-sampling and creating a new ImageWrapper",
         "ui.keepScreenOn method to keep the device screen on while a UI page is focused",
         "ui.root property (getter) to obtain the \"window content root container\" node of the UI layout",
-        "webview element now supports JsBridge-based web page layouts (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) [see Sample Code > Layout > Interactive HTML / Vue2 + Vant (SFC)] _[`issue #281`](http://issues.autojs6.com/281)_"
+        "webview element now supports JsBridge-based web page layouts (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) [see Sample Code > Layout > Interactive HTML / Vue2 + Vant (SFC)] _[`issue #281`](http://issues.autojs6.com/281)_",
+        "Layout Inspector supports hiding controls (by [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #371`](http://pr.autojs6.com/371)_ _[`issue #355`](http://issues.autojs6.com/355)_"
       ],
       "fix": [
         "Online docs in the Home > Docs tab and Docs activity may be covered by the system navigation bar",
@@ -60,7 +61,6 @@
         "Gradle build could fail due to invalid library archive length _[`issue #389`](http://issues.autojs6.com/389)_"
       ],
       "improvement": [
-        "Layout Inspector supports hiding controls (by [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #371`](http://pr.autojs6.com/371)_ _[`issue #355`](http://issues.autojs6.com/355)_",
         "Added gradient separators to the Layout Inspector menu for lightweight grouping",
         "project.json now supports a permissions option for script projects (by [wirsnow](https://github.com/wirsnow)) _[`pr #391`](http://pr.autojs6.com/391)_ _[`issue #362`](http://issues.autojs6.com/362)_",
         "Automatically read and check declared permissions of installed apps when packaging a single file _[`issue #362`](http://issues.autojs6.com/362)_",
