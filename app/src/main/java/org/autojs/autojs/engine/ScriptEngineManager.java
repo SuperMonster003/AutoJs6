@@ -29,6 +29,8 @@ public class ScriptEngineManager {
     }
 
     private final Set<ScriptEngine<? extends ScriptSource>> mEngines = new HashSet<>();
+    private final Object mEnginesLock = new Object();
+
     private EngineLifecycleCallback mEngineLifecycleCallback;
     private final Map<String, Supplier<ScriptEngine<? extends ScriptSource>>> mEngineSuppliers = new HashMap<>();
     private final Map<String, Object> mGlobalVariableMap = new HashMap<>();
@@ -41,7 +43,7 @@ public class ScriptEngineManager {
 
     private void addEngine(ScriptEngine<? extends ScriptSource> engine) {
         engine.setOnDestroyListener(mOnEngineDestroyListener);
-        synchronized (mEngines) {
+        synchronized (mEnginesLock) {
             mEngines.add(engine);
             if (mEngineLifecycleCallback != null) {
                 mEngineLifecycleCallback.onEngineCreate(engine);
@@ -54,7 +56,7 @@ public class ScriptEngineManager {
     }
 
     public Set<ScriptEngine<? extends ScriptSource>> getEngines() {
-        synchronized (mEngines) {
+        synchronized (mEnginesLock) {
             return Collections.unmodifiableSet(new LinkedHashSet<>(mEngines));
         }
     }
@@ -64,7 +66,7 @@ public class ScriptEngineManager {
     }
 
     public void removeEngine(ScriptEngine<? extends ScriptSource> engine) {
-        synchronized (mEngines) {
+        synchronized (mEnginesLock) {
             if (mEngines.remove(engine) && mEngineLifecycleCallback != null) {
                 mEngineLifecycleCallback.onEngineRemove(engine);
             }
@@ -72,7 +74,7 @@ public class ScriptEngineManager {
     }
 
     public int stopAll() {
-        synchronized (mEngines) {
+        synchronized (mEnginesLock) {
             int n = mEngines.size();
             for (ScriptEngine<? extends ScriptSource> engine : mEngines) {
                 engine.forceStop();

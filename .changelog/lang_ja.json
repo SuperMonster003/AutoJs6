@@ -34,7 +34,8 @@
         "images.downsample メソッドで解像度を下げて新しい ImageWrapper を生成",
         "ui.keepScreenOn メソッドで UI ページがフォーカス中は画面を点灯したまま維持",
         "ui.root プロパティ (getter) で UI レイアウト内の「ウィンドウコンテンツのルートコンテナ」ノードを取得",
-        "webview 要素が JsBridge ベースのウェブページレイアウトをサポート (参照 [Auto.js Pro](https://g.pro.autojs.org/)) [例: Layout > Interactive HTML / Vue2 + Vant (SFC)] _[`issue #281`](http://issues.autojs6.com/281)_"
+        "webview 要素が JsBridge ベースのウェブページレイアウトをサポート (参照 [Auto.js Pro](https://g.pro.autojs.org/)) [例: Layout > Interactive HTML / Vue2 + Vant (SFC)] _[`issue #281`](http://issues.autojs6.com/281)_",
+        "レイアウトインスペクターが要素の非表示をサポート (寄稿 [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #371`](http://pr.autojs6.com/371)_ _[`issue #355`](http://issues.autojs6.com/355)_"
       ],
       "fix": [
         "Docs タブおよび Docs アクティビティのオンラインドキュメントがシステムナビゲーションバーと重なる場合がある問題を修正",
@@ -60,7 +61,6 @@
         "Gradle ビルドがライブラリアーカイブのサイズ不正で失敗する問題を修正 _[`issue #389`](http://issues.autojs6.com/389)_"
       ],
       "improvement": [
-        "レイアウトインスペクターが要素の非表示をサポート (寄稿 [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #371`](http://pr.autojs6.com/371)_ _[`issue #355`](http://issues.autojs6.com/355)_",
         "レイアウトインスペクターのメニューに機能グループ化用のグラデーション区切りを追加",
         "project.json がスクリプトプロジェクト用 permissions オプションをサポート (寄稿 [wirsnow](https://github.com/wirsnow)) _[`pr #391`](http://pr.autojs6.com/391)_ _[`issue #362`](http://issues.autojs6.com/362)_",
         "単一ファイルをパッケージングする際, インストール済みアプリの宣言パーミッションを自動読み取り・選択 _[`issue #362`](http://issues.autojs6.com/362)_",

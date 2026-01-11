@@ -34,7 +34,8 @@
         "الدالة images.downsample لخفض الدقة وإنشاء ImageWrapper جديد",
         "الدالة ui.keepScreenOn لإبقاء الشاشة مضاءة عند تركيز صفحة الواجهة",
         "خاصية ui.root (getter) للحصول على عقدة \"حاوية المحتوى الجذرية للنافذة\" في تخطيط الواجهة",
-        "عنصر webview يدعم تخطيطات صفحات الويب عبر JsBridge (انظر [Auto.js Pro](https://g.pro.autojs.org/)) [مثال: Layout > Interactive HTML / Vue2 + Vant (SFC)] _[`issue #281`](http://issues.autojs6.com/281)_"
+        "عنصر webview يدعم تخطيطات صفحات الويب عبر JsBridge (انظر [Auto.js Pro](https://g.pro.autojs.org/)) [مثال: Layout > Interactive HTML / Vue2 + Vant (SFC)] _[`issue #281`](http://issues.autojs6.com/281)_",
+        "مصحح التخطيط يدعم إخفاء العناصر (بواسطة [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #371`](http://pr.autojs6.com/371)_ _[`issue #355`](http://issues.autojs6.com/355)_"
       ],
       "fix": [
         "قد يتم حجب بعض محتوى الوثائق عبر الإنترنت في تبويب Docs وصفحة الوثائق بواسطة شريط التنقل",
@@ -60,7 +61,6 @@
         "قد تفشل عملية بناء Gradle بسبب طول غير صالح لأرشيف مكتبة _[`issue #389`](http://issues.autojs6.com/389)_"
       ],
       "improvement": [
-        "مصحح التخطيط يدعم إخفاء العناصر (بواسطة [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #371`](http://pr.autojs6.com/371)_ _[`issue #355`](http://issues.autojs6.com/355)_",
         "إضافة فواصل متدرّجة في قائمة مصحح التخطيط لتجميع الوظائف",
         "يدعم project.json خيار permissions لمشاريع السكربتات (بواسطة [wirsnow](https://github.com/wirsnow)) _[`pr #391`](http://pr.autojs6.com/391)_ _[`issue #362`](http://issues.autojs6.com/362)_",
         "عند حزم ملف واحد تُقرأ أذونات التطبيق المثبت وتُحدد تلقائيًا _[`issue #362`](http://issues.autojs6.com/362)_",

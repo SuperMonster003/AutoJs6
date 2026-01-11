@@ -41,7 +41,7 @@ import java.util.List;
 
 /**
  * Created by Stardust on Mar 24, 2017.
- * Modified by SuperMonster003 as of May 26, 2022.
+ * Modified by SuperMonster003 as of Jan 7, 2026.
  */
 public class TaskListRecyclerView extends ThemeColorRecyclerView {
 
@@ -59,9 +59,13 @@ public class TaskListRecyclerView extends ThemeColorRecyclerView {
             try {
                 int i = mRunningTaskGroup.addTask(execution);
                 if (i != -1) {
+                    final Adapter adapter = mAdapter;
                     post(() -> {
-                        mAdapter.notifyChildInserted(0, i);
-                        mAdapter.notifyParentChanged(0);
+                        if (adapter != mAdapter) {
+                            return;
+                        }
+                        adapter.notifyChildInserted(0, i);
+                        notifyParentChangedSafe(adapter, 0);
                     });
                 }
             } catch (Exception e) {
@@ -80,17 +84,48 @@ public class TaskListRecyclerView extends ThemeColorRecyclerView {
         }
 
         private void onFinish(ScriptExecution execution) {
+            final Adapter adapter = mAdapter;
             post(() -> {
+                if (adapter != mAdapter) {
+                    return;
+                }
                 final int i = mRunningTaskGroup.removeTask(execution);
                 if (i >= 0) {
-                    mAdapter.notifyChildRemoved(0, i);
-                    mAdapter.notifyParentChanged(0);
+                    adapter.notifyChildRemoved(0, i);
+                    notifyParentChangedSafe(adapter, 0);
                 } else {
                     refresh();
                 }
             });
         }
     };
+
+    private void notifyParentChangedSafe(@NonNull Adapter adapter, int parentPosition) {
+        // Avoid notifying an adapter that has been replaced asynchronously.
+        // zh-CN: 避免对已经被异步替换的适配器发送通知.
+        if (adapter != mAdapter) {
+            return;
+        }
+
+        // Avoid out-of-range parentPosition caused by transient state mismatch.
+        // zh-CN: 避免由于瞬时状态不一致导致的 parentPosition 越界.
+        if (parentPosition < 0 || parentPosition >= mTaskGroups.size()) {
+            return;
+        }
+
+        // RecyclerView may be computing layout/dispatching updates; postpone to next loop.
+        // zh-CN: RecyclerView 可能正在计算布局/分发更新, 将通知延迟到下一次消息循环.
+        if (isComputingLayout()) {
+            post(() -> notifyParentChangedSafe(adapter, parentPosition));
+            return;
+        }
+
+        try {
+            adapter.notifyParentChanged(parentPosition);
+        } catch (IndexOutOfBoundsException e) {
+            /* Ignored. */
+        }
+    }
 
     public TaskListRecyclerView(Context context) {
         super(context);
@@ -169,14 +204,15 @@ public class TaskListRecyclerView extends ThemeColorRecyclerView {
     }
 
     void onTaskChange(ModelChange<?> taskChange) {
+        final Adapter adapter = mAdapter;
         if (taskChange.getAction() == ModelChange.INSERT) {
-            mAdapter.notifyChildInserted(1, mPendingTaskGroup.addTask(taskChange.getData()));
-            mAdapter.notifyParentChanged(1);
+            adapter.notifyChildInserted(1, mPendingTaskGroup.addTask(taskChange.getData()));
+            notifyParentChangedSafe(adapter, 1);
         } else if (taskChange.getAction() == ModelChange.DELETE) {
             final int i = mPendingTaskGroup.removeTask(taskChange.getData());
             if (i >= 0) {
-                mAdapter.notifyChildRemoved(1, i);
-                mAdapter.notifyParentChanged(1);
+                adapter.notifyChildRemoved(1, i);
+                notifyParentChangedSafe(adapter, 1);
             } else {
                 Log.w(LOG_TAG, "data inconsistent on change: " + taskChange);
                 refresh();
@@ -184,7 +220,7 @@ public class TaskListRecyclerView extends ThemeColorRecyclerView {
         } else if (taskChange.getAction() == ModelChange.UPDATE) {
             final int i = mPendingTaskGroup.updateTask(taskChange.getData());
             if (i >= 0) {
-                mAdapter.notifyChildChanged(1, i);
+                adapter.notifyChildChanged(1, i);
             } else {
                 refresh();
             }

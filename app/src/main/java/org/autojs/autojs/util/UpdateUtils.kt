@@ -1,9 +1,7 @@
 package org.autojs.autojs.util
 
 import android.content.Context
-import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.net.toUri
 import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.app.DialogUtils
@@ -24,42 +22,6 @@ object UpdateUtils {
 
     private val ignoredVersions: LinkedHashSet<String> by lazy {
         Pref.getLinkedHashSet(R.string.key_ignored_updates)
-    }
-
-    @JvmStatic
-    fun openUrl(context: Context, url: String) {
-        context.startActivity(
-            Intent(Intent.ACTION_VIEW)
-                .setData(url.toUri())
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        )
-    }
-
-    class IntervalChecker {
-
-        private val mMinCheckedIntervalNoNewer: Long = 120 * 60 * 1000
-        private val mMinCheckedIntervalPostponed: Long = 30 * 60 * 1000
-        private val mMinCheckedIntervalAutoChecked: Long = 15 * 1000
-
-        val isBeyondNoNewer: Boolean
-            get() {
-                val now = System.currentTimeMillis()
-                val lastNoNewer = lastNoNewerUpdatesTimestamp
-                return now - lastNoNewer > mMinCheckedIntervalNoNewer
-            }
-        val isBeyondPostponed: Boolean
-            get() {
-                val now = System.currentTimeMillis()
-                val lastPostponed = lastUpdatesPostponedTimestamp
-                return now - lastPostponed > mMinCheckedIntervalPostponed
-            }
-        val isBeyondAutoChecked: Boolean
-            get() {
-                val now = System.currentTimeMillis()
-                val lastAutoChecked = lastUpdatesAutoCheckedTimestamp
-                return now - lastAutoChecked > mMinCheckedIntervalAutoChecked
-            }
-
     }
 
     fun manageIgnoredUpdates(context: Context) {
@@ -167,15 +129,47 @@ object UpdateUtils {
     @JvmStatic
     @JvmOverloads
     fun autoCheckForUpdatesIfNeededWithSnackbar(activity: AppCompatActivity, snackbarViewIdRes: Int = android.R.id.content) {
-        if (isAutoCheckForUpdatesEnabled) {
-            val checker = IntervalChecker()
-            if (checker.isBeyondNoNewer && checker.isBeyondPostponed && checker.isBeyondAutoChecked) {
-                UpdateChecker.Builder(activity.findViewById(snackbarViewIdRes))
-                    .setPromptMode(PromptMode.SNACKBAR)
-                    .build().checkNow()
-                Pref.refreshLastUpdatesAutoCheckedTimestamp()
+        if (!isAutoCheckForUpdatesEnabled) return
+
+        val checker = IntervalChecker()
+        if (!checker.isBeyondNoNewer || !checker.isBeyondPostponed || !checker.isBeyondAutoChecked) return
+
+        UpdateChecker.Builder(activity.findViewById(snackbarViewIdRes))
+            .setPromptMode(PromptMode.SNACKBAR)
+            .setGitHubMainBranch("master")
+            .build()
+            .checkNow()
+
+        Pref.refreshLastUpdatesAutoCheckedTimestamp()
+    }
+
+    private class IntervalChecker {
+
+        private val mMinCheckedIntervalNoNewer: Long = 120 * 60 * 1000
+        private val mMinCheckedIntervalPostponed: Long = 30 * 60 * 1000
+        private val mMinCheckedIntervalAutoChecked: Long = 15 * 1000
+
+        val isBeyondNoNewer: Boolean
+            get() {
+                val now = System.currentTimeMillis()
+                val lastNoNewer = lastNoNewerUpdatesTimestamp
+                return now - lastNoNewer > mMinCheckedIntervalNoNewer
             }
-        }
+
+        val isBeyondPostponed: Boolean
+            get() {
+                val now = System.currentTimeMillis()
+                val lastPostponed = lastUpdatesPostponedTimestamp
+                return now - lastPostponed > mMinCheckedIntervalPostponed
+            }
+
+        val isBeyondAutoChecked: Boolean
+            get() {
+                val now = System.currentTimeMillis()
+                val lastAutoChecked = lastUpdatesAutoCheckedTimestamp
+                return now - lastAutoChecked > mMinCheckedIntervalAutoChecked
+            }
+
     }
 
 }
