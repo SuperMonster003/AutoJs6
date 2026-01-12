@@ -17,6 +17,7 @@ import org.autojs.autojs.extension.ScriptableExtensions.defineProp
 import org.autojs.autojs.extension.ScriptableExtensions.prop
 import org.autojs.autojs.rhino.TopLevelScope
 import org.autojs.autojs.runtime.ScriptRuntime
+import org.autojs.autojs.runtime.api.ScriptPromiseAdapter
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.runtime.exception.WrappedRuntimeException
 import org.autojs.autojs6.BuildConfig
@@ -910,6 +911,37 @@ object RhinoUtils {
         }
         return null
     }
+
+    fun handleAsyncOperation(scriptRuntime: ScriptRuntime, func: () -> Any?): NativeObject {
+        val promiseAdapter = ScriptPromiseAdapter()
+
+        // Use Android Thread directly to avoid coupling with JS threads/loopers here.
+        // zh-CN: 直接使用 Android Thread, 避免在此处与 JS 线程/Looper 机制强耦合.
+        Thread {
+            try {
+                // Do the blocking work (e.g. network request) in background thread.
+                // zh-CN: 在后台线程执行阻塞式操作 (如网络请求).
+                val result = func.invoke()
+
+                // Resolve on UI thread so that UI scripts can safely touch `ui.*` in then().
+                // zh-CN: 在 UI 线程 resolve, 让 UI 脚本在 then() 中可安全操作 `ui.*`.
+                Handler(Looper.getMainLooper()).post {
+                    promiseAdapter.resolve(result)
+                }
+            } catch (t: Throwable) {
+                // Reject on UI thread for consistent callback threading.
+                // zh-CN: 在 UI 线程 reject, 保持回调线程一致性.
+                Handler(Looper.getMainLooper()).post {
+                    promiseAdapter.reject(t)
+                }
+            }
+        }.start()
+
+        // Convert ScriptPromiseAdapter into a JavaScript Promise.
+        // zh-CN: 将 ScriptPromiseAdapter 转换为 JavaScript Promise.
+        return callFunction(scriptRuntime, scriptRuntime.js_ResultAdapter, "promise", arrayOf(promiseAdapter)) as NativeObject
+    }
+
 
     @JvmStatic
     fun Class<*>.getRhinoStandardFunctionMethods(): List<Method> {

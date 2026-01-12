@@ -559,15 +559,11 @@ public class Images {
         };
     }
 
-    public ImageWrapper load(String src) {
-        try {
-            HttpURLConnection connection = (HttpURLConnection) new URL(src).openConnection();
-            connection.setDoInput(true);
-            connection.connect();
-            return ImageWrapper.ofBitmap(mScriptRuntime, BitmapFactory.decodeStream(connection.getInputStream()));
-        } catch (IOException e) {
-            return null;
-        }
+    public ImageWrapper load(String src) throws IOException {
+        HttpURLConnection connection = (HttpURLConnection) new URL(src).openConnection();
+        connection.setDoInput(true);
+        connection.connect();
+        return ImageWrapper.ofBitmap(mScriptRuntime, BitmapFactory.decodeStream(connection.getInputStream()));
     }
 
     public ImageWrapper invert(@NonNull ImageWrapper image) {
