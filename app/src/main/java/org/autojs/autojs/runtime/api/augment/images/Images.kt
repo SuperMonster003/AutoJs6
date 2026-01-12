@@ -51,6 +51,7 @@ import org.autojs.autojs.util.RhinoUtils.coerceIntNumber
 import org.autojs.autojs.util.RhinoUtils.coerceNumber
 import org.autojs.autojs.util.RhinoUtils.coerceString
 import org.autojs.autojs.util.RhinoUtils.coerceStringLowercase
+import org.autojs.autojs.util.RhinoUtils.handleAsyncOperation
 import org.autojs.autojs.util.RhinoUtils.isBackgroundThread
 import org.autojs.autojs.util.RhinoUtils.isUiThread
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
@@ -86,6 +87,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         ::imread.name,
         ::copy.name,
         ::load.name,
+        ::loadAsync.name,
         ::clip.name,
         ::pixel.name,
         ::captureScreen.name to AS_GLOBAL,
@@ -215,8 +217,15 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun load(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ImageWrapper = ensureArgumentsOnlyOne(args) { src ->
+        fun load(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ImageWrapper? = ensureArgumentsOnlyOne(args) { src ->
             scriptRuntime.images.load(coerceString(src))
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun loadAsync(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeObject = ensureArgumentsOnlyOne(args) { src ->
+            val url = coerceString(src)
+            handleAsyncOperation(scriptRuntime) { scriptRuntime.images.load(url) }
         }
 
         @JvmStatic
