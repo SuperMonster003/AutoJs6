@@ -1,13 +1,14 @@
 package org.autojs.autojs.codegeneration;
 
+import androidx.annotation.NonNull;
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
-
-import org.autojs.autojs.core.accessibility.UiSelector;
 import org.autojs.autojs.core.accessibility.NodeInfo;
+import org.autojs.autojs.core.accessibility.UiSelector;
 import org.autojs.autojs.core.automator.UiObject;
 
 /**
  * Created by Stardust on Dec 7, 2017.
+ * Modified by SuperMonster003 as of Jan 12, 2026.
  */
 public class CodeGenerator {
 
@@ -56,7 +57,14 @@ public class CodeGenerator {
     public String generateCode() {
         UiObject collection = getCollectionParent(mTarget);
         if (collection != null) {
-            return generateCodeForCollectionChild(collection, mTarget);
+            // @Hint by SuperMonster003 on Jan 12, 2026.
+            //  ! Collection-based generation may fail in some apps due to unstable accessibility trees.
+            //  ! zh-CN: 基于集合控件的生成在某些应用中可能因无障碍树不稳定而失败.
+            //  # return generateCodeForCollectionChild(collection, mTarget);
+            String collectionChildCode = generateCodeForCollectionChild(collection, mTarget);
+            if (collectionChildCode != null) {
+                return collectionChildCode;
+            }
         }
 
         UiSelectorGenerator generator = new UiSelectorGenerator(mRoot, mTarget);
@@ -65,8 +73,9 @@ public class CodeGenerator {
         generator.setUsingId(mUsingId);
         generator.setUsingText(mUsingText);
         String selector = generateCode(generator, mRoot, mTarget, 2, 2, true);
-        if (selector == null)
+        if (selector == null) {
             return null;
+        }
         return generateAction(selector);
     }
 
@@ -85,8 +94,9 @@ public class CodeGenerator {
         if (maxChildrenLevel > 0) {
             for (int i = 0; i < target.childCount(); i++) {
                 UiObject child = target.child(i);
-                if (child == null)
+                if (child == null) {
                     continue;
+                }
                 String childCode = generateCode(root, child, 0, maxChildrenLevel - 1);
                 if (childCode != null) {
                     return childCode + ".parent()";
@@ -116,8 +126,9 @@ public class CodeGenerator {
     }
 
     private String generateAction(String selector) {
-        if (selector == null)
+        if (selector == null) {
             return null;
+        }
         if (mSearchMode == WAIT_FOR) {
             return selector + ".waitFor()";
         }
@@ -145,30 +156,38 @@ public class CodeGenerator {
 
     private String generateCodeForCollectionChild(UiObject collection, UiObject target) {
         UiObject parent = target.parent();
-        if (parent == null)
+        if (parent == null) {
             return null;
+        }
         UiObject collectionItem = null;
         for (int i = 0; i < collection.childCount(); i++) {
-            if (inherits(collection.child(i), target)) {
-                collectionItem = collection.child(i);
+            UiObject child = collection.child(i);
+            if (child == null) {
+                continue;
+            }
+            if (inherits(child, target)) {
+                collectionItem = child;
                 break;
             }
         }
-        if (collectionItem == null)
+        if (collectionItem == null) {
             return null;
+        }
         String collectionCode = generateCode(mRoot, collection, 2, 0);
-        if (collectionCode == null)
+        if (collectionCode == null) {
             return null;
+        }
         String itemCode = generateCode(collectionItem, target, 1, 2, false);
-        if (itemCode == null)
+        if (itemCode == null) {
             return null;
+        }
         return collectionCode + ".children().forEach(child => {\n"
-                + "var target = child.findOne(" + itemCode + ");\n"
-                + "target." + getAction() + ";\n"
-                + "});";
+               + "var target = child.findOne(" + itemCode + ");\n"
+               + "target." + getAction() + ";\n"
+               + "});";
     }
 
-    private boolean inherits(UiObject root, UiObject target) {
+    private boolean inherits(@NonNull UiObject root, UiObject target) {
         for (int i = 0; i < root.childCount(); i++) {
             UiObject child = root.child(i);
             if (child != null) {
