@@ -17,6 +17,8 @@
         "images.loadAsync 方法, 用于异步获取网络图像资源 _[`issue #327`](http://issues.autojs6.com/327)_",
         "ui.getNavigationBarHeight 方法/navigationBarHeight 属性 (getter), 用于获取导航栏高度 _[`issue #456`](http://issues.autojs6.com/456)_",
         "ui.getVisible(Status/Navigation)BarHeight 方法/visible(Status/Navigation)BarHeight 属性 (getter), 用于快捷获取状态栏或导航栏可见高度 _[`issue #456`](http://issues.autojs6.com/456)_",
+        "http.put/del(ete)/head 方法, 用于使用不同的 HTTP 请求方法发送网络请求",
+        "http.getAsync/postAsync/requestAsync 等方法, 用于异步发送网络请求 _[`issue #423`](http://issues.autojs6.com/423)_",
         "http 模块请求相关方法获取的 body 对象增加 stream/saveToFile/close 等方法 _[`issue #452`](http://issues.autojs6.com/452)_",
         "http 模块请求相关方法支持缓存控制选项参数 (cacheBody/bodyCacheThresholdBytes)",
         "http 模块请求相关方法支持不安全选项参数 (isInsecure/insecure), 用于忽略证书相关异常 _[`issue #417`](http://issues.autojs6.com/417)_",

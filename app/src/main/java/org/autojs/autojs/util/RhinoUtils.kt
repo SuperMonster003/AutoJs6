@@ -913,6 +913,14 @@ object RhinoUtils {
     }
 
     fun handleAsyncOperation(scriptRuntime: ScriptRuntime, func: () -> Any?): NativeObject {
+        return handleAsyncOperation(scriptRuntime, func) { it }
+    }
+
+    fun <T> handleAsyncOperation(
+        scriptRuntime: ScriptRuntime,
+        operation: () -> T,
+        uiMapper: (T) -> Any?,
+    ): NativeObject {
         val promiseAdapter = ScriptPromiseAdapter()
 
         // Use Android Thread directly to avoid coupling with JS threads/loopers here.
@@ -921,12 +929,19 @@ object RhinoUtils {
             try {
                 // Do the blocking work (e.g. network request) in background thread.
                 // zh-CN: 在后台线程执行阻塞式操作 (如网络请求).
-                val result = func.invoke()
+                val result = operation.invoke()
 
                 // Resolve on UI thread so that UI scripts can safely touch `ui.*` in then().
                 // zh-CN: 在 UI 线程 resolve, 让 UI 脚本在 then() 中可安全操作 `ui.*`.
                 Handler(Looper.getMainLooper()).post {
-                    promiseAdapter.resolve(result)
+                    try {
+                        // Map result on UI thread (e.g. wrap Java objects into Rhino objects).
+                        // zh-CN: 在 UI 线程映射结果 (例如将 Java 对象包装为 Rhino 对象).
+                        val mapped = uiMapper.invoke(result)
+                        promiseAdapter.resolve(mapped)
+                    } catch (t: Throwable) {
+                        promiseAdapter.reject(t)
+                    }
                 }
             } catch (t: Throwable) {
                 // Reject on UI thread for consistent callback threading.
@@ -941,7 +956,6 @@ object RhinoUtils {
         // zh-CN: 将 ScriptPromiseAdapter 转换为 JavaScript Promise.
         return callFunction(scriptRuntime, scriptRuntime.js_ResultAdapter, "promise", arrayOf(promiseAdapter)) as NativeObject
     }
-
 
     @JvmStatic
     fun Class<*>.getRhinoStandardFunctionMethods(): List<Method> {
