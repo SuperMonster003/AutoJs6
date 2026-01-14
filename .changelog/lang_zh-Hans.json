@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.7.0": {
-      "released_date": "2026/01/12",
+      "released_date": "2026/01/14",
       "feature": [
         "插件中心功能, 支持插件的安装/卸载/更新等操作 (入口: 主页抽屉按钮)",
         "cvt 模块, 用于数据单位转换 (参阅 项目文档 > [单位转换](https://docs.autojs6.com/#/cvt))",
@@ -14,6 +14,7 @@
         "app.isDualInstalled 方法, 用于检测双开应用是否已安装 (需要 Shizuku 或 Root 权限) _[`issue #450`](http://issues.autojs6.com/450)_",
         "device.getSharedDeviceId 方法, 用于跨应用获取统一共享设备 ID _[`issue #455`](http://issues.autojs6.com/455)_",
         "device.setPointerLocation 等 Toggleablle 系列方法, 用于设置或获取指针位置系统设置项 _[`issue #381`](http://issues.autojs6.com/381)_",
+        "dialogs.build 方法支持 textAllCaps/(positive/negative/neutral)TextAllCaps 选项参数, 用于控制按钮文本是否全部大写",
         "images.loadAsync 方法, 用于异步获取网络图像资源 _[`issue #327`](http://issues.autojs6.com/327)_",
         "ui.getNavigationBarHeight 方法/navigationBarHeight 属性 (getter), 用于获取导航栏高度 _[`issue #456`](http://issues.autojs6.com/456)_",
         "ui.getVisible(Status/Navigation)BarHeight 方法/visible(Status/Navigation)BarHeight 属性 (getter), 用于快捷获取状态栏或导航栏可见高度 _[`issue #456`](http://issues.autojs6.com/456)_",
@@ -56,6 +57,8 @@
         "无法使用 console/toast 等方法显示 BigInt 数据类型的问题",
         "部分全局对象可能丢失 JavaScript 原型属性及方法的问题",
         "使用 XML 语法将 JavaScript 表达式作为属性值时, this 对象可能出现指向错误的问题",
+        "dialogs.build 方法无法使用 MaterialDialog.Builder 原生选项参数的问题",
+        "dialogs.build 方法可能破坏对象参数原有数据的问题",
         "canvas 元素控件 setMaxFps 方法内部帧率计算错误",
         "images.concat 方法纵向拼接时宽度值计算错误",
         "images.requestScreenCapture 方法调用时用户取消授权可能导致应用崩溃的问题",
@@ -364,9 +367,9 @@
         "布局分析支持切换窗口 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))",
         "auto.clearCache 方法, 支持清除控件缓存 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))",
         "threads.pool 方法, 支持线程池简单应用 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))",
-        "images.matchTemplate 方法增加 useTransparentMask 选项参数, 支持透明找图 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))",
+        "images.matchTemplate 方法支持 useTransparentMask 选项参数, 支持透明找图 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))",
         "images.requestScreenCaptureAsync 方法, 用于 UI 模式异步方式申请截图权限 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))",
-        "images.requestScreenCapture 方法增加 isAsync 选项参数, 支持异步方式获取屏幕截图 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))",
+        "images.requestScreenCapture 方法支持 isAsync 选项参数, 支持异步方式获取屏幕截图 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))",
         "images.on('screen_capture', callback) 等事件监听方法, 支持监听屏幕截图可用事件 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))",
         "images.stopScreenCapture 方法, 支持主动释放截图申请的相关资源 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))",
         "images.psnr/mse/ssim/mssim/hist/ncc 及 images.getSimilarity 方法, 用于获取图像相似性度量值",
@@ -520,7 +523,7 @@
     "v6.4.2": {
       "released_date": "2023/11/15",
       "feature": [
-        "dialogs.build() 选项参数属性 inputSingleLine",
+        "dialogs.build 方法支持 inputSingleLine 选项参数",
         "console.setTouchable 方法 _[`issue #122`](http://issues.autojs6.com/122)_"
       ],
       "fix": [
@@ -989,10 +992,10 @@
         "automator.lockScreen() 等方法 (参阅 示例代码 > 无障碍服务 > Android 9 新增)",
         "automator.headsethook() 等方法 (参阅 示例代码 > 无障碍服务 > Android 11 新增)",
         "automator.captureScreen() 方法 (参阅 示例代码 > 无障碍服务 > 获取屏幕截图)",
-        "dialogs.build() 选项参数属性 animation, linkify 等 (参阅 示例代码 > 对话框 > 个性化对话框)"
+        "dialogs.build 方法支持 animation, linkify 等选项参数 (参阅 示例代码 > 对话框 > 个性化对话框)"
       ],
       "fix": [
-        "dialogs.build() 选项参数属性 inputHint, itemsSelectedIndex 等功能异常",
+        "dialogs.build 方法 inputHint, itemsSelectedIndex 等选项参数功能异常",
         "JsDialog#on('multi_choice') 回调参数功能异常",
         "UiObject#parent().indexInParent() 总是返回 -1 的问题 _[`issue #16`](http://issues.autojs6.com/16)_",
         "Promise.resolve() 返回的 Thenable 在临近脚本结束时可能不被调用的问题",

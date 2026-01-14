@@ -215,9 +215,9 @@
         "L'analyse de la mise en page prend en charge le changement de fenêtre (Réf. à [Auto.js Pro](https://g.pro.autojs.org/))",
         "La méthode auto.clearCache prend en charge le nettoyage des caches de contrôle (Réf. à [Auto.js Pro](https://g.pro.autojs.org/))",
         "La méthode threads.pool prend en charge l'application simple des pools de threads (Réf. à [Auto.js Pro](https://g.pro.autojs.org/))",
-        "La méthode images.matchTemplate ajoute le paramètre d'option useTransparentMask pour prendre en charge la recherche d'image transparente (Réf. à [Auto.js Pro](https://g.pro.autojs.org/))",
+        "La méthode images.matchTemplate prend en charge le paramètre d'option useTransparentMask, prenant en charge la recherche d'images avec transparence (Ref to [Auto.js Pro](https://g.pro.autojs.org/))",
         "La méthode images.requestScreenCaptureAsync permet de demander des permissions de capture d'écran de manière asynchrone en mode UI (Réf. à [Auto.js Pro](https://g.pro.autojs.org/))",
-        "La méthode images.requestScreenCapture ajoute le paramètre d'option isAsync pour prendre en charge la capture d'écran asynchrone (Réf. à [Auto.js Pro](https://g.pro.autojs.org/))",
+        "La méthode images.requestScreenCapture prend en charge le paramètre d'option isAsync, prenant en charge la capture d'écran de manière asynchrone (Ref to [Auto.js Pro](https://g.pro.autojs.org/))",
         "images.on('screen_capture', callback) et d'autres méthodes d'écoute d'événements prennent en charge l'écoute des événements de disponibilité de capture d'écran (Réf. à [Auto.js Pro](https://g.pro.autojs.org/))",
         "La méthode images.stopScreenCapture soutient la libération active des ressources liées aux applications de capture d'écran (Réf. à [Auto.js Pro](https://g.pro.autojs.org/))",
         "Les méthodes Images.psnr/mse/ssim/mssim/hist/ncc et images.getSimilarity pour obtenir des mesures de similarité d'image",
@@ -371,7 +371,7 @@
     "v6.4.2": {
       "released_date": "2023/11/15",
       "feature": [
-        "Propriété de paramètre d'option inputSingleLine pour dialogs.build()",
+        "La méthode dialogs.build prend en charge le paramètre d'option inputSingleLine",
         "Méthode console.setTouchable _[`issue #122`](http://issues.autojs6.com/122)_"
       ],
       "fix": [
@@ -840,10 +840,10 @@
         "Méthodes automator.lockScreen() etc. (voir des exemples de code > Services d'accessibilité > Android 9)",
         "Méthodes automator.headsethook() etc. (voir des exemples de code > Services d'accessibilité > Android 11)",
         "Méthode automator.captureScreen() (voir des exemples de code > Services d'accessibilité > Capture d'écran)",
-        "Options des paramètres d'animation, de mise en lien etc. dans dialogs.build() (voir des exemples de code > Dialogues > Dialogues personnalisés)"
+        "La méthode dialogs.build prend en charge des paramètres d'option tels que animation, linkify, etc. (voir des exemples de code > Dialogues > Dialogues personnalisés)"
       ],
       "fix": [
-        "Anomalies des options des paramètres d'inputHint, des itemsSelectedIndex etc. dans dialogs.build()",
+        "Les paramètres d'option inputHint, itemsSelectedIndex, etc. de dialogs.build ne fonctionnent pas correctement",
         "Anomalies des paramètres de rappel dans JsDialog#on('multi_choice')",
         "Problème de retour constant de -1 par UiObject#parent().indexInParent() _[`issue #16`](http://issues.autojs6.com/16)_",
         "Problème de non-exécution des Thenable retournées par Promise.resolve() à la fin du script",

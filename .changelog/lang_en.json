@@ -215,9 +215,9 @@
         "Layout analysis supports window switching (Ref to [Auto.js Pro](https://g.pro.autojs.org/))",
         "auto.clearCache method supports clearing control caches (Ref to [Auto.js Pro](https://g.pro.autojs.org/))",
         "threads.pool method supports simple application of thread pools (Ref to [Auto.js Pro](https://g.pro.autojs.org/))",
-        "images.matchTemplate method adds useTransparentMask option parameter to support transparent image search (Ref to [Auto.js Pro](https://g.pro.autojs.org/))",
+        "images.matchTemplate method supports the useTransparentMask option parameter, enabling transparent template matching (Ref to [Auto.js Pro](https://g.pro.autojs.org/))",
         "images.requestScreenCaptureAsync method for asynchronously requesting screenshot permissions in UI mode (Ref to [Auto.js Pro](https://g.pro.autojs.org/))",
-        "images.requestScreenCapture method adds isAsync option parameter to support asynchronous screenshot capture (Ref to [Auto.js Pro](https://g.pro.autojs.org/))",
+        "images.requestScreenCapture method supports the isAsync option parameter, enabling asynchronous screen capture (Ref to [Auto.js Pro](https://g.pro.autojs.org/))",
         "images.on('screen_capture', callback) and other event listener methods support listening for screen capture availability events (Ref to [Auto.js Pro](https://g.pro.autojs.org/))",
         "images.stopScreenCapture method supports actively releasing resources related to screenshot applications (Ref to [Auto.js Pro](https://g.pro.autojs.org/))",
         "Images.psnr/mse/ssim/mssim/hist/ncc and images.getSimilarity methods for obtaining image similarity metrics",
@@ -371,7 +371,7 @@
     "v6.4.2": {
       "released_date": "2023/11/15",
       "feature": [
-        "Added inputSingleLine option parameter property to dialogs.build()",
+        "dialogs.build method supports the inputSingleLine option parameter",
         "Added console.setTouchable method _[`issue #122`](http://issues.autojs6.com/122)_"
       ],
       "fix": [
@@ -840,10 +840,10 @@
         "automator.lockScreen() and other methods (refer to Example Code > Accessibility Service > Android 9 New Additions)",
         "automator.headsethook() and other methods (refer to Example Code > Accessibility Service > Android 11 New Additions)",
         "automator.captureScreen() method (refer to Example Code > Accessibility Service > Take Screenshots)",
-        "dialogs.build() option parameter properties animation, linkify, etc. (refer to Example Code > Dialogs > Customized Dialogs)"
+        "dialogs.build method supports option parameters such as animation, linkify, etc. (refer to Example Code > Dialogs > Customized Dialogs)"
       ],
       "fix": [
-        "Issues with dialogs.build() option parameter properties like inputHint, itemsSelectedIndex, etc.",
+        "inputHint, itemsSelectedIndex, and other option parameters of dialogs.build behave abnormally",
         "Issue with JsDialog#on('multi_choice') callback parameters",
         "Issue with UiObject#parent().indexInParent() always returning -1 _[`issue #16`](http://issues.autojs6.com/16)_",
         "Issue with Promise.resolve() returned Thenable not being called near the end of the script",

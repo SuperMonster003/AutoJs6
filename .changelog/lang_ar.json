@@ -215,9 +215,9 @@
         "دعم تحليل التخطيط لتبديل النوافذ (راجع إلى [Auto.js Pro](https://g.pro.autojs.org/))",
         "طريقة auto.clearCache، تدعم مسح ذاكرة الكاش (راجع إلى [Auto.js Pro](https://g.pro.autojs.org/))",
         "طريقة threads.pool، تدعم تطبيق بسيط للمؤشرات (راجع إلى [Auto.js Pro](https://g.pro.autojs.org/))",
-        "طريقة images.matchTemplate تضيف خيار useTransparentMask لدعم البحث الشفاف عن الصور (راجع إلى [Auto.js Pro](https://g.pro.autojs.org/))",
+        "تدعم الدالة images.matchTemplate وسيط الخيار useTransparentMask، مع دعم البحث عن الصور مع الشفافية (Ref to [Auto.js Pro](https://g.pro.autojs.org/))",
         "طريقة images.requestScreenCaptureAsync، تُستخدم لطلب إذن لالتقاط الشاشة بشكل غير متزامن في وضع UI (راجع إلى [Auto.js Pro](https://g.pro.autojs.org/))",
-        "طريقة images.requestScreenCapture تضيف خيار isAsync لدعم الحصول على لقطة الشاشة بشكل غير متزامن (راجع إلى [Auto.js Pro](https://g.pro.autojs.org/))",
+        "تدعم الدالة images.requestScreenCapture وسيط الخيار isAsync، مع دعم التقاط لقطة الشاشة بطريقة غير متزامنة (Ref to [Auto.js Pro](https://g.pro.autojs.org/))",
         "طرق مراقبة الأحداث مثل images.on('screen_capture', callback)، تدعم مراقبة توافر لقطة الشاشة (راجع إلى [Auto.js Pro](https://g.pro.autojs.org/))",
         "طريقة images.stopScreenCapture، تدعم تحرير الموارد المتعلقة بطلب لقطة الشاشة (راجع إلى [Auto.js Pro](https://g.pro.autojs.org/))",
         "طرق images.psnr/mse/ssim/mssim/hist/ncc وimages.getSimilarity، تُستخدم للحصول على مقادير تشابه الصور",
@@ -371,7 +371,7 @@
     "v6.4.2": {
       "released_date": "2023/11/15",
       "feature": [
-        "خصائص خيار المعلمة inputSingleLine في dialogs.build()",
+        "تدعم الدالة dialogs.build وسيط الخيار inputSingleLine",
         "طريقة console.setTouchable _[`issue #122`](http://issues.autojs6.com/122)_"
       ],
       "fix": [
@@ -840,10 +840,10 @@
         "طرق automator.lockScreen() وما إلى ذلك (راجع أمثلة الكود > خدمات ذوي الاحتياجات الخاصة > جديد في Android 9)",
         "طرق automator.headsethook() وما إلى ذلك (راجع أمثلة الكود > خدمات ذوي الاحتياجات الخاصة > جديد في Android 11)",
         "طريقة automator.captureScreen() (راجع أمثلة الكود > خدمات ذوي الاحتياجات الخاصة > التقاط الشاشة)",
-        "خصائص الخيار في dialogs.build() مثل animation و linkify وما إلى ذلك (راجع أمثلة الكود > حوار > حوار مخصص)"
+        "تدعم الدالة dialogs.build وسائط خيارات مثل animation و linkify وغيرها. (راجع أمثلة الكود > حوار > حوار مخصص)"
       ],
       "fix": [
-        "خصائص الخيار في dialogs.build() مثل inputHint و itemsSelectedIndex وما إلى ذلك تعاني من خلل",
+        "توجد مشكلة في عمل وسائط الخيارات مثل inputHint و itemsSelectedIndex وغيرها في dialogs.build",
         "خلل في استدعاء المعاملات في JsDialog#on('multi_choice')",
         "مشكلة في UiObject#parent().indexInParent() الذي دائمًا يعيد القيمة -1 _[`issue #16`](http://issues.autojs6.com/16)_",
         "مشكلة في Promise.resolve() التي قد تعود بقيم غير مستدعاة عندما يكون النص البرمجي قريبًا من الانتهاء",

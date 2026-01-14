@@ -14,7 +14,6 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
@@ -57,7 +56,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 /** @author Aidan Follestad (afollestad) */
 public class MaterialDialog extends DialogBase implements View.OnClickListener, DefaultRvAdapter.InternalListCallback {
@@ -1079,6 +1077,10 @@ public class MaterialDialog extends DialogBase implements View.OnClickListener, 
         protected CharSequence positiveText;
         protected CharSequence neutralText;
         protected CharSequence negativeText;
+        protected Boolean positiveTextAllCaps = null;
+        protected Boolean negativeTextAllCaps = null;
+        protected Boolean neutralTextAllCaps = null;
+        protected Boolean textAllCaps = null;
         protected boolean positiveFocus;
         protected boolean neutralFocus;
         protected boolean negativeFocus;
@@ -1634,6 +1636,11 @@ public class MaterialDialog extends DialogBase implements View.OnClickListener, 
             return this;
         }
 
+        public Builder positiveTextAllCaps(boolean allCaps) {
+            this.positiveTextAllCaps = allCaps;
+            return this;
+        }
+
         public Builder positiveColor(@ColorInt int color) {
             return positiveColor(DialogUtils.getActionTextStateList(context, color));
         }
@@ -1670,6 +1677,11 @@ public class MaterialDialog extends DialogBase implements View.OnClickListener, 
             return this;
         }
 
+        public Builder neutralTextAllCaps(boolean allCaps) {
+            this.neutralTextAllCaps = allCaps;
+            return this;
+        }
+
         public Builder negativeColor(@ColorInt int color) {
             return negativeColor(DialogUtils.getActionTextStateList(context, color));
         }
@@ -1698,6 +1710,11 @@ public class MaterialDialog extends DialogBase implements View.OnClickListener, 
 
         public Builder negativeText(@NonNull CharSequence message) {
             this.negativeText = message;
+            return this;
+        }
+
+        public Builder negativeTextAllCaps(boolean allCaps) {
+            this.negativeTextAllCaps = allCaps;
             return this;
         }
 
@@ -2003,6 +2020,11 @@ public class MaterialDialog extends DialogBase implements View.OnClickListener, 
          */
         public Builder autoDismiss(boolean dismiss) {
             this.autoDismiss = dismiss;
+            return this;
+        }
+
+        public Builder textAllCaps(boolean allCaps) {
+            this.textAllCaps = allCaps;
             return this;
         }
 

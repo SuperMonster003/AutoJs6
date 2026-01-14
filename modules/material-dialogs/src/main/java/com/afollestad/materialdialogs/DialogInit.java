@@ -304,12 +304,19 @@ class DialogInit {
         dialog.view.setButtonGravity(builder.buttonsGravity);
         dialog.view.setButtonStackedGravity(builder.btnStackedGravity);
         dialog.view.setStackingBehavior(builder.stackingBehavior);
+
         boolean textAllCaps;
         textAllCaps = DialogUtils.resolveBoolean(builder.context, android.R.attr.textAllCaps, true);
 
         MDButton positiveTextView = dialog.positiveButton;
         dialog.setTypeface(positiveTextView, builder.mediumFont);
-        positiveTextView.setAllCapsCompat(textAllCaps);
+        if (builder.positiveTextAllCaps != null) {
+            positiveTextView.setAllCapsCompat(builder.positiveTextAllCaps);
+        } else if (builder.textAllCaps != null) {
+            positiveTextView.setAllCapsCompat(builder.textAllCaps);
+        } else {
+            positiveTextView.setAllCapsCompat(textAllCaps);
+        }
         positiveTextView.setText(builder.positiveText);
         positiveTextView.setTextColor(builder.positiveColor);
         dialog.positiveButton.setStackedSelector(dialog.getButtonSelector(DialogAction.POSITIVE, true));
@@ -320,7 +327,13 @@ class DialogInit {
 
         MDButton negativeTextView = dialog.negativeButton;
         dialog.setTypeface(negativeTextView, builder.mediumFont);
-        negativeTextView.setAllCapsCompat(textAllCaps);
+        if (builder.negativeTextAllCaps != null) {
+            negativeTextView.setAllCapsCompat(builder.negativeTextAllCaps);
+        } else if (builder.textAllCaps != null) {
+            negativeTextView.setAllCapsCompat(builder.textAllCaps);
+        } else {
+            negativeTextView.setAllCapsCompat(textAllCaps);
+        }
         negativeTextView.setText(builder.negativeText);
         negativeTextView.setTextColor(builder.negativeColor);
         dialog.negativeButton.setStackedSelector(dialog.getButtonSelector(DialogAction.NEGATIVE, true));
@@ -331,7 +344,13 @@ class DialogInit {
 
         MDButton neutralTextView = dialog.neutralButton;
         dialog.setTypeface(neutralTextView, builder.mediumFont);
-        neutralTextView.setAllCapsCompat(textAllCaps);
+        if (builder.neutralTextAllCaps != null) {
+            neutralTextView.setAllCapsCompat(builder.neutralTextAllCaps);
+        } else if (builder.textAllCaps != null) {
+            neutralTextView.setAllCapsCompat(builder.textAllCaps);
+        } else {
+            neutralTextView.setAllCapsCompat(textAllCaps);
+        }
         neutralTextView.setText(builder.neutralText);
         neutralTextView.setTextColor(builder.neutralColor);
         dialog.neutralButton.setStackedSelector(dialog.getButtonSelector(DialogAction.NEUTRAL, true));

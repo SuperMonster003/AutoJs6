@@ -215,9 +215,9 @@
         "Анализ макета поддерживает изменение окна (Ссылка на [Auto.js Pro](https://g.pro.autojs.org/))",
         "Метод auto.clearCache поддерживает очистку кешей управления (Ссылка на [Auto.js Pro](https://g.pro.autojs.org/))",
         "Метод threads.pool поддерживает простое применение пулов потоков (Ссылка на [Auto.js Pro](https://g.pro.autojs.org/))",
-        "Метод images.matchTemplate добавляет параметр опции useTransparentMask для поддержки поиска прозрачного изображения (Ссылка на [Auto.js Pro](https://g.pro.autojs.org/))",
+        "Метод images.matchTemplate поддерживает параметр-опцию useTransparentMask, поддерживается поиск изображений с прозрачностью (Ref to [Auto.js Pro](https://g.pro.autojs.org/))",
         "Метод images.requestScreenCaptureAsync позволяет запрашивать разрешения на запись экрана асинхронно в режиме интерфейса (Ссылка на [Auto.js Pro](https://g.pro.autojs.org/))",
-        "Метод images.requestScreenCapture добавляет параметр опции isAsync для поддержки асинхронного захвата экрана (Ссылка на [Auto.js Pro](https://g.pro.autojs.org/))",
+        "Метод images.requestScreenCapture поддерживает параметр-опцию isAsync, поддерживается асинхронное получение снимка экрана (Ref to [Auto.js Pro](https://g.pro.autojs.org/))",
         "images.on('screen_capture', callback) и другие методы прослушивания событий поддерживают прослушивание событий доступности захвата экрана (Ссылка на [Auto.js Pro](https://g.pro.autojs.org/))",
         "Метод images.stopScreenCapture поддерживает активное освобождение ресурсов, связанных с приложениями захвата экрана (Ссылка на [Auto.js Pro](https://g.pro.autojs.org/))",
         "Методы Images.psnr/mse/ssim/mssim/hist/ncc и images.getSimilarity для получения метрик сходства изображений",
@@ -371,7 +371,7 @@
     "v6.4.2": {
       "released_date": "2023/11/15",
       "feature": [
-        "Параметр опции inputSingleLine для dialogs.build()",
+        "Метод dialogs.build поддерживает параметр-опцию inputSingleLine",
         "Метод console.setTouchable _[`issue #122`](http://issues.autojs6.com/122)_"
       ],
       "fix": [
@@ -840,10 +840,10 @@
         "Методы automator.lockScreen() и другие (см. Примеры > Сервисы доступности > Новое в Android 9)",
         "Методы automator.headsethook() и другие (см. Примеры > Сервисы доступности > Новое в Android 11)",
         "Метод automator.captureScreen() (см. Примеры > Сервисы доступности > Получение скриншотов)",
-        "Параметры опций метода dialogs.build() animation, linkify и другие (см. Примеры > Диалоги > Персонализированные диалоги)"
+        "Метод dialogs.build поддерживает параметры-опции, такие как animation, linkify и т. д. (см. Примеры > Диалоги > Персонализированные диалоги)"
       ],
       "fix": [
-        "Неисправность параметров опций метода dialogs.build() inputHint, itemsSelectedIndex и другие",
+        "Параметры-опции inputHint, itemsSelectedIndex и т. д. в dialogs.build работают некорректно",
         "Неисправность параметров обратного вызова метода JsDialog#on('multi_choice')",
         "Проблема, в которой UiObject#parent().indexInParent() всегда возвращает -1 _[`issue #16`](http://issues.autojs6.com/16)_",
         "Возможная проблема с невызывающимся Thenable в Promise.resolve() в конце скрипта",

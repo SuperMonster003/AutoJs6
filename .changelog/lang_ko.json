@@ -215,9 +215,9 @@
         "레이아웃 분석은 창 전환을 지원합니다 (Auto.js Pro",
         "auto.clearCache 메소드는 제어 캐시를 지우는 것을 지원합니다 (Auto.js Pro",
         "threads.pool 메소드는 간단한 스레드 풀 응용 프로그램을 지원합니다 (Auto.js Pro",
-        "images.matchTemplate 메소드는 useTransparentMask 옵션 매개변수를 추가하여 투명 이미지 검색을 지원합니다 (Auto.js Pro",
+        "images.matchTemplate 메서드는 useTransparentMask 옵션 매개변수를 지원하며, 투명 이미지 검색을 지원합니다 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))",
         "images.requestScreenCaptureAsync 메소드는 UI 모드에서 비동기적으로 스크린 캡처 권한을 요청하는 데 사용됩니다  (Auto.js Pro",
-        "images.requestScreenCapture 메소드는 isAsync 옵션 매개변수를 추가하여 비동기적으로 스크린 캡처를 획득하는 것을 지원합니다 (Auto.js Pro",
+        "images.requestScreenCapture 메서드는 isAsync 옵션 매개변수를 지원하며, 비동기 방식으로 화면 캡처를 가져오는 것을 지원합니다 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))",
         "images.on('screen_capture', callback) 등의 이벤트 리스닝 메소드는 스크린 캡처가 사용 가능 이벤트를 모니터링하는 것을 지원합니다 (Auto.js Pro",
         "images.stopScreenCapture 메소드는 스크린 캡처 요청과 관련된 리소스를 적극 해제하는 것을 지원합니다 (Auto.js Pro",
         "images.psnr/mse/ssim/mssim/hist/ncc 및 images.getSimilarity 메소드는 이미지 유사성 측정값을 얻는 데 사용됩니다",
@@ -371,7 +371,7 @@
     "v6.4.2": {
       "released_date": "2023/11/15",
       "feature": [
-        "dialogs.build() 옵션 매개변수 속성 inputSingleLine",
+        "dialogs.build 메서드는 inputSingleLine 옵션 매개변수를 지원합니다",
         "console.setTouchable 메서드 _[`issue #122`](http://issues.autojs6.com/122)_"
       ],
       "fix": [
@@ -840,10 +840,10 @@
         "automator.lockScreen() 등 메서드 (샘플 코드 > 접근성 서비스 > Android 9 추가 참조)",
         "automator.headsethook() 등 메서드 (샘플 코드 > 접근성 서비스 > Android 11 추가 참조)",
         "automator.captureScreen() 메서드 (샘플 코드 > 접근성 서비스 > 스크린샷 가져오기 참조)",
-        "dialogs.build() 옵션 매개변수 속성 animation, linkify 등 (샘플 코드 > 대화상자 > 맞춤형 대화상자 참조)"
+        "dialogs.build 메서드는 animation, linkify 등의 옵션 매개변수를 지원합니다 (샘플 코드 > 대화상자 > 맞춤형 대화상자 참조)"
       ],
       "fix": [
-        "dialogs.build() 옵션 매개변수 속성 inputHint, itemsSelectedIndex 등 기능 오류",
+        "dialogs.build 의 inputHint, itemsSelectedIndex 등의 옵션 매개변수가 비정상적으로 동작합니다",
         "JsDialog#on('multi_choice') 콜백 매개변수 기능 오류",
         "UiObject#parent().indexInParent() 항상 -1 을 반환하는 문제 _[`issue #16`](http://issues.autojs6.com/16)_",
         "Promise.resolve() 가 반환하는 Thenable 이 스크립트 종료 시 호출되지 않을 수 있는 문제",

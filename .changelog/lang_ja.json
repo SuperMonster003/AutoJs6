@@ -215,9 +215,9 @@
         "レイアウト解析はウィンドウの切り替えをサポートしています (Auto.js Pro)",
         "auto.clearCache メソッド, コントロールキャッシュをクリアすることをサポートします (Auto.js Pro)",
         "threads.pool メソッド, シンプルなスレッドプールアプリケーションをサポートします (Auto.js Pro)",
-        "images.matchTemplate メソッドは useTransparentMask オプションパラメーターを追加し, 透明画像検索をサポートします (Auto.js Pro)",
+        "images.matchTemplate メソッドは useTransparentMask オプション引数をサポートし, 透過画像での画像検索に対応します (Ref to [Auto.js Pro](https://g.pro.autojs.org/))",
         "images.requestScreenCaptureAsync メソッド, UI モードで非同期にスクリーンキャプチャの許可を要求するために使用されます (Auto.js Pro)",
-        "images.requestScreenCapture メソッドは isAsync オプションパラメーターを追加し, 非同期でスクリーンキャプチャを取得することをサポートします (Auto.js Pro)",
+        "images.requestScreenCapture メソッドは isAsync オプション引数をサポートし, 非同期でスクリーンショットを取得できます (Ref to [Auto.js Pro](https://g.pro.autojs.org/))",
         "images.on('screen_capture', callback) などのイベントリスニングメソッドは, スクリーンキャプチャが使用可能なイベントをモニターすることをサポートします (Auto.js Pro)",
         "images.stopScreenCapture メソッドは, スクリーンキャプチャ要求に関連するリソースを積極的に解放することをサポートします (Auto.js Pro)",
         "images.psnr/mse/ssim/mssim/hist/ncc および images.getSimilarity メソッドは, 画像類似度測定値を取得するために使用されます",
@@ -371,7 +371,7 @@
     "v6.4.2": {
       "released_date": "2023/11/15",
       "feature": [
-        "dialogs.build() オプションパラメータ属性 inputSingleLine",
+        "dialogs.build メソッドは inputSingleLine オプション引数をサポートします",
         "console.setTouchable メソッド _[`issue #122`](http://issues.autojs6.com/122)_"
       ],
       "fix": [
@@ -840,10 +840,10 @@
         "automator.lockScreen() などのメソッド (サンプルコード > アクセシビリティサービス > Android 9 の新機能を参照)",
         "automator.headsethook() などのメソッド (サンプルコード > アクセシビリティサービス > Android 11 の新機能を参照)",
         "automator.captureScreen() メソッド (サンプルコード > アクセシビリティサービス > スクリーンショットの取得を参照)",
-        "dialogs.build() のオプションパラメータプロパティ animation, linkify など (サンプルコード > ダイアログ > カスタムダイアログを参照)"
+        "dialogs.build メソッドは animation, linkify などのオプション引数をサポートします (サンプルコード > ダイアログ > カスタムダイアログを参照)"
       ],
       "fix": [
-        "dialogs.build() のオプションパラメータプロパティ inputHint, itemsSelectedIndex などの機能異常",
+        "dialogs.build の inputHint, itemsSelectedIndex などのオプション引数の動作が異常です",
         "JsDialog#on('multi_choice') コールバックパラメータの機能異常",
         "UiObject#parent().indexInParent() が常に -1 を返す問題 _[`issue #16`](http://issues.autojs6.com/16)_",
         "Promise.resolve() で返される Thenable がスクリプトの終了時に呼び出されない可能性のある問題",
