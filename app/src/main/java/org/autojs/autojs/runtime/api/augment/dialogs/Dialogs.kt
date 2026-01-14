@@ -26,7 +26,6 @@ import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.colors.Colors
 import org.autojs.autojs.runtime.api.augment.ui.UI
-import org.autojs.autojs.runtime.exception.ShouldNeverHappenException
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.NOT_CONSTRUCTABLE
@@ -46,6 +45,7 @@ import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeObject
+import org.mozilla.javascript.Scriptable
 
 class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
@@ -112,12 +112,15 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun build(scriptRuntime: ScriptRuntime, args: Array<out Any?>): JsDialog = ensureArgumentsAtMost(args, 1) { argList ->
-            var (properties) = argList
-            if (properties.isJsNullish()) {
-                properties = newNativeObject().also { o -> o.defineProp("preset", true) }
+            val (propertiesRaw) = argList
+            require(propertiesRaw is NativeObject || propertiesRaw.isJsNullish()) {
+                "Argument properties ${propertiesRaw.jsBrief()} must be a JavaScript Object for dialogs.build"
             }
-            require(properties is NativeObject) {
-                "Argument properties ${properties.jsBrief()} must be a JavaScript Object for dialogs.build"
+            val properties = when {
+                propertiesRaw.isJsNullish() -> {
+                    newNativeObject().also { o -> o.defineProp("preset", true) }
+                }
+                else -> RhinoUtils.js_object_assign(newNativeObject(), propertiesRaw as Scriptable) as NativeObject
             }
             if (properties.inquire("preset", ::coerceBoolean, false)) {
                 checkPreset(properties, "title", R.string.text_preset_dialog_title)
@@ -129,7 +132,7 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             val builder = scriptRuntime.dialogs.newBuilder().also {
                 it.thread = scriptRuntime.threads.currentThread()
             }
-            properties.forEach { entry ->
+            properties.minus("preset").forEach { entry ->
                 val (nameArg) = entry
                 val name = coerceString(nameArg)
                 applyDialogProperty(builder, name, properties.prop(name))
@@ -452,7 +455,6 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         }
 
         private fun applyDialogProperty(builder: JsDialogBuilder, name: String, value: Any?) {
-            if (!propertySetterMap.containsKey(name)) return
             when (val propertySetter = propertySetterMap[name]) {
                 CVT_DEFAULT -> invokeMethod(builder, name, arrayOf(value))
                 CVT_DEFAULT_STRICT_BOOLEAN -> {
@@ -470,7 +472,7 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                     }
                     else -> invokeMethod(builder, propertySetter, arrayOf(value))
                 }
-                else -> throw ShouldNeverHappenException()
+                else -> invokeMethod(builder, name, arrayOf(value))
             }
         }
 

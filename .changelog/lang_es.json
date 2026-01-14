@@ -215,9 +215,9 @@
         "El análisis de diseño admite el cambio de ventanas (Ref a [Auto.js Pro](https://g.pro.autojs.org/))",
         "El método auto.clearCache admite la limpieza de cachés de control (Ref a [Auto.js Pro](https://g.pro.autojs.org/))",
         "El método threads.pool admite la aplicación simple de grupos de hilos (Ref a [Auto.js Pro](https://g.pro.autojs.org/))",
-        "El método images.matchTemplate agrega el parámetro de opción useTransparentMask para soportar la búsqueda de imágenes transparentes (Ref a [Auto.js Pro](https://g.pro.autojs.org/))",
+        "El método images.matchTemplate admite el parámetro de opción useTransparentMask, compatible con la búsqueda de imágenes con transparencia (Ref to [Auto.js Pro](https://g.pro.autojs.org/))",
         "El método images.requestScreenCaptureAsync se usa para solicitar permisos de captura de pantalla de manera asíncrona en el modo UI (Ref a [Auto.js Pro](https://g.pro.autojs.org/))",
-        "El método images.requestScreenCapture agrega el parámetro de opción isAsync para soportar la captura de pantalla de manera asíncrona (Ref a [Auto.js Pro](https://g.pro.autojs.org/))",
+        "El método images.requestScreenCapture admite el parámetro de opción isAsync, compatible con la captura de pantalla de forma asíncrona (Ref to [Auto.js Pro](https://g.pro.autojs.org/))",
         "images.on('screen_capture', callback) y otros métodos de escucha de eventos admiten la escucha de eventos de disponibilidad de captura de pantalla (Ref a [Auto.js Pro](https://g.pro.autojs.org/))",
         "El método images.stopScreenCapture soporta la liberación activa de recursos relacionados con la aplicación de captura de pantalla (Ref a [Auto.js Pro](https://g.pro.autojs.org/))",
         "Los métodos Images.psnr/mse/ssim/mssim/hist/ncc y images.getSimilarity se utilizan para obtener métricas de similitud de imágenes",
@@ -371,7 +371,7 @@
     "v6.4.2": {
       "released_date": "2023/11/15",
       "feature": [
-        "Propiedad inputSingleLine añadida a la opción de parámetros de dialogs.build()",
+        "El método dialogs.build admite el parámetro de opción inputSingleLine",
         "Método console.setTouchable _[`issue #122`](http://issues.autojs6.com/122)_"
       ],
       "fix": [
@@ -840,10 +840,10 @@
         "Métodos automator.lockScreen() y similares (ver Código de Ejemplo > Servicios de Accesibilidad > Nuevo en Android 9)",
         "Métodos automator.headsethook() y similares (ver Código de Ejemplo > Servicios de Accesibilidad > Nuevo en Android 11)",
         "Método automator.captureScreen() (ver Código de Ejemplo > Servicios de Accesibilidad > Captura de Pantalla)",
-        "Opciones de propiedad animation y linkify en dialogs.build() (ver Código de Ejemplo > Cuadros de diálogo > Personalización del cuadro de diálogo)"
+        "El método dialogs.build admite parámetros de opción como animation, linkify, etc. (ver Código de Ejemplo > Cuadros de diálogo > Personalización del cuadro de diálogo)"
       ],
       "fix": [
-        "Solución a las anomalías en las propiedades inputHint y itemsSelectedIndex en dialogs.build()",
+        "Los parámetros de opción inputHint, itemsSelectedIndex, etc. de dialogs.build presentan un comportamiento anómalo",
         "Solución a problemas con el parámetro de callback de JsDialog#on('multi_choice')",
         "Corrección del problema donde UiObject#parent().indexInParent() siempre devolvía -1 _[`issue #16`](http://issues.autojs6.com/16)_",
         "Resolución del problema donde las promesas Thenable de Promise.resolve() podrían no ser llamadas cerca del final del script",

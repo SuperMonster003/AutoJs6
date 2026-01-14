@@ -215,9 +215,9 @@
         "佈局分析支援切換視窗 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))",
         "auto.clearCache 方法, 支援清除控制元件快取 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))",
         "threads.pool 方法, 支援執行緒池簡單應用 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))",
-        "images.matchTemplate 方法增加 useTransparentMask 選項引數, 支援透明找圖 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))",
+        "images.matchTemplate 方法支援 useTransparentMask 選項引數, 支援透明找圖 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))",
         "images.requestScreenCaptureAsync 方法, 用於 UI 模式非同步方式申請截圖許可權 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))",
-        "images.requestScreenCapture 方法增加 isAsync 選項引數, 支援非同步方式獲取螢幕截圖 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))",
+        "images.requestScreenCapture 方法支援 isAsync 選項引數, 支援非同步方式獲取螢幕截圖 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))",
         "images.on('screen_capture', callback) 等事件監聽方法, 支援監聽螢幕截圖可用事件 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))",
         "images.stopScreenCapture 方法, 支援主動釋放截圖申請的相關資源 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))",
         "images.psnr/mse/ssim/mssim/hist/ncc 及 images.getSimilarity 方法, 用於獲取影象相似性度量值",
@@ -371,7 +371,7 @@
     "v6.4.2": {
       "released_date": "2023/11/15",
       "feature": [
-        "dialogs.build() 選項引數屬性 inputSingleLine",
+        "dialogs.build 方法支援 inputSingleLine 選項引數",
         "console.setTouchable 方法 _[`issue #122`](http://issues.autojs6.com/122)_"
       ],
       "fix": [
@@ -840,10 +840,10 @@
         "automator.lockScreen() 等方法 (參閱 示例程式碼 > 無障礙服務 > Android 9 新增)",
         "automator.headsethook() 等方法 (參閱 示例程式碼 > 無障礙服務 > Android 11 新增)",
         "automator.captureScreen() 方法 (參閱 示例程式碼 > 無障礙服務 > 獲取螢幕截圖)",
-        "dialogs.build() 選項引數屬性 animation, linkify 等 (參閱 示例程式碼 > 對話方塊 > 個性化對話方塊)"
+        "dialogs.build 方法支援 animation, linkify 等選項引數 (參閱 示例程式碼 > 對話方塊 > 個性化對話方塊)"
       ],
       "fix": [
-        "dialogs.build() 選項引數屬性 inputHint, itemsSelectedIndex 等功能異常",
+        "dialogs.build 方法 inputHint, itemsSelectedIndex 等選項引數功能異常",
         "JsDialog#on('multi_choice') 回撥引數功能異常",
         "UiObject#parent().indexInParent() 總是返回 -1 的問題 _[`issue #16`](http://issues.autojs6.com/16)_",
         "Promise.resolve() 返回的 Thenable 在臨近指令碼結束時可能不被呼叫的問題",
