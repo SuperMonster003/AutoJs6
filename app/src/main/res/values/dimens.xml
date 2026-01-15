@@ -7,7 +7,7 @@
     <dimen name="plugin_center_item_side_length">64dp</dimen>
     <dimen name="plugin_center_item_icon_border_width">1dp</dimen>
     <dimen name="content_inset">16dp</dimen>
-    <dimen name="divider_drawer_menu_group">6dp</dimen>
+    <dimen name="divider_drawer_menu_group">1.5dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="floaty_window_offset">12dp</dimen>
     <dimen name="github_avatar_border_width">1dp</dimen>

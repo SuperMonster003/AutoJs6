@@ -56,6 +56,7 @@
     <string name="content_description_fab_for_display_manifest">Un bouton d\'action flottant pour afficher le manifeste</string>
     <string name="content_failed_to_determine_index_of_theme_color_item">Impossible de déterminer l\'index de l\'élément de couleur du thème</string>
     <string name="content_failed_to_locate_library_for_theme_color">Impossible de localiser la bibliothèque de couleurs pour la couleur du thème</string>
+    <string name="content_failed_to_retrieve_changelog_of_current_language_with_zh_hans_release_notes_fallback">Impossible de récupérer le journal des modifications pour la langue actuellement affichée. Vous pouvez réessayer plus tard.\n\nLes notes de version en \"chinois simplifié (zh-Hans)\" seront affichées temporairement.</string>
     <string name="content_github_feedback">Une page web sera lancée pour signaler un problème.\nUn compte pour GitHub peut être nécessaire.</string>
     <string name="content_way_of_output_for_recorded_script">Sélectionnez un mode de sortie pour le script enregistré</string>
     <string name="crash_feedback">Copier le journal de débogage ou quitter directement</string>.
@@ -67,47 +68,71 @@
     <string name="default_value_working_directory">/Scripts</string>
     <string name="description_about_app_and_developer_preference">AutoJs6 est un outil JavaScript automatisé pour Android, qui est open-source et cloné de \"hyb1996/Auto.js\".\n\nPour demander de l\'aide ou des commentaires, allez sur GitHub issues ou rejoignez le groupe Tencent QQ 690946137.</string>
     <string name="description_about_app_tips_preference">1. Maintenez enfoncée l\'icône de l\'application sur la page \"À propos de l\'application et du développeur\" pour accéder à la page des options de développement d\'AutoJs6.</string>
+    <string name="description_accessibility_service">Le service d\'accessibilité est la capacité centrale d\'AutoJs6 pour l\'automatisation. Il sert à lire les informations des contrôles à l\'écran et à simuler des interactions telles que [ appuyer / faire glisser / saisir ].\n\nLa plupart des fonctions liées à l\'automatisation, ainsi que des outils comme l\'analyse de mise en page, nécessitent l\'activation du service d\'accessibilité pour fonctionner correctement.</string>
+    <string name="description_all_files_access" tools:ignore="TypographyEllipsis">L\'autorisation \"gérer tous les fichiers\" (ou \"accès à tous les fichiers\") permet à AutoJs6 d\'[ créer / lire / modifier / supprimer ] des fichiers directement via des chemins de fichiers classiques dans l\'espace de stockage partagé, afin que les scripts puissent accéder à \"Internal Storage\" et que l\'explorateur de fichiers puisse afficher et gérer les fichiers correctement.\n\nSur les appareils Android 11+, c\'est le principal moyen d\'obtenir un accès lecture/écriture à l\'ensemble du stockage.</string>
     <string name="description_app_language_preference">Cette préférence permet de modifier la langue d\'affichage d\'AutoJs6, y compris les messages d\'exception des scripts en cours d\'exécution.\n\nNote : un redémarrage de l\'application peut être nécessaire pour que la langue s\'applique comme prévu.</string>
+    <string name="description_auto_night_mode">Lorsque le mode nuit automatique est activé, AutoJs6 bascule automatiquement en mode nuit en fonction des paramètres système.\n\nNote: l\'interrupteur de mode nuit automatique et l\'interrupteur de mode nuit sont liés et s\'influencent mutuellement.</string>
     <string name="description_change_working_dir_preference">Changer le chemin du répertoire contenant les scripts</string>.
     <string name="description_check_for_updates_preference">AutoJs6 obtient et télécharge les mises à jour depuis GitHub.</string>
+    <string name="description_client_mode">Le mode client permet à AutoJs6 de se connecter activement à un serveur distant afin d\'effectuer [ transfert de scripts / impression des journaux / contrôle à distance ].\n\nEn général, l\'appareil et le serveur doivent être sur le même réseau local (LAN) ou dans un environnement réseau où ils peuvent s\'atteindre mutuellement.</string>
+    <string name="description_display_over_other_app">L\'autorisation \"afficher par-dessus les autres applications\" permet à AutoJs6 d\'afficher des fenêtres flottantes ou un bouton flottant au-dessus des autres applications, afin d\'exécuter rapidement des actions ou de consulter des informations sur n\'importe quel écran.\n\nNote: si cette autorisation n\'est pas accordée, les fenêtres flottantes et le bouton flottant peuvent ne pas s\'afficher ou ne pas fonctionner correctement.</string>
     <string name="description_documentation_source_preference">Documentation locale : Utilisation des fichiers intégrés d\'AutoJs6 comme sources de documentation, aucune connexion réseau n\'est nécessaire. Le contenu change au fur et à mesure que AutoJs6 est mis à jour.\nDocumentation en ligne : Utilisation des pages GitHub comme sources de documentation, nécessitant une connexion réseau. Le contenu est toujours à jour.\n\nRemarque : pour optimiser l\'expérience de lecture des documents en ligne, il est recommandé d\'utiliser un dispositif d\'affichage grand écran tel qu\'un moniteur de bureau.\nRemarque : à partir de la version 6.2.0, la documentation est encore dans les phases préliminaires de développement, et la plupart du contenu n\'a pas encore été écrit ou mis à jour.</string>
     <string name="description_documentation_source_preference_more">Les conditions suivantes doivent être remplies pour la prise en charge du thème sombre sur les pages de la documentation :\n1. Le mode nuit d\'AutoJs6 est activé\n2. WebView du système Android (ou des navigateurs comme Google Chrome) :\n- Android API Level 29 (Android 10) [Q] et supérieur : version >= 76\n- Android API Niveau 28 (Android 9) [P] et inférieur : version >= 105</string>
     <string name="description_extending_js_build_in_objects">L\'extension des objets JavaScript intégrés peut augmenter la flexibilité du code et permettre des fonctionnalités plus riches, mais elle peut provoquer des conflits et même des pannes.\nTous les scripts ont des extensions intégrées activées par défaut lorsque l\'option est activée.\nLes extensions intégrées sont souvent peu sûres et ne sont pas recommandées, sauf si les principes et les risques des extensions intégrées sont clairement compris.\nLorsque l\'option est désactivée, les extensions intégrées peuvent toujours être activées via l\'objet global plugins, comme décrit dans la documentation du projet.</string>
     <string name="description_file_extensions_preference">Permet de définir l\'affichage des extensions de fichier dans l\'explorateur AutoJs6.</string>
+    <string name="description_floating_button">Le bouton flottant affiche un point d\'entrée rapide déplaçable au bord de l\'écran, pouvant être utilisé pour [ démarrer ou arrêter des scripts / analyse de mise en page / afficher le nom de paquet ou le nom d\'activité récents / afficher la position du pointeur ].\n\nNote: cette fonction nécessite généralement l\'autorisation \"afficher par-dessus les autres applications\".</string>
+    <string name="description_foreground_service">Le service au premier plan permet de maintenir AutoJs6 en fonctionnement plus stable en arrière-plan, adapté à des scénarios tels que [ exécution prolongée de scripts / maintien de connexion / écoute continue ].\n\nUne fois activé, le système affiche une \"notification de service au premier plan\" pour informer l\'utilisateur qu\'AutoJs6 continue de s\'exécuter. Cette notification reste généralement affichée jusqu\'à l\'arrêt du service.\n\nDéfinir la notification sur \"Silent\" ou \"Minimize\" ne fait que réduire l\'intensité de l\'alerte et n\'affecte généralement pas le service au premier plan.\n\nSi le canal de notifications est désactivé ou si AutoJs6 est empêché d\'envoyer des notifications, cela peut affecter le démarrage normal et la stabilité du service au premier plan.</string>
     <string name="description_hidden_files_preference">Permet d\'afficher ou non les fichiers et dossiers cachés (commençant généralement par \".\") dans l\'explorateur de fichiers d\'AutoJs6.</string>
+    <string name="description_ignore_battery_optimizations">Ignorer l\'optimisation de la batterie peut réduire les restrictions du système sur AutoJs6 en arrière-plan, ce qui aide les tâches planifiées ou les scripts de longue durée à s\'exécuter de manière relativement plus stable en veille.\n\nNote: selon le fabricant, le système peut appliquer des politiques d\'économie d\'énergie supplémentaires, telles que des restrictions d\'auto-démarrage ou un gel en arrière-plan.</string>
+    <string name="description_keep_screen_on_when_in_foreground">Permet de contrôler si l\'écran reste allumé lorsque AutoJs6 est au premier plan.</string>
     <string name="description_keep_screen_on_when_in_foreground_preference">Préférence pour que l\'écran de l\'appareil reste allumé et lumineux lorsque AutoJs6 est au premier plan.\nPour que cela se produise uniquement sur la page d\'accueil parmi toutes les pages de l\'application AutoJs6, choisissez l\'option \"page d\'accueil uniquement\".</string>
     <string name="description_launcher_icon_preference">L\'icône du lanceur prend en charge les modes d\'affichage d\'icône adaptative ou d\'icône héritée à fond transparent. L\'effet d\'affichage réel peut varier selon les systèmes Android. L\'application du changement peut prendre quelques secondes après avoir basculé de mode d\'affichage.</string>
     <string name="description_launcher_shortcuts">Les raccourcis permettent d\'effectuer des actions spécifiques dans AutoJs6. Les utilisateurs peuvent afficher ces raccourcis dans un lanceur pris en charge et démarrer rapidement certaines tâches ou lancer une activité, comme la lecture de la documentation de l\'application AutoJs6, le lancement de la page de configuration d\'AutoJs6, etc.</string>
     <string name="description_manage_ignored_updates_preference">Cliquez pour afficher ou gérer les éléments de la liste.\nAppuyez longuement pour supprimer l\'élément de la liste.</string>
+    <string name="description_night_mode">Permet de contrôler et de refléter la stratégie de mode nuit d\'AutoJs6.\n\nNote: l\'interrupteur de mode nuit et l\'interrupteur de mode nuit automatique sont liés et s\'influencent mutuellement.</string>
     <string name="description_night_mode_preference">Le mode nuit (également connu sous le nom de thème sombre) s\'applique à la fois à l\'interface utilisateur du système Android et aux applications exécutées sur l\'appareil, ce qui améliore la visibilité pour les utilisateurs malvoyants et ceux qui sont sensibles à la lumière vive, et facilite l\'utilisation d\'un appareil par quiconque dans un environnement à faible luminosité.\n\nSystème de suivi : AutoJs6 possède des paramètres de mode nuit identiques à ceux du système Android\nToujours activé: AutoJs6 maintient le mode Nuit activé (indépendamment des paramètres du système Android).\nToujours désactivé: AutoJs6 désactive le mode Nuit (indépendamment des paramètres du système Android).\n\nRemarque : l\'option Suivre le système n\'est disponible qu\'à partir du niveau 28 de l\'API Android (Android 9) [P].</string>
     <string name="description_night_mode_preference_more">Pour activer le mode Nuit dans le système Android :\n- Niveau 29 de l\'API Android (Android 10) [Q] et supérieur : Paramètres -> Affichage -> Thème.\n- Niveau 28 de l\'API Android (Android 9) [P]: Options du développeur -> Mode nuit.\n\nLes conditions suivantes doivent être remplies pour appliquer un mode nuit (thème sombre) à un contenu Web à l\'aide d\'un composant WebView (comme la page de documentation AutoJs6) :\n1. WebView du système Android (ou des navigateurs comme Google Chrome) :\n- Android API Level 29 (Android 10) [Q] et plus : version >= 76\n- API Android Niveau 28 (Android 9) [P]: version >= 105\n2. Le contenu Web du composant WebView est adapté au thème sombre (par des ressources CSS ou Android XML, etc.).</string>
+    <string name="description_notification_access">L\'autorisation \"accès aux notifications\" (ou \"autorisation de lecture des notifications\") permet à AutoJs6 de lire le contenu des notifications système, afin que les scripts puissent écouter des notifications ou récupérer le texte des notifications, etc.</string>
+    <string name="description_post_notifications">L\'autorisation \"envoyer des notifications\" permet à AutoJs6 de publier des notifications dans le système, afin que les scripts puissent publier et gérer des notifications personnalisées dans le panneau de notifications.\n\nNote: sur les appareils Android 13+, si cette autorisation n\'est pas accordée, certaines notifications peuvent ne pas s\'afficher, et cela peut affecter le démarrage et la stabilité des services au premier plan.</string>
+    <string name="description_project_media_access">Avec l\'accès aux médias du projet, l\'avertissement de sécurité pour l\'enregistrement d\'écran ne sera pas demandé.</string>
     <string name="description_restart_strategy">La stratégie de redémarrage n\'affecte que le bouton de redémarrage dans le tiroir de la page d\'accueil.\n\nRedémarrage rapide : redémarre rapidement l\'application. Si le redémarrage échoue ou qu\'un comportement inattendu survient, essayez de passer à \"Redémarrage planifié\".\nRedémarrage planifié : configure à l\'avance une tâche de courte durée. Après l\'arrêt de l\'application, elle redémarrera selon la planification afin de relancer l\'application.</string>
     <string name="description_rhino_java_primitive_wrap">Interrupteur activé (par défaut) : les valeurs retournées par les méthodes Java de type Number/Boolean/Character sont encapsulées comme objets Java et exposées au script (String exclu). typeof vaut \"object\", species vaut \"JavaObject\" ; les méthodes Java restent accessibles, ce qui permet de conserver les caractéristiques de type précises de Java et la résolution de surcharge.\n\nInterrupteur désactivé : les types ci‑dessus ne sont plus encapsulés et sont exposés directement comme primitives JavaScript (number/boolean/chaîne à un seul caractère). typeof correspond au type JavaScript respectif, plus conforme à la sémantique/à l\'écosystème JavaScript. Il est toujours possible de déclarer explicitement un wrapper Java avec new, par ex. new java.lang.Boolean(true).\n\nVoir : http://issues.autojs6.com/435</string>
     <string name="description_root_mode_preference">Si vous avez un accès exotique à la racine ou un état anormal pour l\'accès à la racine, vous pouvez forcer le réglage de la racine sur racine ou non-racine.</string>
     <string name="description_root_record_out_file_type_preference">Type binaire : non modifiable, avec l\'extension de fichier \"auto\".\nType JavaScript : peut être édité ou copié directement, avec l\'extension de fichier \"js\".</string>
+    <string name="description_server_mode">Le mode serveur permet à AutoJs6 de démarrer un service sur l\'appareil actuel et d\'attendre des connexions de clients externes afin d\'effectuer [ transfert de scripts / impression des journaux / contrôle à distance ].\n\nLe mode serveur d\'AutoJs6 prend en charge deux modes de connexion:\n1. Réseau local (LAN)\n2. Android Debug Bridge (ADB)</string>
+    <string name="description_shizuku_access">Shizuku vous permet d\'obtenir des privilèges ADB et d\'accéder aux API du système</string>
     <string name="description_stable_mode">Le mode stable le rend plus stable lors de l\'obtention des limites de mise en page, mais certains résultats peuvent être ignorés.\nA11y service\'s restart required.</string>
     <string name="description_theme_color_preference">La couleur du thème est appliquée aux widgets, y compris, mais sans s\'y limiter, aux widgets suivants :\nBarre d\'état\nBarre d\'applications\nIcône de fichier\nIcône d\'élément de tâche\nFAB\nTitre de la catégorie Paramètres\nBouton de commutation\n\nRemarque : Depuis la version 6.2.0 d\'AutoJs6, il n\'y a pas encore de différence entre la couleur primaire, la couleur primaire foncée et la couleur d\'accentuation.</string>
     <string name="description_timed_task_backend">Contrôle le mécanisme sous-jacent de déclenchement programmé des scripts.\n\nAlarmManager : En accordant l\'autorisation \"Autoriser la définition d\'alarmes et de rappels\", les tâches peuvent se déclencher avec une meilleure ponctualité.\nWorkManager : Plus conciliant avec le système ; adapté aux tâches non critiques tolérant un certain délai.\nJobScheduler : Ancienne implémentation conservée pour la compatibilité, avec un risque accru de retard.</string>
     <string name="description_timed_task_backend_more" tools:ignore="TypographyEllipsis">Scénarios d\'usage et différences :\n\n1. AlarmManager\nConvient aux tâches sensibles à la ponctualité, p. ex. [rappels/scripts strictement planifiés/...].\nSous Android 12+ avec l\'autorisation \"Autoriser la définition d\'alarmes et de rappels\", l\'exécution reste plus ponctuelle écran éteint ou en veille.\nSans cette autorisation, le système peut réduire la précision ou retarder l\'exécution.\n\n2. WorkManager\nConvient aux tâches ne nécessitant pas une ponctualité stricte, p. ex. [synchronisation non critique/nettoyage/statistiques/...].\nL\'ordonnancement dépend de [la batterie/le réseau/la charge/les stratégies de veille/...], ce qui peut retarder l\'exécution écran éteint ou en veille.\nBien qu\'il ne garantisse pas la précision temporelle, il offre des atouts en [achèvement fiable/reprise en cas d\'échec/chaînage/déduplication des travaux].\n\n3. JobScheduler\nImplémentation historique conservée pour compatibilité.\nSur les versions récentes d\'Android, les tâches peuvent subir des retards plus importants.\nSauf besoin de compatibilité, il n\'est généralement pas recommandé.</string>
+    <string name="description_usage_stats_access">Donne accès à l\'historique et aux statistiques d\'utilisation du périphérique, ce qui donne à currentPackage() un résultat plus précis</string>.
     <string name="description_version_histories_preference">Consulter l\'historique des versions publiées d\'AutoJs6 sur GitHub ainsi que les statistiques des principales catégories.</string>
+    <string name="description_write_secure_settings">Paramètres de sécurité du système, contenant les préférences du système que les applications peuvent lire mais ne sont pas autorisées à écrire.\nIl s\'agit des préférences que l\'utilisateur doit explicitement modifier par le biais de l\'interface utilisateur d\'une application système.\nAvec l\'autorisation de paramètres de sécurité du système, les applications normales peuvent directement modifier les paramètres de sécurité (comme le service d\'accessibilité).</string>
+    <string name="description_write_system_settings">L\'autorisation \"modifier les paramètres système\" permet à AutoJs6 de modifier certains paramètres système, afin que les scripts puissent changer des réglages tels que [ luminosité de l\'écran / rotation automatique / délai d\'extinction de l\'écran ].</string>
+    <string name="dialog_button_advanced_settings">Avancé</string>
     <string name="dialog_button_back">@string/text_back</string>
     <string name="dialog_button_cancel">Cancel</string>
     <string name="dialog_button_cancel_download">Annulation</string>
     <string name="dialog_button_clear_items">Effacer</string>
     <string name="dialog_button_confirm">OK</string>
+    <string name="dialog_button_connect">Se connecter</string>
     <string name="dialog_button_continue">@string/text_continue</string>
+    <string name="dialog_button_continue_connecting">@string/dialog_button_continue</string>
     <string name="dialog_button_copy">@string/text_copy</string>
     <string name="dialog_button_default_prefix">Préfixe def</string>
     <string name="dialog_button_details">Details</string>
     <string name="dialog_button_dismiss">Quitter</string>
     <string name="dialog_button_download_with_browser">Navigateur</string>
+    <string name="dialog_button_exception_details">Détails</string>
     <string name="dialog_button_file_information">Infos fichier</string>
     <string name="dialog_button_history">Histoire</string>
     <string name="dialog_button_ignore_current_update">Ignorer</string>
     <string name="dialog_button_join_group">Joindre groupe</string>
+    <string name="dialog_button_manager">Gestionnaire</string>
     <string name="dialog_button_more">Plus</string>
     <string name="dialog_button_open_color_palette">Palette</string>
     <string name="dialog_button_quit">Quit</string>
+    <string name="dialog_button_quit_connecting">@string/dialog_button_quit</string>
     <string name="dialog_button_remove">Supprimer</string>
     <string name="dialog_button_retrieve">Récupérer</string>
     <string name="dialog_button_retry">Retourner</string>
@@ -120,6 +145,8 @@
     <string name="dialog_button_version_histories">Historique</string>
     <string name="dialog_button_view_file">Voir le fichier</string>
     <string name="dialog_button_view_shortcuts">Voir les raccourcis</string>
+    <string name="dialog_button_view_update">Voir la mise à jour</string>
+    <string name="dialog_button_view_with_browser">@string/dialog_button_download_with_browser</string>
     <string name="dialog_title_color_details">Détails de la couleur</string>
     <string name="dialog_title_color_palette">Palette de couleurs</string>
     <string name="dialog_title_theme_color_details">Détails de la couleur du thème</string>
@@ -169,6 +196,8 @@
     <string name="error_arguments_cannot_be_empty">Les arguments ne peuvent pas être vides</string>
     <string name="error_arguments_must_be_empty">Les arguments doivent être vides</string>
     <string name="error_at_least_one_abi_needs_to_be_selected">Au moins un ABI doit être sélectionné</string>
+    <string name="error_autojs6_version_must_not_be_lower_than_ver">La version d\'AutoJs6 ne doit pas être inférieure à %1$s</string>
+    <string name="error_autojs6_version_number_must_not_be_lower_than_num">Le numéro de version d\'AutoJs6 ne doit pas être inférieur à %1$s</string>
     <string name="error_both_bitmap_and_mat_are_null">Le bitmap et le mat sont tous deux nuls</string>
     <string name="error_cannot_be_null">%s cannot be null</string>
     <string name="error_cannot_connect_to_github">Impossible de se connecter à GitHub</string>
@@ -203,11 +232,17 @@
     <string name="error_failed_to_grant_shizuku_access">Échec de l\'octroi de la permission de Shizuku</string>
     <string name="error_failed_to_instantiate">Échec de l\'instanciation de \"%s\"</string>
     <string name="error_failed_to_instantiate_with_cause"><![CDATA[Échec de l\'instanciation de \"%1$s\": [ %2$s ]]]></string>
+    <string name="error_failed_to_launch_manager">Échec du lancement du gestionnaire</string>
+    <string name="error_failed_to_launch_system_settings">Échec du lancement des paramètres système</string>
+    <string name="error_failed_to_load_plugins_with_reason">Échec du chargement des plugins.\nRaison : %1$s.</string>
     <string name="error_failed_to_render_content">Impossible d\'afficher le contenu</string>
+    <string name="error_failed_to_retrieve_changelog">Échec de la récupération du journal des modifications</string>
+    <string name="error_failed_to_retrieve_release_notes">Échec de la récupération des notes de version</string>
     <string name="error_failed_to_retrieve_version_histories">Impossible de récupérer l\'historique des versions</string>
     <string name="error_failed_to_retrieve_version_properties_file_to_parse_version_information">Impossible de récupérer version.properties pour analyser les informations de version</string>
     <string name="error_failed_to_revoke_shizuku_access">La révocation des droits de Shizuku a échoué</string>
     <string name="error_failed_to_run_script">Échec de l\'exécution du script</string>
+    <string name="error_failed_to_save_project_config">Échec de l\'enregistrement de la configuration du projet</string>
     <string name="error_file_in_path_does_not_exist">Le fichier dans le chemin \"%1$s\" n\'existe pas</string>
     <string name="error_function_called_in_ui_thread">Le thread d\'interface utilisateur ne peut pas être bloqué. Essayez d\'exécuter %s() dans un sous-fil ou un sous-script</string>.
     <string name="error_function_called_more_than_once">%s() appelé plus d\'une fois</string>
@@ -244,6 +279,7 @@
     <string name="error_no_applications_available_for_playing_this_file">Aucune application disponible pour lire ce fichier</string>
     <string name="error_no_applications_available_for_sending_this_file">Aucune application disponible pour envoyer ce fichier</string>
     <string name="error_no_applications_available_for_viewing_this_file">Aucune application disponible pour afficher ce fichier</string>
+    <string name="error_no_available_url_provided_for_current_plugin">Aucune URL disponible n\'a été fournie pour le plug-in actuel</string>
     <string name="error_no_display_over_other_apps_permission">Aucune permission \"display over other apps\"</string>
     <string name="error_no_permission_to_access_shizuku">Pas de permission pour accéder à Shizuku</string>
     <string name="error_no_post_notifications_permission">Pas d\'autorisation pour les \"notifications d\'envoi\"</string>
@@ -272,6 +308,7 @@
     <string name="error_shizuku_is_not_installed">Shizuku n\'est pas installé</string>
     <string name="error_shizuku_service_may_be_not_running">Le service Shizuku n\'est peut-être pas en cours d\'exécution</string>
     <string name="error_shizuku_version_is_not_supported">La version de Shizuku n\'est pas prise en charge</string>
+    <string name="error_specified_autojs6_version_number_must_be_greater_than_461">Le numéro de version AutoJs6 spécifié doit être supérieur à 461</string>
     <string name="error_the_transformer_for_required_property_cannot_return_nullish">Le transformateur pour la propriété requise \"%1$s\" ne peut pas retourner une valeur nulle</string>
     <string name="error_thread_is_not_alive">Thread n\'est pas vivant</string>
     <string name="error_unable_to_use_shizuku_service">Impossible d\'utiliser le service Shizuku</string>
@@ -482,6 +519,7 @@
     <string name="text_captured_window_info_type_unknown">Type inconnu</string>
     <string name="text_category_filter">Filtre de catégorie</string>
     <string name="text_change_working_dir">Changer de répertoire de travail</string>
+    <string name="text_changelog">Journal des modifications</string>
     <string name="text_changelog_item_dependency">Certaines dépendances ou versions de bibliothèques locales ont été ajustées</string>
     <string name="text_check_for_updates">Vérifier les mises à jour</string>
     <string name="text_check_for_updates_while_ignoring_the_local_version">Vérifier les mises à jour (ignorer la version locale)</string>
@@ -519,7 +557,10 @@
     <string name="text_confirm_to_clear_histories_of_all_color_libraries">Tous les historiques ci-dessous seront effacés\n\n[ Toutes les bibliothèques de couleurs ]\n\nÊtes-vous sûr de vouloir les effacer ?</string>
     <string name="text_confirm_to_delete">Vous êtes sûr de vouloir supprimer ?</string>
     <string name="text_confirm_to_remove">Etes-vous sûr de supprimer ?</string>
+    <string name="text_confirm_to_uninstall">Voulez-vous vraiment désinstaller ?</string>
     <string name="text_connect_to_pc">Connexion au PC</string>
+    <string name="text_connected">Connecté</string>
+    <string name="text_connected_count_with_colon">Connectés : %1$d</string>
     <string name="text_connection_cannot_be_established">La connexion ne peut pas être établie</string>
     <string name="text_console">Console</string>
     <string name="text_continue">Continue</string>
@@ -641,6 +682,7 @@
     <string name="text_failed_to_retrieve">Échec de la récupération</string>
     <string name="text_failed_to_save_remote_project_to_local_storage">Échec de l\'enregistrement du projet distant dans le stockage local</string>
     <string name="text_failed_to_send_log_entries">Échec de l\'envoi des entrées de journal</string>
+    <string name="text_failed_to_update">Échec de la mise à jour</string>
     <string name="text_failed_to_write_file">Fail to write file</string>
     <string name="text_file">Fichier</string>
     <string name="text_file_details">Détails du fichier</string>
@@ -665,7 +707,6 @@
     <string name="text_floating_button">Bouton flottant</string>
     <string name="text_force_stop">Force stop</string>
     <string name="text_foreground_service">Service d\'avant-plan</string>
-    <string name="text_foreground_service_description">Les services d\'avant-plan effectuent des opérations qui sont perceptibles par l\'utilisateur\nLes services d\'avant-plan affichent une notification dans la barre d\'état, de sorte que les utilisateurs sont activement conscients que votre application effectue une tâche en avant-plan et consomme des ressources système.\nLa notification ne peut pas être rejetée à moins que le service ne soit arrêté ou supprimé de l\'avant-plan.\nLa notification peut avoir une faible priorité, voire être désactivée, en appuyant longuement sur la notification.</string>
     <string name="text_formatting_completed">Formatage terminé</string>
     <string name="text_function">Fonction</string>
     <string name="text_fx_keyboard">Fx clavier</string>
@@ -705,9 +746,11 @@
     <string name="text_install_from_url">Installer depuis \"URL\"</string>
     <string name="text_install_plugin_from_url">Installer le plugin depuis \"URL\"</string>
     <string name="text_installable">Installable</string>
+    <string name="text_integrity_verification_failed">Échec de la vérification de l\'intégrité</string>
     <string name="text_invalid_character_is_removed">Caractère invalide est supprimé</string>
     <string name="text_invalid_package_name">Nom de paquet non valide</string>
     <string name="text_invalid_project">Projet non valide</string>
+    <string name="text_ip_address_may_be_invalid_for_server_connection" tools:ignore="TypographyEllipsis">L\'adresse IP \"%1$s\" a un usage particulier (loopback/broadcast/multicast/reserved/...), il est donc possible qu\'elle ne puisse pas être utilisée pour se connecter au serveur cible.</string>
     <string name="text_is_latest_version">Pas de version plus récente trouvée</string>
     <string name="text_issue_report">Réaction</string>
     <string name="text_js_file">*.js file</string>
@@ -775,11 +818,13 @@
     <string name="text_night_mode">Mode nuit</string>
     <string name="text_no_browser">Aucun navigateur n\'est installé</string>
     <string name="text_no_content">Pas de contenu</string>
+    <string name="text_no_content_description">Aucune description de contenu</string>
     <string name="text_no_histories">Aucun Histoire</string>
     <string name="text_no_ignored_updates">Aucune mise à jour ignorée</string>
     <string name="text_no_log_entries_to_copy">Aucune entrée de journal à copier</string>
     <string name="text_no_log_entries_to_export">Aucune entrée de journal à exporter</string>
     <string name="text_no_log_entries_to_send">Aucune entrée de journal à envoyer</string>
+    <string name="text_no_plugins_installed_hint">Aucun plugin n\'est actuellement installé.\nCliquez sur le bouton \"+\" pour installer des plugins.</string>
     <string name="text_no_root">Non-root</string>
     <string name="text_no_root_access">Aucun accès root</string>
     <string name="text_no_scripts_to_stop_running">Pas de scripts à arrêter de fonctionner</string>
@@ -922,7 +967,6 @@
     <string name="text_project">Projet</string>
     <string name="text_project_location">Localisation du projet</string>
     <string name="text_project_media_access">Accès aux médias du projet</string>
-    <string name="text_project_media_access_description">Avec l\'accès aux médias du projet, l\'avertissement de sécurité pour l\'enregistrement d\'écran ne sera pas demandé.</string>
     <string name="text_prompt">Prompt</string>
     <string name="text_quit">Quit</string>
     <string name="text_recommended">Recommandé</string>
@@ -938,6 +982,7 @@
     <string name="text_register">Register</string>
     <string name="text_register_succeed">Enregistrement réussi</string>
     <string name="text_registering">Register</string>
+    <string name="text_release_notes">Notes de version</string>
     <string name="text_remote">à distance</string>
     <string name="text_remote_file_saved_to_local_storage_successfully">Fichier distant enregistré avec succès dans la mémoire locale</string>
     <string name="text_remote_project_saved_to_local_storage_successfully">Projet distant sauvegardé avec succès dans le stockage local</string>
@@ -956,6 +1001,9 @@
     <string name="text_restart">Redémarrer</string>
     <string name="text_restart_strategy">Stratégie de redémarrage</string>
     <string name="text_result">Résultat</string>
+    <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">Récupération du journal des modifications...</string>
+    <string name="text_retrieving_plugin_list_data" tools:ignore="TypographyEllipsis">Récupération des données de la liste des plugins...</string>
+    <string name="text_retrieving_release_notes" tools:ignore="TypographyEllipsis">Récupération des notes de version...</string>
     <string name="text_revoke_autojs6_access_in_shizuku_app">Révoquer les privilèges AutoJs6 dans une application Shizuku</string>
     <string name="text_rhino_java_primitive_wrap">Encapsulation des types primitifs Java</string>
     <string name="text_root_mode_title">Vérification de l\'accès root</string>
@@ -986,6 +1034,8 @@
     <string name="text_save_and_exit">Enregistrer et quitter</string>
     <string name="text_save_simplified">Enreg</string>
     <string name="text_save_to">Save to</string>
+    <string name="text_scheduled_restart_backend">Moteur</string>
+    <string name="text_scheduled_restart_start_delay">Délai de démarrage</string>
     <string name="text_script_record">Enregistrement de scripts</string>
     <string name="text_script_running">Script running</string>
     <string name="text_search">Recherche</string>
@@ -1008,8 +1058,8 @@
     <string name="text_set_as_working_dir">Comme répertoire de travail</string>
     <string name="text_set_breakpoint">Définir un point d\'arrêt</string>
     <string name="text_settings">Réglages</string>
+    <string name="text_sha256_mismatch_multiline_expected_actual">Incohérence du SHA-256.\n\nAttendu : %1$s\nObtenu : %2$s</string>
     <string name="text_shizuku_access">Permissions de Shizuku</string>
-    <string name="text_shizuku_access_description">Shizuku vous permet d\'obtenir des privilèges ADB et d\'accéder aux API du système</string>
     <string name="text_shizuku_service_may_need_to_be_run_first">Il se peut que vous deviez d\'abord exécuter le service Shizuku</string>
     <string name="text_should_not_be_empty">Le texte ne peut pas être vide</string>
     <string name="text_show_layout_bounds">Afficher les bords de la disposition</string>
@@ -1064,6 +1114,10 @@
     <string name="text_undo_simplified">Révoq</string>
     <string name="text_uninstall">Uninstall</string>
     <string name="text_unknown">Inconnu</string>
+    <string name="text_unknown_author_for_plugin">Auteur Inconnu</string>
+    <string name="text_unknown_description_for_plugin">Description Inconnue</string>
+    <string name="text_unknown_title_for_plugin">Titre Inconnu</string>
+    <string name="text_unknown_version_for_plugin">Version Inconnue</string>
     <string name="text_unverified">Non vérifié</string>
     <string name="text_updatable">Updatable</string>
     <string name="text_update">Update</string>
@@ -1072,7 +1126,6 @@
     <string name="text_updates_snack_bar_act_later">Plus tard</string>
     <string name="text_updates_snack_bar_act_view">Voir</string>
     <string name="text_usage_stats_permission">Utilisation de l\'accès aux statistiques</string>
-    <string name="text_usage_stats_permission_description">Donne accès à l\'historique et aux statistiques d\'utilisation du périphérique, ce qui donne à currentPackage() un résultat plus précis</string>.
     <string name="text_use_android_n_shortcut">Utiliser le raccourci Android 7.0</string>
     <string name="text_use_default_icon">Utiliser l\'icône par défaut</string>
     <string name="text_use_volume_control_record">Utiliser la touche de réduction du volume pour contrôler l\'enregistrement</string>.
@@ -1107,38 +1160,6 @@
     <string name="text_weekly_task_should_check_day_of_week">Au moins un jour doit être sélectionné</string>
     <string name="text_working_dir_path">Chemin du répertoire de travail</string>.
     <string name="text_write_secure_settings">Écrire les paramètres de sécurité</string>.
-    <string name="text_write_secure_settings_description">Paramètres de sécurité du système, contenant les préférences du système que les applications peuvent lire mais ne sont pas autorisées à écrire.\nIl s\'agit des préférences que l\'utilisateur doit explicitement modifier par le biais de l\'interface utilisateur d\'une application système.\nAvec l\'autorisation de paramètres de sécurité du système, les applications normales peuvent directement modifier les paramètres de sécurité (comme le service d\'accessibilité).</string>
     <string name="text_write_system_settings">Écrire les paramètres système</string>
-    <string name="text_integrity_verification_failed">Échec de la vérification de l\'intégrité</string>
-    <string name="text_sha256_mismatch_multiline_expected_actual">Incohérence du SHA-256.\n\nAttendu : %1$s\nObtenu : %2$s</string>
-    <string name="error_no_available_url_provided_for_current_plugin">Aucune URL disponible n\'a été fournie pour le plug-in actuel</string>
-    <string name="text_failed_to_update">Échec de la mise à jour</string>
-    <string name="text_confirm_to_uninstall">Voulez-vous vraiment désinstaller ?</string>
-    <string name="dialog_button_exception_details">Détails</string>
-    <string name="error_failed_to_load_plugins_with_reason">Échec du chargement des plugins.\nRaison : %1$s.</string>
-    <string name="text_retrieving_plugin_list_data" tools:ignore="TypographyEllipsis">Récupération des données de la liste des plugins...</string>
-    <string name="text_no_plugins_installed_hint">Aucun plugin n\'est actuellement installé.\nCliquez sur le bouton \"+\" pour installer des plugins.</string>
-    <string name="text_unknown_author_for_plugin">Auteur Inconnu</string>
-    <string name="text_unknown_description_for_plugin">Description Inconnue</string>
-    <string name="text_unknown_version_for_plugin">Version Inconnue</string>
-    <string name="text_unknown_title_for_plugin">Titre Inconnu</string>
-    <string name="error_specified_autojs6_version_number_must_be_greater_than_461">Le numéro de version AutoJs6 spécifié doit être supérieur à 461</string>
-    <string name="error_autojs6_version_number_must_not_be_lower_than_num">Le numéro de version d\'AutoJs6 ne doit pas être inférieur à %1$s</string>
-    <string name="error_autojs6_version_must_not_be_lower_than_ver">La version d\'AutoJs6 ne doit pas être inférieure à %1$s</string>
-    <string name="dialog_button_view_update">Voir la mise à jour</string>
-    <string name="content_failed_to_retrieve_changelog_of_current_language_with_zh_hans_release_notes_fallback">Impossible de récupérer le journal des modifications pour la langue actuellement affichée. Vous pouvez réessayer plus tard.\n\nLes notes de version en \"chinois simplifié (zh-Hans)\" seront affichées temporairement.</string>
-    <string name="error_failed_to_retrieve_changelog">Échec de la récupération du journal des modifications</string>
-    <string name="error_failed_to_retrieve_release_notes">Échec de la récupération des notes de version</string>
-    <string name="text_changelog">Journal des modifications</string>
-    <string name="text_release_notes">Notes de version</string>
-    <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">Récupération du journal des modifications...</string>
-    <string name="text_retrieving_release_notes" tools:ignore="TypographyEllipsis">Récupération des notes de version...</string>
-    <string name="dialog_button_view_with_browser">@string/dialog_button_download_with_browser</string>
-    <string name="text_scheduled_restart_backend">Moteur</string>
-    <string name="text_scheduled_restart_start_delay">Délai de démarrage</string>
-    <string name="dialog_button_advanced_settings">Avancé</string>
-    <string name="error_failed_to_save_project_config">Échec de l\'enregistrement de la configuration du projet</string>
-    <string name="text_connected">Connecté</string>
-    <string name="text_connected_count_with_colon">Connectés : %1$d</string>
 
 </resources>

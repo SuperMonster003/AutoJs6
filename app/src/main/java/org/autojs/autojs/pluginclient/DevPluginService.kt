@@ -144,7 +144,7 @@ class DevPluginService(val context: Context) {
 
             // Show connecting subtitle immediately.
             // zh-CN: 立即显示正在连接的 subtitle.
-            clientConnectionIpAddress.onNext("$ip ...");
+            clientConnectionIpAddress.onNext("$ip ...")
 
             return Observable
                 .just(JsonSocketClient(this, context, ip, port))

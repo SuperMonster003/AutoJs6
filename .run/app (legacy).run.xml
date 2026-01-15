@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="app (legacy)" type="AndroidRunConfigurationType" factoryName="Android App" singleton="true">
+  <configuration default="false" name="app (legacy)" type="AndroidRunConfigurationType" factoryName="Android App" activateToolWindowBeforeRun="false" singleton="true">
     <module name="AutoJs6.app.main" />
     <option name="DEPLOY" value="true" />
     <option name="DEPLOY_APK_FROM_BUNDLE" value="false" />

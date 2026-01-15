@@ -17,12 +17,13 @@
         android:id="@+id/drawer_menu"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        android:paddingBottom="4dp"/>
 
     <View
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="?android:divider" />
+        android:layout_height="@dimen/divider_drawer_menu_group"
+        android:background="@color/drawer_menu_group_divider_color" />
 
     <LinearLayout
         android:layout_width="match_parent"

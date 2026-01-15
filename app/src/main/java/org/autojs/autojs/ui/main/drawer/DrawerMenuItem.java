@@ -13,8 +13,6 @@ public class DrawerMenuItem {
         void onClick(DrawerMenuItemViewHolder holder) throws IOException;
     }
 
-    public static final int DEFAULT_DIALOG_CONTENT = 0;
-
     public static final int DEFAULT_PREFERENCE_KEY = 0;
 
     private final int mIcon;

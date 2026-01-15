@@ -56,6 +56,7 @@
     <string name="content_description_fab_for_display_manifest">Плавающая кнопка действий для отображения манифеста</string>
     <string name="content_failed_to_determine_index_of_theme_color_item">Не удалось определить индекс элемента цвета темы</string>
     <string name="content_failed_to_locate_library_for_theme_color">Не удалось найти цветовую библиотеку для темы</string>
+    <string name="content_failed_to_retrieve_changelog_of_current_language_with_zh_hans_release_notes_fallback">Не удалось получить список изменений для текущего отображаемого языка. Попробуйте снова позже.\n\nПока что временно будут показаны примечания к выпуску на \"упрощённом китайском (zh-Hans)\".</string>
     <string name="content_github_feedback">Для сообщения о проблеме будет открыта веб-страница.\nМожет потребоваться учетная запись на GitHub.</string>
     <string name="content_way_of_output_for_recorded_script">Выберите способ вывода для переработанных сценариев</string>
     <string name="crash_feedback">Скопируйте журнал отладки или выйдите напрямую</string>
@@ -67,47 +68,71 @@
     <string name="default_value_working_directory">/Сценарии</string>
     <string name="description_about_app_and_developer_preference">AutoJs6 - это автоматизированный инструмент JavaScript для android, который является открытым исходным кодом и клонирован из \"hyb1996/Auto.js\".\n\nЧтобы попросить о помощи или обратной связи, посетите GitHub issues или присоединитесь к группе Tencent QQ 690946137.</string>
     <string name="description_about_app_tips_preference">1. Нажмите и удерживайте значок приложения на странице \"О приложении и разработчике\", чтобы перейти на страницу параметров разработчика AutoJs6.</string>
+    <string name="description_accessibility_service">Служба доступности — ключевая возможность AutoJs6 для автоматизации. Она используется для чтения информации об элементах интерфейса на экране и для имитации взаимодействий, таких как [ нажатие / свайп / ввод ].\n\nБольшинство функций, связанных с автоматизацией, а также инструменты вроде анализа макета, требуют включения службы доступности для корректной работы.</string>
+    <string name="description_all_files_access" tools:ignore="TypographyEllipsis">Разрешение \"управление всеми файлами\" (или \"доступ ко всем файлам\") позволяет AutoJs6 напрямую [ создавать / читать / изменять / удалять ] файлы в общем хранилище через обычные пути файлов, чтобы скрипты могли получать доступ к \"Internal Storage\", а файловый менеджер мог корректно отображать и управлять файлами.\n\nНа устройствах Android 11+ это основной способ обеспечить полный доступ к чтению/записи файлов.</string>
     <string name="description_app_language_preference">Это предпочтение для изменения языка отображения AutoJs6, включая сообщения исключений от запущенных скриптов.\n\nПримечание: может потребоваться перезапуск приложения, чтобы язык был применен так, как ожидается.</string>
+    <string name="description_auto_night_mode">После включения автоматического ночного режима AutoJs6 будет автоматически переключать ночной режим в соответствии с настройками системы.\n\nNote: переключатель автоматического ночного режима и переключатель ночного режима связаны и взаимно влияют друг на друга.</string>
     <string name="description_change_working_dir_preference">Измените путь к директории, содержащей скрипты</string>
     <string name="description_check_for_updates_preference">AutoJs6 получает и загружает обновления с GitHub.</string>
+    <string name="description_client_mode">Клиентский режим позволяет AutoJs6 активно подключаться к удалённому серверу для выполнения [ передачи скриптов / вывода логов / удалённого управления ].\n\nОбычно устройство и сервер должны находиться в одной локальной сети (LAN) или в сетевой среде, где они могут обращаться друг к другу.</string>
+    <string name="description_display_over_other_app">Разрешение \"показ поверх других приложений\" позволяет AutoJs6 отображать плавающие окна или плавающую кнопку поверх интерфейса других приложений, чтобы быстро выполнять действия или просматривать информацию на любом экране.\n\nNote: если разрешение не выдано, плавающие окна и плавающая кнопка могут не отображаться или работать некорректно.</string>
     <string name="description_documentation_source_preference">Локальная документация: Использование встроенных файлов AutoJs6 в качестве источников документации, подключение к сети не требуется. Содержание меняется по мере обновления AutoJs6.\nОнлайн-документы: Использование страниц GitHub в качестве источников документации, требуется подключение к сети. Содержимое всегда обновляется.\n\nПримечание: Чтобы максимально улучшить качество чтения онлайн-документов, рекомендуется использовать широкоформатное устройство отображения, например настольный монитор.\nПримечание: Начиная с версии 6.2.0, документация находится на предварительной стадии разработки, и большая часть содержимого еще не была написана или обновлена.</string>
     <string name="description_documentation_source_preference_more">Для поддержки темной темы на страницах документов должны быть выполнены следующие условия:\n1. В AutoJs6 включен ночной режим\n2. Android System WebView (или браузеры типа Google Chrome):\n- Android API Level 29 (Android 10) [Q] и выше: версия >= 76\n- Android API Level 28 (Android 9) [P] и ниже: версия >= 105</string>
     <string name="description_extending_js_build_in_objects">Расширение встроенных объектов JavaScript может повысить гибкость кода и обеспечить более богатую функциональность, но может привести к конфликтам и даже поломкам.\nВсе сценарии имеют встроенные расширения, включенные по умолчанию, когда опция включена.\nВстроенные расширения часто небезопасны, и их не рекомендуется использовать, пока принципы и риски встроенных расширений не будут четко поняты.\nКогда опция выключена, встроенные расширения все еще можно включить через глобальный объект plugins, как описано в документации проекта.</string>
     <string name="description_file_extensions_preference">Используется для настройки отображения расширений файлов в файловом менеджере AutoJs6.</string>
+    <string name="description_floating_button">Плавающая кнопка показывает перетаскиваемую точку быстрого доступа у края экрана и может использоваться для [ запуска или остановки скриптов / анализа макета / просмотра последнего имени пакета или имени Activity / отображения положения указателя ].\n\nNote: для этой функции обычно требуется разрешение \"показ поверх других приложений\".</string>
+    <string name="description_foreground_service">Служба на переднем плане используется для более стабильного удержания AutoJs6 в работе в фоне и подходит для сценариев [ длительное выполнение скриптов / поддержание соединения / непрерывное прослушивание ].\n\nПосле включения система покажет \"уведомление службы на переднем плане\", чтобы сообщить пользователю, что AutoJs6 продолжает работать. Обычно это уведомление остаётся видимым до остановки службы.\n\nУстановка уведомления в режим \"Silent\" или \"Minimize\" лишь снижает заметность и, как правило, не влияет на работу службы на переднем плане.\n\nЕсли отключить канал уведомлений или запретить AutoJs6 отправлять уведомления, это может повлиять на нормальный запуск и стабильность службы на переднем плане.</string>
     <string name="description_hidden_files_preference">Используется для установки того, показывать или нет скрытые файлы и папки (обычно начинающиеся с \".\") в файловом проводнике AutoJs6.</string>
+    <string name="description_ignore_battery_optimizations">Игнорирование оптимизации батареи может снизить фоновые ограничения системы для AutoJs6, что помогает запланированным задачам или длительным скриптам работать относительно стабильнее в режиме ожидания.\n\nNote: системы разных производителей могут применять дополнительные политики энергосбережения, например ограничения автозапуска или заморозку в фоне.</string>
+    <string name="description_keep_screen_on_when_in_foreground">Позволяет управлять тем, следует ли удерживать экран включённым, когда AutoJs6 находится на переднем плане.</string>
     <string name="description_keep_screen_on_when_in_foreground_preference">Предпочтение для сохранения экрана устройства включенным и ярким, когда AutoJs6 находится на переднем плане.\nЧтобы это происходило только на главной странице среди всех страниц приложения AutoJs6, выберите опцию \"Только главная страница\".</string>
     <string name="description_launcher_icon_preference">Значок запуска поддерживает режимы отображения адаптивного значка или наследуемого значка с прозрачным фоном. Фактический вид может различаться на разных версиях Android. После переключения режима отображения может пройти несколько секунд, прежде чем изменения вступят в силу.</string>
     <string name="description_launcher_shortcuts">Ярлыки позволяют выполнять определенные действия в AutoJs6. Пользователи могут отображать эти ярлыки в поддерживаемой программе запуска и быстро запускать некоторые задачи или действия, например, читать документацию по приложению AutoJs6, запускать страницу настроек AutoJs6 и т.д.</string>
     <string name="description_manage_ignored_updates_preference">Нажмите для просмотра или управления элементами списка.\nДлинное нажатие для удаления элемента списка.</string>
+    <string name="description_night_mode">Позволяет управлять и отражать стратегию ночного режима AutoJs6.\n\nNote: переключатель ночного режима и переключатель автоматического ночного режима связаны и взаимно влияют друг на друга.</string>
     <string name="description_night_mode_preference">Ночной режим (также известный как темная тема) применяется как к системному пользовательскому интерфейсу Android, так и к приложениям, запущенным на устройстве, что улучшает видимость для пользователей со слабым зрением и тех, кто чувствителен к яркому свету, а также облегчает любому человеку использование устройства в условиях недостаточной освещенности.\n\nСистема слежения: AutoJs6 имеет настройки ночного режима, такие же, как и система Android\nВсегда включен: AutoJs6 держит Ночной режим включенным (независимо от настроек системы Android)\nВсегда выключен: AutoJs6 отключает ночной режим (независимо от настроек системы Android)\n\nПримечание: Опция \"Следовать за системой\" доступна только для Android API Level 28 (Android 9) [P] и выше.</string>
     <string name="description_night_mode_preference_more">Чтобы включить Ночной режим в системе Android:\n- Android API Level 29 (Android 10) [Q] и выше: Настройки -> Дисплей -> Тема.\n- Android API Уровень 28 (Android 9) [P]: Параметры разработчика -> Ночной режим.\n\nДля применения ночного режима (темной темы) к веб-контенту с помощью компонента WebView (например, страницы документации AutoJs6) должны быть выполнены следующие условия:\n1. Android System WebView (или браузеры типа Google Chrome):\n- Android API Level 29 (Android 10) [Q] и выше: версия >= 76\n- Android API Level 28 (Android 9) [P]: версия >= 105\n2. Веб-содержимое в компоненте WebView адаптировано к теме Dark (с помощью CSS или ресурсов Android XML и т.д.).</string>
+    <string name="description_notification_access">Разрешение \"доступ к уведомлениям\" (или \"разрешение на чтение уведомлений\") позволяет AutoJs6 читать содержимое системных уведомлений, чтобы скрипты могли отслеживать уведомления или получать их текст и т. п.</string>
+    <string name="description_post_notifications">Разрешение \"отправка уведомлений\" позволяет AutoJs6 публиковать уведомления в системе, чтобы скрипты могли создавать и управлять пользовательскими уведомлениями в шторке уведомлений.\n\nNote: на устройствах Android 13+ без этого разрешения некоторые уведомления могут не отображаться, а также это может повлиять на запуск и стабильность служб на переднем плане.</string>
+    <string name="description_project_media_access">При наличии доступа к медиафайлам проекта предупреждение о безопасности при записи экрана не выдается.</string>
     <string name="description_restart_strategy">Стратегия перезагрузки влияет только на кнопку перезапуска в выдвижном меню главной страницы.\n\nБыстрая перезагрузка: быстро перезапускает приложение. Если перезапуск не удался или возникли непредвиденные ситуации, попробуйте переключиться на \"Запланированную перезагрузку\".\nЗапланированная перезагрузка: заранее настраивает краткосрочную задачу. После остановки приложение будет запущено по расписанию для выполнения перезапуска.</string>
     <string name="description_rhino_java_primitive_wrap">Переключатель включён (по умолчанию): значения, возвращаемые методами Java типов Number/Boolean/Character, оборачиваются в объекты Java и доступны в скрипте (String исключается). typeof = \"object\", species = \"JavaObject\"; доступны методы Java, что помогает сохранять точные типовые характеристики Java и корректную резолюцию перегрузок.\n\nПереключатель выключен: перечисленные типы больше не оборачиваются и передаются напрямую как примитивы JavaScript (number/boolean/строка из одного символа). typeof соответствует соответствующему типу JavaScript, что ближе к семантике/экосистеме JavaScript. При необходимости можно явно создать Java‑обёртку через new, например new java.lang.Boolean(true).\n\nСм.: http://issues.autojs6.com/435</string>
     <string name="description_root_mode_preference">Если у вас есть экзотический root или аномальное состояние для root-доступа, вы можете принудительно установить root на root или non-root.</string>
     <string name="description_root_record_out_file_type_preference">Бинарный тип: не редактируемый, с расширением файла \"auto\"\nТип JavaScript: может быть отредактирован или скопирован напрямую, с расширением файла \"js\".</string>
+    <string name="description_server_mode">Серверный режим позволяет AutoJs6 запускать службу на текущем устройстве и ожидать подключения внешних клиентов для выполнения [ передачи скриптов / вывода логов / удалённого управления ].\n\nСерверный режим AutoJs6 поддерживает два способа подключения:\n1. Локальная сеть (LAN)\n2. Android Debug Bridge (ADB)</string>
+    <string name="description_shizuku_access">Shizuku позволяет получить привилегии ADB и доступ к системным API.</string>
     <string name="description_stable_mode">Стабильный режим повышает стабильность при получении границ макета, но некоторые результаты могут быть проигнорированы.\nТребуется перезапуск службы доступности.</string>
     <string name="description_theme_color_preference">Цвет темы применяется к виджетам, включая следующие, но не ограничиваясь ими:\nСтрока состояния\nПанель приложений\nЗначок файла\nЗначок элемента задачи\nFAB\nЗаголовок каталога настроек\nКнопка переключения\n\nПримечание: Начиная с версии AutoJs6 6.2.0, пока не существует различий между основным цветом, основным темным цветом и цветом акцента.</string>
     <string name="description_timed_task_backend">Управляет базовым механизмом по расписанию запуска скриптов.\n\nAlarmManager: При выдаче разрешения "Разрешить настройку будильников и напоминаний" задачи выполняются более точно по времени.\nWorkManager: Дружелюбен к системе; подходит для некритичных задач, допускающих задержку.\nJobScheduler: Устаревшая реализация, сохранена для совместимости; вероятность задержек выше.</string>
     <string name="description_timed_task_backend_more" tools:ignore="TypographyEllipsis">Сценарии и отличия:\n\n1. AlarmManager\nПодходит для задач, чувствительных к точности времени, например [напоминания/строго по расписанию/...].\nВ Android 12+ при наличии разрешения "Разрешить настройку будильников и напоминаний" задачи запускаются более точно даже при выключенном экране/в ожидании.\nБез него система может понизить точность или отложить выполнение.\n\n2. WorkManager\nПодходит для задач без строгих требований к времени, например [некритичная синхронизация/очистка/статистика/...].\nПланирование учитывает [батарею/сеть/зарядку/политику сна/...], возможны задержки при выключенном экране или в ожидании.\nХотя точность не гарантируется, он силён в [надёжном завершении/повторных попытках/цепочках/дедупликации работ].\n\n3. JobScheduler\nИсторическая реализация для совместимости.\nНа новых версиях Android возможны более существенные задержки.\nНе рекомендуется, если это не необходимо ради совместимости.</string>
+    <string name="description_usage_stats_access">Предоставляет доступ к истории использования устройства и статистике, что позволяет получить более точный результат в функции currentPackage()</string>
     <string name="description_version_histories_preference">Просмотреть историю выпусков AutoJs6 на GitHub и статистику по основным категориям.</string>
+    <string name="description_write_secure_settings">Настройки безопасности системы, содержащие системные предпочтения, которые приложения могут читать, но не имеют права записывать.\nОни предназначены для параметров, которые пользователь должен явно изменить через пользовательский интерфейс системного приложения.\nПри наличии разрешения на безопасные системные настройки обычные приложения могут напрямую изменять безопасные настройки (например, служба доступности).</string>
+    <string name="description_write_system_settings">Разрешение \"изменение системных настроек\" позволяет AutoJs6 изменять некоторые параметры системы, чтобы скрипты могли менять такие настройки, как [ яркость экрана / автоповорот / тайм-аут экрана ].</string>
+    <string name="dialog_button_advanced_settings">Доп.</string>
     <string name="dialog_button_back">@string/text_back</string>
     <string name="dialog_button_cancel">Отменить</string>
     <string name="dialog_button_cancel_download">Отменить</string>
     <string name="dialog_button_clear_items">Очистить</string>
     <string name="dialog_button_confirm">OK</string>
+    <string name="dialog_button_connect">Подключиться</string>
     <string name="dialog_button_continue">@string/text_continue</string>
+    <string name="dialog_button_continue_connecting">@string/dialog_button_continue</string>
     <string name="dialog_button_copy">@string/text_copy</string>
     <string name="dialog_button_default_prefix">Префикс деф.</string>
     <string name="dialog_button_details">Подробности</string>
     <string name="dialog_button_dismiss">Удалить</string>
     <string name="dialog_button_download_with_browser">Браузер</string>
+    <string name="dialog_button_exception_details">Детали</string>
     <string name="dialog_button_file_information">Информация о файле</string>
     <string name="dialog_button_history">История</string>
     <string name="dialog_button_ignore_current_update">Игнорировать</string>
     <string name="dialog_button_join_group">Вступить группу</string>
+    <string name="dialog_button_manager">Менеджер</string>
     <string name="dialog_button_more">Еще</string>
     <string name="dialog_button_open_color_palette">Открыть палитру</string>
     <string name="dialog_button_quit">Выйти</string>
+    <string name="dialog_button_quit_connecting">@string/dialog_button_quit</string>
     <string name="dialog_button_remove">Удалить</string>
     <string name="dialog_button_retrieve">Получить</string>
     <string name="dialog_button_retry">Повторная попытка</string>
@@ -120,6 +145,8 @@
     <string name="dialog_button_version_histories">История</string>
     <string name="dialog_button_view_file">Просмотр файла</string>
     <string name="dialog_button_view_shortcuts">Просмотреть ярлыки</string>
+    <string name="dialog_button_view_update">Просмотреть обновление</string>
+    <string name="dialog_button_view_with_browser">@string/dialog_button_download_with_browser</string>
     <string name="dialog_title_color_details">Детали цвета</string>
     <string name="dialog_title_color_palette">Цветовая палитра</string>
     <string name="dialog_title_theme_color_details">Детали цвета темы</string>
@@ -169,6 +196,8 @@
     <string name="error_arguments_cannot_be_empty">Аргументы не могут быть пустыми</string>
     <string name="error_arguments_must_be_empty">Аргументы должны быть пустыми</string>
     <string name="error_at_least_one_abi_needs_to_be_selected">Необходимо выбрать хотя бы один ПВБ</string>
+    <string name="error_autojs6_version_must_not_be_lower_than_ver">Версия AutoJs6 не должна быть ниже %1$s</string>
+    <string name="error_autojs6_version_number_must_not_be_lower_than_num">Номер версии AutoJs6 не должен быть ниже %1$s</string>
     <string name="error_both_bitmap_and_mat_are_null">И bitmap, и mat являются нулевыми</string>
     <string name="error_cannot_be_null">%s не может быть null</string>
     <string name="error_cannot_connect_to_github">Не удается подключиться к GitHub</string>
@@ -203,11 +232,17 @@
     <string name="error_failed_to_grant_shizuku_access">Не удалось предоставить права на использование Shizuku</string>
     <string name="error_failed_to_instantiate">Ошибка создания экземпляра \"%s\"</string>
     <string name="error_failed_to_instantiate_with_cause"><![CDATA[Ошибка создания экземпляра \"%1$s\": [ %2$s ]]]></string>
+    <string name="error_failed_to_launch_manager">Не удалось запустить менеджер</string>
+    <string name="error_failed_to_launch_system_settings">Не удалось открыть системные настройки</string>
+    <string name="error_failed_to_load_plugins_with_reason">Не удалось загрузить плагины.\nПричина: %1$s.</string>
     <string name="error_failed_to_render_content">Не удалось отобразить содержимое</string>
+    <string name="error_failed_to_retrieve_changelog">Не удалось получить список изменений</string>
+    <string name="error_failed_to_retrieve_release_notes">Не удалось получить примечания к выпуску</string>
     <string name="error_failed_to_retrieve_version_histories">Не удалось получить историю версий</string>
     <string name="error_failed_to_retrieve_version_properties_file_to_parse_version_information">Не удалось получить файл version.properties для анализа информации о версии</string>
     <string name="error_failed_to_revoke_shizuku_access">Не удалось отозвать права на Shizuku</string>
     <string name="error_failed_to_run_script">Ошибка выполнения скрипта</string>
+    <string name="error_failed_to_save_project_config">Не удалось сохранить конфигурацию проекта</string>
     <string name="error_file_in_path_does_not_exist">Файл в пути \"%1$s\" не существует</string>
     <string name="error_function_called_in_ui_thread">Поток пользовательского интерфейса не может быть заблокирован. Попробуйте запустить %s() в подпотоке или подскрипте</string>
     <string name="error_function_called_more_than_once">%s() вызывается более одного раза</string>
@@ -244,6 +279,7 @@
     <string name="error_no_applications_available_for_playing_this_file">Нет приложений для воспроизведения этого файла</string>
     <string name="error_no_applications_available_for_sending_this_file">Нет приложений для отправки этого файла</string>
     <string name="error_no_applications_available_for_viewing_this_file">Нет приложений для просмотра этого файла</string>
+    <string name="error_no_available_url_provided_for_current_plugin">Для текущего плагина не указан доступный URL-адрес</string>
     <string name="error_no_display_over_other_apps_permission">Нет разрешения \"отображать поверх других приложений\"</string>
     <string name="error_no_permission_to_access_shizuku">Нет разрешения на доступ к Shizuku</string>
     <string name="error_no_post_notifications_permission">Нет разрешения на \"уведомления о сообщениях\"</string>
@@ -272,6 +308,7 @@
     <string name="error_shizuku_is_not_installed">Shizuku не установлен</string>
     <string name="error_shizuku_service_may_be_not_running">Служба Shizuku может быть не запущена</string>
     <string name="error_shizuku_version_is_not_supported">Версия Shizuku не поддерживается</string>
+    <string name="error_specified_autojs6_version_number_must_be_greater_than_461">Указанный номер версии AutoJs6 должен быть больше 461</string>
     <string name="error_the_transformer_for_required_property_cannot_return_nullish">Преобразователь для требуемого свойства \"%1$s\" не может возвращать пустое значение</string>
     <string name="error_thread_is_not_alive">Нить не жива</string>
     <string name="error_unable_to_use_shizuku_service">Невозможно использовать службу Shizuku</string>
@@ -482,6 +519,7 @@
     <string name="text_captured_window_info_type_unknown">Неизвестный тип</string>
     <string name="text_category_filter">Фильтр категории</string>
     <string name="text_change_working_dir">Изменить рабочий каталог</string>
+    <string name="text_changelog">Список изменений</string>
     <string name="text_changelog_item_dependency">Изменения версий некоторых зависимостей или локальных библиотек</string>
     <string name="text_check_for_updates">Проверка наличия обновлений</string>
     <string name="text_check_for_updates_while_ignoring_the_local_version">Проверить обновления (игнорировать локальную версию)</string>
@@ -519,7 +557,10 @@
     <string name="text_confirm_to_clear_histories_of_all_color_libraries">Будут очищены следующие элементы истории\n\n[ Все цветовые библиотеки ]\n\nВы уверены, что хотите их очистить?</string>
     <string name="text_confirm_to_delete">Вы уверены, что хотите удалить?</string>
     <string name="text_confirm_to_remove">Вы уверены, что хотите удалить?</string>
+    <string name="text_confirm_to_uninstall">Вы действительно хотите удалить?</string>
     <string name="text_connect_to_pc">Подключитесь к ПК</string>
+    <string name="text_connected">Подключено</string>
+    <string name="text_connected_count_with_colon">Подключено: %1$d</string>
     <string name="text_connection_cannot_be_established">Соединение не может быть установлено</string>
     <string name="text_console">Консоль</string>
     <string name="text_continue">Продолжить</string>
@@ -641,6 +682,7 @@
     <string name="text_failed_to_retrieve">Не удалось получить</string>
     <string name="text_failed_to_save_remote_project_to_local_storage">Не удалось сохранить удаленный проект в локальное хранилище</string>
     <string name="text_failed_to_send_log_entries">Не удалось отправить записи журнала</string>
+    <string name="text_failed_to_update">Не удалось обновить</string>
     <string name="text_failed_to_write_file">Не удалось записать файл</string>
     <string name="text_file">Файл</string>
     <string name="text_file_details">Сведения о файле</string>
@@ -665,7 +707,6 @@
     <string name="text_floating_button">Плавающая кнопка</string>
     <string name="text_force_stop">Принудительная остановка</string>
     <string name="text_foreground_service">Служба переднего плана</string>
-    <string name="text_foreground_service_description">Службы переднего плана выполняют операции, заметные для пользователя.\nПередние службы отображают уведомление в строке состояния, чтобы пользователи были в курсе, что ваше приложение выполняет задачу на переднем плане и потребляет системные ресурсы.\nУведомление не может быть отменено, пока служба не будет остановлена или удалена с переднего плана.\nУведомление можно установить на низкий приоритет и даже отключить, долго нажимая на него.</string>
     <string name="text_formatting_completed">Форматирование завершено</string>
     <string name="text_function">Функция</string>
     <string name="text_fx_keyboard">Fx клавиатура</string>
@@ -705,9 +746,11 @@
     <string name="text_install_from_url">Установить из \"URL\"</string>
     <string name="text_install_plugin_from_url">Установить плагин из \"URL\"</string>
     <string name="text_installable">Устанавливаемый</string>
+    <string name="text_integrity_verification_failed">Сбой проверки целостности</string>
     <string name="text_invalid_character_is_removed">Недопустимый символ удален</string>
     <string name="text_invalid_package_name">Неверное имя пакета</string>
     <string name="text_invalid_project">Неверный проект</string>
+    <string name="text_ip_address_may_be_invalid_for_server_connection" tools:ignore="TypographyEllipsis">IP-адрес \"%1$s\" имеет специальное назначение (loopback/broadcast/multicast/reserved/...), поэтому он может быть непригоден для подключения к целевому серверу.</string>
     <string name="text_is_latest_version">Более новая версия не найдена</string>
     <string name="text_issue_report">Обратная связь</string>
     <string name="text_js_file">*.js файл</string>
@@ -775,11 +818,13 @@
     <string name="text_night_mode">Ночной режим</string>
     <string name="text_no_browser">Не установлен браузер</string>
     <string name="text_no_content">Нет содержимого</string>
+    <string name="text_no_content_description">Нет описания содержимого</string>
     <string name="text_no_histories">Нет истории</string>
     <string name="text_no_ignored_updates">Нет проигнорированных обновлений</string>
     <string name="text_no_log_entries_to_copy">Нет записей журнала для копирования</string>
     <string name="text_no_log_entries_to_export">Нет записей журнала для экспорта</string>
     <string name="text_no_log_entries_to_send">Нет записей журнала для отправки</string>
+    <string name="text_no_plugins_installed_hint">В настоящее время плагины не установлены.\nНажмите кнопку \"+\" чтобы установить плагины.</string>
     <string name="text_no_root">Не root</string>
     <string name="text_no_root_access">Нет root-доступа</string>
     <string name="text_no_scripts_to_stop_running">Нет скриптов для остановки выполнения</string>
@@ -922,7 +967,6 @@
     <string name="text_project">Проект</string>
     <string name="text_project_location">Расположение проекта</string>
     <string name="text_project_media_access">Доступ к носителям проекта</string>
-    <string name="text_project_media_access_description">При наличии доступа к медиафайлам проекта предупреждение о безопасности при записи экрана не выдается.</string>
     <string name="text_prompt">Запрос</string>
     <string name="text_quit">Выйти</string>
     <string name="text_recommended">Рекомендуемый</string>
@@ -938,6 +982,7 @@
     <string name="text_register">Регистрировать</string>
     <string name="text_register_succeed">Регистрация прошла успешно</string>
     <string name="text_registering">Регистрация</string>
+    <string name="text_release_notes">Примечания к выпуску</string>
     <string name="text_remote">удаленный</string>
     <string name="text_remote_file_saved_to_local_storage_successfully">Удаленный файл успешно сохранен в локальном хранилище</string>
     <string name="text_remote_project_saved_to_local_storage_successfully">Удаленный проект успешно сохранен в локальном хранилище</string>
@@ -956,6 +1001,9 @@
     <string name="text_restart">Перезапустить</string>
     <string name="text_restart_strategy">Стратегия перезагрузки</string>
     <string name="text_result">Результат</string>
+    <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">Получение списка изменений...</string>
+    <string name="text_retrieving_plugin_list_data" tools:ignore="TypographyEllipsis">Получение данных списка плагинов...</string>
+    <string name="text_retrieving_release_notes" tools:ignore="TypographyEllipsis">Получение примечаний к выпуску...</string>
     <string name="text_revoke_autojs6_access_in_shizuku_app">Отмена привилегий AutoJs6 в приложении Shizuku</string>
     <string name="text_rhino_java_primitive_wrap">Обёртка примитивов Java</string>
     <string name="text_root_mode_title">Проверка прав root</string>
@@ -986,6 +1034,8 @@
     <string name="text_save_and_exit">Сохранить и выйти</string>
     <string name="text_save_simplified">Сохран</string>
     <string name="text_save_to">Сохранить в</string>
+    <string name="text_scheduled_restart_backend">Движок</string>
+    <string name="text_scheduled_restart_start_delay">Задержка старта</string>
     <string name="text_script_record">Запись сценария</string>
     <string name="text_script_running">Выполнение сценария</string>
     <string name="text_search">Поиск</string>
@@ -1008,8 +1058,8 @@
     <string name="text_set_as_working_dir">Как рабочий каталог</string>
     <string name="text_set_breakpoint">Установить точку останова</string>
     <string name="text_settings">Настройки</string>
+    <string name="text_sha256_mismatch_multiline_expected_actual">Несовпадение SHA-256.\n\nОжидалось: %1$s\nФактически: %2$s</string>
     <string name="text_shizuku_access">Разрешения Shizuku</string>
-    <string name="text_shizuku_access_description">Shizuku позволяет получить привилегии ADB и доступ к системным API.</string>
     <string name="text_shizuku_service_may_need_to_be_run_first">Возможно, сначала потребуется запустить службу Shizuku</string>
     <string name="text_should_not_be_empty">Текст не может быть пустым</string>
     <string name="text_show_layout_bounds">Вид в границах макета</string>
@@ -1064,6 +1114,10 @@
     <string name="text_undo_simplified">Верни</string>
     <string name="text_uninstall">Uninstall</string>
     <string name="text_unknown">Неизвестно</string>
+    <string name="text_unknown_author_for_plugin">Неизвестный Автор</string>
+    <string name="text_unknown_description_for_plugin">Неизвестное Описание</string>
+    <string name="text_unknown_title_for_plugin">Неизвестный Заголовок</string>
+    <string name="text_unknown_version_for_plugin">Неизвестная Версия</string>
     <string name="text_unverified">Не подтверждено</string>
     <string name="text_updatable">Updatable</string>
     <string name="text_update">Update</string>
@@ -1072,7 +1126,6 @@
     <string name="text_updates_snack_bar_act_later">Позже</string>
     <string name="text_updates_snack_bar_act_view">Просмотр</string>
     <string name="text_usage_stats_permission">Доступ к статистике использования</string>
-    <string name="text_usage_stats_permission_description">Предоставляет доступ к истории использования устройства и статистике, что позволяет получить более точный результат в функции currentPackage()</string>
     <string name="text_use_android_n_shortcut">Использовать ярлык Android 7.0</string>
     <string name="text_use_default_icon">Использовать значок по умолчанию</string>
     <string name="text_use_volume_control_record">Используйте клавишу уменьшения громкости для управления записью</string>
@@ -1107,38 +1160,6 @@
     <string name="text_weekly_task_should_check_day_of_week">Должен быть выбран хотя бы один день</string>
     <string name="text_working_dir_path">Путь к рабочему каталогу</string>
     <string name="text_write_secure_settings">Параметры безопасности записи</string>
-    <string name="text_write_secure_settings_description">Настройки безопасности системы, содержащие системные предпочтения, которые приложения могут читать, но не имеют права записывать.\nОни предназначены для параметров, которые пользователь должен явно изменить через пользовательский интерфейс системного приложения.\nПри наличии разрешения на безопасные системные настройки обычные приложения могут напрямую изменять безопасные настройки (например, служба доступности).</string>
     <string name="text_write_system_settings">Запись системных настроек</string>
-    <string name="text_integrity_verification_failed">Сбой проверки целостности</string>
-    <string name="text_sha256_mismatch_multiline_expected_actual">Несовпадение SHA-256.\n\nОжидалось: %1$s\nФактически: %2$s</string>
-    <string name="error_no_available_url_provided_for_current_plugin">Для текущего плагина не указан доступный URL-адрес</string>
-    <string name="text_failed_to_update">Не удалось обновить</string>
-    <string name="text_confirm_to_uninstall">Вы действительно хотите удалить?</string>
-    <string name="dialog_button_exception_details">Детали</string>
-    <string name="error_failed_to_load_plugins_with_reason">Не удалось загрузить плагины.\nПричина: %1$s.</string>
-    <string name="text_retrieving_plugin_list_data" tools:ignore="TypographyEllipsis">Получение данных списка плагинов...</string>
-    <string name="text_no_plugins_installed_hint">В настоящее время плагины не установлены.\nНажмите кнопку \"+\" чтобы установить плагины.</string>
-    <string name="text_unknown_author_for_plugin">Неизвестный Автор</string>
-    <string name="text_unknown_description_for_plugin">Неизвестное Описание</string>
-    <string name="text_unknown_version_for_plugin">Неизвестная Версия</string>
-    <string name="text_unknown_title_for_plugin">Неизвестный Заголовок</string>
-    <string name="error_specified_autojs6_version_number_must_be_greater_than_461">Указанный номер версии AutoJs6 должен быть больше 461</string>
-    <string name="error_autojs6_version_number_must_not_be_lower_than_num">Номер версии AutoJs6 не должен быть ниже %1$s</string>
-    <string name="error_autojs6_version_must_not_be_lower_than_ver">Версия AutoJs6 не должна быть ниже %1$s</string>
-    <string name="dialog_button_view_update">Просмотреть обновление</string>
-    <string name="content_failed_to_retrieve_changelog_of_current_language_with_zh_hans_release_notes_fallback">Не удалось получить список изменений для текущего отображаемого языка. Попробуйте снова позже.\n\nПока что временно будут показаны примечания к выпуску на \"упрощённом китайском (zh-Hans)\".</string>
-    <string name="error_failed_to_retrieve_changelog">Не удалось получить список изменений</string>
-    <string name="error_failed_to_retrieve_release_notes">Не удалось получить примечания к выпуску</string>
-    <string name="text_changelog">Список изменений</string>
-    <string name="text_release_notes">Примечания к выпуску</string>
-    <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">Получение списка изменений...</string>
-    <string name="text_retrieving_release_notes" tools:ignore="TypographyEllipsis">Получение примечаний к выпуску...</string>
-    <string name="dialog_button_view_with_browser">@string/dialog_button_download_with_browser</string>
-    <string name="text_scheduled_restart_backend">Движок</string>
-    <string name="text_scheduled_restart_start_delay">Задержка старта</string>
-    <string name="dialog_button_advanced_settings">Доп.</string>
-    <string name="error_failed_to_save_project_config">Не удалось сохранить конфигурацию проекта</string>
-    <string name="text_connected">Подключено</string>
-    <string name="text_connected_count_with_colon">Подключено: %1$d</string>
 
 </resources>

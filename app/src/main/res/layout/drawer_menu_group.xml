@@ -3,8 +3,8 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?android:divider"
-        android:paddingTop="4dp">
+        android:background="@color/drawer_menu_group_divider_color"
+        android:layout_marginTop="4dp">
 
     <TextView
             android:id="@+id/title"

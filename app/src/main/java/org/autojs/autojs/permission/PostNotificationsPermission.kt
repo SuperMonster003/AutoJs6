@@ -20,7 +20,7 @@ class PostNotificationsPermission(override val context: Context) : PermissionIte
 
     override fun revoke(): Boolean = false.also { config() }
 
-    private fun config() = NotificationUtils.launchSettings()
+    fun config() = NotificationUtils.launchSettings()
 
     override fun urge() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {

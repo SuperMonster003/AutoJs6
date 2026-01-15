@@ -2,7 +2,9 @@ package org.autojs.autojs.ui.main.drawer
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,6 +20,8 @@ import org.autojs.autojs.app.tool.JsonSocketServerTool
 import org.autojs.autojs.core.accessibility.AccessibilityTool
 import org.autojs.autojs.core.plugin.center.PluginCenterActivity
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.external.foreground.MainActivityForegroundService
+import org.autojs.autojs.permission.AllFilesAccessPermission
 import org.autojs.autojs.permission.DisplayOverOtherAppsPermission
 import org.autojs.autojs.permission.IgnoreBatteryOptimizationsPermission
 import org.autojs.autojs.permission.MediaProjectionPermission
@@ -29,6 +33,7 @@ import org.autojs.autojs.permission.WriteSystemSettingsPermission
 import org.autojs.autojs.pluginclient.DevPluginService
 import org.autojs.autojs.pluginclient.JsonSocketClient
 import org.autojs.autojs.pluginclient.JsonSocketServer
+import org.autojs.autojs.runtime.api.WrappedShizuku
 import org.autojs.autojs.service.AccessibilityService
 import org.autojs.autojs.service.ForegroundService
 import org.autojs.autojs.service.NotificationService
@@ -44,6 +49,7 @@ import org.autojs.autojs.util.DisplayUtils
 import org.autojs.autojs.util.IntentUtils.App.exit
 import org.autojs.autojs.util.IntentUtils.App.restart
 import org.autojs.autojs.util.NetworkUtils
+import org.autojs.autojs.util.NotificationUtils
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.MODE
 import org.autojs.autojs6.BuildConfig
@@ -51,8 +57,10 @@ import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.FragmentDrawerBinding
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
+import rikka.shizuku.Shizuku
 import java.lang.ref.WeakReference
 import kotlin.math.roundToInt
+import org.autojs.autojs.util.App as UtilApp
 
 /**
  * Created by Stardust on Jan 30, 2017.
@@ -87,11 +95,12 @@ open class DrawerFragment : Fragment() {
 
     private lateinit var mAccessibilityServiceItem: DrawerMenuToggleableItem
     private lateinit var mForegroundServiceItem: DrawerMenuToggleableItem
-    private lateinit var mFloatingWindowItem: DrawerMenuToggleableItem
+    private lateinit var mFloatingButtonItem: DrawerMenuToggleableItem
     private lateinit var mClientModeItem: DrawerMenuDisposableItem
     private lateinit var mServerModeItem: DrawerMenuDisposableItem
     private lateinit var mNotificationPostItem: DrawerMenuToggleableItem
     private lateinit var mNotificationAccessItem: DrawerMenuToggleableItem
+    private lateinit var mAllFilesAccessPermissionItem: DrawerMenuToggleableItem
     private lateinit var mUsageStatsPermissionItem: DrawerMenuToggleableItem
     private lateinit var mIgnoreBatteryOptimizationsItem: DrawerMenuToggleableItem
     private lateinit var mDisplayOverOtherAppsItem: DrawerMenuToggleableItem
@@ -124,7 +133,7 @@ open class DrawerFragment : Fragment() {
         mA11yTool = AccessibilityTool(mContext)
 
         mAccessibilityServiceItem = DrawerMenuToggleableItem(
-            object : AccessibilityService(mContext) {
+            helper = object : AccessibilityService(mContext) {
 
                 override fun refreshSubtitle(aimState: Boolean) {
                     val oldSubtitle = mAccessibilityServiceItem.subtitle
@@ -145,22 +154,40 @@ open class DrawerFragment : Fragment() {
                 }
 
             },
-            R.drawable.ic_accessibility_black_48dp,
-            R.string.text_a11y_service,
-            DrawerMenuItem.DEFAULT_DIALOG_CONTENT,
-            R.string.key_a11y_service,
-        )
+            icon = R.drawable.ic_accessibility_black_thicker_48dp,
+            title = R.string.text_a11y_service,
+            descriptionRes = R.string.description_accessibility_service,
+            prefKey = R.string.key_a11y_service,
+        ) {
+            it.setOnLaunchManagerListener { d ->
+                if (d != null) {
+                    ViewUtils.showSnack(d.view, R.string.text_under_development, 1_200)
+                } else {
+                    ViewUtils.showToast(mContext, R.string.text_under_development)
+                }
+            }
+            it.setOnLaunchSettingsListener {
+                Intent().apply {
+                    action = Settings.ACTION_ACCESSIBILITY_SETTINGS
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }.let { i -> mContext.startActivity(i) }
+            }
+        }
 
         mForegroundServiceItem = DrawerMenuToggleableItem(
-            ForegroundService(mContext),
-            R.drawable.ic_service_green,
-            R.string.text_foreground_service,
-            R.string.text_foreground_service_description,
-            R.string.key_foreground_service,
-        )
+            helper = ForegroundService(mContext),
+            icon = R.drawable.ic_service_green,
+            title = R.string.text_foreground_service,
+            descriptionRes = R.string.description_foreground_service,
+            prefKey = R.string.key_foreground_service,
+        ) {
+            it.setOnLaunchSettingsListener {
+                NotificationUtils.launchChannelSettings(mContext, MainActivityForegroundService::class.java)
+            }
+        }
 
-        mFloatingWindowItem = DrawerMenuToggleableItem(
-            object : FloatingButtonTool(mContext) {
+        mFloatingButtonItem = DrawerMenuToggleableItem(
+            helper = object : FloatingButtonTool(mContext) {
                 override fun toggle(aimState: Boolean): Boolean = runCatching {
                     // @BeforeSuper
                     if (!aimState /* is to switch off */) {
@@ -181,18 +208,26 @@ open class DrawerFragment : Fragment() {
                     // }
                 }.isSuccess
             },
-            R.drawable.ic_robot_64,
-            R.string.text_floating_button,
-            DrawerMenuItem.DEFAULT_DIALOG_CONTENT,
-            R.string.key_floating_menu_shown,
-        )
+            icon = R.drawable.ic_robot_thicker_64,
+            title = R.string.text_floating_button,
+            descriptionRes = R.string.description_floating_button,
+            prefKey = R.string.key_floating_menu_shown,
+        ) { item ->
+            item.setOnLaunchSettingsListener {
+                val helper = item.getHelper() as DisplayOverOtherAppsPermission
+                helper.config()
+            }
+        }
 
         JsonSocketClientTool(mActivity).apply {
             val devPluginService = App.app.devPluginService
 
-            val drawerItem = DrawerMenuDisposableItem(this, R.drawable.ic_computer_black_48dp, R.string.text_client_mode).also {
-                mClientModeItem = it
-            }
+            val drawerItem = DrawerMenuDisposableItem(
+                helper = this,
+                icon = R.drawable.ic_computer_black_48dp,
+                title = R.string.text_client_mode,
+                descriptionRes = R.string.description_client_mode,
+            ).also { mClientModeItem = it }
 
             val disposable = Observable
                 .combineLatest(
@@ -215,20 +250,34 @@ open class DrawerFragment : Fragment() {
                     }
                 }
             setStateDisposable(disposable)
+
             setOnConnectionException { e: Throwable ->
                 drawerItem.setCheckedIfNeeded(false)
                 ViewUtils.showToast(context, getString(R.string.error_connect_to_remote, e.message), true)
             }
-            setOnConnectionDialogDismissed { drawerItem.setCheckedIfNeeded(false) }
+            setOnConnectionDialogDismissed {
+                drawerItem.setCheckedIfNeeded(false)
+            }
             connectIfNotNormallyClosed()
         }
 
         JsonSocketServerTool(mActivity).apply {
             val devPluginService = App.app.devPluginService
 
-            val drawerItem = DrawerMenuDisposableItem(this, R.drawable.ic_smartphone_black_48dp, R.string.text_server_mode).also {
-                mServerModeItem = it
-            }
+            val drawerItem = DrawerMenuDisposableItem(
+                helper = this,
+                icon = R.drawable.ic_smartphone_black_48dp,
+                title = R.string.text_server_mode,
+                descriptionRes = R.string.description_server_mode,
+            ) {
+                it.setOnLaunchManagerListener { d ->
+                    if (d != null) {
+                        ViewUtils.showSnack(d.view, R.string.text_under_development, 1_200)
+                    } else {
+                        ViewUtils.showToast(mContext, R.string.text_under_development)
+                    }
+                }
+            }.also { mServerModeItem = it }
 
             val disposable = Observable
                 .combineLatest(
@@ -243,7 +292,7 @@ open class DrawerFragment : Fragment() {
                         state.isDisconnected() -> null
                         else -> NetworkUtils.getIpAddress().let { ip ->
                             when {
-                                count > 0 -> "$ip  [ ${context.getString(R.string.text_connected_count_with_colon, count)} ]"
+                                count > 0 -> "$ip  [ ${this.context.getString(R.string.text_connected_count_with_colon, count)} ]"
                                 else -> ip
                             }
                         }
@@ -255,6 +304,7 @@ open class DrawerFragment : Fragment() {
                     }
                 }
             setStateDisposable(disposable)
+
             setOnConnectionException { e: Throwable ->
                 drawerItem.setCheckedIfNeeded(false)
                 ViewUtils.showToast(context, getString(R.string.error_enable_server, e.message), true)
@@ -263,65 +313,131 @@ open class DrawerFragment : Fragment() {
         }
 
         mNotificationPostItem = DrawerMenuToggleableItem(
-            PostNotificationsPermission(mContext),
-            R.drawable.ic_ali_notification,
-            R.string.text_post_notifications_permission,
-        )
+            helper = PostNotificationsPermission(mContext),
+            icon = R.drawable.ic_ali_notification,
+            title = R.string.text_post_notifications_permission,
+            descriptionRes = R.string.description_post_notifications,
+        ) { item ->
+            item.setOnLaunchSettingsListener {
+                val helper = item.getHelper() as PostNotificationsPermission
+                helper.config()
+            }
+        }
 
         mNotificationAccessItem = DrawerMenuToggleableItem(
-            NotificationService(mContext),
-            R.drawable.ic_ali_notification,
-            R.string.text_notification_access_permission,
-        )
+            helper = NotificationService(mContext),
+            icon = R.drawable.ic_ali_notification,
+            title = R.string.text_notification_access_permission,
+            descriptionRes = R.string.description_notification_access,
+        ) { item ->
+            item.setOnLaunchSettingsListener {
+                val helper = item.getHelper() as NotificationService
+                helper.config()
+            }
+        }
+
+        mAllFilesAccessPermissionItem = DrawerMenuToggleableItem(
+            helper = AllFilesAccessPermission(mContext),
+            icon = R.drawable.ic_database_black_48dp,
+            title = R.string.text_all_files_access,
+            descriptionRes = R.string.description_all_files_access,
+        ) { item ->
+            item.setOnLaunchSettingsListener {
+                val helper = item.getHelper() as AllFilesAccessPermission
+                helper.config()
+            }
+        }
 
         mUsageStatsPermissionItem = DrawerMenuToggleableItem(
-            UsageStatsPermission(mContext),
-            R.drawable.ic_assessment_black_48dp,
-            R.string.text_usage_stats_permission,
-            R.string.text_usage_stats_permission_description,
-        )
+            helper = UsageStatsPermission(mContext),
+            icon = R.drawable.ic_assessment_black_48dp,
+            title = R.string.text_usage_stats_permission,
+            descriptionRes = R.string.description_usage_stats_access,
+        ) { item ->
+            item.setOnLaunchSettingsListener {
+                val helper = item.getHelper() as UsageStatsPermission
+                helper.config()
+            }
+        }
 
         mIgnoreBatteryOptimizationsItem = DrawerMenuToggleableItem(
-            IgnoreBatteryOptimizationsPermission(mContext),
-            R.drawable.ic_battery_std_black_48dp,
-            R.string.text_ignore_battery_optimizations,
-        )
+            helper = IgnoreBatteryOptimizationsPermission(mContext),
+            icon = R.drawable.ic_battery_std_black_48dp,
+            title = R.string.text_ignore_battery_optimizations,
+            descriptionRes = R.string.description_ignore_battery_optimizations,
+        ) { item ->
+            item.setOnLaunchSettingsListener {
+                Intent().apply {
+                    action = Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }.let { i -> mContext.startActivity(i) }
+            }
+        }
 
         mDisplayOverOtherAppsItem = DrawerMenuToggleableItem(
-            DisplayOverOtherAppsPermission(mContext),
-            R.drawable.ic_layers_black_48dp,
-            R.string.text_display_over_other_app,
-        )
+            helper = DisplayOverOtherAppsPermission(mContext),
+            icon = R.drawable.ic_layers_black_48dp,
+            title = R.string.text_display_over_other_app,
+            descriptionRes = R.string.description_display_over_other_app,
+        ) { item ->
+            item.setOnLaunchSettingsListener {
+                val helper = item.getHelper() as DisplayOverOtherAppsPermission
+                helper.config()
+            }
+        }
 
         mWriteSystemSettingsItem = DrawerMenuToggleableItem(
-            WriteSystemSettingsPermission(mContext),
-            R.drawable.ic_settings_black_48dp,
-            R.string.text_write_system_settings,
-        )
+            helper = WriteSystemSettingsPermission(mContext),
+            icon = R.drawable.ic_settings_black_48dp,
+            title = R.string.text_write_system_settings,
+            descriptionRes = R.string.description_write_system_settings,
+        ) { item ->
+            item.setOnLaunchSettingsListener {
+                val helper = item.getHelper() as WriteSystemSettingsPermission
+                helper.config()
+            }
+        }
 
         mWriteSecuritySettingsItem = DrawerMenuToggleableItem(
-            WriteSecureSettingsPermission(mContext),
-            R.drawable.ic_security_black_48dp,
-            R.string.text_write_secure_settings,
-            R.string.text_write_secure_settings_description,
+            helper = WriteSecureSettingsPermission(mContext),
+            icon = R.drawable.ic_security_black_48dp,
+            title = R.string.text_write_secure_settings,
+            descriptionRes = R.string.description_write_secure_settings,
         )
 
         mProjectMediaAccessItem = DrawerMenuToggleableItem(
-            MediaProjectionPermission(mContext),
-            R.drawable.ic_cast_connected_black_48dp,
-            R.string.text_project_media_access,
-            R.string.text_project_media_access_description,
+            helper = MediaProjectionPermission(mContext),
+            icon = R.drawable.ic_cast_connected_black_48dp,
+            title = R.string.text_project_media_access,
+            descriptionRes = R.string.description_project_media_access,
         )
 
         mShizukuAccessItem = DrawerMenuToggleableItem(
-            ShizukuPermission(mContext),
-            R.drawable.ic_app_shizuku_representative,
-            R.string.text_shizuku_access,
-            R.string.text_shizuku_access_description,
-        )
+            helper = ShizukuPermission(mContext),
+            icon = R.drawable.ic_app_shizuku_representative,
+            title = R.string.text_shizuku_access,
+            descriptionRes = R.string.description_shizuku_access,
+        ) {
+            positiveText(UtilApp.SHIZUKU.getAppName())
+            positiveTextAllCaps(false)
+            positiveColorRes(R.color.dialog_button_advanced_settings)
+            onPositive { d, _ ->
+                when {
+                    !WrappedShizuku.isInstalled(mContext) -> {
+                        ViewUtils.showSnack(d.view, R.string.error_shizuku_is_not_installed)
+                    }
+                    Shizuku.isPreV11() -> {
+                        ViewUtils.showSnack(d.view, R.string.error_shizuku_version_is_not_supported)
+                    }
+                    else -> WrappedShizuku.getLaunchIntent(mContext)?.let {
+                        runCatching { mContext.startActivity(it) }.getOrNull()
+                    } ?: ViewUtils.showSnack(d.view, R.string.error_failed_to_revoke_shizuku_access)
+                }
+            }
+        }
 
         mAutoNightModeItem = DrawerMenuToggleableItem(
-            object : DrawerMenuItemCustomHelper(mContext) {
+            helper = object : DrawerMenuItemCustomHelper(mContext) {
                 override fun toggle(): Boolean = runCatching {
                     val isTurningOn = !isActive
                     val isNightModeYes = ViewUtils.isNightModeYes(resources.configuration)
@@ -347,14 +463,22 @@ open class DrawerFragment : Fragment() {
 
                 override val isInMainThread = true
             },
-            R.drawable.ic_automatic_brightness,
-            R.string.text_auto_night_mode,
-            DrawerMenuItem.DEFAULT_DIALOG_CONTENT,
-            R.string.key_auto_night_mode_enabled,
-        ).apply { isHidden = !ViewUtils.AutoNightMode.isFunctional() }
+            icon = R.drawable.ic_automatic_brightness_thicker,
+            title = R.string.text_auto_night_mode,
+            descriptionRes = R.string.description_auto_night_mode,
+            prefKey = R.string.key_auto_night_mode_enabled,
+        ) { item ->
+            item.isHidden = !ViewUtils.AutoNightMode.isFunctional()
+            item.setOnLaunchSettingsListener {
+                Intent().apply {
+                    action = Settings.ACTION_DISPLAY_SETTINGS
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }.let { i -> mContext.startActivity(i) }
+            }
+        }
 
         mNightModeItem = DrawerMenuToggleableItem(
-            object : DrawerMenuItemCustomHelper(mContext) {
+            helper = object : DrawerMenuItemCustomHelper(mContext) {
                 override fun toggle(): Boolean = runCatching {
                     if (!mAutoNightModeItem.isHidden) {
                         ViewUtils.isAutoNightModeEnabled = false
@@ -376,14 +500,21 @@ open class DrawerFragment : Fragment() {
 
                 override val isInMainThread = true
             },
-            R.drawable.ic_night_mode,
-            R.string.text_night_mode,
-            DrawerMenuItem.DEFAULT_DIALOG_CONTENT,
-            R.string.key_night_mode_enabled,
-        )
+            icon = R.drawable.ic_night_mode_thicker,
+            title = R.string.text_night_mode,
+            descriptionRes = R.string.description_night_mode,
+            prefKey = R.string.key_night_mode_enabled,
+        ) { item ->
+            item.setOnLaunchSettingsListener {
+                Intent().apply {
+                    action = Settings.ACTION_DISPLAY_SETTINGS
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }.let { i -> mContext.startActivity(i) }
+            }
+        }
 
         mKeepScreenOnWhenInForegroundItem = DrawerMenuToggleableItem(
-            object : DrawerMenuItemCustomHelper(mContext) {
+            helper = object : DrawerMenuItemCustomHelper(mContext) {
                 override val isActive: Boolean
                     get() = ViewUtils.isKeepScreenOnWhenInForegroundEnabled
 
@@ -411,12 +542,12 @@ open class DrawerFragment : Fragment() {
                     super.refreshSubtitle(aimState)
                 }
             },
-            R.drawable.ic_lightbulb_outline_black_48dp,
-            R.string.text_keep_screen_on_when_in_foreground,
-            DrawerMenuItem.DEFAULT_DIALOG_CONTENT,
+            icon = R.drawable.ic_lightbulb_outline_black_thicker_48dp,
+            title = R.string.text_keep_screen_on_when_in_foreground,
+            descriptionRes = R.string.description_keep_screen_on_when_in_foreground,
         )
 
-        mThemeColorItem = DrawerMenuShortcutItem(R.drawable.ic_personalize, R.string.text_theme_color)
+        mThemeColorItem = DrawerMenuShortcutItem(R.drawable.ic_personalize_thicker, R.string.text_theme_color)
             .setAction(Runnable { ColorSelectBaseActivity.startActivity(mContext) })
             .apply { subtitle = ColorSelectBaseActivity.getCurrentColorSummary(mContext) }
 
@@ -511,18 +642,19 @@ open class DrawerFragment : Fragment() {
     }
 
     private fun initMenuItems() {
-        drawerMenuAdapter = listOf(
+        val items = listOf(
             DrawerMenuGroup(R.string.text_service),
             mAccessibilityServiceItem,
             mForegroundServiceItem,
             DrawerMenuGroup(R.string.text_tools),
-            mFloatingWindowItem,
+            mFloatingButtonItem,
             DrawerMenuGroup(R.string.text_connect_to_pc),
             mClientModeItem,
             mServerModeItem,
             DrawerMenuGroup(R.string.text_permissions),
             mNotificationPostItem,
             mNotificationAccessItem,
+            mAllFilesAccessPermissionItem,
             mUsageStatsPermissionItem,
             mIgnoreBatteryOptimizationsItem,
             mDisplayOverOtherAppsItem,
@@ -537,7 +669,17 @@ open class DrawerFragment : Fragment() {
             mThemeColorItem,
             DrawerMenuGroup(R.string.text_about),
             mAboutAppAndDevItem,
-        ).let { items -> DrawerMenuAdapter(items.filterNot { it.isHidden }) }
+        )
+
+        val drawerMenuAdapter = DrawerMenuAdapter(items.filterNot { it.isHidden })
+
+        // Wire item change notifications to this fragment's adapter instance.
+        // zh-CN: 将 item 的刷新通知绑定到当前 Fragment 的 adapter 实例.
+        items.filterIsInstance<DrawerMenuToggleableItem>().forEach { item ->
+            item.setOnNotifyItemChangedListener { changedItem ->
+                drawerMenuAdapter.notifyItemChanged(changedItem)
+            }
+        }
 
         mDrawerMenu.apply {
             adapter = drawerMenuAdapter
@@ -546,18 +688,19 @@ open class DrawerFragment : Fragment() {
     }
 
     private fun initMenuItemStates() = listOf(
-        mFloatingWindowItem,
+        mFloatingButtonItem,
         mForegroundServiceItem,
     ).forEach { it.selfActive() }
 
     private fun syncMenuItemStates() = listOf(
         mAccessibilityServiceItem,
         mForegroundServiceItem,
-        mFloatingWindowItem,
+        mFloatingButtonItem,
         mClientModeItem,
         mServerModeItem,
         mNotificationPostItem,
         mNotificationAccessItem,
+        mAllFilesAccessPermissionItem,
         mUsageStatsPermissionItem,
         mIgnoreBatteryOptimizationsItem,
         mDisplayOverOtherAppsItem,
@@ -569,9 +712,6 @@ open class DrawerFragment : Fragment() {
     ).forEach { it.sync() }
 
     companion object {
-
-        lateinit var drawerMenuAdapter: DrawerMenuAdapter
-            private set
 
         class Event {
             interface OnDrawerOpened

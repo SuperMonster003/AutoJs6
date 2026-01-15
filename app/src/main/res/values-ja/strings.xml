@@ -57,6 +57,7 @@
     <string name="content_description_fab_for_display_manifest">マニフェストを表示するためのフローティング操作ボタン部品</string>
     <string name="content_failed_to_determine_index_of_theme_color_item">テーマカラーアイテムのインデックスを特定できません</string>
     <string name="content_failed_to_locate_library_for_theme_color">テーマカラーのカラーパレットが見つかりません</string>
+    <string name="content_failed_to_retrieve_changelog_of_current_language_with_zh_hans_release_notes_fallback">現在表示している言語に対応する更新ログの取得に失敗しました. しばらくしてからもう一度お試しください. \n\n現在は一時的に \"簡体字中国語 (zh-Hans)\" のリリースノートを表示します.</string>
     <string name="content_github_feedback">問題を報告するためのウェブページが起動します.\nGitHub のアカウントが必要な場合があります</string>
     <string name="content_way_of_output_for_recorded_script">回収したスクリプトの出力方法を選択する</string>
     <string name="crash_feedback">デバッグログをコピーするか, 直接終了する</string>
@@ -68,47 +69,71 @@
     <string name="default_value_working_directory">/スクリプト</string>
     <string name="description_about_app_and_developer_preference">AutoJs6 は, Android 用の JavaScript 自動化ツールで, 「hyb1996/Auto.js」をクローンしたオープンソースです.\n\nヘルプやフィードバックを求めるには, GitHub issues に行くか, Tencent QQ チャットグループ 690946137 に参加してください</string>
     <string name="description_about_app_tips_preference">1. アプリと開発者について」ページでアプリのアイコンを長押しすると, AutoJs6 の開発者向けオプションページにジャンプします</string>
+    <string name="description_accessibility_service">アクセシビリティサービスは, AutoJs6 が自動化を実現するための中核機能です. 画面上のウィジェット情報を読み取り, [ タップ / スワイプ / 入力 ] などの操作をシミュレートします.\n\n自動化関連の大半の機能やレイアウト解析ツールなどは, アクセシビリティサービスを有効にしないと正常に動作しません.</string>
+    <string name="description_all_files_access" tools:ignore="TypographyEllipsis">\"すべてのファイルを管理\" (または \"すべてのファイルへのアクセス\") 権限により, AutoJs6 は共有ストレージ上で通常のファイルパスを使って直接 [ 作成 / 読み取り / 変更 / 削除 ] を行えます. これによりスクリプトは \"Internal Storage\" にアクセスでき, ファイルマネージャーもファイルを正常に表示・管理できます.\n\nAndroid 11+ では, フルストレージの読み書きを実現する主要な方法です.</string>
     <string name="description_app_language_preference">この環境設定は, 実行中のスクリプトからの例外メッセージを含む, AutoJs6 の表示言語を変更するためのものです.\n\n注: 言語を期待通りに適用するには, アプリの再起動が必要な場合があります</string>
+    <string name="description_auto_night_mode">自動ナイトモードを有効にすると, AutoJs6 はシステム設定に従って自動的にナイトモードへ切り替えます.\n\nNote: 自動ナイトモードのスイッチとナイトモードのスイッチは相互に関連しており, 互いに影響します.</string>
     <string name="description_change_working_dir_preference">スクリプトを含むディレクトリのパスを変更する</string>
     <string name="description_check_for_updates_preference">AutoJs6 は, GitHub からアップデートを取得し, ダウンロードします.</string>
+    <string name="description_client_mode">クライアントモードは, AutoJs6 がリモートのサーバーへ能動的に接続し, [ スクリプト転送 / ログ出力 / リモート制御 ] などを行うための機能です.\n\n通常は, 端末とサーバーが同一 LAN か, 相互に到達可能なネットワーク環境にある必要があります.</string>
+    <string name="description_display_over_other_app">\"他のアプリの上に表示\" 権限により, AutoJs6 は他のアプリ画面の上にフローティングウィンドウやフローティングボタンを表示でき, どの画面からでも素早く操作や情報確認ができます.\n\nNote: この権限が付与されていない場合, フローティングウィンドウやフローティングボタンが表示されない, または正常に利用できない可能性があります.</string>
     <string name="description_documentation_source_preference">ローカルドキュメント AutoJs6 に組み込まれたファイルをドキュメントソースとして使用するため, ネットワーク接続は必要ありません. AutoJs6 が更新されると内容も変わります.\nオンライン・ドキュメント. GitHub のページをドキュメントソースとして使用し, ネットワーク接続が必要です. コンテンツは常に最新の状態に保たれます.\n\n注: オンラインドキュメントを最大限に活用するために, デスクトップモニターなどのワイドスクリーンディスプレイを使用することをお勧めします.\n注意: バージョン 6.2.0 時点では, ドキュメントはまだ開発の初期段階にあり, ほとんどのコンテンツはまだ執筆・更新されていません</string>
     <string name="description_documentation_source_preference_more">ドキュメントページでダークテーマをサポートするには, 以下の条件を満たす必要があります.\n1. AutoJs6 でナイトモードが有効になっている\n2. Android System WebView (または Google Chrome などのブラウザ) .\n- Android API Level 29 (Android 10) [Q] 以上: バージョン >= 76\n- Android API Level 28 (Android 9) [P] 以下: バージョン >= 105</string>
     <string name="description_extending_js_build_in_objects">JavaScript の組み込みオブジェクトを拡張すると, コードの柔軟性が増し, より豊かな機能を実現できますが, 衝突や破損を引き起こす可能性もあります.\nこのオプションをオンにすると, すべてのスクリプトはデフォルトで組み込みの拡張機能を有効にします.\n組み込みの拡張機能は安全でないことが多いので, 組み込みの拡張機能の原理とリスクが明確に理解されていない限り, 推奨されません.\nこのオプションをオフにした場合でも, プロジェクトのドキュメントで説明されているように, plugins グローバルオブジェクトを使用して組み込み拡張機能を有効にすることができます</string>
     <string name="description_file_extensions_preference">AutoJs6のファイルエクスプローラーでファイル拡張子を表示するかどうかの設定に使用されます.</string>
+    <string name="description_floating_button">フローティングボタンは, 画面端にドラッグ可能なクイック入口を表示し, [ スクリプトの開始/停止 / レイアウト解析 / 最近のパッケージ名やアクティビティ名の表示 / ポインター位置の表示 ] などに利用できます.\n\nNote: この機能は通常, \"他のアプリの上に表示\" 権限が必要です.</string>
+    <string name="description_foreground_service">フォアグラウンドサービスは, AutoJs6 をバックグラウンドでもより安定して動作させるための機能で, [ 長時間スクリプト実行 / 接続の維持 / 継続的な監視 ] などの用途に適しています.\n\n有効化すると, システムは \"フォアグラウンドサービス通知\" を表示して AutoJs6 が継続稼働中であることをユーザーに知らせます. この通知は通常, サービスが停止するまで表示され続けます.\n\n通知を \"Silent\" または \"Minimize\" に設定しても, 通知の強さが下がるだけで, 一般的にフォアグラウンドサービス機能には影響しません.\n\n通知チャネルを無効化したり AutoJs6 の通知送信を禁止したりすると, フォアグラウンドサービスの正常な起動や安定性に影響する可能性があります.</string>
     <string name="description_hidden_files_preference">AutoJs6 ファイルエクスプローラーで隠しファイルや隠しフォルダ (通常は「.」で始まる) を表示するかどうかを設定するために使用します</string>
+    <string name="description_ignore_battery_optimizations">バッテリー最適化の無視により, AutoJs6 に対するバックグラウンド制限を緩和でき, スケジュールタスクや長時間スクリプトが待機中でも比較的安定して動作しやすくなります.\n\nNote: メーカーにより, 追加の省電力ポリシー (自動起動制限, バックグラウンド凍結など) が存在する場合があります.</string>
+    <string name="description_keep_screen_on_when_in_foreground">AutoJs6 が前面にあるときに画面を常時点灯させるかどうかを制御します.</string>
     <string name="description_keep_screen_on_when_in_foreground_preference">AutoJs6 がフォアグラウンドにあるとき, デバイスの画面をオンにして明るく保つための設定です.\nAutoJs6 アプリケーションの全ページのうち, ホームページでのみ使用する場合は, \"ホームページのみ\" オプションを選択します</string>
     <string name="description_launcher_icon_preference">ランチャーアイコンはアダプティブアイコンと従来の透過背景アイコンの表示モードに対応しています. 実際の表示効果はAndroidシステムによって異なる場合があります. 表示モードを切り替えた後, 反映されるまで数秒かかることがあります.</string>
     <string name="description_launcher_shortcuts">ショートカットは, AutoJs6 で特定のアクションを実行することができます. ユーザーは, サポートされているランチャーにこれらのショートカットを表示し, AutoJs6 アプリケーションのドキュメントを読んだり, AutoJs6 の設定ページを起動したりするなど, いくつかのタスクを素早く開始したり, アクティビティを起動したりすることができます</string>
     <string name="description_manage_ignored_updates_preference">クリックすると, リストアイテムを表示または管理できます.\nリストアイテムを削除するには, 長押しします</string>
+    <string name="description_night_mode">AutoJs6 のナイトモード方針を制御し, その状態を反映します.\n\nNote: ナイトモードのスイッチと自動ナイトモードのスイッチは相互に関連しており, 互いに影響します.</string>
     <string name="description_night_mode_preference">ナイトモード (ダークテーマとも呼ばれる) は, Android システムの UI と端末上で動作するアプリケーションの両方に適用され, 弱視のユーザーや明るい光に敏感なユーザーの視認性を向上させ, 誰でも簡単に暗い環境下で端末を使用できるようにします.\n\nフォローシステム AutoJs6 では, Android と同じ Night モードが設定できます.\n常にオン Android のシステム設定に関係なく, 常に Night モードが ON になります.\n常にオフ Android のシステム設定に関係なく, AutoJs6 はナイトモードをオフにします.\n\n注: Follow system オプションは, Android API Level 28 (Android 9) [P] 以上の場合のみです</string>
     <string name="description_night_mode_preference_more">Android システムでナイトモードを有効にするには\n- Android API Level 29 (Android 10) [Q] 以上の場合: [設定] -> [ディスプレイ] -> [テーマ].\n- Android API Level 28 (Android 9) [P]: [開発者向けオプション] -> [ナイトモード].\n\nWebView コンポーネント (AutoJs6 のドキュメントページなど) を使って, Web ベースのコンテンツにナイトモード (ダークテーマ) を適用するには, 以下の条件を満たす必要があります.\n1. Android System WebView (または Google Chrome のようなブラウザ) .\n- Android API Level 29 (Android 10) [Q] 以上: バージョン >= 76\n- Android API Level 28 (Android 9) [P]: バージョン >= 105\n2. WebView コンポーネントの Web ベースのコンテンツは, Dark テーマに適合している (CSS や Android XML リソースなどによる)</string>
+    <string name="description_notification_access">\"通知へのアクセス\" (または \"通知読み取り権限\") により, AutoJs6 はシステム通知の内容を読み取れるようになり, スクリプトで通知を監視したり通知テキストを取得したりできます.</string>
+    <string name="description_post_notifications">\"通知の送信\" 権限により, AutoJs6 はシステムに通知を投稿でき, スクリプトで通知バーへカスタム通知を投稿・管理できます.\n\nNote: Android 13+ 端末でこの権限が付与されていない場合, 一部の通知が表示されない可能性があり, フォアグラウンドサービスの起動や安定性に影響することがあります.</string>
+    <string name="description_project_media_access">プロジェクトのメディアアクセス権を使用すると, 画面録画のセキュリティ警告が表示されなくなります</string>
     <string name="description_restart_strategy">再起動戦略はホームページのドロワーにある再起動ボタンにのみ適用されます.\n\nクイック再起動: アプリをすばやく再起動します. 再起動に失敗したり予期しない状況が発生した場合は/\"スケジュール再起動\" に切り替えてください.\nスケジュール再起動: あらかじめ短時間のタイマーを設定します. アプリが停止した後/スケジュールに従って再度起動し/アプリの再起動を実現します.</string>
     <string name="description_rhino_java_primitive_wrap">スイッチ有効 (デフォルト): Java メソッドが返す Number/Boolean/Character は Java オブジェクトとしてラップされ/スクリプトに公開されます (String は除外). typeof は \"object\"/species は \"JavaObject\". Java のメソッドを呼び出せるため/Java の厳密な型特性やオーバーロード解決を保持しやすくなります.\n\nスイッチ無効: 上記の型はラップされず/JavaScript のプリミティブ値 (number/boolean/1 文字の文字列) として直接公開されます. typeof は対応する JavaScript 型となり/JavaScript のセマンティクス／エコシステムにより沿います. 必要なら new によって明示的に Java ラッパーを生成できます (例: new java.lang.Boolean(true)).\n\n参照: http://issues.autojs6.com/435</string>
     <string name="description_root_mode_preference">異国の root や root アクセスに異常がある場合, root を強制的に root または non-root に設定することができます</string>
     <string name="description_root_record_out_file_type_preference">バイナリタイプ: 編集不可, ファイル拡張子は \"auto\"\nJavaScript タイプ: 直接編集またはコピー可能, ファイル拡張子は \"js\"</string>
+    <string name="description_server_mode">サーバーモードは, AutoJs6 が端末上でサービスを起動して外部クライアントからの接続を待ち, [ スクリプト転送 / ログ出力 / リモート制御 ] などを行うための機能です.\n\nAutoJs6 のサーバーモードは 2 つの接続方式に対応しています:\n1. LAN\n2. Android Debug Bridge (ADB)</string>
+    <string name="description_shizuku_access">Shizuku を使用すると, ADB 権限を取得し, システム API にアクセスできるようになります</string>
     <string name="description_stable_mode">安定モードにするとレイアウト境界を取得する際に安定しますが, 一部の結果が無視されることがあります.\nアクセシビリティサービスの再起動が必要です</string>
     <string name="description_theme_color_preference">テーマカラーは, 以下のウィジェットに適用されますが, これに限定されるものではありません.\nステータスバー\nアプリバー\nファイルアイコン\nタスクアイテムアイコン\nファブ\n設定カテゴリのタイトル\nスイッチボタン\n\n注: AutoJs6 バージョン 6.2.0 では, 原色, 原色暗色, アクセントカラーの区別はまだありません</string>
     <string name="description_timed_task_backend">スクリプトを定時で起動するための基盤メカニズムを制御します.\n\nAlarmManager: システムの \"アラームとリマインダーの設定を許可\" 権限を付与すると/より正確な時刻での実行に近づきます.\nWorkManager: システムに優しく/一定の遅延を許容できる非重要タスクに適しています.\nJobScheduler: 旧来の実装で互換性のために残されていますが/遅延が発生しやすいです.</string>
     <string name="description_timed_task_backend_more" tools:ignore="TypographyEllipsis">利用シーンと違い: \n\n1. AlarmManager\n[リマインダー/厳密な時刻のスクリプト/...] など/時刻精度が重要なタスクに適しています.\nAndroid 12 以降で \"アラームとリマインダーの設定を許可\" 権限がある場合/画面消灯/待機中でも比較的正確に実行されます.\n権限がない場合/システムにより不正確または遅延実行になる可能性があります.\n\n2. WorkManager\n[非重要な同期/クリーンアップ/統計/...] など/厳密な時刻精度を必要としないタスクに適しています.\n[バッテリー/ネットワーク/充電状況/待機ポリシー/...] に応じてスケジューリングされ/消灯/待機中は実行が遅れることがあります.\n時間精度は保証されませんが/[確実な完了/失敗時の再試行/チェーン実行/一意タスクの重複排除] に強みがあります.\n\n3. JobScheduler\n互換性維持のための歴史的実装です.\n新しい Android では遅延が大きくなりやすい傾向があります.\n互換性の必要がない限り/通常は非推奨です.</string>
+    <string name="description_usage_stats_access">デバイスの使用履歴や統計情報にアクセスできるようになり, currentPackage()の結果がより正確になります</string>
     <string name="description_version_histories_preference">GitHub 上の AutoJs6 のリリース版変更履歴と主要カテゴリの統計データを確認する.</string>
+    <string name="description_write_secure_settings">アプリケーションが読み取ることはできるが, 書き込むことはできないシステム環境設定を含む, 安全なシステム設定です.\nこれは, ユーザーがシステムアプリの UI を通じて明示的に変更する必要がある環境設定のためのものです.\nセキュアなシステム設定を許可すると, 通常のアプリケーションはセキュアな設定 (アクセシビリティサービスなど) を直接変更できるようになります</string>
+    <string name="description_write_system_settings">\"システム設定の変更\" 権限により, AutoJs6 は一部のシステム設定を変更でき, スクリプトで [ 画面の明るさ / 自動回転 / 画面タイムアウト ] などを調整できます.</string>
+    <string name="dialog_button_advanced_settings">詳細</string>
     <string name="dialog_button_back">@string/text_back</string>
     <string name="dialog_button_cancel">取消</string>
     <string name="dialog_button_cancel_download">取消</string>
     <string name="dialog_button_clear_items">クリア</string>
     <string name="dialog_button_confirm">OK</string>
+    <string name="dialog_button_connect">接続</string>
     <string name="dialog_button_continue">@string/text_continue</string>
+    <string name="dialog_button_continue_connecting">@string/dialog_button_continue</string>
     <string name="dialog_button_copy">@string/text_copy</string>
     <string name="dialog_button_default_prefix">デフォ前置</string>
     <string name="dialog_button_details">詳細</string>
     <string name="dialog_button_dismiss">削除</string>
     <string name="dialog_button_download_with_browser">ブラウザ</string>
+    <string name="dialog_button_exception_details">詳細</string>
     <string name="dialog_button_file_information">ファイル情報</string>
     <string name="dialog_button_history">履歴</string>
     <string name="dialog_button_ignore_current_update">無視する</string>
     <string name="dialog_button_join_group">グループ参加</string>
+    <string name="dialog_button_manager">マネージャー</string>
     <string name="dialog_button_more">詳細</string>
     <string name="dialog_button_open_color_palette">パレットを開く</string>
     <string name="dialog_button_quit">終了する</string>
+    <string name="dialog_button_quit_connecting">@string/dialog_button_quit</string>
     <string name="dialog_button_remove">削除</string>
     <string name="dialog_button_retrieve">取得</string>
     <string name="dialog_button_retry">再試行</string>
@@ -121,6 +146,8 @@
     <string name="dialog_button_version_histories">更新履歴</string>
     <string name="dialog_button_view_file">ファイルの表示</string>
     <string name="dialog_button_view_shortcuts">ショートカットを表示</string>
+    <string name="dialog_button_view_update">更新を表示</string>
+    <string name="dialog_button_view_with_browser">@string/dialog_button_download_with_browser</string>
     <string name="dialog_title_color_details">カラー詳細</string>
     <string name="dialog_title_color_palette">カラーパレット</string>
     <string name="dialog_title_theme_color_details">テーマカラー詳細</string>
@@ -170,6 +197,8 @@
     <string name="error_arguments_cannot_be_empty">引数を空にできません</string>
     <string name="error_arguments_must_be_empty">引数は空でなければなりません</string>
     <string name="error_at_least_one_abi_needs_to_be_selected">少なくとも 1 つの ABI を選択する必要がある</string>
+    <string name="error_autojs6_version_must_not_be_lower_than_ver">AutoJs6 のバージョンは %1$s 未満であってはなりません</string>
+    <string name="error_autojs6_version_number_must_not_be_lower_than_num">AutoJs6 のバージョン番号は %1$s 未満であってはなりません</string>
     <string name="error_both_bitmap_and_mat_are_null">ビットマップとマットの両方が null です</string>
     <string name="error_cannot_be_null">%s は null にできません</string>
     <string name="error_cannot_connect_to_github">GitHub に接続できません</string>
@@ -204,11 +233,17 @@
     <string name="error_failed_to_grant_shizuku_access">Shizuku の権限付与に失敗しました</string>
     <string name="error_failed_to_instantiate">\"%s\" のインスタンス化に失敗しました</string>
     <string name="error_failed_to_instantiate_with_cause"><![CDATA[インスタンス化 \"%1$s\" に失敗しました: [ %2$s ]]]></string>
+    <string name="error_failed_to_launch_manager">マネージャーを起動できませんでした</string>
+    <string name="error_failed_to_launch_system_settings">システム設定を起動できませんでした</string>
+    <string name="error_failed_to_load_plugins_with_reason">プラグインの読み込みに失敗しました.\n理由: %1$s.</string>
     <string name="error_failed_to_render_content">コンテンツの表示に失敗しました</string>
+    <string name="error_failed_to_retrieve_changelog">更新ログの取得に失敗しました</string>
+    <string name="error_failed_to_retrieve_release_notes">リリースノートの取得に失敗しました</string>
     <string name="error_failed_to_retrieve_version_histories">バージョン履歴を取得できません</string>
     <string name="error_failed_to_retrieve_version_properties_file_to_parse_version_information">version.properties を取得できず, バージョン情報を解析できません</string>
     <string name="error_failed_to_revoke_shizuku_access">Shizuku 権限の取り消しに失敗しました</string>
     <string name="error_failed_to_run_script">スクリプトの実行に失敗しました</string>
+    <string name="error_failed_to_save_project_config">プロジェクト設定の保存に失敗しました</string>
     <string name="error_file_in_path_does_not_exist">パス \"%1$s\" にファイルが存在しません</string>
     <string name="error_function_called_in_ui_thread">\"UI スレッドをブロックできません. サブスレッドまたはサブスクリプトで %s() を実行してみてください</string>
     <string name="error_function_called_more_than_once">%s() が複数回呼び出されました</string>
@@ -245,6 +280,7 @@
     <string name="error_no_applications_available_for_playing_this_file">このファイルを再生できるアプリがありません</string>
     <string name="error_no_applications_available_for_sending_this_file">このファイルを送信できるアプリがありません</string>
     <string name="error_no_applications_available_for_viewing_this_file">このファイルを表示できるアプリがありません</string>
+    <string name="error_no_available_url_provided_for_current_plugin">現在のプラグインに利用可能な URL は提供されていません</string>
     <string name="error_no_display_over_other_apps_permission">他のアプリの上に表示する」権限がない</string>
     <string name="error_no_permission_to_access_shizuku">Shizuku にアクセスする権限がありません</string>
     <string name="error_no_post_notifications_permission">\"投稿通知\" 許可なし</string>
@@ -273,6 +309,7 @@
     <string name="error_shizuku_is_not_installed">Shizuku がインストールされていない</string>
     <string name="error_shizuku_service_may_be_not_running">Shizuku サービスが実行されていない可能性があります</string>
     <string name="error_shizuku_version_is_not_supported">Shizuku のバージョンがサポートされていない</string>
+    <string name="error_specified_autojs6_version_number_must_be_greater_than_461">指定された AutoJs6 のバージョン番号は 461 より大きくなければなりません</string>
     <string name="error_the_transformer_for_required_property_cannot_return_nullish">必要なプロパティ \"%1$s\" のトランスフォーマーは null を返すことができません</string>
     <string name="error_thread_is_not_alive">スレッドが生きていない</string>
     <string name="error_unable_to_use_shizuku_service">Shizuku サービスが使用できない</string>
@@ -483,6 +520,7 @@
     <string name="text_captured_window_info_type_unknown">不明なタイプ</string>
     <string name="text_category_filter">カテゴリフィルター</string>
     <string name="text_change_working_dir">作業ディレクトリの変更</string>
+    <string name="text_changelog">更新ログ</string>
     <string name="text_changelog_item_dependency">一部の依存関係またはローカルライブラリのバージョン調整</string>
     <string name="text_check_for_updates">アップデートの確認</string>
     <string name="text_check_for_updates_while_ignoring_the_local_version">アップデートの確認 (ローカルバージョンを無視する)</string>
@@ -520,7 +558,10 @@
     <string name="text_confirm_to_clear_histories_of_all_color_libraries">以下の履歴がクリアされます\n\n[ すべてのカラーライブラリ ]\n\n本当にクリアしてもよろしいですか?</string>
     <string name="text_confirm_to_delete">本当に削除しますか?</string>
     <string name="text_confirm_to_remove">本当に削除しますか?</string>
+    <string name="text_confirm_to_uninstall">アンインストールしてもよろしいですか?</string>
     <string name="text_connect_to_pc">PC に接続する</string>
+    <string name="text_connected">接続済み</string>
+    <string name="text_connected_count_with_colon">接続済み: %1$d</string>
     <string name="text_connection_cannot_be_established">接続が確立できない</string>
     <string name="text_console">コンソール</string>
     <string name="text_continue">続行</string>
@@ -642,6 +683,7 @@
     <string name="text_failed_to_retrieve">取得に失敗</string>
     <string name="text_failed_to_save_remote_project_to_local_storage">リモートプロジェクトをローカルストレージに保存できませんでした</string>
     <string name="text_failed_to_send_log_entries">ログ・エントリの送信に失敗しました</string>
+    <string name="text_failed_to_update">更新に失敗しました</string>
     <string name="text_failed_to_write_file">ファイルの書き込みに失敗しました</string>
     <string name="text_file">ファイル</string>
     <string name="text_file_details">ファイルの詳細</string>
@@ -666,7 +708,6 @@
     <string name="text_floating_button">フローティングボタン</string>
     <string name="text_force_stop">強制停止</string>
     <string name="text_foreground_service">フォアグラウンドサービス</string>
-    <string name="text_foreground_service_description">フォアグラウンド・サービスは, ユーザーにとって目に付く操作を実行します.\nフォアグラウンド・サービスはステータス・バーに通知を表示し, アプリがフォアグラウンドでタスクを実行し, システム・リソースを消費していることをユーザーが積極的に認識できるようにします.\nこの通知は, サービスが停止されるか, フォアグラウンドから削除されない限り, 解除されません.\n通知を長押しすることで, 通知の優先度を低く設定したり, 通知をオフにしたりすることができます</string>
     <string name="text_formatting_completed">フォーマット完了</string>
     <string name="text_function">関数</string>
     <string name="text_fx_keyboard">Fx キーボード</string>
@@ -706,9 +747,11 @@
     <string name="text_install_from_url">\"URL\" からインストール</string>
     <string name="text_install_plugin_from_url">\"URL\" からプラグインをインストール</string>
     <string name="text_installable">インストール可</string>
+    <string name="text_integrity_verification_failed">整合性の検証に失敗しました</string>
     <string name="text_invalid_character_is_removed">無効な文字が削除されました</string>
     <string name="text_invalid_package_name">パッケージ名が無効です</string>
     <string name="text_invalid_project">プロジェクトが無効です</string>
+    <string name="text_ip_address_may_be_invalid_for_server_connection" tools:ignore="TypographyEllipsis">IP アドレス \"%1$s\" は特殊用途 (loopback/broadcast/multicast/reserved/...) のため, 接続先サーバーへの接続に使用できない可能性があります.</string>
     <string name="text_is_latest_version">新しいバージョンが見つかりません</string>
     <string name="text_issue_report">フィードバック</string>
     <string name="text_js_file">*.js ファイル</string>
@@ -776,11 +819,13 @@
     <string name="text_night_mode">夜間モード</string>
     <string name="text_no_browser">ブラウザがインストールされていない</string>
     <string name="text_no_content">内容なし</string>
+    <string name="text_no_content_description">コンテンツの説明がありません</string>
     <string name="text_no_histories">履歴がない</string>
     <string name="text_no_ignored_updates">無視された更新がない</string>
     <string name="text_no_log_entries_to_copy">コピーするログ・エントリがありません</string>
     <string name="text_no_log_entries_to_export">エクスポートするログ・エントリがありません</string>
     <string name="text_no_log_entries_to_send">送信するログ・エントリがありません</string>
+    <string name="text_no_plugins_installed_hint">現在インストールされているプラグインはありません.\n\"+\" ボタンをタップしてプラグインをインストールしてください.</string>
     <string name="text_no_root">非ルート</string>
     <string name="text_no_root_access">ルートアクセス不可</string>
     <string name="text_no_scripts_to_stop_running">実行を停止するスクリプトなし</string>
@@ -923,7 +968,6 @@
     <string name="text_project">プロジェクト</string>
     <string name="text_project_location">プロジェクトの場所</string>
     <string name="text_project_media_access">プロジェクト・メディア・アクセス</string>
-    <string name="text_project_media_access_description">プロジェクトのメディアアクセス権を使用すると, 画面録画のセキュリティ警告が表示されなくなります</string>
     <string name="text_prompt">プロンプト</string>
     <string name="text_quit">終了</string>
     <string name="text_recommended">推奨</string>
@@ -939,6 +983,7 @@
     <string name="text_register">登録</string>
     <string name="text_register_succeed">登録に成功した</string>
     <string name="text_registering">登録中</string>
+    <string name="text_release_notes">リリースノート</string>
     <string name="text_remote">リモート</string>
     <string name="text_remote_file_saved_to_local_storage_successfully">リモート・ファイルがローカル・ストレージに正常に保存された</string>
     <string name="text_remote_project_saved_to_local_storage_successfully">リモートプロジェクトがローカルストレージに正常に保存された</string>
@@ -957,6 +1002,9 @@
     <string name="text_restart">再起動</string>
     <string name="text_restart_strategy">再起動戦略</string>
     <string name="text_result">結果</string>
+    <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">更新ログを取得しています...</string>
+    <string name="text_retrieving_plugin_list_data" tools:ignore="TypographyEllipsis">プラグイン一覧のデータを取得しています...</string>
+    <string name="text_retrieving_release_notes" tools:ignore="TypographyEllipsis">リリースノートを取得しています...</string>
     <string name="text_revoke_autojs6_access_in_shizuku_app">Shizuku アプリケーションで AutoJs6 権限を取り消す</string>
     <string name="text_rhino_java_primitive_wrap">Java プリミティブ型のラップ</string>
     <string name="text_root_mode_title">Root 権限の確認</string>
@@ -987,6 +1035,8 @@
     <string name="text_save_and_exit">保存して終了</string>
     <string name="text_save_simplified">保存</string>
     <string name="text_save_to">保存先</string>
+    <string name="text_scheduled_restart_backend">エンジン</string>
+    <string name="text_scheduled_restart_start_delay">開始遅延</string>
     <string name="text_script_record">スクリプトの記録</string>
     <string name="text_script_running">スクリプトの実行</string>
     <string name="text_search">検索</string>
@@ -1009,8 +1059,8 @@
     <string name="text_set_as_working_dir">作業ディレクトリに設定する</string>
     <string name="text_set_breakpoint">ブレークポイントの設定</string>
     <string name="text_settings">設定</string>
+    <string name="text_sha256_mismatch_multiline_expected_actual">SHA-256 が一致しません.\n\n期待値: %1$s\n実際: %2$s</string>
     <string name="text_shizuku_access">Shizuku のパーミッション</string>
-    <string name="text_shizuku_access_description">Shizuku を使用すると, ADB 権限を取得し, システム API にアクセスできるようになります</string>
     <string name="text_shizuku_service_may_need_to_be_run_first">最初に Shizuku サービスを実行する必要があるかもしれない</string>
     <string name="text_should_not_be_empty">「テキストを空にすることはできません</string>
     <string name="text_show_layout_bounds">レイアウト境界内のビュー</string>
@@ -1065,6 +1115,10 @@
     <string name="text_undo_simplified">戻る</string>
     <string name="text_uninstall">Uninstall</string>
     <string name="text_unknown">不明</string>
+    <string name="text_unknown_author_for_plugin">不明な作者</string>
+    <string name="text_unknown_description_for_plugin">不明な説明</string>
+    <string name="text_unknown_title_for_plugin">不明なタイトル</string>
+    <string name="text_unknown_version_for_plugin">不明なバージョン</string>
     <string name="text_unverified">未確認</string>
     <string name="text_updatable">Updatable</string>
     <string name="text_update">Update</string>
@@ -1073,7 +1127,6 @@
     <string name="text_updates_snack_bar_act_later">後日</string>
     <string name="text_updates_snack_bar_act_view">表示</string>
     <string name="text_usage_stats_permission">使用統計へのアクセス</string>
-    <string name="text_usage_stats_permission_description">デバイスの使用履歴や統計情報にアクセスできるようになり, currentPackage()の結果がより正確になります</string>
     <string name="text_use_android_n_shortcut">Android 7.0 のショートカットを使用</string>
     <string name="text_use_default_icon">デフォルトのアイコンを使用する</string>
     <string name="text_use_volume_control_record">\"Volume Down\" キーで録音を制御</string>
@@ -1108,38 +1161,6 @@
     <string name="text_weekly_task_should_check_day_of_week">最低 1 日選択する必要があります</string>
     <string name="text_working_dir_path">作業ディレクトリのパス</string>
     <string name="text_write_secure_settings">セキュリティ設定の書き込み</string>
-    <string name="text_write_secure_settings_description">アプリケーションが読み取ることはできるが, 書き込むことはできないシステム環境設定を含む, 安全なシステム設定です.\nこれは, ユーザーがシステムアプリの UI を通じて明示的に変更する必要がある環境設定のためのものです.\nセキュアなシステム設定を許可すると, 通常のアプリケーションはセキュアな設定 (アクセシビリティサービスなど) を直接変更できるようになります</string>
     <string name="text_write_system_settings">システム設定の書き込み</string>
-    <string name="text_integrity_verification_failed">整合性の検証に失敗しました</string>
-    <string name="text_sha256_mismatch_multiline_expected_actual">SHA-256 が一致しません.\n\n期待値: %1$s\n実際: %2$s</string>
-    <string name="error_no_available_url_provided_for_current_plugin">現在のプラグインに利用可能な URL は提供されていません</string>
-    <string name="text_failed_to_update">更新に失敗しました</string>
-    <string name="text_confirm_to_uninstall">アンインストールしてもよろしいですか?</string>
-    <string name="dialog_button_exception_details">詳細</string>
-    <string name="error_failed_to_load_plugins_with_reason">プラグインの読み込みに失敗しました.\n理由: %1$s.</string>
-    <string name="text_retrieving_plugin_list_data" tools:ignore="TypographyEllipsis">プラグイン一覧のデータを取得しています...</string>
-    <string name="text_no_plugins_installed_hint">現在インストールされているプラグインはありません.\n\"+\" ボタンをタップしてプラグインをインストールしてください.</string>
-    <string name="text_unknown_author_for_plugin">不明な作者</string>
-    <string name="text_unknown_description_for_plugin">不明な説明</string>
-    <string name="text_unknown_version_for_plugin">不明なバージョン</string>
-    <string name="text_unknown_title_for_plugin">不明なタイトル</string>
-    <string name="error_specified_autojs6_version_number_must_be_greater_than_461">指定された AutoJs6 のバージョン番号は 461 より大きくなければなりません</string>
-    <string name="error_autojs6_version_number_must_not_be_lower_than_num">AutoJs6 のバージョン番号は %1$s 未満であってはなりません</string>
-    <string name="error_autojs6_version_must_not_be_lower_than_ver">AutoJs6 のバージョンは %1$s 未満であってはなりません</string>
-    <string name="dialog_button_view_update">更新を表示</string>
-    <string name="content_failed_to_retrieve_changelog_of_current_language_with_zh_hans_release_notes_fallback">現在表示している言語に対応する更新ログの取得に失敗しました. しばらくしてからもう一度お試しください. \n\n現在は一時的に \"簡体字中国語 (zh-Hans)\" のリリースノートを表示します.</string>
-    <string name="error_failed_to_retrieve_changelog">更新ログの取得に失敗しました</string>
-    <string name="error_failed_to_retrieve_release_notes">リリースノートの取得に失敗しました</string>
-    <string name="text_changelog">更新ログ</string>
-    <string name="text_release_notes">リリースノート</string>
-    <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">更新ログを取得しています...</string>
-    <string name="text_retrieving_release_notes" tools:ignore="TypographyEllipsis">リリースノートを取得しています...</string>
-    <string name="dialog_button_view_with_browser">@string/dialog_button_download_with_browser</string>
-    <string name="text_scheduled_restart_backend">エンジン</string>
-    <string name="text_scheduled_restart_start_delay">開始遅延</string>
-    <string name="dialog_button_advanced_settings">詳細</string>
-    <string name="error_failed_to_save_project_config">プロジェクト設定の保存に失敗しました</string>
-    <string name="text_connected">接続済み</string>
-    <string name="text_connected_count_with_colon">接続済み: %1$d</string>
 
 </resources>
