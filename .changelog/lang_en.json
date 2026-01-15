@@ -281,7 +281,7 @@
         "File manager supports default prefix selection when creating new files and automatically generates appropriate numeric suffix",
         "File manager specifically informs on exception message when running project _[`issue #268`](http://issues.autojs6.com/268)_",
         "File manager supports more types and displays corresponding icon symbols (supports over 800 file types)",
-        "Editable file types (jpg/doc/pdf, etc.) in file manager have added edit buttons",
+        "Editable file types (jpg/doc/pdf/...) in file manager have added edit buttons",
         "APK files in file manager support viewing basic information, Manifest information, and permissions list",
         "Audio/video media files in file manager support viewing basic information and MediaInfo information",
         "Package single file support auto-fill appropriate standardized package name and invalid character filter prompt",

@@ -14,11 +14,12 @@ object ContextUtils {
 
     @JvmStatic
     fun Context.findActivity(): Activity? {
-        var context: Context? = this
-        while (context !is Activity) {
-            context = (context as? ContextWrapper)?.baseContext
+        var ctx: Context? = this
+        while (ctx is ContextWrapper) {
+            if (ctx is Activity) return ctx
+            ctx = ctx.baseContext
         }
-        return context as? Activity?
+        return null
     }
 
 }

@@ -396,7 +396,11 @@
 
         <service
             android:name="org.autojs.autojs.external.foreground.MainActivityForegroundService"
-            android:foregroundServiceType="specialUse" />
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="To ensure the app can smoothly complete automation workflow even when running in the background" />
+        </service>
 
         <service android:name="org.autojs.autojs.external.ScriptExecutionIntentService" />
 

@@ -8,11 +8,9 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
-
 import org.autojs.autojs6.R;
 
 /**
@@ -52,7 +50,7 @@ public class ForegroundServiceUtils {
                 .setContentIntent(contentIntent)
                 .setSmallIcon(R.drawable.autojs6_status_bar_icon)
                 .setAutoCancel(true)
-                .setOngoing(false)
+                .setOngoing(true)
                 .setSilent(true)
                 .setWhen(System.currentTimeMillis())
                 .setChannelId(channelId)
@@ -64,10 +62,9 @@ public class ForegroundServiceUtils {
     }
 
     @NonNull
-    public static String getChannelId(Class<?> className) {
-        return className.getName() + ".foreground";
+    public static String getChannelId(Class<?> clazz) {
+        return clazz.getName() + ".foreground";
     }
-
 
     /**
      * @noinspection deprecation

@@ -225,7 +225,7 @@ object WrappedShizuku {
         Shizuku.removeRequestPermissionResultListener(mRequestPermissionResultListener)
     }
 
-    private fun getLaunchIntent(context: Context): Intent? {
+    fun getLaunchIntent(context: Context): Intent? {
         return context.packageManager.getLaunchIntentForPackage(SHIZUKU.packageName)?.apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }

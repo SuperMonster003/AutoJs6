@@ -87,6 +87,7 @@
     <color name="dialog_button_failure">@color/dialog_button_error</color>
     <color name="dialog_button_finish">#009624</color>
     <color name="dialog_button_hint">#0DA798</color>
+    <color name="dialog_button_manager">@color/md_deep_purple_900</color>
     <color name="dialog_button_reset">#A1887F</color>
     <color name="dialog_button_not_recommended">#A1887F</color>
     <color name="dialog_button_success">@color/dialog_button_finish</color>
@@ -140,8 +141,9 @@
     <color name="tint_1st_developer_identifier">#2B7A85</color>
     <color name="tint_2nd_developer_identifier">#CC7A34</color>
 
-    <color name="drawer_menu_group_text_color">#999999</color>
+    <color name="drawer_menu_group_text_color">#939393</color>
     <color name="drawer_menu_item_text_color">#484C4F</color>
+    <color name="drawer_menu_group_divider_color">#F2F3F5</color>
 
     <color name="market_button_selected">#E14123</color>
     <color name="market_button_unselected">#939393</color>

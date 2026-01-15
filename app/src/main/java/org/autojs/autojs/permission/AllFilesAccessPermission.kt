@@ -8,6 +8,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.Settings
+import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import org.autojs.autojs.extension.MaterialDialogExtensions.widgetThemeColor
 import org.autojs.autojs.permission.Base.getPermissionsToRequest
@@ -21,54 +22,66 @@ import org.autojs.autojs6.R
 /**
  * Created by SuperMonster003 on Jun 21, 2022.
  */
-class ManageAllFilesPermission(override val context: Context) : PermissionItemHelper, AbleToUrge {
+class AllFilesAccessPermission(override val context: Context) : PermissionItemHelper, AbleToUrge {
 
-    override fun has(): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            Environment.isExternalStorageManager()
-        } else {
-            getPermissionsToRequest(context, LEGACY_STORAGE_PERMISSIONS).isEmpty()
-        }
-    }
-
-    override fun request(): Boolean {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            return try {
-                Intent()
-                    .setAction(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
-                    .setData(Uri.fromParts("package", context.packageName, null))
-                    .let { context.startActivity(it) }
-                true
-            } catch (e: Exception) {
-                try {
-                    Intent()
-                        .setAction(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
-                        .let { context.startActivity(it) }
-                    true
-                } catch (e: Exception) {
-                    false
-                }
+    override fun has(): Boolean =
+        when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> {
+                Environment.isExternalStorageManager()
             }
-        } else {
-            return try {
-                ActivityCompat.requestPermissions((context as Activity), LEGACY_STORAGE_PERMISSIONS, Base.REQUEST_CODE)
-                true
-            } catch (e: Exception) {
-                config()
-                false
-            }
+            else -> getPermissionsToRequest(context, LEGACY_STORAGE_PERMISSIONS).isEmpty()
         }
+
+    override fun request(): Boolean =
+        when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> {
+                manageAllFilesAccess()
+            }
+            else -> requestLegacyStoragePermissions() || launchAppDetailsSettings()
+        }
+
+    private fun requestLegacyStoragePermissions(): Boolean =
+        runCatching {
+            ActivityCompat.requestPermissions((context as Activity), LEGACY_STORAGE_PERMISSIONS, Base.REQUEST_CODE)
+        }.isSuccess
+
+    override fun revoke(): Boolean {
+        when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> {
+                manageAllFilesAccess()
+            }
+            else -> launchAppDetailsSettings()
+        }
+        return false
     }
 
-    override fun revoke(): Boolean = false.also { config() }
+    @RequiresApi(Build.VERSION_CODES.R)
+    private fun manageAllFilesAccess(): Boolean = runCatching {
+        Intent()
+            .setAction(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
+            .setData(Uri.fromParts("package", context.packageName, null))
+            .let { context.startActivity(it) }
+        true
+    }.isSuccess || runCatching {
+        Intent()
+            .setAction(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
+            .let { context.startActivity(it) }
+    }.isSuccess
 
-    private fun config() {
-        IntentUtils.goToAppDetailSettings(context, context.packageName)
-    }
+    private fun launchAppDetailsSettings() = IntentUtils.launchAppDetailsSettings(context)
+
+    fun config(): Boolean =
+        when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> {
+                manageAllFilesAccess()
+            }
+            else -> launchAppDetailsSettings()
+        }
 
     override fun urge() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
-            return Unit.also { request() }
+            request()
+            return
         }
         NotAskAgainDialog.Builder(context, key(R.string.key_dialog_manage_all_files_permission))
             .title(R.string.text_all_files_access)

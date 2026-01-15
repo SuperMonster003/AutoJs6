@@ -1,15 +1,15 @@
 package org.autojs.autojs.ui.enhancedfloaty.util;
 
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
 import android.provider.Settings;
-import android.view.WindowManager;
+import org.autojs.autojs.annotation.ReservedForCompatibility;
+import org.autojs.autojs.util.IntentUtils;
 
 /**
  * Created by Stardust on Mar 10, 2017.
+ * Modified by SuperMonster003 as of Jan 15, 2026.
  */
 public class FloatingWindowPermissionUtil {
 
@@ -26,7 +26,7 @@ public class FloatingWindowPermissionUtil {
                     Uri.parse("package:" + packageName))
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
         } catch (Exception e) {
-            goToAppDetailSettings(context, packageName);
+            IntentUtils.launchAppDetailsSettings(context, packageName);
         }
     }
 
@@ -34,17 +34,10 @@ public class FloatingWindowPermissionUtil {
         return Settings.canDrawOverlays(context);
     }
 
+    @Deprecated
+    @ReservedForCompatibility
     public static boolean goToAppDetailSettings(Context context, String packageName) {
-        try {
-            Intent i = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-            i.addCategory(Intent.CATEGORY_DEFAULT);
-            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            i.setData(Uri.parse("package:" + packageName));
-            context.startActivity(i);
-            return true;
-        } catch (ActivityNotFoundException ignored) {
-            return false;
-        }
+        return IntentUtils.launchAppDetailsSettings(context, packageName);
     }
 
 }

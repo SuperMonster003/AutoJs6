@@ -3,15 +3,15 @@ package org.autojs.autojs.ui.main.drawer
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.view.isVisible
 import me.zhanghai.android.materialprogressbar.MaterialProgressBar
 import org.autojs.autojs.ui.widget.BindableViewHolder
 import org.autojs.autojs.ui.widget.PrefSwitch
 import org.autojs.autojs6.databinding.DrawerMenuItemBinding
-import java.io.IOException
 
 /**
  * Created by Stardust on Dec 10, 2017.
- * Modified by SuperMonster003 as of Dec 1, 2021.
+ * Modified by SuperMonster003 as of Jan 14, 2026.
  * Transformed by SuperMonster003 on May 13, 2023.
  */
 class DrawerMenuItemViewHolder(itemView: View) : BindableViewHolder<DrawerMenuItem?>(itemView) {
@@ -24,10 +24,8 @@ class DrawerMenuItemViewHolder(itemView: View) : BindableViewHolder<DrawerMenuIt
 
     private var mAntiShake = false
     private var mLastClickMillis: Long = 0
-    private var mDrawerMenuItem: DrawerMenuItem? = null
 
-    val switchCompat
-        get() = mSwitchCompat
+    private lateinit var mDrawerMenuItem: DrawerMenuItem
 
     init {
         val binding = DrawerMenuItemBinding.bind(itemView)
@@ -37,21 +35,45 @@ class DrawerMenuItemViewHolder(itemView: View) : BindableViewHolder<DrawerMenuIt
         mTitle = binding.title
         mSubtitle = binding.subtitle
         mSwitchCompat.setOnCheckedChangeListener { _, _ ->
-            try {
-                onClick()
-            } catch (e: IOException) {
-                e.printStackTrace()
-            }
+            onClick()
         }
-        itemView.setOnClickListener {
-            if (mSwitchCompat.visibility == View.VISIBLE) {
+
+        val toggleAction = {
+            if (mSwitchCompat.isVisible) {
                 mSwitchCompat.toggle()
             } else {
-                try {
-                    onClick()
-                } catch (e: IOException) {
-                    e.printStackTrace()
+                onClick()
+            }
+        }
+
+        binding.iconContainer.setOnClickListener {
+            toggleAction()
+        }
+
+        binding.iconContainer.setOnLongClickListener {
+            when (val menuItem = mDrawerMenuItem) {
+                is DrawerMenuToggleableItem -> {
+                    menuItem.launchManagerIfPossible()
                 }
+                else -> false
+            }
+        }
+
+        binding.titleContainer.setOnClickListener {
+            when (val menuItem = mDrawerMenuItem) {
+                is DrawerMenuToggleableItem -> {
+                    menuItem.onTitleContainerClick()
+                }
+                else -> toggleAction()
+            }
+        }
+
+        binding.titleContainer.setOnLongClickListener {
+            when (val menuItem = mDrawerMenuItem) {
+                is DrawerMenuToggleableItem -> {
+                    menuItem.launchManagerIfPossible()
+                }
+                else -> false
             }
         }
     }
@@ -61,13 +83,17 @@ class DrawerMenuItemViewHolder(itemView: View) : BindableViewHolder<DrawerMenuIt
         mDrawerMenuItem = data
         mIcon.setImageResource(data.icon)
         mTitle.setText(data.title)
+
         val subtitle = data.subtitle
         mSubtitle.text = subtitle
         mSubtitle.visibility = if (subtitle != null) View.VISIBLE else View.GONE
+
         mAntiShake = data.antiShake()
         setSwitch(data)
         setProgress(data.isProgress)
     }
+
+    fun isChecked() = mSwitchCompat.isChecked
 
     private fun setSwitch(item: DrawerMenuItem) {
         if (!item.isSwitchEnabled) {
@@ -84,16 +110,15 @@ class DrawerMenuItemViewHolder(itemView: View) : BindableViewHolder<DrawerMenuIt
         }
     }
 
-    @Throws(IOException::class)
     private fun onClick() {
-        mDrawerMenuItem!!.isChecked = mSwitchCompat.isChecked
-        if (mAntiShake && System.currentTimeMillis() - mLastClickMillis < CLICK_TIMEOUT) {
-            mSwitchCompat.setChecked(!mSwitchCompat.isChecked, false)
-            return
-        }
-        mLastClickMillis = System.currentTimeMillis()
-        if (mDrawerMenuItem != null) {
-            mDrawerMenuItem!!.performAction(this)
+        runCatching {
+            mDrawerMenuItem.isChecked = mSwitchCompat.isChecked
+            if (mAntiShake && System.currentTimeMillis() - mLastClickMillis < CLICK_TIMEOUT) {
+                mSwitchCompat.setChecked(!mSwitchCompat.isChecked, false)
+                return
+            }
+            mLastClickMillis = System.currentTimeMillis()
+            mDrawerMenuItem.performAction(this)
         }
     }
 

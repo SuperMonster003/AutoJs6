@@ -6,8 +6,8 @@ import android.os.Looper
 import ezy.assist.compat.SettingsCompat
 import org.autojs.autojs.extension.MaterialDialogExtensions.widgetThemeColor
 import org.autojs.autojs.ui.common.NotAskAgainDialog
-import org.autojs.autojs.ui.enhancedfloaty.util.FloatingWindowPermissionUtil
 import org.autojs.autojs.ui.main.drawer.PermissionItemHelper
+import org.autojs.autojs.util.IntentUtils
 import org.autojs.autojs.util.RhinoUtils.isMainThread
 import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs.util.ThreadUtils
@@ -32,7 +32,7 @@ class DisplayOverOtherAppsPermission(override val context: Context) : Permission
             SettingsCompat.manageDrawOverlays(context)
         } catch (e: Exception) {
             e.printStackTrace()
-            FloatingWindowPermissionUtil.goToAppDetailSettings(context, context.packageName)
+            IntentUtils.launchAppDetailsSettings(context)
         }
     }
 

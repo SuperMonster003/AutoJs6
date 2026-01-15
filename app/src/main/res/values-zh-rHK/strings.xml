@@ -55,6 +55,7 @@
     <string name="content_description_fab_for_display_manifest">用於顯示清單內容的浮動操作按鈕控件</string>
     <string name="content_failed_to_determine_index_of_theme_color_item">無法確定主題色條目的索引值</string>
     <string name="content_failed_to_locate_library_for_theme_color">無法定位主題色所在顏色庫</string>
+    <string name="content_failed_to_retrieve_changelog_of_current_language_with_zh_hans_release_notes_fallback">獲取當前顯示語言對應的更新日誌失敗, 可稍後再次嘗試.\n\n目前將臨時顯示 \"簡體中文 (zh-Hans)\" 語言的發行説明.</string>
     <string name="content_github_feedback">即將跳轉到項目議題反饋 WEB 頁面.\n可能需要 GitHub 賬户以完成問題反饋.</string>
     <string name="content_way_of_output_for_recorded_script">選擇一個已錄製腳本的輸出方式</string>
     <string name="crash_feedback">可複製調試信息到剪貼板或直接退出應用</string>
@@ -66,46 +67,70 @@
     <string name="default_value_working_directory">/腳本</string>
     <string name="description_about_app_and_developer_preference">AutoJs6 是 Android 平台支持無障礙服務的 JavaScript 自動化工具, 克隆 (clone) 自 \"hyb1996/Auto.js\" 且保持開源.\n\n如需獲取幫助或提交反饋, 可瀏覽項目的 GitHub 議題 (issues) 板塊, 或加入騰訊 (Tencent) QQ 羣組 690946137.</string>
     <string name="description_about_app_tips_preference">1. 在 \"關於應用與開發者\" 頁面長按應用圖標可跳轉至 AutoJs6 開發者選項頁面</string>
+    <string name="description_accessibility_service">無障礙服務是 AutoJs6 實現自動化操作的核心能力, 用於讀取屏幕控件信息並模擬 [ 點擊 / 滑動 / 輸入 ] 等交互.\n\n自動化相關的大部分功能函數以及佈局分析工具等, 均需要啓用無障礙服務才能正常工作.</string>
+    <string name="description_all_files_access" tools:ignore="TypographyEllipsis">\"管理所有文件\" (或 \"所有文件訪問\") 權限允許 AutoJs6 在共享存儲空間中通過常規文件路徑直接 [ 創建 / 讀取 / 修改 / 刪除 ] 文件, 使腳本可以訪問 \"內部存儲 (Internal Storage)\", 使文件管理器可以正常顯示及管理文件.\n\n在 Android 11+ 設備上, 這是實現全盤文件讀寫能力的主要方式.</string>
     <string name="description_app_language_preference">設置選項用於修改 AutoJs6 應用的文本內容顯示語言, 同時包括腳本運行產生的錯誤消息等.\n\n注: 部分內容可能需要重啓應用才能完成語言切換.</string>
+    <string name="description_auto_night_mode">自動夜間模式開啓後, AutoJs6 將根據系統設置自動切換夜間模式.\n\注: 自動夜間模式開關與夜間模式開關互相關聯且互相影響.</string>
     <string name="description_change_working_dir_preference">更改包含腳本的文件夾路徑</string>
     <string name="description_check_for_updates_preference">AutoJs6 從 GitHub 獲取並下載更新.</string>
+    <string name="description_client_mode">客户端模式用於讓 AutoJs6 主動連接到遠端服務端, 以便進行 [ 腳本傳輸 / 打印日誌 / 遠程控制 ] 等.\n\n通常需要設備與服務端處於同一局域網或可互相訪問的網絡環境.</string>
+    <string name="description_display_over_other_app">\"顯示在其他應用上層\" 權限允許 AutoJs6 在其他應用界面之上展示懸浮窗或浮動按鈕, 以便在任意界面快速執行操作或查看信息.\n\n注: 未授予該權限時, 懸浮窗及浮動按鈕可能會無法顯示或正常使用.</string>
     <string name="description_documentation_source_preference">本地文檔: AutoJs6 內置文件作為文檔來源, 無需網絡連接, 隨 AutoJs6 應用更新而發生內容變動.\n在線文檔: 使用 GitHub 網頁作為文檔來源, 需網絡連接, 可隨時保持文檔內容為最新.\n\n注: 為最大化在線文檔的閲讀體驗, 建議使用桌面顯示器等寬屏顯示設備閲讀.\n注: 截至 6.2.0 版本, 文檔尚處於初步編寫階段, 大部分內容尚未完成編寫或更新.</string>
     <string name="description_documentation_source_preference_more">文檔頁面的深色主題支持需要滿足以下條件:\n1. AutoJs6 開啓夜間模式\n2. WebView (或 Google Chrome 等瀏覽器) 版本要求:\n- API 級別 29 (安卓 10) [Q] 及以上: 版本不低於 76\n- API 級別 28 (安卓 9) [P] 及以下: 版本不低於 105</string>
     <string name="description_extending_js_build_in_objects">擴展 JavaScript 內置對象可以增加代碼靈活性並實現更豐富的功能, 但可能造成衝突甚至破壞.\n選項開啓後所有腳本均默認啓用內置擴展.\n內置擴展往往是不安全的, 除非明確瞭解內置擴展的原理及風險, 否則不建議啓用.\n選項關閉後, 仍然可以通過 plugins 全局對象啓用內置擴展, 詳見項目文檔.</string>
+    <string name="description_floating_button">浮動按鈕用於在屏幕邊緣顯示一個可拖動的快捷功能入口, 可用於 [ 啓動或停止腳本 / 佈局分析 / 查看最近包名或活動名稱 / 顯示指針位置 ] 等.\n\n注: 該功能通常需要授予 \"顯示在其他應用上層\" 權限.</string>
+    <string name="description_foreground_service">前台服務用於在後台更穩定地保持 AutoJs6 運行, 適合 [ 長時間執行腳本 / 保持連接 / 持續監聽 ] 等場景.\n\n啓用後, 系統會顯示一條 \"前台服務通知\" 用於告知用户 AutoJs6 正在持續運行, 該通知通常會保持顯示直到服務停止.\n\n將通知設置為 \"靜音 (Silent)\" 或 \"最小化 (Minimize)\" 只會降低提示強度, 一般不會影響前台服務功能.\n\n如果關閉通知渠道或禁止 AutoJs6 發送通知, 可能影響前台服務的正常啓動及穩定性.</string>
     <string name="description_hidden_files_preference">用於設置是否在 AutoJs6 文件管理器中顯示隱藏文件和文件夾 (通常以 \".\" 開頭).</string>
+    <string name="description_ignore_battery_optimizations">忽略電池優化可降低系統對 AutoJs6 的後台限制, 有助於定時任務或長時間腳本在待機時相對更加穩定地運行.\n\n注: 不同廠商系統可能仍會有額外的省電策略, 如自啓動限制或後台凍結等.</string>
+    <string name="description_keep_screen_on_when_in_foreground">用於控制 AutoJs6 位於前台時是否保持屏幕常亮.</string>
     <string name="description_keep_screen_on_when_in_foreground_preference">用於當 AutoJs6 位於前台時使設備屏幕保持常亮.\n如需在 AutoJs6 應用的所有頁面中, 僅在主頁時保持設備屏幕常亮, 可選擇 \"僅限主頁\" 選項.</string>
     <string name="description_launcher_icon_preference">啓動器圖標支持自適應圖標顯示方式與傳統透明背景圖標顯示方式. 不同安卓系統的圖標實際顯示效果可能有所不同. 切換顯示方式後, 可能需要幾秒鐘的時間生效.</string>
     <string name="description_launcher_shortcuts">快捷方式可以在 AutoJs6 中執行特定操作, 用户可以在啓動器中顯示這些快捷方式, 並快速開始某些任務或啓動某個活動, 如閲讀 AutoJs6 應用文檔, 啓動 AutoJs6 設置頁面等.</string>
     <string name="description_manage_ignored_updates_preference">點擊可查看或管理列表項.\n長按可移除列表項.</string>
+    <string name="description_night_mode">用於控制並反映 AutoJs6 夜間模式策略.\n\n注: 夜間模式開關與自動夜間模式開關互相關聯且互相影響.</string>
     <string name="description_night_mode_preference">夜間模式, 亦稱 [ 暗黑模式 / 深色主題 ] 等.\n夜間模式應用於安卓系統 UI (如通知欄和導航欄) 及 AutoJs6 應用頁面.\n夜間模式可提升設備在低光環境下的易用性, 同時有助於提升弱視或光敏感用户的視覺體驗.\n\n跟隨系統: AutoJs6 與安卓操作系統的夜間模式設置一致\n總是開啓: AutoJs6 保持開啓夜間模式 (忽略操作系統設置)\n總是關閉: AutoJs6 保持關閉夜間模式 (忽略操作系統設置)\n\n注: 跟隨系統功能僅支持安卓 API 級別 28 (安卓 9) [P] 及以上操作系統.</string>
     <string name="description_night_mode_preference_more">啓用安卓系統的夜間模式:\n- API 級別 29 (安卓 10) [Q] 及以上: 通過 [ 設置 -> 顯示 -> 主題 ] 開啓.\n- API 級別 28 (安卓 9) [P]: 通過 [ 開發者選項 -> 夜間模式 ] 開啓.\n\n對於基於 WebView 組件的內容 (如 AutoJs6 的文檔頁面), 夜間模式支持需要滿足以下條件:\n1. WebView (或 Google Chrome 等瀏覽器) 版本要求:\n- API 級別 29 (安卓 10) [Q] 及以上: 版本不低於 76\n- API 級別 28 (安卓 9) [P]: 版本不低於 105\n2. WebView 組件頁面內容可適配夜間模式 (通過 CSS 或 安卓 XML 資源等方式實現)</string>
+    <string name="description_notification_access">\"通知使用權\" (或 \"通知讀取權限\") 允許 AutoJs6 讀取系統通知內容, 使腳本可以監聽通知或獲取通知文本等.</string>
+    <string name="description_post_notifications">\"發送通知\" 權限允許 AutoJs6 向系統發佈通知, 使腳本可以在通知欄發佈並管理自定義通知等.\n\n注: 在 Android 13+ 設備上未授予該權限時, 部分通知可能無法顯示, 並可能影響前台服務的啓動與穩定性.</string>
+    <string name="description_project_media_access">被授予 \"投影媒體權限\" 後, 錄製屏幕的安全提示窗口將不再彈出.</string>
     <string name="description_restart_strategy">重啓策略僅作用於主頁抽屜欄的重啓按鈕.\n\n快速重啓: 快速重啓應用, 如果重啓失敗或出現非預期情況, 可嘗試切換至 \"計劃重啓\".\n計劃重啓: 提前設置一個短時定時任務, 應用停止後會再次定時啓動, 以實現應用重啓.</string>
     <string name="description_rhino_java_primitive_wrap">開關啓用 (默認): 將 Java 方法返回的 Number/Boolean/Character 包裝為 Java 對象暴露到腳本 (String 除外). typeof 為 \"object\", species 為 \"JavaObject\", 可訪問這些對象的 Java 方法, 利於保留 Java 精確類型特徵與方法重載行為.\n\n開關禁用: 不再包裝上述類型, 直接作為 JavaScript 基元值 (number/boolean/單字符字符串). typeof 為相應 JavaScript 類型, 更貼近 JavaScript 語義與生態. 但仍可通過 new 關鍵字顯式聲明一個 Java 包裝類型, 如 new java.lang.Boolean(true).\n\n參閲: http://issues.autojs6.com/435</string>
     <string name="description_root_mode_preference">如果設備使用非常規 Root 方式或 Root 權限檢測結果異常, 可設置 \"強制 Root 模式\" 或 \"強制非 Root 模式\".</string>
     <string name="description_root_record_out_file_type_preference">二進制文件: 不可編輯, 文件擴展名為 \"auto\"\nJavaScript 文件: 可編輯或直接複製, 文件擴展名為 \"js\"</string>
+    <string name="description_server_mode">服務端模式用於讓 AutoJs6 在當前設備開啓服務並等待外部客户端連接, 以便進行 [ 腳本傳輸 / 打印日誌 / 遠程控制 ] 等.\n\nAutoJs6 服務端模式支持兩種連接方式:\n1. 局域網 (LAN)\n2. 安卓調試橋 (ADB)</string>
+    <string name="description_shizuku_access">通過 Shizuku 可以獲得 ADB 特權並使用系統 API</string>
     <string name="description_stable_mode">穩定模式省略佈局細節, 腳本分析佈局時更穩定, 但可能影響獲取的控件總量.\n需重啓無障礙服務.</string>
     <string name="description_theme_color_preference">主題色的應用範圍包括但不限於以下部件:\n系統通知欄\n應用欄 (AppBar)\n文件圖標\n任務項圖標\n浮動操作按鈕 (FAB)\n設置頁面類別標題\n按鈕開關\n\n注: 截至 6.2.0 版本, AutoJs6 主題色暫未對 [ 主要色 (Primary Color) / 主要暗色 (Primary Dark Color) / 強調色 (Accent Color) ] 作出區分.</string>
     <string name="description_timed_task_backend">控制腳本定時觸發的底層機制.\n\nAlarmManager: 通過申請 \"允許設置鬧鐘和提醒\" 權限, 可使定時任務的觸發更接近準時.\nWorkManager: 系統友好, 適合可接受一定延遲的非關鍵定時任務.\nJobScheduler: 舊實現, 僅用作兼容保留, 定時任務出現延遲的概率較大.</string>
-    <string name="description_timed_task_backend_more" tools:ignore="TypographyEllipsis">使用場景與差異説明: \n\n1. AlarmManager\n適用於準時性敏感的定時任務, 如 [提醒/嚴格定時腳本/...].\n在 Android 12+ 獲取 \"允許設置鬧鐘和提醒\" 權限後, 在息屏或待機狀態時能夠較準時地執行定時任務.\n在未授予 \"允許設置鬧鐘和提醒\" 權限時, 系統可能降級為不準時或延後執行任務.\n\n2. WorkManager\n適用於不要求嚴格準時執行的定時任務, 如 [非關鍵性同步/清理/統計/...].\n根據系統 [ 電量/網絡/充電情況/待機策略/... ] 進行調度, 息屏或待機狀態時可能推遲任務執行.\n雖無法保證時間精確性, 但在 [ 可靠完成/失敗重試/鏈式執行/唯一任務去重 ] 等方面擁有獨特優勢.\n\n3. Job\n歷史實現, 為兼容保留.\n在高版本安卓系統中定時任務可能存在較大的延遲執行問題.\n除非出於兼容需要, 一般不推薦使用.</string>
+    <string name="description_timed_task_backend_more" tools:ignore="TypographyEllipsis">使用場景與差異説明: \n\n1. AlarmManager\n適用於準時性敏感的定時任務, 如 [提醒/嚴格定時腳本/...].\n在 Android 12+ 設備上獲取 \"允許設置鬧鐘和提醒\" 權限後, 在息屏或待機狀態時能夠較準時地執行定時任務.\n在未授予 \"允許設置鬧鐘和提醒\" 權限時, 系統可能降級為不準時或延後執行任務.\n\n2. WorkManager\n適用於不要求嚴格準時執行的定時任務, 如 [非關鍵性同步/清理/統計/...].\n根據系統 [ 電量/網絡/充電情況/待機策略/... ] 進行調度, 息屏或待機狀態時可能推遲任務執行.\n雖無法保證時間精確性, 但在 [ 可靠完成/失敗重試/鏈式執行/唯一任務去重 ] 等方面擁有獨特優勢.\n\n3. Job\n歷史實現, 為兼容保留.\n在高版本安卓系統中定時任務可能存在較大的延遲執行問題.\n除非出於兼容需要, 一般不推薦使用.</string>
+    <string name="description_usage_stats_access">\"查看使用情況\" 權限可獲取本設備過去使用應用的情況, 從而使 \"獲取當前應用\" (currentPackage) 結果更準確</string>
     <string name="description_version_histories_preference">查看 AutoJs6 在 GitHub 發行版本的歷史更新記錄及重要分類的統計數據.</string>
+    <string name="description_write_secure_settings">安全設置包含應用程序可讀但不可寫入的設置選項, 這些選項只能由 UI 或系統級別應用修改.\n被授予 \"修改安全設置權限\" 後, 普通應用可直接修改上述安全設置 (例如無障礙服務).</string>
+    <string name="description_write_system_settings">\"修改系統設置\" 權限允許 AutoJs6 修改部分系統設置項, 使腳本可以修改 [ 屏幕亮度 / 自動旋轉 / 屏幕超時 ] 等系統設置參數.</string>
+    <string name="dialog_button_advanced_settings">高級設置</string>
     <string name="dialog_button_back">@string/text_back</string>
     <string name="dialog_button_cancel">取消</string>
     <string name="dialog_button_cancel_download">取消下載</string>
     <string name="dialog_button_clear_items">清空記錄</string>
     <string name="dialog_button_confirm">確定</string>
+    <string name="dialog_button_connect">連接</string>
     <string name="dialog_button_continue">@string/text_continue</string>
+    <string name="dialog_button_continue_connecting">繼續連接</string>
     <string name="dialog_button_copy">@string/text_copy</string>
     <string name="dialog_button_default_prefix">默認前綴</string>
     <string name="dialog_button_details">瞭解更多</string>
     <string name="dialog_button_dismiss">關閉</string>
     <string name="dialog_button_download_with_browser">瀏覽器下載</string>
+    <string name="dialog_button_exception_details">異常詳情</string>
     <string name="dialog_button_file_information">文件信息</string>
     <string name="dialog_button_history">歷史記錄</string>
     <string name="dialog_button_ignore_current_update">忽略此版本</string>
     <string name="dialog_button_join_group">加入羣組</string>
+    <string name="dialog_button_manager">管理器</string>
     <string name="dialog_button_more">瞭解更多</string>
     <string name="dialog_button_open_color_palette">打開調色盤</string>
     <string name="dialog_button_quit">放棄</string>
+    <string name="dialog_button_quit_connecting">放棄連接</string>
     <string name="dialog_button_remove">移除</string>
     <string name="dialog_button_retrieve">獲取</string>
     <string name="dialog_button_retry">重試</string>
@@ -118,6 +143,8 @@
     <string name="dialog_button_version_histories">版本歷史</string>
     <string name="dialog_button_view_file">查看文件</string>
     <string name="dialog_button_view_shortcuts">查看快捷方式</string>
+    <string name="dialog_button_view_update">查看更新</string>
+    <string name="dialog_button_view_with_browser">瀏覽器查看</string>
     <string name="dialog_title_color_details">顏色詳情</string>
     <string name="dialog_title_color_palette">調色盤</string>
     <string name="dialog_title_theme_color_details">主題色詳情</string>
@@ -167,6 +194,8 @@
     <string name="error_arguments_cannot_be_empty">參數列表不可為空</string>
     <string name="error_arguments_must_be_empty">參數列表需為空</string>
     <string name="error_at_least_one_abi_needs_to_be_selected">需要至少選擇一個 ABI</string>
+    <string name="error_autojs6_version_must_not_be_lower_than_ver">AutoJs6 應用版本需不低於 %1$s</string>
+    <string name="error_autojs6_version_number_must_not_be_lower_than_num">AutoJs6 應用版本號需不低於 %1$s</string>
     <string name="error_both_bitmap_and_mat_are_null">Bitmap 與 Mat 不能同時為 null</string>
     <string name="error_cannot_be_null">%s 不能為 null</string>
     <string name="error_cannot_connect_to_github">無法連接到 GitHub</string>
@@ -201,11 +230,17 @@
     <string name="error_failed_to_grant_shizuku_access">Shizuku 權限授予失敗</string>
     <string name="error_failed_to_instantiate">實例 \"%s\" 創建失敗</string>
     <string name="error_failed_to_instantiate_with_cause"><![CDATA[實例 \"%1$s\" 創建失敗: [ %2$s ]]]></string>
+    <string name="error_failed_to_launch_manager">管理器啓動失敗</string>
+    <string name="error_failed_to_launch_system_settings">系統設置啓動失敗</string>
+    <string name="error_failed_to_load_plugins_with_reason">插件讀取失敗.\n原因: %1$s.</string>
     <string name="error_failed_to_render_content">內容渲染失敗</string>
+    <string name="error_failed_to_retrieve_changelog">獲取更新日誌失敗</string>
+    <string name="error_failed_to_retrieve_release_notes">獲取發行説明失敗</string>
     <string name="error_failed_to_retrieve_version_histories">獲取版本歷史失敗</string>
     <string name="error_failed_to_retrieve_version_properties_file_to_parse_version_information">獲取 version.properties 失敗, 無法解析版本信息</string>
     <string name="error_failed_to_revoke_shizuku_access">Shizuku 權限撤銷失敗</string>
     <string name="error_failed_to_run_script">腳本運行失敗</string>
+    <string name="error_failed_to_save_project_config">保存項目配置失敗</string>
     <string name="error_file_in_path_does_not_exist">路徑 \"%1$s\" 對應文件不存在</string>
     <string name="error_function_called_in_ui_thread">UI 線程內無法執行阻塞操作. 可嘗試在子線程或子腳本中執行 %s()</string>
     <string name="error_function_called_more_than_once">%s() 調用不能超過一次</string>
@@ -242,6 +277,7 @@
     <string name="error_no_applications_available_for_playing_this_file">未找到用於播放該文件的應用</string>
     <string name="error_no_applications_available_for_sending_this_file">未找到用於發送該文件的應用</string>
     <string name="error_no_applications_available_for_viewing_this_file">未找到用於查看該文件的應用</string>
+    <string name="error_no_available_url_provided_for_current_plugin">當前插件未提供可用的 URL</string>
     <string name="error_no_display_over_other_apps_permission">缺少 \"顯示在其他應用上層\" 權限</string>
     <string name="error_no_permission_to_access_shizuku">缺少 Shizuku 訪問權限</string>
     <string name="error_no_post_notifications_permission">缺少 \"發佈通知\" 權限</string>
@@ -270,6 +306,7 @@
     <string name="error_shizuku_is_not_installed">Shizuku 未安裝</string>
     <string name="error_shizuku_service_may_be_not_running">Shizuku 服務可能未運行</string>
     <string name="error_shizuku_version_is_not_supported">Shizuku 版本不支持</string>
+    <string name="error_specified_autojs6_version_number_must_be_greater_than_461">指定的 AutoJs6 應用版本號需大於 461</string>
     <string name="error_the_transformer_for_required_property_cannot_return_nullish">必需屬性 "%1$s" 的轉換器不能返回空值</string>
     <string name="error_thread_is_not_alive">線程處於非活動狀態</string>
     <string name="error_unable_to_use_shizuku_service">無法使用 Shizuku 服務</string>
@@ -480,6 +517,7 @@
     <string name="text_captured_window_info_type_unknown">未知類型</string>
     <string name="text_category_filter">類別篩選</string>
     <string name="text_change_working_dir">更改工作路徑</string>
+    <string name="text_changelog">更新日誌</string>
     <string name="text_changelog_item_dependency">部分依賴或本地庫版本調整</string>
     <string name="text_check_for_updates">檢查更新</string>
     <string name="text_check_for_updates_while_ignoring_the_local_version">檢查更新 (忽略本地版本)</string>
@@ -517,7 +555,10 @@
     <string name="text_confirm_to_clear_histories_of_all_color_libraries">以下歷史記錄將被清空\n\n[ 全部顏色庫 ]\n\n是否確定清空</string>
     <string name="text_confirm_to_delete">是否確定刪除</string>
     <string name="text_confirm_to_remove">是否確定移除</string>
+    <string name="text_confirm_to_uninstall">是否確定卸載</string>
     <string name="text_connect_to_pc">連接到計算機</string>
+    <string name="text_connected">已連接</string>
+    <string name="text_connected_count_with_colon">已連接: %1$d</string>
     <string name="text_connection_cannot_be_established">無法建立連接</string>
     <string name="text_console">控制枱</string>
     <string name="text_continue">繼續</string>
@@ -639,6 +680,7 @@
     <string name="text_failed_to_retrieve">獲取失敗</string>
     <string name="text_failed_to_save_remote_project_to_local_storage">無法保存遠程項目至本地</string>
     <string name="text_failed_to_send_log_entries">日誌條目發送失敗</string>
+    <string name="text_failed_to_update">更新失敗</string>
     <string name="text_failed_to_write_file">文件寫入失敗</string>
     <string name="text_file">文件</string>
     <string name="text_file_details">文件詳情</string>
@@ -663,7 +705,6 @@
     <string name="text_floating_button">浮動按鈕</string>
     <string name="text_force_stop">強制停止</string>
     <string name="text_foreground_service">前台服務</string>
-    <string name="text_foreground_service_description">前台服務執行一些用户能注意到的操作.\n前台服務必須顯示通知, 確保用户知道應用正在執行的任務.\n前台服務通知無法移除, 除非服務停止運行.\n可通過長按通知將通知優先級降低 (部分系統支持關閉前台服務通知), 以減少通知對用户的影響.</string>
     <string name="text_formatting_completed">格式化已完成</string>
     <string name="text_function">函數</string>
     <string name="text_fx_keyboard">多功能鍵盤</string>
@@ -703,9 +744,11 @@
     <string name="text_install_from_url">從 \"URL\" 安裝</string>
     <string name="text_install_plugin_from_url">從 \"URL\" 安裝插件</string>
     <string name="text_installable">可安裝</string>
+    <string name="text_integrity_verification_failed">完整性驗證失敗</string>
     <string name="text_invalid_character_is_removed">無效字符已被移除</string>
     <string name="text_invalid_package_name">無效包名</string>
     <string name="text_invalid_project">無效項目</string>
+    <string name="text_ip_address_may_be_invalid_for_server_connection" tools:ignore="TypographyEllipsis">IP 地址 \"%1$s\" 具備特殊用途 (迴環/廣播/多播/保留/...), 因此可能無法用於連接目標服務器.</string>
     <string name="text_is_latest_version">已是最新版本</string>
     <string name="text_issue_report">問題反饋</string>
     <string name="text_js_file">*.js 文件</string>
@@ -773,11 +816,13 @@
     <string name="text_night_mode">夜間模式</string>
     <string name="text_no_browser">未安裝瀏覽器應用</string>
     <string name="text_no_content">無內容</string>
+    <string name="text_no_content_description">無內容描述</string>
     <string name="text_no_histories">無歷史記錄</string>
     <string name="text_no_ignored_updates">暫無已忽略更新</string>
     <string name="text_no_log_entries_to_copy">無可複製的日誌條目</string>
     <string name="text_no_log_entries_to_export">無可導出的日誌條目</string>
     <string name="text_no_log_entries_to_send">無可發送的日誌條目</string>
+    <string name="text_no_plugins_installed_hint">當前沒有已安裝的插件.\n可點擊 \"+\" 按鈕安裝插件.</string>
     <string name="text_no_root">免 root</string>
     <string name="text_no_root_access">無 root 權限</string>
     <string name="text_no_scripts_to_stop_running">無運行中的腳本</string>
@@ -920,7 +965,6 @@
     <string name="text_project">項目</string>
     <string name="text_project_location">項目位置</string>
     <string name="text_project_media_access">投影媒體權限</string>
-    <string name="text_project_media_access_description">被授予 \"投影媒體權限\" 後, 錄製屏幕的安全提示窗口將不再彈出.</string>
     <string name="text_prompt">提示</string>
     <string name="text_quit">放棄</string>
     <string name="text_recommended">推薦</string>
@@ -936,6 +980,7 @@
     <string name="text_register">註冊</string>
     <string name="text_register_succeed">註冊成功</string>
     <string name="text_registering">註冊中</string>
+    <string name="text_release_notes">發行説明</string>
     <string name="text_remote">遠程</string>
     <string name="text_remote_file_saved_to_local_storage_successfully">遠程文件已保存至本地</string>
     <string name="text_remote_project_saved_to_local_storage_successfully">遠程項目已保存至本地</string>
@@ -954,6 +999,9 @@
     <string name="text_restart">重啓</string>
     <string name="text_restart_strategy">重啓策略</string>
     <string name="text_result">結果</string>
+    <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">正在獲取更新日誌...</string>
+    <string name="text_retrieving_plugin_list_data" tools:ignore="TypographyEllipsis">正在獲取插件列表數據...</string>
+    <string name="text_retrieving_release_notes" tools:ignore="TypographyEllipsis">正在獲取發行説明...</string>
     <string name="text_revoke_autojs6_access_in_shizuku_app">在 Shizuku 應用中撤銷 AutoJs6 權限</string>
     <string name="text_rhino_java_primitive_wrap">Java 原始類型包裝</string>
     <string name="text_root_mode_title">Root 權限檢查</string>
@@ -984,6 +1032,8 @@
     <string name="text_save_and_exit">保存並退出</string>
     <string name="text_save_simplified">保存</string>
     <string name="text_save_to">保存到</string>
+    <string name="text_scheduled_restart_backend">調度引擎</string>
+    <string name="text_scheduled_restart_start_delay">啓動延遲</string>
     <string name="text_script_record">錄製腳本</string>
     <string name="text_script_running">腳本運行</string>
     <string name="text_search">搜索</string>
@@ -1006,8 +1056,8 @@
     <string name="text_set_as_working_dir">用作工作路徑</string>
     <string name="text_set_breakpoint">設置斷點</string>
     <string name="text_settings">設置</string>
+    <string name="text_sha256_mismatch_multiline_expected_actual">SHA-256 驗證不一致.\n\n期望值: %1$s\n實際值: %2$s</string>
     <string name="text_shizuku_access">Shizuku 權限</string>
-    <string name="text_shizuku_access_description">通過 Shizuku 可以獲得 ADB 特權並使用系統 API</string>
     <string name="text_shizuku_service_may_need_to_be_run_first">可能需要先運行 Shizuku 服務</string>
     <string name="text_should_not_be_empty">文本不能為空</string>
     <string name="text_show_layout_bounds">在佈局範圍中查看</string>
@@ -1062,6 +1112,10 @@
     <string name="text_undo_simplified">撤銷</string>
     <string name="text_uninstall">Uninstall</string>
     <string name="text_unknown">未知</string>
+    <string name="text_unknown_author_for_plugin">未知開發者</string>
+    <string name="text_unknown_description_for_plugin">未知描述</string>
+    <string name="text_unknown_title_for_plugin">未知標題</string>
+    <string name="text_unknown_version_for_plugin">未知版本</string>
     <string name="text_unverified">未驗證</string>
     <string name="text_updatable">Updatable</string>
     <string name="text_update">Update</string>
@@ -1070,7 +1124,6 @@
     <string name="text_updates_snack_bar_act_later">稍後提示</string>
     <string name="text_updates_snack_bar_act_view">查看更新</string>
     <string name="text_usage_stats_permission">查看使用情況權限</string>
-    <string name="text_usage_stats_permission_description">\"查看使用情況\" 權限可獲取本設備過去使用應用的情況,從而使 \"獲取當前應用\" (currentPackage) 結果更準確</string>
     <string name="text_use_android_n_shortcut">使用安卓 7.0 快捷方式</string>
     <string name="text_use_default_icon">使用默認圖標</string>
     <string name="text_use_volume_control_record">使用 \"音量減\" 鍵控制錄製</string>
@@ -1105,38 +1158,6 @@
     <string name="text_weekly_task_should_check_day_of_week">需至少選擇一天</string>
     <string name="text_working_dir_path">工作路徑</string>
     <string name="text_write_secure_settings">修改安全設置</string>
-    <string name="text_write_secure_settings_description">安全設置包含應用程序可讀但不可寫入的設置選項, 這些選項只能由 UI 或系統級別應用修改.\n被授予 \"修改安全設置權限\" 後, 普通應用可直接修改上述安全設置 (例如無障礙服務).</string>
     <string name="text_write_system_settings">修改系統設置</string>
-    <string name="text_integrity_verification_failed">完整性驗證失敗</string>
-    <string name="text_sha256_mismatch_multiline_expected_actual">SHA-256 驗證不一致.\n\n期望值: %1$s\n實際值: %2$s</string>
-    <string name="error_no_available_url_provided_for_current_plugin">當前插件未提供可用的 URL</string>
-    <string name="text_failed_to_update">更新失敗</string>
-    <string name="text_confirm_to_uninstall">是否確定卸載</string>
-    <string name="dialog_button_exception_details">異常詳情</string>
-    <string name="error_failed_to_load_plugins_with_reason">插件讀取失敗.\n原因: %1$s.</string>
-    <string name="text_retrieving_plugin_list_data" tools:ignore="TypographyEllipsis">正在獲取插件列表數據...</string>
-    <string name="text_no_plugins_installed_hint">當前沒有已安裝的插件.\n可點擊 \"+\" 按鈕安裝插件.</string>
-    <string name="text_unknown_author_for_plugin">未知開發者</string>
-    <string name="text_unknown_description_for_plugin">未知描述</string>
-    <string name="text_unknown_version_for_plugin">未知版本</string>
-    <string name="text_unknown_title_for_plugin">未知標題</string>
-    <string name="error_specified_autojs6_version_number_must_be_greater_than_461">指定的 AutoJs6 應用版本號需大於 461</string>
-    <string name="error_autojs6_version_number_must_not_be_lower_than_num">AutoJs6 應用版本號需不低於 %1$s</string>
-    <string name="error_autojs6_version_must_not_be_lower_than_ver">AutoJs6 應用版本需不低於 %1$s</string>
-    <string name="dialog_button_view_update">查看更新</string>
-    <string name="content_failed_to_retrieve_changelog_of_current_language_with_zh_hans_release_notes_fallback">獲取當前顯示語言對應的更新日誌失敗, 可稍後再次嘗試.\n\n目前將臨時顯示 \"簡體中文 (zh-Hans)\" 語言的發行説明.</string>
-    <string name="error_failed_to_retrieve_changelog">獲取更新日誌失敗</string>
-    <string name="error_failed_to_retrieve_release_notes">獲取發行説明失敗</string>
-    <string name="text_changelog">更新日誌</string>
-    <string name="text_release_notes">發行説明</string>
-    <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">正在獲取更新日誌...</string>
-    <string name="text_retrieving_release_notes" tools:ignore="TypographyEllipsis">正在獲取發行説明...</string>
-    <string name="dialog_button_view_with_browser">瀏覽器查看</string>
-    <string name="text_scheduled_restart_backend">調度引擎</string>
-    <string name="text_scheduled_restart_start_delay">啓動延遲</string>
-    <string name="dialog_button_advanced_settings">高級設置</string>
-    <string name="error_failed_to_save_project_config">保存項目配置失敗</string>
-    <string name="text_connected">已連接</string>
-    <string name="text_connected_count_with_colon">已連接: %1$d</string>
 
 </resources>

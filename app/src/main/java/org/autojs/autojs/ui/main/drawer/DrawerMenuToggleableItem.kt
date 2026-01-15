@@ -1,6 +1,7 @@
 package org.autojs.autojs.ui.main.drawer
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import com.afollestad.materialdialogs.MaterialDialog
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -8,33 +9,144 @@ import io.reactivex.schedulers.Schedulers
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.extension.MaterialDialogExtensions.widgetThemeColor
 import org.autojs.autojs.ui.common.NotAskAgainDialog
+import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 
 open class DrawerMenuToggleableItem : DrawerMenuItem, IToggleableItem {
 
     private lateinit var mItemHelper: DrawerMenuItemHelper
 
-    constructor(helper: DrawerMenuItemHelper, icon: Int, title: Int) : super(icon, title, DEFAULT_PREFERENCE_KEY) {
-        init(helper, null)
+    private var mDescription: String? = null
+
+    private var mDescriptionDialogBuilderProvider: (() -> MaterialDialog.Builder)? = null
+    private var mOnTitleContainerClickListener: (MaterialDialog.Builder.(menuItem: DrawerMenuToggleableItem) -> Unit)? = null
+
+    private var mOnLauncherManagerListener: ((MaterialDialog?) -> Unit)? = null
+    private var mOnLaunchSettingsListener: ((MaterialDialog) -> Unit)? = null
+
+    private var mOnNotifyItemChangedListener: ((DrawerMenuItem) -> Unit)? = null
+
+    constructor(
+        helper: DrawerMenuItemHelper,
+        icon: Int,
+        title: Int,
+        descriptionRes: Int? = null,
+        onTitleContainerClickListener: (MaterialDialog.Builder.(menuItem: DrawerMenuToggleableItem) -> Unit)? = null,
+    ) : super(icon, title, DEFAULT_PREFERENCE_KEY) {
+        init(helper, null, descriptionRes, onTitleContainerClickListener)
     }
 
-    constructor(helper: DrawerMenuItemHelper, icon: Int, title: Int, content: Int) : super(icon, title, DEFAULT_PREFERENCE_KEY) {
-        init(helper, helper.context.takeUnless { content == DEFAULT_DIALOG_CONTENT }?.getString(content))
+    constructor(
+        helper: DrawerMenuItemHelper,
+        icon: Int,
+        title: Int,
+        switchOnHintRes: Int? = null,
+        descriptionRes: Int? = null,
+        onTitleContainerClickListener: (MaterialDialog.Builder.(menuItem: DrawerMenuToggleableItem) -> Unit)? = null,
+    ) : super(icon, title, DEFAULT_PREFERENCE_KEY) {
+        init(helper, switchOnHintRes, descriptionRes, onTitleContainerClickListener)
     }
 
-    constructor(helper: DrawerMenuItemHelper, icon: Int, title: Int, content: Int, prefKey: Int = DEFAULT_PREFERENCE_KEY) : super(icon, title, prefKey) {
-        init(helper, helper.context.takeUnless { content == DEFAULT_DIALOG_CONTENT }?.getString(content))
+    constructor(
+        helper: DrawerMenuItemHelper,
+        icon: Int,
+        title: Int,
+        switchOnHintRes: Int? = null,
+        prefKey: Int = DEFAULT_PREFERENCE_KEY,
+        descriptionRes: Int? = null,
+        onTitleContainerClickListener: (MaterialDialog.Builder.(menuItem: DrawerMenuToggleableItem) -> Unit)? = null,
+    ) : super(icon, title, prefKey) {
+        init(helper, switchOnHintRes, descriptionRes, onTitleContainerClickListener)
     }
 
-    private fun init(itemHelper: DrawerMenuItemHelper, content: String?) {
+    private fun init(
+        itemHelper: DrawerMenuItemHelper,
+        switchOnHintRes: Int?,
+        descriptionRes: Int?,
+        onTitleContainerClickListener: (MaterialDialog.Builder.(menuItem: DrawerMenuToggleableItem) -> Unit)? = null,
+    ) {
         mItemHelper = itemHelper
-        setContent(content)
+        switchOnHintRes?.let { content = itemHelper.context.getString(it) }
         setAction { holder ->
-            when (holder.switchCompat.isChecked) {
+            when (holder.isChecked()) {
                 true -> getPrompt(true) ?: toggle(true)
                 else -> toggle(false)
             }
         }
+        val description = descriptionRes?.let {
+            itemHelper.context.getString(it)
+        } ?: itemHelper.context.getString(R.string.text_no_content_description)
+        mDescription = description
+
+        // Provide a fresh builder each time to avoid stale context.
+        // zh-CN: 每次都提供新的 builder, 避免 context 过期.
+        mDescriptionDialogBuilderProvider = {
+            MaterialDialog.Builder(mItemHelper.context)
+                .title(title)
+                .content(description)
+                .negativeText(R.string.dialog_button_dismiss)
+                .negativeColorRes(R.color.dialog_button_default)
+                .onNegative { d, _ -> d.dismiss() }
+                .autoDismiss(false)
+                .apply {
+                    mOnLauncherManagerListener?.let { listener ->
+                        neutralText(R.string.dialog_button_manager)
+                        neutralColorRes(R.color.dialog_button_manager)
+                        onNeutral { d, _ ->
+                            runCatching {
+                                listener(d)
+                            }.getOrNull() ?: ViewUtils.showSnack(d.view, R.string.error_failed_to_launch_manager)
+                        }
+                    }
+                    mOnLaunchSettingsListener?.let { listener ->
+                        positiveText(R.string.dialog_button_system_settings_simplified)
+                        positiveColorRes(R.color.dialog_button_advanced_settings)
+                        onPositive { d, _ ->
+                            runCatching {
+                                listener(d)
+                            }.getOrNull() ?: ViewUtils.showSnack(d.view, R.string.error_failed_to_launch_system_settings)
+                        }
+                    }
+                }
+        }
+
+        mOnTitleContainerClickListener = onTitleContainerClickListener
+    }
+
+    fun setOnNotifyItemChangedListener(listener: ((DrawerMenuItem) -> Unit)?) {
+        mOnNotifyItemChangedListener = listener
+    }
+
+    fun getHelper(): DrawerMenuItemHelper {
+        return mItemHelper
+    }
+
+    private fun isContextInvalidForDialog(): Boolean {
+        val a = (mItemHelper.context as? Activity) ?: return false
+        return a.isFinishing || a.isDestroyed
+    }
+
+    fun onTitleContainerClick() {
+        if (isContextInvalidForDialog()) return
+        val builder = mDescriptionDialogBuilderProvider?.invoke() ?: return
+        mOnTitleContainerClickListener?.invoke(builder, this)
+        runCatching { builder.show() }
+    }
+
+    fun launchManagerIfPossible(): Boolean {
+        val listener = mOnLauncherManagerListener ?: return false
+        return runCatching {
+            listener(null)
+            true
+        }.getOrDefault(false)
+    }
+
+    fun setOnLaunchManagerListener(onClickListener: (MaterialDialog?) -> Unit) {
+        mOnLauncherManagerListener = onClickListener
+    }
+
+    fun setOnLaunchSettingsListener(onClickListener: (MaterialDialog) -> Unit) {
+        mOnLaunchSettingsListener = onClickListener
     }
 
     override fun sync() {
@@ -61,24 +173,23 @@ open class DrawerMenuToggleableItem : DrawerMenuItem, IToggleableItem {
     }
 
     fun getPrompt(aimState: Boolean): MaterialDialog? {
-        return content?.let {
-            var isPositiveButtonPressed = false
-            val key = "${DrawerMenuToggleableItem::class.simpleName}\$${mItemHelper.context.getString(title)}"
-            NotAskAgainDialog.Builder(mItemHelper.context, key)
-                .title(title)
-                .content(it)
-                .widgetThemeColor()
-                .negativeText(R.string.dialog_button_cancel)
-                .negativeColorRes(R.color.dialog_button_default)
-                .positiveText(R.string.dialog_button_continue)
-                .positiveColorRes(R.color.dialog_button_attraction)
-                .onPositive { _, _ ->
-                    isPositiveButtonPressed = true
-                    toggle(aimState)
-                }
-                .dismissListener { if (!isPositiveButtonPressed) sync() }
-                .show()
-        }
+        val dialogContent = content ?: return null
+        var isPositiveButtonPressed = false
+        val key = "${DrawerMenuToggleableItem::class.simpleName}\$${mItemHelper.context.getString(title)}"
+        return NotAskAgainDialog.Builder(mItemHelper.context, key)
+            .title(title)
+            .content(dialogContent)
+            .widgetThemeColor()
+            .negativeText(R.string.dialog_button_cancel)
+            .negativeColorRes(R.color.dialog_button_default)
+            .positiveText(R.string.dialog_button_continue)
+            .positiveColorRes(R.color.dialog_button_attraction)
+            .onPositive { _, _ ->
+                isPositiveButtonPressed = true
+                toggle(aimState)
+            }
+            .dismissListener { if (!isPositiveButtonPressed) sync() }
+            .show()
     }
 
     override fun setProgress(onProgress: Boolean) {
@@ -87,29 +198,25 @@ open class DrawerMenuToggleableItem : DrawerMenuItem, IToggleableItem {
     }
 
     private fun notifyItemChanged() {
-        DrawerFragment.drawerMenuAdapter.notifyItemChanged(this)
+        mOnNotifyItemChangedListener?.invoke(this)
     }
 
     @SuppressLint("CheckResult")
     override fun toggle(aimState: Boolean) {
-        if (!isHidden) {
-            when (mItemHelper.isInMainThread) {
-                true -> {
-                    val tryToggleResult = mItemHelper.toggle(aimState)
+        if (isHidden) return
+        if (mItemHelper.isInMainThread) {
+            val tryToggleResult = mItemHelper.toggle(aimState)
+            syncDelay { if (tryToggleResult) mItemHelper.callback(aimState) }
+        } else {
+            isProgress = true
+            Observable
+                .fromCallable { mItemHelper.toggle(aimState) }
+                .subscribeOn(Schedulers.single())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe { tryToggleResult ->
+                    isProgress = false
                     syncDelay { if (tryToggleResult) mItemHelper.callback(aimState) }
                 }
-                else -> {
-                    isProgress = true
-                    Observable
-                        .fromCallable { mItemHelper.toggle(aimState) }
-                        .subscribeOn(Schedulers.single())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe { tryToggleResult ->
-                            isProgress = false
-                            syncDelay { if (tryToggleResult) mItemHelper.callback(aimState) }
-                        }
-                }
-            }
         }
     }
 

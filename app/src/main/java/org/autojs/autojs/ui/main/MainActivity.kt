@@ -33,9 +33,8 @@ import org.autojs.autojs.event.BackPressedHandler.HostActivity
 import org.autojs.autojs.extension.ViewExtensions.setOnTitleViewLongClickListener
 import org.autojs.autojs.model.explorer.Explorers
 import org.autojs.autojs.permission.DisplayOverOtherAppsPermission
-import org.autojs.autojs.permission.ManageAllFilesPermission
+import org.autojs.autojs.permission.AllFilesAccessPermission
 import org.autojs.autojs.permission.PostNotificationsPermission
-import org.autojs.autojs.runtime.api.WrappedShizuku
 import org.autojs.autojs.service.ForegroundService
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.theme.ThemeColorManager.addViewBackground
@@ -142,7 +141,7 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
         FloatyWindowManger.refreshCircularMenuIfNeeded(this)
 
         PostNotificationsPermission(this).urgeIfNeeded()
-        ManageAllFilesPermission(this).urgeIfNeeded()
+        AllFilesAccessPermission(this).urgeIfNeeded()
         DisplayOverOtherAppsPermission(this).urgeIfNeeded()
     }
 

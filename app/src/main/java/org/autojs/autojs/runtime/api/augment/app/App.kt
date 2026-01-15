@@ -84,10 +84,15 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         ::launchDualApp.name to AS_GLOBAL,
         ::getPackageName.name to AS_GLOBAL,
         ::getAppName.name to AS_GLOBAL,
-        ::launchSettings.name to AS_GLOBAL,
-        ::launchDualSettings.name to AS_GLOBAL,
-        ::openAppSetting.name to AS_GLOBAL,
-        ::openDualAppSetting.name to AS_GLOBAL,
+
+        ::launchAppDetailsSettings.name to listOf(
+            "launchAppDetailsSettings", "launchSettings", "openAppSetting", "openAppSettings",
+        ) to AS_GLOBAL,
+
+        ::launchDualAppDetailsSettings.name to listOf(
+            "launchDualAppDetailsSettings", "launchDualSettings", "openDualAppSetting", "openDualAppSettings",
+        ) to AS_GLOBAL,
+
         ::isInstalled.name to AS_GLOBAL,
         ::isDualInstalled.name to AS_GLOBAL,
         ::uninstall.name to AS_GLOBAL,
@@ -671,7 +676,7 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun launchSettings(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsOnlyOne(args) { o ->
+        fun launchAppDetailsSettings(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsOnlyOne(args) { o ->
             when {
                 o.isJsNullish() -> false
                 o is PresetApp -> scriptRuntime.app.launchSettings(o.packageName)
@@ -683,7 +688,7 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun launchDualSettings(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsOnlyOne(args) { o ->
+        fun launchDualAppDetailsSettings(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsOnlyOne(args) { o ->
             runCatching {
                 when {
                     o.isJsNullish() -> false
@@ -693,20 +698,6 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                     } ?: launchDualSettingsInternal(scriptRuntime, Context.toString(o))
                 }
             }.isSuccess
-        }
-
-        @JvmStatic
-        @RhinoRuntimeFunctionInterface
-        @Deprecated("Function app.openAppSetting(app) is deprecated", ReplaceWith("app.launchSettings(app)"))
-        fun openAppSetting(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean {
-            return launchSettings(scriptRuntime, args)
-        }
-
-        @JvmStatic
-        @RhinoRuntimeFunctionInterface
-        @Deprecated("Function app.openDualAppSetting(app) is deprecated", ReplaceWith("app.launchDualSettings(app)"))
-        fun openDualAppSetting(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean {
-            return launchDualSettings(scriptRuntime, args)
         }
 
         @JvmStatic

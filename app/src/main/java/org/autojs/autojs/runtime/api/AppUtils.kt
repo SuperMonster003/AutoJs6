@@ -99,12 +99,8 @@ class AppUtils(context: Context, @get:ScriptInterface val fileProviderAuthority:
         else -> packageManager.getApplicationInfo(packageName, flags)
     }
 
-    // @ScriptInterface
-    // @Deprecated("Use openAppSettings instead.", ReplaceWith("this.launchSettings(packageName)"))
-    // fun openAppSetting(packageName: String): Boolean = launchSettings(packageName)
-
     @ScriptInterface
-    fun launchSettings(packageName: String): Boolean = IntentUtils.goToAppDetailSettings(mContext, packageName)
+    fun launchSettings(packageName: String): Boolean = IntentUtils.launchAppDetailsSettings(mContext, packageName)
 
     val currentActivity: Activity?
         get() {

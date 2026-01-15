@@ -2,12 +2,12 @@ package org.autojs.autojs.inrt.theme.preference
 
 import android.content.Context
 import android.util.AttributeSet
-import org.autojs.autojs.permission.ManageAllFilesPermission
+import org.autojs.autojs.permission.AllFilesAccessPermission
 import org.autojs.autojs.theme.preference.ThemeColorPermissionSwitchPreference
 
 class ManageAllFilesPermissionSwitchPreference : ThemeColorPermissionSwitchPreference {
 
-    val perm by lazy { ManageAllFilesPermission(context) }
+    val perm by lazy { AllFilesAccessPermission(context) }
 
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes)
 

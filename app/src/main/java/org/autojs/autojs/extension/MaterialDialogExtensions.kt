@@ -18,7 +18,7 @@ object MaterialDialogExtensions {
     fun MaterialDialog.makeSettingsLaunchable(viewGetter: (dialog: MaterialDialog) -> View?, packageName: String?) {
         viewGetter(this)?.setOnClickListener {
             packageName?.let { pkg ->
-                IntentUtils.goToAppDetailSettings(this.context, pkg)
+                IntentUtils.launchAppDetailsSettings(this.context, pkg)
             } ?: ViewUtils.showSnack(this.view, R.string.error_app_not_installed)
         }
     }

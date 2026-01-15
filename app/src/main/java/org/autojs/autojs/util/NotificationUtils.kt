@@ -5,19 +5,22 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Build
+import android.provider.Settings
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import org.autojs.autojs.app.GlobalAppContext
+import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs6.R
 
 /**
  * Created by SuperMonster003 on Mar 10, 2023.
+ * Modified by SuperMonster003 as of Jan 15, 2026.
  */
 object NotificationUtils {
 
@@ -152,17 +155,23 @@ object NotificationUtils {
 
     @JvmStatic
     fun launchSettings() {
-        val localIntent = Intent()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            localIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            localIntent.action = "android.settings.APPLICATION_DETAILS_SETTINGS"
-            localIntent.data = Uri.fromParts("package", globalAppContext.packageName, null)
-        } else {
-            localIntent.action = "android.settings.APP_NOTIFICATION_SETTINGS"
-            localIntent.putExtra("app_package", globalAppContext.packageName)
-            localIntent.putExtra("app_uid", globalAppContext.applicationInfo.uid)
-        }
+        val localIntent = createAppNotificationIntent(globalAppContext)
         globalAppContext.startActivity(localIntent)
+    }
+
+    @JvmStatic
+    @JvmOverloads
+    fun createAppNotificationIntent(context: Context, pkg: String = context.packageName): Intent {
+        val appNotifIntent: Intent
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            appNotifIntent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+            appNotifIntent.putExtra(Settings.EXTRA_APP_PACKAGE, pkg)
+        } else {
+            appNotifIntent = Intent("android.settings.APP_NOTIFICATION_SETTINGS")
+            appNotifIntent.putExtra("app_package", pkg)
+            appNotifIntent.putExtra("app_uid", context.applicationInfo.uid)
+        }
+        return appNotifIntent
     }
 
     @JvmStatic
@@ -180,6 +189,37 @@ object NotificationUtils {
             launchSettings()
             throw Exception(globalAppContext.getString(R.string.error_no_post_notifications_permission))
         }
+    }
+
+    /**
+     * Open settings screen for a specific notification channel.
+     *
+     * zh-CN: 打开特定通知渠道的设置界面.
+     */
+    @JvmStatic
+    fun launchChannelSettings(context: Context, clazz: Class<*>) {
+        val pkg = context.packageName
+        val channelId = ForegroundServiceUtils.getChannelId(clazz)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channelExists = runCatching {
+                val nm = context.getSystemService(NotificationManager::class.java)
+                nm != null && nm.getNotificationChannel(channelId) != null
+            }.getOrDefault(false)
+
+            if (channelExists) {
+                val channelIntent = Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS).apply {
+                    putExtra(Settings.EXTRA_APP_PACKAGE, pkg)
+                    putExtra(Settings.EXTRA_CHANNEL_ID, channelId)
+                }
+                if (channelIntent.startSafely(context)) return
+            }
+        }
+
+        val appNotifIntent = createAppNotificationIntent(context, pkg)
+        if (appNotifIntent.startSafely(context)) return
+
+        IntentUtils.launchAppDetailsSettings(context, pkg)
     }
 
 }

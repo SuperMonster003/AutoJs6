@@ -281,7 +281,7 @@
         "El administrador de archivos admite la selección de prefijos predeterminados al crear nuevos archivos y genera automáticamente el sufijo numérico apropiado",
         "El administrador de archivos informa específicamente sobre el mensaje de excepción al ejecutar el proyecto _[`issue #268`](http://issues.autojs6.com/268)_",
         "El administrador de archivos admite más tipos y muestra símbolos de icono correspondientes (admite más de 800 tipos de archivos)",
-        "Los tipos de archivos editables (jpg/doc/pdf, etc.) en el administrador de archivos han añadido botones de edición",
+        "Los tipos de archivos editables (jpg/doc/pdf/...) en el administrador de archivos han añadido botones de edición",
         "Los archivos APK en el administrador de archivos admiten la visualización de información básica, información de Manifesto y lista de permisos",
         "Los archivos de medios de audio/video en el administrador de archivos admiten la visualización de información básica e información de MediaInfo",
         "El paquete de archivo único admite el autocompletado de nombre de paquete estandarizado apropiado y el aviso de filtro de caracteres no válidos",

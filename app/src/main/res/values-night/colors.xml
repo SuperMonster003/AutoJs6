@@ -27,12 +27,13 @@
 
     <color name="layout_hierarchy_view_level_beam_5">@color/md_lime_500</color>
 
-    <color name="dialog_button_advanced_settings">@color/md_blue_gray_300</color>
+    <color name="dialog_button_advanced_settings">@color/md_blue_gray_200</color>
     <color name="dialog_button_default">#03A9F4</color>
     <color name="dialog_button_caution">#E57373</color>
     <color name="dialog_button_warn">#F57C00</color>
     <color name="dialog_button_attraction">#C7A4FF</color>
     <color name="dialog_button_hint">#0DA798</color>
+    <color name="dialog_button_manager">@color/md_deep_purple_100</color>
     <color name="dialog_button_reset">#BCAAA4</color>
     <color name="dialog_button_not_recommended">#BCAAA4</color>
     <color name="dialog_button_unavailable">@color/md_gray_700</color>
@@ -60,6 +61,7 @@
 
     <color name="drawer_menu_group_text_color">#808080</color>
     <color name="drawer_menu_item_text_color">#9A9A9A</color>
+    <color name="drawer_menu_group_divider_color">#323232</color>
 
     <color name="tab_indicator">#80202020</color>
     <color name="tab_text">#A0202020</color>

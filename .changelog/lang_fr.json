@@ -281,7 +281,7 @@
         "Le gestionnaire de fichiers prend en charge la sélection de préfixes par défaut lors de la création de nouveaux fichiers et génère automatiquement un suffixe numérique approprié",
         "Le gestionnaire de fichiers informe spécifiquement sur le message d'exception lors de l'exécution du projet _[`issue #268`](http://issues.autojs6.com/268)_",
         "Le gestionnaire de fichiers prend en charge plus de types et affiche les symboles d'icône correspondants (prend en charge plus de 800 types de fichiers)",
-        "Les types de fichiers éditables (jpg/doc/pdf, etc.) dans le gestionnaire de fichiers ont ajouté des boutons d'édition",
+        "Les types de fichiers éditables (jpg/doc/pdf/...) dans le gestionnaire de fichiers ont ajouté des boutons d'édition",
         "Les fichiers APK dans le gestionnaire de fichiers prennent en charge la visualisation des informations de base, des informations du manifest et de la liste des permissions",
         "Les fichiers multimédias audio/vidéo dans le gestionnaire de fichiers prennent en charge la visualisation des informations de base et des informations de MediaInfo",
         "Le paquet de fichier unique prend en charge le remplissage automatique du nom de paquet standardisé approprié et l'indication de filtre de caractère invalide",
