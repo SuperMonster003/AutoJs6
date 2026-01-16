@@ -26,11 +26,13 @@ import org.autojs.autojs.util.RhinoUtils.newBaseFunction
 import org.autojs.autojs.util.ViewUtils.setViewMeasure
 import org.autojs.autojs6.R
 import java.util.concurrent.CopyOnWriteArraySet
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 /**
  * Created by Stardust on Dec 5, 2017.
- * Modified by SuperMonster003 as of Mar 27, 2022.
  * Transformed by SuperMonster003 on Mar 27, 2022.
+ * Modified by SuperMonster003 as of Jan 16, 2026.
  */
 class Floaty(private val uiHandler: UiHandler, private val scriptRuntime: ScriptRuntime) {
 
@@ -89,10 +91,45 @@ class Floaty(private val uiHandler: UiHandler, private val scriptRuntime: Script
 
     @Synchronized
     fun closeAll() {
-        mWindows.apply {
-            forEach { it.close(false) }
-            clear()
+
+        // Close windows synchronously on UI thread.
+        // Reason:
+        // - close(false) is usually posted to UI thread via UiHandler.
+        // - Under heavy start/stop stress, UI queue may be congested.
+        // - If we clear mWindows before actual close runs, leaked windows may remain and block touch.
+        //
+        // zh-CN:
+        //
+        // 在 UI 线程同步关闭窗口.
+        // 原因:
+        // - close(false) 通常会通过 UiHandler 投递到 UI 线程异步执行.
+        // - 在频繁启动/停止脚本的压力场景下, UI 队列可能严重拥堵.
+        // - 如果在实际 close 执行前就清空 mWindows, 可能出现窗口残留并拦截触摸.
+        val snapshot = mWindows.toList()
+
+        // Fast path: already on UI thread.
+        // zh-CN: 快速路径: 已处于 UI 线程.
+        if (isUiThread()) {
+            snapshot.forEach { runCatching { it.close(false) } }
+            mWindows.clear()
+            return
         }
+
+        // Slow path: post to UI thread and wait with timeout.
+        // zh-CN: 慢路径: 投递到 UI 线程并等待, 同时提供超时保护.
+        val latch = CountDownLatch(1)
+        uiHandler.post {
+            try {
+                snapshot.forEach { runCatching { it.close(false) } }
+                mWindows.clear()
+            } finally {
+                latch.countDown()
+            }
+        }
+
+        // Wait a little to ensure removal is performed before runtime fully exits.
+        // zh-CN: 等待一小段时间, 确保在运行时完全退出前窗口已被移除.
+        runCatching { latch.await(1500, TimeUnit.MILLISECONDS) }
     }
 
     @ScriptInterface
