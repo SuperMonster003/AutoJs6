@@ -2,9 +2,9 @@ package org.autojs.autojs.engine
 
 import android.annotation.SuppressLint
 import android.graphics.Paint
+import android.os.Build
 import android.util.Log
 import android.view.View
-import org.autojs.autojs.core.image.RhinoPaint
 import org.autojs.autojs.core.ui.ViewExtras
 import org.autojs.autojs.engine.module.AssetAndUrlModuleSourceProvider
 import org.autojs.autojs.extension.AnyExtensions.isJsNullish
@@ -19,6 +19,7 @@ import org.autojs.autojs.rhino.AutoJsContext
 import org.autojs.autojs.rhino.RhinoAndroidHelper
 import org.autojs.autojs.rhino.TopLevelScope
 import org.autojs.autojs.runtime.ScriptRuntime
+import org.autojs.autojs.runtime.api.augment.proxy.PaintProxyObject
 import org.autojs.autojs.script.JavaScriptSource
 import org.autojs.autojs.util.RhinoUtils.coerceString
 import org.autojs.autojs.util.RhinoUtils.js_object_assign
@@ -45,7 +46,7 @@ import java.util.*
 
 /**
  * Created by Stardust on Apr 2, 2017.
- * Modified by SuperMonster003 as of May 26, 2022.
+ * Modified by SuperMonster003 as of Jan 16, 2026.
  */
 open class RhinoJavaScriptEngine(private val androidContext: android.content.Context) : JavaScriptEngine() {
 
@@ -216,7 +217,12 @@ open class RhinoJavaScriptEngine(private val androidContext: android.content.Con
         override fun wrapAsJavaObject(cx: Context?, scope: Scriptable, javaObject: Any?, staticType: TypeInfo): Scriptable? {
             return when (javaObject) {
                 is View -> ViewExtras.getNativeView(scope, /* view = */ javaObject, staticType.asClass(), runtime)
-                is Paint -> super.wrapAsJavaObject(cx, scope, RhinoPaint(javaObject), staticType)
+                is Paint if Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> {
+                    // Use composition-based proxy to preserve Paint identity and intercept setColor only.
+                    // zh-CN: 使用组合式代理以保持 Paint 身份一致性, 且仅拦截 setColor.
+                    val base = super.wrapAsJavaObject(cx, scope, javaObject, staticType) ?: return null
+                    PaintProxyObject(scope, base, javaObject)
+                }
                 else -> super.wrapAsJavaObject(cx, scope, javaObject, staticType)
             }
         }
