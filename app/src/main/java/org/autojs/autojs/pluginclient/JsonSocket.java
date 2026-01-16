@@ -308,12 +308,26 @@ abstract public class JsonSocket extends Socket {
                 // Treat "Socket closed" as a normal shutdown path.
                 // zh-CN: 将 "Socket closed" 视为正常关闭流程.
                 String message = e.getMessage();
-                if (message != null && (
-                        message.toLowerCase().contains("socket closed") ||
-                        message.toLowerCase().contains("stream ended unexpectedly")
-                )) {
+                if (message != null && message.toLowerCase().contains("socket closed")) {
                     return;
                 }
+
+                // Treat "Stream ended unexpectedly" as error unless user requested normal close.
+                // zh-CN: 除非用户主动正常关闭, 否则将 "Stream ended unexpectedly" 视为错误.
+                if (message != null && message.toLowerCase().contains("stream ended unexpectedly")) {
+                    boolean isNormallyClosed = false;
+                    try {
+                        if (jsonSocket instanceof JsonSocketClient) {
+                            isNormallyClosed = JsonSocketClient.Companion.isClientSocketNormallyClosed();
+                        }
+                    } catch (Throwable ignored) {
+                        /* Ignored. */
+                    }
+                    if (isNormallyClosed) {
+                        return;
+                    }
+                }
+
                 onSocketError(e);
             } finally {
                 if (jsonSocket instanceof JsonSocketClient) {

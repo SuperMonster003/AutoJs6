@@ -73,6 +73,7 @@
     <string name="description_all_files_access" tools:ignore="TypographyEllipsis">\"すべてのファイルを管理\" (または \"すべてのファイルへのアクセス\") 権限により, AutoJs6 は共有ストレージ上で通常のファイルパスを使って直接 [ 作成 / 読み取り / 変更 / 削除 ] を行えます. これによりスクリプトは \"Internal Storage\" にアクセスでき, ファイルマネージャーもファイルを正常に表示・管理できます.\n\nAndroid 11+ では, フルストレージの読み書きを実現する主要な方法です.</string>
     <string name="description_app_language_preference">この環境設定は, 実行中のスクリプトからの例外メッセージを含む, AutoJs6 の表示言語を変更するためのものです.\n\n注: 言語を期待通りに適用するには, アプリの再起動が必要な場合があります</string>
     <string name="description_auto_night_mode">自動ナイトモードを有効にすると, AutoJs6 はシステム設定に従って自動的にナイトモードへ切り替えます.\n\nNote: 自動ナイトモードのスイッチとナイトモードのスイッチは相互に関連しており, 互いに影響します.</string>
+    <string name="description_background_popup_permission" tools:ignore="TypographyEllipsis">\"バックグラウンドでのポップアップ表示\" (\"バックグラウンドでの画面起動\" / \"バックグラウンドでの画面表示\" とも呼ばれます) 権限により/アプリがバックグラウンドにある/または画面が表示されていない場合でも/AutoJs6 が Activity を起動したり特定の設定ページを開いたりできます.[ 定時タスク発火時に UI を開く / ロック画面や待機後に対話を復帰する / 通知やショートカットからスクリプト設定ページを開く ] といったシーンに適しています.\n\nNote: Xiaomi (MIUI/HyperOS)/Vivo (OriginOS/Funtouch OS) などでは/この権限が既定でオフになっている場合があります. 未付与の場合/バックグラウンドからページを開こうとするスクリプトがシステムにブロックされ/[ 無反応 / バックグラウンドでのみ実行され画面が出ない / 遷移失敗 ] のように見えることがあります.\n\n 付与後でも/[ バッテリー最適化 / 自動起動制限 / バックグラウンド凍結 / アプリスタンバイ ] など他のシステムポリシーの影響を受ける可能性があります. 関連する権限やホワイトリスト設定と併せて調整してください.</string>
     <string name="description_change_working_dir_preference">スクリプトを含むディレクトリのパスを変更する</string>
     <string name="description_check_for_updates_preference">AutoJs6 は, GitHub からアップデートを取得し, ダウンロードします.</string>
     <string name="description_client_mode">クライアントモードは, AutoJs6 がリモートのサーバーへ能動的に接続し, [ スクリプト転送 / ログ出力 / リモート制御 ] などを行うための機能です.\n\n通常は, 端末とサーバーが同一 LAN か, 相互に到達可能なネットワーク環境にある必要があります.</string>
@@ -110,7 +111,9 @@
     <string name="description_version_histories_preference">GitHub 上の AutoJs6 のリリース版変更履歴と主要カテゴリの統計データを確認する.</string>
     <string name="description_write_secure_settings">アプリケーションが読み取ることはできるが, 書き込むことはできないシステム環境設定を含む, 安全なシステム設定です.\nこれは, ユーザーがシステムアプリの UI を通じて明示的に変更する必要がある環境設定のためのものです.\nセキュアなシステム設定を許可すると, 通常のアプリケーションはセキュアな設定 (アクセシビリティサービスなど) を直接変更できるようになります</string>
     <string name="description_write_system_settings">\"システム設定の変更\" 権限により, AutoJs6 は一部のシステム設定を変更でき, スクリプトで [ 画面の明るさ / 自動回転 / 画面タイムアウト ] などを調整できます.</string>
+    <string name="dialog_button_abandon">放棄</string>
     <string name="dialog_button_advanced_settings">詳細</string>
+    <string name="dialog_button_amend_host_address">アドレスを修正</string>
     <string name="dialog_button_back">@string/text_back</string>
     <string name="dialog_button_cancel">取消</string>
     <string name="dialog_button_cancel_download">取消</string>
@@ -118,7 +121,6 @@
     <string name="dialog_button_confirm">OK</string>
     <string name="dialog_button_connect">接続</string>
     <string name="dialog_button_continue">@string/text_continue</string>
-    <string name="dialog_button_continue_connecting">@string/dialog_button_continue</string>
     <string name="dialog_button_copy">@string/text_copy</string>
     <string name="dialog_button_default_prefix">デフォ前置</string>
     <string name="dialog_button_details">詳細</string>
@@ -128,12 +130,12 @@
     <string name="dialog_button_file_information">ファイル情報</string>
     <string name="dialog_button_history">履歴</string>
     <string name="dialog_button_ignore_current_update">無視する</string>
+    <string name="dialog_button_interrupt_connection">接続を中止</string>
     <string name="dialog_button_join_group">グループ参加</string>
     <string name="dialog_button_manager">マネージャー</string>
     <string name="dialog_button_more">詳細</string>
     <string name="dialog_button_open_color_palette">パレットを開く</string>
     <string name="dialog_button_quit">終了する</string>
-    <string name="dialog_button_quit_connecting">@string/dialog_button_quit</string>
     <string name="dialog_button_remove">削除</string>
     <string name="dialog_button_retrieve">取得</string>
     <string name="dialog_button_retry">再試行</string>
@@ -213,6 +215,8 @@
     <string name="error_colon_must_follow_a_valid_ip_address">有効な IP アドレスの後にコロンが続くこと</string>
     <string name="error_compass_cannot_be_null">コンパスは null にできません</string>
     <string name="error_connect_to_remote">リモートサーバーに接続できません. %s</string>
+    <string name="error_connection_failed_with_host">\"%1$s\" への接続に失敗しました.</string>
+    <string name="error_connection_timed_out">接続がタイムアウトしました (%d ミリ秒)</string>
     <string name="error_continuation_resume_called_without_suspend">resume() メソッドは suspend() の後に呼び出す必要があります</string>
     <string name="error_continuation_suspend_called_more_than_once">suspend() メソッドは一度だけコールされるべきです</string>
     <string name="error_corresponding_github_release_may_not_published">対応する GitHub のリリースがまだ公開されていない可能性があります</string>
@@ -266,6 +270,7 @@
     <string name="error_invalid_rest_compass">無効な残りコンパスです: %s</string>
     <string name="error_invalid_selector_map_element" formatted="false">無効なセレクタ・マップ要素です. { %s: %s (%s) } です</string>
     <string name="error_ip_address_should_not_be_empty">IP アドレスは空であってはならない</string>
+    <string name="error_ipv6_port_requires_brackets">IPv6 のポートは \"[ipv6]:port\" 形式で指定する必要があります.</string>
     <string name="error_max_listeners_exceeded">リスナーの最大数を超えています: %d</string>
     <string name="error_may_not_have_root_access_to_run_auto_file">AutoJs6 は \"auto\" ファイルを実行するためのルート・アクセス権を持っていない可能性があります</string>
     <string name="error_method_called_with_null_argument" formatted="false">null 引数で %s() が呼び出されました: %s</string>
@@ -338,6 +343,7 @@
     <string name="hint_long_click_run_to_debug">実行」ボタン長押しでデバッグ</string>
     <string name="hint_loop_delay">ループ前の遅延時間</string>
     <string name="hint_loop_times">無限ループの場合は 0</string>
+    <string name="hint_pc_server_address_supported_formats">IPv4/IPv6/およびドメイン名に対応しています.</string>
     <string name="instruction_install_plugin_from_url">リモートプラグインの URL を入力してください. \n例: \"https://example.com/plugin.apk\"</string>
     <string name="label_latest_used_time">最終使用時: %1$s</string>
     <string name="logger_ver_history_blob_thread_failure">\"Blob\" スレッドが失敗</string>
@@ -562,7 +568,10 @@
     <string name="text_connect_to_pc">PC に接続する</string>
     <string name="text_connected">接続済み</string>
     <string name="text_connected_count_with_colon">接続済み: %1$d</string>
+    <string name="text_connecting">接続中</string>
+    <string name="text_connecting_to_host" tools:ignore="TypographyEllipsis">\"%1$s\" に接続しています...</string>
     <string name="text_connection_cannot_be_established">接続が確立できない</string>
+    <string name="text_connection_failed">接続に失敗しました</string>
     <string name="text_console">コンソール</string>
     <string name="text_continue">続行</string>
     <string name="text_copy">コピー</string>
@@ -1155,6 +1164,7 @@
     <string name="text_version_name_with_computing" tools:ignore="TypographyEllipsis">バージョン名 (計算中...)</string>
     <string name="text_view">表示</string>
     <string name="text_view_docs">ドキュメントを見る</string>
+    <string name="text_vivo_background_popup_permission">バックグラウンドでのポップアップ表示</string>
     <string name="text_vsc_ext_version_not_meet_requirement">VSCode 拡張機能のバージョンが要件を満たしていない</string>
     <string name="text_waiting_for_all_data_processing_to_complete" tools:ignore="TypographyEllipsis">すべてのデータ処理が完了するのを待機しています...</string>
     <string name="text_weekly_task">週次タスク</string>
@@ -1162,5 +1172,6 @@
     <string name="text_working_dir_path">作業ディレクトリのパス</string>
     <string name="text_write_secure_settings">セキュリティ設定の書き込み</string>
     <string name="text_write_system_settings">システム設定の書き込み</string>
+    <string name="text_xiaomi_background_popup_permission">バックグラウンドでのポップアップ表示</string>
 
 </resources>

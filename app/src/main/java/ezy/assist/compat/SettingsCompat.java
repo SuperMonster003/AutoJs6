@@ -24,6 +24,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.provider.Settings;
 import android.util.Log;
+import org.autojs.autojs.util.RomUtils;
 
 import java.lang.reflect.Method;
 
@@ -40,41 +41,38 @@ public class SettingsCompat {
         return Settings.System.canWrite(context);
     }
 
-    public static void manageDrawOverlays(Context context) {
-        if (manageDrawOverlaysForRom(context)) {
-            return;
+    public static boolean manageDrawOverlays(Context context) {
+        if (RomUtils.INSTANCE.isEmui()) {
+            return manageDrawOverlaysStandard(context) || manageDrawOverlaysForMiui(context);
         }
+        if (RomUtils.INSTANCE.isEmui()) {
+            return manageDrawOverlaysForEmui(context) || manageDrawOverlaysStandard(context);
+        }
+        if (RomUtils.INSTANCE.isFlyme()) {
+            return manageDrawOverlaysForFlyme(context) || manageDrawOverlaysStandard(context);
+        }
+        if (RomUtils.INSTANCE.isOppo()) {
+            return manageDrawOverlaysForOppo(context) || manageDrawOverlaysStandard(context);
+        }
+        if (RomUtils.INSTANCE.isVivo()) {
+            return manageDrawOverlaysForVivo(context) || manageDrawOverlaysStandard(context);
+        }
+        if (RomUtil.isQiku()) {
+            return manageDrawOverlaysForQihu(context) || manageDrawOverlaysStandard(context);
+        }
+        return manageDrawOverlaysStandard(context);
+    }
+
+    private static boolean manageDrawOverlaysStandard(Context context) {
         Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
         intent.setData(Uri.parse("package:" + context.getPackageName()));
-        context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        return startSafely(context, intent);
     }
 
     public static void manageWriteSettings(Context context) {
         Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS);
         intent.setData(Uri.parse("package:" + context.getPackageName()));
         context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-    }
-
-    private static boolean manageDrawOverlaysForRom(Context context) {
-        if (RomUtil.isMiui()) {
-            return manageDrawOverlaysForMiui(context);
-        }
-        if (RomUtil.isEmui()) {
-            return manageDrawOverlaysForEmui(context);
-        }
-        if (RomUtil.isFlyme()) {
-            return manageDrawOverlaysForFlyme(context);
-        }
-        if (RomUtil.isOppo()) {
-            return manageDrawOverlaysForOppo(context);
-        }
-        if (RomUtil.isVivo()) {
-            return manageDrawOverlaysForVivo(context);
-        }
-        if (RomUtil.isQiku()) {
-            return manageDrawOverlaysForQihu(context);
-        }
-        return false;
     }
 
     private static boolean checkOp(Context context, int op) {

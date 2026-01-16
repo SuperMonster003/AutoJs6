@@ -4,10 +4,11 @@ package org.autojs.autojs.util
 
 import android.app.AppOpsManager
 import android.content.Context
-import android.net.Uri
 import android.os.Build
 import android.os.Process
 import android.provider.Settings
+import androidx.core.net.toUri
+import ezy.assist.compat.RomUtil
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.pref.Language
 import java.io.BufferedReader
@@ -55,7 +56,7 @@ object RomUtils {
      * 判断 Vivo 后台弹出界面状态. 1: 无权限; 0: 有权限.
      */
     private fun getVivoBgStartPermissionStatus(context: Context): Int {
-        val uri = Uri.parse("content://com.vivo.permissionmanager.provider.permission/start_bg_activity")
+        val uri = "content://com.vivo.permissionmanager.provider.permission/start_bg_activity".toUri()
         val selection = "pkgname = ?"
         val selectionArgs = arrayOf(context.packageName)
         var state = 1
@@ -94,6 +95,8 @@ object RomUtils {
     fun isLenovo() = getSystemProperty("ro.lenovo.lvp.version").isNotEmpty()
 
     fun isFlyme() = Build.DISPLAY.lowercase(Language.getPrefLanguage().locale).contains("flyme")
+
+    fun isQiku() = RomUtil.isQiku()
 
     private fun getSystemProperty(propName: String): String = try {
         BufferedReader(

@@ -74,6 +74,7 @@
     <string name="description_all_files_access" tools:ignore="TypographyEllipsis">يسمح إذن \"إدارة جميع الملفات\" (أو \"الوصول إلى جميع الملفات\") لـ AutoJs6 بـ [ إنشاء / قراءة / تعديل / حذف ] الملفات مباشرةً عبر مسارات الملفات العادية ضمن مساحة التخزين المشتركة، مما يتيح للسكربتات الوصول إلى \"Internal Storage\" ويُمكّن مدير الملفات من عرض الملفات وإدارتها بشكل صحيح.\n\nعلى أجهزة Android 11+، تُعد هذه الطريقة الأساسية لتحقيق قدرة القراءة والكتابة على كامل التخزين.</string>
     <string name="description_app_language_preference">هذا التفضيل لتغيير لغة العرض لـ AutoJs6 ، بما في ذلك رسائل الاستثناء من تشغيل البرامج النصية.\n\nملاحظة: قد تكون هناك حاجة إلى إعادة تشغيل التطبيق لجعل اللغة تطبيقها كما هو متوقع.</string>
     <string name="description_auto_night_mode">عند تفعيل الوضع الليلي التلقائي، سيقوم AutoJs6 بالتبديل تلقائيًا إلى الوضع الليلي وفقًا لإعدادات النظام.\n\nNote: مفتاح الوضع الليلي التلقائي ومفتاح الوضع الليلي مرتبطان ويؤثر كل منهما في الآخر.</string>
+    <string name="description_background_popup_permission" tools:ignore="TypographyEllipsis">يتيح إذن \"النوافذ المنبثقة في الخلفية\" (ويُسمّى أيضًا \"تشغيل الواجهة من الخلفية\" أو \"إظهار الواجهة في الخلفية\") لـ AutoJs6، حتى عندما يكون التطبيق في الخلفية أو دون واجهة مرئية، تشغيل Activity أو فتح صفحة إعدادات محددة. وهو مناسب لسيناريوهات مثل [ فتح واجهة المستخدم عند تشغيل مهمة مجدولة / استئناف التفاعل بعد قفل الشاشة أو وضع السكون / فتح صفحة إعدادات السكربت عبر إشعار أو اختصار ].\n\nNote: على أنظمة مثل Xiaomi (MIUI/HyperOS) و Vivo (OriginOS/Funtouch OS)، قد يكون هذا الإذن مُعطّلًا افتراضيًا. عند عدم منحه، قد يمنع النظام محاولات السكربت لفتح صفحات من الخلفية، وقد يظهر ذلك على شكل [ عدم استجابة / تنفيذ في الخلفية دون إظهار واجهة / فشل الانتقال ].\n\nحتى بعد منحه، قد تظل هناك سياسات أخرى للنظام تؤثر عليه مثل [ تحسين البطارية / قيود التشغيل التلقائي / تجميد الخلفية / وضع الاستعداد للتطبيق ]. يُنصح بضبطه مع الأذونات ذات الصلة أو إعدادات القائمة البيضاء.</string>
     <string name="description_change_working_dir_preference">قم بتغيير مسار الدليل الذي يحتوي على البرامج النصية</string>
     <string name="description_check_for_updates_preference">يحصل AutoJs6 على التحديثات وتنزيلها من GitHub.</string>
     <string name="description_client_mode">يُستخدم وضع العميل لتمكين AutoJs6 من الاتصال بشكل نشط بخادم بعيد لتنفيذ [ نقل السكربتات / طباعة السجلات / التحكم عن بُعد ].\n\nعادةً ما يلزم أن يكون الجهاز والخادم ضمن نفس الشبكة المحلية (LAN) أو ضمن بيئة شبكة يمكنهما الوصول فيها إلى بعضهما البعض.</string>
@@ -111,7 +112,9 @@
     <string name="description_version_histories_preference">عرض سجل إصدارات AutoJs6 على GitHub وإحصاءات الفئات الرئيسية.</string>
     <string name="description_write_secure_settings">إعدادات النظام الآمنة ، التي تحتوي على تفضيلات النظام التي يمكن أن تقرأها التطبيقات ولكن لا يُسمح لها بالكتابة.\nهذه هي لتفضيلات يجب على المستخدم تعديلها بشكل صريح من خلال واجهة المستخدم لتطبيق النظام.\nمع إذن إعدادات النظام الآمن ، يمكن للتطبيقات العادية تعديل الإعدادات الآمنة مباشرة (مثل خدمة إمكانية الوصول).</string>
     <string name="description_write_system_settings">يسمح إذن \"تعديل إعدادات النظام\" لـ AutoJs6 بتعديل بعض إعدادات النظام، مما يتيح للسكربتات تعديل إعدادات مثل [ سطوع الشاشة / التدوير التلقائي / مهلة إيقاف الشاشة ].</string>
+    <string name="dialog_button_abandon">تخلَّ</string>
     <string name="dialog_button_advanced_settings">متقدم</string>
+    <string name="dialog_button_amend_host_address">تصحيح العنوان</string>
     <string name="dialog_button_back">@string/text_back</string>
     <string name="dialog_button_cancel">يلغي</string>
     <string name="dialog_button_cancel_download">يلغي</string>
@@ -119,7 +122,6 @@
     <string name="dialog_button_confirm">نعم</string>
     <string name="dialog_button_connect">اتصال</string>
     <string name="dialog_button_continue">@string/text_continue</string>
-    <string name="dialog_button_continue_connecting">@string/dialog_button_continue</string>
     <string name="dialog_button_copy">@string/text_copy</string>
     <string name="dialog_button_default_prefix">بادئة افتراضية</string>
     <string name="dialog_button_details">تفاصيل</string>
@@ -129,12 +131,12 @@
     <string name="dialog_button_file_information">معلومات الملف</string>
     <string name="dialog_button_history">تاريخ</string>
     <string name="dialog_button_ignore_current_update">يتجاهل</string>
+    <string name="dialog_button_interrupt_connection">إيقاف الاتصال</string>
     <string name="dialog_button_join_group">إنضم للمجموعة</string>
     <string name="dialog_button_manager">المدير</string>
     <string name="dialog_button_more">أكثر</string>
     <string name="dialog_button_open_color_palette">فتح لوحة الألوان</string>
     <string name="dialog_button_quit">يترك</string>
-    <string name="dialog_button_quit_connecting">@string/dialog_button_quit</string>
     <string name="dialog_button_remove">إزالة</string>
     <string name="dialog_button_retrieve">جلب</string>
     <string name="dialog_button_retry">إعادة المحاولة</string>
@@ -214,6 +216,8 @@
     <string name="error_colon_must_follow_a_valid_ip_address">يجب أن يتبع القولون عنوان IP صالحًا</string>
     <string name="error_compass_cannot_be_null">لا يمكن أن تكون البوصلة لاغية</string>
     <string name="error_connect_to_remote">لا يمكن الاتصال بالخادم البعيد: %s</string>
+    <string name="error_connection_failed_with_host">فشل الاتصال بـ \"%1$s\".</string>
+    <string name="error_connection_timed_out">انتهت مهلة الاتصال (%d مللي ثانية)</string>
     <string name="error_continuation_resume_called_without_suspend">يجب استدعاء الطريقة السيرة الذاتية() بعد تعليق()</string>
     <string name="error_continuation_suspend_called_more_than_once">يجب استدعاء طريقة تعليق() مرة واحدة فقط</string>
     <string name="error_corresponding_github_release_may_not_published">قد لم يتم نشر إصدار GitHub المقابل بعد</string>
@@ -267,6 +271,7 @@
     <string name="error_invalid_rest_compass">بوصلة راحة غير صالحة: %s</string>
     <string name="error_invalid_selector_map_element" formatted="false">عنصر خريطة محدد غير صالح: {%s: %s (%s)}</string>
     <string name="error_ip_address_should_not_be_empty">لا يمكن أن يكون عنوان IP فارغًا</string>
+    <string name="error_ipv6_port_requires_brackets">يجب تحديد منفذ IPv6 بصيغة \"[ipv6]:port\".</string>
     <string name="error_max_listeners_exceeded">تم تجاوز مستمعي أقصى: %s</string>
     <string name="error_may_not_have_root_access_to_run_auto_file">قد لا يكون لدى AutoJs6 ملف الجذر لتشغيل ملف \"auto\"</string>
     <string name="error_method_called_with_null_argument" formatted="false">%s() دعا مع الوسيطة الفارغة: %s</string>
@@ -339,6 +344,7 @@
     <string name="hint_long_click_run_to_debug">انقر الطويل على زر \"تشغيل\" لتصحيح الأخطاء</string>
     <string name="hint_loop_delay">تأخير قبل الحلقة</string>
     <string name="hint_loop_times">0 للحلقة اللانهائية</string>
+    <string name="hint_pc_server_address_supported_formats">يتم دعم IPv4 و IPv6 وأسماء النطاقات.</string>
     <string name="instruction_install_plugin_from_url">أدخل عنوان URL يشير إلى ملحق (Plugin) بعيد.\nمثال: \"https://example.com/plugin.apk\".</string>
     <string name="label_latest_used_time">آخر استخدام: %1$s</string>
     <string name="logger_ver_history_blob_thread_failure">فشل خيط \"blob"\</string>
@@ -563,7 +569,10 @@
     <string name="text_connect_to_pc">الاتصال بالكمبيوتر</string>
     <string name="text_connected">متصل</string>
     <string name="text_connected_count_with_colon">متصل: %1$d</string>
+    <string name="text_connecting">جارٍ الاتصال</string>
+    <string name="text_connecting_to_host" tools:ignore="TypographyEllipsis">جارٍ الاتصال بـ \"%1$s\"...</string>
     <string name="text_connection_cannot_be_established">لا يمكن إنشاء الاتصال</string>
+    <string name="text_connection_failed">فشل الاتصال</string>
     <string name="text_console">وحدة التحكم</string>
     <string name="text_continue">يكمل</string>
     <string name="text_copy">ينسخ</string>
@@ -1156,6 +1165,7 @@
     <string name="text_version_name_with_computing" tools:ignore="TypographyEllipsis">اسم الإصدار (جارٍ الحساب...)</string>
     <string name="text_view">عرض</string>
     <string name="text_view_docs">عرض المستندات</string>
+    <string name="text_vivo_background_popup_permission">النوافذ المنبثقة في الخلفية</string>
     <string name="text_vsc_ext_version_not_meet_requirement">إصدار امتداد VSCode لا يفي بالمتطلبات</string>
     <string name="text_waiting_for_all_data_processing_to_complete" tools:ignore="TypographyEllipsis">بانتظار اكتمال معالجة جميع البيانات...</string>
     <string name="text_weekly_task">مهمة أسبوعية</string>
@@ -1163,5 +1173,6 @@
     <string name="text_working_dir_path">مسار دليل العمل</string>
     <string name="text_write_secure_settings">اكتب إعدادات الأمان</string>
     <string name="text_write_system_settings">كتابة إعدادات النظام</string>
+    <string name="text_xiaomi_background_popup_permission">النوافذ المنبثقة في الخلفية</string>
 
 </resources>

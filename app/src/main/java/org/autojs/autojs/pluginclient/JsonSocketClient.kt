@@ -14,12 +14,12 @@ import io.reactivex.subjects.BehaviorSubject
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.core.pref.Pref.getBoolean
 import org.autojs.autojs.core.pref.Pref.putBoolean
-import org.autojs.autojs.util.NetworkUtils
 import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import java.io.IOException
+import java.net.InetSocketAddress
 import java.net.Socket
 import java.net.SocketTimeoutException
 import java.util.concurrent.Executors
@@ -59,10 +59,15 @@ class JsonSocketClient(service: DevPluginService?, private val ctx: Context, pri
             try {
                 setStateConnecting()
                 if (mSocket?.isConnected != true) {
-                    mSocket = Socket(host, port)
+                    // Use connect timeout to avoid long blocking (e.g. DNS/connect stall).
+                    // zh-CN: 使用 connect 超时避免长时间阻塞 (例如 DNS/连接卡住).
+                    mSocket = Socket().apply {
+                        connect(InetSocketAddress(host, port), CONNECT_TIMEOUT)
+                    }
                 }
             } catch (e: IOException) {
                 e.printStackTrace()
+                runCatching { onSocketError(e) }
             }
         }
     }
@@ -96,7 +101,7 @@ class JsonSocketClient(service: DevPluginService?, private val ctx: Context, pri
 
         // Clear subtitle on close.
         // zh-CN: 关闭连接时清空 subtitle.
-        service.clientConnectionIpAddress.onNext(NetworkUtils.DEFAULT_IP_ADDRESS)
+        service.clientConnectionIpAddress.onNext("Socket closed")
     }
 
     override fun sayHello() {
@@ -143,7 +148,7 @@ class JsonSocketClient(service: DevPluginService?, private val ctx: Context, pri
 
                 // Mark as disconnected when server rejects handshake (e.g. version mismatch).
                 // zh-CN: 当服务端拒绝握手 (例如版本不匹配) 时, 标记为已断开.
-                service.clientConnectionIpAddress.onNext(NetworkUtils.DEFAULT_IP_ADDRESS)
+                service.clientConnectionIpAddress.onNext("Disconnected")
                 setStateDisconnected(IllegalStateException(errorMessage.asString))
 
                 try {
@@ -171,7 +176,7 @@ class JsonSocketClient(service: DevPluginService?, private val ctx: Context, pri
 
         // Fallback: version check failed or invalid hello.
         // zh-CN: 兜底: 版本校验失败或 hello 异常.
-        service.clientConnectionIpAddress.onNext(NetworkUtils.DEFAULT_IP_ADDRESS)
+        service.clientConnectionIpAddress.onNext("Handshake rejected")
         setStateDisconnected(IllegalStateException("Handshake rejected"))
 
         try {
@@ -182,10 +187,10 @@ class JsonSocketClient(service: DevPluginService?, private val ctx: Context, pri
 
         val msg = """
             ${ctx.getString(R.string.text_vsc_ext_version_not_meet_requirement)}.
-            
+
             ${ctx.getString(R.string.text_min_version)}: $requiredVersion
             ${ctx.getString(R.string.text_current_version)}: ${currentVersion ?: "${ctx.getString(R.string.text_lower_than)} $requiredVersion"}
-            
+
             ${ctx.getString(R.string.text_repo_url_of_vscode_vsc_ext)}:
             ${ctx.getString(R.string.url_github_autojs6_vscode_extension_repo)}
             """.trimIndent()
@@ -311,6 +316,10 @@ class JsonSocketClient(service: DevPluginService?, private val ctx: Context, pri
     companion object {
 
         private val TAG = JsonSocketClient::class.java.simpleName
+
+        // Connect timeout = handshake timeout + 5 seconds (default).
+        // zh-CN: 连接超时 = 握手超时 + 5 秒 (默认).
+        private const val CONNECT_TIMEOUT = HANDSHAKE_TIMEOUT + 5_000
 
         var serverAddressHistories: LinkedHashSet<String>
             get() = Pref.getLinkedHashSet(R.string.key_pc_server_address_histories)

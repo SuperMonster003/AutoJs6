@@ -72,6 +72,7 @@
     <string name="description_all_files_access" tools:ignore="TypographyEllipsis">L\'autorisation \"gérer tous les fichiers\" (ou \"accès à tous les fichiers\") permet à AutoJs6 d\'[ créer / lire / modifier / supprimer ] des fichiers directement via des chemins de fichiers classiques dans l\'espace de stockage partagé, afin que les scripts puissent accéder à \"Internal Storage\" et que l\'explorateur de fichiers puisse afficher et gérer les fichiers correctement.\n\nSur les appareils Android 11+, c\'est le principal moyen d\'obtenir un accès lecture/écriture à l\'ensemble du stockage.</string>
     <string name="description_app_language_preference">Cette préférence permet de modifier la langue d\'affichage d\'AutoJs6, y compris les messages d\'exception des scripts en cours d\'exécution.\n\nNote : un redémarrage de l\'application peut être nécessaire pour que la langue s\'applique comme prévu.</string>
     <string name="description_auto_night_mode">Lorsque le mode nuit automatique est activé, AutoJs6 bascule automatiquement en mode nuit en fonction des paramètres système.\n\nNote: l\'interrupteur de mode nuit automatique et l\'interrupteur de mode nuit sont liés et s\'influencent mutuellement.</string>
+    <string name="description_background_popup_permission" tools:ignore="TypographyEllipsis">L\'autorisation \"fenêtres contextuelles en arrière-plan\" (également appelée \"démarrer une interface en arrière-plan\" ou \"afficher une interface en arrière-plan\") permet à AutoJs6, même lorsque l\'application est en arrière-plan ou sans interface visible, de démarrer une Activity ou d\'ouvrir une page de paramètres spécifique. Utile dans des scénarios tels que [ ouvrir l\'UI lors du déclenchement d\'une tâche planifiée / reprendre l\'interaction après l\'écran verrouillé ou la mise en veille / ouvrir la page de configuration des scripts via une notification ou un raccourci ].\n\nNote: sur des systèmes comme Xiaomi (MIUI/HyperOS) et Vivo (OriginOS/Funtouch OS), cette autorisation peut être désactivée par défaut. Si elle n\'est pas accordée, le système peut bloquer l\'ouverture de pages depuis l\'arrière-plan par un script, ce qui peut se manifester par [ aucune réaction / exécution en arrière-plan sans interface / échec de navigation ].\n\nMême après l\'avoir accordée, d\'autres politiques système peuvent encore s\'appliquer, telles que [ optimisation de la batterie / restrictions d\'auto‑démarrage / gel en arrière-plan / mise en veille de l\'application ]. Il est recommandé de l\'ajuster conjointement avec les autorisations associées ou des réglages de liste blanche.</string>
     <string name="description_change_working_dir_preference">Changer le chemin du répertoire contenant les scripts</string>.
     <string name="description_check_for_updates_preference">AutoJs6 obtient et télécharge les mises à jour depuis GitHub.</string>
     <string name="description_client_mode">Le mode client permet à AutoJs6 de se connecter activement à un serveur distant afin d\'effectuer [ transfert de scripts / impression des journaux / contrôle à distance ].\n\nEn général, l\'appareil et le serveur doivent être sur le même réseau local (LAN) ou dans un environnement réseau où ils peuvent s\'atteindre mutuellement.</string>
@@ -109,7 +110,9 @@
     <string name="description_version_histories_preference">Consulter l\'historique des versions publiées d\'AutoJs6 sur GitHub ainsi que les statistiques des principales catégories.</string>
     <string name="description_write_secure_settings">Paramètres de sécurité du système, contenant les préférences du système que les applications peuvent lire mais ne sont pas autorisées à écrire.\nIl s\'agit des préférences que l\'utilisateur doit explicitement modifier par le biais de l\'interface utilisateur d\'une application système.\nAvec l\'autorisation de paramètres de sécurité du système, les applications normales peuvent directement modifier les paramètres de sécurité (comme le service d\'accessibilité).</string>
     <string name="description_write_system_settings">L\'autorisation \"modifier les paramètres système\" permet à AutoJs6 de modifier certains paramètres système, afin que les scripts puissent changer des réglages tels que [ luminosité de l\'écran / rotation automatique / délai d\'extinction de l\'écran ].</string>
+    <string name="dialog_button_abandon">Abandonner</string>
     <string name="dialog_button_advanced_settings">Avancé</string>
+    <string name="dialog_button_amend_host_address">Corriger l\'adresse</string>
     <string name="dialog_button_back">@string/text_back</string>
     <string name="dialog_button_cancel">Cancel</string>
     <string name="dialog_button_cancel_download">Annulation</string>
@@ -117,7 +120,6 @@
     <string name="dialog_button_confirm">OK</string>
     <string name="dialog_button_connect">Se connecter</string>
     <string name="dialog_button_continue">@string/text_continue</string>
-    <string name="dialog_button_continue_connecting">@string/dialog_button_continue</string>
     <string name="dialog_button_copy">@string/text_copy</string>
     <string name="dialog_button_default_prefix">Préfixe def</string>
     <string name="dialog_button_details">Details</string>
@@ -127,12 +129,12 @@
     <string name="dialog_button_file_information">Infos fichier</string>
     <string name="dialog_button_history">Histoire</string>
     <string name="dialog_button_ignore_current_update">Ignorer</string>
+    <string name="dialog_button_interrupt_connection">Interrompre la connexion</string>
     <string name="dialog_button_join_group">Joindre groupe</string>
     <string name="dialog_button_manager">Gestionnaire</string>
     <string name="dialog_button_more">Plus</string>
     <string name="dialog_button_open_color_palette">Palette</string>
     <string name="dialog_button_quit">Quit</string>
-    <string name="dialog_button_quit_connecting">@string/dialog_button_quit</string>
     <string name="dialog_button_remove">Supprimer</string>
     <string name="dialog_button_retrieve">Récupérer</string>
     <string name="dialog_button_retry">Retourner</string>
@@ -212,6 +214,8 @@
     <string name="error_colon_must_follow_a_valid_ip_address">Les deux points doivent suivre une adresse IP valide</string>
     <string name="error_compass_cannot_be_null">Compass ne peut pas être null</string>
     <string name="error_connect_to_remote">Impossible de se connecter au serveur distant : %s</string>
+    <string name="error_connection_failed_with_host">Échec de la connexion à \"%1$s\".</string>
+    <string name="error_connection_timed_out">Délai de connexion dépassé (%d ms)</string>
     <string name="error_continuation_resume_called_without_suspend">La méthode resume() doit être appelée après suspend()</string>.
     <string name="error_continuation_suspend_called_more_than_once">La méthode suspend() ne devrait être appelée qu\'une seule fois</string>.
     <string name="error_corresponding_github_release_may_not_published">La version GitHub correspondante n\'a peut-être pas encore été publiée</string>.
@@ -265,6 +269,7 @@
     <string name="error_invalid_rest_compass">Invalid rest compass : %s</string>
     <string name="error_invalid_selector_map_element" formatted="false">Elément de carte de sélecteur non valide : { %s : %s (%s) }</string>
     <string name="error_ip_address_should_not_be_empty">L\'adresse IP ne peut pas être vide</string>
+    <string name="error_ipv6_port_requires_brackets">Le port IPv6 doit être spécifié au format \"[ipv6]:port\".</string>
     <string name="error_max_listeners_exceeded">Max listeners exceeded : %d</string>
     <string name="error_may_not_have_root_access_to_run_auto_file">AutoJs6 peut ne pas avoir l\'accès root pour exécuter le fichier \"auto\"</string>.
     <string name="error_method_called_with_null_argument" formatted="false">%s() appelé avec un argument nul : %s</string>
@@ -337,6 +342,7 @@
     <string name="hint_long_click_run_to_debug">Cliquez longuement sur le bouton \"Run\" pour déboguer</string>
     <string name="hint_loop_delay">Délai avant boucle</string>
     <string name="hint_loop_times">0 pour une boucle infinie</string>
+    <string name="hint_pc_server_address_supported_formats">IPv4, IPv6 et les noms de domaine sont pris en charge.</string>
     <string name="instruction_install_plugin_from_url">Saisissez une URL pointant vers l\'adresse d\'un plugin distant.\nPar exemple \"https://example.com/plugin.apk\".</string>
     <string name="label_latest_used_time">Dernière utilisation : %1$s</string>
     <string name="logger_ver_history_blob_thread_failure">Échec du thread \"blob\"</string>
@@ -561,7 +567,10 @@
     <string name="text_connect_to_pc">Connexion au PC</string>
     <string name="text_connected">Connecté</string>
     <string name="text_connected_count_with_colon">Connectés : %1$d</string>
+    <string name="text_connecting" tools:ignore="TypographyEllipsis">Connexion...</string>
+    <string name="text_connecting_to_host" tools:ignore="TypographyEllipsis">Connexion à \"%1$s\"...</string>
     <string name="text_connection_cannot_be_established">La connexion ne peut pas être établie</string>
+    <string name="text_connection_failed">Échec de la connexion</string>
     <string name="text_console">Console</string>
     <string name="text_continue">Continue</string>
     <string name="text_copy">Copie</string>
@@ -1154,6 +1163,7 @@
     <string name="text_version_name_with_computing" tools:ignore="TypographyEllipsis">Nom de la version (en cours de calcul...)</string>
     <string name="text_view">Voir</string>
     <string name="text_view_docs">Voir les documents</string>
+    <string name="text_vivo_background_popup_permission">Fenêtres contextuelles en arrière-plan</string>
     <string name="text_vsc_ext_version_not_meet_requirement">La version de l\'extension VSCode ne répond pas aux exigences</string>
     <string name="text_waiting_for_all_data_processing_to_complete" tools:ignore="TypographyEllipsis">En attente de la fin du traitement de toutes les données...</string>
     <string name="text_weekly_task">Tâche hebdomadaire</string>
@@ -1161,5 +1171,6 @@
     <string name="text_working_dir_path">Chemin du répertoire de travail</string>.
     <string name="text_write_secure_settings">Écrire les paramètres de sécurité</string>.
     <string name="text_write_system_settings">Écrire les paramètres système</string>
+    <string name="text_xiaomi_background_popup_permission">Fenêtres contextuelles en arrière-plan</string>
 
 </resources>
