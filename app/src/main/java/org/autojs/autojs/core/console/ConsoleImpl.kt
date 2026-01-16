@@ -257,7 +257,7 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
                     content("$msgReason, $msgAction.")
                     widgetThemeColor()
                     cancelable(false)
-                    negativeText(R.string.dialog_button_quit)
+                    negativeText(R.string.dialog_button_abandon)
                     negativeColorRes(R.color.dialog_button_default)
                     positiveText(R.string.dialog_button_continue)
                     positiveColorRes(R.color.dialog_button_attraction)

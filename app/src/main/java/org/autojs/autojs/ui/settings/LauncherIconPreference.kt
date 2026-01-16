@@ -89,7 +89,7 @@ class LauncherIconPreference : MaterialListPreference, SharedPreferences.OnShare
             title(R.string.text_prompt)
             content(R.string.text_transparent_background_launcher_icon_may_not_take_effect)
             widgetThemeColor()
-            negativeText(R.string.text_quit)
+            negativeText(R.string.dialog_button_abandon)
             negativeColorRes(R.color.dialog_button_default)
             onNegative { dialog, _ -> dialog.dismiss().also { resetIfNeeded(R.string.key_launcher_icon_adaptive) } }
             positiveText(R.string.dialog_button_continue)
@@ -136,7 +136,7 @@ class LauncherIconPreference : MaterialListPreference, SharedPreferences.OnShare
                     show()
                 }
             }
-            negativeText(R.string.text_quit)
+            negativeText(R.string.dialog_button_abandon)
             negativeColorRes(R.color.dialog_button_default)
             onNegative { dialog, _ -> dialog.dismiss().also { syncValueWithCurrentComponent() } }
             positiveText(R.string.dialog_button_continue)

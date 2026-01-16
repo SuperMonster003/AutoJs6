@@ -332,7 +332,7 @@ public final class ImageFeatureMatching {
          * @param keyPoint    Detected key points in the image.<br>
          *                    zh-CN: 在图像中检测到的关键点集.
          * @param corners     Virtual corners of the image after scale, always [TL, TR, BL, BR]. Used for homography calculation.<br>
-         *                    zh-CN: 缩放后图像的虚拟四角点坐标, 按 [左上,右上,左下,右下] 顺序, 用于单应矩阵计算.
+         *                    zh-CN: 缩放后图像的虚拟四角点坐标, 按 [左上, 右上, 左下, 右下] 顺序, 用于单应矩阵计算.
          */
         public FeatureMatchingDescriptor(Mat descriptors, MatOfKeyPoint keyPoint, MatOfPoint2f corners) {
             mDescriptors = descriptors;
