@@ -72,6 +72,7 @@
     <string name="description_all_files_access" tools:ignore="TypographyEllipsis">El permiso \"administrar todos los archivos\" (o \"acceso a todos los archivos\") permite que AutoJs6 [ cree / lea / modifique / elimine ] archivos directamente mediante rutas de archivo normales en el almacenamiento compartido, de modo que los scripts puedan acceder al \"Internal Storage\" y el explorador de archivos pueda mostrar y administrar archivos correctamente.\n\nEn dispositivos con Android 11+, esta es la forma principal de lograr acceso de lectura y escritura a todo el almacenamiento.</string>
     <string name="description_app_language_preference">Esta preferencia para cambiar el idioma de visualización de AutoJs6, incluyendo los mensajes de excepción de los scripts en ejecución.\n\nNota: puede ser necesario reiniciar la aplicación para que el idioma se aplique como se espera.</string>
     <string name="description_auto_night_mode">Cuando el modo nocturno automático está activado, AutoJs6 cambiará automáticamente al modo nocturno según la configuración del sistema.\n\nNote: el interruptor de modo nocturno automático y el interruptor de modo nocturno están vinculados y se afectan mutuamente.</string>
+    <string name="description_background_popup_permission" tools:ignore="TypographyEllipsis">El permiso \"ventanas emergentes en segundo plano\" (también llamado \"iniciar interfaz desde segundo plano\" o \"mostrar interfaz en segundo plano\") permite que AutoJs6, incluso cuando la app está en segundo plano o sin interfaz visible, pueda iniciar una Activity o abrir una página de ajustes específica. Es útil para escenarios como [ abrir la UI al activarse una tarea programada / reanudar la interacción tras el bloqueo o la suspensión / abrir la página de configuración de scripts desde una notificación o un acceso directo ].\n\nNote: en sistemas como Xiaomi (MIUI/HyperOS) y Vivo (OriginOS/Funtouch OS), este permiso puede estar desactivado por defecto. Si no se concede, el sistema puede bloquear que un script abra páginas desde segundo plano, lo que puede manifestarse como [ sin respuesta / ejecución en segundo plano sin mostrar interfaz / fallo al navegar ].\n\nIncluso después de concederlo, puede seguir viéndose afectado por otras políticas del sistema, como [ optimización de batería / restricciones de inicio automático / congelación en segundo plano / modo de espera de la aplicación ]. Se recomienda ajustarlo junto con permisos relacionados o listas blancas.</string>
     <string name="description_change_working_dir_preference">Cambiar la ruta del directorio que contiene los scripts</string>
     <string name="description_check_for_updates_preference">AutoJs6 obtiene y descarga las actualizaciones de GitHub.</string>
     <string name="description_client_mode">El modo cliente permite que AutoJs6 se conecte activamente a un servidor remoto para realizar [ transferencia de scripts / impresión de registros / control remoto ].\n\nPor lo general, el dispositivo y el servidor deben estar en la misma red local (LAN) o en una red accesible entre sí.</string>
@@ -109,7 +110,9 @@
     <string name="description_version_histories_preference">Ver el historial de versiones publicadas de AutoJs6 en GitHub y las estadísticas de las categorías importantes.</string>
     <string name="description_write_secure_settings">Ajustes de seguridad del sistema, que contienen preferencias del sistema que las aplicaciones pueden leer pero no pueden escribir.\nSe trata de preferencias que el usuario debe modificar explícitamente a través de la interfaz de usuario de una aplicación del sistema.\nCon el permiso de configuración segura del sistema, las aplicaciones normales pueden modificar directamente la configuración segura (como el servicio de accesibilidad).</string>
     <string name="description_write_system_settings">El permiso \"modificar ajustes del sistema\" permite que AutoJs6 cambie algunos ajustes del sistema, de modo que los scripts puedan modificar parámetros como [ brillo de pantalla / rotación automática / tiempo de espera de pantalla ].</string>
+    <string name="dialog_button_abandon">Abandonar</string>
     <string name="dialog_button_advanced_settings">Avanzado</string>
+    <string name="dialog_button_amend_host_address">Corregir dirección</string>
     <string name="dialog_button_back">@string/text_back</string>
     <string name="dialog_button_cancel">Cancelar</string>
     <string name="dialog_button_cancel_download">Cancelar</string>
@@ -117,7 +120,6 @@
     <string name="dialog_button_confirm">OK</string>
     <string name="dialog_button_connect">Conectar</string>
     <string name="dialog_button_continue">@string/text_continue</string>
-    <string name="dialog_button_continue_connecting">@string/dialog_button_continue</string>
     <string name="dialog_button_copy">@string/text_copy</string>
     <string name="dialog_button_default_prefix">Prefijo def</string>
     <string name="dialog_button_details">Detalles</string>
@@ -127,12 +129,12 @@
     <string name="dialog_button_file_information">Información del archivo</string>
     <string name="dialog_button_history">Historial</string>
     <string name="dialog_button_ignore_current_update">Ignorar</string>
+    <string name="dialog_button_interrupt_connection">Interrumpir conexión</string>
     <string name="dialog_button_join_group">Unirse grupo</string>
     <string name="dialog_button_manager">Administrador</string>
     <string name="dialog_button_more">Más</string>
     <string name="dialog_button_open_color_palette">Abrir paleta</string>
     <string name="dialog_button_quit">Salir</string>
-    <string name="dialog_button_quit_connecting">@string/dialog_button_quit</string>
     <string name="dialog_button_remove">Eliminar</string>
     <string name="dialog_button_retrieve">Obtener</string>
     <string name="dialog_button_retry">Reintentar</string>
@@ -212,6 +214,8 @@
     <string name="error_colon_must_follow_a_valid_ip_address">Dos puntos deben seguir a una dirección IP válida</string>
     <string name="error_compass_cannot_be_null">La brújula no puede ser nula</string>
     <string name="error_connect_to_remote">No se puede conectar con el servidor remoto: %s</string>
+    <string name="error_connection_failed_with_host">No se pudo conectar a \"%1$s\".</string>
+    <string name="error_connection_timed_out">La conexión agotó el tiempo de espera (%d ms)</string>
     <string name="error_continuation_resume_called_without_suspend">El método resume() debe ser llamado después de suspender()</string>
     <string name="error_continuation_suspend_called_more_than_once">El método suspender() debería llamarse sólo una vez</string>
     <string name="error_corresponding_github_release_may_not_published">Es posible que la versión correspondiente de GitHub no se haya publicado todavía</string>
@@ -265,6 +269,7 @@
     <string name="error_invalid_rest_compass">Compás de reposo inválido: %s</string>
     <string name="error_invalid_selector_map_element" formatted="false">Elemento de mapa selector no válido: { %s: %s (%s) }</string>
     <string name="error_ip_address_should_not_be_empty">La dirección IP no puede estar vacía</string>
+    <string name="error_ipv6_port_requires_brackets">El puerto IPv6 debe especificarse con el formato \"[ipv6]:port\".</string>
     <string name="error_max_listeners_exceeded">Max listeners exceeded: %d</string>
     <string name="error_may_not_have_root_access_to_run_auto_file">AutoJs6 puede no tener acceso a la raíz para ejecutar el archivo \"auto</string>
     <string name="error_method_called_with_null_argument" formatted="false">%s() llamada con argumento nulo: %s</string>
@@ -337,6 +342,7 @@
     <string name="hint_long_click_run_to_debug">Haga un clic largo en el botón \"Ejecutar\" para depurar</string>
     <string name="hint_loop_delay">Retraso antes del bucle</string>
     <string name="hint_loop_times">0 para bucle infinito</string>
+    <string name="hint_pc_server_address_supported_formats">Se admiten IPv4, IPv6 y dominios.</string>
     <string name="instruction_install_plugin_from_url">Introduce una URL que apunte a la dirección de un complemento remoto.\nPor ejemplo, \"https://example.com/plugin.apk\".</string>
     <string name="label_latest_used_time">Último uso: %1$s</string>
     <string name="logger_ver_history_blob_thread_failure">Hilo \"blob\" fallido</string>
@@ -561,7 +567,10 @@
     <string name="text_connect_to_pc">Conectar al PC</string>
     <string name="text_connected">Conectado</string>
     <string name="text_connected_count_with_colon">Conectados: %1$d</string>
+    <string name="text_connecting">Conectando</string>
+    <string name="text_connecting_to_host" tools:ignore="TypographyEllipsis">Conectando a \"%1$s\"...</string>
     <string name="text_connection_cannot_be_established">No se puede establecer la conexión</string>
+    <string name="text_connection_failed">Conexión fallida</string>
     <string name="text_console">Consola</string>
     <string name="text_continue">Continuar</string>
     <string name="text_copy">Copiar</string>
@@ -1154,6 +1163,7 @@
     <string name="text_version_name_with_computing" tools:ignore="TypographyEllipsis">Nombre de la versión (Calculando...)</string>
     <string name="text_view">Ver</string>
     <string name="text_view_docs">Ver documentos</string>
+    <string name="text_vivo_background_popup_permission">Ventanas emergentes en segundo plano</string>
     <string name="text_vsc_ext_version_not_meet_requirement">La versión de la extensión VSCode no cumple los requisitos</string>
     <string name="text_waiting_for_all_data_processing_to_complete" tools:ignore="TypographyEllipsis">Esperando a que se complete el procesamiento de todos los datos...</string>
     <string name="text_weekly_task">Tarea semanal</string>
@@ -1161,5 +1171,6 @@
     <string name="text_working_dir_path">Ruta del directorio de trabajo</string>
     <string name="text_write_secure_settings">Escribir la configuración de seguridad</string>
     <string name="text_write_system_settings">Escribir la configuración del sistema</string>
+    <string name="text_xiaomi_background_popup_permission">Ventanas emergentes en segundo plano</string>
 
 </resources>

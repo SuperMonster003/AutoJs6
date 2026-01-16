@@ -72,6 +72,7 @@
     <string name="description_all_files_access" tools:ignore="TypographyEllipsis">Разрешение \"управление всеми файлами\" (или \"доступ ко всем файлам\") позволяет AutoJs6 напрямую [ создавать / читать / изменять / удалять ] файлы в общем хранилище через обычные пути файлов, чтобы скрипты могли получать доступ к \"Internal Storage\", а файловый менеджер мог корректно отображать и управлять файлами.\n\nНа устройствах Android 11+ это основной способ обеспечить полный доступ к чтению/записи файлов.</string>
     <string name="description_app_language_preference">Это предпочтение для изменения языка отображения AutoJs6, включая сообщения исключений от запущенных скриптов.\n\nПримечание: может потребоваться перезапуск приложения, чтобы язык был применен так, как ожидается.</string>
     <string name="description_auto_night_mode">После включения автоматического ночного режима AutoJs6 будет автоматически переключать ночной режим в соответствии с настройками системы.\n\nNote: переключатель автоматического ночного режима и переключатель ночного режима связаны и взаимно влияют друг на друга.</string>
+    <string name="description_background_popup_permission" tools:ignore="TypographyEllipsis">Разрешение \"всплывающие окна в фоне\" (также известное как \"запуск интерфейса из фона\" или \"показ интерфейса в фоне\") позволяет AutoJs6, даже когда приложение находится в фоне или без видимого интерфейса, запускать Activity или открывать определённую страницу настроек. Подходит для сценариев [ открывать UI при срабатывании запланированной задачи / восстанавливать взаимодействие после блокировки экрана или режима ожидания / открывать страницу настройки скрипта из уведомления или ярлыка ].\n\nNote: на системах Xiaomi (MIUI/HyperOS), Vivo (OriginOS/Funtouch OS) и т. п. это разрешение может быть отключено по умолчанию. Если оно не выдано, система может блокировать попытки скрипта открыть страницу из фона, что может проявляться как [ нет реакции / выполнение только в фоне без интерфейса / неудачный переход ].\n\nДаже после выдачи разрешения на поведение могут влиять другие политики системы, такие как [ оптимизация батареи / ограничения автозапуска / заморозка в фоне / режим ожидания приложения ]. Рекомендуется настраивать совместно с связанными разрешениями или белыми списками.</string>
     <string name="description_change_working_dir_preference">Измените путь к директории, содержащей скрипты</string>
     <string name="description_check_for_updates_preference">AutoJs6 получает и загружает обновления с GitHub.</string>
     <string name="description_client_mode">Клиентский режим позволяет AutoJs6 активно подключаться к удалённому серверу для выполнения [ передачи скриптов / вывода логов / удалённого управления ].\n\nОбычно устройство и сервер должны находиться в одной локальной сети (LAN) или в сетевой среде, где они могут обращаться друг к другу.</string>
@@ -109,7 +110,9 @@
     <string name="description_version_histories_preference">Просмотреть историю выпусков AutoJs6 на GitHub и статистику по основным категориям.</string>
     <string name="description_write_secure_settings">Настройки безопасности системы, содержащие системные предпочтения, которые приложения могут читать, но не имеют права записывать.\nОни предназначены для параметров, которые пользователь должен явно изменить через пользовательский интерфейс системного приложения.\nПри наличии разрешения на безопасные системные настройки обычные приложения могут напрямую изменять безопасные настройки (например, служба доступности).</string>
     <string name="description_write_system_settings">Разрешение \"изменение системных настроек\" позволяет AutoJs6 изменять некоторые параметры системы, чтобы скрипты могли менять такие настройки, как [ яркость экрана / автоповорот / тайм-аут экрана ].</string>
+    <string name="dialog_button_abandon">Отказаться</string>
     <string name="dialog_button_advanced_settings">Доп.</string>
+    <string name="dialog_button_amend_host_address">Исправить адрес</string>
     <string name="dialog_button_back">@string/text_back</string>
     <string name="dialog_button_cancel">Отменить</string>
     <string name="dialog_button_cancel_download">Отменить</string>
@@ -117,7 +120,6 @@
     <string name="dialog_button_confirm">OK</string>
     <string name="dialog_button_connect">Подключиться</string>
     <string name="dialog_button_continue">@string/text_continue</string>
-    <string name="dialog_button_continue_connecting">@string/dialog_button_continue</string>
     <string name="dialog_button_copy">@string/text_copy</string>
     <string name="dialog_button_default_prefix">Префикс деф.</string>
     <string name="dialog_button_details">Подробности</string>
@@ -127,12 +129,12 @@
     <string name="dialog_button_file_information">Информация о файле</string>
     <string name="dialog_button_history">История</string>
     <string name="dialog_button_ignore_current_update">Игнорировать</string>
+    <string name="dialog_button_interrupt_connection">Прервать соединение</string>
     <string name="dialog_button_join_group">Вступить группу</string>
     <string name="dialog_button_manager">Менеджер</string>
     <string name="dialog_button_more">Еще</string>
     <string name="dialog_button_open_color_palette">Открыть палитру</string>
     <string name="dialog_button_quit">Выйти</string>
-    <string name="dialog_button_quit_connecting">@string/dialog_button_quit</string>
     <string name="dialog_button_remove">Удалить</string>
     <string name="dialog_button_retrieve">Получить</string>
     <string name="dialog_button_retry">Повторная попытка</string>
@@ -212,6 +214,8 @@
     <string name="error_colon_must_follow_a_valid_ip_address">Двоеточие должно следовать за действительным IP-адресом</string>
     <string name="error_compass_cannot_be_null">Компас не может быть нулевым</string>
     <string name="error_connect_to_remote">Не удается подключиться к удаленному серверу: %s</string>
+    <string name="error_connection_failed_with_host">Не удалось подключиться к \"%1$s\".</string>
+    <string name="error_connection_timed_out">Тайм-аут подключения (%d мс)</string>
     <string name="error_continuation_resume_called_without_suspend">Метод resume() должен вызываться после suspend()</string>
     <string name="error_continuation_suspend_called_more_than_once">Метод suspend() должен быть вызван только один раз</string>
     <string name="error_corresponding_github_release_may_not_published">Соответствующий релиз на GitHub может быть еще не опубликован</string>
@@ -265,6 +269,7 @@
     <string name="error_invalid_rest_compass">Неверный остаток компаса: %s</string>
     <string name="error_invalid_selector_map_element" formatted="false">Неверный элемент карты селектора: { %s: %s (%s) }</string>
     <string name="error_ip_address_should_not_be_empty">IP-адрес не может быть пустым</string>
+    <string name="error_ipv6_port_requires_brackets">Порт IPv6 должен быть указан в формате \"[ipv6]:port\".</string>
     <string name="error_max_listeners_exceeded">Превышено максимальное количество слушателей: %d</string>
     <string name="error_may_not_have_root_access_to_run_auto_file">AutoJs6 может не иметь root-доступа для запуска файла \"auto\"</string>
     <string name="error_method_called_with_null_argument" formatted="false">%s() вызвана с нулевым аргументом: %s</string>
@@ -337,6 +342,7 @@
     <string name="hint_long_click_run_to_debug">Длительное нажатие кнопки \"Выполнить\" для отладки</string>
     <string name="hint_loop_delay">Задержка перед циклом</string>
     <string name="hint_loop_times">0 для бесконечного цикла</string>
+    <string name="hint_pc_server_address_supported_formats">Поддерживаются IPv4, IPv6 и доменные имена.</string>
     <string name="instruction_install_plugin_from_url">Введите URL, указывающий на удалённый плагин.\nНапример: \"https://example.com/plugin.apk\".</string>
     <string name="label_latest_used_time">Последнее использование: %1$s</string>
     <string name="logger_ver_history_blob_thread_failure">Поток \"blob\" неудачен</string>
@@ -561,7 +567,10 @@
     <string name="text_connect_to_pc">Подключитесь к ПК</string>
     <string name="text_connected">Подключено</string>
     <string name="text_connected_count_with_colon">Подключено: %1$d</string>
+    <string name="text_connecting">Подключение...</string>
+    <string name="text_connecting_to_host" tools:ignore="TypographyEllipsis">Подключение к \"%1$s\"...</string>
     <string name="text_connection_cannot_be_established">Соединение не может быть установлено</string>
+    <string name="text_connection_failed">Не удалось подключиться</string>
     <string name="text_console">Консоль</string>
     <string name="text_continue">Продолжить</string>
     <string name="text_copy">Скопировать</string>
@@ -1154,6 +1163,7 @@
     <string name="text_version_name_with_computing" tools:ignore="TypographyEllipsis">Название версии (Вычисление...)</string>
     <string name="text_view">Просмотр</string>
     <string name="text_view_docs">Просмотр документов</string>
+    <string name="text_vivo_background_popup_permission">Всплывающие окна в фоне</string>
     <string name="text_vsc_ext_version_not_meet_requirement">Версия расширения VSCode не соответствует требованиям</string>
     <string name="text_waiting_for_all_data_processing_to_complete" tools:ignore="TypographyEllipsis">Ожидание завершения обработки всех данных...</string>
     <string name="text_weekly_task">Недельное задание</string>
@@ -1161,5 +1171,6 @@
     <string name="text_working_dir_path">Путь к рабочему каталогу</string>
     <string name="text_write_secure_settings">Параметры безопасности записи</string>
     <string name="text_write_system_settings">Запись системных настроек</string>
+    <string name="text_xiaomi_background_popup_permission">Всплывающие окна в фоне</string>
 
 </resources>

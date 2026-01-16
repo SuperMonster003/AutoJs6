@@ -7,9 +7,9 @@ import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.Subject
 import org.autojs.autojs.annotation.ScriptInterface
+import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.pluginclient.JsonSocket.HANDSHAKE_TIMEOUT
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.util.NetworkUtils.DEFAULT_IP_ADDRESS
 import org.autojs.autojs.util.ThreadUtils
 import java.io.File
 import java.io.IOException
@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 /**
  * Created by Stardust on May 11, 2017.
  * Modified by SuperMonster003 as of Jan 9, 2026.
- * Transformed by SuperMonster003 on Jul 1, 2023.
+ * Transformed by SuperMonster003 on Jan 15, 2026.
  */
 class DevPluginService(val context: Context) {
 
@@ -52,7 +52,7 @@ class DevPluginService(val context: Context) {
     // zh-CN: 发布当前服务端连接数量.
     val serverConnectionCount = BehaviorSubject.createDefault(0)
 
-    val clientConnectionIpAddress = BehaviorSubject.createDefault(DEFAULT_IP_ADDRESS)
+    val clientConnectionIpAddress = BehaviorSubject.createDefault(Pref.getServerAddress())
 
     @get:ScriptInterface
     @Volatile
@@ -134,13 +134,9 @@ class DevPluginService(val context: Context) {
         }
 
         try {
-            var port = Port.PC_SERVER
-            var ip = host
-            val i = host.lastIndexOf(':')
-            if (i > 0 && i < host.length - 1) {
-                port = host.substring(i + 1).toInt()
-                ip = host.substring(0, i)
-            }
+            val endpoint = parseRemoteEndpoint(host, Port.PC_SERVER)
+            val ip = endpoint.host
+            val port = endpoint.port
 
             // Show connecting subtitle immediately.
             // zh-CN: 立即显示正在连接的 subtitle.
@@ -192,6 +188,44 @@ class DevPluginService(val context: Context) {
         }
         return Observable.empty()
     }
+
+    // Parse host[:port] supporting domain/IPv4/IPv6.
+    // zh-CN: 解析 host[:port], 支持 域名/IPv4/IPv6.
+    private fun parseRemoteEndpoint(input: String, defaultPort: Int): RemoteEndpoint {
+        val s = input.trim()
+
+        // Bracketed IPv6: [addr]:port or [addr]
+        // zh-CN: 方括号 IPv6: [addr]:port 或 [addr].
+        if (s.startsWith("[") && s.contains("]")) {
+            val end = s.indexOf(']')
+            val hostPart = s.substring(1, end)
+            val rest = s.substring(end + 1)
+            if (rest.startsWith(":") && rest.length > 1) {
+                val port = rest.substring(1).toInt()
+                return RemoteEndpoint(hostPart, port)
+            }
+            return RemoteEndpoint(hostPart, defaultPort)
+        }
+
+        // For non-bracketed input:
+        // - If there is exactly one ':' -> treat as host:port (domain or IPv4)
+        // - If there are multiple ':' -> treat as raw IPv6 with no port
+        // zh-CN:
+        // - 若仅 1 个 ':' -> 视为 host:port (域名 或 IPv4)
+        // - 若多个 ':' -> 视为不带端口的 IPv6.
+        val colonCount = s.count { it == ':' }
+        if (colonCount == 1) {
+            val i = s.lastIndexOf(':')
+            val hostPart = s.substring(0, i)
+            val portPart = s.substring(i + 1)
+            val port = portPart.toInt()
+            return RemoteEndpoint(hostPart, port)
+        }
+
+        return RemoteEndpoint(s, defaultPort)
+    }
+
+    private data class RemoteEndpoint(val host: String, val port: Int)
 
     @AnyThread
     fun enableLocalServer(): Observable<JsonSocketServer> {

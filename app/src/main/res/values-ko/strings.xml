@@ -74,6 +74,7 @@
     <string name="description_all_files_access" tools:ignore="TypographyEllipsis">\"모든 파일 관리\" (또는 \"모든 파일 접근\") 권한은 AutoJs6 가 공유 저장소에서 일반적인 파일 경로를 통해 직접 [ 생성 / 읽기 / 수정 / 삭제 ] 를 수행할 수 있게 하여, 스크립트가 \"Internal Storage\"에 접근할 수 있도록 하고 파일 관리자가 파일을 정상적으로 표시 및 관리할 수 있도록 합니다.\n\nAndroid 11+ 기기에서는 전체 저장소 파일 읽기/쓰기 기능을 구현하는 주요 방식입니다.</string>
     <string name="description_app_language_preference">실행 스크립트의 예외 메시지를 포함하여 AutoJs6 의 디스플레이 언어를 변경하는이 선호도.\n\n참고: 예상대로 언어를 적용하려면 앱 재시작이 필요할 수 있습니다.</string>
     <string name="description_auto_night_mode">자동 야간 모드를 켜면 AutoJs6 가 시스템 설정에 따라 자동으로 야간 모드를 전환합니다.\n\nNote: 자동 야간 모드 스위치와 야간 모드 스위치는 서로 연동되며 상호 영향을 줍니다.</string>
+    <string name="description_background_popup_permission" tools:ignore="TypographyEllipsis">\"백그라운드 팝업\" (또는 \"백그라운드에서 화면 시작\" / \"백그라운드에서 화면 표시\") 권한은 앱이 백그라운드에 있거나 화면이 표시되지 않는 상태에서도 AutoJs6 가 Activity 를 시작하거나 특정 설정 페이지를 열 수 있도록 합니다. [ 예약 작업 트리거 시 UI 열기 / 잠금 화면 또는 대기 후 상호작용 복원 / 알림 또는 바로가기에서 스크립트 설정 페이지 호출 ] 같은 시나리오에 적합합니다.\n\nNote: Xiaomi (MIUI/HyperOS), Vivo (OriginOS/Funtouch OS) 등의 시스템에서는 이 권한이 기본적으로 꺼져 있을 수 있습니다. 권한이 없으면 스크립트가 백그라운드에서 페이지를 열려고 할 때 시스템이 차단하여 [ 무반응 / 백그라운드에서만 실행되고 화면이 표시되지 않음 / 이동 실패 ] 로 보일 수 있습니다.\n\n 권한을 부여한 후에도 [ 배터리 최적화 / 자동 시작 제한 / 백그라운드 동결 / 앱 대기 ] 등 다른 시스템 정책의 영향을 받을 수 있으므로, 관련 권한이나 화이트리스트 설정과 함께 조정하는 것을 권장합니다.</string>
     <string name="description_change_working_dir_preference">스크립트가 포함 된 디렉토리의 경로를 변경하십시오</string>
     <string name="description_check_for_updates_preference">AutoJs6 은 GitHub 에서 업데이트를 가져오고 다운로드합니다.</string>
     <string name="description_client_mode">클라이언트 모드는 AutoJs6 가 원격 서버에 능동적으로 연결하여 [ 스크립트 전송 / 로그 출력 / 원격 제어 ] 등을 수행할 수 있도록 합니다.\n\n 일반적으로 기기와 서버는 동일한 LAN 또는 서로 접근 가능한 네트워크 환경에 있어야 합니다.</string>
@@ -111,7 +112,9 @@
     <string name="description_version_histories_preference">GitHub 에서 AutoJs6 릴리스 버전의 변경 기록과 주요 분류 통계 데이터를 확인하기.</string>
     <string name="description_write_secure_settings">애플리케이션이 읽을 수 있지만 쓸 수없는 시스템 환경 설정을 포함하는 보안 시스템 설정.\n이들은 사용자가 시스템 앱의 UI 를 통해 명시 적으로 수정 해야하는 선호도입니다.\n보안 시스템 설정 권한을 사용하면 일반 애플리케이션이 보안 설정 (예: 접근성 서비스)을 직접 수정할 수 있습니다.</string>
     <string name="description_write_system_settings">\"시스템 설정 수정\" 권한은 AutoJs6 가 일부 시스템 설정을 변경할 수 있게 하여, 스크립트가 [ 화면 밝기 / 자동 회전 / 화면 시간 제한 ] 등의 설정을 변경할 수 있도록 합니다.</string>
+    <string name="dialog_button_abandon">포기</string>
     <string name="dialog_button_advanced_settings">고급</string>
+    <string name="dialog_button_amend_host_address">주소 수정</string>
     <string name="dialog_button_back">@string/text_back</string>
     <string name="dialog_button_cancel">취소</string>
     <string name="dialog_button_cancel_download">취소</string>
@@ -119,7 +122,6 @@
     <string name="dialog_button_confirm">확인</string>
     <string name="dialog_button_connect">연결</string>
     <string name="dialog_button_continue">@string/text_continue</string>
-    <string name="dialog_button_continue_connecting">@string/dialog_button_continue</string>
     <string name="dialog_button_copy">@string/text_copy</string>
     <string name="dialog_button_default_prefix">기본 접두사</string>
     <string name="dialog_button_details">세부</string>
@@ -129,12 +131,12 @@
     <string name="dialog_button_file_information">파일 정보</string>
     <string name="dialog_button_history">역사</string>
     <string name="dialog_button_ignore_current_update">무시하다</string>
+    <string name="dialog_button_interrupt_connection">연결 중단</string>
     <string name="dialog_button_join_group">그룹 가입</string>
     <string name="dialog_button_manager">관리자</string>
     <string name="dialog_button_more">더</string>
     <string name="dialog_button_open_color_palette">팔레트 열기</string>
     <string name="dialog_button_quit">그만두다</string>
-    <string name="dialog_button_quit_connecting">@string/dialog_button_quit</string>
     <string name="dialog_button_remove">제거하다</string>
     <string name="dialog_button_retrieve">가져오기</string>
     <string name="dialog_button_retry">다시 해 보다</string>
@@ -214,6 +216,8 @@
     <string name="error_colon_must_follow_a_valid_ip_address">콜론은 유효한 IP 주소를 따라야 합니다</string>
     <string name="error_compass_cannot_be_null">나침반은 무효가 될 수 없다</string>
     <string name="error_connect_to_remote">원격 서버에 연결할 수 없습니다: %s</string>
+    <string name="error_connection_failed_with_host">\"%1$s\"에 연결하지 못했습니다.</string>
+    <string name="error_connection_timed_out">연결 시간 초과 (%d 밀리초)</string>
     <string name="error_continuation_resume_called_without_suspend">메소드 resume() 가 suspend() 후 호출해야합니다.</string>
     <string name="error_continuation_suspend_called_more_than_once">메소드 suspend() 는 한 번만 호출해야합니다</string>
     <string name="error_corresponding_github_release_may_not_published">해당 GitHub 릴리스는 아직 게시되지 않았을 수 있습니다</string>
@@ -267,6 +271,7 @@
     <string name="error_invalid_rest_compass">잘못된 휴식 나침반: %s</string>
     <string name="error_invalid_selector_map_element" formatted="false">잘못된 선택기 맵 요소: { %s: %s (%s) }</string>
     <string name="error_ip_address_should_not_be_empty">IP 주소는 비워둘 수 없습니다</string>
+    <string name="error_ipv6_port_requires_brackets">IPv6 포트는 \"[ipv6]:port\" 형식으로 지정해야 합니다.</string>
     <string name="error_max_listeners_exceeded">최대 청취자를 초과했습니다: %d</string>
     <string name="error_may_not_have_root_access_to_run_auto_file">AutoJs6 은 \"auto\" 파일을 실행할 루트 액세스 권한이 없을 수 있습니다.</string>
     <string name="error_method_called_with_null_argument" formatted="false">널 인수로 호출 된 %s(): %s</string>
@@ -339,6 +344,7 @@
     <string name="hint_long_click_run_to_debug">\"실행\" 버튼을 긴 클릭하여 디버그를 클릭하십시오</string>
     <string name="hint_loop_delay">루프 전 지연</string>
     <string name="hint_loop_times">무한 루프의 경우 0</string>
+    <string name="hint_pc_server_address_supported_formats">IPv4, IPv6 및 도메인을 지원합니다.</string>
     <string name="instruction_install_plugin_from_url">원격 플러그인 주소를 가리키는 URL을 입력하세요.\n예: \"https://example.com/plugin.apk\"</string>
     <string name="label_latest_used_time">최종 사용: %1$s</string>
     <string name="logger_ver_history_blob_thread_failure">\"Blob\" 스레드 요청 실패</string>
@@ -563,7 +569,10 @@
     <string name="text_connect_to_pc">PC 에 연결하십시오</string>
     <string name="text_connected">연결됨</string>
     <string name="text_connected_count_with_colon">연결됨: %1$d</string>
+    <string name="text_connecting">연결 중</string>
+    <string name="text_connecting_to_host" tools:ignore="TypographyEllipsis">\"%1$s\"에 연결하는 중...</string>
     <string name="text_connection_cannot_be_established">연결을 설정할 수 없습니다</string>
+    <string name="text_connection_failed">연결 실패</string>
     <string name="text_console">콘솔</string>
     <string name="text_continue">계속하다</string>
     <string name="text_copy">복사</string>
@@ -1156,6 +1165,7 @@
     <string name="text_version_name_with_computing" tools:ignore="TypographyEllipsis">버전 이름 (계산 중...)</string>
     <string name="text_view">보기</string>
     <string name="text_view_docs">문서를 봅니다</string>
+    <string name="text_vivo_background_popup_permission">백그라운드 팝업</string>
     <string name="text_vsc_ext_version_not_meet_requirement">VSCode 확장 버전이 요구 사항을 충족하지 않습니다</string>
     <string name="text_waiting_for_all_data_processing_to_complete" tools:ignore="TypographyEllipsis">모든 데이터 처리가 완료될 때까지 대기 중입니다...</string>
     <string name="text_weekly_task">주간 과제</string>
@@ -1163,5 +1173,6 @@
     <string name="text_working_dir_path">작업 디렉토리 경로</string>
     <string name="text_write_secure_settings">보안 설정을 작성하십시오</string>
     <string name="text_write_system_settings">시스템 설정을 작성하십시오</string>
+    <string name="text_xiaomi_background_popup_permission">백그라운드 팝업</string>
 
 </resources>

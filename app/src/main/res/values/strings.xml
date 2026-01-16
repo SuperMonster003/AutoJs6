@@ -324,6 +324,7 @@
     <string name="description_all_files_access" tools:ignore="TypographyEllipsis">The \"manage all files\" (or \"all files access\") permission allows AutoJs6 to directly [ create / read / modify / delete ] files in shared storage via normal file paths, allowing scripts to access \"Internal Storage\" and enabling the file manager to display and manage files properly.\n\nOn Android 11+ devices, this is the primary way to achieve full file read/write access.</string>
     <string name="description_app_language_preference">Preference for changing the display language of AutoJs6, including exception messages from running scripts.\n\nNote: an app restart may be needed to make language applied as expected.</string>
     <string name="description_auto_night_mode">When auto night mode is enabled, AutoJs6 will automatically switch night mode based on system settings.\n\nNote: the auto night mode toggle and the night mode toggle are linked and affect each other.</string>
+    <string name="description_background_popup_permission" tools:ignore="TypographyEllipsis">The \"background pop-up\" permission (also known as \"background activity launch\" or \"launch UI from background\") allows AutoJs6 to proactively start an Activity or open specific settings pages even when the app is in the background or no UI is currently visible. It is useful for scenarios such as [ opening UI when a scheduled task is triggered / resuming interaction after the device is locked or idle / opening a script configuration page from a notification or shortcut ].\n\nNote: on systems like Xiaomi (MIUI/HyperOS) and Vivo (OriginOS/Funtouch OS), this permission may be disabled by default. Without it, attempts to open pages from the background may be blocked by the system, which can appear as [ no response / running in background only without showing UI / navigation failed ].\n\nEven after granting it, the behavior may still be affected by other system policies such as [ battery optimizations / auto-start restrictions / background freezing / app standby ]. Consider adjusting it together with related permissions or whitelist settings.</string>
     <string name="description_change_working_dir_preference">Change the path of the directory containing scripts</string>
     <string name="description_check_for_updates_preference">AutoJs6 gets and downloads updates from GitHub.</string>
     <string name="description_client_mode">Client mode allows AutoJs6 to actively connect to a remote server for [ script transfer / log printing / remote control ].\n\nTypically, the device and the server need to be on the same LAN or on a network where they can reach each other.</string>
@@ -361,7 +362,9 @@
     <string name="description_version_histories_preference">View the release version history and key category statistics of AutoJs6 on GitHub.</string>
     <string name="description_write_secure_settings">Secure system settings, containing system preferences that applications can read but are not allowed to write.\nThese are for preferences that the user must explicitly modify through the UI of a system app.\nWith secure system settings permission, normal applications can directly modify the secure settings (such as accessibility service).</string>
     <string name="description_write_system_settings">The \"write system settings\" permission allows AutoJs6 to modify some system settings, so scripts can change system parameters such as [ screen brightness / auto-rotate / screen timeout ].</string>
+    <string name="dialog_button_abandon">Abandon</string>
     <string name="dialog_button_advanced_settings">Advanced</string>
+    <string name="dialog_button_amend_host_address">Amend</string>
     <string name="dialog_button_back">@string/text_back</string>
     <string name="dialog_button_cancel">Cancel</string>
     <string name="dialog_button_cancel_download">Cancel</string>
@@ -369,7 +372,6 @@
     <string name="dialog_button_confirm">OK</string>
     <string name="dialog_button_connect">Connect</string>
     <string name="dialog_button_continue">@string/text_continue</string>
-    <string name="dialog_button_continue_connecting">@string/dialog_button_continue</string>
     <string name="dialog_button_copy">@string/text_copy</string>
     <string name="dialog_button_default_prefix">Def prefix</string>
     <string name="dialog_button_details">Details</string>
@@ -379,12 +381,12 @@
     <string name="dialog_button_file_information">File info</string>
     <string name="dialog_button_history">History</string>
     <string name="dialog_button_ignore_current_update">Ignore</string>
+    <string name="dialog_button_interrupt_connection">Interrupt</string>
     <string name="dialog_button_join_group">Join group</string>
     <string name="dialog_button_manager">Manager</string>
     <string name="dialog_button_more">More</string>
     <string name="dialog_button_open_color_palette">Palette</string>
     <string name="dialog_button_quit">Quit</string>
-    <string name="dialog_button_quit_connecting">@string/dialog_button_quit</string>
     <string name="dialog_button_remove">Remove</string>
     <string name="dialog_button_retrieve">Retrieve</string>
     <string name="dialog_button_retry">Retry</string>
@@ -467,6 +469,8 @@
     <string name="error_colon_must_follow_a_valid_ip_address">Colon must follow a valid IP address</string>
     <string name="error_compass_cannot_be_null">Compass cannot be null</string>
     <string name="error_connect_to_remote">Cannot connect to the remote server: %s</string>
+    <string name="error_connection_failed_with_host">Failed to connect to \"%1$s\".</string>
+    <string name="error_connection_timed_out">Connection timed out after %d ms</string>
     <string name="error_continuation_resume_called_without_suspend">Method resume() should be called after suspend()</string>
     <string name="error_continuation_suspend_called_more_than_once">Method suspend() should be only called once</string>
     <string name="error_corresponding_github_release_may_not_published">Corresponding GitHub release may have not been published yet</string>
@@ -520,6 +524,7 @@
     <string name="error_invalid_rest_compass">Invalid rest compass: %s</string>
     <string name="error_invalid_selector_map_element" formatted="false">Invalid selector map element: { %s: %s (%s) }</string>
     <string name="error_ip_address_should_not_be_empty">IP address can not be empty</string>
+    <string name="error_ipv6_port_requires_brackets">IPv6 port must be specified as \"[ipv6]:port\".</string>
     <string name="error_max_listeners_exceeded">Max listeners exceeded: %d</string>
     <string name="error_may_not_have_root_access_to_run_auto_file">AutoJs6 may not have root access to run \"auto\" file</string>
     <string name="error_method_called_with_null_argument" formatted="false">%s() called with null argument: %s</string>
@@ -592,6 +597,7 @@
     <string name="hint_long_click_run_to_debug">Long click \"Run\" button to debug</string>
     <string name="hint_loop_delay">Delay before loop</string>
     <string name="hint_loop_times">0 for infinite loop</string>
+    <string name="hint_pc_server_address_supported_formats">IPv4, IPv6 and domain are supported.</string>
     <string name="instruction_install_plugin_from_url">Enter a URL pointing to a remote plugin address.\nFor example \"https://example.com/plugin.apk\".</string>
     <string name="label_latest_used_time">Latest used: %1$s</string>
     <string name="logger_ver_history_blob_thread_failure">\"Blob\" thread request failed</string>
@@ -816,7 +822,10 @@
     <string name="text_connect_to_pc">Connect to PC</string>
     <string name="text_connected">Connected</string>
     <string name="text_connected_count_with_colon">Connected: %1$d</string>
+    <string name="text_connecting">Connecting</string>
+    <string name="text_connecting_to_host" tools:ignore="TypographyEllipsis">Connecting to \"%1$s\"...</string>
     <string name="text_connection_cannot_be_established">Connection cannot be established</string>
+    <string name="text_connection_failed">Connection failed</string>
     <string name="text_console">Console</string>
     <string name="text_continue">Continue</string>
     <string name="text_copy">Copy</string>
@@ -1409,6 +1418,7 @@
     <string name="text_version_name_with_computing" tools:ignore="TypographyEllipsis">Version name (computing...)</string>
     <string name="text_view">View</string>
     <string name="text_view_docs">View documents</string>
+    <string name="text_vivo_background_popup_permission">Background pop-ups</string>
     <string name="text_vsc_ext_version_not_meet_requirement">The version of the VSCode extension does not meet the requirements</string>
     <string name="text_waiting_for_all_data_processing_to_complete" tools:ignore="TypographyEllipsis">Waiting for all data processing to complete...</string>
     <string name="text_weekly_task">Weekly task</string>
@@ -1416,5 +1426,6 @@
     <string name="text_working_dir_path">Working directory path</string>
     <string name="text_write_secure_settings">Write security settings</string>
     <string name="text_write_system_settings">Write system settings</string>
+    <string name="text_xiaomi_background_popup_permission">Display pop-up windows while running in the background</string>
 
 </resources>

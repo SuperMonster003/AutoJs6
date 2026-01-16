@@ -19,7 +19,7 @@ open class DrawerMenuToggleableItem : DrawerMenuItem, IToggleableItem {
     private var mDescription: String? = null
 
     private var mDescriptionDialogBuilderProvider: (() -> MaterialDialog.Builder)? = null
-    private var mOnTitleContainerClickListener: (MaterialDialog.Builder.(menuItem: DrawerMenuToggleableItem) -> Unit)? = null
+    private var mOnTitleContainerClickListener: (MaterialDialog.Builder.() -> Boolean)? = null
 
     private var mOnLauncherManagerListener: ((MaterialDialog?) -> Unit)? = null
     private var mOnLaunchSettingsListener: ((MaterialDialog) -> Unit)? = null
@@ -31,7 +31,7 @@ open class DrawerMenuToggleableItem : DrawerMenuItem, IToggleableItem {
         icon: Int,
         title: Int,
         descriptionRes: Int? = null,
-        onTitleContainerClickListener: (MaterialDialog.Builder.(menuItem: DrawerMenuToggleableItem) -> Unit)? = null,
+        onTitleContainerClickListener: (MaterialDialog.Builder.() -> Any?)? = null,
     ) : super(icon, title, DEFAULT_PREFERENCE_KEY) {
         init(helper, null, descriptionRes, onTitleContainerClickListener)
     }
@@ -42,7 +42,7 @@ open class DrawerMenuToggleableItem : DrawerMenuItem, IToggleableItem {
         title: Int,
         switchOnHintRes: Int? = null,
         descriptionRes: Int? = null,
-        onTitleContainerClickListener: (MaterialDialog.Builder.(menuItem: DrawerMenuToggleableItem) -> Unit)? = null,
+        onTitleContainerClickListener: (MaterialDialog.Builder.() -> Any?)? = null,
     ) : super(icon, title, DEFAULT_PREFERENCE_KEY) {
         init(helper, switchOnHintRes, descriptionRes, onTitleContainerClickListener)
     }
@@ -54,7 +54,7 @@ open class DrawerMenuToggleableItem : DrawerMenuItem, IToggleableItem {
         switchOnHintRes: Int? = null,
         prefKey: Int = DEFAULT_PREFERENCE_KEY,
         descriptionRes: Int? = null,
-        onTitleContainerClickListener: (MaterialDialog.Builder.(menuItem: DrawerMenuToggleableItem) -> Unit)? = null,
+        onTitleContainerClickListener: (MaterialDialog.Builder.() -> Any?)? = null,
     ) : super(icon, title, prefKey) {
         init(helper, switchOnHintRes, descriptionRes, onTitleContainerClickListener)
     }
@@ -63,7 +63,7 @@ open class DrawerMenuToggleableItem : DrawerMenuItem, IToggleableItem {
         itemHelper: DrawerMenuItemHelper,
         switchOnHintRes: Int?,
         descriptionRes: Int?,
-        onTitleContainerClickListener: (MaterialDialog.Builder.(menuItem: DrawerMenuToggleableItem) -> Unit)? = null,
+        onTitleContainerClickListener: (MaterialDialog.Builder.() -> Any?)? = null,
     ) {
         mItemHelper = itemHelper
         switchOnHintRes?.let { content = itemHelper.context.getString(it) }
@@ -110,7 +110,14 @@ open class DrawerMenuToggleableItem : DrawerMenuItem, IToggleableItem {
                 }
         }
 
-        mOnTitleContainerClickListener = onTitleContainerClickListener
+        mOnTitleContainerClickListener = listener@{
+            val listener = onTitleContainerClickListener ?: return@listener false
+            when (val result = listener(this)) {
+                is Boolean -> result
+                is Unit -> false
+                else -> throw IllegalArgumentException("onTitleContainerClickListener must return Boolean or Unit")
+            }
+        }
     }
 
     fun setOnNotifyItemChangedListener(listener: ((DrawerMenuItem) -> Unit)?) {
@@ -129,7 +136,10 @@ open class DrawerMenuToggleableItem : DrawerMenuItem, IToggleableItem {
     fun onTitleContainerClick() {
         if (isContextInvalidForDialog()) return
         val builder = mDescriptionDialogBuilderProvider?.invoke() ?: return
-        mOnTitleContainerClickListener?.invoke(builder, this)
+
+        val handled = mOnTitleContainerClickListener?.invoke(builder) == true
+        if (handled) return
+
         runCatching { builder.show() }
     }
 
@@ -141,11 +151,11 @@ open class DrawerMenuToggleableItem : DrawerMenuItem, IToggleableItem {
         }.getOrDefault(false)
     }
 
-    fun setOnLaunchManagerListener(onClickListener: (MaterialDialog?) -> Unit) {
+    fun setOnLaunchManagerListener(onClickListener: (MaterialDialog?) -> Unit) = also {
         mOnLauncherManagerListener = onClickListener
     }
 
-    fun setOnLaunchSettingsListener(onClickListener: (MaterialDialog) -> Unit) {
+    fun setOnLaunchSettingsListener(onClickListener: (MaterialDialog) -> Unit) = also {
         mOnLaunchSettingsListener = onClickListener
     }
 

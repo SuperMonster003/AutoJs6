@@ -71,6 +71,7 @@
     <string name="description_all_files_access" tools:ignore="TypographyEllipsis">\"管理所有文件\" (或 \"所有文件訪問\") 權限允許 AutoJs6 在共享存儲空間中通過常規文件路徑直接 [ 創建 / 讀取 / 修改 / 刪除 ] 文件, 使腳本可以訪問 \"內部存儲 (Internal Storage)\", 使文件管理器可以正常顯示及管理文件.\n\n在 Android 11+ 設備上, 這是實現全盤文件讀寫能力的主要方式.</string>
     <string name="description_app_language_preference">設置選項用於修改 AutoJs6 應用的文本內容顯示語言, 同時包括腳本運行產生的錯誤消息等.\n\n注: 部分內容可能需要重啓應用才能完成語言切換.</string>
     <string name="description_auto_night_mode">自動夜間模式開啓後, AutoJs6 將根據系統設置自動切換夜間模式.\n\注: 自動夜間模式開關與夜間模式開關互相關聯且互相影響.</string>
+    <string name="description_background_popup_permission" tools:ignore="TypographyEllipsis">\"後台彈出界面\" (也稱 \"後台啓動界面\" 或 \"後台彈出頁面\") 權限允許 AutoJs6 在應用位於後台或未顯示界面時, 仍可主動啓動界面(Activity) 或打開特定設置頁, 適合 [ 定時任務觸發時打開 UI / 在鎖屏或待機後恢復交互 / 由通知或快捷方式喚起腳本配置頁 ] 等場景.\n\n注: 在 Xiaomi (MIUI/HyperOS), Vivo (OriginOS/Funtouch OS) 等系統上, 該權限可能默認關閉. 未授予時, 腳本嘗試從後台打開頁面可能會被系統攔截, 表現為 [ 無響應 / 僅後台執行但不顯示界面 / 跳轉失敗 ].\n\n授予後仍可能受到系統其他策略影響, 如 [ 電池優化 / 自啓動限制 / 後台凍結 / 應用待機 ] 等, 可結合相關權限或白名單設置一起調整.</string>
     <string name="description_change_working_dir_preference">更改包含腳本的文件夾路徑</string>
     <string name="description_check_for_updates_preference">AutoJs6 從 GitHub 獲取並下載更新.</string>
     <string name="description_client_mode">客户端模式用於讓 AutoJs6 主動連接到遠端服務端, 以便進行 [ 腳本傳輸 / 打印日誌 / 遠程控制 ] 等.\n\n通常需要設備與服務端處於同一局域網或可互相訪問的網絡環境.</string>
@@ -107,7 +108,9 @@
     <string name="description_version_histories_preference">查看 AutoJs6 在 GitHub 發行版本的歷史更新記錄及重要分類的統計數據.</string>
     <string name="description_write_secure_settings">安全設置包含應用程序可讀但不可寫入的設置選項, 這些選項只能由 UI 或系統級別應用修改.\n被授予 \"修改安全設置權限\" 後, 普通應用可直接修改上述安全設置 (例如無障礙服務).</string>
     <string name="description_write_system_settings">\"修改系統設置\" 權限允許 AutoJs6 修改部分系統設置項, 使腳本可以修改 [ 屏幕亮度 / 自動旋轉 / 屏幕超時 ] 等系統設置參數.</string>
+    <string name="dialog_button_abandon">放棄</string>
     <string name="dialog_button_advanced_settings">高級設置</string>
+    <string name="dialog_button_amend_host_address">修正地址</string>
     <string name="dialog_button_back">@string/text_back</string>
     <string name="dialog_button_cancel">取消</string>
     <string name="dialog_button_cancel_download">取消下載</string>
@@ -115,7 +118,6 @@
     <string name="dialog_button_confirm">確定</string>
     <string name="dialog_button_connect">連接</string>
     <string name="dialog_button_continue">@string/text_continue</string>
-    <string name="dialog_button_continue_connecting">繼續連接</string>
     <string name="dialog_button_copy">@string/text_copy</string>
     <string name="dialog_button_default_prefix">默認前綴</string>
     <string name="dialog_button_details">瞭解更多</string>
@@ -125,12 +127,12 @@
     <string name="dialog_button_file_information">文件信息</string>
     <string name="dialog_button_history">歷史記錄</string>
     <string name="dialog_button_ignore_current_update">忽略此版本</string>
+    <string name="dialog_button_interrupt_connection">中止連接</string>
     <string name="dialog_button_join_group">加入羣組</string>
     <string name="dialog_button_manager">管理器</string>
     <string name="dialog_button_more">瞭解更多</string>
     <string name="dialog_button_open_color_palette">打開調色盤</string>
     <string name="dialog_button_quit">放棄</string>
-    <string name="dialog_button_quit_connecting">放棄連接</string>
     <string name="dialog_button_remove">移除</string>
     <string name="dialog_button_retrieve">獲取</string>
     <string name="dialog_button_retry">重試</string>
@@ -210,6 +212,8 @@
     <string name="error_colon_must_follow_a_valid_ip_address">冒號需跟隨有效的 IP 地址</string>
     <string name="error_compass_cannot_be_null">羅盤參數不能為 null</string>
     <string name="error_connect_to_remote">連接失敗: %s</string>
+    <string name="error_connection_failed_with_host">連接至 \"%1$s\" 失敗.</string>
+    <string name="error_connection_timed_out">連接超時 (%d 毫秒)</string>
     <string name="error_continuation_resume_called_without_suspend">方法 resume() 調用前需先調用 suspend()</string>
     <string name="error_continuation_suspend_called_more_than_once">方法 suspend() 只能調用一次</string>
     <string name="error_corresponding_github_release_may_not_published">對應的 GitHub 發行版可能還未發佈</string>
@@ -263,6 +267,7 @@
     <string name="error_invalid_rest_compass">無效的剩餘羅盤參數: %s</string>
     <string name="error_invalid_selector_map_element" formatted="false">不合法的選擇器集合元素: { %s: %s (%s) }</string>
     <string name="error_ip_address_should_not_be_empty">IP 地址不可為空</string>
+    <string name="error_ipv6_port_requires_brackets">IPv6 端口必須使用 \"[ipv6]:port\" 格式.</string>
     <string name="error_max_listeners_exceeded">超出最大監聽器數量限制: %d</string>
     <string name="error_may_not_have_root_access_to_run_auto_file">AutoJs6 可能因缺少 Root 權限而無法運行 \"auto\" 文件</string>
     <string name="error_method_called_with_null_argument" formatted="false">%s() 傳入的 %s 參數為空</string>
@@ -335,6 +340,7 @@
     <string name="hint_long_click_run_to_debug">長按 \"運行\" 圖標可啓動調試</string>
     <string name="hint_loop_delay">開始循環前的延遲</string>
     <string name="hint_loop_times">0 表示無限循環</string>
+    <string name="hint_pc_server_address_supported_formats">支持 IPv4, IPv6 及域名.</string>
     <string name="instruction_install_plugin_from_url">輸入一個指向遠程插件地址的 URL.\n例如 \"https://example.com/plugin.apk\".</string>
     <string name="label_latest_used_time">最近使用: %1$s</string>
     <string name="logger_ver_history_blob_thread_failure">線程 "blob" 請求失敗</string>
@@ -559,7 +565,10 @@
     <string name="text_connect_to_pc">連接到計算機</string>
     <string name="text_connected">已連接</string>
     <string name="text_connected_count_with_colon">已連接: %1$d</string>
+    <string name="text_connecting">連接中</string>
+    <string name="text_connecting_to_host" tools:ignore="TypographyEllipsis">正在連接至 \"%1$s\"...</string>
     <string name="text_connection_cannot_be_established">無法建立連接</string>
+    <string name="text_connection_failed">連接失敗</string>
     <string name="text_console">控制枱</string>
     <string name="text_continue">繼續</string>
     <string name="text_copy">複製</string>
@@ -1152,6 +1161,7 @@
     <string name="text_version_name_with_computing" tools:ignore="TypographyEllipsis">版本名稱 (計算中...)</string>
     <string name="text_view">查看</string>
     <string name="text_view_docs">查看文檔</string>
+    <string name="text_vivo_background_popup_permission">後台彈出界面</string>
     <string name="text_vsc_ext_version_not_meet_requirement">VSCode 插件版本不符合要求</string>
     <string name="text_waiting_for_all_data_processing_to_complete" tools:ignore="TypographyEllipsis">正在等待全部數據處理完畢...</string>
     <string name="text_weekly_task">每週任務</string>
@@ -1159,5 +1169,6 @@
     <string name="text_working_dir_path">工作路徑</string>
     <string name="text_write_secure_settings">修改安全設置</string>
     <string name="text_write_system_settings">修改系統設置</string>
+    <string name="text_xiaomi_background_popup_permission">後台彈出界面</string>
 
 </resources>
