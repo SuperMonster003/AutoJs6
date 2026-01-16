@@ -19,7 +19,7 @@ object CharacterUtil {
     fun ccFind(ch: Char) = isChineseLetter(ch) || isEnglishLetter(ch) || isDigit(ch) || isConnector(ch)
 
     /**
-     * 全角 to 半角,大写 to 小写
+     * 全角 to 半角, 大写 to 小写
      *
      * @param input
      * 输入字符

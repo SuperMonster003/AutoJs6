@@ -170,7 +170,7 @@ public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
                 DialogUtils.showDialog(new AppLevelThemeDialogBuilder(mContext)
                         .title(mContext.getString(R.string.text_no_root_access))
                         .content(mContext.getString(R.string.no_root_access_for_record))
-                        .positiveText(R.string.dialog_button_quit)
+                        .positiveText(R.string.dialog_button_abandon)
                         .positiveColorRes(R.color.dialog_button_failure)
                         .build());
             } else {

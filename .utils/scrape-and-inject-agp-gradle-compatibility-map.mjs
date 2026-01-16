@@ -5,7 +5,12 @@ import { findTargetRows } from './utils/puppeteer-helpers.mjs';
 import { getMinSupportedAgpVersion, getMinSupportedGradleVersion } from './utils/properties.mjs';
 import { updateGradleMapData } from './utils/update-helper.mjs';
 
-const URL = 'https://developer.android.com/build/releases/gradle-plugin#updating-gradle';
+// @Hint by SuperMonster003 on Jan 16, 2026.
+//  ! Invalid since Jan 16, 2026.
+//  ! zh-CN: 自 2026 年 1 月 16 日起无效.
+//  # const URL = 'https://developer.android.com/build/releases/gradle-plugin#updating-gradle';
+
+const URL = 'https://developer.android.com/build/releases/about-agp';
 
 (async function main() {
     const rows = await findTargetRows({
