@@ -27,7 +27,10 @@
         android:id="@+id/action_search"
         android:icon="@drawable/ic_search_smaller_black_48dp"
         android:title="@string/text_search"
-        app:showAsAction="always" />
+        android:imeOptions="actionSearch"
+        android:inputType="text"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"
+        app:showAsAction="always|collapseActionView"  />
 
     <item
         android:id="@+id/action_sort"

@@ -7,15 +7,17 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.lifecycleScope
-import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
 import kotlinx.coroutines.launch
-import org.autojs.autojs.extension.MaterialDialogExtensions.widgetThemeColor
 import org.autojs.autojs.ui.BaseActivity
+import org.autojs.autojs.ui.widget.SearchViewItem
 import org.autojs.autojs.util.ViewUtils
+import org.autojs.autojs.util.ViewUtils.onceGlobalLayout
 import org.autojs.autojs.util.ViewUtils.setMenuIconsColorByThemeColorLuminance
 import org.autojs.autojs.util.ViewUtils.setNavigationIconColorByThemeColorLuminance
+import org.autojs.autojs.util.ViewUtils.setTitlesTextColorByThemeColorLuminance
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ActivityPluginCenterBinding
 
@@ -23,6 +25,8 @@ import org.autojs.autojs6.databinding.ActivityPluginCenterBinding
 class PluginCenterActivity : BaseActivity() {
 
     private lateinit var binding: ActivityPluginCenterBinding
+
+    private var mSearchViewItem: SearchViewItem? = null
 
     private val pickApkLauncher = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         uri ?: return@registerForActivityResult
@@ -48,73 +52,34 @@ class PluginCenterActivity : BaseActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_plugin_center, menu)
+        setUpSearchMenuItem(menu)
         setUpToolbarColors()
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        val center = supportFragmentManager.findFragmentById(R.id.fragment_plugin_center) as? PluginCenterFragment
+
         return when (item.itemId) {
             R.id.action_install_from_local_file -> {
-                pickApkLauncher.launch(arrayOf("application/vnd.android.package-archive"))
+                PluginInstallActions.installFromLocalFile(pickApkLauncher)
                 true
             }
             R.id.action_install_from_url -> {
-                MaterialDialog.Builder(this)
-                    .title(R.string.text_install_plugin_from_url)
-                    .content(R.string.instruction_install_plugin_from_url)
-                    .input(null, null) { d, input ->
-                        val positiveButton = d.getActionButton(DialogAction.POSITIVE)
-                        when {
-                            input.isNullOrBlank() -> {
-                                positiveButton.setOnClickListener(null)
-                                positiveButton.setTextColor(d.context.getColor(R.color.dialog_button_unavailable))
-                            }
-                            else -> {
-                                positiveButton.setOnClickListener {
-                                    d.dismiss()
-                                    val url = input.trim().toString()
-                                    val context = this@PluginCenterActivity
-                                    lifecycleScope.launch {
-                                        runCatching {
-                                            PluginInstaller.installFromUrlWithPrompt(context, url)
-                                        }.onFailure { e ->
-                                            MaterialDialog.Builder(context)
-                                                .title(R.string.text_failed_to_retrieve)
-                                                .content(e.message ?: e.toString())
-                                                .positiveText(R.string.dialog_button_dismiss)
-                                                .show()
-                                        }
-                                    }
-                                }
-                                positiveButton.setTextColor(d.context.getColor(R.color.dialog_button_attraction))
-                            }
-                        }
-                    }
-                    .alwaysCallInputCallback()
-                    .widgetThemeColor()
-                    .negativeText(R.string.text_cancel)
-                    .negativeColorRes(R.color.dialog_button_default)
-                    .onNegative { d, _ -> d.dismiss() }
-                    .positiveText(R.string.dialog_button_retrieve)
-                    .positiveColorRes(R.color.dialog_button_unavailable)
-                    .autoDismiss(false)
-                    .cancelable(false)
-                    .show()
+                PluginInstallActions.showInstallFromUrlDialog(this, lifecycleScope)
                 true
             }
             R.id.action_search -> {
-                // TODO action_search
-                ViewUtils.showToast(this, R.string.text_under_development)
-                true
+                // Handled by SearchViewItem.
+                // zh-CN: 由 SearchViewItem 处理.
+                super.onOptionsItemSelected(item)
             }
             R.id.action_sort -> {
-                // TODO action_sort
-                ViewUtils.showToast(this, R.string.text_under_development)
+                showSortDialog(center)
                 true
             }
             R.id.action_filter -> {
-                // TODO action_filter
-                ViewUtils.showToast(this, R.string.text_under_development)
+                showFilterDialog(center)
                 true
             }
             R.id.action_global_settings -> {
@@ -126,9 +91,96 @@ class PluginCenterActivity : BaseActivity() {
         }
     }
 
+    private fun setUpSearchMenuItem(menu: Menu?) {
+        val m = menu ?: return
+        val searchMenuItem = m.findItem(R.id.action_search) ?: return
+
+        mSearchViewItem = object : SearchViewItem(this, searchMenuItem) {
+            override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
+                binding.toolbar.onceGlobalLayout { setUpToolbarColors() }
+                return super.onMenuItemActionExpand(item)
+            }
+        }.apply {
+            setQueryCallback(object : SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(query: String?) = true.also { submitQueryToFragment(query) }
+                override fun onQueryTextChange(newText: String?) = true.also { submitQueryToFragment(newText) }
+            })
+        }
+    }
+
+    private fun submitQueryToFragment(query: String?) {
+        val center = supportFragmentManager.findFragmentById(R.id.fragment_plugin_center) as? PluginCenterFragment ?: return
+        center.setQuery(query)
+    }
+
+    private fun showSortDialog(center: PluginCenterFragment?) {
+        if (center == null) return
+
+        MaterialDialog.Builder(this)
+            .title(R.string.text_sort)
+            .items(
+                listOf(
+                    getString(R.string.text_sort_by_name),
+                    getString(R.string.text_sort_by_last_update_time),
+                    getString(R.string.text_sort_by_package_size),
+                )
+            )
+            .itemsCallback { d, _, which, _ ->
+                d.dismiss()
+                when (which) {
+                    0 -> center.setSort(PluginCenterFragment.Sort.TITLE_ASC)
+                    1 -> center.setSort(PluginCenterFragment.Sort.LAST_UPDATE_DESC)
+                    2 -> center.setSort(PluginCenterFragment.Sort.PACKAGE_SIZE_DESC)
+                    else -> Unit
+                }
+            }
+            .negativeText(R.string.text_cancel)
+            .negativeColorRes(R.color.dialog_button_default)
+            .show()
+    }
+
+    private fun showFilterDialog(center: PluginCenterFragment?) {
+        if (center == null) return
+
+        MaterialDialog.Builder(this)
+            .title(R.string.text_filter)
+            .items(
+                listOf(
+                    getString(R.string.text_all),
+                    getString(R.string.text_installed),
+                    getString(R.string.text_not_installed),
+                    getString(R.string.text_enabled),
+                    getString(R.string.text_disabled),
+                    getString(R.string.text_updatable),
+                )
+            )
+            .itemsCallback { d, _, which, _ ->
+                d.dismiss()
+                when (which) {
+                    0 -> center.setFilter(PluginCenterFragment.Filter.ALL)
+                    1 -> center.setFilter(PluginCenterFragment.Filter.INSTALLED)
+                    2 -> center.setFilter(PluginCenterFragment.Filter.NOT_INSTALLED)
+                    3 -> center.setFilter(PluginCenterFragment.Filter.ENABLED)
+                    4 -> center.setFilter(PluginCenterFragment.Filter.DISABLED)
+                    5 -> center.setFilter(PluginCenterFragment.Filter.UPDATABLE)
+                    else -> Unit
+                }
+            }
+            .negativeText(R.string.text_cancel)
+            .negativeColorRes(R.color.dialog_button_default)
+            .show()
+    }
+
     private fun setUpToolbarColors() {
         binding.toolbar.setMenuIconsColorByThemeColorLuminance(this)
         binding.toolbar.setNavigationIconColorByThemeColorLuminance(this)
+        binding.toolbar.setTitlesTextColorByThemeColorLuminance(this)
+        mSearchViewItem?.setColorsByThemeColorLuminance()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mSearchViewItem = null
     }
 
     companion object {

@@ -32,8 +32,8 @@ import org.autojs.autojs.event.BackPressedHandler.DoublePressExit
 import org.autojs.autojs.event.BackPressedHandler.HostActivity
 import org.autojs.autojs.extension.ViewExtensions.setOnTitleViewLongClickListener
 import org.autojs.autojs.model.explorer.Explorers
-import org.autojs.autojs.permission.DisplayOverOtherAppsPermission
 import org.autojs.autojs.permission.AllFilesAccessPermission
+import org.autojs.autojs.permission.DisplayOverOtherAppsPermission
 import org.autojs.autojs.permission.PostNotificationsPermission
 import org.autojs.autojs.service.ForegroundService
 import org.autojs.autojs.theme.ThemeColorManager
@@ -47,6 +47,7 @@ import org.autojs.autojs.ui.floating.FloatyWindowManger
 import org.autojs.autojs.ui.log.LogActivity
 import org.autojs.autojs.ui.main.drawer.DrawerFragment.Companion.Event.OnDrawerClosed
 import org.autojs.autojs.ui.main.drawer.DrawerFragment.Companion.Event.OnDrawerOpened
+import org.autojs.autojs.ui.main.plugin.PluginFragment
 import org.autojs.autojs.ui.main.scripts.ExplorerFragment
 import org.autojs.autojs.ui.main.task.TaskManagerFragment
 import org.autojs.autojs.ui.settings.PreferencesActivity
@@ -100,6 +101,9 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
 
     val docsItemIndex: Int
         get() = findPageIndexByTitle(R.string.text_documentation)
+
+    val pluginsIndex: Int
+        get() = findPageIndexByTitle(R.string.text_plugins)
 
     private fun findPageIndexByTitle(titleRes: Int): Int {
         var i = 0
@@ -226,6 +230,7 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
         mPagerAdapter = FragmentPagerAdapterBuilder(this)
             .add(ExplorerFragment(), R.string.text_file)
             .add(DocumentationFragment(), R.string.text_documentation)
+            .add(PluginFragment(), R.string.text_plugins)
             .add(TaskManagerFragment(), R.string.text_task)
             .build()
             .apply {

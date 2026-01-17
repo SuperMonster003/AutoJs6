@@ -123,7 +123,7 @@ class Ocr(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime)
                     // @Overload
                     // funcName(img: ImageWrapper, options?: DetectOptionsMLKit | DetectOptionsPaddle): org.autojs.autojs.runtime.api.OcrResult[];
                     // funcName(img: ImageWrapper, region: OmniRegion): org.autojs.autojs.runtime.api.OcrResult[];
-                    dispatchOcrWith(scriptRuntime, funcName, arrayOf(img.oneShot(), arg1, arg2))
+                    dispatchOcrWith(scriptRuntime, funcName, arrayOf(img.oneShot(), arg1, arg2), overrideMode, resultsHandler)
                 }
                 arg0 !is ImageWrapper -> {
                     // @Signature
@@ -135,7 +135,7 @@ class Ocr(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime)
                     // funcName(img: ImageWrapper, region: OmniRegion): org.autojs.autojs.runtime.api.OcrResult[];
 
                     val capt = AugmentableImages.captureScreen(scriptRuntime, emptyArray())
-                    dispatchOcrWith(scriptRuntime, funcName, arrayOf(capt, arg0, arg1))
+                    dispatchOcrWith(scriptRuntime, funcName, arrayOf(capt, arg0, arg1), overrideMode, resultsHandler)
                 }
                 shouldTakenAsRegion(arg1) -> {
 
@@ -147,7 +147,7 @@ class Ocr(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime)
                     }
 
                     // @Overload funcName(img: ImageWrapper, options: DetectOptionsMLKit | DetectOptionsPaddle): org.autojs.autojs.runtime.api.OcrResult[];
-                    dispatchOcrWith(scriptRuntime, funcName, arrayOf(arg0, options))
+                    dispatchOcrWith(scriptRuntime, funcName, arrayOf(arg0, options), overrideMode, resultsHandler)
                 }
                 else -> {
 

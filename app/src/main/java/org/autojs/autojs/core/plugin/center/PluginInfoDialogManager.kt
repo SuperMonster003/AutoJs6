@@ -3,6 +3,7 @@ package org.autojs.autojs.core.plugin.center
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.PorterDuff
+import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View.MeasureSpec.UNSPECIFIED
 import android.widget.TextView
@@ -24,6 +25,7 @@ import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.DisplayUtils
 import org.autojs.autojs.util.TimeUtils
+import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.colorFilterWithDesaturateOrNull
 import org.autojs.autojs.util.ViewUtils.toCircular
 import org.autojs.autojs6.R
@@ -59,20 +61,22 @@ object PluginInfoDialogManager {
     private fun showInstallablePluginInfoDialog(context: Context, item: PluginCenterItem) {
         val states = listOf(context.getString(R.string.text_installable))
         val info = PluginInfoInstallable(
-            title = item.title,
+            item = item,
             states = states,
-            packageName = item.packageName,
-            version = item.versionSummary,
-            author = item.author,
-            collaborators = item.collaborators,
-            description = item.description,
-            packageSize = item.installableApkSizeBytes ?: 0L,
             lastInstallTime = item.lastInstallTime,
             lastUninstallTime = item.lastUninstallTime,
-            apkUrl = item.installableApkUrl,
-            sha256 = item.installableApkSha256,
         )
-        showPluginInfoDialogInternal(context, item, info)
+        showPluginInfoDialogInternal(context, info) {
+            positiveText(R.string.text_install)
+            positiveColorRes(R.color.dialog_button_attraction)
+            onPositive { d, _ ->
+                d.dismiss()
+                val url = info.validateApkUrlAndPrompt(context, d) ?: return@onPositive
+                CoroutineScope(Dispatchers.Main).launch {
+                    PluginInstaller.installFromUrlWithPrompt(context, url, info.sha256)
+                }
+            }
+        }
     }
 
     private fun showInstalledPluginInfoDialog(context: Context, item: PluginCenterItem) {
@@ -81,107 +85,63 @@ object PluginInfoDialogManager {
             if (item.isUpdatable) add(context.getString(R.string.text_updatable))
         }
         val info = PluginInfoInstalled(
-            title = item.title,
+            item = item,
             states = states,
-            packageName = item.packageName,
-            version = item.versionSummary,
-            author = item.author,
-            collaborators = item.collaborators,
-            description = item.description,
-            packageSize = item.packageSize,
             updatableVersion = item.updatableVersionSummary,
             firstInstallTime = item.firstInstallTime,
             lastUpdateTime = item.lastUpdateTime,
-            apkUrl = item.installableApkUrl,
-            sha256 = item.installableApkSha256,
         )
-        showPluginInfoDialogInternal(context, item, info)
+        showPluginInfoDialogInternal(context, info) {
+            positiveText(R.string.text_uninstall)
+            positiveColorRes(R.color.dialog_button_warn)
+            onPositive { d, _ -> item.uninstallWithPrompt(context, d) }
+            if (item.isUpdatable) {
+                neutralText(R.string.dialog_button_view_update)
+                neutralColorRes(R.color.dialog_button_attraction)
+                onNeutral { d, _ ->
+                    showUpdatablePluginInfoDialog(context, PluginInfoUpdatable(item), d)
+                }
+            }
+        }.apply {
+            makeSettingsLaunchable({ it.iconView }, info.packageName)
+        }
     }
 
-    private fun showPluginInfoDialogInternal(context: Context, item: PluginCenterItem, info: PluginInfoBase) {
+    private fun showPluginInfoDialogInternal(context: Context, info: PluginInfoBase, builderApplier: MaterialDialog.Builder.() -> Unit = {}): MaterialDialog {
         val binding = PluginInfoDialogItemsBinding.inflate(LayoutInflater.from(context))
 
         val dialog = MaterialDialog.Builder(context)
-            .title(info.title)
-            .customView(binding.root, false)
-            .autoDismiss(false)
             .iconRes(R.drawable.ic_three_dots_outline_small)
             .limitIconToDefaultSize()
+            .title(info.title)
+            .customView(binding.root, false)
             .negativeText(R.string.dialog_button_dismiss)
             .onNegative { d, _ -> d.dismiss() }
-            .apply {
-                when (info) {
-                    is PluginInfoInstallable -> {
-                        positiveText(R.string.text_install)
-                        positiveColorRes(R.color.dialog_button_attraction)
-                        onPositive { d, _ ->
-                            val url = info.apkUrl
-                            when {
-                                url.isNullOrBlank() -> {
-                                    MaterialDialog.Builder(context)
-                                        .title(R.string.text_failed_to_install)
-                                        .content(R.string.error_no_available_url_provided_for_current_plugin)
-                                        .positiveText(R.string.dialog_button_dismiss)
-                                        .show()
-                                    val positiveButton = d.getActionButton(DialogAction.POSITIVE)
-                                    positiveButton.setTextColor(d.context.getColor(R.color.dialog_button_unavailable))
-                                }
-                                else -> {
-                                    d.dismiss()
-                                    CoroutineScope(Dispatchers.Main).launch {
-                                        PluginInstaller.installFromUrlWithPrompt(context, url, info.sha256)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    is PluginInfoInstalled -> {
-                        positiveText(R.string.text_uninstall)
-                        positiveColorRes(R.color.dialog_button_warn)
-                        onPositive { d, _ -> item.uninstallWithPrompt(context, d) }
-                        if (item.isUpdatable) {
-                            neutralText(R.string.text_update)
-                            neutralColorRes(R.color.dialog_button_attraction)
-                            onNeutral { d, _ ->
-                                val url = info.apkUrl
-                                when {
-                                    url.isNullOrBlank() -> {
-                                        MaterialDialog.Builder(context)
-                                            .title(R.string.text_failed_to_update)
-                                            .content(R.string.error_no_available_url_provided_for_current_plugin)
-                                            .positiveText(R.string.dialog_button_dismiss)
-                                            .show()
-                                    }
-                                    else -> {
-                                        d.dismiss()
-                                        CoroutineScope(Dispatchers.Main).launch {
-                                            PluginInstaller.installFromUrlWithPrompt(context, url, info.sha256)
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            .autoDismiss(false)
+            .apply(builderApplier)
             .show()
-            .apply {
-                makeTextCopyable { titleView }
-            }
+            .apply { makeTextCopyable { titleView } }
 
         // Hold the current dialog and package name for refreshing on onResume.
         // zh-CN: 记录 "当前对话框" 与包名, 便于 onResume 刷新.
         currentDialog = WeakReference(dialog)
-        currentPackageName = item.packageName
+        currentPackageName = info.packageName
 
         restoreEssentialViews(binding, context, info)
         updateGuidelines(binding)
 
-        binding.stateValueFirst.text = info.states.getOrNull(0)
-        if (info.states.size > 1) {
-            binding.stateValueSecond.text = info.states[1]
-            binding.stateSpliterFirstSecond.isVisible = true
-            binding.stateValueSecond.isVisible = true
+        when (info.states.size) {
+            0 -> {
+                binding.stateParent.isVisible = false
+            }
+            1 -> {
+                binding.stateValueFirst.text = info.states[0]
+            }
+            else -> {
+                binding.stateValueSecond.text = info.states[1]
+                binding.stateSpliterFirstSecond.isVisible = true
+                binding.stateValueSecond.isVisible = true
+            }
         }
 
         dialog.setCopyableTextIfAbsent(binding.packageNameValue, info.packageName)
@@ -190,7 +150,7 @@ object PluginInfoDialogManager {
         dialog.setCopyableTextIfAbsent(binding.descriptionValue, info.description)
         dialog.setCopyableTextIfAbsent(binding.pluginItemInfoPackageSizeValue, info.packageSize.takeIf { it > 0 }?.let { formatSize(it) })
 
-        val dialogIcon = item.icon ?: AppCompatResources.getDrawable(context, R.drawable.ic_plugin_center_default)?.mutate()?.also { d ->
+        val dialogIcon = info.icon ?: AppCompatResources.getDrawable(context, R.drawable.ic_plugin_center_default)?.mutate()?.also { d ->
             val adjustedImageContrastColor = ColorUtils.adjustColorForContrast(context.getColor(R.color.window_background), ThemeColorManager.colorPrimary, 2.3)
             DrawableCompat.setTint(d, adjustedImageContrastColor)
             DrawableCompat.setTintMode(d, PorterDuff.Mode.SRC_IN)
@@ -205,10 +165,7 @@ object PluginInfoDialogManager {
                     borderColor = context.getColor(R.color.plugin_center_item_icon_border),
                 )
             )
-            dialog.iconView.colorFilterWithDesaturateOrNull(item.isEnabled, 0.5F)
-            if (info is PluginInfoInstalled) {
-                dialog.makeSettingsLaunchable({ it.iconView }, info.packageName)
-            }
+            dialog.iconView.colorFilterWithDesaturateOrNull(info.isEnabled, 0.5F)
         }
 
         // If the index does not provide size, try to HEAD request to get it, update display after success.
@@ -225,6 +182,75 @@ object PluginInfoDialogManager {
                     }
                 }
             }
+        }
+
+        return dialog
+    }
+
+    internal fun showUpdatablePluginInfoDialog(context: Context, info: PluginInfoUpdatable, parentDialog: MaterialDialog? = null) {
+        info.validateApkUrlAndPrompt(context, parentDialog) ?: return
+        parentDialog?.dismiss()
+
+        // TODO 更新详情参考 org.autojs.autojs.network.UpdateChecker.Dialog.Builder.Update.
+        // showPluginInfoDialogInternal(context, info) {
+        //     positiveText(R.string.dialog_button_update_now)
+        //     positiveColorRes(R.color.dialog_button_attraction)
+        //     onPositive { d, _ ->
+        //         d.dismiss()
+        //         CoroutineScope(Dispatchers.Main).launch {
+        //             PluginInstaller.installFromUrlWithPrompt(context, url, info.sha256)
+        //         }
+        //     }
+        // }
+
+        val ignoreUpdateOption = MaterialDialog.OptionMenuItemSpec(context.getString(R.string.dialog_button_ignore_current_update)) { parentDialog ->
+            MaterialDialog.Builder(context)
+                .title(R.string.text_prompt)
+                .content(R.string.prompt_add_ignored_version)
+                .negativeText(R.string.dialog_button_cancel)
+                .positiveText(R.string.dialog_button_confirm)
+                .positiveColorRes(R.color.dialog_button_caution)
+                .onPositive { _, _ ->
+                    // UpdateUtils.addIgnoredVersion(versionInfo)
+                    ViewUtils.showToast(context, R.string.text_done)
+                    parentDialog.dismiss()
+                }
+                .show()
+        }
+
+        MaterialDialog.Builder(context)
+            .title(info.version ?: info.title)
+            .options(listOf(ignoreUpdateOption))
+            .content(R.string.text_retrieving_release_notes)
+            .neutralText(R.string.dialog_button_version_histories)
+            .neutralColor(context.getColor(R.color.dialog_button_hint))
+            .onNeutral { _, _ ->
+                // DisplayVersionHistoriesActivity.launch(context)
+            }
+            .negativeText(R.string.dialog_button_cancel)
+            .negativeColor(context.getColor(R.color.dialog_button_default))
+            .onNegative { d, _ -> d.dismiss() }
+            .positiveText(R.string.dialog_button_update_now)
+            .positiveColor(context.getColor(R.color.dialog_button_unavailable))
+            .autoDismiss(false)
+            .cancelable(false)
+    }
+
+    private fun PluginInfoBase.validateApkUrlAndPrompt(context: Context, parentDialog: MaterialDialog?): String? {
+        val url = this.apkUrl
+        return when {
+            url.isNullOrBlank() -> {
+                MaterialDialog.Builder(context)
+                    .title(R.string.text_prompt)
+                    .content(R.string.error_no_available_url_provided_for_current_plugin)
+                    .positiveText(R.string.dialog_button_dismiss)
+                    .show()
+                parentDialog
+                    ?.getActionButton(DialogAction.POSITIVE)
+                    ?.setTextColor(context.getColor(R.color.dialog_button_unavailable))
+                null
+            }
+            else -> url
         }
     }
 
@@ -246,6 +272,9 @@ object PluginInfoDialogManager {
             binding.pluginItemInfoCollaboratorsThirdParent.isVisible = true
         }
         when (info) {
+            is PluginInfoUpdatable -> {
+                /* No additional operations needed. */
+            }
             is PluginInfoInstalled -> {
                 info.updatableVersion?.let {
                     binding.versionLabel.text = context.getString(R.string.plugin_item_info_installed_version)
@@ -309,44 +338,39 @@ object PluginInfoDialogManager {
     )
 
     private sealed interface PluginInfoBase {
-        val title: String
-        val states: List<String>
-        val packageName: String
-        val version: String
-        val author: String?
-        val collaborators: List<String>
-        val description: String?
+        val item: PluginCenterItem
+        val states: List<String> get() = emptyList()
+        val isEnabled: Boolean get() = item.isEnabled
+        val title: String get() = item.title
+        val icon: Drawable? get() = item.icon
+        val packageName: String get() = item.packageName
+        val version: String? get() = item.versionSummary
+        val author: String? get() = item.author
+        val collaborators: List<String> get() = item.collaborators
+        val description: String? get() = item.description
         val packageSize: Long
-        val apkUrl: String?
-        val sha256: String?
+        val apkUrl: String? get() = item.installableApkUrl
+        val sha256: String? get() = item.installableApkSha256
     }
 
+    internal class PluginInfoUpdatable(
+        override val item: PluginCenterItem,
+        override val packageSize: Long = item.installableApkSizeBytes ?: 0L,
+        override val version: String? = item.updatableVersionSummary,
+    ) : PluginInfoBase
+
     private data class PluginInfoInstallable(
-        override val title: String,
+        override val item: PluginCenterItem,
         override val states: List<String>,
-        override val packageName: String,
-        override val version: String,
-        override val author: String?,
-        override val collaborators: List<String>,
-        override val description: String?,
-        override val packageSize: Long,
-        override val apkUrl: String?,
-        override val sha256: String?,
+        override val packageSize: Long = item.installableApkSizeBytes ?: 0L,
         val lastInstallTime: Long?,
         val lastUninstallTime: Long?,
     ) : PluginInfoBase
 
     private data class PluginInfoInstalled(
-        override val title: String,
+        override val item: PluginCenterItem,
         override val states: List<String>,
-        override val packageName: String,
-        override val version: String,
-        override val author: String?,
-        override val collaborators: List<String>,
-        override val description: String?,
-        override val packageSize: Long,
-        override val apkUrl: String?,
-        override val sha256: String?,
+        override val packageSize: Long = item.packageSize,
         val updatableVersion: String? = null,
         val firstInstallTime: Long?,
         val lastUpdateTime: Long?,

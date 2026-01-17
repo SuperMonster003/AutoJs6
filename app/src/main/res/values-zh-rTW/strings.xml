@@ -1170,5 +1170,12 @@
     <string name="text_write_secure_settings">修改安全設定</string>
     <string name="text_write_system_settings">修改系統設定</string>
     <string name="text_xiaomi_background_popup_permission">後臺彈出介面</string>
+    <string name="error_no_paddle_ocr_plugins_available">未找到可用的 Paddle OCR 外掛</string>
+    <string name="text_installed">已安裝</string>
+    <string name="text_not_installed">未安裝</string>
+    <string name="text_all">全部</string>
+    <string name="text_sort_by_name">按名稱排序</string>
+    <string name="text_sort_by_last_update_time">按最近更新排序</string>
+    <string name="text_sort_by_package_size">按安裝包大小排序</string>
 
 </resources>

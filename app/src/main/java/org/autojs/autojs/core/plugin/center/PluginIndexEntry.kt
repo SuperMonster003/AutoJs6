@@ -19,13 +19,7 @@ data class PluginIndexEntry(
     /** @sample "paddle-ocr-pp-ocrv5" */
     val engineId: String? = null,
 
-    val versionName: String,
-    val versionCode: Long? = null,
-    val versionDate: String? = null,
-
-    val apkUrl: String? = null,
-    val apkSha256: String? = null,
-    val apkSizeBytes: Long? = null,
+    val releases: List<PluginIndexRelease> = emptyList(),
 
     val tags: List<String> = emptyList(),
 )

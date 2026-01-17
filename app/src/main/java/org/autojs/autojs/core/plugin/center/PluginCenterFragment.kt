@@ -39,6 +39,17 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
 
     private var isFirstEnter: Boolean = true
 
+    // Latest full list from ViewModel (unfiltered).
+    // zh-CN: 来自 ViewModel 的最新完整列表 (未过滤).
+    private var latestFullItems: List<PluginCenterItem> = emptyList()
+
+    // Current query used by UI filtering, null means "no filtering".
+    // zh-CN: 当前用于 UI 过滤的查询串, null 表示 "不做过滤".
+    private var currentQuery: String? = null
+
+    private var currentSort: Sort = Sort.TITLE_ASC
+    private var currentFilter: Filter = Filter.ALL
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentPluginCenterBinding.bind(view)
@@ -72,21 +83,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
             }
 
             override fun onUpdate(item: PluginCenterItem) {
-                val url = item.installableApkUrl
-                when {
-                    url.isNullOrBlank() -> MaterialDialog.Builder(contextRef)
-                        .title(R.string.text_failed_to_update)
-                        .content(R.string.error_no_available_url_provided_for_current_plugin)
-                        .positiveText(R.string.dialog_button_dismiss)
-                        .show()
-                    else -> viewLifecycleOwner.lifecycleScope.launch {
-                        PluginInstaller.installFromUrlWithPrompt(
-                            context = contextRef,
-                            url = url,
-                            expectedSha256 = item.installableApkSha256,
-                        )
-                    }
-                }
+                PluginInfoDialogManager.showUpdatablePluginInfoDialog(contextRef, PluginInfoDialogManager.PluginInfoUpdatable(item))
             }
         })
 
@@ -111,8 +108,8 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         // zh-CN: 订阅列表数据.
         viewLifecycleOwner.lifecycleScope.launch {
             vm.items.collectLatest { list ->
-                adapter.updateData(list)
-                updateEmptyHint(list, vm.indexLoaded.value)
+                latestFullItems = list
+                renderList()
             }
         }
 
@@ -121,7 +118,12 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         viewLifecycleOwner.lifecycleScope.launch {
             vm.indexLoaded.collectLatest { loaded ->
                 binding.pluginCenterSwipeRefresh.isRefreshing = false
-                updateEmptyHint(adapter.items(), loaded)
+                updateEmptyHint(
+                    filteredItems = adapter.items(),
+                    indexLoaded = loaded,
+                    fullItems = latestFullItems,
+                    query = currentQuery,
+                )
             }
         }
 
@@ -140,11 +142,95 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         }
     }
 
-    private fun updateEmptyHint(items: List<PluginCenterItem>, indexLoaded: Boolean) {
+    /**
+     * Update query for filtering current list.
+     * zh-CN: 更新用于过滤当前列表的查询串.
+     */
+    fun setQuery(query: String?) {
+        currentQuery = query?.takeIf { it.isNotBlank() }
+        renderList()
+    }
+
+    /**
+     * Update sort strategy for current list rendering.
+     * zh-CN: 更新当前列表渲染的排序策略.
+     */
+    fun setSort(sort: Sort) {
+        currentSort = sort
+        renderList()
+    }
+
+    /**
+     * Update filter strategy for current list rendering.
+     * zh-CN: 更新当前列表渲染的筛选策略.
+     */
+    fun setFilter(filter: Filter) {
+        currentFilter = filter
+        renderList()
+    }
+
+    private fun renderList() {
+        val q = currentQuery
+
+        val filteredByQuery = if (q.isNullOrBlank()) {
+            latestFullItems
+        } else {
+            // @formatter:off
+            latestFullItems.filter { item ->
+                item.title.contains(q, ignoreCase = true) ||
+                item.packageName.contains(q, ignoreCase = true) ||
+                item.author?.contains(q, ignoreCase = true) == true ||
+                item.description?.contains(q, ignoreCase = true) == true
+            }
+            // @formatter:on
+        }
+
+        val filtered = filteredByQuery.filter { item ->
+            when (currentFilter) {
+                Filter.ALL -> true
+                Filter.INSTALLED -> item.isInstalled
+                Filter.NOT_INSTALLED -> !item.isInstalled
+                Filter.ENABLED -> item.isEnabled
+                Filter.DISABLED -> !item.isEnabled
+                Filter.UPDATABLE -> item.updatableVersionCode != null
+            }
+        }
+
+        val sorted = when (currentSort) {
+            Sort.TITLE_ASC -> filtered.sortedBy { it.title.lowercase() }
+            Sort.LAST_UPDATE_DESC -> filtered.sortedWith(
+                compareByDescending<PluginCenterItem> { it.isInstalled }
+                    .thenByDescending { it.lastUpdateTime ?: 0L }
+                    .thenBy { it.title.lowercase() }
+            )
+            Sort.PACKAGE_SIZE_DESC -> filtered.sortedWith(
+                compareByDescending<PluginCenterItem> { it.isInstalled }
+                    .thenByDescending { it.packageSize }
+                    .thenBy { it.title.lowercase() }
+            )
+        }
+
+        adapter.updateData(sorted)
+        updateEmptyHint(
+            filteredItems = sorted,
+            indexLoaded = vm.indexLoaded.value,
+            fullItems = latestFullItems,
+            query = currentQuery,
+        )
+    }
+
+    private fun updateEmptyHint(
+        filteredItems: List<PluginCenterItem>,
+        indexLoaded: Boolean,
+        fullItems: List<PluginCenterItem>,
+        query: String?,
+    ) {
         val hintView = binding.pluginCenterEmptyHint
 
+        val hasQuery = !query.isNullOrBlank()
+
         when {
-            items.isNotEmpty() -> {
+            filteredItems.isNotEmpty() -> {
                 // Has data: hide hint immediately and cancel any waiting tasks.
                 // zh-CN: 有数据: 立即隐藏提示, 并取消任何等待任务.
                 emptyHintJob?.cancel()
@@ -152,9 +238,17 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
                 hintView.visibility = View.GONE
                 isFirstEnter = false
             }
+            hasQuery && fullItems.isNotEmpty() -> {
+                // Search filtering produced empty results, do not show misleading "no plugins" hint.
+                // zh-CN: 搜索过滤导致结果为空时, 不显示可能误导的 "没有插件" 提示.
+                emptyHintJob?.cancel()
+                emptyHintJob = null
+                hintView.visibility = View.GONE
+                isFirstEnter = false
+            }
             indexLoaded -> {
                 // Local and index stages have ended, list is still empty, immediately show "no plugins" hint.
-                // zh-CN: 本地与索引阶段已结束, 列表仍为空, 立即显示"没有插件"提示.
+                // zh-CN: 本地与索引阶段已结束, 列表仍为空, 立即显示 "没有插件" 提示.
                 emptyHintJob?.cancel()
                 emptyHintJob = null
                 hintView.visibility = View.VISIBLE
@@ -247,6 +341,25 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         emptyHintJob?.cancel()
         emptyHintJob = null
         _binding = null
+    }
+
+    // Sort strategy for rendering list.
+    // zh-CN: 用于渲染列表的排序策略.
+    enum class Sort {
+        TITLE_ASC,
+        LAST_UPDATE_DESC,
+        PACKAGE_SIZE_DESC,
+    }
+
+    // Filter strategy for rendering list.
+    // zh-CN: 用于渲染列表的筛选策略.
+    enum class Filter {
+        ALL,
+        INSTALLED,
+        NOT_INSTALLED,
+        ENABLED,
+        DISABLED,
+        UPDATABLE,
     }
 
 }

@@ -1172,5 +1172,12 @@
     <string name="text_write_secure_settings">Écrire les paramètres de sécurité</string>.
     <string name="text_write_system_settings">Écrire les paramètres système</string>
     <string name="text_xiaomi_background_popup_permission">Fenêtres contextuelles en arrière-plan</string>
+    <string name="error_no_paddle_ocr_plugins_available">Aucun plugin Paddle OCR disponible</string>
+    <string name="text_installed">Installé</string>
+    <string name="text_not_installed">Non installé</string>
+    <string name="text_all">Tous</string>
+    <string name="text_sort_by_name">Trier par nom</string>
+    <string name="text_sort_by_last_update_time">Trier par dernière mise à jour</string>
+    <string name="text_sort_by_package_size">Trier par taille du paquet</string>
 
 </resources>

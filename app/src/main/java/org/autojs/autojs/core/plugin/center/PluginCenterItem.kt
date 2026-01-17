@@ -15,9 +15,17 @@ data class PluginCenterItem(
     val versionName: String,
     val versionCode: Long? = null,
     val versionDate: String? = null,
+
     var updatableVersionName: String? = null,
     var updatableVersionCode: Long? = null,
     var updatableVersionDate: String? = null,
+
+    var updatableApkUrl: String? = null,
+    var updatableApkSha256: String? = null,
+    var updatableApkSizeBytes: Long? = null,
+    var updatableChangelogUrl: String? = null,
+    var updatableChangelogText: String? = null,
+
     val author: String? = null,
     val collaborators: List<String> = emptyList(),
     val description: String? = null,
@@ -53,7 +61,7 @@ data class PluginCenterItem(
         }
 
     val isUpdatable: Boolean
-        get() = updatableVersionName != null
+        get() = updatableVersionCode != null
 
     var lastInstallTime: Long?
         get() = PluginRecentStore.getLastInstalled(packageName)

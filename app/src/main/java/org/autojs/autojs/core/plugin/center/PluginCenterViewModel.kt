@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import org.autojs.autojs.network.UpdateIgnoreStore
 import org.autojs.autojs6.R
 
 /**
@@ -28,12 +29,17 @@ import org.autojs.autojs6.R
  * - 先加载本地插件并立即推送列表 (本地优先).
  * - 紧接着在后台加载索引, 成功后与本地合并再推送一次.
  * - 若本地发现失败, 通过 fatalError 通知 UI 弹窗并退出 Activity.
+ *
+ * Created by JetBrains AI Assistant (GPT-5.2) on Nov 26, 2025.
+ * Modified by SuperMonster003 as of Jan 17, 2026.
  */
 class PluginCenterViewModel : ViewModel() {
 
-    private val indexRepo = PluginIndexRepository()
+    // TODO by SuperMonster003 on Jan 17, 2026.
+    // private val indexRepo = PluginIndexRepository()
+
     private val installedRepo = InstalledPluginRepository()
-    private val enableStore = PluginEnableStore()
+    private val enableStore = PluginEnableStore
 
     private val _items = MutableStateFlow<List<PluginCenterItem>>(emptyList())
     val items: StateFlow<List<PluginCenterItem>> = _items
@@ -96,7 +102,9 @@ class PluginCenterViewModel : ViewModel() {
             // Asynchronously load index and merge.
             // zh-CN: 异步加载索引并合并.
             val indexEntries = runCatching {
-                indexRepo.fetchOfficialIndex(context, forceRefresh = forceRefreshIndex)
+                // TODO by SuperMonster003 on Jan 17, 2026.
+                // indexRepo.fetchOfficialIndex(context, forceRefresh = forceRefreshIndex)
+                emptyList<PluginIndexEntry>()
             }.onFailure {
                 // Index fetch exception is not fatal, just log it.
                 // zh-CN: 索引获取异常不算致命, 使用日志记录即可.
@@ -135,6 +143,11 @@ class PluginCenterViewModel : ViewModel() {
         PluginInfoDialogManager.refreshIfShowing(context, _items.value)
     }
 
+    fun ignoreUpdatableVersion(item: PluginCenterItem) {
+        val v = item.updatableVersionCode ?: return
+        UpdateIgnoreStore.ignoreVersion(item.packageName, v)
+    }
+
     private fun toPluginCenterItem(context: Context, index: PluginIndexEntry?, local: InstalledPluginRepository.InstalledPlugin?): PluginCenterItem? {
         val packageName = local?.packageName ?: index?.packageName
         if (packageName.isNullOrBlank()) return null
@@ -144,18 +157,21 @@ class PluginCenterViewModel : ViewModel() {
         val author = local?.author ?: index?.author
         val collaborators = index?.collaborators ?: emptyList()
 
-        val versionNameLocal = local?.versionName ?: index?.versionName ?: context.getString(R.string.text_unknown)
+        val versionNameLocal = local?.versionName ?: index?.releases?.firstOrNull()?.versionName ?: context.getString(R.string.text_unknown)
         val versionCodeLocal = local?.versionCode
         val isInstalled = local != null
 
-        // Only mark as updatable when "installed and index version is higher", and fill in updatable target information.
-        // zh-CN: 仅当 "已安装且索引版本更高" 时, 标记可更新, 并填充可更新目标信息.
-        val (updatableName, updatableCode, updatableDate) = run {
-            val defaultVersionInfo = Triple<String?, Long?, String?>(null, null, null)
-            versionCodeLocal ?: return@run defaultVersionInfo
-            val versionCodeIndex = index?.versionCode ?: return@run defaultVersionInfo
-            if (versionCodeIndex <= versionCodeLocal) return@run defaultVersionInfo
-            Triple(index.versionName, index.versionCode, index.versionDate)
+        // 未安装时: installable 取 releases 最新 (第一个).
+        val latestRelease = index?.releases?.maxByOrNull { it.versionCode }
+
+        // 已安装时: updatable 取 "大于 installed 且未忽略" 的最高版本.
+        val targetUpdate = run {
+            if (!isInstalled || versionCodeLocal == null) return@run null
+            val candidates = index?.releases
+                ?.filter { it.versionCode > versionCodeLocal }
+                ?.sortedByDescending { it.versionCode }
+                ?: emptyList()
+            candidates.firstOrNull { !UpdateIgnoreStore.isIgnored(packageName, it.versionCode) }
         }
 
         val enabled = enableStore.isEnabled(context, packageName, defaultEnabled = isInstalled)
@@ -164,18 +180,28 @@ class PluginCenterViewModel : ViewModel() {
             title = title,
             packageName = packageName,
             versionName = versionNameLocal,
-            versionCode = versionCodeLocal ?: index?.versionCode,
-            versionDate = index?.versionDate,
-            updatableVersionName = updatableName,
-            updatableVersionCode = updatableCode,
-            updatableVersionDate = updatableDate,
+            versionCode = versionCodeLocal ?: latestRelease?.versionCode,
+            versionDate = latestRelease?.versionDate,
+
+            updatableVersionName = targetUpdate?.versionName,
+            updatableVersionCode = targetUpdate?.versionCode,
+            updatableVersionDate = targetUpdate?.versionDate,
+            updatableApkUrl = targetUpdate?.apkUrl,
+            updatableApkSha256 = targetUpdate?.apkSha256,
+            updatableApkSizeBytes = targetUpdate?.apkSizeBytes,
+            updatableChangelogUrl = targetUpdate?.changelogUrl,
+            updatableChangelogText = targetUpdate?.changelogText,
+
             author = author,
             collaborators = collaborators,
             description = description,
-            packageSize = local?.packageSize ?: 0,
-            installableApkUrl = index?.apkUrl,
-            installableApkSha256 = index?.apkSha256,
-            installableApkSizeBytes = index?.apkSizeBytes,
+
+            packageSize = local?.packageSize ?: 0L,
+
+            installableApkUrl = latestRelease?.apkUrl,
+            installableApkSha256 = latestRelease?.apkSha256,
+            installableApkSizeBytes = latestRelease?.apkSizeBytes,
+
             // TODO 已安装优先用应用图标; 未安装走默认占位图.
             icon = local?.icon,
             isEnabled = enabled,

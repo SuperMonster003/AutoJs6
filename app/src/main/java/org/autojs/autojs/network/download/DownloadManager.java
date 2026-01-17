@@ -7,33 +7,11 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.widget.ProgressBar;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.afollestad.materialdialogs.internal.MDButton;
-
-import org.autojs.autojs.concurrent.VolatileBox;
-import org.autojs.autojs.network.UpdateChecker;
-import org.autojs.autojs.network.api.DownloadApi;
-import org.autojs.autojs.network.entity.VersionInfo;
-import org.autojs.autojs.pio.PFiles;
-import org.autojs.autojs.core.pref.Language;
-import org.autojs.autojs.tool.SimpleObserver;
-import org.autojs.autojs.util.StreamUtils;
-import org.autojs.autojs.util.UpdateUtils;
-import org.autojs.autojs.util.ViewUtils;
-import org.autojs.autojs6.R;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.util.concurrent.ConcurrentHashMap;
-
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
@@ -44,8 +22,27 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+import org.autojs.autojs.concurrent.VolatileBox;
+import org.autojs.autojs.core.pref.Language;
+import org.autojs.autojs.network.UpdateChecker;
+import org.autojs.autojs.network.api.DownloadApi;
+import org.autojs.autojs.network.entity.VersionInfo;
+import org.autojs.autojs.pio.PFiles;
+import org.autojs.autojs.tool.SimpleObserver;
+import org.autojs.autojs.util.IntentUtils;
+import org.autojs.autojs.util.IntentUtils.ToastExceptionHolder;
+import org.autojs.autojs.util.StreamUtils;
+import org.autojs.autojs.util.ViewUtils;
+import org.autojs.autojs6.R;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by Stardust on Oct 20, 2017.
@@ -164,7 +161,7 @@ public class DownloadManager {
                         .positiveColorRes(R.color.dialog_button_caution)
                         .onPositive((d2, which2) -> {
                             dialog.getActionButton(DialogAction.POSITIVE).performClick();
-                            UpdateUtils.openUrl(context, url);
+                            IntentUtils.browse(context, url, new ToastExceptionHolder(context));
                         })
                         .cancelable(false)
                         .build()

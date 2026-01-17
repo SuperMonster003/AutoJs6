@@ -163,6 +163,7 @@ open class AboutActivity : BaseActivity() {
     private fun checkForUpdates() {
         UpdateChecker.Builder(this)
             .setPromptMode(PromptMode.DIALOG)
+            .setGitHubMainBranch("master")
             .build().checkNow()
     }
 

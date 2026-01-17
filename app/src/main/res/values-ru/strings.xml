@@ -1172,5 +1172,12 @@
     <string name="text_write_secure_settings">Параметры безопасности записи</string>
     <string name="text_write_system_settings">Запись системных настроек</string>
     <string name="text_xiaomi_background_popup_permission">Всплывающие окна в фоне</string>
+    <string name="error_no_paddle_ocr_plugins_available">Доступные плагины Paddle OCR не найдены</string>
+    <string name="text_installed">Установлено</string>
+    <string name="text_not_installed">Не установлено</string>
+    <string name="text_all">Все</string>
+    <string name="text_sort_by_name">Сортировать по имени</string>
+    <string name="text_sort_by_last_update_time">Сортировать по времени последнего обновления</string>
+    <string name="text_sort_by_package_size">Сортировать по размеру пакета</string>
 
 </resources>

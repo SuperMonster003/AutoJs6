@@ -22,6 +22,7 @@ class CheckForUpdatesWithLocalVersionIgnoredPreference : MaterialPreference {
     override fun onClick() {
         UpdateChecker.Builder(context)
             .setPromptMode(PromptMode.DIALOG)
+            .setGitHubMainBranch("master")
             .build()
             .checkNow(true)
         super.onClick()
