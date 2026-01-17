@@ -1006,6 +1006,10 @@ object ViewUtils {
         toolbar.setNavigationIconColorByColorLuminance(context, aimColor)
     }
 
+    fun Toolbar.setTitlesTextColorByThemeColorLuminance(context: Context) {
+        this.setTitlesTextColorByColorLuminance(context, ThemeColorManager.colorPrimary)
+    }
+
     fun Toolbar.setTitlesTextColorByColorLuminance(context: Context, aimColor: Int) {
         val color = getDayOrNightColorByLuminance(context, aimColor)
         setTitleTextColor(color)

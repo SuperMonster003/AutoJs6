@@ -1173,5 +1173,12 @@
     <string name="text_write_secure_settings">セキュリティ設定の書き込み</string>
     <string name="text_write_system_settings">システム設定の書き込み</string>
     <string name="text_xiaomi_background_popup_permission">バックグラウンドでのポップアップ表示</string>
+    <string name="error_no_paddle_ocr_plugins_available">利用可能な Paddle OCR プラグインが見つかりません</string>
+    <string name="text_installed">インストール済み</string>
+    <string name="text_not_installed">未インストール</string>
+    <string name="text_all">すべて</string>
+    <string name="text_sort_by_name">名前で並べ替え</string>
+    <string name="text_sort_by_last_update_time">最終更新日で並べ替え</string>
+    <string name="text_sort_by_package_size">パッケージサイズで並べ替え</string>
 
 </resources>

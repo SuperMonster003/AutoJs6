@@ -17,7 +17,8 @@ import org.autojs.autojs.ui.main.scripts.ApkInfoDialogManager
 import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.FileUtils
 import org.autojs.autojs.util.FileUtils.toCacheFile
-import org.autojs.autojs.util.UpdateUtils
+import org.autojs.autojs.util.IntentUtils
+import org.autojs.autojs.util.IntentUtils.SnackExceptionHolder
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 import java.io.EOFException
@@ -54,7 +55,7 @@ object PluginInstaller {
                 MaterialDialog.Builder(context)
                     .title(R.string.text_prompt)
                     .content(context.getString(R.string.prompt_file_may_not_be_a_valid_plugin_package_with_uri, "$uri"))
-                    .negativeText(R.string.dialog_button_quit)
+                    .negativeText(R.string.dialog_button_abandon)
                     .negativeColorRes(R.color.dialog_button_default)
                     .onNegative { d, _ -> d.dismiss() }
                     .positiveText(R.string.dialog_button_continue)
@@ -166,7 +167,7 @@ object PluginInstaller {
                     .positiveColorRes(R.color.dialog_button_caution)
                     .onPositive { _, _ ->
                         d.getActionButton(DialogAction.POSITIVE).performClick()
-                        UpdateUtils.openUrl(context, url)
+                        IntentUtils.browse(context, url, SnackExceptionHolder(d.view))
                     }
                     .cancelable(false)
                     .build()
@@ -317,7 +318,7 @@ object PluginInstaller {
                     ClipboardUtils.setClip(context, result.message)
                     ViewUtils.showSnack(d.view, R.string.text_already_copied_to_clip, false)
                 }
-                .negativeText(R.string.dialog_button_quit)
+                .negativeText(R.string.dialog_button_abandon)
                 .negativeColorRes(R.color.dialog_button_default)
                 .onNegative { d, _ ->
                     d.dismiss()

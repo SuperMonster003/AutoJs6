@@ -1174,5 +1174,12 @@
     <string name="text_write_secure_settings">보안 설정을 작성하십시오</string>
     <string name="text_write_system_settings">시스템 설정을 작성하십시오</string>
     <string name="text_xiaomi_background_popup_permission">백그라운드 팝업</string>
+    <string name="error_no_paddle_ocr_plugins_available">사용 가능한 Paddle OCR 플러그인을 찾을 수 없습니다</string>
+    <string name="text_installed">설치됨</string>
+    <string name="text_not_installed">설치되지 않음</string>
+    <string name="text_all">전체</string>
+    <string name="text_sort_by_name">이름순 정렬</string>
+    <string name="text_sort_by_last_update_time">최근 업데이트순 정렬</string>
+    <string name="text_sort_by_package_size">패키지 크기순 정렬</string>
 
 </resources>

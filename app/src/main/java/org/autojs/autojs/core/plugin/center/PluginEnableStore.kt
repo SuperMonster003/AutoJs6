@@ -3,17 +3,17 @@ package org.autojs.autojs.core.plugin.center
 import android.content.Context
 import androidx.core.content.edit
 
-class PluginEnableStore {
+object PluginEnableStore {
 
-    private val spName = "plugin_center_enable_state"
+    private const val SP_NAME = "plugin_center_enable_state"
 
     fun isEnabled(context: Context, packageName: String, defaultEnabled: Boolean = true): Boolean {
-        val sp = context.getSharedPreferences(spName, Context.MODE_PRIVATE)
+        val sp = context.getSharedPreferences(SP_NAME, Context.MODE_PRIVATE)
         return sp.getBoolean(key(packageName), defaultEnabled)
     }
 
     fun setEnabled(context: Context, packageName: String, enabled: Boolean) {
-        val sp = context.getSharedPreferences(spName, Context.MODE_PRIVATE)
+        val sp = context.getSharedPreferences(SP_NAME, Context.MODE_PRIVATE)
         sp.edit { putBoolean(key(packageName), enabled) }
     }
 

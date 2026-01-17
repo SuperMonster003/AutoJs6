@@ -77,8 +77,8 @@ class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListen
         }
         (activity as? MainActivity)?.apply {
             val tabLayout: TabLayout = findViewById(R.id.tab)
-            val docsTab = tabLayout.getTabAt(filesItemIndex)
-            docsTab?.view?.let { setTabViewClickListeners(it) }
+            val filesTab = tabLayout.getTabAt(filesItemIndex)
+            filesTab?.view?.let { setTabViewClickListeners(it) }
         }
         restoreViewStates()
     }
@@ -216,19 +216,19 @@ class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListen
     override fun onClick(button: FloatingActionButton, pos: Int) {
         mExplorerView?.let { view ->
             when (pos) {
-                0 -> ScriptOperations(context, view, view.currentPage)
-                    .newDirectory()
-                1 -> ScriptOperations(context, view, view.currentPage)
-                    .newFile()
-                2 -> ScriptOperations(context, view, view.currentPage)
-                    .importFile()
                 3 -> context?.startActivity(
                     Intent(context, ProjectConfigActivity::class.java)
                         .putExtra(ProjectConfigActivity.EXTRA_PARENT_DIRECTORY, view.currentPage.path)
                         .putExtra(ProjectConfigActivity.EXTRA_NEW_PROJECT, true)
                         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 )
-                else -> {}
+                2 -> ScriptOperations(context, view, view.currentPage)
+                    .importFile()
+                1 -> ScriptOperations(context, view, view.currentPage)
+                    .newFile()
+                0 -> ScriptOperations(context, view, view.currentPage)
+                    .newDirectory()
+                else -> Unit
             }
         }
     }

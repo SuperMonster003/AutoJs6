@@ -32,6 +32,7 @@ import org.autojs.autojs.tool.SimpleObserver;
 import org.autojs.autojs.ui.settings.DisplayVersionHistoriesActivity;
 import org.autojs.autojs.util.AndroidUtils;
 import org.autojs.autojs.util.IntentUtils;
+import org.autojs.autojs.util.IntentUtils.SnackExceptionHolder;
 import org.autojs.autojs.util.IntentUtils.ToastExceptionHolder;
 import org.autojs.autojs.util.TextUtils;
 import org.autojs.autojs.util.UpdateUtils;
@@ -55,6 +56,7 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.Reader;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -77,31 +79,67 @@ import java.util.stream.Collectors;
 @SuppressLint("CheckResult")
 public class UpdateChecker {
 
-    private static final String TAG = UpdateChecker.class.getSimpleName();
-
-    private MaterialDialog mUpdateDialog;
-    private MaterialDialog mPendingDialog;
-
-    public enum PromptMode {DIALOG, SNACKBAR}
-
     public static final String URL_BASE_GITHUB_RAW = "https://raw.githubusercontent.com/";
     public static final String URL_BASE_GITHUB_HOME = "https://github.com/";
 
-    public static final String URL_VERSION_PROPS_RAW = URL_BASE_GITHUB_RAW + "SuperMonster003/AutoJs6/master/version.properties";
-    public static final String URL_VERSION_PROPS_BLOB = URL_BASE_GITHUB_HOME + "SuperMonster003/AutoJs6/blob/master/version.properties";
+    private static final String TAG = UpdateChecker.class.getSimpleName();
 
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final Context mContext;
     private final View mView;
-    private final PromptMode mPromptMode;
-    private final SimpleObserver<ResponseBody> mCallback;
     private final Executor mGitHubExecutor = Executors.newSingleThreadExecutor();
 
-    private UpdateChecker(Context context, View view, PromptMode promptMode, SimpleObserver<ResponseBody> callback) {
+    private final PromptMode mPromptMode;
+    private final SimpleObserver<ResponseBody> mCallback;
+
+    private final String mGitHubUser;
+    private final String mGitHubRepo;
+    private final String mGitHubMainBranch;
+    private final String mGitHubVersionProperties;
+
+    private final String mUrlVersionPropsRaw;
+    private final String mRrlVersionPropsBlob;
+    private final GitHubChangeLogProvider mGitHubChangelogFileProvider;
+
+    private MaterialDialog mUpdateDialog;
+    private MaterialDialog mPendingDialog;
+
+    private UpdateChecker(Context context,
+                          View view,
+                          String gitHubUser,
+                          String gitHubRepo,
+                          String gitHubMainBranch,
+                          String gitHubVersionProperties,
+                          GitHubChangeLogProvider gitHubChangelogFileProvider,
+                          PromptMode promptMode,
+                          SimpleObserver<ResponseBody> callback
+    ) {
         mContext = context;
         mView = view;
         mPromptMode = promptMode;
         mCallback = callback;
+
+        mGitHubUser = gitHubUser;
+        mGitHubRepo = gitHubRepo;
+        mGitHubMainBranch = gitHubMainBranch;
+        mGitHubVersionProperties = gitHubVersionProperties;
+        mGitHubChangelogFileProvider = gitHubChangelogFileProvider;
+
+        mUrlVersionPropsRaw = URL_BASE_GITHUB_RAW + gitHubUser + "/" + gitHubRepo + "/" + gitHubMainBranch + "/" + gitHubVersionProperties;
+        mRrlVersionPropsBlob = URL_BASE_GITHUB_HOME + gitHubUser + "/" + gitHubRepo + "/" + "blob" + "/" + gitHubMainBranch + "/" + gitHubVersionProperties;
+    }
+
+    private static @Nullable Spanned getLatestReleaseFromGitHubRelease(GHRepository repo, GHRelease release) {
+        CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> {
+            return GitHubRepoUtils.getReleaseHtml(repo, release);
+        });
+        try {
+            String rawHtmlContent = future.get(30, TimeUnit.SECONDS);
+            return Html.fromHtml(rawHtmlContent, Html.FROM_HTML_MODE_COMPACT);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public void checkNow() {
@@ -119,20 +157,20 @@ public class UpdateChecker {
         AtomicReference<String> errorRaw = new AtomicReference<>();
 
         Observable<ResponseBody> obsBlobSafe = getStreamingApi()
-                .streamingUrl(URL_VERSION_PROPS_BLOB)
+                .streamingUrl(mRrlVersionPropsBlob)
                 .subscribeOn(Schedulers.io())
                 .onErrorResumeNext(e -> {
-                    Log.d(TAG, "Error from obsBlobSafe while parsing version.properties");
+                    Log.d(TAG, "Error from obsBlobSafe while parsing " + mGitHubVersionProperties);
                     errorBlob.set(e.getMessage());
                     e.printStackTrace();
                     return Observable.empty();
                 });
 
         Observable<ResponseBody> obsRawSafe = getStreamingApi()
-                .streamingUrl(URL_VERSION_PROPS_RAW)
+                .streamingUrl(mUrlVersionPropsRaw)
                 .subscribeOn(Schedulers.io())
                 .onErrorResumeNext(e -> {
-                    Log.d(TAG, "Error from obsRawSafe while parsing version.properties");
+                    Log.d(TAG, "Error from obsRawSafe while parsing " + mGitHubVersionProperties);
                     errorRaw.set(e.getMessage());
                     e.printStackTrace();
                     return Observable.empty();
@@ -276,7 +314,7 @@ public class UpdateChecker {
             }
 
             if (mUpdateDialog != null) {
-                d.getActionButton(DialogAction.NEGATIVE).setText(R.string.dialog_button_quit);
+                d.getActionButton(DialogAction.NEGATIVE).setText(R.string.dialog_button_abandon);
                 d.getActionButton(DialogAction.NEGATIVE).setTextColor(context.getColor(R.color.dialog_button_caution));
                 d.getActionButton(DialogAction.POSITIVE).setText(R.string.dialog_button_retry);
                 d.getActionButton(DialogAction.POSITIVE).setOnClickListener(v -> {
@@ -290,7 +328,7 @@ public class UpdateChecker {
                 d.getActionButton(DialogAction.NEUTRAL).setTextColor(context.getColor(R.color.dialog_button_hint));
                 d.getActionButton(DialogAction.NEUTRAL).setOnClickListener(v -> {
                     d.dismiss();
-                    UpdateUtils.openUrl(context, versionInfo.getDownloadUrl());
+                    IntentUtils.browse(context, versionInfo.getDownloadUrl(), new SnackExceptionHolder(d.getView()));
                 });
             }
 
@@ -342,6 +380,9 @@ public class UpdateChecker {
         mUpdateDialog = new Dialog.Builder.Update(context, versionInfo).build();
         mPendingDialog = new Dialog.Builder.Pending(context, R.string.text_preparing).build();
 
+        MDButton neutralButton = mUpdateDialog.getActionButton(DialogAction.NEUTRAL);
+        neutralButton.setOnClickListener(null);
+
         MDButton negativeButton = mUpdateDialog.getActionButton(DialogAction.NEGATIVE);
         negativeButton.setOnClickListener(v -> mUpdateDialog.dismiss());
 
@@ -351,56 +392,73 @@ public class UpdateChecker {
         mUpdateDialog.show();
 
         mGitHubExecutor.execute(() -> {
-            GitHub github = GHub.getConnection();
+            GitHub github = GitHubRepoUtils.getConnection();
             if (github == null) {
                 Dialog.setDialogContent(mUpdateDialog, R.string.error_cannot_connect_to_github);
                 return;
             }
 
-            String userName = context.getString(R.string.developer_full_name);
-            String repoName = context.getString(R.string.app_name);
-            GHRepository repo = GHub.getRepo(github, userName, repoName);
+            GHRepository repo = GitHubRepoUtils.getRepo(github, mGitHubUser, mGitHubRepo);
             if (repo == null) {
-                Dialog.setDialogContent(mUpdateDialog, context.getString(R.string.error_invalid_github_repo, repoName));
+                Dialog.setDialogContent(mUpdateDialog, context.getString(R.string.error_invalid_github_repo, mGitHubRepo));
                 return;
             }
 
-            GHRelease release = GHub.getRelease(repo);
+            GHRelease release = GitHubRepoUtils.getRelease(repo);
             if (release == null) {
                 Dialog.setDialogContent(mUpdateDialog, R.string.error_get_github_latest_release);
                 return;
             }
 
+            mHandler.post(() -> setUpdateDialogButtonNeutral(context, release.getHtmlUrl()));
+
             String releaseTag = release.getTagName();
-            if (!GHub.isTagMatches(releaseTag, propVersion)) {
+            if (!GitHubRepoUtils.isTagMatches(releaseTag, propVersion)) {
                 Dialog.setDialogContent(mUpdateDialog, R.string.error_corresponding_github_release_may_not_published);
                 return;
             }
 
-            fetchLatestReleaseNotes(context, versionInfo, repo, release, releaseTag);
-            PagedIterable<GHAsset> assets = GHub.getAssets(release);
+            fetchLatestChangelog(context, versionInfo, repo, release, releaseTag);
+            PagedIterable<GHAsset> assets = GitHubRepoUtils.getAssets(release);
             if (assets == null) {
                 mHandler.post(() -> new Dialog.Builder
                         .Prompt(context, R.string.error_empty_github_release_assets)
                         .build().show());
                 return;
             }
-            mHandler.post(() -> setDialogUpdateButton(context, assets, versionInfo));
+            mHandler.post(() -> setUpdateDialogButtonPositive(context, assets, versionInfo));
         });
     }
 
-    private void fetchLatestReleaseNotes(Context context, VersionInfo versionInfo, GHRepository repo, GHRelease release, String releaseTag) {
+    private void fetchLatestChangelog(Context context, VersionInfo versionInfo, GHRepository repo, GHRelease release, String releaseTag) {
         Language language = Objects.requireNonNullElse(Language.getPrefLanguageOrNull(), Language.EN);
         String languageTag = language.getLocalCompatibleLanguageTag();
-        String urlSuffix = "app/src/main/assets-app/doc/CHANGELOG-" + languageTag + ".md";
-        String urlBlob = "https://github.com/SuperMonster003/AutoJs6/blob/master/" + urlSuffix;
-        String urlRaw = "https://raw.githubusercontent.com/SuperMonster003/AutoJs6/master/" + urlSuffix;
+        String urlSuffix = mGitHubChangelogFileProvider.with(languageTag);
+
+        if (urlSuffix == null) {
+            Spanned fallbackLatestReleaseNotes = getFallbackLatestReleaseNotes(repo, release);
+            if (fallbackLatestReleaseNotes == null) {
+                Dialog.setDialogContent(mUpdateDialog, R.string.error_failed_to_retrieve_release_notes);
+            } else {
+                Dialog.setDialogContent(mUpdateDialog, fallbackLatestReleaseNotes);
+            }
+            return;
+        }
+
+        if (urlSuffix.startsWith("/")) {
+            urlSuffix = urlSuffix.substring(1);
+        }
+        if (urlSuffix.startsWith("http://") || urlSuffix.startsWith("https://")) {
+            throw new IllegalArgumentException("Field \"mGitHubChangelogFileProvider\" for UpdataChecker should provide a relative path instead of a full url");
+        }
+        String urlBlob = "https://github.com/" + mGitHubUser + "/" + mGitHubRepo + "/blob/" + mGitHubMainBranch + "/" + urlSuffix;
+        String urlRaw = "https://raw.githubusercontent.com/" + mGitHubUser + "/" + mGitHubRepo + "/" + mGitHubMainBranch + "/" + urlSuffix;
 
         Observable<Spanned> obsBlob = getStreamingApi()
                 .streamingUrl(urlBlob)
                 .subscribeOn(Schedulers.io())
                 .onErrorResumeNext(e -> {
-                    Log.d(TAG, "Error from obsBlob while parsing latest release notes from " + urlBlob);
+                    Log.d(TAG, "Error from obsBlob while parsing latest changelog from " + urlBlob);
                     e.printStackTrace();
                     return Observable.never();
                 })
@@ -408,7 +466,7 @@ public class UpdateChecker {
                     try {
                         String content = responseBody.string().trim();
                         Log.d(TAG, "Respond body string (first 500) got from github: " + content.substring(0, Math.min(content.length(), 500)));
-                        String html = parseLatestReleaseNotesFromHtml(content);
+                        String html = parseLatestChangelogFromHtml(content);
                         if (html != null && !html.isBlank()) {
                             String assembledHtml = assembleBlobDependenciesForSingleVersion(html, versionInfo.getVersionName(), urlBlob);
                             return Observable.just(Html.fromHtml(assembledHtml, Html.FROM_HTML_MODE_COMPACT));
@@ -423,7 +481,7 @@ public class UpdateChecker {
                 .streamingUrl(urlRaw)
                 .subscribeOn(Schedulers.io())
                 .onErrorResumeNext(e -> {
-                    Log.d(TAG, "Error from obsRawSafe while parsing latest release notes from " + urlRaw);
+                    Log.d(TAG, "Error from obsRawSafe while parsing latest changelog from " + urlRaw);
                     e.printStackTrace();
                     return Observable.never();
                 })
@@ -431,7 +489,7 @@ public class UpdateChecker {
                     try {
                         String content = responseBody.string().trim();
                         Log.d(TAG, "Respond body string got from github: " + content);
-                        String markdown = parseLatestReleaseNotesFromMarkdown(content, releaseTag);
+                        String markdown = parseLatestChangelogFromMarkdown(content, releaseTag);
                         if (markdown != null && !markdown.isBlank()) {
                             String assembledMarkdown = assembleRawDependenciesForSingleVersion(markdown, versionInfo.getVersionName(), urlRaw);
                             String assembledHtml = TextUtils.markdownToHtml(assembledMarkdown);
@@ -448,41 +506,40 @@ public class UpdateChecker {
                 .observeOn(AndroidSchedulers.mainThread())
                 .timeout(23, TimeUnit.SECONDS)
                 .subscribe(
-                        releaseNotesSpannedForSingleVersion -> {
-                            Dialog.setDialogContent(mUpdateDialog, releaseNotesSpannedForSingleVersion);
+                        changelogSpannedForSingleVersion -> {
+                            Dialog.setDialogContent(mUpdateDialog, changelogSpannedForSingleVersion);
                         },
                         e -> {
                             e.printStackTrace();
                             Spanned fallbackLatestReleaseNotes = getFallbackLatestReleaseNotes(repo, release);
                             if (fallbackLatestReleaseNotes == null) {
-                                Dialog.setDialogContent(mUpdateDialog, R.string.error_failed_to_retrieve_released_notes);
+                                Dialog.setDialogContent(mUpdateDialog, R.string.error_failed_to_retrieve_release_notes);
                                 return;
                             }
                             Dialog.setDialogContent(mUpdateDialog, fallbackLatestReleaseNotes);
                             if (language != Language.ZH_HANS) {
                                 mHandler.post(() -> new Dialog.Builder
-                                        .Prompt(context, R.string.text_prompt, R.string.content_failed_to_retrieve_released_notes_of_current_language_with_zh_hans_fallback)
+                                        .Prompt(context, R.string.text_prompt, R.string.content_failed_to_retrieve_changelog_of_current_language_with_zh_hans_release_notes_fallback)
                                         .build().show());
-
                             }
                         }
                 );
     }
 
-    private @NotNull String assembleBlobDependenciesForSingleVersion(@NotNull String releaseNotes, String versionName, String markdownUrl) {
+    private @NotNull String assembleBlobDependenciesForSingleVersion(@NotNull String changelog, String versionName, String markdownUrl) {
         String labelImprovement = mContext.getString(R.string.changelog_label_improvement);
         String labelDependency = mContext.getString(R.string.changelog_label_dependency);
 
         boolean isFiltered = false;
 
-        List<String> filteredReleaseNotes = new ArrayList<>();
-        String[] items = releaseNotes.split("\n");
+        List<String> filteredChangelog = new ArrayList<>();
+        String[] items = changelog.split("\n");
         for (String item : items) {
             Log.d(TAG, "item: " + item);
             if (item.matches(".*\\b" + labelDependency + "\\b.*")) {
                 isFiltered = true;
             } else {
-                filteredReleaseNotes.add(item);
+                filteredChangelog.add(item);
             }
         }
 
@@ -490,8 +547,8 @@ public class UpdateChecker {
             String anchor = "v" + String.join("", versionName.split("\\."));
             String dependenciesSummary = mContext.getString(R.string.text_changelog_item_dependency);
 
-            for (int i = filteredReleaseNotes.size() - 1; i >= 0; i--) {
-                String item = filteredReleaseNotes.get(i);
+            for (int i = filteredChangelog.size() - 1; i >= 0; i--) {
+                String item = filteredChangelog.get(i);
                 if (!item.isBlank()) {
                     String assembledHtml = "<li><code>" +
                                            labelImprovement +
@@ -502,28 +559,28 @@ public class UpdateChecker {
                                            "\" rel=\"nofollow\"><code>" +
                                            "CHANGELOG.md" +
                                            "</code></a></em></li>";
-                    filteredReleaseNotes.add(i + 1, assembledHtml);
+                    filteredChangelog.add(i + 1, assembledHtml);
                     break;
                 }
             }
-            return String.join("\n", filteredReleaseNotes);
+            return String.join("\n", filteredChangelog);
         }
-        return releaseNotes;
+        return changelog;
     }
 
-    private @NotNull String assembleRawDependenciesForSingleVersion(@NotNull String releaseNotes, String versionName, String markdownUrl) {
+    private @NotNull String assembleRawDependenciesForSingleVersion(@NotNull String changelog, String versionName, String markdownUrl) {
         String labelImprovement = mContext.getString(R.string.changelog_label_improvement);
         String labelDependency = mContext.getString(R.string.changelog_label_dependency);
 
         boolean isFiltered = false;
 
-        List<String> filteredReleaseNotes = new ArrayList<>();
-        String[] items = releaseNotes.split("\n");
+        List<String> filteredChangelog = new ArrayList<>();
+        String[] items = changelog.split("\n");
         for (String item : items) {
             if (item.contains("`" + labelDependency + "`")) {
                 isFiltered = true;
             } else {
-                filteredReleaseNotes.add(item);
+                filteredChangelog.add(item);
             }
         }
 
@@ -531,28 +588,21 @@ public class UpdateChecker {
             String anchor = "v" + String.join("", versionName.split("\\."));
             String dependenciesSummary = mContext.getString(R.string.text_changelog_item_dependency);
 
-            for (int i = filteredReleaseNotes.size() - 1; i >= 0; i--) {
-                String item = filteredReleaseNotes.get(i);
+            for (int i = filteredChangelog.size() - 1; i >= 0; i--) {
+                String item = filteredChangelog.get(i);
                 if (!item.isBlank()) {
                     String assembledMarkdown = "* `" + labelImprovement + "` " + dependenciesSummary + " _[`CHANGELOG.md`](" + markdownUrl + "#" + anchor + ")_";
-                    filteredReleaseNotes.add(i + 1, assembledMarkdown);
+                    filteredChangelog.add(i + 1, assembledMarkdown);
                     break;
                 }
             }
-            return String.join("\n", filteredReleaseNotes);
+            return String.join("\n", filteredChangelog);
         }
-        return releaseNotes;
-    }
-
-    private String assembleDependenciesInReleaseNotesListMarkdown(String fullReleaseNotes) {
-        // TODO by SuperMonster003 on Apr 24, 2025.
-        //  ! Remove all dependency items and append a summary item as improvement.
-        //  ! Reference to `generate_markdown.py`.
-        return fullReleaseNotes;
+        return changelog;
     }
 
     @Nullable
-    private String parseLatestReleaseNotesFromHtml(String htmlContent) {
+    private String parseLatestChangelogFromHtml(String htmlContent) {
         Document document = Jsoup.parse(htmlContent);
         Element releaseDateHeading = document.selectFirst("div.markdown-heading");
         if (releaseDateHeading != null) {
@@ -572,7 +622,7 @@ public class UpdateChecker {
     }
 
     @Nullable
-    private String parseLatestReleaseNotesFromMarkdown(String markdown, String releaseTag) {
+    private String parseLatestChangelogFromMarkdown(String markdown, String releaseTag) {
         Pattern pattern = Pattern.compile("#+\\s*" + releaseTag + "([\\s\\S]*?)(?=\\n#+\\s*v\\d+\\.\\d+|\\z)");
         Matcher matcher = pattern.matcher(markdown);
         if (matcher.find()) {
@@ -590,27 +640,25 @@ public class UpdateChecker {
     private Spanned getFallbackLatestReleaseNotes(GHRepository repo, GHRelease release) {
         Spanned htmlSpannedContent = getLatestReleaseFromGitHubRelease(repo, release);
         if (htmlSpannedContent == null || htmlSpannedContent.toString().isBlank()) {
-            Log.d(TAG, "Release note got nothing from the latest release (fallback)");
+            Log.d(TAG, "Failed to fetch the latest release notes (fallback)");
             return null;
         }
-        Log.d(TAG, "Release note got from latest release (fallback)");
+        Log.d(TAG, "Fetch the latest release notes (fallback) successfully");
         return htmlSpannedContent;
     }
 
-    private static @Nullable Spanned getLatestReleaseFromGitHubRelease(GHRepository repo, GHRelease release) {
-        CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> {
-            return GHub.getReleaseHtml(repo, release);
+    private void setUpdateDialogButtonNeutral(Context context, URL htmlUrl) {
+        String url = htmlUrl == null ? "" : htmlUrl.toString();
+        if (url.isEmpty()) return;
+
+        mUpdateDialog.getActionButton(DialogAction.NEUTRAL).setText(R.string.dialog_button_view_with_browser);
+        mUpdateDialog.getActionButton(DialogAction.NEUTRAL).setTextColor(context.getColor(R.color.dialog_button_hint));
+        mUpdateDialog.getActionButton(DialogAction.NEUTRAL).setOnClickListener(v -> {
+            IntentUtils.browse(context, url, new SnackExceptionHolder(mUpdateDialog.getView()));
         });
-        try {
-            String rawHtmlContent = future.get(30, TimeUnit.SECONDS);
-            return Html.fromHtml(rawHtmlContent, Html.FROM_HTML_MODE_COMPACT);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
     }
 
-    private void setDialogUpdateButton(@NonNull Context ctx, PagedIterable<GHAsset> ghAssets, VersionInfo versionInfo) {
+    private void setUpdateDialogButtonPositive(@NonNull Context ctx, PagedIterable<GHAsset> ghAssets, VersionInfo versionInfo) {
         MDButton positiveButton = mUpdateDialog.getActionButton(DialogAction.POSITIVE);
         positiveButton.setTextColor(ctx.getColor(R.color.dialog_button_attraction));
         positiveButton.setOnClickListener(v -> {
@@ -623,7 +671,7 @@ public class UpdateChecker {
             mGitHubExecutor.execute(() -> {
                 List<String> abiList = AndroidUtils.getDeviceFilteredAbiList();
                 abiList.add("universal");
-                GHub.Asset targetAsset = GHub.pickAssetIntelligently(ghAssets, abiList);
+                GitHubRepoUtils.Asset targetAsset = GitHubRepoUtils.pickAssetIntelligently(ghAssets, abiList);
 
                 mPendingDialog.dismiss();
 
@@ -648,6 +696,15 @@ public class UpdateChecker {
         });
     }
 
+    public enum PromptMode {DIALOG, SNACKBAR}
+
+    public interface GitHubChangeLogProvider {
+
+        @Nullable
+        String with(String languageTag);
+
+    }
+
     public static class Builder {
         private final Context mContext;
 
@@ -655,8 +712,16 @@ public class UpdateChecker {
         private PromptMode mPromptMode;
         private SimpleObserver<ResponseBody> mCallback;
 
+        private String mGitHubUser;
+        private String mGitHubRepo;
+        private String mGitHubMainBranch = "main";
+        private String mGitHubVersionProperties = "version.properties";
+        private GitHubChangeLogProvider mGitHubChangelogFileProvider = languageTag -> "app/src/main/assets-app/doc/CHANGELOG-" + languageTag + ".md";
+
         public Builder(Context context) {
             mContext = context;
+            mGitHubUser = context.getString(R.string.developer_full_name);
+            mGitHubRepo = context.getString(R.string.app_name);
         }
 
         public Builder(@NonNull View view) {
@@ -664,18 +729,52 @@ public class UpdateChecker {
             mView = view;
         }
 
+        public Builder setGitHubUser(String user) {
+            mGitHubUser = user;
+            return this;
+        }
+
+        public Builder setGitHubRepo(String repo) {
+            mGitHubRepo = repo;
+            return this;
+        }
+
+        public Builder setGitHubMainBranch(String branch) {
+            mGitHubMainBranch = branch;
+            return this;
+        }
+
+        public Builder setGitHubVersionProperties(String versionProperties) {
+            mGitHubVersionProperties = versionProperties;
+            return this;
+        }
+
+        public Builder setGitHubChangelogFileProvider(GitHubChangeLogProvider provider) {
+            mGitHubChangelogFileProvider = provider;
+            return this;
+        }
+
         public Builder setPromptMode(PromptMode promptMode) {
-            this.mPromptMode = promptMode;
+            mPromptMode = promptMode;
             return this;
         }
 
         public Builder setCallback(SimpleObserver<ResponseBody> callback) {
-            this.mCallback = callback;
+            mCallback = callback;
             return this;
         }
 
         public UpdateChecker build() {
-            return new UpdateChecker(mContext, mView, mPromptMode, mCallback);
+            return new UpdateChecker(mContext,
+                    mView,
+                    mGitHubUser,
+                    mGitHubRepo,
+                    mGitHubMainBranch,
+                    mGitHubVersionProperties,
+                    mGitHubChangelogFileProvider,
+                    mPromptMode,
+                    mCallback
+            );
         }
     }
 
@@ -743,26 +842,28 @@ public class UpdateChecker {
                     super(context);
                     this
                             .title(versionInfo.getVersionName())
-                            .options(List.of(new MaterialDialog.OptionMenuItemSpec(context.getString(R.string.dialog_button_ignore_current_update), parentDialog -> {
-                                new MaterialDialog.Builder(context)
-                                        .title(R.string.text_prompt)
-                                        .content(R.string.prompt_add_ignored_version)
-                                        .negativeText(R.string.dialog_button_cancel)
-                                        .positiveText(R.string.dialog_button_confirm)
-                                        .positiveColorRes(R.color.dialog_button_warn)
-                                        .onPositive((tmpDialog, which) -> {
-                                            UpdateUtils.addIgnoredVersion(versionInfo);
-                                            ViewUtils.showToast(context, R.string.text_done);
-                                            parentDialog.dismiss();
-                                        })
-                                        .show();
-                            })))
-                            .content(R.string.text_getting_release_notes)
-                            .neutralText(R.string.dialog_button_version_histories)
-                            .neutralColor(context.getColor(R.color.dialog_button_hint))
-                            .onNeutral((dialog, which) -> {
-                                DisplayVersionHistoriesActivity.launch(context);
-                            })
+                            .options(List.of(
+                                    new MaterialDialog.OptionMenuItemSpec(context.getString(R.string.dialog_button_ignore_current_update), parentDialog -> {
+                                        new MaterialDialog.Builder(context)
+                                                .title(R.string.text_prompt)
+                                                .content(R.string.prompt_add_ignored_version)
+                                                .negativeText(R.string.dialog_button_cancel)
+                                                .positiveText(R.string.dialog_button_confirm)
+                                                .positiveColorRes(R.color.dialog_button_caution)
+                                                .onPositive((tmpDialog, which) -> {
+                                                    UpdateUtils.addIgnoredVersion(versionInfo);
+                                                    ViewUtils.showToast(context, R.string.text_done);
+                                                    parentDialog.dismiss();
+                                                })
+                                                .show();
+                                    }),
+                                    new MaterialDialog.OptionMenuItemSpec(context.getString(R.string.dialog_button_version_histories), parentDialog -> {
+                                        DisplayVersionHistoriesActivity.launch(context);
+                                    })
+                            ))
+                            .content(R.string.text_retrieving_changelog)
+                            .neutralText(R.string.dialog_button_view_with_browser)
+                            .neutralColor(context.getColor(R.color.dialog_button_unavailable))
                             .negativeText(R.string.dialog_button_cancel)
                             .negativeColor(context.getColor(R.color.dialog_button_default))
                             .positiveText(R.string.dialog_button_update_now)
@@ -777,7 +878,7 @@ public class UpdateChecker {
 
     }
 
-    private static class GHub {
+    private static class GitHubRepoUtils {
 
         private static GitHub mGitHubConnection;
 
@@ -897,13 +998,13 @@ public class UpdateChecker {
                 mGitHubAsset = gitHubAsset;
             }
 
-            public void setAbi(String abi) {
-                mAbi = abi;
-            }
-
             @Override
             public String getAbi() {
                 return mAbi;
+            }
+
+            public void setAbi(String abi) {
+                mAbi = abi;
             }
 
             @Override
@@ -928,5 +1029,4 @@ public class UpdateChecker {
     private static class ObservableEmptyException extends RuntimeException {
         /* Empty body. */
     }
-
 }

@@ -33,6 +33,7 @@ class CheckForUpdatesPreference : MaterialPreference, OnSharedPreferenceChangeLi
     override fun onClick() {
         UpdateChecker.Builder(prefContext)
             .setPromptMode(PromptMode.DIALOG)
+            .setGitHubMainBranch("master")
             .build().checkNow()
         super.onClick()
     }

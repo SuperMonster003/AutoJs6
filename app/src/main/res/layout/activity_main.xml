@@ -69,7 +69,19 @@
             android:clipToPadding="false"
             android:visibility="invisible"
             app:layout_anchor="@id/viewpager"
-            app:layout_anchorGravity="bottom|end" />
+            app:layout_anchorGravity="bottom|end"/>
+
+        <org.autojs.autojs.ui.main.plugin.PluginFloatingActionMenu
+            android:id="@+id/plugin_floating_action_menu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end|bottom"
+            android:layout_margin="16dp"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:visibility="invisible"
+            app:layout_anchor="@id/viewpager"
+            app:layout_anchorGravity="bottom|end"/>
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 

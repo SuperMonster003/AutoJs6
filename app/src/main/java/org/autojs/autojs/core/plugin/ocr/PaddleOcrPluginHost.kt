@@ -20,6 +20,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.plugin.paddle.ocr.IOcrPlugin
 import org.autojs.plugin.paddle.ocr.OcrOptions
 import org.autojs.plugin.paddle.ocr.OcrResult
@@ -106,7 +107,9 @@ object PaddleOcrPluginHost {
         // e.g. "v5"
         variant: String? = null,
     ): Discovered? {
-        val list = discover(context).filter { it.pluginInfo != null }
+        val list = discover(context)
+            .filter { it.pluginInfo != null }
+            .filter { PluginEnableStore.isEnabled(context, it.serviceInfo.packageName, false) }
         if (list.isEmpty()) return null
         if (engineId != null) {
             list.firstOrNull { d -> d.pluginInfo?.id == engineId }?.let { return it }
@@ -117,7 +120,10 @@ object PaddleOcrPluginHost {
         if (engine != null) {
             list.firstOrNull { d -> d.pluginInfo?.engine == engine }?.let { return it }
         }
-        return list.first()
+        return list.maxBy {
+            val variant = it.pluginInfo?.variant ?: return@maxBy 0
+            variant.replace(Regex("\\D"), "").toIntOrNull() ?: 0
+        }
     }
 
     // Convert temporary file to read-only FD.

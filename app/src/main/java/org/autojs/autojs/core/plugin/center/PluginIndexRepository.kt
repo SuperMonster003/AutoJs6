@@ -30,7 +30,7 @@ class PluginIndexRepository {
         private const val KEY_LAST_FAILURE_TS = "last_failure_ts"
         private const val KEY_RETRY_ATTEMPTS = "retry_attempts"
 
-        private const val CACHE_FILE_NAME = "plugin_center_index_cache.json"
+        private const val CACHE_FILE_NAME = "autojs6_plugin_index.json"
 
         private const val MIN_RETRY_INTERVAL_MS = 30_000L // 30 sec
         private const val MAX_RETRY_INTERVAL_MS = 10 * 60_000L // 10 min
@@ -266,12 +266,16 @@ class PluginIndexRepository {
                 engine = engine,
                 variant = variant,
                 engineId = engineId,
-                versionName = versionName,
-                versionCode = versionCode,
-                versionDate = versionDate,
-                apkUrl = apkUrl,
-                apkSha256 = apkSha256,
-                apkSizeBytes = apkSize,
+                releases = listOf(
+                    PluginIndexRelease(
+                        versionName = versionName,
+                        versionCode = versionCode ?: 0L,
+                        versionDate = versionDate,
+                        apkUrl = apkUrl,
+                        apkSha256 = apkSha256,
+                        apkSizeBytes = apkSize,
+                    ),
+                ),
                 tags = emptyList(),
             )
         }

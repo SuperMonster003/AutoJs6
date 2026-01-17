@@ -1,9 +1,9 @@
 {
   "$data": {
     "v6.7.0": {
-      "released_date": "2026/01/14",
+      "released_date": "2026/01/17",
       "feature": [
-        "插件中心功能, 支持插件的安装/卸载/更新等操作 (入口: 主页抽屉按钮)",
+        "插件中心功能, 支持插件的安装/卸载/更新等操作 (入口: 主页抽屉按钮/主页标签页)",
         "cvt 模块, 用于数据单位转换 (参阅 项目文档 > [单位转换](https://docs.autojs6.com/#/cvt))",
         "fmt 模块, 用于数据格式化 (参阅 项目文档 > [格式化](https://docs.autojs6.com/#/fmt))",
         "zip 模块, 用于文件压缩与解压缩操作 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (参阅 项目文档 > [Zip](https://docs.autojs6.com/#/zip))",
