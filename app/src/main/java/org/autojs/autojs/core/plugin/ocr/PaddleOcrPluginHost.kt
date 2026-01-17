@@ -109,7 +109,7 @@ object PaddleOcrPluginHost {
     ): Discovered? {
         val list = discover(context)
             .filter { it.pluginInfo != null }
-            .filter { PluginEnableStore.isEnabled(context, it.serviceInfo.packageName, false) }
+            .filter { PluginEnableStore.isEnabled(context, it.serviceInfo.packageName, true) }
         if (list.isEmpty()) return null
         if (engineId != null) {
             list.firstOrNull { d -> d.pluginInfo?.id == engineId }?.let { return it }
