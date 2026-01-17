@@ -38,7 +38,7 @@
     <LinearLayout
         android:id="@+id/title_container"
         android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:minHeight="43dp"
         android:layout_toEndOf="@+id/icon_container"
         android:layout_toStartOf="@id/sw"

@@ -37,6 +37,10 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
     // zh-CN: 用于延迟显示空态提示的 Job.
     private var emptyHintJob: Job? = null
 
+    // Job for debouncing package change refresh during replacing install/update.
+    // zh-CN: 用于在替换安装/更新期间对包变更刷新进行去抖的 Job.
+    private var pkgChangeRefreshJob: Job? = null
+
     private var isFirstEnter: Boolean = true
 
     // Latest full list from ViewModel (unfiltered).
@@ -300,14 +304,40 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
                         Intent.ACTION_PACKAGE_ADDED -> {
                             // Package installation (update) does not record "Recently installed" when replacing, but will refresh.
                             // zh-CN: 替换安装 (更新) 不记录 "最近安装", 但会刷新.
-                            if (!replacing) PluginRecentStore.setLastInstalled(packageName)
-                            vm.load(context, forceRefreshIndex = false)
+                            if (!replacing) {
+                                PluginRecentStore.setLastInstalled(packageName)
+                                vm.load(context, forceRefreshIndex = false)
+                                return
+                            }
+
+                            // Debounce refresh when replacing, to avoid transient "missing pluginInfo" state.
+                            // zh-CN: 替换安装时对刷新做去抖, 避免短暂的 "pluginInfo 缺失" 中间态.
+                            pkgChangeRefreshJob?.cancel()
+                            pkgChangeRefreshJob = viewLifecycleOwner.lifecycleScope.launch {
+                                delay(1500L)
+                                if (isAdded && _binding != null) {
+                                    vm.load(context, forceRefreshIndex = false)
+                                }
+                            }
                         }
                         Intent.ACTION_PACKAGE_REMOVED -> {
                             // Package uninstallation (pre-update phase) does not record "Recently uninstalled" when replacing.
                             // zh-CN: 替换卸载 (更新前阶段) 不记录 "最近卸载".
-                            if (!replacing) PluginRecentStore.setLastUninstalled(packageName)
-                            vm.load(context, forceRefreshIndex = false)
+                            if (!replacing) {
+                                PluginRecentStore.setLastUninstalled(packageName)
+                                vm.load(context, forceRefreshIndex = false)
+                                return
+                            }
+
+                            // Debounce refresh when replacing, to avoid transient "missing pluginInfo" state.
+                            // zh-CN: 替换卸载时对刷新做去抖, 避免短暂的 "pluginInfo 缺失" 中间态.
+                            pkgChangeRefreshJob?.cancel()
+                            pkgChangeRefreshJob = viewLifecycleOwner.lifecycleScope.launch {
+                                delay(1500L)
+                                if (isAdded && _binding != null) {
+                                    vm.load(context, forceRefreshIndex = false)
+                                }
+                            }
                         }
                     }
                 }
@@ -323,6 +353,8 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
 
     override fun onStop() {
         super.onStop()
+        pkgChangeRefreshJob?.cancel()
+        pkgChangeRefreshJob = null
         pkgReceiver?.let { runCatching { requireContext().unregisterReceiver(it) } }
         pkgReceiver = null
     }
@@ -340,6 +372,8 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         super.onDestroyView()
         emptyHintJob?.cancel()
         emptyHintJob = null
+        pkgChangeRefreshJob?.cancel()
+        pkgChangeRefreshJob = null
         _binding = null
     }
 
