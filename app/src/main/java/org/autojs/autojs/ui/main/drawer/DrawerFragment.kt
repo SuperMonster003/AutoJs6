@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
-import org.autojs.autojs.App
+import org.autojs.autojs.AutoJs
 import org.autojs.autojs.app.tool.FloatingButtonTool
 import org.autojs.autojs.app.tool.JsonSocketClientTool
 import org.autojs.autojs.app.tool.JsonSocketServerTool
@@ -223,7 +223,7 @@ open class DrawerFragment : Fragment() {
         }
 
         JsonSocketClientTool(mActivity).apply {
-            val devPluginService = App.app.devPluginService
+            val devPluginService = AutoJs.instance.devPluginService
 
             val drawerItem = DrawerMenuDisposableItem(
                 helper = this,
@@ -269,7 +269,7 @@ open class DrawerFragment : Fragment() {
         }
 
         JsonSocketServerTool(mActivity).apply {
-            val devPluginService = App.app.devPluginService
+            val devPluginService = AutoJs.instance.devPluginService
 
             val drawerItem = DrawerMenuDisposableItem(
                 helper = this,

@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import com.google.gson.Gson
+import org.autojs.autojs.AbstractAutoJs.Companion.isInrt
 import org.autojs.autojs.App.Companion.app
 import org.autojs.autojs.annotation.KeyRes
 import org.autojs.autojs.annotation.ScriptInterfaceCompatible
@@ -26,6 +27,7 @@ import java.util.*
 
 /**
  * Created by Stardust on Jan 31, 2017.
+ * Modified by SuperMonster003 as of Jan 17, 2026.
  */
 object Pref {
 
@@ -231,7 +233,7 @@ object Pref {
     private fun updateTimestamp(@KeyRes keyRes: Int) = putLong(keyRes, System.currentTimeMillis())
 
     @JvmStatic
-    fun getServerAddress(): String = getString(R.string.key_server_address, NetworkUtils.getGatewayAddress())
+    fun getServerAddress(): String = getString(R.string.key_server_address, if (!isInrt) NetworkUtils.getGatewayAddress() else NetworkUtils.DEFAULT_IP_ADDRESS)
 
     @JvmStatic
     fun setServerAddress(address: String?) = putString(R.string.key_server_address, address)

@@ -25,7 +25,6 @@ import org.autojs.autojs.event.GlobalKeyObserver
 import org.autojs.autojs.external.receiver.DynamicBroadcastReceivers
 import org.autojs.autojs.ipc.InAppEventBus
 import org.autojs.autojs.leakcanary.LeakCanarySetup
-import org.autojs.autojs.pluginclient.DevPluginService
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.timing.TimedTaskManager
 import org.autojs.autojs.timing.TimedTaskScheduler
@@ -40,14 +39,11 @@ import java.lang.reflect.Method
 
 /**
  * Created by Stardust on Jan 27, 2017.
- * Modified by SuperMonster003 as of Aug 23, 2022.
+ * Modified by SuperMonster003 as of Jan 17, 2026.
  */
 class App : MultiDexApplication() {
 
     lateinit var dynamicBroadcastReceivers: DynamicBroadcastReceivers
-        private set
-
-    lateinit var devPluginService: DevPluginService
         private set
 
     override fun onCreate() {
@@ -62,8 +58,6 @@ class App : MultiDexApplication() {
                 setUpDefaultNightMode()
             }
             else /* Main process. */ -> {
-                devPluginService = DevPluginService(this)
-
                 setUpDebugEnvironment()
                 setUpLeakCanary()
 
