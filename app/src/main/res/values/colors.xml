@@ -169,6 +169,7 @@
     <color name="prefTextColorPrimary">#282C2F</color>
     <color name="prefTextColorSecondary">#9DA0A2</color>
 
+    <color name="explorer_file_operation_button">#A9AAAB</color>
     <color name="project_toolbar_button">#606366</color>
     <color name="project_toolbar_title">#606366</color>
 

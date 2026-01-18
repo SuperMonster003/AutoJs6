@@ -108,7 +108,7 @@
                 android:focusable="true"
                 android:src="@drawable/ic_install_explorer_btn"
                 android:visibility="gone"
-                app:tint="#A9AAAB"
+                app:tint="@color/explorer_file_operation_button"
                 tools:visibility="visible" />
 
             <ImageView
@@ -121,7 +121,7 @@
                 android:focusable="true"
                 android:src="@drawable/ic_run_explorer_btn"
                 android:visibility="gone"
-                app:tint="#A9AAAB"
+                app:tint="@color/explorer_file_operation_button"
                 tools:visibility="visible" />
 
             <ImageView
@@ -134,7 +134,7 @@
                 android:focusable="true"
                 android:src="@drawable/ic_edit_explorer_btn"
                 android:visibility="gone"
-                app:tint="#A9AAAB"
+                app:tint="@color/explorer_file_operation_button"
                 tools:visibility="visible" />
 
             <ImageView
@@ -147,7 +147,7 @@
                 android:focusable="true"
                 android:src="@drawable/ic_info_explorer_btn"
                 android:visibility="gone"
-                app:tint="#A9AAAB"
+                app:tint="@color/explorer_file_operation_button"
                 tools:visibility="visible" />
 
         </LinearLayout>
@@ -162,7 +162,7 @@
             android:contentDescription="@string/text_more"
             android:focusable="true"
             android:src="@drawable/ic_more_explorer_btn"
-            app:tint="#A9AAAB" />
+            app:tint="@color/explorer_file_operation_button" />
 
     </LinearLayout>
 

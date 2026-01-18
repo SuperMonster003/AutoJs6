@@ -2,6 +2,7 @@ package org.autojs.autojs.ui.explorer
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.res.ColorStateList
 import android.util.AttributeSet
 import android.util.Log
 import android.view.ContextThemeWrapper
@@ -12,6 +13,7 @@ import android.view.ViewGroup
 import android.widget.PopupMenu
 import android.widget.TextView
 import androidx.core.view.isVisible
+import androidx.core.widget.ImageViewCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSmoothScroller
@@ -126,15 +128,21 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     private val mPageStateHistories = Stack<ExplorerPageState>()
     private var mDirectorySpanSize = 2
 
+    // Unify action icon tint to match day/night theme, especially for overlay dialogs.
+    // zh-CN: 统一操作图标着色以匹配日/夜主题, 尤其用于 overlay 对话框场景.
+    private val mActionIconTint by lazy {
+        ColorStateList.valueOf(context.getColor(R.color.explorer_file_operation_button))
+    }
+
     constructor(context: Context) : super(context) {
-        init()
+        init(context)
     }
 
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
-        init()
+        init(context)
     }
 
-    private fun init() {
+    private fun init(context: Context) {
         ExplorerViewBinding.inflate(LayoutInflater.from(context), this, true).also { binding ->
             this.binding = binding
             binding.explorerItemList.also {
@@ -703,6 +711,10 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
 
             mOptions = explorerFileBinding.more.apply { setOnClickListener { withItemSelected { showOptionsMenu() } } }
 
+            listOf(mRun, mEdit, mInfo, mInstall, mOptions).forEach { view ->
+                ImageViewCompat.setImageTintList(view, mActionIconTint)
+            }
+
             explorerFileBinding.item.setOnClickListener { withItemSelected { onItemClick() } }
         }
 
@@ -933,6 +945,12 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         }
 
         private var mExplorerPage: ExplorerPage? = null
+
+        init {
+            listOf(mOptions).forEach { view ->
+                ImageViewCompat.setImageTintList(view, mActionIconTint)
+            }
+        }
 
         override fun bind(data: Any, position: Int) {
             if (data !is ExplorerPage) return

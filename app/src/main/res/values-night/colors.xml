@@ -72,6 +72,7 @@
     <color name="prefTextColorPrimary">#9A9A9A</color>
     <color name="prefTextColorSecondary">#808080</color>
 
+    <color name="explorer_file_operation_button">@color/md_gray_600</color>
     <color name="project_toolbar_button">#A9AAAB</color>
     <color name="project_toolbar_title">#A9AAAB</color>
 
