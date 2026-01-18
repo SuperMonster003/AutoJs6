@@ -38,8 +38,18 @@ object DialogUtils {
                 @Suppress("DEPRECATION")
                 WindowManager.LayoutParams.TYPE_PHONE
             }
+
+            // Try setting window type before show().
+            // zh-CN: 尝试在 show() 之前设置窗口类型.
             window?.setType(type)
+
+            // Ensure window type is applied when window becomes available.
+            // zh-CN: 当 window 可用时确保窗口类型已正确应用.
+            dialog.setOnShowListener {
+                window?.setType(type)
+            }
         }
+
         if (Looper.getMainLooper() == Looper.myLooper()) {
             dialog.show()
         } else {
@@ -117,7 +127,7 @@ object DialogUtils {
                                             text = text
                                         }
                                     }
-                                    .show()
+                                    .let { showDialog(it) }
                             }
                         }
                     }
@@ -133,7 +143,7 @@ object DialogUtils {
                             text = text
                         }
                     }
-                    .show()
+                    .let { showDialog(it) }
                 true
             } ?: false
         }

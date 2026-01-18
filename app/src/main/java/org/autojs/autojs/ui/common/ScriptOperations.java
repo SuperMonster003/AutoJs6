@@ -19,6 +19,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.internal.functions.ObjectHelper;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.PublishSubject;
+import org.autojs.autojs.app.DialogUtils;
 import org.autojs.autojs.app.GlobalAppContext;
 import org.autojs.autojs.core.pref.Pref;
 import org.autojs.autojs.extension.MaterialDialogExtensions;
@@ -389,15 +390,14 @@ public class ScriptOperations {
     }
 
     public void delete(final ScriptFile scriptFile) {
-        new MaterialDialog.Builder(mContext)
+        DialogUtils.showDialog(new MaterialDialog.Builder(mContext)
                 .title(mContext.getString(R.string.text_confirm_to_delete))
                 .content(scriptFile.getName())
                 .negativeText(R.string.text_cancel)
                 .positiveText(R.string.dialog_button_confirm)
                 .positiveColorRes(R.color.dialog_button_caution)
                 .onPositive((dialog, which) -> deleteWithoutConfirm(scriptFile))
-                .build()
-                .show();
+                .build());
     }
 
     public void setAsWorkingDir(final ScriptFile scriptFile) {
@@ -409,7 +409,7 @@ public class ScriptOperations {
         }
         String content = mContext.getString(R.string.text_old_path) + ": " + oldPath + "\n"
                          + mContext.getString(R.string.text_new_path) + ": " + newPath;
-        new MaterialDialog.Builder(mContext)
+        DialogUtils.showDialog(new MaterialDialog.Builder(mContext)
                 .title(mContext.getString(R.string.text_prompt))
                 .content(content)
                 .negativeText(R.string.text_cancel)
@@ -417,8 +417,7 @@ public class ScriptOperations {
                 .positiveText(R.string.dialog_button_confirm)
                 .positiveColorRes(R.color.dialog_button_warn)
                 .onPositive((dialog, which) -> setAsWorkingDirNow(scriptFile))
-                .build()
-                .show();
+                .build());
     }
 
     public void deleteWithoutConfirm(final ScriptFile scriptFile) {
@@ -490,14 +489,14 @@ public class ScriptOperations {
     }
 
     public void importFile() {
-        new FileChooserDialogBuilder(mContext)
+        DialogUtils.showDialog(new FileChooserDialogBuilder(mContext)
                 .dir(EnvironmentUtils.getExternalStoragePath())
                 .justScriptFile()
                 .singleChoice(file -> importFile(file.getPath()).subscribe())
                 .title(R.string.text_select_file_to_import)
                 .positiveText(R.string.dialog_button_confirm)
                 .positiveColorRes(R.color.dialog_button_attraction)
-                .show();
+                .build());
     }
 
     public void timedTask(ScriptFile scriptFile) {

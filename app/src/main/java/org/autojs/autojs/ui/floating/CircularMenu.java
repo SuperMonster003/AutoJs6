@@ -86,8 +86,9 @@ public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
     };
 
     public CircularMenu(Context context) {
-        // mContext = new ContextThemeWrapper(context, R.style.AppTheme);
-        mContext = context;
+        // Use application context as base to avoid being treated as Activity context.
+        // zh-CN: 使用 application context 作为 base, 避免被识别为 Activity context.
+        mContext = new ContextThemeWrapper(context.getApplicationContext(), R.style.AppTheme);
         initFloaty();
         setupWindowListeners();
         mRecorder = GlobalActionRecorder.getSingleton(context);
@@ -137,26 +138,39 @@ public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
             ExplorerView explorerView = new ExplorerView(mContext);
             explorerView.setExplorer(Explorers.workspace(), ExplorerDirPage.createRoot(WorkingDirectoryUtils.getPath()));
             explorerView.setDirectorySpanSize(2);
-            final MaterialDialog dialog = new AppLevelThemeDialogBuilder(mContext)
-                    .title(mContext.getString(R.string.text_run_script))
+            final MaterialDialog dialog = new MaterialDialog.Builder(mContext)
+                    .title(R.string.text_run_script)
+                    .titleColorRes(R.color.day_night)
                     .customView(explorerView, false)
+                    .backgroundColorRes(R.color.window_background)
                     .positiveText(R.string.dialog_button_dismiss)
                     .positiveColorRes(R.color.dialog_button_default)
                     .cancelable(false)
                     .build();
-            explorerView.setOnItemOperateListener(item -> dialog.dismiss());
+
+            // Only dismiss on clicking the item itself.
+            // zh-CN: 仅在点击条目本体时关闭对话框.
             explorerView.setOnItemClickListener((view, item) -> {
                 if (item.isExecutable()) {
-                    Scripts.run(mContext, item.toScriptFile());
+                    dialog.dismiss();
+                    Scripts.run(view != null ? view.getContext() : explorerView.getContext(), item.toScriptFile());
                 } else {
-                    new MaterialDialog.Builder(mContext)
+                    DialogUtils.showDialog(new MaterialDialog.Builder(mContext)
                             .title(mContext.getString(R.string.error_failed_to_run_script))
-                            .content(mContext.getString(R.string.text_file_with_abs_path_is_not_an_executable_script, item.toScriptFile().getAbsolutePath()))
+                            .content(mContext.getString(
+                                    R.string.text_file_with_abs_path_is_not_an_executable_script,
+                                    item.toScriptFile().getAbsolutePath()
+                            ))
                             .positiveText(R.string.dialog_button_dismiss)
                             .positiveColorRes(R.color.dialog_button_failure)
-                            .show();
+                            .build());
                 }
             });
+
+            // Do not dismiss on action buttons (run/edit/delete/rename/etc.).
+            // zh-CN: 点击右侧操作按钮 (运行/编辑/删除/重命名等) 时不关闭对话框.
+            explorerView.setOnItemOperateListener(null);
+
             explorerView.setOnProjectToolbarOperateListener(toolbar -> dialog.dismiss());
             explorerView.setOnProjectToolbarClickListener(toolbar -> toolbar.findViewById(R.id.project_run).performClick());
             explorerView.setProjectToolbarRunnableOnly(true);
