@@ -70,7 +70,7 @@
     <string name="description_all_files_access" tools:ignore="TypographyEllipsis">\"管理所有文件\" (或 \"所有文件访问\") 权限允许 AutoJs6 在共享存储空间中通过常规文件路径直接 [ 创建 / 读取 / 修改 / 删除 ] 文件, 使脚本可以访问 \"内部存储 (Internal Storage)\", 使文件管理器可以正常显示及管理文件.\n\n在 Android 11+ 设备上, 这是实现全盘文件读写能力的主要方式.</string>
     <string name="description_app_language_preference">设置选项用于修改 AutoJs6 应用的文本内容显示语言, 同时包括脚本运行产生的错误消息等.\n\n注: 部分内容可能需要重启应用才能完成语言切换.</string>
     <string name="description_auto_night_mode">自动夜间模式开启后, AutoJs6 将根据系统设置自动切换夜间模式.\n\注: 自动夜间模式开关与夜间模式开关互相关联且互相影响.</string>
-    <string name="description_background_popup_permission" tools:ignore="TypographyEllipsis">\"后台弹出界面\" (也称 \"后台启动界面\" 或 \"后台弹出页面\") 权限允许 AutoJs6 在应用位于后台或未显示界面时, 仍可主动启动界面(Activity) 或打开特定设置页, 适合 [ 定时任务触发时打开 UI / 在锁屏或待机后恢复交互 / 由通知或快捷方式唤起脚本配置页 ] 等场景.\n\n注: 在 Xiaomi (MIUI/HyperOS), Vivo (OriginOS/Funtouch OS) 等系统上, 该权限可能默认关闭. 未授予时, 脚本尝试从后台打开页面可能会被系统拦截, 表现为 [ 无响应 / 仅后台执行但不显示界面 / 跳转失败 ].\n\n授予后仍可能受到系统其他策略影响, 如 [ 电池优化 / 自启动限制 / 后台冻结 / 应用待机 ] 等, 可结合相关权限或白名单设置一起调整.</string>
+    <string name="description_background_popup_permission" tools:ignore="TypographyEllipsis">\"后台弹出界面\" (也称 \"后台启动界面\" 或 \"后台弹出页面\") 权限允许 AutoJs6 在应用位于后台或未显示界面时, 仍可主动启动界面 (Activity) 或打开特定设置页, 适合 [ 定时任务触发时打开 UI / 在锁屏或待机后恢复交互 / 由通知或快捷方式唤起脚本配置页 ] 等场景.\n\n注: 在 Xiaomi (MIUI/HyperOS), Vivo (OriginOS/Funtouch OS) 等系统上, 该权限可能默认关闭. 未授予时, 脚本尝试从后台打开页面可能会被系统拦截, 表现为 [ 无响应 / 仅后台执行但不显示界面 / 跳转失败 ].\n\n授予后仍可能受到系统其他策略影响, 如 [ 电池优化 / 自启动限制 / 后台冻结 / 应用待机 ] 等, 可结合相关权限或白名单设置一起调整.</string>
     <string name="description_change_working_dir_preference">更改包含脚本的文件夹路径</string>
     <string name="description_check_for_updates_preference">AutoJs6 从 GitHub 获取并下载更新.</string>
     <string name="description_client_mode">客户端模式用于让 AutoJs6 主动连接到远端服务端, 以便进行 [ 脚本传输 / 打印日志 / 远程控制 ] 等.\n\n通常需要设备与服务端处于同一局域网或可互相访问的网络环境.</string>
@@ -1177,5 +1177,15 @@
     <string name="text_sort_by_name">按名称排序</string>
     <string name="text_sort_by_last_update_time">按最近更新排序</string>
     <string name="text_sort_by_package_size">按安装包大小排序</string>
+    <string name="error_missing_required_plugin_for_module_label">缺少 \"%1$s\" 所需的插件. 请先安装插件, 然后重试.</string>
+    <string name="error_no_enabled_plugin_for_module_label">\"%1$s\" 没有已启用的插件. 请先启用插件, 然后重试.</string>
+    <string name="error_no_available_enabled_plugin_variants_found">未找到可用且已启用的 %1$s 插件变体 (%2$s).</string>
+    <string name="error_plugin_apk_does_not_contain_required_assets_for_variant">插件 APK 不包含变体 \"%1$s\" 所需的资源文件: %2$s.</string>
+    <string name="error_plugin_apk_does_not_contain_required_native_libraries">插件 APK 不包含所需的 native 库文件: %1$s.</string>
+    <string name="error_failed_to_bind_plugin_service">绑定 %1$s 插件服务失败.</string>
+    <string name="error_timeout_while_querying_plugin_info">查询 %1$s 插件信息超时.</string>
+    <string name="error_plugin_returned_empty_info">%1$s 插件返回的 info 为空.</string>
+    <string name="error_plugin_returned_invalid_variant">%1$s 插件返回的 variant 无效: %2$s.</string>
+    <string name="error_no_embedded_paddle_ocr_assets_found">未找到内置 Paddle OCR 资源, 请在打包时勾选并注入 Paddle OCR 后重试.</string>
 
 </resources>

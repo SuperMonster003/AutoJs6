@@ -1,6 +1,7 @@
 package org.autojs.autojs.runtime.api.augment.ocr
 
 import kotlinx.coroutines.runBlocking
+import org.autojs.autojs.AbstractAutoJs.Companion.isInrt
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.apkbuilder.ApkBuilder
 import org.autojs.autojs.core.image.ImageWrapper
@@ -15,7 +16,7 @@ import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.RhinoUtils.coerceBoolean
 import org.autojs.autojs.util.RhinoUtils.coerceIntNumber
 import org.autojs.autojs6.R
-import org.autojs.plugin.paddle.ocr.OcrOptions
+import org.autojs.plugin.paddle.ocr.api.OcrOptions
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeObject
 
@@ -50,33 +51,47 @@ class OcrPaddle(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRu
         }
 
         fun recognizeTextImpl(scriptRuntime: ScriptRuntime, image: ImageWrapper, options: NativeObject): List<String> {
-            ApkBuilder.Libs.PADDLE_OCR.ensureLibFiles(OcrMode.PADDLE.value)
+            ApkBuilder.Lib.PADDLE_OCR.ensureLibFiles(OcrMode.PADDLE.value)
             val (cpuThreadNum, useSlim, useOpenCL) = getOcrOptions(options)
             val ocrOptions = OcrOptions().apply {
                 this.cpuThreadNum = cpuThreadNum
                 this.useSlim = useSlim
                 this.useOpenCL = useOpenCL
             }
-            return runBlocking(scriptRuntime.coroutineContext) {
-                val target = PaddleOcrPluginHost.select(globalContext)
-                    ?: throw WrappedIllegalArgumentException(globalContext.getString(R.string.error_no_paddle_ocr_plugins_available))
-                PaddleOcrPluginHost.recognizeText(globalContext, target, image.bitmap, ocrOptions)
+            return if (!isInrt) {
+                runBlocking(scriptRuntime.coroutineContext) {
+                    val target = PaddleOcrPluginHost.select(globalContext)
+                        ?: throw WrappedIllegalArgumentException(globalContext.getString(R.string.error_no_paddle_ocr_plugins_available))
+                    PaddleOcrPluginHost.recognizeText(globalContext, target, image.bitmap, ocrOptions)
+                }
+            } else {
+                // Use embedded engine in packaged (INRT) app.
+                // zh-CN: 打包应用 (INRT) 使用内置引擎 (本地推理), 不依赖插件.
+                PaddleOcrEmbeddedEngine.recognizeText(globalContext, image.bitmap, ocrOptions)
             }
         }
 
         fun detectImpl(scriptRuntime: ScriptRuntime, image: ImageWrapper, options: NativeObject): List<OcrResult> {
-            ApkBuilder.Libs.PADDLE_OCR.ensureLibFiles(OcrMode.PADDLE.value)
+            ApkBuilder.Lib.PADDLE_OCR.ensureLibFiles(OcrMode.PADDLE.value)
             val (cpuThreadNum, useSlim, useOpenCL) = getOcrOptions(options)
             val ocrOptions = OcrOptions().apply {
                 this.cpuThreadNum = cpuThreadNum
                 this.useSlim = useSlim
                 this.useOpenCL = useOpenCL
             }
-            return runBlocking(scriptRuntime.coroutineContext) {
-                val target = PaddleOcrPluginHost.select(globalContext)
-                    ?: throw WrappedIllegalArgumentException(globalContext.getString(R.string.error_no_paddle_ocr_plugins_available))
-                PaddleOcrPluginHost.detect(globalContext, target, image.bitmap, ocrOptions)
-            }.map { OcrResult(it.text, it.confidence, it.bounds) }
+            return if (!isInrt) {
+                runBlocking(scriptRuntime.coroutineContext) {
+                    val target = PaddleOcrPluginHost.select(globalContext)
+                        ?: throw WrappedIllegalArgumentException(globalContext.getString(R.string.error_no_paddle_ocr_plugins_available))
+                    PaddleOcrPluginHost.detect(globalContext, target, image.bitmap, ocrOptions)
+                }.map { OcrResult(it.text, it.confidence, it.bounds) }
+            } else {
+                // Use embedded engine in packaged (INRT) app.
+                // zh-CN: 打包应用 (INRT) 使用内置引擎 (本地推理), 不依赖插件.
+                PaddleOcrEmbeddedEngine.detect(globalContext, image.bitmap, ocrOptions).map {
+                    OcrResult(it.text, it.confidence, it.bounds)
+                }
+            }
         }
 
         private fun getOcrOptions(options: NativeObject): OcrOptions {

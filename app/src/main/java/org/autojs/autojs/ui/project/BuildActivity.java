@@ -240,7 +240,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     private KeyStoreViewModel mKeyStoreViewModel;
 
     static {
-        for (ApkBuilder.Libs entry : ApkBuilder.Libs.getEntries()) {
+        for (ApkBuilder.Lib entry : ApkBuilder.Lib.getEntries()) {
             if (entry.enumerable) {
                 SUPPORTED_LIBS.add(entry.label);
                 LIB_ALIASES.put(entry.label, entry.aliases);

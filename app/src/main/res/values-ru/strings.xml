@@ -1179,5 +1179,15 @@
     <string name="text_sort_by_name">Сортировать по имени</string>
     <string name="text_sort_by_last_update_time">Сортировать по времени последнего обновления</string>
     <string name="text_sort_by_package_size">Сортировать по размеру пакета</string>
+    <string name="error_missing_required_plugin_for_module_label">Отсутствует требуемый плагин для \"%1$s\". Установите плагин и повторите попытку.</string>
+    <string name="error_no_enabled_plugin_for_module_label">Для \"%1$s\" нет включённого плагина. Включите плагин и повторите попытку.</string>
+    <string name="error_no_available_enabled_plugin_variants_found">Не найдено доступных и включённых вариантов плагина %1$s (%2$s).</string>
+    <string name="error_plugin_apk_does_not_contain_required_assets_for_variant">APK плагина не содержит требуемые ресурсы для variant=\"%1$s\": %2$s.</string>
+    <string name="error_plugin_apk_does_not_contain_required_native_libraries">APK плагина не содержит требуемые native-библиотеки: %1$s.</string>
+    <string name="error_failed_to_bind_plugin_service">Не удалось привязаться к службе плагина %1$s.</string>
+    <string name="error_timeout_while_querying_plugin_info">Тайм-аут при запросе информации о плагине %1$s.</string>
+    <string name="error_plugin_returned_empty_info">Плагин %1$s вернул пустую информацию.</string>
+    <string name="error_plugin_returned_invalid_variant">Плагин %1$s вернул недопустимый variant: %2$s.</string>
+    <string name="error_no_embedded_paddle_ocr_assets_found">Не найдены встроенные ресурсы Paddle OCR. Перепакуйте приложение с включённым Paddle OCR.</string>
 
 </resources>

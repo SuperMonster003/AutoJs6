@@ -1,17 +1,25 @@
 package org.autojs.autojs.apkbuilder
 
+import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
 import android.content.pm.PackageManager.ApplicationInfoFlags
 import android.content.pm.PackageManager.GET_SHARED_LIBRARY_FILES
+import android.content.pm.ServiceInfo
 import android.content.res.AssetManager
 import android.graphics.Bitmap
 import android.os.Build
+import android.os.IBinder
 import android.util.Log
 import com.mcal.apksigner.ApkSigner
 import com.reandroid.arsc.chunk.TableBlock
 import org.autojs.autojs.AbstractAutoJs.Companion.isInrt
 import org.autojs.autojs.apkbuilder.keystore.AESUtils
 import org.autojs.autojs.app.GlobalAppContext
+import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.autojs.engine.encryption.AdvancedEncryptionStandard
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.project.BuildInfo
@@ -23,6 +31,7 @@ import org.autojs.autojs.script.JavaScriptFileSource
 import org.autojs.autojs.util.FileUtils.TYPE.JAVASCRIPT
 import org.autojs.autojs.util.MD5Utils
 import org.autojs.autojs6.R
+import org.autojs.plugin.paddle.ocr.api.IOcrPlugin
 import pxb.android.StringItem
 import pxb.android.axml.AxmlWriter
 import zhao.arsceditor.ResDecoder.ARSCDecoder
@@ -33,10 +42,15 @@ import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import java.util.zip.ZipEntry
+import java.util.zip.ZipFile
 
 /**
  * Created by Stardust on Oct 24, 2017.
- * Modified by SuperMonster003 as of Jul 8, 2022.
+ * Modified by JetBrains AI Assistant (GPT-5.2) as of Jan 17, 2026.
+ * Modified by SuperMonster003 as of Jan 18, 2026.
  */
 open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File, private val buildPath: String) {
 
@@ -52,9 +66,9 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
 
     private val mAssetManager: AssetManager by lazy { globalContext.assets }
 
-    private var mLibsIncludes = Libs.defaultLibsToInclude.toMutableList()
-    private var mAssetsFileIncludes = Libs.defaultAssetFilesToInclude.toMutableList()
-    private var mAssetsDirExcludes = Libs.defaultAssetDirsToExclude.toMutableList()
+    private var mLibsIncludes = Lib.defaultLibsToInclude.toMutableList()
+    private var mAssetsFileIncludes = Lib.defaultAssetFilesToInclude.toMutableList()
+    private var mAssetsDirExcludes = Lib.defaultAssetDirsToExclude.toMutableList()
 
     private var mSplashThemeId: Int = 0
     private var mNoSplashThemeId: Int = 0
@@ -231,11 +245,11 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
 
         mKey = MD5Utils.md5(projectConfig.run { packageName + versionName + mainScriptFileName })
         mInitVector = MD5Utils.md5(projectConfig.run { buildInfo.buildId + name }).take(16)
-        Libs.entries.forEach { entry ->
+        Lib.entries.forEach { entry ->
             if (config.libs.contains(entry.label)) {
                 mLibsIncludes += entry.libsToInclude.toSet()
                 mAssetsFileIncludes += entry.assetFilesToInclude.toSet()
-                mAssetsDirExcludes -= entry.assetDirsToExclude.toSet()
+                mAssetsDirExcludes -= entry.assetDirsToInclude.toSet()
             }
         }
     }
@@ -418,11 +432,331 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
             "armeabi-v7a" to "arm",
         )
 
+        // Try extracting native libraries from installed plugin APKs if needed.
+        // zh-CN: 如有需要, 尝试从已安装插件 APK 中解压 native 库文件.
+        ensureAndExtractPluginLibrariesIfNeeded(config, potentialAbiAliasList)
+
         config.abis.forEach { abiCanonicalName ->
             copyLibrariesByAbi(abiCanonicalName, abiCanonicalName)
             potentialAbiAliasList[abiCanonicalName]?.let { abiAliasName ->
                 copyLibrariesByAbi(abiAliasName, abiCanonicalName)
             }
+        }
+    }
+
+    private fun ensureAndExtractPluginLibrariesIfNeeded(
+        config: ProjectConfig,
+        potentialAbiAliasList: Map<String, String>,
+    ) {
+        Lib.entries.mapNotNull {
+            if (it.isPlugin && config.libs.contains(it.label)) it.toPluginPair() else null
+        }.forEach { (lib, plugin) ->
+            // Select plugin service by variant.
+            // zh-CN: 通过 variant 选择插件服务.
+            val (serviceInfo, selectedVariant) = selectPluginServiceOrThrow(
+                lib = lib,
+                action = plugin.action,
+            )
+
+            Log.i(TAG, "Selected ${lib.label} plugin: variant=${selectedVariant.variant}, pkg=${serviceInfo.packageName}")
+
+            // Extract libraries from installed plugin APK (variant-aware).
+            // zh-CN: 从已安装插件 APK 中解压 so 文件, 并按变体裁剪.
+            extractLibrariesFromPluginApkOrThrow(
+                config = config,
+                requiredLibNames = selectedVariant.libsToInclude,
+                serviceInfo = serviceInfo,
+                potentialAbiAliasList = potentialAbiAliasList,
+            )
+
+            // Extract assets (models/labels) from installed plugin APK (variant-aware).
+            // zh-CN: 从已安装插件 APK 中解压 assets 资源 (models/labels), 并按变体裁剪.
+            extractAssetsFromPluginApkOrThrow(
+                serviceInfo = serviceInfo,
+                pluginLibVariant = selectedVariant,
+            )
+        }
+    }
+
+    private fun selectPluginServiceOrThrow(
+        lib: Lib,
+        action: String,
+    ): Pair<ServiceInfo, PluginLibVariant> {
+        val pm = globalContext.packageManager
+        val moduleLabel = lib.label
+        val pluginPair = lib.toPluginPair()
+        val plugin = pluginPair.second
+        val services = findServicesByAction(pm, action)
+        if (services.isEmpty()) {
+            throw IllegalStateException(
+                globalContext.getString(R.string.error_missing_required_plugin_for_module_label, moduleLabel)
+            )
+        }
+
+        // Only consider enabled plugins in packaging phase.
+        // zh-CN: 打包阶段仅考虑已启用的插件.
+        val enabledServices = services.filter { si ->
+            PluginEnableStore.isEnabled(globalContext, si.packageName, defaultEnabled = true)
+        }
+
+        if (enabledServices.isEmpty()) {
+            throw IllegalStateException(
+                globalContext.getString(R.string.error_no_enabled_plugin_for_module_label, moduleLabel)
+            )
+        }
+
+        val infos = enabledServices.mapNotNull { si ->
+            val info = runCatching { queryPluginInfoBlocking(globalContext, si, pluginPair) }.getOrNull()
+            info?.let { si to it }
+        }
+
+        val variantList = plugin.variants.map { it.variant?.lowercase() }
+
+        infos.filter { (_, pi) ->
+            pi.variant?.lowercase() in variantList
+        }.maxByOrNull { (_, pi) -> pi.variant?.replace(Regex("\\D"), "")?.toIntOrNull() ?: 0 }?.let {
+            return it
+        }
+
+        infos.firstOrNull()?.let { return it }
+
+        throw IllegalStateException(
+            globalContext.getString(R.string.error_no_available_enabled_plugin_variants_found, moduleLabel, variantList.joinToString("/"))
+        )
+    }
+
+    private fun queryPluginInfoBlocking(context: Context, serviceInfo: ServiceInfo, pluginPair: Pair<Lib, PluginLib>): PluginLibVariant {
+        // Bind service and call getInfo() synchronously (packaging-time only).
+        // zh-CN: 同步绑定服务并调用 getInfo() (仅打包阶段使用).
+        val latch = CountDownLatch(1)
+        var selectedVariant: String? = null
+        var error: Throwable? = null
+
+        val (lib, plugin) = pluginPair
+
+        val intent = Intent(plugin.action).apply {
+            component = ComponentName(serviceInfo.packageName, serviceInfo.name)
+        }
+
+        val conn = object : ServiceConnection {
+            override fun onServiceConnected(name: ComponentName, binder: IBinder) {
+                try {
+                    selectedVariant = plugin.onServiceConnected(binder)
+                } catch (t: Throwable) {
+                    error = t
+                } finally {
+                    latch.countDown()
+                }
+            }
+
+            override fun onServiceDisconnected(name: ComponentName) {
+                // Ignored.
+            }
+        }
+
+        val bound = runCatching {
+            context.bindService(intent, conn, Context.BIND_AUTO_CREATE)
+        }.getOrDefault(false)
+
+        if (!bound) {
+            throw IllegalStateException(
+                globalContext.getString(R.string.error_failed_to_bind_plugin_service, lib.label)
+            )
+        }
+
+        try {
+            val ok = latch.await(15, TimeUnit.SECONDS)
+            if (!ok) {
+                throw IllegalStateException(
+                    globalContext.getString(R.string.error_timeout_while_querying_plugin_info, lib.label)
+                )
+            }
+            error?.let { throw it }
+            selectedVariant ?: throw IllegalStateException(
+                globalContext.getString(R.string.error_plugin_returned_empty_info, lib.label)
+            )
+            return plugin.variants.firstOrNull {
+                it.variant.equals(selectedVariant, ignoreCase = true)
+            } ?: throw IllegalStateException(
+                globalContext.getString(R.string.error_plugin_returned_invalid_variant, lib.label, selectedVariant)
+            )
+        } finally {
+            runCatching { context.unbindService(conn) }
+        }
+    }
+
+    private fun extractAssetsFromPluginApkOrThrow(
+        serviceInfo: ServiceInfo,
+        pluginLibVariant: PluginLibVariant,
+    ) {
+        val pm = globalContext.packageManager
+
+        val appInfo = getApplicationInfoCompat(pm, serviceInfo.packageName)
+        val apkPaths = buildList {
+            add(appInfo.sourceDir)
+            appInfo.splitSourceDirs?.forEach { add(it) }
+        }.distinct()
+
+        val (requiredPrefixes, optionalPrefixes) = pluginLibVariant.assetsToInclude
+
+        // Extract required prefixes.
+        // zh-CN: 解压必需前缀.
+        val missingRequired = mutableListOf<String>()
+        requiredPrefixes.forEach { prefix ->
+            val ok = extractAssetsByPrefixFromApks(
+                apkPaths = apkPaths,
+                assetPrefix = prefix,
+            )
+            if (!ok) missingRequired += prefix
+        }
+
+        if (missingRequired.isNotEmpty()) {
+            val detail = missingRequired.joinToString(", ")
+            throw IllegalStateException(
+                globalContext.getString(R.string.error_plugin_apk_does_not_contain_required_assets_for_variant, pluginLibVariant.variant, detail)
+            )
+        }
+
+        // Extract optional prefixes (best-effort).
+        // zh-CN: 解压可选前缀 (尽力而为).
+        optionalPrefixes.forEach { prefix ->
+            extractAssetsByPrefixFromApks(
+                apkPaths = apkPaths,
+                assetPrefix = prefix,
+            )
+        }
+    }
+
+    private fun extractAssetsByPrefixFromApks(
+        apkPaths: List<String>,
+        assetPrefix: String,
+    ): Boolean {
+        var extractedAny = false
+        apkPaths.forEach { apkPath ->
+            runCatching {
+                ZipFile(apkPath).use { zip ->
+                    val entries = zip.entries()
+                    while (entries.hasMoreElements()) {
+                        val entry: ZipEntry = entries.nextElement()
+                        val name = entry.name
+                        if (!name.startsWith(assetPrefix)) continue
+                        if (entry.isDirectory) continue
+
+                        val relative = name.removePrefix("assets/")
+                        val outFile = File(buildPath, "assets/$relative").apply {
+                            parentFile?.let { parent -> if (!parent.exists()) parent.mkdirs() }
+                        }
+
+                        zip.getInputStream(entry).use { input ->
+                            FileOutputStream(outFile, false).use { output ->
+                                input.copyTo(output, bufferSize = 16 * 1024)
+                                output.fd.sync()
+                            }
+                        }
+
+                        extractedAny = true
+                    }
+                }
+            }.onFailure {
+                // Ignore and try next apk path.
+                // zh-CN: 忽略异常并尝试下一个 apk 路径.
+                it.printStackTrace()
+            }
+        }
+        return extractedAny
+    }
+
+    private fun extractLibrariesFromPluginApkOrThrow(
+        config: ProjectConfig,
+        requiredLibNames: List<String>,
+        serviceInfo: ServiceInfo,
+        potentialAbiAliasList: Map<String, String>,
+    ) {
+        val pm = globalContext.packageManager
+
+        val appInfo = getApplicationInfoCompat(pm, serviceInfo.packageName)
+        val apkPaths = buildList {
+            add(appInfo.sourceDir)
+            appInfo.splitSourceDirs?.forEach { add(it) }
+        }.distinct()
+
+        val missingPairs = mutableListOf<Pair<String, String>>() // (abi, soName)
+
+        config.abis.forEach { abiCanonicalName ->
+            val abiCandidates = buildList {
+                add(abiCanonicalName)
+                potentialAbiAliasList[abiCanonicalName]?.let { add(it) }
+            }.distinct()
+
+            requiredLibNames.forEach { soName ->
+                val ok = extractFirstMatchedSoFromApks(
+                    apkPaths = apkPaths,
+                    abiCandidates = abiCandidates,
+                    soName = soName,
+                    abiDestName = abiCanonicalName,
+                )
+                if (!ok) missingPairs += abiCanonicalName to soName
+            }
+        }
+
+        if (missingPairs.isNotEmpty()) {
+            val detail = missingPairs.joinToString(", ") { (abi, so) -> "$abi/$so" }
+            throw IllegalStateException(
+                globalContext.getString(R.string.error_plugin_apk_does_not_contain_required_native_libraries, detail)
+            )
+        }
+    }
+
+    private fun findServicesByAction(pm: PackageManager, action: String): List<ServiceInfo> {
+        val resolveList = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            pm.queryIntentServices(Intent(action), PackageManager.ResolveInfoFlags.of(0))
+        } else {
+            @Suppress("DEPRECATION")
+            pm.queryIntentServices(Intent(action), 0)
+        }
+        return resolveList.mapNotNull { it.serviceInfo }
+    }
+
+    private fun extractFirstMatchedSoFromApks(
+        apkPaths: List<String>,
+        abiCandidates: List<String>,
+        soName: String,
+        abiDestName: String,
+    ): Boolean {
+        apkPaths.forEach { apkPath ->
+            runCatching {
+                ZipFile(apkPath).use { zip ->
+                    abiCandidates.forEach { abiInApk ->
+                        val entryName = "lib/$abiInApk/$soName"
+                        val entry = zip.getEntry(entryName) ?: return@forEach
+                        val outFile = File(buildPath, "lib/$abiDestName/$soName").apply {
+                            parentFile?.let { parent -> if (!parent.exists()) parent.mkdirs() }
+                        }
+                        zip.getInputStream(entry).use { input ->
+                            FileOutputStream(outFile, false).use { output ->
+                                input.copyTo(output, bufferSize = 16 * 1024)
+                                output.fd.sync()
+                            }
+                        }
+                        Log.i(TAG, "Extracted so from plugin apk: $apkPath!/$entryName -> ${outFile.path}")
+                        return true
+                    }
+                }
+            }.onFailure {
+                // Ignore and try next apk path.
+                // zh-CN: 忽略异常并尝试下一个 apk 路径.
+                it.printStackTrace()
+            }
+        }
+        return false
+    }
+
+    private fun getApplicationInfoCompat(pm: PackageManager, packageName: String): ApplicationInfo {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            pm.getApplicationInfo(packageName, ApplicationInfoFlags.of(0))
+        } else {
+            @Suppress("DEPRECATION")
+            pm.getApplicationInfo(packageName, 0)
         }
     }
 
@@ -466,12 +800,15 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
     }
 
     @Suppress("SpellCheckingInspection")
-    enum class Libs(
+    enum class Lib(
         @JvmField val label: String,
         @JvmField val aliases: List<String> = emptyList(),
         @JvmField val enumerable: Boolean = true,
+        internal val plugin: PluginLib? = null,
         internal val libsToInclude: List<String> = emptyList(),
         internal val assetFilesToInclude: List<String> = emptyList(),
+        // Select, then include into packaging APK. (选择后, 会被打包进 APK 中.)
+        internal val assetDirsToInclude: List<String> = emptyList(),
         internal val assetDirsToExclude: List<String> = emptyList(),
     ) {
 
@@ -499,7 +836,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
             libsToInclude = listOf(
                 "libmlkit_google_ocr_pipeline.so",
             ),
-            assetDirsToExclude = listOf(
+            assetDirsToInclude = listOf(
                 "mlkit-google-ocr-models",
             ),
         ),
@@ -507,14 +844,51 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         PADDLE_OCR(
             label = "Paddle OCR",
             aliases = listOf("paddle", "paddleocr", "paddle-ocr", "paddle_ocr"),
-            libsToInclude = listOf(
-                "libc++_shared.so",
-                "libpaddle_light_api_shared.so",
-                "libNative.so",
-            ),
+            libsToInclude = emptyList(),
+            assetDirsToInclude = emptyList(),
             assetDirsToExclude = listOf(
                 "models",
-            )
+            ),
+            plugin = PluginLib(
+                action = "org.autojs.plugin.PADDLE_OCR",
+                onServiceConnected = { binder: IBinder ->
+                    IOcrPlugin.Stub.asInterface(binder).info.variant
+                },
+                variants = listOf(
+                    PluginLibVariant(
+                        variant = "v3",
+                        assetsToInclude = listOf(
+                            "assets/labels/ppocr_keys_v1.txt",
+                            "assets/models/ocr_v3_for_cpu/",
+                        ) to listOf(
+                            "assets/models/ocr_v3_for_cpu(slim)/",
+                        ),
+                        libsToInclude = listOf(
+                            "libc++_shared.so",
+                            "libpaddle_light_api_shared.so",
+                            "libNative.so",
+                            "libopencv_java4.so",
+                        ),
+                    ),
+                    PluginLibVariant(
+                        variant = "v5",
+                        assetsToInclude = listOf(
+                            "assets/labels/ppocr_keys_ocrv5.txt",
+                            "assets/models/pp-ocrv5-arm/",
+                            "assets/models/pp-ocrv5-arm-int8/",
+                            "assets/models/pp-ocrv5-arm-opencl/",
+                            "assets/models/pp-ocrv5-arm-opencl-int8/",
+                        ) to emptyList(),
+                        libsToInclude = listOf(
+                            "libc++_shared.so",
+                            "libpaddle_light_api_shared.so",
+                            "libNative.so",
+                            "libopencv_java4.so",
+                            "libopencl_probe.so",
+                        ),
+                    ),
+                ),
+            ),
         ),
 
         RAPID_OCR(
@@ -524,7 +898,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
                 "libRapidOcr.so",
                 "libonnxruntime.so",
             ),
-            assetDirsToExclude = listOf(
+            assetDirsToInclude = listOf(
                 "labels",
             ),
         ),
@@ -535,7 +909,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
             libsToInclude = listOf(
                 "libChineseConverter.so",
             ),
-            assetDirsToExclude = listOf(
+            assetDirsToInclude = listOf(
                 "openccdata",
             ),
         ),
@@ -557,7 +931,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
             libsToInclude = listOf(
                 "libbarhopper_v3.so",
             ),
-            assetDirsToExclude = listOf(
+            assetDirsToInclude = listOf(
                 "mlkit_barcode_models",
             ),
         ),
@@ -582,6 +956,11 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
 
         ;
 
+        val isPlugin: Boolean
+            get() = plugin != null
+
+        fun toPluginPair(): Pair<Lib, PluginLib> = this to plugin!!
+
         fun ensureLibFiles(moduleName: String = label) {
             if (!isInrt) return
             val nativeLibraryDir = File(globalContext.applicationInfo.nativeLibraryDir)
@@ -604,10 +983,23 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
 
             val defaultAssetDirsToExclude = listOf(
                 "doc", "docs", "editor", "indices", "js-beautify", "sample", "stored-locales",
-            ) + Libs.entries.flatMap { it.assetDirsToExclude }
+            ) + entries.flatMap { it.assetDirsToInclude } + entries.flatMap { it.assetDirsToExclude }
 
         }
 
     }
+
+    data class PluginLib(
+        val action: String,
+        val onServiceConnected: (IBinder) -> String,
+        val variants: List<PluginLibVariant>,
+    )
+
+    data class PluginLibVariant(
+        val variant: String? = null,
+        /** <Required List> to <Optional List>. */
+        val assetsToInclude: Pair<List<String>, List<String>> = emptyList<String>() to emptyList(),
+        val libsToInclude: List<String> = emptyList(),
+    )
 
 }
