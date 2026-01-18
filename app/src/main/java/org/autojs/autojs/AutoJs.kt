@@ -17,6 +17,7 @@ import org.autojs.autojs.execution.ScriptExecutionGlobalListener
 import org.autojs.autojs.external.fileprovider.AppFileProvider
 import org.autojs.autojs.ipc.LayoutInspectEvent
 import org.autojs.autojs.ipc.LayoutInspectEventBus
+import org.autojs.autojs.pluginclient.DevPluginService
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.AppUtils
 import org.autojs.autojs.runtime.api.AppUtils.Companion.ActivityShortForm
@@ -33,11 +34,15 @@ import org.autojs.autojs.inrt.autojs.AutoJs as AutoJsInrt
 
 /**
  * Created by Stardust on Apr 2, 2017.
- * Modified by SuperMonster003 as of Dec 1, 2021.
  * Transformed by SuperMonster003 on Oct 10, 2022.
  * Modified by LZX284 (https://github.com/LZX284) as of Sep 30, 2023.
+ * Modified by SuperMonster003 as of Jan 17, 2026.
  */
 open class AutoJs(appContext: Application) : AbstractAutoJs(appContext) {
+
+    internal val devPluginService by lazy {
+        DevPluginService(application)
+    }
 
     // @Thank to Zen2H
     // Use bounded queue to prevent log flooding from blocking the whole channel.
@@ -122,7 +127,6 @@ open class AutoJs(appContext: Application) : AbstractAutoJs(appContext) {
     override fun createAppUtils(context: Context) = AppUtils(context, AppFileProvider.AUTHORITY)
 
     override fun createGlobalConsole(): GlobalConsole {
-        val devPluginService by lazy { App.app.devPluginService }
         return object : GlobalConsole(uiHandler) {
             override fun println(level: Int, charSequence: CharSequence): String {
                 return super.println(level, charSequence).also {

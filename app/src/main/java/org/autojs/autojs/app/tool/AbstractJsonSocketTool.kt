@@ -4,16 +4,16 @@ import android.content.Context
 import android.content.DialogInterface
 import io.reactivex.disposables.Disposable
 import io.reactivex.functions.Consumer
-import org.autojs.autojs.App
+import org.autojs.autojs.AutoJs
 import org.autojs.autojs.ui.main.drawer.SocketItemHelper
 
 /**
  * Created by SuperMonster003 on Jun 24, 2022.
- * Modified by SuperMonster003 as of Jan 14, 2026.
+ * Modified by SuperMonster003 as of Jan 17, 2026.
  */
 abstract class AbstractJsonSocketTool(final override val context: Context) : SocketItemHelper {
 
-    protected val devPlugin by lazy { App.app.devPluginService }
+    protected val devPlugin by lazy { AutoJs.instance.devPluginService }
 
     @JvmField
     protected var stateDisposable: Disposable? = null
