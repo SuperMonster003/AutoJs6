@@ -1181,5 +1181,15 @@
     <string name="text_sort_by_name">이름순 정렬</string>
     <string name="text_sort_by_last_update_time">최근 업데이트순 정렬</string>
     <string name="text_sort_by_package_size">패키지 크기순 정렬</string>
+    <string name="error_missing_required_plugin_for_module_label">\"%1$s\"에 필요한 플러그인이 없습니다. 플러그인을 설치한 후 다시 시도해 주세요.</string>
+    <string name="error_no_enabled_plugin_for_module_label">\"%1$s\"에 활성화된 플러그인이 없습니다. 플러그인을 활성화한 후 다시 시도해 주세요.</string>
+    <string name="error_no_available_enabled_plugin_variants_found">사용 가능하며 활성화된 %1$s 플러그인 variant를 찾을 수 없습니다 (%2$s).</string>
+    <string name="error_plugin_apk_does_not_contain_required_assets_for_variant">플러그인 APK에 variant=\"%1$s\"에 필요한 assets가 포함되어 있지 않습니다: %2$s.</string>
+    <string name="error_plugin_apk_does_not_contain_required_native_libraries">플러그인 APK에 필요한 native 라이브러리가 포함되어 있지 않습니다: %1$s.</string>
+    <string name="error_failed_to_bind_plugin_service">%1$s 플러그인 서비스 바인딩에 실패했습니다.</string>
+    <string name="error_timeout_while_querying_plugin_info">%1$s 플러그인 정보 조회가 시간 초과되었습니다.</string>
+    <string name="error_plugin_returned_empty_info">%1$s 플러그인이 빈 info를 반환했습니다.</string>
+    <string name="error_plugin_returned_invalid_variant">%1$s 플러그인이 잘못된 variant를 반환했습니다: %2$s.</string>
+    <string name="error_no_embedded_paddle_ocr_assets_found">내장된 Paddle OCR assets를 찾을 수 없습니다. Paddle OCR을 활성화하여 다시 패키징해 주세요.</string>
 
 </resources>

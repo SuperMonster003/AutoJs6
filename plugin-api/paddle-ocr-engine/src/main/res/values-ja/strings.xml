@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_failed_to_initialize_paddle_ocr_predictor">Paddle OCR predictor の初期化に失敗しました.</string>
+    <string name="error_missing_modeldir_for_variant">variant=%1$s の modelDir が見つかりません.</string>
+    <string name="error_failed_to_decode_checking_drawable_resource">確認用 drawable リソースのデコードに失敗しました.</string>
+    <string name="error_missing_required_paddle_ocr_asset">必要な Paddle OCR asset が見つかりません: %1$s.</string>
+</resources>

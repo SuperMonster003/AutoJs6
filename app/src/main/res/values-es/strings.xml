@@ -1179,5 +1179,15 @@
     <string name="text_sort_by_name">Ordenar por nombre</string>
     <string name="text_sort_by_last_update_time">Ordenar por última actualización</string>
     <string name="text_sort_by_package_size">Ordenar por tamaño del paquete</string>
+    <string name="error_missing_required_plugin_for_module_label">Falta el plugin requerido para \"%1$s\". Instala el plugin e inténtalo de nuevo.</string>
+    <string name="error_no_enabled_plugin_for_module_label">No hay ningún plugin habilitado para \"%1$s\". Habilita un plugin e inténtalo de nuevo.</string>
+    <string name="error_no_available_enabled_plugin_variants_found">No se encontraron variantes de plugin %1$s habilitadas y disponibles (%2$s).</string>
+    <string name="error_plugin_apk_does_not_contain_required_assets_for_variant">El APK del plugin no contiene los recursos necesarios para variant=\"%1$s\": %2$s.</string>
+    <string name="error_plugin_apk_does_not_contain_required_native_libraries">El APK del plugin no contiene las bibliotecas nativas requeridas: %1$s.</string>
+    <string name="error_failed_to_bind_plugin_service">No se pudo vincular el servicio del plugin %1$s.</string>
+    <string name="error_timeout_while_querying_plugin_info">Tiempo de espera agotado al consultar la información del plugin %1$s.</string>
+    <string name="error_plugin_returned_empty_info">El plugin %1$s devolvió información vacía.</string>
+    <string name="error_plugin_returned_invalid_variant">El plugin %1$s devolvió una variante no válida: %2$s.</string>
+    <string name="error_no_embedded_paddle_ocr_assets_found">No se encontraron recursos integrados de Paddle OCR. Vuelve a empaquetar con Paddle OCR habilitado.</string>
 
 </resources>

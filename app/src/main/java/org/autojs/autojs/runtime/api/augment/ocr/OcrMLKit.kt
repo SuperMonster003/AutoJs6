@@ -41,7 +41,7 @@ class OcrMLKit(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRun
         //  ! Reserved param `options`.
         //  ! zh-CN: 预留参数 `options`.
         fun recognizeTextImpl(scriptRuntime: ScriptRuntime, image: ImageWrapper, options: NativeObject): List<String> {
-            ApkBuilder.Libs.MLKIT_OCR.ensureLibFiles(OcrMode.MLKIT.value)
+            ApkBuilder.Lib.MLKIT_OCR.ensureLibFiles(OcrMode.MLKIT.value)
             return scriptRuntime.ocrMLKit.recognizeText(image)
         }
 
@@ -49,7 +49,7 @@ class OcrMLKit(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRun
         //  ! Reserved param `options`.
         //  ! zh-CN: 预留参数 `options`.
         fun detectImpl(scriptRuntime: ScriptRuntime, image: ImageWrapper, options: NativeObject): List<OcrResult> {
-            ApkBuilder.Libs.MLKIT_OCR.ensureLibFiles(OcrMode.MLKIT.value)
+            ApkBuilder.Lib.MLKIT_OCR.ensureLibFiles(OcrMode.MLKIT.value)
             return scriptRuntime.ocrMLKit.detect(image)
         }
 

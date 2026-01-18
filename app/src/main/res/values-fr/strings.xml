@@ -1179,5 +1179,15 @@
     <string name="text_sort_by_name">Trier par nom</string>
     <string name="text_sort_by_last_update_time">Trier par dernière mise à jour</string>
     <string name="text_sort_by_package_size">Trier par taille du paquet</string>
+    <string name="error_missing_required_plugin_for_module_label">Plugin requis manquant pour \"%1$s\". Veuillez installer le plugin et réessayer.</string>
+    <string name="error_no_enabled_plugin_for_module_label">Aucun plugin activé pour \"%1$s\". Veuillez activer un plugin et réessayer.</string>
+    <string name="error_no_available_enabled_plugin_variants_found">Aucune variante de plugin %1$s activée et disponible n\'a été trouvée (%2$s).</string>
+    <string name="error_plugin_apk_does_not_contain_required_assets_for_variant">L\'APK du plugin ne contient pas les ressources requises pour variant=\"%1$s\": %2$s.</string>
+    <string name="error_plugin_apk_does_not_contain_required_native_libraries">L\'APK du plugin ne contient pas les bibliothèques natives requises: %1$s.</string>
+    <string name="error_failed_to_bind_plugin_service">Échec de la liaison du service du plugin %1$s.</string>
+    <string name="error_timeout_while_querying_plugin_info">Délai d\'attente dépassé lors de la requête des informations du plugin %1$s.</string>
+    <string name="error_plugin_returned_empty_info">Le plugin %1$s a renvoyé des informations vides.</string>
+    <string name="error_plugin_returned_invalid_variant">Le plugin %1$s a renvoyé une variante invalide: %2$s.</string>
+    <string name="error_no_embedded_paddle_ocr_assets_found">Aucune ressource Paddle OCR intégrée n\'a été trouvée. Veuillez reconditionner avec Paddle OCR activé.</string>
 
 </resources>

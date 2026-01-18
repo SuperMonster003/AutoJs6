@@ -1181,5 +1181,15 @@
     <string name="text_sort_by_name">فرز حسب الاسم</string>
     <string name="text_sort_by_last_update_time">فرز حسب آخر تحديث</string>
     <string name="text_sort_by_package_size">فرز حسب حجم الحزمة</string>
+    <string name="error_missing_required_plugin_for_module_label">المكوّن الإضافي المطلوب لـ \"%1$s\" مفقود. يُرجى تثبيت المكوّن الإضافي ثم إعادة المحاولة.</string>
+    <string name="error_no_enabled_plugin_for_module_label">لا يوجد مكوّن إضافي مفعّل لـ \"%1$s\". يُرجى تفعيل مكوّن إضافي ثم إعادة المحاولة.</string>
+    <string name="error_no_available_enabled_plugin_variants_found">لم يتم العثور على أي متغيرات مفعّلة ومتاحة للمكوّن الإضافي %1$s (%2$s).</string>
+    <string name="error_plugin_apk_does_not_contain_required_assets_for_variant">ملف APK للمكوّن الإضافي لا يحتوي على الموارد المطلوبة لـ variant=\"%1$s\": %2$s.</string>
+    <string name="error_plugin_apk_does_not_contain_required_native_libraries">ملف APK للمكوّن الإضافي لا يحتوي على مكتبات native المطلوبة: %1$s.</string>
+    <string name="error_failed_to_bind_plugin_service">تعذّر ربط خدمة المكوّن الإضافي %1$s.</string>
+    <string name="error_timeout_while_querying_plugin_info">انتهت مهلة الاستعلام عن معلومات المكوّن الإضافي %1$s.</string>
+    <string name="error_plugin_returned_empty_info">أعاد المكوّن الإضافي %1$s معلومات فارغة.</string>
+    <string name="error_plugin_returned_invalid_variant">أعاد المكوّن الإضافي %1$s variant غير صالح: %2$s.</string>
+    <string name="error_no_embedded_paddle_ocr_assets_found">لم يتم العثور على موارد Paddle OCR المضمّنة. يُرجى إعادة الحزم مع تفعيل Paddle OCR.</string>
 
 </resources>

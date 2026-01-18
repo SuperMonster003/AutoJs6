@@ -1176,5 +1176,15 @@
     <string name="text_sort_by_name">Sort by name</string>
     <string name="text_sort_by_last_update_time">Sort by last update time</string>
     <string name="text_sort_by_package_size">Sort by package size</string>
+    <string name="error_missing_required_plugin_for_module_label">Missing required plugin for \"%1$s\". Please install the plugin and try again.</string>
+    <string name="error_no_enabled_plugin_for_module_label">No enabled plugin for \"%1$s\". Please enable a plugin and try again.</string>
+    <string name="error_no_available_enabled_plugin_variants_found">No available enabled %1$s plugin variants found (%2$s).</string>
+    <string name="error_plugin_apk_does_not_contain_required_assets_for_variant">Plugin APK does not contain required assets for variant=\"%1$s\": %2$s.</string>
+    <string name="error_plugin_apk_does_not_contain_required_native_libraries">Plugin APK does not contain required native libraries: %1$s.</string>
+    <string name="error_failed_to_bind_plugin_service">Failed to bind %1$s plugin service.</string>
+    <string name="error_timeout_while_querying_plugin_info">Timeout while querying %1$s plugin info.</string>
+    <string name="error_plugin_returned_empty_info">%1$s plugin returned empty info.</string>
+    <string name="error_plugin_returned_invalid_variant">%1$s plugin returned invalid variant: %2$s.</string>
+    <string name="error_no_embedded_paddle_ocr_assets_found">No embedded Paddle OCR assets found. Please re-package with Paddle OCR enabled.</string>
 
 </resources>

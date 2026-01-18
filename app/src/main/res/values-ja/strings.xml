@@ -1180,5 +1180,15 @@
     <string name="text_sort_by_name">名前で並べ替え</string>
     <string name="text_sort_by_last_update_time">最終更新日で並べ替え</string>
     <string name="text_sort_by_package_size">パッケージサイズで並べ替え</string>
+    <string name="error_missing_required_plugin_for_module_label">\"%1$s\" に必要なプラグインが見つかりません. プラグインをインストールしてから再試行してください.</string>
+    <string name="error_no_enabled_plugin_for_module_label">\"%1$s\" に有効化されたプラグインがありません. プラグインを有効化してから再試行してください.</string>
+    <string name="error_no_available_enabled_plugin_variants_found">利用可能で有効化された %1$s プラグインの variant が見つかりません (%2$s).</string>
+    <string name="error_plugin_apk_does_not_contain_required_assets_for_variant">プラグイン APK に variant=\"%1$s\" に必要な assets が含まれていません: %2$s.</string>
+    <string name="error_plugin_apk_does_not_contain_required_native_libraries">プラグイン APK に必要な native ライブラリが含まれていません: %1$s.</string>
+    <string name="error_failed_to_bind_plugin_service">%1$s プラグインサービスのバインドに失敗しました.</string>
+    <string name="error_timeout_while_querying_plugin_info">%1$s プラグイン情報の取得がタイムアウトしました.</string>
+    <string name="error_plugin_returned_empty_info">%1$s プラグインが空の info を返しました.</string>
+    <string name="error_plugin_returned_invalid_variant">%1$s プラグインが無効な variant を返しました: %2$s.</string>
+    <string name="error_no_embedded_paddle_ocr_assets_found">埋め込みの Paddle OCR assets が見つかりません. Paddle OCR を有効にして再パッケージしてください.</string>
 
 </resources>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_failed_to_initialize_paddle_ocr_predictor">初始化 Paddle OCR predictor 失败.</string>
+    <string name="error_missing_modeldir_for_variant">变体缺少 modelDir: variant=%1$s.</string>
+    <string name="error_failed_to_decode_checking_drawable_resource">解码检查用 drawable 资源失败.</string>
+    <string name="error_missing_required_paddle_ocr_asset">缺少 Paddle OCR 必要资源文件: %1$s.</string>
+</resources>

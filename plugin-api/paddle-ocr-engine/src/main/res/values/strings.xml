@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_failed_to_initialize_paddle_ocr_predictor">Failed to initialize Paddle OCR predictor.</string>
+    <string name="error_missing_modeldir_for_variant">Missing modelDir for variant=%1$s.</string>
+    <string name="error_failed_to_decode_checking_drawable_resource">Failed to decode checking drawable resource.</string>
+    <string name="error_missing_required_paddle_ocr_asset">Missing required Paddle OCR asset: %1$s.</string>
+</resources>

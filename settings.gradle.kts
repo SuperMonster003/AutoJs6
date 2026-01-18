@@ -40,7 +40,8 @@ private val libs = listOf(
 )
 
 private val pluginApi = listOf(
-    "paddle-ocr",
+    "paddle-ocr-api",
+    "paddle-ocr-engine",
 )
 
 include(

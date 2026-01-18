@@ -21,10 +21,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
-import org.autojs.plugin.paddle.ocr.IOcrPlugin
-import org.autojs.plugin.paddle.ocr.OcrOptions
-import org.autojs.plugin.paddle.ocr.OcrResult
-import org.autojs.plugin.paddle.ocr.PluginInfo
+import org.autojs.plugin.paddle.ocr.api.IOcrPlugin
+import org.autojs.plugin.paddle.ocr.api.OcrOptions
+import org.autojs.plugin.paddle.ocr.api.OcrResult
+import org.autojs.plugin.paddle.ocr.api.PluginInfo
 import java.io.File
 import java.io.FileOutputStream
 
