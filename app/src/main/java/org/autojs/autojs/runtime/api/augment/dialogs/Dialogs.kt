@@ -706,8 +706,8 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             val targetMethodsForName = methods.filter {
                 it.name == key
             }
-            require(targetMethodsForName.isNotEmpty()) {
-                "Method key \"$key\" for dialogs.build is not a valid method name"
+            if (targetMethodsForName.isEmpty()) {
+                return
             }
             val targetMethodsForParamCount = targetMethodsForName.filter {
                 it.parameterCount == argsForMethod.size
