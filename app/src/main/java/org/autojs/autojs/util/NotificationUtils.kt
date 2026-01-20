@@ -155,8 +155,7 @@ object NotificationUtils {
 
     @JvmStatic
     fun launchSettings() {
-        val localIntent = createAppNotificationIntent(globalAppContext)
-        globalAppContext.startActivity(localIntent)
+        createAppNotificationIntent(globalAppContext).startSafely(globalAppContext)
     }
 
     @JvmStatic

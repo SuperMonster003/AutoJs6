@@ -19,6 +19,7 @@ import org.autojs.autojs.util.FileUtils
 import org.autojs.autojs.util.FileUtils.toCacheFile
 import org.autojs.autojs.util.IntentUtils
 import org.autojs.autojs.util.IntentUtils.SnackExceptionHolder
+import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 import java.io.EOFException
@@ -78,12 +79,10 @@ object PluginInstaller {
     }
 
     fun installFromFileUri(context: Context, uri: Uri) {
-        val intent = Intent(Intent.ACTION_VIEW).apply {
+        Intent(Intent.ACTION_VIEW).apply {
             setDataAndType(uri, Mime.APPLICATION_VND_ANDROID_PACKAGE_ARCHIVE)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        }
-        context.startActivity(intent)
+        }.startSafely(context)
     }
 
     suspend fun installFromUrlWithPrompt(context: Context, url: String, expectedSha256: String? = null) {

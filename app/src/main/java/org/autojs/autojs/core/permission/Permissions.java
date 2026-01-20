@@ -2,6 +2,7 @@ package org.autojs.autojs.core.permission;
 
 import android.content.Context;
 import android.content.Intent;
+import org.autojs.autojs.util.IntentUtils;
 
 import java.util.ArrayList;
 
@@ -37,8 +38,8 @@ public class Permissions {
     }
 
     public static void requestPermissions(Context context, String[] permissions) {
-        context.startActivity(new Intent(context, PermissionRequestActivity.class)
-                .putExtra(PermissionRequestActivity.EXTRA_PERMISSIONS, permissions)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        Intent intent = new Intent(context, PermissionRequestActivity.class)
+                .putExtra(PermissionRequestActivity.EXTRA_PERMISSIONS, permissions);
+        IntentUtils.startSafely(intent, context);
     }
 }

@@ -1191,5 +1191,6 @@
     <string name="error_plugin_returned_empty_info">%1$s 플러그인이 빈 info를 반환했습니다.</string>
     <string name="error_plugin_returned_invalid_variant">%1$s 플러그인이 잘못된 variant를 반환했습니다: %2$s.</string>
     <string name="error_no_embedded_paddle_ocr_assets_found">내장된 Paddle OCR assets를 찾을 수 없습니다. Paddle OCR을 활성화하여 다시 패키징해 주세요.</string>
+    <string name="dialog_button_minimize">최소화</string>
 
 </resources>

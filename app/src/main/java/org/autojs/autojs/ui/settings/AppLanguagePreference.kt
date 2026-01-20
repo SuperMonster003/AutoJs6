@@ -8,6 +8,7 @@ import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.pref.Language
 import org.autojs.autojs.theme.preference.MaterialListPreference
 import org.autojs.autojs.ui.BaseActivity
+import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.LocaleUtils
 
 class AppLanguagePreference : MaterialListPreference {
@@ -27,9 +28,7 @@ class AppLanguagePreference : MaterialListPreference {
     override fun onNeutral() {
         Intent(Intent.ACTION_MAIN).apply {
             setClassName("com.android.settings", "com.android.settings.LanguageSettings")
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            prefContext.startActivity(this)
-        }
+        }.startSafely(prefContext)
     }
 
     override fun onChangeConfirmed(dialog: MaterialDialog) {

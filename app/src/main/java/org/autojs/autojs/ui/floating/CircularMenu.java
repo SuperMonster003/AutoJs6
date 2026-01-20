@@ -50,6 +50,8 @@ import java.text.MessageFormat;
 
 /**
  * Created by Stardust on Oct 18, 2017.
+ * Modified by JetBrains AI Assistant (GPT-5.2) as of Jan 20, 2026.
+ * Modified by SuperMonster003 as of Jan 20, 2026.
  */
 public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
 
@@ -70,6 +72,8 @@ public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
     private final Recorder.OnStateChangedListener mRecorderStateListener;
     private CircularActionMenuBinding binding;
     private MaterialDialog mSettingsDialog;
+    private MaterialDialog mScriptListDialog;
+    private ExplorerView mScriptListDialogExplorerView;
     private MaterialDialog mLayoutInspectDialog;
     private String mRunningPackage;
     private String mRunningActivity;
@@ -135,53 +139,82 @@ public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
     private void setupBindingListeners() {
         binding.scriptList.setOnClickListener(v -> {
             mWindow.collapse();
-            ExplorerView explorerView = new ExplorerView(mContext);
-            explorerView.setExplorer(Explorers.workspace(), ExplorerDirPage.createRoot(WorkingDirectoryUtils.getPath()));
-            explorerView.setDirectorySpanSize(2);
-            final MaterialDialog dialog = new MaterialDialog.Builder(mContext)
-                    .title(R.string.text_run_script)
-                    .titleColorRes(R.color.day_night)
-                    .customView(explorerView, false)
-                    .backgroundColorRes(R.color.window_background)
-                    .positiveText(R.string.dialog_button_dismiss)
-                    .positiveColorRes(R.color.dialog_button_default)
-                    .cancelable(false)
-                    .build();
 
-            // Only dismiss on clicking the item itself.
-            // zh-CN: 仅在点击条目本体时关闭对话框.
-            explorerView.setOnItemClickListener((view, item) -> {
-                if (item.isExecutable()) {
-                    dialog.dismiss();
-                    Scripts.run(view != null ? view.getContext() : explorerView.getContext(), item.toScriptFile());
-                } else {
-                    DialogUtils.showDialog(new MaterialDialog.Builder(mContext)
-                            .title(mContext.getString(R.string.error_failed_to_run_script))
-                            .content(mContext.getString(
-                                    R.string.text_file_with_abs_path_is_not_an_executable_script,
-                                    item.toScriptFile().getAbsolutePath()
-                            ))
-                            .positiveText(R.string.dialog_button_dismiss)
-                            .positiveColorRes(R.color.dialog_button_failure)
-                            .build());
-                }
-            });
+            if (mScriptListDialog == null) {
 
-            // Do not dismiss on action buttons (run/edit/delete/rename/etc.).
-            // zh-CN: 点击右侧操作按钮 (运行/编辑/删除/重命名等) 时不关闭对话框.
-            explorerView.setOnItemOperateListener(null);
+                mScriptListDialogExplorerView = new ExplorerView(mContext);
+                mScriptListDialogExplorerView.setExplorer(Explorers.workspace(), ExplorerDirPage.createRoot(WorkingDirectoryUtils.getPath()));
+                mScriptListDialogExplorerView.setDirectorySpanSize(2);
 
-            explorerView.setOnProjectToolbarOperateListener(toolbar -> dialog.dismiss());
-            explorerView.setOnProjectToolbarClickListener(toolbar -> toolbar.findViewById(R.id.project_run).performClick());
-            explorerView.setProjectToolbarRunnableOnly(true);
+                mScriptListDialog = new MaterialDialog.Builder(mContext)
+                        .title(R.string.text_run_script)
+                        .titleColorRes(R.color.day_night)
+                        .customView(mScriptListDialogExplorerView, false)
+                        .backgroundColorRes(R.color.window_background)
+                        .neutralText(R.string.dialog_button_minimize)
+                        .neutralColorRes(R.color.dialog_button_reset)
+                        .onNeutral((dialog, which) -> {
+                            mScriptListDialog.hide();
+                        })
+                        .positiveText(R.string.dialog_button_dismiss)
+                        .positiveColorRes(R.color.dialog_button_default)
+                        .onPositive((dialog, which) -> {
+                            dialog.dismiss();
+                            mScriptListDialog = null;
+                            mScriptListDialogExplorerView = null;
+                        })
+                        .cancelable(false)
+                        .autoDismiss(false)
+                        .build();
 
-            DialogUtils.adaptToExplorer(dialog, explorerView);
-            DialogUtils.showDialog(dialog);
+                var scriptListDialog = mScriptListDialog;
+
+                // Hide host dialog before launching Activity or showing secondary dialogs.
+                // zh-CN: 在启动 Activity 或显示二级对话框之前隐藏宿主对话框.
+                mScriptListDialogExplorerView.setRequestHostDialogHide(scriptListDialog::hide);
+
+                // Restore host dialog (overlay) when needed, keeping state.
+                // zh-CN: 需要时恢复宿主对话框 (overlay), 并保留状态.
+                mScriptListDialogExplorerView.setRequestHostDialogShow(() -> {
+                    if (!scriptListDialog.isShowing()) {
+                        DialogUtils.showDialog(scriptListDialog);
+                    }
+                });
+
+                // Only dismiss on clicking the item itself.
+                // zh-CN: 仅在点击条目本体时关闭对话框.
+                mScriptListDialogExplorerView.setOnItemClickListener((view, item) -> {
+                    if (item.isExecutable()) {
+                        scriptListDialog.hide();
+                        Scripts.run(view != null ? view.getContext() : mScriptListDialogExplorerView.getContext(), item.toScriptFile());
+                    } else {
+                        DialogUtils.showAdaptive(new MaterialDialog.Builder(mContext)
+                                .title(mContext.getString(R.string.error_failed_to_run_script))
+                                .content(mContext.getString(
+                                        R.string.text_file_with_abs_path_is_not_an_executable_script,
+                                        item.toScriptFile().getAbsolutePath()
+                                ))
+                                .positiveText(R.string.dialog_button_dismiss)
+                                .positiveColorRes(R.color.dialog_button_failure)
+                                .build());
+                    }
+                });
+
+                mScriptListDialogExplorerView.setOnItemOperateListener(null);
+
+                mScriptListDialogExplorerView.setOnProjectToolbarOperateListener(toolbar -> scriptListDialog.hide());
+                mScriptListDialogExplorerView.setOnProjectToolbarClickListener(toolbar -> toolbar.findViewById(R.id.project_run).performClick());
+                mScriptListDialogExplorerView.setProjectToolbarRunnableOnly(true);
+
+                DialogUtils.adaptToExplorer(scriptListDialog, mScriptListDialogExplorerView);
+            }
+
+            DialogUtils.showAdaptive(mScriptListDialog);
         });
         binding.record.setOnClickListener(v -> {
             mWindow.collapse();
             if (!RootUtils.isRootAvailable()) {
-                DialogUtils.showDialog(new AppLevelThemeDialogBuilder(mContext)
+                DialogUtils.showAdaptive(new AppLevelThemeDialogBuilder(mContext)
                         .title(mContext.getString(R.string.text_no_root_access))
                         .content(mContext.getString(R.string.no_root_access_for_record))
                         .positiveText(R.string.dialog_button_abandon)
@@ -199,7 +232,7 @@ public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
                     .item(R.drawable.ic_circular_menu_hierarchy, mContext.getString(R.string.text_inspect_layout_hierarchy), mCollapseWindowAndInspectLayoutHierarchyListener)
                     .title(mContext.getString(R.string.text_inspect_layout))
                     .build();
-            DialogUtils.showDialog(mLayoutInspectDialog);
+            DialogUtils.showAdaptive(mLayoutInspectDialog);
             return true;
         });
         binding.stopAllScripts.setOnClickListener(v -> {
@@ -248,7 +281,7 @@ public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
                     .title(mContext.getString(R.string.text_more))
                     .build();
 
-            DialogUtils.showDialog(mSettingsDialog);
+            DialogUtils.showAdaptive(mSettingsDialog);
         });
     }
 
@@ -276,6 +309,7 @@ public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
     private View.OnClickListener onCircularMenuItemClick(View.OnClickListener listener) {
         return v -> {
             dismissSettingsDialog();
+            dismissScriptListDialog();
             listener.onClick(v);
         };
     }
@@ -392,6 +426,16 @@ public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
         }
     }
 
+    private void dismissScriptListDialog() {
+        if (mScriptListDialog != null) {
+            mScriptListDialog.dismiss();
+            mScriptListDialog = null;
+        }
+        if (mScriptListDialogExplorerView != null) {
+            mScriptListDialogExplorerView = null;
+        }
+    }
+
     @NonNull
     private String getTextAlreadyCopied(int actionResId) {
         return MessageFormat.format("{0} ({1})",
@@ -401,6 +445,7 @@ public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
 
     public void close() {
         dismissSettingsDialog();
+        dismissScriptListDialog();
         try {
             mWindow.close();
         } catch (IllegalArgumentException e) {

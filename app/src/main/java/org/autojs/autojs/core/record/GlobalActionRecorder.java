@@ -18,7 +18,6 @@ import org.autojs.autojs6.R;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import static org.autojs.autojs.util.RhinoUtils.isBackgroundThread;
 import static org.autojs.autojs.util.RhinoUtils.isMainThread;
 
 /**
@@ -185,7 +184,7 @@ public class GlobalActionRecorder implements Recorder.OnStateChangedListener {
                 .positiveColorRes(R.color.dialog_button_attraction)
                 .canceledOnTouchOutside(false);
         MaterialDialogExtensions.choiceWidgetThemeColor(builder);
-        DialogUtils.showDialog(builder.build());
+        DialogUtils.showAdaptive(builder.build());
     }
 
     private String getString(int res) {

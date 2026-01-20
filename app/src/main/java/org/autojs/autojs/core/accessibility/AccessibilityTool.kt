@@ -15,6 +15,7 @@ import org.autojs.autojs.runtime.api.ProcessShell
 import org.autojs.autojs.runtime.exception.ScriptException
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.service.AccessibilityInteractionClient
+import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.RootUtils
 import org.autojs.autojs.util.SettingsUtils
 import org.autojs.autojs.util.ViewUtils
@@ -47,7 +48,7 @@ class AccessibilityTool(private val context: Context? = null) {
             ViewUtils.showToast(mContext, it, true)
         }
         try {
-            mApplicationContext.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS).startSafely(mApplicationContext)
         } catch (_: ActivityNotFoundException) {
             ViewUtils.showToast(mContext, R.string.go_to_accessibility_settings, true)
         }

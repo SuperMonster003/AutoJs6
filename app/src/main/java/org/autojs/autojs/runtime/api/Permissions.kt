@@ -8,6 +8,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions
 import androidx.fragment.app.FragmentActivity
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.RomUtils
 import org.autojs.autojs6.R
 
@@ -20,18 +21,19 @@ class Permissions(private val context: Context) {
     var backgroundStart = object : IPermissionToggleable {
         override val description = "后台弹出界面 / Start in background"
         override fun has() = RomUtils.isBackgroundStartGranted(context)
-        override fun config() = when {
-            RomUtils.isMiui() -> {
-                Intent("miui.intent.action.APP_PERM_EDITOR").apply {
-                    setClassName(
-                        "com.miui.securitycenter",
-                        "com.miui.permcenter.permissions.PermissionsEditorActivity",
-                    )
-                    putExtra("extra_pkgname", context.packageName)
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                }.let { context.startActivity(it) }
+        override fun config() {
+            when {
+                RomUtils.isMiui() -> {
+                    Intent("miui.intent.action.APP_PERM_EDITOR").apply {
+                        setClassName(
+                            "com.miui.securitycenter",
+                            "com.miui.permcenter.permissions.PermissionsEditorActivity",
+                        )
+                        putExtra("extra_pkgname", context.packageName)
+                    }.startSafely(context)
+                }
+                else -> super.config()
             }
-            else -> super.config()
         }
     }
     var displayOverOtherApps: IPermissionToggleable? = null

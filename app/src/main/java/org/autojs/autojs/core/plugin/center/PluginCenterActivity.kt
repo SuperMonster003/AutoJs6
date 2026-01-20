@@ -13,6 +13,7 @@ import com.afollestad.materialdialogs.MaterialDialog
 import kotlinx.coroutines.launch
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.widget.SearchViewItem
+import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.onceGlobalLayout
 import org.autojs.autojs.util.ViewUtils.setMenuIconsColorByThemeColorLuminance
@@ -187,8 +188,7 @@ class PluginCenterActivity : BaseActivity() {
 
         fun startActivity(context: Context) {
             Intent(context, PluginCenterActivity::class.java)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                .let { context.startActivity(it) }
+                .startSafely(context)
         }
 
     }

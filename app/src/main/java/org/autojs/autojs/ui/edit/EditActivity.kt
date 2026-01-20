@@ -16,6 +16,8 @@ import android.view.ActionMode
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.TextView
+import androidx.core.view.get
+import androidx.core.view.size
 import com.afollestad.materialdialogs.MaterialDialog
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -33,6 +35,7 @@ import org.autojs.autojs.theme.widget.ThemeColorToolbar
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.main.MainActivity
 import org.autojs.autojs.ui.main.scripts.EditableFileInfoDialogManager
+import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.Observers
 import org.autojs.autojs.util.ViewUtils.onceGlobalLayout
 import org.autojs.autojs.util.ViewUtils.setMenuIconsColorByThemeColorLuminance
@@ -40,8 +43,6 @@ import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ActivityEditBinding
 import java.io.File
 import java.io.IOException
-import androidx.core.view.get
-import androidx.core.view.size
 
 /**
  * Created by Stardust on Jan 29, 2017.
@@ -364,50 +365,46 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
         private const val LOG_TAG = "EditActivity"
 
         @JvmStatic
-        fun editFile(context: Context, path: String?, newTask: Boolean) {
+        fun editFile(context: Context, path: String?, newTask: Boolean) =
             editFile(context, null, path, newTask)
-        }
 
         @JvmStatic
-        fun editFile(context: Context, uri: Uri?, newTask: Boolean) {
-            runCatching {
-                context.startActivity(newIntent(context).setData(uri))
-            }.getOrElse {
-                context.startActivity(newIntentFallback(context, newTask).setData(uri))
+        fun editFile(context: Context, uri: Uri?, newTask: Boolean) =
+            when {
+                newIntent(context).setData(uri).startSafely(context) -> true
+                newIntentFallback(context, newTask).setData(uri).startSafely(context) -> true
+                else -> false
             }
-        }
 
         @JvmStatic
-        fun editFile(context: Context, name: String?, path: String?, newTask: Boolean) {
-            runCatching {
-                context.startActivity(newIntent(context).apply {
+        fun editFile(context: Context, name: String?, path: String?, newTask: Boolean) =
+            when {
+                newIntent(context).apply {
                     putExtra(EditorView.EXTRA_PATH, path)
                     putExtra(EditorView.EXTRA_NAME, name)
-                })
-            }.getOrElse {
-                context.startActivity(newIntentFallback(context, newTask).apply {
+                }.startSafely(context) -> true
+                newIntentFallback(context, newTask).apply {
                     putExtra(EditorView.EXTRA_PATH, path)
                     putExtra(EditorView.EXTRA_NAME, name)
-                })
+                }.startSafely(context) -> true
+                else -> false
             }
-        }
 
         @JvmStatic
-        fun viewContent(context: Context, name: String?, content: String?, newTask: Boolean) {
-            runCatching {
-                context.startActivity(newIntent(context).apply {
+        fun viewContent(context: Context, name: String?, content: String?, newTask: Boolean) =
+            when {
+                newIntent(context).apply {
                     putExtra(EditorView.EXTRA_CONTENT, content)
                     putExtra(EditorView.EXTRA_NAME, name)
                     putExtra(EditorView.EXTRA_READ_ONLY, true)
-                })
-            }.getOrElse {
-                context.startActivity(newIntentFallback(context, newTask).apply {
+                }.startSafely(context) -> true
+                newIntentFallback(context, newTask).apply {
                     putExtra(EditorView.EXTRA_CONTENT, content)
                     putExtra(EditorView.EXTRA_NAME, name)
                     putExtra(EditorView.EXTRA_READ_ONLY, true)
-                })
+                }.startSafely(context) -> true
+                else -> false
             }
-        }
 
         private fun newIntent(context: Context): Intent {
             // @Caution by SuperMonster003 on Sep 11, 2022.

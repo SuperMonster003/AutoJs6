@@ -7,8 +7,10 @@ import android.os.Build
 import android.provider.Settings
 import androidx.annotation.RequiresApi
 import androidx.core.net.toUri
+import org.autojs.autojs.app.DialogUtils.showAdaptive
 import org.autojs.autojs.extension.MaterialDialogExtensions.widgetThemeColor
 import org.autojs.autojs.ui.common.NotAskAgainDialog
+import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
@@ -26,7 +28,7 @@ object ExactAlarmPermissionHelper {
         val intent = Intent()
             .setAction(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
             .setData("package:${context.packageName}".toUri())
-        return runCatching { context.startActivity(intent) }.isSuccess
+        return runCatching { intent.startSafely(context) }.isSuccess
     }
 
     // Check canScheduleExactAlarms permission and prompt user if needed.
@@ -57,7 +59,7 @@ object ExactAlarmPermissionHelper {
             }
             .cancelable(false)
             .autoDismiss(false)
-            .show()
+            .showAdaptive()
     }
 
 }

@@ -32,6 +32,7 @@ import org.autojs.autojs.ui.widget.ScrollAwareFABBehavior
 import org.autojs.autojs.util.IntentUtils
 import org.autojs.autojs.util.IntentUtils.SnackExceptionHolder
 import org.autojs.autojs.util.IntentUtils.ToastExceptionHolder
+import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.ViewUtils.excludePaddingClippableViewFromBottomNavigationBar
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.FragmentExplorerBinding
@@ -215,18 +216,17 @@ class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListen
 
     override fun onClick(button: FloatingActionButton, pos: Int) {
         mExplorerView?.let { view ->
+            val ctx = context ?: return@let
             when (pos) {
-                3 -> context?.startActivity(
-                    Intent(context, ProjectConfigActivity::class.java)
-                        .putExtra(ProjectConfigActivity.EXTRA_PARENT_DIRECTORY, view.currentPage.path)
-                        .putExtra(ProjectConfigActivity.EXTRA_NEW_PROJECT, true)
-                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                )
-                2 -> ScriptOperations(context, view, view.currentPage)
+                3 -> Intent(ctx, ProjectConfigActivity::class.java)
+                    .putExtra(ProjectConfigActivity.EXTRA_PARENT_DIRECTORY, view.currentPage.path)
+                    .putExtra(ProjectConfigActivity.EXTRA_NEW_PROJECT, true)
+                    .startSafely(ctx)
+                2 -> ScriptOperations(ctx, view, view.currentPage)
                     .importFile()
-                1 -> ScriptOperations(context, view, view.currentPage)
+                1 -> ScriptOperations(ctx, view, view.currentPage)
                     .newFile()
-                0 -> ScriptOperations(context, view, view.currentPage)
+                0 -> ScriptOperations(ctx, view, view.currentPage)
                     .newDirectory()
                 else -> Unit
             }

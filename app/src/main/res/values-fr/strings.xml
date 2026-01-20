@@ -1189,5 +1189,6 @@
     <string name="error_plugin_returned_empty_info">Le plugin %1$s a renvoyé des informations vides.</string>
     <string name="error_plugin_returned_invalid_variant">Le plugin %1$s a renvoyé une variante invalide: %2$s.</string>
     <string name="error_no_embedded_paddle_ocr_assets_found">Aucune ressource Paddle OCR intégrée n\'a été trouvée. Veuillez reconditionner avec Paddle OCR activé.</string>
+    <string name="dialog_button_minimize">Réduire</string>
 
 </resources>

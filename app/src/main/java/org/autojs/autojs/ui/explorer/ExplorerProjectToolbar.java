@@ -21,6 +21,7 @@ import org.autojs.autojs.project.ProjectConfig;
 import org.autojs.autojs.project.ProjectLauncher;
 import org.autojs.autojs.ui.project.BuildActivity;
 import org.autojs.autojs.ui.project.ProjectConfigActivity;
+import org.autojs.autojs.util.IntentUtils;
 import org.autojs.autojs6.R;
 import org.autojs.autojs6.databinding.ExplorerProjectToolbarBinding;
 import org.greenrobot.eventbus.Subscribe;
@@ -148,9 +149,8 @@ public class ExplorerProjectToolbar extends CardView {
 
     void edit() {
         Intent intent = new Intent(getContext(), ProjectConfigActivity.class)
-                .putExtra(ProjectConfigActivity.EXTRA_DIRECTORY, mDirectory.getPath())
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        getContext().startActivity(intent);
+                .putExtra(ProjectConfigActivity.EXTRA_DIRECTORY, mDirectory.getPath());
+        IntentUtils.startSafely(intent, getContext());
     }
 
     public void setRunnableOnly(boolean b) {

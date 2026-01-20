@@ -1191,5 +1191,6 @@
     <string name="error_plugin_returned_empty_info">أعاد المكوّن الإضافي %1$s معلومات فارغة.</string>
     <string name="error_plugin_returned_invalid_variant">أعاد المكوّن الإضافي %1$s variant غير صالح: %2$s.</string>
     <string name="error_no_embedded_paddle_ocr_assets_found">لم يتم العثور على موارد Paddle OCR المضمّنة. يُرجى إعادة الحزم مع تفعيل Paddle OCR.</string>
+    <string name="dialog_button_minimize">تصغير</string>
 
 </resources>

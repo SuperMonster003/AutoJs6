@@ -1186,5 +1186,6 @@
     <string name="error_plugin_returned_empty_info">%1$s plugin returned empty info.</string>
     <string name="error_plugin_returned_invalid_variant">%1$s plugin returned invalid variant: %2$s.</string>
     <string name="error_no_embedded_paddle_ocr_assets_found">No embedded Paddle OCR assets found. Please re-package with Paddle OCR enabled.</string>
+    <string name="dialog_button_minimize">Minimize</string>
 
 </resources>

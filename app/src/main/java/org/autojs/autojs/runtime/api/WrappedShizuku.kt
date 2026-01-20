@@ -15,6 +15,7 @@ import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.shizuku.IUserService
 import org.autojs.autojs.core.shizuku.UserService
 import org.autojs.autojs.util.App.SHIZUKU
+import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 import rikka.shizuku.Shizuku
@@ -151,7 +152,7 @@ object WrappedShizuku {
     fun config(isRequest: Boolean? = null) = configWithContext(GlobalAppContext.get(), isRequest)
 
     fun configWithContext(context: Context, isRequest: Boolean? = null): Intent? = getLaunchIntent(context)?.also {
-        context.startActivity(it)
+        it.startSafely(context)
         val message = when (isRequest) {
             true -> "${context.getString(R.string.text_grant_autojs6_access_in_shizuku_app)} (${context.getString(R.string.text_shizuku_service_may_need_to_be_run_first)})"
             false -> context.getString(R.string.text_revoke_autojs6_access_in_shizuku_app)

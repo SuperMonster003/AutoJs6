@@ -1190,5 +1190,6 @@
     <string name="error_plugin_returned_empty_info">%1$s プラグインが空の info を返しました.</string>
     <string name="error_plugin_returned_invalid_variant">%1$s プラグインが無効な variant を返しました: %2$s.</string>
     <string name="error_no_embedded_paddle_ocr_assets_found">埋め込みの Paddle OCR assets が見つかりません. Paddle OCR を有効にして再パッケージしてください.</string>
+    <string name="dialog_button_minimize">最小化</string>
 
 </resources>

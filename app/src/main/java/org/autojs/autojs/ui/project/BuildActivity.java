@@ -1070,7 +1070,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     public static void launch(Context context, String extraSource) {
         Intent intent = new Intent(context, BuildActivity.class)
                 .putExtra(BuildActivity.EXTRA_SOURCE, extraSource);
-        context.startActivity(intent);
+        IntentUtils.startSafely(intent, context);
     }
 
 }

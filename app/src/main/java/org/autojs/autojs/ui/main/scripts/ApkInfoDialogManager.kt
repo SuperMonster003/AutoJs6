@@ -2,6 +2,7 @@ package org.autojs.autojs.ui.main.scripts
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.DialogInterface
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.GET_META_DATA
@@ -24,6 +25,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.selects.select
 import kotlinx.coroutines.withContext
 import net.dongliu.apk.parser.ApkFile
+import org.autojs.autojs.app.DialogUtils.showAdaptive
 import org.autojs.autojs.extension.MaterialDialogExtensions.makeSettingsLaunchable
 import org.autojs.autojs.extension.MaterialDialogExtensions.makeTextCopyable
 import org.autojs.autojs.extension.MaterialDialogExtensions.setCopyableTextIfAbsent
@@ -43,7 +45,20 @@ object ApkInfoDialogManager {
     @JvmStatic
     @JvmOverloads
     @SuppressLint("SetTextI18n")
-    fun showApkInfoDialog(context: Context, apkFile: File, builderApplier: (MaterialDialog.Builder.() -> Unit)? = null) {
+    fun showApkInfoDialog(
+        context: Context,
+        apkFile: File,
+        builderApplier: (MaterialDialog.Builder.() -> Unit)? = null,
+    ) = showApkInfoDialog(context, apkFile, builderApplier, null)
+
+    @JvmStatic
+    @SuppressLint("SetTextI18n")
+    fun showApkInfoDialog(
+        context: Context,
+        apkFile: File,
+        builderApplier: (MaterialDialog.Builder.() -> Unit)?,
+        onDismissListener: DialogInterface.OnDismissListener?,
+    ) {
         val binding = ApkFileInfoDialogItemsBinding.inflate(LayoutInflater.from(context))
 
         // Create an independent Scope for the Dialog, bind its lifecycle with the Dialog.
@@ -75,11 +90,16 @@ object ApkInfoDialogManager {
             .neutralColorRes(R.color.dialog_button_hint)
             .onNegative { materialDialog, _ -> materialDialog.dismiss() }
             .also { builder -> builderApplier?.invoke(builder) }
-            .show()
+            .build()
             .apply {
                 makeTextCopyable { titleView }
-                setOnDismissListener { scope.cancel() }
+                setOnDismissListener {
+                    scope.cancel()
+                    onDismissListener?.onDismiss(this)
+                }
             }
+            .showAdaptive()
+
 
         scope.launch {
             val apkInfoDeferred = async(Dispatchers.IO) { getApkInfo(apkFile) }

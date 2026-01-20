@@ -6,6 +6,7 @@ import android.util.Log
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.accessibility.AccessibilityService
 import org.autojs.autojs.runtime.ScriptRuntime
+import org.autojs.autojs.util.IntentUtils.startSafely
 import java.lang.Thread.UncaughtExceptionHandler
 import java.lang.ref.WeakReference
 import kotlin.system.exitProcess
@@ -48,11 +49,12 @@ class CrashHandler(private val errorReportClass: Class<*>) : UncaughtExceptionHa
     }
 
     private fun startCrashReportActivity(msg: String, detail: String) {
-        Intent(GlobalAppContext.get(), errorReportClass).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+        val context = GlobalAppContext.get()
+        Intent(context, errorReportClass).apply {
+            addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
             putExtra("message", msg)
             putExtra("error", detail)
-        }.let { GlobalAppContext.get().startActivity(it) }
+        }.startSafely(context)
     }
 
     companion object {

@@ -7,6 +7,7 @@ import org.autojs.autojs.runtime.api.augment.util.VersionCodesInfo.briefOfCurren
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.main.MainActivity
 import org.autojs.autojs.util.ClipboardUtils
+import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
@@ -70,9 +71,9 @@ class CrashReportActivity : BaseActivity() {
         val intent = packageManager.getLaunchIntentForPackage(packageName)?.apply {
             addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         } ?: Intent(this, MainActivity::class.java).apply {
-            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         }
-        startActivity(intent)
+        intent.startSafely(this)
         exit()
     }
 

@@ -50,6 +50,7 @@ import org.autojs.autojs.ui.settings.PreferencesActivity
 import org.autojs.autojs.util.DisplayUtils
 import org.autojs.autojs.util.IntentUtils.App.exit
 import org.autojs.autojs.util.IntentUtils.App.restart
+import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.NetworkUtils
 import org.autojs.autojs.util.NotificationUtils
 import org.autojs.autojs.util.RomUtils
@@ -172,10 +173,8 @@ open class DrawerFragment : Fragment() {
                 }
             }
             item.setOnLaunchSettingsListener {
-                Intent().apply {
-                    action = Settings.ACTION_ACCESSIBILITY_SETTINGS
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                }.let { i -> mContext.startActivity(i) }
+                Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+                    .startSafely(mContext)
             }
         }
 
@@ -375,10 +374,8 @@ open class DrawerFragment : Fragment() {
             descriptionRes = R.string.description_ignore_battery_optimizations,
         ).also { item ->
             item.setOnLaunchSettingsListener {
-                Intent().apply {
-                    action = Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                }.let { i -> mContext.startActivity(i) }
+                Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+                    .startSafely(mContext)
             }
         }
 
@@ -463,9 +460,9 @@ open class DrawerFragment : Fragment() {
                     Shizuku.isPreV11() -> {
                         ViewUtils.showSnack(d.view, R.string.error_shizuku_version_is_not_supported)
                     }
-                    else -> WrappedShizuku.getLaunchIntent(mContext)?.let {
-                        runCatching { mContext.startActivity(it) }.getOrNull()
-                    } ?: ViewUtils.showSnack(d.view, R.string.error_failed_to_revoke_shizuku_access)
+                    else -> WrappedShizuku.getLaunchIntent(mContext)
+                        ?.startSafely(mContext)
+                        ?: ViewUtils.showSnack(d.view, R.string.error_failed_to_revoke_shizuku_access)
                 }
             }
         }
@@ -503,10 +500,8 @@ open class DrawerFragment : Fragment() {
             prefKey = R.string.key_auto_night_mode_enabled,
         ).also { item ->
             item.setOnLaunchSettingsListener {
-                Intent().apply {
-                    action = Settings.ACTION_DISPLAY_SETTINGS
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                }.let { i -> mContext.startActivity(i) }
+                Intent(Settings.ACTION_DISPLAY_SETTINGS)
+                    .startSafely(mContext)
             }
             item.isHidden = !ViewUtils.AutoNightMode.isFunctional()
         }
@@ -539,10 +534,8 @@ open class DrawerFragment : Fragment() {
             descriptionRes = R.string.description_night_mode,
             prefKey = R.string.key_night_mode_enabled,
         ).setOnLaunchSettingsListener {
-            Intent().apply {
-                action = Settings.ACTION_DISPLAY_SETTINGS
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            }.let { i -> mContext.startActivity(i) }
+            Intent(Settings.ACTION_DISPLAY_SETTINGS)
+                .startSafely(mContext)
         }
 
         mKeepScreenOnWhenInForegroundItem = DrawerMenuToggleableItem(

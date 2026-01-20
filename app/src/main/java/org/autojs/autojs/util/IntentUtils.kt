@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Context.ALARM_SERVICE
 import android.content.Intent
 import android.net.Uri
+import android.os.Bundle
 import android.os.SystemClock
 import android.provider.OpenableColumns
 import android.provider.Settings
@@ -60,6 +61,16 @@ object IntentUtils {
         }.isSuccess
 
     @JvmStatic
+    @JvmOverloads
+    fun Intent.startSafelyWithOptions(context: Context, options: Bundle? = null, printStackTrace: Boolean = false, onFailure: ((Throwable) -> Unit)? = null): Boolean =
+        runCatching {
+            startWithOptions(context, options)
+        }.onFailure { t ->
+            if (printStackTrace) t.printStackTrace()
+            onFailure?.invoke(t)
+        }.isSuccess
+
+    @JvmStatic
     fun Intent.start(context: Context) {
         val activity = context.findActivity()
         if (activity != null) {
@@ -67,6 +78,17 @@ object IntentUtils {
         } else {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context.startActivity(this)
+        }
+    }
+
+    @JvmStatic
+    fun Intent.startWithOptions(context: Context, options: Bundle? = null) {
+        val activity = context.findActivity()
+        if (activity != null) {
+            activity.startActivity(this, options)
+        } else {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            context.startActivity(this, options)
         }
     }
 

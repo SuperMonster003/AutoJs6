@@ -17,6 +17,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.autojs.autojs.app.DialogUtils.showAdaptive
 import org.autojs.autojs.extension.MaterialDialogExtensions.makeSettingsLaunchable
 import org.autojs.autojs.extension.MaterialDialogExtensions.makeTextCopyable
 import org.autojs.autojs.extension.MaterialDialogExtensions.setCopyableTextIfAbsent
@@ -119,7 +120,7 @@ object PluginInfoDialogManager {
             .onNegative { d, _ -> d.dismiss() }
             .autoDismiss(false)
             .apply(builderApplier)
-            .show()
+            .showAdaptive()
             .apply { makeTextCopyable { titleView } }
 
         // Hold the current dialog and package name for refreshing on onResume.
@@ -215,7 +216,7 @@ object PluginInfoDialogManager {
                     ViewUtils.showToast(context, R.string.text_done)
                     parentDialog.dismiss()
                 }
-                .show()
+                .showAdaptive()
         }
 
         MaterialDialog.Builder(context)
@@ -244,7 +245,7 @@ object PluginInfoDialogManager {
                     .title(R.string.text_prompt)
                     .content(R.string.error_no_available_url_provided_for_current_plugin)
                     .positiveText(R.string.dialog_button_dismiss)
-                    .show()
+                    .showAdaptive()
                 parentDialog
                     ?.getActionButton(DialogAction.POSITIVE)
                     ?.setTextColor(context.getColor(R.color.dialog_button_unavailable))

@@ -10,6 +10,7 @@ import android.view.View
 import android.widget.TextView
 import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.ui.widget.EWebView
+import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs6.databinding.FloatingManualDialogBinding
 
 /**
@@ -62,7 +63,7 @@ class ManualDialog(private val mContext: Context) {
         mDialog.dismiss()
         Intent(mContext, DocumentationActivity::class.java)
             .putExtra(DocumentationActivity.EXTRA_URL, mEWebView.webView.url)
-            .let { mContext.startActivity(it) }
+            .startSafely(mContext)
     }
 
 }

@@ -36,6 +36,7 @@ import org.autojs.autojs.runtime.api.augment.shell.Shell
 import org.autojs.autojs.runtime.exception.ShouldNeverHappenException
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.timing.TimedTaskManager
+import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED
 import org.autojs.autojs.util.RhinoUtils.coerceBoolean
@@ -551,8 +552,7 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             val prefix = "http://".takeUnless { url.contains("://") } ?: ""
             Intent(Intent.ACTION_VIEW)
                 .setData((prefix + url).toUri())
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                .let { globalContext.startActivity(it) }
+                .startSafely(globalContext)
         }
 
         @Suppress("HttpUrlsUsage")
@@ -906,7 +906,7 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         }
 
         private fun startActivityWithGlobalContext(o: Intent) {
-            globalContext.startActivity(o.apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) })
+            o.startSafely(globalContext)
         }
 
         private fun startActivityForDualUser(scriptRuntime: ScriptRuntime, o: Any?) {

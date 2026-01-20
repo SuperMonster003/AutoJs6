@@ -6,6 +6,7 @@ import android.os.Bundle
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.ui.BaseActivity
+import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ActivityPreferencesBinding
 
@@ -46,8 +47,7 @@ open class PreferencesActivity : BaseActivity() {
         @JvmOverloads
         fun launch(context: Context = GlobalAppContext.get()) {
             Intent(context, PreferencesActivity::class.java)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                .let { context.startActivity(it) }
+                .startSafely(context)
         }
 
     }

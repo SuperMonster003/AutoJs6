@@ -43,6 +43,7 @@ import org.autojs.autojs.ui.filechooser.FileChooserDialogBuilder;
 import org.autojs.autojs.ui.shortcut.ShortcutCreateActivity;
 import org.autojs.autojs.ui.timing.TimedTaskSettingActivity;
 import org.autojs.autojs.util.EnvironmentUtils;
+import org.autojs.autojs.util.IntentUtils;
 import org.autojs.autojs.util.ShortcutUtils;
 import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs.util.WorkingDirectoryUtils;
@@ -61,7 +62,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static org.autojs.autojs.app.DialogUtils.fixCheckBoxGravity;
-import static org.autojs.autojs.app.DialogUtils.showDialog;
 import static org.autojs.autojs.util.FileUtils.TYPE.JAVASCRIPT;
 import static org.autojs.autojs.util.RhinoUtils.isMainThread;
 
@@ -198,14 +198,14 @@ public class ScriptOperations {
                             .negativeText(R.string.dialog_button_back);
                     MaterialDialogExtensions.choiceWidgetThemeColor(builderDefaultPrefix);
                     MaterialDialog dialogDefaultPrefix = builderDefaultPrefix.build();
-                    showDialog(dialogDefaultPrefix);
+                    DialogUtils.showAdaptive(dialogDefaultPrefix);
                 })
                 .autoDismiss(false);
         MaterialDialogExtensions.widgetThemeColor(builder);
         MaterialDialog dialog = builder.build();
         dialogRef.set(dialog);
 
-        showDialog(fixCheckBoxGravity(dialog));
+        DialogUtils.showAdaptive(fixCheckBoxGravity(dialog));
     }
 
     private String getNewFileNamePresetPrefill(CharSequence prefix) {
@@ -339,7 +339,7 @@ public class ScriptOperations {
                 })
                 .canceledOnTouchOutside(false);
         MaterialDialogExtensions.widgetThemeColor(builder);
-        showDialog(builder.build());
+        DialogUtils.showAdaptive(builder.build());
         return input;
     }
 
@@ -384,13 +384,12 @@ public class ScriptOperations {
             return;
         }
         Intent intent = new Intent(mContext, ShortcutCreateActivity.class)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 .putExtra(ShortcutCreateActivity.EXTRA_FILE, file);
-        mContext.startActivity(intent);
+        IntentUtils.startSafely(intent, mContext);
     }
 
     public void delete(final ScriptFile scriptFile) {
-        DialogUtils.showDialog(new MaterialDialog.Builder(mContext)
+        DialogUtils.showAdaptive(new MaterialDialog.Builder(mContext)
                 .title(mContext.getString(R.string.text_confirm_to_delete))
                 .content(scriptFile.getName())
                 .negativeText(R.string.text_cancel)
@@ -409,7 +408,7 @@ public class ScriptOperations {
         }
         String content = mContext.getString(R.string.text_old_path) + ": " + oldPath + "\n"
                          + mContext.getString(R.string.text_new_path) + ": " + newPath;
-        DialogUtils.showDialog(new MaterialDialog.Builder(mContext)
+        DialogUtils.showAdaptive(new MaterialDialog.Builder(mContext)
                 .title(mContext.getString(R.string.text_prompt))
                 .content(content)
                 .negativeText(R.string.text_cancel)
@@ -489,7 +488,7 @@ public class ScriptOperations {
     }
 
     public void importFile() {
-        DialogUtils.showDialog(new FileChooserDialogBuilder(mContext)
+        DialogUtils.showAdaptive(new FileChooserDialogBuilder(mContext)
                 .dir(EnvironmentUtils.getExternalStoragePath())
                 .justScriptFile()
                 .singleChoice(file -> importFile(file.getPath()).subscribe())
@@ -502,7 +501,7 @@ public class ScriptOperations {
     public void timedTask(ScriptFile scriptFile) {
         Intent intent = new Intent(mContext, TimedTaskSettingActivity.class)
                 .putExtra(ScriptIntents.EXTRA_KEY_PATH, scriptFile.getPath());
-        mContext.startActivity(intent);
+        IntentUtils.startSafely(intent, mContext);
     }
 
     private class InputCallback implements MaterialDialog.InputCallback {

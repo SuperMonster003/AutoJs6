@@ -22,9 +22,9 @@ public class FloatingWindowPermissionUtil {
     public static void goToFloatingWindowPermissionSetting(Context context) {
         String packageName = context.getPackageName();
         try {
-            context.startActivity(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                    Uri.parse("package:" + packageName))
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:" + packageName));
+            IntentUtils.start(intent, context);
         } catch (Exception e) {
             IntentUtils.launchAppDetailsSettings(context, packageName);
         }
