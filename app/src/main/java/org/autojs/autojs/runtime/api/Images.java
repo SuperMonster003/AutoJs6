@@ -12,6 +12,7 @@ import android.media.Image;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.util.Base64;
 import android.util.Log;
 import android.view.Gravity;
@@ -31,6 +32,7 @@ import org.autojs.autojs.core.image.capture.ScreenCapturerForegroundService;
 import org.autojs.autojs.core.opencv.Mat;
 import org.autojs.autojs.core.opencv.OpenCVHelper;
 import org.autojs.autojs.core.pref.Language;
+import org.autojs.autojs.core.pref.Pref;
 import org.autojs.autojs.core.ui.inflater.util.Drawables;
 import org.autojs.autojs.extension.AnyExtensions;
 import org.autojs.autojs.pio.UncheckedIOException;
@@ -101,6 +103,13 @@ public class Images {
     private static final String TAG = Images.class.getSimpleName();
     private static volatile boolean sOpenCvInitialized;
 
+    // Gate first captures/frames until this time.
+    // zh-CN: 在该时间点之前, 首次截图/异步帧回调将被延迟或丢弃, 以避开授权弹窗渐隐动画.
+    private volatile long mScreenCaptureReadyUptimeMillis = 0L;
+
+    private final int mScreenCaptureRequestDelayMin;
+    private final int mScreenCaptureRequestDelayMax;
+
     @ScriptVariable
     public final RhinoColorFinder colorFinder;
 
@@ -115,6 +124,8 @@ public class Images {
 
     public Images(Context context, ScriptRuntime scriptRuntime) {
         mContext = context;
+        mScreenCaptureRequestDelayMin = context.getResources().getInteger(R.integer.screen_capture_request_delay_min_value);
+        mScreenCaptureRequestDelayMax = context.getResources().getInteger(R.integer.screen_capture_request_delay_max_value);
         mScreenMetrics = scriptRuntime.getScreenMetrics();
         mScriptRuntime = scriptRuntime;
         this.colorFinder = new RhinoColorFinder(mScreenMetrics);
@@ -246,6 +257,16 @@ public class Images {
                             );
                             mScreenCapturer = new ScreenCapturer(mContext, intent, options, handler);
                             mScreenCapturer.setImageCaptureCallback(mOnScreenCaptureAvailableListener);
+
+                            int delayMs = Pref.getScreenCaptureRequestDelay();
+                            if (delayMs < mScreenCaptureRequestDelayMin) delayMs = mScreenCaptureRequestDelayMin;
+                            if (delayMs > mScreenCaptureRequestDelayMax) delayMs = mScreenCaptureRequestDelayMax;
+
+                            mScreenCaptureReadyUptimeMillis = SystemClock.uptimeMillis() + delayMs;
+
+                            // @Caution by JetBrains AI Assistant (GPT-5.2) on Jan 19, 2025.
+                            //  ! Resolve immediately to avoid breaking ResultAdapter.wait semantics.
+                            //  ! zh-CN: 必须立即 resolve, 避免破坏 ResultAdapter.wait 的语义/线程模型.
                             promiseAdapter.resolve(true);
                         } catch (SecurityException ex) {
                             promiseAdapter.reject(ex);
@@ -269,6 +290,17 @@ public class Images {
         synchronized (this) {
             if (mScreenCapturer == null) {
                 throw new SecurityException(mContext.getString(R.string.error_no_screen_capture_permission));
+            }
+
+            // Delay first capture to skip the permission dialog fade-out animation.
+            // zh-CN: 延迟首次取帧, 跳过授权弹窗渐隐动画.
+            long waitMs = mScreenCaptureReadyUptimeMillis - SystemClock.uptimeMillis();
+            if (waitMs > 0) {
+                try {
+                    Thread.sleep(waitMs);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
             }
 
             // Retry in Java side to avoid leaking transient null frames to JS.
@@ -613,12 +645,28 @@ public class Images {
         return ImageWrapper.ofBitmap(mScriptRuntime, invertedBitmap);
     }
 
+    public void setImageCaptureCallback(OnScreenCaptureAvailableListener onScreenCaptureAvailableListener) {
+        mOnScreenCaptureAvailableListener = new ScreenCaptureAvailableHandler(mScriptRuntime, imageWrapper -> {
+            // Drop early frames before ready time.
+            // zh-CN: ready 时间点之前的帧直接丢弃, 避免把授权弹窗渐隐截入异步回调.
+            if (SystemClock.uptimeMillis() < mScreenCaptureReadyUptimeMillis) return;
+            onScreenCaptureAvailableListener.onCaptureAvailable(imageWrapper);
+        });
+        if (mScreenCapturer != null) {
+            mScreenCapturer.setImageCaptureCallback(mOnScreenCaptureAvailableListener);
+        }
+    }
+
     public void releaseScreenCapturer() {
         synchronized (this) {
             if (mScreenCapturer != null) {
                 mScreenCapturer.release();
                 mScreenCapturer = null;
             }
+            // Reset gate.
+            // zh-CN: 重置延迟门闩.
+            mScreenCaptureReadyUptimeMillis = 0L;
+
             if (mPreCapture != null) {
                 mPreCapture.close();
                 mPreCapture = null;
@@ -774,13 +822,6 @@ public class Images {
     public ScreenCapturer.Options getScreenCaptureOptions() {
         synchronized (this) {
             return mScreenCapturer != null ? mScreenCapturer.getOptions() : null;
-        }
-    }
-
-    public void setImageCaptureCallback(OnScreenCaptureAvailableListener onScreenCaptureAvailableListener) {
-        mOnScreenCaptureAvailableListener = new ScreenCaptureAvailableHandler(mScriptRuntime, onScreenCaptureAvailableListener);
-        if (mScreenCapturer != null) {
-            mScreenCapturer.setImageCaptureCallback(mOnScreenCaptureAvailableListener);
         }
     }
 

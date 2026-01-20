@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.app.DialogUtils
+import org.autojs.autojs.app.DialogUtils.showAdaptive
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.core.pref.Pref.isAutoCheckForUpdatesEnabled
 import org.autojs.autojs.core.pref.Pref.lastNoNewerUpdatesTimestamp
@@ -27,6 +28,18 @@ object UpdateUtils {
     fun manageIgnoredUpdates(context: Context) {
         MaterialDialog.Builder(context)
             .title(R.string.text_ignored_updates)
+            .options(
+                listOf(
+                    MaterialDialog.OptionMenuItemSpec(context.getString(R.string.dialog_button_details)) {
+                        MaterialDialog.Builder(context)
+                            .title(R.string.text_details)
+                            .content(R.string.description_manage_ignored_updates_preference)
+                            .positiveText(R.string.dialog_button_dismiss)
+                            .positiveColorRes(R.color.dialog_button_default)
+                            .showAdaptive()
+                    },
+                ),
+            )
             .content(R.string.text_no_ignored_updates)
             .items(ignoredVersions)
             .itemsLongCallback { dialog, _, _, text ->
@@ -74,7 +87,7 @@ object UpdateUtils {
                         }
                         ViewUtils.showSnack(dialogParent.view, R.string.text_all_items_cleared)
                     }
-                    .show()
+                    .showAdaptive()
             }
             .positiveText(R.string.dialog_button_dismiss)
             .positiveColorRes(R.color.dialog_button_default)
@@ -85,7 +98,7 @@ object UpdateUtils {
                 DialogUtils.toggleContentViewByItems(it)
                 DialogUtils.toggleActionButtonAbilityByItems(it, DialogAction.NEUTRAL)
             }
-            .show()
+            .showAdaptive()
     }
 
     private fun showRemoveIgnoredVersionPrompt(context: Context, dialogHoldingItems: MaterialDialog, dialogPromptParent: MaterialDialog?, text: CharSequence) {
@@ -102,7 +115,7 @@ object UpdateUtils {
                 DialogUtils.toggleContentViewByItems(dialogHoldingItems)
                 dialogPromptParent?.dismiss()
             }
-            .show()
+            .showAdaptive()
     }
 
     @JvmStatic

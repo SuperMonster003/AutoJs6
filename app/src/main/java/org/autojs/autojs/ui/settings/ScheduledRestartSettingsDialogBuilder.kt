@@ -65,17 +65,21 @@ class ScheduledRestartSettingsDialogBuilder(context: Context) : MaterialDialog.B
 
         title(R.string.entry_restart_strategy_scheduled)
         customView(binding.root, false)
-        options(listOf(MaterialDialog.OptionMenuItemSpec(context.getString(R.string.dialog_button_use_default)) {
-            when (key(R.string.default_key_scheduled_restart_backend)) {
-                key(R.string.key_scheduled_restart_backend_alarm_manager) -> {
-                    mOptionAlarmManager.isChecked = true
-                }
-                else -> {
-                    mOptionWorkManager.isChecked = true
-                }
-            }
-            mSeekBar.progress = (context.resources.getInteger(R.integer.scheduled_restart_start_delay_default_value) - mStartDelayMinValue) / 100
-        }))
+        options(
+            listOf(
+                MaterialDialog.OptionMenuItemSpec(context.getString(R.string.dialog_button_use_default)) {
+                    when (key(R.string.default_key_scheduled_restart_backend)) {
+                        key(R.string.key_scheduled_restart_backend_alarm_manager) -> {
+                            mOptionAlarmManager.isChecked = true
+                        }
+                        else -> {
+                            mOptionWorkManager.isChecked = true
+                        }
+                    }
+                    mSeekBar.progress = (context.resources.getInteger(R.integer.scheduled_restart_start_delay_default_value) - mStartDelayMinValue) / 100
+                },
+            ),
+        )
         negativeText(R.string.dialog_button_cancel)
         negativeColorRes(R.color.dialog_button_default)
         onNegative { d, _ -> d.dismiss() }

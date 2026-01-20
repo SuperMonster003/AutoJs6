@@ -1187,5 +1187,10 @@
     <string name="error_plugin_returned_invalid_variant">%1$s plugin returned invalid variant: %2$s.</string>
     <string name="error_no_embedded_paddle_ocr_assets_found">No embedded Paddle OCR assets found. Please re-package with Paddle OCR enabled.</string>
     <string name="dialog_button_minimize">Minimize</string>
+    <string name="text_property_colon_value_unit">%1$s: %2$d%3$s</string>
+    <string name="text_property_colon_value_nbsp_unit">%1$s: %2$d %3$s</string>
+    <string name="text_screen_capture_request_delay">Screen capture permission request delay</string>
+    <string name="description_screen_capture_request_delay">When requesting screen capture permission, the permission request window may include a fade-out animation when it disappears. If `images.captureScreen` is called immediately, the captured screenshot may contain the permission request window content and be obstructed.\n\nThe current option value adds a delay (in milliseconds) before capturing the screen immediately after permission is granted, which can be used to avoid the obstruction issue described above.\n\nThis option only applies to the first screenshot after screen capture permission is granted; subsequent screenshots are not affected by this value.</string>
+    <string name="text_delay_time">Delay time</string>
 
 </resources>

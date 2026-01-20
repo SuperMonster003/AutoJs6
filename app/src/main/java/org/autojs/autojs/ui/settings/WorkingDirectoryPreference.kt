@@ -17,6 +17,7 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import org.autojs.autojs.app.DialogUtils
+import org.autojs.autojs.app.DialogUtils.showAdaptive
 import org.autojs.autojs.storage.file.FileObservable
 import org.autojs.autojs.theme.ThemeColorHelper
 import org.autojs.autojs.theme.preference.MaterialPreference
@@ -48,7 +49,7 @@ class WorkingDirectoryPreference : MaterialPreference {
     }
 
     override fun onClick() {
-        WorkingDirectoryDialogBuilder().show()
+        WorkingDirectoryDialogBuilder().showAdaptive()
         super.onClick()
     }
 
@@ -67,13 +68,39 @@ class WorkingDirectoryPreference : MaterialPreference {
             build()
         }
 
-        override fun build(): MaterialDialog = MaterialDialog.Builder(context)
+        override fun build(): MaterialDialog = MaterialDialog.Builder(prefContext)
             .title(R.string.text_working_dir_path)
+            .options(
+                listOf(
+                    MaterialDialog.OptionMenuItemSpec(prefContext.getString(R.string.dialog_button_use_default)) {
+                        val paths = WorkingDirectoryUtils.getRecommendedDefaultPaths()
+                        when (paths.size) {
+                            1 -> mContentView.setText(paths.first())
+                            else -> MaterialDialog.Builder(prefContext)
+                                .title(R.string.text_multiple_options)
+                                .items(paths)
+                                .itemsCallback { _, _, _, text ->
+                                    mContentView.setText(text)
+                                }
+                                .negativeText(R.string.dialog_button_back)
+                                .showAdaptive()
+                        }
+                    },
+                    MaterialDialog.OptionMenuItemSpec(prefContext.getString(R.string.dialog_button_details)) {
+                        MaterialDialog.Builder(prefContext)
+                            .title(R.string.text_working_dir_path)
+                            .content(R.string.description_change_working_dir_preference)
+                            .positiveText(R.string.dialog_button_dismiss)
+                            .positiveColorRes(R.color.dialog_button_default)
+                            .showAdaptive()
+                    },
+                )
+            )
             .customView(R.layout.pref_working_directory, false)
             .neutralText(R.string.dialog_button_history)
             .neutralColorRes(R.color.dialog_button_hint)
             .onNeutral { _, _ ->
-                MaterialDialog.Builder(context)
+                MaterialDialog.Builder(prefContext)
                     .title(R.string.text_histories)
                     .content(R.string.text_no_histories)
                     .items(WorkingDirectoryUtils.histories)
@@ -83,7 +110,7 @@ class WorkingDirectoryPreference : MaterialPreference {
                     }
                     .itemsLongCallback { dHistories, _, _, text ->
                         false.also {
-                            MaterialDialog.Builder(context)
+                            MaterialDialog.Builder(prefContext)
                                 .title(R.string.text_prompt)
                                 .content(R.string.text_confirm_to_delete)
                                 .negativeText(R.string.dialog_button_cancel)
@@ -98,35 +125,14 @@ class WorkingDirectoryPreference : MaterialPreference {
                                         DialogUtils.toggleContentViewByItems(dHistories)
                                     }
                                 }
-                                .show()
-                        }
-                    }
-                    .neutralText(R.string.dialog_button_use_default)
-                    .neutralColorRes(R.color.dialog_button_reset)
-                    .onNeutral { dHistories, _ ->
-                        val paths = WorkingDirectoryUtils.getRecommendedDefaultPaths()
-                        if (paths.size == 1) {
-                            mContentView.setText(paths.first())
-                            dHistories.dismiss()
-                        } else {
-                            MaterialDialog.Builder(context)
-                                .title(R.string.text_multiple_options)
-                                .items(paths)
-                                .itemsCallback { _, _, _, text ->
-                                    true.also {
-                                        dHistories.dismiss()
-                                        mContentView.setText(text)
-                                    }
-                                }
-                                .negativeText(R.string.dialog_button_back)
-                                .show()
+                                .showAdaptive()
                         }
                     }
                     .negativeText(R.string.dialog_button_back)
                     .negativeColorRes(R.color.dialog_button_default)
                     .onNegative { dHistories, _ -> dHistories.dismiss() }
                     .autoDismiss(false)
-                    .show()
+                    .showAdaptive()
                     .also { DialogUtils.toggleContentViewByItems(it) }
             }
             .negativeText(R.string.dialog_button_cancel)
@@ -156,10 +162,10 @@ class WorkingDirectoryPreference : MaterialPreference {
                         setOnClickListener {
                             val initialDir: String? = try {
                                 File(toFullPath(mContentView.text.toString())).path
-                            } catch (ignore: Exception) {
+                            } catch (_: Exception) {
                                 mPrefFullPath
                             }
-                            FileChooserDialogBuilder(context)
+                            FileChooserDialogBuilder(prefContext)
                                 .title(R.string.text_working_dir_path)
                                 .dir(mExtStoragePath, initialDir ?: WorkingDirectoryUtils.path)
                                 .chooseDir()
@@ -203,13 +209,13 @@ class WorkingDirectoryPreference : MaterialPreference {
             when (mRadioGroupView.checkedRadioButtonId) {
                 R.id.copy -> fileObservable = FileObservable.copy(srcPath, toFullPath(dstPath))
                 R.id.move -> fileObservable = FileObservable.move(srcPath, toFullPath(dstPath))
-                else -> ViewUtils.showToast(context, R.string.error_unknown_operation, true)
+                else -> ViewUtils.showToast(prefContext, R.string.error_unknown_operation, true)
             }
             fileObservable?.let { showFileProgressDialog(it) }
         }
 
         private fun showFileProgressDialog(observable: Observable<File>) {
-            val dialog = MaterialDialog.Builder(context)
+            val dialog = MaterialDialog.Builder(prefContext)
                 .progress(true, 0)
                 .progressIndeterminateStyle(true)
                 .title(R.string.text_in_progress)
@@ -235,14 +241,14 @@ class WorkingDirectoryPreference : MaterialPreference {
                     override fun onError(e: Throwable) {
                         e.printStackTrace()
                         dialog.dismiss()
-                        context.getString(R.string.text_error_copy_file, e.message).let {
-                            ViewUtils.showToast(context, it, true)
+                        prefContext.getString(R.string.text_error_copy_file, e.message).let {
+                            ViewUtils.showToast(prefContext, it, true)
                         }
                     }
 
                     override fun onComplete() {
                         dialog.dismiss()
-                        ViewUtils.showToast(context, R.string.text_operation_is_completed)
+                        ViewUtils.showToast(prefContext, R.string.text_operation_is_completed)
                     }
                 })
         }

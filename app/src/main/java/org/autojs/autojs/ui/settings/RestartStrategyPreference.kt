@@ -2,7 +2,6 @@ package org.autojs.autojs.ui.settings
 
 import android.content.Context
 import android.util.AttributeSet
-import android.view.View
 import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.theme.preference.MaterialListPreference
@@ -51,14 +50,11 @@ class RestartStrategyPreference : MaterialListPreference {
                 d.dismiss()
             }
         }
-        builder.options(
-            listOf(
-                MaterialDialog.OptionMenuItemSpec(context.getString(R.string.dialog_button_use_default)) { dialog ->
-                    dialog.selectedIndex = itemDefaultIndex
-                    dialog.configureNeutralButton()
-                },
-            )
-        )
+    }
+
+    override fun useDefaultOptionMenuItemSpecOnClickListener(dialog: MaterialDialog) {
+        dialog.selectedIndex = itemDefaultIndex
+        dialog.configureNeutralButton()
     }
 
     private fun MaterialDialog.Builder.configureNeutralButton() {

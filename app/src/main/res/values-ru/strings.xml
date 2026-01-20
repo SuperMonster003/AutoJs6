@@ -1190,5 +1190,10 @@
     <string name="error_plugin_returned_invalid_variant">Плагин %1$s вернул недопустимый variant: %2$s.</string>
     <string name="error_no_embedded_paddle_ocr_assets_found">Не найдены встроенные ресурсы Paddle OCR. Перепакуйте приложение с включённым Paddle OCR.</string>
     <string name="dialog_button_minimize">Свернуть</string>
+    <string name="text_property_colon_value_unit">%1$s: %2$d%3$s</string>
+    <string name="text_property_colon_value_nbsp_unit">%1$s: %2$d %3$s</string>
+    <string name="text_screen_capture_request_delay">Задержка запроса разрешения на захват экрана</string>
+    <string name="description_screen_capture_request_delay">При запросе разрешения на захват экрана отображаемое окно запроса может иметь анимацию затухания при исчезновении. Если сразу вызвать `images.captureScreen`, полученный снимок может содержать содержимое этого окна и быть частично перекрыт.\n\nЗначение этой опции добавляет задержку (в миллисекундах) перед выполнением снимка экрана сразу после получения разрешения, что позволяет избежать описанной выше проблемы перекрытия.\n\nЭта опция применяется только к первому снимку после получения разрешения; последующие снимки не будут зависеть от этого значения.</string>
+    <string name="text_delay_time">Время задержки</string>
 
 </resources>

@@ -187,6 +187,12 @@
             app:itemDefaultKey="@string/default_key_root_mode"
             app:longClickPrompt="@string/description_root_mode_preference" />
 
+        <org.autojs.autojs.ui.settings.ScreenCaptureRequestDelayPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_screen_capture_request_delay"
+            app:title="@string/text_screen_capture_request_delay"
+            app:longClickPrompt="@string/description_screen_capture_request_delay" />
+
     </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
 
     <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory

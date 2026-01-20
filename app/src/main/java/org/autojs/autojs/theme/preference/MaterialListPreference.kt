@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.text.TextUtils
 import android.util.AttributeSet
 import com.afollestad.materialdialogs.MaterialDialog
+import org.autojs.autojs.app.DialogUtils.showAdaptive
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.extension.MaterialDialogExtensions.choiceWidgetThemeColor
 import org.autojs.autojs.extension.MaterialDialogExtensions.widgetThemeColor
@@ -103,16 +104,42 @@ open class MaterialListPreference : MaterialDialogPreference {
                 }
                 return@itemsCallbackSingleChoice true
             }
+            val options = mutableListOf<MaterialDialog.OptionMenuItemSpec>()
             if (defaultEntry != null) {
-                builder.options(
-                    listOf(
-                        MaterialDialog.OptionMenuItemSpec(context.getString(R.string.dialog_button_use_default)) { dialog ->
-                            dialog.selectedIndex = itemDefaultIndex
-                        },
-                    )
-                )
+                options += MaterialDialog.OptionMenuItemSpec(prefContext.getString(R.string.dialog_button_use_default), ::useDefaultOptionMenuItemSpecOnClickListener)
             }
+            if (longClickPrompt != null) {
+                options += MaterialDialog.OptionMenuItemSpec(prefContext.getString(R.string.dialog_button_details), ::detailsOptionMenuItemSpecOnClickListener)
+            }
+            builder.options(options)
         }
+    }
+
+    open fun useDefaultOptionMenuItemSpecOnClickListener(dialog: MaterialDialog) {
+        dialog.selectedIndex = itemDefaultIndex
+    }
+
+    open fun detailsOptionMenuItemSpecOnClickListener(dialog: MaterialDialog) {
+        MaterialDialog.Builder(prefContext)
+            .title(dialogTitle ?: prefContext.getString(R.string.text_details))
+            .content(longClickPrompt ?: "")
+            .also { builder ->
+                longClickPromptMore?.let { longClickPromptMore ->
+                    builder.neutralText(R.string.dialog_button_more)
+                    builder.neutralColorRes(R.color.dialog_button_hint)
+                    builder.onNeutral { _, _ ->
+                        MaterialDialog.Builder(prefContext)
+                            .title(R.string.text_details)
+                            .content(longClickPromptMore)
+                            .positiveText(R.string.dialog_button_dismiss)
+                            .positiveColorRes(R.color.dialog_button_default)
+                            .showAdaptive()
+                    }
+                }
+            }
+            .positiveText(R.string.dialog_button_dismiss)
+            .positiveColorRes(R.color.dialog_button_default)
+            .showAdaptive()
     }
 
     private fun getKeyIndex(keyString: CharSequence?): Int? {
