@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
 import org.autojs.autojs.ui.main.drawer.PermissionItemHelper
+import org.autojs.autojs.util.IntentUtils.startSafely
 
 class WriteSystemSettingsPermission(override val context: Context) : PermissionItemHelper {
 
@@ -14,10 +15,8 @@ class WriteSystemSettingsPermission(override val context: Context) : PermissionI
 
     override fun revoke() = false.also { config() }
 
-    fun config() = context.startActivity(
-        Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS)
-            .setData(Uri.parse("package:${context.packageName}"))
-            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-    )
+    fun config() = Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS)
+        .setData(Uri.parse("package:${context.packageName}"))
+        .startSafely(context)
 
 }

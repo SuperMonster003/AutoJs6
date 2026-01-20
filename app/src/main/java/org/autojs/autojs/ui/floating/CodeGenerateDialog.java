@@ -86,7 +86,7 @@ public class CodeGenerateDialog extends AppLevelThemeDialogBuilder {
         String code = generateCode();
         AppLevelThemeDialogBuilder builder = new AppLevelThemeDialogBuilder(context);
         if (code != null) {
-            DialogUtils.showDialog(builder
+            DialogUtils.showAdaptive(builder
                     .title(R.string.text_generated_code)
                     .content(code)
                     .negativeText(R.string.dialog_button_cancel)
@@ -99,7 +99,7 @@ public class CodeGenerateDialog extends AppLevelThemeDialogBuilder {
                     }))
                     .build());
         } else {
-            DialogUtils.showDialog(builder
+            DialogUtils.showAdaptive(builder
                     .title(R.string.text_prompt)
                     .content(R.string.text_failed_to_generate)
                     .positiveText(R.string.dialog_button_dismiss)

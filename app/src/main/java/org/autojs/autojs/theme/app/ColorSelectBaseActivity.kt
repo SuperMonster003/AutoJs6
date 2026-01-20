@@ -46,6 +46,7 @@ import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.presetColorL
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.main.drawer.DrawerFragment.Companion.Event.ThemeColorLayoutSwitchedEvent
 import org.autojs.autojs.util.ColorUtils
+import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.onceGlobalLayout
 import org.autojs.autojs.util.ViewUtils.setColorsByColorLuminance
@@ -523,8 +524,7 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
 
     protected fun showColorSearchHelp() {
         Intent(this, ColorSearchHelpActivity::class.java)
-            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            .let { startActivity(it) }
+            .startSafely(this)
     }
 
     protected fun filterColorsFromColorItems(query: String?, colorItems: List<PresetColorItem>, colorItemAdapter: ColorItemAdapter) {
@@ -659,7 +659,7 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
                 intent.putExtra("currentColor", context.currentColor)
                 context.finish()
             }
-            context.startActivity(intent)
+            intent.startSafely(context)
         }
 
         @JvmStatic

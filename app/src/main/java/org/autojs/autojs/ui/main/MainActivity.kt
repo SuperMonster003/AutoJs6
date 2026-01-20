@@ -54,6 +54,7 @@ import org.autojs.autojs.ui.settings.PreferencesActivity
 import org.autojs.autojs.ui.widget.DrawerAutoClose
 import org.autojs.autojs.ui.widget.SearchViewItem
 import org.autojs.autojs.util.IntentUtils
+import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs.util.UpdateUtils
 import org.autojs.autojs.util.ViewUtils
@@ -451,7 +452,7 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
         var shouldRecreateMainActivity = false
 
         @JvmStatic
-        fun launch(context: Context) = context.startActivity(getIntent(context).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        fun launch(context: Context) = getIntent(context).startSafely(context)
 
         @JvmStatic
         fun getIntent(context: Context?) = Intent(context, MainActivity::class.java)

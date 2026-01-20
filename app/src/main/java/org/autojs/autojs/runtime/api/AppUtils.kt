@@ -27,6 +27,8 @@ import org.autojs.autojs.ui.settings.AboutActivity
 import org.autojs.autojs.ui.settings.PreferencesActivity
 import org.autojs.autojs.util.App
 import org.autojs.autojs.util.IntentUtils
+import org.autojs.autojs.util.IntentUtils.start
+import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs6.R
 import java.lang.ref.WeakReference
 import java.net.URI
@@ -63,7 +65,7 @@ class AppUtils(context: Context, @get:ScriptInterface val fileProviderAuthority:
         o ?: return false
         val nicePackageName = getAppByAlias(alias = o)?.packageName ?: (/* packageName = */ o)
         val intent = mPackageManager.getLaunchIntentForPackage(nicePackageName) ?: return false
-        mContext.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        intent.start(mContext)
     }.isSuccess
 
     @ScriptInterface
@@ -155,8 +157,7 @@ class AppUtils(context: Context, @get:ScriptInterface val fileProviderAuthority:
     @ScriptInterface
     fun uninstall(packageName: String) {
         Intent(Intent.ACTION_DELETE, "package:$packageName".toUri())
-            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            .let { mContext.startActivity(it) }
+            .startSafely(mContext)
     }
 
     @ScriptInterface

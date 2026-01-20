@@ -76,7 +76,6 @@ class ScheduledRestartSettingsDialogBuilder(context: Context) : MaterialDialog.B
             }
             mSeekBar.progress = (context.resources.getInteger(R.integer.scheduled_restart_start_delay_default_value) - mStartDelayMinValue) / 100
         }))
-        autoDismiss(false)
         negativeText(R.string.dialog_button_cancel)
         negativeColorRes(R.color.dialog_button_default)
         onNegative { d, _ -> d.dismiss() }
@@ -90,10 +89,11 @@ class ScheduledRestartSettingsDialogBuilder(context: Context) : MaterialDialog.B
             Pref.putInt(R.string.key_scheduled_restart_delay, mStartDelayMinValue + mSeekBar.progress * 100)
             d.dismiss()
         }
+        autoDismiss(false)
     }
 
     override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-        binding.scheduledRestartStartDelayTitle.text = "$mScheduledRestartStartDelayTitlePrefix: ${mStartDelayMinValue + progress * 100}ms"
+        binding.scheduledRestartStartDelayTitle.text = context.getString(R.string.text_property_colon_value_unit, mScheduledRestartStartDelayTitlePrefix, mStartDelayMinValue + progress * 100, "ms")
     }
 
     override fun onStartTrackingTouch(seekBar: SeekBar) {

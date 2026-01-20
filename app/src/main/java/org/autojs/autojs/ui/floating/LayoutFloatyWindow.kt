@@ -5,7 +5,7 @@ import android.view.ContextThemeWrapper
 import android.view.View
 import android.view.ViewGroup
 import org.autojs.autojs.app.AppLevelThemeDialogBuilder
-import org.autojs.autojs.app.DialogUtils
+import org.autojs.autojs.app.DialogUtils.showAdaptive
 import org.autojs.autojs.core.accessibility.Capture
 import org.autojs.autojs.core.accessibility.NodeInfo
 import org.autojs.autojs.core.accessibility.WindowInfo
@@ -111,7 +111,7 @@ abstract class LayoutFloatyWindow(
     protected fun generateCode() {
         CodeGenerateDialog(context, capture.root, mLayoutSelectedNode)
             .build()
-            .let { DialogUtils.showDialog(it) }
+            .showAdaptive()
     }
 
     protected fun switchWindow() {
@@ -129,7 +129,7 @@ abstract class LayoutFloatyWindow(
         val builder = WindowSwitchingDialog(context, windowInfoList).apply {
             sortItems(compareBy { it.order.rawValue })
         }
-        val dialog = DialogUtils.showDialog(builder.build())
+        val dialog = builder.build().showAdaptive()
         builder.itemsClickCallback = { _, position ->
             builder.itemList[position].window.root?.let {
                 dialog.dismiss()

@@ -34,6 +34,7 @@ import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.settings.VersionHistoryRepository.Companion.Category
 import org.autojs.autojs.ui.settings.VersionHistoryRepository.Companion.DEFAULT_FILTER
 import org.autojs.autojs.ui.settings.VersionHistoryRepository.Companion.DEFAULT_VERSION_NAME
+import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.ProcessLogger
 import org.autojs.autojs.util.ViewUtils.excludePaddingClippableViewFromBottomNavigationBar
 import org.autojs.autojs.util.ViewUtils.setMenuIconsColorByThemeColorLuminance
@@ -250,9 +251,8 @@ class DisplayVersionHistoriesActivity : BaseActivity() {
 
         @JvmStatic
         fun launch(context: Context) {
-            Intent(context, DisplayVersionHistoriesActivity::class.java).apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            }.let { context.startActivity(it) }
+            Intent(context, DisplayVersionHistoriesActivity::class.java)
+                .startSafely(context)
         }
 
         class NoFadeItemAnimator : DefaultItemAnimator() {

@@ -10,6 +10,7 @@ import android.widget.FrameLayout
 import androidx.core.net.toUri
 import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.runtime.api.Mime
+import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.TextUtils.markdownToHtml
 
 /**
@@ -47,13 +48,13 @@ class CommonMarkdownView : WebView {
             }
 
             override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
-                context.startActivity(Intent(Intent.ACTION_VIEW).setData(request.url).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                Intent(Intent.ACTION_VIEW).setData(request.url).startSafely(context)
                 return true
             }
 
             @Deprecated("Deprecated in Java")
             override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
-                context.startActivity(Intent(Intent.ACTION_VIEW).setData(url.toUri()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                Intent(Intent.ACTION_VIEW).setData(url.toUri()).startSafely(context)
                 return true
             }
         }

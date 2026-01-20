@@ -2,7 +2,6 @@ package org.autojs.autojs.ui.widget;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
@@ -17,19 +16,17 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
-
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import org.autojs.autojs.app.OnActivityResultDelegate;
 import org.autojs.autojs.tool.ImageSelector;
+import org.autojs.autojs.util.IntentUtils;
 import org.autojs.autojs6.R;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
-import io.reactivex.Observable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 
 /**
  * Created by Stardust on Aug 22, 2017.
@@ -124,7 +121,7 @@ public class EWebView extends FrameLayout implements SwipeRefreshLayout.OnRefres
         public boolean openFileChooser(ValueCallback<Uri> valueCallback,
                                        String[] acceptType) {
             if (getContext() instanceof OnActivityResultDelegate.DelegateHost &&
-                    getContext() instanceof Activity && isImageType(acceptType)) {
+                getContext() instanceof Activity && isImageType(acceptType)) {
                 chooseImage(valueCallback);
                 return true;
             }
@@ -201,12 +198,7 @@ public class EWebView extends FrameLayout implements SwipeRefreshLayout.OnRefres
                 if (intentActivities.isEmpty()) {
                     return false;
                 }
-                try {
-                    getContext().startActivity(Intent.createChooser(intent, getResources().getString(R.string.text_open_with)));
-                } catch (ActivityNotFoundException e) {
-                    e.printStackTrace();
-                    return false;
-                }
+                return IntentUtils.startSafely(Intent.createChooser(intent, getResources().getString(R.string.text_open_with)), getContext());
             }
             return true;
         }

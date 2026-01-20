@@ -13,6 +13,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.autojs.autojs.app.DialogUtils.showAdaptive
 import org.autojs.autojs.extension.MaterialDialogExtensions.makeTextCopyable
 import org.autojs.autojs.extension.MaterialDialogExtensions.setCopyableText
 import org.autojs.autojs.runtime.api.augment.colors.Colors
@@ -35,7 +36,7 @@ object ColorInfoDialogManager {
                 .content(R.string.error_invalid_color)
                 .positiveText(R.string.dialog_button_dismiss)
                 .positiveColorRes(R.color.dialog_button_default)
-                .show()
+                .showAdaptive()
             return
         }
         val binding = ColorInfoDialogItemsBinding.inflate(LayoutInflater.from(context))

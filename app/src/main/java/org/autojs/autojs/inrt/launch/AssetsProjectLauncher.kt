@@ -17,6 +17,7 @@ import org.autojs.autojs.pio.UncheckedIOException
 import org.autojs.autojs.project.ProjectConfig
 import org.autojs.autojs.script.JavaScriptFileSource
 import org.autojs.autojs.script.JavaScriptSource
+import org.autojs.autojs.util.IntentUtils.startSafely
 import java.io.File
 import java.io.IOException
 
@@ -46,10 +47,9 @@ open class AssetsProjectLauncher(private val mAssetsProjectDir: String, private 
             } else {
                 // 否则显示日志界面并在日志界面中运行脚本
                 mHandler.post {
-                    activity.startActivity(
-                        Intent(mActivity, LogActivity::class.java)
-                            .putExtra(LogActivity.EXTRA_LAUNCH_SCRIPT, true)
-                    )
+                    Intent(mActivity, LogActivity::class.java)
+                        .putExtra(LogActivity.EXTRA_LAUNCH_SCRIPT, true)
+                        .startSafely(activity)
                     activity.finish()
                 }
             }

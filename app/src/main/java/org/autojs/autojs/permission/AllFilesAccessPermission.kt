@@ -16,6 +16,7 @@ import org.autojs.autojs.ui.common.NotAskAgainDialog
 import org.autojs.autojs.ui.main.MainActivity
 import org.autojs.autojs.ui.main.drawer.PermissionItemHelper
 import org.autojs.autojs.util.IntentUtils
+import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs6.R
 
@@ -56,17 +57,16 @@ class AllFilesAccessPermission(override val context: Context) : PermissionItemHe
     }
 
     @RequiresApi(Build.VERSION_CODES.R)
-    private fun manageAllFilesAccess(): Boolean = runCatching {
+    private fun manageAllFilesAccess(): Boolean = when {
         Intent()
             .setAction(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
             .setData(Uri.fromParts("package", context.packageName, null))
-            .let { context.startActivity(it) }
-        true
-    }.isSuccess || runCatching {
+            .startSafely(context) -> true
         Intent()
             .setAction(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
-            .let { context.startActivity(it) }
-    }.isSuccess
+            .startSafely(context) -> true
+        else -> false
+    }
 
     private fun launchAppDetailsSettings() = IntentUtils.launchAppDetailsSettings(context)
 

@@ -66,7 +66,7 @@ public class ScriptLoopDialog {
     }
 
     public void show() {
-        DialogUtils.showDialog(mDialog);
+        DialogUtils.showAdaptive(mDialog);
     }
 
 }

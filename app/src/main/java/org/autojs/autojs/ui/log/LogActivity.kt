@@ -10,6 +10,7 @@ import org.autojs.autojs.AutoJs.Companion.instance
 import org.autojs.autojs.core.console.GlobalConsole
 import org.autojs.autojs.runtime.api.Mime
 import org.autojs.autojs.ui.BaseActivity
+import org.autojs.autojs.util.IntentUtils.startSafelyWithOptions
 import org.autojs.autojs.util.ViewUtils.excludeFloatingActionButtonFromBottomNavigationBar
 import org.autojs.autojs.util.ViewUtils.showToast
 import org.autojs.autojs6.R
@@ -97,9 +98,9 @@ class LogActivity : BaseActivity() {
 
         @JvmStatic
         fun launch(context: Context) {
-            val intent = Intent(context, LogActivity::class.java).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
+            val intent = Intent(context, LogActivity::class.java)
             val options = ActivityOptions.makeCustomAnimation(context, R.anim.no_anim_fade_in, R.anim.no_anim_fade_out)
-            context.startActivity(intent, options.toBundle())
+            intent.startSafelyWithOptions(context, options.toBundle())
         }
 
     }

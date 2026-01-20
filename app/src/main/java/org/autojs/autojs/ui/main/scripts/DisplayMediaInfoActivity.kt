@@ -5,6 +5,7 @@ import android.content.Intent
 import io.noties.prism4j.GrammarLocator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs6.R
 
 class DisplayMediaInfoActivity : BaseDisplayContentActivity() {
@@ -27,10 +28,9 @@ class DisplayMediaInfoActivity : BaseDisplayContentActivity() {
 
         @JvmStatic
         fun launch(context: Context, mediaInfo: String) {
-            val intent = Intent(context, DisplayMediaInfoActivity::class.java)
-            intent.putExtra(INTENT_IDENTIFIER_MEDIA_INFO, mediaInfo)
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            context.startActivity(intent)
+            Intent(context, DisplayMediaInfoActivity::class.java).apply {
+                putExtra(INTENT_IDENTIFIER_MEDIA_INFO, mediaInfo)
+            }.startSafely(context)
         }
 
     }

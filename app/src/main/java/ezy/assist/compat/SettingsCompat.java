@@ -24,6 +24,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.provider.Settings;
 import android.util.Log;
+import org.autojs.autojs.util.IntentUtils;
 import org.autojs.autojs.util.RomUtils;
 
 import java.lang.reflect.Method;
@@ -72,7 +73,7 @@ public class SettingsCompat {
     public static void manageWriteSettings(Context context) {
         Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS);
         intent.setData(Uri.parse("package:" + context.getPackageName()));
-        context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        IntentUtils.startSafely(intent, context);
     }
 
     private static boolean checkOp(Context context, int op) {
@@ -88,8 +89,7 @@ public class SettingsCompat {
 
     private static boolean startSafely(Context context, Intent intent) {
         if (context.getPackageManager().queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY).size() > 0) {
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(intent);
+            IntentUtils.startSafely(intent, context);
             return true;
         } else {
             Log.e(TAG, "Intent is not available! " + intent);

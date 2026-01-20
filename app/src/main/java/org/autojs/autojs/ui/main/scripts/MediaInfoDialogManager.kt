@@ -2,6 +2,7 @@ package org.autojs.autojs.ui.main.scripts
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.DialogInterface
 import android.view.LayoutInflater
 import android.view.View.MeasureSpec.UNSPECIFIED
 import android.widget.TextView
@@ -16,6 +17,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.autojs.autojs.app.DialogUtils.showAdaptive
 import org.autojs.autojs.extension.MaterialDialogExtensions.makeTextCopyable
 import org.autojs.autojs.extension.MaterialDialogExtensions.setCopyableText
 import org.autojs.autojs.model.explorer.ExplorerItem
@@ -32,8 +34,22 @@ object MediaInfoDialogManager {
     private const val MEDIA_INFO_ERROR_OPENING_FILE = "Error opening file..."
 
     @JvmStatic
+    @JvmOverloads
     @SuppressLint("SetTextI18n")
-    fun showMediaInfoDialog(context: Context, explorerItem: ExplorerItem) {
+    fun showMediaInfoDialog(
+        context: Context,
+        explorerItem: ExplorerItem,
+        builderApplier: (MaterialDialog.Builder.() -> Unit)? = null,
+    ) = showMediaInfoDialog(context, explorerItem, builderApplier, null)
+
+    @JvmStatic
+    @SuppressLint("SetTextI18n")
+    fun showMediaInfoDialog(
+        context: Context,
+        explorerItem: ExplorerItem,
+        builderApplier: (MaterialDialog.Builder.() -> Unit)?,
+        onDismissListener: DialogInterface.OnDismissListener?,
+    ) {
         val binding = MediaFileInfoDialogItemsBinding.inflate(LayoutInflater.from(context))
 
         // Create an independent Scope for the Dialog, bind its lifecycle with the Dialog.
@@ -52,11 +68,16 @@ object MediaInfoDialogManager {
             .onNegative { materialDialog, _ -> materialDialog.dismiss() }
             .neutralText(R.string.ellipsis_six)
             .neutralColorRes(R.color.dialog_button_unavailable)
-            .show()
+            .also { builder -> builderApplier?.invoke(builder) }
+            .build()
             .apply {
                 makeTextCopyable { titleView }
-                setOnDismissListener { scope.cancel() }
+                setOnDismissListener {
+                    scope.cancel()
+                    onDismissListener?.onDismiss(this)
+                }
             }
+            .showAdaptive()
 
         scope.launch {
             val mediaInfo = MediaInfo()

@@ -13,6 +13,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.autojs.autojs.app.DialogUtils.showAdaptive
 import org.autojs.autojs.extension.MaterialDialogExtensions.makeTextCopyable
 import org.autojs.autojs.extension.MaterialDialogExtensions.setCopyableTextIfAbsent
 import org.autojs.autojs.external.fileprovider.AppFileProvider
@@ -37,7 +38,7 @@ object EditableFileInfoDialogManager {
             MaterialDialog.Builder(context)
                 .title(R.string.text_failed)
                 .content(R.string.file_not_exist_or_readable)
-                .show()
+                .showAdaptive()
             return
         }
         val binding = EditableFileInfoDialogItemsBinding.inflate(LayoutInflater.from(context))
@@ -55,7 +56,7 @@ object EditableFileInfoDialogManager {
             .limitIconToDefaultSize()
             .positiveText(R.string.dialog_button_dismiss)
             .positiveColorRes(R.color.dialog_button_default)
-            .show()
+            .showAdaptive()
             .apply {
                 makeTextCopyable { titleView }
                 setOnDismissListener { scope.cancel() }

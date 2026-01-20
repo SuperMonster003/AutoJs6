@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.drawable.Drawable
 import androidx.core.net.toUri
 import com.afollestad.materialdialogs.MaterialDialog
+import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs6.R
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
@@ -84,7 +85,8 @@ data class PluginCenterItem(
     }
 
     fun uninstall(context: Context) {
-        context.startActivity(Intent(Intent.ACTION_DELETE, "package:$packageName".toUri()))
+        Intent(Intent.ACTION_DELETE, "package:$packageName".toUri())
+            .startSafely(context)
     }
 
     fun uninstallWithPrompt(context: Context, dialog: MaterialDialog? = null) {

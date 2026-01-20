@@ -39,6 +39,7 @@ import org.autojs.autojs.ui.enhancedfloaty.ResizableExpandableFloatyWindow
 import org.autojs.autojs.ui.enhancedfloaty.gesture.DragGesture
 import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.ColorUtils
+import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
@@ -286,9 +287,7 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
             putExtra(Intent.EXTRA_TEXT, message)
             type = Mime.TEXT_PLAIN
         }
-        applicationContext.startActivity(Intent.createChooser(sendIntent, null).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        })
+        Intent.createChooser(sendIntent, null).startSafely(applicationContext)
     }
 
     private fun cutOutEntries(maxLength: Int): MutableList<LogEntry> {

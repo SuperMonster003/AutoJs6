@@ -5,6 +5,7 @@ import android.content.Intent
 import io.noties.prism4j.GrammarLocator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs6.R
 import java.io.File
 import java.util.regex.Pattern
@@ -84,7 +85,7 @@ class DisplayManifestActivity : BaseDisplayContentActivity() {
                 putExtra(PATH_IDENTIFIER_MANIFEST, manifestFile.path)
                 putExtra(INTENT_IDENTIFIER_PERMISSIONS, usesPermissions.toTypedArray())
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            }.let { context.startActivity(it) }
+            }.startSafely(context)
         }
 
         private fun parsePermissionsFromManifest(manifestContent: CharSequence): Array<String> {

@@ -21,6 +21,7 @@ import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.keystore.NewKeyStoreDialog.NewKeyStoreConfigs
 import org.autojs.autojs.ui.viewmodel.KeyStoreViewModel
+import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.ViewUtils.excludeFloatingActionButtonFromBottomNavigationBar
 import org.autojs.autojs.util.ViewUtils.excludePaddingClippableViewFromBottomNavigationBar
 import org.autojs.autojs.util.ViewUtils.setMenuIconsColorByThemeColorLuminance
@@ -38,7 +39,7 @@ class ManageKeyStoreActivity : BaseActivity() {
 
     companion object {
         fun startActivity(context: Context) {
-            context.startActivity(Intent(context, ManageKeyStoreActivity::class.java))
+            Intent(context, ManageKeyStoreActivity::class.java).startSafely(context)
         }
     }
 

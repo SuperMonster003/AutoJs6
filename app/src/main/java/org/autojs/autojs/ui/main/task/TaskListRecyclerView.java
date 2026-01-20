@@ -32,6 +32,7 @@ import org.autojs.autojs.timing.TimedTaskManager;
 import org.autojs.autojs.ui.timing.TimedTaskSettingActivity;
 import org.autojs.autojs.util.ColorUtils;
 import org.autojs.autojs.util.FileUtils;
+import org.autojs.autojs.util.IntentUtils;
 import org.autojs.autojs6.R;
 import org.autojs.autojs6.databinding.ExplorerFirstCharIconBinding;
 import org.autojs.autojs6.databinding.TaskListRecyclerViewItemBinding;
@@ -307,7 +308,7 @@ public class TaskListRecyclerView extends ThemeColorRecyclerView {
                         : TimedTaskSettingActivity.EXTRA_TASK_ID;
                 Intent intent = new Intent(getContext(), TimedTaskSettingActivity.class)
                         .putExtra(extra, task.getId());
-                getContext().startActivity(intent);
+                IntentUtils.startSafely(intent, getContext());
             }
         }
     }

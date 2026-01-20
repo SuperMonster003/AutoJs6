@@ -30,6 +30,7 @@ import org.autojs.autojs.core.pref.Language;
 import org.autojs.autojs.runtime.ScriptRuntime;
 import org.autojs.autojs.runtime.exception.ScriptException;
 import org.autojs.autojs.tool.MapBuilder;
+import org.autojs.autojs.util.IntentUtils;
 import org.autojs.autojs6.R;
 import org.mozilla.javascript.BaseFunction;
 
@@ -240,9 +241,8 @@ public class Events extends EventEmitter implements OnKeyListener, TouchObserver
             NotificationListenerService.getInstance().addListener(this);
             return;
         }
-        Intent intent = new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        mContext.startActivity(intent);
+        Intent intent = new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS);
+        IntentUtils.startSafely(intent, mContext);
         throw new ScriptException(mContext.getString(R.string.text_notification_service_disabled));
     }
 

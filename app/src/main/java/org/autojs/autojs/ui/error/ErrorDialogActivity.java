@@ -7,6 +7,7 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import org.autojs.autojs.extension.MaterialDialogExtensions;
 import org.autojs.autojs.ui.BaseActivity;
 import org.autojs.autojs.util.ClipboardUtils;
+import org.autojs.autojs.util.IntentUtils;
 import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs6.R;
 
@@ -75,8 +76,7 @@ public class ErrorDialogActivity extends BaseActivity {
         Intent intent = new Intent(context, ErrorDialogActivity.class);
         intent.putExtra(EXTRA_TITLE, context.getString(titleRes));
         intent.putExtra(EXTRA_MESSAGE, message);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        context.startActivity(intent);
+        IntentUtils.startSafely(intent, context);
     }
 
     /**
@@ -88,8 +88,7 @@ public class ErrorDialogActivity extends BaseActivity {
         intent.putExtra(EXTRA_TITLE, context.getString(titleRes));
         intent.putExtra(EXTRA_MESSAGE, message);
         intent.putExtra(EXTRA_POSITIVE_BUTTON_TEXT, context.getString(positiveButtonTextRes));
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        context.startActivity(intent);
+        IntentUtils.startSafely(intent, context);
     }
 
 }

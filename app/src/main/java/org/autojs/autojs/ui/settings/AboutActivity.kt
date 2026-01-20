@@ -18,6 +18,7 @@ import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.common.NotAskAgainDialog
 import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.DeviceUtils
+import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
@@ -135,7 +136,7 @@ open class AboutActivity : BaseActivity() {
     }
 
     private fun launchDeveloperOptions() {
-        startActivity(Intent(this, DeveloperOptionsActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        Intent(this, DeveloperOptionsActivity::class.java).startSafely(this)
     }
 
     private fun toastForFirstDeveloperIdentifier() {
@@ -189,16 +190,14 @@ open class AboutActivity : BaseActivity() {
     private fun launchGithubIssuesPage() {
         Intent(Intent.ACTION_VIEW)
             .setData(getString(R.string.url_github_autojs6_issues).toUri())
-            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            .let { startActivity(it) }
+            .startSafely(this)
     }
 
     companion object {
 
         fun startActivity(context: Context) {
             Intent(context, AboutActivity::class.java)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                .let { context.startActivity(it) }
+                .startSafely(context)
         }
 
     }

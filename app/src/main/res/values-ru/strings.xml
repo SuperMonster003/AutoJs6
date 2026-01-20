@@ -1189,5 +1189,6 @@
     <string name="error_plugin_returned_empty_info">Плагин %1$s вернул пустую информацию.</string>
     <string name="error_plugin_returned_invalid_variant">Плагин %1$s вернул недопустимый variant: %2$s.</string>
     <string name="error_no_embedded_paddle_ocr_assets_found">Не найдены встроенные ресурсы Paddle OCR. Перепакуйте приложение с включённым Paddle OCR.</string>
+    <string name="dialog_button_minimize">Свернуть</string>
 
 </resources>

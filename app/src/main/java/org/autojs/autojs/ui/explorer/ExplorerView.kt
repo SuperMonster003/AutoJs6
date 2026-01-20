@@ -81,8 +81,9 @@ import java.util.concurrent.Callable
 
 /**
  * Created by Stardust on Aug 21, 2017.
- * Modified by SuperMonster003 as of Apr 1, 2023.
  * Transformed by SuperMonster003 on Nov 23, 2024.
+ * Modified by JetBrains AI Assistant (GPT-5.2) as of Apr 20, 2026.
+ * Modified by SuperMonster003 as of Apr 20, 2026.
  */
 @SuppressLint("CheckResult", "NonConstantResourceId", "NotifyDataSetChanged")
 open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRefreshListener, PopupMenu.OnMenuItemClickListener {
@@ -134,12 +135,29 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         ColorStateList.valueOf(context.getColor(R.color.explorer_file_operation_button))
     }
 
+    // Request host dialog to hide/show without losing state.
+    // zh-CN: 请求宿主对话框隐藏/显示且不丢失状态.
+    private var mRequestHostDialogHide: Runnable? = null
+    private var mRequestHostDialogShow: Runnable? = null
+
     constructor(context: Context) : super(context) {
         init(context)
     }
 
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
         init(context)
+    }
+
+    // Set hide callback from Java callers (e.g. CircularMenu).
+    // zh-CN: 提供给 Java 调用方 (例如 CircularMenu) 设置 hide 回调.
+    fun setRequestHostDialogHide(runnable: Runnable?) {
+        mRequestHostDialogHide = runnable
+    }
+
+    // Set show callback from Java callers (e.g. CircularMenu).
+    // zh-CN: 提供给 Java 调用方 (例如 CircularMenu) 设置 show 回调.
+    fun setRequestHostDialogShow(runnable: Runnable?) {
+        mRequestHostDialogShow = runnable
     }
 
     private fun init(context: Context) {
@@ -248,6 +266,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             R.id.create_shortcut -> {
                 ScriptOperations(context, this@ExplorerView, currentPage)
                     .createShortcut(selectedItem!!.toScriptFile())
+                mRequestHostDialogHide?.run()
             }
             R.id.open_by_other_apps -> {
                 Scripts.openByOtherApps(selectedItem!!.toScriptFile())
@@ -256,15 +275,18 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             R.id.send -> {
                 Scripts.send(context, selectedItem!!.toScriptFile())
                 notifyItemOperated()
+                mRequestHostDialogHide?.run()
             }
             R.id.timed_task -> {
                 ScriptOperations(context, this@ExplorerView, currentPage)
                     .timedTask(selectedItem!!.toScriptFile())
                 notifyItemOperated()
+                mRequestHostDialogHide?.run()
             }
             R.id.action_build_apk -> {
                 BuildActivity.launch(context, selectedItem!!.path)
                 notifyItemOperated()
+                mRequestHostDialogHide?.run()
             }
             R.id.reset -> {
                 val o = Explorers.Providers.workspace()
@@ -844,6 +866,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         }
 
         private fun run() {
+            mRequestHostDialogHide?.run()
             when {
                 mExplorerItem.isExecutable -> {
                     Scripts.run(context, ScriptFile(mExplorerItem.path))
@@ -857,6 +880,8 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         }
 
         private fun edit() {
+            mRequestHostDialogHide?.run()
+
             when {
                 mExplorerItem.isTextEditable -> {
                     Scripts.edit(context, ScriptFile(mExplorerItem.path))
@@ -870,19 +895,32 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         }
 
         private fun showInfo() {
+            // Hide host overlay dialog so the info dialog can be shown on top.
+            // zh-CN: 隐藏宿主 overlay 对话框, 让信息对话框显示在最上层.
+            mRequestHostDialogHide?.run()
+
             when {
                 mExplorerItem.isInstallable -> {
-                    ApkInfoDialogManager.showApkInfoDialog(context, mExplorerItem.toScriptFile())
+                    ApkInfoDialogManager.showApkInfoDialog(context, mExplorerItem.toScriptFile(), null) {
+                        // Restore host dialog after the info dialog is dismissed.
+                        // zh-CN: 信息对话框关闭后恢复宿主对话框.
+                        mRequestHostDialogShow?.run()
+                    }
                     notifyItemOperated()
                 }
                 mExplorerItem.isMediaMenu || mExplorerItem.isMediaPlayable -> {
-                    MediaInfoDialogManager.showMediaInfoDialog(context, mExplorerItem)
+                    MediaInfoDialogManager.showMediaInfoDialog(context, mExplorerItem, null) {
+                        // Restore host dialog after the info dialog is dismissed.
+                        // zh-CN: 信息对话框关闭后恢复宿主对话框.
+                        mRequestHostDialogShow?.run()
+                    }
                     notifyItemOperated()
                 }
             }
         }
 
         private fun install() {
+            mRequestHostDialogHide?.run()
             when {
                 mExplorerItem.isInstallable -> {
                     mExplorerItem.install(this@ExplorerView)
@@ -1001,6 +1039,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                             .setAsWorkingDir(selectedItem!!.toScriptFile())
                     }
                     R.id.action_build_apk -> {
+                        mRequestHostDialogHide?.run()
                         BuildActivity.launch(context, selectedItem!!.path)
                     }
                     R.id.reset -> {

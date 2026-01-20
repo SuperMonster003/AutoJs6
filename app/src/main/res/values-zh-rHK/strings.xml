@@ -1187,5 +1187,6 @@
     <string name="error_plugin_returned_empty_info">%1$s 插件返回的 info 為空.</string>
     <string name="error_plugin_returned_invalid_variant">%1$s 插件返回的 variant 無效: %2$s.</string>
     <string name="error_no_embedded_paddle_ocr_assets_found">未找到內置 Paddle OCR 資源, 請在打包時勾選並注入 Paddle OCR 後重試.</string>
+    <string name="dialog_button_minimize">最小化</string>
 
 </resources>
