@@ -64,6 +64,18 @@ object Pref {
     fun get(): SharedPreferences = sPref
 
     @JvmStatic
+    val screenCaptureRequestDelay: Int
+        get() {
+            // Default 350ms is a practical value for most ROMs' permission dialog fade-out animation.
+            // zh-CN: 默认 350ms 通常可覆盖多数 ROM 授权弹窗的渐隐动画时间.
+            val defValue = resources.getInteger(R.integer.screen_capture_request_delay_default_value)
+            val minValue = resources.getInteger(R.integer.screen_capture_request_delay_min_value)
+            val maxValue = resources.getInteger(R.integer.screen_capture_request_delay_max_value)
+            val value = getInt(R.string.key_screen_capture_request_delay, defValue)
+            return value.coerceIn(minValue, maxValue)
+        }
+
+    @JvmStatic
     val isExtendingJsBuildInObjectsEnabled
         get() = getBoolean(
             R.string.key_extending_js_build_in_objects,

@@ -347,7 +347,7 @@
     <string name="instruction_install_plugin_from_url">リモートプラグインの URL を入力してください. \n例: \"https://example.com/plugin.apk\"</string>
     <string name="label_latest_used_time">最終使用時: %1$s</string>
     <string name="logger_ver_history_blob_thread_failure">\"Blob\" スレッドが失敗</string>
-    <string name="logger_ver_history_blob_thread_success">\"Blob\" スレッドが成功、オフラインキャッシュを書き込み</string>
+    <string name="logger_ver_history_blob_thread_success">\"Blob\" スレッドが成功, オフラインキャッシュを書き込み</string>
     <string name="logger_ver_history_data_loaded">データ読み込み完了</string>
     <string name="logger_ver_history_initial_content_chosen">初期コンテンツを選択</string>
     <string name="logger_ver_history_insert_new_entries">新しい項目を挿入中</string>
@@ -362,7 +362,7 @@
     <string name="logger_ver_history_overwrite_date">日付内容を上書き中</string>
     <string name="logger_ver_history_overwrite_update_record">更新履歴を上書き中</string>
     <string name="logger_ver_history_raw_thread_failure">\"Raw\" スレッドが失敗</string>
-    <string name="logger_ver_history_raw_thread_success">\"Raw\" スレッドが成功、オフラインキャッシュを書き込み</string>
+    <string name="logger_ver_history_raw_thread_success">\"Raw\" スレッドが成功, オフラインキャッシュを書き込み</string>
     <string name="logger_ver_history_start_blob_thread">\"Blob\" 予備リクエストスレッドを開始</string>
     <string name="logger_ver_history_start_raw_thread">\"Raw\" リクエストスレッドを開始</string>
     <string name="media_info_album_label">アルバム</string>
@@ -1191,5 +1191,10 @@
     <string name="error_plugin_returned_invalid_variant">%1$s プラグインが無効な variant を返しました: %2$s.</string>
     <string name="error_no_embedded_paddle_ocr_assets_found">埋め込みの Paddle OCR assets が見つかりません. Paddle OCR を有効にして再パッケージしてください.</string>
     <string name="dialog_button_minimize">最小化</string>
+    <string name="text_property_colon_value_unit">%1$s: %2$d%3$s</string>
+    <string name="text_property_colon_value_nbsp_unit">%1$s: %2$d %3$s</string>
+    <string name="text_screen_capture_request_delay">画面キャプチャ権限リクエスト遅延</string>
+    <string name="description_screen_capture_request_delay">画面キャプチャ権限を要求する際, 表示される権限リクエスト画面が閉じるときにフェード等のアニメーションが発生する場合があります. この直後に `images.captureScreen` を呼び出すと, 取得したスクリーンショットに権限リクエスト画面の内容が写り込み, 遮蔽が発生することがあります. \n\nこの設定値は, 権限取得直後に最初のスクリーンショットを取得する前に遅延時間（ミリ秒）を追加し, 上記の遮蔽問題を回避するために使用します. \n\nこの設定は権限取得後の最初のスクリーンショットにのみ適用され, 以降のスクリーンショットには影響しません.</string>
+    <string name="text_delay_time">遅延時間</string>
 
 </resources>

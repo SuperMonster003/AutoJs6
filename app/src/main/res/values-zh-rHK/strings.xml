@@ -1188,5 +1188,10 @@
     <string name="error_plugin_returned_invalid_variant">%1$s 插件返回的 variant 無效: %2$s.</string>
     <string name="error_no_embedded_paddle_ocr_assets_found">未找到內置 Paddle OCR 資源, 請在打包時勾選並注入 Paddle OCR 後重試.</string>
     <string name="dialog_button_minimize">最小化</string>
+    <string name="text_property_colon_value_unit">%1$s: %2$d%3$s</string>
+    <string name="text_property_colon_value_nbsp_unit">%1$s: %2$d %3$s</string>
+    <string name="text_screen_capture_request_delay">屏幕捕獲權限申請延遲</string>
+    <string name="description_screen_capture_request_delay">申請屏幕捕獲權限時, 彈出的權限申請窗口消失時可能存在漸變動畫, 此時如果立即調用 `images.captureScreen` 方法, 獲取的屏幕截圖中會出現權限申請的窗口內容而造成遮擋.\n\n當前設置選項值用於在截圖權限申請後立即獲取屏幕截圖前增加一個延遲時間 (單位為毫秒), 可用於避免上述遮擋問題.\n\n當前設置選項僅適用於獲取截圖權限後的首次截圖操作, 後續截圖操作不再受此設置值影響.</string>
+    <string name="text_delay_time">延遲時間</string>
 
 </resources>

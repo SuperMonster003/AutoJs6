@@ -35,6 +35,10 @@
     <integer name="scheduled_restart_start_delay_max_value">3000</integer>
     <integer name="scheduled_restart_start_delay_default_value">300</integer>
 
+    <integer name="screen_capture_request_delay_min_value">0</integer>
+    <integer name="screen_capture_request_delay_max_value">2000</integer>
+    <integer name="screen_capture_request_delay_default_value">350</integer>
+
     <integer name="date_picker_mode">1</integer>
     <integer name="time_picker_mode">1</integer>
 

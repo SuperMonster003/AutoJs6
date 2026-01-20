@@ -42,6 +42,7 @@
         "设置页面增加 \"定时任务调度引擎\" 设置选项, 支持 AlarmManager/WorkManager/JobScheduler _[`issue #457`](http://issues.autojs6.com/457)_ _[`issue #434`](http://issues.autojs6.com/434)_ _[`issue #449`](http://issues.autojs6.com/449)_ _[`issue #388`](http://issues.autojs6.com/388)_ _[`issue #378`](http://issues.autojs6.com/378)_ _[`issue #163`](http://issues.autojs6.com/163)_ _[`issue #53`](http://issues.autojs6.com/53)_ _[`issue #21`](http://issues.autojs6.com/21)_",
         "设置页面增加 \"应用启动器图标\" 设置选项, 支持自适应图标/透明背景图标 _[`issue #405`](http://issues.autojs6.com/405)_",
         "设置页面增加 \"重启策略\" 设置选项, 用于设置主页抽屉栏重启按钮是否使用快速重启策略",
+        "设置页面增加 \"屏幕捕获权限申请延迟\" 设置选项, 用于避免权限申请窗口遮挡屏幕",
         "设置页面启动器快捷方式增加 \"插件\" 选项, 用于通过快捷方式跳转到插件中心页面",
         "Scrapers 工具 (run-scrapers.mjs) 用于自动更新 Gradle 构建脚本结构化数据/README 通用数据/README 模板数据等",
         "Gradle Wrapper 切换工具 (gradle-wrapper-switcher), 用于切换本地 Gradle 主版本 (如 Gradle 8.x 与 Gradle 9.x)"
