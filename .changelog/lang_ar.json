@@ -19,7 +19,7 @@
         "في README.md، قسم البناء، إضافة طرق متعددة لتسهيل تحديد صفحة إعداد الهدف _[`issue #404`](http://issues.autojs6.com/404)_"
       ],
       "dependency": [
-        "إضافة Androidx ConstraintLayout الإصدار 2.2.1"
+        "إضافة AndroidX ConstraintLayout الإصدار 2.2.1"
       ]
     },
     "v6.6.3": {
@@ -95,7 +95,7 @@
         "مضاف Material Progressbar الإصدار 1.4.2",
         "مضاف Flexmark Java HTML to Markdown الإصدار 0.64.8",
         "ترقية Gradle 8.14-rc-1 -> 8.14",
-        "ترقية Androidx Room 2.7.0 -> 2.7.1"
+        "ترقية AndroidX Room 2.7.0 -> 2.7.1"
       ]
     },
     "v6.6.2": {
@@ -158,9 +158,9 @@
         "ترقية إصدار Android SDK من 34 إلى 35",
         "ترقية Gradle من 8.12 إلى 8.14-rc-1",
         "ترقية Rhino من 1.8.0-SNAPSHOT إلى 1.8.1-SNAPSHOT",
-        "ترقية Androidx Recyclerview من 1.3.2 إلى 1.4.0",
-        "ترقية Androidx Room من 2.6.1 إلى 2.7.0",
-        "ترقية Androidx WebKit من 1.12.1 إلى 1.13.0",
+        "ترقية AndroidX Recyclerview من 1.3.2 إلى 1.4.0",
+        "ترقية AndroidX Room من 2.6.1 إلى 2.7.0",
+        "ترقية AndroidX WebKit من 1.12.1 إلى 1.13.0",
         "ترقية Pinyin4j من 2.5.0 إلى 2.5.1"
       ]
     },
@@ -300,9 +300,9 @@
         "ترقية إصدار Gradle من 8.5 إلى 8.11.1",
         "ترقية النسخة Rhino 1.7.15 إلى 1.8.0-SNAPSHOT",
         "ترقية النسخة Android Material 1.10.0 إلى 1.12.0",
-        "ترقية النسخة Androidx Annotation 1.7.0 إلى 1.9.1",
-        "ترقية النسخة Androidx AppCompat 1.6.1 إلى 1.7.0",
-        "ترقية النسخة Androidx WebKit 1.8.0 إلى 1.12.1",
+        "ترقية النسخة AndroidX Annotation 1.7.0 إلى 1.9.1",
+        "ترقية النسخة AndroidX AppCompat 1.6.1 إلى 1.7.0",
+        "ترقية النسخة AndroidX WebKit 1.8.0 إلى 1.12.1",
         "ترقية النسخة Apache Commons 3.13.0 إلى 3.16.0",
         "ترقية النسخة ARSCLib 1.2.4 إلى 1.3.1",
         "ترقية النسخة Gson 2.10.1 إلى 2.11.0",
@@ -472,12 +472,12 @@
         "ترقية إصدار Apache Commons Lang3 من 3.12.0 إلى 3.13.0",
         "ترقية إصدار Glide من 4.15.1 إلى 4.16.0",
         "ترقية إصدار Android Analytics من 14.3.0 إلى 14.4.0",
-        "ترقية إصدار Androidx WebKit من 1.7.0 إلى 1.8.0",
-        "ترقية إصدار Androidx Preference من 1.2.0 إلى 1.2.1",
-        "ترقية إصدار Androidx Annotation من 1.6.0 إلى 1.7.0",
-        "ترقية إصدار Androidx Recyclerview من 1.3.0 إلى 1.3.2",
+        "ترقية إصدار AndroidX WebKit من 1.7.0 إلى 1.8.0",
+        "ترقية إصدار AndroidX Preference من 1.2.0 إلى 1.2.1",
+        "ترقية إصدار AndroidX Annotation من 1.6.0 إلى 1.7.0",
+        "ترقية إصدار AndroidX Recyclerview من 1.3.0 إلى 1.3.2",
         "ترقية إصدار Android Material من 1.9.0 إلى 1.10.0",
-        "ترقية إصدار Androidx AppCompat من 1.4.2 إلى 1.6.1",
+        "ترقية إصدار AndroidX AppCompat من 1.4.2 إلى 1.6.1",
         "ترقية إصدار Commons IO من 2.8.0 إلى 2.14.0",
         "ترقية إصدار Jackson DataBind من 2.13.3 إلى 2.14.3",
         "إزالة إصدار Zeugma Solutions LocaleHelper 1.5.1"
@@ -590,7 +590,7 @@
       "dependency": [
         "ترقية إصدار LeakCanary من 2.10 إلى 2.11",
         "ترقية إصدار Android Material من 1.8.0 إلى 1.9.0",
-        "ترقية إصدار Androidx WebKit من 1.6.1 إلى 1.7.0",
+        "ترقية إصدار AndroidX WebKit من 1.6.1 إلى 1.7.0",
         "ترقية إصدار OkHttp3 من 3.10.0 إلى 5.0.0-alpha.9 ثم إلى 5.0.0-alpha.11",
         "ترقية إصدار MLKit Text Recognition Chinese من 16.0.0-beta6 إلى 16.0.0"
       ]
@@ -658,11 +658,11 @@
         "ترقية إصدار Glide من 4.14.2 إلى 4.15.1",
         "ترقية إصدار Joda Time من 2.12.2 إلى 2.12.5",
         "ترقية إصدار Android Analytics من 14.0.0 إلى 14.2.0",
-        "ترقية إصدار Androidx WebKit من 1.5.0 إلى 1.6.1",
-        "ترقية إصدار Androidx Recyclerview من 1.2.1 إلى 1.3.0",
+        "ترقية إصدار AndroidX WebKit من 1.5.0 إلى 1.6.1",
+        "ترقية إصدار AndroidX Recyclerview من 1.2.1 إلى 1.3.0",
         "ترقية إصدار Zip4j من 2.11.2 إلى 2.11.5",
         "ترقية إصدار Junit Jupiter من 5.9.2 إلى 5.9.3",
-        "ترقية إصدار Androidx Annotation من 1.5.0 إلى 1.6.0",
+        "ترقية إصدار AndroidX Annotation من 1.5.0 إلى 1.6.0",
         "ترقية إصدار Jackson DataBind من 2.14.1 إلى 2.14.2",
         "ترقية إصدار Desugar JDK Libs من 2.0.0 إلى 2.0.3"
       ]
@@ -775,7 +775,7 @@
         "محلية النسخة 1.306 من GitHub API",
         "ترقية إصدار Android SDK 32 -> 33",
         "إضافة تعليقات JCIP نسخة 1.0",
-        "إضافة Androidx WebKit نسخة 1.5.0",
+        "إضافة AndroidX WebKit نسخة 1.5.0",
         "إضافة Commons IO نسخة 2.8.0",
         "إضافة Desugar JDK Libs نسخة 2.0.0",
         "إضافة Jackson DataBind نسخة 2.13.3",
@@ -786,8 +786,8 @@
         "ترقية أدوات بناء Gradle من نسخة 7.4.0-alpha02 إلى 8.0.0-alpha09",
         "ترقية مكونات Kotlin Gradle إلى 1.6.10 -> 1.8.0-RC2",
         "ترقية إصدار Android Material إلى 1.6.0 -> 1.7.0",
-        "ترقية إصدار Androidx Annotation إلى 1.3.0 -> 1.5.0",
-        "ترقية إصدار Androidx AppCompat إلى 1.4.1 -> 1.4.2",
+        "ترقية إصدار AndroidX Annotation إلى 1.3.0 -> 1.5.0",
+        "ترقية إصدار AndroidX AppCompat إلى 1.4.1 -> 1.4.2",
         "ترقية إصدار Android Analytics إلى 13.3.0 -> 14.0.0",
         "ترقية إصدار Gson إلى 2.9.0 -> 2.10",
         "ترقية إصدار Joda Time إلى 2.10.14 -> 2.12.1",
@@ -943,9 +943,9 @@
         "تجاهل استثناء ScriptInterruptedException في sleep()"
       ],
       "dependency": [
-        "إضافة Androidx AppCompat (النسخة القديمة) الإصدار 1.0.2",
-        "ترقية Androidx AppCompat من الإصدار 1.4.0 إلى 1.4.1",
-        "ترقية Androidx Preference من الإصدار 1.1.1 إلى 1.2.0",
+        "إضافة AndroidX AppCompat (النسخة القديمة) الإصدار 1.0.2",
+        "ترقية AndroidX AppCompat من الإصدار 1.4.0 إلى 1.4.1",
+        "ترقية AndroidX Preference من الإصدار 1.1.1 إلى 1.2.0",
         "ترقية محرك Rhino من الإصدار 1.7.14-SNAPSHOT إلى 1.7.14",
         "ترقية OkHttp3 من الإصدار 3.10.0 إلى 5.0.0-alpha.3 وإلى 5.0.0-alpha.4",
         "ترقية Android Material من الإصدار 1.6.0-alpha01 إلى 1.6.0-alpha02",
@@ -1008,7 +1008,7 @@
       "dependency": [
         "تحلية ReportCrash محليًا إلى النسخة 2.6.6",
         "تحلية MutableTheme محليًا إلى النسخة 1.0.0",
-        "إضافة Androidx Preference النسخة 1.1.1",
+        "إضافة AndroidX Preference النسخة 1.1.1",
         "إضافة SwipeRefreshLayout النسخة 1.1.0",
         "ترقية Android SDK من النسخة 28 إلى 30 إلى 31",
         "ترقية نسخة Android Analytics من 7.0.0 إلى 13.1.0",
@@ -1016,7 +1016,7 @@
         "ترقية أدوات بناء Gradle من النسخة 3.2.1 إلى 4.1.0 إلى 7.0.3 إلى 7.2.0-alpha04",
         "ترقية نسخة Android Job من 1.2.6 إلى 1.4.2",
         "ترقية نسخة Android Material من 1.1.0-alpha01 إلى 1.5.0-beta01",
-        "ترقية نسخة Androidx MultiDex من 2.0.0 إلى 2.0.1",
+        "ترقية نسخة AndroidX MultiDex من 2.0.0 إلى 2.0.1",
         "ترقية نسخة Apache Commons Lang3 من 3.6 إلى 3.12.0",
         "ترقية نسخة Appcompat من 1.0.2 إلى 1.4.0",
         "ترقية المكون الإضافي Gradle لـ ButterKnife من 9.0.0-rc2 إلى 10.2.1 إلى 10.2.3",

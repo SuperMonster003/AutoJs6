@@ -19,7 +19,7 @@
         "В README.md в разделе сборки добавлены несколько способов упрощённого поиска страницы настроек цели _[`issue #404`](http://issues.autojs6.com/404)_"
       ],
       "dependency": [
-        "Добавлена зависимость Androidx ConstraintLayout версии 2.2.1"
+        "Добавлена зависимость AndroidX ConstraintLayout версии 2.2.1"
       ]
     },
     "v6.6.3": {
@@ -95,7 +95,7 @@
         "Добавлено Material Progressbar версии 1.4.2",
         "Добавлено Flexmark Java HTML to Markdown версии 0.64.8",
         "Обновлено Gradle 8.14-rc-1 -> 8.14",
-        "Обновлено Androidx Room 2.7.0 -> 2.7.1"
+        "Обновлено AndroidX Room 2.7.0 -> 2.7.1"
       ]
     },
     "v6.6.2": {
@@ -158,9 +158,9 @@
         "Обновлена версия Android SDK с 34 до 35",
         "Обновлён Gradle с 8.12 до 8.14-rc-1",
         "Обновлён Rhino с 1.8.0-SNAPSHOT до 1.8.1-SNAPSHOT",
-        "Обновлён Androidx Recyclerview с 1.3.2 до 1.4.0",
-        "Обновлён Androidx Room с 2.6.1 до 2.7.0",
-        "Обновлён Androidx WebKit с 1.12.1 до 1.13.0",
+        "Обновлён AndroidX Recyclerview с 1.3.2 до 1.4.0",
+        "Обновлён AndroidX Room с 2.6.1 до 2.7.0",
+        "Обновлён AndroidX WebKit с 1.12.1 до 1.13.0",
         "Обновлён Pinyin4j с 2.5.0 до 2.5.1"
       ]
     },
@@ -300,9 +300,9 @@
         "Обновить Gradle с версии 8.5 до 8.11.1",
         "Обновить Rhino с версии 1.7.15-SNAPSHOT до 1.8.0-SNAPSHOT",
         "Обновить Android Material с версии 1.10.0 до 1.12.0",
-        "Обновить Androidx Annotation с версии 1.7.0 до 1.9.1",
-        "Обновить Androidx AppCompat с версии 1.6.1 до 1.7.0",
-        "Обновить Androidx WebKit с версии 1.8.0 до 1.12.1",
+        "Обновить AndroidX Annotation с версии 1.7.0 до 1.9.1",
+        "Обновить AndroidX AppCompat с версии 1.6.1 до 1.7.0",
+        "Обновить AndroidX WebKit с версии 1.8.0 до 1.12.1",
         "Обновить Apache Commons с версии 3.13.0 до 3.16.0",
         "Обновить ARSCLib с версии 1.2.4 до 1.3.1",
         "Обновить Gson с версии 2.10.1 до 2.11.0",
@@ -472,12 +472,12 @@
         "Обновление версии Apache Commons Lang3 с 3.12.0 до 3.13.0",
         "Обновление версии Glide с 4.15.1 до 4.16.0",
         "Обновление версии Android Analytics с 14.3.0 до 14.4.0",
-        "Обновление версии Androidx WebKit с 1.7.0 до 1.8.0",
-        "Обновление версии Androidx Preference с 1.2.0 до 1.2.1",
-        "Обновление версии Androidx Annotation с 1.6.0 до 1.7.0",
-        "Обновление версии Androidx Recyclerview с 1.3.0 до 1.3.2",
+        "Обновление версии AndroidX WebKit с 1.7.0 до 1.8.0",
+        "Обновление версии AndroidX Preference с 1.2.0 до 1.2.1",
+        "Обновление версии AndroidX Annotation с 1.6.0 до 1.7.0",
+        "Обновление версии AndroidX Recyclerview с 1.3.0 до 1.3.2",
         "Обновление версии Android Material с 1.9.0 до 1.10.0",
-        "Обновление версии Androidx AppCompat с 1.4.2 до 1.6.1",
+        "Обновление версии AndroidX AppCompat с 1.4.2 до 1.6.1",
         "Обновление версии Commons IO с 2.8.0 до 2.14.0",
         "Обновление версии Jackson DataBind с 2.13.3 до 2.14.3",
         "Удаление версии Zeugma Solutions LocaleHelper 1.5.1"
@@ -590,7 +590,7 @@
       "dependency": [
         "Обновлена версия LeakCanary 2.10 -> 2.11",
         "Обновлена версия Android Material 1.8.0 -> 1.9.0",
-        "Обновлена версия Androidx WebKit 1.6.1 -> 1.7.0",
+        "Обновлена версия AndroidX WebKit 1.6.1 -> 1.7.0",
         "Обновлены версии OkHttp3 3.10.0 -> 5.0.0-alpha.9 -> 5.0.0-alpha.11",
         "Обновлена версия MLKit Text Recognition Chinese 16.0.0-beta6 -> 16.0.0"
       ]
@@ -658,11 +658,11 @@
         "Обновлена версия Glide 4.14.2 -> 4.15.1",
         "Обновлена версия Joda Time 2.12.2 -> 2.12.5",
         "Обновлена версия Android Analytics 14.0.0 -> 14.2.0",
-        "Обновлена версия Androidx WebKit 1.5.0 -> 1.6.1",
-        "Обновлена версия Androidx Recyclerview 1.2.1 -> 1.3.0",
+        "Обновлена версия AndroidX WebKit 1.5.0 -> 1.6.1",
+        "Обновлена версия AndroidX Recyclerview 1.2.1 -> 1.3.0",
         "Обновлена версия Zip4j 2.11.2 -> 2.11.5",
         "Обновлена версия Junit Jupiter 5.9.2 -> 5.9.3",
-        "Обновлена версия Androidx Annotation 1.5.0 -> 1.6.0",
+        "Обновлена версия AndroidX Annotation 1.5.0 -> 1.6.0",
         "Обновлена версия Jackson DataBind 2.14.1 -> 2.14.2",
         "Обновлена версия Desugar JDK Libs 2.0.0 -> 2.0.3"
       ]
@@ -943,9 +943,9 @@
         "Игнорирование ScriptInterruptedException исключений в sleep()"
       ],
       "dependency": [
-        "Добавлен Androidx AppCompat (Legacy) версии 1.0.2",
-        "Обновлен Androidx AppCompat до версии 1.4.0 -> 1.4.1",
-        "Обновлен Androidx Preference до версии 1.1.1 -> 1.2.0",
+        "Добавлен AndroidX AppCompat (Legacy) версии 1.0.2",
+        "Обновлен AndroidX AppCompat до версии 1.4.0 -> 1.4.1",
+        "Обновлен AndroidX Preference до версии 1.1.1 -> 1.2.0",
         "Обновлен Rhino двигатель до версии 1.7.14-SNAPSHOT -> 1.7.14",
         "Обновлен OkHttp3 до версии 3.10.0 -> 5.0.0-alpha.3 -> 5.0.0-alpha.4",
         "Обновлен Android Material до версии 1.6.0-alpha01 -> 1.6.0-alpha02",
@@ -1009,14 +1009,14 @@
         "Обновление версии Android SDK с 28 до 30 и до 31",
         "Локализованная версия CrashReport 2.6.6",
         "Локализованная версия MutableTheme 1.0.0",
-        "Добавлена версия Androidx Preference 1.1.1",
+        "Добавлена версия AndroidX Preference 1.1.1",
         "Добавлена версия SwipeRefreshLayout 1.1.0",
         "Обновление версии Android Analytics с 7.0.0 до 13.1.0",
         "Обновление версии Android Annotations с 4.5.2 до 4.8.0",
         "Обновление сборочного инструмента Gradle с 3.2.1 до 4.1.0, затем до 7.0.3 и до 7.2.0-alpha04",
         "Обновление версии Android Job с 1.2.6 до 1.4.2",
         "Обновление версии Android Material с 1.1.0-alpha01 до 1.5.0-beta01",
-        "Обновление версии Androidx MultiDex с 2.0.0 до 2.0.1",
+        "Обновление версии AndroidX MultiDex с 2.0.0 до 2.0.1",
         "Обновление версии Apache Commons Lang3 с 3.6 до 3.12.0",
         "Обновление версии Appcompat с 1.0.2 до 1.4.0",
         "Обновление версии плагина ButterKnife Gradle с 9.0.0-rc2 до 10.2.1 и до 10.2.3",

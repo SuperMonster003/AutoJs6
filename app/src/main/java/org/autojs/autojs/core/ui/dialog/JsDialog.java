@@ -58,6 +58,8 @@ public class JsDialog {
     private final MaterialDialog mDialog;
     private final JsDialogBuilder mBuilder;
 
+    private OnBackPressedFromJs mOnBackPressedFromJs;
+
     public JsDialog(JsDialogBuilder builder, EventEmitter emitter, UiHandler uiHandler) {
         mBuilder = builder;
         mDialog = builder.build();
@@ -76,6 +78,7 @@ public class JsDialog {
         return this;
     }
 
+    @SuppressWarnings("deprecation")
     private void checkWindowType() {
         Context context = mDialog.getContext();
         if (!DialogUtils.isActivityContext(context)) {
@@ -512,8 +515,15 @@ public class JsDialog {
         return mDialog.onKeyMultiple(keyCode, repeatCount, event);
     }
 
+    public void setOnBackPressedFromJs(OnBackPressedFromJs callback) {
+        mOnBackPressedFromJs = callback;
+    }
+
+    @SuppressWarnings("deprecation")
     public void onBackPressed() {
-        mDialog.onBackPressed();
+        if (!mOnBackPressedFromJs.onBackPressed(mDialog)) {
+            mDialog.onBackPressed();
+        }
     }
 
     public boolean onKeyShortcut(int keyCode, @NonNull KeyEvent event) {

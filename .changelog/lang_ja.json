@@ -19,7 +19,7 @@
         "README.md のビルド節に複数の方法を追加してターゲット設定ページの特定を容易化 _[`issue #404`](http://issues.autojs6.com/404)_"
       ],
       "dependency": [
-        "Androidx ConstraintLayout バージョン 2.2.1 を追加"
+        "AndroidX ConstraintLayout バージョン 2.2.1 を追加"
       ]
     },
     "v6.6.3": {
@@ -95,7 +95,7 @@
         "追加 Material Progressbar バージョン 1.4.2",
         "追加 Flexmark Java HTML to Markdown バージョン 0.64.8",
         "更新 Gradle 8.14-rc-1 -> 8.14",
-        "更新 Androidx Room 2.7.0 -> 2.7.1"
+        "更新 AndroidX Room 2.7.0 -> 2.7.1"
       ]
     },
     "v6.6.2": {
@@ -158,9 +158,9 @@
         "Android SDK のバージョンを 34 から 35 に更新",
         "Gradle を 8.12 から 8.14-rc-1 に更新",
         "Rhino を 1.8.0-SNAPSHOT から 1.8.1-SNAPSHOT に更新",
-        "Androidx Recyclerview を 1.3.2 から 1.4.0 に更新",
-        "Androidx Room を 2.6.1 から 2.7.0 に更新",
-        "Androidx WebKit を 1.12.1 から 1.13.0 に更新",
+        "AndroidX Recyclerview を 1.3.2 から 1.4.0 に更新",
+        "AndroidX Room を 2.6.1 から 2.7.0 に更新",
+        "AndroidX WebKit を 1.12.1 から 1.13.0 に更新",
         "Pinyin4j を 2.5.0 から 2.5.1 に更新"
       ]
     },
@@ -300,9 +300,9 @@
         "Gradle バージョンを 8.5 -> 8.11.1 にアップグレード",
         "Rhino バージョン 1.7.15-SNAPSHOT -> 1.8.0-SNAPSHOT にアップグレード",
         "Android Material バージョン 1.10.0 -> 1.12.0 にアップグレード",
-        "Androidx Annotation バージョン 1.7.0 -> 1.9.1 にアップグレード",
-        "Androidx AppCompat バージョン 1.6.1 -> 1.7.0 にアップグレード",
-        "Androidx WebKit バージョン 1.8.0 -> 1.12.1 にアップグレード",
+        "AndroidX Annotation バージョン 1.7.0 -> 1.9.1 にアップグレード",
+        "AndroidX AppCompat バージョン 1.6.1 -> 1.7.0 にアップグレード",
+        "AndroidX WebKit バージョン 1.8.0 -> 1.12.1 にアップグレード",
         "Apache Commons バージョン 3.13.0 -> 3.16.0 にアップグレード",
         "ARSCLib バージョン 1.2.4 -> 1.3.1 にアップグレード",
         "Gson バージョン 2.10.1 -> 2.11.0 にアップグレード",
@@ -472,12 +472,12 @@
         "Apache Commons Lang3 バージョンのアップグレード 3.12.0 -> 3.13.0",
         "Glide バージョンのアップグレード 4.15.1 -> 4.16.0",
         "Android Analytics バージョンのアップグレード 14.3.0 -> 14.4.0",
-        "Androidx WebKit バージョンのアップグレード 1.7.0 -> 1.8.0",
-        "Androidx Preference バージョンのアップグレード 1.2.0 -> 1.2.1",
-        "Androidx Annotation バージョンのアップグレード 1.6.0 -> 1.7.0",
-        "Androidx Recyclerview バージョンのアップグレード 1.3.0 -> 1.3.2",
+        "AndroidX WebKit バージョンのアップグレード 1.7.0 -> 1.8.0",
+        "AndroidX Preference バージョンのアップグレード 1.2.0 -> 1.2.1",
+        "AndroidX Annotation バージョンのアップグレード 1.6.0 -> 1.7.0",
+        "AndroidX Recyclerview バージョンのアップグレード 1.3.0 -> 1.3.2",
         "Android Material バージョンのアップグレード 1.9.0 -> 1.10.0",
-        "Androidx AppCompat バージョンのアップグレード 1.4.2 -> 1.6.1",
+        "AndroidX AppCompat バージョンのアップグレード 1.4.2 -> 1.6.1",
         "Commons IO バージョンのアップグレード 2.8.0 -> 2.14.0",
         "Jackson DataBind バージョンのアップグレード 2.13.3 -> 2.14.3",
         "Zeugma Solutions LocaleHelper バージョン 1.5.1 を削除"
@@ -590,7 +590,7 @@
       "dependency": [
         "LeakCanary バージョン 2.10 -> 2.11 にアップグレード",
         "Android Material バージョン 1.8.0 -> 1.9.0 にアップグレード",
-        "Androidx WebKit バージョン 1.6.1 -> 1.7.0 にアップグレード",
+        "AndroidX WebKit バージョン 1.6.1 -> 1.7.0 にアップグレード",
         "OkHttp3 バージョン 3.10.0 -> 5.0.0-alpha.9 -> 5.0.0-alpha.11 にアップグレード",
         "MLKit Text Recognition Chinese バージョン 16.0.0-beta6 -> 16.0.0 にアップグレード"
       ]
@@ -658,11 +658,11 @@
         "Glide バージョン 4.14.2 -> 4.15.1 にアップグレード",
         "Joda Time バージョン 2.12.2 -> 2.12.5 にアップグレード",
         "Android Analytics バージョン 14.0.0 -> 14.2.0 にアップグレード",
-        "Androidx WebKit バージョン 1.5.0 -> 1.6.1 にアップグレード",
-        "Androidx Recyclerview バージョン 1.2.1 -> 1.3.0 にアップグレード",
+        "AndroidX WebKit バージョン 1.5.0 -> 1.6.1 にアップグレード",
+        "AndroidX Recyclerview バージョン 1.2.1 -> 1.3.0 にアップグレード",
         "Zip4j バージョン 2.11.2 -> 2.11.5 にアップグレード",
         "Junit Jupiter バージョン 5.9.2 -> 5.9.3 にアップグレード",
-        "Androidx Annotation バージョン 1.5.0 -> 1.6.0 にアップグレード",
+        "AndroidX Annotation バージョン 1.5.0 -> 1.6.0 にアップグレード",
         "Jackson DataBind バージョン 2.14.1 -> 2.14.2 にアップグレード",
         "Desugar JDK Libs バージョン 2.0.0 -> 2.0.3 にアップグレード"
       ]
@@ -775,7 +775,7 @@
         "ローカライズされた GitHub API バージョン 1.306",
         "Android SDK バージョンを 32 -> 33 にアップグレード",
         "追加された JCIP Annotations バージョン 1.0",
-        "追加された Androidx WebKit バージョン 1.5.0",
+        "追加された AndroidX WebKit バージョン 1.5.0",
         "追加された Commons IO バージョン 2.8.0",
         "追加された Desugar JDK Libs バージョン 2.0.0",
         "追加された Jackson DataBind バージョン 2.13.3",
@@ -786,8 +786,8 @@
         "Gradle ビルドツールバージョンを 7.4.0-alpha02 -> 8.0.0-alpha09 にアップグレード",
         "Kotlin Gradle プラグインバージョンを 1.6.10 -> 1.8.0-RC2 にアップグレード",
         "Android Material バージョンを 1.6.0 -> 1.7.0 にアップグレード",
-        "Androidx Annotation バージョンを 1.3.0 -> 1.5.0 にアップグレード",
-        "Androidx AppCompat バージョンを 1.4.1 -> 1.4.2 にアップグレード",
+        "AndroidX Annotation バージョンを 1.3.0 -> 1.5.0 にアップグレード",
+        "AndroidX AppCompat バージョンを 1.4.1 -> 1.4.2 にアップグレード",
         "Android Analytics バージョンを 13.3.0 -> 14.0.0 にアップグレード",
         "Gson バージョンを 2.9.0 -> 2.10 にアップグレード",
         "Joda Time バージョンを 2.10.14 -> 2.12.1 にアップグレード",
@@ -943,9 +943,9 @@
         "sleep() の ScriptInterruptedException 例外を無視"
       ],
       "dependency": [
-        "追加 Androidx AppCompat (Legacy) バージョン 1.0.2",
-        "アップグレード Androidx AppCompat バージョン 1.4.0 -> 1.4.1",
-        "アップグレード Androidx Preference バージョン 1.1.1 -> 1.2.0",
+        "追加 AndroidX AppCompat (Legacy) バージョン 1.0.2",
+        "アップグレード AndroidX AppCompat バージョン 1.4.0 -> 1.4.1",
+        "アップグレード AndroidX Preference バージョン 1.1.1 -> 1.2.0",
         "アップグレード Rhino エンジンバージョン 1.7.14-SNAPSHOT -> 1.7.14",
         "アップグレード OkHttp3 バージョン 3.10.0 -> 5.0.0-alpha.3 -> 5.0.0-alpha.4",
         "アップグレード Android Material バージョン 1.6.0-alpha01 -> 1.6.0-alpha02",
@@ -1008,7 +1008,7 @@
       "dependency": [
         "ローカライズ CrashReport バージョン 2.6.6",
         "ローカライズ MutableTheme バージョン 1.0.0",
-        "追加 Androidx Preference バージョン 1.1.1",
+        "追加 AndroidX Preference バージョン 1.1.1",
         "追加 SwipeRefreshLayout バージョン 1.1.0",
         "アップグレード Android SDK バージョン 28 -> 30 -> 31",
         "アップグレード Android Analytics バージョン 7.0.0 -> 13.1.0",
@@ -1016,7 +1016,7 @@
         "アップグレード Gradle ビルドツールバージョン 3.2.1 -> 4.1.0 -> 7.0.3 -> 7.2.0-alpha04",
         "アップグレード Android Job バージョン 1.2.6 -> 1.4.2",
         "アップグレード Android Material バージョン 1.1.0-alpha01 -> 1.5.0-beta01",
-        "アップグレード Androidx MultiDex バージョン 2.0.0 -> 2.0.1",
+        "アップグレード AndroidX MultiDex バージョン 2.0.0 -> 2.0.1",
         "アップグレード Apache Commons Lang3 バージョン 3.6 -> 3.12.0",
         "アップグレード Appcompat バージョン 1.0.2 -> 1.4.0",
         "アップグレード ButterKnife Gradle プラグインバージョン 9.0.0-rc2 -> 10.2.1 -> 10.2.3",

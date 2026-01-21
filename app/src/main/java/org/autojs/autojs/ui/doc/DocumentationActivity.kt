@@ -1,8 +1,8 @@
 package org.autojs.autojs.ui.doc
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.webkit.WebView
+import androidx.activity.OnBackPressedCallback
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.util.DocsUtils.getUrl
 import org.autojs.autojs.util.ViewUtils
@@ -17,12 +17,32 @@ import org.intellij.lang.annotations.Language
  */
 class DocumentationActivity : BaseActivity() {
 
+    private val mOnBackPressedCallback = object : OnBackPressedCallback(true) {
+
+        // override fun onBackPressed() {
+        //     if (mWebView.canGoBack()) {
+        //         mWebView.goBack()
+        //     } else {
+        //         onBackPressedDispatcher.onBackPressed()
+        //     }
+        // }
+
+        override fun handleOnBackPressed() {
+            if (mWebView.canGoBack()) {
+                mWebView.goBack()
+            } else {
+                onBackPressedDispatcher.onBackPressed()
+            }
+        }
+    }
     override val handleStatusBarThemeColorAutomatically = false
 
     private lateinit var mWebView: WebView
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
+
         ActivityDocumentationBinding.inflate(layoutInflater).also { binding ->
             setContentView(binding.root)
             binding.ewebView.also { ewebView ->
@@ -39,21 +59,13 @@ class DocumentationActivity : BaseActivity() {
                 }
             }
         }
+
+        onBackPressedDispatcher.addCallback(this, mOnBackPressedCallback)
     }
 
     override fun onStart() {
         super.onStart()
         setUpStatusBarIconLightByNightMode()
-    }
-
-    @SuppressLint("MissingSuperCall")
-    @Suppress("OVERRIDE_DEPRECATION")
-    override fun onBackPressed() {
-        if (mWebView.canGoBack()) {
-            mWebView.goBack()
-        } else {
-            onBackPressedDispatcher.onBackPressed()
-        }
     }
 
     companion object {

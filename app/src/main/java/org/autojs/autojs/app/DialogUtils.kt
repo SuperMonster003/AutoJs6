@@ -12,7 +12,6 @@ import android.provider.Settings
 import android.text.util.Linkify
 import android.util.Log
 import android.view.Gravity
-import android.view.KeyEvent
 import android.view.View
 import android.view.WindowManager
 import android.widget.CheckBox
@@ -22,6 +21,7 @@ import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.annotation.ReservedForCompatibility
 import org.autojs.autojs.theme.preference.LongClickablePreferenceLike
 import org.autojs.autojs.ui.explorer.ExplorerView
+import org.autojs.autojs.event.BackCompat
 import org.autojs.autojs.util.ViewUtils.showSnack
 import org.autojs.autojs6.R
 
@@ -216,27 +216,39 @@ object DialogUtils {
     }
 
     @JvmStatic
+    fun MaterialDialog.installBackHandler(onBack: (DialogInterface) -> Boolean): MaterialDialog =
+        BackCompat.installDialogBackHandler(this, onBack = onBack)
+
+    @JvmStatic
     fun adaptToExplorer(dialog: MaterialDialog, explorerView: ExplorerView): MaterialDialog {
-        val time = object : Any() {
-            var lastPressed: Long = 0
-            val minPressInterval: Long = 1000
+        val time = object {
+            var lastPressed = 0L
+            val minPressInterval = 1000L
         }
-        dialog.setOnKeyListener { dialogInterface: DialogInterface, keyCode: Int, event: KeyEvent ->
-            if (event.action == KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_BACK) {
-                if (explorerView.canGoBack()) {
-                    explorerView.goBack()
-                    return@setOnKeyListener true
-                }
-                if (System.currentTimeMillis() - time.lastPressed < time.minPressInterval) {
-                    dialogInterface.dismiss()
-                } else {
-                    time.lastPressed = System.currentTimeMillis()
-                    showSnack(explorerView, R.string.text_press_again_to_dismiss_dialog)
-                }
+
+        return BackCompat.installDialogBackHandler(
+            dialog = dialog,
+            // Overlay dialog priority is inferred automatically by context.
+            // zh-CN: Overlay/普通对话框优先级由 context 自动推断.
+            priority = BackCompat.inferDialogPriority(dialog),
+            // Always consumes the event, so the fallback will never be reached.
+            // zh-CN: 事件总是会消费, fallback 实际永不可达.
+            fallback = BackCompat.Fallback.NOOP,
+            legacyKeyListener = true,
+        ) { di ->
+            if (explorerView.canGoBack()) {
+                explorerView.goBack()
+                return@installDialogBackHandler true
             }
-            false
+            val now = System.currentTimeMillis()
+            if (now - time.lastPressed >= time.minPressInterval) {
+                time.lastPressed = now
+                showSnack(explorerView, R.string.text_press_again_to_dismiss_dialog)
+                return@installDialogBackHandler true
+            }
+            di.dismiss()
+            return@installDialogBackHandler true
         }
-        return dialog
     }
 
     fun applyLongClickability(preference: LongClickablePreferenceLike, holder: PreferenceViewHolder) {

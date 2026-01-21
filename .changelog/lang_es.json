@@ -19,7 +19,7 @@
         "En README.md, sección de compilación, añadidas varias formas para facilitar la localización de la página de configuración del objetivo _[`issue #404`](http://issues.autojs6.com/404)_"
       ],
       "dependency": [
-        "Añadido Androidx ConstraintLayout versión 2.2.1"
+        "Añadido AndroidX ConstraintLayout versión 2.2.1"
       ]
     },
     "v6.6.3": {
@@ -95,7 +95,7 @@
         "Añadido Material Progressbar versión 1.4.2",
         "Añadido Flexmark Java HTML to Markdown versión 0.64.8",
         "Actualizado Gradle 8.14-rc-1 -> 8.14",
-        "Actualizado Androidx Room 2.7.0 -> 2.7.1"
+        "Actualizado AndroidX Room 2.7.0 -> 2.7.1"
       ]
     },
     "v6.6.2": {
@@ -158,9 +158,9 @@
         "Actualizado la versión de Android SDK de 34 a 35",
         "Actualizado Gradle de 8.12 a 8.14-rc-1",
         "Actualizado Rhino de 1.8.0-SNAPSHOT a 1.8.1-SNAPSHOT",
-        "Actualizado Androidx Recyclerview de 1.3.2 a 1.4.0",
-        "Actualizado Androidx Room de 2.6.1 a 2.7.0",
-        "Actualizado Androidx WebKit de 1.12.1 a 1.13.0",
+        "Actualizado AndroidX Recyclerview de 1.3.2 a 1.4.0",
+        "Actualizado AndroidX Room de 2.6.1 a 2.7.0",
+        "Actualizado AndroidX WebKit de 1.12.1 a 1.13.0",
         "Actualizado Pinyin4j de 2.5.0 a 2.5.1"
       ]
     },
@@ -300,9 +300,9 @@
         "Actualización de versión de Gradle de 8.5 a 8.11.1",
         "Actualizar la versión 1.7.15-SNAPSHOT de Rhino -> 1.8.0-SNAPSHOT",
         "Actualizar la versión 1.10.0 de Android Material -> 1.12.0",
-        "Actualizar la versión 1.7.0 de Androidx Annotation -> 1.9.1",
-        "Actualizar la versión 1.6.1 de Androidx AppCompat -> 1.7.0",
-        "Actualizar la versión 1.8.0 de Androidx WebKit -> 1.12.1",
+        "Actualizar la versión 1.7.0 de AndroidX Annotation -> 1.9.1",
+        "Actualizar la versión 1.6.1 de AndroidX AppCompat -> 1.7.0",
+        "Actualizar la versión 1.8.0 de AndroidX WebKit -> 1.12.1",
         "Actualizar la versión 3.13.0 de Apache Commons -> 3.16.0",
         "Actualizar la versión 1.2.4 de ARSCLib -> 1.3.1",
         "Actualizar la versión 2.10.1 de Gson -> 2.11.0",
@@ -472,12 +472,12 @@
         "Actualización de versión de Apache Commons Lang3 de 3.12.0 a 3.13.0",
         "Actualización de versión de Glide de 4.15.1 a 4.16.0",
         "Actualización de versión de Android Analytics de 14.3.0 a 14.4.0",
-        "Actualización de versión de Androidx WebKit de 1.7.0 a 1.8.0",
-        "Actualización de versión de Androidx Preference de 1.2.0 a 1.2.1",
-        "Actualización de versión de Androidx Annotation de 1.6.0 a 1.7.0",
-        "Actualización de versión de Androidx Recyclerview de 1.3.0 a 1.3.2",
+        "Actualización de versión de AndroidX WebKit de 1.7.0 a 1.8.0",
+        "Actualización de versión de AndroidX Preference de 1.2.0 a 1.2.1",
+        "Actualización de versión de AndroidX Annotation de 1.6.0 a 1.7.0",
+        "Actualización de versión de AndroidX Recyclerview de 1.3.0 a 1.3.2",
         "Actualización de versión de Android Material de 1.9.0 a 1.10.0",
-        "Actualización de versión de Androidx AppCompat de 1.4.2 a 1.6.1",
+        "Actualización de versión de AndroidX AppCompat de 1.4.2 a 1.6.1",
         "Actualización de versión de Commons IO de 2.8.0 a 2.14.0",
         "Actualización de versión de Jackson DataBind de 2.13.3 a 2.14.3",
         "Remoción de Zeugma Solutions LocaleHelper versión 1.5.1"
@@ -590,7 +590,7 @@
       "dependency": [
         "Actualización de la versión de LeakCanary 2.10 -> 2.11",
         "Actualización de la versión de Android Material 1.8.0 -> 1.9.0",
-        "Actualización de la versión de Androidx WebKit 1.6.1 -> 1.7.0",
+        "Actualización de la versión de AndroidX WebKit 1.6.1 -> 1.7.0",
         "Actualización de OkHttp3 3.10.0 -> 5.0.0-alpha.9 -> 5.0.0-alpha.11",
         "Actualización de la versión de MLKit Text Recognition Chinese 16.0.0-beta6 -> 16.0.0"
       ]
@@ -658,11 +658,11 @@
         "Actualización de Glide 4.14.2 -> 4.15.1",
         "Actualización de Joda Time 2.12.2 -> 2.12.5",
         "Actualización de Android Analytics 14.0.0 -> 14.2.0",
-        "Actualización de Androidx WebKit 1.5.0 -> 1.6.1",
-        "Actualización de Androidx Recyclerview 1.2.1 -> 1.3.0",
+        "Actualización de AndroidX WebKit 1.5.0 -> 1.6.1",
+        "Actualización de AndroidX Recyclerview 1.2.1 -> 1.3.0",
         "Actualización de Zip4j 2.11.2 -> 2.11.5",
         "Actualización de Junit Jupiter 5.9.2 -> 5.9.3",
-        "Actualización de Androidx Annotation 1.5.0 -> 1.6.0",
+        "Actualización de AndroidX Annotation 1.5.0 -> 1.6.0",
         "Actualización de Jackson DataBind 2.14.1 -> 2.14.2",
         "Actualización de Desugar JDK Libs 2.0.0 -> 2.0.3"
       ]
@@ -775,7 +775,7 @@
         "Localización de GitHub API versión 1.306",
         "Actualización de Android SDK versión 32 a 33",
         "Añadida la versión 1.0 de JCIP Annotations",
-        "Añadida la versión 1.5.0 de Androidx WebKit",
+        "Añadida la versión 1.5.0 de AndroidX WebKit",
         "Añadida la versión 2.8.0 de Commons IO",
         "Añadida la versión 2.0.0 de Desugar JDK Libs",
         "Añadida la versión 2.13.3 de Jackson DataBind",
@@ -786,8 +786,8 @@
         "Actualización de la versión de las herramientas de construcción de Gradle de 7.4.0-alpha02 a 8.0.0-alpha09",
         "Actualización de la versión de Kotlin Gradle Plugin de 1.6.10 a 1.8.0-RC2",
         "Actualización de la versión de Android Material de 1.6.0 a 1.7.0",
-        "Actualización de la versión de Androidx Annotation de 1.3.0 a 1.5.0",
-        "Actualización de la versión de Androidx AppCompat de 1.4.1 a 1.4.2",
+        "Actualización de la versión de AndroidX Annotation de 1.3.0 a 1.5.0",
+        "Actualización de la versión de AndroidX AppCompat de 1.4.1 a 1.4.2",
         "Actualización de la versión de Android Analytics de 13.3.0 a 14.0.0",
         "Actualización de la versión de Gson de 2.9.0 a 2.10",
         "Actualización de la versión de Joda Time de 2.10.14 a 2.12.1",
@@ -943,9 +943,9 @@
         "Ignorar ScriptInterruptedException en sleep()"
       ],
       "dependency": [
-        "Añadida compatibilidad con Androidx AppCompat (Legacy) versión 1.0.2",
-        "Actualización de Androidx AppCompat de la versión 1.4.0 a 1.4.1",
-        "Actualización de Androidx Preference de la versión 1.1.1 a 1.2.0",
+        "Añadida compatibilidad con AndroidX AppCompat (Legacy) versión 1.0.2",
+        "Actualización de AndroidX AppCompat de la versión 1.4.0 a 1.4.1",
+        "Actualización de AndroidX Preference de la versión 1.1.1 a 1.2.0",
         "Actualización del motor Rhino de la versión 1.7.14-SNAPSHOT a 1.7.14",
         "Actualización de OkHttp3 de la versión 3.10.0 a 5.0.0-alpha.3 y a 5.0.0-alpha.4",
         "Actualización de Android Material de la versión 1.6.0-alpha01 a 1.6.0-alpha02",
@@ -1008,7 +1008,7 @@
       "dependency": [
         "Localización de CrashReport versión 2.6.6",
         "Localización de MutableTheme versión 1.0.0",
-        "Añadida Androidx Preference versión 1.1.1",
+        "Añadida AndroidX Preference versión 1.1.1",
         "Añadido SwipeRefreshLayout versión 1.1.0",
         "Actualización de Android SDK de la versión 28 -> 30 -> 31",
         "Actualización de Android Analytics de la versión 7.0.0 -> 13.1.0",
@@ -1016,7 +1016,7 @@
         "Actualización de las herramientas de construcción de Gradle de la versión 3.2.1 -> 4.1.0 -> 7.0.3 -> 7.2.0-alpha04",
         "Actualización de Android Job de la versión 1.2.6 -> 1.4.2",
         "Actualización de Android Material de la versión 1.1.0-alpha01 -> 1.5.0-beta01",
-        "Actualización de Androidx MultiDex de la versión 2.0.0 -> 2.0.1",
+        "Actualización de AndroidX MultiDex de la versión 2.0.0 -> 2.0.1",
         "Actualización de Apache Commons Lang3 de la versión 3.6 -> 3.12.0",
         "Actualización de Appcompat de la versión 1.0.2 -> 1.4.0",
         "Actualización del plugin de Gradle de ButterKnife de la versión 9.0.0-rc2 -> 10.2.1 -> 10.2.3",

@@ -3,6 +3,7 @@ package org.autojs.autojs.ui.error
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.OnBackPressedCallback
 import org.autojs.autojs.runtime.api.augment.util.VersionCodesInfo.briefOfCurrentVersionInt
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.main.MainActivity
@@ -15,9 +16,18 @@ import org.autojs.autojs6.databinding.ActivityErrorReportBinding
 
 /**
  * Created by Stardust on Feb 2, 2017.
- * Transformed by SuperMonster003 on Mar 10, 2025.
+ * Transformed by SuperMonster003 on Jan 20, 2026.
  */
 class CrashReportActivity : BaseActivity() {
+
+    private val mOnBackPressedCallback = object : OnBackPressedCallback(true) {
+
+        // override fun onBackPressed() = exit()
+
+        override fun handleOnBackPressed() {
+            exit()
+        }
+    }
 
     private lateinit var crashMessage: String
 
@@ -56,12 +66,8 @@ class CrashReportActivity : BaseActivity() {
         binding.restart.setOnClickListener { restart() }
         binding.exit.setOnClickListener { exit() }
 
-        // savedInstanceState ?: copy()
+        onBackPressedDispatcher.addCallback(this, mOnBackPressedCallback)
     }
-
-    @Deprecated("Deprecated in Java")
-    @SuppressLint("MissingSuperCall")
-    override fun onBackPressed() = exit()
 
     private fun copy() = ClipboardUtils.setClip(this, crashMessage)
 

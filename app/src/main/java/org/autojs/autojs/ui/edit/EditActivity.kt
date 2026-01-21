@@ -16,6 +16,7 @@ import android.view.ActionMode
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
 import androidx.core.view.get
 import androidx.core.view.size
 import com.afollestad.materialdialogs.MaterialDialog
@@ -50,6 +51,24 @@ import java.io.IOException
  */
 open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyActivity {
 
+    private val mOnBackPressedCallback = object : OnBackPressedCallback(true) {
+
+        // override fun onBackPressed() {
+        //     if (!mEditorView.onBackPressed()) {
+        //         super.onBackPressed()
+        //     }
+        // }
+
+        override fun handleOnBackPressed() {
+            if (mEditorView.onBackPressed()) {
+                return
+            }
+            isEnabled = false
+            onBackPressedDispatcher.onBackPressed()
+            isEnabled = true
+        }
+    }
+
     override val handleContentViewFromHorizontalNavigationBarAutomatically = false
 
     private var mToolbar: ThemeColorToolbar? = null
@@ -63,6 +82,7 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
 
     @SuppressLint("CheckResult")
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
 
         val binding = ActivityEditBinding.inflate(layoutInflater).also { setContentView(it.root) }
@@ -82,6 +102,8 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
         mEditorMenu = EditorMenu(mEditorView)
         mNewTask = intent.flags and Intent.FLAG_ACTIVITY_NEW_TASK != 0
         setUpToolbar()
+
+        onBackPressedDispatcher.addCallback(this, mOnBackPressedCallback)
     }
 
     private fun onLoadFileError(message: String?) {
@@ -246,13 +268,6 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
             // @Example android.content.res.Resources.NotFoundException
             //  ! on MIUI devices (maybe more)
             e.printStackTrace()
-        }
-    }
-
-    @Suppress("OVERRIDE_DEPRECATION", "DEPRECATION")
-    override fun onBackPressed() {
-        if (!mEditorView.onBackPressed()) {
-            super.onBackPressed()
         }
     }
 

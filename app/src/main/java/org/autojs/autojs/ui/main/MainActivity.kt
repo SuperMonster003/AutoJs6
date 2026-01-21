@@ -12,6 +12,7 @@ import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.forEach
@@ -68,12 +69,48 @@ import org.autojs.autojs6.databinding.ActivityMainBinding
 import org.greenrobot.eventbus.EventBus
 
 /**
- * Modified by SuperMonster003 as of Dec 1, 2021.
  * Transformed by SuperMonster003 on May 11, 2023.
+ * Modified by SuperMonster003 as of Jan 20, 2026.
  */
 class MainActivity : BaseActivity(), DelegateHost, HostActivity {
 
     override val handleStatusBarThemeColorAutomatically = false
+
+    private val mBackPressedCallback = object : OnBackPressedCallback(true) {
+        
+        // override fun onBackPressed() {
+        //     val fragment = mPagerAdapter.getStoredFragment(mViewPager.currentItem)
+        //     if ((fragment as? BackPressedHandler)?.onBackPressed(this) == true) {
+        //         return
+        //     }
+        //     if (!mBackPressObserver.onBackPressed(this)) {
+        //         @Suppress("DEPRECATION")
+        //         super.onBackPressed()
+        //     }
+        // }
+        
+        override fun handleOnBackPressed() {
+            val fragment = mPagerAdapter.getStoredFragment(mViewPager.currentItem)
+
+            // 1. First, let the current page Fragment handle it.
+            // zh-CN: 先给当前页 Fragment 处理.
+            if ((fragment as? BackPressedHandler)?.onBackPressed(this@MainActivity) == true) {
+                return
+            }
+
+            // 2. Then, let the global Observer handle it (DrawerAutoClose / DoublePressExit).
+            // zh-CN: 再给全局 Observer 处理 (DrawerAutoClose / DoublePressExit).
+            if (mBackPressObserver.onBackPressed(this@MainActivity)) {
+                return
+            }
+
+            // 3. Return to the system default back behavior (finish / popBackStack, etc.).
+            // zh-CN: 交还系统默认返回 (finish / popBackStack 等).
+            isEnabled = false
+            onBackPressedDispatcher.onBackPressed()
+            isEnabled = true
+        }
+    }
 
     private lateinit var mViewPager: ViewPager
     private lateinit var mFab: ThemeColorFloatingActionButton
@@ -132,6 +169,8 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
             setUpToolbar(drawerLayout)
             setUpTabViewPager(it)
             registerBackPressHandlers(drawerLayout)
+
+            onBackPressedDispatcher.addCallback(this, mBackPressedCallback)
         }
 
         Pref.registerOnSharedPreferenceChangeListener { _, key ->
@@ -338,18 +377,6 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
     }
 
     override fun getOnActivityResultDelegateMediator() = mActivityResultMediator
-
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        val fragment = mPagerAdapter.getStoredFragment(mViewPager.currentItem)
-        if ((fragment as? BackPressedHandler)?.onBackPressed(this) == true) {
-            return
-        }
-        if (!mBackPressObserver.onBackPressed(this)) {
-            @Suppress("DEPRECATION")
-            super.onBackPressed()
-        }
-    }
 
     override fun getBackPressedObserver() = mBackPressObserver
 

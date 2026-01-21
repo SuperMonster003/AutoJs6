@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <item name="rename" type="id"/>
-    <item name="open_by_other_apps" type="id"/>
-    <item name="create_shortcut" type="id"/>
-    <item name="delete" type="id"/>
-    <item name="package_name" type="id"/>
-    <item name="view_tag_view_extras" type="id"/>
+    <item type="id" name="rename" />
+    <item type="id" name="open_by_other_apps" />
+    <item type="id" name="create_shortcut" />
+    <item type="id" name="delete" />
+    <item type="id" name="package_name" />
+    <item type="id" name="view_tag_view_extras" />
+    <item type="id" name="tag_backcompat_dialog_back_callback" />
 </resources>

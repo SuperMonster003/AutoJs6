@@ -39,6 +39,7 @@ log4j = "1.2.17"
 #purpose : Compatibility of java.time.* for Android API Level < 26 (Android 8.0) [O]
 desugar = "2.1.5"
 
+activity-ktx = "1.12.2"
 android-device-names = "2.1.1"
 android-logging-log4j = "1.0.3"
 android-support-v7 = "28.0.0"
@@ -110,6 +111,7 @@ zip4j = "2.11.5"
 
 [libraries]
 
+activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "activity-ktx" }
 android-device-names = { module = "com.jaredrummler:android-device-names", version.ref = "android-device-names" }
 android-logging-log4j = { module = "de.mindpipe.android:android-logging-log4j", version.ref = "android-logging-log4j" }
 androidannotations = { module = "org.androidannotations:androidannotations", version.ref = "androidannotations" }

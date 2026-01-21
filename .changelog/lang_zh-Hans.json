@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.7.0": {
-      "released_date": "2026/01/18",
+      "released_date": "2026/01/22",
       "feature": [
         "插件中心功能, 支持插件的安装/卸载/更新等操作 (入口: 主页抽屉按钮/主页标签页)",
         "Paddle OCR (PP-OCRv5) 插件, 用于光学字符识别",
@@ -92,6 +92,7 @@
         "ErrorDialogActivity 可能无法正常启动或短时间自动消失的问题 _[`issue #479`](http://issues.autojs6.com/479)_ _[`issue #471`](http://issues.autojs6.com/471)_ _[`issue #414`](http://issues.autojs6.com/414)_ _[`issue #340`](http://issues.autojs6.com/340#issuecomment-2973485826)_",
         "Canvas 构造函数可接受的参数类型错误 _[`issue #402`](http://issues.autojs6.com/402)_",
         "崩溃报告页面复制详细信息功能失效的问题",
+        "Android 16+ 自定义返回逻辑失效导致返回功能异常的问题",
         "文件管理器删除项目文件夹后 UI 未能自动刷新的问题",
         "使用 \"三按钮\" 手势导航时导航栏前景色可能与夜间模式关联异常的问题",
         "APK 文件类型信息对话框可能无法获取应用名称及 SDK 信息的问题",
@@ -145,16 +146,17 @@
         "本地化 Root Shell 版本 1.6",
         "本地化 Expandable Layout 版本 1.6.0",
         "本地化 Recyclerview Flexible Divider 版本 1.4.0",
-        "附加 Androidx Core (KTX) 版本 1.15.0",
-        "附加 Androidx Work Runtime 版本 2.11.0",
+        "附加 AndroidX Activity (KTX) 版本 1.12.2",
+        "附加 AndroidX Core (KTX) 版本 1.15.0",
+        "附加 AndroidX Work Runtime 版本 2.11.0",
         "升级 Android SDK 版本 35 -> 36",
         "升级 Gradle 版本 8.14 -> 8.14.3",
         "升级 Rhino 版本 1.8.1-SNAPSHOT -> 2.0.0-SNAPSHOT",
         "升级 Desugar JDK Libs 版本 2.0.4 -> 2.1.5",
         "升级 Android Material 版本 1.12.0 -> 1.13.0",
-        "升级 Androidx AppCompat 版本 1.7.0 -> 1.7.1",
-        "升级 Androidx Room 版本 2.7.1 -> 2.7.2",
-        "升级 Androidx WebKit 版本 1.13.0 -> 1.14.0",
+        "升级 AndroidX AppCompat 版本 1.7.0 -> 1.7.1",
+        "升级 AndroidX Room 版本 2.7.1 -> 2.7.2",
+        "升级 AndroidX WebKit 版本 1.13.0 -> 1.14.0",
         "升级 Material Progressbar 版本 1.4.2 -> 1.6.1",
         "升级 Apache Commons 版本 3.16.0 -> 3.18.0",
         "升级 Retrofit2 Retrofit 版本 2.11.0 -> 2.12.0",
@@ -187,7 +189,7 @@
         "README.md 项目编译构建小节添加多种方式便于定位目标设置页面 _[`issue #404`](http://issues.autojs6.com/404)_"
       ],
       "dependency": [
-        "附加 Androidx ConstraintLayout 版本 2.2.1"
+        "附加 AndroidX ConstraintLayout 版本 2.2.1"
       ]
     },
     "v6.6.3": {
@@ -263,7 +265,7 @@
         "附加 Material Progressbar 版本 1.4.2",
         "附加 Flexmark Java HTML to Markdown 版本 0.64.8",
         "升级 Gradle 版本 8.14-rc-1 -> 8.14",
-        "升级 Androidx Room 版本 2.7.0 -> 2.7.1"
+        "升级 AndroidX Room 版本 2.7.0 -> 2.7.1"
       ]
     },
     "v6.6.2": {
@@ -326,9 +328,9 @@
         "升级 Android SDK 版本 34 -> 35",
         "升级 Gradle 版本 8.12 -> 8.14-rc-1",
         "升级 Rhino 版本 1.8.0-SNAPSHOT -> 1.8.1-SNAPSHOT",
-        "升级 Androidx Recyclerview 版本 1.3.2 -> 1.4.0",
-        "升级 Androidx Room 版本 2.6.1 -> 2.7.0",
-        "升级 Androidx WebKit 版本 1.12.1 -> 1.13.0",
+        "升级 AndroidX Recyclerview 版本 1.3.2 -> 1.4.0",
+        "升级 AndroidX Room 版本 2.6.1 -> 2.7.0",
+        "升级 AndroidX WebKit 版本 1.12.1 -> 1.13.0",
         "升级 Pinyin4j 版本 2.5.0 -> 2.5.1"
       ]
     },
@@ -468,9 +470,9 @@
         "升级 Gradle 版本 8.5 -> 8.11.1",
         "升级 Rhino 版本 1.7.15-SNAPSHOT -> 1.8.0-SNAPSHOT",
         "升级 Android Material 版本 1.10.0 -> 1.12.0",
-        "升级 Androidx Annotation 版本 1.7.0 -> 1.9.1",
-        "升级 Androidx AppCompat 版本 1.6.1 -> 1.7.0",
-        "升级 Androidx WebKit 版本 1.8.0 -> 1.12.1",
+        "升级 AndroidX Annotation 版本 1.7.0 -> 1.9.1",
+        "升级 AndroidX AppCompat 版本 1.6.1 -> 1.7.0",
+        "升级 AndroidX WebKit 版本 1.8.0 -> 1.12.1",
         "升级 Apache Commons 版本 3.13.0 -> 3.16.0",
         "升级 ARSCLib 版本 1.2.4 -> 1.3.1",
         "升级 Gson 版本 2.10.1 -> 2.11.0",
@@ -640,12 +642,12 @@
         "升级 Apache Commons Lang3 版本 3.12.0 -> 3.13.0",
         "升级 Glide 版本 4.15.1 -> 4.16.0",
         "升级 Android Analytics 版本 14.3.0 -> 14.4.0",
-        "升级 Androidx WebKit 版本 1.7.0 -> 1.8.0",
-        "升级 Androidx Preference 版本 1.2.0 -> 1.2.1",
-        "升级 Androidx Annotation 版本 1.6.0 -> 1.7.0",
-        "升级 Androidx Recyclerview 版本 1.3.0 -> 1.3.2",
+        "升级 AndroidX WebKit 版本 1.7.0 -> 1.8.0",
+        "升级 AndroidX Preference 版本 1.2.0 -> 1.2.1",
+        "升级 AndroidX Annotation 版本 1.6.0 -> 1.7.0",
+        "升级 AndroidX Recyclerview 版本 1.3.0 -> 1.3.2",
         "升级 Android Material 版本 1.9.0 -> 1.10.0",
-        "升级 Androidx AppCompat 版本 1.4.2 -> 1.6.1",
+        "升级 AndroidX AppCompat 版本 1.4.2 -> 1.6.1",
         "升级 Commons IO 版本 2.8.0 -> 2.14.0",
         "升级 Jackson DataBind 版本 2.13.3 -> 2.14.3",
         "移除 Zeugma Solutions LocaleHelper 版本 1.5.1"
@@ -758,7 +760,7 @@
       "dependency": [
         "升级 LeakCanary 版本 2.10 -> 2.11",
         "升级 Android Material 版本 1.8.0 -> 1.9.0",
-        "升级 Androidx WebKit 版本 1.6.1 -> 1.7.0",
+        "升级 AndroidX WebKit 版本 1.6.1 -> 1.7.0",
         "升级 OkHttp3 版本 3.10.0 -> 5.0.0-alpha.9 -> 5.0.0-alpha.11",
         "升级 MLKit Text Recognition Chinese 版本 16.0.0-beta6 -> 16.0.0"
       ]
@@ -826,11 +828,11 @@
         "升级 Glide 版本 4.14.2 -> 4.15.1",
         "升级 Joda Time 版本 2.12.2 -> 2.12.5",
         "升级 Android Analytics 版本 14.0.0 -> 14.2.0",
-        "升级 Androidx WebKit 版本 1.5.0 -> 1.6.1",
-        "升级 Androidx Recyclerview 版本 1.2.1 -> 1.3.0",
+        "升级 AndroidX WebKit 版本 1.5.0 -> 1.6.1",
+        "升级 AndroidX Recyclerview 版本 1.2.1 -> 1.3.0",
         "升级 Zip4j 版本 2.11.2 -> 2.11.5",
         "升级 Junit Jupiter 版本 5.9.2 -> 5.9.3",
-        "升级 Androidx Annotation 版本 1.5.0 -> 1.6.0",
+        "升级 AndroidX Annotation 版本 1.5.0 -> 1.6.0",
         "升级 Jackson DataBind 版本 2.14.1 -> 2.14.2",
         "升级 Desugar JDK Libs 版本 2.0.0 -> 2.0.3"
       ]
@@ -943,7 +945,7 @@
         "本地化 GitHub API 版本 1.306",
         "升级 Android SDK 版本 32 -> 33",
         "附加 JCIP Annotations 版本 1.0",
-        "附加 Androidx WebKit 版本 1.5.0",
+        "附加 AndroidX WebKit 版本 1.5.0",
         "附加 Commons IO 版本 2.8.0",
         "附加 Desugar JDK Libs 版本 2.0.0",
         "附加 Jackson DataBind 版本 2.13.3",
@@ -954,8 +956,8 @@
         "升级 Gradle 构建工具版本 7.4.0-alpha02 -> 8.0.0-alpha09",
         "升级 Kotlin Gradle 插件版本 1.6.10 -> 1.8.0-RC2",
         "升级 Android Material 版本 1.6.0 -> 1.7.0",
-        "升级 Androidx Annotation 版本 1.3.0 -> 1.5.0",
-        "升级 Androidx AppCompat 版本 1.4.1 -> 1.4.2",
+        "升级 AndroidX Annotation 版本 1.3.0 -> 1.5.0",
+        "升级 AndroidX AppCompat 版本 1.4.1 -> 1.4.2",
         "升级 Android Analytics 版本 13.3.0 -> 14.0.0",
         "升级 Gson 版本 2.9.0 -> 2.10",
         "升级 Joda Time 版本 2.10.14 -> 2.12.1",
@@ -1111,9 +1113,9 @@
         "忽略 sleep() 的 ScriptInterruptedException 异常"
       ],
       "dependency": [
-        "附加 Androidx AppCompat (Legacy) 版本 1.0.2",
-        "升级 Androidx AppCompat 版本 1.4.0 -> 1.4.1",
-        "升级 Androidx Preference 版本 1.1.1 -> 1.2.0",
+        "附加 AndroidX AppCompat (Legacy) 版本 1.0.2",
+        "升级 AndroidX AppCompat 版本 1.4.0 -> 1.4.1",
+        "升级 AndroidX Preference 版本 1.1.1 -> 1.2.0",
         "升级 Rhino 引擎版本 1.7.14-SNAPSHOT -> 1.7.14",
         "升级 OkHttp3 版本 3.10.0 -> 5.0.0-alpha.3 -> 5.0.0-alpha.4",
         "升级 Android Material 版本 1.6.0-alpha01 -> 1.6.0-alpha02",
@@ -1176,7 +1178,7 @@
       "dependency": [
         "本地化 CrashReport 版本 2.6.6",
         "本地化 MutableTheme 版本 1.0.0",
-        "附加 Androidx Preference 版本 1.1.1",
+        "附加 AndroidX Preference 版本 1.1.1",
         "附加 SwipeRefreshLayout 版本 1.1.0",
         "升级 Android SDK 版本 28 -> 30 -> 31",
         "升级 Android Analytics 版本 7.0.0 -> 13.1.0",
@@ -1184,7 +1186,7 @@
         "升级 Gradle 构建工具版本 3.2.1 -> 4.1.0 -> 7.0.3 -> 7.2.0-alpha04",
         "升级 Android Job 版本 1.2.6 -> 1.4.2",
         "升级 Android Material 版本 1.1.0-alpha01 -> 1.5.0-beta01",
-        "升级 Androidx MultiDex 版本 2.0.0 -> 2.0.1",
+        "升级 AndroidX MultiDex 版本 2.0.0 -> 2.0.1",
         "升级 Apache Commons Lang3 版本 3.6 -> 3.12.0",
         "升级 Appcompat 版本 1.0.2 -> 1.4.0",
         "升级 ButterKnife Gradle 插件版本 9.0.0-rc2 -> 10.2.1 -> 10.2.3",
