@@ -52,6 +52,9 @@ dependencies /* Unclassified */ {
     // AndroidX Core
     implementation(libs.core.ktx)
 
+    // AndroidX Activity
+    implementation(libs.activity.ktx)
+
     // LeakCanary
     debugImplementation(libs.leakcanary)
 
@@ -175,7 +178,7 @@ dependencies /* Unclassified */ {
     // Android Job
     implementation(project(":libs:android-job-simplified-1_4_3"))
 
-    // Androidx Work Runtime
+    // AndroidX Work Runtime
     implementation(libs.work.runtime)
 
     // APK Parser

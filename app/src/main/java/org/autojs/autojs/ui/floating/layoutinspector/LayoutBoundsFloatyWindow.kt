@@ -7,6 +7,7 @@ import org.autojs.autojs.core.accessibility.Capture
 import org.autojs.autojs.core.accessibility.NodeInfo
 import org.autojs.autojs.ui.enhancedfloaty.FloatyService
 import org.autojs.autojs.ui.floating.LayoutFloatyWindow
+import org.autojs.autojs.event.BackCompat
 import org.autojs.autojs.util.EventUtils
 import org.autojs.autojs6.R
 
@@ -38,12 +39,16 @@ open class LayoutBoundsFloatyWindow @JvmOverloads constructor(
         onCreate(floatyService)
 
         return object : LayoutBoundsView(context) {
+            @Suppress("DEPRECATION")
             override fun dispatchKeyEvent(e: KeyEvent) = when {
                 EventUtils.isKeyBackAndActionUp(e) -> true.also { close() }
                 EventUtils.isKeyVolumeDownAndActionDown(e) -> true.also { close() }
                 else -> super.dispatchKeyEvent(e)
             }
-        }.also { mLayoutBoundsView = it }
+        }.also { view ->
+            mLayoutBoundsView = view
+            BackCompat.installViewBackHandler(view, BackCompat.Priority.OVERLAY) { close() }
+        }
     }
 
     override fun onViewCreated(v: View) {
@@ -57,10 +62,8 @@ open class LayoutBoundsFloatyWindow @JvmOverloads constructor(
                     val x = bounds.centerX() - width / 2
                     val y = bounds.bottom - view.statusBarHeight
                     if (width <= 0) {
-                        try {
+                        runCatching {
                             menu.preMeasure()
-                        } catch (e: Exception) {
-                            /* Ignored. */
                         }
                     }
                     menu.showAsDropDownAtLocation(view, bounds.height(), x, y)

@@ -7,6 +7,7 @@ import org.autojs.autojs.core.accessibility.Capture
 import org.autojs.autojs.ui.enhancedfloaty.FloatyService
 import org.autojs.autojs.core.accessibility.NodeInfo
 import org.autojs.autojs.ui.floating.LayoutFloatyWindow
+import org.autojs.autojs.event.BackCompat
 import org.autojs.autojs.util.EventUtils
 import org.autojs.autojs6.R
 
@@ -35,12 +36,16 @@ open class LayoutHierarchyFloatyWindow @JvmOverloads constructor(
         onCreate(floatyService)
 
         return object : LayoutHierarchyView(context) {
+            @Suppress("DEPRECATION")
             override fun dispatchKeyEvent(e: KeyEvent) = when {
                 EventUtils.isKeyBackAndActionUp(e) -> true.also { close() }
                 EventUtils.isKeyVolumeDownAndActionDown(e) -> true.also { close() }
                 else -> super.dispatchKeyEvent(e)
             }
-        }.also { mLayoutHierarchyView = it }
+        }.also { view ->
+            mLayoutHierarchyView = view
+            BackCompat.installViewBackHandler(view, BackCompat.Priority.OVERLAY) { close() }
+        }
     }
 
     override fun onViewCreated(v: View) {

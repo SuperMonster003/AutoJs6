@@ -1,14 +1,18 @@
 package org.autojs.autojs.runtime.api.augment.dialogs
 
+import android.os.Build
 import android.text.util.Linkify
 import android.view.KeyEvent
 import android.view.View
 import android.view.WindowManager.LayoutParams
+import android.window.OnBackInvokedCallback
+import android.window.OnBackInvokedDispatcher
 import com.afollestad.materialdialogs.Theme
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.core.ui.dialog.JsDialog
 import org.autojs.autojs.core.ui.dialog.JsDialogBuilder
 import org.autojs.autojs.core.ui.nativeview.NativeView
+import org.autojs.autojs.event.BackCompat.TAG_KEY_INSTALLED
 import org.autojs.autojs.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.extension.AnyExtensions.isJsString
 import org.autojs.autojs.extension.AnyExtensions.isJsXml
@@ -619,15 +623,76 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                 }
             }
 
-            properties.prop("onBackKey")?.let { onBackKey ->
+            properties.inquire(listOf("onBackKey", "onBackPressed"))?.let { onBackKey ->
                 val isFunction = onBackKey is BaseFunction
                 val isDisabled = onBackKey == false || (onBackKey is String && onBackKey.matches(Regex("^disabled?$", RegexOption.IGNORE_CASE)))
                 if (isDisabled || isFunction) {
-                    dialog.setOnKeyListener { _, keyCode, event ->
-                        when {
-                            event.action != KeyEvent.ACTION_UP || keyCode != KeyEvent.KEYCODE_BACK -> false
-                            else -> true.also { if (onBackKey is BaseFunction) callFunction(scriptRuntime, onBackKey, arrayOf(dialog)) }
+                    dialog.setOnBackPressedFromJs {
+                        if (onBackKey is BaseFunction) {
+                            val result = callFunction(scriptRuntime, onBackKey, arrayOf(dialog))
+                            return@setOnBackPressedFromJs coerceBoolean(result, false)
                         }
+                        return@setOnBackPressedFromJs false
+                    }
+                    dialog.setOnKeyListener { _, keyCode, event ->
+                        if (event.action == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_BACK) {
+                            dialog.onBackPressed()
+                            return@setOnKeyListener true
+                        }
+                        return@setOnKeyListener false
+                    }
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        runCatching { if (dialog.window == null) dialog.create() }
+
+                        val decor = dialog.window?.decorView ?: run {
+                            val dispatcher = dialog.window?.onBackInvokedDispatcher
+                            dispatcher?.registerOnBackInvokedCallback(OnBackInvokedDispatcher.PRIORITY_OVERLAY) {
+                                runCatching {
+                                    dialog.onBackPressed()
+                                }.onFailure {
+                                    runCatching { dialog.cancel() }.onFailure { runCatching { dialog.dismiss() } }
+                                }
+                            }
+                            return
+                        }
+
+                        if (decor.getTag(TAG_KEY_INSTALLED) == true) return
+                        decor.setTag(TAG_KEY_INSTALLED, true)
+
+                        var dispatcher: OnBackInvokedDispatcher? = null
+                        var callback: OnBackInvokedCallback? = null
+
+                        fun unregister() {
+                            val d = dispatcher
+                            val c = callback
+                            if (d != null && c != null) runCatching { d.unregisterOnBackInvokedCallback(c) }
+                            dispatcher = null
+                            callback = null
+                        }
+
+                        val listener = object : View.OnAttachStateChangeListener {
+                            override fun onViewAttachedToWindow(v: View) {
+                                unregister()
+                                val d = dialog.window?.onBackInvokedDispatcher
+                                val c = OnBackInvokedCallback {
+                                    runCatching {
+                                        dialog.onBackPressed()
+                                    }.onFailure {
+                                        runCatching { dialog.cancel() }.onFailure { runCatching { dialog.dismiss() } }
+                                    }
+                                }
+                                d?.registerOnBackInvokedCallback(OnBackInvokedDispatcher.PRIORITY_OVERLAY, c)
+                                dispatcher = d
+                                callback = c
+                            }
+
+                            override fun onViewDetachedFromWindow(v: View) {
+                                unregister()
+                            }
+                        }
+
+                        decor.addOnAttachStateChangeListener(listener)
+                        if (decor.isAttachedToWindow) listener.onViewAttachedToWindow(decor)
                     }
                 }
             }

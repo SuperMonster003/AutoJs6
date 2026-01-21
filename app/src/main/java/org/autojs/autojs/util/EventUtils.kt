@@ -4,6 +4,10 @@ import android.view.KeyEvent
 
 object EventUtils {
 
+    @Deprecated(
+        message = "KEYCODE_BACK is not a reliable system-back entry on Android 13+ when targetSdk >= 33. Use BackCompat instead.",
+        replaceWith = ReplaceWith("BackCompat.installViewBackHandler(view)")
+    )
     fun isKeyBackAndActionUp(e: KeyEvent) = e.keyCode == KeyEvent.KEYCODE_BACK && e.action == KeyEvent.ACTION_UP
 
     fun isKeyVolumeDownAndActionDown(e: KeyEvent) = e.keyCode == KeyEvent.KEYCODE_VOLUME_DOWN && e.action == KeyEvent.ACTION_DOWN

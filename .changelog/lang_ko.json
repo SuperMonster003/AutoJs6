@@ -19,7 +19,7 @@
         "README.md 빌드 섹션에 여러 방법 추가로 대상 설정 페이지 찾기 용이화 _[`issue #404`](http://issues.autojs6.com/404)_"
       ],
       "dependency": [
-        "Androidx ConstraintLayout 버전 2.2.1 추가"
+        "AndroidX ConstraintLayout 버전 2.2.1 추가"
       ]
     },
     "v6.6.3": {
@@ -95,7 +95,7 @@
         "추가 Material Progressbar 버전 1.4.2",
         "추가 Flexmark Java HTML to Markdown 버전 0.64.8",
         "업데이트 Gradle 8.14-rc-1 -> 8.14",
-        "업데이트 Androidx Room 2.7.0 -> 2.7.1"
+        "업데이트 AndroidX Room 2.7.0 -> 2.7.1"
       ]
     },
     "v6.6.2": {
@@ -158,9 +158,9 @@
         "Android SDK 버전을 34 에서 35 로 업데이트",
         "Gradle 을 8.12 에서 8.14-rc-1 로 업데이트",
         "Rhino 를 1.8.0-SNAPSHOT 에서 1.8.1-SNAPSHOT 으로 업데이트",
-        "Androidx Recyclerview 를 1.3.2 에서 1.4.0 으로 업데이트",
-        "Androidx Room 을 2.6.1 에서 2.7.0 으로 업데이트",
-        "Androidx WebKit 을 1.12.1 에서 1.13.0 으로 업데이트",
+        "AndroidX Recyclerview 를 1.3.2 에서 1.4.0 으로 업데이트",
+        "AndroidX Room 을 2.6.1 에서 2.7.0 으로 업데이트",
+        "AndroidX WebKit 을 1.12.1 에서 1.13.0 으로 업데이트",
         "Pinyin4j 를 2.5.0 에서 2.5.1 로 업데이트"
       ]
     },
@@ -300,9 +300,9 @@
         "Gradle 버전 8.5 -> 8.11.1 업그레이드",
         "Rhino 버전 1.7.15-SNAPSHOT 에서 1.8.0-SNAPSHOT 으로 업그레이드",
         "Android Material 버전 1.10.0 에서 1.12.0 으로 업그레이드",
-        "Androidx Annotation 버전 1.7.0 에서 1.9.1 으로 업그레이드",
-        "Androidx AppCompat 버전 1.6.1 에서 1.7.0 으로 업그레이드",
-        "Androidx WebKit 버전 1.8.0 에서 1.12.1 으로 업그레이드",
+        "AndroidX Annotation 버전 1.7.0 에서 1.9.1 으로 업그레이드",
+        "AndroidX AppCompat 버전 1.6.1 에서 1.7.0 으로 업그레이드",
+        "AndroidX WebKit 버전 1.8.0 에서 1.12.1 으로 업그레이드",
         "Apache Commons 버전 3.13.0 에서 3.16.0 으로 업그레이드",
         "ARSCLib 버전 1.2.4 에서 1.3.1 으로 업그레이드",
         "Gson 버전 2.10.1 에서 2.11.0 으로 업그레이드",
@@ -472,12 +472,12 @@
         "Apache Commons Lang3 버전 3.12.0 -> 3.13.0 으로 업그레이드",
         "Glide 버전 4.15.1 -> 4.16.0 으로 업그레이드",
         "Android Analytics 버전 14.3.0 -> 14.4.0 으로 업그레이드",
-        "Androidx WebKit 버전 1.7.0 -> 1.8.0 으로 업그레이드",
-        "Androidx Preference 버전 1.2.0 -> 1.2.1 으로 업그레이드",
-        "Androidx Annotation 버전 1.6.0 -> 1.7.0 으로 업그레이드",
-        "Androidx Recyclerview 버전 1.3.0 -> 1.3.2 로 업그레이드",
+        "AndroidX WebKit 버전 1.7.0 -> 1.8.0 으로 업그레이드",
+        "AndroidX Preference 버전 1.2.0 -> 1.2.1 으로 업그레이드",
+        "AndroidX Annotation 버전 1.6.0 -> 1.7.0 으로 업그레이드",
+        "AndroidX Recyclerview 버전 1.3.0 -> 1.3.2 로 업그레이드",
         "Android Material 버전 1.9.0 -> 1.10.0 으로 업그레이드",
-        "Androidx AppCompat 버전 1.4.2 -> 1.6.1 으로 업그레이드",
+        "AndroidX AppCompat 버전 1.4.2 -> 1.6.1 으로 업그레이드",
         "Commons IO 버전 2.8.0 -> 2.14.0 으로 업그레이드",
         "Jackson DataBind 버전 2.13.3 -> 2.14.3 으로 업그레이드",
         "Zeugma Solutions LocaleHelper 버전 1.5.1 제거"
@@ -590,7 +590,7 @@
       "dependency": [
         "LeakCanary 버전 2.10 -> 2.11 업그레이드",
         "Android Material 버전 1.8.0 -> 1.9.0 업그레이드",
-        "Androidx WebKit 버전 1.6.1 -> 1.7.0 업그레이드",
+        "AndroidX WebKit 버전 1.6.1 -> 1.7.0 업그레이드",
         "OkHttp3 버전 3.10.0 -> 5.0.0-alpha.9 -> 5.0.0-alpha.11 업그레이드",
         "MLKit Text Recognition Chinese 버전 16.0.0-beta6 -> 16.0.0 업그레이드"
       ]
@@ -658,11 +658,11 @@
         "Glide 버전 4.14.2 -> 4.15.1 업그레이드",
         "Joda Time 버전 2.12.2 -> 2.12.5 업그레이드",
         "Android Analytics 버전 14.0.0 -> 14.2.0 업그레이드",
-        "Androidx WebKit 버전 1.5.0 -> 1.6.1 업그레이드",
-        "Androidx Recyclerview 버전 1.2.1 -> 1.3.0 업그레이드",
+        "AndroidX WebKit 버전 1.5.0 -> 1.6.1 업그레이드",
+        "AndroidX Recyclerview 버전 1.2.1 -> 1.3.0 업그레이드",
         "Zip4j 버전 2.11.2 -> 2.11.5 업그레이드",
         "Junit Jupiter 버전 5.9.2 -> 5.9.3 업그레이드",
-        "Androidx Annotation 버전 1.5.0 -> 1.6.0 업그레이드",
+        "AndroidX Annotation 버전 1.5.0 -> 1.6.0 업그레이드",
         "Jackson DataBind 버전 2.14.1 -> 2.14.2 업그레이드",
         "Desugar JDK Libs 버전 2.0.0 -> 2.0.3 업그레이드"
       ]
@@ -775,7 +775,7 @@
         "로컬화된 GitHub API 버전 1.306",
         "Android SDK 버전 32 -> 33 업그레이드",
         "JCIP Annotations 부가 추가 버전 1.0",
-        "Androidx WebKit 부가 추가 버전 1.5.0",
+        "AndroidX WebKit 부가 추가 버전 1.5.0",
         "Commons IO 부가 추가 버전 2.8.0",
         "Desugar JDK Libs 부가 추가 버전 2.0.0",
         "Jackson DataBind 부가 추가 버전 2.13.3",
@@ -786,8 +786,8 @@
         "Gradle 빌드 도구 버전 7.4.0-alpha02 -> 8.0.0-alpha09 업그레이드",
         "Kotlin Gradle 플러그인 버전 1.6.10 -> 1.8.0-RC2 업그레이드",
         "Android Material 버전 1.6.0 -> 1.7.0 업그레이드",
-        "Androidx Annotation 버전 1.3.0 -> 1.5.0 업그레이드",
-        "Androidx AppCompat 버전 1.4.1 -> 1.4.2 업그레이드",
+        "AndroidX Annotation 버전 1.3.0 -> 1.5.0 업그레이드",
+        "AndroidX AppCompat 버전 1.4.1 -> 1.4.2 업그레이드",
         "Android Analytics 버전 13.3.0 -> 14.0.0 업그레이드",
         "Gson 버전 2.9.0 -> 2.10 업그레이드",
         "Joda Time 버전 2.10.14 -> 2.12.1 업그레이드",
@@ -943,9 +943,9 @@
         "sleep() 의 ScriptInterruptedException 예외를 무시"
       ],
       "dependency": [
-        "Androidx AppCompat (Legacy) 버전 1.0.2 추가",
-        "Androidx AppCompat 버전 1.4.0 -> 1.4.1 업그레이드",
-        "Androidx Preference 버전 1.1.1 -> 1.2.0 업그레이드",
+        "AndroidX AppCompat (Legacy) 버전 1.0.2 추가",
+        "AndroidX AppCompat 버전 1.4.0 -> 1.4.1 업그레이드",
+        "AndroidX Preference 버전 1.1.1 -> 1.2.0 업그레이드",
         "Rhino 엔진 버전 1.7.14-SNAPSHOT -> 1.7.14 업그레이드",
         "OkHttp3 버전 3.10.0 -> 5.0.0-alpha.3 -> 5.0.0-alpha.4 업그레이드",
         "Android Material 버전 1.6.0-alpha01 -> 1.6.0-alpha02 업그레이드",
@@ -1009,14 +1009,14 @@
         "Android SDK 버전 업그레이드 28 -> 30 -> 31",
         "CrashReport 버전 로컬라이제이션 2.6.6",
         "MutableTheme 버전 로컬라이제이션 1.0.0",
-        "Androidx Preference 버전 추가 1.1.1",
+        "AndroidX Preference 버전 추가 1.1.1",
         "SwipeRefreshLayout 버전 추가 1.1.0",
         "Android Analytics 버전 업그레이드 7.0.0 -> 13.1.0",
         "Android Annotations 버전 업그레이드 4.5.2 -> 4.8.0",
         "Gradle 빌드 도구 버전 업그레이드 3.2.1 -> 4.1.0 -> 7.0.3 -> 7.2.0-alpha04",
         "Android Job 버전 업그레이드 1.2.6 -> 1.4.2",
         "Android Material 버전 업그레이드 1.1.0-alpha01 -> 1.5.0-beta01",
-        "Androidx MultiDex 버전 업그레이드 2.0.0 -> 2.0.1",
+        "AndroidX MultiDex 버전 업그레이드 2.0.0 -> 2.0.1",
         "Apache Commons Lang3 버전 업그레이드 3.6 -> 3.12.0",
         "Appcompat 버전 업그레이드 1.0.2 -> 1.4.0",
         "ButterKnife Gradle 플러그인 버전 업그레이드 9.0.0-rc2 -> 10.2.1 -> 10.2.3",
