@@ -2,7 +2,6 @@ package org.autojs.autojs.runtime.api.augment.shell
 
 import android.util.Log
 import android.view.KeyEvent
-import androidx.annotation.IntRange
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.extension.AnyExtensions.jsBrief

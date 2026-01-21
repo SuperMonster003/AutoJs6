@@ -37,6 +37,7 @@ import org.autojs.autojs.execution.ScriptExecution.AbstractScriptExecution
 import org.autojs.autojs.inrt.autojs.LoopBasedJavaScriptEngineWithDecryption
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.script.ScriptSource
+import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 import org.mozilla.javascript.ContinuationPending
@@ -184,10 +185,10 @@ class ScriptExecuteActivity : AppCompatActivity(), OnActivityResultDelegate.Dele
         mScriptEngine.setTag(ScriptEngine.TAG_SOURCE, mScriptSource)
         mExecutionListener!!.onStart(mScriptExecution)
 
-        if (isInrt) {
-            (mScriptEngine as LoopBasedJavaScriptEngineWithDecryption).execute(mScriptSource, executeCallback)
-        } else {
+        if (!isInrt) {
             (mScriptEngine as LoopBasedJavaScriptEngine).execute(mScriptSource, executeCallback)
+        } else {
+            (mScriptEngine as LoopBasedJavaScriptEngineWithDecryption).execute(mScriptSource, executeCallback)
         }
     }
 
@@ -304,11 +305,10 @@ class ScriptExecuteActivity : AppCompatActivity(), OnActivityResultDelegate.Dele
         @JvmStatic
         fun execute(context: Context, manager: ScriptEngineManager, task: ScriptExecutionTask): ActivityScriptExecution {
             val execution = ActivityScriptExecution(manager, task)
-            val i = Intent(context, ScriptExecuteActivity::class.java)
+            Intent(context, ScriptExecuteActivity::class.java)
                 .putExtra(EXTRA_EXECUTION_ID, execution.id)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 .addFlags(task.config.intentFlags)
-            context.startActivity(i)
+                .startSafely(context)
             return execution
         }
     }

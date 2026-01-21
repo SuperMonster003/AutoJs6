@@ -113,6 +113,26 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
         private val presetAnimations = listOf("default", "activity", "dialog", "inputMethod", "toast", "translucent")
 
+        private val customJsPropertiesForBuild: Set<String> = setOf(
+            "preset",
+            "inputHint",
+            "inputPrefill",
+            "items",
+            "progress",
+            "checkBoxPrompt",
+            "checkBoxChecked",
+            "customView",
+            "stubborn",
+            "theme",
+            "linkify",
+            "onBackKey",
+            "onBackPressed",
+            "dimAmount",
+            "animation",
+            "keepScreenOn",
+            "inputSingleLine",
+        )
+
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun build(scriptRuntime: ScriptRuntime, args: Array<out Any?>): JsDialog = ensureArgumentsAtMost(args, 1) { argList ->
@@ -460,23 +480,27 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
         private fun applyDialogProperty(builder: JsDialogBuilder, name: String, value: Any?) {
             when (val propertySetter = propertySetterMap[name]) {
-                CVT_DEFAULT -> invokeMethod(builder, name, arrayOf(value))
+                CVT_DEFAULT -> invokeJavaMethod(builder, name, arrayOf(value))
                 CVT_DEFAULT_STRICT_BOOLEAN -> {
                     if (value == true) {
-                        invokeMethod(builder, name, emptyArray())
+                        invokeJavaMethod(builder, name, emptyArray())
                     }
                 }
                 CVT_COLOR_INT -> {
                     val colorInt = Colors.toIntRhino(value)
-                    invokeMethod(builder, name, arrayOf(colorInt))
+                    invokeJavaMethod(builder, name, arrayOf(colorInt))
                 }
                 is String -> when (propertySetter) {
                     in propertySetterMap -> {
                         applyDialogProperty(builder, propertySetter, value)
                     }
-                    else -> invokeMethod(builder, propertySetter, arrayOf(value))
+                    else -> invokeJavaMethod(builder, propertySetter, arrayOf(value))
                 }
-                else -> invokeMethod(builder, name, arrayOf(value))
+                else -> {
+                    if (!customJsPropertiesForBuild.contains(name)) {
+                        invokeJavaMethod(builder, name, arrayOf(value))
+                    }
+                }
             }
         }
 
@@ -766,13 +790,13 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             }
         }
 
-        private fun invokeMethod(builder: JsDialogBuilder, key: String, argsForMethod: Array<out Any?>) {
+        private fun invokeJavaMethod(builder: JsDialogBuilder, key: String, argsForMethod: Array<out Any?>) {
             val methods = builder.javaClass.methods
             val targetMethodsForName = methods.filter {
                 it.name == key
             }
-            if (targetMethodsForName.isEmpty()) {
-                return
+            require(targetMethodsForName.isNotEmpty()) {
+                "Method key \"$key\" for dialogs.build is not a valid method name"
             }
             val targetMethodsForParamCount = targetMethodsForName.filter {
                 it.parameterCount == argsForMethod.size
