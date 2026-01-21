@@ -7,6 +7,7 @@ import android.os.Process
 import android.provider.Settings
 import androidx.core.net.toUri
 import org.autojs.autojs.ui.main.drawer.PermissionItemHelper
+import org.autojs.autojs.util.IntentUtils.start
 import org.autojs.autojs.util.RomUtils
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
@@ -46,8 +47,7 @@ class XiaomiBackgroundPopupPermission(
                     "com.miui.securitycenter",
                     "com.miui.permcenter.permissions.PermissionsEditorActivity",
                 )
-                .putExtra("extra_pkgname", pkg)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                .putExtra("extra_pkgname", pkg),
 
             // Some MIUI versions use AppPermissionsEditorActivity.
             // zh-CN: 部分 MIUI 版本使用 AppPermissionsEditorActivity.
@@ -56,8 +56,7 @@ class XiaomiBackgroundPopupPermission(
                     "com.miui.securitycenter",
                     "com.miui.permcenter.permissions.AppPermissionsEditorActivity",
                 )
-                .putExtra("extra_pkgname", pkg)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                .putExtra("extra_pkgname", pkg),
         )
 
         return tryStartActivities(intents) || openAppDetails()
@@ -66,12 +65,11 @@ class XiaomiBackgroundPopupPermission(
     private fun openAppDetails(): Boolean = Intent()
         .setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
         .setData("package:${context.packageName}".toUri())
-        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         .let { tryStartActivity(it) }
 
     /**
      * Check MIUI "background start activity" app-op (commonly op=10021).
-     * zh-CN: 检查 MIUI "后台启动界面" 的 AppOps 状态(常见 op=10021).
+     * zh-CN: 检查 MIUI "后台启动界面" 的 AppOps 状态 (常见 op=10021).
      */
     private fun isMiuiBgStartPermissionGranted(context: Context): Boolean {
         val ops = context.getSystemService(Context.APP_OPS_SERVICE) as? AppOpsManager ?: return true
@@ -96,7 +94,7 @@ class XiaomiBackgroundPopupPermission(
 
     // /**
     //  * Check whether this looks like a Xiaomi/Redmi/POCO device.
-    //  * zh-CN: 判断是否为 Xiaomi/Redmi/POCO 设备(经验判断).
+    //  * zh-CN: 判断是否为 Xiaomi/Redmi/POCO 设备 (经验判断).
     //  */
     // private fun isXiaomiLikeDevice(): Boolean {
     //     val brand = (Build.BRAND ?: "").lowercase()
@@ -114,7 +112,7 @@ class XiaomiBackgroundPopupPermission(
     private fun tryStartActivity(i: Intent): Boolean = runCatching {
         val pm = context.packageManager
         i.resolveActivity(pm) ?: return@runCatching false
-        context.startActivity(i)
+        i.start(context)
         true
     }.onFailure {
         it.printStackTrace()
@@ -124,7 +122,7 @@ class XiaomiBackgroundPopupPermission(
     private companion object {
 
         // MIUI app-op code for background start activity (commonly 10021).
-        // zh-CN: MIUI 后台启动界面常见的 AppOps 编号(通常为 10021).
+        // zh-CN: MIUI 后台启动界面常见的 AppOps 编号 (通常为 10021).
         private const val OP_BACKGROUND_START_ACTIVITY = 10021
 
     }

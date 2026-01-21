@@ -67,6 +67,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs6.R
@@ -303,7 +304,7 @@ object ViewUtils {
         if (systemUiHeightInset in 1..maxReasonable) return systemUiHeightInset
 
         // Otherwise, try to remove an estimated nav bar height (dimen only).
-        // zh-CN: 否则尝试减去导航栏估值(仅 dimen), 再次校验.
+        // zh-CN: 否则尝试减去导航栏估值 (仅 dimen), 再次校验.
         val navBar = getNavigationBarHeightByDimen(context, withComputedOnPreR = false).coerceAtLeast(0)
         val guess = (systemUiHeightInset - navBar).coerceAtLeast(0)
 
@@ -1155,7 +1156,11 @@ object ViewUtils {
 
     @JvmStatic
     fun showSnack(view: View, stringRes: Int, isLong: Boolean) {
-        Snackbar.make(view, stringRes, if (isLong) Snackbar.LENGTH_LONG else Snackbar.LENGTH_SHORT).show()
+        try {
+            Snackbar.make(view, stringRes, if (isLong) Snackbar.LENGTH_LONG else Snackbar.LENGTH_SHORT).show()
+        } catch (e: IllegalStateException) {
+            ScriptRuntime.popException(e.message)
+        }
     }
 
     @JvmStatic
@@ -1163,14 +1168,30 @@ object ViewUtils {
 
     @JvmStatic
     fun showSnack(view: View, string: CharSequence, isLong: Boolean) {
-        Snackbar.make(view, string, if (isLong) Snackbar.LENGTH_LONG else Snackbar.LENGTH_SHORT).show()
+        try {
+            Snackbar.make(view, string, if (isLong) Snackbar.LENGTH_LONG else Snackbar.LENGTH_SHORT).show()
+        } catch (e: IllegalStateException) {
+            ScriptRuntime.popException(e.message)
+        }
     }
 
     @JvmStatic
-    fun showSnack(view: View, stringRes: Int, duration: Int) = Snackbar.make(view, stringRes, duration).show()
+    fun showSnack(view: View, stringRes: Int, duration: Int) {
+        try {
+            Snackbar.make(view, stringRes, duration).show()
+        } catch (e: IllegalStateException) {
+            ScriptRuntime.popException(e.message)
+        }
+    }
 
     @JvmStatic
-    fun showSnack(view: View, string: CharSequence, duration: Int) = Snackbar.make(view, string, duration).show()
+    fun showSnack(view: View, string: CharSequence, duration: Int) {
+        try {
+            Snackbar.make(view, string, duration).show()
+        } catch (e: IllegalStateException) {
+            ScriptRuntime.popException(e.message)
+        }
+    }
 
     fun setKeepScreenOnWhenInForegroundDisabled() {
         Pref.putString(R.string.key_keep_screen_on_when_in_foreground, key(R.string.key_keep_screen_on_when_in_foreground_disabled))

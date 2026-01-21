@@ -65,7 +65,7 @@ public class RootUtils {
     private static boolean isSuPresentFast() {
         try {
             // 1. Check common su paths.
-            // zh-CN: 1. 检查常见 su 路径.
+            // zh-CN: 检查常见 su 路径.
             for (String path : COMMON_SU_PATHS) {
                 if (isExecutableFile(path)) {
                     return true;
@@ -73,7 +73,7 @@ public class RootUtils {
             }
 
             // 2. Check su in PATH environment.
-            // zh-CN: 2. 检查 PATH 环境中的 su.
+            // zh-CN: 检查 PATH 环境中的 su.
             String envPath = System.getenv("PATH");
             if (envPath != null && !envPath.isEmpty()) {
                 String[] paths = envPath.split(":");

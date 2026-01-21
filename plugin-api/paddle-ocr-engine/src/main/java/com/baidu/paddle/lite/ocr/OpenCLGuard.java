@@ -111,8 +111,8 @@ public final class OpenCLGuard {
         // 2) Try loading (absolute path first, then loadLibrary("OpenCL")).
         // zh-CN: 2) 尝试加载 (绝对路径优先, 其次 loadLibrary("OpenCL")).
         boolean loadOk = false;
-        // 2.1 Absolute path dlopen.
-        // zh-CN: 2.1 绝对路径 dlopen.
+        // 2.1. Absolute path dlopen.
+        // zh-CN: 绝对路径 dlopen.
         if (hitPath != null) {
             try {
                 System.load(hitPath);
@@ -122,8 +122,8 @@ public final class OpenCLGuard {
                 Log.i(TAG, "[OpenCL] System.load failed: " + hitPath + " -> " + t.getClass().getSimpleName());
             }
         }
-        // 2.2 Regular link name.
-        // zh-CN: 2.2 常规链接名.
+        // 2.2. Regular link name.
+        // zh-CN: 常规链接名.
         if (!loadOk) {
             try {
                 System.loadLibrary("OpenCL");

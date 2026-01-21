@@ -6,6 +6,7 @@ import android.content.Intent
 import android.provider.Settings
 import androidx.core.net.toUri
 import org.autojs.autojs.ui.main.drawer.PermissionItemHelper
+import org.autojs.autojs.util.IntentUtils.start
 import org.autojs.autojs.util.RomUtils
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
@@ -39,15 +40,14 @@ class VivoBackgroundPopupPermission(
 
         val intents = listOf(
             // Vivo permission detail page (commonly works on many models).
-            // zh-CN: Vivo 权限详情页(较多机型可用).
+            // zh-CN: Vivo 权限详情页 (较多机型可用).
             Intent()
                 .setClassName(
                     "com.vivo.permissionmanager",
                     "com.vivo.permissionmanager.activity.SoftPermissionDetailActivity",
                 )
                 .setAction("secure.intent.action.softPermissionDetail")
-                .putExtra("packagename", pkg)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                .putExtra("packagename", pkg),
 
             // Older models may use PurviewTabActivity.
             // zh-CN: 老机型可能使用 PurviewTabActivity.
@@ -57,8 +57,7 @@ class VivoBackgroundPopupPermission(
                     "com.vivo.permissionmanager.activity.PurviewTabActivity",
                 )
                 .putExtra("packagename", pkg)
-                .putExtra("tabId", "1")
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                .putExtra("tabId", "1"),
 
             // Some ROMs expose a background start manager page.
             // zh-CN: 部分 ROM 暴露了后台启动管理页.
@@ -66,8 +65,7 @@ class VivoBackgroundPopupPermission(
                 .setClassName(
                     "com.vivo.permissionmanager",
                     "com.vivo.permissionmanager.activity.BgStartUpManagerActivity",
-                )
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                ),
         )
 
         return tryStartActivities(intents) || openAppDetails()
@@ -76,7 +74,6 @@ class VivoBackgroundPopupPermission(
     private fun openAppDetails(): Boolean = Intent()
         .setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
         .setData("package:${context.packageName}".toUri())
-        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         .let { tryStartActivity(it) }
 
     /**
@@ -110,7 +107,7 @@ class VivoBackgroundPopupPermission(
 
     // /**
     //  * Check whether this looks like a vivo/iQOO device.
-    //  * zh-CN: 判断是否为 vivo/iQOO 设备(经验判断).
+    //  * zh-CN: 判断是否为 vivo/iQOO 设备 (经验判断).
     //  */
     // private fun isVivoLikeDevice(): Boolean {
     //     val brand = (Build.BRAND ?: "").lowercase()
@@ -128,7 +125,7 @@ class VivoBackgroundPopupPermission(
     private fun tryStartActivity(i: Intent): Boolean = runCatching {
         val pm = context.packageManager
         i.resolveActivity(pm) ?: return@runCatching false
-        context.startActivity(i)
+        i.start(context)
         true
     }.onFailure {
         it.printStackTrace()
