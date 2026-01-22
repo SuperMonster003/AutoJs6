@@ -26,7 +26,7 @@
             android:layout_marginEnd="6dp"
             android:src="@drawable/ic_expanded"
             android:translationY="1.2dp"
-            app:tint="#828384" />
+            app:tint="@color/explorer_category_operation_button" />
 
         <TextView
             android:id="@+id/title"
@@ -34,7 +34,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:text="@string/text_directory"
-            android:textColor="#828384"
+            android:textColor="@color/explorer_category_operation_button"
             android:textSize="13sp" />
 
     </LinearLayout>
@@ -50,7 +50,7 @@
         android:layout_marginHorizontal="3dp"
         android:src="@drawable/ic_dir_up"
         android:focusable="true"
-        app:tint="#828384" />
+        app:tint="@color/explorer_category_operation_button" />
 
     <ImageView
         android:id="@+id/sort_order"
@@ -63,7 +63,7 @@
         android:layout_marginHorizontal="3dp"
         android:src="@drawable/ic_ascending_order"
         android:focusable="true"
-        app:tint="#828384" />
+        app:tint="@color/explorer_category_operation_button" />
 
     <ImageView
         android:id="@+id/sort_type"
@@ -76,6 +76,6 @@
         android:layout_marginHorizontal="3dp"
         android:src="@drawable/ic_sort"
         android:focusable="true"
-        app:tint="#828384" />
+        app:tint="@color/explorer_category_operation_button" />
 
 </LinearLayout>

@@ -42,6 +42,8 @@
     <color name="dialog_button_error">#4FC3F7</color>
     <color name="dialog_button_failure">@color/dialog_button_error</color>
 
+    <color name="dialog_options_button_tint">#DEA9A9A9</color>
+
     <color name="item_background">#333333</color>
     <color name="item_background_dark">@color/dawn_full</color>
 
@@ -73,6 +75,7 @@
     <color name="prefTextColorSecondary">#808080</color>
 
     <color name="explorer_file_operation_button">@color/md_gray_600</color>
+    <color name="explorer_category_operation_button">@color/md_gray_500</color>
     <color name="project_toolbar_button">#A9AAAB</color>
     <color name="project_toolbar_title">#A9AAAB</color>
 

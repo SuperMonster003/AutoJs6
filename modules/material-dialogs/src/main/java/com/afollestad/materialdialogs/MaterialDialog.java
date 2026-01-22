@@ -506,6 +506,11 @@ public class MaterialDialog extends DialogBase implements View.OnClickListener, 
         return content;
     }
 
+    @Nullable
+    public final ImageView getOptionsView() {
+        return optionsView;
+    }
+
     /**
      * Retrieves the custom view that was inflated or set to the MaterialDialog during building.
      *

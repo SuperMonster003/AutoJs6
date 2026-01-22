@@ -121,6 +121,8 @@
     <color name="dialog_progress_success_bg_tint">#DCEDC8</color>
     <color name="dialog_progress_success_tint">#00C853</color>
 
+    <color name="dialog_options_button_tint">@color/day</color>
+
     <color name="item_background">#FAFAFA</color>
     <color name="item_background_dark">#FAFAFA</color>
 
@@ -170,6 +172,7 @@
     <color name="prefTextColorSecondary">#9DA0A2</color>
 
     <color name="explorer_file_operation_button">#A9AAAB</color>
+    <color name="explorer_category_operation_button">#828384</color>
     <color name="project_toolbar_button">#606366</color>
     <color name="project_toolbar_title">#606366</color>
 

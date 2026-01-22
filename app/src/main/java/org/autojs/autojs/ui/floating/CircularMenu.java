@@ -7,6 +7,7 @@ import android.os.RemoteException;
 import android.text.TextUtils;
 import android.view.ContextThemeWrapper;
 import android.view.View;
+import android.widget.ImageView;
 import androidx.annotation.NonNull;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.makeramen.roundedimageview.RoundedImageView;
@@ -23,6 +24,7 @@ import org.autojs.autojs.core.pref.Pref;
 import org.autojs.autojs.core.record.GlobalActionRecorder;
 import org.autojs.autojs.core.record.Recorder;
 import org.autojs.autojs.model.explorer.ExplorerDirPage;
+import org.autojs.autojs.model.explorer.ExplorerPage;
 import org.autojs.autojs.model.explorer.Explorers;
 import org.autojs.autojs.model.script.Scripts;
 import org.autojs.autojs.runtime.api.WrappedShizuku;
@@ -47,6 +49,8 @@ import org.jdeferred.impl.DeferredObject;
 import org.jetbrains.annotations.NotNull;
 
 import java.text.MessageFormat;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by Stardust on Oct 18, 2017.
@@ -149,6 +153,18 @@ public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
                 mScriptListDialog = new MaterialDialog.Builder(mContext)
                         .title(R.string.text_run_script)
                         .titleColorRes(R.color.day_night)
+                        .options(List.of(
+                                new MaterialDialog.OptionMenuItemSpec(mContext.getString(R.string.dialog_button_homepage), (d) -> {
+                                    String homepage = WorkingDirectoryUtils.getPath();
+                                    ExplorerPage currentPageStatePage = mScriptListDialogExplorerView.currentPageState.getPage();
+                                    if (currentPageStatePage != null) {
+                                        if (!Objects.equals(currentPageStatePage.getPath(), homepage)) {
+                                            mScriptListDialogExplorerView.saveCurrentPageIntoHistory();
+                                        }
+                                    }
+                                    mScriptListDialogExplorerView.setExplorer(Explorers.workspace(), ExplorerDirPage.createRoot(homepage));
+                                })
+                        ))
                         .customView(mScriptListDialogExplorerView, false)
                         .backgroundColorRes(R.color.window_background)
                         .neutralText(R.string.dialog_button_minimize)
@@ -160,14 +176,21 @@ public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
                         .positiveColorRes(R.color.dialog_button_default)
                         .onPositive((dialog, which) -> {
                             dialog.dismiss();
-                            mScriptListDialog = null;
-                            mScriptListDialogExplorerView = null;
                         })
                         .cancelable(false)
                         .autoDismiss(false)
+                        .dismissListener((di) -> {
+                            mScriptListDialog = null;
+                            mScriptListDialogExplorerView = null;
+                        })
                         .build();
 
                 var scriptListDialog = mScriptListDialog;
+
+                ImageView optionsView = scriptListDialog.getOptionsView();
+                if (optionsView != null) {
+                    optionsView.setImageTintList(ColorStateList.valueOf(mContext.getColor(R.color.dialog_options_button_tint)));
+                }
 
                 // Hide host dialog before launching Activity or showing secondary dialogs.
                 // zh-CN: 在启动 Activity 或显示二级对话框之前隐藏宿主对话框.

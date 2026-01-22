@@ -135,6 +135,10 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         ColorStateList.valueOf(context.getColor(R.color.explorer_file_operation_button))
     }
 
+    private val mChevronIconTint by lazy {
+        ColorStateList.valueOf(context.getColor(R.color.explorer_category_operation_button))
+    }
+
     // Request host dialog to hide/show without losing state.
     // zh-CN: 请求宿主对话框隐藏/显示且不丢失状态.
     private var mRequestHostDialogHide: Runnable? = null
@@ -349,7 +353,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             //  # mCurrentPageState.scrollY = layoutManager.findLastCompletelyVisibleItemPosition();
             currentPageState.scrollY = layoutManager.findFirstCompletelyVisibleItemPosition()
         }
-        mPageStateHistories.push(currentPageState)
+        saveCurrentPageIntoHistory()
         setCurrentPageState(ExplorerPageState(childItemGroup))
         refreshCurrentPage()
     }
@@ -515,7 +519,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     }
 
     fun goUp() {
-        mPageStateHistories.push(currentPageState)
+        saveCurrentPageIntoHistory()
         val currentPagePath = currentPage.path
         val nextPagePath = if (Explorers.Providers.workspace().isCurrentSampleDir(currentDirectory)) {
             path
@@ -524,6 +528,10 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         }
         setCurrentPageState(ExplorerPageState(ExplorerDirPage.createRoot(nextPagePath)))
         refreshCurrentPage()
+    }
+
+    fun saveCurrentPageIntoHistory() {
+        mPageStateHistories.push(currentPageState)
     }
 
     fun setDirectorySpanSize(directorySpanSize: Int) {
@@ -1078,6 +1086,8 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
 
         init {
             setOnClickListeners()
+
+            ImageViewCompat.setImageTintList(binding.arrowIcon, mChevronIconTint)
         }
 
         private fun setOnClickListeners() {
