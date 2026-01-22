@@ -1193,5 +1193,6 @@
     <string name="text_screen_capture_request_delay">螢幕捕獲許可權申請延遲</string>
     <string name="description_screen_capture_request_delay">申請螢幕捕獲許可權時, 彈出的許可權申請視窗消失時可能存在漸變動畫, 此時如果立即呼叫 `images.captureScreen` 方法, 獲取的螢幕截圖中會出現許可權申請的視窗內容而造成遮擋.\n\n當前設定選項值用於在截圖許可權申請後立即獲取螢幕截圖前增加一個延遲時間 (單位為毫秒), 可用於避免上述遮擋問題.\n\n當前設定選項僅適用於獲取截圖許可權後的首次截圖操作, 後續截圖操作不再受此設定值影響.</string>
     <string name="text_delay_time">延遲時間</string>
+    <string name="dialog_button_homepage">主頁</string>
 
 </resources>

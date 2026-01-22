@@ -1192,5 +1192,6 @@
     <string name="text_screen_capture_request_delay">Screen capture permission request delay</string>
     <string name="description_screen_capture_request_delay">When requesting screen capture permission, the permission request window may include a fade-out animation when it disappears. If `images.captureScreen` is called immediately, the captured screenshot may contain the permission request window content and be obstructed.\n\nThe current option value adds a delay (in milliseconds) before capturing the screen immediately after permission is granted, which can be used to avoid the obstruction issue described above.\n\nThis option only applies to the first screenshot after screen capture permission is granted; subsequent screenshots are not affected by this value.</string>
     <string name="text_delay_time">Delay time</string>
+    <string name="dialog_button_homepage">Homepage</string>
 
 </resources>
