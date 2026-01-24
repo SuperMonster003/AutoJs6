@@ -4,11 +4,11 @@ import android.provider.Settings
 import androidx.core.net.toUri
 import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
-import org.autojs.autojs.extension.AnyExtensions.isJsNullish
-import org.autojs.autojs.extension.AnyExtensions.jsBrief
-import org.autojs.autojs.extension.FlexibleArray
-import org.autojs.autojs.extension.FlexibleArray.Companion.component1
-import org.autojs.autojs.extension.FlexibleArray.Companion.component2
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
+import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
+import org.autojs.autojs.rhino.ArgumentGuards
+import org.autojs.autojs.rhino.ArgumentGuards.Companion.component1
+import org.autojs.autojs.rhino.ArgumentGuards.Companion.component2
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.ScreenMetrics
 import org.autojs.autojs.runtime.api.augment.Augmentable
@@ -61,7 +61,7 @@ class Device(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         "density" to Supplier { ScreenMetrics.deviceScreenDensity },
     )
 
-    companion object : FlexibleArray() {
+    companion object : ArgumentGuards() {
 
         const val KEY_POINTER_LOCATION = "pointer_location"
 

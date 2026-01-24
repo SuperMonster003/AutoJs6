@@ -1,7 +1,7 @@
 package org.autojs.autojs.runtime.api.augment.jsox
 
 import org.autojs.autojs.AutoJs
-import org.autojs.autojs.extension.ScriptableExtensions.prop
+import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.Augmentable.Companion.refineAttributes

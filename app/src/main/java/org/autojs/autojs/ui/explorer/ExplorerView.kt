@@ -30,7 +30,7 @@ import org.autojs.autojs.core.pref.Pref.putInt
 import org.autojs.autojs.core.pref.Pref.putLinkedList
 import org.autojs.autojs.core.pref.Pref.putString
 import org.autojs.autojs.core.pref.Pref.remove
-import org.autojs.autojs.extension.ViewExtensions.setForceShowIconCompat
+import org.autojs.autojs.util.ViewUtils.setForceShowIconCompat
 import org.autojs.autojs.model.explorer.Explorer
 import org.autojs.autojs.model.explorer.ExplorerChangeEvent
 import org.autojs.autojs.model.explorer.ExplorerDirPage

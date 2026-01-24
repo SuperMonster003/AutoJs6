@@ -1,7 +1,7 @@
 package org.autojs.autojs.runtime.api.augment.images
 
 import org.autojs.autojs.core.image.TemplateMatching
-import org.autojs.autojs.extension.ArrayExtensions.toNativeArray
+import org.autojs.autojs.rhino.extension.IterableExtensions.toNativeArray
 import kotlin.math.roundToInt
 
 class MatchingResult(private val matchedList: List<TemplateMatching.Match>) {
@@ -14,12 +14,12 @@ class MatchingResult(private val matchedList: List<TemplateMatching.Match>) {
 
     fun first() = matchedList.firstOrNull()
     fun last() = matchedList.lastOrNull()
-    fun leftmost() = findMax(Companion.comparators["left"])
-    fun rightmost() = findMax(Companion.comparators["right"])
-    fun topmost() = findMax(Companion.comparators["top"])
-    fun bottommost() = findMax(Companion.comparators["bottom"])
-    fun best() = findMax(Companion.comparators["best"])
-    fun worst() = findMax(Companion.comparators["worst"])
+    fun leftmost() = findMax(comparators["left"])
+    fun rightmost() = findMax(comparators["right"])
+    fun topmost() = findMax(comparators["top"])
+    fun bottommost() = findMax(comparators["bottom"])
+    fun best() = findMax(comparators["best"])
+    fun worst() = findMax(comparators["worst"])
 
     fun findMax(comparator: Comparator<TemplateMatching.Match>?): TemplateMatching.Match? {
         return comparator?.let { matchedList.maxWithOrNull(it) }
@@ -33,7 +33,7 @@ class MatchingResult(private val matchedList: List<TemplateMatching.Match>) {
         var comparator: ((TemplateMatching.Match, TemplateMatching.Match) -> Int)? = null
 
         direction.split("-").forEach { s ->
-            val tmpComparator = Companion.comparators[s] ?: throw Exception("Unknown direction '$s' in '$direction'")
+            val tmpComparator = comparators[s] ?: throw Exception("Unknown direction '$s' in '$direction'")
             comparator = when (comparator) {
                 null -> tmpComparator
                 else -> { l, r ->

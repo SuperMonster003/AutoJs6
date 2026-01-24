@@ -13,7 +13,7 @@ import android.util.AttributeSet
 import androidx.preference.PreferenceManager
 import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.core.pref.Pref
-import org.autojs.autojs.extension.MaterialDialogExtensions.widgetThemeColor
+import org.autojs.autojs.util.MaterialDialogUtils.widgetThemeColor
 import org.autojs.autojs.external.shortcut.ShortcutActivity
 import org.autojs.autojs.theme.preference.MaterialListPreference
 import org.autojs.autojs.ui.common.NotAskAgainDialog

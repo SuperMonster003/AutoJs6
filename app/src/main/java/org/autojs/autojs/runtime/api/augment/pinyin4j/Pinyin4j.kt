@@ -14,7 +14,7 @@ import net.sourceforge.pinyin4j.format.HanyuPinyinVCharType.WITH_U_AND_COLON
 import net.sourceforge.pinyin4j.format.HanyuPinyinVCharType.WITH_U_UNICODE
 import net.sourceforge.pinyin4j.format.HanyuPinyinVCharType.WITH_V
 import org.autojs.autojs.annotation.RhinoSingletonFunctionInterface
-import org.autojs.autojs.extension.ScriptableObjectExtensions.inquire
+import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.Invokable
 import org.autojs.autojs.util.RhinoUtils.coerceString

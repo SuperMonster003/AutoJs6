@@ -22,7 +22,7 @@ import io.reactivex.subjects.PublishSubject;
 import org.autojs.autojs.app.DialogUtils;
 import org.autojs.autojs.app.GlobalAppContext;
 import org.autojs.autojs.core.pref.Pref;
-import org.autojs.autojs.extension.MaterialDialogExtensions;
+import org.autojs.autojs.util.MaterialDialogUtils;
 import org.autojs.autojs.external.ScriptIntents;
 import org.autojs.autojs.model.explorer.Explorer;
 import org.autojs.autojs.model.explorer.ExplorerDirPage;
@@ -196,12 +196,12 @@ public class ScriptOperations {
                             .positiveText(R.string.dialog_button_confirm)
                             .positiveColorRes(R.color.dialog_button_attraction)
                             .negativeText(R.string.dialog_button_back);
-                    MaterialDialogExtensions.choiceWidgetThemeColor(builderDefaultPrefix);
+                    MaterialDialogUtils.choiceWidgetThemeColor(builderDefaultPrefix);
                     MaterialDialog dialogDefaultPrefix = builderDefaultPrefix.build();
                     DialogUtils.showAdaptive(dialogDefaultPrefix);
                 })
                 .autoDismiss(false);
-        MaterialDialogExtensions.widgetThemeColor(builder);
+        MaterialDialogUtils.widgetThemeColor(builder);
         MaterialDialog dialog = builder.build();
         dialogRef.set(dialog);
 
@@ -338,7 +338,7 @@ public class ScriptOperations {
                     input.onComplete();
                 })
                 .canceledOnTouchOutside(false);
-        MaterialDialogExtensions.widgetThemeColor(builder);
+        MaterialDialogUtils.widgetThemeColor(builder);
         DialogUtils.showAdaptive(builder.build());
         return input;
     }

@@ -1,6 +1,6 @@
-package org.autojs.autojs.extension
+package org.autojs.autojs.rhino.extension
 
-import org.autojs.autojs.util.RhinoUtils.undefined
+import org.autojs.autojs.util.RhinoUtils
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.Wrapper
@@ -16,7 +16,7 @@ object ScriptableExtensions {
      * Searches the prototype chain for a property named `key`.
      *
      * @param key A property name
-     * @return The value of a property with name `key` found in this object or any object in its prototype chain, or [Scriptable.NOT_FOUND] if not found
+     * @return The value of a property with name `key` found in this object or any object in its prototype chain, or [org.mozilla.javascript.Scriptable.NOT_FOUND] if not found
      */
     fun Scriptable.getProp(key: String): Any? = ScriptableObject.getProperty(this, key).let {
         if (it is Wrapper) it.unwrap() else it
@@ -53,7 +53,7 @@ object ScriptableExtensions {
      * @param value The initial value of the property
      * @param attributes The attributes of the JavaScript property
      */
-    fun Scriptable.defineProp(key: String, value: Any?, attributes: Int = ScriptableObject.EMPTY) = undefined { ScriptableObject.defineProperty(this, key, value, attributes) }
+    fun Scriptable.defineProp(key: String, value: Any?, attributes: Int = ScriptableObject.EMPTY) = RhinoUtils.undefined { ScriptableObject.defineProperty(this, key, value, attributes) }
 
     /**
      * Puts a named property in this object or in an object in its prototype chain.
@@ -66,7 +66,7 @@ object ScriptableExtensions {
      * @param key A property key
      * @param value Any JavaScript value accepted by [Scriptable.put]
      */
-    fun Scriptable.putProp(key: String, value: Any?) = undefined { ScriptableObject.putProperty(this, key, value) }
+    fun Scriptable.putProp(key: String, value: Any?) = RhinoUtils.undefined { ScriptableObject.putProperty(this, key, value) }
 
     /**
      * Removes the property from this object or its prototype chain.

@@ -19,9 +19,9 @@ import org.autojs.autojs.core.image.capture.ScreenCaptureRequester
 import org.autojs.autojs.core.looper.Loopers
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.engine.ScriptEngineService
-import org.autojs.autojs.extension.ScriptableExtensions.defineProp
-import org.autojs.autojs.extension.ScriptableExtensions.deleteProp
-import org.autojs.autojs.extension.ScriptableExtensions.prop
+import org.autojs.autojs.rhino.extension.ScriptableExtensions.defineProp
+import org.autojs.autojs.rhino.extension.ScriptableExtensions.deleteProp
+import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.lang.ThreadCompat
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.pio.UncheckedIOException

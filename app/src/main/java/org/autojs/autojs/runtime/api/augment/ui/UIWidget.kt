@@ -2,12 +2,12 @@ package org.autojs.autojs.runtime.api.augment.ui
 
 import android.view.View
 import org.autojs.autojs.annotation.RhinoStandardFunctionInterface
-import org.autojs.autojs.extension.AnyExtensions.isJsNullish
-import org.autojs.autojs.extension.AnyExtensions.jsBrief
-import org.autojs.autojs.extension.FlexibleArray
-import org.autojs.autojs.extension.ScriptableExtensions.hasProp
-import org.autojs.autojs.extension.ScriptableExtensions.prop
-import org.autojs.autojs.extension.ScriptableExtensions.defineProp
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
+import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
+import org.autojs.autojs.rhino.ArgumentGuards
+import org.autojs.autojs.rhino.extension.ScriptableExtensions.hasProp
+import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
+import org.autojs.autojs.rhino.extension.ScriptableExtensions.defineProp
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.RhinoUtils.NOT_CONSTRUCTABLE
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED
@@ -25,7 +25,7 @@ import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.Undefined
 
 @Suppress("unused", "UNUSED_PARAMETER")
-object UIWidget : FlexibleArray() {
+object UIWidget : ArgumentGuards() {
 
     @JvmStatic
     @RhinoStandardFunctionInterface

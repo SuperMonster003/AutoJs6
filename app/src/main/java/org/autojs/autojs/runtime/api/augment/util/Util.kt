@@ -4,28 +4,28 @@ import org.autojs.autojs.AutoJs
 import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoSingletonFunctionInterface
 import org.autojs.autojs.annotation.RhinoStandardFunctionInterface
-import org.autojs.autojs.extension.AnyExtensions.isJsArray
-import org.autojs.autojs.extension.AnyExtensions.isJsBigInt
-import org.autojs.autojs.extension.AnyExtensions.isJsBoolean
-import org.autojs.autojs.extension.AnyExtensions.isJsDate
-import org.autojs.autojs.extension.AnyExtensions.isJsError
-import org.autojs.autojs.extension.AnyExtensions.isJsFunction
-import org.autojs.autojs.extension.AnyExtensions.isJsNonNullObject
-import org.autojs.autojs.extension.AnyExtensions.isJsNullish
-import org.autojs.autojs.extension.AnyExtensions.isJsNumber
-import org.autojs.autojs.extension.AnyExtensions.isJsObject
-import org.autojs.autojs.extension.AnyExtensions.isJsRegExp
-import org.autojs.autojs.extension.AnyExtensions.isJsString
-import org.autojs.autojs.extension.AnyExtensions.isJsSymbol
-import org.autojs.autojs.extension.AnyExtensions.isJsUndefined
-import org.autojs.autojs.extension.AnyExtensions.jsBrief
-import org.autojs.autojs.extension.FlexibleArray
-import org.autojs.autojs.extension.FlexibleArray.Companion.component1
-import org.autojs.autojs.extension.FlexibleArray.Companion.component2
-import org.autojs.autojs.extension.FlexibleArray.Companion.component3
-import org.autojs.autojs.extension.NumberExtensions.jsString
-import org.autojs.autojs.extension.ScriptableExtensions.defineProp
-import org.autojs.autojs.extension.ScriptableExtensions.prop
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsArray
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsBigInt
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsBoolean
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsDate
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsError
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsFunction
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNonNullObject
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNumber
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsObject
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsRegExp
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsString
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsSymbol
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsUndefined
+import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
+import org.autojs.autojs.rhino.ArgumentGuards
+import org.autojs.autojs.rhino.ArgumentGuards.Companion.component1
+import org.autojs.autojs.rhino.ArgumentGuards.Companion.component2
+import org.autojs.autojs.rhino.ArgumentGuards.Companion.component3
+import org.autojs.autojs.rhino.extension.NumberExtensions.jsString
+import org.autojs.autojs.rhino.extension.ScriptableExtensions.defineProp
+import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.global.Species
 import org.autojs.autojs.runtime.api.augment.util.Inspect.inspectRhino
@@ -815,7 +815,7 @@ object Util : Augmentable() {
             return func.call(cx, scope, null, args)
         }
 
-        companion object : FlexibleArray() {
+        companion object : ArgumentGuards() {
             @JvmStatic
             @RhinoStandardFunctionInterface
             fun toString(cx: Context, thisObj: Scriptable, args: Array<Any?>, funObj: Function): String = ensureArgumentsIsEmpty(args) {

@@ -14,8 +14,8 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.app.DialogUtils.showAdaptive
-import org.autojs.autojs.extension.MaterialDialogExtensions.makeTextCopyable
-import org.autojs.autojs.extension.MaterialDialogExtensions.setCopyableTextIfAbsent
+import org.autojs.autojs.util.MaterialDialogUtils.makeTextCopyable
+import org.autojs.autojs.util.MaterialDialogUtils.setCopyableTextIfAbsent
 import org.autojs.autojs.external.fileprovider.AppFileProvider
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.runtime.api.Mime

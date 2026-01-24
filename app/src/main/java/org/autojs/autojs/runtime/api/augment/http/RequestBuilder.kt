@@ -4,10 +4,10 @@ import android.annotation.SuppressLint
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.autojs.autojs.core.http.MutableOkHttp
-import org.autojs.autojs.extension.AnyExtensions.isJsNullish
-import org.autojs.autojs.extension.AnyExtensions.jsBrief
-import org.autojs.autojs.extension.ScriptableExtensions.prop
-import org.autojs.autojs.extension.ScriptableObjectExtensions.inquire
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
+import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
+import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
+import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.http.Http.Companion.DEFAULT_TIMEOUT
 import org.autojs.autojs.runtime.api.augment.http.Http.Companion.KEY_CLIENT

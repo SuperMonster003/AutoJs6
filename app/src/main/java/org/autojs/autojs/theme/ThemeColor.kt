@@ -5,7 +5,7 @@ import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 import org.autojs.autojs.annotation.ScriptInterface
 import org.autojs.autojs.core.pref.Pref
-import org.autojs.autojs.extension.ArrayExtensions.toHashCode
+import org.autojs.autojs.rhino.extension.IterableExtensions.toHashCode
 import org.autojs.autojs6.R
 
 /**

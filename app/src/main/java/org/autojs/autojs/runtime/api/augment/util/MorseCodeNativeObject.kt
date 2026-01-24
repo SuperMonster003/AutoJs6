@@ -3,10 +3,10 @@ package org.autojs.autojs.runtime.api.augment.util
 import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoFunctionObjectBody
 import org.autojs.autojs.annotation.RhinoStandardFunctionInterface
-import org.autojs.autojs.extension.AnyExtensions.isJsNullish
-import org.autojs.autojs.extension.ArrayExtensions.toNativeArray
-import org.autojs.autojs.extension.FlexibleArray.Companion.ensureArgumentsAtMost
-import org.autojs.autojs.extension.FlexibleArray.Companion.ensureArgumentsIsEmpty
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
+import org.autojs.autojs.rhino.ArgumentGuards.Companion.ensureArgumentsAtMost
+import org.autojs.autojs.rhino.ArgumentGuards.Companion.ensureArgumentsIsEmpty
+import org.autojs.autojs.rhino.extension.IterableExtensions.toNativeArray
 import org.autojs.autojs.runtime.api.StringReadable
 import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.NOT_CONSTRUCTABLE

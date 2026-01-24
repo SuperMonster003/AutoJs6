@@ -3,13 +3,13 @@
 package org.autojs.autojs.runtime.api.augment.formatter
 
 import org.autojs.autojs.annotation.RhinoSingletonFunctionInterface
-import org.autojs.autojs.extension.AnyExtensions.isJsBoolean
-import org.autojs.autojs.extension.AnyExtensions.isJsNullish
-import org.autojs.autojs.extension.AnyExtensions.isJsNumber
-import org.autojs.autojs.extension.AnyExtensions.isJsObject
-import org.autojs.autojs.extension.AnyExtensions.isJsString
-import org.autojs.autojs.extension.AnyExtensions.jsBrief
-import org.autojs.autojs.extension.ScriptableObjectExtensions.inquire
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsBoolean
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNumber
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsObject
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsString
+import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
+import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.Invokable
 import org.autojs.autojs.runtime.api.augment.converter.core.Bytes.AUTO

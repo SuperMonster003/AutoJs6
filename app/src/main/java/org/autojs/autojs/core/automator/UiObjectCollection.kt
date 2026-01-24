@@ -1,7 +1,7 @@
 package org.autojs.autojs.core.automator
 
 import org.autojs.autojs.core.accessibility.UiSelector
-import org.autojs.autojs.extension.ArrayExtensions.toHashCode
+import org.autojs.autojs.rhino.extension.IterableExtensions.toHashCode
 import org.autojs.autojs.tool.Consumer
 import org.autojs.autojs.util.RhinoUtils
 import org.mozilla.javascript.Scriptable

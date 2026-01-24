@@ -1,10 +1,10 @@
 package org.autojs.autojs.runtime.api.augment.threads
 
 import org.autojs.autojs.annotation.RhinoStandardFunctionInterface
-import org.autojs.autojs.extension.FlexibleArray
-import org.autojs.autojs.extension.FlexibleArray.Companion.component1
-import org.autojs.autojs.extension.FlexibleArray.Companion.component2
-import org.autojs.autojs.extension.FlexibleArray.Companion.component3
+import org.autojs.autojs.rhino.ArgumentGuards
+import org.autojs.autojs.rhino.ArgumentGuards.Companion.component1
+import org.autojs.autojs.rhino.ArgumentGuards.Companion.component2
+import org.autojs.autojs.rhino.ArgumentGuards.Companion.component3
 import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED
 import org.autojs.autojs.util.RhinoUtils.coerceLongNumber
@@ -75,7 +75,7 @@ class VolatileDisposeNativeObject : NativeObject() {
         RuntimeException(e)
     }
 
-    companion object : FlexibleArray() {
+    companion object : ArgumentGuards() {
 
         @JvmStatic
         @RhinoStandardFunctionInterface

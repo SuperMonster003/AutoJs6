@@ -10,7 +10,7 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import org.autojs.autojs.core.pref.Language;
 import org.autojs.autojs.core.pref.Pref;
-import org.autojs.autojs.extension.MaterialDialogExtensions;
+import org.autojs.autojs.util.MaterialDialogUtils;
 import org.autojs.autojs.model.indices.AndroidClass;
 import org.autojs.autojs.model.indices.ClassSearchingItem;
 import org.autojs.autojs.script.JavaScriptFileSource;
@@ -75,7 +75,7 @@ public class EditorMenu {
                     .content(R.string.hint_long_click_run_to_debug)
                     .positiveText(R.string.dialog_button_dismiss)
                     .positiveColorRes(R.color.dialog_button_default);
-            MaterialDialogExtensions.widgetThemeColor(builder);
+            MaterialDialogUtils.widgetThemeColor(builder);
             builder.show();
             return tryDoing(mEditorView::debug);
         }
@@ -248,7 +248,7 @@ public class EditorMenu {
                 .onPositive((dialog, which) -> dialog.dismiss())
                 .autoDismiss(false);
 
-        MaterialDialogExtensions.choiceWidgetThemeColor(builder);
+        MaterialDialogUtils.choiceWidgetThemeColor(builder);
 
         // TODO by SuperMonster003 on Oct 17, 2022.
         //  ! Implementation for "scale view".
@@ -330,7 +330,7 @@ public class EditorMenu {
         builder.positiveColorRes(R.color.dialog_button_attraction);
         builder.negativeText(R.string.dialog_button_cancel);
         builder.negativeColorRes(R.color.dialog_button_default);
-        MaterialDialogExtensions.widgetThemeColor(builder);
+        MaterialDialogUtils.widgetThemeColor(builder);
         builder.show();
     }
 

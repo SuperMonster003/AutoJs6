@@ -1,7 +1,7 @@
 package org.autojs.autojs.runtime.api.augment.shizuku
 
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
-import org.autojs.autojs.extension.ScriptableExtensions.defineProp
+import org.autojs.autojs.rhino.extension.ScriptableExtensions.defineProp
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.AbstractShell
 import org.autojs.autojs.runtime.api.WrappedShizuku

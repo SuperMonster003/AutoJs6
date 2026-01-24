@@ -3,11 +3,11 @@ package org.autojs.autojs.runtime.api.augment.selector
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.core.accessibility.UiSelector
 import org.autojs.autojs.core.automator.UiObject
-import org.autojs.autojs.extension.AnyExtensions.isJsNullish
-import org.autojs.autojs.extension.AnyExtensions.jsUnwrapped
-import org.autojs.autojs.extension.FlexibleArray
-import org.autojs.autojs.extension.ScriptableExtensions.defineProp
-import org.autojs.autojs.extension.ScriptableExtensions.hasProp
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
+import org.autojs.autojs.rhino.extension.AnyExtensions.jsUnwrapped
+import org.autojs.autojs.rhino.ArgumentGuards
+import org.autojs.autojs.rhino.extension.ScriptableExtensions.defineProp
+import org.autojs.autojs.rhino.extension.ScriptableExtensions.hasProp
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.Invokable
@@ -142,7 +142,7 @@ class Selector(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRun
     }
 
     @Suppress("SameParameterValue")
-    companion object : FlexibleArray() {
+    companion object : ArgumentGuards() {
 
         private val scopeAugmentMethodBlacklist = listOf(
             UiSelector::plus.name,

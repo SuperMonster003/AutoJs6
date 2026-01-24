@@ -4,7 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import com.afollestad.materialdialogs.MaterialDialog;
-import org.autojs.autojs.extension.MaterialDialogExtensions;
+import org.autojs.autojs.util.MaterialDialogUtils;
 import org.autojs.autojs.ui.BaseActivity;
 import org.autojs.autojs.util.ClipboardUtils;
 import org.autojs.autojs.util.IntentUtils;
@@ -65,7 +65,7 @@ public class ErrorDialogActivity extends BaseActivity {
 
         var materialDialog = builder.show();
 
-        MaterialDialogExtensions.makeTextCopyable(materialDialog, materialDialog.getContentView());
+        MaterialDialogUtils.makeTextCopyable(materialDialog, materialDialog.getContentView());
     }
 
     /**

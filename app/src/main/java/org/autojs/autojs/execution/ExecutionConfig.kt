@@ -2,8 +2,8 @@ package org.autojs.autojs.execution
 
 import android.os.Parcel
 import android.os.Parcelable
-import org.autojs.autojs.extension.ArrayExtensions.toHashCode
 import org.autojs.autojs.project.ScriptConfig
+import org.autojs.autojs.rhino.extension.IterableExtensions.toHashCode
 
 /**
  * Created by Stardust on Feb 1, 2017.

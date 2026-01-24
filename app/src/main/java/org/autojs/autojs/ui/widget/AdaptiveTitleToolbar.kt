@@ -5,7 +5,7 @@ import android.content.res.Configuration
 import android.util.AttributeSet
 import androidx.annotation.StyleRes
 import androidx.appcompat.widget.Toolbar
-import org.autojs.autojs.extension.ViewExtensions.titleView
+import org.autojs.autojs.util.ViewUtils.titleView
 import org.autojs.autojs6.R
 
 /**

@@ -1,6 +1,6 @@
 package org.autojs.autojs.runtime.api
 
-import org.autojs.autojs.extension.AnyExtensions.jsBrief
+import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
 
 object Util {
 

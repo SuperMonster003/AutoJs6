@@ -1,7 +1,7 @@
 package org.autojs.autojs.runtime
 
 import android.os.SystemClock
-import org.autojs.autojs.extension.NumberExtensions.jsString
+import org.autojs.autojs.rhino.extension.NumberExtensions.jsString
 import org.autojs.autojs.runtime.api.augment.console.Console
 import java.util.concurrent.ConcurrentHashMap
 

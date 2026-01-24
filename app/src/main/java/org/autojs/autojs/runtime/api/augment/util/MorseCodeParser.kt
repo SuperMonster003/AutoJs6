@@ -1,6 +1,6 @@
 package org.autojs.autojs.runtime.api.augment.util
 
-import org.autojs.autojs.extension.AnyExtensions.isJsNullish
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.runtime.api.Device
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED
 import org.mozilla.javascript.Context

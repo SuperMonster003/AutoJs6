@@ -1,74 +1,46 @@
-package org.autojs.autojs.util;
+package org.autojs.autojs.util
 
-import androidx.annotation.NonNull;
-
-import org.jetbrains.annotations.Contract;
-import org.mozilla.javascript.NativeArray;
-
-import java.lang.reflect.Array;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.IntStream;
+import java.lang.reflect.Array as JavaArray
 
 /**
  * Created by Stardust on May 8, 2017.
+ * Transformed by SuperMonster003 on Jan 23, 2026.
  */
-public class ArrayUtils {
+object ArrayUtils {
 
-    @NonNull
-    @Contract(pure = true)
-    public static Integer[] box(@NonNull int[] array) {
-        Integer[] box = new Integer[array.length];
-        for (int i = 0; i < array.length; i++) {
-            box[i] = array[i];
-        }
-        return box;
+    @JvmStatic
+    fun box(array: IntArray): Array<Int> {
+        return Array(array.size) { i -> array[i] }
     }
 
-    @NonNull
-    @Contract(pure = true)
-    public static int[] unbox(@NonNull Integer[] array) {
-        int[] unbox = new int[array.length];
-        for (int i = 0; i < array.length; i++) {
-            unbox[i] = array[i];
-        }
-        return unbox;
+    @JvmStatic
+    fun unbox(array: Array<Int>): IntArray {
+        return IntArray(array.size) { i -> array[i] }
     }
 
-    @NonNull
-    public static String[] toStringArray(@NonNull List<?> list) {
-        int i = 0;
-        String[] str = new String[list.size()];
-        for (Object o : list) {
-            str[i] = o == null ? null : o.toString();
-        }
-        return str;
+    @JvmStatic
+    fun toStringArray(list: List<*>): Array<String?> {
+        return Array(list.size) { i -> list[i]?.toString() }
     }
 
-    @NonNull
-    @SuppressWarnings("unchecked")
-    public static <T> T[] merge(@NonNull T[] a1, @NonNull T[] a2) {
-        T[] a = (T[]) Array.newInstance(Objects.requireNonNull(a1.getClass().getComponentType()), a1.length + a2.length);
-        System.arraycopy(a1, 0, a, 0, a1.length);
-        System.arraycopy(a2, 0, a, a1.length, a2.length);
-        return a;
+    @JvmStatic
+    @Suppress("UNCHECKED_CAST")
+    fun <T> merge(a1: Array<T>, a2: Array<T>): Array<T> {
+        val componentType = requireNotNull(a1.javaClass.componentType)
+        val result = JavaArray.newInstance(componentType, a1.size + a2.size) as Array<T>
+        System.arraycopy(a1, 0, result, 0, a1.size)
+        System.arraycopy(a2, 0, result, a1.size, a2.size)
+        return result
     }
 
-    @NonNull
-    public static byte[] jsBytesToByteArray(@NonNull NativeArray values) {
-        var bytes = new byte[values.size()];
-        IntStream.range(0, values.size()).forEach(i -> {
-            Object number = values.get(i);
-            if (number instanceof Number) {
-                bytes[i] = ((Number) number).byteValue();
-            }
-        });
-        return bytes;
+    fun <T> Array<T>.unshiftWith(thisObj: Any?): Array<Any?> {
+        return Array(this.size + 1) { if (it == 0) thisObj else this[it - 1] }
     }
 
-    @NonNull
-    public static String jsBytesToString(@NonNull NativeArray values) {
-        return new java.lang.String(jsBytesToByteArray(values));
+    fun <T> Array<T>.symmetricDifference(other: Array<T>): Set<T> {
+        val a = this.asIterable() subtract other.asIterable().toSet()
+        val b = other.asIterable() subtract this.asIterable().toSet()
+        return a union b
     }
 
 }

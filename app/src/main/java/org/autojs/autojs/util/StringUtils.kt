@@ -2,15 +2,18 @@ package org.autojs.autojs.util
 
 import android.content.res.Configuration
 import android.text.TextUtils
+import androidx.core.net.toUri
 import com.ibm.icu.text.CharsetDetector
 import com.ibm.icu.text.CharsetMatch
 import org.autojs.autojs.annotation.LocaleNonRelated
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.pref.Language
-import org.autojs.autojs.extension.NumberExtensions.roundToString
+import org.autojs.autojs.util.NumberUtils.roundToString
 import org.opencv.core.Point
+import java.io.File
 import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
+import java.text.Normalizer
 import java.util.*
 import kotlin.math.min
 import kotlin.math.pow
@@ -191,18 +194,6 @@ object StringUtils {
     }
 
     @JvmStatic
-    fun String.uppercaseFirstChar(): String {
-        val s = this
-        return if (s.isEmpty()) s else s.replaceFirstChar { s[0].uppercaseChar() }
-    }
-
-    @JvmStatic
-    fun String.lowercaseFirstChar(): String {
-        val s = this
-        return if (s.isEmpty()) s else s.replaceFirstChar { s[0].lowercaseChar() }
-    }
-
-    @JvmStatic
     @Deprecated("Deprecated since v6.6.0", ReplaceWith("uppercaseFirstChar(s)"))
     fun toUpperCaseFirst(s: String) = s.uppercaseFirstChar()
 
@@ -276,6 +267,103 @@ object StringUtils {
         return bytes.copyOfRange(bom.size, bytes.size)
     }
 
+    val String.estimateVisualWidth: Int
+        get() {
+            var width = 0
+            var i = 0
+            while (i < length) {
+                // 取 code point (可能是两位 surrogates 拼成一个 code point)
+                val cp = codePointAt(i)
+                // 移动下标, 跳过组合过的 surrogate
+                i += Character.charCount(cp)
+
+                // 简易判断: 东亚全宽/Emoji 等
+                width += if (isLikelyFullwidth(cp)) 2 else 1
+            }
+            return width
+        }
+
+    fun String.toDoubleOrNaN() = this.toDoubleOrNull() ?: Double.NaN
+
+    fun String.padStart(length: Int, padStr: String) = when {
+        this.length >= length || padStr.isEmpty() -> this
+        else -> getPadding(length, padStr) + this
+    }
+
+    fun String.padEnd(length: Int, padStr: String) = when {
+        this.length >= length || padStr.isEmpty() -> this
+        else -> this + getPadding(length, padStr)
+    }
+
+    private fun String.getPadding(length: Int, padStr: String): String {
+        val repeatTimes = (length - this.length) / padStr.length
+        val remainderStr = padStr.take((length - this.length) % padStr.length)
+        return padStr.repeat(repeatTimes) + remainderStr
+    }
+
+    fun CharSequence.looseMatches(reference: CharSequence): Boolean {
+        return this.toString().normalizeForMatch() == reference.toString().normalizeForMatch()
+    }
+
+    private fun String.normalizeForMatch(): String {
+        return Normalizer.normalize(this, Normalizer.Form.NFD)
+            .trim()
+            .replace(Regex("\\p{M}"), "") // 移除组合符号, 如上标符号
+            .replace(Regex("[^\\p{L}\\p{N}@.|]+"), "") // 只保留 [字母/数字/特定符号]
+            .lowercase()
+    }
+
+    private fun isLikelyFullwidth(codePoint: Int) = when (codePoint) {
+        // CJK 中日韩统一表意文字
+        in 0x4E00..0x9FFF -> true
+        // 常见的 Emoji 起始, 又或者判断 Character.getType(cp)
+        in 0x1F300..0x1FAFF -> true
+        // East Asian Fullwidth, Wide 等范围, 可参考 EastAsianWidth.txt
+        else -> false
+    }
+
+    @JvmStatic
+    fun String.isUri(): Boolean {
+        if (isBlank()) return false
+        val uri = runCatching { this.toUri() }.getOrNull() ?: return false
+        uri.scheme?.lowercase() ?: return false
+        return true
+    }
+
+    @JvmStatic
+    fun String.toFile(): File {
+        val path = this
+        return File(path)
+    }
+
+    @JvmStatic
+    fun String.uppercaseFirstChar(): String {
+        val s = this
+        return if (s.isEmpty()) s else s.replaceFirstChar { s[0].uppercaseChar() }
+    }
+
+    @JvmStatic
+    fun String.lowercaseFirstChar(): String {
+        val s = this
+        return if (s.isEmpty()) s else s.replaceFirstChar { s[0].lowercaseChar() }
+    }
+
+    @JvmStatic
+    fun String.looseKey(): String =
+        buildString(length) {
+            for (c in this@looseKey) {
+                if (c.isLetterOrDigit()) append(c.lowercaseChar())
+            }
+        }
+
+    @JvmStatic
+    fun String.equalsLoosely(other: String): Boolean =
+        this.looseKey() == other.looseKey()
+
+    @JvmStatic
+    fun String.isLooselyIn(list: Iterable<String>): Boolean =
+        list.any { this.equalsLoosely(it) }
+
     class CharsetMatchWrapper(private val charsetMatch: CharsetMatch?) {
 
         val name: String? by lazy { charsetMatch?.name }
@@ -290,6 +378,25 @@ object StringUtils {
 
         fun nameOrDefault(defaultValue: String): String = name ?: defaultValue
 
+    }
+
+    class LooseMatcher(options: Iterable<String>) {
+
+        private val keySet: Set<String>
+
+        init {
+            val map = HashMap<String, String>(16)
+            for (opt in options) {
+                val key = opt.looseKey()
+                val prev = map.putIfAbsent(key, opt)
+                require(prev == null) {
+                    "Loose key collision: \"$prev\" and \"$opt\" both normalize to \"$key\""
+                }
+            }
+            keySet = map.keys
+        }
+
+        fun contains(value: String): Boolean = value.looseKey() in keySet
     }
 
 }

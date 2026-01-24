@@ -34,7 +34,7 @@ import org.autojs.autojs.core.opencv.OpenCVHelper;
 import org.autojs.autojs.core.pref.Language;
 import org.autojs.autojs.core.pref.Pref;
 import org.autojs.autojs.core.ui.inflater.util.Drawables;
-import org.autojs.autojs.extension.AnyExtensions;
+import org.autojs.autojs.rhino.extension.AnyExtensions;
 import org.autojs.autojs.pio.UncheckedIOException;
 import org.autojs.autojs.runtime.ScriptRuntime;
 import org.autojs.autojs.runtime.api.ImageFeatureMatching.FeatureMatchingDescriptor;

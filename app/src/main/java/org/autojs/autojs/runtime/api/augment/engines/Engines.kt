@@ -5,12 +5,12 @@ import org.autojs.autojs.engine.JavaScriptEngine
 import org.autojs.autojs.engine.ScriptEngine
 import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.execution.ScriptExecution
-import org.autojs.autojs.extension.AnyExtensions.isJsNullish
-import org.autojs.autojs.extension.AnyExtensions.jsBrief
-import org.autojs.autojs.extension.AnyExtensions.toRuntimePath
-import org.autojs.autojs.extension.FlexibleArray
-import org.autojs.autojs.extension.ScriptableExtensions.prop
-import org.autojs.autojs.extension.ScriptableObjectExtensions.inquire
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
+import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
+import org.autojs.autojs.rhino.extension.AnyExtensions.toRuntimePath
+import org.autojs.autojs.rhino.ArgumentGuards
+import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
+import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.AsEmitter
 import org.autojs.autojs.runtime.api.augment.Augmentable
@@ -58,7 +58,7 @@ class Engines(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunt
         }
     }
 
-    companion object : FlexibleArray() {
+    companion object : ArgumentGuards() {
 
         @JvmStatic
         fun emit(scriptRuntime: ScriptRuntime, eventName: String, vararg args: Any?) {

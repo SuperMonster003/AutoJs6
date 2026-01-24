@@ -44,6 +44,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageView
+import android.widget.PopupMenu
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.ColorInt
@@ -106,6 +107,18 @@ object ViewUtils {
     var isNightModeEnabled: Boolean
         get() = Pref.getBoolean(R.string.key_night_mode_enabled, false)
         set(b) = Pref.putBoolean(R.string.key_night_mode_enabled, b)
+
+    val Toolbar.titleView: TextView?
+        get() = this.findViewById(androidx.appcompat.R.id.action_bar_title)
+            ?: runCatching {
+                Toolbar::class.java.getDeclaredField("mTitleTextView").apply { isAccessible = true }.get(this@titleView) as TextView?
+            }.getOrNull()
+
+    val Toolbar.subtitleView: TextView?
+        get() = this.findViewById(androidx.appcompat.R.id.action_bar_subtitle)
+            ?: runCatching {
+                Toolbar::class.java.getDeclaredField("mSubtitleTextView").apply { isAccessible = true }.get(this@subtitleView) as TextView?
+            }.getOrNull()
 
     @JvmStatic
     @Suppress("FunctionName")
@@ -1260,6 +1273,54 @@ object ViewUtils {
     fun hideSoftInput(target: View) {
         val imm = target.context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager ?: return
         imm.hideSoftInputFromWindow(target.windowToken, 0)
+    }
+
+    fun PopupMenu.setForceShowIconCompat() {
+        val popup = this
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            popup.setForceShowIcon(true)
+        } else {
+            runCatching {
+                @SuppressLint("DiscouragedPrivateApi")
+                val field = PopupMenu::class.java.getDeclaredField("mPopup")
+                field.isAccessible = true
+                // MenuPopupHelper
+                val helper = field.get(popup)
+                val method = helper.javaClass.getDeclaredMethod("setForceShowIcon", Boolean::class.javaPrimitiveType)
+                method.invoke(helper, true)
+            }
+        }
+    }
+
+    @JvmStatic
+    fun Toolbar.setOnTitleViewClickListener(l: View.OnClickListener?) {
+        this.setOnTitleViewClickListener(l, withFallback = true)
+    }
+
+    @JvmStatic
+    fun Toolbar.setOnTitleViewClickListener(l: View.OnClickListener?, withFallback: Boolean) {
+        this.onceGlobalLayout {
+            this.titleView?.setOnClickListener(l) ?: run { if (withFallback) this.setOnClickListener(l) }
+        }
+    }
+
+    @JvmStatic
+    fun Toolbar.setOnSubtitleViewClickListener(l: View.OnClickListener?) {
+        this.onceGlobalLayout {
+            this.subtitleView?.setOnClickListener(l)
+        }
+    }
+
+    @JvmStatic
+    fun Toolbar.setOnTitleViewLongClickListener(l: View.OnLongClickListener?) {
+        this.setOnTitleViewLongClickListener(l, withFallback = true)
+    }
+
+    @JvmStatic
+    fun Toolbar.setOnTitleViewLongClickListener(l: View.OnLongClickListener?, withFallback: Boolean) {
+        this.onceGlobalLayout {
+            this.titleView?.setOnLongClickListener(l) ?: run { if (withFallback) this.setOnLongClickListener(l) }
+        }
     }
 
     enum class MODE(val key: String) {

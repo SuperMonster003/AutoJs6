@@ -2,7 +2,8 @@ package org.autojs.autojs.runtime.api.augment.base64
 
 import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoSingletonFunctionInterface
-import org.autojs.autojs.extension.AnyExtensions.isJsNullish
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
+import org.autojs.autojs.rhino.extension.NativeArrayExtensions.jsBytesToByteArray
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.ArrayUtils
@@ -62,7 +63,7 @@ object Base64 : Augmentable() {
         o.isJsNullish() -> throw WrappedIllegalArgumentException("Cannot convert o ($o) to byte[]")
         o is String -> o.toByteArray(encoding)
         o is ByteArray -> o
-        o is NativeArray -> ArrayUtils.jsBytesToByteArray(o)
+        o is NativeArray -> o.jsBytesToByteArray()
         else -> toBytes(o.toString())
     }
 

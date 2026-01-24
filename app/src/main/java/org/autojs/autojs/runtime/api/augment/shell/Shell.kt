@@ -3,9 +3,9 @@ package org.autojs.autojs.runtime.api.augment.shell
 import android.util.Log
 import android.view.KeyEvent
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
-import org.autojs.autojs.extension.AnyExtensions.isJsNullish
-import org.autojs.autojs.extension.AnyExtensions.jsBrief
-import org.autojs.autojs.extension.FlexibleArray
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
+import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
+import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.AbstractShell
 import org.autojs.autojs.runtime.api.augment.Augmentable
@@ -58,7 +58,7 @@ class Shell(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntim
 
     override fun invoke(vararg args: Any?): AbstractShell.Result = execCommand(scriptRuntime, args)
 
-    companion object : FlexibleArray() {
+    companion object : ArgumentGuards() {
 
         private val TAG = Shell::class.java.simpleName
 

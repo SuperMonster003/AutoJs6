@@ -1,9 +1,9 @@
 package org.autojs.autojs.runtime.api.augment
 
-import org.autojs.autojs.extension.FlexibleArray.Companion.component1
-import org.autojs.autojs.extension.FlexibleArray.Companion.component2
-import org.autojs.autojs.extension.ScriptableExtensions.defineProp
-import org.autojs.autojs.extension.ScriptableExtensions.prop
+import org.autojs.autojs.rhino.ArgumentGuards.Companion.component1
+import org.autojs.autojs.rhino.ArgumentGuards.Companion.component2
+import org.autojs.autojs.rhino.extension.ScriptableExtensions.defineProp
+import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.rhino.ProxyObject
 import org.autojs.autojs.rhino.ProxyObject.Companion.AUGMENTED_OBJECT_KEY
 import org.autojs.autojs.runtime.ScriptRuntime

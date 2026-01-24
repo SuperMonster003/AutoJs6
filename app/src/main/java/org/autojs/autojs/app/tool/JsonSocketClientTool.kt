@@ -15,7 +15,7 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import org.autojs.autojs.app.DialogUtils
 import org.autojs.autojs.core.pref.Pref
-import org.autojs.autojs.extension.MaterialDialogExtensions.widgetThemeColor
+import org.autojs.autojs.util.MaterialDialogUtils.widgetThemeColor
 import org.autojs.autojs.pluginclient.DevPluginService
 import org.autojs.autojs.pluginclient.JsonSocketClient
 import org.autojs.autojs.ui.common.NotAskAgainDialog

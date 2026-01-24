@@ -28,8 +28,8 @@ import org.autojs.autojs.app.OnActivityResultDelegate.DelegateHost
 import org.autojs.autojs.core.permission.OnRequestPermissionsResultCallback
 import org.autojs.autojs.core.permission.PermissionRequestProxyActivity
 import org.autojs.autojs.core.permission.RequestPermissionCallbacks
-import org.autojs.autojs.extension.ViewExtensions.setOnTitleViewClickListener
-import org.autojs.autojs.extension.ViewExtensions.titleView
+import org.autojs.autojs.util.ViewUtils.setOnTitleViewClickListener
+import org.autojs.autojs.util.ViewUtils.titleView
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.storage.file.TmpScriptFiles
 import org.autojs.autojs.theme.widget.ThemeColorToolbar

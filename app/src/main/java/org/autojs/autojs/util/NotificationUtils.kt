@@ -1,6 +1,6 @@
 package org.autojs.autojs.util
 
-import android.Manifest.permission.POST_NOTIFICATIONS
+import android.Manifest
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -76,7 +76,7 @@ object NotificationUtils {
         intent: Intent?,
         priority: Int?,
     ) {
-        if (ActivityCompat.checkSelfPermission(globalAppContext, POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(globalAppContext, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             throw RuntimeException(globalAppContext.getString(R.string.error_no_post_notifications_permission))
         }
         NotificationManagerCompat.from(globalAppContext).notify(
@@ -176,7 +176,7 @@ object NotificationUtils {
     @JvmStatic
     fun requestPermission(launcher: ActivityResultLauncher<Array<String>>) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            launcher.launch(arrayOf(POST_NOTIFICATIONS))
+            launcher.launch(arrayOf(Manifest.permission.POST_NOTIFICATIONS))
         } else {
             launchSettings()
         }

@@ -1,8 +1,8 @@
 package org.autojs.autojs.runtime.api.augment.files
 
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
-import org.autojs.autojs.extension.AnyExtensions.isJsNullish
-import org.autojs.autojs.extension.FlexibleArray
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
+import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.pio.PFileInterface
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.Augmentable
@@ -22,7 +22,7 @@ class Files(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         ::toFile.name,
     )
 
-    companion object : FlexibleArray() {
+    companion object : ArgumentGuards() {
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface

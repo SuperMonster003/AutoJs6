@@ -5,7 +5,7 @@ import org.autojs.autojs.engine.JavaScriptEngine
 import org.autojs.autojs.engine.ScriptEngine
 import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.execution.ScriptExecution
-import org.autojs.autojs.extension.ArrayExtensions.toNativeArray
+import org.autojs.autojs.rhino.extension.IterableExtensions.toNativeArray
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.script.AutoFileSource
 import org.autojs.autojs.script.JavaScriptFileSource

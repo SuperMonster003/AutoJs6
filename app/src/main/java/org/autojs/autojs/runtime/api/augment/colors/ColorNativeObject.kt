@@ -3,13 +3,13 @@ package org.autojs.autojs.runtime.api.augment.colors
 import android.graphics.Color.BLACK
 import org.autojs.autojs.annotation.RhinoFunctionObjectBody
 import org.autojs.autojs.annotation.RhinoStandardFunctionInterface
-import org.autojs.autojs.extension.ArrayExtensions.unshiftWith
-import org.autojs.autojs.extension.FlexibleArray.Companion.ensureArgumentsIsEmpty
-import org.autojs.autojs.extension.FlexibleArray.Companion.ensureArgumentsOnlyOne
+import org.autojs.autojs.rhino.ArgumentGuards.Companion.ensureArgumentsIsEmpty
+import org.autojs.autojs.rhino.ArgumentGuards.Companion.ensureArgumentsOnlyOne
 import org.autojs.autojs.runtime.api.StringReadable
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.colors.Colors.parseRelativePercentage
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
+import org.autojs.autojs.util.ArrayUtils.unshiftWith
 import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.NOT_CONSTRUCTABLE
 import org.autojs.autojs.util.RhinoUtils.newBaseFunction
