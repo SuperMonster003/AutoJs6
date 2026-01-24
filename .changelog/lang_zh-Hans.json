@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.7.0": {
-      "released_date": "2026/01/22",
+      "released_date": "2026/01/24",
       "feature": [
         "插件中心功能, 支持插件的安装/卸载/更新等操作 (入口: 主页抽屉按钮/主页标签页)",
         "Paddle OCR (PP-OCRv5) 插件, 用于光学字符识别",
@@ -61,6 +61,7 @@
         "无法使用 console/toast 等方法显示 BigInt 数据类型的问题",
         "部分全局对象可能丢失 JavaScript 原型属性及方法的问题",
         "使用 XML 语法将 JavaScript 表达式作为属性值时, this 对象可能出现指向错误的问题",
+        "dialogs.build 方法 linkify 选项参数功能失效的问题",
         "dialogs.build 方法无法使用 MaterialDialog.Builder 原生选项参数的问题",
         "dialogs.build 方法可能破坏对象参数原有数据的问题",
         "canvas 元素控件 setMaxFps 方法内部帧率计算错误",

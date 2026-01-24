@@ -43,7 +43,7 @@ import org.autojs.autojs.util.RhinoUtils.isUiThread
 import org.autojs.autojs.util.RhinoUtils.js_eval
 import org.autojs.autojs.util.RhinoUtils.newBaseFunction
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
-import org.autojs.autojs.util.StringUtils.uppercaseFirstChar
+import org.autojs.autojs.util.StringUtils.looseMatches
 import org.autojs.autojs6.R
 import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.Context
@@ -93,9 +93,36 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             "alwaysCallMultiChoiceCallback" to PropertyConverter.BOOLEAN,
         )
 
-        private val presetLinkifyMasks = listOf("all", "emailAddresses", "mapAddresses", "phoneNumbers", "webUrls")
+        @Suppress("DEPRECATION")
+        private val linkifyMasksMappings = listOf(
+            "webUrls" to Linkify.WEB_URLS,
+            "web" to Linkify.WEB_URLS,
+            "url" to Linkify.WEB_URLS,
+            "urls" to Linkify.WEB_URLS,
 
-        private val presetAnimations = listOf("default", "activity", "dialog", "inputMethod", "toast", "translucent")
+            "emailAddresses" to Linkify.EMAIL_ADDRESSES,
+            "email" to Linkify.EMAIL_ADDRESSES,
+
+            "phoneNumbers" to Linkify.PHONE_NUMBERS,
+            "phone" to Linkify.PHONE_NUMBERS,
+            "tel" to Linkify.PHONE_NUMBERS,
+
+            "mapAddresses" to Linkify.MAP_ADDRESSES,
+            "addresses" to Linkify.MAP_ADDRESSES,
+            "address" to Linkify.MAP_ADDRESSES,
+            "street" to Linkify.MAP_ADDRESSES,
+
+            "all" to Linkify.ALL,
+        )
+
+        private val animationMappings = listOf(
+            "default" to android.R.style.Animation,
+            "activity" to android.R.style.Animation_Activity,
+            "dialog" to android.R.style.Animation_Dialog,
+            "inputMethod" to android.R.style.Animation_InputMethod,
+            "toast" to android.R.style.Animation_Toast,
+            "translucent" to android.R.style.Animation_Translucent,
+        )
 
         private val customJsPropertiesForBuild: Set<String> = setOf(
             "animation",
@@ -606,18 +633,19 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         }
 
         private fun applyBuiltDialogProperties(scriptRuntime: ScriptRuntime, dialog: JsDialog, properties: NativeObject) {
-            if (!properties.prop("linkify").isJsString() && Context.toBoolean(properties.prop("linkify"))) {
+            if (!properties.prop("linkify").isJsNullish() && Context.toBoolean(properties.prop("linkify"))) {
+                val linkifyRaw = when (properties.prop("linkify")) {
+                    true -> "all"
+                    else -> properties.inquire("linkify", transformer = ::coerceString)
+                }
                 val autoLinkMask = run {
-                    var linkify = when (properties.prop("linkify")) {
-                        true -> "all"
-                        else -> properties.inquire("linkify", ::coerceString, "all")
-                    }
-                    if (presetLinkifyMasks.contains(linkify)) {
-                        linkify = linkify.replace(Regex("[A-Z]"), "_$&").uppercase()
-                    }
-                    runCatching { Linkify::class.java.getDeclaredField(linkify).get(null) }.getOrElse { e ->
-                        throw IllegalArgumentException("Unknown property linkify ${linkify.jsBrief()} of argument properties for dialogs.build", e)
-                    }.let(::coerceIntNumber)
+                    linkifyRaw?.let {
+                        linkifyMasksMappings.firstOrNull {
+                            it.first.looseMatches(linkifyRaw)
+                        }?.second
+                    } ?: throw IllegalArgumentException(
+                        "Unknown property linkify ${linkifyRaw.jsBrief()} of argument properties for dialogs.build",
+                    )
                 }
                 dialog.contentView?.let { view ->
                     val text = view.text
@@ -742,20 +770,18 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             //  # }
 
             if (!properties.prop("animation").isJsNullish() && Context.toBoolean(properties.prop("animation"))) {
-                val animation = when (properties.prop("animation")) {
+                val animationRaw = when (properties.prop("animation")) {
                     true -> "default"
                     else -> properties.inquire("animation", ::coerceString, "default")
                 }
-                require(presetAnimations.contains(animation)) { "Unknown linkify: $animation" }
+                val animationStyle = animationMappings.firstOrNull {
+                    it.first.looseMatches(animationRaw)
+                }?.second ?: throw IllegalArgumentException(
+                    "Unknown property animation ${animationRaw.jsBrief()} of argument properties for dialogs.build",
+                )
                 dialog.window?.let { win ->
                     UI.postRhinoRuntime(scriptRuntime, newBaseFunction("action", {
-                        if (animation == "default") {
-                            win.setWindowAnimations(android.R.style.Animation)
-                        } else {
-                            val suffix = animation.replace('-', '_').uppercaseFirstChar()
-                            val animationStyle = android.R.style::class.java.getDeclaredField("Animation_$suffix").getInt(null)
-                            win.setWindowAnimations(animationStyle)
-                        }
+                        win.setWindowAnimations(animationStyle)
                     }, NOT_CONSTRUCTABLE))
                 }
             }
