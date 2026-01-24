@@ -18,9 +18,7 @@ import org.autojs.autojs.core.console.GlobalConsole
 import org.autojs.autojs.core.image.capture.ScreenCaptureRequester
 import org.autojs.autojs.core.looper.Loopers
 import org.autojs.autojs.core.pref.Pref
-import org.autojs.autojs.engine.ScriptEngineService
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.defineProp
-import org.autojs.autojs.rhino.extension.ScriptableExtensions.deleteProp
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.lang.ThreadCompat
 import org.autojs.autojs.pio.PFiles
@@ -123,7 +121,6 @@ import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.ScriptableObject.PERMANENT
 import org.mozilla.javascript.ScriptableObject.READONLY
-import org.mozilla.javascript.Wrapper
 import java.io.File
 import java.io.FileFilter
 import java.io.IOException
@@ -180,7 +177,7 @@ import org.autojs.autojs.runtime.api.augment.util.VersionCodes as UtilVersionCod
  * Modified by SuperMonster003 as of Dec 29, 2025.
  * Transformed by SuperMonster003 on May 24, 2024.
  */
-@Suppress("unused", "PropertyName", "PrivatePropertyName")
+@Suppress("unused", "PropertyName")
 class ScriptRuntime private constructor(builder: Builder) {
 
     private val mJob = SupervisorJob()
@@ -407,12 +404,12 @@ class ScriptRuntime private constructor(builder: Builder) {
     // @Commented by SuperMonster003 on May 24, 2022.
     //  ! Use internal Rhino JSON for better performance and compatibility.
     //  ! zh-CN: 使用 Rhino 内置的 JSON 以获得更好的性能及兼容性.
-    // val js_JSON by lazy { rhinoRequire("json2") as ScriptableObject }
+    // internal val js_JSON by lazy { rhinoRequire("json2") as ScriptableObject }
 
     // @Commented by SuperMonster003 on May 26, 2024.
     //  ! Already implemented in Rhino 1.7.15 .
     //  ! zh-CN: 已在 Rhino 1.7.15 中实现.
-    // val js_polyfill by lazy { rhinoRequire("polyfill") as ScriptableObject }
+    // internal val js_polyfill by lazy { rhinoRequire("polyfill") as ScriptableObject }
 
     /**
      * @Hint by SuperMonster003 on Apr 17, 2022.
@@ -441,23 +438,23 @@ class ScriptRuntime private constructor(builder: Builder) {
      * Substitution of Promise.
      * zh-CN: Promise 的替代方案.
      */
-    val js_Promise by lazy { rhinoRequire("promise") as BaseFunction }
+    internal val js_Promise by lazy { rhinoRequire("promise") as BaseFunction }
 
-    val js_ResultAdapter by lazy { rhinoRequire("result-adapter") as BaseFunction }
+    internal val js_ResultAdapter by lazy { rhinoRequire("result-adapter") as BaseFunction }
+    internal val js_UiExt by lazy { rhinoRequire("ui-ext") as BaseFunction }
+    internal val js_Module by lazy { rhinoRequire("jvm-npm") as ScriptableObject }
 
-    val js_UiExt by lazy { rhinoRequire("ui-ext") as BaseFunction }
+    internal val js_mod_axios by lazy { rhinoRequire("axios") as BaseFunction }
+    internal val js_mod_cheerio by lazy { rhinoRequire("cheerio") as ScriptableObject }
+    internal val js_mod_dayjs by lazy { rhinoRequire("dayjs") as BaseFunction }
+    internal val js_mod_i18n by lazy { rhinoRequire("i18n") as BaseFunction }
 
-    private val js_object_observe_lite_min by lazy { rhinoRequire("object-observe-lite.min") as BaseFunction }
+    internal val js_mod_continuation by lazy { rhinoRequire("continuation") as ScriptableObject }
+    internal val js_mod_internal by lazy { rhinoRequire("internal") as ScriptableObject }
 
-    private val js_array_observe_min by lazy { rhinoRequire("array-observe.min") as BaseFunction }
-
-    private val js_structured_clone by lazy { rhinoRequire("structured-clone.min") as BaseFunction }
-
-    private val js_mod_continuation by lazy { rhinoRequire("continuation") as ScriptableObject }
-
-    private val js_mod_internal by lazy { rhinoRequire("internal") as ScriptableObject }
-
-    private val js_Module by lazy { rhinoRequire("jvm-npm") as ScriptableObject }
+    internal val js_object_observe_lite_min by lazy { rhinoRequire("object-observe-lite.min") as BaseFunction }
+    internal val js_array_observe_min by lazy { rhinoRequire("array-observe.min") as BaseFunction }
+    internal val js_structured_clone by lazy { rhinoRequire("structured-clone.min") as BaseFunction }
 
     init {
         info = accessibilityBridge.infoProvider
@@ -500,7 +497,6 @@ class ScriptRuntime private constructor(builder: Builder) {
         ).let { ApiPlugins(mUiHandlerAppContext, it) }
 
         augment(topLevelScope)
-        applyExecutionModules(topLevelScope)
         applyInternalModules(topLevelScope)
     }
 
@@ -815,20 +811,6 @@ class ScriptRuntime private constructor(builder: Builder) {
         Mediainfo(this).augment(target, true)
 
         augmentedApp.defineProp(Autojs::class.java.simpleName.lowercase(), augmentedAutojs)
-    }
-
-    private fun applyExecutionModules(global: Scriptable) {
-        ScriptEngineService.GLOBAL_MODULES.forEach { moduleMode ->
-            val moduleName = ScriptEngineService.getModuleNameFromMode(moduleMode) ?: return@forEach
-            var module = global.prop(moduleName) ?: return@forEach
-            if (module is Wrapper) module = module.unwrap()
-            when (module) {
-                is ScriptEngineService.ScriptModuleIdentifier -> {
-                    global.defineProp(moduleName, rhinoRequire(module.moduleFileName), PERMANENT)
-                }
-                else -> global.deleteProp(moduleName)
-            }
-        }
     }
 
     private fun applyInternalModules(global: Scriptable) {

@@ -28,10 +28,6 @@ public abstract class JavaScriptSource extends ScriptSource {
     public static final int EXECUTION_MODE_UI = 0x0001;
     public static final int EXECUTION_MODE_AUTO = 0x0002;
     public static final int EXECUTION_MODE_JSOX = 0x0004;
-    public static final int EXECUTION_MODE_MODULE_AXIOS = 0x0010;
-    public static final int EXECUTION_MODE_MODULE_CHEERIO = 0x0020;
-    public static final int EXECUTION_MODE_MODULE_DAYJS = 0x0040;
-    public static final int EXECUTION_MODE_MODULE_I18N = 0x0080;
 
     private static final String LOG_TAG = "JavaScriptSource";
 
@@ -40,10 +36,6 @@ public abstract class JavaScriptSource extends ScriptSource {
             .put("auto", EXECUTION_MODE_AUTO)
             .put("jsox", EXECUTION_MODE_JSOX)
             .put("x", EXECUTION_MODE_JSOX)
-            .put("axios", EXECUTION_MODE_MODULE_AXIOS)
-            .put("cheerio", EXECUTION_MODE_MODULE_CHEERIO)
-            .put("dayjs", EXECUTION_MODE_MODULE_DAYJS)
-            .put("i18n", EXECUTION_MODE_MODULE_I18N)
             .build();
 
     private static final int PARSING_MAX_TOKEN = 300;

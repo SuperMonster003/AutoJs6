@@ -5,6 +5,10 @@ import io.github.g00fy2.versioncompare.Version
 import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.core.automator.UiObject
+import org.autojs.autojs.rhino.ArgumentGuards.Companion.component1
+import org.autojs.autojs.rhino.ArgumentGuards.Companion.component2
+import org.autojs.autojs.rhino.ArgumentGuards.Companion.component3
+import org.autojs.autojs.rhino.ArgumentGuards.Companion.component4
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.rhino.extension.NumberExtensions.jsString
@@ -107,6 +111,10 @@ class Global(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
     override val selfAssignmentGetters = listOf<Pair<String, Supplier<Any?>>>(
         "WIDTH" to Supplier { ScreenMetrics.deviceScreenWidth },
         "HEIGHT" to Supplier { ScreenMetrics.deviceScreenHeight },
+        "axios" to Supplier { scriptRuntime.js_mod_axios },
+        "cheerio" to Supplier { scriptRuntime.js_mod_cheerio },
+        "dayjs" to Supplier { scriptRuntime.js_mod_dayjs },
+        "i18n" to Supplier { scriptRuntime.js_mod_i18n },
     )
 
     companion object {

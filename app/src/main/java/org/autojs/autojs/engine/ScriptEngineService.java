@@ -27,15 +27,10 @@ import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import static org.autojs.autojs.script.JavaScriptSource.EXECUTION_MODES;
-import static org.autojs.autojs.script.JavaScriptSource.EXECUTION_MODE_MODULE_AXIOS;
-import static org.autojs.autojs.script.JavaScriptSource.EXECUTION_MODE_MODULE_CHEERIO;
-import static org.autojs.autojs.script.JavaScriptSource.EXECUTION_MODE_MODULE_DAYJS;
-import static org.autojs.autojs.script.JavaScriptSource.EXECUTION_MODE_MODULE_I18N;
 
 /**
  * Created by Stardust on Jan 23, 2017.
@@ -43,12 +38,6 @@ import static org.autojs.autojs.script.JavaScriptSource.EXECUTION_MODE_MODULE_I1
 public class ScriptEngineService {
 
     private static final String TAG = ScriptEngineService.class.getSimpleName();
-
-    public static final List<Integer> GLOBAL_MODULES = List.of(
-            EXECUTION_MODE_MODULE_AXIOS,
-            EXECUTION_MODE_MODULE_CHEERIO,
-            EXECUTION_MODE_MODULE_DAYJS,
-            EXECUTION_MODE_MODULE_I18N);
 
     private static ScriptEngineService sInstance;
     private final Context mApplicationContext;
@@ -160,7 +149,6 @@ public class ScriptEngineService {
         }
         ScriptSource source = task.getSource();
         if (source instanceof JavaScriptSource src) {
-            GLOBAL_MODULES.forEach((mode) -> handleGlobalModuleExecution(src, mode, getModuleNameFromMode(mode)));
             int mode = src.getExecutionMode();
             if ((mode & JavaScriptSource.EXECUTION_MODE_UI) != 0) {
                 return ScriptExecuteActivity.execute(mApplicationContext, mScriptEngineManager, task);
@@ -185,15 +173,6 @@ public class ScriptEngineService {
                 .findFirst()
                 .map(Map.Entry::getKey)
                 .orElse(null);
-    }
-
-    private void handleGlobalModuleExecution(JavaScriptSource source, int executionMode, @Nullable String moduleName) {
-        if (moduleName == null) return;
-        if ((source.getExecutionMode() & executionMode) != 0) {
-            mScriptEngineManager.putGlobal(moduleName, new ScriptModuleIdentifier(moduleName));
-        } else {
-            mScriptEngineManager.removeGlobal(moduleName);
-        }
     }
 
     public ScriptExecution execute(ScriptSource source, ScriptExecutionListener listener, ExecutionConfig config) {
@@ -294,16 +273,6 @@ public class ScriptEngineService {
 
         public String getMessage() {
             return mMessage;
-        }
-
-    }
-
-    public static class ScriptModuleIdentifier {
-
-        public String moduleFileName;
-
-        public ScriptModuleIdentifier(String moduleFileName) {
-            this.moduleFileName = moduleFileName;
         }
 
     }
