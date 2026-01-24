@@ -9,7 +9,7 @@ import androidx.core.graphics.get
 import org.autojs.autojs.annotation.ScriptInterface
 import org.autojs.autojs.core.opencv.Mat
 import org.autojs.autojs.core.opencv.OpenCVHelper
-import org.autojs.autojs.extension.AnyExtensions.toRuntimePath
+import org.autojs.autojs.rhino.extension.AnyExtensions.toRuntimePath
 import org.autojs.autojs.pio.UncheckedIOException
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.Images

@@ -2,10 +2,10 @@ package org.autojs.autojs.runtime.api.augment.jsox
 
 import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoSingletonFunctionInterface
-import org.autojs.autojs.extension.AnyExtensions.isJsArray
-import org.autojs.autojs.extension.AnyExtensions.jsBrief
-import org.autojs.autojs.extension.FlexibleArray
-import org.autojs.autojs.extension.ScriptableExtensions.prop
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsArray
+import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
+import org.autojs.autojs.rhino.ArgumentGuards
+import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
@@ -65,7 +65,7 @@ class Mathx(private val scriptRuntime: ScriptRuntime) : Augmentable(), JsBuildIn
         extendBuildInObjectInternal(scriptRuntime, this, "Math")
     }
 
-    companion object : FlexibleArray() {
+    companion object : ArgumentGuards() {
 
         @Deprecated("Deprecated in Java", ReplaceWith("randomInt"))
         @JvmStatic

@@ -23,8 +23,6 @@ import androidx.recyclerview.widget.RecyclerView.VERTICAL
 import androidx.recyclerview.widget.ThemeColorRecyclerView
 import org.autojs.autojs.core.image.ColorItems
 import org.autojs.autojs.core.pref.Pref
-import org.autojs.autojs.extension.ViewExtensions.setOnSubtitleViewClickListener
-import org.autojs.autojs.extension.ViewExtensions.setOnTitleViewClickListener
 import org.autojs.autojs.theme.ThemeChangeNotifier
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.COLOR_LIBRARY_ID_DEFAULT
@@ -37,6 +35,8 @@ import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.excludePaddingClippableViewFromBottomNavigationBar
 import org.autojs.autojs.util.ViewUtils.onceGlobalLayout
 import org.autojs.autojs.util.ViewUtils.setMenuIconsColorByColorLuminance
+import org.autojs.autojs.util.ViewUtils.setOnSubtitleViewClickListener
+import org.autojs.autojs.util.ViewUtils.setOnTitleViewClickListener
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.MtActivityColorItemsBinding
 import kotlin.properties.Delegates

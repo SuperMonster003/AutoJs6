@@ -6,6 +6,7 @@ import androidx.fragment.app.FragmentActivity
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.runtime.api.Permissions
 import org.autojs.autojs.ui.main.drawer.PermissionItemHelper
+import org.autojs.autojs.util.ContextUtils.findActivity
 import org.autojs.autojs.util.NotificationUtils
 import org.autojs.autojs6.R
 
@@ -24,8 +25,8 @@ class PostNotificationsPermission(override val context: Context) : PermissionIte
 
     override fun urge() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            when (val ctx = context) {
-                is FragmentActivity -> Permissions.getRequestMultiplePermissionsLauncher(ctx).let {
+            when (val activity = context.findActivity()) {
+                is FragmentActivity -> Permissions.getRequestMultiplePermissionsLauncher(activity).let {
                     NotificationUtils.requestPermission(it)
                 }
             }

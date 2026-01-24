@@ -2,8 +2,8 @@ package org.autojs.autojs.runtime.api.augment.jsox
 
 import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
-import org.autojs.autojs.extension.AnyExtensions.jsSpecies
-import org.autojs.autojs.extension.FlexibleArray
+import org.autojs.autojs.rhino.extension.AnyExtensions.jsSpecies
+import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.Invokable
@@ -26,7 +26,7 @@ class Jsox(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
 
     override fun invoke(vararg args: Any?): Undefined = extendRhinoWithRuntime(scriptRuntime, *args)
 
-    companion object : FlexibleArray() {
+    companion object : ArgumentGuards() {
 
         private val presetModules = listOf("Mathx", "Numberx", "Arrayx")
 

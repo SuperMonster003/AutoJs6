@@ -10,7 +10,7 @@ import android.os.Environment
 import android.provider.Settings
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
-import org.autojs.autojs.extension.MaterialDialogExtensions.widgetThemeColor
+import org.autojs.autojs.util.MaterialDialogUtils.widgetThemeColor
 import org.autojs.autojs.permission.Base.getPermissionsToRequest
 import org.autojs.autojs.ui.common.NotAskAgainDialog
 import org.autojs.autojs.ui.main.MainActivity

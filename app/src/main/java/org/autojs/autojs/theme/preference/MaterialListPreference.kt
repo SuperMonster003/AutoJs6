@@ -7,8 +7,8 @@ import android.util.AttributeSet
 import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.app.DialogUtils.showAdaptive
 import org.autojs.autojs.core.pref.Pref
-import org.autojs.autojs.extension.MaterialDialogExtensions.choiceWidgetThemeColor
-import org.autojs.autojs.extension.MaterialDialogExtensions.widgetThemeColor
+import org.autojs.autojs.util.MaterialDialogUtils.choiceWidgetThemeColor
+import org.autojs.autojs.util.MaterialDialogUtils.widgetThemeColor
 import org.autojs.autojs.ui.common.NotAskAgainDialog
 import org.autojs.autojs6.R
 

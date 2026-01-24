@@ -4,8 +4,9 @@ package org.autojs.autojs.core.crypto
 
 import android.util.Base64
 import org.autojs.autojs.annotation.ScriptInterface
-import org.autojs.autojs.extension.ScriptableExtensions.prop
-import org.autojs.autojs.util.ArrayUtils
+import org.autojs.autojs.core.crypto.Crypto.input
+import org.autojs.autojs.rhino.extension.NativeArrayExtensions.jsBytesToByteArray
+import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeObject
@@ -116,7 +117,7 @@ object Crypto {
         when (val iv = options.prop("iv")) {
             is String -> cipher.init(mode, niceKey.toKeySpec(transformation), IvParameterSpec(iv.toByteArray()))
             is ByteArray -> cipher.init(mode, niceKey.toKeySpec(transformation), IvParameterSpec(iv))
-            is NativeArray -> cipher.init(mode, niceKey.toKeySpec(transformation), IvParameterSpec(ArrayUtils.jsBytesToByteArray(iv)))
+            is NativeArray -> cipher.init(mode, niceKey.toKeySpec(transformation), IvParameterSpec(iv.jsBytesToByteArray()))
             is AlgorithmParameterSpec -> cipher.init(mode, niceKey.toKeySpec(transformation), iv)
             else -> cipher.init(mode, niceKey.toKeySpec(transformation))
         }
@@ -158,7 +159,7 @@ object Crypto {
     private fun input(input: Any, options: NativeObject, callback: (bytes: ByteArray, start: Int, length: Int) -> Unit) {
         when (input) {
             is ByteArray -> callback(input, 0, input.size)
-            is NativeArray -> callback(ArrayUtils.jsBytesToByteArray(input), 0, input.size)
+            is NativeArray -> callback(input.jsBytesToByteArray(), 0, input.size)
             is String -> when (options.prop("input")) {
                 "file" -> {
                     val fis = FileInputStream(input)

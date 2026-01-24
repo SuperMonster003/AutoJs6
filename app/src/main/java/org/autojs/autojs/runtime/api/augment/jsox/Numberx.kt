@@ -3,21 +3,24 @@ package org.autojs.autojs.runtime.api.augment.jsox
 import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionWithThisObjInterface
-import org.autojs.autojs.extension.AnyExtensions.isJsNullish
-import org.autojs.autojs.extension.AnyExtensions.jsBrief
-import org.autojs.autojs.extension.ArrayExtensions.toNativeArray
-import org.autojs.autojs.extension.ArrayExtensions.unshiftWith
-import org.autojs.autojs.extension.FlexibleArray
-import org.autojs.autojs.extension.NumberExtensions.jsString
-import org.autojs.autojs.extension.StringExtensions.padEnd
-import org.autojs.autojs.extension.StringExtensions.padStart
-import org.autojs.autojs.extension.StringExtensions.toDoubleOrNaN
+import org.autojs.autojs.rhino.ArgumentGuards
+import org.autojs.autojs.rhino.ArgumentGuards.Companion.component1
+import org.autojs.autojs.rhino.ArgumentGuards.Companion.component2
+import org.autojs.autojs.rhino.ArgumentGuards.Companion.component3
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
+import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
+import org.autojs.autojs.rhino.extension.IterableExtensions.toNativeArray
+import org.autojs.autojs.rhino.extension.NumberExtensions.jsString
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.Augmentable
-import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.runtime.exception.ShouldNeverHappenException
+import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
+import org.autojs.autojs.util.ArrayUtils.unshiftWith
 import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.toFunctionName
+import org.autojs.autojs.util.StringUtils.padEnd
+import org.autojs.autojs.util.StringUtils.padStart
+import org.autojs.autojs.util.StringUtils.toDoubleOrNaN
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.Scriptable
@@ -107,7 +110,7 @@ class Numberx(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunt
 
     }
 
-    companion object : FlexibleArray() {
+    companion object : ArgumentGuards() {
 
         const val DEFAULT_PADDING_STRING = "0"
 

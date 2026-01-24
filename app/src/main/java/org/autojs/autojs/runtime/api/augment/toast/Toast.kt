@@ -3,7 +3,7 @@ package org.autojs.autojs.runtime.api.augment.toast
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
-import org.autojs.autojs.extension.FlexibleArray
+import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.Invokable
@@ -30,7 +30,7 @@ class Toast(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntim
     //  ! 2. Android Studio 自带的安卓虚拟设备 (安卓 9.0 x86 架构)
     override fun invoke(vararg args: Any?): Undefined = call(scriptRuntime, args)
 
-    companion object : FlexibleArray() {
+    companion object : ArgumentGuards() {
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface

@@ -6,8 +6,8 @@ import android.content.ServiceConnection
 import android.content.pm.ApplicationInfo
 import android.os.IBinder
 import org.autojs.autojs.annotation.ScriptInterface
-import org.autojs.autojs.extension.ArrayExtensions.toHashCode
 import org.autojs.autojs.rhino.TopLevelScope
+import org.autojs.autojs.rhino.extension.IterableExtensions.toHashCode
 import org.autojs.autojs.runtime.api.Plugins.PluginRuntime
 import java.lang.reflect.Method
 

@@ -26,7 +26,7 @@ import org.autojs.autojs.annotation.OmniColor
 import org.autojs.autojs.annotation.ScriptInterface
 import org.autojs.autojs.core.pref.Language
 import org.autojs.autojs.core.ui.inflater.util.Gravities
-import org.autojs.autojs.extension.MaterialDialogExtensions.widgetThemeColor
+import org.autojs.autojs.util.MaterialDialogUtils.widgetThemeColor
 import org.autojs.autojs.permission.DisplayOverOtherAppsPermission
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.AbstractConsole

@@ -1,7 +1,7 @@
 package org.autojs.autojs.runtime.api.augment.plugins
 
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
-import org.autojs.autojs.extension.FlexibleArray
+import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.Invokable
@@ -23,7 +23,7 @@ class Plugins(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunt
         load(scriptRuntime, arrayOf(o))
     }
 
-    companion object : FlexibleArray() {
+    companion object : ArgumentGuards() {
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface

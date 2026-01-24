@@ -2,12 +2,12 @@ package org.autojs.autojs.runtime.api.augment
 
 import android.content.Context
 import org.autojs.autojs.app.GlobalAppContext
-import org.autojs.autojs.extension.AnyExtensions.isJsNullish
-import org.autojs.autojs.extension.AnyExtensions.jsBrief
-import org.autojs.autojs.extension.FlexibleArray
-import org.autojs.autojs.extension.FlexibleArray.Companion.component1
-import org.autojs.autojs.extension.ScriptableExtensions.defineProp
-import org.autojs.autojs.extension.ScriptableExtensions.prop
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
+import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
+import org.autojs.autojs.rhino.ArgumentGuards
+import org.autojs.autojs.rhino.ArgumentGuards.Companion.component1
+import org.autojs.autojs.rhino.extension.ScriptableExtensions.defineProp
+import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.rhino.ProxyObject
 import org.autojs.autojs.rhino.ProxyObject.Companion.AUGMENTED_CUSTOM_TO_STRING_KEY
 import org.autojs.autojs.rhino.ProxyObject.Companion.PROXY_GETTER_KEY
@@ -59,7 +59,7 @@ import org.mozilla.javascript.ScriptRuntime as RhinoScriptRuntime
  *
  * Created by SuperMonster003 on May 21, 2024.
  */
-abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : FlexibleArray() {
+abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : ArgumentGuards() {
 
     private var mIsOriginalKeyName = false
 
@@ -549,7 +549,7 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : F
         }?.call(message)
     }.getOrNull()
 
-    companion object : FlexibleArray() {
+    companion object : ArgumentGuards() {
 
         // @Caution by SuperMonster003 on Oct 5, 2025.
         //  ! These constants are "bit flags", each value is a power of 2, with only one bit being 1 in binary.

@@ -1,7 +1,9 @@
-package org.autojs.autojs.extension
+package org.autojs.autojs.rhino.extension
 
-import org.autojs.autojs.extension.ArrayExtensions.toNativeArray
-import org.autojs.autojs.extension.ArrayExtensions.toNativeObject
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
+import org.autojs.autojs.rhino.extension.ArrayExtensions.toNativeArray
+import org.autojs.autojs.rhino.extension.IterableExtensions.toNativeArray
+import org.autojs.autojs.rhino.extension.MapExtensions.toNativeObject
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.global.IsNullish
 import org.autojs.autojs.runtime.api.augment.global.Species
@@ -15,7 +17,7 @@ import org.mozilla.javascript.ConsString
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeError
 import org.mozilla.javascript.Scriptable
-import org.mozilla.javascript.UniqueTag.NOT_FOUND
+import org.mozilla.javascript.UniqueTag
 import org.mozilla.javascript.Wrapper
 import java.math.BigInteger
 
@@ -102,27 +104,27 @@ object AnyExtensions {
 
     fun Any?.isJsNullish() = IsNullish.invoke(this)
 
-    fun Any?.isJsArray() = this != NOT_FOUND && this is Scriptable && "Array" == this.className
+    fun Any?.isJsArray() = this != UniqueTag.NOT_FOUND && this is Scriptable && "Array" == this.className
 
-    fun Any?.isJsBoolean() = this != NOT_FOUND && js_typeof(this) == "boolean"
+    fun Any?.isJsBoolean() = this != UniqueTag.NOT_FOUND && js_typeof(this) == "boolean"
 
-    fun Any?.isJsNumber() = this != NOT_FOUND && js_typeof(this) == "number"
+    fun Any?.isJsNumber() = this != UniqueTag.NOT_FOUND && js_typeof(this) == "number"
 
-    fun Any?.isJsString() = this != NOT_FOUND && js_typeof(this) == "string"
+    fun Any?.isJsString() = this != UniqueTag.NOT_FOUND && js_typeof(this) == "string"
 
-    fun Any?.isJsSymbol() = this != NOT_FOUND && js_typeof(this) == "symbol"
+    fun Any?.isJsSymbol() = this != UniqueTag.NOT_FOUND && js_typeof(this) == "symbol"
 
-    fun Any?.isJsUndefined() = this == NOT_FOUND || js_typeof(this) == "undefined"
+    fun Any?.isJsUndefined() = this == UniqueTag.NOT_FOUND || js_typeof(this) == "undefined"
 
-    fun Any?.isJsObject() = this != NOT_FOUND && js_typeof(this) == "object" && this != null
+    fun Any?.isJsObject() = this != UniqueTag.NOT_FOUND && js_typeof(this) == "object" && this != null
 
     fun Any?.isJsNonNullObject() = this != null && this.isJsObject()
 
-    fun Any?.isJsBigInt() = this != NOT_FOUND && js_typeof(this) == "bigint"
+    fun Any?.isJsBigInt() = this != UniqueTag.NOT_FOUND && js_typeof(this) == "bigint"
 
-    fun Any?.isJsFunction() = this != NOT_FOUND && js_typeof(this) == "function"
+    fun Any?.isJsFunction() = this != UniqueTag.NOT_FOUND && js_typeof(this) == "function"
 
-    fun Any?.isJsXml() = this != NOT_FOUND && js_typeof(this) == "xml"
+    fun Any?.isJsXml() = this != UniqueTag.NOT_FOUND && js_typeof(this) == "xml"
 
     fun Any?.isJsRegExp() = this.isJsObject() && Species.isRegExpRhino(this)
 

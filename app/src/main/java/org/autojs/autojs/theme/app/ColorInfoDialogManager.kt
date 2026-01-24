@@ -14,8 +14,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.app.DialogUtils.showAdaptive
-import org.autojs.autojs.extension.MaterialDialogExtensions.makeTextCopyable
-import org.autojs.autojs.extension.MaterialDialogExtensions.setCopyableText
+import org.autojs.autojs.util.MaterialDialogUtils.makeTextCopyable
+import org.autojs.autojs.util.MaterialDialogUtils.setCopyableText
 import org.autojs.autojs.runtime.api.augment.colors.Colors
 import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs6.R

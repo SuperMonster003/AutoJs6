@@ -4,7 +4,7 @@ import android.view.View
 import android.webkit.WebView
 import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.inflater.util.Strings
-import org.autojs.autojs.extension.StringExtensions.isUri
+import org.autojs.autojs.util.StringUtils.isUri
 import org.autojs.autojs.runtime.ScriptRuntime
 
 open class WebViewAttributes(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser, view: View) : ViewGroupAttributes(scriptRuntime, resourceParser, view) {

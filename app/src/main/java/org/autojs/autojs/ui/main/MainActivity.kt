@@ -31,8 +31,8 @@ import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.event.BackPressedHandler
 import org.autojs.autojs.event.BackPressedHandler.DoublePressExit
 import org.autojs.autojs.event.BackPressedHandler.HostActivity
-import org.autojs.autojs.extension.ViewExtensions.setOnTitleViewLongClickListener
 import org.autojs.autojs.model.explorer.Explorers
+import org.autojs.autojs.permission.AbleToUrge
 import org.autojs.autojs.permission.AllFilesAccessPermission
 import org.autojs.autojs.permission.DisplayOverOtherAppsPermission
 import org.autojs.autojs.permission.PostNotificationsPermission
@@ -63,6 +63,7 @@ import org.autojs.autojs.util.ViewUtils.excludeFloatingActionButtonFromBottomNav
 import org.autojs.autojs.util.ViewUtils.onceGlobalLayout
 import org.autojs.autojs.util.ViewUtils.setMenuIconsColorByThemeColorLuminance
 import org.autojs.autojs.util.ViewUtils.setNavigationIconColorByThemeColorLuminance
+import org.autojs.autojs.util.ViewUtils.setOnTitleViewLongClickListener
 import org.autojs.autojs.util.WorkingDirectoryUtils
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ActivityMainBinding
@@ -77,7 +78,7 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
     override val handleStatusBarThemeColorAutomatically = false
 
     private val mBackPressedCallback = object : OnBackPressedCallback(true) {
-        
+
         // override fun onBackPressed() {
         //     val fragment = mPagerAdapter.getStoredFragment(mViewPager.currentItem)
         //     if ((fragment as? BackPressedHandler)?.onBackPressed(this) == true) {
@@ -88,7 +89,7 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
         //         super.onBackPressed()
         //     }
         // }
-        
+
         override fun handleOnBackPressed() {
             val fragment = mPagerAdapter.getStoredFragment(mViewPager.currentItem)
 
@@ -184,9 +185,11 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
 
         FloatyWindowManger.refreshCircularMenuIfNeeded(this)
 
-        PostNotificationsPermission(this).urgeIfNeeded()
-        AllFilesAccessPermission(this).urgeIfNeeded()
-        DisplayOverOtherAppsPermission(this).urgeIfNeeded()
+        listOf<AbleToUrge>(
+            PostNotificationsPermission(this),
+            AllFilesAccessPermission(this),
+            DisplayOverOtherAppsPermission(this),
+        ).forEach { it.urgeIfNeeded() }
     }
 
     override fun onPostResume() {

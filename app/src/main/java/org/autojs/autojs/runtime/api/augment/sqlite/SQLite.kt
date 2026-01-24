@@ -3,11 +3,11 @@ package org.autojs.autojs.runtime.api.augment.sqlite
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.core.database.Database
 import org.autojs.autojs.core.database.Database.DatabaseCallback
-import org.autojs.autojs.extension.AnyExtensions.isJsNullish
-import org.autojs.autojs.extension.AnyExtensions.jsBrief
-import org.autojs.autojs.extension.AnyExtensions.jsSanitize
-import org.autojs.autojs.extension.AnyExtensions.jsTryToJava
-import org.autojs.autojs.extension.ScriptableObjectExtensions.inquire
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
+import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
+import org.autojs.autojs.rhino.extension.AnyExtensions.jsSanitize
+import org.autojs.autojs.rhino.extension.AnyExtensions.jsTryToJava
+import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.SQLite.Companion.DEFAULT_READ_ONLY
 import org.autojs.autojs.runtime.api.SQLite.Companion.DEFAULT_VERSION

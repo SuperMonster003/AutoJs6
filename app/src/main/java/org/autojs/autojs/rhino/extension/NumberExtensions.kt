@@ -1,6 +1,4 @@
-package org.autojs.autojs.extension
-
-import java.math.RoundingMode
+package org.autojs.autojs.rhino.extension
 
 object NumberExtensions {
 
@@ -16,14 +14,5 @@ object NumberExtensions {
             }
             else -> this.toString()
         }
-
-    @JvmStatic
-    @JvmOverloads
-    fun Double.roundToString(scale: Int, stripTrailingZeros: Boolean = true): String {
-        return toBigDecimal()
-            .setScale(scale, RoundingMode.HALF_UP)
-            .let { if (stripTrailingZeros) it.stripTrailingZeros() else it }
-            .toPlainString()
-    }
 
 }

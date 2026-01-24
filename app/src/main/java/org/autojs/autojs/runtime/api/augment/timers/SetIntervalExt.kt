@@ -1,6 +1,6 @@
 package org.autojs.autojs.runtime.api.augment.timers
 
-import org.autojs.autojs.extension.AnyExtensions.isJsNullish
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.util.RhinoUtils
 import org.mozilla.javascript.BaseFunction

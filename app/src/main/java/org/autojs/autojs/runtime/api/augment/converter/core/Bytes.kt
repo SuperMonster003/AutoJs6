@@ -2,9 +2,9 @@
 
 package org.autojs.autojs.runtime.api.augment.converter.core
 
-import org.autojs.autojs.extension.AnyExtensions.isJsNullish
-import org.autojs.autojs.extension.AnyExtensions.isJsNumber
-import org.autojs.autojs.extension.AnyExtensions.jsBrief
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNumber
+import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.util.RhinoUtils.MAX_SAFE_INT_IEEE754_BD
 import org.autojs.autojs.util.RhinoUtils.MIN_SAFE_INT_IEEE754_BD
 import org.autojs.autojs.util.RhinoUtils.coerceBoolean

@@ -1,7 +1,7 @@
 package org.autojs.autojs.runtime.api.augment.toast
 
 import org.autojs.autojs.AutoJs
-import org.autojs.autojs.extension.AnyExtensions.jsBrief
+import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.util.RhinoUtils.coerceString
 import org.mozilla.javascript.Context

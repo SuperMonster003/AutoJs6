@@ -2,9 +2,9 @@ package org.autojs.autojs.runtime.api.augment.storages
 
 import org.autojs.autojs.annotation.RhinoStandardFunctionInterface
 import org.autojs.autojs.core.storage.LocalStorage
-import org.autojs.autojs.extension.AnyExtensions.isJsNullish
-import org.autojs.autojs.extension.AnyExtensions.jsBrief
-import org.autojs.autojs.extension.FlexibleArray
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
+import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
+import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.runtime.api.StringReadable
 import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED
@@ -45,7 +45,7 @@ class StorageNativeObject(@JvmField val name: String) : NativeObject(), StringRe
     override fun toStringReadable() = "Storage { name: $name, size: ${storage.size()} }"
 
     @Suppress("UNUSED_PARAMETER")
-    internal object Getter : FlexibleArray() {
+    internal object Getter : ArgumentGuards() {
 
         private val className = StorageNativeObject::class.java.simpleName
 

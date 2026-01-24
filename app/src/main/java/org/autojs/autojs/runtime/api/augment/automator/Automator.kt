@@ -11,13 +11,13 @@ import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.core.automator.UiObject
 import org.autojs.autojs.core.automator.action.ActionTarget
 import org.autojs.autojs.core.image.ImageWrapper
-import org.autojs.autojs.extension.AnyExtensions.isJsArray
-import org.autojs.autojs.extension.AnyExtensions.isJsFunction
-import org.autojs.autojs.extension.AnyExtensions.isJsNullish
-import org.autojs.autojs.extension.AnyExtensions.isJsNumber
-import org.autojs.autojs.extension.FlexibleArray
-import org.autojs.autojs.extension.ScriptableExtensions.prop
-import org.autojs.autojs.extension.ScriptableObjectExtensions.inquire
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsArray
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsFunction
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNumber
+import org.autojs.autojs.rhino.ArgumentGuards
+import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
+import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.exception.ScriptException
@@ -76,7 +76,7 @@ class Automator(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         ::splitScreen.name to AS_GLOBAL,
     )
 
-    companion object : FlexibleArray() {
+    companion object : ArgumentGuards() {
 
         /**
          * TypeScript Declarations:

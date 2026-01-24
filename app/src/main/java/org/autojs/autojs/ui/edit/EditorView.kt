@@ -33,7 +33,7 @@ import org.autojs.autojs.engine.JavaScriptEngine
 import org.autojs.autojs.engine.ScriptEngine
 import org.autojs.autojs.event.BackPressedHandler.HostActivity
 import org.autojs.autojs.execution.ScriptExecution
-import org.autojs.autojs.extension.MaterialDialogExtensions.choiceWidgetThemeColor
+import org.autojs.autojs.util.MaterialDialogUtils.choiceWidgetThemeColor
 import org.autojs.autojs.model.autocomplete.AutoCompletion
 import org.autojs.autojs.model.autocomplete.CodeCompletions
 import org.autojs.autojs.model.autocomplete.Symbols

@@ -13,19 +13,19 @@ import org.autojs.autojs.core.ui.dialog.JsDialog
 import org.autojs.autojs.core.ui.dialog.JsDialogBuilder
 import org.autojs.autojs.core.ui.nativeview.NativeView
 import org.autojs.autojs.event.BackCompat.TAG_KEY_INSTALLED
-import org.autojs.autojs.extension.AnyExtensions.isJsNullish
-import org.autojs.autojs.extension.AnyExtensions.isJsString
-import org.autojs.autojs.extension.AnyExtensions.isJsXml
-import org.autojs.autojs.extension.AnyExtensions.jsBrief
-import org.autojs.autojs.extension.AnyExtensions.jsUnwrapped
-import org.autojs.autojs.extension.ArrayExtensions.toNativeArray
-import org.autojs.autojs.extension.FlexibleArray.Companion.component1
-import org.autojs.autojs.extension.FlexibleArray.Companion.component2
-import org.autojs.autojs.extension.FlexibleArray.Companion.component3
-import org.autojs.autojs.extension.FlexibleArray.Companion.component4
-import org.autojs.autojs.extension.ScriptableExtensions.defineProp
-import org.autojs.autojs.extension.ScriptableExtensions.prop
-import org.autojs.autojs.extension.ScriptableObjectExtensions.inquire
+import org.autojs.autojs.rhino.ArgumentGuards.Companion.component1
+import org.autojs.autojs.rhino.ArgumentGuards.Companion.component2
+import org.autojs.autojs.rhino.ArgumentGuards.Companion.component3
+import org.autojs.autojs.rhino.ArgumentGuards.Companion.component4
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsString
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsXml
+import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
+import org.autojs.autojs.rhino.extension.AnyExtensions.jsUnwrapped
+import org.autojs.autojs.rhino.extension.IterableExtensions.toNativeArray
+import org.autojs.autojs.rhino.extension.ScriptableExtensions.defineProp
+import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
+import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.colors.Colors
@@ -67,46 +67,30 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
     companion object {
 
-        private const val CVT_DEFAULT = 0x0001
-        private const val CVT_DEFAULT_STRICT_BOOLEAN = 0x0002
-        private const val CVT_COLOR_INT = 0x0003
+        private enum class PropertyConverter {
+            COLOR_INT, BOOLEAN,
+        }
 
         private val propertySetterMap = mapOf(
-            "title" to CVT_DEFAULT,
-            "titleColor" to CVT_COLOR_INT,
-            "buttonRippleColor" to CVT_COLOR_INT,
-            "icon" to CVT_DEFAULT,
-            "iconRes" to CVT_DEFAULT,
-            "content" to CVT_DEFAULT,
-            "contentColor" to CVT_COLOR_INT,
-            "contentColorRes" to CVT_DEFAULT,
-            "contentLineSpacing" to CVT_DEFAULT,
-            "items" to CVT_DEFAULT,
-            "itemsColor" to CVT_COLOR_INT,
-            "itemsColorRes" to CVT_DEFAULT,
+            "titleColor" to PropertyConverter.COLOR_INT,
+            "buttonRippleColor" to PropertyConverter.COLOR_INT,
+            "contentColor" to PropertyConverter.COLOR_INT,
+            "itemsColor" to PropertyConverter.COLOR_INT,
             "positive" to "positiveText",
-            "positiveColor" to CVT_COLOR_INT,
-            "positiveColorRes" to CVT_DEFAULT,
+            "positiveColor" to PropertyConverter.COLOR_INT,
             "neutral" to "neutralText",
-            "neutralColor" to CVT_COLOR_INT,
-            "neutralColorRes" to CVT_DEFAULT,
+            "neutralColor" to PropertyConverter.COLOR_INT,
             "negative" to "negativeText",
-            "negativeColor" to CVT_COLOR_INT,
-            "negativeColorRes" to CVT_DEFAULT,
-            "linkColor" to CVT_COLOR_INT,
-            "linkColorRes" to CVT_DEFAULT,
+            "negativeColor" to PropertyConverter.COLOR_INT,
+            "linkColor" to PropertyConverter.COLOR_INT,
             "bg" to "background",
             "background" to "backgroundColor",
             "bgColor" to "backgroundColor",
-            "backgroundColor" to CVT_COLOR_INT,
+            "backgroundColor" to PropertyConverter.COLOR_INT,
             "bgColorRes" to "backgroundColorRes",
-            "backgroundColorRes" to CVT_DEFAULT,
-            "cancelable" to CVT_DEFAULT,
-            "canceledOnTouchOutside" to CVT_DEFAULT,
-            "autoDismiss" to CVT_DEFAULT,
-            "limitIconToDefaultSize" to CVT_DEFAULT_STRICT_BOOLEAN,
-            "alwaysCallSingleChoiceCallback" to CVT_DEFAULT_STRICT_BOOLEAN,
-            "alwaysCallMultiChoiceCallback" to CVT_DEFAULT_STRICT_BOOLEAN,
+            "limitIconToDefaultSize" to PropertyConverter.BOOLEAN,
+            "alwaysCallSingleChoiceCallback" to PropertyConverter.BOOLEAN,
+            "alwaysCallMultiChoiceCallback" to PropertyConverter.BOOLEAN,
         )
 
         private val presetLinkifyMasks = listOf("all", "emailAddresses", "mapAddresses", "phoneNumbers", "webUrls")
@@ -114,23 +98,27 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         private val presetAnimations = listOf("default", "activity", "dialog", "inputMethod", "toast", "translucent")
 
         private val customJsPropertiesForBuild: Set<String> = setOf(
-            "preset",
+            "animation",
+            "background",
+            "checkBoxChecked",
+            "checkBoxPrompt",
+            "customView",
+            "dimAmount",
             "inputHint",
             "inputPrefill",
-            "items",
-            "progress",
-            "checkBoxPrompt",
-            "checkBoxChecked",
-            "customView",
-            "stubborn",
-            "theme",
+            "inputSingleLine",
+            "itemsSelectedIndex",
+            "itemsSelectedIndices",
+            "itemsSelectMode",
+            "keepScreenOn",
             "linkify",
             "onBackKey",
             "onBackPressed",
-            "dimAmount",
-            "animation",
-            "keepScreenOn",
-            "inputSingleLine",
+            "preset",
+            "progress",
+            "stubborn",
+            "theme",
+            "wrapInScrollView",
         )
 
         @JvmStatic
@@ -480,15 +468,12 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
         private fun applyDialogProperty(builder: JsDialogBuilder, name: String, value: Any?) {
             when (val propertySetter = propertySetterMap[name]) {
-                CVT_DEFAULT -> invokeJavaMethod(builder, name, arrayOf(value))
-                CVT_DEFAULT_STRICT_BOOLEAN -> {
-                    if (value == true) {
-                        invokeJavaMethod(builder, name, emptyArray())
-                    }
-                }
-                CVT_COLOR_INT -> {
+                PropertyConverter.COLOR_INT -> {
                     val colorInt = Colors.toIntRhino(value)
                     invokeJavaMethod(builder, name, arrayOf(colorInt))
+                }
+                PropertyConverter.BOOLEAN if coerceBoolean(value, false) -> {
+                    invokeJavaMethod(builder, name, emptyArray())
                 }
                 is String -> when (propertySetter) {
                     in propertySetterMap -> {

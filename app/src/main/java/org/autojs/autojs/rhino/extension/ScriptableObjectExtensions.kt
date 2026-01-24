@@ -1,9 +1,9 @@
-package org.autojs.autojs.extension
+package org.autojs.autojs.rhino.extension
 
-import org.autojs.autojs.extension.AnyExtensions.isJsNullish
-import org.autojs.autojs.extension.ScriptableExtensions.prop
-import org.autojs.autojs.util.StringUtils.str
-import org.autojs.autojs6.R.string as R_string
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
+import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
+import org.autojs.autojs.util.StringUtils
+import org.autojs.autojs6.R
 import org.mozilla.javascript.ScriptableObject
 
 /**
@@ -13,13 +13,13 @@ object ScriptableObjectExtensions {
 
     fun ScriptableObject.acquire(name: String): Any {
         val propValue = this.prop(name)
-        require(!propValue.isJsNullish()) { str(R_string.error_required_property_is_nullish_or_does_not_exist, name) }
+        require(!propValue.isJsNullish()) { StringUtils.str(R.string.error_required_property_is_nullish_or_does_not_exist, name) }
         return propValue!!
     }
 
     fun <R> ScriptableObject.acquire(name: String, transformer: (o: Any) -> R): R {
         val result = transformer(acquire(name))
-        require(!result.isJsNullish()) { str(R_string.error_the_transformer_for_required_property_cannot_return_nullish, name) }
+        require(!result.isJsNullish()) { StringUtils.str(org.autojs.autojs6.R.string.error_the_transformer_for_required_property_cannot_return_nullish, name) }
         return result!!
     }
 

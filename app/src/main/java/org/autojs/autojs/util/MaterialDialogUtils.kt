@@ -1,4 +1,4 @@
-package org.autojs.autojs.extension
+package org.autojs.autojs.util
 
 import android.view.View
 import android.widget.TextView
@@ -8,12 +8,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.theme.ThemeColorHelper
-import org.autojs.autojs.util.ClipboardUtils
-import org.autojs.autojs.util.IntentUtils
-import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
+import kotlin.text.isNullOrBlank
 
-object MaterialDialogExtensions {
+object MaterialDialogUtils {
 
     fun MaterialDialog.makeSettingsLaunchable(viewGetter: (dialog: MaterialDialog) -> View?, packageName: String?) {
         viewGetter(this)?.setOnClickListener {

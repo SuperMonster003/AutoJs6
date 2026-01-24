@@ -2,7 +2,7 @@ package org.autojs.autojs.core.accessibility
 
 import android.content.Context
 import android.view.accessibility.AccessibilityWindowInfo
-import org.autojs.autojs.extension.ArrayExtensions.toHashCode
+import org.autojs.autojs.rhino.extension.IterableExtensions.toHashCode
 import org.autojs.autojs.util.ObjectUtils
 import org.autojs.autojs.util.StringUtils.str
 import org.autojs.autojs6.R
