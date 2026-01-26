@@ -966,7 +966,7 @@
     <string name="text_preset_dialog_content">預設對話方塊內容</string>
     <string name="text_preset_dialog_title">預設對話方塊標題</string>
     <string name="text_press_again_to_dismiss_dialog">再按一次關閉對話方塊</string>
-    <string name="text_press_again_to_exit">再按一次退出應用</string>
+    <string name="text_press_again_to_exit">再按一次退出</string>
     <string name="text_press_back_or_vol_down_to_close_window">如需關閉視窗, 可按 \"返回鍵\" 或 \"音量減鍵\"</string>
     <string name="text_preview">預覽</string>
     <string name="text_process_log">流程日誌</string>

@@ -3,10 +3,12 @@ package org.autojs.autojs.ui.doc
 import android.os.Bundle
 import android.webkit.WebView
 import androidx.activity.OnBackPressedCallback
+import org.autojs.autojs.event.BackPressedHandler
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.util.DocsUtils.getUrl
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.WebViewUtils
+import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ActivityDocumentationBinding
 import org.intellij.lang.annotations.Language
 
@@ -16,6 +18,10 @@ import org.intellij.lang.annotations.Language
  * Transformed by SuperMonster003 on May 26, 2023.
  */
 class DocumentationActivity : BaseActivity() {
+
+    override val handleStatusBarThemeColorAutomatically = false
+
+    private val mBackPressedHandler = BackPressedHandler.Observer()
 
     private val mOnBackPressedCallback = object : OnBackPressedCallback(true) {
 
@@ -30,12 +36,18 @@ class DocumentationActivity : BaseActivity() {
         override fun handleOnBackPressed() {
             if (mWebView.canGoBack()) {
                 mWebView.goBack()
-            } else {
-                onBackPressedDispatcher.onBackPressed()
+                return
             }
+
+            if (mBackPressedHandler.onBackPressed(this@DocumentationActivity)) {
+                return
+            }
+
+            isEnabled = false
+            onBackPressedDispatcher.onBackPressed()
+            isEnabled = true
         }
     }
-    override val handleStatusBarThemeColorAutomatically = false
 
     private lateinit var mWebView: WebView
 
@@ -60,6 +72,11 @@ class DocumentationActivity : BaseActivity() {
             }
         }
 
+        handleBackPressedHandlerAndCallback()
+    }
+
+    private fun handleBackPressedHandlerAndCallback() {
+        mBackPressedHandler.registerHandler(BackPressedHandler.DoublePressExit(this, R.string.text_press_again_to_exit))
         onBackPressedDispatcher.addCallback(this, mOnBackPressedCallback)
     }
 
