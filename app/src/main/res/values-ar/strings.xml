@@ -1198,5 +1198,7 @@
     <string name="description_screen_capture_request_delay">عند طلب إذن التقاط الشاشة، قد تحتوي نافذة طلب الإذن المنبثقة على حركة تلاشي عند اختفائها. إذا تم استدعاء `images.captureScreen` مباشرةً، فقد تتضمن لقطة الشاشة الناتجة محتوى نافذة طلب الإذن مما يسبب حجبًا.\n\nتضيف قيمة هذا الخيار مدة تأخير (بالمللي ثانية) قبل التقاط الشاشة مباشرةً بعد الحصول على الإذن، وذلك لتجنب مشكلة الحجب المذكورة أعلاه.\n\nينطبق هذا الخيار فقط على أول عملية التقاط بعد الحصول على الإذن؛ أما عمليات الالتقاط اللاحقة فلن تتأثر بهذه القيمة.</string>
     <string name="text_delay_time">مدة التأخير</string>
     <string name="dialog_button_homepage">الصفحة الرئيسية</string>
+    <string name="error_failed_to_change_the_toggle_state">تعذّر تغيير حالة المفتاح</string>
+    <string name="text_post_notifications_permission_rationale">لضمان عمل خدمات المقدّمة في AutoJs6 وغيرها بشكل طبيعي، وتمكين السكربتات من نشر الإشعارات، يجب منح AutoJs6 إذن \"نشر الإشعارات\".</string>
 
 </resources>

@@ -1197,5 +1197,7 @@
     <string name="description_screen_capture_request_delay">画面キャプチャ権限を要求する際, 表示される権限リクエスト画面が閉じるときにフェード等のアニメーションが発生する場合があります. この直後に `images.captureScreen` を呼び出すと, 取得したスクリーンショットに権限リクエスト画面の内容が写り込み, 遮蔽が発生することがあります. \n\nこの設定値は, 権限取得直後に最初のスクリーンショットを取得する前に遅延時間（ミリ秒）を追加し, 上記の遮蔽問題を回避するために使用します. \n\nこの設定は権限取得後の最初のスクリーンショットにのみ適用され, 以降のスクリーンショットには影響しません.</string>
     <string name="text_delay_time">遅延時間</string>
     <string name="dialog_button_homepage">ホームページ</string>
+    <string name="error_failed_to_change_the_toggle_state">スイッチの状態の変更に失敗しました</string>
+    <string name="text_post_notifications_permission_rationale">AutoJs6 のフォアグラウンドサービス等が正常に動作し, スクリプトが通知を投稿できるようにするため, AutoJs6 には \"通知の送信\" 権限を付与する必要があります.</string>
 
 </resources>

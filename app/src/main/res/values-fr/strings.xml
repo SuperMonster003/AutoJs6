@@ -1196,5 +1196,7 @@
     <string name="description_screen_capture_request_delay">Lors de la demande d\'autorisation de capture d\'écran, la fenêtre de demande affichée peut comporter une animation de fondu lors de sa disparition. Si `images.captureScreen` est appelé immédiatement, la capture obtenue peut contenir le contenu de cette fenêtre et être partiellement masquée.\n\nLa valeur de cette option ajoute un délai (en millisecondes) avant d\'effectuer la capture juste après l\'obtention de l\'autorisation, afin d\'éviter le problème de masquage ci-dessus.\n\nCette option ne s\'applique qu\'à la première capture après l\'obtention de l\'autorisation ; les captures suivantes ne seront plus affectées par cette valeur.</string>
     <string name="text_delay_time">Délai</string>
     <string name="dialog_button_homepage">Accueil</string>
+    <string name="error_failed_to_change_the_toggle_state">Échec de la modification de l\'état de l\'interrupteur</string>
+    <string name="text_post_notifications_permission_rationale">Afin de garantir que les services au premier plan d\'AutoJs6, etc. fonctionnent correctement et que les scripts puissent publier des notifications, AutoJs6 doit se voir accorder l\'autorisation de \"publier des notifications\".</string>
 
 </resources>

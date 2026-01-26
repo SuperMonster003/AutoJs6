@@ -1196,5 +1196,7 @@
     <string name="description_screen_capture_request_delay">Al solicitar el permiso de captura de pantalla, la ventana de solicitud de permiso mostrada puede tener una animación de desvanecimiento al desaparecer. Si se llama a `images.captureScreen` inmediatamente, la captura obtenida puede incluir el contenido de dicha ventana y quedar obstruida.\n\nEl valor de esta opción añade un tiempo de espera (en milisegundos) antes de capturar la pantalla inmediatamente después de obtener el permiso, para evitar el problema de obstrucción descrito.\n\nEsta opción solo se aplica a la primera captura tras obtener el permiso; las capturas posteriores no se verán afectadas por este valor.</string>
     <string name="text_delay_time">Tiempo de retraso</string>
     <string name="dialog_button_homepage">Inicio</string>
+    <string name="error_failed_to_change_the_toggle_state">No se pudo cambiar el estado del interruptor</string>
+    <string name="text_post_notifications_permission_rationale">Para garantizar que los servicios en primer plano de AutoJs6, etc. funcionen correctamente y que los scripts puedan publicar notificaciones, AutoJs6 debe recibir el permiso de \"publicar notificaciones\".</string>
 
 </resources>

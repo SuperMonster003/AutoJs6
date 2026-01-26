@@ -7,8 +7,8 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import org.autojs.autojs.core.pref.Pref
-import org.autojs.autojs.util.MaterialDialogUtils.widgetThemeColor
 import org.autojs.autojs.ui.common.NotAskAgainDialog
+import org.autojs.autojs.util.MaterialDialogUtils.widgetThemeColor
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 
@@ -115,7 +115,8 @@ open class DrawerMenuToggleableItem : DrawerMenuItem, IToggleableItem {
             when (val result = listener(this)) {
                 is Boolean -> result
                 is Unit -> false
-                else -> throw IllegalArgumentException("onTitleContainerClickListener must return Boolean or Unit")
+                is MaterialDialog.Builder -> false
+                else -> throw IllegalArgumentException("onTitleContainerClickListener must return Boolean, MaterialDialog.Builder or Unit")
             }
         }
     }
@@ -223,10 +224,14 @@ open class DrawerMenuToggleableItem : DrawerMenuItem, IToggleableItem {
                 .fromCallable { mItemHelper.toggle(aimState) }
                 .subscribeOn(Schedulers.single())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe { tryToggleResult ->
+                .subscribe({ tryToggleResult ->
                     isProgress = false
                     syncDelay { if (tryToggleResult) mItemHelper.callback(aimState) }
-                }
+                }, { e ->
+                    isProgress = false
+                    syncDelay { sync() }
+                    ViewUtils.showToast(mItemHelper.context, e.message ?: mItemHelper.context.getString(R.string.error_failed_to_change_the_toggle_state), true)
+                })
         }
     }
 

@@ -137,8 +137,9 @@
     <string name="key_night_mode_null" translatable="false">key_$_night_mode_null</string>
     <string name="key_not_showing_main_activity" translatable="false">key_$_not_showing_main_activity</string>
     <string name="key_pc_server_address_histories" translatable="false">key_$_pc_server_address_histories</string>
-    <string name="key_post_notification_permission_requested" translatable="false">key_$_post_notification_permission_urged</string>
     <string name="key_post_notifications_permission" translatable="false">key_$_post_notifications_permission</string>
+    <string name="key_post_notifications_permission_auto_request_done" translatable="false">key_$_post_notifications_permission_auto_request_done</string>
+    <string name="key_post_notifications_permission_request_attempted" translatable="false">key_$_post_notifications_permission_request_attempted</string>
     <string name="key_pref_bundle_default_item" translatable="false">key_$_pref_bundle_default_item</string>
     <string name="key_pref_bundle_disabled_items" translatable="false">key_$_pref_bundle_disabled_items</string>
     <string name="key_record_toast" translatable="false">key_$_record_toast</string>
@@ -1452,5 +1453,7 @@
     <string name="description_screen_capture_request_delay">When requesting screen capture permission, the permission request window may include a fade-out animation when it disappears. If `images.captureScreen` is called immediately, the captured screenshot may contain the permission request window content and be obstructed.\n\nThe current option value adds a delay (in milliseconds) before capturing the screen immediately after permission is granted, which can be used to avoid the obstruction issue described above.\n\nThis option only applies to the first screenshot after screen capture permission is granted; subsequent screenshots are not affected by this value.</string>
     <string name="text_delay_time">Delay time</string>
     <string name="dialog_button_homepage">Homepage</string>
+    <string name="error_failed_to_change_the_toggle_state">Failed to change the toggle state</string>
+    <string name="text_post_notifications_permission_rationale">To ensure that AutoJs6 foreground services, etc. can work properly and that scripts can post notifications, AutoJs6 must be granted the \"post notifications\" permission.</string>
 
 </resources>

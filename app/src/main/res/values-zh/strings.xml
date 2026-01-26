@@ -1194,5 +1194,7 @@
     <string name="description_screen_capture_request_delay">申请屏幕捕获权限时, 弹出的权限申请窗口消失时可能存在渐变动画, 此时如果立即调用 `images.captureScreen` 方法, 获取的屏幕截图中会出现权限申请的窗口内容而造成遮挡.\n\n当前设置选项值用于在截图权限申请后立即获取屏幕截图前增加一个延迟时间 (单位为毫秒), 可用于避免上述遮挡问题.\n\n当前设置选项仅适用于获取截图权限后的首次截图操作, 后续截图操作不再受此设置值影响.</string>
     <string name="text_delay_time">延迟时间</string>
     <string name="dialog_button_homepage">主页</string>
+    <string name="error_failed_to_change_the_toggle_state">开关状态改变失败</string>
+    <string name="text_post_notifications_permission_rationale">为确保 AutoJs6 前台服务等能够正常运行, 脚本能够发布通知, AutoJs6 需要被授予 \"发布通知权限\".</string>
 
 </resources>

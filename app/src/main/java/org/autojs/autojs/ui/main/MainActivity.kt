@@ -36,6 +36,7 @@ import org.autojs.autojs.permission.AbleToUrge
 import org.autojs.autojs.permission.AllFilesAccessPermission
 import org.autojs.autojs.permission.DisplayOverOtherAppsPermission
 import org.autojs.autojs.permission.PostNotificationsPermission
+import org.autojs.autojs.runtime.api.Permissions
 import org.autojs.autojs.service.ForegroundService
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.theme.ThemeColorManager.addViewBackground
@@ -71,7 +72,7 @@ import org.greenrobot.eventbus.EventBus
 
 /**
  * Transformed by SuperMonster003 on May 11, 2023.
- * Modified by SuperMonster003 as of Jan 20, 2026.
+ * Modified by SuperMonster003 as of Jan 26, 2026.
  */
 class MainActivity : BaseActivity(), DelegateHost, HostActivity {
 
@@ -179,6 +180,8 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
                 ViewUtils.configKeepScreenOnWhenInForeground(this)
             }
         }
+
+        Permissions.registerRequestMultiplePermissionsLauncher(this)
 
         WorkingDirectoryUtils.determineIfNeeded()
         ExplorerView.clearViewStates()

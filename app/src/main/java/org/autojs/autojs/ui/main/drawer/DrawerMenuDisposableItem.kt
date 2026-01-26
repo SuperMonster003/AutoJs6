@@ -18,7 +18,8 @@ class DrawerMenuDisposableItem(
         when (val result = listener(this, helper)) {
             is Boolean -> result
             is Unit -> false
-            else -> throw IllegalArgumentException("onTitleContainerClickListener must return Boolean or Unit")
+            is MaterialDialog.Builder -> false
+            else -> throw IllegalArgumentException("onTitleContainerClickListener must return Boolean, MaterialDialog.Builder or Unit")
         }
     },
 ) {

@@ -1198,5 +1198,7 @@
     <string name="description_screen_capture_request_delay">화면 캡처 권한을 요청할 때 표시되는 권한 요청 창은 사라질 때 페이드 등의 전환 애니메이션이 있을 수 있습니다. 이때 `images.captureScreen` 메서드를 즉시 호출하면, 얻은 스크린샷에 권한 요청 창의 내용이 포함되어 화면이 가려질 수 있습니다.\n\n이 설정 값은 권한을 획득한 직후 첫 스크린샷을 캡처하기 전에 지연 시간(밀리초)을 추가하여, 위와 같은 가림 문제를 방지하는 데 사용할 수 있습니다.\n\n이 설정은 권한 획득 후 첫 번째 캡처에만 적용되며, 이후 캡처에는 더 이상 영향을 주지 않습니다.</string>
     <string name="text_delay_time">지연 시간</string>
     <string name="dialog_button_homepage">홈페이지</string>
+    <string name="error_failed_to_change_the_toggle_state">스위치 상태 변경에 실패했습니다</string>
+    <string name="text_post_notifications_permission_rationale">AutoJs6 포그라운드 서비스 등이 정상적으로 동작하고 스크립트가 알림을 게시할 수 있도록 하려면, AutoJs6 에 \"알림 게시\" 권한을 부여해야 합니다.</string>
 
 </resources>
