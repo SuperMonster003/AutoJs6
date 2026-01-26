@@ -102,7 +102,7 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
 
             // 2. Then, let the global Observer handle it (DrawerAutoClose / DoublePressExit).
             // zh-CN: 再给全局 Observer 处理 (DrawerAutoClose / DoublePressExit).
-            if (mBackPressObserver.onBackPressed(this@MainActivity)) {
+            if (mBackPressedObserver.onBackPressed(this@MainActivity)) {
                 return
             }
 
@@ -125,7 +125,7 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
 
     private val mActivityResultMediator = OnActivityResultDelegate.Mediator()
     private val mRequestPermissionCallbacks = RequestPermissionCallbacks()
-    private val mBackPressObserver = BackPressedHandler.Observer()
+    private val mBackPressedObserver = BackPressedHandler.Observer()
     private val mForeGroundService = ForegroundService(this)
     private var mSearchViewItem: SearchViewItem? = null
     private val mA11yTool = AccessibilityTool(this)
@@ -222,8 +222,8 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
     }
 
     private fun registerBackPressHandlers(drawerLayout: DrawerLayout) {
-        mBackPressObserver.registerHandler(DrawerAutoClose(drawerLayout, Gravity.START))
-        mBackPressObserver.registerHandler(DoublePressExit(this, R.string.text_press_again_to_exit))
+        mBackPressedObserver.registerHandler(DrawerAutoClose(drawerLayout, Gravity.START))
+        mBackPressedObserver.registerHandler(DoublePressExit(this, R.string.text_press_again_to_exit))
     }
 
     private fun setUpToolbar(drawerLayout: DrawerLayout) {
@@ -384,7 +384,7 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
 
     override fun getOnActivityResultDelegateMediator() = mActivityResultMediator
 
-    override fun getBackPressedObserver() = mBackPressObserver
+    override fun getBackPressedObserver() = mBackPressedObserver
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
