@@ -34,7 +34,9 @@ class SplashActivity : BaseActivity() {
         mHandler = Looper.myLooper()?.let { Handler(it) } ?: Handler()
         mHandler.postDelayed({ enterNextActivity() }, INIT_TIMEOUT)
 
-        FloatyWindowManger.hideCircularMenuIfNeeded()
+        if (FloatyWindowManger.isCircularMenuShowing()) {
+            FloatyWindowManger.hideCircularMenuAndSaveState()
+        }
     }
 
     override fun onPause() {
