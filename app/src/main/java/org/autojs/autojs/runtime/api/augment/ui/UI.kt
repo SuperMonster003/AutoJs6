@@ -8,6 +8,8 @@ import android.view.WindowManager
 import androidx.core.graphics.drawable.toDrawable
 import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
+import org.autojs.autojs.core.looper.Loopers
+import org.autojs.autojs.core.looper.Timer
 import org.autojs.autojs.core.ui.JsViewHelper
 import org.autojs.autojs.core.ui.ViewExtras
 import org.autojs.autojs.core.ui.attribute.ViewAttributeDelegate
@@ -20,20 +22,20 @@ import org.autojs.autojs.core.ui.nativeview.NativeView
 import org.autojs.autojs.core.ui.widget.JsListView
 import org.autojs.autojs.core.ui.widget.JsWebView
 import org.autojs.autojs.execution.ScriptExecuteActivity
-import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
-import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
-import org.autojs.autojs.rhino.extension.AnyExtensions.jsSanitize
-import org.autojs.autojs.rhino.extension.AnyExtensions.jsUnwrapped
 import org.autojs.autojs.rhino.ArgumentGuards.Companion.component1
 import org.autojs.autojs.rhino.ArgumentGuards.Companion.component2
 import org.autojs.autojs.rhino.ArgumentGuards.Companion.component3
 import org.autojs.autojs.rhino.ArgumentGuards.Companion.component4
-import org.autojs.autojs.rhino.extension.ScriptableExtensions.defineProp
-import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
-import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.rhino.ProxyObject.Companion.PROXY_GETTER_KEY
 import org.autojs.autojs.rhino.ProxyObject.Companion.PROXY_OBJECT_KEY
 import org.autojs.autojs.rhino.ProxyObject.Companion.PROXY_SETTER_KEY
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
+import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
+import org.autojs.autojs.rhino.extension.AnyExtensions.jsSanitize
+import org.autojs.autojs.rhino.extension.AnyExtensions.jsUnwrapped
+import org.autojs.autojs.rhino.extension.ScriptableExtensions.defineProp
+import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
+import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.AugmentableProxy
 import org.autojs.autojs.runtime.api.augment.colors.ColorNativeObject
@@ -108,7 +110,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         ::__inflate__.name,
         ::inflate.name,
         ::useAndroidLayout.name,
-        ::isUiThread.name,
+        ::isUiThread.name to AS_GLOBAL,
         ::post.name,
         ::layout.name,
         ::layoutFile.name,
@@ -435,26 +437,21 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
             return when {
                 RhinoUtils.isUiThread() -> callFunction(scriptRuntime, action, arrayOf())
                 else -> {
-                    var error: Exception? = null
+                    var error: Throwable? = null
                     var result: Any? = null
                     val disposable = scriptRuntime.threads.disposable()
                     scriptRuntime.uiHandler.post {
                         try {
                             result = callFunction(scriptRuntime, action, arrayOf())
-                        } catch (e: Exception) {
-                            error = e
+                        } catch (t: Throwable) {
+                            error = t
                         } finally {
                             disposable.setAndNotify(true)
                         }
                     }
                     disposable.blockedGet()
 
-                    error?.let {
-                        scriptRuntime.console.warn("${error.jsBrief()} occurred in `ui.run()`")
-                        scriptRuntime.console.warn(it.message)
-                        scriptRuntime.console.warn(it.stackTraceToString())
-                        throw it
-                    }
+                    error?.let { throw it }
                     result
                 }
             }
@@ -479,9 +476,15 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
             require(action is BaseFunction) {
                 "Argument \"action\" ${action.jsBrief()} for ui.post must be a JavaScript Function"
             }
+            val loopers = scriptRuntime.loopers
+            val timer = scriptRuntime.timers.timerForCurrentThread
+            val waitId = timer?.let { loopers.waitWhenIdle() } ?: -1
+
+            val uiAction = wrapUiActionForPost(scriptRuntime, action, loopers, timer, waitId)
+
             return when {
-                delay.isJsNullish() -> scriptRuntime.uiHandler.post(wrapUiAction(scriptRuntime, action))
-                else -> scriptRuntime.uiHandler.postDelayed(wrapUiAction(scriptRuntime, action), coerceLongNumber(delay, 0L))
+                delay.isJsNullish() -> scriptRuntime.uiHandler.post(uiAction)
+                else -> scriptRuntime.uiHandler.postDelayed(uiAction, coerceLongNumber(delay, 0L))
             }
         }
 
@@ -889,16 +892,23 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
             callFunction(scriptRuntime.js_UiExt, scriptRuntime.topLevelScope, null, arrayOf(webView))
         }
 
-        private fun wrapUiAction(scriptRuntime: ScriptRuntime, action: BaseFunction) = Runnable {
-            when {
-                !getActivity(scriptRuntime).isJsNullish() -> callFunction(scriptRuntime, action, scriptRuntime.topLevelScope, arrayOf())
-                else -> withRhinoContext { cx ->
-                    val scope = scriptRuntime.topLevelScope
-                    val func = scope.prop("__exitIfError__") as BaseFunction
-                    func.call(cx, scope, scope, arrayOf(newBaseFunction("action", {
-                        callFunction(scriptRuntime, action, arrayOf())
-                    }, NOT_CONSTRUCTABLE)))
+        private fun wrapUiActionForPost(scriptRuntime: ScriptRuntime, action: BaseFunction, loopers: Loopers, timer: Timer?, waitId: Int) = Runnable {
+            try {
+                val isAutoJsUiMode = !getActivity(scriptRuntime).isJsNullish()
+                when {
+                    isAutoJsUiMode -> {
+                        callFunction(scriptRuntime, action, scriptRuntime.topLevelScope, arrayOf())
+                    }
+                    else -> withRhinoContext { cx ->
+                        val scope = scriptRuntime.topLevelScope
+                        val exitIfErrorFunc = scope.prop("__exitIfError__") as BaseFunction
+                        exitIfErrorFunc.call(cx, scope, scope, arrayOf(newBaseFunction("action", {
+                            callFunction(scriptRuntime, action, arrayOf())
+                        }, NOT_CONSTRUCTABLE)))
+                    }
                 }
+            } finally {
+                timer?.postDelayed({ loopers.doNotWaitWhenIdle(waitId) }, 0)
             }
         }
 
