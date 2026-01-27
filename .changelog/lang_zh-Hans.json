@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.7.0": {
-      "released_date": "2026/01/26",
+      "released_date": "2026/01/27",
       "feature": [
         "插件中心功能, 支持插件的安装/卸载/更新等操作 (入口: 主页抽屉按钮/主页标签页)",
         "Paddle OCR (PP-OCRv5) 插件, 用于光学字符识别",
@@ -50,6 +50,7 @@
       "fix": [
         "notice 方法参数数量及类型限制错误 _[`issue #462`](http://issues.autojs6.com/462)_",
         "ui.R 属性 (getter) 无法正常使用的问题",
+        "ui.post 方法回调参数中产生异常时可能静默失败的问题",
         "isJavaClass/isJavaPackage 等全局方法无效的问题",
         "timers.keepAlive 方法 timeout 参数功能无效的问题",
         "floaty.window/rawWindow 方法无法接受字符串参数的问题 _[`issue #467`](http://issues.autojs6.com/467)_",
