@@ -10,7 +10,7 @@ import org.autojs.autojs.util.IntentUtils.startSafely
 class NotificationService(override val context: Context) : ServiceItemHelper {
 
     override val isRunning: Boolean
-        get() = NotificationListenerService.instance != null
+        get() = NotificationListenerService.isNotificationListenerEnabled(context)
 
     override fun start(): Boolean = false.also { config() }
 
