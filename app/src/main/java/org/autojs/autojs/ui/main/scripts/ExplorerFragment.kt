@@ -125,6 +125,8 @@ class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListen
 
     private fun initFloatingActionMenuIfNeeded(fab: FloatingActionButton): FloatingActionMenu {
         return mFloatingActionMenu ?: requireActivity().findViewById<FloatingActionMenu>(R.id.floating_action_menu).also { menu ->
+            val locFab = IntArray(2)
+            fab.getLocationOnScreen(locFab)
             menu.state
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(object : SimpleObserver<Boolean?>() {
@@ -139,7 +141,7 @@ class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListen
             menu.layoutParams.runCatching {
                 javaClass.getField("bottomMargin").setInt(this, fab.marginBottom)
             }
-            menu.setToggleFab(fab)
+            menu.setToggleFab(fab, locFab)
             mFloatingActionMenu = menu
         }
     }
