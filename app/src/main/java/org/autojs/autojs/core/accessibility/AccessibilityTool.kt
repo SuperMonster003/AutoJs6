@@ -1,6 +1,5 @@
 package org.autojs.autojs.core.accessibility
 
-import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -23,7 +22,7 @@ import org.autojs.autojs6.R
 
 /**
  * Created by Stardust on Jan 26, 2017.
- * Modified by SuperMonster003 as of Feb 15, 2022.
+ * Modified by SuperMonster003 as of Jan 28, 2026.
  */
 class AccessibilityTool(private val context: Context? = null) {
 
@@ -43,13 +42,14 @@ class AccessibilityTool(private val context: Context? = null) {
     }
 
     @ScriptInterface
-    fun launchSettings() {
-        "${mContext.getString(R.string.text_please_choose)} ${mContext.getString(R.string.app_name)}".let {
-            ViewUtils.showToast(mContext, it, true)
+    @JvmOverloads
+    fun launchSettings(showGuideMessage: Boolean = true, showExceptionHint: Boolean = true) {
+        if (showGuideMessage) {
+            val msg = "${mContext.getString(R.string.text_please_choose)} ${mContext.getString(R.string.app_name)}"
+            ViewUtils.showToast(mContext, msg, true)
         }
-        try {
-            Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS).startSafely(mApplicationContext)
-        } catch (_: ActivityNotFoundException) {
+        val result = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS).startSafely(mApplicationContext)
+        if (!result && showExceptionHint) {
             ViewUtils.showToast(mContext, R.string.go_to_accessibility_settings, true)
         }
     }
@@ -81,6 +81,9 @@ class AccessibilityTool(private val context: Context? = null) {
     // zh-CN: 表示服务已启用, 且在当前进程中已确认可用.
     @ScriptInterface
     fun isOperational() = isRunning() && AccessibilityService.hasOperationalState
+
+    @ScriptInterface
+    fun isMalfunctioning() = hasService() && !hasInstance()
 
     @JvmOverloads
     @ScriptInterface

@@ -1455,5 +1455,7 @@
     <string name="dialog_button_homepage">Homepage</string>
     <string name="error_failed_to_change_the_toggle_state">Failed to change the toggle state</string>
     <string name="text_post_notifications_permission_rationale">To ensure that AutoJs6 foreground services, etc. can work properly and that scripts can post notifications, AutoJs6 must be granted the \"post notifications\" permission.</string>
+    <string name="description_pointer_location">\"Pointer location\" is a debugging feature in Android Developer options.\nWhen enabled, the system will display information about touch point(s) on the screen, such as [coordinates/movement trajectory/count/size/movement speed/pressure], which helps with [writing/debugging/verification] of related scripts.</string>
+    <string name="error_an_error_occurred">An error occurred</string>
 
 </resources>

@@ -1199,5 +1199,7 @@
     <string name="dialog_button_homepage">ホームページ</string>
     <string name="error_failed_to_change_the_toggle_state">スイッチの状態の変更に失敗しました</string>
     <string name="text_post_notifications_permission_rationale">AutoJs6 のフォアグラウンドサービス等が正常に動作し, スクリプトが通知を投稿できるようにするため, AutoJs6 には \"通知の送信\" 権限を付与する必要があります.</string>
+    <string name="description_pointer_location">\"ポインタの位置\" は Android の開発者向けオプションにあるデバッグ機能です.\n有効にすると, システムが画面上にタッチポイントの [座標/移動軌跡/数/サイズ/移動速度/圧力] などの情報を表示し, 関連スクリプトの [作成/デバッグ/検証] に役立ちます.</string>
+    <string name="error_an_error_occurred">エラーが発生しました</string>
 
 </resources>

@@ -1196,5 +1196,7 @@
     <string name="dialog_button_homepage">主頁</string>
     <string name="error_failed_to_change_the_toggle_state">開關狀態改變失敗</string>
     <string name="text_post_notifications_permission_rationale">為確保 AutoJs6 前台服務等能夠正常運行, 腳本能夠發佈通知, AutoJs6 需要被授予 \"發佈通知權限\".</string>
+    <string name="description_pointer_location">\"指針位置\" 是安卓開發者選項中的調試功能.\n開啓後, 系統會在屏幕上顯示觸摸點的 [座標/移動軌跡/數量/大小/移動速度/壓力] 等信息, 便於相關腳本的 [編寫/調試/校對] 等.</string>
+    <string name="error_an_error_occurred">發生錯誤</string>
 
 </resources>

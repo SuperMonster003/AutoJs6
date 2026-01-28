@@ -1200,5 +1200,7 @@
     <string name="dialog_button_homepage">الصفحة الرئيسية</string>
     <string name="error_failed_to_change_the_toggle_state">تعذّر تغيير حالة المفتاح</string>
     <string name="text_post_notifications_permission_rationale">لضمان عمل خدمات المقدّمة في AutoJs6 وغيرها بشكل طبيعي، وتمكين السكربتات من نشر الإشعارات، يجب منح AutoJs6 إذن \"نشر الإشعارات\".</string>
+    <string name="description_pointer_location">\"موقع المؤشر\" هي ميزة تصحيح أخطاء ضمن خيارات المطوّر في Android.\nعند تفعيلها، يعرض النظام على الشاشة معلومات نقاط اللمس مثل [الإحداثيات/مسار الحركة/العدد/الحجم/سرعة الحركة/الضغط]، مما يسهل [كتابة/تصحيح/التحقق من] السكربتات ذات الصلة.</string>
+    <string name="error_an_error_occurred">حدث خطأ</string>
 
 </resources>

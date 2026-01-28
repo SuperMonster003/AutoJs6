@@ -1,14 +1,14 @@
 package org.autojs.autojs.runtime.api.augment.device
 
-import android.provider.Settings
 import androidx.core.net.toUri
 import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
-import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
-import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
+import org.autojs.autojs.app.tool.PointerLocationTool
 import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.rhino.ArgumentGuards.Companion.component1
 import org.autojs.autojs.rhino.ArgumentGuards.Companion.component2
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
+import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.ScreenMetrics
 import org.autojs.autojs.runtime.api.augment.Augmentable
@@ -19,8 +19,6 @@ import org.autojs.autojs.util.DeviceUtils
 import org.autojs.autojs.util.NetworkUtils
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED
 import org.autojs.autojs.util.RhinoUtils.coerceBoolean
-import org.autojs.autojs.util.ShellUtils
-import org.autojs.autojs.util.ShellUtils.PointerLocation
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.Undefined
@@ -124,14 +122,14 @@ class Device(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @JvmStatic
         @RhinoFunctionBody
         fun vibrateRhinoWithRuntime(scriptRuntime: ScriptRuntime, o: Any?, p: Any?) {
-            when {
-                o is String -> {
+            when (o) {
+                is String -> {
                     MorseCode.vibrateRhino(o, p)
                 }
-                o is Number && p is Number -> {
+                is Number if p is Number -> {
                     scriptRuntime.device.vibrate(/* off = */ o.toLong(), /* millis = */ p.toLong())
                 }
-                o is NativeArray && p is Number -> {
+                is NativeArray if p is Number -> {
                     val listOff = listOf(p.toLong())
                     val listOthers = o.map { toVibrateTimingElement(it) }
                     val timings = (listOff + listOthers).toLongArray()
@@ -253,7 +251,7 @@ class Device(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             //  #     }
             //  # }
 
-            ShellUtils.checkPointerLocationState(globalContext, enabled) || ShellUtils.togglePointerLocation(globalContext)
+            PointerLocationTool.checkPointerLocationState(globalContext, enabled) || PointerLocationTool.togglePointerLocation(globalContext)
         }
 
         @JvmStatic
@@ -271,17 +269,13 @@ class Device(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun isPointerLocationEnabled(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsIsEmpty(args) {
-            try {
-                Settings.System.getInt(globalContext.contentResolver, KEY_POINTER_LOCATION, PointerLocation.DISABLED.value) == PointerLocation.ENABLED.value
-            } catch (e: Exception) {
-                ShellUtils.checkPointerLocationState(globalContext, true)
-            }
+            PointerLocationTool.isPointerLocationEnabled(globalContext)
         }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun isPointerLocationDisabled(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsIsEmpty(args) {
-            !isPointerLocationEnabled(scriptRuntime, args)
+            PointerLocationTool.isPointerLocationDisabled(globalContext)
         }
 
         @JvmStatic

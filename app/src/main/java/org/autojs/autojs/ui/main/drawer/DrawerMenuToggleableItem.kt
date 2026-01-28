@@ -95,7 +95,14 @@ open class DrawerMenuToggleableItem : DrawerMenuItem, IToggleableItem {
                         onNeutral { d, _ ->
                             runCatching {
                                 listener(d)
-                            }.getOrNull() ?: ViewUtils.showSnack(d.view, R.string.error_failed_to_launch_manager)
+                            }.onFailure { e ->
+                                MaterialDialog.Builder(itemHelper.context)
+                                    .title(R.string.error_failed_to_launch_manager)
+                                    .apply { e.message?.let { content(it) } }
+                                    .positiveText(R.string.dialog_button_dismiss)
+                                    .positiveColorRes(R.color.dialog_button_default)
+                                    .show()
+                            }
                         }
                     }
                     mOnLaunchSettingsListener?.let { listener ->
@@ -104,7 +111,14 @@ open class DrawerMenuToggleableItem : DrawerMenuItem, IToggleableItem {
                         onPositive { d, _ ->
                             runCatching {
                                 listener(d)
-                            }.getOrNull() ?: ViewUtils.showSnack(d.view, R.string.error_failed_to_launch_system_settings)
+                            }.onFailure { e ->
+                                MaterialDialog.Builder(itemHelper.context)
+                                    .title(R.string.error_failed_to_launch_system_settings)
+                                    .apply { e.message?.let { content(it) } }
+                                    .positiveText(R.string.dialog_button_dismiss)
+                                    .positiveColorRes(R.color.dialog_button_default)
+                                    .show()
+                            }
                         }
                     }
                 }

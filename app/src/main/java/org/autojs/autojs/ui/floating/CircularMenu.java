@@ -15,6 +15,7 @@ import org.autojs.autojs.AutoJs;
 import org.autojs.autojs.app.AppLevelThemeDialogBuilder;
 import org.autojs.autojs.app.CircularMenuOperationDialogBuilder;
 import org.autojs.autojs.app.DialogUtils;
+import org.autojs.autojs.app.tool.PointerLocationTool;
 import org.autojs.autojs.core.accessibility.AccessibilityTool;
 import org.autojs.autojs.core.accessibility.Capture;
 import org.autojs.autojs.core.accessibility.LayoutInspector;
@@ -38,7 +39,6 @@ import org.autojs.autojs.ui.floating.layoutinspector.LayoutHierarchyFloatyWindow
 import org.autojs.autojs.ui.main.MainActivity;
 import org.autojs.autojs.util.ClipboardUtils;
 import org.autojs.autojs.util.RootUtils;
-import org.autojs.autojs.util.ShellUtils;
 import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs.util.WorkingDirectoryUtils;
 import org.autojs.autojs6.R;
@@ -75,14 +75,15 @@ public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
     private final GlobalActionRecorder mRecorder;
     private final Recorder.OnStateChangedListener mRecorderStateListener;
     private CircularActionMenuBinding binding;
-    private MaterialDialog mSettingsDialog;
+    private MaterialDialog mMenuOperationDialog;
     private MaterialDialog mScriptListDialog;
     private ExplorerView mScriptListDialogExplorerView;
     private MaterialDialog mLayoutInspectDialog;
-    private String mRunningPackage;
-    private String mRunningActivity;
+    private String mCurrentPackage;
+    private String mCurrentActivity;
     private Deferred<Capture, Void, Void> mCaptureDeferred;
     private final AccessibilityTool mA11yTool;
+    private final PointerLocationTool mPointerLocationTool;
 
     private final View.OnClickListener mCollapseWindowAndInspectLayoutBoundsListener = v -> {
         mWindow.collapse();
@@ -124,6 +125,7 @@ public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
         mRecorder.addOnStateChangedListener(mRecorderStateListener);
         AutoJs.getInstance().getLayoutInspector().addCaptureAvailableListener(this);
         mA11yTool = new AccessibilityTool(mContext);
+        mPointerLocationTool = new PointerLocationTool(mContext);
     }
 
     private void setupWindowListeners() {
@@ -267,65 +269,59 @@ public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
         binding.actionMenuMore.setOnClickListener(v -> {
             mWindow.collapse();
 
-            if (mSettingsDialog != null && mSettingsDialog.isShowing()) {
-                mSettingsDialog.dismiss();
+            if (mMenuOperationDialog != null && mMenuOperationDialog.isShowing()) {
+                mMenuOperationDialog.dismiss();
             }
 
-            applyComponentInformation();
-
-            // noinspection CodeBlock2Expr
-            mSettingsDialog = new CircularMenuOperationDialogBuilder(mContext)
-                    .item(R.drawable.ic_accessibility_black_48dp, mContext.getString(R.string.text_manage_a11y_service), onCircularMenuItemClick(v1 -> {
-                        mA11yTool.launchSettings();
+            mMenuOperationDialog = new CircularMenuOperationDialogBuilder(mContext)
+                    .item(R.drawable.ic_accessibility_black_48dp, mContext.getString(R.string.text_a11y_service), this::getA11yState, onCircularMenuItemClick(itemView -> {
+                        mA11yTool.launchSettings(false, true);
                     }))
-                    .item(R.drawable.ic_text_fields_black_48dp, mContext.getString(R.string.text_latest_package) + ":\n" + getRunningPackage(), onCircularMenuItemClick(v1 -> {
-                        if (!TextUtils.isEmpty(mRunningPackage)) {
-                            ClipboardUtils.setClip(mContext, mRunningPackage);
+                    .item(R.drawable.ic_text_fields_black_48dp, mContext.getString(R.string.text_latest_package), this::getCurrentPackage, onCircularMenuItemClick(itemView -> {
+                        if (!TextUtils.isEmpty(mCurrentPackage)) {
+                            ClipboardUtils.setClip(mContext, mCurrentPackage);
                             ViewUtils.showToast(mContext, getTextAlreadyCopied(R.string.text_latest_package));
                         }
                     }))
-                    .item(R.drawable.ic_text_fields_black_48dp, mContext.getString(R.string.text_latest_activity) + ":\n" + getRunningActivity(), onCircularMenuItemClick(v1 -> {
-                        if (!TextUtils.isEmpty(mRunningActivity)) {
-                            ClipboardUtils.setClip(mContext, mRunningActivity);
+                    .item(R.drawable.ic_text_fields_black_48dp, mContext.getString(R.string.text_latest_activity), this::getCurrentActivity, onCircularMenuItemClick(itemView -> {
+                        if (!TextUtils.isEmpty(mCurrentActivity)) {
+                            ClipboardUtils.setClip(mContext, mCurrentActivity);
                             ViewUtils.showToast(mContext, getTextAlreadyCopied(R.string.text_latest_activity));
                         }
                     }))
-                    .item(R.drawable.ic_home_black_48dp, mContext.getString(R.string.text_open_main_activity), onCircularMenuItemClick(v1 -> {
+                    .item(R.drawable.ic_home_black_48dp, mContext.getString(R.string.text_open_main_activity), onCircularMenuItemClick(itemView -> {
                         MainActivity.launch(mContext);
                     }))
-                    .item(R.drawable.ic_control_point_black_48dp, mContext.getString(R.string.text_pointer_location), onCircularMenuItemClick(v1 -> {
-                        if (!ShellUtils.togglePointerLocation(mContext)) {
-                            ViewUtils.showToast(mContext, mContext.getString(R.string.text_pointer_location_toggle_failed_with_hint), true);
+                    .item(R.drawable.ic_control_point_black_48dp, mContext.getString(R.string.text_pointer_location), this::getPointerLocationState, onCircularMenuItemClick(itemView -> {
+                        if (PointerLocationTool.togglePointerLocation(mContext)) {
+                            // var subtitleView = itemView.findViewById(R.id.subtitle);
+                            // if (subtitleView instanceof TextView textView) {
+                            //     textView.setText(mPointerLocationTool.isShowing() ? mContext.getString(R.string.text_enabled) : mContext.getString(R.string.text_disabled));
+                            // }
+                            EventBus.getDefault().post(new PointerLocationTool.Companion.StateChangedEvent());
+                            return;
                         }
+                        // ViewUtils.showToast(mContext, mContext.getString(R.string.text_pointer_location_toggle_failed_with_hint), true);
+                        mPointerLocationTool.config();
                     }))
-                    .item(R.drawable.ic_close_white_48dp, mContext.getString(R.string.text_close_floating_button), onCircularMenuItemClick(v1 -> {
+                    .item(R.drawable.ic_close_white_48dp, mContext.getString(R.string.text_close_floating_button), onCircularMenuItemClick(itemView -> {
                         closeAndSaveState(false);
                     }))
                     .title(mContext.getString(R.string.text_more))
                     .build();
 
-            DialogUtils.showAdaptive(mSettingsDialog);
+            DialogUtils.showAdaptive(mMenuOperationDialog);
         });
     }
 
-    private void applyComponentInformation() {
-        if (WrappedShizuku.INSTANCE.isOperational() && WrappedShizuku.service != null) {
-            try {
-                mRunningPackage = WrappedShizuku.service.currentPackage();
-                mRunningActivity = WrappedShizuku.service.currentActivity();
-                return;
-            } catch (RemoteException ignored) {
+    @NonNull
+    private String getA11yState() {
+        return mA11yTool.isMalfunctioning() ? mContext.getString(R.string.text_malfunctioning) : mA11yTool.isRunning() ? mContext.getString(R.string.text_enabled) : mContext.getString(R.string.text_disabled);
+    }
 
-            }
-        }
-        if (RootUtils.isRootAvailable()) {
-            mRunningPackage = Shell.currentPackageRhino();
-            mRunningActivity = Shell.currentActivityRhino();
-            return;
-        }
-        ActivityInfoProvider infoProvider = AutoJs.getInstance().getInfoProvider();
-        mRunningPackage = infoProvider.getLatestPackageByUsageStatsIfGranted();
-        mRunningActivity = infoProvider.getLatestActivity();
+    @NonNull
+    private String getPointerLocationState() {
+        return mPointerLocationTool.isShowing() ? mContext.getString(R.string.text_enabled) : mContext.getString(R.string.text_disabled);
     }
 
     @NonNull
@@ -415,16 +411,52 @@ public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
         mWindow.savePosition(newConfig);
     }
 
-    private String getRunningPackage() {
-        if (!TextUtils.isEmpty(mRunningPackage)) {
-            return mRunningPackage;
+    private String getCurrentPackage() {
+        if (WrappedShizuku.INSTANCE.isOperational()) {
+            try {
+                mCurrentPackage = Objects.requireNonNull(WrappedShizuku.service).currentPackage();
+                if (!TextUtils.isEmpty(mCurrentPackage)) {
+                    return mCurrentPackage;
+                }
+            } catch (RemoteException ignored) {
+                /* Ignored. */
+            }
+        }
+        if (RootUtils.isRootAvailable()) {
+            mCurrentPackage = Shell.currentPackageRhino();
+            if (!TextUtils.isEmpty(mCurrentPackage)) {
+                return mCurrentPackage;
+            }
+        }
+        ActivityInfoProvider infoProvider = AutoJs.getInstance().getInfoProvider();
+        mCurrentPackage = infoProvider.getLatestPackageByUsageStatsIfGranted();
+        if (!TextUtils.isEmpty(mCurrentPackage)) {
+            return mCurrentPackage;
         }
         return getEmptyInfoHint();
     }
 
-    private String getRunningActivity() {
-        if (!TextUtils.isEmpty(mRunningActivity)) {
-            return mRunningActivity;
+    private String getCurrentActivity() {
+        if (WrappedShizuku.INSTANCE.isOperational()) {
+            try {
+                mCurrentActivity = Objects.requireNonNull(WrappedShizuku.service).currentActivity();
+                if (!TextUtils.isEmpty(mCurrentActivity)) {
+                    return mCurrentActivity;
+                }
+            } catch (RemoteException ignored) {
+                /* Ignored. */
+            }
+        }
+        if (RootUtils.isRootAvailable()) {
+            mCurrentActivity = Shell.currentActivityRhino();
+            if (!TextUtils.isEmpty(mCurrentActivity)) {
+                return mCurrentActivity;
+            }
+        }
+        ActivityInfoProvider infoProvider = AutoJs.getInstance().getInfoProvider();
+        mCurrentActivity = infoProvider.getLatestActivity();
+        if (!TextUtils.isEmpty(mCurrentActivity)) {
+            return mCurrentActivity;
         }
         return getEmptyInfoHint();
     }
@@ -443,9 +475,9 @@ public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
     }
 
     private void dismissSettingsDialog() {
-        if (mSettingsDialog != null) {
-            mSettingsDialog.dismiss();
-            mSettingsDialog = null;
+        if (mMenuOperationDialog != null) {
+            mMenuOperationDialog.dismiss();
+            mMenuOperationDialog = null;
         }
     }
 
