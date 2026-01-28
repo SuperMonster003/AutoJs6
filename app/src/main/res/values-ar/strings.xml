@@ -332,9 +332,9 @@
     <string name="error_unknown_type">نوع غير معروف: %s</string>
     <string name="error_webp_lossless_quality_not_supported">لا يمكن ضغط تنسيق WebP-Lossless باستخدام معامل الجودة؛ استخدم JPEG/PNG/WebP-Lossy بدلاً من ذلك</string>
     <string name="file_not_exist_or_readable">الملف غير موجود أو قابلاً للقراءة: %s</string>
-    <string name="foreground_notification_channel_name">خدمة مقدمة AutoJs6</string>
-    <string name="foreground_notification_text">انقر لإطلاق AutoJs6</string>
-    <string name="foreground_notification_title">خدمة مقدمة AutoJs6</string>
+    <string name="foreground_notification_channel_name">خدمة مقدمة %1$s</string>
+    <string name="foreground_notification_text">انقر لإطلاق %1$s</string>
+    <string name="foreground_notification_title">خدمة مقدمة %1$s</string>
     <string name="format_build_succeeded" formatted="true">نجح بناء.\nمسار الملف: %s</string>
     <string name="format_debug_bar_title"><![CDATA[تصحيح [ %s ]]]></string>
     <string name="format_editor_info" formatted="false">chars: %s\nالخطوط: %s\nبحجم: %s</string>
@@ -1202,5 +1202,8 @@
     <string name="text_post_notifications_permission_rationale">لضمان عمل خدمات المقدّمة في AutoJs6 وغيرها بشكل طبيعي، وتمكين السكربتات من نشر الإشعارات، يجب منح AutoJs6 إذن \"نشر الإشعارات\".</string>
     <string name="description_pointer_location">\"موقع المؤشر\" هي ميزة تصحيح أخطاء ضمن خيارات المطوّر في Android.\nعند تفعيلها، يعرض النظام على الشاشة معلومات نقاط اللمس مثل [الإحداثيات/مسار الحركة/العدد/الحجم/سرعة الحركة/الضغط]، مما يسهل [كتابة/تصحيح/التحقق من] السكربتات ذات الصلة.</string>
     <string name="error_an_error_occurred">حدث خطأ</string>
+    <string name="text_permission_management">إدارة الأذونات</string>
+    <string name="text_service_management">إدارة الخدمات</string>
+    <string name="summary_foreground_service_inrt">تتيح خدمة المقدمة الحفاظ على تشغيل التطبيق والبرامج النصية بشكل أكثر استقرارًا في الخلفية</string>
 
 </resources>

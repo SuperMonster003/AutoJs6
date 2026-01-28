@@ -1,9 +1,13 @@
-package org.autojs.autojs.theme.preference
+package org.autojs.autojs.inrt.theme.preference
 
 import android.content.Context
 import android.util.AttributeSet
+import org.autojs.autojs.service.ForegroundService
+import org.autojs.autojs.theme.preference.ThemeColorServiceSwitchPreference
 
-abstract class ThemeColorPermissionSwitchPreference : ThemeColorSwitchPreference, Syncable {
+class ForegroundServiceSwitchPreference : ThemeColorServiceSwitchPreference {
+
+    val svc by lazy { ForegroundService(context) }
 
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes)
 
@@ -13,23 +17,10 @@ abstract class ThemeColorPermissionSwitchPreference : ThemeColorSwitchPreference
 
     constructor(context: Context) : super(context)
 
-    override fun sync() {
-        isChecked = has()
-    }
+    override fun isRunning() = svc.isRunning
 
-    abstract fun has(): Boolean
+    override fun start() = svc.start()
 
-    abstract fun request(): Boolean
-
-    abstract fun revoke(): Boolean
-
-    override fun onClick() {
-        toggle()
-        super.onClick()
-    }
-
-    private fun toggle() {
-        if (isChecked) revoke() else request()
-    }
+    override fun stop() = svc.stop()
 
 }

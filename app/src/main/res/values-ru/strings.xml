@@ -330,9 +330,9 @@
     <string name="error_unknown_type">Неизвестный тип: %s</string>
     <string name="error_webp_lossless_quality_not_supported">Формат WebP-Lossless нельзя сжать с параметром качества; используйте вместо этого JPEG/PNG/WebP-Lossy</string>
     <string name="file_not_exist_or_readable">\"Файл не существует или не доступен для чтения: %s\".</string>
-    <string name="foreground_notification_channel_name">Служба AutoJs6 в фоновом режиме</string>
-    <string name="foreground_notification_text">Нажмите для запуска AutoJs6</string>
-    <string name="foreground_notification_title">Фоновая служба AutoJs6</string>
+    <string name="foreground_notification_channel_name">Служба %1$s в фоновом режиме</string>
+    <string name="foreground_notification_text">Нажмите для запуска %1$s</string>
+    <string name="foreground_notification_title">Фоновая служба %1$s</string>
     <string name="format_build_succeeded" formatted="true">Сборка прошла успешно.\nПуть к файлу: %s</string>
     <string name="format_debug_bar_title"><![CDATA[Отладка [ %s ]]]></string>
     <string name="format_editor_info" formatted="false">Заголовки: %d\nСтроки: %d\nРазмер: %s</string>
@@ -1200,5 +1200,8 @@
     <string name="text_post_notifications_permission_rationale">Чтобы обеспечить корректную работу фоновых служб переднего плана AutoJs6 и возможность публикации уведомлений скриптами, AutoJs6 необходимо предоставить разрешение \"публикации уведомлений\".</string>
     <string name="description_pointer_location">\"Положение указателя\" - это отладочная функция в параметрах разработчика Android.\nПосле включения система будет отображать на экране сведения о точке(ах) касания, такие как [координаты/траектория движения/количество/размер/скорость движения/давление], что упрощает [написание/отладку/проверку] соответствующих скриптов.</string>
     <string name="error_an_error_occurred">Произошла ошибка</string>
+    <string name="text_permission_management">Управление разрешениями</string>
+    <string name="text_service_management">Управление службами</string>
+    <string name="summary_foreground_service_inrt">Служба на переднем плане позволяет более стабильно поддерживать работу приложения и скриптов в фоновом режиме</string>
 
 </resources>

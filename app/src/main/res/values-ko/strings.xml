@@ -332,9 +332,9 @@
     <string name="error_unknown_type">알 수없는 유형: %s</string>
     <string name="error_webp_lossless_quality_not_supported">WebP-Lossless 형식은 품질 파라미터로 압축할 수 없습니다, 대신 JPEG/PNG/WebP-Lossy를 사용하세요</string>
     <string name="file_not_exist_or_readable">파일이 존재하지 않거나 읽을 수 없습니다: %s</string>
-    <string name="foreground_notification_channel_name">AutoJs6 전경 서비스</string>
-    <string name="foreground_notification_text">AutoJs6 을 시작하려면 클릭하십시오</string>
-    <string name="foreground_notification_title">AutoJs6 전경 서비스</string>
+    <string name="foreground_notification_channel_name">%1$s 전경 서비스</string>
+    <string name="foreground_notification_text">%1$s 을 시작하려면 클릭하십시오</string>
+    <string name="foreground_notification_title">%1$s 전경 서비스</string>
     <string name="format_build_succeeded" formatted="true">빌드가 성공했습니다.\n파일 경로: %s</string>
     <string name="format_debug_bar_title"><![CDATA[디버그 [ %s ]]]></string>
     <string name="format_editor_info" formatted="false">숯: %d\n라인: %d\n크기: %s</string>
@@ -1202,5 +1202,8 @@
     <string name="text_post_notifications_permission_rationale">AutoJs6 포그라운드 서비스 등이 정상적으로 동작하고 스크립트가 알림을 게시할 수 있도록 하려면, AutoJs6 에 \"알림 게시\" 권한을 부여해야 합니다.</string>
     <string name="description_pointer_location">\"포인터 위치\" 는 Android 개발자 옵션에 있는 디버깅 기능입니다.\n활성화하면 시스템이 화면에 터치 지점의 [좌표/이동 궤적/개수/크기/이동 속도/압력] 등의 정보를 표시하여 관련 스크립트의 [작성/디버깅/검증] 에 도움이 됩니다.</string>
     <string name="error_an_error_occurred">오류가 발생했습니다</string>
+    <string name="text_permission_management">권한 관리</string>
+    <string name="text_service_management">서비스 관리</string>
+    <string name="summary_foreground_service_inrt">포그라운드 서비스는 백그라운드에서 앱과 스크립트 실행을 더 안정적으로 유지합니다</string>
 
 </resources>

@@ -2,12 +2,13 @@ package org.autojs.autojs.ui.main.drawer
 
 import android.os.Handler
 import android.os.Looper
+import org.autojs.autojs.theme.preference.Syncable
 
-interface IToggleableItem {
+interface IToggleableItem : Syncable {
 
     fun toggle(aimState: Boolean)
 
-    fun sync()
+    override fun sync()
 
     fun sync(callback: Runnable) {
         sync()

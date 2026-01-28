@@ -21,7 +21,7 @@ import org.autojs.autojs.app.tool.PointerLocationTool
 import org.autojs.autojs.core.accessibility.AccessibilityTool
 import org.autojs.autojs.core.plugin.center.PluginCenterActivity
 import org.autojs.autojs.core.pref.Pref
-import org.autojs.autojs.external.foreground.MainActivityForegroundService
+import org.autojs.autojs.external.foreground.AppForegroundService
 import org.autojs.autojs.permission.AllFilesAccessPermission
 import org.autojs.autojs.permission.DisplayOverOtherAppsPermission
 import org.autojs.autojs.permission.IgnoreBatteryOptimizationsPermission
@@ -187,7 +187,7 @@ open class DrawerFragment : Fragment() {
             descriptionRes = R.string.description_foreground_service,
             prefKey = R.string.key_foreground_service,
         ).setOnLaunchSettingsListener {
-            NotificationUtils.launchChannelSettings(mContext, MainActivityForegroundService::class.java)
+            NotificationUtils.launchChannelSettings(mContext, AppForegroundService::class.java)
         }
 
         mFloatingButtonItem = DrawerMenuToggleableItem(
