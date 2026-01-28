@@ -4,11 +4,11 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import org.autojs.autojs.core.console.ConsoleImpl
 import org.autojs.autojs.inrt.autojs.AutoJs
 import org.autojs.autojs.inrt.launch.GlobalProjectLauncher
 import org.autojs.autojs.ui.BaseActivity
+import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ActivityMainInrtBinding
 
@@ -29,6 +29,7 @@ class LogActivity : BaseActivity() {
             setContentView(binding.root)
             binding.toolbar.apply {
                 setSupportActionBar(this)
+                ViewUtils.setStatusBarIconLight(this@LogActivity, false)
             }
             binding.console.apply {
                 setConsole(AutoJs.instance.globalConsole as ConsoleImpl)

@@ -3,7 +3,7 @@ package org.autojs.autojs.theme.preference
 import android.content.Context
 import android.util.AttributeSet
 
-abstract class ThemeColorPermissionSwitchPreference : ThemeColorSwitchPreference {
+abstract class ThemeColorPermissionSwitchPreference : ThemeColorSwitchPreference, Syncable {
 
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes)
 
@@ -13,7 +13,7 @@ abstract class ThemeColorPermissionSwitchPreference : ThemeColorSwitchPreference
 
     constructor(context: Context) : super(context)
 
-    fun sync() {
+    override fun sync() {
         isChecked = has()
     }
 
@@ -23,7 +23,10 @@ abstract class ThemeColorPermissionSwitchPreference : ThemeColorSwitchPreference
 
     abstract fun revoke(): Boolean
 
-    override fun onClick() = toggle()
+    override fun onClick() {
+        toggle()
+        super.onClick()
+    }
 
     private fun toggle() {
         if (isChecked) revoke() else request()

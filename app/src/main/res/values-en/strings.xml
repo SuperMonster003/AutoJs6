@@ -327,9 +327,9 @@
     <string name="error_unknown_type">Unknown type: %s</string>
     <string name="error_webp_lossless_quality_not_supported">Format WebP-Lossless cannot be compressed with a quality parameter, use JPEG/PNG/WebP-Lossy instead</string>
     <string name="file_not_exist_or_readable">File does not exist or readable: %s</string>
-    <string name="foreground_notification_channel_name">AutoJs6 foreground service</string>
-    <string name="foreground_notification_text">Click to launch AutoJs6</string>
-    <string name="foreground_notification_title">AutoJs6 foreground service</string>
+    <string name="foreground_notification_channel_name">%1$s foreground service</string>
+    <string name="foreground_notification_text">Click to launch %1$s</string>
+    <string name="foreground_notification_title">%1$s foreground service</string>
     <string name="format_build_succeeded" formatted="true">Build succeeded.\nFile path: %s</string>
     <string name="format_debug_bar_title"><![CDATA[Debug [ %s ]]]></string>
     <string name="format_editor_info" formatted="false">Chars: %d\nLines: %d\nSize: %s</string>
@@ -1197,5 +1197,8 @@
     <string name="text_post_notifications_permission_rationale">To ensure that AutoJs6 foreground services, etc. can work properly and that scripts can post notifications, AutoJs6 must be granted the \"post notifications\" permission.</string>
     <string name="description_pointer_location">\"Pointer location\" is a debugging feature in Android Developer options.\nWhen enabled, the system will display information about touch point(s) on the screen, such as [coordinates/movement trajectory/count/size/movement speed/pressure], which helps with [writing/debugging/verification] of related scripts.</string>
     <string name="error_an_error_occurred">An error occurred</string>
+    <string name="text_permission_management">Permission management</string>
+    <string name="text_service_management">Service management</string>
+    <string name="summary_foreground_service_inrt">The foreground service helps keep the app and scripts running more reliably in the background</string>
 
 </resources>

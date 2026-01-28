@@ -328,9 +328,9 @@
     <string name="error_unknown_type">未知型別: %s</string>
     <string name="error_webp_lossless_quality_not_supported">WebP-Lossless 格式無法使用 quality 質量引數進行壓縮, 可改用 JPEG/PNG/WebP-Lossy</string>
     <string name="file_not_exist_or_readable">檔案不存在或不可讀: %s</string>
-    <string name="foreground_notification_channel_name">AutoJs6 前臺服務</string>
-    <string name="foreground_notification_text">點選返回 AutoJs6 主介面</string>
-    <string name="foreground_notification_title">AutoJs6 前臺服務</string>
+    <string name="foreground_notification_channel_name">%1$s 前臺服務</string>
+    <string name="foreground_notification_text">點選返回 %1$s 主介面</string>
+    <string name="foreground_notification_title">%1$s 前臺服務</string>
     <string name="format_build_succeeded">構建成功.\n檔案路徑: %s</string>
     <string name="format_debug_bar_title"><![CDATA[除錯 [ %s ]]]></string>
     <string name="format_editor_info" formatted="false">字元數: %d\n行數: %d\n大小: %s</string>
@@ -1198,5 +1198,8 @@
     <string name="text_post_notifications_permission_rationale">為確保 AutoJs6 前臺服務等能夠正常執行, 指令碼能夠釋出通知, AutoJs6 需要被授予 \"釋出通知許可權\".</string>
     <string name="description_pointer_location">\"指標位置\" 是安卓開發者選項中的除錯功能.\n開啟後, 系統會在螢幕上顯示觸控點的 [座標/移動軌跡/數量/大小/移動速度/壓力] 等資訊, 便於相關指令碼的 [編寫/除錯/校對] 等.</string>
     <string name="error_an_error_occurred">發生錯誤</string>
+    <string name="text_permission_management">許可權管理</string>
+    <string name="text_service_management">服務管理</string>
+    <string name="summary_foreground_service_inrt">前臺服務用於在後臺更穩定地保持應用及指令碼執行</string>
 
 </resources>

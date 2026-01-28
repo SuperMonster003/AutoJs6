@@ -328,9 +328,9 @@
     <string name="error_unknown_type">未知类型: %s</string>
     <string name="error_webp_lossless_quality_not_supported">WebP-Lossless 格式无法使用 quality 质量参数进行压缩, 可改用 JPEG/PNG/WebP-Lossy</string>
     <string name="file_not_exist_or_readable">文件不存在或不可读: %s</string>
-    <string name="foreground_notification_channel_name">AutoJs6 前台服务</string>
-    <string name="foreground_notification_text">点击返回 AutoJs6 主界面</string>
-    <string name="foreground_notification_title">AutoJs6 前台服务</string>
+    <string name="foreground_notification_channel_name">%1$s 前台服务</string>
+    <string name="foreground_notification_text">点击返回 %1$s 主界面</string>
+    <string name="foreground_notification_title">%1$s 前台服务</string>
     <string name="format_build_succeeded">构建成功.\n文件路径: %s</string>
     <string name="format_debug_bar_title"><![CDATA[调试 [ %s ]]]></string>
     <string name="format_editor_info" formatted="false">字符数: %d\n行数: %d\n大小: %s</string>
@@ -1198,5 +1198,8 @@
     <string name="text_post_notifications_permission_rationale">为确保 AutoJs6 前台服务等能够正常运行, 脚本能够发布通知, AutoJs6 需要被授予 \"发布通知权限\".</string>
     <string name="description_pointer_location">\"指针位置\" 是安卓开发者选项中的调试功能.\n开启后, 系统会在屏幕上显示触摸点的 [坐标/移动轨迹/数量/大小/移动速度/压力] 等信息, 便于相关脚本的 [编写/调试/校对] 等.</string>
     <string name="error_an_error_occurred">发生错误</string>
+    <string name="text_permission_management">权限管理</string>
+    <string name="text_service_management">服务管理</string>
+    <string name="summary_foreground_service_inrt">前台服务用于在后台更稳定地保持应用及脚本运行</string>
 
 </resources>

@@ -330,9 +330,9 @@
     <string name="error_unknown_type">Tipo desconocido: %s</string>
     <string name="error_webp_lossless_quality_not_supported">El formato WebP-Lossless no se puede comprimir con un parámetro de calidad; usa JPEG/PNG/WebP-Lossy en su lugar</string>
     <string name="file_not_exist_or_readable">El archivo no existe o no se puede leer: %s</string>
-    <string name="foreground_notification_channel_name">Servicio de primer plano de AutoJs6</string>
-    <string name="foreground_notification_text">Haga clic para iniciar AutoJs6</string>
-    <string name="foreground_notification_title">Servicio de primer plano de AutoJs6</string>
+    <string name="foreground_notification_channel_name">Servicio de primer plano de %1$s</string>
+    <string name="foreground_notification_text">Haga clic para iniciar %1$s</string>
+    <string name="foreground_notification_title">Servicio de primer plano de %1$s</string>
     <string name="format_build_succeeded" formatted="true">La construcción se ha realizado con éxito.\nRuta del archivo: %s</string>
     <string name="format_debug_bar_title"><![CDATA[Depuración [ %s ]]]></string>
     <string name="format_editor_info" formatted="false">Caracteres: %d\nLíneas: %d\nTamaño: %s</string>
@@ -1200,5 +1200,8 @@
     <string name="text_post_notifications_permission_rationale">Para garantizar que los servicios en primer plano de AutoJs6, etc. funcionen correctamente y que los scripts puedan publicar notificaciones, AutoJs6 debe recibir el permiso de \"publicar notificaciones\".</string>
     <string name="description_pointer_location">\"Ubicación del puntero\" es una función de depuración en las opciones de desarrollador de Android.\nAl activarla, el sistema mostrará en pantalla información del/de los punto(s) de toque, como [coordenadas/trayectoria de movimiento/cantidad/tamaño/velocidad de movimiento/presión], lo que facilita la [escritura/depuración/verificación] de los scripts relacionados.</string>
     <string name="error_an_error_occurred">Se produjo un error</string>
+    <string name="text_permission_management">Gestión de permisos</string>
+    <string name="text_service_management">Gestión de servicios</string>
+    <string name="summary_foreground_service_inrt">El servicio en primer plano permite mantener la app y los scripts en ejecución de forma más estable en segundo plano</string>
 
 </resources>

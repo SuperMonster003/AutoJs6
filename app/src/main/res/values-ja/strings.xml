@@ -331,9 +331,9 @@
     <string name="error_unknown_type">不明なタイプ: %s</string>
     <string name="error_webp_lossless_quality_not_supported">WebP-Lossless 形式は品質パラメータで圧縮できません, 代わりに JPEG/PNG/WebP-Lossy を使用してください</string>
     <string name="file_not_exist_or_readable">ファイルが存在しないか, 読み取り可能でない: %s</string>
-    <string name="foreground_notification_channel_name">AutoJs6 のフォアグラウンド サービス</string>
-    <string name="foreground_notification_text">クリックすると, AutoJs6 が起動します</string>
-    <string name="foreground_notification_title">AutoJs6 のフォアグラウンド・サービス</string>
+    <string name="foreground_notification_channel_name">%1$s のフォアグラウンド サービス</string>
+    <string name="foreground_notification_text">クリックすると, %1$s が起動します</string>
+    <string name="foreground_notification_title">%1$s のフォアグラウンド・サービス</string>
     <string name="format_build_succeeded" formatted="true">ビルドに成功しました.\nファイル パス: %s</string>
     <string name="format_debug_bar_title"><![CDATA[デバッグ [ %s ]]]></string>
     <string name="format_editor_info" formatted="false">文字数: %d\n行数 %d\nサイズ: %s</string>
@@ -1201,5 +1201,8 @@
     <string name="text_post_notifications_permission_rationale">AutoJs6 のフォアグラウンドサービス等が正常に動作し, スクリプトが通知を投稿できるようにするため, AutoJs6 には \"通知の送信\" 権限を付与する必要があります.</string>
     <string name="description_pointer_location">\"ポインタの位置\" は Android の開発者向けオプションにあるデバッグ機能です.\n有効にすると, システムが画面上にタッチポイントの [座標/移動軌跡/数/サイズ/移動速度/圧力] などの情報を表示し, 関連スクリプトの [作成/デバッグ/検証] に役立ちます.</string>
     <string name="error_an_error_occurred">エラーが発生しました</string>
+    <string name="text_permission_management">権限管理</string>
+    <string name="text_service_management">サービス管理</string>
+    <string name="summary_foreground_service_inrt">フォアグラウンドサービスは, バックグラウンドでアプリとスクリプトの実行をより安定して維持します</string>
 
 </resources>

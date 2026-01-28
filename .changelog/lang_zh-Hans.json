@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.7.0": {
-      "released_date": "2026/01/28",
+      "released_date": "2026/01/29",
       "feature": [
         "插件中心功能, 支持插件的安装/卸载/更新等操作 (入口: 主页抽屉按钮/主页标签页)",
         "Paddle OCR (PP-OCRv5) 插件, 用于光学字符识别",
@@ -110,7 +110,7 @@
         "构建工具启用 isCleanup[Paddle/Rapid]Ocr 配置选项时无法正常完成 Rebuild Project 任务的问题"
       ],
       "improvement": [
-        "插件化 Paddle OCR (PP-OCRv3) 相关功能 _[`issue #334`](http://issues.autojs6.com/334)_ _[`issue #331`](http://issues.autojs6.com/331)_",
+        "插件化 Paddle OCR (PP-OCRv3) 相关功能 _[`issue #334`](http://issues.autojs6.com/334)_ _[`issue #331`](http://issues.autojs6.com/331)_ _[`issue #325`](http://issues.autojs6.com/325)_",
         "runtime.loadJar 方法增强兼容性 (by [LYS86](https://github.com/LYS86)) _[`pr #475`](http://pr.autojs6.com/475)_",
         "ui.getStatusBarHeight 方法/statusBarHeight 属性 (getter) 增强一定程度的兼容性",
         "console.log 等方法打印全局对象 (images, app, ocr 等) 时支持显示详细信息",
@@ -128,6 +128,7 @@
         "文件管理器浮动按钮展开后点击菜单项时优化菜单收起时机",
         "文件管理器/任务面板支持显示文件/任务数量统计信息",
         "打包应用页面默认勾选必要权限 (WAKE_LOCK/INTERNET/WRITE_EXTERNAL_STORAGE) _[`issue #397`](http://issues.autojs6.com/397)_",
+        "打包应用设置页面增加前台服务开关 _[`issue #406`](http://issues.autojs6.com/406)_",
         "脚本项目配置文件保存时增加键名冲突检测机制防止键名歧义",
         "崩溃报告页面支持双指缩放调整字体大小并添加常用功能按钮",
         "应用启动器图标支持自适应图标特性 _[`issue #405`](http://issues.autojs6.com/405)_",
@@ -143,14 +144,14 @@
         "浮动按钮 \"更多\" 对话框使用异步加载数据方式提升显示流畅度",
         "浮动按钮 \"运行脚本\" 对话框增加 \"主页\" 菜单项",
         "浮动按钮 \"运行脚本\" 对话框支持最小化及状态恢复并尽最大努力保持窗口常驻或自动恢复",
-        "使用 LiveData 及 SharedFlow 替代已弃用的 LocalBroadcastManager",
+        "使用 [LiveData](https://developer.android.com/topic/libraries/architecture/livedata) 及 [SharedFlow](https://developer.android.com/kotlin/flow/stateflow-and-sharedflow) 替代已弃用的 [LocalBroadcastManager](https://developer.android.com/jetpack/androidx/releases/localbroadcastmanager)",
         "Gradle 构建脚本提升 7z 格式文件的解压效率",
         "Gradle 构建脚本支持获取详细的 Android Studio IDE 版本 (如 \"2025.1.4.7\")",
         "Gradle 构建脚本支持自动生成 VersionCodesList 类所需数据以降低脚本启动延迟",
-        "使用版本目录 (Version Catalogs) 集中管理 Gradle 依赖和插件版本",
+        "使用 [版本目录 (Version Catalogs)](https://developer.android.com/build/migrate-to-catalogs) 集中管理 Gradle 依赖和插件版本",
         "模块化 Gradle 构建脚本, 将共享构建逻辑迁移至 build-logic 并抽象为约定插件",
         "使用 Gradle 约定插件简化本地 AAR 库加载逻辑",
-        "使用 Toolchain 替代 sourceCompatibility/targetCompatibility 以降低构建环境差异"
+        "使用 [Toolchain](https://docs.gradle.org/current/userguide/toolchains.html) 替代 sourceCompatibility/targetCompatibility 以降低构建环境差异"
       ],
       "dependency": [
         "本地化 Root Shell 版本 1.6",

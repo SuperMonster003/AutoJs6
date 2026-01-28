@@ -395,7 +395,7 @@
         <service android:name="org.autojs.autojs.ui.enhancedfloaty.FloatyService" />
 
         <service
-            android:name="org.autojs.autojs.external.foreground.MainActivityForegroundService"
+            android:name="org.autojs.autojs.external.foreground.AppForegroundService"
             android:foregroundServiceType="specialUse">
             <property
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"

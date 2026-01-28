@@ -330,9 +330,9 @@
     <string name="error_unknown_type">Type inconnu : %s</string>
     <string name="error_webp_lossless_quality_not_supported">Le format WebP-Lossless ne peut pas être compressé avec un paramètre de qualité ; utilisez plutôt JPEG/PNG/WebP-Lossy</string>
     <string name="file_not_exist_or_readable">Le fichier n\'existe pas ou n\'est pas lisible : %s</string>
-    <string name="foreground_notification_channel_name">Service d\'avant-plan AutoJs6</string>
-    <string name="foreground_notification_text">Cliquez pour lancer AutoJs6</string>
-    <string name="foreground_notification_title">Service AutoJs6 au premier plan</string>
+    <string name="foreground_notification_channel_name">Service d\'avant-plan %1$s</string>
+    <string name="foreground_notification_text">Cliquez pour lancer %1$s</string>
+    <string name="foreground_notification_title">Service %1$s au premier plan</string>
     <string name="format_build_succeeded" formatted="true">Construction réussie.\nPlateau du fichier : %s</string>
     <string name="format_debug_bar_title"><![CDATA[Debug [ %s ]]]></string>
     <string name="format_editor_info" formatted="false">Chars : %d\nLines : %d\nSize : %s</string>
@@ -1200,5 +1200,8 @@
     <string name="text_post_notifications_permission_rationale">Afin de garantir que les services au premier plan d\'AutoJs6, etc. fonctionnent correctement et que les scripts puissent publier des notifications, AutoJs6 doit se voir accorder l\'autorisation de \"publier des notifications\".</string>
     <string name="description_pointer_location">\"Emplacement du pointeur\" est une fonctionnalité de débogage dans les options pour les développeurs d\'Android.\nUne fois activée, le système affiche à l\'écran des informations sur le(s) point(s) de contact, telles que [coordonnées/trajectoire de déplacement/nombre/taille/vitesse de déplacement/pression], ce qui facilite [l\'écriture/le débogage/la vérification] des scripts associés.</string>
     <string name="error_an_error_occurred">Une erreur s\'est produite</string>
+    <string name="text_permission_management">Gestion des autorisations</string>
+    <string name="text_service_management">Gestion des services</string>
+    <string name="summary_foreground_service_inrt">Le service au premier plan permet de maintenir l\'application et les scripts en cours d\'exécution de manière plus stable en arrière-plan</string>
 
 </resources>
