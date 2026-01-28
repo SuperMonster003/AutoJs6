@@ -1198,5 +1198,7 @@
     <string name="dialog_button_homepage">Accueil</string>
     <string name="error_failed_to_change_the_toggle_state">Échec de la modification de l\'état de l\'interrupteur</string>
     <string name="text_post_notifications_permission_rationale">Afin de garantir que les services au premier plan d\'AutoJs6, etc. fonctionnent correctement et que les scripts puissent publier des notifications, AutoJs6 doit se voir accorder l\'autorisation de \"publier des notifications\".</string>
+    <string name="description_pointer_location">\"Emplacement du pointeur\" est une fonctionnalité de débogage dans les options pour les développeurs d\'Android.\nUne fois activée, le système affiche à l\'écran des informations sur le(s) point(s) de contact, telles que [coordonnées/trajectoire de déplacement/nombre/taille/vitesse de déplacement/pression], ce qui facilite [l\'écriture/le débogage/la vérification] des scripts associés.</string>
+    <string name="error_an_error_occurred">Une erreur s\'est produite</string>
 
 </resources>

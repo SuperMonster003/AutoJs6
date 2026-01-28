@@ -202,6 +202,8 @@ pluginManagement {
                 ?: compareVersionSuffix(ver1Suffix, ver2Suffix)
         }
 
+        fun compareVersionStringsDesc(v1: String, v2: String): Int = compareVersionStrings(v2, v1)
+
         fun compareVersionParts(parts1: List<Int>, parts2: List<Int>): Int {
             for (i in 0 until maxOf(parts1.size, parts2.size)) {
                 val part1 = parts1.getOrElse(i) { 0 }
@@ -555,7 +557,7 @@ pluginManagement {
             val kotlin = object : Version(
                 gradleKotlinCompatProps.filter { (gradleMin, _) ->
                     gradle.gradleVersion.toGradleVersion() >= gradleMin.toGradleVersion()
-                }.toSortedMap(utils::compareVersionStrings).reversed(),
+                }.toSortedMap(utils::compareVersionStringsDesc),
                 platform.version,
             ) {
                 override fun refinedBestMatchingValue(bestMatchingValue: String?): String? {

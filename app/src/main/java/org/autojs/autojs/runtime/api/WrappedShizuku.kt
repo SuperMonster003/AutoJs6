@@ -32,7 +32,7 @@ object WrappedShizuku {
     @JvmField
     var service: IUserService? = null
 
-    private val TAG: String = WrappedShizuku::class.java.simpleName
+    private const val TAG = "WrappedShizuku"
 
     private val mRequestCode = when {
         isInrt -> "shizuku-request-code-inrt".hashCode()
@@ -139,10 +139,13 @@ object WrappedShizuku {
     }
 
     @ScriptInterface
-    fun isOperational() = isRunning() && hasPermission()
+    fun isOperational() = hasService() && isRunning() && hasPermission()
 
     @ScriptInterface
     fun isRunning() = mHasBinder
+
+    @ScriptInterface
+    fun hasService() = service != null
 
     @ScriptInterface
     fun requestPermission() = Shizuku.requestPermission(mRequestCode)
@@ -170,7 +173,7 @@ object WrappedShizuku {
     }
 
     private fun execCommandWithAutoReconnect(context: Context, cmd: String, allowRetry: Boolean): ShellResult {
-        if (service == null && hasPermission()) {
+        if (!hasService() && hasPermission()) {
             onCreate()
             bindUserServiceIfNeeded()
             initializeShizukuServiceAndWait(5000L)
@@ -189,6 +192,7 @@ object WrappedShizuku {
                 )
             )
         } catch (e: Throwable) {
+            Log.d(TAG, "execCommand failed", e)
             // Reconnect and retry once when binder is dead.
             // zh-CN: 当 binder 已死亡时, 自动重连并重试一次.
             if (allowRetry && e is DeadObjectException) {

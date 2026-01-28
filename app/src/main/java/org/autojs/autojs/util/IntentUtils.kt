@@ -276,6 +276,28 @@ object IntentUtils {
         return result
     }
 
+    @JvmStatic
+    fun launchDeveloperOptions(context: Context): Boolean {
+        val intent = Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS)
+
+        return if (intent.resolveActivity(context.packageManager) != null) {
+            intent.startSafely(context)
+        } else {
+            false
+        }
+    }
+
+    @JvmStatic
+    fun launchDeveloperOptionsOrSettings(context: Context) {
+        val intents = listOf(
+            Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS),
+            Intent(Settings.ACTION_SETTINGS),
+        )
+
+        val pm = context.packageManager
+        intents.firstOrNull { it.resolveActivity(pm) != null }?.startSafely(context)
+    }
+
     fun requestAppUsagePermission(context: Context) =
         Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
             .startSafely(context, true)

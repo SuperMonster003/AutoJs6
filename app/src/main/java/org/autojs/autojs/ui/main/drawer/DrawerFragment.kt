@@ -17,6 +17,7 @@ import org.autojs.autojs.AutoJs
 import org.autojs.autojs.app.tool.FloatingButtonTool
 import org.autojs.autojs.app.tool.JsonSocketClientTool
 import org.autojs.autojs.app.tool.JsonSocketServerTool
+import org.autojs.autojs.app.tool.PointerLocationTool
 import org.autojs.autojs.core.accessibility.AccessibilityTool
 import org.autojs.autojs.core.plugin.center.PluginCenterActivity
 import org.autojs.autojs.core.pref.Pref
@@ -100,6 +101,7 @@ open class DrawerFragment : Fragment() {
     private lateinit var mAccessibilityServiceItem: DrawerMenuToggleableItem
     private lateinit var mForegroundServiceItem: DrawerMenuToggleableItem
     private lateinit var mFloatingButtonItem: DrawerMenuToggleableItem
+    private lateinit var mPointerLocationItem: DrawerMenuToggleableItem
     private lateinit var mClientModeItem: DrawerMenuDisposableItem
     private lateinit var mServerModeItem: DrawerMenuDisposableItem
     private lateinit var mNotificationPostItem: DrawerMenuToggleableItem
@@ -144,7 +146,7 @@ open class DrawerFragment : Fragment() {
                 override fun refreshSubtitle(aimState: Boolean) {
                     val oldSubtitle = mAccessibilityServiceItem.subtitle
                     if (aimState) {
-                        if (mA11yTool.hasService() && !mA11yTool.isRunning()) {
+                        if (mA11yTool.isMalfunctioning()) {
                             mAccessibilityServiceItem.subtitle = context.getString(R.string.text_malfunctioning)
                         } else {
                             mAccessibilityServiceItem.subtitle = null
@@ -216,7 +218,19 @@ open class DrawerFragment : Fragment() {
             prefKey = R.string.key_floating_menu_shown,
         ).also { item ->
             item.setOnLaunchSettingsListener {
-                val helper = item.getHelper() as DisplayOverOtherAppsPermission
+                val helper = DisplayOverOtherAppsPermission(mContext)
+                helper.config()
+            }
+        }
+
+        mPointerLocationItem = DrawerMenuToggleableItem(
+            helper = PointerLocationTool(mContext),
+            icon = R.drawable.ic_control_point_bigger_black_48dp,
+            title = R.string.text_pointer_location,
+            descriptionRes = R.string.description_pointer_location,
+        ).also { item ->
+            item.setOnLaunchSettingsListener {
+                val helper = item.getHelper() as PointerLocationTool
                 helper.config()
             }
         }
@@ -636,6 +650,12 @@ open class DrawerFragment : Fragment() {
         // mFloatingWindowItem.toggle(event.currentState != CircularMenu.STATE_CLOSED)
     }
 
+    @Suppress("unused", "UNUSED_PARAMETER")
+    @Subscribe
+    fun onPointerLocationStateChange(event: PointerLocationTool.Companion.StateChangedEvent) {
+        mPointerLocationItem.sync()
+    }
+
     @Subscribe
     @Suppress("unused", "UNUSED_PARAMETER")
     fun onDrawerOpened(event: Event.OnDrawerOpened) {
@@ -673,6 +693,7 @@ open class DrawerFragment : Fragment() {
             mForegroundServiceItem,
             DrawerMenuGroup(R.string.text_tools),
             mFloatingButtonItem,
+            mPointerLocationItem,
             DrawerMenuGroup(R.string.text_connect_to_pc),
             mClientModeItem,
             mServerModeItem,
@@ -723,6 +744,7 @@ open class DrawerFragment : Fragment() {
         mAccessibilityServiceItem,
         mForegroundServiceItem,
         mFloatingButtonItem,
+        mPointerLocationItem,
         mClientModeItem,
         mServerModeItem,
         mNotificationPostItem,
