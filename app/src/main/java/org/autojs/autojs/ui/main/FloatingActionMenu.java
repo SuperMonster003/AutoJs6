@@ -22,6 +22,7 @@ import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import io.reactivex.subjects.PublishSubject;
 import org.autojs.autojs6.R;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Created by Stardust on Sep 24, 2017.
@@ -54,6 +55,7 @@ public class FloatingActionMenu extends FrameLayout implements View.OnClickListe
     private OnFloatingActionButtonClickListener mOnFloatingActionButtonClickListener;
 
     private View mToggleFab;
+    private int[] mToggleFabLoc;
 
     public FloatingActionMenu(@NonNull Context context) {
         super(context);
@@ -110,8 +112,9 @@ public class FloatingActionMenu extends FrameLayout implements View.OnClickListe
         mOnFloatingActionButtonClickListener = listener;
     }
 
-    public void setToggleFab(@Nullable View toggleFab) {
+    public void setToggleFab(@Nullable View toggleFab, int @NotNull [] locFab) {
         mToggleFab = toggleFab;
+        mToggleFabLoc = locFab;
     }
 
     @Override
@@ -190,29 +193,28 @@ public class FloatingActionMenu extends FrameLayout implements View.OnClickListe
         FloatingActionMenu thisMenu = this;
 
         mOverlay = new View(context) {
-            private final int[] loc = new int[2];
             private final Rect menuRectOnScreen = new Rect();
             private final Rect toggleFabRectOnScreen = new Rect();
 
             @SuppressLint("ClickableViewAccessibility")
             @Override
             public boolean onTouchEvent(MotionEvent event) {
-                thisMenu.getLocationOnScreen(loc);
+                int[] locMenu = new int[2];
+                thisMenu.getLocationOnScreen(locMenu);
                 menuRectOnScreen.set(
-                        loc[0],
-                        loc[1],
-                        loc[0] + thisMenu.getWidth(),
-                        loc[1] + thisMenu.getHeight()
+                        locMenu[0],
+                        locMenu[1],
+                        locMenu[0] + thisMenu.getWidth(),
+                        locMenu[1] + thisMenu.getHeight()
                 );
 
                 boolean hasToggleFab = (mToggleFab != null) && mToggleFab.isShown();
                 if (hasToggleFab) {
-                    mToggleFab.getLocationOnScreen(loc);
                     toggleFabRectOnScreen.set(
-                            loc[0],
-                            loc[1],
-                            loc[0] + mToggleFab.getWidth(),
-                            loc[1] + mToggleFab.getHeight()
+                            mToggleFabLoc[0],
+                            mToggleFabLoc[1],
+                            mToggleFabLoc[0] + mToggleFab.getWidth(),
+                            mToggleFabLoc[1] + mToggleFab.getHeight()
                     );
                 } else {
                     toggleFabRectOnScreen.setEmpty();

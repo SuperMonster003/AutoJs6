@@ -86,7 +86,7 @@ class PostNotificationsPermission(override val context: Context) : PermissionIte
                 }
 
                 // First request (or still allowed without rationale).
-                // zh-CN: 首次请求 (或无需 rationale 也允许再次请求)时直接发起系统权限请求.
+                // zh-CN: 首次请求 (或无需 rationale 也允许再次请求) 时直接发起系统权限请求.
                 launchRequest()
                 return true
             }
