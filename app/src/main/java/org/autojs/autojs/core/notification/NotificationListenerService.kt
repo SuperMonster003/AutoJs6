@@ -1,13 +1,17 @@
 package org.autojs.autojs.core.notification
 
+import android.content.ComponentName
+import android.content.Context
+import android.provider.Settings
 import android.service.notification.StatusBarNotification
 import org.autojs.autojs.core.accessibility.NotificationListener
 import java.util.concurrent.CopyOnWriteArrayList
+import android.service.notification.NotificationListenerService as AndroidNotificationListenerService
 
 /**
  * Created by Stardust on Oct 30, 2017.
  */
-class NotificationListenerService : android.service.notification.NotificationListenerService() {
+class NotificationListenerService : AndroidNotificationListenerService() {
 
     private val mNotificationListeners = CopyOnWriteArrayList<NotificationListener>()
 
@@ -44,8 +48,31 @@ class NotificationListenerService : android.service.notification.NotificationLis
     }
 
     companion object {
+
         @JvmStatic
         var instance: NotificationListenerService? = null
             private set
+
+        @JvmStatic
+        fun isNotificationListenerEnabled(context: Context): Boolean {
+            val enabled = Settings.Secure.getString(
+                context.contentResolver,
+                "enabled_notification_listeners",
+            ) ?: return false
+            val cn = ComponentName(context, NotificationListenerService::class.java).flattenToString()
+            return enabled.contains(cn)
+        }
+
+        @JvmStatic
+        fun requestRebindIfPossible(context: Context): Boolean {
+            if (!isNotificationListenerEnabled(context)) return false
+            return runCatching {
+                val cn = ComponentName(context, NotificationListenerService::class.java)
+                requestRebind(cn)
+                true
+            }.isSuccess
+        }
+
     }
+
 }

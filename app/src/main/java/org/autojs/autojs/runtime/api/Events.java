@@ -40,6 +40,8 @@ import java.util.Set;
 
 /**
  * Created by Stardust on Jul 18, 2017.
+ * Modified by JetBrains AI Assistant (GPT-5.2) as of Jan 28, 2026.
+ * Modified by SuperMonster003 as of Jan 28, 2026.
  */
 public class Events extends EventEmitter implements OnKeyListener, TouchObserver.OnTouchEventListener, NotificationListener, AccessibilityNotificationObserver.ToastListener, AccessibilityService.Companion.GestureListener {
 
@@ -72,8 +74,14 @@ public class Events extends EventEmitter implements OnKeyListener, TouchObserver
     private boolean mListeningKey = false;
     private final Loopers mLoopers;
     private Handler mHandler;
+    
     private boolean mListeningNotification = false;
     private boolean mListeningToast = false;
+
+    private int mNotificationBindRetryCount = 0;
+    private static final int NOTIFICATION_BIND_MAX_RETRY = 5;
+    private static final long NOTIFICATION_BIND_RETRY_DELAY_MS = 400L;
+    
     private final ScriptRuntime mScriptRuntime;
     private volatile boolean mInterceptsAllKey = false;
     private KeyInterceptor mKeyInterceptor;
@@ -237,13 +245,44 @@ public class Events extends EventEmitter implements OnKeyListener, TouchObserver
         mListeningNotification = true;
         ensureHandler();
         mLoopers.waitWhenIdle(true);
+
         if (NotificationListenerService.getInstance() != null) {
             NotificationListenerService.getInstance().addListener(this);
             return;
         }
+
+        // Permission enabled but service not bound (common on some ROMs): try to rebind automatically.
+        // zh-CN: 权限已启用但服务未绑定 (在某些 ROM 上常见): 尝试自动重新绑定.
+        if (NotificationListenerService.isNotificationListenerEnabled(mContext)) {
+            mNotificationBindRetryCount = 0;
+            NotificationListenerService.requestRebindIfPossible(mContext);
+            retryAttachNotificationListener();
+            return;
+        }
+
+        // Permission not enabled: guide user to settings page.
+        // zh-CN: 权限未启用: 引导用户前往设置页面.
         Intent intent = new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS);
         IntentUtils.startSafely(intent, mContext);
         throw new ScriptException(mContext.getString(R.string.text_notification_service_disabled));
+    }
+
+    private void retryAttachNotificationListener() {
+        if (!mListeningNotification) {
+            return;
+        }
+        if (NotificationListenerService.getInstance() != null) {
+            NotificationListenerService.getInstance().addListener(this);
+            return;
+        }
+        if (mNotificationBindRetryCount++ >= NOTIFICATION_BIND_MAX_RETRY) {
+            // Still not bound: last resort, open settings page to let user re-toggle.
+            // zh-CN: 仍未绑定: 最后的手段, 打开设置页面让用户重新切换.
+            Intent intent = new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS);
+            IntentUtils.startSafely(intent, mContext);
+            return;
+        }
+        mHandler.postDelayed(this::retryAttachNotificationListener, NOTIFICATION_BIND_RETRY_DELAY_MS);
     }
 
     public void removeNotificationObserver() {
@@ -252,6 +291,7 @@ public class Events extends EventEmitter implements OnKeyListener, TouchObserver
             NotificationListenerService.getInstance().removeListener(this);
         }
         mListeningNotification = false;
+        mNotificationBindRetryCount = 0;
         if (!mListeningToast) {
             mLoopers.waitWhenIdle(false);
         }

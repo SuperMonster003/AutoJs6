@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.7.0": {
-      "released_date": "2026/01/27",
+      "released_date": "2026/01/28",
       "feature": [
         "插件中心功能, 支持插件的安装/卸载/更新等操作 (入口: 主页抽屉按钮/主页标签页)",
         "Paddle OCR (PP-OCRv5) 插件, 用于光学字符识别",
@@ -138,6 +138,7 @@
         "客户端模式连接时支持特殊用途 IPv4 地址 (回环/广播/多播/保留/...) 检测提示",
         "客户端模式连接时支持连接状态显示及管理 (修正地址/中止连接)",
         "服务端模式连接时支持显示已建立连接的客户端数量",
+        "读取通知权限支持自动重连机制 ([requestRebind](https://developer.android.com/reference/android/service/notification/NotificationListenerService#requestRebind(android.content.ComponentName))) 以增强通知监听相关功能的稳定性",
         "浮动按钮增强后台启动 Activity 的安全性以避免应用崩溃",
         "浮动按钮 \"更多\" 对话框使用异步加载数据方式提升显示流畅度",
         "浮动按钮 \"运行脚本\" 对话框增加 \"主页\" 菜单项",
