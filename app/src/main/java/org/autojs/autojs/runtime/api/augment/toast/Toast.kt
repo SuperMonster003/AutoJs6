@@ -1,13 +1,13 @@
 package org.autojs.autojs.runtime.api.augment.toast
 
-import org.autojs.autojs.AutoJs
-import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.runtime.ScriptRuntime
+import org.autojs.autojs.runtime.api.ScriptToast
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.Invokable
-import org.autojs.autojs.util.RhinoUtils.undefined
+import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
+import org.autojs.autojs.util.RhinoUtils.UNDEFINED
 import org.mozilla.javascript.Undefined
 
 class Toast(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), Invokable {
@@ -35,26 +35,22 @@ class Toast(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntim
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun call(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsLengthInRange(args, 0..3) {
-            undefined {
-                when (it.size) {
-                    0 -> ToastParser("").show(scriptRuntime)
-                    1 -> ToastParser(args[0]).show(scriptRuntime)
-                    2 -> ToastParser(args[0], args[1]).show(scriptRuntime)
-                    3 -> ToastParser(args[0], args[1], args[2]).show(scriptRuntime)
-                }
+            val toastParser = when (it.size) {
+                0 -> ToastParser(globalContext, "")
+                1 -> ToastParser(globalContext, args[0])
+                2 -> ToastParser(globalContext, args[0], args[1])
+                3 -> ToastParser(globalContext, args[0], args[1], args[2])
+                else -> throw WrappedIllegalArgumentException("Invalid arguments length ${args.size} for global.toast")
             }
+            toastParser.show(scriptRuntime)
+            return@ensureArgumentsLengthInRange UNDEFINED
         }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun dismissAll(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsIsEmpty(args) {
-            dismissAllRhino(scriptRuntime)
-        }
-
-        @JvmStatic
-        @RhinoFunctionBody
-        fun dismissAllRhino(scriptRuntime: ScriptRuntime) = undefined {
-            AutoJs.instance.uiHandler.dismissAllToasts(scriptRuntime)
+            ScriptToast.dismissAll(scriptRuntime)
+            return@ensureArgumentsIsEmpty UNDEFINED
         }
 
     }
