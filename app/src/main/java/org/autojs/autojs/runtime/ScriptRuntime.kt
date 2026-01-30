@@ -18,19 +18,18 @@ import org.autojs.autojs.core.console.GlobalConsole
 import org.autojs.autojs.core.image.capture.ScreenCaptureRequester
 import org.autojs.autojs.core.looper.Loopers
 import org.autojs.autojs.core.pref.Pref
-import org.autojs.autojs.rhino.extension.ScriptableExtensions.defineProp
-import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.lang.ThreadCompat
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.pio.UncheckedIOException
 import org.autojs.autojs.rhino.AndroidClassLoader
 import org.autojs.autojs.rhino.ProxyObject
 import org.autojs.autojs.rhino.TopLevelScope
+import org.autojs.autojs.rhino.extension.ScriptableExtensions.defineProp
+import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.runtime.api.AbstractShell
 import org.autojs.autojs.runtime.api.AppUtils
 import org.autojs.autojs.runtime.api.ProcessShell
 import org.autojs.autojs.runtime.api.ScreenMetrics
-import org.autojs.autojs.runtime.api.ScriptToast
 import org.autojs.autojs.runtime.api.WrappedShizuku
 import org.autojs.autojs.runtime.api.augment.app.App
 import org.autojs.autojs.runtime.api.augment.autojs.Autojs
@@ -183,7 +182,7 @@ class ScriptRuntime private constructor(builder: Builder) {
     private val mJob = SupervisorJob()
     val coroutineScope = CoroutineScope(Dispatchers.Default + mJob)
     val coroutineContext = coroutineScope.coroutineContext
-    
+
     val ownerId = "runtime@${System.identityHashCode(this)}"
 
     private var mUiHandlerAppContext: Context
@@ -587,13 +586,13 @@ class ScriptRuntime private constructor(builder: Builder) {
         Log.d(TAG, "on exit")
         this.isExiting = true
 
-        ignoresException({
+        ignoresException {
             if (console.configurator.isExitOnClose) {
                 console.hideDelayed()
             }
-        })
+        }
 
-        ignoresException({ CoreWebSocket.onExit("Triggered by $TAG") })
+        ignoresException { CoreWebSocket.onExit("Triggered by $TAG") }
 
         // @Hint by 抠脚本人 (https://github.com/little-alei) on Jul 10, 2023.
         //  ! 清空无障碍事件.
@@ -604,35 +603,42 @@ class ScriptRuntime private constructor(builder: Builder) {
         //  ! by the current script to avoid affecting other still-running scripts.
         //  ! zh-CN: 只清理当前脚本注册的无障碍事件回调，避免影响其他仍在运行的脚本.
         //  # ignoresException({ AccessibilityService.clearAccessibilityEventCallback() })
-        ignoresException({ automator.removeAllEventsForThisRuntime() })
+        ignoresException { automator.removeAllEventsForThisRuntime() }
 
-        ignoresException({ RootUtils.resetRuntimeOverriddenRootModeState() })
+        ignoresException { RootUtils.resetRuntimeOverriddenRootModeState() }
 
-        /* 回收全部记录的 ImageWrapper 实例. */
-        ignoresException({ CoreImageWrapper.recycleAll() })
+        // Recycle all recorded ImageWrapper instances.
+        // zh-CN: 回收全部记录的 ImageWrapper 实例.
+        ignoresException { CoreImageWrapper.recycleAll() }
 
-        /* 清除 interrupt 状态. */
-        ignoresException({ ThreadCompat.interrupted() })
+        // Clear interrupt status.
+        // zh-CN: 清除 interrupt 状态.
+        ignoresException { ThreadCompat.interrupted() }
 
-        /* 浮动窗口需要第一时间关闭. */
-        /* 以免出现恶意脚本全屏浮动窗口遮蔽屏幕并且在 exit 中写死循环的问题. */
-        ignoresException({ floaty.closeAll() })
+        // Floating windows need to be closed immediately.
+        // To prevent malicious scripts from creating fullscreen floating windows
+        // that obscure the screen and write infinite loops in exit.
+        // zh-CN:
+        // 浮动窗口需要第一时间关闭.
+        // 以免出现恶意脚本全屏浮动窗口遮蔽屏幕并且在 exit 中写死循环的问题.
+        ignoresException { floaty.closeAll() }
 
-        ignoresException({ events.emit("exit") }, "Exception on exit: %s")
-        ignoresException({ ScriptToast.clear(this) }, 500)
+        ignoresException("Exception on exit: %s") {
+            events.emit("exit")
+        }
 
-        ignoresException({ threads.shutDownAll() })
-        ignoresException({ events.recycle() })
-        ignoresException({ media.recycle() })
-        ignoresException({ loopers.recycle() })
-        ignoresException({ this.recycleShell() })
-        ignoresException({ images.releaseScreenCapturer() })
-        ignoresException({ images.stopScreenCapturerForegroundService() })
-        ignoresException({ ocrMLKit.release() })
-        ignoresException({ sensors.unregisterAll() })
-        ignoresException({ timers.recycle() })
-        ignoresException({ ui.recycle() })
-        ignoresException({ closeableManager.recycleAll() })
+        ignoresException { threads.shutDownAll() }
+        ignoresException { events.recycle() }
+        ignoresException { media.recycle() }
+        ignoresException { loopers.recycle() }
+        ignoresException { recycleShell() }
+        ignoresException { images.releaseScreenCapturer() }
+        ignoresException { images.stopScreenCapturerForegroundService() }
+        ignoresException { ocrMLKit.release() }
+        ignoresException { sensors.unregisterAll() }
+        ignoresException { timers.recycle() }
+        ignoresException { ui.recycle() }
+        ignoresException { closeableManager.recycleAll() }
     }
 
     fun setScreenMetrics(width: Int, height: Int) {
@@ -709,11 +715,11 @@ class ScriptRuntime private constructor(builder: Builder) {
         }
     }
 
-    private fun ignoresException(r: Runnable, @Suppress("SameParameterValue") delay: Int) {
-        uiHandler.postDelayed(r, delay.toLong())
+    private fun ignoresException(r: Runnable) {
+        ignoresException(null, r)
     }
 
-    private fun ignoresException(r: Runnable, consoleMessage: String? = null) {
+    private fun ignoresException(consoleMessage: String?, r: Runnable) {
         try {
             r.run()
         } catch (e: Throwable) {

@@ -6,8 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
@@ -347,12 +345,9 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
     }
 
     private fun setUpStatusBarIconLight() {
-        Handler(Looper.getMainLooper()).post {
-            if (sIsActionBarDrawerOpened) {
-                setUpStatusBarIconLightByNightMode()
-            } else {
-                setUpStatusBarIconLightByThemeColor()
-            }
+        when (sIsActionBarDrawerOpened) {
+            true -> setUpStatusBarIconLightByNightMode()
+            else -> setUpStatusBarIconLightByThemeColor()
         }
     }
 

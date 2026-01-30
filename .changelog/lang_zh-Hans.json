@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.7.0": {
-      "released_date": "2026/01/29",
+      "released_date": "2026/01/30",
       "feature": [
         "插件中心功能, 支持插件的安装/卸载/更新等操作 (入口: 主页抽屉按钮/主页标签页)",
         "Paddle OCR (PP-OCRv5) 插件, 用于光学字符识别",
@@ -61,6 +61,7 @@
         "console.build 方法的 (title/content)BackgroundColor 选项导致透明度或着色选项被覆盖的问题 _[`issue #458`](http://issues.autojs6.com/458)_",
         "console/toast 等方法显示 Java Double 时可能丢失末尾零的问题",
         "无法使用 console/toast 等方法显示 BigInt 数据类型的问题",
+        "toast 方法因持有 Toast 实例强引用而导致可能得内存泄露问题",
         "部分全局对象可能丢失 JavaScript 原型属性及方法的问题",
         "使用 XML 语法将 JavaScript 表达式作为属性值时, this 对象可能出现指向错误的问题",
         "dialogs.build 方法 linkify 选项参数功能失效的问题",
