@@ -1170,7 +1170,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             var bitmap: Bitmap? = null
             try {
                 image = read(scriptRuntime, argList)
-                require(image != null) { "Image path ${argList[0]} is invalid for images.readPixels" }
+                requireNotNull(image) { "Image path ${argList[0]} is invalid for images.readPixels" }
                 bitmap = image.bitmap
                 val w = bitmap.width
                 val h = bitmap.height

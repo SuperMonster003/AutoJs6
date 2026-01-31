@@ -266,7 +266,7 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : A
         }
 
         if (this is AsEmitter) {
-            require(scriptRuntime != null) { "Augmentable instance of AsEmitter must have a non-null scriptRuntime property" }
+            requireNotNull(scriptRuntime) { "Augmentable instance of AsEmitter must have a non-null scriptRuntime property" }
             objProtoList += Events.__asEmitter__(scriptRuntime, emptyArray())
         }
 

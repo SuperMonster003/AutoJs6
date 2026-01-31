@@ -45,7 +45,7 @@ public class Dialogs {
         MaterialDialog.Builder builder = dialogBuilder(callback)
                 .alert()
                 .title(title)
-                .positiveText(R.string.text_ok);
+                .positiveText(R.string.dialog_button_dismiss);
         if (!TextUtils.isEmpty(content)) {
             builder.content(content);
         }
@@ -57,8 +57,8 @@ public class Dialogs {
         MaterialDialog.Builder builder = dialogBuilder(callback)
                 .confirm()
                 .title(title)
-                .positiveText(R.string.text_ok)
-                .negativeText(R.string.text_cancel);
+                .positiveText(R.string.dialog_button_confirm)
+                .negativeText(R.string.dialog_button_cancel);
         if (!TextUtils.isEmpty(content)) {
             builder.content(content);
         }
@@ -86,7 +86,7 @@ public class Dialogs {
         return ((BlockedMaterialDialog.Builder) dialogBuilder(callback)
                 .itemsCallbackSingleChoice(selectedIndex)
                 .title(title)
-                .positiveText(R.string.text_ok)
+                .positiveText(R.string.dialog_button_confirm)
                 .items(items))
                 .showAndGet();
     }
@@ -96,7 +96,7 @@ public class Dialogs {
         return ((BlockedMaterialDialog.Builder) dialogBuilder(callback)
                 .itemsCallbackMultiChoice(ArrayUtils.box(indices))
                 .title(title)
-                .positiveText(R.string.text_ok)
+                .positiveText(R.string.dialog_button_confirm)
                 .items(items))
                 .showAndGet();
     }
