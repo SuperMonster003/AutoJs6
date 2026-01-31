@@ -13,5 +13,5 @@ interface IScriptBridges {
 
     fun toString(obj: Any?): String
 
-    fun toPrimitive(obj: Any?): Any
+    fun toPrimitive(obj: Any?): Any?
 }

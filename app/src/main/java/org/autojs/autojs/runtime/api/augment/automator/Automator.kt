@@ -309,7 +309,12 @@ class Automator(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             val last = it.last()
             when {
                 isGestureResultCallbackLike(last) -> {
-                    scriptRuntime.automator.gestureAsync(start, duration, toPointsGroup(it.drop(1).dropLast(1)).toTypedArray<IntArray>(), toGestureResultCallback(last))
+                    scriptRuntime.automator.gestureAsync(
+                        start = start,
+                        duration = duration,
+                        points = toPointsGroup(it.drop(1).dropLast(1)).toTypedArray<IntArray>(),
+                        callback = toGestureResultCallback(scriptRuntime, last),
+                    )
                 }
                 else -> scriptRuntime.automator.gestureAsync(start, duration, toPointsGroup(it.drop(1)).toTypedArray<IntArray>())
             }
@@ -349,7 +354,10 @@ class Automator(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             when {
                 isGestureResultCallbackLike(last) -> {
                     it.dropLast(1).forEach { o -> require((o is List<*>)) { "Arguments for automator.gesturesAsync should be of type Array<Any>" } }
-                    scriptRuntime.automator.gesturesAsync(toStrokes(scriptRuntime, it.dropLast(1).toTypedArray<Any?>()), toGestureResultCallback(last))
+                    scriptRuntime.automator.gesturesAsync(
+                        strokes = toStrokes(scriptRuntime, it.dropLast(1).toTypedArray<Any?>()),
+                        callback = toGestureResultCallback(scriptRuntime, last),
+                    )
                 }
                 else -> {
                     it.dropLast(1).forEach { o -> require((o is List<*>)) { "Arguments for automator.gesturesAsync should be of type Array<Any>" } }
@@ -662,16 +670,16 @@ class Automator(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             else -> throw WrappedIllegalArgumentException("Invalid arguments length (${args.size}) for \"args\" of Automator#performAction")
         }
 
-        private fun toGestureResultCallback(callback: Any?): AccessibilityService.GestureResultCallback? {
+        private fun toGestureResultCallback(scriptRuntime: ScriptRuntime, callback: Any?): AccessibilityService.GestureResultCallback? {
             if (!isGestureResultCallbackLike(callback)) return null
             return object : AccessibilityService.GestureResultCallback() {
                 override fun onCompleted(gestureDescription: GestureDescription) {
                     when (callback) {
-                        is BaseFunction -> withRhinoContext { cx ->
+                        is BaseFunction -> withRhinoContext(scriptRuntime) { cx ->
                             callback.call(cx, ImporterTopLevel(cx), callback, arrayOf(true))
                         }
                         is NativeObject -> callback.prop("onCompleted")?.let {
-                            if (it is BaseFunction) withRhinoContext { cx ->
+                            if (it is BaseFunction) withRhinoContext(scriptRuntime) { cx ->
                                 it.call(cx, ImporterTopLevel(cx), callback, arrayOf(gestureDescription))
                             }
                         }
@@ -680,11 +688,11 @@ class Automator(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
                 override fun onCancelled(gestureDescription: GestureDescription) {
                     when (callback) {
-                        is BaseFunction -> withRhinoContext { cx ->
+                        is BaseFunction -> withRhinoContext(scriptRuntime) { cx ->
                             callback.call(cx, ImporterTopLevel(cx), callback, arrayOf(false))
                         }
                         is NativeObject -> callback.prop("onCancelled")?.let {
-                            if (it is BaseFunction) withRhinoContext { cx ->
+                            if (it is BaseFunction) withRhinoContext(scriptRuntime) { cx ->
                                 it.call(cx, ImporterTopLevel(cx), callback, arrayOf(gestureDescription))
                             }
                         }

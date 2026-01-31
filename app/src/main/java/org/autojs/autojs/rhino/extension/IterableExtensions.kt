@@ -1,6 +1,7 @@
 package org.autojs.autojs.rhino.extension
 
 import org.autojs.autojs.util.RhinoUtils
+import org.autojs.autojs.util.RhinoUtils.getOrCreateStandardObjects
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeArray
 
@@ -8,7 +9,7 @@ object IterableExtensions {
 
     fun Iterable<*>.toNativeArray(): NativeArray {
         return RhinoUtils.withRhinoContext { cx ->
-            val standardObjects = cx.initStandardObjects()
+            val standardObjects = cx.getOrCreateStandardObjects()
             cx.newArray(standardObjects, this.map { Context.javaToJS(it, standardObjects) }.toTypedArray()) as NativeArray
         }
     }

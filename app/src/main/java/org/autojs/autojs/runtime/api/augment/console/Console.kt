@@ -7,15 +7,15 @@ import org.apache.log4j.LogManager
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.core.console.ConsoleImpl
 import org.autojs.autojs.core.console.ConsoleImpl.Companion.DEFAULT_EXIT_ON_CLOSE_TIMEOUT
-import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
-import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.rhino.ArgumentGuards.Companion.component1
 import org.autojs.autojs.rhino.ArgumentGuards.Companion.component2
+import org.autojs.autojs.rhino.ProxyObject
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
+import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.hasProp
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
-import org.autojs.autojs.rhino.ProxyObject
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.AugmentableProxy
 import org.autojs.autojs.runtime.api.augment.s13n.S13n
@@ -50,7 +50,7 @@ import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.Undefined
 
 @Suppress("unused", "UNUSED_PARAMETER")
-class Console(scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRuntime) {
+class Console(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRuntime) {
 
     private val mRtConsole = scriptRuntime.console
     private val mTopLevelScope = scriptRuntime.topLevelScope
@@ -137,7 +137,7 @@ class Console(scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRuntime) {
         ::launch.name to "launchConsole",
     )
 
-    private fun getStackTrace() = withRhinoContext { cx ->
+    private fun getStackTrace() = withRhinoContext(scriptRuntime) { cx ->
         newNativeObject().also { o ->
             val globalErrorObject = mTopLevelScope.prop(NativeError.ERROR_TAG) as ScriptableObject
             NativeError.js_captureStackTrace(

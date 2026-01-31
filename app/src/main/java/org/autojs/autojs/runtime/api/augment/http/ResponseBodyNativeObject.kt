@@ -2,12 +2,12 @@ package org.autojs.autojs.runtime.api.augment.http
 
 import okhttp3.ResponseBody
 import org.autojs.autojs.annotation.RhinoStandardFunctionInterface
-import org.autojs.autojs.rhino.extension.AnyExtensions.toRuntimePath
+import org.autojs.autojs.pio.PFile
 import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.rhino.ArgumentGuards.Companion.component1
 import org.autojs.autojs.rhino.ArgumentGuards.Companion.component2
+import org.autojs.autojs.rhino.extension.AnyExtensions.toRuntimePath
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
-import org.autojs.autojs.pio.PFile
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.RhinoUtils
@@ -56,7 +56,7 @@ class ResponseBodyNativeObject(
             return super.get(name, start)
         }
         return when (val o = mResBodyObject.prop(name)) {
-            is BaseFunction -> withRhinoContext { cx ->
+            is BaseFunction -> withRhinoContext(scriptRuntime) { cx ->
                 BoundFunction(cx, mResBodyObject, o, mResBodyObject, arrayOf())
             }
             else -> super.get(name, start)

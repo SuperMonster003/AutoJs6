@@ -4,6 +4,7 @@ import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoSingletonFunctionInterface
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.Invokable
+import org.autojs.autojs.util.RhinoUtils.getOrCreateStandardObjects
 import org.autojs.autojs.util.RhinoUtils.withRhinoContext
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Scriptable
@@ -61,7 +62,7 @@ object Species : Augmentable(), Invokable {
         when {
             o == null -> "Null"
             Undefined.isUndefined(o) -> "Undefined"
-            else -> when (val obj = withRhinoContext { cx -> Context.javaToJS(o, cx.initStandardObjects()) }) {
+            else -> when (val obj = withRhinoContext { cx -> Context.javaToJS(o, cx.getOrCreateStandardObjects()) }) {
                 is Boolean -> "Boolean"
                 is String -> "String"
                 is BigInteger -> "BigInt"
