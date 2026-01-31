@@ -195,7 +195,7 @@ class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                 uiMapper = { response ->
                     // Wrap response into Rhino object on UI thread with Rhino Context.
                     // zh-CN: 在 UI 线程进入 Rhino Context, 将 Response 包装为 Rhino 对象.
-                    withRhinoContext {
+                    withRhinoContext(scriptRuntime) {
                         val wrapped = wrapResponse(scriptRuntime, response, prepared.cacheBody, prepared.cacheThreshold)
 
                         // Optional: if user provided callback, call it on UI thread.

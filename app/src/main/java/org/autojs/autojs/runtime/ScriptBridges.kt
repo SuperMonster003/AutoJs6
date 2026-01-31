@@ -29,12 +29,12 @@ class ScriptBridges : IScriptBridges {
         this.engine = engine
     }
 
-    fun setJavaPrimitiveWrap(b: Boolean) = useJsContext {
-        it.wrapFactory.isJavaPrimitiveWrap = b
+    fun setJavaPrimitiveWrap(b: Boolean) = useJsContext { cx ->
+        cx.wrapFactory.isJavaPrimitiveWrap = b
     }
 
-    fun isJavaPrimitiveWrap(): Boolean = useJsContext {
-        it.wrapFactory.isJavaPrimitiveWrap
+    fun isJavaPrimitiveWrap(): Boolean = useJsContext { cx ->
+        cx.wrapFactory.isJavaPrimitiveWrap
     }
 
     override fun call(func: BaseFunction, target: Any?, args: Array<*>) = useJsContext { cx ->
@@ -46,12 +46,12 @@ class ScriptBridges : IScriptBridges {
         callFunction(engine.runtime, func, niceScope, thisObj, niceArgs)
     }
 
-    override fun toArray(o: Iterable<*>?): NativeArray = useJsContext { context ->
-        val scope = context.initStandardObjects()
-        context.newArray(scope, o?.map { Context.javaToJS(it, scope) }?.toTypedArray()) as NativeArray
+    override fun toArray(o: Iterable<*>?): NativeArray = useJsContext { cx ->
+        val scope = engine.runtime.topLevelScope
+        cx.newArray(scope, o?.map { Context.javaToJS(it, scope) }?.toTypedArray()) as NativeArray
     }
 
-    override fun asArray(listLike: Any): NativeArray = useJsContext { context ->
+    override fun asArray(listLike: Any): NativeArray = useJsContext { cx ->
         if (listLike is Iterable<*>) {
             return@useJsContext toArray(listLike)
         }
@@ -61,7 +61,7 @@ class ScriptBridges : IScriptBridges {
             listLike::class.java.methods.forEach {
                 val name = it.name
                 val method = NativeJavaMethod(it, name)
-                val bound = BoundFunction(context, arr, method, boundThis, emptyArray())
+                val bound = BoundFunction(cx, arr, method, boundThis, emptyArray())
                 arr.put(name, arr, bound)
             }
             return@useJsContext arr
@@ -69,16 +69,18 @@ class ScriptBridges : IScriptBridges {
         return@useJsContext newNativeArray()
     }
 
-    override fun toString(obj: Any?): String = Context.toString(obj)
+    override fun toString(obj: Any?): String =
+        Context.toString(obj)
 
-    override fun toPrimitive(obj: Any?): Any = useJsContext { context ->
-        Context.javaToJS(obj, context.initStandardObjects())
-    }
+    override fun toPrimitive(obj: Any?): Any? =
+        Context.javaToJS(obj, engine.runtime.topLevelScope)
 
     private fun <T> useJsContext(f: (Context) -> T): T {
         val currentContext = Context.getCurrentContext()
         return try {
-            f(currentContext ?: engine.setupContext(Context.enter()))
+            // Enter Context via engine to ensure WrapFactory and AutoJsContext binding are installed.
+            // zh-CN: 通过 engine 进入 Context, 确保 WrapFactory 与 AutoJsContext 绑定已安装.
+            f(currentContext ?: engine.enterContext())
         } finally {
             currentContext ?: Context.exit()
         }

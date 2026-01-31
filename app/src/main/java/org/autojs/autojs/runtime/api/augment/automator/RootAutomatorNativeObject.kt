@@ -13,7 +13,7 @@ import org.autojs.autojs.core.inputevent.RootAutomator as CoreRootAutomator
 import org.mozilla.javascript.ScriptRuntime as RhinoScriptRuntime
 
 @Suppress("unused")
-class RootAutomatorNativeObject(scriptRuntime: ScriptRuntime, waitForReady: Any? = false) : NativeObject() {
+class RootAutomatorNativeObject(private val scriptRuntime: ScriptRuntime, waitForReady: Any? = false) : NativeObject() {
 
     private val mRootAutomatorObject: Scriptable = run {
         val rootAutomator = when (waitForReady) {
@@ -46,7 +46,7 @@ class RootAutomatorNativeObject(scriptRuntime: ScriptRuntime, waitForReady: Any?
         //  #     'touchDown', 'touchUp', 'touchMove', 'getDefaultId', 'setDefaultId', 'exit',
         //  # ]
         return when (val o = mRootAutomatorObject.prop(name)) {
-            is BaseFunction -> withRhinoContext { cx ->
+            is BaseFunction -> withRhinoContext(scriptRuntime) { cx ->
                 BoundFunction(cx, mRootAutomatorObject, o, mRootAutomatorObject, arrayOf())
             }
             else -> super.get(name, start)

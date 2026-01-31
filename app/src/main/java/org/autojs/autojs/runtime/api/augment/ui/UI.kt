@@ -232,7 +232,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
             val widgets = scriptRuntime.ui.widgets
             if (widgets.contains(viewName)) {
                 val ctor = widgets.prop(viewName) as BaseFunction
-                val widget = withRhinoContext { cx ->
+                val widget = withRhinoContext(scriptRuntime) { cx ->
                     ctor.construct(cx, scriptRuntime.topLevelScope, arrayOf())
                 } as ScriptableObject
                 val f = widget.prop("renderInternal") as BaseFunction
@@ -881,7 +881,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
                             }
                         }
                     }, NOT_CONSTRUCTABLE)
-                    withRhinoContext { cx ->
+                    withRhinoContext(scriptRuntime) { cx ->
                         arrayObserveFunc.call(cx, global, globalArray, arrayOf(dataSource, handlerFunc))
                     }
                 }
@@ -899,7 +899,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
                     isAutoJsUiMode -> {
                         callFunction(scriptRuntime, action, scriptRuntime.topLevelScope, arrayOf())
                     }
-                    else -> withRhinoContext { cx ->
+                    else -> withRhinoContext(scriptRuntime) { cx ->
                         val scope = scriptRuntime.topLevelScope
                         val exitIfErrorFunc = scope.prop("__exitIfError__") as BaseFunction
                         exitIfErrorFunc.call(cx, scope, scope, arrayOf(newBaseFunction("action", {

@@ -56,7 +56,7 @@ class Selector(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRun
             // @Hint by SuperMonster003 on Jul 25, 2024.
             //  ! For scope binding.
             //  ! zh-CN: 用于绑定作用域.
-            withRhinoContext { cx ->
+            withRhinoContext(scriptRuntime) { cx ->
                 global.defineProp(methodName, newBaseFunction(null, { argList ->
                     val methodKey = coerceString(argList[0])
                     newBaseFunction(methodKey, { arguments ->

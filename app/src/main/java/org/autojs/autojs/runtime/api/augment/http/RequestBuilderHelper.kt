@@ -9,14 +9,14 @@ import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okio.BufferedSink
+import org.autojs.autojs.pio.PFile
+import org.autojs.autojs.pio.PFileInterface
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNumber
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsString
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.rhino.extension.AnyExtensions.toRuntimePath
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
-import org.autojs.autojs.pio.PFile
-import org.autojs.autojs.pio.PFileInterface
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.Mime
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
@@ -53,7 +53,7 @@ class RequestBuilderHelper(private val options: NativeObject) {
         // require(method is String) { "Property method is required for header options" }
         when {
             !options.prop(Http.KEY_BODY).isJsNullish() -> {
-                request.method(method, parseBody())
+                request.method(method, parseBody(scriptRuntime))
             }
             !options.prop(Http.KEY_FILES).isJsNullish() -> {
                 request.method(method, parseMultipart(scriptRuntime))
@@ -64,7 +64,7 @@ class RequestBuilderHelper(private val options: NativeObject) {
         }
     }
 
-    fun parseBody(): RequestBody = when (val body = options.prop(Http.KEY_BODY)) {
+    fun parseBody(scriptRuntime: ScriptRuntime): RequestBody = when (val body = options.prop(Http.KEY_BODY)) {
         is RequestBody -> body
         is String -> {
             val mediaType = options.prop(Http.KEY_CONTENT_TYPE).takeUnless { it.isJsNullish() }
@@ -77,7 +77,7 @@ class RequestBuilderHelper(private val options: NativeObject) {
             }
 
             override fun writeTo(sink: BufferedSink) {
-                RhinoUtils.withRhinoContext { cx ->
+                RhinoUtils.withRhinoContext(scriptRuntime) { cx ->
                     body.call(cx, body, body, arrayOf(sink))
                 }
             }
