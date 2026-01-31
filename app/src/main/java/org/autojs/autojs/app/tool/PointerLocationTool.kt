@@ -98,7 +98,7 @@ open class PointerLocationTool(final override val context: Context) : ShowableIt
 
             runCatching byShizuku@{
                 when {
-                    WrappedShizuku.isOperational() -> {
+                    WrappedShizuku.hasService() && WrappedShizuku.isOperational() -> {
                         WrappedShizuku.execCommand(context, cmd).result.trim().toIntOrNull()
                     }
                     else -> null

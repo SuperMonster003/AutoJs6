@@ -24,6 +24,7 @@ import org.autojs.autojs.core.pref.Language;
 import org.autojs.autojs.core.pref.Pref;
 import org.autojs.autojs.core.record.GlobalActionRecorder;
 import org.autojs.autojs.core.record.Recorder;
+import org.autojs.autojs.core.shizuku.IUserService;
 import org.autojs.autojs.model.explorer.ExplorerDirPage;
 import org.autojs.autojs.model.explorer.ExplorerPage;
 import org.autojs.autojs.model.explorer.Explorers;
@@ -414,9 +415,12 @@ public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
     private String getCurrentPackage() {
         if (WrappedShizuku.INSTANCE.isOperational()) {
             try {
-                mCurrentPackage = Objects.requireNonNull(WrappedShizuku.service).currentPackage();
-                if (!TextUtils.isEmpty(mCurrentPackage)) {
-                    return mCurrentPackage;
+                IUserService service = WrappedShizuku.getServiceOrNull();
+                if (service != null) {
+                    mCurrentPackage = service.currentPackage();
+                    if (!TextUtils.isEmpty(mCurrentPackage)) {
+                        return mCurrentPackage;
+                    }
                 }
             } catch (RemoteException ignored) {
                 /* Ignored. */
@@ -439,9 +443,12 @@ public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
     private String getCurrentActivity() {
         if (WrappedShizuku.INSTANCE.isOperational()) {
             try {
-                mCurrentActivity = Objects.requireNonNull(WrappedShizuku.service).currentActivity();
-                if (!TextUtils.isEmpty(mCurrentActivity)) {
-                    return mCurrentActivity;
+                IUserService service = WrappedShizuku.getServiceOrNull();
+                if (service != null) {
+                    mCurrentActivity = service.currentActivity();
+                    if (!TextUtils.isEmpty(mCurrentActivity)) {
+                        return mCurrentActivity;
+                    }
                 }
             } catch (RemoteException ignored) {
                 /* Ignored. */

@@ -1037,10 +1037,9 @@ public class Dim {
         @Override
         public void onEngineCreate(ScriptEngine<? extends ScriptSource> engine) {
             if (type != IPROXY_LISTEN) Kit.codeBug();
-            if (!(engine instanceof RhinoJavaScriptEngine) ||
-                !callback.shouldAttachDebugger((RhinoJavaScriptEngine) engine)) {
-                return;
-            }
+
+            if (!(engine instanceof RhinoJavaScriptEngine)) return;
+            if (!callback.shouldAttachDebugger((RhinoJavaScriptEngine) engine)) return;
 
             Context cx = ((RhinoJavaScriptEngine) engine).getContext();
             ContextData contextData = new ContextData();

@@ -13,7 +13,7 @@ object Util {
     fun getClassName(o: Any?) = getClassNameInternal(o, "getClassName")
 
     private fun getClassInternal(o: Any?, methodName: String): Class<out Any> {
-        require(o != null) { "Argument \"o\" ${o.jsBrief()} for util.$methodName must be non-null" }
+        requireNotNull(o) { "Argument \"o\" ${o.jsBrief()} for util.$methodName must be non-null" }
         return o as? Class<*> ?: o.javaClass
     }
 

@@ -12,7 +12,7 @@ object LooperThread {
 
     fun getLooperOrNull(thread: Thread) = when {
         isEqual(thread, Looper.getMainLooper().thread) -> Looper.getMainLooper()
-        thread is ILooperThread -> (thread as ILooperThread).looper
+        thread is ILooperThread -> thread.looper
         else -> null
     }
 

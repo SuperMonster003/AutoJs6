@@ -43,7 +43,7 @@ class UI(context: Context, private val scriptRuntime: ScriptRuntime) : ProxyObje
         it.context = context
     }
 
-    private val mProperties = ConcurrentHashMap<String, Any?>().also {
+    private val mProperties = ConcurrentHashMap<String, Any>().also {
         it["layoutInflater"] = layoutInflater
     }
 

@@ -139,13 +139,22 @@ object WrappedShizuku {
     }
 
     @ScriptInterface
-    fun isOperational() = hasService() && isRunning() && hasPermission()
+    fun isOperational() = isRunning() && hasPermission()
 
     @ScriptInterface
     fun isRunning() = mHasBinder
 
     @ScriptInterface
     fun hasService() = service != null
+
+    @JvmStatic
+    fun getServiceOrNull(): IUserService? {
+        service?.let { return it }
+        bindUserServiceIfNeeded()
+        initializeShizukuServiceAndWait(5000L)
+        service?.let { return it }
+        return null
+    }
 
     @ScriptInterface
     fun requestPermission() = Shizuku.requestPermission(mRequestCode)

@@ -81,7 +81,7 @@ internal fun extendBuildInObjectInternal(scriptRuntime: ScriptRuntime, augmentab
     }
     protoList.forEach { pair ->
         val (funcName, attributes) = pair
-        require(extensibleProtoClass != null) { "A proto class must be specified for build-in object prototype extension" }
+        requireNotNull(extensibleProtoClass) { "A proto class must be specified for build-in object prototype extension" }
 
         val prototypeObject = buildInObject.prop("prototype") as ScriptableObject
 
