@@ -1223,4 +1223,5 @@
     <string name="text_write_secure_settings">Escribir la configuración de seguridad</string>
     <string name="text_write_system_settings">Escribir la configuración del sistema</string>
     <string name="text_xiaomi_background_popup_permission">Ventanas emergentes en segundo plano</string>
+    <string name="error_refresh_failed">Error al actualizar</string>
 </resources>

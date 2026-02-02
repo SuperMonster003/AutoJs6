@@ -1221,4 +1221,5 @@
     <string name="text_write_secure_settings">修改安全設定</string>
     <string name="text_write_system_settings">修改系統設定</string>
     <string name="text_xiaomi_background_popup_permission">後臺彈出介面</string>
+    <string name="error_refresh_failed">刷新失敗</string>
 </resources>
