@@ -6,7 +6,6 @@
 <!-- Proofreader: [ Google Gemini ] -->
 
 <resources xmlns:tools="http://schemas.android.com/tools">
-
     <string name="apk_builder_build" tools:ignore="TypographyEllipsis">建築...</string>
     <string name="apk_builder_clean" tools:ignore="TypographyEllipsis">洗浄...</string>
     <string name="apk_builder_package" tools:ignore="TypographyEllipsis">パッケージング...</string>
@@ -51,7 +50,8 @@
     <string name="config_abi_options_contains_unavailable">設定 \"abi\" に利用できないオプションが含まれています</string>
     <string name="config_lib_options_contains_invalid">設定 \"lib\" に無効なオプションが含まれています</string>
     <string name="config_lib_options_contains_unavailable">設定 \"lib\" に利用できないオプションが含まれています</string>
-    <string name="confirm_overwrite_file">ファイルはすでに存在します.\n上書きしますか?</string>
+    <string name="confirm_overwrite_directory">フォルダーは既に存在します. 上書きしますか?</string>
+    <string name="confirm_overwrite_file">ファイルは既に存在します. 上書きしますか?</string>
     <string name="content_about_app_tips">1. ホーム画面でアプリケーション名 (AutoJs6) を長押しして, 設定画面にジャンプする\n2. 設定ページで特定の設定オプションを長押しすると, 詳細情報が表示されます</string>
     <string name="content_current_theme_color_configured_by_palette">現在のテーマカラー %1$s はカラーパレットで設定されています</string>
     <string name="content_description_fab_for_display_manifest">マニフェストを表示するためのフローティング操作ボタン部品</string>
@@ -67,8 +67,8 @@
     <string name="default_script_notification_content">スクリプトからの通知</string>
     <string name="default_script_notification_title">スクリプト通知</string>
     <string name="default_value_working_directory">/スクリプト</string>
-    <string name="description_about_app_and_developer_preference">AutoJs6 は, Android 用の JavaScript 自動化ツールで, 「hyb1996/Auto.js」をクローンしたオープンソースです.\n\nヘルプやフィードバックを求めるには, GitHub issues に行くか, Tencent QQ チャットグループ 690946137 に参加してください</string>
-    <string name="description_about_app_tips_preference">1. アプリと開発者について」ページでアプリのアイコンを長押しすると, AutoJs6 の開発者向けオプションページにジャンプします</string>
+    <string name="description_about_app_and_developer_preference">AutoJs6 は, Android 用の JavaScript 自動化ツールで, [hyb1996/Auto.js] をクローンしたオープンソースです.\n\nヘルプやフィードバックを求めるには, GitHub issues に行くか, Tencent QQ チャットグループ 690946137 に参加してください</string>
+    <string name="description_about_app_tips_preference">1. アプリと開発者について ページでアプリのアイコンを長押しすると, AutoJs6 の開発者向けオプションページにジャンプします</string>
     <string name="description_accessibility_service">アクセシビリティサービスは, AutoJs6 が自動化を実現するための中核機能です. 画面上のウィジェット情報を読み取り, [ タップ / スワイプ / 入力 ] などの操作をシミュレートします.\n\n自動化関連の大半の機能やレイアウト解析ツールなどは, アクセシビリティサービスを有効にしないと正常に動作しません.</string>
     <string name="description_all_files_access" tools:ignore="TypographyEllipsis">\"すべてのファイルを管理\" (または \"すべてのファイルへのアクセス\") 権限により, AutoJs6 は共有ストレージ上で通常のファイルパスを使って直接 [ 作成 / 読み取り / 変更 / 削除 ] を行えます. これによりスクリプトは \"Internal Storage\" にアクセスでき, ファイルマネージャーもファイルを正常に表示・管理できます.\n\nAndroid 11+ では, フルストレージの読み書きを実現する主要な方法です.</string>
     <string name="description_app_language_preference">この環境設定は, 実行中のスクリプトからの例外メッセージを含む, AutoJs6 の表示言語を変更するためのものです.\n\n注: 言語を期待通りに適用するには, アプリの再起動が必要な場合があります</string>
@@ -84,7 +84,7 @@
     <string name="description_file_extensions_preference">AutoJs6のファイルエクスプローラーでファイル拡張子を表示するかどうかの設定に使用されます.</string>
     <string name="description_floating_button">フローティングボタンは, 画面端にドラッグ可能なクイック入口を表示し, [ スクリプトの開始/停止 / レイアウト解析 / 最近のパッケージ名やアクティビティ名の表示 / ポインター位置の表示 ] などに利用できます.\n\nNote: この機能は通常, \"他のアプリの上に表示\" 権限が必要です.</string>
     <string name="description_foreground_service">フォアグラウンドサービスは, AutoJs6 をバックグラウンドでもより安定して動作させるための機能で, [ 長時間スクリプト実行 / 接続の維持 / 継続的な監視 ] などの用途に適しています.\n\n有効化すると, システムは \"フォアグラウンドサービス通知\" を表示して AutoJs6 が継続稼働中であることをユーザーに知らせます. この通知は通常, サービスが停止するまで表示され続けます.\n\n通知を \"Silent\" または \"Minimize\" に設定しても, 通知の強さが下がるだけで, 一般的にフォアグラウンドサービス機能には影響しません.\n\n通知チャネルを無効化したり AutoJs6 の通知送信を禁止したりすると, フォアグラウンドサービスの正常な起動や安定性に影響する可能性があります.</string>
-    <string name="description_hidden_files_preference">AutoJs6 ファイルエクスプローラーで隠しファイルや隠しフォルダ (通常は「.」で始まる) を表示するかどうかを設定するために使用します</string>
+    <string name="description_hidden_files_preference">AutoJs6 ファイルエクスプローラーで隠しファイルや隠しフォルダ (通常は [.] で始まる) を表示するかどうかを設定するために使用します</string>
     <string name="description_ignore_battery_optimizations">バッテリー最適化の無視により, AutoJs6 に対するバックグラウンド制限を緩和でき, スケジュールタスクや長時間スクリプトが待機中でも比較的安定して動作しやすくなります.\n\nNote: メーカーにより, 追加の省電力ポリシー (自動起動制限, バックグラウンド凍結など) が存在する場合があります.</string>
     <string name="description_keep_screen_on_when_in_foreground">AutoJs6 が前面にあるときに画面を常時点灯させるかどうかを制御します.</string>
     <string name="description_keep_screen_on_when_in_foreground_preference">AutoJs6 がフォアグラウンドにあるとき, デバイスの画面をオンにして明るく保つための設定です.\nAutoJs6 アプリケーションの全ページのうち, ホームページでのみ使用する場合は, \"ホームページのみ\" オプションを選択します</string>
@@ -95,12 +95,14 @@
     <string name="description_night_mode_preference">ナイトモード (ダークテーマとも呼ばれる) は, Android システムの UI と端末上で動作するアプリケーションの両方に適用され, 弱視のユーザーや明るい光に敏感なユーザーの視認性を向上させ, 誰でも簡単に暗い環境下で端末を使用できるようにします.\n\nフォローシステム AutoJs6 では, Android と同じ Night モードが設定できます.\n常にオン Android のシステム設定に関係なく, 常に Night モードが ON になります.\n常にオフ Android のシステム設定に関係なく, AutoJs6 はナイトモードをオフにします.\n\n注: Follow system オプションは, Android API Level 28 (Android 9) [P] 以上の場合のみです</string>
     <string name="description_night_mode_preference_more">Android システムでナイトモードを有効にするには\n- Android API Level 29 (Android 10) [Q] 以上の場合: [設定] -> [ディスプレイ] -> [テーマ].\n- Android API Level 28 (Android 9) [P]: [開発者向けオプション] -> [ナイトモード].\n\nWebView コンポーネント (AutoJs6 のドキュメントページなど) を使って, Web ベースのコンテンツにナイトモード (ダークテーマ) を適用するには, 以下の条件を満たす必要があります.\n1. Android System WebView (または Google Chrome のようなブラウザ) .\n- Android API Level 29 (Android 10) [Q] 以上: バージョン >= 76\n- Android API Level 28 (Android 9) [P]: バージョン >= 105\n2. WebView コンポーネントの Web ベースのコンテンツは, Dark テーマに適合している (CSS や Android XML リソースなどによる)</string>
     <string name="description_notification_access">\"通知へのアクセス\" (または \"通知読み取り権限\") により, AutoJs6 はシステム通知の内容を読み取れるようになり, スクリプトで通知を監視したり通知テキストを取得したりできます.</string>
+    <string name="description_pointer_location">\"ポインタの位置\" は Android の開発者向けオプションにあるデバッグ機能です.\n有効にすると, システムが画面上にタッチポイントの [座標/移動軌跡/数/サイズ/移動速度/圧力] などの情報を表示し, 関連スクリプトの [作成/デバッグ/検証] に役立ちます.</string>
     <string name="description_post_notifications">\"通知の送信\" 権限により, AutoJs6 はシステムに通知を投稿でき, スクリプトで通知バーへカスタム通知を投稿・管理できます.\n\nNote: Android 13+ 端末でこの権限が付与されていない場合, 一部の通知が表示されない可能性があり, フォアグラウンドサービスの起動や安定性に影響することがあります.</string>
     <string name="description_project_media_access">プロジェクトのメディアアクセス権を使用すると, 画面録画のセキュリティ警告が表示されなくなります</string>
     <string name="description_restart_strategy">再起動戦略はホームページのドロワーにある再起動ボタンにのみ適用されます.\n\nクイック再起動: アプリをすばやく再起動します. 再起動に失敗したり予期しない状況が発生した場合は/\"スケジュール再起動\" に切り替えてください.\nスケジュール再起動: あらかじめ短時間のタイマーを設定します. アプリが停止した後/スケジュールに従って再度起動し/アプリの再起動を実現します.</string>
     <string name="description_rhino_java_primitive_wrap">スイッチ有効 (デフォルト): Java メソッドが返す Number/Boolean/Character は Java オブジェクトとしてラップされ/スクリプトに公開されます (String は除外). typeof は \"object\"/species は \"JavaObject\". Java のメソッドを呼び出せるため/Java の厳密な型特性やオーバーロード解決を保持しやすくなります.\n\nスイッチ無効: 上記の型はラップされず/JavaScript のプリミティブ値 (number/boolean/1 文字の文字列) として直接公開されます. typeof は対応する JavaScript 型となり/JavaScript のセマンティクス／エコシステムにより沿います. 必要なら new によって明示的に Java ラッパーを生成できます (例: new java.lang.Boolean(true)).\n\n参照: http://issues.autojs6.com/435</string>
     <string name="description_root_mode_preference">異国の root や root アクセスに異常がある場合, root を強制的に root または non-root に設定することができます</string>
     <string name="description_root_record_out_file_type_preference">バイナリタイプ: 編集不可, ファイル拡張子は \"auto\"\nJavaScript タイプ: 直接編集またはコピー可能, ファイル拡張子は \"js\"</string>
+    <string name="description_screen_capture_request_delay">画面キャプチャ権限を要求する際, 表示される権限リクエスト画面が閉じるときにフェード等のアニメーションが発生する場合があります. この直後に `images.captureScreen` を呼び出すと, 取得したスクリーンショットに権限リクエスト画面の内容が写り込み, 遮蔽が発生することがあります. \n\nこの設定値は, 権限取得直後に最初のスクリーンショットを取得する前に遅延時間（ミリ秒）を追加し, 上記の遮蔽問題を回避するために使用します. \n\nこの設定は権限取得後の最初のスクリーンショットにのみ適用され, 以降のスクリーンショットには影響しません.</string>
     <string name="description_server_mode">サーバーモードは, AutoJs6 が端末上でサービスを起動して外部クライアントからの接続を待ち, [ スクリプト転送 / ログ出力 / リモート制御 ] などを行うための機能です.\n\nAutoJs6 のサーバーモードは 2 つの接続方式に対応しています:\n1. LAN\n2. Android Debug Bridge (ADB)</string>
     <string name="description_shizuku_access">Shizuku を使用すると, ADB 権限を取得し, システム API にアクセスできるようになります</string>
     <string name="description_stable_mode">安定モードにするとレイアウト境界を取得する際に安定しますが, 一部の結果が無視されることがあります.\nアクセシビリティサービスの再起動が必要です</string>
@@ -112,6 +114,8 @@
     <string name="description_write_secure_settings">アプリケーションが読み取ることはできるが, 書き込むことはできないシステム環境設定を含む, 安全なシステム設定です.\nこれは, ユーザーがシステムアプリの UI を通じて明示的に変更する必要がある環境設定のためのものです.\nセキュアなシステム設定を許可すると, 通常のアプリケーションはセキュアな設定 (アクセシビリティサービスなど) を直接変更できるようになります</string>
     <string name="description_write_system_settings">\"システム設定の変更\" 権限により, AutoJs6 は一部のシステム設定を変更でき, スクリプトで [ 画面の明るさ / 自動回転 / 画面タイムアウト ] などを調整できます.</string>
     <string name="dialog_button_abandon">放棄</string>
+    <string name="dialog_button_abort">中止</string>
+    <string name="dialog_button_abort_connection">接続を中止</string>
     <string name="dialog_button_advanced_settings">詳細</string>
     <string name="dialog_button_amend_host_address">アドレスを修正</string>
     <string name="dialog_button_back">@string/text_back</string>
@@ -129,10 +133,11 @@
     <string name="dialog_button_exception_details">詳細</string>
     <string name="dialog_button_file_information">ファイル情報</string>
     <string name="dialog_button_history">履歴</string>
+    <string name="dialog_button_homepage">ホームページ</string>
     <string name="dialog_button_ignore_current_update">無視する</string>
-    <string name="dialog_button_interrupt_connection">接続を中止</string>
     <string name="dialog_button_join_group">グループ参加</string>
     <string name="dialog_button_manager">マネージャー</string>
+    <string name="dialog_button_minimize">最小化</string>
     <string name="dialog_button_more">詳細</string>
     <string name="dialog_button_open_color_palette">パレットを開く</string>
     <string name="dialog_button_quit">終了する</string>
@@ -171,7 +176,7 @@
     <string name="entry_file_extensions_not_show">すべてのファイル拡張子を隠す</string>
     <string name="entry_file_extensions_show_all">すべてのファイル拡張子を表示する</string>
     <string name="entry_file_extensions_show_all_but_executable">実行可能ファイル (*.js / *.auto を除く) の拡張子を表示する</string>
-    <string name="entry_hidden_files_not_show">「隠しファイルや隠しフォルダーを表示しない</string>
+    <string name="entry_hidden_files_not_show">隠しファイルや隠しフォルダーを表示しない</string>
     <string name="entry_hidden_files_show">隠しファイルや隠しフォルダーを表示する</string>
     <string name="entry_keep_screen_on_when_in_foreground_all_pages">全ページ</string>
     <string name="entry_keep_screen_on_when_in_foreground_disabled">使用不可</string>
@@ -192,6 +197,7 @@
     <string name="error_abandoned_method">メソッド %s は放棄されたので, 使用しないでください</string>
     <string name="error_action_cannot_be_completed_with_negative_coordinate">\"%1$s\" 操作はパラメータに負の座標値 (%2$d, %3$d) が含まれているため, 完了できません</string>
     <string name="error_activity_is_required_for_ui_exec_mode">UI 実行モードに必要なアクティビティが不足しています</string>
+    <string name="error_an_error_occurred">エラーが発生しました</string>
     <string name="error_an_operation_is_not_implemented">操作が実装されていません</string>
     <string name="error_app_not_installed">アプリがインストールされていません</string>
     <string name="error_app_not_installed_with_name">\"%s\" アプリがインストールされていません</string>
@@ -230,8 +236,10 @@
     <string name="error_excessive_height_for_template_n_region">高さ超過: テンプレート [%1$d] > 領域 [%2$d]</string>
     <string name="error_excessive_width_for_template_n_region">幅が超過しています: テンプレート [%1$d] > 領域 [%2$d]</string>
     <string name="error_failed_to_apply_current_color_history">現在のカラー履歴の適用に失敗しました</string>
+    <string name="error_failed_to_bind_plugin_service">%1$s プラグインサービスのバインドに失敗しました.</string>
     <string name="error_failed_to_call_method">メソッド \"%s\" の呼び出しに失敗しました</string>
     <string name="error_failed_to_call_method_with_cause"><![CDATA[メソッド \"%1$s\" の呼び出しに失敗しました: [ %2$s ]]]></string>
+    <string name="error_failed_to_change_the_toggle_state">スイッチの状態の変更に失敗しました</string>
     <string name="error_failed_to_convert_into_drawable">値 %s を Drawable に変換するのに失敗しました</string>
     <string name="error_failed_to_go_to_access_settings">設定画面を開けませんでした</string>
     <string name="error_failed_to_grant_shizuku_access">Shizuku の権限付与に失敗しました</string>
@@ -251,10 +259,10 @@
     <string name="error_file_in_path_does_not_exist">パス \"%1$s\" にファイルが存在しません</string>
     <string name="error_function_called_in_ui_thread">\"UI スレッドをブロックできません. サブスレッドまたはサブスクリプトで %s() を実行してみてください</string>
     <string name="error_function_called_more_than_once">%s() が複数回呼び出されました</string>
-    <string name="error_get_github_latest_release">「最新の GitHub リリースを取得できません</string>
+    <string name="error_get_github_latest_release">最新の GitHub リリースを取得できません</string>
     <string name="error_handshake_timed_out">ハンドシェイクは %d ms 後にタイムアウトしました</string>
     <string name="error_illegal_argument" formatted="false">不正な引数 %s: %s</string>
-    <string name="error_illegal_relative_url_argument_without_base">「ベース URL がないと相対 URL を使用できません</string>
+    <string name="error_illegal_relative_url_argument_without_base">ベース URL がないと相対 URL を使用できません</string>
     <string name="error_illegal_ui_object_result_type" formatted="false">結果タイプ \"%s\" は UiObject ではサポートされません</string>
     <string name="error_illegal_url_argument" formatted="false">URL は \"https://\" などのようにプロトコルで開始する必要があります</string>
     <string name="error_illegal_widget_command" formatted="false">パラメータ %s (%s) は, %s 型にキャストする必要があるか, キャストできます</string>
@@ -275,6 +283,7 @@
     <string name="error_may_not_have_root_access_to_run_auto_file">AutoJs6 は \"auto\" ファイルを実行するためのルート・アクセス権を持っていない可能性があります</string>
     <string name="error_method_called_with_null_argument" formatted="false">null 引数で %s() が呼び出されました: %s</string>
     <string name="error_method_only_accepts_a_number_of_arguments_in_the_range_n_to_m">メソッドは [%1$d..%2$d] の範囲の引数しか受け付けません</string>
+    <string name="error_missing_required_plugin_for_module_label">\"%1$s\" に必要なプラグインが見つかりません. プラグインをインストールしてから再試行してください.</string>
     <string name="error_module_does_not_work_due_to_the_lack_of_necessary_library_files">必要なライブラリ・ファイルがないため, \"%s\" モジュールが動作しません</string>
     <string name="error_no_accessibility_permission">アクセシビリティサービスが無効で, スクリプトが停止しています</string>
     <string name="error_no_accessibility_permission_to_capture">アクセシビリティサービスが有効になっていない</string>
@@ -285,11 +294,15 @@
     <string name="error_no_applications_available_for_playing_this_file">このファイルを再生できるアプリがありません</string>
     <string name="error_no_applications_available_for_sending_this_file">このファイルを送信できるアプリがありません</string>
     <string name="error_no_applications_available_for_viewing_this_file">このファイルを表示できるアプリがありません</string>
+    <string name="error_no_available_enabled_plugin_variants_found">利用可能で有効化された %1$s プラグインの variant が見つかりません (%2$s).</string>
     <string name="error_no_available_url_provided_for_current_plugin">現在のプラグインに利用可能な URL は提供されていません</string>
-    <string name="error_no_display_over_other_apps_permission">他のアプリの上に表示する」権限がない</string>
+    <string name="error_no_display_over_other_apps_permission">他のアプリの上に表示する 権限がない</string>
+    <string name="error_no_embedded_paddle_ocr_assets_found">埋め込みの Paddle OCR assets が見つかりません. Paddle OCR を有効にして再パッケージしてください.</string>
+    <string name="error_no_enabled_plugin_for_module_label">\"%1$s\" に有効化されたプラグインがありません. プラグインを有効化してから再試行してください.</string>
+    <string name="error_no_paddle_ocr_plugins_available">利用可能な Paddle OCR プラグインが見つかりません</string>
     <string name="error_no_permission_to_access_shizuku">Shizuku にアクセスする権限がありません</string>
     <string name="error_no_post_notifications_permission">\"投稿通知\" 許可なし</string>
-    <string name="error_no_read_phone_state_permission">電話の状態を読む」権限がない</string>
+    <string name="error_no_read_phone_state_permission">電話の状態を読む 権限がない</string>
     <string name="error_no_screen_capture_permission">画面キャプチャ許可がありません</string>
     <string name="error_no_storage_rw_permission">\"ストレージ R/W\" 権限なし</string>
     <string name="error_no_such_selector_method" formatted="false">そのようなセレクタ・メソッドはありません %s(%s: %s)</string>
@@ -299,6 +312,10 @@
     <string name="error_parse_github_release_assets">GitHub リリース・アセットの解析に失敗しました</string>
     <string name="error_parse_version_info">バージョン情報の解析に失敗しました</string>
     <string name="error_pattern_syntax">無効なパターン構文</string>
+    <string name="error_plugin_apk_does_not_contain_required_assets_for_variant">プラグイン APK に variant=\"%1$s\" に必要な assets が含まれていません: %2$s.</string>
+    <string name="error_plugin_apk_does_not_contain_required_native_libraries">プラグイン APK に必要な native ライブラリが含まれていません: %1$s.</string>
+    <string name="error_plugin_returned_empty_info">%1$s プラグインが空の info を返しました.</string>
+    <string name="error_plugin_returned_invalid_variant">%1$s プラグインが無効な variant を返しました: %2$s.</string>
     <string name="error_port_num_over_65535">65535 を超えるポート番号</string>
     <string name="error_project_main_script_file_with_abs_path_does_not_exist">プロジェクトのメインスクリプトファイル \"%1$s\" が存在しません</string>
     <string name="error_put_value_into_json">\"値 %s を JSON に入れることができません\" というメッセージが表示されます</string>
@@ -317,6 +334,7 @@
     <string name="error_specified_autojs6_version_number_must_be_greater_than_461">指定された AutoJs6 のバージョン番号は 461 より大きくなければなりません</string>
     <string name="error_the_transformer_for_required_property_cannot_return_nullish">必要なプロパティ \"%1$s\" のトランスフォーマーは null を返すことができません</string>
     <string name="error_thread_is_not_alive">スレッドが生きていない</string>
+    <string name="error_timeout_while_querying_plugin_info">%1$s プラグイン情報の取得がタイムアウトしました.</string>
     <string name="error_unable_to_use_shizuku_service">Shizuku サービスが使用できない</string>
     <string name="error_unacceptable_character">使用できない文字</string>
     <string name="error_unknown">不明なエラー</string>
@@ -340,7 +358,7 @@
     <string name="format_file_downloaded" formatted="true">ファイルは %s にダウンロードされました</string>
     <string name="go_to_accessibility_settings"><![CDATA[設定 -> アクセシビリティサービス -> AutoJs6 [を有効にする]]></string>
     <string name="hint_find_with_regex">Regex に対応しています. キャプチャしたグループには, \"$1\" 〜 \"$9\" を使用します</string>
-    <string name="hint_long_click_run_to_debug">実行」ボタン長押しでデバッグ</string>
+    <string name="hint_long_click_run_to_debug">実行 ボタン長押しでデバッグ</string>
     <string name="hint_loop_delay">ループ前の遅延時間</string>
     <string name="hint_loop_times">無限ループの場合は 0</string>
     <string name="hint_pc_server_address_supported_formats">IPv4/IPv6/およびドメイン名に対応しています.</string>
@@ -405,6 +423,7 @@
     <string name="summary_enable_a11y_service_with_root_access">必要なときに自動的に root 権限でアクセシビリティサービスを有効にする</string>
     <string name="summary_enable_a11y_service_with_secure_settings">必要なときに自動的にセキュアな設定のアクセシビリティサービスを有効にする</string>
     <string name="summary_extending_js_build_in_objects">JavaScript の組み込みオブジェクトを拡張することで, コードの柔軟性を高め, より豊かな機能を実現します</string>
+    <string name="summary_foreground_service_inrt">フォアグラウンドサービスは, バックグラウンドでアプリとスクリプトの実行をより安定して維持します</string>
     <string name="summary_guard_mode">AutoJs6 がフォアグラウンドにあるときにスクリプトから自動化アクションが実行されないようにする</string>
     <string name="summary_not_showing_main_activity">メインのアクティビティを表示せずにスクリプトを直接実行</string>
     <string name="summary_post_notifications_permission">AutoJs6 が通知を作成して送信することを許可します</string>
@@ -417,10 +436,12 @@
     <string name="summary_use_volume_control_record">フローティングボタンが表示されているときに, \"Volume Down\" キーで録画の開始/停止を制御できるようになりました</string>
     <string name="summary_use_volume_key_to_stop_running_scripts">\"Volume Up\" キーを押すと, 実行中のスクリプトをすべて停止します</string>
     <string name="summary_version_histories_preference">リリース版の変更履歴と統計データを確認する</string>
+    <string name="term_internal_strorage">内部ストレージ</string>
     <string name="text_a11y_service">アクセシビリティサービス</string>
     <string name="text_a11y_service_description">スクリプトの自動操作 (クリック, 長押し, スライドなど) で必要です</string>
     <string name="text_a11y_service_enabled_but_not_running">アクセシビリティサービスが有効だが, 実行されていない (デバイスを再有効化または再起動する)</string>
     <string name="text_a11y_service_may_be_needed">アクセシビリティサービスが必要な場合がある</string>
+    <string name="text_aborting" tools:ignore="TypographyEllipsis">中止しています...</string>
     <string name="text_about">について</string>
     <string name="text_about_all_files_access">全ファイルのアクセスについて</string>
     <string name="text_about_app_and_developer">アプリと開発者について</string>
@@ -443,6 +464,7 @@
     <string name="text_alias">別名</string>
     <string name="text_alias_cannot_be_empty">エイリアスは空にできません</string>
     <string name="text_alias_password">エイリアスのパスワード</string>
+    <string name="text_all">すべて</string>
     <string name="text_all_files_access">全ファイルアクセス</string>
     <string name="text_all_files_access_is_needed">携帯電話上のスクリプトファイルにアクセスするために, \"すべてのファイルへのアクセス\" が必要です</string>
     <string name="text_all_histories">すべての履歴</string>
@@ -495,7 +517,7 @@
     <string name="text_app_version_code">アプリバージョンコード</string>
     <string name="text_app_version_name">アプリのバージョン名</string>
     <string name="text_appearance">外観</string>
-    <string name="text_at_least_one_certificate_issuer_field_is_not_empty">「氏名, 組織名, 組織単位, 国コード, 州または省, 市区町村, 街」のいずれかの項目を入力する必要があります</string>
+    <string name="text_at_least_one_certificate_issuer_field_is_not_empty">[氏名, 組織名, 組織単位, 国コード, 州または省, 市区町村, 街] のいずれかの項目を入力する必要があります</string>
     <string name="text_attribute">属性</string>
     <string name="text_auto_check_for_updates">更新の自動チェック</string>
     <string name="text_auto_check_for_updates_and_show_snackbar">自動的に更新をチェックし, ホームページにスナックバーを表示します</string>
@@ -579,7 +601,11 @@
     <string name="text_copy_all_files_to_new_directory">すべてのファイルを新しいディレクトリにコピーします</string>
     <string name="text_copy_command">cmd をコピー</string>
     <string name="text_copy_debug_info">デバッグログをコピー</string>
+    <string name="text_copy_file">ファイルをコピー</string>
+    <string name="text_copy_folder">フォルダーをコピー</string>
     <string name="text_copy_line">行をコピー</string>
+    <string name="text_copy_same_path_confirm">ソースパスと宛先パスが同じです. コピーを続行しますか?\n\n新しい名前: \"%1$s\".</string>
+    <string name="text_copy_to">コピー先</string>
     <string name="text_copy_to_clip">クリップボードにコピーする</string>
     <string name="text_copy_value">値をコピーする</string>
     <string name="text_country_code">国コード (XX)</string>
@@ -602,10 +628,14 @@
     <string name="text_default">デフォルト</string>
     <string name="text_default_key_store">デフォルトのキーストア</string>
     <string name="text_default_prefix">デフォルトのプレフィックス</string>
+    <string name="text_delay_time">遅延時間</string>
     <string name="text_delete">削除</string>
     <string name="text_delete_all">すべて削除</string>
+    <string name="text_delete_file">ファイルを削除</string>
+    <string name="text_delete_folder">フォルダーを削除</string>
     <string name="text_delete_line">行削除</string>
     <string name="text_description">説明</string>
+    <string name="text_destination">宛先</string>
     <string name="text_details">詳細</string>
     <string name="text_developer_details_under_development">デベロッパーの詳細については, 現在開発中です</string>
     <string name="text_developer_options">デベロッパーオプション</string>
@@ -715,6 +745,7 @@
     <string name="text_find_prev_simplified">前へ</string>
     <string name="text_first_and_last_name">氏名</string>
     <string name="text_floating_button">フローティングボタン</string>
+    <string name="text_folder">フォルダー</string>
     <string name="text_force_stop">強制停止</string>
     <string name="text_foreground_service">フォアグラウンドサービス</string>
     <string name="text_formatting_completed">フォーマット完了</string>
@@ -756,6 +787,7 @@
     <string name="text_install_from_url">\"URL\" からインストール</string>
     <string name="text_install_plugin_from_url">\"URL\" からプラグインをインストール</string>
     <string name="text_installable">インストール可</string>
+    <string name="text_installed">インストール済み</string>
     <string name="text_integrity_verification_failed">整合性の検証に失敗しました</string>
     <string name="text_invalid_character_is_removed">無効な文字が削除されました</string>
     <string name="text_invalid_package_name">パッケージ名が無効です</string>
@@ -808,10 +840,15 @@
     <string name="text_manage_key_store">キーストアを管理</string>
     <string name="text_min_version">最小バージョン</string>
     <string name="text_min_version_of_vscode_vsc_ext">VSCode 拡張機能の最小バージョン</string>
-    <string name="text_mobile_qq_not_installed">「モバイル QQ がインストールされていない</string>
+    <string name="text_mobile_qq_not_installed">モバイル QQ がインストールされていない</string>
     <string name="text_more">詳細</string>
     <string name="text_more_details">詳細</string>
+    <string name="text_move">移動</string>
+    <string name="text_move_aborted_same_path">ソースパスと宛先パスが同じです. 移動を中止しました.</string>
     <string name="text_move_all_files_to_new_directory">すべてのファイルを新しいディレクトリに移動する</string>
+    <string name="text_move_file">ファイルを移動</string>
+    <string name="text_move_folder">フォルダーを移動</string>
+    <string name="text_move_to">移動先</string>
     <string name="text_multiple_options">複数のオプション</string>
     <string name="text_name">名称</string>
     <string name="text_need_to_enable_a11y_service">アクセシビリティサービスを有効にする必要があります</string>
@@ -839,6 +876,7 @@
     <string name="text_no_root_access">ルートアクセス不可</string>
     <string name="text_no_scripts_to_stop_running">実行を停止するスクリプトなし</string>
     <string name="text_not_granted">許可されない</string>
+    <string name="text_not_installed">未インストール</string>
     <string name="text_not_showing_main_activity">メインのアクティビティが表示されない</string>
     <string name="text_notification">通知</string>
     <string name="text_notification_access_permission">通知へのアクセス</string>
@@ -853,6 +891,8 @@
     <string name="text_open_by_other_apps">他のアプリで開く</string>
     <string name="text_open_main_activity">メインのアクティビティを開く</string>
     <string name="text_open_with">で開く</string>
+    <string name="text_operation_aborted">中止</string>
+    <string name="text_operation_completed">完了</string>
     <string name="text_operation_is_completed">操作が完了しました</string>
     <string name="text_options">オプション</string>
     <string name="text_organization">組織名</string>
@@ -941,6 +981,7 @@
     <string name="text_permission_granted_failed_with_shizuku">許可に失敗しました (Shizuku を使用)</string>
     <string name="text_permission_granted_with_root">許可された (root で)</string>
     <string name="text_permission_granted_with_shizuku">権限が付与されました (Shizuku を使用)</string>
+    <string name="text_permission_management">権限管理</string>
     <string name="text_permission_package_usage_stats">アプリに他のアプリの使用統計情報にアクセスする権限を与える</string>
     <string name="text_permission_revoked">許可取り消し</string>
     <string name="text_permission_revoked_failed_with_root">権限の取り消しに失敗しました (ルート)</string>
@@ -962,8 +1003,9 @@
     <string name="text_plugin_details">プラグイン詳細</string>
     <string name="text_plugins">Plugins</string>
     <string name="text_pointer_location">ポインターの位置</string>
-    <string name="text_pointer_location_toggle_failed_with_hint">トグル「ポインターの位置」に失敗しました.\nroot 権限が必要です</string>
+    <string name="text_pointer_location_toggle_failed_with_hint">トグル [ポインターの位置] に失敗しました.\nroot 権限が必要です</string>
     <string name="text_post_notifications_permission">ゆうびんけいほう</string>
+    <string name="text_post_notifications_permission_rationale">AutoJs6 のフォアグラウンドサービス等が正常に動作し, スクリプトが通知を投稿できるようにするため, AutoJs6 には \"通知の送信\" 権限を付与する必要があります.</string>
     <string name="text_pre_execute_script">スクリプトの事前実行</string>
     <string name="text_preparing" tools:ignore="TypographyEllipsis">準備中...</string>
     <string name="text_preset_dialog_content">プリセット・ダイアログ・内容</string>
@@ -978,6 +1020,9 @@
     <string name="text_project_location">プロジェクトの場所</string>
     <string name="text_project_media_access">プロジェクト・メディア・アクセス</string>
     <string name="text_prompt">プロンプト</string>
+    <string name="text_property_colon_value">%1$s: %2$s</string>
+    <string name="text_property_colon_value_nbsp_unit">%1$s: %2$d %3$s</string>
+    <string name="text_property_colon_value_unit">%1$s: %2$d%3$s</string>
     <string name="text_quit">終了</string>
     <string name="text_recommended">推奨</string>
     <string name="text_record_finished">記録終了</string>
@@ -1046,6 +1091,7 @@
     <string name="text_save_to">保存先</string>
     <string name="text_scheduled_restart_backend">エンジン</string>
     <string name="text_scheduled_restart_start_delay">開始遅延</string>
+    <string name="text_screen_capture_request_delay">画面キャプチャ権限リクエスト遅延</string>
     <string name="text_script_record">スクリプトの記録</string>
     <string name="text_script_running">スクリプトの実行</string>
     <string name="text_search">検索</string>
@@ -1065,13 +1111,14 @@
     <string name="text_send_shortcut">ショートカットの作成</string>
     <string name="text_server_mode">サーバーモード</string>
     <string name="text_service">サービス</string>
+    <string name="text_service_management">サービス管理</string>
     <string name="text_set_as_working_dir">作業ディレクトリに設定する</string>
     <string name="text_set_breakpoint">ブレークポイントの設定</string>
     <string name="text_settings">設定</string>
     <string name="text_sha256_mismatch_multiline_expected_actual">SHA-256 が一致しません.\n\n期待値: %1$s\n実際: %2$s</string>
     <string name="text_shizuku_access">Shizuku のパーミッション</string>
     <string name="text_shizuku_service_may_need_to_be_run_first">最初に Shizuku サービスを実行する必要があるかもしれない</string>
-    <string name="text_should_not_be_empty">「テキストを空にすることはできません</string>
+    <string name="text_should_not_be_empty">テキストを空にすることはできません</string>
     <string name="text_show_layout_bounds">レイアウト境界内のビュー</string>
     <string name="text_show_layout_hierarchy">レイアウト階層内の表示</string>
     <string name="text_show_widget_information">ウィジェット情報を表示する</string>
@@ -1081,6 +1128,10 @@
     <string name="text_size">サイズ</string>
     <string name="text_some_items_exported">エクスポートされた項目 %d</string>
     <string name="text_sort">並べ替え</string>
+    <string name="text_sort_by_last_update_time">最終更新日で並べ替え</string>
+    <string name="text_sort_by_name">名前で並べ替え</string>
+    <string name="text_sort_by_package_size">パッケージサイズで並べ替え</string>
+    <string name="text_source">ソース</string>
     <string name="text_source_file_path">ソースコードのパス</string>
     <string name="text_special_permissions">特殊な権限</string>
     <string name="text_stable_mode">安定モード</string>
@@ -1141,7 +1192,7 @@
     <string name="text_use_volume_control_record">\"Volume Down\" キーで録音を制御</string>
     <string name="text_use_volume_key_to_control_script_running">\"Volume Up\" キーでスクリプトの実行を制御します</string>
     <string name="text_username">ユーザー名</string>
-    <string name="text_username_cannot_be_empty">「ユーザー名を空にすることはできません</string>
+    <string name="text_username_cannot_be_empty">ユーザー名を空にすることはできません</string>
     <string name="text_using_desc_selector">降順セレクタを使用する</string>
     <string name="text_using_id_selector">ID セレクタを使用する</string>
     <string name="text_using_text_selector">テキストセレクタを使用する</string>
@@ -1173,36 +1224,4 @@
     <string name="text_write_secure_settings">セキュリティ設定の書き込み</string>
     <string name="text_write_system_settings">システム設定の書き込み</string>
     <string name="text_xiaomi_background_popup_permission">バックグラウンドでのポップアップ表示</string>
-    <string name="error_no_paddle_ocr_plugins_available">利用可能な Paddle OCR プラグインが見つかりません</string>
-    <string name="text_installed">インストール済み</string>
-    <string name="text_not_installed">未インストール</string>
-    <string name="text_all">すべて</string>
-    <string name="text_sort_by_name">名前で並べ替え</string>
-    <string name="text_sort_by_last_update_time">最終更新日で並べ替え</string>
-    <string name="text_sort_by_package_size">パッケージサイズで並べ替え</string>
-    <string name="error_missing_required_plugin_for_module_label">\"%1$s\" に必要なプラグインが見つかりません. プラグインをインストールしてから再試行してください.</string>
-    <string name="error_no_enabled_plugin_for_module_label">\"%1$s\" に有効化されたプラグインがありません. プラグインを有効化してから再試行してください.</string>
-    <string name="error_no_available_enabled_plugin_variants_found">利用可能で有効化された %1$s プラグインの variant が見つかりません (%2$s).</string>
-    <string name="error_plugin_apk_does_not_contain_required_assets_for_variant">プラグイン APK に variant=\"%1$s\" に必要な assets が含まれていません: %2$s.</string>
-    <string name="error_plugin_apk_does_not_contain_required_native_libraries">プラグイン APK に必要な native ライブラリが含まれていません: %1$s.</string>
-    <string name="error_failed_to_bind_plugin_service">%1$s プラグインサービスのバインドに失敗しました.</string>
-    <string name="error_timeout_while_querying_plugin_info">%1$s プラグイン情報の取得がタイムアウトしました.</string>
-    <string name="error_plugin_returned_empty_info">%1$s プラグインが空の info を返しました.</string>
-    <string name="error_plugin_returned_invalid_variant">%1$s プラグインが無効な variant を返しました: %2$s.</string>
-    <string name="error_no_embedded_paddle_ocr_assets_found">埋め込みの Paddle OCR assets が見つかりません. Paddle OCR を有効にして再パッケージしてください.</string>
-    <string name="dialog_button_minimize">最小化</string>
-    <string name="text_property_colon_value_unit">%1$s: %2$d%3$s</string>
-    <string name="text_property_colon_value_nbsp_unit">%1$s: %2$d %3$s</string>
-    <string name="text_screen_capture_request_delay">画面キャプチャ権限リクエスト遅延</string>
-    <string name="description_screen_capture_request_delay">画面キャプチャ権限を要求する際, 表示される権限リクエスト画面が閉じるときにフェード等のアニメーションが発生する場合があります. この直後に `images.captureScreen` を呼び出すと, 取得したスクリーンショットに権限リクエスト画面の内容が写り込み, 遮蔽が発生することがあります. \n\nこの設定値は, 権限取得直後に最初のスクリーンショットを取得する前に遅延時間（ミリ秒）を追加し, 上記の遮蔽問題を回避するために使用します. \n\nこの設定は権限取得後の最初のスクリーンショットにのみ適用され, 以降のスクリーンショットには影響しません.</string>
-    <string name="text_delay_time">遅延時間</string>
-    <string name="dialog_button_homepage">ホームページ</string>
-    <string name="error_failed_to_change_the_toggle_state">スイッチの状態の変更に失敗しました</string>
-    <string name="text_post_notifications_permission_rationale">AutoJs6 のフォアグラウンドサービス等が正常に動作し, スクリプトが通知を投稿できるようにするため, AutoJs6 には \"通知の送信\" 権限を付与する必要があります.</string>
-    <string name="description_pointer_location">\"ポインタの位置\" は Android の開発者向けオプションにあるデバッグ機能です.\n有効にすると, システムが画面上にタッチポイントの [座標/移動軌跡/数/サイズ/移動速度/圧力] などの情報を表示し, 関連スクリプトの [作成/デバッグ/検証] に役立ちます.</string>
-    <string name="error_an_error_occurred">エラーが発生しました</string>
-    <string name="text_permission_management">権限管理</string>
-    <string name="text_service_management">サービス管理</string>
-    <string name="summary_foreground_service_inrt">フォアグラウンドサービスは, バックグラウンドでアプリとスクリプトの実行をより安定して維持します</string>
-
 </resources>

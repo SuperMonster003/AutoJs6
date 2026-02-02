@@ -203,7 +203,7 @@ public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
                 // zh-CN: 需要时恢复宿主对话框 (overlay), 并保留状态.
                 mScriptListDialogExplorerView.setRequestHostDialogShow(() -> {
                     if (!scriptListDialog.isShowing()) {
-                        DialogUtils.showDialog(scriptListDialog);
+                        DialogUtils.showAdaptive(scriptListDialog);
                     }
                 });
 

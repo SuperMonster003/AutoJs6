@@ -2,7 +2,6 @@ package org.autojs.autojs.core.plugin.center
 
 import android.content.Context
 import android.content.Intent
-import android.content.res.ColorStateList
 import android.net.Uri
 import androidx.core.content.FileProvider
 import com.afollestad.materialdialogs.DialogAction
@@ -11,7 +10,8 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
-import org.autojs.autojs.network.download.DownloadManager
+import org.autojs.autojs.app.DialogUtils.applyProgressThemeColorTintLists
+import org.autojs.autojs.app.DialogUtils.setProgressNumberFormatByBytes
 import org.autojs.autojs.runtime.api.Mime
 import org.autojs.autojs.ui.main.scripts.ApkInfoDialogManager
 import org.autojs.autojs.util.ClipboardUtils
@@ -182,12 +182,9 @@ object PluginInstaller {
             .autoDismiss(false)
             .show()
 
+        dialog.applyProgressThemeColorTintLists()
         dialog.setProgressNumberFormat(context.getString(R.string.text_half_ellipsis))
         dialog.setProgress(0)
-
-        val progressBar = dialog.getProgressBar()
-        progressBar.setProgressTintList(ColorStateList.valueOf(context.getColor(R.color.dialog_progress_download_tint)))
-        progressBar.setProgressBackgroundTintList(ColorStateList.valueOf(context.getColor(R.color.dialog_progress_download_bg_tint)))
 
         try {
             val cache = File(context.cacheDir, "plugin_dl").apply { if (!exists()) mkdirs() }
@@ -204,15 +201,7 @@ object PluginInstaller {
                 if (code !in 200..299) throw HttpStatusException(code, conn.responseMessage ?: "HTTP error")
                 val total = conn.contentLengthLong.takeIf { it > 0 } ?: -1L
 
-                if (total > 0) {
-                    dialog.setProgressNumberFormat(
-                        DownloadManager.getProgressMegaBytesFormat(
-                            context,
-                            /* downloadedMiB */ 0f,
-                            /* totalMiB */ total / (1024f * 1024f),
-                        )
-                    )
-                }
+                dialog.setProgressNumberFormatByBytes(0, total, true)
 
                 conn.inputStream.use { input ->
                     val md = MessageDigest.getInstance("SHA-256")
@@ -233,13 +222,7 @@ object PluginInstaller {
                                 if (total > 0 && (now - lastUpdateTs > 80)) {
                                     val pct = ((downloaded * 100f) / total).coerceIn(0f, 100f)
                                     withContext(Dispatchers.Main) {
-                                        dialog.setProgressNumberFormat(
-                                            DownloadManager.getProgressMegaBytesFormat(
-                                                context,
-                                                downloaded / (1024f * 1024f),
-                                                total / (1024f * 1024f),
-                                            )
-                                        )
+                                        dialog.setProgressNumberFormatByBytes(downloaded, total, true)
                                         dialog.setProgress(pct.roundToInt())
                                     }
                                     lastUpdateTs = now

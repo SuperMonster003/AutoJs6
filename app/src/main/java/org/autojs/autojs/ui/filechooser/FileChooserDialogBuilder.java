@@ -73,7 +73,8 @@ public class FileChooserDialogBuilder extends MaterialDialog.Builder {
 
     @Override
     public MaterialDialog show() {
-        return DialogUtils.adaptToExplorer(super.show(), mFileChooseListView);
+        MaterialDialog dialog = DialogUtils.showAdaptive(this);
+        return DialogUtils.adaptToExplorer(dialog, mFileChooseListView);
     }
 
     public FileChooserDialogBuilder dir(String rootDir, String initialDir) {

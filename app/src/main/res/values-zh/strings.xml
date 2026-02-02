@@ -3,7 +3,6 @@
 <!-- Proofreader: [ SuperMonster003 ] -->
 
 <resources xmlns:tools="http://schemas.android.com/tools">
-
     <string name="apk_builder_build" tools:ignore="TypographyEllipsis">构建中...</string>
     <string name="apk_builder_clean" tools:ignore="TypographyEllipsis">清理临时文件...</string>
     <string name="apk_builder_package" tools:ignore="TypographyEllipsis">打包中...</string>
@@ -48,7 +47,8 @@
     <string name="config_abi_options_contains_unavailable">配置 \"abi\" 含不可用选项</string>
     <string name="config_lib_options_contains_invalid">配置 \"lib\" 含无效选项</string>
     <string name="config_lib_options_contains_unavailable">配置 \"lib\" 含不可用选项</string>
-    <string name="confirm_overwrite_file">文件已存在, 是否覆盖</string>
+    <string name="confirm_overwrite_directory">文件夹已存在, 是否覆盖.</string>
+    <string name="confirm_overwrite_file">文件已存在, 是否覆盖.</string>
     <string name="content_about_app_tips">1. 长按主页应用名称 (AutoJs6) 可跳转至设置页面\n2. 设置页面长按设置选项可查看详细信息</string>
     <string name="content_current_theme_color_configured_by_palette">当前主题色 %1$s 由调色盘配置</string>
     <string name="content_description_fab_for_display_manifest">用于显示清单内容的浮动操作按钮控件</string>
@@ -92,12 +92,14 @@
     <string name="description_night_mode_preference">夜间模式, 亦称 [ 暗黑模式 / 深色主题 ] 等.\n夜间模式应用于安卓系统 UI (如通知栏和导航栏) 及 AutoJs6 应用页面.\n夜间模式可提升设备在低光环境下的易用性, 同时有助于提升弱视或光敏感用户的视觉体验.\n\n跟随系统: AutoJs6 与安卓操作系统的夜间模式设置一致\n总是开启: AutoJs6 保持开启夜间模式 (忽略操作系统设置)\n总是关闭: AutoJs6 保持关闭夜间模式 (忽略操作系统设置)\n\n注: 跟随系统功能仅支持安卓 API 级别 28 (安卓 9) [P] 及以上操作系统.</string>
     <string name="description_night_mode_preference_more">启用安卓系统的夜间模式:\n- API 级别 29 (安卓 10) [Q] 及以上: 通过 [ 设置 -> 显示 -> 主题 ] 开启.\n- API 级别 28 (安卓 9) [P]: 通过 [ 开发者选项 -> 夜间模式 ] 开启.\n\n对于基于 WebView 组件的内容 (如 AutoJs6 的文档页面), 夜间模式支持需要满足以下条件:\n1. WebView (或 Google Chrome 等浏览器) 版本要求:\n- API 级别 29 (安卓 10) [Q] 及以上: 版本不低于 76\n- API 级别 28 (安卓 9) [P]: 版本不低于 105\n2. WebView 组件页面内容可适配夜间模式 (通过 CSS 或 安卓 XML 资源等方式实现)</string>
     <string name="description_notification_access">\"通知使用权\" (或 \"通知读取权限\") 允许 AutoJs6 读取系统通知内容, 使脚本可以监听通知或获取通知文本等.</string>
+    <string name="description_pointer_location">\"指针位置\" 是安卓开发者选项中的调试功能.\n开启后, 系统会在屏幕上显示触摸点的 [坐标/移动轨迹/数量/大小/移动速度/压力] 等信息, 便于相关脚本的 [编写/调试/校对] 等.</string>
     <string name="description_post_notifications">\"发送通知\" 权限允许 AutoJs6 向系统发布通知, 使脚本可以在通知栏发布并管理自定义通知等.\n\n注: 在 Android 13+ 设备上未授予该权限时, 部分通知可能无法显示, 并可能影响前台服务的启动与稳定性.</string>
     <string name="description_project_media_access">被授予 \"投影媒体权限\" 后, 录制屏幕的安全提示窗口将不再弹出.</string>
     <string name="description_restart_strategy">重启策略仅作用于主页抽屉栏的重启按钮.\n\n快速重启: 快速重启应用, 如果重启失败或出现非预期情况, 可尝试切换至 \"计划重启\".\n计划重启: 提前设置一个短时定时任务, 应用停止后会再次定时启动, 以实现应用重启.</string>
     <string name="description_rhino_java_primitive_wrap">开关启用 (默认): 将 Java 方法返回的 Number/Boolean/Character 包装为 Java 对象暴露到脚本 (String 除外). typeof 为 \"object\", species 为 \"JavaObject\", 可访问这些对象的 Java 方法, 利于保留 Java 精确类型特征与方法重载行为.\n\n开关禁用: 不再包装上述类型, 直接作为 JavaScript 基元值 (number/boolean/单字符字符串). typeof 为相应 JavaScript 类型, 更贴近 JavaScript 语义与生态. 但仍可通过 new 关键字显式声明一个 Java 包装类型, 如 new java.lang.Boolean(true).\n\n参阅: http://issues.autojs6.com/435</string>
     <string name="description_root_mode_preference">如果设备使用非常规 Root 方式或 Root 权限检测结果异常, 可设置 \"强制 Root 模式\" 或 \"强制非 Root 模式\".</string>
     <string name="description_root_record_out_file_type_preference">二进制文件: 不可编辑, 文件扩展名为 \"auto\"\nJavaScript 文件: 可编辑或直接复制, 文件扩展名为 \"js\"</string>
+    <string name="description_screen_capture_request_delay">申请屏幕捕获权限时, 弹出的权限申请窗口消失时可能存在渐变动画, 此时如果立即调用 `images.captureScreen` 方法, 获取的屏幕截图中会出现权限申请的窗口内容而造成遮挡.\n\n当前设置选项值用于在截图权限申请后立即获取屏幕截图前增加一个延迟时间 (单位为毫秒), 可用于避免上述遮挡问题.\n\n当前设置选项仅适用于获取截图权限后的首次截图操作, 后续截图操作不再受此设置值影响.</string>
     <string name="description_server_mode">服务端模式用于让 AutoJs6 在当前设备开启服务并等待外部客户端连接, 以便进行 [ 脚本传输 / 打印日志 / 远程控制 ] 等.\n\nAutoJs6 服务端模式支持两种连接方式:\n1. 局域网 (LAN)\n2. 安卓调试桥 (ADB)</string>
     <string name="description_shizuku_access">通过 Shizuku 可以获得 ADB 特权并使用系统 API</string>
     <string name="description_stable_mode">稳定模式省略布局细节, 脚本分析布局时更稳定, 但可能影响获取的控件总量.\n需重启无障碍服务.</string>
@@ -109,6 +111,8 @@
     <string name="description_write_secure_settings">安全设置包含应用程序可读但不可写入的设置选项, 这些选项只能由 UI 或系统级别应用修改.\n被授予 \"修改安全设置权限\" 后, 普通应用可直接修改上述安全设置 (例如无障碍服务).</string>
     <string name="description_write_system_settings">\"修改系统设置\" 权限允许 AutoJs6 修改部分系统设置项, 使脚本可以修改 [ 屏幕亮度 / 自动旋转 / 屏幕超时 ] 等系统设置参数.</string>
     <string name="dialog_button_abandon">放弃</string>
+    <string name="dialog_button_abort">中止</string>
+    <string name="dialog_button_abort_connection">中止连接</string>
     <string name="dialog_button_advanced_settings">高级设置</string>
     <string name="dialog_button_amend_host_address">修正地址</string>
     <string name="dialog_button_back">@string/text_back</string>
@@ -126,10 +130,11 @@
     <string name="dialog_button_exception_details">异常详情</string>
     <string name="dialog_button_file_information">文件信息</string>
     <string name="dialog_button_history">历史记录</string>
+    <string name="dialog_button_homepage">主页</string>
     <string name="dialog_button_ignore_current_update">忽略此版本</string>
-    <string name="dialog_button_interrupt_connection">中止连接</string>
     <string name="dialog_button_join_group">加入群组</string>
     <string name="dialog_button_manager">管理器</string>
+    <string name="dialog_button_minimize">最小化</string>
     <string name="dialog_button_more">了解更多</string>
     <string name="dialog_button_open_color_palette">打开调色盘</string>
     <string name="dialog_button_quit">放弃</string>
@@ -189,6 +194,7 @@
     <string name="error_abandoned_method">方法 %s 已被废弃, 应避免使用</string>
     <string name="error_action_cannot_be_completed_with_negative_coordinate">无法完成 \"%1$s\" 操作, 因为参数中包含负数坐标值 (%2$d,%3$d)</string>
     <string name="error_activity_is_required_for_ui_exec_mode">缺少必要的 activity 对象, 可通过 \"ui\" 执行模式来提供</string>
+    <string name="error_an_error_occurred">发生错误</string>
     <string name="error_an_operation_is_not_implemented">操作尚未实现</string>
     <string name="error_app_not_installed">应用未安装</string>
     <string name="error_app_not_installed_with_name">应用未安装: \"%s\"</string>
@@ -227,8 +233,10 @@
     <string name="error_excessive_height_for_template_n_region">高度超限: 模板图像 [%1$d] > 限定区域 [%2$d]</string>
     <string name="error_excessive_width_for_template_n_region">宽度超限: 模板图像 [%1$d] > 限定区域 [%2$d]</string>
     <string name="error_failed_to_apply_current_color_history">应用当前历史颜色失败</string>
+    <string name="error_failed_to_bind_plugin_service">绑定 %1$s 插件服务失败.</string>
     <string name="error_failed_to_call_method">方法 \"%s\" 调用失败</string>
     <string name="error_failed_to_call_method_with_cause"><![CDATA[方法 \"%1$s\" 调用失败: [ %2$s ]]]></string>
+    <string name="error_failed_to_change_the_toggle_state">开关状态改变失败</string>
     <string name="error_failed_to_convert_into_drawable">无法将值 %s 转换为 Drawable 实例</string>
     <string name="error_failed_to_go_to_access_settings">跳转设置页面失败</string>
     <string name="error_failed_to_grant_shizuku_access">Shizuku 权限授予失败</string>
@@ -272,6 +280,7 @@
     <string name="error_may_not_have_root_access_to_run_auto_file">AutoJs6 可能因缺少 Root 权限而无法运行 \"auto\" 文件</string>
     <string name="error_method_called_with_null_argument" formatted="false">%s() 传入的 %s 参数为空</string>
     <string name="error_method_only_accepts_a_number_of_arguments_in_the_range_n_to_m">方法仅可接受参数数量位于 [%1$d\.\.%2$d] 区间内</string>
+    <string name="error_missing_required_plugin_for_module_label">缺少 \"%1$s\" 所需的插件. 请先安装插件, 然后重试.</string>
     <string name="error_module_does_not_work_due_to_the_lack_of_necessary_library_files">由于缺少必要的库文件, 模块 \"%s\" 无法正常加载</string>
     <string name="error_no_accessibility_permission">无障碍服务未启用</string>
     <string name="error_no_accessibility_permission_to_capture">无障碍服务未启用</string>
@@ -282,8 +291,12 @@
     <string name="error_no_applications_available_for_playing_this_file">未找到用于播放该文件的应用</string>
     <string name="error_no_applications_available_for_sending_this_file">未找到用于发送该文件的应用</string>
     <string name="error_no_applications_available_for_viewing_this_file">未找到用于查看该文件的应用</string>
+    <string name="error_no_available_enabled_plugin_variants_found">未找到可用且已启用的 %1$s 插件变体 (%2$s).</string>
     <string name="error_no_available_url_provided_for_current_plugin">当前插件未提供可用的 URL</string>
     <string name="error_no_display_over_other_apps_permission">缺少 \"显示在其他应用上层\" 权限</string>
+    <string name="error_no_embedded_paddle_ocr_assets_found">未找到内置 Paddle OCR 资源, 请在打包时勾选并注入 Paddle OCR 后重试.</string>
+    <string name="error_no_enabled_plugin_for_module_label">\"%1$s\" 没有已启用的插件. 请先启用插件, 然后重试.</string>
+    <string name="error_no_paddle_ocr_plugins_available">未找到可用的 Paddle OCR 插件</string>
     <string name="error_no_permission_to_access_shizuku">缺少 Shizuku 访问权限</string>
     <string name="error_no_post_notifications_permission">缺少 \"发布通知\" 权限</string>
     <string name="error_no_read_phone_state_permission">缺少 \"读取手机状态\" 权限</string>
@@ -296,13 +309,17 @@
     <string name="error_parse_github_release_assets">解析 GitHub 发行版资源信息失败</string>
     <string name="error_parse_version_info">无法解析版本信息</string>
     <string name="error_pattern_syntax">正则表达式句法错误</string>
+    <string name="error_plugin_apk_does_not_contain_required_assets_for_variant">插件 APK 不包含变体 \"%1$s\" 所需的资源文件: %2$s.</string>
+    <string name="error_plugin_apk_does_not_contain_required_native_libraries">插件 APK 不包含所需的 native 库文件: %1$s.</string>
+    <string name="error_plugin_returned_empty_info">%1$s 插件返回的 info 为空.</string>
+    <string name="error_plugin_returned_invalid_variant">%1$s 插件返回的 variant 无效: %2$s.</string>
     <string name="error_port_num_over_65535">端口号超过 65535</string>
     <string name="error_project_main_script_file_with_abs_path_does_not_exist">项目主脚本文件 \"%1$s\" 不存在</string>
     <string name="error_put_value_into_json">无法将值 %s 存入 JSON</string>
     <string name="error_regex_find_prev">正则表达式不支持向前查找</string>
     <string name="error_repeated_colon_symbol">重复的分号符号</string>
     <string name="error_repeated_dot_symbol">重复的句点符号</string>
-    <string name="error_required_property_is_nullish_or_does_not_exist">必需属性 "%1$s" 为空或不存在</string>
+    <string name="error_required_property_is_nullish_or_does_not_exist">必需属性 \"%1$s\" 为空或不存在</string>
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">解析后的路径 \"%1$s\" 不可为 null</string>
     <string name="error_script_is_on_exiting">脚本正在退出中</string>
     <string name="error_selector_method_without_calling">选择器方法需调用而不可作为参数直接传入: %s</string>
@@ -312,8 +329,9 @@
     <string name="error_shizuku_service_may_be_not_running">Shizuku 服务可能未运行</string>
     <string name="error_shizuku_version_is_not_supported">Shizuku 版本不支持</string>
     <string name="error_specified_autojs6_version_number_must_be_greater_than_461">指定的 AutoJs6 应用版本号需大于 461</string>
-    <string name="error_the_transformer_for_required_property_cannot_return_nullish">必需属性 "%1$s" 的转换器不能返回空值</string>
+    <string name="error_the_transformer_for_required_property_cannot_return_nullish">必需属性 \"%1$s\" 的转换器不能返回空值</string>
     <string name="error_thread_is_not_alive">线程处于非活动状态</string>
+    <string name="error_timeout_while_querying_plugin_info">查询 %1$s 插件信息超时.</string>
     <string name="error_unable_to_use_shizuku_service">无法使用 Shizuku 服务</string>
     <string name="error_unacceptable_character">不接受的字符</string>
     <string name="error_unknown">未知错误</string>
@@ -402,6 +420,7 @@
     <string name="summary_enable_a11y_service_with_root_access">自动尝试使用 root 权限启用无障碍服务</string>
     <string name="summary_enable_a11y_service_with_secure_settings">自动尝试使用修改安全设置权限启用无障碍服务</string>
     <string name="summary_extending_js_build_in_objects">扩展 JavaScript 内置对象以增加代码灵活性</string>
+    <string name="summary_foreground_service_inrt">前台服务用于在后台更稳定地保持应用及脚本运行</string>
     <string name="summary_guard_mode">当 AutoJs6 前置时禁用自动化行为以避免误操作</string>
     <string name="summary_not_showing_main_activity">启动应用后直接运行脚本</string>
     <string name="summary_post_notifications_permission">允许 AutoJs6 创建并发送通知</string>
@@ -414,10 +433,12 @@
     <string name="summary_use_volume_control_record">按 \"音量减\" 键开始或停止脚本录制 (需开启浮动按钮)</string>
     <string name="summary_use_volume_key_to_stop_running_scripts">按 \"音量加\" 键停止所有正在运行的脚本</string>
     <string name="summary_version_histories_preference">查看发行版本历史更新记录与统计数据</string>
+    <string name="term_internal_strorage">内部存储</string>
     <string name="text_a11y_service">无障碍服务</string>
     <string name="text_a11y_service_description">脚本自动操作 (点击/长按/滑动等) 所需</string>
     <string name="text_a11y_service_enabled_but_not_running">无障碍服务已启用但未运行 (尝试重新启用或重启设备)</string>
     <string name="text_a11y_service_may_be_needed">可能需要启用无障碍服务</string>
+    <string name="text_aborting" tools:ignore="TypographyEllipsis">正在中止...</string>
     <string name="text_about">关于</string>
     <string name="text_about_all_files_access">关于所有文件访问权限</string>
     <string name="text_about_app_and_developer">关于应用与开发者</string>
@@ -440,6 +461,7 @@
     <string name="text_alias">别名</string>
     <string name="text_alias_cannot_be_empty">别名不能为空</string>
     <string name="text_alias_password">别名密码</string>
+    <string name="text_all">全部</string>
     <string name="text_all_files_access">所有文件管理权限</string>
     <string name="text_all_files_access_is_needed">需要授予 \"所有文件管理权限\" 才能正常读写脚本文件</string>
     <string name="text_all_histories">全部历史记录</string>
@@ -492,7 +514,7 @@
     <string name="text_app_version_code">应用版本号</string>
     <string name="text_app_version_name">应用版本名</string>
     <string name="text_appearance">外观</string>
-    <string name="text_at_least_one_certificate_issuer_field_is_not_empty">“姓名、组织名称、组织单位、国家代码、州或省份、城市或区域、街道”至少填写一个</string>
+    <string name="text_at_least_one_certificate_issuer_field_is_not_empty">[姓名, 组织名称, 组织单位, 国家代码, 州或省份, 城市或区域, 街道] 至少填写一个</string>
     <string name="text_attribute">属性</string>
     <string name="text_auto_check_for_updates">自动检查更新</string>
     <string name="text_auto_check_for_updates_and_show_snackbar">自动检查更新并在首页下方显示通知条</string>
@@ -576,7 +598,11 @@
     <string name="text_copy_all_files_to_new_directory">复制原目录文件到新目录</string>
     <string name="text_copy_command">复制指令</string>
     <string name="text_copy_debug_info">复制调试信息</string>
+    <string name="text_copy_file">复制文件</string>
+    <string name="text_copy_folder">复制文件夹</string>
     <string name="text_copy_line">复制行</string>
+    <string name="text_copy_same_path_confirm">源路径与目标路径相同, 是否继续复制.\n\n新名称: \"%1$s\"</string>
+    <string name="text_copy_to">复制到</string>
     <string name="text_copy_to_clip">复制到剪贴板</string>
     <string name="text_copy_value">复制值</string>
     <string name="text_country_code">国家代码 (XX)</string>
@@ -599,10 +625,14 @@
     <string name="text_default">默认</string>
     <string name="text_default_key_store">默认密钥库</string>
     <string name="text_default_prefix">默认前缀</string>
+    <string name="text_delay_time">延迟时间</string>
     <string name="text_delete">删除</string>
     <string name="text_delete_all">删除全部</string>
+    <string name="text_delete_file">删除文件</string>
+    <string name="text_delete_folder">删除文件夹</string>
     <string name="text_delete_line">删除行</string>
     <string name="text_description">描述</string>
+    <string name="text_destination">目标</string>
     <string name="text_details">详情</string>
     <string name="text_developer_details_under_development" tools:ignore="TypographyEllipsis">\"开发者详情\" 正在开发中...</string>
     <string name="text_developer_options">开发者选项</string>
@@ -615,7 +645,7 @@
     <string name="text_device_product_name">设备产品名称</string>
     <string name="text_device_screen_resolution">设备屏幕分辨率</string>
     <string name="text_directly_download">直接下载</string>
-    <string name="text_directory">文件夹</string>
+    <string name="text_directory">目录</string>
     <string name="text_disabled">已禁用</string>
     <string name="text_display_over_other_app">显示在其他应用上层</string>
     <string name="text_display_over_other_app_is_recommended">建议授予 \"显示在其他应用上层\" 权限以确保应用窗口组件正常显示</string>
@@ -712,6 +742,7 @@
     <string name="text_find_prev_simplified">上一个</string>
     <string name="text_first_and_last_name">姓名</string>
     <string name="text_floating_button">浮动按钮</string>
+    <string name="text_folder">文件夹</string>
     <string name="text_force_stop">强制停止</string>
     <string name="text_foreground_service">前台服务</string>
     <string name="text_formatting_completed">格式化已完成</string>
@@ -753,6 +784,7 @@
     <string name="text_install_from_url">从 \"URL\" 安装</string>
     <string name="text_install_plugin_from_url">从 \"URL\" 安装插件</string>
     <string name="text_installable">可安装</string>
+    <string name="text_installed">已安装</string>
     <string name="text_integrity_verification_failed">完整性验证失败</string>
     <string name="text_invalid_character_is_removed">无效字符已被移除</string>
     <string name="text_invalid_package_name">无效包名</string>
@@ -808,7 +840,12 @@
     <string name="text_mobile_qq_not_installed">未安装 \"手机QQ\"</string>
     <string name="text_more">更多</string>
     <string name="text_more_details">了解详情</string>
+    <string name="text_move">移动</string>
+    <string name="text_move_aborted_same_path">源路径与目标路径相同, 移动操作中止</string>
     <string name="text_move_all_files_to_new_directory">移动原目录文件到新目录</string>
+    <string name="text_move_file">移动文件</string>
+    <string name="text_move_folder">移动文件夹</string>
+    <string name="text_move_to">移动到</string>
     <string name="text_multiple_options">多个可选项</string>
     <string name="text_name">名称</string>
     <string name="text_need_to_enable_a11y_service">需要启用无障碍服务</string>
@@ -836,6 +873,7 @@
     <string name="text_no_root_access">无 root 权限</string>
     <string name="text_no_scripts_to_stop_running">无运行中的脚本</string>
     <string name="text_not_granted">未授予</string>
+    <string name="text_not_installed">未安装</string>
     <string name="text_not_showing_main_activity">不显示主界面</string>
     <string name="text_notification">通知</string>
     <string name="text_notification_access_permission">通知读取权限</string>
@@ -850,6 +888,8 @@
     <string name="text_open_by_other_apps">用其他应用打开</string>
     <string name="text_open_main_activity">打开主界面</string>
     <string name="text_open_with">打开方式</string>
+    <string name="text_operation_aborted">已中止</string>
+    <string name="text_operation_completed">已完成</string>
     <string name="text_operation_is_completed">操作已完成</string>
     <string name="text_options">选项</string>
     <string name="text_organization">组织名称</string>
@@ -938,6 +978,7 @@
     <string name="text_permission_granted_failed_with_shizuku">权限授予失败 (使用 Shizuku)</string>
     <string name="text_permission_granted_with_root">已授予权限 (使用 root)</string>
     <string name="text_permission_granted_with_shizuku">已授予权限 (使用 Shizuku)</string>
+    <string name="text_permission_management">权限管理</string>
     <string name="text_permission_package_usage_stats">允许应用访问其他应用的使用统计数据</string>
     <string name="text_permission_revoked">已撤消授权</string>
     <string name="text_permission_revoked_failed_with_root">权限撤消失败 (使用 root)</string>
@@ -961,6 +1002,7 @@
     <string name="text_pointer_location">指针位置</string>
     <string name="text_pointer_location_toggle_failed_with_hint">切换 \"指针位置\" 显示状态失败\n可能缺少 root 权限</string>
     <string name="text_post_notifications_permission">发布通知权限</string>
+    <string name="text_post_notifications_permission_rationale">为确保 AutoJs6 前台服务等能够正常运行, 脚本能够发布通知, AutoJs6 需要被授予 \"发布通知权限\".</string>
     <string name="text_pre_execute_script">预执行脚本</string>
     <string name="text_preparing" tools:ignore="TypographyEllipsis">准备中...</string>
     <string name="text_preset_dialog_content">预设对话框内容</string>
@@ -975,6 +1017,9 @@
     <string name="text_project_location">项目位置</string>
     <string name="text_project_media_access">投影媒体权限</string>
     <string name="text_prompt">提示</string>
+    <string name="text_property_colon_value">%1$s: %2$s</string>
+    <string name="text_property_colon_value_nbsp_unit">%1$s: %2$d %3$s</string>
+    <string name="text_property_colon_value_unit">%1$s: %2$d%3$s</string>
     <string name="text_quit">放弃</string>
     <string name="text_recommended">推荐</string>
     <string name="text_record_finished">录制完成</string>
@@ -1043,6 +1088,7 @@
     <string name="text_save_to">保存到</string>
     <string name="text_scheduled_restart_backend">调度引擎</string>
     <string name="text_scheduled_restart_start_delay">启动延迟</string>
+    <string name="text_screen_capture_request_delay">屏幕捕获权限申请延迟</string>
     <string name="text_script_record">录制脚本</string>
     <string name="text_script_running">脚本运行</string>
     <string name="text_search">搜索</string>
@@ -1062,6 +1108,7 @@
     <string name="text_send_shortcut">创建快捷方式</string>
     <string name="text_server_mode">服务端模式</string>
     <string name="text_service">服务</string>
+    <string name="text_service_management">服务管理</string>
     <string name="text_set_as_working_dir">用作工作路径</string>
     <string name="text_set_breakpoint">设置断点</string>
     <string name="text_settings">设置</string>
@@ -1078,6 +1125,10 @@
     <string name="text_size">大小</string>
     <string name="text_some_items_exported">已导出 %d 个条目</string>
     <string name="text_sort">排序</string>
+    <string name="text_sort_by_last_update_time">按最近更新排序</string>
+    <string name="text_sort_by_name">按名称排序</string>
+    <string name="text_sort_by_package_size">按安装包大小排序</string>
+    <string name="text_source">来源</string>
     <string name="text_source_file_path">源代码路径</string>
     <string name="text_special_permissions">特殊权限</string>
     <string name="text_stable_mode">稳定模式</string>
@@ -1170,36 +1221,4 @@
     <string name="text_write_secure_settings">修改安全设置</string>
     <string name="text_write_system_settings">修改系统设置</string>
     <string name="text_xiaomi_background_popup_permission">后台弹出界面</string>
-    <string name="error_no_paddle_ocr_plugins_available">未找到可用的 Paddle OCR 插件</string>
-    <string name="text_installed">已安装</string>
-    <string name="text_not_installed">未安装</string>
-    <string name="text_all">全部</string>
-    <string name="text_sort_by_name">按名称排序</string>
-    <string name="text_sort_by_last_update_time">按最近更新排序</string>
-    <string name="text_sort_by_package_size">按安装包大小排序</string>
-    <string name="error_missing_required_plugin_for_module_label">缺少 \"%1$s\" 所需的插件. 请先安装插件, 然后重试.</string>
-    <string name="error_no_enabled_plugin_for_module_label">\"%1$s\" 没有已启用的插件. 请先启用插件, 然后重试.</string>
-    <string name="error_no_available_enabled_plugin_variants_found">未找到可用且已启用的 %1$s 插件变体 (%2$s).</string>
-    <string name="error_plugin_apk_does_not_contain_required_assets_for_variant">插件 APK 不包含变体 \"%1$s\" 所需的资源文件: %2$s.</string>
-    <string name="error_plugin_apk_does_not_contain_required_native_libraries">插件 APK 不包含所需的 native 库文件: %1$s.</string>
-    <string name="error_failed_to_bind_plugin_service">绑定 %1$s 插件服务失败.</string>
-    <string name="error_timeout_while_querying_plugin_info">查询 %1$s 插件信息超时.</string>
-    <string name="error_plugin_returned_empty_info">%1$s 插件返回的 info 为空.</string>
-    <string name="error_plugin_returned_invalid_variant">%1$s 插件返回的 variant 无效: %2$s.</string>
-    <string name="error_no_embedded_paddle_ocr_assets_found">未找到内置 Paddle OCR 资源, 请在打包时勾选并注入 Paddle OCR 后重试.</string>
-    <string name="dialog_button_minimize">最小化</string>
-    <string name="text_property_colon_value_unit">%1$s: %2$d%3$s</string>
-    <string name="text_property_colon_value_nbsp_unit">%1$s: %2$d %3$s</string>
-    <string name="text_screen_capture_request_delay">屏幕捕获权限申请延迟</string>
-    <string name="description_screen_capture_request_delay">申请屏幕捕获权限时, 弹出的权限申请窗口消失时可能存在渐变动画, 此时如果立即调用 `images.captureScreen` 方法, 获取的屏幕截图中会出现权限申请的窗口内容而造成遮挡.\n\n当前设置选项值用于在截图权限申请后立即获取屏幕截图前增加一个延迟时间 (单位为毫秒), 可用于避免上述遮挡问题.\n\n当前设置选项仅适用于获取截图权限后的首次截图操作, 后续截图操作不再受此设置值影响.</string>
-    <string name="text_delay_time">延迟时间</string>
-    <string name="dialog_button_homepage">主页</string>
-    <string name="error_failed_to_change_the_toggle_state">开关状态改变失败</string>
-    <string name="text_post_notifications_permission_rationale">为确保 AutoJs6 前台服务等能够正常运行, 脚本能够发布通知, AutoJs6 需要被授予 \"发布通知权限\".</string>
-    <string name="description_pointer_location">\"指针位置\" 是安卓开发者选项中的调试功能.\n开启后, 系统会在屏幕上显示触摸点的 [坐标/移动轨迹/数量/大小/移动速度/压力] 等信息, 便于相关脚本的 [编写/调试/校对] 等.</string>
-    <string name="error_an_error_occurred">发生错误</string>
-    <string name="text_permission_management">权限管理</string>
-    <string name="text_service_management">服务管理</string>
-    <string name="summary_foreground_service_inrt">前台服务用于在后台更稳定地保持应用及脚本运行</string>
-
 </resources>

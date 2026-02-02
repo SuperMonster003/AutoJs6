@@ -7,7 +7,6 @@
 <!-- Proofreader: [ Google Gemini ] -->
 
 <resources xmlns:tools="http://schemas.android.com/tools">
-
     <string name="apk_builder_build" tools:ignore="TypographyEllipsis">건물...</string>
     <string name="apk_builder_clean" tools:ignore="TypographyEllipsis">청소...</string>
     <string name="apk_builder_package" tools:ignore="TypographyEllipsis">포장...</string>
@@ -52,7 +51,8 @@
     <string name="config_abi_options_contains_unavailable">설정 \"abi\" 에 사용할 수 없는 옵션이 포함되어 있습니다</string>
     <string name="config_lib_options_contains_invalid">설정 \"lib\" 에 잘못된 옵션이 포함되어 있습니다</string>
     <string name="config_lib_options_contains_unavailable">설정 \"lib\" 에 사용할 수 없는 옵션이 포함되어 있습니다</string>
-    <string name="confirm_overwrite_file">존재하는 파일입니다.\n덮어 쓰기?</string>
+    <string name="confirm_overwrite_directory">폴더가 이미 존재합니다. 덮어쓰시겠습니까?</string>
+    <string name="confirm_overwrite_file">파일이 이미 존재합니다. 덮어쓰시겠습니까?</string>
     <string name="content_about_app_tips">1. 홈 페이지에서 애플리케이션 이름 (AutoJs6) 을 길게 눌러 설정 페이지로 이동합니다.\n2. 설정 페이지에서 특정 설정 옵션을 길게 누르면 자세한 정보를 볼 수 있습니다.</string>
     <string name="content_current_theme_color_configured_by_palette">현재 테마 색상 %1$s 는 색상 팔레트로 설정되어 있습니다</string>
     <string name="content_description_fab_for_display_manifest">매니페스트를 표시하기 위한 플로팅 액션 버튼 위젯</string>
@@ -96,12 +96,14 @@
     <string name="description_night_mode_preference">야간 모드 (다크 테마라고도 함) 는 Android 시스템 UI 와 장치에서 실행되는 앱 모두에 적용되어 저시력 사용자와 밝은 빛에 민감한 사용자의 가시성을 향상시키고 누구나 쉽게 장치를 사용할 수 있습니다. 저조도 환경에서.\n\n시스템 따르기: AutoJs6 에는 Android 시스템과 동일한 야간 모드 설정이 있습니다.\n항상 켜짐: AutoJs6 은 Android 시스템 설정에 관계없이 야간 모드를 유지합니다.\n항상 끄기: AutoJs6 은 야간 모드를 끈 상태로 유지합니다(Android 시스템 설정에 관계없이).\n\n참고: 팔로우 시스템 옵션은 Android API 레벨 28 (Android 9) [P] 이상에만 적용됩니다.</string>
     <string name="description_night_mode_preference_more">Android 시스템에서 야간 모드를 활성화하려면:\n- Android API 레벨 29 (Android 10) [Q] 이상: 설정 -> 디스플레이 -> 테마.\n- Android API 레벨 28 (Android 9) [P]: 개발자 옵션 -> 야간 모드.\n\nWebView 구성 요소(예: AutoJs6 설명서 페이지)를 사용하여 웹 기반 콘텐츠에 야간 모드 (어두운 테마) 를 적용하려면 다음 조건을 충족해야 합니다.\n1. Android 시스템 WebView (또는 Google Chrome 과 같은 브라우저):\n- Android API 레벨 29 (Android 10) [Q] 이상: 버전 >= 76\n- Android API 레벨 28 (Android 9) [P]: 버전 >= 105\n2. WebView 구성 요소의 웹 기반 콘텐츠는 Dark 테마에 맞게 조정됩니다 (CSS 또는 Android XML 리소스 등).</string>
     <string name="description_notification_access">\"알림 접근\" (또는 \"알림 읽기 권한\") 은 AutoJs6 가 시스템 알림 내용을 읽을 수 있게 하여, 스크립트가 알림을 감지하거나 알림 텍스트를 가져올 수 있도록 합니다.</string>
+    <string name="description_pointer_location">\"포인터 위치\" 는 Android 개발자 옵션에 있는 디버깅 기능입니다.\n활성화하면 시스템이 화면에 터치 지점의 [좌표/이동 궤적/개수/크기/이동 속도/압력] 등의 정보를 표시하여 관련 스크립트의 [작성/디버깅/검증] 에 도움이 됩니다.</string>
     <string name="description_post_notifications">\"알림 전송\" 권한은 AutoJs6 가 시스템에 알림을 게시할 수 있게 하여, 스크립트가 알림 영역에서 사용자 지정 알림을 게시하고 관리할 수 있도록 합니다.\n\nNote: Android 13+ 기기에서 이 권한이 부여되지 않으면 일부 알림이 표시되지 않을 수 있으며, 포그라운드 서비스의 시작 및 안정성에 영향을 줄 수 있습니다.</string>
     <string name="description_project_media_access">프로젝트 미디어 액세스를 사용하면 화면 기록에 대한 보안 경고가 중요하지 않습니다.</string>
     <string name="description_restart_strategy">재시작 전략은 홈 페이지 드로어의 재시작 버튼에만 적용됩니다.\n\n빠른 재시작: 앱을 빠르게 다시 시작합니다. 재시작이 실패하거나 예기치 않은 상황이 발생하면 \"예약 재시작\"으로 전환해 보세요.\n예약 재시작: 미리 짧은 시간의 예약 작업을 설정합니다. 앱이 중지된 후 예약에 따라 다시 시작하여 앱 재시작을 수행합니다.</string>
     <string name="description_rhino_java_primitive_wrap">스위치 활성화(기본값): Java 메서드가 반환하는 Number/Boolean/Character 값은 Java 객체로 래핑되어 스크립트에 노출됩니다(String 제외). typeof 는 \"object\", species 는 \"JavaObject\"이며, Java 메서드 호출이 가능해 Java의 정밀한 타입 특성과 오버로드 해석을 보존하는 데 도움이 됩니다.\n\n스위치 비활성화: 위 타입들을 더 이상 래핑하지 않고 JavaScript 원시 값(number/boolean/한 글자 문자열)으로 직접 노출합니다. typeof 는 해당 JavaScript 타입이 되며, JavaScript의 의미론/생태계에 더 가깝습니다. 필요 시 new 키워드로 Java 래퍼를 명시적으로 생성할 수 있습니다(예: new java.lang.Boolean(true)).\n\n참고: http://issues.autojs6.com/435</string>
     <string name="description_root_mode_preference">뿌리 접근을 위해 이국적인 뿌리 또는 비정상 상태가있는 경우 루트를 루트 또는 뿌리가 아닌 것으로 강제로 설정할 수 있습니다.</string>
     <string name="description_root_record_out_file_type_preference">바이너리 유형: 편집 불가능, 파일 확장자는 \"auto\"\nJavaScript 유형: 파일 확장자가 \"js\"인 경우 직접 편집하거나 복사할 수 있습니다.</string>
+    <string name="description_screen_capture_request_delay">화면 캡처 권한을 요청할 때 표시되는 권한 요청 창은 사라질 때 페이드 등의 전환 애니메이션이 있을 수 있습니다. 이때 `images.captureScreen` 메서드를 즉시 호출하면, 얻은 스크린샷에 권한 요청 창의 내용이 포함되어 화면이 가려질 수 있습니다.\n\n이 설정 값은 권한을 획득한 직후 첫 스크린샷을 캡처하기 전에 지연 시간(밀리초)을 추가하여, 위와 같은 가림 문제를 방지하는 데 사용할 수 있습니다.\n\n이 설정은 권한 획득 후 첫 번째 캡처에만 적용되며, 이후 캡처에는 더 이상 영향을 주지 않습니다.</string>
     <string name="description_server_mode">서버 모드는 AutoJs6 가 현재 기기에서 서비스를 실행하고 외부 클라이언트 연결을 대기하여 [ 스크립트 전송 / 로그 출력 / 원격 제어 ] 등을 수행할 수 있도록 합니다.\n\nAutoJs6 서버 모드는 두 가지 연결 방식을 지원합니다:\n1. LAN\n2. Android Debug Bridge (ADB)</string>
     <string name="description_shizuku_access">Shizuku 를 사용하면 ADB 권한과 시스템 API 에 대한 액세스 권한을 얻을 수 있습니다</string>
     <string name="description_stable_mode">안정 모드는 레이아웃 경계를 얻을 때 더 안정적이지만 일부 결과는 무시할 수 있습니다.\n접근성 서비스의 재시작이 필요합니다.</string>
@@ -113,6 +115,8 @@
     <string name="description_write_secure_settings">애플리케이션이 읽을 수 있지만 쓸 수없는 시스템 환경 설정을 포함하는 보안 시스템 설정.\n이들은 사용자가 시스템 앱의 UI 를 통해 명시 적으로 수정 해야하는 선호도입니다.\n보안 시스템 설정 권한을 사용하면 일반 애플리케이션이 보안 설정 (예: 접근성 서비스)을 직접 수정할 수 있습니다.</string>
     <string name="description_write_system_settings">\"시스템 설정 수정\" 권한은 AutoJs6 가 일부 시스템 설정을 변경할 수 있게 하여, 스크립트가 [ 화면 밝기 / 자동 회전 / 화면 시간 제한 ] 등의 설정을 변경할 수 있도록 합니다.</string>
     <string name="dialog_button_abandon">포기</string>
+    <string name="dialog_button_abort">중지</string>
+    <string name="dialog_button_abort_connection">연결 중지</string>
     <string name="dialog_button_advanced_settings">고급</string>
     <string name="dialog_button_amend_host_address">주소 수정</string>
     <string name="dialog_button_back">@string/text_back</string>
@@ -130,10 +134,11 @@
     <string name="dialog_button_exception_details">자세히</string>
     <string name="dialog_button_file_information">파일 정보</string>
     <string name="dialog_button_history">역사</string>
+    <string name="dialog_button_homepage">홈페이지</string>
     <string name="dialog_button_ignore_current_update">무시하다</string>
-    <string name="dialog_button_interrupt_connection">연결 중단</string>
     <string name="dialog_button_join_group">그룹 가입</string>
     <string name="dialog_button_manager">관리자</string>
+    <string name="dialog_button_minimize">최소화</string>
     <string name="dialog_button_more">더</string>
     <string name="dialog_button_open_color_palette">팔레트 열기</string>
     <string name="dialog_button_quit">그만두다</string>
@@ -193,6 +198,7 @@
     <string name="error_abandoned_method">%s 메서드는 중단되었으며 사용해서는 안 됩니다</string>
     <string name="error_action_cannot_be_completed_with_negative_coordinate">매개 변수에 음수 좌표 값 (%2$d, %3$d)이 포함되어 있으므로 \"%1$s\" 작업을 완료할 수 없습니다</string>
     <string name="error_activity_is_required_for_ui_exec_mode">UI 실행 모드를 위한 활동이 필요합니다</string>
+    <string name="error_an_error_occurred">오류가 발생했습니다</string>
     <string name="error_an_operation_is_not_implemented">작업이 구현되지 않았습니다</string>
     <string name="error_app_not_installed">앱이 설치되지 않았습니다</string>
     <string name="error_app_not_installed_with_name">앱이 설치되지 않았습니다: \"%s\"</string>
@@ -231,8 +237,10 @@
     <string name="error_excessive_height_for_template_n_region">높이 초과: 템플릿 [%1$d] > 영역 [%2$d]</string>
     <string name="error_excessive_width_for_template_n_region">너비 초과: 템플릿 [%1$d] > 영역 [%2$d]</string>
     <string name="error_failed_to_apply_current_color_history">현재 색상 기록 적용에 실패했습니다</string>
+    <string name="error_failed_to_bind_plugin_service">%1$s 플러그인 서비스 바인딩에 실패했습니다.</string>
     <string name="error_failed_to_call_method">메서드 \"%s\"를 호출하지 못했습니다</string>
     <string name="error_failed_to_call_method_with_cause"><![CDATA[메서드 \"%1$s\" 를 호출하지 못했습니다: [ %2$s ]]]></string>
+    <string name="error_failed_to_change_the_toggle_state">스위치 상태 변경에 실패했습니다</string>
     <string name="error_failed_to_convert_into_drawable">%s 값을 Drawable 로 변환하지 못했습니다</string>
     <string name="error_failed_to_go_to_access_settings">설정 페이지를 열지 못했습니다</string>
     <string name="error_failed_to_grant_shizuku_access">Shizuku 권한을 부여하지 못했습니다</string>
@@ -276,6 +284,7 @@
     <string name="error_may_not_have_root_access_to_run_auto_file">AutoJs6 은 \"auto\" 파일을 실행할 루트 액세스 권한이 없을 수 있습니다.</string>
     <string name="error_method_called_with_null_argument" formatted="false">널 인수로 호출 된 %s(): %s</string>
     <string name="error_method_only_accepts_a_number_of_arguments_in_the_range_n_to_m">메소드는 [%1$d..%2$d] 범위의 인수만 허용합니다</string>
+    <string name="error_missing_required_plugin_for_module_label">\"%1$s\"에 필요한 플러그인이 없습니다. 플러그인을 설치한 후 다시 시도해 주세요.</string>
     <string name="error_module_does_not_work_due_to_the_lack_of_necessary_library_files">필요한 라이브러리 파일이 부족하여 \"%s\" 모듈이 작동하지 않습니다</string>
     <string name="error_no_accessibility_permission">접근성 서비스가 비활성화되고 스크립트가 중지되었습니다</string>
     <string name="error_no_accessibility_permission_to_capture">접근성 서비스는 활성화되지 않습니다</string>
@@ -286,8 +295,12 @@
     <string name="error_no_applications_available_for_playing_this_file">이 파일을 재생할 수 있는 앱이 없습니다</string>
     <string name="error_no_applications_available_for_sending_this_file">이 파일을 전송할 수 있는 앱이 없습니다</string>
     <string name="error_no_applications_available_for_viewing_this_file">이 파일을 볼 수 있는 앱이 없습니다</string>
+    <string name="error_no_available_enabled_plugin_variants_found">사용 가능하며 활성화된 %1$s 플러그인 variant를 찾을 수 없습니다 (%2$s).</string>
     <string name="error_no_available_url_provided_for_current_plugin">현재 플러그인에 사용 가능한 URL 이 제공되지 않았습니다</string>
     <string name="error_no_display_over_other_apps_permission">\"다른 앱 위에 표시\"권한이 없습니다</string>
+    <string name="error_no_embedded_paddle_ocr_assets_found">내장된 Paddle OCR assets를 찾을 수 없습니다. Paddle OCR을 활성화하여 다시 패키징해 주세요.</string>
+    <string name="error_no_enabled_plugin_for_module_label">\"%1$s\"에 활성화된 플러그인이 없습니다. 플러그인을 활성화한 후 다시 시도해 주세요.</string>
+    <string name="error_no_paddle_ocr_plugins_available">사용 가능한 Paddle OCR 플러그인을 찾을 수 없습니다</string>
     <string name="error_no_permission_to_access_shizuku">Shizuku 에 액세스할 수 있는 권한이 없습니다</string>
     <string name="error_no_post_notifications_permission">\"게시물 알림\" 권한 없음</string>
     <string name="error_no_read_phone_state_permission">\"전화 상태 읽기\"권한이 없습니다</string>
@@ -300,6 +313,10 @@
     <string name="error_parse_github_release_assets">GitHub 릴리스 자산을 구문 분석하지 못했습니다</string>
     <string name="error_parse_version_info">버전 정보를 구문 분석하지 못했습니다</string>
     <string name="error_pattern_syntax">잘못된 패턴 구문</string>
+    <string name="error_plugin_apk_does_not_contain_required_assets_for_variant">플러그인 APK에 variant=\"%1$s\"에 필요한 assets가 포함되어 있지 않습니다: %2$s.</string>
+    <string name="error_plugin_apk_does_not_contain_required_native_libraries">플러그인 APK에 필요한 native 라이브러리가 포함되어 있지 않습니다: %1$s.</string>
+    <string name="error_plugin_returned_empty_info">%1$s 플러그인이 빈 info를 반환했습니다.</string>
+    <string name="error_plugin_returned_invalid_variant">%1$s 플러그인이 잘못된 variant를 반환했습니다: %2$s.</string>
     <string name="error_port_num_over_65535">65535 이상의 포트 번호</string>
     <string name="error_project_main_script_file_with_abs_path_does_not_exist">프로젝트 메인 스크립트 파일 \"%1$s\" 이 존재하지 않습니다</string>
     <string name="error_put_value_into_json">가치 %s 를 JSON 에 넣을 수 없습니다</string>
@@ -318,6 +335,7 @@
     <string name="error_specified_autojs6_version_number_must_be_greater_than_461">지정된 AutoJs6 버전 번호는 461보다 커야 합니다</string>
     <string name="error_the_transformer_for_required_property_cannot_return_nullish">필수 속성 \"%1$s\" 에 대한 변환기는 null 값을 반환할 수 없습니다</string>
     <string name="error_thread_is_not_alive">스레드는 살아 있지 않습니다</string>
+    <string name="error_timeout_while_querying_plugin_info">%1$s 플러그인 정보 조회가 시간 초과되었습니다.</string>
     <string name="error_unable_to_use_shizuku_service">Shizuku 서비스를 사용할 수 없음</string>
     <string name="error_unacceptable_character">허용되지 않는 문자</string>
     <string name="error_unknown">알수없는 오류</string>
@@ -406,6 +424,7 @@
     <string name="summary_enable_a11y_service_with_root_access">필요할 때 루트 액세스로 접근성 서비스를 자동으로 활성화하십시오</string>
     <string name="summary_enable_a11y_service_with_secure_settings">필요할 때 안전한 설정으로 접근성 서비스를 활성화하십시오</string>
     <string name="summary_extending_js_build_in_objects">JavaScript 내장 개체를 확장하여 코드 유연성을 높이고 더 풍부한 기능을 활성화합니다.</string>
+    <string name="summary_foreground_service_inrt">포그라운드 서비스는 백그라운드에서 앱과 스크립트 실행을 더 안정적으로 유지합니다</string>
     <string name="summary_guard_mode">AutoJs6 이 전경에있을 때 스크립트의 자동화 조치 방지</string>
     <string name="summary_not_showing_main_activity">주요 활동을 표시하지 않고 직접 스크립트를 실행하십시오</string>
     <string name="summary_post_notifications_permission">AutoJs6 가 알림을 생성하고 보낼 수 있도록 허용합니다</string>
@@ -418,10 +437,12 @@
     <string name="summary_use_volume_control_record">부동 버튼이 표시 될 때 볼륨 다운 키로 제어 된 녹음 시작 또는 중지</string>
     <string name="summary_use_volume_key_to_stop_running_scripts">실행 중인 모든 스크립트를 중지하려면 \"볼륨 크게\" 키를 누르십시오.</string>
     <string name="summary_version_histories_preference">릴리스 버전의 변경 기록 및 통계 데이터를 확인하기</string>
+    <string name="term_internal_strorage">내부 저장소</string>
     <string name="text_a11y_service">접근성 서비스</string>
     <string name="text_a11y_service_description">스크립트 자동 작동에 필요합니다 (클릭, 긴 프레스, 슬라이드 등).</string>
     <string name="text_a11y_service_enabled_but_not_running">접근성 서비스가 활성화되었지만 실행되지 않음 (장치를 다시 활성화 또는 재부팅)</string>
     <string name="text_a11y_service_may_be_needed">접근성 서비스가 필요할 수 있습니다</string>
+    <string name="text_aborting" tools:ignore="TypographyEllipsis">중지하는 중...</string>
     <string name="text_about">에 대한</string>
     <string name="text_about_all_files_access">모든 파일 액세스에 대해</string>
     <string name="text_about_app_and_developer">앱과 개발자에 대해</string>
@@ -444,6 +465,7 @@
     <string name="text_alias">별칭</string>
     <string name="text_alias_cannot_be_empty">별칭은 비워둘 수 없습니다</string>
     <string name="text_alias_password">별칭 비밀번호</string>
+    <string name="text_all">전체</string>
     <string name="text_all_files_access">모든 파일에 액세스합니다</string>
     <string name="text_all_files_access_is_needed">\"모든 파일 액세스\"는 전화기의 스크립트 파일에 액세스하려면 필요합니다.</string>
     <string name="text_all_histories">모든 기록</string>
@@ -496,7 +518,7 @@
     <string name="text_app_version_code">앱 버전 코드</string>
     <string name="text_app_version_name">앱 버전 이름</string>
     <string name="text_appearance">모습</string>
-    <string name="text_at_least_one_certificate_issuer_field_is_not_empty">"성명, 조직명, 조직 단위, 국가 코드, 주 또는 도, 시 또는 지역, 거리" 중 하나 이상을 입력해야 합니다</string>
+    <string name="text_at_least_one_certificate_issuer_field_is_not_empty">[성명, 조직명, 조직 단위, 국가 코드, 주 또는 도, 시 또는 지역, 거리] 중 하나 이상을 입력해야 합니다</string>
     <string name="text_attribute">기인하다</string>
     <string name="text_auto_check_for_updates">자동 확인 업데이트</string>
     <string name="text_auto_check_for_updates_and_show_snackbar">자동으로 업데이트를 확인하고 홈페이지에 스낵바를 표시합니다.</string>
@@ -580,7 +602,11 @@
     <string name="text_copy_all_files_to_new_directory">모든 파일을 새 디렉토리로 복사하십시오</string>
     <string name="text_copy_command">CMD 를 복사하십시오</string>
     <string name="text_copy_debug_info">디버깅 로그를 복사하십시오</string>
+    <string name="text_copy_file">파일 복사</string>
+    <string name="text_copy_folder">폴더 복사</string>
     <string name="text_copy_line">사본 라인</string>
+    <string name="text_copy_same_path_confirm">원본 경로와 대상 경로가 같습니다. 계속 복사하시겠습니까?\n\n새 이름: \"%1$s\".</string>
+    <string name="text_copy_to">복사 위치</string>
     <string name="text_copy_to_clip">클립 보드에 복사</string>
     <string name="text_copy_value">값을 복사하십시오</string>
     <string name="text_country_code">국가 코드 (XX)</string>
@@ -603,10 +629,14 @@
     <string name="text_default">기본</string>
     <string name="text_default_key_store">기본 키 저장소</string>
     <string name="text_default_prefix">기본 접두사</string>
+    <string name="text_delay_time">지연 시간</string>
     <string name="text_delete">삭제</string>
     <string name="text_delete_all">모두 삭제</string>
+    <string name="text_delete_file">파일 삭제</string>
+    <string name="text_delete_folder">폴더 삭제</string>
     <string name="text_delete_line">라인 삭제</string>
     <string name="text_description">설명</string>
+    <string name="text_destination">대상</string>
     <string name="text_details">세부</string>
     <string name="text_developer_details_under_development">개발자 세부 사항이 개발 중입니다</string>
     <string name="text_developer_options">개발자 옵션</string>
@@ -619,7 +649,7 @@
     <string name="text_device_product_name">장치 제품 이름</string>
     <string name="text_device_screen_resolution">기기 화면 해상도</string>
     <string name="text_directly_download">지금 다운로드하십시오</string>
-    <string name="text_directory">예배 규칙서</string>
+    <string name="text_directory">디렉터리</string>
     <string name="text_disabled">비활성화됨</string>
     <string name="text_display_over_other_app">다른 앱에 표시됩니다</string>
     <string name="text_display_over_other_app_is_recommended">\"다른 앱 위의 디스플레이\"권한은 모든 위젯을 올바르게 표시하는 것이 좋습니다.</string>
@@ -716,6 +746,7 @@
     <string name="text_find_prev_simplified">이전을</string>
     <string name="text_first_and_last_name">성명</string>
     <string name="text_floating_button">플로팅 버튼</string>
+    <string name="text_folder">폴더</string>
     <string name="text_force_stop">강제 정지</string>
     <string name="text_foreground_service">전경 서비스</string>
     <string name="text_formatting_completed">포맷 완료</string>
@@ -757,6 +788,7 @@
     <string name="text_install_from_url">\"URL\"에서 설치</string>
     <string name="text_install_plugin_from_url">\"URL\"에서 플러그인 설치</string>
     <string name="text_installable">설치 가능</string>
+    <string name="text_installed">설치됨</string>
     <string name="text_integrity_verification_failed">무결성 검증에 실패했습니다</string>
     <string name="text_invalid_character_is_removed">잘못된 문자가 제거되었습니다</string>
     <string name="text_invalid_package_name">잘못된 패키지 이름</string>
@@ -812,7 +844,12 @@
     <string name="text_mobile_qq_not_installed">\"모바일 QQ\" 가 설치되지 않았습니다</string>
     <string name="text_more">더</string>
     <string name="text_more_details">세부</string>
+    <string name="text_move">이동</string>
+    <string name="text_move_aborted_same_path">원본 경로와 대상 경로가 같습니다. 이동이 중지되었습니다.</string>
     <string name="text_move_all_files_to_new_directory">모든 파일을 새 디렉토리로 이동하십시오</string>
+    <string name="text_move_file">파일 이동</string>
+    <string name="text_move_folder">폴더 이동</string>
+    <string name="text_move_to">이동 위치</string>
     <string name="text_multiple_options">여러 옵션</string>
     <string name="text_name">이름</string>
     <string name="text_need_to_enable_a11y_service">접근성 서비스를 활성화해야합니다</string>
@@ -840,6 +877,7 @@
     <string name="text_no_root_access">루트 액세스가 없습니다</string>
     <string name="text_no_scripts_to_stop_running">실행을 멈출 스크립트가 없습니다</string>
     <string name="text_not_granted">부여되지 않았습니다</string>
+    <string name="text_not_installed">설치되지 않음</string>
     <string name="text_not_showing_main_activity">주요 활동을 보여주지 않습니다</string>
     <string name="text_notification">공고</string>
     <string name="text_notification_access_permission">알림 액세스</string>
@@ -854,6 +892,8 @@
     <string name="text_open_by_other_apps">다른 앱으로 열립니다</string>
     <string name="text_open_main_activity">열린 주요 활동</string>
     <string name="text_open_with">함께 열립니다</string>
+    <string name="text_operation_aborted">중지됨</string>
+    <string name="text_operation_completed">완료</string>
     <string name="text_operation_is_completed">작동이 완료되었습니다</string>
     <string name="text_options">옵션</string>
     <string name="text_organization">조직명</string>
@@ -942,6 +982,7 @@
     <string name="text_permission_granted_failed_with_shizuku">권한을 부여하지 못함 (Shizuku 사용)</string>
     <string name="text_permission_granted_with_root">부여 된 권한 (루트 포함)</string>
     <string name="text_permission_granted_with_shizuku">권한 부여됨 (Shizuku 사용)</string>
+    <string name="text_permission_management">권한 관리</string>
     <string name="text_permission_package_usage_stats">앱이 다른 앱의 사용 통계를 볼 수 있도록 허용</string>
     <string name="text_permission_revoked">허가가 취소되었습니다</string>
     <string name="text_permission_revoked_failed_with_root">허가를 철회하지 못했습니다 (루트 포함)</string>
@@ -965,6 +1006,7 @@
     <string name="text_pointer_location">포인터 위치</string>
     <string name="text_pointer_location_toggle_failed_with_hint">\"포인터 위치\"토글이 실패했습니다.\n루트 액세스가 필요합니다.</string>
     <string name="text_post_notifications_permission">게시물 알림</string>
+    <string name="text_post_notifications_permission_rationale">AutoJs6 포그라운드 서비스 등이 정상적으로 동작하고 스크립트가 알림을 게시할 수 있도록 하려면, AutoJs6 에 \"알림 게시\" 권한을 부여해야 합니다.</string>
     <string name="text_pre_execute_script">사전 배제 스크립트</string>
     <string name="text_preparing" tools:ignore="TypographyEllipsis">준비 ...</string>
     <string name="text_preset_dialog_content">사전 설정 대화 상자 내용</string>
@@ -979,6 +1021,9 @@
     <string name="text_project_location">프로젝트 위치</string>
     <string name="text_project_media_access">프로젝트 미디어 액세스</string>
     <string name="text_prompt">즉각적인</string>
+    <string name="text_property_colon_value">%1$s: %2$s</string>
+    <string name="text_property_colon_value_nbsp_unit">%1$s: %2$d %3$s</string>
+    <string name="text_property_colon_value_unit">%1$s: %2$d%3$s</string>
     <string name="text_quit">그만두다</string>
     <string name="text_recommended">권장</string>
     <string name="text_record_finished">녹음 완료</string>
@@ -1047,6 +1092,7 @@
     <string name="text_save_to">저장</string>
     <string name="text_scheduled_restart_backend">엔진</string>
     <string name="text_scheduled_restart_start_delay">시작 지연</string>
+    <string name="text_screen_capture_request_delay">화면 캡처 권한 요청 지연</string>
     <string name="text_script_record">스크립트 녹음</string>
     <string name="text_script_running">스크립트 실행</string>
     <string name="text_search">검색</string>
@@ -1066,6 +1112,7 @@
     <string name="text_send_shortcut">바로 가기를 만듭니다</string>
     <string name="text_server_mode">서버 모드</string>
     <string name="text_service">서비스</string>
+    <string name="text_service_management">서비스 관리</string>
     <string name="text_set_as_working_dir">작업 디렉토리로</string>
     <string name="text_set_breakpoint">중단 점을 설정하십시오</string>
     <string name="text_settings">설정</string>
@@ -1082,6 +1129,10 @@
     <string name="text_size">크기</string>
     <string name="text_some_items_exported">내보낸 %d 항목</string>
     <string name="text_sort">정렬</string>
+    <string name="text_sort_by_last_update_time">최근 업데이트순 정렬</string>
+    <string name="text_sort_by_name">이름순 정렬</string>
+    <string name="text_sort_by_package_size">패키지 크기순 정렬</string>
+    <string name="text_source">원본</string>
     <string name="text_source_file_path">소스 코드 경로</string>
     <string name="text_special_permissions">특수 권한</string>
     <string name="text_stable_mode">안정적인 모드</string>
@@ -1174,36 +1225,4 @@
     <string name="text_write_secure_settings">보안 설정을 작성하십시오</string>
     <string name="text_write_system_settings">시스템 설정을 작성하십시오</string>
     <string name="text_xiaomi_background_popup_permission">백그라운드 팝업</string>
-    <string name="error_no_paddle_ocr_plugins_available">사용 가능한 Paddle OCR 플러그인을 찾을 수 없습니다</string>
-    <string name="text_installed">설치됨</string>
-    <string name="text_not_installed">설치되지 않음</string>
-    <string name="text_all">전체</string>
-    <string name="text_sort_by_name">이름순 정렬</string>
-    <string name="text_sort_by_last_update_time">최근 업데이트순 정렬</string>
-    <string name="text_sort_by_package_size">패키지 크기순 정렬</string>
-    <string name="error_missing_required_plugin_for_module_label">\"%1$s\"에 필요한 플러그인이 없습니다. 플러그인을 설치한 후 다시 시도해 주세요.</string>
-    <string name="error_no_enabled_plugin_for_module_label">\"%1$s\"에 활성화된 플러그인이 없습니다. 플러그인을 활성화한 후 다시 시도해 주세요.</string>
-    <string name="error_no_available_enabled_plugin_variants_found">사용 가능하며 활성화된 %1$s 플러그인 variant를 찾을 수 없습니다 (%2$s).</string>
-    <string name="error_plugin_apk_does_not_contain_required_assets_for_variant">플러그인 APK에 variant=\"%1$s\"에 필요한 assets가 포함되어 있지 않습니다: %2$s.</string>
-    <string name="error_plugin_apk_does_not_contain_required_native_libraries">플러그인 APK에 필요한 native 라이브러리가 포함되어 있지 않습니다: %1$s.</string>
-    <string name="error_failed_to_bind_plugin_service">%1$s 플러그인 서비스 바인딩에 실패했습니다.</string>
-    <string name="error_timeout_while_querying_plugin_info">%1$s 플러그인 정보 조회가 시간 초과되었습니다.</string>
-    <string name="error_plugin_returned_empty_info">%1$s 플러그인이 빈 info를 반환했습니다.</string>
-    <string name="error_plugin_returned_invalid_variant">%1$s 플러그인이 잘못된 variant를 반환했습니다: %2$s.</string>
-    <string name="error_no_embedded_paddle_ocr_assets_found">내장된 Paddle OCR assets를 찾을 수 없습니다. Paddle OCR을 활성화하여 다시 패키징해 주세요.</string>
-    <string name="dialog_button_minimize">최소화</string>
-    <string name="text_property_colon_value_unit">%1$s: %2$d%3$s</string>
-    <string name="text_property_colon_value_nbsp_unit">%1$s: %2$d %3$s</string>
-    <string name="text_screen_capture_request_delay">화면 캡처 권한 요청 지연</string>
-    <string name="description_screen_capture_request_delay">화면 캡처 권한을 요청할 때 표시되는 권한 요청 창은 사라질 때 페이드 등의 전환 애니메이션이 있을 수 있습니다. 이때 `images.captureScreen` 메서드를 즉시 호출하면, 얻은 스크린샷에 권한 요청 창의 내용이 포함되어 화면이 가려질 수 있습니다.\n\n이 설정 값은 권한을 획득한 직후 첫 스크린샷을 캡처하기 전에 지연 시간(밀리초)을 추가하여, 위와 같은 가림 문제를 방지하는 데 사용할 수 있습니다.\n\n이 설정은 권한 획득 후 첫 번째 캡처에만 적용되며, 이후 캡처에는 더 이상 영향을 주지 않습니다.</string>
-    <string name="text_delay_time">지연 시간</string>
-    <string name="dialog_button_homepage">홈페이지</string>
-    <string name="error_failed_to_change_the_toggle_state">스위치 상태 변경에 실패했습니다</string>
-    <string name="text_post_notifications_permission_rationale">AutoJs6 포그라운드 서비스 등이 정상적으로 동작하고 스크립트가 알림을 게시할 수 있도록 하려면, AutoJs6 에 \"알림 게시\" 권한을 부여해야 합니다.</string>
-    <string name="description_pointer_location">\"포인터 위치\" 는 Android 개발자 옵션에 있는 디버깅 기능입니다.\n활성화하면 시스템이 화면에 터치 지점의 [좌표/이동 궤적/개수/크기/이동 속도/압력] 등의 정보를 표시하여 관련 스크립트의 [작성/디버깅/검증] 에 도움이 됩니다.</string>
-    <string name="error_an_error_occurred">오류가 발생했습니다</string>
-    <string name="text_permission_management">권한 관리</string>
-    <string name="text_service_management">서비스 관리</string>
-    <string name="summary_foreground_service_inrt">포그라운드 서비스는 백그라운드에서 앱과 스크립트 실행을 더 안정적으로 유지합니다</string>
-
 </resources>

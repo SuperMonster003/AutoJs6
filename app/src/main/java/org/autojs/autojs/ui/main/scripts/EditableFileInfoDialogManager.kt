@@ -91,7 +91,7 @@ object EditableFileInfoDialogManager {
                     setCopyableTextIfAbsent(binding.lineCountValue, textUnknown)
                     setCopyableTextIfAbsent(binding.charCountValue, textUnknown)
                     setCopyableTextIfAbsent(binding.lineBreakValue, textUnknown)
-                    setCopyableTextIfAbsent(binding.fileSizeValue, scope) { PFiles.getHumanReadableSize(file.length()) }
+                    setCopyableTextIfAbsent(binding.fileSizeValue, scope) { PFiles.formatSizeWithUnit(file.length()) }
                 }
                 else -> dialog.apply {
                     val charsetMatch = StringUtils.detectCharset(bytes)
@@ -166,7 +166,7 @@ object EditableFileInfoDialogManager {
 
     private fun getReadableSizeString(context: Context, charset: Charset, bytes: ByteArray, text: String): Pair<String, String?> {
         val (size, suffix) = getByteCount(context, charset, bytes, text)
-        return PFiles.getHumanReadableSize(size) to suffix
+        return PFiles.formatSizeWithUnit(size) to suffix
     }
 
     private fun getByteCountString(context: Context, charset: Charset, bytes: ByteArray, text: String): Pair<String, String?> {

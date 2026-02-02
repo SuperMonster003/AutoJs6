@@ -93,7 +93,9 @@ class ColorNativeObject @JvmOverloads constructor(color: Any? = BLACK) : NativeO
     }
 
     @RhinoFunctionObjectBody
-    override fun equals(other: Any?) = Colors.isEqualRhino(color, other)
+    override fun equals(other: Any?) = runCatching {
+        Colors.isEqualRhino(color, other)
+    }.getOrDefault(false)
 
     @RhinoFunctionObjectBody
     override fun toStringReadable(): String = Colors.summaryRhino(color)

@@ -30,7 +30,6 @@ import org.autojs.autojs.core.pref.Pref.putInt
 import org.autojs.autojs.core.pref.Pref.putLinkedList
 import org.autojs.autojs.core.pref.Pref.putString
 import org.autojs.autojs.core.pref.Pref.remove
-import org.autojs.autojs.util.ViewUtils.setForceShowIconCompat
 import org.autojs.autojs.model.explorer.Explorer
 import org.autojs.autojs.model.explorer.ExplorerChangeEvent
 import org.autojs.autojs.model.explorer.ExplorerDirPage
@@ -65,6 +64,7 @@ import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.EnvironmentUtils.externalStoragePath
 import org.autojs.autojs.util.FileUtils
 import org.autojs.autojs.util.Observers
+import org.autojs.autojs.util.ViewUtils.setForceShowIconCompat
 import org.autojs.autojs.util.ViewUtils.showSnack
 import org.autojs.autojs.util.WorkingDirectoryUtils
 import org.autojs.autojs.util.WorkingDirectoryUtils.path
@@ -76,14 +76,16 @@ import org.autojs.autojs6.databinding.ExplorerFirstCharIconBinding
 import org.autojs.autojs6.databinding.ExplorerViewBinding
 import org.greenrobot.eventbus.Subscribe
 import java.io.File
-import java.util.*
+import java.util.LinkedList
+import java.util.Objects
+import java.util.Stack
 import java.util.concurrent.Callable
 
 /**
  * Created by Stardust on Aug 21, 2017.
  * Transformed by SuperMonster003 on Nov 23, 2024.
  * Modified by JetBrains AI Assistant (GPT-5.2) as of Apr 20, 2026.
- * Modified by SuperMonster003 as of Apr 20, 2026.
+ * Modified by SuperMonster003 as of Feb 2, 2026.
  */
 @SuppressLint("CheckResult", "NonConstantResourceId", "NotifyDataSetChanged")
 open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRefreshListener, PopupMenu.OnMenuItemClickListener {
@@ -253,35 +255,45 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
 
     override fun onMenuItemClick(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.rename -> {
+            R.id.action_move_to -> {
+                ScriptOperations(context, this@ExplorerView, currentPage)
+                    .move(selectedItem!!.toScriptFile())
+                    .subscribe(Observers.emptyObserver())
+            }
+            R.id.action_copy_to -> {
+                ScriptOperations(context, this@ExplorerView, currentPage)
+                    .copy(selectedItem!!.toScriptFile())
+                    .subscribe(Observers.emptyObserver())
+            }
+            R.id.action_rename -> {
                 ScriptOperations(context, this@ExplorerView, currentPage)
                     .rename(selectedItem as ExplorerFileItem?)
                     .subscribe(Observers.emptyObserver())
             }
-            R.id.delete -> {
+            R.id.action_delete -> {
                 ScriptOperations(context, this@ExplorerView, currentPage)
                     .delete(selectedItem!!.toScriptFile())
             }
-            R.id.run_repeatedly -> {
+            R.id.action_run_repeatedly -> {
                 ScriptLoopDialog(context, selectedItem!!.toScriptFile())
                     .show()
                 notifyItemOperated()
             }
-            R.id.create_shortcut -> {
+            R.id.action_create_shortcut -> {
                 ScriptOperations(context, this@ExplorerView, currentPage)
                     .createShortcut(selectedItem!!.toScriptFile())
                 mRequestHostDialogHide?.run()
             }
-            R.id.open_by_other_apps -> {
+            R.id.action_open_by_other_apps -> {
                 Scripts.openByOtherApps(selectedItem!!.toScriptFile())
                 notifyItemOperated()
             }
-            R.id.send -> {
+            R.id.action_send -> {
                 Scripts.send(context, selectedItem!!.toScriptFile())
                 notifyItemOperated()
                 mRequestHostDialogHide?.run()
             }
-            R.id.timed_task -> {
+            R.id.action_timed_task -> {
                 ScriptOperations(context, this@ExplorerView, currentPage)
                     .timedTask(selectedItem!!.toScriptFile())
                 notifyItemOperated()
@@ -292,7 +304,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                 notifyItemOperated()
                 mRequestHostDialogHide?.run()
             }
-            R.id.reset -> {
+            R.id.action_reset -> {
                 val o = Explorers.Providers.workspace()
                     .resetSample(selectedItem!!.toScriptFile())
                 if (o == null) {
@@ -757,7 +769,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
 
             setTextWith(mName) { ExplorerViewHelper.getDisplayName(context, item) }
             setTextWith(mFileDate) { PFile.getFullDateString(item.lastModified()) }
-            setTextWith(mFileSize) { PFiles.getHumanReadableSize(item.size) }
+            setTextWith(mFileSize) { PFiles.formatSizeWithUnit(item.size) }
 
             Observable.fromCallable {
                 val shouldEditShow = item.isTextEditable || item.isExternalEditable
@@ -947,15 +959,21 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             popupMenu.inflate(R.menu.menu_script_options)
             val menu = popupMenu.menu
             if (!mExplorerItem.isExecutable) {
-                menu.removeItem(R.id.create_shortcut)
-                menu.removeItem(R.id.timed_task)
-                menu.removeItem(R.id.run_repeatedly)
+                menu.removeItem(R.id.action_create_shortcut)
+                menu.removeItem(R.id.action_timed_task)
+                menu.removeItem(R.id.action_run_repeatedly)
             }
-            if (!mExplorerItem.canDelete()) {
-                menu.removeItem(R.id.delete)
+            if (!mExplorerItem.canMove()) {
+                menu.removeItem(R.id.action_move_to)
+            }
+            if (!mExplorerItem.canCopy()) {
+                menu.removeItem(R.id.action_copy_to)
             }
             if (!mExplorerItem.canRename()) {
-                menu.removeItem(R.id.rename)
+                menu.removeItem(R.id.action_rename)
+            }
+            if (!mExplorerItem.canDelete()) {
+                menu.removeItem(R.id.action_delete)
             }
             if (!mExplorerItem.canBuildApk()) {
                 menu.removeItem(R.id.action_build_apk)
@@ -965,7 +983,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             }
             val samplePath = PFile(context.filesDir, WorkspaceFileProvider.SAMPLE_PATH).path
             if (!mExplorerItem.path.startsWith(samplePath)) {
-                menu.removeItem(R.id.reset)
+                menu.removeItem(R.id.action_reset)
             }
             popupMenu.setOnMenuItemClickListener(this@ExplorerView)
             popupMenu.show()
@@ -1012,47 +1030,61 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         }
 
         private fun showOptionsMenu() {
+            val explorerPage = mExplorerPage ?: return
             val popupMenu = PopupMenu(context, mOptions)
             val menu = popupMenu.menu
             popupMenu.inflate(R.menu.menu_dir_options)
-            if (!mExplorerPage!!.canRename()) {
+            if (!explorerPage.canMove()) {
+                menu.removeItem(R.id.action_move_to)
+            }
+            if (!explorerPage.canCopy()) {
+                menu.removeItem(R.id.action_copy_to)
+            }
+            if (!explorerPage.canRename()) {
                 menu.removeItem(R.id.action_rename)
             }
-            if (!mExplorerPage!!.canDelete()) {
+            if (!explorerPage.canDelete()) {
                 menu.removeItem(R.id.action_delete)
             }
-            if (!mExplorerPage!!.canSetAsWorkingDir()) {
+            if (!explorerPage.canSetAsWorkingDir()) {
                 menu.removeItem(R.id.action_set_as_working_dir)
             }
-            if (!mExplorerPage!!.canBuildApk()) {
+            if (!explorerPage.canBuildApk()) {
                 menu.removeItem(R.id.action_build_apk)
             }
             val samplePath = PFile(context.filesDir, WorkspaceFileProvider.SAMPLE_PATH).path
-            if (!mExplorerPage!!.path.startsWith(samplePath)) {
-                menu.removeItem(R.id.reset)
+            if (!explorerPage.path.startsWith(samplePath)) {
+                menu.removeItem(R.id.action_reset)
             }
             popupMenu.setOnMenuItemClickListener { item: MenuItem ->
+                val selectedItem = selectedItem ?: return@setOnMenuItemClickListener false
+                val explorerView = this@ExplorerView
                 when (item.itemId) {
-                    R.id.action_rename -> {
-                        ScriptOperations(context, this@ExplorerView, currentPage)
-                            .rename(selectedItem as ExplorerFileItem?)
+                    R.id.action_copy_to ->
+                        ScriptOperations(context, explorerView, currentPage)
+                            .copy(selectedItem.toScriptFile())
                             .subscribe(Observers.emptyObserver())
-                    }
-                    R.id.action_delete -> {
-                        ScriptOperations(context, this@ExplorerView, currentPage)
-                            .delete(selectedItem!!.toScriptFile())
-                    }
-                    R.id.action_set_as_working_dir -> {
-                        ScriptOperations(context, this@ExplorerView, currentPage)
-                            .setAsWorkingDir(selectedItem!!.toScriptFile())
-                    }
+                    R.id.action_move_to ->
+                        ScriptOperations(context, explorerView, currentPage)
+                            .move(selectedItem.toScriptFile())
+                            .subscribe(Observers.emptyObserver())
+                    R.id.action_rename ->
+                        ScriptOperations(context, explorerView, currentPage)
+                            .rename(selectedItem as? ExplorerFileItem)
+                            .subscribe(Observers.emptyObserver())
+                    R.id.action_delete ->
+                        ScriptOperations(context, explorerView, currentPage)
+                            .delete(selectedItem.toScriptFile())
+                    R.id.action_set_as_working_dir ->
+                        ScriptOperations(context, explorerView, currentPage)
+                            .setAsWorkingDir(selectedItem.toScriptFile())
                     R.id.action_build_apk -> {
                         mRequestHostDialogHide?.run()
-                        BuildActivity.launch(context, selectedItem!!.path)
+                        BuildActivity.launch(context, selectedItem.path)
                     }
-                    R.id.reset -> {
+                    R.id.action_reset -> {
                         val o = Explorers.Providers.workspace()
-                            .resetSample(selectedItem!!.toScriptFile())
+                            .resetSample(selectedItem.toScriptFile())
                         if (o == null) {
                             resetFailed()
                         } else {
@@ -1148,7 +1180,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
         override fun bind(isDirCategory: Any, position: Int) {
             if (isDirCategory !is Boolean) return
-            val titleRes = if (isDirCategory) R.string.text_directory else R.string.text_file
+            val titleRes = if (isDirCategory) R.string.text_folder else R.string.text_file
             val count = if (isDirCategory) explorerItemManager.groupCount() else explorerItemManager.itemCount()
             binding.title.text = "${context.getString(titleRes)}  [ $count ]"
             mIsDir = isDirCategory

@@ -37,7 +37,7 @@ public class FloatingActionMenu extends FrameLayout implements View.OnClickListe
             R.drawable.ic_project_white};
 
     private static final int[] LABELS = {
-            R.string.text_directory,
+            R.string.text_folder,
             R.string.text_file,
             R.string.text_import,
             R.string.text_project};

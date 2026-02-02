@@ -1,17 +1,13 @@
 package org.autojs.autojs.ui.filechooser;
 
 import android.content.Context;
-import android.content.res.ColorStateList;
 import android.view.View;
-
 import androidx.annotation.NonNull;
-
 import org.autojs.autojs.core.ui.widget.JsCheckBox;
 import org.autojs.autojs.model.explorer.ExplorerItem;
 import org.autojs.autojs.pio.PFile;
 import org.autojs.autojs.pio.PFiles;
 import org.autojs.autojs.theme.ThemeColorHelper;
-import org.autojs.autojs.theme.ThemeColorManagerCompat;
 import org.autojs.autojs.ui.explorer.ExplorerViewHelper;
 import org.autojs.autojs.ui.widget.BindableViewHolder;
 import org.autojs.autojs.util.ColorUtils;
@@ -59,7 +55,7 @@ class ExplorerItemViewHolder extends BindableViewHolder<Object> {
                 fileChooseListView.getSelectedFiles().remove(mExplorerItem.toScriptFile());
             }
         });
-        listFileBinding.scriptFileSize.setText(PFiles.getHumanReadableSize(explorerItem.getSize()));
+        listFileBinding.scriptFileSize.setText(PFiles.formatSizeWithUnit(explorerItem.getSize()));
         listFileBinding.scriptFileDate.setText(PFile.getFullDateString(explorerItem.lastModified()));
 
         switch (explorerItem.getType()) {

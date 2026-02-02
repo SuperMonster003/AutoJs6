@@ -6,6 +6,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.DialogInterface
+import android.content.res.ColorStateList
 import android.os.Build
 import android.os.Looper
 import android.provider.Settings
@@ -19,18 +20,26 @@ import androidx.preference.PreferenceViewHolder
 import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.annotation.ReservedForCompatibility
+import org.autojs.autojs.event.BackCompat
+import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.theme.preference.LongClickablePreferenceLike
 import org.autojs.autojs.ui.explorer.ExplorerView
-import org.autojs.autojs.event.BackCompat
+import org.autojs.autojs.util.ColorUtils
+import org.autojs.autojs.util.ThreadUtils.runOnMain
 import org.autojs.autojs.util.ViewUtils.showSnack
 import org.autojs.autojs6.R
+import java.util.Locale
+import java.util.concurrent.Callable
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicReference
 
 /**
  * Created by Stardust on Aug 4, 2017.
  * Transformed by SuperMonster003 on Oct 19, 2022.
- * Modified by JetBrains AI Assistant (GPT-5.2) as of Jan 18, 2026.
  * Modified by OpenAI ChatGPT (GPT-5.2 Thinking) as of Jan 20, 2026.
- * Modified by SuperMonster003 as of Jan 20, 2026.
+ * Modified by JetBrains AI Assistant (GPT-5.2) as of Feb 1, 2026.
+ * Modified by SuperMonster003 as of Feb 1, 2026.
  */
 object DialogUtils {
 
@@ -40,6 +49,7 @@ object DialogUtils {
     fun MaterialDialog.Builder.showAdaptive() = build().showAdaptive()
 
     @JvmStatic
+    @Suppress("DEPRECATION")
     fun MaterialDialog.showAdaptive() = showDialog(this)
 
     /**
@@ -80,6 +90,7 @@ object DialogUtils {
      */
     @JvmStatic
     @JvmOverloads
+    @Deprecated("Use showAdaptive instead.", ReplaceWith("showAdaptive(dialog, focusable)"))
     @ReservedForCompatibility
     fun <T : MaterialDialog> showDialog(dialog: T, focusable: Boolean = true): T {
         runOnMain {
@@ -178,19 +189,97 @@ object DialogUtils {
         return dialog
     }
 
+    /**
+     * Build dialog on the main thread and return it.
+     *
+     * Note:
+     * - MaterialDialog.Builder.build() may internally create Android Dialog/Handler.
+     * - Building on a background thread can crash with "Can't create handler inside thread ...".
+     *
+     * zh-CN:
+     *
+     * 在主线程 build 对话框并返回实例.
+     *
+     * 注:
+     * - MaterialDialog.Builder.build() 内部可能创建 Android Dialog/Handler.
+     * - 在后台线程 build 可能触发 "Can't create handler inside thread ..." 崩溃.
+     */
+    @JvmStatic
+    fun <T : MaterialDialog> buildAdaptive(builder: MaterialDialog.Builder): T {
+        @Suppress("UNCHECKED_CAST")
+        return buildAdaptive { builder.build() as T }
+    }
+
+    /**
+     * Build dialog on the main thread by a callable factory.
+     *
+     * zh-CN: 通过 callable 工厂在主线程 build 对话框.
+     */
+    @JvmStatic
+    fun <T : MaterialDialog> buildAdaptive(factory: Callable<T>): T {
+        if (Looper.getMainLooper() == Looper.myLooper()) {
+            return factory.call()
+        }
+
+        val ref = AtomicReference<T>()
+        val err = AtomicReference<Throwable?>()
+        val latch = CountDownLatch(1)
+
+        GlobalAppContext.post {
+            try {
+                ref.set(factory.call())
+            } catch (t: Throwable) {
+                err.set(t)
+                Log.w(TAG, "buildAdaptive: failed", t)
+            } finally {
+                latch.countDown()
+            }
+        }
+
+        // Wait a bit to avoid infinite blocking in background threads.
+        // zh-CN: 设置等待超时以避免后台线程无限阻塞.
+        latch.await(5, TimeUnit.SECONDS)
+
+        err.get()?.let { throw RuntimeException(it) }
+
+        return ref.get() ?: throw RuntimeException("buildAdaptive: dialog is null (timeout or build failed)")
+    }
+
+    /**
+     * Build and show dialog on the main thread, then return the dialog instance.
+     * Use this when the caller might be running on a background thread.
+     *
+     * zh-CN:
+     *
+     * 在主线程 build 并 show 对话框, 然后返回对话框实例.
+     * 当调用方可能运行在后台线程时使用该方法.
+     */
+    @JvmStatic
+    @JvmOverloads
+    fun <T : MaterialDialog> buildAndShowAdaptive(builder: MaterialDialog.Builder, focusable: Boolean = true): T {
+        val dialog = buildAdaptive<T>(builder)
+        @Suppress("DEPRECATION")
+        return showDialog(dialog, focusable)
+    }
+
+    /**
+     * Build and show dialog on the main thread with a callable factory, then return the instance.
+     *
+     * zh-CN: 使用 callable 工厂在主线程 build 并 show 对话框, 然后返回实例.
+     */
+    @JvmStatic
+    @JvmOverloads
+    fun <T : MaterialDialog> buildAndShowAdaptive(factory: Callable<T>, focusable: Boolean = true): T {
+        val dialog = buildAdaptive(factory)
+        @Suppress("DEPRECATION")
+        return showDialog(dialog, focusable)
+    }
+
     private fun unwrapActivity(context: Context?): Activity? {
         return when (context) {
             is Activity -> context
             is ContextWrapper -> unwrapActivity(context.baseContext)
             else -> null
-        }
-    }
-
-    private inline fun runOnMain(crossinline block: () -> Unit) {
-        if (Looper.getMainLooper() == Looper.myLooper()) {
-            block()
-        } else {
-            GlobalAppContext.post { block() }
         }
     }
 
@@ -214,10 +303,6 @@ object DialogUtils {
     fun toggleActionButtonAbilityByItems(dialog: MaterialDialog, actionButton: DialogAction) {
         dialog.getActionButton(actionButton)?.isEnabled = !dialog.items.isNullOrEmpty()
     }
-
-    @JvmStatic
-    fun MaterialDialog.installBackHandler(onBack: (DialogInterface) -> Boolean): MaterialDialog =
-        BackCompat.installDialogBackHandler(this, onBack = onBack)
 
     @JvmStatic
     fun adaptToExplorer(dialog: MaterialDialog, explorerView: ExplorerView): MaterialDialog {
@@ -295,6 +380,99 @@ object DialogUtils {
                 true
             } ?: false
         }
+    }
+
+    @JvmStatic
+    fun MaterialDialog.installBackHandler(onBack: (DialogInterface) -> Boolean): MaterialDialog =
+        BackCompat.installDialogBackHandler(this, onBack = onBack)
+
+    @JvmStatic
+    @JvmOverloads
+    fun MaterialDialog.setProgressNumberFormatByBytes(readBytes: Long, totalBytes: Long, invalidBytesHint: String = ""): MaterialDialog = also {
+        setProgressNumberFormat(getProgressBytesFormat(readBytes, totalBytes, invalidBytesHint))
+    }
+
+    @JvmStatic
+    fun MaterialDialog.setProgressNumberFormatByBytes(readBytes: Long, totalBytes: Long, showPendingHint: Boolean): MaterialDialog = also {
+        setProgressNumberFormat(getProgressBytesFormat(readBytes, totalBytes, if (showPendingHint) "..." else ""))
+    }
+
+    @Suppress("LocalVariableName")
+    private fun getProgressBytesFormat(
+        readBytes: Long,
+        totalBytes: Long,
+        invalidBytesHint: String = "",
+    ): String {
+
+        if (totalBytes <= 0 || readBytes <= 0) {
+            return invalidBytesHint
+        }
+
+        val locale = Locale.getDefault()
+
+        val r = readBytes.toDouble()
+        val t = totalBytes.toDouble()
+
+        val KiB = 1024.0
+        val MiB = KiB * 1024.0
+        val GiB = MiB * 1024.0
+        val TiB = GiB * 1024.0
+
+        return when {
+            totalBytes < 1000L ->
+                String.format(locale, "%.0f B / %.0f B", r, t)
+
+            totalBytes < 1000L * 1024L -> when {
+                readBytes < 1000L ->
+                    String.format(locale, "%.0f B / %.1f KiB", r, t / KiB)
+                else ->
+                    String.format(locale, "%.1f KiB / %.1f KiB", r / KiB, t / KiB)
+            }
+
+            totalBytes < 1000L * 1024L * 1024L -> when {
+                readBytes < 1000L ->
+                    String.format(locale, "%.0f B / %.2f MiB", r, t / MiB)
+                readBytes < 1000L * 1024L ->
+                    String.format(locale, "%.1f KiB / %.2f MiB", r / KiB, t / MiB)
+                else ->
+                    String.format(locale, "%.2f MiB / %.2f MiB", r / MiB, t / MiB)
+            }
+
+            totalBytes < 1000L * 1024L * 1024L * 1024L -> when {
+                readBytes < 1000L ->
+                    String.format(locale, "%.0f B / %.2f GiB", r, t / GiB)
+                readBytes < 1000L * 1024L ->
+                    String.format(locale, "%.1f KiB / %.2f GiB", r / KiB, t / GiB)
+                readBytes < 1000L * 1024L * 1024L ->
+                    String.format(locale, "%.2f MiB / %.2f GiB", r / MiB, t / GiB)
+                else ->
+                    String.format(locale, "%.2f GiB / %.2f GiB", r / GiB, t / GiB)
+            }
+
+            else -> when {
+                readBytes < 1000L ->
+                    String.format(locale, "%.0f B / %.2f TiB", r, t / TiB)
+                readBytes < 1000L * 1024L ->
+                    String.format(locale, "%.1f KiB / %.2f TiB", r / KiB, t / TiB)
+                readBytes < 1000L * 1024L * 1024L ->
+                    String.format(locale, "%.2f MiB / %.2f TiB", r / MiB, t / TiB)
+                readBytes < 1000L * 1024L * 1024L * 1024L ->
+                    String.format(locale, "%.2f GiB / %.2f TiB", r / GiB, t / TiB)
+                else ->
+                    String.format(locale, "%.2f TiB / %.2f TiB", r / TiB, t / TiB)
+            }
+        }
+    }
+
+    @JvmStatic
+    fun MaterialDialog.applyProgressThemeColorTintLists(): MaterialDialog = also {
+        val progressBar = progressBar ?: return@also
+
+        val bgColor = context.getColor(R.color.dialog_progress_gray_background_tint)
+        val fgColor = ColorUtils.adjustColorForContrast(bgColor, ThemeColorManager.colorPrimary, 2.3)
+
+        progressBar.setProgressTintList(ColorStateList.valueOf(fgColor))
+        progressBar.setProgressBackgroundTintList(ColorStateList.valueOf(bgColor))
     }
 
 }

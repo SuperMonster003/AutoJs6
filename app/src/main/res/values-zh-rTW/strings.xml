@@ -4,7 +4,6 @@
 <!-- Proofreader: [ SuperMonster003 ] -->
 
 <resources xmlns:tools="http://schemas.android.com/tools">
-
     <string name="apk_builder_build" tools:ignore="TypographyEllipsis">構建中...</string>
     <string name="apk_builder_clean" tools:ignore="TypographyEllipsis">清理臨時檔案...</string>
     <string name="apk_builder_package" tools:ignore="TypographyEllipsis">打包中...</string>
@@ -49,7 +48,8 @@
     <string name="config_abi_options_contains_unavailable">配置 \"abi\" 含不可用選項</string>
     <string name="config_lib_options_contains_invalid">配置 \"lib\" 含無效選項</string>
     <string name="config_lib_options_contains_unavailable">配置 \"lib\" 含不可用選項</string>
-    <string name="confirm_overwrite_file">檔案已存在, 是否覆蓋</string>
+    <string name="confirm_overwrite_directory">資料夾已存在, 是否覆蓋.</string>
+    <string name="confirm_overwrite_file">檔案已存在, 是否覆蓋.</string>
     <string name="content_about_app_tips">1. 長按主頁應用名稱 (AutoJs6) 可跳轉至設定頁面\n2. 設定頁面長按設定選項可檢視詳細資訊</string>
     <string name="content_current_theme_color_configured_by_palette">當前主題色 %1$s 由調色盤配置</string>
     <string name="content_description_fab_for_display_manifest">用於顯示清單內容的浮動操作按鈕控制元件</string>
@@ -92,12 +92,14 @@
     <string name="description_night_mode_preference">夜間模式, 亦稱 [ 暗黑模式 / 深色主題 ] 等.\n夜間模式應用於安卓系統 UI (如通知欄和導航欄) 及 AutoJs6 應用頁面.\n夜間模式可提升裝置在低光環境下的易用性, 同時有助於提升弱視或光敏感使用者的視覺體驗.\n\n跟隨系統: AutoJs6 與安卓作業系統的夜間模式設定一致\n總是開啟: AutoJs6 保持開啟夜間模式 (忽略作業系統設定)\n總是關閉: AutoJs6 保持關閉夜間模式 (忽略作業系統設定)\n\n注: 跟隨系統功能僅支援安卓 API 級別 28 (安卓 9) [P] 及以上作業系統.</string>
     <string name="description_night_mode_preference_more">啟用安卓系統的夜間模式:\n- API 級別 29 (安卓 10) [Q] 及以上: 透過 [ 設定 -> 顯示 -> 主題 ] 開啟.\n- API 級別 28 (安卓 9) [P]: 透過 [ 開發者選項 -> 夜間模式 ] 開啟.\n\n對於基於 WebView 元件的內容 (如 AutoJs6 的文件頁面), 夜間模式支援需要滿足以下條件:\n1. WebView (或 Google Chrome 等瀏覽器) 版本要求:\n- API 級別 29 (安卓 10) [Q] 及以上: 版本不低於 76\n- API 級別 28 (安卓 9) [P]: 版本不低於 105\n2. WebView 元件頁面內容可適配夜間模式 (透過 CSS 或 安卓 XML 資源等方式實現)</string>
     <string name="description_notification_access">\"通知使用權\" (或 \"通知讀取許可權\") 允許 AutoJs6 讀取系統通知內容, 使指令碼可以監聽通知或獲取通知文字等.</string>
+    <string name="description_pointer_location">\"指標位置\" 是安卓開發者選項中的除錯功能.\n開啟後, 系統會在螢幕上顯示觸控點的 [座標/移動軌跡/數量/大小/移動速度/壓力] 等資訊, 便於相關指令碼的 [編寫/除錯/校對] 等.</string>
     <string name="description_post_notifications">\"傳送通知\" 許可權允許 AutoJs6 向系統釋出通知, 使指令碼可以在通知欄釋出並管理自定義通知等.\n\n注: 在 Android 13+ 裝置上未授予該許可權時, 部分通知可能無法顯示, 並可能影響前臺服務的啟動與穩定性.</string>
     <string name="description_project_media_access">被授予 \"投影媒體許可權\" 後, 錄製螢幕的安全提示視窗將不再彈出.</string>
     <string name="description_restart_strategy">重啟策略僅作用於主頁抽屜欄的重啟按鈕.\n\n快速重啟: 快速重啟應用, 如果重啟失敗或出現非預期情況, 可嘗試切換至 \"計劃重啟\".\n計劃重啟: 提前設定一個短時定時任務, 應用停止後會再次定時啟動, 以實現應用重啟.</string>
     <string name="description_rhino_java_primitive_wrap">開關啟用 (預設): 將 Java 方法返回的 Number/Boolean/Character 包裝為 Java 物件暴露到指令碼 (String 除外). typeof 為 \"object\", species 為 \"JavaObject\", 可訪問這些物件的 Java 方法, 利於保留 Java 精確型別特徵與方法過載行為.\n\n開關禁用: 不再包裝上述型別, 直接作為 JavaScript 基元值 (number/boolean/單字元字串). typeof 為相應 JavaScript 型別, 更貼近 JavaScript 語義與生態. 但仍可透過 new 關鍵字顯式宣告一個 Java 包裝型別, 如 new java.lang.Boolean(true).\n\n參閱: http://issues.autojs6.com/435</string>
     <string name="description_root_mode_preference">如果裝置使用非常規 Root 方式或 Root 許可權檢測結果異常, 可設定 \"強制 Root 模式\" 或 \"強制非 Root 模式\".</string>
     <string name="description_root_record_out_file_type_preference">二進位制檔案: 不可編輯, 副檔名為 \"auto\"\nJavaScript 檔案: 可編輯或直接複製, 副檔名為 \"js\"</string>
+    <string name="description_screen_capture_request_delay">申請螢幕捕獲許可權時, 彈出的許可權申請視窗消失時可能存在漸變動畫, 此時如果立即呼叫 `images.captureScreen` 方法, 獲取的螢幕截圖中會出現許可權申請的視窗內容而造成遮擋.\n\n當前設定選項值用於在截圖許可權申請後立即獲取螢幕截圖前增加一個延遲時間 (單位為毫秒), 可用於避免上述遮擋問題.\n\n當前設定選項僅適用於獲取截圖許可權後的首次截圖操作, 後續截圖操作不再受此設定值影響.</string>
     <string name="description_server_mode">服務端模式用於讓 AutoJs6 在當前裝置開啟服務並等待外部客戶端連線, 以便進行 [ 指令碼傳輸 / 列印日誌 / 遠端控制 ] 等.\n\nAutoJs6 服務端模式支援兩種連線方式:\n1. 區域網 (LAN)\n2. 安卓除錯橋 (ADB)</string>
     <string name="description_shizuku_access">透過 Shizuku 可以獲得 ADB 特權並使用系統 API</string>
     <string name="description_stable_mode">穩定模式省略佈局細節, 指令碼分析佈局時更穩定, 但可能影響獲取的控制元件總量.\n需重啟無障礙服務.</string>
@@ -109,6 +111,8 @@
     <string name="description_write_secure_settings">安全設定包含應用程式可讀但不可寫入的設定選項, 這些選項只能由 UI 或系統級別應用修改.\n被授予 \"修改安全設定許可權\" 後, 普通應用可直接修改上述安全設定 (例如無障礙服務).</string>
     <string name="description_write_system_settings">\"修改系統設定\" 許可權允許 AutoJs6 修改部分系統設定項, 使指令碼可以修改 [ 螢幕亮度 / 自動旋轉 / 螢幕超時 ] 等系統設定引數.</string>
     <string name="dialog_button_abandon">放棄</string>
+    <string name="dialog_button_abort">中止</string>
+    <string name="dialog_button_abort_connection">中止連線</string>
     <string name="dialog_button_advanced_settings">高階設定</string>
     <string name="dialog_button_amend_host_address">修正地址</string>
     <string name="dialog_button_back">@string/text_back</string>
@@ -126,10 +130,11 @@
     <string name="dialog_button_exception_details">異常詳情</string>
     <string name="dialog_button_file_information">檔案資訊</string>
     <string name="dialog_button_history">歷史記錄</string>
+    <string name="dialog_button_homepage">主頁</string>
     <string name="dialog_button_ignore_current_update">忽略此版本</string>
-    <string name="dialog_button_interrupt_connection">中止連線</string>
     <string name="dialog_button_join_group">加入群組</string>
     <string name="dialog_button_manager">管理器</string>
+    <string name="dialog_button_minimize">最小化</string>
     <string name="dialog_button_more">瞭解更多</string>
     <string name="dialog_button_open_color_palette">開啟調色盤</string>
     <string name="dialog_button_quit">放棄</string>
@@ -189,6 +194,7 @@
     <string name="error_abandoned_method">方法 %s 已被廢棄, 應避免使用</string>
     <string name="error_action_cannot_be_completed_with_negative_coordinate">無法完成 \"%1$s\" 操作, 因為引數中包含負數座標值 (%2$d,%3$d)</string>
     <string name="error_activity_is_required_for_ui_exec_mode">缺少必要的 activity 物件, 可透過 \"ui\" 執行模式來提供</string>
+    <string name="error_an_error_occurred">發生錯誤</string>
     <string name="error_an_operation_is_not_implemented">操作尚未實現</string>
     <string name="error_app_not_installed">應用未安裝</string>
     <string name="error_app_not_installed_with_name">應用未安裝: \"%s\"</string>
@@ -227,8 +233,10 @@
     <string name="error_excessive_height_for_template_n_region">高度超限: 模板影象 [%1$d] > 限定區域 [%2$d]</string>
     <string name="error_excessive_width_for_template_n_region">寬度超限: 模板影象 [%1$d] > 限定區域 [%2$d]</string>
     <string name="error_failed_to_apply_current_color_history">應用當前歷史顏色失敗</string>
+    <string name="error_failed_to_bind_plugin_service">繫結 %1$s 外掛服務失敗.</string>
     <string name="error_failed_to_call_method">方法 \"%s\" 呼叫失敗</string>
     <string name="error_failed_to_call_method_with_cause"><![CDATA[方法 \"%1$s\" 呼叫失敗: [ %2$s ]]]></string>
+    <string name="error_failed_to_change_the_toggle_state">開關狀態改變失敗</string>
     <string name="error_failed_to_convert_into_drawable">無法將值 %s 轉換為 Drawable 例項</string>
     <string name="error_failed_to_go_to_access_settings">跳轉設定頁面失敗</string>
     <string name="error_failed_to_grant_shizuku_access">Shizuku 許可權授予失敗</string>
@@ -272,6 +280,7 @@
     <string name="error_may_not_have_root_access_to_run_auto_file">AutoJs6 可能因缺少 Root 許可權而無法執行 \"auto\" 檔案</string>
     <string name="error_method_called_with_null_argument" formatted="false">%s() 傳入的 %s 引數為空</string>
     <string name="error_method_only_accepts_a_number_of_arguments_in_the_range_n_to_m">方法僅可接受引數數量位於 [%1$d\.\.%2$d] 區間內</string>
+    <string name="error_missing_required_plugin_for_module_label">缺少 \"%1$s\" 所需的外掛. 請先安裝外掛, 然後重試.</string>
     <string name="error_module_does_not_work_due_to_the_lack_of_necessary_library_files">由於缺少必要的庫檔案, 模組 \"%s\" 無法正常載入</string>
     <string name="error_no_accessibility_permission">無障礙服務未啟用</string>
     <string name="error_no_accessibility_permission_to_capture">無障礙服務未啟用</string>
@@ -282,8 +291,12 @@
     <string name="error_no_applications_available_for_playing_this_file">未找到用於播放該檔案的應用</string>
     <string name="error_no_applications_available_for_sending_this_file">未找到用於傳送該檔案的應用</string>
     <string name="error_no_applications_available_for_viewing_this_file">未找到用於檢視該檔案的應用</string>
+    <string name="error_no_available_enabled_plugin_variants_found">未找到可用且已啟用的 %1$s 外掛變體 (%2$s).</string>
     <string name="error_no_available_url_provided_for_current_plugin">當前外掛未提供可用的 URL</string>
     <string name="error_no_display_over_other_apps_permission">缺少 \"顯示在其他應用上層\" 許可權</string>
+    <string name="error_no_embedded_paddle_ocr_assets_found">未找到內建 Paddle OCR 資源, 請在打包時勾選並注入 Paddle OCR 後重試.</string>
+    <string name="error_no_enabled_plugin_for_module_label">\"%1$s\" 沒有已啟用的外掛. 請先啟用外掛, 然後重試.</string>
+    <string name="error_no_paddle_ocr_plugins_available">未找到可用的 Paddle OCR 外掛</string>
     <string name="error_no_permission_to_access_shizuku">缺少 Shizuku 訪問許可權</string>
     <string name="error_no_post_notifications_permission">缺少 \"釋出通知\" 許可權</string>
     <string name="error_no_read_phone_state_permission">缺少 \"讀取手機狀態\" 許可權</string>
@@ -296,13 +309,17 @@
     <string name="error_parse_github_release_assets">解析 GitHub 發行版資源資訊失敗</string>
     <string name="error_parse_version_info">無法解析版本資訊</string>
     <string name="error_pattern_syntax">正則表示式句法錯誤</string>
+    <string name="error_plugin_apk_does_not_contain_required_assets_for_variant">外掛 APK 不包含變體 \"%1$s\" 所需的資原始檔: %2$s.</string>
+    <string name="error_plugin_apk_does_not_contain_required_native_libraries">外掛 APK 不包含所需的 native 庫檔案: %1$s.</string>
+    <string name="error_plugin_returned_empty_info">%1$s 外掛返回的 info 為空.</string>
+    <string name="error_plugin_returned_invalid_variant">%1$s 外掛返回的 variant 無效: %2$s.</string>
     <string name="error_port_num_over_65535">埠號超過 65535</string>
     <string name="error_project_main_script_file_with_abs_path_does_not_exist">專案主指令碼檔案 \"%1$s\" 不存在</string>
     <string name="error_put_value_into_json">無法將值 %s 存入 JSON</string>
     <string name="error_regex_find_prev">正則表示式不支援向前查詢</string>
     <string name="error_repeated_colon_symbol">重複的分號符號</string>
     <string name="error_repeated_dot_symbol">重複的句點符號</string>
-    <string name="error_required_property_is_nullish_or_does_not_exist">必需屬性 "%1$s" 為空或不存在</string>
+    <string name="error_required_property_is_nullish_or_does_not_exist">必需屬性 \"%1$s\" 為空或不存在</string>
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">解析後的路徑 \"%1$s\" 不可為 null</string>
     <string name="error_script_is_on_exiting">指令碼正在退出中</string>
     <string name="error_selector_method_without_calling">選擇器方法需呼叫而不可作為引數直接傳入: %s</string>
@@ -312,8 +329,9 @@
     <string name="error_shizuku_service_may_be_not_running">Shizuku 服務可能未執行</string>
     <string name="error_shizuku_version_is_not_supported">Shizuku 版本不支援</string>
     <string name="error_specified_autojs6_version_number_must_be_greater_than_461">指定的 AutoJs6 應用版本號需大於 461</string>
-    <string name="error_the_transformer_for_required_property_cannot_return_nullish">必需屬性 "%1$s" 的轉換器不能返回空值</string>
+    <string name="error_the_transformer_for_required_property_cannot_return_nullish">必需屬性 \"%1$s\" 的轉換器不能返回空值</string>
     <string name="error_thread_is_not_alive">執行緒處於非活動狀態</string>
+    <string name="error_timeout_while_querying_plugin_info">查詢 %1$s 外掛資訊超時.</string>
     <string name="error_unable_to_use_shizuku_service">無法使用 Shizuku 服務</string>
     <string name="error_unacceptable_character">不接受的字元</string>
     <string name="error_unknown">未知錯誤</string>
@@ -343,8 +361,8 @@
     <string name="hint_pc_server_address_supported_formats">支援 IPv4, IPv6 及域名.</string>
     <string name="instruction_install_plugin_from_url">輸入一個指向遠端外掛地址的 URL.\n例如 \"https://example.com/plugin.apk\".</string>
     <string name="label_latest_used_time">最近使用: %1$s</string>
-    <string name="logger_ver_history_blob_thread_failure">執行緒 "blob" 請求失敗</string>
-    <string name="logger_ver_history_blob_thread_success">執行緒 "blob" 請求成功, 寫入離線快取</string>
+    <string name="logger_ver_history_blob_thread_failure">執行緒 \"blob\" 請求失敗</string>
+    <string name="logger_ver_history_blob_thread_success">執行緒 \"blob\" 請求成功, 寫入離線快取</string>
     <string name="logger_ver_history_data_loaded">資料載入完畢</string>
     <string name="logger_ver_history_initial_content_chosen">初始內容選用</string>
     <string name="logger_ver_history_insert_new_entries">插入新條目</string>
@@ -358,10 +376,10 @@
     <string name="logger_ver_history_offline_cache_latest">離線快取檔案最新版本</string>
     <string name="logger_ver_history_overwrite_date">覆寫日期內容</string>
     <string name="logger_ver_history_overwrite_update_record">覆寫更新記錄</string>
-    <string name="logger_ver_history_raw_thread_failure">執行緒 "raw" 請求失敗</string>
-    <string name="logger_ver_history_raw_thread_success">執行緒 "raw" 請求成功, 寫入離線快取</string>
-    <string name="logger_ver_history_start_blob_thread">啟動 "blob" 備用請求執行緒</string>
-    <string name="logger_ver_history_start_raw_thread">啟動 "raw" 請求執行緒</string>
+    <string name="logger_ver_history_raw_thread_failure">執行緒 \"raw\" 請求失敗</string>
+    <string name="logger_ver_history_raw_thread_success">執行緒 \"raw\" 請求成功, 寫入離線快取</string>
+    <string name="logger_ver_history_start_blob_thread">啟動 \"blob\" 備用請求執行緒</string>
+    <string name="logger_ver_history_start_raw_thread">啟動 \"raw\" 請求執行緒</string>
     <string name="media_info_album_label">專輯</string>
     <string name="media_info_aspect_ratio_label">縱橫比</string>
     <string name="media_info_audio_format_label">音訊</string>
@@ -402,6 +420,7 @@
     <string name="summary_enable_a11y_service_with_root_access">自動嘗試使用 root 許可權啟用無障礙服務</string>
     <string name="summary_enable_a11y_service_with_secure_settings">自動嘗試使用修改安全設定許可權啟用無障礙服務</string>
     <string name="summary_extending_js_build_in_objects">擴充套件 JavaScript 內建物件以增加程式碼靈活性</string>
+    <string name="summary_foreground_service_inrt">前臺服務用於在後臺更穩定地保持應用及指令碼執行</string>
     <string name="summary_guard_mode">當 AutoJs6 前置時禁用自動化行為以避免誤操作</string>
     <string name="summary_not_showing_main_activity">啟動應用後直接執行指令碼</string>
     <string name="summary_post_notifications_permission">允許 AutoJs6 建立併發送通知</string>
@@ -414,10 +433,12 @@
     <string name="summary_use_volume_control_record">按 \"音量減\" 鍵開始或停止指令碼錄製 (需開啟浮動按鈕)</string>
     <string name="summary_use_volume_key_to_stop_running_scripts">按 \"音量加\" 鍵停止所有正在執行的指令碼</string>
     <string name="summary_version_histories_preference">檢視發行版本歷史更新記錄與統計資料</string>
+    <string name="term_internal_strorage">內部儲存</string>
     <string name="text_a11y_service">無障礙服務</string>
     <string name="text_a11y_service_description">指令碼自動操作 (點選/長按/滑動等) 所需</string>
     <string name="text_a11y_service_enabled_but_not_running">無障礙服務已啟用但未執行 (嘗試重新啟用或重啟裝置)</string>
     <string name="text_a11y_service_may_be_needed">可能需要啟用無障礙服務</string>
+    <string name="text_aborting" tools:ignore="TypographyEllipsis">正在中止...</string>
     <string name="text_about">關於</string>
     <string name="text_about_all_files_access">關於所有檔案訪問許可權</string>
     <string name="text_about_app_and_developer">關於應用與開發者</string>
@@ -440,6 +461,7 @@
     <string name="text_alias">別名</string>
     <string name="text_alias_cannot_be_empty">別名不能為空</string>
     <string name="text_alias_password">別名密碼</string>
+    <string name="text_all">全部</string>
     <string name="text_all_files_access">所有檔案管理許可權</string>
     <string name="text_all_files_access_is_needed">需要授予 \"所有檔案管理許可權\" 才能正常讀寫指令碼檔案</string>
     <string name="text_all_histories">全部歷史記錄</string>
@@ -492,7 +514,7 @@
     <string name="text_app_version_code">應用版本號</string>
     <string name="text_app_version_name">應用版本名</string>
     <string name="text_appearance">外觀</string>
-    <string name="text_at_least_one_certificate_issuer_field_is_not_empty">“姓名、組織名稱、組織單位、國家代碼、州或省份、城市或區域、街道”至少填寫一個</string>
+    <string name="text_at_least_one_certificate_issuer_field_is_not_empty">[姓名, 組織名稱, 組織單位, 國家代碼, 州或省份, 城市或區域, 街道] 至少填寫一個</string>
     <string name="text_attribute">屬性</string>
     <string name="text_auto_check_for_updates">自動檢查更新</string>
     <string name="text_auto_check_for_updates_and_show_snackbar">自動檢查更新並在首頁下方顯示通知條</string>
@@ -576,7 +598,11 @@
     <string name="text_copy_all_files_to_new_directory">複製原目錄檔案到新目錄</string>
     <string name="text_copy_command">複製指令</string>
     <string name="text_copy_debug_info">複製除錯資訊</string>
+    <string name="text_copy_file">複製檔案</string>
+    <string name="text_copy_folder">複製資料夾</string>
     <string name="text_copy_line">複製行</string>
+    <string name="text_copy_same_path_confirm">源路徑與目標路徑相同, 是否繼續複製.\n\n新名稱: \"%1$s\"</string>
+    <string name="text_copy_to">複製到</string>
     <string name="text_copy_to_clip">複製到剪貼簿</string>
     <string name="text_copy_value">複製值</string>
     <string name="text_country_code">國家代碼 (XX)</string>
@@ -599,10 +625,14 @@
     <string name="text_default">預設</string>
     <string name="text_default_key_store">預設密鑰庫</string>
     <string name="text_default_prefix">預設字首</string>
+    <string name="text_delay_time">延遲時間</string>
     <string name="text_delete">刪除</string>
     <string name="text_delete_all">刪除全部</string>
+    <string name="text_delete_file">刪除檔案</string>
+    <string name="text_delete_folder">刪除資料夾</string>
     <string name="text_delete_line">刪除行</string>
     <string name="text_description">描述</string>
+    <string name="text_destination">目標</string>
     <string name="text_details">詳情</string>
     <string name="text_developer_details_under_development" tools:ignore="TypographyEllipsis">\"開發者詳情\" 正在開發中...</string>
     <string name="text_developer_options">開發者選項</string>
@@ -615,7 +645,7 @@
     <string name="text_device_product_name">裝置產品名稱</string>
     <string name="text_device_screen_resolution">裝置螢幕解析度</string>
     <string name="text_directly_download">直接下載</string>
-    <string name="text_directory">資料夾</string>
+    <string name="text_directory">目錄</string>
     <string name="text_disabled">已禁用</string>
     <string name="text_display_over_other_app">顯示在其他應用上層</string>
     <string name="text_display_over_other_app_is_recommended">建議授予 \"顯示在其他應用上層\" 許可權以確保應用視窗元件正常顯示</string>
@@ -712,6 +742,7 @@
     <string name="text_find_prev_simplified">上一個</string>
     <string name="text_first_and_last_name">姓名</string>
     <string name="text_floating_button">浮動按鈕</string>
+    <string name="text_folder">資料夾</string>
     <string name="text_force_stop">強制停止</string>
     <string name="text_foreground_service">前臺服務</string>
     <string name="text_formatting_completed">格式化已完成</string>
@@ -753,6 +784,7 @@
     <string name="text_install_from_url">從 \"URL\" 安裝</string>
     <string name="text_install_plugin_from_url">從 \"URL\" 安裝外掛</string>
     <string name="text_installable">可安裝</string>
+    <string name="text_installed">已安裝</string>
     <string name="text_integrity_verification_failed">完整性驗證失敗</string>
     <string name="text_invalid_character_is_removed">無效字元已被移除</string>
     <string name="text_invalid_package_name">無效包名</string>
@@ -808,7 +840,12 @@
     <string name="text_mobile_qq_not_installed">未安裝 \"手機QQ\"</string>
     <string name="text_more">更多</string>
     <string name="text_more_details">瞭解詳情</string>
+    <string name="text_move">移動</string>
+    <string name="text_move_aborted_same_path">源路徑與目標路徑相同, 移動操作中止</string>
     <string name="text_move_all_files_to_new_directory">移動原目錄檔案到新目錄</string>
+    <string name="text_move_file">移動檔案</string>
+    <string name="text_move_folder">移動資料夾</string>
+    <string name="text_move_to">移動到</string>
     <string name="text_multiple_options">多個可選項</string>
     <string name="text_name">名稱</string>
     <string name="text_need_to_enable_a11y_service">需要啟用無障礙服務</string>
@@ -836,6 +873,7 @@
     <string name="text_no_root_access">無 root 許可權</string>
     <string name="text_no_scripts_to_stop_running">無執行中的指令碼</string>
     <string name="text_not_granted">未授予</string>
+    <string name="text_not_installed">未安裝</string>
     <string name="text_not_showing_main_activity">不顯示主介面</string>
     <string name="text_notification">通知</string>
     <string name="text_notification_access_permission">通知讀取許可權</string>
@@ -850,6 +888,8 @@
     <string name="text_open_by_other_apps">用其他應用開啟</string>
     <string name="text_open_main_activity">開啟主介面</string>
     <string name="text_open_with">開啟方式</string>
+    <string name="text_operation_aborted">已中止</string>
+    <string name="text_operation_completed">已完成</string>
     <string name="text_operation_is_completed">操作已完成</string>
     <string name="text_options">選項</string>
     <string name="text_organization">組織名稱</string>
@@ -938,6 +978,7 @@
     <string name="text_permission_granted_failed_with_shizuku">許可權授予失敗 (使用 Shizuku)</string>
     <string name="text_permission_granted_with_root">已授予許可權 (使用 root)</string>
     <string name="text_permission_granted_with_shizuku">已授予許可權 (使用 Shizuku)</string>
+    <string name="text_permission_management">許可權管理</string>
     <string name="text_permission_package_usage_stats">允許應用程式訪問其他應用程式的使用統計數據</string>
     <string name="text_permission_revoked">已撤消授權</string>
     <string name="text_permission_revoked_failed_with_root">許可權撤消失敗 (使用 root)</string>
@@ -961,6 +1002,7 @@
     <string name="text_pointer_location">指標位置</string>
     <string name="text_pointer_location_toggle_failed_with_hint">切換 \"指標位置\" 顯示狀態失敗\n可能缺少 root 許可權</string>
     <string name="text_post_notifications_permission">釋出通知許可權</string>
+    <string name="text_post_notifications_permission_rationale">為確保 AutoJs6 前臺服務等能夠正常執行, 指令碼能夠釋出通知, AutoJs6 需要被授予 \"釋出通知許可權\".</string>
     <string name="text_pre_execute_script">預執行指令碼</string>
     <string name="text_preparing" tools:ignore="TypographyEllipsis">準備中...</string>
     <string name="text_preset_dialog_content">預設對話方塊內容</string>
@@ -975,6 +1017,9 @@
     <string name="text_project_location">專案位置</string>
     <string name="text_project_media_access">投影媒體許可權</string>
     <string name="text_prompt">提示</string>
+    <string name="text_property_colon_value">%1$s: %2$s</string>
+    <string name="text_property_colon_value_nbsp_unit">%1$s: %2$d %3$s</string>
+    <string name="text_property_colon_value_unit">%1$s: %2$d%3$s</string>
     <string name="text_quit">放棄</string>
     <string name="text_recommended">推薦</string>
     <string name="text_record_finished">錄製完成</string>
@@ -1043,6 +1088,7 @@
     <string name="text_save_to">儲存到</string>
     <string name="text_scheduled_restart_backend">排程引擎</string>
     <string name="text_scheduled_restart_start_delay">啟動延遲</string>
+    <string name="text_screen_capture_request_delay">螢幕捕獲許可權申請延遲</string>
     <string name="text_script_record">錄製指令碼</string>
     <string name="text_script_running">指令碼執行</string>
     <string name="text_search">搜尋</string>
@@ -1062,6 +1108,7 @@
     <string name="text_send_shortcut">建立快捷方式</string>
     <string name="text_server_mode">服務端模式</string>
     <string name="text_service">服務</string>
+    <string name="text_service_management">服務管理</string>
     <string name="text_set_as_working_dir">用作工作路徑</string>
     <string name="text_set_breakpoint">設定斷點</string>
     <string name="text_settings">設定</string>
@@ -1078,6 +1125,10 @@
     <string name="text_size">大小</string>
     <string name="text_some_items_exported">已匯出 %d 個條目</string>
     <string name="text_sort">排序</string>
+    <string name="text_sort_by_last_update_time">按最近更新排序</string>
+    <string name="text_sort_by_name">按名稱排序</string>
+    <string name="text_sort_by_package_size">按安裝包大小排序</string>
+    <string name="text_source">來源</string>
     <string name="text_source_file_path">原始碼路徑</string>
     <string name="text_special_permissions">特殊許可權</string>
     <string name="text_stable_mode">穩定模式</string>
@@ -1170,36 +1221,4 @@
     <string name="text_write_secure_settings">修改安全設定</string>
     <string name="text_write_system_settings">修改系統設定</string>
     <string name="text_xiaomi_background_popup_permission">後臺彈出介面</string>
-    <string name="error_no_paddle_ocr_plugins_available">未找到可用的 Paddle OCR 外掛</string>
-    <string name="text_installed">已安裝</string>
-    <string name="text_not_installed">未安裝</string>
-    <string name="text_all">全部</string>
-    <string name="text_sort_by_name">按名稱排序</string>
-    <string name="text_sort_by_last_update_time">按最近更新排序</string>
-    <string name="text_sort_by_package_size">按安裝包大小排序</string>
-    <string name="error_missing_required_plugin_for_module_label">缺少 \"%1$s\" 所需的外掛. 請先安裝外掛, 然後重試.</string>
-    <string name="error_no_enabled_plugin_for_module_label">\"%1$s\" 沒有已啟用的外掛. 請先啟用外掛, 然後重試.</string>
-    <string name="error_no_available_enabled_plugin_variants_found">未找到可用且已啟用的 %1$s 外掛變體 (%2$s).</string>
-    <string name="error_plugin_apk_does_not_contain_required_assets_for_variant">外掛 APK 不包含變體 \"%1$s\" 所需的資原始檔: %2$s.</string>
-    <string name="error_plugin_apk_does_not_contain_required_native_libraries">外掛 APK 不包含所需的 native 庫檔案: %1$s.</string>
-    <string name="error_failed_to_bind_plugin_service">繫結 %1$s 外掛服務失敗.</string>
-    <string name="error_timeout_while_querying_plugin_info">查詢 %1$s 外掛資訊超時.</string>
-    <string name="error_plugin_returned_empty_info">%1$s 外掛返回的 info 為空.</string>
-    <string name="error_plugin_returned_invalid_variant">%1$s 外掛返回的 variant 無效: %2$s.</string>
-    <string name="error_no_embedded_paddle_ocr_assets_found">未找到內建 Paddle OCR 資源, 請在打包時勾選並注入 Paddle OCR 後重試.</string>
-    <string name="dialog_button_minimize">最小化</string>
-    <string name="text_property_colon_value_unit">%1$s: %2$d%3$s</string>
-    <string name="text_property_colon_value_nbsp_unit">%1$s: %2$d %3$s</string>
-    <string name="text_screen_capture_request_delay">螢幕捕獲許可權申請延遲</string>
-    <string name="description_screen_capture_request_delay">申請螢幕捕獲許可權時, 彈出的許可權申請視窗消失時可能存在漸變動畫, 此時如果立即呼叫 `images.captureScreen` 方法, 獲取的螢幕截圖中會出現許可權申請的視窗內容而造成遮擋.\n\n當前設定選項值用於在截圖許可權申請後立即獲取螢幕截圖前增加一個延遲時間 (單位為毫秒), 可用於避免上述遮擋問題.\n\n當前設定選項僅適用於獲取截圖許可權後的首次截圖操作, 後續截圖操作不再受此設定值影響.</string>
-    <string name="text_delay_time">延遲時間</string>
-    <string name="dialog_button_homepage">主頁</string>
-    <string name="error_failed_to_change_the_toggle_state">開關狀態改變失敗</string>
-    <string name="text_post_notifications_permission_rationale">為確保 AutoJs6 前臺服務等能夠正常執行, 指令碼能夠釋出通知, AutoJs6 需要被授予 \"釋出通知許可權\".</string>
-    <string name="description_pointer_location">\"指標位置\" 是安卓開發者選項中的除錯功能.\n開啟後, 系統會在螢幕上顯示觸控點的 [座標/移動軌跡/數量/大小/移動速度/壓力] 等資訊, 便於相關指令碼的 [編寫/除錯/校對] 等.</string>
-    <string name="error_an_error_occurred">發生錯誤</string>
-    <string name="text_permission_management">許可權管理</string>
-    <string name="text_service_management">服務管理</string>
-    <string name="summary_foreground_service_inrt">前臺服務用於在後臺更穩定地保持應用及指令碼執行</string>
-
 </resources>

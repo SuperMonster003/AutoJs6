@@ -2,7 +2,6 @@
 <!-- Proofreader: [ SuperMonster003 ] -->
 
 <resources xmlns:tools="http://schemas.android.com/tools">
-
     <string name="apk_builder_build" tools:ignore="TypographyEllipsis">Building...</string>
     <string name="apk_builder_clean" tools:ignore="TypographyEllipsis">Cleaning...</string>
     <string name="apk_builder_package" tools:ignore="TypographyEllipsis">Packaging...</string>
@@ -47,7 +46,8 @@
     <string name="config_abi_options_contains_unavailable">Config \"abi\" contains unavailable options</string>
     <string name="config_lib_options_contains_invalid">Config \"lib\" contains invalid options</string>
     <string name="config_lib_options_contains_unavailable">Config \"lib\" contains unavailable options</string>
-    <string name="confirm_overwrite_file">File already exists.\nOverwrite?</string>
+    <string name="confirm_overwrite_directory">Folder already exists. Overwrite?</string>
+    <string name="confirm_overwrite_file">File already exists. Overwrite?</string>
     <string name="content_about_app_tips">1. Press and hold the application name (AutoJs6) on the home page to jump to the settings page\n2. Press and hold a certain settings option on the settings page to view detailed information</string>
     <string name="content_current_theme_color_configured_by_palette">Current theme color %1$s is configured by the color palette</string>
     <string name="content_description_fab_for_display_manifest">A Floating Action Button widget for displaying the manifest</string>
@@ -91,23 +91,27 @@
     <string name="description_night_mode_preference">Night mode (also known as Dark theme) applies to both the Android system UI and apps running on the device, which improves visibility for users with low vision and those who are sensitive to bright light, and makes it easier for anyone to use a device in a low-light environment.\n\nFollow system: AutoJs6 has Night mode settings same as Android system\nAlways on: AutoJs6 keeps Night mode on (regardless of Android system settings)\nAlways off: AutoJs6 keeps Night mode off (regardless of Android system settings)\n\nNote: Follow system option is only for Android API Level 28 (Android 9) [P] and above.</string>
     <string name="description_night_mode_preference_more">To enable Night mode in Android system:\n- Android API Level 29 (Android 10) [Q] and above: Settings -> Display -> Theme.\n- Android API Level 28 (Android 9) [P]: Developer options -> Night mode.\n\nThe following conditions must to met for applying a Night mode (Dark theme) to web-based content using a WebView component (like AutoJs6 documentation page):\n1. Android System WebView (or browsers like Google Chrome):\n- Android API Level 29 (Android 10) [Q] and above: version >= 76\n- Android API Level 28 (Android 9) [P]: version >= 105\n2. Web-based content in WebView component is adapted to Dark theme (by CSS or Android XML resources and so forth)</string>
     <string name="description_notification_access">The \"notification access\" (or \"notification reading\") permission allows AutoJs6 to read system notification content, so scripts can listen for notifications or retrieve notification text, etc.</string>
+    <string name="description_pointer_location">\"Pointer location\" is a debugging feature in Android Developer options.\nWhen enabled, the system will display information about touch point(s) on the screen, such as [coordinates/movement trajectory/count/size/movement speed/pressure], which helps with [writing/debugging/verification] of related scripts.</string>
     <string name="description_post_notifications">The \"post notifications\" permission allows AutoJs6 to publish notifications to the system, so scripts can post and manage custom notifications in the notification shade.\n\nNote: on Android 13+ devices, if this permission is not granted, some notifications may not show, and it may affect foreground service startup and stability.</string>
     <string name="description_project_media_access">With project media access, security warning for screen recording will not prompt.</string>
     <string name="description_restart_strategy">The restart strategy only affects the restart button in the home page drawer.\n\nQuick restart: Quickly restarts the app. If the restart fails or unexpected situations occur, try switching to \"Scheduled restart\".\nScheduled restart: Sets up a short-timed task in advance. After the app stops, it will start again on schedule to achieve app restart.</string>
     <string name="description_rhino_java_primitive_wrap">Switch ON (default): results of Java methods that are instances of Number/Boolean/Character are wrapped as Java objects and exposed to scripts (String excluded). typeof is \"object\", species is \"JavaObject\"; Java methods remain accessible, which helps retain precise Java type traits and overload resolution.\n\nSwitch OFF: the above types are no longer wrapped and are exposed directly as JavaScript primitives (number/boolean/one‑character string). typeof is the corresponding JavaScript type, aligning better with JavaScript semantics and ecosystem. You can still explicitly create a Java wrapper via new, e.g. new java.lang.Boolean(true).\n\nSee: http://issues.autojs6.com/435</string>
     <string name="description_root_mode_preference">If you have exotic root or abnormal state for root access, you can force set root to root or non-root.</string>
     <string name="description_root_record_out_file_type_preference">Binary type: non-editable, with the file extension \"auto\"\nJavaScript type: can be edited or copied directly, with the file extension \"js\"</string>
+    <string name="description_screen_capture_request_delay">When requesting screen capture permission, the permission request window may include a fade-out animation when it disappears. If `images.captureScreen` is called immediately, the captured screenshot may contain the permission request window content and be obstructed.\n\nThe current option value adds a delay (in milliseconds) before capturing the screen immediately after permission is granted, which can be used to avoid the obstruction issue described above.\n\nThis option only applies to the first screenshot after screen capture permission is granted; subsequent screenshots are not affected by this value.</string>
     <string name="description_server_mode">Server mode allows AutoJs6 to start a service on the current device and wait for external client connections for [ script transfer / log printing / remote control ].\n\nAutoJs6 server mode supports two connection methods:\n1. LAN\n2. Android Debug Bridge (ADB)</string>
     <string name="description_shizuku_access">Shizuku makes it possible to uses system API with ADB privileges</string>
     <string name="description_stable_mode">Stable mode makes it more stable when getting layout bounds, but some results may be ignored.\nA11y service\'s restart required.</string>
     <string name="description_theme_color_preference">Theme color is applied to widgets including but not limited to the following ones:\nStatus bar\nAppbar\nFile icon\nTask item icon\nFAB\nSettings category title\nSwitch button\n\nNote: As of AutoJs6 version 6.2.0, there has been no difference between primary color, primary dark color and accent color yet.</string>
-    <string name="description_timed_task_backend">Controls the underlying mechanism for triggering scripts on a schedule.\n\nAlarmManager: With the “Allow setting alarms and reminders” permission granted, scheduled tasks can fire closer to the exact time.\nWorkManager: System-friendly; suitable for non-critical tasks that can tolerate some delay.\nJobScheduler: Legacy implementation kept for compatibility; higher chance of delays.</string>
-    <string name="description_timed_task_backend_more" tools:ignore="TypographyEllipsis">Use cases and differences:\n\n1. AlarmManager\nBest for time-sensitive tasks, e.g., [reminders/strictly scheduled scripts/...].\nOn Android 12+ with the “Allow setting alarms and reminders” permission, tasks can run more on time even when the screen is off or the device is idle.\nWithout it, the system may degrade exactness or delay execution.\n\n2. WorkManager\nBest for tasks that don’t require strict timing, e.g., [non-critical sync/cleanup/statistics/...].\nScheduling depends on [battery/network/charging/idle policies/...], so execution may be postponed when the screen is off or idle.\nWhile it can’t guarantee exact timing, it excels at [reliable completion/retries/chaining/unique work de-duplication].\n\n3. JobScheduler\nHistorical implementation for compatibility.\nOn newer Android versions, tasks may be delayed more noticeably.\nGenerally not recommended unless required for compatibility.</string>
+    <string name="description_timed_task_backend">Controls the underlying mechanism for triggering scripts on a schedule.\n\nAlarmManager: With the \"Allow setting alarms and reminders\" permission granted, scheduled tasks can fire closer to the exact time.\nWorkManager: System-friendly; suitable for non-critical tasks that can tolerate some delay.\nJobScheduler: Legacy implementation kept for compatibility; higher chance of delays.</string>
+    <string name="description_timed_task_backend_more" tools:ignore="TypographyEllipsis">Use cases and differences:\n\n1. AlarmManager\nBest for time-sensitive tasks, e.g., [reminders/strictly scheduled scripts/...].\nOn Android 12+ with the \"Allow setting alarms and reminders\" permission, tasks can run more on time even when the screen is off or the device is idle.\nWithout it, the system may degrade exactness or delay execution.\n\n2. WorkManager\nBest for tasks that don’t require strict timing, e.g., [non-critical sync/cleanup/statistics/...].\nScheduling depends on [battery/network/charging/idle policies/...], so execution may be postponed when the screen is off or idle.\nWhile it can’t guarantee exact timing, it excels at [reliable completion/retries/chaining/unique work de-duplication].\n\n3. JobScheduler\nHistorical implementation for compatibility.\nOn newer Android versions, tasks may be delayed more noticeably.\nGenerally not recommended unless required for compatibility.</string>
     <string name="description_usage_stats_access">Provides access to device usage history and statistics which results in currentPackage() a more accurate result</string>
     <string name="description_version_histories_preference">View the release version history and key category statistics of AutoJs6 on GitHub.</string>
     <string name="description_write_secure_settings">Secure system settings, containing system preferences that applications can read but are not allowed to write.\nThese are for preferences that the user must explicitly modify through the UI of a system app.\nWith secure system settings permission, normal applications can directly modify the secure settings (such as accessibility service).</string>
     <string name="description_write_system_settings">The \"write system settings\" permission allows AutoJs6 to modify some system settings, so scripts can change system parameters such as [ screen brightness / auto-rotate / screen timeout ].</string>
     <string name="dialog_button_abandon">Abandon</string>
+    <string name="dialog_button_abort">Abort</string>
+    <string name="dialog_button_abort_connection">Abort</string>
     <string name="dialog_button_advanced_settings">Advanced</string>
     <string name="dialog_button_amend_host_address">Amend</string>
     <string name="dialog_button_back">@string/text_back</string>
@@ -125,10 +129,11 @@
     <string name="dialog_button_exception_details">Details</string>
     <string name="dialog_button_file_information">File info</string>
     <string name="dialog_button_history">History</string>
+    <string name="dialog_button_homepage">Homepage</string>
     <string name="dialog_button_ignore_current_update">Ignore</string>
-    <string name="dialog_button_interrupt_connection">Interrupt</string>
     <string name="dialog_button_join_group">Join group</string>
     <string name="dialog_button_manager">Manager</string>
+    <string name="dialog_button_minimize">Minimize</string>
     <string name="dialog_button_more">More</string>
     <string name="dialog_button_open_color_palette">Palette</string>
     <string name="dialog_button_quit">Quit</string>
@@ -188,6 +193,7 @@
     <string name="error_abandoned_method">Method %s has been abandoned and should not be used</string>
     <string name="error_action_cannot_be_completed_with_negative_coordinate">The \"%1$s\" operation cannot be completed because the parameter contains negative coordinate values (%2$d, %3$d)</string>
     <string name="error_activity_is_required_for_ui_exec_mode">An activity is required, which could be provided by running in \"ui\" execution mode</string>
+    <string name="error_an_error_occurred">An error occurred</string>
     <string name="error_an_operation_is_not_implemented">An operation is not implemented</string>
     <string name="error_app_not_installed">App is not installed</string>
     <string name="error_app_not_installed_with_name">App is not installed: \"%s\"</string>
@@ -226,13 +232,15 @@
     <string name="error_excessive_height_for_template_n_region">Excessive height: template [%1$d] > region [%2$d]</string>
     <string name="error_excessive_width_for_template_n_region">Excessive width: template [%1$d] > region [%2$d]</string>
     <string name="error_failed_to_apply_current_color_history">Failed to apply current color history</string>
-    <string name="error_failed_to_call_method">Failed to call method "%s"</string>
-    <string name="error_failed_to_call_method_with_cause"><![CDATA[Failed to call method "%1$s": [ %2$s ]]]></string>
+    <string name="error_failed_to_bind_plugin_service">Failed to bind %1$s plugin service.</string>
+    <string name="error_failed_to_call_method">Failed to call method \"%s\"</string>
+    <string name="error_failed_to_call_method_with_cause"><![CDATA[Failed to call method \"%1$s\": [ %2$s ]]]></string>
+    <string name="error_failed_to_change_the_toggle_state">Failed to change the toggle state</string>
     <string name="error_failed_to_convert_into_drawable">Failed to convert value %s into a Drawable</string>
     <string name="error_failed_to_go_to_access_settings">Failed to open the settings page</string>
     <string name="error_failed_to_grant_shizuku_access">Failed to grant Shizuku access</string>
-    <string name="error_failed_to_instantiate">Failed to instantiate "%s"</string>
-    <string name="error_failed_to_instantiate_with_cause"><![CDATA[Failed to instantiate "%1$s": [ %2$s ]]]></string>
+    <string name="error_failed_to_instantiate">Failed to instantiate \"%s\"</string>
+    <string name="error_failed_to_instantiate_with_cause"><![CDATA[Failed to instantiate \"%1$s\": [ %2$s ]]]></string>
     <string name="error_failed_to_launch_manager">Failed to launcher manager</string>
     <string name="error_failed_to_launch_system_settings">Failed to launch system settings</string>
     <string name="error_failed_to_load_plugins_with_reason">Failed to load plugins.\nReason: %1$s.</string>
@@ -271,6 +279,7 @@
     <string name="error_may_not_have_root_access_to_run_auto_file">AutoJs6 may not have root access to run \"auto\" file</string>
     <string name="error_method_called_with_null_argument" formatted="false">%s() called with null argument: %s</string>
     <string name="error_method_only_accepts_a_number_of_arguments_in_the_range_n_to_m">Method only accepts a number of arguments in the range [%1$d\.\.%2$d]</string>
+    <string name="error_missing_required_plugin_for_module_label">Missing required plugin for \"%1$s\". Please install the plugin and try again.</string>
     <string name="error_module_does_not_work_due_to_the_lack_of_necessary_library_files">The \"%s\" module does not work due to the lack of necessary library files</string>
     <string name="error_no_accessibility_permission">Accessibility service is disabled and the script has stopped</string>
     <string name="error_no_accessibility_permission_to_capture">Accessibility service is not activated</string>
@@ -281,8 +290,12 @@
     <string name="error_no_applications_available_for_playing_this_file">No applications available for playing this file</string>
     <string name="error_no_applications_available_for_sending_this_file">No applications available for sending this file</string>
     <string name="error_no_applications_available_for_viewing_this_file">No applications available for viewing this file</string>
+    <string name="error_no_available_enabled_plugin_variants_found">No available enabled %1$s plugin variants found (%2$s).</string>
     <string name="error_no_available_url_provided_for_current_plugin">No available URL provided for current plugin</string>
     <string name="error_no_display_over_other_apps_permission">No \"display over other apps\" permission</string>
+    <string name="error_no_embedded_paddle_ocr_assets_found">No embedded Paddle OCR assets found. Please re-package with Paddle OCR enabled.</string>
+    <string name="error_no_enabled_plugin_for_module_label">No enabled plugin for \"%1$s\". Please enable a plugin and try again.</string>
+    <string name="error_no_paddle_ocr_plugins_available">No Paddle OCR plugins available</string>
     <string name="error_no_permission_to_access_shizuku">No permission to access Shizuku</string>
     <string name="error_no_post_notifications_permission">No \"post notifications\" permission</string>
     <string name="error_no_read_phone_state_permission">No \"read phone state\" permission</string>
@@ -295,6 +308,10 @@
     <string name="error_parse_github_release_assets">Failed to parse GitHub release assets</string>
     <string name="error_parse_version_info">Failed to parse version information</string>
     <string name="error_pattern_syntax">Invalid pattern syntax</string>
+    <string name="error_plugin_apk_does_not_contain_required_assets_for_variant">Plugin APK does not contain required assets for variant=\"%1$s\": %2$s.</string>
+    <string name="error_plugin_apk_does_not_contain_required_native_libraries">Plugin APK does not contain required native libraries: %1$s.</string>
+    <string name="error_plugin_returned_empty_info">%1$s plugin returned empty info.</string>
+    <string name="error_plugin_returned_invalid_variant">%1$s plugin returned invalid variant: %2$s.</string>
     <string name="error_port_num_over_65535">Port number over 65535</string>
     <string name="error_project_main_script_file_with_abs_path_does_not_exist">Project main script file \"%1$s\" does not exist</string>
     <string name="error_put_value_into_json">Cannot put value %s into JSON</string>
@@ -313,6 +330,7 @@
     <string name="error_specified_autojs6_version_number_must_be_greater_than_461">Specified AutoJs6 version number must be greater than 461</string>
     <string name="error_the_transformer_for_required_property_cannot_return_nullish">The transformer for required property \"%1$s\" cannot return nullish</string>
     <string name="error_thread_is_not_alive">Thread is not alive</string>
+    <string name="error_timeout_while_querying_plugin_info">Timeout while querying %1$s plugin info.</string>
     <string name="error_unable_to_use_shizuku_service">Unable to use Shizuku service</string>
     <string name="error_unacceptable_character">Unacceptable character</string>
     <string name="error_unknown">Unknown error</string>
@@ -401,6 +419,7 @@
     <string name="summary_enable_a11y_service_with_root_access">Enable accessibility service with root access automatically when needed</string>
     <string name="summary_enable_a11y_service_with_secure_settings">Enable accessibility service with secure settings automatically when needed</string>
     <string name="summary_extending_js_build_in_objects">Increase code flexibility and enable richer functionality by extending JavaScript built-in objects</string>
+    <string name="summary_foreground_service_inrt">The foreground service helps keep the app and scripts running more reliably in the background</string>
     <string name="summary_guard_mode">Prevent automation actions from scripts when AutoJs6 is in the foreground</string>
     <string name="summary_not_showing_main_activity">Run script directly without showing main activity</string>
     <string name="summary_post_notifications_permission">Allows AutoJs6 to create and post notifications</string>
@@ -410,13 +429,15 @@
     <string name="summary_rhino_java_primitive_wrap">Java primitive types will be wrapped as Java objects in scripts</string>
     <string name="summary_stable_mode">More stable layout analysis but worse code compatibility (a11y service restarting needed)</string>
     <string name="summary_text_launcher_shortcuts">Add shortcuts to launcher</string>
-    <string name="summary_use_volume_control_record">Start or stop recording controlled by “Volume Down” key when floating button is showing</string>
+    <string name="summary_use_volume_control_record">Start or stop recording controlled by \"Volume Down\" key when floating button is showing</string>
     <string name="summary_use_volume_key_to_stop_running_scripts">Press \"Volume Up\" key to stop all running scripts</string>
     <string name="summary_version_histories_preference">View release version history and statistics</string>
+    <string name="term_internal_strorage">Internal Storage</string>
     <string name="text_a11y_service">Accessibility service</string>
     <string name="text_a11y_service_description">Required by the script automatic operation (click, long press, slide, etc.).</string>
     <string name="text_a11y_service_enabled_but_not_running">Accessibility service enabled but not running (Re-enable or reboot the device)</string>
     <string name="text_a11y_service_may_be_needed">Accessibility service may be needed</string>
+    <string name="text_aborting" tools:ignore="TypographyEllipsis">Aborting...</string>
     <string name="text_about">About</string>
     <string name="text_about_all_files_access">About all files access</string>
     <string name="text_about_app_and_developer">About app and developer</string>
@@ -439,12 +460,13 @@
     <string name="text_alias">alias</string>
     <string name="text_alias_cannot_be_empty">Alias cannot be empty</string>
     <string name="text_alias_password">Alias Password</string>
+    <string name="text_all">All</string>
     <string name="text_all_files_access">All files access</string>
     <string name="text_all_files_access_is_needed">\"All files access\" is needed to access script files on the phone</string>
     <string name="text_all_histories">All histories</string>
     <string name="text_all_histories_cleared">All histories have been cleared</string>
     <string name="text_all_items_cleared">All items have been cleared</string>
-    <string name="text_allow_setting_alarms_and_reminders_is_recommended">Granting the “Allow setting alarms and reminders” permission is recommended to help tasks run as punctually as possible even when the screen is off or the device is idle</string>
+    <string name="text_allow_setting_alarms_and_reminders_is_recommended">Granting the \"Allow setting alarms and reminders\" permission is recommended to help tasks run as punctually as possible even when the screen is off or the device is idle</string>
     <string name="text_already_copied_to_clip">Copied to clipboard</string>
     <string name="text_already_copied_to_clip_but_only_latest_few_items">Already copied to clipboard (only latest %d items)</string>
     <string name="text_already_created">Created</string>
@@ -491,7 +513,7 @@
     <string name="text_app_version_code">App version code</string>
     <string name="text_app_version_name">App version name</string>
     <string name="text_appearance">Appearance</string>
-    <string name="text_at_least_one_certificate_issuer_field_is_not_empty">At least one field from \"Full Name, Organization Name, Organizational Unit, Country Code, State or Province, City or Locality, Street\" must be filled</string>
+    <string name="text_at_least_one_certificate_issuer_field_is_not_empty">At least one field from [Full Name, Organization Name, Organizational Unit, Country Code, State or Province, City or Locality, Street] must be filled</string>
     <string name="text_attribute">Attribute</string>
     <string name="text_auto_check_for_updates">Auto check for updates</string>
     <string name="text_auto_check_for_updates_and_show_snackbar">Check for updates automatically and show a snackbar on homepage</string>
@@ -575,7 +597,11 @@
     <string name="text_copy_all_files_to_new_directory">Copy all files to new directory</string>
     <string name="text_copy_command">Copy cmd</string>
     <string name="text_copy_debug_info">Copy debugging log</string>
+    <string name="text_copy_file">Copy file</string>
+    <string name="text_copy_folder">Copy folder</string>
     <string name="text_copy_line">Copy line</string>
+    <string name="text_copy_same_path_confirm">Source path is the same as destination path. Continue copying?\n\nNew name: \"%1$s\".</string>
+    <string name="text_copy_to">Copy to</string>
     <string name="text_copy_to_clip">Copy to clipboard</string>
     <string name="text_copy_value">Copy value</string>
     <string name="text_country_code">Country Code (XX)</string>
@@ -598,10 +624,14 @@
     <string name="text_default">Default</string>
     <string name="text_default_key_store">Default Keystore</string>
     <string name="text_default_prefix">Default prefix</string>
+    <string name="text_delay_time">Delay time</string>
     <string name="text_delete">Delete</string>
     <string name="text_delete_all">Delete All</string>
+    <string name="text_delete_file">Delete file</string>
+    <string name="text_delete_folder">Delete folder</string>
     <string name="text_delete_line">Delete line</string>
     <string name="text_description">Description</string>
+    <string name="text_destination">Destination</string>
     <string name="text_details">Details</string>
     <string name="text_developer_details_under_development">Developer details is under development</string>
     <string name="text_developer_options">Developer options</string>
@@ -711,6 +741,7 @@
     <string name="text_find_prev_simplified">Prev</string>
     <string name="text_first_and_last_name">Full Name</string>
     <string name="text_floating_button">Floating button</string>
+    <string name="text_folder">Folder</string>
     <string name="text_force_stop">Force stop</string>
     <string name="text_foreground_service">Foreground service</string>
     <string name="text_formatting_completed">Formatting completed</string>
@@ -752,6 +783,7 @@
     <string name="text_install_from_url">Install from \"URL\"</string>
     <string name="text_install_plugin_from_url">Install plugin from \"URL\"</string>
     <string name="text_installable">Installable</string>
+    <string name="text_installed">Installed</string>
     <string name="text_integrity_verification_failed">Integrity verification failed</string>
     <string name="text_invalid_character_is_removed">Invalid character is removed</string>
     <string name="text_invalid_package_name">Invalid package name</string>
@@ -807,7 +839,12 @@
     <string name="text_mobile_qq_not_installed">\"Mobile QQ\" not installed</string>
     <string name="text_more">More</string>
     <string name="text_more_details">Details</string>
+    <string name="text_move">Move</string>
+    <string name="text_move_aborted_same_path">Source path is the same as destination path, move aborted.</string>
     <string name="text_move_all_files_to_new_directory">Move all files to new directory</string>
+    <string name="text_move_file">Move file</string>
+    <string name="text_move_folder">Move folder</string>
+    <string name="text_move_to">Move to</string>
     <string name="text_multiple_options">Multiple options</string>
     <string name="text_name">Name</string>
     <string name="text_need_to_enable_a11y_service">Need to enable accessibility service</string>
@@ -835,6 +872,7 @@
     <string name="text_no_root_access">No root access</string>
     <string name="text_no_scripts_to_stop_running">No scripts to stop running</string>
     <string name="text_not_granted">Not granted</string>
+    <string name="text_not_installed">Not installed</string>
     <string name="text_not_showing_main_activity">Not showing main activity</string>
     <string name="text_notification">Notification</string>
     <string name="text_notification_access_permission">Notification access</string>
@@ -849,6 +887,8 @@
     <string name="text_open_by_other_apps">Open by other apps</string>
     <string name="text_open_main_activity">Open main activity</string>
     <string name="text_open_with">Open with</string>
+    <string name="text_operation_aborted">Aborted</string>
+    <string name="text_operation_completed">Completed</string>
     <string name="text_operation_is_completed">Operation is completed</string>
     <string name="text_options">Options</string>
     <string name="text_organization">Organization Name</string>
@@ -937,6 +977,7 @@
     <string name="text_permission_granted_failed_with_shizuku">Failed to grant permission (with Shizuku)</string>
     <string name="text_permission_granted_with_root">Permission granted (with root)</string>
     <string name="text_permission_granted_with_shizuku">Permission granted (with Shizuku)</string>
+    <string name="text_permission_management">Permission management</string>
     <string name="text_permission_package_usage_stats">Allow the app to access usage statistics of other apps</string>
     <string name="text_permission_revoked">Permission revoked</string>
     <string name="text_permission_revoked_failed_with_root">Failed to revoked permission (with root)</string>
@@ -960,6 +1001,7 @@
     <string name="text_pointer_location">Pointer location</string>
     <string name="text_pointer_location_toggle_failed_with_hint">Toggle \"pointer location\" failed.\nRoot access is required.</string>
     <string name="text_post_notifications_permission">Post notifications</string>
+    <string name="text_post_notifications_permission_rationale">To ensure that AutoJs6 foreground services, etc. can work properly and that scripts can post notifications, AutoJs6 must be granted the \"post notifications\" permission.</string>
     <string name="text_pre_execute_script">Pre-execute script</string>
     <string name="text_preparing" tools:ignore="TypographyEllipsis">Preparing...</string>
     <string name="text_preset_dialog_content">Preset dialog content</string>
@@ -974,6 +1016,9 @@
     <string name="text_project_location">Project location</string>
     <string name="text_project_media_access">Project media access</string>
     <string name="text_prompt">Prompt</string>
+    <string name="text_property_colon_value">%1$s: %2$s</string>
+    <string name="text_property_colon_value_nbsp_unit">%1$s: %2$d %3$s</string>
+    <string name="text_property_colon_value_unit">%1$s: %2$d%3$s</string>
     <string name="text_quit">Quit</string>
     <string name="text_recommended">Recommended</string>
     <string name="text_record_finished">Recording finished</string>
@@ -1042,6 +1087,7 @@
     <string name="text_save_to">Save to</string>
     <string name="text_scheduled_restart_backend">Backend</string>
     <string name="text_scheduled_restart_start_delay">Start delay</string>
+    <string name="text_screen_capture_request_delay">Screen capture permission request delay</string>
     <string name="text_script_record">Script recording</string>
     <string name="text_script_running">Script running</string>
     <string name="text_search">Search</string>
@@ -1061,6 +1107,7 @@
     <string name="text_send_shortcut">Create shortcut</string>
     <string name="text_server_mode">Server mode</string>
     <string name="text_service">Service</string>
+    <string name="text_service_management">Service management</string>
     <string name="text_set_as_working_dir">Set as working dir</string>
     <string name="text_set_breakpoint">Set a breakpoint</string>
     <string name="text_settings">Settings</string>
@@ -1077,6 +1124,10 @@
     <string name="text_size">Size</string>
     <string name="text_some_items_exported">%d items exported</string>
     <string name="text_sort">Sort</string>
+    <string name="text_sort_by_last_update_time">Sort by last update time</string>
+    <string name="text_sort_by_name">Sort by name</string>
+    <string name="text_sort_by_package_size">Sort by package size</string>
+    <string name="text_source">Source</string>
     <string name="text_source_file_path">Source code path</string>
     <string name="text_special_permissions">Special permissions</string>
     <string name="text_stable_mode">Stable mode</string>
@@ -1134,7 +1185,7 @@
     <string name="text_usage_stats_permission">Usage stats access</string>
     <string name="text_use_android_n_shortcut">Use Android 7.0 shortcut</string>
     <string name="text_use_default_icon">Use default icon</string>
-    <string name="text_use_volume_control_record">Use “Volume Down” key to control recording</string>
+    <string name="text_use_volume_control_record">Use \"Volume Down\" key to control recording</string>
     <string name="text_use_volume_key_to_control_script_running">Use \"Volume Up\" key to control the script running</string>
     <string name="text_username">Username</string>
     <string name="text_username_cannot_be_empty">Username cannot be empty</string>
@@ -1169,36 +1220,4 @@
     <string name="text_write_secure_settings">Write security settings</string>
     <string name="text_write_system_settings">Write system settings</string>
     <string name="text_xiaomi_background_popup_permission">Display pop-up windows while running in the background</string>
-    <string name="error_no_paddle_ocr_plugins_available">No Paddle OCR plugins available</string>
-    <string name="text_installed">Installed</string>
-    <string name="text_not_installed">Not installed</string>
-    <string name="text_all">All</string>
-    <string name="text_sort_by_name">Sort by name</string>
-    <string name="text_sort_by_last_update_time">Sort by last update time</string>
-    <string name="text_sort_by_package_size">Sort by package size</string>
-    <string name="error_missing_required_plugin_for_module_label">Missing required plugin for \"%1$s\". Please install the plugin and try again.</string>
-    <string name="error_no_enabled_plugin_for_module_label">No enabled plugin for \"%1$s\". Please enable a plugin and try again.</string>
-    <string name="error_no_available_enabled_plugin_variants_found">No available enabled %1$s plugin variants found (%2$s).</string>
-    <string name="error_plugin_apk_does_not_contain_required_assets_for_variant">Plugin APK does not contain required assets for variant=\"%1$s\": %2$s.</string>
-    <string name="error_plugin_apk_does_not_contain_required_native_libraries">Plugin APK does not contain required native libraries: %1$s.</string>
-    <string name="error_failed_to_bind_plugin_service">Failed to bind %1$s plugin service.</string>
-    <string name="error_timeout_while_querying_plugin_info">Timeout while querying %1$s plugin info.</string>
-    <string name="error_plugin_returned_empty_info">%1$s plugin returned empty info.</string>
-    <string name="error_plugin_returned_invalid_variant">%1$s plugin returned invalid variant: %2$s.</string>
-    <string name="error_no_embedded_paddle_ocr_assets_found">No embedded Paddle OCR assets found. Please re-package with Paddle OCR enabled.</string>
-    <string name="dialog_button_minimize">Minimize</string>
-    <string name="text_property_colon_value_unit">%1$s: %2$d%3$s</string>
-    <string name="text_property_colon_value_nbsp_unit">%1$s: %2$d %3$s</string>
-    <string name="text_screen_capture_request_delay">Screen capture permission request delay</string>
-    <string name="description_screen_capture_request_delay">When requesting screen capture permission, the permission request window may include a fade-out animation when it disappears. If `images.captureScreen` is called immediately, the captured screenshot may contain the permission request window content and be obstructed.\n\nThe current option value adds a delay (in milliseconds) before capturing the screen immediately after permission is granted, which can be used to avoid the obstruction issue described above.\n\nThis option only applies to the first screenshot after screen capture permission is granted; subsequent screenshots are not affected by this value.</string>
-    <string name="text_delay_time">Delay time</string>
-    <string name="dialog_button_homepage">Homepage</string>
-    <string name="error_failed_to_change_the_toggle_state">Failed to change the toggle state</string>
-    <string name="text_post_notifications_permission_rationale">To ensure that AutoJs6 foreground services, etc. can work properly and that scripts can post notifications, AutoJs6 must be granted the \"post notifications\" permission.</string>
-    <string name="description_pointer_location">\"Pointer location\" is a debugging feature in Android Developer options.\nWhen enabled, the system will display information about touch point(s) on the screen, such as [coordinates/movement trajectory/count/size/movement speed/pressure], which helps with [writing/debugging/verification] of related scripts.</string>
-    <string name="error_an_error_occurred">An error occurred</string>
-    <string name="text_permission_management">Permission management</string>
-    <string name="text_service_management">Service management</string>
-    <string name="summary_foreground_service_inrt">The foreground service helps keep the app and scripts running more reliably in the background</string>
-
 </resources>

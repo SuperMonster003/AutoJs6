@@ -25,9 +25,15 @@ public interface ExplorerItem {
 
     long lastModified();
 
-    boolean canDelete();
+    boolean canMove();
+
+    default boolean canCopy() {
+        return true;
+    }
 
     boolean canRename();
+
+    boolean canDelete();
 
     default boolean canBuildApk() {
         return true;

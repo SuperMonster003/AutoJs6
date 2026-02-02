@@ -5,7 +5,6 @@
 <!-- Proofreader: [ JetBrains AI Assistant ] -->
 
 <resources xmlns:tools="http://schemas.android.com/tools">
-
     <string name="apk_builder_build" tools:ignore="TypographyEllipsis">Construir...</string>
     <string name="apk_builder_clean" tools:ignore="TypographyEllipsis">Limpieza...</string>
     <string name="apk_builder_package" tools:ignore="TypographyEllipsis">Empaquetando...</string>
@@ -50,7 +49,8 @@
     <string name="config_abi_options_contains_unavailable">La configuración \"abi\" contiene opciones no disponibles</string>
     <string name="config_lib_options_contains_invalid">La configuración \"lib\" contiene opciones inválidas</string>
     <string name="config_lib_options_contains_unavailable">La configuración \"lib\" contiene opciones no disponibles</string>
-    <string name="confirm_overwrite_file">El archivo ya existe.\n¿Sobreescribir?</string>
+    <string name="confirm_overwrite_directory">La carpeta ya existe. ¿Sobrescribir?</string>
+    <string name="confirm_overwrite_file">El archivo ya existe. ¿Sobrescribir?</string>
     <string name="content_about_app_tips">1. Mantén pulsado el nombre de la aplicación (AutoJs6) en la página de inicio para saltar a la página de configuración\n2. 2. Mantén pulsada una opción de configuración determinada en la página de configuración para ver información detallada</string>
     <string name="content_current_theme_color_configured_by_palette">El color del tema actual %1$s está configurado por la paleta de colores</string>
     <string name="content_description_fab_for_display_manifest">Un botón de acción flotante para mostrar el manifiesto</string>
@@ -94,12 +94,14 @@
     <string name="description_night_mode_preference">El modo nocturno (también conocido como tema oscuro) se aplica tanto a la interfaz de usuario del sistema Android como a las aplicaciones que se ejecutan en el dispositivo, lo que mejora la visibilidad para los usuarios con baja visión y los que son sensibles a la luz brillante, y facilita el uso de un dispositivo en un entorno con poca luz.\n\nSistema de seguimiento: AutoJs6 tiene ajustes de modo nocturno iguales a los del sistema Android\nSiempre activado: AutoJs6 mantiene activado el modo Noche (independientemente de la configuración del sistema Android)\nSiempre desactivado: AutoJs6 mantiene el modo nocturno desactivado (independientemente de la configuración del sistema Android)\n\nNota: La opción de seguir el sistema es sólo para el nivel 28 de la API de Android (Android 9) [P] y superior.</string>
     <string name="description_night_mode_preference_more">Para activar el modo nocturno en el sistema Android:\n- Android API Level 29 (Android 10) [Q] y superior: Ajustes -> Pantalla -> Tema.\n- Android API Level 28 (Android 9) [P]: Opciones de desarrollador -> Modo nocturno.\n\nLas siguientes condiciones deben cumplirse para aplicar un modo nocturno (tema oscuro) al contenido basado en la web utilizando un componente WebView (como la página de documentación de AutoJs6):\n1. Sistema Android WebView (o navegadores como Google Chrome):\n- Android API Level 29 (Android 10) [Q] y superior: versión >= 76\n- Android API Level 28 (Android 9) [P]: versión >= 105\n2. El contenido basado en la web en el componente WebView se adapta al tema oscuro (mediante CSS o recursos XML de Android, etc.)</string>
     <string name="description_notification_access">El permiso \"acceso a notificaciones\" (o \"permiso de lectura de notificaciones\") permite que AutoJs6 lea el contenido de las notificaciones del sistema, para que los scripts puedan escuchar notificaciones u obtener el texto de notificaciones, etc.</string>
+    <string name="description_pointer_location">\"Ubicación del puntero\" es una función de depuración en las opciones de desarrollador de Android.\nAl activarla, el sistema mostrará en pantalla información del/de los punto(s) de toque, como [coordenadas/trayectoria de movimiento/cantidad/tamaño/velocidad de movimiento/presión], lo que facilita la [escritura/depuración/verificación] de los scripts relacionados.</string>
     <string name="description_post_notifications">El permiso \"enviar notificaciones\" permite que AutoJs6 publique notificaciones en el sistema, de modo que los scripts puedan publicar y administrar notificaciones personalizadas en la barra de notificaciones.\n\nNote: en dispositivos con Android 13+, si este permiso no se concede, algunas notificaciones pueden no mostrarse y esto puede afectar el inicio y la estabilidad de los servicios en primer plano.</string>
     <string name="description_project_media_access">Con el acceso a los medios del proyecto, la advertencia de seguridad para la grabación de la pantalla no aparecerá.</string>
     <string name="description_restart_strategy">La estrategia de reinicio solo afecta al botón de reinicio del cajón de la página principal.\n\nReinicio rápido: reinicia rápidamente la app. Si el reinicio falla o ocurre alguna situación inesperada, prueba cambiar a \"Reinicio programado\".\nReinicio programado: configura de antemano una tarea de corta duración. Después de que la app se detenga, se iniciará de nuevo según lo programado para lograr el reinicio de la app.</string>
     <string name="description_rhino_java_primitive_wrap">Con el interruptor activado (predeterminado): los valores devueltos por métodos Java de tipo Number/Boolean/Character se envuelven como objetos Java y se exponen al script (String excluido). typeof es \"object\", species es \"JavaObject\"; se pueden invocar métodos de Java, lo que ayuda a conservar las características de tipo precisas de Java y la resolución de sobrecargas.\n\nCon el interruptor desactivado: no se envuelven los tipos anteriores y se exponen directamente como primitivos de JavaScript (number/boolean/cadena de un solo carácter). typeof corresponde al tipo de JavaScript respectivo, más acorde con la semántica/ecosistema de JavaScript. Aun así, puede declarar explícitamente un envoltorio de Java con new, por ejemplo new java.lang.Boolean(true).\n\nConsulte: http://issues.autojs6.com/435</string>
     <string name="description_root_mode_preference">Si tiene una raíz exótica o un estado anormal para el acceso a la raíz, puede forzar el establecimiento de la raíz a raíz o no raíz.</string>
     <string name="description_root_record_out_file_type_preference">Tipo binario: no editable, con la extensión de archivo \"auto\"\nTipo JavaScript: se puede editar o copiar directamente, con la extensión de archivo \"js\"</string>
+    <string name="description_screen_capture_request_delay">Al solicitar el permiso de captura de pantalla, la ventana de solicitud de permiso mostrada puede tener una animación de desvanecimiento al desaparecer. Si se llama a `images.captureScreen` inmediatamente, la captura obtenida puede incluir el contenido de dicha ventana y quedar obstruida.\n\nEl valor de esta opción añade un tiempo de espera (en milisegundos) antes de capturar la pantalla inmediatamente después de obtener el permiso, para evitar el problema de obstrucción descrito.\n\nEsta opción solo se aplica a la primera captura tras obtener el permiso; las capturas posteriores no se verán afectadas por este valor.</string>
     <string name="description_server_mode">El modo servidor permite que AutoJs6 inicie un servicio en el dispositivo actual y espere conexiones de clientes externos para realizar [ transferencia de scripts / impresión de registros / control remoto ].\n\nEl modo servidor de AutoJs6 admite dos métodos de conexión:\n1. Red de área local (LAN)\n2. Android Debug Bridge (ADB)</string>
     <string name="description_shizuku_access">Shizuku te permite obtener privilegios ADB y acceso a las APIs del sistema</string>
     <string name="description_stable_mode">El modo estable hace que sea más estable al obtener los límites de diseño, pero algunos resultados pueden ser ignorados.\nEs necesario reiniciar el servicio de accesibilidad.</string>
@@ -111,6 +113,8 @@
     <string name="description_write_secure_settings">Ajustes de seguridad del sistema, que contienen preferencias del sistema que las aplicaciones pueden leer pero no pueden escribir.\nSe trata de preferencias que el usuario debe modificar explícitamente a través de la interfaz de usuario de una aplicación del sistema.\nCon el permiso de configuración segura del sistema, las aplicaciones normales pueden modificar directamente la configuración segura (como el servicio de accesibilidad).</string>
     <string name="description_write_system_settings">El permiso \"modificar ajustes del sistema\" permite que AutoJs6 cambie algunos ajustes del sistema, de modo que los scripts puedan modificar parámetros como [ brillo de pantalla / rotación automática / tiempo de espera de pantalla ].</string>
     <string name="dialog_button_abandon">Abandonar</string>
+    <string name="dialog_button_abort">Abortar</string>
+    <string name="dialog_button_abort_connection">Interrumpir conexión</string>
     <string name="dialog_button_advanced_settings">Avanzado</string>
     <string name="dialog_button_amend_host_address">Corregir dirección</string>
     <string name="dialog_button_back">@string/text_back</string>
@@ -128,10 +132,11 @@
     <string name="dialog_button_exception_details">Detalles</string>
     <string name="dialog_button_file_information">Información del archivo</string>
     <string name="dialog_button_history">Historial</string>
+    <string name="dialog_button_homepage">Inicio</string>
     <string name="dialog_button_ignore_current_update">Ignorar</string>
-    <string name="dialog_button_interrupt_connection">Interrumpir conexión</string>
     <string name="dialog_button_join_group">Unirse grupo</string>
     <string name="dialog_button_manager">Administrador</string>
+    <string name="dialog_button_minimize">Minimizar</string>
     <string name="dialog_button_more">Más</string>
     <string name="dialog_button_open_color_palette">Abrir paleta</string>
     <string name="dialog_button_quit">Salir</string>
@@ -191,6 +196,7 @@
     <string name="error_abandoned_method">El método %s ha sido abandonado y no debe utilizarse</string>
     <string name="error_action_cannot_be_completed_with_negative_coordinate">La operación \"%1$s\" no puede completarse porque el parámetro contiene valores de coordenadas negativos (%2$d, %3$d)</string>
     <string name="error_activity_is_required_for_ui_exec_mode">Se requiere una actividad, que podría proporcionarse ejecutando en modo de ejecución \"ui\"</string>
+    <string name="error_an_error_occurred">Se produjo un error</string>
     <string name="error_an_operation_is_not_implemented">Una operación no está implementada</string>
     <string name="error_app_not_installed">La aplicación no está instalada</string>
     <string name="error_app_not_installed_with_name">La aplicación no está instalada: \"%s\"</string>
@@ -229,8 +235,10 @@
     <string name="error_excessive_height_for_template_n_region">Altura excesiva: plantilla [%1$d] > región [%2$d]</string>
     <string name="error_excessive_width_for_template_n_region">Anchura excesiva: plantilla [%1$d] > región [%2$d]</string>
     <string name="error_failed_to_apply_current_color_history">Error al aplicar el historial de color actual</string>
+    <string name="error_failed_to_bind_plugin_service">No se pudo vincular el servicio del plugin %1$s.</string>
     <string name="error_failed_to_call_method">Fallo al llamar al método \"%s\"</string>
     <string name="error_failed_to_call_method_with_cause"><![CDATA[Error al llamar al método \"%1$s\": [ %2$s ]]]></string>
+    <string name="error_failed_to_change_the_toggle_state">No se pudo cambiar el estado del interruptor</string>
     <string name="error_failed_to_convert_into_drawable">Fallo al convertir el valor %s en un Dibujable</string>
     <string name="error_failed_to_go_to_access_settings">No se pudo abrir la página de ajustes</string>
     <string name="error_failed_to_grant_shizuku_access">Fallo en la concesión de permisos Shizuku</string>
@@ -274,6 +282,7 @@
     <string name="error_may_not_have_root_access_to_run_auto_file">AutoJs6 puede no tener acceso a la raíz para ejecutar el archivo \"auto</string>
     <string name="error_method_called_with_null_argument" formatted="false">%s() llamada con argumento nulo: %s</string>
     <string name="error_method_only_accepts_a_number_of_arguments_in_the_range_n_to_m">El método solo acepta una cantidad de argumentos en el rango [%1$d..%2$d]</string>
+    <string name="error_missing_required_plugin_for_module_label">Falta el plugin requerido para \"%1$s\". Instala el plugin e inténtalo de nuevo.</string>
     <string name="error_module_does_not_work_due_to_the_lack_of_necessary_library_files">El módulo \"%s\" no funciona debido a la falta de archivos de biblioteca necesarios</string>
     <string name="error_no_accessibility_permission">El servicio de accesibilidad está desactivado y el script se ha detenido</string>
     <string name="error_no_accessibility_permission_to_capture">El servicio de accesibilidad no está activado</string>
@@ -284,8 +293,12 @@
     <string name="error_no_applications_available_for_playing_this_file">No hay aplicaciones disponibles para reproducir este archivo</string>
     <string name="error_no_applications_available_for_sending_this_file">No hay aplicaciones disponibles para enviar este archivo</string>
     <string name="error_no_applications_available_for_viewing_this_file">No hay aplicaciones disponibles para ver este archivo</string>
+    <string name="error_no_available_enabled_plugin_variants_found">No se encontraron variantes de plugin %1$s habilitadas y disponibles (%2$s).</string>
     <string name="error_no_available_url_provided_for_current_plugin">No se proporcionó ninguna URL disponible para el complemento actual</string>
     <string name="error_no_display_over_other_apps_permission">No hay permiso de \"mostrar sobre otras aplicaciones\".</string>
+    <string name="error_no_embedded_paddle_ocr_assets_found">No se encontraron recursos integrados de Paddle OCR. Vuelve a empaquetar con Paddle OCR habilitado.</string>
+    <string name="error_no_enabled_plugin_for_module_label">No hay ningún plugin habilitado para \"%1$s\". Habilita un plugin e inténtalo de nuevo.</string>
+    <string name="error_no_paddle_ocr_plugins_available">No se encontraron plugins de Paddle OCR disponibles</string>
     <string name="error_no_permission_to_access_shizuku">No hay permiso para acceder a Shizuku</string>
     <string name="error_no_post_notifications_permission">Sin permiso para \"enviar notificaciones\"</string>
     <string name="error_no_read_phone_state_permission">No hay permiso de \"lectura del estado del teléfono\".</string>
@@ -298,6 +311,10 @@
     <string name="error_parse_github_release_assets">Fallo al analizar los activos de publicación de GitHub</string>
     <string name="error_parse_version_info">Fallo al analizar la información de la versión</string>
     <string name="error_pattern_syntax">Sintaxis de patrón no válida</string>
+    <string name="error_plugin_apk_does_not_contain_required_assets_for_variant">El APK del plugin no contiene los recursos necesarios para variant=\"%1$s\": %2$s.</string>
+    <string name="error_plugin_apk_does_not_contain_required_native_libraries">El APK del plugin no contiene las bibliotecas nativas requeridas: %1$s.</string>
+    <string name="error_plugin_returned_empty_info">El plugin %1$s devolvió información vacía.</string>
+    <string name="error_plugin_returned_invalid_variant">El plugin %1$s devolvió una variante no válida: %2$s.</string>
     <string name="error_port_num_over_65535">Número de puerto superior a 65535</string>
     <string name="error_project_main_script_file_with_abs_path_does_not_exist">El archivo de script principal del proyecto \"%1$s\" no existe</string>
     <string name="error_put_value_into_json">No se puede poner el valor %s en JSON</string>
@@ -316,6 +333,7 @@
     <string name="error_specified_autojs6_version_number_must_be_greater_than_461">El número de versión especificado de AutoJs6 debe ser mayor que 461</string>
     <string name="error_the_transformer_for_required_property_cannot_return_nullish">El transformador para la propiedad requerida \"%1$s\" no puede devolver un valor nulo</string>
     <string name="error_thread_is_not_alive">El hilo no está vivo</string>
+    <string name="error_timeout_while_querying_plugin_info">Tiempo de espera agotado al consultar la información del plugin %1$s.</string>
     <string name="error_unable_to_use_shizuku_service">No se puede utilizar el servicio Shizuku</string>
     <string name="error_unacceptable_character">Carácter inaceptable</string>
     <string name="error_unknown">Error desconocido</string>
@@ -404,6 +422,7 @@
     <string name="summary_enable_a11y_service_with_root_access">Habilitar el servicio de accesibilidad con acceso root automáticamente cuando sea necesario</string>
     <string name="summary_enable_a11y_service_with_secure_settings">Habilitar el servicio de accesibilidad con configuración segura automáticamente cuando sea necesario</string>
     <string name="summary_extending_js_build_in_objects">Aumentar la flexibilidad del código y permitir una funcionalidad más rica mediante la ampliación de los objetos incorporados de JavaScript</string>
+    <string name="summary_foreground_service_inrt">El servicio en primer plano permite mantener la app y los scripts en ejecución de forma más estable en segundo plano</string>
     <string name="summary_guard_mode">Evitar las acciones de automatización de los scripts cuando AutoJs6 está en primer plano</string>
     <string name="summary_not_showing_main_activity">Ejecutar el script directamente sin mostrar la actividad principal</string>
     <string name="summary_post_notifications_permission">Permite que AutoJs6 cree y envíe notificaciones</string>
@@ -416,10 +435,12 @@
     <string name="summary_use_volume_control_record">Iniciar o detener la grabación controlada por la tecla de bajar el volumen cuando se muestra el botón flotante</string>
     <string name="summary_use_volume_key_to_stop_running_scripts">Pulse la tecla \"Subir volumen\" para detener todos los scripts en ejecución</string>
     <string name="summary_version_histories_preference">Ver el historial de versiones publicadas y las estadísticas</string>
+    <string name="term_internal_strorage">Almacenamiento interno</string>
     <string name="text_a11y_service">Servicio de accesibilidad</string>
     <string name="text_a11y_service_description">Requerido por el funcionamiento automático del script (clic, pulsación larga, deslizamiento, etc.).</string>
     <string name="text_a11y_service_enabled_but_not_running">El servicio de accesibilidad está habilitado pero no se está ejecutando (vuelva a habilitarlo o reinicie el dispositivo)</string>
     <string name="text_a11y_service_may_be_needed">El servicio de accesibilidad puede ser necesario</string>
+    <string name="text_aborting" tools:ignore="TypographyEllipsis">Abortando...</string>
     <string name="text_about">Acerca de</string>
     <string name="text_about_all_files_access">Sobre el acceso a todos los archivos</string>
     <string name="text_about_app_and_developer">Sobre la aplicación y el desarrollador</string>
@@ -442,6 +463,7 @@
     <string name="text_alias">alias</string>
     <string name="text_alias_cannot_be_empty">El alias no puede estar vacío</string>
     <string name="text_alias_password">Contraseña del alias</string>
+    <string name="text_all">Todos</string>
     <string name="text_all_files_access">Acceso a todos los archivos</string>
     <string name="text_all_files_access_is_needed">Se necesita \"All files access\" para acceder a los archivos de script en el teléfono</string>
     <string name="text_all_histories">Todos los historiales</string>
@@ -494,7 +516,7 @@
     <string name="text_app_version_code">Código de la versión de la aplicación</string>
     <string name="text_app_version_name">Nombre de la versión de la aplicación</string>
     <string name="text_appearance">Aspecto</string>
-    <string name="text_at_least_one_certificate_issuer_field_is_not_empty">Al menos uno de los campos “Nombre completo, Nombre de la organización, Unidad organizacional, Código de país, Estado o provincia, Ciudad o localidad, Calle” debe estar lleno</string>
+    <string name="text_at_least_one_certificate_issuer_field_is_not_empty">Al menos uno de los campos [Nombre completo, Nombre de la organización, Unidad organizacional, Código de país, Estado o provincia, Ciudad o localidad, Calle] debe estar lleno</string>
     <string name="text_attribute">Atributo</string>
     <string name="text_auto_check_for_updates">Comprobación automática de actualizaciones</string>
     <string name="text_auto_check_for_updates_and_show_snackbar">Comprueba las actualizaciones automáticamente y muestra una barra de snacks en la página de inicio</string>
@@ -578,7 +600,11 @@
     <string name="text_copy_all_files_to_new_directory">Copiar todos los archivos en el nuevo directorio</string>
     <string name="text_copy_command">Copiar cmd</string>
     <string name="text_copy_debug_info">Copiar el registro de depuración</string>
+    <string name="text_copy_file">Copiar archivo</string>
+    <string name="text_copy_folder">Copiar carpeta</string>
     <string name="text_copy_line">Copiar línea</string>
+    <string name="text_copy_same_path_confirm">La ruta de origen es la misma que la de destino. ¿Continuar copiando?\n\nNuevo nombre: \"%1$s\".</string>
+    <string name="text_copy_to">Copiar a</string>
     <string name="text_copy_to_clip">Copiar al portapapeles</string>
     <string name="text_copy_value">Copiar valor</string>
     <string name="text_country_code">Código de país (XX)</string>
@@ -601,10 +627,14 @@
     <string name="text_default">Por defecto</string>
     <string name="text_default_key_store">Almacenamiento de claves predeterminado</string>
     <string name="text_default_prefix">Prefijo predeterminado</string>
+    <string name="text_delay_time">Tiempo de retraso</string>
     <string name="text_delete">Borrar</string>
     <string name="text_delete_all">Eliminar todo</string>
+    <string name="text_delete_file">Eliminar archivo</string>
+    <string name="text_delete_folder">Eliminar carpeta</string>
     <string name="text_delete_line">Borrar línea</string>
     <string name="text_description">Descripción</string>
+    <string name="text_destination">Destino</string>
     <string name="text_details">Detalles</string>
     <string name="text_developer_details_under_development">Los detalles del desarrollador están en desarrollo</string>
     <string name="text_developer_options">Opciones del desarrollador</string>
@@ -714,6 +744,7 @@
     <string name="text_find_prev_simplified">Anter</string>
     <string name="text_first_and_last_name">Nombre completo</string>
     <string name="text_floating_button">Botón flotante</string>
+    <string name="text_folder">Carpeta</string>
     <string name="text_force_stop">Forzar parada</string>
     <string name="text_foreground_service">Servicio de primer plano</string>
     <string name="text_formatting_completed">Formateo completado</string>
@@ -755,6 +786,7 @@
     <string name="text_install_from_url">Instalar desde \"URL\"</string>
     <string name="text_install_plugin_from_url">Instalar complemento desde \"URL\"</string>
     <string name="text_installable">Instalable</string>
+    <string name="text_installed">Instalado</string>
     <string name="text_integrity_verification_failed">La verificación de integridad falló</string>
     <string name="text_invalid_character_is_removed">Carácter inválido ha sido removido</string>
     <string name="text_invalid_package_name">Nombre de paquete no válido</string>
@@ -810,7 +842,12 @@
     <string name="text_mobile_qq_not_installed">\"QQ móvil\" no instalado</string>
     <string name="text_more">Más</string>
     <string name="text_more_details">Detalles</string>
+    <string name="text_move">Mover</string>
+    <string name="text_move_aborted_same_path">La ruta de origen es la misma que la de destino; movimiento cancelado.</string>
     <string name="text_move_all_files_to_new_directory">Mover todos los archivos a un nuevo directorio</string>
+    <string name="text_move_file">Mover archivo</string>
+    <string name="text_move_folder">Mover carpeta</string>
+    <string name="text_move_to">Mover a</string>
     <string name="text_multiple_options">Opciones múltiples</string>
     <string name="text_name">Nombre</string>
     <string name="text_need_to_enable_a11y_service">Necesidad de habilitar el servicio de accesibilidad</string>
@@ -838,6 +875,7 @@
     <string name="text_no_root_access">Sin acceso root</string>
     <string name="text_no_scripts_to_stop_running">No hay scripts que dejen de ejecutarse</string>
     <string name="text_not_granted">No se concede</string>
+    <string name="text_not_installed">No instalado</string>
     <string name="text_not_showing_main_activity">No muestra la actividad principal</string>
     <string name="text_notification">Notificación</string>
     <string name="text_notification_access_permission">Acceso a las notificaciones</string>
@@ -852,6 +890,8 @@
     <string name="text_open_by_other_apps">Abierto por otras aplicaciones</string>
     <string name="text_open_main_activity">Abrir la actividad principal</string>
     <string name="text_open_with">Abrir con</string>
+    <string name="text_operation_aborted">Abortado</string>
+    <string name="text_operation_completed">Completado</string>
     <string name="text_operation_is_completed">La operación se ha completado</string>
     <string name="text_options">Opciones</string>
     <string name="text_organization">Nombre de la organización</string>
@@ -940,6 +980,7 @@
     <string name="text_permission_granted_failed_with_shizuku">Permiso no concedido (con Shizuku)</string>
     <string name="text_permission_granted_with_root">Permiso concedido (con root)</string>
     <string name="text_permission_granted_with_shizuku">Permiso concedido (con Shizuku)</string>
+    <string name="text_permission_management">Gestión de permisos</string>
     <string name="text_permission_package_usage_stats">Permitir que la aplicación acceda a las estadísticas de uso de otras aplicaciones</string>
     <string name="text_permission_revoked">Permiso revocado</string>
     <string name="text_permission_revoked_failed_with_root">Fallo al revocar el permiso (con root)</string>
@@ -963,6 +1004,7 @@
     <string name="text_pointer_location">Ubicación del puntero</string>
     <string name="text_pointer_location_toggle_failed_with_hint">Falló la conmutación de la \"ubicación del puntero\".\nSe requiere acceso a la raíz.</string>
     <string name="text_post_notifications_permission">Notificaciones postales</string>
+    <string name="text_post_notifications_permission_rationale">Para garantizar que los servicios en primer plano de AutoJs6, etc. funcionen correctamente y que los scripts puedan publicar notificaciones, AutoJs6 debe recibir el permiso de \"publicar notificaciones\".</string>
     <string name="text_pre_execute_script">Ejecutar previamente el script</string>
     <string name="text_preparing" tools:ignore="TypographyEllipsis">Preparando...</string>
     <string name="text_preset_dialog_content">Contenido del diálogo predefinido</string>
@@ -977,6 +1019,9 @@
     <string name="text_project_location">Ubicación del proyecto</string>
     <string name="text_project_media_access">Acceso a los medios del proyecto</string>
     <string name="text_prompt">Indicación</string>
+    <string name="text_property_colon_value">%1$s: %2$s</string>
+    <string name="text_property_colon_value_nbsp_unit">%1$s: %2$d %3$s</string>
+    <string name="text_property_colon_value_unit">%1$s: %2$d%3$s</string>
     <string name="text_quit">Salga de</string>
     <string name="text_recommended">Recomendado</string>
     <string name="text_record_finished">Grabación terminada</string>
@@ -1045,6 +1090,7 @@
     <string name="text_save_to">Guardar en</string>
     <string name="text_scheduled_restart_backend">Motor</string>
     <string name="text_scheduled_restart_start_delay">Retraso de inicio</string>
+    <string name="text_screen_capture_request_delay">Retraso de solicitud del permiso de captura de pantalla</string>
     <string name="text_script_record">Grabación del script</string>
     <string name="text_script_running">Script en ejecución</string>
     <string name="text_search">Buscar en</string>
@@ -1064,6 +1110,7 @@
     <string name="text_send_shortcut">Crear acceso directo</string>
     <string name="text_server_mode">Modo servidor</string>
     <string name="text_service">Servicio</string>
+    <string name="text_service_management">Gestión de servicios</string>
     <string name="text_set_as_working_dir">Como directorio de trabajo</string>
     <string name="text_set_breakpoint">Establecer un punto de interrupción</string>
     <string name="text_settings">Configuración</string>
@@ -1080,6 +1127,10 @@
     <string name="text_size">Tamaño</string>
     <string name="text_some_items_exported">%d elementos exportados</string>
     <string name="text_sort">Ordenar</string>
+    <string name="text_sort_by_last_update_time">Ordenar por última actualización</string>
+    <string name="text_sort_by_name">Ordenar por nombre</string>
+    <string name="text_sort_by_package_size">Ordenar por tamaño del paquete</string>
+    <string name="text_source">Origen</string>
     <string name="text_source_file_path">Ruta del código fuente</string>
     <string name="text_special_permissions">Permisos especiales</string>
     <string name="text_stable_mode">Modo estable</string>
@@ -1172,36 +1223,4 @@
     <string name="text_write_secure_settings">Escribir la configuración de seguridad</string>
     <string name="text_write_system_settings">Escribir la configuración del sistema</string>
     <string name="text_xiaomi_background_popup_permission">Ventanas emergentes en segundo plano</string>
-    <string name="error_no_paddle_ocr_plugins_available">No se encontraron plugins de Paddle OCR disponibles</string>
-    <string name="text_installed">Instalado</string>
-    <string name="text_not_installed">No instalado</string>
-    <string name="text_all">Todos</string>
-    <string name="text_sort_by_name">Ordenar por nombre</string>
-    <string name="text_sort_by_last_update_time">Ordenar por última actualización</string>
-    <string name="text_sort_by_package_size">Ordenar por tamaño del paquete</string>
-    <string name="error_missing_required_plugin_for_module_label">Falta el plugin requerido para \"%1$s\". Instala el plugin e inténtalo de nuevo.</string>
-    <string name="error_no_enabled_plugin_for_module_label">No hay ningún plugin habilitado para \"%1$s\". Habilita un plugin e inténtalo de nuevo.</string>
-    <string name="error_no_available_enabled_plugin_variants_found">No se encontraron variantes de plugin %1$s habilitadas y disponibles (%2$s).</string>
-    <string name="error_plugin_apk_does_not_contain_required_assets_for_variant">El APK del plugin no contiene los recursos necesarios para variant=\"%1$s\": %2$s.</string>
-    <string name="error_plugin_apk_does_not_contain_required_native_libraries">El APK del plugin no contiene las bibliotecas nativas requeridas: %1$s.</string>
-    <string name="error_failed_to_bind_plugin_service">No se pudo vincular el servicio del plugin %1$s.</string>
-    <string name="error_timeout_while_querying_plugin_info">Tiempo de espera agotado al consultar la información del plugin %1$s.</string>
-    <string name="error_plugin_returned_empty_info">El plugin %1$s devolvió información vacía.</string>
-    <string name="error_plugin_returned_invalid_variant">El plugin %1$s devolvió una variante no válida: %2$s.</string>
-    <string name="error_no_embedded_paddle_ocr_assets_found">No se encontraron recursos integrados de Paddle OCR. Vuelve a empaquetar con Paddle OCR habilitado.</string>
-    <string name="dialog_button_minimize">Minimizar</string>
-    <string name="text_property_colon_value_unit">%1$s: %2$d%3$s</string>
-    <string name="text_property_colon_value_nbsp_unit">%1$s: %2$d %3$s</string>
-    <string name="text_screen_capture_request_delay">Retraso de solicitud del permiso de captura de pantalla</string>
-    <string name="description_screen_capture_request_delay">Al solicitar el permiso de captura de pantalla, la ventana de solicitud de permiso mostrada puede tener una animación de desvanecimiento al desaparecer. Si se llama a `images.captureScreen` inmediatamente, la captura obtenida puede incluir el contenido de dicha ventana y quedar obstruida.\n\nEl valor de esta opción añade un tiempo de espera (en milisegundos) antes de capturar la pantalla inmediatamente después de obtener el permiso, para evitar el problema de obstrucción descrito.\n\nEsta opción solo se aplica a la primera captura tras obtener el permiso; las capturas posteriores no se verán afectadas por este valor.</string>
-    <string name="text_delay_time">Tiempo de retraso</string>
-    <string name="dialog_button_homepage">Inicio</string>
-    <string name="error_failed_to_change_the_toggle_state">No se pudo cambiar el estado del interruptor</string>
-    <string name="text_post_notifications_permission_rationale">Para garantizar que los servicios en primer plano de AutoJs6, etc. funcionen correctamente y que los scripts puedan publicar notificaciones, AutoJs6 debe recibir el permiso de \"publicar notificaciones\".</string>
-    <string name="description_pointer_location">\"Ubicación del puntero\" es una función de depuración en las opciones de desarrollador de Android.\nAl activarla, el sistema mostrará en pantalla información del/de los punto(s) de toque, como [coordenadas/trayectoria de movimiento/cantidad/tamaño/velocidad de movimiento/presión], lo que facilita la [escritura/depuración/verificación] de los scripts relacionados.</string>
-    <string name="error_an_error_occurred">Se produjo un error</string>
-    <string name="text_permission_management">Gestión de permisos</string>
-    <string name="text_service_management">Gestión de servicios</string>
-    <string name="summary_foreground_service_inrt">El servicio en primer plano permite mantener la app y los scripts en ejecución de forma más estable en segundo plano</string>
-
 </resources>
