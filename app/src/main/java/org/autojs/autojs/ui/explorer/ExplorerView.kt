@@ -22,6 +22,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import org.autojs.autojs.core.pref.Pref.getInt
 import org.autojs.autojs.core.pref.Pref.getLinkedList
@@ -84,8 +85,8 @@ import java.util.concurrent.Callable
 /**
  * Created by Stardust on Aug 21, 2017.
  * Transformed by SuperMonster003 on Nov 23, 2024.
- * Modified by JetBrains AI Assistant (GPT-5.2) as of Apr 20, 2026.
- * Modified by SuperMonster003 as of Feb 2, 2026.
+ * Modified by JetBrains AI Assistant (GPT-5.2) as of Feb 3, 2026.
+ * Modified by SuperMonster003 as of Feb 3, 2026.
  */
 @SuppressLint("CheckResult", "NonConstantResourceId", "NotifyDataSetChanged")
 open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRefreshListener, PopupMenu.OnMenuItemClickListener {
@@ -130,6 +131,10 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
 
     private val mPageStateHistories = Stack<ExplorerPageState>()
     private var mDirectorySpanSize = 2
+
+    // Keep only one refresh chain running to avoid concurrent updates.
+    // zh-CN: 只允许一个刷新链路运行, 避免并发更新导致竞态问题.
+    private var mRefreshDisposable: Disposable? = null
 
     // Unify action icon tint to match day/night theme, especially for overlay dialogs.
     // zh-CN: 统一操作图标着色以匹配日/夜主题, 尤其用于 overlay 对话框场景.
@@ -244,6 +249,11 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         mExplorer?.unregisterChangeListener(this)
         mPageStateHistories.clear()
         binding = null
+
+        // Cancel pending refresh to avoid late UI updates and concurrent iterations.
+        // zh-CN: 取消未完成的刷新, 避免延迟 UI 更新以及并发遍历导致的问题.
+        mRefreshDisposable?.dispose()
+        mRefreshDisposable = null
     }
 
     override fun onRefresh() {
@@ -588,24 +598,41 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     private fun refreshCurrentPage() {
         val explorer = mExplorer ?: return
         isRefreshing = true
-        explorer.fetchChildren(currentPage)
+
+        // Cancel the previous refresh to prevent multiple concurrent iterators on mutable data.
+        // zh-CN: 取消上一次刷新, 防止对可变数据产生多个并发迭代器.
+        mRefreshDisposable?.dispose()
+
+        mRefreshDisposable = explorer.fetchChildren(currentPage)
             .subscribeOn(Schedulers.io())
             .flatMapObservable { page: ExplorerPage? ->
                 currentPageState.page = page
-                Observable.fromIterable(page)
+
+                // Snapshot the iterable to avoid ConcurrentModificationException during iteration.
+                // zh-CN: 对可迭代对象做快照, 避免迭代期间被修改触发 ConcurrentModificationException.
+                val snapshot: List<ExplorerItem> = page?.toList() ?: emptyList()
+
+                Observable.fromIterable(snapshot)
             }
             .filter { f: ExplorerItem -> mFilter == null || mFilter!!.invoke(f) }
             .collectInto(explorerItemManager.cloneConfig(), ExplorerItemManager::add)
             .observeOn(Schedulers.computation())
             .doOnSuccess(ExplorerItemManager::sort)
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe { newManager: ExplorerItemManager ->
+            .doFinally {
+                // Always end the refreshing state even when errors happen.
+                // zh-CN: 无论成功或失败都要结束刷新状态.
+                isRefreshing = false
+            }
+            .subscribe({ newManager: ExplorerItemManager ->
                 mProjectToolbar.updateVisibility()
                 explorerItemManager = newManager
                 notifyDataSetChanged()
-                isRefreshing = false
                 post { scrollToPositionImmediately() }
-            }
+            }, { e ->
+                Log.e(LOG_TAG, "refreshCurrentPage() failed", e)
+                showSnack(this, R.string.error_refresh_failed, true)
+            })
     }
 
     private fun scrollToPositionSmoothly() {

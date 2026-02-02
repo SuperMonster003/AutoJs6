@@ -1481,4 +1481,5 @@
     <string name="text_write_secure_settings">Write security settings</string>
     <string name="text_write_system_settings">Write system settings</string>
     <string name="text_xiaomi_background_popup_permission">Display pop-up windows while running in the background</string>
+    <string name="error_refresh_failed">Refresh failed</string>
 </resources>

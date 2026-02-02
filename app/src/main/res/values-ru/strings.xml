@@ -5,7 +5,6 @@
 <!-- Proofreader: [ JetBrains AI Assistant ] -->
 
 <resources xmlns:tools="http://schemas.android.com/tools">
-
     <string name="apk_builder_build" tools:ignore="TypographyEllipsis">Строительство...</string>
     <string name="apk_builder_clean" tools:ignore="TypographyEllipsis">Очистка...</string>
     <string name="apk_builder_package" tools:ignore="TypographyEllipsis">Упаковка...</string>
@@ -1224,5 +1223,5 @@
     <string name="text_write_secure_settings">Параметры безопасности записи</string>
     <string name="text_write_system_settings">Запись системных настроек</string>
     <string name="text_xiaomi_background_popup_permission">Всплывающие окна в фоне</string>
-
+    <string name="error_refresh_failed">Не удалось обновить</string>
 </resources>
