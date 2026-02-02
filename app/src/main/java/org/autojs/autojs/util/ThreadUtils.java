@@ -1,5 +1,9 @@
 package org.autojs.autojs.util;
 
+import android.os.Handler;
+import androidx.annotation.NonNull;
+import org.autojs.autojs.app.GlobalAppContext;
+
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -9,8 +13,11 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
+import static org.autojs.autojs.util.RhinoUtils.isMainThread;
+
 /**
  * Created by SuperMonster003 on May 26, 2022.
+ * Modified by SuperMonster003 as of Feb 2, 2026.
  */
 public class ThreadUtils {
 
@@ -48,5 +55,21 @@ public class ThreadUtils {
         }
         future.cancel(true);
         return result.get();
+    }
+
+    public static void runOnMain(Handler handler, @NonNull Runnable r) {
+        if (isMainThread()) {
+            r.run();
+            return;
+        }
+        handler.post(r);
+    }
+
+    public static void runOnMain(@NonNull Runnable r) {
+        if (isMainThread()) {
+            r.run();
+            return;
+        }
+        GlobalAppContext.post(r);
     }
 }

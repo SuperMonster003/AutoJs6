@@ -197,6 +197,10 @@ class Files(private val scriptRuntime: ScriptRuntime) {
         return PFiles.getHumanReadableSize(bytes, useIecIdentifier)
     }
 
+    fun formatSizeWithUnit(bytes: Long): String {
+        return PFiles.formatSizeWithUnit(bytes)
+    }
+
     fun getSimplifiedPath(path: String?): String {
         return getElegantPath(ensurePathNotNull(path, ::getSimplifiedPath.name, shouldWrapWithPathMethod = false))
     }

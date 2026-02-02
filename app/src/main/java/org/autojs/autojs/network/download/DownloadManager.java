@@ -22,8 +22,8 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+import org.autojs.autojs.app.DialogUtils;
 import org.autojs.autojs.concurrent.VolatileBox;
-import org.autojs.autojs.core.pref.Language;
 import org.autojs.autojs.network.UpdateChecker;
 import org.autojs.autojs.network.api.DownloadApi;
 import org.autojs.autojs.network.entity.VersionInfo;
@@ -53,8 +53,6 @@ public class DownloadManager {
 
     private final int mRetryCount = 3;
 
-    // 10,000 KB (around but less than 10 MB)
-    private final int mMegaThreshold = 10000 * (1 << 10);
     private final Handler mHandler;
     private final DownloadApi mDownloadApi;
     private final ConcurrentHashMap<String, VolatileBox<Boolean>> mDownloadStatuses = new ConcurrentHashMap<>();
@@ -119,16 +117,6 @@ public class DownloadManager {
         }
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    @SuppressLint("CheckResult")
-    public Observable<ProgressInfo> download(String url, String path) {
-        DownloadTask task = new DownloadTask(url, path);
-        mDownloadApi.download(url)
-                .subscribeOn(Schedulers.io())
-                .subscribe(task::start, error -> task.progress().onError(error));
-        return task.progress();
-    }
-
     public Observable<File> downloadWithProgress(Context context, String url, String path) {
         String content = context.getString(R.string.text_file_name) + ": " + DownloadManager.parseFileNameLocally(url);
         return downloadWithProgress(context, url, path, content);
@@ -139,12 +127,12 @@ public class DownloadManager {
         final String path = new File(downloadDir, versionInfo.getFileName()).getPath();
         String url = versionInfo.getDownloadUrl();
         initProgressDialog(context, versionInfo);
-        return download(context, url, path);
+        return download(url, path);
     }
 
     public Observable<File> downloadWithProgress(Context context, String url, String path, String content) {
         initProgressDialog(context, url, content);
-        return download(context, url, path);
+        return download(url, path);
     }
 
     private void initProgressDialog(Context context, @NonNull String url, @Nullable VersionInfo versionInfo, @Nullable String content) {
@@ -178,21 +166,12 @@ public class DownloadManager {
             mProgressDialog.setContent(contentText);
         }
 
-        if (versionInfo != null && versionInfo.getSize() > 0) {
+        if (versionInfo != null) {
             long size = versionInfo.getSize();
-            if (size > mMegaThreshold) {
-                mProgressDialog.setProgressNumberFormat(getProgressMegaBytesFormat(context, 0, (float) (size / Math.pow(2, 20))));
-            } else {
-                mProgressDialog.setProgressNumberFormat(getProgressKiloBytesFormat(context, 0, (float) (size / Math.pow(2, 10))));
-            }
-        } else {
-            mProgressDialog.setProgressNumberFormat(context.getString(R.string.text_half_ellipsis));
+            DialogUtils.setProgressNumberFormatByBytes(mProgressDialog, 0, size, context.getString(R.string.text_half_ellipsis));
         }
 
-        ProgressBar progressBar = mProgressDialog.getProgressBar();
-        progressBar.setProgressTintList(ColorStateList.valueOf(context.getColor(R.color.dialog_progress_download_tint)));
-        progressBar.setProgressBackgroundTintList(ColorStateList.valueOf(context.getColor(R.color.dialog_progress_download_bg_tint)));
-
+        DialogUtils.applyProgressThemeColorTintLists(mProgressDialog);
     }
 
     private void initProgressDialog(Context context, String url, String content) {
@@ -203,18 +182,23 @@ public class DownloadManager {
         initProgressDialog(context, versionInfo.getDownloadUrl(), versionInfo, null);
     }
 
-    @NonNull
-    private Observable<File> download(Context context, String url, String path) {
-        PublishSubject<File> subject = PublishSubject.create();
-        DownloadManager downloadMgr = DownloadManager.getInstance();
-        downloadMgr.download(url, path)
+    @SuppressLint("CheckResult")
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    private Observable<File> download(String url, String path) {
+
+        PublishSubject<File> downloadSubject = PublishSubject.create();
+
+        DownloadTask task = new DownloadTask(url, path);
+        PublishSubject<ProgressInfo> progressSubject = task.progress();
+
+        mDownloadApi.download(url)
+                .subscribeOn(Schedulers.io())
+                .subscribe(task::start, progressSubject::onError);
+
+        progressSubject
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnNext(o -> {
-                    if (o.getTotalBytes() > mMegaThreshold) {
-                        mProgressDialog.setProgressNumberFormat(getProgressMegaBytesFormat(context, o.getReadMegaBytes(), o.getTotalMegaBytes()));
-                    } else {
-                        mProgressDialog.setProgressNumberFormat(getProgressKiloBytesFormat(context, o.getReadKiloBytes(), o.getTotalKiloBytes()));
-                    }
+                    DialogUtils.setProgressNumberFormatByBytes(mProgressDialog, o.getReadBytes(), o.getTotalBytes());
                     mProgressDialog.setProgress(o.getProgress());
                 })
                 .subscribe(new SimpleObserver<>() {
@@ -227,8 +211,8 @@ public class DownloadManager {
                     public void onComplete() {
                         mProgressDialog.dismiss();
                         mProgressDialog = null;
-                        subject.onNext(new File(path));
-                        subject.onComplete();
+                        downloadSubject.onNext(new File(path));
+                        downloadSubject.onComplete();
                     }
 
                     @Override
@@ -237,10 +221,10 @@ public class DownloadManager {
                         mProgressDialog = null;
                         disposeIfNeeded();
                         mOkHttpClient.dispatcher().cancelAll();
-                        subject.onError(error);
+                        downloadSubject.onError(error);
                     }
                 });
-        return subject;
+        return downloadSubject;
     }
 
     public void cancelDownload(String url) {
@@ -248,18 +232,6 @@ public class DownloadManager {
         if (status != null) {
             status.set(false);
         }
-    }
-
-    public static String getProgressKiloBytesFormat(Context context, float readKiloBytes, float totalKiloBytes) {
-        return String.format(Language.getPrefLanguage().getLocale(),
-                context.getString(R.string.format_dialog_progress_number_format_kilo_bytes),
-                readKiloBytes, totalKiloBytes);
-    }
-
-    public static String getProgressMegaBytesFormat(Context context, float readMegaBytes, float totalMegaBytes) {
-        return String.format(Language.getPrefLanguage().getLocale(),
-                context.getString(R.string.format_dialog_progress_number_format_mega_bytes),
-                readMegaBytes, totalMegaBytes);
     }
 
     private class DownloadTask {
@@ -317,7 +289,7 @@ public class DownloadManager {
 
         private void activeProgressDialogButton() {
             MDButton button = mProgressDialog.getActionButton(DialogAction.POSITIVE);
-            button.setTextColor(mProgressDialog.getContext().getColor(R.color.dialog_progress_download_act_btn));
+            button.setTextColor(mProgressDialog.getContext().getColor(R.color.dialog_button_caution));
             button.setOnClickListener(view -> {
                 mProgressDialog.dismiss();
                 DownloadManager.getInstance().cancelDownload(mUrl);

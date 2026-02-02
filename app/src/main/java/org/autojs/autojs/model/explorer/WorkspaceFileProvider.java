@@ -58,11 +58,11 @@ public class WorkspaceFileProvider extends ExplorerFileProvider {
                 .subscribeOn(Schedulers.io());
     }
 
-    public boolean isInSampleDir(PFile file) {
+    public boolean isInSampleDir(File file) {
         return file.getPath().startsWith(mSampleDir.getPath());
     }
 
-    public boolean isCurrentSampleDir(PFile file) {
+    public boolean isCurrentSampleDir(File file) {
         return file.getPath().equals(mSampleDir.getPath());
     }
 

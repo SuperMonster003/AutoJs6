@@ -141,7 +141,7 @@
   "p_project_compilation_and_build_android_studio_intellij_idea": "AutoJs6 オープンソース プロジェクトのデバッグや開発が必要な場合は, [Android Studio](https://pro.autojs.org/) ([Google](https://www.google.com/) 社製品) または [IntelliJ IDEA](https://www.jetbrains.com/idea/) ([Jetbrains](https://www.jetbrains.com/) 社製品) を使用できます",
   "step_android_sdk": "Android SDK (Android ソフトウェア開発キット)",
   "step_appearance_behavior": "Appearance & Behavior (外観と動作)",
-  "step_build_execution_deployment": "Build, Execution, Deployment (ビルド、実行、デプロイ)",
+  "step_build_execution_deployment": "Build, Execution, Deployment (ビルド, 実行, デプロイ)",
   "step_build_tools": "Build Tools (ビルドツール)",
   "step_debug_apk_path": "デフォルトの署名が含まれたデバッグ版のインストールパッケージを生成します",
   "step_debug_version_path": "デバッグ版 (デバッグバージョン)",

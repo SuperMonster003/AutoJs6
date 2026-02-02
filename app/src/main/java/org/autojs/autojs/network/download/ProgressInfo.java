@@ -2,6 +2,7 @@ package org.autojs.autojs.network.download;
 
 /**
  * Created by SuperMonster003 on May 30, 2022.
+ * Modified by SuperMonster003 as of Feb 1, 2026.
  */
 public class ProgressInfo {
     private long mRead = 0;
@@ -15,14 +16,6 @@ public class ProgressInfo {
         return mTotal;
     }
 
-    public float getTotalKiloBytes() {
-        return (float) (mTotal / Math.pow(2, 10));
-    }
-
-    public float getTotalMegaBytes() {
-        return (float) (mTotal / Math.pow(2, 20));
-    }
-
     public void setTotal(long total) {
         mTotal = total;
     }
@@ -33,14 +26,6 @@ public class ProgressInfo {
 
     public long getReadBytes() {
         return mRead;
-    }
-
-    public float getReadKiloBytes() {
-        return (float) (mRead / Math.pow(2, 10));
-    }
-
-    public float getReadMegaBytes() {
-        return (float) (mRead / Math.pow(2, 20));
     }
 
     public void setRead(long read) {

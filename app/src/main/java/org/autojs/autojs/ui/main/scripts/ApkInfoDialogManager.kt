@@ -138,7 +138,7 @@ object ApkInfoDialogManager {
 
             dialog.setCopyableTextIfAbsent(binding.packageNameValue, packageName)
             dialog.setCopyableTextIfAbsent(binding.deviceSdkValue, "${Build.VERSION.SDK_INT}")
-            dialog.setCopyableTextIfAbsent(binding.fileSizeValue, this) { PFiles.getHumanReadableSize(apkFile.length()) }
+            dialog.setCopyableTextIfAbsent(binding.fileSizeValue, this) { PFiles.formatSizeWithUnit(apkFile.length()) }
             dialog.setCopyableTextIfAbsent(binding.signatureSchemeValue, this) { getApkSignatureInfo(apkFile) }
 
             withContext(Dispatchers.Main) {

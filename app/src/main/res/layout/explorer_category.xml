@@ -32,8 +32,10 @@
             android:id="@+id/title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:text="@string/text_directory"
+            android:ellipsize="middle"
+            android:gravity="center_vertical"
+            android:maxLines="1"
+            android:text="@string/text_folder"
             android:textColor="@color/explorer_category_operation_button"
             android:textSize="13sp" />
 

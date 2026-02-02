@@ -42,6 +42,8 @@
     <color name="dialog_button_error">#4FC3F7</color>
     <color name="dialog_button_failure">@color/dialog_button_error</color>
 
+    <color name="dialog_progress_gray_background_tint">@color/md_gray_700</color>
+
     <color name="dialog_options_button_tint">#DEA9A9A9</color>
 
     <color name="item_background">#333333</color>

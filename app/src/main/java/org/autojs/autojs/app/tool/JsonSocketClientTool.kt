@@ -20,6 +20,7 @@ import org.autojs.autojs.pluginclient.DevPluginService
 import org.autojs.autojs.pluginclient.JsonSocketClient
 import org.autojs.autojs.ui.common.NotAskAgainDialog
 import org.autojs.autojs.util.Observers
+import org.autojs.autojs.util.ThreadUtils.runOnMain
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 import java.lang.ref.WeakReference
@@ -95,23 +96,15 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
         return a.isFinishing || a.isDestroyed
     }
 
-    private fun runOnMainThread(action: () -> Unit) {
-        if (Looper.myLooper() == Looper.getMainLooper()) {
-            action()
-        } else {
-            mainHandler.post { action() }
-        }
-    }
-
     private fun dismissConnectionDialogSilently() {
-        runOnMainThread {
+        runOnMain(mainHandler) {
             runCatching { connectionDialogRef?.get()?.dismiss() }
             connectionDialogRef = null
         }
     }
 
     private fun dismissConnectingStatusDialogSilently() {
-        runOnMainThread {
+        runOnMain(mainHandler) {
             runCatching { connectingStatusDisposable?.dispose() }
             connectingStatusDisposable = null
             runCatching { connectingStatusDialogRef?.get()?.dismiss() }
@@ -120,7 +113,7 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
     }
 
     private fun dismissConnectionFailedDialogSilently() {
-        runOnMainThread {
+        runOnMain(mainHandler) {
             runCatching { connectionFailedDialogRef?.get()?.dismiss() }
             connectionFailedDialogRef = null
         }
@@ -136,7 +129,7 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
     private fun scheduleDismissConnectingDialogWithMinDuration(shownAt: Long, afterDismiss: (() -> Unit)? = null) {
         val elapsed = System.currentTimeMillis() - shownAt
         val delay = (connectingDialogMinShowMillis - elapsed).coerceAtLeast(0L)
-        runOnMainThread {
+        runOnMain(mainHandler) {
             mainHandler.postDelayed(
                 {
                     dismissConnectingStatusDialogSilently()
@@ -296,12 +289,12 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
             .positiveColorRes(R.color.dialog_button_attraction)
             .autoDismiss(false)
             .dismissListener {
-                runOnMainThread { connectionDialogRef = null }
+                runOnMain(mainHandler) { connectionDialogRef = null }
                 onConnectionDialogDismissed.onDismiss(it)
             }
             .show()
             .also { dialog: MaterialDialog ->
-                runOnMainThread { connectionDialogRef = WeakReference(dialog) }
+                runOnMain(mainHandler) { connectionDialogRef = WeakReference(dialog) }
 
                 dialog.setOnKeyListener { _, keyCode, _ ->
                     if (keyCode == KeyEvent.KEYCODE_ENTER) {
@@ -360,7 +353,7 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
 
         // Close input dialog first, then show status dialog.
         // zh-CN: 先关闭输入 dialog, 再显示状态 dialog.
-        runOnMainThread { runCatching { dismissInputDialog?.dismiss() } }
+        runOnMain(mainHandler) { runCatching { dismissInputDialog?.dismiss() } }
 
         dismissConnectingStatusDialogSilently()
         dismissConnectionFailedDialogSilently()
@@ -382,7 +375,7 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
                 dismissConnectingStatusDialogSilently()
                 inputRemoteHost(isAutoConnect = false, prefill = trimmedHost)
             }
-            .positiveText(R.string.dialog_button_interrupt_connection)
+            .positiveText(R.string.dialog_button_abort_connection)
             .positiveColorRes(R.color.dialog_button_caution)
             .onPositive { d, _ ->
                 // Treat as user interrupt: stop current attempt and mark normally closed.
@@ -482,7 +475,7 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
                 dismissConnectingStatusDialogSilently()
                 inputRemoteHost(isAutoConnect = false, prefill = host)
             }
-            .positiveText(R.string.dialog_button_interrupt_connection)
+            .positiveText(R.string.dialog_button_abort_connection)
             .positiveColorRes(R.color.dialog_button_caution)
             .onPositive { d, _ ->
                 // Treat as user interrupt: stop current attempt and mark normally closed.
@@ -578,8 +571,8 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
     }
 
     private fun showSnack(dialog: MaterialDialog, strRes: Int) {
-        runOnMainThread {
-            if (isContextInvalidForDialog()) return@runOnMainThread
+        runOnMain(mainHandler) {
+            if (isContextInvalidForDialog()) return@runOnMain
             ViewUtils.showSnack(dialog.view, dialog.context.getString(strRes))
         }
     }

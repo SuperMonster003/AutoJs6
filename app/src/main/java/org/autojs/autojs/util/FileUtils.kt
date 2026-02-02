@@ -114,6 +114,12 @@ object FileUtils {
         return false
     }
 
+    @JvmStatic
+    fun areSamePath(a: File, b: File): Boolean =
+        runCatching {
+            a.getCanonicalPath() == b.getCanonicalPath()
+        }.getOrNull() ?: (a.absolutePath == b.absolutePath)
+
     suspend fun Uri.toCacheFile(
         context: Context,
         subDir: String = "from_uri",
@@ -3384,5 +3390,4 @@ object FileUtils {
     ) {
         val isLikelyApk = isZipReadable && hasAndroidManifest && (hasClassesDex || hasResourcesArsc || hasResDir)
     }
-
 }

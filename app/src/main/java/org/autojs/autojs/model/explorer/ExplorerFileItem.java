@@ -63,6 +63,11 @@ public class ExplorerFileItem implements ExplorerItem {
     }
 
     @Override
+    public boolean canMove() {
+        return !isInSampleDir(mFile) && mFile.canWrite();
+    }
+
+    @Override
     public boolean canDelete() {
         return !isInSampleDir(mFile) && mFile.canWrite();
     }
@@ -109,7 +114,7 @@ public class ExplorerFileItem implements ExplorerItem {
         return new ScriptFile(mFile);
     }
 
-    private boolean isInSampleDir(PFile file) {
+    public static boolean isInSampleDir(File file) {
         return Explorers.Providers.workspace().isInSampleDir(file);
     }
 

@@ -75,10 +75,11 @@ import org.autojs.autojs6.R
 import kotlin.math.floor
 import kotlin.math.min
 import kotlin.math.roundToInt
+import android.text.TextUtils as AndroidTextUtils
 
 /**
  * Created by Stardust on Jan 24, 2017.
- * Modified by SuperMonster003 as of Sep 11, 2022.
+ * Modified by SuperMonster003 as of Feb 2, 2026.
  */
 @Suppress("unused")
 object ViewUtils {
@@ -1323,6 +1324,37 @@ object ViewUtils {
         }
     }
 
+    @JvmStatic
+    @JvmOverloads
+    fun TextView.setLinesEllipsizedIndividually(
+        lines: List<CharSequence>,
+        lineSpacing: Float = 0f,
+        where: AndroidTextUtils.TruncateAt = AndroidTextUtils.TruncateAt.MIDDLE
+    ) {
+        post {
+            val avail = width - paddingLeft - paddingRight
+            if (avail <= 0) {
+                post { setLinesEllipsizedIndividually(lines, lineSpacing, where) }
+                return@post
+            }
+
+            setLineSpacing(0f, lineSpacing)
+
+            val out = buildString {
+                lines.forEachIndexed { idx, s ->
+                    val e = AndroidTextUtils.ellipsize(s, paint, avail.toFloat(), where)
+                    if (idx > 0) append('\n')
+                    append(e)
+                }
+            }
+
+            setSingleLine(false)
+            ellipsize = null
+
+            text = out
+        }
+    }
+
     enum class MODE(val key: String) {
 
         DAY(key(R.string.key_night_mode_always_off)),
@@ -1345,9 +1377,7 @@ object ViewUtils {
             private fun dysfunction() {
                 isAutoNightModeEnabled = false
             }
-
         }
-
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -1370,7 +1400,6 @@ object ViewUtils {
                 }
             }
         }
-
     }
 
     private class TextSizeScaleListener(private val textView: TextView) : ScaleGestureDetector.SimpleOnScaleGestureListener() {
@@ -1406,7 +1435,5 @@ object ViewUtils {
         }
 
         fun getTextSize(): Float = DisplayUtils.pxToSp(textView.textSize)
-
     }
-
 }

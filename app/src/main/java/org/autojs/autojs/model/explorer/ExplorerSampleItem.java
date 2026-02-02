@@ -5,6 +5,7 @@ import org.autojs.autojs.pio.PFile;
 import java.io.File;
 
 public class ExplorerSampleItem extends ExplorerFileItem {
+
     public ExplorerSampleItem(PFile file, ExplorerPage parent) {
         super(file, parent);
     }
@@ -28,6 +29,11 @@ public class ExplorerSampleItem extends ExplorerFileItem {
     }
 
     @Override
+    public boolean canMove() {
+        return false;
+    }
+
+    @Override
     public boolean canBuildApk() {
         return getFile().canBuildApk();
     }
@@ -36,5 +42,4 @@ public class ExplorerSampleItem extends ExplorerFileItem {
     public boolean canSetAsWorkingDir() {
         return false;
     }
-
 }
