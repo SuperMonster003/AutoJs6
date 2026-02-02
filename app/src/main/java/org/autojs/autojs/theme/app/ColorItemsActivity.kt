@@ -17,7 +17,6 @@ import androidx.core.view.forEach
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.VERTICAL
 import androidx.recyclerview.widget.ThemeColorRecyclerView
@@ -162,27 +161,57 @@ class ColorItemsActivity : ColorSelectBaseActivity() {
         if (recyclerView.findViewHolderForAdapterPosition(targetPosition) != null) {
             highlightColorItem(recyclerView, targetPosition, targetItem)
         } else {
-            recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-                override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                    if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                        recyclerView.removeOnScrollListener(this)
+            // @Hint by JetBrains AI Assistant (GPT-5.2) on Feb 3, 2025.
+            //  ! `scrollToPositionWithOffset/scrollToPosition` may not dispatch scroll state changes,
+            //  ! so relying on `SCROLL_STATE_IDLE` can miss the timing.
+            //  ! zh-CN:
+            //  ! `scrollToPositionWithOffset/scrollToPosition` 可能不会触发滚动状态变化,
+            //  ! 因此依赖 `SCROLL_STATE_IDLE` 会错过触发时机.
+            //  !
+            //  # recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            //  #     override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+            //  #         if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+            //  #             recyclerView.removeOnScrollListener(this)
+            //  #             highlightColorItem(recyclerView, targetPosition, targetItem)
+            //  #         }
+            //  #     }
+            //  # })
+
+            // Trigger highlight when the target view is actually attached to window.
+            // zh-CN: 当目标 View 真正 attach 到窗口时再触发高亮.
+            val attachListener = object : RecyclerView.OnChildAttachStateChangeListener {
+
+                override fun onChildViewAttachedToWindow(view: View) {
+                    val holder = recyclerView.getChildViewHolder(view)
+                    if (holder.bindingAdapterPosition == targetPosition) {
+                        recyclerView.removeOnChildAttachStateChangeListener(this)
                         highlightColorItem(recyclerView, targetPosition, targetItem)
                     }
                 }
-            })
+
+                override fun onChildViewDetachedFromWindow(view: View) = Unit
+            }
+            recyclerView.addOnChildAttachStateChangeListener(attachListener)
         }
 
-        val layoutManager = recyclerView.layoutManager
+        // val layoutManager = recyclerView.layoutManager
+        //
+        // val smoothScroller = object : LinearSmoothScroller(this) {
+        //     override fun getVerticalSnapPreference() = SNAP_TO_START
+        // }.apply { this.targetPosition = targetPosition }
+        //
+        // when (layoutManager) {
+        //     null -> recyclerView.smoothScrollToPosition(targetPosition)
+        //     is GridLayoutManager -> layoutManager.startSmoothScroll(smoothScroller)
+        //     is LinearLayoutManager -> layoutManager.startSmoothScroll(smoothScroller)
+        //     else -> layoutManager.startSmoothScroll(smoothScroller)
+        // }
 
-        val smoothScroller = object : LinearSmoothScroller(this) {
-            override fun getVerticalSnapPreference() = SNAP_TO_START
-        }.apply { this.targetPosition = targetPosition }
-
-        when (layoutManager) {
-            null -> recyclerView.smoothScrollToPosition(targetPosition)
-            is GridLayoutManager -> layoutManager.startSmoothScroll(smoothScroller)
-            is LinearLayoutManager -> layoutManager.startSmoothScroll(smoothScroller)
-            else -> layoutManager.startSmoothScroll(smoothScroller)
+        when (val layoutManager = recyclerView.layoutManager) {
+            null -> recyclerView.scrollToPosition(targetPosition)
+            is GridLayoutManager -> layoutManager.scrollToPositionWithOffset(targetPosition, 0)
+            is LinearLayoutManager -> layoutManager.scrollToPositionWithOffset(targetPosition, 0)
+            else -> layoutManager.scrollToPosition(targetPosition)
         }
 
         mInitiallyItemIdScrollTo = -1
