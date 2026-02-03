@@ -141,11 +141,19 @@ public class EditorMenu {
             showFileDetails();
             return true;
         }
+        if (itemId == R.id.action_version_history) {
+            showHistory();
+            return true;
+        }
         if (itemId == R.id.action_build_apk) {
             startBuildApkActivity();
             return true;
         }
         return false;
+    }
+
+    private void showHistory() {
+        mEditorView.showVersionHistoryDialog();
     }
 
     private void importJavaPackageOrClass() {

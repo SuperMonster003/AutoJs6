@@ -1230,4 +1230,7 @@
     <string name="text_draft_file_path">초안 경로</string>
     <string name="dialog_button_copy_path">복사</string>
     <string name="dialog_button_save_as">다른 이름으로 저장</string>
+    <string name="text_version_history">버전 기록</string>
+    <string name="text_no_version_history">버전 기록 없음</string>
+    <string name="text_version_history_restore_does_not_auto_save_to_disk">복원하면 편집기 내용만 변경됩니다. 파일에 자동으로 저장되지 않습니다. 저장 버튼을 수동으로 눌러 주세요.</string>
 </resources>

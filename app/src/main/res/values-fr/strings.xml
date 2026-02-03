@@ -1228,4 +1228,7 @@
     <string name="text_draft_file_path">Chemin du brouillon</string>
     <string name="dialog_button_copy_path">Copier</string>
     <string name="dialog_button_save_as">Enregistrer sous</string>
+    <string name="text_version_history">Historique des versions</string>
+    <string name="text_no_version_history">Aucun historique des versions</string>
+    <string name="text_version_history_restore_does_not_auto_save_to_disk">La restauration ne modifie que le contenu de l\'editeur. Elle n\'enregistre pas automatiquement dans le fichier. Veuillez appuyer manuellement sur le bouton Enregistrer.</string>
 </resources>

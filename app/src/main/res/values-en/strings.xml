@@ -1225,4 +1225,7 @@
     <string name="text_draft_file_path">Draft file path</string>
     <string name="dialog_button_copy_path">Copy path</string>
     <string name="dialog_button_save_as">Save as</string>
+    <string name="text_version_history">Version history</string>
+    <string name="text_no_version_history">No version history</string>
+    <string name="text_version_history_restore_does_not_auto_save_to_disk">Restoring only changes the editor content. It will not automatically save to the file. Please tap the Save button manually.</string>
 </resources>

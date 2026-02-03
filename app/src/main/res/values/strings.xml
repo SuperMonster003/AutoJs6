@@ -175,6 +175,7 @@
     <string name="key_use_volume_control_record" translatable="false">key_$_use_volume_control_record</string>
     <string name="key_use_volume_control_running" translatable="false">key_$_use_volume_control_running</string>
     <string name="key_version_histories" translatable="false">key_$_version_histories</string>
+    <string name="key_version_history_restore_does_not_auto_save_to_disk" translatable="false">key_$_version_history_restore_does_not_auto_save_to_disk</string>
     <string name="key_working_directory" translatable="false">key_$_working_directory</string>
     <string name="key_working_directory_histories" translatable="false">key_$_working_directory_histories</string>
     <string name="key_working_directory_initialized" translatable="false">key_$_working_directory_initialized</string>
@@ -1486,4 +1487,7 @@
     <string name="text_draft_file_path">Draft file path</string>
     <string name="dialog_button_copy_path">Copy path</string>
     <string name="dialog_button_save_as">Save as</string>
+    <string name="text_version_history">Version history</string>
+    <string name="text_no_version_history">No version history</string>
+    <string name="text_version_history_restore_does_not_auto_save_to_disk">Restore will only change editor content; it will not save to file automatically.</string>
 </resources>

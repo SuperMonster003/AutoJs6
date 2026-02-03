@@ -25,6 +25,7 @@ import org.autojs.autojs.event.GlobalKeyObserver
 import org.autojs.autojs.external.receiver.DynamicBroadcastReceivers
 import org.autojs.autojs.ipc.InAppEventBus
 import org.autojs.autojs.leakcanary.LeakCanarySetup
+import org.autojs.autojs.storage.history.HistoryCleanupScheduler
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.timing.TimedTaskManager
 import org.autojs.autojs.timing.TimedTaskScheduler
@@ -39,7 +40,7 @@ import java.lang.reflect.Method
 
 /**
  * Created by Stardust on Jan 27, 2017.
- * Modified by SuperMonster003 as of Jan 17, 2026.
+ * Modified by SuperMonster003 as of Feb 3, 2026.
  */
 class App : MultiDexApplication() {
 
@@ -71,6 +72,8 @@ class App : MultiDexApplication() {
 
                 ThemeColorManager.init()
                 setUpDefaultNightMode()
+
+                HistoryCleanupScheduler.schedule(this)
             }
         }
     }

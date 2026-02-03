@@ -2,18 +2,16 @@ package org.autojs.autojs.ui.common;
 
 import android.content.Context;
 import android.text.TextUtils;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.preference.PreferenceManager;
-
 import com.afollestad.materialdialogs.MaterialDialog;
-
 import org.autojs.autojs.util.MD5Utils;
 import org.autojs.autojs6.R;
 
 /**
  * Created by Stardust on Jan 30, 2017.
+ * Modified by SuperMonster003 as of Feb 3, 2026.
  */
 public class NotAskAgainDialog extends MaterialDialog {
 
@@ -38,6 +36,13 @@ public class NotAskAgainDialog extends MaterialDialog {
         }
 
         @Nullable
+        @Override
+        public MaterialDialog build() {
+            return mRemind ? super.build() : null;
+        }
+
+        @Nullable
+        @Override
         public MaterialDialog show() {
             return mRemind ? super.show() : null;
         }
