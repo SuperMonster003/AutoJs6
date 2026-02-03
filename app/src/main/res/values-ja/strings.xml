@@ -1225,4 +1225,8 @@
     <string name="text_write_system_settings">システム設定の書き込み</string>
     <string name="text_xiaomi_background_popup_permission">バックグラウンドでのポップアップ表示</string>
     <string name="error_refresh_failed">更新に失敗しました</string>
+    <string name="error_save_failed">保存に失敗しました</string>
+    <string name="text_draft_file_path">下書きのパス</string>
+    <string name="dialog_button_copy_path">コピー</string>
+    <string name="dialog_button_save_as">名前を付けて保存</string>
 </resources>

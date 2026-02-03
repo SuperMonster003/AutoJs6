@@ -1224,4 +1224,8 @@
     <string name="text_write_system_settings">Запись системных настроек</string>
     <string name="text_xiaomi_background_popup_permission">Всплывающие окна в фоне</string>
     <string name="error_refresh_failed">Не удалось обновить</string>
+    <string name="error_save_failed">Не удалось сохранить</string>
+    <string name="text_draft_file_path">Путь к черновику</string>
+    <string name="dialog_button_copy_path">Копировать</string>
+    <string name="dialog_button_save_as">Сохранить как</string>
 </resources>

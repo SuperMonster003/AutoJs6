@@ -1226,4 +1226,8 @@
     <string name="text_write_system_settings">시스템 설정을 작성하십시오</string>
     <string name="text_xiaomi_background_popup_permission">백그라운드 팝업</string>
     <string name="error_refresh_failed">새로고침에 실패했습니다</string>
+    <string name="error_save_failed">저장에 실패했습니다</string>
+    <string name="text_draft_file_path">초안 경로</string>
+    <string name="dialog_button_copy_path">복사</string>
+    <string name="dialog_button_save_as">다른 이름으로 저장</string>
 </resources>
