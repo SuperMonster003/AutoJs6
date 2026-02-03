@@ -1228,4 +1228,7 @@
     <string name="text_draft_file_path">Путь к черновику</string>
     <string name="dialog_button_copy_path">Копировать</string>
     <string name="dialog_button_save_as">Сохранить как</string>
+    <string name="text_version_history">История версий</string>
+    <string name="text_no_version_history">Нет истории версий</string>
+    <string name="text_version_history_restore_does_not_auto_save_to_disk">Восстановление изменяет только содержимое редактора. Файл не будет сохранен автоматически. Нажмите кнопку \"Сохранить\" вручную.</string>
 </resources>

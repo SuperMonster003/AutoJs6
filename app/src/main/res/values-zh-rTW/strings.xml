@@ -1226,4 +1226,7 @@
     <string name="text_draft_file_path">草稿檔案路徑</string>
     <string name="dialog_button_copy_path">複製路徑</string>
     <string name="dialog_button_save_as">另存為</string>
+    <string name="text_version_history">版本歷史</string>
+    <string name="text_no_version_history">無版本歷史</string>
+    <string name="text_version_history_restore_does_not_auto_save_to_disk">恢復時只修改編輯器內容, 不會自動儲存到檔案, 需要手動點選儲存按鈕.</string>
 </resources>

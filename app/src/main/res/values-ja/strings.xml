@@ -1229,4 +1229,7 @@
     <string name="text_draft_file_path">下書きのパス</string>
     <string name="dialog_button_copy_path">コピー</string>
     <string name="dialog_button_save_as">名前を付けて保存</string>
+    <string name="text_version_history">バージョン履歴</string>
+    <string name="text_no_version_history">バージョン履歴なし</string>
+    <string name="text_version_history_restore_does_not_auto_save_to_disk">復元すると編集内容のみが変更されます. ファイルには自動保存されません. 保存ボタンを手動でタップしてください.</string>
 </resources>

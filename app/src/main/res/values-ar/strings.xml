@@ -1230,4 +1230,7 @@
     <string name="text_draft_file_path">مسار المسودة</string>
     <string name="dialog_button_copy_path">نسخ</string>
     <string name="dialog_button_save_as">حفظ باسم</string>
+    <string name="text_version_history">سجل الاصدارات</string>
+    <string name="text_no_version_history">لا يوجد سجل للاصدارات</string>
+    <string name="text_version_history_restore_does_not_auto_save_to_disk">عند الاستعادة، يتم تغيير محتوى المحرر فقط. لن يتم الحفظ تلقائيا في الملف. يرجى الضغط على زر \"حفظ\" يدويا.</string>
 </resources>

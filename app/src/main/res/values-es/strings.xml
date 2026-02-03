@@ -1228,4 +1228,7 @@
     <string name="text_draft_file_path">Ruta del borrador</string>
     <string name="dialog_button_copy_path">Copiar</string>
     <string name="dialog_button_save_as">Guardar como</string>
+    <string name="text_version_history">Historial de versiones</string>
+    <string name="text_no_version_history">Sin historial de versiones</string>
+    <string name="text_version_history_restore_does_not_auto_save_to_disk">Al restaurar, solo se cambia el contenido del editor. No se guardara automaticamente en el archivo. Debes pulsar el boton Guardar manualmente.</string>
 </resources>
