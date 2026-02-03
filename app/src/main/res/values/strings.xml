@@ -1482,4 +1482,8 @@
     <string name="text_write_system_settings">Write system settings</string>
     <string name="text_xiaomi_background_popup_permission">Display pop-up windows while running in the background</string>
     <string name="error_refresh_failed">Refresh failed</string>
+    <string name="error_save_failed">Save failed</string>
+    <string name="text_draft_file_path">Draft file path</string>
+    <string name="dialog_button_copy_path">Copy path</string>
+    <string name="dialog_button_save_as">Save as</string>
 </resources>

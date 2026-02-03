@@ -92,7 +92,7 @@ object DialogUtils {
     @JvmOverloads
     @Deprecated("Use showAdaptive instead.", ReplaceWith("showAdaptive(dialog, focusable)"))
     @ReservedForCompatibility
-    fun <T : MaterialDialog> showDialog(dialog: T, focusable: Boolean = true): T {
+    fun showDialog(dialog: MaterialDialog, focusable: Boolean = true): MaterialDialog {
         runOnMain {
             // Prevent duplicated show.
             // zh-CN: 防止重复 show().
@@ -205,9 +205,9 @@ object DialogUtils {
      * - 在后台线程 build 可能触发 "Can't create handler inside thread ..." 崩溃.
      */
     @JvmStatic
-    fun <T : MaterialDialog> buildAdaptive(builder: MaterialDialog.Builder): T {
+    fun buildAdaptive(builder: MaterialDialog.Builder): MaterialDialog {
         @Suppress("UNCHECKED_CAST")
-        return buildAdaptive { builder.build() as T }
+        return buildAdaptive { builder.build() }
     }
 
     /**
@@ -216,12 +216,12 @@ object DialogUtils {
      * zh-CN: 通过 callable 工厂在主线程 build 对话框.
      */
     @JvmStatic
-    fun <T : MaterialDialog> buildAdaptive(factory: Callable<T>): T {
+    fun buildAdaptive(factory: Callable<MaterialDialog>): MaterialDialog {
         if (Looper.getMainLooper() == Looper.myLooper()) {
             return factory.call()
         }
 
-        val ref = AtomicReference<T>()
+        val ref = AtomicReference<MaterialDialog>()
         val err = AtomicReference<Throwable?>()
         val latch = CountDownLatch(1)
 
@@ -256,8 +256,8 @@ object DialogUtils {
      */
     @JvmStatic
     @JvmOverloads
-    fun <T : MaterialDialog> buildAndShowAdaptive(builder: MaterialDialog.Builder, focusable: Boolean = true): T {
-        val dialog = buildAdaptive<T>(builder)
+    fun buildAndShowAdaptive(builder: MaterialDialog.Builder, focusable: Boolean = true): MaterialDialog {
+        val dialog = buildAdaptive(builder)
         @Suppress("DEPRECATION")
         return showDialog(dialog, focusable)
     }
@@ -269,7 +269,7 @@ object DialogUtils {
      */
     @JvmStatic
     @JvmOverloads
-    fun <T : MaterialDialog> buildAndShowAdaptive(factory: Callable<T>, focusable: Boolean = true): T {
+    fun buildAndShowAdaptive(factory: Callable<MaterialDialog>, focusable: Boolean = true): MaterialDialog {
         val dialog = buildAdaptive(factory)
         @Suppress("DEPRECATION")
         return showDialog(dialog, focusable)
@@ -284,7 +284,7 @@ object DialogUtils {
     }
 
     @JvmStatic
-    fun <T : MaterialDialog> fixCheckBoxGravity(dialog: T): T = dialog.also {
+    fun fixCheckBoxGravity(dialog: MaterialDialog): MaterialDialog = dialog.also {
         it.view.findViewById<CheckBox>(com.afollestad.materialdialogs.R.id.md_promptCheckbox)?.gravity = Gravity.CENTER_VERTICAL
     }
 

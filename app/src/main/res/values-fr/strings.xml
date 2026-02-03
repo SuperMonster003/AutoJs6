@@ -1224,4 +1224,8 @@
     <string name="text_write_system_settings">Écrire les paramètres système</string>
     <string name="text_xiaomi_background_popup_permission">Fenêtres contextuelles en arrière-plan</string>
     <string name="error_refresh_failed">Echec de l\'actualisation</string>
+    <string name="error_save_failed">Echec de l\'enregistrement</string>
+    <string name="text_draft_file_path">Chemin du brouillon</string>
+    <string name="dialog_button_copy_path">Copier</string>
+    <string name="dialog_button_save_as">Enregistrer sous</string>
 </resources>

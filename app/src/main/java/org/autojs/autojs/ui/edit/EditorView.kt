@@ -13,7 +13,6 @@ import android.os.Bundle
 import android.os.Parcelable
 import android.text.TextUtils
 import android.util.AttributeSet
-import android.util.Log
 import android.util.SparseBooleanArray
 import android.view.View
 import android.widget.ImageView
@@ -27,13 +26,13 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import org.autojs.autojs.AutoJs
+import org.autojs.autojs.app.DialogUtils
 import org.autojs.autojs.core.pref.Pref.getEditorTextSize
 import org.autojs.autojs.core.pref.Pref.setEditorTextSize
 import org.autojs.autojs.engine.JavaScriptEngine
 import org.autojs.autojs.engine.ScriptEngine
 import org.autojs.autojs.event.BackPressedHandler.HostActivity
 import org.autojs.autojs.execution.ScriptExecution
-import org.autojs.autojs.util.MaterialDialogUtils.choiceWidgetThemeColor
 import org.autojs.autojs.model.autocomplete.AutoCompletion
 import org.autojs.autojs.model.autocomplete.CodeCompletions
 import org.autojs.autojs.model.autocomplete.Symbols
@@ -46,7 +45,6 @@ import org.autojs.autojs.model.script.Scripts.EXTRA_EXCEPTION_MESSAGE
 import org.autojs.autojs.model.script.Scripts.openByOtherApps
 import org.autojs.autojs.model.script.Scripts.runWithBroadcastSender
 import org.autojs.autojs.pio.PFiles.getNameWithoutExtension
-import org.autojs.autojs.pio.PFiles.move
 import org.autojs.autojs.pio.PFiles.write
 import org.autojs.autojs.storage.file.TmpScriptFiles
 import org.autojs.autojs.tool.Callback
@@ -65,11 +63,14 @@ import org.autojs.autojs.ui.edit.toolbar.DebugToolbarFragment
 import org.autojs.autojs.ui.edit.toolbar.NormalToolbarFragment
 import org.autojs.autojs.ui.edit.toolbar.SearchToolbarFragment
 import org.autojs.autojs.ui.edit.toolbar.ToolbarFragment
+import org.autojs.autojs.ui.filechooser.FileChooserDialogBuilder
 import org.autojs.autojs.ui.log.LogActivity
 import org.autojs.autojs.ui.widget.EWebView
 import org.autojs.autojs.ui.widget.SimpleTextWatcher
+import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.DisplayUtils.pxToSp
 import org.autojs.autojs.util.DocsUtils.getUrl
+import org.autojs.autojs.util.MaterialDialogUtils.choiceWidgetThemeColor
 import org.autojs.autojs.util.Observers
 import org.autojs.autojs.util.StringUtils
 import org.autojs.autojs.util.ViewUtils.showSnack
@@ -80,11 +81,14 @@ import java.io.File
 import java.io.IOException
 import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
+import java.security.MessageDigest
+import java.util.Locale
 
 /**
  * Created by Stardust on Sep 28, 2017.
- * Modified by SuperMonster003 as of May 1, 2023.
  * Transformed by SuperMonster003 on May 1, 2023.
+ * Modified by JetBrains AI Assistant (GPT-5.2) as of Feb 3, 2026.
+ * Modified by SuperMonster003 as of Feb 3, 2026.
  */
 @SuppressLint("CheckResult")
 class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFragment.OnMenuItemClickListener {
@@ -429,47 +433,331 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     private fun redo() = editor.redo()
 
-    fun save(): Observable<String> {
-        val path = uri.path!!
-        val backPath = "$path.save"
-        move(path, backPath)
-        return Observable
+    fun save(): Observable<String> =
+        Observable
             .fromCallable {
+                // Use a transactional save flow for both file:// and content://.
+                // zh-CN: 对 file:// 与 content:// 统一使用事务式保存流程.
                 editor.text.apply {
-                    writeTextWithCharset(uri, this)
+                    writeTextWithCharsetTransactional(uri, this)
                 }
             }
-            .observeOn(Schedulers.io())
+            .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext {
                 editor.markTextAsSaved()
                 setMenuItemStatus(R.id.save, false)
             }
-            .doOnNext {
-                if (!File(backPath).delete()) {
-                    Log.e(TAG, "save: failed")
-                }
+
+    /**
+     * Transactional save for text files.
+     *
+     * Behavior:
+     * 1) SAVE_PRE: read old bytes (best-effort).
+     * 2) Build new bytes with charset/BOM strategy.
+     * 3) Write with openOutputStream(uri, "rwt").
+     * 4) Verify by reading back and comparing hash.
+     * 5) On failure:
+     *    - Try rollback to SAVE_PRE when possible.
+     *    - Always save an emergency draft, then prompt user to "Save as".
+     *
+     * zh-CN:
+     *
+     * 面向文本文件的事务式保存.
+     *
+     * 行为:
+     * 1) SAVE_PRE: 尽力读取旧 bytes.
+     * 2) 按 charset/BOM 策略生成新 bytes.
+     * 3) 通过 openOutputStream(uri, "rwt") 写入.
+     * 4) 写后读回并比对 hash 校验.
+     * 5) 失败时:
+     *    - 在可能时回滚到 SAVE_PRE.
+     *    - 无论能否回滚, 均保存草稿, 并提示用户 "另存为".
+     */
+    private fun writeTextWithCharsetTransactional(uri: Uri, text: String) {
+        val resolver = context.contentResolver
+
+        val (targetCharset, needBom) = when {
+            mHadBom -> {
+                mCurrentCharset to true
             }
+            mCurrentCharsetConfidence >= MIN_CONFIDENCE_TO_WRITE_FILE -> {
+                mCurrentCharset to false
+            }
+            else -> {
+                DEFAULT_CHARSET_TO_WRITE_FILE to false
+            }
+        }
+
+        val newBytes = buildBytesToWrite(text, targetCharset, needBom)
+
+        // SAVE_PRE snapshot (best-effort).
+        // zh-CN: SAVE_PRE 快照 (尽力而为).
+        val oldBytes = runCatching {
+            resolver.openInputStream(uri)?.use { it.readBytes() }
+        }.getOrNull()
+
+        // Track history only when within size guardrails.
+        // zh-CN: 仅在满足大小护栏时纳管历史.
+        if (shouldTrackHistory(oldBytes, newBytes)) {
+            // TODO Hook HistoryRepository here.
+            // zh-CN: 在这里接入 HistoryRepository.
+            //
+            // Example:
+            // historyRepo.recordPreSave(uri = uri, oldBytes = oldBytes, meta = ...)
+        }
+
+        val newHash = sha256(newBytes)
+
+        try {
+            resolver.openOutputStream(uri, "rwt")?.use { out ->
+                out.write(newBytes)
+                out.flush()
+            } ?: throw IOException("Cannot open output stream for $uri")
+
+            val readBack = runCatching {
+                resolver.openInputStream(uri)?.use { it.readBytes() } ?: ByteArray(0)
+            }.getOrElse { e ->
+                throw IOException("Read-back failed after write: $uri", e)
+            }
+
+            val readBackHash = sha256(readBack)
+            if (!readBackHash.contentEquals(newHash)) {
+                throw IOException("Write verification failed (hash mismatch) for uri: $uri")
+            }
+        } catch (e: SecurityException) {
+            // Permission denied by provider or missing URI grants.
+            // zh-CN: provider 拒绝访问或缺少 URI 授权导致权限被拒绝.
+            handleSaveFailure(uri, oldBytes, newBytes, IOException("Permission denied for uri: $uri", e))
+        } catch (e: Throwable) {
+            handleSaveFailure(uri, oldBytes, newBytes, e)
+        }
     }
 
-    private fun writeTextWithCharset(uri: Uri, text: String) {
-        context.contentResolver.openOutputStream(uri, "rwt")?.use { out ->
-            val (targetCharset, needBom) = when {
-                mHadBom -> {
-                    mCurrentCharset to true
-                }
-                mCurrentCharsetConfidence >= MIN_CONFIDENCE_TO_WRITE_FILE -> {
-                    mCurrentCharset to false
-                }
-                else -> {
-                    DEFAULT_CHARSET_TO_WRITE_FILE to false
+    /**
+     * Handle transactional save failure.
+     *
+     * Steps:
+     * - Try rollback (best-effort).
+     * - Save emergency draft (always).
+     * - Prompt user actions on main thread.
+     *
+     * zh-CN:
+     *
+     * 处理事务保存失败.
+     *
+     * 步骤:
+     * - 尝试回滚 (尽力而为).
+     * - 保存草稿 (始终执行).
+     * - 在主线程弹窗提示用户后续操作.
+     */
+    private fun handleSaveFailure(uri: Uri, oldBytes: ByteArray?, newBytes: ByteArray, error: Throwable): Nothing {
+        val resolver = context.contentResolver
+
+        // Try rollback to SAVE_PRE if possible.
+        // zh-CN: 若可能则回滚到 SAVE_PRE.
+        if (oldBytes != null) {
+            runCatching {
+                resolver.openOutputStream(uri, "rwt")?.use { out ->
+                    out.write(oldBytes)
+                    out.flush()
                 }
             }
-            if (needBom) {
-                out.write(StringUtils.bomBytes(targetCharset))
+        }
+
+        val draftFile = runCatching {
+            EmergencyDraftStore(context).saveDraft(
+                displayName = name.ifBlank { "untitled" },
+                bytes = newBytes,
+            )
+        }.getOrNull()
+
+        // Prompt user on main thread.
+        // zh-CN: 在主线程提示用户.
+        DialogUtils.buildAndShowAdaptive(
+            MaterialDialog.Builder(context)
+                .title(R.string.error_save_failed)
+                .content(
+                    buildString {
+                        append(error.message ?: error.toString())
+                        if (draftFile != null) {
+                            append("\n\n")
+                            append(context.getString(R.string.text_draft_file_path))
+                            append(":\n")
+                            append(draftFile.absolutePath)
+                        }
+                    }
+                )
+                .also { builder ->
+                    if (draftFile != null) {
+                        builder.neutralText(R.string.dialog_button_copy_path)
+                        builder.neutralColorRes(R.color.dialog_button_hint)
+                        builder.onNeutral { d, _ ->
+                            ClipboardUtils.setClip(context, draftFile.absolutePath)
+                            showSnack(d.view, R.string.text_already_copied_to_clip, false)
+                        }
+                    }
+                }
+                .negativeText(R.string.dialog_button_dismiss)
+                .negativeColorRes(R.color.dialog_button_default)
+                .onNegative { d, _ -> d.dismiss() }
+                .positiveText(R.string.dialog_button_save_as)
+                .positiveColorRes(R.color.dialog_button_attraction)
+                .onPositive { d, _ ->
+                    // Guide user to save as a normal file path (file://).
+                    // zh-CN: 引导用户另存为普通文件路径 (file://).
+                    runCatching {
+                        FileChooserDialogBuilder(context)
+                            .title(R.string.text_save_to)
+                            .dir(INTERNAL_STORAGE_ROOT)
+                            .chooseDir()
+                            .singleChoice()
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe({ dir ->
+                                // Determine extension from current uri path if possible.
+                                // zh-CN: 尽可能从当前 uri.path 推导扩展名.
+                                val ext = uri.path?.let { targetExtFromPath(it) } ?: ""
+
+                                val dest = File(
+                                    dir.path,
+                                    buildSafeFileNameForSaveAs(
+                                        baseName = name,
+                                        ext = ext,
+                                    )
+                                )
+
+                                Schedulers.io().scheduleDirect {
+                                    runCatching {
+                                        dest.parentFile?.mkdirs()
+                                        File(dest.path).outputStream().use { it.write(newBytes) }
+
+                                        // If "Save as" succeeded, update current uri to the new file.
+                                        // zh-CN: 若另存为成功, 则将当前 uri 更新为新文件.
+                                        this@EditorView.uri = Uri.fromFile(dest)
+                                        this@EditorView.name = getNameWithoutExtension(dest.path)
+
+                                        // Mark as saved on UI thread.
+                                        // zh-CN: 在 UI 线程标记为已保存.
+                                        post {
+                                            d.dismiss()
+                                            editor.markTextAsSaved()
+                                            setMenuItemStatus(R.id.save, false)
+                                        }
+                                    }.onFailure {
+                                        post {
+                                            showSnack(d.view, R.string.error_save_failed, false)
+                                            showToast(context, it.message, true)
+                                        }
+                                    }
+                                }
+                            }, { e ->
+                                e.printStackTrace()
+                            })
+                    }
+                }
+                .autoDismiss(false)
+                .cancelable(false)
+        )
+
+        if (error is IOException) {
+            throw error
+        }
+        throw IOException(error)
+    }
+
+    private fun buildBytesToWrite(text: String, charset: Charset, needBom: Boolean): ByteArray {
+        val body = text.toByteArray(charset)
+        if (!needBom) return body
+
+        val bom = StringUtils.bomBytes(charset)
+        return ByteArray(bom.size + body.size).also {
+            System.arraycopy(bom, 0, it, 0, bom.size)
+            System.arraycopy(body, 0, it, bom.size, body.size)
+        }
+    }
+
+    private fun shouldTrackHistory(oldBytes: ByteArray?, newBytes: ByteArray): Boolean {
+        val oldSize = oldBytes?.size ?: 0
+        val newSize = newBytes.size
+        return oldSize <= MAX_FILE_SIZE_TO_TRACK_BYTES && newSize <= MAX_FILE_SIZE_TO_TRACK_BYTES
+    }
+
+    private fun sha256(bytes: ByteArray): ByteArray {
+        return MessageDigest.getInstance("SHA-256").digest(bytes)
+    }
+
+    private fun targetExtFromPath(path: String): String {
+        val name = File(path).name
+        val dot = name.lastIndexOf('.')
+        if (dot <= 0 || dot >= name.length - 1) return ""
+        return name.substring(dot + 1)
+    }
+
+    private fun buildSafeFileNameForSaveAs(baseName: String, ext: String): String {
+        val raw = if (baseName.isBlank()) "untitled" else baseName
+        val sanitized = raw.replace(Regex("""[\\/:*?"<>|]"""), "_")
+        val niceExt = ext.trim().trimStart('.')
+        return if (niceExt.isBlank()) sanitized else "$sanitized.$niceExt"
+    }
+
+    // A minimal emergency draft store.
+    // zh-CN: 一个最小实现的草稿存储器.
+    private class EmergencyDraftStore(private val context: Context) {
+
+        private val draftsDir: File by lazy { File(context.filesDir, "drafts") }
+
+        fun saveDraft(displayName: String, bytes: ByteArray): File {
+            draftsDir.mkdirs()
+
+            val safeName = displayName
+                .ifBlank { "untitled" }
+                .replace(Regex("""[\\/:*?"<>|]"""), "_")
+                .lowercase(Locale.getDefault())
+
+            val now = System.currentTimeMillis()
+            val f = File(draftsDir, "${now}_${safeName}.bin")
+
+            f.outputStream().use { it.write(bytes) }
+
+            // Cleanup drafts after save (best-effort).
+            // zh-CN: 保存后顺便清理草稿 (尽力而为).
+            runCatching { cleanupLocked() }
+
+            return f
+        }
+
+        private fun cleanupLocked() {
+            val files = draftsDir.listFiles()?.toList() ?: return
+            if (files.isEmpty()) return
+
+            val now = System.currentTimeMillis()
+
+            // 1) Remove expired (older than 7 days).
+            // zh-CN: 1) 删除过期草稿 (超过 7 天).
+            val expiredBefore = now - DRAFT_MAX_DAYS_MS
+            files.forEach { f ->
+                if (f.lastModified() < expiredBefore) {
+                    // noinspection ResultOfMethodCallIgnored
+                    f.delete()
+                }
             }
-            out.write(text.toByteArray(targetCharset))
-        } ?: throw IOException("Cannot open output stream for $uri")
+
+            // 2) Enforce total bytes limit (keep newest first).
+            // zh-CN: 2) 约束总容量上限 (优先保留最新).
+            val remained = draftsDir.listFiles()?.toList()?.sortedByDescending { it.lastModified() } ?: return
+            var total = remained.sumOf { it.length().coerceAtLeast(0L) }
+
+            if (total <= DRAFT_MAX_TOTAL_BYTES) return
+
+            for (f in remained.asReversed()) {
+                if (total <= DRAFT_MAX_TOTAL_BYTES) break
+                val len = f.length().coerceAtLeast(0L)
+                if (f.delete()) {
+                    total -= len
+                }
+            }
+        }
     }
 
     fun forceStop() {
@@ -756,10 +1044,24 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     companion object {
 
-        private val TAG = EditorView::class.java.simpleName
-
         private const val MIN_CONFIDENCE_TO_WRITE_FILE = 90
         private val DEFAULT_CHARSET_TO_WRITE_FILE = StandardCharsets.UTF_8
+
+        // Max file size to track history snapshots.
+        // zh-CN: 纳管历史快照的最大文件大小.
+        private const val MAX_FILE_SIZE_TO_TRACK_BYTES: Int = 20 * 1024 * 1024
+
+        // Emergency draft cleanup window (7 days).
+        // zh-CN: 草稿清理时间窗口 (7 天).
+        private const val DRAFT_MAX_DAYS_MS: Long = 7L * 24L * 60L * 60L * 1000L
+
+        // Emergency draft total size limit (200MB).
+        // zh-CN: 草稿总容量上限 (200MB).
+        private const val DRAFT_MAX_TOTAL_BYTES: Long = 200L * 1024L * 1024L
+
+        // Internal storage root (no external SD).
+        // zh-CN: 内部存储根目录 (不访问外置 SD).
+        private const val INTERNAL_STORAGE_ROOT: String = "/storage/emulated/0"
 
         const val EXTRA_PATH = "path"
         const val EXTRA_NAME = "name"
@@ -767,7 +1069,5 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         const val EXTRA_READ_ONLY = "readOnly"
         const val EXTRA_SAVE_ENABLED = "saveEnabled"
         const val EXTRA_RUN_ENABLED = "runEnabled"
-
     }
-
 }

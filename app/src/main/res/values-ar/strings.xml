@@ -1226,4 +1226,8 @@
     <string name="text_write_system_settings">كتابة إعدادات النظام</string>
     <string name="text_xiaomi_background_popup_permission">النوافذ المنبثقة في الخلفية</string>
     <string name="error_refresh_failed">فشل التحديث</string>
+    <string name="error_save_failed">فشل الحفظ</string>
+    <string name="text_draft_file_path">مسار المسودة</string>
+    <string name="dialog_button_copy_path">نسخ</string>
+    <string name="dialog_button_save_as">حفظ باسم</string>
 </resources>

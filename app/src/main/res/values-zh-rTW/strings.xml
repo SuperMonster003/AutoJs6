@@ -1222,4 +1222,8 @@
     <string name="text_write_system_settings">修改系統設定</string>
     <string name="text_xiaomi_background_popup_permission">後臺彈出介面</string>
     <string name="error_refresh_failed">刷新失敗</string>
+    <string name="error_save_failed">儲存失敗</string>
+    <string name="text_draft_file_path">草稿檔案路徑</string>
+    <string name="dialog_button_copy_path">複製路徑</string>
+    <string name="dialog_button_save_as">另存為</string>
 </resources>
