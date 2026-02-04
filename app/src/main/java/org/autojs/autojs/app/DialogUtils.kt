@@ -39,18 +39,21 @@ import java.util.concurrent.atomic.AtomicReference
  * Transformed by SuperMonster003 on Oct 19, 2022.
  * Modified by OpenAI ChatGPT (GPT-5.2 Thinking) as of Jan 20, 2026.
  * Modified by JetBrains AI Assistant (GPT-5.2) as of Feb 1, 2026.
- * Modified by SuperMonster003 as of Feb 1, 2026.
+ * Modified by SuperMonster003 as of Feb 3, 2026.
  */
 object DialogUtils {
 
     private const val TAG = "DialogUtils"
 
     @JvmStatic
-    fun MaterialDialog.Builder.showAdaptive() = build().showAdaptive()
+    fun <T : MaterialDialog.Builder> T.showAdaptive(): MaterialDialog = build().showAdaptive()
+
+    @JvmStatic
+    fun <T : MaterialDialog.Builder> T.showAdaptiveOrNull(): MaterialDialog? = build()?.showAdaptive()
 
     @JvmStatic
     @Suppress("DEPRECATION")
-    fun MaterialDialog.showAdaptive() = showDialog(this)
+    fun <T : MaterialDialog> T.showAdaptive(): T = showDialog(this)
 
     /**
      * Show this [MaterialDialog] in a context-safe way.
@@ -92,7 +95,7 @@ object DialogUtils {
     @JvmOverloads
     @Deprecated("Use showAdaptive instead.", ReplaceWith("showAdaptive(dialog, focusable)"))
     @ReservedForCompatibility
-    fun showDialog(dialog: MaterialDialog, focusable: Boolean = true): MaterialDialog {
+    fun <T : MaterialDialog> showDialog(dialog: T, focusable: Boolean = true): T {
         runOnMain {
             // Prevent duplicated show.
             // zh-CN: 防止重复 show().
@@ -190,38 +193,17 @@ object DialogUtils {
     }
 
     /**
-     * Build dialog on the main thread and return it.
-     *
-     * Note:
-     * - MaterialDialog.Builder.build() may internally create Android Dialog/Handler.
-     * - Building on a background thread can crash with "Can't create handler inside thread ...".
-     *
-     * zh-CN:
-     *
-     * 在主线程 build 对话框并返回实例.
-     *
-     * 注:
-     * - MaterialDialog.Builder.build() 内部可能创建 Android Dialog/Handler.
-     * - 在后台线程 build 可能触发 "Can't create handler inside thread ..." 崩溃.
-     */
-    @JvmStatic
-    fun buildAdaptive(builder: MaterialDialog.Builder): MaterialDialog {
-        @Suppress("UNCHECKED_CAST")
-        return buildAdaptive { builder.build() }
-    }
-
-    /**
      * Build dialog on the main thread by a callable factory.
      *
      * zh-CN: 通过 callable 工厂在主线程 build 对话框.
      */
     @JvmStatic
-    fun buildAdaptive(factory: Callable<MaterialDialog>): MaterialDialog {
+    fun <T : MaterialDialog> buildAdaptive(factory: Callable<T>): T {
         if (Looper.getMainLooper() == Looper.myLooper()) {
             return factory.call()
         }
 
-        val ref = AtomicReference<MaterialDialog>()
+        val ref = AtomicReference<T>()
         val err = AtomicReference<Throwable?>()
         val latch = CountDownLatch(1)
 
@@ -245,21 +227,34 @@ object DialogUtils {
         return ref.get() ?: throw RuntimeException("buildAdaptive: dialog is null (timeout or build failed)")
     }
 
-    /**
-     * Build and show dialog on the main thread, then return the dialog instance.
-     * Use this when the caller might be running on a background thread.
-     *
-     * zh-CN:
-     *
-     * 在主线程 build 并 show 对话框, 然后返回对话框实例.
-     * 当调用方可能运行在后台线程时使用该方法.
-     */
     @JvmStatic
-    @JvmOverloads
-    fun buildAndShowAdaptive(builder: MaterialDialog.Builder, focusable: Boolean = true): MaterialDialog {
-        val dialog = buildAdaptive(builder)
-        @Suppress("DEPRECATION")
-        return showDialog(dialog, focusable)
+    fun <T : MaterialDialog> buildAdaptiveOrNull(factory: Callable<T?>): T? {
+        if (Looper.getMainLooper() == Looper.myLooper()) {
+            return factory.call()
+        }
+
+        val ref = AtomicReference<T?>()
+        val err = AtomicReference<Throwable?>()
+        val latch = CountDownLatch(1)
+
+        GlobalAppContext.post {
+            try {
+                ref.set(factory.call())
+            } catch (t: Throwable) {
+                err.set(t)
+                Log.w(TAG, "buildAdaptiveOrNull: failed", t)
+            } finally {
+                latch.countDown()
+            }
+        }
+
+        // Wait a bit to avoid infinite blocking in background threads.
+        // zh-CN: 设置等待超时以避免后台线程无限阻塞.
+        latch.await(5, TimeUnit.SECONDS)
+
+        err.get()?.let { throw RuntimeException(it) }
+
+        return ref.get()
     }
 
     /**
@@ -268,10 +263,32 @@ object DialogUtils {
      * zh-CN: 使用 callable 工厂在主线程 build 并 show 对话框, 然后返回实例.
      */
     @JvmStatic
-    @JvmOverloads
-    fun buildAndShowAdaptive(factory: Callable<MaterialDialog>, focusable: Boolean = true): MaterialDialog {
+    @Suppress("DEPRECATION")
+    fun <T : MaterialDialog> buildAndShowAdaptive(factory: Callable<T>): T {
+        return buildAndShowAdaptive(factory, true)
+    }
+
+    /**
+     * Build and show dialog on the main thread with a callable factory, then return the instance.
+     *
+     * zh-CN: 使用 callable 工厂在主线程 build 并 show 对话框, 然后返回实例.
+     */
+    @JvmStatic
+    @Suppress("DEPRECATION")
+    fun <T : MaterialDialog> buildAndShowAdaptive(factory: Callable<T>, focusable: Boolean): T {
         val dialog = buildAdaptive(factory)
-        @Suppress("DEPRECATION")
+        return showDialog(dialog, focusable)
+    }
+
+    @JvmStatic
+    @Suppress("DEPRECATION")
+    fun <T : MaterialDialog> buildAndShowAdaptiveOrNull(factory: Callable<T?>): T? =
+        buildAndShowAdaptiveOrNull(factory, true)
+
+    @JvmStatic
+    @Suppress("DEPRECATION")
+    fun <T : MaterialDialog> buildAndShowAdaptiveOrNull(factory: Callable<T?>, focusable: Boolean): T? {
+        val dialog = buildAdaptiveOrNull(factory) ?: return null
         return showDialog(dialog, focusable)
     }
 
@@ -468,8 +485,8 @@ object DialogUtils {
     fun MaterialDialog.applyProgressThemeColorTintLists(): MaterialDialog = also {
         val progressBar = progressBar ?: return@also
 
-        val bgColor = context.getColor(R.color.dialog_progress_gray_background_tint)
-        val fgColor = ColorUtils.adjustColorForContrast(bgColor, ThemeColorManager.colorPrimary, 2.3)
+        val fgColor = ColorUtils.adjustColorForContrast(context.getColor(R.color.dialog_progress_gray_background_tint), ThemeColorManager.colorPrimary, 2.3)
+        val bgColor = ColorUtils.applyAlpha(fgColor, 0.2)
 
         progressBar.setProgressTintList(ColorStateList.valueOf(fgColor))
         progressBar.setProgressBackgroundTintList(ColorStateList.valueOf(bgColor))

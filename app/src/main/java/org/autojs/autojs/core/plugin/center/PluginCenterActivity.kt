@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.widget.SearchViewItem
 import org.autojs.autojs.util.IntentUtils.startSafely
+import org.autojs.autojs.util.MaterialDialogUtils.choiceWidgetThemeColor
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.onceGlobalLayout
 import org.autojs.autojs.util.ViewUtils.setMenuIconsColorByThemeColorLuminance
@@ -135,6 +136,7 @@ class PluginCenterActivity : BaseActivity() {
                     else -> Unit
                 }
             }
+            .choiceWidgetThemeColor()
             .negativeText(R.string.text_cancel)
             .negativeColorRes(R.color.dialog_button_default)
             .show()
@@ -167,6 +169,7 @@ class PluginCenterActivity : BaseActivity() {
                     else -> Unit
                 }
             }
+            .choiceWidgetThemeColor()
             .negativeText(R.string.text_cancel)
             .negativeColorRes(R.color.dialog_button_default)
             .show()

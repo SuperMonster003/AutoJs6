@@ -35,6 +35,7 @@ import org.autojs.autojs.ui.settings.VersionHistoryRepository.Companion.Category
 import org.autojs.autojs.ui.settings.VersionHistoryRepository.Companion.DEFAULT_FILTER
 import org.autojs.autojs.ui.settings.VersionHistoryRepository.Companion.DEFAULT_VERSION_NAME
 import org.autojs.autojs.util.IntentUtils.startSafely
+import org.autojs.autojs.util.MaterialDialogUtils.choiceWidgetThemeColor
 import org.autojs.autojs.util.ProcessLogger
 import org.autojs.autojs.util.ViewUtils.excludePaddingClippableViewFromBottomNavigationBar
 import org.autojs.autojs.util.ViewUtils.setMenuIconsColorByThemeColorLuminance
@@ -208,6 +209,7 @@ class DisplayVersionHistoriesActivity : BaseActivity() {
                 }
                 true
             }
+            .choiceWidgetThemeColor()
             .show()
     }
 

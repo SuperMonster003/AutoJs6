@@ -19,6 +19,7 @@ import org.autojs.autojs.util.MaterialDialogUtils.widgetThemeColor
 import org.autojs.autojs.pluginclient.DevPluginService
 import org.autojs.autojs.pluginclient.JsonSocketClient
 import org.autojs.autojs.ui.common.NotAskAgainDialog
+import org.autojs.autojs.util.MaterialDialogUtils.choiceWidgetThemeColor
 import org.autojs.autojs.util.Observers
 import org.autojs.autojs.util.ThreadUtils.runOnMain
 import org.autojs.autojs.util.ViewUtils
@@ -229,6 +230,7 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
                         dialog.inputEditText?.setText(text)
                         validateAndConnectToRemoteServer(dialog)
                     }
+                    .choiceWidgetThemeColor()
                     .itemsLongCallback { dHistories, _, _, text ->
                         MaterialDialog.Builder(context)
                             .title(R.string.text_prompt)
