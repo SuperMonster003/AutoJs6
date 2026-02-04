@@ -475,4 +475,8 @@ object DialogUtils {
         progressBar.setProgressBackgroundTintList(ColorStateList.valueOf(bgColor))
     }
 
+    @JvmStatic
+    fun MaterialDialog.setActionButtonText(actionButton: DialogAction, string: String) {
+        getActionButton(actionButton).text = string
+    }
 }

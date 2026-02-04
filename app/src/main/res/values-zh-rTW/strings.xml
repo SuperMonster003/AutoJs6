@@ -1229,4 +1229,20 @@
     <string name="text_version_history">版本歷史</string>
     <string name="text_no_version_history">無版本歷史</string>
     <string name="text_version_history_restore_does_not_auto_save_to_disk">恢復時只修改編輯器內容, 不會自動儲存到檔案, 需要手動點選儲存按鈕.</string>
+    <string name="item_move_to_trash">移入回收站</string>
+    <string name="item_delete_permanently">永久刪除</string>
+    <string name="text_moved_to_trash">已移入回收站</string>
+    <string name="text_choose_delete_strategy">選擇刪除策略</string>
+    <string name="text_trash">回收站</string>
+    <string name="text_choose_restore_path">選擇恢復路徑</string>
+    <string name="text_restore_to_original_path">恢復到原始路徑</string>
+    <string name="text_restore_to_specified_path">恢復到指定路徑</string>
+    <string name="text_path_colon_value">路徑: %1$s</string>
+    <string name="text_file_name_colon_value">檔名: %1$s</string>
+    <string name="dialog_button_choose_path">選擇路徑</string>
+    <string name="text_overwrite">覆蓋</string>
+    <string name="text_auto_rename">自動重新命名</string>
+    <string name="text_no_data">無資料</string>
+    <string name="error_invalid_path">無效的路徑: %1$s</string>
+    <string name="text_version_history_restore_will_overwrite_file">恢復將覆蓋檔案內容.\n路徑: %1$s</string>
 </resources>

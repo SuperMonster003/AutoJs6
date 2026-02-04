@@ -19,7 +19,9 @@ class HistoryCleanupWorker(
     override suspend fun doWork(): Result {
         return runCatching {
             cleanupExpiredRevisions()
+            cleanupExpiredTrashItems()
             cleanupOrphanHistoryBlobs()
+            cleanupOrphanTrashBlobs()
             cleanupEmergencyDrafts()
         }.fold(
             onSuccess = { Result.success() },
@@ -56,6 +58,58 @@ class HistoryCleanupWorker(
 
         // Delete blobs that are not referenced by DB.
         // zh-CN: 删除 DB 未引用的 blob.
+        root.walkTopDown()
+            .filter { it.isFile }
+            .forEach { f ->
+                val rel = f.relativeTo(applicationContext.filesDir).invariantSeparatorsPath
+                if (!referenced.contains(rel)) {
+                    // noinspection ResultOfMethodCallIgnored
+                    f.delete()
+                }
+            }
+
+        // Best-effort: remove empty directories.
+        // zh-CN: 尽力删除空目录.
+        root.walkBottomUp()
+            .filter { it.isDirectory }
+            .forEach { dir ->
+                val children = dir.listFiles()
+                if (children == null || children.isEmpty()) {
+                    // noinspection ResultOfMethodCallIgnored
+                    dir.delete()
+                }
+            }
+    }
+
+    private fun cleanupExpiredTrashItems() {
+        val db = HistoryDatabase.getInstance(applicationContext)
+        val dao = db.historyDao()
+        val trashBlobs = TrashBlobStore(applicationContext)
+
+        // Remove expired trash items by days (default 30 days).
+        // zh-CN: 按天数删除过期回收站条目 (默认 30 天).
+        val now = System.currentTimeMillis()
+        val expiredBefore = now - TRASH_MAX_DAYS_MS
+        val expired = dao.listExpiredTrashItems(expiredBefore)
+        if (expired.isEmpty()) return
+
+        dao.deleteTrashItemsByIds(expired.map { it.trashId })
+        expired.forEach { trashBlobs.deleteBlobByRelPath(it.blobRelPath) }
+    }
+
+    private fun cleanupOrphanTrashBlobs() {
+        val db = HistoryDatabase.getInstance(applicationContext)
+        val dao = db.historyDao()
+
+        // Build the referenced trash blob set from DB.
+        // zh-CN: 从 DB 构建被引用的回收站 blob 集合.
+        val referenced = dao.listAllTrashBlobRelPaths().toHashSet()
+
+        val root = File(applicationContext.filesDir, "trash/blob")
+        if (!root.exists() || !root.isDirectory) return
+
+        // Delete trash blobs that are not referenced by DB.
+        // zh-CN: 删除 DB 未引用的回收站 blob.
         root.walkTopDown()
             .filter { it.isFile }
             .forEach { f ->
@@ -118,6 +172,7 @@ class HistoryCleanupWorker(
 
     companion object {
         private const val MAX_DAYS_MS: Long = 30L * 24L * 60L * 60L * 1000L
+        private const val TRASH_MAX_DAYS_MS: Long = 30L * 24L * 60L * 60L * 1000L
         private const val DRAFT_MAX_DAYS_MS: Long = 7L * 24L * 60L * 60L * 1000L
         private const val DRAFT_MAX_TOTAL_BYTES: Long = 200L * 1024L * 1024L
     }

@@ -1489,5 +1489,21 @@
     <string name="dialog_button_save_as">Save as</string>
     <string name="text_version_history">Version history</string>
     <string name="text_no_version_history">No version history</string>
-    <string name="text_version_history_restore_does_not_auto_save_to_disk">Restore will only change editor content; it will not save to file automatically.</string>
+    <string name="text_version_history_restore_does_not_auto_save_to_disk">Restoring only changes the editor content. It will not automatically save to the file. Please tap the Save button manually.</string>
+    <string name="item_move_to_trash">Move to trash</string>
+    <string name="item_delete_permanently">Delete permanently</string>
+    <string name="text_moved_to_trash">Moved to trash</string>
+    <string name="text_choose_delete_strategy">Choose delete strategy</string>
+    <string name="text_trash">Trash</string>
+    <string name="text_choose_restore_path">Choose restore path</string>
+    <string name="text_restore_to_original_path">Restore to original path</string>
+    <string name="text_restore_to_specified_path">Restore to specified path</string>
+    <string name="text_path_colon_value">Path: %1$s</string>
+    <string name="text_file_name_colon_value">File name: %1$s</string>
+    <string name="dialog_button_choose_path">Choose</string>
+    <string name="text_overwrite">Overwrite</string>
+    <string name="text_auto_rename">Auto rename</string>
+    <string name="text_no_data">No data</string>
+    <string name="error_invalid_path">Invalid path: %1$s</string>
+    <string name="text_version_history_restore_will_overwrite_file">Restore will overwrite file content.\nPath: %1$s</string>
 </resources>

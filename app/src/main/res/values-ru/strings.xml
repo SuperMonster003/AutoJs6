@@ -1231,4 +1231,20 @@
     <string name="text_version_history">История версий</string>
     <string name="text_no_version_history">Нет истории версий</string>
     <string name="text_version_history_restore_does_not_auto_save_to_disk">Восстановление изменяет только содержимое редактора. Файл не будет сохранен автоматически. Нажмите кнопку \"Сохранить\" вручную.</string>
+    <string name="item_move_to_trash">Переместить в корзину</string>
+    <string name="item_delete_permanently">Удалить навсегда</string>
+    <string name="text_moved_to_trash">Перемещено в корзину</string>
+    <string name="text_choose_delete_strategy">Выберите способ удаления</string>
+    <string name="text_trash">Корзина</string>
+    <string name="text_choose_restore_path">Выберите путь восстановления</string>
+    <string name="text_restore_to_original_path">Восстановить в исходный путь</string>
+    <string name="text_restore_to_specified_path">Восстановить в указанный путь</string>
+    <string name="text_path_colon_value">Путь: %1$s</string>
+    <string name="text_file_name_colon_value">Имя файла: %1$s</string>
+    <string name="dialog_button_choose_path">Выбрать</string>
+    <string name="text_overwrite">Перезаписать</string>
+    <string name="text_auto_rename">Автопереименование</string>
+    <string name="text_no_data">Нет данных</string>
+    <string name="error_invalid_path">Недопустимый путь: %1$s</string>
+    <string name="text_version_history_restore_will_overwrite_file">Восстановление перезапишет содержимое файла.\nПуть: %1$s</string>
 </resources>

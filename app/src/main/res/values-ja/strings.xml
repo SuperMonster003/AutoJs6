@@ -1232,4 +1232,20 @@
     <string name="text_version_history">バージョン履歴</string>
     <string name="text_no_version_history">バージョン履歴なし</string>
     <string name="text_version_history_restore_does_not_auto_save_to_disk">復元すると編集内容のみが変更されます. ファイルには自動保存されません. 保存ボタンを手動でタップしてください.</string>
+    <string name="item_move_to_trash">ゴミ箱に移動</string>
+    <string name="item_delete_permanently">完全に削除</string>
+    <string name="text_moved_to_trash">ゴミ箱に移動しました</string>
+    <string name="text_choose_delete_strategy">削除方法を選択</string>
+    <string name="text_trash">ゴミ箱</string>
+    <string name="text_choose_restore_path">復元先を選択</string>
+    <string name="text_restore_to_original_path">元のパスに復元</string>
+    <string name="text_restore_to_specified_path">指定したパスに復元</string>
+    <string name="text_path_colon_value">パス: %1$s</string>
+    <string name="text_file_name_colon_value">ファイル名: %1$s</string>
+    <string name="dialog_button_choose_path">選択</string>
+    <string name="text_overwrite">上書き</string>
+    <string name="text_auto_rename">自動リネーム</string>
+    <string name="text_no_data">データなし</string>
+    <string name="error_invalid_path">無効なパス: %1$s</string>
+    <string name="text_version_history_restore_will_overwrite_file">復元するとファイル内容が上書きされます.\nパス: %1$s</string>
 </resources>
