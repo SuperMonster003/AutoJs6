@@ -1233,4 +1233,20 @@
     <string name="text_version_history">سجل الاصدارات</string>
     <string name="text_no_version_history">لا يوجد سجل للاصدارات</string>
     <string name="text_version_history_restore_does_not_auto_save_to_disk">عند الاستعادة، يتم تغيير محتوى المحرر فقط. لن يتم الحفظ تلقائيا في الملف. يرجى الضغط على زر \"حفظ\" يدويا.</string>
+    <string name="item_move_to_trash">نقل الى سلة المحذوفات</string>
+    <string name="item_delete_permanently">حذف نهائيا</string>
+    <string name="text_moved_to_trash">تم النقل الى سلة المحذوفات</string>
+    <string name="text_choose_delete_strategy">اختر طريقة الحذف</string>
+    <string name="text_trash">سلة المحذوفات</string>
+    <string name="text_choose_restore_path">اختر مسار الاستعادة</string>
+    <string name="text_restore_to_original_path">استعادة الى المسار الاصلي</string>
+    <string name="text_restore_to_specified_path">استعادة الى مسار محدد</string>
+    <string name="text_path_colon_value">المسار: %1$s</string>
+    <string name="text_file_name_colon_value">اسم الملف: %1$s</string>
+    <string name="dialog_button_choose_path">اختيار</string>
+    <string name="text_overwrite">استبدال</string>
+    <string name="text_auto_rename">اعادة تسمية تلقائيا</string>
+    <string name="text_no_data">لا توجد بيانات</string>
+    <string name="error_invalid_path">مسار غير صالح: %1$s</string>
+    <string name="text_version_history_restore_will_overwrite_file">ستؤدي الاستعادة الى استبدال محتوى الملف.\nالمسار: %1$s</string>
 </resources>

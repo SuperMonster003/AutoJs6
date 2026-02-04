@@ -1231,4 +1231,20 @@
     <string name="text_version_history">Historial de versiones</string>
     <string name="text_no_version_history">Sin historial de versiones</string>
     <string name="text_version_history_restore_does_not_auto_save_to_disk">Al restaurar, solo se cambia el contenido del editor. No se guardara automaticamente en el archivo. Debes pulsar el boton Guardar manualmente.</string>
+    <string name="item_move_to_trash">Mover a la papelera</string>
+    <string name="item_delete_permanently">Eliminar definitivamente</string>
+    <string name="text_moved_to_trash">Movido a la papelera</string>
+    <string name="text_choose_delete_strategy">Elegir metodo de eliminacion</string>
+    <string name="text_trash">Papelera</string>
+    <string name="text_choose_restore_path">Elegir ruta de restauracion</string>
+    <string name="text_restore_to_original_path">Restaurar a la ruta original</string>
+    <string name="text_restore_to_specified_path">Restaurar a una ruta especifica</string>
+    <string name="text_path_colon_value">Ruta: %1$s</string>
+    <string name="text_file_name_colon_value">Nombre de archivo: %1$s</string>
+    <string name="dialog_button_choose_path">Elegir</string>
+    <string name="text_overwrite">Sobrescribir</string>
+    <string name="text_auto_rename">Renombrar automaticamente</string>
+    <string name="text_no_data">Sin datos</string>
+    <string name="error_invalid_path">Ruta no valida: %1$s</string>
+    <string name="text_version_history_restore_will_overwrite_file">La restauracion sobrescribira el contenido del archivo.\nRuta: %1$s</string>
 </resources>

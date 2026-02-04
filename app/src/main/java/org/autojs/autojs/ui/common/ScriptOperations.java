@@ -40,10 +40,12 @@ import org.autojs.autojs.pio.PFiles;
 import org.autojs.autojs.pio.UncheckedIOException;
 import org.autojs.autojs.project.ProjectConfig;
 import org.autojs.autojs.storage.file.TmpScriptFiles;
+import org.autojs.autojs.storage.history.TrashRepository;
 import org.autojs.autojs.ui.filechooser.FileChooserDialogBuilder;
 import org.autojs.autojs.ui.shortcut.ShortcutCreateActivity;
 import org.autojs.autojs.ui.timing.TimedTaskSettingActivity;
 import org.autojs.autojs.util.EnvironmentUtils;
+import org.autojs.autojs.util.FileUtils;
 import org.autojs.autojs.util.IntentUtils;
 import org.autojs.autojs.util.MaterialDialogUtils;
 import org.autojs.autojs.util.ShortcutUtils;
@@ -67,7 +69,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.autojs.autojs.util.FileUtils;
 
 import static org.autojs.autojs.app.DialogUtils.fixCheckBoxGravity;
 import static org.autojs.autojs.model.explorer.ExplorerFileItem.isInSampleDir;
@@ -957,14 +958,31 @@ public class ScriptOperations {
     }
 
     public void delete(final ScriptFile scriptFile) {
-        DialogUtils.showAdaptive(new MaterialDialog.Builder(mContext)
-                .title(mContext.getString(R.string.text_confirm_to_delete))
-                .content(scriptFile.getName())
-                .negativeText(R.string.text_cancel)
-                .positiveText(R.string.dialog_button_confirm)
-                .positiveColorRes(R.color.dialog_button_caution)
-                .onPositive((dialog, which) -> deleteWithoutConfirm(scriptFile))
-                .build());
+        DialogUtils.buildAndShowAdaptive(() -> {
+            MaterialDialog.Builder builder = new MaterialDialog.Builder(mContext)
+                    .title(R.string.text_choose_delete_strategy)
+                    .content(scriptFile.getName())
+                    .items(
+                            mContext.getString(R.string.item_move_to_trash),
+                            mContext.getString(R.string.item_delete_permanently)
+                    )
+                    .itemsCallbackSingleChoice(0, (dialog, itemView, which, text) -> {
+                        dialog.dismiss();
+
+                        if (which == 0) {
+                            moveToTrashWithProgress(scriptFile);
+                        } else if (which == 1) {
+                            deleteWithoutConfirm(scriptFile);
+                        }
+
+                        return true;
+                    })
+                    .negativeText(R.string.dialog_button_cancel)
+                    .positiveText(R.string.dialog_button_confirm)
+                    .positiveColorRes(R.color.dialog_button_caution);
+            MaterialDialogUtils.choiceWidgetThemeColor(builder);
+            return builder.build();
+        });
     }
 
     public void setAsWorkingDir(final ScriptFile scriptFile) {
@@ -985,6 +1003,68 @@ public class ScriptOperations {
                 .positiveColorRes(R.color.dialog_button_warn)
                 .onPositive((dialog, which) -> setAsWorkingDirNow(scriptFile))
                 .build());
+    }
+
+    private void moveToTrashWithProgress(final ScriptFile scriptFile) {
+        boolean isDir = scriptFile.isDirectory();
+        int titleRes = isDir ? R.string.text_delete_folder : R.string.text_delete_file;
+
+        Observable.fromCallable(() -> {
+                    OperationController controller = new OperationController();
+                    ProgressDialogSession session = new ProgressDialogSession(controller);
+
+                    try {
+                        // Indeterminate progress is acceptable for trashing.
+                        // zh-CN: 移入回收站使用不确定进度条即可.
+                        MaterialDialog.Builder builder = new MaterialDialog.Builder(mContext)
+                                .title(titleRes)
+                                .content(R.string.ellipsis_six)
+                                .negativeText(R.string.dialog_button_abort)
+                                .negativeColorRes(R.color.dialog_button_caution)
+                                .onNegative((dialog, which) -> {
+                                    controller.cancel();
+                                    try {
+                                        dialog.setContent(mContext.getString(R.string.text_aborting));
+                                    } catch (Throwable ignored) {
+                                        /* Ignored. */
+                                    }
+                                })
+                                .progress(true, 0)
+                                .progressIndeterminateStyle(true)
+                                .cancelable(false)
+                                .canceledOnTouchOutside(false);
+
+                        session.scheduleShow(builder);
+
+                        controller.throwIfCancelled();
+
+                        // Move into trash (blob + db) then notify explorer.
+                        // zh-CN: 移入回收站 (blob + db), 然后通知资源管理器.
+                        new TrashRepository(mContext.getApplicationContext())
+                                .moveToTrash(scriptFile.getPath());
+
+                        return 1;
+                    } catch (OperationAbortedException aborted) {
+                        return -1;
+                    } finally {
+                        session.dismissSafely();
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(result -> {
+                    switch (result) {
+                        case 1 -> {
+                            showMessage(R.string.text_moved_to_trash);
+                            notifyFileRemoved(ProjectConfig.isProject(scriptFile), scriptFile.isDirectory(), scriptFile);
+                        }
+                        case -1 -> showMessage(R.string.text_operation_aborted);
+                        default -> showMessage(R.string.text_failed_to_delete);
+                    }
+                }, e -> {
+                    e.printStackTrace();
+                    showMessage(R.string.text_failed_to_delete);
+                });
     }
 
     public void deleteWithoutConfirm(final ScriptFile scriptFile) {

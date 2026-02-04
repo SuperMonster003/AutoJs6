@@ -45,6 +45,7 @@ import org.autojs.autojs.model.script.Scripts
 import org.autojs.autojs.pio.PFile
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.project.ProjectConfig
+import org.autojs.autojs.storage.history.VersionHistoryController
 import org.autojs.autojs.theme.ThemeColorHelper
 import org.autojs.autojs.theme.ThemeColorManagerCompat
 import org.autojs.autojs.theme.widget.ThemeColorSwipeRefreshLayout
@@ -283,6 +284,16 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             R.id.action_delete -> {
                 ScriptOperations(context, this@ExplorerView, currentPage)
                     .delete(selectedItem!!.toScriptFile())
+            }
+            R.id.action_version_history -> {
+                val selected = selectedItem ?: return false
+
+                // Show version history for this file and restore to disk when chosen.
+                // zh-CN: 显示该文件的版本历史, 选择后写回磁盘恢复.
+                VersionHistoryController(context).showForFilePath(selected.path)
+
+                notifyItemOperated()
+                mRequestHostDialogHide?.run()
             }
             R.id.action_run_repeatedly -> {
                 ScriptLoopDialog(context, selectedItem!!.toScriptFile())

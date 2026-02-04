@@ -44,15 +44,13 @@ import org.autojs.autojs.model.script.Scripts.EXTRA_EXCEPTION_LINE_NUMBER
 import org.autojs.autojs.model.script.Scripts.EXTRA_EXCEPTION_MESSAGE
 import org.autojs.autojs.model.script.Scripts.openByOtherApps
 import org.autojs.autojs.model.script.Scripts.runWithBroadcastSender
-import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.pio.PFiles.getNameWithoutExtension
 import org.autojs.autojs.pio.PFiles.write
 import org.autojs.autojs.storage.file.TmpScriptFiles
-import org.autojs.autojs.storage.history.HistoryDatabase
 import org.autojs.autojs.storage.history.HistoryRepository
 import org.autojs.autojs.storage.history.HistoryUriUtils
+import org.autojs.autojs.storage.history.VersionHistoryController
 import org.autojs.autojs.tool.Callback
-import org.autojs.autojs.ui.common.NotAskAgainDialog
 import org.autojs.autojs.ui.doc.ManualDialog
 import org.autojs.autojs.ui.edit.completion.CodeCompletionBar
 import org.autojs.autojs.ui.edit.completion.CodeCompletionBar.OnHintClickListener
@@ -76,10 +74,8 @@ import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.DisplayUtils.pxToSp
 import org.autojs.autojs.util.DocsUtils.getUrl
 import org.autojs.autojs.util.MaterialDialogUtils.choiceWidgetThemeColor
-import org.autojs.autojs.util.MaterialDialogUtils.widgetThemeColor
 import org.autojs.autojs.util.Observers
 import org.autojs.autojs.util.StringUtils
-import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs.util.ViewUtils.showSnack
 import org.autojs.autojs.util.ViewUtils.showToast
 import org.autojs.autojs6.R
@@ -89,8 +85,6 @@ import java.io.IOException
 import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
-import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Locale
 
 /**
@@ -717,140 +711,18 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     fun showVersionHistoryDialog() {
-        val logicalPath = HistoryUriUtils.toLogicalPathOrNull(uri)
-        if (logicalPath == null) {
-            // History is only tracked under internal storage root.
-            // zh-CN: 历史记录仅纳管内部存储根目录下的文件.
-            DialogUtils.buildAndShowAdaptive {
-                MaterialDialog.Builder(context)
-                    .title(R.string.text_version_history)
-                    .content(R.string.text_no_version_history)
-                    .positiveText(R.string.dialog_button_dismiss)
-                    .positiveColorRes(R.color.dialog_button_default)
-                    .cancelable(false)
-                    .build()
-            }
-            return
-        }
-
-        Schedulers.io().scheduleDirect {
-            runCatching {
-                val appCtx = context.applicationContext
-                val db = HistoryDatabase.getInstance(appCtx)
-                val dao = db.historyDao()
-
-                val fileEntry = dao.findFileByPath(logicalPath)
-                val fileId = fileEntry?.fileId
-
-                val revs = if (fileId != null) {
-                    // Show latest first for selection.
-                    // zh-CN: 列表按最新优先展示供选择.
-                    dao.listRevisionsAsc(fileId).asReversed().take(HISTORY_DIALOG_MAX_ITEMS)
-                } else {
-                    emptyList()
-                }
-
-                post {
-                    if (revs.isEmpty()) {
-                        DialogUtils.buildAndShowAdaptive {
-                            MaterialDialog.Builder(context)
-                                .title(R.string.text_version_history)
-                                .content(R.string.text_no_version_history)
-                                .positiveText(R.string.dialog_button_dismiss)
-                                .positiveColorRes(R.color.dialog_button_default)
-                                .cancelable(false)
-                                .build()
-                        }
-                        return@post
-                    }
-
-                    val fmt = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-                    val items = revs.map { rev ->
-                        val t = fmt.format(Date(rev.createdAt))
-                        val size = rev.sizeBytes
-                        "$t  |  ${PFiles.formatSizeWithUnit(size)}"
-                    }
-
-                    val selectedIndex = intArrayOf(0)
-
-                    DialogUtils.buildAndShowAdaptive {
-                        MaterialDialog.Builder(context)
-                            .title(R.string.dialog_button_history)
-                            .items(items)
-                            .itemsCallbackSingleChoice(0) { _, _, which, _ ->
-                                selectedIndex[0] = which
-                                true
-                            }
-                            .negativeText(R.string.dialog_button_cancel)
-                            .negativeColorRes(R.color.dialog_button_default)
-                            .positiveText(R.string.dialog_button_retrieve)
-                            .positiveColorRes(R.color.dialog_button_attraction)
-                            .onPositive { _, _ ->
-                                val chosen = revs.getOrNull(selectedIndex[0]) ?: return@onPositive
-
-                                // Confirm before restoring to editor.
-                                // zh-CN: 恢复到编辑器前先做二次确认.
-                                showRestoreConfirmDialog() {
-                                    // Load blob and restore into editor (not auto-save).
-                                    // zh-CN: 读取 blob 并恢复到编辑器 (不自动保存).
-                                    Schedulers.io().scheduleDirect {
-                                        runCatching {
-                                            val bytes = HistoryRepository(appCtx).readRevisionBytes(chosen)
-                                            val restored = decodeRevisionBytes(
-                                                bytes = bytes,
-                                                encodingName = chosen.encoding,
-                                                hadBom = chosen.hadBom,
-                                            )
-                                            post {
-                                                editor.text = restored
-                                                setMenuItemStatus(R.id.save, true)
-                                                showSnack(this@EditorView, R.string.text_done)
-                                            }
-                                        }.onFailure {
-                                            it.printStackTrace()
-                                            post { showToast(context, it.message, true) }
-                                        }
-                                    }
-                                }
-                            }
-                            .cancelable(true)
-                            .build()
-                    }
-                }
-            }.onFailure {
-                it.printStackTrace()
-                post { showToast(context, it.message, true) }
-            }
-        }
-    }
-
-    private fun showRestoreConfirmDialog(onConfirm: () -> Unit) {
-        DialogUtils.buildAndShowAdaptiveOrNull {
-            NotAskAgainDialog.Builder(
-                context,
-                key(R.string.key_version_history_restore_does_not_auto_save_to_disk)
-            ).apply {
-                title(R.string.text_prompt)
-                content(R.string.text_version_history_restore_does_not_auto_save_to_disk)
-                widgetThemeColor()
-                negativeText(R.string.dialog_button_cancel)
-                negativeColorRes(R.color.dialog_button_default)
-                positiveText(R.string.dialog_button_confirm)
-                positiveColorRes(R.color.dialog_button_attraction)
-                onPositive { _, _ -> onConfirm() }
-                cancelable(false)
-            }.build()
-        } ?: onConfirm()
-    }
-
-    private fun decodeRevisionBytes(bytes: ByteArray, encodingName: String, hadBom: Boolean): String {
-        val charset = runCatching { Charset.forName(encodingName) }.getOrElse { DEFAULT_CHARSET_TO_WRITE_FILE }
-        val effective = if (hadBom) {
-            // Drop BOM before decoding because BOM presence is tracked by metadata.
-            // zh-CN: BOM 是否存在由元数据记录, 解码前需丢弃 BOM.
-            StringUtils.dropBom(bytes, charset)
-        } else bytes
-        return String(effective, charset)
+        // Delegate to controller to unify editor/explorer/history page behavior.
+        // zh-CN: 委托给 Controller, 统一 editor/explorer/history page 的行为.
+        VersionHistoryController(context).showForEditor(
+            uri = uri,
+            onRestoreToEditor = { restoredText ->
+                editor.text = restoredText
+            },
+            onRestoredUi = {
+                setMenuItemStatus(R.id.save, true)
+                showSnack(this@EditorView, R.string.text_done)
+            },
+        )
     }
 
     // A minimal emergency draft store.
@@ -1210,10 +1082,6 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         // Emergency draft total size limit (200MB).
         // zh-CN: 草稿总容量上限 (200MB).
         private const val DRAFT_MAX_TOTAL_BYTES: Long = 200L * 1024L * 1024L
-
-        // Max items shown in history dialog.
-        // zh-CN: 历史对话框最多展示条数.
-        private const val HISTORY_DIALOG_MAX_ITEMS: Int = 20
 
         // Internal storage root (no external SD).
         // zh-CN: 内部存储根目录 (不访问外置 SD).

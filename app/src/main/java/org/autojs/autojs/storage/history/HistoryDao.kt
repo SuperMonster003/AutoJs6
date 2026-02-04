@@ -40,4 +40,19 @@ interface HistoryDao {
 
     @Query("SELECT blobRelPath FROM revision")
     fun listAllBlobRelPaths(): List<String>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun upsertTrashItem(item: TrashEntities.TrashItem)
+
+    @Query("SELECT * FROM trash_item ORDER BY trashedAt DESC")
+    fun listTrashItemsDesc(): List<TrashEntities.TrashItem>
+
+    @Query("SELECT * FROM trash_item WHERE trashedAt < :expiredBefore ORDER BY trashedAt ASC")
+    fun listExpiredTrashItems(expiredBefore: Long): List<TrashEntities.TrashItem>
+
+    @Query("DELETE FROM trash_item WHERE trashId IN (:trashIds)")
+    fun deleteTrashItemsByIds(trashIds: List<String>)
+
+    @Query("SELECT blobRelPath FROM trash_item")
+    fun listAllTrashBlobRelPaths(): List<String>
 }

@@ -48,6 +48,8 @@ import org.autojs.autojs.ui.fragment.BindingDelegates.viewBinding
 import org.autojs.autojs.ui.main.MainActivity
 import org.autojs.autojs.ui.settings.AboutActivity
 import org.autojs.autojs.ui.settings.PreferencesActivity
+import org.autojs.autojs.ui.storage.TrashActivity
+import org.autojs.autojs.ui.storage.VersionHistoryActivity
 import org.autojs.autojs.util.DisplayUtils
 import org.autojs.autojs.util.IntentUtils.App.exit
 import org.autojs.autojs.util.IntentUtils.App.restart
@@ -120,6 +122,8 @@ open class DrawerFragment : Fragment() {
     private lateinit var mAutoNightModeItem: DrawerMenuToggleableItem
     private lateinit var mKeepScreenOnWhenInForegroundItem: DrawerMenuToggleableItem
     private lateinit var mThemeColorItem: DrawerMenuShortcutItem
+    private lateinit var mTrashItem: DrawerMenuShortcutItem
+    private lateinit var mVersionHistoryItem: DrawerMenuShortcutItem
     private lateinit var mAboutAppAndDevItem: DrawerMenuShortcutItem
 
     private lateinit var mA11yTool: AccessibilityTool
@@ -586,13 +590,35 @@ open class DrawerFragment : Fragment() {
             descriptionRes = R.string.description_keep_screen_on_when_in_foreground,
         )
 
-        mThemeColorItem = DrawerMenuShortcutItem(R.drawable.ic_personalize_thicker, R.string.text_theme_color)
-            .setAction(Runnable { ColorSelectBaseActivity.startActivity(mContext) })
-            .apply { subtitle = ColorSelectBaseActivity.getCurrentColorSummary(mContext) }
+        mThemeColorItem = DrawerMenuShortcutItem(
+            icon = R.drawable.ic_personalize_thicker,
+            title = R.string.text_theme_color,
+        ).apply {
+            setAction { ColorSelectBaseActivity.startActivity(mContext) }
+            subtitle = ColorSelectBaseActivity.getCurrentColorSummary(mContext)
+        }
 
-        mAboutAppAndDevItem = DrawerMenuShortcutItem(R.drawable.ic_about, R.string.text_about_app_and_developer)
-            .setAction(Runnable { AboutActivity.startActivity(mContext) })
-            .apply { subtitle = BuildConfig.VERSION_NAME }
+        mTrashItem = DrawerMenuShortcutItem(
+            icon = R.drawable.ic_recycle_bin,
+            title = R.string.text_trash,
+        ).apply {
+            setAction { TrashActivity.startActivity(mContext) }
+        }
+
+        mVersionHistoryItem = DrawerMenuShortcutItem(
+            icon = R.drawable.ic_version_history,
+            title = R.string.text_version_history,
+        ).apply {
+            setAction { VersionHistoryActivity.startActivity(mContext) }
+        }
+
+        mAboutAppAndDevItem = DrawerMenuShortcutItem(
+            icon = R.drawable.ic_about,
+            title = R.string.text_about_app_and_developer,
+        ).apply {
+            setAction { AboutActivity.startActivity(mContext) }
+            subtitle = BuildConfig.VERSION_NAME
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -715,6 +741,9 @@ open class DrawerFragment : Fragment() {
             mNightModeItem,
             mKeepScreenOnWhenInForegroundItem,
             mThemeColorItem,
+            DrawerMenuGroup(R.string.text_file),
+            mTrashItem,
+            mVersionHistoryItem,
             DrawerMenuGroup(R.string.text_about),
             mAboutAppAndDevItem,
         )

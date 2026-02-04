@@ -1233,4 +1233,20 @@
     <string name="text_version_history">버전 기록</string>
     <string name="text_no_version_history">버전 기록 없음</string>
     <string name="text_version_history_restore_does_not_auto_save_to_disk">복원하면 편집기 내용만 변경됩니다. 파일에 자동으로 저장되지 않습니다. 저장 버튼을 수동으로 눌러 주세요.</string>
+    <string name="item_move_to_trash">휴지통으로 이동</string>
+    <string name="item_delete_permanently">영구 삭제</string>
+    <string name="text_moved_to_trash">휴지통으로 이동했습니다</string>
+    <string name="text_choose_delete_strategy">삭제 방식 선택</string>
+    <string name="text_trash">휴지통</string>
+    <string name="text_choose_restore_path">복원 경로 선택</string>
+    <string name="text_restore_to_original_path">원래 경로로 복원</string>
+    <string name="text_restore_to_specified_path">지정한 경로로 복원</string>
+    <string name="text_path_colon_value">경로: %1$s</string>
+    <string name="text_file_name_colon_value">파일 이름: %1$s</string>
+    <string name="dialog_button_choose_path">선택</string>
+    <string name="text_overwrite">덮어쓰기</string>
+    <string name="text_auto_rename">자동 이름 변경</string>
+    <string name="text_no_data">데이터 없음</string>
+    <string name="error_invalid_path">잘못된 경로: %1$s</string>
+    <string name="text_version_history_restore_will_overwrite_file">복원하면 파일 내용이 덮어써집니다.\n경로: %1$s</string>
 </resources>

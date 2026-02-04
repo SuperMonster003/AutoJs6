@@ -15,6 +15,9 @@
         android:id="@+id/action_delete"
         android:title="@string/text_delete" />
     <item
+        android:id="@+id/action_version_history"
+        android:title="@string/text_version_history" />
+    <item
         android:id="@+id/action_timed_task"
         android:title="@string/text_timed_task" />
     <item
