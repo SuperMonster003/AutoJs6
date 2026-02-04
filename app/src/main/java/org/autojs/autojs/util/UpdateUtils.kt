@@ -14,6 +14,7 @@ import org.autojs.autojs.core.pref.Pref.lastUpdatesPostponedTimestamp
 import org.autojs.autojs.network.UpdateChecker
 import org.autojs.autojs.network.UpdateChecker.PromptMode
 import org.autojs.autojs.network.entity.VersionInfo
+import org.autojs.autojs.util.MaterialDialogUtils.choiceWidgetThemeColor
 import org.autojs.autojs6.R
 
 /**
@@ -67,6 +68,7 @@ object UpdateUtils {
                     .autoDismiss(false)
                     .show()
             }
+            .choiceWidgetThemeColor()
             .neutralText(R.string.dialog_button_clear_items)
             .neutralColorRes(R.color.dialog_button_warn)
             .onNeutral { dialogParent, _ ->

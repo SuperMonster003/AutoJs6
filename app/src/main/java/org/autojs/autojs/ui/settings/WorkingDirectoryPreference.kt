@@ -25,6 +25,7 @@ import org.autojs.autojs.tool.SimpleObserver
 import org.autojs.autojs.ui.filechooser.FileChooserDialogBuilder
 import org.autojs.autojs.ui.main.MainActivity
 import org.autojs.autojs.util.EnvironmentUtils
+import org.autojs.autojs.util.MaterialDialogUtils.choiceWidgetThemeColor
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.WorkingDirectoryUtils
 import org.autojs.autojs6.R
@@ -82,6 +83,7 @@ class WorkingDirectoryPreference : MaterialPreference {
                                 .itemsCallback { _, _, _, text ->
                                     mContentView.setText(text)
                                 }
+                                .choiceWidgetThemeColor()
                                 .negativeText(R.string.dialog_button_back)
                                 .showAdaptive()
                         }
@@ -128,6 +130,7 @@ class WorkingDirectoryPreference : MaterialPreference {
                                 .showAdaptive()
                         }
                     }
+                    .choiceWidgetThemeColor()
                     .negativeText(R.string.dialog_button_back)
                     .negativeColorRes(R.color.dialog_button_default)
                     .onNegative { dHistories, _ -> dHistories.dismiss() }

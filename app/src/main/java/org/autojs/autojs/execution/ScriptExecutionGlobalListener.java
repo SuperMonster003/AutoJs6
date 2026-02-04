@@ -2,16 +2,10 @@ package org.autojs.autojs.execution;
 
 import org.autojs.autojs.AutoJs;
 import org.autojs.autojs.core.pref.Language;
-import org.autojs.autojs.engine.JavaScriptEngine;
 import org.autojs.autojs.engine.ScriptEngine;
-import org.autojs.autojs.runtime.ScriptRuntime;
 import org.autojs.autojs.runtime.api.Console;
-import org.autojs.autojs.runtime.api.augment.engines.Engines;
 import org.autojs.autojs.script.ScriptSource;
 import org.autojs.autojs6.R;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.autojs.autojs.util.StringUtils.str;
 
@@ -26,9 +20,6 @@ public class ScriptExecutionGlobalListener implements ScriptExecutionListener {
     @Override
     public void onStart(ScriptExecution execution) {
         ScriptEngine<? extends ScriptSource> engine = execution.getEngine();
-
-        emitEngineEvent("start", engine);
-
         engine.setTag(ENGINE_TAG_START_TIME, System.currentTimeMillis());
     }
 
@@ -39,11 +30,6 @@ public class ScriptExecutionGlobalListener implements ScriptExecutionListener {
 
     private void onFinish(ScriptExecution execution) {
         ScriptEngine<? extends ScriptSource> engine = execution.getEngine();
-
-        emitEngineEvent("finish", engine);
-        emitEngineEvent("exit", engine);
-        emitEngineEvent("stop", engine);
-
         Long startTime = (Long) engine.getTag(ENGINE_TAG_START_TIME);
         if (startTime != null) {
             printSeconds(execution, startTime);
@@ -60,27 +46,6 @@ public class ScriptExecutionGlobalListener implements ScriptExecutionListener {
 
     @Override
     public void onException(ScriptExecution execution, Throwable e) {
-        ScriptEngine<? extends ScriptSource> engine = execution.getEngine();
-
-        emitEngineEvent("exception", engine, e);
-        emitEngineEvent("error", engine, e);
-
         onFinish(execution);
     }
-
-    private void emitEngineEvent(String eventName, ScriptEngine<? extends ScriptSource> engine, Object... args) {
-        List<JavaScriptEngine> jsEngines = AutoJs.getInstance()
-                .getScriptEngineService()
-                .getEngines()
-                .stream()
-                .filter(JavaScriptEngine.class::isInstance)
-                .map(JavaScriptEngine.class::cast)
-                .collect(Collectors.toList());
-
-        for (JavaScriptEngine jsEngine : jsEngines) {
-            ScriptRuntime runtime = jsEngine.getRuntime();
-            Engines.emit(runtime, eventName, engine, args);
-        }
-    }
-
 }

@@ -17,6 +17,7 @@ import org.autojs.autojs.execution.SimpleScriptExecutionListener;
 import org.autojs.autojs.lang.ThreadCompat;
 import org.autojs.autojs.runtime.ScriptRuntime;
 import org.autojs.autojs.runtime.api.Console;
+import org.autojs.autojs.runtime.api.augment.engines.Engines;
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException;
 import org.autojs.autojs.script.JavaScriptSource;
 import org.autojs.autojs.script.ScriptSource;
@@ -66,6 +67,7 @@ public class ScriptEngineService {
                 if (execution.getEngine() instanceof JavaScriptEngine) {
                     ((JavaScriptEngine) execution.getEngine()).getRuntime().console.setTitle(scriptSource.getName());
                 }
+                emitEngineEvent("start", execution.getEngine());
                 mGlobalConsole.verbose(MessageFormat.format("{0} [{1}].", getLanguageContext().getString(R.string.text_start_running), scriptSource.getElegantPath()));
             }
 
@@ -75,26 +77,34 @@ public class ScriptEngineService {
             }
 
             private void onFinish(ScriptExecution execution) {
-                /* Empty function body. */
+                var engine = execution.getEngine();
+                emitEngineEvent("finish", engine);
+                emitEngineEvent("exit", engine);
+                emitEngineEvent("stop", engine);
             }
 
             @Override
             public void onException(ScriptExecution execution, Throwable e) {
                 Log.d(TAG, "onException");
                 e.printStackTrace();
+
+                var engine = execution.getEngine();
+                emitEngineEvent("exception", engine, e);
+                emitEngineEvent("error", engine, e);
+
                 onFinish(execution);
                 String message = null;
                 if (!ScriptInterruptedException.causedByInterrupt(e)) {
                     message = e.getMessage();
-                    if (execution.getEngine() instanceof JavaScriptEngine engine) {
-                        engine.getRuntime().console.error(e);
+                    if (engine instanceof JavaScriptEngine scriptEngine) {
+                        scriptEngine.getRuntime().console.error(e);
                     }
                 }
-                if (execution.getEngine() instanceof JavaScriptEngine engine) {
+                if (engine instanceof JavaScriptEngine scriptEngine) {
                     Throwable uncaughtException = engine.getUncaughtException();
                     if (uncaughtException != null) {
                         message = uncaughtException.getMessage();
-                        engine.getRuntime().console.error(uncaughtException);
+                        scriptEngine.getRuntime().console.error(uncaughtException);
                     }
                 }
                 if (message != null) {
@@ -209,6 +219,15 @@ public class ScriptEngineService {
             return null;
         }
         return mScriptExecutions.get(id);
+    }
+
+    private void emitEngineEvent(String eventName, ScriptEngine<? extends ScriptSource> engine, Object... args) {
+        for (ScriptEngine<?> scriptEngine : getEngines()) {
+            if (scriptEngine instanceof JavaScriptEngine jsEngine) {
+                ScriptRuntime runtime = jsEngine.getRuntime();
+                Engines.emit(runtime, eventName, engine, args);
+            }
+        }
     }
 
     public static void setInstance(ScriptEngineService service) {
