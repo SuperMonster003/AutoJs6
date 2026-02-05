@@ -537,7 +537,7 @@ class HistoryDetailActivity : BaseActivity() {
         val uri =
             FileProvider.getUriForFile(
                 this,
-                "$packageName.fileprovider",
+                "$packageName.autoglm.fileprovider",
                 file,
             )
 

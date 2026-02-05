@@ -1,5 +1,5 @@
 plugins {
-    id("com.android.application")
+    id("com.android.library")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.serialization")
 }
@@ -9,31 +9,18 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.kevinluo.autoglm"
         minSdk = 24
-        targetSdk = 34
-        versionCode = 6
-        versionName = "0.0.6"
 
+        // library 不需要 applicationId / versionCode / versionName
+        // version 由最终宿主 app 决定（Phase B-2 会在 :app 输出 APK）
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    }
-
-    signingConfigs {
-        create("release") {
-            val keystoreFile = file("release.keystore")
-            if (keystoreFile.exists()) {
-                storeFile = keystoreFile
-                storePassword = System.getenv("KEYSTORE_PASSWORD") ?: ""
-                keyAlias = System.getenv("KEY_ALIAS") ?: ""
-                keyPassword = System.getenv("KEY_PASSWORD") ?: ""
-            }
-        }
+        consumerProguardFiles("consumer-rules.pro")
     }
 
     buildTypes {
         debug {
-            // 不再使用 applicationIdSuffix，与发行版使用相同包名
-            resValue("string", "app_name", "AutoGLM Dev")
+            // library 不建议再注入 app_name（会在 Phase B-2 与宿主资源合并时冲突）
+            // resValue("string", "app_name", "AutoGLM Dev")
         }
         release {
             isMinifyEnabled = false
@@ -41,66 +28,29 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
-            signingConfig =
-                if (file("release.keystore").exists()) {
-                    signingConfigs.getByName("release")
-                } else {
-                    signingConfigs.getByName("debug")
-                }
         }
     }
+
     buildFeatures {
+        // library 也可以生成 BuildConfig（如果你的代码引用了 BuildConfig 字段）
         buildConfig = true
         aidl = true
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
     kotlinOptions {
         jvmTarget = "11"
     }
 
-    // Enable JUnit 5 for Kotest property-based testing
     testOptions {
         unitTests.all {
             it.useJUnitPlatform()
         }
         unitTests.isReturnDefaultValues = true
-    }
-}
-
-// Copy dev_profiles.json to assets for debug builds only
-android.applicationVariants.all {
-    val variant = this
-
-    // Custom APK file name
-    outputs.all {
-        val output = this as com.android.build.gradle.internal.api.BaseVariantOutputImpl
-        output.outputFileName = "AutoGLM-${variant.versionName}-${variant.buildType.name}.apk"
-    }
-
-    if (variant.buildType.name == "debug") {
-        val copyDevProfiles =
-            tasks.register("copyDevProfiles${variant.name.replaceFirstChar { it.uppercase() }}") {
-                val devProfilesFile = rootProject.file("dev_profiles.json")
-                // Use debug-specific assets directory to avoid polluting release builds
-                val assetsDir = file("src/debug/assets")
-
-                doLast {
-                    if (devProfilesFile.exists()) {
-                        assetsDir.mkdirs()
-                        devProfilesFile.copyTo(File(assetsDir, "dev_profiles.json"), overwrite = true)
-                        println("Copied dev_profiles.json to debug assets")
-                    } else {
-                        println("dev_profiles.json not found, skipping")
-                    }
-                }
-            }
-
-        tasks.named("merge${variant.name.replaceFirstChar { it.uppercase() }}Assets") {
-            dependsOn(copyDevProfiles)
-        }
     }
 }
 
@@ -147,13 +97,12 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
 
     // Sherpa-ONNX for offline speech recognition
-    // Available via JitPack: https://jitpack.io/#k2-fsa/sherpa-onnx
     implementation("com.github.k2-fsa:sherpa-onnx:1.12.20")
 
     // Apache Commons Compress for tar.bz2 extraction
     implementation("org.apache.commons:commons-compress:1.28.0")
 
-    // Testing
+    // Testing（library 仍然可保留）
     testImplementation(libs.junit)
     testImplementation(libs.kotest.runner.junit5)
     testImplementation(libs.kotest.property)

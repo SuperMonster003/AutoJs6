@@ -35,7 +35,7 @@ private val libs = listOf(
 
 include(
     ":app",
-    ":autoglm-app",
+    ":autoglm",
     *modules.map { ":modules:$it" }.toTypedArray(),
     *libs.map { ":libs:$it" }.toTypedArray(),
 )

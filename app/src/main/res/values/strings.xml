@@ -13,6 +13,7 @@
     <!-- Forcibly use LeakCanary to detect memory leaks. -->
     <string name="leak_canary_test_class_name" translatable="false">assertk.Assert</string>
 
+    <string name="text_auto_glm" translatable="false">AutoGLM</string>
     <string name="app_name" translatable="false">AutoJs6</string>
     <string name="app_name_qq" translatable="false">QQ</string>
     <string name="color_library_identifier_android_colors" translatable="false">Android</string>

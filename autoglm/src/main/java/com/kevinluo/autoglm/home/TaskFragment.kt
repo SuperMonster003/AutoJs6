@@ -6,8 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
-import android.widget.ScrollView
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
@@ -18,7 +16,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.button.MaterialButton
-import com.google.android.material.card.MaterialCardView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import com.kevinluo.autoglm.R
@@ -28,7 +25,6 @@ import com.kevinluo.autoglm.ui.FloatingWindowStateManager
 import com.kevinluo.autoglm.ui.MainUiState
 import com.kevinluo.autoglm.ui.MainViewModel
 import com.kevinluo.autoglm.ui.ShizukuStatus
-import com.kevinluo.autoglm.ui.TaskStatus
 import com.kevinluo.autoglm.util.Logger
 import com.kevinluo.autoglm.util.showWithPrimaryButtons
 import com.kevinluo.autoglm.voice.VoiceError
@@ -78,7 +74,7 @@ class TaskFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         Logger.d(TAG, "TaskFragment onCreateView")
-        return inflater.inflate(R.layout.fragment_task, container, false)
+        return inflater.inflate(R.layout.autoglm_fragment_task, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

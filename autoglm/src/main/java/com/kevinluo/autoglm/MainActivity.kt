@@ -22,6 +22,7 @@ import com.kevinluo.autoglm.ui.ShizukuStatus
 import com.kevinluo.autoglm.util.Logger
 import kotlinx.coroutines.launch
 import rikka.shizuku.Shizuku
+import com.kevinluo.autoglm.app.AutoGlmInit
 
 /**
  * Main Activity that hosts the bottom navigation and Fragment container.
@@ -36,13 +37,16 @@ class MainActivity : BaseActivity() {
     private lateinit var bottomNav: BottomNavigationView
     private val viewModel: MainViewModel by viewModels()
 
-    private val componentManager: ComponentManager by lazy {
-        ComponentManager.getInstance(applicationContext)
-    }
+    // private val componentManager: ComponentManager by lazy {
+    //     ComponentManager.getInstance(applicationContext)
+    // }
+    private lateinit var componentManager: ComponentManager
 
     // Shizuku service connection
     private var userService: IUserService? = null
     private var isServiceBound = false
+
+    private lateinit var userServiceArgs: Shizuku.UserServiceArgs
 
     private val userServiceConnection =
         object : ServiceConnection {
@@ -64,16 +68,30 @@ class MainActivity : BaseActivity() {
             }
         }
 
-    private val userServiceArgs =
-        Shizuku.UserServiceArgs(
-            ComponentName(
-                BuildConfig.APPLICATION_ID,
-                UserService::class.java.name,
-            ),
-        ).daemon(false)
-            .processNameSuffix("service")
-            .debuggable(BuildConfig.DEBUG)
-            .version(BuildConfig.VERSION_CODE)
+    private fun getHostVersionCode(): Int {
+        return try {
+            val pkgInfo = packageManager.getPackageInfo(packageName, 0)
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+                pkgInfo.longVersionCode.toInt()
+            } else {
+                @Suppress("DEPRECATION")
+                pkgInfo.versionCode
+            }
+        } catch (_: Exception) {
+            1
+        }
+    }
+
+    // private val userServiceArgs =
+    //     Shizuku.UserServiceArgs(
+    //         ComponentName(
+    //             applicationContext.packageName,
+    //             UserService::class.java.name,
+    //         ),
+    //     ).daemon(false)
+    //         .processNameSuffix("service")
+    //         .debuggable(BuildConfig.DEBUG)
+    //         .version(getHostVersionCode())
 
     private val onRequestPermissionResultListener =
         Shizuku.OnRequestPermissionResultListener { requestCode, grantResult ->
@@ -105,7 +123,23 @@ class MainActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+
+        AutoGlmInit.ensureInitialized(applicationContext)
+
+        componentManager = ComponentManager.getInstance(applicationContext)
+
+        userServiceArgs =
+            Shizuku.UserServiceArgs(
+                ComponentName(
+                    applicationContext.packageName,
+                    UserService::class.java.name,
+                ),
+            ).daemon(false)
+                .processNameSuffix("service")
+                .debuggable(BuildConfig.DEBUG)
+                .version(getHostVersionCode())
+
+        setContentView(R.layout.autoglm_activity_main)
 
         Logger.d(TAG, "MainActivity created")
 

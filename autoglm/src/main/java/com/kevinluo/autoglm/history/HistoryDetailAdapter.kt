@@ -69,7 +69,7 @@ class HistoryDetailAdapter(private val historyManager: HistoryManager, private v
         val inflater = LayoutInflater.from(parent.context)
         return when (viewType) {
             TYPE_HEADER -> {
-                val view = inflater.inflate(R.layout.item_history_header, parent, false)
+                val view = inflater.inflate(R.layout.autoglm_item_history_header, parent, false)
                 HeaderViewHolder(view)
             }
 

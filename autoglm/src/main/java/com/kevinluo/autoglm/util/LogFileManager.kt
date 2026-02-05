@@ -165,7 +165,7 @@ object LogFileManager {
         val uri =
             FileProvider.getUriForFile(
                 context,
-                "${context.packageName}.fileprovider",
+                "${context.packageName}.autoglm.fileprovider",
                 zipFile,
             )
 
@@ -421,10 +421,24 @@ object LogFileManager {
      * @return Formatted device info string
      */
     fun getDeviceInfo(context: Context): String = buildString {
+        val pkgName = context.packageName
+
+        val (versionName, versionCode) =
+            try {
+                val pkgInfo = context.packageManager.getPackageInfo(pkgName, 0)
+                val vName = pkgInfo.versionName ?: "unknown"
+                val vCode =
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) pkgInfo.longVersionCode
+                    else @Suppress("DEPRECATION") pkgInfo.versionCode.toLong()
+                vName to vCode
+            } catch (_: Exception) {
+                "unknown" to -1L
+            }
+
         appendLine("=== AutoGLM Debug Info ===")
         appendLine()
-        appendLine("App Version: ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})")
-        appendLine("Package: ${BuildConfig.APPLICATION_ID}")
+        appendLine("App Version: $versionName ($versionCode)")
+        appendLine("Package: $pkgName")
         appendLine("Build Type: ${BuildConfig.BUILD_TYPE}")
         appendLine()
         appendLine("=== Device Info ===")

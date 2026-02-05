@@ -49,6 +49,7 @@ import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import java.lang.ref.WeakReference
 import kotlin.math.roundToInt
+import android.widget.Toast
 
 /**
  * Created by Stardust on Jan 30, 2017.
@@ -100,6 +101,7 @@ open class DrawerFragment : Fragment() {
     private lateinit var mKeepScreenOnWhenInForegroundItem: DrawerMenuToggleableItem
     private lateinit var mThemeColorItem: DrawerMenuShortcutItem
     private lateinit var mAboutAppAndDevItem: DrawerMenuShortcutItem
+    private lateinit var mAutoGlmItem: DrawerMenuShortcutItem
 
     private lateinit var mA11yTool: AccessibilityTool
 
@@ -383,6 +385,25 @@ open class DrawerFragment : Fragment() {
         mAboutAppAndDevItem = DrawerMenuShortcutItem(R.drawable.ic_about, R.string.text_about_app_and_developer)
             .setAction(Runnable { AboutActivity.startActivity(mContext) })
             .apply { subtitle = BuildConfig.VERSION_NAME }
+
+        mAutoGlmItem = DrawerMenuShortcutItem(R.drawable.ic_robot_64, R.string.text_auto_glm)
+            .setAction(
+                Runnable {
+                    runCatching {
+                        // 确保 AutoGLM 初始化（多次调用安全）
+                        com.kevinluo.autoglm.app.AutoGlmInit.ensureInitialized(mContext.applicationContext)
+
+                        // 显式启动 AutoGLM 的 MainActivity
+                        val intent = Intent().apply {
+                            setClassName(mContext.packageName, "com.kevinluo.autoglm.MainActivity")
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        }
+                        startActivity(intent)
+                    }.onFailure { e ->
+                        Toast.makeText(mContext, "Failed to open AutoGLM: ${e.message}", Toast.LENGTH_LONG).show()
+                    }
+                }
+            )
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -481,6 +502,7 @@ open class DrawerFragment : Fragment() {
             mForegroundServiceItem,
             DrawerMenuGroup(R.string.text_tools),
             mFloatingWindowItem,
+            mAutoGlmItem,
             DrawerMenuGroup(R.string.text_connect_to_pc),
             mClientModeItem,
             mServerModeItem,

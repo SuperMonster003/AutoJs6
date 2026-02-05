@@ -424,6 +424,10 @@ dependencies /* Reserved for auto append by IDE */ {
 
 }
 
+dependencies /* for autoglm */ {
+    implementation(project(":autoglm"))
+}
+
 android {
 
     namespace = globalApplicationId
@@ -643,10 +647,26 @@ android {
         }
 
         jniLibs {
-            // @Reference to kkevsekk1/AutoX (https://github.com/kkevsekk1/AutoX) by SuperMonster003 on Nov 16, 2023.
-            //  ! https://github.com/kkevsekk1/AutoX/blob/a6d482189291b460c3be60970b74c5321d26e457/inrt/build.gradle.kts#L91
-            excludes += "*"
             useLegacyPackaging = true
+
+            // 1) 处理当前直接失败的重复 onnxruntime：选择一个即可（先让构建通过）
+            pickFirsts += setOf(
+                // arm / arm64（你明确需要）
+                "lib/arm64-v8a/libonnxruntime.so",
+                "lib/armeabi-v7a/libonnxruntime.so",
+                // x86 / x86_64（你并不需要，但别人可能会引入）
+                "lib/x86/libonnxruntime.so",
+                "lib/x86_64/libonnxruntime.so",
+            )
+
+            // 2) libc++_shared.so 你这里本来就已经在 resources.pickFirsts 做过了，
+            //    但那是 resources，不一定覆盖 jni 合并；这里也明确一下。
+            pickFirsts += setOf(
+                "lib/arm64-v8a/libc++_shared.so",
+                "lib/armeabi-v7a/libc++_shared.so",
+                "lib/x86/libc++_shared.so",
+                "lib/x86_64/libc++_shared.so",
+            )
         }
     }
 

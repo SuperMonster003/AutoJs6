@@ -1,0 +1,11 @@
+{
+  "profiles": [
+    {
+      "name": "本地 Ollama",
+      "baseUrl": "http://127.0.0.1:11434/v1",
+      "modelName": "qwen2.5:7b",
+      "apiKey": ""
+    }
+  ],
+  "defaultProfile": "本地 Ollama"
+}
