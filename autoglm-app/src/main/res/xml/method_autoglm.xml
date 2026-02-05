@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Input method configuration for AutoGLM Keyboard.
+    
+    This defines the keyboard's capabilities and settings activity.
+    
+    Requirements: 2.4
+-->
+<input-method xmlns:android="http://schemas.android.com/apk/res/android"
+    android:settingsActivity="com.kevinluo.autoglm.settings.SettingsActivity"
+    android:icon="@drawable/ic_keyboard"
+    android:isDefault="false">
+    
+    <subtype
+        android:label="@string/keyboard_name"
+        android:imeSubtypeLocale="zh_CN"
+        android:imeSubtypeMode="keyboard" />
+        
+    <subtype
+        android:label="@string/keyboard_name"
+        android:imeSubtypeLocale="en_US"
+        android:imeSubtypeMode="keyboard" />
+        
+</input-method>

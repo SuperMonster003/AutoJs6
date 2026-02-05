@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="@color/text_hint" android:state_enabled="false" />
+    <item android:color="@color/primary" android:state_checked="true" />
+    <item android:color="@color/icon_secondary" />
+</selector>
+

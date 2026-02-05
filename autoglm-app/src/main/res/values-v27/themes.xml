@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- API 27+ specific theme attributes -->
+    <style name="Base.Theme.AutoGLM" parent="Theme.Material3.Dark.NoActionBar">
+        <!-- windowLightNavigationBar requires API 27 -->
+        <item name="android:windowLightNavigationBar">false</item>
+    </style>
+</resources>

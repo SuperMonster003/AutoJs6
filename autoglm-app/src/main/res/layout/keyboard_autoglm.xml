@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Minimal keyboard layout for AutoGLM Keyboard.
+    
+    This layout shows a simple status bar indicating the keyboard is active.
+    Actual text input is handled via broadcasts, so no interactive keys are needed.
+    
+    Requirements: 2.1, 2.4
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:background="@color/keyboard_background"
+    android:padding="12dp"
+    android:gravity="center_vertical">
+
+    <!-- Status indicator -->
+    <View
+        android:id="@+id/keyboard_status_indicator"
+        android:layout_width="8dp"
+        android:layout_height="8dp"
+        android:background="@drawable/keyboard_status_indicator" />
+
+    <!-- Keyboard name -->
+    <TextView
+        android:id="@+id/keyboard_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginStart="8dp"
+        android:text="@string/keyboard_name"
+        android:textColor="@color/keyboard_text"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+    <!-- Switch keyboard button -->
+    <ImageButton
+        android:id="@+id/btn_switch_keyboard"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="@android:color/transparent"
+        android:contentDescription="@string/keyboard_switch"
+        android:src="@drawable/ic_switch_keyboard"
+        android:padding="8dp"
+        android:scaleType="fitCenter" />
+
+</LinearLayout>

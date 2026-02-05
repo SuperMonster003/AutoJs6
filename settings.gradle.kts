@@ -35,12 +35,33 @@ private val libs = listOf(
 
 include(
     ":app",
+    ":autoglm-app",
     *modules.map { ":modules:$it" }.toTypedArray(),
     *libs.map { ":libs:$it" }.toTypedArray(),
 )
 
 modules.forEach {
     project(":modules:$it").projectDir = File("modules", it)
+}
+
+dependencyResolutionManagement {
+    // 让 settings 级别的仓库成为“权威来源”
+    // 注意：AutoJs6 顶层 build.gradle.kts 里也有 allprojects.repositories，
+    // 这里先按兼容方式配置，避免 autoglm-app 找不到依赖。
+    repositories {
+        google()
+        mavenCentral()
+        maven("https://jitpack.io")
+
+        // AutoJs6 现有使用的镜像仓库（可选但建议保留一致性）
+        maven("https://maven.aliyun.com/repository/central")
+        maven("https://maven.aliyun.com/repository/google")
+        maven("https://maven.aliyun.com/repository/gradle-plugin")
+        maven("https://maven.aliyun.com/repository/jcenter")
+        maven("https://maven.aliyun.com/repository/public")
+
+        gradlePluginPortal()
+    }
 }
 
 pluginManagement {
@@ -366,6 +387,7 @@ pluginManagement {
             Classpath(id = "com.android.tools.build:gradle", version = overriddenAgpVersion ?: "auto:agp"),
             Classpath(id = "org.jetbrains.kotlin:kotlin-gradle-plugin", version = overriddenKotlinVersion ?: "auto:kotlin"),
             Plugin(id = "com.google.devtools.ksp", version = overriddenKspVersion ?: "auto:ksp"),
+            Plugin(id = "org.jetbrains.kotlin.plugin.serialization", version = overriddenKotlinVersion ?: "2.1.10"),
         )
 
         // @Reference https://github.com/google/ksp/releases

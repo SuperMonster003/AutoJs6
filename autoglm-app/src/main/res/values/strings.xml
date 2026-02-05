@@ -1,0 +1,328 @@
+<resources>
+    <string name="app_name">AutoGLM For Android</string>
+    
+    <!-- Bottom Navigation -->
+    <string name="nav_home">首页</string>
+    <string name="nav_history">历史</string>
+    <string name="nav_settings">设置</string>
+    
+    <!-- Permissions Center -->
+    <string name="permissions_center_title">权限状态</string>
+    <string name="permissions_summary_default">检查中...</string>
+    <string name="permissions_summary_all_granted">全部已授权</string>
+    <string name="permissions_summary_partial">%d/%d 已授权</string>
+    <string name="permission_action_grant">授权</string>
+    <string name="permission_action_enable">启用</string>
+    <string name="permission_granted">已授权</string>
+    <string name="permission_not_granted">未授权</string>
+    
+    <!-- Shizuku Status -->
+    <string name="shizuku_status_title">Shizuku 状态</string>
+    <string name="shizuku_status_unknown">未知</string>
+    <string name="shizuku_status_not_running">未运行</string>
+    <string name="shizuku_status_no_permission">运行中，未授权</string>
+    <string name="shizuku_status_connecting">正在连接...</string>
+    <string name="shizuku_status_connected">已连接</string>
+    <string name="request_shizuku_permission">授权</string>
+    <string name="open_shizuku">打开 Shizuku</string>
+    
+    <!-- Overlay Permission -->
+    <string name="overlay_permission_title">悬浮窗权限</string>
+    <string name="overlay_permission_granted">已授权</string>
+    <string name="overlay_permission_denied">未授权</string>
+    <string name="request_overlay_permission">授权</string>
+    
+    <!-- Battery Optimization -->
+    <string name="battery_opt_title">电池优化</string>
+    <string name="battery_opt_ignored">已忽略电池优化</string>
+    <string name="battery_opt_not_ignored">未忽略电池优化</string>
+    <string name="battery_opt_request">去设置</string>
+    <string name="battery_opt_description">忽略电池优化可以让任务在后台更稳定地执行</string>
+    
+    <!-- AutoGLM Keyboard -->
+    <string name="keyboard_title">输入法</string>
+    <string name="keyboard_enabled">已启用</string>
+    <string name="keyboard_not_enabled">未启用</string>
+    <string name="enable_keyboard">去启用</string>
+    <string name="toast_keyboard_required">需要启用 AutoGLM Keyboard 才能输入文字</string>
+    
+    <!-- Task Section -->
+    <string name="task_section_label">任务输入</string>
+    <string name="task_input_hint">描述你想要执行的任务...</string>
+    <string name="start_task">启动</string>
+    <string name="cancel_task">停止</string>
+    
+    <!-- Task Status -->
+    <string name="task_status_label">状态</string>
+    <string name="task_status_idle">空闲</string>
+    <string name="task_status_running">执行中</string>
+    <string name="task_status_paused">已暂停</string>
+    <string name="task_status_completed">已完成</string>
+    <string name="task_status_failed">失败</string>
+    <string name="task_status_cancelled">已取消</string>
+    <string name="step_counter_default">步骤: 0</string>
+    <string name="step_counter_format">步骤: %d</string>
+    <string name="pause_task">暂停</string>
+    <string name="resume_task">继续</string>
+    
+    <!-- Output Section -->
+    <string name="output_section_label">执行日志</string>
+    <string name="output_description">查看任务执行的详细日志</string>
+    <string name="output_placeholder">日志将显示在这里...</string>
+    
+    <!-- Toast Messages -->
+    <string name="toast_shizuku_not_running">请先启动 Shizuku</string>
+    <string name="toast_shizuku_version_low">Shizuku 版本过低</string>
+    <string name="toast_shizuku_permission_granted">权限已授予</string>
+    <string name="toast_shizuku_permission_denied">权限被拒绝</string>
+    <string name="toast_shizuku_already_granted">已有权限</string>
+    <string name="toast_shizuku_grant_in_app">请在 Shizuku 中授予权限</string>
+    <string name="toast_user_service_connected">服务已连接</string>
+    <string name="toast_user_service_disconnected">服务已断开</string>
+    <string name="toast_task_empty">请输入任务描述</string>
+    <string name="toast_task_started">任务已开始</string>
+    <string name="toast_task_cancelled">任务已取消</string>
+    <string name="toast_overlay_permission_required">需要悬浮窗权限</string>
+    <string name="toast_task_already_running">已有任务正在执行</string>
+    <string name="toast_phone_agent_not_ready">代理未就绪，请稍后重试</string>
+    
+    <!-- Settings Activity -->
+    <string name="settings_title">设置</string>
+    <string name="settings_model_section">模型配置</string>
+    <string name="settings_model_description">配置 API 连接参数</string>
+    <string name="settings_agent_section">执行配置</string>
+    <string name="settings_agent_description">配置任务执行参数</string>
+    <string name="settings_base_url">API 地址</string>
+    <string name="settings_model_name">模型名称</string>
+    <string name="settings_api_key">API 密钥</string>
+    <string name="settings_max_steps">最大步数</string>
+    <string name="settings_max_steps_hint">设置为 0 则无最大步数限制</string>
+    <string name="settings_screenshot_delay">截图延时（秒）</string>
+    <string name="settings_screenshot_delay_hint">执行操作后等待页面加载的时间</string>
+    <string name="settings_language">语言</string>
+    <string name="settings_language_chinese">中文</string>
+    <string name="settings_language_english">English</string>
+    <string name="settings_save">保存</string>
+    <string name="settings_reset">重置</string>
+    <string name="settings_saved">设置已保存</string>
+    <string name="settings_reset_done">已重置</string>
+    <string name="settings_validation_error_url">请输入有效的 URL</string>
+    <string name="settings_validation_error_model">请输入模型名称</string>
+    <string name="settings_validation_error_steps">步数不能为负数</string>
+    <string name="settings_validation_error_delay">延时不能为负数</string>
+    <string name="settings_saved_profiles">已保存的配置</string>
+    <string name="settings_save_profile">保存配置</string>
+    <string name="settings_copy_profile">复制配置</string>
+    <string name="settings_delete_profile">删除配置</string>
+    <string name="settings_profile_menu">配置菜单</string>
+    <string name="settings_new_profile">新建配置</string>
+    <string name="settings_profile_name_hint">配置名称</string>
+    <string name="settings_profile_saved">配置已保存</string>
+    <string name="settings_profile_copied">配置已复制</string>
+    <string name="settings_profile_deleted">配置已删除</string>
+    <string name="settings_profile_name_empty">请输入配置名称</string>
+    <string name="settings_delete_profile_confirm">确定要删除此配置吗？</string>
+    <string name="settings_copy_profile_name">%s (副本)</string>
+    <string name="settings_test_connection">测试连接</string>
+    <string name="settings_testing">测试中...</string>
+    <string name="settings_test_success">连接成功！延迟: %dms</string>
+    <string name="settings_test_auth_error">认证失败: %s</string>
+    <string name="settings_test_model_not_found">模型错误: %s</string>
+    <string name="settings_test_server_error" formatted="false">服务器错误 (%d): %s</string>
+    <string name="settings_test_connection_error">连接失败: %s</string>
+    <string name="settings_test_timeout">连接超时: %s</string>
+    <string name="settings_test_invalid_config">请先填写完整的配置信息</string>
+    
+    <!-- Task Templates -->
+    <string name="settings_task_templates">任务模板</string>
+    <string name="settings_task_templates_description">保存常用任务，快速填入</string>
+    <string name="settings_add_template">添加模板</string>
+    <string name="settings_edit_template">编辑模板</string>
+    <string name="settings_delete_template">删除模板</string>
+    <string name="settings_template_name">模板名称</string>
+    <string name="settings_template_description">任务描述</string>
+    <string name="settings_template_saved">模板已保存</string>
+    <string name="settings_template_deleted">模板已删除</string>
+    <string name="settings_template_name_empty">请输入模板名称</string>
+    <string name="settings_template_desc_empty">请输入任务描述</string>
+    <string name="settings_delete_template_confirm">确定要删除此模板吗？</string>
+    <string name="settings_no_templates">暂无模板</string>
+    <string name="task_select_template">选择模板</string>
+    
+    <!-- Advanced Settings -->
+    <string name="settings_advanced">高级设置</string>
+    <string name="settings_advanced_description">自定义系统提示词</string>
+    <string name="settings_system_prompt">系统提示词</string>
+    <string name="settings_system_prompt_warning">这是高级功能，修改系统提示词可能会影响 Agent 的行为。如果不确定，请保持默认设置。\n\n提示：使用 {date} 作为日期占位符，运行时会自动替换为当前日期。</string>
+    <string name="settings_system_prompt_cn">中文提示词</string>
+    <string name="settings_system_prompt_en">英文提示词</string>
+    <string name="settings_system_prompt_edit">编辑提示词</string>
+    <string name="settings_system_prompt_reset">重置为默认</string>
+    <string name="settings_system_prompt_reset_confirm">确定要重置为默认提示词吗？</string>
+    <string name="settings_system_prompt_saved">提示词已保存</string>
+    <string name="settings_system_prompt_reset_done">已重置为默认提示词</string>
+    <string name="settings_system_prompt_custom">已自定义</string>
+    <string name="settings_system_prompt_default">默认</string>
+    
+    <!-- Dialog Strings -->
+    <string name="dialog_confirm_title">确认操作</string>
+    <string name="dialog_confirm_message">确定要执行此操作吗？</string>
+    <string name="dialog_confirm">确认</string>
+    <string name="dialog_cancel">取消</string>
+    <string name="dialog_choose_option">选择选项</string>
+    <string name="dialog_select_option">请选择以下选项之一</string>
+    <string name="cancel">取消</string>
+    
+    <!-- Takeover Prompt -->
+    <string name="takeover_title">需要手动操作</string>
+    <string name="takeover_message">请完成以下操作</string>
+    <string name="takeover_instructions_placeholder">操作说明将显示在这里</string>
+    <string name="takeover_continue">已完成，继续</string>
+    
+    <!-- Floating Window -->
+    <string name="floating_thinking_label">思考</string>
+    <string name="floating_action_label">操作</string>
+    <string name="floating_waiting">等待任务...</string>
+    <string name="floating_action_none">无</string>
+    <string name="floating_minimize">最小化</string>
+    <string name="floating_open_app">打开应用</string>
+    <string name="floating_waiting_confirm">等待确认</string>
+    <string name="floating_open">打开悬浮窗</string>
+    <string name="floating_new_task">新任务</string>
+    <string name="floating_thinking">正在思考...</string>
+    
+    <!-- Quick Actions -->
+    <string name="quick_action_floating">悬浮窗</string>
+    <string name="quick_action_history">历史记录</string>
+    
+    <!-- Quick Settings Tile -->
+    <string name="tile_floating_window">AutoGLM</string>
+    <string name="tile_floating_window_desc">显示/隐藏悬浮窗</string>
+    
+    <!-- Foreground Service Notifications -->
+    <string name="notification_service_running">服务运行中</string>
+    <string name="notification_task_running">任务执行中...</string>
+    <string name="notification_task_paused">任务已暂停</string>
+    <string name="notification_task_completed">任务已完成</string>
+    <string name="notification_task_failed">任务执行失败</string>
+    <string name="notification_waiting_confirm">等待确认操作</string>
+    <string name="notification_waiting_takeover">需要手动操作</string>
+    
+    <!-- History -->
+    <string name="history_title">历史记录</string>
+    <string name="history_detail_title">任务详情</string>
+    <string name="history_empty">暂无历史记录</string>
+    <string name="history_steps_format">%d 步</string>
+    <string name="history_duration_format">耗时 %s</string>
+    <string name="history_success">成功</string>
+    <string name="history_failed">失败</string>
+    <string name="history_thinking_label">思考过程</string>
+    <string name="history_original">原图</string>
+    <string name="history_annotated">标注</string>
+    <string name="history_clear_all">清空历史</string>
+    <string name="history_clear_confirm">确定要清空所有历史记录吗？</string>
+    <string name="history_delete_confirm">确定要删除这条记录吗？</string>
+    <string name="history_cleared">历史已清空</string>
+    <string name="history_deleted">记录已删除</string>
+    <string name="history_selected_count">已选择 %d 项</string>
+    <string name="history_select_all">全选</string>
+    <string name="history_delete_selected">删除所选</string>
+    <string name="history_delete_selected_confirm">确定要删除选中的 %d 条记录吗？</string>
+    <string name="history_share">分享</string>
+    <string name="history_share_title">分享任务记录</string>
+    <string name="history_save_image">保存图片</string>
+    <string name="history_generating_image">正在生成图片...</string>
+    <string name="history_share_failed">分享失败</string>
+    <string name="history_save_success">图片已保存到相册</string>
+    <string name="history_save_failed">保存失败</string>
+    <string name="history_copy_prompt">复制提示词</string>
+    <string name="history_prompt_copied">提示词已复制到剪贴板</string>
+    <string name="history_load_more">加载更多</string>
+    <string name="history_load_more_count">加载更多 (剩余 %d 步)</string>
+    
+    <!-- Debug Logs -->
+    <string name="settings_debug_logs">调试日志</string>
+    <string name="settings_debug_logs_description">导出日志用于问题排查</string>
+    <string name="settings_debug_logs_size">日志大小: %s</string>
+    <string name="settings_export_logs">导出日志</string>
+    <string name="settings_clear_logs">清空</string>
+    <string name="settings_logs_cleared">日志已清空</string>
+    <string name="settings_logs_export_failed">导出失败</string>
+    <string name="settings_logs_empty">暂无日志</string>
+    <string name="settings_clear_logs_confirm">确定要清空所有日志吗？</string>
+    
+    <!-- AutoGLM Keyboard -->
+    <string name="keyboard_name">AutoGLM Keyboard</string>
+    <string name="keyboard_status_ready">就绪</string>
+    <string name="keyboard_hint">文本输入由 AutoGLM 控制</string>
+    <string name="keyboard_settings_title">AutoGLM 键盘</string>
+    <string name="keyboard_settings_subtitle">已启用</string>
+    <string name="keyboard_switch">切换键盘</string>
+
+    <!-- Voice Input -->
+    <string name="voice_input_title">语音输入</string>
+    <string name="voice_settings_title">语音输入</string>
+    <string name="voice_settings_description">配置语音识别和唤醒词</string>
+    <string name="voice_model_status">模型状态</string>
+    <string name="voice_model_not_downloaded">未下载</string>
+    <string name="voice_model_downloaded">已下载 (%1$d MB)</string>
+    <string name="voice_download_model">下载模型</string>
+    <string name="voice_delete_model">删除模型</string>
+    <string name="voice_sensitivity">唤醒灵敏度</string>
+    <string name="voice_sensitivity_low">低</string>
+    <string name="voice_sensitivity_high">高</string>
+    <string name="voice_wake_word_helper">多个唤醒词用逗号分隔</string>
+    <string name="voice_download_confirm_title">下载语音模型</string>
+    <string name="voice_download_confirm_message">语音识别需要下载离线模型才能使用。模型支持中文和英文识别。</string>
+    <string name="voice_download_size_hint">模型大小约 85MB，建议在 WiFi 环境下下载</string>
+    <string name="voice_downloading_title">正在下载语音模型</string>
+    <string name="voice_downloading_progress">%1$d%%</string>
+    <string name="voice_download_status_preparing">准备下载...</string>
+    <string name="voice_download_status_downloading">正在下载 VAD 模型...</string>
+    <string name="voice_download_status_downloading_asr">正在下载 ASR 模型...</string>
+    <string name="voice_download_status_extracting">正在解压模型...</string>
+    <string name="voice_download_complete">下载完成</string>
+    <string name="voice_download_failed">下载失败: %1$s</string>
+    <string name="voice_download_cancelled">下载已取消</string>
+    <string name="voice_continuous_listening">后台持续监听</string>
+    <string name="voice_continuous_listening_desc">开启后在后台持续监听语音，说出唤醒词可快速启动任务</string>
+    <string name="voice_listening_active">正在监听语音...</string>
+    <string name="voice_wake_word">唤醒词</string>
+    <string name="voice_wake_word_hint">多个唤醒词用逗号分隔</string>
+    <string name="voice_wake_word_default">你好小智</string>
+    <string name="voice_wake_sensitivity">唤醒词灵敏度</string>
+    <string name="voice_listening">正在听...</string>
+    <string name="voice_recognizing">识别中...</string>
+    <string name="voice_permission_required">需要麦克风权限才能使用语音输入</string>
+    <string name="voice_permission_denied">麦克风权限被拒绝</string>
+    <string name="voice_model_required">请先下载语音模型</string>
+    <string name="voice_notification_permission_required">需要通知权限才能在后台运行语音监听服务</string>
+    <string name="voice_audio_permission_required">需要麦克风权限才能使用语音监听功能</string>
+    <string name="voice_listening_started">后台语音监听已启动</string>
+    <string name="voice_delete_confirm_title">删除语音模型</string>
+    <string name="voice_delete_confirm_message">确定要删除语音模型吗？删除后需要重新下载才能使用语音输入功能。</string>
+    <string name="voice_delete_success">语音模型已删除</string>
+    <string name="voice_wake_word_detected">检测到唤醒词: %1$s</string>
+    
+    <!-- Voice Status Messages -->
+    <string name="voice_recording_hint">正在聆听，请说话…</string>
+    <string name="voice_recognizing_hint">正在识别中...</string>
+    <string name="voice_no_speech_detected">未检测到语音，请重试</string>
+    <string name="voice_result_hint">识别完成，即将执行</string>
+    <string name="voice_stop_recording">停止输入</string>
+    <string name="voice_auto_run_countdown">%d 秒后自动运行</string>
+    <string name="voice_cancel_auto_run">取消</string>
+    <string name="voice_confirm_with_countdown">确认 (%d)</string>
+    <string name="voice_confirm">确认</string>
+    <string name="voice_retry">重试</string>
+    
+    <!-- Voice Error Messages -->
+    <string name="voice_model_load_failed">语音模型加载失败</string>
+    <string name="voice_recording_failed">语音输入失败</string>
+    <string name="voice_recognition_failed">语音识别失败</string>
+    <string name="voice_network_error">网络错误</string>
+    <string name="voice_unknown_error">未知错误</string>
+    <string name="voice_downloading">正在下载...</string>
+    <string name="voice_download_progress">下载进度: %1$d MB / %2$d MB</string>
+    <string name="voice_download_confirm">下载确认</string>
+</resources>

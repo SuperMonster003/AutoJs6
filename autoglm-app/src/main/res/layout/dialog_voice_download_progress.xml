@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <TextView
+        android:id="@+id/tv_download_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/voice_downloading_title"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <ProgressBar
+        android:id="@+id/downloadProgressBar"
+        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:max="100"
+        android:progress="0"
+        android:indeterminateTint="?attr/colorPrimary"
+        android:progressTint="?attr/colorPrimary"
+        android:secondaryProgressTint="?attr/colorPrimary"
+        android:progressBackgroundTint="@color/switch_track_unchecked" />
+
+    <TextView
+        android:id="@+id/downloadProgressText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/voice_downloading_progress"
+        android:textSize="14sp"
+        android:textColor="?android:attr/textColorSecondary" />
+
+    <TextView
+        android:id="@+id/tv_download_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="@string/voice_download_status_preparing"
+        android:textSize="12sp"
+        android:textColor="?android:attr/textColorHint" />
+
+</LinearLayout>

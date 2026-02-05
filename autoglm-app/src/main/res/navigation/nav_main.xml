@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_main"
+    app:startDestination="@id/taskFragment">
+
+    <fragment
+        android:id="@+id/taskFragment"
+        android:name="com.kevinluo.autoglm.home.TaskFragment"
+        android:label="@string/nav_home" />
+
+    <fragment
+        android:id="@+id/historyFragment"
+        android:name="com.kevinluo.autoglm.history.HistoryFragment"
+        android:label="@string/nav_history" />
+
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.kevinluo.autoglm.settings.SettingsFragment"
+        android:label="@string/nav_settings" />
+</navigation>

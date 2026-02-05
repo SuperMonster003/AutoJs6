@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/action_save_profile"
+        android:icon="@drawable/ic_save"
+        android:title="@string/settings_save_profile" />
+    <item
+        android:id="@+id/action_copy_profile"
+        android:icon="@drawable/ic_copy"
+        android:title="@string/settings_copy_profile" />
+    <item
+        android:id="@+id/action_delete_profile"
+        android:icon="@drawable/ic_delete"
+        android:title="@string/settings_delete_profile" />
+</menu>

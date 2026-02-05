@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Warning -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:background="@drawable/warning_background"
+        android:padding="12dp"
+        android:text="@string/settings_system_prompt_warning"
+        android:textColor="@color/text_secondary"
+        android:textSize="12sp" />
+
+    <!-- Prompt Input -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/promptInputLayout"
+        style="@style/Widget.App.TextInputLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/settings_system_prompt"
+        app:boxBackgroundColor="@color/surface_variant">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/promptInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="top|start"
+            android:inputType="textMultiLine"
+            android:maxLines="15"
+            android:minLines="8"
+            android:textColor="@color/text_primary"
+            android:textSize="13sp"
+            android:fontFamily="monospace" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Reset Button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnResetPrompt"
+        style="@style/Widget.App.Button.Text.Secondary"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/settings_system_prompt_reset" />
+
+</LinearLayout>

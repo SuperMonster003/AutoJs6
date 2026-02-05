@@ -1,0 +1,260 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme - Dark with Blue Accent -->
+    <style name="Base.Theme.AutoGLM" parent="Theme.Material3.Dark.NoActionBar">
+        <!-- Primary brand color -->
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryVariant">@color/primary_variant</item>
+        <item name="colorOnPrimary">@color/on_primary</item>
+        <item name="colorPrimaryContainer">@color/surface_variant</item>
+        <item name="colorOnPrimaryContainer">@color/primary</item>
+        
+        <!-- Secondary brand color -->
+        <item name="colorSecondary">@color/secondary</item>
+        <item name="colorSecondaryVariant">@color/secondary_variant</item>
+        <item name="colorOnSecondary">@color/on_secondary</item>
+        <item name="colorSecondaryContainer">@color/surface_variant</item>
+        <item name="colorOnSecondaryContainer">@color/secondary</item>
+
+        <!-- Tertiary brand color (avoid default purple/pink) -->
+        <item name="colorTertiary">@color/primary</item>
+        <item name="colorOnTertiary">@color/on_primary</item>
+        <item name="colorTertiaryContainer">@color/surface_variant</item>
+        <item name="colorOnTertiaryContainer">@color/primary</item>
+
+        <!-- Unified control colors (radio/checkbox/slider/etc.) -->
+        <item name="colorControlActivated">@color/primary</item>
+        <item name="colorControlNormal">@color/icon_secondary</item>
+        <item name="android:colorControlActivated">@color/primary</item>
+        <item name="android:colorControlNormal">@color/icon_secondary</item>
+        <!-- AppCompat legacy widgets (AlertDialog/ProgressBar/etc.) -->
+        <item name="colorAccent">@color/primary</item>
+        <item name="android:colorAccent">@color/primary</item>
+        <item name="android:radioButtonStyle">@style/Widget.App.RadioButton</item>
+        <item name="radioButtonStyle">@style/Widget.App.RadioButton</item>
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.App.MaterialAlertDialog</item>
+        <item name="alertDialogTheme">@style/ThemeOverlay.App.MaterialAlertDialog</item>
+        
+        <!-- Surface colors -->
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnSurface">@color/on_surface</item>
+        <item name="colorSurfaceVariant">@color/surface_variant</item>
+        <item name="colorOnSurfaceVariant">@color/on_surface_variant</item>
+        
+        <!-- Background -->
+        <item name="android:colorBackground">@color/background</item>
+        <item name="colorOnBackground">@color/on_background</item>
+        
+        <!-- Immersive status bar and navigation bar -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:windowTranslucentNavigation">false</item>
+        
+        <!-- Outline and divider -->
+        <item name="colorOutline">@color/card_stroke</item>
+        <item name="colorOutlineVariant">@color/divider</item>
+        
+        <!-- Text appearance -->
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+        <item name="android:textColorHint">@color/text_hint</item>
+    </style>
+
+    <style name="Theme.AutoGLM" parent="Base.Theme.AutoGLM" />
+
+    <style name="ThemeOverlay.App.MaterialAlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <!-- Override all color slots to use our blue primary -->
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorSecondary">@color/primary</item>
+        <item name="colorTertiary">@color/primary</item>
+        <item name="colorAccent">@color/primary</item>
+        <item name="android:colorAccent">@color/primary</item>
+        <item name="colorControlActivated">@color/primary</item>
+        <item name="android:colorControlActivated">@color/primary</item>
+        <item name="colorOnSurface">@color/on_surface</item>
+        <item name="colorOnSurfaceVariant">@color/on_surface_variant</item>
+        <item name="colorSurface">@color/dialog_background</item>
+        <item name="colorSurfaceVariant">@color/surface_variant</item>
+        <!-- Button styles - use TextButton style that inherits colorPrimary -->
+        <item name="buttonBarPositiveButtonStyle">@style/Widget.App.Button.TextButton.Dialog</item>
+        <item name="buttonBarNegativeButtonStyle">@style/Widget.App.Button.TextButton.Dialog</item>
+        <item name="buttonBarNeutralButtonStyle">@style/Widget.App.Button.TextButton.Dialog</item>
+        <!-- RadioButton in dialog -->
+        <item name="radioButtonStyle">@style/Widget.App.RadioButton</item>
+        <item name="android:radioButtonStyle">@style/Widget.App.RadioButton</item>
+    </style>
+
+    <!-- Custom Dialog Button Style with primary color -->
+    <style name="Widget.App.Button.TextButton.Dialog" parent="Widget.Material3.Button.TextButton.Dialog">
+        <item name="android:textColor">@color/primary</item>
+        <item name="backgroundTint">@android:color/transparent</item>
+        <item name="rippleColor">@color/ripple_color</item>
+        <item name="iconTint">@color/primary</item>
+        <!-- Force Material3 to use our color -->
+        <item name="materialThemeOverlay">@style/ThemeOverlay.App.DialogButton</item>
+    </style>
+
+    <!-- Theme overlay for dialog buttons to force primary color -->
+    <style name="ThemeOverlay.App.DialogButton" parent="">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorOnSurface">@color/primary</item>
+    </style>
+    
+    <!-- Voice Recording Dialog Theme -->
+    <style name="VoiceRecordingDialogTheme" parent="Theme.Material3.Dark.Dialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowAnimationStyle">@style/VoiceDialogAnimation</item>
+        <!-- Override colors to use our blue primary -->
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorSecondary">@color/primary</item>
+        <item name="colorTertiary">@color/primary</item>
+        <item name="colorAccent">@color/primary</item>
+        <item name="android:colorAccent">@color/primary</item>
+        <item name="colorControlActivated">@color/primary</item>
+        <item name="android:colorControlActivated">@color/primary</item>
+        <item name="colorOnPrimary">@color/on_primary</item>
+        <item name="colorSurface">@color/dialog_background</item>
+        <item name="colorOnSurface">@color/on_surface</item>
+    </style>
+    
+    <style name="VoiceDialogAnimation">
+        <item name="android:windowEnterAnimation">@android:anim/fade_in</item>
+        <item name="android:windowExitAnimation">@android:anim/fade_out</item>
+    </style>
+    
+    <!-- Transparent theme for utility activities -->
+    <style name="Theme.Transparent" parent="Theme.AutoGLM">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
+    
+    <!-- Card Style -->
+    <style name="Widget.App.CardView" parent="Widget.Material3.CardView.Filled">
+        <item name="cardBackgroundColor">@color/card_background</item>
+        <item name="cardCornerRadius">16dp</item>
+        <item name="cardElevation">0dp</item>
+        <item name="strokeWidth">0dp</item>
+    </style>
+    
+    <!-- Primary Button Style - Filled with blue -->
+    <style name="Widget.App.Button.Primary" parent="Widget.Material3.Button">
+        <item name="backgroundTint">@color/button_primary</item>
+        <item name="android:textColor">@color/button_primary_text</item>
+        <item name="cornerRadius">24dp</item>
+        <item name="android:paddingTop">12dp</item>
+        <item name="android:paddingBottom">12dp</item>
+        <item name="iconTint">@color/button_primary_text</item>
+    </style>
+    
+    <!-- Secondary Button Style - Outlined -->
+    <style name="Widget.App.Button.Secondary" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="strokeColor">@color/button_outlined_stroke</item>
+        <item name="android:textColor">@color/button_secondary_text</item>
+        <item name="cornerRadius">24dp</item>
+        <item name="android:paddingTop">12dp</item>
+        <item name="android:paddingBottom">12dp</item>
+        <item name="iconTint">@color/button_secondary_text</item>
+    </style>
+    
+    <!-- Text Button Style -->
+    <style name="Widget.App.Button.Text" parent="Widget.Material3.Button.TextButton">
+        <item name="android:textColor">@color/primary</item>
+        <item name="cornerRadius">24dp</item>
+        <item name="iconTint">@color/primary</item>
+    </style>
+
+    <style name="Widget.App.Button.Text.Secondary" parent="Widget.App.Button.Text">
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="iconTint">@color/text_secondary</item>
+    </style>
+    
+    <!-- Tonal Button Style -->
+    <style name="Widget.App.Button.Tonal" parent="Widget.Material3.Button.TonalButton">
+        <item name="backgroundTint">@color/surface_variant</item>
+        <item name="android:textColor">@color/primary</item>
+        <item name="cornerRadius">24dp</item>
+        <item name="iconTint">@color/primary</item>
+    </style>
+    
+    <!-- Tonal Button Style - Large (for card buttons) -->
+    <style name="Widget.App.Button.Tonal.Large" parent="Widget.App.Button.Tonal">
+        <item name="android:textSize">16sp</item>
+        <item name="iconSize">24dp</item>
+    </style>
+    
+    <!-- Input Field Style -->
+    <style name="Widget.App.TextInputLayout" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="boxStrokeColor">@color/input_stroke_focused</item>
+        <item name="boxCornerRadiusTopStart">12dp</item>
+        <item name="boxCornerRadiusTopEnd">12dp</item>
+        <item name="boxCornerRadiusBottomStart">12dp</item>
+        <item name="boxCornerRadiusBottomEnd">12dp</item>
+        <item name="hintTextColor">@color/primary</item>
+        <item name="boxBackgroundColor">@color/input_background</item>
+    </style>
+    
+    <!-- Base Text Appearance -->
+    <style name="TextAppearance.App" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:textColor">@color/text_primary</item>
+    </style>
+    
+    <!-- Section Title Style -->
+    <style name="TextAppearance.App.SectionTitle" parent="TextAppearance.App">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+    
+    <!-- Card Title Style -->
+    <style name="TextAppearance.App.CardTitle" parent="TextAppearance.App">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+    
+    <!-- List Item Title -->
+    <style name="TextAppearance.App.ListTitle" parent="TextAppearance.App">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/text_primary</item>
+    </style>
+    
+    <!-- List Item Subtitle -->
+    <style name="TextAppearance.App.ListSubtitle" parent="TextAppearance.App">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/text_secondary</item>
+    </style>
+    
+    <!-- MaterialSwitch Style - Better visibility for unchecked state -->
+    <style name="Widget.App.Switch" parent="Widget.Material3.CompoundButton.MaterialSwitch">
+        <item name="trackTint">@color/switch_track_color</item>
+        <item name="thumbTint">@color/switch_thumb_color</item>
+    </style>
+
+    <style name="Widget.App.RadioButton" parent="Widget.Material3.CompoundButton.RadioButton">
+        <item name="buttonTint">@color/radio_button_tint</item>
+        <item name="android:buttonTint">@color/radio_button_tint</item>
+        <item name="materialThemeOverlay">@style/ThemeOverlay.App.RadioButton</item>
+    </style>
+
+    <style name="ThemeOverlay.App.RadioButton" parent="">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorSecondary">@color/primary</item>
+        <item name="colorOnSurface">@color/icon_secondary</item>
+        <item name="colorOnSurfaceVariant">@color/icon_secondary</item>
+    </style>
+
+    <style name="Widget.App.Slider" parent="Widget.MaterialComponents.Slider">
+        <item name="thumbColor">@color/primary</item>
+        <item name="haloColor">@color/ripple_color</item>
+        <item name="trackColorActive">@color/primary</item>
+        <item name="trackColorInactive">@color/switch_track_unchecked</item>
+        <item name="tickColorActive">@color/primary</item>
+        <item name="tickColorInactive">@color/icon_secondary</item>
+    </style>
+</resources>

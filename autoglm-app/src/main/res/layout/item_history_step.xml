@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    app:cardBackgroundColor="@color/card_background"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="0dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Step header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <!-- Step number badge -->
+            <TextView
+                android:id="@+id/stepNumber"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:background="@drawable/step_number_background"
+                android:gravity="center"
+                android:textColor="@color/white"
+                android:textSize="14sp"
+                android:fontFamily="sans-serif-medium" />
+
+            <!-- Action description -->
+            <TextView
+                android:id="@+id/actionDescription"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_weight="1"
+                android:textColor="@color/text_primary"
+                android:textSize="15sp" />
+
+            <!-- Status icon -->
+            <ImageView
+                android:id="@+id/statusIcon"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_check_circle"
+                app:tint="@color/status_success" />
+
+        </LinearLayout>
+
+        <!-- Thinking section -->
+        <LinearLayout
+            android:id="@+id/thinkingSection"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/history_thinking_label"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/thinkingText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:background="@drawable/thinking_background"
+                android:padding="10dp"
+                android:textColor="@color/text_primary"
+                android:textSize="13sp"
+                android:lineSpacingMultiplier="1.2" />
+
+        </LinearLayout>
+
+        <!-- Screenshot section -->
+        <LinearLayout
+            android:id="@+id/screenshotSection"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <!-- Toggle buttons -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnOriginal"
+                    style="@style/Widget.App.Button.Text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:text="@string/history_original"
+                    android:textSize="12sp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnAnnotated"
+                    style="@style/Widget.App.Button.Text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:text="@string/history_annotated"
+                    android:textSize="12sp" />
+
+            </LinearLayout>
+
+            <!-- Screenshot image -->
+            <ImageView
+                android:id="@+id/screenshotImage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:adjustViewBounds="true"
+                android:background="@drawable/screenshot_border"
+                android:scaleType="fitCenter" />
+
+        </LinearLayout>
+
+        <!-- Message section -->
+        <TextView
+            android:id="@+id/messageText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textColor="@color/text_secondary"
+            android:textSize="13sp"
+            android:visibility="gone" />
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>
