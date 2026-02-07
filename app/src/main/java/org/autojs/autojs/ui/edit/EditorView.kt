@@ -26,7 +26,7 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import org.autojs.autojs.AutoJs
-import org.autojs.autojs.app.DialogUtils
+import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs.core.pref.Pref.getEditorTextSize
 import org.autojs.autojs.core.pref.Pref.setEditorTextSize
 import org.autojs.autojs.engine.JavaScriptEngine
@@ -47,6 +47,7 @@ import org.autojs.autojs.model.script.Scripts.runWithBroadcastSender
 import org.autojs.autojs.pio.PFiles.getNameWithoutExtension
 import org.autojs.autojs.pio.PFiles.write
 import org.autojs.autojs.storage.file.TmpScriptFiles
+import org.autojs.autojs.storage.history.HistoryPrefs
 import org.autojs.autojs.storage.history.HistoryRepository
 import org.autojs.autojs.storage.history.HistoryUriUtils
 import org.autojs.autojs.storage.history.VersionHistoryController
@@ -73,12 +74,14 @@ import org.autojs.autojs.ui.widget.SimpleTextWatcher
 import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.DisplayUtils.pxToSp
 import org.autojs.autojs.util.DocsUtils.getUrl
-import org.autojs.autojs.util.MaterialDialogUtils.choiceWidgetThemeColor
+import org.autojs.autojs.util.DialogUtils.choiceWidgetThemeColor
 import org.autojs.autojs.util.Observers
 import org.autojs.autojs.util.StringUtils
+import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.showSnack
 import org.autojs.autojs.util.ViewUtils.showToast
 import org.autojs.autojs6.R
+import org.autojs.autojs6.R.string.text_unknown
 import org.autojs.autojs6.databinding.EditorViewBinding
 import java.io.File
 import java.io.IOException
@@ -104,9 +107,15 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     @JvmField
     val debugBar: DebugBar = binding.debugBar
 
-    lateinit var name: String
+    private var _name: String? = null
 
-    lateinit var uri: Uri
+    var name: String
+        get() = _name ?: "[ ${this.context.getString(text_unknown)} ]"
+        set(value) {
+            _name = value
+        }
+
+    var uri: Uri? = null
 
     var scriptExecutionId = 0
         private set
@@ -204,19 +213,31 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     fun handleIntent(intent: Intent): Observable<String> {
-        intent.getStringExtra(EXTRA_NAME)?.let { name = it }
+        val name = intent.getStringExtra(EXTRA_NAME)
+        if (name != null) {
+            this.name = name
+        }
+        val readOnly = intent.getBooleanExtra(EXTRA_READ_ONLY, false).also {
+            mReadOnly = it
+        }
+        if (readOnly) {
+            mInputMethodEnhanceBar.visibility = GONE
+        }
         return handleText(intent)
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext {
-                mReadOnly = intent.getBooleanExtra(EXTRA_READ_ONLY, false)
                 val saveEnabled = intent.getBooleanExtra(EXTRA_SAVE_ENABLED, true)
-                if (mReadOnly || !saveEnabled) {
+                if (!saveEnabled) {
+                    findViewById<View>(R.id.save).visibility = GONE
+                } else if (readOnly) {
+                    findViewById<View>(R.id.undo).visibility = GONE
+                    findViewById<View>(R.id.redo).visibility = GONE
                     findViewById<View>(R.id.save).visibility = GONE
                 }
                 if (!intent.getBooleanExtra(EXTRA_RUN_ENABLED, true)) {
                     findViewById<View>(R.id.run).visibility = GONE
                 }
-                if (mReadOnly) {
+                if (readOnly) {
                     editor.setReadOnly(true)
                 }
             }
@@ -228,21 +249,28 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     private fun handleText(intent: Intent): Observable<String> {
-        val path = intent.getStringExtra(EXTRA_PATH)
         val content = intent.getStringExtra(EXTRA_CONTENT)
         if (content != null) {
             setInitialText(content)
-            return Observable.just(content)
         }
-        uri = if (path == null) {
-            intent.data ?: return Observable.error(IllegalArgumentException("path and content is empty"))
-        } else {
-            Uri.fromFile(File(path))
+
+        val path = intent.getStringExtra(EXTRA_PATH)
+        val uri = path?.let {
+            Uri.fromFile(File(it))
+        } ?: intent.data
+        this.uri = uri
+
+        if (_name == null && uri != null) {
+            uri.path?.let {
+                name = getNameWithoutExtension(it)
+            }
         }
-        if (!::name.isInitialized) {
-            name = getNameWithoutExtension(uri.path!!)
+
+        return when {
+            content != null -> Observable.just(content)
+            uri != null -> loadUri(uri)
+            else -> Observable.error(IllegalArgumentException("path and content is empty"))
         }
-        return loadUri(uri)
     }
 
     @SuppressLint("CheckResult")
@@ -295,7 +323,12 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private fun initNormalToolbar() {
         mNormalToolbar.apply {
             setOnMenuItemClickListener(this@EditorView)
-            setOnMenuItemLongClickListener { id -> if (id == R.id.run) true.also { debug() } else false }
+            setOnMenuItemLongClickListener { id ->
+                when (id) {
+                    R.id.run if !mReadOnly -> true.also { debug() }
+                    else -> false
+                }
+            }
         }
         activity.supportFragmentManager.findFragmentById(R.id.toolbar_menu) ?: showNormalToolbar()
     }
@@ -375,6 +408,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             mCodeCompletionBar.setTextColor(textColor)
             mSymbolBar.setTextColor(textColor)
             mShowFunctionsButton.setColorFilter(textColor)
+            ViewUtils.setNavigationBarBackgroundColor(activity, it.imeBarBackgroundColor)
             invalidate()
         }
     }
@@ -412,7 +446,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     @JvmOverloads
-    fun run(showMessage: Boolean, file: File? = uri.path?.let { File(it) }, overriddenFullPath: String? = null): ScriptExecution? {
+    fun run(showMessage: Boolean, file: File? = uri?.path?.let { File(it) }, overriddenFullPath: String? = null): ScriptExecution? {
         file ?: return null
         if (showMessage) {
             showSnack(this, R.string.text_start_running)
@@ -420,7 +454,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         // TODO by Stardust on Oct 24, 2018.
         val execution = runWithBroadcastSender(
             file,
-            workingDirectory = uri.path?.let { File(it).parent },
+            workingDirectory = uri?.path?.let { File(it).parent },
             overriddenFullPath,
         ) ?: return null
         scriptExecutionId = execution.id
@@ -428,8 +462,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         return execution
     }
 
-    private fun runTmpFile(file: File? = uri.path?.let { File(it) }): ScriptExecution? {
-        return run(true, file, uri.path)
+    private fun runTmpFile(file: File? = uri?.path?.let { File(it) }): ScriptExecution? {
+        return run(true, file, uri?.path)
     }
 
     private fun undo() = editor.undo()
@@ -439,10 +473,17 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     fun save(): Observable<String> =
         Observable
             .fromCallable {
-                // Use a transactional save flow for both file:// and content://.
-                // zh-CN: 对 file:// 与 content:// 统一使用事务式保存流程.
-                editor.text.apply {
-                    writeTextWithCharsetTransactional(uri, this)
+                when (val uri = uri) {
+                    null -> {
+                        throw IllegalStateException(context.getString(R.string.error_unable_to_save_file_as_current_file_path_is_unknown))
+                    }
+                    else -> {
+                        // Use a transactional save flow for both file:// and content://.
+                        // zh-CN: 对 file:// 与 content:// 统一使用事务式保存流程.
+                        editor.text.apply {
+                            writeTextWithCharsetTransactional(uri, this)
+                        }
+                    }
                 }
             }
             .subscribeOn(Schedulers.io())
@@ -506,7 +547,6 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         if (logicalPath != null && shouldTrackHistory(oldBytes, newBytes) && oldBytes != null) {
             runCatching {
                 HistoryRepository(context.applicationContext).recordSavePre(
-                    uri = uri,
                     logicalPath = logicalPath,
                     oldBytes = oldBytes,
                     encodingName = targetCharset.name(),
@@ -689,7 +729,9 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private fun shouldTrackHistory(oldBytes: ByteArray?, newBytes: ByteArray): Boolean {
         val oldSize = oldBytes?.size ?: 0
         val newSize = newBytes.size
-        return oldSize <= MAX_FILE_SIZE_TO_TRACK_BYTES && newSize <= MAX_FILE_SIZE_TO_TRACK_BYTES
+        val limit = HistoryPrefs.maxFileSizeToTrackBytes().coerceAtLeast(0L)
+
+        return oldSize.toLong() <= limit && newSize.toLong() <= limit
     }
 
     private fun sha256(bytes: ByteArray): ByteArray {
@@ -711,18 +753,32 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     fun showVersionHistoryDialog() {
-        // Delegate to controller to unify editor/explorer/history page behavior.
-        // zh-CN: 委托给 Controller, 统一 editor/explorer/history page 的行为.
-        VersionHistoryController(context).showForEditor(
-            uri = uri,
-            onRestoreToEditor = { restoredText ->
-                editor.text = restoredText
-            },
-            onRestoredUi = {
-                setMenuItemStatus(R.id.save, true)
-                showSnack(this@EditorView, R.string.text_done)
-            },
-        )
+        when (val uri = uri) {
+            null -> {
+                DialogUtils.buildAndShowAdaptive {
+                    MaterialDialog.Builder(context)
+                        .title(R.string.text_prompt)
+                        .content(R.string.error_unable_to_display_version_history_as_current_file_path_is_unknown)
+                        .positiveText(R.string.dialog_button_dismiss)
+                        .positiveColorRes(R.color.dialog_button_default)
+                        .build()
+                }
+            }
+            else -> {
+                // Delegate to controller to unify editor/explorer/history page behavior.
+                // zh-CN: 委托给 Controller, 统一 editor/explorer/history page 的行为.
+                VersionHistoryController(context).showForEditor(
+                    uri = uri,
+                    onRestoreToEditor = { restoredText ->
+                        editor.text = restoredText
+                    },
+                    onRestoredUi = {
+                        setMenuItemStatus(R.id.save, true)
+                        showSnack(this@EditorView, R.string.text_done)
+                    },
+                )
+            }
+        }
     }
 
     // A minimal emergency draft store.
@@ -757,9 +813,10 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
             val now = System.currentTimeMillis()
 
-            // 1) Remove expired (older than 7 days).
-            // zh-CN: 1) 删除过期草稿 (超过 7 天).
-            val expiredBefore = now - DRAFT_MAX_DAYS_MS
+            // 1) Remove expired.
+            // zh-CN: 1) 删除过期草稿.
+            val maxDraftLifetime = HistoryPrefs.draftsMaxDays().coerceAtLeast(0).toLong() * 24L * 60L * 60L * 1000L
+            val expiredBefore = now - maxDraftLifetime
             files.forEach { f ->
                 if (f.lastModified() < expiredBefore) {
                     // noinspection ResultOfMethodCallIgnored
@@ -772,10 +829,12 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             val remained = draftsDir.listFiles()?.toList()?.sortedByDescending { it.lastModified() } ?: return
             var total = remained.sumOf { it.length().coerceAtLeast(0L) }
 
-            if (total <= DRAFT_MAX_TOTAL_BYTES) return
+            val draftLimit = HistoryPrefs.draftsMaxTotalBytes().coerceAtLeast(0L)
+
+            if (total <= draftLimit) return
 
             for (f in remained.asReversed()) {
-                if (total <= DRAFT_MAX_TOTAL_BYTES) break
+                if (total <= draftLimit) break
                 val len = f.length().coerceAtLeast(0L)
                 if (f.delete()) {
                     total -= len
@@ -823,7 +882,16 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     fun openByOtherApps() {
-        openByOtherApps(uri)
+        uri?.let { openByOtherApps(it) } ?: run {
+            DialogUtils.buildAndShowAdaptive {
+                MaterialDialog.Builder(context)
+                    .title(R.string.text_prompt)
+                    .content(R.string.error_unable_to_open_with_other_apps_as_current_file_path_is_unknown)
+                    .positiveText(R.string.dialog_button_dismiss)
+                    .positiveColorRes(R.color.dialog_button_default)
+                    .build()
+            }
+        }
     }
 
     fun beautifyCode() {
@@ -843,10 +911,12 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     fun selectTextSize() {
-        TextSizeSettingDialogBuilder(context)
-            .initialValue(pxToSp(editor.codeEditText.textSize).toInt())
-            .callback { value: Int -> setTextSize(value) }
-            .show()
+        DialogUtils.buildAndShowAdaptive {
+            TextSizeSettingDialogBuilder(context)
+                .initialValue(pxToSp(editor.codeEditText.textSize).toInt())
+                .callback { value: Int -> setTextSize(value) }
+                .build()
+        }
     }
 
     fun setTextSize(value: Int) {
@@ -860,22 +930,24 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         if (i < 0) {
             i = 0
         }
-        MaterialDialog.Builder(context)
-            .title(R.string.text_editor_theme)
-            .items(themes)
-            .choiceWidgetThemeColor()
-            .itemsCallbackSingleChoice(i) { _, _, which, _ ->
-                themes[which]?.let {
-                    setTheme(it)
-                    Themes.setCurrent(it.name)
+        DialogUtils.buildAndShowAdaptive {
+            MaterialDialog.Builder(context)
+                .title(R.string.text_editor_theme)
+                .items(themes)
+                .choiceWidgetThemeColor()
+                .itemsCallbackSingleChoice(i) { _, _, which, _ ->
+                    themes[which]?.let {
+                        setTheme(it)
+                        Themes.setCurrent(it.name)
+                    }
+                    true
                 }
-                true
-            }
-            .negativeText(R.string.dialog_button_cancel)
-            .negativeColorRes(R.color.dialog_button_default)
-            .positiveText(R.string.dialog_button_confirm)
-            .positiveColorRes(R.color.dialog_button_attraction)
-            .show()
+                .negativeText(R.string.dialog_button_cancel)
+                .negativeColorRes(R.color.dialog_button_default)
+                .positiveText(R.string.dialog_button_confirm)
+                .positiveColorRes(R.color.dialog_button_attraction)
+                .build()
+        }
     }
 
     @Throws(CheckedPatternSyntaxException::class)
@@ -910,7 +982,9 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             .replace(R.id.toolbar_menu, DebugToolbarFragment())
             .commit()
         debugBar.visibility = VISIBLE
-        mInputMethodEnhanceBar.visibility = GONE
+        if (!mReadOnly) {
+            mInputMethodEnhanceBar.visibility = GONE
+        }
         mDebugging = true
     }
 
@@ -923,7 +997,9 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         showNormalToolbar()
         editor.setDebuggingLine(-1)
         debugBar.visibility = GONE
-        mInputMethodEnhanceBar.visibility = VISIBLE
+        if (!mReadOnly) {
+            mInputMethodEnhanceBar.visibility = VISIBLE
+        }
         mDebugging = false
     }
 
@@ -1070,18 +1146,6 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
         private const val MIN_CONFIDENCE_TO_WRITE_FILE = 90
         private val DEFAULT_CHARSET_TO_WRITE_FILE = StandardCharsets.UTF_8
-
-        // Max file size to track history snapshots.
-        // zh-CN: 纳管历史快照的最大文件大小.
-        private const val MAX_FILE_SIZE_TO_TRACK_BYTES: Int = 20 * 1024 * 1024
-
-        // Emergency draft cleanup window (7 days).
-        // zh-CN: 草稿清理时间窗口 (7 天).
-        private const val DRAFT_MAX_DAYS_MS: Long = 7L * 24L * 60L * 60L * 1000L
-
-        // Emergency draft total size limit (200MB).
-        // zh-CN: 草稿总容量上限 (200MB).
-        private const val DRAFT_MAX_TOTAL_BYTES: Long = 200L * 1024L * 1024L
 
         // Internal storage root (no external SD).
         // zh-CN: 内部存储根目录 (不访问外置 SD).

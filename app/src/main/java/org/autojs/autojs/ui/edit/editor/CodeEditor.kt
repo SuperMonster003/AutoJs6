@@ -51,8 +51,9 @@ import kotlin.math.floor
  * Modified by project: https://github.com/980008027/JsDroidEditor
  */
 /**
- * Modified by SuperMonster003 as of Jul 16, 2023.
  * Transformed by SuperMonster003 on Jul 16, 2023.
+ * Modified by SuperMonster003 as of Jul 16, 2023.
+ * Modified by JetBrains AI Assistant (GPT-5.2) as of Feb 6, 2026.
  */
 class CodeEditor : HVScrollView {
 
@@ -293,7 +294,7 @@ class CodeEditor : HVScrollView {
     }
 
     fun setReadOnly(readOnly: Boolean) {
-        codeEditText.isEnabled = !readOnly
+        codeEditText.setReadOnly(readOnly)
     }
 
     fun setRedoUndoEnabled(enabled: Boolean) {
