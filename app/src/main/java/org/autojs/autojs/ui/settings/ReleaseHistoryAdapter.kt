@@ -11,33 +11,33 @@ import android.widget.TextView
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import io.noties.markwon.Markwon
-import org.autojs.autojs.ui.settings.VersionHistoryAdapter.VersionHistoryViewHolder
-import org.autojs.autojs.ui.settings.VersionHistoryRepository.Companion.Category
-import org.autojs.autojs.ui.settings.VersionHistoryRepository.Companion.DEFAULT_FILTER
-import org.autojs.autojs.ui.settings.VersionHistoryRepository.Companion.compareVersion
+import org.autojs.autojs.ui.settings.ReleaseHistoryAdapter.ReleaseHistoryViewHolder
+import org.autojs.autojs.ui.settings.ReleaseHistoryRepository.Companion.Category
+import org.autojs.autojs.ui.settings.ReleaseHistoryRepository.Companion.DEFAULT_FILTER
+import org.autojs.autojs.ui.settings.ReleaseHistoryRepository.Companion.compareVersion
 import org.autojs.autojs.util.ProcessLogger
 import org.autojs.autojs6.R
-import org.autojs.autojs6.databinding.ItemVersionHistoryBinding
+import org.autojs.autojs6.databinding.ItemReleaseHistoryBinding
 
 @SuppressLint("NotifyDataSetChanged")
-class VersionHistoryAdapter(private val context: Context, private val markwon: Markwon) : RecyclerView.Adapter<VersionHistoryViewHolder>() {
+class ReleaseHistoryAdapter(private val context: Context, private val markwon: Markwon) : RecyclerView.Adapter<ReleaseHistoryViewHolder>() {
 
-    private val mData = mutableListOf<VersionHistoryItem>()
+    private val mData = mutableListOf<ReleaseHistoryItem>()
     private var mLayoutManager: RecyclerView.LayoutManager? = null
     private val mCategoryFilter: MutableSet<Category> = DEFAULT_FILTER.clone()
 
-    fun submit(list: MutableList<VersionHistoryItem>) {
+    fun submit(list: MutableList<ReleaseHistoryItem>) {
         mData.clear()
         mData += list
         notifyDataSetChanged()
     }
 
-    fun add(item: VersionHistoryItem) {
+    fun add(item: ReleaseHistoryItem) {
         mData += item
         notifyItemInserted(mData.lastIndex)
     }
 
-    fun addAll(list: List<VersionHistoryItem>) {
+    fun addAll(list: List<ReleaseHistoryItem>) {
         val start = mData.size
         mData += list
         notifyItemRangeInserted(start, list.size)
@@ -49,7 +49,7 @@ class VersionHistoryAdapter(private val context: Context, private val markwon: M
         notifyDataSetChanged()
     }
 
-    fun addOrUpdate(item: VersionHistoryItem) {
+    fun addOrUpdate(item: ReleaseHistoryItem) {
         when (val idx = mData.indexOfFirst { compareVersion(it.version, item.version) == 0 }) {
             -1 -> {
                 ProcessLogger.i("${item.version}: ${context.getString(R.string.logger_ver_history_insert_new_entries)}")
@@ -60,8 +60,8 @@ class VersionHistoryAdapter(private val context: Context, private val markwon: M
                 mLayoutManager?.scrollToPosition(0)
             }
             else -> {
-                fun sameDate(local: VersionHistoryItem) = local.date == item.date
-                fun sameLines(local: VersionHistoryItem) = local.lines.joinToString(",") { it.trim() } == item.lines.joinToString(",") { it.trim() }
+                fun sameDate(local: ReleaseHistoryItem) = local.date == item.date
+                fun sameLines(local: ReleaseHistoryItem) = local.lines.joinToString(",") { it.trim() } == item.lines.joinToString(",") { it.trim() }
                 val local = mData[idx]
                 if (sameDate(local) && sameLines(local)) {
                     ProcessLogger.i("${item.version}: ${context.getString(R.string.logger_ver_history_no_processing_needed)}")
@@ -88,18 +88,18 @@ class VersionHistoryAdapter(private val context: Context, private val markwon: M
         mLayoutManager = recyclerView.layoutManager
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VersionHistoryViewHolder {
-        val binding = ItemVersionHistoryBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return VersionHistoryViewHolder(parent.context, binding)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ReleaseHistoryViewHolder {
+        val binding = ItemReleaseHistoryBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return ReleaseHistoryViewHolder(parent.context, binding)
     }
 
     override fun getItemCount() = mData.size
 
-    override fun onBindViewHolder(holder: VersionHistoryViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: ReleaseHistoryViewHolder, position: Int) {
         holder.bind(mData[position], animate = false)
     }
 
-    override fun onBindViewHolder(holder: VersionHistoryViewHolder, position: Int, payloads: MutableList<Any>) {
+    override fun onBindViewHolder(holder: ReleaseHistoryViewHolder, position: Int, payloads: MutableList<Any>) {
         val animate = payloads.contains(PAYLOAD_EXPAND_STATE_CHANGED)
         holder.bind(mData[position], animate)
     }
@@ -114,7 +114,7 @@ class VersionHistoryAdapter(private val context: Context, private val markwon: M
         notifyItemRangeChanged(0, itemCount, PAYLOAD_EXPAND_STATE_CHANGED)
     }
 
-    inner class VersionHistoryViewHolder(context: Context, binding: ItemVersionHistoryBinding) : RecyclerView.ViewHolder(binding.root) {
+    inner class ReleaseHistoryViewHolder(context: Context, binding: ItemReleaseHistoryBinding) : RecyclerView.ViewHolder(binding.root) {
 
         private val chevron = binding.chevron
 
@@ -140,7 +140,7 @@ class VersionHistoryAdapter(private val context: Context, private val markwon: M
         private val changelogLabelImprovement = "`${context.getString(R.string.changelog_label_improvement)}`"
         private val changelogLabelDependency = "`${context.getString(R.string.changelog_label_dependency)}`"
 
-        fun bind(item: VersionHistoryItem, animate: Boolean) {
+        fun bind(item: ReleaseHistoryItem, animate: Boolean) {
             val rotationAngle = if (item.expanded) 180f else 0f
             chevron.animate().cancel()
             when (animate) {
@@ -205,7 +205,7 @@ class VersionHistoryAdapter(private val context: Context, private val markwon: M
 
     companion object {
 
-        private val TAG = VersionHistoryAdapter::class.java.simpleName
+        private val TAG = ReleaseHistoryAdapter::class.java.simpleName
 
         private const val PAYLOAD_EXPAND_STATE_CHANGED = 1
 

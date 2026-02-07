@@ -289,8 +289,8 @@ class ColorItemsActivity : ColorSelectBaseActivity() {
             locateCurrentThemeColor()
             true
         }
-        R.id.action_show_histories -> {
-            showColorHistories(mLibrary.id) { selectedHistoryItem ->
+        R.id.action_show_history -> {
+            showColorHistory(mLibrary.id) { selectedHistoryItem ->
                 when (val targetIndex = mAdapter.items.indexOfFirst { getColor(it.colorRes) == selectedHistoryItem.colorInt }) {
                     -1 -> ViewUtils.showToast(this, R.string.error_failed_to_apply_current_color_history, true)
                     else -> {

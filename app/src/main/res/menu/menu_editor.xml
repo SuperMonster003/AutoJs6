@@ -52,6 +52,7 @@
     </item>
 
     <item
+        android:id="@+id/action_jump"
         android:title="@string/text_jump"
         app:showAsAction="never">
         <menu>
@@ -83,6 +84,7 @@
     </item>
 
     <item
+        android:id="@+id/action_debug"
         android:title="@string/text_debug"
         app:showAsAction="never">
         <menu>
@@ -145,7 +147,9 @@
                 android:title="@string/text_pinch_to_zoom"
                 app:showAsAction="never" />
 
-            <item android:title="@string/text_fx_keyboard">
+            <item
+                android:id="@+id/action_fx_keyboard"
+                android:title="@string/text_fx_keyboard">
                 <menu>
                     <item
                         android:id="@+id/action_editor_fx_symbols_settings"

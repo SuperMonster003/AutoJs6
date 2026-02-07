@@ -31,25 +31,25 @@ import org.autojs.autojs.core.pref.Language.Companion.getPrefLanguageOrNull
 import org.autojs.autojs.theme.ThemeColorHelper
 import org.autojs.autojs.theme.widget.ThemeColorToolbar
 import org.autojs.autojs.ui.BaseActivity
-import org.autojs.autojs.ui.settings.VersionHistoryRepository.Companion.Category
-import org.autojs.autojs.ui.settings.VersionHistoryRepository.Companion.DEFAULT_FILTER
-import org.autojs.autojs.ui.settings.VersionHistoryRepository.Companion.DEFAULT_VERSION_NAME
+import org.autojs.autojs.ui.settings.ReleaseHistoryRepository.Companion.Category
+import org.autojs.autojs.ui.settings.ReleaseHistoryRepository.Companion.DEFAULT_FILTER
+import org.autojs.autojs.ui.settings.ReleaseHistoryRepository.Companion.DEFAULT_VERSION_NAME
 import org.autojs.autojs.util.IntentUtils.startSafely
-import org.autojs.autojs.util.MaterialDialogUtils.choiceWidgetThemeColor
+import org.autojs.autojs.util.DialogUtils.choiceWidgetThemeColor
 import org.autojs.autojs.util.ProcessLogger
 import org.autojs.autojs.util.ViewUtils.excludePaddingClippableViewFromBottomNavigationBar
 import org.autojs.autojs.util.ViewUtils.setMenuIconsColorByThemeColorLuminance
 import org.autojs.autojs.util.ViewUtils.setNavigationIconColorByThemeColorLuminance
 import org.autojs.autojs6.R
-import org.autojs.autojs6.databinding.ActivityDisplayVersionHistoriesBinding
+import org.autojs.autojs6.databinding.ActivityDisplayReleaseHistoryBinding
 
-class DisplayVersionHistoriesActivity : BaseActivity() {
+class DisplayReleaseHistoryActivity : BaseActivity() {
 
-    private val repo by lazy { VersionHistoryRepository() }
+    private val repo by lazy { ReleaseHistoryRepository() }
 
-    private lateinit var binding: ActivityDisplayVersionHistoriesBinding
+    private lateinit var binding: ActivityDisplayReleaseHistoryBinding
 
-    private lateinit var mAdapter: VersionHistoryAdapter
+    private lateinit var mAdapter: ReleaseHistoryAdapter
     private lateinit var mToolbar: ThemeColorToolbar
 
     private var mAllDataHandled = false
@@ -58,13 +58,13 @@ class DisplayVersionHistoriesActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val binding = ActivityDisplayVersionHistoriesBinding.inflate(layoutInflater).also {
+        val binding = ActivityDisplayReleaseHistoryBinding.inflate(layoutInflater).also {
             binding = it
             mToolbar = binding.toolbar
             setContentView(it.root)
         }
 
-        val adapter = VersionHistoryAdapter(this, Markwon.create(this)).also {
+        val adapter = ReleaseHistoryAdapter(this, Markwon.create(this)).also {
             mAdapter = it
         }
 
@@ -86,8 +86,8 @@ class DisplayVersionHistoriesActivity : BaseActivity() {
             val urlBlob = "https://github.com/SuperMonster003/AutoJs6/blob/master/$urlSuffix"
 
             val localItems = withContext(Dispatchers.IO) {
-                VersionHistoryRepository.readBestLocalSample(
-                    context = this@DisplayVersionHistoriesActivity,
+                ReleaseHistoryRepository.readBestLocalSample(
+                    context = this@DisplayReleaseHistoryActivity,
                     languageTag = languageTag,
                 )
             }
@@ -103,8 +103,8 @@ class DisplayVersionHistoriesActivity : BaseActivity() {
             var onlineItemLatestVersion: String? = null
             var shouldContinueCollect = true
 
-            repo.loadVersionHistoriesFlow(
-                context = this@DisplayVersionHistoriesActivity,
+            repo.loadReleaseHistoryFlow(
+                context = this@DisplayReleaseHistoryActivity,
                 languageTag = languageTag,
                 urlRaw = urlRaw,
                 urlBlob = urlBlob
@@ -115,7 +115,7 @@ class DisplayVersionHistoriesActivity : BaseActivity() {
                 }
                 if (onlineItemLatestVersion == null) {
                     onlineItemLatestVersion = onlineItem.version
-                    if (VersionHistoryRepository.compareVersion(localItemLatestVersion, onlineItemLatestVersion) > 0) {
+                    if (ReleaseHistoryRepository.compareVersion(localItemLatestVersion, onlineItemLatestVersion) > 0) {
                         shouldContinueCollect = false
                         ProcessLogger.i(getString(R.string.logger_ver_history_local_data_newer_stop_online))
                         return@collectLatest
@@ -128,7 +128,7 @@ class DisplayVersionHistoriesActivity : BaseActivity() {
             mAllDataHandled = true
         }
 
-        setToolbarAsBack(R.string.text_version_histories)
+        setToolbarAsBack(R.string.text_release_history)
     }
 
     private suspend fun hideLoadingTextContainerIfNeeded() {
@@ -144,7 +144,7 @@ class DisplayVersionHistoriesActivity : BaseActivity() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.menu_display_version_histories, menu)
+        menuInflater.inflate(R.menu.menu_display_release_history, menu)
         setUpToolbarColors()
         return super.onCreateOptionsMenu(menu)
     }
@@ -253,7 +253,7 @@ class DisplayVersionHistoriesActivity : BaseActivity() {
 
         @JvmStatic
         fun launch(context: Context) {
-            Intent(context, DisplayVersionHistoriesActivity::class.java)
+            Intent(context, DisplayReleaseHistoryActivity::class.java)
                 .startSafely(context)
         }
 

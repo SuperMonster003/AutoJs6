@@ -95,6 +95,7 @@
     <string name="description_pointer_location">\"指针位置\" 是安卓开发者选项中的调试功能.\n开启后, 系统会在屏幕上显示触摸点的 [坐标/移动轨迹/数量/大小/移动速度/压力] 等信息, 便于相关脚本的 [编写/调试/校对] 等.</string>
     <string name="description_post_notifications">\"发送通知\" 权限允许 AutoJs6 向系统发布通知, 使脚本可以在通知栏发布并管理自定义通知等.\n\n注: 在 Android 13+ 设备上未授予该权限时, 部分通知可能无法显示, 并可能影响前台服务的启动与稳定性.</string>
     <string name="description_project_media_access">被授予 \"投影媒体权限\" 后, 录制屏幕的安全提示窗口将不再弹出.</string>
+    <string name="description_release_history_preference">查看 AutoJs6 在 GitHub 发行版本的历史更新记录及重要分类的统计数据.</string>
     <string name="description_restart_strategy">重启策略仅作用于主页抽屉栏的重启按钮.\n\n快速重启: 快速重启应用, 如果重启失败或出现非预期情况, 可尝试切换至 \"计划重启\".\n计划重启: 提前设置一个短时定时任务, 应用停止后会再次定时启动, 以实现应用重启.</string>
     <string name="description_rhino_java_primitive_wrap">开关启用 (默认): 将 Java 方法返回的 Number/Boolean/Character 包装为 Java 对象暴露到脚本 (String 除外). typeof 为 \"object\", species 为 \"JavaObject\", 可访问这些对象的 Java 方法, 利于保留 Java 精确类型特征与方法重载行为.\n\n开关禁用: 不再包装上述类型, 直接作为 JavaScript 基元值 (number/boolean/单字符字符串). typeof 为相应 JavaScript 类型, 更贴近 JavaScript 语义与生态. 但仍可通过 new 关键字显式声明一个 Java 包装类型, 如 new java.lang.Boolean(true).\n\n参阅: http://issues.autojs6.com/435</string>
     <string name="description_root_mode_preference">如果设备使用非常规 Root 方式或 Root 权限检测结果异常, 可设置 \"强制 Root 模式\" 或 \"强制非 Root 模式\".</string>
@@ -107,7 +108,6 @@
     <string name="description_timed_task_backend">控制脚本定时触发的底层机制.\n\nAlarmManager: 通过申请 \"允许设置闹钟和提醒\" 权限, 可使定时任务的触发更接近准时.\nWorkManager: 系统友好, 适合可接受一定延迟的非关键定时任务.\nJobScheduler: 旧实现, 仅用作兼容保留, 定时任务出现延迟的概率较大.</string>
     <string name="description_timed_task_backend_more" tools:ignore="TypographyEllipsis">使用场景与差异说明: \n\n1. AlarmManager\n适用于准时性敏感的定时任务, 如 [提醒/严格定时脚本/...].\n在 Android 12+ 设备上获取 \"允许设置闹钟和提醒\" 权限后, 在息屏或待机状态时能够较准时地执行定时任务.\n在未授予 \"允许设置闹钟和提醒\" 权限时, 系统可能降级为不准时或延后执行任务.\n\n2. WorkManager\n适用于不要求严格准时执行的定时任务, 如 [非关键性同步/清理/统计/...].\n根据系统 [ 电量/网络/充电情况/待机策略/... ] 进行调度, 息屏或待机状态时可能推迟任务执行.\n虽无法保证时间精确性, 但在 [ 可靠完成/失败重试/链式执行/唯一任务去重 ] 等方面拥有独特优势.\n\n3. Job\n历史实现, 为兼容保留.\n在高版本安卓系统中定时任务可能存在较大的延迟执行问题.\n除非出于兼容需要, 一般不推荐使用.</string>
     <string name="description_usage_stats_access">\"查看使用情况\" 权限可获取本设备过去使用应用的情况, 从而使 \"获取当前应用\" (currentPackage) 结果更准确</string>
-    <string name="description_version_histories_preference">查看 AutoJs6 在 GitHub 发行版本的历史更新记录及重要分类的统计数据.</string>
     <string name="description_write_secure_settings">安全设置包含应用程序可读但不可写入的设置选项, 这些选项只能由 UI 或系统级别应用修改.\n被授予 \"修改安全设置权限\" 后, 普通应用可直接修改上述安全设置 (例如无障碍服务).</string>
     <string name="description_write_system_settings">\"修改系统设置\" 权限允许 AutoJs6 修改部分系统设置项, 使脚本可以修改 [ 屏幕亮度 / 自动旋转 / 屏幕超时 ] 等系统设置参数.</string>
     <string name="dialog_button_abandon">放弃</string>
@@ -118,11 +118,13 @@
     <string name="dialog_button_back">@string/text_back</string>
     <string name="dialog_button_cancel">取消</string>
     <string name="dialog_button_cancel_download">取消下载</string>
+    <string name="dialog_button_choose_path">选择路径</string>
     <string name="dialog_button_clear_items">清空记录</string>
     <string name="dialog_button_confirm">确定</string>
     <string name="dialog_button_connect">连接</string>
     <string name="dialog_button_continue">@string/text_continue</string>
     <string name="dialog_button_copy">@string/text_copy</string>
+    <string name="dialog_button_copy_path">复制路径</string>
     <string name="dialog_button_default_prefix">默认前缀</string>
     <string name="dialog_button_details">了解更多</string>
     <string name="dialog_button_dismiss">关闭</string>
@@ -137,17 +139,20 @@
     <string name="dialog_button_minimize">最小化</string>
     <string name="dialog_button_more">了解更多</string>
     <string name="dialog_button_open_color_palette">打开调色盘</string>
+    <string name="dialog_button_preview">预览</string>
     <string name="dialog_button_quit">放弃</string>
+    <string name="dialog_button_release_history">发行历史</string>
     <string name="dialog_button_remove">移除</string>
+    <string name="dialog_button_restore">@string/text_restore</string>
     <string name="dialog_button_retrieve">获取</string>
     <string name="dialog_button_retry">重试</string>
     <string name="dialog_button_save">保存</string>
+    <string name="dialog_button_save_as">另存为</string>
     <string name="dialog_button_system_settings">系统设置</string>
     <string name="dialog_button_system_settings_simplified">@string/dialog_button_system_settings</string>
     <string name="dialog_button_update_now">立即更新</string>
     <string name="dialog_button_use_default">使用默认值</string>
     <string name="dialog_button_use_palette">使用调色盘</string>
-    <string name="dialog_button_version_histories">版本历史</string>
     <string name="dialog_button_view_file">查看文件</string>
     <string name="dialog_button_view_shortcuts">查看快捷方式</string>
     <string name="dialog_button_view_update">查看更新</string>
@@ -210,7 +215,6 @@
     <string name="error_cannot_convert_value_into_a_script_runtime_path">无法将 %s 转换为脚本运行时路径</string>
     <string name="error_cannot_find_editor_view_from_child_view">无法在子控件 %s 中找到 EditorView</string>
     <string name="error_cannot_get_download_url">无法获取下载链接</string>
-    <string name="error_cannot_rename">重命名失败</string>
     <string name="error_cannot_retrieve_battery_state">无法获取设备电池状态</string>
     <string name="error_change_password_error_length">密码长度不足</string>
     <string name="error_change_password_error_match">密码不一致</string>
@@ -238,6 +242,8 @@
     <string name="error_failed_to_call_method_with_cause"><![CDATA[方法 \"%1$s\" 调用失败: [ %2$s ]]]></string>
     <string name="error_failed_to_change_the_toggle_state">开关状态改变失败</string>
     <string name="error_failed_to_convert_into_drawable">无法将值 %s 转换为 Drawable 实例</string>
+    <string name="error_failed_to_copy">复制失败</string>
+    <string name="error_failed_to_create">创建失败</string>
     <string name="error_failed_to_go_to_access_settings">跳转设置页面失败</string>
     <string name="error_failed_to_grant_shizuku_access">Shizuku 权限授予失败</string>
     <string name="error_failed_to_instantiate">实例 \"%s\" 创建失败</string>
@@ -245,10 +251,12 @@
     <string name="error_failed_to_launch_manager">管理器启动失败</string>
     <string name="error_failed_to_launch_system_settings">系统设置启动失败</string>
     <string name="error_failed_to_load_plugins_with_reason">插件读取失败.\n原因: %1$s.</string>
+    <string name="error_failed_to_move">移动失败</string>
+    <string name="error_failed_to_rename">重命名失败</string>
     <string name="error_failed_to_render_content">内容渲染失败</string>
     <string name="error_failed_to_retrieve_changelog">获取更新日志失败</string>
+    <string name="error_failed_to_retrieve_release_history">获取发行历史失败</string>
     <string name="error_failed_to_retrieve_release_notes">获取发行说明失败</string>
-    <string name="error_failed_to_retrieve_version_histories">获取版本历史失败</string>
     <string name="error_failed_to_retrieve_version_properties_file_to_parse_version_information">获取 version.properties 失败, 无法解析版本信息</string>
     <string name="error_failed_to_revoke_shizuku_access">Shizuku 权限撤销失败</string>
     <string name="error_failed_to_run_script">脚本运行失败</string>
@@ -272,6 +280,7 @@
     <string name="error_invalid_github_repo">无效的 GitHub 仓库: %s</string>
     <string name="error_invalid_ip_address">无效的 IP 地址</string>
     <string name="error_invalid_login_credentials">无效的登录凭证</string>
+    <string name="error_invalid_path">无效的路径: %1$s</string>
     <string name="error_invalid_rest_compass">无效的剩余罗盘参数: %s</string>
     <string name="error_invalid_selector_map_element" formatted="false">不合法的选择器集合元素: { %s: %s (%s) }</string>
     <string name="error_ip_address_should_not_be_empty">IP 地址不可为空</string>
@@ -316,11 +325,13 @@
     <string name="error_port_num_over_65535">端口号超过 65535</string>
     <string name="error_project_main_script_file_with_abs_path_does_not_exist">项目主脚本文件 \"%1$s\" 不存在</string>
     <string name="error_put_value_into_json">无法将值 %s 存入 JSON</string>
+    <string name="error_refresh_failed">刷新失败</string>
     <string name="error_regex_find_prev">正则表达式不支持向前查找</string>
     <string name="error_repeated_colon_symbol">重复的分号符号</string>
     <string name="error_repeated_dot_symbol">重复的句点符号</string>
     <string name="error_required_property_is_nullish_or_does_not_exist">必需属性 \"%1$s\" 为空或不存在</string>
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">解析后的路径 \"%1$s\" 不可为 null</string>
+    <string name="error_save_failed">保存失败</string>
     <string name="error_script_is_on_exiting">脚本正在退出中</string>
     <string name="error_selector_method_without_calling">选择器方法需调用而不可作为参数直接传入: %s</string>
     <string name="error_selector_result_type_with_compass">结果类型为 selector 时, 无法同时使用罗盘参数</string>
@@ -332,12 +343,18 @@
     <string name="error_the_transformer_for_required_property_cannot_return_nullish">必需属性 \"%1$s\" 的转换器不能返回空值</string>
     <string name="error_thread_is_not_alive">线程处于非活动状态</string>
     <string name="error_timeout_while_querying_plugin_info">查询 %1$s 插件信息超时.</string>
+    <string name="error_unable_to_display_file_details_as_current_file_path_is_unknown">当前文件路径未知, 无法显示文件详情</string>
+    <string name="error_unable_to_display_version_history_as_current_file_path_is_unknown">当前文件路径未知, 无法显示版本历史</string>
+    <string name="error_unable_to_open_with_other_apps_as_current_file_path_is_unknown">当前文件路径未知, 无法使用其他应用打开</string>
+    <string name="error_unable_to_package_application_as_current_file_path_is_unknown">当前文件路径未知, 无法打包应用</string>
+    <string name="error_unable_to_save_file_as_current_file_path_is_unknown">当前文件路径未知, 无法保存文件</string>
     <string name="error_unable_to_use_shizuku_service">无法使用 Shizuku 服务</string>
     <string name="error_unacceptable_character">不接受的字符</string>
     <string name="error_unknown">未知错误</string>
     <string name="error_unknown_algorithm_selector_param">未知的 algorithm 选择器参数: %s</string>
     <string name="error_unknown_color_name">未知颜色名称: %s</string>
     <string name="error_unknown_element_name">未知的元素名称: %1$s</string>
+    <string name="error_unknown_exception">未知异常</string>
     <string name="error_unknown_gravity_for">未知的重力参数: %s</string>
     <string name="error_unknown_operation">未知操作指令</string>
     <string name="error_unknown_picker_result_type">未知结果类型 {名称: %s}</string>
@@ -345,7 +362,8 @@
     <string name="error_unknown_picker_selector_type" formatted="false">未知选择器 {名称: %s, 类型: %s}</string>
     <string name="error_unknown_type">未知类型: %s</string>
     <string name="error_webp_lossless_quality_not_supported">WebP-Lossless 格式无法使用 quality 质量参数进行压缩, 可改用 JPEG/PNG/WebP-Lossy</string>
-    <string name="file_not_exist_or_readable">文件不存在或不可读: %s</string>
+    <string name="file_not_exist_or_readable">文件不存在或不可读</string>
+    <string name="file_not_exist_or_readable_with_path">文件不存在或不可读: %s</string>
     <string name="foreground_notification_channel_name">%1$s 前台服务</string>
     <string name="foreground_notification_text">点击返回 %1$s 主界面</string>
     <string name="foreground_notification_title">%1$s 前台服务</string>
@@ -360,6 +378,8 @@
     <string name="hint_loop_times">0 表示无限循环</string>
     <string name="hint_pc_server_address_supported_formats">支持 IPv4, IPv6 及域名.</string>
     <string name="instruction_install_plugin_from_url">输入一个指向远程插件地址的 URL.\n例如 \"https://example.com/plugin.apk\".</string>
+    <string name="item_delete_permanently">永久删除</string>
+    <string name="item_move_to_trash">移入回收站</string>
     <string name="label_latest_used_time">最近使用: %1$s</string>
     <string name="logger_ver_history_blob_thread_failure">线程 \"blob\" 请求失败</string>
     <string name="logger_ver_history_blob_thread_success">线程 \"blob\" 请求成功, 写入离线缓存</string>
@@ -427,12 +447,12 @@
     <string name="summary_post_notifications_permission_inrt">允许应用创建并发送通知</string>
     <string name="summary_pre_execute_script">在脚本文件之前执行</string>
     <string name="summary_record_prompt">录制开始及停止时显示提示消息</string>
+    <string name="summary_release_history_preference">查看发行版本历史更新记录与统计数据</string>
     <string name="summary_rhino_java_primitive_wrap">Java 原始类型在脚本中将被包装为对应的 Java 对象</string>
     <string name="summary_stable_mode">增强布局分析稳定性但降低代码兼容性 (需重启无障碍服务)</string>
     <string name="summary_text_launcher_shortcuts">添加快捷方式到启动器</string>
     <string name="summary_use_volume_control_record">按 \"音量减\" 键开始或停止脚本录制 (需开启浮动按钮)</string>
     <string name="summary_use_volume_key_to_stop_running_scripts">按 \"音量加\" 键停止所有正在运行的脚本</string>
-    <string name="summary_version_histories_preference">查看发行版本历史更新记录与统计数据</string>
     <string name="term_internal_strorage">内部存储</string>
     <string name="text_a11y_service">无障碍服务</string>
     <string name="text_a11y_service_description">脚本自动操作 (点击/长按/滑动等) 所需</string>
@@ -446,8 +466,8 @@
     <string name="text_about_display_over_other_apps">关于显示在其他应用上层</string>
     <string name="text_about_functions_feedback">问题反馈</string>
     <string name="text_about_functions_licenses">许可信息</string>
+    <string name="text_about_functions_release_history">@string/text_release_history</string>
     <string name="text_about_functions_update">检查更新</string>
-    <string name="text_about_functions_version_histories">@string/text_version_histories</string>
     <string name="text_access_has_been_granted">授权成功</string>
     <string name="text_act_by_click">点击 (click)</string>
     <string name="text_act_by_long_click">长按 (longClick)</string>
@@ -464,8 +484,7 @@
     <string name="text_all">全部</string>
     <string name="text_all_files_access">所有文件管理权限</string>
     <string name="text_all_files_access_is_needed">需要授予 \"所有文件管理权限\" 才能正常读写脚本文件</string>
-    <string name="text_all_histories">全部历史记录</string>
-    <string name="text_all_histories_cleared">历史记录已清空</string>
+    <string name="text_all_history_entries">全部历史记录</string>
     <string name="text_all_items_cleared">全部记录已清空</string>
     <string name="text_allow_setting_alarms_and_reminders_is_recommended">建议授予 \"允许设置闹钟和提醒\" 权限以确保定时任务在息屏或待机状态时尽可能准时执行</string>
     <string name="text_already_copied_to_clip">已复制到剪贴板</string>
@@ -519,6 +538,7 @@
     <string name="text_auto_check_for_updates">自动检查更新</string>
     <string name="text_auto_check_for_updates_and_show_snackbar">自动检查更新并在首页下方显示通知条</string>
     <string name="text_auto_night_mode">自动夜间模式</string>
+    <string name="text_auto_rename">自动重命名</string>
     <string name="text_available_windows">可用窗口</string>
     <string name="text_back">返回</string>
     <string name="text_broadcast_action">动作 (Action)</string>
@@ -551,12 +571,18 @@
     <string name="text_check_for_updates_while_ignoring_the_local_version">检查更新 (忽略本地版本)</string>
     <string name="text_check_for_updates_while_ignoring_the_local_version_description">检查更新时, 直接从远程获取最新版本</string>
     <string name="text_checking_update" tools:ignore="TypographyEllipsis">正在检查更新...</string>
+    <string name="text_choose_delete_strategy">选择删除策略</string>
+    <string name="text_choose_restore_path">选择恢复路径</string>
     <string name="text_city_or_locality">城市或区域</string>
     <string name="text_class_or_package_name">类/包名</string>
     <string name="text_clear">清空</string>
     <string name="text_clear_file_selection">清空文件选择</string>
     <string name="text_clear_pre_execute_script">清空预执行脚本</string>
+    <string name="text_clear_trash">清空回收站</string>
+    <string name="text_clear_trash_confirm">是否清空回收站全部条目</string>
     <string name="text_clear_updates_checked_states">清除更新检查状态</string>
+    <string name="text_clear_version_history">清空全部历史记录</string>
+    <string name="text_clear_version_history_confirm">是否清空版本历史全部条目</string>
     <string name="text_click_icon_to_add_launcher_shortcut">点击图标添加启动器快捷方式</string>
     <string name="text_click_item_to_remove">点击条目可移除</string>
     <string name="text_click_item_to_show_details">点击条目可查看详情</string>
@@ -577,10 +603,10 @@
     <string name="text_compatibility">兼容性</string>
     <string name="text_confidence_level">置信度</string>
     <string name="text_config">配置</string>
-    <string name="text_confirm_to_clear_all_histories">是否确定清空历史记录</string>
     <string name="text_confirm_to_clear_all_items">是否确定清空全部记录</string>
-    <string name="text_confirm_to_clear_histories_of">以下历史记录将被清空\n\n[ %1$s ]\n\n是否确定清空</string>
-    <string name="text_confirm_to_clear_histories_of_all_color_libraries">以下历史记录将被清空\n\n[ 全部颜色库 ]\n\n是否确定清空</string>
+    <string name="text_confirm_to_clear_the_history">是否确定清空历史记录</string>
+    <string name="text_confirm_to_clear_the_history_of">以下历史记录将被清空\n\n[ %1$s ]\n\n是否确定清空</string>
+    <string name="text_confirm_to_clear_the_history_of_all_color_libraries">以下历史记录将被清空\n\n[ 全部颜色库 ]\n\n是否确定清空</string>
     <string name="text_confirm_to_delete">是否确定删除</string>
     <string name="text_confirm_to_remove">是否确定移除</string>
     <string name="text_confirm_to_uninstall">是否确定卸载</string>
@@ -605,6 +631,7 @@
     <string name="text_copy_to">复制到</string>
     <string name="text_copy_to_clip">复制到剪贴板</string>
     <string name="text_copy_value">复制值</string>
+    <string name="text_copying" tools:ignore="TypographyEllipsis">复制中...</string>
     <string name="text_country_code">国家代码 (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">国家代码必须为两个大写字母</string>
     <string name="text_current_version">当前版本</string>
@@ -631,6 +658,8 @@
     <string name="text_delete_file">删除文件</string>
     <string name="text_delete_folder">删除文件夹</string>
     <string name="text_delete_line">删除行</string>
+    <string name="text_delete_revision_confirm">是否永久删除此版本记录</string>
+    <string name="text_deleting" tools:ignore="TypographyEllipsis">正在删除...</string>
     <string name="text_description">描述</string>
     <string name="text_destination">目标</string>
     <string name="text_details">详情</string>
@@ -664,6 +693,7 @@
     <string name="text_download_link_for_autojs6">AutoJs6 下载链接</string>
     <string name="text_download_url">下载地址</string>
     <string name="text_downloading">下载中</string>
+    <string name="text_draft_file_path">草稿文件路径</string>
     <string name="text_drawer_close">关闭侧拉抽屉</string>
     <string name="text_drawer_open">打开侧拉抽屉</string>
     <string name="text_edit">编辑</string>
@@ -697,8 +727,6 @@
     <string name="text_extensibility">扩展性</string>
     <string name="text_failed">失败</string>
     <string name="text_failed_to_build">打包失败</string>
-    <string name="text_failed_to_copy">复制失败</string>
-    <string name="text_failed_to_create">创建失败</string>
     <string name="text_failed_to_create_key_store">生成签名密钥失败</string>
     <string name="text_failed_to_delete">删除失败</string>
     <string name="text_failed_to_disable_a11y_service">禁用无障碍服务失败</string>
@@ -722,11 +750,13 @@
     <string name="text_failed_to_update">更新失败</string>
     <string name="text_failed_to_write_file">文件写入失败</string>
     <string name="text_file">文件</string>
+    <string name="text_file_colon_value">文件: %1$s</string>
     <string name="text_file_details">文件详情</string>
     <string name="text_file_exists">文件已存在</string>
     <string name="text_file_explorer">文件管理器</string>
     <string name="text_file_extensions_title">文件扩展名</string>
     <string name="text_file_name">文件名</string>
+    <string name="text_file_name_colon_value">文件名: %1$s</string>
     <string name="text_file_not_exists">文件不存在</string>
     <string name="text_file_path">文件路径</string>
     <string name="text_file_with_abs_path_is_not_an_executable_script">文件 \"%1$s\" 非可执行脚本</string>
@@ -743,6 +773,7 @@
     <string name="text_first_and_last_name">姓名</string>
     <string name="text_floating_button">浮动按钮</string>
     <string name="text_folder">文件夹</string>
+    <string name="text_folder_colon_value">文件夹: %1$s</string>
     <string name="text_force_stop">强制停止</string>
     <string name="text_foreground_service">前台服务</string>
     <string name="text_formatting_completed">格式化已完成</string>
@@ -764,7 +795,8 @@
     <string name="text_hide_button">隐藏按钮</string>
     <string name="text_hide_node">隐藏此节点</string>
     <string name="text_hide_same_frame_nodes">隐藏同框节点</string>
-    <string name="text_histories">历史记录</string>
+    <string name="text_history">历史记录</string>
+    <string name="text_history_has_been_cleared">历史记录已清空</string>
     <string name="text_icon">图标</string>
     <string name="text_ignore_battery_optimizations">忽略电池优化</string>
     <string name="text_ignored_updates">已忽略更新</string>
@@ -792,6 +824,7 @@
     <string name="text_ip_address_may_be_invalid_for_server_connection" tools:ignore="TypographyEllipsis">IP 地址 \"%1$s\" 具备特殊用途 (回环/广播/多播/保留/...), 因此可能无法用于连接目标服务器.</string>
     <string name="text_is_latest_version">已是最新版本</string>
     <string name="text_issue_report">问题反馈</string>
+    <string name="text_items_count_colon_value">项目: %1$d</string>
     <string name="text_js_file">*.js 文件</string>
     <string name="text_jump">跳转</string>
     <string name="text_jump_to_end">跳转到文件末尾</string>
@@ -844,8 +877,14 @@
     <string name="text_move_aborted_same_path">源路径与目标路径相同, 移动操作中止</string>
     <string name="text_move_all_files_to_new_directory">移动原目录文件到新目录</string>
     <string name="text_move_file">移动文件</string>
+    <string name="text_move_file_to_trash">将文件移入回收站</string>
     <string name="text_move_folder">移动文件夹</string>
+    <string name="text_move_folder_to_trash">将文件夹移入回收站</string>
     <string name="text_move_to">移动到</string>
+    <string name="text_move_to_trash_failed">移入回收站失败</string>
+    <string name="text_moved_to_trash">已移入回收站</string>
+    <string name="text_moving" tools:ignore="TypographyEllipsis">移动中...</string>
+    <string name="text_moving_to_trash" tools:ignore="TypographyEllipsis">正在移入回收站...</string>
     <string name="text_multiple_options">多个可选项</string>
     <string name="text_name">名称</string>
     <string name="text_need_to_enable_a11y_service">需要启用无障碍服务</string>
@@ -863,7 +902,8 @@
     <string name="text_no_browser">未安装浏览器应用</string>
     <string name="text_no_content">无内容</string>
     <string name="text_no_content_description">无内容描述</string>
-    <string name="text_no_histories">无历史记录</string>
+    <string name="text_no_data">无数据</string>
+    <string name="text_no_history">无历史记录</string>
     <string name="text_no_ignored_updates">暂无已忽略更新</string>
     <string name="text_no_log_entries_to_copy">无可复制的日志条目</string>
     <string name="text_no_log_entries_to_export">无可导出的日志条目</string>
@@ -872,6 +912,7 @@
     <string name="text_no_root">免 root</string>
     <string name="text_no_root_access">无 root 权限</string>
     <string name="text_no_scripts_to_stop_running">无运行中的脚本</string>
+    <string name="text_no_version_history">无版本历史</string>
     <string name="text_not_granted">未授予</string>
     <string name="text_not_installed">未安装</string>
     <string name="text_not_showing_main_activity">不显示主界面</string>
@@ -897,14 +938,17 @@
     <string name="text_original_developer">原始开发者</string>
     <string name="text_others">其他</string>
     <string name="text_output_apk_path">打包应用保存路径</string>
+    <string name="text_overwrite">覆盖</string>
     <string name="text_package_name">包名</string>
     <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">包名 (计算中...)</string>
     <string name="text_password">密码</string>
     <string name="text_password_cannot_be_empty">密码不能为空</string>
     <string name="text_password_requires_at_least_n_characters">密码至少需要 %d 位字符</string>
     <string name="text_paste">粘贴</string>
+    <string name="text_path_colon_value">路径: %1$s</string>
     <string name="text_path_is_empty">路径为空</string>
     <string name="text_pc_server_address">PC 服务端地址</string>
+    <string name="text_percentage_colon_value">使用率: %1$s</string>
     <string name="text_permission_desc_access_coarse_location">允许应用通过网络访问粗略的位置信息</string>
     <string name="text_permission_desc_access_fine_location">允许应用通过 GPS 获取精确的位置信息</string>
     <string name="text_permission_desc_access_location_extra_commands">允许应用访问位置提供者的额外命令</string>
@@ -1034,11 +1078,14 @@
     <string name="text_register">注册</string>
     <string name="text_register_succeed">注册成功</string>
     <string name="text_registering">注册中</string>
+    <string name="text_release_history">发行历史</string>
     <string name="text_release_notes">发行说明</string>
     <string name="text_remote">远程</string>
     <string name="text_remote_file_saved_to_local_storage_successfully">远程文件已保存至本地</string>
     <string name="text_remote_project_saved_to_local_storage_successfully">远程项目已保存至本地</string>
     <string name="text_remove_all_breakpoints">删除所有断点</string>
+    <string name="text_remove_from_trash">从回收站移除</string>
+    <string name="text_remove_from_trash_confirm">是否永久删除此项目</string>
     <string name="text_rename">重命名</string>
     <string name="text_replace">替换</string>
     <string name="text_replace_all">全部替换</string>
@@ -1052,6 +1099,10 @@
     <string name="text_reset_to_initial_content_only_for_assets">只能重置示例代码文件</string>
     <string name="text_restart">重启</string>
     <string name="text_restart_strategy">重启策略</string>
+    <string name="text_restore">恢复</string>
+    <string name="text_restore_to_original_path">恢复到原始路径</string>
+    <string name="text_restore_to_specified_path">恢复到指定路径</string>
+    <string name="text_restoring" tools:ignore="TypographyEllipsis">正在恢复...</string>
     <string name="text_result">结果</string>
     <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">正在获取更新日志...</string>
     <string name="text_retrieving_plugin_list_data" tools:ignore="TypographyEllipsis">正在获取插件列表数据...</string>
@@ -1127,7 +1178,13 @@
     <string name="text_sort">排序</string>
     <string name="text_sort_by_last_update_time">按最近更新排序</string>
     <string name="text_sort_by_name">按名称排序</string>
+    <string name="text_sort_by_name_asc">名称 (A-Z)</string>
     <string name="text_sort_by_package_size">按安装包大小排序</string>
+    <string name="text_sort_by_path_asc">路径 (A-Z)</string>
+    <string name="text_sort_by_size_asc">大小 (最小优先)</string>
+    <string name="text_sort_by_size_desc">大小 (最大优先)</string>
+    <string name="text_sort_by_time_asc">时间 (最旧优先)</string>
+    <string name="text_sort_by_time_desc">时间 (最新优先)</string>
     <string name="text_source">来源</string>
     <string name="text_source_file_path">源代码路径</string>
     <string name="text_special_permissions">特殊权限</string>
@@ -1158,10 +1215,15 @@
     <string name="text_timed_task">定时任务</string>
     <string name="text_timed_task_backend_title">定时任务调度引擎</string>
     <string name="text_timed_task_timing">定时</string>
+    <string name="text_to_be_chosen">待选择</string>
     <string name="text_tools">工具</string>
+    <string name="text_total_size_colon_value">大小: %1$s</string>
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">透明背景启动器图标可能被系统自动添加遮罩或背景, 因此不同设备的实际效果与预期可能不完全一致</string>
+    <string name="text_trash">回收站</string>
     <string name="text_tutorial">教程</string>
     <string name="text_type">类型</string>
+    <string name="text_type_file">文件</string>
+    <string name="text_type_folder">文件夹</string>
     <string name="text_unable_to_build_apk_as_autojs6_does_not_include_selected_abi">选择的 ABI 架构 \"%s\" 无法用于创建打包应用, 因当前 AutoJs6 版本未包含上述 ABI 架构.</string>
     <string name="text_unavailable">不可用</string>
     <string name="text_unavailable_abi_for">ABI \"%s\" 不可用</string>
@@ -1206,7 +1268,10 @@
     <string name="text_version">版本</string>
     <string name="text_version_code">版本号</string>
     <string name="text_version_code_with_computing" tools:ignore="TypographyEllipsis">版本号 (计算中...)</string>
-    <string name="text_version_histories">版本历史</string>
+    <string name="text_version_count_colon_value">版本: %1$s</string>
+    <string name="text_version_history">版本历史</string>
+    <string name="text_version_history_restore_does_not_auto_save_to_disk">恢复时只修改编辑器内容, 不会自动保存到文件, 需要手动点击保存按钮.</string>
+    <string name="text_version_history_restore_will_overwrite_file">恢复将覆盖文件内容.\n路径: %1$s</string>
     <string name="text_version_info">版本信息</string>
     <string name="text_version_name">版本名称</string>
     <string name="text_version_name_with_computing" tools:ignore="TypographyEllipsis">版本名称 (计算中...)</string>
@@ -1221,28 +1286,4 @@
     <string name="text_write_secure_settings">修改安全设置</string>
     <string name="text_write_system_settings">修改系统设置</string>
     <string name="text_xiaomi_background_popup_permission">后台弹出界面</string>
-    <string name="error_refresh_failed">刷新失败</string>
-    <string name="error_save_failed">保存失败</string>
-    <string name="text_draft_file_path">草稿文件路径</string>
-    <string name="dialog_button_copy_path">复制路径</string>
-    <string name="dialog_button_save_as">另存为</string>
-    <string name="text_version_history">版本历史</string>
-    <string name="text_no_version_history">无版本历史</string>
-    <string name="text_version_history_restore_does_not_auto_save_to_disk">恢复时只修改编辑器内容, 不会自动保存到文件, 需要手动点击保存按钮.</string>
-    <string name="item_move_to_trash">移入回收站</string>
-    <string name="item_delete_permanently">永久删除</string>
-    <string name="text_moved_to_trash">已移入回收站</string>
-    <string name="text_choose_delete_strategy">选择删除策略</string>
-    <string name="text_trash">回收站</string>
-    <string name="text_choose_restore_path">选择恢复路径</string>
-    <string name="text_restore_to_original_path">恢复到原始路径</string>
-    <string name="text_restore_to_specified_path">恢复到指定路径</string>
-    <string name="text_path_colon_value">路径: %1$s</string>
-    <string name="text_file_name_colon_value">文件名: %1$s</string>
-    <string name="dialog_button_choose_path">选择路径</string>
-    <string name="text_overwrite">覆盖</string>
-    <string name="text_auto_rename">自动重命名</string>
-    <string name="text_no_data">无数据</string>
-    <string name="error_invalid_path">无效的路径: %1$s</string>
-    <string name="text_version_history_restore_will_overwrite_file">恢复将覆盖文件内容.\n路径: %1$s</string>
 </resources>

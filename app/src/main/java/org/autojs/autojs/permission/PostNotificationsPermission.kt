@@ -11,7 +11,7 @@ import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.runtime.api.Permissions
 import org.autojs.autojs.ui.main.drawer.PermissionItemHelper
 import org.autojs.autojs.util.ContextUtils.findActivity
-import org.autojs.autojs.util.MaterialDialogUtils.widgetThemeColor
+import org.autojs.autojs.util.DialogUtils.widgetThemeColor
 import org.autojs.autojs.util.NotificationUtils
 import org.autojs.autojs6.R
 import java.util.WeakHashMap

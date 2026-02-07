@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <!-- Translator: [ DeepL (https://www.deepl.com/translator) ] -->
+<!-- Translator: [ JetBrains AI Assistant ] -->
+<!-- Translator: [ OpenAI ChatGPT ] -->
 <!-- Proofreader: [ SuperMonster003 ] -->
 <!-- Proofreader: [ JetBrains AI Assistant ] -->
 <!-- Proofreader: [ Google Gemini ] -->
@@ -98,6 +100,7 @@
     <string name="description_pointer_location">\"ポインタの位置\" は Android の開発者向けオプションにあるデバッグ機能です.\n有効にすると, システムが画面上にタッチポイントの [座標/移動軌跡/数/サイズ/移動速度/圧力] などの情報を表示し, 関連スクリプトの [作成/デバッグ/検証] に役立ちます.</string>
     <string name="description_post_notifications">\"通知の送信\" 権限により, AutoJs6 はシステムに通知を投稿でき, スクリプトで通知バーへカスタム通知を投稿・管理できます.\n\nNote: Android 13+ 端末でこの権限が付与されていない場合, 一部の通知が表示されない可能性があり, フォアグラウンドサービスの起動や安定性に影響することがあります.</string>
     <string name="description_project_media_access">プロジェクトのメディアアクセス権を使用すると, 画面録画のセキュリティ警告が表示されなくなります</string>
+    <string name="description_release_history_preference">GitHub 上の AutoJs6 のリリース版変更履歴と主要カテゴリの統計データを確認する.</string>
     <string name="description_restart_strategy">再起動戦略はホームページのドロワーにある再起動ボタンにのみ適用されます.\n\nクイック再起動: アプリをすばやく再起動します. 再起動に失敗したり予期しない状況が発生した場合は/\"スケジュール再起動\" に切り替えてください.\nスケジュール再起動: あらかじめ短時間のタイマーを設定します. アプリが停止した後/スケジュールに従って再度起動し/アプリの再起動を実現します.</string>
     <string name="description_rhino_java_primitive_wrap">スイッチ有効 (デフォルト): Java メソッドが返す Number/Boolean/Character は Java オブジェクトとしてラップされ/スクリプトに公開されます (String は除外). typeof は \"object\"/species は \"JavaObject\". Java のメソッドを呼び出せるため/Java の厳密な型特性やオーバーロード解決を保持しやすくなります.\n\nスイッチ無効: 上記の型はラップされず/JavaScript のプリミティブ値 (number/boolean/1 文字の文字列) として直接公開されます. typeof は対応する JavaScript 型となり/JavaScript のセマンティクス／エコシステムにより沿います. 必要なら new によって明示的に Java ラッパーを生成できます (例: new java.lang.Boolean(true)).\n\n参照: http://issues.autojs6.com/435</string>
     <string name="description_root_mode_preference">異国の root や root アクセスに異常がある場合, root を強制的に root または non-root に設定することができます</string>
@@ -110,7 +113,6 @@
     <string name="description_timed_task_backend">スクリプトを定時で起動するための基盤メカニズムを制御します.\n\nAlarmManager: システムの \"アラームとリマインダーの設定を許可\" 権限を付与すると/より正確な時刻での実行に近づきます.\nWorkManager: システムに優しく/一定の遅延を許容できる非重要タスクに適しています.\nJobScheduler: 旧来の実装で互換性のために残されていますが/遅延が発生しやすいです.</string>
     <string name="description_timed_task_backend_more" tools:ignore="TypographyEllipsis">利用シーンと違い: \n\n1. AlarmManager\n[リマインダー/厳密な時刻のスクリプト/...] など/時刻精度が重要なタスクに適しています.\nAndroid 12 以降で \"アラームとリマインダーの設定を許可\" 権限がある場合/画面消灯/待機中でも比較的正確に実行されます.\n権限がない場合/システムにより不正確または遅延実行になる可能性があります.\n\n2. WorkManager\n[非重要な同期/クリーンアップ/統計/...] など/厳密な時刻精度を必要としないタスクに適しています.\n[バッテリー/ネットワーク/充電状況/待機ポリシー/...] に応じてスケジューリングされ/消灯/待機中は実行が遅れることがあります.\n時間精度は保証されませんが/[確実な完了/失敗時の再試行/チェーン実行/一意タスクの重複排除] に強みがあります.\n\n3. JobScheduler\n互換性維持のための歴史的実装です.\n新しい Android では遅延が大きくなりやすい傾向があります.\n互換性の必要がない限り/通常は非推奨です.</string>
     <string name="description_usage_stats_access">デバイスの使用履歴や統計情報にアクセスできるようになり, currentPackage()の結果がより正確になります</string>
-    <string name="description_version_histories_preference">GitHub 上の AutoJs6 のリリース版変更履歴と主要カテゴリの統計データを確認する.</string>
     <string name="description_write_secure_settings">アプリケーションが読み取ることはできるが, 書き込むことはできないシステム環境設定を含む, 安全なシステム設定です.\nこれは, ユーザーがシステムアプリの UI を通じて明示的に変更する必要がある環境設定のためのものです.\nセキュアなシステム設定を許可すると, 通常のアプリケーションはセキュアな設定 (アクセシビリティサービスなど) を直接変更できるようになります</string>
     <string name="description_write_system_settings">\"システム設定の変更\" 権限により, AutoJs6 は一部のシステム設定を変更でき, スクリプトで [ 画面の明るさ / 自動回転 / 画面タイムアウト ] などを調整できます.</string>
     <string name="dialog_button_abandon">放棄</string>
@@ -121,11 +123,13 @@
     <string name="dialog_button_back">@string/text_back</string>
     <string name="dialog_button_cancel">取消</string>
     <string name="dialog_button_cancel_download">取消</string>
+    <string name="dialog_button_choose_path">選択</string>
     <string name="dialog_button_clear_items">クリア</string>
     <string name="dialog_button_confirm">OK</string>
     <string name="dialog_button_connect">接続</string>
     <string name="dialog_button_continue">@string/text_continue</string>
     <string name="dialog_button_copy">@string/text_copy</string>
+    <string name="dialog_button_copy_path">コピー</string>
     <string name="dialog_button_default_prefix">デフォ前置</string>
     <string name="dialog_button_details">詳細</string>
     <string name="dialog_button_dismiss">削除</string>
@@ -140,17 +144,20 @@
     <string name="dialog_button_minimize">最小化</string>
     <string name="dialog_button_more">詳細</string>
     <string name="dialog_button_open_color_palette">パレットを開く</string>
+    <string name="dialog_button_preview">プレビュー</string>
     <string name="dialog_button_quit">終了する</string>
+    <string name="dialog_button_release_history">履歴</string>
     <string name="dialog_button_remove">削除</string>
+    <string name="dialog_button_restore">@string/text_restore</string>
     <string name="dialog_button_retrieve">取得</string>
     <string name="dialog_button_retry">再試行</string>
     <string name="dialog_button_save">保存する</string>
+    <string name="dialog_button_save_as">名前を付けて保存</string>
     <string name="dialog_button_system_settings">システム設定</string>
     <string name="dialog_button_system_settings_simplified">システム</string>
     <string name="dialog_button_update_now">更新</string>
     <string name="dialog_button_use_default">デフォルトを使用</string>
     <string name="dialog_button_use_palette">パレットを使う</string>
-    <string name="dialog_button_version_histories">更新履歴</string>
     <string name="dialog_button_view_file">ファイルの表示</string>
     <string name="dialog_button_view_shortcuts">ショートカットを表示</string>
     <string name="dialog_button_view_update">更新を表示</string>
@@ -213,7 +220,6 @@
     <string name="error_cannot_convert_value_into_a_script_runtime_path">%s をスクリプトランタイムパスに変換できません</string>
     <string name="error_cannot_find_editor_view_from_child_view">\"%s 子ビューから EditorView を見つけることができません</string>
     <string name="error_cannot_get_download_url">ダウンロード用 URL を取得できません</string>
-    <string name="error_cannot_rename">名前の変更に失敗しました</string>
     <string name="error_cannot_retrieve_battery_state">バッテリー状態の取得ができません</string>
     <string name="error_change_password_error_length">パスワードにもっと多くの文字を使用する</string>
     <string name="error_change_password_error_match">これらのパスワードは一致しませんでした</string>
@@ -241,6 +247,8 @@
     <string name="error_failed_to_call_method_with_cause"><![CDATA[メソッド \"%1$s\" の呼び出しに失敗しました: [ %2$s ]]]></string>
     <string name="error_failed_to_change_the_toggle_state">スイッチの状態の変更に失敗しました</string>
     <string name="error_failed_to_convert_into_drawable">値 %s を Drawable に変換するのに失敗しました</string>
+    <string name="error_failed_to_copy">コピーに失敗しました</string>
+    <string name="error_failed_to_create">作成に失敗しました</string>
     <string name="error_failed_to_go_to_access_settings">設定画面を開けませんでした</string>
     <string name="error_failed_to_grant_shizuku_access">Shizuku の権限付与に失敗しました</string>
     <string name="error_failed_to_instantiate">\"%s\" のインスタンス化に失敗しました</string>
@@ -248,10 +256,12 @@
     <string name="error_failed_to_launch_manager">マネージャーを起動できませんでした</string>
     <string name="error_failed_to_launch_system_settings">システム設定を起動できませんでした</string>
     <string name="error_failed_to_load_plugins_with_reason">プラグインの読み込みに失敗しました.\n理由: %1$s.</string>
+    <string name="error_failed_to_move">移動に失敗しました</string>
+    <string name="error_failed_to_rename">名前の変更に失敗しました</string>
     <string name="error_failed_to_render_content">コンテンツの表示に失敗しました</string>
     <string name="error_failed_to_retrieve_changelog">更新ログの取得に失敗しました</string>
+    <string name="error_failed_to_retrieve_release_history">リリース履歴の取得に失敗しました</string>
     <string name="error_failed_to_retrieve_release_notes">リリースノートの取得に失敗しました</string>
-    <string name="error_failed_to_retrieve_version_histories">バージョン履歴を取得できません</string>
     <string name="error_failed_to_retrieve_version_properties_file_to_parse_version_information">version.properties を取得できず, バージョン情報を解析できません</string>
     <string name="error_failed_to_revoke_shizuku_access">Shizuku 権限の取り消しに失敗しました</string>
     <string name="error_failed_to_run_script">スクリプトの実行に失敗しました</string>
@@ -275,6 +285,7 @@
     <string name="error_invalid_github_repo">無効な GitHub リポジトリ: %s</string>
     <string name="error_invalid_ip_address">無効な IP アドレス</string>
     <string name="error_invalid_login_credentials">無効なログイン認証情報</string>
+    <string name="error_invalid_path">無効なパス: %1$s</string>
     <string name="error_invalid_rest_compass">無効な残りコンパスです: %s</string>
     <string name="error_invalid_selector_map_element" formatted="false">無効なセレクタ・マップ要素です. { %s: %s (%s) } です</string>
     <string name="error_ip_address_should_not_be_empty">IP アドレスは空であってはならない</string>
@@ -319,11 +330,13 @@
     <string name="error_port_num_over_65535">65535 を超えるポート番号</string>
     <string name="error_project_main_script_file_with_abs_path_does_not_exist">プロジェクトのメインスクリプトファイル \"%1$s\" が存在しません</string>
     <string name="error_put_value_into_json">\"値 %s を JSON に入れることができません\" というメッセージが表示されます</string>
+    <string name="error_refresh_failed">更新に失敗しました</string>
     <string name="error_regex_find_prev">正規表現で前を見つけることができません</string>
     <string name="error_repeated_colon_symbol">繰り返されるコロン記号</string>
     <string name="error_repeated_dot_symbol">ドット記号の繰り返し</string>
     <string name="error_required_property_is_nullish_or_does_not_exist">必要なプロパティ \"%1$s\" が null か存在しません</string>
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">\"%1$s\" の解決済みパスは null にできません</string>
+    <string name="error_save_failed">保存に失敗しました</string>
     <string name="error_script_is_on_exiting">スクリプトが終了してしまう</string>
     <string name="error_selector_method_without_calling">セレクタ・メソッドはパラメータとして渡されるのではなく, 呼び出される必要があります: %s</string>
     <string name="error_selector_result_type_with_compass">結果タイプがセレクタの場合, コンパスを使用できません</string>
@@ -335,12 +348,18 @@
     <string name="error_the_transformer_for_required_property_cannot_return_nullish">必要なプロパティ \"%1$s\" のトランスフォーマーは null を返すことができません</string>
     <string name="error_thread_is_not_alive">スレッドが生きていない</string>
     <string name="error_timeout_while_querying_plugin_info">%1$s プラグイン情報の取得がタイムアウトしました.</string>
+    <string name="error_unable_to_display_file_details_as_current_file_path_is_unknown">現在のファイルパスが不明のため, ファイル詳細を表示できません</string>
+    <string name="error_unable_to_display_version_history_as_current_file_path_is_unknown">現在のファイルパスが不明のため, バージョン履歴を表示できません</string>
+    <string name="error_unable_to_open_with_other_apps_as_current_file_path_is_unknown">現在のファイルパスが不明のため, 他のアプリで開けません</string>
+    <string name="error_unable_to_package_application_as_current_file_path_is_unknown">現在のファイルパスが不明のため, アプリをパッケージ化できません</string>
+    <string name="error_unable_to_save_file_as_current_file_path_is_unknown">現在のファイルパスが不明のため, ファイルを保存できません</string>
     <string name="error_unable_to_use_shizuku_service">Shizuku サービスが使用できない</string>
     <string name="error_unacceptable_character">使用できない文字</string>
     <string name="error_unknown">不明なエラー</string>
     <string name="error_unknown_algorithm_selector_param">不明なアルゴリズム・セレクタ・パラメータ: %s</string>
     <string name="error_unknown_color_name">不明な色名: %s</string>
     <string name="error_unknown_element_name">不明な要素名: %1$s</string>
+    <string name="error_unknown_exception">不明な例外</string>
     <string name="error_unknown_gravity_for">不明な重力: %s</string>
     <string name="error_unknown_operation">不明な操作</string>
     <string name="error_unknown_picker_result_type">不明な結果タイプ {name: %s} です</string>
@@ -348,7 +367,8 @@
     <string name="error_unknown_picker_selector_type" formatted="false">不明なセレクタ {name: %s, type: %s} です</string>
     <string name="error_unknown_type">不明なタイプ: %s</string>
     <string name="error_webp_lossless_quality_not_supported">WebP-Lossless 形式は品質パラメータで圧縮できません, 代わりに JPEG/PNG/WebP-Lossy を使用してください</string>
-    <string name="file_not_exist_or_readable">ファイルが存在しないか, 読み取り可能でない: %s</string>
+    <string name="file_not_exist_or_readable">ファイルが存在しないか, 読み取れません</string>
+    <string name="file_not_exist_or_readable_with_path">ファイルが存在しないか, 読み取り可能でない: %s</string>
     <string name="foreground_notification_channel_name">%1$s のフォアグラウンド サービス</string>
     <string name="foreground_notification_text">クリックすると, %1$s が起動します</string>
     <string name="foreground_notification_title">%1$s のフォアグラウンド・サービス</string>
@@ -363,6 +383,8 @@
     <string name="hint_loop_times">無限ループの場合は 0</string>
     <string name="hint_pc_server_address_supported_formats">IPv4/IPv6/およびドメイン名に対応しています.</string>
     <string name="instruction_install_plugin_from_url">リモートプラグインの URL を入力してください. \n例: \"https://example.com/plugin.apk\"</string>
+    <string name="item_delete_permanently">完全に削除</string>
+    <string name="item_move_to_trash">ゴミ箱に移動</string>
     <string name="label_latest_used_time">最終使用時: %1$s</string>
     <string name="logger_ver_history_blob_thread_failure">\"Blob\" スレッドが失敗</string>
     <string name="logger_ver_history_blob_thread_success">\"Blob\" スレッドが成功, オフラインキャッシュを書き込み</string>
@@ -430,12 +452,12 @@
     <string name="summary_post_notifications_permission_inrt">アプリが通知を作成して送信することを許可する</string>
     <string name="summary_pre_execute_script">スクリプトファイルの前に実行する</string>
     <string name="summary_record_prompt">スクリプトの録音を開始または停止するときにメッセージを表示する</string>
+    <string name="summary_release_history_preference">リリース履歴と統計を表示</string>
     <string name="summary_rhino_java_primitive_wrap">Java のプリミティブ型はスクリプト内で Java オブジェクトとしてラップされます</string>
     <string name="summary_stable_mode">レイアウト解析はより安定するが, コードの互換性は低下 (アクセシビリティ・サービスの再起動が必要)</string>
     <string name="summary_text_launcher_shortcuts">ランチャーへのショートカットの追加</string>
     <string name="summary_use_volume_control_record">フローティングボタンが表示されているときに, \"Volume Down\" キーで録画の開始/停止を制御できるようになりました</string>
     <string name="summary_use_volume_key_to_stop_running_scripts">\"Volume Up\" キーを押すと, 実行中のスクリプトをすべて停止します</string>
-    <string name="summary_version_histories_preference">リリース版の変更履歴と統計データを確認する</string>
     <string name="term_internal_strorage">内部ストレージ</string>
     <string name="text_a11y_service">アクセシビリティサービス</string>
     <string name="text_a11y_service_description">スクリプトの自動操作 (クリック, 長押し, スライドなど) で必要です</string>
@@ -449,8 +471,8 @@
     <string name="text_about_display_over_other_apps">他のアプリとの比較表示について</string>
     <string name="text_about_functions_feedback">フィードバック</string>
     <string name="text_about_functions_licenses">ライセンスについて</string>
+    <string name="text_about_functions_release_history">@string/text_release_history</string>
     <string name="text_about_functions_update">更新情報</string>
-    <string name="text_about_functions_version_histories">@string/text_version_histories</string>
     <string name="text_access_has_been_granted">アクセス権が付与されました</string>
     <string name="text_act_by_click">クリック (click)</string>
     <string name="text_act_by_long_click">ロングクリック (longClick)</string>
@@ -467,8 +489,7 @@
     <string name="text_all">すべて</string>
     <string name="text_all_files_access">全ファイルアクセス</string>
     <string name="text_all_files_access_is_needed">携帯電話上のスクリプトファイルにアクセスするために, \"すべてのファイルへのアクセス\" が必要です</string>
-    <string name="text_all_histories">すべての履歴</string>
-    <string name="text_all_histories_cleared">すべての履歴がクリアされました</string>
+    <string name="text_all_history_entries">すべての履歴</string>
     <string name="text_all_items_cleared">すべての項目を削除しました</string>
     <string name="text_allow_setting_alarms_and_reminders_is_recommended">画面消灯中や待機時でもできるだけ正確に実行できるよう/[アラームとリマインダーの設定を許可] 権限の付与を推奨します</string>
     <string name="text_already_copied_to_clip">クリップボードにコピーされる</string>
@@ -509,8 +530,8 @@
     <string name="text_app_shortcut_docs_short_label">文書</string>
     <string name="text_app_shortcut_log_long_label">AutoJs6 ログ</string>
     <string name="text_app_shortcut_log_short_label">ログ</string>
-    <string name="text_app_shortcut_plugin_center_long_label">AutoJs6 Plugin Center</string>
-    <string name="text_app_shortcut_plugin_center_short_label">Plugins</string>
+    <string name="text_app_shortcut_plugin_center_long_label">AutoJs6 プラグインセンター</string>
+    <string name="text_app_shortcut_plugin_center_short_label">プラグイン</string>
     <string name="text_app_shortcut_settings_long_label">AutoJs6 設定</string>
     <string name="text_app_shortcut_settings_short_label">設定</string>
     <string name="text_app_source_code">ソースコード</string>
@@ -522,6 +543,7 @@
     <string name="text_auto_check_for_updates">更新の自動チェック</string>
     <string name="text_auto_check_for_updates_and_show_snackbar">自動的に更新をチェックし, ホームページにスナックバーを表示します</string>
     <string name="text_auto_night_mode">オートナイトモード</string>
+    <string name="text_auto_rename">自動リネーム</string>
     <string name="text_available_windows">使用可能なウィンドウ</string>
     <string name="text_back">戻る</string>
     <string name="text_broadcast_action">動作</string>
@@ -554,17 +576,23 @@
     <string name="text_check_for_updates_while_ignoring_the_local_version">アップデートの確認 (ローカルバージョンを無視する)</string>
     <string name="text_check_for_updates_while_ignoring_the_local_version_description">アップデートを確認する際に, 最新のリモートバージョンを直接取得する</string>
     <string name="text_checking_update" tools:ignore="TypographyEllipsis">アップデートを確認中...</string>
+    <string name="text_choose_delete_strategy">削除方法を選択</string>
+    <string name="text_choose_restore_path">復元先を選択</string>
     <string name="text_city_or_locality">市区町村</string>
     <string name="text_class_or_package_name">クラス名/パッケージ名</string>
     <string name="text_clear">クリア</string>
     <string name="text_clear_file_selection">ファイル選択の解除</string>
     <string name="text_clear_pre_execute_script">実行前スクリプトのクリア</string>
+    <string name="text_clear_trash">ゴミ箱を空にする</string>
+    <string name="text_clear_trash_confirm">ゴミ箱内の項目をすべて削除しますか?</string>
     <string name="text_clear_updates_checked_states">アップデートのチェック状態をクリアする</string>
-    <string name="text_click_icon_to_add_launcher_shortcut">Click icon to add launcher shortcut</string>
+    <string name="text_clear_version_history">バージョン履歴を消去</string>
+    <string name="text_clear_version_history_confirm">バージョン履歴をすべて消去しますか?</string>
+    <string name="text_click_icon_to_add_launcher_shortcut">アイコンをタップしてランチャーにショートカットを追加</string>
     <string name="text_click_item_to_remove">削除する項目をクリックします</string>
     <string name="text_click_item_to_show_details">項目をタップして詳細を表示します</string>
     <string name="text_click_ok_to_go_to_settings">\"OK\" をクリックすると設定に進みます</string>
-    <string name="text_click_other_areas_to_exit_selection">Click other areas to exit selection</string>
+    <string name="text_click_other_areas_to_exit_selection">他の場所をタップして選択を終了</string>
     <string name="text_click_too_frequently">頻繁に行う操作</string>
     <string name="text_client_mode">クライアントモード</string>
     <string name="text_clone_color_library">カラーライブラリを複製</string>
@@ -580,10 +608,10 @@
     <string name="text_compatibility">互換性</string>
     <string name="text_confidence_level">信頼度</string>
     <string name="text_config">設定</string>
-    <string name="text_confirm_to_clear_all_histories">すべての履歴をクリアしてもよろしいですか?</string>
     <string name="text_confirm_to_clear_all_items">すべての項目を削除しますか?</string>
-    <string name="text_confirm_to_clear_histories_of">以下の履歴がクリアされます\n\n[ %1$s ]\n\n本当にクリアしてもよろしいですか?</string>
-    <string name="text_confirm_to_clear_histories_of_all_color_libraries">以下の履歴がクリアされます\n\n[ すべてのカラーライブラリ ]\n\n本当にクリアしてもよろしいですか?</string>
+    <string name="text_confirm_to_clear_the_history">履歴を消去しますか?</string>
+    <string name="text_confirm_to_clear_the_history_of">以下の履歴を消去します\n\n[ %1$s ]\n\n消去しますか?</string>
+    <string name="text_confirm_to_clear_the_history_of_all_color_libraries">以下の履歴をすべて消去します\n\n[ すべてのカラーライブラリ ]\n\nすべて消去しますか?</string>
     <string name="text_confirm_to_delete">本当に削除しますか?</string>
     <string name="text_confirm_to_remove">本当に削除しますか?</string>
     <string name="text_confirm_to_uninstall">アンインストールしてもよろしいですか?</string>
@@ -608,6 +636,7 @@
     <string name="text_copy_to">コピー先</string>
     <string name="text_copy_to_clip">クリップボードにコピーする</string>
     <string name="text_copy_value">値をコピーする</string>
+    <string name="text_copying" tools:ignore="TypographyEllipsis">コピー中...</string>
     <string name="text_country_code">国コード (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">国コードは 2 文字の大文字でなければなりません</string>
     <string name="text_current_version">現在のバージョン</string>
@@ -634,6 +663,8 @@
     <string name="text_delete_file">ファイルを削除</string>
     <string name="text_delete_folder">フォルダーを削除</string>
     <string name="text_delete_line">行削除</string>
+    <string name="text_delete_revision_confirm">この履歴を完全に削除しますか?</string>
+    <string name="text_deleting" tools:ignore="TypographyEllipsis">削除中...</string>
     <string name="text_description">説明</string>
     <string name="text_destination">宛先</string>
     <string name="text_details">詳細</string>
@@ -667,6 +698,7 @@
     <string name="text_download_link_for_autojs6">AutoJs6 のダウンロードリンク</string>
     <string name="text_download_url">ダウンロード URL</string>
     <string name="text_downloading">ダウンロード中</string>
+    <string name="text_draft_file_path">下書きのパス</string>
     <string name="text_drawer_close">ドロワーを閉じる</string>
     <string name="text_drawer_open">ドロワーを開く</string>
     <string name="text_edit">編集する</string>
@@ -700,8 +732,6 @@
     <string name="text_extensibility">拡張性</string>
     <string name="text_failed">失敗</string>
     <string name="text_failed_to_build">ビルドに失敗しました</string>
-    <string name="text_failed_to_copy">コピーに失敗しました</string>
-    <string name="text_failed_to_create">作成に失敗しました</string>
     <string name="text_failed_to_create_key_store">署名キーの作成に失敗しました</string>
     <string name="text_failed_to_delete">削除の失敗</string>
     <string name="text_failed_to_disable_a11y_service">アクセシビリティ・サービスの無効化の失敗</string>
@@ -725,11 +755,13 @@
     <string name="text_failed_to_update">更新に失敗しました</string>
     <string name="text_failed_to_write_file">ファイルの書き込みに失敗しました</string>
     <string name="text_file">ファイル</string>
+    <string name="text_file_colon_value">ファイル: %1$s</string>
     <string name="text_file_details">ファイルの詳細</string>
     <string name="text_file_exists">ファイルは既に存在しています</string>
     <string name="text_file_explorer">ファイルエクスプローラー</string>
     <string name="text_file_extensions_title">ファイル拡張子</string>
     <string name="text_file_name">ファイル名</string>
+    <string name="text_file_name_colon_value">ファイル名: %1$s</string>
     <string name="text_file_not_exists">ファイルが存在しません</string>
     <string name="text_file_path">ファイルパス</string>
     <string name="text_file_with_abs_path_is_not_an_executable_script">ファイル \"%1$s\" は実行可能なスクリプトではありません</string>
@@ -746,6 +778,7 @@
     <string name="text_first_and_last_name">氏名</string>
     <string name="text_floating_button">フローティングボタン</string>
     <string name="text_folder">フォルダー</string>
+    <string name="text_folder_colon_value">フォルダー: %1$s</string>
     <string name="text_force_stop">強制停止</string>
     <string name="text_foreground_service">フォアグラウンドサービス</string>
     <string name="text_formatting_completed">フォーマット完了</string>
@@ -767,7 +800,8 @@
     <string name="text_hide_button">隠しボタン</string>
     <string name="text_hide_node">このノードを隠す</string>
     <string name="text_hide_same_frame_nodes">同じフレームのノードを隠す</string>
-    <string name="text_histories">ヒストリー</string>
+    <string name="text_history">履歴</string>
+    <string name="text_history_has_been_cleared">履歴を消去しました</string>
     <string name="text_icon">アイコン</string>
     <string name="text_ignore_battery_optimizations">バッテリーの最適化を無視する</string>
     <string name="text_ignored_updates">アップデートを無視する</string>
@@ -795,6 +829,7 @@
     <string name="text_ip_address_may_be_invalid_for_server_connection" tools:ignore="TypographyEllipsis">IP アドレス \"%1$s\" は特殊用途 (loopback/broadcast/multicast/reserved/...) のため, 接続先サーバーへの接続に使用できない可能性があります.</string>
     <string name="text_is_latest_version">新しいバージョンが見つかりません</string>
     <string name="text_issue_report">フィードバック</string>
+    <string name="text_items_count_colon_value">項目: %1$d</string>
     <string name="text_js_file">*.js ファイル</string>
     <string name="text_jump">ジャンプ</string>
     <string name="text_jump_to_end">末尾へジャンプ</string>
@@ -847,8 +882,14 @@
     <string name="text_move_aborted_same_path">ソースパスと宛先パスが同じです. 移動を中止しました.</string>
     <string name="text_move_all_files_to_new_directory">すべてのファイルを新しいディレクトリに移動する</string>
     <string name="text_move_file">ファイルを移動</string>
+    <string name="text_move_file_to_trash">ファイルをゴミ箱に移動</string>
     <string name="text_move_folder">フォルダーを移動</string>
+    <string name="text_move_folder_to_trash">フォルダーをゴミ箱に移動</string>
     <string name="text_move_to">移動先</string>
+    <string name="text_move_to_trash_failed">ゴミ箱への移動に失敗しました</string>
+    <string name="text_moved_to_trash">ゴミ箱に移動しました</string>
+    <string name="text_moving" tools:ignore="TypographyEllipsis">移動中...</string>
+    <string name="text_moving_to_trash" tools:ignore="TypographyEllipsis">ゴミ箱に移動中...</string>
     <string name="text_multiple_options">複数のオプション</string>
     <string name="text_name">名称</string>
     <string name="text_need_to_enable_a11y_service">アクセシビリティサービスを有効にする必要があります</string>
@@ -866,7 +907,8 @@
     <string name="text_no_browser">ブラウザがインストールされていない</string>
     <string name="text_no_content">内容なし</string>
     <string name="text_no_content_description">コンテンツの説明がありません</string>
-    <string name="text_no_histories">履歴がない</string>
+    <string name="text_no_data">データなし</string>
+    <string name="text_no_history">履歴なし</string>
     <string name="text_no_ignored_updates">無視された更新がない</string>
     <string name="text_no_log_entries_to_copy">コピーするログ・エントリがありません</string>
     <string name="text_no_log_entries_to_export">エクスポートするログ・エントリがありません</string>
@@ -875,6 +917,7 @@
     <string name="text_no_root">非ルート</string>
     <string name="text_no_root_access">ルートアクセス不可</string>
     <string name="text_no_scripts_to_stop_running">実行を停止するスクリプトなし</string>
+    <string name="text_no_version_history">バージョン履歴なし</string>
     <string name="text_not_granted">許可されない</string>
     <string name="text_not_installed">未インストール</string>
     <string name="text_not_showing_main_activity">メインのアクティビティが表示されない</string>
@@ -900,14 +943,17 @@
     <string name="text_original_developer">オリジナル開発者</string>
     <string name="text_others">その他</string>
     <string name="text_output_apk_path">APK 出力パス</string>
+    <string name="text_overwrite">上書き</string>
     <string name="text_package_name">パッケージ名</string>
     <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">パッケージ名 (計算中...)</string>
     <string name="text_password">パスワード</string>
     <string name="text_password_cannot_be_empty">パスワードは空であってはならない</string>
     <string name="text_password_requires_at_least_n_characters">パスワードは少なくとも %d 文字以上である必要があります</string>
     <string name="text_paste">貼り付け</string>
+    <string name="text_path_colon_value">パス: %1$s</string>
     <string name="text_path_is_empty">パスが空です</string>
     <string name="text_pc_server_address">PC サーバーのアドレス</string>
+    <string name="text_percentage_colon_value">使用率: %1$s</string>
     <string name="text_permission_desc_access_coarse_location">アプリがネットワーク経由で大まかな位置情報にアクセスすることを許可します</string>
     <string name="text_permission_desc_access_fine_location">アプリが GPS 経由で正確な位置情報を取得することを許可します</string>
     <string name="text_permission_desc_access_location_extra_commands">アプリが位置情報プロバイダからの追加コマンドにアクセスすることを許可します</string>
@@ -999,9 +1045,9 @@
     <string name="text_please_input_name">入力名</string>
     <string name="text_please_wait" tools:ignore="TypographyEllipsis">しばらくお待ちください...</string>
     <string name="text_please_wait_a_moment_before_trying_again" tools:ignore="TypographyEllipsis">しばらくしてからもう一度お試しください...</string>
-    <string name="text_plugin_center">Plugin center</string>
+    <string name="text_plugin_center">プラグインセンター</string>
     <string name="text_plugin_details">プラグイン詳細</string>
-    <string name="text_plugins">Plugins</string>
+    <string name="text_plugins">プラグイン</string>
     <string name="text_pointer_location">ポインターの位置</string>
     <string name="text_pointer_location_toggle_failed_with_hint">トグル [ポインターの位置] に失敗しました.\nroot 権限が必要です</string>
     <string name="text_post_notifications_permission">ゆうびんけいほう</string>
@@ -1037,11 +1083,14 @@
     <string name="text_register">登録</string>
     <string name="text_register_succeed">登録に成功した</string>
     <string name="text_registering">登録中</string>
+    <string name="text_release_history">リリース履歴</string>
     <string name="text_release_notes">リリースノート</string>
     <string name="text_remote">リモート</string>
     <string name="text_remote_file_saved_to_local_storage_successfully">リモート・ファイルがローカル・ストレージに正常に保存された</string>
     <string name="text_remote_project_saved_to_local_storage_successfully">リモートプロジェクトがローカルストレージに正常に保存された</string>
     <string name="text_remove_all_breakpoints">すべてのブレークポイントを削除する</string>
+    <string name="text_remove_from_trash">ゴミ箱から削除</string>
+    <string name="text_remove_from_trash_confirm">この項目をゴミ箱から完全に削除しますか?</string>
     <string name="text_rename">名前の変更</string>
     <string name="text_replace">置換</string>
     <string name="text_replace_all">すべてを置き換える</string>
@@ -1055,6 +1104,10 @@
     <string name="text_reset_to_initial_content_only_for_assets">リセットはサンプルのみ</string>
     <string name="text_restart">再起動</string>
     <string name="text_restart_strategy">再起動戦略</string>
+    <string name="text_restore">復元</string>
+    <string name="text_restore_to_original_path">元のパスに復元</string>
+    <string name="text_restore_to_specified_path">指定したパスに復元</string>
+    <string name="text_restoring" tools:ignore="TypographyEllipsis">復元中...</string>
     <string name="text_result">結果</string>
     <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">更新ログを取得しています...</string>
     <string name="text_retrieving_plugin_list_data" tools:ignore="TypographyEllipsis">プラグイン一覧のデータを取得しています...</string>
@@ -1130,7 +1183,13 @@
     <string name="text_sort">並べ替え</string>
     <string name="text_sort_by_last_update_time">最終更新日で並べ替え</string>
     <string name="text_sort_by_name">名前で並べ替え</string>
+    <string name="text_sort_by_name_asc">名前 (A-Z)</string>
     <string name="text_sort_by_package_size">パッケージサイズで並べ替え</string>
+    <string name="text_sort_by_path_asc">パス (A-Z)</string>
+    <string name="text_sort_by_size_asc">サイズ (小さい順)</string>
+    <string name="text_sort_by_size_desc">サイズ (大きい順)</string>
+    <string name="text_sort_by_time_asc">時間 (古い順)</string>
+    <string name="text_sort_by_time_desc">時間 (新しい順)</string>
     <string name="text_source">ソース</string>
     <string name="text_source_file_path">ソースコードのパス</string>
     <string name="text_special_permissions">特殊な権限</string>
@@ -1161,10 +1220,15 @@
     <string name="text_timed_task">時間指定タスク</string>
     <string name="text_timed_task_backend_title">定時タスクのスケジューリングエンジン</string>
     <string name="text_timed_task_timing">タイミング</string>
+    <string name="text_to_be_chosen">未選択</string>
     <string name="text_tools">ツール</string>
+    <string name="text_total_size_colon_value">サイズ: %1$s</string>
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">透過背景ランチャーアイコンはシステムによって自動的にマスクされたり背景が追加されたりする場合があるため, 実際の効果はデバイスによって異なる場合があります</string>
+    <string name="text_trash">ゴミ箱</string>
     <string name="text_tutorial">チュートリアル</string>
     <string name="text_type">種類</string>
+    <string name="text_type_file">ファイル</string>
+    <string name="text_type_folder">フォルダー</string>
     <string name="text_unable_to_build_apk_as_autojs6_does_not_include_selected_abi">現在のバージョンの AutoJs6 には上記の ABI が含まれていないため, 選択した ABI \"%s\" を使用してパッケージ・アプリケーションを作成できません</string>
     <string name="text_unavailable">使用できません</string>
     <string name="text_unavailable_abi_for">ABI \"%s\" は使用できません</string>
@@ -1173,15 +1237,15 @@
     <string name="text_under_development_title">@string/text_under_development</string>
     <string name="text_undo">元に戻す</string>
     <string name="text_undo_simplified">戻る</string>
-    <string name="text_uninstall">Uninstall</string>
+    <string name="text_uninstall">アンインストール</string>
     <string name="text_unknown">不明</string>
     <string name="text_unknown_author_for_plugin">不明な作者</string>
     <string name="text_unknown_description_for_plugin">不明な説明</string>
     <string name="text_unknown_title_for_plugin">不明なタイトル</string>
     <string name="text_unknown_version_for_plugin">不明なバージョン</string>
     <string name="text_unverified">未確認</string>
-    <string name="text_updatable">Updatable</string>
-    <string name="text_update">Update</string>
+    <string name="text_updatable">更新あり</string>
+    <string name="text_update">更新</string>
     <string name="text_updates">アップデート</string>
     <string name="text_updates_checked_states_cleared">更新のチェック状態を解除</string>
     <string name="text_updates_snack_bar_act_later">後日</string>
@@ -1209,7 +1273,10 @@
     <string name="text_version">バージョン</string>
     <string name="text_version_code">バージョンコード</string>
     <string name="text_version_code_with_computing" tools:ignore="TypographyEllipsis">バージョンコード (計算中...)</string>
-    <string name="text_version_histories">バージョン履歴</string>
+    <string name="text_version_count_colon_value">バージョン: %1$s</string>
+    <string name="text_version_history">バージョン履歴</string>
+    <string name="text_version_history_restore_does_not_auto_save_to_disk">復元すると編集内容のみが変更されます. ファイルには自動保存されません. 保存ボタンを手動でタップしてください.</string>
+    <string name="text_version_history_restore_will_overwrite_file">復元するとファイル内容が上書きされます.\nパス: %1$s</string>
     <string name="text_version_info">バージョン情報</string>
     <string name="text_version_name">バージョン名</string>
     <string name="text_version_name_with_computing" tools:ignore="TypographyEllipsis">バージョン名 (計算中...)</string>
@@ -1224,28 +1291,4 @@
     <string name="text_write_secure_settings">セキュリティ設定の書き込み</string>
     <string name="text_write_system_settings">システム設定の書き込み</string>
     <string name="text_xiaomi_background_popup_permission">バックグラウンドでのポップアップ表示</string>
-    <string name="error_refresh_failed">更新に失敗しました</string>
-    <string name="error_save_failed">保存に失敗しました</string>
-    <string name="text_draft_file_path">下書きのパス</string>
-    <string name="dialog_button_copy_path">コピー</string>
-    <string name="dialog_button_save_as">名前を付けて保存</string>
-    <string name="text_version_history">バージョン履歴</string>
-    <string name="text_no_version_history">バージョン履歴なし</string>
-    <string name="text_version_history_restore_does_not_auto_save_to_disk">復元すると編集内容のみが変更されます. ファイルには自動保存されません. 保存ボタンを手動でタップしてください.</string>
-    <string name="item_move_to_trash">ゴミ箱に移動</string>
-    <string name="item_delete_permanently">完全に削除</string>
-    <string name="text_moved_to_trash">ゴミ箱に移動しました</string>
-    <string name="text_choose_delete_strategy">削除方法を選択</string>
-    <string name="text_trash">ゴミ箱</string>
-    <string name="text_choose_restore_path">復元先を選択</string>
-    <string name="text_restore_to_original_path">元のパスに復元</string>
-    <string name="text_restore_to_specified_path">指定したパスに復元</string>
-    <string name="text_path_colon_value">パス: %1$s</string>
-    <string name="text_file_name_colon_value">ファイル名: %1$s</string>
-    <string name="dialog_button_choose_path">選択</string>
-    <string name="text_overwrite">上書き</string>
-    <string name="text_auto_rename">自動リネーム</string>
-    <string name="text_no_data">データなし</string>
-    <string name="error_invalid_path">無効なパス: %1$s</string>
-    <string name="text_version_history_restore_will_overwrite_file">復元するとファイル内容が上書きされます.\nパス: %1$s</string>
 </resources>

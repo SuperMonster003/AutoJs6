@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_search"
+        android:icon="@drawable/ic_search_smaller_black_48dp"
+        android:title="@string/text_search"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"
+        app:showAsAction="always|collapseActionView" />
+
+    <item
+        android:id="@+id/action_sort"
+        android:title="@string/text_sort"
+        app:showAsAction="never">
+        <menu>
+            <item
+                android:id="@+id/action_sort_time_desc"
+                android:title="@string/text_sort_by_time_desc" />
+            <item
+                android:id="@+id/action_sort_time_asc"
+                android:title="@string/text_sort_by_time_asc" />
+
+            <item
+                android:id="@+id/action_sort_size_desc"
+                android:title="@string/text_sort_by_size_desc" />
+            <item
+                android:id="@+id/action_sort_size_asc"
+                android:title="@string/text_sort_by_size_asc" />
+
+            <item
+                android:id="@+id/action_sort_name_asc"
+                android:title="@string/text_sort_by_name_asc" />
+            <item
+                android:id="@+id/action_sort_path_asc"
+                android:title="@string/text_sort_by_path_asc" />
+        </menu>
+    </item>
+
+    <item
+        android:id="@+id/action_clear_trash"
+        android:title="@string/text_clear_trash"
+        app:showAsAction="never" />
+</menu>

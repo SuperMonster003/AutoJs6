@@ -10,8 +10,8 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
-import org.autojs.autojs.app.DialogUtils.applyProgressThemeColorTintLists
-import org.autojs.autojs.app.DialogUtils.setProgressNumberFormatByBytes
+import org.autojs.autojs.util.DialogUtils.applyProgressThemeColorTintLists
+import org.autojs.autojs.util.DialogUtils.setProgressNumberFormatByBytes
 import org.autojs.autojs.runtime.api.Mime
 import org.autojs.autojs.ui.main.scripts.ApkInfoDialogManager
 import org.autojs.autojs.util.ClipboardUtils

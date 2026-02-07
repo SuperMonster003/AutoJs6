@@ -321,20 +321,20 @@ class JsonSocketClient(service: DevPluginService?, private val ctx: Context, pri
         // zh-CN: 连接超时 = 握手超时 + 5 秒 (默认).
         private const val CONNECT_TIMEOUT = HANDSHAKE_TIMEOUT + 5_000
 
-        var serverAddressHistories: LinkedHashSet<String>
-            get() = Pref.getLinkedHashSet(R.string.key_pc_server_address_histories)
-            private set(value) = Pref.putLinkedHashSet(R.string.key_pc_server_address_histories, value)
+        var serverAddressHistory: LinkedHashSet<String>
+            get() = Pref.getLinkedHashSet(R.string.key_pc_server_address_history)
+            private set(value) = Pref.putLinkedHashSet(R.string.key_pc_server_address_history, value)
 
-        fun addIntoHistories(ip: String) {
-            serverAddressHistories = linkedSetOf(ip).apply { addAll(serverAddressHistories) }
+        fun addIntoHistory(ip: String) {
+            serverAddressHistory = linkedSetOf(ip).apply { addAll(serverAddressHistory) }
         }
 
-        fun removeFromHistories(ip: String) {
-            serverAddressHistories = serverAddressHistories.apply { remove(ip) }
+        fun removeFromHistory(ip: String) {
+            serverAddressHistory = serverAddressHistory.apply { remove(ip) }
         }
 
-        fun clearAllHistories() {
-            serverAddressHistories = linkedSetOf()
+        fun clearHistory() {
+            serverAddressHistory = linkedSetOf()
         }
 
         // Track current active instance for guarding state emission.

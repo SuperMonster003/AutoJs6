@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.app.tool.FloatingButtonTool
 import org.autojs.autojs.app.tool.JsonSocketClientTool
@@ -21,6 +22,7 @@ import org.autojs.autojs.app.tool.PointerLocationTool
 import org.autojs.autojs.core.accessibility.AccessibilityTool
 import org.autojs.autojs.core.plugin.center.PluginCenterActivity
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.PrefRx
 import org.autojs.autojs.external.foreground.AppForegroundService
 import org.autojs.autojs.permission.AllFilesAccessPermission
 import org.autojs.autojs.permission.DisplayOverOtherAppsPermission
@@ -36,10 +38,13 @@ import org.autojs.autojs.permission.XiaomiBackgroundPopupPermission
 import org.autojs.autojs.pluginclient.DevPluginService
 import org.autojs.autojs.pluginclient.JsonSocketClient
 import org.autojs.autojs.pluginclient.JsonSocketServer
+import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.runtime.api.WrappedShizuku
 import org.autojs.autojs.service.AccessibilityService
 import org.autojs.autojs.service.ForegroundService
 import org.autojs.autojs.service.NotificationService
+import org.autojs.autojs.storage.history.HistoryDatabase
+import org.autojs.autojs.storage.history.HistoryPrefs
 import org.autojs.autojs.theme.ThemeChangeNotifier
 import org.autojs.autojs.theme.app.ColorSelectBaseActivity
 import org.autojs.autojs.ui.floating.CircularMenu
@@ -66,17 +71,25 @@ import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import rikka.shizuku.Shizuku
 import java.lang.ref.WeakReference
+import java.util.Locale
 import kotlin.math.roundToInt
 import org.autojs.autojs.util.App as UtilApp
 
 /**
  * Created by Stardust on Jan 30, 2017.
- * Modified by SuperMonster003 as of Jan 9, 2026.
  * Transformed by SuperMonster003 on Sep 19, 2022.
+ * Modified by SuperMonster003 as of Jan 9, 2026.
+ * Modified by JetBrains AI Assistant (GPT-5.2) as of Feb 5, 2026.
  */
 open class DrawerFragment : Fragment() {
 
     private val binding by viewBinding(FragmentDrawerBinding::bind)
+
+    /**
+     * Rx disposables for drawer subtitle observing.
+     * zh-CN: 抽屉子标题监听的 Rx 订阅管理器.
+     */
+    private val drawerStatsDisposables: CompositeDisposable = CompositeDisposable()
 
     private var privateDrawerMenu: RecyclerView? = null
     private var privateContext: WeakReference<Context?>? = null
@@ -632,7 +645,87 @@ open class DrawerFragment : Fragment() {
         initMenuItems()
         initMenuItemStates()
         setupListeners()
+
+        // Start observing stats for drawer subtitles.
+        // zh-CN: 开始监听抽屉子标题所需的统计信息.
+        observeTrashAndHistoryDrawerSubtitles()
     }
+
+    private fun observeTrashAndHistoryDrawerSubtitles() {
+        val appCtx = mContext.applicationContext
+        val dao = HistoryDatabase.getInstance(appCtx).historyDao()
+
+        // Trash: observe DB stats + observe limit preference.
+        // zh-CN: 回收站: 监听 DB 统计 + 监听容量上限偏好.
+        val trashLimitFlow = PrefRx.observeLong(
+            keyRes = R.string.key_trash_max_total_bytes,
+            defaultValue = HistoryPrefs.DEFAULT_TRASH_MAX_TOTAL_BYTES,
+        )
+
+        val trashDisposable = Observable
+            .combineLatest(
+                dao.observeTrashStats().toObservable(),
+                trashLimitFlow.toObservable(),
+            ) { stats, limitBytes ->
+                val count = stats.count.coerceAtLeast(0L)
+                val totalBytes = (stats.totalBytes ?: 0L).coerceAtLeast(0L)
+                val limit = limitBytes.coerceAtLeast(0L)
+
+                val sizeText = PFiles.formatSizeWithUnit(totalBytes)
+
+                val percentText = if (limit > 0L) {
+                    val ratio = (totalBytes.toDouble() / limit.toDouble()).coerceAtLeast(0.0)
+                    String.format(Locale.getDefault(), "%.1f%%", ratio * 100.0)
+                } else {
+                    String.format(Locale.getDefault(), "%.1f%%", 0.0)
+                }
+
+                "$count | $sizeText | $percentText"
+            }
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe { subtitle ->
+                mTrashItem.subtitle = subtitle
+                (mDrawerMenu.adapter as? DrawerMenuAdapter)?.notifyItemChanged(mTrashItem)
+            }
+
+        drawerStatsDisposables.add(trashDisposable)
+
+        // Version history: observe DB stats + observe limit preference.
+        // zh-CN: 版本历史: 监听 DB 统计 + 监听容量上限偏好.
+        val historyLimitFlow = PrefRx.observeLong(
+            keyRes = R.string.key_history_max_total_bytes,
+            defaultValue = HistoryPrefs.DEFAULT_HISTORY_MAX_TOTAL_BYTES,
+        )
+
+        val historyDisposable = Observable
+            .combineLatest(
+                dao.observeVersionHistoryStats().toObservable(),
+                historyLimitFlow.toObservable(),
+            ) { stats, limitBytes ->
+                val count = stats.fileCount.coerceAtLeast(0L)
+                val totalBytes = (stats.totalBytes ?: 0L).coerceAtLeast(0L)
+                val limit = limitBytes.coerceAtLeast(0L)
+
+                val sizeText = PFiles.formatSizeWithUnit(totalBytes)
+
+                val percentText = if (limit > 0L) {
+                    val ratio = (totalBytes.toDouble() / limit.toDouble()).coerceAtLeast(0.0)
+                    String.format(Locale.getDefault(), "%.1f%%", ratio * 100.0)
+                } else {
+                    String.format(Locale.getDefault(), "%.1f%%", 0.0)
+                }
+
+                "$count | $sizeText | $percentText"
+            }
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe { subtitle ->
+                mVersionHistoryItem.subtitle = subtitle
+                (mDrawerMenu.adapter as? DrawerMenuAdapter)?.notifyItemChanged(mVersionHistoryItem)
+            }
+
+        drawerStatsDisposables.add(historyDisposable)
+    }
+
 
     private fun configureDrawerWidth() {
         val screenWidthDp = resources.configuration.screenWidthDp
@@ -659,7 +752,13 @@ open class DrawerFragment : Fragment() {
         super.onDestroy()
         mClientModeItem.dispose()
         mServerModeItem.dispose()
+
         // mActivity.unregisterReceiver(mReceiver)
+
+        // Dispose drawer subtitle observers.
+        // zh-CN: 释放抽屉子标题监听订阅.
+        drawerStatsDisposables.clear()
+
         EventBus.getDefault().unregister(this)
     }
 

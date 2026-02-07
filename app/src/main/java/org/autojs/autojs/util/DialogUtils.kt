@@ -1,6 +1,4 @@
-@file:Suppress("unused")
-
-package org.autojs.autojs.app
+package org.autojs.autojs.util
 
 import android.app.Activity
 import android.content.Context
@@ -9,6 +7,7 @@ import android.content.DialogInterface
 import android.content.res.ColorStateList
 import android.os.Build
 import android.os.Looper
+import android.os.SystemClock
 import android.provider.Settings
 import android.text.util.Linkify
 import android.util.Log
@@ -16,34 +15,61 @@ import android.view.Gravity
 import android.view.View
 import android.view.WindowManager
 import android.widget.CheckBox
+import android.widget.TextView
 import androidx.preference.PreferenceViewHolder
 import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.autojs.autojs.annotation.ReservedForCompatibility
+import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.event.BackCompat
+import org.autojs.autojs.theme.ThemeColorHelper
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.theme.preference.LongClickablePreferenceLike
 import org.autojs.autojs.ui.explorer.ExplorerView
-import org.autojs.autojs.util.ColorUtils
-import org.autojs.autojs.util.ThreadUtils.runOnMain
-import org.autojs.autojs.util.ViewUtils.showSnack
+import org.autojs.autojs.util.ViewUtils.setLinesEllipsizedIndividually
 import org.autojs.autojs6.R
 import java.util.Locale
 import java.util.concurrent.Callable
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
+import kotlin.concurrent.Volatile
+import kotlin.math.max
+import kotlin.math.min
+import kotlin.math.roundToInt
 
 /**
  * Created by Stardust on Aug 4, 2017.
  * Transformed by SuperMonster003 on Oct 19, 2022.
  * Modified by OpenAI ChatGPT (GPT-5.2 Thinking) as of Jan 20, 2026.
  * Modified by JetBrains AI Assistant (GPT-5.2) as of Feb 1, 2026.
- * Modified by SuperMonster003 as of Feb 3, 2026.
+ * Modified by SuperMonster003 as of Feb 7, 2026.
  */
 object DialogUtils {
 
     private const val TAG = "DialogUtils"
+
+    // Minimum UI update interval for progress dialog, to reduce main-thread pressure.
+    // zh-CN: 进度对话框 UI 更新的最小间隔, 用于降低主线程压力.
+    private const val PROGRESS_UPDATE_MIN_INTERVAL_MS: Long = 50L
+
+    // Delay before showing progress dialog to avoid flashing for fast operations.
+    // zh-CN: 显示进度对话框前的延迟, 用于避免快速操作导致的闪现.
+    private const val PROGRESS_DIALOG_SHOW_DELAY_MS: Long = 200L
+
+    // Minimum duration to keep progress dialog visible once shown, to avoid flashing.
+    // zh-CN: 进度对话框一旦显示后的最短展示时长, 用于避免闪现.
+    private const val PROGRESS_DIALOG_MIN_SHOW_MS: Long = 300L
+
+    // Progress max for large files (totalBytes > Integer.MAX_VALUE), higher means smoother progress.
+    // zh-CN: 大文件 (totalBytes > Integer.MAX_VALUE) 的进度最大值, 值越大进度越细腻.
+    const val PROGRESS_MAX_LARGE: Int = 10000
 
     @JvmStatic
     fun <T : MaterialDialog.Builder> T.showAdaptive(): MaterialDialog = build().showAdaptive()
@@ -60,7 +86,7 @@ object DialogUtils {
      *
      * Behavior:
      * 1) Always performs window operations and `show()` on the main thread.
-     * 2) If the dialog uses an [Activity] context, it is shown normally.
+     * 2) If the dialog uses an [android.app.Activity] context, it is shown normally.
      * 3) Otherwise, it tries to show as an overlay window:
      *    - `TYPE_APPLICATION_OVERLAY` on Android O+.
      *    - `TYPE_PHONE` on pre-O devices.
@@ -72,7 +98,7 @@ object DialogUtils {
      *
      * 行为说明:
      * 1) 所有 Window 参数操作和 `show()` 都保证在主线程执行.
-     * 2) 若对话框基于 [Activity] Context, 则按常规方式显示.
+     * 2) 若对话框基于 [android.app.Activity] Context, 则按常规方式显示.
      * 3) 否则尝试以 overlay 窗口显示:
      *    - Android O+ 使用 `TYPE_APPLICATION_OVERLAY`.
      *    - Android O 以下使用 `TYPE_PHONE`.
@@ -96,7 +122,7 @@ object DialogUtils {
     @Deprecated("Use showAdaptive instead.", ReplaceWith("showAdaptive(dialog, focusable)"))
     @ReservedForCompatibility
     fun <T : MaterialDialog> showDialog(dialog: T, focusable: Boolean = true): T {
-        runOnMain {
+        ThreadUtils.runOnMain {
             // Prevent duplicated show.
             // zh-CN: 防止重复 show().
             if (dialog.isShowing) return@runOnMain
@@ -300,13 +326,90 @@ object DialogUtils {
         }
     }
 
+    fun MaterialDialog.makeSettingsLaunchable(viewGetter: (dialog: MaterialDialog) -> View?, packageName: String?) {
+        viewGetter(this)?.setOnClickListener {
+            packageName?.let { pkg ->
+                IntentUtils.launchAppDetailsSettings(this.context, pkg)
+            } ?: ViewUtils.showSnack(this.view, R.string.error_app_not_installed)
+        }
+    }
+
+    @JvmStatic
+    fun MaterialDialog.makeTextCopyable(textViewGetter: (dialog: MaterialDialog) -> TextView?) {
+        makeTextCopyable(textViewGetter(this))
+    }
+
+    @JvmStatic
+    @JvmOverloads
+    fun MaterialDialog.makeTextCopyable(textView: TextView?, textValue: String? = textView?.text?.toString()) {
+        if (!textValue.isNullOrBlank()) {
+            val context = this.context
+            textView?.setOnClickListener {
+                ClipboardUtils.setClip(context, textValue)
+                ViewUtils.showSnack(this.view, "${context.getString(R.string.text_already_copied_to_clip)}: $textValue")
+            }
+        }
+    }
+
+    fun MaterialDialog.setCopyableTextIfAbsent(textView: TextView, textValuePair: Pair<String?, String?>) {
+        setCopyableTextIfAbsent(textView, textValuePair.first, textValuePair.second)
+    }
+
+    fun MaterialDialog.setCopyableTextIfAbsent(textView: TextView, textValue: String?, suffix: String? = null) {
+        when {
+            textValue.isNullOrBlank() -> {
+                if (textView.isNullOrBlank() || textView.isEllipsisSix()) {
+                    textView.setUnknown()
+                }
+            }
+            textView.isNullOrBlank() || textView.isEllipsisSix() || textView.isUnknown() -> {
+                textView.text = textValue + (suffix ?: "")
+                this.makeTextCopyable(textView, textValue)
+            }
+        }
+    }
+
+    fun MaterialDialog.setCopyableTextIfAbsent(textView: TextView, scope: CoroutineScope, f: () -> String?) {
+        setCopyableTextIfAbsent(textView, scope, f, suffix = null)
+    }
+
+    fun MaterialDialog.setCopyableTextIfAbsent(textView: TextView, scope: CoroutineScope, f: () -> String?, suffix: String?) {
+        scope.launch(Dispatchers.IO) {
+            val textValue = f.invoke()
+            withContext(Dispatchers.Main) {
+                setCopyableTextIfAbsent(textView, textValue, suffix)
+            }
+        }
+    }
+
+    fun MaterialDialog.setCopyableText(textView: TextView, textValue: String?) {
+        when {
+            textValue.isNullOrBlank() -> {
+                textView.setUnknown()
+            }
+            else -> {
+                textView.text = textValue
+                this.makeTextCopyable(textView, textValue)
+            }
+        }
+    }
+
+    @JvmStatic
+    fun MaterialDialog.Builder.choiceWidgetThemeColor() = also {
+        it.choiceWidgetColor(ThemeColorHelper.getThemeColorStateList(context))
+    }
+
+    @JvmStatic
+    fun MaterialDialog.Builder.widgetThemeColor() = also {
+        it.widgetColor(ThemeColorHelper.getThemeColorStateList(context))
+    }
+
     @JvmStatic
     fun fixCheckBoxGravity(dialog: MaterialDialog): MaterialDialog = dialog.also {
         it.view.findViewById<CheckBox>(com.afollestad.materialdialogs.R.id.md_promptCheckbox)?.gravity = Gravity.CENTER_VERTICAL
     }
 
-    @JvmStatic
-    fun isActivityContext(context: Context?): Boolean {
+    private fun isActivityContext(context: Context?): Boolean {
         return context is Activity || (context is ContextWrapper && isActivityContext(context.baseContext))
     }
 
@@ -345,7 +448,7 @@ object DialogUtils {
             val now = System.currentTimeMillis()
             if (now - time.lastPressed >= time.minPressInterval) {
                 time.lastPressed = now
-                showSnack(explorerView, R.string.text_press_again_to_dismiss_dialog)
+                ViewUtils.showSnack(explorerView, R.string.text_press_again_to_dismiss_dialog)
                 return@installDialogBackHandler true
             }
             di.dismiss()
@@ -496,4 +599,212 @@ object DialogUtils {
     fun MaterialDialog.setActionButtonText(actionButton: DialogAction, string: String) {
         getActionButton(actionButton).text = string
     }
+
+    class ProgressDialogSession internal constructor(private val controller: OperationController) {
+        private val dialogRef = AtomicReference<MaterialDialog?>()
+
+        // Whether the session has been closed (operation finished/aborted), used to prevent late dialog showing.
+        // zh-CN: 会话是否已关闭 (操作已完成/已中止), 用于防止延迟任务在结束后仍弹出对话框.
+        private val closed = AtomicBoolean(false)
+
+        private val showScheduled = AtomicBoolean(false)
+
+        @Volatile
+        private var shown = false
+
+        private var shownAtUptimeMs = 0L
+
+        // Pending UI state before dialog is actually shown.
+        // zh-CN: 对话框真正 show 之前的挂起 UI 状态, 用于避免延迟显示导致的首次更新丢失.
+        private val pendingContentRef: AtomicReference<List<String>?> = AtomicReference(null)
+        private val pendingProcessedRef: AtomicLong = AtomicLong(-1L)
+        private val pendingTotalRef: AtomicLong = AtomicLong(0L)
+
+        // Timestamp/progress/content state for throttling UI updates.
+        // zh-CN: 用于节流 UI 更新的时间戳/进度/文本状态.
+        private val lastProgressUpdateTime: LongArray = longArrayOf(0L)
+        private val lastProgressValue: LongArray = longArrayOf(-1L)
+        private val lastContentUpdateTime: LongArray = longArrayOf(0L)
+
+        fun scheduleShow(builder: MaterialDialog.Builder) {
+            if (!showScheduled.compareAndSet(false, true)) {
+                return
+            }
+
+            GlobalAppContext.postDelayed(Runnable {
+                // Skip showing if operation already finished/aborted.
+                // zh-CN: 若操作已结束/已中止, 则不再显示对话框.
+                if (closed.get() || controller.cancelled.get()) {
+                    return@Runnable
+                }
+
+                val dialog: MaterialDialog = buildAndShowAdaptive { builder.build() }
+                dialog.setProgressNumberFormat("...")
+                dialog.applyProgressThemeColorTintLists()
+
+                // If closed becomes true right after building, dismiss immediately to avoid dangling dialog.
+                // zh-CN: 若 build 后立刻变为 closed, 则立即关闭, 避免对话框悬挂.
+                if (closed.get()) {
+                    try {
+                        if (dialog.isShowing) {
+                            dialog.dismiss()
+                        }
+                    } catch (_: Throwable) {
+                        /* Ignored. */
+                    }
+                    return@Runnable
+                }
+
+                dialogRef.set(dialog)
+                shown = true
+                shownAtUptimeMs = SystemClock.uptimeMillis()
+
+                // Apply pending content/progress immediately after dialog is ready.
+                // zh-CN: 对话框就绪后立即应用挂起的 content/progress, 避免首次更新被延迟显示吞掉.
+                pendingContentRef.getAndSet(null)?.let { pending ->
+                    GlobalAppContext.post {
+                        try {
+                            dialog.contentView?.setLinesEllipsizedIndividually(pending, 1.5f)
+                        } catch (_: Throwable) {
+                            /* Ignored. */
+                        }
+                    }
+                }
+
+                val pendingProcessed = pendingProcessedRef.getAndSet(-1L)
+                if (pendingProcessed >= 0L) {
+                    val pendingTotal = pendingTotalRef.get()
+                    setProgressThrottled(pendingProcessed, pendingTotal)
+                }
+            }, PROGRESS_DIALOG_SHOW_DELAY_MS)
+        }
+
+        fun setContentThrottled(contentList: MutableList<String>) {
+            val dialog = dialogRef.get()
+            if (dialog == null) {
+                // Cache the latest content if dialog is not shown yet.
+                // zh-CN: 若对话框尚未显示, 缓存最新 content, 等显示后回放.
+                pendingContentRef.set(contentList.toList())
+                return
+            }
+
+            val now = SystemClock.uptimeMillis()
+
+            if (now - lastContentUpdateTime[0] < PROGRESS_UPDATE_MIN_INTERVAL_MS) {
+                return
+            }
+
+            lastContentUpdateTime[0] = now
+
+            GlobalAppContext.post {
+                try {
+                    dialog.contentView?.setLinesEllipsizedIndividually(contentList.toList(), 1.5f)
+                } catch (_: Throwable) {
+                    /* Ignored. */
+                }
+            }
+        }
+
+        fun setProgressThrottled(processed: Long, total: Long) {
+            val dialog = dialogRef.get()
+            if (dialog == null) {
+                // Cache the latest progress if dialog is not shown yet.
+                // zh-CN: 若对话框尚未显示, 缓存最新进度, 等显示后回放.
+                pendingProcessedRef.set(processed)
+                pendingTotalRef.set(total)
+                return
+            }
+
+            val now = SystemClock.uptimeMillis()
+
+            if (processed == lastProgressValue[0]) {
+                return
+            }
+            if (now - lastProgressUpdateTime[0] < PROGRESS_UPDATE_MIN_INTERVAL_MS) {
+                return
+            }
+
+            lastProgressUpdateTime[0] = now
+            lastProgressValue[0] = processed
+
+            GlobalAppContext.post(Runnable {
+                try {
+                    dialog.setProgressNumberFormatByBytes(processed, total, true)
+
+                    var v: Int
+                    val max: Int
+
+                    if (total > 0 && total <= Int.MAX_VALUE) {
+                        max = total.toInt()
+                        v = max(0L, min(processed, max.toLong())).toInt()
+                    } else if (total > 0) {
+                        max = PROGRESS_MAX_LARGE
+                        val ratio = processed.toDouble() / total.toDouble()
+                        v = (ratio * max.toDouble()).roundToInt()
+                        v = max(0, min(max, v))
+                    } else {
+                        // No total bytes, keep indeterminate behavior.
+                        // zh-CN: 无总字节数, 保持不确定进度行为.
+                        return@Runnable
+                    }
+
+                    dialog.setMaxProgress(max)
+                    dialog.setProgress(v)
+                } catch (_: Throwable) {
+                    /* Ignored. */
+                }
+            })
+        }
+
+        fun dismissSafely() {
+            // Mark closed first so delayed show won't create a dialog after completion.
+            // zh-CN: 先标记 closed, 防止延迟 show 在完成后创建对话框.
+            closed.set(true)
+
+            val dialog = dialogRef.get() ?: return
+
+            val now = SystemClock.uptimeMillis()
+            var delay = 0L
+
+            if (shown) {
+                val shownDuration = now - shownAtUptimeMs
+                if (shownDuration < PROGRESS_DIALOG_MIN_SHOW_MS) {
+                    delay = PROGRESS_DIALOG_MIN_SHOW_MS - shownDuration
+                }
+            }
+
+            GlobalAppContext.postDelayed({
+                try {
+                    if (dialog.isShowing) {
+                        dialog.dismiss()
+                    }
+                } catch (_: Throwable) {
+                    /* Ignored. */
+                }
+            }, delay)
+        }
+    }
+
+    // Controller for cancellable operations (copy/move/delete).
+    // zh-CN: 用于可取消操作 (复制/移动/删除) 的控制器.
+    class OperationController {
+        val cancelled: AtomicBoolean = AtomicBoolean(false)
+
+        fun cancel() {
+            cancelled.set(true)
+        }
+
+        fun throwIfCancelled() {
+            if (cancelled.get()) {
+                throw OperationAbortedException()
+            }
+        }
+    }
+
+    class OperationAbortedException internal constructor() : RuntimeException("Operation aborted")
+
+    private fun TextView.setUnknown() = setText(R.string.text_unknown)
+    private fun TextView.isUnknown() = text == context.getString(R.string.text_unknown)
+    private fun TextView.isEllipsisSix() = text == context.getString(R.string.ellipsis_six)
+    private fun TextView.isNullOrBlank() = text.isNullOrBlank()
 }

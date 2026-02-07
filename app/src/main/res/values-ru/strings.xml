@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <!-- Translator: [ DeepL (https://www.deepl.com/translator) ] -->
+<!-- Translator: [ JetBrains AI Assistant ] -->
+<!-- Translator: [ OpenAI ChatGPT ] -->
 <!-- Proofreader: [ SuperMonster003 ] -->
 <!-- Proofreader: [ JetBrains AI Assistant ] -->
 
@@ -97,6 +99,7 @@
     <string name="description_pointer_location">\"Положение указателя\" - это отладочная функция в параметрах разработчика Android.\nПосле включения система будет отображать на экране сведения о точке(ах) касания, такие как [координаты/траектория движения/количество/размер/скорость движения/давление], что упрощает [написание/отладку/проверку] соответствующих скриптов.</string>
     <string name="description_post_notifications">Разрешение \"отправка уведомлений\" позволяет AutoJs6 публиковать уведомления в системе, чтобы скрипты могли создавать и управлять пользовательскими уведомлениями в шторке уведомлений.\n\nNote: на устройствах Android 13+ без этого разрешения некоторые уведомления могут не отображаться, а также это может повлиять на запуск и стабильность служб на переднем плане.</string>
     <string name="description_project_media_access">При наличии доступа к медиафайлам проекта предупреждение о безопасности при записи экрана не выдается.</string>
+    <string name="description_release_history_preference">Просмотреть историю выпусков AutoJs6 на GitHub и статистику по основным категориям.</string>
     <string name="description_restart_strategy">Стратегия перезагрузки влияет только на кнопку перезапуска в выдвижном меню главной страницы.\n\nБыстрая перезагрузка: быстро перезапускает приложение. Если перезапуск не удался или возникли непредвиденные ситуации, попробуйте переключиться на \"Запланированную перезагрузку\".\nЗапланированная перезагрузка: заранее настраивает краткосрочную задачу. После остановки приложение будет запущено по расписанию для выполнения перезапуска.</string>
     <string name="description_rhino_java_primitive_wrap">Переключатель включён (по умолчанию): значения, возвращаемые методами Java типов Number/Boolean/Character, оборачиваются в объекты Java и доступны в скрипте (String исключается). typeof = \"object\", species = \"JavaObject\"; доступны методы Java, что помогает сохранять точные типовые характеристики Java и корректную резолюцию перегрузок.\n\nПереключатель выключен: перечисленные типы больше не оборачиваются и передаются напрямую как примитивы JavaScript (number/boolean/строка из одного символа). typeof соответствует соответствующему типу JavaScript, что ближе к семантике/экосистеме JavaScript. При необходимости можно явно создать Java‑обёртку через new, например new java.lang.Boolean(true).\n\nСм.: http://issues.autojs6.com/435</string>
     <string name="description_root_mode_preference">Если у вас есть экзотический root или аномальное состояние для root-доступа, вы можете принудительно установить root на root или non-root.</string>
@@ -109,7 +112,6 @@
     <string name="description_timed_task_backend">Управляет базовым механизмом по расписанию запуска скриптов.\n\nAlarmManager: При выдаче разрешения \"Разрешить настройку будильников и напоминаний\" задачи выполняются более точно по времени.\nWorkManager: Дружелюбен к системе; подходит для некритичных задач, допускающих задержку.\nJobScheduler: Устаревшая реализация, сохранена для совместимости; вероятность задержек выше.</string>
     <string name="description_timed_task_backend_more" tools:ignore="TypographyEllipsis">Сценарии и отличия:\n\n1. AlarmManager\nПодходит для задач, чувствительных к точности времени, например [напоминания/строго по расписанию/...].\nВ Android 12+ при наличии разрешения \"Разрешить настройку будильников и напоминаний\" задачи запускаются более точно даже при выключенном экране/в ожидании.\nБез него система может понизить точность или отложить выполнение.\n\n2. WorkManager\nПодходит для задач без строгих требований к времени, например [некритичная синхронизация/очистка/статистика/...].\nПланирование учитывает [батарею/сеть/зарядку/политику сна/...], возможны задержки при выключенном экране или в ожидании.\nХотя точность не гарантируется, он силён в [надёжном завершении/повторных попытках/цепочках/дедупликации работ].\n\n3. JobScheduler\nИсторическая реализация для совместимости.\nНа новых версиях Android возможны более существенные задержки.\nНе рекомендуется, если это не необходимо ради совместимости.</string>
     <string name="description_usage_stats_access">Предоставляет доступ к истории использования устройства и статистике, что позволяет получить более точный результат в функции currentPackage()</string>
-    <string name="description_version_histories_preference">Просмотреть историю выпусков AutoJs6 на GitHub и статистику по основным категориям.</string>
     <string name="description_write_secure_settings">Настройки безопасности системы, содержащие системные предпочтения, которые приложения могут читать, но не имеют права записывать.\nОни предназначены для параметров, которые пользователь должен явно изменить через пользовательский интерфейс системного приложения.\nПри наличии разрешения на безопасные системные настройки обычные приложения могут напрямую изменять безопасные настройки (например, служба доступности).</string>
     <string name="description_write_system_settings">Разрешение \"изменение системных настроек\" позволяет AutoJs6 изменять некоторые параметры системы, чтобы скрипты могли менять такие настройки, как [ яркость экрана / автоповорот / тайм-аут экрана ].</string>
     <string name="dialog_button_abandon">Отказаться</string>
@@ -120,11 +122,13 @@
     <string name="dialog_button_back">@string/text_back</string>
     <string name="dialog_button_cancel">Отменить</string>
     <string name="dialog_button_cancel_download">Отменить</string>
+    <string name="dialog_button_choose_path">Выбрать</string>
     <string name="dialog_button_clear_items">Очистить</string>
     <string name="dialog_button_confirm">OK</string>
     <string name="dialog_button_connect">Подключиться</string>
     <string name="dialog_button_continue">@string/text_continue</string>
     <string name="dialog_button_copy">@string/text_copy</string>
+    <string name="dialog_button_copy_path">Копировать</string>
     <string name="dialog_button_default_prefix">Префикс деф.</string>
     <string name="dialog_button_details">Подробности</string>
     <string name="dialog_button_dismiss">Удалить</string>
@@ -139,17 +143,20 @@
     <string name="dialog_button_minimize">Свернуть</string>
     <string name="dialog_button_more">Еще</string>
     <string name="dialog_button_open_color_palette">Открыть палитру</string>
+    <string name="dialog_button_preview">Предпросмотр</string>
     <string name="dialog_button_quit">Выйти</string>
+    <string name="dialog_button_release_history">История</string>
     <string name="dialog_button_remove">Удалить</string>
+    <string name="dialog_button_restore">@string/text_restore</string>
     <string name="dialog_button_retrieve">Получить</string>
     <string name="dialog_button_retry">Повторная попытка</string>
     <string name="dialog_button_save">Сохранить</string>
+    <string name="dialog_button_save_as">Сохранить как</string>
     <string name="dialog_button_system_settings">Системные настройки</string>
     <string name="dialog_button_system_settings_simplified">Система</string>
     <string name="dialog_button_update_now">Обновить</string>
     <string name="dialog_button_use_default">Использовать по умолчанию</string>
     <string name="dialog_button_use_palette">Использовать палитру</string>
-    <string name="dialog_button_version_histories">История</string>
     <string name="dialog_button_view_file">Просмотр файла</string>
     <string name="dialog_button_view_shortcuts">Просмотреть ярлыки</string>
     <string name="dialog_button_view_update">Просмотреть обновление</string>
@@ -212,7 +219,6 @@
     <string name="error_cannot_convert_value_into_a_script_runtime_path">Невозможно преобразовать %s в путь ScriptRuntime</string>
     <string name="error_cannot_find_editor_view_from_child_view">Не удается найти EditorView из дочернего представления: %s</string>
     <string name="error_cannot_get_download_url">Не удается получить URL загрузки</string>
-    <string name="error_cannot_rename">Не удалось переименовать</string>
     <string name="error_cannot_retrieve_battery_state">Не удается получить состояние батареи</string>
     <string name="error_change_password_error_length">Используйте больше символов для пароля</string>
     <string name="error_change_password_error_match">Эти пароли не совпадают</string>
@@ -240,6 +246,8 @@
     <string name="error_failed_to_call_method_with_cause"><![CDATA[Не удалось вызвать метод \"%1$s\": [ %2$s ]]]></string>
     <string name="error_failed_to_change_the_toggle_state">Не удалось изменить состояние переключателя</string>
     <string name="error_failed_to_convert_into_drawable">Не удалось преобразовать значение %s в Drawable</string>
+    <string name="error_failed_to_copy">Не удалось скопировать</string>
+    <string name="error_failed_to_create">Не удалось создать</string>
     <string name="error_failed_to_go_to_access_settings">Не удалось открыть страницу настроек</string>
     <string name="error_failed_to_grant_shizuku_access">Не удалось предоставить права на использование Shizuku</string>
     <string name="error_failed_to_instantiate">Ошибка создания экземпляра \"%s\"</string>
@@ -247,10 +255,12 @@
     <string name="error_failed_to_launch_manager">Не удалось запустить менеджер</string>
     <string name="error_failed_to_launch_system_settings">Не удалось открыть системные настройки</string>
     <string name="error_failed_to_load_plugins_with_reason">Не удалось загрузить плагины.\nПричина: %1$s.</string>
+    <string name="error_failed_to_move">Не удалось переместить</string>
+    <string name="error_failed_to_rename">Не удалось переименовать</string>
     <string name="error_failed_to_render_content">Не удалось отобразить содержимое</string>
     <string name="error_failed_to_retrieve_changelog">Не удалось получить список изменений</string>
+    <string name="error_failed_to_retrieve_release_history">Не удалось получить историю релизов</string>
     <string name="error_failed_to_retrieve_release_notes">Не удалось получить примечания к выпуску</string>
-    <string name="error_failed_to_retrieve_version_histories">Не удалось получить историю версий</string>
     <string name="error_failed_to_retrieve_version_properties_file_to_parse_version_information">Не удалось получить файл version.properties для анализа информации о версии</string>
     <string name="error_failed_to_revoke_shizuku_access">Не удалось отозвать права на Shizuku</string>
     <string name="error_failed_to_run_script">Ошибка выполнения скрипта</string>
@@ -274,6 +284,7 @@
     <string name="error_invalid_github_repo">Неверный репозиторий GitHub: %s</string>
     <string name="error_invalid_ip_address">Неверный IP-адрес</string>
     <string name="error_invalid_login_credentials">Неверные учетные данные для входа в систему</string>
+    <string name="error_invalid_path">Недопустимый путь: %1$s</string>
     <string name="error_invalid_rest_compass">Неверный остаток компаса: %s</string>
     <string name="error_invalid_selector_map_element" formatted="false">Неверный элемент карты селектора: { %s: %s (%s) }</string>
     <string name="error_ip_address_should_not_be_empty">IP-адрес не может быть пустым</string>
@@ -318,11 +329,13 @@
     <string name="error_port_num_over_65535">Номер порта более 65535</string>
     <string name="error_project_main_script_file_with_abs_path_does_not_exist">Основной файл скрипта проекта \"%1$s\" не существует</string>
     <string name="error_put_value_into_json">Не удается поместить значение %s в JSON</string>
+    <string name="error_refresh_failed">Не удалось обновить</string>
     <string name="error_regex_find_prev">Невозможно найти предыдущее значение с помощью regex</string>
     <string name="error_repeated_colon_symbol">Повторяющийся символ двоеточия</string>
     <string name="error_repeated_dot_symbol">Повторяющийся символ точки</string>
     <string name="error_required_property_is_nullish_or_does_not_exist">Требуемое свойство \"%1$s\" пусто или не существует</string>
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">Разрешённый путь для \"%1$s\" не может быть равен null</string>
+    <string name="error_save_failed">Не удалось сохранить</string>
     <string name="error_script_is_on_exiting">Скрипт завершается</string>
     <string name="error_selector_method_without_calling">Метод селектора должен быть вызван, а не передан в качестве параметра: %s</string>
     <string name="error_selector_result_type_with_compass">Невозможно использовать компас, когда тип результата - селектор</string>
@@ -334,12 +347,18 @@
     <string name="error_the_transformer_for_required_property_cannot_return_nullish">Преобразователь для требуемого свойства \"%1$s\" не может возвращать пустое значение</string>
     <string name="error_thread_is_not_alive">Нить не жива</string>
     <string name="error_timeout_while_querying_plugin_info">Тайм-аут при запросе информации о плагине %1$s.</string>
+    <string name="error_unable_to_display_file_details_as_current_file_path_is_unknown">Текущий путь к файлу неизвестен; невозможно показать сведения о файле</string>
+    <string name="error_unable_to_display_version_history_as_current_file_path_is_unknown">Текущий путь к файлу неизвестен; невозможно показать историю версий</string>
+    <string name="error_unable_to_open_with_other_apps_as_current_file_path_is_unknown">Текущий путь к файлу неизвестен; невозможно открыть в других приложениях</string>
+    <string name="error_unable_to_package_application_as_current_file_path_is_unknown">Текущий путь к файлу неизвестен; невозможно упаковать приложение</string>
+    <string name="error_unable_to_save_file_as_current_file_path_is_unknown">Текущий путь к файлу неизвестен; невозможно сохранить файл</string>
     <string name="error_unable_to_use_shizuku_service">Невозможно использовать службу Shizuku</string>
     <string name="error_unacceptable_character">Недопустимый символ</string>
     <string name="error_unknown">Неизвестная ошибка</string>
     <string name="error_unknown_algorithm_selector_param">Неизвестный параметр селектора алгоритма: %s</string>
     <string name="error_unknown_color_name">Неизвестное имя цвета: %s</string>
     <string name="error_unknown_element_name">Неизвестное имя элемента: %1$s</string>
+    <string name="error_unknown_exception">Неизвестное исключение</string>
     <string name="error_unknown_gravity_for">Неизвестная гравитация: %s</string>
     <string name="error_unknown_operation">Неизвестная операция</string>
     <string name="error_unknown_picker_result_type">Неизвестный тип результата {имя: %s}</string>
@@ -347,7 +366,8 @@
     <string name="error_unknown_picker_selector_type" formatted="false">Неизвестный селектор {имя: %s, тип: %s}</string>
     <string name="error_unknown_type">Неизвестный тип: %s</string>
     <string name="error_webp_lossless_quality_not_supported">Формат WebP-Lossless нельзя сжать с параметром качества; используйте вместо этого JPEG/PNG/WebP-Lossy</string>
-    <string name="file_not_exist_or_readable">\"Файл не существует или не доступен для чтения: %s\".</string>
+    <string name="file_not_exist_or_readable">Файл не существует или недоступен для чтения</string>
+    <string name="file_not_exist_or_readable_with_path">\"Файл не существует или не доступен для чтения: %s\".</string>
     <string name="foreground_notification_channel_name">Служба %1$s в фоновом режиме</string>
     <string name="foreground_notification_text">Нажмите для запуска %1$s</string>
     <string name="foreground_notification_title">Фоновая служба %1$s</string>
@@ -362,6 +382,8 @@
     <string name="hint_loop_times">0 для бесконечного цикла</string>
     <string name="hint_pc_server_address_supported_formats">Поддерживаются IPv4, IPv6 и доменные имена.</string>
     <string name="instruction_install_plugin_from_url">Введите URL, указывающий на удалённый плагин.\nНапример: \"https://example.com/plugin.apk\".</string>
+    <string name="item_delete_permanently">Удалить навсегда</string>
+    <string name="item_move_to_trash">Переместить в корзину</string>
     <string name="label_latest_used_time">Последнее использование: %1$s</string>
     <string name="logger_ver_history_blob_thread_failure">Поток \"blob\" неудачен</string>
     <string name="logger_ver_history_blob_thread_success">Поток \"blob\" успешен, запись офлайн-кеша</string>
@@ -429,12 +451,12 @@
     <string name="summary_post_notifications_permission_inrt">Разрешить приложению создавать и отправлять уведомления</string>
     <string name="summary_pre_execute_script">Выполнять перед файлом сценария</string>
     <string name="summary_record_prompt">Показывать сообщение при начале или прекращении записи сценария</string>
+    <string name="summary_release_history_preference">Просмотр истории релизов и статистики</string>
     <string name="summary_rhino_java_primitive_wrap">Примитивы Java в скрипте будут обёрнуты в объекты Java</string>
     <string name="summary_stable_mode">Более стабильный анализ макета, но худшая совместимость кода (требуется перезапуск службы доступности)</string>
     <string name="summary_text_launcher_shortcuts">Добавление ярлыков в пусковую установку</string>
     <string name="summary_use_volume_control_record">Запуск или остановка записи, управляемая клавишей уменьшения громкости, когда отображается плавающая кнопка</string>
     <string name="summary_use_volume_key_to_stop_running_scripts">Нажмите клавишу \"Громкость вверх\", чтобы остановить все запущенные скрипты</string>
-    <string name="summary_version_histories_preference">Просмотреть историю выпусков и статистические данные</string>
     <string name="term_internal_strorage">Внутреннее хранилище</string>
     <string name="text_a11y_service">Служба доступности</string>
     <string name="text_a11y_service_description">Требуется для автоматической работы сценария (щелчок, длительное нажатие, скольжение и т.д.).</string>
@@ -448,8 +470,8 @@
     <string name="text_about_display_over_other_apps">Об отображении поверх других приложений</string>
     <string name="text_about_functions_feedback">Обратная связь</string>
     <string name="text_about_functions_licenses">Лицензии</string>
+    <string name="text_about_functions_release_history">@string/text_release_history</string>
     <string name="text_about_functions_update">Обновить</string>
-    <string name="text_about_functions_version_histories">@string/text_version_histories</string>
     <string name="text_access_has_been_granted">Доступ был предоставлен</string>
     <string name="text_act_by_click">Щелчок (click)</string>
     <string name="text_act_by_long_click">Длинный щелчок (longClick)</string>
@@ -466,8 +488,7 @@
     <string name="text_all">Все</string>
     <string name="text_all_files_access">Доступ ко всем файлам</string>
     <string name="text_all_files_access_is_needed">\"Доступ ко всем файлам\" необходим для доступа к файлам сценариев на телефоне</string>
-    <string name="text_all_histories">Вся история</string>
-    <string name="text_all_histories_cleared">Вся история очищена</string>
+    <string name="text_all_history_entries">Все записи истории</string>
     <string name="text_all_items_cleared">Все элементы удалены</string>
     <string name="text_allow_setting_alarms_and_reminders_is_recommended">Рекомендуется выдать разрешение \"Разрешить настройку будильников и напоминаний\", чтобы обеспечить максимально точный запуск задач даже при выключенном экране или в режиме ожидания</string>
     <string name="text_already_copied_to_clip">Скопировано в буфер обмена</string>
@@ -508,8 +529,8 @@
     <string name="text_app_shortcut_docs_short_label">документы</string>
     <string name="text_app_shortcut_log_long_label">AutoJs6 Журнал</string>
     <string name="text_app_shortcut_log_short_label">Журнал</string>
-    <string name="text_app_shortcut_plugin_center_long_label">AutoJs6 Plugin Center</string>
-    <string name="text_app_shortcut_plugin_center_short_label">Plugins</string>
+    <string name="text_app_shortcut_plugin_center_long_label">Центр плагинов AutoJs6</string>
+    <string name="text_app_shortcut_plugin_center_short_label">Плагины</string>
     <string name="text_app_shortcut_settings_long_label">AutoJs6 Настройки</string>
     <string name="text_app_shortcut_settings_short_label">Настройки</string>
     <string name="text_app_source_code">Исходный код</string>
@@ -521,6 +542,7 @@
     <string name="text_auto_check_for_updates">Автоматическая проверка обновлений</string>
     <string name="text_auto_check_for_updates_and_show_snackbar">Автоматическая проверка обновлений и отображение закуски на домашней странице</string>
     <string name="text_auto_night_mode">Автоматический ночной режим</string>
+    <string name="text_auto_rename">Автопереименование</string>
     <string name="text_available_windows">Доступные окна</string>
     <string name="text_back">Назад</string>
     <string name="text_broadcast_action">Действие</string>
@@ -553,17 +575,23 @@
     <string name="text_check_for_updates_while_ignoring_the_local_version">Проверить обновления (игнорировать локальную версию)</string>
     <string name="text_check_for_updates_while_ignoring_the_local_version_description">При проверке обновлений напрямую получать последнюю удалённую версию</string>
     <string name="text_checking_update" tools:ignore="TypographyEllipsis">Проверка обновлений...</string>
+    <string name="text_choose_delete_strategy">Выберите способ удаления</string>
+    <string name="text_choose_restore_path">Выберите путь восстановления</string>
     <string name="text_city_or_locality">Город или населенный пункт</string>
     <string name="text_class_or_package_name">Имя класса / пакета</string>
     <string name="text_clear">Очистить</string>
     <string name="text_clear_file_selection">Очистить выбор файла</string>
     <string name="text_clear_pre_execute_script">Очистить сценарий предварительного выполнения</string>
+    <string name="text_clear_trash">Очистить корзину</string>
+    <string name="text_clear_trash_confirm">Очистить все элементы в корзине?</string>
     <string name="text_clear_updates_checked_states">Очистить состояния проверки обновлений</string>
-    <string name="text_click_icon_to_add_launcher_shortcut">Click icon to add launcher shortcut</string>
+    <string name="text_clear_version_history">Очистить историю версий</string>
+    <string name="text_clear_version_history_confirm">Очистить все элементы истории версий?</string>
+    <string name="text_click_icon_to_add_launcher_shortcut">Нажмите на значок, чтобы добавить ярлык на экран</string>
     <string name="text_click_item_to_remove">Нажмите на элемент для удаления</string>
     <string name="text_click_item_to_show_details">Нажмите на пункт, чтобы просмотреть подробности</string>
     <string name="text_click_ok_to_go_to_settings">Нажмите \"OK\" для перехода к настройкам</string>
-    <string name="text_click_other_areas_to_exit_selection">Click other areas to exit selection</string>
+    <string name="text_click_other_areas_to_exit_selection">Нажмите в другом месте, чтобы выйти из выбора</string>
     <string name="text_click_too_frequently">Частые операции</string>
     <string name="text_client_mode">Режим клиента</string>
     <string name="text_clone_color_library">Клонировать цветовую библиотеку</string>
@@ -579,10 +607,10 @@
     <string name="text_compatibility">Совместимость</string>
     <string name="text_confidence_level">Доверие</string>
     <string name="text_config">Конфигурация</string>
-    <string name="text_confirm_to_clear_all_histories">Вы уверены, что хотите очистить всю историю?</string>
     <string name="text_confirm_to_clear_all_items">Вы уверены, что хотите удалить все элементы?</string>
-    <string name="text_confirm_to_clear_histories_of">Будут очищены следующие элементы истории\n\n[ %1$s ]\n\nВы уверены, что хотите очистить их?</string>
-    <string name="text_confirm_to_clear_histories_of_all_color_libraries">Будут очищены следующие элементы истории\n\n[ Все цветовые библиотеки ]\n\nВы уверены, что хотите их очистить?</string>
+    <string name="text_confirm_to_clear_the_history">Очистить историю?</string>
+    <string name="text_confirm_to_clear_the_history_of">Следующая история будет очищена\n\n[ %1$s ]\n\nОчистить?</string>
+    <string name="text_confirm_to_clear_the_history_of_all_color_libraries">Все записи истории ниже будут очищены\n\n[ Все цветовые библиотеки ]\n\nОчистить все?</string>
     <string name="text_confirm_to_delete">Вы уверены, что хотите удалить?</string>
     <string name="text_confirm_to_remove">Вы уверены, что хотите удалить?</string>
     <string name="text_confirm_to_uninstall">Вы действительно хотите удалить?</string>
@@ -607,18 +635,19 @@
     <string name="text_copy_to">Копировать в</string>
     <string name="text_copy_to_clip">Копировать в буфер обмена</string>
     <string name="text_copy_value">Копировать значение</string>
+    <string name="text_copying" tools:ignore="TypographyEllipsis">Копирование...</string>
     <string name="text_country_code">Код страны (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">Код страны должен состоять из двух заглавных букв</string>
     <string name="text_current_version">Текущая версия</string>
     <string name="text_daily_task">Ежедневная задача</string>
     <string name="text_date">Дата</string>
     <string name="text_day1">Пн</string>
-    <string name="text_day2">Вторник</string>
-    <string name="text_day3">Ср.</string>
-    <string name="text_day4">Thu</string>
-    <string name="text_day5">Fri</string>
+    <string name="text_day2">Вт</string>
+    <string name="text_day3">Ср</string>
+    <string name="text_day4">Чт</string>
+    <string name="text_day5">Пт</string>
     <string name="text_day6">Сб</string>
-    <string name="text_day7">Солнце</string>
+    <string name="text_day7">Вс</string>
     <string name="text_debug">Отладка</string>
     <string name="text_debug_resume_script">Возобновить</string>
     <string name="text_debug_step_into">Шаг в</string>
@@ -633,6 +662,8 @@
     <string name="text_delete_file">Удалить файл</string>
     <string name="text_delete_folder">Удалить папку</string>
     <string name="text_delete_line">Удалить строку</string>
+    <string name="text_delete_revision_confirm">Удалить эту ревизию навсегда?</string>
+    <string name="text_deleting" tools:ignore="TypographyEllipsis">Удаление...</string>
     <string name="text_description">Описание</string>
     <string name="text_destination">Назначение</string>
     <string name="text_details">Детали</string>
@@ -666,6 +697,7 @@
     <string name="text_download_link_for_autojs6">Ссылка на скачивание AutoJs6</string>
     <string name="text_download_url">URL-адрес загрузки</string>
     <string name="text_downloading">Загрузка</string>
+    <string name="text_draft_file_path">Путь к черновику</string>
     <string name="text_drawer_close">Закрыть ящик</string>
     <string name="text_drawer_open">Открыть ящик</string>
     <string name="text_edit">Редактировать</string>
@@ -699,8 +731,6 @@
     <string name="text_extensibility">Расширяемость</string>
     <string name="text_failed">Не удалось</string>
     <string name="text_failed_to_build">Не удалось создать</string>
-    <string name="text_failed_to_copy">Не удалось скопировать</string>
-    <string name="text_failed_to_create">Не удалось создать</string>
     <string name="text_failed_to_create_key_store">Не удалось создать ключ подписи</string>
     <string name="text_failed_to_delete">Не удалось удалить</string>
     <string name="text_failed_to_disable_a11y_service">Не удалось отключить службу доступности</string>
@@ -724,11 +754,13 @@
     <string name="text_failed_to_update">Не удалось обновить</string>
     <string name="text_failed_to_write_file">Не удалось записать файл</string>
     <string name="text_file">Файл</string>
+    <string name="text_file_colon_value">Файл: %1$s</string>
     <string name="text_file_details">Сведения о файле</string>
     <string name="text_file_exists">Файл уже существует</string>
     <string name="text_file_explorer">Проводник файлов</string>
     <string name="text_file_extensions_title">Расширения файлов</string>
     <string name="text_file_name">Имя файла</string>
+    <string name="text_file_name_colon_value">Имя файла: %1$s</string>
     <string name="text_file_not_exists">Файл не существует</string>
     <string name="text_file_path">Путь к файлу</string>
     <string name="text_file_with_abs_path_is_not_an_executable_script">Файл \"%1$s\" не является исполняемым скриптом</string>
@@ -745,6 +777,7 @@
     <string name="text_first_and_last_name">Полное имя</string>
     <string name="text_floating_button">Плавающая кнопка</string>
     <string name="text_folder">Папка</string>
+    <string name="text_folder_colon_value">Папка: %1$s</string>
     <string name="text_force_stop">Принудительная остановка</string>
     <string name="text_foreground_service">Служба переднего плана</string>
     <string name="text_formatting_completed">Форматирование завершено</string>
@@ -766,7 +799,8 @@
     <string name="text_hide_button">Кнопка скрытия</string>
     <string name="text_hide_node">Скрыть этот узел</string>
     <string name="text_hide_same_frame_nodes">Скрыть узел того же фрейма</string>
-    <string name="text_histories">Истории</string>
+    <string name="text_history">История</string>
+    <string name="text_history_has_been_cleared">История очищена</string>
     <string name="text_icon">Значок</string>
     <string name="text_ignore_battery_optimizations">Игнорировать оптимизацию батареи</string>
     <string name="text_ignored_updates">Игнорировать обновления</string>
@@ -794,6 +828,7 @@
     <string name="text_ip_address_may_be_invalid_for_server_connection" tools:ignore="TypographyEllipsis">IP-адрес \"%1$s\" имеет специальное назначение (loopback/broadcast/multicast/reserved/...), поэтому он может быть непригоден для подключения к целевому серверу.</string>
     <string name="text_is_latest_version">Более новая версия не найдена</string>
     <string name="text_issue_report">Обратная связь</string>
+    <string name="text_items_count_colon_value">Элементы: %1$d</string>
     <string name="text_js_file">*.js файл</string>
     <string name="text_jump">Перейти</string>
     <string name="text_jump_to_end">Перейти к концу</string>
@@ -846,8 +881,14 @@
     <string name="text_move_aborted_same_path">Исходный путь совпадает с путем назначения; перемещение отменено.</string>
     <string name="text_move_all_files_to_new_directory">Переместить все файлы в новый каталог</string>
     <string name="text_move_file">Переместить файл</string>
+    <string name="text_move_file_to_trash">Переместить файл в корзину</string>
     <string name="text_move_folder">Переместить папку</string>
+    <string name="text_move_folder_to_trash">Переместить папку в корзину</string>
     <string name="text_move_to">Переместить в</string>
+    <string name="text_move_to_trash_failed">Не удалось переместить в корзину</string>
+    <string name="text_moved_to_trash">Перемещено в корзину</string>
+    <string name="text_moving" tools:ignore="TypographyEllipsis">Перемещение...</string>
+    <string name="text_moving_to_trash" tools:ignore="TypographyEllipsis">Перемещение в корзину...</string>
     <string name="text_multiple_options">Несколько вариантов</string>
     <string name="text_name">Имя</string>
     <string name="text_need_to_enable_a11y_service">Необходимо включить службу доступности</string>
@@ -865,7 +906,8 @@
     <string name="text_no_browser">Не установлен браузер</string>
     <string name="text_no_content">Нет содержимого</string>
     <string name="text_no_content_description">Нет описания содержимого</string>
-    <string name="text_no_histories">Нет истории</string>
+    <string name="text_no_data">Нет данных</string>
+    <string name="text_no_history">Истории нет</string>
     <string name="text_no_ignored_updates">Нет проигнорированных обновлений</string>
     <string name="text_no_log_entries_to_copy">Нет записей журнала для копирования</string>
     <string name="text_no_log_entries_to_export">Нет записей журнала для экспорта</string>
@@ -874,6 +916,7 @@
     <string name="text_no_root">Не root</string>
     <string name="text_no_root_access">Нет root-доступа</string>
     <string name="text_no_scripts_to_stop_running">Нет скриптов для остановки выполнения</string>
+    <string name="text_no_version_history">Нет истории версий</string>
     <string name="text_not_granted">Не предоставляется</string>
     <string name="text_not_installed">Не установлено</string>
     <string name="text_not_showing_main_activity">Не показывает основную деятельность</string>
@@ -899,14 +942,17 @@
     <string name="text_original_developer">Оригинальный разработчик</string>
     <string name="text_others">Другие</string>
     <string name="text_output_apk_path">Путь вывода APK</string>
+    <string name="text_overwrite">Перезаписать</string>
     <string name="text_package_name">Имя пакета</string>
     <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">Имя пакета (Вычисление...)</string>
     <string name="text_password">Пароль</string>
     <string name="text_password_cannot_be_empty">Пароль не может быть пустым</string>
     <string name="text_password_requires_at_least_n_characters">Пароль должен содержать не менее %d символов</string>
     <string name="text_paste">Вставить</string>
+    <string name="text_path_colon_value">Путь: %1$s</string>
     <string name="text_path_is_empty">Путь пуст</string>
     <string name="text_pc_server_address">Адрес сервера ПК</string>
+    <string name="text_percentage_colon_value">Использовано: %1$s</string>
     <string name="text_permission_desc_access_coarse_location">Разрешить приложению получать приблизительную геолокацию через сеть</string>
     <string name="text_permission_desc_access_fine_location">Разрешить приложению получать точную геолокацию через GPS</string>
     <string name="text_permission_desc_access_location_extra_commands">Разрешить приложению доступ к дополнительным командам провайдера геолокации</string>
@@ -998,9 +1044,9 @@
     <string name="text_please_input_name">Имя ввода</string>
     <string name="text_please_wait" tools:ignore="TypographyEllipsis">Пожалуйста, подождите...</string>
     <string name="text_please_wait_a_moment_before_trying_again" tools:ignore="TypographyEllipsis">Пожалуйста, повторите попытку позже...</string>
-    <string name="text_plugin_center">Plugin center</string>
+    <string name="text_plugin_center">Центр плагинов</string>
     <string name="text_plugin_details">Сведения о плагине</string>
-    <string name="text_plugins">Plugins</string>
+    <string name="text_plugins">Плагины</string>
     <string name="text_pointer_location">Расположение указателя</string>
     <string name="text_pointer_location_toggle_failed_with_hint">Переключение \"Расположение указателя\" не удалось.\nТребуется корневой доступ.</string>
     <string name="text_post_notifications_permission">почтовые уведомления</string>
@@ -1036,11 +1082,14 @@
     <string name="text_register">Регистрировать</string>
     <string name="text_register_succeed">Регистрация прошла успешно</string>
     <string name="text_registering">Регистрация</string>
+    <string name="text_release_history">История релизов</string>
     <string name="text_release_notes">Примечания к выпуску</string>
     <string name="text_remote">удаленный</string>
     <string name="text_remote_file_saved_to_local_storage_successfully">Удаленный файл успешно сохранен в локальном хранилище</string>
     <string name="text_remote_project_saved_to_local_storage_successfully">Удаленный проект успешно сохранен в локальном хранилище</string>
     <string name="text_remove_all_breakpoints">Удалить все точки останова</string>
+    <string name="text_remove_from_trash">Убрать из корзины</string>
+    <string name="text_remove_from_trash_confirm">Удалить этот элемент из корзины навсегда?</string>
     <string name="text_rename">Переименовать</string>
     <string name="text_replace">Заменить</string>
     <string name="text_replace_all">Заменить все</string>
@@ -1054,6 +1103,10 @@
     <string name="text_reset_to_initial_content_only_for_assets">Сброс выполняется только для образцов</string>
     <string name="text_restart">Перезапустить</string>
     <string name="text_restart_strategy">Стратегия перезагрузки</string>
+    <string name="text_restore">Восстановить</string>
+    <string name="text_restore_to_original_path">Восстановить в исходный путь</string>
+    <string name="text_restore_to_specified_path">Восстановить в указанный путь</string>
+    <string name="text_restoring" tools:ignore="TypographyEllipsis">Восстановление...</string>
     <string name="text_result">Результат</string>
     <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">Получение списка изменений...</string>
     <string name="text_retrieving_plugin_list_data" tools:ignore="TypographyEllipsis">Получение данных списка плагинов...</string>
@@ -1129,7 +1182,13 @@
     <string name="text_sort">Сортировать</string>
     <string name="text_sort_by_last_update_time">Сортировать по времени последнего обновления</string>
     <string name="text_sort_by_name">Сортировать по имени</string>
+    <string name="text_sort_by_name_asc">Имя (A-Z)</string>
     <string name="text_sort_by_package_size">Сортировать по размеру пакета</string>
+    <string name="text_sort_by_path_asc">Путь (A-Z)</string>
+    <string name="text_sort_by_size_asc">Размер (сначала маленькие)</string>
+    <string name="text_sort_by_size_desc">Размер (сначала большие)</string>
+    <string name="text_sort_by_time_asc">Время (сначала старые)</string>
+    <string name="text_sort_by_time_desc">Время (сначала новые)</string>
     <string name="text_source">Источник</string>
     <string name="text_source_file_path">Путь к исходному коду</string>
     <string name="text_special_permissions">Специальные разрешения</string>
@@ -1160,10 +1219,15 @@
     <string name="text_timed_task">Задание по времени</string>
     <string name="text_timed_task_backend_title">Движок планирования таймерных задач</string>
     <string name="text_timed_task_timing">Время</string>
+    <string name="text_to_be_chosen">Выбрать</string>
     <string name="text_tools">Инструменты</string>
+    <string name="text_total_size_colon_value">Размер: %1$s</string>
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">Значок запуска с прозрачным фоном может быть автоматически замаскирован системой или получить фон, поэтому фактический результат может отличаться на разных устройствах</string>
+    <string name="text_trash">Корзина</string>
     <string name="text_tutorial">Учебник</string>
     <string name="text_type">Тип</string>
+    <string name="text_type_file">Файл</string>
+    <string name="text_type_folder">Папка</string>
     <string name="text_unable_to_build_apk_as_autojs6_does_not_include_selected_abi">Выбранный ABI \"%s\" не может быть использован для создания упакованного приложения, поскольку текущая версия AutoJs6 не включает указанный ABI.</string>
     <string name="text_unavailable">Недоступно</string>
     <string name="text_unavailable_abi_for">ABI \"%s\" недоступен</string>
@@ -1172,15 +1236,15 @@
     <string name="text_under_development_title">@string/text_under_development</string>
     <string name="text_undo">Отозвать</string>
     <string name="text_undo_simplified">Верни</string>
-    <string name="text_uninstall">Uninstall</string>
+    <string name="text_uninstall">Удалить</string>
     <string name="text_unknown">Неизвестно</string>
     <string name="text_unknown_author_for_plugin">Неизвестный Автор</string>
     <string name="text_unknown_description_for_plugin">Неизвестное Описание</string>
     <string name="text_unknown_title_for_plugin">Неизвестный Заголовок</string>
     <string name="text_unknown_version_for_plugin">Неизвестная Версия</string>
     <string name="text_unverified">Не подтверждено</string>
-    <string name="text_updatable">Updatable</string>
-    <string name="text_update">Update</string>
+    <string name="text_updatable">Доступно обновление</string>
+    <string name="text_update">Обновить</string>
     <string name="text_updates">Обновления</string>
     <string name="text_updates_checked_states_cleared">Обновления проверенные состояния очищены</string>
     <string name="text_updates_snack_bar_act_later">Позже</string>
@@ -1208,7 +1272,10 @@
     <string name="text_version">Версия</string>
     <string name="text_version_code">Код версии</string>
     <string name="text_version_code_with_computing" tools:ignore="TypographyEllipsis">Код версии (Вычисление...)</string>
-    <string name="text_version_histories">История версий</string>
+    <string name="text_version_count_colon_value">Версии: %1$s</string>
+    <string name="text_version_history">История версий</string>
+    <string name="text_version_history_restore_does_not_auto_save_to_disk">Восстановление изменяет только содержимое редактора. Файл не будет сохранен автоматически. Нажмите кнопку \"Сохранить\" вручную.</string>
+    <string name="text_version_history_restore_will_overwrite_file">Восстановление перезапишет содержимое файла.\nПуть: %1$s</string>
     <string name="text_version_info">Информация о версии</string>
     <string name="text_version_name">Название версии</string>
     <string name="text_version_name_with_computing" tools:ignore="TypographyEllipsis">Название версии (Вычисление...)</string>
@@ -1223,28 +1290,4 @@
     <string name="text_write_secure_settings">Параметры безопасности записи</string>
     <string name="text_write_system_settings">Запись системных настроек</string>
     <string name="text_xiaomi_background_popup_permission">Всплывающие окна в фоне</string>
-    <string name="error_refresh_failed">Не удалось обновить</string>
-    <string name="error_save_failed">Не удалось сохранить</string>
-    <string name="text_draft_file_path">Путь к черновику</string>
-    <string name="dialog_button_copy_path">Копировать</string>
-    <string name="dialog_button_save_as">Сохранить как</string>
-    <string name="text_version_history">История версий</string>
-    <string name="text_no_version_history">Нет истории версий</string>
-    <string name="text_version_history_restore_does_not_auto_save_to_disk">Восстановление изменяет только содержимое редактора. Файл не будет сохранен автоматически. Нажмите кнопку \"Сохранить\" вручную.</string>
-    <string name="item_move_to_trash">Переместить в корзину</string>
-    <string name="item_delete_permanently">Удалить навсегда</string>
-    <string name="text_moved_to_trash">Перемещено в корзину</string>
-    <string name="text_choose_delete_strategy">Выберите способ удаления</string>
-    <string name="text_trash">Корзина</string>
-    <string name="text_choose_restore_path">Выберите путь восстановления</string>
-    <string name="text_restore_to_original_path">Восстановить в исходный путь</string>
-    <string name="text_restore_to_specified_path">Восстановить в указанный путь</string>
-    <string name="text_path_colon_value">Путь: %1$s</string>
-    <string name="text_file_name_colon_value">Имя файла: %1$s</string>
-    <string name="dialog_button_choose_path">Выбрать</string>
-    <string name="text_overwrite">Перезаписать</string>
-    <string name="text_auto_rename">Автопереименование</string>
-    <string name="text_no_data">Нет данных</string>
-    <string name="error_invalid_path">Недопустимый путь: %1$s</string>
-    <string name="text_version_history_restore_will_overwrite_file">Восстановление перезапишет содержимое файла.\nПуть: %1$s</string>
 </resources>

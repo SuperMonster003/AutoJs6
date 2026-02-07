@@ -38,7 +38,7 @@ interface PaletteHistoryDao {
     suspend fun hasData(): Boolean
 
     @Delete
-    suspend fun delete(vararg histories: PaletteHistory): Int
+    suspend fun delete(vararg historyItem: PaletteHistory): Int
 
     @Query("DELETE FROM palette_history")
     suspend fun deleteAll()

@@ -123,7 +123,7 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.DayNight.ActionBar">
         <item name="android:textColorPrimary">@color/day_full</item>
-        <item name="android:textColorSecondary">@color/colorAccent</item>
+        <item name="android:textColorSecondary">@color/day_full</item>
         <item name="actionOverflowMenuStyle">@style/OverflowMenu</item>
     </style>
 
@@ -218,7 +218,7 @@
     <style name="TextAppearanceMainSubtitle" parent="TextAppearanceDefaultMainTitle">
         <item name="android:textSize">@dimen/main_subtitle_text_size</item>
         <item name="android:maxLines">1</item>
-        <item name="android:ellipsize">end</item>
+        <item name="android:ellipsize">middle</item>
     </style>
 
     <style name="OverflowIconDarkTheme" parent="@style/Widget.AppCompat.ActionButton.Overflow">

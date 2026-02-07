@@ -4,8 +4,7 @@ import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
-import org.autojs.autojs.app.DialogUtils
-import org.autojs.autojs.app.DialogUtils.showAdaptive
+import org.autojs.autojs.util.DialogUtils.showAdaptive
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.core.pref.Pref.isAutoCheckForUpdatesEnabled
 import org.autojs.autojs.core.pref.Pref.lastNoNewerUpdatesTimestamp
@@ -14,7 +13,7 @@ import org.autojs.autojs.core.pref.Pref.lastUpdatesPostponedTimestamp
 import org.autojs.autojs.network.UpdateChecker
 import org.autojs.autojs.network.UpdateChecker.PromptMode
 import org.autojs.autojs.network.entity.VersionInfo
-import org.autojs.autojs.util.MaterialDialogUtils.choiceWidgetThemeColor
+import org.autojs.autojs.util.DialogUtils.choiceWidgetThemeColor
 import org.autojs.autojs6.R
 
 /**

@@ -7,7 +7,7 @@ import org.autojs.autojs.theme.preference.MaterialPreference
 /**
  * Created by SuperMonster003 on May 1, 2025.
  */
-class VersionHistoryPreference : MaterialPreference {
+class ReleaseHistoryPreference : MaterialPreference {
 
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes)
 
@@ -17,6 +17,6 @@ class VersionHistoryPreference : MaterialPreference {
 
     constructor(context: Context) : super(context)
 
-    override fun onClick() = DisplayVersionHistoriesActivity.launch(context)
+    override fun onClick() = DisplayReleaseHistoryActivity.launch(context)
 
 }

@@ -5,10 +5,10 @@ import android.os.Bundle
 import android.text.TextUtils
 import android.util.AttributeSet
 import com.afollestad.materialdialogs.MaterialDialog
-import org.autojs.autojs.app.DialogUtils.showAdaptive
+import org.autojs.autojs.util.DialogUtils.showAdaptive
 import org.autojs.autojs.core.pref.Pref
-import org.autojs.autojs.util.MaterialDialogUtils.choiceWidgetThemeColor
-import org.autojs.autojs.util.MaterialDialogUtils.widgetThemeColor
+import org.autojs.autojs.util.DialogUtils.choiceWidgetThemeColor
+import org.autojs.autojs.util.DialogUtils.widgetThemeColor
 import org.autojs.autojs.ui.common.NotAskAgainDialog
 import org.autojs.autojs6.R
 

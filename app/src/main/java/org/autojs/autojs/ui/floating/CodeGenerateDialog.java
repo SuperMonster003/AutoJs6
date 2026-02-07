@@ -20,7 +20,7 @@ import com.bignerdranch.expandablerecyclerview.ParentViewHolder;
 import com.bignerdranch.expandablerecyclerview.model.Parent;
 
 import org.autojs.autojs.app.AppLevelThemeDialogBuilder;
-import org.autojs.autojs.app.DialogUtils;
+import org.autojs.autojs.util.DialogUtils;
 import org.autojs.autojs.codegeneration.CodeGenerator;
 import org.autojs.autojs.core.accessibility.NodeInfo;
 import org.autojs.autojs.theme.util.ListBuilder;

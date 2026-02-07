@@ -1,4 +1,6 @@
 <!-- Translator: [ SuperMonster003 ] -->
+<!-- Translator: [ JetBrains AI Assistant ] -->
+<!-- Translator: [ OpenAI ChatGPT ] -->
 <!-- Proofreader: [ SuperMonster003 ] -->
 
 <resources xmlns:tools="http://schemas.android.com/tools">
@@ -94,6 +96,7 @@
     <string name="description_pointer_location">\"Pointer location\" is a debugging feature in Android Developer options.\nWhen enabled, the system will display information about touch point(s) on the screen, such as [coordinates/movement trajectory/count/size/movement speed/pressure], which helps with [writing/debugging/verification] of related scripts.</string>
     <string name="description_post_notifications">The \"post notifications\" permission allows AutoJs6 to publish notifications to the system, so scripts can post and manage custom notifications in the notification shade.\n\nNote: on Android 13+ devices, if this permission is not granted, some notifications may not show, and it may affect foreground service startup and stability.</string>
     <string name="description_project_media_access">With project media access, security warning for screen recording will not prompt.</string>
+    <string name="description_release_history_preference">View the release history and key category statistics of AutoJs6 on GitHub.</string>
     <string name="description_restart_strategy">The restart strategy only affects the restart button in the home page drawer.\n\nQuick restart: Quickly restarts the app. If the restart fails or unexpected situations occur, try switching to \"Scheduled restart\".\nScheduled restart: Sets up a short-timed task in advance. After the app stops, it will start again on schedule to achieve app restart.</string>
     <string name="description_rhino_java_primitive_wrap">Switch ON (default): results of Java methods that are instances of Number/Boolean/Character are wrapped as Java objects and exposed to scripts (String excluded). typeof is \"object\", species is \"JavaObject\"; Java methods remain accessible, which helps retain precise Java type traits and overload resolution.\n\nSwitch OFF: the above types are no longer wrapped and are exposed directly as JavaScript primitives (number/boolean/one‑character string). typeof is the corresponding JavaScript type, aligning better with JavaScript semantics and ecosystem. You can still explicitly create a Java wrapper via new, e.g. new java.lang.Boolean(true).\n\nSee: http://issues.autojs6.com/435</string>
     <string name="description_root_mode_preference">If you have exotic root or abnormal state for root access, you can force set root to root or non-root.</string>
@@ -106,7 +109,6 @@
     <string name="description_timed_task_backend">Controls the underlying mechanism for triggering scripts on a schedule.\n\nAlarmManager: With the \"Allow setting alarms and reminders\" permission granted, scheduled tasks can fire closer to the exact time.\nWorkManager: System-friendly; suitable for non-critical tasks that can tolerate some delay.\nJobScheduler: Legacy implementation kept for compatibility; higher chance of delays.</string>
     <string name="description_timed_task_backend_more" tools:ignore="TypographyEllipsis">Use cases and differences:\n\n1. AlarmManager\nBest for time-sensitive tasks, e.g., [reminders/strictly scheduled scripts/...].\nOn Android 12+ with the \"Allow setting alarms and reminders\" permission, tasks can run more on time even when the screen is off or the device is idle.\nWithout it, the system may degrade exactness or delay execution.\n\n2. WorkManager\nBest for tasks that don’t require strict timing, e.g., [non-critical sync/cleanup/statistics/...].\nScheduling depends on [battery/network/charging/idle policies/...], so execution may be postponed when the screen is off or idle.\nWhile it can’t guarantee exact timing, it excels at [reliable completion/retries/chaining/unique work de-duplication].\n\n3. JobScheduler\nHistorical implementation for compatibility.\nOn newer Android versions, tasks may be delayed more noticeably.\nGenerally not recommended unless required for compatibility.</string>
     <string name="description_usage_stats_access">Provides access to device usage history and statistics which results in currentPackage() a more accurate result</string>
-    <string name="description_version_histories_preference">View the release version history and key category statistics of AutoJs6 on GitHub.</string>
     <string name="description_write_secure_settings">Secure system settings, containing system preferences that applications can read but are not allowed to write.\nThese are for preferences that the user must explicitly modify through the UI of a system app.\nWith secure system settings permission, normal applications can directly modify the secure settings (such as accessibility service).</string>
     <string name="description_write_system_settings">The \"write system settings\" permission allows AutoJs6 to modify some system settings, so scripts can change system parameters such as [ screen brightness / auto-rotate / screen timeout ].</string>
     <string name="dialog_button_abandon">Abandon</string>
@@ -117,11 +119,13 @@
     <string name="dialog_button_back">@string/text_back</string>
     <string name="dialog_button_cancel">Cancel</string>
     <string name="dialog_button_cancel_download">Cancel</string>
+    <string name="dialog_button_choose_path">Choose</string>
     <string name="dialog_button_clear_items">Clear</string>
     <string name="dialog_button_confirm">OK</string>
     <string name="dialog_button_connect">Connect</string>
     <string name="dialog_button_continue">@string/text_continue</string>
     <string name="dialog_button_copy">@string/text_copy</string>
+    <string name="dialog_button_copy_path">Copy path</string>
     <string name="dialog_button_default_prefix">Def prefix</string>
     <string name="dialog_button_details">Details</string>
     <string name="dialog_button_dismiss">Dismiss</string>
@@ -136,17 +140,20 @@
     <string name="dialog_button_minimize">Minimize</string>
     <string name="dialog_button_more">More</string>
     <string name="dialog_button_open_color_palette">Palette</string>
+    <string name="dialog_button_preview">Preview</string>
     <string name="dialog_button_quit">Quit</string>
+    <string name="dialog_button_release_history">History</string>
     <string name="dialog_button_remove">Remove</string>
+    <string name="dialog_button_restore">@string/text_restore</string>
     <string name="dialog_button_retrieve">Retrieve</string>
     <string name="dialog_button_retry">Retry</string>
     <string name="dialog_button_save">Save</string>
+    <string name="dialog_button_save_as">Save as</string>
     <string name="dialog_button_system_settings">System settings</string>
     <string name="dialog_button_system_settings_simplified">System</string>
     <string name="dialog_button_update_now">Update</string>
     <string name="dialog_button_use_default">Use default</string>
     <string name="dialog_button_use_palette">Use palette</string>
-    <string name="dialog_button_version_histories">Histories</string>
     <string name="dialog_button_view_file">View File</string>
     <string name="dialog_button_view_shortcuts">View shortcuts</string>
     <string name="dialog_button_view_update">View update</string>
@@ -209,7 +216,6 @@
     <string name="error_cannot_convert_value_into_a_script_runtime_path">Cannot convert %s into a ScriptRuntime path</string>
     <string name="error_cannot_find_editor_view_from_child_view">Cannot find EditorView from child view: %s</string>
     <string name="error_cannot_get_download_url">Cannot get downloading URL</string>
-    <string name="error_cannot_rename">Failed to rename</string>
     <string name="error_cannot_retrieve_battery_state">Cannot retrieve the battery state</string>
     <string name="error_change_password_error_length">Use more characters for the password</string>
     <string name="error_change_password_error_match">Those passwords did not match</string>
@@ -237,6 +243,8 @@
     <string name="error_failed_to_call_method_with_cause"><![CDATA[Failed to call method \"%1$s\": [ %2$s ]]]></string>
     <string name="error_failed_to_change_the_toggle_state">Failed to change the toggle state</string>
     <string name="error_failed_to_convert_into_drawable">Failed to convert value %s into a Drawable</string>
+    <string name="error_failed_to_copy">Failed to copy</string>
+    <string name="error_failed_to_create">Failed to create</string>
     <string name="error_failed_to_go_to_access_settings">Failed to open the settings page</string>
     <string name="error_failed_to_grant_shizuku_access">Failed to grant Shizuku access</string>
     <string name="error_failed_to_instantiate">Failed to instantiate \"%s\"</string>
@@ -244,10 +252,12 @@
     <string name="error_failed_to_launch_manager">Failed to launcher manager</string>
     <string name="error_failed_to_launch_system_settings">Failed to launch system settings</string>
     <string name="error_failed_to_load_plugins_with_reason">Failed to load plugins.\nReason: %1$s.</string>
+    <string name="error_failed_to_move">Failed to move</string>
+    <string name="error_failed_to_rename">Failed to rename</string>
     <string name="error_failed_to_render_content">Failed to render content</string>
     <string name="error_failed_to_retrieve_changelog">Failed to retrieve changelog</string>
+    <string name="error_failed_to_retrieve_release_history">Failed to retrieve the release history</string>
     <string name="error_failed_to_retrieve_release_notes">Failed to retrieve release notes</string>
-    <string name="error_failed_to_retrieve_version_histories">Failed to retrieve version histories</string>
     <string name="error_failed_to_retrieve_version_properties_file_to_parse_version_information">Failed to retrieve version.properties to parse version information</string>
     <string name="error_failed_to_revoke_shizuku_access">Failed to revoke Shizuku access</string>
     <string name="error_failed_to_run_script">Failed to run script</string>
@@ -271,6 +281,7 @@
     <string name="error_invalid_github_repo">Invalid GitHub repository: %s</string>
     <string name="error_invalid_ip_address">Invalid IP address</string>
     <string name="error_invalid_login_credentials">Invalid login credentials</string>
+    <string name="error_invalid_path">Invalid path: %1$s</string>
     <string name="error_invalid_rest_compass">Invalid rest compass: %s</string>
     <string name="error_invalid_selector_map_element" formatted="false">Invalid selector map element: { %s: %s (%s) }</string>
     <string name="error_ip_address_should_not_be_empty">IP address can not be empty</string>
@@ -315,11 +326,13 @@
     <string name="error_port_num_over_65535">Port number over 65535</string>
     <string name="error_project_main_script_file_with_abs_path_does_not_exist">Project main script file \"%1$s\" does not exist</string>
     <string name="error_put_value_into_json">Cannot put value %s into JSON</string>
+    <string name="error_refresh_failed">Refresh failed</string>
     <string name="error_regex_find_prev">Cannot find previous with regex</string>
     <string name="error_repeated_colon_symbol">Repeated colon symbol</string>
     <string name="error_repeated_dot_symbol">Repeated dot symbol</string>
     <string name="error_required_property_is_nullish_or_does_not_exist">Required property \"%1$s\" is nullish or does not exist</string>
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">Resolved path for \"%1$s\" cannot be null</string>
+    <string name="error_save_failed">Save failed</string>
     <string name="error_script_is_on_exiting">Script is on exiting</string>
     <string name="error_selector_method_without_calling">Selector method should be called rather than passed as a parameter: %s</string>
     <string name="error_selector_result_type_with_compass">Cannot use a compass when result type is selector</string>
@@ -331,12 +344,18 @@
     <string name="error_the_transformer_for_required_property_cannot_return_nullish">The transformer for required property \"%1$s\" cannot return nullish</string>
     <string name="error_thread_is_not_alive">Thread is not alive</string>
     <string name="error_timeout_while_querying_plugin_info">Timeout while querying %1$s plugin info.</string>
+    <string name="error_unable_to_display_file_details_as_current_file_path_is_unknown">Current file path is unknown, unable to display file details</string>
+    <string name="error_unable_to_display_version_history_as_current_file_path_is_unknown">Current file path is unknown, unable to display version history</string>
+    <string name="error_unable_to_open_with_other_apps_as_current_file_path_is_unknown">Current file path is unknown, unable to open with other apps</string>
+    <string name="error_unable_to_package_application_as_current_file_path_is_unknown">Current file path is unknown, unable to package application</string>
+    <string name="error_unable_to_save_file_as_current_file_path_is_unknown">Current file path is unknown, unable to save file</string>
     <string name="error_unable_to_use_shizuku_service">Unable to use Shizuku service</string>
     <string name="error_unacceptable_character">Unacceptable character</string>
     <string name="error_unknown">Unknown error</string>
     <string name="error_unknown_algorithm_selector_param">Unknown algorithm selector param: %s</string>
     <string name="error_unknown_color_name">Unknown color name: %s</string>
     <string name="error_unknown_element_name">Unknown element name: %1$s</string>
+    <string name="error_unknown_exception">Unknown exception</string>
     <string name="error_unknown_gravity_for">Unknown gravity: %s</string>
     <string name="error_unknown_operation">Unknown operation</string>
     <string name="error_unknown_picker_result_type">Unknown result type {name: %s}</string>
@@ -344,7 +363,8 @@
     <string name="error_unknown_picker_selector_type" formatted="false">Unknown selector {name: %s, type: %s}</string>
     <string name="error_unknown_type">Unknown type: %s</string>
     <string name="error_webp_lossless_quality_not_supported">Format WebP-Lossless cannot be compressed with a quality parameter, use JPEG/PNG/WebP-Lossy instead</string>
-    <string name="file_not_exist_or_readable">File does not exist or readable: %s</string>
+    <string name="file_not_exist_or_readable">File does not exist or readable</string>
+    <string name="file_not_exist_or_readable_with_path">File does not exist or readable: %s</string>
     <string name="foreground_notification_channel_name">%1$s foreground service</string>
     <string name="foreground_notification_text">Click to launch %1$s</string>
     <string name="foreground_notification_title">%1$s foreground service</string>
@@ -359,6 +379,8 @@
     <string name="hint_loop_times">0 for infinite loop</string>
     <string name="hint_pc_server_address_supported_formats">IPv4, IPv6 and domain are supported.</string>
     <string name="instruction_install_plugin_from_url">Enter a URL pointing to a remote plugin address.\nFor example \"https://example.com/plugin.apk\".</string>
+    <string name="item_delete_permanently">Delete permanently</string>
+    <string name="item_move_to_trash">Move to trash</string>
     <string name="label_latest_used_time">Latest used: %1$s</string>
     <string name="logger_ver_history_blob_thread_failure">\"Blob\" thread request failed</string>
     <string name="logger_ver_history_blob_thread_success">\"Blob\" thread request successful, writing offline cache</string>
@@ -426,12 +448,12 @@
     <string name="summary_post_notifications_permission_inrt">Allow the application to create and send notifications</string>
     <string name="summary_pre_execute_script">Execute before the script file</string>
     <string name="summary_record_prompt">Show message when starting or stopping recording a script</string>
+    <string name="summary_release_history_preference">View release history and statistics</string>
     <string name="summary_rhino_java_primitive_wrap">Java primitive types will be wrapped as Java objects in scripts</string>
     <string name="summary_stable_mode">More stable layout analysis but worse code compatibility (a11y service restarting needed)</string>
     <string name="summary_text_launcher_shortcuts">Add shortcuts to launcher</string>
     <string name="summary_use_volume_control_record">Start or stop recording controlled by \"Volume Down\" key when floating button is showing</string>
     <string name="summary_use_volume_key_to_stop_running_scripts">Press \"Volume Up\" key to stop all running scripts</string>
-    <string name="summary_version_histories_preference">View release version history and statistics</string>
     <string name="term_internal_strorage">Internal Storage</string>
     <string name="text_a11y_service">Accessibility service</string>
     <string name="text_a11y_service_description">Required by the script automatic operation (click, long press, slide, etc.).</string>
@@ -445,8 +467,8 @@
     <string name="text_about_display_over_other_apps">About display over other apps</string>
     <string name="text_about_functions_feedback">Feedback</string>
     <string name="text_about_functions_licenses">Licenses</string>
+    <string name="text_about_functions_release_history">@string/text_release_history</string>
     <string name="text_about_functions_update">Update</string>
-    <string name="text_about_functions_version_histories">@string/text_version_histories</string>
     <string name="text_access_has_been_granted">Access has been granted</string>
     <string name="text_act_by_click">Click (click)</string>
     <string name="text_act_by_long_click">Long click (longClick)</string>
@@ -463,8 +485,7 @@
     <string name="text_all">All</string>
     <string name="text_all_files_access">All files access</string>
     <string name="text_all_files_access_is_needed">\"All files access\" is needed to access script files on the phone</string>
-    <string name="text_all_histories">All histories</string>
-    <string name="text_all_histories_cleared">All histories have been cleared</string>
+    <string name="text_all_history_entries">All history entries</string>
     <string name="text_all_items_cleared">All items have been cleared</string>
     <string name="text_allow_setting_alarms_and_reminders_is_recommended">Granting the \"Allow setting alarms and reminders\" permission is recommended to help tasks run as punctually as possible even when the screen is off or the device is idle</string>
     <string name="text_already_copied_to_clip">Copied to clipboard</string>
@@ -518,6 +539,7 @@
     <string name="text_auto_check_for_updates">Auto check for updates</string>
     <string name="text_auto_check_for_updates_and_show_snackbar">Check for updates automatically and show a snackbar on homepage</string>
     <string name="text_auto_night_mode">Auto night mode</string>
+    <string name="text_auto_rename">Auto rename</string>
     <string name="text_available_windows">Available windows</string>
     <string name="text_back">Back</string>
     <string name="text_broadcast_action">Action</string>
@@ -550,12 +572,18 @@
     <string name="text_check_for_updates_while_ignoring_the_local_version">Check for updates (ignore the local version)</string>
     <string name="text_check_for_updates_while_ignoring_the_local_version_description">Fetch the latest remote version directly when checking for updates</string>
     <string name="text_checking_update" tools:ignore="TypographyEllipsis">Checking for updates...</string>
+    <string name="text_choose_delete_strategy">Choose delete strategy</string>
+    <string name="text_choose_restore_path">Choose restore path</string>
     <string name="text_city_or_locality">City or Locality</string>
     <string name="text_class_or_package_name">Class / Package name</string>
     <string name="text_clear">Clear</string>
     <string name="text_clear_file_selection">Clear file selection</string>
     <string name="text_clear_pre_execute_script">Clear pre-execute script</string>
+    <string name="text_clear_trash">Clear trash</string>
+    <string name="text_clear_trash_confirm">Clear all items in trash?</string>
     <string name="text_clear_updates_checked_states">Clear updates checked states</string>
+    <string name="text_clear_version_history">Clear version history</string>
+    <string name="text_clear_version_history_confirm">Clear all version history items?</string>
     <string name="text_click_icon_to_add_launcher_shortcut">Click icon to add launcher shortcut</string>
     <string name="text_click_item_to_remove">Click the item to remove</string>
     <string name="text_click_item_to_show_details">Click an item to view details</string>
@@ -576,10 +604,10 @@
     <string name="text_compatibility">Compatibility</string>
     <string name="text_confidence_level">Confidence</string>
     <string name="text_config">Config</string>
-    <string name="text_confirm_to_clear_all_histories">Are you sure to clear all histories?</string>
     <string name="text_confirm_to_clear_all_items">Are you sure to clear all items?</string>
-    <string name="text_confirm_to_clear_histories_of">All histories below will be cleared\n\n[ %1$s ]\n\nAre you sure to clear them all?</string>
-    <string name="text_confirm_to_clear_histories_of_all_color_libraries">All histories below will be cleared\n\n[ All color libraries ]\n\nAre you sure to clear them all?</string>
+    <string name="text_confirm_to_clear_the_history">Are you sure to clear the history?</string>
+    <string name="text_confirm_to_clear_the_history_of">The history below will be cleared\n\n[ %1$s ]\n\nAre you sure to clear?</string>
+    <string name="text_confirm_to_clear_the_history_of_all_color_libraries">All history entries below will be cleared\n\n[ All color libraries ]\n\nAre you sure to clear them all?</string>
     <string name="text_confirm_to_delete">Are you sure to delete?</string>
     <string name="text_confirm_to_remove">Are you sure to remove?</string>
     <string name="text_confirm_to_uninstall">Are you sure to uninstall?</string>
@@ -604,6 +632,7 @@
     <string name="text_copy_to">Copy to</string>
     <string name="text_copy_to_clip">Copy to clipboard</string>
     <string name="text_copy_value">Copy value</string>
+    <string name="text_copying" tools:ignore="TypographyEllipsis">Copying...</string>
     <string name="text_country_code">Country Code (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">Country code must be two capital letters</string>
     <string name="text_current_version">Current version</string>
@@ -630,6 +659,8 @@
     <string name="text_delete_file">Delete file</string>
     <string name="text_delete_folder">Delete folder</string>
     <string name="text_delete_line">Delete line</string>
+    <string name="text_delete_revision_confirm">Delete this revision permanently?</string>
+    <string name="text_deleting" tools:ignore="TypographyEllipsis">Deleting...</string>
     <string name="text_description">Description</string>
     <string name="text_destination">Destination</string>
     <string name="text_details">Details</string>
@@ -663,6 +694,7 @@
     <string name="text_download_link_for_autojs6">Download link for AutoJs6</string>
     <string name="text_download_url">Download URL</string>
     <string name="text_downloading">Downloading</string>
+    <string name="text_draft_file_path">Draft file path</string>
     <string name="text_drawer_close">Close drawer</string>
     <string name="text_drawer_open">Open drawer</string>
     <string name="text_edit">Edit</string>
@@ -696,8 +728,6 @@
     <string name="text_extensibility">Extensibility</string>
     <string name="text_failed">Failed</string>
     <string name="text_failed_to_build">Failed to build</string>
-    <string name="text_failed_to_copy">Failed to copy</string>
-    <string name="text_failed_to_create">Failed to create</string>
     <string name="text_failed_to_create_key_store">Failed to create signature key</string>
     <string name="text_failed_to_delete">Failed to delete</string>
     <string name="text_failed_to_disable_a11y_service">Failed to disable accessibility service</string>
@@ -721,11 +751,13 @@
     <string name="text_failed_to_update">Failed to update</string>
     <string name="text_failed_to_write_file">Failed to write file</string>
     <string name="text_file">File</string>
+    <string name="text_file_colon_value">File: %1$s</string>
     <string name="text_file_details">File details</string>
     <string name="text_file_exists">File already exists</string>
     <string name="text_file_explorer">File explorer</string>
     <string name="text_file_extensions_title">File extensions</string>
     <string name="text_file_name">File name</string>
+    <string name="text_file_name_colon_value">File name: %1$s</string>
     <string name="text_file_not_exists">File does not exist</string>
     <string name="text_file_path">File Path</string>
     <string name="text_file_with_abs_path_is_not_an_executable_script">File \"%1$s\" is not an executable script</string>
@@ -742,6 +774,7 @@
     <string name="text_first_and_last_name">Full Name</string>
     <string name="text_floating_button">Floating button</string>
     <string name="text_folder">Folder</string>
+    <string name="text_folder_colon_value">Folder: %1$s</string>
     <string name="text_force_stop">Force stop</string>
     <string name="text_foreground_service">Foreground service</string>
     <string name="text_formatting_completed">Formatting completed</string>
@@ -763,7 +796,8 @@
     <string name="text_hide_button">Hide button</string>
     <string name="text_hide_node">Hide this node</string>
     <string name="text_hide_same_frame_nodes">Hide same frame nodes</string>
-    <string name="text_histories">Histories</string>
+    <string name="text_history">History</string>
+    <string name="text_history_has_been_cleared">The history has been cleared</string>
     <string name="text_icon">Icon</string>
     <string name="text_ignore_battery_optimizations">Ignore battery optimizations</string>
     <string name="text_ignored_updates">Ignored updates</string>
@@ -791,6 +825,7 @@
     <string name="text_ip_address_may_be_invalid_for_server_connection" tools:ignore="TypographyEllipsis">IP address \"%1$s\" has a special purpose (loopback/broadcast/multicast/reserved/...), so it may not be usable for connecting to the target server.</string>
     <string name="text_is_latest_version">No newer version found</string>
     <string name="text_issue_report">Feedback</string>
+    <string name="text_items_count_colon_value">Items: %1$d</string>
     <string name="text_js_file">*.js file</string>
     <string name="text_jump">Jump</string>
     <string name="text_jump_to_end">Jump to end</string>
@@ -843,8 +878,14 @@
     <string name="text_move_aborted_same_path">Source path is the same as destination path, move aborted.</string>
     <string name="text_move_all_files_to_new_directory">Move all files to new directory</string>
     <string name="text_move_file">Move file</string>
+    <string name="text_move_file_to_trash">Move file to trash</string>
     <string name="text_move_folder">Move folder</string>
+    <string name="text_move_folder_to_trash">Move folder to trash</string>
     <string name="text_move_to">Move to</string>
+    <string name="text_move_to_trash_failed">Failed to move to trash</string>
+    <string name="text_moved_to_trash">Moved to trash</string>
+    <string name="text_moving" tools:ignore="TypographyEllipsis">Moving...</string>
+    <string name="text_moving_to_trash" tools:ignore="TypographyEllipsis">Moving to trash...</string>
     <string name="text_multiple_options">Multiple options</string>
     <string name="text_name">Name</string>
     <string name="text_need_to_enable_a11y_service">Need to enable accessibility service</string>
@@ -862,7 +903,8 @@
     <string name="text_no_browser">No browser installed</string>
     <string name="text_no_content">No content</string>
     <string name="text_no_content_description">No content description</string>
-    <string name="text_no_histories">No histories</string>
+    <string name="text_no_data">No data</string>
+    <string name="text_no_history">No history</string>
     <string name="text_no_ignored_updates">No ignored updates</string>
     <string name="text_no_log_entries_to_copy">No log entries to copy</string>
     <string name="text_no_log_entries_to_export">No log entries to export</string>
@@ -871,6 +913,7 @@
     <string name="text_no_root">Non-root</string>
     <string name="text_no_root_access">No root access</string>
     <string name="text_no_scripts_to_stop_running">No scripts to stop running</string>
+    <string name="text_no_version_history">No version history</string>
     <string name="text_not_granted">Not granted</string>
     <string name="text_not_installed">Not installed</string>
     <string name="text_not_showing_main_activity">Not showing main activity</string>
@@ -896,14 +939,17 @@
     <string name="text_original_developer">Original developer</string>
     <string name="text_others">Others</string>
     <string name="text_output_apk_path">APK output path</string>
+    <string name="text_overwrite">Overwrite</string>
     <string name="text_package_name">Package name</string>
     <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">Package name (computing...)</string>
     <string name="text_password">Password</string>
     <string name="text_password_cannot_be_empty">Password cannot be empty</string>
     <string name="text_password_requires_at_least_n_characters">Password must be at least %d characters long</string>
     <string name="text_paste">Paste</string>
+    <string name="text_path_colon_value">Path: %1$s</string>
     <string name="text_path_is_empty">Path is empty</string>
     <string name="text_pc_server_address">PC server address</string>
+    <string name="text_percentage_colon_value">Usage: %1$s</string>
     <string name="text_permission_desc_access_coarse_location">Allow the app to access approximate location via network</string>
     <string name="text_permission_desc_access_fine_location">Allow the app to access precise location via GPS</string>
     <string name="text_permission_desc_access_location_extra_commands">Allow the app to access extra commands for location providers</string>
@@ -1033,11 +1079,14 @@
     <string name="text_register">Register</string>
     <string name="text_register_succeed">Register succeeded</string>
     <string name="text_registering">Registering</string>
+    <string name="text_release_history">Release history</string>
     <string name="text_release_notes">Release notes</string>
     <string name="text_remote">remote</string>
     <string name="text_remote_file_saved_to_local_storage_successfully">Remote file saved to local storage successfully</string>
     <string name="text_remote_project_saved_to_local_storage_successfully">Remote project saved to local storage successfully</string>
     <string name="text_remove_all_breakpoints">Remove all breakpoints</string>
+    <string name="text_remove_from_trash">Remove from trash</string>
+    <string name="text_remove_from_trash_confirm">Remove this item from trash permanently?</string>
     <string name="text_rename">Rename</string>
     <string name="text_replace">Replace</string>
     <string name="text_replace_all">Replace all</string>
@@ -1051,6 +1100,10 @@
     <string name="text_reset_to_initial_content_only_for_assets">Reset is only for samples</string>
     <string name="text_restart">Restart</string>
     <string name="text_restart_strategy">Restart strategy</string>
+    <string name="text_restore">Restore</string>
+    <string name="text_restore_to_original_path">Restore to original path</string>
+    <string name="text_restore_to_specified_path">Restore to specified path</string>
+    <string name="text_restoring" tools:ignore="TypographyEllipsis">Restoring...</string>
     <string name="text_result">Result</string>
     <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">Retrieving changelog...</string>
     <string name="text_retrieving_plugin_list_data" tools:ignore="TypographyEllipsis">Retrieving plugin list data...</string>
@@ -1126,7 +1179,13 @@
     <string name="text_sort">Sort</string>
     <string name="text_sort_by_last_update_time">Sort by last update time</string>
     <string name="text_sort_by_name">Sort by name</string>
+    <string name="text_sort_by_name_asc">Name (A-Z)</string>
     <string name="text_sort_by_package_size">Sort by package size</string>
+    <string name="text_sort_by_path_asc">Path (A-Z)</string>
+    <string name="text_sort_by_size_asc">Size (smallest first)</string>
+    <string name="text_sort_by_size_desc">Size (largest first)</string>
+    <string name="text_sort_by_time_asc">Time (oldest first)</string>
+    <string name="text_sort_by_time_desc">Time (newest first)</string>
     <string name="text_source">Source</string>
     <string name="text_source_file_path">Source code path</string>
     <string name="text_special_permissions">Special permissions</string>
@@ -1157,10 +1216,15 @@
     <string name="text_timed_task">Timed task</string>
     <string name="text_timed_task_backend_title">Timed task scheduling engine</string>
     <string name="text_timed_task_timing">Timing</string>
+    <string name="text_to_be_chosen">To be chosen</string>
     <string name="text_tools">Tools</string>
+    <string name="text_total_size_colon_value">Size: %1$s</string>
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">The transparent background launcher icon may be automatically masked or given a background by the system, so the actual effect may vary across different devices</string>
+    <string name="text_trash">Trash</string>
     <string name="text_tutorial">Tutorial</string>
     <string name="text_type">Type</string>
+    <string name="text_type_file">File</string>
+    <string name="text_type_folder">Folder</string>
     <string name="text_unable_to_build_apk_as_autojs6_does_not_include_selected_abi">The selected ABI \"%s\" cannot be used to create a packaged application, because the current version of AutoJs6 does not include the above ABI.</string>
     <string name="text_unavailable">Unavailable</string>
     <string name="text_unavailable_abi_for">ABI \"%s\" is unavailable</string>
@@ -1205,7 +1269,10 @@
     <string name="text_version">Version</string>
     <string name="text_version_code">Version code</string>
     <string name="text_version_code_with_computing" tools:ignore="TypographyEllipsis">Version code (computing...)</string>
-    <string name="text_version_histories">Version histories</string>
+    <string name="text_version_count_colon_value">Versions: %1$s</string>
+    <string name="text_version_history">Version history</string>
+    <string name="text_version_history_restore_does_not_auto_save_to_disk">Restoring only changes the editor content. It will not automatically save to the file. Please tap the Save button manually.</string>
+    <string name="text_version_history_restore_will_overwrite_file">Restore will overwrite file content.\nPath: %1$s</string>
     <string name="text_version_info">Version info</string>
     <string name="text_version_name">Version name</string>
     <string name="text_version_name_with_computing" tools:ignore="TypographyEllipsis">Version name (computing...)</string>
@@ -1220,28 +1287,4 @@
     <string name="text_write_secure_settings">Write security settings</string>
     <string name="text_write_system_settings">Write system settings</string>
     <string name="text_xiaomi_background_popup_permission">Display pop-up windows while running in the background</string>
-    <string name="error_refresh_failed">Refresh failed</string>
-    <string name="error_save_failed">Save failed</string>
-    <string name="text_draft_file_path">Draft file path</string>
-    <string name="dialog_button_copy_path">Copy path</string>
-    <string name="dialog_button_save_as">Save as</string>
-    <string name="text_version_history">Version history</string>
-    <string name="text_no_version_history">No version history</string>
-    <string name="text_version_history_restore_does_not_auto_save_to_disk">Restoring only changes the editor content. It will not automatically save to the file. Please tap the Save button manually.</string>
-    <string name="item_move_to_trash">Move to trash</string>
-    <string name="item_delete_permanently">Delete permanently</string>
-    <string name="text_moved_to_trash">Moved to trash</string>
-    <string name="text_choose_delete_strategy">Choose delete strategy</string>
-    <string name="text_trash">Trash</string>
-    <string name="text_choose_restore_path">Choose restore path</string>
-    <string name="text_restore_to_original_path">Restore to original path</string>
-    <string name="text_restore_to_specified_path">Restore to specified path</string>
-    <string name="text_path_colon_value">Path: %1$s</string>
-    <string name="text_file_name_colon_value">File name: %1$s</string>
-    <string name="dialog_button_choose_path">Choose</string>
-    <string name="text_overwrite">Overwrite</string>
-    <string name="text_auto_rename">Auto rename</string>
-    <string name="text_no_data">No data</string>
-    <string name="error_invalid_path">Invalid path: %1$s</string>
-    <string name="text_version_history_restore_will_overwrite_file">Restore will overwrite file content.\nPath: %1$s</string>
 </resources>

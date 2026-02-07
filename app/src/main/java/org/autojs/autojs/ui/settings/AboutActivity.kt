@@ -11,7 +11,7 @@ import com.afollestad.materialdialogs.MaterialDialog
 import com.jaredrummler.android.widget.AnimatedSvgView
 import de.psdev.licensesdialog.LicenseResolver
 import de.psdev.licensesdialog.LicensesDialog
-import org.autojs.autojs.util.MaterialDialogUtils.widgetThemeColor
+import org.autojs.autojs.util.DialogUtils.widgetThemeColor
 import org.autojs.autojs.network.UpdateChecker
 import org.autojs.autojs.network.UpdateChecker.PromptMode
 import org.autojs.autojs.ui.BaseActivity
@@ -66,7 +66,7 @@ open class AboutActivity : BaseActivity() {
 
         functionsButtonsBinding.aboutFunctionsButtonLicenses.setOnClickListener { showLicensesDialog() }
         functionsButtonsBinding.aboutFunctionsButtonUpdate.setOnClickListener { checkForUpdates() }
-        functionsButtonsBinding.aboutFunctionsButtonVersionHistories.setOnClickListener { showVersionHistories() }
+        functionsButtonsBinding.aboutFunctionsButtonReleaseHistory.setOnClickListener { showReleaseHistory() }
         functionsButtonsBinding.aboutFunctionsButtonFeedback.setOnClickListener { startFeedbackActivity() }
     }
 
@@ -168,8 +168,8 @@ open class AboutActivity : BaseActivity() {
             .build().checkNow()
     }
 
-    private fun showVersionHistories() {
-        DisplayVersionHistoriesActivity.launch(this)
+    private fun showReleaseHistory() {
+        DisplayReleaseHistoryActivity.launch(this)
     }
 
     private fun startFeedbackActivity() {

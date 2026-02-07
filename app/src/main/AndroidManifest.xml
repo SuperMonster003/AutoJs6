@@ -278,7 +278,7 @@
             android:theme="@style/AppTheme.Settings" />
 
         <activity
-            android:name="org.autojs.autojs.ui.settings.DisplayVersionHistoriesActivity"
+            android:name="org.autojs.autojs.ui.settings.DisplayReleaseHistoryActivity"
             android:theme="@style/AppTheme.Settings" />
 
         <activity

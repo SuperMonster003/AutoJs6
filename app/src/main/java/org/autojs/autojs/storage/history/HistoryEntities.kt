@@ -1,11 +1,13 @@
 package org.autojs.autojs.storage.history
 
+import android.net.Uri
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
 /**
  * Created by JetBrains AI Assistant (GPT-5.2) on Feb 3, 2026.
+ * Modified by SuperMonster003 as of Feb 6, 2026.
  */
 object HistoryEntities {
 
@@ -29,7 +31,13 @@ object HistoryEntities {
         // Latest content fingerprint for "path lost but content same" matching.
         // zh-CN: 用于 "路径丢失但内容相同" 匹配的最新内容指纹.
         val latestFingerprint: String,
-    )
+    ) {
+        val displayPath: String
+            get() = runCatching { Uri.decode(logicalPath) }.getOrElse { logicalPath }
+
+        val canonicalPath: String
+            get() = logicalPath
+    }
 
     @Entity(
         tableName = "revision",

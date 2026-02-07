@@ -1,7 +1,6 @@
 package org.autojs.autojs.ui.settings
 
 import android.content.Context
-import androidx.annotation.StringRes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
@@ -18,16 +17,16 @@ import java.io.File
 import org.autojs.autojs6.R
 import java.util.EnumSet
 
-class VersionHistoryRepository {
+class ReleaseHistoryRepository {
 
     private val mOkHttpClient by lazy { OkHttpClient() }
 
-    fun loadVersionHistoriesFlow(
+    fun loadReleaseHistoryFlow(
         context: Context,
         languageTag: String,
         urlRaw: String,
         urlBlob: String,
-    ): Flow<VersionHistoryItem> = channelFlow {
+    ): Flow<ReleaseHistoryItem> = channelFlow {
         runCatching {
             ProcessLogger.i(context.getString(R.string.logger_ver_history_start_raw_thread))
             ProcessLogger.i("URL: $urlRaw")
@@ -107,7 +106,7 @@ class VersionHistoryRepository {
             return "CHANGELOG-$this.cache.md"
         }
 
-        suspend fun readBestLocalSample(context: Context, languageTag: String): List<VersionHistoryItem> {
+        suspend fun readBestLocalSample(context: Context, languageTag: String): List<ReleaseHistoryItem> {
             val assetStr = runCatching {
                 context.assets.open("doc/${languageTag.toChangelogMarkdownFile()}").bufferedReader().use { it.readText() }
             }.getOrNull()
@@ -162,14 +161,14 @@ class VersionHistoryRepository {
             File(context.filesDir, languageTag.toChangelogMarkdownCacheFile()).writeText(markdown)
         }
 
-        private fun parseMarkdownFlow(md: String): Flow<VersionHistoryItem> = channelFlow {
+        private fun parseMarkdownFlow(md: String): Flow<ReleaseHistoryItem> = channelFlow {
             var curTitle = ""
             var curDate = ""
             val bodyLines = mutableListOf<String>()
 
             fun flush(isClose: Boolean = false) {
                 if (curTitle.isNotBlank()) {
-                    trySend(VersionHistoryItem(curTitle, curDate, bodyLines.toList()))
+                    trySend(ReleaseHistoryItem(curTitle, curDate, bodyLines.toList()))
                     bodyLines.clear()
                 }
                 if (isClose) close()
@@ -206,7 +205,7 @@ class VersionHistoryRepository {
                     val lines = ul.getElementsByTag("li").map { li ->
                         TextUtils.htmlToMarkdown(li.outerHtml()).trim()
                     }
-                    send(VersionHistoryItem(version, date, lines))
+                    send(ReleaseHistoryItem(version, date, lines))
                 }
             }
         }

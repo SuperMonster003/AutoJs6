@@ -25,7 +25,7 @@
     "v6.6.3": {
       "released_date": "2025/05/27",
       "feature": [
-        "Función de historial de versiones: ver registros de cambios multilenguaje y estadísticas",
+        "Función de historial de lanzamientos: ver registros de cambios y estadísticas de lanzamientos en múltiples idiomas",
         "Método timers.keepAlive (ahora global) para mantener activo el script",
         "Métodos de escucha de eventos como engines.on('start/stop/error', callback) para eventos globales del motor",
         "Método images.detectMultiColors para verificación de colores multipunto _[`issue #374`](http://issues.autojs6.com/374)_",
@@ -40,7 +40,7 @@
       "fix": [
         "El contenido de la documentación en línea en la pestaña Documentos y la actividad Documentos podía quedar cubierto por la barra de navegación del sistema",
         "En algunas páginas, al pulsar botones de la Toolbar se podía activar por error el evento de clic en el título",
-        "Las líneas en blanco del editor de código mostraban caracteres de cuadro en ciertos dispositivos",
+        "Las líneas en blanco del editor de código mostraban caracteres de cuadro en ciertos dispositivos (solución tentativa)",
         "El cuadro de diálogo del selector de colores en los ajustes de color de tema podía apilarse infinitamente",
         "La tecla de subir volumen no detenía todos los scripts cuando el servicio de accesibilidad estaba desactivado",
         "Superposición del teclado IME al editar contenido de difusión personalizado en la página de tareas programadas",

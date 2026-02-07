@@ -17,10 +17,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.autojs.autojs.app.DialogUtils.showAdaptive
-import org.autojs.autojs.util.MaterialDialogUtils.makeSettingsLaunchable
-import org.autojs.autojs.util.MaterialDialogUtils.makeTextCopyable
-import org.autojs.autojs.util.MaterialDialogUtils.setCopyableTextIfAbsent
+import org.autojs.autojs.util.DialogUtils.showAdaptive
+import org.autojs.autojs.util.DialogUtils.makeSettingsLaunchable
+import org.autojs.autojs.util.DialogUtils.makeTextCopyable
+import org.autojs.autojs.util.DialogUtils.setCopyableTextIfAbsent
 import org.autojs.autojs.runtime.api.augment.converter.core.Bytes
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.util.ColorUtils
@@ -223,10 +223,10 @@ object PluginInfoDialogManager {
             .title(info.version ?: info.title)
             .options(listOf(ignoreUpdateOption))
             .content(R.string.text_retrieving_release_notes)
-            .neutralText(R.string.dialog_button_version_histories)
+            .neutralText(R.string.dialog_button_release_history)
             .neutralColor(context.getColor(R.color.dialog_button_hint))
             .onNeutral { _, _ ->
-                // DisplayVersionHistoriesActivity.launch(context)
+                // DisplayReleaseHistoryActivity.launch(context)
             }
             .negativeText(R.string.dialog_button_cancel)
             .negativeColor(context.getColor(R.color.dialog_button_default))

@@ -22,7 +22,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
-import org.autojs.autojs.app.DialogUtils;
+import org.autojs.autojs.util.DialogUtils;
 import org.autojs.autojs.network.UpdateChecker;
 import org.autojs.autojs.network.api.DownloadApi;
 import org.autojs.autojs.network.entity.VersionInfo;

@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.res.TypedArray
 import android.util.AttributeSet
 import androidx.preference.PreferenceViewHolder
-import org.autojs.autojs.app.DialogUtils
+import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs6.R
 
 open class MaterialPreference : androidx.preference.Preference, LongClickablePreferenceLike {

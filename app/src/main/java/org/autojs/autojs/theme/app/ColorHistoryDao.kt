@@ -48,7 +48,7 @@ interface ColorHistoryDao {
     suspend fun hasDataByLibraryId(libraryId: Long): Boolean
 
     @Delete
-    suspend fun delete(vararg histories: ColorHistory)
+    suspend fun delete(vararg history: ColorHistory)
 
     @Query("DELETE FROM color_history")
     suspend fun deleteAll()

@@ -31,8 +31,8 @@ import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.SELECT_NONE
 import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.colorItemsLegacy
 import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.customColorPosition
 import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.defaultColorPosition
-import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.saveDatabaseForColorHistories
-import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.saveDatabaseForPaletteHistories
+import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.saveDatabaseForColorHistory
+import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.saveDatabaseForPaletteHistory
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.MtColorSettingRecyclerViewItemBinding
@@ -70,7 +70,7 @@ class ColorSettingRecyclerView : ThemeColorRecyclerView {
                     presetColorLibraries.find { it.isDefault }!!.colors.find { colorItem ->
                         context.getColor(colorItem.colorRes) == context.getColor(R.color.theme_color_default)
                     }?.let {
-                        saveDatabaseForColorHistories(
+                        saveDatabaseForColorHistory(
                             applicationContext = context.applicationContext,
                             libraryId = COLOR_LIBRARY_ID_DEFAULT,
                             itemId = it.itemId,
@@ -85,7 +85,7 @@ class ColorSettingRecyclerView : ThemeColorRecyclerView {
                         presetColorLibraries.find { it.isMaterial }!!.colors.find { colorItem ->
                             context.getColor(colorItem.colorRes) == c
                         }?.let {
-                            saveDatabaseForColorHistories(
+                            saveDatabaseForColorHistory(
                                 applicationContext = context.applicationContext,
                                 libraryId = COLOR_LIBRARY_ID_MATERIAL,
                                 itemId = it.itemId,
@@ -174,7 +174,7 @@ class ColorSettingRecyclerView : ThemeColorRecyclerView {
                 val colorWithFullAlpha = color or Color.BLACK
                 Pref.putInt(ColorSelectBaseActivity.KEY_CUSTOM_COLOR, colorWithFullAlpha)
                 setSelectedPosition(customColorPosition)
-                saveDatabaseForPaletteHistories(applicationContext = context.applicationContext, color = colorWithFullAlpha)
+                saveDatabaseForPaletteHistory(applicationContext = context.applicationContext, color = colorWithFullAlpha)
                 mOnItemClickListener?.onItemClick(v, customColorPosition)
             }
             .show((context as FragmentActivity).supportFragmentManager, "ColorPickerTagForColorSelect")

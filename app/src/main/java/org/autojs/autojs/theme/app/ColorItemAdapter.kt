@@ -10,7 +10,7 @@ import org.autojs.autojs.theme.ThemeChangeNotifier
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.PresetColorItem
 import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.SELECT_NONE
-import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.saveDatabaseForColorHistories
+import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.saveDatabaseForColorHistory
 import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.savePrefsForLegacy
 import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.savePrefsForLibraries
 import org.autojs.autojs6.R
@@ -68,7 +68,7 @@ class ColorItemAdapter(
     private fun savePrefsAndDatabase(context: Context, item: PresetColorItem) {
         savePrefsForLibraries(item)
         savePrefsForLegacy(context, item)
-        saveDatabaseForColorHistories(
+        saveDatabaseForColorHistory(
             applicationContext = context.applicationContext,
             libraryId = item.libraryId,
             itemId = item.itemId,

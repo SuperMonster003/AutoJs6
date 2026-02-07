@@ -2,6 +2,8 @@
 
 <!-- Translator: [ QTranslate (https://quest-app.appspot.com) ] -->
 <!-- Translator: [ DeepL (https://www.deepl.com/translator) ] -->
+<!-- Translator: [ JetBrains AI Assistant ] -->
+<!-- Translator: [ OpenAI ChatGPT ] -->
 <!-- Proofreader: [ SuperMonster003 ] -->
 <!-- Proofreader: [ JetBrains AI Assistant ] -->
 <!-- Proofreader: [ Google Gemini ] -->
@@ -99,6 +101,7 @@
     <string name="description_pointer_location">\"포인터 위치\" 는 Android 개발자 옵션에 있는 디버깅 기능입니다.\n활성화하면 시스템이 화면에 터치 지점의 [좌표/이동 궤적/개수/크기/이동 속도/압력] 등의 정보를 표시하여 관련 스크립트의 [작성/디버깅/검증] 에 도움이 됩니다.</string>
     <string name="description_post_notifications">\"알림 전송\" 권한은 AutoJs6 가 시스템에 알림을 게시할 수 있게 하여, 스크립트가 알림 영역에서 사용자 지정 알림을 게시하고 관리할 수 있도록 합니다.\n\nNote: Android 13+ 기기에서 이 권한이 부여되지 않으면 일부 알림이 표시되지 않을 수 있으며, 포그라운드 서비스의 시작 및 안정성에 영향을 줄 수 있습니다.</string>
     <string name="description_project_media_access">프로젝트 미디어 액세스를 사용하면 화면 기록에 대한 보안 경고가 중요하지 않습니다.</string>
+    <string name="description_release_history_preference">GitHub 에서 AutoJs6 릴리스 버전의 변경 기록과 주요 분류 통계 데이터를 확인하기.</string>
     <string name="description_restart_strategy">재시작 전략은 홈 페이지 드로어의 재시작 버튼에만 적용됩니다.\n\n빠른 재시작: 앱을 빠르게 다시 시작합니다. 재시작이 실패하거나 예기치 않은 상황이 발생하면 \"예약 재시작\"으로 전환해 보세요.\n예약 재시작: 미리 짧은 시간의 예약 작업을 설정합니다. 앱이 중지된 후 예약에 따라 다시 시작하여 앱 재시작을 수행합니다.</string>
     <string name="description_rhino_java_primitive_wrap">스위치 활성화(기본값): Java 메서드가 반환하는 Number/Boolean/Character 값은 Java 객체로 래핑되어 스크립트에 노출됩니다(String 제외). typeof 는 \"object\", species 는 \"JavaObject\"이며, Java 메서드 호출이 가능해 Java의 정밀한 타입 특성과 오버로드 해석을 보존하는 데 도움이 됩니다.\n\n스위치 비활성화: 위 타입들을 더 이상 래핑하지 않고 JavaScript 원시 값(number/boolean/한 글자 문자열)으로 직접 노출합니다. typeof 는 해당 JavaScript 타입이 되며, JavaScript의 의미론/생태계에 더 가깝습니다. 필요 시 new 키워드로 Java 래퍼를 명시적으로 생성할 수 있습니다(예: new java.lang.Boolean(true)).\n\n참고: http://issues.autojs6.com/435</string>
     <string name="description_root_mode_preference">뿌리 접근을 위해 이국적인 뿌리 또는 비정상 상태가있는 경우 루트를 루트 또는 뿌리가 아닌 것으로 강제로 설정할 수 있습니다.</string>
@@ -111,7 +114,6 @@
     <string name="description_timed_task_backend">스크립트를 정해진 시간에 실행하는 기본 메커니즘을 제어합니다.\n\nAlarmManager: 시스템의 \"알람 및 알림 설정 허용\" 권한을 부여하면 보다 정확한 시각에 가깝게 실행됩니다.\nWorkManager: 시스템 친화적이며, 일정 지연을 허용할 수 있는 비중요 작업에 적합합니다.\nJobScheduler: 호환성 유지를 위해 남겨둔 구방식으로, 지연 발생 가능성이 큽니다.</string>
     <string name="description_timed_task_backend_more" tools:ignore="TypographyEllipsis">사용 시나리오 및 차이점:\n\n1. AlarmManager\n[리마인더/엄격한 정시 스크립트/...] 등 시간 정확도가 중요한 작업에 적합합니다.\nAndroid 12+ 에서 \"알람 및 알림 설정 허용\" 권한이 있으면, 화면 꺼짐/대기 중에도 비교적 정확하게 실행됩니다.\n 권한이 없으면 시스템이 정확도를 낮추거나 실행을 지연할 수 있습니다.\n\n2. WorkManager\n[비중요 동기화/정리/통계/...] 등 엄격한 정시성이 필요 없는 작업에 적합합니다.\n[배터리/네트워크/충전 상태/대기 정책/...] 에 따라 스케줄링되며, 화면 꺼짐/대기 중에는 지연될 수 있습니다.\n 시간 정확도는 보장되지 않지만, [신뢰성 있는 완료/실패 재시도/체이닝/단일 작업 중복 방지] 에 장점이 있습니다.\n\n3. JobScheduler\n 호환성 유지를 위한 기존 구현입니다.\n 신형 Android 에서는 지연이 더 커질 수 있습니다.\n 특별한 호환성 목적이 아니라면 일반적으로 권장하지 않습니다.</string>
     <string name="description_usage_stats_access">장치 사용 기록 및 통계에 대한 액세스를 제공하여 CurrentPackage ()보다 정확한 결과를 초래합니다.</string>
-    <string name="description_version_histories_preference">GitHub 에서 AutoJs6 릴리스 버전의 변경 기록과 주요 분류 통계 데이터를 확인하기.</string>
     <string name="description_write_secure_settings">애플리케이션이 읽을 수 있지만 쓸 수없는 시스템 환경 설정을 포함하는 보안 시스템 설정.\n이들은 사용자가 시스템 앱의 UI 를 통해 명시 적으로 수정 해야하는 선호도입니다.\n보안 시스템 설정 권한을 사용하면 일반 애플리케이션이 보안 설정 (예: 접근성 서비스)을 직접 수정할 수 있습니다.</string>
     <string name="description_write_system_settings">\"시스템 설정 수정\" 권한은 AutoJs6 가 일부 시스템 설정을 변경할 수 있게 하여, 스크립트가 [ 화면 밝기 / 자동 회전 / 화면 시간 제한 ] 등의 설정을 변경할 수 있도록 합니다.</string>
     <string name="dialog_button_abandon">포기</string>
@@ -122,11 +124,13 @@
     <string name="dialog_button_back">@string/text_back</string>
     <string name="dialog_button_cancel">취소</string>
     <string name="dialog_button_cancel_download">취소</string>
+    <string name="dialog_button_choose_path">선택</string>
     <string name="dialog_button_clear_items">지우기</string>
     <string name="dialog_button_confirm">확인</string>
     <string name="dialog_button_connect">연결</string>
     <string name="dialog_button_continue">@string/text_continue</string>
     <string name="dialog_button_copy">@string/text_copy</string>
+    <string name="dialog_button_copy_path">복사</string>
     <string name="dialog_button_default_prefix">기본 접두사</string>
     <string name="dialog_button_details">세부</string>
     <string name="dialog_button_dismiss">닫기</string>
@@ -141,17 +145,20 @@
     <string name="dialog_button_minimize">최소화</string>
     <string name="dialog_button_more">더</string>
     <string name="dialog_button_open_color_palette">팔레트 열기</string>
+    <string name="dialog_button_preview">미리보기</string>
     <string name="dialog_button_quit">그만두다</string>
+    <string name="dialog_button_release_history">기록</string>
     <string name="dialog_button_remove">제거하다</string>
+    <string name="dialog_button_restore">@string/text_restore</string>
     <string name="dialog_button_retrieve">가져오기</string>
     <string name="dialog_button_retry">다시 해 보다</string>
     <string name="dialog_button_save">구하다</string>
+    <string name="dialog_button_save_as">다른 이름으로 저장</string>
     <string name="dialog_button_system_settings">환경 설정</string>
     <string name="dialog_button_system_settings_simplified">시스템</string>
     <string name="dialog_button_update_now">업데이트</string>
     <string name="dialog_button_use_default">기본값을 사용하십시오</string>
     <string name="dialog_button_use_palette">팔레트 사용</string>
-    <string name="dialog_button_version_histories">변경내역</string>
     <string name="dialog_button_view_file">파일 보기</string>
     <string name="dialog_button_view_shortcuts">바로가기 보기</string>
     <string name="dialog_button_view_update">업데이트 보기</string>
@@ -214,7 +221,6 @@
     <string name="error_cannot_convert_value_into_a_script_runtime_path">%s 를 스크립트 런타임 경로로 변환할 수 없습니다</string>
     <string name="error_cannot_find_editor_view_from_child_view">Child View: %s 에서 EditorView 를 찾을 수 없습니다</string>
     <string name="error_cannot_get_download_url">URL 다운로드를받을 수 없습니다</string>
-    <string name="error_cannot_rename">이름을 바꾸지 못했습니다</string>
     <string name="error_cannot_retrieve_battery_state">배터리 상태를 검색 할 수 없습니다</string>
     <string name="error_change_password_error_length">비밀번호에 더 많은 문자를 사용하십시오</string>
     <string name="error_change_password_error_match">그 암호는 일치하지 않았다</string>
@@ -242,6 +248,8 @@
     <string name="error_failed_to_call_method_with_cause"><![CDATA[메서드 \"%1$s\" 를 호출하지 못했습니다: [ %2$s ]]]></string>
     <string name="error_failed_to_change_the_toggle_state">스위치 상태 변경에 실패했습니다</string>
     <string name="error_failed_to_convert_into_drawable">%s 값을 Drawable 로 변환하지 못했습니다</string>
+    <string name="error_failed_to_copy">복사하지 못했습니다</string>
+    <string name="error_failed_to_create">만들지 못했습니다</string>
     <string name="error_failed_to_go_to_access_settings">설정 페이지를 열지 못했습니다</string>
     <string name="error_failed_to_grant_shizuku_access">Shizuku 권한을 부여하지 못했습니다</string>
     <string name="error_failed_to_instantiate">\"%s\" 인스턴스 생성에 실패했습니다</string>
@@ -249,10 +257,12 @@
     <string name="error_failed_to_launch_manager">관리자를 실행하지 못했습니다</string>
     <string name="error_failed_to_launch_system_settings">시스템 설정을 실행하지 못했습니다</string>
     <string name="error_failed_to_load_plugins_with_reason">플러그인을 불러오지 못했습니다.\n사유: %1$s.</string>
+    <string name="error_failed_to_move">이동에 실패했습니다</string>
+    <string name="error_failed_to_rename">이름을 바꾸지 못했습니다</string>
     <string name="error_failed_to_render_content">콘텐츠 렌더링에 실패했습니다</string>
     <string name="error_failed_to_retrieve_changelog">변경 로그를 가져오지 못했습니다</string>
+    <string name="error_failed_to_retrieve_release_history">릴리스 기록을 가져오지 못했습니다</string>
     <string name="error_failed_to_retrieve_release_notes">릴리스 노트를 가져오지 못했습니다</string>
-    <string name="error_failed_to_retrieve_version_histories">버전 기록을 가져올 수 없습니다</string>
     <string name="error_failed_to_retrieve_version_properties_file_to_parse_version_information">version.properties 를 가져올 수 없어 버전 정보를 분석할 수 없습니다</string>
     <string name="error_failed_to_revoke_shizuku_access">Shizuku 권한 해지에 실패했습니다</string>
     <string name="error_failed_to_run_script">스크립트 실행 실패</string>
@@ -276,6 +286,7 @@
     <string name="error_invalid_github_repo">유효하지 않은 GitHub 저장소: %s</string>
     <string name="error_invalid_ip_address">잘못된 IP 주소</string>
     <string name="error_invalid_login_credentials">로그인 자격 증명이 잘못되었습니다</string>
+    <string name="error_invalid_path">잘못된 경로: %1$s</string>
     <string name="error_invalid_rest_compass">잘못된 휴식 나침반: %s</string>
     <string name="error_invalid_selector_map_element" formatted="false">잘못된 선택기 맵 요소: { %s: %s (%s) }</string>
     <string name="error_ip_address_should_not_be_empty">IP 주소는 비워둘 수 없습니다</string>
@@ -320,11 +331,13 @@
     <string name="error_port_num_over_65535">65535 이상의 포트 번호</string>
     <string name="error_project_main_script_file_with_abs_path_does_not_exist">프로젝트 메인 스크립트 파일 \"%1$s\" 이 존재하지 않습니다</string>
     <string name="error_put_value_into_json">가치 %s 를 JSON 에 넣을 수 없습니다</string>
+    <string name="error_refresh_failed">새로고침에 실패했습니다</string>
     <string name="error_regex_find_prev">Regex 와 함께 이전을 찾을 수 없습니다</string>
     <string name="error_repeated_colon_symbol">반복 콜론 기호</string>
     <string name="error_repeated_dot_symbol">반복되는 점 기호</string>
     <string name="error_required_property_is_nullish_or_does_not_exist">필수 속성 \"%1$s\" 가 null 이거나 존재하지 않습니다</string>
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">\"%1$s\" 에 대한 해결된 경로는 null 일 수 없습니다</string>
+    <string name="error_save_failed">저장에 실패했습니다</string>
     <string name="error_script_is_on_exiting">스크립트가 종료 중입니다</string>
     <string name="error_selector_method_without_calling">셀렉터 메소드는 매개 변수로 전달되지 않고 호출되어야합니다: %s</string>
     <string name="error_selector_result_type_with_compass">결과 유형이 선택기 일 때 나침반을 사용할 수 없습니다</string>
@@ -336,12 +349,18 @@
     <string name="error_the_transformer_for_required_property_cannot_return_nullish">필수 속성 \"%1$s\" 에 대한 변환기는 null 값을 반환할 수 없습니다</string>
     <string name="error_thread_is_not_alive">스레드는 살아 있지 않습니다</string>
     <string name="error_timeout_while_querying_plugin_info">%1$s 플러그인 정보 조회가 시간 초과되었습니다.</string>
+    <string name="error_unable_to_display_file_details_as_current_file_path_is_unknown">현재 파일 경로를 알 수 없어 파일 정보를 표시할 수 없습니다</string>
+    <string name="error_unable_to_display_version_history_as_current_file_path_is_unknown">현재 파일 경로를 알 수 없어 버전 기록을 표시할 수 없습니다</string>
+    <string name="error_unable_to_open_with_other_apps_as_current_file_path_is_unknown">현재 파일 경로를 알 수 없어 다른 앱으로 열 수 없습니다</string>
+    <string name="error_unable_to_package_application_as_current_file_path_is_unknown">현재 파일 경로를 알 수 없어 앱을 패키징할 수 없습니다</string>
+    <string name="error_unable_to_save_file_as_current_file_path_is_unknown">현재 파일 경로를 알 수 없어 파일을 저장할 수 없습니다</string>
     <string name="error_unable_to_use_shizuku_service">Shizuku 서비스를 사용할 수 없음</string>
     <string name="error_unacceptable_character">허용되지 않는 문자</string>
     <string name="error_unknown">알수없는 오류</string>
     <string name="error_unknown_algorithm_selector_param">알 수없는 알고리즘 선택기 매개 변수: %s</string>
     <string name="error_unknown_color_name">알 수 없는 색상 이름: %s</string>
     <string name="error_unknown_element_name">알 수 없는 요소 이름: %1$s</string>
+    <string name="error_unknown_exception">알 수 없는 예외</string>
     <string name="error_unknown_gravity_for">알 수 없는 중력: %s</string>
     <string name="error_unknown_operation">알 수없는 작업</string>
     <string name="error_unknown_picker_result_type">알 수없는 결과 유형 {이름: %s}</string>
@@ -349,7 +368,8 @@
     <string name="error_unknown_picker_selector_type" formatted="false">알 수없는 선택기 {이름: %s, 유형: %s}</string>
     <string name="error_unknown_type">알 수없는 유형: %s</string>
     <string name="error_webp_lossless_quality_not_supported">WebP-Lossless 형식은 품질 파라미터로 압축할 수 없습니다, 대신 JPEG/PNG/WebP-Lossy를 사용하세요</string>
-    <string name="file_not_exist_or_readable">파일이 존재하지 않거나 읽을 수 없습니다: %s</string>
+    <string name="file_not_exist_or_readable">파일이 없거나 읽을 수 없습니다</string>
+    <string name="file_not_exist_or_readable_with_path">파일이 존재하지 않거나 읽을 수 없습니다: %s</string>
     <string name="foreground_notification_channel_name">%1$s 전경 서비스</string>
     <string name="foreground_notification_text">%1$s 을 시작하려면 클릭하십시오</string>
     <string name="foreground_notification_title">%1$s 전경 서비스</string>
@@ -364,6 +384,8 @@
     <string name="hint_loop_times">무한 루프의 경우 0</string>
     <string name="hint_pc_server_address_supported_formats">IPv4, IPv6 및 도메인을 지원합니다.</string>
     <string name="instruction_install_plugin_from_url">원격 플러그인 주소를 가리키는 URL을 입력하세요.\n예: \"https://example.com/plugin.apk\"</string>
+    <string name="item_delete_permanently">영구 삭제</string>
+    <string name="item_move_to_trash">휴지통으로 이동</string>
     <string name="label_latest_used_time">최종 사용: %1$s</string>
     <string name="logger_ver_history_blob_thread_failure">\"Blob\" 스레드 요청 실패</string>
     <string name="logger_ver_history_blob_thread_success">\"Blob\" 스레드 요청 성공, 오프라인 캐시 기록</string>
@@ -431,12 +453,12 @@
     <string name="summary_post_notifications_permission_inrt">앱이 알림을 생성하고 보낼 수 있도록 허용합니다</string>
     <string name="summary_pre_execute_script">스크립트 파일 전에 실행하십시오</string>
     <string name="summary_record_prompt">스크립트 기록을 시작하거나 중지할 때 메시지 표시</string>
+    <string name="summary_release_history_preference">릴리스 기록과 통계를 보기</string>
     <string name="summary_rhino_java_primitive_wrap">Java 원시 타입이 스크립트에서 Java 객체로 래핑됩니다</string>
     <string name="summary_stable_mode">보다 안정적인 레이아웃 분석이지만 더 나쁜 코드 호환성 (접근성 서비스 재시작 필요)</string>
     <string name="summary_text_launcher_shortcuts">런처에 바로 가기 추가</string>
     <string name="summary_use_volume_control_record">부동 버튼이 표시 될 때 볼륨 다운 키로 제어 된 녹음 시작 또는 중지</string>
     <string name="summary_use_volume_key_to_stop_running_scripts">실행 중인 모든 스크립트를 중지하려면 \"볼륨 크게\" 키를 누르십시오.</string>
-    <string name="summary_version_histories_preference">릴리스 버전의 변경 기록 및 통계 데이터를 확인하기</string>
     <string name="term_internal_strorage">내부 저장소</string>
     <string name="text_a11y_service">접근성 서비스</string>
     <string name="text_a11y_service_description">스크립트 자동 작동에 필요합니다 (클릭, 긴 프레스, 슬라이드 등).</string>
@@ -450,8 +472,8 @@
     <string name="text_about_display_over_other_apps">다른 앱에 대한 디스플레이 정보</string>
     <string name="text_about_functions_feedback">피드백</string>
     <string name="text_about_functions_licenses">라이센스</string>
+    <string name="text_about_functions_release_history">@string/text_release_history</string>
     <string name="text_about_functions_update">업데이트</string>
-    <string name="text_about_functions_version_histories">@string/text_version_histories</string>
     <string name="text_access_has_been_granted">액세스가 승인되었습니다</string>
     <string name="text_act_by_click">클릭 (click)</string>
     <string name="text_act_by_long_click">긴 클릭 (longClick)</string>
@@ -468,8 +490,7 @@
     <string name="text_all">전체</string>
     <string name="text_all_files_access">모든 파일에 액세스합니다</string>
     <string name="text_all_files_access_is_needed">\"모든 파일 액세스\"는 전화기의 스크립트 파일에 액세스하려면 필요합니다.</string>
-    <string name="text_all_histories">모든 기록</string>
-    <string name="text_all_histories_cleared">모든 기록이 삭제되었습니다</string>
+    <string name="text_all_history_entries">모든 기록 항목</string>
     <string name="text_all_items_cleared">모든 항목이 삭제되었습니다</string>
     <string name="text_allow_setting_alarms_and_reminders_is_recommended">화면이 꺼져 있거나 대기 상태에서도 최대한 정시에 실행되도록, \"알람 및 알림 설정 허용\" 권한 부여를 권장합니다</string>
     <string name="text_already_copied_to_clip">클립 보드에 복사</string>
@@ -510,8 +531,8 @@
     <string name="text_app_shortcut_docs_short_label">문서</string>
     <string name="text_app_shortcut_log_long_label">AutoJs6 통나무</string>
     <string name="text_app_shortcut_log_short_label">통나무</string>
-    <string name="text_app_shortcut_plugin_center_long_label">AutoJs6 Plugin Center</string>
-    <string name="text_app_shortcut_plugin_center_short_label">Plugins</string>
+    <string name="text_app_shortcut_plugin_center_long_label">AutoJs6 플러그인 센터</string>
+    <string name="text_app_shortcut_plugin_center_short_label">플러그인</string>
     <string name="text_app_shortcut_settings_long_label">AutoJs6 설정</string>
     <string name="text_app_shortcut_settings_short_label">설정</string>
     <string name="text_app_source_code">소스 코드</string>
@@ -523,6 +544,7 @@
     <string name="text_auto_check_for_updates">자동 확인 업데이트</string>
     <string name="text_auto_check_for_updates_and_show_snackbar">자동으로 업데이트를 확인하고 홈페이지에 스낵바를 표시합니다.</string>
     <string name="text_auto_night_mode">자동 밤 모드</string>
+    <string name="text_auto_rename">자동 이름 변경</string>
     <string name="text_available_windows">사용 가능한 창</string>
     <string name="text_back">뒤</string>
     <string name="text_broadcast_action">동작</string>
@@ -555,17 +577,23 @@
     <string name="text_check_for_updates_while_ignoring_the_local_version">업데이트 확인 (로컬 버전 무시)</string>
     <string name="text_check_for_updates_while_ignoring_the_local_version_description">업데이트 확인 시 최신 원격 버전을 직접 가져옵니다</string>
     <string name="text_checking_update" tools:ignore="TypographyEllipsis">업데이트 확인 ...</string>
+    <string name="text_choose_delete_strategy">삭제 방식 선택</string>
+    <string name="text_choose_restore_path">복원 경로 선택</string>
     <string name="text_city_or_locality">시 또는 지역</string>
     <string name="text_class_or_package_name">클래스 / 패키지 이름</string>
     <string name="text_clear">분명한</string>
     <string name="text_clear_file_selection">파일 선택을 지우십시오</string>
     <string name="text_clear_pre_execute_script">사전 에코 슈트 스크립트를 지우십시오</string>
+    <string name="text_clear_trash">휴지통 비우기</string>
+    <string name="text_clear_trash_confirm">휴지통의 모든 항목을 비울까요?</string>
     <string name="text_clear_updates_checked_states">확인 된 상태에서 명확한 업데이트</string>
-    <string name="text_click_icon_to_add_launcher_shortcut">Click icon to add launcher shortcut</string>
+    <string name="text_clear_version_history">버전 기록 삭제</string>
+    <string name="text_clear_version_history_confirm">버전 기록의 모든 항목을 삭제할까요?</string>
+    <string name="text_click_icon_to_add_launcher_shortcut">아이콘을 눌러 런처에 바로가기를 추가</string>
     <string name="text_click_item_to_remove">제거하려면 항목을 클릭하십시오</string>
     <string name="text_click_item_to_show_details">항목을 탭하면 자세한 정보를 볼 수 있습니다</string>
     <string name="text_click_ok_to_go_to_settings">\"확인\"을 클릭하여 설정으로 이동하십시오</string>
-    <string name="text_click_other_areas_to_exit_selection">Click other areas to exit selection</string>
+    <string name="text_click_other_areas_to_exit_selection">다른 곳을 눌러 선택을 종료</string>
     <string name="text_click_too_frequently">빈번한 작동</string>
     <string name="text_client_mode">클라이언트 모드</string>
     <string name="text_clone_color_library">색상 라이브러리 복제</string>
@@ -581,10 +609,10 @@
     <string name="text_compatibility">호환성</string>
     <string name="text_confidence_level">신뢰도</string>
     <string name="text_config">구성</string>
-    <string name="text_confirm_to_clear_all_histories">모든 기록을 삭제하시겠습니까?</string>
     <string name="text_confirm_to_clear_all_items">모든 항목을 삭제하시겠습니까?</string>
-    <string name="text_confirm_to_clear_histories_of">다음 기록들이 삭제됩니다\n\n[ %1$s ]\n\n정말 삭제하시겠습니까?</string>
-    <string name="text_confirm_to_clear_histories_of_all_color_libraries">다음 기록들이 삭제됩니다\n\n[ 모든 색상 라이브러리 ]\n\n정말 삭제하시겠습니까?</string>
+    <string name="text_confirm_to_clear_the_history">기록을 삭제하시겠습니까?</string>
+    <string name="text_confirm_to_clear_the_history_of">아래 기록이 삭제됩니다\n\n[ %1$s ]\n\n삭제하시겠습니까?</string>
+    <string name="text_confirm_to_clear_the_history_of_all_color_libraries">아래 모든 기록 항목이 삭제됩니다\n\n[ 모든 색상 라이브러리 ]\n\n모두 삭제하시겠습니까?</string>
     <string name="text_confirm_to_delete">삭제 하시겠습니까?</string>
     <string name="text_confirm_to_remove">제거 하시겠습니까?</string>
     <string name="text_confirm_to_uninstall">정말 제거하시겠습니까?</string>
@@ -609,6 +637,7 @@
     <string name="text_copy_to">복사 위치</string>
     <string name="text_copy_to_clip">클립 보드에 복사</string>
     <string name="text_copy_value">값을 복사하십시오</string>
+    <string name="text_copying" tools:ignore="TypographyEllipsis">복사 중...</string>
     <string name="text_country_code">국가 코드 (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">국가 코드는 두 개의 대문자로 입력해야 합니다</string>
     <string name="text_current_version">현재 버전</string>
@@ -635,6 +664,8 @@
     <string name="text_delete_file">파일 삭제</string>
     <string name="text_delete_folder">폴더 삭제</string>
     <string name="text_delete_line">라인 삭제</string>
+    <string name="text_delete_revision_confirm">이 버전을 영구 삭제할까요?</string>
+    <string name="text_deleting" tools:ignore="TypographyEllipsis">삭제 중...</string>
     <string name="text_description">설명</string>
     <string name="text_destination">대상</string>
     <string name="text_details">세부</string>
@@ -668,6 +699,7 @@
     <string name="text_download_link_for_autojs6">AutoJs6 다운로드 링크</string>
     <string name="text_download_url">URL 을 다운로드하십시오</string>
     <string name="text_downloading">다운로드</string>
+    <string name="text_draft_file_path">초안 경로</string>
     <string name="text_drawer_close">가까운 서랍</string>
     <string name="text_drawer_open">열린 서랍</string>
     <string name="text_edit">편집하다</string>
@@ -701,8 +733,6 @@
     <string name="text_extensibility">확장성</string>
     <string name="text_failed">실패한</string>
     <string name="text_failed_to_build">건축에 실패했습니다</string>
-    <string name="text_failed_to_copy">복사하지 못했습니다</string>
-    <string name="text_failed_to_create">만들지 못했습니다</string>
     <string name="text_failed_to_create_key_store">서명 키 생성에 실패했습니다</string>
     <string name="text_failed_to_delete">삭제하지 못했습니다</string>
     <string name="text_failed_to_disable_a11y_service">접근성 서비스를 비활성화하지 못했습니다</string>
@@ -726,11 +756,13 @@
     <string name="text_failed_to_update">업데이트 실패</string>
     <string name="text_failed_to_write_file">파일을 쓰지 못했습니다</string>
     <string name="text_file">파일</string>
+    <string name="text_file_colon_value">파일: %1$s</string>
     <string name="text_file_details">파일 세부정보</string>
     <string name="text_file_exists">존재하는 파일입니다</string>
     <string name="text_file_explorer">파일 탐색기</string>
     <string name="text_file_extensions_title">파일 확장자</string>
     <string name="text_file_name">파일 이름</string>
+    <string name="text_file_name_colon_value">파일 이름: %1$s</string>
     <string name="text_file_not_exists">파일이 존재하지 않는다</string>
     <string name="text_file_path">파일 경로</string>
     <string name="text_file_with_abs_path_is_not_an_executable_script">\"%1$s\" 파일은 실행 가능한 스크립트가 아닙니다</string>
@@ -747,6 +779,7 @@
     <string name="text_first_and_last_name">성명</string>
     <string name="text_floating_button">플로팅 버튼</string>
     <string name="text_folder">폴더</string>
+    <string name="text_folder_colon_value">폴더: %1$s</string>
     <string name="text_force_stop">강제 정지</string>
     <string name="text_foreground_service">전경 서비스</string>
     <string name="text_formatting_completed">포맷 완료</string>
@@ -768,7 +801,8 @@
     <string name="text_hide_button">버튼 숨기기</string>
     <string name="text_hide_node">이 노드를 숨기기</string>
     <string name="text_hide_same_frame_nodes">동일 프레임의 노드를 숨기기</string>
-    <string name="text_histories">역사</string>
+    <string name="text_history">기록</string>
+    <string name="text_history_has_been_cleared">기록이 삭제되었습니다</string>
     <string name="text_icon">상</string>
     <string name="text_ignore_battery_optimizations">배터리 최적화를 무시합니다</string>
     <string name="text_ignored_updates">업데이트를 무시했습니다</string>
@@ -796,6 +830,7 @@
     <string name="text_ip_address_may_be_invalid_for_server_connection" tools:ignore="TypographyEllipsis">IP 주소 \"%1$s\" 는 특수 용도 (loopback/broadcast/multicast/reserved/...) 를 가지므로, 대상 서버에 연결하는 데 사용할 수 없을 수도 있습니다.</string>
     <string name="text_is_latest_version">새로운 버전이 발견되지 않았습니다</string>
     <string name="text_issue_report">피드백</string>
+    <string name="text_items_count_colon_value">항목: %1$d</string>
     <string name="text_js_file">*.js 파일</string>
     <string name="text_jump">도약</string>
     <string name="text_jump_to_end">끝까지 점프하십시오</string>
@@ -848,8 +883,14 @@
     <string name="text_move_aborted_same_path">원본 경로와 대상 경로가 같습니다. 이동이 중지되었습니다.</string>
     <string name="text_move_all_files_to_new_directory">모든 파일을 새 디렉토리로 이동하십시오</string>
     <string name="text_move_file">파일 이동</string>
+    <string name="text_move_file_to_trash">파일을 휴지통으로 이동</string>
     <string name="text_move_folder">폴더 이동</string>
+    <string name="text_move_folder_to_trash">폴더를 휴지통으로 이동</string>
     <string name="text_move_to">이동 위치</string>
+    <string name="text_move_to_trash_failed">휴지통으로 이동하지 못했습니다</string>
+    <string name="text_moved_to_trash">휴지통으로 이동했습니다</string>
+    <string name="text_moving" tools:ignore="TypographyEllipsis">이동 중...</string>
+    <string name="text_moving_to_trash" tools:ignore="TypographyEllipsis">휴지통으로 이동 중...</string>
     <string name="text_multiple_options">여러 옵션</string>
     <string name="text_name">이름</string>
     <string name="text_need_to_enable_a11y_service">접근성 서비스를 활성화해야합니다</string>
@@ -867,7 +908,8 @@
     <string name="text_no_browser">브라우저가 설치되지 않았습니다</string>
     <string name="text_no_content">내용 없음</string>
     <string name="text_no_content_description">콘텐츠 설명 없음</string>
-    <string name="text_no_histories">역사가 없습니다</string>
+    <string name="text_no_data">데이터 없음</string>
+    <string name="text_no_history">기록 없음</string>
     <string name="text_no_ignored_updates">무시되지 않았습니다</string>
     <string name="text_no_log_entries_to_copy">복사할 로그 항목이 없습니다</string>
     <string name="text_no_log_entries_to_export">내보낼 로그 항목이 없습니다</string>
@@ -876,6 +918,7 @@
     <string name="text_no_root">뿌리가 아닌</string>
     <string name="text_no_root_access">루트 액세스가 없습니다</string>
     <string name="text_no_scripts_to_stop_running">실행을 멈출 스크립트가 없습니다</string>
+    <string name="text_no_version_history">버전 기록 없음</string>
     <string name="text_not_granted">부여되지 않았습니다</string>
     <string name="text_not_installed">설치되지 않음</string>
     <string name="text_not_showing_main_activity">주요 활동을 보여주지 않습니다</string>
@@ -901,14 +944,17 @@
     <string name="text_original_developer">원래 개발자</string>
     <string name="text_others">기타</string>
     <string name="text_output_apk_path">APK 출력 경로</string>
+    <string name="text_overwrite">덮어쓰기</string>
     <string name="text_package_name">패키지 이름</string>
     <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">패키지 이름 (계산 중...)</string>
     <string name="text_password">비밀번호</string>
     <string name="text_password_cannot_be_empty">비밀번호가 비어질 수 없다</string>
     <string name="text_password_requires_at_least_n_characters">비밀번호는 최소 %d 자 이상이어야 합니다</string>
     <string name="text_paste">반죽</string>
+    <string name="text_path_colon_value">경로: %1$s</string>
     <string name="text_path_is_empty">경로는 비어 있습니다</string>
     <string name="text_pc_server_address">PC 서버 주소</string>
+    <string name="text_percentage_colon_value">사용량: %1$s</string>
     <string name="text_permission_desc_access_coarse_location">앱이 네트워크를 통해 대략적인 위치 정보에 접근하도록 허용합니다</string>
     <string name="text_permission_desc_access_fine_location">앱이 GPS 를 통해 정확한 위치 정보에 접근하도록 허용합니다</string>
     <string name="text_permission_desc_access_location_extra_commands">앱이 위치 제공자의 추가 명령에 접근하도록 허용합니다</string>
@@ -1000,9 +1046,9 @@
     <string name="text_please_input_name">입력 이름</string>
     <string name="text_please_wait" tools:ignore="TypographyEllipsis">잠시만 기다려주세요...</string>
     <string name="text_please_wait_a_moment_before_trying_again" tools:ignore="TypographyEllipsis">잠시 후 다시 시도해 주세요...</string>
-    <string name="text_plugin_center">Plugin center</string>
+    <string name="text_plugin_center">플러그인 센터</string>
     <string name="text_plugin_details">플러그인 상세</string>
-    <string name="text_plugins">Plugins</string>
+    <string name="text_plugins">플러그인</string>
     <string name="text_pointer_location">포인터 위치</string>
     <string name="text_pointer_location_toggle_failed_with_hint">\"포인터 위치\"토글이 실패했습니다.\n루트 액세스가 필요합니다.</string>
     <string name="text_post_notifications_permission">게시물 알림</string>
@@ -1038,11 +1084,14 @@
     <string name="text_register">등록하다</string>
     <string name="text_register_succeed">등록이 성공했습니다</string>
     <string name="text_registering">등록</string>
+    <string name="text_release_history">릴리스 기록</string>
     <string name="text_release_notes">릴리스 노트</string>
     <string name="text_remote">원격</string>
     <string name="text_remote_file_saved_to_local_storage_successfully">원격 파일이 로컬 저장소에 성공적으로 저장됨</string>
     <string name="text_remote_project_saved_to_local_storage_successfully">원격 프로젝트가 로컬 저장소에 성공적으로 저장되었습니다</string>
     <string name="text_remove_all_breakpoints">모든 중단 점을 제거하십시오</string>
+    <string name="text_remove_from_trash">휴지통에서 제거</string>
+    <string name="text_remove_from_trash_confirm">이 항목을 휴지통에서 영구 삭제할까요?</string>
     <string name="text_rename">이름 바꾸기</string>
     <string name="text_replace">바꾸다</string>
     <string name="text_replace_all">모두 다 바꿔</string>
@@ -1056,6 +1105,10 @@
     <string name="text_reset_to_initial_content_only_for_assets">재설정은 샘플에만 해당됩니다</string>
     <string name="text_restart">재시작</string>
     <string name="text_restart_strategy">재시작 전략</string>
+    <string name="text_restore">복원</string>
+    <string name="text_restore_to_original_path">원래 경로로 복원</string>
+    <string name="text_restore_to_specified_path">지정한 경로로 복원</string>
+    <string name="text_restoring" tools:ignore="TypographyEllipsis">복원 중...</string>
     <string name="text_result">결과</string>
     <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">변경 로그를 가져오는 중...</string>
     <string name="text_retrieving_plugin_list_data" tools:ignore="TypographyEllipsis">플러그인 목록 데이터를 가져오는 중입니다...</string>
@@ -1131,7 +1184,13 @@
     <string name="text_sort">정렬</string>
     <string name="text_sort_by_last_update_time">최근 업데이트순 정렬</string>
     <string name="text_sort_by_name">이름순 정렬</string>
+    <string name="text_sort_by_name_asc">이름 (A-Z)</string>
     <string name="text_sort_by_package_size">패키지 크기순 정렬</string>
+    <string name="text_sort_by_path_asc">경로 (A-Z)</string>
+    <string name="text_sort_by_size_asc">크기 (작은순)</string>
+    <string name="text_sort_by_size_desc">크기 (큰순)</string>
+    <string name="text_sort_by_time_asc">시간 (오래된순)</string>
+    <string name="text_sort_by_time_desc">시간 (최신순)</string>
     <string name="text_source">원본</string>
     <string name="text_source_file_path">소스 코드 경로</string>
     <string name="text_special_permissions">특수 권한</string>
@@ -1162,10 +1221,15 @@
     <string name="text_timed_task">시간이 정한 작업</string>
     <string name="text_timed_task_backend_title">정시 작업 스케줄링 엔진</string>
     <string name="text_timed_task_timing">타이밍</string>
+    <string name="text_to_be_chosen">선택 대기</string>
     <string name="text_tools">도구</string>
+    <string name="text_total_size_colon_value">크기: %1$s</string>
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">투명 배경 런처 아이콘은 시스템에 의해 자동으로 마스킹되거나 배경이 추가될 수 있어 장치마다 실제 효과가 다를 수 있습니다</string>
+    <string name="text_trash">휴지통</string>
     <string name="text_tutorial">지도 시간</string>
     <string name="text_type">유형</string>
+    <string name="text_type_file">파일</string>
+    <string name="text_type_folder">폴더</string>
     <string name="text_unable_to_build_apk_as_autojs6_does_not_include_selected_abi">현재 버전의 AutoJs6 에 위의 ABI 가 포함되어 있지 않으므로 선택한 ABI \"%s\" 를 사용하여 패키지 응용 프로그램을 만들 수 없습니다.</string>
     <string name="text_unavailable">사용할 수 없음</string>
     <string name="text_unavailable_abi_for">ABI \"%s\" 를 사용할 수 없습니다</string>
@@ -1174,15 +1238,15 @@
     <string name="text_under_development_title">@string/text_under_development</string>
     <string name="text_undo">실행 취소</string>
     <string name="text_undo_simplified">뒤</string>
-    <string name="text_uninstall">Uninstall</string>
+    <string name="text_uninstall">삭제</string>
     <string name="text_unknown">알 수 없음</string>
     <string name="text_unknown_author_for_plugin">알 수 없는 작성자</string>
     <string name="text_unknown_description_for_plugin">알 수 없는 설명</string>
     <string name="text_unknown_title_for_plugin">알 수 없는 제목</string>
     <string name="text_unknown_version_for_plugin">알 수 없는 버전</string>
     <string name="text_unverified">미확인</string>
-    <string name="text_updatable">Updatable</string>
-    <string name="text_update">Update</string>
+    <string name="text_updatable">업데이트 가능</string>
+    <string name="text_update">업데이트</string>
     <string name="text_updates">업데이트</string>
     <string name="text_updates_checked_states_cleared">확인 된 상태가 지워졌습니다</string>
     <string name="text_updates_snack_bar_act_later">나중</string>
@@ -1210,7 +1274,10 @@
     <string name="text_version">버전</string>
     <string name="text_version_code">버전 코드</string>
     <string name="text_version_code_with_computing" tools:ignore="TypographyEllipsis">버전 코드 (계산 중...)</string>
-    <string name="text_version_histories">버전 기록</string>
+    <string name="text_version_count_colon_value">버전: %1$s</string>
+    <string name="text_version_history">버전 기록</string>
+    <string name="text_version_history_restore_does_not_auto_save_to_disk">복원하면 편집기 내용만 변경됩니다. 파일에 자동으로 저장되지 않습니다. 저장 버튼을 수동으로 눌러 주세요.</string>
+    <string name="text_version_history_restore_will_overwrite_file">복원하면 파일 내용이 덮어써집니다.\n경로: %1$s</string>
     <string name="text_version_info">버전 정보</string>
     <string name="text_version_name">버전 이름</string>
     <string name="text_version_name_with_computing" tools:ignore="TypographyEllipsis">버전 이름 (계산 중...)</string>
@@ -1225,28 +1292,4 @@
     <string name="text_write_secure_settings">보안 설정을 작성하십시오</string>
     <string name="text_write_system_settings">시스템 설정을 작성하십시오</string>
     <string name="text_xiaomi_background_popup_permission">백그라운드 팝업</string>
-    <string name="error_refresh_failed">새로고침에 실패했습니다</string>
-    <string name="error_save_failed">저장에 실패했습니다</string>
-    <string name="text_draft_file_path">초안 경로</string>
-    <string name="dialog_button_copy_path">복사</string>
-    <string name="dialog_button_save_as">다른 이름으로 저장</string>
-    <string name="text_version_history">버전 기록</string>
-    <string name="text_no_version_history">버전 기록 없음</string>
-    <string name="text_version_history_restore_does_not_auto_save_to_disk">복원하면 편집기 내용만 변경됩니다. 파일에 자동으로 저장되지 않습니다. 저장 버튼을 수동으로 눌러 주세요.</string>
-    <string name="item_move_to_trash">휴지통으로 이동</string>
-    <string name="item_delete_permanently">영구 삭제</string>
-    <string name="text_moved_to_trash">휴지통으로 이동했습니다</string>
-    <string name="text_choose_delete_strategy">삭제 방식 선택</string>
-    <string name="text_trash">휴지통</string>
-    <string name="text_choose_restore_path">복원 경로 선택</string>
-    <string name="text_restore_to_original_path">원래 경로로 복원</string>
-    <string name="text_restore_to_specified_path">지정한 경로로 복원</string>
-    <string name="text_path_colon_value">경로: %1$s</string>
-    <string name="text_file_name_colon_value">파일 이름: %1$s</string>
-    <string name="dialog_button_choose_path">선택</string>
-    <string name="text_overwrite">덮어쓰기</string>
-    <string name="text_auto_rename">자동 이름 변경</string>
-    <string name="text_no_data">데이터 없음</string>
-    <string name="error_invalid_path">잘못된 경로: %1$s</string>
-    <string name="text_version_history_restore_will_overwrite_file">복원하면 파일 내용이 덮어써집니다.\n경로: %1$s</string>
 </resources>
