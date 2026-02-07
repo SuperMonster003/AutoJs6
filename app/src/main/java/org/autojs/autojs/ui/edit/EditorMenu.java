@@ -2,15 +2,17 @@ package org.autojs.autojs.ui.edit;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.net.Uri;
 import android.text.InputType;
 import android.text.TextUtils;
+import android.view.Menu;
 import android.view.MenuItem;
 import androidx.annotation.Nullable;
 import com.afollestad.materialdialogs.MaterialDialog;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import org.autojs.autojs.util.DialogUtils;
 import org.autojs.autojs.core.pref.Language;
 import org.autojs.autojs.core.pref.Pref;
-import org.autojs.autojs.util.MaterialDialogUtils;
 import org.autojs.autojs.model.indices.AndroidClass;
 import org.autojs.autojs.model.indices.ClassSearchingItem;
 import org.autojs.autojs.script.JavaScriptFileSource;
@@ -35,18 +37,56 @@ import static org.autojs.autojs.util.StringUtils.key;
 /**
  * Created by Stardust on Sep 28, 2017.
  */
-@SuppressWarnings("ResultOfMethodCallIgnored")
+@SuppressWarnings({"ResultOfMethodCallIgnored", "unused"})
 @SuppressLint("CheckResult")
 public class EditorMenu {
 
     private final EditorView mEditorView;
     private final Context mContext;
     private final CodeEditor mEditor;
+    private final boolean mReadOnly;
 
     public EditorMenu(EditorView editorView) {
+        this(editorView, false);
+    }
+
+    public EditorMenu(EditorView editorView, boolean readOnly) {
         mEditorView = editorView;
         mContext = editorView.getContext();
         mEditor = editorView.editor;
+        mReadOnly = readOnly;
+    }
+
+    public void prepareOptionsMenu(Menu menu) {
+        if (menu == null) {
+            return;
+        }
+        if (!mReadOnly) {
+            return;
+        }
+        setMenuItemInvisible(menu, R.id.action_find_or_replace);
+        setMenuItemInvisible(menu, R.id.action_copy_line);
+        setMenuItemInvisible(menu, R.id.action_paste);
+        setMenuItemInvisible(menu, R.id.action_delete_line);
+        setMenuItemInvisible(menu, R.id.action_clear);
+        setMenuItemInvisible(menu, R.id.action_comment);
+        setMenuItemInvisible(menu, R.id.action_beautify);
+        setMenuItemInvisible(menu, R.id.action_jump);
+        setMenuItemInvisible(menu, R.id.action_debug);
+        setMenuItemInvisible(menu, R.id.action_build_apk);
+        setMenuItemInvisible(menu, R.id.action_console);
+        setMenuItemInvisible(menu, R.id.action_import_java_class);
+        setMenuItemInvisible(menu, R.id.action_file_details);
+        setMenuItemInvisible(menu, R.id.action_version_history);
+        setMenuItemInvisible(menu, R.id.action_fx_keyboard);
+        setMenuItemInvisible(menu, R.id.action_open_by_other_apps);
+    }
+
+    private void setMenuItemInvisible(Menu menu, int itemId) {
+        MenuItem item = menu.findItem(itemId);
+        if (item != null) {
+            item.setVisible(false);
+        }
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -75,7 +115,7 @@ public class EditorMenu {
                     .content(R.string.hint_long_click_run_to_debug)
                     .positiveText(R.string.dialog_button_dismiss)
                     .positiveColorRes(R.color.dialog_button_default);
-            MaterialDialogUtils.widgetThemeColor(builder);
+            DialogUtils.widgetThemeColor(builder);
             builder.show();
             return tryDoing(mEditorView::debug);
         }
@@ -216,7 +256,22 @@ public class EditorMenu {
     }
 
     private void startBuildApkActivity() {
-        BuildActivity.launch(mContext, mEditorView.uri.getPath());
+        Uri uri = mEditorView.getUri();
+        String path;
+        if (uri == null) {
+            path = null;
+        } else {
+            path = uri.getPath();
+        }
+        if (TextUtils.isEmpty(path)) {
+            DialogUtils.buildAndShowAdaptive(new MaterialDialog.Builder(mContext)
+                    .title(R.string.text_prompt)
+                    .content(R.string.error_unable_to_package_application_as_current_file_path_is_unknown)
+                    .positiveText(R.string.dialog_button_dismiss)
+                    .positiveColorRes(R.color.dialog_button_default)::build);
+            return;
+        }
+        BuildActivity.launch(mContext, path);
     }
 
     private void setPinchToZoomStrategy() {
@@ -256,7 +311,7 @@ public class EditorMenu {
                 .onPositive((dialog, which) -> dialog.dismiss())
                 .autoDismiss(false);
 
-        MaterialDialogUtils.choiceWidgetThemeColor(builder);
+        DialogUtils.choiceWidgetThemeColor(builder);
 
         // TODO by SuperMonster003 on Oct 17, 2022.
         //  ! Implementation for "scale view".
@@ -338,12 +393,26 @@ public class EditorMenu {
         builder.positiveColorRes(R.color.dialog_button_attraction);
         builder.negativeText(R.string.dialog_button_cancel);
         builder.negativeColorRes(R.color.dialog_button_default);
-        MaterialDialogUtils.widgetThemeColor(builder);
+        DialogUtils.widgetThemeColor(builder);
         builder.show();
     }
 
     private void showFileDetails() {
-        var path = mEditorView.uri.getPath();
+        Uri uri = mEditorView.getUri();
+        String path;
+        if (uri != null) {
+            path = uri.getPath();
+        } else {
+            path = null;
+        }
+        if (TextUtils.isEmpty(path)) {
+            DialogUtils.buildAndShowAdaptive(new MaterialDialog.Builder(mContext)
+                    .title(R.string.text_prompt)
+                    .content(R.string.error_unable_to_display_file_details_as_current_file_path_is_unknown)
+                    .positiveText(R.string.dialog_button_dismiss)
+                    .positiveColorRes(R.color.dialog_button_default)::build);
+            return;
+        }
         EditableFileInfoDialogManager.showEditableFileInfoDialog(mContext, new File(path), mEditor::getText);
     }
 

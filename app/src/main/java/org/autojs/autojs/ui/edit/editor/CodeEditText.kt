@@ -33,7 +33,11 @@ import android.os.Parcelable
 import android.text.Layout
 import android.util.AttributeSet
 import android.view.Gravity
+import android.view.KeyEvent
 import android.view.MotionEvent
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputConnection
+import android.view.inputmethod.InputConnectionWrapper
 import android.widget.TextViewHelper
 import androidx.appcompat.widget.AppCompatEditText
 import androidx.core.graphics.withTranslation
@@ -68,6 +72,14 @@ class CodeEditText : AppCompatEditText {
     private var mDebuggingLine = -1
     private var mCursorChangeCallbacks: CopyOnWriteArrayList<CursorChangeCallback>? = null
 
+    // Read-only state.
+    // zh-CN: 只读状态.
+    private var mReadOnly = false
+
+    // Backup of the original KeyListener, used to restore editable behavior.
+    // zh-CN: 备份原始 KeyListener, 用于恢复可编辑行为.
+    private var mOriginalKeyListener = keyListener
+
     private val currentLine: Int
         get() = layout?.let { LayoutHelper.getLineOfChar(it, selectionStart) } ?: -1
 
@@ -99,6 +111,86 @@ class CodeEditText : AppCompatEditText {
             importantForAutofill = IMPORTANT_FOR_AUTOFILL_NO
         }
         mCursorChangeCallbacks = CopyOnWriteArrayList()
+
+        // Ensure selection is possible by default.
+        // zh-CN: 默认确保可以进行文本选择.
+        setTextIsSelectable(true)
+        isLongClickable = true
+    }
+
+    // Public API to toggle read-only mode.
+    // zh-CN: 切换只读模式的公开接口.
+    fun setReadOnly(readOnly: Boolean) {
+        if (mReadOnly == readOnly) return
+        mReadOnly = readOnly
+
+        if (readOnly) {
+            // Keep enabled/focusable so the user can select and copy text.
+            // zh-CN: 保持 enabled/focusable, 让用户可以选择并复制文本.
+            isEnabled = true
+            isFocusable = true
+            isFocusableInTouchMode = true
+            setTextIsSelectable(true)
+            isLongClickable = true
+            isCursorVisible = true
+
+            // Disable soft keyboard editing by removing KeyListener.
+            // zh-CN: 通过移除 KeyListener 禁用软键盘编辑.
+            if (mOriginalKeyListener == null) {
+                mOriginalKeyListener = keyListener
+            }
+            keyListener = null
+
+            showSoftInputOnFocus = false
+        } else {
+            // Restore editable behavior.
+            // zh-CN: 恢复可编辑行为.
+            keyListener = mOriginalKeyListener
+            showSoftInputOnFocus = true
+        }
+    }
+
+    override fun onCreateInputConnection(outAttrs: EditorInfo): InputConnection? {
+        val ic = super.onCreateInputConnection(outAttrs) ?: return null
+        if (!mReadOnly) return ic
+
+        // Block all text-mutating operations at the InputConnection layer.
+        // zh-CN: 在 InputConnection 层阻止所有会修改文本的操作.
+        return object : InputConnectionWrapper(ic, true) {
+            override fun commitText(text: CharSequence?, newCursorPosition: Int): Boolean = false
+            override fun setComposingText(text: CharSequence?, newCursorPosition: Int): Boolean = false
+            override fun finishComposingText(): Boolean = false
+            override fun deleteSurroundingText(beforeLength: Int, afterLength: Int): Boolean = false
+            override fun deleteSurroundingTextInCodePoints(beforeLength: Int, afterLength: Int): Boolean = false
+        }
+    }
+
+    override fun onTextContextMenuItem(id: Int): Boolean {
+        if (mReadOnly) {
+            // Allow copy/select actions, block cut/paste/replace actions.
+            // zh-CN: 允许复制/选择相关操作, 阻止剪切/粘贴/替换等修改操作.
+            when (id) {
+                android.R.id.cut,
+                android.R.id.paste,
+                android.R.id.pasteAsPlainText,
+                android.R.id.replaceText -> return false
+            }
+        }
+        return super.onTextContextMenuItem(id)
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
+        if (mReadOnly) {
+            // Block hardware-keyboard editing shortcuts.
+            // zh-CN: 阻止硬件键盘的编辑快捷键.
+            if (keyCode == KeyEvent.KEYCODE_DEL || keyCode == KeyEvent.KEYCODE_FORWARD_DEL) {
+                return true
+            }
+            if (event.isCtrlPressed && (keyCode == KeyEvent.KEYCODE_V || keyCode == KeyEvent.KEYCODE_X)) {
+                return true
+            }
+        }
+        return super.onKeyDown(keyCode, event)
     }
 
     @SuppressLint("WrongConstant")
@@ -237,22 +329,31 @@ class CodeEditText : AppCompatEditText {
             // Draw code
 
             val lineStart = layout.getLineStart(line)
-            val lineVisibleEnd = layout.getLineVisibleEnd(line)
+
+            // Never draw line-break control characters.
+            // zh-CN: 永远不要绘制换行等控制字符.
+            val safeText = text ?: continue
+            var lineEnd = layout.getLineEnd(line).coerceAtMost(safeText.length)
+            while (lineEnd > lineStart) {
+                val ch = safeText[lineEnd - 1]
+                if (ch == '\n' || ch == '\r') {
+                    lineEnd--
+                } else {
+                    break
+                }
+            }
 
             if (lineStart >= textLength) continue
-            if (lineVisibleEnd > textLength) continue
+            if (lineEnd > textLength) continue
 
-            // @Reference to LYS86 (https://github.com/LYS86) by SuperMonster003 on Apr 17, 2025.
-            //  ! https://github.com/LYS86/AutoJs/blob/05a7e48a8d5b0c6207b3d2974f762c050156298c/app/src/main/java/org/autojs/autojs/ui/edit/editor/CodeEditText.java#L232
-            if (lineStart == lineVisibleEnd) continue
+            // If this is an empty line (or the line only contains line-break chars), skip drawing.
+            // zh-CN: 如果这是空白行(或该行只包含换行字符), 则跳过绘制.
+            if (lineStart >= lineEnd) continue
 
-            val lineEnd = lineVisibleEnd.coerceAtMost(highlightTokens.colors.size)
+            val localColors = highlightTokens.colors
 
             val visibleCharStart = getVisibleCharIndex(paint, scrollX, lineStart, lineEnd)
             var visibleCharEnd = getVisibleCharIndex(paint, scrollX + mParentScrollView!!.width, lineStart, lineEnd) + 1
-
-            val safeText = text ?: continue
-            val localColors = highlightTokens.colors
 
             if (visibleCharStart >= visibleCharEnd) continue
             if (visibleCharStart >= safeText.length) continue
@@ -290,7 +391,7 @@ class CodeEditText : AppCompatEditText {
             }
             paint.color = previousColor
 
-            visibleCharEnd = visibleCharEnd.coerceAtMost(textLength)
+            visibleCharEnd = minOf(visibleCharEnd.coerceAtMost(textLength), lineEnd)
             if (previousColorPos >= visibleCharEnd) continue
 
             val currentText = text ?: continue

@@ -28,8 +28,6 @@ import org.autojs.autojs.app.OnActivityResultDelegate.DelegateHost
 import org.autojs.autojs.core.permission.OnRequestPermissionsResultCallback
 import org.autojs.autojs.core.permission.PermissionRequestProxyActivity
 import org.autojs.autojs.core.permission.RequestPermissionCallbacks
-import org.autojs.autojs.util.ViewUtils.setOnTitleViewClickListener
-import org.autojs.autojs.util.ViewUtils.titleView
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.storage.file.TmpScriptFiles
 import org.autojs.autojs.theme.widget.ThemeColorToolbar
@@ -40,6 +38,8 @@ import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.Observers
 import org.autojs.autojs.util.ViewUtils.onceGlobalLayout
 import org.autojs.autojs.util.ViewUtils.setMenuIconsColorByThemeColorLuminance
+import org.autojs.autojs.util.ViewUtils.setOnTitleViewClickListener
+import org.autojs.autojs.util.ViewUtils.titleView
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ActivityEditBinding
 import java.io.File
@@ -50,6 +50,8 @@ import java.io.IOException
  * Modified by SuperMonster003 as of Jan 21, 2023.
  */
 open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyActivity {
+
+    private var mReadOnly: Boolean = false
 
     private val mOnBackPressedCallback = object : OnBackPressedCallback(true) {
 
@@ -85,12 +87,17 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
 
         super.onCreate(savedInstanceState)
 
+        mReadOnly = intent.getBooleanExtra(EditorView.EXTRA_READ_ONLY, false)
+
         val binding = ActivityEditBinding.inflate(layoutInflater).also { setContentView(it.root) }
         mToolbar = findViewById<ThemeColorToolbar>(R.id.toolbar).apply {
             setTitleTextAppearance(this@EditActivity, R.style.TextAppearanceEditorTitle)
             setOnTitleViewClickListener {
-                EditableFileInfoDialogManager.showEditableFileInfoDialog(this@EditActivity, mEditorView.uri.path?.let { File(it) }) {
-                    mEditorView.editor.text
+                val path = mEditorView.uri?.path
+                if (path != null) {
+                    EditableFileInfoDialogManager.showEditableFileInfoDialog(this@EditActivity, File(path)) {
+                        mEditorView.editor.text
+                    }
                 }
             }
         }
@@ -99,7 +106,7 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(Observers.emptyConsumer()) { ex: Throwable -> onLoadFileError(ex.message) }
         }
-        mEditorMenu = EditorMenu(mEditorView)
+        mEditorMenu = EditorMenu(mEditorView, mReadOnly)
         mNewTask = intent.flags and Intent.FLAG_ACTIVITY_NEW_TASK != 0
         setUpToolbar()
 
@@ -128,6 +135,11 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
             toolbar.onceGlobalLayout { toolbar.titleView?.adjustTitleTextView() }
         }
         return true
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
+        mEditorMenu.prepareOptionsMenu(menu)
+        return super.onPrepareOptionsMenu(menu)
     }
 
     private fun TextView.adjustTitleTextView() = this.post {
@@ -247,7 +259,9 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
         val menu = mode.menu
         val item = menu[menu.size - 1]
 
-        addMenuItem(menu, item.groupId, R.id.action_delete_line, 10000, R.string.text_delete_line) { mEditorMenu.deleteLine() }
+        if (!mReadOnly) {
+            addMenuItem(menu, item.groupId, R.id.action_delete_line, 10000, R.string.text_delete_line) { mEditorMenu.deleteLine() }
+        }
         addMenuItem(menu, item.groupId, R.id.action_copy_line, 20000, R.string.text_copy_line) { mEditorMenu.copyLine() }
 
         super.onActionModeStarted(mode)

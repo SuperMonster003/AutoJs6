@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.7.0": {
-      "released_date": "2026/02/04",
+      "released_date": "2026/02/08",
       "feature": [
         "插件中心功能, 支持插件的安装/卸载/更新等操作 (入口: 主页抽屉按钮/主页标签页)",
         "版本历史功能, 支持查看/恢复可编辑文件的历史版本 (入口: 主页抽屉按钮/文件管理器菜单/代码编辑器菜单)",
@@ -96,6 +96,9 @@
         "发行历史页面部分系统因字体差别导致统计数据显示不完整的问题",
         "部分设备无法正常初始化 MLKit Google OCR 的问题 (试修) _[`issue #8`](http://issues.autojs6.com/8#issuecomment-3117061768)_",
         "部分设备无法正常触发文件管理器功能按钮点击事件的问题 (试修) _[`issue #465`](http://issues.autojs6.com/465)_",
+        "部分设备代码编辑器空行显示方框字符的问题 (试修)",
+        "代码编辑器在只读模式下依然可以编辑代码内容的问题",
+        "代码编辑器在只读模式下点击标题区域及部分菜单项导致应用崩溃的问题",
         "ErrorDialogActivity 可能无法正常启动或短时间自动消失的问题 _[`issue #479`](http://issues.autojs6.com/479)_ _[`issue #471`](http://issues.autojs6.com/471)_ _[`issue #414`](http://issues.autojs6.com/414)_ _[`issue #340`](http://issues.autojs6.com/340#issuecomment-2973485826)_",
         "Canvas 构造函数可接受的参数类型错误 _[`issue #402`](http://issues.autojs6.com/402)_",
         "崩溃报告页面复制详细信息功能失效的问题",
