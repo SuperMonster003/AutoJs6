@@ -3,14 +3,13 @@ package org.autojs.autojs.core.record;
 import android.content.Context;
 import android.view.ContextThemeWrapper;
 import com.afollestad.materialdialogs.MaterialDialog;
-import org.autojs.autojs.app.DialogUtils;
+import org.autojs.autojs.util.DialogUtils;
 import org.autojs.autojs.app.GlobalAppContext;
 import org.autojs.autojs.core.pref.Pref;
 import org.autojs.autojs.core.record.inputevent.InputEventRecorder;
 import org.autojs.autojs.core.record.inputevent.InputEventToAutoFileRecorder;
 import org.autojs.autojs.core.record.inputevent.InputEventToRootAutomatorRecorder;
 import org.autojs.autojs.core.record.inputevent.TouchRecorder;
-import org.autojs.autojs.util.MaterialDialogUtils;
 import org.autojs.autojs.ui.common.ScriptOperations;
 import org.autojs.autojs.util.ClipboardUtils;
 import org.autojs.autojs.util.ViewUtils;
@@ -183,8 +182,8 @@ public class GlobalActionRecorder implements Recorder.OnStateChangedListener {
                 .positiveText(R.string.dialog_button_confirm)
                 .positiveColorRes(R.color.dialog_button_attraction)
                 .canceledOnTouchOutside(false);
-        MaterialDialogUtils.choiceWidgetThemeColor(builder);
-        DialogUtils.showAdaptive(builder.build());
+        DialogUtils.choiceWidgetThemeColor(builder);
+        DialogUtils.buildAndShowAdaptive(builder::build);
     }
 
     private String getString(int res) {

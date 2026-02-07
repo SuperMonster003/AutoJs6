@@ -29,7 +29,7 @@ import org.autojs.autojs.network.download.DownloadManager;
 import org.autojs.autojs.network.entity.ExtendedVersionInfo;
 import org.autojs.autojs.network.entity.VersionInfo;
 import org.autojs.autojs.tool.SimpleObserver;
-import org.autojs.autojs.ui.settings.DisplayVersionHistoriesActivity;
+import org.autojs.autojs.ui.settings.DisplayReleaseHistoryActivity;
 import org.autojs.autojs.util.AndroidUtils;
 import org.autojs.autojs.util.IntentUtils;
 import org.autojs.autojs.util.IntentUtils.SnackExceptionHolder;
@@ -857,8 +857,8 @@ public class UpdateChecker {
                                                 })
                                                 .show();
                                     }),
-                                    new MaterialDialog.OptionMenuItemSpec(context.getString(R.string.dialog_button_version_histories), parentDialog -> {
-                                        DisplayVersionHistoriesActivity.launch(context);
+                                    new MaterialDialog.OptionMenuItemSpec(context.getString(R.string.dialog_button_release_history), parentDialog -> {
+                                        DisplayReleaseHistoryActivity.launch(context);
                                     })
                             ))
                             .content(R.string.text_retrieving_changelog)

@@ -38,7 +38,7 @@ import org.autojs.autojs.runtime.api.WrappedShizuku
 import org.autojs.autojs.ui.enhancedfloaty.FloatyService
 import org.autojs.autojs.ui.floating.FloatyWindowManger
 import org.autojs.autojs.util.ContextUtils.findActivity
-import org.autojs.autojs.util.MaterialDialogUtils.choiceWidgetThemeColor
+import org.autojs.autojs.util.DialogUtils.choiceWidgetThemeColor
 import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs6.R
 import java.io.File

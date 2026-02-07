@@ -2,14 +2,22 @@ package org.autojs.autojs.storage.history
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.text.TextUtils
+import android.view.Gravity
 import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
-import org.autojs.autojs.app.DialogUtils
-import org.autojs.autojs.app.DialogUtils.setActionButtonText
+import org.autojs.autojs.model.explorer.ExplorerDirPage
+import org.autojs.autojs.model.explorer.Explorers
+import org.autojs.autojs.model.script.ScriptFile
 import org.autojs.autojs.ui.filechooser.FileChooserDialogBuilder
-import org.autojs.autojs.util.MaterialDialogUtils.choiceWidgetThemeColor
+import org.autojs.autojs.util.DialogUtils
+import org.autojs.autojs.util.DialogUtils.OperationAbortedException
+import org.autojs.autojs.util.DialogUtils.OperationController
+import org.autojs.autojs.util.DialogUtils.ProgressDialogSession
+import org.autojs.autojs.util.DialogUtils.choiceWidgetThemeColor
+import org.autojs.autojs.util.DialogUtils.setActionButtonText
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 import java.io.File
@@ -20,67 +28,108 @@ import java.util.regex.Pattern
  * zh-CN: 回收站条目的恢复流程控制器.
  *
  * Created by JetBrains AI Assistant (GPT-5.2) on Feb 4, 2026.
+ * Modified by SuperMonster003 as of Feb 7, 2026.
  */
+@SuppressLint("CheckResult")
 class TrashRestoreController(private val context: Context) {
 
-    fun startRestoreFlow(item: TrashEntities.TrashItem) {
+    fun startRestoreFlow(
+        item: TrashEntities.TrashItem,
+        optionMenuItems: List<MaterialDialog.OptionMenuItemSpec> = emptyList(),
+        onFinished: (() -> Unit)? = null,
+    ) {
         val originalPath = item.originalPath
         val originalName = File(originalPath).name
 
         val selected = intArrayOf(0)
 
+        fun generateContent(context: Context, isUserChoice: Boolean): String {
+            val pathContent = if (isUserChoice) {
+                "[ ${context.getString(R.string.text_to_be_chosen)} ]"
+            } else originalPath.removeSuffix(originalName)
+
+            return listOf(
+                if (item.isDirectory) {
+                    context.getString(R.string.text_folder_colon_value, originalName)
+                } else {
+                    context.getString(R.string.text_file_colon_value, originalName)
+                },
+                context.getString(R.string.text_path_colon_value, pathContent),
+            ).joinToString("\n")
+        }
+
         DialogUtils.buildAndShowAdaptive {
             MaterialDialog.Builder(context)
                 .title(R.string.text_choose_restore_path)
-                .content(context.getString(R.string.text_path_colon_value, originalPath))
+                .options(optionMenuItems)
+                .content(generateContent(context, false))
                 .items(
                     context.getString(R.string.text_restore_to_original_path),
                     context.getString(R.string.text_restore_to_specified_path),
                 )
                 .itemsCallbackSingleChoice(0) { dialog, _, which, _ ->
                     selected[0] = which
-
-                    // Update content and positive button text dynamically.
-                    // zh-CN: 动态更新内容与确认按钮文本.
                     when (which) {
                         0 -> {
-                            dialog.setContent(context.getString(R.string.text_path_colon_value, originalPath))
+                            dialog.setContent(generateContent(context, isUserChoice = false))
                             dialog.setActionButtonText(DialogAction.POSITIVE, context.getString(R.string.dialog_button_confirm))
                         }
                         else -> {
-                            dialog.setContent(context.getString(R.string.text_file_name_colon_value, originalName))
+                            dialog.setContent(generateContent(context, isUserChoice = true))
                             dialog.setActionButtonText(DialogAction.POSITIVE, context.getString(R.string.dialog_button_choose_path))
                         }
                     }
                     true
                 }
+                .alwaysCallSingleChoiceCallback()
                 .choiceWidgetThemeColor()
                 .negativeText(R.string.dialog_button_cancel)
                 .negativeColorRes(R.color.dialog_button_default)
+                .onNegative { d, _ -> d.dismiss() }
                 .positiveText(R.string.dialog_button_confirm)
                 .positiveColorRes(R.color.dialog_button_attraction)
-                .onPositive { _, _ ->
+                .onPositive { d, _ ->
                     when (selected[0]) {
-                        0 -> restoreToOriginalPathWithConflictHandling(item)
-                        else -> chooseDirectoryThenRestore(item, originalName)
+                        0 -> restoreToOriginalPathWithConflictHandling(
+                            item = item,
+                            onRestore = { d.dismiss() },
+                            onFinished = onFinished,
+                        )
+                        else -> chooseDirectoryThenRestore(
+                            item = item,
+                            fileName = originalName,
+                            onRestore = { d.dismiss() },
+                            onFinished = onFinished,
+                        )
                     }
                 }
                 .cancelable(true)
+                .autoDismiss(false)
                 .build()
+                .apply {
+                    contentView?.apply {
+                        setLineSpacing(0f, 1.2f)
+                        setLines(3)
+                        minLines = 3
+                        maxLines = 9
+                        ellipsize = TextUtils.TruncateAt.MIDDLE
+                        gravity = Gravity.CENTER_VERTICAL
+                    }
+                }
         }
     }
 
-    private fun restoreToOriginalPathWithConflictHandling(item: TrashEntities.TrashItem) {
+    private fun restoreToOriginalPathWithConflictHandling(item: TrashEntities.TrashItem, onRestore: (() -> Unit)? = null, onFinished: (() -> Unit)? = null) {
         val dest = File(item.originalPath)
         val parent = dest.parentFile ?: run {
             ViewUtils.showToast(context, context.getString(R.string.error_invalid_path, item.originalPath), true)
             return
         }
-        restoreWithConflictHandling(item, parent, dest.name)
+        restoreWithConflictHandling(item, parent, dest.name, onRestore, onFinished)
     }
 
     @SuppressLint("CheckResult")
-    private fun chooseDirectoryThenRestore(item: TrashEntities.TrashItem, fileName: String) {
+    private fun chooseDirectoryThenRestore(item: TrashEntities.TrashItem, fileName: String, onRestore: (() -> Unit)? = null, onFinished: (() -> Unit)? = null) {
         FileChooserDialogBuilder(context)
             .title(R.string.dialog_button_choose_path)
             .dir(INTERNAL_STORAGE_ROOT)
@@ -89,18 +138,18 @@ class TrashRestoreController(private val context: Context) {
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({ dir ->
-                restoreWithConflictHandling(item, File(dir.path), fileName)
+                restoreWithConflictHandling(item, File(dir.path), fileName, onRestore, onFinished)
             }, { e ->
                 e.printStackTrace()
                 ViewUtils.showToast(context, e.message, true)
             })
     }
 
-    private fun restoreWithConflictHandling(item: TrashEntities.TrashItem, destDir: File, fileName: String) {
+    private fun restoreWithConflictHandling(item: TrashEntities.TrashItem, destDir: File, fileName: String, onRestore: (() -> Unit)? = null, onFinished: (() -> Unit)? = null) {
         val dest = File(destDir, fileName)
 
         if (!dest.exists()) {
-            restoreNow(item, dest)
+            restoreNow(item, dest, onRestore, onFinished)
             return
         }
 
@@ -116,31 +165,96 @@ class TrashRestoreController(private val context: Context) {
                 .neutralColorRes(R.color.dialog_button_hint)
                 .onNeutral { _, _ ->
                     val newName = generateNextIndexedName(destDir, fileName)
-                    restoreNow(item, File(destDir, newName))
+                    restoreNow(item, File(destDir, newName), onRestore, onFinished)
                 }
                 .positiveText(R.string.text_overwrite)
                 .positiveColorRes(R.color.dialog_button_caution)
                 .onPositive { _, _ ->
-                    restoreNow(item, dest)
+                    restoreNow(item, dest, onRestore, onFinished)
                 }
                 .cancelable(true)
                 .build()
         }
     }
 
-    private fun restoreNow(item: TrashEntities.TrashItem, dest: File) {
+    private fun restoreNow(item: TrashEntities.TrashItem, dest: File, onRestore: (() -> Unit)? = null, onFinished: (() -> Unit)? = null) {
+        val destExistsBeforeRestore = dest.exists()
         Schedulers.io().scheduleDirect {
             runCatching {
-                TrashRepository(context.applicationContext).restoreTrashItemToPath(item, dest)
+                AndroidSchedulers.mainThread().scheduleDirect {
+                    onRestore?.invoke()
+                }
+
+                withControllableProgressDialog { operationController ->
+                    TrashRepository(context.applicationContext).restoreTrashItemToPath(item, dest, operationController)
+
+                    // Notify Explorer to refresh the parent directory after restore.
+                    // zh-CN: 恢复成功后通知 Explorer 刷新目标父目录.
+                    notifyExplorerParentDirChanged(dest)
+                }
+
                 AndroidSchedulers.mainThread().scheduleDirect {
                     ViewUtils.showToast(context, context.getString(R.string.text_done), true)
+                    onFinished?.invoke()
                 }
-            }.onFailure {
-                it.printStackTrace()
-                AndroidSchedulers.mainThread().scheduleDirect {
-                    ViewUtils.showToast(context, it.message, true)
+            }.onFailure { e ->
+                when (e) {
+                    is OperationAbortedException -> {
+                        AndroidSchedulers.mainThread().scheduleDirect {
+                            ViewUtils.showToast(context, context.getString(R.string.text_operation_aborted), false)
+                        }
+                        if (!destExistsBeforeRestore && dest.exists()) {
+                            dest.deleteRecursively()
+                        }
+                    }
+                    else -> {
+                        e.printStackTrace()
+                        AndroidSchedulers.mainThread().scheduleDirect {
+                            ViewUtils.showToast(context, e.message, true)
+                        }
+                    }
                 }
             }
+        }
+    }
+
+    @Throws(OperationAbortedException::class)
+    private fun withControllableProgressDialog(operation: (OperationController) -> Unit) {
+        val controller = OperationController()
+        val session = ProgressDialogSession(controller)
+        try {
+            val builder = MaterialDialog.Builder(context)
+                .title(R.string.text_restore)
+                .content(R.string.text_restoring)
+                .negativeText(R.string.dialog_button_abort)
+                .negativeColorRes(R.color.dialog_button_caution)
+                .onNegative { d, _ ->
+                    controller.cancel()
+                }
+                .progress(true, 0)
+                .progressIndeterminateStyle(true)
+                .cancelable(false)
+                .canceledOnTouchOutside(false)
+
+            session.scheduleShow(builder)
+
+            controller.throwIfCancelled()
+            operation(controller)
+            controller.throwIfCancelled()
+        } catch (e: OperationAbortedException) {
+            throw e
+        } catch (e: Throwable) {
+            e.printStackTrace()
+        } finally {
+            session.dismissSafely()
+        }
+    }
+
+    private fun notifyExplorerParentDirChanged(dest: File) {
+        runCatching {
+            val parent = dest.parentFile ?: return
+            val page = ExplorerDirPage(ScriptFile(parent.path), null)
+            Explorers.workspace().notifyChildrenChanged(page)
         }
     }
 

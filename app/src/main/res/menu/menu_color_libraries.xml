@@ -12,7 +12,7 @@
     <item
         android:id="@+id/action_search_color"
         android:title="@string/text_search_color"
-        android:icon="@drawable/ic_search_black_48dp"
+        android:icon="@drawable/ic_search_smaller_black_48dp"
         android:imeOptions="actionSearch"
         android:inputType="text"
         app:actionViewClass="androidx.appcompat.widget.SearchView"
@@ -25,8 +25,8 @@
         app:showAsAction="never" />
 
     <item
-        android:id="@+id/action_show_all_histories"
-        android:title="@string/text_all_histories"
+        android:id="@+id/action_show_all_history_entries"
+        android:title="@string/text_all_history_entries"
         app:showAsAction="never" />
 
     <item

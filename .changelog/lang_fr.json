@@ -25,7 +25,7 @@
     "v6.6.3": {
       "released_date": "2025/05/27",
       "feature": [
-        "Fonction historique des versions : consulter les journaux de mise à jour multilingues et les statistiques",
+        "Fonctionnalité d'historique des versions : visualisation des changelogs de versions multilingues et des statistiques",
         "Méthode timers.keepAlive (désormais globale) pour maintenir le script actif",
         "Méthodes d'écoute d'événements telles que engines.on('start/stop/error', callback) pour les événements globaux du moteur",
         "Méthode images.detectMultiColors pour la vérification de couleurs multipoints _[`issue #374`](http://issues.autojs6.com/374)_",
@@ -40,7 +40,7 @@
       "fix": [
         "Le contenu de la documentation en ligne dans l'onglet Docs et l'activité Docs pouvait être recouvert par la barre de navigation système",
         "Sur certaines pages, cliquer sur les boutons de la Toolbar pouvait déclencher par erreur l'événement de clic sur le titre",
-        "Les lignes vides dans l'éditeur de code affichaient des carrés sur certains appareils",
+        "Les lignes vides dans l'éditeur de code affichaient des carrés sur certains appareils (solution provisoire)",
         "La boîte de dialogue du sélecteur de couleurs dans les paramètres de couleur du thème pouvait se superposer indéfiniment",
         "La touche volume + ne stoppait pas tous les scripts lorsque le service d'accessibilité était désactivé",
         "Chevauchement du clavier IME lors de l'édition d'un contenu de diffusion personnalisé dans la page des tâches planifiées",

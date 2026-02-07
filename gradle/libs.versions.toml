@@ -178,6 +178,7 @@ retrofit2-kotlin-coroutines-adapter = { module = "com.jakewharton.retrofit:retro
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
+room-rxjava2 = { module = "androidx.room:room-rxjava2", version.ref = "room" }
 roundedimageview = { module = "com.makeramen:roundedimageview", version.ref = "roundedimageview" }
 rxandroid = { module = "io.reactivex.rxjava2:rxandroid", version.ref = "rxandroid" }
 rxjava = { module = "io.reactivex.rxjava2:rxjava", version.ref = "rxjava" }

@@ -19,6 +19,6 @@
     <string name="cpv_custom">Особый</string>
     <string name="cpv_select">Выбрать</string>
     <string name="cpv_transparency">Прозрачность</string>
-    <string name="cpv_menu_item_histories">Истории</string>
+    <string name="cpv_menu_item_history">Истории</string>
     <string name="cpv_menu_item_reset_color_palette">Сбросить палитру</string>
 </resources>

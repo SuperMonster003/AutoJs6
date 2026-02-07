@@ -4,13 +4,11 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Environment;
-import android.os.SystemClock;
 import android.text.Editable;
 import android.text.InputType;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.pm.ShortcutManagerCompat;
@@ -21,7 +19,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.internal.functions.ObjectHelper;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.PublishSubject;
-import org.autojs.autojs.app.DialogUtils;
 import org.autojs.autojs.app.GlobalAppContext;
 import org.autojs.autojs.core.pref.Pref;
 import org.autojs.autojs.external.ScriptIntents;
@@ -40,14 +37,19 @@ import org.autojs.autojs.pio.PFiles;
 import org.autojs.autojs.pio.UncheckedIOException;
 import org.autojs.autojs.project.ProjectConfig;
 import org.autojs.autojs.storage.file.TmpScriptFiles;
+import org.autojs.autojs.storage.history.HistoryPrefs;
+import org.autojs.autojs.storage.history.HistoryRepository;
 import org.autojs.autojs.storage.history.TrashRepository;
 import org.autojs.autojs.ui.filechooser.FileChooserDialogBuilder;
 import org.autojs.autojs.ui.shortcut.ShortcutCreateActivity;
 import org.autojs.autojs.ui.timing.TimedTaskSettingActivity;
+import org.autojs.autojs.util.DialogUtils;
+import org.autojs.autojs.util.DialogUtils.OperationAbortedException;
+import org.autojs.autojs.util.DialogUtils.OperationController;
+import org.autojs.autojs.util.DialogUtils.ProgressDialogSession;
 import org.autojs.autojs.util.EnvironmentUtils;
 import org.autojs.autojs.util.FileUtils;
 import org.autojs.autojs.util.IntentUtils;
-import org.autojs.autojs.util.MaterialDialogUtils;
 import org.autojs.autojs.util.ShortcutUtils;
 import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs.util.WorkingDirectoryUtils;
@@ -65,43 +67,26 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.autojs.autojs.app.DialogUtils.fixCheckBoxGravity;
 import static org.autojs.autojs.model.explorer.ExplorerFileItem.isInSampleDir;
+import static org.autojs.autojs.util.DialogUtils.fixCheckBoxGravity;
 import static org.autojs.autojs.util.FileUtils.TYPE.JAVASCRIPT;
 import static org.autojs.autojs.util.RhinoUtils.isMainThread;
 import static org.autojs.autojs.util.ThreadUtils.runOnMain;
 
 /**
  * Created by Stardust on Jul 31, 2017.
- * Modified by JetBrains AI Assistant (GPT-5.2) as of Jan 31, 2026.
- * Modified by SuperMonster003 as of Feb 1, 2026.
+ * Modified by JetBrains AI Assistant (GPT-5.2) as of Feb 6, 2026.
+ * Modified by SuperMonster003 as of Feb 7, 2026.
  */
-@SuppressWarnings({"ResultOfMethodCallIgnored", "CodeBlock2Expr"})
+@SuppressWarnings({"ResultOfMethodCallIgnored", "CodeBlock2Expr", "unused"})
 @SuppressLint("CheckResult")
 public class ScriptOperations {
 
     private static final String LOG_TAG = "ScriptOperations";
-
-    // Minimum UI update interval for progress dialog, to reduce main-thread pressure.
-    // zh-CN: 进度对话框 UI 更新的最小间隔, 用于降低主线程压力.
-    private static final long PROGRESS_UPDATE_MIN_INTERVAL_MS = 50L;
-
-    // Delay before showing progress dialog to avoid flashing for fast operations.
-    // zh-CN: 显示进度对话框前的延迟, 用于避免快速操作导致的闪现.
-    private static final long PROGRESS_DIALOG_SHOW_DELAY_MS = 200L;
-
-    // Minimum duration to keep progress dialog visible once shown, to avoid flashing.
-    // zh-CN: 进度对话框一旦显示后的最短展示时长, 用于避免闪现.
-    private static final long PROGRESS_DIALOG_MIN_SHOW_MS = 300L;
-
-    // Progress max for large files (totalBytes > Integer.MAX_VALUE), higher means smoother progress.
-    // zh-CN: 大文件 (totalBytes > Integer.MAX_VALUE) 的进度最大值, 值越大进度越细腻.
-    private static final int PROGRESS_MAX_LARGE = 10_000;
 
     // Suffix for partial copy output file.
     // zh-CN: 复制过程的临时输出文件后缀.
@@ -168,7 +153,7 @@ public class ScriptOperations {
                 Scripts.edit(mContext, path);
             }
         } else {
-            showMessage(R.string.text_failed_to_create);
+            showMessage(R.string.error_failed_to_create);
         }
     }
 
@@ -225,12 +210,12 @@ public class ScriptOperations {
                             .positiveText(R.string.dialog_button_confirm)
                             .positiveColorRes(R.color.dialog_button_attraction)
                             .negativeText(R.string.dialog_button_back);
-                    MaterialDialogUtils.choiceWidgetThemeColor(builderDefaultPrefix);
+                    DialogUtils.choiceWidgetThemeColor(builderDefaultPrefix);
                     MaterialDialog dialogDefaultPrefix = builderDefaultPrefix.build();
                     DialogUtils.showAdaptive(dialogDefaultPrefix);
                 })
                 .autoDismiss(false);
-        MaterialDialogUtils.widgetThemeColor(builder);
+        DialogUtils.widgetThemeColor(builder);
         MaterialDialog dialog = builder.build();
         dialogRef.set(dialog);
 
@@ -327,7 +312,7 @@ public class ScriptOperations {
                         showMessage(R.string.text_already_created);
                         notifyFileCreated(new ScriptFile(newDir));
                     } else {
-                        showMessage(R.string.text_failed_to_create);
+                        showMessage(R.string.error_failed_to_create);
                     }
                 });
     }
@@ -367,7 +352,7 @@ public class ScriptOperations {
                     input.onComplete();
                 })
                 .canceledOnTouchOutside(false);
-        MaterialDialogUtils.widgetThemeColor(builder);
+        DialogUtils.widgetThemeColor(builder);
         DialogUtils.showAdaptive(builder.build());
         return input;
     }
@@ -395,7 +380,6 @@ public class ScriptOperations {
                     }
                     ExplorerFileItem newItem = item.rename(newName);
                     if (ObjectHelper.equals(newItem.toScriptFile(), item.toScriptFile())) {
-                        showMessage(R.string.error_cannot_rename);
                         throw new IOException();
                     }
                     notifyFileChanged(item, newItem);
@@ -434,12 +418,6 @@ public class ScriptOperations {
                             // zh-CN: 用于中止处理与刷新.
                             boolean destTouched = false;
 
-                            // Timestamp/progress/content state for throttling UI updates.
-                            // zh-CN: 用于节流 UI 更新的时间戳/进度/文本状态.
-                            final long[] lastProgressUpdateTime = new long[]{0L};
-                            final long[] lastProgressValue = new long[]{-1L};
-                            final long[] lastContentUpdateTime = new long[]{0L};
-
                             try {
                                 long totalBytes = computeTotalBytes(source);
 
@@ -456,11 +434,11 @@ public class ScriptOperations {
                                             totalBytes,
                                             (copied, total) -> {
                                                 controller.throwIfCancelled();
-                                                session.setProgressThrottled(copied, totalBytes, lastProgressUpdateTime, lastProgressValue);
+                                                session.setProgressThrottled(copied, totalBytes);
                                             },
                                             (currentFile) -> {
                                                 controller.throwIfCancelled();
-                                                session.setContentThrottled(toContentList(source, dest, currentFile), lastContentUpdateTime);
+                                                session.setContentThrottled(toContentList(source, dest, currentFile));
                                             },
                                             controller
                                     );
@@ -475,11 +453,11 @@ public class ScriptOperations {
                                             totalBytes,
                                             (copied, total) -> {
                                                 controller.throwIfCancelled();
-                                                session.setProgressThrottled(copied, totalBytes, lastProgressUpdateTime, lastProgressValue);
+                                                session.setProgressThrottled(copied, totalBytes);
                                             },
                                             (currentFile) -> {
                                                 controller.throwIfCancelled();
-                                                session.setContentThrottled(toContentList(source, dest, currentFile), lastContentUpdateTime);
+                                                session.setContentThrottled(toContentList(source, dest, currentFile));
                                             },
                                             controller
                                     );
@@ -494,7 +472,7 @@ public class ScriptOperations {
                                 // Cleanup and refresh when aborted.
                                 // zh-CN: 中止时清理并刷新.
                                 if (destTouched) {
-                                    notifyChildrenChangedAtItsParent(new ScriptFile(dest.getPath()));
+                                    notifyChildrenChangedAtItsParent(new ScriptFile(dest));
                                     if (isMove) {
                                         notifyChildrenChangedAtItsParent(source);
                                     }
@@ -529,18 +507,15 @@ public class ScriptOperations {
                 ? isMove ? R.string.text_move_folder : R.string.text_copy_folder
                 : isMove ? R.string.text_move_file : R.string.text_copy_file;
 
+        int contentRes = isMove ? R.string.text_moving : R.string.text_copying;
+
         MaterialDialog.Builder builder = new MaterialDialog.Builder(mContext)
                 .title(titleRes)
-                .content(R.string.ellipsis_six)
+                .content(contentRes)
                 .negativeText(R.string.dialog_button_abort)
                 .negativeColorRes(R.color.dialog_button_caution)
                 .onNegative((dialog, which) -> {
                     controller.cancel();
-                    try {
-                        dialog.setContent(mContext.getString(R.string.text_aborting));
-                    } catch (Throwable ignored) {
-                        /* Ignored. */
-                    }
                 })
                 .cancelable(false)
                 .canceledOnTouchOutside(false);
@@ -552,7 +527,7 @@ public class ScriptOperations {
         } else if (totalBytes > 0) {
             // Determinate progress in scaled units for huge files.
             // zh-CN: 对于超大文件使用缩放单位的确定性进度.
-            builder.progress(false, PROGRESS_MAX_LARGE, true);
+            builder.progress(false, DialogUtils.PROGRESS_MAX_LARGE, true);
         } else {
             builder.progress(true, 0);
         }
@@ -705,13 +680,13 @@ public class ScriptOperations {
             @NonNull File src,
             @NonNull File dst,
             long totalBytes,
-            @NonNull ProgressCallback callback,
+            @NonNull ProgressCallback progressCallback,
             @NonNull FileProgressCallback fileCallback,
             @NonNull OperationController controller
     ) throws IOException {
         controller.throwIfCancelled();
         long[] copied = new long[]{0L};
-        copyFileOrDirWithProgressInternal(src, dst, totalBytes, copied, callback, fileCallback, controller);
+        copyFileOrDirWithProgressInternal(src, dst, totalBytes, copied, progressCallback, fileCallback, controller);
     }
 
     private void copyFileOrDirWithProgressInternal(
@@ -719,13 +694,13 @@ public class ScriptOperations {
             @NonNull File dst,
             long totalBytes,
             @NonNull long[] copied,
-            @NonNull ProgressCallback callback,
-            @NonNull FileProgressCallback pathCallback,
+            @NonNull ProgressCallback progressCallback,
+            @NonNull FileProgressCallback fileCallback,
             @NonNull OperationController controller
     ) throws IOException {
         controller.throwIfCancelled();
 
-        pathCallback.onFile(dst);
+        fileCallback.onFile(dst);
 
         if (src.isDirectory()) {
             if (!dst.exists() && !dst.mkdirs()) {
@@ -736,12 +711,12 @@ public class ScriptOperations {
                 return;
             }
             for (File child : children) {
-                copyFileOrDirWithProgressInternal(child, new File(dst, child.getName()), totalBytes, copied, callback, pathCallback, controller);
+                copyFileOrDirWithProgressInternal(child, new File(dst, child.getName()), totalBytes, copied, progressCallback, fileCallback, controller);
             }
             return;
         }
 
-        copyFileWithProgressAtomic(src, dst, totalBytes, copied, callback, pathCallback, controller);
+        copyFileWithProgressAtomic(src, dst, totalBytes, copied, progressCallback, fileCallback, controller);
     }
 
     // Copy file with an atomic "partial file then rename" strategy, supports abort cleanup.
@@ -751,8 +726,8 @@ public class ScriptOperations {
             @NonNull File dst,
             long totalBytes,
             @NonNull long[] copied,
-            @NonNull ProgressCallback callback,
-            @NonNull FileProgressCallback pathCallback,
+            @NonNull ProgressCallback progressCallback,
+            @NonNull FileProgressCallback fileCallback,
             @NonNull OperationController controller
     ) throws IOException {
         controller.throwIfCancelled();
@@ -777,8 +752,8 @@ public class ScriptOperations {
                     fos.write(buffer, 0, read);
                     copied[0] += read;
 
-                    pathCallback.onFile(dst);
-                    callback.onProgress(copied[0], totalBytes);
+                    fileCallback.onFile(dst);
+                    progressCallback.onProgress(copied[0], totalBytes);
                 }
                 fos.getFD().sync();
             }
@@ -821,7 +796,7 @@ public class ScriptOperations {
             @NonNull File src,
             @NonNull File dst,
             long totalBytes,
-            @NonNull ProgressCallback callback,
+            @NonNull ProgressCallback progressCallback,
             @NonNull FileProgressCallback fileCallback,
             @NonNull OperationController controller
     ) throws IOException {
@@ -833,7 +808,7 @@ public class ScriptOperations {
             return;
         }
 
-        copyFileOrDirWithProgress(src, dst, totalBytes, callback, fileCallback, controller);
+        copyFileOrDirWithProgress(src, dst, totalBytes, progressCallback, fileCallback, controller);
 
         controller.throwIfCancelled();
 
@@ -980,7 +955,7 @@ public class ScriptOperations {
                     .negativeText(R.string.dialog_button_cancel)
                     .positiveText(R.string.dialog_button_confirm)
                     .positiveColorRes(R.color.dialog_button_caution);
-            MaterialDialogUtils.choiceWidgetThemeColor(builder);
+            DialogUtils.choiceWidgetThemeColor(builder);
             return builder.build();
         });
     }
@@ -1007,30 +982,22 @@ public class ScriptOperations {
 
     private void moveToTrashWithProgress(final ScriptFile scriptFile) {
         boolean isDir = scriptFile.isDirectory();
-        int titleRes = isDir ? R.string.text_delete_folder : R.string.text_delete_file;
+        int titleRes = isDir ? R.string.text_move_folder_to_trash : R.string.text_move_file_to_trash;
 
         Observable.fromCallable(() -> {
                     OperationController controller = new OperationController();
                     ProgressDialogSession session = new ProgressDialogSession(controller);
 
                     try {
-                        // Indeterminate progress is acceptable for trashing.
-                        // zh-CN: 移入回收站使用不确定进度条即可.
                         MaterialDialog.Builder builder = new MaterialDialog.Builder(mContext)
                                 .title(titleRes)
-                                .content(R.string.ellipsis_six)
+                                .content(R.string.text_moving_to_trash)
                                 .negativeText(R.string.dialog_button_abort)
                                 .negativeColorRes(R.color.dialog_button_caution)
                                 .onNegative((dialog, which) -> {
                                     controller.cancel();
-                                    try {
-                                        dialog.setContent(mContext.getString(R.string.text_aborting));
-                                    } catch (Throwable ignored) {
-                                        /* Ignored. */
-                                    }
                                 })
-                                .progress(true, 0)
-                                .progressIndeterminateStyle(true)
+                                .progress(false, DialogUtils.PROGRESS_MAX_LARGE, true)
                                 .cancelable(false)
                                 .canceledOnTouchOutside(false);
 
@@ -1041,7 +1008,20 @@ public class ScriptOperations {
                         // Move into trash (blob + db) then notify explorer.
                         // zh-CN: 移入回收站 (blob + db), 然后通知资源管理器.
                         new TrashRepository(mContext.getApplicationContext())
-                                .moveToTrash(scriptFile.getPath());
+                                .moveToTrashWithProgress(
+                                        scriptFile.getPath(),
+                                        (processed, total) -> {
+                                            controller.throwIfCancelled();
+                                            if (total > 0) {
+                                                session.setProgressThrottled(processed, total);
+                                            }
+                                        },
+                                        (currentFile) -> {
+                                            controller.throwIfCancelled();
+                                            session.setContentThrottled(toContentList(scriptFile, currentFile));
+                                        },
+                                        controller
+                                );
 
                         return 1;
                     } catch (OperationAbortedException aborted) {
@@ -1056,6 +1036,13 @@ public class ScriptOperations {
                     switch (result) {
                         case 1 -> {
                             showMessage(R.string.text_moved_to_trash);
+
+                            // Refresh explorer reliably for both file and directory.
+                            // zh-CN: 对文件与目录均使用更可靠的刷新方式.
+                            notifyChildrenChangedAtItsParent(scriptFile);
+
+                            // Keep existing item removed notification as best-effort.
+                            // zh-CN: 保留原有的 itemRemoved 通知, 作为尽力而为的补充.
                             notifyFileRemoved(ProjectConfig.isProject(scriptFile), scriptFile.isDirectory(), scriptFile);
                         }
                         case -1 -> showMessage(R.string.text_operation_aborted);
@@ -1064,6 +1051,17 @@ public class ScriptOperations {
                 }, e -> {
                     e.printStackTrace();
                     showMessage(R.string.text_failed_to_delete);
+
+                    String msg = e.getClass().getSimpleName();
+                    if (e.getMessage() != null && !e.getMessage().isBlank()) {
+                        msg = msg + ": " + e.getMessage();
+                    }
+                    DialogUtils.buildAndShowAdaptive(new MaterialDialog.Builder(mContext)
+                            .title(R.string.text_move_to_trash_failed)
+                            .content(msg)
+                            .positiveText(R.string.dialog_button_dismiss)
+                            .positiveColorRes(R.color.dialog_button_default)
+                            .cancelable(false)::build);
                 });
     }
 
@@ -1077,23 +1075,16 @@ public class ScriptOperations {
                     OperationController controller = new OperationController();
                     ProgressDialogSession session = new ProgressDialogSession(controller);
 
-                    final long[] lastContentUpdateTime = new long[]{0L};
-
                     try {
                         // For delete, indeterminate progress is acceptable and consistent.
                         // zh-CN: 删除操作使用不确定进度条即可, 行为更稳定.
                         MaterialDialog.Builder builder = new MaterialDialog.Builder(mContext)
                                 .title(titleRes)
-                                .content(R.string.ellipsis_six)
+                                .content(R.string.text_deleting)
                                 .negativeText(R.string.dialog_button_abort)
                                 .negativeColorRes(R.color.dialog_button_caution)
                                 .onNegative((dialog, which) -> {
                                     controller.cancel();
-                                    try {
-                                        dialog.setContent(mContext.getString(R.string.text_aborting));
-                                    } catch (Throwable ignored) {
-                                        /* Ignored. */
-                                    }
                                 })
                                 .progress(true, 0)
                                 .progressIndeterminateStyle(true)
@@ -1104,7 +1095,7 @@ public class ScriptOperations {
 
                         boolean deleted = deleteRecursivelyWithProgress(
                                 scriptFile,
-                                currentFile -> session.setContentThrottled(toContentList(scriptFile, currentFile), lastContentUpdateTime),
+                                currentFile -> session.setContentThrottled(toContentList(scriptFile, currentFile)),
                                 controller
                         );
 
@@ -1122,6 +1113,20 @@ public class ScriptOperations {
                         case 1 -> {
                             showMessage(R.string.text_already_deleted);
                             notifyFileRemoved(isProject, isDir, scriptFile);
+
+                            if (HistoryPrefs.deletePermanentlyAlsoClearHistory()) {
+                                var scriptFilePath = scriptFile.getPath();
+                                if (scriptFilePath.startsWith(INTERNAL_STORAGE_ROOT)) {
+                                    Schedulers.io().scheduleDirect(() -> {
+                                        try {
+                                            new HistoryRepository(mContext.getApplicationContext())
+                                                    .clearHistoryForPath(scriptFilePath);
+                                        } catch (Throwable ignored) {
+                                            /* Ignored. */
+                                        }
+                                    });
+                                }
+                            }
                         }
                         case 0 -> showMessage(R.string.text_failed_to_delete);
                         case -1 -> showMessage(R.string.text_operation_aborted);
@@ -1131,7 +1136,7 @@ public class ScriptOperations {
 
     public void setAsWorkingDirNow(final ScriptFile scriptFile) {
         WorkingDirectoryUtils.setPath(scriptFile.getPath());
-        WorkingDirectoryUtils.addIntoHistories(scriptFile.getPath());
+        WorkingDirectoryUtils.addIntoHistory(scriptFile.getPath());
         showMessage(R.string.text_done);
     }
 
@@ -1288,190 +1293,11 @@ public class ScriptOperations {
         }
     }
 
-    private static final class ProgressDialogSession {
-
-        private final OperationController controller;
-        private final AtomicReference<MaterialDialog> dialogRef = new AtomicReference<>();
-
-        // Whether the session has been closed (operation finished/aborted), used to prevent late dialog showing.
-        // zh-CN: 会话是否已关闭 (操作已完成/已中止), 用于防止延迟任务在结束后仍弹出对话框.
-        private final AtomicBoolean closed = new AtomicBoolean(false);
-
-        private final AtomicBoolean showScheduled = new AtomicBoolean(false);
-
-        private volatile boolean shown = false;
-
-        private long shownAtUptimeMs = 0L;
-
-        ProgressDialogSession(OperationController controller) {
-            this.controller = controller;
-        }
-
-        void scheduleShow(MaterialDialog.Builder builder) {
-            if (!showScheduled.compareAndSet(false, true)) {
-                return;
-            }
-
-            GlobalAppContext.postDelayed(() -> {
-                // Skip showing if operation already finished/aborted.
-                // zh-CN: 若操作已结束/已中止, 则不再显示对话框.
-                if (closed.get() || controller.cancelled.get()) {
-                    return;
-                }
-
-                MaterialDialog dialog = DialogUtils.buildAndShowAdaptive(builder::build);
-                dialog.setProgressNumberFormat("...");
-                DialogUtils.applyProgressThemeColorTintLists(dialog);
-
-                // If closed becomes true right after building, dismiss immediately to avoid dangling dialog.
-                // zh-CN: 若 build 后立刻变为 closed, 则立即关闭, 避免对话框悬挂.
-                if (closed.get()) {
-                    try {
-                        if (dialog.isShowing()) {
-                            dialog.dismiss();
-                        }
-                    } catch (Throwable ignored) {
-                        /* Ignored. */
-                    }
-                    return;
-                }
-
-                dialogRef.set(dialog);
-                shown = true;
-                shownAtUptimeMs = SystemClock.uptimeMillis();
-            }, PROGRESS_DIALOG_SHOW_DELAY_MS);
-        }
-
-        void setContentThrottled(List<String> contentList, long[] lastUpdateTime) {
-            long now = SystemClock.uptimeMillis();
-
-            if (now - lastUpdateTime[0] < PROGRESS_UPDATE_MIN_INTERVAL_MS) {
-                return;
-            }
-
-            lastUpdateTime[0] = now;
-
-            MaterialDialog dialog = dialogRef.get();
-            if (dialog == null) {
-                return;
-            }
-            GlobalAppContext.post(() -> {
-                try {
-                    TextView contentView = dialog.getContentView();
-                    if (contentView != null) {
-                        ViewUtils.setLinesEllipsizedIndividually(contentView, contentList, 1.5f);
-                    }
-                } catch (Throwable ignored) {
-                    /* Ignored. */
-                }
-            });
-        }
-
-        void setProgressThrottled(long progress, long totalBytes, long[] lastUpdateTime, long[] lastProgress) {
-            long now = SystemClock.uptimeMillis();
-
-            if (progress == lastProgress[0]) {
-                return;
-            }
-            if (now - lastUpdateTime[0] < PROGRESS_UPDATE_MIN_INTERVAL_MS) {
-                return;
-            }
-
-            lastUpdateTime[0] = now;
-            lastProgress[0] = progress;
-
-            MaterialDialog dialog = dialogRef.get();
-            if (dialog == null) {
-                return;
-            }
-            GlobalAppContext.post(() -> {
-                try {
-                    DialogUtils.setProgressNumberFormatByBytes(dialog, progress, totalBytes, true);
-
-                    int v;
-                    int max;
-
-                    if (totalBytes > 0 && totalBytes <= Integer.MAX_VALUE) {
-                        max = (int) totalBytes;
-                        v = (int) Math.max(0L, Math.min(progress, max));
-                    } else if (totalBytes > 0) {
-                        max = PROGRESS_MAX_LARGE;
-                        double ratio = (double) progress / (double) totalBytes;
-                        v = (int) Math.round(ratio * (double) max);
-                        v = Math.max(0, Math.min(max, v));
-                    } else {
-                        // No total bytes, keep indeterminate behavior.
-                        // zh-CN: 无总字节数, 保持不确定进度行为.
-                        return;
-                    }
-
-                    dialog.setMaxProgress(max);
-                    dialog.setProgress(v);
-                } catch (Throwable ignored) {
-                    /* Ignored. */
-                }
-            });
-        }
-
-        void dismissSafely() {
-            // Mark closed first so delayed show won't create a dialog after completion.
-            // zh-CN: 先标记 closed, 防止延迟 show 在完成后创建对话框.
-            closed.set(true);
-
-            MaterialDialog dialog = dialogRef.get();
-            if (dialog == null) {
-                return;
-            }
-
-            long now = SystemClock.uptimeMillis();
-            long delay = 0L;
-
-            if (shown) {
-                long shownDuration = now - shownAtUptimeMs;
-                if (shownDuration < PROGRESS_DIALOG_MIN_SHOW_MS) {
-                    delay = PROGRESS_DIALOG_MIN_SHOW_MS - shownDuration;
-                }
-            }
-
-            GlobalAppContext.postDelayed(() -> {
-                try {
-                    if (dialog.isShowing()) {
-                        dialog.dismiss();
-                    }
-                } catch (Throwable ignored) {
-                    /* Ignored. */
-                }
-            }, delay);
-        }
-    }
-
-    // Controller for cancellable operations (copy/move/delete).
-    // zh-CN: 用于可取消操作 (复制/移动/删除) 的控制器.
-    private static final class OperationController {
-        final AtomicBoolean cancelled = new AtomicBoolean(false);
-
-        void cancel() {
-            cancelled.set(true);
-        }
-
-        void throwIfCancelled() {
-            if (cancelled.get()) {
-                throw new OperationAbortedException();
-            }
-        }
-    }
-
-    private static final class OperationAbortedException extends RuntimeException {
-        OperationAbortedException() {
-            super("Operation aborted");
-        }
-    }
-
-    private interface FileProgressCallback {
+    public interface FileProgressCallback {
         void onFile(@NonNull File currentFile);
     }
 
-    private interface ProgressCallback {
-        void onProgress(long copiedBytes, long totalBytes);
+    public interface ProgressCallback {
+        void onProgress(long processed, long total);
     }
 }

@@ -65,7 +65,7 @@ class AndroidClassLoader(private val parent: ClassLoader, private val cacheDir: 
         Log.d(TAG, "loadDex: file = $originalPath")
 
         if (!file.exists() || !file.canRead()) {
-            throw FileNotFoundException(str(R.string.file_not_exist_or_readable, originalPath))
+            throw FileNotFoundException(str(R.string.file_not_exist_or_readable_with_path, originalPath))
         }
 
         // @Hint by SuperMonster003 on Nov 30, 2023.
@@ -99,7 +99,7 @@ class AndroidClassLoader(private val parent: ClassLoader, private val cacheDir: 
     fun loadJar(jar: File): DexClassLoader {
         Log.d(TAG, "loadJar: jar = ${jar.path}")
         if (!jar.exists() || !jar.canRead()) {
-            throw FileNotFoundException(str(R.string.file_not_exist_or_readable, jar.path))
+            throw FileNotFoundException(str(R.string.file_not_exist_or_readable_with_path, jar.path))
         }
 
         val key = generateArtifactsCacheName(jar)

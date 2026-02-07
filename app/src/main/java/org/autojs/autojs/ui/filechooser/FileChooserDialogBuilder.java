@@ -7,7 +7,7 @@ import androidx.annotation.StringRes;
 import com.afollestad.materialdialogs.MaterialDialog;
 import io.reactivex.Observable;
 import io.reactivex.subjects.PublishSubject;
-import org.autojs.autojs.app.DialogUtils;
+import org.autojs.autojs.util.DialogUtils;
 import org.autojs.autojs.model.explorer.Explorer;
 import org.autojs.autojs.model.explorer.ExplorerDirPage;
 import org.autojs.autojs.model.explorer.ExplorerFileProvider;

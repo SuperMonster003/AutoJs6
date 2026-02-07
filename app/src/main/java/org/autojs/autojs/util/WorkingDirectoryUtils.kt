@@ -12,9 +12,9 @@ import java.io.File
 
 object WorkingDirectoryUtils {
 
-    var histories: LinkedHashSet<String>
-        get() = Pref.getLinkedHashSet(R.string.key_working_directory_histories)
-        private set(value) = Pref.putLinkedHashSet(R.string.key_working_directory_histories, value)
+    var history: LinkedHashSet<String>
+        get() = Pref.getLinkedHashSet(R.string.key_working_directory_history)
+        private set(value) = Pref.putLinkedHashSet(R.string.key_working_directory_history, value)
 
     @JvmStatic
     var path: String
@@ -86,12 +86,12 @@ object WorkingDirectoryUtils {
     }
 
     @JvmStatic
-    fun addIntoHistories(history: CharSequence) {
-        histories = linkedSetOf(toRelativePath(history.toString())).apply { addAll(histories) }
+    fun addIntoHistory(item: CharSequence) {
+        history = linkedSetOf(toRelativePath(item.toString())).apply { addAll(history) }
     }
 
-    fun removeFromHistories(history: CharSequence) {
-        histories = histories.apply { remove(toRelativePath(history.toString())) }
+    fun removeFromHistory(item: CharSequence) {
+        history = history.apply { remove(toRelativePath(item.toString())) }
     }
 
 }

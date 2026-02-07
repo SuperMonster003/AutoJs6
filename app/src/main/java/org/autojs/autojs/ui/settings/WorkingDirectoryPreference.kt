@@ -16,8 +16,8 @@ import com.afollestad.materialdialogs.MaterialDialog
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
-import org.autojs.autojs.app.DialogUtils
-import org.autojs.autojs.app.DialogUtils.showAdaptive
+import org.autojs.autojs.util.DialogUtils
+import org.autojs.autojs.util.DialogUtils.showAdaptive
 import org.autojs.autojs.storage.file.FileObservable
 import org.autojs.autojs.theme.ThemeColorHelper
 import org.autojs.autojs.theme.preference.MaterialPreference
@@ -25,7 +25,7 @@ import org.autojs.autojs.tool.SimpleObserver
 import org.autojs.autojs.ui.filechooser.FileChooserDialogBuilder
 import org.autojs.autojs.ui.main.MainActivity
 import org.autojs.autojs.util.EnvironmentUtils
-import org.autojs.autojs.util.MaterialDialogUtils.choiceWidgetThemeColor
+import org.autojs.autojs.util.DialogUtils.choiceWidgetThemeColor
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.WorkingDirectoryUtils
 import org.autojs.autojs6.R
@@ -103,14 +103,14 @@ class WorkingDirectoryPreference : MaterialPreference {
             .neutralColorRes(R.color.dialog_button_hint)
             .onNeutral { _, _ ->
                 MaterialDialog.Builder(prefContext)
-                    .title(R.string.text_histories)
-                    .content(R.string.text_no_histories)
-                    .items(WorkingDirectoryUtils.histories)
-                    .itemsCallback { dHistories, _, _, text ->
-                        dHistories.dismiss()
+                    .title(R.string.text_history)
+                    .content(R.string.text_no_history)
+                    .items(WorkingDirectoryUtils.history)
+                    .itemsCallback { dHistory, _, _, text ->
+                        dHistory.dismiss()
                         mContentView.setText(text)
                     }
-                    .itemsLongCallback { dHistories, _, _, text ->
+                    .itemsLongCallback { dHistory, _, _, text ->
                         false.also {
                             MaterialDialog.Builder(prefContext)
                                 .title(R.string.text_prompt)
@@ -120,11 +120,11 @@ class WorkingDirectoryPreference : MaterialPreference {
                                 .positiveColorRes(R.color.dialog_button_caution)
                                 .onPositive { ds, _ ->
                                     ds.dismiss()
-                                    WorkingDirectoryUtils.removeFromHistories(text)
-                                    dHistories.items?.let {
+                                    WorkingDirectoryUtils.removeFromHistory(text)
+                                    dHistory.items?.let {
                                         it.remove(text)
-                                        dHistories.notifyItemsChanged()
-                                        DialogUtils.toggleContentViewByItems(dHistories)
+                                        dHistory.notifyItemsChanged()
+                                        DialogUtils.toggleContentViewByItems(dHistory)
                                     }
                                 }
                                 .showAdaptive()
@@ -133,7 +133,7 @@ class WorkingDirectoryPreference : MaterialPreference {
                     .choiceWidgetThemeColor()
                     .negativeText(R.string.dialog_button_back)
                     .negativeColorRes(R.color.dialog_button_default)
-                    .onNegative { dHistories, _ -> dHistories.dismiss() }
+                    .onNegative { dHistory, _ -> dHistory.dismiss() }
                     .autoDismiss(false)
                     .showAdaptive()
                     .also { DialogUtils.toggleContentViewByItems(it) }
@@ -144,7 +144,7 @@ class WorkingDirectoryPreference : MaterialPreference {
             .positiveColorRes(R.color.dialog_button_attraction)
             .onPositive { dialog, _ ->
                 val inputPath = mContentView.text.toString()
-                WorkingDirectoryUtils.addIntoHistories(inputPath)
+                WorkingDirectoryUtils.addIntoHistory(inputPath)
                 if (isDirPathChanged(inputPath)) {
                     if (mSwitchView.isChecked) {
                         transfer(mPrefFullPath, inputPath)

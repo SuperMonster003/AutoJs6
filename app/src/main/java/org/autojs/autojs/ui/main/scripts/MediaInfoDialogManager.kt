@@ -17,9 +17,9 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.autojs.autojs.app.DialogUtils.showAdaptive
-import org.autojs.autojs.util.MaterialDialogUtils.makeTextCopyable
-import org.autojs.autojs.util.MaterialDialogUtils.setCopyableText
+import org.autojs.autojs.util.DialogUtils.showAdaptive
+import org.autojs.autojs.util.DialogUtils.makeTextCopyable
+import org.autojs.autojs.util.DialogUtils.setCopyableText
 import org.autojs.autojs.model.explorer.ExplorerItem
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R

@@ -38,7 +38,6 @@ import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewTreeObserver
 import android.view.Window
-import android.view.WindowInsets
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
@@ -64,6 +63,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.children
 import androidx.core.view.get
 import androidx.core.view.size
+import androidx.core.view.updateLayoutParams
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import org.autojs.autojs.app.GlobalAppContext
@@ -80,11 +80,13 @@ import android.text.TextUtils as AndroidTextUtils
 /**
  * Created by Stardust on Jan 24, 2017.
  * Modified by SuperMonster003 as of Feb 2, 2026.
+ * Modified by OpenAI ChatGPT (GPT-5.2 Thinking) as of Feb 7, 2026.
  */
 @Suppress("unused")
 object ViewUtils {
 
-    private const val TAG_STATUS_BAR_SCRIM = "status_bar_scrim"
+    private const val STATUS_BAR_SCRIM_TAG = "autojs6:status_bar_scrim"
+    private const val NAV_BAR_SCRIM_TAG = "autojs6:nav_bar_scrim"
 
     @JvmStatic
     var isKeepScreenOnWhenInForegroundEnabled
@@ -747,9 +749,9 @@ object ViewUtils {
 
     private fun installOrUpdateScrim(activity: Activity, @ColorInt color: Int) {
         val decor = activity.window.decorView as ViewGroup
-        val scrim = decor.children.find { it.tag == TAG_STATUS_BAR_SCRIM }
+        val scrim = decor.children.find { it.tag == STATUS_BAR_SCRIM_TAG }
             ?: FrameLayout(activity).also {
-                it.tag = TAG_STATUS_BAR_SCRIM
+                it.tag = STATUS_BAR_SCRIM_TAG
                 // Height will be set by Insets later.
                 // zh-CN: 高度稍后由 Insets 赋值.
                 val lp = FrameLayout.LayoutParams(MATCH_PARENT, 0, Gravity.TOP)
@@ -789,7 +791,6 @@ object ViewUtils {
 
     fun setNavigationBarBackgroundColor(activity: Activity, color: Int) {
         val window = activity.window
-        val decorView = window.decorView
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) {
             @Suppress("DEPRECATION")
@@ -797,18 +798,66 @@ object ViewUtils {
             return
         }
 
-        decorView.setOnApplyWindowInsetsListener { view, insets ->
-            val navBarInsets = insets.getInsets(WindowInsets.Type.navigationBars())
-            val contentView: ViewGroup? = activity.findViewById(android.R.id.content)
-            val navBarOverlay = View(activity).apply {
+        val content = activity.findViewById<ViewGroup>(android.R.id.content) ?: return
+
+        val scrim = (content.findViewWithTag(NAV_BAR_SCRIM_TAG) ?: run {
+            View(activity).apply {
+                tag = NAV_BAR_SCRIM_TAG
+                // Avoid intercepting touch/accessibility focus.
+                // zh-CN: 避免拦截触摸/无障碍焦点.
+                isClickable = false
+                isFocusable = false
+                importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+
                 layoutParams = FrameLayout.LayoutParams(
                     MATCH_PARENT,
-                    navBarInsets.bottom, // Navigation bar height. (zh-CN: 导航栏高度.)
-                ).apply { gravity = Gravity.BOTTOM }
-                setBackgroundColor(color)
+                    0,
+                ).apply {
+                    gravity = Gravity.BOTTOM
+                }
+
+                // Key: listener is attached to scrim itself, not touching decorView.
+                // zh-CN: 关键: listener 挂在 scrim 自己身上, 不去动 decorView.
+                ViewCompat.setOnApplyWindowInsetsListener(this) { v, insets ->
+                    val nav = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+                    val tap = insets.getInsets(WindowInsetsCompat.Type.tappableElement())
+                    val bottom = maxOf(nav.bottom, tap.bottom)
+
+                    v.updateLayoutParams<FrameLayout.LayoutParams> {
+                        height = bottom
+                        gravity = Gravity.BOTTOM
+                    }
+                    insets
+                }
+            }.also { created ->
+                content.addView(created)
+                created.requestApplyInsetsWhenAttached()
             }
-            contentView?.addView(navBarOverlay)
-            view.onApplyWindowInsets(insets)
+        })
+
+        // Update color without depending on insets callback (avoid "probabilistic ineffectiveness").
+        // zh-CN: 更新颜色不依赖 insets 回调 (避免 "概率不生效").
+        scrim.setBackgroundColor(color)
+        scrim.bringToFront()
+    }
+
+    // If requestApplyInsets() is called when view is not attached, it will be discarded.
+    // Need to wait until attached and request again to reliably trigger insets dispatch.
+    // zh-CN:
+    // 如果 view 未 attach 时调用 requestApplyInsets() 会被丢弃.
+    // 需要等 attach 后再请求一次, 才能稳定触发 insets 分发.
+    private fun View.requestApplyInsetsWhenAttached() {
+        if (ViewCompat.isAttachedToWindow(this)) {
+            ViewCompat.requestApplyInsets(this)
+        } else {
+            addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
+                override fun onViewAttachedToWindow(v: View) {
+                    v.removeOnAttachStateChangeListener(this)
+                    ViewCompat.requestApplyInsets(v)
+                }
+
+                override fun onViewDetachedFromWindow(v: View) = Unit
+            })
         }
     }
 
@@ -1075,7 +1124,7 @@ object ViewUtils {
         val desaturate = ColorMatrix().apply { setSaturation(0f) }
         // Construct the alpha scaling matrix.
         // zh-CN: 构造透明度缩放矩阵.
-        val alphaMatrix = ColorMatrix().apply { setScale(1f, 1f, 1f, 0.5f) }
+        val alphaMatrix = ColorMatrix().apply { setScale(1f, 1f, 1f, alpha) }
         // Concatenate: first desaturate, then apply alpha.
         // zh-CN: 叠加: 先灰度, 再透明度.
         desaturate.postConcat(alphaMatrix)
@@ -1149,18 +1198,17 @@ object ViewUtils {
     fun showToast(context: Context, stringRes: Int, isLong: Boolean) = showToast(context, context.getString(stringRes), isLong)
 
     @JvmStatic
-    fun showToast(context: Context, string: String?) = showToast(context, string, false)
+    fun showToast(context: Context, string: CharSequence?) = showToast(context, string, false)
 
     @JvmStatic
-    fun showToast(context: Context, string: String?, isLong: Boolean) {
-        string?.let {
-            when {
-                Looper.getMainLooper() == Looper.myLooper() -> {
-                    Toast.makeText(context, it, if (isLong) Toast.LENGTH_LONG else Toast.LENGTH_SHORT).show()
-                }
-                else -> GlobalAppContext.post {
-                    Toast.makeText(context, it, if (isLong) Toast.LENGTH_LONG else Toast.LENGTH_SHORT).show()
-                }
+    fun showToast(context: Context, string: CharSequence?, isLong: Boolean) {
+        string ?: return
+        when {
+            Looper.getMainLooper() == Looper.myLooper() -> {
+                Toast.makeText(context, string, if (isLong) Toast.LENGTH_LONG else Toast.LENGTH_SHORT).show()
+            }
+            else -> GlobalAppContext.post {
+                Toast.makeText(context, string, if (isLong) Toast.LENGTH_LONG else Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -1178,10 +1226,11 @@ object ViewUtils {
     }
 
     @JvmStatic
-    fun showSnack(view: View, string: CharSequence) = showSnack(view, string, false)
+    fun showSnack(view: View, string: CharSequence?) = showSnack(view, string, false)
 
     @JvmStatic
-    fun showSnack(view: View, string: CharSequence, isLong: Boolean) {
+    fun showSnack(view: View, string: CharSequence?, isLong: Boolean) {
+        string ?: return
         try {
             Snackbar.make(view, string, if (isLong) Snackbar.LENGTH_LONG else Snackbar.LENGTH_SHORT).show()
         } catch (e: IllegalStateException) {
@@ -1199,7 +1248,8 @@ object ViewUtils {
     }
 
     @JvmStatic
-    fun showSnack(view: View, string: CharSequence, duration: Int) {
+    fun showSnack(view: View, string: CharSequence?, duration: Int) {
+        string ?: return
         try {
             Snackbar.make(view, string, duration).show()
         } catch (e: IllegalStateException) {
@@ -1329,7 +1379,7 @@ object ViewUtils {
     fun TextView.setLinesEllipsizedIndividually(
         lines: List<CharSequence>,
         lineSpacing: Float = 0f,
-        where: AndroidTextUtils.TruncateAt = AndroidTextUtils.TruncateAt.MIDDLE
+        where: AndroidTextUtils.TruncateAt = AndroidTextUtils.TruncateAt.MIDDLE,
     ) {
         post {
             val avail = width - paddingLeft - paddingRight

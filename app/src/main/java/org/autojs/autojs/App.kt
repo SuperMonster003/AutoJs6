@@ -41,6 +41,7 @@ import java.lang.reflect.Method
 /**
  * Created by Stardust on Jan 27, 2017.
  * Modified by SuperMonster003 as of Feb 3, 2026.
+ * Modified by JetBrains AI Assistant (GPT-5.2) as of Feb 7, 2026.
  */
 class App : MultiDexApplication() {
 
@@ -73,7 +74,8 @@ class App : MultiDexApplication() {
                 ThemeColorManager.init()
                 setUpDefaultNightMode()
 
-                HistoryCleanupScheduler.schedule(this)
+                HistoryCleanupScheduler.scheduleStartupCleanup(this)
+                HistoryCleanupScheduler.schedulePeriodicCleanup(this)
             }
         }
     }

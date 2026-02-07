@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.widget.SearchViewItem
 import org.autojs.autojs.util.IntentUtils.startSafely
-import org.autojs.autojs.util.MaterialDialogUtils.choiceWidgetThemeColor
+import org.autojs.autojs.util.DialogUtils.choiceWidgetThemeColor
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.onceGlobalLayout
 import org.autojs.autojs.util.ViewUtils.setMenuIconsColorByThemeColorLuminance

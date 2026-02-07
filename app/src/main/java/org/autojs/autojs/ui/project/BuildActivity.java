@@ -35,7 +35,7 @@ import net.dongliu.apk.parser.bean.ApkMeta;
 import org.autojs.autojs.apkbuilder.ApkBuilder;
 import org.autojs.autojs.apkbuilder.keystore.KeyStore;
 import org.autojs.autojs.core.pref.Language;
-import org.autojs.autojs.util.MaterialDialogUtils;
+import org.autojs.autojs.util.DialogUtils;
 import org.autojs.autojs.external.fileprovider.AppFileProvider;
 import org.autojs.autojs.model.explorer.Explorers;
 import org.autojs.autojs.model.script.ScriptFile;
@@ -422,7 +422,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                         getString(R.string.uri_autojs6_download_link));
         builder.positiveText(R.string.dialog_button_dismiss);
         builder.positiveColorRes(R.color.dialog_button_hint);
-        MaterialDialogUtils.widgetThemeColor(builder);
+        DialogUtils.widgetThemeColor(builder);
         MaterialDialog dialog = builder.show();
         if (dialog != null) {
             TextView contentView = dialog.getContentView();

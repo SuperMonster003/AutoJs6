@@ -26,7 +26,7 @@ import org.autojs.autojs.annotation.OmniColor
 import org.autojs.autojs.annotation.ScriptInterface
 import org.autojs.autojs.core.pref.Language
 import org.autojs.autojs.core.ui.inflater.util.Gravities
-import org.autojs.autojs.util.MaterialDialogUtils.widgetThemeColor
+import org.autojs.autojs.util.DialogUtils.widgetThemeColor
 import org.autojs.autojs.permission.DisplayOverOtherAppsPermission
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.AbstractConsole
@@ -191,7 +191,7 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
         } catch (e: Exception) {
             e.printStackTrace()
             if (text.length < mSafeSizeToCopy || cutOutEntriesSize >= 0) {
-                ViewUtils.showToast(context, R.string.text_failed_to_copy)
+                ViewUtils.showToast(context, R.string.error_failed_to_copy)
                 return
             }
             try {
@@ -199,7 +199,7 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
                 copyAll(cutOutEntries.joinToString("\n") { it.content }, cutOutEntries.size)
             } catch (e: Exception) {
                 e.printStackTrace()
-                ViewUtils.showToast(context, R.string.text_failed_to_copy)
+                ViewUtils.showToast(context, R.string.error_failed_to_copy)
             }
         }
     }

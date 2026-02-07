@@ -14,7 +14,7 @@ import com.makeramen.roundedimageview.RoundedImageView;
 import org.autojs.autojs.AutoJs;
 import org.autojs.autojs.app.AppLevelThemeDialogBuilder;
 import org.autojs.autojs.app.CircularMenuOperationDialogBuilder;
-import org.autojs.autojs.app.DialogUtils;
+import org.autojs.autojs.util.DialogUtils;
 import org.autojs.autojs.app.tool.PointerLocationTool;
 import org.autojs.autojs.core.accessibility.AccessibilityTool;
 import org.autojs.autojs.core.accessibility.Capture;

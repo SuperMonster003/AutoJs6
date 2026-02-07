@@ -269,12 +269,12 @@
             app:title="@string/text_manage_ignored_updates"
             app:longClickPrompt="@string/description_manage_ignored_updates_preference" />
 
-        <org.autojs.autojs.ui.settings.VersionHistoryPreference
+        <org.autojs.autojs.ui.settings.ReleaseHistoryPreference
             app:layout="@layout/preference_custom"
-            app:key="@string/key_version_histories"
-            app:title="@string/text_version_histories"
-            app:summary="@string/summary_version_histories_preference"
-            app:longClickPrompt="@string/description_version_histories_preference" />
+            app:key="@string/key_release_history"
+            app:title="@string/text_release_history"
+            app:summary="@string/summary_release_history_preference"
+            app:longClickPrompt="@string/description_release_history_preference" />
 
     </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
 

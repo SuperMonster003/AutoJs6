@@ -3,6 +3,7 @@ package org.autojs.autojs.core.ui.dialog;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
@@ -36,7 +37,6 @@ import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.afollestad.materialdialogs.internal.MDButton;
 import com.google.android.material.snackbar.Snackbar;
-import org.autojs.autojs.app.DialogUtils;
 import org.autojs.autojs.core.eventloop.EventEmitter;
 import org.autojs.autojs.tool.UiHandler;
 import org.autojs.autojs6.R;
@@ -81,7 +81,7 @@ public class JsDialog {
     @SuppressWarnings("deprecation")
     private void checkWindowType() {
         Context context = mDialog.getContext();
-        if (!DialogUtils.isActivityContext(context)) {
+        if (!isActivityContext(context)) {
             Window window = mDialog.getWindow();
             if (window != null) {
                 int type;
@@ -92,6 +92,16 @@ public class JsDialog {
                 }
                 window.setType(type);
             }
+        }
+    }
+
+    private boolean isActivityContext(Context context) {
+        if (context instanceof Activity) {
+            return true;
+        } else if (context instanceof ContextWrapper) {
+            return isActivityContext(((ContextWrapper) context).getBaseContext());
+        } else {
+            return false;
         }
     }
 

@@ -7,8 +7,8 @@ import android.os.Build
 import android.provider.Settings
 import androidx.annotation.RequiresApi
 import androidx.core.net.toUri
-import org.autojs.autojs.app.DialogUtils.showAdaptive
-import org.autojs.autojs.util.MaterialDialogUtils.widgetThemeColor
+import org.autojs.autojs.util.DialogUtils.showAdaptive
+import org.autojs.autojs.util.DialogUtils.widgetThemeColor
 import org.autojs.autojs.ui.common.NotAskAgainDialog
 import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.StringUtils.key

@@ -19,7 +19,7 @@
     <string name="cpv_custom">ألوان معدلة</string>
     <string name="cpv_select">اختر</string>
     <string name="cpv_transparency">الشفافية</string>
-    <string name="cpv_menu_item_histories">التاريخ</string>
+    <string name="cpv_menu_item_history">التاريخ</string>
     <string name="cpv_menu_item_reset_color_palette">إعادة تعيين لوحة</string>
 
 </resources>

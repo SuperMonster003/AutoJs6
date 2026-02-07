@@ -13,13 +13,13 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
-import org.autojs.autojs.app.DialogUtils
+import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs.core.pref.Pref
-import org.autojs.autojs.util.MaterialDialogUtils.widgetThemeColor
+import org.autojs.autojs.util.DialogUtils.widgetThemeColor
 import org.autojs.autojs.pluginclient.DevPluginService
 import org.autojs.autojs.pluginclient.JsonSocketClient
 import org.autojs.autojs.ui.common.NotAskAgainDialog
-import org.autojs.autojs.util.MaterialDialogUtils.choiceWidgetThemeColor
+import org.autojs.autojs.util.DialogUtils.choiceWidgetThemeColor
 import org.autojs.autojs.util.Observers
 import org.autojs.autojs.util.ThreadUtils.runOnMain
 import org.autojs.autojs.util.ViewUtils
@@ -222,16 +222,16 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
             .neutralColorRes(R.color.dialog_button_hint)
             .onNeutral { dialog, _ ->
                 MaterialDialog.Builder(context)
-                    .title(R.string.text_histories)
-                    .content(R.string.text_no_histories)
-                    .items(JsonSocketClient.serverAddressHistories)
-                    .itemsCallback { dHistories, _, _, text ->
-                        dHistories.dismiss()
+                    .title(R.string.text_history)
+                    .content(R.string.text_no_history)
+                    .items(JsonSocketClient.serverAddressHistory)
+                    .itemsCallback { dHistory, _, _, text ->
+                        dHistory.dismiss()
                         dialog.inputEditText?.setText(text)
                         validateAndConnectToRemoteServer(dialog)
                     }
                     .choiceWidgetThemeColor()
-                    .itemsLongCallback { dHistories, _, _, text ->
+                    .itemsLongCallback { dHistory, _, _, text ->
                         MaterialDialog.Builder(context)
                             .title(R.string.text_prompt)
                             .content(R.string.text_confirm_to_delete)
@@ -241,12 +241,12 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
                             .positiveColorRes(R.color.dialog_button_caution)
                             .onPositive { ds, _ ->
                                 ds.dismiss()
-                                JsonSocketClient.removeFromHistories(text.toString())
-                                dHistories.items?.let {
+                                JsonSocketClient.removeFromHistory(text.toString())
+                                dHistory.items?.let {
                                     it.remove(text)
-                                    dHistories.notifyItemsChanged()
-                                    DialogUtils.toggleContentViewByItems(dHistories)
-                                    DialogUtils.toggleActionButtonAbilityByItems(dHistories, DialogAction.NEUTRAL)
+                                    dHistory.notifyItemsChanged()
+                                    DialogUtils.toggleContentViewByItems(dHistory)
+                                    DialogUtils.toggleActionButtonAbilityByItems(dHistory, DialogAction.NEUTRAL)
                                 }
                             }
                             .show()
@@ -254,29 +254,29 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
                     }
                     .neutralText(R.string.dialog_button_clear_items)
                     .neutralColorRes(R.color.dialog_button_warn)
-                    .onNeutral { dHistories, _ ->
+                    .onNeutral { dHistory, _ ->
                         MaterialDialog.Builder(context)
                             .title(R.string.text_prompt)
-                            .content(R.string.text_confirm_to_clear_all_histories)
+                            .content(R.string.text_confirm_to_clear_the_history)
                             .negativeText(R.string.dialog_button_cancel)
                             .negativeColorRes(R.color.dialog_button_default)
                             .positiveText(R.string.dialog_button_confirm)
                             .positiveColorRes(R.color.dialog_button_caution)
                             .onPositive { _, _ ->
-                                JsonSocketClient.clearAllHistories()
-                                dHistories.items?.let {
+                                JsonSocketClient.clearHistory()
+                                dHistory.items?.let {
                                     it.clear()
-                                    dHistories.notifyItemsChanged()
-                                    DialogUtils.toggleContentViewByItems(dHistories)
-                                    DialogUtils.toggleActionButtonAbilityByItems(dHistories, DialogAction.NEUTRAL)
+                                    dHistory.notifyItemsChanged()
+                                    DialogUtils.toggleContentViewByItems(dHistory)
+                                    DialogUtils.toggleActionButtonAbilityByItems(dHistory, DialogAction.NEUTRAL)
                                 }
-                                ViewUtils.showSnack(dHistories.view, R.string.text_all_histories_cleared)
+                                ViewUtils.showSnack(dHistory.view, R.string.text_history_has_been_cleared)
                             }
                             .show()
                     }
                     .positiveText(R.string.dialog_button_back)
                     .positiveColorRes(R.color.dialog_button_default)
-                    .onPositive { dHistories, _ -> dHistories.dismiss() }
+                    .onPositive { dHistory, _ -> dHistory.dismiss() }
                     .autoDismiss(false)
                     .show()
                     .also {
@@ -552,7 +552,7 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
             return
         }
 
-        val isInHistory = { JsonSocketClient.serverAddressHistories.contains(input) }
+        val isInHistory = { JsonSocketClient.serverAddressHistory.contains(input) }
         val isPotentiallyInvalid = { POTENTIALLY_INVALID_IP_ADRESS_LIST_FOR_REMOTE_SERVER.any { input.matches(it) } }
 
         when {

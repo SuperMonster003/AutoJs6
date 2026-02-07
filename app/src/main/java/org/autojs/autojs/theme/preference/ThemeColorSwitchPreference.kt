@@ -10,7 +10,7 @@ import android.widget.Switch
 import androidx.appcompat.widget.SwitchCompat
 import androidx.preference.PreferenceViewHolder
 import androidx.preference.SwitchPreference
-import org.autojs.autojs.app.DialogUtils
+import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs.theme.ThemeColor
 import org.autojs.autojs.theme.ThemeColorHelper
 import org.autojs.autojs.theme.ThemeColorManager

@@ -162,7 +162,7 @@ class DevPluginService(val context: Context) {
                                 .sayHello()
                         } else {
                             if (client.isExtensionVersionCheckFailed || client.hasErrorMessageOnHello) {
-                                JsonSocketClient.addIntoHistories(ip)
+                                JsonSocketClient.addIntoHistory(ip)
                                 client.switchOff()
                                 return@doOnNext
                             }

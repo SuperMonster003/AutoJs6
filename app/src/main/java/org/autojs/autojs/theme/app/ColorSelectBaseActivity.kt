@@ -264,7 +264,7 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
             .setColor(initialColor ?: customColor)
             .setOldColorPanelOnClickListener { v, dialog -> showColorDetails(v.tag as? Int, parentDialog = dialog) }
             .setNewColorPanelOnClickListener { v, dialog -> showColorDetails(v.tag as? Int, parentDialog = dialog) }
-            .setColorHistoriesHandler { showColorPickerHistories(it) }
+            .setColorHistoryHandler { showColorPickerHistory(it) }
             .create()
             .setColorPickerDialogListener { _, color: Int ->
                 onColorPickerConfirmed(color)
@@ -276,7 +276,7 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
         savePrefsForLegacyPalette(color)
         savePrefsForLibraries(COLOR_LIBRARY_ID_PALETTE, 0)
 
-        saveDatabaseForPaletteHistories(lifecycleScope, applicationContext, color)
+        saveDatabaseForPaletteHistory(lifecycleScope, applicationContext, color)
 
         isForciblyEnableAppBarColorTransition = true
 
@@ -284,16 +284,16 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
         ThemeChangeNotifier.notifyThemeChanged()
     }
 
-    private fun showColorPickerHistories(colorPickerDialog: ColorPickerDialog) {
+    private fun showColorPickerHistory(colorPickerDialog: ColorPickerDialog) {
         lifecycleScope.launch {
-            var historiesDialog: MaterialDialog? = null
+            var historyDialog: MaterialDialog? = null
             val dao = withContext(Dispatchers.IO) {
                 ColorHistoryDatabase.getInstance(applicationContext).paletteHistoryDao()
             }
             when {
                 withContext(Dispatchers.IO) { dao.hasData() } -> {
                     val adapter = PaletteHistoryItemAdapter(emptyList()) { selectedColor ->
-                        historiesDialog?.dismiss()
+                        historyDialog?.dismiss()
                         colorPickerDialog.onHistorySelected(selectedColor)
                     }
                     launch(Dispatchers.Main) {
@@ -303,15 +303,15 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
                             it.layoutManager = LinearLayoutManager(context)
                             it.addItemDecoration(DividerItemDecoration(context, VERTICAL))
                         }
-                        historiesDialog = MaterialDialog.Builder(context)
-                            .title(R.string.text_histories)
+                        historyDialog = MaterialDialog.Builder(context)
+                            .title(R.string.text_history)
                             .customView(recyclerView, false)
                             .neutralText(R.string.dialog_button_clear_items)
                             .neutralColorRes(R.color.dialog_button_warn)
                             .onNeutral { parentDialog, _ ->
                                 MaterialDialog.Builder(context)
                                     .title(R.string.text_prompt)
-                                    .content(getString(R.string.text_confirm_to_clear_histories_of, getString(R.string.text_color_palette)))
+                                    .content(getString(R.string.text_confirm_to_clear_the_history_of, getString(R.string.text_color_palette)))
                                     .negativeText(R.string.dialog_button_cancel)
                                     .negativeColorRes(R.color.dialog_button_default)
                                     .positiveText(R.string.dialog_button_confirm)
@@ -322,7 +322,7 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
                                             withContext(Dispatchers.Main) {
                                                 adapter.updateData(emptyList())
                                                 parentDialog.dismiss()
-                                                ViewUtils.showToast(context, R.string.text_all_histories_cleared, true)
+                                                ViewUtils.showToast(context, R.string.text_history_has_been_cleared, true)
                                             }
                                         }
                                     }
@@ -334,17 +334,17 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
                             .autoDismiss(false)
                             .show()
                     }
-                    val histories = withContext(Dispatchers.IO) {
+                    val history = withContext(Dispatchers.IO) {
                         dao.getAll().sortedByDescending { it.lastUsedTime }
                     }
                     launch(Dispatchers.Main) {
-                        adapter.updateData(histories)
+                        adapter.updateData(history)
                     }
                 }
                 else -> withContext(Dispatchers.Main) {
                     MaterialDialog.Builder(this@ColorSelectBaseActivity)
-                        .title(R.string.text_histories)
-                        .content(R.string.text_no_histories)
+                        .title(R.string.text_history)
+                        .content(R.string.text_no_history)
                         .positiveText(R.string.dialog_button_dismiss)
                         .positiveColorRes(R.color.dialog_button_default)
                         .show()
@@ -353,12 +353,12 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
         }
     }
 
-    protected fun showColorHistories(libraryId: Int? = null, onHistorySelected: (selectedHistoryItem: ColorHistoryItem) -> Unit) {
+    protected fun showColorHistory(libraryId: Int? = null, onHistorySelected: (selectedHistoryItem: ColorHistoryItem) -> Unit) {
 
-        val isShowAllHistories = libraryId == null
+        val isShowAllHistoryEntries = libraryId == null
 
         lifecycleScope.launch {
-            var historiesDialog: MaterialDialog? = null
+            var historyDialog: MaterialDialog? = null
             var paletteHistoryDao: PaletteHistoryDao? = null
             val colorHistoryDao = withContext(Dispatchers.IO) {
                 ColorHistoryDatabase.getInstance(applicationContext).colorHistoryDao()
@@ -372,8 +372,8 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
             if (!hasData) {
                 withContext(Dispatchers.Main) {
                     MaterialDialog.Builder(this@ColorSelectBaseActivity)
-                        .title(R.string.text_histories)
-                        .content(R.string.text_no_histories)
+                        .title(R.string.text_history)
+                        .content(R.string.text_no_history)
                         .positiveText(R.string.dialog_button_dismiss)
                         .positiveColorRes(R.color.dialog_button_default)
                         .show()
@@ -381,7 +381,7 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
                 return@launch
             }
             val adapter = ColorHistoryItemAdapter(emptyList()) { selectedHistoryItem ->
-                historiesDialog?.dismiss()
+                historyDialog?.dismiss()
                 onHistorySelected(selectedHistoryItem)
             }
             launch(Dispatchers.Main) {
@@ -391,8 +391,8 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
                     it.layoutManager = LinearLayoutManager(context)
                     it.addItemDecoration(DividerItemDecoration(context, VERTICAL))
                 }
-                historiesDialog = MaterialDialog.Builder(context)
-                    .title(R.string.text_histories)
+                historyDialog = MaterialDialog.Builder(context)
+                    .title(R.string.text_history)
                     .customView(recyclerView, false)
                     .neutralText(R.string.dialog_button_clear_items)
                     .neutralColorRes(R.color.dialog_button_warn)
@@ -401,12 +401,12 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
                             .title(R.string.text_prompt)
                             .apply {
                                 when {
-                                    isShowAllHistories -> {
-                                        content(getString(R.string.text_confirm_to_clear_histories_of_all_color_libraries))
+                                    isShowAllHistoryEntries -> {
+                                        content(getString(R.string.text_confirm_to_clear_the_history_of_all_color_libraries))
                                     }
                                     else -> presetColorLibraries.find { it.id == libraryId }?.let {
-                                        content(getString(R.string.text_confirm_to_clear_histories_of, getString(it.nameRes)))
-                                    } ?: content(getString(R.string.text_confirm_to_clear_all_histories))
+                                        content(getString(R.string.text_confirm_to_clear_the_history_of, getString(it.nameRes)))
+                                    } ?: content(getString(R.string.text_confirm_to_clear_the_history))
                                 }
                             }
                             .negativeText(R.string.dialog_button_cancel)
@@ -415,7 +415,7 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
                             .positiveColorRes(R.color.dialog_button_caution)
                             .onPositive { _, _ ->
                                 lifecycleScope.launch(Dispatchers.IO) {
-                                    if (isShowAllHistories) {
+                                    if (isShowAllHistoryEntries) {
                                         if (paletteHistoryDao == null) {
                                             paletteHistoryDao = withContext(Dispatchers.IO) {
                                                 ColorHistoryDatabase.getInstance(applicationContext).paletteHistoryDao()
@@ -429,7 +429,7 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
                                     withContext(Dispatchers.Main) {
                                         adapter.updateData(emptyList())
                                         parentDialog.dismiss()
-                                        ViewUtils.showToast(context, R.string.text_all_histories_cleared, true)
+                                        ViewUtils.showToast(context, R.string.text_history_has_been_cleared, true)
                                     }
                                 }
                             }
@@ -442,14 +442,14 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
                     .show()
             }
 
-            val colorHistories = withContext(Dispatchers.IO) {
+            val colorHistory = withContext(Dispatchers.IO) {
                 when {
-                    isShowAllHistories -> colorHistoryDao.getAll()
+                    isShowAllHistoryEntries -> colorHistoryDao.getAll()
                     else -> colorHistoryDao.getAllByLibraryId(libraryId.toLong())
                 }
             }
 
-            val historyItems = colorHistories.mapNotNull { history ->
+            val historyItems = colorHistory.mapNotNull { history ->
                 var colorInt: Int? = null
                 var colorName: String? = null
                 var colorLibraryIdentifier: String? = null
@@ -460,7 +460,7 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
                     presetColorLibrary.colors.find { it.itemId == history.itemId }?.let { item ->
                         colorInt = getColor(item.colorRes)
                         colorName = getString(item.nameRes)
-                        if (isShowAllHistories) {
+                        if (isShowAllHistoryEntries) {
                             colorLibraryIdentifier = getString(presetColorLibrary.identifierRes)
                         }
                     }
@@ -480,7 +480,7 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
                 return@mapNotNull null
             }.toMutableList()
 
-            if (isShowAllHistories) {
+            if (isShowAllHistoryEntries) {
                 val paletteIdentifier = getString(R.string.color_library_identifier_palette)
                 if (paletteHistoryDao == null) {
                     paletteHistoryDao = withContext(Dispatchers.IO) {
@@ -778,22 +778,22 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
         }
 
         @JvmStatic
-        fun saveDatabaseForPaletteHistories(dispatcherScope: CoroutineScope? = null, applicationContext: Context, color: Int) {
-            saveHistories(dispatcherScope) {
+        fun saveDatabaseForPaletteHistory(dispatcherScope: CoroutineScope? = null, applicationContext: Context, color: Int) {
+            saveHistory(dispatcherScope) {
                 var itemId by Delegates.notNull<Int>()
-                savePaletteHistories(applicationContext, color).also { itemId = it }
-                saveColorHistories(applicationContext, COLOR_LIBRARY_ID_PALETTE, itemId)
+                savePaletteHistory(applicationContext, color).also { itemId = it }
+                saveColorHistory(applicationContext, COLOR_LIBRARY_ID_PALETTE, itemId)
             }
         }
 
         @JvmStatic
-        fun saveDatabaseForColorHistories(dispatcherScope: CoroutineScope? = null, applicationContext: Context, libraryId: Int, itemId: Int) {
-            saveHistories(dispatcherScope) {
-                saveColorHistories(applicationContext, libraryId, itemId)
+        fun saveDatabaseForColorHistory(dispatcherScope: CoroutineScope? = null, applicationContext: Context, libraryId: Int, itemId: Int) {
+            saveHistory(dispatcherScope) {
+                saveColorHistory(applicationContext, libraryId, itemId)
             }
         }
 
-        private fun saveHistories(
+        private fun saveHistory(
             dispatcherScope: CoroutineScope? = null,
             saveJob: suspend CoroutineScope.() -> Unit,
         ) {
@@ -803,13 +803,13 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
             }
         }
 
-        private suspend fun savePaletteHistories(applicationContext: Context, color: Int): Int {
+        private suspend fun savePaletteHistory(applicationContext: Context, color: Int): Int {
             val dao = ColorHistoryDatabase.getInstance(applicationContext).paletteHistoryDao()
             val colorInfo = ColorInfo(ColorUtils.toHex(color, 6))
             return dao.upsert(PaletteHistory(colorInfo = colorInfo).apply { setLastUsedTimeCurrent() }).toInt()
         }
 
-        private suspend fun saveColorHistories(applicationContext: Context, libraryId: Int, itemId: Int) {
+        private suspend fun saveColorHistory(applicationContext: Context, libraryId: Int, itemId: Int) {
             val dao = ColorHistoryDatabase.getInstance(applicationContext).colorHistoryDao()
             dao.upsert(ColorHistory(libraryId = libraryId, itemId = itemId).apply { setLastUsedTimeCurrent() })
         }

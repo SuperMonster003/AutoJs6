@@ -53,7 +53,7 @@ public class TaskerScriptEditActivity extends BaseActivity {
                     ViewUtils.showToast(TaskerScriptEditActivity.this, ex.getMessage(), true);
                     finish();
                 });
-        setToolbarAsBack(mEditorView.name);
+        setToolbarAsBack(mEditorView.getName());
     }
 
     public static void edit(Activity activity, String title, String summary, String content) {

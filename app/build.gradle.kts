@@ -229,6 +229,7 @@ dependencies /* Unclassified */ {
     // Room
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
+    implementation(libs.room.rxjava2)
     ksp(libs.room.compiler)
 
     // ApkSig

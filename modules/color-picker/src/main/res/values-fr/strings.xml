@@ -16,6 +16,6 @@
     <string name="cpv_custom">Personnalisée</string>
     <string name="cpv_select">Valider</string>
     <string name="cpv_transparency">Transparence</string>
-    <string name="cpv_menu_item_histories">Histoires</string>
+    <string name="cpv_menu_item_history">Historique</string>
     <string name="cpv_menu_item_reset_color_palette">Réinitialiser palette</string>
 </resources>

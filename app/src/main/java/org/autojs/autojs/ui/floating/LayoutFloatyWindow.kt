@@ -5,7 +5,7 @@ import android.view.ContextThemeWrapper
 import android.view.View
 import android.view.ViewGroup
 import org.autojs.autojs.app.AppLevelThemeDialogBuilder
-import org.autojs.autojs.app.DialogUtils.showAdaptive
+import org.autojs.autojs.util.DialogUtils.showAdaptive
 import org.autojs.autojs.core.accessibility.Capture
 import org.autojs.autojs.core.accessibility.NodeInfo
 import org.autojs.autojs.core.accessibility.WindowInfo

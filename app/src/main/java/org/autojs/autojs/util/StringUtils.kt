@@ -20,7 +20,7 @@ import kotlin.math.pow
 
 /**
  * Created by Stardust on May 3, 2017.
- * Modified by SuperMonster003 as of Jul 6, 2022.
+ * Modified by SuperMonster003 as of Feb 8, 2026.
  */
 object StringUtils {
 
@@ -363,6 +363,14 @@ object StringUtils {
     @JvmStatic
     fun String.isLooselyIn(list: Iterable<String>): Boolean =
         list.any { this.equalsLoosely(it) }
+
+    @JvmStatic
+    fun String.normalizeTrailingSlash(isDir: Boolean): String {
+        if (this == "/") return "/"
+
+        val noTail = this.trimEnd('/')
+        return if (isDir) "$noTail/" else noTail
+    }
 
     class CharsetMatchWrapper(private val charsetMatch: CharsetMatch?) {
 

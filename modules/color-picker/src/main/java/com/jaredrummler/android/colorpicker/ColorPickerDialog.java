@@ -127,7 +127,7 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerView
     ColorPickerDialogListener colorPickerDialogListener;
     OnClickListener oldColorPanelOnClickListener;
     OnClickListener newColorPanelOnClickListener;
-    Consumer<ColorPickerDialog> colorHistoriesHandler;
+    Consumer<ColorPickerDialog> colorHistoryHandler;
 
     FrameLayout rootView;
     ImageView customTitleOptions;
@@ -235,8 +235,8 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerView
                         resetColorPanel();
                         return true;
                     }
-                    if (menuItem.getItemId() == R.id.action_show_histories) {
-                        showHistories(this);
+                    if (menuItem.getItemId() == R.id.action_show_history) {
+                        showHistory(this);
                         return true;
                     }
                     return false;
@@ -408,9 +408,9 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerView
         colorPicker.setColor(aimColor, true);
     }
 
-    private void showHistories(ColorPickerDialog colorPickerDialog) {
-        if (colorHistoriesHandler == null) return;
-        colorHistoriesHandler.accept(colorPickerDialog);
+    private void showHistory(ColorPickerDialog colorPickerDialog) {
+        if (colorHistoryHandler == null) return;
+        colorHistoryHandler.accept(colorPickerDialog);
     }
 
     public void onHistorySelected(@ColorInt int color) {
@@ -863,7 +863,7 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerView
 
         OnClickListener oldColorPanelOnClickListener;
         OnClickListener newColorPanelOnClickListener;
-        Consumer<ColorPickerDialog> colorHistoriesHandler;
+        Consumer<ColorPickerDialog> colorHistoryHandler;
 
         /*package*/ Builder() {
 
@@ -1028,8 +1028,8 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerView
             return this;
         }
 
-        public Builder setColorHistoriesHandler(Consumer<ColorPickerDialog> colorHistoriesHandler) {
-            this.colorHistoriesHandler = colorHistoriesHandler;
+        public Builder setColorHistoryHandler(Consumer<ColorPickerDialog> colorHistoryHandler) {
+            this.colorHistoryHandler = colorHistoryHandler;
             return this;
         }
 
@@ -1058,7 +1058,7 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerView
             args.putBoolean(ARG_USE_LEGACY_MODE, useLegacyMode);
             dialog.oldColorPanelOnClickListener = oldColorPanelOnClickListener;
             dialog.newColorPanelOnClickListener = newColorPanelOnClickListener;
-            dialog.colorHistoriesHandler = colorHistoriesHandler;
+            dialog.colorHistoryHandler = colorHistoryHandler;
             dialog.setArguments(args);
             return dialog;
         }

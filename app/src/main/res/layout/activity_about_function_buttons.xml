@@ -123,7 +123,7 @@
     <View
         app:layout_constraintStart_toEndOf="@id/about_functions_button_update"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/about_functions_button_version_histories"
+        app:layout_constraintEnd_toStartOf="@id/about_functions_button_release_history"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintWidth_max="40dp"
         app:layout_constraintHorizontal_weight="1"
@@ -137,7 +137,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toStartOf="@id/space_3_4"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:id="@+id/about_functions_button_version_histories"
+        android:id="@+id/about_functions_button_release_history"
         android:layout_width="72dp"
         android:layout_height="wrap_content"
         android:background="?selectableItemBackground"
@@ -145,22 +145,22 @@
         android:clickable="true">
 
         <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guideline_50_version_histories"
+            android:id="@+id/guideline_50_release_history"
             android:orientation="horizontal"
             app:layout_constraintGuide_percent="0.5"
             android:layout_width="0dp"
             android:layout_height="0dp" />
 
         <ImageView
-            android:id="@+id/about_functions_button_version_histories_icon"
+            android:id="@+id/about_functions_button_release_history_icon"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_marginTop="4dp"
-            android:src="@drawable/ic_about_version_histories"
-            android:contentDescription="@string/text_about_functions_version_histories"
+            android:src="@drawable/ic_about_release_history"
+            android:contentDescription="@string/text_about_functions_release_history"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/guideline_50_version_histories" />
+            app:layout_constraintBottom_toTopOf="@id/guideline_50_release_history" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -168,17 +168,17 @@
             android:layout_marginTop="6dp"
             android:maxLines="2"
             android:gravity="center"
-            android:text="@string/text_about_functions_version_histories"
+            android:text="@string/text_about_functions_release_history"
             android:textSize="13sp"
             android:textColor="@color/about_app_function_buttons"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/guideline_50_version_histories"
+            app:layout_constraintTop_toBottomOf="@id/guideline_50_release_history"
             app:layout_constraintEnd_toEndOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <View
-        app:layout_constraintStart_toEndOf="@id/about_functions_button_version_histories"
+        app:layout_constraintStart_toEndOf="@id/about_functions_button_release_history"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toStartOf="@id/about_functions_button_feedback"
         app:layout_constraintBottom_toBottomOf="parent"

@@ -2,6 +2,8 @@
 
 <!-- Translator: [ QTranslate (https://quest-app.appspot.com) ] -->
 <!-- Translator: [ DeepL (https://www.deepl.com/translator) ] -->
+<!-- Translator: [ JetBrains AI Assistant ] -->
+<!-- Translator: [ OpenAI ChatGPT ] -->
 <!-- Proofreader: [ SuperMonster003 ] -->
 <!-- Proofreader: [ JetBrains AI Assistant ] -->
 <!-- Proofreader: [ Google Gemini ] -->
@@ -99,6 +101,7 @@
     <string name="description_pointer_location">\"موقع المؤشر\" هي ميزة تصحيح أخطاء ضمن خيارات المطوّر في Android.\nعند تفعيلها، يعرض النظام على الشاشة معلومات نقاط اللمس مثل [الإحداثيات/مسار الحركة/العدد/الحجم/سرعة الحركة/الضغط]، مما يسهل [كتابة/تصحيح/التحقق من] السكربتات ذات الصلة.</string>
     <string name="description_post_notifications">يسمح إذن \"إرسال الإشعارات\" لـ AutoJs6 بنشر الإشعارات على النظام، مما يتيح للسكربتات نشر وإدارة إشعارات مخصّصة في شريط الإشعارات.\n\nNote: على أجهزة Android 13+، إذا لم يتم منح هذا الإذن فقد لا تظهر بعض الإشعارات، وقد يؤثر ذلك على تشغيل خدمات المقدمة واستقرارها.</string>
     <string name="description_project_media_access">مع الوصول إلى وسائط المشروع ، لن يطلب منك التحذير الأمني لتسجيل الشاشة.</string>
+    <string name="description_release_history_preference">عرض سجل إصدارات AutoJs6 على GitHub وإحصاءات الفئات الرئيسية.</string>
     <string name="description_restart_strategy">تؤثر استراتيجية إعادة التشغيل فقط في زر إعادة التشغيل في درج الصفحة الرئيسية.\n\nإعادة تشغيل سريعة: تعيد تشغيل التطبيق بسرعة. إذا فشلت عملية إعادة التشغيل أو حدثت حالات غير متوقعة، جرّب التبديل إلى \"إعادة تشغيل مجدولة\".\nإعادة تشغيل مجدولة: تُعدّ مسبقًا مهمة مؤقتة قصيرة. بعد إيقاف التطبيق، سيبدأ مرة أخرى وفق الجدول لتنفيذ إعادة التشغيل.</string>
     <string name="description_rhino_java_primitive_wrap">عند تفعيل المفتاح (الوضع الافتراضي): سيتم تغليف القيم المُعادة من أساليب Java من الأنواع Number/Boolean/Character ككائنات Java وإتاحتها للسكريبت (باستثناء String). ستكون typeof هي \"object\" و species هي \"JavaObject\"، ويمكن استدعاء أساليب Java، مما يساعد على الحفاظ على خصائص الأنواع الدقيقة في Java وحل زيادة التحميل (overload).\n\nعند إيقاف المفتاح: لن تُغلف الأنواع المذكورة، وستُعرض مباشرة كقيم أولية في JavaScript (number/boolean/سلسلة ذات حرف واحد). ستكون typeof هي نوع JavaScript الموافق، وهو أقرب لدلالات ونظام JavaScript البيئي. لا يزال بالإمكان إعلان مغلّف Java صراحةً باستخدام new، مثل new java.lang.Boolean(true).\n\nانظر: http://issues.autojs6.com/435</string>
     <string name="description_root_mode_preference">إذا كان لديك جذر غريب أو حالة غير طبيعية للوصول إلى الجذر ، فيمكنك إجبار الجذر على الجذر أو غير الجذر.</string>
@@ -111,7 +114,6 @@
     <string name="description_timed_task_backend">يتحكم في الآلية الأساسية لتشغيل السكربتات بشكل مجدول.\n\nAlarmManager: عبر منح إذن \"السماح بتعيين المنبّهات والتذكيرات\" يمكن أن تصبح المهام أقرب إلى التنفيذ في الوقت المحدد.\nWorkManager: صديق للنظام؛ مناسب للمهام غير الحرجة التي تتحمل بعض التأخير.\nJobScheduler: تنفيذ قديم محفوظ للتوافق؛ احتمال التأخير أعلى.</string>
     <string name="description_timed_task_backend_more" tools:ignore="TypographyEllipsis">حالات الاستخدام والفروقات:\n\n1. AlarmManager\nمناسب للمهام الحسّاسة للتوقيت، مثل [التذكيرات/السكربتات الدقيقة التوقيت/...].\nعلى Android 12+ ومع منح إذن \"السماح بتعيين المنبّهات والتذكيرات\" يمكن التنفيذ بدقة أكبر حتى مع إيقاف الشاشة أو في وضع السكون.\nبدون الإذن قد يقلل النظام الدقة أو يؤخر التنفيذ.\n\n2. WorkManager\nمناسب للمهام التي لا تتطلب دقة زمنية صارمة مثل [مزامنة غير حرجة/تنظيف/إحصاءات/...].\nيتم الجدولة وفق [حالة البطارية/الشبكة/الشحن/سياسات السكون/...], وقد تتأخر المهام عند إيقاف الشاشة أو في وضع السكون.\nلا يضمن الدقة الزمنية لكنه يوفر مزايا في [إتمام موثوق/إعادة المحاولة عند الفشل/سلاسل المهام/إزالة التكرار].\n\n3. JobScheduler\nتنفيذ تاريخي لأغراض التوافق.\nفي إصدارات أندرويد الحديثة قد تحدث تأخيرات أكبر.\nلا يُنصح به إلا لاعتبارات التوافق.</string>
     <string name="description_usage_stats_access">يوفر إمكانية الوصول إلى سجل وإحصائيات استخدام الجهاز مما يؤدي إلى CurrentPackage () نتيجة أكثر دقة</string>
-    <string name="description_version_histories_preference">عرض سجل إصدارات AutoJs6 على GitHub وإحصاءات الفئات الرئيسية.</string>
     <string name="description_write_secure_settings">إعدادات النظام الآمنة ، التي تحتوي على تفضيلات النظام التي يمكن أن تقرأها التطبيقات ولكن لا يُسمح لها بالكتابة.\nهذه هي لتفضيلات يجب على المستخدم تعديلها بشكل صريح من خلال واجهة المستخدم لتطبيق النظام.\nمع إذن إعدادات النظام الآمن ، يمكن للتطبيقات العادية تعديل الإعدادات الآمنة مباشرة (مثل خدمة إمكانية الوصول).</string>
     <string name="description_write_system_settings">يسمح إذن \"تعديل إعدادات النظام\" لـ AutoJs6 بتعديل بعض إعدادات النظام، مما يتيح للسكربتات تعديل إعدادات مثل [ سطوع الشاشة / التدوير التلقائي / مهلة إيقاف الشاشة ].</string>
     <string name="dialog_button_abandon">تخلَّ</string>
@@ -122,11 +124,13 @@
     <string name="dialog_button_back">@string/text_back</string>
     <string name="dialog_button_cancel">يلغي</string>
     <string name="dialog_button_cancel_download">يلغي</string>
+    <string name="dialog_button_choose_path">اختيار</string>
     <string name="dialog_button_clear_items">مسح</string>
     <string name="dialog_button_confirm">نعم</string>
     <string name="dialog_button_connect">اتصال</string>
     <string name="dialog_button_continue">@string/text_continue</string>
     <string name="dialog_button_copy">@string/text_copy</string>
+    <string name="dialog_button_copy_path">نسخ</string>
     <string name="dialog_button_default_prefix">بادئة افتراضية</string>
     <string name="dialog_button_details">تفاصيل</string>
     <string name="dialog_button_dismiss">رفض</string>
@@ -141,17 +145,20 @@
     <string name="dialog_button_minimize">تصغير</string>
     <string name="dialog_button_more">أكثر</string>
     <string name="dialog_button_open_color_palette">فتح لوحة الألوان</string>
+    <string name="dialog_button_preview">معاينة</string>
     <string name="dialog_button_quit">يترك</string>
+    <string name="dialog_button_release_history">السجل</string>
     <string name="dialog_button_remove">إزالة</string>
+    <string name="dialog_button_restore">@string/text_restore</string>
     <string name="dialog_button_retrieve">جلب</string>
     <string name="dialog_button_retry">إعادة المحاولة</string>
     <string name="dialog_button_save">يحفظ</string>
+    <string name="dialog_button_save_as">حفظ باسم</string>
     <string name="dialog_button_system_settings">اعدادات النظام</string>
     <string name="dialog_button_system_settings_simplified">النظام</string>
     <string name="dialog_button_update_now">تحديث</string>
     <string name="dialog_button_use_default">استخدم الافتراضي</string>
     <string name="dialog_button_use_palette">ستخدام اللوحة</string>
-    <string name="dialog_button_version_histories">السجل</string>
     <string name="dialog_button_view_file">استعراض الملف</string>
     <string name="dialog_button_view_shortcuts">عرض الاختصارات</string>
     <string name="dialog_button_view_update">عرض التحديث</string>
@@ -214,7 +221,6 @@
     <string name="error_cannot_convert_value_into_a_script_runtime_path">لا يمكن تحويل %s إلى مسار وقت تشغيل البرنامج النصي</string>
     <string name="error_cannot_find_editor_view_from_child_view">لا يمكن العثور على EditorView من عرض الطفل: %s</string>
     <string name="error_cannot_get_download_url">لا يمكن الحصول على تنزيل عنوان URL</string>
-    <string name="error_cannot_rename">فشل في إعادة تسمية</string>
     <string name="error_cannot_retrieve_battery_state">لا يمكن استرداد حالة البطارية</string>
     <string name="error_change_password_error_length">استخدم المزيد من الأحرف لكلمة المرور</string>
     <string name="error_change_password_error_match">لا تتطابق كلمات المرور هذه</string>
@@ -242,6 +248,8 @@
     <string name="error_failed_to_call_method_with_cause"><![CDATA[فشل استدعاء الأسلوب \"%1$s\": [ %2$s ]]]></string>
     <string name="error_failed_to_change_the_toggle_state">تعذّر تغيير حالة المفتاح</string>
     <string name="error_failed_to_convert_into_drawable">فشل تحويل القيمة %s إلى قابل للرسم</string>
+    <string name="error_failed_to_copy">فشل النسخ</string>
+    <string name="error_failed_to_create">فشل في انشاء</string>
     <string name="error_failed_to_go_to_access_settings">فشل فتح صفحة الإعدادات</string>
     <string name="error_failed_to_grant_shizuku_access">فشل منح Shizuku حق الوصول</string>
     <string name="error_failed_to_instantiate">فشل إنشاء المثيل \"%s\"</string>
@@ -249,10 +257,12 @@
     <string name="error_failed_to_launch_manager">تعذّر تشغيل المدير</string>
     <string name="error_failed_to_launch_system_settings">تعذّر فتح إعدادات النظام</string>
     <string name="error_failed_to_load_plugins_with_reason">فشل تحميل المكونات الإضافية.\nالسبب: %1$s.</string>
+    <string name="error_failed_to_move">فشل النقل</string>
+    <string name="error_failed_to_rename">فشل في إعادة تسمية</string>
     <string name="error_failed_to_render_content">فشل في عرض المحتوى</string>
     <string name="error_failed_to_retrieve_changelog">تعذّر جلب سجل التغييرات</string>
+    <string name="error_failed_to_retrieve_release_history">فشل في جلب سجل الاصدارات</string>
     <string name="error_failed_to_retrieve_release_notes">تعذّر جلب ملاحظات الإصدار</string>
-    <string name="error_failed_to_retrieve_version_histories">تعذّر جلب سجل الإصدارات</string>
     <string name="error_failed_to_retrieve_version_properties_file_to_parse_version_information">تعذّر جلب ملف version.properties لتحليل معلومات الإصدار</string>
     <string name="error_failed_to_revoke_shizuku_access">فشل في إلغاء وصول Shizuku</string>
     <string name="error_failed_to_run_script">فشل في تشغيل البرنامج النصي</string>
@@ -276,6 +286,7 @@
     <string name="error_invalid_github_repo">مستودع جيثب غير صالح: %s</string>
     <string name="error_invalid_ip_address">عنوان إب غير صالح</string>
     <string name="error_invalid_login_credentials">اعتماد تسجيل الدخول غير صالح</string>
+    <string name="error_invalid_path">مسار غير صالح: %1$s</string>
     <string name="error_invalid_rest_compass">بوصلة راحة غير صالحة: %s</string>
     <string name="error_invalid_selector_map_element" formatted="false">عنصر خريطة محدد غير صالح: {%s: %s (%s)}</string>
     <string name="error_ip_address_should_not_be_empty">لا يمكن أن يكون عنوان IP فارغًا</string>
@@ -320,11 +331,13 @@
     <string name="error_port_num_over_65535">رقم المنفذ أكثر من 65535</string>
     <string name="error_project_main_script_file_with_abs_path_does_not_exist">ملف البرنامج النصي الرئيسي للمشروع \"%1$s\" غير موجود</string>
     <string name="error_put_value_into_json">لا يمكن وضع القيمة %s في JSON</string>
+    <string name="error_refresh_failed">فشل التحديث</string>
     <string name="error_regex_find_prev">لا يمكن العثور على السابق مع Regex</string>
     <string name="error_repeated_colon_symbol">رمز القولون المتكرر</string>
     <string name="error_repeated_dot_symbol">تكرار رمز النقطة</string>
     <string name="error_required_property_is_nullish_or_does_not_exist">الخاصية المطلوبة \"%1$s\" خالية أو غير موجودة</string>
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">المسار المُحلّ لـ \"%1$s\" لا يمكن أن يكون null</string>
+    <string name="error_save_failed">فشل الحفظ</string>
     <string name="error_script_is_on_exiting">السيناريو عند الخروج</string>
     <string name="error_selector_method_without_calling">يجب أن تسمى طريقة المحدد بدلاً من تمريرها كمعلمة: %s</string>
     <string name="error_selector_result_type_with_compass">لا يمكن استخدام بوصلة عندما يكون نوع النتيجة محددًا</string>
@@ -336,12 +349,18 @@
     <string name="error_the_transformer_for_required_property_cannot_return_nullish">لا يمكن لمحول الخاصية المطلوبة \"%1$s\" إرجاع قيمة فارغة</string>
     <string name="error_thread_is_not_alive">الموضوع ليس على قيد الحياة</string>
     <string name="error_timeout_while_querying_plugin_info">انتهت مهلة الاستعلام عن معلومات المكوّن الإضافي %1$s.</string>
+    <string name="error_unable_to_display_file_details_as_current_file_path_is_unknown">مسار الملف الحالي غير معروف، لا يمكن عرض تفاصيل الملف</string>
+    <string name="error_unable_to_display_version_history_as_current_file_path_is_unknown">مسار الملف الحالي غير معروف، لا يمكن عرض سجل الاصدارات</string>
+    <string name="error_unable_to_open_with_other_apps_as_current_file_path_is_unknown">مسار الملف الحالي غير معروف، لا يمكن الفتح بتطبيقات اخرى</string>
+    <string name="error_unable_to_package_application_as_current_file_path_is_unknown">مسار الملف الحالي غير معروف، لا يمكن حزم التطبيق</string>
+    <string name="error_unable_to_save_file_as_current_file_path_is_unknown">مسار الملف الحالي غير معروف، لا يمكن حفظ الملف</string>
     <string name="error_unable_to_use_shizuku_service">غير قادر على استخدام خدمة Shizuku</string>
     <string name="error_unacceptable_character">الطابع غير المقبول</string>
     <string name="error_unknown">خطأ غير معروف</string>
     <string name="error_unknown_algorithm_selector_param">محدد خوارزمية غير معروف بارام: %s</string>
     <string name="error_unknown_color_name">اسم لون غير معروف: %s</string>
     <string name="error_unknown_element_name">اسم عنصر غير معروف: %1$s</string>
+    <string name="error_unknown_exception">استثناء غير معروف</string>
     <string name="error_unknown_gravity_for">الجاذبية غير معروفة: %s</string>
     <string name="error_unknown_operation">عملية غير معروفة</string>
     <string name="error_unknown_picker_result_type">نوع نتيجة غير معروف {name: %s}</string>
@@ -349,7 +368,8 @@
     <string name="error_unknown_picker_selector_type" formatted="false">محدد غير معروف {الاسم: %s ، اكتب: %s}</string>
     <string name="error_unknown_type">نوع غير معروف: %s</string>
     <string name="error_webp_lossless_quality_not_supported">لا يمكن ضغط تنسيق WebP-Lossless باستخدام معامل الجودة؛ استخدم JPEG/PNG/WebP-Lossy بدلاً من ذلك</string>
-    <string name="file_not_exist_or_readable">الملف غير موجود أو قابلاً للقراءة: %s</string>
+    <string name="file_not_exist_or_readable">الملف غير موجود او غير قابل للقراءة</string>
+    <string name="file_not_exist_or_readable_with_path">الملف غير موجود أو قابلاً للقراءة: %s</string>
     <string name="foreground_notification_channel_name">خدمة مقدمة %1$s</string>
     <string name="foreground_notification_text">انقر لإطلاق %1$s</string>
     <string name="foreground_notification_title">خدمة مقدمة %1$s</string>
@@ -364,6 +384,8 @@
     <string name="hint_loop_times">0 للحلقة اللانهائية</string>
     <string name="hint_pc_server_address_supported_formats">يتم دعم IPv4 و IPv6 وأسماء النطاقات.</string>
     <string name="instruction_install_plugin_from_url">أدخل عنوان URL يشير إلى ملحق (Plugin) بعيد.\nمثال: \"https://example.com/plugin.apk\".</string>
+    <string name="item_delete_permanently">حذف نهائيا</string>
+    <string name="item_move_to_trash">نقل الى سلة المحذوفات</string>
     <string name="label_latest_used_time">آخر استخدام: %1$s</string>
     <string name="logger_ver_history_blob_thread_failure">فشل خيط \"blob\"</string>
     <string name="logger_ver_history_blob_thread_success">نجح خيط \"blob\" وجرى حفظ التخزين المؤقت دون اتصال</string>
@@ -431,12 +453,12 @@
     <string name="summary_post_notifications_permission_inrt">السماح للتطبيق بإنشاء وإرسال الإشعارات</string>
     <string name="summary_pre_execute_script">تنفيذ قبل ملف البرنامج النصي</string>
     <string name="summary_record_prompt">إظهار الرسالة عند بدء أو إيقاف تسجيل البرنامج النصي</string>
+    <string name="summary_release_history_preference">عرض سجل الاصدارات والاحصاءات</string>
     <string name="summary_rhino_java_primitive_wrap">ستُغلَّف الأنواع البدائية في Java ككائنات Java داخل السكربت</string>
     <string name="summary_stable_mode">تحليل تخطيط أكثر استقرارًا ولكن توافق رمز أسوأ (إعادة تشغيل خدمة إمكانية الوصول المطلوبة)</string>
     <string name="summary_text_launcher_shortcuts">أضف اختصارات إلى المشغل</string>
     <string name="summary_use_volume_control_record">ابدأ أو توقف عن التسجيل الذي يتم التحكم فيه بواسطة مفتاح خفض مستوى الصوت عند عرض الزر العائم</string>
     <string name="summary_use_volume_key_to_stop_running_scripts">اضغط على مفتاح \"رفع الصوت\" لإيقاف تشغيل جميع البرامج النصية</string>
-    <string name="summary_version_histories_preference">عرض سجل إصدارات النُّسَخ والبيانات الإحصائية</string>
     <string name="term_internal_strorage">وحدة التخزين الداخلية</string>
     <string name="text_a11y_service">خدمة إمكانية الوصول</string>
     <string name="text_a11y_service_description">مطلوب من خلال العملية التلقائية البرنامج النصي (انقر فوق ، اضغط لفترة طويلة ، شريحة ، إلخ).</string>
@@ -450,8 +472,8 @@
     <string name="text_about_display_over_other_apps">حول العرض على التطبيقات الأخرى</string>
     <string name="text_about_functions_feedback">استجابة</string>
     <string name="text_about_functions_licenses">التراخيص</string>
+    <string name="text_about_functions_release_history">@string/text_release_history</string>
     <string name="text_about_functions_update">تحديث</string>
-    <string name="text_about_functions_version_histories">@string/text_version_histories</string>
     <string name="text_access_has_been_granted">وقد تم منح الوصول</string>
     <string name="text_act_by_click">صوت نقر)</string>
     <string name="text_act_by_long_click">انقر طويل (Longclick)</string>
@@ -468,8 +490,7 @@
     <string name="text_all">الكل</string>
     <string name="text_all_files_access">جميع الملفات وصول</string>
     <string name="text_all_files_access_is_needed">هناك حاجة إلى \"All Files Access\" للوصول إلى ملفات البرنامج النصي على الهاتف</string>
-    <string name="text_all_histories">جميع السجلات</string>
-    <string name="text_all_histories_cleared">تم مسح جميع السجلات</string>
+    <string name="text_all_history_entries">كل ادخالات السجل</string>
     <string name="text_all_items_cleared">تم مسح جميع العناصر</string>
     <string name="text_allow_setting_alarms_and_reminders_is_recommended">يُوصى بمنح إذن \"السماح بتعيين المنبّهات والتذكيرات\" لضمان تنفيذ المهام المجدولة بأكبر قدر ممكن من الدقة حتى عند إيقاف الشاشة أو في وضع السكون</string>
     <string name="text_already_copied_to_clip">نسخ إلى الحافظة</string>
@@ -510,8 +531,8 @@
     <string name="text_app_shortcut_docs_short_label">توثيق</string>
     <string name="text_app_shortcut_log_long_label">AutoJs6 سجل</string>
     <string name="text_app_shortcut_log_short_label">سجل</string>
-    <string name="text_app_shortcut_plugin_center_long_label">AutoJs6 Plugin Center</string>
-    <string name="text_app_shortcut_plugin_center_short_label">Plugins</string>
+    <string name="text_app_shortcut_plugin_center_long_label">مركز اضافات AutoJs6</string>
+    <string name="text_app_shortcut_plugin_center_short_label">الاضافات</string>
     <string name="text_app_shortcut_settings_long_label">AutoJs6 إعدادات</string>
     <string name="text_app_shortcut_settings_short_label">إعدادات</string>
     <string name="text_app_source_code">مصدر الرمز</string>
@@ -523,6 +544,7 @@
     <string name="text_auto_check_for_updates">تحقق من التحديثات التلقائية</string>
     <string name="text_auto_check_for_updates_and_show_snackbar">تحقق من وجود التحديثات تلقائيًا وعرض تناول وجبة خفيفة على الصفحة الرئيسية</string>
     <string name="text_auto_night_mode">وضع الليل التلقائي</string>
+    <string name="text_auto_rename">اعادة تسمية تلقائيا</string>
     <string name="text_available_windows">النوافذ المتاحة</string>
     <string name="text_back">خلف</string>
     <string name="text_broadcast_action">عمل</string>
@@ -555,17 +577,23 @@
     <string name="text_check_for_updates_while_ignoring_the_local_version">التحقق من وجود تحديثات (تجاهل النسخة المحلية)</string>
     <string name="text_check_for_updates_while_ignoring_the_local_version_description">الحصول مباشرة على آخر نسخة عن بُعد عند التحقق من التحديثات</string>
     <string name="text_checking_update" tools:ignore="TypographyEllipsis">البحث عن تحديثات...</string>
+    <string name="text_choose_delete_strategy">اختر طريقة الحذف</string>
+    <string name="text_choose_restore_path">اختر مسار الاستعادة</string>
     <string name="text_city_or_locality">المدينة أو المنطقة</string>
     <string name="text_class_or_package_name">اسم الفئة / الحزمة</string>
     <string name="text_clear">صافي</string>
     <string name="text_clear_file_selection">مسح اختيار الملف</string>
     <string name="text_clear_pre_execute_script">مسح السيناريو قبل التنفيذ</string>
+    <string name="text_clear_trash">تفريغ سلة المحذوفات</string>
+    <string name="text_clear_trash_confirm">هل تريد تفريغ جميع العناصر في سلة المحذوفات?</string>
     <string name="text_clear_updates_checked_states">تحديثات مسح الحالات التي تم فحصها</string>
-    <string name="text_click_icon_to_add_launcher_shortcut">Click icon to add launcher shortcut</string>
+    <string name="text_clear_version_history">مسح سجل الاصدارات</string>
+    <string name="text_clear_version_history_confirm">هل تريد مسح جميع عناصر سجل الاصدارات?</string>
+    <string name="text_click_icon_to_add_launcher_shortcut">اضغط على الايقونة لاضافة اختصار للشاشة الرئيسية</string>
     <string name="text_click_item_to_remove">انقر فوق العنصر لإزالته</string>
     <string name="text_click_item_to_show_details">اضغط على العنصر لعرض التفاصيل</string>
     <string name="text_click_ok_to_go_to_settings">انقر فوق \"نعم\" للانتقال إلى الإعدادات</string>
-    <string name="text_click_other_areas_to_exit_selection">Click other areas to exit selection</string>
+    <string name="text_click_other_areas_to_exit_selection">اضغط في مكان اخر للخروج من التحديد</string>
     <string name="text_click_too_frequently">التشغيل المتكرر</string>
     <string name="text_client_mode">وضع العميل</string>
     <string name="text_clone_color_library">استنساخ مكتبة ألوان</string>
@@ -581,10 +609,10 @@
     <string name="text_compatibility">التوافق</string>
     <string name="text_confidence_level">ثقة</string>
     <string name="text_config">تكوين</string>
-    <string name="text_confirm_to_clear_all_histories">هل أنت متأكد من مسح جميع السجلات؟</string>
     <string name="text_confirm_to_clear_all_items">هل أنت متأكد من مسح جميع العناصر؟</string>
-    <string name="text_confirm_to_clear_histories_of">سيتم مسح السجلات التالية\n\n[ %1$s ]\n\nهل أنت متأكد من المسح؟</string>
-    <string name="text_confirm_to_clear_histories_of_all_color_libraries">سيتم مسح السجلات التالية\n\n[ جميع مكتبات الألوان ]\n\nهل أنت متأكد من المسح؟</string>
+    <string name="text_confirm_to_clear_the_history">هل تريد مسح السجل?</string>
+    <string name="text_confirm_to_clear_the_history_of">سيتم مسح السجل ادناه\n\n[ %1$s ]\n\nهل تريد المتابعة?</string>
+    <string name="text_confirm_to_clear_the_history_of_all_color_libraries">سيتم مسح جميع ادخالات السجل ادناه\n\n[ جميع مكتبات الالوان ]\n\nهل تريد مسحها كلها?</string>
     <string name="text_confirm_to_delete">هل انت متأكد من الحذف؟</string>
     <string name="text_confirm_to_remove">هل أنت متأكد من إزالته؟</string>
     <string name="text_confirm_to_uninstall">هل تريد بالتأكيد إلغاء التثبيت؟</string>
@@ -609,6 +637,7 @@
     <string name="text_copy_to">نسخ إلى</string>
     <string name="text_copy_to_clip">نسخ إلى الحافظة</string>
     <string name="text_copy_value">نسخ القيمة</string>
+    <string name="text_copying" tools:ignore="TypographyEllipsis">جارٍ النسخ...</string>
     <string name="text_country_code">رمز الدولة (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">رمز الدولة يجب أن يكون حرفين كبيرين</string>
     <string name="text_current_version">النسخة الحالية</string>
@@ -635,6 +664,8 @@
     <string name="text_delete_file">حذف الملف</string>
     <string name="text_delete_folder">حذف المجلد</string>
     <string name="text_delete_line">حذف الخط</string>
+    <string name="text_delete_revision_confirm">هل تريد حذف هذه المراجعة نهائيا?</string>
+    <string name="text_deleting" tools:ignore="TypographyEllipsis">جارٍ الحذف...</string>
     <string name="text_description">الوصف</string>
     <string name="text_destination">الوجهة</string>
     <string name="text_details">تفاصيل</string>
@@ -668,6 +699,7 @@
     <string name="text_download_link_for_autojs6">رابط تحميل AutoJs6</string>
     <string name="text_download_url">تنزيل URL</string>
     <string name="text_downloading">جارى التحميل</string>
+    <string name="text_draft_file_path">مسار المسودة</string>
     <string name="text_drawer_close">وثيق درج</string>
     <string name="text_drawer_open">درج مفتوح</string>
     <string name="text_edit">يحرر</string>
@@ -701,8 +733,6 @@
     <string name="text_extensibility">التمدد</string>
     <string name="text_failed">باءت بالفشل</string>
     <string name="text_failed_to_build">فشل في البناء</string>
-    <string name="text_failed_to_copy">فشل النسخ</string>
-    <string name="text_failed_to_create">فشل في انشاء</string>
     <string name="text_failed_to_create_key_store">فشل في إنشاء مفتاح التوقيع</string>
     <string name="text_failed_to_delete">فشل في حذف</string>
     <string name="text_failed_to_disable_a11y_service">فشل في تعطيل خدمة الوصول</string>
@@ -726,11 +756,13 @@
     <string name="text_failed_to_update">فشل التحديث</string>
     <string name="text_failed_to_write_file">فشل في كتابة الملف</string>
     <string name="text_file">ملف</string>
+    <string name="text_file_colon_value">الملف: %1$s</string>
     <string name="text_file_details">تفاصيل الملف</string>
     <string name="text_file_exists">ملف موجود بالفعل</string>
     <string name="text_file_explorer">مستكشف الملفات</string>
     <string name="text_file_extensions_title">امتدادات الملف</string>
     <string name="text_file_name">اسم الملف</string>
+    <string name="text_file_name_colon_value">اسم الملف: %1$s</string>
     <string name="text_file_not_exists">ملف غير موجود</string>
     <string name="text_file_path">مسار الملف</string>
     <string name="text_file_with_abs_path_is_not_an_executable_script">الملف \"%1$s\" ليس برنامجًا نصيًا قابلًا للتنفيذ</string>
@@ -747,6 +779,7 @@
     <string name="text_first_and_last_name">الاسم</string>
     <string name="text_floating_button">زر عائم</string>
     <string name="text_folder">مجلد</string>
+    <string name="text_folder_colon_value">المجلد: %1$s</string>
     <string name="text_force_stop">توقف إجباري</string>
     <string name="text_foreground_service">خدمة المقدمة</string>
     <string name="text_formatting_completed">اكتمل التنسيق</string>
@@ -768,7 +801,8 @@
     <string name="text_hide_button">زر الإخفاء</string>
     <string name="text_hide_node">إخفاء هذه العقدة</string>
     <string name="text_hide_same_frame_nodes">إخفاء العقدة ذات الإطار المماثل</string>
-    <string name="text_histories">التاريخ</string>
+    <string name="text_history">السجل</string>
+    <string name="text_history_has_been_cleared">تم مسح السجل</string>
     <string name="text_icon">أيقونة</string>
     <string name="text_ignore_battery_optimizations">تجاهل تحسينات البطارية</string>
     <string name="text_ignored_updates">تحديثات تجاهل</string>
@@ -796,6 +830,7 @@
     <string name="text_ip_address_may_be_invalid_for_server_connection" tools:ignore="TypographyEllipsis">عنوان IP \"%1$s\" له استخدام خاص (loopback/broadcast/multicast/reserved/...)، لذلك قد لا يمكن استخدامه للاتصال بالخادم الهدف.</string>
     <string name="text_is_latest_version">لم يتم العثور على نسخة أحدث</string>
     <string name="text_issue_report">استجابة</string>
+    <string name="text_items_count_colon_value">العناصر: %1$d</string>
     <string name="text_js_file">*</string>
     <string name="text_jump">القفز</string>
     <string name="text_jump_to_end">القفز إلى النهاية</string>
@@ -848,8 +883,14 @@
     <string name="text_move_aborted_same_path">مسار المصدر هو نفسه مسار الوجهة، تم إلغاء النقل.</string>
     <string name="text_move_all_files_to_new_directory">انقل جميع الملفات إلى دليل جديد</string>
     <string name="text_move_file">نقل الملف</string>
+    <string name="text_move_file_to_trash">نقل الملف الى سلة المحذوفات</string>
     <string name="text_move_folder">نقل المجلد</string>
+    <string name="text_move_folder_to_trash">نقل المجلد الى سلة المحذوفات</string>
     <string name="text_move_to">نقل إلى</string>
+    <string name="text_move_to_trash_failed">فشل النقل الى سلة المحذوفات</string>
+    <string name="text_moved_to_trash">تم النقل الى سلة المحذوفات</string>
+    <string name="text_moving" tools:ignore="TypographyEllipsis">جارٍ النقل...</string>
+    <string name="text_moving_to_trash" tools:ignore="TypographyEllipsis">جارٍ النقل الى سلة المحذوفات...</string>
     <string name="text_multiple_options">خيارات متعددة</string>
     <string name="text_name">اسم</string>
     <string name="text_need_to_enable_a11y_service">تحتاج إلى تمكين خدمة الوصول</string>
@@ -867,7 +908,8 @@
     <string name="text_no_browser">لم يتم تثبيت متصفح</string>
     <string name="text_no_content">لا يوجد محتوى</string>
     <string name="text_no_content_description">لا يوجد وصف للمحتوى</string>
-    <string name="text_no_histories">لا تاريخ</string>
+    <string name="text_no_data">لا توجد بيانات</string>
+    <string name="text_no_history">لا يوجد سجل</string>
     <string name="text_no_ignored_updates">لا تحديثات تم تجاهلها</string>
     <string name="text_no_log_entries_to_copy">لا توجد إدخالات سجل لنسخها</string>
     <string name="text_no_log_entries_to_export">لا توجد إدخالات سجل للتصدير</string>
@@ -876,6 +918,7 @@
     <string name="text_no_root">غير الجذر</string>
     <string name="text_no_root_access">لا الوصول إلى الجذر</string>
     <string name="text_no_scripts_to_stop_running">لا توجد نصوص للتوقف عن الجري</string>
+    <string name="text_no_version_history">لا يوجد سجل للاصدارات</string>
     <string name="text_not_granted">لم تمنح</string>
     <string name="text_not_installed">غير مثبّت</string>
     <string name="text_not_showing_main_activity">لا تظهر النشاط الرئيسي</string>
@@ -901,14 +944,17 @@
     <string name="text_original_developer">المطور الأصلي</string>
     <string name="text_others">آحرون</string>
     <string name="text_output_apk_path">مسار الإخراج APK</string>
+    <string name="text_overwrite">استبدال</string>
     <string name="text_package_name">اسم الحزمة</string>
     <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">اسم الحزمة (جارٍ الحساب...)</string>
     <string name="text_password">كلمة المرور</string>
     <string name="text_password_cannot_be_empty">كلمة المرور لا يمكن أن تكون فارغة</string>
     <string name="text_password_requires_at_least_n_characters">يجب أن يحتوي كلمة المرور على %d على الأقل من الأحرف</string>
     <string name="text_paste">معجون</string>
+    <string name="text_path_colon_value">المسار: %1$s</string>
     <string name="text_path_is_empty">المسار فارغ</string>
     <string name="text_pc_server_address">عنوان خادم الكمبيوتر</string>
+    <string name="text_percentage_colon_value">الاستخدام: %1$s</string>
     <string name="text_permission_desc_access_coarse_location">يسمح للتطبيق بالوصول إلى معلومات الموقع التقريبية عبر الشبكة</string>
     <string name="text_permission_desc_access_fine_location">يسمح للتطبيق بالحصول على معلومات الموقع الدقيقة عبر نظام تحديد المواقع العالمي (GPS)</string>
     <string name="text_permission_desc_access_location_extra_commands">يسمح للتطبيق بالوصول إلى أوامر إضافية من مزودي خدمات الموقع</string>
@@ -1000,9 +1046,9 @@
     <string name="text_please_input_name">اسم الإدخال</string>
     <string name="text_please_wait" tools:ignore="TypographyEllipsis">الرجاء الانتظار...</string>
     <string name="text_please_wait_a_moment_before_trying_again" tools:ignore="TypographyEllipsis">يرجى المحاولة مرة أخرى لاحقًا...</string>
-    <string name="text_plugin_center">Plugin center</string>
+    <string name="text_plugin_center">مركز الاضافات</string>
     <string name="text_plugin_details">تفاصيل الملحق</string>
-    <string name="text_plugins">Plugins</string>
+    <string name="text_plugins">الاضافات</string>
     <string name="text_pointer_location">موقع المؤشر</string>
     <string name="text_pointer_location_toggle_failed_with_hint">فشل تبديل \"موقع المؤشر\".\nالوصول إلى الجذر مطلوب.</string>
     <string name="text_post_notifications_permission">نشر الإخطارات</string>
@@ -1038,11 +1084,14 @@
     <string name="text_register">يسجل</string>
     <string name="text_register_succeed">نجح السجل</string>
     <string name="text_registering">التسجيل</string>
+    <string name="text_release_history">سجل الاصدارات</string>
     <string name="text_release_notes">ملاحظات الإصدار</string>
     <string name="text_remote">التحكم عن بعد</string>
     <string name="text_remote_file_saved_to_local_storage_successfully">تم حفظ الملف البعيد في وحدة التخزين المحلية بنجاح</string>
     <string name="text_remote_project_saved_to_local_storage_successfully">تم حفظ المشروع البعيد في وحدة التخزين المحلية بنجاح</string>
     <string name="text_remove_all_breakpoints">إزالة جميع نقاط التوقف</string>
+    <string name="text_remove_from_trash">ازالة من سلة المحذوفات</string>
+    <string name="text_remove_from_trash_confirm">هل تريد حذف هذا العنصر من سلة المحذوفات نهائيا?</string>
     <string name="text_rename">إعادة تسمية</string>
     <string name="text_replace">يحل محل</string>
     <string name="text_replace_all">استبدل كل شيء</string>
@@ -1056,6 +1105,10 @@
     <string name="text_reset_to_initial_content_only_for_assets">إعادة التعيين هي فقط للعينات</string>
     <string name="text_restart">إعادة بدء</string>
     <string name="text_restart_strategy">استراتيجية إعادة التشغيل</string>
+    <string name="text_restore">استعادة</string>
+    <string name="text_restore_to_original_path">استعادة الى المسار الاصلي</string>
+    <string name="text_restore_to_specified_path">استعادة الى مسار محدد</string>
+    <string name="text_restoring" tools:ignore="TypographyEllipsis">جارٍ الاستعادة...</string>
     <string name="text_result">نتيجة</string>
     <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">جارٍ جلب سجل التغييرات...</string>
     <string name="text_retrieving_plugin_list_data" tools:ignore="TypographyEllipsis">جارٍ جلب بيانات قائمة المكونات الإضافية...</string>
@@ -1131,7 +1184,13 @@
     <string name="text_sort">فرز</string>
     <string name="text_sort_by_last_update_time">فرز حسب آخر تحديث</string>
     <string name="text_sort_by_name">فرز حسب الاسم</string>
+    <string name="text_sort_by_name_asc">الاسم (A-Z)</string>
     <string name="text_sort_by_package_size">فرز حسب حجم الحزمة</string>
+    <string name="text_sort_by_path_asc">المسار (A-Z)</string>
+    <string name="text_sort_by_size_asc">الحجم (الاصغر اولا)</string>
+    <string name="text_sort_by_size_desc">الحجم (الاكبر اولا)</string>
+    <string name="text_sort_by_time_asc">الوقت (الاقدم اولا)</string>
+    <string name="text_sort_by_time_desc">الوقت (الاحدث اولا)</string>
     <string name="text_source">المصدر</string>
     <string name="text_source_file_path">مسار رمز المصدر</string>
     <string name="text_special_permissions">أذونات خاصة</string>
@@ -1162,10 +1221,15 @@
     <string name="text_timed_task">مهمة توقيت</string>
     <string name="text_timed_task_backend_title">محرك جدولة المهام المؤقتة</string>
     <string name="text_timed_task_timing">توقيت</string>
+    <string name="text_to_be_chosen">قيد الاختيار</string>
     <string name="text_tools">أدوات</string>
+    <string name="text_total_size_colon_value">الحجم: %1$s</string>
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">قد يتم تلقائيًا إخفاء رمز المشغّل بخلفية شفافة أو إضافة خلفية إليه بواسطة النظام, لذلك قد يختلف التأثير الفعلي بين الأجهزة المختلفة</string>
+    <string name="text_trash">سلة المحذوفات</string>
     <string name="text_tutorial">الدورة التعليمية</string>
     <string name="text_type">يكتب</string>
+    <string name="text_type_file">ملف</string>
+    <string name="text_type_folder">مجلد</string>
     <string name="text_unable_to_build_apk_as_autojs6_does_not_include_selected_abi">لا يمكن استخدام ABI المحدد \"%s\" لإنشاء تطبيق مجمع، لأن الإصدار الحالي من AutoJs6 لا يتضمن ABI أعلاه.</string>
     <string name="text_unavailable">غير متوفره</string>
     <string name="text_unavailable_abi_for">واجهة برمجة التطبيقات \"%s\" غير متوفرة</string>
@@ -1174,15 +1238,15 @@
     <string name="text_under_development_title">@string/text_under_development</string>
     <string name="text_undo">الغاء التحميل</string>
     <string name="text_undo_simplified">ينسحب</string>
-    <string name="text_uninstall">Uninstall</string>
+    <string name="text_uninstall">الغاء التثبيت</string>
     <string name="text_unknown">غير معروف</string>
     <string name="text_unknown_author_for_plugin">مؤلف غير معروف</string>
     <string name="text_unknown_description_for_plugin">وصف غير معروف</string>
     <string name="text_unknown_title_for_plugin">عنوان غير معروف</string>
     <string name="text_unknown_version_for_plugin">إصدار غير معروف</string>
     <string name="text_unverified">لم يتم التحقق</string>
-    <string name="text_updatable">Updatable</string>
-    <string name="text_update">Update</string>
+    <string name="text_updatable">قابل للتحديث</string>
+    <string name="text_update">تحديث</string>
     <string name="text_updates">التحديثات</string>
     <string name="text_updates_checked_states_cleared">تم مسح الحالات التي تم فحصها</string>
     <string name="text_updates_snack_bar_act_later">في وقت لاحق</string>
@@ -1210,7 +1274,10 @@
     <string name="text_version">إصدار</string>
     <string name="text_version_code">رمز الإصدار</string>
     <string name="text_version_code_with_computing" tools:ignore="TypographyEllipsis">رمز الإصدار (جارٍ الحساب...)</string>
-    <string name="text_version_histories">سجل الإصدارات</string>
+    <string name="text_version_count_colon_value">الاصدارات: %1$s</string>
+    <string name="text_version_history">سجل الاصدارات</string>
+    <string name="text_version_history_restore_does_not_auto_save_to_disk">عند الاستعادة، يتم تغيير محتوى المحرر فقط. لن يتم الحفظ تلقائيا في الملف. يرجى الضغط على زر \"حفظ\" يدويا.</string>
+    <string name="text_version_history_restore_will_overwrite_file">ستؤدي الاستعادة الى استبدال محتوى الملف.\nالمسار: %1$s</string>
     <string name="text_version_info">معلومات الإصدار</string>
     <string name="text_version_name">اسم الإصدار</string>
     <string name="text_version_name_with_computing" tools:ignore="TypographyEllipsis">اسم الإصدار (جارٍ الحساب...)</string>
@@ -1225,28 +1292,4 @@
     <string name="text_write_secure_settings">اكتب إعدادات الأمان</string>
     <string name="text_write_system_settings">كتابة إعدادات النظام</string>
     <string name="text_xiaomi_background_popup_permission">النوافذ المنبثقة في الخلفية</string>
-    <string name="error_refresh_failed">فشل التحديث</string>
-    <string name="error_save_failed">فشل الحفظ</string>
-    <string name="text_draft_file_path">مسار المسودة</string>
-    <string name="dialog_button_copy_path">نسخ</string>
-    <string name="dialog_button_save_as">حفظ باسم</string>
-    <string name="text_version_history">سجل الاصدارات</string>
-    <string name="text_no_version_history">لا يوجد سجل للاصدارات</string>
-    <string name="text_version_history_restore_does_not_auto_save_to_disk">عند الاستعادة، يتم تغيير محتوى المحرر فقط. لن يتم الحفظ تلقائيا في الملف. يرجى الضغط على زر \"حفظ\" يدويا.</string>
-    <string name="item_move_to_trash">نقل الى سلة المحذوفات</string>
-    <string name="item_delete_permanently">حذف نهائيا</string>
-    <string name="text_moved_to_trash">تم النقل الى سلة المحذوفات</string>
-    <string name="text_choose_delete_strategy">اختر طريقة الحذف</string>
-    <string name="text_trash">سلة المحذوفات</string>
-    <string name="text_choose_restore_path">اختر مسار الاستعادة</string>
-    <string name="text_restore_to_original_path">استعادة الى المسار الاصلي</string>
-    <string name="text_restore_to_specified_path">استعادة الى مسار محدد</string>
-    <string name="text_path_colon_value">المسار: %1$s</string>
-    <string name="text_file_name_colon_value">اسم الملف: %1$s</string>
-    <string name="dialog_button_choose_path">اختيار</string>
-    <string name="text_overwrite">استبدال</string>
-    <string name="text_auto_rename">اعادة تسمية تلقائيا</string>
-    <string name="text_no_data">لا توجد بيانات</string>
-    <string name="error_invalid_path">مسار غير صالح: %1$s</string>
-    <string name="text_version_history_restore_will_overwrite_file">ستؤدي الاستعادة الى استبدال محتوى الملف.\nالمسار: %1$s</string>
 </resources>

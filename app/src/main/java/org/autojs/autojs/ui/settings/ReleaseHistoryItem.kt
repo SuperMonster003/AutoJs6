@@ -1,6 +1,6 @@
 package org.autojs.autojs.ui.settings
 
-data class VersionHistoryItem(
+data class ReleaseHistoryItem(
     val version: String,
     val date: String,
     val lines: List<String>,

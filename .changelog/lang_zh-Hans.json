@@ -93,7 +93,7 @@
         "输入事件观察器 InputEventObserver 可能导致应用启动时明显卡顿的问题",
         "Shizuku 用户服务进程未能正常结束导致进程堆积的问题 _[`issue #474`](http://issues.autojs6.com/474)_",
         "打包应用无法正常使用 Paddle OCR 与 Rapid OCR 功能的问题",
-        "版本历史页面部分系统因字体差别导致统计数据显示不完整的问题",
+        "发行历史页面部分系统因字体差别导致统计数据显示不完整的问题",
         "部分设备无法正常初始化 MLKit Google OCR 的问题 (试修) _[`issue #8`](http://issues.autojs6.com/8#issuecomment-3117061768)_",
         "部分设备无法正常触发文件管理器功能按钮点击事件的问题 (试修) _[`issue #465`](http://issues.autojs6.com/465)_",
         "ErrorDialogActivity 可能无法正常启动或短时间自动消失的问题 _[`issue #479`](http://issues.autojs6.com/479)_ _[`issue #471`](http://issues.autojs6.com/471)_ _[`issue #414`](http://issues.autojs6.com/414)_ _[`issue #340`](http://issues.autojs6.com/340#issuecomment-2973485826)_",
@@ -169,6 +169,7 @@
         "附加 AndroidX Activity (KTX) 版本 1.12.2",
         "附加 AndroidX Core (KTX) 版本 1.15.0",
         "附加 AndroidX Work Runtime 版本 2.11.0",
+        "附加 Room RxJava2 版本 2.8.1",
         "升级 Android SDK 版本 35 -> 36",
         "升级 Gradle 版本 8.14 -> 8.14.3",
         "升级 Rhino 版本 1.8.1-SNAPSHOT -> 2.0.0-SNAPSHOT",
@@ -215,7 +216,7 @@
     "v6.6.3": {
       "released_date": "2025/05/27",
       "feature": [
-        "版本历史功能, 可查看发行版本历史更新记录 (多语言) 与统计数据",
+        "发行历史功能, 可查看发行版本的发行历史记录 (多语言) 与统计数据",
         "timers.keepAlive 方法 (已全局化), 用于保持脚本活跃状态",
         "engines.on('start/stop/error', callback) 等事件监听方法, 用于监听脚本引擎全局事件",
         "images.detectMultiColors 方法, 用于多点颜色校验 _[`issue #374`](http://issues.autojs6.com/374)_",
@@ -230,7 +231,7 @@
       "fix": [
         "主页文档标签及文档活动页面显示在线文档时部分内容被系统导航栏遮挡的问题",
         "部分页面 Toolbar 点击按钮时可能导致标题点击事件误触发的问题",
-        "部分设备代码编辑器空行显示方框字符的问题",
+        "部分设备代码编辑器空行显示方框字符的问题 (试修)",
         "主题色设置页面调色盘对话框可能无限叠加的问题",
         "无障碍服务关闭时音量加键停止所有脚本功能失效的问题",
         "定时任务页面编辑自定义广播内容时出现的输入法遮挡问题",

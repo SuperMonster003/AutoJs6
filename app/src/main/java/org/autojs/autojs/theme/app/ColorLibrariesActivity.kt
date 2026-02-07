@@ -126,22 +126,22 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
             showColorPicker()
             true
         }
-        R.id.action_show_all_histories -> {
-            showColorHistories { selectedHistoryItem ->
+        R.id.action_show_all_history_entries -> {
+            showColorHistory { selectedHistoryItem ->
                 val identifier = selectedHistoryItem.colorLibraryIdentifier ?: run {
                     ViewUtils.showToast(this@ColorLibrariesActivity, R.string.error_failed_to_apply_current_color_history, true)
-                    return@showColorHistories
+                    return@showColorHistory
                 }
                 if (identifier == getString(R.string.color_library_identifier_palette)) {
                     onColorPickerConfirmed(selectedHistoryItem.colorInt)
-                    return@showColorHistories
+                    return@showColorHistory
                 }
                 presetColorLibraries.find { getString(it.identifierRes) == identifier }?.let { library ->
                     library.colors.firstOrNull { getColor(it.colorRes) == selectedHistoryItem.colorInt }?.let { item ->
                         savePrefsForLibraries(item)
                         savePrefsForLegacy(this, item)
 
-                        saveDatabaseForColorHistories(
+                        saveDatabaseForColorHistory(
                             applicationContext = applicationContext,
                             libraryId = item.libraryId,
                             itemId = item.itemId,
