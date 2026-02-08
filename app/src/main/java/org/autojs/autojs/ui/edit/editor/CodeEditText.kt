@@ -54,6 +54,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 /**
  * Created by Administrator on Feb 11, 2018.
  * Modified by SuperMonster003 as of May 1, 2023.
+ * Modified by JetBrains AI Assistant (GPT-5.2) as of Feb 8, 2026.
  */
 class CodeEditText : AppCompatEditText {
 
@@ -62,6 +63,16 @@ class CodeEditText : AppCompatEditText {
 
     @Volatile
     private var mHighlightTokens: HighlightTokens? = null
+
+    // Loading state, used to suppress expensive callbacks during bulk text insertion.
+    // zh-CN: 加载状态, 用于在批量插入文本时抑制高开销回调.
+    @Volatile
+    private var mLoadingText = false
+
+    // Fixed gutter digits used during loading to avoid frequent requestLayout().
+    // zh-CN: 加载期间使用固定 gutter 位数, 避免频繁 requestLayout().
+    @Volatile
+    private var mLoadingGutterDigits: Int = 1
 
     private var mTheme: Theme = Theme.getDefault(context)
     private val mLineHighlightPaint = Paint().apply { style = Paint.Style.FILL }
@@ -116,6 +127,43 @@ class CodeEditText : AppCompatEditText {
         // zh-CN: 默认确保可以进行文本选择.
         setTextIsSelectable(true)
         isLongClickable = true
+    }
+
+    // Toggle loading state.
+    // zh-CN: 切换加载状态.
+    fun setLoadingText(loading: Boolean) {
+        mLoadingText = loading
+        if (loading) {
+            applyFixedGutterPaddingForLoading()
+        } else {
+            // Recompute gutter once after loading.
+            // zh-CN: 加载结束后重新计算 gutter(仅一次).
+            requestLayout()
+            invalidate()
+        }
+    }
+
+    // Expose loading state for outer components to suppress expensive UI updates.
+    // zh-CN: 对外暴露加载状态, 以便外部组件抑制高开销 UI 更新.
+    fun isLoadingText(): Boolean = mLoadingText
+
+    // Configure a fixed gutter width for loading.
+    // zh-CN: 配置加载期间的固定 gutter 宽度.
+    fun setLoadingGutterDigits(digits: Int) {
+        mLoadingGutterDigits = digits.coerceIn(2, 10)
+        if (mLoadingText) {
+            applyFixedGutterPaddingForLoading()
+        }
+    }
+
+    private fun applyFixedGutterPaddingForLoading() {
+        // Pre-allocate gutter width based on digits, e.g., "888888".
+        // zh-CN: 基于位数预分配 gutter 宽度, 例如 "888888".
+        val sample = "8".repeat(mLoadingGutterDigits)
+        val gutterWidth = paint.measureText(sample) + 20
+        if (paddingLeft.toFloat() != gutterWidth) {
+            setPadding(gutterWidth.toInt(), 0, 0, 0)
+        }
     }
 
     // Public API to toggle read-only mode.
@@ -173,7 +221,8 @@ class CodeEditText : AppCompatEditText {
                 android.R.id.cut,
                 android.R.id.paste,
                 android.R.id.pasteAsPlainText,
-                android.R.id.replaceText -> return false
+                android.R.id.replaceText,
+                    -> return false
             }
         }
         return super.onTextContextMenuItem(id)
@@ -279,6 +328,12 @@ class CodeEditText : AppCompatEditText {
     }
 
     private fun updatePaddingForGutter() {
+        // During loading, keep gutter fixed to avoid setPadding() loops and relayout storms.
+        // zh-CN: 加载期间保持 gutter 固定, 避免 setPadding() 循环与频繁 relayout.
+        if (mLoadingText) {
+            return
+        }
+
         // 根据行号计算左边距 padding 留出绘制行号的空间
         val max = lineCount.toString()
         val gutterWidth = paint.measureText(max) + 20
@@ -292,7 +347,9 @@ class CodeEditText : AppCompatEditText {
     private fun drawText(canvas: Canvas) {
         if (mFirstLineForDraw < 0) return
 
-        val textLength = mHighlightTokens?.text?.length ?: 0
+        val highlightTokens = mHighlightTokens
+        val safeText = text ?: return
+        val textLength = highlightTokens?.text?.length ?: 0
         val scrollX = (mParentScrollView!!.scrollX + scrollX - paddingLeft).coerceAtLeast(0)
 
         for (line in mFirstLineForDraw..lineCount.coerceAtMost(mLastLineForDraw)) {
@@ -303,7 +360,6 @@ class CodeEditText : AppCompatEditText {
             val lineBottom = layout.getLineTop(lineNumber)
             val lineTop = layout.getLineTop(line)
             val lineBaseline = lineBottom - layout.getLineDescent(line)
-            val highlightTokens = mHighlightTokens
 
             // if there is a breakpoint at this line, draw a highlight background for line number
             if (breakpoints.containsKey(line)) {
@@ -324,15 +380,10 @@ class CodeEditText : AppCompatEditText {
                 /* paint = */ paint.apply { color = mTheme.lineNumberColor },
             )
 
-            if (highlightTokens == null) continue
-
-            // Draw code
-
             val lineStart = layout.getLineStart(line)
 
             // Never draw line-break control characters.
             // zh-CN: 永远不要绘制换行等控制字符.
-            val safeText = text ?: continue
             var lineEnd = layout.getLineEnd(line).coerceAtMost(safeText.length)
             while (lineEnd > lineStart) {
                 val ch = safeText[lineEnd - 1]
@@ -343,11 +394,28 @@ class CodeEditText : AppCompatEditText {
                 }
             }
 
+            // Fast path: no syntax highlighting, draw the line once with default color.
+            // zh-CN: 快速路径: 无语法高亮时, 使用默认颜色一次性绘制整行.
+            if (highlightTokens == null) {
+                val visibleCharStart = getVisibleCharIndex(paint, scrollX, lineStart, lineEnd)
+                val visibleCharEnd = (getVisibleCharIndex(paint, scrollX + mParentScrollView!!.width, lineStart, lineEnd) + 1)
+                    .coerceAtMost(lineEnd)
+
+                if (visibleCharStart >= visibleCharEnd) continue
+
+                paint.color = mTheme.getColorForToken(Token.NAME)
+                runCatching {
+                    val offsetX = paint.measureText(safeText, lineStart, visibleCharStart)
+                    canvas.drawText(safeText, visibleCharStart, visibleCharEnd, paddingLeft + offsetX, lineBaseline.toFloat(), paint)
+                }.onFailure { it.printStackTrace() }
+                continue
+            }
+
             if (lineStart >= textLength) continue
             if (lineEnd > textLength) continue
 
             // If this is an empty line (or the line only contains line-break chars), skip drawing.
-            // zh-CN: 如果这是空白行(或该行只包含换行字符), 则跳过绘制.
+            // zh-CN: 如果这是空白行 (或该行只包含换行字符), 则跳过绘制.
             if (lineStart >= lineEnd) continue
 
             val localColors = highlightTokens.colors
@@ -403,8 +471,8 @@ class CodeEditText : AppCompatEditText {
             }
 
             runCatching {
-                val offsetX = paint.measureText(currentText, lineStart, previousColorPos)
-                canvas.drawText(currentText, previousColorPos, visibleCharEnd, paddingLeft + offsetX, lineBaseline.toFloat(), paint)
+                val offsetX = paint.measureText(safeText, lineStart, previousColorPos)
+                canvas.drawText(safeText, previousColorPos, visibleCharEnd, paddingLeft + offsetX, lineBaseline.toFloat(), paint)
             }.onFailure {
                 it.printStackTrace()
                 runCatching {
@@ -460,6 +528,13 @@ class CodeEditText : AppCompatEditText {
     }
 
     override fun onSelectionChanged(selStart: Int, selEnd: Int) {
+        // Skip selection callbacks during bulk loading to keep UI responsive.
+        // zh-CN: 批量加载期间跳过 selection 回调, 以保持 UI 响应.
+        if (mLoadingText) {
+            super.onSelectionChanged(selStart, selEnd)
+            return
+        }
+
         // 调用父类的 onSelectionChanged 时会发送一个 AccessibilityEvent, 当文本过大时造成异常
         // super.onSelectionChanged(selStart, selEnd);
         // 父类构造函数会调用 onSelectionChanged, 此时 mCursorChangeCallbacks 还没有初始化
@@ -523,6 +598,13 @@ class CodeEditText : AppCompatEditText {
     }
 
     fun removeCursorChangeCallback(callback: CursorChangeCallback) = mCursorChangeCallbacks!!.remove(callback)
+
+    // Clear syntax highlight tokens and redraw with plain text.
+    // zh-CN: 清空语法高亮 tokens, 并用纯文本方式重绘.
+    fun clearHighlightTokens() {
+        mHighlightTokens = null
+        postInvalidate()
+    }
 
     fun updateHighlightTokens(highlightTokens: HighlightTokens) {
         if (mHighlightTokens != null && mHighlightTokens!!.id >= highlightTokens.id) {

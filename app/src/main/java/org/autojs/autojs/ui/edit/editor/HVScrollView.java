@@ -21,6 +21,8 @@ import java.util.List;
 
 /**
  * Reference to ScrollView and HorizontalScrollView
+ *
+ * Modified by JetBrains AI Assistant (GPT-5.2) as of Feb 8, 2026.
  */
 public class HVScrollView extends FrameLayout {
     static final int ANIMATED_SCROLL_GAP = 250;
@@ -385,6 +387,20 @@ public class HVScrollView extends FrameLayout {
             final int scrollX = getScrollX();
             final int scrollY = getScrollY();
             final View child = getChildAt(0);
+
+            // Fallback for transient layout states during progressive loading.
+            // zh-CN: 渐进式加载期间可能出现的短暂布局状态回退处理.
+            //
+            // When the child is not measured/layouted yet (width/height == 0), the original
+            // bounds check may reject all ACTION_DOWN events, causing scrolling to be stuck.
+            // zh-CN: 当子 View 尚未完成测量/布局时(width/height == 0), 原边界判断可能拒绝所有 ACTION_DOWN,
+            // zh-CN: 从而导致滚动完全失效.
+            final int childWidth = child.getWidth();
+            final int childHeight = child.getHeight();
+            if (childWidth <= 0 || childHeight <= 0) {
+                return x >= 0 && x < getWidth() && y >= 0 && y < getHeight();
+            }
+
             return !(y < child.getTop() - scrollY
                     || y >= child.getBottom() - scrollY
                     || x < child.getLeft() - scrollX

@@ -3,11 +3,15 @@ package org.autojs.autojs.ui.edit.editor
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
+import android.os.Handler
+import android.os.Looper
+import android.os.SystemClock
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import android.view.ScaleGestureDetector.SimpleOnScaleGestureListener
+import android.view.WindowManager
 import com.afollestad.materialdialogs.MaterialDialog
 import io.reactivex.Observable
 import org.autojs.autojs.core.pref.Pref.getEditorTextSize
@@ -53,7 +57,7 @@ import kotlin.math.floor
 /**
  * Transformed by SuperMonster003 on Jul 16, 2023.
  * Modified by SuperMonster003 as of Jul 16, 2023.
- * Modified by JetBrains AI Assistant (GPT-5.2) as of Feb 6, 2026.
+ * Modified by JetBrains AI Assistant (GPT-5.2) as of Feb 8, 2026.
  */
 class CodeEditor : HVScrollView {
 
@@ -64,6 +68,15 @@ class CodeEditor : HVScrollView {
         lastTextSize = getEditorTextSize(pxToSp(it.textSize).toInt())
         ThemeColorHelper.setThemeColorPrimary(it, true)
     }
+
+    // Whether the user is interacting with the editor via touch.
+    // zh-CN: 用户是否正在通过触摸与编辑器交互.
+    @Volatile
+    private var mUserTouching = false
+
+    // Public getter for streaming loader to prioritize scroll responsiveness.
+    // zh-CN: 给流式加载器使用的公开读取口, 用于优先保障滚动响应性.
+    fun isUserTouching(): Boolean = mUserTouching
 
     val lineCount
         get() = Observable.just(codeEditText.layout.lineCount)
@@ -146,12 +159,138 @@ class CodeEditor : HVScrollView {
     private var mFoundIndex = -1
     private var mLastScaleFactor = 1.0
 
+    private val mUiHandler = Handler(Looper.getMainLooper())
+
+    // Delay showing the loading dialog to avoid flicker for fast operations.
+    // zh-CN: 延迟显示加载对话框, 避免快速操作产生闪烁.
+    private val mProgressShowDelayMs = 1500L
+
+    // Once shown, keep the dialog visible for at least this duration to avoid flash.
+    // zh-CN: 对话框一旦出现, 至少显示一段时间, 避免一闪而过.
+    private val mProgressMinShowMs = 500L
+
+    private var mProgressRequested = false
+    private var mProgressShownAtMs = 0L
+    private var mProgressInteractive = false
+
+    private val mShowProgressRunnable = Runnable {
+        if (!mProgressRequested) return@Runnable
+        if (mProcessDialog?.isShowing == true) return@Runnable
+
+        mProcessDialog = MaterialDialog.Builder(context)
+            .content(R.string.text_processing)
+            // Text only, no progress spinner.
+            // zh-CN: 仅显示文字, 不使用进度圆圈动画.
+            .cancelable(false)
+            .canceledOnTouchOutside(false)
+            .show()
+
+        mProgressShownAtMs = SystemClock.uptimeMillis()
+
+        // Make it non-modal (optional) so user can scroll/view during loading.
+        // zh-CN: 可选地设置为非模态, 使用户在加载时仍可滚动/查看.
+        if (mProgressInteractive) {
+            mProcessDialog?.window?.let { w ->
+                w.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+                w.setDimAmount(0f)
+                w.addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL)
+                w.addFlags(WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH)
+            }
+        }
+    }
+
     constructor(context: Context?) : super(context)
 
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
 
     init {
         applyScaleGesture()
+    }
+
+    fun refreshHighlightTokensIfAllowed() {
+        // Force a highlight refresh after bulk loading, when loading flags are cleared.
+        // zh-CN: 在批量加载结束且 loading 标记已清除后, 主动触发一次高亮刷新.
+        val t = codeEditText.text?.toString() ?: return
+        mJavaScriptHighlighter.updateTokens(t)
+    }
+
+    /**
+     * Show or hide a "processing" indicator.
+     *
+     * Behavior:
+     * - Delayed show to avoid flicker.
+     * - Minimum show time once visible.
+     * - Optional interactive mode: don't block touches and don't dim background.
+     *
+     * zh-CN:
+     * 显示或隐藏 "处理中" 提示.
+     *
+     * 行为:
+     * - 延迟显示以避免闪烁.
+     * - 一旦出现则保证最短展示时间.
+     * - 可选交互模式: 不拦截触摸/不压暗背景.
+     */
+    /**
+     * Show or hide a "processing" indicator.
+     *
+     * Behavior:
+     * - Delayed show to avoid flicker.
+     * - Minimum show time once visible.
+     * - Optional interactive mode: don't block touches and don't dim background.
+     *
+     * zh-CN:
+     * 显示或隐藏 "处理中" 提示.
+     *
+     * 行为:
+     * - 延迟显示以避免闪烁.
+     * - 一旦出现则保证最短展示时间.
+     * - 可选交互模式: 不拦截触摸/不压暗背景.
+     */
+    fun setProgress(progress: Boolean, interactive: Boolean = false) {
+        mProgressInteractive = interactive
+
+        if (progress) {
+            mProgressRequested = true
+
+            // If already showing, keep it.
+            // zh-CN: 若已显示则保持不变.
+            if (mProcessDialog?.isShowing == true) return
+
+            // Schedule delayed show.
+            // zh-CN: 延迟调度显示.
+            mUiHandler.removeCallbacks(mShowProgressRunnable)
+            mUiHandler.postDelayed(mShowProgressRunnable, mProgressShowDelayMs)
+            return
+        }
+
+        // Hide requested.
+        // zh-CN: 请求隐藏.
+        mProgressRequested = false
+        mUiHandler.removeCallbacks(mShowProgressRunnable)
+
+        val dlg = mProcessDialog
+        if (dlg == null || dlg.isShowing != true) {
+            mProcessDialog = null
+            return
+        }
+
+        val elapsed = SystemClock.uptimeMillis() - mProgressShownAtMs
+        val remain = (mProgressMinShowMs - elapsed).coerceAtLeast(0L)
+
+        if (remain == 0L) {
+            dlg.dismiss()
+            mProcessDialog = null
+            return
+        }
+
+        mUiHandler.postDelayed({
+            // Only dismiss if no new show request came in.
+            // zh-CN: 仅当没有新的显示请求时才 dismiss.
+            if (!mProgressRequested) {
+                runCatching { dlg.dismiss() }
+                mProcessDialog = null
+            }
+        }, remain)
     }
 
     private fun applyScaleGesture(key: String? = null) {
@@ -174,6 +313,23 @@ class CodeEditor : HVScrollView {
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(ev: MotionEvent): Boolean {
+        when (ev.actionMasked) {
+            MotionEvent.ACTION_DOWN,
+            MotionEvent.ACTION_POINTER_DOWN,
+            MotionEvent.ACTION_MOVE -> {
+                // Mark touching as early as possible.
+                // zh-CN: 尽可能早地标记触摸中状态.
+                mUserTouching = true
+            }
+            MotionEvent.ACTION_UP,
+            MotionEvent.ACTION_CANCEL,
+            MotionEvent.ACTION_POINTER_UP -> {
+                // Clear touching flag when gesture ends.
+                // zh-CN: 手势结束时清除触摸中标记.
+                mUserTouching = false
+            }
+        }
+
         return mScaleGestureDetector?.let {
             it.onTouchEvent(ev)
             !it.isInProgress && super.onTouchEvent(ev)
@@ -182,6 +338,14 @@ class CodeEditor : HVScrollView {
 
     override fun onScrollChanged(l: Int, t: Int, oldl: Int, oldt: Int) {
         super.onScrollChanged(l, t, oldl, oldt)
+
+        // Avoid scheduling extra invalidations during bulk loading.
+        // zh-CN: 批量加载期间避免额外调度 invalidate, 降低重绘压力.
+        if (codeEditText.isLoadingText()) {
+            codeEditText.invalidate()
+            return
+        }
+
         codeEditText.postInvalidate()
     }
 
@@ -301,16 +465,10 @@ class CodeEditor : HVScrollView {
         mTextViewRedoUndo.isEnabled = enabled
     }
 
-    fun setProgress(progress: Boolean) {
-        mProcessDialog?.dismiss()
-        mProcessDialog = when {
-            !progress -> null
-            else -> MaterialDialog.Builder(context)
-                .content(R.string.text_processing)
-                .progress(true, 0)
-                .cancelable(false)
-                .show()
-        }
+    fun markUndoRedoBaselineAsUnchanged() {
+        // Reset undo/redo history but keep current text intact.
+        // zh-CN: 重置 undo/redo 历史但保持当前文本不变.
+        mTextViewRedoUndo.resetHistoryAsUnchanged()
     }
 
     fun addCursorChangeCallback(callback: CursorChangeCallback?) {

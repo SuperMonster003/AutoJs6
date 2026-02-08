@@ -7,16 +7,23 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
 import android.content.IntentFilter
+import android.database.Cursor
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.os.Parcelable
+import android.os.SystemClock
+import android.provider.OpenableColumns
 import android.text.TextUtils
 import android.util.AttributeSet
 import android.util.SparseBooleanArray
+import android.view.Choreographer
 import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.FragmentActivity
@@ -24,9 +31,9 @@ import com.afollestad.materialdialogs.MaterialDialog
 import com.google.android.material.snackbar.Snackbar
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import org.autojs.autojs.AutoJs
-import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs.core.pref.Pref.getEditorTextSize
 import org.autojs.autojs.core.pref.Pref.setEditorTextSize
 import org.autojs.autojs.engine.JavaScriptEngine
@@ -51,6 +58,7 @@ import org.autojs.autojs.storage.history.HistoryPrefs
 import org.autojs.autojs.storage.history.HistoryRepository
 import org.autojs.autojs.storage.history.HistoryUriUtils
 import org.autojs.autojs.storage.history.VersionHistoryController
+import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.tool.Callback
 import org.autojs.autojs.ui.doc.ManualDialog
 import org.autojs.autojs.ui.edit.completion.CodeCompletionBar
@@ -58,6 +66,7 @@ import org.autojs.autojs.ui.edit.completion.CodeCompletionBar.OnHintClickListene
 import org.autojs.autojs.ui.edit.debug.DebugBar
 import org.autojs.autojs.ui.edit.editor.CodeEditor
 import org.autojs.autojs.ui.edit.editor.CodeEditor.CheckedPatternSyntaxException
+import org.autojs.autojs.ui.edit.editor.JavaScriptHighlighter.MAX_HIGHLIGHT_CHARS
 import org.autojs.autojs.ui.edit.keyboard.FunctionsKeyboardHelper
 import org.autojs.autojs.ui.edit.keyboard.FunctionsKeyboardView
 import org.autojs.autojs.ui.edit.keyboard.FunctionsKeyboardView.ClickCallback
@@ -72,9 +81,11 @@ import org.autojs.autojs.ui.log.LogActivity
 import org.autojs.autojs.ui.widget.EWebView
 import org.autojs.autojs.ui.widget.SimpleTextWatcher
 import org.autojs.autojs.util.ClipboardUtils
+import org.autojs.autojs.util.ColorUtils
+import org.autojs.autojs.util.DialogUtils
+import org.autojs.autojs.util.DialogUtils.choiceWidgetThemeColor
 import org.autojs.autojs.util.DisplayUtils.pxToSp
 import org.autojs.autojs.util.DocsUtils.getUrl
-import org.autojs.autojs.util.DialogUtils.choiceWidgetThemeColor
 import org.autojs.autojs.util.Observers
 import org.autojs.autojs.util.StringUtils
 import org.autojs.autojs.util.ViewUtils
@@ -83,23 +94,31 @@ import org.autojs.autojs.util.ViewUtils.showToast
 import org.autojs.autojs6.R
 import org.autojs.autojs6.R.string.text_unknown
 import org.autojs.autojs6.databinding.EditorViewBinding
+import java.io.BufferedInputStream
 import java.io.File
 import java.io.IOException
+import java.io.InputStream
+import java.io.InputStreamReader
 import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.util.Locale
+import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicLong
+import java.util.concurrent.atomic.AtomicReference
+import kotlin.text.set
 
 /**
  * Created by Stardust on Sep 28, 2017.
  * Transformed by SuperMonster003 on May 1, 2023.
- * Modified by JetBrains AI Assistant (GPT-5.2) as of Feb 3, 2026.
  * Modified by SuperMonster003 as of Feb 3, 2026.
+ * Modified by JetBrains AI Assistant (GPT-5.2) as of Feb 8, 2026.
  */
 @SuppressLint("CheckResult")
 class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFragment.OnMenuItemClickListener {
 
-    private var binding: EditorViewBinding = EditorViewBinding.bind(View.inflate(context, R.layout.editor_view, this))
+    private var binding: EditorViewBinding = EditorViewBinding.bind(inflate(context, R.layout.editor_view, this))
 
     @JvmField
     val editor: CodeEditor = binding.editor
@@ -134,6 +153,34 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     private val scriptExecution: ScriptExecution?
         get() = AutoJs.instance.scriptEngineService.getScriptExecution(scriptExecutionId)
+
+    // Whether the editor is currently loading text (including streaming append).
+    // zh-CN: 编辑器是否正在加载文本(包括流式追加阶段).
+    @Volatile
+    private var mEditorLoading: Boolean = false
+
+    // Large file mode flag: keep undo/redo disabled to avoid memory/perf issues.
+    // zh-CN: 大文件模式标记: 为避免内存/性能问题, 保持撤销/重做不可用.
+    @Volatile
+    private var mLargeFileMode: Boolean = false
+
+    // Active large-file loading cancel flag.
+    // zh-CN: 大文件加载的取消标记(当前会话).
+    private val mLargeFileCancel = AtomicBoolean(false)
+
+    // Active IO subscription disposable for large-file loading.
+    // zh-CN: 大文件加载的 IO 订阅 Disposable.
+    @Volatile
+    private var mLargeFileIoDisposable: Disposable? = null
+
+    // Active streaming source stream reference (for forced close).
+    // zh-CN: 流式读取的底层流引用(用于强制 close 以打断阻塞 read).
+    private val mLargeFileStreamRef = AtomicReference<InputStream?>(null)
+
+    // Active Choreographer callback for streaming append.
+    // zh-CN: 流式追加的 Choreographer 回调引用(用于取消帧回调).
+    @Volatile
+    private var mLargeFileFrameCallback: Choreographer.FrameCallback? = null
 
     private val mCodeCompletionBar: CodeCompletionBar = binding.codeCompletionBar
     private val mInputMethodEnhanceBar: View = binding.inputMethodEnhanceBar
@@ -174,6 +221,32 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private var mDebugging = false
     private var mTmpSavedFileForRunning: File? = null
 
+    private val mUiHandler = Handler(Looper.getMainLooper())
+
+    // Delay showing loading bar to avoid flicker.
+    // zh-CN: 延迟显示加载提示条, 避免闪烁.
+    private val mLoadingBarShowDelayMs = 1500L
+
+    // Once shown, keep it visible for at least this duration.
+    // zh-CN: 一旦显示, 则保证最短展示时间.
+    private val mLoadingBarMinShowMs = 500L
+
+    private val mLoadingBarContainer: View = binding.loadingBarContainer
+    private val mLoadingBarText: TextView = binding.loadingBarText
+
+    private var mLoadingBarRequested = false
+    private var mLoadingBarShownAtMs = 0L
+
+    private var mWasReadOnlyBeforeLoading = false
+
+    private val mShowLoadingBarRunnable = Runnable {
+        if (!mLoadingBarRequested) return@Runnable
+        if (mLoadingBarContainer.visibility == VISIBLE) return@Runnable
+
+        mLoadingBarContainer.visibility = VISIBLE
+        mLoadingBarShownAtMs = SystemClock.uptimeMillis()
+    }
+
     constructor(context: Context) : super(context)
 
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
@@ -206,13 +279,12 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         (context as? HostActivity)?.backPressedObserver?.registerHandler(mFunctionsKeyboardHelper)
     }
 
-    override fun onDetachedFromWindow() {
-        super.onDetachedFromWindow()
-        context.unregisterReceiver(mOnRunFinishedReceiver)
-        (context as? HostActivity)?.backPressedObserver?.unregisterHandler(mFunctionsKeyboardHelper)
-    }
-
     fun handleIntent(intent: Intent): Observable<String> {
+        // Initialize menu state early to avoid "first render" flicker.
+        // zh-CN: 尽早初始化菜单状态, 避免首次渲染闪烁.
+        mEditorLoading = true
+        syncPrimaryMenuState()
+
         val name = intent.getStringExtra(EXTRA_NAME)
         if (name != null) {
             this.name = name
@@ -240,6 +312,11 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 if (readOnly) {
                     editor.setReadOnly(true)
                 }
+
+                // Loading is finished for intent-handling stage (actual file loading may continue).
+                // zh-CN: Intent 处理阶段结束(实际文件加载可能仍在继续).
+                mEditorLoading = false
+                syncPrimaryMenuState()
             }
     }
 
@@ -273,10 +350,92 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         }
     }
 
-    @SuppressLint("CheckResult")
+    private fun setLoadingBar(loading: Boolean) {
+        if (loading) {
+            mLoadingBarRequested = true
+            mUiHandler.removeCallbacks(mShowLoadingBarRunnable)
+            mUiHandler.postDelayed(mShowLoadingBarRunnable, mLoadingBarShowDelayMs)
+            return
+        }
+
+        mLoadingBarRequested = false
+        mUiHandler.removeCallbacks(mShowLoadingBarRunnable)
+
+        if (mLoadingBarContainer.visibility != VISIBLE) {
+            mLoadingBarContainer.visibility = GONE
+            return
+        }
+
+        val elapsed = SystemClock.uptimeMillis() - mLoadingBarShownAtMs
+        val remain = (mLoadingBarMinShowMs - elapsed).coerceAtLeast(0L)
+
+        if (remain == 0L) {
+            mLoadingBarContainer.visibility = GONE
+            return
+        }
+
+        mUiHandler.postDelayed({
+            if (!mLoadingBarRequested) {
+                mLoadingBarContainer.visibility = GONE
+            }
+        }, remain)
+    }
+
+    private fun setEnhanceBarInteractive(interactive: Boolean) {
+        // When not interactive, hide function/completion bars and show loading bar.
+        // zh-CN: 非可操作状态时隐藏功能/补全栏, 显示加载提示条.
+        when (interactive) {
+            true -> {
+                mShowFunctionsButton.visibility = VISIBLE
+                mCodeCompletionBar.visibility = VISIBLE
+                mSymbolBar.visibility = VISIBLE
+            }
+            else -> {
+                mShowFunctionsButton.visibility = INVISIBLE
+                mCodeCompletionBar.visibility = INVISIBLE
+                mSymbolBar.visibility = INVISIBLE
+            }
+        }
+    }
+
+    private fun beginEditorLoadingUi(initialMessage: String) {
+        mLoadingBarText.text = initialMessage
+        setEnhanceBarInteractive(false)
+        setLoadingBar(true)
+
+        // Use read-only during loading to avoid accidental edits.
+        // zh-CN: 加载期间启用只读以避免误修改.
+        mWasReadOnlyBeforeLoading = mReadOnly
+        if (!mReadOnly) {
+            editor.setReadOnly(true)
+        }
+    }
+
+    private fun endEditorLoadingUi() {
+        setLoadingBar(false)
+        setEnhanceBarInteractive(!mReadOnly)
+
+        // Restore read-only state.
+        // zh-CN: 恢复只读状态.
+        if (!mWasReadOnlyBeforeLoading) {
+            editor.setReadOnly(false)
+        }
+    }
+
     private fun loadUri(uri: Uri): Observable<String> {
+        val streamThresholdBytes = 1024L * 1024L
+
+        val sizeOrNull = runCatching { queryContentLengthOrNull(uri) }.getOrNull()
+        if (sizeOrNull != null && sizeOrNull >= streamThresholdBytes) {
+            // Large file: show loading in enhance bar, allow viewing/scrolling (read-only).
+            // zh-CN: 大文件: 在增强栏显示加载提示, 允许查看/滚动(只读).
+            beginEditorLoadingUi(context.getString(R.string.text_loading_with_dots))
+            return loadUriStreamed(uri, totalBytesOrNull = sizeOrNull)
+        }
+
         return Observable
             .fromCallable {
+                // ... existing code ...
                 val resolver = context.contentResolver
                 val rawBytes = resolver.openInputStream(uri)?.use { it.readBytes() } ?: ByteArray(0)
 
@@ -285,24 +444,650 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 mCurrentCharset = detectedCharsetWrapper.charsetOrDefault()
                 mHadBom = StringUtils.hasBom(rawBytes, mCurrentCharset)
 
-                val effectiveBytes = if (mHadBom) {
-                    StringUtils.dropBom(rawBytes, mCurrentCharset)
-                } else rawBytes
+                val offset = if (mHadBom) {
+                    StringUtils.bomBytes(mCurrentCharset).size.coerceAtMost(rawBytes.size)
+                } else 0
+                val len = (rawBytes.size - offset).coerceAtLeast(0)
 
-                String(effectiveBytes, mCurrentCharset)
+                String(rawBytes, offset, len, mCurrentCharset)
             }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .doOnNext { text: String -> setInitialText(text) }
+            .doOnSubscribe {
+                beginEditorLoadingUi(context.getString(R.string.text_loading_with_dots))
+                mEditorLoading = true
+                syncPrimaryMenuState()
+            }
+            .doOnNext { text: String ->
+                post {
+                    runCatching {
+                        setInitialText(text)
+
+                        // IMPORTANT: end loading UI on success.
+                        // zh-CN: 重要: 成功时必须结束加载 UI.
+                        endEditorLoadingUi()
+
+                        mEditorLoading = false
+                        syncPrimaryMenuState()
+                    }.onFailure {
+                        endEditorLoadingUi()
+                        mEditorLoading = false
+                        syncPrimaryMenuState()
+                    }
+                }
+            }
+            .doOnError {
+                endEditorLoadingUi()
+                mEditorLoading = false
+                syncPrimaryMenuState()
+            }
+    }
+
+    private fun queryContentLengthOrNull(uri: Uri): Long? {
+        return when (uri.scheme?.lowercase()) {
+            "file" -> uri.path?.let { File(it).length().coerceAtLeast(0L) }
+            "content" -> {
+                val resolver = context.contentResolver
+                var cursor: Cursor? = null
+                try {
+                    cursor = resolver.query(uri, arrayOf(OpenableColumns.SIZE), null, null, null)
+                    if (cursor != null && cursor.moveToFirst()) {
+                        val idx = cursor.getColumnIndex(OpenableColumns.SIZE)
+                        if (idx >= 0 && !cursor.isNull(idx)) {
+                            cursor.getLong(idx).coerceAtLeast(0L)
+                        } else null
+                    } else null
+                } finally {
+                    runCatching { cursor?.close() }
+                }
+            }
+            else -> null
+        }
+    }
+
+    override fun onDetachedFromWindow() {
+        // Cancel loading before unregistering receivers to avoid ANR on exit.
+        // zh-CN: 退出前先取消加载, 避免返回退出时 ANR.
+        cancelLargeFileLoading("onDetachedFromWindow")
+
+        super.onDetachedFromWindow()
+        context.unregisterReceiver(mOnRunFinishedReceiver)
+        (context as? HostActivity)?.backPressedObserver?.unregisterHandler(mFunctionsKeyboardHelper)
+    }
+
+    // Cancel current large-file loading as soon as possible.
+    // zh-CN: 尽快取消当前大文件加载.
+    private fun cancelLargeFileLoading(reason: String) {
+        // Mark cancel first so both IO/UI can observe it.
+        // zh-CN: 先标记取消, 让 IO/UI 两侧都能观察到.
+        mLargeFileCancel.set(true)
+
+        // Stop UI frame callback quickly.
+        // zh-CN: 尽快停止 UI 帧回调.
+        mLargeFileFrameCallback?.let { cb ->
+            runCatching { Choreographer.getInstance().removeFrameCallback(cb) }
+        }
+        mLargeFileFrameCallback = null
+
+        // Dispose IO subscription.
+        // zh-CN: 取消 IO 订阅.
+        mLargeFileIoDisposable?.let { d ->
+            runCatching { d.dispose() }
+        }
+        mLargeFileIoDisposable = null
+
+        // Force close stream to interrupt blocking read().
+        // zh-CN: 强制关闭流以打断可能阻塞的 read().
+        mLargeFileStreamRef.getAndSet(null)?.let { s ->
+            runCatching { s.close() }
+        }
+
+        // Cleanup UI state best-effort (do NOT re-enable editing in read-only editor).
+        // zh-CN: 尽力清理 UI 状态(只读编辑器不要被重新启用编辑).
+        post {
+            runCatching {
+                endEditorLoadingUi()
+            }
+            mEditorLoading = false
+            syncPrimaryMenuState()
+        }
+    }
+
+    private fun loadUriStreamed(uri: Uri, totalBytesOrNull: Long?): Observable<String> {
+        val readBytes = AtomicLong(0L)
+
+        // Reset cancel state for a new session.
+        // zh-CN: 新的加载会话开始前重置取消标记.
+        mLargeFileCancel.set(false)
+
+        return Observable
+            .create<String> { emitter ->
+                val resolver = context.contentResolver
+
+                // Emit an early placeholder so handleIntent() can proceed.
+                // zh-CN: 提前发出占位字符串, 使 handleIntent() 能继续运行.
+                emitter.onNext("")
+
+                val raw = resolver.openInputStream(uri) ?: run {
+                    emitter.onError(IllegalStateException("Cannot open input stream for $uri"))
+                    return@create
+                }
+
+                // Keep a reference for cancellation.
+                // zh-CN: 保存引用以便取消时强制 close.
+                mLargeFileStreamRef.set(raw)
+
+                val counted = CountingInputStream(raw, readBytes)
+                val bis = BufferedInputStream(counted)
+
+                try {
+                bis.use { input ->
+                        if (mLargeFileCancel.get() || emitter.isDisposed) {
+                            // Cancel early.
+                            // zh-CN: 提前取消.
+                            return@use
+                        }
+
+                    val sampleLimitBytes = 64 * 1024
+                    input.mark(sampleLimitBytes + 8)
+
+                    val sample = ByteArray(sampleLimitBytes)
+                    val sampleRead = input.read(sample).coerceAtLeast(0)
+                    val sampleBytes = if (sampleRead == sample.size) sample else sample.copyOf(sampleRead)
+
+                    val detected = StringUtils.detectCharset(sampleBytes)
+                    mCurrentCharsetConfidence = detected.confidence ?: 0
+                    mCurrentCharset = detected.charsetOrDefault()
+                    mHadBom = StringUtils.hasBom(sampleBytes, mCurrentCharset)
+
+                    runCatching { input.reset() }.getOrElse {
+                            if (!emitter.isDisposed && !mLargeFileCancel.get()) {
+                        emitter.onError(IllegalStateException("Stream reset failed for $uri"))
+                            }
+                        return@use
+                    }
+
+                    streamDecodeAndEmit(input, emitter)
+                }
+                } finally {
+                    // Clear reference when finished/failed.
+                    // zh-CN: 结束/失败后清理引用.
+                    mLargeFileStreamRef.set(null)
+                }
+            }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .let { upstream ->
+                bridgeStreamToUiWithProgress(
+                    upstream = upstream,
+                    totalBytesOrNull = totalBytesOrNull,
+                    readBytes = readBytes,
+                )
+            }
+    }
+
+    private fun bridgeStreamToUiWithProgress(
+        upstream: Observable<String>,
+        totalBytesOrNull: Long?,
+        readBytes: AtomicLong,
+    ): Observable<String> {
+        val queue = ConcurrentLinkedQueue<String>()
+        val done = AtomicBoolean(false)
+        val started = AtomicBoolean(false)
+
+        // Dispose previous session if any.
+        // zh-CN: 若存在上一会话, 则先取消.
+        runCatching { mLargeFileIoDisposable?.dispose() }
+        mLargeFileIoDisposable = null
+
+        // Subscribe on IO side, push chunks into queue.
+        // zh-CN: 在 IO 侧订阅, 将分片推入队列.
+        mLargeFileIoDisposable = upstream
+            .observeOn(Schedulers.io())
+            .subscribe({ chunk ->
+                if (mLargeFileCancel.get()) {
+                    // Stop producing.
+                    // zh-CN: 停止生产.
+                    done.set(true)
+                    return@subscribe
+                }
+                if (chunk.isNotEmpty()) {
+                    queue.add(chunk)
+                }
+            }, { e ->
+                done.set(true)
+                if (!mLargeFileCancel.get()) {
+                post { endEditorLoadingUi() }
+                e.printStackTrace()
+                }
+            }, {
+                done.set(true)
+            })
+
+        return Observable
+            .just("")
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnNext {
+                if (started.compareAndSet(false, true)) {
+                    startStreamingAppendWithProgress(queue, done, totalBytesOrNull, readBytes)
+                }
+            }
+    }
+
+    private fun startStreamingAppendWithProgress(
+        queue: ConcurrentLinkedQueue<String>,
+        done: AtomicBoolean,
+        totalBytesOrNull: Long?,
+        readBytes: AtomicLong,
+    ) {
+        val editText = editor.codeEditText
+
+        mLargeFileMode = true
+        mEditorLoading = true
+        syncPrimaryMenuState()
+
+        editText.setLoadingText(true)
+        editor.setRedoUndoEnabled(false)
+        editText.setLoadingGutterDigits(7)
+        editText.setText("")
+
+        val choreographer = Choreographer.getInstance()
+
+        // Per-frame time budget for appending text (favor throughput).
+        // zh-CN: 每帧用于追加文本的时间预算(优先吞吐).
+        val appendBudgetMsIdle = 12L
+        val appendBudgetMsTouching = 3L
+
+        // Upper bound of chars appended per frame as a second guardrail.
+        // zh-CN: 每帧追加字符数的上限, 作为第二道护栏.
+        val maxCharsPerFrameIdle = 128 * 1024
+        val maxCharsPerFrameTouching = 16 * 1024
+
+        // Reuse StringBuilder to reduce per-frame allocations.
+        // zh-CN: 复用 StringBuilder, 降低每帧分配压力.
+        val sb = StringBuilder(128 * 1024)
+
+        val callback = object : Choreographer.FrameCallback {
+            override fun doFrame(frameTimeNanos: Long) {
+                if (mLargeFileCancel.get()) {
+                    // Cancel: stop immediately and do not schedule next frame.
+                    // zh-CN: 取消: 立即停止且不再调度下一帧.
+                    editText.setLoadingText(false)
+                    mEditorLoading = false
+                    syncPrimaryMenuState()
+                    endEditorLoadingUi()
+                    mLargeFileFrameCallback = null
+                    return
+                }
+
+                val finished = done.get() && queue.isEmpty()
+                if (finished) {
+                    editText.setLoadingText(false)
+                    editor.setRedoUndoEnabled(false)
+                    editor.markUndoRedoBaselineAsUnchanged()
+
+                    mEditorLoading = false
+                    syncPrimaryMenuState()
+
+                    // IMPORTANT: end loading UI on success.
+                    // zh-CN: 重要: 成功时必须结束加载 UI.
+                    endEditorLoadingUi()
+
+                    mLargeFileFrameCallback = null
+                    return
+                }
+
+                val now = SystemClock.uptimeMillis()
+
+                mLoadingBarText.text = context.getString(R.string.text_loading_with_dots)
+
+                val userTouching = editor.isUserTouching()
+
+                val budgetMs = if (userTouching) appendBudgetMsTouching else appendBudgetMsIdle
+                val maxCharsThisFrame = if (userTouching) maxCharsPerFrameTouching else maxCharsPerFrameIdle
+
+                // Append with time budget.
+                // zh-CN: 采用时间预算追加.
+                val t0 = now
+
+                sb.setLength(0)
+                while (sb.length < maxCharsThisFrame) {
+                    if (mLargeFileCancel.get()) {
+                        break
+                    }
+                    if (SystemClock.uptimeMillis() - t0 >= budgetMs) {
+                        break
+                    }
+                    val s = queue.poll() ?: break
+                    sb.append(s)
+                }
+
+                if (sb.isNotEmpty()) {
+                    editText.beginBatchEdit()
+                    try {
+                        editText.text?.append(sb)
+                    } finally {
+                        editText.endBatchEdit()
+                    }
+                }
+
+                choreographer.postFrameCallback(this)
+            }
+        }
+
+        // Keep reference for cancellation.
+        // zh-CN: 保存引用以便取消.
+        mLargeFileFrameCallback = callback
+        choreographer.postFrameCallback(callback)
+    }
+
+    private fun streamDecodeAndEmit(input: BufferedInputStream, emitter: io.reactivex.ObservableEmitter<String>) {
+        // Skip BOM bytes by consuming from raw stream before decoding.
+        // zh-CN: 在解码前先从原始字节流中消费 BOM 字节.
+        val bomBytes = StringUtils.bomBytes(mCurrentCharset)
+        if (mHadBom && bomBytes.isNotEmpty()) {
+            var skipped = 0
+            while (skipped < bomBytes.size) {
+                if (mLargeFileCancel.get() || emitter.isDisposed) {
+                    // Cancel early.
+                    // zh-CN: 提前取消.
+                    return
+                }
+                val r = input.read()
+                if (r == -1) break
+                skipped++
+            }
+        }
+
+        val reader = InputStreamReader(input, mCurrentCharset)
+        val buf = CharArray(32 * 1024)
+        while (!emitter.isDisposed && !mLargeFileCancel.get()) {
+            val n = reader.read(buf)
+            if (n <= 0) break
+            emitter.onNext(String(buf, 0, n))
+        }
+
+        if (!emitter.isDisposed && !mLargeFileCancel.get()) {
+            emitter.onComplete()
+        }
+    }
+
+    private fun bridgeStreamToUi(upstream: Observable<String>): Observable<String> {
+        val queue = ConcurrentLinkedQueue<String>()
+        val done = AtomicBoolean(false)
+        val started = AtomicBoolean(false)
+
+        // Subscribe on IO side, push chunks into queue.
+        // zh-CN: 在 IO 侧订阅, 将分片推入队列.
+        upstream
+            .observeOn(Schedulers.io())
+            .subscribe({ chunk ->
+                if (chunk.isNotEmpty()) {
+                    queue.add(chunk)
+                } else {
+                    // Ignore placeholder.
+                    // zh-CN: 忽略占位分片.
+                }
+            }, { e ->
+                done.set(true)
+                post { editor.setProgress(false) }
+                e.printStackTrace()
+            }, {
+                done.set(true)
+            })
+
+        // Return a UI-side observable that triggers the append loop once.
+        // zh-CN: 返回 UI 侧 observable, 仅用于触发一次追加循环.
+        return Observable
+            .just("")
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnNext {
+                if (started.compareAndSet(false, true)) {
+                    startStreamingAppend(queue, done)
+                }
+            }
+    }
+
+    private fun startStreamingAppend(queue: ConcurrentLinkedQueue<String>, done: AtomicBoolean) {
+        val editText = editor.codeEditText
+
+        // Large file streaming: disable all buttons while loading.
+        // zh-CN: 大文件流式加载: 加载期间禁用所有按钮.
+        mLargeFileMode = true
+        mEditorLoading = true
+        syncPrimaryMenuState()
+
+        // Keep a non-blocking indicator during streaming.
+        // zh-CN: 流式加载期间保持一个不遮挡操作的提示.
+        editor.setProgress(true, interactive = true)
+
+        editText.setLoadingText(true)
+
+        // Keep undo/redo disabled in large file mode.
+        // zh-CN: 大文件模式下保持撤销/重做禁用.
+        editor.setRedoUndoEnabled(false)
+
+        editText.setLoadingGutterDigits(7)
+        editText.setText("")
+
+        val targetMs = 6L
+        var chunkSize = 64 * 1024
+        val minChunkSize = 2 * 1024
+        val maxChunkSize = 256 * 1024
+        var lastAppendCostMs = 0L
+
+        val choreographer = Choreographer.getInstance()
+
+        val callback = object : Choreographer.FrameCallback {
+            override fun doFrame(frameTimeNanos: Long) {
+                val finished = done.get() && queue.isEmpty()
+                if (finished) {
+                    // Finish: restore state and close progress.
+                    // zh-CN: 完成: 恢复状态并关闭进度.
+                    editText.setLoadingText(false)
+
+                    // Undo/redo stay disabled for large files.
+                    // zh-CN: 大文件撤销/重做保持禁用.
+                    editor.setRedoUndoEnabled(false)
+                    editor.markUndoRedoBaselineAsUnchanged()
+
+                    editor.setProgress(false)
+
+                    mEditorLoading = false
+                    syncPrimaryMenuState()
+
+                    val len = editText.text?.length ?: 0
+                    if (len in 1..MAX_HIGHLIGHT_CHARS) {
+                        post { editor.refreshHighlightTokensIfAllowed() }
+                    }
+                    return
+                }
+
+                val sb = StringBuilder(chunkSize.coerceAtLeast(1024))
+                while (sb.length < chunkSize) {
+                    val s = queue.poll() ?: break
+                    sb.append(s)
+                }
+
+                if (sb.isNotEmpty()) {
+                    val t0 = SystemClock.uptimeMillis()
+                    editText.beginBatchEdit()
+                    try {
+                        editText.text?.append(sb)
+                    } finally {
+                        editText.endBatchEdit()
+                    }
+                    lastAppendCostMs = (SystemClock.uptimeMillis() - t0).coerceAtLeast(0L)
+
+                    chunkSize = when {
+                        lastAppendCostMs > targetMs * 2 -> (chunkSize / 2).coerceAtLeast(minChunkSize)
+                        lastAppendCostMs < targetMs / 2 -> (chunkSize * 2).coerceAtMost(maxChunkSize)
+                        else -> chunkSize
+                    }
+                }
+
+                choreographer.postFrameCallback(this)
+            }
+        }
+
+        choreographer.postFrameCallback(callback)
     }
 
     private fun setInitialText(text: String) {
+        // NOTE: This method should not manage loading UI lifecycle anymore.
+        // zh-CN: 注意: 此方法不再管理加载 UI 的生命周期.
+        mEditorLoading = true
+        syncPrimaryMenuState()
+
         if (mRestoredText != null) {
             editor.text = mRestoredText!!
             mRestoredText = null
+
+            editor.markUndoRedoBaselineAsUnchanged()
+            editor.setRedoUndoEnabled(!mLargeFileMode)
+
+            // Refresh highlight for restored text if size allows.
+            // zh-CN: 若大小允许, 则对恢复文本刷新一次高亮.
+            post { editor.refreshHighlightTokensIfAllowed() }
+
             return
         }
-        editor.setInitialText(text)
+
+        val progressiveThreshold = 1024 * 1024
+        if (text.length >= progressiveThreshold) {
+            mLargeFileMode = true
+            setInitialTextProgressively(text)
+            return
+        }
+
+        val editText = editor.codeEditText
+        editText.setLoadingText(true)
+        editor.setRedoUndoEnabled(false)
+        try {
+            editText.setText(text)
+            editor.markUndoRedoBaselineAsUnchanged()
+        } finally {
+            editor.setRedoUndoEnabled(true)
+            editText.setLoadingText(false)
+        }
+
+        // Re-highlight once after fast load, but only when size is within highlighter limit.
+        // zh-CN: 快速加载完成后主动触发一次高亮, 但仅在文本大小不超过高亮上限时执行.
+        if (text.length <= MAX_HIGHLIGHT_CHARS) {
+            post { editor.refreshHighlightTokensIfAllowed() }
+        }
+    }
+
+    private fun syncPrimaryMenuState() {
+        // Unified primary buttons state.
+        // zh-CN: 统一主按钮状态.
+        when {
+            mEditorLoading -> {
+                setMenuItemStatus(R.id.run, false)
+                setMenuItemStatus(R.id.undo, false)
+                setMenuItemStatus(R.id.redo, false)
+                setMenuItemStatus(R.id.save, false)
+            }
+
+            mLargeFileMode -> {
+                // Large file: keep undo/redo disabled; save is enabled only when text changed by explicit edits.
+                // zh-CN: 大文件: 撤销/重做保持禁用; 保存仅在明确编辑导致文本变化时启用.
+                setMenuItemStatus(R.id.run, true)
+                setMenuItemStatus(R.id.undo, false)
+                setMenuItemStatus(R.id.redo, false)
+                setMenuItemStatus(R.id.save, editor.isTextChanged)
+            }
+
+            else -> {
+                // Normal mode.
+                // zh-CN: 普通模式.
+                setMenuItemStatus(R.id.run, true)
+                setMenuItemStatus(R.id.undo, editor.canUndo())
+                setMenuItemStatus(R.id.redo, editor.canRedo())
+                setMenuItemStatus(R.id.save, editor.isTextChanged)
+            }
+        }
+    }
+
+    private fun setInitialTextProgressively(text: String) {
+        val editText = editor.codeEditText
+
+        // Mark loading state to suppress heavy callbacks during bulk insertion.
+        // zh-CN: 标记加载状态, 在批量插入期间抑制高开销回调.
+        editText.setLoadingText(true)
+
+        // Disable undo/redo recording during progressive load to avoid huge history and allocations.
+        // zh-CN: 渐进式加载期间禁用 undo/redo 记录, 避免巨大历史与大量分配.
+        editor.setRedoUndoEnabled(false)
+
+        // Clear existing content quickly.
+        // zh-CN: 快速清空现有内容.
+        editText.setText("")
+
+        // Do NOT call editor.setProgress(true) here.
+        // zh-CN: 不要在这里再次 setProgress(true), 进度对话框已由 loadUri() 负责显示.
+        // editor.setProgress(true)
+
+        // Frame time budget in ms (tune for devices).
+        // zh-CN: 单帧时间预算(毫秒), 可按设备调参.
+        val frameBudgetMs = 7L
+
+        // Adaptive chunk size to balance layout cost and responsiveness.
+        // zh-CN: 自适应分片大小, 在布局成本与响应性之间取平衡.
+        var chunkSize = 64 * 1024
+        val minChunkSize = 4 * 1024
+        val maxChunkSize = 256 * 1024
+
+        var index = 0
+
+        val choreographer = Choreographer.getInstance()
+
+        val callback = object : Choreographer.FrameCallback {
+            override fun doFrame(frameTimeNanos: Long) {
+                if (index >= text.length) {
+                    // Finish: mark current content as baseline without re-setting text.
+                    // zh-CN: 完成: 将当前内容设为基线, 避免再次 setText.
+                    editText.setLoadingText(false)
+                    editor.setRedoUndoEnabled(true)
+                    editor.markUndoRedoBaselineAsUnchanged()
+                    editor.setProgress(false)
+                    return
+                }
+
+                val start = SystemClock.uptimeMillis()
+
+                var appendedChunks = 0
+
+                // Do as much work as possible within the frame budget.
+                // zh-CN: 在单帧预算内尽可能推进加载.
+                while (index < text.length) {
+                    val end = (index + chunkSize).coerceAtMost(text.length)
+                    editText.text?.append(text, index, end)
+                    index = end
+                    appendedChunks++
+
+                    if (SystemClock.uptimeMillis() - start >= frameBudgetMs) {
+                        break
+                    }
+                }
+
+                // Adapt chunk size based on how many chunks we managed to append in this frame.
+                // zh-CN: 根据本帧完成的分片数量自适应调整 chunkSize.
+                chunkSize = when {
+                    appendedChunks <= 1 -> (chunkSize / 2).coerceAtLeast(minChunkSize)
+                    appendedChunks >= 4 -> (chunkSize * 2).coerceAtMost(maxChunkSize)
+                    else -> chunkSize
+                }
+
+                // Continue on next frame.
+                // zh-CN: 下一帧继续执行.
+                choreographer.postFrameCallback(this)
+            }
+        }
+
+        // Start on next frame to let the progress dialog animate.
+        // zh-CN: 下一帧开始, 让进度对话框先跑起来.
+        choreographer.postFrameCallback(callback)
     }
 
     private fun setMenuItemStatus(id: Int, enabled: Boolean) {
@@ -380,9 +1165,12 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         editor.let { editor ->
             editor.codeEditText.let { editText ->
                 editText.addTextChangedListener(SimpleTextWatcher { _ ->
-                    setMenuItemStatus(R.id.save, editor.isTextChanged)
-                    setMenuItemStatus(R.id.undo, editor.canUndo())
-                    setMenuItemStatus(R.id.redo, editor.canRedo())
+                    // Skip menu state updates during progressive loading.
+                    // zh-CN: 渐进式加载期间跳过菜单状态更新.
+                    if (editText.isLoadingText() || mEditorLoading) {
+                        return@SimpleTextWatcher
+                    }
+                    syncPrimaryMenuState()
                 })
                 editText.textSize = getEditorTextSize(pxToSp(editText.textSize).toInt()).toFloat()
             }
@@ -392,6 +1180,15 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 }
             })
             editor.layoutDirection = LAYOUT_DIRECTION_LTR
+
+            // Initialize to "new file" expected state: only Run enabled.
+            // zh-CN: 初始化为 "新建文件" 预期状态: 仅运行可用.
+            mEditorLoading = false
+            mLargeFileMode = false
+            setMenuItemStatus(R.id.run, true)
+            setMenuItemStatus(R.id.undo, false)
+            setMenuItemStatus(R.id.redo, false)
+            setMenuItemStatus(R.id.save, false)
         }
     }
 
@@ -402,13 +1199,23 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private fun setTheme(theme: Theme?) {
         theme?.let {
             mEditorTheme = it
+
+            val appThemeColor = ThemeColorManager.colorPrimary
+            val imeBarBackgroundColor = it.imeBarBackgroundColor
+
             editor.setTheme(it)
-            mInputMethodEnhanceBar.setBackgroundColor(it.imeBarBackgroundColor)
+            mInputMethodEnhanceBar.setBackgroundColor(imeBarBackgroundColor)
+
+            run {
+                val adjustedImageContrastColor = ColorUtils.adjustColorForContrast(imeBarBackgroundColor, appThemeColor, 3.6)
+                mLoadingBarText.setTextColor(adjustedImageContrastColor)
+            }
+
             val textColor = it.imeBarForegroundColor
             mCodeCompletionBar.setTextColor(textColor)
             mSymbolBar.setTextColor(textColor)
             mShowFunctionsButton.setColorFilter(textColor)
-            ViewUtils.setNavigationBarBackgroundColor(activity, it.imeBarBackgroundColor)
+            ViewUtils.setNavigationBarBackgroundColor(activity, imeBarBackgroundColor)
             invalidate()
         }
     }
@@ -1120,6 +1927,10 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     fun destroy() {
+        // Cancel loading before destroying editor resources.
+        // zh-CN: 销毁前先取消加载, 再销毁编辑器相关资源.
+        cancelLargeFileLoading("destroy")
+
         editor.destroy()
         mAutoCompletion?.shutdown()
         if (mDebugging) {
@@ -1140,6 +1951,32 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     fun cleanBeforeExit() {
         mTmpSavedFileForRunning?.deleteOnExit()
+    }
+
+    private class CountingInputStream(private val delegate: InputStream, private val counter: AtomicLong) : InputStream() {
+        override fun read(): Int {
+            val r = delegate.read()
+            if (r >= 0) counter.incrementAndGet()
+            return r
+        }
+
+        override fun read(b: ByteArray, off: Int, len: Int): Int {
+            val n = delegate.read(b, off, len)
+            if (n > 0) counter.addAndGet(n.toLong())
+            return n
+        }
+
+        override fun skip(n: Long): Long {
+            val s = delegate.skip(n)
+            if (s > 0) counter.addAndGet(s)
+            return s
+        }
+
+        override fun available(): Int = delegate.available()
+        override fun close() = delegate.close()
+        override fun mark(readlimit: Int) = delegate.mark(readlimit)
+        override fun reset() = delegate.reset()
+        override fun markSupported(): Boolean = delegate.markSupported()
     }
 
     companion object {

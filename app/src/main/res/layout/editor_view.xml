@@ -83,6 +83,29 @@
                     android:layout_alignParentTop="true"
                     android:layout_toEndOf="@+id/functions" />
 
+                <FrameLayout
+                    android:id="@+id/loading_bar_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:visibility="gone"
+                    tools:visibility="visible"
+                    tools:background="#A0000000">
+
+                    <TextView
+                        android:id="@+id/loading_bar_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:textColor="@color/night_full"
+                        android:textSize="14sp"
+                        tools:text="@string/text_loading_with_dots" />
+
+                </FrameLayout>
+
             </RelativeLayout>
 
             <org.autojs.autojs.ui.edit.keyboard.FunctionsKeyboardView

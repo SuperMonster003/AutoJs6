@@ -1286,4 +1286,5 @@
     <string name="text_write_secure_settings">修改安全设置</string>
     <string name="text_write_system_settings">修改系统设置</string>
     <string name="text_xiaomi_background_popup_permission">后台弹出界面</string>
+    <string name="text_loading_completed">加载完毕</string>
 </resources>
