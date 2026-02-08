@@ -17,6 +17,8 @@ import android.widget.TextView;
 
 /**
  * A generic undo/redo implementation for TextViews.
+ *
+ * Modified by JetBrains AI Assistant (GPT-5.2) as of Feb 8, 2026.
  */
 public class TextViewUndoRedo {
 
@@ -72,10 +74,39 @@ public class TextViewUndoRedo {
         mEnabled = enabled;
     }
 
+    /**
+     * Reset undo/redo history without modifying the current text.
+     *
+     * This is useful after bulk loading text progressively, where the text is already in the TextView
+     * and we only want to treat it as the "baseline" (unchanged) state.
+     *
+     * zh-CN:
+     *
+     * 在不修改当前文本的前提下重置 undo/redo 历史.
+     *
+     * 适用于渐进式批量加载文本后: 文本已经在 TextView 中, 此时只需要把它视为 "基线" (未修改) 状态.
+     */
+    public final void resetHistoryAsUnchanged() {
+        clearHistory();
+        markTextAsUnchanged();
+    }
+
+    // public final void setDefaultText(CharSequence text) {
+    //     clearHistory();
+    //     mIsUndoOrRedo = true;
+    //     ((Editable) mTextView.getText()).replace(0, text.length(), text);
+    //     mIsUndoOrRedo = false;
+    // }
+
     public final void setDefaultText(CharSequence text) {
         clearHistory();
         mIsUndoOrRedo = true;
-        ((Editable) mTextView.getText()).replace(0, text.length(), text);
+        Editable editable = (Editable) mTextView.getText();
+
+        // Replace the entire old content, not based on the new text length.
+        // zh-CN: 替换整个旧内容, 而不是按新文本长度截断替换范围.
+        editable.replace(0, editable.length(), text);
+
         mIsUndoOrRedo = false;
     }
 
