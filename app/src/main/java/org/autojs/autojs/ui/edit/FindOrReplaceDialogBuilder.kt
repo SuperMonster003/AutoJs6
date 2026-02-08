@@ -7,6 +7,7 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.widget.CheckBox
 import androidx.appcompat.widget.AppCompatEditText
+import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.ui.edit.editor.CodeEditor.CheckedPatternSyntaxException
@@ -17,6 +18,7 @@ import org.autojs.autojs6.databinding.DialogFindOrReplaceBinding
  * Created by Stardust on Sep 28, 2017.
  * Modified by SuperMonster003 as of Dec 1, 2021.
  * Transformed by SuperMonster003 on May 12, 2023.
+ * Modified by JetBrains AI Assistant (GPT-5.2) as of Feb 8, 2026.
  */
 class FindOrReplaceDialogBuilder(context: Context, private val mEditorView: EditorView) : MaterialDialog.Builder(context) {
 
@@ -41,7 +43,9 @@ class FindOrReplaceDialogBuilder(context: Context, private val mEditorView: Edit
         val binding = DialogFindOrReplaceBinding.inflate(LayoutInflater.from(context))
 
         mRegexCheckBox = binding.checkboxRegex
-        mReplaceCheckBox = binding.checkboxReplace
+        mReplaceCheckBox = binding.checkboxReplace.apply {
+            setOnCheckedChangeListener { _, _ -> syncWithReplaceAllCheckBox() }
+        }
         mKeywordsEditText = binding.keywords
         mReplaceAllCheckBox = binding.checkboxReplaceAll.apply {
             setOnCheckedChangeListener { _, _ -> syncWithReplaceCheckBox() }
@@ -67,9 +71,10 @@ class FindOrReplaceDialogBuilder(context: Context, private val mEditorView: Edit
     }
 
     private fun storeState() {
-        PreferenceManager.getDefaultSharedPreferences(getContext()).edit()
-            .putString(KEY_KEYWORDS, mKeywordsEditText.text.toString())
-            .apply()
+        PreferenceManager.getDefaultSharedPreferences(getContext()).edit {
+            putString(KEY_KEYWORDS, mKeywordsEditText.text.toString())
+            putBoolean(KEY_USING_REGEX, mRegexCheckBox.isChecked)
+        }
     }
 
     private fun restoreState() {
@@ -77,11 +82,25 @@ class FindOrReplaceDialogBuilder(context: Context, private val mEditorView: Edit
             .getString(KEY_KEYWORDS, "")
             .let { mKeywordsEditText.setText(it) }
 
+        PreferenceManager.getDefaultSharedPreferences(getContext())
+            .getBoolean(KEY_USING_REGEX, false)
+            .let { mRegexCheckBox.isChecked = it }
+    }
+
+    fun setUsingRegex(usingRegex: Boolean): FindOrReplaceDialogBuilder {
+        mRegexCheckBox.isChecked = usingRegex
+        return this
     }
 
     private fun syncWithReplaceCheckBox() {
         if (mReplaceAllCheckBox.isChecked && !mReplaceCheckBox.isChecked) {
             mReplaceCheckBox.isChecked = true
+        }
+    }
+
+    private fun syncWithReplaceAllCheckBox() {
+        if (!mReplaceCheckBox.isChecked && mReplaceAllCheckBox.isChecked) {
+            mReplaceAllCheckBox.isChecked = false
         }
     }
 
@@ -93,16 +112,22 @@ class FindOrReplaceDialogBuilder(context: Context, private val mEditorView: Edit
         try {
             val usingRegex = mRegexCheckBox.isChecked
             if (!mReplaceCheckBox.isChecked) {
-                mEditorView.find(keywords, usingRegex)
+                val ok = mEditorView.tryFind(keywords, usingRegex)
+                if (ok) {
+                    dialog.dismiss()
+                }
             } else {
                 val replacement = mReplacementEditText.text.toString()
                 if (mReplaceAllCheckBox.isChecked) {
                     mEditorView.replaceAll(keywords, replacement, usingRegex)
+                    dialog.dismiss()
                 } else {
-                    mEditorView.replace(keywords, replacement, usingRegex)
+                    val ok = mEditorView.tryReplace(keywords, replacement, usingRegex)
+                    if (ok) {
+                        dialog.dismiss()
+                    }
                 }
             }
-            dialog.dismiss()
         } catch (e: CheckedPatternSyntaxException) {
             e.printStackTrace()
             mKeywordsEditText.error = getContext().getString(R.string.error_pattern_syntax)
@@ -117,6 +142,7 @@ class FindOrReplaceDialogBuilder(context: Context, private val mEditorView: Edit
     companion object {
 
         private const val KEY_KEYWORDS = "..."
+        private const val KEY_USING_REGEX = "find_or_replace_using_regex"
 
     }
 

@@ -442,8 +442,24 @@ public class EditorMenu {
         mEditor.getSelection()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(s -> {
-                    FindOrReplaceDialogBuilder builder = new FindOrReplaceDialogBuilder(mContext, mEditorView)
-                            .setQueryIfNotEmpty(s);
+                    // Prefer restoring last search (even after exit search mode).
+                    // zh-CN: 优先恢复 "上一次搜索" (即使已退出搜索模式), 避免 selection (命中内容) 覆盖关键词.
+                    String preferredQuery = mEditorView.getPreferredSearchQueryForDialogOrNull();
+                    boolean preferredRegex = mEditorView.getPreferredSearchUsingRegexForDialog();
+
+                    FindOrReplaceDialogBuilder builder = new FindOrReplaceDialogBuilder(mContext, mEditorView);
+
+                    // Only override regex checkbox when we are restoring an actual previous query.
+                    // Otherwise keep the persisted checkbox state from SharedPreferences (restoreState()).
+                    //
+                    // zh-CN: 仅当我们确实在恢复 "上一次 query" 时才覆盖 regex 勾选状态;
+                    // 否则使用 SharedPreferences 中持久化的勾选状态.
+                    if (preferredQuery != null) {
+                        builder.setUsingRegex(preferredRegex);
+                    }
+
+                    builder.setQueryIfNotEmpty(preferredQuery != null ? preferredQuery : s);
+
                     builder.positiveColorRes(R.color.dialog_button_attraction);
                     builder.show();
                 });

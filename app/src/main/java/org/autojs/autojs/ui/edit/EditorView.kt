@@ -112,6 +112,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
+import java.util.regex.Pattern
 
 /**
  * Created by Stardust on Sep 28, 2017.
@@ -159,7 +160,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         get() = AutoJs.instance.scriptEngineService.getScriptExecution(scriptExecutionId)
 
     // Whether the editor is currently loading text (including streaming append).
-    // zh-CN: 编辑器是否正在加载文本(包括流式追加阶段).
+    // zh-CN: 编辑器是否正在加载文本 (包括流式追加阶段).
     @Volatile
     private var mEditorLoading: Boolean = false
 
@@ -169,7 +170,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private var mLargeFileMode: Boolean = false
 
     // Active large-file loading cancel flag.
-    // zh-CN: 大文件加载的取消标记(当前会话).
+    // zh-CN: 大文件加载的取消标记 (当前会话).
     private val mLargeFileCancel = AtomicBoolean(false)
 
     // Active IO subscription disposable for large-file loading.
@@ -178,11 +179,11 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private var mLargeFileIoDisposable: Disposable? = null
 
     // Active streaming source stream reference (for forced close).
-    // zh-CN: 流式读取的底层流引用(用于强制 close 以打断阻塞 read).
+    // zh-CN: 流式读取的底层流引用 (用于强制 close 以打断阻塞 read).
     private val mLargeFileStreamRef = AtomicReference<InputStream?>(null)
 
     // Active Choreographer callback for streaming append.
-    // zh-CN: 流式追加的 Choreographer 回调引用(用于取消帧回调).
+    // zh-CN: 流式追加的 Choreographer 回调引用 (用于取消帧回调).
     @Volatile
     private var mLargeFileFrameCallback: Choreographer.FrameCallback? = null
 
@@ -263,6 +264,36 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     // zh-CN: 复用的窗口可见区域 Rect.
     private val mTmpWindowVisibleRect = Rect()
 
+    // Search mode UI state.
+    // zh-CN: 搜索模式 UI 状态.
+    private var mInSearchMode = false
+    private var mToolbarTitleBeforeSearch: CharSequence? = null
+    private var mToolbarSubtitleBeforeSearch: CharSequence? = null
+    private var mCurrentSearchQuery: String? = null
+    private var mCurrentSearchUsingRegex: Boolean = false
+    private var mCurrentSearchShowReplaceItem: Boolean = false
+
+    // Remember last successful search even after exiting search mode.
+    // zh-CN: 即使退出搜索模式, 也保留上一次成功搜索的 query/regex.
+    private var mLastSearchQuery: String? = null
+    private var mLastSearchUsingRegex: Boolean = false
+
+    // Search stats (global count) state.
+    // zh-CN: 搜索统计 (全局匹配数) 状态.
+    private var mSearchStatsGeneration: Int = 0
+    private var mSearchStatsDisposable: Disposable? = null
+    private var mSearchStatsCurrentOrdinal: Int? = null
+    private var mSearchStatsTotal: Int? = null
+    private var mSearchStatsTotalCapped: Boolean = false
+    private var mSearchStatsCounting: Boolean = false
+
+    private val mSearchStatsDebounceMs = 300L
+    private val mSearchStatsMaxTotal = 1000
+
+    private val mSearchStatsDebounceRunnable = Runnable {
+        restartSearchStatsAsync(reason = "debounce")
+    }
+
     constructor(context: Context) : super(context)
 
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
@@ -331,7 +362,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 }
 
                 // Loading is finished for intent-handling stage (actual file loading may continue).
-                // zh-CN: Intent 处理阶段结束(实际文件加载可能仍在继续).
+                // zh-CN: Intent 处理阶段结束 (实际文件加载可能仍在继续).
                 mEditorLoading = false
                 syncPrimaryMenuState()
             }
@@ -383,20 +414,18 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
             // Compute the real overlap between editor and the visible window area.
             // zh-CN: 计算 editor 与窗口可见区域之间的真实重叠量.
-            val targetBottom = if (imeVisible) {
-                val activity = findHostActivityOrNull()
-                if (activity != null) {
-                    activity.window.decorView.getWindowVisibleDisplayFrame(mTmpWindowVisibleRect)
+            val activity = findHostActivityOrNull()
+            val targetBottom = if (activity != null) {
+                activity.window.decorView.getWindowVisibleDisplayFrame(mTmpWindowVisibleRect)
 
-                    val loc = IntArray(2)
-                    editor.getLocationOnScreen(loc)
-                    val editorBottomOnScreen = loc[1] + editor.height
+                val loc = IntArray(2)
+                editor.getLocationOnScreen(loc)
+                val editorBottomOnScreen = loc[1] + editor.height
 
-                    (editorBottomOnScreen - mTmpWindowVisibleRect.bottom).coerceAtLeast(0)
-                } else {
-                    0
-                }
-            } else 0
+                (editorBottomOnScreen - mTmpWindowVisibleRect.bottom).coerceAtLeast(0)
+            } else {
+                0
+            }
 
             if (targetBottom != mLastImeBottomInset) {
                 mLastImeBottomInset = targetBottom
@@ -417,6 +446,12 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             // zh-CN: 不消费 insets.
             insets
         }
+    }
+
+    private fun requestApplyInsetsSoon() {
+        // Helps fixing timing issues when IME hides/shows during dialog dismiss/focus change.
+        // zh-CN: 用于修复对话框 dismiss/焦点切换期间 IME 显隐导致的时序问题.
+        post { ViewCompat.requestApplyInsets(this@EditorView) }
     }
 
     private fun ensureCursorVisibleIfPossible() {
@@ -551,14 +586,13 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         val sizeOrNull = runCatching { queryContentLengthOrNull(uri) }.getOrNull()
         if (sizeOrNull != null && sizeOrNull >= streamThresholdBytes) {
             // Large file: show loading in enhance bar, allow viewing/scrolling (read-only).
-            // zh-CN: 大文件: 在增强栏显示加载提示, 允许查看/滚动(只读).
+            // zh-CN: 大文件: 在增强栏显示加载提示, 允许查看/滚动 (只读).
             beginEditorLoadingUi(context.getString(R.string.text_loading_with_dots))
             return loadUriStreamed(uri)
         }
 
         return Observable
             .fromCallable {
-                // ... existing code ...
                 val resolver = context.contentResolver
                 val rawBytes = resolver.openInputStream(uri)?.use { it.readBytes() } ?: ByteArray(0)
 
@@ -638,6 +672,21 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         (context as? HostActivity)?.backPressedObserver?.unregisterHandler(mFunctionsKeyboardHelper)
     }
 
+    // Expose current/last search session for reopening find/replace dialog.
+    // zh-CN: 对外暴露当前/上一次搜索会话信息, 用于再次打开查找/替换对话框时恢复状态.
+    fun getCurrentSearchQueryOrNull(): String? = mCurrentSearchQuery
+    fun getCurrentSearchUsingRegex(): Boolean = mCurrentSearchUsingRegex
+    fun isInSearchMode(): Boolean = mInSearchMode
+
+    fun getLastSearchQueryOrNull(): String? = mLastSearchQuery
+    fun getLastSearchUsingRegex(): Boolean = mLastSearchUsingRegex
+
+    fun getPreferredSearchQueryForDialogOrNull(): String? =
+        (mCurrentSearchQuery ?: mLastSearchQuery)
+
+    fun getPreferredSearchUsingRegexForDialog(): Boolean =
+        (if (mInSearchMode) mCurrentSearchUsingRegex else mLastSearchUsingRegex)
+
     // Cancel current large-file loading as soon as possible.
     // zh-CN: 尽快取消当前大文件加载.
     fun cancelLargeFileLoading() {
@@ -666,7 +715,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         }
 
         // Cleanup UI state best-effort (do NOT re-enable editing in read-only editor).
-        // zh-CN: 尽力清理 UI 状态(只读编辑器不要被重新启用编辑).
+        // zh-CN: 尽力清理 UI 状态 (只读编辑器不要被重新启用编辑).
         post {
             runCatching {
                 endEditorLoadingUi()
@@ -704,34 +753,34 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 val bis = BufferedInputStream(counted)
 
                 try {
-                bis.use { input ->
+                    bis.use { input ->
                         if (mLargeFileCancel.get() || emitter.isDisposed) {
                             // Cancel early.
                             // zh-CN: 提前取消.
                             return@use
                         }
 
-                    val sampleLimitBytes = 64 * 1024
-                    input.mark(sampleLimitBytes + 8)
+                        val sampleLimitBytes = 64 * 1024
+                        input.mark(sampleLimitBytes + 8)
 
-                    val sample = ByteArray(sampleLimitBytes)
-                    val sampleRead = input.read(sample).coerceAtLeast(0)
-                    val sampleBytes = if (sampleRead == sample.size) sample else sample.copyOf(sampleRead)
+                        val sample = ByteArray(sampleLimitBytes)
+                        val sampleRead = input.read(sample).coerceAtLeast(0)
+                        val sampleBytes = if (sampleRead == sample.size) sample else sample.copyOf(sampleRead)
 
-                    val detected = StringUtils.detectCharset(sampleBytes)
-                    mCurrentCharsetConfidence = detected.confidence ?: 0
-                    mCurrentCharset = detected.charsetOrDefault()
-                    mHadBom = StringUtils.hasBom(sampleBytes, mCurrentCharset)
+                        val detected = StringUtils.detectCharset(sampleBytes)
+                        mCurrentCharsetConfidence = detected.confidence ?: 0
+                        mCurrentCharset = detected.charsetOrDefault()
+                        mHadBom = StringUtils.hasBom(sampleBytes, mCurrentCharset)
 
-                    runCatching { input.reset() }.getOrElse {
+                        runCatching { input.reset() }.getOrElse {
                             if (!emitter.isDisposed && !mLargeFileCancel.get()) {
-                        emitter.onError(IllegalStateException("Stream reset failed for $uri"))
+                                emitter.onError(IllegalStateException("Stream reset failed for $uri"))
                             }
-                        return@use
-                    }
+                            return@use
+                        }
 
-                    streamDecodeAndEmit(input, emitter)
-                }
+                        streamDecodeAndEmit(input, emitter)
+                    }
                 } finally {
                     // Clear reference when finished/failed.
                     // zh-CN: 结束/失败后清理引用.
@@ -776,8 +825,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             }, { e ->
                 done.set(true)
                 if (!mLargeFileCancel.get()) {
-                post { endEditorLoadingUi() }
-                e.printStackTrace()
+                    post { endEditorLoadingUi() }
+                    e.printStackTrace()
                 }
             }, {
                 done.set(true)
@@ -811,7 +860,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         val choreographer = Choreographer.getInstance()
 
         // Per-frame time budget for appending text (favor throughput).
-        // zh-CN: 每帧用于追加文本的时间预算(优先吞吐).
+        // zh-CN: 每帧用于追加文本的时间预算 (优先吞吐).
         val appendBudgetMsIdle = 12L
         val appendBudgetMsTouching = 3L
 
@@ -1033,7 +1082,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         // editor.setProgress(true)
 
         // Frame time budget in ms (tune for devices).
-        // zh-CN: 单帧时间预算(毫秒), 可按设备调参.
+        // zh-CN: 单帧时间预算 (毫秒), 可按设备调参.
         val frameBudgetMs = 7L
 
         // Adaptive chunk size to balance layout cost and responsiveness.
@@ -1177,8 +1226,31 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                     }
                     syncPrimaryMenuState()
                 })
+
+                editText.addTextChangedListener(SimpleTextWatcher { _ ->
+                    // Live refresh search stats in search mode (debounced).
+                    // Behavior:
+                    // - Immediately show ".../..." to indicate recounting.
+                    // - Debounce the actual background scan.
+                    //
+                    // zh-CN: 搜索模式下实时刷新统计 (带防抖).
+                    // - 立刻把 subtitle 变成 ".../..." 表示重新统计中.
+                    // - 后台扫描做 debounce, 避免频繁扫全文.
+                    if (!mInSearchMode) return@SimpleTextWatcher
+                    if (editText.isLoadingText() || mEditorLoading) return@SimpleTextWatcher
+
+                    mSearchStatsCounting = true
+                    mSearchStatsCurrentOrdinal = null
+                    mSearchStatsTotal = null
+                    mSearchStatsTotalCapped = false
+                    updateSearchSubtitleBestEffort()
+
+                    scheduleSearchStatsRefreshDebounced()
+                })
+
                 editText.textSize = getEditorTextSize(pxToSp(editText.textSize).toInt()).toFloat()
             }
+
             editor.addCursorChangeCallback(object : CodeEditor.CursorChangeCallback {
                 override fun onCursorChange(line: String, cursor: Int) {
                     autoComplete(line, cursor)
@@ -1243,11 +1315,45 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             R.id.save -> saveFile()
             R.id.undo -> undo()
             R.id.redo -> redo()
-            R.id.replace -> replace()
-            R.id.find_next -> findNext()
-            R.id.find_prev -> findPrev()
-            R.id.cancel_search -> cancelSearch()
+
+            R.id.find_next -> {
+                // IMPORTANT: base "next" on current caret, not previous foundIndex.
+                // zh-CN: 重要: "下一个" 必须以当前光标为起点, 而不是以上次 foundIndex 为起点.
+                editor.resetFoundIndexForFindNextFromCursor()
+                findNext()
+                onSearchStateMaybeChanged()
+            }
+
+            R.id.find_prev -> {
+                // IMPORTANT: base "prev" on current caret, not previous foundIndex.
+                // zh-CN: 重要: "上一个" 必须以当前光标为起点, 而不是以上次 foundIndex 为起点.
+                editor.resetFoundIndexForFindPrevFromCursor()
+                findPrev()
+                onSearchStateMaybeChanged()
+            }
+
+            R.id.cancel_search -> {
+                cancelSearch()
+            }
+
+            R.id.replace -> {
+                replace()
+                onSearchStateMaybeChanged()
+            }
         }
+    }
+
+    private fun onSearchStateMaybeChanged() {
+        // After next/prev/replace, selection likely changed -> current ordinal changes.
+        // zh-CN: next/prev/replace 后 selection 可能变化 -> current 序号需要刷新.
+        if (!mInSearchMode) return
+        updateSearchSubtitleBestEffort()
+        scheduleSearchStatsRefreshDebounced()
+    }
+
+    private fun scheduleSearchStatsRefreshDebounced() {
+        mUiHandler.removeCallbacks(mSearchStatsDebounceRunnable)
+        mUiHandler.postDelayed(mSearchStatsDebounceRunnable, mSearchStatsDebounceMs)
     }
 
     @SuppressLint("CheckResult")
@@ -1677,8 +1783,6 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     private fun findPrev() = editor.findPrev()
 
-    private fun cancelSearch() = showNormalToolbar()
-
     private fun showNormalToolbar() {
         activity.supportFragmentManager.beginTransaction()
             .replace(R.id.toolbar_menu, mNormalToolbar)
@@ -1762,10 +1866,319 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         }
     }
 
+    private fun getHostToolbarOrNull(): androidx.appcompat.widget.Toolbar? {
+        // The activity toolbar id is "toolbar".
+        // zh-CN: Activity Toolbar 的 id 为 toolbar.
+        return activity.findViewById(R.id.toolbar)
+    }
+
+    private fun enterSearchMode(query: String, usingRegex: Boolean, showReplaceItem: Boolean) {
+        if (!mInSearchMode) {
+            val tb = getHostToolbarOrNull()
+            mToolbarTitleBeforeSearch = tb?.title
+            mToolbarSubtitleBeforeSearch = tb?.subtitle
+        }
+
+        mInSearchMode = true
+        mCurrentSearchQuery = query
+        mCurrentSearchUsingRegex = usingRegex
+        mCurrentSearchShowReplaceItem = showReplaceItem
+
+        // Persist last successful search so reopening dialog restores it even after exit.
+        // zh-CN: 记录最近一次成功搜索, 使退出后再次打开对话框仍可恢复.
+        mLastSearchQuery = query
+        mLastSearchUsingRegex = usingRegex
+
+        // Reset stats UI to "counting".
+        // zh-CN: 重置统计 UI 为 "统计中".
+        mSearchStatsCurrentOrdinal = null
+        mSearchStatsTotal = null
+        mSearchStatsTotalCapped = false
+        mSearchStatsCounting = true
+
+        val tb = getHostToolbarOrNull()
+        tb?.title = query
+        tb?.subtitle = null
+
+        // Start stats immediately.
+        // zh-CN: 立即启动统计.
+        restartSearchStatsAsync(reason = "enter")
+        requestApplyInsetsSoon()
+    }
+
+    private fun exitSearchModeAndRestoreToolbar() {
+        if (!mInSearchMode) return
+
+        mInSearchMode = false
+        mCurrentSearchQuery = null
+        mCurrentSearchUsingRegex = false
+        mCurrentSearchShowReplaceItem = false
+
+        cancelSearchStats()
+
+        val tb = getHostToolbarOrNull()
+        tb?.title = mToolbarTitleBeforeSearch
+        tb?.subtitle = mToolbarSubtitleBeforeSearch
+
+        requestApplyInsetsSoon()
+    }
+
+    private fun cancelSearchStats() {
+        mSearchStatsGeneration++
+        mUiHandler.removeCallbacks(mSearchStatsDebounceRunnable)
+        mSearchStatsDisposable?.let { d -> runCatching { d.dispose() } }
+        mSearchStatsDisposable = null
+        mSearchStatsCounting = false
+    }
+
+    private fun buildSearchSubtitleText(): CharSequence? {
+        if (!mInSearchMode) return null
+
+        val current = mSearchStatsCurrentOrdinal
+        val total = mSearchStatsTotal
+        val counting = mSearchStatsCounting
+
+        fun formatTotal(): String {
+            if (total == null) return "..."
+            return if (mSearchStatsTotalCapped) "${mSearchStatsMaxTotal - 1}+" else total.toString()
+        }
+
+        val totalText = when {
+            total != null -> formatTotal()
+            counting -> "..."
+            else -> null
+        }
+
+        val currentText = when {
+            current != null -> current.toString()
+            counting -> "..."
+            total != null -> "..." // <-- key: total known but current unknown => show ".../total"
+            else -> null
+        }
+
+        return when {
+            currentText != null && totalText != null -> "$currentText/$totalText"
+            else -> null
+        }
+    }
+
+    private fun updateSearchSubtitleBestEffort() {
+        val tb = getHostToolbarOrNull() ?: return
+        if (!mInSearchMode) return
+        tb.subtitle = buildSearchSubtitleText()
+    }
+
+    private fun showNoSearchResultDialog(query: String) {
+        // Show a clear no-result prompt.
+        // zh-CN: 显示明确的无结果提示.
+        DialogUtils.buildAndShowAdaptive {
+            MaterialDialog.Builder(context)
+                .title(R.string.text_prompt)
+                .content(context.getString(R.string.text_no_search_results_for_keyword, query))
+                .positiveText(R.string.dialog_button_dismiss)
+                .positiveColorRes(R.color.dialog_button_default)
+                .build()
+        }
+    }
+
+    private fun restartSearchStatsAsync(reason: String) {
+        if (!mInSearchMode) return
+
+        val query = mCurrentSearchQuery
+        if (query.isNullOrEmpty()) return
+
+        // Cancel previous task.
+        // zh-CN: 取消上一轮任务.
+        cancelSearchStats()
+
+        mSearchStatsCounting = true
+        mSearchStatsCurrentOrdinal = null
+        mSearchStatsTotal = null
+        mSearchStatsTotalCapped = false
+
+        updateSearchSubtitleBestEffort()
+
+        val gen = ++mSearchStatsGeneration
+
+        val usingRegex = mCurrentSearchUsingRegex
+        val selStart = editor.codeEditText.selectionStart
+        val selEnd = editor.codeEditText.selectionEnd
+        val textSnapshot = editor.text
+
+        mSearchStatsDisposable = Observable
+            .fromCallable {
+                computeSearchStats(
+                    text = textSnapshot,
+                    query = query,
+                    usingRegex = usingRegex,
+                    selectionStart = minOf(selStart, selEnd),
+                    selectionEnd = maxOf(selStart, selEnd),
+                    maxTotal = mSearchStatsMaxTotal,
+                    generation = gen,
+                )
+            }
+            .subscribeOn(Schedulers.computation())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({ result ->
+                // Ignore stale results.
+                // zh-CN: 忽略过期结果.
+                if (gen != mSearchStatsGeneration) return@subscribe
+                if (!mInSearchMode) return@subscribe
+
+                mSearchStatsCounting = false
+                mSearchStatsCurrentOrdinal = result.currentOrdinal
+                mSearchStatsTotal = result.total
+                mSearchStatsTotalCapped = result.capped
+
+                updateSearchSubtitleBestEffort()
+            }, { e ->
+                if (gen != mSearchStatsGeneration) return@subscribe
+                mSearchStatsCounting = false
+                e.printStackTrace()
+                updateSearchSubtitleBestEffort()
+            })
+    }
+
+    private data class SearchStatsResult(
+        val currentOrdinal: Int?,
+        val total: Int,
+        val capped: Boolean,
+    )
+
+    private fun computeSearchStats(
+        text: String,
+        query: String,
+        usingRegex: Boolean,
+        selectionStart: Int,
+        selectionEnd: Int,
+        maxTotal: Int,
+        generation: Int,
+    ): SearchStatsResult {
+        // Note:
+        // - Non-regex: count non-overlapping occurrences.
+        // - Regex: count matcher.find() occurrences.
+        // - currentOrdinal: match whose range equals current selection range.
+        // zh-CN:
+        // - 非正则: 统计不重叠匹配次数.
+        // - 正则: 统计 matcher.find() 次数.
+        // - currentOrdinal: 匹配区间与当前 selection 区间相等时记录序号.
+        if (query.isEmpty()) return SearchStatsResult(null, 0, false)
+
+        fun cancelled(): Boolean = generation != mSearchStatsGeneration
+
+        var total = 0
+        var capped = false
+        var currentOrdinal: Int? = null
+
+        if (!usingRegex) {
+            var from = 0
+            while (from <= text.length) {
+                if (cancelled()) break
+
+                val idx = text.indexOf(query, from)
+                if (idx < 0) break
+
+                total++
+                val end = idx + query.length
+                if (idx == selectionStart && end == selectionEnd) {
+                    currentOrdinal = total
+                }
+
+                if (total >= maxTotal) {
+                    capped = true
+                    break
+                }
+
+                // Non-overlapping.
+                // zh-CN: 不重叠推进.
+                from = end
+            }
+        } else {
+            val p = Pattern.compile(query)
+            val m = p.matcher(text)
+            while (m.find()) {
+                if (cancelled()) break
+
+                total++
+                val start = m.start()
+                val end = m.end()
+                if (start == selectionStart && end == selectionEnd) {
+                    currentOrdinal = total
+                }
+
+                if (total >= maxTotal) {
+                    capped = true
+                    break
+                }
+            }
+        }
+
+        return SearchStatsResult(
+            currentOrdinal = currentOrdinal,
+            total = total,
+            capped = capped,
+        )
+    }
+
+    // Try to start "Find" and enter search mode. Returns true if any result is found.
+    // zh-CN: 尝试开始 "查找" 并进入搜索模式. 若找到任意结果则返回 true.
+    fun tryFind(keywords: String, usingRegex: Boolean): Boolean {
+        editor.find(keywords, usingRegex)
+
+        val hasResult = editor.getFoundIndex() >= 0
+        if (!hasResult) {
+            showNoSearchResultDialog(keywords)
+            return false
+        }
+
+        enterSearchMode(query = keywords, usingRegex = usingRegex, showReplaceItem = false)
+        showSearchToolbar(showReplaceItem = false)
+        updateSearchSubtitleBestEffort()
+
+        // Fix possible IME/insets timing issues after dialog confirm and IME hide.
+        // zh-CN: 修复对话框确认导致 IME 收起后的 insets 时序问题.
+        requestApplyInsetsSoon()
+        return true
+    }
+
+    // Try to start "Replace (single)" and enter search mode. Returns true if any result is found.
+    // zh-CN: 尝试开始 "替换 (单次)" 并进入搜索模式. 若找到任意结果则返回 true.
+    fun tryReplace(keywords: String, replacement: String, usingRegex: Boolean): Boolean {
+        editor.replace(keywords, replacement, usingRegex)
+
+        val hasResult = editor.getFoundIndex() >= 0
+        if (!hasResult) {
+            showNoSearchResultDialog(keywords)
+            return false
+        }
+
+        enterSearchMode(query = keywords, usingRegex = usingRegex, showReplaceItem = true)
+        showSearchToolbar(showReplaceItem = true)
+        updateSearchSubtitleBestEffort()
+
+        // Fix possible IME/insets timing issues after dialog confirm and IME hide.
+        // zh-CN: 修复对话框确认导致 IME 收起后的 insets 时序问题.
+        requestApplyInsetsSoon()
+        return true
+    }
+
+    private fun cancelSearch() {
+        exitSearchModeAndRestoreToolbar()
+        showNormalToolbar()
+    }
+
     @Throws(CheckedPatternSyntaxException::class)
     fun find(keywords: String, usingRegex: Boolean) {
-        editor.find(keywords, usingRegex)
-        showSearchToolbar(false)
+        // Keep old API for callers that don't care about result.
+        // zh-CN: 保留旧 API, 兼容不关心结果的调用方.
+        tryFind(keywords, usingRegex)
+    }
+
+    @Throws(CheckedPatternSyntaxException::class)
+    fun replace(keywords: String, replacement: String, usingRegex: Boolean) {
+        // Keep old API for callers that don't care about result.
+        // zh-CN: 保留旧 API, 兼容不关心结果的调用方.
+        tryReplace(keywords, replacement, usingRegex)
     }
 
     private fun showSearchToolbar(showReplaceItem: Boolean) {
@@ -1776,12 +2189,6 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 arguments!!.putBoolean(SearchToolbarFragment.ARGUMENT_SHOW_REPLACE_ITEM, showReplaceItem)
             })
             .commit()
-    }
-
-    @Throws(CheckedPatternSyntaxException::class)
-    fun replace(keywords: String, replacement: String, usingRegex: Boolean) {
-        editor.replace(keywords, replacement, usingRegex)
-        showSearchToolbar(true)
     }
 
     @Throws(CheckedPatternSyntaxException::class)
@@ -1935,6 +2342,10 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         // Cancel loading before destroying editor resources.
         // zh-CN: 销毁前先取消加载, 再销毁编辑器相关资源.
         cancelLargeFileLoading()
+
+        // Cancel search stats.
+        // zh-CN: 取消搜索统计任务.
+        cancelSearchStats()
 
         editor.destroy()
         mAutoCompletion?.shutdown()
