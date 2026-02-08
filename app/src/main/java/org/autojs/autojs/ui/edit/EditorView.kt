@@ -8,6 +8,7 @@ import android.content.ContextWrapper
 import android.content.Intent
 import android.content.IntentFilter
 import android.database.Cursor
+import android.graphics.Rect
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -25,6 +26,9 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.view.GravityCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.isVisible
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.FragmentActivity
 import com.afollestad.materialdialogs.MaterialDialog
@@ -67,6 +71,7 @@ import org.autojs.autojs.ui.edit.debug.DebugBar
 import org.autojs.autojs.ui.edit.editor.CodeEditor
 import org.autojs.autojs.ui.edit.editor.CodeEditor.CheckedPatternSyntaxException
 import org.autojs.autojs.ui.edit.editor.JavaScriptHighlighter.MAX_HIGHLIGHT_CHARS
+import org.autojs.autojs.ui.edit.editor.LayoutHelper
 import org.autojs.autojs.ui.edit.keyboard.FunctionsKeyboardHelper
 import org.autojs.autojs.ui.edit.keyboard.FunctionsKeyboardView
 import org.autojs.autojs.ui.edit.keyboard.FunctionsKeyboardView.ClickCallback
@@ -107,7 +112,6 @@ import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
-import kotlin.text.set
 
 /**
  * Created by Stardust on Sep 28, 2017.
@@ -241,11 +245,23 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     private val mShowLoadingBarRunnable = Runnable {
         if (!mLoadingBarRequested) return@Runnable
-        if (mLoadingBarContainer.visibility == VISIBLE) return@Runnable
+        if (mLoadingBarContainer.isVisible) return@Runnable
 
         mLoadingBarContainer.visibility = VISIBLE
         mLoadingBarShownAtMs = SystemClock.uptimeMillis()
     }
+
+    // IME bottom inset last applied to editor padding.
+    // zh-CN: 最近一次应用到编辑器 padding 的 IME 底部值.
+    private var mLastImeBottomInset = 0
+
+    // Reusable rect for cursor visibility requests.
+    // zh-CN: 光标可见性请求复用 Rect.
+    private val mTmpCursorRect = Rect()
+
+    // Reusable rect for window visible area.
+    // zh-CN: 复用的窗口可见区域 Rect.
+    private val mTmpWindowVisibleRect = Rect()
 
     constructor(context: Context) : super(context)
 
@@ -257,6 +273,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         setUpEditor()
         setUpInputMethodEnhancedBar()
         setUpFunctionsKeyboard()
+        setUpImeInsetsHandling()
         setMenuItemStatus(R.id.save, false)
         mDocsWebView.apply {
             webView.settings.displayZoomControls = true
@@ -350,6 +367,112 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         }
     }
 
+    private fun findHostActivityOrNull(): Activity? {
+        var c = context
+        while (c !is Activity && c is ContextWrapper) {
+            c = c.baseContext
+        }
+        return c as? Activity
+    }
+
+    private fun setUpImeInsetsHandling() {
+        // Handle IME insets to avoid keyboard covering the editor.
+        // zh-CN: 处理 IME inset, 避免软键盘遮挡编辑器内容.
+        ViewCompat.setOnApplyWindowInsetsListener(this) { _, insets ->
+            val imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
+
+            // Compute the real overlap between editor and the visible window area.
+            // zh-CN: 计算 editor 与窗口可见区域之间的真实重叠量.
+            val targetBottom = if (imeVisible) {
+                val activity = findHostActivityOrNull()
+                if (activity != null) {
+                    activity.window.decorView.getWindowVisibleDisplayFrame(mTmpWindowVisibleRect)
+
+                    val loc = IntArray(2)
+                    editor.getLocationOnScreen(loc)
+                    val editorBottomOnScreen = loc[1] + editor.height
+
+                    (editorBottomOnScreen - mTmpWindowVisibleRect.bottom).coerceAtLeast(0)
+                } else {
+                    0
+                }
+            } else 0
+
+            if (targetBottom != mLastImeBottomInset) {
+                mLastImeBottomInset = targetBottom
+
+                // Apply bottom padding only when the editor is actually overlapped by IME.
+                // zh-CN: 仅当 editor 实际被 IME 遮挡时才应用底部 padding.
+                val v = editor
+                v.setPadding(v.paddingLeft, v.paddingTop, v.paddingRight, targetBottom)
+
+                // Only ensure cursor visible when IME becomes visible.
+                // zh-CN: 仅在 IME 变为可见时确保光标可见.
+                if (imeVisible) {
+                    post { ensureCursorVisibleIfPossible() }
+                }
+            }
+
+            // Do not consume insets.
+            // zh-CN: 不消费 insets.
+            insets
+        }
+    }
+
+    private fun ensureCursorVisibleIfPossible() {
+        // Bring the caret into visible area when keyboard shows, without "scrolling back" on hide.
+        // zh-CN: 键盘弹起时将光标区域滚动到可见范围内, 键盘收起时不回滚.
+        val editText = editor.codeEditText
+        val textLen = editText.text?.length ?: 0
+        if (textLen <= 0) return
+
+        val layout = editText.layout ?: return
+        val sel = editText.selectionStart.coerceIn(0, textLen)
+
+        val line = LayoutHelper.getLineOfChar(layout, sel).coerceAtLeast(0)
+        val lineTop = layout.getLineTop(line)
+        val lineBottom = layout.getLineBottom(line)
+
+        // Compute a small rect around the current line/caret.
+        // zh-CN: 计算一个围绕当前行/光标的小矩形区域.
+        val x = runCatching { layout.getPrimaryHorizontal(sel).toInt() }.getOrElse { 0 }
+        val left = (x - editText.paddingLeft - 16).coerceAtLeast(0)
+        val right = left + 32
+
+        mTmpCursorRect.set(
+            /* left = */ left,
+            /* top = */ lineTop,
+            /* right = */ right,
+            /* bottom = */ lineBottom,
+        )
+
+        // Request rectangle visible inside scroll container.
+        // zh-CN: 请求在滚动容器内显示该矩形区域.
+        editText.requestRectangleOnScreen(mTmpCursorRect, true)
+    }
+
+    private fun ensureEditorHasCursorAfterLoadIfNeeded() {
+        // Ensure there is a visible caret after loading, so jump operations can work.
+        // zh-CN: 加载完成后确保存在可见光标, 以使跳转操作可用.
+        val editText = editor.codeEditText
+        val len = editText.text?.length ?: 0
+        if (len <= 0) return
+
+        // If selection is invalid or collapsed at -1-like state, normalize.
+        // zh-CN: 若 selection 异常, 则归一化.
+        val safeSel = editText.selectionStart.coerceIn(0, len)
+
+        // Request focus without forcing soft keyboard.
+        // zh-CN: 请求焦点但不强制弹出软键盘.
+        editText.requestFocus()
+        editText.isCursorVisible = true
+        editText.setSelection(safeSel)
+
+        // Optionally ensure visible once.
+        // zh-CN: 可选地确保一次可见.
+        ensureCursorVisibleIfPossible()
+    }
+
     private fun setLoadingBar(loading: Boolean) {
         if (loading) {
             mLoadingBarRequested = true
@@ -430,7 +553,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             // Large file: show loading in enhance bar, allow viewing/scrolling (read-only).
             // zh-CN: 大文件: 在增强栏显示加载提示, 允许查看/滚动(只读).
             beginEditorLoadingUi(context.getString(R.string.text_loading_with_dots))
-            return loadUriStreamed(uri, totalBytesOrNull = sizeOrNull)
+            return loadUriStreamed(uri)
         }
 
         return Observable
@@ -508,7 +631,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     override fun onDetachedFromWindow() {
         // Cancel loading before unregistering receivers to avoid ANR on exit.
         // zh-CN: 退出前先取消加载, 避免返回退出时 ANR.
-        cancelLargeFileLoading("onDetachedFromWindow")
+        cancelLargeFileLoading()
 
         super.onDetachedFromWindow()
         context.unregisterReceiver(mOnRunFinishedReceiver)
@@ -517,7 +640,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     // Cancel current large-file loading as soon as possible.
     // zh-CN: 尽快取消当前大文件加载.
-    private fun cancelLargeFileLoading(reason: String) {
+    fun cancelLargeFileLoading() {
         // Mark cancel first so both IO/UI can observe it.
         // zh-CN: 先标记取消, 让 IO/UI 两侧都能观察到.
         mLargeFileCancel.set(true)
@@ -553,7 +676,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         }
     }
 
-    private fun loadUriStreamed(uri: Uri, totalBytesOrNull: Long?): Observable<String> {
+    private fun loadUriStreamed(uri: Uri): Observable<String> {
         val readBytes = AtomicLong(0L)
 
         // Reset cancel state for a new session.
@@ -561,7 +684,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         mLargeFileCancel.set(false)
 
         return Observable
-            .create<String> { emitter ->
+            .create { emitter ->
                 val resolver = context.contentResolver
 
                 // Emit an early placeholder so handleIntent() can proceed.
@@ -620,16 +743,12 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             .let { upstream ->
                 bridgeStreamToUiWithProgress(
                     upstream = upstream,
-                    totalBytesOrNull = totalBytesOrNull,
-                    readBytes = readBytes,
                 )
             }
     }
 
     private fun bridgeStreamToUiWithProgress(
         upstream: Observable<String>,
-        totalBytesOrNull: Long?,
-        readBytes: AtomicLong,
     ): Observable<String> {
         val queue = ConcurrentLinkedQueue<String>()
         val done = AtomicBoolean(false)
@@ -669,7 +788,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext {
                 if (started.compareAndSet(false, true)) {
-                    startStreamingAppendWithProgress(queue, done, totalBytesOrNull, readBytes)
+                    startStreamingAppendWithProgress(queue, done)
                 }
             }
     }
@@ -677,8 +796,6 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private fun startStreamingAppendWithProgress(
         queue: ConcurrentLinkedQueue<String>,
         done: AtomicBoolean,
-        totalBytesOrNull: Long?,
-        readBytes: AtomicLong,
     ) {
         val editText = editor.codeEditText
 
@@ -732,6 +849,10 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                     // IMPORTANT: end loading UI on success.
                     // zh-CN: 重要: 成功时必须结束加载 UI.
                     endEditorLoadingUi()
+
+                    // Ensure caret/focus after loading is done.
+                    // zh-CN: 加载结束后确保光标/焦点.
+                    post { ensureEditorHasCursorAfterLoadIfNeeded() }
 
                     mLargeFileFrameCallback = null
                     return
@@ -812,127 +933,6 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         }
     }
 
-    private fun bridgeStreamToUi(upstream: Observable<String>): Observable<String> {
-        val queue = ConcurrentLinkedQueue<String>()
-        val done = AtomicBoolean(false)
-        val started = AtomicBoolean(false)
-
-        // Subscribe on IO side, push chunks into queue.
-        // zh-CN: 在 IO 侧订阅, 将分片推入队列.
-        upstream
-            .observeOn(Schedulers.io())
-            .subscribe({ chunk ->
-                if (chunk.isNotEmpty()) {
-                    queue.add(chunk)
-                } else {
-                    // Ignore placeholder.
-                    // zh-CN: 忽略占位分片.
-                }
-            }, { e ->
-                done.set(true)
-                post { editor.setProgress(false) }
-                e.printStackTrace()
-            }, {
-                done.set(true)
-            })
-
-        // Return a UI-side observable that triggers the append loop once.
-        // zh-CN: 返回 UI 侧 observable, 仅用于触发一次追加循环.
-        return Observable
-            .just("")
-            .observeOn(AndroidSchedulers.mainThread())
-            .doOnNext {
-                if (started.compareAndSet(false, true)) {
-                    startStreamingAppend(queue, done)
-                }
-            }
-    }
-
-    private fun startStreamingAppend(queue: ConcurrentLinkedQueue<String>, done: AtomicBoolean) {
-        val editText = editor.codeEditText
-
-        // Large file streaming: disable all buttons while loading.
-        // zh-CN: 大文件流式加载: 加载期间禁用所有按钮.
-        mLargeFileMode = true
-        mEditorLoading = true
-        syncPrimaryMenuState()
-
-        // Keep a non-blocking indicator during streaming.
-        // zh-CN: 流式加载期间保持一个不遮挡操作的提示.
-        editor.setProgress(true, interactive = true)
-
-        editText.setLoadingText(true)
-
-        // Keep undo/redo disabled in large file mode.
-        // zh-CN: 大文件模式下保持撤销/重做禁用.
-        editor.setRedoUndoEnabled(false)
-
-        editText.setLoadingGutterDigits(7)
-        editText.setText("")
-
-        val targetMs = 6L
-        var chunkSize = 64 * 1024
-        val minChunkSize = 2 * 1024
-        val maxChunkSize = 256 * 1024
-        var lastAppendCostMs = 0L
-
-        val choreographer = Choreographer.getInstance()
-
-        val callback = object : Choreographer.FrameCallback {
-            override fun doFrame(frameTimeNanos: Long) {
-                val finished = done.get() && queue.isEmpty()
-                if (finished) {
-                    // Finish: restore state and close progress.
-                    // zh-CN: 完成: 恢复状态并关闭进度.
-                    editText.setLoadingText(false)
-
-                    // Undo/redo stay disabled for large files.
-                    // zh-CN: 大文件撤销/重做保持禁用.
-                    editor.setRedoUndoEnabled(false)
-                    editor.markUndoRedoBaselineAsUnchanged()
-
-                    editor.setProgress(false)
-
-                    mEditorLoading = false
-                    syncPrimaryMenuState()
-
-                    val len = editText.text?.length ?: 0
-                    if (len in 1..MAX_HIGHLIGHT_CHARS) {
-                        post { editor.refreshHighlightTokensIfAllowed() }
-                    }
-                    return
-                }
-
-                val sb = StringBuilder(chunkSize.coerceAtLeast(1024))
-                while (sb.length < chunkSize) {
-                    val s = queue.poll() ?: break
-                    sb.append(s)
-                }
-
-                if (sb.isNotEmpty()) {
-                    val t0 = SystemClock.uptimeMillis()
-                    editText.beginBatchEdit()
-                    try {
-                        editText.text?.append(sb)
-                    } finally {
-                        editText.endBatchEdit()
-                    }
-                    lastAppendCostMs = (SystemClock.uptimeMillis() - t0).coerceAtLeast(0L)
-
-                    chunkSize = when {
-                        lastAppendCostMs > targetMs * 2 -> (chunkSize / 2).coerceAtLeast(minChunkSize)
-                        lastAppendCostMs < targetMs / 2 -> (chunkSize * 2).coerceAtMost(maxChunkSize)
-                        else -> chunkSize
-                    }
-                }
-
-                choreographer.postFrameCallback(this)
-            }
-        }
-
-        choreographer.postFrameCallback(callback)
-    }
-
     private fun setInitialText(text: String) {
         // NOTE: This method should not manage loading UI lifecycle anymore.
         // zh-CN: 注意: 此方法不再管理加载 UI 的生命周期.
@@ -970,6 +970,10 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             editor.setRedoUndoEnabled(true)
             editText.setLoadingText(false)
         }
+
+        // Ensure caret/focus after fast load.
+        // zh-CN: 快速加载完成后确保光标/焦点.
+        post { ensureEditorHasCursorAfterLoadIfNeeded() }
 
         // Re-highlight once after fast load, but only when size is within highlighter limit.
         // zh-CN: 快速加载完成后主动触发一次高亮, 但仅在文本大小不超过高亮上限时执行.
@@ -1073,6 +1077,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
                 // Adapt chunk size based on how many chunks we managed to append in this frame.
                 // zh-CN: 根据本帧完成的分片数量自适应调整 chunkSize.
+                @Suppress("AssignedValueIsNeverRead")
                 chunkSize = when {
                     appendedChunks <= 1 -> (chunkSize / 2).coerceAtLeast(minChunkSize)
                     appendedChunks >= 4 -> (chunkSize * 2).coerceAtMost(maxChunkSize)
@@ -1553,7 +1558,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     private fun buildSafeFileNameForSaveAs(baseName: String, ext: String): String {
-        val raw = if (baseName.isBlank()) "untitled" else baseName
+        val raw = baseName.ifBlank { "untitled" }
         val sanitized = raw.replace(Regex("""[\\/:*?"<>|]"""), "_")
         val niceExt = ext.trim().trimStart('.')
         return if (niceExt.isBlank()) sanitized else "$sanitized.$niceExt"
@@ -1929,7 +1934,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     fun destroy() {
         // Cancel loading before destroying editor resources.
         // zh-CN: 销毁前先取消加载, 再销毁编辑器相关资源.
-        cancelLargeFileLoading("destroy")
+        cancelLargeFileLoading()
 
         editor.destroy()
         mAutoCompletion?.shutdown()
