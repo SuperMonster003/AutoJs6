@@ -65,6 +65,8 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
             if (mEditorView.onBackPressed()) {
                 return
             }
+            mEditorView.cancelLargeFileLoading()
+
             isEnabled = false
             onBackPressedDispatcher.onBackPressed()
             isEnabled = true
