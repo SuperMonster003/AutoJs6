@@ -483,6 +483,55 @@ class CodeEditor : HVScrollView {
 
     fun redo() = mTextViewRedoUndo.redo()
 
+    // Expose current found index for UI logic (e.g., no-result prompt).
+    // zh-CN: 暴露当前命中位置, 供 UI 逻辑使用 (例如无结果提示).
+    fun getFoundIndex(): Int = mFoundIndex
+
+    /**
+     * Reset search cursor for "Find Next" based on current caret/selection.
+     *
+     * Behavior:
+     * - Uses current selection start (min of start/end).
+     * - Sets mFoundIndex to (cursor - 1), so findNext() starts at cursor.
+     *
+     * zh-CN:
+     * 将 "查找下一个" 的起点对齐到当前光标/选择起点.
+     * - 使用 selectionStart/End 的较小值作为光标位置
+     * - mFoundIndex 设为 cursor-1, 使 findNext() 从 cursor 开始找
+     */
+    fun resetFoundIndexForFindNextFromCursor() {
+        val textLen = codeEditText.text?.length ?: 0
+
+        // Use selection END as the starting anchor for "next",
+        // so when current match is selected we won't re-select it again.
+        //
+        // zh-CN: "下一个" 以 selectionEnd 作为起点锚点,
+        // 这样当当前命中被选中时不会再次选中同一条.
+        val cursor = maxOf(codeEditText.selectionStart, codeEditText.selectionEnd).coerceIn(0, textLen)
+
+        // Make findNext() start from `cursor`.
+        // zh-CN: 让 findNext() 从 cursor 开始找.
+        mFoundIndex = (cursor - 1).coerceAtLeast(-1)
+    }
+
+    /**
+     * Reset search cursor for "Find Prev" based on current caret/selection.
+     *
+     * Behavior:
+     * - Uses current selection start (min of start/end).
+     * - Sets mFoundIndex to cursor, so findPrev() searches before cursor.
+     *
+     * zh-CN:
+     * 将 "查找上一个" 的起点对齐到当前光标/选择起点.
+     * - 使用 selectionStart/End 的较小值作为光标位置
+     * - mFoundIndex 设为 cursor, 使 findPrev() 从 cursor 往前找
+     */
+    fun resetFoundIndexForFindPrevFromCursor() {
+        val textLen = codeEditText.text?.length ?: 0
+        val cursor = minOf(codeEditText.selectionStart, codeEditText.selectionEnd).coerceIn(0, textLen)
+        mFoundIndex = cursor
+    }
+
     @Throws(CheckedPatternSyntaxException::class)
     fun find(keywords: String, usingRegex: Boolean) {
         if (usingRegex) {

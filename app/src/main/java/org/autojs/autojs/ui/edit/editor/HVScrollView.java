@@ -393,7 +393,7 @@ public class HVScrollView extends FrameLayout {
             //
             // When the child is not measured/layouted yet (width/height == 0), the original
             // bounds check may reject all ACTION_DOWN events, causing scrolling to be stuck.
-            // zh-CN: 当子 View 尚未完成测量/布局时(width/height == 0), 原边界判断可能拒绝所有 ACTION_DOWN,
+            // zh-CN: 当子 View 尚未完成测量/布局时 (width/height == 0), 原边界判断可能拒绝所有 ACTION_DOWN,
             // zh-CN: 从而导致滚动完全失效.
             final int childWidth = child.getWidth();
             final int childHeight = child.getHeight();
