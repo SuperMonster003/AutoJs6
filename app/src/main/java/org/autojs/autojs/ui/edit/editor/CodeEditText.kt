@@ -146,7 +146,7 @@ class CodeEditText : AppCompatEditText {
             applyFixedGutterPaddingForLoading()
         } else {
             // Recompute gutter once after loading.
-            // zh-CN: 加载结束后重新计算 gutter(仅一次).
+            // zh-CN: 加载结束后重新计算 gutter (仅一次).
             requestLayout()
             invalidate()
         }

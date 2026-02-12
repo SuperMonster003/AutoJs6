@@ -495,6 +495,22 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
                 else -> false
             }
 
+        @JvmStatic
+        fun viewPath(context: Context, name: String?, path: String?, newTask: Boolean) =
+            when {
+                newIntent(context).apply {
+                    putExtra(EditorView.EXTRA_PATH, path)
+                    putExtra(EditorView.EXTRA_NAME, name)
+                    putExtra(EditorView.EXTRA_READ_ONLY, true)
+                }.startSafely(context) -> true
+                newIntentFallback(context, newTask).apply {
+                    putExtra(EditorView.EXTRA_PATH, path)
+                    putExtra(EditorView.EXTRA_NAME, name)
+                    putExtra(EditorView.EXTRA_READ_ONLY, true)
+                }.startSafely(context) -> true
+                else -> false
+            }
+
         private fun newIntent(context: Context): Intent {
             // @Caution by SuperMonster003 on Sep 11, 2022.
             //  ! FLAG_ACTIVITY_NEW_TASK makes screen flash when Activity started.

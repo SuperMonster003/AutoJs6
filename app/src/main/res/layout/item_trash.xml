@@ -18,7 +18,7 @@
         android:padding="2dp"
         android:layout_gravity="start|center_vertical"
         tools:src="@drawable/ic_simple_file"
-        app:tint="?android:attr/textColorSecondary" />
+        app:tint="@color/day_night_alpha_60" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -30,19 +30,21 @@
             android:id="@+id/title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:maxLines="1"
             android:ellipsize="middle"
-            tools:text="test-116_v1.0.5.apk"
-            android:textSize="16sp" />
+            android:maxLines="1"
+            android:textColor="@color/day_night"
+            android:textSize="16sp"
+            tools:text="test-116_v1.0.5.apk" />
 
         <TextView
             android:id="@+id/subtitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:maxLines="3"
+            android:alpha="0.75"
             android:ellipsize="end"
-            tools:text="2026-02-06 21:45:55  |  21.93 MiB\n/storage/emulated/0/Scripts/test-116_v1.0.5.apk"
+            android:maxLines="3"
+            android:textColor="@color/day_night_alpha_70"
             android:textSize="12sp"
-            android:alpha="0.75" />
+            tools:text="2026-02-06 21:45:55  |  21.93 MiB\n/storage/emulated/0/Scripts/test-116_v1.0.5.apk" />
     </LinearLayout>
 </LinearLayout>

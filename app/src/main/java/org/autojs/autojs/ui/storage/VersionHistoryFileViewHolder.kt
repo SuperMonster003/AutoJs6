@@ -1,5 +1,6 @@
 package org.autojs.autojs.ui.storage
 
+import android.text.TextUtils.TruncateAt
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
@@ -107,10 +108,16 @@ internal class VersionHistoryFileViewHolder(
 
             val title = TextView(ctx).apply {
                 textSize = 16f
+                setTextColor(context.getColor(R.color.day_night))
+                maxLines = 1
+                ellipsize = TruncateAt.MIDDLE
             }
 
             val subtitle = TextView(ctx).apply {
                 textSize = 12f
+                setTextColor(context.getColor(R.color.day_night_alpha_70))
+                maxLines = 3
+                ellipsize = TruncateAt.END
                 alpha = 0.75f
             }
 

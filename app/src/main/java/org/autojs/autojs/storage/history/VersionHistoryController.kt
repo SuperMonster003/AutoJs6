@@ -6,14 +6,15 @@ import android.net.Uri
 import com.afollestad.materialdialogs.MaterialDialog
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
-import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs.model.explorer.ExplorerDirPage
 import org.autojs.autojs.model.explorer.Explorers
 import org.autojs.autojs.model.script.ScriptFile
 import org.autojs.autojs.model.script.Scripts
 import org.autojs.autojs.pio.PFiles
+import org.autojs.autojs.storage.file.TmpScriptFiles
 import org.autojs.autojs.ui.common.NotAskAgainDialog
 import org.autojs.autojs.ui.edit.EditActivity
+import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs.util.DialogUtils.choiceWidgetThemeColor
 import org.autojs.autojs.util.DialogUtils.widgetThemeColor
 import org.autojs.autojs.util.StringUtils
@@ -225,7 +226,6 @@ class VersionHistoryController(private val context: Context) {
         Schedulers.io().scheduleDirect {
             runCatching {
                 val bytes = HistoryRepository(appCtx).readRevisionBytes(rev)
-                val restored = decodeRevisionBytes(bytes, rev.encoding, rev.hadBom)
 
                 val fmt = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
                 val timeText = fmt.format(Date(rev.createdAt))
@@ -234,6 +234,25 @@ class VersionHistoryController(private val context: Context) {
 
                 AndroidSchedulers.mainThread().scheduleDirect {
                     val newTask = context !is Activity
+
+                    // Avoid putting large content into Intent extras to prevent FAILED BINDER TRANSACTION.
+                    // zh-CN: 避免将大文本放入 Intent extras, 防止 FAILED BINDER TRANSACTION.
+                    if (bytes.size >= PREVIEW_INTENT_MAX_BYTES) {
+                        val tmp = runCatching {
+                            TmpScriptFiles.create(appCtx).also { f ->
+                                f.outputStream().use { it.write(bytes) }
+                            }
+                        }.getOrElse {
+                            it.printStackTrace()
+                            ViewUtils.showToast(context, it.message, true)
+                            return@scheduleDirect
+                        }
+
+                        EditActivity.viewPath(context, name, tmp.absolutePath, newTask)
+                        return@scheduleDirect
+                    }
+
+                    val restored = decodeRevisionBytes(bytes, rev.encoding, rev.hadBom)
                     EditActivity.viewContent(context, name, restored, newTask)
                 }
             }.onFailure {
@@ -455,5 +474,9 @@ class VersionHistoryController(private val context: Context) {
         private val DEFAULT_CHARSET: Charset = StandardCharsets.UTF_8
         private const val HISTORY_DIALOG_MAX_ITEMS: Int = 20
         private const val INTERNAL_STORAGE_ROOT: String = "/storage/emulated/0"
+
+        // Keep Intent extras payload under a conservative threshold.
+        // zh-CN: 将 Intent extras 的载荷控制在一个保守阈值以内.
+        private const val PREVIEW_INTENT_MAX_BYTES: Int = 64 * 1024
     }
 }
