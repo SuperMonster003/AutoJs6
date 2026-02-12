@@ -1331,4 +1331,6 @@
     <string name="text_xiaomi_background_popup_permission">백그라운드 팝업</string>
     <string name="warn_continue_operation_without_saving_settings">설정이 저장되지 않았습니다. 계속할까요?</string>
     <string name="warn_exit_without_saving_settings">설정이 저장되지 않았습니다. 종료할까요?</string>
+    <string name="error_failed_to_save">저장에 실패했습니다</string>
+    <string name="text_saving" tools:ignore="TypographyEllipsis">저장 중...</string>
 </resources>

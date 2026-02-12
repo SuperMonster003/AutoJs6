@@ -13,12 +13,14 @@ import android.text.TextPaint
 import android.util.Log
 import android.util.TypedValue
 import android.view.ActionMode
+import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.core.view.get
 import androidx.core.view.size
+import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -32,6 +34,7 @@ import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.storage.file.TmpScriptFiles
 import org.autojs.autojs.theme.widget.ThemeColorToolbar
 import org.autojs.autojs.ui.BaseActivity
+import org.autojs.autojs.ui.error.ErrorDialogActivity
 import org.autojs.autojs.ui.main.MainActivity
 import org.autojs.autojs.ui.main.scripts.EditableFileInfoDialogManager
 import org.autojs.autojs.util.DialogUtils
@@ -48,8 +51,8 @@ import java.io.IOException
 
 /**
  * Created by Stardust on Jan 29, 2017.
- * Modified by SuperMonster003 as of Jan 21, 2023.
- * Modified by JetBrains AI Assistant (GPT-5.2) as of Feb 8, 2026.
+ * Modified by JetBrains AI Assistant (GPT-5.2) as of Feb 12, 2026.
+ * Modified by SuperMonster003 as of Feb 12, 2026.
  */
 open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyActivity {
 
@@ -290,7 +293,7 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
     }
 
     override fun finish() {
-        if (mEditorView.isTextChanged) {
+        if (mEditorView.saveStickyDirty) {
             showExitConfirmDialog()
         } else {
             finishAndRemoveFromRecents()
@@ -305,6 +308,7 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
         }
     }
 
+    @SuppressLint("CheckResult")
     private fun showExitConfirmDialog() {
         DialogUtils.buildAndShowAdaptive {
             MaterialDialog.Builder(this)
@@ -312,17 +316,60 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
                 .content(R.string.edit_exit_without_save_warn)
                 .neutralText(R.string.dialog_button_back)
                 .negativeText(R.string.text_exit_directly)
+                .onNeutral { d, _ -> d.dismiss() }
                 .negativeColorRes(R.color.dialog_button_caution)
-                .onNegative { _, _ ->
+                .onNegative { d, _ ->
+                    runCatching { d.dismiss() }
                     finishAndRemoveFromRecents()
                 }
                 .positiveText(R.string.text_save_and_exit)
                 .positiveColorRes(R.color.dialog_button_warn)
-                .onPositive { _, _ ->
-                    mEditorView.saveFile()
-                    finishAndRemoveFromRecents()
+                .onPositive { d, _ ->
+                    // Save is async, exit only after success.
+                    // zh-CN: 保存是异步的, 保存成功后再退出.
+                    d.apply {
+                        setCancelable(false)
+                        getActionButton(DialogAction.NEUTRAL).apply {
+                            isEnabled = false
+                            setTextColor(getColor(R.color.dialog_button_unavailable))
+                        }
+                        getActionButton(DialogAction.NEGATIVE).apply {
+                            isEnabled = false
+                            setTextColor(getColor(R.color.dialog_button_unavailable))
+                        }
+                        getActionButton(DialogAction.POSITIVE).apply {
+                            isEnabled = false
+                            setTextColor(getColor(R.color.dialog_button_unavailable))
+                        }
+                        contentView?.postDelayed({
+                            contentView?.text = getString(R.string.text_saving)
+                        }, 300)
+                    }
+
+                    mEditorView
+                        .save()
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe({
+                            runCatching { d.dismiss() }
+                            finishAndRemoveFromRecents()
+                        }, { e: Throwable ->
+                            // Save failed, keep editor open.
+                            // zh-CN: 保存失败, 保持编辑器不退出.
+                            e.printStackTrace()
+                            runCatching { d.dismiss() }
+                            ErrorDialogActivity.showErrorDialog(this@EditActivity, R.string.error_failed_to_save, e.message)
+                        })
                 }
+                .autoDismiss(false)
                 .build()
+                .apply {
+                    contentView?.apply {
+                        setLineSpacing(0f, 1.2f)
+                        setLines(2)
+                        minLines = 2
+                        gravity = Gravity.CENTER_VERTICAL
+                    }
+                }
         }
     }
 

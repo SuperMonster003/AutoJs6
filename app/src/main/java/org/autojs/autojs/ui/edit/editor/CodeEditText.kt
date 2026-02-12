@@ -83,6 +83,15 @@ class CodeEditText : AppCompatEditText {
     private var mDebuggingLine = -1
     private var mCursorChangeCallbacks: CopyOnWriteArrayList<CursorChangeCallback>? = null
 
+    // Callback when user touches the editor text area (not gutter).
+    // This is used by large-file loader to avoid forcing caret to 0 after user interaction.
+    //
+    // zh-CN:
+    // 当用户触摸编辑器文本区域 (非行号区域) 时的回调.
+    // 用于大文件加载逻辑: 若用户已交互, 则避免加载完成后强制将光标跳到 0.
+    @Volatile
+    var onUserTouchInTextArea: (() -> Unit)? = null
+
     // Read-only state.
     // zh-CN: 只读状态.
     private var mReadOnly = false
@@ -649,6 +658,12 @@ class CodeEditText : AppCompatEditText {
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
+        // Notify outer layer early when user touches inside text area (not gutter).
+        // zh-CN: 当用户触摸文本区域 (非行号区域) 时尽早通知外层.
+        if (event.action == MotionEvent.ACTION_DOWN && event.x >= paddingLeft) {
+            onUserTouchInTextArea?.invoke()
+        }
+
         // 如果行号区域被按下
         if (event.action == MotionEvent.ACTION_DOWN && event.x < paddingLeft) {
             // 则计算当前行, 如果行号有效, 记录起来

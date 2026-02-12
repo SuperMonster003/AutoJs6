@@ -1330,4 +1330,6 @@
     <string name="text_xiaomi_background_popup_permission">バックグラウンドでのポップアップ表示</string>
     <string name="warn_continue_operation_without_saving_settings">設定が保存されていません. 続行しますか?</string>
     <string name="warn_exit_without_saving_settings">設定が保存されていません. 終了しますか?</string>
+    <string name="error_failed_to_save">保存に失敗しました</string>
+    <string name="text_saving" tools:ignore="TypographyEllipsis">保存中...</string>
 </resources>

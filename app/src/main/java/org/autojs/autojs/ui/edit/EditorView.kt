@@ -120,7 +120,7 @@ import java.util.regex.Pattern
  * Created by Stardust on Sep 28, 2017.
  * Transformed by SuperMonster003 on May 1, 2023.
  * Modified by SuperMonster003 as of Feb 3, 2026.
- * Modified by JetBrains AI Assistant (GPT-5.2) as of Feb 8, 2026.
+ * Modified by JetBrains AI Assistant (GPT-5.2) as of Feb 12, 2026.
  */
 @SuppressLint("CheckResult")
 class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFragment.OnMenuItemClickListener {
@@ -134,6 +134,46 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     val debugBar: DebugBar = binding.debugBar
 
     private var _name: String? = null
+
+    // Sticky save dirty flag.
+    // Behavior:
+    // - Set to true on ANY text change (including undo/redo).
+    // - Reset to false only after successful save or when a new baseline text is loaded.
+    //
+    // zh-CN:
+    // 保存按钮的 sticky 脏标记.
+    // 行为:
+    // - 任意文本变化 (包括 undo/redo) 都会置为 true.
+    // - 仅在保存成功或加载新基线文本时重置为 false.
+    @Volatile
+    var saveStickyDirty: Boolean = false
+
+    // Whether we have had any direct edits since last save/baseline.
+    // Direct edits mean changes NOT caused by undo/redo buttons.
+    //
+    // zh-CN:
+    // 自上次保存/建立基线以来是否发生过任何直接编辑.
+    // 直接编辑指不是由撤销/重做按钮触发的文本变化.
+    @Volatile
+    private var mHadDirectEditSinceSave: Boolean = false
+
+    // Guard flag to mark text changes caused by undo/redo button actions.
+    // This is used to distinguish direct edits from history navigation.
+    //
+    // zh-CN:
+    // 用于标记由撤销/重做按钮动作导致的文本变化的哨兵标记.
+    // 用于区分直接编辑与历史导航.
+    @Volatile
+    private var mUndoRedoButtonInProgress: Boolean = false
+
+    // Whether user has touched/moved caret during large file loading.
+    // If true, we should NOT force caret to 0 on load completion.
+    //
+    // zh-CN:
+    // 用户是否在大文件加载期间触摸过/移动过光标.
+    // 若为 true, 则加载完成时不要强制把光标设为 0.
+    @Volatile
+    private var mUserMovedCursorDuringLoading: Boolean = false
 
     var name: String
         get() = _name ?: "[ ${this.context.getString(text_unknown)} ]"
@@ -232,7 +272,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     // Delay showing loading bar to avoid flicker.
     // zh-CN: 延迟显示加载提示条, 避免闪烁.
-    private val mLoadingBarShowDelayMs = 1500L
+    private val mLoadingBarShowDelayMs = 300L
 
     // Once shown, keep it visible for at least this duration.
     // zh-CN: 一旦显示, 则保证最短展示时间.
@@ -333,6 +373,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         // Initialize menu state early to avoid "first render" flicker.
         // zh-CN: 尽早初始化菜单状态, 避免首次渲染闪烁.
         mEditorLoading = true
+        saveStickyDirty = false
+        mHadDirectEditSinceSave = false
         syncPrimaryMenuState()
 
         val name = intent.getStringExtra(EXTRA_NAME)
@@ -851,12 +893,14 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
         mLargeFileMode = true
         mEditorLoading = true
+        mUserMovedCursorDuringLoading = false
         syncPrimaryMenuState()
 
         editText.setLoadingText(true)
         editor.setRedoUndoEnabled(false)
-        editText.setLoadingGutterDigits(7)
+        editText.setLoadingGutterDigits(3)
         editText.setText("")
+        editText.setSelection(0)
 
         val choreographer = Choreographer.getInstance()
 
@@ -901,8 +945,19 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                     endEditorLoadingUi()
 
                     // Ensure caret/focus after loading is done.
-                    // zh-CN: 加载结束后确保光标/焦点.
-                    post { ensureEditorHasCursorAfterLoadIfNeeded() }
+                    // - Default: caret at 0 for "read from top".
+                    // - If user touched during loading: keep current caret (do not force to 0).
+                    //
+                    // zh-CN:
+                    // 加载结束后确保光标/焦点.
+                    // - 默认: 光标置于 0, 方便从头阅读.
+                    // - 若用户在加载期间触摸过: 保持当前光标, 不强制跳回 0.
+                    post {
+                        if (!mUserMovedCursorDuringLoading) {
+                            runCatching { editText.setSelection(0) }
+                        }
+                        ensureEditorHasCursorAfterLoadIfNeeded()
+                    }
 
                     mLargeFileFrameCallback = null
                     return
@@ -996,6 +1051,12 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             editor.markUndoRedoBaselineAsUnchanged()
             editor.setRedoUndoEnabled(!mLargeFileMode)
 
+            // Reset sticky dirty because we just established a new baseline.
+            // zh-CN: 因刚刚建立了新的基线, 重置 sticky 脏标记.
+            saveStickyDirty = false
+            mHadDirectEditSinceSave = false
+            syncPrimaryMenuState()
+
             // Refresh highlight for restored text if size allows.
             // zh-CN: 若大小允许, 则对恢复文本刷新一次高亮.
             post { editor.refreshHighlightTokensIfAllowed() }
@@ -1016,10 +1077,18 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         try {
             editText.setText(text)
             editor.markUndoRedoBaselineAsUnchanged()
+
+            // Reset sticky dirty because we just established a new baseline.
+            // zh-CN: 因刚刚建立了新的基线, 重置 sticky 脏标记.
+            saveStickyDirty = false
+            mHadDirectEditSinceSave = false
         } finally {
             editor.setRedoUndoEnabled(true)
             editText.setLoadingText(false)
         }
+
+        mEditorLoading = false
+        syncPrimaryMenuState()
 
         // Ensure caret/focus after fast load.
         // zh-CN: 快速加载完成后确保光标/焦点.
@@ -1048,7 +1117,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 setMenuItemStatus(R.id.run, true)
                 setMenuItemStatus(R.id.undo, false)
                 setMenuItemStatus(R.id.redo, false)
-                setMenuItemStatus(R.id.save, editor.isTextChanged)
+                setMenuItemStatus(R.id.save, saveStickyDirty)
             }
             else -> {
                 // Normal mode.
@@ -1056,7 +1125,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 setMenuItemStatus(R.id.run, true)
                 setMenuItemStatus(R.id.undo, editor.canUndo())
                 setMenuItemStatus(R.id.redo, editor.canRedo())
-                setMenuItemStatus(R.id.save, editor.isTextChanged)
+                setMenuItemStatus(R.id.save, saveStickyDirty)
             }
         }
     }
@@ -1224,12 +1293,40 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private fun setUpEditor() {
         editor.let { editor ->
             editor.codeEditText.let { editText ->
+                // Observe user touch in text area to preserve caret position after large-file load.
+                // zh-CN: 监听用户在文本区域的触摸, 以便大文件加载完成后保留光标位置.
+                editText.onUserTouchInTextArea = {
+                    if (mEditorLoading && mLargeFileMode) {
+                        mUserMovedCursorDuringLoading = true
+                    }
+                }
+
                 editText.addTextChangedListener(SimpleTextWatcher { _ ->
                     // Skip menu state updates during progressive loading.
                     // zh-CN: 渐进式加载期间跳过菜单状态更新.
                     if (editText.isLoadingText() || mEditorLoading) {
                         return@SimpleTextWatcher
                     }
+
+                    // If this change is not caused by undo/redo buttons, treat it as a direct edit.
+                    // Direct edits keep Save sticky until next successful save.
+                    //
+                    // zh-CN:
+                    // 若本次变化并非由撤销/重做按钮触发, 则视为直接编辑.
+                    // 直接编辑会使保存按钮保持 sticky, 直到下一次保存成功.
+                    if (!mUndoRedoButtonInProgress) {
+                        mHadDirectEditSinceSave = true
+                        saveStickyDirty = true
+                    } else {
+                        // Undo/redo navigation:
+                        // Save should reflect (baseline changed) OR (there has been any direct edit since save).
+                        //
+                        // zh-CN:
+                        // undo/redo 历史导航:
+                        // 保存按钮应反映 (相对基线有变化) 或 (自保存以来发生过直接编辑).
+                        saveStickyDirty = editor.isTextChanged || mHadDirectEditSinceSave
+                    }
+
                     syncPrimaryMenuState()
                 })
 
@@ -1268,6 +1365,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             // zh-CN: 初始化为 "新建文件" 预期状态: 仅运行可用.
             mEditorLoading = false
             mLargeFileMode = false
+            saveStickyDirty = false
+            mHadDirectEditSinceSave = false
             setMenuItemStatus(R.id.run, true)
             setMenuItemStatus(R.id.undo, false)
             setMenuItemStatus(R.id.redo, false)
@@ -1287,7 +1386,9 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             val imeBarBackgroundColor = it.imeBarBackgroundColor
 
             editor.setTheme(it)
+
             mInputMethodEnhanceBar.setBackgroundColor(imeBarBackgroundColor)
+            mLoadingBarContainer.setBackgroundColor(imeBarBackgroundColor)
 
             run {
                 val adjustedImageContrastColor = ColorUtils.adjustColorForContrast(imeBarBackgroundColor, appThemeColor, 3.6)
@@ -1390,9 +1491,43 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         return run(true, file, uri?.path)
     }
 
-    private fun undo() = editor.undo()
+    private fun undo() {
+        // Mark undo/redo button action so TextWatcher can distinguish it.
+        // zh-CN: 标记撤销/重做按钮动作, 以便 TextWatcher 区分来源.
+        mUndoRedoButtonInProgress = true
+        try {
+            editor.undo()
+        } finally {
+            mUndoRedoButtonInProgress = false
+        }
 
-    private fun redo() = editor.redo()
+        // Recompute Save state after history navigation.
+        // zh-CN: 历史导航后重新计算保存按钮状态.
+        saveStickyDirty = editor.isTextChanged || mHadDirectEditSinceSave
+        syncPrimaryMenuState()
+    }
+
+    private fun redo() {
+        // Mark undo/redo button action so TextWatcher can distinguish it.
+        // zh-CN: 标记撤销/重做按钮动作, 以便 TextWatcher 区分来源.
+        mUndoRedoButtonInProgress = true
+        try {
+            editor.redo()
+        } finally {
+            mUndoRedoButtonInProgress = false
+        }
+
+        // Recompute Save state after history navigation.
+        // This makes "edit -> save -> undo -> redo" turn Save off again,
+        // because we are back to baseline and there was no direct edit since save.
+        //
+        // zh-CN:
+        // 历史导航后重新计算保存按钮状态.
+        // 这会使 "编辑 -> 保存 -> 撤销 -> 重做" 再次熄灭保存按钮,
+        // 因为已回到基线, 且保存后没有发生直接编辑.
+        saveStickyDirty = editor.isTextChanged || mHadDirectEditSinceSave
+        syncPrimaryMenuState()
+    }
 
     fun save(): Observable<String> =
         Observable
@@ -1414,6 +1549,12 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext {
                 editor.markTextAsSaved()
+
+                // Reset sticky dirty only on successful save.
+                // zh-CN: 仅在保存成功后重置 sticky 脏标记.
+                saveStickyDirty = false
+                mHadDirectEditSinceSave = false
+
                 setMenuItemStatus(R.id.save, false)
             }
 
@@ -1695,9 +1836,13 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                     uri = uri,
                     onRestoreToEditor = { restoredText ->
                         editor.text = restoredText
+
+                        // Restoring changes content => mark sticky dirty.
+                        // zh-CN: 恢复版本会改变内容, 因此置 sticky 脏标记.
+                        saveStickyDirty = true
                     },
                     onRestoredUi = {
-                        setMenuItemStatus(R.id.save, true)
+                        syncPrimaryMenuState()
                         showSnack(this@EditorView, R.string.text_done)
                     },
                 )
