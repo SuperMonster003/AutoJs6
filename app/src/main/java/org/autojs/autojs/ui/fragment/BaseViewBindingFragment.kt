@@ -1,28 +1,32 @@
-package org.autojs.autojs.ui.fragment;
+package org.autojs.autojs.ui.fragment
 
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import androidx.viewbinding.ViewBinding
 
-public abstract class BaseViewBindingFragment<T extends androidx.viewbinding.ViewBinding> extends Fragment {
+abstract class BaseViewBindingFragment<T : ViewBinding?> : Fragment() {
 
-    protected T binding;
+    @JvmField
+    protected var binding: T? = null
 
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        binding = createBinding(inflater, container);
-        return getRootView(binding);
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        val binding = createBinding(inflater, container).also {
+            this.binding = it
+        }
+        return getRootView(binding)
     }
 
-    protected abstract T createBinding(@NonNull LayoutInflater inflater, @Nullable ViewGroup container);
-
-    protected View getRootView(@NonNull T binding) {
-        return binding.getRoot();
+    override fun onDestroyView() {
+        super.onDestroyView()
+        binding = null
     }
 
+    protected abstract fun createBinding(inflater: LayoutInflater, container: ViewGroup?): T
+
+    protected fun getRootView(binding: T): View {
+        return binding!!.root
+    }
 }

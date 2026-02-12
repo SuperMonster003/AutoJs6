@@ -357,7 +357,7 @@ class VersionHistoryActivity : BaseSearchSortListActivity<ActivityVersionHistory
         DialogUtils.buildAndShowAdaptive {
             MaterialDialog.Builder(this)
                 .title(R.string.text_prompt)
-                .content(getString(R.string.text_confirm_to_clear_the_history_of, entry.canonicalPath))
+                .content(getString(R.string.text_confirm_to_clear_the_history_of, entry.displayPath))
                 .negativeText(R.string.dialog_button_cancel)
                 .negativeColorRes(R.color.dialog_button_default)
                 .positiveText(R.string.dialog_button_confirm)

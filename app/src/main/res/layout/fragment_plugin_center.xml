@@ -20,7 +20,6 @@
             android:scrollbarDefaultDelayBeforeFade="600"
             android:scrollbarFadeDuration="500"
             android:scrollbars="vertical" />
-
     </org.autojs.autojs.theme.widget.ThemeColorSwipeRefreshLayout>
 
     <TextView
@@ -36,5 +35,4 @@
         android:visibility="gone"
         tools:visibility="visible"
         tools:text="@string/text_retrieving_plugin_list_data" />
-
 </FrameLayout>
