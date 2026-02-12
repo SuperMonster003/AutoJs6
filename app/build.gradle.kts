@@ -651,10 +651,10 @@ android {
 
             // 1) 处理当前直接失败的重复 onnxruntime：选择一个即可（先让构建通过）
             pickFirsts += setOf(
-                // arm / arm64（你明确需要）
+                // arm / arm64（明确需要）
                 "lib/arm64-v8a/libonnxruntime.so",
                 "lib/armeabi-v7a/libonnxruntime.so",
-                // x86 / x86_64（你并不需要，但别人可能会引入）
+                // x86 / x86_64
                 "lib/x86/libonnxruntime.so",
                 "lib/x86_64/libonnxruntime.so",
             )

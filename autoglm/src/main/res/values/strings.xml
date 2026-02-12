@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">AutoGLM For Android</string>
+
+    <string name="autoglm_open_autojs">打开脚本运行界面</string>
     
     <!-- Bottom Navigation -->
     <string name="nav_home">首页</string>

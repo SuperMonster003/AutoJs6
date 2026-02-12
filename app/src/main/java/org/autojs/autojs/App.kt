@@ -39,6 +39,8 @@ import org.autojs.autojs6.R
 import org.greenrobot.eventbus.EventBus
 import java.lang.ref.WeakReference
 import java.lang.reflect.Method
+import com.kevinluo.autoglm.api.CapabilitiesProvider
+import org.autojs.autojs.autoglm.AutoJsCapabilitiesImpl
 
 /**
  * Created by Stardust on Jan 27, 2017.
@@ -64,6 +66,9 @@ class App : MultiDexApplication() {
         setUpLeakCanary()
 
         AutoJs.initInstance(this)
+        // 只做一次，且只在主进程
+        injectAutoGlmCapabilitiesIfMainProcess()
+
         GlobalKeyObserver.initIfNeeded(applicationContext)
         setupDrawableImageLoader()
         TimedTaskScheduler.init(this)
@@ -71,6 +76,24 @@ class App : MultiDexApplication() {
         Toaster.init(this)
 
         setUpDefaultNightMode()
+    }
+
+    // AutoGLM 能力注入必须在 AutoJs.initInstance 之后进行，且只能在主进程进行
+    private fun injectAutoGlmCapabilitiesIfMainProcess() {
+        val processName = getProcessNameCompat()
+        // 主进程一般等于 applicationId（这里 AutoJs 的包名就是 org.autojs.autojs）
+        if (processName != packageName) {
+            Log.d("AutoGLM", "Skip AutoGLM capabilities injection in process=$processName")
+            return
+        }
+
+        runCatching {
+            CapabilitiesProvider.setAutoJsCapabilities(AutoJsCapabilitiesImpl())
+            Log.d("AutoGLM", "AutoGLM capabilities injected")
+        }.onFailure { e ->
+            // 如果重复注入会抛 IllegalStateException；你可以选择忽略或直接报错
+            Log.e("AutoGLM", "Failed to inject AutoGLM capabilities", e)
+        }
     }
 
     override fun attachBaseContext(base: Context) {

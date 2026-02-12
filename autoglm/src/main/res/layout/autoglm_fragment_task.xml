@@ -123,8 +123,26 @@
 
                 </LinearLayout>
 
-            </com.google.android.material.card.MaterialCardView>
+                </com.google.android.material.card.MaterialCardView>
 
+
+            <Button
+                android:id="@+id/btn_open_autojs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/autoglm_open_autojs" />
+
+            <!-- Script status (AutoJs execution) -->
+            <TextView
+                android:id="@+id/tvAutoJsStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:padding="12dp"
+                android:text="脚本状态：未运行"
+                android:textSize="14sp"
+                android:textColor="@color/text_primary"
+                android:background="@color/card_background" />
         </LinearLayout>
 
     </ScrollView>

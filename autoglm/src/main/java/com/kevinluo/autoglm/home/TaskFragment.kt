@@ -32,6 +32,14 @@ import com.kevinluo.autoglm.voice.VoiceInputManager
 import com.kevinluo.autoglm.voice.VoiceRecognitionResult
 import com.kevinluo.autoglm.voice.VoiceRecordingDialog
 import kotlinx.coroutines.launch
+import android.content.Intent
+import com.kevinluo.autoglm.api.CapabilitiesProvider
+import android.widget.TextView
+import com.kevinluo.autoglm.api.ScriptExecutionEvent
+import com.kevinluo.autoglm.api.Subscription
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 /**
  * Home Fragment for task input and execution status display.
@@ -52,6 +60,11 @@ class TaskFragment : Fragment() {
     private lateinit var btnVoiceInput: ImageButton
     private lateinit var btnSelectTemplate: ImageButton
     private lateinit var btnStartTask: MaterialButton
+
+    // Open AutoJs Button
+    private lateinit var btnOpenAutoJs: android.widget.Button
+    private lateinit var tvAutoJsStatus: TextView
+    private var autoJsExecutionSub: Subscription? = null
 
     // Floating Window Button
     private lateinit var btnFloatingWindow: ImageButton
@@ -86,12 +99,53 @@ class TaskFragment : Fragment() {
         initViews(view)
         setupListeners()
         observeViewModel()
+        startObserveAutoJsExecutions()
     }
 
     override fun onDestroyView() {
+        // Clean up AutoJs execution subscription to avoid memory leaks
+        autoJsExecutionSub?.dispose()
+        autoJsExecutionSub = null
+
         super.onDestroyView()
         voiceInputManager?.release()
         voiceInputManager = null
+    }
+
+    /* *
+     * Starts observing AutoJs script execution events.
+     *
+     * Subscribes to AutoJs capabilities to receive real-time updates on script execution status.
+     * Updates the UI with the latest status of running scripts, including any results or exceptions.
+     */
+    private fun startObserveAutoJsExecutions() {
+        // 避免重复订阅
+        if (autoJsExecutionSub != null) return
+
+        autoJsExecutionSub = runCatching {
+            CapabilitiesProvider.autoJs().observeScriptExecutions { ev ->
+                // 确保在主线程更新 UI（listener 可能来自非 UI 线程）
+                activity?.runOnUiThread {
+                    tvAutoJsStatus.text = formatAutoJsStatus(ev)
+                }
+            }
+        }.onFailure { e ->
+            Logger.e(TAG, "observeScriptExecutions failed", e)
+            tvAutoJsStatus.text = "脚本状态：监听初始化失败"
+        }.getOrNull()
+    }
+
+    private fun formatAutoJsStatus(ev: ScriptExecutionEvent): String {
+        val time = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date(ev.timestamp))
+        val nameOrPath = ev.scriptPath ?: "(unknown)"
+        return when (ev.type) {
+            ScriptExecutionEvent.Type.START ->
+                "[$time] 运行中：$nameOrPath"
+            ScriptExecutionEvent.Type.SUCCESS ->
+                "[$time] 已完成：$nameOrPath" + (ev.message?.let { "\nResult: $it" } ?: "")
+            ScriptExecutionEvent.Type.EXCEPTION ->
+                "[$time] 异常：$nameOrPath" + (ev.message?.let { "\nError: $it" } ?: "")
+        }
     }
 
     /**
@@ -103,6 +157,10 @@ class TaskFragment : Fragment() {
         btnVoiceInput = view.findViewById(R.id.btnVoiceInput)
         btnSelectTemplate = view.findViewById(R.id.btnSelectTemplate)
         btnStartTask = view.findViewById(R.id.btnStartTask)
+
+        // Open AutoJs Button
+        btnOpenAutoJs = view.findViewById(R.id.btn_open_autojs)
+        tvAutoJsStatus = view.findViewById(R.id.tvAutoJsStatus)
 
         // Floating Window Button
         btnFloatingWindow = view.findViewById(R.id.btnFloatingWindow)
@@ -135,6 +193,25 @@ class TaskFragment : Fragment() {
         // Floating window button
         btnFloatingWindow.setOnClickListener {
             toggleFloatingWindow()
+        }
+
+        btnOpenAutoJs.setOnClickListener {
+            // val intent = Intent().apply {
+            //     setClassName(requireContext().packageName, "org.autojs.autojs.ui.main.MainActivity")
+            //     addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            // }
+            // startActivity(intent)
+            runCatching {
+                CapabilitiesProvider.autoJs()
+                    .pickWorkspaceScript(requireContext()) { path ->
+                        taskInput.setText(path)
+                        taskInput.setSelection(path.length)
+                    }
+            }.onFailure { e ->
+                // 未注入时会抛 IllegalStateException，这里给个友好提示
+                Logger.e(TAG, "AutoJsCapabilities not ready", e)
+                Toast.makeText(requireContext(), "脚本选择功能未初始化", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
