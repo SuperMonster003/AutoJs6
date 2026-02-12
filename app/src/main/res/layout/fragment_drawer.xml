@@ -18,7 +18,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:paddingBottom="4dp"/>
+        android:paddingBottom="4dp" />
 
     <View
         android:layout_width="match_parent"
@@ -29,16 +29,16 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginVertical="2dp"
+        android:paddingVertical="2dp"
         android:baselineAligned="false">
 
         <LinearLayout
             android:id="@+id/settings"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="?selectableItemBackground"
-            android:layout_gravity="center|bottom"
+            android:gravity="center|bottom"
             android:orientation="vertical">
 
             <ImageView
@@ -65,10 +65,10 @@
         <LinearLayout
             android:id="@+id/plugin_center"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="?selectableItemBackground"
-            android:layout_gravity="center|bottom"
+            android:gravity="center|bottom"
             android:orientation="vertical">
 
             <ImageView
@@ -95,10 +95,10 @@
         <LinearLayout
             android:id="@+id/restart"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="?selectableItemBackground"
-            android:layout_gravity="center|bottom"
+            android:gravity="center|bottom"
             android:orientation="vertical">
 
             <ImageView
@@ -125,10 +125,10 @@
         <LinearLayout
             android:id="@+id/exit"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="?selectableItemBackground"
-            android:layout_gravity="center|bottom"
+            android:gravity="center|bottom"
             android:orientation="vertical">
 
             <ImageView
