@@ -2,6 +2,7 @@ package org.autojs.autojs.ui.edit;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.text.InputType;
 import android.text.TextUtils;
@@ -10,7 +11,7 @@ import android.view.MenuItem;
 import androidx.annotation.Nullable;
 import com.afollestad.materialdialogs.MaterialDialog;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import org.autojs.autojs.util.DialogUtils;
+import kotlin.Unit;
 import org.autojs.autojs.core.pref.Language;
 import org.autojs.autojs.core.pref.Pref;
 import org.autojs.autojs.model.indices.AndroidClass;
@@ -18,10 +19,12 @@ import org.autojs.autojs.model.indices.ClassSearchingItem;
 import org.autojs.autojs.script.JavaScriptFileSource;
 import org.autojs.autojs.ui.common.NotAskAgainDialog;
 import org.autojs.autojs.ui.edit.editor.CodeEditor;
+import org.autojs.autojs.ui.edit.keyboard.SymbolsSettingsActivity;
 import org.autojs.autojs.ui.main.scripts.EditableFileInfoDialogManager;
 import org.autojs.autojs.ui.project.BuildActivity;
 import org.autojs.autojs.util.ClipboardUtils;
 import org.autojs.autojs.util.ConsoleUtils;
+import org.autojs.autojs.util.DialogUtils;
 import org.autojs.autojs.util.IntentUtils;
 import org.autojs.autojs.util.IntentUtils.ToastExceptionHolder;
 import org.autojs.autojs.util.ViewUtils;
@@ -36,6 +39,7 @@ import static org.autojs.autojs.util.StringUtils.key;
 
 /**
  * Created by Stardust on Sep 28, 2017.
+ * Modified by JetBrains AI Assistant (GPT-5.2) as of Feb 8, 2026.
  */
 @SuppressWarnings({"ResultOfMethodCallIgnored", "unused"})
 @SuppressLint("CheckResult")
@@ -328,13 +332,11 @@ public class EditorMenu {
     }
 
     private void startSymbolsSettingsActivity() {
-        // TODO by SuperMonster003 on Oct 16, 2022.
-
-        // new SymbolsSettingsActivity.IntentBuilder(mContext)
-        //         .extra(mEditorView.getUri().getPath())
-        //         .start();
-
-        ViewUtils.showToast(mContext, R.string.text_under_development_content);
+        Intent intent = new Intent(mContext, SymbolsSettingsActivity.class);
+        IntentUtils.startSafely(intent, mContext, true, (t -> {
+            ViewUtils.showToast(mContext, t.getMessage(), true);
+            return Unit.INSTANCE;
+        }));
     }
 
     private boolean onEditOptionsSelected(MenuItem item) {
@@ -479,5 +481,4 @@ public class EditorMenu {
         }
         return false;
     }
-
 }

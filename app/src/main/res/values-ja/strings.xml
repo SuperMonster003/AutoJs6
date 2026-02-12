@@ -118,6 +118,7 @@
     <string name="dialog_button_abandon">放棄</string>
     <string name="dialog_button_abort">中止</string>
     <string name="dialog_button_abort_connection">接続を中止</string>
+    <string name="dialog_button_add">追加</string>
     <string name="dialog_button_advanced_settings">詳細</string>
     <string name="dialog_button_amend_host_address">アドレスを修正</string>
     <string name="dialog_button_back">@string/text_back</string>
@@ -132,6 +133,7 @@
     <string name="dialog_button_copy_path">コピー</string>
     <string name="dialog_button_default_prefix">デフォ前置</string>
     <string name="dialog_button_details">詳細</string>
+    <string name="dialog_button_discard_changes">破棄</string>
     <string name="dialog_button_dismiss">削除</string>
     <string name="dialog_button_download_with_browser">ブラウザ</string>
     <string name="dialog_button_exception_details">詳細</string>
@@ -143,6 +145,7 @@
     <string name="dialog_button_manager">マネージャー</string>
     <string name="dialog_button_minimize">最小化</string>
     <string name="dialog_button_more">詳細</string>
+    <string name="dialog_button_next_step">次へ</string>
     <string name="dialog_button_open_color_palette">パレットを開く</string>
     <string name="dialog_button_preview">プレビュー</string>
     <string name="dialog_button_quit">終了する</string>
@@ -152,6 +155,7 @@
     <string name="dialog_button_retrieve">取得</string>
     <string name="dialog_button_retry">再試行</string>
     <string name="dialog_button_save">保存する</string>
+    <string name="dialog_button_save_and_continue">保存して続行</string>
     <string name="dialog_button_save_as">名前を付けて保存</string>
     <string name="dialog_button_system_settings">システム設定</string>
     <string name="dialog_button_system_settings_simplified">システム</string>
@@ -483,6 +487,7 @@
     <string name="text_activity_not_found_for_apk_installing">APK インストーラーなし</string>
     <string name="text_adb_tool_needed">ADB ツールが必要</string>
     <string name="text_add_color_library">カラーライブラリを追加</string>
+    <string name="text_add_symbol_hint">記号を追加</string>
     <string name="text_alias">別名</string>
     <string name="text_alias_cannot_be_empty">エイリアスは空にできません</string>
     <string name="text_alias_password">エイリアスのパスワード</string>
@@ -552,6 +557,7 @@
     <string name="text_build_succeeded">ビルドに成功しました</string>
     <string name="text_cancel">取消</string>
     <string name="text_cancel_simplified">取消</string>
+    <string name="text_cannot_delete_default">デフォルトは削除できません</string>
     <string name="text_cannot_read_file">ファイルを読めません</string>
     <string name="text_captured_window_info_order">順序</string>
     <string name="text_captured_window_info_package_name">パッケージ</string>
@@ -639,6 +645,7 @@
     <string name="text_copying" tools:ignore="TypographyEllipsis">コピー中...</string>
     <string name="text_country_code">国コード (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">国コードは 2 文字の大文字でなければなりません</string>
+    <string name="text_current_page_configuration">現在のページ設定</string>
     <string name="text_current_version">現在のバージョン</string>
     <string name="text_daily_task">デイリータスク</string>
     <string name="text_date">日付</string>
@@ -655,8 +662,10 @@
     <string name="text_debug_step_out">ステップアウト</string>
     <string name="text_debug_step_over">ステップオーバー</string>
     <string name="text_default">デフォルト</string>
+    <string name="text_default_configuration">デフォルト設定</string>
     <string name="text_default_key_store">デフォルトのキーストア</string>
     <string name="text_default_prefix">デフォルトのプレフィックス</string>
+    <string name="text_default_profile_overwrite_hint">デフォルトは上書きできません. 別名のプロファイルを新規作成できます</string>
     <string name="text_delay_time">遅延時間</string>
     <string name="text_delete">削除</string>
     <string name="text_delete_all">すべて削除</string>
@@ -666,6 +675,7 @@
     <string name="text_delete_revision_confirm">この履歴を完全に削除しますか?</string>
     <string name="text_deleting" tools:ignore="TypographyEllipsis">削除中...</string>
     <string name="text_description">説明</string>
+    <string name="text_deselect_all">全て解除</string>
     <string name="text_destination">宛先</string>
     <string name="text_details">詳細</string>
     <string name="text_developer_details_under_development">デベロッパーの詳細については, 現在開発中です</string>
@@ -708,6 +718,7 @@
     <string name="text_email">電子メール</string>
     <string name="text_email_cannot_be_empty">電子メールを空にすることはできません</string>
     <string name="text_email_format_error">電子メールの形式が無効です</string>
+    <string name="text_empty_configuration">空の設定</string>
     <string name="text_empty_release_note">リリースノートなし</string>
     <string name="text_enable_a11y_service">アクセシビリティサービスを有効にする</string>
     <string name="text_enable_a11y_service_with_root_access_automatically">ルートアクセスでアクセシビリティサービスを自動的に有効にする</string>
@@ -727,6 +738,8 @@
     <string name="text_exit_directly">終了</string>
     <string name="text_expand_all">すべて展開する</string>
     <string name="text_export">輸出</string>
+    <string name="text_export_all">全てエクスポート</string>
+    <string name="text_export_selected">選択をエクスポート</string>
     <string name="text_exported">エクスポートされました</string>
     <string name="text_extending_js_build_in_objects">JavaScript 組み込みオブジェクトの拡張</string>
     <string name="text_extensibility">拡張性</string>
@@ -807,7 +820,11 @@
     <string name="text_ignored_updates">アップデートを無視する</string>
     <string name="text_import">インポート</string>
     <string name="text_import_color_library">カラーライブラリをインポート</string>
+    <string name="text_import_name_conflict">同名のプロファイル \"%1$s\" が存在します. インポート方法を選択してください:</string>
     <string name="text_import_script">インポートスクリプト</string>
+    <string name="text_import_strategy_auto_rename">自動リネーム</string>
+    <string name="text_import_strategy_manual_rename">手動リネーム</string>
+    <string name="text_import_strategy_overwrite">既存のプロファイルを上書き</string>
     <string name="text_import_succeed">インポートに成功しました</string>
     <string name="text_import_to_my_scripts">インポート先: 作業ディレクトリ</string>
     <string name="text_in_progress">進行中</string>
@@ -826,6 +843,7 @@
     <string name="text_invalid_character_is_removed">無効な文字が削除されました</string>
     <string name="text_invalid_package_name">パッケージ名が無効です</string>
     <string name="text_invalid_project">プロジェクトが無効です</string>
+    <string name="text_invert_selection">反転</string>
     <string name="text_ip_address_may_be_invalid_for_server_connection" tools:ignore="TypographyEllipsis">IP アドレス \"%1$s\" は特殊用途 (loopback/broadcast/multicast/reserved/...) のため, 接続先サーバーへの接続に使用できない可能性があります.</string>
     <string name="text_is_latest_version">新しいバージョンが見つかりません</string>
     <string name="text_issue_report">フィードバック</string>
@@ -856,6 +874,7 @@
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">レイアウトの検査中...</string>
     <string name="text_licenses">オープンソースライセンス</string>
     <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">バックアップ策を試しています...</string>
+    <string name="text_loading_completed">読み込み完了</string>
     <string name="text_loading_with_dots" tools:ignore="TypographyEllipsis">読み込み中...</string>
     <string name="text_locate_current_theme_color">現在のテーマカラーを特定</string>
     <string name="text_log">ログ</string>
@@ -917,6 +936,8 @@
     <string name="text_no_root">非ルート</string>
     <string name="text_no_root_access">ルートアクセス不可</string>
     <string name="text_no_scripts_to_stop_running">実行を停止するスクリプトなし</string>
+    <string name="text_no_search_results_for_keyword">一致する項目が見つかりません:\n\n%1$s</string>
+    <string name="text_no_symbols_hint">現在の設定は空です.\nここをタップして記号を作成します.</string>
     <string name="text_no_version_history">バージョン履歴なし</string>
     <string name="text_not_granted">許可されない</string>
     <string name="text_not_installed">未インストール</string>
@@ -1098,6 +1119,7 @@
     <string name="text_repo_url_of_vscode_vsc_ext">VSCode 拡張機能のリポジトリ URL</string>
     <string name="text_report_succeed">送信に成功しました</string>
     <string name="text_requires_android_os_version" formatted="false">Android OS バージョン %s (API %s) が必要ですが, 現在のバージョンは %s (API %s)です</string>
+    <string name="text_reset">リセット</string>
     <string name="text_reset_password">パスワードのリセット</string>
     <string name="text_reset_succeed">リセット成功</string>
     <string name="text_reset_to_initial_content">初期リセット</string>
@@ -1140,6 +1162,7 @@
     <string name="text_sample_name">サービスの実行</string>
     <string name="text_save">保存する</string>
     <string name="text_save_and_exit">保存して終了</string>
+    <string name="text_save_configuration_as">設定を別名で保存</string>
     <string name="text_save_simplified">保存</string>
     <string name="text_save_to">保存先</string>
     <string name="text_scheduled_restart_backend">エンジン</string>
@@ -1152,6 +1175,8 @@
     <string name="text_search_color">色を検索</string>
     <string name="text_search_help">検索ヘルプ</string>
     <string name="text_select">選択</string>
+    <string name="text_select_a_configuration_template">設定テンプレートを選択</string>
+    <string name="text_select_all">全て選択</string>
     <string name="text_select_by_exists">クリップが存在する場合 (exists)</string>
     <string name="text_select_by_find_one">1 つ見つけるまで (findOne)</string>
     <string name="text_select_by_until_find">すべて見つけるまで (untilFind)</string>
@@ -1165,6 +1190,7 @@
     <string name="text_server_mode">サーバーモード</string>
     <string name="text_service">サービス</string>
     <string name="text_service_management">サービス管理</string>
+    <string name="text_set_a_name_for_the_new_configuration">新しい設定に名前を付ける</string>
     <string name="text_set_as_working_dir">作業ディレクトリに設定する</string>
     <string name="text_set_breakpoint">ブレークポイントの設定</string>
     <string name="text_settings">設定</string>
@@ -1209,6 +1235,16 @@
     <string name="text_switch_to_legacy_layout">従来のレイアウトに切り替え</string>
     <string name="text_switch_to_new_layout">新しいレイアウトに切り替え</string>
     <string name="text_switch_window">ウィンドウの切り替え</string>
+    <string name="text_symbol_invalid_no_whitespace">記号に空白文字は含められません</string>
+    <string name="text_symbol_name_conflict_with_value">記号 \"%1$s\" は既に存在します</string>
+    <string name="text_symbols_delete_profile_confirm">プロファイル \"%1$s\" を削除しますか?</string>
+    <string name="text_symbols_new_profile">新規プロファイル</string>
+    <string name="text_symbols_profile">記号プロファイル</string>
+    <string name="text_symbols_profile_default_name">@string/text_default</string>
+    <string name="text_symbols_profile_name_cannot_be_default">プロファイル名に \"Default\" は使えません</string>
+    <string name="text_symbols_profile_name_conflict">プロファイル名が既に存在します</string>
+    <string name="text_symbols_profile_name_hint">プロファイル名</string>
+    <string name="text_symbols_profile_name_invalid">プロファイル名は空にできません</string>
     <string name="text_symbols_settings">シンボル設定</string>
     <string name="text_tailor_made_developer">テーラーメイド開発者</string>
     <string name="text_task">タスク</string>
@@ -1221,6 +1257,7 @@
     <string name="text_timed_task_backend_title">定時タスクのスケジューリングエンジン</string>
     <string name="text_timed_task_timing">タイミング</string>
     <string name="text_to_be_chosen">未選択</string>
+    <string name="text_toggle_all">全て切替</string>
     <string name="text_tools">ツール</string>
     <string name="text_total_size_colon_value">サイズ: %1$s</string>
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">透過背景ランチャーアイコンはシステムによって自動的にマスクされたり背景が追加されたりする場合があるため, 実際の効果はデバイスによって異なる場合があります</string>
@@ -1291,4 +1328,6 @@
     <string name="text_write_secure_settings">セキュリティ設定の書き込み</string>
     <string name="text_write_system_settings">システム設定の書き込み</string>
     <string name="text_xiaomi_background_popup_permission">バックグラウンドでのポップアップ表示</string>
+    <string name="warn_continue_operation_without_saving_settings">設定が保存されていません. 続行しますか?</string>
+    <string name="warn_exit_without_saving_settings">設定が保存されていません. 終了しますか?</string>
 </resources>

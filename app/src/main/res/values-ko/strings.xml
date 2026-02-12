@@ -119,6 +119,7 @@
     <string name="dialog_button_abandon">포기</string>
     <string name="dialog_button_abort">중지</string>
     <string name="dialog_button_abort_connection">연결 중지</string>
+    <string name="dialog_button_add">추가</string>
     <string name="dialog_button_advanced_settings">고급</string>
     <string name="dialog_button_amend_host_address">주소 수정</string>
     <string name="dialog_button_back">@string/text_back</string>
@@ -133,6 +134,7 @@
     <string name="dialog_button_copy_path">복사</string>
     <string name="dialog_button_default_prefix">기본 접두사</string>
     <string name="dialog_button_details">세부</string>
+    <string name="dialog_button_discard_changes">버리기</string>
     <string name="dialog_button_dismiss">닫기</string>
     <string name="dialog_button_download_with_browser">브라우저</string>
     <string name="dialog_button_exception_details">자세히</string>
@@ -144,6 +146,7 @@
     <string name="dialog_button_manager">관리자</string>
     <string name="dialog_button_minimize">최소화</string>
     <string name="dialog_button_more">더</string>
+    <string name="dialog_button_next_step">다음</string>
     <string name="dialog_button_open_color_palette">팔레트 열기</string>
     <string name="dialog_button_preview">미리보기</string>
     <string name="dialog_button_quit">그만두다</string>
@@ -153,6 +156,7 @@
     <string name="dialog_button_retrieve">가져오기</string>
     <string name="dialog_button_retry">다시 해 보다</string>
     <string name="dialog_button_save">구하다</string>
+    <string name="dialog_button_save_and_continue">저장 후 계속</string>
     <string name="dialog_button_save_as">다른 이름으로 저장</string>
     <string name="dialog_button_system_settings">환경 설정</string>
     <string name="dialog_button_system_settings_simplified">시스템</string>
@@ -484,6 +488,7 @@
     <string name="text_activity_not_found_for_apk_installing">APK 설치 프로그램이 없습니다</string>
     <string name="text_adb_tool_needed">ADB 도구가 필요합니다</string>
     <string name="text_add_color_library">색상 라이브러리 추가</string>
+    <string name="text_add_symbol_hint">기호 추가</string>
     <string name="text_alias">별칭</string>
     <string name="text_alias_cannot_be_empty">별칭은 비워둘 수 없습니다</string>
     <string name="text_alias_password">별칭 비밀번호</string>
@@ -553,6 +558,7 @@
     <string name="text_build_succeeded">빌드가 성공했습니다</string>
     <string name="text_cancel">취소</string>
     <string name="text_cancel_simplified">취소</string>
+    <string name="text_cannot_delete_default">기본 프로필은 삭제할 수 없습니다</string>
     <string name="text_cannot_read_file">파일을 읽을 수 없다</string>
     <string name="text_captured_window_info_order">순서</string>
     <string name="text_captured_window_info_package_name">패키지</string>
@@ -640,6 +646,7 @@
     <string name="text_copying" tools:ignore="TypographyEllipsis">복사 중...</string>
     <string name="text_country_code">국가 코드 (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">국가 코드는 두 개의 대문자로 입력해야 합니다</string>
+    <string name="text_current_page_configuration">현재 페이지 설정</string>
     <string name="text_current_version">현재 버전</string>
     <string name="text_daily_task">일상적인 작업</string>
     <string name="text_date">날짜</string>
@@ -656,8 +663,10 @@
     <string name="text_debug_step_out">나가</string>
     <string name="text_debug_step_over">한 걸음 더</string>
     <string name="text_default">기본</string>
+    <string name="text_default_configuration">기본 설정</string>
     <string name="text_default_key_store">기본 키 저장소</string>
     <string name="text_default_prefix">기본 접두사</string>
+    <string name="text_default_profile_overwrite_hint">기본 프로필은 덮어쓸 수 없습니다. 별칭 프로필을 새로 만들 수 있습니다</string>
     <string name="text_delay_time">지연 시간</string>
     <string name="text_delete">삭제</string>
     <string name="text_delete_all">모두 삭제</string>
@@ -667,6 +676,7 @@
     <string name="text_delete_revision_confirm">이 버전을 영구 삭제할까요?</string>
     <string name="text_deleting" tools:ignore="TypographyEllipsis">삭제 중...</string>
     <string name="text_description">설명</string>
+    <string name="text_deselect_all">전체 해제</string>
     <string name="text_destination">대상</string>
     <string name="text_details">세부</string>
     <string name="text_developer_details_under_development">개발자 세부 사항이 개발 중입니다</string>
@@ -709,6 +719,7 @@
     <string name="text_email">이메일</string>
     <string name="text_email_cannot_be_empty">이메일이 비어질 수 없다</string>
     <string name="text_email_format_error">잘못된 이메일 형식</string>
+    <string name="text_empty_configuration">빈 설정</string>
     <string name="text_empty_release_note">릴리스 노트가 없습니다</string>
     <string name="text_enable_a11y_service">접근성 서비스를 활성화합니다</string>
     <string name="text_enable_a11y_service_with_root_access_automatically">루트 액세스를 통해 자동으로 접근성 서비스를 활성화하십시오</string>
@@ -728,6 +739,8 @@
     <string name="text_exit_directly">출구</string>
     <string name="text_expand_all">모두 펼치기</string>
     <string name="text_export">내보내다</string>
+    <string name="text_export_all">모두 내보내기</string>
+    <string name="text_export_selected">선택 항목 내보내기</string>
     <string name="text_exported">내보낸</string>
     <string name="text_extending_js_build_in_objects">JavaScript 내장 개체 확장</string>
     <string name="text_extensibility">확장성</string>
@@ -808,7 +821,11 @@
     <string name="text_ignored_updates">업데이트를 무시했습니다</string>
     <string name="text_import">수입</string>
     <string name="text_import_color_library">색상 라이브러리 가져오기</string>
+    <string name="text_import_name_conflict">이름이 \"%1$s\" 인 프로필이 이미 있습니다. 가져오기 방식을 선택하세요:</string>
     <string name="text_import_script">스크립트 가져 오기</string>
+    <string name="text_import_strategy_auto_rename">자동 이름 변경</string>
+    <string name="text_import_strategy_manual_rename">수동 이름 변경</string>
+    <string name="text_import_strategy_overwrite">기존 프로필 덮어쓰기</string>
     <string name="text_import_succeed">수입이 성공했습니다</string>
     <string name="text_import_to_my_scripts">\"내 스크립트\"로 가져 오기</string>
     <string name="text_in_progress">진행 중</string>
@@ -827,6 +844,7 @@
     <string name="text_invalid_character_is_removed">잘못된 문자가 제거되었습니다</string>
     <string name="text_invalid_package_name">잘못된 패키지 이름</string>
     <string name="text_invalid_project">잘못된 프로젝트</string>
+    <string name="text_invert_selection">선택 반전</string>
     <string name="text_ip_address_may_be_invalid_for_server_connection" tools:ignore="TypographyEllipsis">IP 주소 \"%1$s\" 는 특수 용도 (loopback/broadcast/multicast/reserved/...) 를 가지므로, 대상 서버에 연결하는 데 사용할 수 없을 수도 있습니다.</string>
     <string name="text_is_latest_version">새로운 버전이 발견되지 않았습니다</string>
     <string name="text_issue_report">피드백</string>
@@ -857,6 +875,7 @@
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">레이아웃 검사 ...</string>
     <string name="text_licenses">오픈 소스 라이센스</string>
     <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">대체 솔루션을 시도하는 중...</string>
+    <string name="text_loading_completed">로딩 완료</string>
     <string name="text_loading_with_dots" tools:ignore="TypographyEllipsis">로딩 중...</string>
     <string name="text_locate_current_theme_color">현재 테마 색상 찾기</string>
     <string name="text_log">통나무</string>
@@ -918,6 +937,8 @@
     <string name="text_no_root">뿌리가 아닌</string>
     <string name="text_no_root_access">루트 액세스가 없습니다</string>
     <string name="text_no_scripts_to_stop_running">실행을 멈출 스크립트가 없습니다</string>
+    <string name="text_no_search_results_for_keyword">일치하는 항목이 없습니다:\n\n%1$s</string>
+    <string name="text_no_symbols_hint">현재 설정이 비어 있습니다.\n여기를 눌러 기호를 만드세요.</string>
     <string name="text_no_version_history">버전 기록 없음</string>
     <string name="text_not_granted">부여되지 않았습니다</string>
     <string name="text_not_installed">설치되지 않음</string>
@@ -1099,6 +1120,7 @@
     <string name="text_repo_url_of_vscode_vsc_ext">VSCode 확장의 리포지토리 URL</string>
     <string name="text_report_succeed">제출 성공</string>
     <string name="text_requires_android_os_version" formatted="false">Android OS 버전 %s (API %s) 가 필요하지만 현재는 %s (API %s) 입니다.</string>
+    <string name="text_reset">초기화</string>
     <string name="text_reset_password">암호를 재설정</string>
     <string name="text_reset_succeed">재설정이 성공했습니다</string>
     <string name="text_reset_to_initial_content">처음에 재설정하십시오</string>
@@ -1141,6 +1163,7 @@
     <string name="text_sample_name">실행 서비스</string>
     <string name="text_save">구하다</string>
     <string name="text_save_and_exit">저장하고 종료</string>
+    <string name="text_save_configuration_as">다른 이름으로 저장</string>
     <string name="text_save_simplified">구하다</string>
     <string name="text_save_to">저장</string>
     <string name="text_scheduled_restart_backend">엔진</string>
@@ -1153,6 +1176,8 @@
     <string name="text_search_color">색상 검색</string>
     <string name="text_search_help">검색 도움말</string>
     <string name="text_select">고르다</string>
+    <string name="text_select_a_configuration_template">설정 템플릿 선택</string>
+    <string name="text_select_all">전체 선택</string>
     <string name="text_select_by_exists">클립이 존재하는 경우 (exists)</string>
     <string name="text_select_by_find_one">하나를 찾을 때까지 (findOne)</string>
     <string name="text_select_by_until_find">모든 것을 찾을 때까지 (untilFind)</string>
@@ -1166,6 +1191,7 @@
     <string name="text_server_mode">서버 모드</string>
     <string name="text_service">서비스</string>
     <string name="text_service_management">서비스 관리</string>
+    <string name="text_set_a_name_for_the_new_configuration">새 설정 이름 지정</string>
     <string name="text_set_as_working_dir">작업 디렉토리로</string>
     <string name="text_set_breakpoint">중단 점을 설정하십시오</string>
     <string name="text_settings">설정</string>
@@ -1210,6 +1236,16 @@
     <string name="text_switch_to_legacy_layout">기존 레이아웃으로 전환</string>
     <string name="text_switch_to_new_layout">새 레이아웃으로 전환</string>
     <string name="text_switch_window">창 전환</string>
+    <string name="text_symbol_invalid_no_whitespace">기호에는 공백 문자를 포함할 수 없습니다</string>
+    <string name="text_symbol_name_conflict_with_value">기호 \"%1$s\" 이 (가) 이미 존재합니다</string>
+    <string name="text_symbols_delete_profile_confirm">프로필 \"%1$s\" 을 (를) 삭제할까요?</string>
+    <string name="text_symbols_new_profile">새 프로필</string>
+    <string name="text_symbols_profile">기호 프로필</string>
+    <string name="text_symbols_profile_default_name">@string/text_default</string>
+    <string name="text_symbols_profile_name_cannot_be_default">프로필 이름으로 \"Default\" 를 사용할 수 없습니다</string>
+    <string name="text_symbols_profile_name_conflict">프로필 이름이 이미 존재합니다</string>
+    <string name="text_symbols_profile_name_hint">프로필 이름</string>
+    <string name="text_symbols_profile_name_invalid">프로필 이름은 비워 둘 수 없습니다</string>
     <string name="text_symbols_settings">기호 설정</string>
     <string name="text_tailor_made_developer">맞춤형 개발자</string>
     <string name="text_task">일</string>
@@ -1222,6 +1258,7 @@
     <string name="text_timed_task_backend_title">정시 작업 스케줄링 엔진</string>
     <string name="text_timed_task_timing">타이밍</string>
     <string name="text_to_be_chosen">선택 대기</string>
+    <string name="text_toggle_all">전체 전환</string>
     <string name="text_tools">도구</string>
     <string name="text_total_size_colon_value">크기: %1$s</string>
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">투명 배경 런처 아이콘은 시스템에 의해 자동으로 마스킹되거나 배경이 추가될 수 있어 장치마다 실제 효과가 다를 수 있습니다</string>
@@ -1292,4 +1329,6 @@
     <string name="text_write_secure_settings">보안 설정을 작성하십시오</string>
     <string name="text_write_system_settings">시스템 설정을 작성하십시오</string>
     <string name="text_xiaomi_background_popup_permission">백그라운드 팝업</string>
+    <string name="warn_continue_operation_without_saving_settings">설정이 저장되지 않았습니다. 계속할까요?</string>
+    <string name="warn_exit_without_saving_settings">설정이 저장되지 않았습니다. 종료할까요?</string>
 </resources>
