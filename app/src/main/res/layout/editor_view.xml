@@ -21,8 +21,8 @@
             app:contentInsetEndWithActions="2dp"
             app:contentInsetStartWithNavigation="0dp"
             app:popupTheme="@style/PopupMenuTheme"
-            tools:title="@string/app_name"
-            app:titleTextAppearance="@style/TextAppearanceEditorTitle">
+            app:titleTextAppearance="@style/TextAppearanceEditorTitle"
+            tools:title="@string/app_name">
 
             <FrameLayout
                 android:id="@+id/toolbar_menu"
@@ -50,38 +50,53 @@
                 android:layout_height="0dp"
                 android:layout_weight="1" />
 
-            <RelativeLayout
+            <FrameLayout
                 android:id="@+id/input_method_enhance_bar"
                 android:layout_width="match_parent"
-                android:layout_height="70dp"
+                android:layout_height="wrap_content"
                 android:background="#77f2f3f7">
 
-                <org.autojs.autojs.ui.edit.completion.CodeCompletionBar
-                    android:id="@+id/symbol_bar"
+                <LinearLayout
+                    android:id="@+id/input_method_enhance_bar_content"
                     android:layout_width="match_parent"
-                    android:layout_height="35dp"
-                    android:layout_alignParentBottom="true" />
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
 
-                <ImageView
-                    android:id="@+id/functions"
-                    android:layout_width="40dp"
-                    android:layout_height="35dp"
-                    android:layout_alignParentStart="true"
-                    android:layout_alignParentTop="true"
-                    android:background="?selectableItemBackgroundBorderless"
-                    android:contentDescription="@string/text_function"
-                    android:padding="6dp"
-                    android:src="@drawable/ic_ali_fx"
-                    app:tint="#222329" />
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/code_completion_row"
+                        android:layout_width="match_parent"
+                        android:layout_height="35dp">
 
-                <org.autojs.autojs.ui.edit.completion.CodeCompletionBar
-                    android:id="@+id/code_completion_bar"
-                    android:layout_width="match_parent"
-                    android:layout_height="35dp"
-                    android:layout_above="@+id/symbol_bar"
-                    android:layout_alignParentEnd="true"
-                    android:layout_alignParentTop="true"
-                    android:layout_toEndOf="@+id/functions" />
+                        <ImageView
+                            android:id="@+id/functions"
+                            android:layout_width="40dp"
+                            android:layout_height="35dp"
+                            android:background="?selectableItemBackgroundBorderless"
+                            android:contentDescription="@string/text_function"
+                            android:padding="6dp"
+                            android:src="@drawable/ic_ali_fx"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:tint="#222329" />
+
+                        <org.autojs.autojs.ui.edit.completion.CodeCompletionBar
+                            android:id="@+id/code_completion_bar"
+                            android:layout_width="0dp"
+                            android:layout_height="35dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toEndOf="@+id/functions"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    <org.autojs.autojs.ui.edit.completion.CodeCompletionBar
+                        android:id="@+id/symbol_bar"
+                        android:layout_width="match_parent"
+                        android:layout_height="35dp" />
+
+                </LinearLayout>
 
                 <FrameLayout
                     android:id="@+id/loading_bar_container"
@@ -89,9 +104,10 @@
                     android:layout_height="match_parent"
                     android:clickable="false"
                     android:focusable="false"
+                    android:minHeight="35dp"
                     android:visibility="gone"
-                    tools:visibility="visible"
-                    tools:background="#A0000000">
+                    tools:background="#A0000000"
+                    tools:visibility="visible">
 
                     <TextView
                         android:id="@+id/loading_bar_text"
@@ -106,7 +122,7 @@
 
                 </FrameLayout>
 
-            </RelativeLayout>
+            </FrameLayout>
 
             <org.autojs.autojs.ui.edit.keyboard.FunctionsKeyboardView
                 android:id="@+id/functions_keyboard"
