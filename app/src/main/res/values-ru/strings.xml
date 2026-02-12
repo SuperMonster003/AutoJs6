@@ -1329,4 +1329,6 @@
     <string name="text_xiaomi_background_popup_permission">Всплывающие окна в фоне</string>
     <string name="warn_continue_operation_without_saving_settings">Настройки не сохранены. Продолжить?</string>
     <string name="warn_exit_without_saving_settings">Настройки не сохранены. Выйти?</string>
+    <string name="error_failed_to_save">Не удалось сохранить</string>
+    <string name="text_saving" tools:ignore="TypographyEllipsis">Сохранение...</string>
 </resources>

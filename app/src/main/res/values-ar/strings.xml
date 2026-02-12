@@ -1331,4 +1331,6 @@
     <string name="text_xiaomi_background_popup_permission">النوافذ المنبثقة في الخلفية</string>
     <string name="warn_continue_operation_without_saving_settings">لم يتم حفظ الاعدادات. هل تريد المتابعة?</string>
     <string name="warn_exit_without_saving_settings">لم يتم حفظ الاعدادات. هل تريد الخروج?</string>
+    <string name="error_failed_to_save">فشل الحفظ</string>
+    <string name="text_saving" tools:ignore="TypographyEllipsis">جارٍ الحفظ...</string>
 </resources>

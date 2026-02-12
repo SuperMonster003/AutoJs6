@@ -1325,4 +1325,6 @@
     <string name="text_xiaomi_background_popup_permission">後臺彈出介面</string>
     <string name="warn_continue_operation_without_saving_settings">設定尚未儲存, 確定要繼續操作嗎</string>
     <string name="warn_exit_without_saving_settings">設定尚未儲存, 確定要退出嗎</string>
+    <string name="error_failed_to_save">儲存失敗</string>
+    <string name="text_saving" tools:ignore="TypographyEllipsis">正在儲存...</string>
 </resources>
