@@ -117,6 +117,7 @@
     <string name="dialog_button_abandon">Отказаться</string>
     <string name="dialog_button_abort">Прервать</string>
     <string name="dialog_button_abort_connection">Прервать соединение</string>
+    <string name="dialog_button_add">Добавить</string>
     <string name="dialog_button_advanced_settings">Доп.</string>
     <string name="dialog_button_amend_host_address">Исправить адрес</string>
     <string name="dialog_button_back">@string/text_back</string>
@@ -131,6 +132,7 @@
     <string name="dialog_button_copy_path">Копировать</string>
     <string name="dialog_button_default_prefix">Префикс деф.</string>
     <string name="dialog_button_details">Подробности</string>
+    <string name="dialog_button_discard_changes">Отменить</string>
     <string name="dialog_button_dismiss">Удалить</string>
     <string name="dialog_button_download_with_browser">Браузер</string>
     <string name="dialog_button_exception_details">Детали</string>
@@ -142,6 +144,7 @@
     <string name="dialog_button_manager">Менеджер</string>
     <string name="dialog_button_minimize">Свернуть</string>
     <string name="dialog_button_more">Еще</string>
+    <string name="dialog_button_next_step">Далее</string>
     <string name="dialog_button_open_color_palette">Открыть палитру</string>
     <string name="dialog_button_preview">Предпросмотр</string>
     <string name="dialog_button_quit">Выйти</string>
@@ -151,6 +154,7 @@
     <string name="dialog_button_retrieve">Получить</string>
     <string name="dialog_button_retry">Повторная попытка</string>
     <string name="dialog_button_save">Сохранить</string>
+    <string name="dialog_button_save_and_continue">Сохранить и продолжить</string>
     <string name="dialog_button_save_as">Сохранить как</string>
     <string name="dialog_button_system_settings">Системные настройки</string>
     <string name="dialog_button_system_settings_simplified">Система</string>
@@ -482,6 +486,7 @@
     <string name="text_activity_not_found_for_apk_installing">Нет установщика APK</string>
     <string name="text_adb_tool_needed">Необходим инструмент ADB</string>
     <string name="text_add_color_library">Добавить цветовую библиотеку</string>
+    <string name="text_add_symbol_hint">Добавить символ</string>
     <string name="text_alias">псевдоним</string>
     <string name="text_alias_cannot_be_empty">Псевдоним не может быть пустым</string>
     <string name="text_alias_password">Пароль псевдонима</string>
@@ -551,6 +556,7 @@
     <string name="text_build_succeeded">Сборка прошла успешно</string>
     <string name="text_cancel">Отменить</string>
     <string name="text_cancel_simplified">Отмен</string>
+    <string name="text_cannot_delete_default">Профиль по умолчанию нельзя удалить</string>
     <string name="text_cannot_read_file">Невозможно прочитать файл</string>
     <string name="text_captured_window_info_order">Порядок</string>
     <string name="text_captured_window_info_package_name">Пакет</string>
@@ -638,6 +644,7 @@
     <string name="text_copying" tools:ignore="TypographyEllipsis">Копирование...</string>
     <string name="text_country_code">Код страны (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">Код страны должен состоять из двух заглавных букв</string>
+    <string name="text_current_page_configuration">Конфигурация страницы</string>
     <string name="text_current_version">Текущая версия</string>
     <string name="text_daily_task">Ежедневная задача</string>
     <string name="text_date">Дата</string>
@@ -654,8 +661,10 @@
     <string name="text_debug_step_out">Шаг наружу</string>
     <string name="text_debug_step_over">Шаг за</string>
     <string name="text_default">По умолчанию</string>
+    <string name="text_default_configuration">Конфигурация по умолчанию</string>
     <string name="text_default_key_store">По умолчанию хранилище ключей</string>
     <string name="text_default_prefix">Префикс по умолчанию</string>
+    <string name="text_default_profile_overwrite_hint">Профиль по умолчанию нельзя перезаписать; можно создать профиль-алиас</string>
     <string name="text_delay_time">Время задержки</string>
     <string name="text_delete">Удалить</string>
     <string name="text_delete_all">Удалить все</string>
@@ -665,6 +674,7 @@
     <string name="text_delete_revision_confirm">Удалить эту ревизию навсегда?</string>
     <string name="text_deleting" tools:ignore="TypographyEllipsis">Удаление...</string>
     <string name="text_description">Описание</string>
+    <string name="text_deselect_all">Снять выделение</string>
     <string name="text_destination">Назначение</string>
     <string name="text_details">Детали</string>
     <string name="text_developer_details_under_development">Детали разработчика находятся в стадии разработки</string>
@@ -707,6 +717,7 @@
     <string name="text_email">Электронная почта</string>
     <string name="text_email_cannot_be_empty">Электронная почта не может быть пустой</string>
     <string name="text_email_format_error">Неверный формат электронной почты</string>
+    <string name="text_empty_configuration">Пустая конфигурация</string>
     <string name="text_empty_release_note">Отсутствует примечание к релизу</string>
     <string name="text_enable_a11y_service">Включить службу доступности</string>
     <string name="text_enable_a11y_service_with_root_access_automatically">Включить службу доступности с корневым доступом автоматически</string>
@@ -726,6 +737,8 @@
     <string name="text_exit_directly">Выйти</string>
     <string name="text_expand_all">Развернуть всё</string>
     <string name="text_export">Экспорт</string>
+    <string name="text_export_all">Экспортировать все</string>
+    <string name="text_export_selected">Экспорт выбранного</string>
     <string name="text_exported">Экспортировано</string>
     <string name="text_extending_js_build_in_objects">Расширение встроенных объектов JavaScript</string>
     <string name="text_extensibility">Расширяемость</string>
@@ -806,7 +819,11 @@
     <string name="text_ignored_updates">Игнорировать обновления</string>
     <string name="text_import">Импорт</string>
     <string name="text_import_color_library">Импортировать цветовую библиотеку</string>
+    <string name="text_import_name_conflict">Профиль с именем \"%1$s\" уже существует. Выберите способ импорта:</string>
     <string name="text_import_script">Импорт скрипта(ов)</string>
+    <string name="text_import_strategy_auto_rename">Автопереименовать</string>
+    <string name="text_import_strategy_manual_rename">Переименовать вручную</string>
+    <string name="text_import_strategy_overwrite">Перезаписать существующий профиль</string>
     <string name="text_import_succeed">Импорт удался</string>
     <string name="text_import_to_my_scripts">Импорт в \"мои скрипты\"</string>
     <string name="text_in_progress">В процессе выполнения</string>
@@ -825,6 +842,7 @@
     <string name="text_invalid_character_is_removed">Недопустимый символ удален</string>
     <string name="text_invalid_package_name">Неверное имя пакета</string>
     <string name="text_invalid_project">Неверный проект</string>
+    <string name="text_invert_selection">Инвертировать</string>
     <string name="text_ip_address_may_be_invalid_for_server_connection" tools:ignore="TypographyEllipsis">IP-адрес \"%1$s\" имеет специальное назначение (loopback/broadcast/multicast/reserved/...), поэтому он может быть непригоден для подключения к целевому серверу.</string>
     <string name="text_is_latest_version">Более новая версия не найдена</string>
     <string name="text_issue_report">Обратная связь</string>
@@ -855,6 +873,7 @@
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">Проверка макета...</string>
     <string name="text_licenses">Лицензии на открытые источники</string>
     <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">Пробуем запасное решение...</string>
+    <string name="text_loading_completed">Загрузка завершена</string>
     <string name="text_loading_with_dots" tools:ignore="TypographyEllipsis">Загрузка...</string>
     <string name="text_locate_current_theme_color">Найти текущий цвет темы</string>
     <string name="text_log">Журнал</string>
@@ -916,6 +935,8 @@
     <string name="text_no_root">Не root</string>
     <string name="text_no_root_access">Нет root-доступа</string>
     <string name="text_no_scripts_to_stop_running">Нет скриптов для остановки выполнения</string>
+    <string name="text_no_search_results_for_keyword">Ничего не найдено по запросу:\n\n%1$s</string>
+    <string name="text_no_symbols_hint">Текущая конфигурация пуста.\nНажмите здесь, чтобы создать символ.</string>
     <string name="text_no_version_history">Нет истории версий</string>
     <string name="text_not_granted">Не предоставляется</string>
     <string name="text_not_installed">Не установлено</string>
@@ -1097,6 +1118,7 @@
     <string name="text_repo_url_of_vscode_vsc_ext">URL репозитория расширения VSCode</string>
     <string name="text_report_succeed">Отправить успешно</string>
     <string name="text_requires_android_os_version" formatted="false">Требуется версия Android OS %s (API %s), но текущая версия %s (API %s)</string>
+    <string name="text_reset">Сбросить</string>
     <string name="text_reset_password">Сброс пароля</string>
     <string name="text_reset_succeed">Сброс выполнен успешно</string>
     <string name="text_reset_to_initial_content">Сброс первоначально</string>
@@ -1139,6 +1161,7 @@
     <string name="text_sample_name">Запуск сервиса</string>
     <string name="text_save">Сохранить</string>
     <string name="text_save_and_exit">Сохранить и выйти</string>
+    <string name="text_save_configuration_as">Сохранить конфигурацию как</string>
     <string name="text_save_simplified">Сохран</string>
     <string name="text_save_to">Сохранить в</string>
     <string name="text_scheduled_restart_backend">Движок</string>
@@ -1151,6 +1174,8 @@
     <string name="text_search_color">Поиск цвета</string>
     <string name="text_search_help">Помощь по поиску</string>
     <string name="text_select">Выберите</string>
+    <string name="text_select_a_configuration_template">Выберите шаблон конфигурации</string>
+    <string name="text_select_all">Выбрать все</string>
     <string name="text_select_by_exists">Если клип существует (существует)</string>
     <string name="text_select_by_find_one">Пока не найдется один (findOne)</string>
     <string name="text_select_by_until_find">Пока не найдем все (untilFind)</string>
@@ -1164,6 +1189,7 @@
     <string name="text_server_mode">Режим сервера</string>
     <string name="text_service">Сервис</string>
     <string name="text_service_management">Управление службами</string>
+    <string name="text_set_a_name_for_the_new_configuration">Задайте имя для новой конфигурации</string>
     <string name="text_set_as_working_dir">Как рабочий каталог</string>
     <string name="text_set_breakpoint">Установить точку останова</string>
     <string name="text_settings">Настройки</string>
@@ -1208,6 +1234,16 @@
     <string name="text_switch_to_legacy_layout">Переключиться на старый макет</string>
     <string name="text_switch_to_new_layout">Переключиться на новый макет</string>
     <string name="text_switch_window">Переключить окно</string>
+    <string name="text_symbol_invalid_no_whitespace">Символы не могут содержать пробельные символы</string>
+    <string name="text_symbol_name_conflict_with_value">Символ \"%1$s\" уже существует</string>
+    <string name="text_symbols_delete_profile_confirm">Удалить профиль \"%1$s\"?</string>
+    <string name="text_symbols_new_profile">Новый профиль</string>
+    <string name="text_symbols_profile">Профиль символов</string>
+    <string name="text_symbols_profile_default_name">@string/text_default</string>
+    <string name="text_symbols_profile_name_cannot_be_default">Нельзя использовать \"По умолчанию\" как имя профиля</string>
+    <string name="text_symbols_profile_name_conflict">Имя профиля уже существует</string>
+    <string name="text_symbols_profile_name_hint">Имя профиля</string>
+    <string name="text_symbols_profile_name_invalid">Имя профиля не может быть пустым</string>
     <string name="text_symbols_settings">Настройки символов</string>
     <string name="text_tailor_made_developer">Индивидуальный разработчик</string>
     <string name="text_task">Задание</string>
@@ -1220,6 +1256,7 @@
     <string name="text_timed_task_backend_title">Движок планирования таймерных задач</string>
     <string name="text_timed_task_timing">Время</string>
     <string name="text_to_be_chosen">Выбрать</string>
+    <string name="text_toggle_all">Переключить все</string>
     <string name="text_tools">Инструменты</string>
     <string name="text_total_size_colon_value">Размер: %1$s</string>
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">Значок запуска с прозрачным фоном может быть автоматически замаскирован системой или получить фон, поэтому фактический результат может отличаться на разных устройствах</string>
@@ -1290,4 +1327,6 @@
     <string name="text_write_secure_settings">Параметры безопасности записи</string>
     <string name="text_write_system_settings">Запись системных настроек</string>
     <string name="text_xiaomi_background_popup_permission">Всплывающие окна в фоне</string>
+    <string name="warn_continue_operation_without_saving_settings">Настройки не сохранены. Продолжить?</string>
+    <string name="warn_exit_without_saving_settings">Настройки не сохранены. Выйти?</string>
 </resources>

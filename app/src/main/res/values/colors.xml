@@ -36,6 +36,7 @@
     <color name="text_color_primary">@color/day_night</color>
     <color name="text_color_primary_full">@color/day_night_full</color>
     <color name="text_color_primary_alpha_70">@color/day_night_alpha_70</color>
+    <color name="text_color_primary_alpha_60">@color/day_night_alpha_60</color>
     <color name="text_color_primary_alpha_50">@color/day_night_alpha_50</color>
     <color name="text_color_primary_alpha_40">@color/day_night_alpha_40</color>
     <color name="text_color_primary_alpha_30">@color/day_night_alpha_30</color>

@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="true"
+        app:theme="@style/AppTheme.AppBarOverlay">
+
+        <org.autojs.autojs.theme.widget.ThemeColorToolbarEditor
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:theme="@style/ToolBarStyle"
+            app:contentInsetEndWithActions="2dp"
+            app:contentInsetStartWithNavigation="0dp"
+            app:popupTheme="@style/PopupMenuTheme"
+            app:titleTextAppearance="@style/TextAppearanceEditorTitle"
+            tools:title="@string/text_sample_string">
+
+            <FrameLayout
+                android:id="@+id/toolbar_menu"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="end" />
+        </org.autojs.autojs.theme.widget.ThemeColorToolbarEditor>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingHorizontal="4dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:paddingVertical="8dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginHorizontal="8dp"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:lines="2"
+                android:maxWidth="48dp"
+                android:maxLines="2"
+                android:minWidth="36dp"
+                android:text="@string/text_config"
+                android:textStyle="bold"
+                android:translationY="1.2dp" />
+
+            <Spinner
+                android:id="@+id/profileSpinner"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_gravity="center_vertical" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:paddingEnd="4dp"
+                android:layout_gravity="center_vertical">
+
+                <ImageView
+                    android:id="@+id/ivNewProfile"
+                    android:layout_width="32dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginHorizontal="4dp"
+                    android:paddingHorizontal="3dp"
+                    android:src="@drawable/ic_add_black_48dp" />
+
+                <ImageView
+                    android:id="@+id/ivDeleteProfile"
+                    android:layout_width="32dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginHorizontal="4dp"
+                    android:paddingHorizontal="5dp"
+                    android:src="@drawable/ic_close_black_48dp" />
+
+                <ImageView
+                    android:id="@+id/ivMoreProfile"
+                    android:layout_width="32dp"
+                    android:layout_height="match_parent"
+                    android:paddingHorizontal="4dp"
+                    android:layout_marginHorizontal="4dp"
+                    android:src="@drawable/ic_more_vert_black_48dp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:paddingHorizontal="4dp">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <LinearLayout
+                android:id="@+id/symbols_empty_hint_container"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:padding="24dp"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="88dp"
+                    android:layout_height="88dp"
+                    android:layout_marginBottom="8dp"
+                    android:src="@drawable/ic_add_black_48dp"
+                    app:tint="@color/text_color_primary_alpha_60" />
+
+                <TextView
+                    android:id="@+id/symbols_empty_hint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:lineSpacingMultiplier="1.5"
+                    android:paddingHorizontal="24dp"
+                    android:text="@string/text_no_symbols_hint"
+                    android:textColor="@color/text_color_primary_alpha_70"
+                    android:textSize="14sp"
+                    android:visibility="visible" />
+            </LinearLayout>
+        </FrameLayout>
+    </LinearLayout>
+</LinearLayout>

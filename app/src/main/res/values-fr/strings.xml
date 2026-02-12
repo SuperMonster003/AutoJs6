@@ -117,6 +117,7 @@
     <string name="dialog_button_abandon">Abandonner</string>
     <string name="dialog_button_abort">Interrompre</string>
     <string name="dialog_button_abort_connection">Interrompre la connexion</string>
+    <string name="dialog_button_add">Ajouter</string>
     <string name="dialog_button_advanced_settings">Avancé</string>
     <string name="dialog_button_amend_host_address">Corriger l\'adresse</string>
     <string name="dialog_button_back">@string/text_back</string>
@@ -131,6 +132,7 @@
     <string name="dialog_button_copy_path">Copier</string>
     <string name="dialog_button_default_prefix">Préfixe def</string>
     <string name="dialog_button_details">Details</string>
+    <string name="dialog_button_discard_changes">Ignorer</string>
     <string name="dialog_button_dismiss">Quitter</string>
     <string name="dialog_button_download_with_browser">Navigateur</string>
     <string name="dialog_button_exception_details">Détails</string>
@@ -142,6 +144,7 @@
     <string name="dialog_button_manager">Gestionnaire</string>
     <string name="dialog_button_minimize">Réduire</string>
     <string name="dialog_button_more">Plus</string>
+    <string name="dialog_button_next_step">Suivant</string>
     <string name="dialog_button_open_color_palette">Palette</string>
     <string name="dialog_button_preview">Apercu</string>
     <string name="dialog_button_quit">Quit</string>
@@ -151,6 +154,7 @@
     <string name="dialog_button_retrieve">Récupérer</string>
     <string name="dialog_button_retry">Retourner</string>
     <string name="dialog_button_save">Enregistrer</string>
+    <string name="dialog_button_save_and_continue">Enregistrer et continuer</string>
     <string name="dialog_button_save_as">Enregistrer sous</string>
     <string name="dialog_button_system_settings">Paramètres du système</string>
     <string name="dialog_button_system_settings_simplified">Système</string>
@@ -482,6 +486,7 @@
     <string name="text_activity_not_found_for_apk_installing">Pas d\'installateur d\'APK</string>
     <string name="text_adb_tool_needed">L\'outil ADB est nécessaire</string>
     <string name="text_add_color_library">Ajouter une bibliothèque de couleurs</string>
+    <string name="text_add_symbol_hint">Ajouter un symbole</string>
     <string name="text_alias">alias</string>
     <string name="text_alias_cannot_be_empty">L\'alias ne peut pas être vide</string>
     <string name="text_alias_password">Mot de passe de l\'alias</string>
@@ -551,6 +556,7 @@
     <string name="text_build_succeeded">Construction réussie</string>
     <string name="text_cancel">Annulation</string>
     <string name="text_cancel_simplified">Annul</string>
+    <string name="text_cannot_delete_default">Le profil par defaut ne peut pas etre supprime</string>
     <string name="text_cannot_read_file">Impossible de lire le fichier</string>
     <string name="text_captured_window_info_order">Ordre</string>
     <string name="text_captured_window_info_package_name">Paquet</string>
@@ -638,6 +644,7 @@
     <string name="text_copying" tools:ignore="TypographyEllipsis">Copie...</string>
     <string name="text_country_code">Code du pays (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">Le code du pays doit être composé de deux lettres majuscules</string>
+    <string name="text_current_page_configuration">Config de la page</string>
     <string name="text_current_version">Version actuelle</string>
     <string name="text_daily_task">Tâche quotidienne</string>
     <string name="text_date">Date</string>
@@ -654,8 +661,10 @@
     <string name="text_debug_step_out">Step out</string>
     <string name="text_debug_step_over">Step over</string>
     <string name="text_default">Default</string>
+    <string name="text_default_configuration">Config par defaut</string>
     <string name="text_default_key_store">Magasin de clés par défaut</string>
     <string name="text_default_prefix">Préfixe par défaut</string>
+    <string name="text_default_profile_overwrite_hint">Le profil par defaut ne peut pas etre ecrase; vous pouvez creer un profil alias</string>
     <string name="text_delay_time">Délai</string>
     <string name="text_delete">Suppression</string>
     <string name="text_delete_all">Tout supprimer</string>
@@ -665,6 +674,7 @@
     <string name="text_delete_revision_confirm">Supprimer definitivement cette revision?</string>
     <string name="text_deleting" tools:ignore="TypographyEllipsis">Suppression...</string>
     <string name="text_description">Description</string>
+    <string name="text_deselect_all">Tout deselectionner</string>
     <string name="text_destination">Destination</string>
     <string name="text_details">Détails</string>
     <string name="text_developer_details_under_development">Les détails du développeur sont en cours de développement</string>
@@ -707,6 +717,7 @@
     <string name="text_email">E-mail</string>
     <string name="text_email_cannot_be_empty">L\'e-mail ne peut être vide</string>
     <string name="text_email_format_error">Format d\'e-mail invalide</string>
+    <string name="text_empty_configuration">Config vide</string>
     <string name="text_empty_release_note">Pas de release note</string>
     <string name="text_enable_a11y_service">Activer le service d\'accessibilité</string>
     <string name="text_enable_a11y_service_with_root_access_automatically">Activer le service d\'accessibilité avec accès root automatiquement</string>.
@@ -726,6 +737,8 @@
     <string name="text_exit_directly">Exit</string>
     <string name="text_expand_all">Tout développer</string>
     <string name="text_export">Export</string>
+    <string name="text_export_all">Tout exporter</string>
+    <string name="text_export_selected">Exporter la selection</string>
     <string name="text_exported">Exporté</string>
     <string name="text_extending_js_build_in_objects">Extension des objets intégrés de JavaScript</string>
     <string name="text_extensibility">Extensibilité</string>
@@ -806,7 +819,11 @@
     <string name="text_ignored_updates">Ignorer les mises à jour</string>
     <string name="text_import">Importer</string>
     <string name="text_import_color_library">Importer une bibliothèque de couleurs</string>
+    <string name="text_import_name_conflict">Un profil nomme \"%1$s\" existe deja, choisissez une methode d\'import:</string>
     <string name="text_import_script">Importer un ou des scripts</string>
+    <string name="text_import_strategy_auto_rename">Renommage auto</string>
+    <string name="text_import_strategy_manual_rename">Renommage manuel</string>
+    <string name="text_import_strategy_overwrite">Ecraser le profil existant</string>
     <string name="text_import_succeed">Importation réussie</string>
     <string name="text_import_to_my_scripts">Importation vers \"mes scripts\"</string>
     <string name="text_in_progress">En cours</string>
@@ -825,6 +842,7 @@
     <string name="text_invalid_character_is_removed">Caractère invalide est supprimé</string>
     <string name="text_invalid_package_name">Nom de paquet non valide</string>
     <string name="text_invalid_project">Projet non valide</string>
+    <string name="text_invert_selection">Inverser</string>
     <string name="text_ip_address_may_be_invalid_for_server_connection" tools:ignore="TypographyEllipsis">L\'adresse IP \"%1$s\" a un usage particulier (loopback/broadcast/multicast/reserved/...), il est donc possible qu\'elle ne puisse pas être utilisée pour se connecter au serveur cible.</string>
     <string name="text_is_latest_version">Pas de version plus récente trouvée</string>
     <string name="text_issue_report">Réaction</string>
@@ -855,6 +873,7 @@
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">Inspecter la mise en page...</string>
     <string name="text_licenses">Licences Open Sources</string>
     <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">Tentative d\'une solution de secours...</string>
+    <string name="text_loading_completed">Chargement termine</string>
     <string name="text_loading_with_dots" tools:ignore="TypographyEllipsis">Chargement...</string>
     <string name="text_locate_current_theme_color">Localiser la couleur du thème actuel</string>
     <string name="text_log">Journal</string>
@@ -916,6 +935,8 @@
     <string name="text_no_root">Non-root</string>
     <string name="text_no_root_access">Aucun accès root</string>
     <string name="text_no_scripts_to_stop_running">Pas de scripts à arrêter de fonctionner</string>
+    <string name="text_no_search_results_for_keyword">Aucun resultat pour:\n\n%1$s</string>
+    <string name="text_no_symbols_hint">La config actuelle est vide.\nAppuyez ici pour creer un symbole.</string>
     <string name="text_no_version_history">Aucun historique des versions</string>
     <string name="text_not_granted">Non accordée</string>
     <string name="text_not_installed">Non installé</string>
@@ -1097,6 +1118,7 @@
     <string name="text_repo_url_of_vscode_vsc_ext">URL du dépôt de l\'extension VSCode</string>
     <string name="text_report_succeed">Submission réussie</string>
     <string name="text_requires_android_os_version" formatted="false">Requiert Android OS version %s (API %s) mais la version actuelle est %s (API %s)</string>
+    <string name="text_reset">Reinitialiser</string>
     <string name="text_reset_password">Réinitialiser le mot de passe</string>
     <string name="text_reset_succeed">Réinitialisation réussie</string>
     <string name="text_reset_to_initial_content">Réinitialisation initiale</string>
@@ -1139,6 +1161,7 @@
     <string name="text_sample_name">Service en cours d\'exécution</string>
     <string name="text_save">Enregistrer</string>
     <string name="text_save_and_exit">Enregistrer et quitter</string>
+    <string name="text_save_configuration_as">Enregistrer la config sous</string>
     <string name="text_save_simplified">Enreg</string>
     <string name="text_save_to">Save to</string>
     <string name="text_scheduled_restart_backend">Moteur</string>
@@ -1151,6 +1174,8 @@
     <string name="text_search_color">Rechercher une couleur</string>
     <string name="text_search_help">Aide à la recherche</string>
     <string name="text_select">Select</string>
+    <string name="text_select_a_configuration_template">Choisir un modele de config</string>
+    <string name="text_select_all">Tout selectionner</string>
     <string name="text_select_by_exists">Si le clip existe (exists)</string>
     <string name="text_select_by_find_one">Until find one (findOne)</string>
     <string name="text_select_by_until_find">Until find all (untilFind)</string>
@@ -1164,6 +1189,7 @@
     <string name="text_server_mode">Mode serveur</string>
     <string name="text_service">Service</string>
     <string name="text_service_management">Gestion des services</string>
+    <string name="text_set_a_name_for_the_new_configuration">Nommer la nouvelle config</string>
     <string name="text_set_as_working_dir">Comme répertoire de travail</string>
     <string name="text_set_breakpoint">Définir un point d\'arrêt</string>
     <string name="text_settings">Réglages</string>
@@ -1208,6 +1234,16 @@
     <string name="text_switch_to_legacy_layout">Passer à l\'ancienne disposition</string>
     <string name="text_switch_to_new_layout">Passer à la nouvelle disposition</string>
     <string name="text_switch_window">Changer de fenêtre</string>
+    <string name="text_symbol_invalid_no_whitespace">Les symboles ne peuvent pas contenir d\'espaces</string>
+    <string name="text_symbol_name_conflict_with_value">Le symbole \"%1$s\" existe deja</string>
+    <string name="text_symbols_delete_profile_confirm">Supprimer le profil \"%1$s\"?</string>
+    <string name="text_symbols_new_profile">Nouveau profil</string>
+    <string name="text_symbols_profile">Profil de symboles</string>
+    <string name="text_symbols_profile_default_name">@string/text_default</string>
+    <string name="text_symbols_profile_name_cannot_be_default">Impossible d\'utiliser \"Par defaut\" comme nom de profil</string>
+    <string name="text_symbols_profile_name_conflict">Le nom du profil existe deja</string>
+    <string name="text_symbols_profile_name_hint">Nom du profil</string>
+    <string name="text_symbols_profile_name_invalid">Le nom du profil ne peut pas etre vide</string>
     <string name="text_symbols_settings">Param des symboles</string>
     <string name="text_tailor_made_developer">Développeur sur mesure</string>
     <string name="text_task">Task</string>
@@ -1220,6 +1256,7 @@
     <string name="text_timed_task_backend_title">Moteur d\'ordonnancement des tâches planifiées</string>
     <string name="text_timed_task_timing">Timing</string>
     <string name="text_to_be_chosen">A choisir</string>
+    <string name="text_toggle_all">Basculer tout</string>
     <string name="text_tools">Outils</string>
     <string name="text_total_size_colon_value">Taille: %1$s</string>
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">L\'icône du lanceur à fond transparent peut être automatiquement masquée ou recevoir un fond par le système, de sorte que l\'effet réel peut varier selon les appareils</string>
@@ -1290,4 +1327,6 @@
     <string name="text_write_secure_settings">Écrire les paramètres de sécurité</string>.
     <string name="text_write_system_settings">Écrire les paramètres système</string>
     <string name="text_xiaomi_background_popup_permission">Fenêtres contextuelles en arrière-plan</string>
+    <string name="warn_continue_operation_without_saving_settings">Les parametres ne sont pas enregistres. Continuer?</string>
+    <string name="warn_exit_without_saving_settings">Les parametres ne sont pas enregistres. Quitter?</string>
 </resources>

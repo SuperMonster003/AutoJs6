@@ -113,6 +113,7 @@
     <string name="dialog_button_abandon">放棄</string>
     <string name="dialog_button_abort">中止</string>
     <string name="dialog_button_abort_connection">中止連線</string>
+    <string name="dialog_button_add">新增</string>
     <string name="dialog_button_advanced_settings">高階設定</string>
     <string name="dialog_button_amend_host_address">修正地址</string>
     <string name="dialog_button_back">@string/text_back</string>
@@ -127,6 +128,7 @@
     <string name="dialog_button_copy_path">複製路徑</string>
     <string name="dialog_button_default_prefix">預設字首</string>
     <string name="dialog_button_details">瞭解更多</string>
+    <string name="dialog_button_discard_changes">放棄更改</string>
     <string name="dialog_button_dismiss">關閉</string>
     <string name="dialog_button_download_with_browser">瀏覽器下載</string>
     <string name="dialog_button_exception_details">異常詳情</string>
@@ -138,6 +140,7 @@
     <string name="dialog_button_manager">管理器</string>
     <string name="dialog_button_minimize">最小化</string>
     <string name="dialog_button_more">瞭解更多</string>
+    <string name="dialog_button_next_step">下一步</string>
     <string name="dialog_button_open_color_palette">開啟調色盤</string>
     <string name="dialog_button_preview">預覽</string>
     <string name="dialog_button_quit">放棄</string>
@@ -147,6 +150,7 @@
     <string name="dialog_button_retrieve">獲取</string>
     <string name="dialog_button_retry">重試</string>
     <string name="dialog_button_save">儲存</string>
+    <string name="dialog_button_save_and_continue">儲存並繼續</string>
     <string name="dialog_button_save_as">另存為</string>
     <string name="dialog_button_system_settings">系統設定</string>
     <string name="dialog_button_system_settings_simplified">@string/dialog_button_system_settings</string>
@@ -478,6 +482,7 @@
     <string name="text_activity_not_found_for_apk_installing">找不到 APK 安裝器</string>
     <string name="text_adb_tool_needed">需要 ADB 命令列工具</string>
     <string name="text_add_color_library">新增顏色庫</string>
+    <string name="text_add_symbol_hint">新增一個符號</string>
     <string name="text_alias">別名</string>
     <string name="text_alias_cannot_be_empty">別名不能為空</string>
     <string name="text_alias_password">別名密碼</string>
@@ -547,6 +552,7 @@
     <string name="text_build_succeeded">打包成功</string>
     <string name="text_cancel">取消</string>
     <string name="text_cancel_simplified">取消</string>
+    <string name="text_cannot_delete_default">預設配置不可刪除</string>
     <string name="text_cannot_read_file">無法讀取檔案</string>
     <string name="text_captured_window_info_order">次序</string>
     <string name="text_captured_window_info_package_name">包名</string>
@@ -634,6 +640,7 @@
     <string name="text_copying" tools:ignore="TypographyEllipsis">複製中...</string>
     <string name="text_country_code">國家代碼 (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">國家代碼必須是兩個大寫字母</string>
+    <string name="text_current_page_configuration">當前頁面配置</string>
     <string name="text_current_version">當前版本</string>
     <string name="text_daily_task">每日任務</string>
     <string name="text_date">日期</string>
@@ -650,8 +657,10 @@
     <string name="text_debug_step_out">跳出</string>
     <string name="text_debug_step_over">單步</string>
     <string name="text_default">預設</string>
+    <string name="text_default_configuration">預設配置</string>
     <string name="text_default_key_store">預設密鑰庫</string>
     <string name="text_default_prefix">預設字首</string>
+    <string name="text_default_profile_overwrite_hint">預設配置無法被覆寫, 可新建一個別名配置</string>
     <string name="text_delay_time">延遲時間</string>
     <string name="text_delete">刪除</string>
     <string name="text_delete_all">刪除全部</string>
@@ -661,6 +670,7 @@
     <string name="text_delete_revision_confirm">是否永久刪除此版本記錄</string>
     <string name="text_deleting" tools:ignore="TypographyEllipsis">正在刪除...</string>
     <string name="text_description">描述</string>
+    <string name="text_deselect_all">取消全選</string>
     <string name="text_destination">目標</string>
     <string name="text_details">詳情</string>
     <string name="text_developer_details_under_development" tools:ignore="TypographyEllipsis">\"開發者詳情\" 正在開發中...</string>
@@ -703,6 +713,7 @@
     <string name="text_email">郵箱</string>
     <string name="text_email_cannot_be_empty">郵箱不能為空</string>
     <string name="text_email_format_error">郵箱格式錯誤</string>
+    <string name="text_empty_configuration">空白配置</string>
     <string name="text_empty_release_note">無版本資訊</string>
     <string name="text_enable_a11y_service">啟用無障礙服務</string>
     <string name="text_enable_a11y_service_with_root_access_automatically">使用 root 許可權自動啟用無障礙服務</string>
@@ -722,6 +733,8 @@
     <string name="text_exit_directly">直接退出</string>
     <string name="text_expand_all">展開全部</string>
     <string name="text_export">匯出</string>
+    <string name="text_export_all">匯出全部</string>
+    <string name="text_export_selected">匯出選中項</string>
     <string name="text_exported">已匯出</string>
     <string name="text_extending_js_build_in_objects">JavaScript 內建物件擴充套件</string>
     <string name="text_extensibility">擴充套件性</string>
@@ -802,7 +815,11 @@
     <string name="text_ignored_updates">已忽略更新</string>
     <string name="text_import">匯入</string>
     <string name="text_import_color_library">匯入顏色庫</string>
+    <string name="text_import_name_conflict">已存在同名配置 \"%1$s\", 請選擇匯入方式:</string>
     <string name="text_import_script">匯入指令碼檔案</string>
+    <string name="text_import_strategy_auto_rename">自動重新命名</string>
+    <string name="text_import_strategy_manual_rename">手動重新命名</string>
+    <string name="text_import_strategy_overwrite">覆蓋現有配置</string>
     <string name="text_import_succeed">匯入成功</string>
     <string name="text_import_to_my_scripts">匯入到 \"我的指令碼\"</string>
     <string name="text_in_progress">處理中</string>
@@ -821,6 +838,7 @@
     <string name="text_invalid_character_is_removed">無效字元已被移除</string>
     <string name="text_invalid_package_name">無效包名</string>
     <string name="text_invalid_project">無效專案</string>
+    <string name="text_invert_selection">反選</string>
     <string name="text_ip_address_may_be_invalid_for_server_connection" tools:ignore="TypographyEllipsis">IP 地址 \"%1$s\" 具備特殊用途 (迴環/廣播/多播/保留/...), 因此可能無法用於連線目標伺服器.</string>
     <string name="text_is_latest_version">已是最新版本</string>
     <string name="text_issue_report">問題反饋</string>
@@ -851,6 +869,7 @@
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">佈局分析中...</string>
     <string name="text_licenses">開源許可資訊</string>
     <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">正在嘗試備選方案...</string>
+    <string name="text_loading_completed">載入完畢</string>
     <string name="text_loading_with_dots" tools:ignore="TypographyEllipsis">載入中...</string>
     <string name="text_locate_current_theme_color">定位當前主題色</string>
     <string name="text_log">日誌</string>
@@ -912,6 +931,8 @@
     <string name="text_no_root">免 root</string>
     <string name="text_no_root_access">無 root 許可權</string>
     <string name="text_no_scripts_to_stop_running">無執行中的指令碼</string>
+    <string name="text_no_search_results_for_keyword">未找到匹配項:\n\n%1$s</string>
+    <string name="text_no_symbols_hint">當前配置為空.\n點選此處可新建符號.</string>
     <string name="text_no_version_history">無版本歷史</string>
     <string name="text_not_granted">未授予</string>
     <string name="text_not_installed">未安裝</string>
@@ -1093,6 +1114,7 @@
     <string name="text_repo_url_of_vscode_vsc_ext">VSCode 外掛專案地址</string>
     <string name="text_report_succeed">提交成功</string>
     <string name="text_requires_android_os_version" formatted="false">要求最低安卓系統版本 %s (API %s), 當前為 %s (API %s)</string>
+    <string name="text_reset">重置</string>
     <string name="text_reset_password">重置密碼</string>
     <string name="text_reset_succeed">重置成功</string>
     <string name="text_reset_to_initial_content">重置為初始內容</string>
@@ -1135,6 +1157,7 @@
     <string name="text_sample_name">正在執行的服務</string>
     <string name="text_save">儲存</string>
     <string name="text_save_and_exit">儲存並退出</string>
+    <string name="text_save_configuration_as">配置另存為</string>
     <string name="text_save_simplified">儲存</string>
     <string name="text_save_to">儲存到</string>
     <string name="text_scheduled_restart_backend">排程引擎</string>
@@ -1147,6 +1170,8 @@
     <string name="text_search_color">搜尋顏色</string>
     <string name="text_search_help">搜尋幫助</string>
     <string name="text_select">選擇</string>
+    <string name="text_select_a_configuration_template">選擇一個配置模版</string>
+    <string name="text_select_all">全選</string>
     <string name="text_select_by_exists">判斷控制元件存在 (exists)</string>
     <string name="text_select_by_find_one">直到找到一個 (findOne)</string>
     <string name="text_select_by_until_find">直到找到所有 (untilFind)</string>
@@ -1160,6 +1185,7 @@
     <string name="text_server_mode">服務端模式</string>
     <string name="text_service">服務</string>
     <string name="text_service_management">服務管理</string>
+    <string name="text_set_a_name_for_the_new_configuration">為新配置設定一個名稱</string>
     <string name="text_set_as_working_dir">用作工作路徑</string>
     <string name="text_set_breakpoint">設定斷點</string>
     <string name="text_settings">設定</string>
@@ -1204,6 +1230,16 @@
     <string name="text_switch_to_legacy_layout">切換至傳統佈局</string>
     <string name="text_switch_to_new_layout">切換至新佈局</string>
     <string name="text_switch_window">切換視窗</string>
+    <string name="text_symbol_invalid_no_whitespace">符號不可包含空白字元</string>
+    <string name="text_symbol_name_conflict_with_value">符號 \"%1$s\" 已存在</string>
+    <string name="text_symbols_delete_profile_confirm">是否刪除配置 \"%1$s\"</string>
+    <string name="text_symbols_new_profile">新建配置</string>
+    <string name="text_symbols_profile">符號配置</string>
+    <string name="text_symbols_profile_default_name">@string/text_default</string>
+    <string name="text_symbols_profile_name_cannot_be_default">不能使用 \"預設\" 作為配置名稱</string>
+    <string name="text_symbols_profile_name_conflict">配置名稱已存在</string>
+    <string name="text_symbols_profile_name_hint">配置名稱</string>
+    <string name="text_symbols_profile_name_invalid">配置名稱不能為空</string>
     <string name="text_symbols_settings">符號設定</string>
     <string name="text_tailor_made_developer">二次開發者</string>
     <string name="text_task">任務</string>
@@ -1216,6 +1252,7 @@
     <string name="text_timed_task_backend_title">定時任務排程引擎</string>
     <string name="text_timed_task_timing">定時</string>
     <string name="text_to_be_chosen">待選擇</string>
+    <string name="text_toggle_all">全選切換</string>
     <string name="text_tools">工具</string>
     <string name="text_total_size_colon_value">大小: %1$s</string>
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">透明背景啟動器圖示可能被系統自動新增遮罩或背景, 因此不同裝置的實際效果與預期可能不完全一致</string>
@@ -1286,4 +1323,6 @@
     <string name="text_write_secure_settings">修改安全設定</string>
     <string name="text_write_system_settings">修改系統設定</string>
     <string name="text_xiaomi_background_popup_permission">後臺彈出介面</string>
+    <string name="warn_continue_operation_without_saving_settings">設定尚未儲存, 確定要繼續操作嗎</string>
+    <string name="warn_exit_without_saving_settings">設定尚未儲存, 確定要退出嗎</string>
 </resources>

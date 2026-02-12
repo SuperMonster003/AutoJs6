@@ -114,6 +114,7 @@
     <string name="dialog_button_abandon">Abandon</string>
     <string name="dialog_button_abort">Abort</string>
     <string name="dialog_button_abort_connection">Abort</string>
+    <string name="dialog_button_add">Add</string>
     <string name="dialog_button_advanced_settings">Advanced</string>
     <string name="dialog_button_amend_host_address">Amend</string>
     <string name="dialog_button_back">@string/text_back</string>
@@ -128,6 +129,7 @@
     <string name="dialog_button_copy_path">Copy path</string>
     <string name="dialog_button_default_prefix">Def prefix</string>
     <string name="dialog_button_details">Details</string>
+    <string name="dialog_button_discard_changes">Discard changes</string>
     <string name="dialog_button_dismiss">Dismiss</string>
     <string name="dialog_button_download_with_browser">Browser</string>
     <string name="dialog_button_exception_details">Details</string>
@@ -139,6 +141,7 @@
     <string name="dialog_button_manager">Manager</string>
     <string name="dialog_button_minimize">Minimize</string>
     <string name="dialog_button_more">More</string>
+    <string name="dialog_button_next_step">Next</string>
     <string name="dialog_button_open_color_palette">Palette</string>
     <string name="dialog_button_preview">Preview</string>
     <string name="dialog_button_quit">Quit</string>
@@ -148,6 +151,7 @@
     <string name="dialog_button_retrieve">Retrieve</string>
     <string name="dialog_button_retry">Retry</string>
     <string name="dialog_button_save">Save</string>
+    <string name="dialog_button_save_and_continue">Save and continue</string>
     <string name="dialog_button_save_as">Save as</string>
     <string name="dialog_button_system_settings">System settings</string>
     <string name="dialog_button_system_settings_simplified">System</string>
@@ -479,6 +483,7 @@
     <string name="text_activity_not_found_for_apk_installing">No APK installer</string>
     <string name="text_adb_tool_needed">ADB tool is needed</string>
     <string name="text_add_color_library">Add a color library</string>
+    <string name="text_add_symbol_hint">Add a symbol</string>
     <string name="text_alias">alias</string>
     <string name="text_alias_cannot_be_empty">Alias cannot be empty</string>
     <string name="text_alias_password">Alias Password</string>
@@ -548,6 +553,7 @@
     <string name="text_build_succeeded">Build succeeded</string>
     <string name="text_cancel">Cancel</string>
     <string name="text_cancel_simplified">Cancel</string>
+    <string name="text_cannot_delete_default">Default profile cannot be deleted</string>
     <string name="text_cannot_read_file">Cannot read file</string>
     <string name="text_captured_window_info_order">Order</string>
     <string name="text_captured_window_info_package_name">Package</string>
@@ -635,6 +641,7 @@
     <string name="text_copying" tools:ignore="TypographyEllipsis">Copying...</string>
     <string name="text_country_code">Country Code (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">Country code must be two capital letters</string>
+    <string name="text_current_page_configuration">Current page configuration</string>
     <string name="text_current_version">Current version</string>
     <string name="text_daily_task">Daily task</string>
     <string name="text_date">Date</string>
@@ -651,8 +658,10 @@
     <string name="text_debug_step_out">Step out</string>
     <string name="text_debug_step_over">Step over</string>
     <string name="text_default">Default</string>
+    <string name="text_default_configuration">Deafult configuration</string>
     <string name="text_default_key_store">Default Keystore</string>
     <string name="text_default_prefix">Default prefix</string>
+    <string name="text_default_profile_overwrite_hint">Default profile cannot be overwritten, you can create a new aliased profile</string>
     <string name="text_delay_time">Delay time</string>
     <string name="text_delete">Delete</string>
     <string name="text_delete_all">Delete All</string>
@@ -662,6 +671,7 @@
     <string name="text_delete_revision_confirm">Delete this revision permanently?</string>
     <string name="text_deleting" tools:ignore="TypographyEllipsis">Deleting...</string>
     <string name="text_description">Description</string>
+    <string name="text_deselect_all">Deselect all</string>
     <string name="text_destination">Destination</string>
     <string name="text_details">Details</string>
     <string name="text_developer_details_under_development">Developer details is under development</string>
@@ -704,6 +714,7 @@
     <string name="text_email">E-mail</string>
     <string name="text_email_cannot_be_empty">E-mail cannot be empty</string>
     <string name="text_email_format_error">Invalid e-mail format</string>
+    <string name="text_empty_configuration">Empty configuration</string>
     <string name="text_empty_release_note">No release note</string>
     <string name="text_enable_a11y_service">Enable accessibility service</string>
     <string name="text_enable_a11y_service_with_root_access_automatically">Enable accessibility service with root access automatically</string>
@@ -723,6 +734,8 @@
     <string name="text_exit_directly">Exit</string>
     <string name="text_expand_all">Expand all</string>
     <string name="text_export">Export</string>
+    <string name="text_export_all">Export all</string>
+    <string name="text_export_selected">Export selected</string>
     <string name="text_exported">Exported</string>
     <string name="text_extending_js_build_in_objects">Extending JavaScript build-in objects</string>
     <string name="text_extensibility">Extensibility</string>
@@ -803,7 +816,11 @@
     <string name="text_ignored_updates">Ignored updates</string>
     <string name="text_import">Import</string>
     <string name="text_import_color_library">Import a color library</string>
+    <string name="text_import_name_conflict">A profile named \"%1$s\" already exists, please choose an import strategy:</string>
     <string name="text_import_script">Import script(s)</string>
+    <string name="text_import_strategy_auto_rename">Auto rename</string>
+    <string name="text_import_strategy_manual_rename">Manual rename</string>
+    <string name="text_import_strategy_overwrite">Overwrite existing profile</string>
     <string name="text_import_succeed">Import succeeded</string>
     <string name="text_import_to_my_scripts">Import to \"my scripts\"</string>
     <string name="text_in_progress">In progress</string>
@@ -822,6 +839,7 @@
     <string name="text_invalid_character_is_removed">Invalid character is removed</string>
     <string name="text_invalid_package_name">Invalid package name</string>
     <string name="text_invalid_project">Invalid project</string>
+    <string name="text_invert_selection">Invert selection</string>
     <string name="text_ip_address_may_be_invalid_for_server_connection" tools:ignore="TypographyEllipsis">IP address \"%1$s\" has a special purpose (loopback/broadcast/multicast/reserved/...), so it may not be usable for connecting to the target server.</string>
     <string name="text_is_latest_version">No newer version found</string>
     <string name="text_issue_report">Feedback</string>
@@ -852,6 +870,7 @@
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">Inspecting layout...</string>
     <string name="text_licenses">Open Sources Licenses</string>
     <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">Trying a fallback solution...</string>
+    <string name="text_loading_completed">Loading completed</string>
     <string name="text_loading_with_dots" tools:ignore="TypographyEllipsis">Loading...</string>
     <string name="text_locate_current_theme_color">Locate current theme color</string>
     <string name="text_log">Log</string>
@@ -913,6 +932,8 @@
     <string name="text_no_root">Non-root</string>
     <string name="text_no_root_access">No root access</string>
     <string name="text_no_scripts_to_stop_running">No scripts to stop running</string>
+    <string name="text_no_search_results_for_keyword">No results found for:\n\n%1$s</string>
+    <string name="text_no_symbols_hint">Current configuration is empty.\nTap here to create a symbol.</string>
     <string name="text_no_version_history">No version history</string>
     <string name="text_not_granted">Not granted</string>
     <string name="text_not_installed">Not installed</string>
@@ -1094,6 +1115,7 @@
     <string name="text_repo_url_of_vscode_vsc_ext">Repository URL of VSCode extension</string>
     <string name="text_report_succeed">Submit succeeded</string>
     <string name="text_requires_android_os_version" formatted="false">Requires Android OS version %s (API %s) but current is %s (API %s)</string>
+    <string name="text_reset">Reset</string>
     <string name="text_reset_password">Reset password</string>
     <string name="text_reset_succeed">Reset succeeded</string>
     <string name="text_reset_to_initial_content">Reset initially</string>
@@ -1136,6 +1158,7 @@
     <string name="text_sample_name">Running service</string>
     <string name="text_save">Save</string>
     <string name="text_save_and_exit">Save and exit</string>
+    <string name="text_save_configuration_as">Save configuration as</string>
     <string name="text_save_simplified">Save</string>
     <string name="text_save_to">Save to</string>
     <string name="text_scheduled_restart_backend">Backend</string>
@@ -1148,6 +1171,8 @@
     <string name="text_search_color">Search color</string>
     <string name="text_search_help">Search help</string>
     <string name="text_select">Select</string>
+    <string name="text_select_a_configuration_template">Select a configuration template</string>
+    <string name="text_select_all">Select all</string>
     <string name="text_select_by_exists">If clip exists (exists)</string>
     <string name="text_select_by_find_one">Until find one (findOne)</string>
     <string name="text_select_by_until_find">Until find all (untilFind)</string>
@@ -1161,6 +1186,7 @@
     <string name="text_server_mode">Server mode</string>
     <string name="text_service">Service</string>
     <string name="text_service_management">Service management</string>
+    <string name="text_set_a_name_for_the_new_configuration">Set a name for the new configuration</string>
     <string name="text_set_as_working_dir">Set as working dir</string>
     <string name="text_set_breakpoint">Set a breakpoint</string>
     <string name="text_settings">Settings</string>
@@ -1205,6 +1231,16 @@
     <string name="text_switch_to_legacy_layout">Switch to legacy layout</string>
     <string name="text_switch_to_new_layout">Switch to new layout</string>
     <string name="text_switch_window">Switch window</string>
+    <string name="text_symbol_invalid_no_whitespace">Symbols cannot contain whitespace characters</string>
+    <string name="text_symbol_name_conflict_with_value">Symbol \"%1$s\" already exists</string>
+    <string name="text_symbols_delete_profile_confirm">Delete profile \"%1$s\"?</string>
+    <string name="text_symbols_new_profile">New profile</string>
+    <string name="text_symbols_profile">Symbols profile</string>
+    <string name="text_symbols_profile_default_name">@string/text_default</string>
+    <string name="text_symbols_profile_name_cannot_be_default">Cannot use \"Default\" as profile name</string>
+    <string name="text_symbols_profile_name_conflict">Profile name already exists</string>
+    <string name="text_symbols_profile_name_hint">Profile name</string>
+    <string name="text_symbols_profile_name_invalid">Profile name cannot be empty</string>
     <string name="text_symbols_settings">Symbols settings</string>
     <string name="text_tailor_made_developer">Tailor-made developer</string>
     <string name="text_task">Task</string>
@@ -1217,6 +1253,7 @@
     <string name="text_timed_task_backend_title">Timed task scheduling engine</string>
     <string name="text_timed_task_timing">Timing</string>
     <string name="text_to_be_chosen">To be chosen</string>
+    <string name="text_toggle_all">Toggle all</string>
     <string name="text_tools">Tools</string>
     <string name="text_total_size_colon_value">Size: %1$s</string>
     <string name="text_transparent_background_launcher_icon_may_not_take_effect">The transparent background launcher icon may be automatically masked or given a background by the system, so the actual effect may vary across different devices</string>
@@ -1287,4 +1324,6 @@
     <string name="text_write_secure_settings">Write security settings</string>
     <string name="text_write_system_settings">Write system settings</string>
     <string name="text_xiaomi_background_popup_permission">Display pop-up windows while running in the background</string>
+    <string name="warn_continue_operation_without_saving_settings">The settings has not been saved, are you sure to continue the operation?</string>
+    <string name="warn_exit_without_saving_settings">The settings has not been saved, are you sure to exit?</string>
 </resources>
