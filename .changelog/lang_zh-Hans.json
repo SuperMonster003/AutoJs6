@@ -103,6 +103,7 @@
         "代码编辑器在只读模式下点击标题区域及部分菜单项导致应用崩溃的问题",
         "代码编辑器加载大文件可能导致应用崩溃的问题 (试修)",
         "代码编辑器自动打开新建文件时功能按钮状态初始化异常",
+        "Android 15+ 代码编辑器点击 fx 按钮无法显示模块函数快捷面板的问题 (试修)",
         "ErrorDialogActivity 可能无法正常启动或短时间自动消失的问题 _[`issue #479`](http://issues.autojs6.com/479)_ _[`issue #471`](http://issues.autojs6.com/471)_ _[`issue #414`](http://issues.autojs6.com/414)_ _[`issue #340`](http://issues.autojs6.com/340#issuecomment-2973485826)_",
         "Canvas 构造函数可接受的参数类型错误 _[`issue #402`](http://issues.autojs6.com/402)_",
         "崩溃报告页面复制详细信息功能失效的问题",

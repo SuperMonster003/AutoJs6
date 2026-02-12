@@ -34,6 +34,7 @@ import org.autojs.autojs.theme.widget.ThemeColorToolbar
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.main.MainActivity
 import org.autojs.autojs.ui.main.scripts.EditableFileInfoDialogManager
+import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.Observers
 import org.autojs.autojs.util.ViewUtils.onceGlobalLayout
@@ -48,6 +49,7 @@ import java.io.IOException
 /**
  * Created by Stardust on Jan 29, 2017.
  * Modified by SuperMonster003 as of Jan 21, 2023.
+ * Modified by JetBrains AI Assistant (GPT-5.2) as of Feb 8, 2026.
  */
 open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyActivity {
 
@@ -304,20 +306,24 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
     }
 
     private fun showExitConfirmDialog() {
-        MaterialDialog.Builder(this)
-            .title(R.string.text_prompt)
-            .content(R.string.edit_exit_without_save_warn)
-            .neutralText(R.string.dialog_button_back)
-            .negativeText(R.string.text_exit_directly)
-            .negativeColorRes(R.color.dialog_button_caution)
-            .positiveText(R.string.text_save_and_exit)
-            .positiveColorRes(R.color.dialog_button_warn)
-            .onNegative { _, _ -> finishAndRemoveFromRecents() }
-            .onPositive { _, _ ->
-                mEditorView.saveFile()
-                finishAndRemoveFromRecents()
-            }
-            .show()
+        DialogUtils.buildAndShowAdaptive {
+            MaterialDialog.Builder(this)
+                .title(R.string.text_prompt)
+                .content(R.string.edit_exit_without_save_warn)
+                .neutralText(R.string.dialog_button_back)
+                .negativeText(R.string.text_exit_directly)
+                .negativeColorRes(R.color.dialog_button_caution)
+                .onNegative { _, _ ->
+                    finishAndRemoveFromRecents()
+                }
+                .positiveText(R.string.text_save_and_exit)
+                .positiveColorRes(R.color.dialog_button_warn)
+                .onPositive { _, _ ->
+                    mEditorView.saveFile()
+                    finishAndRemoveFromRecents()
+                }
+                .build()
+        }
     }
 
     override fun onDestroy() {
@@ -361,6 +367,11 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
     } catch (e: IOException) {
         e.printStackTrace()
         null
+    }
+
+    override fun onResume() {
+        super.onResume()
+        runCatching { mEditorView.refreshSymbolsBar() }
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {

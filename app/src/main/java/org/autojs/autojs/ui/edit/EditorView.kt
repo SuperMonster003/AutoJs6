@@ -28,12 +28,14 @@ import android.widget.TextView
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.FragmentActivity
 import com.afollestad.materialdialogs.MaterialDialog
 import com.google.android.material.snackbar.Snackbar
 import io.reactivex.Observable
+import io.reactivex.ObservableEmitter
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
@@ -46,7 +48,6 @@ import org.autojs.autojs.event.BackPressedHandler.HostActivity
 import org.autojs.autojs.execution.ScriptExecution
 import org.autojs.autojs.model.autocomplete.AutoCompletion
 import org.autojs.autojs.model.autocomplete.CodeCompletions
-import org.autojs.autojs.model.autocomplete.Symbols
 import org.autojs.autojs.model.indices.Module
 import org.autojs.autojs.model.indices.Property
 import org.autojs.autojs.model.script.Scripts.ACTION_ON_EXECUTION_FINISHED
@@ -75,6 +76,7 @@ import org.autojs.autojs.ui.edit.editor.LayoutHelper
 import org.autojs.autojs.ui.edit.keyboard.FunctionsKeyboardHelper
 import org.autojs.autojs.ui.edit.keyboard.FunctionsKeyboardView
 import org.autojs.autojs.ui.edit.keyboard.FunctionsKeyboardView.ClickCallback
+import org.autojs.autojs.ui.edit.keyboard.SymbolsConfigStore
 import org.autojs.autojs.ui.edit.theme.Theme
 import org.autojs.autojs.ui.edit.theme.Themes
 import org.autojs.autojs.ui.edit.toolbar.DebugToolbarFragment
@@ -546,12 +548,20 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             true -> {
                 mShowFunctionsButton.visibility = VISIBLE
                 mCodeCompletionBar.visibility = VISIBLE
-                mSymbolBar.visibility = VISIBLE
             }
             else -> {
                 mShowFunctionsButton.visibility = INVISIBLE
                 mCodeCompletionBar.visibility = INVISIBLE
-                mSymbolBar.visibility = INVISIBLE
+            }
+        }
+        if (!mSymbolBar.isGone) {
+            when (interactive) {
+                true -> {
+                    mSymbolBar.visibility = VISIBLE
+                }
+                else -> {
+                    mSymbolBar.visibility = INVISIBLE
+                }
             }
         }
     }
@@ -581,7 +591,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     private fun loadUri(uri: Uri): Observable<String> {
-        val streamThresholdBytes = 1024L * 1024L
+        val streamThresholdBytes = MAX_HIGHLIGHT_CHARS
 
         val sizeOrNull = runCatching { queryContentLengthOrNull(uri) }.getOrNull()
         if (sizeOrNull != null && sizeOrNull >= streamThresholdBytes) {
@@ -671,15 +681,6 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         context.unregisterReceiver(mOnRunFinishedReceiver)
         (context as? HostActivity)?.backPressedObserver?.unregisterHandler(mFunctionsKeyboardHelper)
     }
-
-    // Expose current/last search session for reopening find/replace dialog.
-    // zh-CN: 对外暴露当前/上一次搜索会话信息, 用于再次打开查找/替换对话框时恢复状态.
-    fun getCurrentSearchQueryOrNull(): String? = mCurrentSearchQuery
-    fun getCurrentSearchUsingRegex(): Boolean = mCurrentSearchUsingRegex
-    fun isInSearchMode(): Boolean = mInSearchMode
-
-    fun getLastSearchQueryOrNull(): String? = mLastSearchQuery
-    fun getLastSearchUsingRegex(): Boolean = mLastSearchUsingRegex
 
     fun getPreferredSearchQueryForDialogOrNull(): String? =
         (mCurrentSearchQuery ?: mLastSearchQuery)
@@ -951,7 +952,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         choreographer.postFrameCallback(callback)
     }
 
-    private fun streamDecodeAndEmit(input: BufferedInputStream, emitter: io.reactivex.ObservableEmitter<String>) {
+    private fun streamDecodeAndEmit(input: BufferedInputStream, emitter: ObservableEmitter<String>) {
         // Skip BOM bytes by consuming from raw stream before decoding.
         // zh-CN: 在解码前先从原始字节流中消费 BOM 字节.
         val bomBytes = StringUtils.bomBytes(mCurrentCharset)
@@ -1002,8 +1003,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             return
         }
 
-        val progressiveThreshold = 1024 * 1024
-        if (text.length >= progressiveThreshold) {
+        val progressiveThreshold = MAX_HIGHLIGHT_CHARS
+        if (text.length > progressiveThreshold) {
             mLargeFileMode = true
             setInitialTextProgressively(text)
             return
@@ -1041,7 +1042,6 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 setMenuItemStatus(R.id.redo, false)
                 setMenuItemStatus(R.id.save, false)
             }
-
             mLargeFileMode -> {
                 // Large file: keep undo/redo disabled; save is enabled only when text changed by explicit edits.
                 // zh-CN: 大文件: 撤销/重做保持禁用; 保存仅在明确编辑导致文本变化时启用.
@@ -1050,7 +1050,6 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 setMenuItemStatus(R.id.redo, false)
                 setMenuItemStatus(R.id.save, editor.isTextChanged)
             }
-
             else -> {
                 // Normal mode.
                 // zh-CN: 普通模式.
@@ -1204,7 +1203,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private fun setUpInputMethodEnhancedBar() {
         mSymbolBar.let { bar ->
             bar.setOnHintClickListener(this)
-            bar.codeCompletions = Symbols.getSymbols()
+            refreshSymbolsBar()
         }
         mCodeCompletionBar.let { bar ->
             bar.setOnHintClickListener(this)
@@ -1213,6 +1212,13 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 mAutoCompletion = this
             }
         }
+    }
+
+    fun refreshSymbolsBar() {
+        SymbolsConfigStore.ensureDefaultProfileExists(context)
+        val symbols = SymbolsConfigStore.getEnabledSymbolsForActiveProfile(context)
+        mSymbolBar.isVisible = symbols.isNotEmpty()
+        mSymbolBar.codeCompletions = CodeCompletions.just(symbols)
     }
 
     private fun setUpEditor() {
@@ -1820,7 +1826,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         Themes.getAllThemes(context)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe { themes: List<Theme?> ->
+            .subscribe { themes: List<Theme> ->
                 editor.setProgress(false)
                 selectEditorTheme(themes)
             }
@@ -1841,18 +1847,15 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         editor.lastTextSize = value
     }
 
-    private fun selectEditorTheme(themes: List<Theme?>) {
-        var i = themes.indexOf(mEditorTheme)
-        if (i < 0) {
-            i = 0
-        }
+    private fun selectEditorTheme(themes: List<Theme>) {
+        val i = themes.indexOf(mEditorTheme).coerceAtLeast(0)
         DialogUtils.buildAndShowAdaptive {
             MaterialDialog.Builder(context)
                 .title(R.string.text_editor_theme)
                 .items(themes)
                 .choiceWidgetThemeColor()
                 .itemsCallbackSingleChoice(i) { _, _, which, _ ->
-                    themes[which]?.let {
+                    themes[which].let {
                         setTheme(it)
                         Themes.setCurrent(it.name)
                     }
