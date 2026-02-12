@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.provider.Settings
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
@@ -726,7 +727,6 @@ open class DrawerFragment : Fragment() {
         drawerStatsDisposables.add(historyDisposable)
     }
 
-
     private fun configureDrawerWidth() {
         val screenWidthDp = resources.configuration.screenWidthDp
         val targetWidthPx = 288f.coerceIn(
@@ -741,6 +741,40 @@ open class DrawerFragment : Fragment() {
         binding.pluginCenter.setOnClickListener { PluginCenterActivity.startActivity(it.context) }
         binding.restart.setOnClickListener { restart(mActivity, mActivity::beforeExit) }
         binding.exit.setOnClickListener { exit(mActivity, mActivity::beforeExit) }
+
+        // Consume touches on drawer blank area to prevent "press state" leaking to RecyclerView items.
+        // zh-CN: 消费抽屉空白区域触摸, 防止按压状态影响 RecyclerView item 的 ripple/pressed 表现.
+        binding.drawerMenuContainer.setOnTouchListener { v, ev ->
+            val rv = binding.drawerMenu
+            val buttonsRow = binding.settings.parent as? View
+
+            fun hitTest(target: View?): Boolean {
+                if (target == null) return false
+                val loc = IntArray(2)
+                target.getLocationOnScreen(loc)
+                val left = loc[0]
+                val top = loc[1]
+                val right = left + target.width
+                val bottom = top + target.height
+                val x = ev.rawX.toInt()
+                val y = ev.rawY.toInt()
+                return x in left until right && y in top until bottom
+            }
+
+            val onRecycler = hitTest(rv)
+            val onButtons = hitTest(buttonsRow)
+
+            if (onRecycler || onButtons) {
+                false
+            } else {
+                // Keep container from staying pressed.
+                // zh-CN: 避免容器保持 pressed 状态.
+                if (ev.actionMasked == MotionEvent.ACTION_DOWN) {
+                    v.isPressed = false
+                }
+                true
+            }
+        }
     }
 
     override fun onResume() {

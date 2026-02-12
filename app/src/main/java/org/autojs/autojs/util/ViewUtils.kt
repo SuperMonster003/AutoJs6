@@ -32,8 +32,10 @@ import android.util.DisplayMetrics
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.Menu
+import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import android.view.View
+import android.view.ViewConfiguration
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewTreeObserver
@@ -72,6 +74,7 @@ import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs6.R
+import kotlin.math.abs
 import kotlin.math.floor
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -388,7 +391,7 @@ object ViewUtils {
      *    - 以 Type.navigationBars() 为主来源.
      *    - ignoreVisibility=true 时使用 "忽略可见性" 的 insets, 即使系统栏被隐藏也尽量返回稳定厚度.
      *    - ignoreVisibility=false 时使用 "可见" 的 insets, 反映当前可见状态.
-     * 2. computed(显示差值法), 可选.
+     * 2. computed (显示差值法), 可选.
      *    - 仅在 withComputed=true 且 pre-Android R 或 window==null 时启用.
      *    - 通过 real metrics 与 usable metrics 的差值计算系统 UI insets, 再推导导航栏厚度.
      * 3. 内部 dimen, 可选.
@@ -846,6 +849,7 @@ object ViewUtils {
     // zh-CN:
     // 如果 view 未 attach 时调用 requestApplyInsets() 会被丢弃.
     // 需要等 attach 后再请求一次, 才能稳定触发 insets 分发.
+    @Suppress("DEPRECATION")
     private fun View.requestApplyInsetsWhenAttached() {
         if (ViewCompat.isAttachedToWindow(this)) {
             ViewCompat.requestApplyInsets(this)
@@ -1403,6 +1407,239 @@ object ViewUtils {
 
             text = out
         }
+    }
+
+    /**
+     * Install a ripple forwarder that makes full-row background react to touches on specific children,
+     * while preserving RecyclerView-like delayed pressed behavior.
+     * zh-CN:
+     * 安装 Ripple 转发器, 让整行背景响应指定子视图的触摸,
+     * 同时尽量模拟 RecyclerView 的延迟 pressed 行为.
+     */
+    fun installFullRowRippleForwarder(
+        parent: View,
+        vararg touchSources: View,
+        pressDelayMillis: Int = ViewConfiguration.getTapTimeout(),
+    ) {
+        // Ensure the parent can show stateful background/foreground.
+        // zh-CN: 确保父视图可以显示带状态的 background/foreground.
+        parent.isClickable = true
+        parent.isFocusable = true
+
+        val vc = ViewConfiguration.get(parent.context)
+
+        // Movement threshold to decide "scrolling" vs "tapping".
+        // zh-CN: 用于区分 "滚动" 与 "点击" 的移动阈值.
+        val touchSlop = vc.scaledTouchSlop
+
+        // Duration used by framework to show a short pressed state for quick taps.
+        // zh-CN: 系统用于 "快速点击" 时短暂显示 pressed 的持续时间.
+        val pressedStateDuration = ViewConfiguration.getPressedStateDuration()
+
+        // Reusable objects to avoid allocations in hot paths.
+        // zh-CN: 复用对象, 避免高频路径分配.
+        val parentLoc = IntArray(2)
+        val childHitRect = Rect()
+
+        touchSources.forEach { child ->
+            child.setOnTouchListener(object : View.OnTouchListener {
+
+                // Track one gesture stream.
+                // zh-CN: 跟踪一次手势流.
+                private var activePointerId: Int = MotionEvent.INVALID_POINTER_ID
+
+                // Down positions in raw (screen) coordinates.
+                // zh-CN: DOWN 时的 raw (屏幕) 坐标.
+                private var downRawX: Float = 0f
+                private var downRawY: Float = 0f
+
+                // Last known raw coordinates for hotspot update.
+                // zh-CN: 用于更新 hotspot 的最近 raw 坐标.
+                private var lastRawX: Float = 0f
+                private var lastRawY: Float = 0f
+
+                // Whether we have applied parent pressed state.
+                // zh-CN: 是否已应用父视图 pressed 状态.
+                private var pressedApplied: Boolean = false
+
+                // Whether we are still waiting to apply pressed (pre-pressed).
+                // zh-CN: 是否仍处于等待 pressed 的 pre-pressed 状态.
+                private var prePressed: Boolean = false
+
+                // Runnable to apply pressed after delay.
+                // zh-CN: 延迟触发 pressed 的 Runnable.
+                private val applyPressedRunnable = Runnable {
+                    if (!prePressed) {
+                        return@Runnable
+                    }
+                    if (!isInsideViewWithSlop(child, lastRawX, lastRawY, touchSlop, childHitRect)) {
+                        prePressed = false
+                        return@Runnable
+                    }
+                    applyPressedNow()
+                }
+
+                override fun onTouch(v: View, event: MotionEvent): Boolean {
+                    when (event.actionMasked) {
+                        MotionEvent.ACTION_DOWN -> {
+                            activePointerId = event.getPointerId(0)
+
+                            downRawX = event.rawX
+                            downRawY = event.rawY
+                            lastRawX = event.rawX
+                            lastRawY = event.rawY
+
+                            pressedApplied = false
+                            prePressed = true
+
+                            // Delay pressed to mimic scrolling container behavior.
+                            // zh-CN: 延迟 pressed, 模拟可滚动容器的行为.
+                            parent.removeCallbacks(applyPressedRunnable)
+                            parent.postDelayed(applyPressedRunnable, pressDelayMillis.toLong())
+                        }
+
+                        MotionEvent.ACTION_MOVE -> {
+                            val idx = event.findPointerIndex(activePointerId)
+                            if (idx < 0) {
+                                return false
+                            }
+
+                            lastRawX = event.rawX
+                            lastRawY = event.rawY
+
+                            // If moved too much, treat as scroll and cancel.
+                            // zh-CN: 如果移动过大, 视为滚动并取消.
+                            val movedTooMuch =
+                                abs(lastRawX - downRawX) > touchSlop || abs(lastRawY - downRawY) > touchSlop
+
+                            if (movedTooMuch) {
+                                cancelPressed()
+                                return false
+                            }
+
+                            // If pressed is already applied, keep hotspot in sync.
+                            // zh-CN: 若 pressed 已应用, 持续同步 hotspot.
+                            if (pressedApplied) {
+                                updateHotspot(lastRawX, lastRawY)
+                            }
+                        }
+
+                        MotionEvent.ACTION_UP -> {
+                            val idx = event.findPointerIndex(activePointerId)
+                            if (idx < 0) {
+                                cancelPressed()
+                                return false
+                            }
+
+                            lastRawX = event.rawX
+                            lastRawY = event.rawY
+
+                            // If we never applied pressed (quick tap), apply briefly then clear.
+                            // zh-CN: 如果尚未应用 pressed (快速点击), 短暂应用后清除.
+                            if (prePressed && !pressedApplied) {
+                                parent.removeCallbacks(applyPressedRunnable)
+
+                                if (isInsideViewWithSlop(child, lastRawX, lastRawY, touchSlop, childHitRect)) {
+                                    applyPressedNow()
+                                    parent.postDelayed(
+                                        { parent.isPressed = false },
+                                        pressedStateDuration.toLong(),
+                                    )
+                                } else {
+                                    cancelPressed()
+                                }
+                            } else {
+                                // Normal end of gesture.
+                                // zh-CN: 正常结束手势.
+                                parent.removeCallbacks(applyPressedRunnable)
+                                // Defer clearing pressed state until after this UP is dispatched to the child view.
+                                // zh-CN: 将清除 pressed 的时机延后到本次 UP 分发给子视图之后.
+                                parent.post {
+                                    parent.isPressed = false
+                                }
+                                prePressed = false
+                                pressedApplied = false
+                            }
+
+                            activePointerId = MotionEvent.INVALID_POINTER_ID
+                        }
+
+                        MotionEvent.ACTION_CANCEL -> {
+                            cancelPressed()
+                            activePointerId = MotionEvent.INVALID_POINTER_ID
+                        }
+                    }
+
+                    // Do not consume, so child's click/long-click keep working.
+                    // zh-CN: 不消费事件, 保持子视图 click/long-click 正常工作.
+                    return false
+                }
+
+                /**
+                 * Apply pressed immediately and update hotspot.
+                 * zh-CN: 立即应用 pressed, 并更新 hotspot.
+                 */
+                private fun applyPressedNow() {
+                    pressedApplied = true
+                    prePressed = false
+                    parent.isPressed = true
+                    updateHotspot(lastRawX, lastRawY)
+                }
+
+                /**
+                 * Cancel any pending pressed state and clear current pressed state.
+                 * zh-CN: 取消所有待触发的 pressed, 并清除当前 pressed 状态.
+                 */
+                private fun cancelPressed() {
+                    parent.removeCallbacks(applyPressedRunnable)
+                    parent.isPressed = false
+                    prePressed = false
+                    pressedApplied = false
+                }
+
+                /**
+                 * Update parent's ripple hotspot based on raw coordinates.
+                 * zh-CN: 基于 raw 坐标更新父视图的 Ripple hotspot.
+                 */
+                private fun updateHotspot(rawX: Float, rawY: Float) {
+                    parent.getLocationOnScreen(parentLoc)
+                    val hx = rawX - parentLoc[0]
+                    val hy = rawY - parentLoc[1]
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        parent.drawableHotspotChanged(hx, hy)
+                        parent.background?.setHotspot(hx, hy)
+                        parent.foreground?.setHotspot(hx, hy)
+                    }
+                }
+            })
+        }
+    }
+
+    /**
+     * Check whether a raw (screen) coordinate is inside the view bounds with slop tolerance.
+     * zh-CN: 判断 raw (屏幕) 坐标是否在视图边界内, 并允许一定 slop 容差.
+     */
+    private fun isInsideViewWithSlop(
+        view: View,
+        rawX: Float,
+        rawY: Float,
+        slop: Int,
+        outRect: Rect,
+    ): Boolean {
+        val loc = IntArray(2)
+        view.getLocationOnScreen(loc)
+
+        val xInView = rawX - loc[0]
+        val yInView = rawY - loc[1]
+
+        outRect.set(
+            -slop,
+            -slop,
+            view.width + slop,
+            view.height + slop,
+        )
+        return outRect.contains(xInView.toInt(), yInView.toInt())
     }
 
     enum class MODE(val key: String) {

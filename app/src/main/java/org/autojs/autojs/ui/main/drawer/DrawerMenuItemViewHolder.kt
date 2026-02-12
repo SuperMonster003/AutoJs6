@@ -7,6 +7,7 @@ import androidx.core.view.isVisible
 import me.zhanghai.android.materialprogressbar.MaterialProgressBar
 import org.autojs.autojs.ui.widget.BindableViewHolder
 import org.autojs.autojs.ui.widget.PrefSwitch
+import org.autojs.autojs.util.ViewUtils.installFullRowRippleForwarder
 import org.autojs.autojs6.databinding.DrawerMenuItemBinding
 
 /**
@@ -17,6 +18,7 @@ import org.autojs.autojs6.databinding.DrawerMenuItemBinding
 class DrawerMenuItemViewHolder(itemView: View) : BindableViewHolder<DrawerMenuItem?>(itemView) {
 
     private val mSwitchCompat: PrefSwitch
+    private val mSwitchDivider: View
     private val mProgressBar: MaterialProgressBar
     private val mIcon: ImageView
     private val mTitle: TextView
@@ -30,6 +32,7 @@ class DrawerMenuItemViewHolder(itemView: View) : BindableViewHolder<DrawerMenuIt
     init {
         val binding = DrawerMenuItemBinding.bind(itemView)
         mSwitchCompat = binding.sw
+        mSwitchDivider = binding.switchDivider
         mProgressBar = binding.progressBar
         mIcon = binding.icon
         mTitle = binding.title
@@ -37,6 +40,13 @@ class DrawerMenuItemViewHolder(itemView: View) : BindableViewHolder<DrawerMenuIt
         mSwitchCompat.setOnCheckedChangeListener { _, _ ->
             onClick()
         }
+
+        val iconContainer = binding.iconContainer
+        val titleContainer = binding.titleContainer
+
+        // Install full-row ripple forwarding once.
+        // zh-CN: 安装整行 Ripple 转发, 通常只需安装一次.
+        installFullRowRippleForwarder(itemView, iconContainer, titleContainer)
 
         val toggleAction = {
             if (mSwitchCompat.isVisible) {
@@ -46,11 +56,11 @@ class DrawerMenuItemViewHolder(itemView: View) : BindableViewHolder<DrawerMenuIt
             }
         }
 
-        binding.iconContainer.setOnClickListener {
+        iconContainer.setOnClickListener {
             toggleAction()
         }
 
-        binding.iconContainer.setOnLongClickListener {
+        iconContainer.setOnLongClickListener {
             when (val menuItem = mDrawerMenuItem) {
                 is DrawerMenuToggleableItem -> {
                     menuItem.launchManagerIfPossible()
@@ -59,7 +69,7 @@ class DrawerMenuItemViewHolder(itemView: View) : BindableViewHolder<DrawerMenuIt
             }
         }
 
-        binding.titleContainer.setOnClickListener {
+        titleContainer.setOnClickListener {
             when (val menuItem = mDrawerMenuItem) {
                 is DrawerMenuToggleableItem -> {
                     menuItem.onTitleContainerClick()
@@ -68,7 +78,7 @@ class DrawerMenuItemViewHolder(itemView: View) : BindableViewHolder<DrawerMenuIt
             }
         }
 
-        binding.titleContainer.setOnLongClickListener {
+        titleContainer.setOnLongClickListener {
             when (val menuItem = mDrawerMenuItem) {
                 is DrawerMenuToggleableItem -> {
                     menuItem.launchManagerIfPossible()
@@ -98,9 +108,11 @@ class DrawerMenuItemViewHolder(itemView: View) : BindableViewHolder<DrawerMenuIt
     private fun setSwitch(item: DrawerMenuItem) {
         if (!item.isSwitchEnabled) {
             mSwitchCompat.visibility = View.GONE
+            mSwitchDivider.visibility = View.GONE
             return
         }
         mSwitchCompat.visibility = View.VISIBLE
+        mSwitchDivider.visibility = View.VISIBLE
         val prefKey = item.prefKey
         if (prefKey == DrawerMenuItem.DEFAULT_PREFERENCE_KEY) {
             mSwitchCompat.setChecked(item.isChecked, false)

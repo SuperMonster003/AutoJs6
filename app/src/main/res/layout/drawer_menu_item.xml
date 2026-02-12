@@ -5,8 +5,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:minHeight="43dp"
     android:background="?selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true"
+    android:minHeight="43dp"
     android:orientation="horizontal">
 
     <FrameLayout
@@ -32,7 +34,6 @@
             android:layout_height="15dp"
             android:backgroundTint="@color/drawer_menu_group_text_color"
             android:visibility="gone" />
-
     </FrameLayout>
 
     <LinearLayout
@@ -41,7 +42,7 @@
         android:layout_width="match_parent"
         android:minHeight="43dp"
         android:layout_toEndOf="@+id/icon_container"
-        android:layout_toStartOf="@id/sw"
+        android:layout_toStartOf="@id/switch_divider"
         android:layout_centerVertical="true"
         android:layout_marginEnd="5dp"
         android:gravity="center_vertical"
@@ -66,8 +67,19 @@
             android:visibility="gone"
             tools:visibility="gone"
             tools:text="@string/text_sample_string" />
-
     </LinearLayout>
+
+    <View
+        android:id="@+id/switch_divider"
+        android:layout_width="1dp"
+        android:layout_height="24dp"
+        android:layout_toStartOf="@id/sw"
+        android:layout_marginStart="2dp"
+        android:layout_marginEnd="6dp"
+        android:layout_centerVertical="true"
+        android:background="@color/day_night_alpha_20"
+        android:visibility="gone"
+        tools:visibility="visible" />
 
     <org.autojs.autojs.ui.widget.PrefSwitch
         android:id="@+id/sw"
@@ -79,5 +91,4 @@
         android:visibility="gone"
         tools:checked="true"
         tools:visibility="visible" />
-
 </RelativeLayout>
