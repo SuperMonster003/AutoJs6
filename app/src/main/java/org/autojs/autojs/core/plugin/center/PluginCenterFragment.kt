@@ -14,10 +14,15 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.DividerItemDecoration.VERTICAL
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.afollestad.materialdialogs.MaterialDialog
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import org.autojs.autojs.core.plugin.ocr.PaddleOcrPluginHost
+import org.autojs.autojs.util.ClipboardUtils
+import org.autojs.autojs.util.IntentUtils.startSafely
+import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.excludePaddingClippableViewFromBottomNavigationBar
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.FragmentPluginCenterBinding
@@ -62,8 +67,75 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
 
         adapter = PluginCenterItemAdapter(object : PluginCenterItemAdapter.Listener {
             override fun onToggleEnable(item: PluginCenterItem, enabled: Boolean) {
-                vm.setEnabled(contextRef, item.packageName, enabled)
-                item.isEnabled = enabled
+                if (!enabled) {
+                    vm.setEnabled(contextRef, item.packageName, false)
+                    item.isEnabled = false
+                    return
+                }
+
+                vm.setEnabled(contextRef, item.packageName, true)
+                item.isEnabled = true
+
+                viewLifecycleOwner.lifecycleScope.launch {
+                    val error = runCatching {
+                        PaddleOcrPluginHost.probe(contextRef, item.packageName)
+                    }.exceptionOrNull()
+                    if (error != null && error !is CancellationException) {
+                        if (isAdded) {
+                            val pm = contextRef.packageManager
+                            val launchIntent = pm.getLaunchIntentForPackage(item.packageName)
+                            val wakeIntent = PluginWakeManager.buildWakeIntent(contextRef, item.packageName)
+
+                            val errorBody = error.message ?: error.toString()
+                            val message = listOf(
+                                contextRef.getString(R.string.text_exception_info) + contextRef.getString(R.string.symbol_colon_with_blank),
+                                errorBody,
+                                contextRef.getString(R.string.text_hint) + contextRef.getString(R.string.symbol_colon_with_blank),
+                                getString(R.string.hint_try_clicking_the_activate_button_to_activate_the_plugin)
+                            ).joinToString("\n\n")
+
+                            MaterialDialog.Builder(contextRef)
+                                .title(R.string.error_failed_to_enable_the_plugin)
+                                .content(message)
+                                .neutralText(R.string.dialog_button_copy)
+                                .neutralColorRes(R.color.dialog_button_hint)
+                                .onNeutral { d, _ ->
+                                    ClipboardUtils.setClip(contextRef, errorBody)
+                                    ViewUtils.showSnack(d.view, R.string.text_already_copied_to_clip, false)
+                                }
+                                .negativeText(R.string.dialog_button_dismiss)
+                                .negativeColorRes(R.color.dialog_button_default)
+                                .onNegative { d, _ -> d.dismiss() }
+                                .apply positive@{
+                                    positiveText(R.string.dialog_button_activate)
+
+                                    val openIntent = wakeIntent ?: launchIntent ?: run {
+                                        positiveColorRes(R.color.dialog_button_unavailable)
+                                        onPositive { d, _ ->
+                                            ViewUtils.showSnack(d.view, R.string.text_unavailable, false)
+                                        }
+                                        return@positive
+                                    }
+
+                                    positiveColorRes(R.color.dialog_button_attraction)
+                                    onPositive { d, _ ->
+                                        val started = openIntent.startSafely(contextRef, true)
+                                        d.dismiss()
+                                        if (started) {
+                                            ViewUtils.showToast(contextRef, getString(R.string.text_activated_successfully), true)
+                                            tryEnableAfterWake(item)
+                                        }
+                                    }
+                                }
+                                .cancelable(false)
+                                .autoDismiss(false)
+                                .show()
+                        }
+                        vm.setEnabled(contextRef, item.packageName, false)
+                        item.isEnabled = false
+                        adapter.notifyDataSetChanged()
+                    }
+                }
             }
 
             override fun onUninstall(item: PluginCenterItem) {
@@ -292,6 +364,29 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         }
     }
 
+    private fun tryEnableAfterWake(item: PluginCenterItem) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            val delays = longArrayOf(300L, 800L, 1500L)
+            for (delayMs in delays) {
+                delay(delayMs)
+                val error = runCatching {
+                    PaddleOcrPluginHost.probe(contextRef, item.packageName)
+                }.exceptionOrNull()
+                if (error == null) {
+                    if (isAdded && _binding != null) {
+                        vm.setEnabled(contextRef, item.packageName, true)
+                        item.isEnabled = true
+                        adapter.notifyDataSetChanged()
+                    }
+                    return@launch
+                }
+                if (error is CancellationException) {
+                    return@launch
+                }
+            }
+        }
+    }
+
     override fun onStart() {
         super.onStart()
         pkgReceiver ?: run registerPackageReceiver@{
@@ -324,6 +419,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
                             // Package uninstallation (pre-update phase) does not record "Recently uninstalled" when replacing.
                             // zh-CN: 替换卸载 (更新前阶段) 不记录 "最近卸载".
                             if (!replacing) {
+                                PluginWakeManager.clearAutoWakeAttempt(packageName)
                                 PluginRecentStore.setLastUninstalled(packageName)
                                 vm.load(context, forceRefreshIndex = false)
                                 return

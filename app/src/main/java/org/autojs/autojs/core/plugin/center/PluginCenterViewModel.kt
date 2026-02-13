@@ -32,6 +32,7 @@ import org.autojs.autojs6.R
  *
  * Created by JetBrains AI Assistant (GPT-5.2) on Nov 26, 2025.
  * Modified by SuperMonster003 as of Jan 17, 2026.
+ * Modified by JetBrains AI Assistant (GPT-5.2-Codex (xhigh)) as of Feb 13, 2026.
  */
 class PluginCenterViewModel : ViewModel() {
 
@@ -90,6 +91,15 @@ class PluginCenterViewModel : ViewModel() {
                 _items.value = emptyList()
                 _indexLoaded.value = true
                 return@launch
+            }
+
+            installed.forEach { local ->
+                if (local.bindError != null) {
+                    enableStore.setEnabled(context, local.packageName, false)
+                }
+                if (local.isStopped) {
+                    PluginWakeManager.tryAutoWakeIfNeeded(context, local.packageName)
+                }
             }
 
             // Render list using "local only".

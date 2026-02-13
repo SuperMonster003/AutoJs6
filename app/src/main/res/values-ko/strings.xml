@@ -1333,4 +1333,11 @@
     <string name="warn_exit_without_saving_settings">설정이 저장되지 않았습니다. 종료할까요?</string>
     <string name="error_failed_to_save">저장에 실패했습니다</string>
     <string name="text_saving" tools:ignore="TypographyEllipsis">저장 중...</string>
+    <string name="symbol_colon_with_blank">": "</string>
+    <string name="error_failed_to_enable_the_plugin">플러그인을 활성화하지 못했습니다</string>
+    <string name="text_exception_info">예외 정보</string>
+    <string name="text_hint">힌트</string>
+    <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">\"활성화\" 버튼을 눌러 플러그인을 한 번 활성화해 보세요.\n활성화에 성공하면 일정 시간 내에 버튼이 자동으로 켜집니다.</string>
+    <string name="dialog_button_activate">활성화</string>
+    <string name="text_activated_successfully">활성화되었습니다</string>
 </resources>
