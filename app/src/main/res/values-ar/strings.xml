@@ -1333,4 +1333,11 @@
     <string name="warn_exit_without_saving_settings">لم يتم حفظ الاعدادات. هل تريد الخروج?</string>
     <string name="error_failed_to_save">فشل الحفظ</string>
     <string name="text_saving" tools:ignore="TypographyEllipsis">جارٍ الحفظ...</string>
+    <string name="symbol_colon_with_blank">": "</string>
+    <string name="error_failed_to_enable_the_plugin">فشل في تفعيل الاضافة</string>
+    <string name="text_exception_info">معلومات الاستثناء</string>
+    <string name="text_hint">تلميح</string>
+    <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">جرّب الضغط على زر \"تفعيل\" لتفعيل الاضافة مرة واحدة.\nاذا نجح التفعيل، فسيتم تشغيل الزر تلقائيا خلال فترة زمنية معينة.</string>
+    <string name="dialog_button_activate">تفعيل</string>
+    <string name="text_activated_successfully">تم التفعيل بنجاح</string>
 </resources>

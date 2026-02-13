@@ -1327,4 +1327,11 @@
     <string name="warn_exit_without_saving_settings">設定尚未儲存, 確定要退出嗎</string>
     <string name="error_failed_to_save">儲存失敗</string>
     <string name="text_saving" tools:ignore="TypographyEllipsis">正在儲存...</string>
+    <string name="symbol_colon_with_blank">": "</string>
+    <string name="error_failed_to_enable_the_plugin">外掛啟用失敗</string>
+    <string name="text_exception_info">異常資訊</string>
+    <string name="text_hint">提示</string>
+    <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">可嘗試點選 \"啟用\" 按鈕啟用一次外掛.\n如啟用成功, 按鈕將在一定時間內自動開啟.</string>
+    <string name="dialog_button_activate">啟用</string>
+    <string name="text_activated_successfully">啟用成功</string>
 </resources>

@@ -1,6 +1,7 @@
 package org.autojs.autojs.core.plugin.center
 
 import android.content.Context
+import android.content.pm.ApplicationInfo
 import android.graphics.drawable.Drawable
 import androidx.core.content.pm.PackageInfoCompat
 import kotlinx.coroutines.Dispatchers
@@ -14,6 +15,9 @@ import java.io.File
  * Local installed plugin discovery (based on existing PaddleOcrPluginHost.discover).
  *
  * zh-CN: 本地已安装插件发现 (基于现有的 PaddleOcrPluginHost.discover).
+ *
+ * Modified by JetBrains AI Assistant (GPT-5.2-Codex (xhigh)) as of Feb 13, 2026.
+ * Modified by SuperMonster003 as of Feb 13, 2026.
  */
 class InstalledPluginRepository {
 
@@ -29,6 +33,8 @@ class InstalledPluginRepository {
         val lastUpdateTime: Long?,
         val icon: Drawable?,
         val pluginInfo: PluginInfo?,
+        val bindError: Throwable?,
+        val isStopped: Boolean,
     )
 
     suspend fun discoverInstalled(context: Context): List<InstalledPlugin> = withContext(Dispatchers.IO) {
@@ -41,6 +47,7 @@ class InstalledPluginRepository {
             val appInfo = runCatching { pm.getApplicationInfo(packageName, 0) }.getOrNull()
             val appLabel = appInfo?.loadLabel(pm)?.toString()
             val icon = appInfo?.loadIcon(pm)
+            val isStopped = appInfo != null && (appInfo.flags and ApplicationInfo.FLAG_STOPPED) != 0
 
             val pkgInfo = runCatching { pm.getPackageInfo(packageName, 0) }.getOrNull()
             val versionName = pkgInfo?.versionName ?: d.pluginInfo?.versionName ?: context.getString(R.string.text_unknown)
@@ -70,6 +77,8 @@ class InstalledPluginRepository {
                 lastUpdateTime = lastUpdateTime,
                 icon = icon,
                 pluginInfo = d.pluginInfo,
+                bindError = d.error,
+                isStopped = isStopped,
             )
         }
     }

@@ -1602,4 +1602,11 @@
     <string name="warn_exit_without_saving_settings">The settings has not been saved, are you sure to exit?</string>
     <string name="error_failed_to_save">Failed to save</string>
     <string name="text_saving" tools:ignore="TypographyEllipsis">Saving...</string>
+    <string name="symbol_colon_with_blank">": "</string>
+    <string name="error_failed_to_enable_the_plugin">Failed to enable the plugin</string>
+    <string name="text_exception_info">Exception info</string>
+    <string name="text_hint">Hint</string>
+    <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">Try clicking the \"Activate\" button to activate the plugin once.\nIf activation is successful, the button will automatically turn on within a certain period of time.</string>
+    <string name="dialog_button_activate">Activate</string>
+    <string name="text_activated_successfully">Activated successfully</string>
 </resources>
