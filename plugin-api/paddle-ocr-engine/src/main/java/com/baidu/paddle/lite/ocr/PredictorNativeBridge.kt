@@ -14,6 +14,7 @@ import org.autojs.plugin.paddle.ocr.api.OcrResult
  *
  * Created by JetBrains AI Assistant (GPT-5.2) on Jan 17, 2026.
  * Modified by SuperMonster003 as of Jan 18, 2026.
+ * Modified by JetBrains AI Assistant (GPT-5.2-Codex (xhigh)) as of Feb 13, 2026.
  */
 class PredictorNativeBridge : NativeBridge {
 
@@ -110,6 +111,7 @@ class PredictorNativeBridge : NativeBridge {
     }
 
     override fun recognizeText(bitmap: Bitmap, options: OcrOptions): List<String> {
+        applyRuntimeOptions(options)
         val results = predictor.runOcr(bitmap)
         val out = ArrayList<String>(results.size)
         for (r in results) out.add(r.label)
@@ -124,6 +126,7 @@ class PredictorNativeBridge : NativeBridge {
     }
 
     override fun detect(bitmap: Bitmap, options: OcrOptions): List<OcrResult> {
+        applyRuntimeOptions(options)
         val results = predictor.runOcr(bitmap)
         return results.map { r ->
             OcrResult().apply {
@@ -132,6 +135,17 @@ class PredictorNativeBridge : NativeBridge {
                 bounds = r.bounds
                 extras = Bundle()
             }
+        }
+    }
+
+    private fun applyRuntimeOptions(options: OcrOptions) {
+        val detLongSize = options.detLongSize
+        if (detLongSize > 0) {
+            predictor.setDetLongSize(detLongSize)
+        }
+        val scoreThreshold = options.scoreThreshold
+        if (scoreThreshold >= 0f) {
+            predictor.setScoreThreshold(scoreThreshold)
         }
     }
 

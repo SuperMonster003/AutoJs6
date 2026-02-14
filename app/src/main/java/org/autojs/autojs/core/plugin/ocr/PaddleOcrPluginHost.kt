@@ -1,5 +1,6 @@
 package org.autojs.autojs.core.plugin.ocr
 
+import android.annotation.SuppressLint
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -10,24 +11,31 @@ import android.content.pm.ServiceInfo
 import android.graphics.Bitmap
 import android.graphics.Bitmap.CompressFormat
 import android.os.Build
+import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.os.ParcelFileDescriptor
+import android.os.RemoteException
+import android.os.SharedMemory
 import android.os.SystemClock.uptimeMillis
 import android.util.Log
+import androidx.annotation.RequiresApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.CancellableContinuation
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.plugin.paddle.ocr.api.IOcrPlugin
 import org.autojs.plugin.paddle.ocr.api.OcrOptions
 import org.autojs.plugin.paddle.ocr.api.OcrResult
 import org.autojs.plugin.paddle.ocr.api.PluginInfo
-import java.io.File
-import java.io.FileOutputStream
+import java.io.FileDescriptor
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 /**
  * Modified by JetBrains AI Assistant (GPT-5.2-Codex (xhigh)) as of Feb 13, 2026.
@@ -40,9 +48,20 @@ object PaddleOcrPluginHost {
 
     private const val DEFAULT_BIND_TIMEOUT_MS = 60_000L
     private const val DEFAULT_CALL_TIMEOUT_MS = 60_000L
+    private const val EXTRA_IMAGE_FORMAT = "imageFormat"
+    private const val EXTRA_IMAGE_QUALITY = "imageQuality"
+    private const val EXTRA_RAW_IMAGE = "rawImage"
+    private const val EXTRA_RAW_WIDTH = "rawWidth"
+    private const val EXTRA_RAW_HEIGHT = "rawHeight"
+    private const val EXTRA_RAW_STRIDE = "rawStride"
+    private const val EXTRA_RAW_CONFIG = "rawConfig"
+    private const val IDLE_UNBIND_MS = 30_000L
 
     private val externalServiceFlag = runCatching { ServiceInfo::class.java.getField("FLAG_EXTERNAL_SERVICE").getInt(null) }.getOrNull() ?: 0
     private val bindExternalServiceFlag = runCatching { Context::class.java.getField("BIND_EXTERNAL_SERVICE").getInt(null) }.getOrNull() ?: 0
+    private val poolHandler = Handler(Looper.getMainLooper())
+    private val poolLock = Any()
+    private val connectionPool = LinkedHashMap<ComponentName, PooledConnection>()
 
     data class Discovered(
         val serviceInfo: ServiceInfo,
@@ -78,8 +97,9 @@ object PaddleOcrPluginHost {
         options: OcrOptions = OcrOptions(),
         callTimeoutMs: Long = DEFAULT_CALL_TIMEOUT_MS,
     ): List<String> {
+        ensureRawSupport(target, options)
         val start = uptimeMillis()
-        return createTempPfd(context, bitmap).use { pfd ->
+        return createTempPfd(bitmap, options).use { pfd ->
             withService(context, target.serviceInfo, DEFAULT_BIND_TIMEOUT_MS) { proxy ->
                 val remain = callTimeoutMs - (uptimeMillis() - start)
                 if (remain <= 0) error("AIDL call timeout in ${callTimeoutMs / 1000} seconds")
@@ -97,8 +117,9 @@ object PaddleOcrPluginHost {
         options: OcrOptions = OcrOptions(),
         callTimeoutMs: Long = DEFAULT_CALL_TIMEOUT_MS,
     ): List<OcrResult> {
+        ensureRawSupport(target, options)
         val start = uptimeMillis()
-        return createTempPfd(context, bitmap).use { pfd ->
+        return createTempPfd(bitmap, options).use { pfd ->
             withService(context, target.serviceInfo, DEFAULT_BIND_TIMEOUT_MS) { proxy ->
                 val remain = callTimeoutMs - (uptimeMillis() - start)
                 if (remain <= 0) error("AIDL call timeout")
@@ -139,17 +160,147 @@ object PaddleOcrPluginHost {
 
     // Convert temporary file to read-only FD.
     // zh-CN: 临时文件转换为只读 FD.
-    private fun createTempPfd(context: Context, bmp: Bitmap): ParcelFileDescriptor {
-        val dir = File(context.cacheDir, "ocr_ipc").apply { if (!exists()) mkdirs() }
-        val f = File.createTempFile("img_", ".bin", dir)
-        FileOutputStream(f).use { fos ->
-            val format = when {
-                bmp.hasAlpha() -> CompressFormat.PNG
-                else -> CompressFormat.JPEG
-            }
-            require(bmp.compress(format, 100, fos)) { "Failed to encode bitmap" }
+    private fun createTempPfd(bmp: Bitmap, options: OcrOptions): ParcelFileDescriptor {
+        val useRaw = options.extras?.getBoolean(EXTRA_RAW_IMAGE, false) == true
+        if (useRaw && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            return runCatching { createRawPfd(bmp, options) }
+                .getOrElse {
+                    Log.w(TAG, "raw image transfer failed: ${it.message}")
+                    disableRawExtras(options)
+                    createEncodedPfd(bmp, options)
+                }
         }
-        return ParcelFileDescriptor.open(f, ParcelFileDescriptor.MODE_READ_ONLY)
+        if (useRaw) {
+            disableRawExtras(options)
+        }
+        return createEncodedPfd(bmp, options)
+    }
+
+    private fun createEncodedPfd(bmp: Bitmap, options: OcrOptions): ParcelFileDescriptor {
+        val (format, quality) = resolveEncodeOptions(bmp, options)
+        val pipe = ParcelFileDescriptor.createPipe()
+        val readFd = pipe[0]
+        val writeFd = pipe[1]
+
+        CoroutineScope(Dispatchers.IO).launch {
+            runCatching {
+                ParcelFileDescriptor.AutoCloseOutputStream(writeFd).use { out ->
+                    require(bmp.compress(format, quality, out)) { "Failed to encode bitmap" }
+                }
+            }.onFailure { t ->
+                Log.e(TAG, "encode bitmap failed: ${t.message}")
+            }
+        }
+        return readFd
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O_MR1)
+    private fun createRawPfd(bmp: Bitmap, options: OcrOptions): ParcelFileDescriptor {
+        val src = if (bmp.config == Bitmap.Config.ARGB_8888) bmp else bmp.copy(Bitmap.Config.ARGB_8888, false)
+        val shouldRecycle = src !== bmp
+        val rowBytes = src.rowBytes
+        val size = rowBytes * src.height
+
+        val extras = options.extras ?: Bundle().also { options.extras = it }
+        extras.putBoolean(EXTRA_RAW_IMAGE, true)
+        extras.putInt(EXTRA_RAW_WIDTH, src.width)
+        extras.putInt(EXTRA_RAW_HEIGHT, src.height)
+        extras.putInt(EXTRA_RAW_STRIDE, rowBytes)
+        extras.putString(EXTRA_RAW_CONFIG, Bitmap.Config.ARGB_8888.name)
+
+        runCatching {
+            val shm = SharedMemory.create("ocr_ipc_raw", size)
+            val buffer = shm.mapReadWrite()
+            buffer.order(ByteOrder.nativeOrder())
+            src.copyPixelsToBuffer(buffer)
+            SharedMemory.unmap(buffer)
+
+            val pfd = dupSharedMemoryFd(shm)
+            shm.close()
+            if (pfd != null) {
+                if (shouldRecycle) {
+                    src.recycle()
+                }
+                return pfd
+            }
+        }.onFailure { t ->
+            Log.w(TAG, "shared memory unavailable, fallback to raw pipe: ${t.message}")
+        }
+
+        return createRawPipePfd(src, size, shouldRecycle)
+    }
+
+    private fun createRawPipePfd(
+        bmp: Bitmap,
+        size: Int,
+        shouldRecycle: Boolean,
+    ): ParcelFileDescriptor {
+        val pipe = ParcelFileDescriptor.createPipe()
+        val readFd = pipe[0]
+        val writeFd = pipe[1]
+        val raw = ByteArray(size)
+        val buffer = ByteBuffer.wrap(raw).order(ByteOrder.nativeOrder())
+        bmp.copyPixelsToBuffer(buffer)
+
+        if (shouldRecycle) {
+            bmp.recycle()
+        }
+
+        CoroutineScope(Dispatchers.IO).launch {
+            runCatching {
+                ParcelFileDescriptor.AutoCloseOutputStream(writeFd).use { out ->
+                    out.write(raw, 0, size)
+                }
+            }.onFailure { t ->
+                Log.e(TAG, "write raw pipe failed: ${t.message}")
+            }
+        }
+        return readFd
+    }
+
+    @SuppressLint("SoonBlockedPrivateApi")
+    private fun dupSharedMemoryFd(shm: SharedMemory): ParcelFileDescriptor? {
+        val method = shm.javaClass.methods.firstOrNull { it.name == "getFdDup" && it.parameterCount == 0 }
+            ?: shm.javaClass.methods.firstOrNull { it.name == "getFileDescriptor" && it.parameterCount == 0 }
+        val result = method?.let { runCatching { it.invoke(shm) }.getOrNull() }
+        return when (result) {
+            is ParcelFileDescriptor -> result
+            is FileDescriptor -> ParcelFileDescriptor.dup(result)
+            else -> null
+        }
+    }
+
+    private fun resolveEncodeOptions(bmp: Bitmap, options: OcrOptions): Pair<CompressFormat, Int> {
+        val extras = options.extras
+        val formatName = extras?.getString(EXTRA_IMAGE_FORMAT)?.trim()?.lowercase().orEmpty()
+        val quality = extras?.getInt(EXTRA_IMAGE_QUALITY, 100) ?: 100
+        val resolvedQuality = quality.coerceIn(1, 100)
+        val resolvedFormat = when (formatName) {
+            "png" -> CompressFormat.PNG
+            "jpg", "jpeg" -> CompressFormat.JPEG
+            "webp" -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) CompressFormat.WEBP_LOSSY else CompressFormat.WEBP
+            "webp_lossless" -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) CompressFormat.WEBP_LOSSLESS else CompressFormat.WEBP
+            else -> if (bmp.hasAlpha()) CompressFormat.PNG else CompressFormat.JPEG
+        }
+        return resolvedFormat to resolvedQuality
+    }
+
+    private fun disableRawExtras(options: OcrOptions) {
+        val extras = options.extras ?: return
+        extras.remove(EXTRA_RAW_IMAGE)
+        extras.remove(EXTRA_RAW_WIDTH)
+        extras.remove(EXTRA_RAW_HEIGHT)
+        extras.remove(EXTRA_RAW_STRIDE)
+        extras.remove(EXTRA_RAW_CONFIG)
+    }
+
+    private fun ensureRawSupport(target: Discovered, options: OcrOptions) {
+        val extras = options.extras ?: return
+        if (!extras.getBoolean(EXTRA_RAW_IMAGE, false)) return
+        val supportsRaw = target.pluginInfo?.capabilities?.getBoolean("supportsRawImage", false) == true
+        if (!supportsRaw) {
+            disableRawExtras(options)
+        }
     }
 
     private fun queryOcrServices(context: Context, packageName: String? = null): List<ServiceInfo> {
@@ -191,92 +342,267 @@ object PaddleOcrPluginHost {
         serviceInfo: ServiceInfo,
         bindTimeoutMs: Long = DEFAULT_BIND_TIMEOUT_MS,
         block: suspend (IOcrPlugin) -> T,
-    ): T = suspendCancellableCoroutine { cont ->
-        val cn = ComponentName(serviceInfo.packageName, serviceInfo.name)
-        val intent = Intent().setComponent(cn)
+    ): T {
         val appCtx = context.applicationContext
+        val entry = getOrCreateEntry(appCtx, serviceInfo)
+        val proxy = awaitProxy(entry, bindTimeoutMs)
+        return try {
+            block(proxy)
+        } catch (e: RemoteException) {
+            retryAfterBinderFailure(entry, bindTimeoutMs, e, block)
+        } finally {
+            touch(entry)
+        }
+    }
 
-        var resolved = false
-        var jobRef: Job? = null
+    private suspend fun <T> retryAfterBinderFailure(
+        entry: PooledConnection,
+        bindTimeoutMs: Long,
+        error: RemoteException,
+        block: suspend (IOcrPlugin) -> T,
+    ): T {
+        invalidateEntry(entry, error)
+        val proxy = awaitProxy(entry, bindTimeoutMs)
+        return block(proxy)
+    }
 
-        val conn = object : ServiceConnection {
+    private fun touch(entry: PooledConnection) {
+        synchronized(entry.lock) {
+            entry.lastUsed = uptimeMillis()
+        }
+        scheduleIdleUnbind(entry)
+    }
+
+    private suspend fun awaitProxy(entry: PooledConnection, bindTimeoutMs: Long): IOcrPlugin =
+        suspendCancellableCoroutine { cont ->
+            var shouldBind = false
+            synchronized(entry.lock) {
+                entry.lastUsed = uptimeMillis()
+                cancelIdleUnbindLocked(entry)
+                val existing = entry.proxy
+                if (existing != null && entry.bound) {
+                    cont.resume(existing)
+                    return@suspendCancellableCoroutine
+                }
+                entry.waiters.add(cont)
+                if (!entry.connecting) {
+                    entry.connecting = true
+                    shouldBind = true
+                }
+            }
+            if (shouldBind) {
+                startBind(entry, bindTimeoutMs)
+            }
+            cont.invokeOnCancellation {
+                synchronized(entry.lock) {
+                    entry.waiters.remove(cont)
+                }
+            }
+        }
+
+    private fun startBind(entry: PooledConnection, bindTimeoutMs: Long) {
+        val intent = Intent().setComponent(entry.cn)
+        val bindFlags = buildBindFlags(entry.serviceInfo)
+        var ok = try {
+            Log.i(TAG, "bindService: ${entry.cn}")
+            entry.appCtx.bindService(intent, entry.connection, bindFlags)
+        } catch (se: SecurityException) {
+            failWaiters(
+                entry,
+                IllegalStateException(
+                    "bindService SecurityException: ${entry.cn}. Please make sure the plugin declares <uses-permission android:name=\"org.autojs.permission.PLUGIN\"/> and the Service uses this permission.",
+                    se
+                )
+            )
+            return
+        }
+        if (!ok && bindFlags != Context.BIND_AUTO_CREATE) {
+            ok = try {
+                entry.appCtx.bindService(intent, entry.connection, Context.BIND_AUTO_CREATE)
+            } catch (se: SecurityException) {
+                failWaiters(
+                    entry,
+                    IllegalStateException(
+                        "bindService SecurityException: ${entry.cn}. Please make sure the plugin declares <uses-permission android:name=\"org.autojs.permission.PLUGIN\"/> and the Service uses this permission.",
+                        se
+                    )
+                )
+                return
+            }
+        }
+        if (!ok) {
+            val msg = buildBindFailureMessage(entry.appCtx, entry.serviceInfo, entry.cn)
+            Log.e(TAG, msg)
+            failWaiters(entry, IllegalStateException(msg))
+            return
+        }
+
+        val timeout = Runnable {
+            val pending = synchronized(entry.lock) {
+                entry.connecting = false
+                val list = entry.waiters.toList()
+                entry.waiters.clear()
+                entry.bindTimeoutRunnable = null
+                list
+            }
+            if (pending.isNotEmpty()) {
+                Log.e(TAG, "bindService timeout: ${entry.cn}")
+                pending.forEach { waiter ->
+                    if (!waiter.isCompleted) {
+                        waiter.resumeWithException(TimeoutException("bindService timeout: ${entry.cn}"))
+                    }
+                }
+                runCatching { entry.appCtx.unbindService(entry.connection) }
+            }
+        }
+        synchronized(entry.lock) {
+            entry.bindTimeoutRunnable?.let { poolHandler.removeCallbacks(it) }
+            entry.bindTimeoutRunnable = timeout
+        }
+        poolHandler.postDelayed(timeout, bindTimeoutMs)
+    }
+
+    private fun invalidateEntry(entry: PooledConnection, error: Throwable) {
+        val shouldUnbind = synchronized(entry.lock) {
+            entry.proxy = null
+            entry.bound = false
+            entry.connecting = false
+            entry.bindTimeoutRunnable?.let { poolHandler.removeCallbacks(it) }
+            entry.bindTimeoutRunnable = null
+            entry.idleRunnable?.let { poolHandler.removeCallbacks(it) }
+            entry.idleRunnable = null
+            true
+        }
+        if (shouldUnbind) {
+            poolHandler.post {
+                runCatching { entry.appCtx.unbindService(entry.connection) }
+                Log.w(TAG, "invalidateEntry: ${entry.cn} | ${error.message}")
+            }
+        }
+    }
+
+    private fun failWaiters(entry: PooledConnection, error: Throwable) {
+        val pending = synchronized(entry.lock) {
+            entry.connecting = false
+            entry.bindTimeoutRunnable?.let { poolHandler.removeCallbacks(it) }
+            entry.bindTimeoutRunnable = null
+            val list = entry.waiters.toList()
+            entry.waiters.clear()
+            list
+        }
+        pending.forEach { waiter ->
+            if (!waiter.isCompleted) {
+                waiter.resumeWithException(error)
+            }
+        }
+    }
+
+    private fun scheduleIdleUnbind(entry: PooledConnection) {
+        val runnable = Runnable {
+            val shouldUnbind = synchronized(entry.lock) {
+                val idleEnough = uptimeMillis() - entry.lastUsed >= IDLE_UNBIND_MS
+                idleEnough && entry.bound && entry.proxy != null && !entry.connecting
+            }
+            if (shouldUnbind) {
+                runCatching { entry.appCtx.unbindService(entry.connection) }
+                synchronized(entry.lock) {
+                    entry.proxy = null
+                    entry.bound = false
+                }
+            }
+        }
+        synchronized(entry.lock) {
+            entry.idleRunnable?.let { poolHandler.removeCallbacks(it) }
+            entry.idleRunnable = runnable
+        }
+        poolHandler.postDelayed(runnable, IDLE_UNBIND_MS)
+    }
+
+    private fun cancelIdleUnbindLocked(entry: PooledConnection) {
+        entry.idleRunnable?.let { poolHandler.removeCallbacks(it) }
+        entry.idleRunnable = null
+    }
+
+    private fun getOrCreateEntry(appCtx: Context, serviceInfo: ServiceInfo): PooledConnection {
+        val cn = ComponentName(serviceInfo.packageName, serviceInfo.name)
+        synchronized(poolLock) {
+            return connectionPool.getOrPut(cn) {
+                PooledConnection(appCtx, serviceInfo)
+            }
+        }
+    }
+
+    private class PooledConnection(
+        val appCtx: Context,
+        val serviceInfo: ServiceInfo,
+    ) {
+        val cn: ComponentName = ComponentName(serviceInfo.packageName, serviceInfo.name)
+        val lock = Any()
+        val waiters = ArrayList<CancellableContinuation<IOcrPlugin>>()
+        var proxy: IOcrPlugin? = null
+        var bound: Boolean = false
+        var connecting: Boolean = false
+        var lastUsed: Long = 0L
+        var idleRunnable: Runnable? = null
+        var bindTimeoutRunnable: Runnable? = null
+
+        val connection = object : ServiceConnection {
             override fun onServiceConnected(name: ComponentName, binder: IBinder) {
                 Log.i(TAG, "onServiceConnected: $name")
                 val proxy = IOcrPlugin.Stub.asInterface(binder)
-                val self = this
-
-                jobRef = CoroutineScope(cont.context + Dispatchers.IO).launch {
-                    val result = runCatching { block(proxy) }
-                    try {
-                        resolved = true
-                        if (!cont.isCompleted) cont.resumeWith(result)
-                        Log.i(TAG, "resume continuation: success=${result.isSuccess}")
-                    } finally {
-                        withContext(Dispatchers.Main) {
-                            runCatching { appCtx.unbindService(self) }
-                            Log.i(TAG, "unbindService: $name")
-                        }
+                val pending = synchronized(lock) {
+                    this@PooledConnection.proxy = proxy
+                    bound = true
+                    connecting = false
+                    lastUsed = uptimeMillis()
+                    bindTimeoutRunnable?.let { poolHandler.removeCallbacks(it) }
+                    bindTimeoutRunnable = null
+                    val list = waiters.toList()
+                    waiters.clear()
+                    list
+                }
+                pending.forEach { waiter ->
+                    if (!waiter.isCompleted) {
+                        waiter.resume(proxy)
                     }
                 }
             }
 
             override fun onServiceDisconnected(name: ComponentName) {
                 Log.w(TAG, "onServiceDisconnected: $name")
+                handleDisconnect(name, "onServiceDisconnected")
+            }
+
+            override fun onBindingDied(name: ComponentName) {
+                Log.w(TAG, "onBindingDied: $name")
+                handleDisconnect(name, "onBindingDied")
+            }
+
+            override fun onNullBinding(name: ComponentName) {
+                Log.w(TAG, "onNullBinding: $name")
+                handleDisconnect(name, "onNullBinding")
             }
         }
 
-        val bindFlags = buildBindFlags(serviceInfo)
-        var ok = try {
-            Log.i(TAG, "bindService: $cn")
-            appCtx.bindService(intent, conn, bindFlags)
-        } catch (se: SecurityException) {
-            Log.e(TAG, "bindService SecurityException: $cn | ${se.message}")
-            cont.resumeWith(
-                Result.failure(
-                    IllegalStateException(
-                        "bindService SecurityException: $cn. Please make sure the plugin declares <uses-permission android:name=\"org.autojs.permission.PLUGIN\"/> and the Service uses this permission.", se
-                    )
-                )
-            )
-            return@suspendCancellableCoroutine
-        }
-        if (!ok && bindFlags != Context.BIND_AUTO_CREATE) {
-            ok = try {
-                appCtx.bindService(intent, conn, Context.BIND_AUTO_CREATE)
-            } catch (se: SecurityException) {
-                Log.e(TAG, "bindService SecurityException: $cn | ${se.message}")
-                cont.resumeWith(
-                    Result.failure(
-                        IllegalStateException(
-                            "bindService SecurityException: $cn. Please make sure the plugin declares <uses-permission android:name=\"org.autojs.permission.PLUGIN\"/> and the Service uses this permission.", se
-                        )
-                    )
-                )
-                return@suspendCancellableCoroutine
+        private fun handleDisconnect(name: ComponentName, reason: String) {
+            val pending = synchronized(lock) {
+                proxy = null
+                bound = false
+                connecting = false
+                bindTimeoutRunnable?.let { poolHandler.removeCallbacks(it) }
+                bindTimeoutRunnable = null
+                val list = waiters.toList()
+                waiters.clear()
+                list
             }
-        }
-        if (!ok) {
-            val msg = buildBindFailureMessage(appCtx, serviceInfo, cn)
-            Log.e(TAG, msg)
-            cont.resumeWith(Result.failure(IllegalStateException(msg)))
-            return@suspendCancellableCoroutine
-        }
-
-        val cancel = Runnable {
-            if (!resolved && !cont.isCompleted) {
-                Log.e(TAG, "bindService timeout: $cn")
-                cont.resumeWith(Result.failure(TimeoutException("bindService timeout: $cn")))
-                runCatching { appCtx.unbindService(conn) }
+            if (pending.isNotEmpty()) {
+                val error = IllegalStateException("$reason: $name")
+                pending.forEach { waiter ->
+                    if (!waiter.isCompleted) {
+                        waiter.resumeWithException(error)
+                    }
+                }
             }
-        }
-        val h = Handler(appCtx.mainLooper)
-        h.postDelayed(cancel, bindTimeoutMs)
-
-        cont.invokeOnCancellation {
-            Log.w(TAG, "continuation cancelled: $cn")
-            h.removeCallbacks(cancel)
-            jobRef?.cancel()
-            runCatching { appCtx.unbindService(conn) }
         }
     }
 
