@@ -25,6 +25,7 @@ import org.autojs.autojs.event.GlobalKeyObserver
 import org.autojs.autojs.external.receiver.DynamicBroadcastReceivers
 import org.autojs.autojs.ipc.InAppEventBus
 import org.autojs.autojs.leakcanary.LeakCanarySetup
+import org.autojs.autojs.storage.file.TmpScriptFilesCleanupScheduler
 import org.autojs.autojs.storage.history.HistoryCleanupScheduler
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.timing.TimedTaskManager
@@ -76,6 +77,8 @@ class App : MultiDexApplication() {
 
                 HistoryCleanupScheduler.scheduleStartupCleanup(this)
                 HistoryCleanupScheduler.schedulePeriodicCleanup(this)
+                TmpScriptFilesCleanupScheduler.scheduleStartupCleanup(this)
+                TmpScriptFilesCleanupScheduler.schedulePeriodicCleanup(this)
             }
         }
     }
