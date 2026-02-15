@@ -35,6 +35,7 @@ import android.util.AttributeSet
 import android.view.Gravity
 import android.view.KeyEvent
 import android.view.MotionEvent
+import android.view.accessibility.AccessibilityEvent
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputConnection
 import android.view.inputmethod.InputConnectionWrapper
@@ -72,7 +73,11 @@ class CodeEditText : AppCompatEditText {
     // Fixed gutter digits used during loading to avoid frequent requestLayout().
     // zh-CN: 加载期间使用固定 gutter 位数, 避免频繁 requestLayout().
     @Volatile
-    private var mLoadingGutterDigits: Int = 1
+    private var mLoadingGutterDigits: Int = 3
+
+    // Accessibility payload guardrail threshold.
+    // zh-CN: 无障碍事件负载护栏阈值.
+    private val mA11yLargeTextThresholdChars: Int = 64 * 1024
 
     private var mTheme: Theme = Theme.getDefault(context)
     private val mLineHighlightPaint = Paint().apply { style = Paint.Style.FILL }
@@ -136,6 +141,10 @@ class CodeEditText : AppCompatEditText {
         // zh-CN: 默认确保可以进行文本选择.
         setTextIsSelectable(true)
         isLongClickable = true
+
+        // Update accessibility importance at init.
+        // zh-CN: 初始化时更新无障碍重要性配置.
+        updateAccessibilityImportanceIfNeeded()
     }
 
     // Toggle loading state.
@@ -544,14 +553,48 @@ class CodeEditText : AppCompatEditText {
             return
         }
 
-        // 调用父类的 onSelectionChanged 时会发送一个 AccessibilityEvent, 当文本过大时造成异常
-        // super.onSelectionChanged(selStart, selEnd);
-        // 父类构造函数会调用 onSelectionChanged, 此时 mCursorChangeCallbacks 还没有初始化
-        super.onSelectionChanged(selStart, selEnd)
+        // Update accessibility importance when selection changes (input usually changes selection).
+        // zh-CN: selection 变化时更新无障碍重要性 (输入通常会改变 selection).
+        updateAccessibilityImportanceIfNeeded()
+
+        // Avoid sending large accessibility events for huge text on every keystroke.
+        // zh-CN: 避免在超大文本下每次按键都发送巨大的无障碍事件.
+        if (shouldSuppressAccessibilityForLargeText()) {
+            // Do NOT call super.onSelectionChanged() here because it may dispatch
+            // TYPE_VIEW_TEXT_SELECTION_CHANGED with huge payload and cause Binder TTLE.
+            // zh-CN:
+            // 此处不要调用 super.onSelectionChanged(),
+            // 因其可能派发携带巨大负载的 TYPE_VIEW_TEXT_SELECTION_CHANGED,
+            // 从而导致 Binder TTLE.
+        } else {
+            // 调用父类的 onSelectionChanged 时会发送一个 AccessibilityEvent, 当文本过大时造成异常
+            // super.onSelectionChanged(selStart, selEnd);
+            // 父类构造函数会调用 onSelectionChanged, 此时 mCursorChangeCallbacks 还没有初始化
+            super.onSelectionChanged(selStart, selEnd)
+        }
+
         mCursorChangeCallbacks?.let { it.takeUnless { it.isEmpty() } } ?: return
         if (selStart != selEnd) return
         callCursorChangeCallback(text, selStart)
         matchesBracket(text, selStart)
+    }
+
+    override fun sendAccessibilityEventUnchecked(event: AccessibilityEvent) {
+        // Guardrail: drop or shrink accessibility payload when text is huge.
+        // zh-CN: 护栏: 文本很大时丢弃或瘦身无障碍事件负载.
+        if (shouldSuppressAccessibilityForLargeText()) {
+            // Clear potentially huge text payload to avoid Binder transaction overflow.
+            // zh-CN: 清空可能非常大的 text 负载, 避免 Binder 事务溢出.
+            runCatching { event.text.clear() }
+            runCatching { event.contentDescription = null }
+
+            // Also drop selection-changed events entirely in large-text mode.
+            // zh-CN: 大文本模式下直接丢弃 selection-changed 事件.
+            if (event.eventType == AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED) {
+                return
+            }
+        }
+        super.sendAccessibilityEventUnchecked(event)
     }
 
     private fun matchesBracket(text: CharSequence?, cursor: Int) {
@@ -711,6 +754,25 @@ class CodeEditText : AppCompatEditText {
         breakpoints.clear()
         breakpointChangeListener?.onAllBreakpointRemoved(breakpoints.size)
         invalidate()
+    }
+
+    // Whether accessibility should be suppressed for current content size.
+    // zh-CN: 是否需要针对当前内容大小抑制无障碍事件.
+    private fun shouldSuppressAccessibilityForLargeText(): Boolean {
+        val len = text?.length ?: 0
+        return len >= mA11yLargeTextThresholdChars
+    }
+
+    // Apply accessibility importance based on current text length.
+    // zh-CN: 根据当前文本长度应用无障碍重要性配置.
+    private fun updateAccessibilityImportanceIfNeeded() {
+        val target = when (shouldSuppressAccessibilityForLargeText()) {
+            true -> IMPORTANT_FOR_ACCESSIBILITY_NO
+            else -> IMPORTANT_FOR_ACCESSIBILITY_AUTO
+        }
+        if (importantForAccessibility != target) {
+            importantForAccessibility = target
+        }
     }
 
     companion object {

@@ -10,6 +10,7 @@ import static org.autojs.autojs.util.FileUtils.TYPE.JAVASCRIPT;
 
 /**
  * Created by Stardust on Oct 21, 2017.
+ * Modified by SuperMonster003 as of Feb 15, 2026.
  */
 public class TmpScriptFiles {
 
@@ -18,6 +19,11 @@ public class TmpScriptFiles {
         File tmp = new File(getTmpDir(context), "tmp-" + System.currentTimeMillis() + JAVASCRIPT.extensionWithDot);
         tmp.createNewFile();
         return tmp;
+    }
+
+    public static void clearTmpDir(Context context, long maxAgeMs) {
+        File dir = getTmpDir(context);
+        PFiles.deleteRecursivelyOlderThan(dir, maxAgeMs);
     }
 
     public static void clearTmpDir(Context context) {

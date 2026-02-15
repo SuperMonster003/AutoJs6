@@ -31,7 +31,7 @@ import org.autojs.autojs.core.permission.OnRequestPermissionsResultCallback
 import org.autojs.autojs.core.permission.PermissionRequestProxyActivity
 import org.autojs.autojs.core.permission.RequestPermissionCallbacks
 import org.autojs.autojs.pio.PFiles
-import org.autojs.autojs.storage.file.TmpScriptFiles
+import org.autojs.autojs.storage.file.StableDraftFileHelper
 import org.autojs.autojs.theme.widget.ThemeColorToolbar
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.error.ErrorDialogActivity
@@ -47,12 +47,11 @@ import org.autojs.autojs.util.ViewUtils.titleView
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ActivityEditBinding
 import java.io.File
-import java.io.IOException
 
 /**
  * Created by Stardust on Jan 29, 2017.
- * Modified by JetBrains AI Assistant (GPT-5.2) as of Feb 12, 2026.
- * Modified by SuperMonster003 as of Feb 12, 2026.
+ * Modified by JetBrains AI Assistant (GPT-5.2) as of Feb 15, 2026.
+ * Modified by SuperMonster003 as of Feb 15, 2026.
  */
 open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyActivity {
 
@@ -89,34 +88,49 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
     private val mRequestPermissionCallbacks = RequestPermissionCallbacks()
     private var mNewTask = false
 
+    private lateinit var draftFileHelper: StableDraftFileHelper
+
     @SuppressLint("CheckResult")
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
 
-        mReadOnly = intent.getBooleanExtra(EditorView.EXTRA_READ_ONLY, false)
+        val binding = ActivityEditBinding.inflate(layoutInflater).also {
+            setContentView(it.root)
+        }
+        val readOnly = intent.getBooleanExtra(EditorView.EXTRA_READ_ONLY, false).also {
+            mReadOnly = it
+        }
+        val toolbar = findViewById<ThemeColorToolbar>(R.id.toolbar).also {
+            mToolbar = it
+        }
+        val editorView = binding.editorView.also {
+            mEditorView = it
+        }
+        EditorMenu(editorView, readOnly).also {
+            mEditorMenu = it
+        }
+        StableDraftFileHelper(this, editorView.uri?.path).also {
+            draftFileHelper = it
+        }
+        (intent.flags and Intent.FLAG_ACTIVITY_NEW_TASK != 0).also {
+            mNewTask = it
+        }
 
-        val binding = ActivityEditBinding.inflate(layoutInflater).also { setContentView(it.root) }
-        mToolbar = findViewById<ThemeColorToolbar>(R.id.toolbar).apply {
-            setTitleTextAppearance(this@EditActivity, R.style.TextAppearanceEditorTitle)
-            setOnTitleViewClickListener {
-                val path = mEditorView.uri?.path
-                if (path != null) {
-                    EditableFileInfoDialogManager.showEditableFileInfoDialog(this@EditActivity, File(path)) {
-                        mEditorView.editor.text
-                    }
+        toolbar.setTitleTextAppearance(this, R.style.TextAppearanceEditorTitle)
+        toolbar.setOnTitleViewClickListener {
+            val path = mEditorView.uri?.path
+            if (path != null) {
+                EditableFileInfoDialogManager.showEditableFileInfoDialog(this, File(path)) {
+                    mEditorView.editor.text
                 }
             }
         }
-        mEditorView = binding.editorView.apply {
-            handleIntent(intent)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(Observers.emptyConsumer()) { ex: Throwable -> onLoadFileError(ex.message) }
-        }
-        mEditorMenu = EditorMenu(mEditorView, mReadOnly)
-        mNewTask = intent.flags and Intent.FLAG_ACTIVITY_NEW_TASK != 0
-        setUpToolbar()
+        editorView.handleIntent(intent)
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(Observers.emptyConsumer()) { ex: Throwable -> onLoadFileError(ex.message) }
 
+        setToolbarAsBack(editorView.name)
         onBackPressedDispatcher.addCallback(this, mOnBackPressedCallback)
     }
 
@@ -129,10 +143,6 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
             .onPositive { _, _ -> finish() }
             .cancelable(false)
             .show()
-    }
-
-    private fun setUpToolbar() {
-        setToolbarAsBack(mEditorView.name)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -350,6 +360,10 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
                         .save()
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe({
+                            // Save succeeded: remove draft for this file.
+                            // zh-CN: 保存成功: 删除该文件对应草稿.
+                            draftFileHelper.deleteDraft()
+
                             runCatching { d.dismiss() }
                             finishAndRemoveFromRecents()
                         }, { e: Throwable ->
@@ -389,31 +403,30 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        if (!mEditorView.isTextChanged) {
+        // Save draft when UI indicates "needs save".
+        // zh-CN: 当 UI 表示 "需要保存" 时保存草稿.
+        if (!mEditorView.saveStickyDirty) {
+            super.onSaveInstanceState(outState)
             return
         }
+
         val text = mEditorView.editor.text
-        if (text.length < 256 * 1024) {
-            outState.putString("text", text)
-        } else {
-            val tmp = saveToTmpFile(text)
-            if (tmp != null) {
-                outState.putString("path", tmp.path)
+        when {
+            text.length < 256 * 1024 -> {
+                Log.d(LOG_TAG, "saveDraftText, length: ${text.length}")
+                outState.putString("text", text)
+            }
+            else -> {
+                Log.d(LOG_TAG, "saveDraftFile, length: ${text.length}")
+
+                // Use stable file key (real script path) to avoid accumulating tmp files.
+                // zh-CN: 使用稳定 key (脚本真实 path) 避免累计 tmp 文件.
+                draftFileHelper.saveDraft(text)?.let { tmp ->
+                    outState.putString("path", tmp.path)
+                }
             }
         }
         super.onSaveInstanceState(outState)
-    }
-
-    @SuppressLint("CheckResult")
-    private fun saveToTmpFile(text: String): File? = try {
-        TmpScriptFiles.create(this).also { tmp ->
-            Observable.just(text)
-                .observeOn(Schedulers.io())
-                .subscribe { t: String? -> PFiles.write(tmp, t) }
-        }
-    } catch (e: IOException) {
-        e.printStackTrace()
-        null
     }
 
     override fun onResume() {

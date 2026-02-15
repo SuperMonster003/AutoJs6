@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-                                    xmlns:app="http://schemas.android.com/apk/res-auto"
-                                    xmlns:tools="http://schemas.android.com/tools"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="match_parent"
-                                    app:cardBackgroundColor="@android:color/white"
-                                    app:cardCornerRadius="6dp">
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:cardBackgroundColor="@android:color/white"
+    app:cardCornerRadius="6dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -26,7 +27,7 @@
                 android:paddingStart="20dp"
                 android:textColor="#2a2a2a"
                 android:textSize="16sp"
-                tools:text="标题"/>
+                tools:text="标题" />
 
             <ImageView
                 android:id="@+id/pin_to_left"
@@ -35,7 +36,7 @@
                 android:background="?selectableItemBackgroundBorderless"
                 android:padding="16dp"
                 android:src="@drawable/ic_ali_pin_to_left"
-                    app:tint="#3c3c3c" />
+                app:tint="#3c3c3c" />
 
             <ImageView
                 android:id="@+id/fullscreen"
@@ -44,7 +45,7 @@
                 android:background="?selectableItemBackgroundBorderless"
                 android:padding="16dp"
                 android:src="@drawable/ic_ali_fullscreen"
-                    app:tint="#3c3c3c" />
+                app:tint="#3c3c3c" />
 
             <ImageView
                 android:id="@+id/close"
@@ -54,18 +55,19 @@
                 android:background="?selectableItemBackgroundBorderless"
                 android:padding="16dp"
                 android:src="@drawable/ic_ali_close"
-                    app:tint="#3c3c3c" />
+                app:tint="#3c3c3c" />
         </LinearLayout>
 
         <View
             android:layout_width="match_parent"
             android:layout_height="1.2px"
-            android:background="#cccccc"/>
+            android:background="#cccccc" />
 
         <org.autojs.autojs.ui.widget.EWebView
             android:id="@+id/eweb_view"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_height="match_parent"
+            android:saveEnabled="false" />
     </LinearLayout>
 
 </androidx.cardview.widget.CardView>

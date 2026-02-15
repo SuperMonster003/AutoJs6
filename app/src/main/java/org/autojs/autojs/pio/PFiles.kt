@@ -369,6 +369,43 @@ object PFiles {
     }
 
     @JvmStatic
+    @JvmOverloads
+    fun deleteRecursivelyOlderThan(file: File, maxAgeMs: Long, now: Long = System.currentTimeMillis()): Boolean {
+        if (!file.exists()) return true
+
+        var ok = true
+
+        if (file.isDirectory) {
+            val dirLastModified = file.lastModified()
+            val children = file.listFiles() ?: return false
+
+            for (child in children) {
+                val childResult = deleteRecursivelyOlderThan(child, maxAgeMs, now)
+                if (!childResult) {
+                    ok = false
+                }
+            }
+
+            val remaining = file.listFiles()
+            val isEmpty = (remaining != null && remaining.isEmpty())
+
+            if (isEmpty) {
+                val age = now - dirLastModified
+                if (age >= maxAgeMs) {
+                    ok = runCatching { file.delete() }.getOrDefault(false) && ok
+                }
+            }
+            return ok
+        }
+
+        val age = now - file.lastModified()
+        if (age < maxAgeMs) return true
+
+        val deleted = runCatching { file.delete() }.getOrDefault(false)
+        return deleted && ok
+    }
+
+    @JvmStatic
     fun deleteRecursively(file: File): Boolean {
         if (file.isDirectory()) {
             val children = file.listFiles()

@@ -58,6 +58,7 @@ import org.autojs.autojs.model.script.Scripts.openByOtherApps
 import org.autojs.autojs.model.script.Scripts.runWithBroadcastSender
 import org.autojs.autojs.pio.PFiles.getNameWithoutExtension
 import org.autojs.autojs.pio.PFiles.write
+import org.autojs.autojs.storage.file.StableDraftFileHelper
 import org.autojs.autojs.storage.file.TmpScriptFiles
 import org.autojs.autojs.storage.history.HistoryPrefs
 import org.autojs.autojs.storage.history.HistoryRepository
@@ -119,8 +120,8 @@ import java.util.regex.Pattern
 /**
  * Created by Stardust on Sep 28, 2017.
  * Transformed by SuperMonster003 on May 1, 2023.
- * Modified by SuperMonster003 as of Feb 3, 2026.
  * Modified by JetBrains AI Assistant (GPT-5.2) as of Feb 12, 2026.
+ * Modified by SuperMonster003 as of Feb 15, 2026.
  */
 @SuppressLint("CheckResult")
 class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFragment.OnMenuItemClickListener {
@@ -1055,6 +1056,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             // zh-CN: 因刚刚建立了新的基线, 重置 sticky 脏标记.
             saveStickyDirty = false
             mHadDirectEditSinceSave = false
+
+            mEditorLoading = false
             syncPrimaryMenuState()
 
             // Refresh highlight for restored text if size allows.
@@ -1556,6 +1559,10 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 mHadDirectEditSinceSave = false
 
                 setMenuItemStatus(R.id.save, false)
+
+                val keyPath = uri?.path
+                val draftFileHelper = StableDraftFileHelper(context, keyPath)
+                draftFileHelper.deleteDraft()
             }
 
     /**

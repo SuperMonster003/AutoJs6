@@ -142,7 +142,8 @@
             android:id="@+id/docs"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_gravity="start" />
+            android:layout_gravity="start"
+            android:saveEnabled="false" />
 
     </androidx.drawerlayout.widget.DrawerLayout>
 
