@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.7.0": {
-      "released_date": "2026/02/15",
+      "released_date": "2026/02/23",
       "feature": [
         "插件中心功能, 支持插件的安装/卸载/更新等操作 (入口: 主页抽屉按钮/主页标签页)",
         "版本历史功能, 支持查看/恢复可编辑文件的历史版本 (入口: 主页抽屉按钮/文件管理器菜单/代码编辑器菜单)",
@@ -60,6 +60,7 @@
         "timers.keepAlive 方法 timeout 参数功能无效的问题",
         "floaty.window/rawWindow 方法无法接受字符串参数的问题 _[`issue #467`](http://issues.autojs6.com/467)_",
         "util.class[Name]/getClass[Name] 可能返回错误结果的问题",
+        "util.java.array 无法正常使用 Boolean 等类型参数的问题",
         "threads.disposable() 返回的对象在存取数据时可能被意外装箱的问题 _[`issue #435`](http://issues.autojs6.com/435)_",
         "console.build 方法多次调用时, 日志浮动窗口样式选项未能正常重置的问题",
         "console.build 方法的 (title/content)BackgroundColor 选项导致透明度或着色选项被覆盖的问题 _[`issue #458`](http://issues.autojs6.com/458)_",
