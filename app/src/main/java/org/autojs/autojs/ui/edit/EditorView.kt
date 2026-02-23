@@ -1217,13 +1217,16 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     private fun setMenuItemStatus(id: Int, enabled: Boolean) {
         mMenuItemStatus.put(id, enabled)
+
+        // Always update the normal toolbar cache as well, so switching toolbars won't lose state.
+        // zh-CN: 同时更新普通工具栏的缓存, 避免切换工具栏后状态丢失.
+        mNormalToolbar.setMenuItemStatus(id, enabled)
+
+        // Also update current visible toolbar fragment if exists.
+        // zh-CN: 若当前存在正在显示的工具栏 Fragment, 也同步更新它.
         val supportManager = activity.supportFragmentManager
         val fragment = supportManager.findFragmentById(R.id.toolbar_menu) as ToolbarFragment<*>?
-        if (fragment == null) {
-            mNormalToolbar.setMenuItemStatus(id, enabled)
-        } else {
-            fragment.setMenuItemStatus(id, enabled)
-        }
+        fragment?.setMenuItemStatus(id, enabled)
     }
 
     fun getMenuItemStatus(id: Int, defValue: Boolean): Boolean {
@@ -1231,6 +1234,17 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     private fun initNormalToolbar() {
+        val fm = activity.supportFragmentManager
+        val existing = fm.findFragmentById(R.id.toolbar_menu)
+
+        // Always (re)bind listeners for both the cached normal toolbar and any restored fragment.
+        // This fixes the case where FragmentManager restores a ToolbarFragment instance after
+        // Activity recreation, but its listener fields are lost (null), causing "click does nothing".
+        //
+        // zh-CN:
+        // 总是为普通工具栏缓存对象与任何已恢复的 Fragment 重新绑定监听器.
+        // 这可以修复 Activity 重建后 FragmentManager 恢复出的 ToolbarFragment 实例其监听字段丢失 (null),
+        // 从而出现 "点击无反应" 的问题.
         mNormalToolbar.apply {
             setOnMenuItemClickListener(this@EditorView)
             setOnMenuItemLongClickListener { id ->
@@ -1240,7 +1254,24 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 }
             }
         }
-        activity.supportFragmentManager.findFragmentById(R.id.toolbar_menu) ?: showNormalToolbar()
+
+        (existing as? ToolbarFragment<*>)?.apply {
+            setOnMenuItemClickListener(this@EditorView)
+            setOnMenuItemLongClickListener { id ->
+                when (id) {
+                    R.id.run if !mReadOnly -> true.also { debug() }
+                    else -> false
+                }
+            }
+
+            // Sync menu state after rebinding to avoid stale enabled flags.
+            // zh-CN: 重新绑定后同步一次菜单状态, 避免 enabled 标记过期.
+            post { syncPrimaryMenuState() }
+        }
+
+        if (existing == null) {
+            showNormalToolbar()
+        }
     }
 
     private fun setUpFunctionsKeyboard() {
@@ -1933,6 +1964,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(Observers.emptyConsumer()) { e: Throwable ->
                 e.printStackTrace()
+                showSnack(this, e.message, true)
                 showToast(context, e.message, true)
             }
     }
@@ -1945,6 +1977,10 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         activity.supportFragmentManager.beginTransaction()
             .replace(R.id.toolbar_menu, mNormalToolbar)
             .commitAllowingStateLoss()
+
+        // Sync menu state after toolbar switch to avoid stale enabled flags.
+        // zh-CN: 切换工具栏后同步一次菜单状态, 避免 enabled 标记过期.
+        post { syncPrimaryMenuState() }
     }
 
     fun replace() {
@@ -2344,6 +2380,10 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 arguments!!.putBoolean(SearchToolbarFragment.ARGUMENT_SHOW_REPLACE_ITEM, showReplaceItem)
             })
             .commit()
+
+        // Sync menu state after toolbar switch to avoid stale enabled flags.
+        // zh-CN: 切换工具栏后同步一次菜单状态, 避免 enabled 标记过期.
+        post { syncPrimaryMenuState() }
     }
 
     @Throws(CheckedPatternSyntaxException::class)
@@ -2360,6 +2400,10 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             mInputMethodEnhanceBar.visibility = GONE
         }
         mDebugging = true
+
+        // Sync menu state after toolbar switch to avoid stale enabled flags.
+        // zh-CN: 切换工具栏后同步一次菜单状态, 避免 enabled 标记过期.
+        post { syncPrimaryMenuState() }
     }
 
     fun exitDebugging() {
@@ -2375,6 +2419,10 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             mInputMethodEnhanceBar.visibility = VISIBLE
         }
         mDebugging = false
+
+        // Sync menu state after toolbar switch to avoid stale enabled flags.
+        // zh-CN: 切换工具栏后同步一次菜单状态, 避免 enabled 标记过期.
+        post { syncPrimaryMenuState() }
     }
 
     private fun showErrorMessage(msg: String) {
