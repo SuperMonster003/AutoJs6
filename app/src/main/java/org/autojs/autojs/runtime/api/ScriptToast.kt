@@ -34,6 +34,10 @@ object ScriptToast {
     private var currentToast: Toast? = null
     private var currentFinishRunnable: Runnable? = null
 
+    // Fallback timeout runnable for API 30+ when Toast.Callback is not reliably invoked.
+    // zh-CN: 用于 API 30+ 场景的超时兜底 Runnable, 防止 Toast.Callback 不回调导致队列卡死.
+    private var currentFallbackTimeoutRunnable: Runnable? = null
+
     private data class ToastTask(
         val message: String,
         val duration: Int,
@@ -73,6 +77,9 @@ object ScriptToast {
                 currentFinishRunnable?.let { mainHandler.removeCallbacks(it) }
                 currentFinishRunnable = null
 
+                currentFallbackTimeoutRunnable?.let { mainHandler.removeCallbacks(it) }
+                currentFallbackTimeoutRunnable = null
+
                 currentToast?.cancel()
                 currentToast = null
                 currentTask = null
@@ -99,6 +106,9 @@ object ScriptToast {
             currentFinishRunnable?.let { mainHandler.removeCallbacks(it) }
             currentFinishRunnable = null
 
+            currentFallbackTimeoutRunnable?.let { mainHandler.removeCallbacks(it) }
+            currentFallbackTimeoutRunnable = null
+
             currentToast?.cancel()
             currentToast = null
             currentTask = null
@@ -118,7 +128,14 @@ object ScriptToast {
         currentToast = toast
 
         val finish = Runnable {
+            // Ensure idempotency.
+            // zh-CN: 确保 finish 具备幂等性.
+            currentFinishRunnable?.let { mainHandler.removeCallbacks(it) }
             currentFinishRunnable = null
+
+            currentFallbackTimeoutRunnable?.let { mainHandler.removeCallbacks(it) }
+            currentFallbackTimeoutRunnable = null
+
             currentToast = null
             currentTask = null
             isShowing = false
@@ -126,19 +143,42 @@ object ScriptToast {
         }
         currentFinishRunnable = finish
 
+        val delay = if (task.duration == Toast.LENGTH_LONG) 3_500L else 2_000L
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            // Fallback timeout:
+            // Some ROMs may not invoke Toast.Callback reliably, which would freeze the queue forever.
+            //
+            // zh-CN:
+            // 超时兜底:
+            // 某些 ROM 可能不会可靠触发 Toast.Callback, 否则队列会永久卡死.
+            val fallback = Runnable { finish.run() }
+            currentFallbackTimeoutRunnable = fallback
+            mainHandler.postDelayed(fallback, delay + 1_000L)
+
             toast.addCallback(object : Toast.Callback() {
                 override fun onToastHidden() {
                     super.onToastHidden()
+
+                    // Cancel fallback and finish immediately.
+                    // zh-CN: 取消兜底计时并立即 finish.
+                    currentFallbackTimeoutRunnable?.let { mainHandler.removeCallbacks(it) }
+                    currentFallbackTimeoutRunnable = null
+
                     finish.run()
                 }
             })
         } else {
-            val delay = if (task.duration == Toast.LENGTH_LONG) 3_500L else 2_000L
             mainHandler.postDelayed(finish, delay)
         }
 
-        toast.show()
+        runCatching {
+            toast.show()
+        }.onFailure {
+            // If show() throws, release the queue immediately.
+            // zh-CN: 若 show() 抛异常, 立即释放队列避免卡死.
+            finish.run()
+        }
     }
 
     private fun <E> ArrayDeque<E>.removeFirstOrNull(): E? =
