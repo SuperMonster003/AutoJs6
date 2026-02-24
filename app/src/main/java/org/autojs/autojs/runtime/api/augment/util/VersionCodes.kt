@@ -113,7 +113,7 @@ object VersionCodes : Augmentable() {
                 val (_, month, day, year) = it.groupValues
                 "$year,${monthMap[month.lowercase().slice(0..2)]!!.minus(1)},$day"
             }
-            val (year, month, day) = replaceFullDate.split(',').map { it.toInt() }
+            val (year, month, day) = replaceFullDate.split(',').map { it.toIntOrNull() ?: return@parseTimestamp 0 }
             return Calendar.getInstance().apply {
                 clear()
                 set(year, month, day)

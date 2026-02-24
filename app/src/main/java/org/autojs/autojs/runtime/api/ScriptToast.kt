@@ -24,7 +24,7 @@ import java.util.ArrayDeque
  */
 object ScriptToast {
 
-    private const val MAX_GLOBAL_QUEUE_SIZE = 17
+    private const val MAX_GLOBAL_QUEUE_SIZE = 32
 
     private val mainHandler = Handler(Looper.getMainLooper())
     private val queue = ArrayDeque<ToastTask>(MAX_GLOBAL_QUEUE_SIZE)
@@ -56,13 +56,15 @@ object ScriptToast {
             return
         }
 
+        val task = ToastTask(message, duration, ownerId)
+
         if (queue.size >= MAX_GLOBAL_QUEUE_SIZE) {
-            // Discard newest task when the queue is full.
-            // zh-CN: 当队列已满时丢弃最新任务.
-            return
+            // Keep newest: discard oldest when queue is full.
+            // zh-CN: 保留最新: 队列满时丢弃最旧任务.
+            queue.removeFirstOrNull()
         }
 
-        queue.addLast(ToastTask(message, duration, ownerId))
+        queue.addLast(task)
 
         tryShowNextLocked(context.applicationContext)
     }
