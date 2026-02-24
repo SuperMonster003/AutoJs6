@@ -110,7 +110,32 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
         EditorMenu(editorView, readOnly).also {
             mEditorMenu = it
         }
-        StableDraftFileHelper(this, editorView.uri?.path).also {
+
+        // Restore draft as early as possible to avoid being overwritten by async file loading.
+        // We intentionally do this in onCreate(), not in onRestoreInstanceState(),
+        // because handleIntent() may start async loading and call setInitialText() later.
+        //
+        // zh-CN:
+        // 尽可能早地恢复草稿, 避免被异步文件加载覆盖.
+        // 我们刻意在 onCreate() 中恢复, 而不是在 onRestoreInstanceState() 中恢复,
+        // 因为 handleIntent() 可能启动异步加载并在稍后调用 setInitialText().
+        savedInstanceState?.getString("text")?.let { draftText ->
+            mEditorView.restoreDraftTextForThisSession(draftText)
+        } ?: savedInstanceState?.getString("path")?.let { path ->
+            Observable.just(path)
+                .observeOn(Schedulers.io())
+                .map { PFiles.read(it) }
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({ draftText ->
+                    mEditorView.restoreDraftTextForThisSession(draftText)
+                }, Throwable::printStackTrace)
+        }
+
+        // Use a stable key from intent instead of editorView.uri (which is not set yet here).
+        // zh-CN: 使用 intent 中的稳定 key, 避免此处 editorView.uri 尚未赋值导致 key 为 null.
+        val draftKeyPath = intent.getStringExtra(EditorView.EXTRA_PATH) ?: intent.data?.path
+
+        StableDraftFileHelper(this, draftKeyPath).also {
             draftFileHelper = it
         }
         (intent.flags and Intent.FLAG_ACTIVITY_NEW_TASK != 0).also {
@@ -403,9 +428,15 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        // Save draft when UI indicates "needs save".
-        // zh-CN: 当 UI 表示 "需要保存" 时保存草稿.
-        if (!mEditorView.saveStickyDirty) {
+
+        // Save draft when content actually differs from baseline OR UI indicates "needs save".
+        // This makes state restore robust against any sticky/menu state glitches.
+        //
+        // zh-CN:
+        // 当内容相对基线确实发生变化, 或 UI 表示 "需要保存" 时, 保存草稿.
+        // 这能使状态恢复不再受 sticky/menu 状态偶发异常的影响.
+        val needDraft = mEditorView.isTextChanged || mEditorView.saveStickyDirty
+        if (!needDraft) {
             super.onSaveInstanceState(outState)
             return
         }
@@ -431,22 +462,8 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
 
     override fun onResume() {
         super.onResume()
+        mEditorView.syncPrimaryMenuState()
         runCatching { mEditorView.refreshSymbolsBar() }
-    }
-
-    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        super.onRestoreInstanceState(savedInstanceState)
-        savedInstanceState.getString("text")?.let {
-            mEditorView.setRestoredText(it)
-            return
-        }
-        savedInstanceState.getString("path")?.let { path ->
-            Observable.just(path)
-                .observeOn(Schedulers.io())
-                .map { PFiles.read(it) }
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ mEditorView.editor.text = it }, Throwable::printStackTrace)
-        }
     }
 
     override fun addRequestPermissionsCallback(callback: OnRequestPermissionsResultCallback) {

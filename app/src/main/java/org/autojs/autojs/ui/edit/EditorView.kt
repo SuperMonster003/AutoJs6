@@ -158,6 +158,15 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     @Volatile
     private var mHadDirectEditSinceSave: Boolean = false
 
+    // Whether a draft has been restored in this session.
+    // If true, subsequent async file-load setInitialText() must NOT overwrite the restored draft.
+    //
+    // zh-CN:
+    // 本次会话是否已恢复草稿.
+    // 若为 true, 则后续异步文件加载触发的 setInitialText() 不得覆盖已恢复的草稿.
+    @Volatile
+    private var mDraftRestoredInThisSession: Boolean = false
+
     // Guard flag to mark text changes caused by undo/redo button actions.
     // This is used to distinguish direct edits from history navigation.
     //
@@ -374,8 +383,20 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         // Initialize menu state early to avoid "first render" flicker.
         // zh-CN: 尽早初始化菜单状态, 避免首次渲染闪烁.
         mEditorLoading = true
-        saveStickyDirty = false
-        mHadDirectEditSinceSave = false
+
+        // Do NOT reset dirty flags if we already restored a draft in this session.
+        // Otherwise, the editor will keep the draft text but lose "needs save" state,
+        // causing Save button to turn off and exit-confirm not to show.
+        //
+        // zh-CN:
+        // 若本会话已恢复草稿, 则不要重置脏标记.
+        // 否则会出现草稿文本仍在但 "需要保存" 状态丢失,
+        // 导致保存按钮熄灭且退出不提示保存.
+        if (!mDraftRestoredInThisSession) {
+            saveStickyDirty = false
+            mHadDirectEditSinceSave = false
+        }
+
         syncPrimaryMenuState()
 
         val name = intent.getStringExtra(EXTRA_NAME)
@@ -416,6 +437,49 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     fun setRestoredText(text: String) {
         mRestoredText = text
         editor.text = text
+    }
+
+    /**
+     * Restore draft text for this editor session.
+     *
+     * Behavior:
+     * - Applies text immediately.
+     * - Marks current session as "draft restored", so async file loading won't overwrite it.
+     * - Marks editor state as dirty (needs save) and refreshes menu state.
+     *
+     * zh-CN:
+     * 为本次编辑会话恢复草稿文本.
+     *
+     * 行为:
+     * - 立即应用文本.
+     * - 标记本会话为 "已恢复草稿", 防止异步文件加载覆盖.
+     * - 标记为未保存并刷新菜单状态.
+     */
+    fun restoreDraftTextForThisSession(text: String) {
+        mDraftRestoredInThisSession = true
+        mRestoredText = text
+        editor.text = text
+        markRestoredDraftAsDirty()
+    }
+
+    /**
+     * Mark a restored draft as unsaved and refresh menu state.
+     *
+     * Rationale:
+     * - Draft restore should not be treated as "saved baseline".
+     * - Otherwise Save button may appear disabled and exit-confirm may not show.
+     *
+     * zh-CN:
+     * 将已恢复的草稿标记为未保存, 并刷新菜单状态.
+     *
+     * 理由:
+     * - 草稿恢复不应被当作 "已保存基线".
+     * - 否则保存按钮可能呈灰色, 且退出确认可能不弹出.
+     */
+    fun markRestoredDraftAsDirty() {
+        saveStickyDirty = true
+        mHadDirectEditSinceSave = true
+        syncPrimaryMenuState()
     }
 
     private fun handleText(intent: Intent): Observable<String> {
@@ -1045,6 +1109,18 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         mEditorLoading = true
         syncPrimaryMenuState()
 
+        // If draft has been restored in this session, do NOT overwrite it with async file load results.
+        // Still end loading flags and sync menu state to keep UI consistent.
+        //
+        // zh-CN:
+        // 若本会话已恢复草稿, 则不要用异步文件加载结果覆盖它.
+        // 但仍需结束 loading 标记并同步菜单状态, 保持 UI 一致.
+        if (mDraftRestoredInThisSession) {
+            mEditorLoading = false
+            syncPrimaryMenuState()
+            return
+        }
+
         if (mRestoredText != null) {
             editor.text = mRestoredText!!
             mRestoredText = null
@@ -1104,7 +1180,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         }
     }
 
-    private fun syncPrimaryMenuState() {
+    internal fun syncPrimaryMenuState() {
         // Unified primary buttons state.
         // zh-CN: 统一主按钮状态.
         when {
