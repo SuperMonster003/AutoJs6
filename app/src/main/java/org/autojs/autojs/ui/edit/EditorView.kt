@@ -72,7 +72,7 @@ import org.autojs.autojs.ui.edit.completion.CodeCompletionBar.OnHintClickListene
 import org.autojs.autojs.ui.edit.debug.DebugBar
 import org.autojs.autojs.ui.edit.editor.CodeEditor
 import org.autojs.autojs.ui.edit.editor.CodeEditor.CheckedPatternSyntaxException
-import org.autojs.autojs.ui.edit.editor.JavaScriptHighlighter.MAX_HIGHLIGHT_CHARS
+import org.autojs.autojs.ui.edit.editor.JavaScriptHighlighter
 import org.autojs.autojs.ui.edit.editor.LayoutHelper
 import org.autojs.autojs.ui.edit.keyboard.FunctionsKeyboardHelper
 import org.autojs.autojs.ui.edit.keyboard.FunctionsKeyboardView
@@ -420,6 +420,10 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                     findViewById<View>(R.id.redo).visibility = GONE
                     findViewById<View>(R.id.save).visibility = GONE
                 }
+                if (mLargeFileMode) {
+                    findViewById<View>(R.id.undo).visibility = GONE
+                    findViewById<View>(R.id.redo).visibility = GONE
+                }
                 if (!intent.getBooleanExtra(EXTRA_RUN_ENABLED, true)) {
                     findViewById<View>(R.id.run).visibility = GONE
                 }
@@ -698,7 +702,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     private fun loadUri(uri: Uri): Observable<String> {
-        val streamThresholdBytes = MAX_HIGHLIGHT_CHARS
+        val streamThresholdBytes = LARGE_FILE_MODE_THRESHOLD
 
         val sizeOrNull = runCatching { queryContentLengthOrNull(uri) }.getOrNull()
         if (sizeOrNull != null && sizeOrNull >= streamThresholdBytes) {
@@ -1143,7 +1147,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             return
         }
 
-        val progressiveThreshold = MAX_HIGHLIGHT_CHARS
+        val progressiveThreshold = LARGE_FILE_MODE_THRESHOLD
         if (text.length > progressiveThreshold) {
             mLargeFileMode = true
             setInitialTextProgressively(text)
@@ -1175,7 +1179,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
         // Re-highlight once after fast load, but only when size is within highlighter limit.
         // zh-CN: 快速加载完成后主动触发一次高亮, 但仅在文本大小不超过高亮上限时执行.
-        if (text.length <= MAX_HIGHLIGHT_CHARS) {
+        if (text.length <= JavaScriptHighlighter.MAX_HIGHLIGHT_CHARS) {
             post { editor.refreshHighlightTokensIfAllowed() }
         }
     }
@@ -2678,6 +2682,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
         private const val MIN_CONFIDENCE_TO_WRITE_FILE = 90
         private val DEFAULT_CHARSET_TO_WRITE_FILE = StandardCharsets.UTF_8
+
+        private const val LARGE_FILE_MODE_THRESHOLD =  JavaScriptHighlighter.MAX_HIGHLIGHT_CHARS
 
         // Internal storage root (no external SD).
         // zh-CN: 内部存储根目录 (不访问外置 SD).

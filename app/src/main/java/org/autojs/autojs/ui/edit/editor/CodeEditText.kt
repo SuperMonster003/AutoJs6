@@ -137,6 +137,15 @@ class CodeEditText : AppCompatEditText {
         }
         mCursorChangeCallbacks = CopyOnWriteArrayList()
 
+        // Prevent Android framework from saving/restoring huge editor text via View state.
+        // Otherwise minimizing the Activity may trigger TransactionTooLargeException for large files.
+        //
+        // zh-CN:
+        // 禁止系统通过 View state 自动保存/恢复超大的编辑器文本.
+        // 否则在最小化 Activity 时, 大文件很容易触发 TransactionTooLargeException.
+        isSaveEnabled = false
+        freezesText = false
+
         // Ensure selection is possible by default.
         // zh-CN: 默认确保可以进行文本选择.
         setTextIsSelectable(true)
@@ -590,9 +599,9 @@ class CodeEditText : AppCompatEditText {
 
             // Also drop selection-changed events entirely in large-text mode.
             // zh-CN: 大文本模式下直接丢弃 selection-changed 事件.
-            if (event.eventType == AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED) {
-                return
-            }
+            if (event.eventType == AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED) return
+            if (event.eventType == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED) return
+            if (event.eventType == AccessibilityEvent.TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY) return
         }
         super.sendAccessibilityEventUnchecked(event)
     }
