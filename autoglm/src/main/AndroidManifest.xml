@@ -86,7 +86,8 @@
         <activity
             android:name=".history.HistoryDetailActivity"
             android:exported="false"
-            android:parentActivityName=".MainActivity" />
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/Theme.AutoGLM"/>
 
         <provider
             android:name="rikka.shizuku.ShizukuProvider"

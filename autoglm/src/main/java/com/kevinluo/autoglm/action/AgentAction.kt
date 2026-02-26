@@ -155,6 +155,20 @@ sealed class AgentAction {
      */
     data class Batch(val steps: List<AgentAction>, val delayMs: Int = 500) : AgentAction()
 
+    /** Request list of runnable scripts (JSON text). */
+    data object ListScripts : AgentAction()
+
+    /** Run a script by path with optional params (JSON string). */
+    data class RunScript(
+        val path: String,
+        val paramsJson: String? = null,
+    ) : AgentAction()
+
+    /** Watch a script execution until it finishes. */
+    data class WatchScript(
+        val executionId: Int,
+    ) : AgentAction()
+
     /**
      * Formats the action for display in UI.
      *
@@ -181,6 +195,9 @@ sealed class AgentAction {
         is CallApi -> "API调用"
         is Finish -> "完成: ${message.take(30)}${if (message.length > 30) "..." else ""}"
         is Batch -> "批量操作: ${steps.size}步 (间隔${delayMs}ms)"
+        is ListScripts -> "列出可运行脚本"
+        is RunScript -> "运行脚本: $path"
+        is WatchScript -> "监视脚本执行: ID $executionId"
     }
 }
 

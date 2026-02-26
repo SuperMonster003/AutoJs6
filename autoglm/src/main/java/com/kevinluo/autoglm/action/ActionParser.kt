@@ -44,6 +44,11 @@ object ActionParser {
     private val BATCH_END_PATTERN = Regex(""""end"\s*:\s*\[(-?\d+),\s*(-?\d+)\]""")
     private val BATCH_DURATION_PATTERN = Regex(""""duration"\s*:\s*"?([^",}]+)"?""")
 
+    // Additional patterns for AutoJs style actions
+    private val PATH_PATTERN = Regex("""path=["']([^"']+)["']""")
+    private val PARAMS_PATTERN = Regex("""params=["'](.*)["']""", RegexOption.DOT_MATCHES_ALL)
+    private val EXECUTION_ID_PATTERN = Regex("""executionId=["']?(\d+)["']?""")
+
     /**
      * Parses a model response string into an [AgentAction].
      *
@@ -199,11 +204,39 @@ object ActionParser {
                 parseBatchAction(response)
             }
 
+            "ListScripts" -> {
+                AgentAction.ListScripts
+            }
+
+            "RunScript" -> {
+                parseRunScriptAction(response)
+            }
+
+            "WatchScript" -> {
+                parseWatchScriptAction(response)
+            }
+
             else -> {
                 Logger.w(TAG, "Unknown action type: $actionType")
                 throw ActionParseException("Unknown action type: $actionType")
             }
         }
+    }
+
+    private fun parseRunScriptAction(response: String): AgentAction.RunScript {
+        val pathMatch = PATH_PATTERN.find(response)
+            ?: throw ActionParseException("No path found in RunScript action: $response")
+        val paramsMatch = PARAMS_PATTERN.find(response)
+        return AgentAction.RunScript(
+            path = pathMatch.groupValues[1],
+            paramsJson = paramsMatch?.groupValues?.get(1),
+        )
+    }
+
+    private fun parseWatchScriptAction(response: String): AgentAction.WatchScript {
+        val idMatch = EXECUTION_ID_PATTERN.find(response)
+            ?: throw ActionParseException("No executionId found in WatchScript action: $response")
+        return AgentAction.WatchScript(executionId = idMatch.groupValues[1].toInt())
     }
 
     /**

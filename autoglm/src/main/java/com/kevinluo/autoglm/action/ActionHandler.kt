@@ -9,6 +9,8 @@ import com.kevinluo.autoglm.util.ErrorHandler
 import com.kevinluo.autoglm.util.HumanizedSwipeGenerator
 import com.kevinluo.autoglm.util.Logger
 import kotlinx.coroutines.delay
+import com.kevinluo.autoglm.api.CapabilitiesProvider
+import org.json.JSONObject
 
 /**
  * Handles execution of agent actions by coordinating with DeviceExecutor,
@@ -134,6 +136,9 @@ class ActionHandler(
                     is AgentAction.CallApi -> executeCallApi(action)
                     is AgentAction.Finish -> executeFinish(action)
                     is AgentAction.Batch -> executeBatch(action, screenWidth, screenHeight)
+                    is AgentAction.ListScripts -> executeListScripts()
+                    is AgentAction.RunScript -> executeRunScript(action)
+                    is AgentAction.WatchScript -> executeWatchScript(action)
                 }
 
             Logger.d(TAG, "Action result: success=${result.success}, message=${result.message}")
@@ -626,6 +631,44 @@ class ActionHandler(
             shouldFinish = false,
             message = summary,
         )
+    }
+
+    /**
+     * Executes a ListScripts action.
+     * Returns a JSON string of available scripts from CapabilitiesProvider.
+     */
+    private suspend fun executeListScripts(): ActionResult {
+        val json = CapabilitiesProvider.autoJs().listWorkspaceScriptsJson()
+        return ActionResult(true, false, json.toString())
+    }
+
+    /**
+     * Executes a RunScript action.
+     * Runs a script by path with optional params and returns the result as JSON string.
+     */
+    private suspend fun executeRunScript(action: AgentAction.RunScript): ActionResult {
+        val params = action.paramsJson?.let { JSONObject(it) }
+        val json = CapabilitiesProvider.autoJs().runScriptJson(action.path, params)
+        return ActionResult(json.optBoolean("ok"), false, json.toString())
+    }
+
+    /**
+     * Executes a WatchScript action.
+     * Polls the execution status of a running script until it finishes and returns the final status as JSON string.
+     */
+    private suspend fun executeWatchScript(action: AgentAction.WatchScript): ActionResult {
+        val pollIntervalMs = 1000L
+        while (true) {
+            val json = CapabilitiesProvider.autoJs().getExecutionStatusJson(action.executionId)
+            val ok = json.optBoolean("ok")
+            val finished = json.optBoolean("finished", false)
+
+            if (!ok || finished) {
+                return ActionResult(ok, false, json.toString())
+            }
+
+            delay(pollIntervalMs)
+        }
     }
 
     /**

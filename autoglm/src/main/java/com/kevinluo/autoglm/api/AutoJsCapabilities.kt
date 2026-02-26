@@ -7,7 +7,7 @@ import android.content.Context
  *
  * 由宿主模块（:app / AutoJs）提供实现并在 Application 启动时注入。
  */
-interface AutoJsCapabilities {
+interface AutoJsCapabilities : AutoJsToolApi {
 
     /**
      * 打开“工作区脚本选择器”，选中脚本后回调返回脚本绝对路径。
