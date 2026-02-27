@@ -778,6 +778,9 @@
     <string name="text_permission_desc_billing">Разрешить приложению выполнять покупки внутри приложения</string>
     <string name="text_permission_desc_bluetooth">Разрешить приложению доступ к устройствам Bluetooth</string>
     <string name="text_permission_desc_bluetooth_admin">Разрешить приложению настраивать устройства Bluetooth</string>
+    <string name="text_permission_desc_bluetooth_connect">Разрешить приложению доступ к устройствам Bluetooth и состоянию подключения</string>
+    <string name="text_permission_desc_bluetooth_scan">Разрешить приложению сканировать близлежащие устройства Bluetooth</string>
+    <string name="text_permission_desc_bluetooth_advertise">Разрешить приложению рекламировать себя через Bluetooth</string>
     <string name="text_permission_desc_broadcast_close_system_dialogs">Разрешить приложению отправлять намерение для закрытия системных диалогов</string>
     <string name="text_permission_desc_call_phone">Разрешить приложению совершать телефонные звонки</string>
     <string name="text_permission_desc_camera">Разрешить приложению доступ к камере</string>

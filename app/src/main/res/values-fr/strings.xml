@@ -778,6 +778,9 @@
     <string name="text_permission_desc_billing">Autoriser l\'application à effectuer des achats intégrés</string>
     <string name="text_permission_desc_bluetooth">Autoriser l\'application à accéder aux périphériques Bluetooth</string>
     <string name="text_permission_desc_bluetooth_admin">Autoriser l\'application à configurer les périphériques Bluetooth</string>
+    <string name="text_permission_desc_bluetooth_connect">Autoriser l\'application à accéder aux périphériques et à l\'état de connexion Bluetooth</string>
+    <string name="text_permission_desc_bluetooth_scan">Autoriser l\'application à rechercher des périphériques Bluetooth à proximité</string>
+    <string name="text_permission_desc_bluetooth_advertise">Autoriser l\'application à se rendre visible via Bluetooth</string>
     <string name="text_permission_desc_broadcast_close_system_dialogs">Autoriser l\'application à envoyer une intention pour fermer les boîtes de dialogue système</string>
     <string name="text_permission_desc_call_phone">Autoriser l\'application à passer des appels téléphoniques</string>
     <string name="text_permission_desc_camera">Autoriser l\'application à accéder à la caméra</string>

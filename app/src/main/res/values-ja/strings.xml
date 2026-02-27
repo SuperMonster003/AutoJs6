@@ -779,6 +779,9 @@
     <string name="text_permission_desc_billing">アプリがアプリ内購入を実行することを許可します</string>
     <string name="text_permission_desc_bluetooth">アプリが Bluetooth デバイスにアクセスすることを許可します</string>
     <string name="text_permission_desc_bluetooth_admin">アプリが Bluetooth デバイスを設定することを許可します</string>
+    <string name="text_permission_desc_bluetooth_connect">アプリが Bluetooth デバイスと接続状態にアクセスすることを許可します</string>
+    <string name="text_permission_desc_bluetooth_scan">アプリが近くの Bluetooth デバイスをスキャンすることを許可します</string>
+    <string name="text_permission_desc_bluetooth_advertise">アプリが Bluetooth でアドバタイズすることを許可します</string>
     <string name="text_permission_desc_broadcast_close_system_dialogs">アプリがシステムダイアログを閉じるためのインテントを送信することを許可します</string>
     <string name="text_permission_desc_call_phone">アプリが電話をかけることを許可します</string>
     <string name="text_permission_desc_camera">アプリがカメラにアクセスすることを許可します</string>

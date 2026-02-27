@@ -776,6 +776,9 @@
     <string name="text_permission_desc_billing">允許應用執行應用內購買</string>
     <string name="text_permission_desc_bluetooth">允許應用訪問藍牙設備</string>
     <string name="text_permission_desc_bluetooth_admin">允許應用配置藍牙設備</string>
+    <string name="text_permission_desc_bluetooth_connect">允許應用訪問藍牙設備及連接狀態</string>
+    <string name="text_permission_desc_bluetooth_scan">允許應用搜尋附近的藍牙設備</string>
+    <string name="text_permission_desc_bluetooth_advertise">允許應用透過藍牙廣播</string>
     <string name="text_permission_desc_broadcast_close_system_dialogs">允許應用發送一個意圖來關閉系統對話框</string>
     <string name="text_permission_desc_call_phone">允許應用撥打電話</string>
     <string name="text_permission_desc_camera">允許應用訪問相機</string>

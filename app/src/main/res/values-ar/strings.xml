@@ -780,6 +780,9 @@
     <string name="text_permission_desc_billing">يسمح للتطبيق بإجراء عمليات الشراء داخل التطبيق</string>
     <string name="text_permission_desc_bluetooth">يسمح للتطبيق بالوصول إلى أجهزة Bluetooth</string>
     <string name="text_permission_desc_bluetooth_admin">يسمح للتطبيق بتهيئة أجهزة Bluetooth</string>
+    <string name="text_permission_desc_bluetooth_connect">السماح للتطبيق بالوصول إلى أجهزة Bluetooth وحالة الاتصال</string>
+    <string name="text_permission_desc_bluetooth_scan">السماح للتطبيق بالبحث عن أجهزة Bluetooth القريبة</string>
+    <string name="text_permission_desc_bluetooth_advertise">السماح للتطبيق بالإعلان عبر Bluetooth</string>
     <string name="text_permission_desc_broadcast_close_system_dialogs">يسمح للتطبيق بإرسال نية لإغلاق مربعات حوار النظام</string>
     <string name="text_permission_desc_call_phone">يسمح للتطبيق بإجراء مكالمات هاتفية</string>
     <string name="text_permission_desc_camera">يسمح للتطبيق بالوصول إلى الكاميرا</string>
