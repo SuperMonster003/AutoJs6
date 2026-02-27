@@ -778,6 +778,9 @@
     <string name="text_permission_desc_billing">Permitir que la aplicación realice compras dentro de la aplicación</string>
     <string name="text_permission_desc_bluetooth">Permitir que la aplicación acceda a dispositivos Bluetooth</string>
     <string name="text_permission_desc_bluetooth_admin">Permitir que la aplicación configure dispositivos Bluetooth</string>
+    <string name="text_permission_desc_bluetooth_connect">Permitir que la aplicación acceda a los dispositivos Bluetooth y al estado de conexión</string>
+    <string name="text_permission_desc_bluetooth_scan">Permitir que la aplicación busque dispositivos Bluetooth cercanos</string>
+    <string name="text_permission_desc_bluetooth_advertise">Permitir que la aplicación se anuncie mediante Bluetooth</string>
     <string name="text_permission_desc_broadcast_close_system_dialogs">Permitir que la aplicación envíe una intención para cerrar los cuadros de diálogo del sistema</string>
     <string name="text_permission_desc_call_phone">Permitir que la aplicación realice llamadas telefónicas</string>
     <string name="text_permission_desc_camera">Permitir que la aplicación acceda a la cámara</string>
