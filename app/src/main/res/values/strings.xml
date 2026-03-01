@@ -151,6 +151,7 @@
     <string name="key_pref_bundle_default_item" translatable="false">key_$_pref_bundle_default_item</string>
     <string name="key_pref_bundle_disabled_items" translatable="false">key_$_pref_bundle_disabled_items</string>
     <string name="key_record_toast" translatable="false">key_$_record_toast</string>
+    <string name="key_release_history" translatable="false">key_$_release_history</string>
     <string name="key_restart_strategy" translatable="false">key_$_restart_strategy</string>
     <string name="key_restart_strategy_quick" translatable="false">key_$_restart_strategy_quick</string>
     <string name="key_restart_strategy_scheduled" translatable="false">key_$_restart_strategy_scheduled</string>
@@ -184,7 +185,6 @@
     <string name="key_updates_checked_states_cleared" translatable="false">key_$_updates_checked_states_cleared</string>
     <string name="key_use_volume_control_record" translatable="false">key_$_use_volume_control_record</string>
     <string name="key_use_volume_control_running" translatable="false">key_$_use_volume_control_running</string>
-    <string name="key_release_history" translatable="false">key_$_release_history</string>
     <string name="key_version_history_restore_does_not_auto_save_to_disk" translatable="false">key_$_version_history_restore_does_not_auto_save_to_disk</string>
     <string name="key_working_directory" translatable="false">key_$_working_directory</string>
     <string name="key_working_directory_history" translatable="false">key_$_working_directory_histories</string>
@@ -251,6 +251,8 @@
     <string name="text_full_version_info" translatable="false">%1$s (%2$d)</string>
     <string name="text_half_ellipsis" translatable="false" formatted="true">...</string>
     <string name="text_jks" translatable="false">JKS</string>
+    <string name="text_plugin_mechanism_aidl" translatable="false">AIDL / IPC</string>
+    <string name="text_plugin_mechanism_sdk" translatable="false">SDK / In-Process</string>
     <string name="text_powered_by_autojs" translatable="false">Powered by AutoJs6</string>
     <string name="text_root" translatable="false">Root</string>
     <string name="text_sample_button" translatable="false">Hello</string>
@@ -1609,4 +1611,19 @@
     <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">Try clicking the \"Activate\" button to activate the plugin once.\nIf activation is successful, the button will automatically turn on within a certain period of time.</string>
     <string name="dialog_button_activate">Activate</string>
     <string name="text_activated_successfully">Activated successfully</string>
+    <string name="text_authorize_plugin">Authorize Plugin</string>
+    <string name="text_authorize_plugin_content">This is a third-party plugin. Please pay attention to the plugin source and usage safety.\n\nClick the \"Authorize\" button to enable the plugin.</string>
+    <string name="dialog_button_authorize">Authorize</string>
+    <string name="text_plugin_official">Official</string>
+    <string name="text_plugin_authorized">Authorized</string>
+    <string name="text_plugin_authorization_required">Authorization required</string>
+    <string name="text_plugin_authorization_denied">Authorization denied</string>
+    <string name="text_plugin_activation_recommended">Activation recommended</string>
+    <string name="text_plugin_activated">Activated</string>
+    <string name="text_plugin_trusted">Trusted</string>
+    <string name="plugin_item_info_mechanism">Mechanism</string>
+    <string name="error_plugin_is_not_enabled_in_plugin_center">Plugin \"%1$s\" is not enabled in Plugin Center</string>
+    <string name="error_plugin_is_not_authorized_in_plugin_center">Plugin \"%1$s\" is not authorized in Plugin Center</string>
+    <string name="error_plugin_not_found_in_installed_apps">Plugin \"%1$s\" not found in installed apps</string>
+    <string name="error_unsupported_plugin_connection">Unsupported plugin connection</string>
 </resources>

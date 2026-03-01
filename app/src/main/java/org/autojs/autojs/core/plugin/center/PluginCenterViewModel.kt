@@ -40,6 +40,7 @@ class PluginCenterViewModel : ViewModel() {
     // private val indexRepo = PluginIndexRepository()
 
     private val installedRepo = InstalledPluginRepository()
+    private val legacyRepo = LegacyInstalledPluginRepository()
     private val enableStore = PluginEnableStore
 
     private val _items = MutableStateFlow<List<PluginCenterItem>>(emptyList())
@@ -93,6 +94,12 @@ class PluginCenterViewModel : ViewModel() {
                 return@launch
             }
 
+            val legacyInstalled = runCatching {
+                legacyRepo.discoverInstalled(context)
+            }.onFailure { e ->
+                Log.w(TAG, "legacy discovery failed: ${e.message}")
+            }.getOrElse { emptyList() }
+
             installed.forEach { local ->
                 if (local.bindError != null) {
                     enableStore.setEnabled(context, local.packageName, false)
@@ -104,9 +111,13 @@ class PluginCenterViewModel : ViewModel() {
 
             // Render list using "local only".
             // zh-CN: 使用 "仅本地" 渲染列表.
-            val onlyLocalItems = installed.mapNotNull { local ->
+            val localAidlItems = installed.mapNotNull { local ->
                 toPluginCenterItem(context, index = null, local = local)
             }
+            val localLegacyItems = legacyInstalled.mapNotNull { local ->
+                toLegacyPluginCenterItem(context, local)
+            }
+            val onlyLocalItems = localAidlItems + localLegacyItems
             _items.value = onlyLocalItems
 
             // Asynchronously load index and merge.
@@ -132,9 +143,10 @@ class PluginCenterViewModel : ViewModel() {
 
             // Supplement plugins that "exist locally but not in index" (third-party/not yet in index).
             // zh-CN: 补充 "本地有但索引没有" 的插件 (第三方/暂未入索引).
-            val extraLocals = installed
+            val extraAidlLocals = installed
                 .filter { ins -> indexEntries.none { it.packageName == ins.packageName } }
                 .mapNotNull { local -> toPluginCenterItem(context, index = null, local = local) }
+            val extraLocals = extraAidlLocals + localLegacyItems
 
             _items.value = fromIndex + extraLocals
             _indexLoaded.value = true
@@ -145,10 +157,21 @@ class PluginCenterViewModel : ViewModel() {
         }
     }
 
-    fun setEnabled(context: Context, packageName: String, enabled: Boolean) {
+    fun setEnabled(context: Context, packageName: String, enabled: Boolean, error: PluginError? = null) {
         enableStore.setEnabled(context, packageName, enabled)
         _items.value = _items.value.map {
-            if (it.packageName == packageName) it.copy(isEnabled = enabled) else it
+            if (it.packageName == packageName) {
+                val nextEnabledState = when {
+                    !enabled -> PluginEnabledState.DISABLED
+                    error != null -> PluginEnabledState.ERROR(error)
+                    else -> PluginEnabledState.READY
+                }
+                it.copy(
+                    isEnabled = enabled,
+                    enabledState = nextEnabledState,
+                    lastError = error,
+                )
+            } else it
         }
         PluginInfoDialogManager.refreshIfShowing(context, _items.value)
     }
@@ -184,7 +207,41 @@ class PluginCenterViewModel : ViewModel() {
             candidates.firstOrNull { !UpdateIgnoreStore.isIgnored(packageName, it.versionCode) }
         }
 
-        val enabled = enableStore.isEnabled(context, packageName, defaultEnabled = isInstalled)
+        val trustInfo = runCatching { PluginTrustManager.resolveTrustInfo(context, packageName) }.getOrElse {
+            PluginTrustManager.TrustInfo(
+                authorizedState = PluginAuthorizedState.REQUIRED,
+                isOfficial = false,
+                isTrusted = false,
+                primaryFingerprintSha256 = null,
+                fingerprintsSha256 = emptyList(),
+            )
+        }
+
+        var enabled = enableStore.isEnabled(context, packageName, defaultEnabled = isInstalled)
+        if (trustInfo.authorizedState == PluginAuthorizedState.REQUIRED && enabled) {
+            enableStore.setEnabled(context, packageName, false)
+            enabled = false
+        }
+
+        val canActivate = isInstalled && PluginWakeManager.buildWakeIntent(context, packageName) != null
+        var activatedState = when {
+            !canActivate -> PluginActivatedState.NOT_SUPPORTED
+            PluginActivationStore.getLastActivatedAt(context, packageName) != null -> PluginActivatedState.DONE
+            else -> PluginActivatedState.UNKNOWN
+        }
+
+        val mappedError = local?.bindError?.let { PluginErrorMapper.fromThrowable(it) }
+        if (mappedError != null && canActivate && activatedState == PluginActivatedState.UNKNOWN && PluginErrorMapper.shouldRecommendActivation(mappedError)) {
+            activatedState = PluginActivatedState.RECOMMENDED
+        }
+        val authError = if (trustInfo.authorizedState == PluginAuthorizedState.REQUIRED) PluginError(PluginErrorCode.NOT_AUTHORIZED) else null
+        val lastError = authError ?: mappedError
+        val enabledState = when {
+            !enabled -> PluginEnabledState.DISABLED
+            mappedError != null -> PluginEnabledState.ERROR(mappedError)
+            else -> PluginEnabledState.READY
+        }
+        val readyEnabled = enabled && enabledState is PluginEnabledState.READY
 
         return PluginCenterItem(
             title = title,
@@ -202,7 +259,7 @@ class PluginCenterViewModel : ViewModel() {
             updatableChangelogUrl = targetUpdate?.changelogUrl,
             updatableChangelogText = targetUpdate?.changelogText,
 
-            author = author,
+            author = author ?: trustInfo.developer,
             collaborators = collaborators,
             description = description,
 
@@ -214,12 +271,86 @@ class PluginCenterViewModel : ViewModel() {
 
             // TODO 已安装优先用应用图标; 未安装走默认占位图.
             icon = local?.icon,
-            isEnabled = enabled,
+            isEnabled = readyEnabled,
             isInstalled = isInstalled,
             firstInstallTime = local?.firstInstallTime,
             lastUpdateTime = local?.lastUpdateTime,
             // TODO M1 暂不接入单插件设置入口.
             settings = null,
+            mechanism = PluginMechanism.AIDL,
+            authorizedState = trustInfo.authorizedState,
+            activatedState = activatedState,
+            enabledState = enabledState,
+            lastError = lastError,
+            signingFingerprintSha256 = trustInfo.primaryFingerprintSha256,
+            isOfficialVerified = trustInfo.isOfficial,
+            canActivate = canActivate,
+        )
+    }
+
+    private fun toLegacyPluginCenterItem(context: Context, local: LegacyInstalledPluginRepository.LegacyInstalledPlugin): PluginCenterItem? {
+        val packageName = local.packageName
+        if (packageName.isBlank()) return null
+
+        val trustInfo = runCatching { PluginTrustManager.resolveTrustInfo(context, packageName) }.getOrElse {
+            PluginTrustManager.TrustInfo(
+                authorizedState = PluginAuthorizedState.REQUIRED,
+                isOfficial = false,
+                isTrusted = false,
+                primaryFingerprintSha256 = null,
+                fingerprintsSha256 = emptyList(),
+            )
+        }
+
+        var enabled = enableStore.isEnabled(context, packageName, defaultEnabled = true)
+        if (trustInfo.authorizedState == PluginAuthorizedState.REQUIRED && enabled) {
+            enableStore.setEnabled(context, packageName, false)
+            enabled = false
+        }
+
+        val enabledState = if (enabled) PluginEnabledState.READY else PluginEnabledState.DISABLED
+        val lastError = if (trustInfo.authorizedState == PluginAuthorizedState.REQUIRED) PluginError(PluginErrorCode.NOT_AUTHORIZED) else null
+
+        return PluginCenterItem(
+            title = local.title,
+            packageName = packageName,
+            versionName = local.versionName,
+            versionCode = local.versionCode,
+            versionDate = null,
+
+            updatableVersionName = null,
+            updatableVersionCode = null,
+            updatableVersionDate = null,
+            updatableApkUrl = null,
+            updatableApkSha256 = null,
+            updatableApkSizeBytes = null,
+            updatableChangelogUrl = null,
+            updatableChangelogText = null,
+
+            author = local.author ?: trustInfo.developer,
+            collaborators = emptyList(),
+            description = local.description,
+
+            packageSize = local.packageSize,
+
+            installableApkUrl = null,
+            installableApkSha256 = null,
+            installableApkSizeBytes = null,
+
+            icon = local.icon,
+            isEnabled = enabled,
+            isInstalled = true,
+            firstInstallTime = local.firstInstallTime,
+            lastUpdateTime = local.lastUpdateTime,
+            settings = null,
+            mechanism = PluginMechanism.SDK,
+            authorizedState = trustInfo.authorizedState,
+            activatedState = PluginActivatedState.NOT_SUPPORTED,
+            enabledState = enabledState,
+            lastError = lastError,
+            signingFingerprintSha256 = trustInfo.primaryFingerprintSha256,
+            isOfficialVerified = trustInfo.isOfficial,
+            canActivate = false,
         )
     }
 

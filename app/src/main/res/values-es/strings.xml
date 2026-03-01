@@ -1338,4 +1338,19 @@
     <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">Prueba a pulsar el boton \"Activar\" para activar el plugin una vez.\nSi la activacion se realiza correctamente, el boton se activara automaticamente en un periodo de tiempo.</string>
     <string name="dialog_button_activate">Activar</string>
     <string name="text_activated_successfully">Activado correctamente</string>
+    <string name="text_authorize_plugin">Autorizar plugin</string>
+    <string name="text_authorize_plugin_content">Este es un plugin de terceros. Presta atencion al origen del plugin y a la seguridad de uso.\n\nPulsa el boton \"Autorizar\" para habilitar el plugin.</string>
+    <string name="dialog_button_authorize">Autorizar</string>
+    <string name="text_plugin_official">Oficial</string>
+    <string name="text_plugin_authorized">Autorizado</string>
+    <string name="text_plugin_authorization_required">Requiere autorizacion</string>
+    <string name="text_plugin_authorization_denied">Autorizacion denegada</string>
+    <string name="text_plugin_activation_recommended">Activacion recomendada</string>
+    <string name="text_plugin_activated">Activado</string>
+    <string name="text_plugin_trusted">Confiable</string>
+    <string name="plugin_item_info_mechanism">Mecanismo</string>
+    <string name="error_plugin_is_not_enabled_in_plugin_center">El plugin \"%1$s\" no esta habilitado en el Centro de plugins</string>
+    <string name="error_plugin_is_not_authorized_in_plugin_center">El plugin \"%1$s\" no esta autorizado en el Centro de plugins</string>
+    <string name="error_plugin_not_found_in_installed_apps">No se encontro el plugin \"%1$s\" en las apps instaladas</string>
+    <string name="error_unsupported_plugin_connection">Conexion de plugin no compatible</string>
 </resources>

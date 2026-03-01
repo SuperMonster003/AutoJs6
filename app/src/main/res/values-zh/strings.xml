@@ -1335,4 +1335,19 @@
     <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">可尝试点击 \"激活\" 按钮激活一次插件.\n如激活成功, 按钮将在一定时间内自动开启.</string>
     <string name="dialog_button_activate">激活</string>
     <string name="text_activated_successfully">激活成功</string>
+    <string name="text_authorize_plugin">授权插件</string>
+    <string name="text_authorize_plugin_content">这是一个第三方插件, 请注意插件来源及使用安全.\n\n点击 \"授权\" 按钮以启用插件.</string>
+    <string name="dialog_button_authorize">授权</string>
+    <string name="text_plugin_official">官方</string>
+    <string name="text_plugin_authorized">已授权</string>
+    <string name="text_plugin_authorization_required">需要授权</string>
+    <string name="text_plugin_authorization_denied">授权拒绝</string>
+    <string name="text_plugin_activation_recommended">建议激活</string>
+    <string name="text_plugin_activated">已激活</string>
+    <string name="text_plugin_trusted">受信任</string>
+    <string name="plugin_item_info_mechanism">机制</string>
+    <string name="error_plugin_is_not_enabled_in_plugin_center">插件 \"%1$s\" 未在插件中心启用</string>
+    <string name="error_plugin_is_not_authorized_in_plugin_center">插件 \"%1$s\" 未在插件中心获得授权</string>
+    <string name="error_plugin_not_found_in_installed_apps">已安装应用中未找到插件 \"%1$s\"</string>
+    <string name="error_unsupported_plugin_connection">不支持的插件连接方式</string>
 </resources>

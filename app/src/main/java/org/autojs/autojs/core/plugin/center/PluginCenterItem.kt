@@ -47,6 +47,14 @@ data class PluginCenterItem(
     val firstInstallTime: Long? = null,
     val lastUpdateTime: Long? = null,
     val settings: PluginCenterItemSettings? = null,
+    val mechanism: PluginMechanism = PluginMechanism.AIDL,
+    var authorizedState: PluginAuthorizedState = PluginAuthorizedState.OFFICIAL,
+    var activatedState: PluginActivatedState = PluginActivatedState.NOT_SUPPORTED,
+    var enabledState: PluginEnabledState = PluginEnabledState.READY,
+    var lastError: PluginError? = null,
+    var signingFingerprintSha256: String? = null,
+    var isOfficialVerified: Boolean = false,
+    var canActivate: Boolean = false,
 ) {
     val versionSummary: String
         get() = formatVersionInfo(versionName, versionCode, versionDate)

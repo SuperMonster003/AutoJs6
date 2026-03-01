@@ -1338,4 +1338,19 @@
     <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">Essayez d\'appuyer sur le bouton \"Activer\" pour activer le plugin une fois.\nSi l\'activation reussit, le bouton s\'activera automatiquement dans un certain delai.</string>
     <string name="dialog_button_activate">Activer</string>
     <string name="text_activated_successfully">Activation reussie</string>
+    <string name="text_authorize_plugin">Autoriser le plugin</string>
+    <string name="text_authorize_plugin_content">Il s\'agit d\'un plugin tiers. Faites attention a la source du plugin et a la securite d\'utilisation.\n\nAppuyez sur le bouton \"Autoriser\" pour activer le plugin.</string>
+    <string name="dialog_button_authorize">Autoriser</string>
+    <string name="text_plugin_official">Officiel</string>
+    <string name="text_plugin_authorized">Autorise</string>
+    <string name="text_plugin_authorization_required">Autorisation requise</string>
+    <string name="text_plugin_authorization_denied">Autorisation refusee</string>
+    <string name="text_plugin_activation_recommended">Activation recommandee</string>
+    <string name="text_plugin_activated">Active</string>
+    <string name="text_plugin_trusted">De confiance</string>
+    <string name="plugin_item_info_mechanism">Mecanisme</string>
+    <string name="error_plugin_is_not_enabled_in_plugin_center">Le plugin \"%1$s\" n\'est pas active dans le Centre des plugins</string>
+    <string name="error_plugin_is_not_authorized_in_plugin_center">Le plugin \"%1$s\" n\'est pas autorise dans le Centre des plugins</string>
+    <string name="error_plugin_not_found_in_installed_apps">Plugin \"%1$s\" introuvable parmi les applis installees</string>
+    <string name="error_unsupported_plugin_connection">Connexion de plugin non prise en charge</string>
 </resources>

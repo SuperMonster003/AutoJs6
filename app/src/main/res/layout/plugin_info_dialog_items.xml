@@ -19,7 +19,7 @@
         android:layout_marginStart="@dimen/ref_md_listitem_margin_left"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/package_name_parent"
+        app:layout_constraintBottom_toTopOf="@id/mechanism_parent"
         app:layout_constraintEnd_toEndOf="parent">
 
         <androidx.constraintlayout.widget.Guideline
@@ -68,7 +68,9 @@
 
             <TextView
                 android:id="@+id/state_value_first"
-                android:text="@string/text_enabled"
+                android:visibility="gone"
+                tools:visibility="visible"
+                tools:text="@string/text_plugin_authorization_required"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -107,6 +109,45 @@
                 android:id="@+id/state_value_second"
                 android:visibility="gone"
                 tools:visibility="visible"
+                tools:text="@string/text_disabled"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center_vertical|start"
+                android:textAlignment="viewStart"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:paddingBottom="0dp"
+                android:paddingTop="0dp"
+                android:lineSpacingExtra="2dp"
+                android:textSize="@dimen/ref_md_listitem_textsize"
+                app:layout_constraintStart_toEndOf="@id/state_spliter_first_second"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/state_spliter_second_third" />
+
+            <TextView
+                android:id="@+id/state_spliter_second_third"
+                android:visibility="gone"
+                tools:visibility="visible"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center_vertical|start"
+                android:textAlignment="viewStart"
+                android:layout_marginHorizontal="8sp"
+                android:text="@string/symbol_pipe"
+                android:textSize="@dimen/ref_md_listitem_textsize"
+                android:textColor="@color/text_color_secondary"
+                app:layout_constraintStart_toEndOf="@id/state_value_second"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/state_value_third" />
+
+            <TextView
+                android:id="@+id/state_value_third"
+                android:visibility="gone"
+                tools:visibility="visible"
                 tools:text="@string/text_updatable"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -120,12 +161,79 @@
                 android:paddingTop="0dp"
                 android:lineSpacingExtra="2dp"
                 android:textSize="@dimen/ref_md_listitem_textsize"
-                app:layout_constraintStart_toEndOf="@id/state_spliter_first_second"
+                app:layout_constraintStart_toEndOf="@id/state_spliter_second_third"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />
 
         </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/mechanism_parent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/ref_md_dialog_frame_margin"
+        android:layout_marginStart="@dimen/ref_md_listitem_margin_left"
+        android:layout_marginTop="4sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/state_parent"
+        app:layout_constraintBottom_toTopOf="@id/package_name_parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/mechanism_guideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_begin="100dp" />
+
+        <TextView
+            android:id="@+id/mechanism_label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical|start"
+            android:textAlignment="viewStart"
+            android:text="@string/plugin_item_info_mechanism"
+            android:lineSpacingExtra="2dp"
+            android:textSize="@dimen/ref_md_listitem_textsize"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/mechanism_guideline" />
+
+        <TextView
+            android:id="@+id/mechanism_colon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical|start"
+            android:textAlignment="viewStart"
+            android:layout_marginHorizontal="4sp"
+            android:text="@string/symbol_colon"
+            android:textSize="@dimen/ref_md_listitem_textsize"
+            app:layout_constraintStart_toEndOf="@id/mechanism_label"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/mechanism_value" />
+
+        <TextView
+            android:id="@+id/mechanism_value"
+            android:text="@string/ellipsis_six"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical|start"
+            android:textAlignment="viewStart"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:paddingBottom="0dp"
+            android:paddingTop="0dp"
+            android:lineSpacingExtra="2dp"
+            android:textSize="@dimen/ref_md_listitem_textsize"
+            app:layout_constraintStart_toEndOf="@id/mechanism_colon"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -137,7 +245,7 @@
         android:layout_marginStart="@dimen/ref_md_listitem_margin_left"
         android:layout_marginTop="4sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/state_parent"
+        app:layout_constraintTop_toBottomOf="@id/mechanism_parent"
         app:layout_constraintBottom_toTopOf="@id/version_parent"
         app:layout_constraintEnd_toEndOf="parent">
 

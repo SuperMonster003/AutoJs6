@@ -17,13 +17,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.autojs.autojs.util.DialogUtils.showAdaptive
-import org.autojs.autojs.util.DialogUtils.makeSettingsLaunchable
-import org.autojs.autojs.util.DialogUtils.makeTextCopyable
-import org.autojs.autojs.util.DialogUtils.setCopyableTextIfAbsent
 import org.autojs.autojs.runtime.api.augment.converter.core.Bytes
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.util.ColorUtils
+import org.autojs.autojs.util.DialogUtils.makeSettingsLaunchable
+import org.autojs.autojs.util.DialogUtils.makeTextCopyable
+import org.autojs.autojs.util.DialogUtils.setCopyableTextIfAbsent
+import org.autojs.autojs.util.DialogUtils.showAdaptive
 import org.autojs.autojs.util.DisplayUtils
 import org.autojs.autojs.util.TimeUtils
 import org.autojs.autojs.util.ViewUtils
@@ -68,11 +68,11 @@ object PluginInfoDialogManager {
             lastUninstallTime = item.lastUninstallTime,
         )
         showPluginInfoDialogInternal(context, info) {
-            positiveText(R.string.text_install)
-            positiveColorRes(R.color.dialog_button_attraction)
-            onPositive { d, _ ->
+            neutralText(R.string.text_install)
+            neutralColorRes(R.color.dialog_button_attraction)
+            onNeutral { d, _ ->
                 d.dismiss()
-                val url = info.validateApkUrlAndPrompt(context, d) ?: return@onPositive
+                val url = info.validateApkUrlAndPrompt(context, d) ?: return@onNeutral
                 CoroutineScope(Dispatchers.Main).launch {
                     PluginInstaller.installFromUrlWithPrompt(context, url, info.sha256)
                 }
@@ -81,21 +81,14 @@ object PluginInfoDialogManager {
     }
 
     private fun showInstalledPluginInfoDialog(context: Context, item: PluginCenterItem) {
-        val enabledRes = if (item.isEnabled) R.string.text_enabled else R.string.text_disabled
-        val states = mutableListOf(context.getString(enabledRes)).apply {
-            if (item.isUpdatable) add(context.getString(R.string.text_updatable))
-        }
         val info = PluginInfoInstalled(
             item = item,
-            states = states,
+            states = parseStates(context, item),
             updatableVersion = item.updatableVersionSummary,
             firstInstallTime = item.firstInstallTime,
             lastUpdateTime = item.lastUpdateTime,
         )
         showPluginInfoDialogInternal(context, info) {
-            positiveText(R.string.text_uninstall)
-            positiveColorRes(R.color.dialog_button_warn)
-            onPositive { d, _ -> item.uninstallWithPrompt(context, d) }
             if (item.isUpdatable) {
                 neutralText(R.string.dialog_button_view_update)
                 neutralColorRes(R.color.dialog_button_attraction)
@@ -137,15 +130,32 @@ object PluginInfoDialogManager {
             }
             1 -> {
                 binding.stateValueFirst.text = info.states[0]
+
+                binding.stateValueFirst.isVisible = true
             }
-            else -> {
+            2 -> {
+                binding.stateValueFirst.text = info.states[0]
                 binding.stateValueSecond.text = info.states[1]
+
+                binding.stateValueFirst.isVisible = true
                 binding.stateSpliterFirstSecond.isVisible = true
                 binding.stateValueSecond.isVisible = true
+            }
+            else -> {
+                binding.stateValueFirst.text = info.states[0]
+                binding.stateValueSecond.text = info.states[1]
+                binding.stateValueThird.text = info.states[2]
+
+                binding.stateValueFirst.isVisible = true
+                binding.stateSpliterFirstSecond.isVisible = true
+                binding.stateValueSecond.isVisible = true
+                binding.stateSpliterSecondThird.isVisible = true
+                binding.stateValueThird.isVisible = true
             }
         }
 
         dialog.setCopyableTextIfAbsent(binding.packageNameValue, info.packageName)
+        dialog.setCopyableTextIfAbsent(binding.mechanismValue, info.mechanism)
         dialog.setCopyableTextIfAbsent(binding.versionValue, info.version)
         dialog.setCopyableTextIfAbsent(binding.pluginItemInfoAuthorValue, info.author)
         dialog.setCopyableTextIfAbsent(binding.descriptionValue, info.description)
@@ -237,6 +247,42 @@ object PluginInfoDialogManager {
             .cancelable(false)
     }
 
+    private fun parseStates(context: Context, item: PluginCenterItem): List<String> {
+        if (!item.isInstalled) {
+            return listOf(context.getString(R.string.text_not_installed))
+        }
+
+        val states = mutableListOf<String>()
+
+        val authText = when (item.authorizedState) {
+            PluginAuthorizedState.OFFICIAL -> context.getString(R.string.text_plugin_official)
+            PluginAuthorizedState.TRUSTED -> context.getString(R.string.text_plugin_trusted)
+            PluginAuthorizedState.USER_GRANTED -> context.getString(R.string.text_plugin_authorized)
+            PluginAuthorizedState.REQUIRED -> context.getString(R.string.text_plugin_authorization_required)
+            PluginAuthorizedState.DENIED -> context.getString(R.string.text_plugin_authorization_denied)
+        }
+        states += authText
+
+        val enabledText = when (item.enabledState) {
+            PluginEnabledState.READY -> context.getString(R.string.text_enabled)
+            PluginEnabledState.DISABLED -> context.getString(R.string.text_disabled)
+            is PluginEnabledState.ERROR -> context.getString(R.string.text_error)
+        }
+        states += enabledText
+
+        if (item.isUpdatable) {
+            states += context.getString(R.string.text_updatable)
+        }
+
+        when (item.activatedState) {
+            PluginActivatedState.RECOMMENDED -> states += context.getString(R.string.text_plugin_activation_recommended)
+            PluginActivatedState.DONE -> states += context.getString(R.string.text_plugin_activated)
+            else -> Unit
+        }
+
+        return states.filter { it.isNotBlank() }
+    }
+
     private fun PluginInfoBase.validateApkUrlAndPrompt(context: Context, parentDialog: MaterialDialog?): String? {
         val url = this.apkUrl
         return when {
@@ -295,6 +341,7 @@ object PluginInfoDialogManager {
     private fun updateGuidelines(binding: PluginInfoDialogItemsBinding) {
         val filteredBindings = listOf(
             binding.stateLabel to binding.stateGuideline,
+            binding.mechanismLabel to binding.mechanismGuideline,
             binding.packageNameLabel to binding.packageNameGuideline,
             binding.versionLabel to binding.versionGuideline,
             binding.updatableVersionLabel to binding.updatableVersionGuideline,
@@ -345,6 +392,7 @@ object PluginInfoDialogManager {
         val title: String get() = item.title
         val icon: Drawable? get() = item.icon
         val packageName: String get() = item.packageName
+        val mechanism: String get() = item.mechanism.displayName
         val version: String? get() = item.versionSummary
         val author: String? get() = item.author
         val collaborators: List<String> get() = item.collaborators

@@ -73,9 +73,7 @@
                         android:textColor="#03A5EF"
                         android:textSize="12sp"
                         android:text="@string/text_updatable" />
-
                 </FrameLayout>
-
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <LinearLayout
@@ -85,6 +83,7 @@
                 android:orientation="horizontal">
 
                 <LinearLayout
+                    android:id="@+id/item_middle_area"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -121,7 +120,6 @@
                         android:textColor="@color/text_color_primary"
                         android:textSize="13sp"
                         tools:text="SuperMonster003" />
-
                 </LinearLayout>
 
                 <FrameLayout
@@ -132,26 +130,34 @@
                     <org.autojs.autojs.theme.widget.ThemeColorSwitch
                         android:id="@+id/sw"
                         android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
+                        android:layout_height="wrap_content"
                         android:checked="true"
                         android:layout_gravity="center" />
-
                 </FrameLayout>
-
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/description"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:maxLines="2"
-                android:textColor="@color/text_color_primary_alpha_70"
-                android:textSize="12sp"
-                tools:text="百度飞桨光学字符识别插件" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
 
+                <TextView
+                    android:id="@+id/description"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:ellipsize="end"
+                    android:maxLines="2"
+                    android:textColor="@color/text_color_primary_alpha_70"
+                    android:textSize="12sp"
+                    tools:text="百度飞桨光学字符识别插件" />
+
+                <FrameLayout
+                    android:id="@+id/reserved"
+                    android:layout_width="@dimen/plugin_center_item_side_length"
+                    android:layout_height="match_parent" />
+            </LinearLayout>
         </LinearLayout>
-
     </LinearLayout>
 
     <View
@@ -196,7 +202,6 @@
                 android:textColor="@color/text_color_primary"
                 android:textSize="13sp"
                 android:translationY="-0.5dp" />
-
         </LinearLayout>
 
         <View
@@ -236,7 +241,6 @@
                 android:textSize="13sp"
                 android:translationY="-0.5dp"
                 tools:textColor="#03A5EF" />
-
         </LinearLayout>
 
         <View
@@ -273,7 +277,6 @@
                 android:textColor="@color/text_color_primary_alpha_30"
                 android:textSize="13sp"
                 android:translationY="-0.5dp" />
-
         </LinearLayout>
 
         <View
@@ -309,9 +312,6 @@
                 android:textColor="@color/text_color_primary"
                 android:textSize="13sp"
                 android:translationY="-0.5dp" />
-
         </LinearLayout>
-
     </LinearLayout>
-
 </LinearLayout>

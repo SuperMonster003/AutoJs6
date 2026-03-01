@@ -68,7 +68,7 @@ class InstalledPluginRepository {
             InstalledPlugin(
                 packageName = packageName,
                 title = d.pluginInfo?.name ?: appLabel ?: packageName,
-                description = d.pluginInfo?.description,
+                description = PluginDescriptionResolver.resolve(context, packageName, d.pluginInfo?.description),
                 author = d.pluginInfo?.author,
                 versionName = versionName,
                 versionCode = versionCode,

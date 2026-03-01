@@ -14,13 +14,14 @@ import androidx.recyclerview.widget.RecyclerView
 import de.hdodenhof.circleimageview.CircleImageView
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.util.ColorUtils
+import org.autojs.autojs.util.IntentUtils
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.colorFilterWithDesaturateOrNull
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.PluginCenterRecyclerViewItemBinding
 
 class PluginCenterItemViewHolder(
-    itemViewBinding: PluginCenterRecyclerViewItemBinding,
+    private val itemViewBinding: PluginCenterRecyclerViewItemBinding,
     private val listener: PluginCenterItemAdapter.Listener,
 ) : RecyclerView.ViewHolder(itemViewBinding.root) {
 
@@ -65,6 +66,12 @@ class PluginCenterItemViewHolder(
             iconView.setImageDrawable(d)
         } ?: iconView.setImageResource(R.mipmap.ic_app_shortcut_plugin_center_adaptive_round)
 
+        iconView.setOnClickListener {
+            if (item.isInstalled) {
+                IntentUtils.launchAppDetailsSettings(context, item.packageName)
+            }
+        }
+
         switchView.setOnCheckedChangeListener(null)
         switchView.isChecked = item.isEnabled
 
@@ -107,6 +114,14 @@ class PluginCenterItemViewHolder(
 
         btnDetailsView.setButtonState(true) {
             listener.onDetails(currentItem)
+        }
+
+        listOf(
+            itemViewBinding.title,
+            itemViewBinding.itemMiddleArea,
+            itemViewBinding.description,
+        ).forEach {
+            it.setOnClickListener { listener.onDetails(currentItem) }
         }
 
         applyUiBySwitch(switchView.isChecked, item)

@@ -1339,4 +1339,19 @@
     <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">\"有効化\" ボタンをタップして, プラグインを一度有効化してみてください.\n有効化に成功すると, 一定時間内にボタンが自動的にオンになります.</string>
     <string name="dialog_button_activate">有効化</string>
     <string name="text_activated_successfully">有効化しました</string>
+    <string name="text_authorize_plugin">プラグインを許可</string>
+    <string name="text_authorize_plugin_content">これはサードパーティ製プラグインです. 提供元と利用上の安全性に注意してください.\n\n\"許可\" ボタンをタップしてプラグインを有効にします.</string>
+    <string name="dialog_button_authorize">許可</string>
+    <string name="text_plugin_official">公式</string>
+    <string name="text_plugin_authorized">許可済み</string>
+    <string name="text_plugin_authorization_required">許可が必要</string>
+    <string name="text_plugin_authorization_denied">許可が拒否されました</string>
+    <string name="text_plugin_activation_recommended">有効化を推奨</string>
+    <string name="text_plugin_activated">有効</string>
+    <string name="text_plugin_trusted">信頼済み</string>
+    <string name="plugin_item_info_mechanism">方式</string>
+    <string name="error_plugin_is_not_enabled_in_plugin_center">プラグイン \"%1$s\" はプラグインセンターで有効になっていません</string>
+    <string name="error_plugin_is_not_authorized_in_plugin_center">プラグイン \"%1$s\" はプラグインセンターで許可されていません</string>
+    <string name="error_plugin_not_found_in_installed_apps">インストール済みアプリにプラグイン \"%1$s\" が見つかりません</string>
+    <string name="error_unsupported_plugin_connection">サポートされていないプラグイン接続方式です</string>
 </resources>
