@@ -27,6 +27,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.CancellableContinuation
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
+import org.autojs.autojs.core.plugin.center.PluginTrustManager
 import org.autojs.plugin.paddle.ocr.api.IOcrPlugin
 import org.autojs.plugin.paddle.ocr.api.OcrOptions
 import org.autojs.plugin.paddle.ocr.api.OcrResult
@@ -85,6 +86,9 @@ object PaddleOcrPluginHost {
     }
 
     suspend fun probe(context: Context, packageName: String): PluginInfo {
+        if (!PluginTrustManager.isAuthorized(context, packageName)) {
+            error("Plugin not authorized: $packageName")
+        }
         val serviceInfo = queryOcrServices(context, packageName).firstOrNull()
             ?: error("No OCR service found for package: $packageName")
         return withService(context, serviceInfo, DEFAULT_BIND_TIMEOUT_MS) { it.getInfo() }
@@ -97,6 +101,9 @@ object PaddleOcrPluginHost {
         options: OcrOptions = OcrOptions(),
         callTimeoutMs: Long = DEFAULT_CALL_TIMEOUT_MS,
     ): List<String> {
+        if (!PluginTrustManager.isAuthorized(context, target.serviceInfo.packageName)) {
+            error("Plugin not authorized: ${target.serviceInfo.packageName}")
+        }
         ensureRawSupport(target, options)
         val start = uptimeMillis()
         return createTempPfd(bitmap, options).use { pfd ->
@@ -117,6 +124,9 @@ object PaddleOcrPluginHost {
         options: OcrOptions = OcrOptions(),
         callTimeoutMs: Long = DEFAULT_CALL_TIMEOUT_MS,
     ): List<OcrResult> {
+        if (!PluginTrustManager.isAuthorized(context, target.serviceInfo.packageName)) {
+            error("Plugin not authorized: ${target.serviceInfo.packageName}")
+        }
         ensureRawSupport(target, options)
         val start = uptimeMillis()
         return createTempPfd(bitmap, options).use { pfd ->
@@ -142,6 +152,7 @@ object PaddleOcrPluginHost {
         val list = discover(context)
             .filter { it.pluginInfo != null }
             .filter { PluginEnableStore.isEnabled(context, it.serviceInfo.packageName, true) }
+            .filter { PluginTrustManager.isAuthorized(context, it.serviceInfo.packageName) }
         if (list.isEmpty()) return null
         if (engineId != null) {
             list.firstOrNull { d -> d.pluginInfo?.id == engineId }?.let { return it }

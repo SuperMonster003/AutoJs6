@@ -1340,4 +1340,19 @@
     <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">جرّب الضغط على زر \"تفعيل\" لتفعيل الاضافة مرة واحدة.\nاذا نجح التفعيل، فسيتم تشغيل الزر تلقائيا خلال فترة زمنية معينة.</string>
     <string name="dialog_button_activate">تفعيل</string>
     <string name="text_activated_successfully">تم التفعيل بنجاح</string>
+    <string name="text_authorize_plugin">تفويض الاضافة</string>
+    <string name="text_authorize_plugin_content">هذه اضافة من طرف ثالث. يرجى الانتباه الى مصدر الاضافة وامان الاستخدام.\n\nاضغط زر \"تفويض\" لتمكين الاضافة.</string>
+    <string name="dialog_button_authorize">تفويض</string>
+    <string name="text_plugin_official">رسمي</string>
+    <string name="text_plugin_authorized">مفوّض</string>
+    <string name="text_plugin_authorization_required">يتطلب تفويضا</string>
+    <string name="text_plugin_authorization_denied">تم رفض التفويض</string>
+    <string name="text_plugin_activation_recommended">يوصى بالتفعيل</string>
+    <string name="text_plugin_activated">مفعّل</string>
+    <string name="text_plugin_trusted">موثوق</string>
+    <string name="plugin_item_info_mechanism">الالية</string>
+    <string name="error_plugin_is_not_enabled_in_plugin_center">الاضافة \"%1$s\" غير مُمكّنة في مركز الاضافات</string>
+    <string name="error_plugin_is_not_authorized_in_plugin_center">الاضافة \"%1$s\" غير مُفوّضة في مركز الاضافات</string>
+    <string name="error_plugin_not_found_in_installed_apps">لم يتم العثور على الاضافة \"%1$s\" ضمن التطبيقات المثبتة</string>
+    <string name="error_unsupported_plugin_connection">طريقة اتصال الاضافة غير مدعومة</string>
 </resources>

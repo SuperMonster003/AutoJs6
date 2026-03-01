@@ -1338,4 +1338,19 @@
     <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">Попробуйте нажать кнопку \"Активировать\", чтобы активировать плагин один раз.\nЕсли активация пройдет успешно, кнопка автоматически включится в течение некоторого времени.</string>
     <string name="dialog_button_activate">Активировать</string>
     <string name="text_activated_successfully">Активация выполнена</string>
+    <string name="text_authorize_plugin">Авторизовать плагин</string>
+    <string name="text_authorize_plugin_content">Это сторонний плагин. Обратите внимание на источник плагина и безопасность использования.\n\nНажмите кнопку \"Авторизовать\", чтобы включить плагин.</string>
+    <string name="dialog_button_authorize">Авторизовать</string>
+    <string name="text_plugin_official">Официальный</string>
+    <string name="text_plugin_authorized">Авторизован</string>
+    <string name="text_plugin_authorization_required">Требуется авторизация</string>
+    <string name="text_plugin_authorization_denied">Авторизация отклонена</string>
+    <string name="text_plugin_activation_recommended">Рекомендуется активация</string>
+    <string name="text_plugin_activated">Активирован</string>
+    <string name="text_plugin_trusted">Доверенный</string>
+    <string name="plugin_item_info_mechanism">Механизм</string>
+    <string name="error_plugin_is_not_enabled_in_plugin_center">Плагин \"%1$s\" не включен в Центре плагинов</string>
+    <string name="error_plugin_is_not_authorized_in_plugin_center">Плагин \"%1$s\" не авторизован в Центре плагинов</string>
+    <string name="error_plugin_not_found_in_installed_apps">Плагин \"%1$s\" не найден среди установленных приложений</string>
+    <string name="error_unsupported_plugin_connection">Неподдерживаемое подключение плагина</string>
 </resources>

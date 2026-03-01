@@ -1334,4 +1334,19 @@
     <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">可嘗試點選 \"啟用\" 按鈕啟用一次外掛.\n如啟用成功, 按鈕將在一定時間內自動開啟.</string>
     <string name="dialog_button_activate">啟用</string>
     <string name="text_activated_successfully">啟用成功</string>
+    <string name="text_authorize_plugin">授權外掛</string>
+    <string name="text_authorize_plugin_content">這是一個第三方外掛, 請注意外掛來源及使用安全.\n\n點選 \"授權\" 按鈕以啟用外掛.</string>
+    <string name="dialog_button_authorize">授權</string>
+    <string name="text_plugin_official">官方</string>
+    <string name="text_plugin_authorized">已授權</string>
+    <string name="text_plugin_authorization_required">需要授權</string>
+    <string name="text_plugin_authorization_denied">授權拒絕</string>
+    <string name="text_plugin_activation_recommended">建議啟用</string>
+    <string name="text_plugin_activated">已啟用</string>
+    <string name="text_plugin_trusted">受信任</string>
+    <string name="plugin_item_info_mechanism">機制</string>
+    <string name="error_plugin_is_not_enabled_in_plugin_center">外掛 \"%1$s\" 未在外掛中心啟用</string>
+    <string name="error_plugin_is_not_authorized_in_plugin_center">外掛 \"%1$s\" 未在外掛中心獲得授權</string>
+    <string name="error_plugin_not_found_in_installed_apps">已安裝應用中未找到外掛 \"%1$s\"</string>
+    <string name="error_unsupported_plugin_connection">不支援的外掛連線方式</string>
 </resources>

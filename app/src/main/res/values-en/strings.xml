@@ -1335,4 +1335,19 @@
     <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">Try clicking the \"Activate\" button to activate the plugin once.\nIf activation is successful, the button will automatically turn on within a certain period of time.</string>
     <string name="dialog_button_activate">Activate</string>
     <string name="text_activated_successfully">Activated successfully</string>
+    <string name="text_authorize_plugin">Authorize Plugin</string>
+    <string name="text_authorize_plugin_content">This is a third-party plugin. Please pay attention to the plugin source and usage safety.\n\nClick the \"Authorize\" button to enable the plugin.</string>
+    <string name="dialog_button_authorize">Authorize</string>
+    <string name="text_plugin_official">Official</string>
+    <string name="text_plugin_authorized">Authorized</string>
+    <string name="text_plugin_authorization_required">Authorization required</string>
+    <string name="text_plugin_authorization_denied">Authorization denied</string>
+    <string name="text_plugin_activation_recommended">Activation recommended</string>
+    <string name="text_plugin_activated">Activated</string>
+    <string name="text_plugin_trusted">Trusted</string>
+    <string name="plugin_item_info_mechanism">Mechanism</string>
+    <string name="error_plugin_is_not_enabled_in_plugin_center">Plugin \"%1$s\" is not enabled in Plugin Center</string>
+    <string name="error_plugin_is_not_authorized_in_plugin_center">Plugin \"%1$s\" is not authorized in Plugin Center</string>
+    <string name="error_plugin_not_found_in_installed_apps">Plugin \"%1$s\" not found in installed apps</string>
+    <string name="error_unsupported_plugin_connection">Unsupported plugin connection</string>
 </resources>

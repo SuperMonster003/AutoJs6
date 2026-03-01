@@ -11,10 +11,13 @@ import android.os.Parcel
 import android.os.RemoteException
 import org.autojs.autojs.core.plugin.Plugin
 import org.autojs.autojs.core.plugin.Plugin.PluginLoadException
+import org.autojs.autojs.core.plugin.center.PluginEnableStore
+import org.autojs.autojs.core.plugin.center.PluginTrustManager
 import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.pio.PFiles.copyAssetDir
 import org.autojs.autojs.pio.PFiles.deleteRecursively
 import org.autojs.autojs.rhino.TopLevelScope
+import org.autojs.autojs6.R
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 
@@ -32,9 +35,16 @@ class Plugins(private val context: Context, private val runtime: PluginRuntime) 
     fun load(packageName: String): Plugin {
         mPlugins[packageName]?.let { return it }
 
+        if (!PluginEnableStore.isEnabled(context, packageName, defaultEnabled = true)) {
+            throw PluginLoadException(context.getString(R.string.error_plugin_is_not_enabled_in_plugin_center, packageName))
+        }
+        if (!PluginTrustManager.isAuthorized(context, packageName)) {
+            throw PluginLoadException(context.getString(R.string.error_plugin_is_not_authorized_in_plugin_center, packageName))
+        }
+
         var packageContext = packages[packageName] ?: loadInstalledPackage(packageName) ?: throw Resources.NotFoundException(
             // "Plugin $packageName not found in installed apps or directory ${File(runtime.pluginSearchDir)}"
-            "Plugin $packageName not found in installed apps"
+            context.getString(R.string.error_plugin_not_found_in_installed_apps, packageName)
         )
         packages.putIfAbsent(packageName, packageContext)?.let { packageContext = it }
 
@@ -101,9 +111,9 @@ class Plugins(private val context: Context, private val runtime: PluginRuntime) 
         override fun getFilesDir(): File = hostContext.filesDir
     }
 
-    private class UnsupportedConnection : ServiceProxy(null), IRemoteCall {
+    private inner class UnsupportedConnection : ServiceProxy(null), IRemoteCall {
         override fun call(action: String, args: Map<Any?, Any?>, callback: IRemoteCallback): Map<Any?, Any?> {
-            throw UnsupportedOperationException("Unsupported plugin connection")
+            throw UnsupportedOperationException(context.getString(R.string.error_unsupported_plugin_connection))
         }
     }
 

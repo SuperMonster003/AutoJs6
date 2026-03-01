@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
 import androidx.core.net.toUri
@@ -56,8 +57,24 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
     // zh-CN: 当前用于 UI 过滤的查询串, null 表示 "不做过滤".
     private var currentQuery: String? = null
 
-    private var currentSort: Sort = Sort.TITLE_ASC
-    private var currentFilter: Filter = Filter.ALL
+    private lateinit var currentSort: Sort
+    private lateinit var currentFilter: Filter
+
+    private val sortPrefListener = SharedPreferences.OnSharedPreferenceChangeListener { _, _ ->
+        if (!isAdded || _binding == null) return@OnSharedPreferenceChangeListener
+        val ctx = contextRef
+        viewLifecycleOwner.lifecycleScope.launch {
+            setSort(PluginSortStore.getSort(ctx))
+        }
+    }
+
+    private val filterPrefListener = SharedPreferences.OnSharedPreferenceChangeListener { _, _ ->
+        if (!isAdded || _binding == null) return@OnSharedPreferenceChangeListener
+        val ctx = contextRef
+        viewLifecycleOwner.lifecycleScope.launch {
+            setFilter(PluginFilterStore.getFilter(ctx))
+        }
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -65,75 +82,34 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
 
         val context = requireContext().also { contextRef = it }
 
+        currentSort = PluginSortStore.getSort(context)
+        currentFilter = PluginFilterStore.getFilter(context)
+
         adapter = PluginCenterItemAdapter(object : PluginCenterItemAdapter.Listener {
             override fun onToggleEnable(item: PluginCenterItem, enabled: Boolean) {
                 if (!enabled) {
                     vm.setEnabled(contextRef, item.packageName, false)
                     item.isEnabled = false
+                    item.enabledState = PluginEnabledState.DISABLED
+                    item.lastError = null
+                    adapter.notifyDataSetChanged()
                     return
                 }
 
-                vm.setEnabled(contextRef, item.packageName, true)
-                item.isEnabled = true
+                if (!item.isInstalled) {
+                    vm.setEnabled(contextRef, item.packageName, false)
+                    item.isEnabled = false
+                    item.enabledState = PluginEnabledState.DISABLED
+                    item.lastError = null
+                    adapter.notifyDataSetChanged()
+                    ViewUtils.showToast(contextRef, getString(R.string.text_unavailable), true)
+                    return
+                }
 
-                viewLifecycleOwner.lifecycleScope.launch {
-                    val error = runCatching {
-                        PaddleOcrPluginHost.probe(contextRef, item.packageName)
-                    }.exceptionOrNull()
-                    if (error != null && error !is CancellationException) {
-                        if (isAdded) {
-                            val pm = contextRef.packageManager
-                            val launchIntent = pm.getLaunchIntentForPackage(item.packageName)
-                            val wakeIntent = PluginWakeManager.buildWakeIntent(contextRef, item.packageName)
-
-                            val errorBody = error.message ?: error.toString()
-                            val message = listOf(
-                                contextRef.getString(R.string.text_exception_info) + contextRef.getString(R.string.symbol_colon_with_blank),
-                                errorBody,
-                                contextRef.getString(R.string.text_hint) + contextRef.getString(R.string.symbol_colon_with_blank),
-                                getString(R.string.hint_try_clicking_the_activate_button_to_activate_the_plugin)
-                            ).joinToString("\n\n")
-
-                            MaterialDialog.Builder(contextRef)
-                                .title(R.string.error_failed_to_enable_the_plugin)
-                                .content(message)
-                                .neutralText(R.string.dialog_button_copy)
-                                .neutralColorRes(R.color.dialog_button_hint)
-                                .onNeutral { d, _ ->
-                                    ClipboardUtils.setClip(contextRef, errorBody)
-                                    ViewUtils.showSnack(d.view, R.string.text_already_copied_to_clip, false)
-                                }
-                                .negativeText(R.string.dialog_button_dismiss)
-                                .negativeColorRes(R.color.dialog_button_default)
-                                .onNegative { d, _ -> d.dismiss() }
-                                .apply positive@{
-                                    positiveText(R.string.dialog_button_activate)
-
-                                    val openIntent = wakeIntent ?: launchIntent ?: run {
-                                        positiveColorRes(R.color.dialog_button_unavailable)
-                                        onPositive { d, _ ->
-                                            ViewUtils.showSnack(d.view, R.string.text_unavailable, false)
-                                        }
-                                        return@positive
-                                    }
-
-                                    positiveColorRes(R.color.dialog_button_attraction)
-                                    onPositive { d, _ ->
-                                        val started = openIntent.startSafely(contextRef, true)
-                                        d.dismiss()
-                                        if (started) {
-                                            ViewUtils.showToast(contextRef, getString(R.string.text_activated_successfully), true)
-                                            tryEnableAfterWake(item)
-                                        }
-                                    }
-                                }
-                                .cancelable(false)
-                                .autoDismiss(false)
-                                .show()
-                        }
-                        vm.setEnabled(contextRef, item.packageName, false)
-                        item.isEnabled = false
-                        adapter.notifyDataSetChanged()
+                ensureAuthorized(item) { authorizedItem ->
+                    when (authorizedItem.mechanism) {
+                        PluginMechanism.SDK -> enableLegacyPlugin(authorizedItem)
+                        PluginMechanism.AIDL -> enableAidlPlugin(authorizedItem)
                     }
                 }
             }
@@ -269,6 +245,8 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
                 Filter.ENABLED -> item.isEnabled
                 Filter.DISABLED -> !item.isEnabled
                 Filter.UPDATABLE -> item.updatableVersionCode != null
+                Filter.AIDL -> item.mechanism == PluginMechanism.AIDL
+                Filter.SDK -> item.mechanism == PluginMechanism.SDK
             }
         }
 
@@ -364,6 +342,161 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         }
     }
 
+    private fun ensureAuthorized(item: PluginCenterItem, onAuthorized: (PluginCenterItem) -> Unit) {
+        if (item.authorizedState != PluginAuthorizedState.REQUIRED) {
+            onAuthorized(item)
+            return
+        }
+
+        val authError = PluginError(PluginErrorCode.NOT_AUTHORIZED)
+        vm.setEnabled(contextRef, item.packageName, false, authError)
+        item.isEnabled = false
+        item.enabledState = PluginEnabledState.DISABLED
+        item.lastError = authError
+        adapter.notifyDataSetChanged()
+
+        val fingerprint = item.signingFingerprintSha256
+        if (fingerprint.isNullOrBlank()) {
+            ViewUtils.showToast(contextRef, getString(R.string.text_unavailable), true)
+            vm.setEnabled(contextRef, item.packageName, false, authError)
+            item.isEnabled = false
+            item.enabledState = PluginEnabledState.DISABLED
+            item.lastError = authError
+            adapter.notifyDataSetChanged()
+            return
+        }
+
+        MaterialDialog.Builder(contextRef)
+            .title(R.string.text_authorize_plugin)
+            .content(R.string.text_authorize_plugin_content)
+            .negativeText(R.string.dialog_button_cancel)
+            .negativeColorRes(R.color.dialog_button_default)
+            .positiveText(R.string.dialog_button_authorize)
+            .positiveColorRes(R.color.dialog_button_attraction)
+            .onPositive { d, _ ->
+                PluginAuthorizationStore.grant(contextRef, item.packageName, fingerprint)
+                item.authorizedState = PluginAuthorizedState.USER_GRANTED
+                item.lastError = null
+                d.dismiss()
+                adapter.notifyDataSetChanged()
+                onAuthorized(item)
+            }
+            .onNegative { d, _ -> d.dismiss() }
+            .cancelable(true)
+            .show()
+    }
+
+    private fun enableLegacyPlugin(item: PluginCenterItem) {
+        vm.setEnabled(contextRef, item.packageName, true)
+        item.isEnabled = true
+        item.enabledState = PluginEnabledState.READY
+        item.lastError = null
+        adapter.notifyDataSetChanged()
+    }
+
+    private fun enableAidlPlugin(item: PluginCenterItem) {
+        vm.setEnabled(contextRef, item.packageName, true)
+        item.isEnabled = true
+        item.enabledState = PluginEnabledState.READY
+        item.lastError = null
+        adapter.notifyDataSetChanged()
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            val error = runCatching {
+                PaddleOcrPluginHost.probe(contextRef, item.packageName)
+            }.exceptionOrNull()
+            if (error != null && error !is CancellationException) {
+                val mapped = PluginErrorMapper.fromThrowable(error)
+                val shouldRecommend = item.canActivate && PluginErrorMapper.shouldRecommendActivation(mapped)
+                if (item.activatedState == PluginActivatedState.UNKNOWN && shouldRecommend) {
+                    item.activatedState = PluginActivatedState.RECOMMENDED
+                }
+                val finalError = if (shouldRecommend) {
+                    mapped.copy(
+                        code = PluginErrorCode.ROM_FIRST_RUN_RESTRICTED_SUSPECTED,
+                        recoverHint = getString(R.string.hint_try_clicking_the_activate_button_to_activate_the_plugin),
+                    )
+                } else mapped
+                showEnableErrorDialog(item, finalError, error)
+                vm.setEnabled(contextRef, item.packageName, false, finalError)
+                item.isEnabled = false
+                item.enabledState = PluginEnabledState.ERROR(finalError)
+                item.lastError = finalError
+                adapter.notifyDataSetChanged()
+                return@launch
+            }
+
+            vm.setEnabled(contextRef, item.packageName, true)
+            item.isEnabled = true
+            item.enabledState = PluginEnabledState.READY
+            item.lastError = null
+            adapter.notifyDataSetChanged()
+        }
+    }
+
+    private fun showEnableErrorDialog(item: PluginCenterItem, mapped: PluginError, raw: Throwable) {
+        if (!isAdded) return
+
+        val pm = contextRef.packageManager
+        val launchIntent = pm.getLaunchIntentForPackage(item.packageName)
+        val wakeIntent = if (item.canActivate) PluginWakeManager.buildWakeIntent(contextRef, item.packageName) else null
+
+        val errorBody = raw.message ?: raw.toString()
+        val messageParts = mutableListOf(
+            contextRef.getString(R.string.text_exception_info) + contextRef.getString(R.string.symbol_colon_with_blank),
+            errorBody,
+        )
+        val hintText = mapped.recoverHint?.takeIf { it.isNotBlank() }
+            ?: if (item.canActivate && PluginErrorMapper.shouldRecommendActivation(mapped)) {
+                getString(R.string.hint_try_clicking_the_activate_button_to_activate_the_plugin)
+            } else null
+        if (!hintText.isNullOrBlank()) {
+            messageParts += contextRef.getString(R.string.text_hint) + contextRef.getString(R.string.symbol_colon_with_blank)
+            messageParts += hintText
+        }
+        val message = messageParts.joinToString("\n\n")
+
+        MaterialDialog.Builder(contextRef)
+            .title(R.string.error_failed_to_enable_the_plugin)
+            .content(message)
+            .neutralText(R.string.dialog_button_copy)
+            .neutralColorRes(R.color.dialog_button_hint)
+            .onNeutral { d, _ ->
+                ClipboardUtils.setClip(contextRef, errorBody)
+                ViewUtils.showSnack(d.view, R.string.text_already_copied_to_clip, false)
+            }
+            .negativeText(R.string.dialog_button_dismiss)
+            .negativeColorRes(R.color.dialog_button_default)
+            .onNegative { d, _ -> d.dismiss() }
+            .apply positive@{
+                positiveText(R.string.dialog_button_activate)
+
+                val openIntent = wakeIntent ?: launchIntent ?: run {
+                    positiveColorRes(R.color.dialog_button_unavailable)
+                    onPositive { d, _ ->
+                        ViewUtils.showSnack(d.view, R.string.text_unavailable, false)
+                    }
+                    return@positive
+                }
+
+                positiveColorRes(R.color.dialog_button_attraction)
+                onPositive { d, _ ->
+                    val started = openIntent.startSafely(contextRef, true)
+                    d.dismiss()
+                    if (started) {
+                        PluginActivationStore.markActivated(contextRef, item.packageName)
+                        item.activatedState = PluginActivatedState.DONE
+                        ViewUtils.showToast(contextRef, getString(R.string.text_activated_successfully), true)
+                        adapter.notifyDataSetChanged()
+                        tryEnableAfterWake(item)
+                    }
+                }
+            }
+            .cancelable(false)
+            .autoDismiss(false)
+            .show()
+    }
+
     private fun tryEnableAfterWake(item: PluginCenterItem) {
         viewLifecycleOwner.lifecycleScope.launch {
             val delays = longArrayOf(300L, 800L, 1500L)
@@ -376,6 +509,8 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
                     if (isAdded && _binding != null) {
                         vm.setEnabled(contextRef, item.packageName, true)
                         item.isEnabled = true
+                        item.enabledState = PluginEnabledState.READY
+                        item.lastError = null
                         adapter.notifyDataSetChanged()
                     }
                     return@launch
@@ -389,6 +524,16 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
 
     override fun onStart() {
         super.onStart()
+        if (::contextRef.isInitialized) {
+            PluginSortStore.registerOnSharedPreferenceChangeListener(contextRef, sortPrefListener)
+            PluginFilterStore.registerOnSharedPreferenceChangeListener(contextRef, filterPrefListener)
+
+            // Sync with latest persisted state (e.g., changed while fragment was stopped).
+            // zh-CN: 同步最新的持久化状态 (如在 Fragment 停止期间被修改).
+            setSort(PluginSortStore.getSort(contextRef))
+            setFilter(PluginFilterStore.getFilter(contextRef))
+        }
+
         pkgReceiver ?: run registerPackageReceiver@{
             pkgReceiver = object : BroadcastReceiver() {
                 override fun onReceive(context: Context, intent: Intent) {
@@ -449,6 +594,10 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
 
     override fun onStop() {
         super.onStop()
+        if (::contextRef.isInitialized) {
+            PluginSortStore.unregisterOnSharedPreferenceChangeListener(contextRef, sortPrefListener)
+            PluginFilterStore.unregisterOnSharedPreferenceChangeListener(contextRef, filterPrefListener)
+        }
         pkgChangeRefreshJob?.cancel()
         pkgChangeRefreshJob = null
         pkgReceiver?.let { runCatching { requireContext().unregisterReceiver(it) } }
@@ -475,21 +624,23 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
 
     // Sort strategy for rendering list.
     // zh-CN: 用于渲染列表的排序策略.
-    enum class Sort {
-        TITLE_ASC,
-        LAST_UPDATE_DESC,
-        PACKAGE_SIZE_DESC,
+    enum class Sort(val titleRes: Int) {
+        TITLE_ASC(R.string.text_sort_by_name),
+        LAST_UPDATE_DESC(R.string.text_sort_by_last_update_time),
+        PACKAGE_SIZE_DESC(R.string.text_sort_by_package_size),
     }
 
     // Filter strategy for rendering list.
     // zh-CN: 用于渲染列表的筛选策略.
-    enum class Filter {
-        ALL,
-        INSTALLED,
-        NOT_INSTALLED,
-        ENABLED,
-        DISABLED,
-        UPDATABLE,
+    enum class Filter(val titleRes: Int) {
+        ALL(R.string.text_all),
+        INSTALLED(R.string.text_installed),
+        NOT_INSTALLED(R.string.text_not_installed),
+        ENABLED(R.string.text_enabled),
+        DISABLED(R.string.text_disabled),
+        UPDATABLE(R.string.text_updatable),
+        AIDL(R.string.text_plugin_mechanism_aidl),
+        SDK(R.string.text_plugin_mechanism_sdk),
     }
 
 }

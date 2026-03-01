@@ -13,8 +13,8 @@ import com.afollestad.materialdialogs.MaterialDialog
 import kotlinx.coroutines.launch
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.widget.SearchViewItem
-import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.DialogUtils.choiceWidgetThemeColor
+import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.onceGlobalLayout
 import org.autojs.autojs.util.ViewUtils.setMenuIconsColorByThemeColorLuminance
@@ -118,60 +118,46 @@ class PluginCenterActivity : BaseActivity() {
     private fun showSortDialog(center: PluginCenterFragment?) {
         if (center == null) return
 
+        val entries = PluginCenterFragment.Sort.values()
+
         MaterialDialog.Builder(this)
             .title(R.string.text_sort)
-            .items(
-                listOf(
-                    getString(R.string.text_sort_by_name),
-                    getString(R.string.text_sort_by_last_update_time),
-                    getString(R.string.text_sort_by_package_size),
-                )
-            )
-            .itemsCallback { d, _, which, _ ->
+            .items(entries.map { getString(it.titleRes) })
+            .itemsCallbackSingleChoice(PluginSortStore.getSortOrdinal(this)) { d, _, which, _ ->
                 d.dismiss()
-                when (which) {
-                    0 -> center.setSort(PluginCenterFragment.Sort.TITLE_ASC)
-                    1 -> center.setSort(PluginCenterFragment.Sort.LAST_UPDATE_DESC)
-                    2 -> center.setSort(PluginCenterFragment.Sort.PACKAGE_SIZE_DESC)
-                    else -> Unit
-                }
+                val selectedSort = entries[which]
+                // center.setSort(selectedSort)
+                PluginSortStore.setSort(this, selectedSort)
+                true
             }
             .choiceWidgetThemeColor()
-            .negativeText(R.string.text_cancel)
+            .negativeText(R.string.dialog_button_cancel)
             .negativeColorRes(R.color.dialog_button_default)
+            .positiveText(R.string.dialog_button_confirm)
+            .positiveColorRes(R.color.dialog_button_attraction)
             .show()
     }
 
     private fun showFilterDialog(center: PluginCenterFragment?) {
         if (center == null) return
 
+        val entries = PluginCenterFragment.Filter.values()
+
         MaterialDialog.Builder(this)
             .title(R.string.text_filter)
-            .items(
-                listOf(
-                    getString(R.string.text_all),
-                    getString(R.string.text_installed),
-                    getString(R.string.text_not_installed),
-                    getString(R.string.text_enabled),
-                    getString(R.string.text_disabled),
-                    getString(R.string.text_updatable),
-                )
-            )
-            .itemsCallback { d, _, which, _ ->
+            .items(entries.map { getString(it.titleRes) })
+            .itemsCallbackSingleChoice(PluginFilterStore.getFilterOrdinal(this)) { d, _, which, _ ->
                 d.dismiss()
-                when (which) {
-                    0 -> center.setFilter(PluginCenterFragment.Filter.ALL)
-                    1 -> center.setFilter(PluginCenterFragment.Filter.INSTALLED)
-                    2 -> center.setFilter(PluginCenterFragment.Filter.NOT_INSTALLED)
-                    3 -> center.setFilter(PluginCenterFragment.Filter.ENABLED)
-                    4 -> center.setFilter(PluginCenterFragment.Filter.DISABLED)
-                    5 -> center.setFilter(PluginCenterFragment.Filter.UPDATABLE)
-                    else -> Unit
-                }
+                val selectedFilter = entries[which]
+                // center.setFilter(selectedFilter)
+                PluginFilterStore.setFilter(this, selectedFilter)
+                true
             }
             .choiceWidgetThemeColor()
-            .negativeText(R.string.text_cancel)
+            .negativeText(R.string.dialog_button_cancel)
             .negativeColorRes(R.color.dialog_button_default)
+            .positiveText(R.string.dialog_button_confirm)
+            .positiveColorRes(R.color.dialog_button_attraction)
             .show()
     }
 
