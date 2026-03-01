@@ -72,7 +72,7 @@ object Util : Augmentable() {
         ::isNull.name,
         ::isNullOrUndefined.name,
         ::isNumber.name,
-        ::isSting.name,
+        ::isString.name,
         ::isSymbol.name,
         ::isUndefined.name,
         ::isRegExp.name,
@@ -154,7 +154,7 @@ object Util : Augmentable() {
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
-    fun isSting(args: Array<out Any?>): Boolean = ensureArgumentsOnlyOne(args) {
+    fun isString(args: Array<out Any?>): Boolean = ensureArgumentsOnlyOne(args) {
         it.isJsString()
     }
 
