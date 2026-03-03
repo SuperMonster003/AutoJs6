@@ -141,6 +141,9 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         put("android.permission.ACCESS_WIFI_STATE", R.string.text_permission_desc_access_wifi_state);
         put("android.permission.BLUETOOTH", R.string.text_permission_desc_bluetooth);
         put("android.permission.BLUETOOTH_ADMIN", R.string.text_permission_desc_bluetooth_admin);
+        put("android.permission.BLUETOOTH_CONNECT", R.string.text_permission_desc_bluetooth_connect);
+        put("android.permission.BLUETOOTH_SCAN", R.string.text_permission_desc_bluetooth_scan);
+        put("android.permission.BLUETOOTH_ADVERTISE", R.string.text_permission_desc_bluetooth_advertise);
         put("android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS", R.string.text_permission_desc_broadcast_close_system_dialogs);
         put("android.permission.CALL_PHONE", R.string.text_permission_desc_call_phone);
         put("android.permission.CAMERA", R.string.text_permission_desc_camera);
