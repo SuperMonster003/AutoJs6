@@ -776,6 +776,9 @@
     <string name="text_permission_desc_billing">允许应用执行应用内购买</string>
     <string name="text_permission_desc_bluetooth">允许应用访问蓝牙设备</string>
     <string name="text_permission_desc_bluetooth_admin">允许应用配置蓝牙设备</string>
+    <string name="text_permission_desc_bluetooth_connect">允许应用访问蓝牙设备及连接状态</string>
+    <string name="text_permission_desc_bluetooth_scan">允许应用扫描附近的蓝牙设备</string>
+    <string name="text_permission_desc_bluetooth_advertise">允许应用通过蓝牙广播</string>
     <string name="text_permission_desc_broadcast_close_system_dialogs">允许应用发送一个意图来关闭系统对话框</string>
     <string name="text_permission_desc_call_phone">允许应用拨打电话</string>
     <string name="text_permission_desc_camera">允许应用访问相机</string>
