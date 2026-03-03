@@ -780,6 +780,9 @@
     <string name="text_permission_desc_billing">앱이 인앱 구매를 수행하도록 허용합니다</string>
     <string name="text_permission_desc_bluetooth">앱이 블루투스 기기에 접근하도록 허용합니다</string>
     <string name="text_permission_desc_bluetooth_admin">앱이 블루투스 기기를 구성하도록 허용합니다</string>
+    <string name="text_permission_desc_bluetooth_connect">앱이 블루투스 장치 및 연결 상태에 접근하도록 허용합니다</string>
+    <string name="text_permission_desc_bluetooth_scan">앱이 근처 블루투스 장치를 검색하도록 허용합니다</string>
+    <string name="text_permission_desc_bluetooth_advertise">앱이 블루투스로 광고하도록 허용합니다</string>
     <string name="text_permission_desc_broadcast_close_system_dialogs">앱이 시스템 대화 상자를 닫기 위한 인텐트를 보내도록 허용합니다</string>
     <string name="text_permission_desc_call_phone">앱이 전화를 걸도록 허용합니다</string>
     <string name="text_permission_desc_camera">앱이 카메라에 접근하도록 허용합니다</string>
