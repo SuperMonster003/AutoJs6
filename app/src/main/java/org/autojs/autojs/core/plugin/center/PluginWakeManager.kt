@@ -4,8 +4,6 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import androidx.core.content.edit
-import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.util.IntentUtils.startSafely
 
 /**
@@ -13,18 +11,12 @@ import org.autojs.autojs.util.IntentUtils.startSafely
  */
 object PluginWakeManager {
 
-    private const val SP = "plugin_center_wake"
-    private const val ACTION_OCR_WAKE = "org.autojs.plugin.PADDLE_OCR.WAKE"
+    private const val ACTION_WAKE = "org.autojs.plugin.action.WAKE"
     private const val WAKE_ACTIVITY_META = "org.autojs.plugin.WAKE_ACTIVITY"
 
-    private val storeContext by lazy { GlobalAppContext.get() }
-
     fun tryAutoWakeIfNeeded(context: Context, packageName: String): Boolean {
-        if (isAutoWakeAttempted(packageName)) return false
         val intent = buildWakeIntent(context, packageName) ?: return false
-        val started = intent.startSafely(context, true)
-        markAutoWakeAttempted(packageName)
-        return started
+        return intent.startSafely(context, true)
     }
 
     fun buildWakeIntent(context: Context, packageName: String): Intent? {
@@ -36,30 +28,13 @@ object PluginWakeManager {
             ComponentName(packageName, fullName)
         }
         val wakeComponent = metaComponent ?: run {
-            val implicitIntent = Intent(ACTION_OCR_WAKE).setPackage(packageName)
+            val implicitIntent = Intent(ACTION_WAKE).setPackage(packageName)
             val info = pm.queryIntentActivities(implicitIntent, 0).firstOrNull()
             info?.activityInfo?.let { ComponentName(it.packageName, it.name) }
         }
         return when {
             wakeComponent != null -> Intent().setComponent(wakeComponent)
-            else -> Intent(ACTION_OCR_WAKE).setPackage(packageName).takeIf { it.resolveActivity(pm) != null }
+            else -> Intent(ACTION_WAKE).setPackage(packageName).takeIf { it.resolveActivity(pm) != null }
         }
     }
-
-    private fun isAutoWakeAttempted(packageName: String): Boolean {
-        val sp = storeContext.getSharedPreferences(SP, Context.MODE_PRIVATE)
-        return sp.getBoolean(key(packageName), false)
-    }
-
-    private fun markAutoWakeAttempted(packageName: String) {
-        val sp = storeContext.getSharedPreferences(SP, Context.MODE_PRIVATE)
-        sp.edit { putBoolean(key(packageName), true) }
-    }
-
-    fun clearAutoWakeAttempt(packageName: String) {
-        val sp = storeContext.getSharedPreferences(SP, Context.MODE_PRIVATE)
-        sp.edit { remove(key(packageName)) }
-    }
-
-    private fun key(packageName: String) = "key_\$_auto_wake_attempted_\$_$packageName"
 }

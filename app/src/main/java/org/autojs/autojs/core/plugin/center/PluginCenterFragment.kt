@@ -484,7 +484,6 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
                     val started = openIntent.startSafely(contextRef, true)
                     d.dismiss()
                     if (started) {
-                        PluginActivationStore.markActivated(contextRef, item.packageName)
                         item.activatedState = PluginActivatedState.DONE
                         ViewUtils.showToast(contextRef, getString(R.string.text_activated_successfully), true)
                         adapter.notifyDataSetChanged()
@@ -564,7 +563,6 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
                             // Package uninstallation (pre-update phase) does not record "Recently uninstalled" when replacing.
                             // zh-CN: 替换卸载 (更新前阶段) 不记录 "最近卸载".
                             if (!replacing) {
-                                PluginWakeManager.clearAutoWakeAttempt(packageName)
                                 PluginRecentStore.setLastUninstalled(packageName)
                                 vm.load(context, forceRefreshIndex = false)
                                 return
