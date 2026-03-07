@@ -97,6 +97,13 @@ object Pref {
         )
 
     @JvmStatic
+    val isUseVolumeControlRecordEnabled
+        get() = getBoolean(
+            R.string.key_use_volume_control_record,
+            resources.getBoolean(R.bool.pref_use_volume_control_record),
+        )
+
+    @JvmStatic
     val isAutoCheckForUpdatesEnabled
         get() = getBoolean(
             R.string.key_auto_check_for_updates,

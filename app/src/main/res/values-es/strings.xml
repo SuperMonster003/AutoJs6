@@ -1410,4 +1410,5 @@
     <string name="text_extracted_plugin_assets">Assets del plugin extraidos</string>
     <string name="text_extracting_plugin_asset">Extrayendo asset del plugin</string>
     <string name="text_extracting_plugin_so">Extrayendo archivo so del plugin</string>
+    <string name="error_conditions_not_met_for_record">La grabacion de scripts requiere al menos una de las siguientes condiciones:\n- Acceso root\n- Acceso Shizuku</string>
 </resources>

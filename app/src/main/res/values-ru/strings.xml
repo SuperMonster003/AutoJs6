@@ -1410,4 +1410,5 @@
     <string name="text_extracted_plugin_assets">Assets плагина извлечены</string>
     <string name="text_extracting_plugin_asset">Извлечение asset плагина</string>
     <string name="text_extracting_plugin_so">Извлечение файла so плагина</string>
+    <string name="error_conditions_not_met_for_record">Запись скриптов требует выполнения хотя бы одного из следующих условий:\n- Доступ root\n- Доступ Shizuku</string>
 </resources>

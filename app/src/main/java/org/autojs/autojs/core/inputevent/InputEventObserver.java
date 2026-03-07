@@ -8,7 +8,10 @@ import android.text.TextUtils;
 
 import org.autojs.autojs6.R;
 import org.autojs.autojs.core.record.inputevent.EventFormatException;
+import org.autojs.autojs.runtime.api.AbstractShell;
 import org.autojs.autojs.runtime.api.Shell;
+import org.autojs.autojs.runtime.api.WrappedShizuku;
+import org.autojs.autojs.util.RootUtils;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Matcher;
@@ -17,14 +20,19 @@ import java.util.regex.Pattern;
 /**
  * Created by Stardust on Aug 4, 2017.
  * Modified by SuperMonster003 as of May 26, 2022.
+ * Modified by JetBrains AI Assistant (GPT-5.3-Codex (xhigh)) as of Mar 7, 2026.
  */
 public class InputEventObserver {
 
     private static InputEventObserver sGlobal;
+    private static final int SHIZUKU_GETEVENT_BATCH_SIZE = 1;
+    private static final long SHIZUKU_RETRY_DELAY = 120;
 
     private final CopyOnWriteArrayList<InputEventListener> mInputEventListeners = new CopyOnWriteArrayList<>();
     private final Context mContext;
     private Shell mShell;
+    private Thread mShizukuObserverThread;
+    private volatile boolean mShizukuObserverRunning;
 
     public InputEventObserver(Context context) {
         mContext = context;
@@ -98,9 +106,16 @@ public class InputEventObserver {
     }
 
     public void observe() {
-        if (mShell != null) {
+        if (isObserved()) {
             throw new IllegalStateException(mContext.getString(R.string.error_function_called_more_than_once, "InputEventObserver.observe"));
         }
+        if (observeByShizuku()) {
+            return;
+        }
+        observeByRoot();
+    }
+
+    private void observeByRoot() {
         mShell = new Shell(mContext, true);
         mShell.setCallback(new Shell.SimpleCallback() {
             @Override
@@ -114,17 +129,61 @@ public class InputEventObserver {
             public void onInitialized() {
                 mShell.exec("getevent -t");
             }
-
         });
+    }
+
+    private boolean observeByShizuku() {
+        if (!WrappedShizuku.INSTANCE.isOperational()) {
+            return false;
+        }
+        mShizukuObserverRunning = true;
+        mShizukuObserverThread = new Thread(() -> {
+            while (mShizukuObserverRunning && !Thread.currentThread().isInterrupted()) {
+                try {
+                    AbstractShell.Result result = WrappedShizuku.INSTANCE.execCommand(mContext, "getevent -t -c " + SHIZUKU_GETEVENT_BATCH_SIZE);
+                    if (result != null && result.code == 0) {
+                        String output = result.result;
+                        if (!TextUtils.isEmpty(output)) {
+                            for (String line : output.split("\\r?\\n")) {
+                                onInputEvent(line);
+                            }
+                        }
+                        continue;
+                    }
+                    if (!WrappedShizuku.INSTANCE.isOperational() && RootUtils.isRootAvailable()) {
+                        mShizukuObserverRunning = false;
+                        observeByRoot();
+                        return;
+                    }
+                    Thread.sleep(SHIZUKU_RETRY_DELAY);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    return;
+                } catch (Throwable ignored) {
+                    try {
+                        Thread.sleep(SHIZUKU_RETRY_DELAY);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        return;
+                    }
+                }
+            }
+        }, "InputEventObserver-Shizuku");
+        mShizukuObserverThread.start();
+        return true;
+    }
+
+    private boolean isObserved() {
+        return mShell != null || (mShizukuObserverThread != null && mShizukuObserverThread.isAlive());
     }
 
     // Ensure lazy start observation in background thread
     // to avoid blocking the main thread/app startup.
     // zh-CN: 确保在后台线程懒启动观察, 避免在主线程/应用启动期阻塞.
     public void ensureObservedAsync() {
-        if (mShell != null) return;
+        if (isObserved()) return;
         synchronized (this) {
-            if (mShell != null) return;
+            if (isObserved()) return;
             new Thread(() -> {
                 try {
                     observe();
@@ -163,7 +222,16 @@ public class InputEventObserver {
     }
 
     public void recycle() {
-        mShell.exit();
+        mShizukuObserverRunning = false;
+        Thread shizukuObserverThread = mShizukuObserverThread;
+        if (shizukuObserverThread != null) {
+            shizukuObserverThread.interrupt();
+            mShizukuObserverThread = null;
+        }
+        if (mShell != null) {
+            mShell.exit();
+            mShell = null;
+        }
     }
 
 }

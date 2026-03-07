@@ -1412,4 +1412,5 @@
     <string name="text_extracted_plugin_assets">تم استخراج assets الاضافة</string>
     <string name="text_extracting_plugin_asset">جارٍ استخراج asset الاضافة</string>
     <string name="text_extracting_plugin_so">جارٍ استخراج ملف so للاضافة</string>
+    <string name="error_conditions_not_met_for_record">يتطلب تسجيل السكربتات توفر شرط واحد على الاقل مما يلي:\n- صلاحيات Root\n- صلاحيات Shizuku</string>
 </resources>

@@ -1412,4 +1412,5 @@
     <string name="text_extracted_plugin_assets">플러그인 assets를 추출함</string>
     <string name="text_extracting_plugin_asset">플러그인 asset 추출 중</string>
     <string name="text_extracting_plugin_so">플러그인 so 파일 추출 중</string>
+    <string name="error_conditions_not_met_for_record">스크립트 녹화에는 다음 조건 중 하나 이상이 필요합니다:\n- Root 권한\n- Shizuku 권한</string>
 </resources>

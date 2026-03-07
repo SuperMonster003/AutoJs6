@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.7.0": {
-      "released_date": "2026/03/07",
+      "released_date": "2026/03/08",
       "feature": [
         "插件中心功能, 支持插件的安装/卸载/更新等操作 (入口: 主页抽屉按钮/主页标签页)",
         "版本历史功能, 支持查看/恢复可编辑文件的历史版本 (入口: 主页抽屉按钮/文件管理器菜单/代码编辑器菜单)",
@@ -16,7 +16,7 @@
         "s13n.bytes 方法, 用于标准化字节数据 (参阅 项目文档 > [标准化](https://docs.autojs6.com/#/s13n))",
         "app.isDualInstalled 方法, 用于检测双开应用是否已安装 (需要 Shizuku 或 Root 权限) _[`issue #450`](http://issues.autojs6.com/450)_",
         "device.getSharedDeviceId 方法, 用于跨应用获取统一共享设备 ID _[`issue #455`](http://issues.autojs6.com/455)_",
-        "device.setPointerLocation 等 Toggleablle 系列方法, 用于设置或获取指针位置系统设置项 _[`issue #381`](http://issues.autojs6.com/381)_",
+        "device.setPointerLocation 等 Toggleable 系列方法, 用于设置或获取指针位置系统设置项 _[`issue #381`](http://issues.autojs6.com/381)_",
         "dialogs.build 方法支持 textAllCaps/(positive/negative/neutral)TextAllCaps 选项参数, 用于控制按钮文本是否全部大写",
         "images.loadAsync 方法, 用于异步获取网络图像资源 _[`issue #327`](http://issues.autojs6.com/327)_",
         "ui.getNavigationBarHeight 方法/navigationBarHeight 属性 (getter), 用于获取导航栏高度 _[`issue #456`](http://issues.autojs6.com/456)_",
@@ -121,6 +121,9 @@
         "服务端模式连接时, 旋转屏幕及切换语言等触发 Activity 重建的操作导致 VSCode 控制台无法输出日志的问题 _[`issue #385`](http://issues.autojs6.com/385)_",
         "连接 VSCode 插件时, 多种方式同时连接可能导致日志打印数量成倍增加的问题",
         "布局分析页面生成代码时对于集合控件可能生成失败的问题 (试修) _[`issue #328`](http://issues.autojs6.com/328)_",
+        "设置页面 \"使用 '音量减' 键控制录制\" 开关功能失效的问题 _[`issue #480`](http://issues.autojs6.com/480)_",
+        "录制脚本生成的代码文件可能出现坐标数值与屏幕实际像素值不匹配的问题 _[`issue #480`](http://issues.autojs6.com/480)_",
+        "录制脚本生成的代码文件首个行为 (如点击或滑动等) 总是被忽略的问题",
         "浮动按钮 \"运行脚本\" 对话框后台操作文件时可能导致应用崩溃的问题",
         "主页活动页面生命周期结束后重新进入主页时, 浮动按钮状态可能被重置的问题",
         "小米设备 \"显示在其他应用上层\" 开关可能跳转到错误设置页面的问题",
@@ -169,6 +172,7 @@
         "浮动按钮 \"更多\" 对话框使用异步加载数据方式提升显示流畅度",
         "浮动按钮 \"运行脚本\" 对话框增加 \"主页\" 菜单项",
         "浮动按钮 \"运行脚本\" 对话框支持最小化及状态恢复并尽最大努力保持窗口常驻或自动恢复",
+        "支持使用 Shizuku 权限录制脚本及录制回放 (回放流畅度受一定影响) _[`issue #320`](http://issues.autojs6.com/320)_",
         "主题色设置页面定位主题色时使用快速定位方式以提升定位效率",
         "使用 [LiveData](https://developer.android.com/topic/libraries/architecture/livedata) 及 [SharedFlow](https://developer.android.com/kotlin/flow/stateflow-and-sharedflow) 替代已弃用的 [LocalBroadcastManager](https://developer.android.com/jetpack/androidx/releases/localbroadcastmanager)",
         "Gradle 构建脚本提升 7z 格式文件的解压效率",
