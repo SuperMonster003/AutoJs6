@@ -61,12 +61,13 @@ class AppUtils(context: Context, @get:ScriptInterface val fileProviderAuthority:
      * @param o < alias | packageName >
      */
     @ScriptInterface
-    fun launchPackage(o: String?) = runCatching {
-        o ?: return false
-        val nicePackageName = getAppByAlias(alias = o)?.packageName ?: (/* packageName = */ o)
-        val intent = mPackageManager.getLaunchIntentForPackage(nicePackageName) ?: return false
-        intent.start(mContext)
-    }.isSuccess
+    fun launchPackage(o: String?): Boolean =
+        runCatching {
+            o ?: return false
+            val nicePackageName = getAppByAlias(alias = o)?.packageName ?: (/* packageName = */ o)
+            val intent = mPackageManager.getLaunchIntentForPackage(nicePackageName) ?: return false
+            intent.start(mContext)
+        }.isSuccess
 
     @ScriptInterface
     @Suppress("unused")

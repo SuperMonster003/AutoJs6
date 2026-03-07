@@ -2,8 +2,10 @@ package org.autojs.autojs.inrt
 
 import android.os.Bundle
 import android.view.View
+import android.widget.EdgeEffect
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceFragmentCompat
+import androidx.recyclerview.widget.RecyclerView
 import org.autojs.autojs.runtime.api.Permissions
 import org.autojs.autojs.theme.preference.Syncable
 import org.autojs.autojs.util.ViewUtils.excludePaddingClippableViewFromBottomNavigationBar
@@ -67,11 +69,17 @@ class SettingsActivity : AppCompatActivity() {
             setDivider(null)
             setDividerHeight(0)
 
+            listView.edgeEffectFactory = object : RecyclerView.EdgeEffectFactory() {
+                override fun createEdgeEffect(recyclerView: RecyclerView, direction: Int): EdgeEffect {
+                    return EdgeEffect(recyclerView.context).apply {
+                        color = recyclerView.context.getColor(R.color.md_blue_gray_500)
+                    }
+                }
+            }
+
             listView.isHorizontalScrollBarEnabled = false
             listView.isVerticalScrollBarEnabled = false
             listView.excludePaddingClippableViewFromBottomNavigationBar()
         }
-
     }
-
 }

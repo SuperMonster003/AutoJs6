@@ -225,7 +225,7 @@ object SymbolsConfigStore {
     fun getAllDefaultNameAliases(context: Context): Set<String> {
         val appLang = Language.getPrefLanguageOrNull()
         val appKey = appLang?.languageTag ?: "null"
-        val sysKey = LocaleUtils.getSystemLocale().toLanguageTag()
+        val sysKey = LocaleUtils.getPrimarySystemLocale().toLanguageTag()
         val cacheKey = "app=$appKey|sys=$sysKey"
 
         sDefaultAliasesCache[cacheKey]?.let { return it }

@@ -7,10 +7,6 @@ import android.util.Log
 import android.view.View
 import org.autojs.autojs.core.ui.ViewExtras
 import org.autojs.autojs.engine.module.AssetAndUrlModuleSourceProvider
-import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
-import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
-import org.autojs.autojs.rhino.extension.ScriptableExtensions.defineProp
-import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.pio.UncheckedIOException
 import org.autojs.autojs.project.ScriptConfig
@@ -18,6 +14,10 @@ import org.autojs.autojs.rhino.AndroidContextFactory
 import org.autojs.autojs.rhino.AutoJsContext
 import org.autojs.autojs.rhino.RhinoAndroidHelper
 import org.autojs.autojs.rhino.TopLevelScope
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
+import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
+import org.autojs.autojs.rhino.extension.ScriptableExtensions.defineProp
+import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.proxy.PaintProxyObject
 import org.autojs.autojs.script.JavaScriptSource
@@ -42,7 +42,7 @@ import java.io.IOException
 import java.io.InputStreamReader
 import java.io.Reader
 import java.net.URI
-import java.util.*
+import java.util.Locale
 
 /**
  * Created by Stardust on Apr 2, 2017.
@@ -215,9 +215,9 @@ open class RhinoJavaScriptEngine(private val androidContext: android.content.Con
     private inner class WrapFactory : AndroidContextFactory.WrapFactory() {
 
         override fun wrapAsJavaObject(cx: Context?, scope: Scriptable, javaObject: Any?, staticType: TypeInfo): Scriptable? {
-            return when (javaObject) {
-                is View -> ViewExtras.getNativeView(scope, /* view = */ javaObject, staticType.asClass(), runtime)
-                is Paint if Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> {
+            return when {
+                javaObject is View -> ViewExtras.getNativeView(scope, /* view = */ javaObject, staticType.asClass(), runtime)
+                javaObject is Paint && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> {
                     // Use composition-based proxy to preserve Paint identity and intercept setColor only.
                     // zh-CN: 使用组合式代理以保持 Paint 身份一致性, 且仅拦截 setColor.
                     val base = super.wrapAsJavaObject(cx, scope, javaObject, staticType) ?: return null
@@ -226,10 +226,11 @@ open class RhinoJavaScriptEngine(private val androidContext: android.content.Con
                 else -> super.wrapAsJavaObject(cx, scope, javaObject, staticType)
             }
         }
-
     }
 
     companion object {
+
+        private const val TAG = "RhinoJavaScriptEngine"
 
         const val SOURCE_FILE_INIT = "init.js"
         const val SOURCE_NAME_INIT = "<init>"
@@ -238,9 +239,5 @@ open class RhinoJavaScriptEngine(private val androidContext: android.content.Con
 
         @JvmField
         val JS_BEAUTIFY_FILE = PFiles.join(JS_BEAUTIFY_PATH, "beautify.js")
-
-        private val TAG = RhinoJavaScriptEngine::class.java.simpleName
-
     }
-
 }

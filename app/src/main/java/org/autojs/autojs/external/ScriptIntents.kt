@@ -65,7 +65,7 @@ object ScriptIntents {
                     JavaScriptFileSource(path).let { fss: JavaScriptFileSource ->
                         source = script?.let { SequenceScriptSource(fss.name, StringScriptSource(it), fss) } ?: fss
                     }
-                    File(path!!).parent?.let { config.workingDirectory = it }
+                    File(path).parent?.let { config.workingDirectory = it }
                 }
             }
             source?.let { AutoJs.instance.scriptEngineService.execute(it, config) }

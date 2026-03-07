@@ -384,10 +384,8 @@ object ColorUtils {
     )
 
     @JvmStatic
-    fun applyAlpha(@ColorInt color: Int, alpha: Double): Int = when (alpha) {
-        1.0 -> color
-        else -> ColorUtils.setAlphaComponent(color, (alpha * 255).roundToInt())
-    }
+    fun applyAlpha(@ColorInt color: Int, alpha: Double): Int =
+        ColorUtils.setAlphaComponent(color, (alpha * 255).roundToInt())
 
     /**
      * Calculate the contrast ratio between two colors using the W3C WCAG formula.

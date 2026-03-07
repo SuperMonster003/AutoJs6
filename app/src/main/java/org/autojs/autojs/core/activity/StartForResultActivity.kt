@@ -41,15 +41,17 @@ class StartForResultActivity : Activity() {
             }
         }
         if (extras == null) {
-            finish().also { return }
+            finish()
+            return
         }
-        val callback = extras!!.map["callback"]
+        val callback = extras.map["callback"]
         if (callback is Callback) {
             mCallback = callback
         }
         if (callback == null) {
             mCallback = null
-            finish().also { return }
+            finish()
+            return
         }
         mCallback!!.onActivityCreate(this)
     }

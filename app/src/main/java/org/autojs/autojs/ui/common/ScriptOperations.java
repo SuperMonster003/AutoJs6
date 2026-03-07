@@ -1080,7 +1080,7 @@ public class ScriptOperations {
                         // zh-CN: 删除操作使用不确定进度条即可, 行为更稳定.
                         MaterialDialog.Builder builder = new MaterialDialog.Builder(mContext)
                                 .title(titleRes)
-                                .content(R.string.text_deleting)
+                                .content(mContext.getString(R.string.text_deleting) + mContext.getString(R.string.text_half_ellipsis))
                                 .negativeText(R.string.dialog_button_abort)
                                 .negativeColorRes(R.color.dialog_button_caution)
                                 .onNegative((dialog, which) -> {

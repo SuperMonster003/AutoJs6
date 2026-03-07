@@ -494,15 +494,16 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         }
 
         private fun applyDialogProperty(builder: JsDialogBuilder, name: String, value: Any?) {
-            when (val propertySetter = propertySetterMap[name]) {
-                PropertyConverter.COLOR_INT -> {
+            val propertySetter = propertySetterMap[name]
+            when {
+                propertySetter == PropertyConverter.COLOR_INT -> {
                     val colorInt = Colors.toIntRhino(value)
                     invokeJavaMethod(builder, name, arrayOf(colorInt))
                 }
-                PropertyConverter.BOOLEAN if coerceBoolean(value, false) -> {
+                propertySetter == PropertyConverter.BOOLEAN && coerceBoolean(value, false) -> {
                     invokeJavaMethod(builder, name, emptyArray())
                 }
-                is String -> when (propertySetter) {
+                propertySetter is String -> when (propertySetter) {
                     in propertySetterMap -> {
                         applyDialogProperty(builder, propertySetter, value)
                     }

@@ -8,6 +8,7 @@ import android.content.ContextWrapper
 import android.content.Intent
 import android.content.IntentFilter
 import android.database.Cursor
+import android.graphics.Color
 import android.graphics.Rect
 import android.net.Uri
 import android.os.Build
@@ -1328,8 +1329,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         mNormalToolbar.apply {
             setOnMenuItemClickListener(this@EditorView)
             setOnMenuItemLongClickListener { id ->
-                when (id) {
-                    R.id.run if !mReadOnly -> true.also { debug() }
+                when {
+                    id == R.id.run && !mReadOnly -> true.also { debug() }
                     else -> false
                 }
             }
@@ -1338,8 +1339,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         (existing as? ToolbarFragment<*>)?.apply {
             setOnMenuItemClickListener(this@EditorView)
             setOnMenuItemLongClickListener { id ->
-                when (id) {
-                    R.id.run if !mReadOnly -> true.also { debug() }
+                when {
+                    id == R.id.run && !mReadOnly -> true.also { debug() }
                     else -> false
                 }
             }
@@ -1513,7 +1514,12 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             mCodeCompletionBar.setTextColor(textColor)
             mSymbolBar.setTextColor(textColor)
             mShowFunctionsButton.setColorFilter(textColor)
-            ViewUtils.setNavigationBarBackgroundColor(activity, imeBarBackgroundColor)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                ViewUtils.setNavigationBarBackgroundColor(activity, imeBarBackgroundColor)
+            } else {
+                val adjustedImageContrastColor = ColorUtils.adjustColorForContrast(Color.WHITE, ColorUtils.applyAlpha(imeBarBackgroundColor, 1.0), 2.3)
+                ViewUtils.setNavigationBarBackgroundColor(activity, adjustedImageContrastColor)
+            }
             invalidate()
         }
     }
@@ -2683,7 +2689,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         private const val MIN_CONFIDENCE_TO_WRITE_FILE = 90
         private val DEFAULT_CHARSET_TO_WRITE_FILE = StandardCharsets.UTF_8
 
-        private const val LARGE_FILE_MODE_THRESHOLD =  JavaScriptHighlighter.MAX_HIGHLIGHT_CHARS
+        private const val LARGE_FILE_MODE_THRESHOLD = JavaScriptHighlighter.MAX_HIGHLIGHT_CHARS
 
         // Internal storage root (no external SD).
         // zh-CN: 内部存储根目录 (不访问外置 SD).

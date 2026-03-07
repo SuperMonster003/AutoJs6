@@ -4,7 +4,7 @@
               android:layout_height="match_parent"
               android:orientation="vertical">
 
-    <androidx.recyclerview.widget.RecyclerView
+    <androidx.recyclerview.widget.ThemeColorRecyclerView
         android:id="@+id/list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>

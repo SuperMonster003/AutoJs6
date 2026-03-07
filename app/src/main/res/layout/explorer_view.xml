@@ -14,7 +14,7 @@
             app:cardElevation="0.97dp"
             app:cardUseCompatPadding="true" />
 
-    <androidx.recyclerview.widget.RecyclerView
+    <androidx.recyclerview.widget.ThemeColorRecyclerView
             android:id="@+id/explorer_item_list"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />

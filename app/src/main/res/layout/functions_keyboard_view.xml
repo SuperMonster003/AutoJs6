@@ -10,7 +10,7 @@
             android:layout_height="1dp"
             android:background="@color/divider_functions_keyboard" />
 
-    <androidx.recyclerview.widget.RecyclerView
+    <androidx.recyclerview.widget.ThemeColorRecyclerView
             android:id="@+id/properties"
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -22,7 +22,7 @@
             android:layout_height="1dp"
             android:background="@color/divider_functions_keyboard" />
 
-    <androidx.recyclerview.widget.RecyclerView
+    <androidx.recyclerview.widget.ThemeColorRecyclerView
             android:id="@+id/module_list"
             android:layout_width="match_parent"
             android:layout_height="50dp" />

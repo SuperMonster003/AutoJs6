@@ -184,7 +184,7 @@ class NodeInfoView : RecyclerView {
             }
         }
         return when (NodeInfo::class.java.getDeclaredField(attr).type) {
-            java.lang.String::class.java -> "$attr('$value')"
+            String::class.java -> "$attr('$value')"
             else -> "$attr($value)"
         }
     }

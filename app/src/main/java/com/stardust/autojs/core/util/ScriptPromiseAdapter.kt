@@ -44,6 +44,6 @@ class ScriptPromiseAdapter {
     }
 
     companion object {
-        private val UNSET = Object()
+        private val UNSET = Any()
     }
 }

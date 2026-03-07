@@ -863,13 +863,17 @@ open class UiSelector : UiObjectActions, StringReadable {
 
             internal fun pick(scriptRuntime: ScriptRuntime) = Detector(compass, object : Result(resultType) {
 
-                override fun byOne() = selector?.let { sel ->
-                    root?.let { return sel.findOneOf(it) } ?: sel.findOnce()
+                override fun byOne(): UiObject? {
+                    return selector?.let { sel ->
+                        root?.let { return sel.findOneOf(it) } ?: sel.findOnce()
+                    }
                 }
 
-                override fun byAll() = selector?.let { sel ->
-                    root?.let { return sel.findOf(it) } ?: sel.find()
-                } ?: EMPTY
+                override fun byAll(): UiObjectCollection {
+                    return selector?.let { sel ->
+                        root?.let { return sel.findOf(it) } ?: sel.find()
+                    } ?: EMPTY
+                }
 
             }, callback, selector).detect(scriptRuntime)
 

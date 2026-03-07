@@ -139,7 +139,7 @@ public class MDTintHelper {
             fCursorDrawable.set(editor, drawables);
         } catch (NoSuchFieldException e1) {
             Log.d("MDTintHelper", "Device issue with cursor tinting: " + e1.getMessage());
-            e1.printStackTrace();
+            // e1.printStackTrace();
         } catch (Exception e2) {
             e2.printStackTrace();
         }

@@ -1,10 +1,11 @@
 package org.autojs.autojs.theme.widget;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.widget.EdgeEffect;
 import android.widget.HorizontalScrollView;
-
 import org.autojs.autojs.theme.ThemeColor;
 import org.autojs.autojs.theme.ThemeColorManager;
 import org.autojs.autojs.theme.ThemeColorMutable;
@@ -60,17 +61,23 @@ public class ThemeColorHorizontalScrollView extends HorizontalScrollView impleme
         invalidate();
     }
 
+    @SuppressLint("DiscouragedPrivateApi")
     private void syncEdgeEffect() {
-        try {
-            Field f1 = HorizontalScrollView.class.getDeclaredField("mEdgeGlowLeft");
-            f1.setAccessible(true);
-            f1.set(this, mEdgeGlowLeft);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            setLeftEdgeEffectColor(mFadingEdgeColor);
+            setRightEdgeEffectColor(mFadingEdgeColor);
+        } else {
+            try {
+                Field f1 = HorizontalScrollView.class.getDeclaredField("mEdgeGlowLeft");
+                f1.setAccessible(true);
+                f1.set(this, mEdgeGlowLeft);
 
-            Field f2 = HorizontalScrollView.class.getDeclaredField("mEdgeGlowRight");
-            f2.setAccessible(true);
-            f2.set(this, mEdgeGlowRight);
-        } catch (Exception e) {
-            e.printStackTrace();
+                Field f2 = HorizontalScrollView.class.getDeclaredField("mEdgeGlowRight");
+                f2.setAccessible(true);
+                f2.set(this, mEdgeGlowRight);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 }
