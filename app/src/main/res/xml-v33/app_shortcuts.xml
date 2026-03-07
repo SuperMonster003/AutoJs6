@@ -47,4 +47,17 @@
                 android:targetClass="org.autojs.autojs.ui.log.LogActivity" />
         <categories android:name="android.shortcut.conversation" />
     </shortcut>
+    <shortcut
+        android:shortcutId="id_launcher_shortcut_plugins"
+        android:enabled="true"
+        android:icon="@drawable/ic_app_shortcut_plugin_center_green"
+        android:shortcutShortLabel="@string/text_app_shortcut_plugin_center_short_label"
+        android:shortcutLongLabel="@string/text_app_shortcut_plugin_center_long_label"
+        android:shortcutDisabledMessage="@string/text_app_shortcut_disabled">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="org.autojs.autojs6"
+            android:targetClass="org.autojs.autojs.core.plugin.center.PluginCenterActivity" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
 </shortcuts>
