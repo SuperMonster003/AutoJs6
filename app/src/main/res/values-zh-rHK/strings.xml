@@ -4,11 +4,11 @@
 <!-- Proofreader: [ SuperMonster003 ] -->
 
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="apk_builder_build" tools:ignore="TypographyEllipsis">構建中...</string>
-    <string name="apk_builder_clean" tools:ignore="TypographyEllipsis">清理臨時文件...</string>
-    <string name="apk_builder_package" tools:ignore="TypographyEllipsis">打包中...</string>
+    <string name="apk_builder_build">構建中</string>
+    <string name="apk_builder_clean">清理臨時文件</string>
+    <string name="apk_builder_package">打包中</string>
     <string name="apk_builder_plugin_version_incompatible">打包插件需更新\n是否下載</string>
-    <string name="apk_builder_prepare" tools:ignore="TypographyEllipsis">準備文件...</string>
+    <string name="apk_builder_prepare">準備文件</string>
     <string name="apk_info_device_sdk">設備 SDK</string>
     <string name="apk_info_file_size">文件大小</string>
     <string name="apk_info_installed_version">已安裝</string>
@@ -530,7 +530,7 @@
     <string name="text_app_shortcut_docs_short_label">文檔</string>
     <string name="text_app_shortcut_log_long_label">AutoJs6 日誌</string>
     <string name="text_app_shortcut_log_short_label">日誌</string>
-    <string name="text_app_shortcut_plugin_center_long_label">AutoJs6 插件中心</string>
+    <string name="text_app_shortcut_plugin_center_long_label">AutoJs6 插件</string>
     <string name="text_app_shortcut_plugin_center_short_label">插件</string>
     <string name="text_app_shortcut_settings_long_label">AutoJs6 設置</string>
     <string name="text_app_shortcut_settings_short_label">設置</string>
@@ -668,7 +668,7 @@
     <string name="text_delete_folder">刪除文件夾</string>
     <string name="text_delete_line">刪除行</string>
     <string name="text_delete_revision_confirm">是否永久刪除此版本記錄</string>
-    <string name="text_deleting" tools:ignore="TypographyEllipsis">正在刪除...</string>
+    <string name="text_deleting">正在刪除</string>
     <string name="text_description">描述</string>
     <string name="text_deselect_all">取消全選</string>
     <string name="text_destination">目標</string>
@@ -1080,7 +1080,7 @@
     <string name="text_press_back_or_vol_down_to_close_window">如需關閉窗口, 可按 \"返回鍵\" 或 \"音量減鍵\"</string>
     <string name="text_preview">預覽</string>
     <string name="text_process_log">流程日誌</string>
-    <string name="text_processing">處理中</string>
+    <string name="text_processing">正在處理</string>
     <string name="text_project">項目</string>
     <string name="text_project_location">項目位置</string>
     <string name="text_project_media_access">投影媒體權限</string>
@@ -1352,4 +1352,58 @@
     <string name="error_plugin_is_not_authorized_in_plugin_center">插件 \"%1$s\" 未在插件中心獲得授權</string>
     <string name="error_plugin_not_found_in_installed_apps">已安裝應用中未找到插件 \"%1$s\"</string>
     <string name="error_unsupported_plugin_connection">不支持的插件連接方式</string>
+    <string name="text_property_colon">%1$s:</string>
+    <string name="text_title">標題</string>
+    <string name="text_content">內容</string>
+    <string name="text_building_apk">正在打包應用</string>
+    <string name="text_built_apk_file_path">打包應用文件路徑</string>
+    <string name="text_clean">清理</string>
+    <string name="text_sign">簽名</string>
+    <string name="text_build">構建</string>
+    <string name="text_prepare">準備</string>
+    <string name="text_preparing_workspace">正在準備工作區</string>
+    <string name="text_extracting_template_apk">正在提取模板 APK</string>
+    <string name="text_prepare_completed">準備完成</string>
+    <string name="text_copying_project_directory">正在複製項目目錄</string>
+    <string name="text_copying_script_file">正在複製腳本文件</string>
+    <string name="text_source_processing_completed">源代碼處理完成</string>
+    <string name="text_copying_directory">正在複製目錄</string>
+    <string name="text_copying_file">正在複製文件</string>
+    <string name="text_encrypting_script">正在加密腳本</string>
+    <string name="text_replacing_file">正在替換文件</string>
+    <string name="text_preparing_build_config">正在準備構建配置</string>
+    <string name="text_reading_splash_resources">正在讀取啓動頁資源</string>
+    <string name="text_configuring_manifest">正在配置清單文件</string>
+    <string name="text_configuring_package_name">正在配置包名</string>
+    <string name="text_copying_assets_to">正在複製資源到</string>
+    <string name="text_processing_source">正在處理源代碼</string>
+    <string name="text_applying_binary_resources">正在應用二進制資源</string>
+    <string name="text_copying_native_libraries">正在複製原生庫</string>
+    <string name="text_updating_project_config">正在更新項目配置</string>
+    <string name="text_sign_stage_completed">簽名階段完成</string>
+    <string name="text_writing_project_config">正在寫入項目配置</string>
+    <string name="text_building_resources">正在構建資源</string>
+    <string name="text_build_completed">構建完成</string>
+    <string name="text_writing_resources_arsc">正在寫入 resources.arsc</string>
+    <string name="text_writing_manifest">正在寫入清單文件</string>
+    <string name="text_writing_app_icon">正在寫入應用圖標</string>
+    <string name="text_copying_asset">正在複製資源</string>
+    <string name="text_preparing_assets_dir">正在準備資源目錄</string>
+    <string name="text_copying_library">正在複製庫文件</string>
+    <string name="text_preparing_keystore">正在準備密鑰庫</string>
+    <string name="text_unsigned_apk_created">未簽名 APK 已創建</string>
+    <string name="text_creating_unsigned_apk">正在創建未簽名 APK</string>
+    <string name="text_using_keystore">正在使用密鑰庫</string>
+    <string name="text_re_signing_apk">正在重新簽名 APK</string>
+    <string name="text_writing_signed_apk">正在寫入已簽名 APK</string>
+    <string name="text_sign_completed">簽名完成</string>
+    <string name="text_clean_completed">清理完成</string>
+    <string name="text_cleaning_workspace">正在清理工作區</string>
+    <string name="text_resolving_plugin_native_libraries">正在解析插件原生庫</string>
+    <string name="text_copying_libraries_for_abi">正在複製 ABI 庫文件</string>
+    <string name="text_selected_plugin">已選擇插件</string>
+    <string name="text_extracted_plugin_libraries">已提取插件庫文件</string>
+    <string name="text_extracted_plugin_assets">已提取插件資源</string>
+    <string name="text_extracting_plugin_asset">正在提取插件資源</string>
+    <string name="text_extracting_plugin_so">正在提取插件 so 文件</string>
 </resources>

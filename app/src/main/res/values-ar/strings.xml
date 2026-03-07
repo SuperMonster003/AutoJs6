@@ -9,11 +9,11 @@
 <!-- Proofreader: [ Google Gemini ] -->
 
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="apk_builder_build" tools:ignore="TypographyEllipsis">مبنى...</string>
-    <string name="apk_builder_clean" tools:ignore="TypographyEllipsis">تنظيف...</string>
-    <string name="apk_builder_package" tools:ignore="TypographyEllipsis">التغليف ...</string>
+    <string name="apk_builder_build">مبنى</string>
+    <string name="apk_builder_clean">تنظيف</string>
+    <string name="apk_builder_package">التغليف </string>
     <string name="apk_builder_plugin_version_incompatible">نسخة غير متوافقة من \"APK Builder\".\nتحميله الآن؟</string>
-    <string name="apk_builder_prepare" tools:ignore="TypographyEllipsis">خطة...</string>
+    <string name="apk_builder_prepare">خطة</string>
     <string name="apk_info_device_sdk">SDK الجهاز</string>
     <string name="apk_info_file_size">حجم الملف</string>
     <string name="apk_info_installed_version">مثبت</string>
@@ -536,7 +536,7 @@
     <string name="text_app_shortcut_docs_short_label">توثيق</string>
     <string name="text_app_shortcut_log_long_label">AutoJs6 سجل</string>
     <string name="text_app_shortcut_log_short_label">سجل</string>
-    <string name="text_app_shortcut_plugin_center_long_label">مركز اضافات AutoJs6</string>
+    <string name="text_app_shortcut_plugin_center_long_label">AutoJs6 الاضافات</string>
     <string name="text_app_shortcut_plugin_center_short_label">الاضافات</string>
     <string name="text_app_shortcut_settings_long_label">AutoJs6 إعدادات</string>
     <string name="text_app_shortcut_settings_short_label">إعدادات</string>
@@ -674,7 +674,7 @@
     <string name="text_delete_folder">حذف المجلد</string>
     <string name="text_delete_line">حذف الخط</string>
     <string name="text_delete_revision_confirm">هل تريد حذف هذه المراجعة نهائيا?</string>
-    <string name="text_deleting" tools:ignore="TypographyEllipsis">جارٍ الحذف...</string>
+    <string name="text_deleting">جارٍ الحذف</string>
     <string name="text_description">الوصف</string>
     <string name="text_deselect_all">الغاء التحديد</string>
     <string name="text_destination">الوجهة</string>
@@ -1086,7 +1086,7 @@
     <string name="text_press_back_or_vol_down_to_close_window">لإغلاق، اضغط على \"رجوع\" أو \"خفض الصوت\"</string>
     <string name="text_preview">معاينة</string>
     <string name="text_process_log">سجل العملية</string>
-    <string name="text_processing">يعالج</string>
+    <string name="text_processing">جارٍ المعالجة</string>
     <string name="text_project">مشروع</string>
     <string name="text_project_location">موقع المشروع</string>
     <string name="text_project_media_access">وصول وسائل الإعلام المشروع</string>
@@ -1358,4 +1358,58 @@
     <string name="error_plugin_is_not_authorized_in_plugin_center">الاضافة \"%1$s\" غير مُفوّضة في مركز الاضافات</string>
     <string name="error_plugin_not_found_in_installed_apps">لم يتم العثور على الاضافة \"%1$s\" ضمن التطبيقات المثبتة</string>
     <string name="error_unsupported_plugin_connection">طريقة اتصال الاضافة غير مدعومة</string>
+    <string name="text_property_colon">%1$s:</string>
+    <string name="text_title">العنوان</string>
+    <string name="text_content">المحتوى</string>
+    <string name="text_building_apk">جارٍ بناء APK</string>
+    <string name="text_built_apk_file_path">مسار APK المبني</string>
+    <string name="text_clean">تنظيف</string>
+    <string name="text_sign">توقيع</string>
+    <string name="text_build">بناء</string>
+    <string name="text_prepare">تحضير</string>
+    <string name="text_preparing_workspace">جارٍ تحضير مساحة العمل</string>
+    <string name="text_extracting_template_apk">جارٍ استخراج APK القالب</string>
+    <string name="text_prepare_completed">اكتمل التحضير</string>
+    <string name="text_copying_project_directory">جارٍ نسخ مجلد المشروع</string>
+    <string name="text_copying_script_file">جارٍ نسخ ملف السكربت</string>
+    <string name="text_source_processing_completed">اكتملت معالجة المصدر</string>
+    <string name="text_copying_directory">جارٍ نسخ المجلد</string>
+    <string name="text_copying_file">جارٍ نسخ الملف</string>
+    <string name="text_encrypting_script">جارٍ تشفير السكربت</string>
+    <string name="text_replacing_file">جارٍ استبدال الملف</string>
+    <string name="text_preparing_build_config">جارٍ تحضير اعدادات البناء</string>
+    <string name="text_reading_splash_resources">جارٍ قراءة موارد شاشة البدء</string>
+    <string name="text_configuring_manifest">جارٍ ضبط manifest</string>
+    <string name="text_configuring_package_name">جارٍ ضبط اسم الحزمة</string>
+    <string name="text_copying_assets_to">جارٍ نسخ assets الى</string>
+    <string name="text_processing_source">جارٍ معالجة المصدر</string>
+    <string name="text_applying_binary_resources">جارٍ تطبيق الموارد الثنائية</string>
+    <string name="text_copying_native_libraries">جارٍ نسخ المكتبات الاصلية</string>
+    <string name="text_updating_project_config">جارٍ تحديث اعدادات المشروع</string>
+    <string name="text_sign_stage_completed">اكتملت مرحلة التوقيع</string>
+    <string name="text_writing_project_config">جارٍ كتابة اعدادات المشروع</string>
+    <string name="text_building_resources">جارٍ بناء الموارد</string>
+    <string name="text_build_completed">اكتمل البناء</string>
+    <string name="text_writing_resources_arsc">جارٍ كتابة resources.arsc</string>
+    <string name="text_writing_manifest">جارٍ كتابة manifest</string>
+    <string name="text_writing_app_icon">جارٍ كتابة ايقونة التطبيق</string>
+    <string name="text_copying_asset">جارٍ نسخ asset</string>
+    <string name="text_preparing_assets_dir">جارٍ تحضير مجلد assets</string>
+    <string name="text_copying_library">جارٍ نسخ المكتبة</string>
+    <string name="text_preparing_keystore">جارٍ تحضير keystore</string>
+    <string name="text_unsigned_apk_created">تم انشاء APK غير موقّع</string>
+    <string name="text_creating_unsigned_apk">جارٍ انشاء APK غير موقّع</string>
+    <string name="text_using_keystore">جارٍ استخدام keystore</string>
+    <string name="text_re_signing_apk">جارٍ اعادة توقيع APK</string>
+    <string name="text_writing_signed_apk">جارٍ كتابة APK الموقّع</string>
+    <string name="text_sign_completed">اكتمل التوقيع</string>
+    <string name="text_clean_completed">اكتمل التنظيف</string>
+    <string name="text_cleaning_workspace">جارٍ تنظيف مساحة العمل</string>
+    <string name="text_resolving_plugin_native_libraries">جارٍ تحليل مكتبات الاضافة الاصلية</string>
+    <string name="text_copying_libraries_for_abi">جارٍ نسخ المكتبات لـ ABI</string>
+    <string name="text_selected_plugin">الاضافة المحددة</string>
+    <string name="text_extracted_plugin_libraries">تم استخراج مكتبات الاضافة</string>
+    <string name="text_extracted_plugin_assets">تم استخراج assets الاضافة</string>
+    <string name="text_extracting_plugin_asset">جارٍ استخراج asset الاضافة</string>
+    <string name="text_extracting_plugin_so">جارٍ استخراج ملف so للاضافة</string>
 </resources>

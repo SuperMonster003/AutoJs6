@@ -9,11 +9,11 @@
 <!-- Proofreader: [ Google Gemini ] -->
 
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="apk_builder_build" tools:ignore="TypographyEllipsis">건물...</string>
-    <string name="apk_builder_clean" tools:ignore="TypographyEllipsis">청소...</string>
-    <string name="apk_builder_package" tools:ignore="TypographyEllipsis">포장...</string>
+    <string name="apk_builder_build">건물</string>
+    <string name="apk_builder_clean">청소</string>
+    <string name="apk_builder_package">포장</string>
     <string name="apk_builder_plugin_version_incompatible">\"APK Builder\" 의 호환되지 않는 버전.\n지금 다운로드 하시겠습니까?</string>
-    <string name="apk_builder_prepare" tools:ignore="TypographyEllipsis">준비...</string>
+    <string name="apk_builder_prepare">준비</string>
     <string name="apk_info_device_sdk">디바이스 SDK</string>
     <string name="apk_info_file_size">파일 크기</string>
     <string name="apk_info_installed_version">설치됨</string>
@@ -536,7 +536,7 @@
     <string name="text_app_shortcut_docs_short_label">문서</string>
     <string name="text_app_shortcut_log_long_label">AutoJs6 통나무</string>
     <string name="text_app_shortcut_log_short_label">통나무</string>
-    <string name="text_app_shortcut_plugin_center_long_label">AutoJs6 플러그인 센터</string>
+    <string name="text_app_shortcut_plugin_center_long_label">AutoJs6 플러그인</string>
     <string name="text_app_shortcut_plugin_center_short_label">플러그인</string>
     <string name="text_app_shortcut_settings_long_label">AutoJs6 설정</string>
     <string name="text_app_shortcut_settings_short_label">설정</string>
@@ -674,7 +674,7 @@
     <string name="text_delete_folder">폴더 삭제</string>
     <string name="text_delete_line">라인 삭제</string>
     <string name="text_delete_revision_confirm">이 버전을 영구 삭제할까요?</string>
-    <string name="text_deleting" tools:ignore="TypographyEllipsis">삭제 중...</string>
+    <string name="text_deleting">삭제 중</string>
     <string name="text_description">설명</string>
     <string name="text_deselect_all">전체 해제</string>
     <string name="text_destination">대상</string>
@@ -1086,7 +1086,7 @@
     <string name="text_press_back_or_vol_down_to_close_window">창을 닫으려면 \"뒤로\" 또는 \"볼륨 감소\" 버튼을 누르세요</string>
     <string name="text_preview">시사</string>
     <string name="text_process_log">프로세스 로그</string>
-    <string name="text_processing">처리</string>
+    <string name="text_processing">처리 중</string>
     <string name="text_project">프로젝트</string>
     <string name="text_project_location">프로젝트 위치</string>
     <string name="text_project_media_access">프로젝트 미디어 액세스</string>
@@ -1358,4 +1358,58 @@
     <string name="error_plugin_is_not_authorized_in_plugin_center">플러그인 \"%1$s\" 이 (가) 플러그인 센터에서 권한이 부여되지 않았습니다</string>
     <string name="error_plugin_not_found_in_installed_apps">설치된 앱에서 플러그인 \"%1$s\" 을 (를) 찾을 수 없습니다</string>
     <string name="error_unsupported_plugin_connection">지원되지 않는 플러그인 연결 방식입니다</string>
+    <string name="text_property_colon">%1$s:</string>
+    <string name="text_title">제목</string>
+    <string name="text_content">내용</string>
+    <string name="text_building_apk">APK 빌드 중</string>
+    <string name="text_built_apk_file_path">생성된 APK 경로</string>
+    <string name="text_clean">정리</string>
+    <string name="text_sign">서명</string>
+    <string name="text_build">빌드</string>
+    <string name="text_prepare">준비</string>
+    <string name="text_preparing_workspace">작업 공간 준비 중</string>
+    <string name="text_extracting_template_apk">템플릿 APK 추출 중</string>
+    <string name="text_prepare_completed">준비 완료</string>
+    <string name="text_copying_project_directory">프로젝트 디렉터리 복사 중</string>
+    <string name="text_copying_script_file">스크립트 파일 복사 중</string>
+    <string name="text_source_processing_completed">소스 처리 완료</string>
+    <string name="text_copying_directory">디렉터리 복사 중</string>
+    <string name="text_copying_file">파일 복사 중</string>
+    <string name="text_encrypting_script">스크립트 암호화 중</string>
+    <string name="text_replacing_file">파일 교체 중</string>
+    <string name="text_preparing_build_config">빌드 설정 준비 중</string>
+    <string name="text_reading_splash_resources">스플래시 리소스 읽는 중</string>
+    <string name="text_configuring_manifest">manifest 설정 중</string>
+    <string name="text_configuring_package_name">패키지 이름 설정 중</string>
+    <string name="text_copying_assets_to">assets 복사 중:</string>
+    <string name="text_processing_source">소스 처리 중</string>
+    <string name="text_applying_binary_resources">바이너리 리소스 적용 중</string>
+    <string name="text_copying_native_libraries">네이티브 라이브러리 복사 중</string>
+    <string name="text_updating_project_config">프로젝트 설정 업데이트 중</string>
+    <string name="text_sign_stage_completed">서명 단계 완료</string>
+    <string name="text_writing_project_config">프로젝트 설정 기록 중</string>
+    <string name="text_building_resources">리소스 빌드 중</string>
+    <string name="text_build_completed">빌드 완료</string>
+    <string name="text_writing_resources_arsc">resources.arsc 기록 중</string>
+    <string name="text_writing_manifest">manifest 기록 중</string>
+    <string name="text_writing_app_icon">앱 아이콘 기록 중</string>
+    <string name="text_copying_asset">asset 복사 중</string>
+    <string name="text_preparing_assets_dir">assets 디렉터리 준비 중</string>
+    <string name="text_copying_library">라이브러리 복사 중</string>
+    <string name="text_preparing_keystore">keystore 준비 중</string>
+    <string name="text_unsigned_apk_created">서명되지 않은 APK가 생성됨</string>
+    <string name="text_creating_unsigned_apk">서명되지 않은 APK 생성 중</string>
+    <string name="text_using_keystore">keystore 사용 중</string>
+    <string name="text_re_signing_apk">APK 재서명 중</string>
+    <string name="text_writing_signed_apk">서명된 APK 기록 중</string>
+    <string name="text_sign_completed">서명 완료</string>
+    <string name="text_clean_completed">정리 완료</string>
+    <string name="text_cleaning_workspace">작업 공간 정리 중</string>
+    <string name="text_resolving_plugin_native_libraries">플러그인 네이티브 라이브러리 확인 중</string>
+    <string name="text_copying_libraries_for_abi">ABI용 라이브러리 복사 중</string>
+    <string name="text_selected_plugin">선택된 플러그인</string>
+    <string name="text_extracted_plugin_libraries">플러그인 라이브러리를 추출함</string>
+    <string name="text_extracted_plugin_assets">플러그인 assets를 추출함</string>
+    <string name="text_extracting_plugin_asset">플러그인 asset 추출 중</string>
+    <string name="text_extracting_plugin_so">플러그인 so 파일 추출 중</string>
 </resources>
