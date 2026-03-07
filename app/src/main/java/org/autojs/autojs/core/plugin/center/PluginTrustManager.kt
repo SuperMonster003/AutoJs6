@@ -65,7 +65,6 @@ object PluginTrustManager {
         PluginIdentifier(
             setOf(
                 "517c51b16bead916296eb3cadfd57cd4f871ae8a4f767094ddf635338bad21c1", // Auto.js M
-                "2e64822e13a6c80c12e1c4b47e8fb32d1e9334526289da75777b7a79145de4b8", // Plugins
                 "a40da80a59d170caa950cf15c18c454d47a39b26989d8b640ecd745ba71bf5dc", // Plugins
             ),
             "TonyJiangWJ", PluginAuthorizedState.TRUSTED,

@@ -9,6 +9,7 @@ import android.os.Build
 import androidx.core.content.pm.PackageInfoCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.autojs.autojs.core.pref.Language
 import org.autojs.autojs6.R
 import java.io.File
 
@@ -42,7 +43,7 @@ class LegacyInstalledPluginRepository {
             val meta = appInfo.metaData ?: return@mapNotNull null
             val registry = meta.getString(KEY_REGISTRY) ?: return@mapNotNull null
             val packageName = appInfo.packageName
-            val label = appInfo.loadLabel(pm)?.toString()
+            val label = appInfo.loadLabel(pm).takeUnless { it.isBlank() }?.toString()
             val icon = appInfo.loadIcon(pm)
             val isStopped = (appInfo.flags and ApplicationInfo.FLAG_STOPPED) != 0
 
@@ -53,11 +54,26 @@ class LegacyInstalledPluginRepository {
             val lastUpdateTime = pkgInfo?.lastUpdateTime
             val packageSize = calcPackageSize(appInfo)
 
+            val metaDescriptionRes = meta.getInt(KEY_DESCRIPTION_RESOURCE, 0)
+            val description = when {
+                metaDescriptionRes != 0 -> {
+                    val metaContext = context.createPackageContext(packageName, 0)
+                    val configuration = context.resources.configuration.apply {
+                        setLocale(Language.getPrefLanguage().locale)
+                    }
+                    val localizedMetaContext = metaContext.createConfigurationContext(configuration)
+                    localizedMetaContext.getString(metaDescriptionRes)
+                }
+                else -> {
+                    meta.getString(KEY_DESCRIPTION)
+                }
+            }
+
             LegacyInstalledPlugin(
                 packageName = packageName,
                 title = label ?: packageName,
-                description = null,
-                author = null,
+                description = description,
+                author = meta.getString(KEY_AUTHOR),
                 versionName = versionName,
                 versionCode = versionCode,
                 packageSize = packageSize,
@@ -83,5 +99,8 @@ class LegacyInstalledPluginRepository {
 
     companion object {
         private const val KEY_REGISTRY = "org.autojs.plugin.sdk.registry"
+        private const val KEY_AUTHOR = "org.autojs.plugin.info.AUTHOR"
+        private const val KEY_DESCRIPTION_RESOURCE = "org.autojs.plugin.info.DESCRIPTION_RESOURCE"
+        private const val KEY_DESCRIPTION = "org.autojs.plugin.info.DESCRIPTION"
     }
 }

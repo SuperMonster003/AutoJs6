@@ -102,10 +102,8 @@ class PluginCenterViewModel : ViewModel() {
 
             installed.forEach { local ->
                 if (local.bindError != null) {
-                    enableStore.setEnabled(context, local.packageName, false)
-                }
-                if (local.isStopped) {
-                    PluginWakeManager.tryAutoWakeIfNeeded(context, local.packageName)
+                    val isAutoWakeSuccess = PluginWakeManager.tryAutoWakeIfNeeded(context, local.packageName)
+                    enableStore.setEnabled(context, local.packageName, isAutoWakeSuccess)
                 }
             }
 
@@ -226,7 +224,6 @@ class PluginCenterViewModel : ViewModel() {
         val canActivate = isInstalled && PluginWakeManager.buildWakeIntent(context, packageName) != null
         var activatedState = when {
             !canActivate -> PluginActivatedState.NOT_SUPPORTED
-            PluginActivationStore.getLastActivatedAt(context, packageName) != null -> PluginActivatedState.DONE
             else -> PluginActivatedState.UNKNOWN
         }
 
