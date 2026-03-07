@@ -587,9 +587,7 @@ object Inspect : Augmentable(), Invokable {
 
     private fun formatProperty(ctx: Ctx, value: ScriptableObject, recurseTimes: Int?, visibleKeys: NativeObject, key: String, array: Boolean): String {
         var name: String? = null
-        val desc = js_object_getOwnPropertyDescriptor(value, key) ?: newNativeObject().apply {
-            put("value", this, value.prop(key))
-        }
+        val desc = js_object_getOwnPropertyDescriptor(value, key)
         val getter = desc.prop(PROXY_GETTER_KEY)
         val setter = desc.prop(PROXY_SETTER_KEY)
 

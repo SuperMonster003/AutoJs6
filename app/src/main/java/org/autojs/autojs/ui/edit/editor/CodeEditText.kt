@@ -597,11 +597,14 @@ class CodeEditText : AppCompatEditText {
             runCatching { event.text.clear() }
             runCatching { event.contentDescription = null }
 
-            // Also drop selection-changed events entirely in large-text mode.
-            // zh-CN: 大文本模式下直接丢弃 selection-changed 事件.
-            if (event.eventType == AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED) return
-            if (event.eventType == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED) return
-            if (event.eventType == AccessibilityEvent.TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY) return
+            // Also drop selection-changed events entirely in large-text mode to avoid TransactionTooLargeException.
+            // zh-CN: 大文本模式下直接丢弃 selection-changed 事件以避免 TransactionTooLargeException.
+            when (event.eventType) {
+                AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED -> return
+                AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED -> return
+                AccessibilityEvent.TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY -> return
+                else -> Unit
+            }
         }
         super.sendAccessibilityEventUnchecked(event)
     }

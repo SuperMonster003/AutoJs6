@@ -23,7 +23,7 @@ enum class Language(@JvmField val languageTag: String, @KeyRes private val keyRe
     ;
 
     val locale: Locale = when (languageTag.isBlank()) {
-        true -> LocaleUtils.getSystemLocale()
+        true -> LocaleUtils.getPrimarySystemLocale()
         else -> Locale.forLanguageTag(languageTag)
     }
 
@@ -39,7 +39,7 @@ enum class Language(@JvmField val languageTag: String, @KeyRes private val keyRe
             return languageTag
         }
 
-        val systemTag = LocaleUtils.getSystemLocale().toLanguageTag()
+        val systemTag = LocaleUtils.getPrimarySystemLocale().toLanguageTag()
         val availableTags = values().map { it.languageTag }
 
         if (systemTag in availableTags) {

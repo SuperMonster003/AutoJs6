@@ -3091,16 +3091,17 @@ object FileUtils {
     }.getOrElse { false }
 
     @JvmStatic
-    fun File.isBinDiscImageLike() = runCatching {
-        this@isBinDiscImageLike.inputStream().use { inputStream ->
-            val header = ByteArray(2048) // Read first sector
-            if (inputStream.read(header) != header.size) return false
+    fun File.isBinDiscImageLike(): Boolean =
+        runCatching {
+            this@isBinDiscImageLike.inputStream().use { inputStream ->
+                val header = ByteArray(2048) // Read first sector
+                if (inputStream.read(header) != header.size) return false
 
-            // Check for very basic ISO 9660 primary volume descriptor
-            val pvdDescriptor = "CD001".toByteArray()
-            header.sliceArray(0x800 until 0x800 + pvdDescriptor.size).contentEquals(pvdDescriptor)
-        }
-    }.getOrElse { false }
+                // Check for very basic ISO 9660 primary volume descriptor
+                val pvdDescriptor = "CD001".toByteArray()
+                header.sliceArray(0x800 until 0x800 + pvdDescriptor.size).contentEquals(pvdDescriptor)
+            }
+        }.getOrElse { false }
 
     // Determines if a CUE file describes audio tracks
     @JvmStatic
@@ -3168,17 +3169,26 @@ object FileUtils {
     }.getOrElse { false }
 
     @JvmStatic
-    fun File.isSegaMDLike() = runCatching {
-        this@isSegaMDLike.inputStream().use { inputStream ->
-            val header = ByteArray(512) // 假设 SEGA 游戏文件有特定的头部
-            if (inputStream.read(header) != header.size) return false
+    fun File.isSegaMDLike(): Boolean =
+        runCatching {
+            this@isSegaMDLike.inputStream().use { inputStream ->
+                // Assume SEGA game files have a specific header.
+                // zh-CN: 假设 SEGA 游戏文件有特定的头部.
+                val header = ByteArray(512)
+                if (inputStream.read(header) != header.size) return false
 
-            // 这里你需要根据 SEGA 文件的具体特征来调整条件
-            // 例如: 找到特定的标识符或者模式
-            val segaIdentifier = byteArrayOf(0x53, 0x45, 0x47, 0x41) // 可能的 "SEGA" 标记
-            header.sliceArray(segaIdentifier.indices).contentEquals(segaIdentifier)
-        }
-    }.getOrElse { false }
+                // Here is the modification needed to adjust the conditions based on specific SEGA file characteristics.
+                // This requires identifying specific identifiers or patterns within the header.
+                // zh-CN:
+                // 这里需要根据 SEGA 文件的具体特征来调整条件.
+                // 例如: 找到特定的标识符或者模式.
+
+                // Possible "SEGA" marker.
+                // zh-CN: 可能的 "SEGA" 标记.
+                val segaIdentifier = byteArrayOf(0x53, 0x45, 0x47, 0x41)
+                header.sliceArray(segaIdentifier.indices).contentEquals(segaIdentifier)
+            }
+        }.getOrElse { false }
 
     // Function to check if a file is likely a macro based on scripting patterns found in samples
     @JvmStatic

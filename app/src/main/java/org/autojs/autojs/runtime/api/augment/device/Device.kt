@@ -122,14 +122,14 @@ class Device(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @JvmStatic
         @RhinoFunctionBody
         fun vibrateRhinoWithRuntime(scriptRuntime: ScriptRuntime, o: Any?, p: Any?) {
-            when (o) {
-                is String -> {
+            when {
+                o is String -> {
                     MorseCode.vibrateRhino(o, p)
                 }
-                is Number if p is Number -> {
+                o is Number && p is Number -> {
                     scriptRuntime.device.vibrate(/* off = */ o.toLong(), /* millis = */ p.toLong())
                 }
-                is NativeArray if p is Number -> {
+                o is NativeArray && p is Number -> {
                     val listOff = listOf(p.toLong())
                     val listOthers = o.map { toVibrateTimingElement(it) }
                     val timings = (listOff + listOthers).toLongArray()

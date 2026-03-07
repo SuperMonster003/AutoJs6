@@ -38,18 +38,41 @@ object LocaleUtils {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             context.getSystemService(LocaleManager::class.java).applicationLocales = LocaleList.getEmptyLocaleList()
         } else {
-            setLocale(context, getSystemLocale())
+            setLocale(context, getPrimarySystemLocale())
         }
     }
 
     @JvmStatic
+    @Deprecated("Use getSystemLocaleList instead", ReplaceWith("getPrimarySystemLocale()"))
     fun getSystemLocale(): Locale = Resources.getSystem().configuration.locales[0] ?: Locale.getDefault()
+
+    @JvmStatic
+    @JvmOverloads
+    fun getSystemLocaleList(context: Context? = null): List<Locale> {
+        return when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
+                val localeManager = (context ?: GlobalAppContext.get()).getSystemService(LocaleManager::class.java)
+                val localeList: LocaleList = localeManager.systemLocales
+                List(localeList.size()) { index -> localeList[index] }
+            }
+            else -> {
+                val localeList = Resources.getSystem().configuration.locales
+                List(localeList.size()) { index -> localeList[index] }
+            }
+        }
+    }
+
+    @JvmStatic
+    @JvmOverloads
+    fun getPrimarySystemLocale(context: Context? = null): Locale {
+        return getSystemLocaleList(context).firstOrNull() ?: Locale.getDefault()
+    }
 
     @JvmStatic
     fun getResources(desiredLocale: Locale?): Resources {
         return GlobalAppContext.get().let { context ->
             context.resources.configuration.let { Configuration(it) }.run {
-                setLocale(desiredLocale ?: getSystemLocale())
+                setLocale(desiredLocale ?: getPrimarySystemLocale())
                 context.createConfigurationContext(this).resources
             }
         }

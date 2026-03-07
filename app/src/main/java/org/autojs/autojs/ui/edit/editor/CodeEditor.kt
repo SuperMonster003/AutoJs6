@@ -178,7 +178,7 @@ class CodeEditor : HVScrollView {
         if (mProcessDialog?.isShowing == true) return@Runnable
 
         mProcessDialog = MaterialDialog.Builder(context)
-            .content(R.string.text_processing)
+            .content(R.string.text_in_progress)
             // Text only, no progress spinner.
             // zh-CN: 仅显示文字, 不使用进度圆圈动画.
             .cancelable(false)

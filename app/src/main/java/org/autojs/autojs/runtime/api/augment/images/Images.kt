@@ -1494,7 +1494,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
                 val similarityMethod = runCatching {
                     ImageSimilarity::class.java.getDeclaredMethod(metric, OpencvMat::class.java, OpencvMat::class.java)
                 }.getOrElse { throw WrappedIllegalArgumentException("Unknown similarity metric: $metric") }
-                if (similarityMethod.returnType != Double::class.java && similarityMethod.returnType != java.lang.Double::class.java) {
+                if (similarityMethod.returnType != Double::class.java) {
                     throw WrappedIllegalArgumentException("Similarity metric ($metric) method must return Double type. Found: ${similarityMethod.returnType}")
                 }
                 similarityMethod.invoke(ImageSimilarity, matA, matB) as Double
