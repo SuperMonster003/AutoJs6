@@ -8,11 +8,11 @@
 <!-- Proofreader: [ Google Gemini ] -->
 
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="apk_builder_build" tools:ignore="TypographyEllipsis">建築...</string>
-    <string name="apk_builder_clean" tools:ignore="TypographyEllipsis">洗浄...</string>
-    <string name="apk_builder_package" tools:ignore="TypographyEllipsis">パッケージング...</string>
+    <string name="apk_builder_build">建築</string>
+    <string name="apk_builder_clean">洗浄</string>
+    <string name="apk_builder_package">パッケージング</string>
     <string name="apk_builder_plugin_version_incompatible">apk builder の非互換バージョン.\n今すぐダウンロードしますか?</string>
-    <string name="apk_builder_prepare" tools:ignore="TypographyEllipsis">準備中...</string>
+    <string name="apk_builder_prepare">準備中</string>
     <string name="apk_info_device_sdk">デバイス SDK</string>
     <string name="apk_info_file_size">ファイルサイズ</string>
     <string name="apk_info_installed_version">インストール済み</string>
@@ -535,7 +535,7 @@
     <string name="text_app_shortcut_docs_short_label">文書</string>
     <string name="text_app_shortcut_log_long_label">AutoJs6 ログ</string>
     <string name="text_app_shortcut_log_short_label">ログ</string>
-    <string name="text_app_shortcut_plugin_center_long_label">AutoJs6 プラグインセンター</string>
+    <string name="text_app_shortcut_plugin_center_long_label">AutoJs6 プラグイン</string>
     <string name="text_app_shortcut_plugin_center_short_label">プラグイン</string>
     <string name="text_app_shortcut_settings_long_label">AutoJs6 設定</string>
     <string name="text_app_shortcut_settings_short_label">設定</string>
@@ -673,7 +673,7 @@
     <string name="text_delete_folder">フォルダーを削除</string>
     <string name="text_delete_line">行削除</string>
     <string name="text_delete_revision_confirm">この履歴を完全に削除しますか?</string>
-    <string name="text_deleting" tools:ignore="TypographyEllipsis">削除中...</string>
+    <string name="text_deleting">削除中</string>
     <string name="text_description">説明</string>
     <string name="text_deselect_all">全て解除</string>
     <string name="text_destination">宛先</string>
@@ -1357,4 +1357,58 @@
     <string name="error_plugin_is_not_authorized_in_plugin_center">プラグイン \"%1$s\" はプラグインセンターで許可されていません</string>
     <string name="error_plugin_not_found_in_installed_apps">インストール済みアプリにプラグイン \"%1$s\" が見つかりません</string>
     <string name="error_unsupported_plugin_connection">サポートされていないプラグイン接続方式です</string>
+    <string name="text_property_colon">%1$s:</string>
+    <string name="text_title">タイトル</string>
+    <string name="text_content">内容</string>
+    <string name="text_building_apk">APK をビルド中</string>
+    <string name="text_built_apk_file_path">生成された APK のパス</string>
+    <string name="text_clean">クリーン</string>
+    <string name="text_sign">署名</string>
+    <string name="text_build">ビルド</string>
+    <string name="text_prepare">準備</string>
+    <string name="text_preparing_workspace">ワークスペースを準備中</string>
+    <string name="text_extracting_template_apk">テンプレート APK を展開中</string>
+    <string name="text_prepare_completed">準備完了</string>
+    <string name="text_copying_project_directory">プロジェクトディレクトリをコピー中</string>
+    <string name="text_copying_script_file">スクリプトファイルをコピー中</string>
+    <string name="text_source_processing_completed">ソース処理完了</string>
+    <string name="text_copying_directory">ディレクトリをコピー中</string>
+    <string name="text_copying_file">ファイルをコピー中</string>
+    <string name="text_encrypting_script">スクリプトを暗号化中</string>
+    <string name="text_replacing_file">ファイルを置換中</string>
+    <string name="text_preparing_build_config">ビルド設定を準備中</string>
+    <string name="text_reading_splash_resources">スプラッシュ資源を読み込み中</string>
+    <string name="text_configuring_manifest">manifest を設定中</string>
+    <string name="text_configuring_package_name">パッケージ名を設定中</string>
+    <string name="text_copying_assets_to">assets をコピー中:</string>
+    <string name="text_processing_source">ソースを処理中</string>
+    <string name="text_applying_binary_resources">バイナリ資源を適用中</string>
+    <string name="text_copying_native_libraries">ネイティブライブラリをコピー中</string>
+    <string name="text_updating_project_config">プロジェクト設定を更新中</string>
+    <string name="text_sign_stage_completed">署名ステージ完了</string>
+    <string name="text_writing_project_config">プロジェクト設定を書き込み中</string>
+    <string name="text_building_resources">資源をビルド中</string>
+    <string name="text_build_completed">ビルド完了</string>
+    <string name="text_writing_resources_arsc">resources.arsc を書き込み中</string>
+    <string name="text_writing_manifest">manifest を書き込み中</string>
+    <string name="text_writing_app_icon">アプリアイコンを書き込み中</string>
+    <string name="text_copying_asset">asset をコピー中</string>
+    <string name="text_preparing_assets_dir">assets ディレクトリを準備中</string>
+    <string name="text_copying_library">ライブラリをコピー中</string>
+    <string name="text_preparing_keystore">keystore を準備中</string>
+    <string name="text_unsigned_apk_created">未署名 APK を作成しました</string>
+    <string name="text_creating_unsigned_apk">未署名 APK を作成中</string>
+    <string name="text_using_keystore">keystore を使用中</string>
+    <string name="text_re_signing_apk">APK を再署名中</string>
+    <string name="text_writing_signed_apk">署名済み APK を書き込み中</string>
+    <string name="text_sign_completed">署名完了</string>
+    <string name="text_clean_completed">クリーン完了</string>
+    <string name="text_cleaning_workspace">ワークスペースをクリーン中</string>
+    <string name="text_resolving_plugin_native_libraries">プラグインのネイティブライブラリを解決中</string>
+    <string name="text_copying_libraries_for_abi">ABI 用ライブラリをコピー中</string>
+    <string name="text_selected_plugin">選択したプラグイン</string>
+    <string name="text_extracted_plugin_libraries">プラグインのライブラリを抽出しました</string>
+    <string name="text_extracted_plugin_assets">プラグインの資源を抽出しました</string>
+    <string name="text_extracting_plugin_asset">プラグイン資源を抽出中</string>
+    <string name="text_extracting_plugin_so">プラグインの so を抽出中</string>
 </resources>

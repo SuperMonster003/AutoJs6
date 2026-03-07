@@ -7,11 +7,11 @@
 <!-- Proofreader : [ JetBrains AI Assistant ] -->
 
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="apk_builder_build" tools:ignore="TypographyEllipsis">Construire...</string>
-    <string name="apk_builder_clean" tools:ignore="TypographyEllipsis">Nettoyage...</string>
-    <string name="apk_builder_package" tools:ignore="TypographyEllipsis">Emballage...</string>
+    <string name="apk_builder_build">Construire</string>
+    <string name="apk_builder_clean">Nettoyage</string>
+    <string name="apk_builder_package">Emballage</string>
     <string name="apk_builder_plugin_version_incompatible">Version incompatible de \"apk builder\".\nTéléchargez-la maintenant ?</string>
-    <string name="apk_builder_prepare" tools:ignore="TypographyEllipsis">Préparation...</string>
+    <string name="apk_builder_prepare">Préparation</string>
     <string name="apk_info_device_sdk">SDK de l\'appareil</string>
     <string name="apk_info_file_size">Taille du fichier</string>
     <string name="apk_info_installed_version">Installé</string>
@@ -534,7 +534,7 @@
     <string name="text_app_shortcut_docs_short_label">Docs</string>
     <string name="text_app_shortcut_log_long_label">AutoJs6 Journal</string>
     <string name="text_app_shortcut_log_short_label">Journal</string>
-    <string name="text_app_shortcut_plugin_center_long_label">Centre des plugins AutoJs6</string>
+    <string name="text_app_shortcut_plugin_center_long_label">AutoJs6 Plugins</string>
     <string name="text_app_shortcut_plugin_center_short_label">Plugins</string>
     <string name="text_app_shortcut_settings_long_label">AutoJs6 Réglages</string>
     <string name="text_app_shortcut_settings_short_label">Réglages</string>
@@ -672,7 +672,7 @@
     <string name="text_delete_folder">Supprimer le dossier</string>
     <string name="text_delete_line">Supprimer la ligne</string>
     <string name="text_delete_revision_confirm">Supprimer definitivement cette revision?</string>
-    <string name="text_deleting" tools:ignore="TypographyEllipsis">Suppression...</string>
+    <string name="text_deleting">Suppression</string>
     <string name="text_description">Description</string>
     <string name="text_deselect_all">Tout deselectionner</string>
     <string name="text_destination">Destination</string>
@@ -1356,4 +1356,58 @@
     <string name="error_plugin_is_not_authorized_in_plugin_center">Le plugin \"%1$s\" n\'est pas autorise dans le Centre des plugins</string>
     <string name="error_plugin_not_found_in_installed_apps">Plugin \"%1$s\" introuvable parmi les applis installees</string>
     <string name="error_unsupported_plugin_connection">Connexion de plugin non prise en charge</string>
+    <string name="text_property_colon">%1$s :</string>
+    <string name="text_title">Titre</string>
+    <string name="text_content">Contenu</string>
+    <string name="text_building_apk">Compilation de l\'APK</string>
+    <string name="text_built_apk_file_path">Chemin de l\'APK genere</string>
+    <string name="text_clean">Nettoyer</string>
+    <string name="text_sign">Signer</string>
+    <string name="text_build">Compiler</string>
+    <string name="text_prepare">Preparer</string>
+    <string name="text_preparing_workspace">Preparation de l\'espace de travail</string>
+    <string name="text_extracting_template_apk">Extraction de l\'APK modele</string>
+    <string name="text_prepare_completed">Preparation terminee</string>
+    <string name="text_copying_project_directory">Copie du repertoire du projet</string>
+    <string name="text_copying_script_file">Copie du fichier de script</string>
+    <string name="text_source_processing_completed">Traitement du code source termine</string>
+    <string name="text_copying_directory">Copie du repertoire</string>
+    <string name="text_copying_file">Copie du fichier</string>
+    <string name="text_encrypting_script">Chiffrement du script</string>
+    <string name="text_replacing_file">Remplacement du fichier</string>
+    <string name="text_preparing_build_config">Preparation de la config de build</string>
+    <string name="text_reading_splash_resources">Lecture des ressources d\'ecran de demarrage</string>
+    <string name="text_configuring_manifest">Configuration du manifest</string>
+    <string name="text_configuring_package_name">Configuration du nom de package</string>
+    <string name="text_copying_assets_to">Copie des assets vers</string>
+    <string name="text_processing_source">Traitement du code source</string>
+    <string name="text_applying_binary_resources">Application des ressources binaires</string>
+    <string name="text_copying_native_libraries">Copie des bibliotheques natives</string>
+    <string name="text_updating_project_config">Mise a jour de la config du projet</string>
+    <string name="text_sign_stage_completed">Etape de signature terminee</string>
+    <string name="text_writing_project_config">Ecriture de la config du projet</string>
+    <string name="text_building_resources">Compilation des ressources</string>
+    <string name="text_build_completed">Build termine</string>
+    <string name="text_writing_resources_arsc">Ecriture de resources.arsc</string>
+    <string name="text_writing_manifest">Ecriture du manifest</string>
+    <string name="text_writing_app_icon">Ecriture de l\'icone de l\'appli</string>
+    <string name="text_copying_asset">Copie d\'asset</string>
+    <string name="text_preparing_assets_dir">Preparation du dir des assets</string>
+    <string name="text_copying_library">Copie de bibliotheque</string>
+    <string name="text_preparing_keystore">Preparation du keystore</string>
+    <string name="text_unsigned_apk_created">APK non signe cree</string>
+    <string name="text_creating_unsigned_apk">Creation de l\'APK non signe</string>
+    <string name="text_using_keystore">Utilisation du keystore</string>
+    <string name="text_re_signing_apk">Re-signature de l\'APK</string>
+    <string name="text_writing_signed_apk">Ecriture de l\'APK signe</string>
+    <string name="text_sign_completed">Signature terminee</string>
+    <string name="text_clean_completed">Nettoyage termine</string>
+    <string name="text_cleaning_workspace">Nettoyage de l\'espace de travail</string>
+    <string name="text_resolving_plugin_native_libraries">Resolution des bibliotheques natives du plugin</string>
+    <string name="text_copying_libraries_for_abi">Copie des bibliotheques pour ABI</string>
+    <string name="text_selected_plugin">Plugin selectionne</string>
+    <string name="text_extracted_plugin_libraries">Bibliotheques du plugin extraites</string>
+    <string name="text_extracted_plugin_assets">Assets du plugin extraits</string>
+    <string name="text_extracting_plugin_asset">Extraction d\'asset du plugin</string>
+    <string name="text_extracting_plugin_so">Extraction du fichier so du plugin</string>
 </resources>

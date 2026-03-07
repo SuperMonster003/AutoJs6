@@ -4,8 +4,10 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.util.Linkify;
@@ -24,6 +26,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.util.Pair;
 import androidx.lifecycle.ViewModelProvider;
+import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.android.flexbox.FlexboxLayout;
 import com.google.android.material.textfield.TextInputLayout;
@@ -35,14 +38,15 @@ import net.dongliu.apk.parser.bean.ApkMeta;
 import org.autojs.autojs.apkbuilder.ApkBuilder;
 import org.autojs.autojs.apkbuilder.keystore.KeyStore;
 import org.autojs.autojs.core.pref.Language;
-import org.autojs.autojs.util.DialogUtils;
 import org.autojs.autojs.external.fileprovider.AppFileProvider;
 import org.autojs.autojs.model.explorer.Explorers;
 import org.autojs.autojs.model.script.ScriptFile;
+import org.autojs.autojs.pio.PFiles;
 import org.autojs.autojs.project.ProjectConfig;
 import org.autojs.autojs.runtime.api.AppUtils;
 import org.autojs.autojs.runtime.api.AppUtils.Companion.SimpleVersionInfo;
 import org.autojs.autojs.runtime.api.augment.pinyin.Pinyin;
+import org.autojs.autojs.theme.ThemeColorManager;
 import org.autojs.autojs.ui.BaseActivity;
 import org.autojs.autojs.ui.common.NotAskAgainDialog;
 import org.autojs.autojs.ui.error.ErrorDialogActivity;
@@ -55,13 +59,17 @@ import org.autojs.autojs.ui.widget.RoundCheckboxWithText;
 import org.autojs.autojs.util.AndroidUtils;
 import org.autojs.autojs.util.AndroidUtils.Abi;
 import org.autojs.autojs.util.BitmapUtils;
+import org.autojs.autojs.util.ColorUtils;
+import org.autojs.autojs.util.DialogUtils;
 import org.autojs.autojs.util.EnvironmentUtils;
 import org.autojs.autojs.util.IntentUtils;
 import org.autojs.autojs.util.IntentUtils.ToastExceptionHolder;
+import org.autojs.autojs.util.StringUtils;
 import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs.util.WorkingDirectoryUtils;
 import org.autojs.autojs6.R;
 import org.autojs.autojs6.databinding.ActivityBuildBinding;
+import org.autojs.autojs6.databinding.DialogBuildProgressBinding;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -70,12 +78,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -89,7 +99,7 @@ import static org.autojs.autojs.util.StringUtils.key;
  * Created by Stardust on Oct 22, 2017.
  * Modified by SuperMonster003 as of Jan 6, 2026.
  *
- * @noinspection ResultOfMethodCallIgnored
+ * @noinspection ResultOfMethodCallIgnored, unused
  */
 public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCallback {
 
@@ -224,6 +234,35 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     private ProjectConfig mProjectConfig;
 
     private MaterialDialog mProgressDialog;
+    private ImageView mProgressPrepareIcon;
+    private TextView mProgressPrepareText;
+    private ImageView mProgressBuildIcon;
+    private TextView mProgressBuildText;
+    private ImageView mProgressSignIcon;
+    private TextView mProgressSignText;
+    private ImageView mProgressCleanIcon;
+    private TextView mProgressCleanText;
+    private TextView mProgressPrepareDurationText;
+    private TextView mProgressBuildDurationText;
+    private TextView mProgressSignDurationText;
+    private TextView mProgressCleanDurationText;
+    private TextView mStateTitleText;
+    private TextView mStateContentText;
+    private final EnumMap<BuildStep, Long> mStepDurationMs = new EnumMap<>(BuildStep.class);
+    @Nullable
+    private BuildStep mCurrentTimingStep;
+    private long mCurrentTimingStepStartedAtMs;
+    // Track cancellation state for cooperative build abort.
+    // zh-CN: 跟踪取消状态, 用于协作式中止构建.
+    private final AtomicBoolean mBuildCancelled = new AtomicBoolean(false);
+    @Nullable
+    private File mBuildWorkspace;
+    @Nullable
+    private File mBuildOutputApk;
+    @Nullable
+    private File mBuildOutputApkBackup;
+    @Nullable
+    private Thread mBuildThread;
     private String mSource;
     private boolean mIsDefaultIcon = true;
     private boolean mIsProjectLevelBuilding;
@@ -712,7 +751,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     }
 
     @Override
-    protected void onNewIntent(Intent intent) {
+    protected void onNewIntent(@NonNull Intent intent) {
         super.onNewIntent(intent);
     }
 
@@ -910,24 +949,74 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                block == Character.UnicodeBlock.HALFWIDTH_AND_FULLWIDTH_FORMS;
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     @SuppressLint("CheckResult")
     private void doBuildingApk() {
         ProjectConfig projectConfig = determineProjectConfig();
         File buildPath = new File(getCacheDir(), "build/");
         File outApk = new File(mOutputPathView.getText().toString(),
                 String.format("%s_v%s.apk", projectConfig.getName(), projectConfig.getVersionName()));
+        File outApkBackup = null;
+        try {
+            outApkBackup = backupExistingOutputApkIfNeeded(outApk);
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "Failed to backup existing output apk", e);
+            ErrorDialogActivity.showErrorDialog(this, R.string.text_failed_to_build, e.getMessage());
+            return;
+        }
+        mBuildCancelled.set(false);
+        mBuildWorkspace = buildPath;
+        mBuildOutputApk = outApk;
+        mBuildOutputApkBackup = outApkBackup;
         showProgressDialog();
-        Observable.fromCallable(() -> callApkBuilder(buildPath, outApk, projectConfig))
+        Observable.fromCallable(() -> {
+                    mBuildThread = Thread.currentThread();
+                    try {
+                        return callApkBuilder(buildPath, outApk, projectConfig);
+                    } finally {
+                        mBuildThread = null;
+                    }
+                })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(apkBuilder -> {
+                    if (mBuildCancelled.get()) {
+                        handleBuildAborted();
+                        return;
+                    }
                     if (apkBuilder != null) {
                         onBuildSuccessful(outApk);
                     } else {
                         onBuildFailed(new FileNotFoundException(TEMPLATE_APK_NAME));
                     }
                 }, this::onBuildFailed);
+    }
+
+    @Nullable
+    private File backupExistingOutputApkIfNeeded(@NonNull File outApk) throws IOException {
+        if (!outApk.exists()) {
+            return null;
+        }
+        File parentDir = outApk.getAbsoluteFile().getParentFile();
+        if (parentDir == null) {
+            throw new IOException("Invalid output apk path: " + outApk.getPath());
+        }
+        File backupApk = new File(parentDir, outApk.getName() + "." + System.nanoTime() + ".bak");
+        if (backupApk.exists() && !backupApk.delete()) {
+            throw new IOException("Failed to remove stale output apk backup: " + backupApk.getPath());
+        }
+        if (outApk.renameTo(backupApk)) {
+            return backupApk;
+        }
+        if (!PFiles.copy(outApk.getPath(), backupApk.getPath())) {
+            throw new IOException("Failed to backup existing output apk: " + outApk.getPath());
+        }
+        if (!outApk.delete()) {
+            if (!backupApk.delete()) {
+                Log.w(LOG_TAG, "Failed to delete incomplete backup apk after backup cleanup failure: " + backupApk.getPath());
+            }
+            throw new IOException("Failed to remove original output apk after backup copy: " + outApk.getPath());
+        }
+        return backupApk;
     }
 
     private ProjectConfig determineProjectConfig() {
@@ -988,71 +1077,362 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         InputStream templateApk = getAssets().open(TEMPLATE_APK_NAME);
         return new ApkBuilder(templateApk, outApk, buildPath.getPath())
                 .setProgressCallback(BuildActivity.this)
-                .prepare()
-                .withConfig(projectConfig)
-                .build()
-                .sign()
-                .cleanWorkspace();
+                .setCancelSignal(mBuildCancelled)
+                .prepare(BuildActivity.this)
+                .withConfig(BuildActivity.this, projectConfig)
+                .build(BuildActivity.this)
+                .sign(BuildActivity.this)
+                .commitProjectConfigIfNeeded(BuildActivity.this)
+                .cleanWorkspace(BuildActivity.this)
+                .finish();
+    }
+
+    private enum BuildStep {
+        PREPARE,
+        BUILD,
+        SIGN,
+        CLEAN,
+        FINISHED,
     }
 
     private void showProgressDialog() {
+        dismissProgressDialog();
+        View contentView = DialogBuildProgressBinding.inflate(getLayoutInflater()).getRoot();
+        mProgressPrepareIcon = contentView.findViewById(R.id.icon_prepare);
+        mProgressPrepareText = contentView.findViewById(R.id.text_prepare);
+        mProgressBuildIcon = contentView.findViewById(R.id.icon_build);
+        mProgressBuildText = contentView.findViewById(R.id.text_build);
+        mProgressSignIcon = contentView.findViewById(R.id.icon_sign);
+        mProgressSignText = contentView.findViewById(R.id.text_sign);
+        mProgressCleanIcon = contentView.findViewById(R.id.icon_clean);
+        mProgressCleanText = contentView.findViewById(R.id.text_clean);
+        mProgressPrepareDurationText = contentView.findViewById(R.id.text_prepare_duration);
+        mProgressBuildDurationText = contentView.findViewById(R.id.text_build_duration);
+        mProgressSignDurationText = contentView.findViewById(R.id.text_sign_duration);
+        mProgressCleanDurationText = contentView.findViewById(R.id.text_clean_duration);
+        mStateTitleText = contentView.findViewById(R.id.text_state_title);
+        mStateContentText = contentView.findViewById(R.id.text_state_content);
+        resetStepDurations();
+        applyThemeColorIcons(mProgressPrepareIcon, mProgressBuildIcon, mProgressSignIcon, mProgressCleanIcon);
         mProgressDialog = new MaterialDialog.Builder(this)
-                .progress(true, 100)
-                .content(R.string.text_in_progress)
+                .title(R.string.text_building_apk)
+                .customView(contentView, false)
+                .neutralText("")
+                .negativeText("")
+                .positiveText(R.string.dialog_button_abort)
+                .positiveColorRes(R.color.dialog_button_caution)
+                .onPositive((dialog, which) -> requestBuildAbort())
+                .autoDismiss(false)
                 .cancelable(false)
                 .show();
+        updateProgressDialog(BuildStep.PREPARE);
+        mStateTitleText.setText(getString(R.string.text_property_colon, getString(R.string.text_processing)));
+    }
+
+    private void applyThemeColorIcons(ImageView... imageView) {
+        int backgroundColor = getColor(R.color.window_background);
+        int adjustedColor = ColorUtils.adjustColorForContrast(backgroundColor, ThemeColorManager.getColorPrimary(), 2.3);
+        for (ImageView iv : imageView) {
+            iv.setImageTintList(ColorStateList.valueOf(adjustedColor));
+        }
+    }
+
+    private void updateProgressDialog(BuildStep currentStep) {
+        if (mProgressDialog == null) {
+            return;
+        }
+        recordStepDuration(currentStep);
+        setProgressStep(mProgressPrepareIcon, mProgressPrepareText, mProgressPrepareDurationText, BuildStep.PREPARE, currentStep);
+        setProgressStep(mProgressBuildIcon, mProgressBuildText, mProgressBuildDurationText, BuildStep.BUILD, currentStep);
+        setProgressStep(mProgressSignIcon, mProgressSignText, mProgressSignDurationText, BuildStep.SIGN, currentStep);
+        setProgressStep(mProgressCleanIcon, mProgressCleanText, mProgressCleanDurationText, BuildStep.CLEAN, currentStep);
+    }
+
+    private void setProgressStep(@Nullable ImageView iconView, @Nullable TextView stateView, @Nullable TextView durationView, BuildStep step, BuildStep currentStep) {
+        if (step.ordinal() < currentStep.ordinal()) {
+            if (iconView != null) iconView.setImageResource(R.drawable.ic_check_mark);
+            if (stateView != null) stateView.setText(ensureTextEndsWithDot(stateView.getText()));
+            if (durationView != null && currentStep.ordinal() - step.ordinal() == 1) {
+                updateStepDurationText(durationView, step, SystemClock.elapsedRealtime());
+            }
+        } else if (step == currentStep) {
+            if (iconView != null) iconView.setImageResource(R.drawable.ic_right_arrow);
+            if (stateView != null) stateView.setText(ensureTextEndsWithHalfEllipsis(stateView.getText()));
+        } else {
+            if (iconView != null) iconView.setImageResource(R.drawable.transparent);
+            if (stateView != null) stateView.setText(ensureTextEndsWithoutDot(stateView.getText()));
+        }
+    }
+
+    private void resetStepDurations() {
+        mStepDurationMs.clear();
+        mCurrentTimingStep = null;
+        mCurrentTimingStepStartedAtMs = 0L;
+    }
+
+    private void recordStepDuration(@NonNull BuildStep currentStep) {
+        long now = SystemClock.elapsedRealtime();
+        if (mCurrentTimingStep != null && mCurrentTimingStep != currentStep && isTrackedStep(mCurrentTimingStep)) {
+            mStepDurationMs.put(mCurrentTimingStep, Math.max(0L, now - mCurrentTimingStepStartedAtMs));
+        }
+        if (isTrackedStep(currentStep) && !mStepDurationMs.containsKey(currentStep)) {
+            if (mCurrentTimingStep != currentStep) {
+                mCurrentTimingStep = currentStep;
+                mCurrentTimingStepStartedAtMs = now;
+            }
+        } else if (!isTrackedStep(currentStep)) {
+            mCurrentTimingStep = null;
+            mCurrentTimingStepStartedAtMs = 0L;
+        }
+    }
+
+    private boolean isTrackedStep(@NonNull BuildStep step) {
+        return step == BuildStep.PREPARE
+               || step == BuildStep.BUILD
+               || step == BuildStep.SIGN
+               || step == BuildStep.CLEAN;
+    }
+
+    @Nullable
+    private Long resolveStepDurationMs(@NonNull BuildStep step, long now) {
+        Long duration = mStepDurationMs.get(step);
+        if (duration != null) {
+            return duration;
+        }
+        if (step == mCurrentTimingStep) {
+            return Math.max(0L, now - mCurrentTimingStepStartedAtMs);
+        }
+        return null;
+    }
+
+    private void updateStepDurationText(@NonNull TextView textView, @NonNull BuildStep step, long now) {
+        Long durationMs = resolveStepDurationMs(step, now);
+        textView.setText(durationMs == null ? "" : formatStepDuration(durationMs));
+    }
+
+    @NonNull
+    private String formatStepDuration(long durationMs) {
+        long safeDurationMs = Math.max(0L, durationMs);
+        long tenths = Math.round(safeDurationMs / 100.0d);
+        long integerPart = tenths / 10;
+        long decimalPart = tenths % 10;
+        // if (decimalPart == 0L) {
+        //     return "[ " + integerPart + " s ]";
+        // }
+        return "[ " + integerPart + "." + decimalPart + " s ]";
+    }
+
+    private String ensureTextEndsWithDot(CharSequence text) {
+        return ensureTextEndsWithoutDot(text) + ".";
+    }
+
+    private String ensureTextEndsWithHalfEllipsis(CharSequence text) {
+        return ensureTextEndsWithoutDot(text) + StringUtils.str(R.string.text_half_ellipsis);
+    }
+
+    private String ensureTextEndsWithoutDot(CharSequence text) {
+        var tmp = text.toString();
+        while (tmp.length() > 0 && tmp.charAt(tmp.length() - 1) == '.') {
+            tmp = tmp.subSequence(0, tmp.length() - 1).toString();
+        }
+        return tmp;
+    }
+
+    // Abort build cooperatively and trigger cleanup as early as possible.
+    // zh-CN: 协作式中止构建, 并尽早触发清理.
+    private void requestBuildAbort() {
+        if (!mBuildCancelled.compareAndSet(false, true)) {
+            return;
+        }
+        if (mProgressDialog != null) {
+            mProgressDialog.setTitle(R.string.text_aborting);
+            View button = mProgressDialog.getActionButton(DialogAction.POSITIVE);
+            if (button != null) {
+                button.setEnabled(false);
+            }
+        }
+        Thread buildThread = mBuildThread;
+        if (buildThread != null) {
+            buildThread.interrupt();
+        }
+        cleanupBuildArtifactsAsync(false);
+    }
+
+    private void cleanupBuildArtifactsAsync(boolean restoreOutputApk) {
+        File workspace = mBuildWorkspace;
+        File outApk = mBuildOutputApk;
+        File outApkBackup = mBuildOutputApkBackup;
+        if (workspace == null && outApk == null && outApkBackup == null) {
+            return;
+        }
+        Schedulers.io().scheduleDirect(() -> cleanupBuildArtifacts(workspace, outApk, outApkBackup, restoreOutputApk));
+    }
+
+    // Best-effort cleanup for workspace and output artifacts.
+    // zh-CN: 对工作区和输出产物执行尽力清理.
+    private void cleanupBuildArtifacts(@Nullable File workspace, @Nullable File outApk, @Nullable File outApkBackup, boolean restoreOutputApk) {
+        if (workspace != null && workspace.exists()) {
+            PFiles.deleteRecursively(workspace);
+        }
+        if (outApk != null && outApk.exists()) {
+            outApk.delete();
+        }
+        if (restoreOutputApk) {
+            restoreOutputApkIfNeeded(outApk, outApkBackup);
+        }
+    }
+
+    private void restoreOutputApkIfNeeded(@Nullable File outApk, @Nullable File outApkBackup) {
+        if (outApk == null || outApkBackup == null || !outApkBackup.exists()) {
+            return;
+        }
+        if (outApk.exists() && !outApk.delete()) {
+            Log.w(LOG_TAG, "Failed to delete output apk before restore: " + outApk.getPath());
+        }
+        if (!outApkBackup.renameTo(outApk)) {
+            if (!PFiles.copy(outApkBackup.getPath(), outApk.getPath())) {
+                Log.w(LOG_TAG, "Failed to restore output apk backup: " + outApk.getPath());
+                return;
+            }
+            if (!outApkBackup.delete()) {
+                Log.w(LOG_TAG, "Failed to delete output apk backup: " + outApkBackup.getPath());
+            }
+        }
+    }
+
+    private void discardOutputApkBackup() {
+        File outApkBackup = mBuildOutputApkBackup;
+        if (outApkBackup != null && outApkBackup.exists() && !outApkBackup.delete()) {
+            Log.w(LOG_TAG, "Failed to delete output apk backup: " + outApkBackup.getPath());
+        }
+    }
+
+    private void handleBuildAborted() {
+        dismissProgressDialog();
+        cleanupBuildArtifactsAsync(true);
+        ViewUtils.showToast(this, getString(R.string.text_operation_aborted));
+        finishBuildState();
+    }
+
+    private void finishBuildState() {
+        mBuildWorkspace = null;
+        mBuildOutputApk = null;
+        mBuildOutputApkBackup = null;
+        mBuildThread = null;
+        mBuildCancelled.set(false);
+    }
+
+    private void dismissProgressDialog() {
+        if (mProgressDialog == null) {
+            return;
+        }
+        mProgressDialog.dismiss();
+        mProgressDialog = null;
+        mProgressPrepareIcon = null;
+        mProgressPrepareText = null;
+        mProgressBuildIcon = null;
+        mProgressBuildText = null;
+        mProgressSignIcon = null;
+        mProgressSignText = null;
+        mProgressCleanIcon = null;
+        mProgressCleanText = null;
+        mProgressPrepareDurationText = null;
+        mProgressBuildDurationText = null;
+        mProgressSignDurationText = null;
+        mProgressCleanDurationText = null;
+        mStateTitleText = null;
+        mStateContentText = null;
+        resetStepDurations();
     }
 
     private void onBuildFailed(Throwable error) {
-        if (mProgressDialog != null) {
-            mProgressDialog.dismiss();
-            mProgressDialog = null;
+        if (mBuildCancelled.get() || error instanceof CancellationException) {
+            handleBuildAborted();
+            return;
         }
+        dismissProgressDialog();
+        restoreOutputApkIfNeeded(mBuildOutputApk, mBuildOutputApkBackup);
         ErrorDialogActivity.showErrorDialog(this, R.string.text_failed_to_build, error.getMessage());
         Log.e(LOG_TAG, "Failed to build", error);
+        finishBuildState();
     }
 
     private void onBuildSuccessful(File outApk) {
+        if (mBuildCancelled.get()) {
+            handleBuildAborted();
+            return;
+        }
+        discardOutputApkBackup();
         Explorers.workspace().refreshAll();
-        mProgressDialog.dismiss();
-        mProgressDialog = null;
-        new MaterialDialog.Builder(this)
-                .title(R.string.text_build_succeeded)
-                .content(getString(R.string.format_build_succeeded, outApk.getPath()))
-                .positiveText(R.string.text_install)
-                .positiveColorRes(R.color.dialog_button_attraction)
-                .onPositive((dialog, which) -> IntentUtils.installApk(
+        // dismissProgressDialog();
+        if (mProgressDialog != null) {
+            mProgressDialog.setTitle(R.string.text_build_succeeded);
+            mStateTitleText.setText(getString(R.string.text_property_colon, getString(R.string.text_built_apk_file_path)));
+            mStateContentText.setText(outApk.getPath());
+            var positiveButton = mProgressDialog.getActionButton(DialogAction.POSITIVE);
+            positiveButton.setEnabled(true);
+            positiveButton.setText(getString(R.string.text_install));
+            positiveButton.setTextColor(getColor(R.color.dialog_button_attraction));
+            positiveButton.setOnClickListener(v -> {
+                IntentUtils.installApk(
                         BuildActivity.this,
                         outApk.getPath(),
                         AppFileProvider.AUTHORITY,
                         new ToastExceptionHolder(BuildActivity.this)
-                ))
-                .negativeText(R.string.text_cancel)
-                .negativeColorRes(R.color.dialog_button_default)
-                .neutralText(R.string.dialog_button_file_information)
-                .neutralColorRes(R.color.dialog_button_hint)
-                .onNeutral((dialog, which) -> ApkInfoDialogManager.showApkInfoDialog(dialog.getContext(), outApk))
-                .show();
+                );
+                dismissProgressDialog();
+            });
+            var negativeButton = mProgressDialog.getActionButton(DialogAction.NEGATIVE);
+            negativeButton.setEnabled(true);
+            negativeButton.setText(getString(R.string.text_cancel));
+            negativeButton.setTextColor(getColor(R.color.dialog_button_default));
+            negativeButton.setOnClickListener(v -> {
+                dismissProgressDialog();
+            });
+            var neutralButton = mProgressDialog.getActionButton(DialogAction.NEUTRAL);
+            neutralButton.setEnabled(true);
+            neutralButton.setText(getString(R.string.dialog_button_file_information));
+            neutralButton.setTextColor(getColor(R.color.dialog_button_hint));
+            neutralButton.setOnClickListener(v -> {
+                ApkInfoDialogManager.showApkInfoDialog(this, outApk);
+            });
+        }
+        finishBuildState();
     }
 
     @Override
     public void onPrepare(@NonNull ApkBuilder builder) {
-        mProgressDialog.setContent(R.string.apk_builder_prepare);
+        updateProgressDialog(BuildStep.PREPARE);
     }
 
     @Override
     public void onBuild(@NonNull ApkBuilder builder) {
-        mProgressDialog.setContent(R.string.apk_builder_build);
+        updateProgressDialog(BuildStep.BUILD);
     }
 
     @Override
     public void onSign(@NonNull ApkBuilder builder) {
-        mProgressDialog.setContent(R.string.apk_builder_package);
+        updateProgressDialog(BuildStep.SIGN);
     }
 
     @Override
     public void onClean(@NonNull ApkBuilder builder) {
-        mProgressDialog.setContent(R.string.apk_builder_clean);
+        updateProgressDialog(BuildStep.CLEAN);
+    }
+
+    @Override
+    public void onStepProgress(@NonNull ApkBuilder builder, @NonNull String title, @Nullable String detail) {
+        if (mStateTitleText != null) {
+            mStateTitleText.setText(getString(R.string.text_property_colon, title));
+        }
+        if (!TextUtils.isEmpty(detail) && mStateContentText != null) {
+            mStateContentText.setText(detail);
+        }
+    }
+
+    @Override
+    public void onFinished(@NotNull ApkBuilder builder) {
+        updateProgressDialog(BuildStep.FINISHED);
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")

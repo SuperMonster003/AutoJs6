@@ -10,8 +10,10 @@ import java.io.OutputStream;
  */
 public class StreamUtils {
 
+    public static final int DEFAULT_BUFFER_SIZE = 16 * 1024;
+
     public static void write(InputStream inputStream, OutputStream out) throws IOException {
-        byte[] buffer = new byte[4096];
+        byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
         int len;
         while ((len = inputStream.read(buffer)) > 0) {
             out.write(buffer, 0, len);
@@ -20,7 +22,7 @@ public class StreamUtils {
 
     public static byte[] readAsBytes(InputStream inputStream) throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        byte[] buffer = new byte[4096];
+        byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
         int len;
         while ((len = inputStream.read(buffer)) > 0) {
             outputStream.write(buffer, 0, len);

@@ -36,14 +36,18 @@ import pxb.android.StringItem
 import pxb.android.axml.AxmlWriter
 import zhao.arsceditor.ResDecoder.ARSCDecoder
 import java.io.BufferedInputStream
+import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
+import java.io.OutputStream
+import java.util.concurrent.CancellationException
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 
@@ -59,6 +63,9 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
     private var mManifestEditor: ManifestEditor? = null
     private var mInitVector: String? = null
     private var mKey: String? = null
+    private var mCancelSignal: AtomicBoolean? = null
+    private var mPendingProjectConfigFile: File? = null
+    private var mPendingProjectConfigJson: String? = null
 
     private lateinit var mProjectConfig: ProjectConfig
 
@@ -85,49 +92,157 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
 
     fun setProgressCallback(callback: ProgressCallback?) = also { mProgressCallback = callback }
 
-    @Throws(IOException::class)
-    fun prepare() = also {
-        mProgressCallback?.let { callback -> GlobalAppContext.post { callback.onPrepare(this) } }
-        File(buildPath).mkdirs()
-        mApkPackager.unzip()
+    fun setCancelSignal(cancelSignal: AtomicBoolean?) = also {
+        mCancelSignal = cancelSignal
+        mApkPackager.setCancelSignal(cancelSignal)
+    }
+
+    // Throw early when cancellation is requested to avoid partial outputs.
+    // zh-CN: 当收到取消请求时尽早抛出, 以避免产生部分输出.
+    private fun ensureNotCancelled() {
+        if (mCancelSignal?.get() == true) {
+            throw CancellationException("Build aborted")
+        }
+        if (Thread.currentThread().isInterrupted) {
+            throw CancellationException("Build aborted")
+        }
+    }
+
+    // Copy streams with cancellation checks to keep abort responsive during large IO.
+    // zh-CN: 在大 IO 过程中加入取消检查, 保持中止响应.
+    private fun copyStreamWithCancel(input: InputStream, output: OutputStream, bufferSize: Int = 16 * 1024) {
+        val buffer = ByteArray(bufferSize)
+        var len: Int
+        while (input.read(buffer).also { len = it } > 0) {
+            ensureNotCancelled()
+            output.write(buffer, 0, len)
+        }
+    }
+
+    private fun notifyStepChanged(step: ProgressStep) {
+        mProgressCallback?.let { callback ->
+            GlobalAppContext.post {
+                when (step) {
+                    ProgressStep.PREPARE -> callback.onPrepare(this)
+                    ProgressStep.BUILD -> callback.onBuild(this)
+                    ProgressStep.SIGN -> callback.onSign(this)
+                    ProgressStep.CLEAN -> callback.onClean(this)
+                }
+            }
+        }
+    }
+
+    private fun notifyStepProgress(step: ProgressStep, title: String, detail: String?) {
+        mProgressCallback?.let { callback ->
+            GlobalAppContext.post {
+                callback.onStepProgress(
+                    builder = this,
+                    title = title,
+                    detail = detail?.takeIf { it.isNotBlank() },
+                )
+            }
+        }
     }
 
     @Throws(IOException::class)
-    fun setScriptFile(path: String?) = also {
+    fun prepare(context: Context) = also {
+        ensureNotCancelled()
+        notifyStepChanged(ProgressStep.PREPARE)
+        notifyStepProgress(
+            ProgressStep.PREPARE,
+            context.getString(R.string.text_preparing_workspace),
+            buildPath,
+        )
+        File(buildPath).mkdirs()
+        notifyStepProgress(
+            ProgressStep.PREPARE,
+            context.getString(R.string.text_extracting_template_apk),
+            buildPath,
+        )
+        mApkPackager.unzip()
+        ensureNotCancelled()
+        notifyStepProgress(
+            ProgressStep.PREPARE,
+            context.getString(R.string.text_prepare_completed),
+            buildPath,
+        )
+    }
+
+    @Throws(IOException::class)
+    fun setScriptFile(context: Context, path: String?) = also {
+        ensureNotCancelled()
         path?.let {
             when {
-                PFiles.isDir(it) -> copyDir(it, "assets/project/")
-                else -> replaceFile(it, "assets/project/main.js")
+                PFiles.isDir(it) -> {
+                    notifyStepProgress(
+                        ProgressStep.BUILD,
+                        context.getString(R.string.text_copying_project_directory),
+                        it,
+                    )
+                    copyDir(context, it, "assets/project/")
+                }
+                else -> {
+                    notifyStepProgress(
+                        ProgressStep.BUILD,
+                        context.getString(R.string.text_copying_script_file),
+                        it,
+                    )
+                    replaceFile(context, it, "assets/project/main.js")
+                }
             }
+            notifyStepProgress(
+                ProgressStep.BUILD,
+                context.getString(R.string.text_source_processing_completed),
+                it,
+            )
         }
     }
 
     @Throws(IOException::class)
     @Suppress("SameParameterValue")
-    private fun copyDir(srcPath: String, relativeDestPath: String) {
-        copyDir(File(srcPath), relativeDestPath)
+    private fun copyDir(context: Context, srcPath: String, relativeDestPath: String) {
+        copyDir(context, File(srcPath), relativeDestPath)
     }
 
     @Throws(IOException::class)
-    fun copyDir(srcFile: File, relativeDestPath: String) {
+    fun copyDir(context: Context, srcFile: File, relativeDestPath: String) {
+        ensureNotCancelled()
         val destDirFile = File(buildPath, relativeDestPath).apply { mkdir() }
+        notifyStepProgress(
+            ProgressStep.BUILD,
+            context.getString(R.string.text_copying_directory),
+            "${srcFile.path} -> ${destDirFile.path}",
+        )
         srcFile.listFiles()?.forEach { srcChildFile ->
+            ensureNotCancelled()
             if (srcChildFile.isFile) {
                 if (srcChildFile.name.endsWith(JAVASCRIPT.extensionWithDot)) {
-                    encryptToDir(srcChildFile, destDirFile)
+                    encryptToDir(context, srcChildFile, destDirFile)
                 } else {
-                    srcChildFile.copyTo(File(destDirFile, srcChildFile.name), true)
+                    val destFile = File(destDirFile, srcChildFile.name)
+                    notifyStepProgress(
+                        ProgressStep.BUILD,
+                        context.getString(R.string.text_copying_file),
+                        "${srcChildFile.path} -> ${destFile.path}",
+                    )
+                    srcChildFile.copyTo(destFile, true)
                 }
             } else {
                 if (!mProjectConfig.excludedDirs.contains(srcChildFile)) {
-                    copyDir(srcChildFile, PFiles.join(relativeDestPath, srcChildFile.name + File.separator))
+                    copyDir(context, srcChildFile, PFiles.join(relativeDestPath, srcChildFile.name + File.separator))
                 }
             }
         }
     }
 
     @Throws(IOException::class)
-    private fun encrypt(srcFile: File, destFile: File) {
+    private fun encrypt(context: Context, srcFile: File, destFile: File) {
+        ensureNotCancelled()
+        notifyStepProgress(
+            ProgressStep.BUILD,
+            context.getString(R.string.text_encrypting_script),
+            "${srcFile.path} -> ${destFile.path}",
+        )
         destFile.outputStream().use { os ->
             writeHeader(os, JavaScriptFileSource(srcFile).executionMode.toShort())
             AdvancedEncryptionStandard(mKey!!.toByteArray(), mInitVector!!)
@@ -136,34 +251,93 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         }
     }
 
-    private fun encryptToDir(srcFile: File, destDirFile: File) {
+    private fun encryptToDir(context: Context, srcFile: File, destDirFile: File) {
         val destFile = File(destDirFile, srcFile.name)
-        encrypt(srcFile, destFile)
+        encrypt(context, srcFile, destFile)
     }
 
     @Throws(IOException::class)
-    fun replaceFile(srcPath: String, relativeDestPath: String) = replaceFile(File(srcPath), relativeDestPath)
+    fun replaceFile(context: Context, srcPath: String, relativeDestPath: String) = replaceFile(context, File(srcPath), relativeDestPath)
 
     @Throws(IOException::class)
-    fun replaceFile(srcFile: File, relativeDestPath: String) = also {
+    fun replaceFile(context: Context, srcFile: File, relativeDestPath: String) = also {
+        ensureNotCancelled()
         val destFile = File(buildPath, relativeDestPath)
         if (destFile.name.endsWith(JAVASCRIPT.extensionWithDot)) {
-            encrypt(srcFile, destFile)
+            encrypt(context, srcFile, destFile)
         } else {
+            notifyStepProgress(
+                ProgressStep.BUILD,
+                context.getString(R.string.text_replacing_file),
+                "${srcFile.path} -> ${destFile.path}",
+            )
             srcFile.copyTo(destFile, true)
         }
     }
 
     @Throws(IOException::class)
-    fun withConfig(config: ProjectConfig) = also {
+    fun withConfig(context: Context, config: ProjectConfig) = also {
+        notifyStepChanged(ProgressStep.BUILD)
+        notifyStepProgress(
+            ProgressStep.BUILD,
+            context.getString(R.string.text_processing),
+            context.getString(R.string.text_preparing_build_config),
+        )
         config.also { mProjectConfig = it }.run {
+            ensureNotCancelled()
+            notifyStepProgress(
+                ProgressStep.BUILD,
+                context.getString(R.string.text_reading_splash_resources),
+                mResourcesArscFile.path,
+            )
             retrieveSplashThemeResources(launchConfig)
+            ensureNotCancelled()
+            notifyStepProgress(
+                ProgressStep.BUILD,
+                context.getString(R.string.text_configuring_manifest),
+                mManifestFile.path,
+            )
             prepareManifestConfiguration(this)
+            ensureNotCancelled()
+            notifyStepProgress(
+                ProgressStep.BUILD,
+                context.getString(R.string.text_configuring_package_name),
+                packageName,
+            )
             setArscPackageName(packageName)
+            ensureNotCancelled()
+            notifyStepProgress(
+                ProgressStep.BUILD,
+                context.getString(R.string.text_processing),
+                context.getString(R.string.text_updating_project_config),
+            )
             updateProjectConfig(this)
-            copyAssetsRecursively("", File(buildPath, "assets"))
-            copyLibrariesByConfig(this)
-            setScriptFile(sourcePath)
+            ensureNotCancelled()
+            notifyStepProgress(
+                ProgressStep.BUILD,
+                context.getString(R.string.text_copying_assets_to),
+                File(buildPath, "assets").path,
+            )
+            copyAssetsRecursively(context, "", File(buildPath, "assets"))
+            ensureNotCancelled()
+            notifyStepProgress(
+                ProgressStep.BUILD,
+                context.getString(R.string.text_processing),
+                context.getString(R.string.text_copying_native_libraries),
+            )
+            copyLibrariesByConfig(context, this)
+            ensureNotCancelled()
+            notifyStepProgress(
+                ProgressStep.BUILD,
+                context.getString(R.string.text_processing_source),
+                sourcePath,
+            )
+            setScriptFile(context, sourcePath)
+            notifyStepProgress(
+                ProgressStep.BUILD,
+                context.getString(R.string.text_processing),
+                context.getString(R.string.text_applying_binary_resources),
+            )
         }
     }
 
@@ -203,6 +377,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
     fun editManifest(): ManifestEditor = ManifestEditorWithAuthorities(FileInputStream(mManifestFile)).also { mManifestEditor = it }
 
     private fun updateProjectConfig(config: ProjectConfig) {
+        ensureNotCancelled()
 
         // 这里为什么要有这样的一个方法? (
         //     会不会是因为有些配置需要写入到文件中, 这些配置包括自增的版本号, 用户的选择或键入值等等
@@ -222,7 +397,8 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
                 ProjectConfig.fromProjectDir(config.sourcePath)?.let { sourceProjectConfig ->
                     sourceProjectConfig
                         .setBuildInfo(BuildInfo.generate(sourceProjectConfig.buildInfo.buildNumber + 1))
-                    File(ProjectConfig.configFileOfDir(config.sourcePath)).writeText(sourceProjectConfig.toJson(true))
+                    mPendingProjectConfigFile = File(ProjectConfig.configFileOfDir(config.sourcePath))
+                    mPendingProjectConfigJson = sourceProjectConfig.toJson(true)
                     return@run sourceProjectConfig
                 }
             }
@@ -254,11 +430,46 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         }
     }
 
+    // Commit project config changes only after a successful build.
+    // zh-CN: 仅在构建成功后提交项目配置变更.
+    fun commitProjectConfigIfNeeded(context: Context) = also {
+        val pendingFile = mPendingProjectConfigFile
+        val pendingJson = mPendingProjectConfigJson
+        if (pendingFile == null || pendingJson == null) {
+            notifyStepProgress(
+                ProgressStep.SIGN,
+                context.getString(R.string.text_processing),
+                context.getString(R.string.text_sign_stage_completed),
+            )
+            return@also
+        }
+        ensureNotCancelled()
+        notifyStepProgress(
+            ProgressStep.SIGN,
+            context.getString(R.string.text_writing_project_config),
+            pendingFile.path,
+        )
+        pendingFile.writeText(pendingJson)
+        mPendingProjectConfigFile = null
+        mPendingProjectConfigJson = null
+        notifyStepProgress(
+            ProgressStep.SIGN,
+            context.getString(R.string.text_processing),
+            context.getString(R.string.text_sign_stage_completed),
+        )
+    }
+
     @Throws(Exception::class)
-    fun build() = also {
-        mProgressCallback?.let { callback -> GlobalAppContext.post { callback.onBuild(this) } }
+    fun build(context: Context) = also {
+        ensureNotCancelled()
+        notifyStepProgress(
+            ProgressStep.BUILD,
+            context.getString(R.string.text_processing),
+            context.getString(R.string.text_building_resources),
+        )
         mProjectConfig.iconBitmapGetter?.let { callable ->
             runCatching {
+                ensureNotCancelled()
                 val tableBlock = TableBlock.load(mResourcesArscFile)
                 val packageName = "${GlobalAppContext.get().packageName}.inrt"
                 val packageBlock = tableBlock.getOrCreatePackage(0x7f, packageName).also {
@@ -273,17 +484,42 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
                         it.createNewFile()
                     }
                 }
+                notifyStepProgress(
+                    ProgressStep.BUILD,
+                    context.getString(R.string.text_writing_app_icon),
+                    file.path,
+                )
                 callable.call()?.compress(Bitmap.CompressFormat.PNG, 100, FileOutputStream(file))
             }.onFailure { throw RuntimeException(it) }
         }
         mManifestEditor?.let {
+            ensureNotCancelled()
+            notifyStepProgress(
+                ProgressStep.BUILD,
+                context.getString(R.string.text_writing_manifest),
+                mManifestFile.path,
+            )
             it.commit()
             it.writeTo(FileOutputStream(mManifestFile))
         }
-        mArscPackageName?.let { buildArsc() }
+        mArscPackageName?.let {
+            ensureNotCancelled()
+            notifyStepProgress(
+                ProgressStep.BUILD,
+                context.getString(R.string.text_writing_resources_arsc),
+                mResourcesArscFile.path,
+            )
+            buildArsc()
+        }
+        notifyStepProgress(
+            ProgressStep.BUILD,
+            context.getString(R.string.text_processing),
+            context.getString(R.string.text_build_completed),
+        )
     }
 
-    private fun copyAssetsRecursively(assetPath: String, targetFile: File) {
+    private fun copyAssetsRecursively(context: Context, assetPath: String, targetFile: File) {
+        ensureNotCancelled()
         if (targetFile.isFile && targetFile.exists()) return
         val list = mAssetManager.list(assetPath) ?: return
         if (list.isEmpty()) /* asset is a file */ {
@@ -292,9 +528,14 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
                     return
                 }
             }
+            notifyStepProgress(
+                ProgressStep.BUILD,
+                context.getString(R.string.text_copying_asset),
+                "assets/$assetPath -> ${targetFile.path}",
+            )
             mAssetManager.open(assetPath).use { input ->
                 FileOutputStream(targetFile.absolutePath).use { output ->
-                    input.copyTo(output)
+                    copyStreamWithCancel(input, output)
                     output.flush()
                 }
             }
@@ -302,36 +543,80 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
             if (mAssetsDirExcludes.any { assetPath.matches(Regex("$it(/[^/]+)*")) }) {
                 return
             }
+            val displayPath = if (assetPath.isEmpty()) "/" else "/$assetPath"
+            notifyStepProgress(
+                ProgressStep.BUILD,
+                context.getString(R.string.text_preparing_assets_dir),
+                displayPath,
+            )
             targetFile.delete()
             targetFile.mkdir()
             list.forEach {
+                ensureNotCancelled()
                 val sourcePath = if (assetPath.isEmpty()) it else "$assetPath/$it"
-                copyAssetsRecursively(sourcePath, File(targetFile, it))
+                copyAssetsRecursively(context, sourcePath, File(targetFile, it))
             }
         }
     }
 
     @Throws(Exception::class)
-    fun sign() = also {
-        mProgressCallback?.let { callback -> GlobalAppContext.post { callback.onSign(this) } }
-        val fos = FileOutputStream(outApkFile)
-        TinySign.sign(File(buildPath), fos)
-        fos.close()
+    fun sign(context: Context) = also {
+        ensureNotCancelled()
+        notifyStepChanged(ProgressStep.SIGN)
+        val workspaceDir = File(buildPath)
+        outApkFile.parentFile?.let { if (!it.exists()) it.mkdirs() }
+        val unsignedApkFile = outApkFile
+        val tmpOutputApk = File(outApkFile.parentFile ?: workspaceDir, "${outApkFile.name}.signed.tmp")
+        if (tmpOutputApk.exists()) {
+            tmpOutputApk.delete()
+        }
+        notifyStepProgress(
+            ProgressStep.SIGN,
+            context.getString(R.string.text_creating_unsigned_apk),
+            unsignedApkFile.path,
+        )
+        try {
+            BufferedOutputStream(FileOutputStream(unsignedApkFile, false), 256 * 1024).use { fos ->
+                TinySign.sign(workspaceDir, fos)
+                fos.flush()
+            }
+        } catch (e: Exception) {
+            if (tmpOutputApk.exists() && !tmpOutputApk.delete()) {
+                Log.w(TAG, "Failed to delete temporary signed apk after unsigned apk creation failure: ${tmpOutputApk.path}")
+            }
+            if (e.hasNoSpaceLeft()) {
+                throw IOException("No space left on device while creating unsigned APK: ${unsignedApkFile.path}", e)
+            }
+            throw e
+        }
+        notifyStepProgress(
+            ProgressStep.SIGN,
+            context.getString(R.string.text_unsigned_apk_created),
+            unsignedApkFile.path,
+        )
 
         val defaultKeyStoreFile = File(buildPath, "default_key_store.bks")
-        val tmpOutputApk = File(buildPath, "temp.apk")
+        if (mProjectConfig.keyStore == null) {
 
-        // Replace FileUtils.copyInputStreamToFile(...).
-        // zh-CN: 替换 FileUtils.copyInputStreamToFile(...).
-        defaultKeyStoreFile.parentFile?.let { if (!it.exists()) it.mkdirs() }
-        GlobalAppContext.get().assets.open("default_key_store.bks").use { input ->
-            FileOutputStream(defaultKeyStoreFile, false).use { output ->
-                input.copyTo(output, bufferSize = 16 * 1024)
-                output.fd.sync()
+            // Replace FileUtils.copyInputStreamToFile(...).
+            // zh-CN: 替换 FileUtils.copyInputStreamToFile(...).
+            ensureNotCancelled()
+            defaultKeyStoreFile.parentFile?.let { if (!it.exists()) it.mkdirs() }
+            notifyStepProgress(
+                ProgressStep.SIGN,
+                context.getString(R.string.text_preparing_keystore),
+                defaultKeyStoreFile.path,
+            )
+            GlobalAppContext.get().assets.open("default_key_store.bks").use { input ->
+                FileOutputStream(defaultKeyStoreFile, false).use { output ->
+                    copyStreamWithCancel(input, output)
+                    output.fd.sync()
+                }
             }
         }
 
-        val signer = ApkSigner(outApkFile, tmpOutputApk).apply {
+        ensureNotCancelled()
+        val signer = ApkSigner(unsignedApkFile, tmpOutputApk).apply {
             useDefaultSignatureVersion = false
             v1SigningEnabled = "V1" in mProjectConfig.signatureScheme
             v2SigningEnabled = "V2" in mProjectConfig.signatureScheme
@@ -350,24 +635,84 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
             alias = it.alias
             aliasPassword = AESUtils.decrypt(it.aliasPassword)
         }
+        notifyStepProgress(
+            ProgressStep.SIGN,
+            context.getString(R.string.text_using_keystore),
+            keyStoreFile.path,
+        )
 
         // Re-sign using ApkSigner.
         // zh-CN: 使用 ApkSigner 重新签名.
-        if (!signer.signRelease(keyStoreFile, password, alias, aliasPassword)) {
-            throw java.lang.RuntimeException("Failed to re-sign using ApkSigner")
+        ensureNotCancelled()
+        notifyStepProgress(
+            ProgressStep.SIGN,
+            context.getString(R.string.text_processing),
+            context.getString(R.string.text_re_signing_apk),
+        )
+        try {
+            if (!signer.signRelease(keyStoreFile, password, alias, aliasPassword)) {
+                throw RuntimeException("Failed to re-sign using ApkSigner")
+            }
+        } catch (e: Exception) {
+            if (tmpOutputApk.exists() && !tmpOutputApk.delete()) {
+                Log.w(TAG, "Failed to delete temporary signed apk after re-sign failure: ${tmpOutputApk.path}")
+            }
+            if (e.hasNoSpaceLeft()) {
+                throw IOException("No space left on device while re-signing APK: ${tmpOutputApk.path}", e)
+            }
+            throw e
         }
 
         try {
-            outApkFile.parentFile?.let { if (!it.exists()) it.mkdirs() }
-            tmpOutputApk.copyTo(outApkFile, overwrite = true)
-        } catch (e: java.lang.Exception) {
-            throw java.lang.RuntimeException(e)
+            ensureNotCancelled()
+            notifyStepProgress(
+                ProgressStep.SIGN,
+                context.getString(R.string.text_writing_signed_apk),
+                outApkFile.path,
+            )
+            if (outApkFile.exists() && !outApkFile.delete()) {
+                throw IOException("Failed to delete unsigned apk before replace: ${outApkFile.path}")
+            }
+            if (!tmpOutputApk.renameTo(outApkFile)) {
+                copyFileWithLargeBuffer(tmpOutputApk, outApkFile)
+            }
+        } catch (e: Exception) {
+            if (e.hasNoSpaceLeft()) {
+                throw IOException("No space left on device while writing signed APK: ${outApkFile.path}", e)
+            }
+            throw RuntimeException(e)
+        } finally {
+            if (tmpOutputApk.exists() && !tmpOutputApk.delete()) {
+                Log.w(TAG, "Failed to delete temporary signed apk: ${tmpOutputApk.path}")
+            }
         }
+        notifyStepProgress(
+            ProgressStep.SIGN,
+            context.getString(R.string.text_sign_completed),
+            outApkFile.path,
+        )
     }
 
-    fun cleanWorkspace() = also {
-        mProgressCallback?.let { callback -> GlobalAppContext.post { callback.onClean(this) } }
-        delete(File(buildPath))
+    fun cleanWorkspace(context: Context) = also {
+        notifyStepChanged(ProgressStep.CLEAN)
+        val workspace = File(buildPath)
+        val totalTargets = countDeleteTargets(workspace).coerceAtLeast(1)
+        val deletedTargets = intArrayOf(0)
+        notifyStepProgress(
+            ProgressStep.CLEAN,
+            context.getString(R.string.text_cleaning_workspace),
+            workspace.path,
+        )
+        deleteWithProgress(context, workspace, totalTargets, deletedTargets)
+        notifyStepProgress(
+            ProgressStep.CLEAN,
+            context.getString(R.string.text_clean_completed),
+            workspace.path,
+        )
+    }
+
+    fun finish() = also {
+        mProgressCallback?.let { callback -> GlobalAppContext.post { callback.onFinished(this) } }
     }
 
     @Throws(IOException::class)
@@ -377,23 +722,86 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
     private fun buildArsc() {
         val oldArsc = File(buildPath, "resources.arsc")
         val newArsc = File(buildPath, "resources.arsc.new")
-        val decoder = ARSCDecoder(BufferedInputStream(FileInputStream(oldArsc)), null, false)
-        decoder.CloneArsc(FileOutputStream(newArsc), mArscPackageName, true)
+        BufferedInputStream(FileInputStream(oldArsc), 256 * 1024).use { input ->
+            BufferedOutputStream(FileOutputStream(newArsc, false), 256 * 1024).use { output ->
+                val decoder = ARSCDecoder(input, null, false)
+                decoder.CloneArsc(output, mArscPackageName, true)
+                output.flush()
+            }
+        }
         oldArsc.delete()
-        newArsc.renameTo(oldArsc)
+        if (!newArsc.renameTo(oldArsc)) {
+            copyFileWithLargeBuffer(newArsc, oldArsc)
+            newArsc.delete()
+        }
     }
 
-    private fun delete(file: File) {
-        file.apply { if (isDirectory) listFiles()?.forEach { delete(it) } }.also { it.delete() }
+    private fun copyFileWithLargeBuffer(source: File, target: File, bufferSize: Int = 256 * 1024) {
+        FileInputStream(source).use { input ->
+            FileOutputStream(target, false).use { output ->
+                val buffer = ByteArray(bufferSize)
+                var len: Int
+                while (input.read(buffer).also { len = it } > 0) {
+                    ensureNotCancelled()
+                    output.write(buffer, 0, len)
+                }
+            }
+        }
+    }
+
+    private fun Throwable.hasNoSpaceLeft(): Boolean {
+        var current: Throwable? = this
+        while (current != null) {
+            val message = current.message.orEmpty()
+            if (message.contains("ENOSPC", ignoreCase = true) || message.contains("No space left on device", ignoreCase = true)) {
+                return true
+            }
+            current = current.cause
+        }
+        return false
+    }
+
+    private fun countDeleteTargets(file: File): Int {
+        if (!file.exists()) {
+            return 0
+        }
+        return if (file.isDirectory) {
+            1 + (file.listFiles()?.sumOf(::countDeleteTargets) ?: 0)
+        } else {
+            1
+        }
+    }
+
+    private fun deleteWithProgress(context: Context, file: File, totalTargets: Int, deletedTargets: IntArray) {
+        ensureNotCancelled()
+        if (file.isDirectory) {
+            file.listFiles()?.forEach { child ->
+                deleteWithProgress(context, child, totalTargets, deletedTargets)
+            }
+        }
+        notifyStepProgress(
+            ProgressStep.CLEAN,
+            context.getString(R.string.text_deleting),
+            file.path,
+        )
+        file.delete()
+        deletedTargets[0] += 1
+    }
+
+    enum class ProgressStep {
+        PREPARE,
+        BUILD,
+        SIGN,
+        CLEAN,
     }
 
     interface ProgressCallback {
-
         fun onPrepare(builder: ApkBuilder)
         fun onBuild(builder: ApkBuilder)
         fun onSign(builder: ApkBuilder)
         fun onClean(builder: ApkBuilder)
-
+        fun onStepProgress(builder: ApkBuilder, title: String, detail: String?)
+        fun onFinished(builder: ApkBuilder)
     }
 
     private inner class ManifestEditorWithAuthorities(manifestInputStream: InputStream?) : ManifestEditor(manifestInputStream) {
@@ -422,7 +830,8 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         }
     }
 
-    private fun copyLibrariesByConfig(config: ProjectConfig) {
+    private fun copyLibrariesByConfig(context: Context, config: ProjectConfig) {
+        ensureNotCancelled()
 
         // @Hint by SuperMonster003 on Dec 11, 2023.
         //  ! The list contains only abi names not matching the canonical name itself.
@@ -434,28 +843,47 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
 
         // Try extracting native libraries from installed plugin APKs if needed.
         // zh-CN: 如有需要, 尝试从已安装插件 APK 中解压 native 库文件.
-        ensureAndExtractPluginLibrariesIfNeeded(config, potentialAbiAliasList)
+        notifyStepProgress(
+            ProgressStep.BUILD,
+            context.getString(R.string.text_processing),
+            context.getString(R.string.text_resolving_plugin_native_libraries),
+        )
+        ensureAndExtractPluginLibrariesIfNeeded(context, config, potentialAbiAliasList)
 
         config.abis.forEach { abiCanonicalName ->
-            copyLibrariesByAbi(abiCanonicalName, abiCanonicalName)
+            ensureNotCancelled()
+            notifyStepProgress(
+                ProgressStep.BUILD,
+                context.getString(R.string.text_copying_libraries_for_abi),
+                abiCanonicalName,
+            )
+            copyLibrariesByAbi(context, abiCanonicalName, abiCanonicalName)
             potentialAbiAliasList[abiCanonicalName]?.let { abiAliasName ->
-                copyLibrariesByAbi(abiAliasName, abiCanonicalName)
+                copyLibrariesByAbi(context, abiAliasName, abiCanonicalName)
             }
         }
     }
 
     private fun ensureAndExtractPluginLibrariesIfNeeded(
+        context: Context,
         config: ProjectConfig,
         potentialAbiAliasList: Map<String, String>,
     ) {
+        ensureNotCancelled()
         Lib.entries.mapNotNull {
             if (it.isPlugin && config.libs.contains(it.label)) it.toPluginPair() else null
         }.forEach { (lib, plugin) ->
+            ensureNotCancelled()
             // Select plugin service by variant.
             // zh-CN: 通过 variant 选择插件服务.
             val (serviceInfo, selectedVariant) = selectPluginServiceOrThrow(
                 lib = lib,
                 action = plugin.action,
+            )
+            notifyStepProgress(
+                ProgressStep.BUILD,
+                context.getString(R.string.text_selected_plugin),
+                "${lib.label} (${selectedVariant.variant}) from ${serviceInfo.packageName}",
             )
 
             Log.i(TAG, "Selected ${lib.label} plugin: variant=${selectedVariant.variant}, pkg=${serviceInfo.packageName}")
@@ -463,17 +891,29 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
             // Extract libraries from installed plugin APK (variant-aware).
             // zh-CN: 从已安装插件 APK 中解压 so 文件, 并按变体裁剪.
             extractLibrariesFromPluginApkOrThrow(
+                context = context,
                 config = config,
                 requiredLibNames = selectedVariant.libsToInclude,
                 serviceInfo = serviceInfo,
                 potentialAbiAliasList = potentialAbiAliasList,
             )
+            notifyStepProgress(
+                ProgressStep.BUILD,
+                context.getString(R.string.text_extracted_plugin_libraries),
+                lib.label,
+            )
 
             // Extract assets (models/labels) from installed plugin APK (variant-aware).
             // zh-CN: 从已安装插件 APK 中解压 assets 资源 (models/labels), 并按变体裁剪.
             extractAssetsFromPluginApkOrThrow(
+                context = context,
                 serviceInfo = serviceInfo,
                 pluginLibVariant = selectedVariant,
+            )
+            notifyStepProgress(
+                ProgressStep.BUILD,
+                context.getString(R.string.text_extracted_plugin_assets),
+                lib.label,
             )
         }
     }
@@ -482,6 +922,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         lib: Lib,
         action: String,
     ): Pair<ServiceInfo, PluginLibVariant> {
+        ensureNotCancelled()
         val pm = globalContext.packageManager
         val moduleLabel = lib.label
         val pluginPair = lib.toPluginPair()
@@ -526,6 +967,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
     }
 
     private fun queryPluginInfoBlocking(context: Context, serviceInfo: ServiceInfo, pluginPair: Pair<Lib, PluginLib>): PluginLibVariant {
+        ensureNotCancelled()
         // Bind service and call getInfo() synchronously (packaging-time only).
         // zh-CN: 同步绑定服务并调用 getInfo() (仅打包阶段使用).
         val latch = CountDownLatch(1)
@@ -586,9 +1028,11 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
     }
 
     private fun extractAssetsFromPluginApkOrThrow(
+        context: Context,
         serviceInfo: ServiceInfo,
         pluginLibVariant: PluginLibVariant,
     ) {
+        ensureNotCancelled()
         val pm = globalContext.packageManager
 
         val appInfo = getApplicationInfoCompat(pm, serviceInfo.packageName)
@@ -603,7 +1047,9 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         // zh-CN: 解压必需前缀.
         val missingRequired = mutableListOf<String>()
         requiredPrefixes.forEach { prefix ->
+            ensureNotCancelled()
             val ok = extractAssetsByPrefixFromApks(
+                context = context,
                 apkPaths = apkPaths,
                 assetPrefix = prefix,
             )
@@ -620,7 +1066,9 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         // Extract optional prefixes (best-effort).
         // zh-CN: 解压可选前缀 (尽力而为).
         optionalPrefixes.forEach { prefix ->
+            ensureNotCancelled()
             extractAssetsByPrefixFromApks(
+                context = context,
                 apkPaths = apkPaths,
                 assetPrefix = prefix,
             )
@@ -628,15 +1076,19 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
     }
 
     private fun extractAssetsByPrefixFromApks(
+        context: Context,
         apkPaths: List<String>,
         assetPrefix: String,
     ): Boolean {
+        ensureNotCancelled()
         var extractedAny = false
         apkPaths.forEach { apkPath ->
+            ensureNotCancelled()
             runCatching {
                 ZipFile(apkPath).use { zip ->
                     val entries = zip.entries()
                     while (entries.hasMoreElements()) {
+                        ensureNotCancelled()
                         val entry: ZipEntry = entries.nextElement()
                         val name = entry.name
                         if (!name.startsWith(assetPrefix)) continue
@@ -646,10 +1098,15 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
                         val outFile = File(buildPath, "assets/$relative").apply {
                             parentFile?.let { parent -> if (!parent.exists()) parent.mkdirs() }
                         }
+                        notifyStepProgress(
+                            ProgressStep.BUILD,
+                            context.getString(R.string.text_extracting_plugin_asset),
+                            "$apkPath!/$name -> ${outFile.path}",
+                        )
 
                         zip.getInputStream(entry).use { input ->
                             FileOutputStream(outFile, false).use { output ->
-                                input.copyTo(output, bufferSize = 16 * 1024)
+                                copyStreamWithCancel(input, output)
                                 output.fd.sync()
                             }
                         }
@@ -667,11 +1124,13 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
     }
 
     private fun extractLibrariesFromPluginApkOrThrow(
+        context: Context,
         config: ProjectConfig,
         requiredLibNames: List<String>,
         serviceInfo: ServiceInfo,
         potentialAbiAliasList: Map<String, String>,
     ) {
+        ensureNotCancelled()
         val pm = globalContext.packageManager
 
         val appInfo = getApplicationInfoCompat(pm, serviceInfo.packageName)
@@ -683,13 +1142,16 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         val missingPairs = mutableListOf<Pair<String, String>>() // (abi, soName)
 
         config.abis.forEach { abiCanonicalName ->
+            ensureNotCancelled()
             val abiCandidates = buildList {
                 add(abiCanonicalName)
                 potentialAbiAliasList[abiCanonicalName]?.let { add(it) }
             }.distinct()
 
             requiredLibNames.forEach { soName ->
+                ensureNotCancelled()
                 val ok = extractFirstMatchedSoFromApks(
+                    context = context,
                     apkPaths = apkPaths,
                     abiCandidates = abiCandidates,
                     soName = soName,
@@ -718,23 +1180,32 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
     }
 
     private fun extractFirstMatchedSoFromApks(
+        context: Context,
         apkPaths: List<String>,
         abiCandidates: List<String>,
         soName: String,
         abiDestName: String,
     ): Boolean {
+        ensureNotCancelled()
         apkPaths.forEach { apkPath ->
+            ensureNotCancelled()
             runCatching {
                 ZipFile(apkPath).use { zip ->
                     abiCandidates.forEach { abiInApk ->
+                        ensureNotCancelled()
                         val entryName = "lib/$abiInApk/$soName"
                         val entry = zip.getEntry(entryName) ?: return@forEach
                         val outFile = File(buildPath, "lib/$abiDestName/$soName").apply {
                             parentFile?.let { parent -> if (!parent.exists()) parent.mkdirs() }
                         }
+                        notifyStepProgress(
+                            ProgressStep.BUILD,
+                            context.getString(R.string.text_extracting_plugin_so),
+                            "$apkPath!/$entryName -> ${outFile.path}",
+                        )
                         zip.getInputStream(entry).use { input ->
                             FileOutputStream(outFile, false).use { output ->
-                                input.copyTo(output, bufferSize = 16 * 1024)
+                                copyStreamWithCancel(input, output)
                                 output.fd.sync()
                             }
                         }
@@ -760,18 +1231,26 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         }
     }
 
-    private fun copyLibrariesByAbi(abiSrcName: String, abiDestName: String) {
+    private fun copyLibrariesByAbi(context: Context, abiSrcName: String, abiDestName: String) {
+        ensureNotCancelled()
 
         // @Reference to LZX284 (https://github.com/LZX284) by SuperMonster003 on Dec 11, 2023.
         //  ! http://pr.autojs6.com/187/files#diff-d932ac49867d4610f8eeb21b59306e8e923d016cbca192b254caebd829198856R61
         val srcLibDir = File(appApkFile.parent, LIBRARY_DIR).path
 
         mLibsIncludes.distinct().forEach { libName ->
+            ensureNotCancelled()
             runCatching {
-                File(srcLibDir, "$abiSrcName/$libName").takeIf { it.exists() }?.copyTo(
-                    File(buildPath, "lib/$abiDestName/$libName"),
-                    overwrite = true
-                )
+                val srcFile = File(srcLibDir, "$abiSrcName/$libName")
+                val destFile = File(buildPath, "lib/$abiDestName/$libName")
+                srcFile.takeIf { it.exists() }?.let {
+                    notifyStepProgress(
+                        ProgressStep.BUILD,
+                        context.getString(R.string.text_copying_library),
+                        "${srcFile.path} -> ${destFile.path}",
+                    )
+                    it.copyTo(destFile, overwrite = true)
+                }
             }.onFailure { it.printStackTrace() }
         }
     }

@@ -69,5 +69,9 @@
     <dimen name="ref_md_listitem_textsize">16sp</dimen>
     <dimen name="ref_md_listitem_height">48dp</dimen>
     <dimen name="toolbar_menu_item_width">40dp</dimen>
+    <dimen name="build_progress_icon_size">24dp</dimen>
+    <dimen name="build_progress_icon_text_gap">12dp</dimen>
+    <dimen name="build_progress_icon_text_size">16sp</dimen>
+    <dimen name="build_progress_row_spacing">12dp</dimen>
 
 </resources>
