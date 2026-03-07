@@ -86,8 +86,8 @@
         "El script de compilación Gradle mejora su capacidad de adaptación de versiones _[`discussion #369`](http://discussions.autojs6.com/369)_"
       ],
       "dependency": [
-        "Incluido Material Dialogs versión 0.9.6.0 (localizado)",
-        "Incluido Material Date Time Picker versión 4.2.3 (localizado)",
+        "Incluido Material Dialogs versión 0.9.6.0 (modularizado)",
+        "Incluido Material Date Time Picker versión 4.2.3 (modularizado)",
         "Incluido libimagequant versión 2.17.0 (localizado)",
         "Incluido libpng versión 1.6.49 (localizado)",
         "Añadido ICU4J versión 77.1",

@@ -177,18 +177,22 @@
         "使用 [版本目录 (Version Catalogs)](https://developer.android.com/build/migrate-to-catalogs) 集中管理 Gradle 依赖和插件版本",
         "模块化 Gradle 构建脚本, 将共享构建逻辑迁移至 build-logic 并抽象为约定插件",
         "使用 Gradle 约定插件简化本地 AAR 库加载逻辑",
+        "移除 \"android.enableJetifier=true\" Gradle 配置选项以适配 Gradle 9",
         "使用 [Toolchain](https://docs.gradle.org/current/userguide/toolchains.html) 替代 sourceCompatibility/targetCompatibility 以降低构建环境差异"
       ],
       "dependency": [
+        "模块化 Expandable Layout 版本 1.6.0",
+        "模块化 Expandable RecyclerView 版本 3.0.0-RC1",
+        "模块化 Recyclerview Flexible Divider 版本 1.4.0",
         "本地化 Root Shell 版本 1.6",
-        "本地化 Expandable Layout 版本 1.6.0",
-        "本地化 Recyclerview Flexible Divider 版本 1.4.0",
         "附加 AndroidX Activity (KTX) 版本 1.12.2",
         "附加 AndroidX Core (KTX) 版本 1.15.0",
         "附加 AndroidX Work Runtime 版本 2.11.0",
+        "附加 AndroidX Interpolator 版本 1.0.0",
         "附加 Room RxJava2 版本 2.8.1",
         "升级 Android SDK 版本 35 -> 36",
-        "升级 Gradle 版本 8.14 -> 8.14.3",
+        "升级 Gradle 8 版本 8.14 -> 8.14.4",
+        "升级 Gradle 9 版本 8.14 -> 9.4.0",
         "升级 Rhino 版本 1.8.1-SNAPSHOT -> 2.0.0-SNAPSHOT",
         "升级 Desugar JDK Libs 版本 2.0.4 -> 2.1.5",
         "升级 Android Material 版本 1.12.0 -> 1.13.0",
@@ -205,7 +209,10 @@
         "升级 ARSCLib 版本 1.3.1 -> 1.3.5",
         "升级 Jsoup 版本 1.19.1 -> 1.20.1",
         "升级 Junit Jupiter 版本 5.10.3 -> 5.13.0",
-        "升级 OpenCC 版本 1.2.0 -> 1.2.2"
+        "升级 OpenCC 版本 1.2.0 -> 1.2.2",
+        "移除 Android Support Annotation v7 版本 28.0.0",
+        "移除 Android Support AppCompat v7 版本 28.0.0",
+        "移除 Android Support RecyclerView v7 版本 28.0.0"
       ]
     },
     "v6.6.4": {
@@ -294,8 +301,8 @@
         "Gradle 构建脚本提升版本自适应能力 _[`discussion #369`](http://discussions.autojs6.com/369)_"
       ],
       "dependency": [
-        "本地化 Material Dialogs 版本 0.9.6.0",
-        "本地化 Material Date Time Picker 版本 4.2.3",
+        "模块化 Material Dialogs 版本 0.9.6.0",
+        "模块化 Material Date Time Picker 版本 4.2.3",
         "本地化 libimagequant 版本 2.17.0",
         "本地化 libpng 版本 1.6.49",
         "附加 ICU4J 版本 77.1",

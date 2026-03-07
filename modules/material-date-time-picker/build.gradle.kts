@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.wdullaer.materialdatetimepicker"
-    version = "4.2.3 (54)"
+    version = "4.2.3 (54) Mod"
     compileSdk = versions.sdkVersionCompile
 
     defaultConfig {

@@ -115,7 +115,7 @@ class Selector(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRun
             when {
                 arg !is Double -> arg
                 paramType == Double::class.java || paramType == java.lang.Double.TYPE -> arg
-                paramType == Float::class.java || paramType == java.lang.Float.TYPE -> arg.toDouble()
+                paramType == Float::class.java || paramType == java.lang.Float.TYPE -> arg.toFloat()
                 paramType == Long::class.java || paramType == java.lang.Long.TYPE -> arg.roundToLong()
                 paramType == Int::class.java || paramType == Integer.TYPE -> arg.roundToInt()
                 paramType == Short::class.java || paramType == java.lang.Short.TYPE -> arg.toInt().toShort()

@@ -40,10 +40,9 @@ log4j = "1.2.17"
 desugar = "2.1.5"
 
 activity-ktx = "1.12.2"
+android-annotations = "4.8.0"
 android-device-names = "2.1.1"
 android-logging-log4j = "1.0.3"
-android-support-v7 = "28.0.0"
-androidannotations = "4.8.0"
 animated-svg-view = "1.0.6"
 annotation = "1.9.1"
 appcompat = "1.7.1"
@@ -60,13 +59,13 @@ commons-lang3 = "3.18.0"
 constraintlayout = "2.2.1"
 easywindow = "10.3"
 eventbus = "3.3.1"
-expandablerecyclerview = "3.0.0-RC1"
 flexbox = "3.0.0"
 flexmark-html2md = "0.64.8"
 foojay-resolver-convention = "1.0.0"
 glide = "5.0.5"
 gson = "2.13.2"
 icu4j = "77.1"
+interpolator = "1.0.0"
 jcip-annotations = "1.0"
 jdeferred = "1.2.6"
 joda-time = "2.14.0"
@@ -112,15 +111,14 @@ zip4j = "2.11.5"
 [libraries]
 
 activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "activity-ktx" }
+android-annotations = { module = "org.androidannotations:androidannotations", version.ref = "android-annotations" }
+android-annotations-api = { module = "org.androidannotations:androidannotations-api", version.ref = "android-annotations" }
 android-device-names = { module = "com.jaredrummler:android-device-names", version.ref = "android-device-names" }
 android-logging-log4j = { module = "de.mindpipe.android:android-logging-log4j", version.ref = "android-logging-log4j" }
-androidannotations = { module = "org.androidannotations:androidannotations", version.ref = "androidannotations" }
-androidannotations-api = { module = "org.androidannotations:androidannotations-api", version.ref = "androidannotations" }
 animated-svg-view = { module = "com.jaredrummler:animated-svg-view", version.ref = "animated-svg-view" }
 annotation = { module = "androidx.annotation:annotation", version.ref = "annotation" }
 apache-commons-compress = { module = "org.apache.commons:commons-compress", version.ref = "commons-compress" }
 appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
-appcompat-v7 = { module = "com.android.support:appcompat-v7", version.ref = "android-support-v7" }
 arsclib = { module = "io.github.reandroid:ARSCLib", version.ref = "arsclib" }
 barcode-scanning = { module = "com.google.mlkit:barcode-scanning", version.ref = "barcode-scanning" }
 bcpkix-jdk15on = { module = "org.bouncycastle:bcpkix-jdk15on", version.ref = "bcpkix-jdk15on" }
@@ -136,13 +134,13 @@ core-ktx = { module = "androidx.core:core-ktx", version.ref = "core-ktx" }
 desugar = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar" }
 easywindow = { module = "com.github.getActivity:EasyWindow", version.ref = "easywindow" }
 eventbus = { module = "org.greenrobot:eventbus", version.ref = "eventbus" }
-expandablerecyclerview = { module = "com.bignerdranch.android:expandablerecyclerview", version.ref = "expandablerecyclerview" }
 flexbox = { module = "com.google.android.flexbox:flexbox", version.ref = "flexbox" }
 flexmark-html2md = { module = "com.vladsch.flexmark:flexmark-html2md-converter", version.ref = "flexmark-html2md" }
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
 glide-ksp = { module = "com.github.bumptech.glide:ksp", version.ref = "glide" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 icu4j = { module = "com.ibm.icu:icu4j", version.ref = "icu4j" }
+interpolator = { group = "androidx.interpolator", name = "interpolator", version.ref = "interpolator" }
 jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson-databind" }
 jcip-annotations = { module = "net.jcip:jcip-annotations", version.ref = "jcip-annotations" }
 jdeferred = { module = "org.jdeferred:jdeferred-android-aar", version.ref = "jdeferred" }
@@ -170,7 +168,6 @@ preference-ktx = { module = "androidx.preference:preference-ktx", version.ref = 
 prov = { module = "com.madgag.spongycastle:prov", version.ref = "prov" }
 r8 = { module = "com.android.tools:r8", version.ref = "r8" }
 recyclerview = { module = "androidx.recyclerview:recyclerview", version.ref = "recyclerview" }
-recyclerview-v7 = { module = "com.android.support:recyclerview-v7", version.ref = "android-support-v7" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 retrofit-adapter-rxjava2 = { module = "com.squareup.retrofit2:adapter-rxjava2", version.ref = "retrofit" }
 retrofit-converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
@@ -184,7 +181,6 @@ rxandroid = { module = "io.reactivex.rxjava2:rxandroid", version.ref = "rxandroi
 rxjava = { module = "io.reactivex.rxjava2:rxjava", version.ref = "rxjava" }
 shizuku-api = { module = "dev.rikka.shizuku:api", version.ref = "shizuku" }
 shizuku-provider = { module = "dev.rikka.shizuku:provider", version.ref = "shizuku" }
-support-annotations = { module = "com.android.support:support-annotations", version.ref = "android-support-v7" }
 swiperefreshlayout = { module = "androidx.swiperefreshlayout:swiperefreshlayout", version.ref = "swiperefreshlayout" }
 test-espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "test-espresso-core" }
 test-ext-junit = { module = "androidx.test.ext:junit", version.ref = "test-junit-version" }

@@ -86,8 +86,8 @@
         "Gradle 構建腳本提升版本自適應能力 _[`discussion #369`](http://discussions.autojs6.com/369)_"
       ],
       "dependency": [
-        "本地化 Material Dialogs 版本 0.9.6.0",
-        "本地化 Material Date Time Picker 版本 4.2.3",
+        "模塊化 Material Dialogs 版本 0.9.6.0",
+        "模塊化 Material Date Time Picker 版本 4.2.3",
         "本地化 libimagequant 版本 2.17.0",
         "本地化 libpng 版本 1.6.49",
         "附加 ICU4J 版本 77.1",

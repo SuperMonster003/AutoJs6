@@ -86,8 +86,8 @@
         "Скрипт сборки Gradle лучше адаптируется к новым версиям _[`discussion #369`](http://discussions.autojs6.com/369)_"
       ],
       "dependency": [
-        "Встроено Material Dialogs версии 0.9.6.0 (локализовано)",
-        "Встроено Material Date Time Picker версии 4.2.3 (локализовано)",
+        "Встроено Material Dialogs версии 0.9.6.0 (модульный)",
+        "Встроено Material Date Time Picker версии 4.2.3 (модульный)",
         "Встроено libimagequant версии 2.17.0 (локализовано)",
         "Встроено libpng версии 1.6.49 (локализовано)",
         "Добавлено ICU4J версии 77.1",

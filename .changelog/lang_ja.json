@@ -86,8 +86,8 @@
         "Gradle ビルドスクリプトが新しいバージョンに柔軟に対応 _[`discussion #369`](http://discussions.autojs6.com/369)_"
       ],
       "dependency": [
-        "同梱 Material Dialogs バージョン 0.9.6.0 (ローカライズ済み)",
-        "同梱 Material Date Time Picker バージョン 4.2.3 (ローカライズ済み)",
+        "同梱 Material Dialogs バージョン 0.9.6.0 (モジュール化)",
+        "同梱 Material Date Time Picker バージョン 4.2.3 (モジュール化)",
         "同梱 libimagequant バージョン 2.17.0 (ローカライズ済み)",
         "同梱 libpng バージョン 1.6.49 (ローカライズ済み)",
         "追加 ICU4J バージョン 77.1",

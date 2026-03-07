@@ -86,8 +86,8 @@
         "Gradle 빌드 스크립트가 최신 버전에 더 유연하게 대응 _[`discussion #369`](http://discussions.autojs6.com/369)_"
       ],
       "dependency": [
-        "내장 Material Dialogs 버전 0.9.6.0 (현지화)",
-        "내장 Material Date Time Picker 버전 4.2.3 (현지화)",
+        "내장 Material Dialogs 버전 0.9.6.0 (모듈화)",
+        "내장 Material Date Time Picker 버전 4.2.3 (모듈화)",
         "내장 libimagequant 버전 2.17.0 (현지화)",
         "내장 libpng 버전 1.6.49 (현지화)",
         "추가 ICU4J 버전 77.1",
