@@ -2,7 +2,6 @@ plugins {
     id("org.autojs.build.versions")
     id("org.autojs.build.jvm-convention")
     id("com.android.library")
-    id("kotlin-android")
 }
 
 android {
@@ -17,7 +16,7 @@ android {
 
     sourceSets {
         getByName("main") {
-            java.srcDirs("src/main/java")
+            java.directories.add("src/main/java")
         }
     }
 

@@ -1,7 +1,6 @@
 @file:Suppress("SpellCheckingInspection")
 
-import com.android.build.gradle.internal.api.ApplicationVariantImpl
-import com.android.build.gradle.internal.api.BaseVariantOutputImpl
+import com.android.build.api.variant.FilterConfiguration
 import org.gradle.kotlin.dsl.support.uppercaseFirstChar
 import kotlin.text.RegexOption.IGNORE_CASE
 
@@ -12,17 +11,18 @@ plugins {
     id("org.autojs.build.jvm-convention")
     id("com.android.application")
     id("com.google.devtools.ksp")
-    id("org.jetbrains.kotlin.android") /* kotlin("android") */
     id("idea")
 }
 
 idea {
     module {
-        excludeDirs.addAll(listOf(
-            file("$rootDir/app/src/main/java/com/stardust/"),
-            file("$rootDir/app/src/main/assets/modules/obsolete/"),
-            file("$rootDir/app/src/main/assets-app/js-beautify/"),
-        ))
+        excludeDirs.addAll(
+            listOf(
+                file("$rootDir/app/src/main/java/com/stardust/"),
+                file("$rootDir/app/src/main/assets/modules/obsolete/"),
+                file("$rootDir/app/src/main/assets-app/js-beautify/"),
+            )
+        )
     }
 }
 
@@ -569,20 +569,37 @@ android {
         //  ! The assets division idea was accepted, and it wouldn't hurt to try. :)
         //  ! zh-CN: 资产隔离的想法可以被接受, 毕竟试一下也无妨. [笑脸符号]
 
+        // @Archived by JetBrains AI Assistant (GPT-5.3-Codex (xhigh)) on Mar 7, 2026.
+        //  # getByName("main") {
+        //  #     assets.srcDirs("src/main/assets")
+        //  # }
+        //  # getByName("release") {
+        //  #     java.srcDirs("src/release/java")
+        //  # }
+        //  # getByName("debug") {
+        //  #     java.srcDirs("src/debug/java")
+        //  # }
+        //  # getByName(flavorNameApp) {
+        //  #     assets.srcDirs("src/main/assets-$flavorNameApp")
+        //  # }
+        //  # getByName(flavorNameInrt) {
+        //  #     assets.srcDirs("src/main/assets-$flavorNameInrt")
+        //  # }
+        //  !
         getByName("main") {
-            assets.srcDirs("src/main/assets")
+            assets.directories.add("src/main/assets")
         }
         getByName("release") {
-            java.srcDirs("src/release/java")
+            java.directories.add("src/release/java")
         }
         getByName("debug") {
-            java.srcDirs("src/debug/java")
+            java.directories.add("src/debug/java")
         }
         getByName(flavorNameApp) {
-            assets.srcDirs("src/main/assets-$flavorNameApp")
+            assets.directories.add("src/main/assets-$flavorNameApp")
         }
         getByName(flavorNameInrt) {
-            assets.srcDirs("src/main/assets-$flavorNameInrt")
+            assets.directories.add("src/main/assets-$flavorNameInrt")
         }
 
     }
@@ -651,7 +668,9 @@ android {
 
     buildTypes {
         val proguardFiles = arrayOf<Any>(
-            getDefaultProguardFile("proguard-android.txt"),
+            // @Archived by JetBrains AI Assistant (GPT-5.3-Codex (xhigh)) on Mar 7, 2026.
+            //  # getDefaultProguardFile("proguard-android.txt"),
+            getDefaultProguardFile("proguard-android-optimize.txt"),
             "proguard-rules.pro",
         )
         val niceSigningConfig = takeIf { signs.isValid }?.let {
@@ -686,45 +705,6 @@ android {
         //  # }
     }
 
-    applicationVariants.all {
-        mergeAssetsProvider.configure {
-            doLast {
-                mapOf(
-                    "dir" to outputDir,
-                    "includes" to when (variantName.startsWith(flavorNameInrt)) {
-                        true -> listOf(
-                            "mlkit-google-ocr-models/**/*",
-                            "mlkit_barcode_models/**/*",
-                            "models/**/*",
-                            "modules/obsolete/**/*",
-                            "openccdata/**/*",
-                            "project/**/*",
-                            "android-devices.db",
-                            "autojs.keystore",
-                            "**/prob_emit.txt", // Jieba Analysis (zh-CN: 结巴分词)
-                            "**/dict-chinese-*.db.gzip", // Jieba Analysis (zh-CN: 结巴分词)
-                        )
-                        else -> listOf(
-                            "declarations/**/*",
-                            "sample/declarations/**/*",
-                            "modules/obsolete/**/*",
-                        )
-                    },
-                ).let { delete(fileTree(it)) }
-            }
-        }
-
-        outputs.map { it as BaseVariantOutputImpl }.forEach {
-            it.outputFileName = run {
-                val variant = this@all as ApplicationVariantImpl
-                val autojs = variant.applicationId.replace("^.+\\.(.+)$".toRegex(), "$1") // e.g. autojs6
-                val version = variant.versionName.replace("\\s".toRegex(), "-") // e.g. 6.1.0
-                val architecture = it.getFilter("ABI") ?: "universal"
-                val extension = utils.FILE_EXTENSION_APK
-                "$autojs-v$version-$architecture.$extension".lowercase()
-            }
-        }
-    }
 
     splits {
         // Configures multiple APKs based on ABI.
@@ -742,6 +722,74 @@ android {
         }
     }
 
+}
+
+androidComponents {
+    onVariants { variant ->
+        val variantName = variant.name
+        val mergeAssetsTaskName = "merge${variantName.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }}Assets"
+        val isInrtVariant = variantName.startsWith(flavorNameInrt, ignoreCase = true)
+
+        tasks.matching { it.name == mergeAssetsTaskName }.configureEach {
+            doLast {
+                val outputDir = when (val dir = javaClass.methods.firstOrNull {
+                    it.name == "getOutputDir" && it.parameterTypes.isEmpty()
+                }?.invoke(this)) {
+                    is File -> dir
+                    is Directory -> dir.asFile
+                    else -> null
+                } ?: return@doLast
+
+                val includes = when (isInrtVariant) {
+                    true -> listOf(
+                        "mlkit-google-ocr-models/**/*",
+                        "mlkit_barcode_models/**/*",
+                        "models/**/*",
+                        "modules/obsolete/**/*",
+                        "openccdata/**/*",
+                        "project/**/*",
+                        "android-devices.db",
+                        "autojs.keystore",
+                        "**/prob_emit.txt", // Jieba Analysis
+                        "**/dict-chinese-*.db.gzip", // Jieba Analysis
+                    )
+                    else -> listOf(
+                        "declarations/**/*",
+                        "sample/declarations/**/*",
+                        "modules/obsolete/**/*",
+                    )
+                }
+
+                delete(
+                    fileTree(
+                        mapOf(
+                            "dir" to outputDir,
+                            "includes" to includes,
+                        )
+                    )
+                )
+            }
+        }
+
+        variant.outputs.forEach { output ->
+            val architecture = output.filters.find {
+                it.filterType == FilterConfiguration.FilterType.ABI
+            }?.identifier ?: "universal"
+            val outputFileNameProperty = output.javaClass.methods.firstOrNull {
+                it.name == "getOutputFileName" && it.parameterTypes.isEmpty()
+            }?.invoke(output) as? Property<*>
+
+            @Suppress("UNCHECKED_CAST")
+            (outputFileNameProperty as? Property<String>)?.set(
+                variant.applicationId.zip(output.versionName) { appId, versionName ->
+                    val autojs = appId.substringAfterLast('.')
+                    val version = versionName.replace("\\s".toRegex(), "-")
+                    val extension = utils.FILE_EXTENSION_APK
+                    "$autojs-v$version-$architecture.$extension".lowercase()
+                }
+            )
+        }
+    }
 }
 
 tasks {

@@ -2,7 +2,6 @@ plugins {
     id("org.autojs.build.versions")
     id("org.autojs.build.jvm-convention")
     id("com.android.library")
-    id("kotlin-android")
 }
 
 android {
@@ -21,9 +20,9 @@ android {
     sourceSets {
         named("main") {
             // 主 Java/Kotlin 目录
-            java.setSrcDirs(listOf("src/main/java"))
+            java.directories.add("src/main/java")
             // 将资源文件夹指定为 assets 目录
-            assets.setSrcDirs(listOf("src/main/assets"))
+            assets.directories.add("src/main/assets")
         }
     }
 

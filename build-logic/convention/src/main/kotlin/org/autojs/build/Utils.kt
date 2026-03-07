@@ -229,6 +229,70 @@ object Utils {
 
     private fun capitalize(s: String) = "${s[0].uppercase(Locale.getDefault())}${s.substring(1)}"
 
+    private fun parseBooleanOrNull(value: String?): Boolean? = when (value?.trim()?.lowercase(Locale.getDefault())) {
+        "1", "true", "yes", "on" -> true
+        "0", "false", "no", "off" -> false
+        else -> null
+    }
+
+    private fun parseMajorVersionOrNull(version: String?): Int? {
+        if (version.isNullOrBlank()) return null
+        return version.substringBefore('.').substringBefore('-').toIntOrNull()
+    }
+
+    private fun detectAgpVersionOrNull(): String? = runCatching {
+        Class.forName("com.android.Version")
+            .getField("ANDROID_GRADLE_PLUGIN_VERSION")
+            .get(null) as? String
+    }.getOrNull()
+
+    private fun shouldUseBuiltInKotlin(project: Project): Boolean {
+        parseBooleanOrNull(project.providers.gradleProperty("useBuiltInKotlin").orNull)?.let { overridden ->
+            project.logInfo("[JvmConv] useBuiltInKotlin overridden by gradle property to '$overridden' for '${project.path}'")
+            return overridden
+        }
+
+        val agpVersion = detectAgpVersionOrNull()
+        parseMajorVersionOrNull(agpVersion)?.let { agpMajor ->
+            val useBuiltIn = agpMajor >= 9
+            project.logInfo(
+                "[JvmConv] AGP version='$agpVersion' (major=$agpMajor), " +
+                        "useBuiltInKotlin='$useBuiltIn' for '${project.path}'"
+            )
+            return useBuiltIn
+        }
+
+        val gradleVersion = project.gradle.gradleVersion
+        val gradleMajor = parseMajorVersionOrNull(gradleVersion) ?: 0
+        val useBuiltIn = gradleMajor >= 9
+        project.logWarn(
+            "[JvmConv] Failed to determine AGP version; fallback to Gradle version='$gradleVersion' " +
+                    "(major=$gradleMajor), useBuiltInKotlin='$useBuiltIn' for '${project.path}'"
+        )
+        return useBuiltIn
+    }
+
+    private fun applyKotlinAndroidPluginIfNeeded(project: Project) {
+        val kotlinAndroidPluginId = "org.jetbrains.kotlin.android"
+        if (project.plugins.hasPlugin(kotlinAndroidPluginId)) {
+            project.logInfo("[JvmConv] '$kotlinAndroidPluginId' already applied for '${project.path}'")
+            return
+        }
+        if (shouldUseBuiltInKotlin(project)) {
+            project.logInfo("[JvmConv] Skip applying '$kotlinAndroidPluginId' (AGP built-in Kotlin) for '${project.path}'")
+            return
+        }
+
+        runCatching {
+            project.pluginManager.apply(kotlinAndroidPluginId)
+        }.onSuccess {
+            project.logInfo("[JvmConv] Applied '$kotlinAndroidPluginId' for '${project.path}'")
+        }.onFailure {
+            project.logError("[JvmConv] Failed to apply '$kotlinAndroidPluginId' for '${project.path}'", it)
+            throw it
+        }
+    }
+
     // Configure Java/Kotlin target version uniformly for Android modules:
     // - Android.compileOptions.sourceCompatibility/targetCompatibility = versions.javaVersion 
     // - Kotlin compile tasks jvmTarget = versions.javaVersion level
@@ -251,6 +315,7 @@ object Utils {
 
         val installer = {
             project.logInfo("[JvmConv] Detected Android plugin in module='${project.path}', installing configuration")
+            applyKotlinAndroidPluginIfNeeded(project)
 
             System.getProperty("gradle.java.version.select").let { ver ->
                 configureJavaToolchainLanguageLevel(project, ver)
@@ -288,17 +353,19 @@ object Utils {
     }
 
     private fun configureKotlinJvmToolchain(project: Project, target: String) {
-        project.plugins.withId("org.jetbrains.kotlin.android") {
-            project.extensions.findByName("kotlin")?.let { kotlinExt ->
-                runCatching {
-                    kotlinExt.javaClass.getMethod("jvmToolchain", Int::class.java)
-                        .invoke(kotlinExt, target.toInt())
-                }.onSuccess {
-                    project.logInfo("[JvmConv] Kotlin jvmToolchain set to $target for '${project.path}'")
-                }.onFailure {
-                    project.logError("[JvmConv] Set Kotlin jvmToolchain failed on '${project.path}': ${it.message}", it)
-                }
-            }
+        val kotlinExt = project.extensions.findByName("kotlin")
+        if (kotlinExt == null) {
+            project.logWarn("[JvmConv] Kotlin extension not found in '${project.path}', skip Kotlin jvmToolchain")
+            return
+        }
+
+        runCatching {
+            kotlinExt.javaClass.getMethod("jvmToolchain", Int::class.java)
+                .invoke(kotlinExt, target.toInt())
+        }.onSuccess {
+            project.logInfo("[JvmConv] Kotlin jvmToolchain set to $target for '${project.path}'")
+        }.onFailure {
+            project.logError("[JvmConv] Set Kotlin jvmToolchain failed on '${project.path}': ${it.message}", it)
         }
     }
 
