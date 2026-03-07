@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.afollestad.materialdialogs"
-    version = "0.9.6.0 (179)"
+    version = "0.9.6.0 (179) Mod"
 
     compileSdk = versions.sdkVersionCompile
 
@@ -27,8 +27,8 @@ repositories {
 }
 
 dependencies {
-    implementation(libs.appcompat.v7)
-    implementation(libs.support.annotations)
-    implementation(libs.recyclerview.v7)
+    implementation(libs.appcompat)
+    implementation(libs.annotation)
+    implementation(libs.recyclerview)
     implementation(libs.materialprogressbar)
 }

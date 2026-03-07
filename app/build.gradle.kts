@@ -284,9 +284,9 @@ dependencies /* Test */ {
 
 dependencies /* Annotations */ {
     // Android Annotations
-    implementation(libs.androidannotations.api)
+    implementation(libs.android.annotations.api)
     implementation(libs.annotation)
-    ksp(libs.androidannotations)
+    ksp(libs.android.annotations)
 
     // JCIP Annotations
     implementation(libs.jcip.annotations)
@@ -332,14 +332,12 @@ dependencies /* Material Dialogs */ {
 dependencies /* Layout */ {
     // Expandable Layout
     // implementation("com.github.aakira:expandable-layout:1.6.0")
-    implementation(project(":libs:expandable-layout-1_6_0"))
+    // implementation(project(":libs:expandable-layout-1_6_0"))
+    implementation(project(":modules:expandable-layout"))
 
-    // Expandable RecyclerView
-    implementation(libs.expandablerecyclerview)
+    implementation(project(":modules:expandable-recyclerview"))
 
-    // Flexible Divider
-    // implementation("com.yqritc:recyclerview-flexibledivider:1.4.0")
-    implementation(project(":libs:recyclerview-flexibledivider-1_4_0"))
+    implementation(project(":modules:recyclerview-flexibledivider"))
 }
 
 dependencies /* View */ {

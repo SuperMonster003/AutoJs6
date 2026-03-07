@@ -1,0 +1,21 @@
+plugins {
+    id("org.autojs.build.versions")
+    id("org.autojs.build.jvm-convention")
+    id("com.android.library")
+}
+
+android {
+    namespace "com.bignerdranch.expandablerecyclerview"
+    compileSdkVersion versions.sdkVersionCompile
+
+    defaultConfig {
+        minSdkVersion versions.sdkVersionMin
+        targetSdkVersion versions.sdkVersionTarget
+        versionName "3.0.0-RC1 Mod"
+    }
+}
+
+dependencies {
+    implementation libs.annotation
+    implementation libs.recyclerview
+}

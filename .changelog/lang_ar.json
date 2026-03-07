@@ -86,8 +86,8 @@
         "نص بناء Gradle أصبح أكثر قدرة على التكيّف مع الإصدارات الجديدة _[`discussion #369`](http://discussions.autojs6.com/369)_"
       ],
       "dependency": [
-        "مرفق Material Dialogs الإصدار 0.9.6.0 (محلي)",
-        "مرفق Material Date Time Picker الإصدار 4.2.3 (محلي)",
+        "مرفق Material Dialogs الإصدار 0.9.6.0 (تجزئة إلى وحدات)",
+        "مرفق Material Date Time Picker الإصدار 4.2.3 (تجزئة إلى وحدات)",
         "مرفق libimagequant الإصدار 2.17.0 (محلي)",
         "مرفق libpng الإصدار 1.6.49 (محلي)",
         "مضاف ICU4J الإصدار 77.1",

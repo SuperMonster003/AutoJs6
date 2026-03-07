@@ -86,8 +86,8 @@
         "Gradle build script now better adapts to newer versions _[`discussion #369`](http://discussions.autojs6.com/369)_"
       ],
       "dependency": [
-        "Bundled Material Dialogs 0.9.6.0 (localized)",
-        "Bundled Material Date Time Picker 4.2.3 (localized)",
+        "Bundled Material Dialogs 0.9.6.0 (modularized)",
+        "Bundled Material Date Time Picker 4.2.3 (modularized)",
         "Bundled libimagequant 2.17.0 (localized)",
         "Bundled libpng 1.6.49 (localized)",
         "Added ICU4J 77.1",
