@@ -48,21 +48,16 @@ class Plugins(private val context: Context, private val runtime: PluginRuntime) 
         )
         packages.putIfAbsent(packageName, packageContext)?.let { packageContext = it }
 
-        val lock = Object()
-        synchronized(lock) {
-            try {
-                val plugin = Plugin.load(context, packageContext, runtime, runtime.topLevelScope)
-                val scriptCacheDir = getScriptCacheDir(packageName)
-                copyAssetDir(packageContext.context.assets, plugin.assetsScriptDir, scriptCacheDir.path)
-                plugin.mainScriptPath = File(scriptCacheDir, "index.js").path
-                bindService(plugin)
-                mPlugins[packageName] = plugin
-                lock.notify()
-                return plugin
-            } catch (e: Exception) {
-                lock.notify()
-                throw PluginLoadException(e)
-            }
+        return try {
+            val plugin = Plugin.load(context, packageContext, runtime, runtime.topLevelScope)
+            val scriptCacheDir = getScriptCacheDir(packageName)
+            copyAssetDir(packageContext.context.assets, plugin.assetsScriptDir, scriptCacheDir.path)
+            plugin.mainScriptPath = File(scriptCacheDir, "index.js").path
+            bindService(plugin)
+            mPlugins[packageName] = plugin
+            plugin
+        } catch (e: Exception) {
+            throw PluginLoadException(e)
         }
     }
 
