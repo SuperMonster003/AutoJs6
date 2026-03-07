@@ -6,6 +6,8 @@ import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.TextRecognizer
 import com.google.mlkit.vision.text.chinese.ChineseTextRecognizerOptions
 import org.autojs.autojs.core.image.ImageWrapper
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 /**
  * Created by SuperMonster003 on Mar 18, 2023.
@@ -34,22 +36,21 @@ class OcrMLKit {
         if (bitmap.isRecycled) return emptyList<OcrResult>().also { image.shoot() }
 
         val inputImage = InputImage.fromBitmap(bitmap, 0)
+        val detectCompletedSignal = CountDownLatch(1)
         val result = recognizer!!.process(inputImage)
-            .addOnCanceledListener { lockNotify() }
-            .addOnCompleteListener { lockNotify() }
-            .addOnSuccessListener { lockNotify() }
+            .addOnCanceledListener { detectCompletedSignal.countDown() }
+            .addOnCompleteListener { detectCompletedSignal.countDown() }
+            .addOnSuccessListener { detectCompletedSignal.countDown() }
             .addOnFailureListener { e: Exception ->
                 Log.w(TAG, "Failed to detect: ${e.message}")
                 e.printStackTrace()
-                lockNotify()
+                detectCompletedSignal.countDown()
             }
         while (!result.isComplete) {
-            synchronized(lock) {
-                try {
-                    lock.wait(50)
-                } catch (_: InterruptedException) {
-                    /* Ignored. */
-                }
+            try {
+                detectCompletedSignal.await(50, TimeUnit.MILLISECONDS)
+            } catch (_: InterruptedException) {
+                /* Ignored. */
             }
         }
         image.shoot()
@@ -77,11 +78,7 @@ class OcrMLKit {
         }
     }
 
-    private fun lockNotify() = synchronized(lock) { lock.notify() }
-
     companion object {
-
-        private val lock = Object()
 
         private val TAG: String = Companion::class.java.simpleName
 

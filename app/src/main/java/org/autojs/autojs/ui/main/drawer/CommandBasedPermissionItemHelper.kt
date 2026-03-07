@@ -11,6 +11,7 @@ import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.RootUtils
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
+import java.util.concurrent.CountDownLatch
 
 interface CommandBasedPermissionItemHelper : PermissionItemHelper, IPermissionRootItem, IPermissionShizukuItem, IPermissionAdbItem {
 
@@ -92,17 +93,21 @@ interface CommandBasedPermissionItemHelper : PermissionItemHelper, IPermissionRo
     }
 
     fun withAdb(action: ACTION): Boolean {
-        val lock = Object()
+        val dialogDismissSignal = CountDownLatch(1)
 
         AdbDialogBuilder(context, getCommand(action))
             .setChecker(object : AdbDialogBuilder.Checker {
                 override fun check() = has()
             })
             .build()
-            .dismissListener { synchronized(lock) { lock.notify() } }
+            .dismissListener { dialogDismissSignal.countDown() }
             .let { Handler(Looper.getMainLooper()).post { it.show() } }
 
-        synchronized(lock) { lock.wait() }
+        try {
+            dialogDismissSignal.await()
+        } catch (_: InterruptedException) {
+            /* Ignored. */
+        }
 
         return has()
     }

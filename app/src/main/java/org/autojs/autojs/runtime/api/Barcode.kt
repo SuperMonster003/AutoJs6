@@ -5,6 +5,8 @@ import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
 import org.autojs.autojs.core.image.ImageWrapper
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import com.google.mlkit.vision.barcode.common.Barcode as MLKitBarcode
 
 /**
@@ -23,6 +25,7 @@ class Barcode {
 
         val scanner = BarcodeScanning.getClient(options)
         val inputImage = InputImage.fromBitmap(image.bitmap, 0)
+        val scanCompletedSignal = CountDownLatch(1)
 
         var results: List<WrappedBarcode>? = null
 
@@ -32,22 +35,20 @@ class Barcode {
                     onlyOneResult -> barcodes.firstOrNull()?.let { results = listOf(WrappedBarcode(it)) }
                     else -> results = barcodes.map { WrappedBarcode(it) }
                 }
-                lockNotify()
+                scanCompletedSignal.countDown()
             }
             .addOnFailureListener { e ->
                 e.printStackTrace()
-                lockNotify()
+                scanCompletedSignal.countDown()
             }
-            .addOnCanceledListener { lockNotify() }
-            .addOnCompleteListener { lockNotify() }
+            .addOnCanceledListener { scanCompletedSignal.countDown() }
+            .addOnCompleteListener { scanCompletedSignal.countDown() }
 
         while (!resultScan.isComplete) {
-            synchronized(lock) {
-                try {
-                    lock.wait(50)
-                } catch (_: InterruptedException) {
-                    /* Ignored. */
-                }
+            try {
+                scanCompletedSignal.await(50, TimeUnit.MILLISECONDS)
+            } catch (_: InterruptedException) {
+                /* Ignored. */
             }
         }
 
@@ -59,11 +60,7 @@ class Barcode {
         return results ?: emptyList()
     }
 
-    private fun lockNotify() = synchronized(lock) { lock.notify() }
-
     companion object {
-
-        private val lock = Object()
 
         private val TAG: String = Companion::class.java.simpleName
 

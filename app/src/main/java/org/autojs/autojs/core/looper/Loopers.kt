@@ -9,6 +9,7 @@ import org.autojs.autojs.rhino.AutoJsContext
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.util.RhinoUtils.isMainThread
 import org.mozilla.javascript.Context
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.concurrent.Volatile
 
@@ -28,7 +29,7 @@ class Loopers(val scriptRuntime: ScriptRuntime) : MessageQueue.IdleHandler {
     private var mLooperQuitHandlers = ThreadLocal<CopyOnWriteArrayList<LooperQuitHandler>>()
     private var mTimers = scriptRuntime.timers
     private var mThreads = scriptRuntime.threads
-    private val mLock = Object()
+    private val mServantLooperReady = CountDownLatch(1)
 
     private var mMaxWaitId: ThreadLocal<Int> = object : ThreadLocal<Int>() {
         override fun initialValue() = 0
@@ -44,16 +45,10 @@ class Loopers(val scriptRuntime: ScriptRuntime) : MessageQueue.IdleHandler {
         get() {
             if (mServantLooper == null) {
                 initServantThread()
-                synchronized(mLock) {
-                    try {
-                        try {
-                            mLock.wait()
-                        } finally {
-                            mLock.notify()
-                        }
-                    } catch (ex: InterruptedException) {
-                        /* Ignored. */
-                    }
+                try {
+                    mServantLooperReady.await()
+                } catch (_: InterruptedException) {
+                    /* Ignored. */
                 }
             }
             return mServantLooper!!
@@ -160,9 +155,7 @@ class Loopers(val scriptRuntime: ScriptRuntime) : MessageQueue.IdleHandler {
         ThreadCompat {
             Looper.prepare()
             mServantLooper = Looper.myLooper()
-            synchronized(mLock) {
-                mLock.notifyAll()
-            }
+            mServantLooperReady.countDown()
             Looper.loop()
         }.start()
     }
