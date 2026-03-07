@@ -2,7 +2,6 @@ plugins {
     id("org.autojs.build.versions")
     id("org.autojs.build.jvm-convention")
     id("com.android.library")
-    id("org.jetbrains.kotlin.android")
     kotlin("plugin.parcelize")
 }
 
