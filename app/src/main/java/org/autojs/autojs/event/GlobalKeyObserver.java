@@ -40,7 +40,7 @@ public class GlobalKeyObserver implements OnKeyListener, ShellKeyObserver.KeyLis
     }
 
     public static void initIfNeeded(Context applicationContext) {
-        if (Pref.isUseVolumeControlRunningEnabled()) makeSureSingletonInitialized(applicationContext);
+        if (isVolumeControlEnabled()) makeSureSingletonInitialized(applicationContext);
     }
 
     public static void init(Context applicationContext) {
@@ -88,7 +88,7 @@ public class GlobalKeyObserver implements OnKeyListener, ShellKeyObserver.KeyLis
                 mVolumeDownFromShell = false;
                 return;
             }
-            mVolumeUpFromAccessibility = true;
+            mVolumeDownFromAccessibility = true;
             onVolumeDown();
         } else if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
             if (mVolumeUpFromShell) {
@@ -124,4 +124,7 @@ public class GlobalKeyObserver implements OnKeyListener, ShellKeyObserver.KeyLis
         }
     }
 
+    private static boolean isVolumeControlEnabled() {
+        return Pref.isUseVolumeControlRunningEnabled() || Pref.isUseVolumeControlRecordEnabled();
+    }
 }

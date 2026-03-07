@@ -1411,4 +1411,5 @@
     <string name="text_extracted_plugin_assets">プラグインの資源を抽出しました</string>
     <string name="text_extracting_plugin_asset">プラグイン資源を抽出中</string>
     <string name="text_extracting_plugin_so">プラグインの so を抽出中</string>
+    <string name="error_conditions_not_met_for_record">スクリプト録画には次の条件のうち少なくとも1つが必要です:\n- Root 権限\n- Shizuku 権限</string>
 </resources>

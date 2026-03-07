@@ -57,7 +57,7 @@ public class GlobalActionRecorder implements Recorder.OnStateChangedListener {
             protected InputEventRecorder createInputEventRecorder() {
                 return Pref.rootRecordGeneratesBinary()
                         ? new InputEventToAutoFileRecorder(mContext)
-                        : new InputEventToRootAutomatorRecorder();
+                        : new InputEventToRootAutomatorRecorder(mContext);
             }
         };
     }

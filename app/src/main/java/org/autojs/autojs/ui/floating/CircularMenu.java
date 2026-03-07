@@ -25,6 +25,7 @@ import org.autojs.autojs.core.pref.Pref;
 import org.autojs.autojs.core.record.GlobalActionRecorder;
 import org.autojs.autojs.core.record.Recorder;
 import org.autojs.autojs.core.shizuku.IUserService;
+import org.autojs.autojs.event.GlobalKeyObserver;
 import org.autojs.autojs.model.explorer.ExplorerDirPage;
 import org.autojs.autojs.model.explorer.ExplorerPage;
 import org.autojs.autojs.model.explorer.Explorers;
@@ -58,6 +59,7 @@ import java.util.Objects;
  * Modified by JetBrains AI Assistant (GPT-5.2) as of Jan 20, 2026.
  * Modified by SuperMonster003 as of Jan 20, 2026.
  */
+@SuppressWarnings({"unused", "CodeBlock2Expr"})
 public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
 
     public record StateChangeEvent(int currentState, int previousState) {
@@ -85,6 +87,8 @@ public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
     private Deferred<Capture, Void, Void> mCaptureDeferred;
     private final AccessibilityTool mA11yTool;
     private final PointerLocationTool mPointerLocationTool;
+    private final GlobalKeyObserver mGlobalKeyObserver;
+    private final GlobalKeyObserver.OnVolumeDownListener mVolumeDownListener;
 
     private final View.OnClickListener mCollapseWindowAndInspectLayoutBoundsListener = v -> {
         mWindow.collapse();
@@ -127,6 +131,9 @@ public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
         AutoJs.getInstance().getLayoutInspector().addCaptureAvailableListener(this);
         mA11yTool = new AccessibilityTool(mContext);
         mPointerLocationTool = new PointerLocationTool(mContext);
+        mGlobalKeyObserver = GlobalKeyObserver.getSingleton(mContext.getApplicationContext());
+        mVolumeDownListener = this::onVolumeDownForRecord;
+        mGlobalKeyObserver.addVolumeDownListener(mVolumeDownListener);
     }
 
     private void setupWindowListeners() {
@@ -239,10 +246,11 @@ public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
         });
         binding.record.setOnClickListener(v -> {
             mWindow.collapse();
-            if (!RootUtils.isRootAvailable()) {
+            boolean hasShizukuAccessForRecord = WrappedShizuku.INSTANCE.isOperational();
+            if (!hasShizukuAccessForRecord && !RootUtils.isRootAvailable()) {
                 DialogUtils.showAdaptive(new AppLevelThemeDialogBuilder(mContext)
-                        .title(mContext.getString(R.string.text_no_root_access))
-                        .content(mContext.getString(R.string.no_root_access_for_record))
+                        .title(mContext.getString(R.string.text_prompt))
+                        .content(mContext.getString(R.string.error_conditions_not_met_for_record))
                         .positiveText(R.string.dialog_button_abandon)
                         .positiveColorRes(R.color.dialog_button_failure)
                         .build());
@@ -379,6 +387,29 @@ public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
 
     public void stopRecord() {
         mRecorder.stop();
+    }
+
+    private void onVolumeDownForRecord() {
+        if (!Pref.isUseVolumeControlRecordEnabled() || mState == STATE_CLOSED) {
+            return;
+        }
+        Runnable toggleTask = () -> {
+            if (isRecording()) {
+                stopRecord();
+                return;
+            }
+            boolean hasShizukuAccessForRecord = WrappedShizuku.INSTANCE.isOperational();
+            if (hasShizukuAccessForRecord || RootUtils.isRootAvailable()) {
+                mRecorder.start();
+            } else {
+                ViewUtils.showToast(mContext, mContext.getString(R.string.no_root_access_for_record));
+            }
+        };
+        if (mActionViewIcon != null) {
+            mActionViewIcon.post(toggleTask);
+        } else {
+            toggleTask.run();
+        }
     }
 
     private void inspectLayout(Func1<Capture, FloatyWindow> windowCreator) {
@@ -518,6 +549,6 @@ public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
         }
         mRecorder.removeOnStateChangedListener(mRecorderStateListener);
         AutoJs.getInstance().getLayoutInspector().removeCaptureAvailableListener(this);
+        mGlobalKeyObserver.removeVolumeDownListener(mVolumeDownListener);
     }
-
 }

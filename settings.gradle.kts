@@ -13,6 +13,9 @@ private val modules = listOf(
     "color-picker",
     "material-dialogs",
     "material-date-time-picker",
+    "expandable-layout",
+    "expandable-recyclerview",
+    "recyclerview-flexibledivider",
 )
 
 private val libs = listOf(
@@ -35,8 +38,6 @@ private val libs = listOf(
     "markwon-syntax-highlight-4_6_2",
 
     "root-shell-1_6",
-    "expandable-layout-1_6_0",
-    "recyclerview-flexibledivider-1_4_0"
 )
 
 private val pluginApi = listOf(
@@ -324,8 +325,9 @@ pluginManagement {
             val intelliJIdea = object : Platform(
                 name = "IntelliJIdea", vendor = "Jetbrains",
                 // @Reference AGP Upgrade Assistant integrated within JetBrains IntelliJ IDEA.
-                // @Updated by SuperMonster003 on Aug 20, 2025. (Manual)
+                // @Updated by SuperMonster003 on Mar 2, 2026. (Manual)
                 agpVersionMap = mapOf(
+                    "2026.1" to "8.13.2",
                     "2025.2.2" to "8.12.0",
                     "2025.2.1" to "8.11.1",
                     "2025.1" to "8.10.1",

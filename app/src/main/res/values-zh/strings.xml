@@ -1407,4 +1407,5 @@
     <string name="text_extracted_plugin_assets">已提取插件资源</string>
     <string name="text_extracting_plugin_asset">正在提取插件资源</string>
     <string name="text_extracting_plugin_so">正在提取插件 so 文件</string>
+    <string name="error_conditions_not_met_for_record">脚本录制需至少满足以下条件之一:\n- Root 权限\n- Shizuku 权限</string>
 </resources>

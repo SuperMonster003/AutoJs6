@@ -1407,4 +1407,5 @@
     <string name="text_extracted_plugin_assets">Extracted plugin assets</string>
     <string name="text_extracting_plugin_asset">Extracting plugin asset</string>
     <string name="text_extracting_plugin_so">Extracting plugin so</string>
+    <string name="error_conditions_not_met_for_record">Script recording requires at least one of the following conditions:\n- Root access\n- Shizuku access</string>
 </resources>

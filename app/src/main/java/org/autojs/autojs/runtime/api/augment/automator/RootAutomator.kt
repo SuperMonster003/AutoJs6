@@ -1,6 +1,7 @@
 package org.autojs.autojs.runtime.api.augment.automator
 
 import org.autojs.autojs.runtime.ScriptRuntime
+import org.autojs.autojs.runtime.api.WrappedShizuku
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.Constructable
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
@@ -15,8 +16,8 @@ class RootAutomator(private val scriptRuntime: ScriptRuntime) : Augmentable(scri
     }
 
     override fun construct(vararg args: Any?): Scriptable = ensureArgumentsAtMost(args, 1) {
-        if (!RootUtils.isRootAvailable()) {
-            throw RuntimeException("$key must be instantiated with root access")
+        if (!RootUtils.isRootAvailable() && !WrappedShizuku.isOperational()) {
+            throw RuntimeException("$key must be instantiated with root access or shizuku access")
         }
         when (it.size) {
             0 -> RootAutomatorNativeObject(scriptRuntime)
