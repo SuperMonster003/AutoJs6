@@ -5,27 +5,22 @@ import android.os.Looper;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
-
-import org.autojs.autojs.model.autocomplete.CodeCompletions;
 import org.autojs.autojs.groundwork.WrapContentLinearLayoutManager;
+import org.autojs.autojs.model.autocomplete.CodeCompletions;
+import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs6.R;
 
 /**
  * Created by Stardust on Feb 17, 2017.
+ * Modified by SuperMonster003 as of Mar 8, 2026.
  */
 public class CodeCompletionBar extends RecyclerView {
-
-    public interface OnHintClickListener {
-        void onHintClick(CodeCompletions completions, int pos);
-
-        void onHintLongClick(CodeCompletions completions, int pos);
-    }
 
     private int mTextColor;
     private CodeCompletions mCodeCompletions;
@@ -33,20 +28,19 @@ public class CodeCompletionBar extends RecyclerView {
     private final OnClickListener mOnCodeCompletionItemClickListener = new OnClickListener() {
         @Override
         public void onClick(View v) {
-            int position = getChildViewHolder(v).getAdapterPosition();
+            int position = getChildViewHolder(v).getBindingAdapterPosition();
             if (position >= 0 && position < mCodeCompletions.size()) {
                 if (mOnHintClickListener != null) {
                     mOnHintClickListener.onHintClick(mCodeCompletions, position);
                 }
             }
-
         }
     };
 
     private final OnLongClickListener mOnCodeCompletionItemLongClickListener = new OnLongClickListener() {
         @Override
         public boolean onLongClick(View v) {
-            int position = getChildViewHolder(v).getAdapterPosition();
+            int position = getChildViewHolder(v).getBindingAdapterPosition();
             if (position < 0 || position >= mCodeCompletions.size())
                 return false;
             if (mOnHintClickListener != null) {
@@ -127,7 +121,18 @@ public class CodeCompletionBar extends RecyclerView {
             super(itemView);
             itemView.setOnClickListener(mOnCodeCompletionItemClickListener);
             itemView.setOnLongClickListener(mOnCodeCompletionItemLongClickListener);
+            itemView.setOnTouchListener(
+                    new ViewUtils.DelayedLongPressTouchListener(
+                            itemView.getContext(),
+                            (long) (ViewConfiguration.getLongPressTimeout() * 1.25)
+                    )
+            );
         }
     }
 
+    public interface OnHintClickListener {
+        void onHintClick(CodeCompletions completions, int pos);
+
+        void onHintLongClick(CodeCompletions completions, int pos);
+    }
 }

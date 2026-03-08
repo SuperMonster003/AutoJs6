@@ -6,6 +6,7 @@ import android.graphics.Canvas
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
+import android.text.Layout
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -316,14 +317,16 @@ class CodeEditor : HVScrollView {
         when (ev.actionMasked) {
             MotionEvent.ACTION_DOWN,
             MotionEvent.ACTION_POINTER_DOWN,
-            MotionEvent.ACTION_MOVE -> {
+            MotionEvent.ACTION_MOVE,
+                -> {
                 // Mark touching as early as possible.
                 // zh-CN: 尽可能早地标记触摸中状态.
                 mUserTouching = true
             }
             MotionEvent.ACTION_UP,
             MotionEvent.ACTION_CANCEL,
-            MotionEvent.ACTION_POINTER_UP -> {
+            MotionEvent.ACTION_POINTER_UP,
+                -> {
                 // Clear touching flag when gesture ends.
                 // zh-CN: 手势结束时清除触摸中标记.
                 mUserTouching = false
@@ -397,6 +400,10 @@ class CodeEditor : HVScrollView {
         }
     }
 
+    fun clear() {
+        codeEditText.setText("")
+    }
+
     fun jumpToStart() {
         codeEditText.setSelection(0)
     }
@@ -417,15 +424,46 @@ class CodeEditor : HVScrollView {
         val layout = codeEditText.layout
         val line = LayoutHelper.getLineOfChar(layout, minOf(codeEditText.selectionStart, codeEditText.selectionEnd))
         if (line >= 0 && line < layout.lineCount) {
-            val lineEnd = layout.getLineEnd(line)
-            val text = codeEditText.text.toString()
-            val finalPosition = when {
-                lineEnd > 0 && text[lineEnd - 1] == '\n' -> {
-                    lineEnd - 1
-                }
-                else -> lineEnd
-            }
-            codeEditText.setSelection(finalPosition)
+            codeEditText.setSelection(getLineEndWithoutTrailingNewline(layout, line))
+        }
+    }
+
+    fun jumpToNextLine() {
+        val layout = codeEditText.layout
+        val cursor = minOf(codeEditText.selectionStart, codeEditText.selectionEnd)
+        val line = LayoutHelper.getLineOfChar(layout, cursor)
+        jumpToLinePreservingColumn(layout, line, line + 1, cursor)
+    }
+
+    fun jumpToPrevLine() {
+        val layout = codeEditText.layout
+        val cursor = minOf(codeEditText.selectionStart, codeEditText.selectionEnd)
+        val line = LayoutHelper.getLineOfChar(layout, cursor)
+        jumpToLinePreservingColumn(layout, line, line - 1, cursor)
+    }
+
+    private fun jumpToLinePreservingColumn(layout: Layout, fromLine: Int, targetLine: Int, cursor: Int) {
+        if (fromLine !in 0 until layout.lineCount || targetLine !in 0 until layout.lineCount) {
+            return
+        }
+        val fromLineStart = layout.getLineStart(fromLine)
+        val fromLineEnd = getLineEndWithoutTrailingNewline(layout, fromLine)
+        val fromLineCursor = cursor.coerceIn(fromLineStart, fromLineEnd)
+        val desiredColumn = fromLineCursor - fromLineStart
+
+        val targetLineStart = layout.getLineStart(targetLine)
+        val targetLineEnd = getLineEndWithoutTrailingNewline(layout, targetLine)
+        val targetCursor = (targetLineStart + desiredColumn).coerceAtMost(targetLineEnd)
+        codeEditText.setSelection(targetCursor)
+    }
+
+    private fun getLineEndWithoutTrailingNewline(layout: Layout, line: Int): Int {
+        val lineEnd = layout.getLineEnd(line)
+        val text = codeEditText.text ?: return lineEnd
+        return if (lineEnd > 0 && lineEnd <= text.length && text[lineEnd - 1] == '\n') {
+            lineEnd - 1
+        } else {
+            lineEnd
         }
     }
 
@@ -739,13 +777,19 @@ class CodeEditor : HVScrollView {
         fun onCursorChange(line: String, cursor: Int)
     }
 
-    inner class CommentHelper : CodeEditorCommentHelper {
+    inner class CommentHelper {
 
         private val prefix = "//"
 
-        override fun handle() = toggle()
+        fun toggle() {
+            if (isCommented()) {
+                uncomment()
+            } else {
+                comment()
+            }
+        }
 
-        override fun comment() {
+        fun comment() {
             var selectionEnd = codeEditText.selectionEnd
             val insetPosition = getProperWhitespaceAmount()
             var hasEverMatched = false
@@ -776,7 +820,7 @@ class CodeEditor : HVScrollView {
             codeEditText.setSelection(selectionEnd)
         }
 
-        override fun uncomment() {
+        fun uncomment() {
             var selectionEnd = codeEditText.selectionEnd
 
             replaceSelectedLines(Regex("(\\s*)($prefix\\s?)(.*)")) { matchResult ->
@@ -788,7 +832,7 @@ class CodeEditor : HVScrollView {
             codeEditText.setSelection(selectionEnd)
         }
 
-        override fun isCommented(): Boolean {
+        fun isCommented(): Boolean {
             var atLeastOneWithPrefix = false
             val allMatched = getCoveredLinesText().split("\n").all {
                 it.matches(Regex("\\s*")) || it
