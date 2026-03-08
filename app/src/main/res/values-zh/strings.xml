@@ -674,6 +674,9 @@
     <string name="text_jump_to_line">跳转到行</string>
     <string name="text_jump_to_line_end">跳转到行尾</string>
     <string name="text_jump_to_line_start">跳转到行首</string>
+    <string name="text_jump_to_error_line">跳转到出错行</string>
+    <string name="text_no_error_line">没有错误行</string>
+    <string name="text_stack_frame_info">堆栈 %1$d/%2$d: %3$s() 行 %4$d</string>
     <string name="text_jump_to_start">跳转到文件开始</string>
     <string name="text_keep_screen_on_when_in_foreground">前台时保持屏幕常亮</string>
     <string name="text_key_alias">别名</string>
