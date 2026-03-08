@@ -56,6 +56,7 @@ import org.autojs.autojs.ui.edit.completion.CodeCompletionBar.OnHintClickListene
 import org.autojs.autojs.ui.edit.debug.DebugBar
 import org.autojs.autojs.ui.edit.editor.CodeEditor
 import org.autojs.autojs.ui.edit.editor.CodeEditor.CheckedPatternSyntaxException
+import org.autojs.autojs.ui.edit.editor.CodeEditor.StackFrame
 import org.autojs.autojs.ui.edit.keyboard.FunctionsKeyboardHelper
 import org.autojs.autojs.ui.edit.keyboard.FunctionsKeyboardView
 import org.autojs.autojs.ui.edit.keyboard.FunctionsKeyboardView.ClickCallback
@@ -145,6 +146,9 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 val msg = intent.getStringExtra(EXTRA_EXCEPTION_MESSAGE)
                 val line = intent.getIntExtra(EXTRA_EXCEPTION_LINE_NUMBER, -1)
                 val col = intent.getIntExtra(EXTRA_EXCEPTION_COLUMN_NUMBER, 0)
+                // Parse stack trace and set stack frames for navigation
+                val stackFrames = parseStackTrace(msg, line, col)
+                editor.setStackFrames(stackFrames)
                 if (line >= 1) {
                     editor.jumpTo(line - 1, col)
                 }
@@ -752,6 +756,52 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     fun cleanBeforeExit() {
         mTmpSavedFileForRunning?.deleteOnExit()
+    }
+
+    /**
+     * Parse stack trace from error message
+     * Rhino stack trace format: "at funcName (/path/file.js:line:col)" or "at /path/file.js:line:col"
+     */
+    private fun parseStackTrace(msg: String?, mainLine: Int, mainCol: Int): ArrayList<CodeEditor.StackFrame> {
+        val frames = ArrayList<CodeEditor.StackFrame>()
+        if (msg == null) {
+            if (mainLine >= 1) {
+                frames.add(CodeEditor.StackFrame("<error>", mainLine - 1, mainCol))
+            }
+            return frames
+        }
+
+        // Add main error line first (from RhinoException)
+        if (mainLine >= 1) {
+            frames.add(CodeEditor.StackFrame("<error>", mainLine - 1, mainCol))
+        }
+
+        // Parse stack frames: "at funcName (/path/file.js:line:col)" or "at /path/file.js:line:col"
+        // Pattern matches both formats
+        val stackPattern = Regex("""at\s+(?:(\w+)\s+)?\([^)]*?:(\d+):(\d+)\)|at\s+[^:]+:(\d+):(\d+)""")
+        stackPattern.findAll(msg).forEach { match ->
+            val (funcName, lineStr, colStr) = when {
+                match.groupValues[1] != "" -> Triple(
+                    match.groupValues[1],
+                    match.groupValues[2],
+                    match.groupValues[3]
+                )
+                match.groupValues[4] != "" -> Triple(
+                    "<anonymous>",
+                    match.groupValues[4],
+                    match.groupValues[5]
+                )
+                else -> return@forEach
+            }
+            val line = lineStr.toIntOrNull()?.minus(1) ?: return@forEach
+            val col = colStr.toIntOrNull() ?: 0
+            // Skip duplicate entries
+            if (frames.none { it.lineNumber == line && it.columnNumber == col }) {
+                frames.add(CodeEditor.StackFrame(funcName, line, col))
+            }
+        }
+
+        return frames
     }
 
     companion object {

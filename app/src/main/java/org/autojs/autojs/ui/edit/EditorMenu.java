@@ -5,6 +5,7 @@ import android.content.Context;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.view.MenuItem;
+import android.widget.Toast;
 import androidx.annotation.Nullable;
 import com.afollestad.materialdialogs.MaterialDialog;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -16,6 +17,7 @@ import org.autojs.autojs.model.indices.ClassSearchingItem;
 import org.autojs.autojs.script.JavaScriptFileSource;
 import org.autojs.autojs.ui.common.NotAskAgainDialog;
 import org.autojs.autojs.ui.edit.editor.CodeEditor;
+import org.autojs.autojs.ui.edit.editor.CodeEditor.StackFrame;
 import org.autojs.autojs.ui.main.scripts.EditableFileInfoDialogManager;
 import org.autojs.autojs.ui.project.BuildActivity;
 import org.autojs.autojs.util.ClipboardUtils;
@@ -90,6 +92,10 @@ public class EditorMenu {
         int itemId = item.getItemId();
         if (itemId == R.id.action_jump_to_line) {
             jumpToLine();
+            return true;
+        }
+        if (itemId == R.id.action_jump_to_error_line) {
+            jumpToErrorLine();
             return true;
         }
         if (itemId == R.id.action_jump_to_start) {
@@ -309,6 +315,19 @@ public class EditorMenu {
         mEditor.getLineCount()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::showJumpDialog);
+    }
+
+    private void jumpToErrorLine() {
+        if (mEditor.hasErrorLine()) {
+            CodeEditor.StackFrame frame = mEditor.getNextStackFrame();
+            mEditor.jumpTo(frame.getLineNumber(), frame.getColumnNumber());
+            int total = mEditor.getStackFrameCount();
+            int current = mEditor.getCurrentStackIndex() + 1;
+            String info = mContext.getString(R.string.text_stack_frame_info, current, total, frame.getFunctionName(), frame.getLineNumber() + 1);
+            Toast.makeText(mContext, info, Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(mContext, R.string.text_no_error_line, Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void showJumpDialog(final int lineCount) {

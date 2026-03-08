@@ -520,6 +520,45 @@ class CodeEditor : HVScrollView {
         var enabled = true
     }
 
+    /**
+     * Stack frame for error navigation
+     * Used to store function name, line number and column number of each call frame
+     */
+    data class StackFrame(
+        @JvmField val functionName: String,
+        @JvmField val lineNumber: Int,
+        @JvmField val columnNumber: Int
+    )
+
+    private val mStackFrames = ArrayList<StackFrame>()
+    private var mCurrentStackIndex = -1
+    private var mHasErrorLine = false
+
+    fun setStackFrames(frames: ArrayList<StackFrame>) {
+        mStackFrames.clear()
+        mStackFrames.addAll(frames)
+        mCurrentStackIndex = -1
+        mHasErrorLine = frames.isNotEmpty()
+    }
+
+    fun getNextStackFrame(): StackFrame? {
+        if (mStackFrames.isEmpty()) return null
+        mCurrentStackIndex = (mCurrentStackIndex + 1) % mStackFrames.size
+        return mStackFrames[mCurrentStackIndex]
+    }
+
+    fun getStackFrameCount(): Int = mStackFrames.size
+
+    fun getCurrentStackIndex(): Int = mCurrentStackIndex
+
+    fun hasErrorLine(): Boolean = mHasErrorLine
+
+    fun clearErrorLine() {
+        mStackFrames.clear()
+        mCurrentStackIndex = -1
+        mHasErrorLine = false
+    }
+
     class CheckedPatternSyntaxException(cause: PatternSyntaxException?) : Exception(cause)
 
     interface BreakpointChangeListener {
