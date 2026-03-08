@@ -13,13 +13,14 @@ import androidx.recyclerview.widget.RecyclerView;
  */
 public class VerticalDividerItemDecoration extends FlexibleDividerDecoration {
 
-    private MarginProvider mMarginProvider;
+    private final MarginProvider mMarginProvider;
 
     protected VerticalDividerItemDecoration(Builder builder) {
         super(builder);
         mMarginProvider = builder.mMarginProvider;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     protected Rect getDividerBound(int position, RecyclerView parent, View child) {
         Rect bounds = new Rect(0, 0, 0, 0);
@@ -116,6 +117,7 @@ public class VerticalDividerItemDecoration extends FlexibleDividerDecoration {
         int dividerBottomMargin(int position, RecyclerView parent);
     }
 
+    @SuppressWarnings("unused")
     public static class Builder extends FlexibleDividerDecoration.Builder<Builder> {
 
         private MarginProvider mMarginProvider = new MarginProvider() {
