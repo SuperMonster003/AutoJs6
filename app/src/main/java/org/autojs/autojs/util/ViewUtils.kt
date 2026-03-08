@@ -76,6 +76,7 @@ import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs6.R
 import kotlin.math.abs
 import kotlin.math.floor
+import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
 import android.text.TextUtils as AndroidTextUtils
@@ -1686,6 +1687,83 @@ object ViewUtils {
                     }
                 }
             }
+        }
+    }
+
+    class DelayedLongPressTouchListener(context: Context, longPressDelayMs: Long) : View.OnTouchListener {
+
+        private val longPressDelayMs: Long
+        private val touchSlop: Int
+
+        private var downX = 0f
+        private var downY = 0f
+        private var tracking = false
+        private var longPressed = false
+        private var pendingLongPress: Runnable? = null
+
+        init {
+            this.longPressDelayMs = max(0, longPressDelayMs)
+            this.touchSlop = ViewConfiguration.get(context).getScaledTouchSlop()
+        }
+
+        override fun onTouch(v: View, event: MotionEvent): Boolean =
+            when (event.getActionMasked()) {
+                MotionEvent.ACTION_DOWN -> {
+                    downX = event.getX()
+                    downY = event.getY()
+                    tracking = true
+                    longPressed = false
+                    v.setPressed(true)
+
+                    cancelPending(v)
+                    pendingLongPress = Runnable {
+                        if (tracking && v.isPressed()) {
+                            longPressed = v.performLongClick()
+                        }
+                    }
+                    v.postDelayed(pendingLongPress, longPressDelayMs)
+                    true
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    if (tracking) {
+                        val dx = abs(event.getX() - downX)
+                        val dy = abs(event.getY() - downY)
+                        if (dx > touchSlop || dy > touchSlop) {
+                            cancelGesture(v)
+                        }
+                    }
+                    true
+                }
+                MotionEvent.ACTION_UP -> {
+                    cancelPending(v)
+                    v.setPressed(false)
+
+                    val shouldClick = tracking && !longPressed
+                    tracking = false
+                    if (shouldClick) {
+                        v.performClick()
+                    }
+                    true
+                }
+                MotionEvent.ACTION_CANCEL -> {
+                    cancelGesture(v)
+                    true
+                }
+                else -> false
+            }
+
+        private fun cancelPending(v: View) {
+            if (pendingLongPress != null) {
+                v.removeCallbacks(pendingLongPress)
+                pendingLongPress = null
+            }
+        }
+
+        private fun cancelGesture(v: View) {
+            cancelPending(v)
+            v.setPressed(false)
+            tracking = false
+            longPressed = false
         }
     }
 

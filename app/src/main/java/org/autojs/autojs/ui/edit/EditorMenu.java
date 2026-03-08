@@ -362,7 +362,7 @@ public class EditorMenu {
             return tryDoing(() -> mEditor.setText(""));
         }
         if (itemId == R.id.action_comment) {
-            return tryDoing(mEditor.commentHelper::handle);
+            return tryDoing(mEditor.commentHelper::toggle);
         }
         if (itemId == R.id.action_beautify) {
             return tryDoing(mEditorView::beautifyCode);

@@ -2566,7 +2566,17 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         completions[pos].let {
             when {
                 // @Inspired by 抠脚本人 (https://github.com/little-alei) on Jul 13, 2023.
-                it.insertText == "/" -> editor.commentHelper.handle()
+                it.insertText == "/" -> editor.commentHelper.toggle()
+                it.insertText == "=" -> editor.clear()
+                it.insertText == "-" -> editor.deleteLine()
+                it.insertText == "(" -> editor.moveCursor(-1)
+                it.insertText == ")" -> editor.moveCursor(1)
+                it.insertText == "[" -> editor.jumpToLineStart()
+                it.insertText == "]" -> editor.jumpToLineEnd()
+                it.insertText == "{" -> editor.jumpToStart()
+                it.insertText == "}" -> editor.jumpToEnd()
+                it.insertText == "<" -> editor.jumpToPrevLine()
+                it.insertText == ">" -> editor.jumpToNextLine()
                 it.url != null -> showManual(it.url, it.hint)
             }
         }
