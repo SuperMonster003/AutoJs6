@@ -19,6 +19,7 @@ import java.lang.ref.WeakReference;
  * Created by Stardust on Dec 9, 2017.
  * <a href="https://github.com/dss886/Android-FunctionsInputDetector">Android-FunctionsInputDetector</a>
  * Modified by JetBrains AI Assistant (GPT-5.2) as of Feb 11, 2026.
+ * Modified by JetBrains AI Assistant (GPT-5.3-Codex (xhigh)) as of Mar 8, 2026.
  */
 public class FunctionsKeyboardHelper implements BackPressedHandler {
 
@@ -97,7 +98,7 @@ public class FunctionsKeyboardHelper implements BackPressedHandler {
     }
 
     public FunctionsKeyboardHelper build() {
-        mActivityRef.get().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN |
+        mActivityRef.get().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN |
                                                         WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         hideSoftInput();
         return this;
