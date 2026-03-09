@@ -6,6 +6,7 @@ import androidx.core.app.NotificationCompat.BigTextStyle
 import androidx.core.app.NotificationCompat.Builder
 import androidx.core.app.NotificationManagerCompat
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
+import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
@@ -210,7 +211,7 @@ class Notice(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
         }
     }
 
-    companion object {
+    companion object : ArgumentGuards() {
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface

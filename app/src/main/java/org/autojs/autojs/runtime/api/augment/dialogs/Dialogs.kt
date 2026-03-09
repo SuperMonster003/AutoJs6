@@ -13,6 +13,7 @@ import org.autojs.autojs.core.ui.dialog.JsDialog
 import org.autojs.autojs.core.ui.dialog.JsDialogBuilder
 import org.autojs.autojs.core.ui.nativeview.NativeView
 import org.autojs.autojs.event.BackCompat.TAG_KEY_INSTALLED
+import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.rhino.ArgumentGuards.Companion.component1
 import org.autojs.autojs.rhino.ArgumentGuards.Companion.component2
 import org.autojs.autojs.rhino.ArgumentGuards.Companion.component3
@@ -65,7 +66,7 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         ::multiChoice.name,
     )
 
-    companion object {
+    companion object : ArgumentGuards() {
 
         private enum class PropertyConverter {
             COLOR_INT, BOOLEAN,

@@ -1,6 +1,7 @@
 package org.autojs.autojs.runtime.api.augment.shizuku
 
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
+import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.defineProp
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.AbstractShell
@@ -38,7 +39,7 @@ class Shizuku(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunt
 
     override fun invoke(vararg args: Any?): AbstractShell.Result = execCommand(scriptRuntime, args)
 
-    companion object {
+    companion object : ArgumentGuards() {
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface

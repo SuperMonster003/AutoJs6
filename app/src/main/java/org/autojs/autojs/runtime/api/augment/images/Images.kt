@@ -11,6 +11,7 @@ import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.core.image.ColorDetector
 import org.autojs.autojs.core.image.ImageWrapper
 import org.autojs.autojs.core.image.capture.ScreenCapturer
+import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsArray
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNumber
@@ -161,7 +162,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
     )
 
     @Suppress("MayBeConstant")
-    companion object {
+    companion object : ArgumentGuards() {
 
         private val TAG = Images::class.java.simpleName
 

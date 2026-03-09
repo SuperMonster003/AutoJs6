@@ -3,6 +3,7 @@ package org.autojs.autojs.runtime.api.augment.sqlite
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.core.database.Database
 import org.autojs.autojs.core.database.Database.DatabaseCallback
+import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsSanitize
@@ -31,7 +32,7 @@ class SQLite(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
         open(scriptRuntime, argList)
     }
 
-    companion object {
+    companion object : ArgumentGuards() {
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface

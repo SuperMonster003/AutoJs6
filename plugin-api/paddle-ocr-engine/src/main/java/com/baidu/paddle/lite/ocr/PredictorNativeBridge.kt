@@ -7,6 +7,8 @@ import android.os.Looper
 import android.util.Log
 import org.autojs.plugin.paddle.ocr.api.OcrOptions
 import org.autojs.plugin.paddle.ocr.api.OcrResult
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 /**
  * Native bridge based on com.baidu.paddle.lite.ocr.Predictor.
@@ -37,37 +39,28 @@ class PredictorNativeBridge : NativeBridge {
         // Predictor.init() may do heavy work and should not block main thread.
         // zh-CN: Predictor.init() 可能较耗时, 不应阻塞主线程.
         val ok = if (Looper.getMainLooper() == Looper.myLooper()) {
-            val lock = Object()
-            val completed = booleanArrayOf(false)
+            val latch = CountDownLatch(1)
             val initResult = booleanArrayOf(false)
 
             Thread {
                 initResult[0] = initInternal(context, profile)
-                synchronized(lock) {
-                    completed[0] = true
-                    lock.notifyAll()
-                }
+                latch.countDown()
             }.start()
 
-            val deadline = System.currentTimeMillis() + 60_000
             var interrupted = false
-            synchronized(lock) {
-                try {
-                    while (!completed[0]) {
-                        val remaining = deadline - System.currentTimeMillis()
-                        if (remaining <= 0) break
-                        lock.wait(remaining)
-                    }
-                } catch (_: InterruptedException) {
-                    Thread.currentThread().interrupt()
-                    interrupted = true
+            try {
+                val completed = latch.await(60, TimeUnit.SECONDS)
+                if (!completed) {
+                    interrupted = false
                 }
+            } catch (_: InterruptedException) {
+                Thread.currentThread().interrupt()
+                interrupted = true
             }
-            !interrupted && completed[0] && initResult[0]
+            !interrupted && latch.count == 0L && initResult[0]
         } else {
             initInternal(context, profile)
         }
-
         if (!ok) {
             throw IllegalStateException(context.getString(R.string.error_failed_to_initialize_paddle_ocr_predictor))
         }

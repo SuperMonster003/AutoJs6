@@ -1,6 +1,7 @@
 package org.autojs.autojs.runtime.api.augment.global
 
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
+import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.util.Util
@@ -13,7 +14,7 @@ class Legacy(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         ::isObjectSpecies.name,
     )
 
-    companion object {
+    companion object : ArgumentGuards() {
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface

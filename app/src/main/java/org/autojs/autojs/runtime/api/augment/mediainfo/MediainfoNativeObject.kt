@@ -2,6 +2,7 @@ package org.autojs.autojs.runtime.api.augment.mediainfo
 
 import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoStandardFunctionInterface
+import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.rhino.ArgumentGuards.Companion.ensureArgumentsIsEmpty
@@ -98,7 +99,7 @@ class MediainfoNativeObject(
 
     override fun toStringReadable() = toStringRhino(this)
 
-    companion object {
+    companion object : ArgumentGuards() {
 
         @JvmStatic
         @RhinoStandardFunctionInterface

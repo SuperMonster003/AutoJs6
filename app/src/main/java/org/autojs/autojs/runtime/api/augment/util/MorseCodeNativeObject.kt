@@ -3,9 +3,9 @@ package org.autojs.autojs.runtime.api.augment.util
 import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoFunctionObjectBody
 import org.autojs.autojs.annotation.RhinoStandardFunctionInterface
+import org.autojs.autojs.rhino.ArgumentGuards
+import org.autojs.autojs.rhino.ArgumentGuards.Companion.component1
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
-import org.autojs.autojs.rhino.ArgumentGuards.Companion.ensureArgumentsAtMost
-import org.autojs.autojs.rhino.ArgumentGuards.Companion.ensureArgumentsIsEmpty
 import org.autojs.autojs.rhino.extension.IterableExtensions.toNativeArray
 import org.autojs.autojs.runtime.api.StringReadable
 import org.autojs.autojs.util.RhinoUtils
@@ -37,7 +37,7 @@ class MorseCodeNativeObject(val parser: MorseCodeParser) : NativeObject(), Strin
     @RhinoFunctionObjectBody
     override fun toStringReadable() = toStringRhino(this)
 
-    companion object {
+    companion object : ArgumentGuards() {
 
         @JvmStatic
         @RhinoStandardFunctionInterface
@@ -77,7 +77,5 @@ class MorseCodeNativeObject(val parser: MorseCodeParser) : NativeObject(), Strin
             val (delay) = it
             (thisObj as MorseCodeNativeObject).parser.vibrate(if (!delay.isJsNullish()) Context.toNumber(delay) else 0.0)
         }
-
     }
-
 }

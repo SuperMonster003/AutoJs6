@@ -2,15 +2,14 @@ package org.autojs.autojs.ui.edit.keyboard
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.content.res.Configuration
+import androidx.core.content.edit
 import org.autojs.autojs.core.pref.Language
 import org.autojs.autojs.util.LocaleUtils
+import org.autojs.autojs.util.StringUtils
 import org.autojs.autojs6.R
 import org.json.JSONArray
 import org.json.JSONObject
-import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
-import androidx.core.content.edit
 
 /**
  * Symbol profiles store for editor symbol bar.
@@ -235,7 +234,7 @@ object SymbolsConfigStore {
 
             Language.values().forEach { lang ->
                 if (lang == Language.AUTO) return@forEach
-                val s = getStringForLocale(context, lang.locale, R.string.text_symbols_profile_default_name)
+                val s = StringUtils.getStringForLocale(context, lang.locale, R.string.text_symbols_profile_default_name)
                     .trim()
                 if (s.isNotBlank()) add(s)
             }
@@ -251,13 +250,6 @@ object SymbolsConfigStore {
         val n = name?.trim().orEmpty()
         if (n.isBlank()) return false
         return getAllDefaultNameAliases(context).any { it == n }
-    }
-
-    private fun getStringForLocale(context: Context, locale: Locale, resId: Int): String {
-        val cfg = Configuration(context.resources.configuration)
-        cfg.setLocale(locale)
-        val localized = context.createConfigurationContext(cfg)
-        return localized.resources.getString(resId)
     }
 
     private fun readRootOrCreate(context: Context): JSONObject {

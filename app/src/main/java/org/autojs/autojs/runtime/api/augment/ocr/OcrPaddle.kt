@@ -9,6 +9,7 @@ import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.apkbuilder.ApkBuilder
 import org.autojs.autojs.core.image.ImageWrapper
 import org.autojs.autojs.core.plugin.ocr.PaddleOcrPluginHost
+import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.OcrResult
@@ -42,7 +43,7 @@ class OcrPaddle(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRu
 
     override fun invoke(vararg args: Any?): NativeArray = recognizeText(scriptRuntime, args)
 
-    companion object {
+    companion object : ArgumentGuards() {
 
         private const val DEFAULT_CPU_THREAD_NUM = 4
 

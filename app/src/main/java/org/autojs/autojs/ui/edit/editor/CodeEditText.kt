@@ -719,9 +719,6 @@ class CodeEditText : AppCompatEditText {
         // zh-CN: 当用户触摸文本区域 (非行号区域) 时尽早通知外层.
         if (event.action == MotionEvent.ACTION_DOWN && event.x >= paddingLeft) {
             onUserTouchInTextArea?.invoke()
-            // Best-effort IME wake-up for devices/ROMs where tap-to-show may be missed.
-            // zh-CN: 兜底唤起输入法, 兼容部分设备/ROM 点按后未自动弹出软键盘的情况.
-            requestSoftInputIfEditable()
         }
 
         // 如果行号区域被按下
@@ -752,20 +749,6 @@ class CodeEditText : AppCompatEditText {
             return true
         }
         return super.onTouchEvent(event)
-    }
-
-    private fun requestSoftInputIfEditable() {
-        if (mReadOnly || !showSoftInputOnFocus) return
-        if (!isFocusable || !isFocusableInTouchMode) return
-
-        post {
-            if (mReadOnly || !showSoftInputOnFocus) return@post
-            if (!hasFocus()) {
-                requestFocus()
-            }
-            val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager ?: return@post
-            imm.showSoftInput(this@CodeEditText, InputMethodManager.SHOW_IMPLICIT)
-        }
     }
 
     fun removeBreakpoint(line: Int): Boolean {
@@ -807,9 +790,6 @@ class CodeEditText : AppCompatEditText {
     }
 
     companion object {
-
         const val TAG = "CodeEditText"
-
     }
-
 }

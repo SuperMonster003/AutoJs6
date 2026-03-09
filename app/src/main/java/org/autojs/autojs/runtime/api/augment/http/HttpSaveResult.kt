@@ -1,7 +1,7 @@
 package org.autojs.autojs.runtime.api.augment.http
 
 import org.autojs.autojs.annotation.RhinoStandardFunctionInterface
-import org.autojs.autojs.rhino.ArgumentGuards.Companion.ensureArgumentsIsEmpty
+import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.runtime.api.StringReadable
 import org.autojs.autojs.runtime.api.augment.converter.core.Bytes
 import org.autojs.autojs.util.RhinoUtils
@@ -37,7 +37,7 @@ class HttpSaveResult @JvmOverloads constructor(
         "}",
     ).joinToString("\n")
 
-    companion object {
+    companion object : ArgumentGuards() {
 
         const val RESULT_OK = 0
 
