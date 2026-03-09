@@ -6,6 +6,8 @@
 *.log
 *.ffs_db
 *.patch
+*.salive
+.tmp_*.txt
 
 .DS_Store
 .externalNativeBuild

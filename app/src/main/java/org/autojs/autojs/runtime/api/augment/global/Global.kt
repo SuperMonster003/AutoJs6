@@ -5,6 +5,7 @@ import io.github.g00fy2.versioncompare.Version
 import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.core.automator.UiObject
+import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.rhino.ArgumentGuards.Companion.component1
 import org.autojs.autojs.rhino.ArgumentGuards.Companion.component2
 import org.autojs.autojs.rhino.ArgumentGuards.Companion.component3
@@ -117,7 +118,7 @@ class Global(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
         "i18n" to Supplier { scriptRuntime.js_mod_i18n },
     )
 
-    companion object {
+    companion object : ArgumentGuards() {
 
         @Suppress("FunctionName")
         @JvmStatic

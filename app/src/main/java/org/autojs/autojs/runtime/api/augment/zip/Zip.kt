@@ -2,6 +2,7 @@ package org.autojs.autojs.runtime.api.augment.zip
 
 import okhttp3.internal.closeQuietly
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
+import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.rhino.ArgumentGuards.Companion.component1
@@ -34,7 +35,7 @@ class Zip(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime)
         open(scriptRuntime, arrayOf(zipPath))
     }
 
-    companion object {
+    companion object : ArgumentGuards() {
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
@@ -84,7 +85,7 @@ class Zip(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime)
         fun zipFiles(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ZipNativeObject = ensureArgumentsLengthInRange(args, 2..3) { argList ->
             var (filePathList, destZipPath, options) = argList
             require(filePathList is Iterable<*>) {
-                "Argument \"filePathList\" ${filePathList.jsBrief()} for zip.${Companion::zipFiles.name} must be an Iterable"
+                "Argument \"filePathList\" ${filePathList.jsBrief()} for zip.zipFiles must be an Iterable"
             }
             val fileList = mutableListOf<File>()
             filePathList.forEach { filePath ->

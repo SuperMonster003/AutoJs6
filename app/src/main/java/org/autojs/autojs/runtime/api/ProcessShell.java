@@ -68,7 +68,7 @@ public class ProcessShell extends AbstractShell {
     @Override
     public void exit() {
         if (mProcess != null) {
-            Log.d(TAG, "exit: pid = " + ProcessUtils.getProcessPid(mProcess));
+            // Log.d(TAG, "exit: pid = " + ProcessUtils.getProcessPid(mProcess));
             mProcess.destroy();
             mProcess = null;
         }
@@ -202,11 +202,11 @@ public class ProcessShell extends AbstractShell {
             }
             os.writeBytes(COMMAND_EXIT);
             os.flush();
-            Log.d(TAG, "pid = " + ProcessUtils.getProcessPid(process));
+            // Log.d(TAG, "pid = " + ProcessUtils.getProcessPid(process));
             commandResult = new Result(process.waitFor(),
                     readAll(process.getInputStream()),
                     readAll(process.getErrorStream()));
-            Log.d(TAG, commandResult.toString());
+            // Log.d(TAG, commandResult.toString());
         } catch (Exception e) {
             // @Overwrite by SuperMonster003 on Apr 26, 2022.
             //  ! Try writing exception into commandResult and make it visible to AutoJs6 console.

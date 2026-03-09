@@ -13,15 +13,16 @@ import net.lingala.zip4j.model.enums.CompressionMethod
 import net.lingala.zip4j.model.enums.EncryptionMethod
 import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoStandardFunctionInterface
+import org.autojs.autojs.rhino.ArgumentGuards
+import org.autojs.autojs.rhino.ArgumentGuards.Companion.component1
+import org.autojs.autojs.rhino.ArgumentGuards.Companion.component2
+import org.autojs.autojs.rhino.ArgumentGuards.Companion.component3
+import org.autojs.autojs.rhino.ArgumentGuards.Companion.component4
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNumber
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
-import org.autojs.autojs.rhino.ArgumentGuards.Companion.ensureArgumentsIsEmpty
-import org.autojs.autojs.rhino.ArgumentGuards.Companion.ensureArgumentsLengthInRange
-import org.autojs.autojs.rhino.ArgumentGuards.Companion.ensureArgumentsOnlyOne
 import org.autojs.autojs.rhino.extension.IterableExtensions.toNativeArray
 import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
-import org.autojs.autojs.util.StringUtils.toFile
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.StringReadable
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
@@ -36,6 +37,7 @@ import org.autojs.autojs.util.RhinoUtils.coerceStringUppercase
 import org.autojs.autojs.util.RhinoUtils.newBaseFunction
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import org.autojs.autojs.util.RhinoUtils.undefined
+import org.autojs.autojs.util.StringUtils.toFile
 import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Function
@@ -330,7 +332,7 @@ class ZipNativeObject(
         else -> SymbolicLinkAction.valueOf(coerceStringUppercase(this))
     }
 
-    companion object {
+    companion object : ArgumentGuards() {
 
         @JvmStatic
         @RhinoStandardFunctionInterface
@@ -375,7 +377,7 @@ class ZipNativeObject(
             val zip = thisObj as ZipNativeObject
             val (filePath, options) = argList
             val file = zip.scriptRuntime.files.nonNullPath(coerceString(filePath)).toFile()
-            val zipParameters = zip.buildZipParameters(Companion::addFile.name, options)
+            val zipParameters = zip.buildZipParameters("addFile", options)
             undefined { zip.zipFile.addFile(file, zipParameters) }
         }
 
@@ -385,13 +387,13 @@ class ZipNativeObject(
             val zip = thisObj as ZipNativeObject
             val (filePathList, options) = argList
             require(filePathList is Iterable<*>) {
-                "Argument \"filePathList\" ${filePathList.jsBrief()} for ${ZipNativeObject::class.java.simpleName}#${Companion::addFiles.name} must be an Iterable"
+                "Argument \"filePathList\" ${filePathList.jsBrief()} for ${ZipNativeObject::class.java.simpleName}#${"addFiles"} must be an Iterable"
             }
             val fileList = mutableListOf<File>()
             filePathList.forEach { rawFilePath ->
                 fileList.add(zip.scriptRuntime.files.nonNullPath(coerceString(rawFilePath)).toFile())
             }
-            val zipParameters = zip.buildZipParameters(Companion::addFiles.name, options)
+            val zipParameters = zip.buildZipParameters("addFiles", options)
             undefined { zip.zipFile.addFiles(fileList, zipParameters) }
         }
 
@@ -401,7 +403,7 @@ class ZipNativeObject(
             val zip = thisObj as ZipNativeObject
             val (filePath, options) = argList
             val file = zip.scriptRuntime.files.nonNullPath(coerceString(filePath)).toFile()
-            val zipParameters = zip.buildZipParameters(Companion::addFolder.name, options)
+            val zipParameters = zip.buildZipParameters("addFolder", options)
             undefined { zip.zipFile.addFolder(file, zipParameters) }
         }
 
@@ -411,7 +413,7 @@ class ZipNativeObject(
             val zip = thisObj as ZipNativeObject
             val (rawDestPath, options) = argList
             val destPath = zip.scriptRuntime.files.nonNullPath(coerceString(rawDestPath))
-            val unzipParameters = zip.buildUnzipParameters(Companion::extractAll.name, options)
+            val unzipParameters = zip.buildUnzipParameters("extractAll", options)
             undefined { zip.zipFile.extractAll(destPath, unzipParameters) }
         }
 
@@ -423,7 +425,7 @@ class ZipNativeObject(
             val zipFilePath = zip.scriptRuntime.files.nonNullPath(coerceString(rawZipFilePath))
             val destPath = zip.scriptRuntime.files.nonNullPath(coerceString(rawDestPath))
             val newFileName = rawNewFileName.takeUnless { it.isJsNullish() }?.let { coerceString(it) }
-            val unzipParameters = zip.buildUnzipParameters(Companion::extractFile.name, options)
+            val unzipParameters = zip.buildUnzipParameters("extractFile", options)
             undefined { zip.zipFile.extractFile(zipFilePath, destPath, newFileName, unzipParameters) }
         }
 

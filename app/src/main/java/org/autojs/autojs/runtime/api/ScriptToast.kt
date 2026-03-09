@@ -7,6 +7,8 @@ import android.os.Looper
 import android.widget.Toast
 import org.autojs.autojs.runtime.ScriptRuntime
 import java.util.ArrayDeque
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 /**
  * Toast global queue manager.
@@ -25,6 +27,7 @@ import java.util.ArrayDeque
 object ScriptToast {
 
     private const val MAX_GLOBAL_QUEUE_SIZE = 32
+    private const val ENQUEUE_SYNC_WAIT_MS = 1_000L
 
     private val mainHandler = Handler(Looper.getMainLooper())
     private val queue = ArrayDeque<ToastTask>(MAX_GLOBAL_QUEUE_SIZE)
@@ -52,7 +55,18 @@ object ScriptToast {
         // Must be called on the main thread.
         // zh-CN: 必须在主线程调用.
         if (Looper.myLooper() != Looper.getMainLooper()) {
-            mainHandler.post { enqueueToast(context, scriptRuntime, message, isLong) }
+            val appContext = context.applicationContext
+            val latch = CountDownLatch(1)
+            mainHandler.postAtFrontOfQueue {
+                try {
+                    enqueueToast(appContext, scriptRuntime, message, isLong)
+                } finally {
+                    latch.countDown()
+                }
+            }
+            runCatching {
+                latch.await(ENQUEUE_SYNC_WAIT_MS, TimeUnit.MILLISECONDS)
+            }
             return
         }
 

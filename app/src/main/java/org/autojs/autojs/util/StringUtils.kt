@@ -1,7 +1,9 @@
 package org.autojs.autojs.util
 
+import android.content.Context
 import android.content.res.Configuration
 import android.text.TextUtils
+import androidx.annotation.StringRes
 import androidx.core.net.toUri
 import com.ibm.icu.text.CharsetDetector
 import com.ibm.icu.text.CharsetMatch
@@ -370,6 +372,14 @@ object StringUtils {
 
         val noTail = this.trimEnd('/')
         return if (isDir) "$noTail/" else noTail
+    }
+
+    @JvmStatic
+    fun getStringForLocale(context: Context, locale: Locale, @StringRes resId: Int): String {
+        val cfg = Configuration(context.resources.configuration)
+        cfg.setLocale(locale)
+        val localized = context.createConfigurationContext(cfg)
+        return localized.resources.getString(resId)
     }
 
     class CharsetMatchWrapper(private val charsetMatch: CharsetMatch?) {

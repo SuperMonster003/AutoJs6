@@ -2,13 +2,11 @@ package org.autojs.autojs.theme.app
 
 import android.content.Context
 import android.content.Intent
-import android.content.res.Configuration
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewAnimationUtils
-import androidx.annotation.StringRes
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.DialogFragment
@@ -47,6 +45,7 @@ import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.main.drawer.DrawerFragment.Companion.Event.ThemeColorLayoutSwitchedEvent
 import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.IntentUtils.startSafely
+import org.autojs.autojs.util.StringUtils
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.onceGlobalLayout
 import org.autojs.autojs.util.ViewUtils.setColorsByColorLuminance
@@ -55,7 +54,7 @@ import org.autojs.autojs.util.ViewUtils.setNavigationIconColorByColorLuminance
 import org.autojs.autojs.util.ViewUtils.setTitlesTextColorByColorLuminance
 import org.autojs.autojs6.R
 import org.greenrobot.eventbus.EventBus
-import java.util.*
+import java.util.Locale
 import kotlin.math.absoluteValue
 import kotlin.math.hypot
 import kotlin.properties.Delegates
@@ -537,7 +536,7 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
                 val normalizedQuery = normalizeForMatching(searchTerm)
                 colorItems.filter { colorItem ->
                     val colorHex = String.format("#%06X", 0xFFFFFF and getColor(colorItem.colorRes))
-                    val enName by lazy { getLocalizedString(this@ColorSelectBaseActivity, colorItem.nameRes, Locale.forLanguageTag("en")) }
+                    val enName by lazy { StringUtils.getStringForLocale(this@ColorSelectBaseActivity, Locale.forLanguageTag("en"), colorItem.nameRes) }
                     val localizedName by lazy { getString(colorItem.nameRes) }
                     when {
                         searchTerm.startsWith("#") -> {
@@ -575,12 +574,6 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
         // 去掉所有非字母或数字字符 (例如空格/括号/斜线等).
         // \p{L} 表示任何语言的字母字符, \p{N} 表示数字.
         return input.replace("[^\\p{L}\\p{N}]+".toRegex(), "")
-    }
-
-    private fun getLocalizedString(context: Context, @StringRes resId: Int, locale: Locale): String {
-        val config = Configuration(context.resources.configuration).apply { setLocale(locale) }
-        val localizedContext = context.createConfigurationContext(config)
-        return localizedContext.getString(resId)
     }
 
     private fun isRegexSearch(query: String?): Boolean {

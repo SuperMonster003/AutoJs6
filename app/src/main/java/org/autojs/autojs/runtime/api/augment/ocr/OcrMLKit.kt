@@ -3,6 +3,7 @@ package org.autojs.autojs.runtime.api.augment.ocr
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.apkbuilder.ApkBuilder
 import org.autojs.autojs.core.image.ImageWrapper
+import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.OcrResult
 import org.autojs.autojs.runtime.api.augment.Augmentable
@@ -23,7 +24,7 @@ class OcrMLKit(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRun
     override fun invoke(vararg args: Any?): NativeArray = recognizeText(scriptRuntime, args)
 
     @Suppress("unused")
-    companion object {
+    companion object : ArgumentGuards() {
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface

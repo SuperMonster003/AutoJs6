@@ -1,6 +1,7 @@
 package org.autojs.autojs.runtime.api.augment.mediainfo
 
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
+import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.Invokable
@@ -17,7 +18,7 @@ class Mediainfo(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRu
         read(scriptRuntime, arrayOf(path))
     }
 
-    companion object {
+    companion object : ArgumentGuards() {
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
