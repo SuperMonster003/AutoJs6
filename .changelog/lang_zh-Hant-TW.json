@@ -129,7 +129,7 @@
       "improvement": [
         "精簡打包應用模板 APK 檔案大小",
         "應用 (以及打包應用) 支援更多許可權 _[`issue #338`](http://issues.autojs6.com/338)_",
-        "打包頁面支援 Pinyin 庫選項",
+        "打包應用配置頁面支援 Pinyin 庫選項",
         "打包應用主活動頁面最佳化狀態列背景及文字顏色",
         "打包應用設定頁面增加訪問所有檔案和傳送通知等特殊許可權開關 _[`issue #354`](http://issues.autojs6.com/354)_",
         "控制元件的文字及圖示根據主題色亮度值自動切換合適的顏色",
@@ -181,7 +181,7 @@
         "UiObjectCollection 例項缺失自身方法及屬性的問題"
       ],
       "improvement": [
-        "打包頁面支援簽名配置/金鑰庫管理/許可權設定 (by [luckyloogn](https://github.com/luckyloogn)) _[`pr #286`](http://pr.autojs6.com/286)_",
+        "打包應用配置頁面支援簽名配置/金鑰庫管理/許可權設定 (by [luckyloogn](https://github.com/luckyloogn)) _[`pr #286`](http://pr.autojs6.com/286)_",
         "提升浮動視窗當前包名及當前活動名的識別準確性 (優先順序: Shizuku > Root > A11Y)",
         "提升 currentPackage/currentActivity 識別準確性 (優先順序: Shizuku > Root > A11Y)",
         "恢復日誌活動視窗單個條目文字內容的雙擊或長按選擇功能 _[`issue #280`](http://issues.autojs6.com/280)_",
@@ -264,7 +264,7 @@
         "打包應用無法正常使用 opencc 模組的問題"
       ],
       "improvement": [
-        "打包頁面中 \"不可用 ABI\" 控制元件的點選提示體驗",
+        "打包應用配置頁面中 \"不可用 ABI\" 控制元件的點選提示體驗",
         "支援使用 Shizuku 控制 \"指標位置\" 顯示開關",
         "支援使用 Shizuku 控制 \"投影媒體\" 及 \"修改安全設定\" 許可權開關",
         "automator.gestureAsync/gesturesAsync 支援回撥函式引數",
@@ -324,12 +324,12 @@
       "feature": [
         "opencc 模組 (參閱 專案文件 > [中文轉換](https://docs.autojs6.com/#/opencc)) (Ref to [LZX284](https://github.com/SuperMonster003/AutoJs6/pull/187/files#diff-8cff73265af19c059547b76aca8882cbaa3209291406f52df1dafbbc78e80c46R268))",
         "UiSelector 增加 [plus](https://docs.autojs6.com/#/uiObjectType?id=m-plus) 及 [append](https://docs.autojs6.com/#/uiObjectType?id=m-append) 方法 _[`issue #115`](http://issues.autojs6.com/115)_",
-        "打包應用頁面增加 ABI 及庫的篩選支援 (Ref to [AutoX](https://github.com/kkevsekk1/AutoX)) _[`issue #189`](http://issues.autojs6.com/189)_"
+        "打包應用配置頁面增加 ABI 及庫的篩選支援 (Ref to [AutoX](https://github.com/kkevsekk1/AutoX)) _[`issue #189`](http://issues.autojs6.com/189)_"
       ],
       "fix": [
         "打包應用檔案體積異常龐大的問題 (Ref to [AutoX](https://github.com/kkevsekk1/AutoX) / [LZX284](https://github.com/SuperMonster003/AutoJs6/pull/187/files#diff-d932ac49867d4610f8eeb21b59306e8e923d016cbca192b254caebd829198856R61)) _[`issue #176`](http://issues.autojs6.com/176)_",
         "打包應用無法顯示並列印部分異常訊息的問題",
-        "打包應用頁面選擇應用圖示後可能顯示空圖示的問題",
+        "打包應用配置頁面選擇應用圖示後可能顯示空圖示的問題",
         "打包應用包含 MLKit Google OCR 庫時可能出現的上下文未初始化異常",
         "ocr.recognizeText/detect 方法無效的問題",
         "部分文字 (如日誌頁面) 顯示語言與應用設定語言可能不相符的問題",
@@ -353,9 +353,9 @@
       "improvement": [
         "程式碼編輯器模組函式快捷面板適配夜間模式",
         "打包應用啟動頁面適配夜間模式並調整應用圖示佈局",
-        "打包應用頁面支援使用軟鍵盤 ENTER 鍵實現游標跳轉",
-        "打包應用頁面支援點選 ABI 標題及庫標題切換全選狀態",
-        "打包應用頁面預設 ABI 智慧選擇並增加不可選擇項的引導提示",
+        "打包應用配置頁面支援使用軟鍵盤 ENTER 鍵實現游標跳轉",
+        "打包應用配置頁面支援點選 ABI 標題及庫標題切換全選狀態",
+        "打包應用配置頁面預設 ABI 智慧選擇並增加不可選擇項的引導提示",
         "檔案管理器根據檔案及資料夾的型別及特徵調整選單項的顯示情況",
         "檔案管理器資料夾右鍵選單增加打包應用選項",
         "無障礙服務啟用但功能異常時在 AutoJs6 主頁抽屜開關處將體現異常狀態",

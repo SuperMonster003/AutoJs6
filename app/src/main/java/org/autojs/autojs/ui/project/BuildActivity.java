@@ -6,20 +6,27 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.text.util.Linkify;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.Spinner;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
@@ -42,6 +49,7 @@ import org.autojs.autojs.external.fileprovider.AppFileProvider;
 import org.autojs.autojs.model.explorer.Explorers;
 import org.autojs.autojs.model.script.ScriptFile;
 import org.autojs.autojs.pio.PFiles;
+import org.autojs.autojs.project.LaunchConfig;
 import org.autojs.autojs.project.ProjectConfig;
 import org.autojs.autojs.runtime.api.AppUtils;
 import org.autojs.autojs.runtime.api.AppUtils.Companion.SimpleVersionInfo;
@@ -56,6 +64,7 @@ import org.autojs.autojs.ui.main.scripts.ApkInfoDialogManager;
 import org.autojs.autojs.ui.shortcut.AppsIconSelectActivity;
 import org.autojs.autojs.ui.viewmodel.KeyStoreViewModel;
 import org.autojs.autojs.ui.widget.RoundCheckboxWithText;
+import org.autojs.autojs.ui.widget.ToolbarMenuItem;
 import org.autojs.autojs.util.AndroidUtils;
 import org.autojs.autojs.util.AndroidUtils.Abi;
 import org.autojs.autojs.util.BitmapUtils;
@@ -70,16 +79,24 @@ import org.autojs.autojs.util.WorkingDirectoryUtils;
 import org.autojs.autojs6.R;
 import org.autojs.autojs6.databinding.ActivityBuildBinding;
 import org.autojs.autojs6.databinding.DialogBuildProgressBinding;
+import org.autojs.autojs6.databinding.FragmentSymbolsToolbarBinding;
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -98,14 +115,18 @@ import static org.autojs.autojs.util.StringUtils.key;
 /**
  * Created by Stardust on Oct 22, 2017.
  * Modified by SuperMonster003 as of Jan 6, 2026.
+ * Modified by JetBrains AI Assistant (GPT-5.3-Codex (xhigh)) as of Mar 9, 2026.
  *
  * @noinspection ResultOfMethodCallIgnored, unused
  */
 public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCallback {
 
     private static final int REQUEST_CODE = 44401;
+    private static final int REQ_EXPORT_JSON = 44402;
+    private static final int REQ_IMPORT_JSON = 44403;
     public static final String EXTRA_SOURCE = BuildActivity.class.getName() + ".extra_source_file";
     private static final String LOG_TAG = "BuildActivity";
+    private static final int MAX_BUILD_UNDO_STACK = 120;
     private static final Pattern REGEX_PACKAGE_NAME = Pattern.compile("^([A-Za-z][A-Za-z\\d_]*\\.)+([A-Za-z][A-Za-z\\d_]*)$");
 
     private static final ArrayList<String> SUPPORTED_ABIS = new ArrayList<>() {{
@@ -229,6 +250,11 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     TextInputLayout mVersionCodeParentView;
     ImageView mIconView;
     LinearLayout mAppConfigView;
+    CheckBox mLaunchLogsVisibleView;
+    CheckBox mLaunchSplashVisibleView;
+    CheckBox mLaunchLauncherVisibleView;
+    CheckBox mLaunchRunOnBootView;
+    EditText mLaunchSlugView;
 
     @Nullable
     private ProjectConfig mProjectConfig;
@@ -272,6 +298,39 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     private Spinner mSignatureSchemesView;
     private Spinner mVerifiedKeyStoresView;
     private FlexboxLayout mFlexboxPermissionsView;
+
+    private Spinner mBuildProfileSpinner;
+    private ImageView mIvBuildProfileNew;
+    private ImageView mIvBuildProfileDelete;
+    private ImageView mIvBuildProfileMore;
+    private ToolbarMenuItem mActionBuildUndo;
+    private ToolbarMenuItem mActionBuildRedo;
+    private ToolbarMenuItem mActionBuildSave;
+
+    private final ArrayList<ProfileEntry> mBuildProfileEntries = new ArrayList<>();
+    private String mCurrentBuildProfileName = BuildConfigStore.PROFILE_DEFAULT_ID;
+    @NonNull
+    private BuildFieldPolicy mCurrentBuildFieldPolicy = BuildFieldPolicy.defaultPolicy();
+    @NonNull
+    private BuildFieldPolicy mProjectJsonFieldPolicyInSession = BuildFieldPolicy.projectJsonPolicy();
+    @Nullable
+    private BuildUiState mAutoBuildUiState;
+
+    private final ArrayDeque<BuildUiState> mUndoStateStack = new ArrayDeque<>();
+    private final ArrayDeque<BuildUiState> mRedoStateStack = new ArrayDeque<>();
+    @Nullable
+    private BuildUiState mBaselineBuildUiState;
+    @Nullable
+    private BuildUiState mTrackedBuildUiState;
+
+    private boolean mBuildConfigSaveSticky = false;
+    private boolean mBuildProfilesInitialized = false;
+    private boolean mApplyingBuildUiState = false;
+    private boolean mSuppressBuildProfileSpinnerCallback = false;
+    private boolean mSuppressBuildStateTracking = false;
+    private boolean mDeferBuildProfilesInitUntilSourceResolved = false;
+    @Nullable
+    private String mPendingKeyStorePathForStateApply;
 
     private final ArrayList<String> mInvalidAbis = new ArrayList<>();
     private final ArrayList<String> mUnavailableAbis = new ArrayList<>();
@@ -349,6 +408,18 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         mIconView.setOnClickListener(v -> selectIcon());
 
         mAppConfigView = binding.appConfig;
+        mLaunchLogsVisibleView = binding.checkboxLaunchLogsVisible;
+        mLaunchSplashVisibleView = binding.checkboxLaunchSplashVisible;
+        mLaunchLauncherVisibleView = binding.checkboxLaunchLauncherVisible;
+        mLaunchRunOnBootView = binding.checkboxLaunchRunOnBoot;
+        mLaunchSlugView = binding.launchSlug;
+
+        LaunchConfig defaultLaunchConfig = new LaunchConfig();
+        mLaunchLogsVisibleView.setChecked(defaultLaunchConfig.isLogsVisible());
+        mLaunchSplashVisibleView.setChecked(defaultLaunchConfig.isSplashVisible());
+        mLaunchLauncherVisibleView.setChecked(defaultLaunchConfig.isLauncherVisible());
+        mLaunchRunOnBootView.setChecked(defaultLaunchConfig.isRunOnBoot());
+        mLaunchSlugView.setText(defaultLaunchConfig.getSlug());
 
         mFlexboxAbisView = binding.flexboxAbis;
         initAbisChildren();
@@ -362,6 +433,15 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         mSignatureSchemesView = binding.spinnerSignatureSchemes;
         mVerifiedKeyStoresView = binding.spinnerVerifiedKeyStores;
         mFlexboxPermissionsView = binding.flexboxPermissions;
+
+        mBuildProfileSpinner = binding.buildProfileSpinner;
+        mIvBuildProfileNew = binding.ivBuildProfileNew;
+        mIvBuildProfileDelete = binding.ivBuildProfileDelete;
+        mIvBuildProfileMore = binding.ivBuildProfileMore;
+        FragmentSymbolsToolbarBinding toolbarBinding = FragmentSymbolsToolbarBinding.inflate(getLayoutInflater(), binding.toolbarMenu, true);
+        mActionBuildUndo = toolbarBinding.actionUndo;
+        mActionBuildRedo = toolbarBinding.actionRedo;
+        mActionBuildSave = toolbarBinding.actionSave;
 
         binding.fab.setOnClickListener(v -> buildApk());
         ViewUtils.excludeFloatingActionButtonFromBottomNavigationBar(binding.fab);
@@ -379,18 +459,44 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         binding.manageKeyStore.setOnClickListener(v -> ManageKeyStoreActivity.Companion.startActivity(this));
         binding.textPermissions.setOnClickListener(v -> toggleAllFlexboxChildren(mFlexboxPermissionsView));
 
+        mActionBuildUndo.setOnClickListener(v -> performBuildConfigUndo());
+        mActionBuildRedo.setOnClickListener(v -> performBuildConfigRedo());
+        mActionBuildSave.setOnClickListener(v -> saveCurrentBuildProfile());
+        mActionBuildSave.setOnLongClickListener(v -> {
+            promptBuildFieldPolicyDialog(getCurrentBuildFieldPolicy(), false, selectedPolicy ->
+                    promptCreateBuildProfileByName(captureCurrentBuildUiState(), selectedPolicy, null));
+            return true;
+        });
+
+        mIvBuildProfileNew.setOnClickListener(v -> runWithUnsavedBuildConfigGuard(this::promptCreateBuildProfileWithBasePicker));
+        mIvBuildProfileDelete.setOnClickListener(v -> runWithUnsavedBuildConfigGuard(this::promptDeleteBuildProfile));
+        mIvBuildProfileMore.setOnClickListener(this::showBuildProfileMorePopup);
+
         setToolbarAsBack(R.string.text_build_apk);
         mSource = getIntent().getStringExtra(EXTRA_SOURCE);
         if (mSource != null) {
+            mDeferBuildProfilesInitUntilSourceResolved = true;
             setupWithSourceFile(new ScriptFile(mSource));
         }
 
         initSignatureSchemeSpinner();
         initVerifiedKeyStoresSpinner();
         initPermissionsChildren();
+        attachBuildStateChangeListeners();
+        updateBuildProfileActionButtons();
 
         syncAbisCheckedStates();
         syncLibsCheckedStates();
+        if (mDeferBuildProfilesInitUntilSourceResolved
+            && mSource != null
+            && new File(mSource).isDirectory()) {
+            onSourcePresetReady();
+        }
+        refreshAutoBuildUiStateSnapshot();
+
+        if (!mDeferBuildProfilesInitUntilSourceResolved) {
+            initBuildProfilesIfNeeded();
+        }
 
         showHintDialogIfNeeded();
     }
@@ -401,41 +507,1205 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         mKeyStoreViewModel.updateVerifiedKeyStores();
     }
 
-    private void toggleAllFlexboxChildren(FlexboxLayout mFlexboxLibs) {
-        boolean isAllChecked = true;
-        for (int i = 0; i < mFlexboxLibs.getChildCount(); i += 1) {
-            View child = mFlexboxLibs.getChildAt(i);
-            if (child instanceof RoundCheckboxWithText) {
-                if (!child.isEnabled()) {
-                    continue;
-                }
-                if (!((RoundCheckboxWithText) child).isChecked()) {
-                    isAllChecked = false;
-                    break;
-                }
-            } else if (child instanceof CheckBox) {
-                if (!child.isEnabled()) {
-                    continue;
-                }
-                if (!((CheckBox) child).isChecked()) {
-                    isAllChecked = false;
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_build_profile_options, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.action_import) {
+            runWithUnsavedBuildConfigGuard(this::startImportBuildProfileJson);
+            return true;
+        }
+        if (item.getItemId() == R.id.action_export) {
+            runWithUnsavedBuildConfigGuard(this::startExportBuildProfileJson);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onPause() {
+        saveCurrentBuildProfileSilently();
+        super.onPause();
+    }
+
+    @Override
+    public void finish() {
+        if (!mBuildProfilesInitialized || !mBuildConfigSaveSticky) {
+            super.finish();
+            return;
+        }
+        runWithUnsavedBuildConfigGuard(() -> BuildActivity.super.finish());
+    }
+
+    private void onSourcePresetReady() {
+        refreshAutoBuildUiStateSnapshot();
+        if (!mDeferBuildProfilesInitUntilSourceResolved) {
+            return;
+        }
+        mDeferBuildProfilesInitUntilSourceResolved = false;
+        initBuildProfilesIfNeeded();
+    }
+
+    private void initBuildProfilesIfNeeded() {
+        if (mBuildProfilesInitialized) {
+            return;
+        }
+
+        BuildUiState fallback = getAutoBuildUiState();
+        BuildConfigStore.ensureDefaultProfileExists(this, fallback.toJson(), BuildFieldPolicy.defaultPolicy().toJson());
+
+        mBuildProfilesInitialized = true;
+        String active = mIsProjectLevelBuilding
+                ? BuildConfigStore.PROFILE_PROJECT_JSON
+                : BuildConfigStore.getActiveProfileName(this);
+        rebuildBuildProfilesSpinnerAndSelect(active);
+    }
+
+    private void rebuildBuildProfilesSpinnerAndSelect(@NonNull String internalName) {
+        ArrayList<String> internalProfiles = new ArrayList<>();
+        internalProfiles.add(BuildConfigStore.PROFILE_DEFAULT_ID);
+        if (mIsProjectLevelBuilding) {
+            internalProfiles.add(BuildConfigStore.PROFILE_PROJECT_JSON);
+        }
+        BuildConfigStore.listProfiles(this).forEach(name -> {
+            if (BuildConfigStore.PROFILE_DEFAULT_ID.equals(name)) return;
+            if (BuildConfigStore.PROFILE_PROJECT_JSON.equals(name)) return;
+            internalProfiles.add(name);
+        });
+
+        mBuildProfileEntries.clear();
+        ArrayList<String> displayNames = new ArrayList<>(internalProfiles.size());
+        for (String internal : internalProfiles) {
+            String display = BuildConfigStore.PROFILE_DEFAULT_ID.equals(internal)
+                    ? BuildConfigStore.getDefaultProfileDisplayName(this)
+                    : internal;
+            mBuildProfileEntries.add(new ProfileEntry(internal, display));
+            displayNames.add(display);
+        }
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, displayNames);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        mSuppressBuildProfileSpinnerCallback = true;
+        mBuildProfileSpinner.setAdapter(adapter);
+        int index = 0;
+        for (int i = 0; i < mBuildProfileEntries.size(); i++) {
+            if (mBuildProfileEntries.get(i).internalName.equals(internalName)) {
+                index = i;
+                break;
+            }
+        }
+        if (mIsProjectLevelBuilding) {
+            for (int i = 0; i < mBuildProfileEntries.size(); i++) {
+                if (BuildConfigStore.PROFILE_PROJECT_JSON.equals(mBuildProfileEntries.get(i).internalName)) {
+                    index = i;
                     break;
                 }
             }
         }
-        for (int i = 0; i < mFlexboxLibs.getChildCount(); i += 1) {
-            View child = mFlexboxLibs.getChildAt(i);
-            if (child instanceof RoundCheckboxWithText) {
-                if (!child.isEnabled()) {
-                    continue;
-                }
-                ((RoundCheckboxWithText) child).setChecked(!isAllChecked);
-            } else if (child instanceof CheckBox) {
-                if (!child.isEnabled()) {
-                    continue;
-                }
-                ((CheckBox) child).setChecked(!isAllChecked);
+        mBuildProfileSpinner.setSelection(index, false);
+        mSuppressBuildProfileSpinnerCallback = false;
+
+        switchToBuildProfile(mBuildProfileEntries.get(index).internalName);
+    }
+
+    private void reselectCurrentBuildProfileInSpinner() {
+        if (mBuildProfileEntries.isEmpty()) {
+            return;
+        }
+        int index = 0;
+        for (int i = 0; i < mBuildProfileEntries.size(); i++) {
+            if (mBuildProfileEntries.get(i).internalName.equals(mCurrentBuildProfileName)) {
+                index = i;
+                break;
             }
+        }
+        mSuppressBuildProfileSpinnerCallback = true;
+        mBuildProfileSpinner.setSelection(index, false);
+        mSuppressBuildProfileSpinnerCallback = false;
+    }
+
+    private void switchToBuildProfile(@NonNull String internalName) {
+        boolean isProjectJsonProfile = isProjectJsonProfile(internalName);
+        BuildUiState storedState;
+        BuildFieldPolicy fieldPolicy;
+        if (isProjectJsonProfile) {
+            storedState = buildUiStateFromProjectConfig();
+            fieldPolicy = mProjectJsonFieldPolicyInSession.copy();
+        } else {
+            BuildConfigStore.ProfilePayload payload = BuildConfigStore.loadProfilePayload(this, internalName);
+            storedState = payload == null
+                    ? captureCurrentBuildUiState()
+                    : BuildUiState.fromJson(payload.state);
+            fieldPolicy = payload == null
+                    ? BuildFieldPolicy.defaultPolicy()
+                    : BuildFieldPolicy.fromJson(payload.fields);
+        }
+        BuildUiState state = resolveBuildUiStateByFieldPolicy(storedState, getAutoBuildUiState(), fieldPolicy);
+
+        mCurrentBuildProfileName = internalName;
+        mCurrentBuildFieldPolicy = fieldPolicy.copy();
+        if (!mIsProjectLevelBuilding) {
+            BuildConfigStore.setActiveProfileName(this, internalName);
+        }
+
+        applyBuildUiState(state);
+
+        mUndoStateStack.clear();
+        mRedoStateStack.clear();
+        mTrackedBuildUiState = state.copy();
+        mBaselineBuildUiState = state.copy();
+        mBuildConfigSaveSticky = false;
+        updateBuildProfileActionButtons();
+    }
+
+    private void refreshAutoBuildUiStateSnapshot() {
+        mAutoBuildUiState = captureCurrentBuildUiState().copy();
+    }
+
+    @NonNull
+    private BuildUiState getAutoBuildUiState() {
+        return mAutoBuildUiState == null ? captureCurrentBuildUiState() : mAutoBuildUiState.copy();
+    }
+
+    @NonNull
+    private BuildFieldPolicy getCurrentBuildFieldPolicy() {
+        return mCurrentBuildFieldPolicy == null ? BuildFieldPolicy.defaultPolicy() : mCurrentBuildFieldPolicy.copy();
+    }
+
+    private boolean isProjectJsonProfile(@Nullable String internalName) {
+        return BuildConfigStore.PROFILE_PROJECT_JSON.equals(internalName);
+    }
+
+    @NonNull
+    private BuildUiState buildUiStateFromProjectConfig() {
+        if (mProjectConfig == null) {
+            return captureCurrentBuildUiState();
+        }
+        BuildUiState state = captureCurrentBuildUiState();
+        String sourcePath = state.sourcePath == null ? "" : state.sourcePath.trim();
+        if (TextUtils.isEmpty(sourcePath)) {
+            sourcePath = mSource == null ? "" : mSource;
+        }
+        state.sourcePath = sourcePath;
+        if (TextUtils.isEmpty(state.outputPath)) {
+            state.outputPath = new File(sourcePath, mProjectConfig.getBuildDir()).getPath();
+        }
+        state.appName = Objects.requireNonNullElse(mProjectConfig.getName(), "");
+        state.packageName = Objects.requireNonNullElse(mProjectConfig.getPackageName(), "");
+        state.versionName = Objects.requireNonNullElse(mProjectConfig.getVersionName(), "");
+        state.versionCode = String.valueOf(mProjectConfig.getVersionCode());
+        state.signatureScheme = Objects.requireNonNullElse(mProjectConfig.getSignatureScheme(), "");
+        LaunchConfig launchConfig = mProjectConfig.getLaunchConfig();
+        if (launchConfig != null) {
+            state.launchLogsVisible = launchConfig.isLogsVisible();
+            state.launchSplashVisible = launchConfig.isSplashVisible();
+            state.launchLauncherVisible = launchConfig.isLauncherVisible();
+            state.launchRunOnBoot = launchConfig.isRunOnBoot();
+            state.launchSlug = Objects.requireNonNullElse(launchConfig.getSlug(), "");
+        }
+        if (!mProjectConfig.getAbis().isEmpty()) {
+            state.abis = new ArrayList<>(mProjectConfig.getAbis());
+        }
+        state.libs = new ArrayList<>(mProjectConfig.getLibs());
+        state.permissions = new ArrayList<>(mProjectConfig.getPermissions());
+        return state;
+    }
+
+    @NonNull
+    private BuildUiState resolveBuildUiStateByFieldPolicy(@NonNull BuildUiState fixedState, @NonNull BuildUiState autoState, @NonNull BuildFieldPolicy policy) {
+        BuildUiState out = autoState.copy();
+        if (policy.fixedSourcePath) out.sourcePath = fixedState.sourcePath;
+        if (policy.fixedOutputPath) out.outputPath = fixedState.outputPath;
+        if (policy.fixedAppName) out.appName = fixedState.appName;
+        if (policy.fixedPackageName) out.packageName = fixedState.packageName;
+        if (policy.fixedVersionName) out.versionName = fixedState.versionName;
+        if (policy.fixedVersionCode) out.versionCode = fixedState.versionCode;
+        if (policy.fixedLaunchLogsVisible) out.launchLogsVisible = fixedState.launchLogsVisible;
+        if (policy.fixedLaunchSplashVisible) out.launchSplashVisible = fixedState.launchSplashVisible;
+        if (policy.fixedLaunchLauncherVisible) out.launchLauncherVisible = fixedState.launchLauncherVisible;
+        if (policy.fixedLaunchRunOnBoot) out.launchRunOnBoot = fixedState.launchRunOnBoot;
+        if (policy.fixedLaunchSlug) out.launchSlug = fixedState.launchSlug;
+        if (policy.fixedAbis && !fixedState.abis.isEmpty()) out.abis = new ArrayList<>(fixedState.abis);
+        if (policy.fixedLibs) out.libs = new ArrayList<>(fixedState.libs);
+        if (policy.fixedSignatureScheme) out.signatureScheme = fixedState.signatureScheme;
+        if (policy.fixedKeyStore) out.keyStorePath = fixedState.keyStorePath;
+        if (policy.fixedPermissions) out.permissions = new ArrayList<>(fixedState.permissions);
+        return out;
+    }
+
+    private void attachBuildStateChangeListeners() {
+        TextWatcher watcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                /* Ignored. */
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                /* Ignored. */
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                onBuildUiControlChanged();
+            }
+        };
+
+        mSourcePathView.addTextChangedListener(watcher);
+        mOutputPathView.addTextChangedListener(watcher);
+        mAppNameView.addTextChangedListener(watcher);
+        mPackageNameView.addTextChangedListener(watcher);
+        mVersionNameView.addTextChangedListener(watcher);
+        mVersionCodeView.addTextChangedListener(watcher);
+        mLaunchSlugView.addTextChangedListener(watcher);
+
+        mLaunchLogsVisibleView.setOnCheckedChangeListener((buttonView, isChecked) -> onBuildUiControlChanged());
+        mLaunchSplashVisibleView.setOnCheckedChangeListener((buttonView, isChecked) -> onBuildUiControlChanged());
+        mLaunchLauncherVisibleView.setOnCheckedChangeListener((buttonView, isChecked) -> onBuildUiControlChanged());
+        mLaunchRunOnBootView.setOnCheckedChangeListener((buttonView, isChecked) -> onBuildUiControlChanged());
+
+        AdapterView.OnItemSelectedListener stateSpinnerListener = new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                onBuildUiControlChanged();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                /* Ignored. */
+            }
+        };
+        mSignatureSchemesView.setOnItemSelectedListener(stateSpinnerListener);
+        mVerifiedKeyStoresView.setOnItemSelectedListener(stateSpinnerListener);
+
+        mBuildProfileSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (mSuppressBuildProfileSpinnerCallback) {
+                    return;
+                }
+                if (position < 0 || position >= mBuildProfileEntries.size()) {
+                    return;
+                }
+                String nextProfile = mBuildProfileEntries.get(position).internalName;
+                if (Objects.equals(nextProfile, mCurrentBuildProfileName)) {
+                    return;
+                }
+                runWithUnsavedBuildConfigGuard(() -> switchToBuildProfile(nextProfile), BuildActivity.this::reselectCurrentBuildProfileInSpinner);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                /* Ignored. */
+            }
+        });
+    }
+
+    private boolean canTrackBuildStateChanges() {
+        return mBuildProfilesInitialized
+               && !mApplyingBuildUiState
+               && !mSuppressBuildStateTracking;
+    }
+
+    private void onBuildUiControlChanged() {
+        if (!canTrackBuildStateChanges()) {
+            return;
+        }
+        BuildUiState current = captureCurrentBuildUiState();
+        if (mTrackedBuildUiState != null && current.equals(mTrackedBuildUiState)) {
+            return;
+        }
+
+        if (mTrackedBuildUiState != null) {
+            mUndoStateStack.addLast(mTrackedBuildUiState.copy());
+            while (mUndoStateStack.size() > MAX_BUILD_UNDO_STACK) {
+                mUndoStateStack.removeFirst();
+            }
+        }
+        mTrackedBuildUiState = current.copy();
+        mRedoStateStack.clear();
+
+        mBuildConfigSaveSticky = mBaselineBuildUiState == null || !current.equals(mBaselineBuildUiState);
+        updateBuildProfileActionButtons();
+    }
+
+    private void performBuildConfigUndo() {
+        if (mUndoStateStack.isEmpty()) {
+            return;
+        }
+        BuildUiState current = captureCurrentBuildUiState();
+        BuildUiState target = mUndoStateStack.removeLast();
+        mRedoStateStack.addLast(current.copy());
+
+        applyBuildUiState(target);
+        mTrackedBuildUiState = target.copy();
+        mBuildConfigSaveSticky = mBaselineBuildUiState == null || !target.equals(mBaselineBuildUiState);
+        updateBuildProfileActionButtons();
+    }
+
+    private void performBuildConfigRedo() {
+        if (mRedoStateStack.isEmpty()) {
+            return;
+        }
+        BuildUiState current = captureCurrentBuildUiState();
+        BuildUiState target = mRedoStateStack.removeLast();
+        mUndoStateStack.addLast(current.copy());
+
+        applyBuildUiState(target);
+        mTrackedBuildUiState = target.copy();
+        mBuildConfigSaveSticky = mBaselineBuildUiState == null || !target.equals(mBaselineBuildUiState);
+        updateBuildProfileActionButtons();
+    }
+
+    private void saveCurrentBuildProfile() {
+        saveCurrentBuildProfile(null);
+    }
+
+    private void saveCurrentBuildProfile(@Nullable Runnable afterSaved) {
+        if (!mBuildProfilesInitialized || mCurrentBuildProfileName == null || mCurrentBuildProfileName.trim().isEmpty()) {
+            return;
+        }
+        if (!mBuildConfigSaveSticky && !BuildConfigStore.PROFILE_DEFAULT_ID.equals(mCurrentBuildProfileName)) {
+            if (afterSaved != null) {
+                afterSaved.run();
+            }
+            return;
+        }
+
+        BuildUiState current = captureCurrentBuildUiState();
+        promptBuildFieldPolicyDialog(getCurrentBuildFieldPolicy(), selectedPolicy -> {
+            if (BuildConfigStore.PROFILE_DEFAULT_ID.equals(mCurrentBuildProfileName)) {
+                ViewUtils.showToast(this, R.string.text_default_profile_overwrite_hint, true);
+                promptCreateBuildProfileByName(current, selectedPolicy, afterSaved);
+                return;
+            }
+            if (isProjectJsonProfile(mCurrentBuildProfileName)) {
+                persistProjectJsonSnapshot(current, selectedPolicy, false);
+                if (afterSaved != null) {
+                    afterSaved.run();
+                }
+                return;
+            }
+            persistProfileSnapshot(mCurrentBuildProfileName, current, selectedPolicy, false);
+            if (afterSaved != null) {
+                afterSaved.run();
+            }
+        });
+    }
+
+    private void saveCurrentBuildProfileSilently() {
+        if (!mBuildProfilesInitialized || mCurrentBuildProfileName == null || mCurrentBuildProfileName.trim().isEmpty()) {
+            return;
+        }
+        if (!mBuildConfigSaveSticky) {
+            return;
+        }
+        if (BuildConfigStore.PROFILE_DEFAULT_ID.equals(mCurrentBuildProfileName)) {
+            return;
+        }
+        if (isProjectJsonProfile(mCurrentBuildProfileName)) {
+            persistProjectJsonSnapshot(captureCurrentBuildUiState(), getCurrentBuildFieldPolicy(), true);
+            return;
+        }
+        persistProfileSnapshot(mCurrentBuildProfileName, captureCurrentBuildUiState(), getCurrentBuildFieldPolicy(), true);
+    }
+
+    private void persistProfileSnapshot(@NonNull String profileName, @NonNull BuildUiState state, @NonNull BuildFieldPolicy fieldPolicy, boolean silent) {
+        BuildConfigStore.saveProfile(this, profileName, state.toJson(), fieldPolicy.toJson());
+        mCurrentBuildFieldPolicy = fieldPolicy.copy();
+        if (isProjectJsonProfile(profileName)) {
+            mProjectJsonFieldPolicyInSession = fieldPolicy.copy();
+        }
+        mCurrentBuildProfileName = profileName;
+        BuildUiState current = captureCurrentBuildUiState();
+        mBaselineBuildUiState = current.copy();
+        mTrackedBuildUiState = current.copy();
+        mBuildConfigSaveSticky = false;
+        updateBuildProfileActionButtons();
+        if (!silent) {
+            ViewUtils.showToast(this, R.string.text_done);
+        }
+    }
+
+    private void persistProjectJsonSnapshot(@NonNull BuildUiState state, @NonNull BuildFieldPolicy fieldPolicy, boolean silent) {
+        if (mProjectConfig == null) {
+            if (!silent) {
+                ViewUtils.showToast(this, R.string.text_failed_to_save_project_json, true);
+            }
+            return;
+        }
+        BuildUiState effectiveState = resolveBuildUiStateByFieldPolicy(state, getAutoBuildUiState(), fieldPolicy);
+        try {
+            ProjectConfig configToPersist = determineProjectConfig(effectiveState);
+            String sourcePath = configToPersist.getSourcePath();
+            if (TextUtils.isEmpty(sourcePath)) {
+                throw new IllegalStateException("Source path is empty");
+            }
+            mSource = sourcePath;
+            String projectConfigPath = ProjectConfig.configFileOfDir(sourcePath);
+            PFiles.write(projectConfigPath, configToPersist.toJson(true));
+
+            mProjectConfig = ProjectConfig.fromProjectDir(sourcePath);
+            if (mProjectConfig == null) {
+                mProjectConfig = configToPersist;
+            }
+            mProjectJsonFieldPolicyInSession = fieldPolicy.copy();
+            mCurrentBuildFieldPolicy = fieldPolicy.copy();
+            BuildUiState current = captureCurrentBuildUiState();
+            mBaselineBuildUiState = current.copy();
+            mTrackedBuildUiState = current.copy();
+            mBuildConfigSaveSticky = false;
+            updateBuildProfileActionButtons();
+            if (!silent) {
+                ViewUtils.showToast(this, R.string.text_done);
+            }
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+            if (!silent) {
+                ViewUtils.showToast(this, throwable.getMessage(), true);
+            }
+        }
+    }
+
+    private void promptCreateBuildProfileWithBasePicker() {
+        BuildUiState baseState = captureCurrentBuildUiState();
+        promptBuildFieldPolicyDialog(getCurrentBuildFieldPolicy(), false, selectedPolicy ->
+                promptCreateBuildProfileByName(baseState, selectedPolicy, null));
+    }
+
+    private void promptCreateBuildProfileByName(@NonNull BuildUiState baseState, @NonNull BuildFieldPolicy fieldPolicy, @Nullable Runnable afterCreated) {
+        MaterialDialog.Builder builder = new MaterialDialog.Builder(this)
+                .title(R.string.text_save_configuration_as)
+                .inputType(InputType.TYPE_CLASS_TEXT)
+                .input(getString(R.string.text_build_profile_name_hint), BuildConfigStore.getPrefillProfileName(this), false, (dialog, input) -> {
+                    String raw = input == null ? "" : input.toString().trim();
+                    if (raw.isEmpty()) {
+                        ViewUtils.showToast(this, R.string.text_symbols_profile_name_invalid, true);
+                        return;
+                    }
+                    if (BuildConfigStore.isReservedProfileName(this, raw)) {
+                        ViewUtils.showToast(this, R.string.text_build_profile_name_cannot_be_reserved, true);
+                        return;
+                    }
+                    if (BuildConfigStore.listProfiles(this).contains(raw)) {
+                        ViewUtils.showToast(this, R.string.text_symbols_profile_name_conflict, true);
+                        return;
+                    }
+                    BuildConfigStore.saveProfile(this, raw, baseState.toJson(), fieldPolicy.toJson());
+                    if (!mIsProjectLevelBuilding) {
+                        BuildConfigStore.setActiveProfileName(this, raw);
+                    }
+                    rebuildBuildProfilesSpinnerAndSelect(raw);
+                    dialog.dismiss();
+                    ViewUtils.showToast(this, R.string.text_done);
+                    if (afterCreated != null) {
+                        afterCreated.run();
+                    }
+                })
+                .negativeText(R.string.dialog_button_cancel)
+                .negativeColorRes(R.color.dialog_button_default)
+                .onNegative((dialog, which) -> dialog.dismiss())
+                .positiveText(R.string.dialog_button_confirm)
+                .positiveColorRes(R.color.dialog_button_attraction)
+                .autoDismiss(false);
+        DialogUtils.widgetThemeColor(builder);
+        builder.show();
+    }
+
+    private void promptDeleteBuildProfile() {
+        if (BuildConfigStore.PROFILE_DEFAULT_ID.equals(mCurrentBuildProfileName)) {
+            ViewUtils.showToast(this, R.string.text_build_profile_cannot_delete_default, true);
+            return;
+        }
+        if (isProjectJsonProfile(mCurrentBuildProfileName)) {
+            ViewUtils.showToast(this, R.string.text_build_profile_cannot_delete_project_json, true);
+            return;
+        }
+
+        String profileName = mCurrentBuildProfileName;
+        MaterialDialog.Builder builder = new MaterialDialog.Builder(this)
+                .title(R.string.text_prompt)
+                .content(getString(R.string.text_delete) + getString(R.string.symbol_colon_with_blank) + profileName)
+                .negativeText(R.string.dialog_button_cancel)
+                .negativeColorRes(R.color.dialog_button_default)
+                .onNegative((dialog, which) -> dialog.dismiss())
+                .positiveText(R.string.dialog_button_confirm)
+                .positiveColorRes(R.color.dialog_button_caution)
+                .onPositive((dialog, which) -> {
+                    BuildConfigStore.deleteProfile(this, profileName);
+                    BuildConfigStore.ensureDefaultProfileExists(this, getAutoBuildUiState().toJson(), BuildFieldPolicy.defaultPolicy().toJson());
+                    rebuildBuildProfilesSpinnerAndSelect(BuildConfigStore.PROFILE_DEFAULT_ID);
+                    dialog.dismiss();
+                    ViewUtils.showToast(this, R.string.text_done);
+                })
+                .autoDismiss(false);
+        DialogUtils.widgetThemeColor(builder);
+        builder.show();
+    }
+
+    private void showBuildProfileMorePopup(View anchor) {
+        PopupMenu popupMenu = new PopupMenu(this, anchor);
+        popupMenu.getMenu().add(0, 1, 0, getString(R.string.text_save_configuration_as));
+        popupMenu.getMenu().add(0, 2, 1, getString(R.string.text_rename));
+        popupMenu.getMenu().add(0, 3, 2, getString(R.string.text_build_profile_fields_configure));
+        popupMenu.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == 1) {
+                promptBuildFieldPolicyDialog(getCurrentBuildFieldPolicy(), false, selectedPolicy ->
+                        promptCreateBuildProfileByName(captureCurrentBuildUiState(), selectedPolicy, null));
+                return true;
+            }
+            if (item.getItemId() == 2) {
+                promptRenameCurrentBuildProfile();
+                return true;
+            }
+            if (item.getItemId() == 3) {
+                promptEditCurrentBuildProfileFields();
+                return true;
+            }
+            return false;
+        });
+        popupMenu.show();
+    }
+
+    private void promptRenameCurrentBuildProfile() {
+        if (BuildConfigStore.PROFILE_DEFAULT_ID.equals(mCurrentBuildProfileName)
+            || isProjectJsonProfile(mCurrentBuildProfileName)) {
+            ViewUtils.showToast(this, R.string.text_build_profile_name_cannot_be_reserved, true);
+            return;
+        }
+
+        String oldName = mCurrentBuildProfileName;
+        MaterialDialog.Builder builder = new MaterialDialog.Builder(this)
+                .title(R.string.text_rename)
+                .inputType(InputType.TYPE_CLASS_TEXT)
+                .input(getString(R.string.text_build_profile_name_hint), oldName, false, (dialog, input) -> {
+                    String raw = input == null ? "" : input.toString().trim();
+                    if (raw.isEmpty()) {
+                        ViewUtils.showToast(this, R.string.text_symbols_profile_name_invalid, true);
+                        return;
+                    }
+                    if (BuildConfigStore.isReservedProfileName(this, raw)) {
+                        ViewUtils.showToast(this, R.string.text_build_profile_name_cannot_be_reserved, true);
+                        return;
+                    }
+                    if (Objects.equals(raw, oldName)) {
+                        dialog.dismiss();
+                        return;
+                    }
+                    if (BuildConfigStore.listProfiles(this).contains(raw)) {
+                        ViewUtils.showToast(this, R.string.text_symbols_profile_name_conflict, true);
+                        return;
+                    }
+                    BuildConfigStore.ProfilePayload oldPayload = BuildConfigStore.loadProfilePayload(this, oldName);
+                    JSONObject oldState = oldPayload == null ? captureCurrentBuildUiState().toJson() : oldPayload.state;
+                    JSONObject oldFields = oldPayload == null ? getCurrentBuildFieldPolicy().toJson() : oldPayload.fields;
+                    BuildConfigStore.saveProfile(this, raw, oldState, oldFields);
+                    BuildConfigStore.deleteProfile(this, oldName);
+                    if (!mIsProjectLevelBuilding) {
+                        BuildConfigStore.setActiveProfileName(this, raw);
+                    }
+                    rebuildBuildProfilesSpinnerAndSelect(raw);
+                    dialog.dismiss();
+                    ViewUtils.showToast(this, R.string.text_done);
+                })
+                .negativeText(R.string.dialog_button_cancel)
+                .negativeColorRes(R.color.dialog_button_default)
+                .onNegative((dialog, which) -> dialog.dismiss())
+                .positiveText(R.string.dialog_button_confirm)
+                .positiveColorRes(R.color.dialog_button_attraction)
+                .autoDismiss(false);
+        DialogUtils.widgetThemeColor(builder);
+        builder.show();
+    }
+
+    private void promptEditCurrentBuildProfileFields() {
+        BuildUiState current = captureCurrentBuildUiState();
+        promptBuildFieldPolicyDialog(getCurrentBuildFieldPolicy(), selectedPolicy -> {
+            if (BuildConfigStore.PROFILE_DEFAULT_ID.equals(mCurrentBuildProfileName)) {
+                ViewUtils.showToast(this, R.string.text_default_profile_overwrite_hint, true);
+                promptCreateBuildProfileByName(current, selectedPolicy, null);
+                return;
+            }
+            if (isProjectJsonProfile(mCurrentBuildProfileName)) {
+                persistProjectJsonSnapshot(current, selectedPolicy, false);
+                return;
+            }
+            persistProfileSnapshot(mCurrentBuildProfileName, current, selectedPolicy, false);
+        });
+    }
+
+    private void promptBuildFieldPolicyDialog(@NonNull BuildFieldPolicy initialPolicy, @NonNull BuildFieldPolicySelectedCallback onSelected) {
+        promptBuildFieldPolicyDialog(initialPolicy, isProjectJsonProfile(mCurrentBuildProfileName), onSelected);
+    }
+
+    private void promptBuildFieldPolicyDialog(
+            @NonNull BuildFieldPolicy initialPolicy,
+            boolean editableSourceAndIcon,
+            @NonNull BuildFieldPolicySelectedCallback onSelected
+    ) {
+        LinearLayout container = new LinearLayout(this);
+        container.setOrientation(LinearLayout.VERTICAL);
+        int horizontal = (int) (8 * getResources().getDisplayMetrics().density);
+        int vertical = (int) (4 * getResources().getDisplayMetrics().density);
+        container.setPadding(horizontal, vertical, horizontal, vertical);
+
+        TextView hint = new TextView(this);
+        hint.setText(R.string.text_build_profile_fields_hint);
+        hint.setTextSize(13f);
+        hint.setPadding(0, 0, 0, (int) (6 * getResources().getDisplayMetrics().density));
+        hint.setTextColor(getColor(R.color.text_color_primary_alpha_70));
+        container.addView(hint);
+
+        CheckBox icon = createFieldPolicyCheckBox(container, R.string.text_icon, initialPolicy.fixedIcon, editableSourceAndIcon);
+        addFieldPolicyDivider(container);
+
+        CheckBox sourcePath = createFieldPolicyCheckBox(container, R.string.text_source_file_path, initialPolicy.fixedSourcePath, editableSourceAndIcon);
+        CheckBox outputPath = createFieldPolicyCheckBox(container, R.string.text_output_apk_path, initialPolicy.fixedOutputPath, true);
+        addFieldPolicyDivider(container);
+
+        CheckBox appName = createFieldPolicyCheckBox(container, R.string.text_app_name, initialPolicy.fixedAppName, true);
+        CheckBox packageName = createFieldPolicyCheckBox(container, R.string.text_package_name, initialPolicy.fixedPackageName, true);
+        CheckBox versionName = createFieldPolicyCheckBox(container, R.string.text_version_name, initialPolicy.fixedVersionName, true);
+        CheckBox versionCode = createFieldPolicyCheckBox(container, R.string.text_version_code, initialPolicy.fixedVersionCode, true);
+        addFieldPolicyDivider(container);
+
+        CheckBox launchRunOnBoot = createFieldPolicyCheckBox(container, R.string.text_launch_run_on_boot, initialPolicy.fixedLaunchRunOnBoot, true);
+        CheckBox launchLogsVisible = createFieldPolicyCheckBox(container, R.string.text_launch_logs_visible, initialPolicy.fixedLaunchLogsVisible, true);
+        CheckBox launchSplashVisible = createFieldPolicyCheckBox(container, R.string.text_launch_splash_visible, initialPolicy.fixedLaunchSplashVisible, true);
+        CheckBox launchLauncherVisible = createFieldPolicyCheckBox(container, R.string.text_launch_launcher_visible, initialPolicy.fixedLaunchLauncherVisible, true);
+        CheckBox launchSlug = createFieldPolicyCheckBox(container, R.string.text_launch_slug, initialPolicy.fixedLaunchSlug, true);
+        addFieldPolicyDivider(container);
+
+        CheckBox abis = createFieldPolicyCheckBox(container, R.string.text_supported_abis_short, initialPolicy.fixedAbis, true);
+        CheckBox libs = createFieldPolicyCheckBox(container, R.string.text_supported_libraries_short, initialPolicy.fixedLibs, true);
+        CheckBox signatureScheme = createFieldPolicyCheckBox(container, R.string.text_signature_scheme, initialPolicy.fixedSignatureScheme, true);
+        CheckBox keyStore = createFieldPolicyCheckBox(container, R.string.text_key_store, initialPolicy.fixedKeyStore, true);
+        CheckBox permissions = createFieldPolicyCheckBox(container, R.string.text_supported_permissions_short, initialPolicy.fixedPermissions, true);
+
+        MaterialDialog.Builder builder = new MaterialDialog.Builder(this)
+                .title(R.string.text_build_profile_fields)
+                .customView(container, true)
+                .positiveText(R.string.dialog_button_confirm)
+                .positiveColorRes(R.color.dialog_button_attraction)
+                .negativeText(R.string.dialog_button_cancel)
+                .negativeColorRes(R.color.dialog_button_default)
+                .onPositive((dialog, which) -> {
+                    BuildFieldPolicy selected = new BuildFieldPolicy();
+                    selected.fixedSourcePath = sourcePath.isChecked();
+                    selected.fixedIcon = icon.isChecked();
+                    selected.fixedOutputPath = outputPath.isChecked();
+                    selected.fixedAppName = appName.isChecked();
+                    selected.fixedPackageName = packageName.isChecked();
+                    selected.fixedVersionName = versionName.isChecked();
+                    selected.fixedVersionCode = versionCode.isChecked();
+                    selected.fixedLaunchRunOnBoot = launchRunOnBoot.isChecked();
+                    selected.fixedLaunchLogsVisible = launchLogsVisible.isChecked();
+                    selected.fixedLaunchSplashVisible = launchSplashVisible.isChecked();
+                    selected.fixedLaunchLauncherVisible = launchLauncherVisible.isChecked();
+                    selected.fixedLaunchSlug = launchSlug.isChecked();
+                    selected.fixedAbis = abis.isChecked();
+                    selected.fixedLibs = libs.isChecked();
+                    selected.fixedSignatureScheme = signatureScheme.isChecked();
+                    selected.fixedKeyStore = keyStore.isChecked();
+                    selected.fixedPermissions = permissions.isChecked();
+                    onSelected.onSelected(selected);
+                });
+        DialogUtils.widgetThemeColor(builder);
+        builder.show();
+    }
+
+    @NonNull
+    private CheckBox createFieldPolicyCheckBox(@NonNull LinearLayout container, int textRes, boolean checked, boolean enabled) {
+        CheckBox checkBox = new CheckBox(this);
+        checkBox.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        ));
+        checkBox.setText(textRes);
+        checkBox.setChecked(checked);
+        checkBox.setEnabled(enabled);
+        if (!enabled) {
+            checkBox.setAlpha(0.62f);
+        }
+        container.addView(checkBox);
+        return checkBox;
+    }
+
+    private void addFieldPolicyDivider(@NonNull LinearLayout container) {
+        View divider = new View(this);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                Math.max(1, (int) (getResources().getDisplayMetrics().density))
+        );
+        int marginV = (int) (4 * getResources().getDisplayMetrics().density);
+        lp.setMargins(0, marginV, 0, marginV);
+        divider.setLayoutParams(lp);
+        divider.setBackgroundColor(getColor(android.R.color.darker_gray));
+        container.addView(divider);
+    }
+
+    private interface BuildFieldPolicySelectedCallback {
+        void onSelected(@NonNull BuildFieldPolicy selectedPolicy);
+    }
+
+    private void runWithUnsavedBuildConfigGuard(@NonNull Runnable onProceed) {
+        runWithUnsavedBuildConfigGuard(onProceed, null);
+    }
+
+    private void runWithUnsavedBuildConfigGuard(@NonNull Runnable onProceed, @Nullable Runnable onCancel) {
+        if (!mBuildConfigSaveSticky) {
+            onProceed.run();
+            return;
+        }
+
+        int unsavedChangesTextRes = isProjectJsonProfile(mCurrentBuildProfileName)
+                ? R.string.text_build_profile_unsaved_changes_project_json
+                : R.string.text_build_profile_unsaved_changes;
+
+        DialogUtils.buildAndShowAdaptive(() -> {
+            MaterialDialog.Builder builder = new MaterialDialog.Builder(this)
+                    .title(R.string.text_prompt)
+                    .content(unsavedChangesTextRes)
+                    .neutralText(R.string.dialog_button_back)
+                    .neutralColorRes(R.color.dialog_button_default)
+                    .negativeText(R.string.text_exit_directly)
+                    .negativeColorRes(R.color.dialog_button_caution)
+                    .positiveText(R.string.text_save_and_exit)
+                    .positiveColorRes(R.color.dialog_button_warn)
+                    .onPositive((dialog, which) -> {
+                        saveCurrentBuildProfile(onProceed);
+                    })
+                    .onNeutral((dialog, which) -> onProceed.run())
+                    .onNegative((dialog, which) -> {
+                        if (onCancel != null) {
+                            onCancel.run();
+                        }
+                    });
+            DialogUtils.widgetThemeColor(builder);
+            return builder.build();
+        });
+    }
+
+    @SuppressWarnings("deprecation")
+    private void startExportBuildProfileJson() {
+        String name = mCurrentBuildProfileName;
+        if (name == null || name.trim().isEmpty() || BuildConfigStore.PROFILE_DEFAULT_ID.equals(name)) {
+            name = "default";
+        }
+        Intent i = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+        i.addCategory(Intent.CATEGORY_OPENABLE);
+        i.setType("application/json");
+        i.putExtra(Intent.EXTRA_TITLE, "autojs6-build-profile-" + name + ".json");
+        startActivityForResult(i, REQ_EXPORT_JSON);
+    }
+
+    @SuppressWarnings("deprecation")
+    private void startImportBuildProfileJson() {
+        Intent i = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        i.addCategory(Intent.CATEGORY_OPENABLE);
+        i.setType("application/json");
+        startActivityForResult(i, REQ_IMPORT_JSON);
+    }
+
+    private void doExportBuildProfileToUri(@NonNull Uri uri) {
+        try {
+            JSONObject json;
+            if (isProjectJsonProfile(mCurrentBuildProfileName)) {
+                json = new JSONObject();
+                json.put("name", BuildConfigStore.PROFILE_PROJECT_JSON);
+                json.put("state", captureCurrentBuildUiState().toJson());
+                json.put("fields", getCurrentBuildFieldPolicy().toJson());
+            } else {
+                json = BuildConfigStore.exportProfileToJson(this, mCurrentBuildProfileName);
+            }
+            try (var out = getContentResolver().openOutputStream(uri, "wt")) {
+                if (out == null) throw new IllegalStateException("Cannot open output stream");
+                out.write(json.toString(2).getBytes(StandardCharsets.UTF_8));
+                out.flush();
+            }
+            ViewUtils.showToast(this, R.string.text_done);
+        } catch (Throwable e) {
+            e.printStackTrace();
+            ViewUtils.showToast(this, e.getMessage(), true);
+        }
+    }
+
+    private void doImportBuildProfileFromUri(@NonNull Uri uri) {
+        try {
+            byte[] raw;
+            try (InputStream in = getContentResolver().openInputStream(uri)) {
+                if (in == null) throw new IllegalStateException("Cannot open input stream");
+                ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+                byte[] chunk = new byte[8 * 1024];
+                int read;
+                while ((read = in.read(chunk)) != -1) {
+                    buffer.write(chunk, 0, read);
+                }
+                raw = buffer.toByteArray();
+            }
+            JSONObject json = new JSONObject(new String(raw, StandardCharsets.UTF_8));
+            BuildConfigStore.ProfilePayload payload = BuildConfigStore.importProfileFromJson(json);
+
+            boolean reservedName = BuildConfigStore.isReservedProfileName(this, payload.name);
+            if (reservedName) {
+                handleImportNameConflictAndSave(payload.name, payload, false, true);
+                return;
+            }
+            handleImportNameConflictAndSave(payload.name, payload, true, false);
+        } catch (Throwable e) {
+            e.printStackTrace();
+            ViewUtils.showToast(this, e.getMessage(), true);
+        }
+    }
+
+    private void handleImportNameConflictAndSave(
+            @NonNull String desiredName,
+            @NonNull BuildConfigStore.ProfilePayload importedPayload,
+            boolean overwriteEnabled,
+            boolean forceConflict
+    ) {
+        LinkedHashSet<String> existing = new LinkedHashSet<>(BuildConfigStore.listProfiles(this));
+        boolean conflict = forceConflict || existing.contains(desiredName);
+
+        if (!conflict) {
+            saveImportedProfileAndSwitch(desiredName, importedPayload);
+            return;
+        }
+
+        ArrayList<String> options = new ArrayList<>();
+        options.add(getString(R.string.text_import_strategy_overwrite));
+        options.add(getString(R.string.text_import_strategy_auto_rename));
+        options.add(getString(R.string.text_import_strategy_manual_rename));
+
+        MaterialDialog.Builder builder = new MaterialDialog.Builder(this)
+                .title(R.string.text_import)
+                .content(getString(R.string.text_import_name_conflict, desiredName))
+                .items(options)
+                .itemsCallback((dialog, itemView, which, text) -> {
+                    dialog.dismiss();
+                    if (which == 0) {
+                        if (!overwriteEnabled) return;
+                        saveImportedProfileAndSwitch(desiredName, importedPayload);
+                        return;
+                    }
+                    if (which == 1) {
+                        String unique = makeUniqueProfileName(existing, desiredName);
+                        saveImportedProfileAndSwitch(unique, importedPayload);
+                        return;
+                    }
+                    if (which == 2) {
+                        promptManualRenameAndImport(existing, desiredName, importedPayload);
+                    }
+                });
+        if (!overwriteEnabled) {
+            builder.itemsDisabledIndices(0);
+        }
+        DialogUtils.widgetThemeColor(builder);
+        builder.show();
+    }
+
+    private void promptManualRenameAndImport(
+            @NonNull LinkedHashSet<String> existing,
+            @NonNull String suggestedName,
+            @NonNull BuildConfigStore.ProfilePayload payload
+    ) {
+        MaterialDialog.Builder builder = new MaterialDialog.Builder(this)
+                .title(R.string.text_import_strategy_manual_rename)
+                .inputType(InputType.TYPE_CLASS_TEXT)
+                .input(getString(R.string.text_build_profile_name_hint), suggestedName, false, (dialog, input) -> {
+                    String raw = input == null ? "" : input.toString().trim();
+                    if (raw.isEmpty()) {
+                        ViewUtils.showToast(this, R.string.text_symbols_profile_name_invalid, true);
+                        return;
+                    }
+                    if (BuildConfigStore.isReservedProfileName(this, raw)) {
+                        ViewUtils.showToast(this, R.string.text_build_profile_name_cannot_be_reserved, true);
+                        return;
+                    }
+                    if (existing.contains(raw)) {
+                        ViewUtils.showToast(this, R.string.text_symbols_profile_name_conflict, true);
+                        return;
+                    }
+                    saveImportedProfileAndSwitch(raw, payload);
+                    dialog.dismiss();
+                })
+                .negativeText(R.string.dialog_button_cancel)
+                .negativeColorRes(R.color.dialog_button_default)
+                .onNegative((dialog, which) -> dialog.dismiss())
+                .positiveText(R.string.dialog_button_confirm)
+                .positiveColorRes(R.color.dialog_button_attraction)
+                .autoDismiss(false);
+        DialogUtils.widgetThemeColor(builder);
+        builder.show();
+    }
+
+    @NonNull
+    private String makeUniqueProfileName(@NonNull LinkedHashSet<String> existing, @NonNull String baseName) {
+        if (!existing.contains(baseName) && !BuildConfigStore.isReservedProfileName(this, baseName)) return baseName;
+        int i = 2;
+        while (true) {
+            String candidate = baseName + " (" + i + ")";
+            if (!existing.contains(candidate) && !BuildConfigStore.isReservedProfileName(this, candidate)) {
+                return candidate;
+            }
+            i++;
+        }
+    }
+
+    private void saveImportedProfileAndSwitch(@NonNull String name, @NonNull BuildConfigStore.ProfilePayload payload) {
+        BuildConfigStore.saveProfile(this, name, payload.state, payload.fields);
+        if (!mIsProjectLevelBuilding) {
+            BuildConfigStore.setActiveProfileName(this, name);
+        }
+        rebuildBuildProfilesSpinnerAndSelect(name);
+        ViewUtils.showToast(this, R.string.text_done);
+    }
+
+    private void updateBuildProfileActionButtons() {
+        setBuildActionEnabled(mActionBuildUndo, !mUndoStateStack.isEmpty());
+        setBuildActionEnabled(mActionBuildRedo, !mRedoStateStack.isEmpty());
+        setBuildActionEnabled(mActionBuildSave, mBuildConfigSaveSticky);
+        setBuildActionEnabled(
+                mIvBuildProfileDelete,
+                mBuildProfilesInitialized
+                && !BuildConfigStore.PROFILE_DEFAULT_ID.equals(mCurrentBuildProfileName)
+                && !isProjectJsonProfile(mCurrentBuildProfileName)
+        );
+    }
+
+    private void setBuildActionEnabled(@Nullable View view, boolean enabled) {
+        if (view == null) return;
+        view.setEnabled(enabled);
+        if (view instanceof ImageView) {
+            view.setAlpha(enabled ? 1.0f : 0.45f);
+        }
+    }
+
+    private void applyBuildUiState(@NonNull BuildUiState state) {
+        boolean previousApplying = mApplyingBuildUiState;
+        boolean previousSuppress = mSuppressBuildStateTracking;
+        mApplyingBuildUiState = true;
+        mSuppressBuildStateTracking = true;
+        try {
+            setTextIfChanged(mSourcePathView, state.sourcePath);
+            setTextIfChanged(mOutputPathView, state.outputPath);
+            setTextIfChanged(mAppNameView, state.appName);
+            setTextIfChanged(mPackageNameView, state.packageName);
+            setTextIfChanged(mVersionNameView, state.versionName);
+            setTextIfChanged(mVersionCodeView, state.versionCode);
+            setCheckedIfChanged(mLaunchLogsVisibleView, state.launchLogsVisible);
+            setCheckedIfChanged(mLaunchSplashVisibleView, state.launchSplashVisible);
+            setCheckedIfChanged(mLaunchLauncherVisibleView, state.launchLauncherVisible);
+            setCheckedIfChanged(mLaunchRunOnBootView, state.launchRunOnBoot);
+            setTextIfChanged(mLaunchSlugView, state.launchSlug);
+
+            applyStringSelectionsToFlexbox(mFlexboxAbisView, state.abis);
+            applyStringSelectionsToFlexbox(mFlexboxLibsView, state.libs);
+            applyStringSelectionsToFlexbox(mFlexboxPermissionsView, state.permissions);
+
+            setSignatureSchemeByLabel(state.signatureScheme);
+            mPendingKeyStorePathForStateApply = state.keyStorePath;
+            tryApplyPendingKeyStorePathSelection();
+        } finally {
+            mApplyingBuildUiState = previousApplying;
+            mSuppressBuildStateTracking = previousSuppress;
+        }
+    }
+
+    private void setTextIfChanged(@NonNull EditText editText, @Nullable String value) {
+        String target = value == null ? "" : value;
+        String current = editText.getText() == null ? "" : editText.getText().toString();
+        if (!Objects.equals(current, target)) {
+            editText.setText(target);
+        }
+    }
+
+    private void setCheckedIfChanged(@NonNull CheckBox checkBox, boolean checked) {
+        if (checkBox.isChecked() != checked) {
+            checkBox.setChecked(checked);
+        }
+    }
+
+    private void applyStringSelectionsToFlexbox(@NonNull FlexboxLayout flexboxLayout, @NonNull List<String> selectedValues) {
+        LinkedHashSet<String> normalized = selectedValues.stream()
+                .map(v -> v == null ? "" : v.trim().toLowerCase(Locale.ROOT))
+                .filter(v -> !v.isEmpty())
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        for (int i = 0; i < flexboxLayout.getChildCount(); i++) {
+            View child = flexboxLayout.getChildAt(i);
+            String label = parseWidgetLabel(child);
+            if (label == null) continue;
+            boolean checked = normalized.contains(label.trim().toLowerCase(Locale.ROOT));
+            if (child instanceof RoundCheckboxWithText) {
+                ((RoundCheckboxWithText) child).setChecked(checked);
+            } else if (child instanceof CheckBox) {
+                ((CheckBox) child).setChecked(checked);
+            }
+        }
+    }
+
+    @Nullable
+    private String parseWidgetLabel(@NonNull View child) {
+        CharSequence text = null;
+        if (child instanceof RoundCheckboxWithText) {
+            text = ((RoundCheckboxWithText) child).getText();
+        } else if (child instanceof CheckBox) {
+            text = ((CheckBox) child).getText();
+        }
+        if (text == null) return null;
+        return text.toString().split("\n")[0].trim();
+    }
+
+    private void setSignatureSchemeByLabel(@Nullable String rawLabel) {
+        if (rawLabel == null || rawLabel.trim().isEmpty()) {
+            return;
+        }
+        String target = rawLabel.trim();
+        int index = -1;
+        for (int i = 0; i < SIGNATURE_SCHEMES.size(); i++) {
+            String standard = SIGNATURE_SCHEMES.get(i).first;
+            if (standard.equalsIgnoreCase(target)) {
+                index = i;
+                break;
+            }
+        }
+        if (index < 0) {
+            String normalized = normalizeSignatureSchemeLabel(target);
+            for (int i = 0; i < SIGNATURE_SCHEMES.size(); i++) {
+                String standard = SIGNATURE_SCHEMES.get(i).first;
+                if (standard.equalsIgnoreCase(normalized)) {
+                    index = i;
+                    break;
+                }
+            }
+        }
+        if (index >= 0 && mSignatureSchemesView.getSelectedItemPosition() != index) {
+            mSignatureSchemesView.setSelection(index);
+        }
+    }
+
+    private void tryApplyPendingKeyStorePathSelection() {
+        if (mVerifiedKeyStoresView == null) return;
+        String pendingPath = mPendingKeyStorePathForStateApply;
+        if (pendingPath == null) return;
+
+        if (pendingPath.trim().isEmpty()) {
+            mVerifiedKeyStoresView.setSelection(0);
+            mPendingKeyStorePathForStateApply = null;
+            return;
+        }
+
+        for (int i = 1; i < mVerifiedKeyStoresView.getCount(); i++) {
+            Object item = mVerifiedKeyStoresView.getItemAtPosition(i);
+            if (!(item instanceof KeyStore)) continue;
+            KeyStore keyStore = (KeyStore) item;
+            if (pendingPath.equalsIgnoreCase(keyStore.getAbsolutePath())) {
+                mVerifiedKeyStoresView.setSelection(i);
+                mPendingKeyStorePathForStateApply = null;
+                return;
+            }
+        }
+    }
+
+    @NonNull
+    private BuildUiState captureCurrentBuildUiState() {
+        BuildUiState state = new BuildUiState();
+        state.sourcePath = mSourcePathView.getText() == null ? "" : mSourcePathView.getText().toString();
+        state.outputPath = mOutputPathView.getText() == null ? "" : mOutputPathView.getText().toString();
+        state.appName = mAppNameView.getText() == null ? "" : mAppNameView.getText().toString();
+        state.packageName = mPackageNameView.getText() == null ? "" : mPackageNameView.getText().toString();
+        state.versionName = mVersionNameView.getText() == null ? "" : mVersionNameView.getText().toString();
+        state.versionCode = mVersionCodeView.getText() == null ? "" : mVersionCodeView.getText().toString();
+        state.launchLogsVisible = mLaunchLogsVisibleView.isChecked();
+        state.launchSplashVisible = mLaunchSplashVisibleView.isChecked();
+        state.launchLauncherVisible = mLaunchLauncherVisibleView.isChecked();
+        state.launchRunOnBoot = mLaunchRunOnBootView.isChecked();
+        state.launchSlug = mLaunchSlugView.getText() == null ? "" : mLaunchSlugView.getText().toString();
+        state.abis = collectCheckedItems(mFlexboxAbisView);
+        state.libs = collectCheckedItems(mFlexboxLibsView);
+        state.permissions = collectCheckedItems(mFlexboxPermissionsView);
+        state.signatureScheme = normalizeSignatureSchemeLabel(
+                mSignatureSchemesView.getSelectedItem() == null ? "" : mSignatureSchemesView.getSelectedItem().toString()
+        );
+        if (mVerifiedKeyStoresView.getSelectedItemPosition() > 0) {
+            Object selected = mVerifiedKeyStoresView.getSelectedItem();
+            if (selected instanceof KeyStore) {
+                state.keyStorePath = ((KeyStore) selected).getAbsolutePath();
+            }
+        }
+        return state;
+    }
+
+    @NonNull
+    private String normalizeSignatureSchemeLabel(@Nullable String raw) {
+        if (raw == null) return "";
+        String value = raw.trim();
+        if (value.isEmpty()) return value;
+        int index = value.indexOf(" (");
+        if (index > 0) {
+            return value.substring(0, index).trim();
+        }
+        int selectedIndex = mSignatureSchemesView == null ? -1 : mSignatureSchemesView.getSelectedItemPosition();
+        if (selectedIndex >= 0 && selectedIndex < SIGNATURE_SCHEMES.size()) {
+            return SIGNATURE_SCHEMES.get(selectedIndex).first;
+        }
+        return value;
+    }
+
+    private void toggleAllFlexboxChildren(FlexboxLayout mFlexboxLibs) {
+        boolean shouldTrack = canTrackBuildStateChanges();
+        boolean previousSuppress = mSuppressBuildStateTracking;
+        if (shouldTrack) {
+            mSuppressBuildStateTracking = true;
+        }
+
+        boolean isAllChecked = true;
+        try {
+            for (int i = 0; i < mFlexboxLibs.getChildCount(); i += 1) {
+                View child = mFlexboxLibs.getChildAt(i);
+                if (child instanceof RoundCheckboxWithText) {
+                    if (!child.isEnabled()) {
+                        continue;
+                    }
+                    if (!((RoundCheckboxWithText) child).isChecked()) {
+                        isAllChecked = false;
+                        break;
+                    }
+                } else if (child instanceof CheckBox) {
+                    if (!child.isEnabled()) {
+                        continue;
+                    }
+                    if (!((CheckBox) child).isChecked()) {
+                        isAllChecked = false;
+                        break;
+                    }
+                }
+            }
+            for (int i = 0; i < mFlexboxLibs.getChildCount(); i += 1) {
+                View child = mFlexboxLibs.getChildAt(i);
+                if (child instanceof RoundCheckboxWithText) {
+                    if (!child.isEnabled()) {
+                        continue;
+                    }
+                    ((RoundCheckboxWithText) child).setChecked(!isAllChecked);
+                } else if (child instanceof CheckBox) {
+                    if (!child.isEnabled()) {
+                        continue;
+                    }
+                    ((CheckBox) child).setChecked(!isAllChecked);
+                }
+            }
+        } finally {
+            mSuppressBuildStateTracking = previousSuppress;
+        }
+        if (shouldTrack) {
+            onBuildUiControlChanged();
         }
     }
 
@@ -445,6 +1715,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
             child.setText(abiText);
             child.setChecked(false);
             child.setEnabled(false);
+            child.setOnCheckedChangeListener((buttonView, isChecked) -> onBuildUiControlChanged());
             child.setOnBeingUnavailableListener(this::promptForUnavailability);
             mFlexboxAbisView.addView(child);
         });
@@ -457,10 +1728,10 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         NotAskAgainDialog.Builder builder = new NotAskAgainDialog.Builder(context, key);
         builder.title(R.string.text_prompt);
         builder.content(getString(R.string.text_unable_to_build_apk_as_autojs6_does_not_include_selected_abi, abiText) + "\n\n" +
-                        getString(R.string.text_the_following_solutions_can_be_referred_to) + ":\n\n" +
+                        getString(R.string.text_the_following_solutions_can_be_referred_to) + getString(R.string.symbol_colon_with_blank) + "\n\n" +
                         "- " + getString(R.string.text_download_and_install_autojs6_including_above_abi, abiText) + "\n" +
                         "- " + getString(R.string.text_download_and_install_autojs6_including_all_abis) + " [" + getString(R.string.text_recommended) + "]\n\n" +
-                        getString(R.string.text_download_link_for_autojs6) + ":\n" +
+                        getString(R.string.text_download_link_for_autojs6) + getString(R.string.symbol_colon_with_blank) + "\n" +
                         getString(R.string.uri_autojs6_download_link));
         builder.positiveText(R.string.dialog_button_dismiss);
         builder.positiveColorRes(R.color.dialog_button_hint);
@@ -477,6 +1748,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     }
 
     private void syncAbisCheckedStates() {
+        mInvalidAbis.clear();
+        mUnavailableStandardAbis.clear();
         if (mProjectConfig != null) {
             List<String> projectConfigAbis = mProjectConfig.getAbis();
             if (!projectConfigAbis.isEmpty()) {
@@ -513,17 +1786,20 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
             RoundCheckboxWithText child = new RoundCheckboxWithText(this, null);
             child.setText(text);
             child.setChecked(false);
+            child.setOnCheckedChangeListener((buttonView, isChecked) -> onBuildUiControlChanged());
             mFlexboxLibsView.addView(child);
         });
     }
 
     private void syncLibsCheckedStates() {
+        mInvalidLibs.clear();
         if (mProjectConfig == null) return;
 
         var configLibs = mProjectConfig.getLibs();
         if (configLibs.isEmpty()) return;
 
-        // 创建一个新的副本
+        // Create a new copy.
+        // zh-CN: 创建一个新的副本
         var candidates = new ArrayList<>(configLibs);
 
         for (int i = 0; i < mFlexboxLibsView.getChildCount(); i += 1) {
@@ -562,8 +1838,9 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
 
     private void initVerifiedKeyStoresSpinner() {
         ArrayList<KeyStore> verifiedKeyStores = new ArrayList<>();
-        // 添加 默认密钥库 下拉选项
-        KeyStore defaultKeyStore = new KeyStore("", getString(R.string.text_default_key_store), "", "", "", false); // 仅用于显示下拉列表
+        // Add "default keystore" dropdown option.
+        // zh-CN: 添加 "默认密钥库" 下拉选项.
+        KeyStore defaultKeyStore = new KeyStore("", getString(R.string.text_default_key_store), "", "", "", false);
         verifiedKeyStores.add(defaultKeyStore);
 
         ArrayAdapter<KeyStore> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, verifiedKeyStores);
@@ -571,12 +1848,26 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         mVerifiedKeyStoresView.setAdapter(adapter);
 
         mKeyStoreViewModel.getVerifiedKeyStores().observe(this, keyStores -> {
-            // 清空现有的选项, 但保留第一个元素, 即默认密钥库
+            String selectedPath = null;
+            Object selected = mVerifiedKeyStoresView.getSelectedItem();
+            if (selected instanceof KeyStore) {
+                selectedPath = ((KeyStore) selected).getAbsolutePath();
+            }
+
+            // Clear existing options, but keep the first element,
+            // that is, the default keystore.
+            // zh-CN: 清空现有的选项, 但保留第一个元素, 即默认密钥库.
             if (verifiedKeyStores.size() > 1) {
                 verifiedKeyStores.subList(1, verifiedKeyStores.size()).clear();
             }
             verifiedKeyStores.addAll(keyStores);
             adapter.notifyDataSetChanged();
+
+            if (!TextUtils.isEmpty(selectedPath)) {
+                mPendingKeyStorePathForStateApply = selectedPath;
+            }
+            tryApplyPendingKeyStorePathSelection();
+            onBuildUiControlChanged();
         });
     }
 
@@ -600,8 +1891,28 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                     : ProjectConfig.DEFAULT_PERMISSIONS;
             boolean checked = hasPermission(permissions, permission);
             checkBox.setChecked(checked);
+            checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> onBuildUiControlChanged());
             mFlexboxPermissionsView.addView(checkBox);
         });
+    }
+
+    private void syncPermissionsCheckedStates(@NonNull List<String> permissions) {
+        for (int i = 0; i < mFlexboxPermissionsView.getChildCount(); i += 1) {
+            View child = mFlexboxPermissionsView.getChildAt(i);
+            CharSequence text = child instanceof RoundCheckboxWithText
+                    ? ((RoundCheckboxWithText) child).getText()
+                    : child instanceof CheckBox ? ((CheckBox) child).getText() : null;
+            if (text == null) {
+                continue;
+            }
+            String permission = text.toString().split("\n")[0].trim();
+            boolean checked = hasPermission(permissions, permission);
+            if (child instanceof RoundCheckboxWithText) {
+                ((RoundCheckboxWithText) child).setChecked(checked);
+            } else if (child instanceof CheckBox) {
+                ((CheckBox) child).setChecked(checked);
+            }
+        }
     }
 
     private boolean hasPermission(List<String> permissions, String permission) {
@@ -642,6 +1953,10 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
 
     @SuppressLint("CheckResult")
     private void setupWithSourceFile(ScriptFile file) {
+        if (file.isDirectory()) {
+            setSource(file);
+            return;
+        }
         String dir = file.getParent();
         if (dir != null && dir.startsWith(getFilesDir().getPath())) {
             dir = WorkingDirectoryUtils.getPath();
@@ -678,6 +1993,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                     mIconView.setVisibility(View.VISIBLE);
 
                     updatePermissionsCheckboxes(packageName);
+                    onSourcePresetReady();
                 }, throwable -> {
                     mPackageNameView.setText(getString(R.string.format_default_package_name, file.getSimplifiedName().toLowerCase(Language.getPrefLanguage().getLocale())));
                     mVersionNameView.setText(R.string.default_build_apk_version_name);
@@ -686,6 +2002,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                     mVersionNameParentView.setHint(R.string.text_version_name);
                     mVersionCodeParentView.setHint(R.string.text_version_code);
                     mIconView.setVisibility(View.VISIBLE);
+                    onSourcePresetReady();
                 });
 
         setSource(file);
@@ -766,8 +2083,13 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     }
 
     private void setSource(File file) {
+        mSource = file.getPath();
+        mSourcePathView.setText(file.getPath());
         if (!file.isDirectory()) {
-            mSourcePathView.setText(file.getPath());
+            mIsProjectLevelBuilding = false;
+            mProjectConfig = null;
+            mAppConfigView.setVisibility(View.VISIBLE);
+            mSourcePathContainerView.setVisibility(View.VISIBLE);
             return;
         }
         mProjectConfig = ProjectConfig.fromProjectDir(file.getPath());
@@ -775,9 +2097,54 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
             return;
         }
         mIsProjectLevelBuilding = true;
-        mOutputPathView.setText(new File(mSource, mProjectConfig.getBuildDir()).getPath());
-        mAppConfigView.setVisibility(View.GONE);
-        mSourcePathContainerView.setVisibility(View.GONE);
+        mProjectConfig.setSourcePath(file.getPath());
+        mOutputPathView.setText(new File(file, mProjectConfig.getBuildDir()).getPath());
+
+        mAppNameView.setText(mProjectConfig.getName());
+        mPackageNameView.setText(mProjectConfig.getPackageName());
+        mVersionNameView.setText(mProjectConfig.getVersionName());
+        mVersionCodeView.setText(String.valueOf(mProjectConfig.getVersionCode()));
+
+        mPackageNameParentView.setHint(R.string.text_package_name);
+        mVersionNameParentView.setHint(R.string.text_version_name);
+        mVersionCodeParentView.setHint(R.string.text_version_code);
+
+        String iconPath = mProjectConfig.getIconPath();
+        if (!TextUtils.isEmpty(iconPath)) {
+            String absoluteIconPath = new File(file, iconPath).getPath();
+            Drawable iconDrawable = Drawable.createFromPath(absoluteIconPath);
+            if (iconDrawable != null) {
+                mIconView.setImageDrawable(iconDrawable);
+                mIsDefaultIcon = false;
+            } else {
+                mIsDefaultIcon = true;
+            }
+        } else {
+            mIsDefaultIcon = true;
+        }
+        mIconView.setVisibility(View.VISIBLE);
+
+        boolean previousSuppress = mSuppressBuildStateTracking;
+        mSuppressBuildStateTracking = true;
+        try {
+            LaunchConfig launchConfig = mProjectConfig.getLaunchConfig();
+            if (launchConfig != null) {
+                mLaunchLogsVisibleView.setChecked(launchConfig.isLogsVisible());
+                mLaunchSplashVisibleView.setChecked(launchConfig.isSplashVisible());
+                mLaunchLauncherVisibleView.setChecked(launchConfig.isLauncherVisible());
+                mLaunchRunOnBootView.setChecked(launchConfig.isRunOnBoot());
+                mLaunchSlugView.setText(launchConfig.getSlug());
+            }
+            syncAbisCheckedStates();
+            syncLibsCheckedStates();
+            setSignatureSchemeByLabel(mProjectConfig.getSignatureScheme());
+            syncPermissionsCheckedStates(mProjectConfig.getPermissions());
+        } finally {
+            mSuppressBuildStateTracking = previousSuppress;
+        }
+
+        mAppConfigView.setVisibility(View.VISIBLE);
+        mSourcePathContainerView.setVisibility(View.VISIBLE);
     }
 
     void selectOutputDirPath() {
@@ -806,13 +2173,11 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
             ViewUtils.showToast(this, getString(R.string.error_at_least_one_abi_needs_to_be_selected));
             return;
         }
+        saveCurrentBuildProfileSilently();
         doBuildingApk();
     }
 
     private boolean checkInputs() {
-        if (mIsProjectLevelBuilding) {
-            return checkNotEmpty(mOutputPathView);
-        }
         return checkNotEmpty(mSourcePathView)
                & checkNotEmpty(mOutputPathView)
                & checkNotEmpty(mAppNameView)
@@ -897,7 +2262,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
 
         if (info.isEmpty()) return;
 
-        // 动态计算 splitLineLength, 考虑广范围的双宽字符
+        // Compute splitLineLength dynamically, considering wide characters.
+        // zh-CN: 动态计算 splitLineLength, 考虑广范围的双宽字符.
         for (ArrayList<Map<Integer, List<String>>> mapsList : info) {
             for (Map<Integer, List<String>> map : mapsList) {
                 for (Map.Entry<Integer, List<String>> entry : map.entrySet()) {
@@ -913,11 +2279,12 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
 
         final int finalSplitLineLength = splitLineLength;
 
-        // 生成对话框内容
+        // Generate dialog content.
+        // zh-CN: 生成对话框内容.
         String content = info.stream()
                 .map(mapsList -> mapsList.stream()
                         .map(map -> map.entrySet().stream()
-                                .map(entry -> getString(entry.getKey()) + ":\n[ " + String.join(", ", entry.getValue()) + " ]")
+                                .map(entry -> getString(entry.getKey()) + getString(R.string.symbol_colon_with_blank) + "\n[ " + String.join(", ", entry.getValue()) + " ]")
                                 .collect(Collectors.joining("\n")))
                         .collect(Collectors.joining("\n")))
                 .collect(Collectors.joining("\n" + "-".repeat(finalSplitLineLength) + "\n"));
@@ -931,7 +2298,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                 .show();
     }
 
-    // 判断字符是否是广范围双宽字符
+    // Determine whether a character is a wide glyph.
+    // zh-CN: 判断字符是否是广范围双宽字符.
     private boolean isWideCharacter(char c) {
         Character.UnicodeBlock block = Character.UnicodeBlock.of(c);
         return block == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS ||
@@ -1020,32 +2388,95 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     }
 
     private ProjectConfig determineProjectConfig() {
-        ArrayList<String> abis = collectCheckedItems(mFlexboxAbisView);
-        ArrayList<String> libs = collectCheckedItems(mFlexboxLibsView);
-        ArrayList<String> permissions = collectCheckedItems(mFlexboxPermissionsView);
+        return determineProjectConfig(captureCurrentBuildUiState());
+    }
+
+    private ProjectConfig determineProjectConfig(@NonNull BuildUiState state) {
+        ArrayList<String> abis = new ArrayList<>(state.abis);
+        ArrayList<String> libs = new ArrayList<>(state.libs);
+        ArrayList<String> permissions = new ArrayList<>(state.permissions);
+
+        String sourcePath = state.sourcePath == null ? "" : state.sourcePath.trim();
+        if (TextUtils.isEmpty(sourcePath)) {
+            sourcePath = mSource == null ? "" : mSource;
+        }
 
         ProjectConfig projectConfig;
         if (mProjectConfig != null) {
             projectConfig = mProjectConfig
                     .excludeDir(mProjectConfig.getBuildDir())
-                    .setSourcePath(mSource)
-                    .setIconPath(mProjectConfig.getIconPath() == null ? null : new File(mSource, mProjectConfig.getIconPath()).getPath());
+                    .setSourcePath(sourcePath);
+            if (!mIsDefaultIcon && mIconView.getDrawable() != null) {
+                projectConfig.setIconGetter(() -> BitmapUtils.drawableToBitmap(mIconView.getDrawable()));
+            } else if (!TextUtils.isEmpty(mProjectConfig.getIconPath())) {
+                projectConfig.setIconPath(new File(sourcePath, Objects.requireNonNull(mProjectConfig.getIconPath())).getPath());
+            }
         } else {
             projectConfig = new ProjectConfig()
-                    .setName(mAppNameView.getText().toString())
-                    .setSourcePath(mSourcePathView.getText().toString())
-                    .setPackageName(mPackageNameView.getText().toString())
-                    .setVersionName(mVersionNameView.getText().toString())
-                    .setVersionCode(Integer.parseInt(mVersionCodeView.getText().toString()))
+                    .setSourcePath(sourcePath)
                     .setIconGetter(mIsDefaultIcon ? null : () -> BitmapUtils.drawableToBitmap(mIconView.getDrawable()));
         }
 
-        return projectConfig
+        int fallbackVersionCode = mProjectConfig == null ? 1 : mProjectConfig.getVersionCode();
+        if (fallbackVersionCode <= 0) {
+            fallbackVersionCode = 1;
+        }
+        int versionCode = parseVersionCodeOrDefault(state.versionCode, fallbackVersionCode);
+        String signatureScheme = TextUtils.isEmpty(state.signatureScheme)
+                ? normalizeSignatureSchemeLabel(mSignatureSchemesView.getSelectedItem() == null ? "" : mSignatureSchemesView.getSelectedItem().toString())
+                : state.signatureScheme;
+        LaunchConfig launchConfig = projectConfig.getLaunchConfig();
+        if (launchConfig == null) {
+            launchConfig = new LaunchConfig();
+        }
+        launchConfig.setLogsVisible(state.launchLogsVisible);
+        launchConfig.setSplashVisible(state.launchSplashVisible);
+        launchConfig.setLauncherVisible(state.launchLauncherVisible);
+        launchConfig.setRunOnBoot(state.launchRunOnBoot);
+        launchConfig.setSlug(state.launchSlug);
+
+        ProjectConfig resolved = projectConfig
+                .setName(state.appName)
+                .setPackageName(state.packageName)
+                .setVersionName(state.versionName)
+                .setVersionCode(versionCode)
                 .setAbis(abis)
                 .setLibs(libs)
-                .setKeyStore(mVerifiedKeyStoresView.getSelectedItemPosition() > 0 ? (KeyStore) mVerifiedKeyStoresView.getSelectedItem() : null)
-                .setSignatureScheme(mSignatureSchemesView.getSelectedItem().toString())
+                .setKeyStore(resolveKeyStoreByPath(state.keyStorePath))
+                .setSignatureScheme(signatureScheme)
                 .setPermissions(permissions);
+        resolved.setLaunchConfig(launchConfig);
+        return resolved;
+    }
+
+    @Nullable
+    private KeyStore resolveKeyStoreByPath(@Nullable String keyStorePath) {
+        if (TextUtils.isEmpty(keyStorePath) || mVerifiedKeyStoresView == null) {
+            return null;
+        }
+        for (int i = 1; i < mVerifiedKeyStoresView.getCount(); i++) {
+            Object item = mVerifiedKeyStoresView.getItemAtPosition(i);
+            if (!(item instanceof KeyStore)) {
+                continue;
+            }
+            KeyStore keyStore = (KeyStore) item;
+            if (keyStorePath.equalsIgnoreCase(keyStore.getAbsolutePath())) {
+                return keyStore;
+            }
+        }
+        return null;
+    }
+
+    private int parseVersionCodeOrDefault(@Nullable String rawVersionCode, int fallback) {
+        String value = rawVersionCode == null ? "" : rawVersionCode.trim();
+        if (value.isEmpty()) {
+            return fallback;
+        }
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException ignored) {
+            return fallback;
+        }
     }
 
     @NotNull
@@ -1239,7 +2670,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     }
 
     // Abort build cooperatively and trigger cleanup as early as possible.
-    // zh-CN: 协作式中止构建, 并尽早触发清理.
+    // zh-CN: Abort build cooperatively and trigger cleanup as early as possible.
     private void requestBuildAbort() {
         if (!mBuildCancelled.compareAndSet(false, true)) {
             return;
@@ -1269,7 +2700,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     }
 
     // Best-effort cleanup for workspace and output artifacts.
-    // zh-CN: 对工作区和输出产物执行尽力清理.
+    // zh-CN: Best-effort cleanup for workspace and output artifacts.
     private void cleanupBuildArtifacts(@Nullable File workspace, @Nullable File outApk, @Nullable File outApkBackup, boolean restoreOutputApk) {
         if (workspace != null && workspace.exists()) {
             PFiles.deleteRecursively(workspace);
@@ -1436,10 +2867,15 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    @SuppressLint({"CheckResult", "MissingSuperCall"})
+    @SuppressLint("CheckResult")
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode == RESULT_OK) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode != RESULT_OK) {
+            return;
+        }
+
+        if (requestCode == REQUEST_CODE) {
             AppsIconSelectActivity.getDrawableFromIntent(getApplicationContext(), data)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -1447,6 +2883,300 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                         mIconView.setImageDrawable(drawable);
                         mIsDefaultIcon = false;
                     }, Throwable::printStackTrace);
+            return;
+        }
+
+        Uri uri = data == null ? null : data.getData();
+        if (uri == null) {
+            return;
+        }
+        if (requestCode == REQ_EXPORT_JSON) {
+            doExportBuildProfileToUri(uri);
+            return;
+        }
+        if (requestCode == REQ_IMPORT_JSON) {
+            doImportBuildProfileFromUri(uri);
+        }
+    }
+
+    private static final class BuildFieldPolicy {
+        boolean fixedSourcePath = false;
+        boolean fixedIcon = false;
+        boolean fixedOutputPath = false;
+        boolean fixedAppName = false;
+        boolean fixedPackageName = false;
+        boolean fixedVersionName = false;
+        boolean fixedVersionCode = false;
+        boolean fixedLaunchLogsVisible = false;
+        boolean fixedLaunchSplashVisible = false;
+        boolean fixedLaunchLauncherVisible = false;
+        boolean fixedLaunchRunOnBoot = false;
+        boolean fixedLaunchSlug = false;
+        boolean fixedAbis = false;
+        boolean fixedLibs = true;
+        boolean fixedSignatureScheme = true;
+        boolean fixedKeyStore = true;
+        boolean fixedPermissions = true;
+
+        @NonNull
+        static BuildFieldPolicy defaultPolicy() {
+            return new BuildFieldPolicy();
+        }
+
+        @NonNull
+        static BuildFieldPolicy projectJsonPolicy() {
+            BuildFieldPolicy policy = new BuildFieldPolicy();
+            policy.fixedSourcePath = true;
+            policy.fixedIcon = true;
+            policy.fixedOutputPath = true;
+            policy.fixedAppName = true;
+            policy.fixedPackageName = true;
+            policy.fixedVersionName = true;
+            policy.fixedVersionCode = true;
+            policy.fixedLaunchLogsVisible = true;
+            policy.fixedLaunchSplashVisible = true;
+            policy.fixedLaunchLauncherVisible = true;
+            policy.fixedLaunchRunOnBoot = true;
+            policy.fixedLaunchSlug = true;
+            policy.fixedAbis = true;
+            policy.fixedLibs = true;
+            policy.fixedSignatureScheme = true;
+            policy.fixedKeyStore = true;
+            policy.fixedPermissions = true;
+            return policy;
+        }
+
+        @NonNull
+        BuildFieldPolicy copy() {
+            BuildFieldPolicy copied = new BuildFieldPolicy();
+            copied.fixedSourcePath = fixedSourcePath;
+            copied.fixedIcon = fixedIcon;
+            copied.fixedOutputPath = fixedOutputPath;
+            copied.fixedAppName = fixedAppName;
+            copied.fixedPackageName = fixedPackageName;
+            copied.fixedVersionName = fixedVersionName;
+            copied.fixedVersionCode = fixedVersionCode;
+            copied.fixedLaunchLogsVisible = fixedLaunchLogsVisible;
+            copied.fixedLaunchSplashVisible = fixedLaunchSplashVisible;
+            copied.fixedLaunchLauncherVisible = fixedLaunchLauncherVisible;
+            copied.fixedLaunchRunOnBoot = fixedLaunchRunOnBoot;
+            copied.fixedLaunchSlug = fixedLaunchSlug;
+            copied.fixedAbis = fixedAbis;
+            copied.fixedLibs = fixedLibs;
+            copied.fixedSignatureScheme = fixedSignatureScheme;
+            copied.fixedKeyStore = fixedKeyStore;
+            copied.fixedPermissions = fixedPermissions;
+            return copied;
+        }
+
+        @NonNull
+        JSONObject toJson() {
+            JSONObject out = new JSONObject();
+            try {
+                out.put(BuildConfigStore.FIELD_FIXED_SOURCE_PATH, fixedSourcePath);
+                out.put(BuildConfigStore.FIELD_FIXED_ICON, fixedIcon);
+                out.put(BuildConfigStore.FIELD_FIXED_OUTPUT_PATH, fixedOutputPath);
+                out.put(BuildConfigStore.FIELD_FIXED_APP_NAME, fixedAppName);
+                out.put(BuildConfigStore.FIELD_FIXED_PACKAGE_NAME, fixedPackageName);
+                out.put(BuildConfigStore.FIELD_FIXED_VERSION_NAME, fixedVersionName);
+                out.put(BuildConfigStore.FIELD_FIXED_VERSION_CODE, fixedVersionCode);
+                out.put(BuildConfigStore.FIELD_FIXED_LAUNCH_LOGS_VISIBLE, fixedLaunchLogsVisible);
+                out.put(BuildConfigStore.FIELD_FIXED_LAUNCH_SPLASH_VISIBLE, fixedLaunchSplashVisible);
+                out.put(BuildConfigStore.FIELD_FIXED_LAUNCH_LAUNCHER_VISIBLE, fixedLaunchLauncherVisible);
+                out.put(BuildConfigStore.FIELD_FIXED_LAUNCH_RUN_ON_BOOT, fixedLaunchRunOnBoot);
+                out.put(BuildConfigStore.FIELD_FIXED_LAUNCH_SLUG, fixedLaunchSlug);
+                out.put(BuildConfigStore.FIELD_FIXED_ABIS, fixedAbis);
+                out.put(BuildConfigStore.FIELD_FIXED_LIBS, fixedLibs);
+                out.put(BuildConfigStore.FIELD_FIXED_SIGNATURE_SCHEME, fixedSignatureScheme);
+                out.put(BuildConfigStore.FIELD_FIXED_KEY_STORE, fixedKeyStore);
+                out.put(BuildConfigStore.FIELD_FIXED_PERMISSIONS, fixedPermissions);
+            } catch (JSONException ignored) {
+                // Keep best-effort snapshot for profile persistence.
+            }
+            return out;
+        }
+
+        @NonNull
+        static BuildFieldPolicy fromJson(@Nullable JSONObject json) {
+            BuildFieldPolicy policy = defaultPolicy();
+            if (json == null) return policy;
+            policy.fixedSourcePath = json.optBoolean(BuildConfigStore.FIELD_FIXED_SOURCE_PATH, policy.fixedSourcePath);
+            policy.fixedIcon = json.optBoolean(BuildConfigStore.FIELD_FIXED_ICON, policy.fixedIcon);
+            policy.fixedOutputPath = json.optBoolean(BuildConfigStore.FIELD_FIXED_OUTPUT_PATH, policy.fixedOutputPath);
+            policy.fixedAppName = json.optBoolean(BuildConfigStore.FIELD_FIXED_APP_NAME, policy.fixedAppName);
+            policy.fixedPackageName = json.optBoolean(BuildConfigStore.FIELD_FIXED_PACKAGE_NAME, policy.fixedPackageName);
+            policy.fixedVersionName = json.optBoolean(BuildConfigStore.FIELD_FIXED_VERSION_NAME, policy.fixedVersionName);
+            policy.fixedVersionCode = json.optBoolean(BuildConfigStore.FIELD_FIXED_VERSION_CODE, policy.fixedVersionCode);
+            policy.fixedLaunchLogsVisible = json.optBoolean(BuildConfigStore.FIELD_FIXED_LAUNCH_LOGS_VISIBLE, policy.fixedLaunchLogsVisible);
+            policy.fixedLaunchSplashVisible = json.optBoolean(BuildConfigStore.FIELD_FIXED_LAUNCH_SPLASH_VISIBLE, policy.fixedLaunchSplashVisible);
+            policy.fixedLaunchLauncherVisible = json.optBoolean(BuildConfigStore.FIELD_FIXED_LAUNCH_LAUNCHER_VISIBLE, policy.fixedLaunchLauncherVisible);
+            policy.fixedLaunchRunOnBoot = json.optBoolean(BuildConfigStore.FIELD_FIXED_LAUNCH_RUN_ON_BOOT, policy.fixedLaunchRunOnBoot);
+            policy.fixedLaunchSlug = json.optBoolean(BuildConfigStore.FIELD_FIXED_LAUNCH_SLUG, policy.fixedLaunchSlug);
+            policy.fixedAbis = json.optBoolean(BuildConfigStore.FIELD_FIXED_ABIS, policy.fixedAbis);
+            policy.fixedLibs = json.optBoolean(BuildConfigStore.FIELD_FIXED_LIBS, policy.fixedLibs);
+            policy.fixedSignatureScheme = json.optBoolean(BuildConfigStore.FIELD_FIXED_SIGNATURE_SCHEME, policy.fixedSignatureScheme);
+            policy.fixedKeyStore = json.optBoolean(BuildConfigStore.FIELD_FIXED_KEY_STORE, policy.fixedKeyStore);
+            policy.fixedPermissions = json.optBoolean(BuildConfigStore.FIELD_FIXED_PERMISSIONS, policy.fixedPermissions);
+            return policy;
+        }
+    }
+
+    private static final class BuildUiState {
+        String sourcePath = "";
+        String outputPath = "";
+        String appName = "";
+        String packageName = "";
+        String versionName = "";
+        String versionCode = "";
+        boolean launchLogsVisible = true;
+        boolean launchSplashVisible = true;
+        boolean launchLauncherVisible = true;
+        boolean launchRunOnBoot = false;
+        String launchSlug = "";
+        String signatureScheme = "";
+        String keyStorePath = "";
+        ArrayList<String> abis = new ArrayList<>();
+        ArrayList<String> libs = new ArrayList<>();
+        ArrayList<String> permissions = new ArrayList<>();
+
+        @NonNull
+        BuildUiState copy() {
+            BuildUiState copied = new BuildUiState();
+            copied.sourcePath = sourcePath;
+            copied.outputPath = outputPath;
+            copied.appName = appName;
+            copied.packageName = packageName;
+            copied.versionName = versionName;
+            copied.versionCode = versionCode;
+            copied.launchLogsVisible = launchLogsVisible;
+            copied.launchSplashVisible = launchSplashVisible;
+            copied.launchLauncherVisible = launchLauncherVisible;
+            copied.launchRunOnBoot = launchRunOnBoot;
+            copied.launchSlug = launchSlug;
+            copied.signatureScheme = signatureScheme;
+            copied.keyStorePath = keyStorePath;
+            copied.abis = new ArrayList<>(abis);
+            copied.libs = new ArrayList<>(libs);
+            copied.permissions = new ArrayList<>(permissions);
+            return copied;
+        }
+
+        @NonNull
+        JSONObject toJson() {
+            JSONObject json = new JSONObject();
+            try {
+                json.put(BuildConfigStore.STATE_SOURCE_PATH, sourcePath);
+                json.put(BuildConfigStore.STATE_OUTPUT_PATH, outputPath);
+                json.put(BuildConfigStore.STATE_APP_NAME, appName);
+                json.put(BuildConfigStore.STATE_PACKAGE_NAME, packageName);
+                json.put(BuildConfigStore.STATE_VERSION_NAME, versionName);
+                json.put(BuildConfigStore.STATE_VERSION_CODE, versionCode);
+                json.put(BuildConfigStore.STATE_LAUNCH_LOGS_VISIBLE, launchLogsVisible);
+                json.put(BuildConfigStore.STATE_LAUNCH_SPLASH_VISIBLE, launchSplashVisible);
+                json.put(BuildConfigStore.STATE_LAUNCH_LAUNCHER_VISIBLE, launchLauncherVisible);
+                json.put(BuildConfigStore.STATE_LAUNCH_RUN_ON_BOOT, launchRunOnBoot);
+                json.put(BuildConfigStore.STATE_LAUNCH_SLUG, launchSlug);
+                json.put(BuildConfigStore.STATE_SIGNATURE_SCHEME, signatureScheme);
+                json.put(BuildConfigStore.STATE_KEY_STORE_PATH, keyStorePath);
+                json.put(BuildConfigStore.STATE_ABIS, new JSONArray(abis));
+                json.put(BuildConfigStore.STATE_LIBS, new JSONArray(libs));
+                json.put(BuildConfigStore.STATE_PERMISSIONS, new JSONArray(permissions));
+            } catch (JSONException ignored) {
+                // Keep best-effort snapshot for profile persistence.
+            }
+            return json;
+        }
+
+        @NonNull
+        static BuildUiState fromJson(@NonNull JSONObject json) {
+            BuildUiState state = new BuildUiState();
+            state.sourcePath = json.optString(BuildConfigStore.STATE_SOURCE_PATH, "");
+            state.outputPath = json.optString(BuildConfigStore.STATE_OUTPUT_PATH, "");
+            state.appName = json.optString(BuildConfigStore.STATE_APP_NAME, "");
+            state.packageName = json.optString(BuildConfigStore.STATE_PACKAGE_NAME, "");
+            state.versionName = json.optString(BuildConfigStore.STATE_VERSION_NAME, "");
+            state.versionCode = json.optString(BuildConfigStore.STATE_VERSION_CODE, "");
+            state.launchLogsVisible = json.optBoolean(BuildConfigStore.STATE_LAUNCH_LOGS_VISIBLE, true);
+            state.launchSplashVisible = json.optBoolean(BuildConfigStore.STATE_LAUNCH_SPLASH_VISIBLE, true);
+            state.launchLauncherVisible = json.optBoolean(BuildConfigStore.STATE_LAUNCH_LAUNCHER_VISIBLE, true);
+            state.launchRunOnBoot = json.optBoolean(BuildConfigStore.STATE_LAUNCH_RUN_ON_BOOT, false);
+            state.launchSlug = json.optString(BuildConfigStore.STATE_LAUNCH_SLUG, "");
+            state.signatureScheme = json.optString(BuildConfigStore.STATE_SIGNATURE_SCHEME, "");
+            state.keyStorePath = json.optString(BuildConfigStore.STATE_KEY_STORE_PATH, "");
+            state.abis = readStringArray(json.optJSONArray(BuildConfigStore.STATE_ABIS));
+            state.libs = readStringArray(json.optJSONArray(BuildConfigStore.STATE_LIBS));
+            state.permissions = readStringArray(json.optJSONArray(BuildConfigStore.STATE_PERMISSIONS));
+            return state;
+        }
+
+        @NonNull
+        private static ArrayList<String> readStringArray(@Nullable JSONArray array) {
+            ArrayList<String> out = new ArrayList<>();
+            if (array == null) return out;
+            LinkedHashSet<String> dedup = new LinkedHashSet<>();
+            for (int i = 0; i < array.length(); i++) {
+                String value = array.optString(i, "").trim();
+                if (!value.isEmpty()) {
+                    dedup.add(value);
+                }
+            }
+            out.addAll(dedup);
+            return out;
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (this == other) return true;
+            if (!(other instanceof BuildUiState)) return false;
+            BuildUiState that = (BuildUiState) other;
+            return Objects.equals(sourcePath, that.sourcePath)
+                   && Objects.equals(outputPath, that.outputPath)
+                   && Objects.equals(appName, that.appName)
+                   && Objects.equals(packageName, that.packageName)
+                   && Objects.equals(versionName, that.versionName)
+                   && Objects.equals(versionCode, that.versionCode)
+                   && launchLogsVisible == that.launchLogsVisible
+                   && launchSplashVisible == that.launchSplashVisible
+                   && launchLauncherVisible == that.launchLauncherVisible
+                   && launchRunOnBoot == that.launchRunOnBoot
+                   && Objects.equals(launchSlug, that.launchSlug)
+                   && Objects.equals(signatureScheme, that.signatureScheme)
+                   && Objects.equals(keyStorePath, that.keyStorePath)
+                   && Objects.equals(abis, that.abis)
+                   && Objects.equals(libs, that.libs)
+                   && Objects.equals(permissions, that.permissions);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(
+                    sourcePath,
+                    outputPath,
+                    appName,
+                    packageName,
+                    versionName,
+                    versionCode,
+                    launchLogsVisible,
+                    launchSplashVisible,
+                    launchLauncherVisible,
+                    launchRunOnBoot,
+                    launchSlug,
+                    signatureScheme,
+                    keyStorePath,
+                    abis,
+                    libs,
+                    permissions
+            );
+        }
+    }
+
+    private static final class ProfileEntry {
+        final String internalName;
+        final String displayName;
+
+        ProfileEntry(@NonNull String internalName, @NonNull String displayName) {
+            this.internalName = internalName;
+            this.displayName = displayName;
         }
     }
 
@@ -1455,5 +3185,4 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                 .putExtra(BuildActivity.EXTRA_SOURCE, extraSource);
         IntentUtils.startSafely(intent, context);
     }
-
 }

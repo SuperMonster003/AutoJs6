@@ -16,10 +16,18 @@
         <org.autojs.autojs.theme.widget.ThemeColorToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="?attr/actionBarSize"
             android:theme="@style/ToolBarStyle"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
+            app:contentInsetEndWithActions="2dp"
+            app:contentInsetStartWithNavigation="0dp"
+            app:popupTheme="@style/AppTheme.PopupOverlay">
 
+            <FrameLayout
+                android:id="@+id/toolbar_menu"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="end" />
+        </org.autojs.autojs.theme.widget.ThemeColorToolbar>
     </com.google.android.material.appbar.AppBarLayout>
 
     <FrameLayout
@@ -36,6 +44,76 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
+
+                <LinearLayout
+                    android:id="@+id/build_profile_panel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingHorizontal="16dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingTop="2dp"
+                        android:paddingBottom="6dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginEnd="8dp"
+                            android:text="@string/text_build_profile"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                            android:textColor="?android:textColorSecondary" />
+
+                        <Spinner
+                            android:id="@+id/buildProfileSpinner"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:layout_gravity="center_vertical" />
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="32dp"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginStart="4dp"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:id="@+id/ivBuildProfileNew"
+                                android:layout_width="32dp"
+                                android:layout_height="match_parent"
+                                android:layout_marginHorizontal="2dp"
+                                android:paddingHorizontal="3dp"
+                                android:src="@drawable/ic_add_black_48dp"
+                                android:contentDescription="@string/text_build_profile_new" />
+
+                            <ImageView
+                                android:id="@+id/ivBuildProfileDelete"
+                                android:layout_width="32dp"
+                                android:layout_height="match_parent"
+                                android:layout_marginHorizontal="2dp"
+                                android:paddingHorizontal="5dp"
+                                android:src="@drawable/ic_close_black_48dp"
+                                android:contentDescription="@string/text_build_profile_delete" />
+
+                            <ImageView
+                                android:id="@+id/ivBuildProfileMore"
+                                android:layout_width="32dp"
+                                android:layout_height="match_parent"
+                                android:layout_marginHorizontal="2dp"
+                                android:paddingHorizontal="4dp"
+                                android:src="@drawable/ic_more_vert_black_48dp"
+                                android:contentDescription="@string/text_build_profile_more" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -72,7 +150,6 @@
                                 android:lineSpacingMultiplier="1.1"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content" />
-
                         </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
 
                         <ImageView
@@ -86,7 +163,6 @@
                             android:clickable="true"
                             android:focusable="true"
                             android:layout_gravity="bottom|center" />
-
                     </LinearLayout>
 
                     <LinearLayout
@@ -109,7 +185,6 @@
                                 android:lineSpacingMultiplier="1.1"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content" />
-
                         </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
 
                         <ImageView
@@ -123,9 +198,7 @@
                             android:clickable="true"
                             android:focusable="true"
                             android:layout_gravity="bottom|center" />
-
                     </LinearLayout>
-
                 </LinearLayout>
 
                 <LinearLayout
@@ -155,7 +228,6 @@
                             android:inputType="text"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content" />
-
                     </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
 
                     <org.autojs.autojs.theme.widget.ThemeColorTextInputLayout
@@ -165,7 +237,6 @@
                         android:layout_marginTop="8dp"
                         android:hint="@string/text_package_name_with_computing"
                         app:expandedHintEnabled="false">
-
                         <!-- @Hint by SuperMonster003 on Nov 18, 2024. -->
                         <!--  ! Input limitation will be handled in Java/Kotlin class. -->
                         <!--  ! zh-CN: 将于 Java/Kotlin 类中处理输入限制. -->
@@ -176,7 +247,6 @@
                             android:layout_height="wrap_content"
                             android:inputType="text"
                             android:imeOptions="actionNext" />
-
                     </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
 
                     <LinearLayout
@@ -205,7 +275,6 @@
                                     android:layout_height="wrap_content"
                                     android:inputType="text"
                                     tools:text="1.0.0" />
-
                             </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
 
                             <org.autojs.autojs.theme.widget.ThemeColorTextInputLayout
@@ -222,9 +291,7 @@
                                     android:layout_height="wrap_content"
                                     android:inputType="number"
                                     tools:text="1" />
-
                             </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
-
                         </LinearLayout>
 
                         <LinearLayout
@@ -252,11 +319,66 @@
                                 android:text="@string/text_icon"
                                 android:textSize="12sp"
                                 android:gravity="center" />
-
                         </LinearLayout>
-
                     </LinearLayout>
 
+                    <TextView
+                        android:id="@+id/text_launch_configs"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:layout_marginBottom="16dp"
+                        android:text="@string/text_launch_config"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                        android:textColor="?android:textColorSecondary" />
+
+                    <CheckBox
+                        android:id="@+id/checkbox_launch_run_on_boot"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/text_launch_run_on_boot"
+                        android:paddingStart="4dp"
+                        android:paddingEnd="4dp" />
+
+                    <CheckBox
+                        android:id="@+id/checkbox_launch_logs_visible"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/text_launch_logs_visible"
+                        android:paddingStart="4dp"
+                        android:paddingEnd="4dp" />
+
+                    <CheckBox
+                        android:id="@+id/checkbox_launch_splash_visible"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/text_launch_splash_visible"
+                        android:paddingStart="4dp"
+                        android:paddingEnd="4dp" />
+
+                    <CheckBox
+                        android:id="@+id/checkbox_launch_launcher_visible"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/text_launch_launcher_visible"
+                        android:paddingStart="4dp"
+                        android:paddingEnd="4dp" />
+
+                    <org.autojs.autojs.theme.widget.ThemeColorTextInputLayout
+                        android:id="@+id/launch_slug_parent"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:hint="@string/text_launch_slug"
+                        app:expandedHintEnabled="false">
+
+                        <androidx.appcompat.widget.AppCompatEditText
+                            android:id="@+id/launch_slug"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="text"
+                            android:maxLines="2" />
+                    </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
                 </LinearLayout>
 
                 <LinearLayout
@@ -287,7 +409,6 @@
                         app:flexDirection="row"
                         app:flexWrap="wrap"
                         app:alignContent="center" />
-
                 </LinearLayout>
 
                 <LinearLayout
@@ -318,7 +439,6 @@
                         app:flexDirection="row"
                         app:flexWrap="wrap"
                         app:alignContent="center" />
-
                 </LinearLayout>
 
                 <LinearLayout
@@ -432,16 +552,13 @@
                         app:flexDirection="column"
                         app:flexWrap="wrap"
                         app:showDivider="middle" />
-
                 </LinearLayout>
 
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="72dp"
                     android:background="@android:color/transparent" />
-
             </LinearLayout>
-
         </ScrollView>
 
         <org.autojs.autojs.theme.widget.ThemeColorFloatingActionButton
@@ -452,7 +569,5 @@
             android:layout_margin="16dp"
             android:src="@drawable/ic_packaging"
             android:tint="@color/toolbar_text" />
-
     </FrameLayout>
-
 </LinearLayout>

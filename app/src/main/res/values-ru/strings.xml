@@ -117,9 +117,11 @@
     <string name="dialog_button_abandon">Отказаться</string>
     <string name="dialog_button_abort">Прервать</string>
     <string name="dialog_button_abort_connection">Прервать соединение</string>
+    <string name="dialog_button_activate">Активировать</string>
     <string name="dialog_button_add">Добавить</string>
     <string name="dialog_button_advanced_settings">Доп.</string>
     <string name="dialog_button_amend_host_address">Исправить адрес</string>
+    <string name="dialog_button_authorize">Авторизовать</string>
     <string name="dialog_button_back">@string/text_back</string>
     <string name="dialog_button_cancel">Отменить</string>
     <string name="dialog_button_cancel_download">Отменить</string>
@@ -229,6 +231,7 @@
     <string name="error_check_for_update">Не удалось проверить наличие обновлений</string>
     <string name="error_colon_must_follow_a_valid_ip_address">Двоеточие должно следовать за действительным IP-адресом</string>
     <string name="error_compass_cannot_be_null">Компас не может быть нулевым</string>
+    <string name="error_conditions_not_met_for_record">Запись скриптов требует выполнения хотя бы одного из следующих условий:\n- Доступ root\n- Доступ Shizuku</string>
     <string name="error_connect_to_remote">Не удается подключиться к удаленному серверу: %s</string>
     <string name="error_connection_failed_with_host">Не удалось подключиться к \"%1$s\".</string>
     <string name="error_connection_timed_out">Тайм-аут подключения (%d мс)</string>
@@ -252,6 +255,7 @@
     <string name="error_failed_to_convert_into_drawable">Не удалось преобразовать значение %s в Drawable</string>
     <string name="error_failed_to_copy">Не удалось скопировать</string>
     <string name="error_failed_to_create">Не удалось создать</string>
+    <string name="error_failed_to_enable_the_plugin">Не удалось включить плагин</string>
     <string name="error_failed_to_go_to_access_settings">Не удалось открыть страницу настроек</string>
     <string name="error_failed_to_grant_shizuku_access">Не удалось предоставить права на использование Shizuku</string>
     <string name="error_failed_to_instantiate">Ошибка создания экземпляра \"%s\"</string>
@@ -268,6 +272,7 @@
     <string name="error_failed_to_retrieve_version_properties_file_to_parse_version_information">Не удалось получить файл version.properties для анализа информации о версии</string>
     <string name="error_failed_to_revoke_shizuku_access">Не удалось отозвать права на Shizuku</string>
     <string name="error_failed_to_run_script">Ошибка выполнения скрипта</string>
+    <string name="error_failed_to_save">Не удалось сохранить</string>
     <string name="error_failed_to_save_project_config">Не удалось сохранить конфигурацию проекта</string>
     <string name="error_file_in_path_does_not_exist">Файл в пути \"%1$s\" не существует</string>
     <string name="error_function_called_in_ui_thread">Поток пользовательского интерфейса не может быть заблокирован. Попробуйте запустить %s() в подпотоке или подскрипте</string>
@@ -328,6 +333,9 @@
     <string name="error_pattern_syntax">Неверный синтаксис шаблона</string>
     <string name="error_plugin_apk_does_not_contain_required_assets_for_variant">APK плагина не содержит требуемые ресурсы для variant=\"%1$s\": %2$s.</string>
     <string name="error_plugin_apk_does_not_contain_required_native_libraries">APK плагина не содержит требуемые native-библиотеки: %1$s.</string>
+    <string name="error_plugin_is_not_authorized_in_plugin_center">Плагин \"%1$s\" не авторизован в Центре плагинов</string>
+    <string name="error_plugin_is_not_enabled_in_plugin_center">Плагин \"%1$s\" не включен в Центре плагинов</string>
+    <string name="error_plugin_not_found_in_installed_apps">Плагин \"%1$s\" не найден среди установленных приложений</string>
     <string name="error_plugin_returned_empty_info">Плагин %1$s вернул пустую информацию.</string>
     <string name="error_plugin_returned_invalid_variant">Плагин %1$s вернул недопустимый variant: %2$s.</string>
     <string name="error_port_num_over_65535">Номер порта более 65535</string>
@@ -369,6 +377,7 @@
     <string name="error_unknown_picker_result_type_with_params" formatted="false">Неизвестный тип результата {имя: %s, params: %s}</string>
     <string name="error_unknown_picker_selector_type" formatted="false">Неизвестный селектор {имя: %s, тип: %s}</string>
     <string name="error_unknown_type">Неизвестный тип: %s</string>
+    <string name="error_unsupported_plugin_connection">Неподдерживаемое подключение плагина</string>
     <string name="error_webp_lossless_quality_not_supported">Формат WebP-Lossless нельзя сжать с параметром качества; используйте вместо этого JPEG/PNG/WebP-Lossy</string>
     <string name="file_not_exist_or_readable">Файл не существует или недоступен для чтения</string>
     <string name="file_not_exist_or_readable_with_path">\"Файл не существует или не доступен для чтения: %s\".</string>
@@ -385,6 +394,7 @@
     <string name="hint_loop_delay">Задержка перед циклом</string>
     <string name="hint_loop_times">0 для бесконечного цикла</string>
     <string name="hint_pc_server_address_supported_formats">Поддерживаются IPv4, IPv6 и доменные имена.</string>
+    <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">Попробуйте нажать кнопку \"Активировать\", чтобы активировать плагин один раз.\nЕсли активация пройдет успешно, кнопка автоматически включится в течение некоторого времени.</string>
     <string name="instruction_install_plugin_from_url">Введите URL, указывающий на удалённый плагин.\nНапример: \"https://example.com/plugin.apk\".</string>
     <string name="item_delete_permanently">Удалить навсегда</string>
     <string name="item_move_to_trash">Переместить в корзину</string>
@@ -431,6 +441,7 @@
     <string name="plugin_item_info_last_install_time">Посл. устан.</string>
     <string name="plugin_item_info_last_uninstall_time">Посл. удал.</string>
     <string name="plugin_item_info_last_update_time">Посл. обновл.</string>
+    <string name="plugin_item_info_mechanism">Механизм</string>
     <string name="plugin_item_info_package_size">Размер пакета</string>
     <string name="plugin_item_info_updatable_version">Обновл. вер.</string>
     <string name="prompt_add_ignored_version">Вы уверены, что игнорируете текущую версию обновления?\nВы можете управлять всеми игнорируемыми версиями в настройках приложения.</string>
@@ -461,6 +472,7 @@
     <string name="summary_text_launcher_shortcuts">Добавление ярлыков в пусковую установку</string>
     <string name="summary_use_volume_control_record">Запуск или остановка записи, управляемая клавишей уменьшения громкости, когда отображается плавающая кнопка</string>
     <string name="summary_use_volume_key_to_stop_running_scripts">Нажмите клавишу \"Громкость вверх\", чтобы остановить все запущенные скрипты</string>
+    <string name="symbol_colon_with_blank">": "</string>
     <string name="term_internal_strorage">Внутреннее хранилище</string>
     <string name="text_a11y_service">Служба доступности</string>
     <string name="text_a11y_service_description">Требуется для автоматической работы сценария (щелчок, длительное нажатие, скольжение и т.д.).</string>
@@ -483,6 +495,7 @@
     <string name="text_act_by_scroll_forward">Прокрутка вперед (scrollForward)</string>
     <string name="text_act_by_set_text">Установить текст (setText)</string>
     <string name="text_action">Действие</string>
+    <string name="text_activated_successfully">Активация выполнена</string>
     <string name="text_activity_not_found_for_apk_installing">Нет установщика APK</string>
     <string name="text_adb_tool_needed">Необходим инструмент ADB</string>
     <string name="text_add_color_library">Добавить цветовую библиотеку</string>
@@ -542,8 +555,11 @@
     <string name="text_app_version_code">Код версии приложения</string>
     <string name="text_app_version_name">Название версии приложения</string>
     <string name="text_appearance">Внешний вид</string>
+    <string name="text_applying_binary_resources">Применение бинарных ресурсов</string>
     <string name="text_at_least_one_certificate_issuer_field_is_not_empty">Необходимо заполнить хотя бы одно поле из: [Полное имя, Название организации, Организационная единица, Код страны, Штат или провинция, Город или населенный пункт, Улица]</string>
     <string name="text_attribute">Атрибут</string>
+    <string name="text_authorize_plugin">Авторизовать плагин</string>
+    <string name="text_authorize_plugin_content">Это сторонний плагин. Обратите внимание на источник плагина и безопасность использования.\n\nНажмите кнопку \"Авторизовать\", чтобы включить плагин.</string>
     <string name="text_auto_check_for_updates">Автоматическая проверка обновлений</string>
     <string name="text_auto_check_for_updates_and_show_snackbar">Автоматическая проверка обновлений и отображение закуски на домашней странице</string>
     <string name="text_auto_night_mode">Автоматический ночной режим</string>
@@ -552,8 +568,27 @@
     <string name="text_back">Назад</string>
     <string name="text_broadcast_action">Действие</string>
     <string name="text_broadcast_task">Трансляция задачи</string>
+    <string name="text_build">Собрать</string>
     <string name="text_build_apk">Сборка APK</string>
+    <string name="text_build_completed">Сборка завершена</string>
+    <string name="text_build_profile">Профиль сборки</string>
+    <string name="text_build_profile_cannot_delete_default">Профиль по умолчанию нельзя удалить</string>
+    <string name="text_build_profile_cannot_delete_project_json">Профиль project.json нельзя удалить</string>
+    <string name="text_build_profile_delete">Удалить профиль</string>
+    <string name="text_build_profile_fields">Поля профиля</string>
+    <string name="text_build_profile_fields_configure">Настроить поля профиля</string>
+    <string name="text_build_profile_fields_hint">Отмеченные поля сохраняются как фиксированные значения в этом профиле.</string>
+    <string name="text_build_profile_more">Другие действия профиля</string>
+    <string name="text_build_profile_name_cannot_be_reserved">Нельзя использовать зарезервированные имена профиля (Default, project.json)</string>
+    <string name="text_build_profile_name_hint">Имя профиля сборки</string>
+    <string name="text_build_profile_new">Новый профиль</string>
+    <string name="text_build_profile_unsaved_changes">В текущей конфигурации сборки есть несохраненные изменения.</string>
+    <string name="text_build_profile_unsaved_changes_project_json">В текущей конфигурации сборки есть несохраненные изменения; они будут записаны в project.json.</string>
+    <string name="text_build_profile_unsaved_switch_confirm">Сохранить изменения перед продолжением?</string>
     <string name="text_build_succeeded">Сборка прошла успешно</string>
+    <string name="text_building_apk">Сборка APK</string>
+    <string name="text_building_resources">Сборка ресурсов</string>
+    <string name="text_built_apk_file_path">Путь к собранному APK</string>
     <string name="text_cancel">Отменить</string>
     <string name="text_cancel_simplified">Отмен</string>
     <string name="text_cannot_delete_default">Профиль по умолчанию нельзя удалить</string>
@@ -585,6 +620,9 @@
     <string name="text_choose_restore_path">Выберите путь восстановления</string>
     <string name="text_city_or_locality">Город или населенный пункт</string>
     <string name="text_class_or_package_name">Имя класса / пакета</string>
+    <string name="text_clean">Очистить</string>
+    <string name="text_clean_completed">Очистка завершена</string>
+    <string name="text_cleaning_workspace">Очистка рабочей области</string>
     <string name="text_clear">Очистить</string>
     <string name="text_clear_file_selection">Очистить выбор файла</string>
     <string name="text_clear_pre_execute_script">Очистить сценарий предварительного выполнения</string>
@@ -613,6 +651,8 @@
     <string name="text_compatibility">Совместимость</string>
     <string name="text_confidence_level">Доверие</string>
     <string name="text_config">Конфигурация</string>
+    <string name="text_configuring_manifest">Настройка manifest</string>
+    <string name="text_configuring_package_name">Настройка имени пакета</string>
     <string name="text_confirm_to_clear_all_items">Вы уверены, что хотите удалить все элементы?</string>
     <string name="text_confirm_to_clear_the_history">Очистить историю?</string>
     <string name="text_confirm_to_clear_the_history_of">Следующая история будет очищена\n\n[ %1$s ]\n\nОчистить?</string>
@@ -628,6 +668,7 @@
     <string name="text_connection_cannot_be_established">Соединение не может быть установлено</string>
     <string name="text_connection_failed">Не удалось подключиться</string>
     <string name="text_console">Консоль</string>
+    <string name="text_content">Содержимое</string>
     <string name="text_continue">Продолжить</string>
     <string name="text_copy">Скопировать</string>
     <string name="text_copy_all">Скопировать все</string>
@@ -642,8 +683,18 @@
     <string name="text_copy_to_clip">Копировать в буфер обмена</string>
     <string name="text_copy_value">Копировать значение</string>
     <string name="text_copying" tools:ignore="TypographyEllipsis">Копирование...</string>
+    <string name="text_copying_asset">Копирование asset</string>
+    <string name="text_copying_assets_to">Копирование assets в</string>
+    <string name="text_copying_directory">Копирование каталога</string>
+    <string name="text_copying_file">Копирование файла</string>
+    <string name="text_copying_libraries_for_abi">Копирование библиотек для ABI</string>
+    <string name="text_copying_library">Копирование библиотеки</string>
+    <string name="text_copying_native_libraries">Копирование нативных библиотек</string>
+    <string name="text_copying_project_directory">Копирование каталога проекта</string>
+    <string name="text_copying_script_file">Копирование файла скрипта</string>
     <string name="text_country_code">Код страны (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">Код страны должен состоять из двух заглавных букв</string>
+    <string name="text_creating_unsigned_apk">Создание неподписанного APK</string>
     <string name="text_current_page_configuration">Конфигурация страницы</string>
     <string name="text_current_version">Текущая версия</string>
     <string name="text_daily_task">Ежедневная задача</string>
@@ -726,10 +777,12 @@
     <string name="text_enable_a11y_service_with_secure_settings_timeout">Включить службу доступа с безопасными настройками по таймеру</string>
     <string name="text_enable_plugin">Включить плагин</string>
     <string name="text_enabled">Включено</string>
+    <string name="text_encrypting_script">Шифрование скрипта</string>
     <string name="text_error">Ошибка</string>
     <string name="text_error_copy_file" formatted="true">Не удалось скопировать файл: %s</string>
     <string name="text_error_report">Отчет об ошибке</string>
     <string name="text_estimated">Оценка</string>
+    <string name="text_exception_info">Сведения об исключении</string>
     <string name="text_execute">Выполнить</string>
     <string name="text_execute_code">Код выполнения</string>
     <string name="text_execution_finished" formatted="false">[%s] завершилось через %s секунд.\n</string>
@@ -742,6 +795,11 @@
     <string name="text_exported">Экспортировано</string>
     <string name="text_extending_js_build_in_objects">Расширение встроенных объектов JavaScript</string>
     <string name="text_extensibility">Расширяемость</string>
+    <string name="text_extracted_plugin_assets">Assets плагина извлечены</string>
+    <string name="text_extracted_plugin_libraries">Библиотеки плагина извлечены</string>
+    <string name="text_extracting_plugin_asset">Извлечение asset плагина</string>
+    <string name="text_extracting_plugin_so">Извлечение файла so плагина</string>
+    <string name="text_extracting_template_apk">Извлечение шаблонного APK</string>
     <string name="text_failed">Не удалось</string>
     <string name="text_failed_to_build">Не удалось создать</string>
     <string name="text_failed_to_create_key_store">Не удалось создать ключ подписи</string>
@@ -762,6 +820,7 @@
     <string name="text_failed_to_register">Не удалось зарегистрироваться</string>
     <string name="text_failed_to_report">Не удалось отправить</string>
     <string name="text_failed_to_retrieve">Не удалось получить</string>
+    <string name="text_failed_to_save_project_json">Не удалось сохранить project.json</string>
     <string name="text_failed_to_save_remote_project_to_local_storage">Не удалось сохранить удаленный проект в локальное хранилище</string>
     <string name="text_failed_to_send_log_entries">Не удалось отправить записи журнала</string>
     <string name="text_failed_to_update">Не удалось обновить</string>
@@ -812,6 +871,7 @@
     <string name="text_hide_button">Кнопка скрытия</string>
     <string name="text_hide_node">Скрыть этот узел</string>
     <string name="text_hide_same_frame_nodes">Скрыть узел того же фрейма</string>
+    <string name="text_hint">Подсказка</string>
     <string name="text_history">История</string>
     <string name="text_history_has_been_cleared">История очищена</string>
     <string name="text_icon">Значок</string>
@@ -867,6 +927,11 @@
     <string name="text_latest_package">Последний пакет</string>
     <string name="text_launch_config">Запуск конфигурации</string>
     <string name="text_launch_debugger">Запуск отладчика</string>
+    <string name="text_launch_launcher_visible">Показывать значок приложения в лаунчере</string>
+    <string name="text_launch_logs_visible">Показывать логи при запуске</string>
+    <string name="text_launch_run_on_boot">Запускать скрипт при загрузке</string>
+    <string name="text_launch_slug">Текст слогана заставки</string>
+    <string name="text_launch_splash_visible">Показывать заставку при запуске</string>
     <string name="text_launcher_icon_title">Значок запуска</string>
     <string name="text_launcher_shortcuts">Ярлыки лаунчера</string>
     <string name="text_launcher_shortcuts_may_be_lost_after_launcher_icon_changed">Смена значков запуска на некоторых устройствах может привести к потере всех существующих ярлыков AutoJs6, действуйте с осторожностью</string>
@@ -982,9 +1047,9 @@
     <string name="text_permission_desc_billing">Разрешить приложению выполнять покупки внутри приложения</string>
     <string name="text_permission_desc_bluetooth">Разрешить приложению доступ к устройствам Bluetooth</string>
     <string name="text_permission_desc_bluetooth_admin">Разрешить приложению настраивать устройства Bluetooth</string>
+    <string name="text_permission_desc_bluetooth_advertise">Разрешить приложению рекламировать себя через Bluetooth</string>
     <string name="text_permission_desc_bluetooth_connect">Разрешить приложению доступ к устройствам Bluetooth и состоянию подключения</string>
     <string name="text_permission_desc_bluetooth_scan">Разрешить приложению сканировать близлежащие устройства Bluetooth</string>
-    <string name="text_permission_desc_bluetooth_advertise">Разрешить приложению рекламировать себя через Bluetooth</string>
     <string name="text_permission_desc_broadcast_close_system_dialogs">Разрешить приложению отправлять намерение для закрытия системных диалогов</string>
     <string name="text_permission_desc_call_phone">Разрешить приложению совершать телефонные звонки</string>
     <string name="text_permission_desc_camera">Разрешить приложению доступ к камере</string>
@@ -1068,15 +1133,28 @@
     <string name="text_please_input_name">Имя ввода</string>
     <string name="text_please_wait" tools:ignore="TypographyEllipsis">Пожалуйста, подождите...</string>
     <string name="text_please_wait_a_moment_before_trying_again" tools:ignore="TypographyEllipsis">Пожалуйста, повторите попытку позже...</string>
+    <string name="text_plugin_activated">Активирован</string>
+    <string name="text_plugin_activation_recommended">Рекомендуется активация</string>
+    <string name="text_plugin_authorization_denied">Авторизация отклонена</string>
+    <string name="text_plugin_authorization_required">Требуется авторизация</string>
+    <string name="text_plugin_authorized">Авторизован</string>
     <string name="text_plugin_center">Центр плагинов</string>
     <string name="text_plugin_details">Сведения о плагине</string>
+    <string name="text_plugin_official">Официальный</string>
+    <string name="text_plugin_trusted">Доверенный</string>
     <string name="text_plugins">Плагины</string>
     <string name="text_pointer_location">Расположение указателя</string>
     <string name="text_pointer_location_toggle_failed_with_hint">Переключение \"Расположение указателя\" не удалось.\nТребуется корневой доступ.</string>
     <string name="text_post_notifications_permission">почтовые уведомления</string>
     <string name="text_post_notifications_permission_rationale">Чтобы обеспечить корректную работу фоновых служб переднего плана AutoJs6 и возможность публикации уведомлений скриптами, AutoJs6 необходимо предоставить разрешение \"публикации уведомлений\".</string>
     <string name="text_pre_execute_script">Предварительное выполнение сценария</string>
+    <string name="text_prepare">Подготовить</string>
+    <string name="text_prepare_completed">Подготовка завершена</string>
     <string name="text_preparing" tools:ignore="TypographyEllipsis">Подготовка...</string>
+    <string name="text_preparing_assets_dir">Подготовка каталога assets</string>
+    <string name="text_preparing_build_config">Подготовка конфигурации сборки</string>
+    <string name="text_preparing_keystore">Подготовка keystore</string>
+    <string name="text_preparing_workspace">Подготовка рабочей области</string>
     <string name="text_preset_dialog_content">Содержимое предустановленного диалога</string>
     <string name="text_preset_dialog_title">Предустановленный заголовок диалога</string>
     <string name="text_press_again_to_dismiss_dialog">Нажмите еще раз, чтобы закрыть диалог</string>
@@ -1085,14 +1163,19 @@
     <string name="text_preview">Предварительный просмотр</string>
     <string name="text_process_log">Журнал процесса</string>
     <string name="text_processing">Обработка</string>
+    <string name="text_processing_source">Обработка исходников</string>
     <string name="text_project">Проект</string>
     <string name="text_project_location">Расположение проекта</string>
     <string name="text_project_media_access">Доступ к носителям проекта</string>
     <string name="text_prompt">Запрос</string>
+    <string name="text_property_colon">%1$s:</string>
     <string name="text_property_colon_value">%1$s: %2$s</string>
     <string name="text_property_colon_value_nbsp_unit">%1$s: %2$d %3$s</string>
     <string name="text_property_colon_value_unit">%1$s: %2$d%3$s</string>
+    <string name="text_pruning">Обрезка</string>
     <string name="text_quit">Выйти</string>
+    <string name="text_re_signing_apk">Повторная подпись APK</string>
+    <string name="text_reading_splash_resources">Чтение ресурсов заставки</string>
     <string name="text_recommended">Рекомендуемый</string>
     <string name="text_record_finished">Запись завершена</string>
     <string name="text_record_prompt">Запрос записи</string>
@@ -1118,6 +1201,7 @@
     <string name="text_replace">Заменить</string>
     <string name="text_replace_all">Заменить все</string>
     <string name="text_replace_simplified">Замен</string>
+    <string name="text_replacing_file">Замена файла</string>
     <string name="text_repo_url_of_vscode_vsc_ext">URL репозитория расширения VSCode</string>
     <string name="text_report_succeed">Отправить успешно</string>
     <string name="text_requires_android_os_version" formatted="false">Требуется версия Android OS %s (API %s), но текущая версия %s (API %s)</string>
@@ -1126,6 +1210,7 @@
     <string name="text_reset_succeed">Сброс выполнен успешно</string>
     <string name="text_reset_to_initial_content">Сброс первоначально</string>
     <string name="text_reset_to_initial_content_only_for_assets">Сброс выполняется только для образцов</string>
+    <string name="text_resolving_plugin_native_libraries">Разбор нативных библиотек плагина</string>
     <string name="text_restart">Перезапустить</string>
     <string name="text_restart_strategy">Стратегия перезагрузки</string>
     <string name="text_restore">Восстановить</string>
@@ -1167,6 +1252,7 @@
     <string name="text_save_configuration_as">Сохранить конфигурацию как</string>
     <string name="text_save_simplified">Сохран</string>
     <string name="text_save_to">Сохранить в</string>
+    <string name="text_saving" tools:ignore="TypographyEllipsis">Сохранение...</string>
     <string name="text_scheduled_restart_backend">Движок</string>
     <string name="text_scheduled_restart_start_delay">Задержка старта</string>
     <string name="text_screen_capture_request_delay">Задержка запроса разрешения на захват экрана</string>
@@ -1187,6 +1273,7 @@
     <string name="text_select_file_to_upload">Выберите файл для загрузки</string>
     <string name="text_select_icon">Выбрать значок</string>
     <string name="text_select_image">Выбрать изображение</string>
+    <string name="text_selected_plugin">Выбранный плагин</string>
     <string name="text_send">Отправить</string>
     <string name="text_send_shortcut">Создать ярлык</string>
     <string name="text_server_mode">Режим сервера</string>
@@ -1203,6 +1290,9 @@
     <string name="text_show_layout_bounds">Вид в границах макета</string>
     <string name="text_show_layout_hierarchy">Вид в иерархии макета</string>
     <string name="text_show_widget_information">Показать информацию о виджете</string>
+    <string name="text_sign">Подписать</string>
+    <string name="text_sign_completed">Подпись завершена</string>
+    <string name="text_sign_stage_completed">Этап подписи завершен</string>
     <string name="text_signature_algorithm">Алгоритм подписи</string>
     <string name="text_signature_configuration">Конфигурация подписи</string>
     <string name="text_signature_scheme">Схема подписи</string>
@@ -1220,6 +1310,7 @@
     <string name="text_sort_by_time_desc">Время (сначала новые)</string>
     <string name="text_source">Источник</string>
     <string name="text_source_file_path">Путь к исходному коду</string>
+    <string name="text_source_processing_completed">Обработка исходников завершена</string>
     <string name="text_special_permissions">Специальные разрешения</string>
     <string name="text_stable_mode">Стабильный режим</string>
     <string name="text_star">Звезда</string>
@@ -1258,6 +1349,7 @@
     <string name="text_timed_task">Задание по времени</string>
     <string name="text_timed_task_backend_title">Движок планирования таймерных задач</string>
     <string name="text_timed_task_timing">Время</string>
+    <string name="text_title">Заголовок</string>
     <string name="text_to_be_chosen">Выбрать</string>
     <string name="text_toggle_all">Переключить все</string>
     <string name="text_tools">Инструменты</string>
@@ -1282,6 +1374,7 @@
     <string name="text_unknown_description_for_plugin">Неизвестное Описание</string>
     <string name="text_unknown_title_for_plugin">Неизвестный Заголовок</string>
     <string name="text_unknown_version_for_plugin">Неизвестная Версия</string>
+    <string name="text_unsigned_apk_created">Неподписанный APK создан</string>
     <string name="text_unverified">Не подтверждено</string>
     <string name="text_updatable">Доступно обновление</string>
     <string name="text_update">Обновить</string>
@@ -1289,6 +1382,7 @@
     <string name="text_updates_checked_states_cleared">Обновления проверенные состояния очищены</string>
     <string name="text_updates_snack_bar_act_later">Позже</string>
     <string name="text_updates_snack_bar_act_view">Просмотр</string>
+    <string name="text_updating_project_config">Обновление конфигурации проекта</string>
     <string name="text_usage_stats_permission">Доступ к статистике использования</string>
     <string name="text_use_android_n_shortcut">Использовать ярлык Android 7.0</string>
     <string name="text_use_default_icon">Использовать значок по умолчанию</string>
@@ -1298,6 +1392,7 @@
     <string name="text_username_cannot_be_empty">Имя пользователя не может быть пустым</string>
     <string name="text_using_desc_selector">Использовать селектор по описанию</string>
     <string name="text_using_id_selector">Использовать селектор id</string>
+    <string name="text_using_keystore">Использование keystore</string>
     <string name="text_using_text_selector">Использовать текстовый селектор</string>
     <string name="text_validity_years">Срок действия (годы)</string>
     <string name="text_validity_years_cannot_be_empty">Срок действия не может быть пустым</string>
@@ -1329,86 +1424,12 @@
     <string name="text_working_dir_path">Путь к рабочему каталогу</string>
     <string name="text_write_secure_settings">Параметры безопасности записи</string>
     <string name="text_write_system_settings">Запись системных настроек</string>
+    <string name="text_writing_app_icon">Запись значка приложения</string>
+    <string name="text_writing_manifest">Запись manifest</string>
+    <string name="text_writing_project_config">Запись конфигурации проекта</string>
+    <string name="text_writing_resources_arsc">Запись resources.arsc</string>
+    <string name="text_writing_signed_apk">Запись подписанного APK</string>
     <string name="text_xiaomi_background_popup_permission">Всплывающие окна в фоне</string>
     <string name="warn_continue_operation_without_saving_settings">Настройки не сохранены. Продолжить?</string>
     <string name="warn_exit_without_saving_settings">Настройки не сохранены. Выйти?</string>
-    <string name="error_failed_to_save">Не удалось сохранить</string>
-    <string name="text_saving" tools:ignore="TypographyEllipsis">Сохранение...</string>
-    <string name="symbol_colon_with_blank">": "</string>
-    <string name="error_failed_to_enable_the_plugin">Не удалось включить плагин</string>
-    <string name="text_exception_info">Сведения об исключении</string>
-    <string name="text_hint">Подсказка</string>
-    <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">Попробуйте нажать кнопку \"Активировать\", чтобы активировать плагин один раз.\nЕсли активация пройдет успешно, кнопка автоматически включится в течение некоторого времени.</string>
-    <string name="dialog_button_activate">Активировать</string>
-    <string name="text_activated_successfully">Активация выполнена</string>
-    <string name="text_authorize_plugin">Авторизовать плагин</string>
-    <string name="text_authorize_plugin_content">Это сторонний плагин. Обратите внимание на источник плагина и безопасность использования.\n\nНажмите кнопку \"Авторизовать\", чтобы включить плагин.</string>
-    <string name="dialog_button_authorize">Авторизовать</string>
-    <string name="text_plugin_official">Официальный</string>
-    <string name="text_plugin_authorized">Авторизован</string>
-    <string name="text_plugin_authorization_required">Требуется авторизация</string>
-    <string name="text_plugin_authorization_denied">Авторизация отклонена</string>
-    <string name="text_plugin_activation_recommended">Рекомендуется активация</string>
-    <string name="text_plugin_activated">Активирован</string>
-    <string name="text_plugin_trusted">Доверенный</string>
-    <string name="plugin_item_info_mechanism">Механизм</string>
-    <string name="error_plugin_is_not_enabled_in_plugin_center">Плагин \"%1$s\" не включен в Центре плагинов</string>
-    <string name="error_plugin_is_not_authorized_in_plugin_center">Плагин \"%1$s\" не авторизован в Центре плагинов</string>
-    <string name="error_plugin_not_found_in_installed_apps">Плагин \"%1$s\" не найден среди установленных приложений</string>
-    <string name="error_unsupported_plugin_connection">Неподдерживаемое подключение плагина</string>
-    <string name="text_property_colon">%1$s:</string>
-    <string name="text_title">Заголовок</string>
-    <string name="text_content">Содержимое</string>
-    <string name="text_building_apk">Сборка APK</string>
-    <string name="text_built_apk_file_path">Путь к собранному APK</string>
-    <string name="text_clean">Очистить</string>
-    <string name="text_sign">Подписать</string>
-    <string name="text_build">Собрать</string>
-    <string name="text_prepare">Подготовить</string>
-    <string name="text_preparing_workspace">Подготовка рабочей области</string>
-    <string name="text_extracting_template_apk">Извлечение шаблонного APK</string>
-    <string name="text_prepare_completed">Подготовка завершена</string>
-    <string name="text_copying_project_directory">Копирование каталога проекта</string>
-    <string name="text_copying_script_file">Копирование файла скрипта</string>
-    <string name="text_source_processing_completed">Обработка исходников завершена</string>
-    <string name="text_copying_directory">Копирование каталога</string>
-    <string name="text_copying_file">Копирование файла</string>
-    <string name="text_encrypting_script">Шифрование скрипта</string>
-    <string name="text_replacing_file">Замена файла</string>
-    <string name="text_preparing_build_config">Подготовка конфигурации сборки</string>
-    <string name="text_reading_splash_resources">Чтение ресурсов заставки</string>
-    <string name="text_configuring_manifest">Настройка manifest</string>
-    <string name="text_configuring_package_name">Настройка имени пакета</string>
-    <string name="text_copying_assets_to">Копирование assets в</string>
-    <string name="text_processing_source">Обработка исходников</string>
-    <string name="text_applying_binary_resources">Применение бинарных ресурсов</string>
-    <string name="text_copying_native_libraries">Копирование нативных библиотек</string>
-    <string name="text_updating_project_config">Обновление конфигурации проекта</string>
-    <string name="text_sign_stage_completed">Этап подписи завершен</string>
-    <string name="text_writing_project_config">Запись конфигурации проекта</string>
-    <string name="text_building_resources">Сборка ресурсов</string>
-    <string name="text_build_completed">Сборка завершена</string>
-    <string name="text_writing_resources_arsc">Запись resources.arsc</string>
-    <string name="text_writing_manifest">Запись manifest</string>
-    <string name="text_writing_app_icon">Запись значка приложения</string>
-    <string name="text_copying_asset">Копирование asset</string>
-    <string name="text_preparing_assets_dir">Подготовка каталога assets</string>
-    <string name="text_copying_library">Копирование библиотеки</string>
-    <string name="text_preparing_keystore">Подготовка keystore</string>
-    <string name="text_unsigned_apk_created">Неподписанный APK создан</string>
-    <string name="text_creating_unsigned_apk">Создание неподписанного APK</string>
-    <string name="text_using_keystore">Использование keystore</string>
-    <string name="text_re_signing_apk">Повторная подпись APK</string>
-    <string name="text_writing_signed_apk">Запись подписанного APK</string>
-    <string name="text_sign_completed">Подпись завершена</string>
-    <string name="text_clean_completed">Очистка завершена</string>
-    <string name="text_cleaning_workspace">Очистка рабочей области</string>
-    <string name="text_resolving_plugin_native_libraries">Разбор нативных библиотек плагина</string>
-    <string name="text_copying_libraries_for_abi">Копирование библиотек для ABI</string>
-    <string name="text_selected_plugin">Выбранный плагин</string>
-    <string name="text_extracted_plugin_libraries">Библиотеки плагина извлечены</string>
-    <string name="text_extracted_plugin_assets">Assets плагина извлечены</string>
-    <string name="text_extracting_plugin_asset">Извлечение asset плагина</string>
-    <string name="text_extracting_plugin_so">Извлечение файла so плагина</string>
-    <string name="error_conditions_not_met_for_record">Запись скриптов требует выполнения хотя бы одного из следующих условий:\n- Доступ root\n- Доступ Shizuku</string>
 </resources>

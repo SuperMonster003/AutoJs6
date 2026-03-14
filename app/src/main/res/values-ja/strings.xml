@@ -118,9 +118,11 @@
     <string name="dialog_button_abandon">放棄</string>
     <string name="dialog_button_abort">中止</string>
     <string name="dialog_button_abort_connection">接続を中止</string>
+    <string name="dialog_button_activate">有効化</string>
     <string name="dialog_button_add">追加</string>
     <string name="dialog_button_advanced_settings">詳細</string>
     <string name="dialog_button_amend_host_address">アドレスを修正</string>
+    <string name="dialog_button_authorize">許可</string>
     <string name="dialog_button_back">@string/text_back</string>
     <string name="dialog_button_cancel">取消</string>
     <string name="dialog_button_cancel_download">取消</string>
@@ -230,6 +232,7 @@
     <string name="error_check_for_update">更新のチェックに失敗しました</string>
     <string name="error_colon_must_follow_a_valid_ip_address">有効な IP アドレスの後にコロンが続くこと</string>
     <string name="error_compass_cannot_be_null">コンパスは null にできません</string>
+    <string name="error_conditions_not_met_for_record">スクリプト録画には次の条件のうち少なくとも1つが必要です:\n- Root 権限\n- Shizuku 権限</string>
     <string name="error_connect_to_remote">リモートサーバーに接続できません. %s</string>
     <string name="error_connection_failed_with_host">\"%1$s\" への接続に失敗しました.</string>
     <string name="error_connection_timed_out">接続がタイムアウトしました (%d ミリ秒)</string>
@@ -253,6 +256,7 @@
     <string name="error_failed_to_convert_into_drawable">値 %s を Drawable に変換するのに失敗しました</string>
     <string name="error_failed_to_copy">コピーに失敗しました</string>
     <string name="error_failed_to_create">作成に失敗しました</string>
+    <string name="error_failed_to_enable_the_plugin">プラグインの有効化に失敗しました</string>
     <string name="error_failed_to_go_to_access_settings">設定画面を開けませんでした</string>
     <string name="error_failed_to_grant_shizuku_access">Shizuku の権限付与に失敗しました</string>
     <string name="error_failed_to_instantiate">\"%s\" のインスタンス化に失敗しました</string>
@@ -269,6 +273,7 @@
     <string name="error_failed_to_retrieve_version_properties_file_to_parse_version_information">version.properties を取得できず, バージョン情報を解析できません</string>
     <string name="error_failed_to_revoke_shizuku_access">Shizuku 権限の取り消しに失敗しました</string>
     <string name="error_failed_to_run_script">スクリプトの実行に失敗しました</string>
+    <string name="error_failed_to_save">保存に失敗しました</string>
     <string name="error_failed_to_save_project_config">プロジェクト設定の保存に失敗しました</string>
     <string name="error_file_in_path_does_not_exist">パス \"%1$s\" にファイルが存在しません</string>
     <string name="error_function_called_in_ui_thread">\"UI スレッドをブロックできません. サブスレッドまたはサブスクリプトで %s() を実行してみてください</string>
@@ -329,6 +334,9 @@
     <string name="error_pattern_syntax">無効なパターン構文</string>
     <string name="error_plugin_apk_does_not_contain_required_assets_for_variant">プラグイン APK に variant=\"%1$s\" に必要な assets が含まれていません: %2$s.</string>
     <string name="error_plugin_apk_does_not_contain_required_native_libraries">プラグイン APK に必要な native ライブラリが含まれていません: %1$s.</string>
+    <string name="error_plugin_is_not_authorized_in_plugin_center">プラグイン \"%1$s\" はプラグインセンターで許可されていません</string>
+    <string name="error_plugin_is_not_enabled_in_plugin_center">プラグイン \"%1$s\" はプラグインセンターで有効になっていません</string>
+    <string name="error_plugin_not_found_in_installed_apps">インストール済みアプリにプラグイン \"%1$s\" が見つかりません</string>
     <string name="error_plugin_returned_empty_info">%1$s プラグインが空の info を返しました.</string>
     <string name="error_plugin_returned_invalid_variant">%1$s プラグインが無効な variant を返しました: %2$s.</string>
     <string name="error_port_num_over_65535">65535 を超えるポート番号</string>
@@ -370,6 +378,7 @@
     <string name="error_unknown_picker_result_type_with_params" formatted="false">不明な結果タイプ {name: %s, params: %s}</string>
     <string name="error_unknown_picker_selector_type" formatted="false">不明なセレクタ {name: %s, type: %s} です</string>
     <string name="error_unknown_type">不明なタイプ: %s</string>
+    <string name="error_unsupported_plugin_connection">サポートされていないプラグイン接続方式です</string>
     <string name="error_webp_lossless_quality_not_supported">WebP-Lossless 形式は品質パラメータで圧縮できません, 代わりに JPEG/PNG/WebP-Lossy を使用してください</string>
     <string name="file_not_exist_or_readable">ファイルが存在しないか, 読み取れません</string>
     <string name="file_not_exist_or_readable_with_path">ファイルが存在しないか, 読み取り可能でない: %s</string>
@@ -386,6 +395,7 @@
     <string name="hint_loop_delay">ループ前の遅延時間</string>
     <string name="hint_loop_times">無限ループの場合は 0</string>
     <string name="hint_pc_server_address_supported_formats">IPv4/IPv6/およびドメイン名に対応しています.</string>
+    <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">\"有効化\" ボタンをタップして, プラグインを一度有効化してみてください.\n有効化に成功すると, 一定時間内にボタンが自動的にオンになります.</string>
     <string name="instruction_install_plugin_from_url">リモートプラグインの URL を入力してください. \n例: \"https://example.com/plugin.apk\"</string>
     <string name="item_delete_permanently">完全に削除</string>
     <string name="item_move_to_trash">ゴミ箱に移動</string>
@@ -432,6 +442,7 @@
     <string name="plugin_item_info_last_install_time">最終インストール</string>
     <string name="plugin_item_info_last_uninstall_time">最終アンインストール</string>
     <string name="plugin_item_info_last_update_time">最終更新</string>
+    <string name="plugin_item_info_mechanism">方式</string>
     <string name="plugin_item_info_package_size">パッケージサイズ</string>
     <string name="plugin_item_info_updatable_version">更新可 Ver.</string>
     <string name="prompt_add_ignored_version">現在のアップデートバージョンを無視して大丈夫ですか?\n無視したバージョンは, アプリの設定で管理することができます</string>
@@ -462,6 +473,7 @@
     <string name="summary_text_launcher_shortcuts">ランチャーへのショートカットの追加</string>
     <string name="summary_use_volume_control_record">フローティングボタンが表示されているときに, \"Volume Down\" キーで録画の開始/停止を制御できるようになりました</string>
     <string name="summary_use_volume_key_to_stop_running_scripts">\"Volume Up\" キーを押すと, 実行中のスクリプトをすべて停止します</string>
+    <string name="symbol_colon_with_blank">": "</string>
     <string name="term_internal_strorage">内部ストレージ</string>
     <string name="text_a11y_service">アクセシビリティサービス</string>
     <string name="text_a11y_service_description">スクリプトの自動操作 (クリック, 長押し, スライドなど) で必要です</string>
@@ -484,6 +496,7 @@
     <string name="text_act_by_scroll_forward">前方にスクロールする (scrollForward)</string>
     <string name="text_act_by_set_text">テキストを設定する (setText)</string>
     <string name="text_action">動作</string>
+    <string name="text_activated_successfully">有効化しました</string>
     <string name="text_activity_not_found_for_apk_installing">APK インストーラーなし</string>
     <string name="text_adb_tool_needed">ADB ツールが必要</string>
     <string name="text_add_color_library">カラーライブラリを追加</string>
@@ -543,8 +556,11 @@
     <string name="text_app_version_code">アプリバージョンコード</string>
     <string name="text_app_version_name">アプリのバージョン名</string>
     <string name="text_appearance">外観</string>
+    <string name="text_applying_binary_resources">バイナリ資源を適用中</string>
     <string name="text_at_least_one_certificate_issuer_field_is_not_empty">[氏名, 組織名, 組織単位, 国コード, 州または省, 市区町村, 街] のいずれかの項目を入力する必要があります</string>
     <string name="text_attribute">属性</string>
+    <string name="text_authorize_plugin">プラグインを許可</string>
+    <string name="text_authorize_plugin_content">これはサードパーティ製プラグインです. 提供元と利用上の安全性に注意してください.\n\n\"許可\" ボタンをタップしてプラグインを有効にします.</string>
     <string name="text_auto_check_for_updates">更新の自動チェック</string>
     <string name="text_auto_check_for_updates_and_show_snackbar">自動的に更新をチェックし, ホームページにスナックバーを表示します</string>
     <string name="text_auto_night_mode">オートナイトモード</string>
@@ -553,8 +569,27 @@
     <string name="text_back">戻る</string>
     <string name="text_broadcast_action">動作</string>
     <string name="text_broadcast_task">タスクの実行</string>
+    <string name="text_build">ビルド</string>
     <string name="text_build_apk">APK のビルド</string>
+    <string name="text_build_completed">ビルド完了</string>
+    <string name="text_build_profile">ビルド設定</string>
+    <string name="text_build_profile_cannot_delete_default">デフォルト設定は削除できません</string>
+    <string name="text_build_profile_cannot_delete_project_json">project.json 設定は削除できません</string>
+    <string name="text_build_profile_delete">設定を削除</string>
+    <string name="text_build_profile_fields">設定フィールド</string>
+    <string name="text_build_profile_fields_configure">設定フィールドを構成</string>
+    <string name="text_build_profile_fields_hint">チェックしたフィールドは, この設定に固定値として保存されます.</string>
+    <string name="text_build_profile_more">その他の設定操作</string>
+    <string name="text_build_profile_name_cannot_be_reserved">予約済みの設定名は使用できません (Default, project.json)</string>
+    <string name="text_build_profile_name_hint">ビルド設定名</string>
+    <string name="text_build_profile_new">新規設定</string>
+    <string name="text_build_profile_unsaved_changes">現在のビルド設定に未保存の変更があります.</string>
+    <string name="text_build_profile_unsaved_changes_project_json">現在のビルド設定に未保存の変更があり, project.json に書き込まれます.</string>
+    <string name="text_build_profile_unsaved_switch_confirm">続行する前に変更を保存しますか?</string>
     <string name="text_build_succeeded">ビルドに成功しました</string>
+    <string name="text_building_apk">APK をビルド中</string>
+    <string name="text_building_resources">資源をビルド中</string>
+    <string name="text_built_apk_file_path">生成された APK のパス</string>
     <string name="text_cancel">取消</string>
     <string name="text_cancel_simplified">取消</string>
     <string name="text_cannot_delete_default">デフォルトは削除できません</string>
@@ -586,6 +621,9 @@
     <string name="text_choose_restore_path">復元先を選択</string>
     <string name="text_city_or_locality">市区町村</string>
     <string name="text_class_or_package_name">クラス名/パッケージ名</string>
+    <string name="text_clean">クリーン</string>
+    <string name="text_clean_completed">クリーン完了</string>
+    <string name="text_cleaning_workspace">ワークスペースをクリーン中</string>
     <string name="text_clear">クリア</string>
     <string name="text_clear_file_selection">ファイル選択の解除</string>
     <string name="text_clear_pre_execute_script">実行前スクリプトのクリア</string>
@@ -614,6 +652,8 @@
     <string name="text_compatibility">互換性</string>
     <string name="text_confidence_level">信頼度</string>
     <string name="text_config">設定</string>
+    <string name="text_configuring_manifest">manifest を設定中</string>
+    <string name="text_configuring_package_name">パッケージ名を設定中</string>
     <string name="text_confirm_to_clear_all_items">すべての項目を削除しますか?</string>
     <string name="text_confirm_to_clear_the_history">履歴を消去しますか?</string>
     <string name="text_confirm_to_clear_the_history_of">以下の履歴を消去します\n\n[ %1$s ]\n\n消去しますか?</string>
@@ -629,6 +669,7 @@
     <string name="text_connection_cannot_be_established">接続が確立できない</string>
     <string name="text_connection_failed">接続に失敗しました</string>
     <string name="text_console">コンソール</string>
+    <string name="text_content">内容</string>
     <string name="text_continue">続行</string>
     <string name="text_copy">コピー</string>
     <string name="text_copy_all">すべてコピー</string>
@@ -643,8 +684,18 @@
     <string name="text_copy_to_clip">クリップボードにコピーする</string>
     <string name="text_copy_value">値をコピーする</string>
     <string name="text_copying" tools:ignore="TypographyEllipsis">コピー中...</string>
+    <string name="text_copying_asset">asset をコピー中</string>
+    <string name="text_copying_assets_to">assets をコピー中:</string>
+    <string name="text_copying_directory">ディレクトリをコピー中</string>
+    <string name="text_copying_file">ファイルをコピー中</string>
+    <string name="text_copying_libraries_for_abi">ABI 用ライブラリをコピー中</string>
+    <string name="text_copying_library">ライブラリをコピー中</string>
+    <string name="text_copying_native_libraries">ネイティブライブラリをコピー中</string>
+    <string name="text_copying_project_directory">プロジェクトディレクトリをコピー中</string>
+    <string name="text_copying_script_file">スクリプトファイルをコピー中</string>
     <string name="text_country_code">国コード (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">国コードは 2 文字の大文字でなければなりません</string>
+    <string name="text_creating_unsigned_apk">未署名 APK を作成中</string>
     <string name="text_current_page_configuration">現在のページ設定</string>
     <string name="text_current_version">現在のバージョン</string>
     <string name="text_daily_task">デイリータスク</string>
@@ -727,10 +778,12 @@
     <string name="text_enable_a11y_service_with_secure_settings_timeout">セキュアな設定でアクセシビリティサービスを有効化するとタイムアウトする</string>
     <string name="text_enable_plugin">プラグインを有効化</string>
     <string name="text_enabled">有効</string>
+    <string name="text_encrypting_script">スクリプトを暗号化中</string>
     <string name="text_error">エラー</string>
     <string name="text_error_copy_file" formatted="true">ファイルのコピーに失敗しました. %s</string>
     <string name="text_error_report">バグレポート</string>
     <string name="text_estimated">推定</string>
+    <string name="text_exception_info">例外情報</string>
     <string name="text_execute">実行</string>
     <string name="text_execute_code">実行コード</string>
     <string name="text_execution_finished" formatted="false">[%s] は %s 秒で終了しました</string>
@@ -743,6 +796,11 @@
     <string name="text_exported">エクスポートされました</string>
     <string name="text_extending_js_build_in_objects">JavaScript 組み込みオブジェクトの拡張</string>
     <string name="text_extensibility">拡張性</string>
+    <string name="text_extracted_plugin_assets">プラグインの資源を抽出しました</string>
+    <string name="text_extracted_plugin_libraries">プラグインのライブラリを抽出しました</string>
+    <string name="text_extracting_plugin_asset">プラグイン資源を抽出中</string>
+    <string name="text_extracting_plugin_so">プラグインの so を抽出中</string>
+    <string name="text_extracting_template_apk">テンプレート APK を展開中</string>
     <string name="text_failed">失敗</string>
     <string name="text_failed_to_build">ビルドに失敗しました</string>
     <string name="text_failed_to_create_key_store">署名キーの作成に失敗しました</string>
@@ -763,6 +821,7 @@
     <string name="text_failed_to_register">登録の失敗</string>
     <string name="text_failed_to_report">投稿の失敗</string>
     <string name="text_failed_to_retrieve">取得に失敗</string>
+    <string name="text_failed_to_save_project_json">project.json の保存に失敗しました</string>
     <string name="text_failed_to_save_remote_project_to_local_storage">リモートプロジェクトをローカルストレージに保存できませんでした</string>
     <string name="text_failed_to_send_log_entries">ログ・エントリの送信に失敗しました</string>
     <string name="text_failed_to_update">更新に失敗しました</string>
@@ -813,6 +872,7 @@
     <string name="text_hide_button">隠しボタン</string>
     <string name="text_hide_node">このノードを隠す</string>
     <string name="text_hide_same_frame_nodes">同じフレームのノードを隠す</string>
+    <string name="text_hint">ヒント</string>
     <string name="text_history">履歴</string>
     <string name="text_history_has_been_cleared">履歴を消去しました</string>
     <string name="text_icon">アイコン</string>
@@ -868,6 +928,11 @@
     <string name="text_latest_package">最新のパッケージ</string>
     <string name="text_launch_config">コンフィグを起動する</string>
     <string name="text_launch_debugger">デバッガを起動する</string>
+    <string name="text_launch_launcher_visible">ランチャーにアプリアイコンを表示</string>
+    <string name="text_launch_logs_visible">起動時にログを表示</string>
+    <string name="text_launch_run_on_boot">起動時にスクリプトを実行</string>
+    <string name="text_launch_slug">スプラッシュ標語テキスト</string>
+    <string name="text_launch_splash_visible">起動時にスプラッシュ画面を表示</string>
     <string name="text_launcher_icon_title">ランチャーアイコン</string>
     <string name="text_launcher_shortcuts">ランチャーショートカット</string>
     <string name="text_launcher_shortcuts_may_be_lost_after_launcher_icon_changed">一部のデバイスでランチャーアイコンを切り替えると既存の AutoJs6 ショートカットがすべて失われる可能性があります, 注意して操作してください</string>
@@ -983,9 +1048,9 @@
     <string name="text_permission_desc_billing">アプリがアプリ内購入を実行することを許可します</string>
     <string name="text_permission_desc_bluetooth">アプリが Bluetooth デバイスにアクセスすることを許可します</string>
     <string name="text_permission_desc_bluetooth_admin">アプリが Bluetooth デバイスを設定することを許可します</string>
+    <string name="text_permission_desc_bluetooth_advertise">アプリが Bluetooth でアドバタイズすることを許可します</string>
     <string name="text_permission_desc_bluetooth_connect">アプリが Bluetooth デバイスと接続状態にアクセスすることを許可します</string>
     <string name="text_permission_desc_bluetooth_scan">アプリが近くの Bluetooth デバイスをスキャンすることを許可します</string>
-    <string name="text_permission_desc_bluetooth_advertise">アプリが Bluetooth でアドバタイズすることを許可します</string>
     <string name="text_permission_desc_broadcast_close_system_dialogs">アプリがシステムダイアログを閉じるためのインテントを送信することを許可します</string>
     <string name="text_permission_desc_call_phone">アプリが電話をかけることを許可します</string>
     <string name="text_permission_desc_camera">アプリがカメラにアクセスすることを許可します</string>
@@ -1069,15 +1134,28 @@
     <string name="text_please_input_name">入力名</string>
     <string name="text_please_wait" tools:ignore="TypographyEllipsis">しばらくお待ちください...</string>
     <string name="text_please_wait_a_moment_before_trying_again" tools:ignore="TypographyEllipsis">しばらくしてからもう一度お試しください...</string>
+    <string name="text_plugin_activated">有効</string>
+    <string name="text_plugin_activation_recommended">有効化を推奨</string>
+    <string name="text_plugin_authorization_denied">許可が拒否されました</string>
+    <string name="text_plugin_authorization_required">許可が必要</string>
+    <string name="text_plugin_authorized">許可済み</string>
     <string name="text_plugin_center">プラグインセンター</string>
     <string name="text_plugin_details">プラグイン詳細</string>
+    <string name="text_plugin_official">公式</string>
+    <string name="text_plugin_trusted">信頼済み</string>
     <string name="text_plugins">プラグイン</string>
     <string name="text_pointer_location">ポインターの位置</string>
     <string name="text_pointer_location_toggle_failed_with_hint">トグル [ポインターの位置] に失敗しました.\nroot 権限が必要です</string>
     <string name="text_post_notifications_permission">ゆうびんけいほう</string>
     <string name="text_post_notifications_permission_rationale">AutoJs6 のフォアグラウンドサービス等が正常に動作し, スクリプトが通知を投稿できるようにするため, AutoJs6 には \"通知の送信\" 権限を付与する必要があります.</string>
     <string name="text_pre_execute_script">スクリプトの事前実行</string>
+    <string name="text_prepare">準備</string>
+    <string name="text_prepare_completed">準備完了</string>
     <string name="text_preparing" tools:ignore="TypographyEllipsis">準備中...</string>
+    <string name="text_preparing_assets_dir">assets ディレクトリを準備中</string>
+    <string name="text_preparing_build_config">ビルド設定を準備中</string>
+    <string name="text_preparing_keystore">keystore を準備中</string>
+    <string name="text_preparing_workspace">ワークスペースを準備中</string>
     <string name="text_preset_dialog_content">プリセット・ダイアログ・内容</string>
     <string name="text_preset_dialog_title">プリセット・ダイアログ・タイトル</string>
     <string name="text_press_again_to_dismiss_dialog">ダイアログを閉じるにはもう一度押してください</string>
@@ -1086,14 +1164,19 @@
     <string name="text_preview">プレビュー</string>
     <string name="text_process_log">プロセスログ</string>
     <string name="text_processing">処理中</string>
+    <string name="text_processing_source">ソースを処理中</string>
     <string name="text_project">プロジェクト</string>
     <string name="text_project_location">プロジェクトの場所</string>
     <string name="text_project_media_access">プロジェクト・メディア・アクセス</string>
     <string name="text_prompt">プロンプト</string>
+    <string name="text_property_colon">%1$s:</string>
     <string name="text_property_colon_value">%1$s: %2$s</string>
     <string name="text_property_colon_value_nbsp_unit">%1$s: %2$d %3$s</string>
     <string name="text_property_colon_value_unit">%1$s: %2$d%3$s</string>
+    <string name="text_pruning">剪定中</string>
     <string name="text_quit">終了</string>
+    <string name="text_re_signing_apk">APK を再署名中</string>
+    <string name="text_reading_splash_resources">スプラッシュ資源を読み込み中</string>
     <string name="text_recommended">推奨</string>
     <string name="text_record_finished">記録終了</string>
     <string name="text_record_prompt">録画のプロンプト</string>
@@ -1119,6 +1202,7 @@
     <string name="text_replace">置換</string>
     <string name="text_replace_all">すべてを置き換える</string>
     <string name="text_replace_simplified">置換</string>
+    <string name="text_replacing_file">ファイルを置換中</string>
     <string name="text_repo_url_of_vscode_vsc_ext">VSCode 拡張機能のリポジトリ URL</string>
     <string name="text_report_succeed">送信に成功しました</string>
     <string name="text_requires_android_os_version" formatted="false">Android OS バージョン %s (API %s) が必要ですが, 現在のバージョンは %s (API %s)です</string>
@@ -1127,6 +1211,7 @@
     <string name="text_reset_succeed">リセット成功</string>
     <string name="text_reset_to_initial_content">初期リセット</string>
     <string name="text_reset_to_initial_content_only_for_assets">リセットはサンプルのみ</string>
+    <string name="text_resolving_plugin_native_libraries">プラグインのネイティブライブラリを解決中</string>
     <string name="text_restart">再起動</string>
     <string name="text_restart_strategy">再起動戦略</string>
     <string name="text_restore">復元</string>
@@ -1168,6 +1253,7 @@
     <string name="text_save_configuration_as">設定を別名で保存</string>
     <string name="text_save_simplified">保存</string>
     <string name="text_save_to">保存先</string>
+    <string name="text_saving" tools:ignore="TypographyEllipsis">保存中...</string>
     <string name="text_scheduled_restart_backend">エンジン</string>
     <string name="text_scheduled_restart_start_delay">開始遅延</string>
     <string name="text_screen_capture_request_delay">画面キャプチャ権限リクエスト遅延</string>
@@ -1188,6 +1274,7 @@
     <string name="text_select_file_to_upload">アップロードするファイルを選択します</string>
     <string name="text_select_icon">アイコンを選択する</string>
     <string name="text_select_image">画像を選択する</string>
+    <string name="text_selected_plugin">選択したプラグイン</string>
     <string name="text_send">送信する</string>
     <string name="text_send_shortcut">ショートカットの作成</string>
     <string name="text_server_mode">サーバーモード</string>
@@ -1204,6 +1291,9 @@
     <string name="text_show_layout_bounds">レイアウト境界内のビュー</string>
     <string name="text_show_layout_hierarchy">レイアウト階層内の表示</string>
     <string name="text_show_widget_information">ウィジェット情報を表示する</string>
+    <string name="text_sign">署名</string>
+    <string name="text_sign_completed">署名完了</string>
+    <string name="text_sign_stage_completed">署名ステージ完了</string>
     <string name="text_signature_algorithm">署名アルゴリズム</string>
     <string name="text_signature_configuration">署名設定</string>
     <string name="text_signature_scheme">署名スキーム</string>
@@ -1221,6 +1311,7 @@
     <string name="text_sort_by_time_desc">時間 (新しい順)</string>
     <string name="text_source">ソース</string>
     <string name="text_source_file_path">ソースコードのパス</string>
+    <string name="text_source_processing_completed">ソース処理完了</string>
     <string name="text_special_permissions">特殊な権限</string>
     <string name="text_stable_mode">安定モード</string>
     <string name="text_star">スター</string>
@@ -1259,6 +1350,7 @@
     <string name="text_timed_task">時間指定タスク</string>
     <string name="text_timed_task_backend_title">定時タスクのスケジューリングエンジン</string>
     <string name="text_timed_task_timing">タイミング</string>
+    <string name="text_title">タイトル</string>
     <string name="text_to_be_chosen">未選択</string>
     <string name="text_toggle_all">全て切替</string>
     <string name="text_tools">ツール</string>
@@ -1283,6 +1375,7 @@
     <string name="text_unknown_description_for_plugin">不明な説明</string>
     <string name="text_unknown_title_for_plugin">不明なタイトル</string>
     <string name="text_unknown_version_for_plugin">不明なバージョン</string>
+    <string name="text_unsigned_apk_created">未署名 APK を作成しました</string>
     <string name="text_unverified">未確認</string>
     <string name="text_updatable">更新あり</string>
     <string name="text_update">更新</string>
@@ -1290,6 +1383,7 @@
     <string name="text_updates_checked_states_cleared">更新のチェック状態を解除</string>
     <string name="text_updates_snack_bar_act_later">後日</string>
     <string name="text_updates_snack_bar_act_view">表示</string>
+    <string name="text_updating_project_config">プロジェクト設定を更新中</string>
     <string name="text_usage_stats_permission">使用統計へのアクセス</string>
     <string name="text_use_android_n_shortcut">Android 7.0 のショートカットを使用</string>
     <string name="text_use_default_icon">デフォルトのアイコンを使用する</string>
@@ -1299,6 +1393,7 @@
     <string name="text_username_cannot_be_empty">ユーザー名を空にすることはできません</string>
     <string name="text_using_desc_selector">降順セレクタを使用する</string>
     <string name="text_using_id_selector">ID セレクタを使用する</string>
+    <string name="text_using_keystore">keystore を使用中</string>
     <string name="text_using_text_selector">テキストセレクタを使用する</string>
     <string name="text_validity_years">有効期限（年）</string>
     <string name="text_validity_years_cannot_be_empty">有効期限の年数は空にできません</string>
@@ -1330,86 +1425,12 @@
     <string name="text_working_dir_path">作業ディレクトリのパス</string>
     <string name="text_write_secure_settings">セキュリティ設定の書き込み</string>
     <string name="text_write_system_settings">システム設定の書き込み</string>
+    <string name="text_writing_app_icon">アプリアイコンを書き込み中</string>
+    <string name="text_writing_manifest">manifest を書き込み中</string>
+    <string name="text_writing_project_config">プロジェクト設定を書き込み中</string>
+    <string name="text_writing_resources_arsc">resources.arsc を書き込み中</string>
+    <string name="text_writing_signed_apk">署名済み APK を書き込み中</string>
     <string name="text_xiaomi_background_popup_permission">バックグラウンドでのポップアップ表示</string>
     <string name="warn_continue_operation_without_saving_settings">設定が保存されていません. 続行しますか?</string>
     <string name="warn_exit_without_saving_settings">設定が保存されていません. 終了しますか?</string>
-    <string name="error_failed_to_save">保存に失敗しました</string>
-    <string name="text_saving" tools:ignore="TypographyEllipsis">保存中...</string>
-    <string name="symbol_colon_with_blank">": "</string>
-    <string name="error_failed_to_enable_the_plugin">プラグインの有効化に失敗しました</string>
-    <string name="text_exception_info">例外情報</string>
-    <string name="text_hint">ヒント</string>
-    <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">\"有効化\" ボタンをタップして, プラグインを一度有効化してみてください.\n有効化に成功すると, 一定時間内にボタンが自動的にオンになります.</string>
-    <string name="dialog_button_activate">有効化</string>
-    <string name="text_activated_successfully">有効化しました</string>
-    <string name="text_authorize_plugin">プラグインを許可</string>
-    <string name="text_authorize_plugin_content">これはサードパーティ製プラグインです. 提供元と利用上の安全性に注意してください.\n\n\"許可\" ボタンをタップしてプラグインを有効にします.</string>
-    <string name="dialog_button_authorize">許可</string>
-    <string name="text_plugin_official">公式</string>
-    <string name="text_plugin_authorized">許可済み</string>
-    <string name="text_plugin_authorization_required">許可が必要</string>
-    <string name="text_plugin_authorization_denied">許可が拒否されました</string>
-    <string name="text_plugin_activation_recommended">有効化を推奨</string>
-    <string name="text_plugin_activated">有効</string>
-    <string name="text_plugin_trusted">信頼済み</string>
-    <string name="plugin_item_info_mechanism">方式</string>
-    <string name="error_plugin_is_not_enabled_in_plugin_center">プラグイン \"%1$s\" はプラグインセンターで有効になっていません</string>
-    <string name="error_plugin_is_not_authorized_in_plugin_center">プラグイン \"%1$s\" はプラグインセンターで許可されていません</string>
-    <string name="error_plugin_not_found_in_installed_apps">インストール済みアプリにプラグイン \"%1$s\" が見つかりません</string>
-    <string name="error_unsupported_plugin_connection">サポートされていないプラグイン接続方式です</string>
-    <string name="text_property_colon">%1$s:</string>
-    <string name="text_title">タイトル</string>
-    <string name="text_content">内容</string>
-    <string name="text_building_apk">APK をビルド中</string>
-    <string name="text_built_apk_file_path">生成された APK のパス</string>
-    <string name="text_clean">クリーン</string>
-    <string name="text_sign">署名</string>
-    <string name="text_build">ビルド</string>
-    <string name="text_prepare">準備</string>
-    <string name="text_preparing_workspace">ワークスペースを準備中</string>
-    <string name="text_extracting_template_apk">テンプレート APK を展開中</string>
-    <string name="text_prepare_completed">準備完了</string>
-    <string name="text_copying_project_directory">プロジェクトディレクトリをコピー中</string>
-    <string name="text_copying_script_file">スクリプトファイルをコピー中</string>
-    <string name="text_source_processing_completed">ソース処理完了</string>
-    <string name="text_copying_directory">ディレクトリをコピー中</string>
-    <string name="text_copying_file">ファイルをコピー中</string>
-    <string name="text_encrypting_script">スクリプトを暗号化中</string>
-    <string name="text_replacing_file">ファイルを置換中</string>
-    <string name="text_preparing_build_config">ビルド設定を準備中</string>
-    <string name="text_reading_splash_resources">スプラッシュ資源を読み込み中</string>
-    <string name="text_configuring_manifest">manifest を設定中</string>
-    <string name="text_configuring_package_name">パッケージ名を設定中</string>
-    <string name="text_copying_assets_to">assets をコピー中:</string>
-    <string name="text_processing_source">ソースを処理中</string>
-    <string name="text_applying_binary_resources">バイナリ資源を適用中</string>
-    <string name="text_copying_native_libraries">ネイティブライブラリをコピー中</string>
-    <string name="text_updating_project_config">プロジェクト設定を更新中</string>
-    <string name="text_sign_stage_completed">署名ステージ完了</string>
-    <string name="text_writing_project_config">プロジェクト設定を書き込み中</string>
-    <string name="text_building_resources">資源をビルド中</string>
-    <string name="text_build_completed">ビルド完了</string>
-    <string name="text_writing_resources_arsc">resources.arsc を書き込み中</string>
-    <string name="text_writing_manifest">manifest を書き込み中</string>
-    <string name="text_writing_app_icon">アプリアイコンを書き込み中</string>
-    <string name="text_copying_asset">asset をコピー中</string>
-    <string name="text_preparing_assets_dir">assets ディレクトリを準備中</string>
-    <string name="text_copying_library">ライブラリをコピー中</string>
-    <string name="text_preparing_keystore">keystore を準備中</string>
-    <string name="text_unsigned_apk_created">未署名 APK を作成しました</string>
-    <string name="text_creating_unsigned_apk">未署名 APK を作成中</string>
-    <string name="text_using_keystore">keystore を使用中</string>
-    <string name="text_re_signing_apk">APK を再署名中</string>
-    <string name="text_writing_signed_apk">署名済み APK を書き込み中</string>
-    <string name="text_sign_completed">署名完了</string>
-    <string name="text_clean_completed">クリーン完了</string>
-    <string name="text_cleaning_workspace">ワークスペースをクリーン中</string>
-    <string name="text_resolving_plugin_native_libraries">プラグインのネイティブライブラリを解決中</string>
-    <string name="text_copying_libraries_for_abi">ABI 用ライブラリをコピー中</string>
-    <string name="text_selected_plugin">選択したプラグイン</string>
-    <string name="text_extracted_plugin_libraries">プラグインのライブラリを抽出しました</string>
-    <string name="text_extracted_plugin_assets">プラグインの資源を抽出しました</string>
-    <string name="text_extracting_plugin_asset">プラグイン資源を抽出中</string>
-    <string name="text_extracting_plugin_so">プラグインの so を抽出中</string>
-    <string name="error_conditions_not_met_for_record">スクリプト録画には次の条件のうち少なくとも1つが必要です:\n- Root 権限\n- Shizuku 権限</string>
 </resources>

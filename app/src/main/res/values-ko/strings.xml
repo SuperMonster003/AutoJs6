@@ -119,9 +119,11 @@
     <string name="dialog_button_abandon">포기</string>
     <string name="dialog_button_abort">중지</string>
     <string name="dialog_button_abort_connection">연결 중지</string>
+    <string name="dialog_button_activate">활성화</string>
     <string name="dialog_button_add">추가</string>
     <string name="dialog_button_advanced_settings">고급</string>
     <string name="dialog_button_amend_host_address">주소 수정</string>
+    <string name="dialog_button_authorize">권한 부여</string>
     <string name="dialog_button_back">@string/text_back</string>
     <string name="dialog_button_cancel">취소</string>
     <string name="dialog_button_cancel_download">취소</string>
@@ -231,6 +233,7 @@
     <string name="error_check_for_update">업데이트를 확인하지 못했습니다</string>
     <string name="error_colon_must_follow_a_valid_ip_address">콜론은 유효한 IP 주소를 따라야 합니다</string>
     <string name="error_compass_cannot_be_null">나침반은 무효가 될 수 없다</string>
+    <string name="error_conditions_not_met_for_record">스크립트 녹화에는 다음 조건 중 하나 이상이 필요합니다:\n- Root 권한\n- Shizuku 권한</string>
     <string name="error_connect_to_remote">원격 서버에 연결할 수 없습니다: %s</string>
     <string name="error_connection_failed_with_host">\"%1$s\"에 연결하지 못했습니다.</string>
     <string name="error_connection_timed_out">연결 시간 초과 (%d 밀리초)</string>
@@ -254,6 +257,7 @@
     <string name="error_failed_to_convert_into_drawable">%s 값을 Drawable 로 변환하지 못했습니다</string>
     <string name="error_failed_to_copy">복사하지 못했습니다</string>
     <string name="error_failed_to_create">만들지 못했습니다</string>
+    <string name="error_failed_to_enable_the_plugin">플러그인을 활성화하지 못했습니다</string>
     <string name="error_failed_to_go_to_access_settings">설정 페이지를 열지 못했습니다</string>
     <string name="error_failed_to_grant_shizuku_access">Shizuku 권한을 부여하지 못했습니다</string>
     <string name="error_failed_to_instantiate">\"%s\" 인스턴스 생성에 실패했습니다</string>
@@ -270,6 +274,7 @@
     <string name="error_failed_to_retrieve_version_properties_file_to_parse_version_information">version.properties 를 가져올 수 없어 버전 정보를 분석할 수 없습니다</string>
     <string name="error_failed_to_revoke_shizuku_access">Shizuku 권한 해지에 실패했습니다</string>
     <string name="error_failed_to_run_script">스크립트 실행 실패</string>
+    <string name="error_failed_to_save">저장에 실패했습니다</string>
     <string name="error_failed_to_save_project_config">프로젝트 설정을 저장하지 못했습니다</string>
     <string name="error_file_in_path_does_not_exist">경로 \"%1$s\" 에 파일이 존재하지 않습니다</string>
     <string name="error_function_called_in_ui_thread">UI 스레드는 차단할 수 없습니다. 하위 스레드 또는 하위 스크립트에서 %s() 를 실행하십시오</string>
@@ -330,6 +335,9 @@
     <string name="error_pattern_syntax">잘못된 패턴 구문</string>
     <string name="error_plugin_apk_does_not_contain_required_assets_for_variant">플러그인 APK에 variant=\"%1$s\"에 필요한 assets가 포함되어 있지 않습니다: %2$s.</string>
     <string name="error_plugin_apk_does_not_contain_required_native_libraries">플러그인 APK에 필요한 native 라이브러리가 포함되어 있지 않습니다: %1$s.</string>
+    <string name="error_plugin_is_not_authorized_in_plugin_center">플러그인 \"%1$s\" 이 (가) 플러그인 센터에서 권한이 부여되지 않았습니다</string>
+    <string name="error_plugin_is_not_enabled_in_plugin_center">플러그인 \"%1$s\" 이(가) 플러그인 센터에서 활성화되어 있지 않습니다</string>
+    <string name="error_plugin_not_found_in_installed_apps">설치된 앱에서 플러그인 \"%1$s\" 을 (를) 찾을 수 없습니다</string>
     <string name="error_plugin_returned_empty_info">%1$s 플러그인이 빈 info를 반환했습니다.</string>
     <string name="error_plugin_returned_invalid_variant">%1$s 플러그인이 잘못된 variant를 반환했습니다: %2$s.</string>
     <string name="error_port_num_over_65535">65535 이상의 포트 번호</string>
@@ -371,6 +379,7 @@
     <string name="error_unknown_picker_result_type_with_params" formatted="false">알 수없는 결과 유형 {이름: %s, 매개 변수: %s}</string>
     <string name="error_unknown_picker_selector_type" formatted="false">알 수없는 선택기 {이름: %s, 유형: %s}</string>
     <string name="error_unknown_type">알 수없는 유형: %s</string>
+    <string name="error_unsupported_plugin_connection">지원되지 않는 플러그인 연결 방식입니다</string>
     <string name="error_webp_lossless_quality_not_supported">WebP-Lossless 형식은 품질 파라미터로 압축할 수 없습니다, 대신 JPEG/PNG/WebP-Lossy를 사용하세요</string>
     <string name="file_not_exist_or_readable">파일이 없거나 읽을 수 없습니다</string>
     <string name="file_not_exist_or_readable_with_path">파일이 존재하지 않거나 읽을 수 없습니다: %s</string>
@@ -387,6 +396,7 @@
     <string name="hint_loop_delay">루프 전 지연</string>
     <string name="hint_loop_times">무한 루프의 경우 0</string>
     <string name="hint_pc_server_address_supported_formats">IPv4, IPv6 및 도메인을 지원합니다.</string>
+    <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">\"활성화\" 버튼을 눌러 플러그인을 한 번 활성화해 보세요.\n활성화에 성공하면 일정 시간 내에 버튼이 자동으로 켜집니다.</string>
     <string name="instruction_install_plugin_from_url">원격 플러그인 주소를 가리키는 URL을 입력하세요.\n예: \"https://example.com/plugin.apk\"</string>
     <string name="item_delete_permanently">영구 삭제</string>
     <string name="item_move_to_trash">휴지통으로 이동</string>
@@ -433,6 +443,7 @@
     <string name="plugin_item_info_last_install_time">마지막 설치</string>
     <string name="plugin_item_info_last_uninstall_time">마지막 제거</string>
     <string name="plugin_item_info_last_update_time">마지막 업데이트</string>
+    <string name="plugin_item_info_mechanism">방식</string>
     <string name="plugin_item_info_package_size">패키지 크기</string>
     <string name="plugin_item_info_updatable_version">업데이트 가능</string>
     <string name="prompt_add_ignored_version">현재 업데이트 버전을 무시해야합니까?\n앱 설정으로 무시 된 버전을 모두 관리 할 수 있습니다.</string>
@@ -463,6 +474,7 @@
     <string name="summary_text_launcher_shortcuts">런처에 바로 가기 추가</string>
     <string name="summary_use_volume_control_record">부동 버튼이 표시 될 때 볼륨 다운 키로 제어 된 녹음 시작 또는 중지</string>
     <string name="summary_use_volume_key_to_stop_running_scripts">실행 중인 모든 스크립트를 중지하려면 \"볼륨 크게\" 키를 누르십시오.</string>
+    <string name="symbol_colon_with_blank">": "</string>
     <string name="term_internal_strorage">내부 저장소</string>
     <string name="text_a11y_service">접근성 서비스</string>
     <string name="text_a11y_service_description">스크립트 자동 작동에 필요합니다 (클릭, 긴 프레스, 슬라이드 등).</string>
@@ -485,6 +497,7 @@
     <string name="text_act_by_scroll_forward">앞으로 스크롤 (scrollForward)</string>
     <string name="text_act_by_set_text">텍스트 설정 (setText)</string>
     <string name="text_action">동작</string>
+    <string name="text_activated_successfully">활성화되었습니다</string>
     <string name="text_activity_not_found_for_apk_installing">APK 설치 프로그램이 없습니다</string>
     <string name="text_adb_tool_needed">ADB 도구가 필요합니다</string>
     <string name="text_add_color_library">색상 라이브러리 추가</string>
@@ -544,8 +557,11 @@
     <string name="text_app_version_code">앱 버전 코드</string>
     <string name="text_app_version_name">앱 버전 이름</string>
     <string name="text_appearance">모습</string>
+    <string name="text_applying_binary_resources">바이너리 리소스 적용 중</string>
     <string name="text_at_least_one_certificate_issuer_field_is_not_empty">[성명, 조직명, 조직 단위, 국가 코드, 주 또는 도, 시 또는 지역, 거리] 중 하나 이상을 입력해야 합니다</string>
     <string name="text_attribute">기인하다</string>
+    <string name="text_authorize_plugin">플러그인 권한 부여</string>
+    <string name="text_authorize_plugin_content">이 플러그인은 타사 플러그인입니다. 플러그인 출처와 사용 안전에 유의하세요.\n\n\"권한 부여\" 버튼을 눌러 플러그인을 활성화하세요.</string>
     <string name="text_auto_check_for_updates">자동 확인 업데이트</string>
     <string name="text_auto_check_for_updates_and_show_snackbar">자동으로 업데이트를 확인하고 홈페이지에 스낵바를 표시합니다.</string>
     <string name="text_auto_night_mode">자동 밤 모드</string>
@@ -554,8 +570,27 @@
     <string name="text_back">뒤</string>
     <string name="text_broadcast_action">동작</string>
     <string name="text_broadcast_task">방송 작업</string>
+    <string name="text_build">빌드</string>
     <string name="text_build_apk">APK 빌드</string>
+    <string name="text_build_completed">빌드 완료</string>
+    <string name="text_build_profile">빌드 프로필</string>
+    <string name="text_build_profile_cannot_delete_default">기본 프로필은 삭제할 수 없습니다</string>
+    <string name="text_build_profile_cannot_delete_project_json">project.json 프로필은 삭제할 수 없습니다</string>
+    <string name="text_build_profile_delete">프로필 삭제</string>
+    <string name="text_build_profile_fields">프로필 필드</string>
+    <string name="text_build_profile_fields_configure">프로필 필드 설정</string>
+    <string name="text_build_profile_fields_hint">체크된 필드는 이 프로필에 고정 값으로 저장됩니다.</string>
+    <string name="text_build_profile_more">더 많은 프로필 작업</string>
+    <string name="text_build_profile_name_cannot_be_reserved">예약된 프로필 이름은 사용할 수 없습니다 (Default, project.json)</string>
+    <string name="text_build_profile_name_hint">빌드 프로필 이름</string>
+    <string name="text_build_profile_new">새 프로필</string>
+    <string name="text_build_profile_unsaved_changes">현재 빌드 설정에 저장되지 않은 변경 사항이 있습니다.</string>
+    <string name="text_build_profile_unsaved_changes_project_json">현재 빌드 설정에 저장되지 않은 변경 사항이 있으며, project.json에 기록됩니다.</string>
+    <string name="text_build_profile_unsaved_switch_confirm">계속하기 전에 변경 사항을 저장할까요?</string>
     <string name="text_build_succeeded">빌드가 성공했습니다</string>
+    <string name="text_building_apk">APK 빌드 중</string>
+    <string name="text_building_resources">리소스 빌드 중</string>
+    <string name="text_built_apk_file_path">생성된 APK 경로</string>
     <string name="text_cancel">취소</string>
     <string name="text_cancel_simplified">취소</string>
     <string name="text_cannot_delete_default">기본 프로필은 삭제할 수 없습니다</string>
@@ -587,6 +622,9 @@
     <string name="text_choose_restore_path">복원 경로 선택</string>
     <string name="text_city_or_locality">시 또는 지역</string>
     <string name="text_class_or_package_name">클래스 / 패키지 이름</string>
+    <string name="text_clean">정리</string>
+    <string name="text_clean_completed">정리 완료</string>
+    <string name="text_cleaning_workspace">작업 공간 정리 중</string>
     <string name="text_clear">분명한</string>
     <string name="text_clear_file_selection">파일 선택을 지우십시오</string>
     <string name="text_clear_pre_execute_script">사전 에코 슈트 스크립트를 지우십시오</string>
@@ -615,6 +653,8 @@
     <string name="text_compatibility">호환성</string>
     <string name="text_confidence_level">신뢰도</string>
     <string name="text_config">구성</string>
+    <string name="text_configuring_manifest">manifest 설정 중</string>
+    <string name="text_configuring_package_name">패키지 이름 설정 중</string>
     <string name="text_confirm_to_clear_all_items">모든 항목을 삭제하시겠습니까?</string>
     <string name="text_confirm_to_clear_the_history">기록을 삭제하시겠습니까?</string>
     <string name="text_confirm_to_clear_the_history_of">아래 기록이 삭제됩니다\n\n[ %1$s ]\n\n삭제하시겠습니까?</string>
@@ -630,6 +670,7 @@
     <string name="text_connection_cannot_be_established">연결을 설정할 수 없습니다</string>
     <string name="text_connection_failed">연결 실패</string>
     <string name="text_console">콘솔</string>
+    <string name="text_content">내용</string>
     <string name="text_continue">계속하다</string>
     <string name="text_copy">복사</string>
     <string name="text_copy_all">모두 복사하십시오</string>
@@ -644,8 +685,18 @@
     <string name="text_copy_to_clip">클립 보드에 복사</string>
     <string name="text_copy_value">값을 복사하십시오</string>
     <string name="text_copying" tools:ignore="TypographyEllipsis">복사 중...</string>
+    <string name="text_copying_asset">asset 복사 중</string>
+    <string name="text_copying_assets_to">assets 복사 중:</string>
+    <string name="text_copying_directory">디렉터리 복사 중</string>
+    <string name="text_copying_file">파일 복사 중</string>
+    <string name="text_copying_libraries_for_abi">ABI용 라이브러리 복사 중</string>
+    <string name="text_copying_library">라이브러리 복사 중</string>
+    <string name="text_copying_native_libraries">네이티브 라이브러리 복사 중</string>
+    <string name="text_copying_project_directory">프로젝트 디렉터리 복사 중</string>
+    <string name="text_copying_script_file">스크립트 파일 복사 중</string>
     <string name="text_country_code">국가 코드 (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">국가 코드는 두 개의 대문자로 입력해야 합니다</string>
+    <string name="text_creating_unsigned_apk">서명되지 않은 APK 생성 중</string>
     <string name="text_current_page_configuration">현재 페이지 설정</string>
     <string name="text_current_version">현재 버전</string>
     <string name="text_daily_task">일상적인 작업</string>
@@ -728,10 +779,12 @@
     <string name="text_enable_a11y_service_with_secure_settings_timeout">안전한 설정 시간이 초과되는 접근성 서비스를 활성화하십시오</string>
     <string name="text_enable_plugin">플러그인 활성화</string>
     <string name="text_enabled">활성화됨</string>
+    <string name="text_encrypting_script">스크립트 암호화 중</string>
     <string name="text_error">오류</string>
     <string name="text_error_copy_file" formatted="true">파일을 복사하지 못했습니다: %s</string>
     <string name="text_error_report">버그 보고서</string>
     <string name="text_estimated">추정</string>
+    <string name="text_exception_info">예외 정보</string>
     <string name="text_execute">실행하다</string>
     <string name="text_execute_code">코드를 실행하십시오</string>
     <string name="text_execution_finished" formatted="false">[%s] 는 %s 초 만에 완료되었습니다.\n</string>
@@ -744,6 +797,11 @@
     <string name="text_exported">내보낸</string>
     <string name="text_extending_js_build_in_objects">JavaScript 내장 개체 확장</string>
     <string name="text_extensibility">확장성</string>
+    <string name="text_extracted_plugin_assets">플러그인 assets를 추출함</string>
+    <string name="text_extracted_plugin_libraries">플러그인 라이브러리를 추출함</string>
+    <string name="text_extracting_plugin_asset">플러그인 asset 추출 중</string>
+    <string name="text_extracting_plugin_so">플러그인 so 파일 추출 중</string>
+    <string name="text_extracting_template_apk">템플릿 APK 추출 중</string>
     <string name="text_failed">실패한</string>
     <string name="text_failed_to_build">건축에 실패했습니다</string>
     <string name="text_failed_to_create_key_store">서명 키 생성에 실패했습니다</string>
@@ -764,6 +822,7 @@
     <string name="text_failed_to_register">등록하지 못했습니다</string>
     <string name="text_failed_to_report">제출하지 못했습니다</string>
     <string name="text_failed_to_retrieve">가져오기 실패</string>
+    <string name="text_failed_to_save_project_json">project.json 저장에 실패했습니다</string>
     <string name="text_failed_to_save_remote_project_to_local_storage">원격 프로젝트를 로컬 저장소에 저장하지 못했습니다</string>
     <string name="text_failed_to_send_log_entries">로그 항목을 보내지 못했습니다</string>
     <string name="text_failed_to_update">업데이트 실패</string>
@@ -814,6 +873,7 @@
     <string name="text_hide_button">버튼 숨기기</string>
     <string name="text_hide_node">이 노드를 숨기기</string>
     <string name="text_hide_same_frame_nodes">동일 프레임의 노드를 숨기기</string>
+    <string name="text_hint">힌트</string>
     <string name="text_history">기록</string>
     <string name="text_history_has_been_cleared">기록이 삭제되었습니다</string>
     <string name="text_icon">상</string>
@@ -869,6 +929,11 @@
     <string name="text_latest_package">최신 패키지</string>
     <string name="text_launch_config">구성을 시작하십시오</string>
     <string name="text_launch_debugger">디버거를 시작하십시오</string>
+    <string name="text_launch_launcher_visible">런처에 앱 아이콘 표시</string>
+    <string name="text_launch_logs_visible">실행 시 로그 표시</string>
+    <string name="text_launch_run_on_boot">부팅 시 스크립트 실행</string>
+    <string name="text_launch_slug">시작 화면 슬로건 텍스트</string>
+    <string name="text_launch_splash_visible">실행 시 시작 화면 표시</string>
     <string name="text_launcher_icon_title">런처 아이콘</string>
     <string name="text_launcher_shortcuts">런처 바로 가기</string>
     <string name="text_launcher_shortcuts_may_be_lost_after_launcher_icon_changed">일부 기기에서 런처 아이콘을 변경하면 기존 AutoJs6 바로가기가 모두 삭제될 수 있으니 주의하십시오</string>
@@ -984,9 +1049,9 @@
     <string name="text_permission_desc_billing">앱이 인앱 구매를 수행하도록 허용합니다</string>
     <string name="text_permission_desc_bluetooth">앱이 블루투스 기기에 접근하도록 허용합니다</string>
     <string name="text_permission_desc_bluetooth_admin">앱이 블루투스 기기를 구성하도록 허용합니다</string>
+    <string name="text_permission_desc_bluetooth_advertise">앱이 블루투스로 광고하도록 허용합니다</string>
     <string name="text_permission_desc_bluetooth_connect">앱이 블루투스 장치 및 연결 상태에 접근하도록 허용합니다</string>
     <string name="text_permission_desc_bluetooth_scan">앱이 근처 블루투스 장치를 검색하도록 허용합니다</string>
-    <string name="text_permission_desc_bluetooth_advertise">앱이 블루투스로 광고하도록 허용합니다</string>
     <string name="text_permission_desc_broadcast_close_system_dialogs">앱이 시스템 대화 상자를 닫기 위한 인텐트를 보내도록 허용합니다</string>
     <string name="text_permission_desc_call_phone">앱이 전화를 걸도록 허용합니다</string>
     <string name="text_permission_desc_camera">앱이 카메라에 접근하도록 허용합니다</string>
@@ -1070,15 +1135,28 @@
     <string name="text_please_input_name">입력 이름</string>
     <string name="text_please_wait" tools:ignore="TypographyEllipsis">잠시만 기다려주세요...</string>
     <string name="text_please_wait_a_moment_before_trying_again" tools:ignore="TypographyEllipsis">잠시 후 다시 시도해 주세요...</string>
+    <string name="text_plugin_activated">활성화됨</string>
+    <string name="text_plugin_activation_recommended">활성화 권장</string>
+    <string name="text_plugin_authorization_denied">권한 거부됨</string>
+    <string name="text_plugin_authorization_required">권한 필요</string>
+    <string name="text_plugin_authorized">권한 부여됨</string>
     <string name="text_plugin_center">플러그인 센터</string>
     <string name="text_plugin_details">플러그인 상세</string>
+    <string name="text_plugin_official">공식</string>
+    <string name="text_plugin_trusted">신뢰됨</string>
     <string name="text_plugins">플러그인</string>
     <string name="text_pointer_location">포인터 위치</string>
     <string name="text_pointer_location_toggle_failed_with_hint">\"포인터 위치\"토글이 실패했습니다.\n루트 액세스가 필요합니다.</string>
     <string name="text_post_notifications_permission">게시물 알림</string>
     <string name="text_post_notifications_permission_rationale">AutoJs6 포그라운드 서비스 등이 정상적으로 동작하고 스크립트가 알림을 게시할 수 있도록 하려면, AutoJs6 에 \"알림 게시\" 권한을 부여해야 합니다.</string>
     <string name="text_pre_execute_script">사전 배제 스크립트</string>
+    <string name="text_prepare">준비</string>
+    <string name="text_prepare_completed">준비 완료</string>
     <string name="text_preparing" tools:ignore="TypographyEllipsis">준비 ...</string>
+    <string name="text_preparing_assets_dir">assets 디렉터리 준비 중</string>
+    <string name="text_preparing_build_config">빌드 설정 준비 중</string>
+    <string name="text_preparing_keystore">keystore 준비 중</string>
+    <string name="text_preparing_workspace">작업 공간 준비 중</string>
     <string name="text_preset_dialog_content">사전 설정 대화 상자 내용</string>
     <string name="text_preset_dialog_title">사전 설정 대화 상자 제목</string>
     <string name="text_press_again_to_dismiss_dialog">다시 눌러 대화 상자를 무시하십시오</string>
@@ -1087,14 +1165,19 @@
     <string name="text_preview">시사</string>
     <string name="text_process_log">프로세스 로그</string>
     <string name="text_processing">처리 중</string>
+    <string name="text_processing_source">소스 처리 중</string>
     <string name="text_project">프로젝트</string>
     <string name="text_project_location">프로젝트 위치</string>
     <string name="text_project_media_access">프로젝트 미디어 액세스</string>
     <string name="text_prompt">즉각적인</string>
+    <string name="text_property_colon">%1$s:</string>
     <string name="text_property_colon_value">%1$s: %2$s</string>
     <string name="text_property_colon_value_nbsp_unit">%1$s: %2$d %3$s</string>
     <string name="text_property_colon_value_unit">%1$s: %2$d%3$s</string>
+    <string name="text_pruning">가지치기 중</string>
     <string name="text_quit">그만두다</string>
+    <string name="text_re_signing_apk">APK 재서명 중</string>
+    <string name="text_reading_splash_resources">스플래시 리소스 읽는 중</string>
     <string name="text_recommended">권장</string>
     <string name="text_record_finished">녹음 완료</string>
     <string name="text_record_prompt">녹음 프롬프트</string>
@@ -1120,6 +1203,7 @@
     <string name="text_replace">바꾸다</string>
     <string name="text_replace_all">모두 다 바꿔</string>
     <string name="text_replace_simplified">교체</string>
+    <string name="text_replacing_file">파일 교체 중</string>
     <string name="text_repo_url_of_vscode_vsc_ext">VSCode 확장의 리포지토리 URL</string>
     <string name="text_report_succeed">제출 성공</string>
     <string name="text_requires_android_os_version" formatted="false">Android OS 버전 %s (API %s) 가 필요하지만 현재는 %s (API %s) 입니다.</string>
@@ -1128,6 +1212,7 @@
     <string name="text_reset_succeed">재설정이 성공했습니다</string>
     <string name="text_reset_to_initial_content">처음에 재설정하십시오</string>
     <string name="text_reset_to_initial_content_only_for_assets">재설정은 샘플에만 해당됩니다</string>
+    <string name="text_resolving_plugin_native_libraries">플러그인 네이티브 라이브러리 확인 중</string>
     <string name="text_restart">재시작</string>
     <string name="text_restart_strategy">재시작 전략</string>
     <string name="text_restore">복원</string>
@@ -1169,6 +1254,7 @@
     <string name="text_save_configuration_as">다른 이름으로 저장</string>
     <string name="text_save_simplified">구하다</string>
     <string name="text_save_to">저장</string>
+    <string name="text_saving" tools:ignore="TypographyEllipsis">저장 중...</string>
     <string name="text_scheduled_restart_backend">엔진</string>
     <string name="text_scheduled_restart_start_delay">시작 지연</string>
     <string name="text_screen_capture_request_delay">화면 캡처 권한 요청 지연</string>
@@ -1189,6 +1275,7 @@
     <string name="text_select_file_to_upload">업로드 할 파일을 선택하십시오</string>
     <string name="text_select_icon">아이콘을 선택하십시오</string>
     <string name="text_select_image">이미지를 선택하십시오</string>
+    <string name="text_selected_plugin">선택된 플러그인</string>
     <string name="text_send">보내다</string>
     <string name="text_send_shortcut">바로 가기를 만듭니다</string>
     <string name="text_server_mode">서버 모드</string>
@@ -1205,6 +1292,9 @@
     <string name="text_show_layout_bounds">레이아웃 경계보기</string>
     <string name="text_show_layout_hierarchy">레이아웃 계층 구조보기</string>
     <string name="text_show_widget_information">위젯 정보를 보여줍니다</string>
+    <string name="text_sign">서명</string>
+    <string name="text_sign_completed">서명 완료</string>
+    <string name="text_sign_stage_completed">서명 단계 완료</string>
     <string name="text_signature_algorithm">서명 알고리즘</string>
     <string name="text_signature_configuration">서명 설정</string>
     <string name="text_signature_scheme">서명 스킴</string>
@@ -1222,6 +1312,7 @@
     <string name="text_sort_by_time_desc">시간 (최신순)</string>
     <string name="text_source">원본</string>
     <string name="text_source_file_path">소스 코드 경로</string>
+    <string name="text_source_processing_completed">소스 처리 완료</string>
     <string name="text_special_permissions">특수 권한</string>
     <string name="text_stable_mode">안정적인 모드</string>
     <string name="text_star">별</string>
@@ -1260,6 +1351,7 @@
     <string name="text_timed_task">시간이 정한 작업</string>
     <string name="text_timed_task_backend_title">정시 작업 스케줄링 엔진</string>
     <string name="text_timed_task_timing">타이밍</string>
+    <string name="text_title">제목</string>
     <string name="text_to_be_chosen">선택 대기</string>
     <string name="text_toggle_all">전체 전환</string>
     <string name="text_tools">도구</string>
@@ -1284,6 +1376,7 @@
     <string name="text_unknown_description_for_plugin">알 수 없는 설명</string>
     <string name="text_unknown_title_for_plugin">알 수 없는 제목</string>
     <string name="text_unknown_version_for_plugin">알 수 없는 버전</string>
+    <string name="text_unsigned_apk_created">서명되지 않은 APK가 생성됨</string>
     <string name="text_unverified">미확인</string>
     <string name="text_updatable">업데이트 가능</string>
     <string name="text_update">업데이트</string>
@@ -1291,6 +1384,7 @@
     <string name="text_updates_checked_states_cleared">확인 된 상태가 지워졌습니다</string>
     <string name="text_updates_snack_bar_act_later">나중</string>
     <string name="text_updates_snack_bar_act_view">보다</string>
+    <string name="text_updating_project_config">프로젝트 설정 업데이트 중</string>
     <string name="text_usage_stats_permission">사용 통계 액세스</string>
     <string name="text_use_android_n_shortcut">Android 7.0 바로 가기를 사용하십시오</string>
     <string name="text_use_default_icon">기본 아이콘 사용</string>
@@ -1300,6 +1394,7 @@
     <string name="text_username_cannot_be_empty">사용자 이름은 비어있을 수 없습니다</string>
     <string name="text_using_desc_selector">desc 선택기를 사용하십시오</string>
     <string name="text_using_id_selector">id 선택기를 사용하십시오</string>
+    <string name="text_using_keystore">keystore 사용 중</string>
     <string name="text_using_text_selector">text 선택기를 사용하십시오</string>
     <string name="text_validity_years">유효 기간 (년)</string>
     <string name="text_validity_years_cannot_be_empty">유효 기간을 입력해야 합니다</string>
@@ -1331,86 +1426,12 @@
     <string name="text_working_dir_path">작업 디렉토리 경로</string>
     <string name="text_write_secure_settings">보안 설정을 작성하십시오</string>
     <string name="text_write_system_settings">시스템 설정을 작성하십시오</string>
+    <string name="text_writing_app_icon">앱 아이콘 기록 중</string>
+    <string name="text_writing_manifest">manifest 기록 중</string>
+    <string name="text_writing_project_config">프로젝트 설정 기록 중</string>
+    <string name="text_writing_resources_arsc">resources.arsc 기록 중</string>
+    <string name="text_writing_signed_apk">서명된 APK 기록 중</string>
     <string name="text_xiaomi_background_popup_permission">백그라운드 팝업</string>
     <string name="warn_continue_operation_without_saving_settings">설정이 저장되지 않았습니다. 계속할까요?</string>
     <string name="warn_exit_without_saving_settings">설정이 저장되지 않았습니다. 종료할까요?</string>
-    <string name="error_failed_to_save">저장에 실패했습니다</string>
-    <string name="text_saving" tools:ignore="TypographyEllipsis">저장 중...</string>
-    <string name="symbol_colon_with_blank">": "</string>
-    <string name="error_failed_to_enable_the_plugin">플러그인을 활성화하지 못했습니다</string>
-    <string name="text_exception_info">예외 정보</string>
-    <string name="text_hint">힌트</string>
-    <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">\"활성화\" 버튼을 눌러 플러그인을 한 번 활성화해 보세요.\n활성화에 성공하면 일정 시간 내에 버튼이 자동으로 켜집니다.</string>
-    <string name="dialog_button_activate">활성화</string>
-    <string name="text_activated_successfully">활성화되었습니다</string>
-    <string name="text_authorize_plugin">플러그인 권한 부여</string>
-    <string name="text_authorize_plugin_content">이 플러그인은 타사 플러그인입니다. 플러그인 출처와 사용 안전에 유의하세요.\n\n\"권한 부여\" 버튼을 눌러 플러그인을 활성화하세요.</string>
-    <string name="dialog_button_authorize">권한 부여</string>
-    <string name="text_plugin_official">공식</string>
-    <string name="text_plugin_authorized">권한 부여됨</string>
-    <string name="text_plugin_authorization_required">권한 필요</string>
-    <string name="text_plugin_authorization_denied">권한 거부됨</string>
-    <string name="text_plugin_activation_recommended">활성화 권장</string>
-    <string name="text_plugin_activated">활성화됨</string>
-    <string name="text_plugin_trusted">신뢰됨</string>
-    <string name="plugin_item_info_mechanism">방식</string>
-    <string name="error_plugin_is_not_enabled_in_plugin_center">플러그인 \"%1$s\" 이(가) 플러그인 센터에서 활성화되어 있지 않습니다</string>
-    <string name="error_plugin_is_not_authorized_in_plugin_center">플러그인 \"%1$s\" 이 (가) 플러그인 센터에서 권한이 부여되지 않았습니다</string>
-    <string name="error_plugin_not_found_in_installed_apps">설치된 앱에서 플러그인 \"%1$s\" 을 (를) 찾을 수 없습니다</string>
-    <string name="error_unsupported_plugin_connection">지원되지 않는 플러그인 연결 방식입니다</string>
-    <string name="text_property_colon">%1$s:</string>
-    <string name="text_title">제목</string>
-    <string name="text_content">내용</string>
-    <string name="text_building_apk">APK 빌드 중</string>
-    <string name="text_built_apk_file_path">생성된 APK 경로</string>
-    <string name="text_clean">정리</string>
-    <string name="text_sign">서명</string>
-    <string name="text_build">빌드</string>
-    <string name="text_prepare">준비</string>
-    <string name="text_preparing_workspace">작업 공간 준비 중</string>
-    <string name="text_extracting_template_apk">템플릿 APK 추출 중</string>
-    <string name="text_prepare_completed">준비 완료</string>
-    <string name="text_copying_project_directory">프로젝트 디렉터리 복사 중</string>
-    <string name="text_copying_script_file">스크립트 파일 복사 중</string>
-    <string name="text_source_processing_completed">소스 처리 완료</string>
-    <string name="text_copying_directory">디렉터리 복사 중</string>
-    <string name="text_copying_file">파일 복사 중</string>
-    <string name="text_encrypting_script">스크립트 암호화 중</string>
-    <string name="text_replacing_file">파일 교체 중</string>
-    <string name="text_preparing_build_config">빌드 설정 준비 중</string>
-    <string name="text_reading_splash_resources">스플래시 리소스 읽는 중</string>
-    <string name="text_configuring_manifest">manifest 설정 중</string>
-    <string name="text_configuring_package_name">패키지 이름 설정 중</string>
-    <string name="text_copying_assets_to">assets 복사 중:</string>
-    <string name="text_processing_source">소스 처리 중</string>
-    <string name="text_applying_binary_resources">바이너리 리소스 적용 중</string>
-    <string name="text_copying_native_libraries">네이티브 라이브러리 복사 중</string>
-    <string name="text_updating_project_config">프로젝트 설정 업데이트 중</string>
-    <string name="text_sign_stage_completed">서명 단계 완료</string>
-    <string name="text_writing_project_config">프로젝트 설정 기록 중</string>
-    <string name="text_building_resources">리소스 빌드 중</string>
-    <string name="text_build_completed">빌드 완료</string>
-    <string name="text_writing_resources_arsc">resources.arsc 기록 중</string>
-    <string name="text_writing_manifest">manifest 기록 중</string>
-    <string name="text_writing_app_icon">앱 아이콘 기록 중</string>
-    <string name="text_copying_asset">asset 복사 중</string>
-    <string name="text_preparing_assets_dir">assets 디렉터리 준비 중</string>
-    <string name="text_copying_library">라이브러리 복사 중</string>
-    <string name="text_preparing_keystore">keystore 준비 중</string>
-    <string name="text_unsigned_apk_created">서명되지 않은 APK가 생성됨</string>
-    <string name="text_creating_unsigned_apk">서명되지 않은 APK 생성 중</string>
-    <string name="text_using_keystore">keystore 사용 중</string>
-    <string name="text_re_signing_apk">APK 재서명 중</string>
-    <string name="text_writing_signed_apk">서명된 APK 기록 중</string>
-    <string name="text_sign_completed">서명 완료</string>
-    <string name="text_clean_completed">정리 완료</string>
-    <string name="text_cleaning_workspace">작업 공간 정리 중</string>
-    <string name="text_resolving_plugin_native_libraries">플러그인 네이티브 라이브러리 확인 중</string>
-    <string name="text_copying_libraries_for_abi">ABI용 라이브러리 복사 중</string>
-    <string name="text_selected_plugin">선택된 플러그인</string>
-    <string name="text_extracted_plugin_libraries">플러그인 라이브러리를 추출함</string>
-    <string name="text_extracted_plugin_assets">플러그인 assets를 추출함</string>
-    <string name="text_extracting_plugin_asset">플러그인 asset 추출 중</string>
-    <string name="text_extracting_plugin_so">플러그인 so 파일 추출 중</string>
-    <string name="error_conditions_not_met_for_record">스크립트 녹화에는 다음 조건 중 하나 이상이 필요합니다:\n- Root 권한\n- Shizuku 권한</string>
 </resources>

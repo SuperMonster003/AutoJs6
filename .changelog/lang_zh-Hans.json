@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.7.0": {
-      "released_date": "2026/03/08",
+      "released_date": "2026/03/14",
       "feature": [
         "插件中心功能, 支持插件的安装/卸载/更新等操作 (入口: 主页抽屉按钮/主页标签页)",
         "版本历史功能, 支持查看/恢复可编辑文件的历史版本 (入口: 主页抽屉按钮/文件管理器菜单/代码编辑器菜单)",
@@ -49,6 +49,10 @@
         "设置页面增加 \"重启策略\" 设置选项, 用于设置主页抽屉栏重启按钮是否使用快速重启策略",
         "设置页面增加 \"屏幕捕获权限申请延迟\" 设置选项, 用于避免权限申请窗口遮挡屏幕",
         "设置页面启动器快捷方式增加 \"插件\" 选项, 用于通过快捷方式跳转到插件中心页面",
+        "打包应用支持开机自启动并在配置页面增加开关配置",
+        "打包应用支持应用快捷方式 (日志页面/设置页面)",
+        "打包应用配置页面增加撤销/重做/保存按钮",
+        "打包应用配置页面增加配置机制, 支持配置的建立/修改/删除/导入/导出 _[`issue #483`](http://issues.autojs6.com/483)_",
         "Scrapers 工具 (run-scrapers.mjs) 用于自动更新 Gradle 构建脚本结构化数据/README 通用数据/README 模板数据等",
         "Gradle Wrapper 切换工具 (gradle-wrapper-switcher), 用于切换本地 Gradle 主版本 (如 Gradle 8.x 与 Gradle 9.x)"
       ],
@@ -96,6 +100,8 @@
         "输入事件观察器 InputEventObserver 可能导致应用启动时明显卡顿的问题",
         "Shizuku 用户服务进程未能正常结束导致进程堆积的问题 _[`issue #474`](http://issues.autojs6.com/474)_",
         "打包应用无法正常使用 Paddle OCR 与 Rapid OCR 功能的问题",
+        "打包应用配置文件 project.json 中的 key 值可能被意外修改的问题",
+        "打包应用配置页面滑动 \"需要的权限\" 列表时可能出现复选框图标闪烁的问题",
         "发行历史页面部分系统因字体差别导致统计数据显示不完整的问题",
         "部分设备无法正常初始化 MLKit Google OCR 的问题 (试修) _[`issue #8`](http://issues.autojs6.com/8#issuecomment-3117061768)_",
         "部分设备无法正常触发文件管理器功能按钮点击事件的问题 (试修) _[`issue #465`](http://issues.autojs6.com/465)_",
@@ -156,7 +162,9 @@
         "代码编辑器支持 \"-\", \"=\", \"(\", \"[\", \"{\", \"<\" 等按键长按功能",
         "打包应用打包过程对话框增加 \"中止\" 按钮",
         "打包应用打包过程对话框的显示方式并增加耗时统计",
-        "打包应用页面默认勾选必要权限 (WAKE_LOCK/INTERNET/WRITE_EXTERNAL_STORAGE) _[`issue #397`](http://issues.autojs6.com/397)_",
+        "打包应用使用新配置安装时将覆盖旧应用的相关配置",
+        "打包应用配置页面默认勾选必要权限 (WAKE_LOCK/INTERNET/WRITE_EXTERNAL_STORAGE/...) _[`issue #397`](http://issues.autojs6.com/397)_",
+        "打包应用配置页面支持更多选项的读取及配置 (启动时显示日志/启动时显示启动页/启动页标语文本/...)",
         "打包应用设置页面增加前台服务开关 _[`issue #406`](http://issues.autojs6.com/406)_",
         "脚本项目配置文件保存时增加键名冲突检测机制防止键名歧义",
         "崩溃报告页面支持双指缩放调整字体大小并添加常用功能按钮",
@@ -349,7 +357,7 @@
       "improvement": [
         "精简打包应用模板 APK 文件大小",
         "应用 (以及打包应用) 支持更多权限 _[`issue #338`](http://issues.autojs6.com/338)_",
-        "打包页面支持 Pinyin 库选项",
+        "打包应用配置页面支持 Pinyin 库选项",
         "打包应用主活动页面优化状态栏背景及文字颜色",
         "打包应用设置页面增加访问所有文件和发送通知等特殊权限开关 _[`issue #354`](http://issues.autojs6.com/354)_",
         "控件的文字及图标根据主题色亮度值自动切换合适的颜色",
@@ -401,7 +409,7 @@
         "UiObjectCollection 实例缺失自身方法及属性的问题"
       ],
       "improvement": [
-        "打包页面支持签名配置/密钥库管理/权限设置 (by [luckyloogn](https://github.com/luckyloogn)) _[`pr #286`](http://pr.autojs6.com/286)_",
+        "打包应用配置页面支持签名配置/密钥库管理/权限设置 (by [luckyloogn](https://github.com/luckyloogn)) _[`pr #286`](http://pr.autojs6.com/286)_",
         "提升浮动窗口当前包名及当前活动名的识别准确性 (优先级: Shizuku > Root > A11Y)",
         "提升 currentPackage/currentActivity 识别准确性 (优先级: Shizuku > Root > A11Y)",
         "恢复日志活动窗口单个条目文本内容的双击或长按选择功能 _[`issue #280`](http://issues.autojs6.com/280)_",
@@ -484,7 +492,7 @@
         "打包应用无法正常使用 opencc 模块的问题"
       ],
       "improvement": [
-        "打包页面中 \"不可用 ABI\" 控件的点击提示体验",
+        "打包应用配置页面中 \"不可用 ABI\" 控件的点击提示体验",
         "支持使用 Shizuku 控制 \"指针位置\" 显示开关",
         "支持使用 Shizuku 控制 \"投影媒体\" 及 \"修改安全设置\" 权限开关",
         "automator.gestureAsync/gesturesAsync 支持回调函数参数",
@@ -544,12 +552,12 @@
       "feature": [
         "opencc 模块 (参阅 项目文档 > [中文转换](https://docs.autojs6.com/#/opencc)) (Ref to [LZX284](https://github.com/SuperMonster003/AutoJs6/pull/187/files#diff-8cff73265af19c059547b76aca8882cbaa3209291406f52df1dafbbc78e80c46R268))",
         "UiSelector 增加 [plus](https://docs.autojs6.com/#/uiObjectType?id=m-plus) 及 [append](https://docs.autojs6.com/#/uiObjectType?id=m-append) 方法 _[`issue #115`](http://issues.autojs6.com/115)_",
-        "打包应用页面增加 ABI 及库的筛选支持 (Ref to [AutoX](https://github.com/kkevsekk1/AutoX)) _[`issue #189`](http://issues.autojs6.com/189)_"
+        "打包应用配置页面增加 ABI 及库的筛选支持 (Ref to [AutoX](https://github.com/kkevsekk1/AutoX)) _[`issue #189`](http://issues.autojs6.com/189)_"
       ],
       "fix": [
         "打包应用文件体积异常庞大的问题 (Ref to [AutoX](https://github.com/kkevsekk1/AutoX) / [LZX284](https://github.com/SuperMonster003/AutoJs6/pull/187/files#diff-d932ac49867d4610f8eeb21b59306e8e923d016cbca192b254caebd829198856R61)) _[`issue #176`](http://issues.autojs6.com/176)_",
         "打包应用无法显示并打印部分异常消息的问题",
-        "打包应用页面选择应用图标后可能显示空图标的问题",
+        "打包应用配置页面选择应用图标后可能显示空图标的问题",
         "打包应用包含 MLKit Google OCR 库时可能出现的上下文未初始化异常",
         "ocr.recognizeText/detect 方法无效的问题",
         "部分文本 (如日志页面) 显示语言与应用设置语言可能不相符的问题",
@@ -573,9 +581,9 @@
       "improvement": [
         "代码编辑器模块函数快捷面板适配夜间模式",
         "打包应用启动页面适配夜间模式并调整应用图标布局",
-        "打包应用页面支持使用软键盘 ENTER 键实现光标跳转",
-        "打包应用页面支持点击 ABI 标题及库标题切换全选状态",
-        "打包应用页面默认 ABI 智能选择并增加不可选择项的引导提示",
+        "打包应用配置页面支持使用软键盘 ENTER 键实现光标跳转",
+        "打包应用配置页面支持点击 ABI 标题及库标题切换全选状态",
+        "打包应用配置页面默认 ABI 智能选择并增加不可选择项的引导提示",
         "文件管理器根据文件及文件夹的类型及特征调整菜单项的显示情况",
         "文件管理器文件夹右键菜单增加打包应用选项",
         "无障碍服务启用但功能异常时在 AutoJs6 主页抽屉开关处将体现异常状态",

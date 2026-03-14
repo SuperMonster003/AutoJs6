@@ -5,12 +5,14 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import android.widget.CheckBox
+import android.widget.CompoundButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import org.autojs.autojs6.R
 
 /**
  * Created by SuperMonster003 on Nov 24, 2023.
+ * Modified by JetBrains AI Assistant (GPT-5.3-Codex (xhigh)) as of Mar 9, 2026.
  */
 class RoundCheckboxWithText : LinearLayout {
 
@@ -51,6 +53,10 @@ class RoundCheckboxWithText : LinearLayout {
 
     fun isChecked() = mCheckbox.isChecked
 
+    fun setOnCheckedChangeListener(listener: CompoundButton.OnCheckedChangeListener?) {
+        mCheckbox.setOnCheckedChangeListener(listener)
+    }
+
     fun setText(text: String?) {
         mTextView.text = text
     }
@@ -82,5 +88,4 @@ class RoundCheckboxWithText : LinearLayout {
     private fun isInside(v: View, e: MotionEvent): Boolean {
         return e.x in 0f..v.measuredWidth.toFloat() && e.y in 0f..v.measuredHeight.toFloat()
     }
-
 }

@@ -54,7 +54,8 @@ import java.util.zip.ZipFile
 /**
  * Created by Stardust on Oct 24, 2017.
  * Modified by JetBrains AI Assistant (GPT-5.2) as of Jan 17, 2026.
- * Modified by SuperMonster003 as of Jan 18, 2026.
+ * Modified by JetBrains AI Assistant (GPT-5.3-Codex (xhigh)) as of Mar 9, 2026.
+ * Modified by SuperMonster003 as of Mar 13, 2026.
  */
 open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File, private val buildPath: String) {
 
@@ -66,6 +67,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
     private var mCancelSignal: AtomicBoolean? = null
     private var mPendingProjectConfigFile: File? = null
     private var mPendingProjectConfigJson: String? = null
+    private var mBundledProjectConfigJson: String? = null
 
     private lateinit var mProjectConfig: ProjectConfig
 
@@ -74,8 +76,8 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
     private val mAssetManager: AssetManager by lazy { globalContext.assets }
 
     private var mLibsIncludes = Lib.defaultLibsToInclude.toMutableList()
-    private var mAssetsFileIncludes = Lib.defaultAssetFilesToInclude.toMutableList()
-    private var mAssetsDirExcludes = Lib.defaultAssetDirsToExclude.toMutableList()
+    private var mAssetsFileIncludes = Lib.defaultAssetFilesToInclude.map(::normalizeAssetPath).toMutableList()
+    private var mAssetsDirExcludes = Lib.defaultAssetDirsToExclude.map(::normalizeAssetPath).toMutableList()
 
     private var mSplashThemeId: Int = 0
     private var mNoSplashThemeId: Int = 0
@@ -90,12 +92,17 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         PFiles.ensureDir(outApkFile.path)
     }
 
-    fun setProgressCallback(callback: ProgressCallback?) = also { mProgressCallback = callback }
+    fun setProgressCallback(callback: ProgressCallback?) = also {
+        mProgressCallback = callback
+    }
 
     fun setCancelSignal(cancelSignal: AtomicBoolean?) = also {
         mCancelSignal = cancelSignal
         mApkPackager.setCancelSignal(cancelSignal)
     }
+
+    private fun getAssetsRoot(): File =
+        File(buildPath, "assets")
 
     // Throw early when cancellation is requested to avoid partial outputs.
     // zh-CN: 当收到取消请求时尽早抛出, 以避免产生部分输出.
@@ -116,6 +123,64 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         while (input.read(buffer).also { len = it } > 0) {
             ensureNotCancelled()
             output.write(buffer, 0, len)
+        }
+    }
+
+    private fun toAssetZipPrefix(path: String): String {
+        val normalized = normalizeAssetPath(path)
+        return if (normalized.isEmpty()) "assets/" else "assets/$normalized"
+    }
+
+    private fun isAssetDirExcluded(assetPath: String): Boolean {
+        val normalized = normalizeAssetPath(assetPath)
+        return mAssetsDirExcludes.any { excluded ->
+            normalized == excluded || normalized.startsWith("$excluded/")
+        }
+    }
+
+    private fun includeLibraryContributions(lib: Lib) {
+        mLibsIncludes += lib.libsToInclude.toSet()
+        mAssetsFileIncludes += lib.assetFilesToInclude.map(::normalizeAssetPath).toSet()
+        mAssetsDirExcludes -= lib.assetDirsToInclude.map(::normalizeAssetPath).toSet()
+    }
+
+    private fun pruneTemplateAssetsByPolicy(context: Context) {
+        val assetsRoot = getAssetsRoot()
+        if (!assetsRoot.exists() || !assetsRoot.isDirectory) {
+            return
+        }
+
+        val optionalAssetFiles = Lib.entries
+            .flatMap { it.assetFilesToInclude }
+            .map(::normalizeAssetPath)
+            .toSet()
+
+        assetsRoot.listFiles()?.forEach { child ->
+            ensureNotCancelled()
+            val normalizedName = normalizeAssetPath(child.name)
+            if (normalizedName.isEmpty()) {
+                return@forEach
+            }
+            if (child.isDirectory) {
+                if (!isAssetDirExcluded(normalizedName)) {
+                    return@forEach
+                }
+                notifyStepProgress(
+                    ProgressStep.BUILD,
+                    context.getString(R.string.text_pruning),
+                    child.path,
+                )
+                PFiles.deleteRecursively(child)
+                return@forEach
+            }
+            if (optionalAssetFiles.contains(normalizedName) && !mAssetsFileIncludes.contains(normalizedName)) {
+                notifyStepProgress(
+                    ProgressStep.BUILD,
+                    context.getString(R.string.text_pruning),
+                    child.path,
+                )
+                child.delete()
+            }
         }
     }
 
@@ -180,6 +245,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
                         it,
                     )
                     copyDir(context, it, "assets/project/")
+                    writeBundledProjectConfigIfNeeded(context)
                 }
                 else -> {
                     notifyStepProgress(
@@ -188,6 +254,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
                         it,
                     )
                     replaceFile(context, it, "assets/project/main.js")
+                    writeBundledProjectConfigIfNeeded(context)
                 }
             }
             notifyStepProgress(
@@ -315,10 +382,17 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
             ensureNotCancelled()
             notifyStepProgress(
                 ProgressStep.BUILD,
-                context.getString(R.string.text_copying_assets_to),
-                File(buildPath, "assets").path,
+                context.getString(R.string.text_processing),
+                getAssetsRoot().path,
             )
-            copyAssetsRecursively(context, "", File(buildPath, "assets"))
+            pruneTemplateAssetsByPolicy(context)
+            ensureNotCancelled()
+            notifyStepProgress(
+                ProgressStep.BUILD,
+                context.getString(R.string.text_copying_assets_to),
+                getAssetsRoot().path,
+            )
+            copyAssetsRecursively(context, "", getAssetsRoot())
             ensureNotCancelled()
             notifyStepProgress(
                 ProgressStep.BUILD,
@@ -376,18 +450,20 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
     @Throws(FileNotFoundException::class)
     fun editManifest(): ManifestEditor = ManifestEditorWithAuthorities(FileInputStream(mManifestFile)).also { mManifestEditor = it }
 
+    private fun writeBundledProjectConfigIfNeeded(context: Context) {
+        val json = mBundledProjectConfigJson ?: return
+        val configFile = File(buildPath, "assets/project/$CONFIG_FILE_NAME")
+        configFile.parentFile?.let { parent -> if (!parent.exists()) parent.mkdirs() }
+        notifyStepProgress(
+            ProgressStep.BUILD,
+            context.getString(R.string.text_writing_project_config),
+            configFile.path,
+        )
+        configFile.writeText(json)
+    }
+
     private fun updateProjectConfig(config: ProjectConfig) {
         ensureNotCancelled()
-
-        // 这里为什么要有这样的一个方法? (
-        //     会不会是因为有些配置需要写入到文件中, 这些配置包括自增的版本号, 用户的选择或键入值等等
-        // )
-        // 参数 config 只是获取了一部分的字段用于设置新的 projectConfig, 为什么不直接使用全部的字段? (
-        //     因为有些不需要更新. 如果我们需要将所有设置开放到 Activity 页面中, 那么其实所有配置都是需要更新的
-        // )
-        // 像 abis, libs, signatureScheme 等信息就全部丢失了. (
-        //     所以需要添加到这个方法中
-        // )
 
         val projectConfig = run {
             if (PFiles.isDir(config.sourcePath)) {
@@ -396,7 +472,21 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
                 //  ! zh-CN: 打包项目目录.
                 ProjectConfig.fromProjectDir(config.sourcePath)?.let { sourceProjectConfig ->
                     sourceProjectConfig
-                        .setBuildInfo(BuildInfo.generate(sourceProjectConfig.buildInfo.buildNumber + 1))
+                        .setName(config.name)
+                        .setPackageName(config.packageName)
+                        .setVersionName(config.versionName)
+                        .setVersionCode(config.versionCode)
+                        .setAbis(ArrayList(config.abis))
+                        .setLibs(ArrayList(config.libs))
+                        .setPermissions(ArrayList(config.permissions))
+                        .setSignatureScheme(config.signatureScheme)
+                    sourceProjectConfig.launchConfig = config.launchConfig
+                    val nextBuildInfo = BuildInfo.generate(sourceProjectConfig.buildInfo.buildNumber + 1)
+                    sourceProjectConfig.buildInfo.apply {
+                        buildId = nextBuildInfo.buildId
+                        buildNumber = nextBuildInfo.buildNumber
+                        buildTime = nextBuildInfo.buildTime
+                    }
                     mPendingProjectConfigFile = File(ProjectConfig.configFileOfDir(config.sourcePath))
                     mPendingProjectConfigJson = sourceProjectConfig.toJson(true)
                     return@run sourceProjectConfig
@@ -411,7 +501,12 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
                     .setPackageName(config.packageName)
                     .setVersionName(config.versionName)
                     .setVersionCode(config.versionCode)
-                    .setBuildInfo(BuildInfo.generate(newProjectConfig.versionCode.toLong()))
+                    .setAbis(ArrayList(config.abis))
+                    .setLibs(ArrayList(config.libs))
+                    .setPermissions(ArrayList(config.permissions))
+                    .setSignatureScheme(config.signatureScheme)
+                newProjectConfig.launchConfig = config.launchConfig
+                newProjectConfig.setBuildInfo(BuildInfo.generate(newProjectConfig.versionCode.toLong()))
                 File(buildPath, "assets/project/$CONFIG_FILE_NAME").also { file ->
                     file.parentFile?.let { parent -> if (!parent.exists()) parent.mkdirs() }
                 }.writeText(newProjectConfig.toJson(true))
@@ -421,11 +516,10 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
 
         mKey = MD5Utils.md5(projectConfig.run { packageName + versionName + mainScriptFileName })
         mInitVector = MD5Utils.md5(projectConfig.run { buildInfo.buildId + name }).take(16)
+        mBundledProjectConfigJson = projectConfig.toJson(true)
         Lib.entries.forEach { entry ->
             if (config.libs.contains(entry.label)) {
-                mLibsIncludes += entry.libsToInclude.toSet()
-                mAssetsFileIncludes += entry.assetFilesToInclude.toSet()
-                mAssetsDirExcludes -= entry.assetDirsToInclude.toSet()
+                includeLibraryContributions(entry)
             }
         }
     }
@@ -523,8 +617,8 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         if (targetFile.isFile && targetFile.exists()) return
         val list = mAssetManager.list(assetPath) ?: return
         if (list.isEmpty()) /* asset is a file */ {
-            if (!assetPath.contains(File.separatorChar)) /* assets root dir */ {
-                if (!mAssetsFileIncludes.contains(assetPath)) {
+            if (!assetPath.contains('/')) /* assets root dir */ {
+                if (!mAssetsFileIncludes.contains(normalizeAssetPath(assetPath))) {
                     return
                 }
             }
@@ -540,7 +634,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
                 }
             }
         } else /* asset is folder */ {
-            if (mAssetsDirExcludes.any { assetPath.matches(Regex("$it(/[^/]+)*")) }) {
+            if (isAssetDirExcluded(assetPath)) {
                 return
             }
             val displayPath = if (assetPath.isEmpty()) "/" else "/$assetPath"
@@ -805,6 +899,26 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
     }
 
     private inner class ManifestEditorWithAuthorities(manifestInputStream: InputStream?) : ManifestEditor(manifestInputStream) {
+
+        override fun shouldIgnoreComponentNode(nodeName: String?, componentClassName: String?): Boolean =
+            when (componentClassName) {
+                // Disable static shortcuts in packaged apps.
+                // Will publish dynamic explicit shortcuts at runtime.
+                // zh-CN:
+                // 在打包应用中禁用静态快捷方式.
+                // 将在运行时发布动态显式快捷方式.
+                "android.app.shortcuts" -> nodeName == "meta-data"
+
+                "org.autojs.autojs.external.open.EditIntentActivity",
+                "org.autojs.autojs.external.open.RunIntentActivity",
+                "org.autojs.autojs.external.open.ImportIntentActivity",
+                "org.autojs.autojs.external.tile.LayoutBoundsTile",
+                "org.autojs.autojs.external.tile.LayoutHierarchyTile",
+                    -> true
+
+                else -> false
+            }
+
         override fun onAttr(attr: AxmlWriter.Attr) {
             attr.apply {
 
@@ -1082,6 +1196,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
     ): Boolean {
         ensureNotCancelled()
         var extractedAny = false
+        val zipPrefix = toAssetZipPrefix(assetPrefix)
         apkPaths.forEach { apkPath ->
             ensureNotCancelled()
             runCatching {
@@ -1091,7 +1206,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
                         ensureNotCancelled()
                         val entry: ZipEntry = entries.nextElement()
                         val name = entry.name
-                        if (!name.startsWith(assetPrefix)) continue
+                        if (name != zipPrefix && !name.startsWith("$zipPrefix/")) continue
                         if (entry.isDirectory) continue
 
                         val relative = name.removePrefix("assets/")
@@ -1255,29 +1370,6 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         }
     }
 
-    companion object {
-
-        const val ICON_NAME = "ic_launcher"
-        const val ICON_RES_DIR = "mipmap"
-        const val LIBRARY_DIR = "lib"
-
-        const val TEMPLATE_APK_NAME = "template.apk"
-        const val INRT_APP_ID = "org.autojs.autojs6.inrt"
-
-        private val TAG = ApkBuilder::class.java.simpleName
-
-        private val globalContext: Context by lazy { GlobalAppContext.get() }
-
-        val appApkFile by lazy {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                File(globalContext.packageManager.getApplicationInfo(globalContext.packageName, ApplicationInfoFlags.of(GET_SHARED_LIBRARY_FILES.toLong())).sourceDir)
-            } else {
-                File(globalContext.packageManager.getApplicationInfo(globalContext.packageName, 0).sourceDir)
-            }
-        }
-
-    }
-
     @Suppress("SpellCheckingInspection")
     enum class Lib(
         @JvmField val label: String,
@@ -1288,7 +1380,6 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         internal val assetFilesToInclude: List<String> = emptyList(),
         // Select, then include into packaging APK. (选择后, 会被打包进 APK 中.)
         internal val assetDirsToInclude: List<String> = emptyList(),
-        internal val assetDirsToExclude: List<String> = emptyList(),
     ) {
 
         TERMINAL_EMULATOR(
@@ -1316,7 +1407,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
                 "libmlkit_google_ocr_pipeline.so",
             ),
             assetDirsToInclude = listOf(
-                "mlkit-google-ocr-models",
+                "assets/mlkit-google-ocr-models",
             ),
         ),
 
@@ -1325,9 +1416,6 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
             aliases = listOf("paddle", "paddleocr", "paddle-ocr", "paddle_ocr"),
             libsToInclude = emptyList(),
             assetDirsToInclude = emptyList(),
-            assetDirsToExclude = listOf(
-                "models",
-            ),
             plugin = PluginLib(
                 action = "org.autojs.plugin.PADDLE_OCR",
                 onServiceConnected = { binder: IBinder ->
@@ -1378,7 +1466,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
                 "libonnxruntime.so",
             ),
             assetDirsToInclude = listOf(
-                "labels",
+                "assets/labels",
             ),
         ),
 
@@ -1389,7 +1477,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
                 "libChineseConverter.so",
             ),
             assetDirsToInclude = listOf(
-                "openccdata",
+                "assets/openccdata",
             ),
         ),
 
@@ -1397,10 +1485,10 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
             label = "Pinyin",
             aliases = listOf("pin"),
             assetFilesToInclude = listOf(
-                "dict-chinese-words.db.gzip",
-                "dict-chinese-phrases.db.gzip",
-                "dict-chinese-chars.db.gzip",
-                "prob_emit.txt",
+                "assets/dict-chinese-words.db.gzip",
+                "assets/dict-chinese-phrases.db.gzip",
+                "assets/dict-chinese-chars.db.gzip",
+                "assets/prob_emit.txt",
             ),
         ),
 
@@ -1411,7 +1499,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
                 "libbarhopper_v3.so",
             ),
             assetDirsToInclude = listOf(
-                "mlkit_barcode_models",
+                "assets/mlkit_barcode_models",
             ),
         ),
 
@@ -1458,14 +1546,14 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
 
             val defaultAssetFilesToInclude = listOf(
                 "init.js", "roboto_medium.ttf",
-            )
+            ).map(::normalizeAssetPath)
 
             val defaultAssetDirsToExclude = listOf(
-                "doc", "docs", "editor", "indices", "js-beautify", "sample", "stored-locales",
-            ) + entries.flatMap { it.assetDirsToInclude } + entries.flatMap { it.assetDirsToExclude }
-
+                "doc", "docs", "editor", "indices", "js-beautify", "sample", "stored-locales", "models",
+            ).plus(entries.flatMap { it.assetDirsToInclude })
+                .map(::normalizeAssetPath)
+                .distinct()
         }
-
     }
 
     data class PluginLib(
@@ -1481,4 +1569,39 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         val libsToInclude: List<String> = emptyList(),
     )
 
+    companion object {
+
+        const val ICON_NAME = "ic_launcher"
+        const val ICON_RES_DIR = "mipmap"
+        const val LIBRARY_DIR = "lib"
+
+        const val TEMPLATE_APK_NAME = "template.apk"
+        const val INRT_APP_ID = "org.autojs.autojs6.inrt"
+
+        private val TAG = ApkBuilder::class.java.simpleName
+
+        private val globalContext: Context by lazy { GlobalAppContext.get() }
+
+        val appApkFile by lazy {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                File(globalContext.packageManager.getApplicationInfo(globalContext.packageName, ApplicationInfoFlags.of(GET_SHARED_LIBRARY_FILES.toLong())).sourceDir)
+            } else {
+                File(globalContext.packageManager.getApplicationInfo(globalContext.packageName, 0).sourceDir)
+            }
+        }
+
+        private fun normalizeAssetPath(path: String): String {
+            var out = path.trim().replace('\\', '/')
+            while (out.startsWith("/")) {
+                out = out.removePrefix("/")
+            }
+            if (out.startsWith("assets/")) {
+                out = out.removePrefix("assets/")
+            }
+            while (out.endsWith("/")) {
+                out = out.removeSuffix("/")
+            }
+            return out
+        }
+    }
 }

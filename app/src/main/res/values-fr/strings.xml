@@ -117,9 +117,11 @@
     <string name="dialog_button_abandon">Abandonner</string>
     <string name="dialog_button_abort">Interrompre</string>
     <string name="dialog_button_abort_connection">Interrompre la connexion</string>
+    <string name="dialog_button_activate">Activer</string>
     <string name="dialog_button_add">Ajouter</string>
     <string name="dialog_button_advanced_settings">Avancé</string>
     <string name="dialog_button_amend_host_address">Corriger l\'adresse</string>
+    <string name="dialog_button_authorize">Autoriser</string>
     <string name="dialog_button_back">@string/text_back</string>
     <string name="dialog_button_cancel">Cancel</string>
     <string name="dialog_button_cancel_download">Annulation</string>
@@ -229,6 +231,7 @@
     <string name="error_check_for_update">Fail to check for updates</string>
     <string name="error_colon_must_follow_a_valid_ip_address">Les deux points doivent suivre une adresse IP valide</string>
     <string name="error_compass_cannot_be_null">Compass ne peut pas être null</string>
+    <string name="error_conditions_not_met_for_record">L\'enregistrement de scripts necessite au moins l\'une des conditions suivantes:\n- Acces root\n- Acces Shizuku</string>
     <string name="error_connect_to_remote">Impossible de se connecter au serveur distant : %s</string>
     <string name="error_connection_failed_with_host">Échec de la connexion à \"%1$s\".</string>
     <string name="error_connection_timed_out">Délai de connexion dépassé (%d ms)</string>
@@ -252,6 +255,7 @@
     <string name="error_failed_to_convert_into_drawable">Échec de la conversion de la valeur %s en un objet à dessiner</string>
     <string name="error_failed_to_copy">Échec de la copie</string>
     <string name="error_failed_to_create">Fail to create</string>
+    <string name="error_failed_to_enable_the_plugin">Echec de l\'activation du plugin</string>
     <string name="error_failed_to_go_to_access_settings">Échec d\'ouverture de la page des paramètres</string>
     <string name="error_failed_to_grant_shizuku_access">Échec de l\'octroi de la permission de Shizuku</string>
     <string name="error_failed_to_instantiate">Échec de l\'instanciation de \"%s\"</string>
@@ -268,6 +272,7 @@
     <string name="error_failed_to_retrieve_version_properties_file_to_parse_version_information">Impossible de récupérer version.properties pour analyser les informations de version</string>
     <string name="error_failed_to_revoke_shizuku_access">La révocation des droits de Shizuku a échoué</string>
     <string name="error_failed_to_run_script">Échec de l\'exécution du script</string>
+    <string name="error_failed_to_save">Echec de l\'enregistrement</string>
     <string name="error_failed_to_save_project_config">Échec de l\'enregistrement de la configuration du projet</string>
     <string name="error_file_in_path_does_not_exist">Le fichier dans le chemin \"%1$s\" n\'existe pas</string>
     <string name="error_function_called_in_ui_thread">Le thread d\'interface utilisateur ne peut pas être bloqué. Essayez d\'exécuter %s() dans un sous-fil ou un sous-script</string>.
@@ -328,6 +333,9 @@
     <string name="error_pattern_syntax">Syntaxe de motif invalide</string>
     <string name="error_plugin_apk_does_not_contain_required_assets_for_variant">L\'APK du plugin ne contient pas les ressources requises pour variant=\"%1$s\" : %2$s.</string>
     <string name="error_plugin_apk_does_not_contain_required_native_libraries">L\'APK du plugin ne contient pas les bibliothèques natives requises : %1$s.</string>
+    <string name="error_plugin_is_not_authorized_in_plugin_center">Le plugin \"%1$s\" n\'est pas autorise dans le Centre des plugins</string>
+    <string name="error_plugin_is_not_enabled_in_plugin_center">Le plugin \"%1$s\" n\'est pas active dans le Centre des plugins</string>
+    <string name="error_plugin_not_found_in_installed_apps">Plugin \"%1$s\" introuvable parmi les applis installees</string>
     <string name="error_plugin_returned_empty_info">Le plugin %1$s a renvoyé des informations vides.</string>
     <string name="error_plugin_returned_invalid_variant">Le plugin %1$s a renvoyé une variante invalide : %2$s.</string>
     <string name="error_port_num_over_65535">Numéro de port supérieur à 65535</string>
@@ -369,6 +377,7 @@
     <string name="error_unknown_picker_result_type_with_params" formatted="false">Type de résultat inconnu {nom : %s, params : %s}</string>
     <string name="error_unknown_picker_selector_type" formatted="false">Sélecteur inconnu {nom : %s, type : %s}</string>
     <string name="error_unknown_type">Type inconnu : %s</string>
+    <string name="error_unsupported_plugin_connection">Connexion de plugin non prise en charge</string>
     <string name="error_webp_lossless_quality_not_supported">Le format WebP-Lossless ne peut pas être compressé avec un paramètre de qualité ; utilisez plutôt JPEG/PNG/WebP-Lossy</string>
     <string name="file_not_exist_or_readable">Le fichier n\'existe pas ou n\'est pas lisible</string>
     <string name="file_not_exist_or_readable_with_path">Le fichier n\'existe pas ou n\'est pas lisible : %s</string>
@@ -385,6 +394,7 @@
     <string name="hint_loop_delay">Délai avant boucle</string>
     <string name="hint_loop_times">0 pour une boucle infinie</string>
     <string name="hint_pc_server_address_supported_formats">IPv4, IPv6 et les noms de domaine sont pris en charge.</string>
+    <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">Essayez d\'appuyer sur le bouton \"Activer\" pour activer le plugin une fois.\nSi l\'activation reussit, le bouton s\'activera automatiquement dans un certain delai.</string>
     <string name="instruction_install_plugin_from_url">Saisissez une URL pointant vers l\'adresse d\'un plugin distant.\nPar exemple \"https://example.com/plugin.apk\".</string>
     <string name="item_delete_permanently">Supprimer definitivement</string>
     <string name="item_move_to_trash">Deplacer vers la corbeille</string>
@@ -431,6 +441,7 @@
     <string name="plugin_item_info_last_install_time">Dern. inst.</string>
     <string name="plugin_item_info_last_uninstall_time">Dern. désinst.</string>
     <string name="plugin_item_info_last_update_time">Dern. maj</string>
+    <string name="plugin_item_info_mechanism">Mecanisme</string>
     <string name="plugin_item_info_package_size">Taille du paquet</string>
     <string name="plugin_item_info_updatable_version">Ver. maj disp.</string>
     <string name="prompt_add_ignored_version">Êtes-vous sûr d\'ignorer la version de mise à jour actuelle?\nVous pouvez gérer toutes les versions ignorées dans les paramètres de l\'application.</string>
@@ -461,6 +472,7 @@
     <string name="summary_text_launcher_shortcuts">Ajouter des raccourcis au lanceur</string>
     <string name="summary_use_volume_control_record">Démarrer ou arrêter l\'enregistrement contrôlé par la touche de réduction du volume lorsque le bouton flottant est affiché</string>.
     <string name="summary_use_volume_key_to_stop_running_scripts">Appuyez sur la touche \"Volume fort\" pour arrêter tous les scripts en cours d\'exécution.</string>
+    <string name="symbol_colon_with_blank">" : "</string>
     <string name="term_internal_strorage">Stockage interne</string>
     <string name="text_a11y_service">Service d\'accessibilité</string>
     <string name="text_a11y_service_description">Requise par le fonctionnement automatique du script (clic, appui long, glissement, etc.).</string>
@@ -483,6 +495,7 @@
     <string name="text_act_by_scroll_forward">Scroll forward (scrollForward)</string>
     <string name="text_act_by_set_text">Définir le texte (setText)</string>
     <string name="text_action">Action</string>
+    <string name="text_activated_successfully">Activation reussie</string>
     <string name="text_activity_not_found_for_apk_installing">Pas d\'installateur d\'APK</string>
     <string name="text_adb_tool_needed">L\'outil ADB est nécessaire</string>
     <string name="text_add_color_library">Ajouter une bibliothèque de couleurs</string>
@@ -542,8 +555,11 @@
     <string name="text_app_version_code">Code de la version de l\'application</string>
     <string name="text_app_version_name">Nom de la version de l\'application</string>
     <string name="text_appearance">Appearance</string>
+    <string name="text_applying_binary_resources">Application des ressources binaires</string>
     <string name="text_at_least_one_certificate_issuer_field_is_not_empty">Au moins un champ parmi [Nom complet, Nom de l\'organisation, Unité organisationnelle, Code du pays, État ou province, Ville ou localité, Rue] doit être renseigné</string>
     <string name="text_attribute">Attribut</string>
+    <string name="text_authorize_plugin">Autoriser le plugin</string>
+    <string name="text_authorize_plugin_content">Il s\'agit d\'un plugin tiers. Faites attention a la source du plugin et a la securite d\'utilisation.\n\nAppuyez sur le bouton \"Autoriser\" pour activer le plugin.</string>
     <string name="text_auto_check_for_updates">Vérification automatique des mises à jour</string>
     <string name="text_auto_check_for_updates_and_show_snackbar">Vérification automatique des mises à jour et affichage d\'un snackbar sur la page d\'accueil</string>
     <string name="text_auto_night_mode">Mode nuit automatique</string>
@@ -552,8 +568,27 @@
     <string name="text_back">Retour</string>
     <string name="text_broadcast_action">Action</string>
     <string name="text_broadcast_task">Tâche de diffusion</string>
+    <string name="text_build">Compiler</string>
     <string name="text_build_apk">Construire un APK</string>
+    <string name="text_build_completed">Build termine</string>
+    <string name="text_build_profile">Profil de build</string>
+    <string name="text_build_profile_cannot_delete_default">Le profil par defaut ne peut pas etre supprime</string>
+    <string name="text_build_profile_cannot_delete_project_json">Le profil project.json ne peut pas etre supprime</string>
+    <string name="text_build_profile_delete">Supprimer le profil</string>
+    <string name="text_build_profile_fields">Champs du profil</string>
+    <string name="text_build_profile_fields_configure">Configurer les champs du profil</string>
+    <string name="text_build_profile_fields_hint">Les champs coches sont enregistres comme valeurs fixes dans ce profil.</string>
+    <string name="text_build_profile_more">Plus d\'actions du profil</string>
+    <string name="text_build_profile_name_cannot_be_reserved">Impossible d\'utiliser des noms de profil reserves (Default, project.json)</string>
+    <string name="text_build_profile_name_hint">Nom du profil de build</string>
+    <string name="text_build_profile_new">Nouveau profil</string>
+    <string name="text_build_profile_unsaved_changes">La configuration de build actuelle contient des modifications non enregistrees.</string>
+    <string name="text_build_profile_unsaved_changes_project_json">La configuration de build actuelle contient des modifications non enregistrees et sera ecrite dans project.json.</string>
+    <string name="text_build_profile_unsaved_switch_confirm">Enregistrer les modifications avant de continuer?</string>
     <string name="text_build_succeeded">Construction réussie</string>
+    <string name="text_building_apk">Compilation de l\'APK</string>
+    <string name="text_building_resources">Compilation des ressources</string>
+    <string name="text_built_apk_file_path">Chemin de l\'APK genere</string>
     <string name="text_cancel">Annulation</string>
     <string name="text_cancel_simplified">Annul</string>
     <string name="text_cannot_delete_default">Le profil par defaut ne peut pas etre supprime</string>
@@ -585,6 +620,9 @@
     <string name="text_choose_restore_path">Choisir le chemin de restauration</string>
     <string name="text_city_or_locality">Ville ou localité</string>
     <string name="text_class_or_package_name">Nom de la classe ou du paquet</string>
+    <string name="text_clean">Nettoyer</string>
+    <string name="text_clean_completed">Nettoyage termine</string>
+    <string name="text_cleaning_workspace">Nettoyage de l\'espace de travail</string>
     <string name="text_clear">Clear</string>
     <string name="text_clear_file_selection">Effacer la sélection de fichiers</string>
     <string name="text_clear_pre_execute_script">Effacer le script de pré-exécution</string>
@@ -613,6 +651,8 @@
     <string name="text_compatibility">Compatibilité</string>
     <string name="text_confidence_level">Confiance</string>
     <string name="text_config">Configuration</string>
+    <string name="text_configuring_manifest">Configuration du manifest</string>
+    <string name="text_configuring_package_name">Configuration du nom de package</string>
     <string name="text_confirm_to_clear_all_items">Voulez-vous vraiment effacer tous les éléments ?</string>
     <string name="text_confirm_to_clear_the_history">Confirmer l\'effacement de l\'historique?</string>
     <string name="text_confirm_to_clear_the_history_of">L\'historique ci-dessous sera efface\n\n[ %1$s ]\n\nConfirmer l\'effacement?</string>
@@ -628,6 +668,7 @@
     <string name="text_connection_cannot_be_established">La connexion ne peut pas être établie</string>
     <string name="text_connection_failed">Échec de la connexion</string>
     <string name="text_console">Console</string>
+    <string name="text_content">Contenu</string>
     <string name="text_continue">Continue</string>
     <string name="text_copy">Copie</string>
     <string name="text_copy_all">Copier tout</string>
@@ -642,8 +683,18 @@
     <string name="text_copy_to_clip">Copie vers le presse-papiers</string>
     <string name="text_copy_value">Copie de la valeur</string>
     <string name="text_copying" tools:ignore="TypographyEllipsis">Copie...</string>
+    <string name="text_copying_asset">Copie d\'asset</string>
+    <string name="text_copying_assets_to">Copie des assets vers</string>
+    <string name="text_copying_directory">Copie du repertoire</string>
+    <string name="text_copying_file">Copie du fichier</string>
+    <string name="text_copying_libraries_for_abi">Copie des bibliotheques pour ABI</string>
+    <string name="text_copying_library">Copie de bibliotheque</string>
+    <string name="text_copying_native_libraries">Copie des bibliotheques natives</string>
+    <string name="text_copying_project_directory">Copie du repertoire du projet</string>
+    <string name="text_copying_script_file">Copie du fichier de script</string>
     <string name="text_country_code">Code du pays (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">Le code du pays doit être composé de deux lettres majuscules</string>
+    <string name="text_creating_unsigned_apk">Creation de l\'APK non signe</string>
     <string name="text_current_page_configuration">Config de la page</string>
     <string name="text_current_version">Version actuelle</string>
     <string name="text_daily_task">Tâche quotidienne</string>
@@ -726,10 +777,12 @@
     <string name="text_enable_a11y_service_with_secure_settings_timeout">Activer le service d\'accessibilité avec des paramètres sécurisés temporairement</string>.
     <string name="text_enable_plugin">Activer le plugin</string>
     <string name="text_enabled">Activé</string>
+    <string name="text_encrypting_script">Chiffrement du script</string>
     <string name="text_error">Erreur</string>
     <string name="text_error_copy_file" formatted="true">Failed to copy file : %s</string>
     <string name="text_error_report">Rapport de bug</string>
     <string name="text_estimated">Estimé</string>
+    <string name="text_exception_info">Infos de l\'exception</string>
     <string name="text_execute">Exécuter</string>
     <string name="text_execute_code">Exécuter le code</string>
     <string name="text_execution_finished" formatted="false">[%s] finished in %s seconds.\n</string>
@@ -742,6 +795,11 @@
     <string name="text_exported">Exporté</string>
     <string name="text_extending_js_build_in_objects">Extension des objets intégrés de JavaScript</string>
     <string name="text_extensibility">Extensibilité</string>
+    <string name="text_extracted_plugin_assets">Assets du plugin extraits</string>
+    <string name="text_extracted_plugin_libraries">Bibliotheques du plugin extraites</string>
+    <string name="text_extracting_plugin_asset">Extraction d\'asset du plugin</string>
+    <string name="text_extracting_plugin_so">Extraction du fichier so du plugin</string>
+    <string name="text_extracting_template_apk">Extraction de l\'APK modele</string>
     <string name="text_failed">Failed</string>
     <string name="text_failed_to_build">Failed to build</string>
     <string name="text_failed_to_create_key_store">Échec de la création de la clé de signature</string>
@@ -762,6 +820,7 @@
     <string name="text_failed_to_register">Failed to register</string>
     <string name="text_failed_to_report">Failed to submit</string>
     <string name="text_failed_to_retrieve">Échec de la récupération</string>
+    <string name="text_failed_to_save_project_json">Echec de l\'enregistrement de project.json</string>
     <string name="text_failed_to_save_remote_project_to_local_storage">Échec de l\'enregistrement du projet distant dans le stockage local</string>
     <string name="text_failed_to_send_log_entries">Échec de l\'envoi des entrées de journal</string>
     <string name="text_failed_to_update">Échec de la mise à jour</string>
@@ -812,6 +871,7 @@
     <string name="text_hide_button">Bouton de cacher</string>
     <string name="text_hide_node">Masquer ce nœud</string>
     <string name="text_hide_same_frame_nodes">Masquer le nœud du même cadre</string>
+    <string name="text_hint">Astuce</string>
     <string name="text_history">Historique</string>
     <string name="text_history_has_been_cleared">L\'historique a ete efface</string>
     <string name="text_icon">Icône</string>
@@ -867,6 +927,11 @@
     <string name="text_latest_package">Dernier paquet</string>
     <string name="text_launch_config">Launch config</string>
     <string name="text_launch_debugger">Launch debugger</string>
+    <string name="text_launch_launcher_visible">Afficher l\'icone de l\'appli dans le lanceur</string>
+    <string name="text_launch_logs_visible">Afficher les logs au lancement</string>
+    <string name="text_launch_run_on_boot">Executer le script au demarrage</string>
+    <string name="text_launch_slug">Texte du slogan de l\'ecran de demarrage</string>
+    <string name="text_launch_splash_visible">Afficher l\'ecran de demarrage au lancement</string>
     <string name="text_launcher_icon_title">Icône du lanceur</string>
     <string name="text_launcher_shortcuts">Raccourcis du lanceur</string>
     <string name="text_launcher_shortcuts_may_be_lost_after_launcher_icon_changed">Le changement de l\'icône du lanceur sur certains appareils peut entraîner la perte de tous les raccourcis AutoJs6 existants, veuillez procéder avec prudence</string>
@@ -982,9 +1047,9 @@
     <string name="text_permission_desc_billing">Autoriser l\'application à effectuer des achats intégrés</string>
     <string name="text_permission_desc_bluetooth">Autoriser l\'application à accéder aux périphériques Bluetooth</string>
     <string name="text_permission_desc_bluetooth_admin">Autoriser l\'application à configurer les périphériques Bluetooth</string>
+    <string name="text_permission_desc_bluetooth_advertise">Autoriser l\'application à se rendre visible via Bluetooth</string>
     <string name="text_permission_desc_bluetooth_connect">Autoriser l\'application à accéder aux périphériques et à l\'état de connexion Bluetooth</string>
     <string name="text_permission_desc_bluetooth_scan">Autoriser l\'application à rechercher des périphériques Bluetooth à proximité</string>
-    <string name="text_permission_desc_bluetooth_advertise">Autoriser l\'application à se rendre visible via Bluetooth</string>
     <string name="text_permission_desc_broadcast_close_system_dialogs">Autoriser l\'application à envoyer une intention pour fermer les boîtes de dialogue système</string>
     <string name="text_permission_desc_call_phone">Autoriser l\'application à passer des appels téléphoniques</string>
     <string name="text_permission_desc_camera">Autoriser l\'application à accéder à la caméra</string>
@@ -1068,15 +1133,28 @@
     <string name="text_please_input_name">Nom de l\'entrée</string>
     <string name="text_please_wait" tools:ignore="TypographyEllipsis">Veuillez patienter...</string>
     <string name="text_please_wait_a_moment_before_trying_again" tools:ignore="TypographyEllipsis">Veuillez réessayer cette opération plus tard...</string>
+    <string name="text_plugin_activated">Active</string>
+    <string name="text_plugin_activation_recommended">Activation recommandee</string>
+    <string name="text_plugin_authorization_denied">Autorisation refusee</string>
+    <string name="text_plugin_authorization_required">Autorisation requise</string>
+    <string name="text_plugin_authorized">Autorise</string>
     <string name="text_plugin_center">Centre des plugins</string>
     <string name="text_plugin_details">Détails du plugin</string>
+    <string name="text_plugin_official">Officiel</string>
+    <string name="text_plugin_trusted">De confiance</string>
     <string name="text_plugins">Plugins</string>
     <string name="text_pointer_location">L\'emplacement du pointeur</string>
     <string name="text_pointer_location_toggle_failed_with_hint">Toggle \"pointer location\" failed.\nL\'accès à la racine est nécessaire.</string>
     <string name="text_post_notifications_permission">Notifications postales</string>
     <string name="text_post_notifications_permission_rationale">Afin de garantir que les services au premier plan d\'AutoJs6, etc. fonctionnent correctement et que les scripts puissent publier des notifications, AutoJs6 doit se voir accorder l\'autorisation de \"publier des notifications\".</string>
     <string name="text_pre_execute_script">Pré-exécution du script</string>
+    <string name="text_prepare">Preparer</string>
+    <string name="text_prepare_completed">Preparation terminee</string>
     <string name="text_preparing" tools:ignore="TypographyEllipsis">Préparation...</string>
+    <string name="text_preparing_assets_dir">Preparation du dir des assets</string>
+    <string name="text_preparing_build_config">Preparation de la config de build</string>
+    <string name="text_preparing_keystore">Preparation du keystore</string>
+    <string name="text_preparing_workspace">Preparation de l\'espace de travail</string>
     <string name="text_preset_dialog_content">Contenu de la boîte de dialogue prédéfinie</string>
     <string name="text_preset_dialog_title">Titre de la boîte de dialogue prédéfini</string>
     <string name="text_press_again_to_dismiss_dialog">Appuyez à nouveau sur la touche pour rejeter la boîte de dialogue</string>.
@@ -1085,14 +1163,19 @@
     <string name="text_preview">Préview</string>
     <string name="text_process_log">Journal de processus</string>
     <string name="text_processing">Traitement</string>
+    <string name="text_processing_source">Traitement du code source</string>
     <string name="text_project">Projet</string>
     <string name="text_project_location">Localisation du projet</string>
     <string name="text_project_media_access">Accès aux médias du projet</string>
     <string name="text_prompt">Prompt</string>
+    <string name="text_property_colon">%1$s :</string>
     <string name="text_property_colon_value">%1$s : %2$s</string>
     <string name="text_property_colon_value_nbsp_unit">%1$s : %2$d %3$s</string>
     <string name="text_property_colon_value_unit">%1$s : %2$d%3$s</string>
+    <string name="text_pruning">Elagage</string>
     <string name="text_quit">Quit</string>
+    <string name="text_re_signing_apk">Re-signature de l\'APK</string>
+    <string name="text_reading_splash_resources">Lecture des ressources d\'ecran de demarrage</string>
     <string name="text_recommended">Recommandé</string>
     <string name="text_record_finished">Enregistrement terminé</string>
     <string name="text_record_prompt">Demande d\'enregistrement</string>
@@ -1118,6 +1201,7 @@
     <string name="text_replace">Remplacer</string>
     <string name="text_replace_all">Remplacer tout</string>
     <string name="text_replace_simplified">Rempl</string>
+    <string name="text_replacing_file">Remplacement du fichier</string>
     <string name="text_repo_url_of_vscode_vsc_ext">URL du dépôt de l\'extension VSCode</string>
     <string name="text_report_succeed">Submission réussie</string>
     <string name="text_requires_android_os_version" formatted="false">Requiert Android OS version %s (API %s) mais la version actuelle est %s (API %s)</string>
@@ -1126,6 +1210,7 @@
     <string name="text_reset_succeed">Réinitialisation réussie</string>
     <string name="text_reset_to_initial_content">Réinitialisation initiale</string>
     <string name="text_reset_to_initial_content_only_for_assets">Reset n\'est que pour les échantillons</string>
+    <string name="text_resolving_plugin_native_libraries">Resolution des bibliotheques natives du plugin</string>
     <string name="text_restart">Redémarrer</string>
     <string name="text_restart_strategy">Stratégie de redémarrage</string>
     <string name="text_restore">Restaurer</string>
@@ -1167,6 +1252,7 @@
     <string name="text_save_configuration_as">Enregistrer la config sous</string>
     <string name="text_save_simplified">Enreg</string>
     <string name="text_save_to">Save to</string>
+    <string name="text_saving" tools:ignore="TypographyEllipsis">Enregistrement...</string>
     <string name="text_scheduled_restart_backend">Moteur</string>
     <string name="text_scheduled_restart_start_delay">Délai de démarrage</string>
     <string name="text_screen_capture_request_delay">Délai de demande d\'autorisation de capture d\'écran</string>
@@ -1187,6 +1273,7 @@
     <string name="text_select_file_to_upload">Sélectionnez le fichier à télécharger</string>
     <string name="text_select_icon">Sélectionner l\'icône</string>
     <string name="text_select_image">Sélectionner une image</string>
+    <string name="text_selected_plugin">Plugin selectionne</string>
     <string name="text_send">Envoyer</string>
     <string name="text_send_shortcut">Créer un raccourci</string>
     <string name="text_server_mode">Mode serveur</string>
@@ -1203,6 +1290,9 @@
     <string name="text_show_layout_bounds">Afficher les bords de la disposition</string>
     <string name="text_show_layout_hierarchy">Afficher la hiérarchie de la disposition</string>
     <string name="text_show_widget_information">Afficher les informations du widget</string>
+    <string name="text_sign">Signer</string>
+    <string name="text_sign_completed">Signature terminee</string>
+    <string name="text_sign_stage_completed">Etape de signature terminee</string>
     <string name="text_signature_algorithm">Algorithme de signature</string>
     <string name="text_signature_configuration">Configuration de la signature</string>
     <string name="text_signature_scheme">Schéma de signature</string>
@@ -1220,6 +1310,7 @@
     <string name="text_sort_by_time_desc">Heure (plus recent d\'abord)</string>
     <string name="text_source">Source</string>
     <string name="text_source_file_path">Chemin du code source</string>
+    <string name="text_source_processing_completed">Traitement du code source termine</string>
     <string name="text_special_permissions">Autorisations spéciales</string>
     <string name="text_stable_mode">Mode stable</string>
     <string name="text_star">Star</string>
@@ -1258,6 +1349,7 @@
     <string name="text_timed_task">Tâche chronométrée</string>
     <string name="text_timed_task_backend_title">Moteur d\'ordonnancement des tâches planifiées</string>
     <string name="text_timed_task_timing">Timing</string>
+    <string name="text_title">Titre</string>
     <string name="text_to_be_chosen">A choisir</string>
     <string name="text_toggle_all">Basculer tout</string>
     <string name="text_tools">Outils</string>
@@ -1282,6 +1374,7 @@
     <string name="text_unknown_description_for_plugin">Description Inconnue</string>
     <string name="text_unknown_title_for_plugin">Titre Inconnu</string>
     <string name="text_unknown_version_for_plugin">Version Inconnue</string>
+    <string name="text_unsigned_apk_created">APK non signe cree</string>
     <string name="text_unverified">Non vérifié</string>
     <string name="text_updatable">Mise a jour dispo</string>
     <string name="text_update">Mettre a jour</string>
@@ -1289,6 +1382,7 @@
     <string name="text_updates_checked_states_cleared">Mise à jour des états vérifiés et effacés</string>
     <string name="text_updates_snack_bar_act_later">Plus tard</string>
     <string name="text_updates_snack_bar_act_view">Voir</string>
+    <string name="text_updating_project_config">Mise a jour de la config du projet</string>
     <string name="text_usage_stats_permission">Utilisation de l\'accès aux statistiques</string>
     <string name="text_use_android_n_shortcut">Utiliser le raccourci Android 7.0</string>
     <string name="text_use_default_icon">Utiliser l\'icône par défaut</string>
@@ -1298,6 +1392,7 @@
     <string name="text_username_cannot_be_empty">Le nom d\'utilisateur ne peut pas être vide</string>.
     <string name="text_using_desc_selector">Utiliser le sélecteur desc</string>
     <string name="text_using_id_selector">Utiliser le sélecteur d\'id</string>
+    <string name="text_using_keystore">Utilisation du keystore</string>
     <string name="text_using_text_selector">Utiliser le sélecteur de texte</string>
     <string name="text_validity_years">Validité (années)</string>
     <string name="text_validity_years_cannot_be_empty">Les années de validité ne peuvent pas être vides</string>
@@ -1329,86 +1424,12 @@
     <string name="text_working_dir_path">Chemin du répertoire de travail</string>.
     <string name="text_write_secure_settings">Écrire les paramètres de sécurité</string>.
     <string name="text_write_system_settings">Écrire les paramètres système</string>
+    <string name="text_writing_app_icon">Ecriture de l\'icone de l\'appli</string>
+    <string name="text_writing_manifest">Ecriture du manifest</string>
+    <string name="text_writing_project_config">Ecriture de la config du projet</string>
+    <string name="text_writing_resources_arsc">Ecriture de resources.arsc</string>
+    <string name="text_writing_signed_apk">Ecriture de l\'APK signe</string>
     <string name="text_xiaomi_background_popup_permission">Fenêtres contextuelles en arrière-plan</string>
     <string name="warn_continue_operation_without_saving_settings">Les parametres ne sont pas enregistres. Continuer?</string>
     <string name="warn_exit_without_saving_settings">Les parametres ne sont pas enregistres. Quitter?</string>
-    <string name="error_failed_to_save">Echec de l\'enregistrement</string>
-    <string name="text_saving" tools:ignore="TypographyEllipsis">Enregistrement...</string>
-    <string name="symbol_colon_with_blank">" : "</string>
-    <string name="error_failed_to_enable_the_plugin">Echec de l\'activation du plugin</string>
-    <string name="text_exception_info">Infos de l\'exception</string>
-    <string name="text_hint">Astuce</string>
-    <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">Essayez d\'appuyer sur le bouton \"Activer\" pour activer le plugin une fois.\nSi l\'activation reussit, le bouton s\'activera automatiquement dans un certain delai.</string>
-    <string name="dialog_button_activate">Activer</string>
-    <string name="text_activated_successfully">Activation reussie</string>
-    <string name="text_authorize_plugin">Autoriser le plugin</string>
-    <string name="text_authorize_plugin_content">Il s\'agit d\'un plugin tiers. Faites attention a la source du plugin et a la securite d\'utilisation.\n\nAppuyez sur le bouton \"Autoriser\" pour activer le plugin.</string>
-    <string name="dialog_button_authorize">Autoriser</string>
-    <string name="text_plugin_official">Officiel</string>
-    <string name="text_plugin_authorized">Autorise</string>
-    <string name="text_plugin_authorization_required">Autorisation requise</string>
-    <string name="text_plugin_authorization_denied">Autorisation refusee</string>
-    <string name="text_plugin_activation_recommended">Activation recommandee</string>
-    <string name="text_plugin_activated">Active</string>
-    <string name="text_plugin_trusted">De confiance</string>
-    <string name="plugin_item_info_mechanism">Mecanisme</string>
-    <string name="error_plugin_is_not_enabled_in_plugin_center">Le plugin \"%1$s\" n\'est pas active dans le Centre des plugins</string>
-    <string name="error_plugin_is_not_authorized_in_plugin_center">Le plugin \"%1$s\" n\'est pas autorise dans le Centre des plugins</string>
-    <string name="error_plugin_not_found_in_installed_apps">Plugin \"%1$s\" introuvable parmi les applis installees</string>
-    <string name="error_unsupported_plugin_connection">Connexion de plugin non prise en charge</string>
-    <string name="text_property_colon">%1$s :</string>
-    <string name="text_title">Titre</string>
-    <string name="text_content">Contenu</string>
-    <string name="text_building_apk">Compilation de l\'APK</string>
-    <string name="text_built_apk_file_path">Chemin de l\'APK genere</string>
-    <string name="text_clean">Nettoyer</string>
-    <string name="text_sign">Signer</string>
-    <string name="text_build">Compiler</string>
-    <string name="text_prepare">Preparer</string>
-    <string name="text_preparing_workspace">Preparation de l\'espace de travail</string>
-    <string name="text_extracting_template_apk">Extraction de l\'APK modele</string>
-    <string name="text_prepare_completed">Preparation terminee</string>
-    <string name="text_copying_project_directory">Copie du repertoire du projet</string>
-    <string name="text_copying_script_file">Copie du fichier de script</string>
-    <string name="text_source_processing_completed">Traitement du code source termine</string>
-    <string name="text_copying_directory">Copie du repertoire</string>
-    <string name="text_copying_file">Copie du fichier</string>
-    <string name="text_encrypting_script">Chiffrement du script</string>
-    <string name="text_replacing_file">Remplacement du fichier</string>
-    <string name="text_preparing_build_config">Preparation de la config de build</string>
-    <string name="text_reading_splash_resources">Lecture des ressources d\'ecran de demarrage</string>
-    <string name="text_configuring_manifest">Configuration du manifest</string>
-    <string name="text_configuring_package_name">Configuration du nom de package</string>
-    <string name="text_copying_assets_to">Copie des assets vers</string>
-    <string name="text_processing_source">Traitement du code source</string>
-    <string name="text_applying_binary_resources">Application des ressources binaires</string>
-    <string name="text_copying_native_libraries">Copie des bibliotheques natives</string>
-    <string name="text_updating_project_config">Mise a jour de la config du projet</string>
-    <string name="text_sign_stage_completed">Etape de signature terminee</string>
-    <string name="text_writing_project_config">Ecriture de la config du projet</string>
-    <string name="text_building_resources">Compilation des ressources</string>
-    <string name="text_build_completed">Build termine</string>
-    <string name="text_writing_resources_arsc">Ecriture de resources.arsc</string>
-    <string name="text_writing_manifest">Ecriture du manifest</string>
-    <string name="text_writing_app_icon">Ecriture de l\'icone de l\'appli</string>
-    <string name="text_copying_asset">Copie d\'asset</string>
-    <string name="text_preparing_assets_dir">Preparation du dir des assets</string>
-    <string name="text_copying_library">Copie de bibliotheque</string>
-    <string name="text_preparing_keystore">Preparation du keystore</string>
-    <string name="text_unsigned_apk_created">APK non signe cree</string>
-    <string name="text_creating_unsigned_apk">Creation de l\'APK non signe</string>
-    <string name="text_using_keystore">Utilisation du keystore</string>
-    <string name="text_re_signing_apk">Re-signature de l\'APK</string>
-    <string name="text_writing_signed_apk">Ecriture de l\'APK signe</string>
-    <string name="text_sign_completed">Signature terminee</string>
-    <string name="text_clean_completed">Nettoyage termine</string>
-    <string name="text_cleaning_workspace">Nettoyage de l\'espace de travail</string>
-    <string name="text_resolving_plugin_native_libraries">Resolution des bibliotheques natives du plugin</string>
-    <string name="text_copying_libraries_for_abi">Copie des bibliotheques pour ABI</string>
-    <string name="text_selected_plugin">Plugin selectionne</string>
-    <string name="text_extracted_plugin_libraries">Bibliotheques du plugin extraites</string>
-    <string name="text_extracted_plugin_assets">Assets du plugin extraits</string>
-    <string name="text_extracting_plugin_asset">Extraction d\'asset du plugin</string>
-    <string name="text_extracting_plugin_so">Extraction du fichier so du plugin</string>
-    <string name="error_conditions_not_met_for_record">L\'enregistrement de scripts necessite au moins l\'une des conditions suivantes:\n- Acces root\n- Acces Shizuku</string>
 </resources>

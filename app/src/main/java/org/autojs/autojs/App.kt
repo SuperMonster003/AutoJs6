@@ -19,6 +19,8 @@ import com.hjq.toast.Toaster
 import io.reactivex.android.schedulers.AndroidSchedulers
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.inrt.Pref as InrtPref
+import org.autojs.autojs.inrt.InrtShortcuts
 import org.autojs.autojs.core.ui.inflater.ImageLoader
 import org.autojs.autojs.core.ui.inflater.util.Drawables
 import org.autojs.autojs.event.GlobalKeyObserver
@@ -43,6 +45,7 @@ import java.lang.reflect.Method
  * Created by Stardust on Jan 27, 2017.
  * Modified by SuperMonster003 as of Feb 3, 2026.
  * Modified by JetBrains AI Assistant (GPT-5.2) as of Feb 7, 2026.
+ * Modified by JetBrains AI Assistant (GPT-5.3-Codex (xhigh)) as of Mar 9, 2026.
  */
 class App : MultiDexApplication() {
 
@@ -61,6 +64,10 @@ class App : MultiDexApplication() {
                 setUpDefaultNightMode()
             }
             else /* Main process. */ -> {
+                if (AbstractAutoJs.isInrt) {
+                    InrtPref.syncLaunchConfigWithBuild()
+                    InrtShortcuts.syncToExplicitIntents()
+                }
                 setUpDebugEnvironment()
                 setUpLeakCanary()
 

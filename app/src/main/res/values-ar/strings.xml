@@ -119,9 +119,11 @@
     <string name="dialog_button_abandon">تخلَّ</string>
     <string name="dialog_button_abort">إيقاف</string>
     <string name="dialog_button_abort_connection">إيقاف الاتصال</string>
+    <string name="dialog_button_activate">تفعيل</string>
     <string name="dialog_button_add">اضافة</string>
     <string name="dialog_button_advanced_settings">متقدم</string>
     <string name="dialog_button_amend_host_address">تصحيح العنوان</string>
+    <string name="dialog_button_authorize">تفويض</string>
     <string name="dialog_button_back">@string/text_back</string>
     <string name="dialog_button_cancel">يلغي</string>
     <string name="dialog_button_cancel_download">يلغي</string>
@@ -231,6 +233,7 @@
     <string name="error_check_for_update">فشل في التحقق من التحديثات</string>
     <string name="error_colon_must_follow_a_valid_ip_address">يجب أن يتبع القولون عنوان IP صالحًا</string>
     <string name="error_compass_cannot_be_null">لا يمكن أن تكون البوصلة لاغية</string>
+    <string name="error_conditions_not_met_for_record">يتطلب تسجيل السكربتات توفر شرط واحد على الاقل مما يلي:\n- صلاحيات Root\n- صلاحيات Shizuku</string>
     <string name="error_connect_to_remote">لا يمكن الاتصال بالخادم البعيد: %s</string>
     <string name="error_connection_failed_with_host">فشل الاتصال بـ \"%1$s\".</string>
     <string name="error_connection_timed_out">انتهت مهلة الاتصال (%d مللي ثانية)</string>
@@ -254,6 +257,7 @@
     <string name="error_failed_to_convert_into_drawable">فشل تحويل القيمة %s إلى قابل للرسم</string>
     <string name="error_failed_to_copy">فشل النسخ</string>
     <string name="error_failed_to_create">فشل في انشاء</string>
+    <string name="error_failed_to_enable_the_plugin">فشل في تفعيل الاضافة</string>
     <string name="error_failed_to_go_to_access_settings">فشل فتح صفحة الإعدادات</string>
     <string name="error_failed_to_grant_shizuku_access">فشل منح Shizuku حق الوصول</string>
     <string name="error_failed_to_instantiate">فشل إنشاء المثيل \"%s\"</string>
@@ -270,6 +274,7 @@
     <string name="error_failed_to_retrieve_version_properties_file_to_parse_version_information">تعذّر جلب ملف version.properties لتحليل معلومات الإصدار</string>
     <string name="error_failed_to_revoke_shizuku_access">فشل في إلغاء وصول Shizuku</string>
     <string name="error_failed_to_run_script">فشل في تشغيل البرنامج النصي</string>
+    <string name="error_failed_to_save">فشل الحفظ</string>
     <string name="error_failed_to_save_project_config">تعذّر حفظ إعدادات المشروع</string>
     <string name="error_file_in_path_does_not_exist">الملف في المسار \"%1$s\" غير موجود</string>
     <string name="error_function_called_in_ui_thread">لا يمكن حظر مؤشر ترابط واجهة المستخدم. حاول تشغيل %s() في الخيط الفرعي أو النصف الفرعي</string>
@@ -330,6 +335,9 @@
     <string name="error_pattern_syntax">بناء جملة نمط غير صالح</string>
     <string name="error_plugin_apk_does_not_contain_required_assets_for_variant">ملف APK للمكوّن الإضافي لا يحتوي على الموارد المطلوبة لـ variant=\"%1$s\": %2$s.</string>
     <string name="error_plugin_apk_does_not_contain_required_native_libraries">ملف APK للمكوّن الإضافي لا يحتوي على مكتبات native المطلوبة: %1$s.</string>
+    <string name="error_plugin_is_not_authorized_in_plugin_center">الاضافة \"%1$s\" غير مُفوّضة في مركز الاضافات</string>
+    <string name="error_plugin_is_not_enabled_in_plugin_center">الاضافة \"%1$s\" غير مُمكّنة في مركز الاضافات</string>
+    <string name="error_plugin_not_found_in_installed_apps">لم يتم العثور على الاضافة \"%1$s\" ضمن التطبيقات المثبتة</string>
     <string name="error_plugin_returned_empty_info">أعاد المكوّن الإضافي %1$s معلومات فارغة.</string>
     <string name="error_plugin_returned_invalid_variant">أعاد المكوّن الإضافي %1$s variant غير صالح: %2$s.</string>
     <string name="error_port_num_over_65535">رقم المنفذ أكثر من 65535</string>
@@ -371,6 +379,7 @@
     <string name="error_unknown_picker_result_type_with_params" formatted="false">نوع نتيجة غير معروف {name: %s ، params: %s}</string>
     <string name="error_unknown_picker_selector_type" formatted="false">محدد غير معروف {الاسم: %s ، اكتب: %s}</string>
     <string name="error_unknown_type">نوع غير معروف: %s</string>
+    <string name="error_unsupported_plugin_connection">طريقة اتصال الاضافة غير مدعومة</string>
     <string name="error_webp_lossless_quality_not_supported">لا يمكن ضغط تنسيق WebP-Lossless باستخدام معامل الجودة؛ استخدم JPEG/PNG/WebP-Lossy بدلاً من ذلك</string>
     <string name="file_not_exist_or_readable">الملف غير موجود او غير قابل للقراءة</string>
     <string name="file_not_exist_or_readable_with_path">الملف غير موجود أو قابلاً للقراءة: %s</string>
@@ -387,6 +396,7 @@
     <string name="hint_loop_delay">تأخير قبل الحلقة</string>
     <string name="hint_loop_times">0 للحلقة اللانهائية</string>
     <string name="hint_pc_server_address_supported_formats">يتم دعم IPv4 و IPv6 وأسماء النطاقات.</string>
+    <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">جرّب الضغط على زر \"تفعيل\" لتفعيل الاضافة مرة واحدة.\nاذا نجح التفعيل، فسيتم تشغيل الزر تلقائيا خلال فترة زمنية معينة.</string>
     <string name="instruction_install_plugin_from_url">أدخل عنوان URL يشير إلى ملحق (Plugin) بعيد.\nمثال: \"https://example.com/plugin.apk\".</string>
     <string name="item_delete_permanently">حذف نهائيا</string>
     <string name="item_move_to_trash">نقل الى سلة المحذوفات</string>
@@ -433,6 +443,7 @@
     <string name="plugin_item_info_last_install_time">آخر تثبيت</string>
     <string name="plugin_item_info_last_uninstall_time">آخر إزالة</string>
     <string name="plugin_item_info_last_update_time">آخر تحديث</string>
+    <string name="plugin_item_info_mechanism">الالية</string>
     <string name="plugin_item_info_package_size">حجم الحزمة</string>
     <string name="plugin_item_info_updatable_version">إصدار متاح</string>
     <string name="prompt_add_ignored_version">هل أنت متأكد من تجاهل إصدار التحديث الحالي؟\nيمكنك إدارة جميع الإصدارات التي تم تجاهلها بواسطة إعدادات التطبيق.</string>
@@ -463,6 +474,7 @@
     <string name="summary_text_launcher_shortcuts">أضف اختصارات إلى المشغل</string>
     <string name="summary_use_volume_control_record">ابدأ أو توقف عن التسجيل الذي يتم التحكم فيه بواسطة مفتاح خفض مستوى الصوت عند عرض الزر العائم</string>
     <string name="summary_use_volume_key_to_stop_running_scripts">اضغط على مفتاح \"رفع الصوت\" لإيقاف تشغيل جميع البرامج النصية</string>
+    <string name="symbol_colon_with_blank">": "</string>
     <string name="term_internal_strorage">وحدة التخزين الداخلية</string>
     <string name="text_a11y_service">خدمة إمكانية الوصول</string>
     <string name="text_a11y_service_description">مطلوب من خلال العملية التلقائية البرنامج النصي (انقر فوق ، اضغط لفترة طويلة ، شريحة ، إلخ).</string>
@@ -485,6 +497,7 @@
     <string name="text_act_by_scroll_forward">التمرير للأمام (التمرير)</string>
     <string name="text_act_by_set_text">تعيين النص (setText)</string>
     <string name="text_action">عمل</string>
+    <string name="text_activated_successfully">تم التفعيل بنجاح</string>
     <string name="text_activity_not_found_for_apk_installing">لا مثبت APK</string>
     <string name="text_adb_tool_needed">هناك حاجة إلى أداة ADB</string>
     <string name="text_add_color_library">إضافة مكتبة ألوان</string>
@@ -544,8 +557,11 @@
     <string name="text_app_version_code">كود إصدار التطبيق</string>
     <string name="text_app_version_name">اسم إصدار التطبيق</string>
     <string name="text_appearance">مظهر</string>
+    <string name="text_applying_binary_resources">جارٍ تطبيق الموارد الثنائية</string>
     <string name="text_at_least_one_certificate_issuer_field_is_not_empty">يجب ملء حقل واحد على الأقل من [الاسم، اسم المنظمة، وحدة التنظيم، رمز الدولة، الولاية أو المقاطعة، المدينة أو المنطقة، الشارع]</string>
     <string name="text_attribute">ينسب</string>
+    <string name="text_authorize_plugin">تفويض الاضافة</string>
+    <string name="text_authorize_plugin_content">هذه اضافة من طرف ثالث. يرجى الانتباه الى مصدر الاضافة وامان الاستخدام.\n\nاضغط زر \"تفويض\" لتمكين الاضافة.</string>
     <string name="text_auto_check_for_updates">تحقق من التحديثات التلقائية</string>
     <string name="text_auto_check_for_updates_and_show_snackbar">تحقق من وجود التحديثات تلقائيًا وعرض تناول وجبة خفيفة على الصفحة الرئيسية</string>
     <string name="text_auto_night_mode">وضع الليل التلقائي</string>
@@ -554,8 +570,27 @@
     <string name="text_back">خلف</string>
     <string name="text_broadcast_action">عمل</string>
     <string name="text_broadcast_task">مهمة البث</string>
+    <string name="text_build">بناء</string>
     <string name="text_build_apk">بناء APK</string>
+    <string name="text_build_completed">اكتمل البناء</string>
+    <string name="text_build_profile">ملف البناء</string>
+    <string name="text_build_profile_cannot_delete_default">لا يمكن حذف الملف الافتراضي</string>
+    <string name="text_build_profile_cannot_delete_project_json">لا يمكن حذف ملف project.json</string>
+    <string name="text_build_profile_delete">حذف الملف</string>
+    <string name="text_build_profile_fields">حقول الملف</string>
+    <string name="text_build_profile_fields_configure">اعداد حقول الملف</string>
+    <string name="text_build_profile_fields_hint">سيتم حفظ الحقول المحددة كقيم ثابتة في هذا الملف.</string>
+    <string name="text_build_profile_more">المزيد من اجراءات الملف</string>
+    <string name="text_build_profile_name_cannot_be_reserved">لا يمكن استخدام اسماء ملفات محجوزة (Default, project.json)</string>
+    <string name="text_build_profile_name_hint">اسم ملف البناء</string>
+    <string name="text_build_profile_new">ملف جديد</string>
+    <string name="text_build_profile_unsaved_changes">توجد تغييرات غير محفوظة في اعدادات البناء الحالية.</string>
+    <string name="text_build_profile_unsaved_changes_project_json">توجد تغييرات غير محفوظة في اعدادات البناء الحالية، وسيتم كتابتها في project.json.</string>
+    <string name="text_build_profile_unsaved_switch_confirm">هل تريد حفظ التغييرات قبل المتابعة?</string>
     <string name="text_build_succeeded">نجح بناء</string>
+    <string name="text_building_apk">جارٍ بناء APK</string>
+    <string name="text_building_resources">جارٍ بناء الموارد</string>
+    <string name="text_built_apk_file_path">مسار APK المبني</string>
     <string name="text_cancel">يلغي</string>
     <string name="text_cancel_simplified">إلغاء</string>
     <string name="text_cannot_delete_default">لا يمكن حذف ملف التعريف الافتراضي</string>
@@ -587,6 +622,9 @@
     <string name="text_choose_restore_path">اختر مسار الاستعادة</string>
     <string name="text_city_or_locality">المدينة أو المنطقة</string>
     <string name="text_class_or_package_name">اسم الفئة / الحزمة</string>
+    <string name="text_clean">تنظيف</string>
+    <string name="text_clean_completed">اكتمل التنظيف</string>
+    <string name="text_cleaning_workspace">جارٍ تنظيف مساحة العمل</string>
     <string name="text_clear">صافي</string>
     <string name="text_clear_file_selection">مسح اختيار الملف</string>
     <string name="text_clear_pre_execute_script">مسح السيناريو قبل التنفيذ</string>
@@ -615,6 +653,8 @@
     <string name="text_compatibility">التوافق</string>
     <string name="text_confidence_level">ثقة</string>
     <string name="text_config">تكوين</string>
+    <string name="text_configuring_manifest">جارٍ ضبط manifest</string>
+    <string name="text_configuring_package_name">جارٍ ضبط اسم الحزمة</string>
     <string name="text_confirm_to_clear_all_items">هل أنت متأكد من مسح جميع العناصر؟</string>
     <string name="text_confirm_to_clear_the_history">هل تريد مسح السجل?</string>
     <string name="text_confirm_to_clear_the_history_of">سيتم مسح السجل ادناه\n\n[ %1$s ]\n\nهل تريد المتابعة?</string>
@@ -630,6 +670,7 @@
     <string name="text_connection_cannot_be_established">لا يمكن إنشاء الاتصال</string>
     <string name="text_connection_failed">فشل الاتصال</string>
     <string name="text_console">وحدة التحكم</string>
+    <string name="text_content">المحتوى</string>
     <string name="text_continue">يكمل</string>
     <string name="text_copy">ينسخ</string>
     <string name="text_copy_all">نسخ جميع</string>
@@ -644,8 +685,18 @@
     <string name="text_copy_to_clip">نسخ إلى الحافظة</string>
     <string name="text_copy_value">نسخ القيمة</string>
     <string name="text_copying" tools:ignore="TypographyEllipsis">جارٍ النسخ...</string>
+    <string name="text_copying_asset">جارٍ نسخ asset</string>
+    <string name="text_copying_assets_to">جارٍ نسخ assets الى</string>
+    <string name="text_copying_directory">جارٍ نسخ المجلد</string>
+    <string name="text_copying_file">جارٍ نسخ الملف</string>
+    <string name="text_copying_libraries_for_abi">جارٍ نسخ المكتبات لـ ABI</string>
+    <string name="text_copying_library">جارٍ نسخ المكتبة</string>
+    <string name="text_copying_native_libraries">جارٍ نسخ المكتبات الاصلية</string>
+    <string name="text_copying_project_directory">جارٍ نسخ مجلد المشروع</string>
+    <string name="text_copying_script_file">جارٍ نسخ ملف السكربت</string>
     <string name="text_country_code">رمز الدولة (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">رمز الدولة يجب أن يكون حرفين كبيرين</string>
+    <string name="text_creating_unsigned_apk">جارٍ انشاء APK غير موقّع</string>
     <string name="text_current_page_configuration">اعدادات الصفحة الحالية</string>
     <string name="text_current_version">النسخة الحالية</string>
     <string name="text_daily_task">مهام يومية</string>
@@ -728,10 +779,12 @@
     <string name="text_enable_a11y_service_with_secure_settings_timeout">تمكين خدمة إمكانية الوصول مع إعدادات آمنة</string>
     <string name="text_enable_plugin">تفعيل الملحق</string>
     <string name="text_enabled">مفعّل</string>
+    <string name="text_encrypting_script">جارٍ تشفير السكربت</string>
     <string name="text_error">خطأ</string>
     <string name="text_error_copy_file" formatted="true">فشل نسخ الملف: %s</string>
     <string name="text_error_report">تقرير الشوائب</string>
     <string name="text_estimated">تقديري</string>
+    <string name="text_exception_info">معلومات الاستثناء</string>
     <string name="text_execute">نفذ - اعدم</string>
     <string name="text_execute_code">تنفيذ الرمز</string>
     <string name="text_execution_finished" formatted="false">[%s] انتهى في %s.\n</string>
@@ -744,6 +797,11 @@
     <string name="text_exported">تصدير</string>
     <string name="text_extending_js_build_in_objects">تمديد كائنات JavaScript المدمجة</string>
     <string name="text_extensibility">التمدد</string>
+    <string name="text_extracted_plugin_assets">تم استخراج assets الاضافة</string>
+    <string name="text_extracted_plugin_libraries">تم استخراج مكتبات الاضافة</string>
+    <string name="text_extracting_plugin_asset">جارٍ استخراج asset الاضافة</string>
+    <string name="text_extracting_plugin_so">جارٍ استخراج ملف so للاضافة</string>
+    <string name="text_extracting_template_apk">جارٍ استخراج APK القالب</string>
     <string name="text_failed">باءت بالفشل</string>
     <string name="text_failed_to_build">فشل في البناء</string>
     <string name="text_failed_to_create_key_store">فشل في إنشاء مفتاح التوقيع</string>
@@ -764,6 +822,7 @@
     <string name="text_failed_to_register">فشل في تسجيل</string>
     <string name="text_failed_to_report">فشل في تقديم</string>
     <string name="text_failed_to_retrieve">فشل الجلب</string>
+    <string name="text_failed_to_save_project_json">فشل حفظ project.json</string>
     <string name="text_failed_to_save_remote_project_to_local_storage">فشل حفظ المشروع البعيد في التخزين المحلي</string>
     <string name="text_failed_to_send_log_entries">فشل في إرسال إدخالات السجل</string>
     <string name="text_failed_to_update">فشل التحديث</string>
@@ -814,6 +873,7 @@
     <string name="text_hide_button">زر الإخفاء</string>
     <string name="text_hide_node">إخفاء هذه العقدة</string>
     <string name="text_hide_same_frame_nodes">إخفاء العقدة ذات الإطار المماثل</string>
+    <string name="text_hint">تلميح</string>
     <string name="text_history">السجل</string>
     <string name="text_history_has_been_cleared">تم مسح السجل</string>
     <string name="text_icon">أيقونة</string>
@@ -869,6 +929,11 @@
     <string name="text_latest_package">أحدث حزمة</string>
     <string name="text_launch_config">إطلاق التكوين</string>
     <string name="text_launch_debugger">إطلاق الأخطاء</string>
+    <string name="text_launch_launcher_visible">اظهار ايقونة التطبيق في المشغل</string>
+    <string name="text_launch_logs_visible">اظهار السجلات عند التشغيل</string>
+    <string name="text_launch_run_on_boot">تشغيل السكربت عند الاقلاع</string>
+    <string name="text_launch_slug">نص شعار شاشة البداية</string>
+    <string name="text_launch_splash_visible">اظهار شاشة البداية عند التشغيل</string>
     <string name="text_launcher_icon_title">رمز المشغّل</string>
     <string name="text_launcher_shortcuts">اختصارات المشغل</string>
     <string name="text_launcher_shortcuts_may_be_lost_after_launcher_icon_changed">قد يؤدي تبديل رموز المشغّل على بعض الأجهزة إلى فقدان جميع اختصارات AutoJs6 الحالية, يرجى المتابعة بحذر</string>
@@ -984,9 +1049,9 @@
     <string name="text_permission_desc_billing">يسمح للتطبيق بإجراء عمليات الشراء داخل التطبيق</string>
     <string name="text_permission_desc_bluetooth">يسمح للتطبيق بالوصول إلى أجهزة Bluetooth</string>
     <string name="text_permission_desc_bluetooth_admin">يسمح للتطبيق بتهيئة أجهزة Bluetooth</string>
+    <string name="text_permission_desc_bluetooth_advertise">السماح للتطبيق بالإعلان عبر Bluetooth</string>
     <string name="text_permission_desc_bluetooth_connect">السماح للتطبيق بالوصول إلى أجهزة Bluetooth وحالة الاتصال</string>
     <string name="text_permission_desc_bluetooth_scan">السماح للتطبيق بالبحث عن أجهزة Bluetooth القريبة</string>
-    <string name="text_permission_desc_bluetooth_advertise">السماح للتطبيق بالإعلان عبر Bluetooth</string>
     <string name="text_permission_desc_broadcast_close_system_dialogs">يسمح للتطبيق بإرسال نية لإغلاق مربعات حوار النظام</string>
     <string name="text_permission_desc_call_phone">يسمح للتطبيق بإجراء مكالمات هاتفية</string>
     <string name="text_permission_desc_camera">يسمح للتطبيق بالوصول إلى الكاميرا</string>
@@ -1070,15 +1135,28 @@
     <string name="text_please_input_name">اسم الإدخال</string>
     <string name="text_please_wait" tools:ignore="TypographyEllipsis">الرجاء الانتظار...</string>
     <string name="text_please_wait_a_moment_before_trying_again" tools:ignore="TypographyEllipsis">يرجى المحاولة مرة أخرى لاحقًا...</string>
+    <string name="text_plugin_activated">مفعّل</string>
+    <string name="text_plugin_activation_recommended">يوصى بالتفعيل</string>
+    <string name="text_plugin_authorization_denied">تم رفض التفويض</string>
+    <string name="text_plugin_authorization_required">يتطلب تفويضا</string>
+    <string name="text_plugin_authorized">مفوّض</string>
     <string name="text_plugin_center">مركز الاضافات</string>
     <string name="text_plugin_details">تفاصيل الملحق</string>
+    <string name="text_plugin_official">رسمي</string>
+    <string name="text_plugin_trusted">موثوق</string>
     <string name="text_plugins">الاضافات</string>
     <string name="text_pointer_location">موقع المؤشر</string>
     <string name="text_pointer_location_toggle_failed_with_hint">فشل تبديل \"موقع المؤشر\".\nالوصول إلى الجذر مطلوب.</string>
     <string name="text_post_notifications_permission">نشر الإخطارات</string>
     <string name="text_post_notifications_permission_rationale">لضمان عمل خدمات المقدّمة في AutoJs6 وغيرها بشكل طبيعي، وتمكين السكربتات من نشر الإشعارات، يجب منح AutoJs6 إذن \"نشر الإشعارات\".</string>
     <string name="text_pre_execute_script">البرنامج النصي مسبقا</string>
+    <string name="text_prepare">تحضير</string>
+    <string name="text_prepare_completed">اكتمل التحضير</string>
     <string name="text_preparing" tools:ignore="TypographyEllipsis">خطة...</string>
+    <string name="text_preparing_assets_dir">جارٍ تحضير مجلد assets</string>
+    <string name="text_preparing_build_config">جارٍ تحضير اعدادات البناء</string>
+    <string name="text_preparing_keystore">جارٍ تحضير keystore</string>
+    <string name="text_preparing_workspace">جارٍ تحضير مساحة العمل</string>
     <string name="text_preset_dialog_content">محتوى مربع الحوار المعين مسبقاً</string>
     <string name="text_preset_dialog_title">عنوان مربع الحوار المعين مسبقاً</string>
     <string name="text_press_again_to_dismiss_dialog">اضغط مرة أخرى لرفض الحوار</string>
@@ -1087,14 +1165,19 @@
     <string name="text_preview">معاينة</string>
     <string name="text_process_log">سجل العملية</string>
     <string name="text_processing">جارٍ المعالجة</string>
+    <string name="text_processing_source">جارٍ معالجة المصدر</string>
     <string name="text_project">مشروع</string>
     <string name="text_project_location">موقع المشروع</string>
     <string name="text_project_media_access">وصول وسائل الإعلام المشروع</string>
     <string name="text_prompt">مستعجل</string>
+    <string name="text_property_colon">%1$s:</string>
     <string name="text_property_colon_value">%1$s: %2$s</string>
     <string name="text_property_colon_value_nbsp_unit">%1$s: %2$d %3$s</string>
     <string name="text_property_colon_value_unit">%1$s: %2$d%3$s</string>
+    <string name="text_pruning">جارٍ التقليم</string>
     <string name="text_quit">يترك</string>
+    <string name="text_re_signing_apk">جارٍ اعادة توقيع APK</string>
+    <string name="text_reading_splash_resources">جارٍ قراءة موارد شاشة البدء</string>
     <string name="text_recommended">مُستَحسَن</string>
     <string name="text_record_finished">انتهى التسجيل</string>
     <string name="text_record_prompt">موجه التسجيل</string>
@@ -1120,6 +1203,7 @@
     <string name="text_replace">يحل محل</string>
     <string name="text_replace_all">استبدل كل شيء</string>
     <string name="text_replace_simplified">يستبدل</string>
+    <string name="text_replacing_file">جارٍ استبدال الملف</string>
     <string name="text_repo_url_of_vscode_vsc_ext">عنوان URL لمستودع امتداد VSCode</string>
     <string name="text_report_succeed">إرسال نجح</string>
     <string name="text_requires_android_os_version" formatted="false">يتطلب إصدار Android OS %s (API %s) ولكن الحالي هو %s (API %s)</string>
@@ -1128,6 +1212,7 @@
     <string name="text_reset_succeed">نجحت إعادة تعيين</string>
     <string name="text_reset_to_initial_content">إعادة تعيين في البداية</string>
     <string name="text_reset_to_initial_content_only_for_assets">إعادة التعيين هي فقط للعينات</string>
+    <string name="text_resolving_plugin_native_libraries">جارٍ تحليل مكتبات الاضافة الاصلية</string>
     <string name="text_restart">إعادة بدء</string>
     <string name="text_restart_strategy">استراتيجية إعادة التشغيل</string>
     <string name="text_restore">استعادة</string>
@@ -1169,6 +1254,7 @@
     <string name="text_save_configuration_as">حفظ الاعدادات باسم</string>
     <string name="text_save_simplified">احفظ</string>
     <string name="text_save_to">حفظ في</string>
+    <string name="text_saving" tools:ignore="TypographyEllipsis">جارٍ الحفظ...</string>
     <string name="text_scheduled_restart_backend">المحرّك</string>
     <string name="text_scheduled_restart_start_delay">تأخير البدء</string>
     <string name="text_screen_capture_request_delay">تأخير طلب إذن التقاط الشاشة</string>
@@ -1189,6 +1275,7 @@
     <string name="text_select_file_to_upload">حدد ملف للتحميل</string>
     <string name="text_select_icon">حدد أيقونة</string>
     <string name="text_select_image">حدد صورة</string>
+    <string name="text_selected_plugin">الاضافة المحددة</string>
     <string name="text_send">إرسال</string>
     <string name="text_send_shortcut">انشاء اختصار</string>
     <string name="text_server_mode">وضع الخادم</string>
@@ -1205,6 +1292,9 @@
     <string name="text_show_layout_bounds">عرض في حدود التصميم</string>
     <string name="text_show_layout_hierarchy">عرض في التسلسل الهرمي للتخطيط</string>
     <string name="text_show_widget_information">إظهار معلومات القطعة</string>
+    <string name="text_sign">توقيع</string>
+    <string name="text_sign_completed">اكتمل التوقيع</string>
+    <string name="text_sign_stage_completed">اكتملت مرحلة التوقيع</string>
     <string name="text_signature_algorithm">خوارزمية التوقيع</string>
     <string name="text_signature_configuration">تكوين التوقيع</string>
     <string name="text_signature_scheme">خطة التوقيع</string>
@@ -1222,6 +1312,7 @@
     <string name="text_sort_by_time_desc">الوقت (الاحدث اولا)</string>
     <string name="text_source">المصدر</string>
     <string name="text_source_file_path">مسار رمز المصدر</string>
+    <string name="text_source_processing_completed">اكتملت معالجة المصدر</string>
     <string name="text_special_permissions">أذونات خاصة</string>
     <string name="text_stable_mode">وضع مستقر</string>
     <string name="text_star">نجمة</string>
@@ -1260,6 +1351,7 @@
     <string name="text_timed_task">مهمة توقيت</string>
     <string name="text_timed_task_backend_title">محرك جدولة المهام المؤقتة</string>
     <string name="text_timed_task_timing">توقيت</string>
+    <string name="text_title">العنوان</string>
     <string name="text_to_be_chosen">قيد الاختيار</string>
     <string name="text_toggle_all">تبديل الكل</string>
     <string name="text_tools">أدوات</string>
@@ -1284,6 +1376,7 @@
     <string name="text_unknown_description_for_plugin">وصف غير معروف</string>
     <string name="text_unknown_title_for_plugin">عنوان غير معروف</string>
     <string name="text_unknown_version_for_plugin">إصدار غير معروف</string>
+    <string name="text_unsigned_apk_created">تم انشاء APK غير موقّع</string>
     <string name="text_unverified">لم يتم التحقق</string>
     <string name="text_updatable">قابل للتحديث</string>
     <string name="text_update">تحديث</string>
@@ -1291,6 +1384,7 @@
     <string name="text_updates_checked_states_cleared">تم مسح الحالات التي تم فحصها</string>
     <string name="text_updates_snack_bar_act_later">في وقت لاحق</string>
     <string name="text_updates_snack_bar_act_view">رأي</string>
+    <string name="text_updating_project_config">جارٍ تحديث اعدادات المشروع</string>
     <string name="text_usage_stats_permission">الاستخدام الإحصائيات الوصول</string>
     <string name="text_use_android_n_shortcut">استخدم اختصار Android 7.0</string>
     <string name="text_use_default_icon">استخدام الرمز الافتراضي</string>
@@ -1300,6 +1394,7 @@
     <string name="text_username_cannot_be_empty">اسم المستخدم لا يمكن أن يكون فارغًا</string>
     <string name="text_using_desc_selector">استخدم محدد DESC</string>
     <string name="text_using_id_selector">استخدم محدد المعرف</string>
+    <string name="text_using_keystore">جارٍ استخدام keystore</string>
     <string name="text_using_text_selector">استخدم محدد النص</string>
     <string name="text_validity_years">المدة (سنوات)</string>
     <string name="text_validity_years_cannot_be_empty">مدة الصلاحية لا يمكن أن تكون فارغة</string>
@@ -1331,86 +1426,12 @@
     <string name="text_working_dir_path">مسار دليل العمل</string>
     <string name="text_write_secure_settings">اكتب إعدادات الأمان</string>
     <string name="text_write_system_settings">كتابة إعدادات النظام</string>
+    <string name="text_writing_app_icon">جارٍ كتابة ايقونة التطبيق</string>
+    <string name="text_writing_manifest">جارٍ كتابة manifest</string>
+    <string name="text_writing_project_config">جارٍ كتابة اعدادات المشروع</string>
+    <string name="text_writing_resources_arsc">جارٍ كتابة resources.arsc</string>
+    <string name="text_writing_signed_apk">جارٍ كتابة APK الموقّع</string>
     <string name="text_xiaomi_background_popup_permission">النوافذ المنبثقة في الخلفية</string>
     <string name="warn_continue_operation_without_saving_settings">لم يتم حفظ الاعدادات. هل تريد المتابعة?</string>
     <string name="warn_exit_without_saving_settings">لم يتم حفظ الاعدادات. هل تريد الخروج?</string>
-    <string name="error_failed_to_save">فشل الحفظ</string>
-    <string name="text_saving" tools:ignore="TypographyEllipsis">جارٍ الحفظ...</string>
-    <string name="symbol_colon_with_blank">": "</string>
-    <string name="error_failed_to_enable_the_plugin">فشل في تفعيل الاضافة</string>
-    <string name="text_exception_info">معلومات الاستثناء</string>
-    <string name="text_hint">تلميح</string>
-    <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">جرّب الضغط على زر \"تفعيل\" لتفعيل الاضافة مرة واحدة.\nاذا نجح التفعيل، فسيتم تشغيل الزر تلقائيا خلال فترة زمنية معينة.</string>
-    <string name="dialog_button_activate">تفعيل</string>
-    <string name="text_activated_successfully">تم التفعيل بنجاح</string>
-    <string name="text_authorize_plugin">تفويض الاضافة</string>
-    <string name="text_authorize_plugin_content">هذه اضافة من طرف ثالث. يرجى الانتباه الى مصدر الاضافة وامان الاستخدام.\n\nاضغط زر \"تفويض\" لتمكين الاضافة.</string>
-    <string name="dialog_button_authorize">تفويض</string>
-    <string name="text_plugin_official">رسمي</string>
-    <string name="text_plugin_authorized">مفوّض</string>
-    <string name="text_plugin_authorization_required">يتطلب تفويضا</string>
-    <string name="text_plugin_authorization_denied">تم رفض التفويض</string>
-    <string name="text_plugin_activation_recommended">يوصى بالتفعيل</string>
-    <string name="text_plugin_activated">مفعّل</string>
-    <string name="text_plugin_trusted">موثوق</string>
-    <string name="plugin_item_info_mechanism">الالية</string>
-    <string name="error_plugin_is_not_enabled_in_plugin_center">الاضافة \"%1$s\" غير مُمكّنة في مركز الاضافات</string>
-    <string name="error_plugin_is_not_authorized_in_plugin_center">الاضافة \"%1$s\" غير مُفوّضة في مركز الاضافات</string>
-    <string name="error_plugin_not_found_in_installed_apps">لم يتم العثور على الاضافة \"%1$s\" ضمن التطبيقات المثبتة</string>
-    <string name="error_unsupported_plugin_connection">طريقة اتصال الاضافة غير مدعومة</string>
-    <string name="text_property_colon">%1$s:</string>
-    <string name="text_title">العنوان</string>
-    <string name="text_content">المحتوى</string>
-    <string name="text_building_apk">جارٍ بناء APK</string>
-    <string name="text_built_apk_file_path">مسار APK المبني</string>
-    <string name="text_clean">تنظيف</string>
-    <string name="text_sign">توقيع</string>
-    <string name="text_build">بناء</string>
-    <string name="text_prepare">تحضير</string>
-    <string name="text_preparing_workspace">جارٍ تحضير مساحة العمل</string>
-    <string name="text_extracting_template_apk">جارٍ استخراج APK القالب</string>
-    <string name="text_prepare_completed">اكتمل التحضير</string>
-    <string name="text_copying_project_directory">جارٍ نسخ مجلد المشروع</string>
-    <string name="text_copying_script_file">جارٍ نسخ ملف السكربت</string>
-    <string name="text_source_processing_completed">اكتملت معالجة المصدر</string>
-    <string name="text_copying_directory">جارٍ نسخ المجلد</string>
-    <string name="text_copying_file">جارٍ نسخ الملف</string>
-    <string name="text_encrypting_script">جارٍ تشفير السكربت</string>
-    <string name="text_replacing_file">جارٍ استبدال الملف</string>
-    <string name="text_preparing_build_config">جارٍ تحضير اعدادات البناء</string>
-    <string name="text_reading_splash_resources">جارٍ قراءة موارد شاشة البدء</string>
-    <string name="text_configuring_manifest">جارٍ ضبط manifest</string>
-    <string name="text_configuring_package_name">جارٍ ضبط اسم الحزمة</string>
-    <string name="text_copying_assets_to">جارٍ نسخ assets الى</string>
-    <string name="text_processing_source">جارٍ معالجة المصدر</string>
-    <string name="text_applying_binary_resources">جارٍ تطبيق الموارد الثنائية</string>
-    <string name="text_copying_native_libraries">جارٍ نسخ المكتبات الاصلية</string>
-    <string name="text_updating_project_config">جارٍ تحديث اعدادات المشروع</string>
-    <string name="text_sign_stage_completed">اكتملت مرحلة التوقيع</string>
-    <string name="text_writing_project_config">جارٍ كتابة اعدادات المشروع</string>
-    <string name="text_building_resources">جارٍ بناء الموارد</string>
-    <string name="text_build_completed">اكتمل البناء</string>
-    <string name="text_writing_resources_arsc">جارٍ كتابة resources.arsc</string>
-    <string name="text_writing_manifest">جارٍ كتابة manifest</string>
-    <string name="text_writing_app_icon">جارٍ كتابة ايقونة التطبيق</string>
-    <string name="text_copying_asset">جارٍ نسخ asset</string>
-    <string name="text_preparing_assets_dir">جارٍ تحضير مجلد assets</string>
-    <string name="text_copying_library">جارٍ نسخ المكتبة</string>
-    <string name="text_preparing_keystore">جارٍ تحضير keystore</string>
-    <string name="text_unsigned_apk_created">تم انشاء APK غير موقّع</string>
-    <string name="text_creating_unsigned_apk">جارٍ انشاء APK غير موقّع</string>
-    <string name="text_using_keystore">جارٍ استخدام keystore</string>
-    <string name="text_re_signing_apk">جارٍ اعادة توقيع APK</string>
-    <string name="text_writing_signed_apk">جارٍ كتابة APK الموقّع</string>
-    <string name="text_sign_completed">اكتمل التوقيع</string>
-    <string name="text_clean_completed">اكتمل التنظيف</string>
-    <string name="text_cleaning_workspace">جارٍ تنظيف مساحة العمل</string>
-    <string name="text_resolving_plugin_native_libraries">جارٍ تحليل مكتبات الاضافة الاصلية</string>
-    <string name="text_copying_libraries_for_abi">جارٍ نسخ المكتبات لـ ABI</string>
-    <string name="text_selected_plugin">الاضافة المحددة</string>
-    <string name="text_extracted_plugin_libraries">تم استخراج مكتبات الاضافة</string>
-    <string name="text_extracted_plugin_assets">تم استخراج assets الاضافة</string>
-    <string name="text_extracting_plugin_asset">جارٍ استخراج asset الاضافة</string>
-    <string name="text_extracting_plugin_so">جارٍ استخراج ملف so للاضافة</string>
-    <string name="error_conditions_not_met_for_record">يتطلب تسجيل السكربتات توفر شرط واحد على الاقل مما يلي:\n- صلاحيات Root\n- صلاحيات Shizuku</string>
 </resources>
