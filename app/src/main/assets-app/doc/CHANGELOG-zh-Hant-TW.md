@@ -1,8 +1,231 @@
 ******
 
-### 版本歷史
+### 發行歷史
 
 ******
+
+# v6.7.0
+
+###### 2026/03/14
+
+* `新增` 外掛中心功能, 支援外掛的安裝/解除安裝/更新等操作 (入口: 主頁抽屜按鈕/主頁標籤頁)
+* `新增` 版本歷史功能, 支援檢視/恢復可編輯檔案的歷史版本 (入口: 主頁抽屜按鈕/檔案管理器選單/程式碼編輯器選單)
+* `新增` 回收站功能, 支援檢視/恢復已刪除的檔案/資料夾 (入口: 主頁抽屜按鈕)
+* `新增` Paddle OCR (PP-OCRv5) 外掛, 用於光學字元識別
+* `新增` cvt 模組, 用於資料單位轉換 (參閱 專案文件 > [單位轉換](https://docs.autojs6.com/#/cvt))
+* `新增` fmt 模組, 用於資料格式化 (參閱 專案文件 > [格式化](https://docs.autojs6.com/#/fmt))
+* `新增` zip 模組, 用於檔案壓縮與解壓縮操作 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (參閱 專案文件 > [Zip](https://docs.autojs6.com/#/zip))
+* `新增` mediainfo 模組, 用於檢視媒體檔案的詳細資訊 (參閱 專案文件 > [媒體資訊](https://docs.autojs6.com/#/mediainfo))
+* `新增` cvt.bytes 方法, 用於位元組資料單位轉換 (參閱 專案文件 > [單位轉換](https://docs.autojs6.com/#/cvt))
+* `新增` fmt.bytes 方法, 用於位元組資料格式化 (參閱 專案文件 > [格式化](https://docs.autojs6.com/#/fmt))
+* `新增` s13n.bytes 方法, 用於標準化位元組資料 (參閱 專案文件 > [標準化](https://docs.autojs6.com/#/s13n))
+* `新增` app.isDualInstalled 方法, 用於檢測雙開應用是否已安裝 (需要 Shizuku 或 Root 許可權) _[`issue #450`](http://issues.autojs6.com/450)_
+* `新增` device.getSharedDeviceId 方法, 用於跨應用獲取統一共享裝置 ID _[`issue #455`](http://issues.autojs6.com/455)_
+* `新增` device.setPointerLocation 等 Toggleable 系列方法, 用於設定或獲取指標位置系統設定項 _[`issue #381`](http://issues.autojs6.com/381)_
+* `新增` dialogs.build 方法支援 textAllCaps/(positive/negative/neutral)TextAllCaps 選項引數, 用於控制按鈕文字是否全部大寫
+* `新增` images.loadAsync 方法, 用於非同步獲取網路影像資源 _[`issue #327`](http://issues.autojs6.com/327)_
+* `新增` ui.getNavigationBarHeight 方法/navigationBarHeight 屬性 (getter), 用於獲取導航欄高度 _[`issue #456`](http://issues.autojs6.com/456)_
+* `新增` ui.getVisible(Status/Navigation)BarHeight 方法/visible(Status/Navigation)BarHeight 屬性 (getter), 用於快捷獲取狀態列或導航欄可見高度 _[`issue #456`](http://issues.autojs6.com/456)_
+* `新增` http.put/del(ete)/head 方法, 用於使用不同的 HTTP 請求方法傳送網路請求
+* `新增` http.getAsync/postAsync/requestAsync 等方法, 用於非同步傳送網路請求 _[`issue #423`](http://issues.autojs6.com/423)_
+* `新增` http 模組請求相關方法獲取的 body 物件增加 stream/saveToFile/close 等方法 _[`issue #452`](http://issues.autojs6.com/452)_
+* `新增` http 模組請求相關方法支援快取控制選項引數 (cacheBody/bodyCacheThresholdBytes)
+* `新增` http 模組請求相關方法支援不安全選項引數 (isInsecure/insecure), 用於忽略證書相關異常 _[`issue #417`](http://issues.autojs6.com/417)_
+* `新增` http 模組請求相關方法支援 options.client 選項, 用於配置 OkHttpClient.Builder (如 followRedirects 等) _[`issue #454`](http://issues.autojs6.com/454)_
+* `新增` auto.state 屬性 (getter) 及 shizuku.state 屬性 (getter), 用於獲取無障礙服務狀態及 Shizuku 服務狀態
+* `新增` runtime.(set/is)JavaPrimitiveWrap 方法, 用於設定或獲取 Java 原始型別包裝策略 _[`issue #435`](http://issues.autojs6.com/435)_
+* `新增` autojs.(restart/exit) 方法, 用於重啟或退出 AutoJs6 應用, 並支援應用重啟時自動執行其引數指定的指令碼 _[`issue #460`](http://issues.autojs6.com/460)_
+* `新增` UiObject#isShifted 方法, 用於檢測控制元件位置變化 _[`issue #469`](http://issues.autojs6.com/469)_
+* `新增` UiObject#snapshot 方法, 用於捕獲控制元件當前狀態 _[`issue #469`](http://issues.autojs6.com/469)_
+* `新增` engines.myEngine().getStartTime() 方法, 用於獲取指令碼引擎啟動時間戳 _[`issue #449`](http://issues.autojs6.com/449)_
+* `新增` crash 全域性方法, 用於測試崩潰報告頁面
+* `新增` structuredClone 全域性方法, 用於深複製 JavaScript 物件 (參閱 [MDN](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/structuredClone))
+* `新增` 等價系列選擇器 (UiSelector#id/text/...) 及包含系列選擇器 (UiSelector#xxxContains) 支援正則表示式引數
+* `新增` 選擇器的正則表示式引數支援使用標誌 (i, m, s, u)
+* `新增` 正則表示式支援後瞻斷言語法 _[`issue #464`](http://issues.autojs6.com/464)_
+* `新增` 檔案管理器增加 "移動到" 及 "複製到" 選單項, 支援操作中止及進度狀態顯示
+* `新增` 程式碼編輯器增加 "多功能鍵盤" - "符號設定" 選單項, 支援符號編輯及按配置級別進行符號的建立/匯入/匯出等
+* `新增` 主頁抽屜增加 "指標位置" 工具
+* `新增` 主頁抽屜增加 "所有檔案管理許可權" 開關
+* `新增` 主頁抽屜增加 "後臺彈出介面" 開關 (針對 [小米/Vivo] 裝置)
+* `新增` 設定頁面增加 "Java 原始型別包裝" 設定選項 _[`issue #435`](http://issues.autojs6.com/435)_
+* `新增` 設定頁面增加 "定時任務排程引擎" 設定選項, 支援 AlarmManager/WorkManager/JobScheduler _[`issue #457`](http://issues.autojs6.com/457)_ _[`issue #434`](http://issues.autojs6.com/434)_ _[`issue #449`](http://issues.autojs6.com/449)_ _[`issue #388`](http://issues.autojs6.com/388)_ _[`issue #378`](http://issues.autojs6.com/378)_ _[`issue #163`](http://issues.autojs6.com/163)_ _[`issue #53`](http://issues.autojs6.com/53)_ _[`issue #21`](http://issues.autojs6.com/21)_
+* `新增` 設定頁面增加 "應用啟動器圖示" 設定選項, 支援自適應圖示/透明背景圖示 _[`issue #405`](http://issues.autojs6.com/405)_
+* `新增` 設定頁面增加 "重啟策略" 設定選項, 用於設定主頁抽屜欄重啟按鈕是否使用快速重啟策略
+* `新增` 設定頁面增加 "螢幕捕獲許可權申請延遲" 設定選項, 用於避免許可權申請視窗遮擋螢幕
+* `新增` 設定頁面啟動器快捷方式增加 "外掛" 選項, 用於透過快捷方式跳轉到外掛中心頁面
+* `新增` 打包應用支援開機自啟動並在配置頁面增加開關配置
+* `新增` 打包應用支援應用快捷方式 (日誌頁面/設定頁面)
+* `新增` 打包應用配置頁面增加撤銷/重做/儲存按鈕
+* `新增` 打包應用配置頁面增加配置機制, 支援配置的建立/修改/刪除/匯入/匯出 _[`issue #483`](http://issues.autojs6.com/483)_
+* `新增` Scrapers 工具 (run-scrapers.mjs) 用於自動更新 Gradle 構建指令碼結構化資料/README 通用資料/README 模板資料等
+* `新增` Gradle Wrapper 切換工具 (gradle-wrapper-switcher), 用於切換本地 Gradle 主版本 (如 Gradle 8.x 與 Gradle 9.x)
+* `修復` notice 方法引數數量及型別限制錯誤 _[`issue #462`](http://issues.autojs6.com/462)_
+* `修復` ui.R 屬性 (getter) 無法正常使用的問題
+* `修復` ui.post 方法回撥引數中產生異常時可能靜默失敗的問題
+* `修復` isJavaClass/isJavaPackage 等全域性方法無效的問題
+* `修復` timers.keepAlive 方法 timeout 引數功能無效的問題
+* `修復` floaty.window/rawWindow 方法無法接受字串引數的問題 _[`issue #467`](http://issues.autojs6.com/467)_
+* `修復` floaty.rawWindow 因傳入錯誤的上下文導致部分控制元件顯示異常的問題
+* `修復` util.isString 方法無效的問題
+* `修復` util.class[Name]/getClass[Name] 可能返回錯誤結果的問題
+* `修復` util.java.array 無法正常使用 Boolean 等型別引數的問題
+* `修復` threads.disposable() 返回的物件在存取資料時可能被意外裝箱的問題 _[`issue #435`](http://issues.autojs6.com/435)_
+* `修復` console.build 方法多次呼叫時, 日誌浮動視窗樣式選項未能正常重置的問題
+* `修復` console.build 方法的 (title/content)BackgroundColor 選項導致透明度或著色選項被覆蓋的問題 _[`issue #458`](http://issues.autojs6.com/458)_
+* `修復` console/toast 等方法顯示 Java Double 時可能丟失末尾零的問題
+* `修復` 無法使用 console/toast 等方法顯示 BigInt 資料型別的問題
+* `修復` toast 方法因持有 Toast 例項強引用而導致可能得記憶體洩露問題
+* `修復` 部分全域性物件可能丟失 JavaScript 原型屬性及方法的問題
+* `修復` 使用 XML 語法將 JavaScript 表示式作為屬性值時, this 物件可能出現指向錯誤的問題
+* `修復` dialogs.build 方法 linkify 選項引數功能失效的問題
+* `修復` dialogs.build 方法可能破壞物件引數原有資料的問題
+* `修復` canvas 元素控制元件 setMaxFps 方法內部幀率計算錯誤
+* `修復` images.concat 方法縱向拼接時寬度值計算錯誤
+* `修復` images.requestScreenCapture 方法呼叫時使用者取消授權可能導致應用崩潰的問題
+* `修復` images.captureScreen 方法獲取的截圖可能存在方向錯誤或黑邊填充的問題 _[`issue #337`](http://issues.autojs6.com/337)_
+* `修復` images 部分方法使用區域引數時 1 被誤解析為百分比的問題
+* `修復` images 部分相關方法出現異常時 oneShot 標記功能失效的問題 _[`issue #372`](http://issues.autojs6.com/372)_
+* `修復` images 部分相關方法可能引發記憶體洩露的問題 _[`issue #372`](http://issues.autojs6.com/372)_
+* `修復` images.save 及 ImageWrapper#saveTo 方法傳入路徑不存在時無法正常寫入檔案的問題
+* `修復` ImageWrapper#recycle 方法回收影像資源功能失效的問題
+* `修復` ocr 部分過載方法可能無法正常使用的問題
+* `修復` ocr.detect 方法獲得的結果可能與 ocr.mode 不匹配的問題 _[`issue #468`](http://issues.autojs6.com/468)_
+* `修復` auto.registerEvent 註冊的無障礙服務事件會被其他指令碼誤清理的問題 _[`issue #466`](http://issues.autojs6.com/466)_ _[`issue #343`](http://issues.autojs6.com/343#issuecomment-3263953918)_
+* `修復` Android 10 UiObject#child 方法可能出現 ArrayIndexOutOfBoundsException 異常的問題 _[`issue #416`](http://issues.autojs6.com/416)_
+* `修復` 內建模組方法呼叫可能出現 Rhino 上下文可能不一致的問題
+* `修復` 指令碼建立大量浮動視窗後, 指令碼退出時可能出現視窗殘留的問題
+* `修復` 執行專案時 project.json 配置引數可能無法正常解析的問題
+* `修復` 專案打包時 project.json 的 excludedDirs 配置引數將導致配置檔案解析失敗的問題 _[`issue #428`](http://issues.autojs6.com/428)_
+* `修復` Android 7.x 可能無法正常使用打包功能的問題
+* `修復` 指令碼專案配置檔案儲存時原始鍵名可能會被修改的問題
+* `修復` 指令碼專案配置檔案中構建版本號或構建時間出現較大數字時可能導致應用崩潰的問題
+* `修復` 頻繁獲取或重建 ImageReader 時可能因緩衝區暫無可用幀導致應用崩潰的問題
+* `修復` 輸入事件觀察器 InputEventObserver 可能導致應用啟動時明顯示卡頓的問題
+* `修復` Shizuku 使用者服務程序未能正常結束導致程序堆積的問題 _[`issue #474`](http://issues.autojs6.com/474)_
+* `修復` 打包應用無法正常使用 Paddle OCR 與 Rapid OCR 功能的問題
+* `修復` 打包應用配置檔案 project.json 中的 key 值可能被意外修改的問題
+* `修復` 打包應用配置頁面滑動 "需要的許可權" 列表時可能出現核取方塊圖示閃爍的問題
+* `修復` 發行歷史頁面部分系統因字型差別導致統計資料顯示不完整的問題
+* `修復` 部分裝置無法正常初始化 MLKit Google OCR 的問題 (試修) _[`issue #8`](http://issues.autojs6.com/8#issuecomment-3117061768)_
+* `修復` 部分裝置無法正常觸發檔案管理器功能按鈕點選事件的問題 (試修) _[`issue #465`](http://issues.autojs6.com/465)_
+* `修復` 部分裝置程式碼編輯器空行顯示方框字元的問題 (試修)
+* `修復` 程式碼編輯器軟鍵盤可能遮擋文字內容的問題
+* `修復` 程式碼編輯器在只讀模式下依然可以編輯程式碼內容的問題
+* `修復` 程式碼編輯器在只讀模式下點選標題區域及部分選單項導致應用崩潰的問題
+* `修復` 程式碼編輯器載入大檔案可能導致應用崩潰的問題 (試修)
+* `修復` 程式碼編輯器自動開啟新建檔案時功能按鈕狀態初始化異常
+* `修復` 程式碼編輯器編輯檔案時置於後臺可能導致應用崩潰的問題
+* `修復` Android 15+ 程式碼編輯器點選 fx 按鈕無法顯示模組函式快捷面板的問題 (試修)
+* `修復` ErrorDialogActivity 可能無法正常啟動或短時間自動消失的問題 _[`issue #479`](http://issues.autojs6.com/479)_ _[`issue #471`](http://issues.autojs6.com/471)_ _[`issue #414`](http://issues.autojs6.com/414)_ _[`issue #340`](http://issues.autojs6.com/340#issuecomment-2973485826)_
+* `修復` Canvas 建構函式可接受的引數型別錯誤 _[`issue #402`](http://issues.autojs6.com/402)_
+* `修復` 崩潰報告頁面複製詳細資訊功能失效的問題
+* `修復` Android 16+ 自定義返回邏輯失效導致返回功能異常的問題
+* `修復` 檔案管理器搜尋結果展示後點擊返回按鈕或切換標籤頁面時可能導致應用崩潰的問題
+* `修復` 檔案管理器刪除專案資料夾後 UI 未能自動重新整理的問題
+* `修復` 任務面板列表項頻繁變動時可能導致應用崩潰的問題
+* `修復` 使用 "三按鈕" 手勢導航時導航欄前景色可能與夜間模式關聯異常的問題
+* `修復` APK 檔案型別資訊對話方塊可能無法獲取應用名稱及 SDK 資訊的問題
+* `修復` 客戶端模式連線後, 短時間斷開連線並再次連線時, 出現握手超時且難以再次建立連線的問題
+* `修復` 客戶端模式連線時, 旋轉螢幕及切換語言等觸發 Activity 重建的操作導致 AutoJs6 總是重建連線的問題
+* `修復` 服務端模式連線時, 旋轉螢幕及切換語言等觸發 Activity 重建的操作導致 VSCode 控制檯無法輸出日誌的問題 _[`issue #385`](http://issues.autojs6.com/385)_
+* `修復` 連線 VSCode 外掛時, 多種方式同時連線可能導致日誌列印數量成倍增加的問題
+* `修復` 佈局分析頁面生成程式碼時對於集合控制元件可能生成失敗的問題 (試修) _[`issue #328`](http://issues.autojs6.com/328)_
+* `修復` 設定頁面 "使用 '音量減' 鍵控制錄製" 開關功能失效的問題 _[`issue #480`](http://issues.autojs6.com/480)_
+* `修復` 錄製指令碼生成的程式碼檔案可能出現座標數值與螢幕實際畫素值不匹配的問題 _[`issue #480`](http://issues.autojs6.com/480)_
+* `修復` 錄製指令碼生成的程式碼檔案首個行為 (如點選或滑動等) 總是被忽略的問題
+* `修復` 浮動按鈕 "執行指令碼" 對話方塊後臺操作檔案時可能導致應用崩潰的問題
+* `修復` 主頁活動頁面生命週期結束後重新進入主頁時, 浮動按鈕狀態可能被重置的問題
+* `修復` 小米裝置 "顯示在其他應用上層" 開關可能跳轉到錯誤設定頁面的問題
+* `修復` 檢查更新中止下載過程後, 網路資料包依然持續後臺獲取的問題 (試修)
+* `修復` 構建工具啟用 isCleanup[Paddle/Rapid]Ocr 配置選項時無法正常完成 Rebuild Project 任務的問題
+* `最佳化` 外掛化 Paddle OCR (PP-OCRv3) 相關功能 _[`issue #334`](http://issues.autojs6.com/334)_ _[`issue #331`](http://issues.autojs6.com/331)_ _[`issue #325`](http://issues.autojs6.com/325)_
+* `最佳化` runtime.loadJar 方法增強相容性 (by [LYS86](https://github.com/LYS86)) _[`pr #475`](http://pr.autojs6.com/475)_
+* `最佳化` ui.getStatusBarHeight 方法/statusBarHeight 屬性 (getter) 增強一定程度的相容性
+* `最佳化` console.log 等方法列印全域性物件 (images, app, ocr 等) 時支援顯示詳細資訊
+* `最佳化` dialogs.build 方法支援使用 MaterialDialog.Builder 原生選項引數
+* `最佳化` dialogs.build 方法 animation/linkify 選項引數支援字串寬鬆匹配
+* `最佳化` device.rotation/rotation/width/height 方法獲取螢幕方向及寬高資料的穩定性與一致性
+* `最佳化` app.launchDual/startDualActivity 等方法提升執行效率並增強相容性
+* `最佳化` android.graphics.Paint#setColor 支援正常解析 ColorInt/ColorHex/ColorName 等顏色引數
+* `最佳化` 內建模組相關方法實參型別的異常訊息增加型別摘要資訊
+* `最佳化` 內建模組 (dayjs/cheerio/dayjs/i18n) 脫離指令碼執行模式, 使用全域性懶載入方式替代
+* `最佳化` 控制檯相關方法列印巨型資料時根據上限適當省略部分內容以降低列印耗時
+* `最佳化` 控制檯浮動視窗倒計時起始值由 6 秒增加到 9 秒
+* `最佳化` 控制檯浮動視窗內部實現進行無鎖化及佇列化處理以提升其引數設定效率與成功率
+* `最佳化` 控制檯浮動視窗背景色彩行為相關 API (透明度/著色/基色) 更符合安卓設計規範 _[`issue #458`](http://issues.autojs6.com/458)_
+* `最佳化` 檔案管理器浮動按鈕展開後點擊選單項時最佳化選單收起時機
+* `最佳化` 檔案管理器/任務面板支援顯示檔案/任務數量統計資訊
+* `最佳化` 程式碼編輯器儲存檔案失敗時自動存為草稿並支援另存為新檔案
+* `最佳化` 程式碼編輯器載入大檔案時提升一定程度的流暢度
+* `最佳化` 程式碼編輯器 "查詢/替換" 支援狀態持久化及即時顯示搜尋計數資訊
+* `最佳化` 程式碼編輯器提示儲存時確保儲存成功後再退出編輯器以降低儲存失敗率
+* `最佳化` 程式碼編輯器儲存按鈕的狀態更符合使用者主觀邏輯
+* `最佳化` 程式碼編輯器支援 "-", "=", "(", "[", "{", "<" 等按鍵長按功能
+* `最佳化` 打包應用打包過程對話方塊增加 "中止" 按鈕
+* `最佳化` 打包應用打包過程對話方塊的顯示方式並增加耗時統計
+* `最佳化` 打包應用使用新配置安裝時將覆蓋舊應用的相關配置
+* `最佳化` 打包應用配置頁面預設勾選必要許可權 (WAKE_LOCK/INTERNET/WRITE_EXTERNAL_STORAGE/...) _[`issue #397`](http://issues.autojs6.com/397)_
+* `最佳化` 打包應用配置頁面支援更多選項的讀取及配置 (啟動時顯示日誌/啟動時顯示啟動頁/啟動頁標語文字/...)
+* `最佳化` 打包應用設定頁面增加前臺服務開關 _[`issue #406`](http://issues.autojs6.com/406)_
+* `最佳化` 指令碼專案配置檔案儲存時增加鍵名衝突檢測機制防止鍵名歧義
+* `最佳化` 崩潰報告頁面支援雙指縮放調整字型大小並新增常用功能按鈕
+* `最佳化` 應用啟動器圖示支援自適應圖示特性 _[`issue #405`](http://issues.autojs6.com/405)_
+* `最佳化` Rhino 引擎在泛型簽名解析失敗時回退為原始反射型別以增強低版本安卓系統的反射方法可用性
+* `最佳化` 主頁抽屜開關類條目新增分隔線, 支援點選標題文字區域顯示詳情對話方塊並按需支援快捷跳轉系統設定
+* `最佳化` 啟動或重啟 AutoJs6 時支援點選主頁抽屜 "客戶端模式" 標題文字區域中止正在嘗試建立的連線
+* `最佳化` 客戶端模式連線時支援使用 IPv6 地址及域名地址建立連線
+* `最佳化` 客戶端模式連線時支援特殊用途 IPv4 地址 (迴環/廣播/多播/保留/...) 檢測提示
+* `最佳化` 客戶端模式連線時支援連線狀態顯示及管理 (修正地址/中止連線)
+* `最佳化` 服務端模式連線時支援顯示已建立連線的客戶端數量
+* `最佳化` 讀取通知許可權支援自動重連機制 ([requestRebind](https://developer.android.com/reference/android/service/notification/NotificationListenerService#requestRebind(android.content.ComponentName))) 以增強通知監聽相關功能的穩定性
+* `最佳化` 浮動按鈕增強後臺啟動 Activity 的安全性以避免應用崩潰
+* `最佳化` 浮動按鈕 "更多" 對話方塊使用非同步載入資料方式提升顯示流暢度
+* `最佳化` 浮動按鈕 "執行指令碼" 對話方塊增加 "主頁" 選單項
+* `最佳化` 浮動按鈕 "執行指令碼" 對話方塊支援最小化及狀態恢復並盡最大努力保持視窗常駐或自動恢復
+* `最佳化` 支援使用 Shizuku 許可權錄製指令碼及錄製回放 (回放流暢度受一定影響) _[`issue #320`](http://issues.autojs6.com/320)_
+* `最佳化` 主題色設定頁面定位主題色時使用快速定位方式以提升定位效率
+* `最佳化` 使用 [LiveData](https://developer.android.com/topic/libraries/architecture/livedata) 及 [SharedFlow](https://developer.android.com/kotlin/flow/stateflow-and-sharedflow) 替代已棄用的 [LocalBroadcastManager](https://developer.android.com/jetpack/androidx/releases/localbroadcastmanager)
+* `最佳化` Gradle 構建指令碼提升 7z 格式檔案的解壓效率
+* `最佳化` Gradle 構建指令碼支援獲取詳細的 Android Studio IDE 版本 (如 "2025.1.4.7")
+* `最佳化` Gradle 構建指令碼支援自動生成 VersionCodesList 類所需資料以降低指令碼啟動延遲
+* `最佳化` 使用 [版本目錄 (Version Catalogs)](https://developer.android.com/build/migrate-to-catalogs) 集中管理 Gradle 依賴和外掛版本
+* `最佳化` 模組化 Gradle 構建指令碼, 將共享構建邏輯遷移至 build-logic 並抽象為約定外掛
+* `最佳化` 使用 Gradle 約定外掛簡化本地 AAR 庫載入邏輯
+* `最佳化` 移除 "android.enableJetifier=true" Gradle 配置選項以適配 Gradle 9
+* `最佳化` 使用 [Toolchain](https://docs.gradle.org/current/userguide/toolchains.html) 替代 sourceCompatibility/targetCompatibility 以降低構建環境差異
+* `依賴` 模組化 Expandable Layout 版本 1.6.0
+* `依賴` 模組化 Expandable RecyclerView 版本 3.0.0-RC1
+* `依賴` 模組化 Recyclerview Flexible Divider 版本 1.4.0
+* `依賴` 本地化 Root Shell 版本 1.6
+* `依賴` 附加 AndroidX Activity (KTX) 版本 1.12.2
+* `依賴` 附加 AndroidX Core (KTX) 版本 1.15.0
+* `依賴` 附加 AndroidX Work Runtime 版本 2.11.0
+* `依賴` 附加 AndroidX Interpolator 版本 1.0.0
+* `依賴` 附加 Room RxJava2 版本 2.8.1
+* `依賴` 升級 Android SDK 版本 35 -> 36
+* `依賴` 升級 Gradle 8 版本 8.14 -> 8.14.4
+* `依賴` 升級 Gradle 9 版本 8.14 -> 9.4.0
+* `依賴` 升級 Rhino 版本 1.8.1-SNAPSHOT -> 2.0.0-SNAPSHOT
+* `依賴` 升級 Desugar JDK Libs 版本 2.0.4 -> 2.1.5
+* `依賴` 升級 Android Material 版本 1.12.0 -> 1.13.0
+* `依賴` 升級 AndroidX AppCompat 版本 1.7.0 -> 1.7.1
+* `依賴` 升級 AndroidX Room 版本 2.7.1 -> 2.7.2
+* `依賴` 升級 AndroidX WebKit 版本 1.13.0 -> 1.14.0
+* `依賴` 升級 Material Progressbar 版本 1.4.2 -> 1.6.1
+* `依賴` 升級 Apache Commons 版本 3.16.0 -> 3.18.0
+* `依賴` 升級 Retrofit2 Retrofit 版本 2.11.0 -> 2.12.0
+* `依賴` 升級 Retrofit2 Converter Gson 版本 2.11.0 -> 2.12.0
+* `依賴` 升級 Retrofit2 RxJava2 版本 2.11.0 -> 2.12.0
+* `依賴` 升級 Joda Time 版本 2.12.7 -> 2.14.0
+* `依賴` 升級 Gson 版本 2.11.0 -> 2.13.1
+* `依賴` 升級 ARSCLib 版本 1.3.1 -> 1.3.5
+* `依賴` 升級 Jsoup 版本 1.19.1 -> 1.20.1
+* `依賴` 升級 Junit Jupiter 版本 5.10.3 -> 5.13.0
+* `依賴` 升級 OpenCC 版本 1.2.0 -> 1.2.2
+* `依賴` 移除 Android Support Annotation v7 版本 28.0.0
+* `依賴` 移除 Android Support AppCompat v7 版本 28.0.0
+* `依賴` 移除 Android Support RecyclerView v7 版本 28.0.0
 
 # v6.6.4
 
@@ -16,13 +239,13 @@
 * `修復` 程式碼編輯器可能使用置信度不足的編碼寫入檔案導致內容解碼異常的問題 (試修)
 * `最佳化` 關於應用與開發者頁面增加布局適配通用性並去除不必要的佈局分類
 * `最佳化` README.md 專案編譯構建小節新增多種方式便於定位目標設定頁面 _[`issue #404`](http://issues.autojs6.com/404)_
-* `依賴` 附加 Androidx ConstraintLayout 版本 2.2.1
+* `依賴` 附加 AndroidX ConstraintLayout 版本 2.2.1
 
 # v6.6.3
 
 ###### 2025/05/27
 
-* `新增` 版本歷史功能, 可檢視發行版本歷史更新記錄 (多語言) 與統計資料
+* `新增` 發行歷史功能, 可檢視發行版本的發行歷史記錄 (多語言) 與統計資料
 * `新增` timers.keepAlive 方法 (已全域性化), 用於保持指令碼活躍狀態
 * `新增` engines.on('start/stop/error', callback) 等事件監聽方法, 用於監聽指令碼引擎全域性事件
 * `新增` images.detectMultiColors 方法, 用於多點顏色校驗 _[`issue #374`](http://issues.autojs6.com/374)_
@@ -32,9 +255,10 @@
 * `新增` ui.keepScreenOn 方法, 用於 UI 頁面獲取焦點時保持裝置螢幕常亮
 * `新增` ui.root 屬性 (getter), 用於獲取 UI 頁面佈局的 "視窗內容根容器" 節點
 * `新增` webview 元素支援基於 JsBridge 的 Web 頁面佈局 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) [參閱 示例程式碼 > 佈局 > 可互動 HTML / Vue2 + Vant (SFC)] _[`issue #281`](http://issues.autojs6.com/281)_
+* `新增` 佈局分析支援控制元件隱藏 (by [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #371`](http://pr.autojs6.com/371)_ _[`issue #355`](http://issues.autojs6.com/355)_
 * `修復` 主頁文件標籤及文件活動頁面顯示線上文件時部分內容被系統導航欄遮擋的問題
 * `修復` 部分頁面 Toolbar 點選按鈕時可能導致標題點選事件誤觸發的問題
-* `修復` 部分裝置程式碼編輯器空行顯示方框字元的問題
+* `修復` 部分裝置程式碼編輯器空行顯示方框字元的問題 (試修)
 * `修復` 主題色設定頁面調色盤對話方塊可能無限疊加的問題
 * `修復` 無障礙服務關閉時音量加鍵停止所有指令碼功能失效的問題
 * `修復` 定時任務頁面編輯自定義廣播內容時出現的輸入法遮擋問題
@@ -53,7 +277,6 @@
 * `修復` engines.all 方法可能觸發 ConcurrentModificationException 的問題 _[`issue #394`](http://issues.autojs6.com/394)_
 * `修復` README.md 中部分語言日期格式不正確的問題
 * `修復` Gradle 構建指令碼可能因獲取到無效庫檔案檔案長度而導致構建失敗的問題 _[`issue #389`](http://issues.autojs6.com/389)_
-* `最佳化` 佈局分析支援控制元件隱藏 (by [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #371`](http://pr.autojs6.com/371)_ _[`issue #355`](http://issues.autojs6.com/355)_
 * `最佳化` 佈局分析選單新增漸變分隔線實現一定程度的功能分組
 * `最佳化` 指令碼專案配置檔案 project.json 支援 permissions 選項 (by [wirsnow](https://github.com/wirsnow)) _[`pr #391`](http://pr.autojs6.com/391)_ _[`issue #362`](http://issues.autojs6.com/362)_
 * `最佳化` 打包單檔案時自動讀取並勾選已安裝應用的宣告許可權 _[`issue #362`](http://issues.autojs6.com/362)_
@@ -77,8 +300,8 @@
 * `最佳化` APK 檔案簽名信息提升檢測效率
 * `最佳化` APK 檔案型別資訊及媒體檔案型別資訊最佳化對話方塊顯示效率及資訊展示邏輯
 * `最佳化` Gradle 構建指令碼提升版本自適應能力 _[`discussion #369`](http://discussions.autojs6.com/369)_
-* `依賴` 本地化 Material Dialogs 版本 0.9.6.0
-* `依賴` 本地化 Material Date Time Picker 版本 4.2.3
+* `依賴` 模組化 Material Dialogs 版本 0.9.6.0
+* `依賴` 模組化 Material Date Time Picker 版本 4.2.3
 * `依賴` 本地化 libimagequant 版本 2.17.0
 * `依賴` 本地化 libpng 版本 1.6.49
 * `依賴` 附加 ICU4J 版本 77.1
@@ -86,7 +309,7 @@
 * `依賴` 附加 Material Progressbar 版本 1.4.2
 * `依賴` 附加 Flexmark Java HTML to Markdown 版本 0.64.8
 * `依賴` 升級 Gradle 版本 8.14-rc-1 -> 8.14
-* `依賴` 升級 Androidx Room 版本 2.7.0 -> 2.7.1
+* `依賴` 升級 AndroidX Room 版本 2.7.0 -> 2.7.1
 
 # v6.6.2
 
@@ -116,7 +339,7 @@
 * `修復` 設定頁面連續快速點選對話方塊型別專案時可能導致應用崩潰的問題
 * `最佳化` 精簡打包應用模板 APK 檔案大小
 * `最佳化` 應用 (以及打包應用) 支援更多許可權 _[`issue #338`](http://issues.autojs6.com/338)_
-* `最佳化` 打包頁面支援 Pinyin 庫選項
+* `最佳化` 打包應用配置頁面支援 Pinyin 庫選項
 * `最佳化` 打包應用主活動頁面最佳化狀態列背景及文字顏色
 * `最佳化` 打包應用設定頁面增加訪問所有檔案和傳送通知等特殊許可權開關 _[`issue #354`](http://issues.autojs6.com/354)_
 * `最佳化` 控制元件的文字及圖示根據主題色亮度值自動切換合適的顏色
@@ -143,9 +366,9 @@
 * `依賴` 升級 Android SDK 版本 34 -> 35
 * `依賴` 升級 Gradle 版本 8.12 -> 8.14-rc-1
 * `依賴` 升級 Rhino 版本 1.8.0-SNAPSHOT -> 1.8.1-SNAPSHOT
-* `依賴` 升級 Androidx Recyclerview 版本 1.3.2 -> 1.4.0
-* `依賴` 升級 Androidx Room 版本 2.6.1 -> 2.7.0
-* `依賴` 升級 Androidx WebKit 版本 1.12.1 -> 1.13.0
+* `依賴` 升級 AndroidX Recyclerview 版本 1.3.2 -> 1.4.0
+* `依賴` 升級 AndroidX Room 版本 2.6.1 -> 2.7.0
+* `依賴` 升級 AndroidX WebKit 版本 1.12.1 -> 1.13.0
 * `依賴` 升級 Pinyin4j 版本 2.5.0 -> 2.5.1
 
 # v6.6.1
@@ -162,7 +385,7 @@
 * `修復` automator.click/longClick 方法引數型別限制錯誤 _[`issue #275`](http://issues.autojs6.com/275)_
 * `修復` 選擇器不支援 ConsString 型別引數的問題 _[`issue #277`](http://issues.autojs6.com/277)_
 * `修復` UiObjectCollection 例項缺失自身方法及屬性的問題
-* `最佳化` 打包頁面支援簽名配置/金鑰庫管理/許可權設定 (by [luckyloogn](https://github.com/luckyloogn)) _[`pr #286`](http://pr.autojs6.com/286)_
+* `最佳化` 打包應用配置頁面支援簽名配置/金鑰庫管理/許可權設定 (by [luckyloogn](https://github.com/luckyloogn)) _[`pr #286`](http://pr.autojs6.com/286)_
 * `最佳化` 提升浮動視窗當前包名及當前活動名的識別準確性 (優先順序: Shizuku > Root > A11Y)
 * `最佳化` 提升 currentPackage/currentActivity 識別準確性 (優先順序: Shizuku > Root > A11Y)
 * `最佳化` 恢復日誌活動視窗單個條目文字內容的雙擊或長按選擇功能 _[`issue #280`](http://issues.autojs6.com/280)_
@@ -191,9 +414,9 @@
 * `新增` 佈局分析支援切換視窗 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
 * `新增` auto.clearCache 方法, 支援清除控制元件快取 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
 * `新增` threads.pool 方法, 支援執行緒池簡單應用 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
-* `新增` images.matchTemplate 方法增加 useTransparentMask 選項引數, 支援透明找圖 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
+* `新增` images.matchTemplate 方法支援 useTransparentMask 選項引數, 支援透明找圖 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
 * `新增` images.requestScreenCaptureAsync 方法, 用於 UI 模式非同步方式申請截圖許可權 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
-* `新增` images.requestScreenCapture 方法增加 isAsync 選項引數, 支援非同步方式獲取螢幕截圖 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
+* `新增` images.requestScreenCapture 方法支援 isAsync 選項引數, 支援非同步方式獲取螢幕截圖 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
 * `新增` images.on('screen_capture', callback) 等事件監聽方法, 支援監聽螢幕截圖可用事件 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
 * `新增` images.stopScreenCapture 方法, 支援主動釋放截圖申請的相關資源 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
 * `新增` images.psnr/mse/ssim/mssim/hist/ncc 及 images.getSimilarity 方法, 用於獲取影象相似性度量值
@@ -236,7 +459,7 @@
 * `修復` 程式碼編輯器跳轉到行尾時可能遺漏末尾字元的問題
 * `修復` 主活動頁面啟動日誌活動頁面時可能出現閃屏的問題
 * `修復` 打包應用無法正常使用 opencc 模組的問題
-* `最佳化` 打包頁面中 "不可用 ABI" 控制元件的點選提示體驗
+* `最佳化` 打包應用配置頁面中 "不可用 ABI" 控制元件的點選提示體驗
 * `最佳化` 支援使用 Shizuku 控制 "指標位置" 顯示開關
 * `最佳化` 支援使用 Shizuku 控制 "投影媒體" 及 "修改安全設定" 許可權開關
 * `最佳化` automator.gestureAsync/gesturesAsync 支援回撥函式引數
@@ -249,11 +472,11 @@
 * `最佳化` 程式碼編輯器匯入 Java 類和包名時支援智慧判斷插入位置
 * `最佳化` images 模組支援直接使用路徑作為影象引數
 * `最佳化` importPackage 支援字串引數
-* `最佳化` 服務端模式 IP 地址支援剪下板匯入智慧識別且支援空格按鍵智慧轉換
+* `最佳化` 客戶端模式 IP 地址支援剪下板匯入智慧識別且支援空格按鍵智慧轉換
 * `最佳化` 檔案管理器新建檔案時支援預設字首選擇並自動生成合適的數字字尾
 * `最佳化` 檔案管理器執行專案時具體化異常訊息提示 _[`issue #268`](http://issues.autojs6.com/268)_
 * `最佳化` 檔案管理器支援更多型別並支援顯示對應的圖示符號 (支援 800 多種檔案型別)
-* `最佳化` 檔案管理器可編輯的檔案型別 (jpg/doc/pdf...) 增加編輯按鈕
+* `最佳化` 檔案管理器可編輯的檔案型別 (jpg/doc/pdf/...) 增加編輯按鈕
 * `最佳化` 檔案管理器 APK 檔案支援檢視基礎資訊, Manifest 資訊及許可權列表
 * `最佳化` 檔案管理器音影片等媒體檔案支援檢視基礎資訊及 MediaInfo 資訊
 * `最佳化` 打包單檔案時支援自動填入合適的標準化名包並支援無效字元過濾提示
@@ -270,9 +493,9 @@
 * `依賴` 升級 Gradle 版本 8.5 -> 8.11.1
 * `依賴` 升級 Rhino 版本 1.7.15-SNAPSHOT -> 1.8.0-SNAPSHOT
 * `依賴` 升級 Android Material 版本 1.10.0 -> 1.12.0
-* `依賴` 升級 Androidx Annotation 版本 1.7.0 -> 1.9.1
-* `依賴` 升級 Androidx AppCompat 版本 1.6.1 -> 1.7.0
-* `依賴` 升級 Androidx WebKit 版本 1.8.0 -> 1.12.1
+* `依賴` 升級 AndroidX Annotation 版本 1.7.0 -> 1.9.1
+* `依賴` 升級 AndroidX AppCompat 版本 1.6.1 -> 1.7.0
+* `依賴` 升級 AndroidX WebKit 版本 1.8.0 -> 1.12.1
 * `依賴` 升級 Apache Commons 版本 3.13.0 -> 3.16.0
 * `依賴` 升級 ARSCLib 版本 1.2.4 -> 1.3.1
 * `依賴` 升級 Gson 版本 2.10.1 -> 2.11.0
@@ -294,10 +517,10 @@
 
 * `新增` opencc 模組 (參閱 專案文件 > [中文轉換](https://docs.autojs6.com/#/opencc)) (Ref to [LZX284](https://github.com/SuperMonster003/AutoJs6/pull/187/files#diff-8cff73265af19c059547b76aca8882cbaa3209291406f52df1dafbbc78e80c46R268))
 * `新增` UiSelector 增加 [plus](https://docs.autojs6.com/#/uiObjectType?id=m-plus) 及 [append](https://docs.autojs6.com/#/uiObjectType?id=m-append) 方法 _[`issue #115`](http://issues.autojs6.com/115)_
-* `新增` 打包應用頁面增加 ABI 及庫的篩選支援 (Ref to [AutoX](https://github.com/kkevsekk1/AutoX)) _[`issue #189`](http://issues.autojs6.com/189)_
+* `新增` 打包應用配置頁面增加 ABI 及庫的篩選支援 (Ref to [AutoX](https://github.com/kkevsekk1/AutoX)) _[`issue #189`](http://issues.autojs6.com/189)_
 * `修復` 打包應用檔案體積異常龐大的問題 (Ref to [AutoX](https://github.com/kkevsekk1/AutoX) / [LZX284](https://github.com/SuperMonster003/AutoJs6/pull/187/files#diff-d932ac49867d4610f8eeb21b59306e8e923d016cbca192b254caebd829198856R61)) _[`issue #176`](http://issues.autojs6.com/176)_
 * `修復` 打包應用無法顯示並列印部分異常訊息的問題
-* `修復` 打包應用頁面選擇應用圖示後可能顯示空圖示的問題
+* `修復` 打包應用配置頁面選擇應用圖示後可能顯示空圖示的問題
 * `修復` 打包應用包含 MLKit Google OCR 庫時可能出現的上下文未初始化異常
 * `修復` ocr.recognizeText/detect 方法無效的問題
 * `修復` 部分文字 (如日誌頁面) 顯示語言與應用設定語言可能不相符的問題
@@ -319,9 +542,9 @@
 * `修復` 程式碼編輯器模組函式快捷面板按鈕函式名稱可能溢位的問題
 * `最佳化` 程式碼編輯器模組函式快捷面板適配夜間模式
 * `最佳化` 打包應用啟動頁面適配夜間模式並調整應用圖示佈局
-* `最佳化` 打包應用頁面支援使用軟鍵盤 ENTER 鍵實現游標跳轉
-* `最佳化` 打包應用頁面支援點選 ABI 標題及庫標題切換全選狀態
-* `最佳化` 打包應用頁面預設 ABI 智慧選擇並增加不可選擇項的引導提示
+* `最佳化` 打包應用配置頁面支援使用軟鍵盤 ENTER 鍵實現游標跳轉
+* `最佳化` 打包應用配置頁面支援點選 ABI 標題及庫標題切換全選狀態
+* `最佳化` 打包應用配置頁面預設 ABI 智慧選擇並增加不可選擇項的引導提示
 * `最佳化` 檔案管理器根據檔案及資料夾的型別及特徵調整選單項的顯示情況
 * `最佳化` 檔案管理器資料夾右鍵選單增加打包應用選項
 * `最佳化` 無障礙服務啟用但功能異常時在 AutoJs6 主頁抽屜開關處將體現異常狀態
@@ -335,7 +558,7 @@
 
 ###### 2023/11/15
 
-* `新增` dialogs.build() 選項引數屬性 inputSingleLine
+* `新增` dialogs.build 方法支援 inputSingleLine 選項引數
 * `新增` console.setTouchable 方法 _[`issue #122`](http://issues.autojs6.com/122)_
 * `修復` ocr 模組部分方法無法識別區域引數的問題 _[`issue #162`](http://issues.autojs6.com/162)_  _[`issue #175`](http://issues.autojs6.com/175)_
 * `修復` Android 7.x 發現新版本時無法獲取版本詳情的問題
@@ -420,12 +643,12 @@
 * `依賴` 升級 Apache Commons Lang3 版本 3.12.0 -> 3.13.0
 * `依賴` 升級 Glide 版本 4.15.1 -> 4.16.0
 * `依賴` 升級 Android Analytics 版本 14.3.0 -> 14.4.0
-* `依賴` 升級 Androidx WebKit 版本 1.7.0 -> 1.8.0
-* `依賴` 升級 Androidx Preference 版本 1.2.0 -> 1.2.1
-* `依賴` 升級 Androidx Annotation 版本 1.6.0 -> 1.7.0
-* `依賴` 升級 Androidx Recyclerview 版本 1.3.0 -> 1.3.2
+* `依賴` 升級 AndroidX WebKit 版本 1.7.0 -> 1.8.0
+* `依賴` 升級 AndroidX Preference 版本 1.2.0 -> 1.2.1
+* `依賴` 升級 AndroidX Annotation 版本 1.6.0 -> 1.7.0
+* `依賴` 升級 AndroidX Recyclerview 版本 1.3.0 -> 1.3.2
 * `依賴` 升級 Android Material 版本 1.9.0 -> 1.10.0
-* `依賴` 升級 Androidx AppCompat 版本 1.4.2 -> 1.6.1
+* `依賴` 升級 AndroidX AppCompat 版本 1.4.2 -> 1.6.1
 * `依賴` 升級 Commons IO 版本 2.8.0 -> 2.14.0
 * `依賴` 升級 Jackson DataBind 版本 2.13.3 -> 2.14.3
 * `依賴` 移除 Zeugma Solutions LocaleHelper 版本 1.5.1
@@ -520,7 +743,7 @@
 * `最佳化` 客戶端模式非正常關閉時將於 AutoJs6 啟動時按最近一次的歷史地址自動連線
 * `依賴` 升級 LeakCanary 版本 2.10 -> 2.11
 * `依賴` 升級 Android Material 版本 1.8.0 -> 1.9.0
-* `依賴` 升級 Androidx WebKit 版本 1.6.1 -> 1.7.0
+* `依賴` 升級 AndroidX WebKit 版本 1.6.1 -> 1.7.0
 * `依賴` 升級 OkHttp3 版本 3.10.0 -> 5.0.0-alpha.9 -> 5.0.0-alpha.11
 * `依賴` 升級 MLKit Text Recognition Chinese 版本 16.0.0-beta6 -> 16.0.0
 
@@ -582,11 +805,11 @@
 * `依賴` 升級 Glide 版本 4.14.2 -> 4.15.1
 * `依賴` 升級 Joda Time 版本 2.12.2 -> 2.12.5
 * `依賴` 升級 Android Analytics 版本 14.0.0 -> 14.2.0
-* `依賴` 升級 Androidx WebKit 版本 1.5.0 -> 1.6.1
-* `依賴` 升級 Androidx Recyclerview 版本 1.2.1 -> 1.3.0
+* `依賴` 升級 AndroidX WebKit 版本 1.5.0 -> 1.6.1
+* `依賴` 升級 AndroidX Recyclerview 版本 1.2.1 -> 1.3.0
 * `依賴` 升級 Zip4j 版本 2.11.2 -> 2.11.5
 * `依賴` 升級 Junit Jupiter 版本 5.9.2 -> 5.9.3
-* `依賴` 升級 Androidx Annotation 版本 1.5.0 -> 1.6.0
+* `依賴` 升級 AndroidX Annotation 版本 1.5.0 -> 1.6.0
 * `依賴` 升級 Jackson DataBind 版本 2.14.1 -> 2.14.2
 * `依賴` 升級 Desugar JDK Libs 版本 2.0.0 -> 2.0.3
 
@@ -693,7 +916,7 @@
 * `依賴` 本地化 GitHub API 版本 1.306
 * `依賴` 升級 Android SDK 版本 32 -> 33
 * `依賴` 附加 JCIP Annotations 版本 1.0
-* `依賴` 附加 Androidx WebKit 版本 1.5.0
+* `依賴` 附加 AndroidX WebKit 版本 1.5.0
 * `依賴` 附加 Commons IO 版本 2.8.0
 * `依賴` 附加 Desugar JDK Libs 版本 2.0.0
 * `依賴` 附加 Jackson DataBind 版本 2.13.3
@@ -704,8 +927,8 @@
 * `依賴` 升級 Gradle 構建工具版本 7.4.0-alpha02 -> 8.0.0-alpha09
 * `依賴` 升級 Kotlin Gradle 外掛版本 1.6.10 -> 1.8.0-RC2
 * `依賴` 升級 Android Material 版本 1.6.0 -> 1.7.0
-* `依賴` 升級 Androidx Annotation 版本 1.3.0 -> 1.5.0
-* `依賴` 升級 Androidx AppCompat 版本 1.4.1 -> 1.4.2
+* `依賴` 升級 AndroidX Annotation 版本 1.3.0 -> 1.5.0
+* `依賴` 升級 AndroidX AppCompat 版本 1.4.1 -> 1.4.2
 * `依賴` 升級 Android Analytics 版本 13.3.0 -> 14.0.0
 * `依賴` 升級 Gson 版本 2.9.0 -> 2.10
 * `依賴` 升級 Joda Time 版本 2.10.14 -> 2.12.1
@@ -749,8 +972,8 @@
 * `新增` automator.lockScreen() 等方法 (參閱 示例程式碼 > 無障礙服務 > Android 9 新增)
 * `新增` automator.headsethook() 等方法 (參閱 示例程式碼 > 無障礙服務 > Android 11 新增)
 * `新增` automator.captureScreen() 方法 (參閱 示例程式碼 > 無障礙服務 > 獲取螢幕截圖)
-* `新增` dialogs.build() 選項引數屬性 animation, linkify 等 (參閱 示例程式碼 > 對話方塊 > 個性化對話方塊)
-* `修復` dialogs.build() 選項引數屬性 inputHint, itemsSelectedIndex 等功能異常
+* `新增` dialogs.build 方法支援 animation, linkify 等選項引數 (參閱 示例程式碼 > 對話方塊 > 個性化對話方塊)
+* `修復` dialogs.build 方法 inputHint, itemsSelectedIndex 等選項引數功能異常
 * `修復` JsDialog#on('multi_choice') 回撥引數功能異常
 * `修復` UiObject#parent().indexInParent() 總是返回 -1 的問題 _[`issue #16`](http://issues.autojs6.com/16)_
 * `修復` Promise.resolve() 返回的 Thenable 在臨近指令碼結束時可能不被呼叫的問題
@@ -834,9 +1057,9 @@
 * `修復` 客戶端模式及服務端模式開關狀態不能正常重新整理的問題
 * `修復` Android 7.x 解析 UI 模式 text 元素異常 (Ref to [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`issue #4`](http://issues.autojs6.com/4)_ _[`issue #9`](http://issues.autojs6.com/9)_
 * `最佳化` 忽略 sleep() 的 ScriptInterruptedException 異常
-* `依賴` 附加 Androidx AppCompat (Legacy) 版本 1.0.2
-* `依賴` 升級 Androidx AppCompat 版本 1.4.0 -> 1.4.1
-* `依賴` 升級 Androidx Preference 版本 1.1.1 -> 1.2.0
+* `依賴` 附加 AndroidX AppCompat (Legacy) 版本 1.0.2
+* `依賴` 升級 AndroidX AppCompat 版本 1.4.0 -> 1.4.1
+* `依賴` 升級 AndroidX Preference 版本 1.1.1 -> 1.2.0
 * `依賴` 升級 Rhino 引擎版本 1.7.14-SNAPSHOT -> 1.7.14
 * `依賴` 升級 OkHttp3 版本 3.10.0 -> 5.0.0-alpha.3 -> 5.0.0-alpha.4
 * `依賴` 升級 Android Material 版本 1.6.0-alpha01 -> 1.6.0-alpha02
@@ -889,7 +1112,7 @@
 * `最佳化` 抽離並移除重複的本地庫檔案
 * `依賴` 本地化 CrashReport 版本 2.6.6
 * `依賴` 本地化 MutableTheme 版本 1.0.0
-* `依賴` 附加 Androidx Preference 版本 1.1.1
+* `依賴` 附加 AndroidX Preference 版本 1.1.1
 * `依賴` 附加 SwipeRefreshLayout 版本 1.1.0
 * `依賴` 升級 Android SDK 版本 28 -> 30 -> 31
 * `依賴` 升級 Android Analytics 版本 7.0.0 -> 13.1.0
@@ -897,7 +1120,7 @@
 * `依賴` 升級 Gradle 構建工具版本 3.2.1 -> 4.1.0 -> 7.0.3 -> 7.2.0-alpha04
 * `依賴` 升級 Android Job 版本 1.2.6 -> 1.4.2
 * `依賴` 升級 Android Material 版本 1.1.0-alpha01 -> 1.5.0-beta01
-* `依賴` 升級 Androidx MultiDex 版本 2.0.0 -> 2.0.1
+* `依賴` 升級 AndroidX MultiDex 版本 2.0.0 -> 2.0.1
 * `依賴` 升級 Apache Commons Lang3 版本 3.6 -> 3.12.0
 * `依賴` 升級 Appcompat 版本 1.0.2 -> 1.4.0
 * `依賴` 升級 ButterKnife Gradle 外掛版本 9.0.0-rc2 -> 10.2.1 -> 10.2.3

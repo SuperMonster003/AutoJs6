@@ -1,7 +1,7 @@
 ******
 
-### {{ h3_version_histories }}
+### {{ h3_release_history }}
 
 ******
 
-{{ placeholder_version_histories }}
+{{ placeholder_release_history }}

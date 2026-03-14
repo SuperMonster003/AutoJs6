@@ -1,8 +1,231 @@
 ******
 
-### Histoires des versions
+### Historique des Versions
 
 ******
+
+# v6.7.0
+
+###### 2026/03/14
+
+* `Fonctionnalité` Fonction Centre des plugins, prenant en charge l'installation/la desinstallation/la mise a jour des plugins et autres operations (entree: bouton du tiroir d'accueil/onglet d'accueil)
+* `Fonctionnalité` Fonction Historique des versions, prenant en charge l'affichage/la restauration des versions historiques des fichiers modifiables (entree: bouton du tiroir d'accueil/menu du gestionnaire de fichiers/menu de l'editeur de code)
+* `Fonctionnalité` Fonction Corbeille, prenant en charge l'affichage/la restauration des fichiers/dossiers supprimes (entree: bouton du tiroir d'accueil)
+* `Fonctionnalité` Plugin Paddle OCR (PP-OCRv5), pour la reconnaissance optique de caracteres
+* `Fonctionnalité` Module cvt, pour la conversion d'unites de donnees (voir Documentation du projet > [Conversion d'unites](https://docs.autojs6.com/#/cvt))
+* `Fonctionnalité` Module fmt, pour le formatage des donnees (voir Documentation du projet > [Formatage](https://docs.autojs6.com/#/fmt))
+* `Fonctionnalité` Module zip, pour les operations de compression et de decompression de fichiers (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (voir Documentation du projet > [Zip](https://docs.autojs6.com/#/zip))
+* `Fonctionnalité` Module mediainfo, pour afficher les informations detaillees des fichiers medias (voir Documentation du projet > [Informations media](https://docs.autojs6.com/#/mediainfo))
+* `Fonctionnalité` Methode cvt.bytes, pour la conversion d'unites des donnees d'octets (voir Documentation du projet > [Conversion d'unites](https://docs.autojs6.com/#/cvt))
+* `Fonctionnalité` Methode fmt.bytes, pour le formatage des donnees d'octets (voir Documentation du projet > [Formatage](https://docs.autojs6.com/#/fmt))
+* `Fonctionnalité` Methode s13n.bytes, pour la standardisation des donnees d'octets (voir Documentation du projet > [Standardisation](https://docs.autojs6.com/#/s13n))
+* `Fonctionnalité` Methode app.isDualInstalled, pour detecter si une application duale est installee (necessite les permissions Shizuku ou Root) _[`issue #450`](http://issues.autojs6.com/450)_
+* `Fonctionnalité` Methode device.getSharedDeviceId, pour obtenir un identifiant d'appareil partage unifie entre applications _[`issue #455`](http://issues.autojs6.com/455)_
+* `Fonctionnalité` Methode device.setPointerLocation et autres methodes de la serie Toggleable, pour definir ou obtenir l'option systeme de position du pointeur _[`issue #381`](http://issues.autojs6.com/381)_
+* `Fonctionnalité` La methode dialogs.build prend en charge les parametres d'option textAllCaps/(positive/negative/neutral)TextAllCaps, pour controler si le texte des boutons est entierement en majuscules
+* `Fonctionnalité` Methode images.loadAsync, pour recuperer de maniere asynchrone des ressources d'image reseau _[`issue #327`](http://issues.autojs6.com/327)_
+* `Fonctionnalité` Methode ui.getNavigationBarHeight/propriete navigationBarHeight (getter), pour obtenir la hauteur de la barre de navigation _[`issue #456`](http://issues.autojs6.com/456)_
+* `Fonctionnalité` Methode ui.getVisible(Status/Navigation)BarHeight/propriete visible(Status/Navigation)BarHeight (getter), pour obtenir rapidement la hauteur visible de la barre d'etat ou de navigation _[`issue #456`](http://issues.autojs6.com/456)_
+* `Fonctionnalité` Methodes http.put/del(ete)/head, pour envoyer des requetes reseau avec differentes methodes HTTP
+* `Fonctionnalité` Methodes telles que http.getAsync/postAsync/requestAsync, pour envoyer des requetes reseau de maniere asynchrone _[`issue #423`](http://issues.autojs6.com/423)_
+* `Fonctionnalité` L'objet body obtenu via les methodes de requete du module http ajoute des methodes telles que stream/saveToFile/close _[`issue #452`](http://issues.autojs6.com/452)_
+* `Fonctionnalité` Les methodes de requete du module http prennent en charge des parametres d'option de controle du cache (cacheBody/bodyCacheThresholdBytes)
+* `Fonctionnalité` Les methodes de requete du module http prennent en charge des parametres d'option non securises (isInsecure/insecure), pour ignorer les exceptions liees aux certificats _[`issue #417`](http://issues.autojs6.com/417)_
+* `Fonctionnalité` Les methodes de requete du module http prennent en charge l'option options.client, pour configurer OkHttpClient.Builder (comme followRedirects, etc.) _[`issue #454`](http://issues.autojs6.com/454)_
+* `Fonctionnalité` Propriete auto.state (getter) et propriete shizuku.state (getter), pour obtenir l'etat du service d'accessibilite et du service Shizuku
+* `Fonctionnalité` Methodes runtime.(set/is)JavaPrimitiveWrap, pour definir ou obtenir la strategie d'encapsulation des types primitifs Java _[`issue #435`](http://issues.autojs6.com/435)_
+* `Fonctionnalité` Methodes autojs.(restart/exit), pour redemarrer ou quitter l'application AutoJs6, avec prise en charge de l'execution automatique du script specifie lors du redemarrage de l'application _[`issue #460`](http://issues.autojs6.com/460)_
+* `Fonctionnalité` Methode UiObject#isShifted, pour detecter les changements de position des controles _[`issue #469`](http://issues.autojs6.com/469)_
+* `Fonctionnalité` Methode UiObject#snapshot, pour capturer l'etat actuel d'un controle _[`issue #469`](http://issues.autojs6.com/469)_
+* `Fonctionnalité` Methode engines.myEngine().getStartTime(), pour obtenir l'horodatage de demarrage du moteur de script _[`issue #449`](http://issues.autojs6.com/449)_
+* `Fonctionnalité` Methode globale crash, pour tester la page de rapport de plantage
+* `Fonctionnalité` Methode globale structuredClone, pour effectuer une copie profonde d'objets JavaScript (voir [MDN](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/structuredClone))
+* `Fonctionnalité` Les selecteurs de la serie equivalente (UiSelector#id/text/...) et de la serie contient (UiSelector#xxxContains) prennent en charge les parametres d'expression reguliere
+* `Fonctionnalité` Les parametres d'expression reguliere des selecteurs prennent en charge les drapeaux (i, m, s, u)
+* `Fonctionnalité` Les expressions regulieres prennent en charge la syntaxe de lookbehind _[`issue #464`](http://issues.autojs6.com/464)_
+* `Fonctionnalité` Le gestionnaire de fichiers ajoute les elements de menu "Deplacer vers" et "Copier vers", avec prise en charge de l'abandon d'operation et de l'affichage de l'etat de progression
+* `Fonctionnalité` L'editeur de code ajoute l'element de menu "Clavier multifonction" - "Parametres des symboles", avec prise en charge de l'edition des symboles et de la creation/importation/exportation de symboles par niveau de profil
+* `Fonctionnalité` Le tiroir d'accueil ajoute l'outil "Position du pointeur"
+* `Fonctionnalité` Le tiroir d'accueil ajoute l'interrupteur "Acces a tous les fichiers"
+* `Fonctionnalité` Le tiroir d'accueil ajoute l'interrupteur "Afficher l'interface depuis l'arriere-plan" (pour les appareils [Xiaomi/Vivo])
+* `Fonctionnalité` La page Parametres ajoute l'option "Encapsulation des types primitifs Java" _[`issue #435`](http://issues.autojs6.com/435)_
+* `Fonctionnalité` La page Parametres ajoute l'option "Moteur de planification des taches", avec prise en charge de AlarmManager/WorkManager/JobScheduler _[`issue #457`](http://issues.autojs6.com/457)_ _[`issue #434`](http://issues.autojs6.com/434)_ _[`issue #449`](http://issues.autojs6.com/449)_ _[`issue #388`](http://issues.autojs6.com/388)_ _[`issue #378`](http://issues.autojs6.com/378)_ _[`issue #163`](http://issues.autojs6.com/163)_ _[`issue #53`](http://issues.autojs6.com/53)_ _[`issue #21`](http://issues.autojs6.com/21)_
+* `Fonctionnalité` La page Parametres ajoute l'option "Icone du lanceur d'application", avec prise en charge des icones adaptatives/icones a fond transparent _[`issue #405`](http://issues.autojs6.com/405)_
+* `Fonctionnalité` La page Parametres ajoute l'option "Strategie de redemarrage", pour definir si le bouton de redemarrage du tiroir d'accueil utilise la strategie de redemarrage rapide
+* `Fonctionnalité` La page Parametres ajoute l'option "Delai de demande de permission de capture d'ecran", pour eviter que la fenetre de demande de permission masque l'ecran
+* `Fonctionnalité` Les raccourcis du lanceur dans la page Parametres ajoutent l'option "Plugins", pour acceder a la page Centre des plugins via un raccourci
+* `Fonctionnalité` Les applications empaquetees prennent en charge le demarrage automatique au boot et ajoutent un interrupteur sur la page de configuration
+* `Fonctionnalité` Les applications empaquetees prennent en charge les raccourcis d'application (page des journaux/page des parametres)
+* `Fonctionnalité` La page de configuration de l'empaquetage ajoute des boutons annuler/retablir/enregistrer
+* `Fonctionnalité` La page de configuration de l'empaquetage ajoute un mecanisme de profils, prenant en charge la creation/modification/suppression/importation/exportation de profils _[`issue #483`](http://issues.autojs6.com/483)_
+* `Fonctionnalité` Outil Scrapers (run-scrapers.mjs), pour mettre a jour automatiquement les donnees structurees des scripts de build Gradle/les donnees communes du README/les donnees de modele README, etc.
+* `Fonctionnalité` Outil Gradle Wrapper switcher (gradle-wrapper-switcher), pour changer la version majeure locale de Gradle (comme Gradle 8.x et Gradle 9.x)
+* `Correction` Erreur dans la restriction du nombre et des types de parametres de la methode notice _[`issue #462`](http://issues.autojs6.com/462)_
+* `Correction` Probleme ou la propriete ui.R (getter) ne pouvait pas etre utilisee correctement
+* `Correction` Probleme ou les exceptions generees dans les parametres de callback de la methode ui.post pouvaient echouer silencieusement
+* `Correction` Probleme ou des methodes globales telles que isJavaClass/isJavaPackage etaient invalides
+* `Correction` Probleme ou le parametre timeout de la methode timers.keepAlive ne fonctionnait pas
+* `Correction` Probleme ou les methodes floaty.window/rawWindow ne pouvaient pas accepter de parametres de type chaine _[`issue #467`](http://issues.autojs6.com/467)_
+* `Correction` Probleme ou floaty.rawWindow affichait certains controles de maniere anormale a cause du passage d'un contexte incorrect
+* `Correction` Probleme ou la methode util.isString etait invalide
+* `Correction` Probleme ou util.class[Name]/getClass[Name] pouvait renvoyer des resultats incorrects
+* `Correction` Probleme ou util.java.array ne pouvait pas utiliser correctement des parametres de type tels que Boolean
+* `Correction` Probleme ou l'objet renvoye par threads.disposable() pouvait etre encapsule de maniere inattendue lors de l'acces aux donnees _[`issue #435`](http://issues.autojs6.com/435)_
+* `Correction` Probleme ou, lors de plusieurs appels a la methode console.build, les options de style de la fenetre flottante de journaux n'etaient pas correctement reinitialisees
+* `Correction` Probleme ou les options (title/content)BackgroundColor de la methode console.build ecrasaient les options de transparence ou de teinte _[`issue #458`](http://issues.autojs6.com/458)_
+* `Correction` Probleme ou des methodes comme console/toast pouvaient perdre les zeros finaux lors de l'affichage de valeurs Java Double
+* `Correction` Probleme ou il etait impossible d'utiliser des methodes comme console/toast pour afficher le type de donnees BigInt
+* `Correction` Probleme ou la methode toast pouvait provoquer une fuite memoire en conservant une reference forte a l'instance Toast
+* `Correction` Probleme ou certains objets globaux pouvaient perdre des proprietes et methodes du prototype JavaScript
+* `Correction` Probleme ou l'objet this pouvait pointer incorrectement lors de l'utilisation d'expressions JavaScript comme valeurs d'attributs en syntaxe XML
+* `Correction` Probleme ou le parametre d'option linkify de la methode dialogs.build ne fonctionnait pas
+* `Correction` Probleme ou la methode dialogs.build pouvait detruire les donnees d'origine du parametre objet
+* `Correction` Calcul incorrect de la frequence d'images interne dans la methode setMaxFps du controle canvas
+* `Correction` Calcul incorrect de la largeur lors de la concatenation verticale avec la methode images.concat
+* `Correction` Probleme ou l'annulation de l'autorisation de la methode images.requestScreenCapture pouvait provoquer un plantage de l'application
+* `Correction` Probleme ou les captures obtenues via la methode images.captureScreen pouvaient avoir une orientation incorrecte ou des bordures noires _[`issue #337`](http://issues.autojs6.com/337)_
+* `Correction` Probleme ou la valeur 1 etait interpretee par erreur comme un pourcentage lors de l'utilisation de parametres de region dans certaines methodes de images
+* `Correction` Probleme ou la fonction du marqueur oneShot echouait lorsqu'une exception survenait dans certaines methodes liees a images _[`issue #372`](http://issues.autojs6.com/372)_
+* `Correction` Probleme ou certaines methodes liees a images pouvaient provoquer des fuites memoire _[`issue #372`](http://issues.autojs6.com/372)_
+* `Correction` Probleme ou images.save et la methode ImageWrapper#saveTo ne pouvaient pas ecrire correctement les fichiers lorsque le chemin fourni n'existait pas
+* `Correction` Probleme ou la methode ImageWrapper#recycle ne recyclait pas correctement les ressources d'image
+* `Correction` Probleme ou certaines methodes surchargees de ocr pouvaient ne pas fonctionner correctement
+* `Correction` Probleme ou les resultats obtenus via la methode ocr.detect pouvaient ne pas correspondre a ocr.mode _[`issue #468`](http://issues.autojs6.com/468)_
+* `Correction` Probleme ou les evenements du service d'accessibilite enregistres avec auto.registerEvent pouvaient etre supprimes par erreur par d'autres scripts _[`issue #466`](http://issues.autojs6.com/466)_ _[`issue #343`](http://issues.autojs6.com/343#issuecomment-3263953918)_
+* `Correction` Probleme ou la methode UiObject#child pouvait lancer ArrayIndexOutOfBoundsException sur Android 10 _[`issue #416`](http://issues.autojs6.com/416)_
+* `Correction` Probleme ou l'appel des methodes de modules integres pouvait conduire a une incoherence de contexte Rhino
+* `Correction` Probleme ou, apres la creation d'un grand nombre de fenetres flottantes dans un script, des fenetres residuelles pouvaient rester apres la sortie du script
+* `Correction` Probleme ou les parametres de configuration de project.json n'etaient pas correctement analyses lors de l'execution d'un projet
+* `Correction` Probleme ou le parametre excludedDirs de project.json pouvait provoquer un echec d'analyse du fichier de configuration lors de l'empaquetage d'un projet _[`issue #428`](http://issues.autojs6.com/428)_
+* `Correction` Probleme ou la fonction d'empaquetage pouvait ne pas fonctionner correctement sur Android 7.x
+* `Correction` Probleme ou les noms de cles d'origine pouvaient etre modifies lors de l'enregistrement du fichier de configuration d'un projet de script
+* `Correction` Probleme ou de grands numeros de version de build ou d'heure de build dans le fichier de configuration d'un projet de script pouvaient provoquer un plantage de l'application
+* `Correction` Probleme ou la recuperation ou la reconstruction frequente de ImageReader pouvait provoquer un plantage de l'application a cause de l'absence temporaire d'image disponible dans le tampon
+* `Correction` Probleme ou l'observateur d'evenements d'entree InputEventObserver pouvait provoquer un ralentissement notable au demarrage de l'application
+* `Correction` Probleme ou le processus de service utilisateur Shizuku ne se terminait pas correctement, provoquant une accumulation de processus _[`issue #474`](http://issues.autojs6.com/474)_
+* `Correction` Probleme ou les applications empaquetees ne pouvaient pas utiliser correctement les fonctions Paddle OCR et Rapid OCR
+* `Correction` Probleme ou la valeur de la cle key dans le fichier de configuration project.json des applications empaquetees pouvait etre modifiee de maniere inattendue
+* `Correction` Probleme ou l'icone des cases a cocher pouvait clignoter lors du defilement de la liste "Permissions requises" dans la page de configuration de l'empaquetage
+* `Correction` Probleme ou, dans la page Historique des versions, certains systemes affichaient des donnees statistiques incompletes en raison de differences de police
+* `Correction` Probleme ou MLKit Google OCR ne pouvait pas s'initialiser correctement sur certains appareils (correction tentative) _[`issue #8`](http://issues.autojs6.com/8#issuecomment-3117061768)_
+* `Correction` Probleme ou, sur certains appareils, les boutons fonctionnels du gestionnaire de fichiers ne declenchaient pas correctement les evenements de clic (correction tentative) _[`issue #465`](http://issues.autojs6.com/465)_
+* `Correction` Probleme ou les lignes vides de l'editeur de code affichaient des caracteres en forme de carre sur certains appareils (correction tentative)
+* `Correction` Probleme ou le clavier virtuel pouvait masquer le contenu texte dans l'editeur de code
+* `Correction` Probleme ou l'editeur de code autorisait encore la modification du contenu en mode lecture seule
+* `Correction` Probleme ou toucher la zone du titre ou certains elements de menu en mode lecture seule provoquait un plantage de l'application dans l'editeur de code
+* `Correction` Probleme ou le chargement de gros fichiers dans l'editeur de code pouvait provoquer un plantage de l'application (correction tentative)
+* `Correction` Initialisation anormale de l'etat des boutons fonctionnels lorsque l'editeur de code ouvrait automatiquement un nouveau fichier
+* `Correction` Probleme ou mettre l'application en arriere-plan pendant l'edition d'un fichier dans l'editeur de code pouvait provoquer un plantage
+* `Correction` Probleme ou, sur Android 15+, le bouton fx de l'editeur de code n'affichait pas le panneau rapide des fonctions de module (correction tentative)
+* `Correction` Probleme ou ErrorDialogActivity pouvait ne pas demarrer correctement ou disparaitre automatiquement apres un court instant _[`issue #479`](http://issues.autojs6.com/479)_ _[`issue #471`](http://issues.autojs6.com/471)_ _[`issue #414`](http://issues.autojs6.com/414)_ _[`issue #340`](http://issues.autojs6.com/340#issuecomment-2973485826)_
+* `Correction` Types de parametres acceptes incorrects dans le constructeur Canvas _[`issue #402`](http://issues.autojs6.com/402)_
+* `Correction` Probleme ou la fonction de copie des informations detaillees ne fonctionnait pas dans la page de rapport de plantage
+* `Correction` Probleme ou la logique personnalisee du bouton retour cessait de fonctionner sur Android 16+, provoquant un comportement anormal du retour
+* `Correction` Probleme ou l'application pouvait planter lors de l'appui sur le bouton retour ou du changement d'onglet apres l'affichage des resultats de recherche du gestionnaire de fichiers
+* `Correction` Probleme ou l'interface ne se rafraichissait pas automatiquement apres la suppression de dossiers de projet dans le gestionnaire de fichiers
+* `Correction` Probleme ou l'application pouvait planter lorsque les elements de la liste du panneau des taches changeaient frequemment
+* `Correction` Probleme ou la couleur du premier plan de la barre de navigation pouvait se comporter anormalement avec le mode nuit lors de l'utilisation de la navigation gestuelle "trois boutons"
+* `Correction` Probleme ou la boite de dialogue d'informations de type de fichier APK pouvait ne pas obtenir le nom de l'application ni les informations SDK
+* `Correction` Probleme ou, en mode client, une deconnexion suivie d'une reconnexion rapide apres une connexion pouvait provoquer un timeout de handshake et rendre la reconnexion difficile
+* `Correction` Probleme ou, en mode client, des operations telles que la rotation de l'ecran ou le changement de langue, recreant l'Activity, faisaient toujours reconstruire la connexion par AutoJs6
+* `Correction` Probleme ou, en mode serveur, des operations telles que la rotation de l'ecran ou le changement de langue, recreant l'Activity, empechaient la console VSCode d'afficher les journaux _[`issue #385`](http://issues.autojs6.com/385)_
+* `Correction` Probleme ou, lors de la connexion au plugin VSCode de plusieurs manieres en meme temps, la quantite de journaux affiches pouvait etre multipliee
+* `Correction` Probleme ou la generation de code dans la page d'analyse de disposition pouvait echouer avec les controles de collection (correction tentative) _[`issue #328`](http://issues.autojs6.com/328)_
+* `Correction` Probleme ou l'interrupteur "Utiliser la touche 'Volume bas' pour controler l'enregistrement" ne fonctionnait pas dans la page Parametres _[`issue #480`](http://issues.autojs6.com/480)_
+* `Correction` Probleme ou les valeurs de coordonnees dans les fichiers de code generes par l'enregistrement de scripts pouvaient ne pas correspondre aux pixels reels de l'ecran _[`issue #480`](http://issues.autojs6.com/480)_
+* `Correction` Probleme ou la premiere action dans les fichiers de code generes par l'enregistrement de scripts (comme toucher ou glisser) etait toujours ignoree
+* `Correction` Probleme ou l'execution d'operations sur des fichiers en arriere-plan depuis la boite de dialogue flottante "Executer le script" pouvait provoquer un plantage de l'application
+* `Correction` Probleme ou l'etat du bouton flottant pouvait etre reinitialise lors du retour a la page d'accueil apres la fin du cycle de vie de l'Activity d'accueil
+* `Correction` Probleme ou l'interrupteur "Afficher par-dessus les autres applications" sur les appareils Xiaomi pouvait ouvrir une mauvaise page de parametres
+* `Correction` Probleme ou, apres l'abandon du telechargement de mise a jour, les paquets reseau continuaient quand meme a etre telecharges en arriere-plan (correction tentative)
+* `Correction` Probleme ou la tache Rebuild Project ne pouvait pas se terminer correctement lorsque l'option isCleanup[Paddle/Rapid]Ocr etait activee dans les outils de build
+* `Amélioration` Fonctionnalites liees a Paddle OCR (PP-OCRv3) pluginise _[`issue #334`](http://issues.autojs6.com/334)_ _[`issue #331`](http://issues.autojs6.com/331)_ _[`issue #325`](http://issues.autojs6.com/325)_
+* `Amélioration` Compatibilite amelioree de la methode runtime.loadJar (by [LYS86](https://github.com/LYS86)) _[`pr #475`](http://pr.autojs6.com/475)_
+* `Amélioration` Compatibilite amelioree dans une certaine mesure de la methode ui.getStatusBarHeight/propriete statusBarHeight (getter)
+* `Amélioration` Les methodes comme console.log prennent en charge l'affichage d'informations detaillees lors de l'impression d'objets globaux (images, app, ocr, etc.)
+* `Amélioration` La methode dialogs.build prend en charge les parametres d'option natifs de MaterialDialog.Builder
+* `Amélioration` La methode dialogs.build prend en charge la correspondance souple de chaines pour les parametres d'option animation/linkify
+* `Amélioration` Stabilite et coherence ameliorees lors de l'obtention de l'orientation d'ecran et des donnees largeur/hauteur via device.rotation/rotation/width/height
+* `Amélioration` Efficacite d'execution et compatibilite ameliorees des methodes telles que app.launchDual/startDualActivity
+* `Amélioration` android.graphics.Paint#setColor prend correctement en charge l'analyse des parametres de couleur tels que ColorInt/ColorHex/ColorName
+* `Amélioration` Les messages d'exception des types d'arguments des methodes liees aux modules integres ajoutent des informations de resume de type
+* `Amélioration` Les modules integres (dayjs/cheerio/dayjs/i18n) n'utilisent plus le mode d'execution de script et adoptent un chargement paresseux global
+* `Amélioration` Lors de l'impression de donnees enormes via les methodes liees a la console, une partie du contenu est correctement omise selon des limites superieures afin de reduire le temps d'impression
+* `Amélioration` La valeur initiale du compte a rebours de la fenetre flottante de console passe de 6 a 9 secondes
+* `Amélioration` L'implementation interne de la fenetre flottante de console adopte un traitement sans verrou et en file d'attente afin d'ameliorer l'efficacite et le taux de reussite du parametrage
+* `Amélioration` Les API liees au comportement de la couleur de fond de la fenetre flottante de console (transparence/teinte/couleur de base) sont davantage conformes aux normes de conception Android _[`issue #458`](http://issues.autojs6.com/458)_
+* `Amélioration` Optimisation du moment de repli du menu lors du toucher des elements apres le deploiement du bouton flottant dans le gestionnaire de fichiers
+* `Amélioration` Le gestionnaire de fichiers/le panneau des taches prennent en charge l'affichage des statistiques du nombre de fichiers/taches
+* `Amélioration` Lorsque l'enregistrement echoue dans l'editeur de code, le fichier est automatiquement enregistre en brouillon et prend en charge Enregistrer sous comme nouveau fichier
+* `Amélioration` Fluidite amelioree dans une certaine mesure lors du chargement de gros fichiers dans l'editeur de code
+* `Amélioration` La fonction "Rechercher/Remplacer" de l'editeur de code prend en charge la persistance d'etat et l'affichage en temps reel du nombre de correspondances
+* `Amélioration` Lorsque l'editeur de code invite a enregistrer, il s'assure desormais que l'enregistrement reussit avant de quitter afin de reduire le taux d'echec
+* `Amélioration` L'etat du bouton Enregistrer de l'editeur de code correspond mieux a la logique subjective de l'utilisateur
+* `Amélioration` L'editeur de code prend en charge l'appui long sur des touches telles que "-", "=", "(", "[", "{", "<"
+* `Amélioration` La boite de dialogue du processus d'empaquetage ajoute un bouton "Interrompre"
+* `Amélioration` Le mode d'affichage de la boite de dialogue du processus d'empaquetage est ameliore et des statistiques de duree sont ajoutees
+* `Amélioration` Lors de l'installation d'applications empaquetees avec une nouvelle configuration, les configurations associees de l'ancienne application seront ecrasees
+* `Amélioration` La page de configuration de l'empaquetage coche par defaut les permissions necessaires (WAKE_LOCK/INTERNET/WRITE_EXTERNAL_STORAGE/...) _[`issue #397`](http://issues.autojs6.com/397)_
+* `Amélioration` La page de configuration de l'empaquetage prend en charge la lecture et la configuration de davantage d'options (afficher les journaux au lancement/afficher l'ecran de demarrage au lancement/texte du slogan de l'ecran de demarrage/...)
+* `Amélioration` La page de parametres des applications empaquetees ajoute un interrupteur de service au premier plan _[`issue #406`](http://issues.autojs6.com/406)_
+* `Amélioration` L'enregistrement du fichier de configuration de projet de script ajoute une detection des conflits de noms de cles afin d'eviter toute ambiguite
+* `Amélioration` La page de rapport de plantage prend en charge le pincement a deux doigts pour ajuster la taille de police et ajoute des boutons de fonctions courantes
+* `Amélioration` Les icones du lanceur d'application prennent en charge les fonctionnalites d'icones adaptatives _[`issue #405`](http://issues.autojs6.com/405)_
+* `Amélioration` Lorsque l'analyse des signatures generiques echoue dans le moteur Rhino, un retour aux types de reflection bruts est effectue afin d'ameliorer la disponibilite des methodes reflexives sur les anciennes versions d'Android
+* `Amélioration` Les elements de type interrupteur du tiroir d'accueil ajoutent des separateurs, prennent en charge l'appui sur la zone du titre pour afficher une boite de dialogue detaillee et, selon le besoin, un acces rapide aux parametres systeme
+* `Amélioration` Au lancement ou au redemarrage de AutoJs6, l'appui sur la zone du titre de "Mode client" dans le tiroir d'accueil permet d'abandonner une tentative de connexion en cours
+* `Amélioration` Le mode client prend en charge l'etablissement de connexions via des adresses IPv6 et des noms de domaine
+* `Amélioration` Le mode client prend en charge des invites de detection pour les adresses IPv4 a usage special (loopback/broadcast/multicast/reservee/...)
+* `Amélioration` Le mode client prend en charge l'affichage et la gestion de l'etat de connexion (corriger l'adresse/interrompre la connexion)
+* `Amélioration` Le mode serveur prend en charge l'affichage du nombre de clients connectes
+* `Amélioration` La lecture de la permission de notification prend en charge un mecanisme de reconnexion automatique ([requestRebind](https://developer.android.com/reference/android/service/notification/NotificationListenerService#requestRebind(android.content.ComponentName))) afin d'ameliorer la stabilite des fonctions liees a l'ecoute des notifications
+* `Amélioration` Le bouton flottant ameliore la securite du lancement d'Activity depuis l'arriere-plan afin d'eviter les plantages de l'application
+* `Amélioration` La boite de dialogue "Plus" du bouton flottant utilise un chargement asynchrone des donnees pour un affichage plus fluide
+* `Amélioration` La boite de dialogue "Executer le script" du bouton flottant ajoute l'element de menu "Accueil"
+* `Amélioration` La boite de dialogue "Executer le script" du bouton flottant prend en charge la minimisation et la restauration d'etat, et fait de son mieux pour maintenir la fenetre residente ou la restaurer automatiquement
+* `Amélioration` La permission Shizuku est prise en charge pour l'enregistrement et la lecture de scripts (la fluidite de lecture peut etre quelque peu affectee) _[`issue #320`](http://issues.autojs6.com/320)_
+* `Amélioration` La page des parametres de couleur du theme utilise une methode de positionnement rapide pour localiser les couleurs du theme et ameliorer l'efficacite
+* `Amélioration` Remplacement du [LocalBroadcastManager](https://developer.android.com/jetpack/androidx/releases/localbroadcastmanager) obsolete par [LiveData](https://developer.android.com/topic/libraries/architecture/livedata) et [SharedFlow](https://developer.android.com/kotlin/flow/stateflow-and-sharedflow)
+* `Amélioration` Les scripts de build Gradle ameliorent l'efficacite d'extraction des fichiers au format 7z
+* `Amélioration` Les scripts de build Gradle prennent en charge l'obtention de la version detaillee de l'IDE Android Studio (par exemple, "2025.1.4.7")
+* `Amélioration` Les scripts de build Gradle prennent en charge la generation automatique des donnees requises par la classe VersionCodesList afin de reduire la latence de demarrage des scripts
+* `Amélioration` Utilisation de [Version Catalogs](https://developer.android.com/build/migrate-to-catalogs) pour gerer de maniere centralisee les versions des dependances et plugins Gradle
+* `Amélioration` Scripts de build Gradle modularises, avec migration de la logique de build partagee vers build-logic et abstraction sous forme de plugins de convention
+* `Amélioration` Utilisation des plugins de convention Gradle pour simplifier la logique de chargement des bibliotheques AAR locales
+* `Amélioration` Suppression de l'option Gradle "android.enableJetifier=true" afin de s'adapter a Gradle 9
+* `Amélioration` Utilisation de [Toolchain](https://docs.gradle.org/current/userguide/toolchains.html) a la place de sourceCompatibility/targetCompatibility pour reduire les differences d'environnement de build
+* `Dépendance` Expandable Layout modularise version 1.6.0
+* `Dépendance` Expandable RecyclerView modularise version 3.0.0-RC1
+* `Dépendance` Recyclerview Flexible Divider modularise version 1.4.0
+* `Dépendance` Root Shell localise version 1.6
+* `Dépendance` Ajout de AndroidX Activity (KTX) version 1.12.2
+* `Dépendance` Ajout de AndroidX Core (KTX) version 1.15.0
+* `Dépendance` Ajout de AndroidX Work Runtime version 2.11.0
+* `Dépendance` Ajout de AndroidX Interpolator version 1.0.0
+* `Dépendance` Ajout de Room RxJava2 version 2.8.1
+* `Dépendance` Mise a niveau de Android SDK version 35 -> 36
+* `Dépendance` Mise a niveau de Gradle 8 version 8.14 -> 8.14.4
+* `Dépendance` Mise a niveau de Gradle 9 version 8.14 -> 9.4.0
+* `Dépendance` Mise a niveau de Rhino version 1.8.1-SNAPSHOT -> 2.0.0-SNAPSHOT
+* `Dépendance` Mise a niveau de Desugar JDK Libs version 2.0.4 -> 2.1.5
+* `Dépendance` Mise a niveau de Android Material version 1.12.0 -> 1.13.0
+* `Dépendance` Mise a niveau de AndroidX AppCompat version 1.7.0 -> 1.7.1
+* `Dépendance` Mise a niveau de AndroidX Room version 2.7.1 -> 2.7.2
+* `Dépendance` Mise a niveau de AndroidX WebKit version 1.13.0 -> 1.14.0
+* `Dépendance` Mise a niveau de Material Progressbar version 1.4.2 -> 1.6.1
+* `Dépendance` Mise a niveau de Apache Commons version 3.16.0 -> 3.18.0
+* `Dépendance` Mise a niveau de Retrofit2 Retrofit version 2.11.0 -> 2.12.0
+* `Dépendance` Mise a niveau de Retrofit2 Converter Gson version 2.11.0 -> 2.12.0
+* `Dépendance` Mise a niveau de Retrofit2 RxJava2 version 2.11.0 -> 2.12.0
+* `Dépendance` Mise a niveau de Joda Time version 2.12.7 -> 2.14.0
+* `Dépendance` Mise a niveau de Gson version 2.11.0 -> 2.13.1
+* `Dépendance` Mise a niveau de ARSCLib version 1.3.1 -> 1.3.5
+* `Dépendance` Mise a niveau de Jsoup version 1.19.1 -> 1.20.1
+* `Dépendance` Mise a niveau de Junit Jupiter version 5.10.3 -> 5.13.0
+* `Dépendance` Mise a niveau de OpenCC version 1.2.0 -> 1.2.2
+* `Dépendance` Suppression de Android Support Annotation v7 version 28.0.0
+* `Dépendance` Suppression de Android Support AppCompat v7 version 28.0.0
+* `Dépendance` Suppression de Android Support RecyclerView v7 version 28.0.0
 
 # v6.6.4
 
@@ -16,13 +239,13 @@
 * `Correction` L'éditeur de code pouvait écrire des fichiers avec un encodage peu fiable, entraînant des erreurs de décodage (tentative de correction)
 * `Amélioration` Adaptabilité de la mise en page améliorée pour les pages Application et Développeur et suppression des catégories de mise en page inutiles
 * `Amélioration` Dans README.md, section Build, ajout de plusieurs méthodes pour faciliter la localisation de la page de configuration de la cible _[`issue #404`](http://issues.autojs6.com/404)_
-* `Dépendance` Ajout de Androidx ConstraintLayout version 2.2.1
+* `Dépendance` Ajout de AndroidX ConstraintLayout version 2.2.1
 
 # v6.6.3
 
 ###### 2025/05/27
 
-* `Fonctionnalité` Fonction historique des versions : consulter les journaux de mise à jour multilingues et les statistiques
+* `Fonctionnalité` Fonction d'historique des versions : consulter le journal des changements multilingue et les statistiques
 * `Fonctionnalité` Méthode timers.keepAlive (désormais globale) pour maintenir le script actif
 * `Fonctionnalité` Méthodes d'écoute d'événements telles que engines.on('start/stop/error', callback) pour les événements globaux du moteur
 * `Fonctionnalité` Méthode images.detectMultiColors pour la vérification de couleurs multipoints _[`issue #374`](http://issues.autojs6.com/374)_
@@ -32,9 +255,10 @@
 * `Fonctionnalité` Méthode ui.keepScreenOn pour garder l'écran allumé lorsque la page UI a le focus
 * `Fonctionnalité` Propriété ui.root (getter) pour obtenir le nœud « conteneur racine du contenu de fenêtre » du layout UI
 * `Fonctionnalité` L'élément webview prend en charge les layouts de pages Web basés sur JsBridge (Réf. [Auto.js Pro](https://g.pro.autojs.org/)) [voir Code d'exemple > Layout > HTML interactif / Vue2 + Vant (SFC)] _[`issue #281`](http://issues.autojs6.com/281)_
+* `Fonctionnalité` L'inspecteur de layout permet de masquer des contrôles (par [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #371`](http://pr.autojs6.com/371)_ _[`issue #355`](http://issues.autojs6.com/355)_
 * `Correction` Le contenu de la documentation en ligne dans l'onglet Docs et l'activité Docs pouvait être recouvert par la barre de navigation système
 * `Correction` Sur certaines pages, cliquer sur les boutons de la Toolbar pouvait déclencher par erreur l'événement de clic sur le titre
-* `Correction` Les lignes vides dans l'éditeur de code affichaient des carrés sur certains appareils
+* `Correction` Sur certains appareils, les lignes vides de l'editeur de code affichaient des caracteres en forme de carre; correction tentative
 * `Correction` La boîte de dialogue du sélecteur de couleurs dans les paramètres de couleur du thème pouvait se superposer indéfiniment
 * `Correction` La touche volume + ne stoppait pas tous les scripts lorsque le service d'accessibilité était désactivé
 * `Correction` Chevauchement du clavier IME lors de l'édition d'un contenu de diffusion personnalisé dans la page des tâches planifiées
@@ -53,7 +277,6 @@
 * `Correction` engines.all pouvait déclencher ConcurrentModificationException _[`issue #394`](http://issues.autojs6.com/394)_
 * `Correction` Formats de date incorrects dans certaines langues du README.md
 * `Correction` La compilation Gradle pouvait échouer à cause d'une longueur invalide d'archive de bibliothèque _[`issue #389`](http://issues.autojs6.com/389)_
-* `Amélioration` L'inspecteur de layout permet de masquer des contrôles (par [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #371`](http://pr.autojs6.com/371)_ _[`issue #355`](http://issues.autojs6.com/355)_
 * `Amélioration` Ajout de séparateurs dégradés dans le menu de l'inspecteur de layout pour regrouper les fonctions
 * `Amélioration` project.json prend désormais en charge l'option permissions pour les projets de script (par [wirsnow](https://github.com/wirsnow)) _[`pr #391`](http://pr.autojs6.com/391)_ _[`issue #362`](http://issues.autojs6.com/362)_
 * `Amélioration` Lors de l'empaquetage d'un fichier unique, les permissions déclarées par l'application installée sont lues et cochées automatiquement _[`issue #362`](http://issues.autojs6.com/362)_
@@ -63,7 +286,7 @@
 * `Amélioration` Les boîtes de dialogue de la page Paramètres proposent l'option « Utiliser la valeur par défaut »
 * `Amélioration` Le bouton flottant du gestionnaire de fichiers se masque automatiquement lorsqu'on touche en dehors
 * `Amélioration` Le formateur de code prend désormais en charge les opérateurs `??`, `?.`, `??=`
-* `Amélioration` L'éditeur de code prend en charge la lecture et l'écriture de fichiers aux encodages GB18030 / UTF-16 (LE/BE) / Shift_JIS, etc.
+* `Amélioration` L'éditeur de code prend en charge la lecture et l'écriture de fichiers aux encodages GB18030 / UTF-16 (LE/BE) / Shift_JIS, etc
 * `Amélioration` L'éditeur de code prend en charge l'affichage des informations détaillées du fichier (chemin/encodage/retour à la ligne/nombre total d'octets et de caractères, etc.) _[`issue #395`](http://issues.autojs6.com/395)_
 * `Amélioration` Ajout de messages d'erreur pour les actions d'intent (éditer / voir / installer / envoyer / lire, etc.)
 * `Amélioration` L'attribut url de webview prend en charge les chemins relatifs
@@ -77,8 +300,8 @@
 * `Amélioration` Efficacité accrue lors de la vérification des informations de signature APK
 * `Amélioration` Optimisation de l'efficacité d'affichage et de présentation des informations pour les fichiers APK/médias
 * `Amélioration` Le script de build Gradle améliore sa capacité d'adaptation aux nouvelles versions _[`discussion #369`](http://discussions.autojs6.com/369)_
-* `Dépendance` Inclus Material Dialogs version 0.9.6.0 (localisé)
-* `Dépendance` Inclus Material Date Time Picker version 4.2.3 (localisé)
+* `Dépendance` Inclus Material Dialogs version 0.9.6.0 (modularise)
+* `Dépendance` Inclus Material Date Time Picker version 4.2.3 (modularise)
 * `Dépendance` Inclus libimagequant version 2.17.0 (localisé)
 * `Dépendance` Inclus libpng version 1.6.49 (localisé)
 * `Dépendance` Ajouté ICU4J version 77.1
@@ -86,13 +309,13 @@
 * `Dépendance` Ajouté Material Progressbar version 1.4.2
 * `Dépendance` Ajouté Flexmark Java HTML to Markdown version 0.64.8
 * `Dépendance` Mise à jour Gradle 8.14-rc-1 -> 8.14
-* `Dépendance` Mise à jour Androidx Room 2.7.0 -> 2.7.1
+* `Dépendance` Mise à jour AndroidX Room 2.7.0 -> 2.7.1
 
 # v6.6.2
 
 ###### 2025/04/16
 
-* `Fonctionnalité` Méthodes telles que ui.statusBarAppearanceLight, statusBarAppearanceLightBy et navigationBarColor, etc.
+* `Fonctionnalité` Méthodes telles que ui.statusBarAppearanceLight, statusBarAppearanceLightBy et navigationBarColor, etc
 * `Fonctionnalité` Attribut ui.statusBarHeight (getter) servant à obtenir la hauteur de la barre d'état _[`issue #357`](http://issues.autojs6.com/357)_
 * `Fonctionnalité` Méthode images.flip pour retourner une image _[`issue #349`](http://issues.autojs6.com/349)_
 * `Fonctionnalité` Ajout de l'option « extension de fichier » dans la page des paramètres
@@ -116,7 +339,7 @@
 * `Correction` Problème où des clics rapides consécutifs sur des éléments de type dialogue dans la page des paramètres peuvent provoquer un crash de l'application
 * `Amélioration` Optimisation de la taille du fichier APK pour le modèle d'application packagée
 * `Amélioration` L'application (et les applications packagées) prend désormais en charge davantage de permissions _[`issue #338`](http://issues.autojs6.com/338)_
-* `Amélioration` Ajout de l'option pour la bibliothèque Pinyin dans la page de packaging
+* `Amélioration` La page de configuration de packaging prend maintenant en charge les options de bibliothèque Pinyin
 * `Amélioration` Optimisation du fond de la barre d'état et de la couleur du texte dans la page principale des applications packagées
 * `Amélioration` Ajout d'interrupteurs pour les permissions spéciales (accès à tous les fichiers et envoi de notifications) dans la page des paramètres des applications packagées _[`issue #354`](http://issues.autojs6.com/354)_
 * `Amélioration` Les textes et icônes des contrôles s'ajustent automatiquement selon la luminosité du thème
@@ -143,9 +366,9 @@
 * `Dépendance` Mise à jour de la version de Android SDK de 34 à 35
 * `Dépendance` Mise à jour de Gradle de 8.12 à 8.14-rc-1
 * `Dépendance` Mise à jour de Rhino de 1.8.0-SNAPSHOT à 1.8.1-SNAPSHOT
-* `Dépendance` Mise à jour d'Androidx Recyclerview de 1.3.2 à 1.4.0
-* `Dépendance` Mise à jour d'Androidx Room de 2.6.1 à 2.7.0
-* `Dépendance` Mise à jour d'Androidx WebKit de 1.12.1 à 1.13.0
+* `Dépendance` Mise à jour d'AndroidX Recyclerview de 1.3.2 à 1.4.0
+* `Dépendance` Mise à jour d'AndroidX Room de 2.6.1 à 2.7.0
+* `Dépendance` Mise à jour d'AndroidX WebKit de 1.12.1 à 1.13.0
 * `Dépendance` Mise à jour de Pinyin4j de 2.5.0 à 2.5.1
 
 # v6.6.1
@@ -162,7 +385,7 @@
 * `Correction` Erreur de restriction de type de paramètre dans les méthodes automator.click/longClick _[`issue #275`](http://issues.autojs6.com/275)_
 * `Correction` Problème avec les sélecteurs ne prenant pas en charge les paramètres de type ConsString _[`issue #277`](http://issues.autojs6.com/277)_
 * `Correction` Problème d'absence des méthodes et propriétés propres aux instances UiObjectCollection
-* `Amélioration` La page de packaging prend en charge la configuration des signatures, la gestion des clés et la configuration des autorisations (par [luckyloogn]()) _[`pr #286`]()_
+* `Amélioration` La page de configuration de packaging prend maintenant en charge la configuration de signature, la gestion du keystore et les parametres d'autorisation (by [luckyloogn](https://github.com/luckyloogn)) _[`pr #286`](http://pr.autojs6.com/286)_
 * `Amélioration` Amélioration de la précision de la reconnaissance du nom du package actuel et de l'activité en cours de la fenêtre flottante (Priorité : Shizuku > Root > A11Y)
 * `Amélioration` Amélioration de la précision de la reconnaissance de currentPackage et currentActivity (Priorité : Shizuku > Root > A11Y)
 * `Amélioration` Restauration de la possibilité de sélectionner le contenu texte d'une entrée individuelle dans la fenêtre de journal via un double-clic ou un appui long _[`issue #280`](http://issues.autojs6.com/280)_
@@ -180,7 +403,7 @@
 
 ###### 2024/12/02 - Réécriture du module intégré, mise à jour avec prudence
 
-* `Astuce` Les modules intégrés sont réécrits en Kotlin pour améliorer l'efficacité d'exécution des scripts, mais des améliorations itératives sont nécessaires.
+* `Astuce` Les modules intégrés sont réécrits en Kotlin pour améliorer l'efficacité d'exécution des scripts, mais des améliorations itératives sont nécessaires
 * `Astuce` Le fichier init.js intégré est vide par défaut, permettant aux développeurs d'étendre les modules intégrés ou de monter des modules externes.
 * `Fonctionnalité` Module Axios / Module Cheerio (Réf. à [AutoX](https://github.com/kkevsekk1/AutoX))
 * `Fonctionnalité` Module SQLite pour des opérations simples sur les bases de données SQLite (Réf. à [Auto.js Pro](https://g.pro.autojs.org/)) (Voir la documentation du projet > [SQLite](https://docs.autojs6.com/#/sqlite))
@@ -191,9 +414,9 @@
 * `Fonctionnalité` L'analyse de la mise en page prend en charge le changement de fenêtre (Réf. à [Auto.js Pro](https://g.pro.autojs.org/))
 * `Fonctionnalité` La méthode auto.clearCache prend en charge le nettoyage des caches de contrôle (Réf. à [Auto.js Pro](https://g.pro.autojs.org/))
 * `Fonctionnalité` La méthode threads.pool prend en charge l'application simple des pools de threads (Réf. à [Auto.js Pro](https://g.pro.autojs.org/))
-* `Fonctionnalité` La méthode images.matchTemplate ajoute le paramètre d'option useTransparentMask pour prendre en charge la recherche d'image transparente (Réf. à [Auto.js Pro](https://g.pro.autojs.org/))
+* `Fonctionnalité` La méthode images.matchTemplate prend en charge le paramètre d'option useTransparentMask, prenant en charge la recherche d'images avec transparence (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
 * `Fonctionnalité` La méthode images.requestScreenCaptureAsync permet de demander des permissions de capture d'écran de manière asynchrone en mode UI (Réf. à [Auto.js Pro](https://g.pro.autojs.org/))
-* `Fonctionnalité` La méthode images.requestScreenCapture ajoute le paramètre d'option isAsync pour prendre en charge la capture d'écran asynchrone (Réf. à [Auto.js Pro](https://g.pro.autojs.org/))
+* `Fonctionnalité` La méthode images.requestScreenCapture prend en charge le paramètre d'option isAsync, prenant en charge la capture d'écran de manière asynchrone (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
 * `Fonctionnalité` images.on('screen_capture', callback) et d'autres méthodes d'écoute d'événements prennent en charge l'écoute des événements de disponibilité de capture d'écran (Réf. à [Auto.js Pro](https://g.pro.autojs.org/))
 * `Fonctionnalité` La méthode images.stopScreenCapture soutient la libération active des ressources liées aux applications de capture d'écran (Réf. à [Auto.js Pro](https://g.pro.autojs.org/))
 * `Fonctionnalité` Les méthodes Images.psnr/mse/ssim/mssim/hist/ncc et images.getSimilarity pour obtenir des mesures de similarité d'image
@@ -236,7 +459,7 @@
 * `Correction` Problème de saut potentiel de caractères de fin lors du saut à la fin de la ligne dans l'éditeur de code
 * `Correction` Problème de scintillement de l'écran lors du démarrage de la page d'activité de journal sur la page principale de l'activité
 * `Correction` Problème avec l'application empaquetée ne pouvant pas utiliser correctement le module opencc
-* `Amélioration` Expérience d'indication de clic pour le contrôle 'ABI non disponible' sur la page de paquet
+* `Amélioration` Amelioration de l'experience des indications au toucher pour le controle "ABI indisponible" dans la page de configuration de packaging
 * `Amélioration` Prend en charge l'utilisation de Shizuku pour contrôler l'interrupteur d'affichage 'Localisation du pointeur'
 * `Amélioration` Prend en charge l'utilisation de Shizuku pour contrôler les interrupteurs de permission 'Médias de projection' et 'Modifier les paramètres sécurisés'
 * `Amélioration` Automator.gestureAsync/gesturesAsync prend en charge les paramètres de fonction de rappel
@@ -249,11 +472,11 @@
 * `Amélioration` L'éditeur de code prend en charge la détermination intelligente de l'emplacement d'insertion lors de l'importation de classes Java et de noms de paquets
 * `Amélioration` Le module images prend en charge l'utilisation des chemins directement comme paramètres d'image
 * `Amélioration` importPackage prend en charge les paramètres de chaîne
-* `Amélioration` L'adresse IP du mode serveur prend en charge l'importation du presse-papiers avec reconnaissance intelligente et conversion intelligente avec la touche espace
+* `Amélioration` En mode client, l'adresse IP prend en charge l'importation depuis le presse-papiers avec reconnaissance intelligente et permet une conversion intelligente de la touche espace
 * `Amélioration` Le gestionnaire de fichiers prend en charge la sélection de préfixes par défaut lors de la création de nouveaux fichiers et génère automatiquement un suffixe numérique approprié
 * `Amélioration` Le gestionnaire de fichiers informe spécifiquement sur le message d'exception lors de l'exécution du projet _[`issue #268`](http://issues.autojs6.com/268)_
 * `Amélioration` Le gestionnaire de fichiers prend en charge plus de types et affiche les symboles d'icône correspondants (prend en charge plus de 800 types de fichiers)
-* `Amélioration` Les types de fichiers éditables (jpg/doc/pdf, etc.) dans le gestionnaire de fichiers ont ajouté des boutons d'édition
+* `Amélioration` Les types de fichiers éditables (jpg/doc/pdf/...) dans le gestionnaire de fichiers ont ajouté des boutons d'édition
 * `Amélioration` Les fichiers APK dans le gestionnaire de fichiers prennent en charge la visualisation des informations de base, des informations du manifest et de la liste des permissions
 * `Amélioration` Les fichiers multimédias audio/vidéo dans le gestionnaire de fichiers prennent en charge la visualisation des informations de base et des informations de MediaInfo
 * `Amélioration` Le paquet de fichier unique prend en charge le remplissage automatique du nom de paquet standardisé approprié et l'indication de filtre de caractère invalide
@@ -270,9 +493,9 @@
 * `Dépendance` Mettre à niveau la version 8.5 de Gradle -> 8.11.1 
 * `Dépendance` Mettre à niveau la version 1.7.15-SNAPSHOT de Rhino -> 1.8.0-SNAPSHOT
 * `Dépendance` Mettre à niveau la version 1.10.0 d'Android Material -> 1.12.0
-* `Dépendance` Mettre à niveau la version 1.7.0 d'Androidx Annotation -> 1.9.1
-* `Dépendance` Mettre à niveau la version 1.6.1 d'Androidx AppCompat -> 1.7.0
-* `Dépendance` Mettre à niveau la version 1.8.0 d'Androidx WebKit -> 1.12.1
+* `Dépendance` Mettre à niveau la version 1.7.0 d'AndroidX Annotation -> 1.9.1
+* `Dépendance` Mettre à niveau la version 1.6.1 d'AndroidX AppCompat -> 1.7.0
+* `Dépendance` Mettre à niveau la version 1.8.0 d'AndroidX WebKit -> 1.12.1
 * `Dépendance` Mettre à niveau la version 3.13.0 de Apache Commons -> 3.16.0
 * `Dépendance` Mettre à niveau la version 1.2.4 de ARSCLib -> 1.3.1
 * `Dépendance` Mettre à niveau la version 2.10.1 de Gson -> 2.11.0
@@ -294,10 +517,10 @@
 
 * `Fonctionnalité` Module opencc (référez-vous à la documentation du projet > [Conversion en Chinois](https://docs.autojs6.com/#/opencc)) (Réf à [LZX284](https://github.com/SuperMonster003/AutoJs6/pull/187/files#diff-8cff73265af19c059547b76aca8882cbaa3209291406f52df1dafbbc78e80c46R268))
 * `Fonctionnalité` Ajout des méthodes [plus](https://docs.autojs6.com/#/uiObjectType?id=m-plus) et [append](https://docs.autojs6.com/#/uiObjectType?id=m-append) pour UiSelector _[`issue #115`](http://issues.autojs6.com/115)_
-* `Fonctionnalité` Support amélioré pour le filtrage des ABI et des bibliothèques sur la page de l'application de packaging (Réf à [AutoX](https://github.com/kkevsekk1/AutoX)) _[`issue #189`](http://issues.autojs6.com/189)_
+* `Fonctionnalité` La page de configuration de packaging prend maintenant en charge le filtrage des ABI et des bibliotheques (Ref to [AutoX](https://github.com/kkevsekk1/AutoX)) _[`issue #189`](http://issues.autojs6.com/189)_
 * `Correction` Problème de taille de fichier anormalement volumineux lors du packaging de l'application (Réf à [AutoX](https://github.com/kkevsekk1/AutoX) / [LZX284](https://github.com/SuperMonster003/AutoJs6/pull/187/files#diff-d932ac49867d4610f8eeb21b59306e8e923d016cbca192b254caebd829198856R61)) _[`issue #176`](http://issues.autojs6.com/176)_
 * `Correction` Problème d'affichage de certains messages d'exception lors du packaging de l'application
-* `Correction` Problème potentiel d'icône blanche après la sélection d'une icône d'application sur la page de packaging de l'application
+* `Correction` Correction d'un probleme ou une icone vide pouvait s'afficher apres la selection de l'icone de l'application dans la page de configuration de packaging
 * `Correction` Problème d'initialisation contextuelle lors de l'intégration de la bibliothèque OCR MLKit Google
 * `Correction` Problème d'inefficacité des méthodes ocr.recognizeText/detect
 * `Correction` Problème de langage d'affichage incohérent avec le paramètre de l'application dans certains textes (comme la page des logs)
@@ -317,14 +540,14 @@
 * `Correction` Problème potentiel de crash de l'application lors de la suppression longue dans l'éditeur de code (correctif partiel)
 * `Correction` Problème de non-affichage du panneau de fonctions de module sur un clic sur le bouton fx dans l'éditeur de code
 * `Correction` Problème de débordement de noms de fonctions sur le panneau de fonctions de module dans l'éditeur de code
-* `Amélioration` Le panneau de fonctions rapides du module d'édition de code s'adapte au mode nuit.
-* `Amélioration` La page de démarrage de l'application emballée s'adapte au mode nuit et la disposition des icônes d'application est ajustée.
-* `Amélioration` La page de l'application emballée prend en charge la navigation du curseur à l'aide de la touche ENTER sur le clavier logiciel.
-* `Amélioration` La page de l'application emballée prend en charge le basculement de l'état de sélection totale en cliquant sur les titres ABI et de bibliothèque.
-* `Amélioration` La sélection par défaut d'ABI est rendue intelligente sur la page de l'application emballée avec des invites guide pour les éléments non sélectionnables.
-* `Amélioration` Le gestionnaire de fichiers ajuste l'affichage des éléments du menu en fonction du type et des caractéristiques des fichiers et dossiers.
-* `Amélioration` Le menu contextuel du gestionnaire de fichiers pour les dossiers ajoute une option d'emballage d'application.
-* `Amélioration` Lorsque les services d'accessibilité sont activés mais dysfonctionnent, un état anormal se reflète dans le commutateur du tiroir de la page d'accueil d'AutoJs6.
+* `Amélioration` Le panneau de fonctions rapides du module d'édition de code s'adapte au mode nuit
+* `Amélioration` La page de démarrage de l'application emballée s'adapte au mode nuit et la disposition des icônes d'application est ajustée
+* `Amélioration` La page de configuration de packaging prend maintenant en charge la touche ENTER du clavier virtuel pour deplacer le focus du curseur
+* `Amélioration` La page de configuration de packaging permet maintenant d'appuyer sur les titres ABI et les titres de bibliotheque pour basculer l'etat de selection globale
+* `Amélioration` La page de configuration de packaging utilise maintenant une selection ABI par defaut plus intelligente et ajoute des indications pour les options indisponibles
+* `Amélioration` Le gestionnaire de fichiers ajuste l'affichage des éléments du menu en fonction du type et des caractéristiques des fichiers et dossiers
+* `Amélioration` Le menu contextuel du gestionnaire de fichiers pour les dossiers ajoute une option d'emballage d'application
+* `Amélioration` Lorsque les services d'accessibilité sont activés mais dysfonctionnent, un état anormal se reflète dans le commutateur du tiroir de la page d'accueil d'AutoJs6
 * `Amélioration` La console inclut des informations détaillées sur la pile lors de l'impression des messages d'erreur.
 * `Dépendance` Ajout de ARSCLib version 1.2.4
 * `Dépendance` Ajout de Flexbox version 3.0.0
@@ -335,7 +558,7 @@
 
 ###### 2023/11/15
 
-* `Fonctionnalité` Propriété de paramètre d'option inputSingleLine pour dialogs.build()
+* `Fonctionnalité` La méthode dialogs.build prend en charge le paramètre d'option inputSingleLine
 * `Fonctionnalité` Méthode console.setTouchable _[`issue #122`](http://issues.autojs6.com/122)_
 * `Correction` Problème où certaines méthodes OCR ne pouvaient pas reconnaître les paramètres de région _[`issue #162`](http://issues.autojs6.com/162)_  _[`issue #175`](http://issues.autojs6.com/175)_
 * `Correction` Problème de récupération des détails de la version lors de la découverte d'une nouvelle version sur Android 7.x
@@ -420,12 +643,12 @@
 * `Dépendance` Mise à jour de Apache Commons Lang3 de la version 3.12.0 à la version 3.13.0
 * `Dépendance` Mise à jour de Glide de la version 4.15.1 à 4.16.0
 * `Dépendance` Mise à jour de Android Analytics de la version 14.3.0 à 14.4.0
-* `Dépendance` Mise à jour de Androidx WebKit de la version 1.7.0 à 1.8.0
-* `Dépendance` Mise à jour de Androidx Preference de la version 1.2.0 à 1.2.1
-* `Dépendance` Mise à jour de Androidx Annotation de la version 1.6.0 à 1.7.0
-* `Dépendance` Mise à jour de Androidx Recyclerview de la version 1.3.0 à 1.3.2
+* `Dépendance` Mise à jour de AndroidX WebKit de la version 1.7.0 à 1.8.0
+* `Dépendance` Mise à jour de AndroidX Preference de la version 1.2.0 à 1.2.1
+* `Dépendance` Mise à jour de AndroidX Annotation de la version 1.6.0 à 1.7.0
+* `Dépendance` Mise à jour de AndroidX Recyclerview de la version 1.3.0 à 1.3.2
 * `Dépendance` Mise à jour de Android Material de la version 1.9.0 à 1.10.0
-* `Dépendance` Mise à jour de Androidx AppCompat de la version 1.4.2 à 1.6.1
+* `Dépendance` Mise à jour de AndroidX AppCompat de la version 1.4.2 à 1.6.1
 * `Dépendance` Mise à jour de Commons IO de la version 2.8.0 à 2.14.0
 * `Dépendance` Mise à jour de Jackson DataBind de la version 2.13.3 à 2.14.3
 * `Dépendance` Suppression de Zeugma Solutions LocaleHelper version 1.5.1
@@ -520,7 +743,7 @@
 * `Amélioration` Reconnexion automatique en mode client avec la dernière adresse historique après une fermeture anormale à l'ouverture de l'application
 * `Dépendance` Mise à jour de LeakCanary version 2.10 -> 2.11
 * `Dépendance` Mise à jour de Android Material version 1.8.0 -> 1.9.0
-* `Dépendance` Mise à jour de Androidx WebKit version 1.6.1 -> 1.7.0
+* `Dépendance` Mise à jour de AndroidX WebKit version 1.6.1 -> 1.7.0
 * `Dépendance` Mise à jour de OkHttp3 version 3.10.0 -> 5.0.0-alpha.9 -> 5.0.0-alpha.11
 * `Dépendance` Mise à jour de MLKit Text Recognition Chinese version 16.0.0-beta6 -> 16.0.0
 
@@ -582,11 +805,11 @@
 * `Dépendance` Mise à jour de Glide version 4.14.2 -> 4.15.1
 * `Dépendance` Mise à jour de Joda Time version 2.12.2 -> 2.12.5
 * `Dépendance` Mise à jour de Android Analytics version 14.0.0 -> 14.2.0
-* `Dépendance` Mise à jour de Androidx WebKit version 1.5.0 -> 1.6.1
-* `Dépendance` Mise à jour de Androidx Recyclerview version 1.2.1 -> 1.3.0
+* `Dépendance` Mise à jour de AndroidX WebKit version 1.5.0 -> 1.6.1
+* `Dépendance` Mise à jour de AndroidX Recyclerview version 1.2.1 -> 1.3.0
 * `Dépendance` Mise à jour de Zip4j version 2.11.2 -> 2.11.5
 * `Dépendance` Mise à jour de Junit Jupiter version 5.9.2 -> 5.9.3
-* `Dépendance` Mise à jour de Androidx Annotation version 1.5.0 -> 1.6.0
+* `Dépendance` Mise à jour de AndroidX Annotation version 1.5.0 -> 1.6.0
 * `Dépendance` Mise à jour de Jackson DataBind version 2.14.1 -> 2.14.2
 * `Dépendance` Mise à jour de Desugar JDK Libs version 2.0.0 -> 2.0.3
 
@@ -644,56 +867,56 @@
 * `Correction` Problèmes de visibilité des boutons de navigation en mode nuit sur les systèmes Android 7.x
 * `Correction` Problèmes de requêtes non fermées pour http.post et autres méthodes similaires
 * `Correction` Problèmes de perte des informations du canal alpha dans les résultats de colors.toString lorsque la valeur alpha est 0
-* `Amélioration` Redirection des classes publiques de la version Auto.js 4.x pour assurer une compatibilité descendante maximale possible (dans une certaine mesure).
-* `Amélioration` Fusionner tous les modules du projet pour éviter d'éventuels problèmes de référence circulaire (supprimer temporairement le module inrt).
-* `Amélioration` Migrer la configuration de construction Gradle de Groovy à KTS.
-* `Amélioration` Ajouter un support multilingue pour les messages d'exception de Rhino.
-* `Amélioration` L'interrupteur de permissions du tiroir de la page d'accueil ne montre des messages que lorsqu'il est activé.
-* `Amélioration` La disposition du tiroir de la page d'accueil s'attache directement sous la barre d'état pour éviter les incompatibilités de barre de couleur supérieure.
-* `Amélioration` Compatibilité des fonctions de vérification de mise à jour, téléchargement et avis de mise à jour avec le système Android 7.x.
-* `Amélioration` Reconcevoir la page des paramètres (migration vers AndroidX).
-* `Amélioration` La page des paramètres prend en charge la pression longue sur les options de configuration pour afficher des informations détaillées.
-* `Amélioration` Ajout de l'option "Suivre le système" pour le mode nocturne (Android 9+).
-* `Amélioration` Compatibilité de l'écran de démarrage de l'application avec le mode nocturne.
-* `Amélioration` Ajouter des identifiants numériques aux icônes d'application pour améliorer l'expérience utilisateur avec plusieurs versions open source coexistantes.
-* `Amélioration` Ajouter plus d'options de couleurs Material Design au thème de l'application.
-* `Amélioration` Alléger et adapter les icônes des éléments de liste dans le gestionnaire de fichiers/panneau des tâches à la couleur du thème.
-* `Amélioration` Compatibilité de la couleur du texte indicatif dans la boîte de recherche de la page d'accueil avec le mode nocturne.
-* `Amélioration` Compatibilité des composants tels que les dialogues/textes/Fab/AppBar/éléments de liste avec le mode nocturne.
-* `Amélioration` Compatibilité des pages telles que les documents/paramètres/à propos/couleurs de thème/analyse de mise en page et des menus des boutons flottants avec le mode nocturne.
-* `Amélioration` Compatibilité de la disposition des pages avec la disposition RTL (Right-To-Left) dans la mesure du possible.
-* `Amélioration` Ajouter des effets d'animation des icônes à la page à propos.
-* `Amélioration` Mise à jour automatique de l'année dans le texte de la déclaration de droits d'auteur sur la page à propos.
-* `Amélioration` Après l'installation initiale de l'application, déterminer et définir automatiquement un répertoire de travail approprié.
-* `Amélioration` Désactiver la fonction de zoom à deux doigts sur la page des documents pour éviter une anomalie de l'affichage du contenu.
-* `Amélioration` Simplifier le nom et le chemin des tâches affichés dans les éléments de liste du panneau des tâches par un chemin relatif.
-* `Amélioration` Abréger le texte des boutons de l'éditeur de texte pour éviter le débordement du contenu.
-* `Amélioration` Prise en charge de la restauration de la taille de police par défaut dans la configuration de l'éditeur de texte.
-* `Amélioration` Améliorer la vitesse de réponse au clic sur le bouton flottant.
-* `Amélioration` Cliquer sur le bouton d'analyse de mise en page du bouton flottant effectue directement l'analyse de la plage de mise en page.
-* `Amélioration` Le thème de l'analyse de mise en page est adaptable (la fenêtre flottante suit le thème de l'application, le panneau de configuration rapide suit le thème du système).
-* `Amélioration` Réorganiser la liste des informations de contrôle de mise en page selon la fréquence d'utilisation potentielle.
-* `Amélioration` Optimiser le format de sortie automatiquement lors du clic et copie sur les informations de contrôle de mise en page selon le type de sélecteur.
-* `Amélioration` Lors de la sélection de fichiers à l'aide de la fenêtre flottante, appuyer sur la touche de retour ramène au répertoire supérieur au lieu de fermer directement la fenêtre.
-* `Amélioration` Prise en charge de la détection de validité numérique et de la conversion automatique des symboles pointillés lors de la saisie d'une adresse en mode client se connectant à l'ordinateur.
-* `Amélioration` Afficher l'adresse IP du périphérique correspondant dans le tiroir de la page d'accueil après que le client et le serveur se sont connectés.
-* `Amélioration` Ajouter une protection contre la réécriture à certains objets globaux et modules intégrés (consultez la documentation du projet > Objets globaux > [Protection contre la réécriture](https://docs.autojs6.com/#/global?id=%e8%a6%86%e5%86%99%e4%bf%9d%e6%8a%a4)).
-* `Amélioration` importClass et importPackage prennent en charge des paramètres de chaîne et des paramètres de longueur variable.
-* `Amélioration` ui.run prend en charge l'impression des informations de trace de pile en cas d'exception.
-* `Amélioration` ui.R et auto.R peuvent obtenir commodément l'ID de ressources d'AutoJs6.
-* `Amélioration` Les méthodes associées à l'utilisation d'applications dans le module app prennent en charge des paramètres de type App et des paramètres d'alias d'application.
-* `Amélioration` Les méthodes associées au rappel asynchrone dans le module dialogs prennent en charge l'omission des paramètres pré-remplis.
-* `Amélioration` app.startActivity et autres prennent en charge des paramètres d'option d'URL (voir code d'exemple > Applications > Intention).
-* `Amélioration` Le module device renvoie null au lieu de lancer une exception lorsque l'obtention de l'IMEI ou du numéro de série matériel échoue.
-* `Amélioration` Augmenter la luminosité du texte dans le journal de la fenêtre flottante affichée par console.show pour améliorer la lisibilité du contenu.
-* `Amélioration` ImageWrapper#saveTo prend en charge la sauvegarde de fichiers image dans des chemins relatifs.
+* `Amélioration` Redirection des classes publiques de la version Auto.js 4.x pour assurer une compatibilité descendante maximale possible (dans une certaine mesure)
+* `Amélioration` Fusionner tous les modules du projet pour éviter d'éventuels problèmes de référence circulaire (supprimer temporairement le module inrt)
+* `Amélioration` Migrer la configuration de construction Gradle de Groovy à KTS
+* `Amélioration` Ajouter un support multilingue pour les messages d'exception de Rhino
+* `Amélioration` L'interrupteur de permissions du tiroir de la page d'accueil ne montre des messages que lorsqu'il est activé
+* `Amélioration` La disposition du tiroir de la page d'accueil s'attache directement sous la barre d'état pour éviter les incompatibilités de barre de couleur supérieure
+* `Amélioration` Compatibilité des fonctions de vérification de mise à jour, téléchargement et avis de mise à jour avec le système Android 7.x
+* `Amélioration` Reconcevoir la page des paramètres (migration vers AndroidX)
+* `Amélioration` La page des paramètres prend en charge la pression longue sur les options de configuration pour afficher des informations détaillées
+* `Amélioration` Ajout de l'option "Suivre le système" pour le mode nocturne (Android 9+)
+* `Amélioration` Compatibilité de l'écran de démarrage de l'application avec le mode nocturne
+* `Amélioration` Ajouter des identifiants numériques aux icônes d'application pour améliorer l'expérience utilisateur avec plusieurs versions open source coexistantes
+* `Amélioration` Ajouter plus d'options de couleurs Material Design au thème de l'application
+* `Amélioration` Alléger et adapter les icônes des éléments de liste dans le gestionnaire de fichiers/panneau des tâches à la couleur du thème
+* `Amélioration` Compatibilité de la couleur du texte indicatif dans la boîte de recherche de la page d'accueil avec le mode nocturne
+* `Amélioration` Compatibilité des composants tels que les dialogues/textes/Fab/AppBar/éléments de liste avec le mode nocturne
+* `Amélioration` Compatibilité des pages telles que les documents/paramètres/à propos/couleurs de thème/analyse de mise en page et des menus des boutons flottants avec le mode nocturne
+* `Amélioration` Compatibilité de la disposition des pages avec la disposition RTL (Right-To-Left) dans la mesure du possible
+* `Amélioration` Ajouter des effets d'animation des icônes à la page à propos
+* `Amélioration` Mise à jour automatique de l'année dans le texte de la déclaration de droits d'auteur sur la page à propos
+* `Amélioration` Après l'installation initiale de l'application, déterminer et définir automatiquement un répertoire de travail approprié
+* `Amélioration` Désactiver la fonction de zoom à deux doigts sur la page des documents pour éviter une anomalie de l'affichage du contenu
+* `Amélioration` Simplifier le nom et le chemin des tâches affichés dans les éléments de liste du panneau des tâches par un chemin relatif
+* `Amélioration` Abréger le texte des boutons de l'éditeur de texte pour éviter le débordement du contenu
+* `Amélioration` Prise en charge de la restauration de la taille de police par défaut dans la configuration de l'éditeur de texte
+* `Amélioration` Améliorer la vitesse de réponse au clic sur le bouton flottant
+* `Amélioration` Cliquer sur le bouton d'analyse de mise en page du bouton flottant effectue directement l'analyse de la plage de mise en page
+* `Amélioration` Le thème de l'analyse de mise en page est adaptable (la fenêtre flottante suit le thème de l'application, le panneau de configuration rapide suit le thème du système)
+* `Amélioration` Réorganiser la liste des informations de contrôle de mise en page selon la fréquence d'utilisation potentielle
+* `Amélioration` Optimiser le format de sortie automatiquement lors du clic et copie sur les informations de contrôle de mise en page selon le type de sélecteur
+* `Amélioration` Lors de la sélection de fichiers à l'aide de la fenêtre flottante, appuyer sur la touche de retour ramène au répertoire supérieur au lieu de fermer directement la fenêtre
+* `Amélioration` Prise en charge de la détection de validité numérique et de la conversion automatique des symboles pointillés lors de la saisie d'une adresse en mode client se connectant à l'ordinateur
+* `Amélioration` Afficher l'adresse IP du périphérique correspondant dans le tiroir de la page d'accueil après que le client et le serveur se sont connectés
+* `Amélioration` Ajouter une protection contre la réécriture à certains objets globaux et modules intégrés (consultez la documentation du projet > Objets globaux > [Protection contre la réécriture](https://docs.autojs6.com/#/global?id=%e8%a6%86%e5%86%99%e4%bf%9d%e6%8a%a4))
+* `Amélioration` importClass et importPackage prennent en charge des paramètres de chaîne et des paramètres de longueur variable
+* `Amélioration` ui.run prend en charge l'impression des informations de trace de pile en cas d'exception
+* `Amélioration` ui.R et auto.R peuvent obtenir commodément l'ID de ressources d'AutoJs6
+* `Amélioration` Les méthodes associées à l'utilisation d'applications dans le module app prennent en charge des paramètres de type App et des paramètres d'alias d'application
+* `Amélioration` Les méthodes associées au rappel asynchrone dans le module dialogs prennent en charge l'omission des paramètres pré-remplis
+* `Amélioration` app.startActivity et autres prennent en charge des paramètres d'option d'URL (voir code d'exemple > Applications > Intention)
+* `Amélioration` Le module device renvoie null au lieu de lancer une exception lorsque l'obtention de l'IMEI ou du numéro de série matériel échoue
+* `Amélioration` Augmenter la luminosité du texte dans le journal de la fenêtre flottante affichée par console.show pour améliorer la lisibilité du contenu
+* `Amélioration` ImageWrapper#saveTo prend en charge la sauvegarde de fichiers image dans des chemins relatifs
 * `Amélioration` Reconcevoir l'objet global colors et inclure la prise en charge des modes de couleur HSV / HSL (consultez la documentation du projet > [Couleurs](https://docs.autojs6.com/#/color)).
 * `Dépendance` Localisation de la version 1.4.3 de Android Job
 * `Dépendance` Localisation de la version 9.0.0 du SDK Client de Plugin Android pour Locale
 * `Dépendance` Localisation de la version 1.306 de l'API GitHub
 * `Dépendance` Mise à jour de la version de Android SDK 32 -> 33
 * `Dépendance` Ajout de la version 1.0 de JCIP Annotations
-* `Dépendance` Ajout de la version 1.5.0 de Androidx WebKit
+* `Dépendance` Ajout de la version 1.5.0 de AndroidX WebKit
 * `Dépendance` Ajout de la version 2.8.0 de Commons IO
 * `Dépendance` Ajout de la version 2.0.0 de Desugar JDK Libs
 * `Dépendance` Ajout de la version 2.13.3 de Jackson DataBind
@@ -704,8 +927,8 @@
 * `Dépendance` Mise à jour de la version des outils de compilation Gradle 7.4.0-alpha02 -> 8.0.0-alpha09
 * `Dépendance` Mise à jour de la version du plugin Kotlin Gradle 1.6.10 -> 1.8.0-RC2
 * `Dépendance` Mise à jour de la version de Android Material 1.6.0 -> 1.7.0
-* `Dépendance` Mise à jour de la version de Androidx Annotation 1.3.0 -> 1.5.0
-* `Dépendance` Mise à jour de la version de Androidx AppCompat 1.4.1 -> 1.4.2
+* `Dépendance` Mise à jour de la version de AndroidX Annotation 1.3.0 -> 1.5.0
+* `Dépendance` Mise à jour de la version de AndroidX AppCompat 1.4.1 -> 1.4.2
 * `Dépendance` Mise à jour de la version de Android Analytics 13.3.0 -> 14.0.0
 * `Dépendance` Mise à jour de la version de Gson 2.9.0 -> 2.10
 * `Dépendance` Mise à jour de la version de Joda Time 2.10.14 -> 2.12.1
@@ -749,8 +972,8 @@
 * `Fonctionnalité` Méthodes automator.lockScreen() etc. (voir des exemples de code > Services d'accessibilité > Android 9)
 * `Fonctionnalité` Méthodes automator.headsethook() etc. (voir des exemples de code > Services d'accessibilité > Android 11)
 * `Fonctionnalité` Méthode automator.captureScreen() (voir des exemples de code > Services d'accessibilité > Capture d'écran)
-* `Fonctionnalité` Options des paramètres d'animation, de mise en lien etc. dans dialogs.build() (voir des exemples de code > Dialogues > Dialogues personnalisés)
-* `Correction` Anomalies des options des paramètres d'inputHint, des itemsSelectedIndex etc. dans dialogs.build()
+* `Fonctionnalité` La méthode dialogs.build prend en charge des paramètres d'option tels que animation, linkify, etc. (voir des exemples de code > Dialogues > Dialogues personnalisés)
+* `Correction` Les paramètres d'option inputHint, itemsSelectedIndex, etc. de dialogs.build ne fonctionnent pas correctement
 * `Correction` Anomalies des paramètres de rappel dans JsDialog#on('multi_choice')
 * `Correction` Problème de retour constant de -1 par UiObject#parent().indexInParent() _[`issue #16`](http://issues.autojs6.com/16)_
 * `Correction` Problème de non-exécution des Thenable retournées par Promise.resolve() à la fin du script
@@ -834,9 +1057,9 @@
 * `Correction` Problème où l'état des commutateurs de mode client et serveur peut ne pas se rafraîchir correctement
 * `Correction` Anomalie de l'analyse des éléments textuels en mode UI sous Android 7.x (Réf à [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`issue #4`](http://issues.autojs6.com/4)_ _[`issue #9`](http://issues.autojs6.com/9)_
 * `Amélioration` Ignorer l'exception ScriptInterruptedException de sleep()
-* `Dépendance` Ajout de la version 1.0.2 de Androidx AppCompat (Legacy)
-* `Dépendance` Mise à niveau de la version de Androidx AppCompat de 1.4.0 à 1.4.1
-* `Dépendance` Mise à niveau de la version de Androidx Preference de 1.1.1 à 1.2.0
+* `Dépendance` Ajout de la version 1.0.2 de AndroidX AppCompat (Legacy)
+* `Dépendance` Mise à niveau de la version de AndroidX AppCompat de 1.4.0 à 1.4.1
+* `Dépendance` Mise à niveau de la version de AndroidX Preference de 1.1.1 à 1.2.0
 * `Dépendance` Mise à niveau de la version du moteur Rhino de 1.7.14-SNAPSHOT à 1.7.14
 * `Dépendance` Mise à niveau de la version d'OkHttp3 de 3.10.0 à 5.0.0-alpha.3 puis 5.0.0-alpha.4
 * `Dépendance` Mise à niveau de la version de Android Material de 1.6.0-alpha01 à 1.6.0-alpha02
@@ -889,7 +1112,7 @@
 * `Amélioration` Suppression et élimination des fichiers de bibliothèque locale redondants
 * `Dépendance` Localisation de la version 2.6.6 de CrashReport
 * `Dépendance` Localisation de la version 1.0.0 de MutableTheme
-* `Dépendance` Ajout de la version 1.1.1 de Androidx Preference
+* `Dépendance` Ajout de la version 1.1.1 de AndroidX Preference
 * `Dépendance` Ajout de la version 1.1.0 de SwipeRefreshLayout
 * `Dépendance` Mise à jour de Android SDK de 28 à 30 puis à 31
 * `Dépendance` Mise à niveau d'Android Analytics de 7.0.0 à 13.1.0
@@ -897,7 +1120,7 @@
 * `Dépendance` Mise à jour des outils de construction Gradle de 3.2.1 à 4.1.0 puis à 7.0.3 puis à 7.2.0-alpha04
 * `Dépendance` Mise à jour de Android Job de 1.2.6 à 1.4.2
 * `Dépendance` Mise à niveau de Android Material de 1.1.0-alpha01 à 1.5.0-beta01
-* `Dépendance` Mise à jour d'Androidx MultiDex de 2.0.0 à 2.0.1
+* `Dépendance` Mise à jour d'AndroidX MultiDex de 2.0.0 à 2.0.1
 * `Dépendance` Mise à jour d'Apache Commons Lang3 de 3.6 à 3.12.0
 * `Dépendance` Mise à jour d'Appcompat de 1.0.2 à 1.4.0
 * `Dépendance` Mise à niveau du plugin Gradle ButterKnife de 9.0.0-rc2 à 10.2.1 puis 10.2.3
