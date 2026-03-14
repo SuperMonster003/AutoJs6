@@ -226,6 +226,7 @@ def init_languages():
             since_date_map = {
                 "tonyjiangwj_auto_js": "2019/11/21",
                 "supermonster003_autojs6": "2021/12/01",
+                "supermonster003_autojs4": "2023/04/11",
                 "aiselp_autox": "2024/04/21",
                 "ozobiozobi_autox_ozobi": "2024/10/01",
                 "autox_community_autox": "2025/03/30",
@@ -297,25 +298,25 @@ def extract_latest_versions(lang_code, lang_content, num_versions=3):
 
 
 def handle_changelog_placeholder(aim_lang_code, aim_content):
-    histories_str = ""
+    history_str = ""
     for version_name, data in changelog_data_map[aim_lang_code].items():
         if not isinstance(data, dict):
             raise TypeError(f"Expected data to be dict, but got {type(data)} for version {version_name} in language {aim_lang_code}")
 
-        histories_str += f"# {version_name}\n\n"
-        histories_str += f"###### {data['released_date']}"
+        history_str += f"# {version_name}\n\n"
+        history_str += f"###### {data['released_date']}"
         if 'released_hint' in data:
-            histories_str += f" - {data['released_hint']}"
-        histories_str += "\n\n"
+            history_str += f" - {data['released_hint']}"
+        history_str += "\n\n"
         for simple_key in ['hint', 'feature', 'fix', 'improvement', 'dependency']:
             if simple_key in data:
                 for text in data[simple_key]:
                     label = changelog_content_map[aim_lang_code][f'changelog_label_{simple_key}']
-                    histories_str += f"* `{label}` {text}\n"
-        histories_str += "\n"
+                    history_str += f"* `{label}` {text}\n"
+        history_str += "\n"
 
-    aim_content['h3_version_histories'] = language_content_map[aim_lang_code]['h3_version_histories']
-    aim_content['placeholder_version_histories'] = histories_str.rstrip("\n")
+    aim_content['h3_release_history'] = language_content_map[aim_lang_code]['h3_release_history']
+    aim_content['placeholder_release_history'] = history_str.rstrip("\n")
 
 
 def handle_readme_placeholder(aim_lang_code, aim_content):
@@ -328,7 +329,7 @@ def handle_readme_placeholder(aim_lang_code, aim_content):
             new_array.append(f" - [{content['$name']} [{lang_code}]](http://project.autojs6.com/blob/master/.readme/README-{lang_code}.md)")
     aim_content['placeholder_ul_languages_all_supported'] = "\n".join(new_array)
 
-    aim_content['placeholder_latest_three_version_histories'] = "\n".join(extract_latest_versions(aim_lang_code, aim_content)).rstrip("\n")
+    aim_content['placeholder_latest_three_release_history'] = "\n".join(extract_latest_versions(aim_lang_code, aim_content)).rstrip("\n")
 
     aim_content['placeholder_read_more_in_changelog_md'] = f"[CHANGELOG.md](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG-{aim_lang_code}.md)"
 

@@ -1,90 +1,217 @@
 ******
 
-### 版本历史
+### 发行历史
 
 ******
 
 # v6.7.0
 
-###### 2025/11/01
+###### 2026/03/14
 
+* `新增` 插件中心功能, 支持插件的安装/卸载/更新等操作 (入口: 主页抽屉按钮/主页标签页)
+* `新增` 版本历史功能, 支持查看/恢复可编辑文件的历史版本 (入口: 主页抽屉按钮/文件管理器菜单/代码编辑器菜单)
+* `新增` 回收站功能, 支持查看/恢复已删除的文件/文件夹 (入口: 主页抽屉按钮)
+* `新增` Paddle OCR (PP-OCRv5) 插件, 用于光学字符识别
 * `新增` cvt 模块, 用于数据单位转换 (参阅 项目文档 > [单位转换](https://docs.autojs6.com/#/cvt))
 * `新增` fmt 模块, 用于数据格式化 (参阅 项目文档 > [格式化](https://docs.autojs6.com/#/fmt))
 * `新增` zip 模块, 用于文件压缩与解压缩操作 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (参阅 项目文档 > [Zip](https://docs.autojs6.com/#/zip))
 * `新增` mediainfo 模块, 用于查看媒体文件的详细信息 (参阅 项目文档 > [媒体信息](https://docs.autojs6.com/#/mediainfo))
 * `新增` cvt.bytes 方法, 用于字节数据单位转换 (参阅 项目文档 > [单位转换](https://docs.autojs6.com/#/cvt))
-* `新增` fmt.bytes 方法, 用于字节数据格式化 (参阅 项目文档 > [数据格式化](https://docs.autojs6.com/#/fmt))
+* `新增` fmt.bytes 方法, 用于字节数据格式化 (参阅 项目文档 > [格式化](https://docs.autojs6.com/#/fmt))
 * `新增` s13n.bytes 方法, 用于标准化字节数据 (参阅 项目文档 > [标准化](https://docs.autojs6.com/#/s13n))
+* `新增` app.isDualInstalled 方法, 用于检测双开应用是否已安装 (需要 Shizuku 或 Root 权限) _[`issue #450`](http://issues.autojs6.com/450)_
 * `新增` device.getSharedDeviceId 方法, 用于跨应用获取统一共享设备 ID _[`issue #455`](http://issues.autojs6.com/455)_
-* `新增` ui.navigationBarHeight 属性 (getter), 用于获取导航栏高度 _[`issue #456`](http://issues.autojs6.com/456)_
-* `新增` http 模块请求相关方法获取的 body 对象增加 stream/saveToFile/close 方法 _[`issue #452`](http://issues.autojs6.com/452)_
+* `新增` device.setPointerLocation 等 Toggleable 系列方法, 用于设置或获取指针位置系统设置项 _[`issue #381`](http://issues.autojs6.com/381)_
+* `新增` dialogs.build 方法支持 textAllCaps/(positive/negative/neutral)TextAllCaps 选项参数, 用于控制按钮文本是否全部大写
+* `新增` images.loadAsync 方法, 用于异步获取网络图像资源 _[`issue #327`](http://issues.autojs6.com/327)_
+* `新增` ui.getNavigationBarHeight 方法/navigationBarHeight 属性 (getter), 用于获取导航栏高度 _[`issue #456`](http://issues.autojs6.com/456)_
+* `新增` ui.getVisible(Status/Navigation)BarHeight 方法/visible(Status/Navigation)BarHeight 属性 (getter), 用于快捷获取状态栏或导航栏可见高度 _[`issue #456`](http://issues.autojs6.com/456)_
+* `新增` http.put/del(ete)/head 方法, 用于使用不同的 HTTP 请求方法发送网络请求
+* `新增` http.getAsync/postAsync/requestAsync 等方法, 用于异步发送网络请求 _[`issue #423`](http://issues.autojs6.com/423)_
+* `新增` http 模块请求相关方法获取的 body 对象增加 stream/saveToFile/close 等方法 _[`issue #452`](http://issues.autojs6.com/452)_
 * `新增` http 模块请求相关方法支持缓存控制选项参数 (cacheBody/bodyCacheThresholdBytes)
 * `新增` http 模块请求相关方法支持不安全选项参数 (isInsecure/insecure), 用于忽略证书相关异常 _[`issue #417`](http://issues.autojs6.com/417)_
 * `新增` http 模块请求相关方法支持 options.client 选项, 用于配置 OkHttpClient.Builder (如 followRedirects 等) _[`issue #454`](http://issues.autojs6.com/454)_
+* `新增` auto.state 属性 (getter) 及 shizuku.state 属性 (getter), 用于获取无障碍服务状态及 Shizuku 服务状态
 * `新增` runtime.(set/is)JavaPrimitiveWrap 方法, 用于设置或获取 Java 原始类型包装策略 _[`issue #435`](http://issues.autojs6.com/435)_
-* `新增` autojs.(restart/exit) 方法, 用于重启或退出 AutoJs6 应用
-* `新增` UiObject#isShifted 方法, 用于检测控件位置变化
+* `新增` autojs.(restart/exit) 方法, 用于重启或退出 AutoJs6 应用, 并支持应用重启时自动运行其参数指定的脚本 _[`issue #460`](http://issues.autojs6.com/460)_
+* `新增` UiObject#isShifted 方法, 用于检测控件位置变化 _[`issue #469`](http://issues.autojs6.com/469)_
+* `新增` UiObject#snapshot 方法, 用于捕获控件当前状态 _[`issue #469`](http://issues.autojs6.com/469)_
+* `新增` engines.myEngine().getStartTime() 方法, 用于获取脚本引擎启动时间戳 _[`issue #449`](http://issues.autojs6.com/449)_
+* `新增` crash 全局方法, 用于测试崩溃报告页面
 * `新增` structuredClone 全局方法, 用于深拷贝 JavaScript 对象 (参阅 [MDN](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/structuredClone))
+* `新增` 等价系列选择器 (UiSelector#id/text/...) 及包含系列选择器 (UiSelector#xxxContains) 支持正则表达式参数
+* `新增` 选择器的正则表达式参数支持使用标志 (i, m, s, u)
+* `新增` 正则表达式支持后瞻断言语法 _[`issue #464`](http://issues.autojs6.com/464)_
+* `新增` 文件管理器增加 "移动到" 及 "复制到" 菜单项, 支持操作中止及进度状态显示
+* `新增` 代码编辑器增加 "多功能键盘" - "符号设置" 菜单项, 支持符号编辑及按配置级别进行符号的创建/导入/导出等
+* `新增` 主页抽屉增加 "指针位置" 工具
+* `新增` 主页抽屉增加 "所有文件管理权限" 开关
+* `新增` 主页抽屉增加 "后台弹出界面" 开关 (针对 [小米/Vivo] 设备)
 * `新增` 设置页面增加 "Java 原始类型包装" 设置选项 _[`issue #435`](http://issues.autojs6.com/435)_
-* `新增` 设置页面增加 "定时任务调度引擎" 设置选项, 支持 AlarmManager/WorkManager/JobScheduler _[`issue #457`](http://issues.autojs6.com/457)_ _[`issue #388`](http://issues.autojs6.com/388)_ _[`issue #163`](http://issues.autojs6.com/163)_ _[`issue #53`](http://issues.autojs6.com/53)_ _[`issue #21`](http://issues.autojs6.com/21)_
+* `新增` 设置页面增加 "定时任务调度引擎" 设置选项, 支持 AlarmManager/WorkManager/JobScheduler _[`issue #457`](http://issues.autojs6.com/457)_ _[`issue #434`](http://issues.autojs6.com/434)_ _[`issue #449`](http://issues.autojs6.com/449)_ _[`issue #388`](http://issues.autojs6.com/388)_ _[`issue #378`](http://issues.autojs6.com/378)_ _[`issue #163`](http://issues.autojs6.com/163)_ _[`issue #53`](http://issues.autojs6.com/53)_ _[`issue #21`](http://issues.autojs6.com/21)_
 * `新增` 设置页面增加 "应用启动器图标" 设置选项, 支持自适应图标/透明背景图标 _[`issue #405`](http://issues.autojs6.com/405)_
+* `新增` 设置页面增加 "重启策略" 设置选项, 用于设置主页抽屉栏重启按钮是否使用快速重启策略
+* `新增` 设置页面增加 "屏幕捕获权限申请延迟" 设置选项, 用于避免权限申请窗口遮挡屏幕
+* `新增` 设置页面启动器快捷方式增加 "插件" 选项, 用于通过快捷方式跳转到插件中心页面
+* `新增` 打包应用支持开机自启动并在配置页面增加开关配置
+* `新增` 打包应用支持应用快捷方式 (日志页面/设置页面)
+* `新增` 打包应用配置页面增加撤销/重做/保存按钮
+* `新增` 打包应用配置页面增加配置机制, 支持配置的建立/修改/删除/导入/导出 _[`issue #483`](http://issues.autojs6.com/483)_
 * `新增` Scrapers 工具 (run-scrapers.mjs) 用于自动更新 Gradle 构建脚本结构化数据/README 通用数据/README 模板数据等
+* `新增` Gradle Wrapper 切换工具 (gradle-wrapper-switcher), 用于切换本地 Gradle 主版本 (如 Gradle 8.x 与 Gradle 9.x)
+* `修复` notice 方法参数数量及类型限制错误 _[`issue #462`](http://issues.autojs6.com/462)_
+* `修复` ui.R 属性 (getter) 无法正常使用的问题
+* `修复` ui.post 方法回调参数中产生异常时可能静默失败的问题
 * `修复` isJavaClass/isJavaPackage 等全局方法无效的问题
 * `修复` timers.keepAlive 方法 timeout 参数功能无效的问题
-* `修复` floaty.window/rawWindow 方法无法接受字符串参数的问题
+* `修复` floaty.window/rawWindow 方法无法接受字符串参数的问题 _[`issue #467`](http://issues.autojs6.com/467)_
+* `修复` floaty.rawWindow 因传入错误的上下文导致部分控件显示异常的问题
+* `修复` util.isString 方法无效的问题
 * `修复` util.class[Name]/getClass[Name] 可能返回错误结果的问题
+* `修复` util.java.array 无法正常使用 Boolean 等类型参数的问题
 * `修复` threads.disposable() 返回的对象在存取数据时可能被意外装箱的问题 _[`issue #435`](http://issues.autojs6.com/435)_
 * `修复` console.build 方法多次调用时, 日志浮动窗口样式选项未能正常重置的问题
 * `修复` console.build 方法的 (title/content)BackgroundColor 选项导致透明度或着色选项被覆盖的问题 _[`issue #458`](http://issues.autojs6.com/458)_
 * `修复` console/toast 等方法显示 Java Double 时可能丢失末尾零的问题
 * `修复` 无法使用 console/toast 等方法显示 BigInt 数据类型的问题
+* `修复` toast 方法因持有 Toast 实例强引用而导致可能得内存泄露问题
 * `修复` 部分全局对象可能丢失 JavaScript 原型属性及方法的问题
 * `修复` 使用 XML 语法将 JavaScript 表达式作为属性值时, this 对象可能出现指向错误的问题
+* `修复` dialogs.build 方法 linkify 选项参数功能失效的问题
+* `修复` dialogs.build 方法可能破坏对象参数原有数据的问题
 * `修复` canvas 元素控件 setMaxFps 方法内部帧率计算错误
 * `修复` images.concat 方法纵向拼接时宽度值计算错误
 * `修复` images.requestScreenCapture 方法调用时用户取消授权可能导致应用崩溃的问题
+* `修复` images.captureScreen 方法获取的截图可能存在方向错误或黑边填充的问题 _[`issue #337`](http://issues.autojs6.com/337)_
+* `修复` images 部分方法使用区域参数时 1 被误解析为百分比的问题
 * `修复` images 部分相关方法出现异常时 oneShot 标记功能失效的问题 _[`issue #372`](http://issues.autojs6.com/372)_
 * `修复` images 部分相关方法可能引发内存泄露的问题 _[`issue #372`](http://issues.autojs6.com/372)_
+* `修复` images.save 及 ImageWrapper#saveTo 方法传入路径不存在时无法正常写入文件的问题
+* `修复` ImageWrapper#recycle 方法回收图像资源功能失效的问题
+* `修复` ocr 部分重载方法可能无法正常使用的问题
+* `修复` ocr.detect 方法获得的结果可能与 ocr.mode 不匹配的问题 _[`issue #468`](http://issues.autojs6.com/468)_
+* `修复` auto.registerEvent 注册的无障碍服务事件会被其他脚本误清理的问题 _[`issue #466`](http://issues.autojs6.com/466)_ _[`issue #343`](http://issues.autojs6.com/343#issuecomment-3263953918)_
 * `修复` Android 10 UiObject#child 方法可能出现 ArrayIndexOutOfBoundsException 异常的问题 _[`issue #416`](http://issues.autojs6.com/416)_
-* `修复` 运行项目时 project.json 配置参数无法正常解析的问题
-* `修复` 修复项目配置文件中构建版本号或构建时间出现较大数字时可能导致应用崩溃的问题
+* `修复` 内置模块方法调用可能出现 Rhino 上下文可能不一致的问题
+* `修复` 脚本创建大量浮动窗口后, 脚本退出时可能出现窗口残留的问题
+* `修复` 运行项目时 project.json 配置参数可能无法正常解析的问题
+* `修复` 项目打包时 project.json 的 excludedDirs 配置参数将导致配置文件解析失败的问题 _[`issue #428`](http://issues.autojs6.com/428)_
+* `修复` Android 7.x 可能无法正常使用打包功能的问题
+* `修复` 脚本项目配置文件保存时原始键名可能会被修改的问题
+* `修复` 脚本项目配置文件中构建版本号或构建时间出现较大数字时可能导致应用崩溃的问题
 * `修复` 频繁获取或重建 ImageReader 时可能因缓冲区暂无可用帧导致应用崩溃的问题
+* `修复` 输入事件观察器 InputEventObserver 可能导致应用启动时明显卡顿的问题
+* `修复` Shizuku 用户服务进程未能正常结束导致进程堆积的问题 _[`issue #474`](http://issues.autojs6.com/474)_
 * `修复` 打包应用无法正常使用 Paddle OCR 与 Rapid OCR 功能的问题
-* `修复` 版本历史页面部分系统因字体差别导致统计数据显示不完整的问题
+* `修复` 打包应用配置文件 project.json 中的 key 值可能被意外修改的问题
+* `修复` 打包应用配置页面滑动 "需要的权限" 列表时可能出现复选框图标闪烁的问题
+* `修复` 发行历史页面部分系统因字体差别导致统计数据显示不完整的问题
 * `修复` 部分设备无法正常初始化 MLKit Google OCR 的问题 (试修) _[`issue #8`](http://issues.autojs6.com/8#issuecomment-3117061768)_
-* `修复` ErrorDialogActivity 可能无法正常启动或短时间自动消失的问题 _[`issue #414`](http://issues.autojs6.com/414)_ _[`issue #340`](http://issues.autojs6.com/340#issuecomment-2973485826)_
+* `修复` 部分设备无法正常触发文件管理器功能按钮点击事件的问题 (试修) _[`issue #465`](http://issues.autojs6.com/465)_
+* `修复` 部分设备代码编辑器空行显示方框字符的问题 (试修)
+* `修复` 代码编辑器软键盘可能遮挡文本内容的问题
+* `修复` 代码编辑器在只读模式下依然可以编辑代码内容的问题
+* `修复` 代码编辑器在只读模式下点击标题区域及部分菜单项导致应用崩溃的问题
+* `修复` 代码编辑器加载大文件可能导致应用崩溃的问题 (试修)
+* `修复` 代码编辑器自动打开新建文件时功能按钮状态初始化异常
+* `修复` 代码编辑器编辑文件时置于后台可能导致应用崩溃的问题
+* `修复` Android 15+ 代码编辑器点击 fx 按钮无法显示模块函数快捷面板的问题 (试修)
+* `修复` ErrorDialogActivity 可能无法正常启动或短时间自动消失的问题 _[`issue #479`](http://issues.autojs6.com/479)_ _[`issue #471`](http://issues.autojs6.com/471)_ _[`issue #414`](http://issues.autojs6.com/414)_ _[`issue #340`](http://issues.autojs6.com/340#issuecomment-2973485826)_
+* `修复` Canvas 构造函数可接受的参数类型错误 _[`issue #402`](http://issues.autojs6.com/402)_
 * `修复` 崩溃报告页面复制详细信息功能失效的问题
+* `修复` Android 16+ 自定义返回逻辑失效导致返回功能异常的问题
+* `修复` 文件管理器搜索结果展示后点击返回按钮或切换标签页面时可能导致应用崩溃的问题
+* `修复` 文件管理器删除项目文件夹后 UI 未能自动刷新的问题
+* `修复` 任务面板列表项频繁变动时可能导致应用崩溃的问题
+* `修复` 使用 "三按钮" 手势导航时导航栏前景色可能与夜间模式关联异常的问题
 * `修复` APK 文件类型信息对话框可能无法获取应用名称及 SDK 信息的问题
+* `修复` 客户端模式连接后, 短时间断开连接并再次连接时, 出现握手超时且难以再次建立连接的问题
+* `修复` 客户端模式连接时, 旋转屏幕及切换语言等触发 Activity 重建的操作导致 AutoJs6 总是重建连接的问题
+* `修复` 服务端模式连接时, 旋转屏幕及切换语言等触发 Activity 重建的操作导致 VSCode 控制台无法输出日志的问题 _[`issue #385`](http://issues.autojs6.com/385)_
+* `修复` 连接 VSCode 插件时, 多种方式同时连接可能导致日志打印数量成倍增加的问题
+* `修复` 布局分析页面生成代码时对于集合控件可能生成失败的问题 (试修) _[`issue #328`](http://issues.autojs6.com/328)_
+* `修复` 设置页面 "使用 '音量减' 键控制录制" 开关功能失效的问题 _[`issue #480`](http://issues.autojs6.com/480)_
+* `修复` 录制脚本生成的代码文件可能出现坐标数值与屏幕实际像素值不匹配的问题 _[`issue #480`](http://issues.autojs6.com/480)_
+* `修复` 录制脚本生成的代码文件首个行为 (如点击或滑动等) 总是被忽略的问题
+* `修复` 浮动按钮 "运行脚本" 对话框后台操作文件时可能导致应用崩溃的问题
+* `修复` 主页活动页面生命周期结束后重新进入主页时, 浮动按钮状态可能被重置的问题
+* `修复` 小米设备 "显示在其他应用上层" 开关可能跳转到错误设置页面的问题
+* `修复` 检查更新中止下载过程后, 网络数据包依然持续后台获取的问题 (试修)
 * `修复` 构建工具启用 isCleanup[Paddle/Rapid]Ocr 配置选项时无法正常完成 Rebuild Project 任务的问题
-* `优化` ui.statusBarHeight 属性 (getter) 增强一定程度的兼容性
+* `优化` 插件化 Paddle OCR (PP-OCRv3) 相关功能 _[`issue #334`](http://issues.autojs6.com/334)_ _[`issue #331`](http://issues.autojs6.com/331)_ _[`issue #325`](http://issues.autojs6.com/325)_
+* `优化` runtime.loadJar 方法增强兼容性 (by [LYS86](https://github.com/LYS86)) _[`pr #475`](http://pr.autojs6.com/475)_
+* `优化` ui.getStatusBarHeight 方法/statusBarHeight 属性 (getter) 增强一定程度的兼容性
 * `优化` console.log 等方法打印全局对象 (images, app, ocr 等) 时支持显示详细信息
+* `优化` dialogs.build 方法支持使用 MaterialDialog.Builder 原生选项参数
+* `优化` dialogs.build 方法 animation/linkify 选项参数支持字符串宽松匹配
+* `优化` device.rotation/rotation/width/height 方法获取屏幕方向及宽高数据的稳定性与一致性
+* `优化` app.launchDual/startDualActivity 等方法提升执行效率并增强兼容性
 * `优化` android.graphics.Paint#setColor 支持正常解析 ColorInt/ColorHex/ColorName 等颜色参数
 * `优化` 内置模块相关方法实参类型的异常消息增加类型摘要信息
+* `优化` 内置模块 (dayjs/cheerio/dayjs/i18n) 脱离脚本执行模式, 使用全局懒加载方式替代
+* `优化` 控制台相关方法打印巨型数据时根据上限适当省略部分内容以降低打印耗时
 * `优化` 控制台浮动窗口倒计时起始值由 6 秒增加到 9 秒
 * `优化` 控制台浮动窗口内部实现进行无锁化及队列化处理以提升其参数设置效率与成功率
+* `优化` 控制台浮动窗口背景色彩行为相关 API (透明度/着色/基色) 更符合安卓设计规范 _[`issue #458`](http://issues.autojs6.com/458)_
 * `优化` 文件管理器浮动按钮展开后点击菜单项时优化菜单收起时机
+* `优化` 文件管理器/任务面板支持显示文件/任务数量统计信息
+* `优化` 代码编辑器保存文件失败时自动存为草稿并支持另存为新文件
+* `优化` 代码编辑器加载大文件时提升一定程度的流畅度
+* `优化` 代码编辑器 "查找/替换" 支持状态持久化及实时显示搜索计数信息
+* `优化` 代码编辑器提示保存时确保保存成功后再退出编辑器以降低保存失败率
+* `优化` 代码编辑器保存按钮的状态更符合用户主观逻辑
+* `优化` 代码编辑器支持 "-", "=", "(", "[", "{", "<" 等按键长按功能
+* `优化` 打包应用打包过程对话框增加 "中止" 按钮
+* `优化` 打包应用打包过程对话框的显示方式并增加耗时统计
+* `优化` 打包应用使用新配置安装时将覆盖旧应用的相关配置
+* `优化` 打包应用配置页面默认勾选必要权限 (WAKE_LOCK/INTERNET/WRITE_EXTERNAL_STORAGE/...) _[`issue #397`](http://issues.autojs6.com/397)_
+* `优化` 打包应用配置页面支持更多选项的读取及配置 (启动时显示日志/启动时显示启动页/启动页标语文本/...)
+* `优化` 打包应用设置页面增加前台服务开关 _[`issue #406`](http://issues.autojs6.com/406)_
+* `优化` 脚本项目配置文件保存时增加键名冲突检测机制防止键名歧义
 * `优化` 崩溃报告页面支持双指缩放调整字体大小并添加常用功能按钮
 * `优化` 应用启动器图标支持自适应图标特性 _[`issue #405`](http://issues.autojs6.com/405)_
-* `优化` 使用 LiveData 及 SharedFlow 替代已弃用的 LocalBroadcastManager
+* `优化` Rhino 引擎在泛型签名解析失败时回退为原始反射类型以增强低版本安卓系统的反射方法可用性
+* `优化` 主页抽屉开关类条目添加分隔线, 支持点击标题文字区域显示详情对话框并按需支持快捷跳转系统设置
+* `优化` 启动或重启 AutoJs6 时支持点击主页抽屉 "客户端模式" 标题文字区域中止正在尝试建立的连接
+* `优化` 客户端模式连接时支持使用 IPv6 地址及域名地址建立连接
+* `优化` 客户端模式连接时支持特殊用途 IPv4 地址 (回环/广播/多播/保留/...) 检测提示
+* `优化` 客户端模式连接时支持连接状态显示及管理 (修正地址/中止连接)
+* `优化` 服务端模式连接时支持显示已建立连接的客户端数量
+* `优化` 读取通知权限支持自动重连机制 ([requestRebind](https://developer.android.com/reference/android/service/notification/NotificationListenerService#requestRebind(android.content.ComponentName))) 以增强通知监听相关功能的稳定性
+* `优化` 浮动按钮增强后台启动 Activity 的安全性以避免应用崩溃
+* `优化` 浮动按钮 "更多" 对话框使用异步加载数据方式提升显示流畅度
+* `优化` 浮动按钮 "运行脚本" 对话框增加 "主页" 菜单项
+* `优化` 浮动按钮 "运行脚本" 对话框支持最小化及状态恢复并尽最大努力保持窗口常驻或自动恢复
+* `优化` 支持使用 Shizuku 权限录制脚本及录制回放 (回放流畅度受一定影响) _[`issue #320`](http://issues.autojs6.com/320)_
+* `优化` 主题色设置页面定位主题色时使用快速定位方式以提升定位效率
+* `优化` 使用 [LiveData](https://developer.android.com/topic/libraries/architecture/livedata) 及 [SharedFlow](https://developer.android.com/kotlin/flow/stateflow-and-sharedflow) 替代已弃用的 [LocalBroadcastManager](https://developer.android.com/jetpack/androidx/releases/localbroadcastmanager)
 * `优化` Gradle 构建脚本提升 7z 格式文件的解压效率
 * `优化` Gradle 构建脚本支持获取详细的 Android Studio IDE 版本 (如 "2025.1.4.7")
 * `优化` Gradle 构建脚本支持自动生成 VersionCodesList 类所需数据以降低脚本启动延迟
-* `优化` 使用版本目录 (Version Catalogs) 集中管理 Gradle 依赖和插件版本
-* `优化` 模块化 Gradle 构建脚本, 将共享构建逻辑迁移至 buildSrc 并抽象为约定插件
+* `优化` 使用 [版本目录 (Version Catalogs)](https://developer.android.com/build/migrate-to-catalogs) 集中管理 Gradle 依赖和插件版本
+* `优化` 模块化 Gradle 构建脚本, 将共享构建逻辑迁移至 build-logic 并抽象为约定插件
 * `优化` 使用 Gradle 约定插件简化本地 AAR 库加载逻辑
-* `优化` 使用 Toolchain 替代 sourceCompatibility/targetCompatibility 以降低构建环境差异
+* `优化` 移除 "android.enableJetifier=true" Gradle 配置选项以适配 Gradle 9
+* `优化` 使用 [Toolchain](https://docs.gradle.org/current/userguide/toolchains.html) 替代 sourceCompatibility/targetCompatibility 以降低构建环境差异
+* `依赖` 模块化 Expandable Layout 版本 1.6.0
+* `依赖` 模块化 Expandable RecyclerView 版本 3.0.0-RC1
+* `依赖` 模块化 Recyclerview Flexible Divider 版本 1.4.0
 * `依赖` 本地化 Root Shell 版本 1.6
-* `依赖` 本地化 Expandable Layout 版本 1.6.0
-* `依赖` 本地化 Recyclerview Flexible Divider 版本 1.4.0
-* `依赖` 附加 Androidx Core (KTX) 版本 1.15.0
-* `依赖` 附加 Androidx Work Runtime 版本 2.11.0
+* `依赖` 附加 AndroidX Activity (KTX) 版本 1.12.2
+* `依赖` 附加 AndroidX Core (KTX) 版本 1.15.0
+* `依赖` 附加 AndroidX Work Runtime 版本 2.11.0
+* `依赖` 附加 AndroidX Interpolator 版本 1.0.0
+* `依赖` 附加 Room RxJava2 版本 2.8.1
 * `依赖` 升级 Android SDK 版本 35 -> 36
-* `依赖` 升级 Gradle 版本 8.14 -> 8.14.3
+* `依赖` 升级 Gradle 8 版本 8.14 -> 8.14.4
+* `依赖` 升级 Gradle 9 版本 8.14 -> 9.4.0
+* `依赖` 升级 Rhino 版本 1.8.1-SNAPSHOT -> 2.0.0-SNAPSHOT
 * `依赖` 升级 Desugar JDK Libs 版本 2.0.4 -> 2.1.5
 * `依赖` 升级 Android Material 版本 1.12.0 -> 1.13.0
-* `依赖` 升级 Androidx AppCompat 版本 1.7.0 -> 1.7.1
-* `依赖` 升级 Androidx Room 版本 2.7.1 -> 2.7.2
-* `依赖` 升级 Androidx WebKit 版本 1.13.0 -> 1.14.0
+* `依赖` 升级 AndroidX AppCompat 版本 1.7.0 -> 1.7.1
+* `依赖` 升级 AndroidX Room 版本 2.7.1 -> 2.7.2
+* `依赖` 升级 AndroidX WebKit 版本 1.13.0 -> 1.14.0
 * `依赖` 升级 Material Progressbar 版本 1.4.2 -> 1.6.1
 * `依赖` 升级 Apache Commons 版本 3.16.0 -> 3.18.0
 * `依赖` 升级 Retrofit2 Retrofit 版本 2.11.0 -> 2.12.0
@@ -96,6 +223,9 @@
 * `依赖` 升级 Jsoup 版本 1.19.1 -> 1.20.1
 * `依赖` 升级 Junit Jupiter 版本 5.10.3 -> 5.13.0
 * `依赖` 升级 OpenCC 版本 1.2.0 -> 1.2.2
+* `依赖` 移除 Android Support Annotation v7 版本 28.0.0
+* `依赖` 移除 Android Support AppCompat v7 版本 28.0.0
+* `依赖` 移除 Android Support RecyclerView v7 版本 28.0.0
 
 # v6.6.4
 
@@ -109,13 +239,13 @@
 * `修复` 代码编辑器可能使用置信度不足的编码写入文件导致内容解码异常的问题 (试修)
 * `优化` 关于应用与开发者页面增加布局适配通用性并去除不必要的布局分类
 * `优化` README.md 项目编译构建小节添加多种方式便于定位目标设置页面 _[`issue #404`](http://issues.autojs6.com/404)_
-* `依赖` 附加 Androidx ConstraintLayout 版本 2.2.1
+* `依赖` 附加 AndroidX ConstraintLayout 版本 2.2.1
 
 # v6.6.3
 
 ###### 2025/05/27
 
-* `新增` 版本历史功能, 可查看发行版本历史更新记录 (多语言) 与统计数据
+* `新增` 发行历史功能, 可查看发行版本的发行历史记录 (多语言) 与统计数据
 * `新增` timers.keepAlive 方法 (已全局化), 用于保持脚本活跃状态
 * `新增` engines.on('start/stop/error', callback) 等事件监听方法, 用于监听脚本引擎全局事件
 * `新增` images.detectMultiColors 方法, 用于多点颜色校验 _[`issue #374`](http://issues.autojs6.com/374)_
@@ -125,9 +255,10 @@
 * `新增` ui.keepScreenOn 方法, 用于 UI 页面获取焦点时保持设备屏幕常亮
 * `新增` ui.root 属性 (getter), 用于获取 UI 页面布局的 "窗口内容根容器" 节点
 * `新增` webview 元素支持基于 JsBridge 的 Web 页面布局 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) [参阅 示例代码 > 布局 > 可交互 HTML / Vue2 + Vant (SFC)] _[`issue #281`](http://issues.autojs6.com/281)_
+* `新增` 布局分析支持控件隐藏 (by [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #371`](http://pr.autojs6.com/371)_ _[`issue #355`](http://issues.autojs6.com/355)_
 * `修复` 主页文档标签及文档活动页面显示在线文档时部分内容被系统导航栏遮挡的问题
 * `修复` 部分页面 Toolbar 点击按钮时可能导致标题点击事件误触发的问题
-* `修复` 部分设备代码编辑器空行显示方框字符的问题
+* `修复` 部分设备代码编辑器空行显示方框字符的问题 (试修)
 * `修复` 主题色设置页面调色盘对话框可能无限叠加的问题
 * `修复` 无障碍服务关闭时音量加键停止所有脚本功能失效的问题
 * `修复` 定时任务页面编辑自定义广播内容时出现的输入法遮挡问题
@@ -146,7 +277,6 @@
 * `修复` engines.all 方法可能触发 ConcurrentModificationException 的问题 _[`issue #394`](http://issues.autojs6.com/394)_
 * `修复` README.md 中部分语言日期格式不正确的问题
 * `修复` Gradle 构建脚本可能因获取到无效库档案文件长度而导致构建失败的问题 _[`issue #389`](http://issues.autojs6.com/389)_
-* `优化` 布局分析支持控件隐藏 (by [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #371`](http://pr.autojs6.com/371)_ _[`issue #355`](http://issues.autojs6.com/355)_
 * `优化` 布局分析菜单添加渐变分隔线实现一定程度的功能分组
 * `优化` 脚本项目配置文件 project.json 支持 permissions 选项 (by [wirsnow](https://github.com/wirsnow)) _[`pr #391`](http://pr.autojs6.com/391)_ _[`issue #362`](http://issues.autojs6.com/362)_
 * `优化` 打包单文件时自动读取并勾选已安装应用的声明权限 _[`issue #362`](http://issues.autojs6.com/362)_
@@ -170,8 +300,8 @@
 * `优化` APK 文件签名信息提升检测效率
 * `优化` APK 文件类型信息及媒体文件类型信息优化对话框显示效率及信息展示逻辑
 * `优化` Gradle 构建脚本提升版本自适应能力 _[`discussion #369`](http://discussions.autojs6.com/369)_
-* `依赖` 本地化 Material Dialogs 版本 0.9.6.0
-* `依赖` 本地化 Material Date Time Picker 版本 4.2.3
+* `依赖` 模块化 Material Dialogs 版本 0.9.6.0
+* `依赖` 模块化 Material Date Time Picker 版本 4.2.3
 * `依赖` 本地化 libimagequant 版本 2.17.0
 * `依赖` 本地化 libpng 版本 1.6.49
 * `依赖` 附加 ICU4J 版本 77.1
@@ -179,7 +309,7 @@
 * `依赖` 附加 Material Progressbar 版本 1.4.2
 * `依赖` 附加 Flexmark Java HTML to Markdown 版本 0.64.8
 * `依赖` 升级 Gradle 版本 8.14-rc-1 -> 8.14
-* `依赖` 升级 Androidx Room 版本 2.7.0 -> 2.7.1
+* `依赖` 升级 AndroidX Room 版本 2.7.0 -> 2.7.1
 
 # v6.6.2
 
@@ -209,7 +339,7 @@
 * `修复` 设置页面连续快速点击对话框类型项目时可能导致应用崩溃的问题
 * `优化` 精简打包应用模板 APK 文件大小
 * `优化` 应用 (以及打包应用) 支持更多权限 _[`issue #338`](http://issues.autojs6.com/338)_
-* `优化` 打包页面支持 Pinyin 库选项
+* `优化` 打包应用配置页面支持 Pinyin 库选项
 * `优化` 打包应用主活动页面优化状态栏背景及文字颜色
 * `优化` 打包应用设置页面增加访问所有文件和发送通知等特殊权限开关 _[`issue #354`](http://issues.autojs6.com/354)_
 * `优化` 控件的文字及图标根据主题色亮度值自动切换合适的颜色
@@ -236,9 +366,9 @@
 * `依赖` 升级 Android SDK 版本 34 -> 35
 * `依赖` 升级 Gradle 版本 8.12 -> 8.14-rc-1
 * `依赖` 升级 Rhino 版本 1.8.0-SNAPSHOT -> 1.8.1-SNAPSHOT
-* `依赖` 升级 Androidx Recyclerview 版本 1.3.2 -> 1.4.0
-* `依赖` 升级 Androidx Room 版本 2.6.1 -> 2.7.0
-* `依赖` 升级 Androidx WebKit 版本 1.12.1 -> 1.13.0
+* `依赖` 升级 AndroidX Recyclerview 版本 1.3.2 -> 1.4.0
+* `依赖` 升级 AndroidX Room 版本 2.6.1 -> 2.7.0
+* `依赖` 升级 AndroidX WebKit 版本 1.12.1 -> 1.13.0
 * `依赖` 升级 Pinyin4j 版本 2.5.0 -> 2.5.1
 
 # v6.6.1
@@ -255,7 +385,7 @@
 * `修复` automator.click/longClick 方法参数类型限制错误 _[`issue #275`](http://issues.autojs6.com/275)_
 * `修复` 选择器不支持 ConsString 类型参数的问题 _[`issue #277`](http://issues.autojs6.com/277)_
 * `修复` UiObjectCollection 实例缺失自身方法及属性的问题
-* `优化` 打包页面支持签名配置/密钥库管理/权限设置 (by [luckyloogn](https://github.com/luckyloogn)) _[`pr #286`](http://pr.autojs6.com/286)_
+* `优化` 打包应用配置页面支持签名配置/密钥库管理/权限设置 (by [luckyloogn](https://github.com/luckyloogn)) _[`pr #286`](http://pr.autojs6.com/286)_
 * `优化` 提升浮动窗口当前包名及当前活动名的识别准确性 (优先级: Shizuku > Root > A11Y)
 * `优化` 提升 currentPackage/currentActivity 识别准确性 (优先级: Shizuku > Root > A11Y)
 * `优化` 恢复日志活动窗口单个条目文本内容的双击或长按选择功能 _[`issue #280`](http://issues.autojs6.com/280)_
@@ -284,9 +414,9 @@
 * `新增` 布局分析支持切换窗口 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
 * `新增` auto.clearCache 方法, 支持清除控件缓存 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
 * `新增` threads.pool 方法, 支持线程池简单应用 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
-* `新增` images.matchTemplate 方法增加 useTransparentMask 选项参数, 支持透明找图 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
+* `新增` images.matchTemplate 方法支持 useTransparentMask 选项参数, 支持透明找图 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
 * `新增` images.requestScreenCaptureAsync 方法, 用于 UI 模式异步方式申请截图权限 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
-* `新增` images.requestScreenCapture 方法增加 isAsync 选项参数, 支持异步方式获取屏幕截图 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
+* `新增` images.requestScreenCapture 方法支持 isAsync 选项参数, 支持异步方式获取屏幕截图 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
 * `新增` images.on('screen_capture', callback) 等事件监听方法, 支持监听屏幕截图可用事件 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
 * `新增` images.stopScreenCapture 方法, 支持主动释放截图申请的相关资源 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
 * `新增` images.psnr/mse/ssim/mssim/hist/ncc 及 images.getSimilarity 方法, 用于获取图像相似性度量值
@@ -329,7 +459,7 @@
 * `修复` 代码编辑器跳转到行尾时可能遗漏末尾字符的问题
 * `修复` 主活动页面启动日志活动页面时可能出现闪屏的问题
 * `修复` 打包应用无法正常使用 opencc 模块的问题
-* `优化` 打包页面中 "不可用 ABI" 控件的点击提示体验
+* `优化` 打包应用配置页面中 "不可用 ABI" 控件的点击提示体验
 * `优化` 支持使用 Shizuku 控制 "指针位置" 显示开关
 * `优化` 支持使用 Shizuku 控制 "投影媒体" 及 "修改安全设置" 权限开关
 * `优化` automator.gestureAsync/gesturesAsync 支持回调函数参数
@@ -342,11 +472,11 @@
 * `优化` 代码编辑器导入 Java 类和包名时支持智能判断插入位置
 * `优化` images 模块支持直接使用路径作为图像参数
 * `优化` importPackage 支持字符串参数
-* `优化` 服务端模式 IP 地址支持剪切板导入智能识别且支持空格按键智能转换
+* `优化` 客户端模式 IP 地址支持剪切板导入智能识别且支持空格按键智能转换
 * `优化` 文件管理器新建文件时支持默认前缀选择并自动生成合适的数字后缀
 * `优化` 文件管理器运行项目时具体化异常消息提示 _[`issue #268`](http://issues.autojs6.com/268)_
 * `优化` 文件管理器支持更多类型并支持显示对应的图标符号 (支持 800 多种文件类型)
-* `优化` 文件管理器可编辑的文件类型 (jpg/doc/pdf...) 增加编辑按钮
+* `优化` 文件管理器可编辑的文件类型 (jpg/doc/pdf/...) 增加编辑按钮
 * `优化` 文件管理器 APK 文件支持查看基础信息, Manifest 信息及权限列表
 * `优化` 文件管理器音视频等媒体文件支持查看基础信息及 MediaInfo 信息
 * `优化` 打包单文件时支持自动填入合适的标准化名包并支持无效字符过滤提示
@@ -363,9 +493,9 @@
 * `依赖` 升级 Gradle 版本 8.5 -> 8.11.1
 * `依赖` 升级 Rhino 版本 1.7.15-SNAPSHOT -> 1.8.0-SNAPSHOT
 * `依赖` 升级 Android Material 版本 1.10.0 -> 1.12.0
-* `依赖` 升级 Androidx Annotation 版本 1.7.0 -> 1.9.1
-* `依赖` 升级 Androidx AppCompat 版本 1.6.1 -> 1.7.0
-* `依赖` 升级 Androidx WebKit 版本 1.8.0 -> 1.12.1
+* `依赖` 升级 AndroidX Annotation 版本 1.7.0 -> 1.9.1
+* `依赖` 升级 AndroidX AppCompat 版本 1.6.1 -> 1.7.0
+* `依赖` 升级 AndroidX WebKit 版本 1.8.0 -> 1.12.1
 * `依赖` 升级 Apache Commons 版本 3.13.0 -> 3.16.0
 * `依赖` 升级 ARSCLib 版本 1.2.4 -> 1.3.1
 * `依赖` 升级 Gson 版本 2.10.1 -> 2.11.0
@@ -387,10 +517,10 @@
 
 * `新增` opencc 模块 (参阅 项目文档 > [中文转换](https://docs.autojs6.com/#/opencc)) (Ref to [LZX284](https://github.com/SuperMonster003/AutoJs6/pull/187/files#diff-8cff73265af19c059547b76aca8882cbaa3209291406f52df1dafbbc78e80c46R268))
 * `新增` UiSelector 增加 [plus](https://docs.autojs6.com/#/uiObjectType?id=m-plus) 及 [append](https://docs.autojs6.com/#/uiObjectType?id=m-append) 方法 _[`issue #115`](http://issues.autojs6.com/115)_
-* `新增` 打包应用页面增加 ABI 及库的筛选支持 (Ref to [AutoX](https://github.com/kkevsekk1/AutoX)) _[`issue #189`](http://issues.autojs6.com/189)_
+* `新增` 打包应用配置页面增加 ABI 及库的筛选支持 (Ref to [AutoX](https://github.com/kkevsekk1/AutoX)) _[`issue #189`](http://issues.autojs6.com/189)_
 * `修复` 打包应用文件体积异常庞大的问题 (Ref to [AutoX](https://github.com/kkevsekk1/AutoX) / [LZX284](https://github.com/SuperMonster003/AutoJs6/pull/187/files#diff-d932ac49867d4610f8eeb21b59306e8e923d016cbca192b254caebd829198856R61)) _[`issue #176`](http://issues.autojs6.com/176)_
 * `修复` 打包应用无法显示并打印部分异常消息的问题
-* `修复` 打包应用页面选择应用图标后可能显示空图标的问题
+* `修复` 打包应用配置页面选择应用图标后可能显示空图标的问题
 * `修复` 打包应用包含 MLKit Google OCR 库时可能出现的上下文未初始化异常
 * `修复` ocr.recognizeText/detect 方法无效的问题
 * `修复` 部分文本 (如日志页面) 显示语言与应用设置语言可能不相符的问题
@@ -412,9 +542,9 @@
 * `修复` 代码编辑器模块函数快捷面板按钮函数名称可能溢出的问题
 * `优化` 代码编辑器模块函数快捷面板适配夜间模式
 * `优化` 打包应用启动页面适配夜间模式并调整应用图标布局
-* `优化` 打包应用页面支持使用软键盘 ENTER 键实现光标跳转
-* `优化` 打包应用页面支持点击 ABI 标题及库标题切换全选状态
-* `优化` 打包应用页面默认 ABI 智能选择并增加不可选择项的引导提示
+* `优化` 打包应用配置页面支持使用软键盘 ENTER 键实现光标跳转
+* `优化` 打包应用配置页面支持点击 ABI 标题及库标题切换全选状态
+* `优化` 打包应用配置页面默认 ABI 智能选择并增加不可选择项的引导提示
 * `优化` 文件管理器根据文件及文件夹的类型及特征调整菜单项的显示情况
 * `优化` 文件管理器文件夹右键菜单增加打包应用选项
 * `优化` 无障碍服务启用但功能异常时在 AutoJs6 主页抽屉开关处将体现异常状态
@@ -428,7 +558,7 @@
 
 ###### 2023/11/15
 
-* `新增` dialogs.build() 选项参数属性 inputSingleLine
+* `新增` dialogs.build 方法支持 inputSingleLine 选项参数
 * `新增` console.setTouchable 方法 _[`issue #122`](http://issues.autojs6.com/122)_
 * `修复` ocr 模块部分方法无法识别区域参数的问题 _[`issue #162`](http://issues.autojs6.com/162)_ _[`issue #175`](http://issues.autojs6.com/175)_
 * `修复` Android 7.x 发现新版本时无法获取版本详情的问题
@@ -513,12 +643,12 @@
 * `依赖` 升级 Apache Commons Lang3 版本 3.12.0 -> 3.13.0
 * `依赖` 升级 Glide 版本 4.15.1 -> 4.16.0
 * `依赖` 升级 Android Analytics 版本 14.3.0 -> 14.4.0
-* `依赖` 升级 Androidx WebKit 版本 1.7.0 -> 1.8.0
-* `依赖` 升级 Androidx Preference 版本 1.2.0 -> 1.2.1
-* `依赖` 升级 Androidx Annotation 版本 1.6.0 -> 1.7.0
-* `依赖` 升级 Androidx Recyclerview 版本 1.3.0 -> 1.3.2
+* `依赖` 升级 AndroidX WebKit 版本 1.7.0 -> 1.8.0
+* `依赖` 升级 AndroidX Preference 版本 1.2.0 -> 1.2.1
+* `依赖` 升级 AndroidX Annotation 版本 1.6.0 -> 1.7.0
+* `依赖` 升级 AndroidX Recyclerview 版本 1.3.0 -> 1.3.2
 * `依赖` 升级 Android Material 版本 1.9.0 -> 1.10.0
-* `依赖` 升级 Androidx AppCompat 版本 1.4.2 -> 1.6.1
+* `依赖` 升级 AndroidX AppCompat 版本 1.4.2 -> 1.6.1
 * `依赖` 升级 Commons IO 版本 2.8.0 -> 2.14.0
 * `依赖` 升级 Jackson DataBind 版本 2.13.3 -> 2.14.3
 * `依赖` 移除 Zeugma Solutions LocaleHelper 版本 1.5.1
@@ -613,7 +743,7 @@
 * `优化` 客户端模式非正常关闭时将于 AutoJs6 启动时按最近一次的历史地址自动连接
 * `依赖` 升级 LeakCanary 版本 2.10 -> 2.11
 * `依赖` 升级 Android Material 版本 1.8.0 -> 1.9.0
-* `依赖` 升级 Androidx WebKit 版本 1.6.1 -> 1.7.0
+* `依赖` 升级 AndroidX WebKit 版本 1.6.1 -> 1.7.0
 * `依赖` 升级 OkHttp3 版本 3.10.0 -> 5.0.0-alpha.9 -> 5.0.0-alpha.11
 * `依赖` 升级 MLKit Text Recognition Chinese 版本 16.0.0-beta6 -> 16.0.0
 
@@ -675,11 +805,11 @@
 * `依赖` 升级 Glide 版本 4.14.2 -> 4.15.1
 * `依赖` 升级 Joda Time 版本 2.12.2 -> 2.12.5
 * `依赖` 升级 Android Analytics 版本 14.0.0 -> 14.2.0
-* `依赖` 升级 Androidx WebKit 版本 1.5.0 -> 1.6.1
-* `依赖` 升级 Androidx Recyclerview 版本 1.2.1 -> 1.3.0
+* `依赖` 升级 AndroidX WebKit 版本 1.5.0 -> 1.6.1
+* `依赖` 升级 AndroidX Recyclerview 版本 1.2.1 -> 1.3.0
 * `依赖` 升级 Zip4j 版本 2.11.2 -> 2.11.5
 * `依赖` 升级 Junit Jupiter 版本 5.9.2 -> 5.9.3
-* `依赖` 升级 Androidx Annotation 版本 1.5.0 -> 1.6.0
+* `依赖` 升级 AndroidX Annotation 版本 1.5.0 -> 1.6.0
 * `依赖` 升级 Jackson DataBind 版本 2.14.1 -> 2.14.2
 * `依赖` 升级 Desugar JDK Libs 版本 2.0.0 -> 2.0.3
 
@@ -786,7 +916,7 @@
 * `依赖` 本地化 GitHub API 版本 1.306
 * `依赖` 升级 Android SDK 版本 32 -> 33
 * `依赖` 附加 JCIP Annotations 版本 1.0
-* `依赖` 附加 Androidx WebKit 版本 1.5.0
+* `依赖` 附加 AndroidX WebKit 版本 1.5.0
 * `依赖` 附加 Commons IO 版本 2.8.0
 * `依赖` 附加 Desugar JDK Libs 版本 2.0.0
 * `依赖` 附加 Jackson DataBind 版本 2.13.3
@@ -797,8 +927,8 @@
 * `依赖` 升级 Gradle 构建工具版本 7.4.0-alpha02 -> 8.0.0-alpha09
 * `依赖` 升级 Kotlin Gradle 插件版本 1.6.10 -> 1.8.0-RC2
 * `依赖` 升级 Android Material 版本 1.6.0 -> 1.7.0
-* `依赖` 升级 Androidx Annotation 版本 1.3.0 -> 1.5.0
-* `依赖` 升级 Androidx AppCompat 版本 1.4.1 -> 1.4.2
+* `依赖` 升级 AndroidX Annotation 版本 1.3.0 -> 1.5.0
+* `依赖` 升级 AndroidX AppCompat 版本 1.4.1 -> 1.4.2
 * `依赖` 升级 Android Analytics 版本 13.3.0 -> 14.0.0
 * `依赖` 升级 Gson 版本 2.9.0 -> 2.10
 * `依赖` 升级 Joda Time 版本 2.10.14 -> 2.12.1
@@ -842,8 +972,8 @@
 * `新增` automator.lockScreen() 等方法 (参阅 示例代码 > 无障碍服务 > Android 9 新增)
 * `新增` automator.headsethook() 等方法 (参阅 示例代码 > 无障碍服务 > Android 11 新增)
 * `新增` automator.captureScreen() 方法 (参阅 示例代码 > 无障碍服务 > 获取屏幕截图)
-* `新增` dialogs.build() 选项参数属性 animation, linkify 等 (参阅 示例代码 > 对话框 > 个性化对话框)
-* `修复` dialogs.build() 选项参数属性 inputHint, itemsSelectedIndex 等功能异常
+* `新增` dialogs.build 方法支持 animation, linkify 等选项参数 (参阅 示例代码 > 对话框 > 个性化对话框)
+* `修复` dialogs.build 方法 inputHint, itemsSelectedIndex 等选项参数功能异常
 * `修复` JsDialog#on('multi_choice') 回调参数功能异常
 * `修复` UiObject#parent().indexInParent() 总是返回 -1 的问题 _[`issue #16`](http://issues.autojs6.com/16)_
 * `修复` Promise.resolve() 返回的 Thenable 在临近脚本结束时可能不被调用的问题
@@ -927,9 +1057,9 @@
 * `修复` 客户端模式及服务端模式开关状态不能正常刷新的问题
 * `修复` Android 7.x 解析 UI 模式 text 元素异常 (Ref to [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`issue #4`](http://issues.autojs6.com/4)_ _[`issue #9`](http://issues.autojs6.com/9)_
 * `优化` 忽略 sleep() 的 ScriptInterruptedException 异常
-* `依赖` 附加 Androidx AppCompat (Legacy) 版本 1.0.2
-* `依赖` 升级 Androidx AppCompat 版本 1.4.0 -> 1.4.1
-* `依赖` 升级 Androidx Preference 版本 1.1.1 -> 1.2.0
+* `依赖` 附加 AndroidX AppCompat (Legacy) 版本 1.0.2
+* `依赖` 升级 AndroidX AppCompat 版本 1.4.0 -> 1.4.1
+* `依赖` 升级 AndroidX Preference 版本 1.1.1 -> 1.2.0
 * `依赖` 升级 Rhino 引擎版本 1.7.14-SNAPSHOT -> 1.7.14
 * `依赖` 升级 OkHttp3 版本 3.10.0 -> 5.0.0-alpha.3 -> 5.0.0-alpha.4
 * `依赖` 升级 Android Material 版本 1.6.0-alpha01 -> 1.6.0-alpha02
@@ -982,7 +1112,7 @@
 * `优化` 抽离并移除重复的本地库文件
 * `依赖` 本地化 CrashReport 版本 2.6.6
 * `依赖` 本地化 MutableTheme 版本 1.0.0
-* `依赖` 附加 Androidx Preference 版本 1.1.1
+* `依赖` 附加 AndroidX Preference 版本 1.1.1
 * `依赖` 附加 SwipeRefreshLayout 版本 1.1.0
 * `依赖` 升级 Android SDK 版本 28 -> 30 -> 31
 * `依赖` 升级 Android Analytics 版本 7.0.0 -> 13.1.0
@@ -990,7 +1120,7 @@
 * `依赖` 升级 Gradle 构建工具版本 3.2.1 -> 4.1.0 -> 7.0.3 -> 7.2.0-alpha04
 * `依赖` 升级 Android Job 版本 1.2.6 -> 1.4.2
 * `依赖` 升级 Android Material 版本 1.1.0-alpha01 -> 1.5.0-beta01
-* `依赖` 升级 Androidx MultiDex 版本 2.0.0 -> 2.0.1
+* `依赖` 升级 AndroidX MultiDex 版本 2.0.0 -> 2.0.1
 * `依赖` 升级 Apache Commons Lang3 版本 3.6 -> 3.12.0
 * `依赖` 升级 Appcompat 版本 1.0.2 -> 1.4.0
 * `依赖` 升级 ButterKnife Gradle 插件版本 9.0.0-rc2 -> 10.2.1 -> 10.2.3

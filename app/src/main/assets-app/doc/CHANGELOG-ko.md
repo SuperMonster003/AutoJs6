@@ -1,8 +1,231 @@
 ******
 
-### 버전 역사
+### 배포 기록
 
 ******
+
+# v6.7.0
+
+###### 2026/03/14
+
+* `추가` 플러그인 센터 기능, 플러그인 설치/제거/업데이트 등의 작업 지원 (진입: 홈 서랍 버튼/홈 탭)
+* `추가` 버전 기록 기능, 편집 가능한 파일의 기록 버전 보기/복원 지원 (진입: 홈 서랍 버튼/파일 관리자 메뉴/코드 편집기 메뉴)
+* `추가` 휴지통 기능, 삭제된 파일/폴더 보기/복원 지원 (진입: 홈 서랍 버튼)
+* `추가` Paddle OCR (PP-OCRv5) 플러그인, 광학 문자 인식용
+* `추가` cvt 모듈, 데이터 단위 변환용 (프로젝트 문서 > [단위 변환](https://docs.autojs6.com/#/cvt) 참조)
+* `추가` fmt 모듈, 데이터 포맷팅용 (프로젝트 문서 > [포맷팅](https://docs.autojs6.com/#/fmt) 참조)
+* `추가` zip 모듈, 파일 압축 및 해제 작업용 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (프로젝트 문서 > [Zip](https://docs.autojs6.com/#/zip) 참조)
+* `추가` mediainfo 모듈, 미디어 파일의 상세 정보 보기용 (프로젝트 문서 > [미디어 정보](https://docs.autojs6.com/#/mediainfo) 참조)
+* `추가` cvt.bytes 메서드, 바이트 데이터 단위 변환용 (프로젝트 문서 > [단위 변환](https://docs.autojs6.com/#/cvt) 참조)
+* `추가` fmt.bytes 메서드, 바이트 데이터 포맷팅용 (프로젝트 문서 > [포맷팅](https://docs.autojs6.com/#/fmt) 참조)
+* `추가` s13n.bytes 메서드, 바이트 데이터 표준화용 (프로젝트 문서 > [표준화](https://docs.autojs6.com/#/s13n) 참조)
+* `추가` app.isDualInstalled 메서드, 듀얼 앱 설치 여부 확인용 (Shizuku 또는 Root 권한 필요) _[`issue #450`](http://issues.autojs6.com/450)_
+* `추가` device.getSharedDeviceId 메서드, 앱 간 통합 공유 디바이스 ID 획득용 _[`issue #455`](http://issues.autojs6.com/455)_
+* `추가` device.setPointerLocation 등 Toggleable 계열 메서드, 포인터 위치 시스템 설정 항목 설정 또는 조회용 _[`issue #381`](http://issues.autojs6.com/381)_
+* `추가` dialogs.build 메서드가 textAllCaps/(positive/negative/neutral)TextAllCaps 옵션 인자를 지원하여 버튼 텍스트의 전체 대문자 여부를 제어 가능
+* `추가` images.loadAsync 메서드, 네트워크 이미지 리소스 비동기 획득용 _[`issue #327`](http://issues.autojs6.com/327)_
+* `추가` ui.getNavigationBarHeight 메서드/navigationBarHeight 속성 (getter), 내비게이션 바 높이 획득용 _[`issue #456`](http://issues.autojs6.com/456)_
+* `추가` ui.getVisible(Status/Navigation)BarHeight 메서드/visible(Status/Navigation)BarHeight 속성 (getter), 상태 표시줄 또는 내비게이션 바의 가시 높이를 빠르게 획득하기 위한 기능 _[`issue #456`](http://issues.autojs6.com/456)_
+* `추가` http.put/del(ete)/head 메서드, 서로 다른 HTTP 요청 메서드로 네트워크 요청 전송용
+* `추가` http.getAsync/postAsync/requestAsync 등의 메서드, 네트워크 요청 비동기 전송용 _[`issue #423`](http://issues.autojs6.com/423)_
+* `추가` http 모듈의 요청 관련 메서드에서 얻는 body 객체에 stream/saveToFile/close 등의 메서드 추가 _[`issue #452`](http://issues.autojs6.com/452)_
+* `추가` http 모듈의 요청 관련 메서드가 캐시 제어 옵션 인자 (cacheBody/bodyCacheThresholdBytes) 지원
+* `추가` http 모듈의 요청 관련 메서드가 비보안 옵션 인자 (isInsecure/insecure) 지원, 인증서 관련 예외 무시에 사용 가능 _[`issue #417`](http://issues.autojs6.com/417)_
+* `추가` http 모듈의 요청 관련 메서드가 options.client 옵션 지원, OkHttpClient.Builder (followRedirects 등) 설정 가능 _[`issue #454`](http://issues.autojs6.com/454)_
+* `추가` auto.state 속성 (getter) 및 shizuku.state 속성 (getter), 접근성 서비스 상태 및 Shizuku 서비스 상태 획득용
+* `추가` runtime.(set/is)JavaPrimitiveWrap 메서드, Java 원시 타입 래핑 전략 설정 또는 조회용 _[`issue #435`](http://issues.autojs6.com/435)_
+* `추가` autojs.(restart/exit) 메서드, AutoJs6 앱 재시작 또는 종료용, 그리고 앱 재시작 시 인자로 지정된 스크립트 자동 실행 지원 _[`issue #460`](http://issues.autojs6.com/460)_
+* `추가` UiObject#isShifted 메서드, 컨트롤 위치 변화 감지용 _[`issue #469`](http://issues.autojs6.com/469)_
+* `추가` UiObject#snapshot 메서드, 컨트롤의 현재 상태 캡처용 _[`issue #469`](http://issues.autojs6.com/469)_
+* `추가` engines.myEngine().getStartTime() 메서드, 스크립트 엔진 시작 타임스탬프 획득용 _[`issue #449`](http://issues.autojs6.com/449)_
+* `추가` crash 전역 메서드, 크래시 보고 페이지 테스트용
+* `추가` structuredClone 전역 메서드, JavaScript 객체의 깊은 복사용 ( [MDN](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/structuredClone) 참조)
+* `추가` 등가 계열 선택기 (UiSelector#id/text/...) 및 포함 계열 선택기 (UiSelector#xxxContains) 가 정규식 인자를 지원
+* `추가` 선택기의 정규식 인자가 플래그 (i, m, s, u) 를 지원
+* `추가` 정규식이 lookbehind 문법을 지원 _[`issue #464`](http://issues.autojs6.com/464)_
+* `추가` 파일 관리자에 "이동 대상" 및 "복사 대상" 메뉴 항목 추가, 작업 중단 및 진행 상태 표시 지원
+* `추가` 코드 편집기에 "다기능 키보드" - "기호 설정" 메뉴 항목 추가, 기호 편집 및 프로필 단위의 기호 생성/가져오기/내보내기 등 지원
+* `추가` 홈 서랍에 "포인터 위치" 도구 추가
+* `추가` 홈 서랍에 "모든 파일 관리 권한" 스위치 추가
+* `추가` 홈 서랍에 "백그라운드에서 UI 표시" 스위치 추가 ( [Xiaomi/Vivo] 기기용)
+* `추가` 설정 페이지에 "Java 원시 타입 래핑" 설정 옵션 추가 _[`issue #435`](http://issues.autojs6.com/435)_
+* `추가` 설정 페이지에 "예약 작업 스케줄링 엔진" 설정 옵션 추가, AlarmManager/WorkManager/JobScheduler 지원 _[`issue #457`](http://issues.autojs6.com/457)_ _[`issue #434`](http://issues.autojs6.com/434)_ _[`issue #449`](http://issues.autojs6.com/449)_ _[`issue #388`](http://issues.autojs6.com/388)_ _[`issue #378`](http://issues.autojs6.com/378)_ _[`issue #163`](http://issues.autojs6.com/163)_ _[`issue #53`](http://issues.autojs6.com/53)_ _[`issue #21`](http://issues.autojs6.com/21)_
+* `추가` 설정 페이지에 "앱 런처 아이콘" 설정 옵션 추가, 적응형 아이콘/투명 배경 아이콘 지원 _[`issue #405`](http://issues.autojs6.com/405)_
+* `추가` 설정 페이지에 "재시작 전략" 설정 옵션 추가, 홈 서랍의 재시작 버튼이 빠른 재시작 전략을 사용할지 설정 가능
+* `추가` 설정 페이지에 "화면 캡처 권한 요청 지연" 설정 옵션 추가, 권한 요청 창이 화면을 가리는 문제 방지
+* `추가` 설정 페이지의 런처 바로가기에 "플러그인" 옵션 추가, 바로가기를 통해 플러그인 센터 페이지로 이동 가능
+* `추가` 패키징 앱이 부팅 시 자동 실행을 지원하고, 설정 페이지에 스위치 추가
+* `추가` 패키징 앱이 앱 바로가기 (로그 페이지/설정 페이지) 지원
+* `추가` 앱 패키징 설정 페이지에 실행 취소/다시 실행/저장 버튼 추가
+* `추가` 앱 패키징 설정 페이지에 프로필 메커니즘 추가, 프로필 생성/수정/삭제/가져오기/내보내기 지원 _[`issue #483`](http://issues.autojs6.com/483)_
+* `추가` Scrapers 도구 (run-scrapers.mjs), Gradle 빌드 스크립트의 구조화 데이터/README 공통 데이터/README 템플릿 데이터 등의 자동 업데이트용
+* `추가` Gradle Wrapper 전환 도구 (gradle-wrapper-switcher), 로컬 Gradle 메이저 버전 (예: Gradle 8.x 및 Gradle 9.x) 전환용
+* `수정` notice 메서드의 인자 개수 및 타입 제한 오류 _[`issue #462`](http://issues.autojs6.com/462)_
+* `수정` ui.R 속성 (getter) 을 정상적으로 사용할 수 없는 문제
+* `수정` ui.post 메서드의 콜백 인자에서 예외가 발생할 때 조용히 실패할 수 있는 문제
+* `수정` isJavaClass/isJavaPackage 등의 전역 메서드가 무효인 문제
+* `수정` timers.keepAlive 메서드의 timeout 인자 기능이 무효인 문제
+* `수정` floaty.window/rawWindow 메서드가 문자열 인자를 받을 수 없는 문제 _[`issue #467`](http://issues.autojs6.com/467)_
+* `수정` 잘못된 컨텍스트가 전달되어 floaty.rawWindow 에서 일부 컨트롤 표시가 비정상적인 문제
+* `수정` util.isString 메서드가 무효인 문제
+* `수정` util.class[Name]/getClass[Name] 이 잘못된 결과를 반환할 수 있는 문제
+* `수정` util.java.array 가 Boolean 등의 타입 인자를 정상적으로 사용할 수 없는 문제
+* `수정` threads.disposable() 가 반환한 객체가 데이터 접근 시 예상치 않게 박싱될 수 있는 문제 _[`issue #435`](http://issues.autojs6.com/435)_
+* `수정` console.build 메서드를 여러 번 호출할 때 로그 플로팅 창의 스타일 옵션이 정상적으로 초기화되지 않는 문제
+* `수정` console.build 메서드의 (title/content)BackgroundColor 옵션이 투명도 또는 착색 옵션을 덮어쓰는 문제 _[`issue #458`](http://issues.autojs6.com/458)_
+* `수정` console/toast 등의 메서드가 Java Double 을 표시할 때 끝의 0 이 사라질 수 있는 문제
+* `수정` console/toast 등의 메서드로 BigInt 데이터 타입을 표시할 수 없는 문제
+* `수정` toast 메서드가 Toast 인스턴스에 대한 강한 참조를 유지하여 메모리 누수를 유발할 수 있는 문제
+* `수정` 일부 전역 객체가 JavaScript 프로토타입 속성과 메서드를 잃을 수 있는 문제
+* `수정` XML 문법에서 JavaScript 식을 속성값으로 사용할 때 this 객체의 참조 대상이 잘못될 수 있는 문제
+* `수정` dialogs.build 메서드의 linkify 옵션 인자 기능이 무효인 문제
+* `수정` dialogs.build 메서드가 객체 인자의 원본 데이터를 손상시킬 수 있는 문제
+* `수정` canvas 요소 컨트롤의 setMaxFps 메서드 내부 프레임레이트 계산 오류
+* `수정` images.concat 메서드에서 세로 방향 결합 시 너비 계산값이 잘못되는 문제
+* `수정` images.requestScreenCapture 메서드 호출 시 사용자가 권한 부여를 취소하면 앱이 크래시할 수 있는 문제
+* `수정` images.captureScreen 메서드로 얻은 스크린샷에 방향 오류 또는 검은 여백이 생길 수 있는 문제 _[`issue #337`](http://issues.autojs6.com/337)_
+* `수정` images 관련 일부 메서드에서 영역 인자 사용 시 1 이 잘못해서 백분율로 해석되는 문제
+* `수정` images 관련 일부 메서드에서 예외 발생 시 oneShot 플래그 기능이 무효가 되는 문제 _[`issue #372`](http://issues.autojs6.com/372)_
+* `수정` images 관련 일부 메서드가 메모리 누수를 일으킬 수 있는 문제 _[`issue #372`](http://issues.autojs6.com/372)_
+* `수정` images.save 및 ImageWrapper#saveTo 메서드에서 전달된 경로가 존재하지 않을 때 파일을 정상적으로 쓸 수 없는 문제
+* `수정` ImageWrapper#recycle 메서드의 이미지 리소스 회수 기능이 무효인 문제
+* `수정` ocr 의 일부 오버로드 메서드가 정상적으로 동작하지 않을 수 있는 문제
+* `수정` ocr.detect 메서드로 얻은 결과가 ocr.mode 와 일치하지 않을 수 있는 문제 _[`issue #468`](http://issues.autojs6.com/468)_
+* `수정` auto.registerEvent 로 등록된 접근성 서비스 이벤트가 다른 스크립트에 의해 잘못 정리되는 문제 _[`issue #466`](http://issues.autojs6.com/466)_ _[`issue #343`](http://issues.autojs6.com/343#issuecomment-3263953918)_
+* `수정` Android 10 에서 UiObject#child 메서드가 ArrayIndexOutOfBoundsException 을 발생시킬 수 있는 문제 _[`issue #416`](http://issues.autojs6.com/416)_
+* `수정` 내장 모듈 메서드 호출 시 Rhino 컨텍스트가 불일치할 수 있는 문제
+* `수정` 스크립트가 많은 플로팅 창을 만든 뒤 종료될 때 창이 남을 수 있는 문제
+* `수정` 프로젝트 실행 시 project.json 의 설정 인자가 정상적으로 파싱되지 않을 수 있는 문제
+* `수정` 프로젝트 패키징 시 project.json 의 excludedDirs 설정 인자가 설정 파일 파싱 실패를 유발하는 문제 _[`issue #428`](http://issues.autojs6.com/428)_
+* `수정` Android 7.x 에서 패키징 기능이 정상적으로 동작하지 않을 수 있는 문제
+* `수정` 스크립트 프로젝트 설정 파일 저장 시 원래 키 이름이 변경될 수 있는 문제
+* `수정` 스크립트 프로젝트 설정 파일 내 빌드 버전 번호 또는 빌드 시간이 큰 숫자일 경우 앱이 크래시할 수 있는 문제
+* `수정` ImageReader 를 자주 가져오거나 재구성할 때 버퍼에 사용 가능한 프레임이 일시적으로 없어 앱이 크래시할 수 있는 문제
+* `수정` 입력 이벤트 관찰자 InputEventObserver 가 앱 시작 시 눈에 띄는 버벅임을 유발할 수 있는 문제
+* `수정` Shizuku 사용자 서비스 프로세스가 정상적으로 종료되지 않아 프로세스가 누적되는 문제 _[`issue #474`](http://issues.autojs6.com/474)_
+* `수정` 패키징 앱이 Paddle OCR 및 Rapid OCR 기능을 정상적으로 사용할 수 없는 문제
+* `수정` 패키징 앱 설정 파일 project.json 의 key 값이 예상치 않게 변경될 수 있는 문제
+* `수정` 앱 패키징 설정 페이지에서 "필요한 권한" 목록을 스크롤할 때 체크박스 아이콘이 깜빡일 수 있는 문제
+* `수정` 릴리스 기록 페이지에서 일부 시스템은 폰트 차이로 인해 통계 데이터가 불완전하게 표시되는 문제
+* `수정` 일부 기기에서 MLKit Google OCR 이 정상적으로 초기화되지 않는 문제 (시험 수정) _[`issue #8`](http://issues.autojs6.com/8#issuecomment-3117061768)_
+* `수정` 일부 기기에서 파일 관리자의 기능 버튼 클릭 이벤트가 정상적으로 발생하지 않는 문제 (시험 수정) _[`issue #465`](http://issues.autojs6.com/465)_
+* `수정` 일부 기기에서 코드 편집기의 빈 줄이 사각형 문자로 표시되는 문제 (시험 수정)
+* `수정` 코드 편집기에서 소프트 키보드가 텍스트 내용을 가릴 수 있는 문제
+* `수정` 코드 편집기가 읽기 전용 모드에서도 내용을 편집할 수 있는 문제
+* `수정` 코드 편집기가 읽기 전용 모드에서 제목 영역 및 일부 메뉴 항목을 클릭하면 앱이 크래시하는 문제
+* `수정` 코드 편집기에서 큰 파일을 불러오면 앱이 크래시할 수 있는 문제 (시험 수정)
+* `수정` 코드 편집기가 새 파일을 자동으로 열 때 기능 버튼 상태 초기화가 비정상적인 문제
+* `수정` 코드 편집기에서 파일 편집 중 백그라운드로 전환하면 앱이 크래시할 수 있는 문제
+* `수정` Android 15+ 에서 코드 편집기의 fx 버튼을 눌러도 모듈 함수 빠른 패널이 표시되지 않는 문제 (시험 수정)
+* `수정` ErrorDialogActivity 가 정상적으로 시작되지 않거나 짧은 시간 내 자동으로 사라질 수 있는 문제 _[`issue #479`](http://issues.autojs6.com/479)_ _[`issue #471`](http://issues.autojs6.com/471)_ _[`issue #414`](http://issues.autojs6.com/414)_ _[`issue #340`](http://issues.autojs6.com/340#issuecomment-2973485826)_
+* `수정` Canvas 생성자가 받아들이는 인자 타입 오류 _[`issue #402`](http://issues.autojs6.com/402)_
+* `수정` 크래시 보고 페이지에서 상세 정보 복사 기능이 무효인 문제
+* `수정` Android 16+ 에서 사용자 정의 뒤로가기 로직이 무효가 되어 뒤로가기 동작이 비정상적인 문제
+* `수정` 파일 관리자 검색 결과 표시 후 뒤로가기 버튼을 누르거나 탭을 전환하면 앱이 크래시할 수 있는 문제
+* `수정` 파일 관리자에서 프로젝트 폴더 삭제 후 UI 가 자동으로 새로고침되지 않는 문제
+* `수정` 작업 패널의 목록 항목이 자주 바뀌면 앱이 크래시할 수 있는 문제
+* `수정` "3버튼" 제스처 내비게이션 사용 시 내비게이션 바 전경색이 야간 모드와 비정상적으로 연관되는 문제
+* `수정` APK 파일 형식 정보 대화상자에서 앱 이름 및 SDK 정보를 얻지 못할 수 있는 문제
+* `수정` 클라이언트 모드 연결 시, 짧은 시간 안에 연결 해제 후 다시 연결하면 핸드셰이크 타임아웃이 발생하고 재연결이 어려워지는 문제
+* `수정` 클라이언트 모드 연결 시, 화면 회전이나 언어 전환처럼 Activity 재생성을 유발하는 작업 때문에 AutoJs6 가 항상 연결을 다시 구성하는 문제
+* `수정` 서버 모드 연결 시, 화면 회전이나 언어 전환처럼 Activity 재생성을 유발하는 작업 때문에 VSCode 콘솔에 로그가 출력되지 않는 문제 _[`issue #385`](http://issues.autojs6.com/385)_
+* `수정` VSCode 플러그인 연결 시 여러 방식으로 동시에 연결하면 로그 출력 수가 배로 증가하는 문제
+* `수정` 레이아웃 분석 페이지에서 컬렉션형 컨트롤에 대해 코드 생성이 실패할 수 있는 문제 (시험 수정) _[`issue #328`](http://issues.autojs6.com/328)_
+* `수정` 설정 페이지의 "'볼륨 작게' 키로 녹화 제어" 스위치 기능이 무효인 문제 _[`issue #480`](http://issues.autojs6.com/480)_
+* `수정` 스크립트 녹화로 생성된 코드 파일의 좌표값이 실제 화면 픽셀값과 일치하지 않을 수 있는 문제 _[`issue #480`](http://issues.autojs6.com/480)_
+* `수정` 스크립트 녹화로 생성된 코드 파일의 첫 동작 (탭, 스와이프 등) 이 항상 무시되는 문제
+* `수정` 플로팅 버튼의 "스크립트 실행" 대화상자에서 백그라운드로 파일 작업을 하면 앱이 크래시할 수 있는 문제
+* `수정` 홈 Activity 수명 주기가 끝난 뒤 홈에 다시 들어오면 플로팅 버튼 상태가 초기화될 수 있는 문제
+* `수정` Xiaomi 기기에서 "다른 앱 위에 표시" 스위치가 잘못된 설정 페이지로 이동하는 문제
+* `수정` 업데이트 확인에서 다운로드를 중단한 뒤에도 네트워크 패킷 획득이 백그라운드에서 계속되는 문제 (시험 수정)
+* `수정` 빌드 도구에서 isCleanup[Paddle/Rapid]Ocr 옵션을 활성화했을 때 Rebuild Project 작업이 정상 완료되지 않는 문제
+* `개선` Paddle OCR (PP-OCRv3) 관련 기능의 플러그인화 _[`issue #334`](http://issues.autojs6.com/334)_ _[`issue #331`](http://issues.autojs6.com/331)_ _[`issue #325`](http://issues.autojs6.com/325)_
+* `개선` runtime.loadJar 메서드의 호환성 향상 (by [LYS86](https://github.com/LYS86)) _[`pr #475`](http://pr.autojs6.com/475)_
+* `개선` ui.getStatusBarHeight 메서드/statusBarHeight 속성 (getter) 의 호환성을 일정 수준 향상
+* `개선` console.log 등의 메서드가 전역 객체 (images, app, ocr 등) 출력 시 상세 정보 표시를 지원
+* `개선` dialogs.build 메서드가 MaterialDialog.Builder 의 네이티브 옵션 인자를 지원
+* `개선` dialogs.build 메서드의 animation/linkify 옵션 인자가 느슨한 문자열 매칭을 지원
+* `개선` device.rotation/rotation/width/height 메서드로 얻는 화면 방향 및 너비/높이 데이터의 안정성과 일관성을 향상
+* `개선` app.launchDual/startDualActivity 등의 메서드의 실행 효율 향상 및 호환성 강화
+* `개선` android.graphics.Paint#setColor 가 ColorInt/ColorHex/ColorName 등의 색상 인자를 정상적으로 파싱 가능
+* `개선` 내장 모듈 관련 메서드의 실인자 타입 예외 메시지에 타입 요약 정보를 추가
+* `개선` 내장 모듈 (dayjs/cheerio/dayjs/i18n) 이 스크립트 실행 모드에서 벗어나 전역 지연 로드 방식으로 대체됨
+* `개선` 콘솔 관련 메서드가 대용량 데이터를 출력할 때 상한에 따라 일부 내용을 적절히 생략하여 출력 시간을 줄임
+* `개선` 콘솔 플로팅 창의 카운트다운 시작값을 6초에서 9초로 증가
+* `개선` 콘솔 플로팅 창의 내부 구현을 락 프리 및 큐 처리로 전환하여 인자 설정 효율과 성공률을 향상
+* `개선` 콘솔 플로팅 창 배경색 관련 API (투명도/착색/기준색) 가 Android 설계 규범에 더 잘 맞도록 개선 _[`issue #458`](http://issues.autojs6.com/458)_
+* `개선` 파일 관리자에서 플로팅 버튼 확장 후 메뉴 항목 클릭 시 메뉴 접힘 타이밍을 최적화
+* `개선` 파일 관리자/작업 패널이 파일/작업 개수 통계 정보 표시를 지원
+* `개선` 코드 편집기에서 파일 저장 실패 시 자동으로 초안 저장하고 새 파일로 다른 이름 저장을 지원
+* `개선` 코드 편집기에서 대용량 파일 로딩 시 일정 수준의 부드러움을 향상
+* `개선` 코드 편집기의 "찾기/바꾸기" 가 상태 유지 및 검색 개수 실시간 표시를 지원
+* `개선` 코드 편집기에서 저장을 요청할 때 편집기 종료 전에 저장 성공을 보장하여 저장 실패율을 낮춤
+* `개선` 코드 편집기의 저장 버튼 상태가 사용자 주관 논리에 더 부합하도록 개선
+* `개선` 코드 편집기가 "-", "=", "(", "[", "{", "<" 등의 키 길게 누르기 기능을 지원
+* `개선` 앱 패키징 처리 대화상자에 "중단" 버튼 추가
+* `개선` 앱 패키징 처리 대화상자의 표시 방식을 개선하고 소요 시간 통계를 추가
+* `개선` 새 설정으로 패키징 앱을 설치할 때 기존 앱의 관련 설정을 덮어쓰도록 개선
+* `개선` 앱 패키징 설정 페이지에서 필요한 권한 (WAKE_LOCK/INTERNET/WRITE_EXTERNAL_STORAGE/...) 을 기본 선택 _[`issue #397`](http://issues.autojs6.com/397)_
+* `개선` 앱 패키징 설정 페이지에서 더 많은 옵션의 읽기 및 설정을 지원 (시작 시 로그 표시/시작 시 스플래시 표시/스플래시 슬로건 텍스트/...)
+* `개선` 앱 패키징 설정 페이지에 포그라운드 서비스 스위치 추가 _[`issue #406`](http://issues.autojs6.com/406)_
+* `개선` 스크립트 프로젝트 설정 파일 저장 시 키 이름 충돌 감지 메커니즘을 추가하여 키 이름의 모호성을 방지
+* `개선` 크래시 보고 페이지가 두 손가락 확대/축소를 통한 글꼴 크기 조정 및 자주 쓰는 기능 버튼 추가를 지원
+* `개선` 앱 런처 아이콘이 적응형 아이콘 기능을 지원 _[`issue #405`](http://issues.autojs6.com/405)_
+* `개선` Rhino 엔진이 제네릭 시그니처 파싱에 실패할 때 원시 reflection 타입으로 폴백하여 낮은 Android 버전에서 reflection 메서드 사용성을 강화
+* `개선` 홈 서랍의 스위치형 항목에 구분선을 추가하고, 제목 텍스트 영역 클릭 시 상세 대화상자를 표시하며, 필요에 따라 시스템 설정으로 빠른 이동을 지원
+* `개선` AutoJs6 시작 또는 재시작 시 홈 서랍의 "클라이언트 모드" 제목 텍스트 영역을 눌러 연결 시도를 중단할 수 있음
+* `개선` 클라이언트 모드 연결이 IPv6 주소 및 도메인 주소 연결을 지원
+* `개선` 클라이언트 모드 연결이 특수 목적 IPv4 주소 (loopback/broadcast/multicast/reserved/...) 에 대한 감지 안내를 지원
+* `개선` 클라이언트 모드 연결이 연결 상태 표시 및 관리 (주소 수정/연결 중단) 를 지원
+* `개선` 서버 모드 연결이 연결된 클라이언트 수 표시를 지원
+* `개선` 알림 권한 읽기가 자동 재연결 메커니즘 ([requestRebind](https://developer.android.com/reference/android/service/notification/NotificationListenerService#requestRebind(android.content.ComponentName))) 을 지원하여 알림 감시 관련 기능의 안정성을 향상
+* `개선` 플로팅 버튼이 백그라운드에서 Activity 를 시작할 때의 안전성을 강화하여 앱 크래시를 방지
+* `개선` 플로팅 버튼의 "더보기" 대화상자가 비동기 데이터 로딩 방식을 사용하여 표시의 부드러움을 향상
+* `개선` 플로팅 버튼의 "스크립트 실행" 대화상자에 "홈" 메뉴 항목 추가
+* `개선` 플로팅 버튼의 "스크립트 실행" 대화상자가 최소화 및 상태 복원을 지원하고, 가능한 한 창 상주 또는 자동 복원을 유지
+* `개선` Shizuku 권한을 사용한 스크립트 녹화 및 녹화 재생을 지원 (재생의 부드러움은 일부 영향을 받을 수 있음) _[`issue #320`](http://issues.autojs6.com/320)_
+* `개선` 테마 색상 설정 페이지에서 테마 색상 위치 지정에 빠른 위치 찾기 방식을 사용하여 효율 향상
+* `개선` 폐기된 [LocalBroadcastManager](https://developer.android.com/jetpack/androidx/releases/localbroadcastmanager) 를 [LiveData](https://developer.android.com/topic/libraries/architecture/livedata) 및 [SharedFlow](https://developer.android.com/kotlin/flow/stateflow-and-sharedflow) 로 대체
+* `개선` Gradle 빌드 스크립트에서 7z 형식 파일의 해제 효율 향상
+* `개선` Gradle 빌드 스크립트가 상세한 Android Studio IDE 버전 (예: "2025.1.4.7") 획득을 지원
+* `개선` Gradle 빌드 스크립트가 VersionCodesList 클래스에 필요한 데이터 자동 생성에 대응하여 스크립트 시작 지연을 줄임
+* `개선` [Version Catalogs](https://developer.android.com/build/migrate-to-catalogs) 를 사용하여 Gradle 의존성과 플러그인 버전을 중앙 관리
+* `개선` Gradle 빌드 스크립트를 모듈화하고, 공유 빌드 로직을 build-logic 으로 이동해 convention plugin 으로 추상화
+* `개선` Gradle convention plugin 을 사용하여 로컬 AAR 라이브러리 로딩 로직을 단순화
+* `개선` Gradle 9 적응을 위해 "android.enableJetifier=true" Gradle 설정 옵션 제거
+* `개선` 빌드 환경 차이를 줄이기 위해 sourceCompatibility/targetCompatibility 대신 [Toolchain](https://docs.gradle.org/current/userguide/toolchains.html) 사용
+* `의존성` 모듈화 Expandable Layout 버전 1.6.0
+* `의존성` 모듈화 Expandable RecyclerView 버전 3.0.0-RC1
+* `의존성` 모듈화 Recyclerview Flexible Divider 버전 1.4.0
+* `의존성` 현지화된 Root Shell 버전 1.6
+* `의존성` AndroidX Activity (KTX) 버전 1.12.2 추가
+* `의존성` AndroidX Core (KTX) 버전 1.15.0 추가
+* `의존성` AndroidX Work Runtime 버전 2.11.0 추가
+* `의존성` AndroidX Interpolator 버전 1.0.0 추가
+* `의존성` Room RxJava2 버전 2.8.1 추가
+* `의존성` Android SDK 버전 35 -> 36 으로 업그레이드
+* `의존성` Gradle 8 버전 8.14 -> 8.14.4 로 업그레이드
+* `의존성` Gradle 9 버전 8.14 -> 9.4.0 로 업그레이드
+* `의존성` Rhino 버전 1.8.1-SNAPSHOT -> 2.0.0-SNAPSHOT 로 업그레이드
+* `의존성` Desugar JDK Libs 버전 2.0.4 -> 2.1.5 로 업그레이드
+* `의존성` Android Material 버전 1.12.0 -> 1.13.0 로 업그레이드
+* `의존성` AndroidX AppCompat 버전 1.7.0 -> 1.7.1 로 업그레이드
+* `의존성` AndroidX Room 버전 2.7.1 -> 2.7.2 로 업그레이드
+* `의존성` AndroidX WebKit 버전 1.13.0 -> 1.14.0 로 업그레이드
+* `의존성` Material Progressbar 버전 1.4.2 -> 1.6.1 로 업그레이드
+* `의존성` Apache Commons 버전 3.16.0 -> 3.18.0 로 업그레이드
+* `의존성` Retrofit2 Retrofit 버전 2.11.0 -> 2.12.0 로 업그레이드
+* `의존성` Retrofit2 Converter Gson 버전 2.11.0 -> 2.12.0 로 업그레이드
+* `의존성` Retrofit2 RxJava2 버전 2.11.0 -> 2.12.0 로 업그레이드
+* `의존성` Joda Time 버전 2.12.7 -> 2.14.0 로 업그레이드
+* `의존성` Gson 버전 2.11.0 -> 2.13.1 로 업그레이드
+* `의존성` ARSCLib 버전 1.3.1 -> 1.3.5 로 업그레이드
+* `의존성` Jsoup 버전 1.19.1 -> 1.20.1 로 업그레이드
+* `의존성` Junit Jupiter 버전 5.10.3 -> 5.13.0 로 업그레이드
+* `의존성` OpenCC 버전 1.2.0 -> 1.2.2 로 업그레이드
+* `의존성` Android Support Annotation v7 버전 28.0.0 제거
+* `의존성` Android Support AppCompat v7 버전 28.0.0 제거
+* `의존성` Android Support RecyclerView v7 버전 28.0.0 제거
 
 # v6.6.4
 
@@ -16,13 +239,13 @@
 * `수정` 코드 편집기가 신뢰도 낮은 인코딩으로 파일을 기록해 디코딩 오류가 발생할 수 있는 문제(수정 시도)
 * `개선` 앱 및 개발자 페이지 레이아웃 호환성 개선 및 불필요한 레이아웃 분류 제거
 * `개선` README.md 빌드 섹션에 여러 방법 추가로 대상 설정 페이지 찾기 용이화 _[`issue #404`](http://issues.autojs6.com/404)_
-* `의존성` Androidx ConstraintLayout 버전 2.2.1 추가
+* `의존성` AndroidX ConstraintLayout 버전 2.2.1 추가
 
 # v6.6.3
 
 ###### 2025/05/27
 
-* `추가` 버전 히스토리 기능: 다국어 변경 로그 및 통계 보기
+* `추가` 릴리스 기록 기능: 다국어 변경 로그와 통계를 보기
 * `추가` timers.keepAlive 메서드 (전역으로 승격) 로 스크립트 활성 유지
 * `추가` engines.on('start/stop/error', callback) 등의 이벤트 리스너로 엔진 전역 이벤트 수신
 * `추가` images.detectMultiColors 메서드로 여러 지점 색상 검사 _[`issue #374`](http://issues.autojs6.com/374)_
@@ -32,9 +255,10 @@
 * `추가` ui.keepScreenOn 메서드로 UI 페이지가 포커스될 때 화면 켜짐 유지
 * `추가` ui.root 프로퍼티 (getter) 로 UI 레이아웃 내 '윈도우 콘텐츠 루트 컨테이너' 노드를 가져옴
 * `추가` webview 요소가 JsBridge 기반 웹 페이지 레이아웃 지원 (참조 [Auto.js Pro](https://g.pro.autojs.org/)) [예: Layout > Interactive HTML / Vue2 + Vant (SFC)] _[`issue #281`](http://issues.autojs6.com/281)_
+* `추가` 레이아웃 인스펙터가 요소 숨기기 지원 (기여 [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #371`](http://pr.autojs6.com/371)_ _[`issue #355`](http://issues.autojs6.com/355)_
 * `수정` Docs 탭 및 Docs 액티비티의 온라인 문서가 시스템 네비게이션 바에 가려질 수 있는 문제 수정
 * `수정` 일부 페이지에서 Toolbar 버튼을 누르면 제목 클릭 이벤트가 잘못 발생하는 문제 수정
-* `수정` 코드 편집기 빈 줄이 일부 기기에서 사각형으로 보이는 문제 수정
+* `수정` 일부 기기에서 코드 편집기 빈 줄이 □로 표시되던 문제 (임시 수정)
 * `수정` 테마 색상 설정의 컬러 피커 대화상자가 무한 중첩되는 문제 수정
 * `수정` 접근성 서비스가 꺼진 상태에서 볼륨 업 키가 모든 스크립트를 중지하지 않는 문제 수정
 * `수정` 예약 작업에서 사용자 정의 브로드캐스트 메시지를 편집할 때 IME가 입력 영역을 덮는 문제 수정
@@ -53,7 +277,6 @@
 * `수정` engines.all 이 ConcurrentModificationException 을 발생시킬 수 있는 문제 수정 _[`issue #394`](http://issues.autojs6.com/394)_
 * `수정` README.md 일부 언어의 날짜 형식 오류 수정
 * `수정` Gradle 빌드가 라이브러리 아카이브 크기 오류로 실패할 수 있는 문제 수정 _[`issue #389`](http://issues.autojs6.com/389)_
-* `개선` 레이아웃 인스펙터가 요소 숨기기 지원 (기여 [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #371`](http://pr.autojs6.com/371)_ _[`issue #355`](http://issues.autojs6.com/355)_
 * `개선` 레이아웃 인스펙터 메뉴에 기능 그룹화를 위한 그라데이션 구분선 추가
 * `개선` project.json 이 스크립트 프로젝트 permissions 옵션 지원 (기여 [wirsnow](https://github.com/wirsnow)) _[`pr #391`](http://pr.autojs6.com/391)_ _[`issue #362`](http://issues.autojs6.com/362)_
 * `개선` 단일 파일 패키징 시 설치된 앱의 선언 권한을 자동 읽어 표시 _[`issue #362`](http://issues.autojs6.com/362)_
@@ -77,8 +300,8 @@
 * `개선` APK 서명 검증 속도 향상
 * `개선` APK/미디어 파일 정보 대화상자 속도 및 표시 로직 최적화
 * `개선` Gradle 빌드 스크립트가 최신 버전에 더 유연하게 대응 _[`discussion #369`](http://discussions.autojs6.com/369)_
-* `의존성` 내장 Material Dialogs 버전 0.9.6.0 (현지화)
-* `의존성` 내장 Material Date Time Picker 버전 4.2.3 (현지화)
+* `의존성` 내장 Material Dialogs 버전 0.9.6.0 (모듈화)
+* `의존성` 내장 Material Date Time Picker 버전 4.2.3 (모듈화)
 * `의존성` 내장 libimagequant 버전 2.17.0 (현지화)
 * `의존성` 내장 libpng 버전 1.6.49 (현지화)
 * `의존성` 추가 ICU4J 버전 77.1
@@ -86,7 +309,7 @@
 * `의존성` 추가 Material Progressbar 버전 1.4.2
 * `의존성` 추가 Flexmark Java HTML to Markdown 버전 0.64.8
 * `의존성` 업데이트 Gradle 8.14-rc-1 -> 8.14
-* `의존성` 업데이트 Androidx Room 2.7.0 -> 2.7.1
+* `의존성` 업데이트 AndroidX Room 2.7.0 -> 2.7.1
 
 # v6.6.2
 
@@ -116,7 +339,7 @@
 * `수정` 설정 페이지의 다이얼로그 요소를 연속해서 빠르게 탭할 경우 앱이 종료되는 문제를 수정
 * `개선` 패키지 앱 템플릿의 APK 파일 크기 최적화
 * `개선` 앱 (및 패키지 앱) 이 더 많은 권한을 지원하도록 개선 _[`issue #338`](http://issues.autojs6.com/338)_
-* `개선` 패키징 페이지에 Pinyin 라이브러리 옵션 추가
+* `개선` 앱 패키징 설정 페이지에서 Pinyin 라이브러리 옵션을 지원합니다
 * `개선` 패키지 앱 메인 페이지에서 상태 표시줄 배경과 텍스트 색상을 최적화
 * `개선` 패키지 앱 설정 페이지에 전체 파일 접근 및 알림 전송과 같은 특수 권한용 스위치 추가 _[`issue #354`](http://issues.autojs6.com/354)_
 * `개선` 컨트롤의 텍스트와 아이콘 색상이 테마의 밝기에 따라 자동으로 조정되도록 개선
@@ -143,9 +366,9 @@
 * `의존성` Android SDK 버전을 34 에서 35 로 업데이트
 * `의존성` Gradle 을 8.12 에서 8.14-rc-1 로 업데이트
 * `의존성` Rhino 를 1.8.0-SNAPSHOT 에서 1.8.1-SNAPSHOT 으로 업데이트
-* `의존성` Androidx Recyclerview 를 1.3.2 에서 1.4.0 으로 업데이트
-* `의존성` Androidx Room 을 2.6.1 에서 2.7.0 으로 업데이트
-* `의존성` Androidx WebKit 을 1.12.1 에서 1.13.0 으로 업데이트
+* `의존성` AndroidX Recyclerview 를 1.3.2 에서 1.4.0 으로 업데이트
+* `의존성` AndroidX Room 을 2.6.1 에서 2.7.0 으로 업데이트
+* `의존성` AndroidX WebKit 을 1.12.1 에서 1.13.0 으로 업데이트
 * `의존성` Pinyin4j 를 2.5.0 에서 2.5.1 로 업데이트
 
 # v6.6.1
@@ -162,7 +385,7 @@
 * `수정` automator.click/longClick 메서드의 파라미터 유형 제한 오류 _[`issue #275`](http://issues.autojs6.com/275)_
 * `수정` 선택자가 ConsString 유형의 파라미터를 지원하지 않는 문제 _[`issue #277`](http://issues.autojs6.com/277)_
 * `수정` UiObjectCollection 인스턴스에서 메서드 및 속성이 누락된 문제
-* `개선` 패키징 페이지에서 서명 구성, 키 저장소 관리 및 권한 설정을 지원합니다. ([luckyloogn]()) _[`pr #286`]()_
+* `개선` 앱 패키징 설정 페이지에서 서명 설정, keystore 관리, 권한 설정을 지원합니다 (by [luckyloogn](https://github.com/luckyloogn)) _[`pr #286`](http://pr.autojs6.com/286)_
 * `개선` 플로팅 윈도우의 현재 패키지 이름 및 현재 활동 이름의 인식 정확도가 향상되었습니다 (우선 순위: Shizuku > Root > A11Y)
 * `개선` currentPackage 및 currentActivity 의 인식 정확도가 향상되었습니다 (우선 순위: Shizuku > Root > A11Y)
 * `개선` 로그 활동 창의 개별 항목 텍스트 내용을 더블 클릭 또는 길게 눌러 선택하는 기능 복원 _[`issue #280`](http://issues.autojs6.com/280)_
@@ -191,9 +414,9 @@
 * `추가` 레이아웃 분석은 창 전환을 지원합니다 (Auto.js Pro
 * `추가` auto.clearCache 메소드는 제어 캐시를 지우는 것을 지원합니다 (Auto.js Pro
 * `추가` threads.pool 메소드는 간단한 스레드 풀 응용 프로그램을 지원합니다 (Auto.js Pro
-* `추가` images.matchTemplate 메소드는 useTransparentMask 옵션 매개변수를 추가하여 투명 이미지 검색을 지원합니다 (Auto.js Pro
+* `추가` images.matchTemplate 메서드는 useTransparentMask 옵션 매개변수를 지원하며, 투명 이미지 검색을 지원합니다 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
 * `추가` images.requestScreenCaptureAsync 메소드는 UI 모드에서 비동기적으로 스크린 캡처 권한을 요청하는 데 사용됩니다  (Auto.js Pro
-* `추가` images.requestScreenCapture 메소드는 isAsync 옵션 매개변수를 추가하여 비동기적으로 스크린 캡처를 획득하는 것을 지원합니다 (Auto.js Pro
+* `추가` images.requestScreenCapture 메서드는 isAsync 옵션 매개변수를 지원하며, 비동기 방식으로 화면 캡처를 가져오는 것을 지원합니다 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
 * `추가` images.on('screen_capture', callback) 등의 이벤트 리스닝 메소드는 스크린 캡처가 사용 가능 이벤트를 모니터링하는 것을 지원합니다 (Auto.js Pro
 * `추가` images.stopScreenCapture 메소드는 스크린 캡처 요청과 관련된 리소스를 적극 해제하는 것을 지원합니다 (Auto.js Pro
 * `추가` images.psnr/mse/ssim/mssim/hist/ncc 및 images.getSimilarity 메소드는 이미지 유사성 측정값을 얻는 데 사용됩니다
@@ -236,7 +459,7 @@
 * `수정` 코드 편집기에서 행의 끝으로 이동할 때 끝 문자 누락 가능성 있는 문제
 * `수정` 메인 액티비티 페이지에서 로그 액티비티 페이지를 실행할 때 플래시 스크린 문제 발생 가능성
 * `수정` 앱 패키지가 opencc 모듈을 정상적으로 사용할 수 없는 문제
-* `개선` 패키지 페이지 내 '사용 불가 ABI' 컨트롤의 클릭 힌트 사용자 경험
+* `개선` 앱 패키징 설정 페이지의 "사용 불가 ABI" 컨트롤에 대한 탭 안내 경험을 개선했습니다
 * `개선` Shizuku 를 사용하여 '포인터 위치' 디스플레이 스위치를 제어하는 것을 지원
 * `개선` Shizuku 를 사용하여 '미디어 프로젝션' 및 '보안 설정 수정' 권한 스위치를 제어하는 것을 지원
 * `개선` automator.gestureAsync/gesturesAsync 가 콜백 함수 매개변수를 지원
@@ -249,11 +472,11 @@
 * `개선` 코드 편집기에서 Java 클래스나 패키지명을 가져오는 위치의 지능형 판단을 지원
 * `개선` images 모듈이 이미지 매개변수로 경로의 직접 사용을 지원
 * `개선` importPackage 가 문자열 매개변수를 지원
-* `개선` 서버 모드의 IP 주소가 클립보드 가져오기를 스마트하게 인식하고, 스페이스 키 스마트 변환을 지원
+* `개선` 클라이언트 모드에서 IP 주소는 클립보드 가져오기를 지능적으로 인식하며, 공백 키 입력을 지능적으로 변환하는 기능도 지원합니다
 * `개선` 파일 관리자가 새 파일을 생성할 때 기본 접두사 선택 및 적절한 숫자 접미사의 자동 생성을 지원
 * `개선` 파일 관리 프로젝트 실행 시 예외 메시지 구체화 _[`issue #268`](http://issues.autojs6.com/268)_
 * `개선` 파일 관리자가 더 많은 유형을 지원하고, 해당 아이콘 심볼을 표시 (800 이상의 파일 타입 지원)
-* `개선` 파일 관리자에서 편집 가능한 파일 타입 (jpg/doc/pdf...) 에 편집 버튼 추가
+* `개선` 파일 관리자에서 편집 가능한 파일 타입 (jpg/doc/pdf/...) 에 편집 버튼 추가
 * `개선` 파일 관리자가 APK 파일의 기본 정보, Manifest 정보 및 권한 목록을 표시하는 것을 지원
 * `개선` 파일 관리자가 오디오 및 비디오 같은 미디어 파일의 기본 정보 및 MediaInfo 정보를 표시하는 것을 지원
 * `개선` 단일 파일 패키징 시 적절한 정규화 이름 패키지를 자동 입력하며, 유효하지 않은 문자 필터링을 권장
@@ -270,9 +493,9 @@
 * `의존성` Gradle 버전 8.5 -> 8.11.1 업그레이드
 * `의존성` Rhino 버전 1.7.15-SNAPSHOT 에서 1.8.0-SNAPSHOT 으로 업그레이드
 * `의존성` Android Material 버전 1.10.0 에서 1.12.0 으로 업그레이드
-* `의존성` Androidx Annotation 버전 1.7.0 에서 1.9.1 으로 업그레이드
-* `의존성` Androidx AppCompat 버전 1.6.1 에서 1.7.0 으로 업그레이드
-* `의존성` Androidx WebKit 버전 1.8.0 에서 1.12.1 으로 업그레이드
+* `의존성` AndroidX Annotation 버전 1.7.0 에서 1.9.1 으로 업그레이드
+* `의존성` AndroidX AppCompat 버전 1.6.1 에서 1.7.0 으로 업그레이드
+* `의존성` AndroidX WebKit 버전 1.8.0 에서 1.12.1 으로 업그레이드
 * `의존성` Apache Commons 버전 3.13.0 에서 3.16.0 으로 업그레이드
 * `의존성` ARSCLib 버전 1.2.4 에서 1.3.1 으로 업그레이드
 * `의존성` Gson 버전 2.10.1 에서 2.11.0 으로 업그레이드
@@ -294,10 +517,10 @@
 
 * `추가` opencc 모듈 (프로젝트 문서 > [중국어 변환](https://docs.autojs6.com/#/opencc)) (참조 [LZX284](https://github.com/SuperMonster003/AutoJs6/pull/187/files#diff-8cff73265af19c059547b76aca8882cbaa3209291406f52df1dafbbc78e80c46R268))
 * `추가` UiSelector 에 [plus](https://docs.autojs6.com/#/uiObjectType?id=m-plus) 및 [append](https://docs.autojs6.com/#/uiObjectType?id=m-append) 메소드 추가 _[`issue #115`](http://issues.autojs6.com/115)_
-* `추가` 번들 앱 페이지에 ABI 및 라이브러리 필터링 지원 추가 (참조 [AutoX](https://github.com/kkevsekk1/AutoX)) _[`issue #189`](http://issues.autojs6.com/189)_
+* `추가` 앱 패키징 설정 페이지에서 ABI 및 라이브러리 필터링을 지원합니다 (Ref to [AutoX](https://github.com/kkevsekk1/AutoX)) _[`issue #189`](http://issues.autojs6.com/189)_
 * `수정` 번들 앱 파일 크기 비정상적으로 큰 문제 (참조 [AutoX](https://github.com/kkevsekk1/AutoX) / [LZX284](https://github.com/SuperMonster003/AutoJs6/pull/187/files#diff-d932ac49867d4610f8eeb21b59306e8e923d016cbca192b254caebd829198856R61)) _[`issue #176`](http://issues.autojs6.com/176)_
 * `수정` 번들 앱이 일부 예외 메시지를 표시하지 못하고 인쇄하지 않는 문제
-* `수정` 번들 앱 페이지에서 앱 아이콘을 선택한 후 빈 아이콘이 표시될 수 있는 문제
+* `수정` 앱 패키징 설정 페이지에서 앱 아이콘 선택 후 빈 아이콘이 표시될 수 있던 문제를 수정했습니다
 * `수정` 번들 앱이 MLKit Google OCR 라이브러리를 포함할 때 발생할 수 있는 초기화되지 않은 컨텍스트 예외
 * `수정` ocr.recognizeText/detect 메소드가 작동하지 않는 문제
 * `수정` 일부 텍스트 (로그 페이지 등) 의 언어가 앱 설정 언어와 일치하지 않는 문제
@@ -317,14 +540,14 @@
 * `수정` 코드 편집기에서 길게 눌러 삭제 시 앱 충돌 문제가 발생할 수 있는 문제 (시도됨)
 * `수정` 코드 편집기에서 fx 버튼 클릭 시 모듈 함수 빠른 선택 패널이 표시되지 않는 문제
 * `수정` 코드 편집기 모듈 함수 빠른 선택 패널에 표시되는 함수 이름이 넘칠 수 있는 문제
-* `개선` 코드 편집기 모듈의 빠른 기능 패널이 야간 모드에 적응합니다.
-* `개선` 포장된 애플리케이션의 시작 페이지가 야간 모드에 적응하고 애플리케이션 아이콘의 레이아웃이 조정됩니다.
-* `개선` 포장된 애플리케이션 페이지는 소프트웨어 키보드의 ENTER 키를 사용하여 커서 내비게이션을 지원합니다.
-* `개선` 포장된 애플리케이션 페이지는 ABI 및 라이브러리 제목을 클릭하여 전체 선택 상태를 토글할 수 있습니다.
-* `개선` 포장된 애플리케이션 페이지의 기본 ABI 선택은 비선택 항목에 대한 가이드 프롬프트가 추가된 지능형 방식으로 이루어집니다.
-* `개선` 파일 관리자에서는 파일 및 폴더의 유형 및 특성에 따라 메뉴 항목의 표시가 조정됩니다.
-* `개선` 파일 관리자의 폴더 마우스 오른쪽 클릭 메뉴에 애플리케이션 포장 옵션이 추가됩니다.
-* `개선` 접근성 서비스가 활성화되었지만 제대로 작동하지 않는 경우, AutoJs6 홈페이지의 드로어 스위치에 비정상적인 상태가 반영됩니다.
+* `개선` 코드 편집기 모듈의 빠른 기능 패널이 야간 모드에 적응합니다
+* `개선` 포장된 애플리케이션의 시작 페이지가 야간 모드에 적응하고 애플리케이션 아이콘의 레이아웃이 조정됩니다
+* `개선` 앱 패키징 설정 페이지에서 소프트 키보드 ENTER 키로 커서 초점을 이동할 수 있도록 지원합니다
+* `개선` 앱 패키징 설정 페이지에서 ABI 제목과 라이브러리 제목을 눌러 전체 선택 상태를 전환할 수 있도록 지원합니다
+* `개선` 앱 패키징 설정 페이지에서 기본 ABI를 더 똑똑하게 선택하고, 선택할 수 없는 항목에 대한 안내 힌트를 추가했습니다
+* `개선` 파일 관리자에서는 파일 및 폴더의 유형 및 특성에 따라 메뉴 항목의 표시가 조정됩니다
+* `개선` 파일 관리자의 폴더 마우스 오른쪽 클릭 메뉴에 애플리케이션 포장 옵션이 추가됩니다
+* `개선` 접근성 서비스가 활성화되었지만 제대로 작동하지 않는 경우, AutoJs6 홈페이지의 드로어 스위치에 비정상적인 상태가 반영됩니다
 * `개선` 콘솔에는 오류 메시지를 인쇄할 때 상세한 스택 정보가 포함됩니다.
 * `의존성` ARSCLib 버전 1.2.4 추가
 * `의존성` Flexbox 버전 3.0.0 추가
@@ -335,7 +558,7 @@
 
 ###### 2023/11/15
 
-* `추가` dialogs.build() 옵션 매개변수 속성 inputSingleLine
+* `추가` dialogs.build 메서드는 inputSingleLine 옵션 매개변수를 지원합니다
 * `추가` console.setTouchable 메서드 _[`issue #122`](http://issues.autojs6.com/122)_
 * `수정` ocr 모듈 일부 메서드가 영역 매개변수를 인식하지 못하는 문제 _[`issue #162`](http://issues.autojs6.com/162)_  _[`issue #175`](http://issues.autojs6.com/175)_
 * `수정` Android 7.x 에서 새로운 버전을 발견했을 때 버전 세부 정보를 가져올 수 없는 문제
@@ -420,12 +643,12 @@
 * `의존성` Apache Commons Lang3 버전 3.12.0 -> 3.13.0 으로 업그레이드
 * `의존성` Glide 버전 4.15.1 -> 4.16.0 으로 업그레이드
 * `의존성` Android Analytics 버전 14.3.0 -> 14.4.0 으로 업그레이드
-* `의존성` Androidx WebKit 버전 1.7.0 -> 1.8.0 으로 업그레이드
-* `의존성` Androidx Preference 버전 1.2.0 -> 1.2.1 으로 업그레이드
-* `의존성` Androidx Annotation 버전 1.6.0 -> 1.7.0 으로 업그레이드
-* `의존성` Androidx Recyclerview 버전 1.3.0 -> 1.3.2 로 업그레이드
+* `의존성` AndroidX WebKit 버전 1.7.0 -> 1.8.0 으로 업그레이드
+* `의존성` AndroidX Preference 버전 1.2.0 -> 1.2.1 으로 업그레이드
+* `의존성` AndroidX Annotation 버전 1.6.0 -> 1.7.0 으로 업그레이드
+* `의존성` AndroidX Recyclerview 버전 1.3.0 -> 1.3.2 로 업그레이드
 * `의존성` Android Material 버전 1.9.0 -> 1.10.0 으로 업그레이드
-* `의존성` Androidx AppCompat 버전 1.4.2 -> 1.6.1 으로 업그레이드
+* `의존성` AndroidX AppCompat 버전 1.4.2 -> 1.6.1 으로 업그레이드
 * `의존성` Commons IO 버전 2.8.0 -> 2.14.0 으로 업그레이드
 * `의존성` Jackson DataBind 버전 2.13.3 -> 2.14.3 으로 업그레이드
 * `의존성` Zeugma Solutions LocaleHelper 버전 1.5.1 제거
@@ -520,7 +743,7 @@
 * `개선` 클라이언트 모드가 비정상 종료될 경우 AutoJs6 시작 시 마지막으로 연결된 히스토리 주소로 자동 연결
 * `의존성` LeakCanary 버전 2.10 -> 2.11 업그레이드
 * `의존성` Android Material 버전 1.8.0 -> 1.9.0 업그레이드
-* `의존성` Androidx WebKit 버전 1.6.1 -> 1.7.0 업그레이드
+* `의존성` AndroidX WebKit 버전 1.6.1 -> 1.7.0 업그레이드
 * `의존성` OkHttp3 버전 3.10.0 -> 5.0.0-alpha.9 -> 5.0.0-alpha.11 업그레이드
 * `의존성` MLKit Text Recognition Chinese 버전 16.0.0-beta6 -> 16.0.0 업그레이드
 
@@ -582,11 +805,11 @@
 * `의존성` Glide 버전 4.14.2 -> 4.15.1 업그레이드
 * `의존성` Joda Time 버전 2.12.2 -> 2.12.5 업그레이드
 * `의존성` Android Analytics 버전 14.0.0 -> 14.2.0 업그레이드
-* `의존성` Androidx WebKit 버전 1.5.0 -> 1.6.1 업그레이드
-* `의존성` Androidx Recyclerview 버전 1.2.1 -> 1.3.0 업그레이드
+* `의존성` AndroidX WebKit 버전 1.5.0 -> 1.6.1 업그레이드
+* `의존성` AndroidX Recyclerview 버전 1.2.1 -> 1.3.0 업그레이드
 * `의존성` Zip4j 버전 2.11.2 -> 2.11.5 업그레이드
 * `의존성` Junit Jupiter 버전 5.9.2 -> 5.9.3 업그레이드
-* `의존성` Androidx Annotation 버전 1.5.0 -> 1.6.0 업그레이드
+* `의존성` AndroidX Annotation 버전 1.5.0 -> 1.6.0 업그레이드
 * `의존성` Jackson DataBind 버전 2.14.1 -> 2.14.2 업그레이드
 * `의존성` Desugar JDK Libs 버전 2.0.0 -> 2.0.3 업그레이드
 
@@ -693,7 +916,7 @@
 * `의존성` 로컬화된 GitHub API 버전 1.306
 * `의존성` Android SDK 버전 32 -> 33 업그레이드
 * `의존성` JCIP Annotations 부가 추가 버전 1.0
-* `의존성` Androidx WebKit 부가 추가 버전 1.5.0
+* `의존성` AndroidX WebKit 부가 추가 버전 1.5.0
 * `의존성` Commons IO 부가 추가 버전 2.8.0
 * `의존성` Desugar JDK Libs 부가 추가 버전 2.0.0
 * `의존성` Jackson DataBind 부가 추가 버전 2.13.3
@@ -704,8 +927,8 @@
 * `의존성` Gradle 빌드 도구 버전 7.4.0-alpha02 -> 8.0.0-alpha09 업그레이드
 * `의존성` Kotlin Gradle 플러그인 버전 1.6.10 -> 1.8.0-RC2 업그레이드
 * `의존성` Android Material 버전 1.6.0 -> 1.7.0 업그레이드
-* `의존성` Androidx Annotation 버전 1.3.0 -> 1.5.0 업그레이드
-* `의존성` Androidx AppCompat 버전 1.4.1 -> 1.4.2 업그레이드
+* `의존성` AndroidX Annotation 버전 1.3.0 -> 1.5.0 업그레이드
+* `의존성` AndroidX AppCompat 버전 1.4.1 -> 1.4.2 업그레이드
 * `의존성` Android Analytics 버전 13.3.0 -> 14.0.0 업그레이드
 * `의존성` Gson 버전 2.9.0 -> 2.10 업그레이드
 * `의존성` Joda Time 버전 2.10.14 -> 2.12.1 업그레이드
@@ -749,8 +972,8 @@
 * `추가` automator.lockScreen() 등 메서드 (샘플 코드 > 접근성 서비스 > Android 9 추가 참조)
 * `추가` automator.headsethook() 등 메서드 (샘플 코드 > 접근성 서비스 > Android 11 추가 참조)
 * `추가` automator.captureScreen() 메서드 (샘플 코드 > 접근성 서비스 > 스크린샷 가져오기 참조)
-* `추가` dialogs.build() 옵션 매개변수 속성 animation, linkify 등 (샘플 코드 > 대화상자 > 맞춤형 대화상자 참조)
-* `수정` dialogs.build() 옵션 매개변수 속성 inputHint, itemsSelectedIndex 등 기능 오류
+* `추가` dialogs.build 메서드는 animation, linkify 등의 옵션 매개변수를 지원합니다 (샘플 코드 > 대화상자 > 맞춤형 대화상자 참조)
+* `수정` dialogs.build 의 inputHint, itemsSelectedIndex 등의 옵션 매개변수가 비정상적으로 동작합니다
 * `수정` JsDialog#on('multi_choice') 콜백 매개변수 기능 오류
 * `수정` UiObject#parent().indexInParent() 항상 -1 을 반환하는 문제 _[`issue #16`](http://issues.autojs6.com/16)_
 * `수정` Promise.resolve() 가 반환하는 Thenable 이 스크립트 종료 시 호출되지 않을 수 있는 문제
@@ -758,7 +981,7 @@
 * `수정` images.requestScreenCapture() 에서 높은 버전의 안드로이드 시스템에서 앱이 충돌할 수 있는 문제 (API >= 31)
 * `수정` images.requestScreenCapture() 여러 스크립트 인스턴스가 동시에 요청할 때 앱이 충돌할 수 있는 문제
 * `수정` new RootAutomator() 호출 시 발생할 수 있는 멈춤 문제
-* `개선` RootAutomator 는 Root 권한이 없을 때 인스턴스화되지 않습니다.
+* `개선` RootAutomator 는 Root 권한이 없을 때 인스턴스화되지 않습니다
 * `개선` "앱 및 개발자 정보" 페이지 재설계
 * `개선` 모든 내장 JavaScript 모듈 재구성
 * `개선` 모든 Gradle 빌드 스크립트 재구성 및 공통 구성 스크립트 추가 (config.gradle)
@@ -834,9 +1057,9 @@
 * `수정` 클라이언트 모드 및 서버 모드 스위치 상태가 정상적으로 새로 고침되지 않는 문제
 * `수정` Android 7.x 에서 UI 모드 텍스트 요소 분석 오류 (Ref to [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`issue #4`](http://issues.autojs6.com/4)_ _[`issue #9`](http://issues.autojs6.com/9)_
 * `개선` sleep() 의 ScriptInterruptedException 예외를 무시
-* `의존성` Androidx AppCompat (Legacy) 버전 1.0.2 추가
-* `의존성` Androidx AppCompat 버전 1.4.0 -> 1.4.1 업그레이드
-* `의존성` Androidx Preference 버전 1.1.1 -> 1.2.0 업그레이드
+* `의존성` AndroidX AppCompat (Legacy) 버전 1.0.2 추가
+* `의존성` AndroidX AppCompat 버전 1.4.0 -> 1.4.1 업그레이드
+* `의존성` AndroidX Preference 버전 1.1.1 -> 1.2.0 업그레이드
 * `의존성` Rhino 엔진 버전 1.7.14-SNAPSHOT -> 1.7.14 업그레이드
 * `의존성` OkHttp3 버전 3.10.0 -> 5.0.0-alpha.3 -> 5.0.0-alpha.4 업그레이드
 * `의존성` Android Material 버전 1.6.0-alpha01 -> 1.6.0-alpha02 업그레이드
@@ -890,14 +1113,14 @@
 * `의존성` Android SDK 버전 업그레이드 28 -> 30 -> 31
 * `의존성` CrashReport 버전 로컬라이제이션 2.6.6
 * `의존성` MutableTheme 버전 로컬라이제이션 1.0.0
-* `의존성` Androidx Preference 버전 추가 1.1.1
+* `의존성` AndroidX Preference 버전 추가 1.1.1
 * `의존성` SwipeRefreshLayout 버전 추가 1.1.0
 * `의존성` Android Analytics 버전 업그레이드 7.0.0 -> 13.1.0
 * `의존성` Android Annotations 버전 업그레이드 4.5.2 -> 4.8.0
 * `의존성` Gradle 빌드 도구 버전 업그레이드 3.2.1 -> 4.1.0 -> 7.0.3 -> 7.2.0-alpha04
 * `의존성` Android Job 버전 업그레이드 1.2.6 -> 1.4.2
 * `의존성` Android Material 버전 업그레이드 1.1.0-alpha01 -> 1.5.0-beta01
-* `의존성` Androidx MultiDex 버전 업그레이드 2.0.0 -> 2.0.1
+* `의존성` AndroidX MultiDex 버전 업그레이드 2.0.0 -> 2.0.1
 * `의존성` Apache Commons Lang3 버전 업그레이드 3.6 -> 3.12.0
 * `의존성` Appcompat 버전 업그레이드 1.0.2 -> 1.4.0
 * `의존성` ButterKnife Gradle 플러그인 버전 업그레이드 9.0.0-rc2 -> 10.2.1 -> 10.2.3

@@ -1,8 +1,231 @@
 ******
 
-### Version Histories
+### Release History
 
 ******
+
+# v6.7.0
+
+###### 2026/03/14
+
+* `Feature` Plugin Center feature, supporting plugin install/uninstall/update and related operations (entry: home drawer button/home tab)
+* `Feature` Version History feature, supporting viewing/restoring history versions of editable files (entry: home drawer button/file manager menu/code editor menu)
+* `Feature` Trash feature, supporting viewing/restoring deleted files/folders (entry: home drawer button)
+* `Feature` Paddle OCR (PP-OCRv5) plugin, for optical character recognition
+* `Feature` cvt module, for data unit conversion (see Project Docs > [Unit Conversion](https://docs.autojs6.com/#/cvt))
+* `Feature` fmt module, for data formatting (see Project Docs > [Formatting](https://docs.autojs6.com/#/fmt))
+* `Feature` zip module, for file compression and extraction operations (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (see Project Docs > [Zip](https://docs.autojs6.com/#/zip))
+* `Feature` mediainfo module, for viewing detailed information of media files (see Project Docs > [Media Info](https://docs.autojs6.com/#/mediainfo))
+* `Feature` cvt.bytes method, for byte data unit conversion (see Project Docs > [Unit Conversion](https://docs.autojs6.com/#/cvt))
+* `Feature` fmt.bytes method, for byte data formatting (see Project Docs > [Formatting](https://docs.autojs6.com/#/fmt))
+* `Feature` s13n.bytes method, for standardizing byte data (see Project Docs > [Standardization](https://docs.autojs6.com/#/s13n))
+* `Feature` app.isDualInstalled method, for detecting whether a dual-installed app is installed (requires Shizuku or Root permission) _[`issue #450`](http://issues.autojs6.com/450)_
+* `Feature` device.getSharedDeviceId method, for obtaining a unified shared device ID across apps _[`issue #455`](http://issues.autojs6.com/455)_
+* `Feature` device.setPointerLocation and other Toggleable series methods, for setting or getting the pointer location system setting _[`issue #381`](http://issues.autojs6.com/381)_
+* `Feature` dialogs.build method now supports textAllCaps/(positive/negative/neutral)TextAllCaps option parameters, for controlling whether button texts are all uppercase
+* `Feature` images.loadAsync method, for asynchronously fetching network image resources _[`issue #327`](http://issues.autojs6.com/327)_
+* `Feature` ui.getNavigationBarHeight method/navigationBarHeight property (getter), for getting navigation bar height _[`issue #456`](http://issues.autojs6.com/456)_
+* `Feature` ui.getVisible(Status/Navigation)BarHeight method/visible(Status/Navigation)BarHeight property (getter), for quickly getting visible height of the status bar or navigation bar _[`issue #456`](http://issues.autojs6.com/456)_
+* `Feature` http.put/del(ete)/head methods, for sending network requests with different HTTP methods
+* `Feature` http.getAsync/postAsync/requestAsync and related methods, for asynchronously sending network requests _[`issue #423`](http://issues.autojs6.com/423)_
+* `Feature` body objects returned by http module request-related methods now include stream/saveToFile/close and related methods _[`issue #452`](http://issues.autojs6.com/452)_
+* `Feature` http module request-related methods now support cache control option parameters (cacheBody/bodyCacheThresholdBytes)
+* `Feature` http module request-related methods now support insecure option parameters (isInsecure/insecure), for ignoring certificate-related exceptions _[`issue #417`](http://issues.autojs6.com/417)_
+* `Feature` http module request-related methods now support the options.client option, for configuring OkHttpClient.Builder (such as followRedirects) _[`issue #454`](http://issues.autojs6.com/454)_
+* `Feature` auto.state property (getter) and shizuku.state property (getter), for obtaining accessibility service status and Shizuku service status
+* `Feature` runtime.(set/is)JavaPrimitiveWrap methods, for setting or getting Java primitive wrapping strategy _[`issue #435`](http://issues.autojs6.com/435)_
+* `Feature` autojs.(restart/exit) methods, for restarting or exiting the AutoJs6 app, and supporting automatic script execution on app restart with the specified arguments _[`issue #460`](http://issues.autojs6.com/460)_
+* `Feature` UiObject#isShifted method, for detecting control position changes _[`issue #469`](http://issues.autojs6.com/469)_
+* `Feature` UiObject#snapshot method, for capturing the current state of a control _[`issue #469`](http://issues.autojs6.com/469)_
+* `Feature` engines.myEngine().getStartTime() method, for getting the script engine startup timestamp _[`issue #449`](http://issues.autojs6.com/449)_
+* `Feature` crash global method, for testing the crash report page
+* `Feature` structuredClone global method, for deep-cloning JavaScript objects (see [MDN](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/structuredClone))
+* `Feature` Equivalent series selectors (UiSelector#id/text/...) and contains series selectors (UiSelector#xxxContains) now support regular expression parameters
+* `Feature` Regular expression parameters of selectors now support flags (i, m, s, u)
+* `Feature` Regular expressions now support lookbehind assertion syntax _[`issue #464`](http://issues.autojs6.com/464)_
+* `Feature` File manager now includes "Move to" and "Copy to" menu items, supporting operation abort and progress status display
+* `Feature` Code editor now includes the "Multi-function Keyboard" - "Symbol Settings" menu item, supporting symbol editing and symbol creation/import/export by profile level
+* `Feature` Home drawer now includes the "Pointer Location" tool
+* `Feature` Home drawer now includes the "All Files Access" switch
+* `Feature` Home drawer now includes the "Show UI from Background" switch (for [Xiaomi/Vivo] devices)
+* `Feature` Settings page now includes the "Java Primitive Wrap" option _[`issue #435`](http://issues.autojs6.com/435)_
+* `Feature` Settings page now includes the "Scheduled Task Engine" option, supporting AlarmManager/WorkManager/JobScheduler _[`issue #457`](http://issues.autojs6.com/457)_ _[`issue #434`](http://issues.autojs6.com/434)_ _[`issue #449`](http://issues.autojs6.com/449)_ _[`issue #388`](http://issues.autojs6.com/388)_ _[`issue #378`](http://issues.autojs6.com/378)_ _[`issue #163`](http://issues.autojs6.com/163)_ _[`issue #53`](http://issues.autojs6.com/53)_ _[`issue #21`](http://issues.autojs6.com/21)_
+* `Feature` Settings page now includes the "App Launcher Icon" option, supporting adaptive icons/transparent background icons _[`issue #405`](http://issues.autojs6.com/405)_
+* `Feature` Settings page now includes the "Restart Strategy" option, for configuring whether the home drawer restart button uses the fast restart strategy
+* `Feature` Settings page now includes the "Screen Capture Permission Request Delay" option, for preventing the permission request window from blocking the screen
+* `Feature` Launcher shortcuts in the Settings page now include the "Plugins" option, for jumping to the Plugin Center page via a shortcut
+* `Feature` Packaged apps now support auto-start on boot, with a switch added on the configuration page
+* `Feature` Packaged apps now support app shortcuts (log page/settings page)
+* `Feature` Packaged app configuration page now includes undo/redo/save buttons
+* `Feature` Packaged app configuration page now includes a profile mechanism, supporting profile creation/modification/deletion/import/export _[`issue #483`](http://issues.autojs6.com/483)_
+* `Feature` Scrapers tool (run-scrapers.mjs), for automatically updating structured data in Gradle build scripts/common README data/README template data and more
+* `Feature` Gradle Wrapper switcher tool (gradle-wrapper-switcher), for switching local Gradle major versions (such as Gradle 8.x and Gradle 9.x)
+* `Fix` Incorrect parameter count and type restrictions for the notice method _[`issue #462`](http://issues.autojs6.com/462)_
+* `Fix` Issue where the ui.R property (getter) could not be used properly
+* `Fix` Issue where exceptions raised in ui.post callback parameters could fail silently
+* `Fix` Issue where global methods such as isJavaClass/isJavaPackage were invalid
+* `Fix` Issue where the timeout parameter of timers.keepAlive did not work
+* `Fix` Issue where floaty.window/rawWindow methods could not accept string parameters _[`issue #467`](http://issues.autojs6.com/467)_
+* `Fix` Issue where floaty.rawWindow could display some controls incorrectly due to an incorrect context being passed
+* `Fix` Issue where util.isString method was invalid
+* `Fix` Issue where util.class[Name]/getClass[Name] could return incorrect results
+* `Fix` Issue where util.java.array could not properly use type parameters such as Boolean
+* `Fix` Issue where objects returned by threads.disposable() could be unexpectedly boxed when accessing stored data _[`issue #435`](http://issues.autojs6.com/435)_
+* `Fix` Issue where style options of the floating log window could not reset properly when console.build was called multiple times
+* `Fix` Issue where (title/content)BackgroundColor options of console.build could override transparency or tint options _[`issue #458`](http://issues.autojs6.com/458)_
+* `Fix` Issue where console/toast and related methods could lose trailing zeros when displaying Java Double values
+* `Fix` Issue where console/toast and related methods could not display BigInt values
+* `Fix` Issue where the toast method could cause memory leaks due to holding a strong reference to the Toast instance
+* `Fix` Issue where some global objects could lose JavaScript prototype properties and methods
+* `Fix` Issue where the this object could point incorrectly when JavaScript expressions were used as attribute values in XML syntax
+* `Fix` Issue where the linkify option parameter of dialogs.build did not work
+* `Fix` Issue where dialogs.build could break original data in object parameters
+* `Fix` Incorrect internal frame rate calculation in the setMaxFps method of the canvas element control
+* `Fix` Incorrect width calculation when images.concat performed vertical concatenation
+* `Fix` Issue where canceling authorization in images.requestScreenCapture could crash the app
+* `Fix` Issue where screenshots obtained by images.captureScreen could have incorrect orientation or black border padding _[`issue #337`](http://issues.autojs6.com/337)_
+* `Fix` Issue where 1 could be incorrectly parsed as a percentage when some images-related methods used region parameters
+* `Fix` Issue where the oneShot flag could fail when exceptions occurred in some images-related methods _[`issue #372`](http://issues.autojs6.com/372)_
+* `Fix` Issue where some images-related methods could cause memory leaks _[`issue #372`](http://issues.autojs6.com/372)_
+* `Fix` Issue where images.save and ImageWrapper#saveTo could not properly write files when the input path did not exist
+* `Fix` Issue where ImageWrapper#recycle failed to recycle image resources
+* `Fix` Issue where some overloaded ocr methods might not work properly
+* `Fix` Issue where results obtained by ocr.detect might not match ocr.mode _[`issue #468`](http://issues.autojs6.com/468)_
+* `Fix` Issue where accessibility events registered by auto.registerEvent could be mistakenly cleared by other scripts _[`issue #466`](http://issues.autojs6.com/466)_ _[`issue #343`](http://issues.autojs6.com/343#issuecomment-3263953918)_
+* `Fix` Issue where UiObject#child could throw ArrayIndexOutOfBoundsException on Android 10 _[`issue #416`](http://issues.autojs6.com/416)_
+* `Fix` Issue where built-in module method calls could run into inconsistent Rhino context problems
+* `Fix` Issue where creating a large number of floating windows in scripts could leave residual windows after script exit
+* `Fix` Issue where project.json configuration parameters might not be parsed properly when running a project
+* `Fix` Issue where the excludedDirs parameter in project.json could cause configuration parsing failure during project packaging _[`issue #428`](http://issues.autojs6.com/428)_
+* `Fix` Issue where packaging might not work properly on Android 7.x
+* `Fix` Issue where original key names could be modified when saving script project configuration files
+* `Fix` Issue where very large build version codes or build times in script project configuration files could crash the app
+* `Fix` Issue where frequent fetching or rebuilding of ImageReader could crash the app due to no available frame in the buffer
+* `Fix` Issue where the input event observer InputEventObserver could cause noticeable app startup lag
+* `Fix` Issue where Shizuku user service processes did not terminate properly and accumulated _[`issue #474`](http://issues.autojs6.com/474)_
+* `Fix` Issue where packaged apps could not properly use Paddle OCR and Rapid OCR features
+* `Fix` Issue where key values in packaged app configuration file project.json could be modified unexpectedly
+* `Fix` Issue where checkbox icons could flicker when scrolling the "Required Permissions" list on the packaged app configuration page
+* `Fix` Issue where statistics on the Release History page could be displayed incompletely on some systems due to font differences
+* `Fix` Issue where MLKit Google OCR could not initialize properly on some devices (tentative fix) _[`issue #8`](http://issues.autojs6.com/8#issuecomment-3117061768)_
+* `Fix` Issue where file manager function buttons could not properly receive click events on some devices (tentative fix) _[`issue #465`](http://issues.autojs6.com/465)_
+* `Fix` Issue where blank lines in the code editor displayed box glyphs on some devices (tentative fix)
+* `Fix` Issue where the soft keyboard could block text content in the code editor
+* `Fix` Issue where code content could still be edited in read-only mode in the code editor
+* `Fix` Issue where tapping the title area or some menu items in read-only mode in the code editor could crash the app
+* `Fix` Issue where loading large files in the code editor could crash the app (tentative fix)
+* `Fix` Abnormal initialization of function button states when the code editor automatically opened a new file
+* `Fix` Issue where putting the app in background while editing a file in the code editor could crash the app
+* `Fix` Issue where tapping the fx button in the code editor on Android 15+ could not show the quick panel for module functions (tentative fix)
+* `Fix` Issue where ErrorDialogActivity could fail to start properly or disappear automatically in a short time _[`issue #479`](http://issues.autojs6.com/479)_ _[`issue #471`](http://issues.autojs6.com/471)_ _[`issue #414`](http://issues.autojs6.com/414)_ _[`issue #340`](http://issues.autojs6.com/340#issuecomment-2973485826)_
+* `Fix` Incorrect accepted parameter types for the Canvas constructor _[`issue #402`](http://issues.autojs6.com/402)_
+* `Fix` Issue where copying detailed information on the crash report page did not work
+* `Fix` Issue where custom back navigation logic stopped working on Android 16+, causing abnormal back behavior
+* `Fix` Issue where the app could crash when pressing the back button or switching tabs after displaying file manager search results
+* `Fix` Issue where the UI did not refresh automatically after deleting project folders in the file manager
+* `Fix` Issue where the app could crash when task panel list items changed frequently
+* `Fix` Issue where navigation bar foreground color could behave abnormally with night mode when using "three-button" gesture navigation
+* `Fix` Issue where the APK file type information dialog might fail to obtain app name and SDK information
+* `Fix` Issue where in client mode, disconnecting and reconnecting shortly after connecting could lead to handshake timeout and make reconnection difficult
+* `Fix` Issue where in client mode, actions such as screen rotation or language switching that recreated the Activity always caused AutoJs6 to reconnect
+* `Fix` Issue where in server mode, actions such as screen rotation or language switching that recreated the Activity caused the VSCode console to stop outputting logs _[`issue #385`](http://issues.autojs6.com/385)_
+* `Fix` Issue where connecting to the VSCode plugin in multiple ways at the same time could multiply the number of printed logs
+* `Fix` Issue where code generation on the layout analysis page could fail for collection controls (tentative fix) _[`issue #328`](http://issues.autojs6.com/328)_
+* `Fix` Issue where the "Use 'Volume Down' Key to Control Recording" switch on the Settings page did not work _[`issue #480`](http://issues.autojs6.com/480)_
+* `Fix` Issue where coordinate values in code files generated by script recording might not match actual screen pixel values _[`issue #480`](http://issues.autojs6.com/480)_
+* `Fix` Issue where the first recorded action (such as tap or swipe) in code files generated by script recording was always ignored
+* `Fix` Issue where background file operations from the floating button "Run Script" dialog could crash the app
+* `Fix` Issue where the floating button state could reset when re-entering the home page after the home Activity lifecycle ended
+* `Fix` Issue where the Xiaomi device "Display over other apps" switch could jump to the wrong settings page
+* `Fix` Issue where after aborting update download, network packets could still continue downloading in the background (tentative fix)
+* `Fix` Issue where the Rebuild Project task could not complete properly when isCleanup[Paddle/Rapid]Ocr option was enabled in build tools
+* `Improvement` Pluginized Paddle OCR (PP-OCRv3) related features _[`issue #334`](http://issues.autojs6.com/334)_ _[`issue #331`](http://issues.autojs6.com/331)_ _[`issue #325`](http://issues.autojs6.com/325)_
+* `Improvement` Enhanced compatibility of runtime.loadJar method (by [LYS86](https://github.com/LYS86)) _[`pr #475`](http://pr.autojs6.com/475)_
+* `Improvement` Improved compatibility of ui.getStatusBarHeight method/statusBarHeight property (getter) to a certain extent
+* `Improvement` console.log and related methods now support displaying detailed information when printing global objects (images, app, ocr, etc.)
+* `Improvement` dialogs.build method now supports native MaterialDialog.Builder option parameters
+* `Improvement` dialogs.build method now supports loose string matching for animation/linkify option parameters
+* `Improvement` Improved stability and consistency of screen orientation and width/height data obtained by device.rotation/rotation/width/height methods
+* `Improvement` Improved execution efficiency and compatibility of app.launchDual/startDualActivity and related methods
+* `Improvement` android.graphics.Paint#setColor now properly parses color parameters such as ColorInt/ColorHex/ColorName
+* `Improvement` Exception messages for argument types of built-in module-related methods now include type summary information
+* `Improvement` Built-in modules (dayjs/cheerio/dayjs/i18n) now use global lazy loading instead of script execution mode
+* `Improvement` When printing huge data through console-related methods, some content is properly omitted according to upper limits to reduce print time
+* `Improvement` Initial countdown value of the console floating window increased from 6 seconds to 9 seconds
+* `Improvement` Internal implementation of the console floating window is now lock-free and queue-based, improving parameter setting efficiency and success rate
+* `Improvement` Background color behavior-related APIs (alpha/tint/base color) of the console floating window now better align with Android design conventions _[`issue #458`](http://issues.autojs6.com/458)_
+* `Improvement` Optimized menu collapse timing when tapping menu items after expanding the floating button in the file manager
+* `Improvement` File manager/task panel now supports showing file/task count statistics
+* `Improvement` When saving files fails in the code editor, they are automatically saved as drafts and support Save As to a new file
+* `Improvement` Improved smoothness to a certain extent when loading large files in the code editor
+* `Improvement` Code editor "Find/Replace" now supports state persistence and real-time display of search count information
+* `Improvement` When prompting to save in the code editor, it now ensures saving succeeds before exiting the editor to reduce save failure rate
+* `Improvement` State of the code editor save button now better matches user expectations
+* `Improvement` Code editor now supports long-press functionality for keys such as "-", "=", "(", "[", "{", "<"
+* `Improvement` Packaged app build process dialog now includes an "Abort" button
+* `Improvement` Improved display behavior of the packaged app build process dialog and added elapsed time statistics
+* `Improvement` When installing packaged apps with new configuration, related configuration of the old app will be overwritten
+* `Improvement` Packaged app configuration page now checks required permissions by default (WAKE_LOCK/INTERNET/WRITE_EXTERNAL_STORAGE/...) _[`issue #397`](http://issues.autojs6.com/397)_
+* `Improvement` Packaged app configuration page now supports reading/configuring more options (show logs on launch/show splash screen on launch/splash slug text/...)
+* `Improvement` Packaged app settings page now includes a foreground service switch _[`issue #406`](http://issues.autojs6.com/406)_
+* `Improvement` Key name conflict detection added when saving script project configuration files to prevent ambiguous keys
+* `Improvement` Crash report page now supports pinch-to-zoom font resizing and adds common function buttons
+* `Improvement` App launcher icons now support adaptive icon features _[`issue #405`](http://issues.autojs6.com/405)_
+* `Improvement` Rhino engine now falls back to raw reflection types when generic signature parsing fails, improving reflective method availability on lower Android versions
+* `Improvement` Divider lines added to switch-type items in the home drawer; tapping the title text area now shows detail dialogs and supports quick jump to system settings when needed
+* `Improvement` When starting or restarting AutoJs6, tapping the title text area of "Client Mode" in the home drawer now supports aborting an ongoing connection attempt
+* `Improvement` Client mode now supports connecting via IPv6 addresses and domain names
+* `Improvement` Client mode now supports detection prompts for special-purpose IPv4 addresses (loopback/broadcast/multicast/reserved/...)
+* `Improvement` Client mode now supports connection status display and management (correct address/abort connection)
+* `Improvement` Server mode now supports showing the number of connected clients
+* `Improvement` Reading notification permission now supports automatic reconnect mechanism ([requestRebind](https://developer.android.com/reference/android/service/notification/NotificationListenerService#requestRebind(android.content.ComponentName))) to improve stability of notification-listening related features
+* `Improvement` Floating button now improves safety when launching Activities from background to avoid app crashes
+* `Improvement` Floating button "More" dialog now uses asynchronous data loading for smoother display
+* `Improvement` Floating button "Run Script" dialog now includes a "Home" menu item
+* `Improvement` Floating button "Run Script" dialog now supports minimization and state restoration, and does its best to keep the window resident or restore it automatically
+* `Improvement` Script recording and playback now support Shizuku permission (playback smoothness may be somewhat affected) _[`issue #320`](http://issues.autojs6.com/320)_
+* `Improvement` Theme color settings page now uses a fast positioning method when locating theme colors to improve efficiency
+* `Improvement` Replaced deprecated [LocalBroadcastManager](https://developer.android.com/jetpack/androidx/releases/localbroadcastmanager) with [LiveData](https://developer.android.com/topic/libraries/architecture/livedata) and [SharedFlow](https://developer.android.com/kotlin/flow/stateflow-and-sharedflow)
+* `Improvement` Gradle build scripts now improve extraction efficiency for 7z files
+* `Improvement` Gradle build scripts now support obtaining detailed Android Studio IDE version (such as "2025.1.4.7")
+* `Improvement` Gradle build scripts now support automatically generating data required by VersionCodesList class to reduce script startup delay
+* `Improvement` Use [Version Catalogs](https://developer.android.com/build/migrate-to-catalogs) to centrally manage Gradle dependency and plugin versions
+* `Improvement` Modularized Gradle build scripts, moved shared build logic into build-logic, and abstracted it as convention plugins
+* `Improvement` Use Gradle convention plugins to simplify loading logic of local AAR libraries
+* `Improvement` Removed the "android.enableJetifier=true" Gradle option to adapt to Gradle 9
+* `Improvement` Use [Toolchain](https://docs.gradle.org/current/userguide/toolchains.html) instead of sourceCompatibility/targetCompatibility to reduce build environment differences
+* `Dependency` Modularized Expandable Layout version 1.6.0
+* `Dependency` Modularized Expandable RecyclerView version 3.0.0-RC1
+* `Dependency` Modularized Recyclerview Flexible Divider version 1.4.0
+* `Dependency` Localized Root Shell version 1.6
+* `Dependency` Added AndroidX Activity (KTX) version 1.12.2
+* `Dependency` Added AndroidX Core (KTX) version 1.15.0
+* `Dependency` Added AndroidX Work Runtime version 2.11.0
+* `Dependency` Added AndroidX Interpolator version 1.0.0
+* `Dependency` Added Room RxJava2 version 2.8.1
+* `Dependency` Upgraded Android SDK version 35 -> 36
+* `Dependency` Upgraded Gradle 8 version 8.14 -> 8.14.4
+* `Dependency` Upgraded Gradle 9 version 8.14 -> 9.4.0
+* `Dependency` Upgraded Rhino version 1.8.1-SNAPSHOT -> 2.0.0-SNAPSHOT
+* `Dependency` Upgraded Desugar JDK Libs version 2.0.4 -> 2.1.5
+* `Dependency` Upgraded Android Material version 1.12.0 -> 1.13.0
+* `Dependency` Upgraded AndroidX AppCompat version 1.7.0 -> 1.7.1
+* `Dependency` Upgraded AndroidX Room version 2.7.1 -> 2.7.2
+* `Dependency` Upgraded AndroidX WebKit version 1.13.0 -> 1.14.0
+* `Dependency` Upgraded Material Progressbar version 1.4.2 -> 1.6.1
+* `Dependency` Upgraded Apache Commons version 3.16.0 -> 3.18.0
+* `Dependency` Upgraded Retrofit2 Retrofit version 2.11.0 -> 2.12.0
+* `Dependency` Upgraded Retrofit2 Converter Gson version 2.11.0 -> 2.12.0
+* `Dependency` Upgraded Retrofit2 RxJava2 version 2.11.0 -> 2.12.0
+* `Dependency` Upgraded Joda Time version 2.12.7 -> 2.14.0
+* `Dependency` Upgraded Gson version 2.11.0 -> 2.13.1
+* `Dependency` Upgraded ARSCLib version 1.3.1 -> 1.3.5
+* `Dependency` Upgraded Jsoup version 1.19.1 -> 1.20.1
+* `Dependency` Upgraded Junit Jupiter version 5.10.3 -> 5.13.0
+* `Dependency` Upgraded OpenCC version 1.2.0 -> 1.2.2
+* `Dependency` Removed Android Support Annotation v7 version 28.0.0
+* `Dependency` Removed Android Support AppCompat v7 version 28.0.0
+* `Dependency` Removed Android Support RecyclerView v7 version 28.0.0
 
 # v6.6.4
 
@@ -16,13 +239,13 @@
 * `Fix` Code editor might write files with low-confidence encoding causing decoding errors (attempted fix)
 * `Improvement` Improved layout adaptability on the App and Developer pages and removed unnecessary layout categories
 * `Improvement` README.md build section added multiple methods to help locate the target settings page _[`issue #404`](http://issues.autojs6.com/404)_
-* `Dependency` Added Androidx ConstraintLayout version 2.2.1
+* `Dependency` Added AndroidX ConstraintLayout version 2.2.1
 
 # v6.6.3
 
 ###### 2025/05/27
 
-* `Feature` Version history feature: view multi-language release changelogs and statistics
+* `Feature` Release history feature: view multi-language release changelogs and statistics
 * `Feature` timers.keepAlive method (now global) for keeping the script alive
 * `Feature` Event listeners such as engines.on('start/stop/error', callback) for global engine events
 * `Feature` images.detectMultiColors method for multi-point color verification _[`issue #374`](http://issues.autojs6.com/374)_
@@ -32,9 +255,10 @@
 * `Feature` ui.keepScreenOn method to keep the device screen on while a UI page is focused
 * `Feature` ui.root property (getter) to obtain the "window content root container" node of the UI layout
 * `Feature` webview element now supports JsBridge-based web page layouts (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) [see Sample Code > Layout > Interactive HTML / Vue2 + Vant (SFC)] _[`issue #281`](http://issues.autojs6.com/281)_
+* `Feature` Layout Inspector supports hiding controls (by [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #371`](http://pr.autojs6.com/371)_ _[`issue #355`](http://issues.autojs6.com/355)_
 * `Fix` Online docs in the Home > Docs tab and Docs activity may be covered by the system navigation bar
 * `Fix` Clicking Toolbar buttons on some pages could accidentally trigger the title click event
-* `Fix` Blank lines in the code editor showed box glyphs on some devices
+* `Fix` Blank lines in the code editor showed box glyphs on some devices (tentative fix)
 * `Fix` Color-picker dialog in the theme-color settings page could stack infinitely
 * `Fix` Volume-up key failed to stop all scripts when the accessibility service was disabled
 * `Fix` IME overlay issue when editing custom broadcast content in the Scheduled Tasks page
@@ -53,7 +277,6 @@
 * `Fix` engines.all could trigger ConcurrentModificationException _[`issue #394`](http://issues.autojs6.com/394)_
 * `Fix` Incorrect date formats in some languages within README.md
 * `Fix` Gradle build could fail due to invalid library archive length _[`issue #389`](http://issues.autojs6.com/389)_
-* `Improvement` Layout Inspector supports hiding controls (by [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #371`](http://pr.autojs6.com/371)_ _[`issue #355`](http://issues.autojs6.com/355)_
 * `Improvement` Added gradient separators to the Layout Inspector menu for lightweight grouping
 * `Improvement` project.json now supports a permissions option for script projects (by [wirsnow](https://github.com/wirsnow)) _[`pr #391`](http://pr.autojs6.com/391)_ _[`issue #362`](http://issues.autojs6.com/362)_
 * `Improvement` Automatically read and check declared permissions of installed apps when packaging a single file _[`issue #362`](http://issues.autojs6.com/362)_
@@ -63,7 +286,7 @@
 * `Improvement` Settings-page dialogs now offer a "Use default value" menu option
 * `Improvement` Floating Action Button in File Manager auto-hides when tapping elsewhere
 * `Improvement` Code formatter now supports operators such as `??`, `?.`, `??=`
-* `Improvement` Code editor supports reading and writing files encoded in GB18030 / UTF-16 (LE/BE) / Shift_JIS, etc.
+* `Improvement` Code editor supports reading and writing files encoded in GB18030 / UTF-16 (LE/BE) / Shift_JIS, etc
 * `Improvement` Code editor supports displaying detailed file information (path/encoding/line break format/total bytes and characters, etc.) _[`issue #395`](http://issues.autojs6.com/395)_
 * `Improvement` Added operation-error prompts for intent actions (edit / view / install / send / play, etc.)
 * `Improvement` webview element's url attribute supports relative paths
@@ -77,8 +300,8 @@
 * `Improvement` Increased efficiency when checking APK signature information
 * `Improvement` Optimized dialog display efficiency and information presentation for APK/media file type info
 * `Improvement` Gradle build script now better adapts to newer versions _[`discussion #369`](http://discussions.autojs6.com/369)_
-* `Dependency` Bundled Material Dialogs 0.9.6.0 (localized)
-* `Dependency` Bundled Material Date Time Picker 4.2.3 (localized)
+* `Dependency` Bundled Material Dialogs 0.9.6.0 (modularized)
+* `Dependency` Bundled Material Date Time Picker 4.2.3 (modularized)
 * `Dependency` Bundled libimagequant 2.17.0 (localized)
 * `Dependency` Bundled libpng 1.6.49 (localized)
 * `Dependency` Added ICU4J 77.1
@@ -86,13 +309,13 @@
 * `Dependency` Added Material Progressbar 1.4.2
 * `Dependency` Added Flexmark Java HTML to Markdown 0.64.8
 * `Dependency` Upgraded Gradle 8.14-rc-1 -> 8.14
-* `Dependency` Upgraded Androidx Room 2.7.0 -> 2.7.1
+* `Dependency` Upgraded AndroidX Room 2.7.0 -> 2.7.1
 
 # v6.6.2
 
 ###### 2025/04/16
 
-* `Feature` Methods such as ui.statusBarAppearanceLight, statusBarAppearanceLightBy, navigationBarColor, etc.
+* `Feature` Methods such as ui.statusBarAppearanceLight, statusBarAppearanceLightBy, navigationBarColor, etc
 * `Feature` ui.statusBarHeight attribute (getter) for obtaining the status bar height _[`issue #357`](http://issues.autojs6.com/357)_
 * `Feature` images.flip method for image flipping _[`issue #349`](http://issues.autojs6.com/349)_
 * `Feature` Added "file extension" option in the settings page
@@ -116,7 +339,7 @@
 * `Fix` Issue where rapid consecutive clicks on dialog-type items in the settings page could cause the app to crash
 * `Improvement` Streamlined the APK file size for the packaged application template
 * `Improvement` Enhanced app (and packaged apps) support for more permissions _[`issue #338`](http://issues.autojs6.com/338)_
-* `Improvement` Added support for the Pinyin library option on the packaging page
+* `Improvement` Packaging app configuration page now supports Pinyin library options
 * `Improvement` Optimized the status bar background and text color on the main activity page of packaged apps
 * `Improvement` Added special permission toggles (such as access all files and send notifications) to the packaged app settings page _[`issue #354`](http://issues.autojs6.com/354)_
 * `Improvement` Automatically switched control text and icon colors based on the brightness of the theme color
@@ -143,9 +366,9 @@
 * `Dependency` Upgraded Android SDK version from 34 to 35
 * `Dependency` Upgraded Gradle from 8.12 to 8.14-rc-1
 * `Dependency` Upgraded Rhino from 1.8.0-SNAPSHOT to 1.8.1-SNAPSHOT
-* `Dependency` Upgraded Androidx Recyclerview from 1.3.2 to 1.4.0
-* `Dependency` Upgraded Androidx Room from 2.6.1 to 2.7.0
-* `Dependency` Upgraded Androidx WebKit from 1.12.1 to 1.13.0
+* `Dependency` Upgraded AndroidX Recyclerview from 1.3.2 to 1.4.0
+* `Dependency` Upgraded AndroidX Room from 2.6.1 to 2.7.0
+* `Dependency` Upgraded AndroidX WebKit from 1.12.1 to 1.13.0
 * `Dependency` Upgraded Pinyin4j from 2.5.0 to 2.5.1
 
 # v6.6.1
@@ -162,7 +385,7 @@
 * `Fix` Incorrect parameter type restrictions for the automator.click/longClick methods _[`issue #275`](http://issues.autojs6.com/275)_
 * `Fix` Issue where selectors did not support ConsString type parameters _[`issue #277`](http://issues.autojs6.com/277)_
 * `Fix` Missing methods and properties on UiObjectCollection instances
-* `Improvement` The packaging page supports signature configuration, keystore management, and permission settings (by [luckyloogn]()) _[`pr #286`]()_
+* `Improvement` Packaging app configuration page now supports signing configuration, keystore management, and permission settings (by [luckyloogn](https://github.com/luckyloogn)) _[`pr #286`](http://pr.autojs6.com/286)_
 * `Improvement` Improved accuracy in identifying the current package name and activity name of the floating window (Priority: Shizuku > Root > A11Y)
 * `Improvement` Improved accuracy in recognizing `currentPackage` and `currentActivity` (Priority: Shizuku > Root > A11Y)
 * `Improvement` Restore the ability to select text content of individual entries in the log activity window via double-click or long press _[`issue #280`](http://issues.autojs6.com/280)_
@@ -180,7 +403,7 @@
 
 ###### 2024/12/02 - Built-in module rewrite, upgrade cautiously
 
-* `Hint` The built-in modules are rewritten in Kotlin to enhance script execution efficiency, but iterative improvements are needed.
+* `Hint` The built-in modules are rewritten in Kotlin to enhance script execution efficiency, but iterative improvements are needed
 * `Hint` The built-in init.js file is empty by default, allowing developers to extend built-in modules or mount external modules.
 * `Feature` Axios module / Cheerio module (Ref to [AutoX](https://github.com/kkevsekk1/AutoX))
 * `Feature` SQLite module for simple operations on SQLite databases (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (See project documentation > [SQLite](https://docs.autojs6.com/#/sqlite))
@@ -191,9 +414,9 @@
 * `Feature` Layout analysis supports window switching (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
 * `Feature` auto.clearCache method supports clearing control caches (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
 * `Feature` threads.pool method supports simple application of thread pools (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
-* `Feature` images.matchTemplate method adds useTransparentMask option parameter to support transparent image search (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
+* `Feature` images.matchTemplate method supports the useTransparentMask option parameter, enabling transparent template matching (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
 * `Feature` images.requestScreenCaptureAsync method for asynchronously requesting screenshot permissions in UI mode (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
-* `Feature` images.requestScreenCapture method adds isAsync option parameter to support asynchronous screenshot capture (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
+* `Feature` images.requestScreenCapture method supports the isAsync option parameter, enabling asynchronous screen capture (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
 * `Feature` images.on('screen_capture', callback) and other event listener methods support listening for screen capture availability events (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
 * `Feature` images.stopScreenCapture method supports actively releasing resources related to screenshot applications (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
 * `Feature` Images.psnr/mse/ssim/mssim/hist/ncc and images.getSimilarity methods for obtaining image similarity metrics
@@ -236,7 +459,7 @@
 * `Fix` Issue with potentially omitting end characters when jumping to line end in code editor
 * `Fix` Issue with flickering screen when starting log activity page on main activity page
 * `Fix` Issue with packaged app unable to use opencc module properly
-* `Improvement` Click prompt experience for 'Unavailable ABI' control on package page
+* `Improvement` Improved tap hint experience for the "Unavailable ABI" control on the packaging app configuration page
 * `Improvement` Supports using Shizuku to control 'Pointer Location' display switch
 * `Improvement` Supports using Shizuku to control 'Projection Media' and 'Modify Secure Settings' permission switches
 * `Improvement` Automator.gestureAsync/gesturesAsync supports callback function parameters
@@ -249,11 +472,11 @@
 * `Improvement` Code editor supports intelligently determining insertion location when importing Java classes and package names
 * `Improvement` images module supports using paths directly as image parameters
 * `Improvement` importPackage supports string parameters
-* `Improvement` Server mode IP address supports clipboard import with intelligent recognition and smart conversion with space key
+* `Improvement` In client mode, the IP address supports smart recognition when importing from the clipboard and also supports intelligent conversion of space-key input
 * `Improvement` File manager supports default prefix selection when creating new files and automatically generates appropriate numeric suffix
 * `Improvement` File manager specifically informs on exception message when running project _[`issue #268`](http://issues.autojs6.com/268)_
 * `Improvement` File manager supports more types and displays corresponding icon symbols (supports over 800 file types)
-* `Improvement` Editable file types (jpg/doc/pdf, etc.) in file manager have added edit buttons
+* `Improvement` Editable file types (jpg/doc/pdf/...) in file manager have added edit buttons
 * `Improvement` APK files in file manager support viewing basic information, Manifest information, and permissions list
 * `Improvement` Audio/video media files in file manager support viewing basic information and MediaInfo information
 * `Improvement` Package single file support auto-fill appropriate standardized package name and invalid character filter prompt
@@ -270,9 +493,9 @@
 * `Dependency` Upgrade Gradle version from 8.5 -> 8.11.1
 * `Dependency` Upgrade Rhino version 1.7.15-SNAPSHOT -> 1.8.0-SNAPSHOT
 * `Dependency` Upgrade Android Material version 1.10.0 -> 1.12.0
-* `Dependency` Upgrade Androidx Annotation version 1.7.0 -> 1.9.1
-* `Dependency` Upgrade Androidx AppCompat version 1.6.1 -> 1.7.0
-* `Dependency` Upgrade Androidx WebKit version 1.8.0 -> 1.12.1
+* `Dependency` Upgrade AndroidX Annotation version 1.7.0 -> 1.9.1
+* `Dependency` Upgrade AndroidX AppCompat version 1.6.1 -> 1.7.0
+* `Dependency` Upgrade AndroidX WebKit version 1.8.0 -> 1.12.1
 * `Dependency` Upgrade Apache Commons version 3.13.0 -> 3.16.0
 * `Dependency` Upgrade ARSCLib version 1.2.4 -> 1.3.1
 * `Dependency` Upgrade Gson version 2.10.1 -> 2.11.0
@@ -294,10 +517,10 @@
 
 * `Feature` opencc module (Refer to project documentation > [Chinese Conversion](https://docs.autojs6.com/#/opencc)) (Ref to [LZX284](https://github.com/SuperMonster003/AutoJs6/pull/187/files#diff-8cff73265af19c059547b76aca8882cbaa3209291406f52df1dafbbc78e80c46R268))
 * `Feature` UiSelector adds [plus](https://docs.autojs6.com/#/uiObjectType?id=m-plus) and [append](https://docs.autojs6.com/#/uiObjectType?id=m-append) methods _[`issue #115`](http://issues.autojs6.com/115)_
-* `Feature` Packaging application page adds support for filtering ABIs and libraries (Ref to [AutoX](https://github.com/kkevsekk1/AutoX)) _[`issue #189`](http://issues.autojs6.com/189)_
+* `Feature` Packaging app configuration page now supports filtering for ABI and libraries (Ref to [AutoX](https://github.com/kkevsekk1/AutoX)) _[`issue #189`](http://issues.autojs6.com/189)_
 * `Fix` Abnormally large file size issue in packaged applications (Ref to [AutoX](https://github.com/kkevsekk1/AutoX) / [LZX284](https://github.com/SuperMonster003/AutoJs6/pull/187/files#diff-d932ac49867d4610f8eeb21b59306e8e923d016cbca192b254caebd829198856R61)) _[`issue #176`](http://issues.autojs6.com/176)_
 * `Fix` Issue where packaged applications cannot display and print some exception messages
-* `Fix` Issue where selecting application icon on packaging application page might show empty icon
+* `Fix` Fixed an issue where a blank app icon could appear after selecting an app icon on the packaging app configuration page
 * `Fix` Context not initialized exception when packaging application includes MLKit Google OCR library
 * `Fix` ocr.recognizeText/detect methods not working
 * `Fix` Mismatch between displayed language and application setting language for some texts (such as log page)
@@ -317,14 +540,14 @@
 * `Fix` Issue where long-press delete in code editor might cause application crash (attempted fix)
 * `Fix` Issue where fx button in code editor cannot show module function quick panel
 * `Fix` Issue where module function quick panel button function name might overflow in code editor
-* `Improvement` The code editor module's quick function panel adapts to night mode.
-* `Improvement` The startup page of the packaged application is adapted to night mode, and the layout of application icons is adjusted.
-* `Improvement` The packaged application page supports cursor navigation using the ENTER key on the software keyboard.
-* `Improvement` The packaged application page supports toggling select-all state by clicking on ABI and library titles.
-* `Improvement` The default ABI selection is made intelligent on the packaged application page with added guide prompts for unselectable items.
-* `Improvement` The file manager adjusts the display of menu items based on the type and characteristics of files and folders.
-* `Improvement` The file manager's folder right-click menu adds a packaging application option.
-* `Improvement` When accessibility services are enabled but malfunction, an abnormal state is reflected in the drawer switch of the AutoJs6 homepage.
+* `Improvement` The code editor module's quick function panel adapts to night mode
+* `Improvement` The startup page of the packaged application is adapted to night mode, and the layout of application icons is adjusted
+* `Improvement` Packaging app configuration page now supports using the soft keyboard ENTER key to move the cursor focus
+* `Improvement` Packaging app configuration page now supports tapping ABI headings and library headings to toggle select-all state
+* `Improvement` Packaging app configuration page now uses smarter default ABI selection and adds guidance hints for unavailable options
+* `Improvement` The file manager adjusts the display of menu items based on the type and characteristics of files and folders
+* `Improvement` The file manager's folder right-click menu adds a packaging application option
+* `Improvement` When accessibility services are enabled but malfunction, an abnormal state is reflected in the drawer switch of the AutoJs6 homepage
 * `Improvement` The console includes detailed stack information when printing error messages.
 * `Dependency` Added ARSCLib version 1.2.4
 * `Dependency` Added Flexbox version 3.0.0
@@ -335,7 +558,7 @@
 
 ###### 2023/11/15
 
-* `Feature` Added inputSingleLine option parameter property to dialogs.build()
+* `Feature` dialogs.build method supports the inputSingleLine option parameter
 * `Feature` Added console.setTouchable method _[`issue #122`](http://issues.autojs6.com/122)_
 * `Fix` Issue where some methods in ocr module could not recognize region parameters _[`issue #162`](http://issues.autojs6.com/162)_  _[`issue #175`](http://issues.autojs6.com/175)_
 * `Fix` Issue where version details could not be retrieved when a new version is found on Android 7.x
@@ -420,12 +643,12 @@
 * `Dependency` Upgraded Apache Commons Lang3 version from 3.12.0 -> 3.13.0
 * `Dependency` Upgraded Glide version from 4.15.1 -> 4.16.0
 * `Dependency` Upgraded Android Analytics version from 14.3.0 -> 14.4.0
-* `Dependency` Upgraded Androidx WebKit version from 1.7.0 -> 1.8.0
-* `Dependency` Upgraded Androidx Preference version from 1.2.0 -> 1.2.1
-* `Dependency` Upgraded Androidx Annotation version from 1.6.0 -> 1.7.0
-* `Dependency` Upgraded Androidx Recyclerview version from 1.3.0 -> 1.3.2
+* `Dependency` Upgraded AndroidX WebKit version from 1.7.0 -> 1.8.0
+* `Dependency` Upgraded AndroidX Preference version from 1.2.0 -> 1.2.1
+* `Dependency` Upgraded AndroidX Annotation version from 1.6.0 -> 1.7.0
+* `Dependency` Upgraded AndroidX Recyclerview version from 1.3.0 -> 1.3.2
 * `Dependency` Upgraded Android Material version from 1.9.0 -> 1.10.0
-* `Dependency` Upgraded Androidx AppCompat version from 1.4.2 -> 1.6.1
+* `Dependency` Upgraded AndroidX AppCompat version from 1.4.2 -> 1.6.1
 * `Dependency` Upgraded Commons IO version from 2.8.0 -> 2.14.0
 * `Dependency` Upgraded Jackson DataBind version from 2.13.3 -> 2.14.3
 * `Dependency` Removed Zeugma Solutions LocaleHelper version 1.5.1
@@ -520,7 +743,7 @@
 * `Improvement` Auto-reconnected last used address in Client Mode on AutoJs6 launch when it was abnormally closed
 * `Dependency` Upgraded LeakCanary version from 2.10 -> 2.11
 * `Dependency` Upgraded Android Material version from 1.8.0 -> 1.9.0
-* `Dependency` Upgraded Androidx WebKit version from 1.6.1 -> 1.7.0
+* `Dependency` Upgraded AndroidX WebKit version from 1.6.1 -> 1.7.0
 * `Dependency` Upgraded OkHttp3 version from 3.10.0 -> 5.0.0-alpha.9 -> 5.0.0-alpha.11
 * `Dependency` Upgraded MLKit Text Recognition Chinese version from 16.0.0-beta6 -> 16.0.0
 
@@ -582,11 +805,11 @@
 * `Dependency` Upgraded Glide version 4.14.2 -> 4.15.1
 * `Dependency` Upgraded Joda Time version 2.12.2 -> 2.12.5
 * `Dependency` Upgraded Android Analytics version 14.0.0 -> 14.2.0
-* `Dependency` Upgraded Androidx WebKit version 1.5.0 -> 1.6.1
-* `Dependency` Upgraded Androidx Recyclerview version 1.2.1 -> 1.3.0
+* `Dependency` Upgraded AndroidX WebKit version 1.5.0 -> 1.6.1
+* `Dependency` Upgraded AndroidX Recyclerview version 1.2.1 -> 1.3.0
 * `Dependency` Upgraded Zip4j version 2.11.2 -> 2.11.5
 * `Dependency` Upgraded Junit Jupiter version 5.9.2 -> 5.9.3
-* `Dependency` Upgraded Androidx Annotation version 1.5.0 -> 1.6.0
+* `Dependency` Upgraded AndroidX Annotation version 1.5.0 -> 1.6.0
 * `Dependency` Upgraded Jackson DataBind version 2.14.1 -> 2.14.2
 * `Dependency` Upgraded Desugar JDK Libs version 2.0.0 -> 2.0.3
 
@@ -595,7 +818,7 @@
 ###### 2023/01/21
 
 * `Feature` Redesign and rewrite of project documentation (partially completed)
-* `Feature` Multi-language adaptation for Western/France/Russian/Arabic/Japanese/Korean/English/Traditional Chinese, etc.
+* `Feature` Multi-language adaptation for Western/France/Russian/Arabic/Japanese/Korean/English/Traditional Chinese, etc
 * `Feature` Added path selection/history/default value intelligent suggestion functions to the work path setting options
 * `Feature` File manager supports jumping to the parent directory of any directory (up to "Internal Storage")
 * `Feature` File manager supports setting any directory as the work path shortcut
@@ -693,7 +916,7 @@
 * `Dependency` Localized GitHub API version 1.306
 * `Dependency` Upgraded Android SDK version 32 -> 33
 * `Dependency` Added JCIP Annotations version 1.0
-* `Dependency` Added Androidx WebKit version 1.5.0
+* `Dependency` Added AndroidX WebKit version 1.5.0
 * `Dependency` Added Commons IO version 2.8.0
 * `Dependency` Added Desugar JDK Libs version 2.0.0
 * `Dependency` Added Jackson DataBind version 2.13.3
@@ -704,8 +927,8 @@
 * `Dependency` Upgraded Gradle build tool version 7.4.0-alpha02 -> 8.0.0-alpha09
 * `Dependency` Upgraded Kotlin Gradle plugin version 1.6.10 -> 1.8.0-RC2
 * `Dependency` Upgraded Android Material version 1.6.0 -> 1.7.0
-* `Dependency` Upgraded Androidx Annotation version 1.3.0 -> 1.5.0
-* `Dependency` Upgraded Androidx AppCompat version 1.4.1 -> 1.4.2
+* `Dependency` Upgraded AndroidX Annotation version 1.3.0 -> 1.5.0
+* `Dependency` Upgraded AndroidX AppCompat version 1.4.1 -> 1.4.2
 * `Dependency` Upgraded Android Analytics version 13.3.0 -> 14.0.0
 * `Dependency` Upgraded Gson version 2.9.0 -> 2.10
 * `Dependency` Upgraded Joda Time version 2.10.14 -> 2.12.1
@@ -749,8 +972,8 @@
 * `Feature` automator.lockScreen() and other methods (refer to Example Code > Accessibility Service > Android 9 New Additions)
 * `Feature` automator.headsethook() and other methods (refer to Example Code > Accessibility Service > Android 11 New Additions)
 * `Feature` automator.captureScreen() method (refer to Example Code > Accessibility Service > Take Screenshots)
-* `Feature` dialogs.build() option parameter properties animation, linkify, etc. (refer to Example Code > Dialogs > Customized Dialogs)
-* `Fix` Issues with dialogs.build() option parameter properties like inputHint, itemsSelectedIndex, etc.
+* `Feature` dialogs.build method supports option parameters such as animation, linkify, etc. (refer to Example Code > Dialogs > Customized Dialogs)
+* `Fix` inputHint, itemsSelectedIndex, and other option parameters of dialogs.build behave abnormally
 * `Fix` Issue with JsDialog#on('multi_choice') callback parameters
 * `Fix` Issue with UiObject#parent().indexInParent() always returning -1 _[`issue #16`](http://issues.autojs6.com/16)_
 * `Fix` Issue with Promise.resolve() returned Thenable not being called near the end of the script
@@ -834,9 +1057,9 @@
 * `Fix` Issues with client mode and server mode switch statuses not refreshing properly
 * `Fix` Issue with parsing UI mode text elements on Android 7.x (ref to [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`issue #4`](http://issues.autojs6.com/4)_ _[`issue #9`](http://issues.autojs6.com/9)_
 * `Improvement` Ignore sleep()'s ScriptInterruptedException
-* `Dependency` Added Androidx AppCompat (Legacy) version 1.0.2
-* `Dependency` Upgraded Androidx AppCompat version 1.4.0 -> 1.4.1
-* `Dependency` Upgraded Androidx Preference version 1.1.1 -> 1.2.0
+* `Dependency` Added AndroidX AppCompat (Legacy) version 1.0.2
+* `Dependency` Upgraded AndroidX AppCompat version 1.4.0 -> 1.4.1
+* `Dependency` Upgraded AndroidX Preference version 1.1.1 -> 1.2.0
 * `Dependency` Upgraded Rhino engine version 1.7.14-SNAPSHOT -> 1.7.14
 * `Dependency` Upgraded OkHttp3 version 3.10.0 -> 5.0.0-alpha.3 -> 5.0.0-alpha.4
 * `Dependency` Upgraded Android Material version 1.6.0-alpha01 -> 1.6.0-alpha02
@@ -889,7 +1112,7 @@
 * `Improvement` Extracted and removed duplicate local library files
 * `Dependency` Localized CrashReport version 2.6.6
 * `Dependency` Localized MutableTheme version 1.0.0
-* `Dependency` Added Androidx Preference version 1.1.1
+* `Dependency` Added AndroidX Preference version 1.1.1
 * `Dependency` Added SwipeRefreshLayout version 1.1.0
 * `Dependency` Upgraded Android SDK version 28 -> 30 -> 31
 * `Dependency` Upgraded Android Analytics version 7.0.0 -> 13.1.0
@@ -897,7 +1120,7 @@
 * `Dependency` Upgraded Gradle build tools version 3.2.1 -> 4.1.0 -> 7.0.3 -> 7.2.0-alpha04
 * `Dependency` Upgraded Android Job version 1.2.6 -> 1.4.2
 * `Dependency` Upgraded Android Material version 1.1.0-alpha01 -> 1.5.0-beta01
-* `Dependency` Upgraded Androidx MultiDex version 2.0.0 -> 2.0.1
+* `Dependency` Upgraded AndroidX MultiDex version 2.0.0 -> 2.0.1
 * `Dependency` Upgraded Apache Commons Lang3 version 3.6 -> 3.12.0
 * `Dependency` Upgraded Appcompat version 1.0.2 -> 1.4.0
 * `Dependency` Upgraded ButterKnife Gradle plugin version 9.0.0-rc2 -> 10.2.1 -> 10.2.3
