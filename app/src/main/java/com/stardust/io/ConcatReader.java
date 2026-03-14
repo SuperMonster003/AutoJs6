@@ -383,10 +383,17 @@ public class ConcatReader extends Reader {
     @Override
     public void close() throws IOException {
         if (closed) return;
+        IOException first = null;
         for (Reader reader : readerQueue) {
-            reader.close();
+            try {
+                reader.close();
+            } catch (IOException e) {
+                if (first == null) first = e;
+                else first.addSuppressed(e);
+            }
         }
         closed = true;
+        if (first != null) throw first;
     }
 
     /**
