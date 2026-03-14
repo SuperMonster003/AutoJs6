@@ -177,7 +177,7 @@ class Floaty(private val uiHandler: UiHandler, private val scriptRuntime: Script
 
         init {
             val context = uiHandler.applicationContext
-            val window = RawWindow(supplier).also { mWindow = it }
+            val window = RawWindow(mContext, supplier).also { mWindow = it }
             val r = Runnable {
                 context.startService(Intent(context, FloatyService::class.java))
                 FloatyService.addWindow(window)
@@ -332,5 +332,4 @@ class Floaty(private val uiHandler: UiHandler, private val scriptRuntime: Script
             }
         }
     }
-
 }

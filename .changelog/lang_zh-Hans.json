@@ -63,6 +63,7 @@
         "isJavaClass/isJavaPackage 等全局方法无效的问题",
         "timers.keepAlive 方法 timeout 参数功能无效的问题",
         "floaty.window/rawWindow 方法无法接受字符串参数的问题 _[`issue #467`](http://issues.autojs6.com/467)_",
+        "floaty.rawWindow 因传入错误的上下文导致部分控件显示异常的问题",
         "util.isString 方法无效的问题",
         "util.class[Name]/getClass[Name] 可能返回错误结果的问题",
         "util.java.array 无法正常使用 Boolean 等类型参数的问题",
