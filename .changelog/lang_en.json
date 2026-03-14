@@ -70,7 +70,7 @@
         "Settings-page dialogs now offer a \"Use default value\" menu option",
         "Floating Action Button in File Manager auto-hides when tapping elsewhere",
         "Code formatter now supports operators such as `??`, `?.`, `??=`",
-        "Code editor supports reading and writing files encoded in GB18030 / UTF-16 (LE/BE) / Shift_JIS, etc.",
+        "Code editor supports reading and writing files encoded in GB18030 / UTF-16 (LE/BE) / Shift_JIS, etc",
         "Code editor supports displaying detailed file information (path/encoding/line break format/total bytes and characters, etc.) _[`issue #395`](http://issues.autojs6.com/395)_",
         "Added operation-error prompts for intent actions (edit / view / install / send / play, etc.)",
         "webview element's url attribute supports relative paths",
@@ -101,7 +101,7 @@
     "v6.6.2": {
       "released_date": "2025/04/16",
       "feature": [
-        "Methods such as ui.statusBarAppearanceLight, statusBarAppearanceLightBy, navigationBarColor, etc.",
+        "Methods such as ui.statusBarAppearanceLight, statusBarAppearanceLightBy, navigationBarColor, etc",
         "ui.statusBarHeight attribute (getter) for obtaining the status bar height _[`issue #357`](http://issues.autojs6.com/357)_",
         "images.flip method for image flipping _[`issue #349`](http://issues.autojs6.com/349)_",
         "Added \"file extension\" option in the settings page",
@@ -129,7 +129,7 @@
       "improvement": [
         "Streamlined the APK file size for the packaged application template",
         "Enhanced app (and packaged apps) support for more permissions _[`issue #338`](http://issues.autojs6.com/338)_",
-        "Added support for the Pinyin library option on the packaging page",
+        "Packaging app configuration page now supports Pinyin library options",
         "Optimized the status bar background and text color on the main activity page of packaged apps",
         "Added special permission toggles (such as access all files and send notifications) to the packaged app settings page _[`issue #354`](http://issues.autojs6.com/354)_",
         "Automatically switched control text and icon colors based on the brightness of the theme color",
@@ -181,7 +181,7 @@
         "Missing methods and properties on UiObjectCollection instances"
       ],
       "improvement": [
-        "The packaging page supports signature configuration, keystore management, and permission settings (by [luckyloogn]()) _[`pr #286`]()_",
+        "Packaging app configuration page now supports signing configuration, keystore management, and permission settings (by [luckyloogn](https://github.com/luckyloogn)) _[`pr #286`](http://pr.autojs6.com/286)_",
         "Improved accuracy in identifying the current package name and activity name of the floating window (Priority: Shizuku > Root > A11Y)",
         "Improved accuracy in recognizing `currentPackage` and `currentActivity` (Priority: Shizuku > Root > A11Y)",
         "Restore the ability to select text content of individual entries in the log activity window via double-click or long press _[`issue #280`](http://issues.autojs6.com/280)_",
@@ -202,7 +202,7 @@
       "released_date": "2024/12/02",
       "released_hint": "Built-in module rewrite, upgrade cautiously",
       "hint": [
-        "The built-in modules are rewritten in Kotlin to enhance script execution efficiency, but iterative improvements are needed.",
+        "The built-in modules are rewritten in Kotlin to enhance script execution efficiency, but iterative improvements are needed",
         "The built-in init.js file is empty by default, allowing developers to extend built-in modules or mount external modules."
       ],
       "feature": [
@@ -264,7 +264,7 @@
         "Issue with packaged app unable to use opencc module properly"
       ],
       "improvement": [
-        "Click prompt experience for 'Unavailable ABI' control on package page",
+        "Improved tap hint experience for the \"Unavailable ABI\" control on the packaging app configuration page",
         "Supports using Shizuku to control 'Pointer Location' display switch",
         "Supports using Shizuku to control 'Projection Media' and 'Modify Secure Settings' permission switches",
         "Automator.gestureAsync/gesturesAsync supports callback function parameters",
@@ -324,12 +324,12 @@
       "feature": [
         "opencc module (Refer to project documentation > [Chinese Conversion](https://docs.autojs6.com/#/opencc)) (Ref to [LZX284](https://github.com/SuperMonster003/AutoJs6/pull/187/files#diff-8cff73265af19c059547b76aca8882cbaa3209291406f52df1dafbbc78e80c46R268))",
         "UiSelector adds [plus](https://docs.autojs6.com/#/uiObjectType?id=m-plus) and [append](https://docs.autojs6.com/#/uiObjectType?id=m-append) methods _[`issue #115`](http://issues.autojs6.com/115)_",
-        "Packaging application page adds support for filtering ABIs and libraries (Ref to [AutoX](https://github.com/kkevsekk1/AutoX)) _[`issue #189`](http://issues.autojs6.com/189)_"
+        "Packaging app configuration page now supports filtering for ABI and libraries (Ref to [AutoX](https://github.com/kkevsekk1/AutoX)) _[`issue #189`](http://issues.autojs6.com/189)_"
       ],
       "fix": [
         "Abnormally large file size issue in packaged applications (Ref to [AutoX](https://github.com/kkevsekk1/AutoX) / [LZX284](https://github.com/SuperMonster003/AutoJs6/pull/187/files#diff-d932ac49867d4610f8eeb21b59306e8e923d016cbca192b254caebd829198856R61)) _[`issue #176`](http://issues.autojs6.com/176)_",
         "Issue where packaged applications cannot display and print some exception messages",
-        "Issue where selecting application icon on packaging application page might show empty icon",
+        "Fixed an issue where a blank app icon could appear after selecting an app icon on the packaging app configuration page",
         "Context not initialized exception when packaging application includes MLKit Google OCR library",
         "ocr.recognizeText/detect methods not working",
         "Mismatch between displayed language and application setting language for some texts (such as log page)",
@@ -351,14 +351,14 @@
         "Issue where module function quick panel button function name might overflow in code editor"
       ],
       "improvement": [
-        "The code editor module's quick function panel adapts to night mode.",
-        "The startup page of the packaged application is adapted to night mode, and the layout of application icons is adjusted.",
-        "The packaged application page supports cursor navigation using the ENTER key on the software keyboard.",
-        "The packaged application page supports toggling select-all state by clicking on ABI and library titles.",
-        "The default ABI selection is made intelligent on the packaged application page with added guide prompts for unselectable items.",
-        "The file manager adjusts the display of menu items based on the type and characteristics of files and folders.",
-        "The file manager's folder right-click menu adds a packaging application option.",
-        "When accessibility services are enabled but malfunction, an abnormal state is reflected in the drawer switch of the AutoJs6 homepage.",
+        "The code editor module's quick function panel adapts to night mode",
+        "The startup page of the packaged application is adapted to night mode, and the layout of application icons is adjusted",
+        "Packaging app configuration page now supports using the soft keyboard ENTER key to move the cursor focus",
+        "Packaging app configuration page now supports tapping ABI headings and library headings to toggle select-all state",
+        "Packaging app configuration page now uses smarter default ABI selection and adds guidance hints for unavailable options",
+        "The file manager adjusts the display of menu items based on the type and characteristics of files and folders",
+        "The file manager's folder right-click menu adds a packaging application option",
+        "When accessibility services are enabled but malfunction, an abnormal state is reflected in the drawer switch of the AutoJs6 homepage",
         "The console includes detailed stack information when printing error messages."
       ],
       "dependency": [
@@ -671,7 +671,7 @@
       "released_date": "2023/01/21",
       "feature": [
         "Redesign and rewrite of project documentation (partially completed)",
-        "Multi-language adaptation for Western/France/Russian/Arabic/Japanese/Korean/English/Traditional Chinese, etc.",
+        "Multi-language adaptation for Western/France/Russian/Arabic/Japanese/Korean/English/Traditional Chinese, etc",
         "Added path selection/history/default value intelligent suggestion functions to the work path setting options",
         "File manager supports jumping to the parent directory of any directory (up to \"Internal Storage\")",
         "File manager supports setting any directory as the work path shortcut",

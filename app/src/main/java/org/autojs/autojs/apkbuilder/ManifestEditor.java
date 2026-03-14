@@ -1,18 +1,19 @@
 package org.autojs.autojs.apkbuilder;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
 import pxb.android.StringItem;
 import pxb.android.axml.AxmlReader;
 import pxb.android.axml.AxmlWriter;
 import pxb.android.axml.NodeVisitor;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
 import static org.autojs.autojs.apkbuilder.ApkBuilder.INRT_APP_ID;
 
 /**
  * Created by Stardust on Oct 23, 2017.
+ * Modified by JetBrains AI Assistant (GPT-5.3-Codex (xhigh)) as of Mar 9, 2026.
  */
 public class ManifestEditor {
 
@@ -94,6 +95,10 @@ public class ManifestEditor {
         return true;
     }
 
+    public boolean shouldIgnoreComponentNode(String nodeName, String componentClassName) {
+        return false;
+    }
+
     private class MutableAxmlWriter extends AxmlWriter {
         private class MutableNodeImpl extends AxmlWriter.NodeImpl {
 
@@ -103,7 +108,19 @@ public class ManifestEditor {
 
             @Override
             protected void onAttr(AxmlWriter.Attr a) {
-                if ("permission".equals(this.name.data) && "name".equals(a.name.data) && a.value instanceof StringItem) {
+                if (a.ns != null
+                    && NS_ANDROID.equals(a.ns.data)
+                    && "name".equals(a.name.data)
+                    && a.value instanceof StringItem
+                    && ManifestEditor.this.shouldIgnoreComponentNode(this.name.data, ((StringItem) a.value).data)
+                ) {
+                    this.ignore = true;
+                    return;
+                }
+                if ("permission".equals(this.name.data)
+                    && "name".equals(a.name.data)
+                    && a.value instanceof StringItem
+                ) {
                     if ((INRT_APP_ID + ".DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION").equals(((StringItem) a.value).data)) {
                         ((StringItem) a.value).data = mPackageName + ".DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION";
                         super.onAttr(a);
@@ -114,7 +131,10 @@ public class ManifestEditor {
                         return;
                     }
                 }
-                if ("uses-permission".equals(this.name.data) && "name".equals(a.name.data) && a.value instanceof StringItem) {
+                if ("uses-permission".equals(this.name.data)
+                    && "name".equals(a.name.data)
+                    && a.value instanceof StringItem
+                ) {
                     this.ignore = !ManifestEditor.this.isPermissionRequired(((StringItem) a.value).data);
                 }
                 ManifestEditor.this.onAttr(a);

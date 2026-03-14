@@ -113,9 +113,11 @@
     <string name="dialog_button_abandon">放棄</string>
     <string name="dialog_button_abort">中止</string>
     <string name="dialog_button_abort_connection">中止連線</string>
+    <string name="dialog_button_activate">啟用</string>
     <string name="dialog_button_add">新增</string>
     <string name="dialog_button_advanced_settings">高階設定</string>
     <string name="dialog_button_amend_host_address">修正地址</string>
+    <string name="dialog_button_authorize">授權</string>
     <string name="dialog_button_back">@string/text_back</string>
     <string name="dialog_button_cancel">取消</string>
     <string name="dialog_button_cancel_download">取消下載</string>
@@ -225,6 +227,7 @@
     <string name="error_check_for_update">檢查更新失敗</string>
     <string name="error_colon_must_follow_a_valid_ip_address">冒號需跟隨有效的 IP 地址</string>
     <string name="error_compass_cannot_be_null">羅盤引數不能為 null</string>
+    <string name="error_conditions_not_met_for_record">指令碼錄製需至少滿足以下條件之一:\n- Root 許可權\n- Shizuku 許可權</string>
     <string name="error_connect_to_remote">連線失敗: %s</string>
     <string name="error_connection_failed_with_host">連線至 \"%1$s\" 失敗.</string>
     <string name="error_connection_timed_out">連線超時 (%d 毫秒)</string>
@@ -248,6 +251,7 @@
     <string name="error_failed_to_convert_into_drawable">無法將值 %s 轉換為 Drawable 例項</string>
     <string name="error_failed_to_copy">複製失敗</string>
     <string name="error_failed_to_create">建立失敗</string>
+    <string name="error_failed_to_enable_the_plugin">外掛啟用失敗</string>
     <string name="error_failed_to_go_to_access_settings">跳轉設定頁面失敗</string>
     <string name="error_failed_to_grant_shizuku_access">Shizuku 許可權授予失敗</string>
     <string name="error_failed_to_instantiate">例項 \"%s\" 建立失敗</string>
@@ -264,6 +268,7 @@
     <string name="error_failed_to_retrieve_version_properties_file_to_parse_version_information">獲取 version.properties 失敗, 無法解析版本資訊</string>
     <string name="error_failed_to_revoke_shizuku_access">Shizuku 許可權撤銷失敗</string>
     <string name="error_failed_to_run_script">指令碼執行失敗</string>
+    <string name="error_failed_to_save">儲存失敗</string>
     <string name="error_failed_to_save_project_config">儲存專案配置失敗</string>
     <string name="error_file_in_path_does_not_exist">路徑 \"%1$s\" 對應檔案不存在</string>
     <string name="error_function_called_in_ui_thread">UI 執行緒內無法執行阻塞操作. 可嘗試在子執行緒或子指令碼中執行 %s()</string>
@@ -324,6 +329,9 @@
     <string name="error_pattern_syntax">正則表示式句法錯誤</string>
     <string name="error_plugin_apk_does_not_contain_required_assets_for_variant">外掛 APK 不包含變體 \"%1$s\" 所需的資原始檔: %2$s.</string>
     <string name="error_plugin_apk_does_not_contain_required_native_libraries">外掛 APK 不包含所需的 native 庫檔案: %1$s.</string>
+    <string name="error_plugin_is_not_authorized_in_plugin_center">外掛 \"%1$s\" 未在外掛中心獲得授權</string>
+    <string name="error_plugin_is_not_enabled_in_plugin_center">外掛 \"%1$s\" 未在外掛中心啟用</string>
+    <string name="error_plugin_not_found_in_installed_apps">已安裝應用中未找到外掛 \"%1$s\"</string>
     <string name="error_plugin_returned_empty_info">%1$s 外掛返回的 info 為空.</string>
     <string name="error_plugin_returned_invalid_variant">%1$s 外掛返回的 variant 無效: %2$s.</string>
     <string name="error_port_num_over_65535">埠號超過 65535</string>
@@ -365,6 +373,7 @@
     <string name="error_unknown_picker_result_type_with_params" formatted="false">未知結果型別 {名稱: %s, 引數: %s}</string>
     <string name="error_unknown_picker_selector_type" formatted="false">未知選擇器 {名稱: %s, 型別: %s}</string>
     <string name="error_unknown_type">未知型別: %s</string>
+    <string name="error_unsupported_plugin_connection">不支援的外掛連線方式</string>
     <string name="error_webp_lossless_quality_not_supported">WebP-Lossless 格式無法使用 quality 質量引數進行壓縮, 可改用 JPEG/PNG/WebP-Lossy</string>
     <string name="file_not_exist_or_readable">檔案不存在或不可讀</string>
     <string name="file_not_exist_or_readable_with_path">檔案不存在或不可讀: %s</string>
@@ -381,6 +390,7 @@
     <string name="hint_loop_delay">開始迴圈前的延遲</string>
     <string name="hint_loop_times">0 表示無限迴圈</string>
     <string name="hint_pc_server_address_supported_formats">支援 IPv4, IPv6 及域名.</string>
+    <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">可嘗試點選 \"啟用\" 按鈕啟用一次外掛.\n如啟用成功, 按鈕將在一定時間內自動開啟.</string>
     <string name="instruction_install_plugin_from_url">輸入一個指向遠端外掛地址的 URL.\n例如 \"https://example.com/plugin.apk\".</string>
     <string name="item_delete_permanently">永久刪除</string>
     <string name="item_move_to_trash">移入回收站</string>
@@ -427,6 +437,7 @@
     <string name="plugin_item_info_last_install_time">最近安裝</string>
     <string name="plugin_item_info_last_uninstall_time">最近解除安裝</string>
     <string name="plugin_item_info_last_update_time">最近更新</string>
+    <string name="plugin_item_info_mechanism">機制</string>
     <string name="plugin_item_info_package_size">安裝包大小</string>
     <string name="plugin_item_info_updatable_version">可更新版本</string>
     <string name="prompt_add_ignored_version">確定忽略當前更新版本嗎?\n在應用設定中可管理已忽略的所有版本.</string>
@@ -457,6 +468,7 @@
     <string name="summary_text_launcher_shortcuts">新增快捷方式到啟動器</string>
     <string name="summary_use_volume_control_record">按 \"音量減\" 鍵開始或停止指令碼錄製 (需開啟浮動按鈕)</string>
     <string name="summary_use_volume_key_to_stop_running_scripts">按 \"音量加\" 鍵停止所有正在執行的指令碼</string>
+    <string name="symbol_colon_with_blank">": "</string>
     <string name="term_internal_strorage">內部儲存</string>
     <string name="text_a11y_service">無障礙服務</string>
     <string name="text_a11y_service_description">指令碼自動操作 (點選/長按/滑動等) 所需</string>
@@ -479,6 +491,7 @@
     <string name="text_act_by_scroll_forward">向前/右/下滑動 (scrollForward)</string>
     <string name="text_act_by_set_text">設定文字 (setText)</string>
     <string name="text_action">動作</string>
+    <string name="text_activated_successfully">啟用成功</string>
     <string name="text_activity_not_found_for_apk_installing">找不到 APK 安裝器</string>
     <string name="text_adb_tool_needed">需要 ADB 命令列工具</string>
     <string name="text_add_color_library">新增顏色庫</string>
@@ -538,8 +551,11 @@
     <string name="text_app_version_code">應用版本號</string>
     <string name="text_app_version_name">應用版本名</string>
     <string name="text_appearance">外觀</string>
+    <string name="text_applying_binary_resources">正在應用二進位制資源</string>
     <string name="text_at_least_one_certificate_issuer_field_is_not_empty">[姓名, 組織名稱, 組織單位, 國家代碼, 州或省份, 城市或區域, 街道] 至少填寫一個</string>
     <string name="text_attribute">屬性</string>
+    <string name="text_authorize_plugin">授權外掛</string>
+    <string name="text_authorize_plugin_content">這是一個第三方外掛, 請注意外掛來源及使用安全.\n\n點選 \"授權\" 按鈕以啟用外掛.</string>
     <string name="text_auto_check_for_updates">自動檢查更新</string>
     <string name="text_auto_check_for_updates_and_show_snackbar">自動檢查更新並在首頁下方顯示通知條</string>
     <string name="text_auto_night_mode">自動夜間模式</string>
@@ -548,8 +564,27 @@
     <string name="text_back">返回</string>
     <string name="text_broadcast_action">動作 (Action)</string>
     <string name="text_broadcast_task">廣播觸發任務</string>
+    <string name="text_build">構建</string>
     <string name="text_build_apk">打包應用</string>
+    <string name="text_build_completed">構建完成</string>
+    <string name="text_build_profile">構建配置</string>
+    <string name="text_build_profile_cannot_delete_default">預設配置不可刪除</string>
+    <string name="text_build_profile_cannot_delete_project_json">project.json 配置不可刪除</string>
+    <string name="text_build_profile_delete">刪除配置</string>
+    <string name="text_build_profile_fields">配置欄位</string>
+    <string name="text_build_profile_fields_configure">配置欄位設定</string>
+    <string name="text_build_profile_fields_hint">已勾選欄位將作為固定值儲存在此配置中.</string>
+    <string name="text_build_profile_more">更多配置操作</string>
+    <string name="text_build_profile_name_cannot_be_reserved">不能使用保留的配置名稱 (預設, project.json)</string>
+    <string name="text_build_profile_name_hint">構建配置名稱</string>
+    <string name="text_build_profile_new">新建配置</string>
+    <string name="text_build_profile_unsaved_changes">當前構建配置存在未儲存的更改.</string>
+    <string name="text_build_profile_unsaved_changes_project_json">當前構建配置存在未儲存的更改, 將被寫入 project.json.</string>
+    <string name="text_build_profile_unsaved_switch_confirm">是否在繼續前儲存更改</string>
     <string name="text_build_succeeded">打包成功</string>
+    <string name="text_building_apk">正在打包應用</string>
+    <string name="text_building_resources">正在構建資源</string>
+    <string name="text_built_apk_file_path">打包應用檔案路徑</string>
     <string name="text_cancel">取消</string>
     <string name="text_cancel_simplified">取消</string>
     <string name="text_cannot_delete_default">預設配置不可刪除</string>
@@ -581,6 +616,9 @@
     <string name="text_choose_restore_path">選擇恢復路徑</string>
     <string name="text_city_or_locality">城市或區域</string>
     <string name="text_class_or_package_name">類/包名</string>
+    <string name="text_clean">清理</string>
+    <string name="text_clean_completed">清理完成</string>
+    <string name="text_cleaning_workspace">正在清理工作區</string>
     <string name="text_clear">清空</string>
     <string name="text_clear_file_selection">清空檔案選擇</string>
     <string name="text_clear_pre_execute_script">清空預執行指令碼</string>
@@ -609,6 +647,8 @@
     <string name="text_compatibility">相容性</string>
     <string name="text_confidence_level">置信度</string>
     <string name="text_config">配置</string>
+    <string name="text_configuring_manifest">正在配置清單檔案</string>
+    <string name="text_configuring_package_name">正在配置包名</string>
     <string name="text_confirm_to_clear_all_items">是否確定清空全部記錄</string>
     <string name="text_confirm_to_clear_the_history">是否確定清空歷史記錄</string>
     <string name="text_confirm_to_clear_the_history_of">以下歷史記錄將被清空\n\n[ %1$s ]\n\n是否確定清空</string>
@@ -624,6 +664,7 @@
     <string name="text_connection_cannot_be_established">無法建立連線</string>
     <string name="text_connection_failed">連線失敗</string>
     <string name="text_console">控制檯</string>
+    <string name="text_content">內容</string>
     <string name="text_continue">繼續</string>
     <string name="text_copy">複製</string>
     <string name="text_copy_all">複製全部</string>
@@ -638,8 +679,18 @@
     <string name="text_copy_to_clip">複製到剪貼簿</string>
     <string name="text_copy_value">複製值</string>
     <string name="text_copying" tools:ignore="TypographyEllipsis">複製中...</string>
+    <string name="text_copying_asset">正在複製資源</string>
+    <string name="text_copying_assets_to">正在複製資源到</string>
+    <string name="text_copying_directory">正在複製目錄</string>
+    <string name="text_copying_file">正在複製檔案</string>
+    <string name="text_copying_libraries_for_abi">正在複製 ABI 庫檔案</string>
+    <string name="text_copying_library">正在複製庫檔案</string>
+    <string name="text_copying_native_libraries">正在複製原生庫</string>
+    <string name="text_copying_project_directory">正在複製專案目錄</string>
+    <string name="text_copying_script_file">正在複製指令碼檔案</string>
     <string name="text_country_code">國家代碼 (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">國家代碼必須是兩個大寫字母</string>
+    <string name="text_creating_unsigned_apk">正在建立未簽名 APK</string>
     <string name="text_current_page_configuration">當前頁面配置</string>
     <string name="text_current_version">當前版本</string>
     <string name="text_daily_task">每日任務</string>
@@ -722,10 +773,12 @@
     <string name="text_enable_a11y_service_with_secure_settings_timeout">使用修改安全設定許可權啟用無障礙服務超時</string>
     <string name="text_enable_plugin">啟用外掛</string>
     <string name="text_enabled">已啟用</string>
+    <string name="text_encrypting_script">正在加密指令碼</string>
     <string name="text_error">錯誤</string>
     <string name="text_error_copy_file">檔案複製失敗: %s</string>
     <string name="text_error_report">錯誤報告</string>
     <string name="text_estimated">預估</string>
+    <string name="text_exception_info">異常資訊</string>
     <string name="text_execute">執行</string>
     <string name="text_execute_code">執行程式碼</string>
     <string name="text_execution_finished" formatted="false">[%s] 執行結束 (用時 %s 秒)\n</string>
@@ -738,6 +791,11 @@
     <string name="text_exported">已匯出</string>
     <string name="text_extending_js_build_in_objects">JavaScript 內建物件擴充套件</string>
     <string name="text_extensibility">擴充套件性</string>
+    <string name="text_extracted_plugin_assets">已提取外掛資源</string>
+    <string name="text_extracted_plugin_libraries">已提取外掛庫檔案</string>
+    <string name="text_extracting_plugin_asset">正在提取外掛資源</string>
+    <string name="text_extracting_plugin_so">正在提取外掛 so 檔案</string>
+    <string name="text_extracting_template_apk">正在提取模板 APK</string>
     <string name="text_failed">失敗</string>
     <string name="text_failed_to_build">打包失敗</string>
     <string name="text_failed_to_create_key_store">生成簽名密鑰失敗</string>
@@ -758,6 +816,7 @@
     <string name="text_failed_to_register">註冊失敗</string>
     <string name="text_failed_to_report">提交失敗</string>
     <string name="text_failed_to_retrieve">獲取失敗</string>
+    <string name="text_failed_to_save_project_json">儲存 project.json 失敗</string>
     <string name="text_failed_to_save_remote_project_to_local_storage">無法儲存遠端專案至本地</string>
     <string name="text_failed_to_send_log_entries">日誌條目傳送失敗</string>
     <string name="text_failed_to_update">更新失敗</string>
@@ -808,6 +867,7 @@
     <string name="text_hide_button">隱藏按鈕</string>
     <string name="text_hide_node">隱藏此節點</string>
     <string name="text_hide_same_frame_nodes">隱藏同框節點</string>
+    <string name="text_hint">提示</string>
     <string name="text_history">歷史記錄</string>
     <string name="text_history_has_been_cleared">歷史記錄已清空</string>
     <string name="text_icon">圖示</string>
@@ -863,6 +923,11 @@
     <string name="text_latest_package">最近包名</string>
     <string name="text_launch_config">執行配置</string>
     <string name="text_launch_debugger">啟動除錯</string>
+    <string name="text_launch_launcher_visible">在啟動器中顯示應用圖示</string>
+    <string name="text_launch_logs_visible">啟動時顯示日誌</string>
+    <string name="text_launch_run_on_boot">開機時執行指令碼</string>
+    <string name="text_launch_slug">啟動頁標語文字</string>
+    <string name="text_launch_splash_visible">啟動時顯示啟動頁</string>
     <string name="text_launcher_icon_title">啟動器圖示</string>
     <string name="text_launcher_shortcuts">啟動器快捷方式</string>
     <string name="text_launcher_shortcuts_may_be_lost_after_launcher_icon_changed">部分裝置切換啟動器圖示可能導致已建立的 AutoJs6 快捷方式全部丟失, 需謹慎操作</string>
@@ -978,9 +1043,9 @@
     <string name="text_permission_desc_billing">允許應用執行應用內購買</string>
     <string name="text_permission_desc_bluetooth">允許應用訪問藍牙設備</string>
     <string name="text_permission_desc_bluetooth_admin">允許應用配置藍牙設備</string>
+    <string name="text_permission_desc_bluetooth_advertise">允許應用透過藍牙廣播</string>
     <string name="text_permission_desc_bluetooth_connect">允許應用訪問藍牙設備及連接狀態</string>
     <string name="text_permission_desc_bluetooth_scan">允許應用搜尋附近的藍牙設備</string>
-    <string name="text_permission_desc_bluetooth_advertise">允許應用透過藍牙廣播</string>
     <string name="text_permission_desc_broadcast_close_system_dialogs">允許應用發送一個意圖來關閉系統對話框</string>
     <string name="text_permission_desc_call_phone">允許應用撥打電話</string>
     <string name="text_permission_desc_camera">允許應用訪問相機</string>
@@ -1064,15 +1129,28 @@
     <string name="text_please_input_name">請輸入名稱</string>
     <string name="text_please_wait" tools:ignore="TypographyEllipsis">請稍候...</string>
     <string name="text_please_wait_a_moment_before_trying_again" tools:ignore="TypographyEllipsis">請稍後再嘗試此操作...</string>
+    <string name="text_plugin_activated">已啟用</string>
+    <string name="text_plugin_activation_recommended">建議啟用</string>
+    <string name="text_plugin_authorization_denied">授權拒絕</string>
+    <string name="text_plugin_authorization_required">需要授權</string>
+    <string name="text_plugin_authorized">已授權</string>
     <string name="text_plugin_center">外掛中心</string>
     <string name="text_plugin_details">外掛詳情</string>
+    <string name="text_plugin_official">官方</string>
+    <string name="text_plugin_trusted">受信任</string>
     <string name="text_plugins">外掛</string>
     <string name="text_pointer_location">指標位置</string>
     <string name="text_pointer_location_toggle_failed_with_hint">切換 \"指標位置\" 顯示狀態失敗\n可能缺少 root 許可權</string>
     <string name="text_post_notifications_permission">釋出通知許可權</string>
     <string name="text_post_notifications_permission_rationale">為確保 AutoJs6 前臺服務等能夠正常執行, 指令碼能夠釋出通知, AutoJs6 需要被授予 \"釋出通知許可權\".</string>
     <string name="text_pre_execute_script">預執行指令碼</string>
+    <string name="text_prepare">準備</string>
+    <string name="text_prepare_completed">準備完成</string>
     <string name="text_preparing" tools:ignore="TypographyEllipsis">準備中...</string>
+    <string name="text_preparing_assets_dir">正在準備資源目錄</string>
+    <string name="text_preparing_build_config">正在準備構建配置</string>
+    <string name="text_preparing_keystore">正在準備金鑰庫</string>
+    <string name="text_preparing_workspace">正在準備工作區</string>
     <string name="text_preset_dialog_content">預設對話方塊內容</string>
     <string name="text_preset_dialog_title">預設對話方塊標題</string>
     <string name="text_press_again_to_dismiss_dialog">再按一次關閉對話方塊</string>
@@ -1081,14 +1159,19 @@
     <string name="text_preview">預覽</string>
     <string name="text_process_log">流程日誌</string>
     <string name="text_processing">正在處理</string>
+    <string name="text_processing_source">正在處理原始碼</string>
     <string name="text_project">專案</string>
     <string name="text_project_location">專案位置</string>
     <string name="text_project_media_access">投影媒體許可權</string>
     <string name="text_prompt">提示</string>
+    <string name="text_property_colon">%1$s:</string>
     <string name="text_property_colon_value">%1$s: %2$s</string>
     <string name="text_property_colon_value_nbsp_unit">%1$s: %2$d %3$s</string>
     <string name="text_property_colon_value_unit">%1$s: %2$d%3$s</string>
+    <string name="text_pruning">正在修剪</string>
     <string name="text_quit">放棄</string>
+    <string name="text_re_signing_apk">正在重新簽名 APK</string>
+    <string name="text_reading_splash_resources">正在讀取啟動頁資源</string>
     <string name="text_recommended">推薦</string>
     <string name="text_record_finished">錄製完成</string>
     <string name="text_record_prompt">錄製提示</string>
@@ -1114,6 +1197,7 @@
     <string name="text_replace">替換</string>
     <string name="text_replace_all">全部替換</string>
     <string name="text_replace_simplified">替換</string>
+    <string name="text_replacing_file">正在替換檔案</string>
     <string name="text_repo_url_of_vscode_vsc_ext">VSCode 外掛專案地址</string>
     <string name="text_report_succeed">提交成功</string>
     <string name="text_requires_android_os_version" formatted="false">要求最低安卓系統版本 %s (API %s), 當前為 %s (API %s)</string>
@@ -1122,6 +1206,7 @@
     <string name="text_reset_succeed">重置成功</string>
     <string name="text_reset_to_initial_content">重置為初始內容</string>
     <string name="text_reset_to_initial_content_only_for_assets">只能重置示例程式碼檔案</string>
+    <string name="text_resolving_plugin_native_libraries">正在解析外掛原生庫</string>
     <string name="text_restart">重啟</string>
     <string name="text_restart_strategy">重啟策略</string>
     <string name="text_restore">恢復</string>
@@ -1163,6 +1248,7 @@
     <string name="text_save_configuration_as">配置另存為</string>
     <string name="text_save_simplified">儲存</string>
     <string name="text_save_to">儲存到</string>
+    <string name="text_saving" tools:ignore="TypographyEllipsis">正在儲存...</string>
     <string name="text_scheduled_restart_backend">排程引擎</string>
     <string name="text_scheduled_restart_start_delay">啟動延遲</string>
     <string name="text_screen_capture_request_delay">螢幕捕獲許可權申請延遲</string>
@@ -1183,6 +1269,7 @@
     <string name="text_select_file_to_upload">選擇要上傳的檔案</string>
     <string name="text_select_icon">選擇圖示</string>
     <string name="text_select_image">選擇圖片</string>
+    <string name="text_selected_plugin">已選擇外掛</string>
     <string name="text_send">傳送</string>
     <string name="text_send_shortcut">建立快捷方式</string>
     <string name="text_server_mode">服務端模式</string>
@@ -1199,6 +1286,9 @@
     <string name="text_show_layout_bounds">在佈局範圍中檢視</string>
     <string name="text_show_layout_hierarchy">在佈局層次中檢視</string>
     <string name="text_show_widget_information">顯示控制元件資訊</string>
+    <string name="text_sign">簽名</string>
+    <string name="text_sign_completed">簽名完成</string>
+    <string name="text_sign_stage_completed">簽名階段完成</string>
     <string name="text_signature_algorithm">簽名演算法</string>
     <string name="text_signature_configuration">簽名設定</string>
     <string name="text_signature_scheme">簽名方案</string>
@@ -1216,6 +1306,7 @@
     <string name="text_sort_by_time_desc">時間 (最新優先)</string>
     <string name="text_source">來源</string>
     <string name="text_source_file_path">原始碼路徑</string>
+    <string name="text_source_processing_completed">原始碼處理完成</string>
     <string name="text_special_permissions">特殊許可權</string>
     <string name="text_stable_mode">穩定模式</string>
     <string name="text_star">收藏</string>
@@ -1254,6 +1345,7 @@
     <string name="text_timed_task">定時任務</string>
     <string name="text_timed_task_backend_title">定時任務排程引擎</string>
     <string name="text_timed_task_timing">定時</string>
+    <string name="text_title">標題</string>
     <string name="text_to_be_chosen">待選擇</string>
     <string name="text_toggle_all">全選切換</string>
     <string name="text_tools">工具</string>
@@ -1278,6 +1370,7 @@
     <string name="text_unknown_description_for_plugin">未知描述</string>
     <string name="text_unknown_title_for_plugin">未知標題</string>
     <string name="text_unknown_version_for_plugin">未知版本</string>
+    <string name="text_unsigned_apk_created">未簽名 APK 已建立</string>
     <string name="text_unverified">未驗證</string>
     <string name="text_updatable">可更新</string>
     <string name="text_update">更新</string>
@@ -1285,6 +1378,7 @@
     <string name="text_updates_checked_states_cleared">更新檢查狀態已清除</string>
     <string name="text_updates_snack_bar_act_later">稍後提示</string>
     <string name="text_updates_snack_bar_act_view">檢視更新</string>
+    <string name="text_updating_project_config">正在更新專案配置</string>
     <string name="text_usage_stats_permission">檢視使用情況許可權</string>
     <string name="text_use_android_n_shortcut">使用安卓 7.0 快捷方式</string>
     <string name="text_use_default_icon">使用預設圖示</string>
@@ -1294,6 +1388,7 @@
     <string name="text_username_cannot_be_empty">使用者名稱不能為空</string>
     <string name="text_using_desc_selector">使用描述選擇器 (desc)</string>
     <string name="text_using_id_selector">使用 id 選擇器 (id)</string>
+    <string name="text_using_keystore">正在使用金鑰庫</string>
     <string name="text_using_text_selector">使用文字選擇器 (text)</string>
     <string name="text_validity_years">有效期 (年)</string>
     <string name="text_validity_years_cannot_be_empty">有效年份不能為空</string>
@@ -1325,86 +1420,12 @@
     <string name="text_working_dir_path">工作路徑</string>
     <string name="text_write_secure_settings">修改安全設定</string>
     <string name="text_write_system_settings">修改系統設定</string>
+    <string name="text_writing_app_icon">正在寫入應用圖示</string>
+    <string name="text_writing_manifest">正在寫入清單檔案</string>
+    <string name="text_writing_project_config">正在寫入專案配置</string>
+    <string name="text_writing_resources_arsc">正在寫入 resources.arsc</string>
+    <string name="text_writing_signed_apk">正在寫入已簽名 APK</string>
     <string name="text_xiaomi_background_popup_permission">後臺彈出介面</string>
     <string name="warn_continue_operation_without_saving_settings">設定尚未儲存, 確定要繼續操作嗎</string>
     <string name="warn_exit_without_saving_settings">設定尚未儲存, 確定要退出嗎</string>
-    <string name="error_failed_to_save">儲存失敗</string>
-    <string name="text_saving" tools:ignore="TypographyEllipsis">正在儲存...</string>
-    <string name="symbol_colon_with_blank">": "</string>
-    <string name="error_failed_to_enable_the_plugin">外掛啟用失敗</string>
-    <string name="text_exception_info">異常資訊</string>
-    <string name="text_hint">提示</string>
-    <string name="hint_try_clicking_the_activate_button_to_activate_the_plugin">可嘗試點選 \"啟用\" 按鈕啟用一次外掛.\n如啟用成功, 按鈕將在一定時間內自動開啟.</string>
-    <string name="dialog_button_activate">啟用</string>
-    <string name="text_activated_successfully">啟用成功</string>
-    <string name="text_authorize_plugin">授權外掛</string>
-    <string name="text_authorize_plugin_content">這是一個第三方外掛, 請注意外掛來源及使用安全.\n\n點選 \"授權\" 按鈕以啟用外掛.</string>
-    <string name="dialog_button_authorize">授權</string>
-    <string name="text_plugin_official">官方</string>
-    <string name="text_plugin_authorized">已授權</string>
-    <string name="text_plugin_authorization_required">需要授權</string>
-    <string name="text_plugin_authorization_denied">授權拒絕</string>
-    <string name="text_plugin_activation_recommended">建議啟用</string>
-    <string name="text_plugin_activated">已啟用</string>
-    <string name="text_plugin_trusted">受信任</string>
-    <string name="plugin_item_info_mechanism">機制</string>
-    <string name="error_plugin_is_not_enabled_in_plugin_center">外掛 \"%1$s\" 未在外掛中心啟用</string>
-    <string name="error_plugin_is_not_authorized_in_plugin_center">外掛 \"%1$s\" 未在外掛中心獲得授權</string>
-    <string name="error_plugin_not_found_in_installed_apps">已安裝應用中未找到外掛 \"%1$s\"</string>
-    <string name="error_unsupported_plugin_connection">不支援的外掛連線方式</string>
-    <string name="text_property_colon">%1$s:</string>
-    <string name="text_title">標題</string>
-    <string name="text_content">內容</string>
-    <string name="text_building_apk">正在打包應用</string>
-    <string name="text_built_apk_file_path">打包應用檔案路徑</string>
-    <string name="text_clean">清理</string>
-    <string name="text_sign">簽名</string>
-    <string name="text_build">構建</string>
-    <string name="text_prepare">準備</string>
-    <string name="text_preparing_workspace">正在準備工作區</string>
-    <string name="text_extracting_template_apk">正在提取模板 APK</string>
-    <string name="text_prepare_completed">準備完成</string>
-    <string name="text_copying_project_directory">正在複製專案目錄</string>
-    <string name="text_copying_script_file">正在複製指令碼檔案</string>
-    <string name="text_source_processing_completed">原始碼處理完成</string>
-    <string name="text_copying_directory">正在複製目錄</string>
-    <string name="text_copying_file">正在複製檔案</string>
-    <string name="text_encrypting_script">正在加密指令碼</string>
-    <string name="text_replacing_file">正在替換檔案</string>
-    <string name="text_preparing_build_config">正在準備構建配置</string>
-    <string name="text_reading_splash_resources">正在讀取啟動頁資源</string>
-    <string name="text_configuring_manifest">正在配置清單檔案</string>
-    <string name="text_configuring_package_name">正在配置包名</string>
-    <string name="text_copying_assets_to">正在複製資源到</string>
-    <string name="text_processing_source">正在處理原始碼</string>
-    <string name="text_applying_binary_resources">正在應用二進位制資源</string>
-    <string name="text_copying_native_libraries">正在複製原生庫</string>
-    <string name="text_updating_project_config">正在更新專案配置</string>
-    <string name="text_sign_stage_completed">簽名階段完成</string>
-    <string name="text_writing_project_config">正在寫入專案配置</string>
-    <string name="text_building_resources">正在構建資源</string>
-    <string name="text_build_completed">構建完成</string>
-    <string name="text_writing_resources_arsc">正在寫入 resources.arsc</string>
-    <string name="text_writing_manifest">正在寫入清單檔案</string>
-    <string name="text_writing_app_icon">正在寫入應用圖示</string>
-    <string name="text_copying_asset">正在複製資源</string>
-    <string name="text_preparing_assets_dir">正在準備資源目錄</string>
-    <string name="text_copying_library">正在複製庫檔案</string>
-    <string name="text_preparing_keystore">正在準備金鑰庫</string>
-    <string name="text_unsigned_apk_created">未簽名 APK 已建立</string>
-    <string name="text_creating_unsigned_apk">正在建立未簽名 APK</string>
-    <string name="text_using_keystore">正在使用金鑰庫</string>
-    <string name="text_re_signing_apk">正在重新簽名 APK</string>
-    <string name="text_writing_signed_apk">正在寫入已簽名 APK</string>
-    <string name="text_sign_completed">簽名完成</string>
-    <string name="text_clean_completed">清理完成</string>
-    <string name="text_cleaning_workspace">正在清理工作區</string>
-    <string name="text_resolving_plugin_native_libraries">正在解析外掛原生庫</string>
-    <string name="text_copying_libraries_for_abi">正在複製 ABI 庫檔案</string>
-    <string name="text_selected_plugin">已選擇外掛</string>
-    <string name="text_extracted_plugin_libraries">已提取外掛庫檔案</string>
-    <string name="text_extracted_plugin_assets">已提取外掛資源</string>
-    <string name="text_extracting_plugin_asset">正在提取外掛資源</string>
-    <string name="text_extracting_plugin_so">正在提取外掛 so 檔案</string>
-    <string name="error_conditions_not_met_for_record">指令碼錄製需至少滿足以下條件之一:\n- Root 許可權\n- Shizuku 許可權</string>
 </resources>

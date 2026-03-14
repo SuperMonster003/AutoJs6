@@ -43,6 +43,7 @@ import java.util.stream.Collectors;
 /**
  * Created by Stardust on Jan 24, 2018.
  * Modified by SuperMonster003 as of Jan 6, 2026.
+ * Modified by JetBrains AI Assistant (GPT-5.3-Codex (xhigh)) as of Mar 9, 2026.
  */
 public class ProjectConfig implements FuzzyDeserializer.OriginalJsonKeyAware {
 
@@ -54,7 +55,15 @@ public class ProjectConfig implements FuzzyDeserializer.OriginalJsonKeyAware {
     public static final List<String> DEFAULT_PERMISSIONS = Arrays.asList(
             "android.permission.WAKE_LOCK",
             "android.permission.INTERNET",
-            "android.permission.WRITE_EXTERNAL_STORAGE"
+            "android.permission.READ_EXTERNAL_STORAGE",
+            "android.permission.WRITE_EXTERNAL_STORAGE",
+            "android.permission.MANAGE_EXTERNAL_STORAGE",
+            "android.permission.FOREGROUND_SERVICE",
+            "android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION",
+            "android.permission.FOREGROUND_SERVICE_SPECIAL_USE",
+            "android.permission.RECEIVE_BOOT_COMPLETED",
+            "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS",
+            "android.permission.SYSTEM_ALERT_WINDOW"
     );
 
     private static final Gson sGson = new GsonBuilder()
@@ -304,6 +313,12 @@ public class ProjectConfig implements FuzzyDeserializer.OriginalJsonKeyAware {
 
         Pattern launchConfigDisplaySplashPattern = Pattern.compile(booleanPatternWithKeyCapture("displaySplash"), Pattern.CASE_INSENSITIVE);
         Pattern launchConfigSplashVisiblePattern = Pattern.compile(booleanPatternWithKeyCapture("splashVisible"), Pattern.CASE_INSENSITIVE);
+        Pattern launchConfigDisplayLauncherPattern = Pattern.compile(booleanPatternWithKeyCapture("displayLauncher"), Pattern.CASE_INSENSITIVE);
+        Pattern launchConfigLauncherVisiblePattern = Pattern.compile(booleanPatternWithKeyCapture("launcherVisible"), Pattern.CASE_INSENSITIVE);
+        Pattern launchConfigAutoRunOnBootPattern = Pattern.compile(booleanPatternWithKeyCapture("autoRunOnBoot"), Pattern.CASE_INSENSITIVE);
+        Pattern launchConfigRunOnBootPattern = Pattern.compile(booleanPatternWithKeyCapture("runOnBoot"), Pattern.CASE_INSENSITIVE);
+        Pattern launchConfigSlugTextPattern = Pattern.compile(stringPatternWithKeyCapture("slugText"), Pattern.CASE_INSENSITIVE);
+        Pattern launchConfigSlugPattern = Pattern.compile(stringPatternWithKeyCapture("slug"), Pattern.CASE_INSENSITIVE);
 
         setFieldIfMatchesWithKey(namePattern, s, "name", projectConfig::setName, projectConfig, detectConflicts);
         setFieldIfMatchesWithKey(versionNamePattern, s, "versionName", projectConfig::setVersionName, projectConfig, detectConflicts);
@@ -323,15 +338,21 @@ public class ProjectConfig implements FuzzyDeserializer.OriginalJsonKeyAware {
         setListIfMatchesWithKey(excludeDirsPattern, s, "excludeDirs", excludeDirs -> excludeDirs.forEach(projectConfig::excludeDir), projectConfig, detectConflicts);
         setListIfMatchesWithKey(excludedDirsPattern, s, "excludeDirs", excludedDirs -> excludedDirs.forEach(projectConfig::excludeDir), projectConfig, detectConflicts);
 
-        setFieldForDoubleIfMatchesWithKey(buildTimePattern, s, "buildTime", buildTime -> buildInfo.setBuildTime((long) buildTime), projectConfig, detectConflicts);
-        setFieldForDoubleIfMatchesWithKey(buildNumberPattern, s, "buildNumber", buildNumber -> buildInfo.setBuildNumber((long) buildNumber), projectConfig, detectConflicts);
-        setFieldIfMatchesWithKey(buildIdPattern, s, "buildId", buildInfo::setBuildId, projectConfig, detectConflicts);
+        setFieldForDoubleIfMatchesWithKey(buildTimePattern, s, "time", buildTime -> buildInfo.setBuildTime((long) buildTime), buildInfo, detectConflicts);
+        setFieldForDoubleIfMatchesWithKey(buildNumberPattern, s, "number", buildNumber -> buildInfo.setBuildNumber((long) buildNumber), buildInfo, detectConflicts);
+        setFieldIfMatchesWithKey(buildIdPattern, s, "id", buildInfo::setBuildId, buildInfo, detectConflicts);
 
-        setFieldForBooleanIfMatchesWithKey(launchConfigHideLogsPattern, s, "hideLogs", value -> launchConfig.setLogsVisible(!value), projectConfig, detectConflicts);
-        setFieldForBooleanIfMatchesWithKey(launchConfigLogsVisiblePattern, s, "logsVisible", launchConfig::setLogsVisible, projectConfig, detectConflicts); /* 优先. */
+        setFieldForBooleanIfMatchesWithKey(launchConfigHideLogsPattern, s, "logsVisible", value -> launchConfig.setLogsVisible(!value), launchConfig, detectConflicts);
+        setFieldForBooleanIfMatchesWithKey(launchConfigLogsVisiblePattern, s, "logsVisible", launchConfig::setLogsVisible, launchConfig, detectConflicts); /* 优先. */
 
-        setFieldForBooleanIfMatchesWithKey(launchConfigDisplaySplashPattern, s, "displaySplash", launchConfig::setSplashVisible, projectConfig, detectConflicts);
-        setFieldForBooleanIfMatchesWithKey(launchConfigSplashVisiblePattern, s, "splashVisible", launchConfig::setSplashVisible, projectConfig, detectConflicts); /* 优先. */
+        setFieldForBooleanIfMatchesWithKey(launchConfigDisplaySplashPattern, s, "splashVisible", launchConfig::setSplashVisible, launchConfig, detectConflicts);
+        setFieldForBooleanIfMatchesWithKey(launchConfigSplashVisiblePattern, s, "splashVisible", launchConfig::setSplashVisible, launchConfig, detectConflicts); /* 优先. */
+        setFieldForBooleanIfMatchesWithKey(launchConfigDisplayLauncherPattern, s, "launcherVisible", launchConfig::setLauncherVisible, launchConfig, detectConflicts);
+        setFieldForBooleanIfMatchesWithKey(launchConfigLauncherVisiblePattern, s, "launcherVisible", launchConfig::setLauncherVisible, launchConfig, detectConflicts); /* 优先. */
+        setFieldForBooleanIfMatchesWithKey(launchConfigAutoRunOnBootPattern, s, "runOnBoot", launchConfig::setRunOnBoot, launchConfig, detectConflicts);
+        setFieldForBooleanIfMatchesWithKey(launchConfigRunOnBootPattern, s, "runOnBoot", launchConfig::setRunOnBoot, launchConfig, detectConflicts); /* 优先. */
+        setFieldIfMatchesWithKey(launchConfigSlugTextPattern, s, "slug", launchConfig::setSlug, launchConfig, detectConflicts);
+        setFieldIfMatchesWithKey(launchConfigSlugPattern, s, "slug", launchConfig::setSlug, launchConfig, detectConflicts); /* 优先. */
 
         if (projectConfig.getName() == null || projectConfig.getName().isBlank()) {
             if (jsonFilePath.endsWith(CONFIG_FILE_NAME)) {
@@ -390,7 +411,7 @@ public class ProjectConfig implements FuzzyDeserializer.OriginalJsonKeyAware {
             String s,
             String canonicalKey,
             java.util.function.Consumer<String> setter,
-            ProjectConfig recorder,
+            FuzzyDeserializer.OriginalJsonKeyAware recorder,
             boolean detectConflicts
     ) {
         Matcher matcher = pattern.matcher(s);
@@ -415,7 +436,7 @@ public class ProjectConfig implements FuzzyDeserializer.OriginalJsonKeyAware {
             String s,
             String canonicalKey,
             java.util.function.DoubleConsumer setter,
-            ProjectConfig recorder,
+            FuzzyDeserializer.OriginalJsonKeyAware recorder,
             boolean detectConflicts
     ) {
         Matcher matcher = pattern.matcher(s);
@@ -440,7 +461,7 @@ public class ProjectConfig implements FuzzyDeserializer.OriginalJsonKeyAware {
             String s,
             String canonicalKey,
             java.util.function.Consumer<Boolean> setter,
-            ProjectConfig recorder,
+            FuzzyDeserializer.OriginalJsonKeyAware recorder,
             boolean detectConflicts
     ) {
         Matcher matcher = pattern.matcher(s);
@@ -465,7 +486,7 @@ public class ProjectConfig implements FuzzyDeserializer.OriginalJsonKeyAware {
             String s,
             String canonicalKey,
             java.util.function.Consumer<List<String>> setter,
-            ProjectConfig recorder,
+            FuzzyDeserializer.OriginalJsonKeyAware recorder,
             boolean detectConflicts
     ) {
         Matcher matcher = pattern.matcher(s);
@@ -689,7 +710,44 @@ public class ProjectConfig implements FuzzyDeserializer.OriginalJsonKeyAware {
             obj.add(originalKey, value);
         }
 
+        applyNestedOriginalKeys(obj, detectConflicts);
+
         return sGson.toJson(obj);
+    }
+
+    private void applyNestedOriginalKeys(@NonNull JsonObject root, boolean detectConflicts) {
+        applyNestedOriginalKeysForLaunchConfig(root, detectConflicts);
+        applyNestedOriginalKeysForBuildInfo(root, detectConflicts);
+    }
+
+    private void applyNestedOriginalKeysForLaunchConfig(@NonNull JsonObject root, boolean detectConflicts) {
+        if (mLaunchConfig == null) {
+            return;
+        }
+        String key = resolveTopLevelJsonKey("launchConfig");
+        JsonElement launchElement = root.get(key);
+        if (launchElement == null || !launchElement.isJsonObject()) {
+            return;
+        }
+        mLaunchConfig.applyOriginalJsonKeys(launchElement.getAsJsonObject(), detectConflicts);
+    }
+
+    private void applyNestedOriginalKeysForBuildInfo(@NonNull JsonObject root, boolean detectConflicts) {
+        if (mBuildInfo == null) {
+            return;
+        }
+        String key = resolveTopLevelJsonKey("build");
+        JsonElement buildElement = root.get(key);
+        if (buildElement == null || !buildElement.isJsonObject()) {
+            return;
+        }
+        mBuildInfo.applyOriginalJsonKeys(buildElement.getAsJsonObject(), detectConflicts);
+    }
+
+    @NonNull
+    private String resolveTopLevelJsonKey(@NonNull String canonicalKey) {
+        String original = mOriginalJsonKeys.get(canonicalKey);
+        return original == null || original.isBlank() ? canonicalKey : original;
     }
 
     public String getIconPath() {

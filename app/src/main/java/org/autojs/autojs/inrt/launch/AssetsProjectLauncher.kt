@@ -3,6 +3,7 @@ package org.autojs.autojs.inrt.launch
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.text.TextUtils
@@ -25,11 +26,17 @@ import java.io.IOException
  * Created by Stardust on Jan 24, 2018.
  */
 open class AssetsProjectLauncher(private val mAssetsProjectDir: String, private val mActivity: Context) {
+
     private val mProjectDir: String = File(mActivity.filesDir, "project/").path
     private val mProjectConfig: ProjectConfig = ProjectConfig.fromAssets(mActivity, ProjectConfig.configFileOfDir(mAssetsProjectDir))
     private val mMainScriptFile: File = File(mProjectDir, mProjectConfig.mainScriptFileName)
     private val mHandler: Handler = Handler(Looper.getMainLooper())
     private var mScriptExecution: ScriptExecution? = null
+
+    // TODO by SuperMonster003 on Mar 9, 2026.
+    //  ! 使其可配置.
+    //  ! Make it configurable.
+    private val finishDelay = 200L // 2000L
 
     init {
         prepare()
@@ -56,6 +63,10 @@ open class AssetsProjectLauncher(private val mAssetsProjectDir: String, private 
         }
     }
 
+    fun launchOnBoot() {
+        runScript(null)
+    }
+
     private fun runScript(activity: Activity?) {
         if (mScriptExecution != null && mScriptExecution!!.engine != null &&
             !mScriptExecution!!.engine.isDestroyed
@@ -68,12 +79,33 @@ open class AssetsProjectLauncher(private val mAssetsProjectDir: String, private 
             if (source.executionMode and JavaScriptSource.EXECUTION_MODE_UI != 0) {
                 config.intentFlags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_TASK_ON_HOME
             } else {
-                activity?.finish()
+                finishHostActivity(activity)
             }
             mScriptExecution = AutoJs.instance.scriptEngineService.execute(source, config)
         } catch (e: Exception) {
             AutoJs.instance.globalConsole.error(e)
         }
+    }
+
+    private fun finishHostActivity(activity: Activity?) {
+        val host = activity ?: return
+        val shouldDelayFinish = Pref.shouldHideLogs() || !mProjectConfig.launchConfig.isLogsVisible
+        if (!shouldDelayFinish) {
+            host.finish()
+            return
+        }
+        mHandler.postDelayed({
+            if (host.isFinishing || host.isDestroyed) {
+                return@postDelayed
+            }
+            host.finish()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                host.overrideActivityTransition(Activity.OVERRIDE_TRANSITION_OPEN, 0, 0)
+            } else {
+                @Suppress("DEPRECATION")
+                host.overridePendingTransition(0, 0)
+            }
+        }, finishDelay)
     }
 
     private fun prepare() {
@@ -106,7 +138,5 @@ open class AssetsProjectLauncher(private val mAssetsProjectDir: String, private 
         } catch (e: Exception) {
             e.printStackTrace()
         }
-
     }
-
 }
