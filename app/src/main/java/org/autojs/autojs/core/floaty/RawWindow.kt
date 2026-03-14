@@ -1,5 +1,6 @@
 package org.autojs.autojs.core.floaty
 
+import android.content.Context
 import android.graphics.PixelFormat
 import android.view.Gravity
 import android.view.View
@@ -18,7 +19,10 @@ import org.autojs.autojs6.R
  * Modified by SuperMonster003 as of Mar 27, 2022.
  * Transformed by SuperMonster003 on Mar 27, 2022.
  */
-class RawWindow(private val supplier: BaseResizableFloatyWindow.ViewSupplier) : FloatyWindow() {
+class RawWindow(
+    private val context: Context,
+    private val supplier: BaseResizableFloatyWindow.ViewSupplier,
+) : FloatyWindow() {
 
     private val mInflateException = VolatileDispose<RuntimeException>()
 
@@ -35,8 +39,8 @@ class RawWindow(private val supplier: BaseResizableFloatyWindow.ViewSupplier) : 
     }
 
     override fun onCreateView(floatyService: FloatyService): View {
-        val windowView = View.inflate(floatyService, R.layout.raw_window, null) as ViewGroup
-        contentView = supplier.inflate(floatyService, windowView)
+        val windowView = View.inflate(context, R.layout.raw_window, null) as ViewGroup
+        contentView = supplier.inflate(context, windowView)
         return windowView
     }
 
