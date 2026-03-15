@@ -1432,4 +1432,5 @@
     <string name="text_xiaomi_background_popup_permission">Ventanas emergentes en segundo plano</string>
     <string name="warn_continue_operation_without_saving_settings">La configuracion no se ha guardado. ¿Seguro que quieres continuar?</string>
     <string name="warn_exit_without_saving_settings">La configuracion no se ha guardado. ¿Seguro que quieres salir?</string>
+    <string name="error_unknown_key_code">Codigo de tecla desconocido: %1$s</string>
 </resources>

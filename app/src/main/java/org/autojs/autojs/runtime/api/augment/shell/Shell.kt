@@ -17,11 +17,13 @@ import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.Invokable
 import org.autojs.autojs.runtime.api.augment.app.App
 import org.autojs.autojs.runtime.exception.ShouldNeverHappenException
+import org.autojs.autojs.util.RhinoUtils.UNDEFINED
 import org.autojs.autojs.util.RhinoUtils.coerceBoolean
 import org.autojs.autojs.util.RhinoUtils.coerceIntNumber
 import org.autojs.autojs.util.RhinoUtils.coerceString
 import org.autojs.autojs.util.RhinoUtils.undefined
 import org.autojs.autojs.util.RootUtils
+import org.autojs.autojs6.R
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.Undefined
@@ -65,7 +67,8 @@ class Shell(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntim
 
     companion object : ArgumentGuards() {
 
-        private val TAG = Shell::class.java.simpleName
+        private const val TAG = "Shell"
+        private const val KEY_CODE_LABEL_PREFIX = "KEYCODE_"
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
@@ -255,7 +258,30 @@ class Shell(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntim
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun KeyCode(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsOnlyOne(args) { keyCode ->
-            undefined { scriptRuntime.rootShell.KeyCode(coerceString(keyCode)) }
+            val raw = coerceString(keyCode)
+            val codeNumber = parseKeyCodeNumber(raw)
+            require(codeNumber != KeyEvent.KEYCODE_UNKNOWN) {
+                globalContext.getString(R.string.error_unknown_key_code, raw)
+            }
+            scriptRuntime.rootShell.KeyCode(codeNumber)
+            return@ensureArgumentsOnlyOne UNDEFINED
+        }
+
+        private fun parseKeyCodeNumber(raw: String): Int {
+            val upperCased = raw.uppercase()
+            val codeNumber = when {
+                raw.startsWith(KEY_CODE_LABEL_PREFIX) -> KeyEvent.keyCodeFromString(upperCased)
+                raw.startsWith("0x", true) -> upperCased.substring(2).toInt(16)
+                else -> {
+                    val firstTry = KeyEvent.keyCodeFromString(upperCased)
+                    if (firstTry != KeyEvent.KEYCODE_UNKNOWN) {
+                        firstTry
+                    } else {
+                        KeyEvent.keyCodeFromString(KEY_CODE_LABEL_PREFIX + upperCased)
+                    }
+                }
+            }
+            return codeNumber
         }
 
         @JvmStatic
@@ -406,7 +432,5 @@ class Shell(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntim
         data class CommandArgumentsData(val arguments: String = "", val withRoot: Boolean = false, val withExit: Boolean = false)
 
         data class CommandData(val command: String, val withRoot: Int = 0)
-
     }
-
 }

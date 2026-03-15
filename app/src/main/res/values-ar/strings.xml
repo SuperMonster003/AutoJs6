@@ -1434,4 +1434,5 @@
     <string name="text_xiaomi_background_popup_permission">النوافذ المنبثقة في الخلفية</string>
     <string name="warn_continue_operation_without_saving_settings">لم يتم حفظ الاعدادات. هل تريد المتابعة?</string>
     <string name="warn_exit_without_saving_settings">لم يتم حفظ الاعدادات. هل تريد الخروج?</string>
+    <string name="error_unknown_key_code">رمز مفتاح غير معروف: %1$s</string>
 </resources>

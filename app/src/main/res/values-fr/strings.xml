@@ -1432,4 +1432,5 @@
     <string name="text_xiaomi_background_popup_permission">Fenêtres contextuelles en arrière-plan</string>
     <string name="warn_continue_operation_without_saving_settings">Les parametres ne sont pas enregistres. Continuer?</string>
     <string name="warn_exit_without_saving_settings">Les parametres ne sont pas enregistres. Quitter?</string>
+    <string name="error_unknown_key_code">Code de touche inconnu: %1$s</string>
 </resources>

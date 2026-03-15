@@ -1434,4 +1434,5 @@
     <string name="text_xiaomi_background_popup_permission">백그라운드 팝업</string>
     <string name="warn_continue_operation_without_saving_settings">설정이 저장되지 않았습니다. 계속할까요?</string>
     <string name="warn_exit_without_saving_settings">설정이 저장되지 않았습니다. 종료할까요?</string>
+    <string name="error_unknown_key_code">알 수 없는 키 코드: %1$s</string>
 </resources>

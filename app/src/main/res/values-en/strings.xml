@@ -1429,4 +1429,5 @@
     <string name="text_xiaomi_background_popup_permission">Display pop-up windows while running in the background</string>
     <string name="warn_continue_operation_without_saving_settings">The settings has not been saved, are you sure to continue the operation?</string>
     <string name="warn_exit_without_saving_settings">The settings has not been saved, are you sure to exit?</string>
+    <string name="error_unknown_key_code">Unknown key code: %1$s</string>
 </resources>

@@ -1433,4 +1433,5 @@
     <string name="text_xiaomi_background_popup_permission">バックグラウンドでのポップアップ表示</string>
     <string name="warn_continue_operation_without_saving_settings">設定が保存されていません. 続行しますか?</string>
     <string name="warn_exit_without_saving_settings">設定が保存されていません. 終了しますか?</string>
+    <string name="error_unknown_key_code">不明なキーコード: %1$s</string>
 </resources>

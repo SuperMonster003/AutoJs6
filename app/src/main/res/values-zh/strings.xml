@@ -1428,4 +1428,5 @@
     <string name="text_xiaomi_background_popup_permission">后台弹出界面</string>
     <string name="warn_continue_operation_without_saving_settings">设置尚未保存, 确定要继续操作吗</string>
     <string name="warn_exit_without_saving_settings">设置尚未保存, 确定要退出吗</string>
+    <string name="error_unknown_key_code">未知的键码: %1$s</string>
 </resources>
