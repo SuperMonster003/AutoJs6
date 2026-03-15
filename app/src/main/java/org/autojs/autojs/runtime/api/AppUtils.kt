@@ -79,9 +79,9 @@ class AppUtils(context: Context, @get:ScriptInterface val fileProviderAuthority:
     fun launchApp(appName: String) = getPackageName(appName)?.let { launchPackage(it) } == true
 
     @ScriptInterface
-    fun getPackageName(appName: String): String? = mPackageManager.let {
+    fun getPackageName(appName: String): String? = mPackageManager.let { pm ->
         getInstalledApplications(mContext).forEach { applicationInfo ->
-            if (appName.contentEquals(it.getApplicationLabel(applicationInfo))) {
+            if (appName.contentEquals(pm.getApplicationLabel(applicationInfo))) {
                 return applicationInfo.packageName
             }
         }
@@ -259,13 +259,13 @@ class AppUtils(context: Context, @get:ScriptInterface val fileProviderAuthority:
         @Suppress("unused")
         fun isActivityShortForm(s: String) = (@Suppress("EnumValuesSoftDeprecate") ActivityShortForm.values()).any { it.shortName.contentEquals(s) }
 
-        fun getInstalledApplications(context: Context): List<ApplicationInfo> = context.packageManager.let {
+        fun getInstalledApplications(context: Context): List<ApplicationInfo> = context.packageManager.let { pm ->
             when {
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
-                    it.getInstalledApplications(ApplicationInfoFlags.of(GET_META_DATA.toLong()))
+                    pm.getInstalledApplications(ApplicationInfoFlags.of(GET_META_DATA.toLong()))
                 }
                 else -> {
-                    it.getInstalledApplications(GET_META_DATA)
+                    pm.getInstalledApplications(GET_META_DATA)
                 }
             }
         }

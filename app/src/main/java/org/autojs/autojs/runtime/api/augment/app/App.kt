@@ -12,17 +12,17 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
-import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
-import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
+import org.autojs.autojs.external.receiver.BaseBroadcastReceiver
+import org.autojs.autojs.ipc.LayoutInspectEventBus
 import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.rhino.ArgumentGuards.Companion.component1
 import org.autojs.autojs.rhino.ArgumentGuards.Companion.component2
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
+import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.defineProp
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.deleteProp
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
-import org.autojs.autojs.external.receiver.BaseBroadcastReceiver
-import org.autojs.autojs.ipc.LayoutInspectEventBus
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.AbstractShell
 import org.autojs.autojs.runtime.api.AppUtils.Companion.ActivityShortForm
@@ -655,11 +655,17 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @RhinoRuntimeFunctionInterface
         fun getPackageName(scriptRuntime: ScriptRuntime, args: Array<out Any?>): String? = ensureArgumentsOnlyOne(args) { o ->
             when {
-                o.isJsNullish() -> null
-                o is PresetApp -> o.packageName
-                else -> getAppByAliasRhino(o)
-                    ?.packageName
-                    ?: scriptRuntime.app.getPackageName(Context.toString(o))
+                o.isJsNullish() ->
+                    null
+                o is PresetApp ->
+                    o.packageName
+                else -> run {
+                    val raw = Context.toString(o)
+                    getAppByAliasRhino(o)?.let { return@run it.packageName }
+                    scriptRuntime.app.getAppName(raw)?.let { return@run raw }
+                    scriptRuntime.app.getPackageName(raw)?.let { return@run it }
+                    return@run null
+                }
             }
         }
 
@@ -667,10 +673,17 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @RhinoRuntimeFunctionInterface
         fun getAppName(scriptRuntime: ScriptRuntime, args: Array<out Any?>): String? = ensureArgumentsOnlyOne(args) { o ->
             when {
-                o.isJsNullish() -> null
-                o is PresetApp -> o.getAppName()
-                else -> getAppByAliasRhino(o)?.getAppName()
-                    ?: scriptRuntime.app.getAppName(Context.toString(o))
+                o.isJsNullish() ->
+                    null
+                o is PresetApp ->
+                    o.getAppName()
+                else -> run {
+                    val raw = Context.toString(o)
+                    getAppByAliasRhino(o)?.let { return@run it.getAppName() }
+                    scriptRuntime.app.getAppName(raw)?.let { return@run it }
+                    scriptRuntime.app.getPackageName(raw)?.let { return@run raw }
+                    return@run null
+                }
             }
         }
 
