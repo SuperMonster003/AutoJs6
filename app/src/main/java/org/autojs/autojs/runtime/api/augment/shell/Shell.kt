@@ -13,6 +13,7 @@ import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.AbstractShell
+import org.autojs.autojs.runtime.api.WrappedShizuku
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.Invokable
 import org.autojs.autojs.runtime.api.augment.app.App
@@ -263,7 +264,11 @@ class Shell(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntim
             require(codeNumber != KeyEvent.KEYCODE_UNKNOWN) {
                 globalContext.getString(R.string.error_unknown_key_code, raw)
             }
-            scriptRuntime.rootShell.KeyCode(codeNumber)
+            if (WrappedShizuku.isOperational()) {
+                WrappedShizuku.execCommand("input keyevent $codeNumber")
+            } else {
+                scriptRuntime.rootShell.KeyCode(codeNumber)
+            }
             return@ensureArgumentsOnlyOne UNDEFINED
         }
 
