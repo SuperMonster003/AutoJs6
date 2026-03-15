@@ -346,8 +346,9 @@ pluginManagement {
             val temurin = object : Platform(
                 name = "Temurin", vendor = "temurin",
                 /* More common as "Eclipse Adoptium". */
-                // @Updated by SuperMonster003 on Apr 16, 2025. (Manual)
+                // @Updated by SuperMonster003 on Mar 15, 2026. (Manual)
                 agpVersionMap = mapOf(
+                    "21.0.10+7" to "8.10.2", /* Mar 15, 2026. */
                     "21.0.6+7" to "8.7.3", /* Apr 16, 2025. */
                     "20.0.2+9" to "8.2.2", /* Dec 2, 2024. */
                 ),
