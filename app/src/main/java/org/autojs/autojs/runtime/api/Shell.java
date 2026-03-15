@@ -95,6 +95,9 @@ public class Shell extends AbstractShell {
                 mTermSession.initializeEmulator(1024, 40);
             } catch (IOException e) {
                 mInitException = new UncheckedIOException(e);
+                synchronized (mInitLock) {
+                    mInitLock.notifyAll();
+                }
             }
         });
     }
@@ -125,6 +128,7 @@ public class Shell extends AbstractShell {
     }
 
     private void ensureInitialized() {
+        checkInitException();
         if (mTermSession == null) {
             logDebug("ensureInitialized: not init");
             checkInitException();
@@ -142,6 +146,10 @@ public class Shell extends AbstractShell {
         if (DEBUG) {
             Log.d(TAG, log);
         }
+    }
+
+    private boolean isShellPrompt(String output) {
+        return output.endsWith(" # ") || output.endsWith(" $ ");
     }
 
     private void checkInitException() {
@@ -251,10 +259,8 @@ public class Shell extends AbstractShell {
             if (!str.isEmpty() && !str.contains("/dev/input/event")) {
                 logDebug("onOutput: " + str);
             }
-            if (!mInitialized) {
-                if (isExecWithRoot() && str.endsWith(":/ # ")) {
-                    notifyInitialized();
-                }
+            if (!mInitialized && isShellPrompt(str)) {
+                notifyInitialized();
             }
             int start = 0;
             int i;
@@ -318,6 +324,14 @@ public class Shell extends AbstractShell {
         @Override
         protected void onProcessExit() {
             super.onProcessExit();
+            if (!mInitialized && mInitException == null) {
+                mInitException = new IllegalStateException("Shell process exited before initialization");
+            }
+            if (!mInitialized) {
+                synchronized (mInitLock) {
+                    mInitLock.notifyAll();
+                }
+            }
             synchronized (mExitLock) {
                 mWaitingExit = false;
                 mExitLock.notify();

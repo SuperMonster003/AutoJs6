@@ -3,7 +3,8 @@
     "v6.7.1": {
       "released_date": "2026/03/15",
       "fix": [
-        "app.isInstalled/kill 等方法无法正常使用包名参数的问题 _[`issue #495`](http://issues.autojs6.com/495)_"
+        "app.isInstalled/kill 等方法无法正常使用包名参数的问题 _[`issue #495`](http://issues.autojs6.com/495)_",
+        "无 Root 权限设备调用 shell 相关方法时可能出现假死的问题"
       ],
       "improvement": [
         "KeyCode 方法提升参数兼容性 _[`issue #492`](http://issues.autojs6.com/492)_",
