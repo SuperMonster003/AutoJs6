@@ -127,6 +127,23 @@ import java.util.regex.Pattern
 @SuppressLint("CheckResult")
 class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFragment.OnMenuItemClickListener {
 
+    /**
+     * Callback interface for showing the log panel from the editor
+     */
+    interface LogPanelCallback {
+        fun onShowLogPanel()
+    }
+
+    private var mLogPanelCallback: LogPanelCallback? = null
+
+    fun setLogPanelCallback(callback: LogPanelCallback) {
+        mLogPanelCallback = callback
+    }
+
+    fun showLogPanel() {
+        mLogPanelCallback?.onShowLogPanel()
+    }
+
     private var binding: EditorViewBinding = EditorViewBinding.bind(inflate(context, R.layout.editor_view, this))
 
     @JvmField
