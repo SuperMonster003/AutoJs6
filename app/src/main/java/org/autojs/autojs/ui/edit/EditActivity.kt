@@ -35,6 +35,7 @@ import org.autojs.autojs.storage.file.StableDraftFileHelper
 import org.autojs.autojs.theme.widget.ThemeColorToolbar
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.error.ErrorDialogActivity
+import org.autojs.autojs.ui.log.LogBottomSheet
 import org.autojs.autojs.ui.main.MainActivity
 import org.autojs.autojs.ui.main.scripts.EditableFileInfoDialogManager
 import org.autojs.autojs.util.DialogUtils
@@ -157,6 +158,39 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
 
         setToolbarAsBack(editorView.name)
         onBackPressedDispatcher.addCallback(this, mOnBackPressedCallback)
+        
+        // Setup log bottom sheet
+        setUpLogSheet()
+    }
+
+    private fun setUpLogSheet() {
+        mEditorView.setLogPanelCallback(object : EditorView.LogPanelCallback {
+            override fun onShowLogPanel() {
+                val scriptName = mEditorView.name
+                val scriptPath = mEditorView.uri?.path
+                
+                val bottomSheet = LogBottomSheet.newInstance(scriptName, scriptPath)
+                bottomSheet.setOnStackFrameClickListener(object : LogBottomSheet.OnStackFrameClickListener {
+                    override fun onStackFrameClick(fileName: String, lineNumber: Int, columnNumber: Int) {
+                        // Jump to the line in editor
+                        try {
+                            val editor = mEditorView.editor
+                            val layout = editor.codeEditText.layout
+                            if (lineNumber >= 0 && lineNumber < layout.lineCount) {
+                                val lineStart = layout.getLineStart(lineNumber)
+                                val column = if (columnNumber > 0) columnNumber else 0
+                                val offset = minOf(lineStart + column, layout.getLineEnd(lineNumber) - 1)
+                                editor.codeEditText.setSelection(offset)
+                                editor.codeEditText.requestFocus()
+                            }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                    }
+                })
+                bottomSheet.show(supportFragmentManager, "LogBottomSheet")
+            }
+        })
     }
 
     private fun onLoadFileError(message: String?) {

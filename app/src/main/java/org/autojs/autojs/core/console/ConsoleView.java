@@ -4,6 +4,11 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.method.LinkMovementMethod;
+import android.text.style.ClickableSpan;
+import android.text.style.ForegroundColorSpan;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
@@ -17,17 +22,20 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.autojs.autojs.theme.ThemeColorHelper;
 import org.autojs.autojs.tool.MapBuilder;
 import org.autojs.autojs.ui.log.LogActivity;
 import org.autojs.autojs.util.DisplayUtils;
 import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs6.R;
-
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Objects;
 
 /**
  * Created by Stardust on May 2, 2017.
@@ -37,6 +45,21 @@ import java.util.Objects;
 public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener {
 
     private final static int sRefreshInterval = 100;
+    
+    // Stack frame link pattern: matches "file:line" or "file:line:col" format
+    // Examples: "/sdcard/script.js:10", "script.js:10:5", "file:///path/to/script.js:42:3"
+    private static final Pattern STACK_FRAME_PATTERN = Pattern.compile(
+            "(?:file:)?((?:/[\\S]+?|[^\\s:]+?)\\.js):(\\d+)(?::(\\d+))?"
+    );
+    private static final int LINK_COLOR = 0xFF2196F3; // Blue color for clickable links
+    
+    private boolean mEnableStackFrameLinks = false;
+    private OnStackFrameClickListener mStackFrameClickListener;
+    
+    public interface OnStackFrameClickListener {
+        void onStackFrameClick(String fileName, int lineNumber, int columnNumber);
+    }
+    
     private final Map<Integer, Integer> mColors = new MapBuilder<Integer, Integer>().build();
     private ConsoleImpl mConsole;
     private WeakReference<LogActivity> mLogActivity = null;
@@ -228,6 +251,66 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
         mIsPinchToZoomEnabled = enabled;
     }
 
+    /**
+     * Enable or disable clickable stack frame links in log entries
+     * @param enabled true to enable, false to disable
+     */
+    public void setEnableStackFrameLinks(boolean enabled) {
+        mEnableStackFrameLinks = enabled;
+    }
+
+    /**
+     * Set the listener for stack frame click events
+     * @param listener the listener to receive click events
+     */
+    public void setOnStackFrameClickListener(OnStackFrameClickListener listener) {
+        mStackFrameClickListener = listener;
+    }
+
+    /**
+     * Parse log content and create clickable spans for stack frames
+     * @param content the original log content
+     * @param baseColor the base text color
+     * @return CharSequence with clickable spans for stack frames
+     */
+    private CharSequence createClickableContent(CharSequence content, int baseColor) {
+        if (!mEnableStackFrameLinks) {
+            return content;
+        }
+        
+        String text = content.toString();
+        SpannableString spannable = new SpannableString(text);
+        
+        Matcher matcher = STACK_FRAME_PATTERN.matcher(text);
+        boolean hasLinks = false;
+        
+        while (matcher.find()) {
+            hasLinks = true;
+            final String fileName = matcher.group(1);
+            final int lineNumber = Integer.parseInt(matcher.group(2));
+            final int columnNumber = matcher.group(3) != null ? Integer.parseInt(matcher.group(3)) : 0;
+            
+            final int start = matcher.start();
+            final int end = matcher.end();
+            
+            ClickableSpan clickableSpan = new ClickableSpan() {
+                @Override
+                public void onClick(@NonNull View widget) {
+                    if (mStackFrameClickListener != null) {
+                        mStackFrameClickListener.onStackFrameClick(fileName, lineNumber - 1, columnNumber);
+                    }
+                }
+            };
+            
+            spannable.setSpan(clickableSpan, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            
+            ForegroundColorSpan colorSpan = new ForegroundColorSpan(LINK_COLOR);
+            spannable.setSpan(colorSpan, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        
+        return hasLinks ? spannable : content;
+    }
+
     protected Map<Integer, Integer> getLogLevelMap() {
         return new MapBuilder<Integer, Integer>()
                 .put(Log.VERBOSE, R.color.console_view_verbose)
@@ -323,6 +406,7 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
         public ViewHolder(View itemView) {
             super(itemView);
             textView = (TextView) itemView;
+            textView.setMovementMethod(LinkMovementMethod.getInstance());
         }
 
     }
@@ -341,12 +425,18 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
         public void onBindViewHolder(ViewHolder holder, int position) {
             TextView textView = holder.textView;
             ConsoleImpl.LogEntry logEntry = mLogEntries.get(position);
-            textView.setText(logEntry.content);
-            ThemeColorHelper.setThemeColorPrimary(textView, true);
+            
             Integer color = mColors.get(logEntry.level);
             if (color != null) {
+                // Create clickable content with stack frame links
+                CharSequence content = createClickableContent(logEntry.content, color);
+                textView.setText(content);
                 textView.setTextColor(color);
+            } else {
+                textView.setText(logEntry.content);
             }
+            
+            ThemeColorHelper.setThemeColorPrimary(textView, true);
             if (textSize > 0) {
                 textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);
             } else {
