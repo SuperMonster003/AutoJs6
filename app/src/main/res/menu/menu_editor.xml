@@ -115,6 +115,11 @@
         android:title="@string/text_log"
         app:showAsAction="never" />
 
+    <item
+        android:id="@+id/action_show_log"
+        android:title="@string/text_show_log"
+        app:showAsAction="never" />
+
     <item android:title="@string/text_more">
         <menu>
             <item

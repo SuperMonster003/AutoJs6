@@ -938,6 +938,7 @@
     <string name="text_loading_with_dots" tools:ignore="TypographyEllipsis">加载中...</string>
     <string name="text_locate_current_theme_color">定位当前主题色</string>
     <string name="text_log">日志</string>
+    <string name="text_show_log">显示日志</string>
     <string name="text_logging_in">登录中</string>
     <string name="text_login">登录</string>
     <string name="text_login_succeed">登录成功</string>
