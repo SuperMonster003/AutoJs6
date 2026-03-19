@@ -7,79 +7,120 @@
     android:orientation="vertical"
     android:background="@drawable/bg_bottom_sheet_rounded">
 
-    <!-- Drag handle -->
-    <View
-        android:layout_width="40dp"
-        android:layout_height="4dp"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
-        android:background="@drawable/bg_drag_handle"/>
+    <!-- Drag handle touch area -->
+
+    <FrameLayout
+        android:id="@+id/drag_handle_touch_area"
+        android:layout_width="match_parent"
+        android:layout_height="24dp">
+
+        <View
+            android:id="@+id/drag_handle"
+            android:layout_width="40dp"
+            android:layout_height="4dp"
+            android:layout_marginTop="4dp"
+            android:layout_gravity="center"
+            android:background="@drawable/bg_drag_handle" />
+    </FrameLayout>
 
     <!-- Header -->
-    <LinearLayout
+
+    <RelativeLayout
+        android:id="@+id/header"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:orientation="horizontal"
+        android:layout_height="40dp"
         android:gravity="center_vertical"
-        android:paddingStart="16dp"
-        android:paddingEnd="8dp">
+        android:orientation="horizontal"
+        android:paddingHorizontal="12dp"
+        android:paddingTop="2dp"
+        android:paddingBottom="6dp">
 
         <!-- Script name / Title -->
+
         <TextView
             android:id="@+id/tv_title"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_centerVertical="true"
+            android:layout_alignParentStart="true"
+            android:layout_toStartOf="@id/btn_run_stop"
+            android:ellipsize="middle"
+            android:maxLines="1"
             android:text="@string/text_log"
             android:textColor="?android:attr/textColorPrimary"
             android:textSize="16sp"
-            android:textStyle="bold"
-            android:ellipsize="end"
-            android:maxLines="1"/>
+            android:textStyle="bold" />
 
         <!-- Action buttons -->
+
         <ImageButton
-            android:id="@+id/btn_open_full"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:id="@+id/btn_run_stop"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_toStartOf="@id/btn_clear"
+            android:layout_centerVertical="true"
             android:background="?selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_logcat"
-            android:tint="?attr/colorPrimary"
-            android:contentDescription="@string/text_log"
-            android:scaleType="center"/>
+            android:contentDescription="@string/text_run"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_play_arrow_white_48dp"
+            app:tint="@color/dialog_button_finish" />
 
         <ImageButton
             android:id="@+id/btn_clear"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="16dp"
+            android:layout_toStartOf="@id/btn_maximize"
             android:background="?selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_clear"
-            android:tint="#666666"
             android:contentDescription="@string/text_clear"
-            android:scaleType="center"/>
+            android:padding="3dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_recycle_bin_thinner"
+            app:tint="@color/day_night" />
 
-    </LinearLayout>
+        <ImageButton
+            android:id="@+id/btn_maximize"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="16dp"
+            android:layout_toStartOf="@id/btn_close"
+            android:background="?selectableItemBackgroundBorderless"
+            android:contentDescription="@string/text_maximize"
+            android:padding="3dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/ic_squared_maximize"
+            app:tint="@color/day_night" />
 
-    <!-- Divider -->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="?android:attr/listDivider"/>
+        <ImageButton
+            android:id="@+id/btn_close"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="16dp"
+            android:background="?selectableItemBackgroundBorderless"
+            android:contentDescription="@string/text_close"
+            android:padding="4dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_ali_close"
+            app:tint="@color/day_night" />
+    </RelativeLayout>
 
     <!-- Console View -->
+
     <FrameLayout
+        android:id="@+id/console_view_container"
         android:layout_width="match_parent"
-        android:layout_height="400dp"
-        android:paddingStart="4dp">
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:minHeight="200dp"
+        android:paddingHorizontal="4dp">
 
         <org.autojs.autojs.core.console.ConsoleView
             android:id="@+id/console"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:color_debug="@color/console_debug"
-            app:color_verbose="@color/console_verbose"/>
-
+            android:layout_height="match_parent" />
     </FrameLayout>
-
 </LinearLayout>

@@ -41,6 +41,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import org.autojs.autojs.AutoJs
+import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.core.pref.Pref.getEditorTextSize
 import org.autojs.autojs.core.pref.Pref.setEditorTextSize
 import org.autojs.autojs.engine.JavaScriptEngine
@@ -134,7 +135,12 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         fun onShowLogPanel()
     }
 
+    interface ScriptRunningStateListener {
+        fun onScriptRunningStateChanged(isRunning: Boolean)
+    }
+
     private var mLogPanelCallback: LogPanelCallback? = null
+    private var mScriptRunningStateListener: ScriptRunningStateListener? = null
 
     fun setLogPanelCallback(callback: LogPanelCallback) {
         mLogPanelCallback = callback
@@ -142,6 +148,11 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     fun showLogPanel() {
         mLogPanelCallback?.onShowLogPanel()
+    }
+
+    fun setScriptRunningStateListener(listener: ScriptRunningStateListener?) {
+        mScriptRunningStateListener = listener
+        listener?.onScriptRunningStateChanged(isScriptRunning())
     }
 
     private var binding: EditorViewBinding = EditorViewBinding.bind(inflate(context, R.layout.editor_view, this))
@@ -211,7 +222,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     var uri: Uri? = null
 
-    var scriptExecutionId = 0
+    var scriptExecutionId = ScriptExecution.NO_ID
         private set
 
     val activity: FragmentActivity
@@ -228,6 +239,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     private val scriptExecution: ScriptExecution?
         get() = AutoJs.instance.scriptEngineService.getScriptExecution(scriptExecutionId)
+
+    fun isScriptRunning(): Boolean = scriptExecution != null
 
     // Whether the editor is currently loading text (including streaming append).
     // zh-CN: 编辑器是否正在加载文本 (包括流式追加阶段).
@@ -279,7 +292,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 if (mDebugging) {
                     exitDebugging()
                 }
-                setMenuItemStatus(R.id.run, true)
+                syncPrimaryMenuState()
+                notifyScriptRunningStateChanged()
                 val msg = intent.getStringExtra(EXTRA_EXCEPTION_MESSAGE)
                 val line = intent.getIntExtra(EXTRA_EXCEPTION_LINE_NUMBER, -1)
                 val col = intent.getIntExtra(EXTRA_EXCEPTION_COLUMN_NUMBER, 0)
@@ -503,6 +517,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         mHadDirectEditSinceSave = true
         syncPrimaryMenuState()
     }
+
+    fun getEditorTheme() = mEditorTheme
 
     private fun handleText(intent: Intent): Observable<String> {
         val content = intent.getStringExtra(EXTRA_CONTENT)
@@ -1229,6 +1245,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 setMenuItemStatus(R.id.save, saveStickyDirty)
             }
         }
+        updateRunButtonVisualState()
     }
 
     private fun setInitialTextProgressively(text: String) {
@@ -1327,6 +1344,21 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         fragment?.setMenuItemStatus(id, enabled)
     }
 
+    private fun updateRunButtonVisualState() {
+        val isRunning = isScriptRunning()
+        mNormalToolbar.setRunButtonAsStop(isRunning)
+        val fragment = activity.supportFragmentManager.findFragmentById(R.id.toolbar_menu)
+        if (fragment is NormalToolbarFragment) {
+            fragment.setRunButtonAsStop(isRunning)
+        }
+    }
+
+    private fun notifyScriptRunningStateChanged() {
+        val isRunning = isScriptRunning()
+        updateRunButtonVisualState()
+        mScriptRunningStateListener?.onScriptRunningStateChanged(isRunning)
+    }
+
     fun getMenuItemStatus(id: Int, defValue: Boolean): Boolean {
         return mMenuItemStatus[id, defValue]
     }
@@ -1347,7 +1379,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             setOnMenuItemClickListener(this@EditorView)
             setOnMenuItemLongClickListener { id ->
                 when {
-                    id == R.id.run && !mReadOnly -> true.also { debug() }
+                    id == R.id.run && !mReadOnly && !isScriptRunning() -> true.also { debug() }
                     else -> false
                 }
             }
@@ -1357,7 +1389,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             setOnMenuItemClickListener(this@EditorView)
             setOnMenuItemLongClickListener { id ->
                 when {
-                    id == R.id.run && !mReadOnly -> true.also { debug() }
+                    id == R.id.run && !mReadOnly && !isScriptRunning() -> true.also { debug() }
                     else -> false
                 }
             }
@@ -1370,6 +1402,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         if (existing == null) {
             showNormalToolbar()
         }
+        updateRunButtonVisualState()
     }
 
     private fun setUpFunctionsKeyboard() {
@@ -1555,7 +1588,10 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     override fun onToolbarMenuItemClick(id: Int) {
         when (id) {
-            R.id.run -> runAndSaveFileIfNeeded()
+            R.id.run -> when {
+                isScriptRunning() -> forceStop()
+                else -> runAndSaveFileIfNeeded()
+            }
             R.id.save -> saveFile()
             R.id.undo -> undo()
             R.id.redo -> redo()
@@ -1601,11 +1637,21 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     @SuppressLint("CheckResult")
-    fun runAndSaveFileIfNeeded() {
+    fun runAndSaveFileIfNeeded(showLogPanelAfterRun: Boolean = true) {
         saveToTmpFile()
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({ file: File -> runTmpFile(file) }, Observers.toastMessage())
+            .subscribe({ file: File ->
+                val execution = runTmpFile(file)
+                if (execution != null && showLogPanelAfterRun && shouldAutoShowLogBottomSheetOnRun()) {
+                    showLogPanel()
+                }
+            }, Observers.toastMessage())
     }
+
+    private fun shouldAutoShowLogBottomSheetOnRun(): Boolean = Pref.getBoolean(
+        R.string.key_editor_auto_show_log_bottom_sheet_on_run,
+        resources.getBoolean(R.bool.pref_editor_auto_show_log_bottom_sheet_on_run),
+    )
 
     @JvmOverloads
     fun run(showMessage: Boolean, file: File? = uri?.path?.let { File(it) }, overriddenFullPath: String? = null): ScriptExecution? {
@@ -1620,12 +1666,13 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             overriddenFullPath,
         ) ?: return null
         scriptExecutionId = execution.id
-        setMenuItemStatus(R.id.run, false)
+        syncPrimaryMenuState()
+        notifyScriptRunningStateChanged()
         return execution
     }
 
     private fun runTmpFile(file: File? = uri?.path?.let { File(it) }): ScriptExecution? {
-        return run(true, file, uri?.path)
+        return run(!shouldAutoShowLogBottomSheetOnRun(), file, uri?.path)
     }
 
     private fun undo() {
@@ -2651,7 +2698,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         val superData = bundle.getParcelable<Parcelable>("super_data")
         scriptExecutionId = bundle.getInt("script_execution_id", ScriptExecution.NO_ID)
         super.onRestoreInstanceState(superData)
-        setMenuItemStatus(R.id.run, scriptExecutionId == ScriptExecution.NO_ID)
+        syncPrimaryMenuState()
+        notifyScriptRunningStateChanged()
     }
 
     fun destroy() {
@@ -2716,11 +2764,11 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         private const val MIN_CONFIDENCE_TO_WRITE_FILE = 90
         private val DEFAULT_CHARSET_TO_WRITE_FILE = StandardCharsets.UTF_8
 
-        private const val LARGE_FILE_MODE_THRESHOLD = JavaScriptHighlighter.MAX_HIGHLIGHT_CHARS
+        private const val LARGE_FILE_MODE_THRESHOLD = 512 * 1024
 
         // Internal storage root (no external SD).
         // zh-CN: 内部存储根目录 (不访问外置 SD).
-        private const val INTERNAL_STORAGE_ROOT: String = "/storage/emulated/0"
+        private const val INTERNAL_STORAGE_ROOT = "/storage/emulated/0"
 
         const val EXTRA_PATH = "path"
         const val EXTRA_NAME = "name"

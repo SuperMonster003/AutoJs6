@@ -1429,4 +1429,13 @@
     <string name="warn_continue_operation_without_saving_settings">設置尚未保存, 確定要繼續操作嗎</string>
     <string name="warn_exit_without_saving_settings">設置尚未保存, 確定要退出嗎</string>
     <string name="error_unknown_key_code">未知的鍵碼: %1$s</string>
+    <string name="text_maximize">最大化</string>
+    <string name="text_stop_simplified">停止</string>
+    <string name="text_code_editor">代碼編輯器</string>
+    <string name="entry_editor_log_button_behavior_bottom_sheet">底部日誌面板</string>
+    <string name="entry_editor_log_button_behavior_fullscreen_page">全屏日誌頁面</string>
+    <string name="text_editor_auto_show_log_bottom_sheet_on_run">運行後自動顯示底部日誌面板</string>
+    <string name="text_editor_log_button_behavior">編輯器日誌按鈕行為</string>
+    <string name="summary_editor_auto_show_log_bottom_sheet_on_run">編輯器運行按鈕啓動腳本後自動打開底部日誌面板</string>
+    <string name="description_editor_log_button_behavior_preference">選擇編輯器日誌按鈕打開日誌的方式: 底部日誌面板或全屏日誌頁面.</string>
 </resources>

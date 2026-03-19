@@ -85,6 +85,7 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
 
     private lateinit var mEditorView: EditorView
     private lateinit var mEditorMenu: EditorMenu
+    private var mLogBottomSheet: LogBottomSheet? = null
 
     private val mRequestPermissionCallbacks = RequestPermissionCallbacks()
     private var mNewTask = false
@@ -158,18 +159,38 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
 
         setToolbarAsBack(editorView.name)
         onBackPressedDispatcher.addCallback(this, mOnBackPressedCallback)
-        
+
         // Setup log bottom sheet
         setUpLogSheet()
     }
 
     private fun setUpLogSheet() {
+        mEditorView.setScriptRunningStateListener(object : EditorView.ScriptRunningStateListener {
+            override fun onScriptRunningStateChanged(isRunning: Boolean) {
+                val bottomSheet = mLogBottomSheet
+                if (bottomSheet == null || !bottomSheet.isAdded) {
+                    if (bottomSheet != null && !bottomSheet.isAdded) {
+                        mLogBottomSheet = null
+                    }
+                    return
+                }
+                bottomSheet.updateScriptRunningState(isRunning)
+            }
+        })
+
         mEditorView.setLogPanelCallback(object : EditorView.LogPanelCallback {
             override fun onShowLogPanel() {
+                val existing = supportFragmentManager.findFragmentByTag(LOG_BOTTOM_SHEET_TAG) as? LogBottomSheet
+                if (existing?.isAdded == true) {
+                    mLogBottomSheet = existing
+                    existing.updateScriptRunningState(mEditorView.isScriptRunning())
+                    return
+                }
+
                 val scriptName = mEditorView.name
                 val scriptPath = mEditorView.uri?.path
-                
-                val bottomSheet = LogBottomSheet.newInstance(scriptName, scriptPath)
+
+                val bottomSheet = LogBottomSheet.newInstance(scriptName, scriptPath, mEditorView.getEditorTheme()?.backgroundColor)
                 bottomSheet.setOnStackFrameClickListener(object : LogBottomSheet.OnStackFrameClickListener {
                     override fun onStackFrameClick(fileName: String, lineNumber: Int, columnNumber: Int) {
                         // Jump to the line in editor
@@ -188,7 +209,22 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
                         }
                     }
                 })
-                bottomSheet.show(supportFragmentManager, "LogBottomSheet")
+                bottomSheet.setScriptControlListener(object : LogBottomSheet.ScriptControlListener {
+                    override fun isScriptRunning(): Boolean {
+                        return mEditorView.isScriptRunning()
+                    }
+
+                    override fun onRunScript() {
+                        mEditorView.runAndSaveFileIfNeeded(showLogPanelAfterRun = false)
+                    }
+
+                    override fun onStopScript() {
+                        mEditorView.forceStop()
+                    }
+                })
+                bottomSheet.updateScriptRunningState(mEditorView.isScriptRunning())
+                mLogBottomSheet = bottomSheet
+                bottomSheet.show(supportFragmentManager, LOG_BOTTOM_SHEET_TAG)
             }
         })
     }
@@ -516,6 +552,7 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
     companion object {
 
         private const val LOG_TAG = "EditActivity"
+        private const val LOG_BOTTOM_SHEET_TAG = "LogBottomSheet"
 
         @JvmStatic
         fun editFile(context: Context, path: String?, newTask: Boolean) =
@@ -598,7 +635,5 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
                 }
             }
         }
-
     }
-
 }

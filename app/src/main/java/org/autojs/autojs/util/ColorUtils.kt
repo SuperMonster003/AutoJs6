@@ -476,4 +476,59 @@ object ColorUtils {
             .toPlainString() + "%"
     }
 
+    @JvmStatic
+    @ColorInt
+    fun adjustBrightness(@ColorInt color: Int, factor: Float): Int {
+        // 约定:
+        // 0.0 = 全黑
+        // 1.0 = 原样
+        // 2.0 = 全白
+        val f = factor.coerceIn(0f, 2f)
+        if (f == 1f) return color
+
+        val a = Color.alpha(color)
+
+        fun adjust(channel: Int): Int {
+            val result = if (f < 1f) {
+                // 向黑色靠近
+                channel * f
+            } else {
+                // 向白色靠近
+                channel + (255 - channel) * (f - 1f)
+            }
+            return result.roundToInt().coerceIn(0, 255)
+        }
+
+        return Color.argb(
+            a,
+            adjust(Color.red(color)),
+            adjust(Color.green(color)),
+            adjust(Color.blue(color))
+        )
+    }
+
+    @JvmStatic
+    @ColorInt
+    fun adjustContrast(@ColorInt color: Int, factor: Float): Int {
+        // 约定:
+        // 0.0 = 完全压到中灰
+        // 1.0 = 原样
+        // 2.0 = 提升一倍对比度
+        val f = factor.coerceIn(0f, 2f)
+        if (f == 1f) return color
+
+        val a = Color.alpha(color)
+
+        fun adjust(channel: Int): Int {
+            val result = (channel - 127.5f) * f + 127.5f
+            return result.roundToInt().coerceIn(0, 255)
+        }
+
+        return Color.argb(
+            a,
+            adjust(Color.red(color)),
+            adjust(Color.green(color)),
+            adjust(Color.blue(color))
+        )
+    }
 }

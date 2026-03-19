@@ -1430,4 +1430,13 @@
     <string name="warn_continue_operation_without_saving_settings">The settings has not been saved, are you sure to continue the operation?</string>
     <string name="warn_exit_without_saving_settings">The settings has not been saved, are you sure to exit?</string>
     <string name="error_unknown_key_code">Unknown key code: %1$s</string>
+    <string name="text_maximize">Maximize</string>
+    <string name="text_stop_simplified">Stop</string>
+    <string name="text_code_editor">Code editor</string>
+    <string name="entry_editor_log_button_behavior_bottom_sheet">Bottom log panel</string>
+    <string name="entry_editor_log_button_behavior_fullscreen_page">Fullscreen log page</string>
+    <string name="text_editor_auto_show_log_bottom_sheet_on_run">Auto show bottom log panel after running</string>
+    <string name="text_editor_log_button_behavior">Editor log button behavior</string>
+    <string name="summary_editor_auto_show_log_bottom_sheet_on_run">Automatically open the bottom log panel after the editor Run button starts a script</string>
+    <string name="description_editor_log_button_behavior_preference">Choose how the editor log button opens logs: bottom log panel or fullscreen log page.</string>
 </resources>

@@ -1434,4 +1434,13 @@
     <string name="warn_continue_operation_without_saving_settings">設定が保存されていません. 続行しますか?</string>
     <string name="warn_exit_without_saving_settings">設定が保存されていません. 終了しますか?</string>
     <string name="error_unknown_key_code">不明なキーコード: %1$s</string>
+    <string name="text_maximize">最大化</string>
+    <string name="text_stop_simplified">停止</string>
+    <string name="text_code_editor">コードエディタ</string>
+    <string name="entry_editor_log_button_behavior_bottom_sheet">下部ログパネル</string>
+    <string name="entry_editor_log_button_behavior_fullscreen_page">全画面ログページ</string>
+    <string name="text_editor_auto_show_log_bottom_sheet_on_run">実行後に下部ログパネルを自動表示</string>
+    <string name="text_editor_log_button_behavior">エディタのログボタン動作</string>
+    <string name="summary_editor_auto_show_log_bottom_sheet_on_run">エディタの実行ボタンでスクリプトを開始した後, 下部ログパネルを自動で開きます</string>
+    <string name="description_editor_log_button_behavior_preference">エディタのログボタンでログを開く方法を選択します: 下部ログパネルまたは全画面ログページ.</string>
 </resources>

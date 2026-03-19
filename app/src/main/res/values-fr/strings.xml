@@ -1433,4 +1433,13 @@
     <string name="warn_continue_operation_without_saving_settings">Les parametres ne sont pas enregistres. Continuer?</string>
     <string name="warn_exit_without_saving_settings">Les parametres ne sont pas enregistres. Quitter?</string>
     <string name="error_unknown_key_code">Code de touche inconnu: %1$s</string>
+    <string name="text_maximize">Agrandir</string>
+    <string name="text_stop_simplified">Arreter</string>
+    <string name="text_code_editor">Editeur de code</string>
+    <string name="entry_editor_log_button_behavior_bottom_sheet">Panneau de logs inferieur</string>
+    <string name="entry_editor_log_button_behavior_fullscreen_page">Page de logs en plein ecran</string>
+    <string name="text_editor_auto_show_log_bottom_sheet_on_run">Afficher automatiquement le panneau de logs inferieur apres l\'execution</string>
+    <string name="text_editor_log_button_behavior">Comportement du bouton de logs de l\'editeur</string>
+    <string name="summary_editor_auto_show_log_bottom_sheet_on_run">Ouvrir automatiquement le panneau de logs inferieur apres que le bouton Executer de l\'editeur lance un script</string>
+    <string name="description_editor_log_button_behavior_preference">Choisissez comment le bouton de logs de l\'editeur ouvre les logs: panneau de logs inferieur ou page de logs en plein ecran.</string>
 </resources>

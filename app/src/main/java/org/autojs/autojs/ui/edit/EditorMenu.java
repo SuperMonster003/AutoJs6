@@ -20,10 +20,10 @@ import org.autojs.autojs.script.JavaScriptFileSource;
 import org.autojs.autojs.ui.common.NotAskAgainDialog;
 import org.autojs.autojs.ui.edit.editor.CodeEditor;
 import org.autojs.autojs.ui.edit.keyboard.SymbolsSettingsActivity;
+import org.autojs.autojs.ui.log.LogActivity;
 import org.autojs.autojs.ui.main.scripts.EditableFileInfoDialogManager;
 import org.autojs.autojs.ui.project.BuildActivity;
 import org.autojs.autojs.util.ClipboardUtils;
-import org.autojs.autojs.util.ConsoleUtils;
 import org.autojs.autojs.util.DialogUtils;
 import org.autojs.autojs.util.IntentUtils;
 import org.autojs.autojs.util.IntentUtils.ToastExceptionHolder;
@@ -96,10 +96,7 @@ public class EditorMenu {
     public boolean onOptionsItemSelected(MenuItem item) {
         int itemId = item.getItemId();
         if (itemId == R.id.action_log) {
-            return ConsoleUtils.launch(mContext);
-        }
-        if (itemId == R.id.action_show_log) {
-            return tryDoing(mEditorView::showLogPanel);
+            return tryDoing(this::openEditorLogByPreference);
         }
         if (itemId == R.id.action_force_stop) {
             return tryDoing(mEditorView::forceStop);
@@ -163,8 +160,8 @@ public class EditorMenu {
         if (itemId == R.id.action_console) {
             return tryDoing(mEditorView::showConsole);
         }
-        if (itemId == R.id.action_show_log) {
-            showLogPanel();
+        if (itemId == R.id.action_log) {
+            openEditorLogByPreference();
             return true;
         }
         if (itemId == R.id.action_import_java_class) {
@@ -408,6 +405,18 @@ public class EditorMenu {
 
     private void showLogPanel() {
         mEditorView.showLogPanel();
+    }
+
+    private void openEditorLogByPreference() {
+        String mode = Pref.getString(
+                R.string.key_editor_log_button_behavior,
+                key(R.string.default_key_editor_log_button_behavior)
+        );
+        if (Objects.equals(mode, key(R.string.key_editor_log_button_behavior_fullscreen_page))) {
+            LogActivity.launch(mContext);
+            return;
+        }
+        showLogPanel();
     }
 
     private void showFileDetails() {
