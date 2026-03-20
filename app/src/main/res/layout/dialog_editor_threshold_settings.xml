@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingHorizontal="16dp">
+
+    <TextView
+        android:id="@+id/threshold_description"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="12dp"
+        android:ellipsize="start"
+        android:lines="2"
+        android:maxLines="2"
+        android:textColor="@color/day_night"
+        android:textSize="16sp"
+        tools:text="Enable code highlighting only for files not larger than 512 KiB" />
+
+    <org.autojs.autojs.theme.widget.ThemeColorSeekBar
+        android:id="@+id/seekBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        tools:progress="12" />
+</LinearLayout>

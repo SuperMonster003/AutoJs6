@@ -81,6 +81,9 @@
     <string name="description_display_over_other_app">L\'autorisation \"afficher par-dessus les autres applications\" permet à AutoJs6 d\'afficher des fenêtres flottantes ou un bouton flottant au-dessus des autres applications, afin d\'exécuter rapidement des actions ou de consulter des informations sur n\'importe quel écran.\n\nNote : si cette autorisation n\'est pas accordée, les fenêtres flottantes et le bouton flottant peuvent ne pas s\'afficher ou ne pas fonctionner correctement.</string>
     <string name="description_documentation_source_preference">Documentation locale : Utilisation des fichiers intégrés d\'AutoJs6 comme sources de documentation, aucune connexion réseau n\'est nécessaire. Le contenu change au fur et à mesure que AutoJs6 est mis à jour.\nDocumentation en ligne : Utilisation des pages GitHub comme sources de documentation, nécessitant une connexion réseau. Le contenu est toujours à jour.\n\nRemarque : pour optimiser l\'expérience de lecture des documents en ligne, il est recommandé d\'utiliser un dispositif d\'affichage grand écran tel qu\'un moniteur de bureau.\nRemarque : à partir de la version 6.2.0, la documentation est encore dans les phases préliminaires de développement, et la plupart du contenu n\'a pas encore été écrit ou mis à jour.</string>
     <string name="description_documentation_source_preference_more">Les conditions suivantes doivent être remplies pour la prise en charge du thème sombre sur les pages de la documentation :\n1. Le mode nuit d\'AutoJs6 est activé\n2. WebView du système Android (ou des navigateurs comme Google Chrome) :\n- Android API Level 29 (Android 10) [Q] et supérieur : version >= 76\n- Android API Niveau 28 (Android 9) [P] et inférieur : version >= 105</string>
+    <string name="description_editor_code_highlight_threshold">Determine si la coloration syntaxique est activee selon la taille du fichier.\nPour les gros fichiers, la desactivation de la coloration syntaxique peut ameliorer dans une certaine mesure l\'efficacite du chargement.</string>
+    <string name="description_editor_large_file_mode_threshold">Determine si le mode gros fichier est utilise pour charger les fichiers selon leur taille.\nLe mode gros fichier peut ameliorer dans une certaine mesure l\'efficacite et la stabilite du chargement, mais les fonctions \"Annuler\" et \"Retablir\" seront desactivees dans ce mode.</string>
+    <string name="description_editor_log_button_behavior_preference">Controle la maniere dont le bouton \"Logs\" du menu de l\'editeur de code ouvre les logs.\n\nPanneau de logs inferieur: Ouvre le panneau de logs inferieur. Vous pouvez acceder a la page de logs en plein ecran en appuyant sur le bouton \"Agrandir\" ou en faisant glisser la poignee vers le haut, pres du bord superieur.\nPage de logs en plein ecran: Ouvre directement la page de logs en plein ecran.</string>
     <string name="description_extending_js_build_in_objects">L\'extension des objets JavaScript intégrés peut augmenter la flexibilité du code et permettre des fonctionnalités plus riches, mais elle peut provoquer des conflits et même des pannes.\nTous les scripts ont des extensions intégrées activées par défaut lorsque l\'option est activée.\nLes extensions intégrées sont souvent peu sûres et ne sont pas recommandées, sauf si les principes et les risques des extensions intégrées sont clairement compris.\nLorsque l\'option est désactivée, les extensions intégrées peuvent toujours être activées via l\'objet global plugins, comme décrit dans la documentation du projet.</string>
     <string name="description_file_extensions_preference">Permet de définir l\'affichage des extensions de fichier dans l\'explorateur AutoJs6.</string>
     <string name="description_floating_button">Le bouton flottant affiche un point d\'entrée rapide déplaçable au bord de l\'écran, pouvant être utilisé pour [ démarrer ou arrêter des scripts / analyse de mise en page / afficher le nom de paquet ou le nom d\'activité récents / afficher la position du pointeur ].\n\nNote : cette fonction nécessite généralement l\'autorisation \"afficher par-dessus les autres applications\".</string>
@@ -182,6 +185,8 @@
     <string name="entry_app_language_auto">Suivre le système</string>
     <string name="entry_documentation_source_local">Documents locaux</string>
     <string name="entry_documentation_source_online">Documents en ligne</string>
+    <string name="entry_editor_log_button_behavior_bottom_sheet">Panneau de logs inferieur</string>
+    <string name="entry_editor_log_button_behavior_fullscreen_page">Page de logs en plein ecran</string>
     <string name="entry_editor_pinch_to_zoom_change_text_size">Taille du texte</string>
     <string name="entry_editor_pinch_to_zoom_disable">Désactiver</string>
     <string name="entry_editor_pinch_to_zoom_scale_view">Vue à l\'échelle</string>
@@ -372,6 +377,7 @@
     <string name="error_unknown_element_name">Nom d\'élément inconnu : %1$s</string>
     <string name="error_unknown_exception">Exception inconnue</string>
     <string name="error_unknown_gravity_for">Gravité inconnue : %s</string>
+    <string name="error_unknown_key_code">Code de touche inconnu: %1$s</string>
     <string name="error_unknown_operation">Opération inconnue</string>
     <string name="error_unknown_picker_result_type">Unknown result type {name : %s}</string>
     <string name="error_unknown_picker_result_type_with_params" formatted="false">Type de résultat inconnu {nom : %s, params : %s}</string>
@@ -456,6 +462,7 @@
     <string name="summary_all_files_access_inrt">Autoriser l\'application à accéder à tous les fichiers, y compris le stockage externe</string>
     <string name="summary_display_over_other_apps">Permet à AutoJs6 d\'afficher du contenu au-dessus d\'autres applications</string>
     <string name="summary_display_over_other_apps_inrt">Autoriser l\'application à afficher du contenu par-dessus d\'autres applications</string>
+    <string name="summary_editor_auto_show_log_bottom_sheet_on_run">Ouvrir automatiquement le panneau de logs inferieur apres que le bouton Executer de l\'editeur lance un script</string>
     <string name="summary_enable_a11y_service_with_root_access">Activer le service d\'accessibilité avec accès root automatiquement lorsque cela est nécessaire</string>.
     <string name="summary_enable_a11y_service_with_secure_settings">Activer le service d\'accessibilité avec des paramètres sécurisés automatiquement lorsque cela est nécessaire</string>.
     <string name="summary_extending_js_build_in_objects">Augmenter la flexibilité du code et permettre une fonctionnalité plus riche en étendant les objets intégrés JavaScript.</string>
@@ -643,6 +650,7 @@
     <string name="text_close_floating_button">Fermer le bouton flottant</string>
     <string name="text_code">Code</string>
     <string name="text_code_beautify">Beautifier le code</string>
+    <string name="text_code_editor">Editeur de code</string>
     <string name="text_collapse_all">Tout réduire</string>
     <string name="text_color_library">Bibliothèque de couleurs</string>
     <string name="text_color_palette">Palette de couleurs</string>
@@ -764,6 +772,16 @@
     <string name="text_edit">Editer</string>
     <string name="text_edit_prepare_script">Editer le script de pré-exécution</string>
     <string name="text_edit_script">Editer le script</string>
+    <string name="text_editor_auto_show_log_bottom_sheet_on_run">Afficher automatiquement le panneau de logs inferieur apres l\'execution</string>
+    <string name="text_editor_code_highlight_always_disabled">Toujours desactiver le surlignage du code</string>
+    <string name="text_editor_code_highlight_always_enabled">Toujours activer le surlignage du code</string>
+    <string name="text_editor_code_highlight_threshold">Seuil de surlignage du code</string>
+    <string name="text_editor_code_highlight_threshold_enabled_for_smaller_files">Activer le surlignage du code uniquement pour les fichiers ne depassant pas %1$s</string>
+    <string name="text_editor_large_file_mode_always_disabled">Toujours desactiver le mode gros fichier</string>
+    <string name="text_editor_large_file_mode_always_enabled">Toujours activer le mode gros fichier</string>
+    <string name="text_editor_large_file_mode_threshold">Seuil du mode gros fichier</string>
+    <string name="text_editor_large_file_mode_threshold_enabled_for_larger_files">Activer le mode gros fichier uniquement pour les fichiers de plus de %1$s</string>
+    <string name="text_editor_log_button_behavior">Comportement du bouton de logs de l\'editeur</string>
     <string name="text_editor_theme">Thème de l\'éditeur</string>
     <string name="text_email">E-mail</string>
     <string name="text_email_cannot_be_empty">L\'e-mail ne peut être vide</string>
@@ -956,6 +974,7 @@
     <string name="text_manage_a11y_service">Gestion du service d\'accessibilité</string>
     <string name="text_manage_ignored_updates">Gérer les mises à jour ignorées</string>
     <string name="text_manage_key_store">Gérer le magasin de clés</string>
+    <string name="text_maximize">Agrandir</string>
     <string name="text_min_version">Version minimale</string>
     <string name="text_min_version_of_vscode_vsc_ext">Version minimale de l\'extension VSCode</string>
     <string name="text_mobile_qq_not_installed">\"Mobile QQ\" non installé</string>
@@ -1318,6 +1337,7 @@
     <string name="text_start_running">Running</string>
     <string name="text_state_or_province">État ou province</string>
     <string name="text_stop">Stop</string>
+    <string name="text_stop_simplified">Arreter</string>
     <string name="text_street">Rue</string>
     <string name="text_successfully_created_key_store">Clé de signature créée avec succès</string>
     <string name="text_supported_abis_short">ABIs</string>
@@ -1432,14 +1452,4 @@
     <string name="text_xiaomi_background_popup_permission">Fenêtres contextuelles en arrière-plan</string>
     <string name="warn_continue_operation_without_saving_settings">Les parametres ne sont pas enregistres. Continuer?</string>
     <string name="warn_exit_without_saving_settings">Les parametres ne sont pas enregistres. Quitter?</string>
-    <string name="error_unknown_key_code">Code de touche inconnu: %1$s</string>
-    <string name="text_maximize">Agrandir</string>
-    <string name="text_stop_simplified">Arreter</string>
-    <string name="text_code_editor">Editeur de code</string>
-    <string name="entry_editor_log_button_behavior_bottom_sheet">Panneau de logs inferieur</string>
-    <string name="entry_editor_log_button_behavior_fullscreen_page">Page de logs en plein ecran</string>
-    <string name="text_editor_auto_show_log_bottom_sheet_on_run">Afficher automatiquement le panneau de logs inferieur apres l\'execution</string>
-    <string name="text_editor_log_button_behavior">Comportement du bouton de logs de l\'editeur</string>
-    <string name="summary_editor_auto_show_log_bottom_sheet_on_run">Ouvrir automatiquement le panneau de logs inferieur apres que le bouton Executer de l\'editeur lance un script</string>
-    <string name="description_editor_log_button_behavior_preference">Choisissez comment le bouton de logs de l\'editeur ouvre les logs: panneau de logs inferieur ou page de logs en plein ecran.</string>
 </resources>

@@ -5,6 +5,7 @@ import android.text.TextWatcher;
 
 import androidx.annotation.NonNull;
 
+import org.autojs.autojs.core.pref.Pref;
 import org.autojs.autojs.pio.UncheckedIOException;
 import org.autojs.autojs.rhino.TokenStream;
 import org.autojs.autojs.ui.edit.theme.Theme;
@@ -21,10 +22,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Modified by JetBrains AI Assistant (GPT-5.2) as of Feb 8, 2026.
  */
 public class JavaScriptHighlighter implements SimpleTextWatcher.AfterTextChangedListener {
-
-    // Syntax highlight hard limit for performance and memory.
-    // zh-CN: 为性能和内存设置的语法高亮硬限制.
-    public static final int MAX_HIGHLIGHT_CHARS = 512 * 1024;
 
     public static class HighlightTokens {
 
@@ -102,7 +99,7 @@ public class JavaScriptHighlighter implements SimpleTextWatcher.AfterTextChanged
 
         // Avoid calling toString() on huge Editable, which allocates a large String on UI thread.
         // zh-CN: 避免对超大的 Editable 调用 toString(), 否则会在 UI 线程分配巨大的 String.
-        if (s != null && s.length() > MAX_HIGHLIGHT_CHARS) {
+        if (s != null && !Pref.isCodeHighlightEnabledForLength(s.length())) {
             mRunningHighlighterId.incrementAndGet();
             if (mCodeEditText != null) {
                 mCodeEditText.clearHighlightTokens();
@@ -124,7 +121,7 @@ public class JavaScriptHighlighter implements SimpleTextWatcher.AfterTextChanged
 
         // Disable highlighting for very large text to avoid ANR/OOM on low-end devices.
         // zh-CN: 对超大文本禁用高亮, 避免低端设备出现 ANR/OOM.
-        if (sourceString.length() > MAX_HIGHLIGHT_CHARS) {
+        if (!Pref.isCodeHighlightEnabledForLength(sourceString.length())) {
             mRunningHighlighterId.incrementAndGet();
             mCodeEditText.clearHighlightTokens();
             return;

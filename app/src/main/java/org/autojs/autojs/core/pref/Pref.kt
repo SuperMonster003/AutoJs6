@@ -23,7 +23,7 @@ import org.autojs.autojs.util.WorkingDirectoryUtils
 import org.autojs.autojs6.R
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
-import java.util.*
+import java.util.LinkedList
 
 /**
  * Created by Stardust on Jan 31, 2017.
@@ -33,6 +33,7 @@ object Pref {
 
     private val globalAppContext: Context = GlobalAppContext.get()
     private val resources: Resources = globalAppContext.resources
+    private const val NO_THRESHOLD = -1
 
     private val sPref by lazy { PreferenceManager.getDefaultSharedPreferences(globalAppContext) }
 
@@ -73,6 +74,48 @@ object Pref {
             val maxValue = resources.getInteger(R.integer.screen_capture_request_delay_max_value)
             val value = getInt(R.string.key_screen_capture_request_delay, defValue)
             return value.coerceIn(minValue, maxValue)
+        }
+
+    @JvmStatic
+    val codeHighlightThresholdChars: Int
+        get() {
+            val defValue = resources.getInteger(R.integer.editor_code_highlight_threshold_default_value)
+            val value = getInt(R.string.key_editor_code_highlight_threshold_bytes, defValue)
+            return when {
+                value < NO_THRESHOLD -> defValue
+                value == NO_THRESHOLD -> NO_THRESHOLD
+                value <= 0 -> 0
+                else -> value
+            }
+        }
+
+    @JvmStatic
+    val largeFileModeThresholdBytes: Int
+        get() {
+            val defValue = resources.getInteger(R.integer.editor_large_file_mode_threshold_default_value)
+            val value = getInt(R.string.key_editor_large_file_mode_threshold_bytes, defValue)
+            return when {
+                value < NO_THRESHOLD -> defValue
+                value == NO_THRESHOLD -> NO_THRESHOLD
+                value <= 0 -> 0
+                else -> value
+            }
+        }
+
+    @JvmStatic
+    fun isCodeHighlightEnabledForLength(length: Int): Boolean =
+        when (val threshold = codeHighlightThresholdChars) {
+            NO_THRESHOLD -> true
+            0 -> false
+            else -> length <= threshold
+        }
+
+    @JvmStatic
+    fun shouldEnableLargeFileModeForSize(size: Long): Boolean =
+        when (val threshold = largeFileModeThresholdBytes) {
+            NO_THRESHOLD -> false
+            0 -> true
+            else -> size > threshold.toLong()
         }
 
     @JvmStatic
@@ -265,6 +308,12 @@ object Pref {
 
     @JvmStatic
     fun getEditorTextSize(defValue: Int): Int = getInt(R.string.key_editor_text_size, defValue)
+
+    @JvmStatic
+    fun setCodeHighlightThresholdChars(value: Int) = putInt(R.string.key_editor_code_highlight_threshold_bytes, value)
+
+    @JvmStatic
+    fun setLargeFileModeThresholdBytes(value: Int) = putInt(R.string.key_editor_large_file_mode_threshold_bytes, value)
 
     @JvmStatic
     fun putString(@KeyRes keyRes: Int, value: String?) = putString(key(keyRes), value)

@@ -30,6 +30,8 @@
     <integer name="editor_text_size_min_value">4</integer>
     <integer name="editor_text_size_max_value">96</integer>
     <integer name="editor_text_size_default_value">14</integer>
+    <integer name="editor_code_highlight_threshold_default_value">524288</integer>
+    <integer name="editor_large_file_mode_threshold_default_value">524288</integer>
 
     <integer name="scheduled_restart_start_delay_min_value">0</integer>
     <integer name="scheduled_restart_start_delay_max_value">3000</integer>

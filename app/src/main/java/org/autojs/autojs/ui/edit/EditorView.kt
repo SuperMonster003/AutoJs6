@@ -74,7 +74,6 @@ import org.autojs.autojs.ui.edit.completion.CodeCompletionBar.OnHintClickListene
 import org.autojs.autojs.ui.edit.debug.DebugBar
 import org.autojs.autojs.ui.edit.editor.CodeEditor
 import org.autojs.autojs.ui.edit.editor.CodeEditor.CheckedPatternSyntaxException
-import org.autojs.autojs.ui.edit.editor.JavaScriptHighlighter
 import org.autojs.autojs.ui.edit.editor.LayoutHelper
 import org.autojs.autojs.ui.edit.keyboard.FunctionsKeyboardHelper
 import org.autojs.autojs.ui.edit.keyboard.FunctionsKeyboardView
@@ -736,10 +735,13 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     private fun loadUri(uri: Uri): Observable<String> {
-        val streamThresholdBytes = LARGE_FILE_MODE_THRESHOLD
+        if (Pref.largeFileModeThresholdBytes == 0) {
+            beginEditorLoadingUi(context.getString(R.string.text_loading_with_dots))
+            return loadUriStreamed(uri)
+        }
 
         val sizeOrNull = runCatching { queryContentLengthOrNull(uri) }.getOrNull()
-        if (sizeOrNull != null && sizeOrNull >= streamThresholdBytes) {
+        if (sizeOrNull != null && Pref.shouldEnableLargeFileModeForSize(sizeOrNull)) {
             // Large file: show loading in enhance bar, allow viewing/scrolling (read-only).
             // zh-CN: 大文件: 在增强栏显示加载提示, 允许查看/滚动 (只读).
             beginEditorLoadingUi(context.getString(R.string.text_loading_with_dots))
@@ -1055,11 +1057,15 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                     // 加载结束后确保光标/焦点.
                     // - 默认: 光标置于 0, 方便从头阅读.
                     // - 若用户在加载期间触摸过: 保持当前光标, 不强制跳回 0.
+                    val textLength = editText.text?.length ?: 0
                     post {
                         if (!mUserMovedCursorDuringLoading) {
                             runCatching { editText.setSelection(0) }
                         }
                         ensureEditorHasCursorAfterLoadIfNeeded()
+                        if (Pref.isCodeHighlightEnabledForLength(textLength)) {
+                            editor.refreshHighlightTokensIfAllowed()
+                        }
                     }
 
                     mLargeFileFrameCallback = null
@@ -1181,8 +1187,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             return
         }
 
-        val progressiveThreshold = LARGE_FILE_MODE_THRESHOLD
-        if (text.length > progressiveThreshold) {
+        if (Pref.shouldEnableLargeFileModeForSize(text.length.toLong())) {
             mLargeFileMode = true
             setInitialTextProgressively(text)
             return
@@ -1213,7 +1218,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
         // Re-highlight once after fast load, but only when size is within highlighter limit.
         // zh-CN: 快速加载完成后主动触发一次高亮, 但仅在文本大小不超过高亮上限时执行.
-        if (text.length <= JavaScriptHighlighter.MAX_HIGHLIGHT_CHARS) {
+        if (Pref.isCodeHighlightEnabledForLength(text.length)) {
             post { editor.refreshHighlightTokensIfAllowed() }
         }
     }
@@ -1290,6 +1295,9 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                     editor.setRedoUndoEnabled(true)
                     editor.markUndoRedoBaselineAsUnchanged()
                     editor.setProgress(false)
+                    if (Pref.isCodeHighlightEnabledForLength(text.length)) {
+                        post { editor.refreshHighlightTokensIfAllowed() }
+                    }
                     return
                 }
 
@@ -2763,8 +2771,6 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
         private const val MIN_CONFIDENCE_TO_WRITE_FILE = 90
         private val DEFAULT_CHARSET_TO_WRITE_FILE = StandardCharsets.UTF_8
-
-        private const val LARGE_FILE_MODE_THRESHOLD = 512 * 1024
 
         // Internal storage root (no external SD).
         // zh-CN: 内部存储根目录 (不访问外置 SD).

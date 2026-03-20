@@ -81,6 +81,9 @@
     <string name="description_display_over_other_app">Разрешение \"показ поверх других приложений\" позволяет AutoJs6 отображать плавающие окна или плавающую кнопку поверх интерфейса других приложений, чтобы быстро выполнять действия или просматривать информацию на любом экране.\n\nNote: если разрешение не выдано, плавающие окна и плавающая кнопка могут не отображаться или работать некорректно.</string>
     <string name="description_documentation_source_preference">Локальная документация: Использование встроенных файлов AutoJs6 в качестве источников документации, подключение к сети не требуется. Содержание меняется по мере обновления AutoJs6.\nОнлайн-документы: Использование страниц GitHub в качестве источников документации, требуется подключение к сети. Содержимое всегда обновляется.\n\nПримечание: Чтобы максимально улучшить качество чтения онлайн-документов, рекомендуется использовать широкоформатное устройство отображения, например настольный монитор.\nПримечание: Начиная с версии 6.2.0, документация находится на предварительной стадии разработки, и большая часть содержимого еще не была написана или обновлена.</string>
     <string name="description_documentation_source_preference_more">Для поддержки темной темы на страницах документов должны быть выполнены следующие условия:\n1. В AutoJs6 включен ночной режим\n2. Android System WebView (или браузеры типа Google Chrome):\n- Android API Level 29 (Android 10) [Q] и выше: версия >= 76\n- Android API Level 28 (Android 9) [P] и ниже: версия >= 105</string>
+    <string name="description_editor_code_highlight_threshold">Определяет, включать ли подсветку синтаксиса в зависимости от размера файла.\nДля больших файлов отключение подсветки синтаксиса может в некоторой степени повысить эффективность загрузки файла.</string>
+    <string name="description_editor_large_file_mode_threshold">Определяет, использовать ли режим больших файлов для загрузки файлов в зависимости от размера файла.\nРежим больших файлов может в некоторой степени повысить эффективность и стабильность загрузки, но функции \"Отменить\" и \"Повторить\" будут отключены в этом режиме.</string>
+    <string name="description_editor_log_button_behavior_preference">Управляет тем, как кнопка \"Логи\" в меню редактора кода открывает журналы.\n\nНижняя панель логов: Открывает нижнюю панель логов. Перейти на полноэкранную страницу логов можно, нажав кнопку \"Развернуть\" или перетащив ручку вверх почти до верхнего края.\nПолноэкранная страница логов: Сразу открывает полноэкранную страницу логов.</string>
     <string name="description_extending_js_build_in_objects">Расширение встроенных объектов JavaScript может повысить гибкость кода и обеспечить более богатую функциональность, но может привести к конфликтам и даже поломкам.\nВсе сценарии имеют встроенные расширения, включенные по умолчанию, когда опция включена.\nВстроенные расширения часто небезопасны, и их не рекомендуется использовать, пока принципы и риски встроенных расширений не будут четко поняты.\nКогда опция выключена, встроенные расширения все еще можно включить через глобальный объект plugins, как описано в документации проекта.</string>
     <string name="description_file_extensions_preference">Используется для настройки отображения расширений файлов в файловом менеджере AutoJs6.</string>
     <string name="description_floating_button">Плавающая кнопка показывает перетаскиваемую точку быстрого доступа у края экрана и может использоваться для [ запуска или остановки скриптов / анализа макета / просмотра последнего имени пакета или имени Activity / отображения положения указателя ].\n\nNote: для этой функции обычно требуется разрешение \"показ поверх других приложений\".</string>
@@ -182,6 +185,8 @@
     <string name="entry_app_language_auto">Следовать за системой</string>
     <string name="entry_documentation_source_local">Локальные документы</string>
     <string name="entry_documentation_source_online">Онлайн-документы</string>
+    <string name="entry_editor_log_button_behavior_bottom_sheet">Нижняя панель логов</string>
+    <string name="entry_editor_log_button_behavior_fullscreen_page">Полноэкранная страница логов</string>
     <string name="entry_editor_pinch_to_zoom_change_text_size">размер текста</string>
     <string name="entry_editor_pinch_to_zoom_disable">Отключить</string>
     <string name="entry_editor_pinch_to_zoom_scale_view">Масштабировать вид</string>
@@ -372,6 +377,7 @@
     <string name="error_unknown_element_name">Неизвестное имя элемента: %1$s</string>
     <string name="error_unknown_exception">Неизвестное исключение</string>
     <string name="error_unknown_gravity_for">Неизвестная гравитация: %s</string>
+    <string name="error_unknown_key_code">Неизвестный код клавиши: %1$s</string>
     <string name="error_unknown_operation">Неизвестная операция</string>
     <string name="error_unknown_picker_result_type">Неизвестный тип результата {имя: %s}</string>
     <string name="error_unknown_picker_result_type_with_params" formatted="false">Неизвестный тип результата {имя: %s, params: %s}</string>
@@ -456,6 +462,7 @@
     <string name="summary_all_files_access_inrt">Разрешить приложению доступ ко всем файлам, включая внешнее хранилище</string>
     <string name="summary_display_over_other_apps">Позволяет AutoJs6 отображать контент поверх других приложений</string>
     <string name="summary_display_over_other_apps_inrt">Разрешить приложению отображать контент поверх других приложений</string>
+    <string name="summary_editor_auto_show_log_bottom_sheet_on_run">Автоматически открывать нижнюю панель логов после запуска скрипта кнопкой Запуск в редакторе</string>
     <string name="summary_enable_a11y_service_with_root_access">Автоматическое включение службы доступности с корневым доступом при необходимости</string>
     <string name="summary_enable_a11y_service_with_secure_settings">Автоматическое включение службы доступности с безопасными настройками при необходимости</string>
     <string name="summary_extending_js_build_in_objects">Повысить гибкость кода и обеспечить более богатую функциональность за счет расширения встроенных объектов JavaScript</string>
@@ -643,6 +650,7 @@
     <string name="text_close_floating_button">Закрыть плавающую кнопку</string>
     <string name="text_code">Код</string>
     <string name="text_code_beautify">Улучшить код</string>
+    <string name="text_code_editor">Редактор кода</string>
     <string name="text_collapse_all">Свернуть всё</string>
     <string name="text_color_library">Цветовая библиотека</string>
     <string name="text_color_palette">Цветовая палитра</string>
@@ -764,6 +772,16 @@
     <string name="text_edit">Редактировать</string>
     <string name="text_edit_prepare_script">Редактирование сценария перед выполнением</string>
     <string name="text_edit_script">Редактирование скрипта</string>
+    <string name="text_editor_auto_show_log_bottom_sheet_on_run">Автоматически показывать нижнюю панель логов после запуска</string>
+    <string name="text_editor_code_highlight_always_disabled">Всегда отключать подсветку кода</string>
+    <string name="text_editor_code_highlight_always_enabled">Всегда включать подсветку кода</string>
+    <string name="text_editor_code_highlight_threshold">Порог подсветки кода</string>
+    <string name="text_editor_code_highlight_threshold_enabled_for_smaller_files">Включать подсветку кода только для файлов не больше %1$s</string>
+    <string name="text_editor_large_file_mode_always_disabled">Всегда отключать режим больших файлов</string>
+    <string name="text_editor_large_file_mode_always_enabled">Всегда включать режим больших файлов</string>
+    <string name="text_editor_large_file_mode_threshold">Порог режима больших файлов</string>
+    <string name="text_editor_large_file_mode_threshold_enabled_for_larger_files">Включать режим больших файлов только для файлов больше %1$s</string>
+    <string name="text_editor_log_button_behavior">Поведение кнопки логов редактора</string>
     <string name="text_editor_theme">Тема редактора</string>
     <string name="text_email">Электронная почта</string>
     <string name="text_email_cannot_be_empty">Электронная почта не может быть пустой</string>
@@ -956,6 +974,7 @@
     <string name="text_manage_a11y_service">Управление службой доступности</string>
     <string name="text_manage_ignored_updates">Управление игнорируемыми обновлениями</string>
     <string name="text_manage_key_store">Управление хранилищем ключей</string>
+    <string name="text_maximize">Развернуть</string>
     <string name="text_min_version">Минимальная версия</string>
     <string name="text_min_version_of_vscode_vsc_ext">Минимальная версия расширения VSCode</string>
     <string name="text_mobile_qq_not_installed">\"Мобильный QQ\" не установлен</string>
@@ -1318,6 +1337,7 @@
     <string name="text_start_running">Выполнение</string>
     <string name="text_state_or_province">Штат или провинция</string>
     <string name="text_stop">Остановить</string>
+    <string name="text_stop_simplified">Стоп</string>
     <string name="text_street">Улица</string>
     <string name="text_successfully_created_key_store">Ключ подписи успешно создан</string>
     <string name="text_supported_abis_short">ABIs</string>
@@ -1432,14 +1452,4 @@
     <string name="text_xiaomi_background_popup_permission">Всплывающие окна в фоне</string>
     <string name="warn_continue_operation_without_saving_settings">Настройки не сохранены. Продолжить?</string>
     <string name="warn_exit_without_saving_settings">Настройки не сохранены. Выйти?</string>
-    <string name="error_unknown_key_code">Неизвестный код клавиши: %1$s</string>
-    <string name="text_maximize">Развернуть</string>
-    <string name="text_stop_simplified">Стоп</string>
-    <string name="text_code_editor">Редактор кода</string>
-    <string name="entry_editor_log_button_behavior_bottom_sheet">Нижняя панель логов</string>
-    <string name="entry_editor_log_button_behavior_fullscreen_page">Полноэкранная страница логов</string>
-    <string name="text_editor_auto_show_log_bottom_sheet_on_run">Автоматически показывать нижнюю панель логов после запуска</string>
-    <string name="text_editor_log_button_behavior">Поведение кнопки логов редактора</string>
-    <string name="summary_editor_auto_show_log_bottom_sheet_on_run">Автоматически открывать нижнюю панель логов после запуска скрипта кнопкой Запуск в редакторе</string>
-    <string name="description_editor_log_button_behavior_preference">Выберите, как кнопка логов редактора открывает логи: нижняя панель логов или полноэкранная страница логов.</string>
 </resources>

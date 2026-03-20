@@ -82,6 +82,9 @@
     <string name="description_display_over_other_app">\"他のアプリの上に表示\" 権限により, AutoJs6 は他のアプリ画面の上にフローティングウィンドウやフローティングボタンを表示でき, どの画面からでも素早く操作や情報確認ができます.\n\nNote: この権限が付与されていない場合, フローティングウィンドウやフローティングボタンが表示されない, または正常に利用できない可能性があります.</string>
     <string name="description_documentation_source_preference">ローカルドキュメント AutoJs6 に組み込まれたファイルをドキュメントソースとして使用するため, ネットワーク接続は必要ありません. AutoJs6 が更新されると内容も変わります.\nオンライン・ドキュメント. GitHub のページをドキュメントソースとして使用し, ネットワーク接続が必要です. コンテンツは常に最新の状態に保たれます.\n\n注: オンラインドキュメントを最大限に活用するために, デスクトップモニターなどのワイドスクリーンディスプレイを使用することをお勧めします.\n注意: バージョン 6.2.0 時点では, ドキュメントはまだ開発の初期段階にあり, ほとんどのコンテンツはまだ執筆・更新されていません</string>
     <string name="description_documentation_source_preference_more">ドキュメントページでダークテーマをサポートするには, 以下の条件を満たす必要があります.\n1. AutoJs6 でナイトモードが有効になっている\n2. Android System WebView (または Google Chrome などのブラウザ) .\n- Android API Level 29 (Android 10) [Q] 以上: バージョン >= 76\n- Android API Level 28 (Android 9) [P] 以下: バージョン >= 105</string>
+    <string name="description_editor_code_highlight_threshold">ファイルサイズに応じて構文ハイライト機能を有効にするかどうかを決定します.\n大きなファイルでは, 構文ハイライトを無効にすることで読み込み効率をある程度向上できます.</string>
+    <string name="description_editor_large_file_mode_threshold">ファイルサイズに応じて大容量ファイルモードで読み込むかどうかを決定します.\n大容量ファイルモードは読み込み効率と安定性をある程度向上できますが, このモードでは \"元に戻す\" と \"やり直し\" 機能が無効になります.</string>
+    <string name="description_editor_log_button_behavior_preference">コードエディタのメニューにある \"ログ\" ボタンでログを開く方法を制御します.\n\n下部ログパネル: 下部ログパネルを開きます. \"最大化\" ボタンをタップするか, ハンドルを上方向へ上端付近までドラッグすると全画面ログページに入れます.\n全画面ログページ: 直接全画面ログページに入ります.</string>
     <string name="description_extending_js_build_in_objects">JavaScript の組み込みオブジェクトを拡張すると, コードの柔軟性が増し, より豊かな機能を実現できますが, 衝突や破損を引き起こす可能性もあります.\nこのオプションをオンにすると, すべてのスクリプトはデフォルトで組み込みの拡張機能を有効にします.\n組み込みの拡張機能は安全でないことが多いので, 組み込みの拡張機能の原理とリスクが明確に理解されていない限り, 推奨されません.\nこのオプションをオフにした場合でも, プロジェクトのドキュメントで説明されているように, plugins グローバルオブジェクトを使用して組み込み拡張機能を有効にすることができます</string>
     <string name="description_file_extensions_preference">AutoJs6のファイルエクスプローラーでファイル拡張子を表示するかどうかの設定に使用されます.</string>
     <string name="description_floating_button">フローティングボタンは, 画面端にドラッグ可能なクイック入口を表示し, [ スクリプトの開始/停止 / レイアウト解析 / 最近のパッケージ名やアクティビティ名の表示 / ポインター位置の表示 ] などに利用できます.\n\nNote: この機能は通常, \"他のアプリの上に表示\" 権限が必要です.</string>
@@ -183,6 +186,8 @@
     <string name="entry_app_language_auto">システムに従ってください</string>
     <string name="entry_documentation_source_local">ローカルドキュメント</string>
     <string name="entry_documentation_source_online">オンラインドキュメント</string>
+    <string name="entry_editor_log_button_behavior_bottom_sheet">下部ログパネル</string>
+    <string name="entry_editor_log_button_behavior_fullscreen_page">全画面ログページ</string>
     <string name="entry_editor_pinch_to_zoom_change_text_size">文字サイズ</string>
     <string name="entry_editor_pinch_to_zoom_disable">無効化</string>
     <string name="entry_editor_pinch_to_zoom_scale_view">ズームビュー</string>
@@ -373,6 +378,7 @@
     <string name="error_unknown_element_name">不明な要素名: %1$s</string>
     <string name="error_unknown_exception">不明な例外</string>
     <string name="error_unknown_gravity_for">不明な重力: %s</string>
+    <string name="error_unknown_key_code">不明なキーコード: %1$s</string>
     <string name="error_unknown_operation">不明な操作</string>
     <string name="error_unknown_picker_result_type">不明な結果タイプ {name: %s} です</string>
     <string name="error_unknown_picker_result_type_with_params" formatted="false">不明な結果タイプ {name: %s, params: %s}</string>
@@ -457,6 +463,7 @@
     <string name="summary_all_files_access_inrt">アプリが外部ストレージを含むすべてのファイルにアクセスすることを許可する</string>
     <string name="summary_display_over_other_apps">AutoJs6 が他のアプリの上にコンテンツを表示することを許可します</string>
     <string name="summary_display_over_other_apps_inrt">アプリが他のアプリの上にコンテンツを表示することを許可する</string>
+    <string name="summary_editor_auto_show_log_bottom_sheet_on_run">エディタの実行ボタンでスクリプトを開始した後, 下部ログパネルを自動で開きます</string>
     <string name="summary_enable_a11y_service_with_root_access">必要なときに自動的に root 権限でアクセシビリティサービスを有効にする</string>
     <string name="summary_enable_a11y_service_with_secure_settings">必要なときに自動的にセキュアな設定のアクセシビリティサービスを有効にする</string>
     <string name="summary_extending_js_build_in_objects">JavaScript の組み込みオブジェクトを拡張することで, コードの柔軟性を高め, より豊かな機能を実現します</string>
@@ -644,6 +651,7 @@
     <string name="text_close_floating_button">フローティングボタンを閉じる</string>
     <string name="text_code">コード</string>
     <string name="text_code_beautify">コードの美化</string>
+    <string name="text_code_editor">コードエディタ</string>
     <string name="text_collapse_all">すべて折りたたむ</string>
     <string name="text_color_library">カラーライブラリ</string>
     <string name="text_color_palette">カラーパレット</string>
@@ -765,6 +773,16 @@
     <string name="text_edit">編集する</string>
     <string name="text_edit_prepare_script">実行前スクリプトの編集</string>
     <string name="text_edit_script">スクリプトの編集</string>
+    <string name="text_editor_auto_show_log_bottom_sheet_on_run">実行後に下部ログパネルを自動表示</string>
+    <string name="text_editor_code_highlight_always_disabled">コードハイライトを常に無効化</string>
+    <string name="text_editor_code_highlight_always_enabled">コードハイライトを常に有効化</string>
+    <string name="text_editor_code_highlight_threshold">コードハイライトしきい値</string>
+    <string name="text_editor_code_highlight_threshold_enabled_for_smaller_files">%1$s 以下のファイルでのみコードハイライトを有効化</string>
+    <string name="text_editor_large_file_mode_always_disabled">大容量ファイルモードを常に無効化</string>
+    <string name="text_editor_large_file_mode_always_enabled">大容量ファイルモードを常に有効化</string>
+    <string name="text_editor_large_file_mode_threshold">大容量ファイルモードしきい値</string>
+    <string name="text_editor_large_file_mode_threshold_enabled_for_larger_files">%1$s を超えるファイルでのみ大容量ファイルモードを有効化</string>
+    <string name="text_editor_log_button_behavior">エディタのログボタン動作</string>
     <string name="text_editor_theme">エディターテーマ</string>
     <string name="text_email">電子メール</string>
     <string name="text_email_cannot_be_empty">電子メールを空にすることはできません</string>
@@ -957,6 +975,7 @@
     <string name="text_manage_a11y_service">アクセシビリティサービスを管理する</string>
     <string name="text_manage_ignored_updates">無視されたアップデートの管理</string>
     <string name="text_manage_key_store">キーストアを管理</string>
+    <string name="text_maximize">最大化</string>
     <string name="text_min_version">最小バージョン</string>
     <string name="text_min_version_of_vscode_vsc_ext">VSCode 拡張機能の最小バージョン</string>
     <string name="text_mobile_qq_not_installed">モバイル QQ がインストールされていない</string>
@@ -1319,6 +1338,7 @@
     <string name="text_start_running">実行中</string>
     <string name="text_state_or_province">州または省</string>
     <string name="text_stop">停止</string>
+    <string name="text_stop_simplified">停止</string>
     <string name="text_street">街</string>
     <string name="text_successfully_created_key_store">署名キーが正常に作成されました</string>
     <string name="text_supported_abis_short">ABI</string>
@@ -1433,14 +1453,4 @@
     <string name="text_xiaomi_background_popup_permission">バックグラウンドでのポップアップ表示</string>
     <string name="warn_continue_operation_without_saving_settings">設定が保存されていません. 続行しますか?</string>
     <string name="warn_exit_without_saving_settings">設定が保存されていません. 終了しますか?</string>
-    <string name="error_unknown_key_code">不明なキーコード: %1$s</string>
-    <string name="text_maximize">最大化</string>
-    <string name="text_stop_simplified">停止</string>
-    <string name="text_code_editor">コードエディタ</string>
-    <string name="entry_editor_log_button_behavior_bottom_sheet">下部ログパネル</string>
-    <string name="entry_editor_log_button_behavior_fullscreen_page">全画面ログページ</string>
-    <string name="text_editor_auto_show_log_bottom_sheet_on_run">実行後に下部ログパネルを自動表示</string>
-    <string name="text_editor_log_button_behavior">エディタのログボタン動作</string>
-    <string name="summary_editor_auto_show_log_bottom_sheet_on_run">エディタの実行ボタンでスクリプトを開始した後, 下部ログパネルを自動で開きます</string>
-    <string name="description_editor_log_button_behavior_preference">エディタのログボタンでログを開く方法を選択します: 下部ログパネルまたは全画面ログページ.</string>
 </resources>

@@ -3,6 +3,8 @@ package org.autojs.autojs.theme.preference
 import android.content.Context
 import android.util.AttributeSet
 import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.MaterialDialog.OptionMenuItemSpec
+import org.autojs.autojs.util.DialogUtils.showAdaptive
 import org.autojs.autojs6.R
 
 open class MaterialDialogPreference : MaterialPreference {
@@ -20,6 +22,8 @@ open class MaterialDialogPreference : MaterialPreference {
     protected var neutralTextShort: CharSequence? = null
     protected var positiveText: CharSequence? = null
     protected var positiveColor: Int? = null
+
+    protected val builderOptions = mutableListOf<OptionMenuItemSpec>()
 
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes) {
         init(context, attrs, defStyleAttr, defStyleRes)
@@ -95,6 +99,12 @@ open class MaterialDialogPreference : MaterialPreference {
                     builder.positiveColorRes(R.color.dialog_button_attraction)
                 }
             }
+            if (longClickPrompt != null) {
+                builderOptions += OptionMenuItemSpec(prefContext.getString(R.string.dialog_button_details)) {
+                    displayDetailsOptionMenuItemSpecDialog(prefContext, dialogTitle, longClickPrompt, longClickPromptMore)
+                }
+            }
+            builder.options(builderOptions)
         }
 
     private fun setNeutralTextIfNeeded(builder: MaterialDialog.Builder) {
@@ -114,6 +124,36 @@ open class MaterialDialogPreference : MaterialPreference {
         val negativeTextLength = 5.coerceAtLeast((negativeText ?: prefContext.getString(android.R.string.cancel)).length)
         val neutralTextLength = 5.coerceAtLeast(neutralText!!.length)
         return positiveTextLength + negativeTextLength + neutralTextLength > maxChars
+    }
+
+    companion object {
+        fun displayDetailsOptionMenuItemSpecDialog(
+            context: Context,
+            dialogTitle: CharSequence? = null,
+            longClickPrompt: CharSequence? = null,
+            longClickPromptMore: CharSequence? = null,
+        ) {
+            MaterialDialog.Builder(context)
+                .title(dialogTitle ?: context.getString(R.string.text_details))
+                .content(longClickPrompt ?: "")
+                .also { builder ->
+                    longClickPromptMore?.let { longClickPromptMore ->
+                        builder.neutralText(R.string.dialog_button_more)
+                        builder.neutralColorRes(R.color.dialog_button_hint)
+                        builder.onNeutral { _, _ ->
+                            MaterialDialog.Builder(context)
+                                .title(R.string.text_details)
+                                .content(longClickPromptMore)
+                                .positiveText(R.string.dialog_button_dismiss)
+                                .positiveColorRes(R.color.dialog_button_default)
+                                .showAdaptive()
+                        }
+                    }
+                }
+                .positiveText(R.string.dialog_button_dismiss)
+                .positiveColorRes(R.color.dialog_button_default)
+                .showAdaptive()
+        }
     }
 
 }

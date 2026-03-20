@@ -83,6 +83,9 @@
     <string name="description_display_over_other_app">\"다른 앱 위에 표시\" 권한은 AutoJs6 가 다른 앱 화면 위에 플로팅 창 또는 플로팅 버튼을 표시할 수 있게 하여, 어떤 화면에서도 빠르게 작업을 실행하거나 정보를 확인할 수 있도록 합니다.\n\nNote: 이 권한이 부여되지 않으면 플로팅 창 및 플로팅 버튼이 표시되지 않거나 정상적으로 사용할 수 없을 수 있습니다.</string>
     <string name="description_documentation_source_preference">로컬 문서: AutoJs6 내장 파일을 문서 소스로 사용, 네트워크 연결이 필요하지 않습니다. 내용은 AutoJs6 이 업데이트됨에 따라 변경됩니다.\n온라인 문서: GitHub 페이지를 문서 소스로 사용, 네트워크 연결 필요. 콘텐츠는 항상 최신 상태입니다.\n\n참고: 온라인 문서의 읽기 환경을 최대화하려면 데스크탑 모니터와 같은 와이드 스크린 디스플레이 장치를 사용하는 것이 좋습니다.\n참고: 버전 6.2.0 현재 문서는 아직 개발 초기 단계이며 대부분의 콘텐츠가 아직 작성되거나 업데이트되지 않았습니다.</string>
     <string name="description_documentation_source_preference_more">문서 페이지에서 어두운 테마를 지원하려면 다음 조건이 충족되어야 합니다.\n1. AutoJs6 에는 야간 모드가 활성화되어 있습니다.\n2. Android 시스템 WebView (또는 Google Chrome 과 같은 브라우저):\n- Android API 레벨 29 (Android 10) [Q] 이상: 버전 >= 76\n- Android API 레벨 28 (Android 9) [P] 이하: 버전 >= 105</string>
+    <string name="description_editor_code_highlight_threshold">파일 크기에 따라 구문 하이라이트 기능을 활성화할지 결정합니다.\n대용량 파일에서는 구문 하이라이트를 비활성화하면 파일 로딩 효율을 어느 정도 높일 수 있습니다.</string>
+    <string name="description_editor_large_file_mode_threshold">파일 크기에 따라 대용량 파일 모드로 파일을 로드할지 결정합니다.\n대용량 파일 모드는 파일 로딩 효율과 안정성을 어느 정도 높일 수 있지만, 이 모드에서는 \"실행 취소\" 및 \"다시 실행\" 기능이 비활성화됩니다.</string>
+    <string name="description_editor_log_button_behavior_preference">코드 편집기 메뉴의 \"로그\" 버튼이 로그를 여는 방식을 제어합니다.\n\n하단 로그 패널: 하단 로그 패널을 엽니다. \"최대화\" 버튼을 누르거나 핸들을 위쪽으로 상단 가까이 끌어올리면 전체 화면 로그 페이지로 들어갈 수 있습니다.\n전체 화면 로그 페이지: 전체 화면 로그 페이지로 바로 들어갑니다.</string>
     <string name="description_extending_js_build_in_objects">JavaScript 내장 개체를 확장하면 코드 유연성이 향상되고 더 풍부한 기능을 사용할 수 있지만 충돌이 발생하고 파손될 수도 있습니다.\n옵션이 켜져 있을 때 모든 스크립트에는 기본적으로 활성화된 내장 확장이 있습니다.\n기본 제공 확장은 종종 안전하지 않으며 기본 제공 확장의 원칙과 위험을 명확하게 이해하지 않는 한 권장되지 않습니다.\n옵션이 꺼져 있어도 프로젝트 문서에 설명된 대로 플러그인 전역 개체를 통해 내장 확장을 계속 활성화할 수 있습니다.</string>
     <string name="description_file_extensions_preference">AutoJs6 파일 탐색기에서 파일 확장자 표시 여부를 설정하는 데 사용됩니다.</string>
     <string name="description_floating_button">플로팅 버튼은 화면 가장자리에 드래그 가능한 빠른 기능 진입점을 표시하며, [ 스크립트 시작/중지 / 레이아웃 분석 / 최근 패키지명 또는 액티비티명 보기 / 포인터 위치 표시 ] 등에 사용할 수 있습니다.\n\nNote: 이 기능은 일반적으로 \"다른 앱 위에 표시\" 권한이 필요합니다.</string>
@@ -184,6 +187,8 @@
     <string name="entry_app_language_auto">시스템을 따르십시오</string>
     <string name="entry_documentation_source_local">현지 문서</string>
     <string name="entry_documentation_source_online">온라인 문서</string>
+    <string name="entry_editor_log_button_behavior_bottom_sheet">하단 로그 패널</string>
+    <string name="entry_editor_log_button_behavior_fullscreen_page">전체 화면 로그 페이지</string>
     <string name="entry_editor_pinch_to_zoom_change_text_size">텍스트 크기 변경</string>
     <string name="entry_editor_pinch_to_zoom_disable">장애를 입히다</string>
     <string name="entry_editor_pinch_to_zoom_scale_view">스케일 보기</string>
@@ -374,6 +379,7 @@
     <string name="error_unknown_element_name">알 수 없는 요소 이름: %1$s</string>
     <string name="error_unknown_exception">알 수 없는 예외</string>
     <string name="error_unknown_gravity_for">알 수 없는 중력: %s</string>
+    <string name="error_unknown_key_code">알 수 없는 키 코드: %1$s</string>
     <string name="error_unknown_operation">알 수없는 작업</string>
     <string name="error_unknown_picker_result_type">알 수없는 결과 유형 {이름: %s}</string>
     <string name="error_unknown_picker_result_type_with_params" formatted="false">알 수없는 결과 유형 {이름: %s, 매개 변수: %s}</string>
@@ -458,6 +464,7 @@
     <string name="summary_all_files_access_inrt">앱이 외부 저장소를 포함한 모든 파일에 접근할 수 있도록 허용합니다</string>
     <string name="summary_display_over_other_apps">AutoJs6 가 다른 애플리케이션 위에 콘텐츠를 표시할 수 있도록 허용합니다</string>
     <string name="summary_display_over_other_apps_inrt">앱이 다른 애플리케이션 위에 콘텐츠를 표시할 수 있도록 허용합니다</string>
+    <string name="summary_editor_auto_show_log_bottom_sheet_on_run">편집기의 실행 버튼으로 스크립트를 시작한 뒤 하단 로그 패널을 자동으로 엽니다</string>
     <string name="summary_enable_a11y_service_with_root_access">필요할 때 루트 액세스로 접근성 서비스를 자동으로 활성화하십시오</string>
     <string name="summary_enable_a11y_service_with_secure_settings">필요할 때 안전한 설정으로 접근성 서비스를 활성화하십시오</string>
     <string name="summary_extending_js_build_in_objects">JavaScript 내장 개체를 확장하여 코드 유연성을 높이고 더 풍부한 기능을 활성화합니다.</string>
@@ -645,6 +652,7 @@
     <string name="text_close_floating_button">플로팅 버튼 닫기</string>
     <string name="text_code">암호</string>
     <string name="text_code_beautify">코드를 아름답게하십시오</string>
+    <string name="text_code_editor">코드 편집기</string>
     <string name="text_collapse_all">모두 접기</string>
     <string name="text_color_library">색상 라이브러리</string>
     <string name="text_color_palette">색상 팔레트</string>
@@ -766,6 +774,16 @@
     <string name="text_edit">편집하다</string>
     <string name="text_edit_prepare_script">사전 사전 자연 스크립트를 편집하십시오</string>
     <string name="text_edit_script">스크립트 편집</string>
+    <string name="text_editor_auto_show_log_bottom_sheet_on_run">실행 후 하단 로그 패널 자동 표시</string>
+    <string name="text_editor_code_highlight_always_disabled">코드 하이라이트 항상 비활성화</string>
+    <string name="text_editor_code_highlight_always_enabled">코드 하이라이트 항상 활성화</string>
+    <string name="text_editor_code_highlight_threshold">코드 하이라이트 임계값</string>
+    <string name="text_editor_code_highlight_threshold_enabled_for_smaller_files">%1$s 이하 파일에서만 코드 하이라이트 활성화</string>
+    <string name="text_editor_large_file_mode_always_disabled">대용량 파일 모드 항상 비활성화</string>
+    <string name="text_editor_large_file_mode_always_enabled">대용량 파일 모드 항상 활성화</string>
+    <string name="text_editor_large_file_mode_threshold">대용량 파일 모드 임계값</string>
+    <string name="text_editor_large_file_mode_threshold_enabled_for_larger_files">%1$s 초과 파일에서만 대용량 파일 모드 활성화</string>
+    <string name="text_editor_log_button_behavior">편집기 로그 버튼 동작</string>
     <string name="text_editor_theme">편집기 테마</string>
     <string name="text_email">이메일</string>
     <string name="text_email_cannot_be_empty">이메일이 비어질 수 없다</string>
@@ -958,6 +976,7 @@
     <string name="text_manage_a11y_service">접근성 서비스를 관리합니다</string>
     <string name="text_manage_ignored_updates">무시 된 업데이트를 관리합니다</string>
     <string name="text_manage_key_store">키 저장소 관리</string>
+    <string name="text_maximize">최대화</string>
     <string name="text_min_version">최소 버전</string>
     <string name="text_min_version_of_vscode_vsc_ext">VSCode 확장의 최소 버전</string>
     <string name="text_mobile_qq_not_installed">\"모바일 QQ\" 가 설치되지 않았습니다</string>
@@ -1320,6 +1339,7 @@
     <string name="text_start_running">달리기</string>
     <string name="text_state_or_province">주 또는 도</string>
     <string name="text_stop">중지</string>
+    <string name="text_stop_simplified">중지</string>
     <string name="text_street">거리</string>
     <string name="text_successfully_created_key_store">서명 키가 성공적으로 생성되었습니다</string>
     <string name="text_supported_abis_short">ABI</string>
@@ -1434,14 +1454,4 @@
     <string name="text_xiaomi_background_popup_permission">백그라운드 팝업</string>
     <string name="warn_continue_operation_without_saving_settings">설정이 저장되지 않았습니다. 계속할까요?</string>
     <string name="warn_exit_without_saving_settings">설정이 저장되지 않았습니다. 종료할까요?</string>
-    <string name="error_unknown_key_code">알 수 없는 키 코드: %1$s</string>
-    <string name="text_maximize">최대화</string>
-    <string name="text_stop_simplified">중지</string>
-    <string name="text_code_editor">코드 편집기</string>
-    <string name="entry_editor_log_button_behavior_bottom_sheet">하단 로그 패널</string>
-    <string name="entry_editor_log_button_behavior_fullscreen_page">전체 화면 로그 페이지</string>
-    <string name="text_editor_auto_show_log_bottom_sheet_on_run">실행 후 하단 로그 패널 자동 표시</string>
-    <string name="text_editor_log_button_behavior">편집기 로그 버튼 동작</string>
-    <string name="summary_editor_auto_show_log_bottom_sheet_on_run">편집기의 실행 버튼으로 스크립트를 시작한 뒤 하단 로그 패널을 자동으로 엽니다</string>
-    <string name="description_editor_log_button_behavior_preference">편집기 로그 버튼이 로그를 여는 방식을 선택하세요: 하단 로그 패널 또는 전체 화면 로그 페이지.</string>
 </resources>
