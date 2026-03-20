@@ -541,11 +541,11 @@ class ScriptRuntime private constructor(builder: Builder) {
     fun selector() = CoreUiSelector(accessibilityBridge)
 
     fun load(vararg path: String) {
-        doLoad({ f: File -> isJarFile(f) || isDexFile(f) }, *path)
+        doLoad({ f: File -> isJarFile(f) || isDexFile(f) || isAarFile(f) }, *path)
     }
 
     fun load(dir: String, isRecursive: Boolean) {
-        doLoad({ f: File -> isJarFile(f) || isDexFile(f) || isRecursive && f.isDirectory }, dir)
+        doLoad({ f: File -> isJarFile(f) || isDexFile(f) || isAarFile(f) || isRecursive && f.isDirectory }, dir)
     }
 
     fun loadDex(vararg path: String) {
@@ -562,6 +562,14 @@ class ScriptRuntime private constructor(builder: Builder) {
 
     fun loadJar(dir: String?, isRecursive: Boolean) {
         doLoadJar({ f: File -> isJarFile(f) || isRecursive && f.isDirectory }, dir!!)
+    }
+
+    fun loadAar(vararg paths: String) {
+        doLoadAar({ f: File -> isAarFile(f) }, *paths)
+    }
+
+    fun loadAar(dir: String?, isRecursive: Boolean) {
+        doLoadAar({ f: File -> isAarFile(f) || isRecursive && f.isDirectory }, dir!!)
     }
 
     @JvmOverloads
@@ -664,11 +672,13 @@ class ScriptRuntime private constructor(builder: Builder) {
                     for (f in filtered) {
                         if (isJarFile(f)) loadJar(f.path)
                         else if (isDexFile(f)) loadDex(f.path)
+                        else if (isAarFile(f)) loadAar(f.path)
                     }
                 }
             } else {
                 if (isJarFile(file)) loadJar(file.path)
                 else if (isDexFile(file)) loadDex(file.path)
+                else if (isAarFile(file)) loadAar(file.path)
             }
         }
     }
@@ -708,6 +718,27 @@ class ScriptRuntime private constructor(builder: Builder) {
                     }
                 } else {
                     classLoader.loadJar(file)
+                }
+            }
+        } catch (e: IOException) {
+            throw UncheckedIOException(e)
+        }
+    }
+
+    private fun doLoadAar(filter: FileFilter, vararg paths: String) {
+        try {
+            val classLoader = sClassLoader
+            for (path in paths) {
+                val file = File(files.nonNullPath(path))
+                if (file.isDirectory) {
+                    val filtered = file.listFiles(filter)
+                    if (filtered != null) {
+                        for (f in filtered) {
+                            loadAar(f.path)
+                        }
+                    }
+                } else {
+                    classLoader.loadAar(file)
                 }
             }
         } catch (e: IOException) {
@@ -956,6 +987,8 @@ class ScriptRuntime private constructor(builder: Builder) {
             return PFiles.getExtension(f.name).equals("jar", ignoreCase = true)
         }
 
+        private fun isAarFile(f: File): Boolean {
+            return PFiles.getExtension(f.name).equals("aar", ignoreCase = true)
+        }
     }
-
 }

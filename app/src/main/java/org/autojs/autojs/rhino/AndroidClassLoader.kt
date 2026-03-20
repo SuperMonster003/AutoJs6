@@ -17,18 +17,21 @@ import org.autojs.autojs.util.StringUtils.str
 import org.autojs.autojs6.R
 import org.mozilla.javascript.GeneratedClassLoader
 import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
+import java.util.jar.JarInputStream
 import kotlin.random.Random
 import com.legacy.android.dx.command.dexer.Main as LegacyMain
 
 /**
  * Created by Stardust on Apr 5, 2017.
- * Modified by SuperMonster003 as of Jul 5, 2023.
  * Transformed by SuperMonster003 on Jul 5, 2023.
+ * Modified by SuperMonster003 as of Jul 5, 2023.
  * Modified by LYS86 (https://github.com/LYS86) as of Dec 26, 2025.
+ * Modified by JetBrains AI Assistant (GPT-5.3-Codex (xhigh)) as of Mar 20, 2026.
  */
 /**
  * Create a new instance with the given parent classloader and cache directory
@@ -107,14 +110,32 @@ class AndroidClassLoader(private val parent: ClassLoader, private val cacheDir: 
 
         return synchronized(lock) {
             runCatching {
-                jarToDexDx(jar)
-            }.recoverCatching { eDx ->
-                Log.e(TAG, "Failed: jarToDexDx", eDx)
                 jarToDexR8(jar)
-            }.getOrElse { eR8 ->
+            }.recoverCatching { eR8 ->
                 Log.e(TAG, "Failed: jarToDexR8", eR8)
-                throw eR8
+                jarToDexDx(jar)
+            }.getOrElse { eDx ->
+                Log.e(TAG, "Failed: jarToDexDx", eDx)
+                throw eDx
             }
+        }
+    }
+
+    @Throws(IOException::class, FileNotFoundException::class)
+    fun loadAar(aar: File): DexClassLoader {
+        Log.d(TAG, "loadAar: aar = ${aar.path}")
+        if (!aar.exists() || !aar.canRead()) {
+            throw FileNotFoundException(str(R.string.file_not_exist_or_readable_with_path, aar.path))
+        }
+
+        val key = "aar_${generateArtifactsCacheName(aar)}"
+        val lock = conversionLocks.getOrPut(key) { Any() }
+        return synchronized(lock) {
+            val mergedJar = File(cacheDir, "$key.jar")
+            if (!mergedJar.exists()) {
+                mergeAarToJar(aar, mergedJar)
+            }
+            loadJar(mergedJar)
         }
     }
 
@@ -273,20 +294,30 @@ class AndroidClassLoader(private val parent: ClassLoader, private val cacheDir: 
         }
 
         try {
+            val runtimeLibraries = collectRuntimeLibrariesForD8()
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val cmd = D8Command.builder()
+                val builder = D8Command.builder()
                     .addProgramFiles(jar.toPath())
                     .setOutput(tmpOut.toPath(), OutputMode.DexIndexed)
                     .setMode(CompilationMode.RELEASE)
-                    .build()
+                    .setMinApiLevel(Build.VERSION.SDK_INT)
+                runtimeLibraries.forEach {
+                    builder.addLibraryFiles(it.toPath())
+                }
+                val cmd = builder.build()
                 D8.run(cmd)
             } else {
-                val args = arrayOf(
+                val args = mutableListOf(
                     "--output", tmpOut.absolutePath,
                     "--release",
-                    jar.absolutePath
+                    "--min-api", Build.VERSION.SDK_INT.toString(),
                 )
-                D8.main(args)
+                runtimeLibraries.forEach {
+                    args += "--lib"
+                    args += it.absolutePath
+                }
+                args += jar.absolutePath
+                D8.main(args.toTypedArray())
             }
 
             val dexFiles = tmpOut.listFiles { _, name ->
@@ -321,10 +352,88 @@ class AndroidClassLoader(private val parent: ClassLoader, private val cacheDir: 
         }
     }
 
-    companion object {
+    @Throws(IOException::class)
+    private fun mergeAarToJar(aar: File, outputJar: File) {
+        if (outputJar.exists() && !outputJar.delete()) {
+            throw IOException("Failed to delete old merged jar: ${outputJar.path}")
+        }
 
-        private val TAG = AndroidClassLoader::class.java.simpleName
+        val addedEntries = HashSet<String>()
+        var mergedEntryCount = 0
 
+        try {
+            val aarZip = ZipFile(aar)
+            val outputZip = ZipFile(outputJar)
+
+            aarZip.fileHeaders
+                .filter { !it.isDirectory && isAarJarEntry(it.fileName) }
+                .forEach { header ->
+                    aarZip.getInputStream(header).use { nestedJarStream ->
+                        JarInputStream(nestedJarStream).use { jarInput ->
+                            var entry = jarInput.nextJarEntry
+                            while (entry != null) {
+                                val entryName = entry.name
+                                if (!entry.isDirectory && isLoadableJarEntry(entryName) && addedEntries.add(entryName)) {
+                                    val entryData = ByteArrayOutputStream().use { buffer ->
+                                        jarInput.copyTo(buffer)
+                                        buffer.toByteArray()
+                                    }
+                                    outputZip.addStream(ByteArrayInputStream(entryData), ZipParameters().apply {
+                                        fileNameInZip = entryName
+                                    })
+                                    mergedEntryCount += 1
+                                }
+                                jarInput.closeEntry()
+                                entry = jarInput.nextJarEntry
+                            }
+                        }
+                    }
+                }
+        } catch (e: ZipException) {
+            if (outputJar.exists() && !outputJar.delete()) {
+                Log.e(TAG, "outputJar.delete() failed")
+            }
+            throw IOException(e)
+        }
+
+        if (mergedEntryCount <= 0) {
+            if (outputJar.exists() && !outputJar.delete()) {
+                Log.e(TAG, "outputJar.delete() failed")
+            }
+            throw IOException("No loadable classes/resources were found in aar: ${aar.path}")
+        }
     }
 
+    private fun collectRuntimeLibrariesForD8(): List<File> = buildList {
+        System.getProperty("java.boot.class.path")?.let(::add)
+        System.getenv("BOOTCLASSPATH")?.let(::add)
+        System.getenv("DEX2OATBOOTCLASSPATH")?.let(::add)
+    }.asSequence()
+        .flatMap { it.split(File.pathSeparator).asSequence() }
+        .map { it.trim() }
+        .filter { it.isNotEmpty() }
+        .map(::File)
+        .filter { it.exists() && it.canRead() }
+        .distinctBy { it.path }
+        .toList()
+
+    private fun isAarJarEntry(name: String): Boolean {
+        val normalized = name.lowercase()
+        return normalized == AAR_CLASSES_JAR || normalized.startsWith(AAR_LIBS_PREFIX) && normalized.endsWith(".jar")
+    }
+
+    private fun isLoadableJarEntry(name: String): Boolean {
+        val normalized = name.lowercase()
+        if (!normalized.startsWith("meta-inf/")) return true
+        return normalized != "meta-inf/manifest.mf"
+            && !normalized.endsWith(".sf")
+            && !normalized.endsWith(".rsa")
+            && !normalized.endsWith(".dsa")
+    }
+
+    companion object {
+        private val TAG = AndroidClassLoader::class.java.simpleName
+        private const val AAR_CLASSES_JAR = "classes.jar"
+        private const val AAR_LIBS_PREFIX = "libs/"
+    }
 }
