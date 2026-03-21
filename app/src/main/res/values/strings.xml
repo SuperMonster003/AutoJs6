@@ -144,6 +144,10 @@
     <string name="key_launcher_icon_transparent_background" translatable="false">key_$_launcher_icon_transparent_background</string>
     <string name="key_launcher_shortcuts" translatable="false">key_$_launcher_shortcuts</string>
     <string name="key_manage_ignored_updates" translatable="false">key_$_manage_ignored_updates</string>
+    <string name="key_plugin_center_show_official_plugins" translatable="false">key_$_plugin_center_show_official_plugins</string>
+    <string name="key_plugin_center_show_third_party_plugins" translatable="false">key_$_plugin_center_show_third_party_plugins</string>
+    <string name="key_plugin_center_auto_check_updates" translatable="false">key_$_plugin_center_auto_check_updates</string>
+    <string name="key_plugin_center_last_online_check_ts" translatable="false">key_$_plugin_center_last_online_check_ts</string>
     <string name="key_night_mode" translatable="false">key_$_night_mode</string>
     <string name="key_night_mode_always_off" translatable="false">key_$_night_mode_always_off</string>
     <string name="key_night_mode_always_on" translatable="false">key_$_night_mode_always_on</string>
@@ -1303,6 +1307,7 @@
     <string name="text_no_search_results_for_keyword">No results found for:\n\n%1$s</string>
     <string name="text_no_symbols_hint">Current configuration is empty.\nTap here to create a symbol.</string>
     <string name="text_no_version_history">No version history</string>
+    <string name="text_no_release_notes">No release notes</string>
     <string name="text_not_granted">Not granted</string>
     <string name="text_not_installed">Not installed</string>
     <string name="text_not_showing_main_activity">Not showing main activity</string>
@@ -1439,8 +1444,16 @@
     <string name="text_plugin_authorization_required">Authorization required</string>
     <string name="text_plugin_authorized">Authorized</string>
     <string name="text_plugin_center">Plugin center</string>
+    <string name="text_plugin_center_settings">Plugin center settings</string>
     <string name="text_plugin_details">Plugin details</string>
     <string name="text_plugin_official">Official</string>
+    <string name="text_plugin_online_source">Online plugin source</string>
+    <string name="text_plugin_show_official_plugins">Show official online-installable plugins</string>
+    <string name="summary_plugin_show_official_plugins">Display online-installable plugins from the official repositories</string>
+    <string name="text_plugin_show_third_party_plugins">Show third-party online-installable plugins</string>
+    <string name="summary_plugin_show_third_party_plugins">Display online-installable plugins collected in Auto.js-SDK-Plugins-Garage</string>
+    <string name="text_plugin_auto_check_updates">Auto check plugin updates</string>
+    <string name="summary_plugin_auto_check_updates">Automatically check plugin updates every 1 hour (pull-to-refresh checks immediately)</string>
     <string name="text_plugin_trusted">Trusted</string>
     <string name="text_plugins">Plugins</string>
     <string name="text_pointer_location">Pointer location</string>

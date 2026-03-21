@@ -1449,4 +1449,13 @@
     <string name="text_xiaomi_background_popup_permission">Display pop-up windows while running in the background</string>
     <string name="warn_continue_operation_without_saving_settings">The settings has not been saved, are you sure to continue the operation?</string>
     <string name="warn_exit_without_saving_settings">The settings has not been saved, are you sure to exit?</string>
+    <string name="text_plugin_center_settings">Plugin center settings</string>
+    <string name="text_plugin_online_source">Online plugin source</string>
+    <string name="text_plugin_show_official_plugins">Show official online-installable plugins</string>
+    <string name="summary_plugin_show_official_plugins">Display online-installable plugins from the official repositories</string>
+    <string name="text_plugin_show_third_party_plugins">Show third-party online-installable plugins</string>
+    <string name="summary_plugin_show_third_party_plugins">Display online-installable plugins collected in Auto.js-SDK-Plugins-Garage</string>
+    <string name="text_plugin_auto_check_updates">Auto check plugin updates</string>
+    <string name="summary_plugin_auto_check_updates">Automatically check plugin updates every 1 hour (pull-to-refresh checks immediately)</string>
+    <string name="text_no_release_notes">No release notes</string>
 </resources>

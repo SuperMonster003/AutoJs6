@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.autojs.autojs.network.UpdateIgnoreStore
 import org.autojs.autojs6.R
+import java.util.Locale
 
 /**
  * Loads both index plugins and locally installed plugins,
@@ -36,8 +37,7 @@ import org.autojs.autojs6.R
  */
 class PluginCenterViewModel : ViewModel() {
 
-    // TODO by SuperMonster003 on Jan 17, 2026.
-    // private val indexRepo = PluginIndexRepository()
+    private val indexRepo = PluginIndexRepository()
 
     private val installedRepo = InstalledPluginRepository()
     private val legacyRepo = LegacyInstalledPluginRepository()
@@ -73,6 +73,14 @@ class PluginCenterViewModel : ViewModel() {
         Log.d(TAG, "load: forceRefreshIndex = $forceRefreshIndex")
         viewModelScope.launch {
             _indexLoaded.value = false
+            val autoCheckUpdatesEnabled = PluginOnlineSettingsStore.isAutoCheckUpdatesEnabled()
+            val enabledSources = PluginOnlineSettingsStore.selectedSources()
+            val shouldForceByAutoCheck = autoCheckUpdatesEnabled && !forceRefreshIndex && PluginOnlineSettingsStore.shouldAutoCheckNow()
+            val shouldForceFetchIndex = forceRefreshIndex || shouldForceByAutoCheck
+
+            if (autoCheckUpdatesEnabled && shouldForceFetchIndex && enabledSources.isNotEmpty()) {
+                PluginOnlineSettingsStore.markCheckedNow()
+            }
 
             // First load local plugins (local priority).
             // zh-CN: 先加载本地插件 (本地优先).
@@ -110,7 +118,7 @@ class PluginCenterViewModel : ViewModel() {
             // Render list using "local only".
             // zh-CN: 使用 "仅本地" 渲染列表.
             val localAidlItems = installed.mapNotNull { local ->
-                toPluginCenterItem(context, index = null, local = local)
+                toPluginCenterItem(context, index = null, local = local, allowUpdateCheck = autoCheckUpdatesEnabled)
             }
             val localLegacyItems = legacyInstalled.mapNotNull { local ->
                 toLegacyPluginCenterItem(context, local)
@@ -121,32 +129,40 @@ class PluginCenterViewModel : ViewModel() {
             // Asynchronously load index and merge.
             // zh-CN: 异步加载索引并合并.
             val indexEntries = runCatching {
-                // TODO by SuperMonster003 on Jan 17, 2026.
-                // indexRepo.fetchOfficialIndex(context, forceRefresh = forceRefreshIndex)
-                emptyList<PluginIndexEntry>()
+                indexRepo.fetchOnlineIndex(
+                    context = context,
+                    forceRefresh = shouldForceFetchIndex,
+                    enabledSources = enabledSources,
+                )
             }.onFailure {
                 // Index fetch exception is not fatal, just log it.
                 // zh-CN: 索引获取异常不算致命, 使用日志记录即可.
-                Log.w(TAG, "fetchOfficialIndex failed: ${it.message}")
+                Log.w(TAG, "fetchOnlineIndex failed: ${it.message}")
             }.getOrElse { emptyList() }
 
             val installedByPkg = installed.associateBy { it.packageName }
+            val installedByNormalizedTitle = installed.groupBy { normalizeTitle(it.title) }
 
             // Use index to drive UI, showing installable/updatable.
             // zh-CN: 用索引驱动 UI, 展示 installable/updatable.
             val fromIndex = indexEntries.mapNotNull { e ->
-                val local = installedByPkg[e.packageName]
-                toPluginCenterItem(context, index = e, local = local)
-            }
+                val local = matchLocalPluginForIndex(
+                    index = e,
+                    installedByPkg = installedByPkg,
+                    installedByNormalizedTitle = installedByNormalizedTitle,
+                )
+                toPluginCenterItem(context, index = e, local = local, allowUpdateCheck = autoCheckUpdatesEnabled)
+            }.let(::dedupeByPackagePreferInstalled)
 
             // Supplement plugins that "exist locally but not in index" (third-party/not yet in index).
             // zh-CN: 补充 "本地有但索引没有" 的插件 (第三方/暂未入索引).
+            val fromIndexPackageNames = fromIndex.asSequence().map { it.packageName }.toHashSet()
             val extraAidlLocals = installed
-                .filter { ins -> indexEntries.none { it.packageName == ins.packageName } }
-                .mapNotNull { local -> toPluginCenterItem(context, index = null, local = local) }
-            val extraLocals = extraAidlLocals + localLegacyItems
+                .filter { ins -> ins.packageName !in fromIndexPackageNames }
+                .mapNotNull { local -> toPluginCenterItem(context, index = null, local = local, allowUpdateCheck = autoCheckUpdatesEnabled) }
+            val extraLocals = dedupeByPackagePreferInstalled(extraAidlLocals + localLegacyItems)
 
-            _items.value = fromIndex + extraLocals
+            _items.value = dedupeByPackagePreferInstalled(fromIndex + extraLocals)
             _indexLoaded.value = true
 
             // When returning to the page, refresh if the details dialog is being displayed.
@@ -179,7 +195,69 @@ class PluginCenterViewModel : ViewModel() {
         UpdateIgnoreStore.ignoreVersion(item.packageName, v)
     }
 
-    private fun toPluginCenterItem(context: Context, index: PluginIndexEntry?, local: InstalledPluginRepository.InstalledPlugin?): PluginCenterItem? {
+    private fun matchLocalPluginForIndex(
+        index: PluginIndexEntry,
+        installedByPkg: Map<String, InstalledPluginRepository.InstalledPlugin>,
+        installedByNormalizedTitle: Map<String, List<InstalledPluginRepository.InstalledPlugin>>,
+    ): InstalledPluginRepository.InstalledPlugin? {
+        installedByPkg[index.packageName]?.let { return it }
+
+        if (!index.packageName.startsWith("unknown.")) {
+            return null
+        }
+
+        val normalizedTitle = normalizeTitle(index.title)
+        if (normalizedTitle.isBlank()) {
+            return null
+        }
+
+        val candidates = installedByNormalizedTitle[normalizedTitle].orEmpty()
+        return candidates.singleOrNull()
+    }
+
+    private fun dedupeByPackagePreferInstalled(items: List<PluginCenterItem>): List<PluginCenterItem> {
+        if (items.isEmpty()) return emptyList()
+
+        val merged = linkedMapOf<String, PluginCenterItem>()
+        items.forEach { item ->
+            val existing = merged[item.packageName]
+            if (existing == null) {
+                merged[item.packageName] = item
+                return@forEach
+            }
+            merged[item.packageName] = pickPreferredItem(existing, item)
+        }
+        return merged.values.toList()
+    }
+
+    private fun pickPreferredItem(existing: PluginCenterItem, candidate: PluginCenterItem): PluginCenterItem {
+        if (existing.isInstalled != candidate.isInstalled) {
+            return if (candidate.isInstalled) candidate else existing
+        }
+
+        val existingVersion = existing.versionCode ?: Long.MIN_VALUE
+        val candidateVersion = candidate.versionCode ?: Long.MIN_VALUE
+        if (existingVersion != candidateVersion) {
+            return if (candidateVersion > existingVersion) candidate else existing
+        }
+
+        val existingHasInstallable = !existing.installableApkUrl.isNullOrBlank()
+        val candidateHasInstallable = !candidate.installableApkUrl.isNullOrBlank()
+        if (existingHasInstallable != candidateHasInstallable) {
+            return if (candidateHasInstallable) candidate else existing
+        }
+
+        return existing
+    }
+
+    private fun normalizeTitle(title: String?): String = title?.trim()?.lowercase(Locale.ROOT).orEmpty()
+
+    private fun toPluginCenterItem(
+        context: Context,
+        index: PluginIndexEntry?,
+        local: InstalledPluginRepository.InstalledPlugin?,
+        allowUpdateCheck: Boolean,
+    ): PluginCenterItem? {
         val packageName = local?.packageName ?: index?.packageName
         if (packageName.isNullOrBlank()) return null
 
@@ -197,7 +275,7 @@ class PluginCenterViewModel : ViewModel() {
 
         // 已安装时: updatable 取 "大于 installed 且未忽略" 的最高版本.
         val targetUpdate = run {
-            if (!isInstalled || versionCodeLocal == null) return@run null
+            if (!allowUpdateCheck || !isInstalled || versionCodeLocal == null) return@run null
             val candidates = index?.releases
                 ?.filter { it.versionCode > versionCodeLocal }
                 ?.sortedByDescending { it.versionCode }
@@ -239,6 +317,11 @@ class PluginCenterViewModel : ViewModel() {
             else -> PluginEnabledState.READY
         }
         val readyEnabled = enabled && enabledState is PluginEnabledState.READY
+        val mechanism = when {
+            local != null -> PluginMechanism.AIDL
+            index?.source == PluginIndexSource.THIRD_PARTY -> PluginMechanism.SDK
+            else -> PluginMechanism.AIDL
+        }
 
         return PluginCenterItem(
             title = title,
@@ -265,6 +348,7 @@ class PluginCenterViewModel : ViewModel() {
             installableApkUrl = latestRelease?.apkUrl,
             installableApkSha256 = latestRelease?.apkSha256,
             installableApkSizeBytes = latestRelease?.apkSizeBytes,
+            remoteIconUrl = index?.iconUrl?.toString(),
 
             // TODO 已安装优先用应用图标; 未安装走默认占位图.
             icon = local?.icon,
@@ -274,7 +358,7 @@ class PluginCenterViewModel : ViewModel() {
             lastUpdateTime = local?.lastUpdateTime,
             // TODO M1 暂不接入单插件设置入口.
             settings = null,
-            mechanism = PluginMechanism.AIDL,
+            mechanism = mechanism,
             authorizedState = trustInfo.authorizedState,
             activatedState = activatedState,
             enabledState = enabledState,
@@ -354,5 +438,4 @@ class PluginCenterViewModel : ViewModel() {
     companion object {
         private const val TAG = "PluginCenterViewModel"
     }
-
 }

@@ -131,8 +131,23 @@
                         android:id="@+id/sw"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_gravity="center"
                         android:checked="true"
-                        android:layout_gravity="center" />
+                        tools:visibility="gone" />
+
+                    <ImageButton
+                        android:id="@+id/download_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:background="@drawable/transparent"
+                        android:contentDescription="@string/text_download"
+                        android:scaleType="fitCenter"
+                        android:padding="4dp"
+                        android:src="@drawable/ic_download"
+                        android:visibility="gone"
+                        tools:tint="#03A5EF"
+                        tools:visibility="visible" />
                 </FrameLayout>
             </LinearLayout>
 

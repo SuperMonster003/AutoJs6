@@ -13,6 +13,9 @@
     <bool name="pref_record_toast">true</bool>
     <bool name="pref_rhino_java_primitive_wrap">true</bool>
     <bool name="pref_stable_mode">false</bool>
+    <bool name="pref_plugin_center_show_official_plugins">true</bool>
+    <bool name="pref_plugin_center_show_third_party_plugins">false</bool>
+    <bool name="pref_plugin_center_auto_check_updates">true</bool>
     <bool name="pref_use_volume_control_record">true</bool>
     <bool name="pref_use_volume_control_running">true</bool>
 </resources>

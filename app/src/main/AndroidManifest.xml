@@ -681,6 +681,10 @@
             android:theme="@style/AppTheme.Settings" />
 
         <activity
+            android:name="org.autojs.autojs.core.plugin.center.PluginCenterSettingsActivity"
+            android:theme="@style/AppTheme.Settings" />
+
+        <activity
             android:name="org.autojs.autojs.execution.ScriptExecuteActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:theme="@style/ScriptTheme" />

@@ -1452,4 +1452,13 @@
     <string name="text_xiaomi_background_popup_permission">Всплывающие окна в фоне</string>
     <string name="warn_continue_operation_without_saving_settings">Настройки не сохранены. Продолжить?</string>
     <string name="warn_exit_without_saving_settings">Настройки не сохранены. Выйти?</string>
+    <string name="text_plugin_center_settings">Настройки центра плагинов</string>
+    <string name="text_plugin_online_source">Источник онлайн-плагинов</string>
+    <string name="text_plugin_show_official_plugins">Показывать официальные онлайн-устанавливаемые плагины</string>
+    <string name="summary_plugin_show_official_plugins">Показывать онлайн-устанавливаемые плагины из официальных репозиториев</string>
+    <string name="text_plugin_show_third_party_plugins">Показывать сторонние онлайн-устанавливаемые плагины</string>
+    <string name="summary_plugin_show_third_party_plugins">Показывать онлайн-устанавливаемые плагины, собранные в Auto.js-SDK-Plugins-Garage</string>
+    <string name="text_plugin_auto_check_updates">Автоматически проверять обновления плагинов</string>
+    <string name="summary_plugin_auto_check_updates">Автоматически проверять обновления плагинов каждые 1 час (потянуть для обновления — проверить немедленно)</string>
+    <string name="text_no_release_notes">Нет примечаний к выпуску</string>
 </resources>

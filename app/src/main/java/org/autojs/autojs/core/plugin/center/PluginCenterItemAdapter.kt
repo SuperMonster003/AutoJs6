@@ -32,10 +32,10 @@ class PluginCenterItemAdapter(
     }
 
     interface Listener {
+        fun onInstall(item: PluginCenterItem)
         fun onToggleEnable(item: PluginCenterItem, enabled: Boolean)
         fun onUninstall(item: PluginCenterItem)
         fun onDetails(item: PluginCenterItem)
         fun onUpdate(item: PluginCenterItem)
     }
-
 }

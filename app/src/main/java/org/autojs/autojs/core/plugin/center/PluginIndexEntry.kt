@@ -2,6 +2,11 @@ package org.autojs.autojs.core.plugin.center
 
 import android.net.Uri
 
+enum class PluginIndexSource {
+    OFFICIAL,
+    THIRD_PARTY,
+}
+
 data class PluginIndexEntry(
     val packageName: String,
     val iconUrl: Uri? = null,
@@ -22,4 +27,6 @@ data class PluginIndexEntry(
     val releases: List<PluginIndexRelease> = emptyList(),
 
     val tags: List<String> = emptyList(),
+
+    val source: PluginIndexSource = PluginIndexSource.OFFICIAL,
 )

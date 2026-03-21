@@ -13,7 +13,6 @@ enum class PluginAuthorizedState {
     TRUSTED,
     USER_GRANTED,
     REQUIRED,
-    DENIED,
 }
 
 enum class PluginActivatedState {

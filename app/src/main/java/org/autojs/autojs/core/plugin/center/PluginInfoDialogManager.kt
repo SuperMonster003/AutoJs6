@@ -17,6 +17,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.autojs.autojs.network.UpdateIgnoreStore
 import org.autojs.autojs.runtime.api.augment.converter.core.Bytes
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.util.ColorUtils
@@ -25,6 +26,7 @@ import org.autojs.autojs.util.DialogUtils.makeTextCopyable
 import org.autojs.autojs.util.DialogUtils.setCopyableTextIfAbsent
 import org.autojs.autojs.util.DialogUtils.showAdaptive
 import org.autojs.autojs.util.DisplayUtils
+import org.autojs.autojs.util.IntentUtils
 import org.autojs.autojs.util.TimeUtils
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.colorFilterWithDesaturateOrNull
@@ -32,6 +34,9 @@ import org.autojs.autojs.util.ViewUtils.toCircular
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.PluginInfoDialogItemsBinding
 import java.lang.ref.WeakReference
+import java.net.HttpURLConnection
+import java.net.URL
+import java.nio.charset.StandardCharsets
 import kotlin.math.roundToInt
 
 object PluginInfoDialogManager {
@@ -199,22 +204,10 @@ object PluginInfoDialogManager {
     }
 
     internal fun showUpdatablePluginInfoDialog(context: Context, info: PluginInfoUpdatable, parentDialog: MaterialDialog? = null) {
-        info.validateApkUrlAndPrompt(context, parentDialog) ?: return
+        val url = info.validateApkUrlAndPrompt(context, parentDialog) ?: return
         parentDialog?.dismiss()
 
-        // TODO 更新详情参考 org.autojs.autojs.network.UpdateChecker.Dialog.Builder.Update.
-        // showPluginInfoDialogInternal(context, info) {
-        //     positiveText(R.string.dialog_button_update_now)
-        //     positiveColorRes(R.color.dialog_button_attraction)
-        //     onPositive { d, _ ->
-        //         d.dismiss()
-        //         CoroutineScope(Dispatchers.Main).launch {
-        //             PluginInstaller.installFromUrlWithPrompt(context, url, info.sha256)
-        //         }
-        //     }
-        // }
-
-        val ignoreUpdateOption = MaterialDialog.OptionMenuItemSpec(context.getString(R.string.dialog_button_ignore_current_update)) { parentDialog ->
+        val ignoreUpdateOption = MaterialDialog.OptionMenuItemSpec(context.getString(R.string.dialog_button_ignore_current_update)) { updateDialog ->
             MaterialDialog.Builder(context)
                 .title(R.string.text_prompt)
                 .content(R.string.prompt_add_ignored_version)
@@ -222,29 +215,67 @@ object PluginInfoDialogManager {
                 .positiveText(R.string.dialog_button_confirm)
                 .positiveColorRes(R.color.dialog_button_caution)
                 .onPositive { _, _ ->
-                    // UpdateUtils.addIgnoredVersion(versionInfo)
+                    info.versionCode?.takeIf { it > 0 }?.let { UpdateIgnoreStore.ignoreVersion(info.packageName, it) }
                     ViewUtils.showToast(context, R.string.text_done)
-                    parentDialog.dismiss()
+                    updateDialog.dismiss()
                 }
                 .showAdaptive()
         }
 
-        MaterialDialog.Builder(context)
+        val releaseHistoryOption = MaterialDialog.OptionMenuItemSpec(context.getString(R.string.dialog_button_release_history)) { d ->
+            val changelogUrl = info.changelogUrl
+            if (changelogUrl.isNullOrBlank()) {
+                ViewUtils.showSnack(d.view, R.string.text_unavailable, false)
+            } else {
+                IntentUtils.browse(context, changelogUrl, IntentUtils.SnackExceptionHolder(d.view))
+            }
+        }
+
+        val dialog = MaterialDialog.Builder(context)
             .title(info.version ?: info.title)
-            .options(listOf(ignoreUpdateOption))
+            .options(listOf(ignoreUpdateOption, releaseHistoryOption))
             .content(R.string.text_retrieving_release_notes)
             .neutralText(R.string.dialog_button_release_history)
-            .neutralColor(context.getColor(R.color.dialog_button_hint))
-            .onNeutral { _, _ ->
-                // DisplayReleaseHistoryActivity.launch(context)
+            .neutralColor(
+                context.getColor(
+                    if (info.changelogUrl.isNullOrBlank()) R.color.dialog_button_unavailable else R.color.dialog_button_hint,
+                ),
+            )
+            .onNeutral { d, _ ->
+                val changelogUrl = info.changelogUrl
+                if (changelogUrl.isNullOrBlank()) {
+                    ViewUtils.showSnack(d.view, R.string.text_unavailable, false)
+                } else {
+                    IntentUtils.browse(context, changelogUrl, IntentUtils.SnackExceptionHolder(d.view))
+                }
             }
             .negativeText(R.string.dialog_button_cancel)
             .negativeColor(context.getColor(R.color.dialog_button_default))
             .onNegative { d, _ -> d.dismiss() }
             .positiveText(R.string.dialog_button_update_now)
-            .positiveColor(context.getColor(R.color.dialog_button_unavailable))
+            .positiveColor(context.getColor(R.color.dialog_button_attraction))
+            .onPositive { d, _ ->
+                d.dismiss()
+                CoroutineScope(Dispatchers.Main).launch {
+                    PluginInstaller.installFromUrlWithPrompt(context, url, info.sha256)
+                }
+            }
             .autoDismiss(false)
             .cancelable(false)
+            .showAdaptive()
+
+        CoroutineScope(Dispatchers.Main).launch {
+            val releaseNotes = withContext(Dispatchers.IO) {
+                val fallback = info.changelogText?.takeIf { it.isNotBlank() } ?: context.getString(R.string.text_no_release_notes)
+                val changelogUrl = info.changelogUrl?.takeIf { it.isNotBlank() } ?: return@withContext fallback
+                runCatching {
+                    fetchReleaseNotesText(changelogUrl)
+                }.getOrNull()?.takeIf { it.isNotBlank() } ?: fallback
+            }
+            if (dialog.isShowing) {
+                dialog.setContent(releaseNotes)
+            }
+        }
     }
 
     private fun parseStates(context: Context, item: PluginCenterItem): List<String> {
@@ -259,7 +290,6 @@ object PluginInfoDialogManager {
             PluginAuthorizedState.TRUSTED -> context.getString(R.string.text_plugin_trusted)
             PluginAuthorizedState.USER_GRANTED -> context.getString(R.string.text_plugin_authorized)
             PluginAuthorizedState.REQUIRED -> context.getString(R.string.text_plugin_authorization_required)
-            PluginAuthorizedState.DENIED -> context.getString(R.string.text_plugin_authorization_denied)
         }
         states += authText
 
@@ -385,6 +415,25 @@ object PluginInfoDialogManager {
         signature = "pluginItemInfo.getPackageSize",
     )
 
+    private fun fetchReleaseNotesText(url: String): String {
+        val conn = (URL(url).openConnection() as HttpURLConnection).apply {
+            requestMethod = "GET"
+            connectTimeout = 12_000
+            readTimeout = 15_000
+            setRequestProperty("Accept", "text/markdown, text/plain, */*")
+        }
+        return try {
+            conn.connect()
+            val code = conn.responseCode
+            if (code !in 200..299) {
+                throw IllegalStateException("HTTP $code for $url")
+            }
+            conn.inputStream.bufferedReader(StandardCharsets.UTF_8).use { it.readText().trim() }
+        } finally {
+            conn.disconnect()
+        }
+    }
+
     private sealed interface PluginInfoBase {
         val item: PluginCenterItem
         val states: List<String> get() = emptyList()
@@ -394,18 +443,26 @@ object PluginInfoDialogManager {
         val packageName: String get() = item.packageName
         val mechanism: String get() = item.mechanism.displayName
         val version: String? get() = item.versionSummary
+        val versionCode: Long? get() = item.versionCode
         val author: String? get() = item.author
         val collaborators: List<String> get() = item.collaborators
         val description: String? get() = item.description
         val packageSize: Long
         val apkUrl: String? get() = item.installableApkUrl
         val sha256: String? get() = item.installableApkSha256
+        val changelogUrl: String? get() = null
+        val changelogText: String? get() = null
     }
 
     internal class PluginInfoUpdatable(
         override val item: PluginCenterItem,
-        override val packageSize: Long = item.installableApkSizeBytes ?: 0L,
+        override val packageSize: Long = item.updatableApkSizeBytes ?: item.installableApkSizeBytes ?: 0L,
         override val version: String? = item.updatableVersionSummary,
+        override val versionCode: Long? = item.updatableVersionCode,
+        override val apkUrl: String? = item.updatableApkUrl ?: item.installableApkUrl,
+        override val sha256: String? = item.updatableApkSha256 ?: item.installableApkSha256,
+        override val changelogUrl: String? = item.updatableChangelogUrl,
+        override val changelogText: String? = item.updatableChangelogText,
     ) : PluginInfoBase
 
     private data class PluginInfoInstallable(

@@ -14,7 +14,21 @@ class PluginIndexSyncWorker(
 
     override suspend fun doWork(): Result =
         try {
-            repo.fetchOfficialIndex(applicationContext, forceRefresh = true)
+            if (!PluginOnlineSettingsStore.isAutoCheckUpdatesEnabled()) {
+                Log.i(TAG, "Index sync skipped: auto update check disabled.")
+                return Result.success()
+            }
+            val enabledSources = PluginOnlineSettingsStore.selectedSources()
+            if (enabledSources.isEmpty()) {
+                Log.i(TAG, "Index sync skipped: no online source enabled.")
+                return Result.success()
+            }
+            repo.fetchOnlineIndex(
+                context = applicationContext,
+                forceRefresh = true,
+                enabledSources = enabledSources,
+            )
+            PluginOnlineSettingsStore.markCheckedNow()
             Log.i(TAG, "Index sync succeeded.")
             Result.success()
         } catch (e: Exception) {

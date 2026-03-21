@@ -1454,4 +1454,13 @@
     <string name="text_xiaomi_background_popup_permission">백그라운드 팝업</string>
     <string name="warn_continue_operation_without_saving_settings">설정이 저장되지 않았습니다. 계속할까요?</string>
     <string name="warn_exit_without_saving_settings">설정이 저장되지 않았습니다. 종료할까요?</string>
+    <string name="text_plugin_center_settings">플러그인 센터 설정</string>
+    <string name="text_plugin_online_source">온라인 플러그인 소스</string>
+    <string name="text_plugin_show_official_plugins">공식 온라인 설치 가능 플러그인 표시</string>
+    <string name="summary_plugin_show_official_plugins">공식 저장소의 온라인 설치 가능 플러그인을 표시합니다</string>
+    <string name="text_plugin_show_third_party_plugins">서드파티 온라인 설치 가능 플러그인 표시</string>
+    <string name="summary_plugin_show_third_party_plugins">Auto.js-SDK-Plugins-Garage 에 수록된 온라인 설치 가능 플러그인을 표시합니다</string>
+    <string name="text_plugin_auto_check_updates">플러그인 업데이트 자동 확인</string>
+    <string name="summary_plugin_auto_check_updates">1시간마다 플러그인 업데이트를 자동으로 확인합니다 (당겨서 새로고침하면 즉시 확인)</string>
+    <string name="text_no_release_notes">릴리스 노트 없음</string>
 </resources>

@@ -76,6 +76,20 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         }
     }
 
+    private val onlinePrefListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+        if (!isAdded || _binding == null) return@OnSharedPreferenceChangeListener
+        val ctx = contextRef
+        val officialKey = ctx.getString(R.string.key_plugin_center_show_official_plugins)
+        val thirdPartyKey = ctx.getString(R.string.key_plugin_center_show_third_party_plugins)
+        val autoCheckKey = ctx.getString(R.string.key_plugin_center_auto_check_updates)
+        when (key) {
+            officialKey,
+            thirdPartyKey,
+            -> vm.load(ctx, forceRefreshIndex = true)
+            autoCheckKey -> vm.load(ctx, forceRefreshIndex = false)
+        }
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentPluginCenterBinding.bind(view)
@@ -86,6 +100,17 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         currentFilter = PluginFilterStore.getFilter(context)
 
         adapter = PluginCenterItemAdapter(object : PluginCenterItemAdapter.Listener {
+            override fun onInstall(item: PluginCenterItem) {
+                val url = item.installableApkUrl
+                if (url.isNullOrBlank()) {
+                    ViewUtils.showToast(contextRef, getString(R.string.text_unavailable), true)
+                    return
+                }
+                viewLifecycleOwner.lifecycleScope.launch {
+                    PluginInstaller.installFromUrlWithPrompt(contextRef, url, item.installableApkSha256)
+                }
+            }
+
             override fun onToggleEnable(item: PluginCenterItem, enabled: Boolean) {
                 if (!enabled) {
                     vm.setEnabled(contextRef, item.packageName, false)
@@ -343,7 +368,10 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
     }
 
     private fun ensureAuthorized(item: PluginCenterItem, onAuthorized: (PluginCenterItem) -> Unit) {
-        if (item.authorizedState != PluginAuthorizedState.REQUIRED) {
+        if (item.authorizedState == PluginAuthorizedState.OFFICIAL
+            || item.authorizedState == PluginAuthorizedState.TRUSTED
+            || item.authorizedState == PluginAuthorizedState.USER_GRANTED
+        ) {
             onAuthorized(item)
             return
         }
@@ -521,11 +549,37 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         }
     }
 
+    private fun scheduleAutoEnableAfterInstall(packageName: String) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeat(8) { index ->
+                delay(if (index == 0) 500L else 700L)
+                if (!isAdded || _binding == null) return@launch
+
+                val item = latestFullItems.firstOrNull { it.packageName == packageName && it.isInstalled } ?: return@repeat
+                val canAutoEnable = when (item.authorizedState) {
+                    PluginAuthorizedState.OFFICIAL,
+                    PluginAuthorizedState.TRUSTED,
+                    PluginAuthorizedState.USER_GRANTED,
+                    -> true
+                    else -> false
+                }
+                if (!canAutoEnable || item.isEnabled) return@launch
+
+                when (item.mechanism) {
+                    PluginMechanism.SDK -> enableLegacyPlugin(item)
+                    PluginMechanism.AIDL -> enableAidlPlugin(item)
+                }
+                return@launch
+            }
+        }
+    }
+
     override fun onStart() {
         super.onStart()
         if (::contextRef.isInitialized) {
             PluginSortStore.registerOnSharedPreferenceChangeListener(contextRef, sortPrefListener)
             PluginFilterStore.registerOnSharedPreferenceChangeListener(contextRef, filterPrefListener)
+            PluginOnlineSettingsStore.registerOnSharedPreferenceChangeListener(onlinePrefListener)
 
             // Sync with latest persisted state (e.g., changed while fragment was stopped).
             // zh-CN: 同步最新的持久化状态 (如在 Fragment 停止期间被修改).
@@ -546,6 +600,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
                             if (!replacing) {
                                 PluginRecentStore.setLastInstalled(packageName)
                                 vm.load(context, forceRefreshIndex = false)
+                                scheduleAutoEnableAfterInstall(packageName)
                                 return
                             }
 
@@ -595,6 +650,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         if (::contextRef.isInitialized) {
             PluginSortStore.unregisterOnSharedPreferenceChangeListener(contextRef, sortPrefListener)
             PluginFilterStore.unregisterOnSharedPreferenceChangeListener(contextRef, filterPrefListener)
+            PluginOnlineSettingsStore.unregisterOnSharedPreferenceChangeListener(onlinePrefListener)
         }
         pkgChangeRefreshJob?.cancel()
         pkgChangeRefreshJob = null

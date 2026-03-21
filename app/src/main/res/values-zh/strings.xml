@@ -1448,4 +1448,13 @@
     <string name="text_xiaomi_background_popup_permission">后台弹出界面</string>
     <string name="warn_continue_operation_without_saving_settings">设置尚未保存, 确定要继续操作吗</string>
     <string name="warn_exit_without_saving_settings">设置尚未保存, 确定要退出吗</string>
+    <string name="text_plugin_center_settings">插件中心设置</string>
+    <string name="text_plugin_online_source">在线插件来源</string>
+    <string name="text_plugin_show_official_plugins">显示官方可在线安装插件</string>
+    <string name="summary_plugin_show_official_plugins">展示官方仓库中的可在线安装插件</string>
+    <string name="text_plugin_show_third_party_plugins">显示第三方可在线安装插件</string>
+    <string name="summary_plugin_show_third_party_plugins">展示 Auto.js-SDK-Plugins-Garage 中收录的可在线安装插件</string>
+    <string name="text_plugin_auto_check_updates">自动检查插件更新</string>
+    <string name="summary_plugin_auto_check_updates">每 1 小时自动检查一次插件更新 (下拉刷新会立即检查)</string>
+    <string name="text_no_release_notes">无发行说明</string>
 </resources>

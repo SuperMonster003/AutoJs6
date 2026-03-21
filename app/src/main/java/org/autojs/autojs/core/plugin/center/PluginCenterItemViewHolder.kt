@@ -7,6 +7,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.content.res.AppCompatResources
+import com.bumptech.glide.Glide
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.isVisible
 import androidx.core.widget.ImageViewCompat
@@ -42,6 +43,7 @@ class PluginCenterItemViewHolder(
     private val descriptionView = itemViewBinding.description
 
     private val switchView = itemViewBinding.sw
+    private val downloadButton = itemViewBinding.downloadButton
 
     private val updatableBadgeView = itemViewBinding.updatableBadge
     private val updatableBadgeTextView = itemViewBinding.updatableBadgeText
@@ -57,14 +59,20 @@ class PluginCenterItemViewHolder(
     fun bind(item: PluginCenterItem) {
         currentItem = item
 
-        item.icon?.let { iconView.setImageDrawable(it) } ?: AppCompatResources.getDrawable(
-            iconView.context,
-            R.drawable.ic_plugin_center_default
-        )?.mutate()?.let { d ->
-            DrawableCompat.setTint(d, adjustedImageContrastColor)
-            DrawableCompat.setTintMode(d, PorterDuff.Mode.SRC_IN)
-            iconView.setImageDrawable(d)
-        } ?: iconView.setImageResource(R.mipmap.ic_app_shortcut_plugin_center_adaptive_round)
+        item.icon?.let {
+            Glide.with(iconView).clear(iconView)
+            iconView.setImageDrawable(it)
+        } ?: item.remoteIconUrl?.takeIf { it.isNotBlank() }?.let { url ->
+            val fallback = buildFallbackIconDrawable()
+            Glide.with(iconView)
+                .load(url)
+                .placeholder(fallback)
+                .error(fallback)
+                .into(iconView)
+        } ?: run {
+            Glide.with(iconView).clear(iconView)
+            iconView.setImageDrawable(buildFallbackIconDrawable())
+        }
 
         iconView.setOnClickListener {
             if (item.isInstalled) {
@@ -74,6 +82,16 @@ class PluginCenterItemViewHolder(
 
         switchView.setOnCheckedChangeListener(null)
         switchView.isChecked = item.isEnabled
+        val showInstallAction = !item.isInstalled
+        switchView.isVisible = !showInstallAction
+        downloadButton.isVisible = showInstallAction
+        if (showInstallAction) {
+            downloadButton.setOnClickListener { listener.onInstall(currentItem) }
+            ImageViewCompat.setImageTintList(downloadButton, ColorStateList.valueOf(adjustedImageContrastColor))
+        } else {
+            downloadButton.setOnClickListener(null)
+            ImageViewCompat.setImageTintList(downloadButton, ColorStateList.valueOf(context.getColor(R.color.text_color_primary_alpha_50)))
+        }
 
         titleView.text = item.title.takeUnless { it.isBlank() }
             ?: "[ ${context.getString(R.string.text_unknown_title_for_plugin)} ]"
@@ -124,11 +142,16 @@ class PluginCenterItemViewHolder(
             it.setOnClickListener { listener.onDetails(currentItem) }
         }
 
-        applyUiBySwitch(switchView.isChecked, item)
+        val visualEnabled = if (item.isInstalled) switchView.isChecked else true
+        applyUiBySwitch(visualEnabled, item)
 
-        switchView.setOnCheckedChangeListener { _, isChecked ->
-            listener.onToggleEnable(currentItem, isChecked)
-            applyUiBySwitch(isChecked, item)
+        if (item.isInstalled) {
+            switchView.setOnCheckedChangeListener { _, isChecked ->
+                listener.onToggleEnable(currentItem, isChecked)
+                applyUiBySwitch(isChecked, item)
+            }
+        } else {
+            switchView.setOnCheckedChangeListener(null)
         }
     }
 
@@ -186,6 +209,15 @@ class PluginCenterItemViewHolder(
     }
 
     private fun LinearLayout.getChildAtOrNull(index: Int) = if (index in 0 until childCount) getChildAt(index) else null
+
+    private fun buildFallbackIconDrawable() =
+        AppCompatResources.getDrawable(iconView.context, R.drawable.ic_plugin_center_default)
+            ?.mutate()
+            ?.also { d ->
+                DrawableCompat.setTint(d, adjustedImageContrastColor)
+                DrawableCompat.setTintMode(d, PorterDuff.Mode.SRC_IN)
+            }
+            ?: AppCompatResources.getDrawable(iconView.context, R.mipmap.ic_app_shortcut_plugin_center_adaptive_round)
 
 }
 

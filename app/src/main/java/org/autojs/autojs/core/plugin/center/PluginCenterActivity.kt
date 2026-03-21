@@ -15,7 +15,6 @@ import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.widget.SearchViewItem
 import org.autojs.autojs.util.DialogUtils.choiceWidgetThemeColor
 import org.autojs.autojs.util.IntentUtils.startSafely
-import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.onceGlobalLayout
 import org.autojs.autojs.util.ViewUtils.setMenuIconsColorByThemeColorLuminance
 import org.autojs.autojs.util.ViewUtils.setNavigationIconColorByThemeColorLuminance
@@ -85,8 +84,7 @@ class PluginCenterActivity : BaseActivity() {
                 true
             }
             R.id.action_global_settings -> {
-                // TODO action_global_settings
-                ViewUtils.showToast(this, R.string.text_under_development)
+                PluginCenterSettingsActivity.startActivity(this)
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -174,12 +172,9 @@ class PluginCenterActivity : BaseActivity() {
     }
 
     companion object {
-
         fun startActivity(context: Context) {
             Intent(context, PluginCenterActivity::class.java)
                 .startSafely(context)
         }
-
     }
-
 }

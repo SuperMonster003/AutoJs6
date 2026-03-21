@@ -1454,4 +1454,13 @@
     <string name="text_xiaomi_background_popup_permission">النوافذ المنبثقة في الخلفية</string>
     <string name="warn_continue_operation_without_saving_settings">لم يتم حفظ الاعدادات. هل تريد المتابعة?</string>
     <string name="warn_exit_without_saving_settings">لم يتم حفظ الاعدادات. هل تريد الخروج?</string>
+    <string name="text_plugin_center_settings">اعدادات مركز الاضافات</string>
+    <string name="text_plugin_online_source">مصدر الاضافات عبر الانترنت</string>
+    <string name="text_plugin_show_official_plugins">اظهار الاضافات الرسمية القابلة للتثبيت عبر الانترنت</string>
+    <string name="summary_plugin_show_official_plugins">عرض الاضافات القابلة للتثبيت عبر الانترنت من المستودعات الرسمية</string>
+    <string name="text_plugin_show_third_party_plugins">اظهار اضافات الجهات الخارجية القابلة للتثبيت عبر الانترنت</string>
+    <string name="summary_plugin_show_third_party_plugins">عرض الاضافات القابلة للتثبيت عبر الانترنت المدرجة في Auto.js-SDK-Plugins-Garage</string>
+    <string name="text_plugin_auto_check_updates">التحقق تلقائيا من تحديثات الاضافات</string>
+    <string name="summary_plugin_auto_check_updates">التحقق تلقائيا من تحديثات الاضافات كل 1 ساعة (السحب للتحديث يتحقق فورا)</string>
+    <string name="text_no_release_notes">لا توجد ملاحظات اصدار</string>
 </resources>

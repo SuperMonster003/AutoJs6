@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
+        app:layout="@layout/preference_category_custom"
+        app:title="@string/text_plugin_online_source">
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_plugin_center_show_official_plugins"
+            app:defaultValue="@bool/pref_plugin_center_show_official_plugins"
+            app:title="@string/text_plugin_show_official_plugins"
+            app:summary="@string/summary_plugin_show_official_plugins" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_plugin_center_show_third_party_plugins"
+            app:defaultValue="@bool/pref_plugin_center_show_third_party_plugins"
+            app:title="@string/text_plugin_show_third_party_plugins"
+            app:summary="@string/summary_plugin_show_third_party_plugins" />
+
+    </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
+
+    <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
+        app:layout="@layout/preference_category_custom"
+        app:title="@string/text_updates">
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_plugin_center_auto_check_updates"
+            app:defaultValue="@bool/pref_plugin_center_auto_check_updates"
+            app:title="@string/text_plugin_auto_check_updates"
+            app:summary="@string/summary_plugin_auto_check_updates" />
+
+    </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
+
+</PreferenceScreen>

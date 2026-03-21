@@ -40,6 +40,7 @@ data class PluginCenterItem(
     val installableApkUrl: String? = null,
     val installableApkSha256: String? = null,
     val installableApkSizeBytes: Long? = null,
+    val remoteIconUrl: String? = null,
 
     val icon: Drawable? = null,
     var isEnabled: Boolean = true,

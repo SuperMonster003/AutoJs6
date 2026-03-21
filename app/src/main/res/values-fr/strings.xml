@@ -1452,4 +1452,13 @@
     <string name="text_xiaomi_background_popup_permission">Fenêtres contextuelles en arrière-plan</string>
     <string name="warn_continue_operation_without_saving_settings">Les parametres ne sont pas enregistres. Continuer?</string>
     <string name="warn_exit_without_saving_settings">Les parametres ne sont pas enregistres. Quitter?</string>
+    <string name="text_plugin_center_settings">Parametres du centre des plugins</string>
+    <string name="text_plugin_online_source">Source de plugins en ligne</string>
+    <string name="text_plugin_show_official_plugins">Afficher les plugins officiels installables en ligne</string>
+    <string name="summary_plugin_show_official_plugins">Afficher les plugins installables en ligne depuis les depots officiels</string>
+    <string name="text_plugin_show_third_party_plugins">Afficher les plugins tiers installables en ligne</string>
+    <string name="summary_plugin_show_third_party_plugins">Afficher les plugins installables en ligne repertories dans Auto.js-SDK-Plugins-Garage</string>
+    <string name="text_plugin_auto_check_updates">Verifier automatiquement les mises a jour des plugins</string>
+    <string name="summary_plugin_auto_check_updates">Verifier automatiquement les mises a jour des plugins toutes les 1 heure (tirer pour actualiser verifie immediatement)</string>
+    <string name="text_no_release_notes">Aucune note de version</string>
 </resources>

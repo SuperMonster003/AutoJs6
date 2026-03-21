@@ -1453,4 +1453,13 @@
     <string name="text_xiaomi_background_popup_permission">バックグラウンドでのポップアップ表示</string>
     <string name="warn_continue_operation_without_saving_settings">設定が保存されていません. 続行しますか?</string>
     <string name="warn_exit_without_saving_settings">設定が保存されていません. 終了しますか?</string>
+    <string name="text_plugin_center_settings">プラグインセンター設定</string>
+    <string name="text_plugin_online_source">オンラインプラグインソース</string>
+    <string name="text_plugin_show_official_plugins">公式のオンラインインストール可能プラグインを表示</string>
+    <string name="summary_plugin_show_official_plugins">公式リポジトリ内のオンラインインストール可能プラグインを表示します</string>
+    <string name="text_plugin_show_third_party_plugins">サードパーティ製のオンラインインストール可能プラグインを表示</string>
+    <string name="summary_plugin_show_third_party_plugins">Auto.js-SDK-Plugins-Garage に収録されたオンラインインストール可能プラグインを表示します</string>
+    <string name="text_plugin_auto_check_updates">プラグイン更新を自動確認</string>
+    <string name="summary_plugin_auto_check_updates">1 時間ごとにプラグイン更新を自動確認します (下に引いて更新すると即時確認します)</string>
+    <string name="text_no_release_notes">リリースノートなし</string>
 </resources>
