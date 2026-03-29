@@ -18,7 +18,8 @@
       "fix": [
         "runtime.loadJar 无法正常动态加载高版本 class 的问题",
         "app.isInstalled/kill 等方法无法正常使用包名参数的问题 _[`issue #495`](http://issues.autojs6.com/495)_",
-        "无 Root 权限设备调用 shell 相关方法时可能出现假死的问题"
+        "无 Root 权限设备调用 shell 相关方法时可能出现假死的问题",
+        "启动页背景未延伸到刘海屏的短边切口区域的问题"
       ],
       "improvement": [
         "代码编辑器 \"运行\" 按钮点击后变换为 \"停止\" 按钮, 可便捷停止脚本",
