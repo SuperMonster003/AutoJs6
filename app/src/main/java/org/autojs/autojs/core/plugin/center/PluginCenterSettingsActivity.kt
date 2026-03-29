@@ -36,7 +36,7 @@ class PluginCenterSettingsActivity : BaseActivity() {
     }
 
     companion object {
-        fun startActivity(context: Context) {
+        fun launch(context: Context) {
             Intent(context, PluginCenterSettingsActivity::class.java)
                 .startSafely(context)
         }

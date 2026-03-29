@@ -9,6 +9,7 @@ object PluginErrorMapper {
         val message = t.message ?: t.toString()
         val causeClass = t.javaClass.name
         val code = when {
+            isProtocolMismatch(message, causeClass) -> PluginErrorCode.PROTOCOL_MISMATCH
             t is SecurityException -> PluginErrorCode.BIND_SECURITY_EXCEPTION
             t is DeadObjectException -> PluginErrorCode.DEAD_OBJECT
             t is RemoteException -> PluginErrorCode.DEAD_OBJECT
@@ -24,6 +25,15 @@ object PluginErrorMapper {
             message = message,
             causeClass = causeClass,
         )
+    }
+
+    private fun isProtocolMismatch(message: String, causeClass: String): Boolean {
+        return causeClass.contains("BadParcelableException", ignoreCase = true) ||
+                causeClass.contains("TransactionTooLargeException", ignoreCase = true) ||
+                message.contains("Bad magic number for Bundle", ignoreCase = true) ||
+                message.contains("Bundle length is not aligned by 4", ignoreCase = true) ||
+                message.contains("TransactionTooLargeException", ignoreCase = true) ||
+                (message.contains("Bundle", ignoreCase = true) && message.contains("unmarshal", ignoreCase = true))
     }
 
     fun shouldRecommendActivation(error: PluginError): Boolean {

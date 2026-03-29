@@ -10,6 +10,8 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import org.autojs.autojs6.R;
 import org.autojs.autojs6.databinding.DialogTextSizeSettingsBinding;
 
+import java.util.List;
+
 /**
  * Created by Stardust on Feb 24, 2018.
  * Modified by SuperMonster003 as of Dec 29, 2025.
@@ -53,9 +55,10 @@ public class TextSizeSettingDialogBuilder extends MaterialDialog.Builder impleme
 
         autoDismiss(false);
 
-        neutralText(R.string.dialog_button_use_default);
-        neutralColorRes(R.color.dialog_button_reset);
-        onNeutral((dialog, which) -> initialValue(getContext().getResources().getInteger(R.integer.editor_text_size_default_value)));
+        options(List.of(new MaterialDialog.OptionMenuItemSpec(context.getString(R.string.dialog_button_use_default), dialog -> {
+            initialValue(getContext().getResources().getInteger(R.integer.editor_text_size_default_value));
+        })));
+
         negativeText(R.string.text_cancel);
         negativeColorRes(R.color.dialog_button_default);
         onNegative((dialog, which) -> dialog.dismiss());

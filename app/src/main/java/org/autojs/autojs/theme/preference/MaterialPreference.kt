@@ -3,16 +3,38 @@ package org.autojs.autojs.theme.preference
 import android.content.Context
 import android.content.res.TypedArray
 import android.util.AttributeSet
+import android.widget.TextView
 import androidx.preference.PreferenceViewHolder
 import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs6.R
 
-open class MaterialPreference : androidx.preference.Preference, LongClickablePreferenceLike {
+open class MaterialPreference :
+    androidx.preference.Preference,
+    LongClickablePreferenceLike,
+    PreferenceTitleColorMutable,
+    PreferenceSummaryColorMutable {
 
     override val prefTitle: CharSequence? = title
     override val prefContext: Context = context
     override var longClickPrompt: CharSequence? = null
     override var longClickPromptMore: CharSequence? = null
+
+    private var _titleColor: Int? = null
+    private var _summaryColor: Int? = null
+
+    override var titleColor: Int?
+        get() = _titleColor
+        set(value) {
+            _titleColor = value
+            notifyChanged()
+        }
+
+    override var summaryColor: Int?
+        get() = _summaryColor
+        set(value) {
+            _summaryColor = value
+            notifyChanged()
+        }
 
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes) {
         init(context, attrs, defStyleAttr, defStyleRes)
@@ -41,6 +63,10 @@ open class MaterialPreference : androidx.preference.Preference, LongClickablePre
     override fun onBindViewHolder(holder: PreferenceViewHolder) {
         super.onBindViewHolder(holder)
         DialogUtils.applyLongClickability(this, holder)
+        val titleView = holder.itemView.findViewById<TextView>(android.R.id.title)
+        val summaryView = holder.itemView.findViewById<TextView>(android.R.id.summary)
+        titleColor?.let { color -> titleView?.setTextColor(color) }
+        summaryColor?.let { color -> summaryView?.setTextColor(color) }
     }
 
     protected fun obtainStyledAttrs(context: Context, set: AttributeSet?, styleableRes: IntArray, defStyleAttr: Int, defStyleRes: Int): TypedArray {
@@ -51,6 +77,5 @@ open class MaterialPreference : androidx.preference.Preference, LongClickablePre
 
     protected fun getAttrTextArray(a: TypedArray, index: Int): Array<CharSequence>? = a.getTextArray(index)
 
-    protected fun getAttrColor(a: TypedArray, index: Int): Int? = a.getColor(index, -1)
-
+    protected fun getAttrColor(a: TypedArray, index: Int): Int = a.getColor(index, -1)
 }

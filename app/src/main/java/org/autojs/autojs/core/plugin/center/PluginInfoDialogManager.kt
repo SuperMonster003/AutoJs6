@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.PorterDuff
 import android.graphics.drawable.Drawable
+import android.util.LruCache
 import android.view.LayoutInflater
 import android.view.View.MeasureSpec.UNSPECIFIED
 import android.widget.TextView
@@ -13,6 +14,13 @@ import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.isVisible
 import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.RequestBuilder
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -45,6 +53,7 @@ object PluginInfoDialogManager {
     // zh-CN: 持有当前对话框与包名, 便于 onResume 时刷新.
     private var currentDialog: WeakReference<MaterialDialog>? = null
     private var currentPackageName: String? = null
+    private val remoteDialogIconCache = object : LruCache<String, Drawable.ConstantState>(40) {}
 
     fun refreshIfShowing(context: Context, allItems: List<PluginCenterItem>) {
         val dialog = currentDialog?.get() ?: return
@@ -78,8 +87,10 @@ object PluginInfoDialogManager {
             onNeutral { d, _ ->
                 d.dismiss()
                 val url = info.validateApkUrlAndPrompt(context, d) ?: return@onNeutral
-                CoroutineScope(Dispatchers.Main).launch {
-                    PluginInstaller.installFromUrlWithPrompt(context, url, info.sha256)
+                PluginAbiCompatibilityPrompt.runBeforeDownload(context, info.item) {
+                    CoroutineScope(Dispatchers.Main).launch {
+                        PluginInstaller.installFromUrlWithPrompt(context, url, info.sha256)
+                    }
                 }
             }
         }
@@ -110,7 +121,6 @@ object PluginInfoDialogManager {
         val binding = PluginInfoDialogItemsBinding.inflate(LayoutInflater.from(context))
 
         val dialog = MaterialDialog.Builder(context)
-            .iconRes(R.drawable.ic_three_dots_outline_small)
             .limitIconToDefaultSize()
             .title(info.title)
             .customView(binding.root, false)
@@ -161,28 +171,20 @@ object PluginInfoDialogManager {
 
         dialog.setCopyableTextIfAbsent(binding.packageNameValue, info.packageName)
         dialog.setCopyableTextIfAbsent(binding.mechanismValue, info.mechanism)
+        dialog.setCopyableTextIfAbsent(binding.pluginItemInfoSourceValue, resolveSourceText(context, info))
         dialog.setCopyableTextIfAbsent(binding.versionValue, info.version)
         dialog.setCopyableTextIfAbsent(binding.pluginItemInfoAuthorValue, info.author)
         dialog.setCopyableTextIfAbsent(binding.descriptionValue, info.description)
         dialog.setCopyableTextIfAbsent(binding.pluginItemInfoPackageSizeValue, info.packageSize.takeIf { it > 0 }?.let { formatSize(it) })
-
-        val dialogIcon = info.icon ?: AppCompatResources.getDrawable(context, R.drawable.ic_plugin_center_default)?.mutate()?.also { d ->
-            val adjustedImageContrastColor = ColorUtils.adjustColorForContrast(context.getColor(R.color.window_background), ThemeColorManager.colorPrimary, 2.3)
-            DrawableCompat.setTint(d, adjustedImageContrastColor)
-            DrawableCompat.setTintMode(d, PorterDuff.Mode.SRC_IN)
-        } ?: AppCompatResources.getDrawable(context, R.mipmap.ic_app_shortcut_plugin_center_adaptive_round)
-
-        if (dialogIcon != null) {
-            dialog.setIcon(
-                dialogIcon.toCircular(
-                    context = context,
-                    sizePx = DisplayUtils.dpToPx(48.0F).roundToInt(),
-                    borderWidthPx = context.resources.getDimensionPixelSize(R.dimen.plugin_center_item_icon_border_width),
-                    borderColor = context.getColor(R.color.plugin_center_item_icon_border),
-                )
-            )
-            dialog.iconView.colorFilterWithDesaturateOrNull(info.isEnabled, 0.5F)
-        }
+        dialog.setCopyableTextIfAbsent(
+            binding.pluginItemInfoSupportedAbisValue,
+            PluginAbiUtils.formatSupportedAbisForDisplay(
+                info.supportedAbis,
+                context.getString(R.string.text_unknown),
+                context.getString(R.string.text_all),
+            ),
+        )
+        bindDialogIcon(context, dialog, info)
 
         // If the index does not provide size, try to HEAD request to get it, update display after success.
         // zh-CN: 若索引未给 size, 尝试 HEAD 获取, 成功后更新显示.
@@ -191,7 +193,6 @@ object PluginInfoDialogManager {
                 CoroutineScope(Dispatchers.IO).launch {
                     val size = PluginInstaller.probeContentLength(url)
                     if (size != null && size > 0 && currentDialog?.get() === dialog) {
-                        // TODO 更新当前 item 的 "可安装包大小" 仅用于对话框展示 (持久化可留到 M2).
                         withContext(Dispatchers.Main) {
                             dialog.setCopyableTextIfAbsent(binding.pluginItemInfoPackageSizeValue, formatSize(size))
                         }
@@ -203,6 +204,152 @@ object PluginInfoDialogManager {
         return dialog
     }
 
+    private fun resolveSourceText(context: Context, info: PluginInfoBase): String {
+        val source = info.item.source.takeIf {
+            !info.item.installableApkUrl.isNullOrBlank() ||
+                    !info.item.updatableApkUrl.isNullOrBlank() ||
+                    !info.item.remoteIconUrl.isNullOrBlank() ||
+                    !info.item.instructionMarkdownUrl.isNullOrBlank()
+        }
+        return when (source) {
+            PluginIndexSource.OFFICIAL -> context.getString(R.string.text_plugin_official)
+            PluginIndexSource.THIRD_PARTY -> context.getString(R.string.text_plugin_third_party)
+            null -> context.getString(R.string.text_unknown)
+        }
+    }
+
+    private fun resolveInitialDialogIcon(context: Context, info: PluginInfoBase): Drawable {
+        info.icon?.let { return toDialogCircularIcon(context, it) }
+        val remoteUrl = info.remoteIconUrl?.takeIf { it.isNotBlank() }
+        val preferredUrl = PluginIconUrlResolver.resolveForCurrentMode(context, remoteUrl) ?: remoteUrl
+        preferredUrl
+            ?.let { url -> getCachedRemoteDialogIcon(context, url) }
+            ?.let { return it }
+        remoteUrl
+            ?.takeIf { it != preferredUrl }
+            ?.let { url -> getCachedRemoteDialogIcon(context, url) }
+            ?.let { return it }
+
+        val fallbackDrawable = buildDefaultDialogIconDrawable(context)
+            ?: AppCompatResources.getDrawable(context, R.mipmap.ic_app_shortcut_plugin_center_adaptive_round)
+            ?: AppCompatResources.getDrawable(context, R.drawable.ic_three_dots_outline_small)
+            ?: error("Dialog icon fallback resource is missing.")
+        return toDialogCircularIcon(context, fallbackDrawable)
+    }
+
+    private fun bindDialogIcon(context: Context, dialog: MaterialDialog, info: PluginInfoBase) {
+        val initialDialogIcon = resolveInitialDialogIcon(context, info)
+        dialog.setIcon(initialDialogIcon)
+        dialog.iconView.colorFilterWithDesaturateOrNull(info.isEnabled, 0.5F)
+        if (info.icon != null) return
+        val remoteUrl = info.remoteIconUrl?.takeIf { it.isNotBlank() } ?: return
+        val preferredUrl = PluginIconUrlResolver.resolveForCurrentMode(context, remoteUrl) ?: remoteUrl
+        val fallbackUrl = remoteUrl.takeIf { it != preferredUrl }
+
+        getCachedRemoteDialogIcon(context, preferredUrl)?.let { cached ->
+            dialog.setIcon(cached)
+            dialog.iconView.colorFilterWithDesaturateOrNull(info.isEnabled, 0.5F)
+            return
+        }
+        val fallbackCached = fallbackUrl?.let { url ->
+            getCachedRemoteDialogIcon(context, url)
+        }
+        if (fallbackCached != null) {
+            // Use opposite-mode cache only as temporary placeholder; still fetch preferred mode icon.
+            dialog.setIcon(fallbackCached)
+            dialog.iconView.colorFilterWithDesaturateOrNull(info.isEnabled, 0.5F)
+        }
+
+        val requestPlaceholder = fallbackCached ?: initialDialogIcon
+        var request = buildDialogRemoteIconRequest(
+            context = context,
+            dialog = dialog,
+            info = info,
+            remoteUrl = preferredUrl,
+            initialDialogIcon = requestPlaceholder,
+        )
+        if (fallbackUrl != null) {
+            request = request.error(
+                buildDialogRemoteIconRequest(
+                    context = context,
+                    dialog = dialog,
+                    info = info,
+                    remoteUrl = fallbackUrl,
+                    initialDialogIcon = requestPlaceholder,
+                ),
+            )
+        }
+        request.into(dialog.iconView)
+    }
+
+    private fun buildDialogRemoteIconRequest(
+        context: Context,
+        dialog: MaterialDialog,
+        info: PluginInfoBase,
+        remoteUrl: String,
+        initialDialogIcon: Drawable,
+    ): RequestBuilder<Drawable> {
+        return Glide.with(dialog.iconView)
+            .load(remoteUrl)
+            .placeholder(initialDialogIcon)
+            .error(initialDialogIcon)
+            .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+            .skipMemoryCache(false)
+            .dontAnimate()
+            .listener(
+                object : RequestListener<Drawable> {
+                    override fun onLoadFailed(
+                        e: GlideException?,
+                        model: Any?,
+                        target: Target<Drawable>,
+                        isFirstResource: Boolean,
+                    ): Boolean {
+                        dialog.setIcon(initialDialogIcon)
+                        dialog.iconView.colorFilterWithDesaturateOrNull(info.isEnabled, 0.5F)
+                        return true
+                    }
+
+                    override fun onResourceReady(
+                        resource: Drawable,
+                        model: Any,
+                        target: Target<Drawable>?,
+                        dataSource: DataSource,
+                        isFirstResource: Boolean,
+                    ): Boolean {
+                        val circular = toDialogCircularIcon(context, resource)
+                        cacheRemoteDialogIcon(remoteUrl, circular)
+                        dialog.setIcon(circular)
+                        dialog.iconView.colorFilterWithDesaturateOrNull(info.isEnabled, 0.5F)
+                        return true
+                    }
+                },
+            )
+    }
+
+    private fun getCachedRemoteDialogIcon(context: Context, remoteUrl: String): Drawable? =
+        remoteDialogIconCache.get(remoteUrl)?.newDrawable(context.resources)?.mutate()
+
+    private fun cacheRemoteDialogIcon(remoteUrl: String, drawable: Drawable) {
+        drawable.constantState?.let { remoteDialogIconCache.put(remoteUrl, it) }
+    }
+
+    private fun buildDefaultDialogIconDrawable(context: Context): Drawable? =
+        AppCompatResources.getDrawable(context, R.drawable.ic_plugin_center_default)
+            ?.mutate()
+            ?.also { d ->
+                val adjustedImageContrastColor = ColorUtils.adjustColorForContrast(context.getColor(R.color.window_background), ThemeColorManager.colorPrimary, 2.3)
+                DrawableCompat.setTint(d, adjustedImageContrastColor)
+                DrawableCompat.setTintMode(d, PorterDuff.Mode.SRC_IN)
+            }
+
+    private fun toDialogCircularIcon(context: Context, source: Drawable): Drawable =
+        source.toCircular(
+            context = context,
+            sizePx = DisplayUtils.dpToPx(48.0F).roundToInt(),
+            borderWidthPx = context.resources.getDimensionPixelSize(R.dimen.plugin_center_item_icon_border_width),
+            borderColor = context.getColor(R.color.plugin_center_item_icon_border),
+        )
+
     internal fun showUpdatablePluginInfoDialog(context: Context, info: PluginInfoUpdatable, parentDialog: MaterialDialog? = null) {
         val url = info.validateApkUrlAndPrompt(context, parentDialog) ?: return
         parentDialog?.dismiss()
@@ -210,12 +357,14 @@ object PluginInfoDialogManager {
         val ignoreUpdateOption = MaterialDialog.OptionMenuItemSpec(context.getString(R.string.dialog_button_ignore_current_update)) { updateDialog ->
             MaterialDialog.Builder(context)
                 .title(R.string.text_prompt)
-                .content(R.string.prompt_add_ignored_version)
+                .content(R.string.prompt_add_ignored_plugin_version)
                 .negativeText(R.string.dialog_button_cancel)
                 .positiveText(R.string.dialog_button_confirm)
                 .positiveColorRes(R.color.dialog_button_caution)
                 .onPositive { _, _ ->
-                    info.versionCode?.takeIf { it > 0 }?.let { UpdateIgnoreStore.ignoreVersion(info.packageName, it) }
+                    info.versionCode?.takeIf { it > 0 }?.let {
+                        UpdateIgnoreStore.ignoreVersion(info.packageName, it, info.item.versionName)
+                    }
                     ViewUtils.showToast(context, R.string.text_done)
                     updateDialog.dismiss()
                 }
@@ -256,8 +405,10 @@ object PluginInfoDialogManager {
             .positiveColor(context.getColor(R.color.dialog_button_attraction))
             .onPositive { d, _ ->
                 d.dismiss()
-                CoroutineScope(Dispatchers.Main).launch {
-                    PluginInstaller.installFromUrlWithPrompt(context, url, info.sha256)
+                PluginAbiCompatibilityPrompt.runBeforeDownload(context, info.item) {
+                    CoroutineScope(Dispatchers.Main).launch {
+                        PluginInstaller.installFromUrlWithPrompt(context, url, info.sha256)
+                    }
                 }
             }
             .autoDismiss(false)
@@ -372,6 +523,7 @@ object PluginInfoDialogManager {
         val filteredBindings = listOf(
             binding.stateLabel to binding.stateGuideline,
             binding.mechanismLabel to binding.mechanismGuideline,
+            binding.pluginItemInfoSourceLabel to binding.pluginItemInfoSourceGuideline,
             binding.packageNameLabel to binding.packageNameGuideline,
             binding.versionLabel to binding.versionGuideline,
             binding.updatableVersionLabel to binding.updatableVersionGuideline,
@@ -381,6 +533,7 @@ object PluginInfoDialogManager {
             binding.pluginItemInfoCollaboratorsThirdLabel to binding.pluginItemInfoCollaboratorsThirdGuideline,
             binding.descriptionLabel to binding.descriptionGuideline,
             binding.pluginItemInfoPackageSizeLabel to binding.pluginItemInfoPackageSizeGuideline,
+            binding.pluginItemInfoSupportedAbisLabel to binding.pluginItemInfoSupportedAbisGuideline,
             binding.pluginItemInfoFirstInstallTimeLabel to binding.pluginItemInfoFirstInstallTimeGuideline,
             binding.pluginItemInfoLastUpdateTimeLabel to binding.pluginItemInfoLastUpdateTimeGuideline,
             binding.pluginItemInfoLastInstallTimeLabel to binding.pluginItemInfoLastInstallTimeGuideline,
@@ -444,10 +597,12 @@ object PluginInfoDialogManager {
         val mechanism: String get() = item.mechanism.displayName
         val version: String? get() = item.versionSummary
         val versionCode: Long? get() = item.versionCode
+        val remoteIconUrl: String? get() = item.remoteIconUrl
         val author: String? get() = item.author
         val collaborators: List<String> get() = item.collaborators
         val description: String? get() = item.description
         val packageSize: Long
+        val supportedAbis: List<String>? get() = item.supportedAbis
         val apkUrl: String? get() = item.installableApkUrl
         val sha256: String? get() = item.installableApkSha256
         val changelogUrl: String? get() = null

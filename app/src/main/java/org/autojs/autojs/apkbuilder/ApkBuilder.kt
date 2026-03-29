@@ -1419,7 +1419,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
             plugin = PluginLib(
                 action = "org.autojs.plugin.PADDLE_OCR",
                 onServiceConnected = { binder: IBinder ->
-                    IOcrPlugin.Stub.asInterface(binder).info.variant
+                    IOcrPlugin.Stub.asInterface(binder).info.variant.orEmpty()
                 },
                 variants = listOf(
                     PluginLibVariant(

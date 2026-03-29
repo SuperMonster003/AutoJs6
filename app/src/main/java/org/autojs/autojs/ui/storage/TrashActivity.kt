@@ -243,7 +243,7 @@ class TrashActivity : BaseSearchSortListActivity<ActivityTrashBinding, TrashEnti
     }
 
     companion object {
-        fun startActivity(context: Context) {
+        fun launch(context: Context) {
             context.startActivity(
                 Intent(context, TrashActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             )

@@ -391,7 +391,7 @@ class VersionHistoryActivity : BaseSearchSortListActivity<ActivityVersionHistory
     }
 
     companion object {
-        fun startActivity(context: Context) {
+        fun launch(context: Context) {
             context.startActivity(
                 Intent(context, VersionHistoryActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             )

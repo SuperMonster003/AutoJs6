@@ -257,6 +257,9 @@ dependencies /* Unclassified */ {
     // R8
     implementation(libs.r8)
 
+    // Plugin API: Common API
+    implementation(project(":plugin-api:common-plugin-api"))
+
     // Plugin API: Paddle OCR API
     implementation(project(":plugin-api:paddle-ocr-api"))
 

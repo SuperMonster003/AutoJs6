@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
+        app:layout="@layout/preference_category_custom"
+        app:title="@string/text_launch">
+
+        <org.autojs.autojs.theme.preference.MaterialPreference
+            app:key="plugin_launch_page"
+            app:layout="@layout/preference_custom"
+            app:title="@string/text_plugin_jump_to_launch_page"
+            app:summary="@string/summary_plugin_jump_to_launch_page" />
+
+    </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
+
+    <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
+        app:layout="@layout/preference_category_custom"
+        app:title="@string/text_show">
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:key="plugin_visibility"
+            app:layout="@layout/preference_custom"
+            app:title="@string/text_hide_plugin"
+            app:summary="@string/summary_plugin_visibility_shown" />
+
+    </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
+
+    <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
+        app:layout="@layout/preference_category_custom"
+        app:title="@string/text_updates">
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:key="plugin_auto_check_updates"
+            app:layout="@layout/preference_custom"
+            app:title="@string/text_plugin_auto_check_updates"
+            app:summary="@string/summary_plugin_auto_check_updates_per_plugin" />
+
+        <org.autojs.autojs.theme.preference.MaterialPreference
+            app:key="plugin_ignored_versions"
+            app:layout="@layout/preference_custom"
+            app:title="@string/text_manage_ignored_updates" />
+
+    </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
+
+    <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
+        app:key="category_auto_mount"
+        app:layout="@layout/preference_category_custom"
+        app:title="@string/text_mount">
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:key="plugin_auto_mount_enabled"
+            app:layout="@layout/preference_custom"
+            app:title="@string/text_plugin_auto_mount"
+            app:summary="@string/summary_plugin_auto_mount" />
+
+        <org.autojs.autojs.theme.preference.MaterialPreference
+            app:key="plugin_mount_object_name"
+            app:layout="@layout/preference_custom"
+            app:title="@string/text_plugin_mount_object_name" />
+
+        <org.autojs.autojs.theme.preference.MaterialPreference
+            app:key="plugin_mount_point"
+            app:layout="@layout/preference_custom"
+            app:title="@string/text_plugin_mount_point" />
+
+    </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
+
+    <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
+        app:layout="@layout/preference_category_custom"
+        app:title="@string/text_about">
+
+        <org.autojs.autojs.theme.preference.MaterialPreference
+            app:key="plugin_instruction_view"
+            app:layout="@layout/preference_custom"
+            app:title="@string/text_plugin_instruction"
+            app:summary="@string/summary_plugin_instruction_view" />
+
+    </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
+
+</PreferenceScreen>

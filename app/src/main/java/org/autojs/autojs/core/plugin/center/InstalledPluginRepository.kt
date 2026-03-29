@@ -7,8 +7,9 @@ import androidx.core.content.pm.PackageInfoCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.core.plugin.ocr.PaddleOcrPluginHost
+import org.autojs.autojs.util.StringUtils.truncateForSafeBinder
 import org.autojs.autojs6.R
-import org.autojs.plugin.paddle.ocr.api.PluginInfo
+import org.autojs.plugin.common.api.PluginInfo
 import java.io.File
 
 /**
@@ -25,9 +26,13 @@ class InstalledPluginRepository {
         val packageName: String,
         val title: String,
         val description: String?,
+        val instructionHardCoded: String?,
         val author: String?,
         val versionName: String,
         val versionCode: Long?,
+        val versionDate: String?,
+        val requiresHostVersion: Long?,
+        val supportedAbis: List<String>?,
         val packageSize: Long,
         val firstInstallTime: Long?,
         val lastUpdateTime: Long?,
@@ -39,7 +44,7 @@ class InstalledPluginRepository {
 
     suspend fun discoverInstalled(context: Context): List<InstalledPlugin> = withContext(Dispatchers.IO) {
         val pm = context.packageManager
-        val discovered = runCatching { PaddleOcrPluginHost.discover(context) }.getOrElse { emptyList() }
+        val discovered = PaddleOcrPluginHost.discover(context)
 
         discovered.map { d ->
             val serviceInfo = d.serviceInfo
@@ -52,6 +57,7 @@ class InstalledPluginRepository {
             val pkgInfo = runCatching { pm.getPackageInfo(packageName, 0) }.getOrNull()
             val versionName = pkgInfo?.versionName ?: d.pluginInfo?.versionName ?: context.getString(R.string.text_unknown)
             val versionCode = pkgInfo?.let { PackageInfoCompat.getLongVersionCode(it) } ?: d.pluginInfo?.versionCode
+            val versionDate = d.pluginInfo?.versionDate
             val firstInstallTime = pkgInfo?.firstInstallTime
             val lastUpdateTime = pkgInfo?.lastUpdateTime
             val packageSize = run calcPackageSize@{
@@ -68,10 +74,21 @@ class InstalledPluginRepository {
             InstalledPlugin(
                 packageName = packageName,
                 title = d.pluginInfo?.name ?: appLabel ?: packageName,
-                description = PluginDescriptionResolver.resolve(context, packageName, d.pluginInfo?.description),
+                description = PluginResourceResolver.resolve(
+                    context,
+                    packageName,
+                    "plugin_description" to PluginResourceResolver.ResType.STRING,
+                    d.pluginInfo?.description,
+                ),
+                instructionHardCoded = d.pluginInfo?.instruction?.truncateForSafeBinder(),
                 author = d.pluginInfo?.author,
                 versionName = versionName,
                 versionCode = versionCode,
+                versionDate = versionDate,
+                requiresHostVersion = PluginCapabilityResolver.resolveRequiresHostVersion(d.pluginInfo?.capabilities),
+                supportedAbis = d.pluginInfo?.supportedAbis?.toList()?.let {
+                    PluginAbiUtils.resolveSupportedAbisFromValue(it)
+                },
                 packageSize = packageSize,
                 firstInstallTime = firstInstallTime,
                 lastUpdateTime = lastUpdateTime,
@@ -82,4 +99,5 @@ class InstalledPluginRepository {
             )
         }
     }
+
 }

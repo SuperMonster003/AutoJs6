@@ -5,7 +5,9 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.SharedPreferences
+import android.content.res.Configuration
 import android.os.Bundle
+import android.os.SystemClock
 import android.view.View
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
@@ -25,8 +27,11 @@ import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.excludePaddingClippableViewFromBottomNavigationBar
+import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.FragmentPluginCenterBinding
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
 
@@ -48,6 +53,11 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
     private var pkgChangeRefreshJob: Job? = null
 
     private var isFirstEnter: Boolean = true
+    private var isFirstListRevealed: Boolean = false
+    private var latestIndexLoaded: Boolean = false
+    private var lastNightModeEnabled: Boolean? = null
+    private var firstListRenderStartedAt: Long = 0L
+    private var firstListRevealJob: Job? = null
 
     // Latest full list from ViewModel (unfiltered).
     // zh-CN: 来自 ViewModel 的最新完整列表 (未过滤).
@@ -57,14 +67,19 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
     // zh-CN: 当前用于 UI 过滤的查询串, null 表示 "不做过滤".
     private var currentQuery: String? = null
 
+    private var sourceScope: PluginIndexSource? = null
+    private val isScopedLibraryMode: Boolean
+        get() = sourceScope != null
+
     private lateinit var currentSort: Sort
-    private lateinit var currentFilter: Filter
+    private var currentFilterState = PluginFilterStore.defaultFilterState()
+    private val versionDateEpochCache = mutableMapOf<String, Long?>()
 
     private val sortPrefListener = SharedPreferences.OnSharedPreferenceChangeListener { _, _ ->
         if (!isAdded || _binding == null) return@OnSharedPreferenceChangeListener
         val ctx = contextRef
         viewLifecycleOwner.lifecycleScope.launch {
-            setSort(PluginSortStore.getSort(ctx))
+            setSort(loadPersistedSort(ctx))
         }
     }
 
@@ -72,7 +87,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         if (!isAdded || _binding == null) return@OnSharedPreferenceChangeListener
         val ctx = contextRef
         viewLifecycleOwner.lifecycleScope.launch {
-            setFilter(PluginFilterStore.getFilter(ctx))
+            setFilterState(PluginFilterStore.getFilterState(ctx))
         }
     }
 
@@ -83,11 +98,22 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         val thirdPartyKey = ctx.getString(R.string.key_plugin_center_show_third_party_plugins)
         val autoCheckKey = ctx.getString(R.string.key_plugin_center_auto_check_updates)
         when (key) {
-            officialKey,
-            thirdPartyKey,
-            -> vm.load(ctx, forceRefreshIndex = true)
-            autoCheckKey -> vm.load(ctx, forceRefreshIndex = false)
+            officialKey, thirdPartyKey -> {
+                if (!isScopedLibraryMode) {
+                    vm.load(ctx, forceRefreshIndex = true, sourceScope = sourceScope)
+                }
+            }
+            autoCheckKey -> {
+                vm.load(ctx, forceRefreshIndex = false, sourceScope = sourceScope)
+            }
         }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        sourceScope = arguments?.getString(ARG_SOURCE_SCOPE)
+            ?.runCatching { PluginIndexSource.valueOf(this) }
+            ?.getOrNull()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -95,9 +121,13 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         _binding = FragmentPluginCenterBinding.bind(view)
 
         val context = requireContext().also { contextRef = it }
+        lastNightModeEnabled = isNightModeEnabled(context)
 
-        currentSort = PluginSortStore.getSort(context)
-        currentFilter = PluginFilterStore.getFilter(context)
+        currentSort = loadPersistedSort(context)
+        currentFilterState = PluginFilterStore.getFilterState(context)
+        latestIndexLoaded = false
+        isFirstListRevealed = false
+        firstListRenderStartedAt = SystemClock.elapsedRealtime()
 
         adapter = PluginCenterItemAdapter(object : PluginCenterItemAdapter.Listener {
             override fun onInstall(item: PluginCenterItem) {
@@ -106,8 +136,10 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
                     ViewUtils.showToast(contextRef, getString(R.string.text_unavailable), true)
                     return
                 }
-                viewLifecycleOwner.lifecycleScope.launch {
-                    PluginInstaller.installFromUrlWithPrompt(contextRef, url, item.installableApkSha256)
+                PluginAbiCompatibilityPrompt.runBeforeDownload(contextRef, item) {
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        PluginInstaller.installFromUrlWithPrompt(contextRef, url, item.installableApkSha256)
+                    }
                 }
             }
 
@@ -132,9 +164,11 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
                 }
 
                 ensureAuthorized(item) { authorizedItem ->
-                    when (authorizedItem.mechanism) {
-                        PluginMechanism.SDK -> enableLegacyPlugin(authorizedItem)
-                        PluginMechanism.AIDL -> enableAidlPlugin(authorizedItem)
+                    PluginAbiCompatibilityPrompt.runBeforeEnable(contextRef, authorizedItem) {
+                        when (authorizedItem.mechanism) {
+                            PluginMechanism.SDK -> enableLegacyPlugin(authorizedItem)
+                            PluginMechanism.AIDL -> enableAidlPlugin(authorizedItem)
+                        }
                     }
                 }
             }
@@ -162,24 +196,38 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
             override fun onUpdate(item: PluginCenterItem) {
                 PluginInfoDialogManager.showUpdatablePluginInfoDialog(contextRef, PluginInfoDialogManager.PluginInfoUpdatable(item))
             }
+
+            override fun onSettings(item: PluginCenterItem) {
+                val installedCountForEngine = item.engine
+                    ?.takeIf { it.isNotBlank() }
+                    ?.let { engineName ->
+                        latestFullItems.count { current ->
+                            current.isInstalled && current.engine == engineName
+                        }
+                    } ?: 0
+                PluginSettingsActivity.launch(contextRef, item, installedCountForEngine)
+            }
         })
 
         binding.pluginCenterRecyclerView.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = this@PluginCenterFragment.adapter
             addItemDecoration(DividerItemDecoration(context, VERTICAL))
+            itemAnimator = null
+            setHasFixedSize(true)
+            alpha = 0f
             excludePaddingClippableViewFromBottomNavigationBar()
         }
 
         // Pull-to-refresh: force refresh index every time (still respects backoff window).
         // zh-CN: 下拉刷新: 每次都强制刷新索引 (仍遵守退避窗口).
         binding.pluginCenterSwipeRefresh.setOnRefreshListener {
-            vm.load(contextRef, forceRefreshIndex = true)
+            vm.load(contextRef, forceRefreshIndex = true, sourceScope = sourceScope)
         }
 
         // First entry: local priority + index async.
         // zh-CN: 首次进入: 本地优先 + 索引异步.
-        vm.load(context, forceRefreshIndex = false)
+        vm.load(context, forceRefreshIndex = false, sourceScope = sourceScope)
 
         // Subscribe to list data.
         // zh-CN: 订阅列表数据.
@@ -194,6 +242,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         // zh-CN: 订阅索引加载完成状态, 用于更新下拉刷新动画与空态文案.
         viewLifecycleOwner.lifecycleScope.launch {
             vm.indexLoaded.collectLatest { loaded ->
+                latestIndexLoaded = loaded
                 binding.pluginCenterSwipeRefresh.isRefreshing = false
                 updateEmptyHint(
                     filteredItems = adapter.items(),
@@ -201,6 +250,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
                     fullItems = latestFullItems,
                     query = currentQuery,
                 )
+                scheduleFirstListRevealIfNeeded(adapter.items().isNotEmpty())
             }
         }
 
@@ -241,19 +291,170 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
      * Update filter strategy for current list rendering.
      * zh-CN: 更新当前列表渲染的筛选策略.
      */
-    fun setFilter(filter: Filter) {
-        currentFilter = filter
+    fun setFilterState(state: PluginFilterStore.FilterState) {
+        currentFilterState = state
         renderList()
+    }
+
+    private fun loadPersistedSort(context: Context): Sort = when (sourceScope) {
+        PluginIndexSource.OFFICIAL -> PluginSortStoreOfficial.getSort(context)
+        PluginIndexSource.THIRD_PARTY -> PluginSortStoreThirdParty.getSort(context)
+        null -> PluginSortStore.getSort(context)
+    }
+
+    private fun loadPersistedSortAscending(context: Context, sort: Sort): Boolean = when (sourceScope) {
+        PluginIndexSource.OFFICIAL -> PluginSortStoreOfficial.getAscending(context, sort)
+        PluginIndexSource.THIRD_PARTY -> PluginSortStoreThirdParty.getAscending(context, sort)
+        null -> PluginSortStore.getAscending(context, sort)
+    }
+
+    private fun loadPersistedMechanismSecondarySort(context: Context): Sort = when (sourceScope) {
+        PluginIndexSource.OFFICIAL -> PluginSortStoreOfficial.getMechanismSecondarySort(context)
+        PluginIndexSource.THIRD_PARTY -> PluginSortStoreThirdParty.getMechanismSecondarySort(context)
+        null -> PluginSortStore.getMechanismSecondarySort(context)
+    }
+
+    private fun loadPersistedSourceSecondarySort(context: Context): Sort = when (sourceScope) {
+        PluginIndexSource.OFFICIAL -> PluginSortStoreOfficial.getSourceSecondarySort(context)
+        PluginIndexSource.THIRD_PARTY -> PluginSortStoreThirdParty.getSourceSecondarySort(context)
+        null -> PluginSortStore.getSourceSecondarySort(context)
+    }
+
+    private fun registerSortPrefListener(context: Context) {
+        when (sourceScope) {
+            PluginIndexSource.OFFICIAL -> PluginSortStoreOfficial.registerOnSharedPreferenceChangeListener(context, sortPrefListener)
+            PluginIndexSource.THIRD_PARTY -> PluginSortStoreThirdParty.registerOnSharedPreferenceChangeListener(context, sortPrefListener)
+            null -> PluginSortStore.registerOnSharedPreferenceChangeListener(context, sortPrefListener)
+        }
+    }
+
+    private fun unregisterSortPrefListener(context: Context) {
+        when (sourceScope) {
+            PluginIndexSource.OFFICIAL -> PluginSortStoreOfficial.unregisterOnSharedPreferenceChangeListener(context, sortPrefListener)
+            PluginIndexSource.THIRD_PARTY -> PluginSortStoreThirdParty.unregisterOnSharedPreferenceChangeListener(context, sortPrefListener)
+            null -> PluginSortStore.unregisterOnSharedPreferenceChangeListener(context, sortPrefListener)
+        }
+    }
+
+    private fun buildSortComparator(): Comparator<PluginCenterItem> {
+        val primaryAscending = loadPersistedSortAscending(contextRef, currentSort)
+        var comparator = comparatorForSortField(currentSort, primaryAscending)
+
+        val usedSorts = linkedSetOf(currentSort)
+        if (currentSort.supportsSecondarySort()) {
+            val secondary = when (currentSort) {
+                Sort.MECHANISM -> loadPersistedMechanismSecondarySort(contextRef)
+                Sort.SOURCE -> loadPersistedSourceSecondarySort(contextRef)
+                else -> null
+            }?.takeUnless { it == currentSort }
+                ?: currentSort.defaultSecondarySort()
+            val secondaryAscending = loadPersistedSortAscending(contextRef, secondary)
+            comparator = comparator.thenComparing(comparatorForSortField(secondary, secondaryAscending))
+            usedSorts += secondary
+        }
+
+        SORT_FALLBACK_CHAIN.forEach { fallback ->
+            if (fallback in usedSorts) return@forEach
+            comparator = comparator.thenComparing(comparatorForSortField(fallback, fallback.defaultAscending))
+            usedSorts += fallback
+        }
+        return comparator
+    }
+
+    private fun comparatorForSortField(
+        sort: Sort,
+        ascending: Boolean,
+    ): Comparator<PluginCenterItem> {
+        val base: Comparator<PluginCenterItem> = when (sort) {
+            Sort.TITLE_ASC ->
+                compareBy { normalizeText(it.title) }
+            Sort.LAST_UPDATE_DESC ->
+                compareBy { resolveLastUpdateSortValue(it) }
+            Sort.PACKAGE_SIZE_DESC ->
+                compareBy { resolvePackageSizeSortValue(it) }
+            Sort.MECHANISM ->
+                compareBy {
+                    when (it.mechanism) {
+                        PluginMechanism.AIDL -> 0
+                        PluginMechanism.SDK -> 1
+                    }
+                }
+            Sort.VERSION_CODE_DESC ->
+                compareBy { resolveVersionSortValue(it) }
+            Sort.VERSION_RELEASE_TIME_DESC ->
+                compareBy { resolveVersionReleaseTimeSortValue(it) }
+            Sort.FIRST_INSTALL_TIME_DESC ->
+                compareBy { resolveFirstInstallSortValue(it) }
+            Sort.PACKAGE_NAME_ASC ->
+                compareBy { normalizeText(it.packageName) }
+            Sort.AUTHOR_ASC ->
+                compareBy { normalizeText(it.author) }
+            Sort.SOURCE ->
+                compareBy {
+                    when (it.source) {
+                        PluginIndexSource.OFFICIAL -> 0
+                        PluginIndexSource.THIRD_PARTY -> 1
+                    }
+                }
+        }
+        return if (ascending) base else base.reversed()
+    }
+
+    private fun resolveVersionSortValue(item: PluginCenterItem): Long =
+        item.versionCode?.takeIf { it > 0 } ?: Long.MIN_VALUE
+
+    private fun resolveVersionReleaseTimeSortValue(item: PluginCenterItem): Long =
+        parseVersionDateToEpochMillis(item.versionDate) ?: 0L
+
+    private fun resolvePackageSizeSortValue(item: PluginCenterItem): Long = when {
+        item.packageSize > 0 -> item.packageSize
+        (item.installableApkSizeBytes ?: 0L) > 0L -> item.installableApkSizeBytes ?: 0L
+        (item.updatableApkSizeBytes ?: 0L) > 0L -> item.updatableApkSizeBytes ?: 0L
+        else -> 0L
+    }
+
+    private fun resolveFirstInstallSortValue(item: PluginCenterItem): Long =
+        item.firstInstallTime?.takeIf { it > 0L }
+            ?: item.lastInstallTime?.takeIf { it > 0L }
+            ?: 0L
+
+    private fun resolveLastUpdateSortValue(item: PluginCenterItem): Long =
+        item.lastUpdateTime?.takeIf { it > 0L }
+            ?: parseVersionDateToEpochMillis(item.versionDate)
+            ?: item.versionCode?.takeIf { it > 0L }
+            ?: 0L
+
+    private fun normalizeText(value: String?): String =
+        value?.trim()
+            ?.takeIf { it.isNotEmpty() }
+            ?.lowercase(Locale.ROOT)
+            ?: ""
+
+    private fun parseVersionDateToEpochMillis(versionDate: String?): Long? {
+        val normalized = versionDate?.trim()?.takeIf { it.isNotEmpty() } ?: return null
+        if (versionDateEpochCache.containsKey(normalized)) {
+            return versionDateEpochCache[normalized]
+        }
+
+        val parsed = DATE_PATTERNS.firstNotNullOfOrNull { pattern ->
+            val locale = if (pattern.contains("MMM")) Locale.ENGLISH else Locale.US
+            runCatching {
+                SimpleDateFormat(pattern, locale).apply { isLenient = false }.parse(normalized)?.time
+            }.getOrNull()
+        }
+        versionDateEpochCache[normalized] = parsed
+        return parsed
     }
 
     private fun renderList() {
         val q = currentQuery
+        val visibleItems = latestFullItems.filterNot { PluginVisibilityStore.isHidden(contextRef, it.packageName) }
 
         val filteredByQuery = if (q.isNullOrBlank()) {
-            latestFullItems
+            visibleItems
         } else {
             // @formatter:off
-            latestFullItems.filter { item ->
+            visibleItems.filter { item ->
                 item.title.contains(q, ignoreCase = true) ||
                 item.packageName.contains(q, ignoreCase = true) ||
                 item.author?.contains(q, ignoreCase = true) == true ||
@@ -262,40 +463,82 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
             // @formatter:on
         }
 
-        val filtered = filteredByQuery.filter { item ->
-            when (currentFilter) {
-                Filter.ALL -> true
-                Filter.INSTALLED -> item.isInstalled
-                Filter.NOT_INSTALLED -> !item.isInstalled
-                Filter.ENABLED -> item.isEnabled
-                Filter.DISABLED -> !item.isEnabled
-                Filter.UPDATABLE -> item.updatableVersionCode != null
-                Filter.AIDL -> item.mechanism == PluginMechanism.AIDL
-                Filter.SDK -> item.mechanism == PluginMechanism.SDK
-            }
-        }
+        val filtered = filteredByQuery.filter(::matchesCurrentFilter)
 
-        val sorted = when (currentSort) {
-            Sort.TITLE_ASC -> filtered.sortedBy { it.title.lowercase() }
-            Sort.LAST_UPDATE_DESC -> filtered.sortedWith(
-                compareByDescending<PluginCenterItem> { it.isInstalled }
-                    .thenByDescending { it.lastUpdateTime ?: 0L }
-                    .thenBy { it.title.lowercase() }
-            )
-            Sort.PACKAGE_SIZE_DESC -> filtered.sortedWith(
-                compareByDescending<PluginCenterItem> { it.isInstalled }
-                    .thenByDescending { it.packageSize }
-                    .thenBy { it.title.lowercase() }
-            )
-        }
+        val sorted = filtered.sortedWith(buildSortComparator())
 
         adapter.updateData(sorted)
+        scheduleFirstListRevealIfNeeded(sorted.isNotEmpty())
         updateEmptyHint(
             filteredItems = sorted,
             indexLoaded = vm.indexLoaded.value,
-            fullItems = latestFullItems,
+            fullItems = visibleItems,
             query = currentQuery,
         )
+    }
+
+    private fun scheduleFirstListRevealIfNeeded(hasItems: Boolean) {
+        if (!hasItems || isFirstListRevealed || _binding == null || !isAdded) {
+            return
+        }
+        firstListRevealJob?.cancel()
+        firstListRevealJob = viewLifecycleOwner.lifecycleScope.launch {
+            val elapsed = SystemClock.elapsedRealtime() - firstListRenderStartedAt
+            val revealDelay = when {
+                latestIndexLoaded -> 90L
+                elapsed >= FIRST_LIST_REVEAL_TIMEOUT_MS -> 0L
+                else -> FIRST_LIST_REVEAL_TIMEOUT_MS - elapsed
+            }
+            if (revealDelay > 0L) {
+                delay(revealDelay)
+            }
+            if (_binding == null || !isAdded || isFirstListRevealed || adapter.items().isEmpty()) {
+                return@launch
+            }
+            isFirstListRevealed = true
+            binding.pluginCenterRecyclerView.animate()
+                .alpha(1f)
+                .setDuration(120L)
+                .start()
+        }
+    }
+
+    private fun matchesCurrentFilter(item: PluginCenterItem): Boolean {
+        val filter = currentFilterState
+
+        if (filter.installState == PluginFilterStore.InstallState.INSTALLED && !item.isInstalled) {
+            return false
+        }
+        if (filter.installState == PluginFilterStore.InstallState.NOT_INSTALLED && item.isInstalled) {
+            return false
+        }
+
+        if (filter.enabledState == PluginFilterStore.EnabledState.ENABLED && !item.isEnabled) {
+            return false
+        }
+        if (filter.enabledState == PluginFilterStore.EnabledState.DISABLED && item.isEnabled) {
+            return false
+        }
+
+        if (filter.updatableOnly && item.updatableVersionCode == null) {
+            return false
+        }
+
+        if (filter.mechanismState == PluginFilterStore.MechanismState.AIDL && item.mechanism != PluginMechanism.AIDL) {
+            return false
+        }
+        if (filter.mechanismState == PluginFilterStore.MechanismState.SDK && item.mechanism != PluginMechanism.SDK) {
+            return false
+        }
+
+        if (filter.sourceState == PluginFilterStore.SourceState.OFFICIAL && item.source != PluginIndexSource.OFFICIAL) {
+            return false
+        }
+        if (filter.sourceState == PluginFilterStore.SourceState.THIRD_PARTY && item.source != PluginIndexSource.THIRD_PARTY) {
+            return false
+        }
+
+        return true
     }
 
     private fun updateEmptyHint(
@@ -331,7 +574,13 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
                 emptyHintJob?.cancel()
                 emptyHintJob = null
                 hintView.visibility = View.VISIBLE
-                hintView.setText(R.string.text_no_plugins_installed_hint)
+                when (sourceScope) {
+                    PluginIndexSource.OFFICIAL,
+                    PluginIndexSource.THIRD_PARTY,
+                        -> hintView.setText(R.string.text_no_available_plugins_found_hint)
+                    else
+                        -> hintView.setText(R.string.text_no_plugins_installed_hint)
+                }
                 isFirstEnter = false
             }
             else -> {
@@ -415,6 +664,11 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
     }
 
     private fun enableLegacyPlugin(item: PluginCenterItem) {
+        val hostVersionError = buildHostVersionErrorIfNeeded(item)
+        if (hostVersionError != null) {
+            rejectEnableWithError(item, hostVersionError)
+            return
+        }
         vm.setEnabled(contextRef, item.packageName, true)
         item.isEnabled = true
         item.enabledState = PluginEnabledState.READY
@@ -423,6 +677,11 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
     }
 
     private fun enableAidlPlugin(item: PluginCenterItem) {
+        val hostVersionError = buildHostVersionErrorIfNeeded(item)
+        if (hostVersionError != null) {
+            rejectEnableWithError(item, hostVersionError)
+            return
+        }
         vm.setEnabled(contextRef, item.packageName, true)
         item.isEnabled = true
         item.enabledState = PluginEnabledState.READY
@@ -462,12 +721,38 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         }
     }
 
+    private fun buildHostVersionErrorIfNeeded(item: PluginCenterItem): PluginError? {
+        val requires = item.requiresHostVersion ?: return null
+        val hostVersion = item.hostVersionCode ?: BuildConfig.VERSION_CODE.toLong()
+        if (hostVersion >= requires) return null
+        return PluginError(
+            code = PluginErrorCode.HOST_VERSION_TOO_LOW,
+            message = "requiresHostVersion=$requires, hostVersionCode=$hostVersion",
+            recoverHint = getString(
+                R.string.hint_plugin_requires_higher_host_version_with_required_and_current,
+                requires,
+                hostVersion,
+            ),
+        )
+    }
+
+    private fun rejectEnableWithError(item: PluginCenterItem, error: PluginError) {
+        val throwable = IllegalStateException(error.message ?: error.recoverHint ?: getString(R.string.text_unknown))
+        showEnableErrorDialog(item, error, throwable)
+        vm.setEnabled(contextRef, item.packageName, false, error)
+        item.isEnabled = false
+        item.enabledState = PluginEnabledState.ERROR(error)
+        item.lastError = error
+        adapter.notifyDataSetChanged()
+    }
+
     private fun showEnableErrorDialog(item: PluginCenterItem, mapped: PluginError, raw: Throwable) {
         if (!isAdded) return
 
         val pm = contextRef.packageManager
         val launchIntent = pm.getLaunchIntentForPackage(item.packageName)
         val wakeIntent = if (item.canActivate) PluginWakeManager.buildWakeIntent(contextRef, item.packageName) else null
+        val shouldShowActivate = shouldShowActivateAction(item, mapped)
 
         val errorBody = raw.message ?: raw.toString()
         val messageParts = mutableListOf(
@@ -475,9 +760,24 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
             errorBody,
         )
         val hintText = mapped.recoverHint?.takeIf { it.isNotBlank() }
-            ?: if (item.canActivate && PluginErrorMapper.shouldRecommendActivation(mapped)) {
-                getString(R.string.hint_try_clicking_the_activate_button_to_activate_the_plugin)
-            } else null
+            ?: when {
+                mapped.code == PluginErrorCode.PROTOCOL_MISMATCH -> {
+                    getString(R.string.hint_plugin_upgrade_required_due_to_protocol_mismatch)
+                }
+                mapped.code == PluginErrorCode.HOST_VERSION_TOO_LOW -> {
+                    val required = item.requiresHostVersion ?: 0L
+                    val host = item.hostVersionCode ?: BuildConfig.VERSION_CODE.toLong()
+                    getString(
+                        R.string.hint_plugin_requires_higher_host_version_with_required_and_current,
+                        required,
+                        host,
+                    )
+                }
+                shouldShowActivate -> {
+                    getString(R.string.hint_try_clicking_the_activate_button_to_activate_the_plugin)
+                }
+                else -> null
+            }
         if (!hintText.isNullOrBlank()) {
             messageParts += contextRef.getString(R.string.text_hint) + contextRef.getString(R.string.symbol_colon_with_blank)
             messageParts += hintText
@@ -496,32 +796,42 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
             .negativeText(R.string.dialog_button_dismiss)
             .negativeColorRes(R.color.dialog_button_default)
             .onNegative { d, _ -> d.dismiss() }
-            .apply positive@{
-                positiveText(R.string.dialog_button_activate)
+            .apply {
+                if (shouldShowActivate) {
+                    positiveText(R.string.dialog_button_activate)
 
-                val openIntent = wakeIntent ?: launchIntent ?: run {
-                    positiveColorRes(R.color.dialog_button_unavailable)
-                    onPositive { d, _ ->
-                        ViewUtils.showSnack(d.view, R.string.text_unavailable, false)
+                    val openIntent = wakeIntent ?: launchIntent ?: run {
+                        positiveColorRes(R.color.dialog_button_unavailable)
+                        onPositive { d, _ ->
+                            ViewUtils.showSnack(d.view, R.string.text_unavailable, false)
+                        }
+                        return@apply
                     }
-                    return@positive
-                }
 
-                positiveColorRes(R.color.dialog_button_attraction)
-                onPositive { d, _ ->
-                    val started = openIntent.startSafely(contextRef, true)
-                    d.dismiss()
-                    if (started) {
-                        item.activatedState = PluginActivatedState.DONE
-                        ViewUtils.showToast(contextRef, getString(R.string.text_activated_successfully), true)
-                        adapter.notifyDataSetChanged()
-                        tryEnableAfterWake(item)
+                    positiveColorRes(R.color.dialog_button_attraction)
+                    onPositive { d, _ ->
+                        val started = openIntent.startSafely(contextRef, true)
+                        d.dismiss()
+                        if (started) {
+                            item.activatedState = PluginActivatedState.DONE
+                            ViewUtils.showToast(contextRef, getString(R.string.text_activated_successfully), true)
+                            adapter.notifyDataSetChanged()
+                            tryEnableAfterWake(item)
+                        }
                     }
                 }
             }
             .cancelable(false)
             .autoDismiss(false)
             .show()
+    }
+
+    private fun shouldShowActivateAction(item: PluginCenterItem, error: PluginError): Boolean {
+        if (!item.canActivate) return false
+        if (error.code == PluginErrorCode.PROTOCOL_MISMATCH) return false
+        if (error.code == PluginErrorCode.HOST_VERSION_TOO_LOW) return false
+        return error.code == PluginErrorCode.ROM_FIRST_RUN_RESTRICTED_SUSPECTED ||
+                PluginErrorMapper.shouldRecommendActivation(error)
     }
 
     private fun tryEnableAfterWake(item: PluginCenterItem) {
@@ -560,10 +870,13 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
                     PluginAuthorizedState.OFFICIAL,
                     PluginAuthorizedState.TRUSTED,
                     PluginAuthorizedState.USER_GRANTED,
-                    -> true
+                        -> true
                     else -> false
                 }
                 if (!canAutoEnable || item.isEnabled) return@launch
+                val requiresHostVersion = item.requiresHostVersion
+                val hostVersion = item.hostVersionCode ?: BuildConfig.VERSION_CODE.toLong()
+                if (requiresHostVersion != null && hostVersion < requiresHostVersion) return@launch
 
                 when (item.mechanism) {
                     PluginMechanism.SDK -> enableLegacyPlugin(item)
@@ -577,14 +890,14 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
     override fun onStart() {
         super.onStart()
         if (::contextRef.isInitialized) {
-            PluginSortStore.registerOnSharedPreferenceChangeListener(contextRef, sortPrefListener)
+            registerSortPrefListener(contextRef)
             PluginFilterStore.registerOnSharedPreferenceChangeListener(contextRef, filterPrefListener)
             PluginOnlineSettingsStore.registerOnSharedPreferenceChangeListener(onlinePrefListener)
 
             // Sync with latest persisted state (e.g., changed while fragment was stopped).
             // zh-CN: 同步最新的持久化状态 (如在 Fragment 停止期间被修改).
-            setSort(PluginSortStore.getSort(contextRef))
-            setFilter(PluginFilterStore.getFilter(contextRef))
+            setSort(loadPersistedSort(contextRef))
+            setFilterState(PluginFilterStore.getFilterState(contextRef))
         }
 
         pkgReceiver ?: run registerPackageReceiver@{
@@ -599,7 +912,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
                             // zh-CN: 替换安装 (更新) 不记录 "最近安装", 但会刷新.
                             if (!replacing) {
                                 PluginRecentStore.setLastInstalled(packageName)
-                                vm.load(context, forceRefreshIndex = false)
+                                vm.load(context, forceRefreshIndex = false, sourceScope = sourceScope)
                                 scheduleAutoEnableAfterInstall(packageName)
                                 return
                             }
@@ -610,7 +923,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
                             pkgChangeRefreshJob = viewLifecycleOwner.lifecycleScope.launch {
                                 delay(1500L)
                                 if (isAdded && _binding != null) {
-                                    vm.load(context, forceRefreshIndex = false)
+                                    vm.load(context, forceRefreshIndex = false, sourceScope = sourceScope)
                                 }
                             }
                         }
@@ -619,7 +932,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
                             // zh-CN: 替换卸载 (更新前阶段) 不记录 "最近卸载".
                             if (!replacing) {
                                 PluginRecentStore.setLastUninstalled(packageName)
-                                vm.load(context, forceRefreshIndex = false)
+                                vm.load(context, forceRefreshIndex = false, sourceScope = sourceScope)
                                 return
                             }
 
@@ -629,7 +942,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
                             pkgChangeRefreshJob = viewLifecycleOwner.lifecycleScope.launch {
                                 delay(1500L)
                                 if (isAdded && _binding != null) {
-                                    vm.load(context, forceRefreshIndex = false)
+                                    vm.load(context, forceRefreshIndex = false, sourceScope = sourceScope)
                                 }
                             }
                         }
@@ -648,7 +961,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
     override fun onStop() {
         super.onStop()
         if (::contextRef.isInitialized) {
-            PluginSortStore.unregisterOnSharedPreferenceChangeListener(contextRef, sortPrefListener)
+            unregisterSortPrefListener(contextRef)
             PluginFilterStore.unregisterOnSharedPreferenceChangeListener(contextRef, filterPrefListener)
             PluginOnlineSettingsStore.unregisterOnSharedPreferenceChangeListener(onlinePrefListener)
         }
@@ -660,11 +973,24 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
 
     override fun onResume() {
         super.onResume()
+        if (::contextRef.isInitialized) {
+            val currentNightModeEnabled = isNightModeEnabled(contextRef)
+            val hasNightModeChanged = lastNightModeEnabled != null && lastNightModeEnabled != currentNightModeEnabled
+            if (hasNightModeChanged) {
+                adapter.notifyDataSetChanged()
+            }
+            lastNightModeEnabled = currentNightModeEnabled
+        }
         // Refresh once when returning to page, to cover state after installation/uninstallation.
         // zh-CN: 回到页面时刷新一次, 覆盖安装/卸载后的状态.
         if (!isFirstEnter && ::contextRef.isInitialized) {
-            vm.load(contextRef, forceRefreshIndex = false)
+            vm.load(contextRef, forceRefreshIndex = false, sourceScope = sourceScope)
         }
+    }
+
+    private fun isNightModeEnabled(context: Context): Boolean {
+        val mode = context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        return mode == Configuration.UI_MODE_NIGHT_YES
     }
 
     override fun onDestroyView() {
@@ -673,28 +999,95 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         emptyHintJob = null
         pkgChangeRefreshJob?.cancel()
         pkgChangeRefreshJob = null
+        firstListRevealJob?.cancel()
+        firstListRevealJob = null
+        isFirstListRevealed = false
+        latestIndexLoaded = false
+        firstListRenderStartedAt = 0L
         _binding = null
     }
 
     // Sort strategy for rendering list.
     // zh-CN: 用于渲染列表的排序策略.
-    enum class Sort(val titleRes: Int) {
-        TITLE_ASC(R.string.text_sort_by_name),
-        LAST_UPDATE_DESC(R.string.text_sort_by_last_update_time),
-        PACKAGE_SIZE_DESC(R.string.text_sort_by_package_size),
+    enum class Sort(
+        val titleRes: Int,
+        val defaultAscending: Boolean,
+    ) {
+        TITLE_ASC(R.string.text_sort_strategy_name, true),
+        LAST_UPDATE_DESC(R.string.text_sort_strategy_last_update_time, false),
+        PACKAGE_SIZE_DESC(R.string.text_sort_strategy_package_size, false),
+        MECHANISM(R.string.text_sort_strategy_mechanism, true),
+        VERSION_CODE_DESC(R.string.text_sort_strategy_version_code, false),
+        FIRST_INSTALL_TIME_DESC(R.string.text_sort_strategy_first_install_time, false),
+        PACKAGE_NAME_ASC(R.string.text_sort_strategy_package_name, true),
+        AUTHOR_ASC(R.string.text_sort_strategy_author, true),
+        SOURCE(R.string.text_sort_strategy_source, true),
+        VERSION_RELEASE_TIME_DESC(R.string.text_sort_strategy_version_release_time, false),
+        ;
+
+        fun supportsSecondarySort(): Boolean = this == MECHANISM || this == SOURCE
+
+        fun defaultSecondarySort(): Sort = when (this) {
+            MECHANISM, SOURCE -> LAST_UPDATE_DESC
+            else -> defaultPrimarySort()
+        }
+
+        companion object {
+            fun defaultPrimarySort(): Sort = LAST_UPDATE_DESC
+
+            fun primarySortDisplayOrder(): List<Sort> = listOf(
+                TITLE_ASC,
+                LAST_UPDATE_DESC,
+                PACKAGE_SIZE_DESC,
+                VERSION_RELEASE_TIME_DESC,
+                VERSION_CODE_DESC,
+                MECHANISM,
+                SOURCE,
+                FIRST_INSTALL_TIME_DESC,
+                AUTHOR_ASC,
+                PACKAGE_NAME_ASC,
+            )
+
+            fun secondaryCandidatesFor(primary: Sort): List<Sort> = primarySortDisplayOrder()
+                .filter { it != primary }
+        }
     }
 
-    // Filter strategy for rendering list.
     // zh-CN: 用于渲染列表的筛选策略.
-    enum class Filter(val titleRes: Int) {
-        ALL(R.string.text_all),
-        INSTALLED(R.string.text_installed),
-        NOT_INSTALLED(R.string.text_not_installed),
-        ENABLED(R.string.text_enabled),
-        DISABLED(R.string.text_disabled),
-        UPDATABLE(R.string.text_updatable),
-        AIDL(R.string.text_plugin_mechanism_aidl),
-        SDK(R.string.text_plugin_mechanism_sdk),
+    companion object {
+        private const val ARG_SOURCE_SCOPE = "arg_source_scope"
+        private const val FIRST_LIST_REVEAL_TIMEOUT_MS = 1000L
+        private val DATE_PATTERNS = arrayOf(
+            "yyyy-MM-dd",
+            "yyyy/MM/dd",
+            "dd/MM/yyyy",
+            "MM/dd/yyyy",
+            "yyyy.MM.dd",
+            "dd.MM.yyyy",
+            "yyyyMMdd",
+            "yyyy-MM-dd HH:mm:ss",
+            "yyyy/MM/dd HH:mm:ss",
+            "MMM dd, yyyy",
+            "dd MMM yyyy",
+            "MMM dd yyyy",
+        )
+        private val SORT_FALLBACK_CHAIN = listOf(
+            Sort.LAST_UPDATE_DESC,
+            Sort.VERSION_RELEASE_TIME_DESC,
+            Sort.VERSION_CODE_DESC,
+            Sort.TITLE_ASC,
+            Sort.PACKAGE_NAME_ASC,
+        )
+
+        fun newInstance(sourceScope: PluginIndexSource?): PluginCenterFragment {
+            return PluginCenterFragment().apply {
+                arguments = Bundle().apply {
+                    if (sourceScope != null) {
+                        putString(ARG_SOURCE_SCOPE, sourceScope.name)
+                    }
+                }
+            }
+        }
     }
 
 }

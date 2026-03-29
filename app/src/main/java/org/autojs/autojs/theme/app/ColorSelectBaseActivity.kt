@@ -635,7 +635,7 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
         }
 
         @JvmStatic
-        fun startActivity(context: Context, isToggled: Boolean = false) {
+        fun launch(context: Context, isToggled: Boolean = false) {
             val cls = when (isLegacyLayout) {
                 true -> ColorSelectActivity::class.java
                 else -> ColorLibrariesActivity::class.java

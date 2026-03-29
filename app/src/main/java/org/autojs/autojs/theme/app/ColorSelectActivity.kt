@@ -57,7 +57,7 @@ class ColorSelectActivity : ColorSelectBaseActivity() {
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
         R.id.action_toggle_color_select_layout -> {
             isLegacyLayout = false
-            startActivity(this, isToggled = true)
+            launch(this, isToggled = true)
             true
         }
         else -> super.onOptionsItemSelected(item)

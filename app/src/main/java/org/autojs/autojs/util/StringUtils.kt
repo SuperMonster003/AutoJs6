@@ -382,6 +382,15 @@ object StringUtils {
         return localized.resources.getString(resId)
     }
 
+    @JvmStatic
+    fun String.truncateToLength(limit: Int): String {
+        if (length <= limit) return this
+        return substring(0, limit) + "..."
+    }
+
+    @JvmStatic
+    fun String.truncateForSafeBinder() = truncateToLength(64 * 1024)
+
     class CharsetMatchWrapper(private val charsetMatch: CharsetMatch?) {
 
         val name: String? by lazy { charsetMatch?.name }
@@ -416,5 +425,4 @@ object StringUtils {
 
         fun contains(value: String): Boolean = value.looseKey() in keySet
     }
-
 }

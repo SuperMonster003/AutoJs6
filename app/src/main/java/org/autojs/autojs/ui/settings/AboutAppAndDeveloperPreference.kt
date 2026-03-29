@@ -2,9 +2,9 @@ package org.autojs.autojs.ui.settings
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.text.util.Linkify
 import android.util.AttributeSet
+import androidx.core.net.toUri
 import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.theme.preference.MaterialPreference
@@ -45,7 +45,7 @@ class AboutAppAndDeveloperPreference : MaterialPreference {
                 when {
                     Intent().apply {
                         @Suppress("SpellCheckingInspection")
-                        data = Uri.parse(
+                        data = run {
                             "mqqopensdkapi://bizAgent/qm/qr" +
                                     "?" + "url" + "=" + "http%3A%2F%2Fqm.qq.com" +
                                     "%2F" + "cgi-bin" + "%2F" + "qm" + "%2F" + "qr" +
@@ -53,7 +53,7 @@ class AboutAppAndDeveloperPreference : MaterialPreference {
                                     "%26" + "p" + "%3D" + "android" +
                                     "%26" + "jump_from" + "%3D" + "webapi" +
                                     "%26" + "k" + "%3D" + "6BH7HuJj29dwE0AIcUuxtAlK6NWlefmH"
-                        )
+                        }.toUri()
                     }.startSafely(context) -> Unit
                     else -> context.getString(
                         R.string.error_app_not_installed_with_name,
@@ -65,7 +65,7 @@ class AboutAppAndDeveloperPreference : MaterialPreference {
     }
 
     override fun onClick() {
-        AboutActivity.startActivity(prefContext)
+        AboutActivity.launch(prefContext)
         super.onClick()
     }
 

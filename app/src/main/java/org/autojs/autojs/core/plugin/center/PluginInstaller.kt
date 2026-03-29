@@ -10,11 +10,11 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
-import org.autojs.autojs.util.DialogUtils.applyProgressThemeColorTintLists
-import org.autojs.autojs.util.DialogUtils.setProgressNumberFormatByBytes
 import org.autojs.autojs.runtime.api.Mime
 import org.autojs.autojs.ui.main.scripts.ApkInfoDialogManager
 import org.autojs.autojs.util.ClipboardUtils
+import org.autojs.autojs.util.DialogUtils.applyProgressThemeColorTintLists
+import org.autojs.autojs.util.DialogUtils.setProgressNumberFormatByBytes
 import org.autojs.autojs.util.FileUtils
 import org.autojs.autojs.util.FileUtils.toCacheFile
 import org.autojs.autojs.util.IntentUtils
@@ -173,7 +173,7 @@ object PluginInstaller {
                     .show()
             }
             .positiveText(R.string.dialog_button_cancel_download)
-            .positiveColorRes(R.color.dialog_button_default)
+            .positiveColorRes(R.color.dialog_button_caution)
             .onPositive { d, _ ->
                 cancelFlag.set(true)
                 d.getActionButton(DialogAction.POSITIVE).isEnabled = false

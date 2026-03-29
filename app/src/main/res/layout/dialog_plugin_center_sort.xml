@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="24dp"
+        android:paddingVertical="8dp">
+
+        <TextView
+            android:id="@+id/plugin_center_sort_order_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/text_sort_order"
+            android:textAppearance="?android:attr/textAppearance" />
+
+        <RadioGroup
+            android:id="@+id/plugin_center_sort_order_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:orientation="horizontal"
+            android:text="@string/text_sort_ascending">
+
+            <RadioButton
+                android:id="@+id/plugin_center_sort_order_ascending_radio"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
+                android:checked="true"
+                android:minHeight="36dp"
+                android:paddingVertical="6dp"
+                android:text="@string/text_sort_ascending"
+                android:textSize="15sp" />
+
+            <RadioButton
+                android:id="@+id/plugin_center_sort_order_descending_radio"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:minHeight="36dp"
+                android:paddingVertical="6dp"
+                android:text="@string/text_sort_descending"
+                android:textSize="15sp" />
+        </RadioGroup>
+
+        <TextView
+            android:id="@+id/plugin_center_sort_primary_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/text_sort_field"
+            android:textAppearance="?android:attr/textAppearance" />
+
+        <LinearLayout
+            android:id="@+id/plugin_center_sort_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:orientation="vertical" />
+
+        <LinearLayout
+            android:id="@+id/plugin_center_sort_secondary_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="vertical"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <TextView
+                android:id="@+id/plugin_center_sort_secondary_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/text_sort_secondary"
+                android:textAppearance="?android:attr/textAppearance" />
+
+            <Spinner
+                android:id="@+id/plugin_center_sort_secondary_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:minHeight="36dp" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

@@ -16,12 +16,11 @@ import org.autojs.autojs.runtime.api.OcrResult
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.Invokable
 import org.autojs.autojs.runtime.api.augment.ocr.Ocr.Companion.OcrMode
-import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
+import org.autojs.autojs.runtime.exception.OfficialPluginMissingException
 import org.autojs.autojs.util.RhinoUtils.coerceBoolean
 import org.autojs.autojs.util.RhinoUtils.coerceFloatNumber
 import org.autojs.autojs.util.RhinoUtils.coerceIntNumber
 import org.autojs.autojs.util.RhinoUtils.coerceString
-import org.autojs.autojs6.R
 import org.autojs.plugin.paddle.ocr.api.OcrOptions
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeObject
@@ -30,6 +29,7 @@ import kotlin.math.max
 
 /**
  * Modified by JetBrains AI Assistant (GPT-5.2-Codex (xhigh)) as of Feb 13, 2026.
+ * Modified by SuperMonster003 as of Mar 26, 2026.
  */
 @Suppress("unused")
 class OcrPaddle(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), Invokable {
@@ -82,7 +82,7 @@ class OcrPaddle(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRu
             return if (!isInrt) {
                 runBlocking(scriptRuntime.coroutineContext) {
                     val target = PaddleOcrPluginHost.select(globalContext)
-                        ?: throw WrappedIllegalArgumentException(globalContext.getString(R.string.error_no_paddle_ocr_plugins_available))
+                        ?: throw OfficialPluginMissingException(globalContext, "Paddle OCR")
                     PaddleOcrPluginHost.recognizeText(globalContext, target, image.bitmap, ocrOptions)
                 }
             } else {
@@ -107,7 +107,7 @@ class OcrPaddle(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRu
             val results = if (!isInrt) {
                 runBlocking(scriptRuntime.coroutineContext) {
                     val target = PaddleOcrPluginHost.select(globalContext)
-                        ?: throw WrappedIllegalArgumentException(globalContext.getString(R.string.error_no_paddle_ocr_plugins_available))
+                        ?: throw OfficialPluginMissingException(globalContext, "Paddle OCR")
                     PaddleOcrPluginHost.detect(globalContext, target, image.bitmap, ocrOptions)
                 }.map { OcrResult(it.text, it.confidence, it.bounds) }
             } else {
@@ -130,7 +130,7 @@ class OcrPaddle(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRu
             val splitWords = options.inquire("splitWords", ::coerceBoolean, false)
             val useWordSegmentation = options.inquire("useWordSegmentation", ::coerceBoolean, false)
             val useRaw = options.inquire("useRaw", ::coerceBoolean, DEFAULT_USE_RAW) ||
-                options.inquire("raw", ::coerceBoolean, false)
+                    options.inquire("raw", ::coerceBoolean, false)
             val imageQuality = options.inquire("imageQuality", ::coerceIntNumber, -1)
             val imageFormat = options.inquire("imageFormat", ::coerceString, "")
 

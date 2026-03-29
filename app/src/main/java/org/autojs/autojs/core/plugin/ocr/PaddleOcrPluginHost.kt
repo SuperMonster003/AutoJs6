@@ -21,17 +21,18 @@ import android.os.SharedMemory
 import android.os.SystemClock.uptimeMillis
 import android.util.Log
 import androidx.annotation.RequiresApi
+import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.coroutines.CancellableContinuation
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.autojs.core.plugin.center.PluginTrustManager
+import org.autojs.autojs.core.plugin.center.PluginVariantPriorityStore
+import org.autojs.plugin.common.api.PluginInfo
 import org.autojs.plugin.paddle.ocr.api.IOcrPlugin
 import org.autojs.plugin.paddle.ocr.api.OcrOptions
 import org.autojs.plugin.paddle.ocr.api.OcrResult
-import org.autojs.plugin.paddle.ocr.api.PluginInfo
 import java.io.FileDescriptor
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -40,6 +41,7 @@ import kotlin.coroutines.resumeWithException
 
 /**
  * Modified by JetBrains AI Assistant (GPT-5.2-Codex (xhigh)) as of Feb 13, 2026.
+ * Modified by JetBrains AI Assistant (GPT-5.3-Codex (xhigh)) as of Mar 26, 2026.
  */
 object PaddleOcrPluginHost {
 
@@ -161,12 +163,81 @@ object PaddleOcrPluginHost {
             list.firstOrNull { d -> d.pluginInfo?.engine == engine && d.pluginInfo.variant == variant }?.let { return it }
         }
         if (engine != null) {
-            list.firstOrNull { d -> d.pluginInfo?.engine == engine }?.let { return it }
+            val candidates = list.filter { d -> d.pluginInfo?.engine == engine }
+            selectByPriorityWithKeys(
+                candidates = candidates,
+                keys = PluginVariantPriorityStore.buildPriorityKeys(
+                    engine = engine,
+                    engineId = engineId ?: inferCommonEngineFamily(candidates),
+                ),
+            )?.let { return it }
+        }
+        val singleEngine = list.mapNotNull { it.pluginInfo?.engine }.distinct().singleOrNull()
+        if (!singleEngine.isNullOrBlank()) {
+            selectByPriorityWithKeys(
+                candidates = list,
+                keys = PluginVariantPriorityStore.buildPriorityKeys(
+                    engine = singleEngine,
+                    engineId = inferCommonEngineFamily(list),
+                ),
+            )?.let { return it }
+        }
+        inferCommonEngineFamily(list)?.let { family ->
+            selectByPriorityWithKeys(
+                candidates = list,
+                keys = PluginVariantPriorityStore.buildPriorityKeys(
+                    engine = family,
+                    engineId = family,
+                ),
+            )?.let { return it }
         }
         return list.maxBy {
             val variant = it.pluginInfo?.variant ?: return@maxBy 0
             variant.replace(Regex("\\D"), "").toIntOrNull() ?: 0
         }
+    }
+
+    private fun selectByPriorityWithKeys(
+        candidates: List<Discovered>,
+        keys: List<String>,
+    ): Discovered? {
+        if (candidates.isEmpty()) return null
+        val byPkg = candidates.associateBy { it.serviceInfo.packageName }
+        val fallbackOrder = PluginVariantPriorityStore.getBestOrderForPackages(
+            byPkg.keys,
+        )
+        if (fallbackOrder.isNotEmpty()) {
+            fallbackOrder.firstNotNullOfOrNull { byPkg[it] }?.let { return it }
+        }
+
+        keys.forEach { key ->
+            PluginVariantPriorityStore.selectByPriority(
+                engine = key,
+                candidates = candidates,
+                packageNameOf = { it.serviceInfo.packageName },
+                variantOf = { it.pluginInfo?.variant },
+            )?.let { selected ->
+                val order = PluginVariantPriorityStore.getOrder(key)
+                if (order.isNotEmpty()) {
+                    return selected
+                }
+            }
+        }
+        return PluginVariantPriorityStore.selectByPriority(
+            engine = keys.firstOrNull(),
+            candidates = candidates,
+            packageNameOf = { it.serviceInfo.packageName },
+            variantOf = { it.pluginInfo?.variant },
+        )
+    }
+
+    private fun inferCommonEngineFamily(candidates: List<Discovered>): String? {
+        if (candidates.isEmpty()) return null
+        val families = candidates.mapNotNull { candidate ->
+            PluginVariantPriorityStore.normalizeFamilyKey(candidate.pluginInfo?.id)
+                ?: PluginVariantPriorityStore.normalizeFamilyKey(candidate.pluginInfo?.engine)
+        }.distinct()
+        return families.singleOrNull()
     }
 
     // Convert temporary file to read-only FD.

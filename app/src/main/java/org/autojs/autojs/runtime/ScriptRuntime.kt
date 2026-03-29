@@ -17,6 +17,7 @@ import org.autojs.autojs.core.activity.ActivityInfoProvider
 import org.autojs.autojs.core.console.GlobalConsole
 import org.autojs.autojs.core.image.capture.ScreenCaptureRequester
 import org.autojs.autojs.core.looper.Loopers
+import org.autojs.autojs.core.plugin.center.PluginAutoMountManager
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.lang.ThreadCompat
 import org.autojs.autojs.pio.PFiles
@@ -516,6 +517,8 @@ class ScriptRuntime private constructor(builder: Builder) {
         //  ! Redirect the "require" method to support relative paths and npm modules.
         topLevelScope.defineProp("Module", js_Module, PERMANENT)
         topLevelScope.defineProp("require", js_Module.prop("require"), PERMANENT)
+
+        PluginAutoMountManager.apply(this)
     }
 
     @ScriptInterface

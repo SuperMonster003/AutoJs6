@@ -28,7 +28,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.core.pref.Language
 import org.autojs.autojs.core.pref.Language.Companion.getPrefLanguageOrNull
-import org.autojs.autojs.theme.ThemeColorHelper
 import org.autojs.autojs.theme.widget.ThemeColorToolbar
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.settings.ReleaseHistoryRepository.Companion.Category
@@ -36,6 +35,8 @@ import org.autojs.autojs.ui.settings.ReleaseHistoryRepository.Companion.DEFAULT_
 import org.autojs.autojs.ui.settings.ReleaseHistoryRepository.Companion.DEFAULT_VERSION_NAME
 import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.DialogUtils.choiceWidgetThemeColor
+import org.autojs.autojs.util.DialogUtils.showAdaptive
+import org.autojs.autojs.util.DialogUtils.widgetThemeColor
 import org.autojs.autojs.util.ProcessLogger
 import org.autojs.autojs.util.ViewUtils.excludePaddingClippableViewFromBottomNavigationBar
 import org.autojs.autojs.util.ViewUtils.setMenuIconsColorByThemeColorLuminance
@@ -166,7 +167,7 @@ class DisplayReleaseHistoryActivity : BaseActivity() {
                 .content(R.string.text_waiting_for_all_data_processing_to_complete)
                 .positiveText(R.string.dialog_button_cancel)
                 .positiveColorRes(R.color.dialog_button_default)
-                .show()
+                .showAdaptive()
 
             lifecycleScope.launch {
                 while (!mAllDataHandled && dialog.isShowing) {
@@ -183,22 +184,16 @@ class DisplayReleaseHistoryActivity : BaseActivity() {
         val totalItems = categories.map { getString(it.labelRes) }
         val checkedItemsIndices = categories.indices.filter { categories[it] in mSelectedCategories.value }.toTypedArray()
         MaterialDialog.Builder(this)
+            .options(
+                listOf(
+                    MaterialDialog.OptionMenuItemSpec(getString(R.string.dialog_button_use_default)) { dialog ->
+                        dialog.setSelectedIndices(categories.indices.filter { categories[it] in DEFAULT_FILTER }.toTypedArray())
+                    },
+                ),
+            )
             .title(R.string.text_category_filter)
-            .positiveText(R.string.dialog_button_confirm)
-            .positiveColorRes(R.color.dialog_button_attraction)
-            .onPositive { dialog, _ -> dialog.dismiss() }
-            .negativeText(R.string.dialog_button_cancel)
-            .neutralColorRes(R.color.dialog_button_default)
-            .onNegative { dialog, _ -> dialog.dismiss() }
-            .neutralText(R.string.dialog_button_use_default)
-            .neutralColorRes(R.color.dialog_button_reset)
-            .choiceWidgetColor(ThemeColorHelper.getThemeColorStateList(this))
-            .onNeutral { dialog, _ ->
-                dialog.setSelectedIndices(categories.indices.filter { categories[it] in DEFAULT_FILTER }.toTypedArray())
-            }
-            .autoDismiss(false)
             .items(totalItems)
-            .itemsCallbackMultiChoice(checkedItemsIndices) { dialog, which, text ->
+            .itemsCallbackMultiChoice(checkedItemsIndices) { _, which, _ ->
                 lifecycleScope.launch {
                     mSelectedCategories.value = which.map { categories[it] }.toSet()
                     repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -209,8 +204,15 @@ class DisplayReleaseHistoryActivity : BaseActivity() {
                 }
                 true
             }
-            .choiceWidgetThemeColor()
-            .show()
+            .widgetThemeColor()
+            .negativeText(R.string.dialog_button_cancel)
+            .negativeColorRes(R.color.dialog_button_default)
+            .onNegative { dialog, _ -> dialog.dismiss() }
+            .positiveText(R.string.dialog_button_confirm)
+            .positiveColorRes(R.color.dialog_button_attraction)
+            .onPositive { dialog, _ -> dialog.dismiss() }
+            .autoDismiss(false)
+            .showAdaptive()
     }
 
     private fun showProcessLogs() {
@@ -219,7 +221,7 @@ class DisplayReleaseHistoryActivity : BaseActivity() {
             .content(ProcessLogger.dump())
             .positiveText(R.string.dialog_button_dismiss)
             .positiveColorRes(R.color.dialog_button_default)
-            .show()
+            .showAdaptive()
 
         val tv = dialog.contentView?.apply {
             autoLinkMask = Linkify.WEB_URLS

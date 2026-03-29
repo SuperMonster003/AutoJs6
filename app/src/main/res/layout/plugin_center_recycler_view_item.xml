@@ -12,7 +12,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="horizontal">
 
         <de.hdodenhof.circleimageview.CircleImageView
@@ -144,7 +144,7 @@
                         android:contentDescription="@string/text_download"
                         android:scaleType="fitCenter"
                         android:padding="4dp"
-                        android:src="@drawable/ic_download"
+                        android:src="@drawable/ic_download_thicker"
                         android:visibility="gone"
                         tools:tint="#03A5EF"
                         tools:visibility="visible" />
@@ -153,7 +153,7 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
                 <TextView
@@ -163,6 +163,7 @@
                     android:layout_weight="1"
                     android:ellipsize="end"
                     android:maxLines="2"
+                    android:breakStrategy="simple"
                     android:textColor="@color/text_color_primary_alpha_70"
                     android:textSize="12sp"
                     tools:text="百度飞桨光学字符识别插件" />

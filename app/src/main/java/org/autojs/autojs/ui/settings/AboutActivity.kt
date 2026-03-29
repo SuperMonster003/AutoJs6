@@ -195,11 +195,9 @@ open class AboutActivity : BaseActivity() {
 
     companion object {
 
-        fun startActivity(context: Context) {
+        fun launch(context: Context) {
             Intent(context, AboutActivity::class.java)
                 .startSafely(context)
         }
-
     }
-
 }

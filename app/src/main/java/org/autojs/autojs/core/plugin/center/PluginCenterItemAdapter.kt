@@ -37,5 +37,6 @@ class PluginCenterItemAdapter(
         fun onUninstall(item: PluginCenterItem)
         fun onDetails(item: PluginCenterItem)
         fun onUpdate(item: PluginCenterItem)
+        fun onSettings(item: PluginCenterItem)
     }
 }

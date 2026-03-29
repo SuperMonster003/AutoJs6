@@ -155,7 +155,7 @@
                 android:layout_gravity="center"
                 android:gravity="center_vertical|start"
                 android:textAlignment="viewStart"
-                android:maxLines="1"
+                android:maxLines="3"
                 android:ellipsize="end"
                 android:paddingBottom="0dp"
                 android:paddingTop="0dp"
@@ -179,7 +179,7 @@
         android:layout_marginTop="4sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/state_parent"
-        app:layout_constraintBottom_toTopOf="@id/package_name_parent"
+        app:layout_constraintBottom_toTopOf="@id/plugin_item_info_source_parent"
         app:layout_constraintEnd_toEndOf="parent">
 
         <androidx.constraintlayout.widget.Guideline
@@ -238,7 +238,7 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/package_name_parent"
+        android:id="@+id/plugin_item_info_source_parent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/ref_md_dialog_frame_margin"
@@ -246,6 +246,73 @@
         android:layout_marginTop="4sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/mechanism_parent"
+        app:layout_constraintBottom_toTopOf="@id/package_name_parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/plugin_item_info_source_guideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_begin="100dp" />
+
+        <TextView
+            android:id="@+id/plugin_item_info_source_label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical|start"
+            android:textAlignment="viewStart"
+            android:text="@string/text_source"
+            android:lineSpacingExtra="2dp"
+            android:textSize="@dimen/ref_md_listitem_textsize"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/plugin_item_info_source_guideline" />
+
+        <TextView
+            android:id="@+id/plugin_item_info_source_colon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical|start"
+            android:textAlignment="viewStart"
+            android:layout_marginHorizontal="4sp"
+            android:text="@string/symbol_colon"
+            android:textSize="@dimen/ref_md_listitem_textsize"
+            app:layout_constraintStart_toEndOf="@id/plugin_item_info_source_label"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/plugin_item_info_source_value" />
+
+        <TextView
+            android:id="@+id/plugin_item_info_source_value"
+            android:text="@string/ellipsis_six"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical|start"
+            android:textAlignment="viewStart"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:paddingBottom="0dp"
+            android:paddingTop="0dp"
+            android:lineSpacingExtra="2dp"
+            android:textSize="@dimen/ref_md_listitem_textsize"
+            app:layout_constraintStart_toEndOf="@id/plugin_item_info_source_colon"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/package_name_parent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/ref_md_dialog_frame_margin"
+        android:layout_marginStart="@dimen/ref_md_listitem_margin_left"
+        android:layout_marginTop="4sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/plugin_item_info_source_parent"
         app:layout_constraintBottom_toTopOf="@id/version_parent"
         app:layout_constraintEnd_toEndOf="parent">
 
@@ -291,7 +358,7 @@
             android:layout_height="wrap_content"
             android:gravity="center_vertical|start"
             android:textAlignment="viewStart"
-            android:maxLines="2"
+            android:maxLines="5"
             android:ellipsize="end"
             android:paddingBottom="0dp"
             android:paddingTop="0dp"
@@ -498,7 +565,7 @@
             android:layout_height="wrap_content"
             android:gravity="center_vertical|start"
             android:textAlignment="viewStart"
-            android:maxLines="2"
+            android:maxLines="5"
             android:ellipsize="end"
             android:paddingBottom="0dp"
             android:paddingTop="0dp"
@@ -574,7 +641,7 @@
             tools:text="A"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="5"
             android:layout_gravity="center"
             android:gravity="center_vertical|start"
             android:textAlignment="viewStart"
@@ -647,7 +714,7 @@
             tools:text="B"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="5"
             android:layout_gravity="center"
             android:gravity="center_vertical|start"
             android:textAlignment="viewStart"
@@ -720,7 +787,7 @@
             tools:text="C"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="5"
             android:layout_gravity="center"
             android:gravity="center_vertical|start"
             android:textAlignment="viewStart"
@@ -791,7 +858,7 @@
             android:layout_height="wrap_content"
             android:gravity="center_vertical|start"
             android:textAlignment="viewStart"
-            android:maxLines="2"
+            android:maxLines="20"
             android:ellipsize="end"
             android:paddingBottom="0dp"
             android:paddingTop="0dp"
@@ -813,7 +880,7 @@
         android:layout_marginTop="4sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/description_parent"
-        app:layout_constraintBottom_toTopOf="@id/plugin_item_info_first_install_time_parent"
+        app:layout_constraintBottom_toTopOf="@id/plugin_item_info_supported_abis_parent"
         app:layout_constraintEnd_toEndOf="parent">
 
         <androidx.constraintlayout.widget.Guideline
@@ -872,6 +939,73 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/plugin_item_info_supported_abis_parent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/ref_md_dialog_frame_margin"
+        android:layout_marginStart="@dimen/ref_md_listitem_margin_left"
+        android:layout_marginTop="4sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/plugin_item_info_package_size_parent"
+        app:layout_constraintBottom_toTopOf="@id/plugin_item_info_first_install_time_parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/plugin_item_info_supported_abis_guideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_begin="100dp" />
+
+        <TextView
+            android:id="@+id/plugin_item_info_supported_abis_label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical|start"
+            android:textAlignment="viewStart"
+            android:text="@string/plugin_item_info_supported_abis"
+            android:lineSpacingExtra="2dp"
+            android:textSize="@dimen/ref_md_listitem_textsize"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/plugin_item_info_supported_abis_guideline" />
+
+        <TextView
+            android:id="@+id/plugin_item_info_supported_abis_colon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical|start"
+            android:textAlignment="viewStart"
+            android:layout_marginHorizontal="4sp"
+            android:text="@string/symbol_colon"
+            android:textSize="@dimen/ref_md_listitem_textsize"
+            app:layout_constraintStart_toEndOf="@id/plugin_item_info_supported_abis_label"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/plugin_item_info_supported_abis_value" />
+
+        <TextView
+            android:id="@+id/plugin_item_info_supported_abis_value"
+            android:text="@string/ellipsis_six"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical|start"
+            android:textAlignment="viewStart"
+            android:maxLines="3"
+            android:ellipsize="end"
+            android:paddingBottom="0dp"
+            android:paddingTop="0dp"
+            android:lineSpacingExtra="2dp"
+            android:textSize="@dimen/ref_md_listitem_textsize"
+            app:layout_constraintStart_toEndOf="@id/plugin_item_info_supported_abis_colon"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/plugin_item_info_first_install_time_parent"
         android:visibility="gone"
         tools:visibility="visible"
@@ -881,7 +1015,7 @@
         android:layout_marginStart="@dimen/ref_md_listitem_margin_left"
         android:layout_marginTop="4sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/plugin_item_info_package_size_parent"
+        app:layout_constraintTop_toBottomOf="@id/plugin_item_info_supported_abis_parent"
         app:layout_constraintBottom_toTopOf="@id/plugin_item_info_last_update_time_parent"
         app:layout_constraintEnd_toEndOf="parent">
 

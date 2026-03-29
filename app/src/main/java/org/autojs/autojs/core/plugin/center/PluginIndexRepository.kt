@@ -1,12 +1,14 @@
 package org.autojs.autojs.core.plugin.center
 
 import android.content.Context
+import android.content.res.Configuration
 import android.util.Log
 import androidx.core.net.toUri
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.core.pref.Language
 import org.autojs.autojs.util.AndroidUtils
+import org.autojs.autojs.util.StringUtils.truncateForSafeBinder
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import org.json.JSONArray
@@ -17,11 +19,12 @@ import java.net.URL
 import java.nio.charset.StandardCharsets
 import kotlin.math.max
 
+@Suppress("SameParameterValue")
 class PluginIndexRepository {
 
     companion object {
         private const val TAG = "PluginIndexRepository"
-        private const val CACHE_FILE_NAME = "autojs6_plugin_index_v2.json"
+        private const val CACHE_FILE_NAME = "autojs6_plugin_index_v5.json"
 
         private const val OFFICIAL_OWNER = "SuperMonster003"
         private const val OFFICIAL_REPO_PREFIX = "AutoJs6-Plugin-"
@@ -38,24 +41,57 @@ class PluginIndexRepository {
 
     @Volatile
     private var memoryCache: List<PluginIndexEntry>? = null
+    @Volatile
+    private var memoryFetchedSources: Set<PluginIndexSource>? = null
+    @Volatile
+    private var memoryLanguageTag: String? = null
 
     suspend fun fetchOnlineIndex(
         context: Context,
         forceRefresh: Boolean,
         enabledSources: Set<PluginIndexSource>,
     ): List<PluginIndexEntry> = withContext(Dispatchers.IO) {
-        val cacheFile = File(context.cacheDir, CACHE_FILE_NAME)
-        val cachedAll = memoryCache ?: readCacheSafely(cacheFile).also { parsed ->
-            if (parsed != null) {
-                memoryCache = parsed
+        val currentLanguageTag = normalizeLanguageTag(Language.getPrefLanguage().getLocalCompatibleLanguageTag()) ?: "en"
+        val cacheFile = resolveCacheFile(context)
+        val cacheSnapshot = when {
+            memoryCache != null && memoryFetchedSources != null -> CacheSnapshot(
+                entries = memoryCache.orEmpty(),
+                fetchedSources = memoryFetchedSources.orEmpty(),
+                languageTag = memoryLanguageTag,
+            )
+            else -> readCacheSafely(cacheFile)?.also { parsed ->
+                memoryCache = parsed.entries
+                memoryFetchedSources = parsed.fetchedSources
+                memoryLanguageTag = parsed.languageTag
+            }
+        }
+        val cachedAll = cacheSnapshot?.entries
+        val cachedFetchedSources = cacheSnapshot?.fetchedSources ?: memoryFetchedSources.orEmpty()
+        val cachedLanguageTag = cacheSnapshot?.languageTag ?: memoryLanguageTag
+        val hasLanguageMismatch = cachedAll != null && !isSameLanguageTag(cachedLanguageTag, currentLanguageTag)
+        val now = System.currentTimeMillis()
+
+        if (!forceRefresh) {
+            cachedAll?.let {
+                val missingSources = enabledSources - cachedFetchedSources
+                val hasOfficialAbiGaps = hasOfficialAbiGaps(it, enabledSources)
+                if (missingSources.isEmpty() && !hasOfficialAbiGaps && !hasLanguageMismatch) {
+                    return@withContext filterBySource(it, enabledSources)
+                }
+                if (missingSources.isEmpty() && hasOfficialAbiGaps && !hasLanguageMismatch && now - lastNetworkFetchAttemptMs < 60_000L) {
+                    Log.i(TAG, "Cache has official ABI gaps, but refresh attempted recently. Use cache.")
+                    return@withContext filterBySource(it, enabledSources)
+                }
+                Log.i(TAG, "Cache missing sources $missingSources, try online fetch once.")
+                if (missingSources.isEmpty() && hasOfficialAbiGaps) {
+                    Log.i(TAG, "Cache has official entries with unknown ABI, try online fetch once.")
+                }
+                if (hasLanguageMismatch) {
+                    Log.i(TAG, "Plugin index cache language changed: $cachedLanguageTag -> $currentLanguageTag, try online fetch once.")
+                }
             }
         }
 
-        if (!forceRefresh) {
-            cachedAll?.let { return@withContext filterBySource(it, enabledSources) }
-        }
-
-        val now = System.currentTimeMillis()
         if (forceRefresh && cachedAll != null && now - lastNetworkFetchAttemptMs < 15_000L) {
             Log.i(TAG, "Skip too-frequent force refresh (<15s), use cache.")
             return@withContext filterBySource(cachedAll, enabledSources)
@@ -69,37 +105,61 @@ class PluginIndexRepository {
 
         val cachedBySource = cachedAll.orEmpty().groupBy { it.source }
         val freshBySource = linkedMapOf<PluginIndexSource, List<PluginIndexEntry>>()
+        val fetchedFromNetworkBySource = linkedMapOf<PluginIndexSource, Boolean>()
 
         if (PluginIndexSource.OFFICIAL in enabledSources) {
-            val entries = runCatching {
-                fetchOfficialEntries(context)
+            val fetchResult = runCatching {
+                fetchOfficialEntries(context, currentLanguageTag)
             }.onFailure { e ->
                 Log.w(TAG, "Failed to fetch official plugin index: ${e.message}")
-            }.getOrElse {
+            }
+            fetchedFromNetworkBySource[PluginIndexSource.OFFICIAL] = fetchResult.isSuccess
+            val entriesFresh = fetchResult.getOrElse {
                 cachedBySource[PluginIndexSource.OFFICIAL].orEmpty()
             }
+            val entries = stabilizeEntriesWithCache(
+                fresh = entriesFresh,
+                cached = cachedBySource[PluginIndexSource.OFFICIAL].orEmpty(),
+            )
             freshBySource[PluginIndexSource.OFFICIAL] = entries
         }
 
         if (PluginIndexSource.THIRD_PARTY in enabledSources) {
-            val entries = runCatching {
-                fetchThirdPartyEntries(context)
+            val fetchResult = runCatching {
+                fetchThirdPartyEntries(context, currentLanguageTag)
             }.onFailure { e ->
                 Log.w(TAG, "Failed to fetch third-party plugin index: ${e.message}")
-            }.getOrElse {
+            }
+            fetchedFromNetworkBySource[PluginIndexSource.THIRD_PARTY] = fetchResult.isSuccess
+            val entriesFresh = fetchResult.getOrElse {
                 cachedBySource[PluginIndexSource.THIRD_PARTY].orEmpty()
             }
+            val entries = stabilizeEntriesWithCache(
+                fresh = entriesFresh,
+                cached = cachedBySource[PluginIndexSource.THIRD_PARTY].orEmpty(),
+            )
             freshBySource[PluginIndexSource.THIRD_PARTY] = entries
         }
 
         val resultForSelected = freshBySource.values.flatten()
         val untouched = cachedAll.orEmpty().filterNot { it.source in enabledSources }
         val finalAll = (resultForSelected + untouched).distinctBy { "${it.source}:${it.packageName}" }
-
-        if (finalAll.isNotEmpty()) {
-            memoryCache = finalAll
-            writeCache(cacheFile, finalAll)
+        val fetchedThisRound = enabledSources.filterTo(linkedSetOf()) { source ->
+            val entries = freshBySource[source].orEmpty()
+            entries.isNotEmpty() || source in cachedFetchedSources
         }
+        val finalFetchedSources = cachedFetchedSources + fetchedThisRound
+        val allEnabledSourcesFetchedFromNetwork = enabledSources.all { fetchedFromNetworkBySource[it] == true }
+        val finalLanguageTag = when {
+            !hasLanguageMismatch -> currentLanguageTag
+            allEnabledSourcesFetchedFromNetwork -> currentLanguageTag
+            else -> cachedLanguageTag
+        }
+
+        memoryCache = finalAll
+        memoryFetchedSources = finalFetchedSources
+        memoryLanguageTag = finalLanguageTag
+        writeCache(cacheFile, finalAll, finalFetchedSources, finalLanguageTag)
 
         val fallback = memoryCache ?: cachedAll.orEmpty()
         return@withContext filterBySource(fallback, enabledSources)
@@ -115,8 +175,54 @@ class PluginIndexRepository {
         return source.filter { it.source in enabledSources }
     }
 
-    private fun fetchOfficialEntries(context: Context): List<PluginIndexEntry> {
-        val languageTag = Language.getPrefLanguage().getLocalCompatibleLanguageTag()
+    private fun hasOfficialAbiGaps(
+        entries: List<PluginIndexEntry>,
+        enabledSources: Set<PluginIndexSource>,
+    ): Boolean {
+        if (PluginIndexSource.OFFICIAL !in enabledSources) return false
+        return entries.any { it.source == PluginIndexSource.OFFICIAL && it.supportedAbis == null }
+    }
+
+    private fun stabilizeEntriesWithCache(
+        fresh: List<PluginIndexEntry>,
+        cached: List<PluginIndexEntry>,
+    ): List<PluginIndexEntry> {
+        if (fresh.isEmpty()) return cached
+        if (cached.isEmpty()) return fresh
+        val cachedByPackage = cached.associateBy { it.packageName }
+        val mergedFresh = fresh.map { entry ->
+            val cachedEntry = cachedByPackage[entry.packageName] ?: return@map entry
+            val stableTitle = when {
+                entry.title.isBlank() -> cachedEntry.title
+                isLikelyVersionLike(entry.title) && cachedEntry.title.isNotBlank() -> cachedEntry.title
+                else -> entry.title
+            }
+            entry.copy(
+                title = stableTitle,
+                iconUrl = entry.iconUrl ?: cachedEntry.iconUrl,
+                description = entry.description ?: cachedEntry.description,
+                author = entry.author ?: cachedEntry.author,
+                instructionHardCoded = entry.instructionHardCoded ?: cachedEntry.instructionHardCoded,
+                instructionMarkdownUrl = entry.instructionMarkdownUrl ?: cachedEntry.instructionMarkdownUrl,
+                collaborators = entry.collaborators.ifEmpty { cachedEntry.collaborators },
+                releases = entry.releases.ifEmpty { cachedEntry.releases },
+                supportedAbis = entry.supportedAbis ?: cachedEntry.supportedAbis,
+                tags = entry.tags.ifEmpty { cachedEntry.tags },
+                requiresHostVersion = entry.requiresHostVersion ?: cachedEntry.requiresHostVersion,
+                engine = entry.engine ?: cachedEntry.engine,
+                variant = entry.variant ?: cachedEntry.variant,
+                engineId = entry.engineId ?: cachedEntry.engineId,
+            )
+        }
+        val freshPackages = mergedFresh.mapTo(linkedSetOf()) { it.packageName }
+        val keepCachedMissing = cached.filterNot { it.packageName in freshPackages }
+        return mergedFresh + keepCachedMissing
+    }
+
+    private fun fetchOfficialEntries(
+        context: Context,
+        languageTag: String,
+    ): List<PluginIndexEntry> {
         val repos = fetchOfficialRepoConfigs(context)
         if (repos.isEmpty()) {
             Log.w(TAG, "No official plugin repository found with prefix: $OFFICIAL_REPO_PREFIX")
@@ -161,16 +267,19 @@ class PluginIndexRepository {
         context: Context,
         plugin: OfficialPluginConfig,
         languageTag: String,
-    ): PluginIndexEntry? {
+    ): PluginIndexEntry {
         val releaseJson = getJsonObject(
             context = context,
             url = "https://api.github.com/repos/${plugin.owner}/${plugin.repo}/releases/latest",
         )
-        val releaseAssets = parseReleaseAssets(releaseJson.optJSONArray("assets"))
+        val releaseAssetsJson = releaseJson.optJSONArray("assets")
+        val releaseAssets = parseReleaseAssets(releaseAssetsJson)
+        val supportedAbis = parseSupportedAbisFromReleaseAssets(releaseAssetsJson)
         val selectedAsset = pickAssetByAbiOrFallback(releaseAssets)
         val releaseBody = releaseJson.optString("body").takeIf { it.isNotBlank() }
         val publishedDate = releaseJson.optString("published_at").takeIf { it.length >= 10 }?.substring(0, 10)
         val releaseAuthor = releaseJson.optJSONObject("author")?.optString("login")?.takeIf { it.isNotBlank() }
+        val releaseName = releaseJson.optString("name").substringBefore(" @").trim()
 
         val versionProperties = runCatching {
             getText(
@@ -209,7 +318,16 @@ class PluginIndexRepository {
             )
         }.getOrNull()
 
-        val repoTreePaths = emptySet<String>()
+        val repoTreePaths = runCatching {
+            fetchRepoTreePaths(
+                context = context,
+                owner = plugin.owner,
+                repo = plugin.repo,
+                branch = plugin.branch,
+            )
+        }.onFailure {
+            Log.w(TAG, "Failed to fetch tree for ${plugin.repo}: ${it.message}")
+        }.getOrElse { emptySet() }
 
         val unknown = context.getString(R.string.text_unknown)
         val packageName = parseManifestPackageName(manifestText)
@@ -217,12 +335,21 @@ class PluginIndexRepository {
             ?: "unknown.${plugin.repo.lowercase().replace(Regex("[^a-z0-9._-]"), "-")}"
 
         val title = parseManifestApplicationLabel(manifestText)
-            ?: releaseJson.optString("name").substringBefore(" @").takeIf { it.isNotBlank() }
             ?: plugin.repo.removePrefix(OFFICIAL_REPO_PREFIX).takeIf { it.isNotBlank() }
+            ?: releaseName.takeIf { it.isNotBlank() && !isLikelyVersionLike(it) }
+            ?: releaseName.takeIf { it.isNotBlank() }
             ?: unknown
 
         val iconRef = parseManifestApplicationIcon(manifestText)
-        val iconPath = resolveIconPath(iconRef, repoTreePaths.orEmpty())
+        val iconPath = resolveIconPath(iconRef, repoTreePaths)
+            ?: resolveIconPathWithoutTreeProbe(
+                context = context,
+                owner = plugin.owner,
+                repo = plugin.repo,
+                branch = plugin.branch,
+                iconRef = iconRef,
+            )
+            ?: resolveOfficialFallbackIconPath(repoTreePaths)
         val iconUrl = iconPath?.let {
             rawGithubUrl(
                 owner = plugin.owner,
@@ -238,7 +365,7 @@ class PluginIndexRepository {
             repo = plugin.repo,
             branch = plugin.branch,
             languageTag = languageTag,
-            treePaths = repoTreePaths.orEmpty(),
+            treePaths = repoTreePaths,
         ) ?: unknown
 
         val author = parseManifestAuthor(manifestText)
@@ -252,7 +379,7 @@ class PluginIndexRepository {
         val versionCode = versionMap["VERSION_BUILD"]?.toLongOrNull()
             ?: 0L
 
-        val changelogPath = resolveOfficialChangelogPath(languageTag, repoTreePaths.orEmpty())
+        val changelogPath = resolveOfficialChangelogPath(languageTag, repoTreePaths)
         val changelogUrl = changelogPath?.let {
             rawGithubUrl(
                 owner = plugin.owner,
@@ -280,16 +407,17 @@ class PluginIndexRepository {
             description = description,
             author = author,
             collaborators = emptyList(),
-            engine = null,
-            variant = null,
-            engineId = null,
             releases = listOf(release),
+            supportedAbis = supportedAbis,
             tags = listOf("official"),
             source = PluginIndexSource.OFFICIAL,
         )
     }
 
-    private fun fetchThirdPartyEntries(context: Context): List<PluginIndexEntry> {
+    private fun fetchThirdPartyEntries(
+        context: Context,
+        languageTag: String,
+    ): List<PluginIndexEntry> {
         val treeJson = getJsonObject(
             context = context,
             url = "https://api.github.com/repos/$THIRD_PARTY_OWNER/$THIRD_PARTY_REPO/git/trees/$THIRD_PARTY_BRANCH?recursive=1",
@@ -297,16 +425,19 @@ class PluginIndexRepository {
         val treeArray = treeJson.optJSONArray("tree") ?: JSONArray()
 
         val candidates = mutableListOf<GarageApk>()
+        val treePathsByPackage = linkedMapOf<String, MutableSet<String>>()
         for (i in 0 until treeArray.length()) {
             val node = treeArray.optJSONObject(i) ?: continue
             if (node.optString("type") != "blob") continue
 
             val path = node.optString("path")
-            if (!path.endsWith(".apk", ignoreCase = true)) continue
             if (!path.contains('/')) continue
 
             val packageName = path.substringBefore('/').trim()
             if (packageName.isBlank()) continue
+            treePathsByPackage.getOrPut(packageName) { linkedSetOf() }.add(path)
+
+            if (!path.endsWith(".apk", ignoreCase = true)) continue
 
             val fileName = path.substringAfterLast('/')
             val parsed = parseGarageApkFileName(fileName) ?: continue
@@ -333,17 +464,58 @@ class PluginIndexRepository {
                 )
             }
 
-        return latestByPackage.map { apk ->
+        return latestByPackage
+            .sortedBy { it.packageName.lowercase() }
+            .map { apk ->
+            val treePaths = treePathsByPackage[apk.packageName].orEmpty()
+            val indexConfig = resolveGarageIndexConfig(
+                context = context,
+                packageName = apk.packageName,
+                versionCode = apk.versionCode,
+                treePaths = treePaths,
+            )
+            val iconUrl = resolveGarageIconPath(context, apk.packageName, treePaths)?.let { path ->
+                rawGithubUrl(
+                    owner = THIRD_PARTY_OWNER,
+                    repo = THIRD_PARTY_REPO,
+                    branch = THIRD_PARTY_BRANCH,
+                    path = path,
+                ).toUri()
+            }
+            val description = resolveGarageDescription(
+                context = context,
+                packageName = apk.packageName,
+                languageTag = languageTag,
+                treePaths = treePaths,
+                fallback = indexConfig.description,
+            )
+            val instructionMarkdownUrl = resolveGarageInstructionMarkdownUrl(
+                packageName = apk.packageName,
+                languageTag = languageTag,
+                treePaths = treePaths,
+            )
+            val instructionHardCoded = indexConfig.instruction?.truncateForSafeBinder()
+
+            val effectiveVersionName = indexConfig.versionName
+                ?.takeIf { it.isNotBlank() }
+                ?: apk.versionName
+            val effectiveVersionDate = indexConfig.versionDate
+                ?.takeIf { it.isNotBlank() }
+
             PluginIndexEntry(
                 packageName = apk.packageName,
-                title = apk.originalName,
-                description = "[ ${context.getString(R.string.text_unknown_description_for_plugin)} ]",
-                author = null,
+                iconUrl = iconUrl,
+                forceIgnoreLocalIcon = indexConfig.forceIgnoreLocalIcon,
+                title = indexConfig.name?.takeIf { it.isNotBlank() } ?: apk.originalName,
+                description = description,
+                instructionHardCoded = instructionHardCoded,
+                instructionMarkdownUrl = instructionMarkdownUrl,
+                author = indexConfig.author,
                 releases = listOf(
                     PluginIndexRelease(
-                        versionName = apk.versionName,
+                        versionName = effectiveVersionName,
                         versionCode = apk.versionCode,
-                        versionDate = null,
+                        versionDate = effectiveVersionDate,
                         apkUrl = apk.downloadUrl,
                         apkSha256 = null,
                         apkSizeBytes = apk.size,
@@ -351,10 +523,235 @@ class PluginIndexRepository {
                         changelogText = context.getString(R.string.text_no_release_notes),
                     ),
                 ),
+                supportedAbis = indexConfig.supportedAbis,
                 tags = listOf("third-party"),
+                requiresHostVersion = indexConfig.requiresHostVersion,
                 source = PluginIndexSource.THIRD_PARTY,
             )
         }
+    }
+
+    private fun fetchRepoTreePaths(
+        context: Context,
+        owner: String,
+        repo: String,
+        branch: String,
+    ): Set<String> {
+        val treeJson = getJsonObject(
+            context = context,
+            url = "https://api.github.com/repos/$owner/$repo/git/trees/$branch?recursive=1",
+        )
+        if (treeJson.optBoolean("truncated", false)) {
+            Log.w(TAG, "Git tree is truncated for $owner/$repo@$branch")
+        }
+        val treeArray = treeJson.optJSONArray("tree") ?: return emptySet()
+        val paths = linkedSetOf<String>()
+        for (i in 0 until treeArray.length()) {
+            val node = treeArray.optJSONObject(i) ?: continue
+            if (node.optString("type") != "blob") continue
+            val path = node.optString("path").trim()
+            if (path.isBlank()) continue
+            paths += path
+        }
+        return paths
+    }
+
+    private fun resolveGarageIndexConfig(
+        context: Context,
+        packageName: String,
+        versionCode: Long,
+        treePaths: Set<String>,
+    ): GarageIndexConfig {
+        val indexPath = "$packageName/index.json"
+        if (indexPath !in treePaths) {
+            return GarageIndexConfig()
+        }
+        val content = runCatching {
+            getText(
+                context = context,
+                url = rawGithubUrl(
+                    owner = THIRD_PARTY_OWNER,
+                    repo = THIRD_PARTY_REPO,
+                    branch = THIRD_PARTY_BRANCH,
+                    path = indexPath,
+                ),
+                accept = "application/json",
+            )
+        }.getOrNull() ?: return GarageIndexConfig()
+        return parseGarageIndexConfig(content, versionCode)
+    }
+
+    private fun parseGarageIndexConfig(json: String, versionCode: Long): GarageIndexConfig {
+        val root = runCatching { JSONObject(json) }.getOrNull() ?: return GarageIndexConfig()
+        val byVersion = root.optJSONObject(versionCode.toString())
+        val defaults = root.optJSONObject("0")
+
+        fun selectString(key: String): String? {
+            val fromVersion = byVersion?.optString(key)?.trim()?.takeIf { it.isNotBlank() }
+            if (fromVersion != null) return fromVersion
+            return defaults?.optString(key)?.trim()?.takeIf { it.isNotBlank() }
+        }
+        fun selectBoolean(key: String): Boolean? {
+            parseBooleanValue(byVersion?.opt(key))?.let { return it }
+            return parseBooleanValue(defaults?.opt(key))
+        }
+
+        val capabilities = byVersion?.optJSONObject("capabilities")
+            ?: defaults?.optJSONObject("capabilities")
+        val supportedAbis = parseSupportedAbisFromGarageConfig(
+            byVersion = byVersion,
+            defaults = defaults,
+            capabilities = capabilities,
+        )
+        return GarageIndexConfig(
+            name = selectString("name"),
+            author = selectString("author"),
+            description = selectString("description"),
+            instruction = selectString("instruction"),
+            versionName = selectString("versionName"),
+            versionDate = selectString("versionDate"),
+            requiresHostVersion = PluginCapabilityResolver.resolveRequiresHostVersion(capabilities),
+            forceIgnoreLocalIcon = selectBoolean("forceIgnoreLocalIcon")
+                ?: selectBoolean("preferRemoteIcon")
+                ?: false,
+            supportedAbis = supportedAbis,
+        )
+    }
+
+    private fun parseSupportedAbisFromGarageConfig(
+        byVersion: JSONObject?,
+        defaults: JSONObject?,
+        capabilities: JSONObject?,
+    ): List<String>? {
+        val keys = listOf("supportedAbis", "abis", "abi")
+        listOf(byVersion, defaults, capabilities).forEach { source ->
+            if (source == null) return@forEach
+            keys.forEach { key ->
+                if (!source.has(key)) return@forEach
+                val resolved = PluginAbiUtils.resolveSupportedAbisFromValue(source.opt(key))
+                if (resolved != null) {
+                    return resolved
+                }
+            }
+        }
+        return null
+    }
+
+    private fun parseBooleanValue(value: Any?): Boolean? = when (value) {
+        is Boolean -> value
+        is Number -> value.toInt() != 0
+        is String -> when (value.trim().lowercase()) {
+            "1", "true", "yes", "y", "on" -> true
+            "0", "false", "no", "n", "off" -> false
+            else -> null
+        }
+        else -> null
+    }
+
+    private fun resolveGarageDescription(
+        context: Context,
+        packageName: String,
+        languageTag: String,
+        treePaths: Set<String>,
+        fallback: String?,
+    ): String? {
+        val languageDirs = languageTagToAndroidResourceDirs(languageTag)
+        val candidatePaths = languageDirs.map { "$packageName/res/$it/strings.xml" }
+        candidatePaths.forEach { path ->
+            if (path !in treePaths) return@forEach
+            val text = runCatching {
+                getText(
+                    context = context,
+                    url = rawGithubUrl(
+                        owner = THIRD_PARTY_OWNER,
+                        repo = THIRD_PARTY_REPO,
+                        branch = THIRD_PARTY_BRANCH,
+                        path = path,
+                    ),
+                )
+            }.getOrNull() ?: return@forEach
+            parseStringResource(text, "plugin_description")?.let { return it }
+        }
+        return fallback
+    }
+
+    private fun resolveGarageInstructionMarkdownUrl(
+        packageName: String,
+        languageTag: String,
+        treePaths: Set<String>,
+    ): String? {
+        val rawDirs = languageTagToAndroidResourceDirs(languageTag)
+            .map { it.replaceFirst("values", "raw") }
+            .toMutableList()
+            .apply { add("raw") }
+            .distinct()
+        val candidatePaths = rawDirs.map { "$packageName/res/$it/plugin_instruction.md" }
+        candidatePaths.forEach { path ->
+            if (path !in treePaths) return@forEach
+            return rawGithubUrl(
+                owner = THIRD_PARTY_OWNER,
+                repo = THIRD_PARTY_REPO,
+                branch = THIRD_PARTY_BRANCH,
+                path = path,
+            )
+        }
+        return null
+    }
+
+    private fun resolveGarageIconPath(
+        context: Context,
+        packageName: String,
+        treePaths: Set<String>,
+    ): String? {
+        val names = listOf("ic_launcher", "ic_launcher_round", "plugin_icon")
+        val exts = listOf("png", "webp", "jpg", "jpeg")
+
+        if (isNightModeEnabled(context)) {
+            val nightDirs = listOf(
+                "$packageName/res/mipmap-night",
+                "$packageName/res/drawable-night",
+            )
+            nightDirs.forEach { dir ->
+                names.forEach { name ->
+                    exts.forEach { ext ->
+                        val candidate = "$dir/$name.$ext"
+                        if (candidate in treePaths) {
+                            return candidate
+                        }
+                    }
+                }
+            }
+        }
+
+        val dirs = listOf(
+            "$packageName/res/mipmap",
+            "$packageName/res/mipmap-anydpi-v26",
+            "$packageName/res/mipmap-xxxhdpi",
+            "$packageName/res/mipmap-xxhdpi",
+            "$packageName/res/mipmap-xhdpi",
+            "$packageName/res/mipmap-hdpi",
+            "$packageName/res/mipmap-mdpi",
+            "$packageName/res/drawable",
+            "$packageName/res/drawable-anydpi-v26",
+            "$packageName/res/drawable-xxxhdpi",
+            "$packageName/res/drawable-xxhdpi",
+            "$packageName/res/drawable-xhdpi",
+            "$packageName/res/drawable-hdpi",
+            "$packageName/res/drawable-mdpi",
+        )
+        return dirs.firstNotNullOfOrNull { dir ->
+            names.firstNotNullOfOrNull { name ->
+                exts.firstNotNullOfOrNull { ext ->
+                    val candidate = "$dir/$name.$ext"
+                    candidate.takeIf { it in treePaths }
+                }
+            }
+        }
+    }
+
+    private fun isNightModeEnabled(context: Context): Boolean {
+        val mode = context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        return mode == Configuration.UI_MODE_NIGHT_YES
     }
 
     private fun parseReleaseAssets(array: JSONArray?): List<ReleaseAsset> {
@@ -372,6 +769,21 @@ class PluginIndexRepository {
             list += ReleaseAsset(name = name, downloadUrl = url, size = size, sha256 = sha256)
         }
         return list
+    }
+
+    private fun parseSupportedAbisFromReleaseAssets(array: JSONArray?): List<String>? {
+        if (array == null) return null
+        var hasAnyAssetName = false
+        val foundSpecific = linkedSetOf<String>()
+        for (i in 0 until array.length()) {
+            val obj = array.optJSONObject(i) ?: continue
+            val name = obj.optString("name").takeIf { it.isNotBlank() } ?: continue
+            hasAnyAssetName = true
+            val parsed = PluginAbiUtils.parseSupportedAbisFromText(name)
+            foundSpecific += parsed.filterNot { it == PluginAbiUtils.ABI_UNIVERSAL }
+        }
+        if (!hasAnyAssetName) return null
+        return PluginAbiUtils.normalizeAbiList(foundSpecific).takeIf { it.isNotEmpty() }
     }
 
     private fun pickAssetByAbiOrFallback(assets: List<ReleaseAsset>): ReleaseAsset? {
@@ -419,9 +831,31 @@ class PluginIndexRepository {
     }
 
     private fun resolveIconPath(iconRef: String?, treePaths: Set<String>): String? {
-        if (iconRef.isNullOrBlank() || !iconRef.startsWith("@")) return null
+        val candidates = buildIconCandidates(iconRef)
+        if (candidates.isEmpty() || treePaths.isEmpty()) return null
+        return candidates.firstOrNull { it in treePaths }
+    }
+
+    private fun resolveIconPathWithoutTreeProbe(
+        context: Context,
+        owner: String,
+        repo: String,
+        branch: String,
+        iconRef: String?,
+    ): String? {
+        val candidates = buildIconCandidates(iconRef)
+        if (candidates.isEmpty()) return null
+
+        return candidates.firstOrNull { candidate ->
+            val url = rawGithubUrl(owner = owner, repo = repo, branch = branch, path = candidate)
+            isRawFileAvailable(context, url)
+        }
+    }
+
+    private fun buildIconCandidates(iconRef: String?): List<String> {
+        if (iconRef.isNullOrBlank() || !iconRef.startsWith("@")) return emptyList()
         val type = iconRef.substringAfter("@").substringBefore("/")
-        val name = iconRef.substringAfter("/").ifBlank { return null }
+        val name = iconRef.substringAfter("/").ifBlank { return emptyList() }
 
         val dirs = linkedSetOf(
             "app/src/main/res/$type",
@@ -439,21 +873,55 @@ class PluginIndexRepository {
             "app/src/main/res/drawable-mdpi",
         )
         val exts = listOf("png", "webp", "jpg", "jpeg")
+        return dirs.flatMap { dir -> exts.map { ext -> "$dir/$name.$ext" } }
+    }
 
-        if (treePaths.isEmpty()) {
-            return dirs.firstNotNullOfOrNull { dir ->
-                exts.firstNotNullOfOrNull { ext ->
-                    "$dir/$name.$ext"
-                }
-            }
+    private fun isRawFileAvailable(context: Context, url: String): Boolean {
+        val conn = (URL(url).openConnection() as HttpURLConnection).apply {
+            requestMethod = "HEAD"
+            connectTimeout = 5_000
+            readTimeout = 5_000
+            setRequestProperty("Accept", "*/*")
+            setRequestProperty("User-Agent", "${context.getString(R.string.app_name)}/${BuildConfig.VERSION_NAME} (PluginCenter)")
         }
+        return try {
+            conn.connect()
+            conn.responseCode in 200..299
+        } catch (_: Throwable) {
+            false
+        } finally {
+            conn.disconnect()
+        }
+    }
 
-        return dirs.firstNotNullOfOrNull { dir ->
-            exts.firstNotNullOfOrNull { ext ->
-                val candidate = "$dir/$name.$ext"
-                candidate.takeIf { it in treePaths }
-            }
-        }
+    private fun resolveOfficialFallbackIconPath(treePaths: Set<String>): String? {
+        if (treePaths.isEmpty()) return null
+        val imagePathRegex = Regex(
+            """^app/src/main/res/(?:drawable(?:-[^/]+)?|mipmap(?:-[^/]+)?)/[^/]+\.(?:png|webp|jpg|jpeg)$""",
+            RegexOption.IGNORE_CASE,
+        )
+        return treePaths
+            .asSequence()
+            .filter { imagePathRegex.matches(it) }
+            .sortedWith(
+                compareBy<String> { scoreIconPath(it) }
+                    .thenBy { it.length }
+                    .thenBy { it },
+            )
+            .firstOrNull()
+    }
+
+    private fun scoreIconPath(path: String): Int {
+        val lowerPath = path.lowercase()
+        val fileName = lowerPath.substringAfterLast('/')
+        var score = 100
+        if ("/drawable" in lowerPath) score -= 20
+        if (fileName.startsWith("ic_plugin")) score -= 70
+        else if (fileName.startsWith("ic_launcher")) score -= 60
+        else if ("plugin" in fileName) score -= 45
+        else if ("logo" in fileName) score -= 35
+        else if ("icon" in fileName) score -= 20
+        return score
     }
 
     private fun resolveOfficialDescription(
@@ -584,6 +1052,12 @@ class PluginIndexRepository {
             }
     }
 
+    private fun isLikelyVersionLike(value: String): Boolean {
+        val text = value.trim()
+        if (text.isBlank()) return false
+        return Regex("""^[vV]?\d+(?:\.\d+){1,4}(?:[-+._][A-Za-z0-9]+)*$""").matches(text)
+    }
+
     private fun parseGarageApkFileName(fileName: String): GarageParsedName? {
         if (!fileName.endsWith(".apk", ignoreCase = true)) return null
         val base = fileName.removeSuffix(".apk")
@@ -617,6 +1091,22 @@ class PluginIndexRepository {
 
     private fun getJsonArray(context: Context, url: String): JSONArray =
         JSONArray(getText(context, url, "application/json"))
+
+    private fun resolveCacheFile(context: Context): File {
+        val persistentDir = File(context.filesDir, "plugin_center").apply { mkdirs() }
+        val persistentFile = File(persistentDir, CACHE_FILE_NAME)
+        if (!persistentFile.exists()) {
+            val legacyCacheFile = File(context.cacheDir, CACHE_FILE_NAME)
+            if (legacyCacheFile.exists() && legacyCacheFile.canRead()) {
+                runCatching {
+                    legacyCacheFile.copyTo(persistentFile, overwrite = true)
+                }.onFailure {
+                    Log.w(TAG, "Failed to migrate plugin index cache: ${it.message}")
+                }
+            }
+        }
+        return persistentFile
+    }
 
     private fun getText(
         context: Context,
@@ -674,29 +1164,41 @@ class PluginIndexRepository {
         }
     }
 
-    private fun readCacheSafely(file: File): List<PluginIndexEntry>? =
+    private fun readCacheSafely(file: File): CacheSnapshot? =
         runCatching {
             if (!file.exists() || !file.canRead()) return null
             val text = file.readText()
             parseCacheJson(text)
         }.getOrNull()
 
-    private fun writeCache(file: File, entries: List<PluginIndexEntry>) {
+    private fun writeCache(
+        file: File,
+        entries: List<PluginIndexEntry>,
+        fetchedSources: Set<PluginIndexSource>,
+        languageTag: String?,
+    ) {
         runCatching {
             val root = JSONObject()
+            root.put("languageTag", languageTag ?: JSONObject.NULL)
             val items = JSONArray()
             entries.forEach { entry ->
                 val obj = JSONObject()
                 obj.put("packageName", entry.packageName)
                 obj.put("iconUrl", entry.iconUrl?.toString())
+                obj.put("forceIgnoreLocalIcon", entry.forceIgnoreLocalIcon)
                 obj.put("title", entry.title)
                 obj.put("description", entry.description)
+                obj.put("instructionHardCoded", entry.instructionHardCoded)
+                obj.put("instructionMarkdownUrl", entry.instructionMarkdownUrl)
                 obj.put("author", entry.author)
                 obj.put("collaborators", JSONArray(entry.collaborators))
-                obj.put("engine", entry.engine)
-                obj.put("variant", entry.variant)
-                obj.put("engineId", entry.engineId)
+                if (entry.supportedAbis == null) {
+                    obj.put("supportedAbis", JSONObject.NULL)
+                } else {
+                    obj.put("supportedAbis", JSONArray(entry.supportedAbis))
+                }
                 obj.put("tags", JSONArray(entry.tags))
+                obj.put("requiresHostVersion", entry.requiresHostVersion)
                 obj.put("source", entry.source.name)
 
                 val releaseArr = JSONArray()
@@ -716,14 +1218,25 @@ class PluginIndexRepository {
                 items.put(obj)
             }
             root.put("items", items)
+            root.put(
+                "fetchedSources",
+                JSONArray(
+                    fetchedSources
+                        .map { it.name }
+                        .sorted(),
+                ),
+            )
             file.writeText(root.toString())
         }.onFailure {
             Log.w(TAG, "Failed to write plugin index cache: ${it.message}")
         }
     }
 
-    private fun parseCacheJson(json: String): List<PluginIndexEntry> {
+    private fun parseCacheJson(json: String): CacheSnapshot {
         val root = JSONObject(json)
+        val languageTag = root.optString("languageTag")
+            .takeIf { it.isNotBlank() && !it.equals("null", true) }
+            ?.let(::normalizeLanguageTag)
         val arr = root.optJSONArray("items") ?: root.optJSONArray("plugins") ?: JSONArray()
         val list = mutableListOf<PluginIndexEntry>()
 
@@ -731,9 +1244,13 @@ class PluginIndexRepository {
             val obj = arr.optJSONObject(i) ?: continue
             val packageName = obj.optString("packageName").takeIf { it.isNotBlank() } ?: continue
             val title = obj.optString("title").takeIf { it.isNotBlank() } ?: packageName
-            val description = obj.optString("description")
-            val author = obj.optString("author").takeIf { it.isNotBlank() }
+            val description = obj.optString("description").takeIf { it.isNotBlank() && !it.equals("null", true) }
+            val instructionHardCoded = obj.optString("instructionHardCoded").takeIf { it.isNotBlank() && !it.equals("null", true) }
+            val instructionMarkdownUrl = obj.optString("instructionMarkdownUrl").takeIf { it.isNotBlank() && !it.equals("null", true) }
+            val author = obj.optString("author").takeIf { it.isNotBlank() && !it.equals("null", true) }
             val iconUrl = obj.optString("iconUrl").takeIf { it.isNotBlank() }?.toUri()
+            val forceIgnoreLocalIcon = obj.optBoolean("forceIgnoreLocalIcon", false)
+            val requiresHostVersion = obj.optLong("requiresHostVersion", -1L).takeIf { it > 0 }
             val source = obj.optString("source")
                 .takeIf { it.isNotBlank() }
                 ?.runCatching { PluginIndexSource.valueOf(this) }
@@ -743,6 +1260,10 @@ class PluginIndexRepository {
             val collaborators = obj.optJSONArray("collaborators")?.let { ja ->
                 List(ja.length()) { idx -> ja.optString(idx) }.filter { it.isNotBlank() }
             } ?: emptyList()
+            val supportedAbis = when {
+                !obj.has("supportedAbis") || obj.isNull("supportedAbis") -> null
+                else -> PluginAbiUtils.resolveSupportedAbisFromValue(obj.opt("supportedAbis"))
+            }
             val tags = obj.optJSONArray("tags")?.let { ja ->
                 List(ja.length()) { idx -> ja.optString(idx) }.filter { it.isNotBlank() }
             } ?: emptyList()
@@ -770,19 +1291,49 @@ class PluginIndexRepository {
             list += PluginIndexEntry(
                 packageName = packageName,
                 iconUrl = iconUrl,
+                forceIgnoreLocalIcon = forceIgnoreLocalIcon,
                 title = title,
                 description = description,
+                instructionHardCoded = instructionHardCoded,
+                instructionMarkdownUrl = instructionMarkdownUrl,
                 author = author,
                 collaborators = collaborators,
-                engine = obj.optString("engine").takeIf { it.isNotBlank() },
-                variant = obj.optString("variant").takeIf { it.isNotBlank() },
-                engineId = obj.optString("engineId").takeIf { it.isNotBlank() },
                 releases = releases,
+                supportedAbis = supportedAbis,
                 tags = tags,
+                requiresHostVersion = requiresHostVersion,
                 source = source,
             )
         }
-        return list
+        val fetchedSources = root.optJSONArray("fetchedSources")
+            ?.let { ja ->
+                buildSet {
+                    for (i in 0 until ja.length()) {
+                        val name = ja.optString(i).takeIf { it.isNotBlank() } ?: continue
+                        PluginIndexSource.entries.firstOrNull { it.name == name }?.let(::add)
+                    }
+                }
+            }
+            ?.takeIf { it.isNotEmpty() }
+            ?: list.mapTo(linkedSetOf()) { it.source }
+
+        return CacheSnapshot(
+            entries = list,
+            fetchedSources = fetchedSources,
+            languageTag = languageTag,
+        )
+    }
+
+    private fun normalizeLanguageTag(tag: String?): String? {
+        return tag
+            ?.trim()
+            ?.replace('_', '-')
+            ?.lowercase()
+            ?.takeIf { it.isNotBlank() }
+    }
+
+    private fun isSameLanguageTag(cached: String?, current: String?): Boolean {
+        return normalizeLanguageTag(cached) == normalizeLanguageTag(current)
     }
 
     private data class OfficialPluginConfig(
@@ -812,5 +1363,23 @@ class PluginIndexRepository {
         val versionCode: Long,
         val size: Long,
         val downloadUrl: String,
+    )
+
+    private data class GarageIndexConfig(
+        val name: String? = null,
+        val author: String? = null,
+        val description: String? = null,
+        val instruction: String? = null,
+        val versionName: String? = null,
+        val versionDate: String? = null,
+        val requiresHostVersion: Long? = null,
+        val forceIgnoreLocalIcon: Boolean = false,
+        val supportedAbis: List<String>? = null,
+    )
+
+    private data class CacheSnapshot(
+        val entries: List<PluginIndexEntry>,
+        val fetchedSources: Set<PluginIndexSource>,
+        val languageTag: String?,
     )
 }

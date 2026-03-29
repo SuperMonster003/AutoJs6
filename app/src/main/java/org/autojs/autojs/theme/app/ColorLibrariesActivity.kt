@@ -174,7 +174,7 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
         }
         R.id.action_toggle_color_select_layout -> {
             isLegacyLayout = true
-            startActivity(this, isToggled = true)
+            launch(this, isToggled = true)
             true
         }
         R.id.action_color_search_help -> {

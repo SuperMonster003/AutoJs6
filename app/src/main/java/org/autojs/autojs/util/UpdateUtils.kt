@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
-import org.autojs.autojs.util.DialogUtils.showAdaptive
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.core.pref.Pref.isAutoCheckForUpdatesEnabled
 import org.autojs.autojs.core.pref.Pref.lastNoNewerUpdatesTimestamp
@@ -14,6 +13,9 @@ import org.autojs.autojs.network.UpdateChecker
 import org.autojs.autojs.network.UpdateChecker.PromptMode
 import org.autojs.autojs.network.entity.VersionInfo
 import org.autojs.autojs.util.DialogUtils.choiceWidgetThemeColor
+import org.autojs.autojs.util.DialogUtils.showAdaptive
+import org.autojs.autojs.util.DialogUtils.toggleActionButtonAbilityByItems
+import org.autojs.autojs.util.DialogUtils.toggleContentViewByItems
 import org.autojs.autojs6.R
 
 /**
@@ -83,8 +85,8 @@ object UpdateUtils {
                         dialogParent.items?.let {
                             it.clear()
                             dialogParent.notifyItemsChanged()
-                            DialogUtils.toggleContentViewByItems(dialogParent)
-                            DialogUtils.toggleActionButtonAbilityByItems(dialogParent, DialogAction.NEUTRAL)
+                            dialogParent.toggleContentViewByItems()
+                            dialogParent.toggleActionButtonAbilityByItems(DialogAction.NEUTRAL)
                         }
                         ViewUtils.showSnack(dialogParent.view, R.string.text_all_items_cleared)
                     }
@@ -95,9 +97,9 @@ object UpdateUtils {
             .onPositive { dialog, _ -> dialog.dismiss() }
             .autoDismiss(false)
             .build()
-            .also {
-                DialogUtils.toggleContentViewByItems(it)
-                DialogUtils.toggleActionButtonAbilityByItems(it, DialogAction.NEUTRAL)
+            .apply {
+                toggleContentViewByItems()
+                toggleActionButtonAbilityByItems(DialogAction.NEUTRAL)
             }
             .showAdaptive()
     }
@@ -113,7 +115,7 @@ object UpdateUtils {
                 dialogHoldingItems.items!!.remove(text)
                 dialogHoldingItems.notifyItemsChanged()
                 removeIgnoredVersion(text)
-                DialogUtils.toggleContentViewByItems(dialogHoldingItems)
+                dialogHoldingItems.toggleContentViewByItems()
                 dialogPromptParent?.dismiss()
             }
             .showAdaptive()

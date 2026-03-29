@@ -35,4 +35,28 @@
 
     </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
 
+    <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
+        app:layout="@layout/preference_category_custom"
+        app:title="@string/text_show">
+
+        <org.autojs.autojs.theme.preference.MaterialPreference
+            app:layout="@layout/preference_custom"
+            app:key="plugin_center_hidden_plugin_management"
+            app:title="@string/text_plugin_hidden_manage"
+            app:summary="@string/summary_plugin_hidden_manage" />
+
+    </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
+
+    <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
+        app:layout="@layout/preference_category_custom"
+        app:title="@string/text_mount">
+
+        <org.autojs.autojs.theme.preference.MaterialPreference
+            app:layout="@layout/preference_custom"
+            app:key="plugin_center_auto_mount_management"
+            app:title="@string/text_plugin_auto_mount_manage"
+            app:summary="@string/summary_plugin_auto_mount_manage" />
+
+    </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
+
 </PreferenceScreen>

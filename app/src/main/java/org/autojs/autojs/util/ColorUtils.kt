@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.view.View
+import androidx.annotation.AttrRes
 import androidx.annotation.ColorInt
 import androidx.annotation.FloatRange
 import androidx.core.graphics.ColorUtils
@@ -530,5 +531,22 @@ object ColorUtils {
             adjust(Color.green(color)),
             adjust(Color.blue(color))
         )
+    }
+
+    @ColorInt
+    fun getColorFromAttr(context: Context, @AttrRes attr: Int): Int {
+        return getColorFromAttr(context, attr, 0)
+    }
+
+    @ColorInt
+    fun getColorFromAttr(context: Context, @AttrRes attr: Int, fallback: Int): Int {
+        val a = runCatching {
+            context.getTheme().obtainStyledAttributes(intArrayOf(attr))
+        }.getOrNull() ?: return fallback
+        try {
+            return a.getColor(0, fallback)
+        } finally {
+            a.recycle()
+        }
     }
 }

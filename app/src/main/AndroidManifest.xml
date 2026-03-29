@@ -207,6 +207,7 @@
         android:icon="${icon}"
         android:label="${appName}"
         android:largeHeap="true"
+        android:networkSecurityConfig="@xml/network_security_config"
         android:requestLegacyExternalStorage="true"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
@@ -682,6 +683,18 @@
 
         <activity
             android:name="org.autojs.autojs.core.plugin.center.PluginCenterSettingsActivity"
+            android:theme="@style/AppTheme.Settings" />
+
+        <activity
+            android:name="org.autojs.autojs.core.plugin.center.PluginSettingsActivity"
+            android:theme="@style/AppTheme.Settings" />
+
+        <activity
+            android:name="org.autojs.autojs.core.plugin.center.PluginInstructionActivity"
+            android:theme="@style/AppTheme.Settings" />
+
+        <activity
+            android:name="org.autojs.autojs.core.plugin.center.PluginVariantPriorityActivity"
             android:theme="@style/AppTheme.Settings" />
 
         <activity

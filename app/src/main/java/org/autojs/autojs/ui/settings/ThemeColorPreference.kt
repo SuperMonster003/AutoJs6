@@ -24,7 +24,7 @@ class ThemeColorPreference : MaterialPreference, SharedPreferences.OnSharedPrefe
 
     override fun onClick() {
         super.onClick()
-        ColorSelectBaseActivity.startActivity(prefContext)
+        ColorSelectBaseActivity.launch(prefContext)
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) = notifyChanged()

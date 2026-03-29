@@ -52,11 +52,11 @@ open class MaterialDialogPreference : MaterialPreference {
                 neutralText = getAttrString(a, R.styleable.MaterialDialogPreference_neutralText)
                 neutralTextShort = getAttrString(a, R.styleable.MaterialDialogPreference_neutralTextShort)
                 negativeText = getAttrString(a, R.styleable.MaterialDialogPreference_negativeText)
-                getAttrColor(a, R.styleable.MaterialDialogPreference_negativeColor)?.takeIf { it != -1 }?.let {
+                getAttrColor(a, R.styleable.MaterialDialogPreference_negativeColor).takeIf { it != -1 }?.let {
                     negativeColor = it
                 }
                 positiveText = getAttrString(a, R.styleable.MaterialDialogPreference_positiveText)
-                getAttrColor(a, R.styleable.MaterialDialogPreference_positiveColor)?.takeIf { it != -1 }?.let {
+                getAttrColor(a, R.styleable.MaterialDialogPreference_positiveColor).takeIf { it != -1 }?.let {
                     positiveColor = it
                 }
                 a.recycle()

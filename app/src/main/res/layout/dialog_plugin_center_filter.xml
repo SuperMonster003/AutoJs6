@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="24dp"
+        android:paddingVertical="8dp">
+
+        <TextView
+            android:id="@+id/plugin_center_filter_install_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/text_filter_install_state"
+            android:textAppearance="?android:attr/textAppearance"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:id="@+id/plugin_center_filter_install_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:orientation="vertical" />
+
+        <TextView
+            android:id="@+id/plugin_center_filter_enabled_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/text_filter_enabled_state"
+            android:textAppearance="?android:attr/textAppearance"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:id="@+id/plugin_center_filter_enabled_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:orientation="vertical" />
+
+        <TextView
+            android:id="@+id/plugin_center_filter_mechanism_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/text_filter_mechanism"
+            android:textAppearance="?android:attr/textAppearance"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:id="@+id/plugin_center_filter_mechanism_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:orientation="vertical" />
+
+        <TextView
+            android:id="@+id/plugin_center_filter_source_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/text_filter_source"
+            android:textAppearance="?android:attr/textAppearance"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:id="@+id/plugin_center_filter_source_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:orientation="vertical" />
+
+        <CheckBox
+            android:id="@+id/plugin_center_filter_updatable_only_checkbox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:minHeight="36dp"
+            android:paddingVertical="6dp"
+            android:text="@string/text_filter_updatable_only"
+            android:textSize="15sp" />
+
+    </LinearLayout>
+
+</ScrollView>

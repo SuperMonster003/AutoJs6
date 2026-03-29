@@ -16,16 +16,16 @@ import com.afollestad.materialdialogs.MaterialDialog
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
-import org.autojs.autojs.util.DialogUtils
-import org.autojs.autojs.util.DialogUtils.showAdaptive
 import org.autojs.autojs.storage.file.FileObservable
 import org.autojs.autojs.theme.ThemeColorHelper
 import org.autojs.autojs.theme.preference.MaterialPreference
 import org.autojs.autojs.tool.SimpleObserver
 import org.autojs.autojs.ui.filechooser.FileChooserDialogBuilder
 import org.autojs.autojs.ui.main.MainActivity
-import org.autojs.autojs.util.EnvironmentUtils
 import org.autojs.autojs.util.DialogUtils.choiceWidgetThemeColor
+import org.autojs.autojs.util.DialogUtils.showAdaptive
+import org.autojs.autojs.util.DialogUtils.toggleContentViewByItems
+import org.autojs.autojs.util.EnvironmentUtils
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.WorkingDirectoryUtils
 import org.autojs.autojs6.R
@@ -124,7 +124,7 @@ class WorkingDirectoryPreference : MaterialPreference {
                                     dHistory.items?.let {
                                         it.remove(text)
                                         dHistory.notifyItemsChanged()
-                                        DialogUtils.toggleContentViewByItems(dHistory)
+                                        dHistory.toggleContentViewByItems()
                                     }
                                 }
                                 .showAdaptive()
@@ -135,8 +135,9 @@ class WorkingDirectoryPreference : MaterialPreference {
                     .negativeColorRes(R.color.dialog_button_default)
                     .onNegative { dHistory, _ -> dHistory.dismiss() }
                     .autoDismiss(false)
+                    .build()
+                    .apply { toggleContentViewByItems() }
                     .showAdaptive()
-                    .also { DialogUtils.toggleContentViewByItems(it) }
             }
             .negativeText(R.string.dialog_button_cancel)
             .onNegative { dialog, _ -> dialog.dismiss() }

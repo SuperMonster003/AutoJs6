@@ -846,7 +846,7 @@ public class UpdateChecker {
                                     new MaterialDialog.OptionMenuItemSpec(context.getString(R.string.dialog_button_ignore_current_update), parentDialog -> {
                                         new MaterialDialog.Builder(context)
                                                 .title(R.string.text_prompt)
-                                                .content(R.string.prompt_add_ignored_version)
+                                                .content(R.string.prompt_add_ignored_app_version)
                                                 .negativeText(R.string.dialog_button_cancel)
                                                 .positiveText(R.string.dialog_button_confirm)
                                                 .positiveColorRes(R.color.dialog_button_caution)

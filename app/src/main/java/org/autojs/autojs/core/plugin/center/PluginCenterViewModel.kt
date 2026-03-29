@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.autojs.autojs.network.UpdateIgnoreStore
+import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import java.util.Locale
 
@@ -56,6 +57,8 @@ class PluginCenterViewModel : ViewModel() {
     private val _fatalError = MutableSharedFlow<String>(extraBufferCapacity = 1)
     val fatalError: SharedFlow<String> = _fatalError
 
+    private val autoWakeAttemptedPackages = mutableSetOf<String>()
+
     /**
      * Load plugin list.
      *
@@ -69,12 +72,16 @@ class PluginCenterViewModel : ViewModel() {
      * - false: 使用 1 分钟节流 + ETag/退避 (普通进入页面).
      * - true: 每次都尝试刷新索引 (仍遵守退避窗口, 供下拉刷新使用).
      */
-    fun load(context: Context, forceRefreshIndex: Boolean = false) {
-        Log.d(TAG, "load: forceRefreshIndex = $forceRefreshIndex")
+    fun load(
+        context: Context,
+        forceRefreshIndex: Boolean = false,
+        sourceScope: PluginIndexSource? = null,
+    ) {
+        Log.d(TAG, "load: forceRefreshIndex = $forceRefreshIndex, sourceScope = $sourceScope")
         viewModelScope.launch {
             _indexLoaded.value = false
             val autoCheckUpdatesEnabled = PluginOnlineSettingsStore.isAutoCheckUpdatesEnabled()
-            val enabledSources = PluginOnlineSettingsStore.selectedSources()
+            val enabledSources = sourceScope?.let { setOf(it) } ?: PluginOnlineSettingsStore.selectedSources()
             val shouldForceByAutoCheck = autoCheckUpdatesEnabled && !forceRefreshIndex && PluginOnlineSettingsStore.shouldAutoCheckNow()
             val shouldForceFetchIndex = forceRefreshIndex || shouldForceByAutoCheck
 
@@ -97,7 +104,7 @@ class PluginCenterViewModel : ViewModel() {
             }.getOrNull() ?: run {
                 // Do not continue subsequent logic when unable to obtain local list.
                 // zh-CN: 无法获取本地列表时不再继续后续逻辑.
-                _items.value = emptyList()
+                updateItemsIfChanged(emptyList())
                 _indexLoaded.value = true
                 return@launch
             }
@@ -107,24 +114,52 @@ class PluginCenterViewModel : ViewModel() {
             }.onFailure { e ->
                 Log.w(TAG, "legacy discovery failed: ${e.message}")
             }.getOrElse { emptyList() }
+            val hostVersionCode = currentHostVersionCode()
 
             installed.forEach { local ->
-                if (local.bindError != null) {
-                    val isAutoWakeSuccess = PluginWakeManager.tryAutoWakeIfNeeded(context, local.packageName)
-                    enableStore.setEnabled(context, local.packageName, isAutoWakeSuccess)
+                if (!isHostVersionCompatible(hostVersionCode, local.requiresHostVersion)) {
+                    enableStore.setEnabled(context, local.packageName, false)
+                    return@forEach
                 }
+                val bindError = local.bindError ?: return@forEach
+                val mapped = PluginErrorMapper.fromThrowable(bindError)
+                if (mapped.code == PluginErrorCode.PROTOCOL_MISMATCH) {
+                    enableStore.setEnabled(context, local.packageName, false)
+                    return@forEach
+                }
+                if (!PluginErrorMapper.shouldRecommendActivation(mapped)) {
+                    return@forEach
+                }
+                if (!autoWakeAttemptedPackages.add(local.packageName)) {
+                    return@forEach
+                }
+                val isAutoWakeSuccess = PluginWakeManager.tryAutoWakeIfNeeded(context, local.packageName)
+                enableStore.setEnabled(context, local.packageName, isAutoWakeSuccess)
             }
 
             // Render list using "local only".
             // zh-CN: 使用 "仅本地" 渲染列表.
             val localAidlItems = installed.mapNotNull { local ->
-                toPluginCenterItem(context, index = null, local = local, allowUpdateCheck = autoCheckUpdatesEnabled)
+                toPluginCenterItem(
+                    context,
+                    index = null,
+                    local = local,
+                    allowGlobalUpdateCheck = autoCheckUpdatesEnabled,
+                )
             }
             val localLegacyItems = legacyInstalled.mapNotNull { local ->
-                toLegacyPluginCenterItem(context, local)
+                toLegacyPluginCenterItem(
+                    context = context,
+                    local = local,
+                    index = null,
+                    allowGlobalUpdateCheck = autoCheckUpdatesEnabled,
+                )
             }
-            val onlyLocalItems = localAidlItems + localLegacyItems
-            _items.value = onlyLocalItems
+            val onlyLocalItems = filterHidden(context, localAidlItems + localLegacyItems)
+            val hasCachedItems = _items.value.isNotEmpty()
+            if (sourceScope == null && !hasCachedItems) {
+                updateItemsIfChanged(onlyLocalItems)
+            }
 
             // Asynchronously load index and merge.
             // zh-CN: 异步加载索引并合并.
@@ -142,27 +177,61 @@ class PluginCenterViewModel : ViewModel() {
 
             val installedByPkg = installed.associateBy { it.packageName }
             val installedByNormalizedTitle = installed.groupBy { normalizeTitle(it.title) }
+            val legacyInstalledByPkg = legacyInstalled.associateBy { it.packageName }
 
             // Use index to drive UI, showing installable/updatable.
             // zh-CN: 用索引驱动 UI, 展示 installable/updatable.
             val fromIndex = indexEntries.mapNotNull { e ->
+                val legacy = legacyInstalledByPkg[e.packageName]
+                if (legacy != null) {
+                    return@mapNotNull toLegacyPluginCenterItem(
+                        context = context,
+                        local = legacy,
+                        index = e,
+                        allowGlobalUpdateCheck = autoCheckUpdatesEnabled,
+                    )
+                }
                 val local = matchLocalPluginForIndex(
                     index = e,
                     installedByPkg = installedByPkg,
                     installedByNormalizedTitle = installedByNormalizedTitle,
                 )
-                toPluginCenterItem(context, index = e, local = local, allowUpdateCheck = autoCheckUpdatesEnabled)
+                toPluginCenterItem(context, index = e, local = local, allowGlobalUpdateCheck = autoCheckUpdatesEnabled)
             }.let(::dedupeByPackagePreferInstalled)
 
             // Supplement plugins that "exist locally but not in index" (third-party/not yet in index).
             // zh-CN: 补充 "本地有但索引没有" 的插件 (第三方/暂未入索引).
             val fromIndexPackageNames = fromIndex.asSequence().map { it.packageName }.toHashSet()
-            val extraAidlLocals = installed
-                .filter { ins -> ins.packageName !in fromIndexPackageNames }
-                .mapNotNull { local -> toPluginCenterItem(context, index = null, local = local, allowUpdateCheck = autoCheckUpdatesEnabled) }
-            val extraLocals = dedupeByPackagePreferInstalled(extraAidlLocals + localLegacyItems)
+            val includeUnindexedLocals = sourceScope == null
+            val extraLocals = if (includeUnindexedLocals) {
+                val extraAidlLocals = installed
+                    .filter { ins -> ins.packageName !in fromIndexPackageNames }
+                    .mapNotNull { local ->
+                        toPluginCenterItem(
+                            context = context,
+                            index = null,
+                            local = local,
+                            allowGlobalUpdateCheck = autoCheckUpdatesEnabled,
+                        )
+                    }
+                val extraLegacyLocals = legacyInstalled
+                    .filter { it.packageName !in fromIndexPackageNames }
+                    .mapNotNull { legacy ->
+                        toLegacyPluginCenterItem(
+                            context = context,
+                            local = legacy,
+                            index = null,
+                            allowGlobalUpdateCheck = autoCheckUpdatesEnabled,
+                        )
+                    }
+                dedupeByPackagePreferInstalled(extraAidlLocals + extraLegacyLocals)
+            } else {
+                localLegacyItems.filter { it.packageName in fromIndexPackageNames }
+            }
 
-            _items.value = dedupeByPackagePreferInstalled(fromIndex + extraLocals)
+            val merged = dedupeByPackagePreferInstalled(fromIndex + extraLocals)
+            val visibleMerged = filterHidden(context, merged)
+            updateItemsIfChanged(visibleMerged)
             _indexLoaded.value = true
 
             // When returning to the page, refresh if the details dialog is being displayed.
@@ -190,9 +259,69 @@ class PluginCenterViewModel : ViewModel() {
         PluginInfoDialogManager.refreshIfShowing(context, _items.value)
     }
 
+    private fun updateItemsIfChanged(next: List<PluginCenterItem>) {
+        if (!isSemanticallySameList(_items.value, next)) {
+            _items.value = next
+        }
+    }
+
+    private fun filterHidden(context: Context, items: List<PluginCenterItem>): List<PluginCenterItem> {
+        if (items.isEmpty()) return emptyList()
+        return items.filterNot { PluginVisibilityStore.isHidden(context, it.packageName) }
+    }
+
+    private fun isSemanticallySameList(
+        current: List<PluginCenterItem>,
+        next: List<PluginCenterItem>,
+    ): Boolean {
+        if (current.size != next.size) {
+            return false
+        }
+        return current.map(::snapshotOf) == next.map(::snapshotOf)
+    }
+
+    private fun snapshotOf(item: PluginCenterItem): ItemSnapshot {
+        val enabledStateKey = when (val state = item.enabledState) {
+            PluginEnabledState.DISABLED -> "disabled"
+            PluginEnabledState.READY -> "ready"
+            is PluginEnabledState.ERROR -> "error:${state.error.code.name}:${state.error.recoverHint.orEmpty()}"
+        }
+        return ItemSnapshot(
+            packageName = item.packageName,
+            title = item.title,
+            versionName = item.versionName,
+            versionCode = item.versionCode,
+            updatableVersionName = item.updatableVersionName,
+            updatableVersionCode = item.updatableVersionCode,
+            installableApkUrl = item.installableApkUrl,
+            updatableApkUrl = item.updatableApkUrl,
+            author = item.author,
+            description = item.description,
+            instructionHardCoded = item.instructionHardCoded,
+            instructionMarkdownUrl = item.instructionMarkdownUrl,
+            forceIgnoreLocalIcon = item.forceIgnoreLocalIcon,
+            packageSize = item.packageSize,
+            supportedAbis = item.supportedAbis,
+            isEnabled = item.isEnabled,
+            isInstalled = item.isInstalled,
+            firstInstallTime = item.firstInstallTime,
+            lastUpdateTime = item.lastUpdateTime,
+            source = item.source,
+            mechanism = item.mechanism,
+            authorizedState = item.authorizedState,
+            activatedState = item.activatedState,
+            enabledStateKey = enabledStateKey,
+            engine = item.engine,
+            variant = item.variant,
+            engineId = item.engineId,
+            requiresHostVersion = item.requiresHostVersion,
+            hostVersionCode = item.hostVersionCode,
+        )
+    }
+
     fun ignoreUpdatableVersion(item: PluginCenterItem) {
         val v = item.updatableVersionCode ?: return
-        UpdateIgnoreStore.ignoreVersion(item.packageName, v)
+        UpdateIgnoreStore.ignoreVersion(item.packageName, v, item.versionName)
     }
 
     private fun matchLocalPluginForIndex(
@@ -256,19 +385,37 @@ class PluginCenterViewModel : ViewModel() {
         context: Context,
         index: PluginIndexEntry?,
         local: InstalledPluginRepository.InstalledPlugin?,
-        allowUpdateCheck: Boolean,
+        allowGlobalUpdateCheck: Boolean,
     ): PluginCenterItem? {
         val packageName = local?.packageName ?: index?.packageName
         if (packageName.isNullOrBlank()) return null
+        val allowUpdateCheck = allowGlobalUpdateCheck &&
+            PluginUpdateCheckStore.isEnabled(packageName, defaultEnabled = true)
 
         val title = local?.title ?: index?.title ?: packageName
         val description = local?.description ?: index?.description
+        val instructionHardCoded = local?.instructionHardCoded ?: index?.instructionHardCoded
+        val instructionMarkdownUrl = index?.instructionMarkdownUrl
         val author = local?.author ?: index?.author
         val collaborators = index?.collaborators ?: emptyList()
+        val source = index?.source ?: PluginIndexSource.OFFICIAL
+        val supportedAbis = local?.supportedAbis ?: index?.supportedAbis
+        val engine = local?.pluginInfo?.engine
+        val variant = local?.pluginInfo?.variant
+        val engineId = local?.pluginInfo?.id
+        val requiresHostVersion = local?.requiresHostVersion ?: index?.requiresHostVersion
+        val hostVersionCode = currentHostVersionCode()
 
         val versionNameLocal = local?.versionName ?: index?.releases?.firstOrNull()?.versionName ?: context.getString(R.string.text_unknown)
         val versionCodeLocal = local?.versionCode
+        val versionDateLocal = local?.versionDate
+            ?: resolveVersionDateFromIndex(
+                index = index,
+                localVersionCode = versionCodeLocal,
+                localVersionName = versionNameLocal,
+            )
         val isInstalled = local != null
+        val forceIgnoreLocalIcon = index?.forceIgnoreLocalIcon == true
 
         // 未安装时: installable 取 releases 最新 (第一个).
         val latestRelease = index?.releases?.maxByOrNull { it.versionCode }
@@ -298,6 +445,10 @@ class PluginCenterViewModel : ViewModel() {
             enableStore.setEnabled(context, packageName, false)
             enabled = false
         }
+        if (!isHostVersionCompatible(hostVersionCode, requiresHostVersion) && enabled) {
+            enableStore.setEnabled(context, packageName, false)
+            enabled = false
+        }
 
         val canActivate = isInstalled && PluginWakeManager.buildWakeIntent(context, packageName) != null
         var activatedState = when {
@@ -309,9 +460,21 @@ class PluginCenterViewModel : ViewModel() {
         if (mappedError != null && canActivate && activatedState == PluginActivatedState.UNKNOWN && PluginErrorMapper.shouldRecommendActivation(mappedError)) {
             activatedState = PluginActivatedState.RECOMMENDED
         }
+        val hostVersionError = if (!isHostVersionCompatible(hostVersionCode, requiresHostVersion)) {
+            PluginError(
+                code = PluginErrorCode.HOST_VERSION_TOO_LOW,
+                message = "requiresHostVersion=$requiresHostVersion, hostVersionCode=$hostVersionCode",
+                recoverHint = context.getString(
+                    R.string.hint_plugin_requires_higher_host_version_with_required_and_current,
+                    requiresHostVersion ?: 0L,
+                    hostVersionCode,
+                ),
+            )
+        } else null
         val authError = if (trustInfo.authorizedState == PluginAuthorizedState.REQUIRED) PluginError(PluginErrorCode.NOT_AUTHORIZED) else null
-        val lastError = authError ?: mappedError
+        val lastError = authError ?: hostVersionError ?: mappedError
         val enabledState = when {
+            hostVersionError != null -> PluginEnabledState.ERROR(hostVersionError)
             !enabled -> PluginEnabledState.DISABLED
             mappedError != null -> PluginEnabledState.ERROR(mappedError)
             else -> PluginEnabledState.READY
@@ -328,7 +491,7 @@ class PluginCenterViewModel : ViewModel() {
             packageName = packageName,
             versionName = versionNameLocal,
             versionCode = versionCodeLocal ?: latestRelease?.versionCode,
-            versionDate = latestRelease?.versionDate,
+            versionDate = versionDateLocal ?: latestRelease?.versionDate,
 
             updatableVersionName = targetUpdate?.versionName,
             updatableVersionCode = targetUpdate?.versionCode,
@@ -342,22 +505,27 @@ class PluginCenterViewModel : ViewModel() {
             author = author ?: trustInfo.developer,
             collaborators = collaborators,
             description = description,
+            instructionHardCoded = instructionHardCoded,
+            instructionMarkdownUrl = instructionMarkdownUrl,
 
             packageSize = local?.packageSize ?: 0L,
 
             installableApkUrl = latestRelease?.apkUrl,
             installableApkSha256 = latestRelease?.apkSha256,
             installableApkSizeBytes = latestRelease?.apkSizeBytes,
+            supportedAbis = supportedAbis,
+            icon = if (forceIgnoreLocalIcon) null else local?.icon,
             remoteIconUrl = index?.iconUrl?.toString(),
-
-            // TODO 已安装优先用应用图标; 未安装走默认占位图.
-            icon = local?.icon,
+            forceIgnoreLocalIcon = forceIgnoreLocalIcon,
             isEnabled = readyEnabled,
             isInstalled = isInstalled,
             firstInstallTime = local?.firstInstallTime,
             lastUpdateTime = local?.lastUpdateTime,
-            // TODO M1 暂不接入单插件设置入口.
-            settings = null,
+            settings = if (isInstalled) PluginCenterItemSettings() else null,
+            source = source,
+            engine = engine,
+            variant = variant,
+            engineId = engineId,
             mechanism = mechanism,
             authorizedState = trustInfo.authorizedState,
             activatedState = activatedState,
@@ -366,12 +534,41 @@ class PluginCenterViewModel : ViewModel() {
             signingFingerprintSha256 = trustInfo.primaryFingerprintSha256,
             isOfficialVerified = trustInfo.isOfficial,
             canActivate = canActivate,
+            requiresHostVersion = requiresHostVersion,
+            hostVersionCode = hostVersionCode,
         )
     }
 
-    private fun toLegacyPluginCenterItem(context: Context, local: LegacyInstalledPluginRepository.LegacyInstalledPlugin): PluginCenterItem? {
+    private fun toLegacyPluginCenterItem(
+        context: Context,
+        local: LegacyInstalledPluginRepository.LegacyInstalledPlugin,
+        index: PluginIndexEntry?,
+        allowGlobalUpdateCheck: Boolean,
+    ): PluginCenterItem? {
         val packageName = local.packageName
         if (packageName.isBlank()) return null
+        val allowUpdateCheck = allowGlobalUpdateCheck &&
+                PluginUpdateCheckStore.isEnabled(packageName, defaultEnabled = true)
+        val versionDateLocal = local.versionDate
+            ?: resolveVersionDateFromIndex(
+                index = index,
+                localVersionCode = local.versionCode,
+                localVersionName = local.versionName,
+            )
+        val latestRelease = index?.releases?.maxByOrNull { it.versionCode }
+        val targetUpdate = run {
+            val localVersionCode = local.versionCode
+            if (!allowUpdateCheck || localVersionCode == null) return@run null
+            val candidates = index?.releases
+                ?.filter { it.versionCode > localVersionCode }
+                ?.sortedByDescending { it.versionCode }
+                ?: emptyList()
+            candidates.firstOrNull { !UpdateIgnoreStore.isIgnored(packageName, it.versionCode) }
+        }
+        val requiresHostVersion = index?.requiresHostVersion
+        val hostVersionCode = currentHostVersionCode()
+        val forceIgnoreLocalIcon = index?.forceIgnoreLocalIcon == true
+        val supportedAbis = index?.supportedAbis
 
         val trustInfo = runCatching { PluginTrustManager.resolveTrustInfo(context, packageName) }.getOrElse {
             PluginTrustManager.TrustInfo(
@@ -388,42 +585,72 @@ class PluginCenterViewModel : ViewModel() {
             enableStore.setEnabled(context, packageName, false)
             enabled = false
         }
+        if (!isHostVersionCompatible(hostVersionCode, requiresHostVersion) && enabled) {
+            enableStore.setEnabled(context, packageName, false)
+            enabled = false
+        }
 
-        val enabledState = if (enabled) PluginEnabledState.READY else PluginEnabledState.DISABLED
-        val lastError = if (trustInfo.authorizedState == PluginAuthorizedState.REQUIRED) PluginError(PluginErrorCode.NOT_AUTHORIZED) else null
+        val hostVersionError = if (!isHostVersionCompatible(hostVersionCode, requiresHostVersion)) {
+            PluginError(
+                code = PluginErrorCode.HOST_VERSION_TOO_LOW,
+                message = "requiresHostVersion=$requiresHostVersion, hostVersionCode=$hostVersionCode",
+                recoverHint = context.getString(
+                    R.string.hint_plugin_requires_higher_host_version_with_required_and_current,
+                    requiresHostVersion ?: 0L,
+                    hostVersionCode,
+                ),
+            )
+        } else null
+        val authError = if (trustInfo.authorizedState == PluginAuthorizedState.REQUIRED) PluginError(PluginErrorCode.NOT_AUTHORIZED) else null
+        val enabledState = when {
+            hostVersionError != null -> PluginEnabledState.ERROR(hostVersionError)
+            enabled -> PluginEnabledState.READY
+            else -> PluginEnabledState.DISABLED
+        }
+        val lastError = authError ?: hostVersionError
+        val readyEnabled = enabled && enabledState is PluginEnabledState.READY
 
         return PluginCenterItem(
-            title = local.title,
+            title = local.title.takeIf { it.isNotBlank() } ?: index?.title ?: packageName,
             packageName = packageName,
             versionName = local.versionName,
             versionCode = local.versionCode,
-            versionDate = null,
+            versionDate = versionDateLocal,
 
-            updatableVersionName = null,
-            updatableVersionCode = null,
-            updatableVersionDate = null,
-            updatableApkUrl = null,
-            updatableApkSha256 = null,
-            updatableApkSizeBytes = null,
-            updatableChangelogUrl = null,
-            updatableChangelogText = null,
+            updatableVersionName = targetUpdate?.versionName,
+            updatableVersionCode = targetUpdate?.versionCode,
+            updatableVersionDate = targetUpdate?.versionDate,
+            updatableApkUrl = targetUpdate?.apkUrl,
+            updatableApkSha256 = targetUpdate?.apkSha256,
+            updatableApkSizeBytes = targetUpdate?.apkSizeBytes,
+            updatableChangelogUrl = targetUpdate?.changelogUrl,
+            updatableChangelogText = targetUpdate?.changelogText,
 
-            author = local.author ?: trustInfo.developer,
-            collaborators = emptyList(),
-            description = local.description,
+            author = local.author ?: index?.author ?: trustInfo.developer,
+            collaborators = index?.collaborators ?: emptyList(),
+            description = local.description ?: index?.description,
+            instructionHardCoded = local.instructionHardCoded ?: index?.instructionHardCoded,
+            instructionMarkdownUrl = index?.instructionMarkdownUrl,
 
             packageSize = local.packageSize,
 
-            installableApkUrl = null,
-            installableApkSha256 = null,
-            installableApkSizeBytes = null,
+            installableApkUrl = latestRelease?.apkUrl,
+            installableApkSha256 = latestRelease?.apkSha256,
+            installableApkSizeBytes = latestRelease?.apkSizeBytes,
+            supportedAbis = supportedAbis,
 
-            icon = local.icon,
-            isEnabled = enabled,
+            icon = if (forceIgnoreLocalIcon) null else local.icon,
+            remoteIconUrl = index?.iconUrl?.toString(),
+            forceIgnoreLocalIcon = forceIgnoreLocalIcon,
+            isEnabled = readyEnabled,
             isInstalled = true,
             firstInstallTime = local.firstInstallTime,
             lastUpdateTime = local.lastUpdateTime,
-            settings = null,
+            settings = PluginCenterItemSettings(),
+            source = index?.source ?: PluginIndexSource.THIRD_PARTY,
+            engine = null,
+            variant = null,
+            engineId = null,
             mechanism = PluginMechanism.SDK,
             authorizedState = trustInfo.authorizedState,
             activatedState = PluginActivatedState.NOT_SUPPORTED,
@@ -432,8 +659,77 @@ class PluginCenterViewModel : ViewModel() {
             signingFingerprintSha256 = trustInfo.primaryFingerprintSha256,
             isOfficialVerified = trustInfo.isOfficial,
             canActivate = false,
+            requiresHostVersion = requiresHostVersion,
+            hostVersionCode = hostVersionCode,
         )
     }
+
+    private fun currentHostVersionCode(): Long = BuildConfig.VERSION_CODE.toLong()
+
+    private fun isHostVersionCompatible(hostVersionCode: Long, requiresHostVersion: Long?): Boolean {
+        if (requiresHostVersion == null || requiresHostVersion <= 0L) return true
+        return hostVersionCode >= requiresHostVersion
+    }
+
+    private fun resolveVersionDateFromIndex(
+        index: PluginIndexEntry?,
+        localVersionCode: Long?,
+        localVersionName: String?,
+    ): String? {
+        val releases = index?.releases.orEmpty()
+        if (releases.isEmpty()) return null
+
+        localVersionCode?.let { code ->
+            releases.firstOrNull { it.versionCode == code }
+                ?.versionDate
+                ?.takeIf { it.isNotBlank() }
+                ?.let { return it }
+        }
+
+        localVersionName
+            ?.trim()
+            ?.takeIf { it.isNotEmpty() }
+            ?.let { name ->
+                releases.firstOrNull { it.versionName.equals(name, ignoreCase = true) }
+                    ?.versionDate
+                    ?.takeIf { it.isNotBlank() }
+                    ?.let { return it }
+            }
+
+        return releases.maxByOrNull { it.versionCode }?.versionDate?.takeIf { it.isNotBlank() }
+    }
+
+    private data class ItemSnapshot(
+        val packageName: String,
+        val title: String,
+        val versionName: String,
+        val versionCode: Long?,
+        val updatableVersionName: String?,
+        val updatableVersionCode: Long?,
+        val installableApkUrl: String?,
+        val updatableApkUrl: String?,
+        val author: String?,
+        val description: String?,
+        val instructionHardCoded: String?,
+        val instructionMarkdownUrl: String?,
+        val forceIgnoreLocalIcon: Boolean,
+        val packageSize: Long,
+        val supportedAbis: List<String>?,
+        val isEnabled: Boolean,
+        val isInstalled: Boolean,
+        val firstInstallTime: Long?,
+        val lastUpdateTime: Long?,
+        val source: PluginIndexSource,
+        val mechanism: PluginMechanism,
+        val authorizedState: PluginAuthorizedState,
+        val activatedState: PluginActivatedState,
+        val enabledStateKey: String,
+        val engine: String?,
+        val variant: String?,
+        val engineId: String?,
+        val requiresHostVersion: Long?,
+        val hostVersionCode: Long?,
+    )
 
     companion object {
         private const val TAG = "PluginCenterViewModel"

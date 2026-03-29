@@ -1,22 +1,30 @@
 package org.autojs.autojs.core.plugin.center
 
 import android.content.res.ColorStateList
+import android.graphics.Bitmap
 import android.graphics.PorterDuff
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.content.res.AppCompatResources
-import com.bumptech.glide.Glide
+import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.isVisible
 import androidx.core.widget.ImageViewCompat
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.RequestBuilder
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import de.hdodenhof.circleimageview.CircleImageView
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.IntentUtils
-import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.colorFilterWithDesaturateOrNull
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.PluginCenterRecyclerViewItemBinding
@@ -54,21 +62,29 @@ class PluginCenterItemViewHolder(
     private val btnSettingsView = itemViewBinding.btnSettings
     private val btnDetailsView = itemViewBinding.btnDetails
 
+    private var lastBoundPackageName: String? = null
     private lateinit var currentItem: PluginCenterItem
 
     fun bind(item: PluginCenterItem) {
         currentItem = item
+        val previousPackageName = lastBoundPackageName
+        lastBoundPackageName = item.packageName
 
         item.icon?.let {
             Glide.with(iconView).clear(iconView)
             iconView.setImageDrawable(it)
+            cacheRemoteItemIcon(item.packageName, it)
         } ?: item.remoteIconUrl?.takeIf { it.isNotBlank() }?.let { url ->
-            val fallback = buildFallbackIconDrawable()
-            Glide.with(iconView)
-                .load(url)
-                .placeholder(fallback)
-                .error(fallback)
-                .into(iconView)
+            val fallback = getCachedRemoteItemIcon(item.packageName)
+                ?: iconView.drawable?.takeIf { previousPackageName == item.packageName }
+                ?: buildFallbackIconDrawable()
+            val preferredUrl = PluginIconUrlResolver.resolveForCurrentMode(context, url) ?: url
+            val fallbackUrl = url.takeIf { it != preferredUrl }
+            var request = buildRemoteIconRequest(preferredUrl, fallback, item.packageName)
+            if (fallbackUrl != null) {
+                request = request.error(buildRemoteIconRequest(fallbackUrl, fallback, item.packageName))
+            }
+            request.into(iconView)
         } ?: run {
             Glide.with(iconView).clear(iconView)
             iconView.setImageDrawable(buildFallbackIconDrawable())
@@ -124,7 +140,7 @@ class PluginCenterItemViewHolder(
 
         if (item.settings != null) {
             btnSettingsView.setButtonState(true) {
-                ViewUtils.showToast(context, R.string.text_under_development)
+                listener.onSettings(currentItem)
             }
         } else {
             btnSettingsView.setButtonState(false)
@@ -218,6 +234,55 @@ class PluginCenterItemViewHolder(
                 DrawableCompat.setTintMode(d, PorterDuff.Mode.SRC_IN)
             }
             ?: AppCompatResources.getDrawable(iconView.context, R.mipmap.ic_app_shortcut_plugin_center_adaptive_round)
+
+    private fun buildRemoteIconRequest(
+        url: String,
+        fallback: Drawable?,
+        packageName: String,
+    ): RequestBuilder<Drawable> =
+        Glide.with(iconView)
+            .load(url)
+            .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+            .skipMemoryCache(false)
+            .placeholder(fallback)
+            .error(fallback)
+            .listener(
+                object : RequestListener<Drawable> {
+                    override fun onLoadFailed(
+                        e: GlideException?,
+                        model: Any?,
+                        target: Target<Drawable>,
+                        isFirstResource: Boolean,
+                    ): Boolean = false
+
+                    override fun onResourceReady(
+                        resource: Drawable,
+                        model: Any,
+                        target: Target<Drawable>?,
+                        dataSource: com.bumptech.glide.load.DataSource,
+                        isFirstResource: Boolean,
+                    ): Boolean {
+                        cacheRemoteItemIcon(packageName, resource)
+                        return false
+                    }
+                },
+            )
+
+    private fun getCachedRemoteItemIcon(packageName: String): Drawable? =
+        remoteItemIconCache.get(packageName)?.let { bitmap ->
+            BitmapDrawable(context.resources, bitmap).mutate()
+        }
+
+    private fun cacheRemoteItemIcon(packageName: String, drawable: Drawable) {
+        val bitmap = runCatching { drawable.toBitmap() }.getOrNull() ?: return
+        remoteItemIconCache.put(packageName, bitmap)
+    }
+
+    companion object {
+        private val remoteItemIconCache = object : android.util.LruCache<String, Bitmap>(8 * 1024) {
+            override fun sizeOf(key: String, value: Bitmap): Int = value.byteCount / 1024
+        }
+    }
 
 }
 

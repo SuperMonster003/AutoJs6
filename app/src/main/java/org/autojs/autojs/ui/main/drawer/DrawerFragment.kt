@@ -608,7 +608,7 @@ open class DrawerFragment : Fragment() {
             icon = R.drawable.ic_personalize_thicker,
             title = R.string.text_theme_color,
         ).apply {
-            setAction { ColorSelectBaseActivity.startActivity(mContext) }
+            setAction { ColorSelectBaseActivity.launch(mContext) }
             subtitle = ColorSelectBaseActivity.getCurrentColorSummary(mContext)
         }
 
@@ -616,21 +616,21 @@ open class DrawerFragment : Fragment() {
             icon = R.drawable.ic_recycle_bin,
             title = R.string.text_trash,
         ).apply {
-            setAction { TrashActivity.startActivity(mContext) }
+            setAction { TrashActivity.launch(mContext) }
         }
 
         mVersionHistoryItem = DrawerMenuShortcutItem(
             icon = R.drawable.ic_version_history,
             title = R.string.text_version_history,
         ).apply {
-            setAction { VersionHistoryActivity.startActivity(mContext) }
+            setAction { VersionHistoryActivity.launch(mContext) }
         }
 
         mAboutAppAndDevItem = DrawerMenuShortcutItem(
             icon = R.drawable.ic_about,
             title = R.string.text_about_app_and_developer,
         ).apply {
-            setAction { AboutActivity.startActivity(mContext) }
+            setAction { AboutActivity.launch(mContext) }
             subtitle = BuildConfig.VERSION_NAME
         }
     }
@@ -738,7 +738,7 @@ open class DrawerFragment : Fragment() {
 
     private fun setupListeners() {
         binding.settings.setOnClickListener { PreferencesActivity.launch(it.context) }
-        binding.pluginCenter.setOnClickListener { PluginCenterActivity.startActivity(it.context) }
+        binding.pluginCenter.setOnClickListener { PluginCenterActivity.launch(it.context) }
         binding.restart.setOnClickListener { restart(mActivity, mActivity::beforeExit) }
         binding.exit.setOnClickListener { exit(mActivity, mActivity::beforeExit) }
 

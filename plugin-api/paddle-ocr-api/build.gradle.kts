@@ -25,3 +25,7 @@ android {
         buildConfig = false
     }
 }
+
+dependencies {
+    api(project(":plugin-api:common-plugin-api"))
+}

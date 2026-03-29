@@ -61,11 +61,11 @@ open class MaterialListPreference : MaterialDialogPreference {
             .let { a ->
                 getAttrString(a, R.styleable.MaterialListPreference_dialogTitle)?.also { dialogTitle = it }
                 getAttrString(a, R.styleable.MaterialListPreference_dialogContent)?.also { dialogContent = it }
-                getAttrColor(a, R.styleable.MaterialListPreference_negativeColor)?.takeIf { it != -1 }?.let {
+                getAttrColor(a, R.styleable.MaterialListPreference_negativeColor).takeIf { it != -1 }?.let {
                     negativeColor = it
                 }
                 positiveText = getAttrString(a, R.styleable.MaterialListPreference_positiveText) ?: context.getString(R.string.dialog_button_confirm)
-                getAttrColor(a, R.styleable.MaterialListPreference_positiveColor)?.takeIf { it != -1 }?.let {
+                getAttrColor(a, R.styleable.MaterialListPreference_positiveColor).takeIf { it != -1 }?.let {
                     positiveColor = it
                 }
                 negativeText = getAttrString(a, R.styleable.MaterialListPreference_negativeText) ?: context.getString(R.string.dialog_button_cancel)

@@ -5,11 +5,20 @@
     app:popupTheme="@style/Widget.AppCompat.PopupMenu">
 
     <item
+        android:id="@+id/action_add"
         android:icon="@drawable/ic_add_black_48dp"
         android:title="@string/text_install"
         app:showAsAction="always">
 
         <menu>
+
+            <item
+                android:id="@+id/action_install_from_official_library"
+                android:title="@string/text_install_from_official_plugin_library" />
+
+            <item
+                android:id="@+id/action_install_from_third_party_library"
+                android:title="@string/text_install_from_third_party_plugin_library" />
 
             <item
                 android:id="@+id/action_install_from_local_file"
@@ -30,7 +39,7 @@
         android:imeOptions="actionSearch"
         android:inputType="text"
         app:actionViewClass="androidx.appcompat.widget.SearchView"
-        app:showAsAction="always|collapseActionView"  />
+        app:showAsAction="always|collapseActionView" />
 
     <item
         android:id="@+id/action_sort"

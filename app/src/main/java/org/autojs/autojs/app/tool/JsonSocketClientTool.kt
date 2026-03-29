@@ -13,13 +13,14 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
-import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs.core.pref.Pref
-import org.autojs.autojs.util.DialogUtils.widgetThemeColor
 import org.autojs.autojs.pluginclient.DevPluginService
 import org.autojs.autojs.pluginclient.JsonSocketClient
 import org.autojs.autojs.ui.common.NotAskAgainDialog
 import org.autojs.autojs.util.DialogUtils.choiceWidgetThemeColor
+import org.autojs.autojs.util.DialogUtils.toggleActionButtonAbilityByItems
+import org.autojs.autojs.util.DialogUtils.toggleContentViewByItems
+import org.autojs.autojs.util.DialogUtils.widgetThemeColor
 import org.autojs.autojs.util.Observers
 import org.autojs.autojs.util.ThreadUtils.runOnMain
 import org.autojs.autojs.util.ViewUtils
@@ -244,9 +245,11 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
                                 JsonSocketClient.removeFromHistory(text.toString())
                                 dHistory.items?.let {
                                     it.remove(text)
-                                    dHistory.notifyItemsChanged()
-                                    DialogUtils.toggleContentViewByItems(dHistory)
-                                    DialogUtils.toggleActionButtonAbilityByItems(dHistory, DialogAction.NEUTRAL)
+                                    dHistory.run {
+                                        notifyItemsChanged()
+                                        toggleContentViewByItems()
+                                        toggleActionButtonAbilityByItems(DialogAction.NEUTRAL)
+                                    }
                                 }
                             }
                             .show()
@@ -266,9 +269,11 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
                                 JsonSocketClient.clearHistory()
                                 dHistory.items?.let {
                                     it.clear()
-                                    dHistory.notifyItemsChanged()
-                                    DialogUtils.toggleContentViewByItems(dHistory)
-                                    DialogUtils.toggleActionButtonAbilityByItems(dHistory, DialogAction.NEUTRAL)
+                                    dHistory.run {
+                                        notifyItemsChanged()
+                                        toggleContentViewByItems()
+                                        toggleActionButtonAbilityByItems(DialogAction.NEUTRAL)
+                                    }
                                 }
                                 ViewUtils.showSnack(dHistory.view, R.string.text_history_has_been_cleared)
                             }
@@ -279,9 +284,9 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
                     .onPositive { dHistory, _ -> dHistory.dismiss() }
                     .autoDismiss(false)
                     .show()
-                    .also {
-                        DialogUtils.toggleContentViewByItems(it)
-                        DialogUtils.toggleActionButtonAbilityByItems(it, DialogAction.NEUTRAL)
+                    .apply {
+                        toggleContentViewByItems()
+                        toggleActionButtonAbilityByItems(DialogAction.NEUTRAL)
                     }
             }
             .negativeText(R.string.text_cancel)

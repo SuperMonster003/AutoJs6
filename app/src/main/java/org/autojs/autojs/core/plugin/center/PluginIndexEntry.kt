@@ -10,9 +10,12 @@ enum class PluginIndexSource {
 data class PluginIndexEntry(
     val packageName: String,
     val iconUrl: Uri? = null,
+    val forceIgnoreLocalIcon: Boolean = false,
 
     val title: String,
-    val description: String,
+    val description: String? = null,
+    val instructionHardCoded: String? = null,
+    val instructionMarkdownUrl: String? = null,
 
     val author: String? = null,
     val collaborators: List<String> = emptyList(),
@@ -25,8 +28,11 @@ data class PluginIndexEntry(
     val engineId: String? = null,
 
     val releases: List<PluginIndexRelease> = emptyList(),
+    val supportedAbis: List<String>? = null,
 
     val tags: List<String> = emptyList(),
+
+    val requiresHostVersion: Long? = null,
 
     val source: PluginIndexSource = PluginIndexSource.OFFICIAL,
 )

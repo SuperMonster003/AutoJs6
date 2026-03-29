@@ -413,14 +413,18 @@ object DialogUtils {
         return context is Activity || (context is ContextWrapper && isActivityContext(context.baseContext))
     }
 
-    fun toggleContentViewByItems(dialog: MaterialDialog) {
+    @JvmStatic
+    fun MaterialDialog.toggleContentViewByItems() {
+        val dialog = this
         dialog.contentView?.visibility = when {
             dialog.items.isNullOrEmpty() -> View.VISIBLE
             else -> View.GONE
         }
     }
 
-    fun toggleActionButtonAbilityByItems(dialog: MaterialDialog, actionButton: DialogAction) {
+    @JvmStatic
+    fun MaterialDialog.toggleActionButtonAbilityByItems(actionButton: DialogAction) {
+        val dialog = this
         dialog.getActionButton(actionButton)?.isEnabled = !dialog.items.isNullOrEmpty()
     }
 

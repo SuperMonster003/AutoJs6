@@ -16,7 +16,9 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.tabs.TabLayout
 import io.reactivex.android.schedulers.AndroidSchedulers
 import kotlinx.coroutines.launch
+import org.autojs.autojs.core.plugin.center.PluginCenterActivity
 import org.autojs.autojs.core.plugin.center.PluginCenterFragment
+import org.autojs.autojs.core.plugin.center.PluginIndexSource
 import org.autojs.autojs.core.plugin.center.PluginInstallActions
 import org.autojs.autojs.core.plugin.center.PluginInstaller
 import org.autojs.autojs.tool.SimpleObserver
@@ -170,9 +172,16 @@ class PluginFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListener
     }
 
     override fun onClick(button: FloatingActionButton, pos: Int) {
+        val context = requireContext()
         when (pos) {
+            3 -> {
+                PluginCenterActivity.launch(context, PluginIndexSource.OFFICIAL)
+            }
+            2 -> {
+                PluginCenterActivity.launch(context, PluginIndexSource.THIRD_PARTY)
+            }
             1 -> {
-                PluginInstallActions.showInstallFromUrlDialog(requireContext(), lifecycleScope)
+                PluginInstallActions.showInstallFromUrlDialog(context, lifecycleScope)
             }
             0 -> {
                 PluginInstallActions.installFromLocalFile(mPickApkLauncher)

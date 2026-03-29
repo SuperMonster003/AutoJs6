@@ -7,28 +7,60 @@ import android.graphics.Color
 import android.util.AttributeSet
 import android.view.View
 import android.widget.Switch
+import android.widget.TextView
 import androidx.appcompat.widget.SwitchCompat
 import androidx.preference.PreferenceViewHolder
 import androidx.preference.SwitchPreference
-import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs.theme.ThemeColor
 import org.autojs.autojs.theme.ThemeColorHelper
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.theme.ThemeColorMutable
+import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs6.R
 
 /**
  * Created by Stardust on Mar 5, 2017.
+ * Modified by SuperMonster003 as of Mar 26, 2026.
  */
-open class ThemeColorSwitchPreference : SwitchPreference, ThemeColorMutable, LongClickablePreferenceLike {
+open class ThemeColorSwitchPreference :
+    SwitchPreference,
+    ThemeColorMutable,
+    LongClickablePreferenceLike,
+    PreferenceTitleColorMutable,
+    PreferenceSummaryColorMutable,
+    PreferenceButtonColorMutable {
 
     private var mCheckableView: View? = null
-    private var mColor = Color.TRANSPARENT
 
     override val prefTitle: CharSequence? = title
     override val prefContext: Context = context
     override var longClickPrompt: CharSequence? = null
     override var longClickPromptMore: CharSequence? = null
+
+    private var _titleColor: Int? = null
+    private var _summaryColor: Int? = null
+    private var _buttonColor = Color.TRANSPARENT
+
+    override var titleColor: Int?
+        get() = _titleColor
+        set(value) {
+            _titleColor = value
+            notifyChanged()
+        }
+
+    override var summaryColor: Int?
+        get() = _summaryColor
+        set(value) {
+            _summaryColor = value
+            notifyChanged()
+        }
+
+    override var buttonColor: Int
+        get() = _buttonColor
+        set(value) {
+            _buttonColor = value
+            applyColor()
+        }
 
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes) {
         init(context, attrs, defStyleAttr, defStyleRes)
@@ -61,23 +93,29 @@ open class ThemeColorSwitchPreference : SwitchPreference, ThemeColorMutable, Lon
     override fun onBindViewHolder(holder: PreferenceViewHolder) {
         super.onBindViewHolder(holder)
         mCheckableView = holder.findViewById(Resources.getSystem().getIdentifier("switch_widget", "id", "android"))
-        if (mColor != Color.TRANSPARENT) {
+        if (buttonColor != Color.TRANSPARENT) {
             applyColor()
         }
         DialogUtils.applyLongClickability(this, holder)
+        titleColor?.let { color ->
+            holder.itemView.findViewById<TextView>(android.R.id.title)?.setTextColor(color)
+        }
+        summaryColor?.let { color ->
+            holder.itemView.findViewById<TextView>(android.R.id.summary)?.setTextColor(color)
+        }
     }
 
     override fun setThemeColor(color: ThemeColor) {
-        mColor = color.colorPrimary
+        buttonColor = color.colorPrimary
         applyColor()
     }
 
     private fun applyColor() {
         if (mCheckableView is Switch) {
-            ThemeColorHelper.setColorPrimary(mCheckableView as Switch, mColor, true)
+            ThemeColorHelper.setColorPrimary(mCheckableView as Switch, buttonColor, true)
         }
         if (mCheckableView is SwitchCompat) {
-            ThemeColorHelper.setColorPrimary(mCheckableView as SwitchCompat, mColor, true)
+            ThemeColorHelper.setColorPrimary(mCheckableView as SwitchCompat, buttonColor, true)
         }
     }
 
