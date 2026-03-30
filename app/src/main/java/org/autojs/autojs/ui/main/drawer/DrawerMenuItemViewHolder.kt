@@ -48,12 +48,22 @@ class DrawerMenuItemViewHolder(itemView: View) : BindableViewHolder<DrawerMenuIt
         // zh-CN: 安装整行 Ripple 转发, 通常只需安装一次.
         installFullRowRippleForwarder(itemView, iconContainer, titleContainer)
 
-        val toggleAction = {
+        fun toggleAction() {
+            if (!itemView.isEnabled) {
+                return
+            }
             if (mSwitchCompat.isVisible) {
-                mSwitchCompat.toggle()
+                if (mSwitchCompat.isEnabled) {
+                    mSwitchCompat.toggle()
+                }
             } else {
                 onClick()
             }
+        }
+
+        // Handle taps on row blank areas (for example around the switch) without changing layout.
+        itemView.setOnClickListener {
+            toggleAction()
         }
 
         iconContainer.setOnClickListener {
