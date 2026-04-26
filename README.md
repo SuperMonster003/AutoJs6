@@ -637,7 +637,11 @@ autojs6-v6.6.2-arm64-v8a-0f2a9d74.apk
 
 编写代码时, AutoJs6 相关 API 及使用方式, 可随时查阅应用文档:
 
-- [AutoJs6-Documentation](http://docs-project.autojs6.com) - AutoJs6 应用文档
+- [AutoJs6-Documentation](http://docs-project.autojs6.com) - AutoJs6 应用文档 
+
+支持截图匹配、UI控件解析的开发工具：
+
+- [AutoJS6 Visual Development Toolkit](https://github.com/terwer/autojs6-dev-tools) - AutoJs6 可视化开发工具包 by [terwer](https://github.com/terwer)
 
 现有的脚本开发项目可作为参考, 激发个人脚本项目的创作灵感:
 
