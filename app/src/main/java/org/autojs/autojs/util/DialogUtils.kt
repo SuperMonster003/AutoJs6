@@ -125,7 +125,7 @@ object DialogUtils {
         ThreadUtils.runOnMain {
             // Prevent duplicated show.
             // zh-CN: 防止重复 show().
-            if (dialog.isShowing) return@runOnMain
+            if (isDialogActuallyVisible(dialog)) return@runOnMain
 
             val context = dialog.context
 
@@ -216,6 +216,12 @@ object DialogUtils {
         }
 
         return dialog
+    }
+
+    private fun isDialogActuallyVisible(dialog: MaterialDialog): Boolean {
+        if (!dialog.isShowing) return false
+        val decorView = dialog.window?.decorView ?: return true
+        return decorView.visibility == View.VISIBLE
     }
 
     /**
