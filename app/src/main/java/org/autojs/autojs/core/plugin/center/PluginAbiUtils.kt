@@ -1,6 +1,7 @@
 package org.autojs.autojs.core.plugin.center
 
 import android.os.Build
+import org.autojs.autojs.runtime.api.augment.sysprops.SystemProperties
 import org.autojs.autojs.util.AndroidUtils
 import org.json.JSONArray
 import org.json.JSONObject
@@ -51,24 +52,24 @@ object PluginAbiUtils {
             ?: return null
         return when {
             token == AndroidUtils.Abi.ARM64_V8A ||
-                token == "arm64" ||
-                token.contains("arm64-v8a") ||
-                token == "aarch64" -> AndroidUtils.Abi.ARM64_V8A
+                    token == "arm64" ||
+                    token.contains("arm64-v8a") ||
+                    token == "aarch64" -> AndroidUtils.Abi.ARM64_V8A
 
             token == AndroidUtils.Abi.ARMEABI_V7A ||
-                token == "armv7" ||
-                token == "armv7a" ||
-                token.contains("armeabi-v7a") -> AndroidUtils.Abi.ARMEABI_V7A
+                    token == "armv7" ||
+                    token == "armv7a" ||
+                    token.contains("armeabi-v7a") -> AndroidUtils.Abi.ARMEABI_V7A
 
             token == AndroidUtils.Abi.X86_64 ||
-                token == "x86-64" ||
-                token == "amd64" ||
-                token == "x64" ||
-                token.contains("x86-64") -> AndroidUtils.Abi.X86_64
+                    token == "x86-64" ||
+                    token == "amd64" ||
+                    token == "x64" ||
+                    token.contains("x86-64") -> AndroidUtils.Abi.X86_64
 
             token == AndroidUtils.Abi.X86 ||
-                token == "i686" ||
-                token == "i386" -> AndroidUtils.Abi.X86
+                    token == "i686" ||
+                    token == "i386" -> AndroidUtils.Abi.X86
 
             token == AndroidUtils.Abi.ARMEABI -> AndroidUtils.Abi.ARMEABI
             token == AndroidUtils.Abi.MIPS64 -> AndroidUtils.Abi.MIPS64
@@ -264,12 +265,12 @@ object PluginAbiUtils {
     private fun isUniversalToken(token: String): Boolean {
         val normalized = token.trim().lowercase(Locale.ROOT)
         return normalized == ABI_UNIVERSAL ||
-            normalized == "all" ||
-            normalized == "any" ||
-            normalized == "noarch" ||
-            normalized.contains("universal") ||
-            normalized.contains("all-abi") ||
-            normalized.contains("all-arch")
+                normalized == "all" ||
+                normalized == "any" ||
+                normalized == "noarch" ||
+                normalized.contains("universal") ||
+                normalized.contains("all-abi") ||
+                normalized.contains("all-arch")
     }
 
     private fun resolveDevicePrimaryAbi(normalizedDeviceAbis: List<String>): String? {
@@ -281,14 +282,12 @@ object PluginAbiUtils {
             return AndroidUtils.Abi.ARM64_V8A
         }
 
-        val propertyAbi = AndroidUtils.SystemProperties
-            .get("ro.product.cpu.abi")
+        val propertyAbi = SystemProperties.get("ro.product.cpu.abi")
             ?.let(::normalizeAbi)
             ?.takeIf { it in normalizedDeviceAbis }
         if (propertyAbi != null) return propertyAbi
 
-        val propertyAbiList = AndroidUtils.SystemProperties
-            .get("ro.product.cpu.abilist")
+        val propertyAbiList = SystemProperties.get("ro.product.cpu.abilist")
             ?.split(',')
             .orEmpty()
             .asSequence()
@@ -355,9 +354,9 @@ object PluginAbiUtils {
     private fun containsUniversalMarker(value: Any?): Boolean = when (value) {
         null, JSONObject.NULL -> false
         is String -> parseSupportedAbisFromText(value).contains(ABI_UNIVERSAL) ||
-            value.split(
-                ',', ';', '|', '/', '\\', ' ', '\n', '\r', '\t', '[', ']', '{', '}', '(', ')',
-            ).any { token -> isUniversalToken(token) }
+                value.split(
+                    ',', ';', '|', '/', '\\', ' ', '\n', '\r', '\t', '[', ']', '{', '}', '(', ')',
+                ).any { token -> isUniversalToken(token) }
         is JSONArray -> {
             for (i in 0 until value.length()) {
                 if (containsUniversalMarker(value.opt(i))) {

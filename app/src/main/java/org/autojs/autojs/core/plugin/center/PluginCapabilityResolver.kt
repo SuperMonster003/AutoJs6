@@ -12,6 +12,7 @@ object PluginCapabilityResolver {
 
     fun resolveRequiresHostVersion(capabilities: Bundle?): Long? {
         if (capabilities == null) return null
+        @Suppress("DEPRECATION")
         val value = capabilities.get(KEY_REQUIRES_HOST_VERSION) ?: return null
         return when (value) {
             is Long -> value

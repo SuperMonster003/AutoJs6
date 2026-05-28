@@ -156,13 +156,87 @@ class PluginCenterViewModel : ViewModel() {
                 )
             }
             val onlyLocalItems = filterHidden(context, localAidlItems + localLegacyItems)
+
+            val installedByPkg = installed.associateBy { it.packageName }
+            val installedByNormalizedTitle = installed.groupBy { normalizeTitle(it.title) }
+            val legacyInstalledByPkg = legacyInstalled.associateBy { it.packageName }
+
+            fun buildMergedItems(indexEntries: List<PluginIndexEntry>): List<PluginCenterItem> {
+                val fromIndex = indexEntries.mapNotNull { entry ->
+                    val legacy = legacyInstalledByPkg[entry.packageName]
+                    if (legacy != null) {
+                        return@mapNotNull toLegacyPluginCenterItem(
+                            context = context,
+                            local = legacy,
+                            index = entry,
+                            allowGlobalUpdateCheck = autoCheckUpdatesEnabled,
+                        )
+                    }
+                    val local = matchLocalPluginForIndex(
+                        index = entry,
+                        installedByPkg = installedByPkg,
+                        installedByNormalizedTitle = installedByNormalizedTitle,
+                    )
+                    toPluginCenterItem(
+                        context = context,
+                        index = entry,
+                        local = local,
+                        allowGlobalUpdateCheck = autoCheckUpdatesEnabled,
+                    )
+                }.let(::dedupeByPackagePreferInstalled)
+
+                // Supplement plugins that "exist locally but not in index" (third-party/not yet in index).
+                // zh-CN: 补充 "本地有但索引没有" 的插件 (第三方/暂未入索引).
+                val fromIndexPackageNames = fromIndex.asSequence().map { it.packageName }.toHashSet()
+                val includeUnindexedLocals = sourceScope == null
+                val extraLocals = if (includeUnindexedLocals) {
+                    val extraAidlLocals = installed
+                        .filter { ins -> ins.packageName !in fromIndexPackageNames }
+                        .mapNotNull { local ->
+                            toPluginCenterItem(
+                                context = context,
+                                index = null,
+                                local = local,
+                                allowGlobalUpdateCheck = autoCheckUpdatesEnabled,
+                            )
+                        }
+                    val extraLegacyLocals = legacyInstalled
+                        .filter { it.packageName !in fromIndexPackageNames }
+                        .mapNotNull { legacy ->
+                            toLegacyPluginCenterItem(
+                                context = context,
+                                local = legacy,
+                                index = null,
+                                allowGlobalUpdateCheck = autoCheckUpdatesEnabled,
+                            )
+                        }
+                    dedupeByPackagePreferInstalled(extraAidlLocals + extraLegacyLocals)
+                } else {
+                    localLegacyItems.filter { it.packageName in fromIndexPackageNames }
+                }
+
+                val merged = dedupeByPackagePreferInstalled(fromIndex + extraLocals)
+                return filterHidden(context, merged)
+            }
+
+            val cachedIndexEntries = runCatching {
+                indexRepo.getCachedIndex(
+                    context = context,
+                    enabledSources = enabledSources,
+                )
+            }.onFailure {
+                Log.w(TAG, "getCachedIndex failed: ${it.message}")
+            }.getOrElse { emptyList() }
+
             val hasCachedItems = _items.value.isNotEmpty()
-            if (sourceScope == null && !hasCachedItems) {
-                updateItemsIfChanged(onlyLocalItems)
+            if (!hasCachedItems) {
+                when {
+                    cachedIndexEntries.isNotEmpty() -> updateItemsIfChanged(buildMergedItems(cachedIndexEntries))
+                    sourceScope == null -> updateItemsIfChanged(onlyLocalItems)
+                }
             }
 
             // Asynchronously load index and merge.
-            // zh-CN: 异步加载索引并合并.
             val indexEntries = runCatching {
                 indexRepo.fetchOnlineIndex(
                     context = context,
@@ -171,67 +245,10 @@ class PluginCenterViewModel : ViewModel() {
                 )
             }.onFailure {
                 // Index fetch exception is not fatal, just log it.
-                // zh-CN: 索引获取异常不算致命, 使用日志记录即可.
                 Log.w(TAG, "fetchOnlineIndex failed: ${it.message}")
-            }.getOrElse { emptyList() }
+            }.getOrElse { cachedIndexEntries }
 
-            val installedByPkg = installed.associateBy { it.packageName }
-            val installedByNormalizedTitle = installed.groupBy { normalizeTitle(it.title) }
-            val legacyInstalledByPkg = legacyInstalled.associateBy { it.packageName }
-
-            // Use index to drive UI, showing installable/updatable.
-            // zh-CN: 用索引驱动 UI, 展示 installable/updatable.
-            val fromIndex = indexEntries.mapNotNull { e ->
-                val legacy = legacyInstalledByPkg[e.packageName]
-                if (legacy != null) {
-                    return@mapNotNull toLegacyPluginCenterItem(
-                        context = context,
-                        local = legacy,
-                        index = e,
-                        allowGlobalUpdateCheck = autoCheckUpdatesEnabled,
-                    )
-                }
-                val local = matchLocalPluginForIndex(
-                    index = e,
-                    installedByPkg = installedByPkg,
-                    installedByNormalizedTitle = installedByNormalizedTitle,
-                )
-                toPluginCenterItem(context, index = e, local = local, allowGlobalUpdateCheck = autoCheckUpdatesEnabled)
-            }.let(::dedupeByPackagePreferInstalled)
-
-            // Supplement plugins that "exist locally but not in index" (third-party/not yet in index).
-            // zh-CN: 补充 "本地有但索引没有" 的插件 (第三方/暂未入索引).
-            val fromIndexPackageNames = fromIndex.asSequence().map { it.packageName }.toHashSet()
-            val includeUnindexedLocals = sourceScope == null
-            val extraLocals = if (includeUnindexedLocals) {
-                val extraAidlLocals = installed
-                    .filter { ins -> ins.packageName !in fromIndexPackageNames }
-                    .mapNotNull { local ->
-                        toPluginCenterItem(
-                            context = context,
-                            index = null,
-                            local = local,
-                            allowGlobalUpdateCheck = autoCheckUpdatesEnabled,
-                        )
-                    }
-                val extraLegacyLocals = legacyInstalled
-                    .filter { it.packageName !in fromIndexPackageNames }
-                    .mapNotNull { legacy ->
-                        toLegacyPluginCenterItem(
-                            context = context,
-                            local = legacy,
-                            index = null,
-                            allowGlobalUpdateCheck = autoCheckUpdatesEnabled,
-                        )
-                    }
-                dedupeByPackagePreferInstalled(extraAidlLocals + extraLegacyLocals)
-            } else {
-                localLegacyItems.filter { it.packageName in fromIndexPackageNames }
-            }
-
-            val merged = dedupeByPackagePreferInstalled(fromIndex + extraLocals)
-            val visibleMerged = filterHidden(context, merged)
-            updateItemsIfChanged(visibleMerged)
+            updateItemsIfChanged(buildMergedItems(indexEntries))
             _indexLoaded.value = true
 
             // When returning to the page, refresh if the details dialog is being displayed.
@@ -390,7 +407,7 @@ class PluginCenterViewModel : ViewModel() {
         val packageName = local?.packageName ?: index?.packageName
         if (packageName.isNullOrBlank()) return null
         val allowUpdateCheck = allowGlobalUpdateCheck &&
-            PluginUpdateCheckStore.isEnabled(packageName, defaultEnabled = true)
+                PluginUpdateCheckStore.isEnabled(packageName, defaultEnabled = true)
 
         val title = local?.title ?: index?.title ?: packageName
         val description = local?.description ?: index?.description
@@ -417,10 +434,12 @@ class PluginCenterViewModel : ViewModel() {
         val isInstalled = local != null
         val forceIgnoreLocalIcon = index?.forceIgnoreLocalIcon == true
 
-        // 未安装时: installable 取 releases 最新 (第一个).
+        // When not installed: installable uses the latest release.
+        // zh-CN: 未安装时: installable 取 releases 最新 (第一个).
         val latestRelease = index?.releases?.maxByOrNull { it.versionCode }
 
-        // 已安装时: updatable 取 "大于 installed 且未忽略" 的最高版本.
+        // When installed: updatable uses highest release greater than local and not ignored.
+        // zh-CN: 已安装时: updatable 取 "大于 installed 且未忽略" 的最高版本.
         val targetUpdate = run {
             if (!allowUpdateCheck || !isInstalled || versionCodeLocal == null) return@run null
             val candidates = index?.releases

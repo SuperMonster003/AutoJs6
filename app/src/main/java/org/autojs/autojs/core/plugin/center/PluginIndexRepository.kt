@@ -46,6 +46,29 @@ class PluginIndexRepository {
     @Volatile
     private var memoryLanguageTag: String? = null
 
+    suspend fun getCachedIndex(
+        context: Context,
+        enabledSources: Set<PluginIndexSource>,
+    ): List<PluginIndexEntry> = withContext(Dispatchers.IO) {
+        if (enabledSources.isEmpty()) {
+            return@withContext emptyList()
+        }
+        val cacheFile = resolveCacheFile(context)
+        val cacheSnapshot = when {
+            memoryCache != null && memoryFetchedSources != null -> CacheSnapshot(
+                entries = memoryCache.orEmpty(),
+                fetchedSources = memoryFetchedSources.orEmpty(),
+                languageTag = memoryLanguageTag,
+            )
+            else -> readCacheSafely(cacheFile)?.also { parsed ->
+                memoryCache = parsed.entries
+                memoryFetchedSources = parsed.fetchedSources
+                memoryLanguageTag = parsed.languageTag
+            }
+        } ?: return@withContext emptyList()
+        return@withContext filterBySource(cacheSnapshot.entries, enabledSources)
+    }
+
     suspend fun fetchOnlineIndex(
         context: Context,
         forceRefresh: Boolean,

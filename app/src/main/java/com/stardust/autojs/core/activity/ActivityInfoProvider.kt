@@ -99,7 +99,7 @@ class ActivityInfoProvider(private val context: Context) : AccessibilityDelegate
             Log.w(LOG_TAG, "invalid format: $output")
             return
         }
-        val latestPackage = matcher.group(1)
+        val latestPackage = matcher.group(1).orEmpty()
         if (latestPackage.contains(":")) {
             return
         }

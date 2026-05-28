@@ -15,11 +15,13 @@ object PluginSignatureUtils {
         } else {
             PackageManager.GET_SIGNATURES
         }
-        val pkgInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            pm.getPackageInfo(packageName, PackageManager.PackageInfoFlags.of(flags.toLong()))
-        } else {
-            pm.getPackageInfo(packageName, flags)
-        }
+        val pkgInfo = runCatching {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                pm.getPackageInfo(packageName, PackageManager.PackageInfoFlags.of(flags.toLong()))
+            } else {
+                pm.getPackageInfo(packageName, flags)
+            }
+        }.getOrNull() ?: return emptyList()
         val signatures = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             pkgInfo.signingInfo?.apkContentsSigners
         } else {
