@@ -2,6 +2,8 @@ package org.autojs.autojs.runtime.api.augment.sysprops
 
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.rhino.ArgumentGuards
+import org.autojs.autojs.rhino.ArgumentGuards.Companion.component1
+import org.autojs.autojs.rhino.ArgumentGuards.Companion.component2
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.rhino.extension.MapExtensions.toNativeObject
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
@@ -9,7 +11,7 @@ import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.Invokable
 import org.autojs.autojs.runtime.exception.ShouldNeverHappenException
-import org.autojs.autojs.util.AndroidUtils.SystemProperties
+import org.autojs.autojs.util.RhinoUtils.callFunction
 import org.autojs.autojs.util.RhinoUtils.coerceBoolean
 import org.autojs.autojs.util.RhinoUtils.coerceIntNumber
 import org.autojs.autojs.util.RhinoUtils.coerceString
@@ -17,7 +19,7 @@ import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.regexp.NativeRegExp
 
 @Suppress("UNUSED_PARAMETER")
-class SysProps(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), Invokable {
+class SysProps(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), Invokable {
 
     override val key = super.key.lowercase()
 
@@ -27,6 +29,10 @@ class SysProps(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), Invok
         ::getBoolean.name,
         ::getAll.name,
     )
+
+    override fun invoke(vararg args: Any?): String? = ensureArgumentsLengthInRange(args, 1..2) { argList ->
+        get(scriptRuntime, argList)
+    }
 
     companion object : ArgumentGuards() {
 
@@ -39,14 +45,14 @@ class SysProps(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), Invok
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun getInt(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Int = ensureArgumentsLengthInRange(args, 1..2) { argList ->
+        fun getInt(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Int? = ensureArgumentsLengthInRange(args, 1..2) { argList ->
             val (propName, defaultValue) = argList
             SystemProperties.getInt(coerceString(propName), if (defaultValue.isJsNullish()) null else coerceIntNumber(defaultValue))
         }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun getBoolean(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsLengthInRange(args, 1..2) { argList ->
+        fun getBoolean(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean? = ensureArgumentsLengthInRange(args, 1..2) { argList ->
             val (propName, defaultValue) = argList
             SystemProperties.getBoolean(coerceString(propName), if (defaultValue.isJsNullish()) null else coerceBoolean(defaultValue))
         }
@@ -85,7 +91,7 @@ class SysProps(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), Invok
 
         private fun matchFilter(input: String, filter: Any?) = when {
             filter.isJsNullish() -> true
-            filter is NativeRegExp -> filter.toString().toRegex().containsMatchIn(input)
+            filter is NativeRegExp -> coerceBoolean(callFunction(filter, "test", arrayOf(input)), false)
             else -> input.contains(coerceString(filter))
         }
 

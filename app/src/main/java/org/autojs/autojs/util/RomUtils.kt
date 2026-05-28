@@ -11,12 +11,11 @@ import androidx.core.net.toUri
 import ezy.assist.compat.RomUtil
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.pref.Language
-import java.io.BufferedReader
-import java.io.IOException
-import java.io.InputStreamReader
+import org.autojs.autojs.runtime.api.augment.sysprops.SystemProperties
 
 /**
  * Created by SuperMonster003 on Aug 17, 2023.
+ * Modified by SuperMonster003 as of Mar 30, 2026.
  */
 // @Reference to https://blog.csdn.net/liao_fu_yun/article/details/114971424
 object RomUtils {
@@ -79,34 +78,24 @@ object RomUtils {
     /* -=-=- Android-based OS, including custom ROMs -=-=- */
     /* -=-=- --------------------------------------- -=-=- */
 
-    fun isMiui() = getSystemProperty("ro.miui.ui.version.name").isNotEmpty()
+    fun isMiui() = !SystemProperties.get("ro.miui.ui.version.name").isNullOrEmpty()
 
-    fun isEmui() = getSystemProperty("ro.build.version.emui").isNotEmpty()
+    fun isEmui() = !SystemProperties.get("ro.build.version.emui").isNullOrEmpty()
 
-    fun isOppo() = getSystemProperty("ro.build.version.opporom").isNotEmpty()
+    fun isOppo() = !SystemProperties.get("ro.build.version.opporom").isNullOrEmpty()
 
-    fun isSmartisan() = getSystemProperty("ro.smartisan.version").isNotEmpty()
+    fun isSmartisan() = !SystemProperties.get("ro.smartisan.version").isNullOrEmpty()
 
-    fun isVivo() = getSystemProperty("ro.vivo.os.version").isNotEmpty()
+    fun isVivo() = !SystemProperties.get("ro.vivo.os.version").isNullOrEmpty()
 
     /** 金立. */
-    fun isGionee() = getSystemProperty("ro.gn.sv.version").isNotEmpty()
+    fun isGionee() = !SystemProperties.get("ro.gn.sv.version").isNullOrEmpty()
 
-    fun isLenovo() = getSystemProperty("ro.lenovo.lvp.version").isNotEmpty()
+    fun isLenovo() = !SystemProperties.get("ro.lenovo.lvp.version").isNullOrEmpty()
 
     fun isFlyme() = Build.DISPLAY.lowercase(Language.getPrefLanguage().locale).contains("flyme")
 
     fun isQiku() = RomUtil.isQiku()
-
-    private fun getSystemProperty(propName: String): String = try {
-        BufferedReader(
-            InputStreamReader(
-                Runtime.getRuntime().exec("getprop $propName").inputStream
-            ), 1024
-        ).use { it.readLine() }
-    } catch (ex: IOException) {
-        ""
-    }
 
     /* -=-=- --------------- -=-=- */
     /* -=-=- Brand / Product -=-=- */
@@ -115,14 +104,12 @@ object RomUtils {
     object Brand {
 
         /** Sony (索尼) Xperia. */
-        fun isXperia() = getSystemProperty("ro.semc.product.name").contains("xperia", true)
+        fun isXperia() = SystemProperties.get("ro.semc.product.name")?.contains("xperia", true) == true
 
         /** Redmi (红米). */
-        fun isRedmi() = getSystemProperty("ro.product.model").contains("redmi", true)
+        fun isRedmi() = SystemProperties.get("ro.product.model")?.contains("redmi", true) == true
 
         /** Mi Mix. */
         fun isMiMix() = Build.MODEL.contains("mi mix", true)
-
     }
-
 }

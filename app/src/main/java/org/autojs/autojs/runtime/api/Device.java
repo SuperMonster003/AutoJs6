@@ -22,6 +22,7 @@ import ezy.assist.compat.SettingsCompat;
 import org.autojs.autojs.pio.PFiles;
 import org.autojs.autojs.pio.UncheckedIOException;
 import org.autojs.autojs.runtime.ScriptRuntime;
+import org.autojs.autojs.runtime.api.augment.sysprops.SystemProperties;
 import org.autojs.autojs.util.DeviceUtils;
 import org.autojs.autojs.util.RomUtils;
 import org.autojs.autojs.util.RomUtils.Brand;
@@ -83,6 +84,11 @@ public class Device {
     public static final String securityPatch = Build.VERSION.SECURITY_PATCH;
 
     public static final String codename = Build.VERSION.CODENAME;
+
+    private static final String PROPERTY_PRODUCT_MARKET_NAME = "ro.product.marketname";
+    private static final String PROPERTY_SONY_MARKET_NAME = "ro.semc.product.name";
+    private static final String PROPERTY_MARKETING_NAME = "ro.config.marketing_name";
+    private static final String PROPERTY_PRODUCT_MODEL = "ro.product.model";
 
     public static String serial;
     public static String imei;
@@ -459,6 +465,23 @@ public class Device {
                '}';
     }
 
+    @NonNull
+    public String getMarketName() {
+        String[] propKeys = new String[]{
+                PROPERTY_PRODUCT_MARKET_NAME,
+                PROPERTY_SONY_MARKET_NAME,
+                PROPERTY_MARKETING_NAME,
+                PROPERTY_PRODUCT_MODEL,
+        };
+        for (String key : propKeys) {
+            String value = SystemProperties.get(key);
+            if (value != null && !value.trim().isEmpty()) {
+                return value;
+            }
+        }
+        return model;
+    }
+
     private Display getDefaultDisplay() {
         return ((WindowManager) getSystemService(WINDOW_SERVICE)).getDefaultDisplay();
     }
@@ -470,7 +493,7 @@ public class Device {
     public class Manufacturers {
 
         private boolean is(String manufacturer) {
-            return manufacturer.equalsIgnoreCase(Build.MANUFACTURER);
+            return manufacturer.trim().equalsIgnoreCase(Build.MANUFACTURER);
         }
 
         /**

@@ -1,9 +1,10 @@
 {
   "$data": {
     "v6.7.1": {
-      "released_date": "2026/03/29",
+      "released_date": "2026/05/29",
       "feature": [
         "runtime.loadAar 方法, 用于动态加载 aar 文件",
+        "device.getMarketName 方法, 用于获取设备的 \"市场名称\" _[`issue #513`](http://issues.autojs6.com/513)_",
         "插件中心增加全局设置页面/使用说明页面",
         "插件中心增加 SDK 插件自动挂载功能",
         "插件中心增加多变体优先级排序功能",

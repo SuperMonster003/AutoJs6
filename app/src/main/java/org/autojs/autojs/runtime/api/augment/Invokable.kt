@@ -1,9 +1,9 @@
 package org.autojs.autojs.runtime.api.augment
 
-import org.autojs.autojs.util.RhinoUtils.DEFAULT_CALLER
+import org.mozilla.javascript.Undefined
 
 interface Invokable {
 
-    fun invoke(vararg args: Any?): Any? = DEFAULT_CALLER
+    fun invoke(vararg args: Any?): Any? = Undefined.instance
 
 }
