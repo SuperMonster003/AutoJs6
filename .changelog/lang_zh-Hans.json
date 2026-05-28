@@ -20,6 +20,7 @@
         "runtime.loadJar 无法正常动态加载高版本 class 的问题",
         "app.isInstalled/kill 等方法无法正常使用包名参数的问题 _[`issue #495`](http://issues.autojs6.com/495)_",
         "无 Root 权限设备调用 shell 相关方法时可能出现假死的问题",
+        "Tasker 无法正常调用并运行脚本的问题 _[`issue #501`](http://issues.autojs6.com/501)_",
         "主页抽屉开关项的开关视图有效点击区域过小的问题",
         "启动页背景未延伸到刘海屏的短边切口区域的问题"
       ],

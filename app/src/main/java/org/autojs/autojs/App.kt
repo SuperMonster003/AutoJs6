@@ -19,12 +19,11 @@ import com.hjq.toast.Toaster
 import io.reactivex.android.schedulers.AndroidSchedulers
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.pref.Pref
-import org.autojs.autojs.inrt.Pref as InrtPref
-import org.autojs.autojs.inrt.InrtShortcuts
 import org.autojs.autojs.core.ui.inflater.ImageLoader
 import org.autojs.autojs.core.ui.inflater.util.Drawables
 import org.autojs.autojs.event.GlobalKeyObserver
 import org.autojs.autojs.external.receiver.DynamicBroadcastReceivers
+import org.autojs.autojs.inrt.InrtShortcuts
 import org.autojs.autojs.ipc.InAppEventBus
 import org.autojs.autojs.leakcanary.LeakCanarySetup
 import org.autojs.autojs.storage.file.TmpScriptFilesCleanupScheduler
@@ -40,6 +39,8 @@ import org.autojs.autojs6.R
 import org.greenrobot.eventbus.EventBus
 import java.lang.ref.WeakReference
 import java.lang.reflect.Method
+import androidx.work.Configuration as WorkManagerConfiguration
+import org.autojs.autojs.inrt.Pref as InrtPref
 
 /**
  * Created by Stardust on Jan 27, 2017.
@@ -47,7 +48,7 @@ import java.lang.reflect.Method
  * Modified by JetBrains AI Assistant (GPT-5.2) as of Feb 7, 2026.
  * Modified by JetBrains AI Assistant (GPT-5.3-Codex (xhigh)) as of Mar 9, 2026.
  */
-class App : MultiDexApplication() {
+class App : MultiDexApplication(), WorkManagerConfiguration.Provider {
 
     lateinit var dynamicBroadcastReceivers: DynamicBroadcastReceivers
         private set
@@ -277,5 +278,18 @@ class App : MultiDexApplication() {
         }
 
     }
+
+    // @Hint by SuperMonster003 on May 29, 2026.
+    //  ! Explicitly provides workManagerConfiguration.
+    //  ! Even if WorkManagerInitializer is disabled in the Manifest,
+    //  ! WorkManager.getInstance(...) can complete initialization through Application configuration,
+    //  ! to avoid crashes at WorkTimedTaskScheduler.schedulePeriodicCheck().
+    //  ! zh-CN:
+    //  ! 显式提供 workManagerConfiguration.
+    //  ! 即使 Manifest 中禁用了 WorkManagerInitializer,
+    //  ! WorkManager.getInstance(...) 也能通过 Application 配置完成初始化,
+    //  ! 以避免 WorkTimedTaskScheduler.schedulePeriodicCheck() 处崩溃.
+    override val workManagerConfiguration: WorkManagerConfiguration
+        get() = WorkManagerConfiguration.Builder().build()
 
 }
