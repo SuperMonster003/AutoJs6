@@ -11,6 +11,7 @@
     var debugMarker = null;
     var storedReplacement = "";
     var scrollNotifyTimer = null;
+    var DEFAULT_FONT_FAMILY = '"JetBrains Mono", monospace';
 
     function callBridge(name, args) {
         try {
@@ -466,7 +467,8 @@
             enableSnippets: true,
             showPrintMargin: false,
             highlightActiveLine: true,
-            wrap: false
+            wrap: false,
+            fontFamily: DEFAULT_FONT_FAMILY
         });
         editor.setFontSize("14px");
 

@@ -329,6 +329,7 @@ Steps:
 Expected:
 - ACE theme follows app theme.
 - Font size is restored after engine switch.
+- ACE text uses bundled JetBrains Mono, falling back to system monospace if the font asset cannot be loaded.
 - Text remains readable and markers stay visible.
 
 Failure logs:

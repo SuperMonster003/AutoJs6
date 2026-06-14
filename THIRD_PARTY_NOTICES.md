@@ -19,4 +19,10 @@ This file records third-party notices relevant to the ACE editor integration.
 
 ## Font assets
 
-No `.ttf`, `.otf`, `.woff`, or `.woff2` font files are bundled under the ACE asset tree. The ACE integration CSS uses the generic system `monospace` family, so no Consolas or other proprietary font file is redistributed by this integration.
+- Component: JetBrains Mono
+- Version: 2.304
+- Path: `app/src/main/assets/editor/ace-builds-1.4.12/fonts/jetbrains-mono`
+- License: SIL Open Font License 1.1
+- Notice files: `OFL.txt`, `AUTHORS.txt`
+
+The integration bundles only the Regular, Italic, Bold, and BoldItalic WOFF2 files needed by the ACE editor. No Consolas or other proprietary font file is redistributed by this integration.
