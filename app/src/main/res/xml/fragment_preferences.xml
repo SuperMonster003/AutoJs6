@@ -155,6 +155,14 @@
             app:itemDefaultKey="@string/default_key_ace_editor_font"
             app:longClickPrompt="@string/description_ace_editor_font_preference" />
 
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_ace_lsp_enabled"
+            app:defaultValue="@bool/pref_ace_lsp_enabled"
+            app:title="@string/text_ace_lsp_enabled"
+            app:summary="@string/summary_ace_lsp_enabled"
+            app:longClickPrompt="@string/description_ace_lsp_enabled_preference" />
+
     </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
 
     <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory

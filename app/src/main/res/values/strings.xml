@@ -74,6 +74,7 @@
     <string name="key_ace_editor_font_jetbrains_mono" translatable="false">jetbrains_mono</string>
     <string name="key_ace_editor_font_source_code_pro" translatable="false">source_code_pro</string>
     <string name="key_ace_editor_font_system_monospace" translatable="false">system_monospace</string>
+    <string name="key_ace_lsp_enabled" translatable="false">key_$_ace_lsp_enabled</string>
     <string name="key_about_app_and_developer" translatable="false">key_$_about_app_and_developer</string>
     <string name="key_about_app_tips" translatable="false">key_$_about_app_tips</string>
     <string name="key_all_files_access" translatable="false">key_$_all_files_access</string>
@@ -1752,7 +1753,10 @@
     <string name="text_editor_auto_show_log_bottom_sheet_on_run">Auto show bottom log panel after running</string>
     <string name="text_editor_log_button_behavior">Editor log button behavior</string>
     <string name="summary_editor_auto_show_log_bottom_sheet_on_run">Automatically open the bottom log panel after the editor Run button starts a script</string>
+    <string name="summary_ace_lsp_enabled">Enable experimental ACE LSP configuration; static completion remains the fallback.</string>
+    <string name="text_ace_lsp_enabled">ACE LSP smart completion (experimental)</string>
     <string name="description_editor_log_button_behavior_preference">Choose how the editor log button opens logs: bottom log panel or fullscreen log page.</string>
     <string name="description_editor_engine_preference">Native remains the default editor. ACE is an experimental WebView editor; if ACE fails at runtime, AutoJs6 falls back to the native editor and keeps the best available text snapshot.</string>
     <string name="description_ace_editor_font_preference">Choose the ACE editor font. JetBrains Mono is the default; Source Code Pro and system monospace are available fallbacks.</string>
+    <string name="description_ace_lsp_enabled_preference">Experimental ACE LSP support is off by default. The current build only exposes bridge options; if no LSP server is available, ACE keeps using static completion.</string>
 </resources>

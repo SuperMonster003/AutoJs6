@@ -54,12 +54,22 @@ class AceBridge(
 
     @JavascriptInterface
     fun getLspOptions(): String {
-        return "{}"
+        return editor.bridgeLspOptions()
     }
 
     @JavascriptInterface
     fun shouldForceJsInitThrow(): Boolean {
         return AceEditorTestHooks.shouldForceJsInitThrow()
+    }
+
+    @JavascriptInterface
+    fun showSoftInput() {
+        editor.showSoftInput()
+    }
+
+    @JavascriptInterface
+    fun hideSoftInput() {
+        editor.hideSoftInput()
     }
 
     @JavascriptInterface

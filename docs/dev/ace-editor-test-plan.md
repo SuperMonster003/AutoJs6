@@ -16,6 +16,10 @@ This plan covers manual device validation for the ACE editor experiment. Native 
   - `ACE editor`
   - `WebView renderer`
   - `Blocked ACE`
+  - `lspError`
+- Local tool checks:
+  - `node tools/ace-completion/verify-autojs6-indices.mjs`
+  - `node tools/ace-completion/test-completer.mjs`
 
 ## Debug Hooks
 
@@ -34,6 +38,15 @@ The following hooks are available in debug builds through `AceEditorTestHooks`. 
 Use `More -> Copy ACE diagnostics` from the editor menu when reporting ACE issues. The same export is available from the isolated ACE debug page through the `Copy ACE diagnostics` button.
 
 Diagnostics should include the current engine type, ACE health state, last failure, Android/WebView versions, LSP state, file size, large-file policy, and TextMirror revision.
+
+## Completion And LSP Checks
+
+- `autojs6_indices.js` must be regenerated from `tools/ace-completion/autojs6_indices.source.json`.
+- Static completion must work for `toast`, `app.launch`, `files.read`, `images.findImage`, `device.getBattery`, `console.log`, `threads.start`, and `engines.myEngine`.
+- `autojs_indices.js` is a fallback only; AutoJs6-specific entries should be added to the source JSON.
+- `ACE LSP smart completion (experimental)` is off by default.
+- With LSP off, `getLspOptions()` returns `{}` and no WebSocket is created.
+- With LSP on and no server available, ACE remains editable and static completion still works.
 
 ## Automation Status
 
@@ -338,6 +351,64 @@ Failure logs:
 - `themeChanged`
 - `fontSizeChanged`
 
+### ACE-COMPLETION-001: Static completion smoke test
+
+Preconditions:
+- Node.js is available on the development machine.
+
+Steps:
+1. Run `node tools/ace-completion/verify-autojs6-indices.mjs`.
+2. Run `node tools/ace-completion/test-completer.mjs`.
+
+Expected:
+- Both commands pass.
+- Common AutoJs6 API completions are present.
+- Missing indices and legacy fallback paths do not throw.
+
+Failure logs:
+- `Missing required global completion`
+- `Missing required member completion`
+
+### ACE-LSP-001: LSP default-off behavior
+
+Preconditions:
+- ACE editor is selected in settings.
+- `ACE LSP smart completion (experimental)` is off.
+
+Steps:
+1. Open `ace-basic.js`.
+2. Copy ACE diagnostics.
+3. Verify no WebSocket request appears in WebView logs.
+
+Expected:
+- ACE opens normally.
+- Diagnostics include `lspEnabled=false` and `lspState=disabled`.
+- Static completion continues to work.
+
+Failure logs:
+- `lspError`
+- `WebSocket`
+
+### ACE-LSP-002: LSP flag without server
+
+Preconditions:
+- ACE editor is selected in settings.
+- `ACE LSP smart completion (experimental)` is on.
+
+Steps:
+1. Open `ace-basic.js`.
+2. Trigger completion for `console.lo`.
+3. Copy ACE diagnostics.
+
+Expected:
+- ACE remains editable.
+- Static completion returns `console.log`.
+- Diagnostics include `lspEnabled=true` and `lspState=configured-no-server`.
+
+Failure logs:
+- `lspError`
+- `AceFailureType.LSP_ERROR`
+
 ### ACE-IME-001: Input method and symbols/function bars
 
 Preconditions:
@@ -391,9 +462,12 @@ Record each run with the actual Android System WebView version from device setti
 ACE can remain enabled as an experimental option only if:
 
 - Native remains the default editor.
+- `verify-autojs6-indices.mjs` and `test-completer.mjs` pass.
 - All fallback cases above return to Native without app crash.
 - Recent small-file input survives fallback through TextMirror in practical tests.
 - Large files route to Native under the current threshold policy.
 - No blocked URL, file bridge, or LSP error prevents basic edit/save/run.
+- `lib.autojs6.d.ts` is generated from the same AutoJs6 completion source.
+- `docs/dev/ace-lsp-design.md` still keeps server-backed LSP experimental and default-off.
 - Third-party asset and license checks remain clean.
 - ACE diagnostics can be copied from an active ACE editor and after ACE fallback to Native.

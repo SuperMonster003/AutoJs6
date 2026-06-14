@@ -2,6 +2,7 @@ package org.autojs.autojs.ui.edit.editor.ace.diagnostics
 
 import android.os.Build
 import android.webkit.WebView
+import org.autojs.autojs.ui.edit.editor.ace.AceEditorLspPreferences
 import org.autojs.autojs.ui.edit.editor.engine.EditorEngineType
 
 object AceDiagnostics {
@@ -20,8 +21,8 @@ object AceDiagnostics {
             assetUrl = null,
             webViewVersion = currentWebViewVersion(),
             androidVersion = androidVersion(),
-            lspEnabled = false,
-            lspState = LSP_DISABLED,
+            lspEnabled = AceEditorLspPreferences.isEnabled(),
+            lspState = lspState(),
             aceFont = null,
             fileSizeBytes = fileSizeBytes,
             largeFilePolicy = largeFilePolicy,
@@ -72,7 +73,12 @@ object AceDiagnostics {
         return "Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT}, ${Build.VERSION.CODENAME})"
     }
 
+    fun lspState(): String {
+        return if (AceEditorLspPreferences.isEnabled()) LSP_CONFIGURED_NO_SERVER else LSP_DISABLED
+    }
+
     private fun String?.orUnknown(): String = this?.takeIf { it.isNotBlank() } ?: "unknown"
 
     const val LSP_DISABLED = "disabled"
+    const val LSP_CONFIGURED_NO_SERVER = "configured-no-server"
 }

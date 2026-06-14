@@ -25,6 +25,7 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.FrameLayout
+import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.ui.edit.editor.ace.diagnostics.AceDiagnostics
 import org.autojs.autojs.ui.edit.editor.ace.diagnostics.AceDiagnosticsSnapshot
 import org.autojs.autojs.ui.edit.editor.ace.health.AceFailure
@@ -128,8 +129,8 @@ class AceCodeEditor @JvmOverloads constructor(
             assetUrl = EDITOR_URL,
             webViewVersion = AceDiagnostics.currentWebViewVersion(),
             androidVersion = AceDiagnostics.androidVersion(),
-            lspEnabled = false,
-            lspState = AceDiagnostics.LSP_DISABLED,
+            lspEnabled = AceEditorLspPreferences.isEnabled(),
+            lspState = AceDiagnostics.lspState(),
             aceFont = AceEditorFontPreferences.get().preferenceValue,
             fileSizeBytes = fileSizeBytes,
             largeFilePolicy = largeFilePolicy,
@@ -487,6 +488,33 @@ class AceCodeEditor @JvmOverloads constructor(
 
     internal fun bridgeFontFamily(): String {
         return AceEditorFontPreferences.get().cssFontFamily
+    }
+
+    internal fun bridgeLspOptions(): String {
+        if (!AceEditorLspPreferences.isEnabled()) {
+            return "{}"
+        }
+        return JSONObject()
+            .put("enabled", true)
+            .put("transport", "unavailable")
+            .put("serverUri", JSONObject.NULL)
+            .put("documentUri", "file:///autojs6/editor/current.js")
+            .put("libraryUris", JSONArray().put("autojs6/types/lib.autojs6.d.ts"))
+            .put("fallback", "static-completion")
+            .put("state", AceDiagnostics.LSP_CONFIGURED_NO_SERVER)
+            .toString()
+    }
+
+    internal fun showSoftInput() {
+        postToMain {
+            ViewUtils.showSoftInput(webView)
+        }
+    }
+
+    internal fun hideSoftInput() {
+        postToMain {
+            ViewUtils.hideSoftInput(webView)
+        }
     }
 
     private fun configureWebView() {
