@@ -685,6 +685,9 @@ Verification performed while creating and extending this baseline:
 - `:app:embeddedNodePackagingPreflightAppDebug -Pautojs.nodejs.releaseFlavor=rhinoOnly`: passed after tightening JNI packaging excludes; report verified no `libnode.so` or `libautojs6-node.so` in the APK.
 - `:app:tasks -Pautojs.nodejs.releaseFlavor=nodeMini -Pautojs.nodejs.releaseAbis=x86`: failed as expected with an actionable x86 unsupported message.
 - `:app:embeddedNodePackagedDiagnosticReport` with `PackagedNodeSmoke_v1.0.0.apk` and `arm64-v8a` expected ABI: passed after Task 45 flavor-aware packaged verifier updates.
+- `:app:compileAppDebugKotlin`: passed after adding Task 46 runtime native library hash logging.
+- `:app:nativeNodeSymbolArchiveReport`: passed after Task 46 and generated `app/build/reports/native-node/native-symbol-archive-appDebug.txt` with `embedded.node.native.symbol_archive.ready=true`.
+- `:app:verifyEmbeddedNodeReleaseCandidate --dry-run`: passed after Task 46 and confirmed `nativeNodeSymbolArchiveReport` is part of the release-candidate task graph.
 
 Instrumentation tests executed while creating and extending this baseline: 186 successful tests.
 
@@ -708,4 +711,5 @@ Recommended next tasks:
 - compare Task 43 performance JSON medians when changing native load, service lifecycle, or destroy behavior
 - run Task 44 memory leak stress before merging lifecycle, bridge transport, fs, or image-handle ownership changes
 - run Task 45 release flavor preflight for `nodeFull`, `nodeMini`, and `rhinoOnly` before changing native packaging rules
+- keep the Task 46 symbol archive report with APKs, logcat, and tombstones when triaging native crashes
 - keep high-risk features behind design gates

@@ -7,7 +7,9 @@ import android.os.SystemClock
 import android.util.Log
 import org.autojs.autojs.App
 import org.autojs.autojs6.BuildConfig
+import java.io.File
 import java.nio.charset.StandardCharsets
+import java.security.MessageDigest
 
 object NativeNodeEmbeddedRuntimeBridge {
 
@@ -78,6 +80,7 @@ object NativeNodeEmbeddedRuntimeBridge {
     private const val PLUGIN_HEARTBEAT_PROBE_PROPERTY = "autojs.nodejs.embedded.probe.pluginheartbeat"
     private const val PLUGIN_HEALTH_PROBE_PROPERTY = "autojs.nodejs.embedded.probe.pluginhealth"
     private const val PLUGIN_TELEMETRY_PROBE_PROPERTY = "autojs.nodejs.embedded.probe.plugintelemetry"
+
     private const val PLUGIN_DIAGNOSTICS_PROBE_PROPERTY = "autojs.nodejs.embedded.probe.plugindiagnostics"
     private const val PLUGIN_RECOVERY_PROBE_PROPERTY = "autojs.nodejs.embedded.probe.pluginrecovery"
     private const val PLUGIN_RESTART_PROBE_PROPERTY = "autojs.nodejs.embedded.probe.pluginrestart"
@@ -437,6 +440,31 @@ object NativeNodeEmbeddedRuntimeBridge {
     private const val PROBE_LEVEL_EMBEDDED_MVP_TIMEOUT_ISOLATION = 207
     private const val PROBE_LEVEL_EMBEDDED_MVP_SECURITY_POLICY = 208
     private const val PROBE_LEVEL_EMBEDDED_MVP_GO_NO_GO = 209
+
+    private fun nativeLibrarySha256(context: Context, libraryFileName: String): String? {
+        val nativeLibraryDir = context.applicationContext.applicationInfo.nativeLibraryDir
+            ?.takeIf(String::isNotBlank)
+            ?: return null
+        val library = File(nativeLibraryDir, libraryFileName).takeIf(File::isFile) ?: return null
+        return runCatching { library.sha256Hex() }.getOrNull()
+    }
+
+    private fun nativeLibrarySoFileName(libraryName: String): String = "lib$libraryName.so"
+
+    private fun File.sha256Hex(): String {
+        val digest = MessageDigest.getInstance("SHA-256")
+        inputStream().use { input ->
+            val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+            while (true) {
+                val read = input.read(buffer)
+                if (read < 0) {
+                    break
+                }
+                digest.update(buffer, 0, read)
+            }
+        }
+        return digest.digest().joinToString("") { "%02x".format(it) }
+    }
 
     fun runEmbeddedScriptInCurrentProcess(
         context: Context,
@@ -1356,6 +1384,8 @@ object NativeNodeEmbeddedRuntimeBridge {
             deviceSupportedAbis = Build.SUPPORTED_ABIS.toList(),
             currentAbi = nativeValues["current.abi"] ?: Build.SUPPORTED_ABIS.firstOrNull().orEmpty(),
             nativeLibraryDir = appContext.applicationInfo.nativeLibraryDir,
+            libnodeSha256 = nativeLibrarySha256(appContext, nativeLibrarySoFileName(NativeNodeRuntimeBridge.NODE_LIBRARY_NAME)),
+            bridgeSha256 = nativeLibrarySha256(appContext, nativeLibrarySoFileName(NativeNodeRuntimeBridge.BRIDGE_LIBRARY_NAME)),
             libcxxLoaded = libcxxLoad.loaded,
             libcxxLoadError = libcxxLoad.error.toLoadErrorMessage(),
             libnodeLoaded = nodeLoad.loaded,
@@ -14225,6 +14255,8 @@ object NativeNodeEmbeddedRuntimeBridge {
             deviceSupportedAbis = Build.SUPPORTED_ABIS.toList(),
             currentAbi = Build.SUPPORTED_ABIS.firstOrNull().orEmpty(),
             nativeLibraryDir = context.applicationContext.applicationInfo.nativeLibraryDir,
+            libnodeSha256 = nativeLibrarySha256(context, nativeLibrarySoFileName(NativeNodeRuntimeBridge.NODE_LIBRARY_NAME)),
+            bridgeSha256 = nativeLibrarySha256(context, nativeLibrarySoFileName(NativeNodeRuntimeBridge.BRIDGE_LIBRARY_NAME)),
             libcxxLoaded = false,
             libcxxLoadError = null,
             libnodeLoaded = false,
@@ -15438,6 +15470,8 @@ object NativeNodeEmbeddedRuntimeBridge {
             deviceSupportedAbis = Build.SUPPORTED_ABIS.toList(),
             currentAbi = Build.SUPPORTED_ABIS.firstOrNull().orEmpty(),
             nativeLibraryDir = context.applicationContext.applicationInfo.nativeLibraryDir,
+            libnodeSha256 = nativeLibrarySha256(context, nativeLibrarySoFileName(NativeNodeRuntimeBridge.NODE_LIBRARY_NAME)),
+            bridgeSha256 = nativeLibrarySha256(context, nativeLibrarySoFileName(NativeNodeRuntimeBridge.BRIDGE_LIBRARY_NAME)),
             libcxxLoaded = false,
             libcxxLoadError = null,
             libnodeLoaded = false,
@@ -16967,6 +17001,8 @@ object NativeNodeEmbeddedRuntimeBridge {
         val deviceSupportedAbis: List<String>,
         val currentAbi: String,
         val nativeLibraryDir: String?,
+        val libnodeSha256: String?,
+        val bridgeSha256: String?,
         val libcxxLoaded: Boolean,
         val libcxxLoadError: String?,
         val libnodeLoaded: Boolean,
@@ -17207,6 +17243,8 @@ object NativeNodeEmbeddedRuntimeBridge {
             appendLine("  device.abis=[${deviceSupportedAbis.joinToString()}]")
             appendLine("  selected.abi=$currentAbi")
             nativeLibraryDir?.let { appendLine("  native.library.dir=$it") }
+            appendLine("  libnode.so.sha256=${libnodeSha256 ?: "missing"}")
+            appendLine("  libautojs6-node.so.sha256=${bridgeSha256 ?: "missing"}")
             appendLine("  service.roundTrip=${serviceRoundTrip ?: "skipped"}")
             nativePing?.let { appendLine("  native.ping=$it") }
             appendLine()

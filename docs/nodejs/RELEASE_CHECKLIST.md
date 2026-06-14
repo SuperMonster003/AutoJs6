@@ -8,6 +8,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `:app:compileAppDebugAndroidTestKotlin`
 - [ ] `:app:externalNativeBuildAppDebug`
 - [ ] `:app:nativeNodeDependencyReportAppDebug`
+- [ ] `:app:nativeNodeSymbolArchiveReport`
 
 ## Device Tests
 
@@ -88,6 +89,8 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `x86_64/libc++_shared.so`
 - [ ] x86 remains fail-fast unless `libnode.so`, `libautojs6-node.so`, and smoke coverage are deliberately added
 - [ ] `embeddedNodePackagingPreflightAppDebug` reports release flavor policy ready
+- [ ] `nativeNodeSymbolArchiveReport` records per-ABI native library SHA-256 and Build ID values
+- [ ] symbol archive report is stored with the APK, git commit, release flavor, and ABI split metadata
 
 ## Runtime Security
 
@@ -139,6 +142,9 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 
 - [ ] `process.version` and `process.versions` captured in smoke
 - [ ] native dependency report generated
+- [ ] native symbol archive report generated
+- [ ] runtime probe logs `libnode.so.sha256` and `libautojs6-node.so.sha256`
+- [ ] logcat/tombstone or bugreport collection steps in `NATIVE_CRASH_DIAGNOSTICS.md` remain current
 - [ ] optional performance report generated with `NodeEmbeddedPerformanceInstrumentationTest` and pulled by `:app:pullNodeEmbeddedPerformanceReports` for lifecycle/native-load changes
 - [ ] memory leak stress report generated with `NodeEmbeddedMemoryLeakStressInstrumentationTest` for lifecycle, bridge, fs, or image-handle changes
 - [ ] packaged verifier gives actionable failures
@@ -154,6 +160,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `docs/nodejs/SECURITY_MODEL.md`
 - [ ] `docs/nodejs/TESTING.md`
 - [ ] `docs/nodejs/PERFORMANCE.md` when benchmark behavior or report schema changes
+- [ ] `docs/nodejs/NATIVE_CRASH_DIAGNOSTICS.md` when native crash capture, symbol archive, or symbolication behavior changes
 - [ ] `docs/nodejs/design/WORK_MANAGER.md` when scheduled/background task behavior changes
 - [ ] `docs/nodejs/design/ESM.md` when ESM or dynamic import behavior changes
 - [ ] `docs/nodejs/design/NETWORK.md` when network behavior, packaging permissions, or request policy changes

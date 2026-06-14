@@ -3021,6 +3021,7 @@ val verifyEmbeddedNodeDebug = tasks.register("verifyEmbeddedNodeDebug") {
         "compileAppDebugAndroidTestKotlin",
         "externalNativeBuildAppDebug",
         "nativeNodeDependencyReportAppDebug",
+        "nativeNodeSymbolArchiveReport",
         embeddedNodePackagingPreflightAppDebug,
     )
 }

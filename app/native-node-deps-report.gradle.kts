@@ -46,6 +46,18 @@ private data class NativeNodeLibcxxCandidate(
     val length: Long,
 )
 
+private data class NativeNodeSymbolSectionEvidence(
+    val debugInfo: Boolean,
+    val symtab: Boolean,
+    val dynsym: Boolean,
+) {
+    val symbolFileAvailable: Boolean
+        get() = debugInfo || symtab
+
+    override fun toString(): String =
+        "debug_info=$debugInfo, symtab=$symtab, dynsym=$dynsym"
+}
+
 private fun File.sha256(): String {
     val digest = MessageDigest.getInstance("SHA-256")
     inputStream().use { input ->
@@ -270,6 +282,65 @@ private fun nativeNodeReportAbiFromPath(path: String): String =
 
 private fun nativeNodeReportSanitizeFileName(value: String): String =
     value.replace(Regex("""[^A-Za-z0-9._+-]"""), "_")
+
+private fun parseNativeNodeReportBuildId(tools: NativeNodeReportTools, so: File): String? {
+    if (!so.isFile) {
+        return null
+    }
+    val buildIdPattern = Regex("""Build ID:\s*([0-9A-Fa-f]+)""")
+    return runNativeNodeReportCommand(tools.readelf.absolutePath, "-n", "--wide", so.absolutePath)
+        .firstNotNullOfOrNull { line -> buildIdPattern.find(line)?.groupValues?.get(1) }
+}
+
+private fun parseNativeNodeReportSymbolEvidence(
+    tools: NativeNodeReportTools,
+    so: File,
+): NativeNodeSymbolSectionEvidence? {
+    if (!so.isFile) {
+        return null
+    }
+    val sections = runNativeNodeReportCommand(tools.readelf.absolutePath, "-S", "--wide", so.absolutePath)
+        .filterNot { it.startsWith("[command failed:") }
+    if (sections.isEmpty()) {
+        return null
+    }
+    return NativeNodeSymbolSectionEvidence(
+        debugInfo = sections.any { it.contains(".debug_info") || it.contains(".debug_line") },
+        symtab = sections.any { it.contains(".symtab") },
+        dynsym = sections.any { it.contains(".dynsym") },
+    )
+}
+
+private fun latestNativeNodeReportLibraryFile(root: File, abi: String, libraryName: String): File? {
+    if (!root.isDirectory) {
+        return null
+    }
+    return root.walkTopDown()
+        .filter { it.isFile && it.name == libraryName && nativeNodeReportAbiFromPath(it.absolutePath) == abi }
+        .maxByOrNull { it.lastModified() }
+}
+
+private fun StringBuilder.appendNativeNodeSymbolArchiveEntry(
+    tools: NativeNodeReportTools,
+    label: String,
+    file: File?,
+) {
+    val existingFile = file?.takeIf(File::isFile)
+    appendLine("    $label:")
+    appendLine("      path: ${existingFile?.absolutePath ?: "missing"}")
+    appendLine("      size: ${existingFile?.length()?.toString() ?: "missing"}")
+    appendLine("      sha256: ${existingFile?.sha256() ?: "missing"}")
+    appendLine("      build_id: ${existingFile?.let { parseNativeNodeReportBuildId(tools, it) } ?: "missing"}")
+    val symbolEvidence = existingFile?.let { parseNativeNodeReportSymbolEvidence(tools, it) }
+    appendLine("      symbol_evidence: ${symbolEvidence ?: "missing"}")
+    appendLine(
+        "      symbol_file: " + when {
+            existingFile == null -> "missing"
+            symbolEvidence?.symbolFileAvailable == true -> existingFile.absolutePath
+            else -> "missing (no .debug_* or .symtab section found)"
+        }
+    )
+}
 
 private fun extractNativeNodeReportApkLibcxx(
     apkFiles: List<File>,
@@ -579,6 +650,144 @@ val nativeNodeDependencyReportAppDebug = tasks.register("nativeNodeDependencyRep
 
         reportFile.writeText(report)
         logger.lifecycle("Native Node dependency report written to ${reportFile.absolutePath}")
+    }
+}
+
+val nativeNodeSymbolArchiveReport = tasks.register("nativeNodeSymbolArchiveReport") {
+    group = "verification"
+    description = "Writes the appDebug native symbol archive report for Embedded Node crash diagnostics."
+
+    dependsOn(
+        "externalNativeBuild${nativeNodeReportVariantTaskSuffix}",
+        "merge${nativeNodeReportVariantTaskSuffix}NativeLibs",
+    )
+    outputs.file(layout.buildDirectory.file("reports/native-node/native-symbol-archive-$nativeNodeReportVariant.txt"))
+    outputs.upToDateWhen { false }
+
+    doLast {
+        val reportFile = layout.buildDirectory
+            .file("reports/native-node/native-symbol-archive-$nativeNodeReportVariant.txt")
+            .get()
+            .asFile
+        reportFile.parentFile.mkdirs()
+
+        val tools = findNativeNodeReportTools(rootProject.projectDir)
+        if (tools == null) {
+            reportFile.writeText(
+                """
+                Native Node symbol archive report: $nativeNodeReportVariant
+                NDK $nativeNodeReportNdkVersion tools were not found.
+                Checked sdk.dir from local.properties and ANDROID_HOME/ANDROID_SDK_ROOT.
+                embedded.node.native.symbol_archive.ready=false
+                """.trimIndent()
+            )
+            logger.warn("Native Node symbol archive report skipped because NDK $nativeNodeReportNdkVersion tools were not found.")
+            return@doLast
+        }
+
+        val sourceJniLibsRoot = projectDir.resolve("src/main/jniLibs")
+        val cxxNativeLibsRoot = layout.buildDirectory.dir("intermediates/cxx").get().asFile
+        val mergedNativeLibsRoot = layout.buildDirectory
+            .dir("intermediates/merged_native_libs/$nativeNodeReportVariant/merge${nativeNodeReportVariantTaskSuffix}NativeLibs/out/lib")
+            .get()
+            .asFile
+        val strippedNativeLibsRoot = layout.buildDirectory
+            .dir("intermediates/stripped_native_libs/$nativeNodeReportVariant/strip${nativeNodeReportVariantTaskSuffix}DebugSymbols/out/lib")
+            .get()
+            .asFile
+
+        val missingRequiredEntries = nativeNodeReportRequiredLibcxxAbis.flatMap { abi ->
+            listOfNotNull(
+                "src/main/jniLibs/$abi/$nativeNodeReportNodeLibraryName".takeUnless {
+                    sourceJniLibsRoot.resolve("$abi/$nativeNodeReportNodeLibraryName").isFile
+                },
+                "CMake output $abi/$nativeNodeReportBridgeLibraryName".takeUnless {
+                    latestNativeNodeReportLibraryFile(cxxNativeLibsRoot, abi, nativeNodeReportBridgeLibraryName)?.isFile == true
+                },
+                "merged_native_libs/$abi/$nativeNodeReportNodeLibraryName".takeUnless {
+                    mergedNativeLibsRoot.resolve("$abi/$nativeNodeReportNodeLibraryName").isFile
+                },
+                "merged_native_libs/$abi/$nativeNodeReportBridgeLibraryName".takeUnless {
+                    mergedNativeLibsRoot.resolve("$abi/$nativeNodeReportBridgeLibraryName").isFile
+                },
+            )
+        }
+        val ready = missingRequiredEntries.isEmpty()
+
+        val report = buildString {
+            appendLine("Native Node symbol archive report: $nativeNodeReportVariant")
+            appendLine("Generated at: ${java.time.ZonedDateTime.now()}")
+            appendLine()
+
+            appendLine("Tools:")
+            appendLine("  NDK: ${tools.ndkDir.absolutePath}")
+            appendLine("  readelf: ${tools.readelf.absolutePath}")
+            appendLine("  nm: ${tools.nm.absolutePath}")
+            appendLine()
+
+            appendLine("Scan roots:")
+            appendLine("  src/main/jniLibs: ${sourceJniLibsRoot.absolutePath}")
+            appendLine("  CMake outputs: ${cxxNativeLibsRoot.absolutePath}")
+            appendLine("  merged native libs: ${mergedNativeLibsRoot.absolutePath}")
+            appendLine("  stripped native libs: ${strippedNativeLibsRoot.absolutePath}")
+            appendLine()
+
+            nativeNodeReportRequiredLibcxxAbis.forEach { abi ->
+                appendLine("ABI: $abi")
+                appendLine("  $nativeNodeReportNodeLibraryName:")
+                appendNativeNodeSymbolArchiveEntry(
+                    tools,
+                    "src/main/jniLibs",
+                    sourceJniLibsRoot.resolve("$abi/$nativeNodeReportNodeLibraryName"),
+                )
+                appendNativeNodeSymbolArchiveEntry(
+                    tools,
+                    "merged native libs",
+                    mergedNativeLibsRoot.resolve("$abi/$nativeNodeReportNodeLibraryName"),
+                )
+                appendNativeNodeSymbolArchiveEntry(
+                    tools,
+                    "stripped native libs",
+                    strippedNativeLibsRoot.resolve("$abi/$nativeNodeReportNodeLibraryName"),
+                )
+                appendLine("  $nativeNodeReportBridgeLibraryName:")
+                appendNativeNodeSymbolArchiveEntry(
+                    tools,
+                    "latest CMake output",
+                    latestNativeNodeReportLibraryFile(cxxNativeLibsRoot, abi, nativeNodeReportBridgeLibraryName),
+                )
+                appendNativeNodeSymbolArchiveEntry(
+                    tools,
+                    "merged native libs",
+                    mergedNativeLibsRoot.resolve("$abi/$nativeNodeReportBridgeLibraryName"),
+                )
+                appendNativeNodeSymbolArchiveEntry(
+                    tools,
+                    "stripped native libs",
+                    strippedNativeLibsRoot.resolve("$abi/$nativeNodeReportBridgeLibraryName"),
+                )
+                appendLine()
+            }
+
+            appendLine("Summary:")
+            appendLine("  embedded.node.native.symbol_archive.report=${reportFile.absolutePath}")
+            appendLine("  embedded.node.native.symbol_archive.ready=$ready")
+            appendLine("  embedded.node.native.symbol_archive.required_abis=${nativeNodeReportRequiredLibcxxAbis.joinToString()}")
+            appendLine(
+                "  embedded.node.native.symbol_archive.missing=" +
+                        if (missingRequiredEntries.isEmpty()) "none" else missingRequiredEntries.joinToString()
+            )
+            appendLine()
+
+            appendLine("Notes:")
+            appendLine("  Keep this report with the APK, git commit, logcat, and tombstone or bugreport for crash triage.")
+            appendLine("  For bridge crashes, prefer the latest CMake output symbol_file path when it has .debug_* or .symtab sections.")
+            appendLine("  For libnode crashes, use the Build ID and sha256 to match the exact prebuilt libnode.so artifact.")
+        }
+
+        reportFile.writeText(report)
+        logger.lifecycle("Native Node symbol archive report written to ${reportFile.absolutePath}")
+        logger.lifecycle("Native Node symbol archive ready: $ready")
     }
 }
 

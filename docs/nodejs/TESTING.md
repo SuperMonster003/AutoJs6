@@ -15,6 +15,7 @@ Run these before device tests:
 .\gradlew.bat --console=plain :app:compileAppDebugAndroidTestKotlin
 .\gradlew.bat --console=plain :app:externalNativeBuildAppDebug
 .\gradlew.bat --console=plain :app:nativeNodeDependencyReportAppDebug
+.\gradlew.bat --console=plain :app:nativeNodeSymbolArchiveReport
 ```
 
 ## Device Instrumentation
@@ -371,6 +372,6 @@ Use these aggregate tasks for local gates:
 .\gradlew.bat --console=plain :app:verifyEmbeddedNodeReleaseCandidate
 ```
 
-`verifyEmbeddedNodeDebug` covers build, native dependency reporting, and packaging preflight. `verifyEmbeddedNodePackagedDebug`
-covers packaged host verification, including the diagnostic report and smoke host verifier. Focused instrumentation classes still
-use the explicit `connectedAppDebugAndroidTest` commands above when a device gate is required.
+`verifyEmbeddedNodeDebug` covers build, native dependency reporting, native symbol archive reporting, and packaging preflight.
+`verifyEmbeddedNodePackagedDebug` covers packaged host verification, including the diagnostic report and smoke host verifier.
+Focused instrumentation classes still use the explicit `connectedAppDebugAndroidTest` commands above when a device gate is required.

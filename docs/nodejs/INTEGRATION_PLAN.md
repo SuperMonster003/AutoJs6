@@ -13,6 +13,7 @@ AutoJs6 embeds Node.js as a controlled Android script runtime:
 - isolated `:nodejs_embedded` service process
 - packaged APK support through native library injection and manifest synthesis
 - diagnostics and release gates
+- native crash diagnostics through native dependency and symbol archive reports
 
 The target is not unrestricted desktop Node.js. The target is a stable AutoJs6 Safe Node Profile that can grow deliberately.
 
@@ -63,6 +64,7 @@ Related properties:
 - `autojs.nodejs.worker_threads.experimental=false`
 - optional Embedded Node performance benchmark: `NodeEmbeddedPerformanceInstrumentationTest`
 - extended Embedded Node memory leak stress gate: `NodeEmbeddedMemoryLeakStressInstrumentationTest`
+- native crash symbol archive gate: `nativeNodeSymbolArchiveReport`
 
 Do not remove the non-embedded paths while embedded lifecycle stress coverage is still evolving.
 
