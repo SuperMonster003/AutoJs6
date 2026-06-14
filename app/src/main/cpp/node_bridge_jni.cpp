@@ -93,6 +93,7 @@ static jobjectArray runEmbeddedScriptLifecycleNative(
         jstring workingDirectory,
         const std::vector<std::pair<std::string, std::string>>& moduleSourcePairs,
         const std::vector<std::pair<std::string, std::string>>& runtimeModuleSourcePairs,
+        const std::vector<std::pair<std::string, std::string>>& envPairs,
         bool esmExperimentalEnabled
 ) {
     const auto startedAt = Clock::now();
@@ -107,6 +108,7 @@ static jobjectArray runEmbeddedScriptLifecycleNative(
     putPayload(payload, "embedded_script.request.source_name", sourceNameText);
     putPayload(payload, "embedded_script.request.source.length", static_cast<long long>(sourceText.size()));
     putPayload(payload, "embedded_script.request.working_directory", workingDirectoryText);
+    putPayload(payload, "embedded_script.request.env.count", static_cast<long long>(envPairs.size()));
     putPayload(payload, "embedded_script.request.module_sources.count", static_cast<long long>(moduleSourcePairs.size()));
     putPayload(payload, "embedded_script.request.runtime_module_sources.count", static_cast<long long>(runtimeModuleSourcePairs.size()));
     putPayload(payload, "embedded_script.request.source_kind", "kotlin_provided_source");
@@ -134,6 +136,7 @@ static jobjectArray runEmbeddedScriptLifecycleNative(
             workingDirectoryText,
             moduleSourcePairs,
             runtimeModuleSourcePairs,
+            envPairs,
             esmExperimentalEnabled
     );
     void* handle = probeLoadedLibnodeHandle(payload);
@@ -181,8 +184,27 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
         jstring source,
         jstring sourceName,
         jstring workingDirectory,
+        jobjectArray envNames,
+        jobjectArray envValues,
         jboolean esmExperimentalEnabled
 ) {
+    const std::vector<std::string> envNameValues = toStringVector(env, envNames);
+    if (env->ExceptionCheck()) {
+        return nullptr;
+    }
+    const std::vector<std::string> envValueValues = toStringVector(env, envValues);
+    if (env->ExceptionCheck()) {
+        return nullptr;
+    }
+    if (envNameValues.size() != envValueValues.size()) {
+        throwJava(env, "java/lang/IllegalArgumentException", "envNames.size != envValues.size");
+        return nullptr;
+    }
+    std::vector<std::pair<std::string, std::string>> envPairs;
+    envPairs.reserve(envNameValues.size());
+    for (size_t index = 0; index < envNameValues.size(); ++index) {
+        envPairs.emplace_back(envNameValues[index], envValueValues[index]);
+    }
     return runEmbeddedScriptLifecycleNative(
             env,
             source,
@@ -190,6 +212,7 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
             workingDirectory,
             {},
             {},
+            envPairs,
             esmExperimentalEnabled == JNI_TRUE
     );
 }
@@ -203,6 +226,8 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
         jstring workingDirectory,
         jobjectArray moduleSourceNames,
         jobjectArray moduleSources,
+        jobjectArray envNames,
+        jobjectArray envValues,
         jboolean esmExperimentalEnabled
 ) {
     const std::vector<std::string> moduleSourceNameValues = toStringVector(env, moduleSourceNames);
@@ -213,14 +238,31 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
     if (env->ExceptionCheck()) {
         return nullptr;
     }
+    const std::vector<std::string> envNameValues = toStringVector(env, envNames);
+    if (env->ExceptionCheck()) {
+        return nullptr;
+    }
+    const std::vector<std::string> envValueValues = toStringVector(env, envValues);
+    if (env->ExceptionCheck()) {
+        return nullptr;
+    }
     if (moduleSourceNameValues.size() != moduleSourceValues.size()) {
         throwJava(env, "java/lang/IllegalArgumentException", "moduleSourceNames.size != moduleSources.size");
+        return nullptr;
+    }
+    if (envNameValues.size() != envValueValues.size()) {
+        throwJava(env, "java/lang/IllegalArgumentException", "envNames.size != envValues.size");
         return nullptr;
     }
     std::vector<std::pair<std::string, std::string>> moduleSourcePairs;
     moduleSourcePairs.reserve(moduleSourceNameValues.size());
     for (size_t index = 0; index < moduleSourceNameValues.size(); ++index) {
         moduleSourcePairs.emplace_back(moduleSourceNameValues[index], moduleSourceValues[index]);
+    }
+    std::vector<std::pair<std::string, std::string>> envPairs;
+    envPairs.reserve(envNameValues.size());
+    for (size_t index = 0; index < envNameValues.size(); ++index) {
+        envPairs.emplace_back(envNameValues[index], envValueValues[index]);
     }
     return runEmbeddedScriptLifecycleNative(
             env,
@@ -229,6 +271,7 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
             workingDirectory,
             moduleSourcePairs,
             {},
+            envPairs,
             esmExperimentalEnabled == JNI_TRUE
     );
 }
@@ -244,6 +287,8 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
         jobjectArray moduleSources,
         jobjectArray runtimeModuleSourceNames,
         jobjectArray runtimeModuleSources,
+        jobjectArray envNames,
+        jobjectArray envValues,
         jboolean esmExperimentalEnabled
 ) {
     const std::vector<std::string> moduleSourceNameValues = toStringVector(env, moduleSourceNames);
@@ -262,12 +307,24 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
     if (env->ExceptionCheck()) {
         return nullptr;
     }
+    const std::vector<std::string> envNameValues = toStringVector(env, envNames);
+    if (env->ExceptionCheck()) {
+        return nullptr;
+    }
+    const std::vector<std::string> envValueValues = toStringVector(env, envValues);
+    if (env->ExceptionCheck()) {
+        return nullptr;
+    }
     if (moduleSourceNameValues.size() != moduleSourceValues.size()) {
         throwJava(env, "java/lang/IllegalArgumentException", "moduleSourceNames.size != moduleSources.size");
         return nullptr;
     }
     if (runtimeModuleSourceNameValues.size() != runtimeModuleSourceValues.size()) {
         throwJava(env, "java/lang/IllegalArgumentException", "runtimeModuleSourceNames.size != runtimeModuleSources.size");
+        return nullptr;
+    }
+    if (envNameValues.size() != envValueValues.size()) {
+        throwJava(env, "java/lang/IllegalArgumentException", "envNames.size != envValues.size");
         return nullptr;
     }
     std::vector<std::pair<std::string, std::string>> moduleSourcePairs;
@@ -280,6 +337,11 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
     for (size_t index = 0; index < runtimeModuleSourceNameValues.size(); ++index) {
         runtimeModuleSourcePairs.emplace_back(runtimeModuleSourceNameValues[index], runtimeModuleSourceValues[index]);
     }
+    std::vector<std::pair<std::string, std::string>> envPairs;
+    envPairs.reserve(envNameValues.size());
+    for (size_t index = 0; index < envNameValues.size(); ++index) {
+        envPairs.emplace_back(envNameValues[index], envValueValues[index]);
+    }
     return runEmbeddedScriptLifecycleNative(
             env,
             source,
@@ -287,6 +349,7 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
             workingDirectory,
             moduleSourcePairs,
             runtimeModuleSourcePairs,
+            envPairs,
             esmExperimentalEnabled == JNI_TRUE
     );
 }

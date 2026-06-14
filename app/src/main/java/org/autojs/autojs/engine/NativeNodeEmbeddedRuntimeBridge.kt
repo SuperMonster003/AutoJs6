@@ -542,6 +542,8 @@ object NativeNodeEmbeddedRuntimeBridge {
                     request.workingDirectory,
                     request.moduleSources.keys.toTypedArray(),
                     request.moduleSources.values.toTypedArray(),
+                    request.env.keys.toTypedArray(),
+                    request.env.values.toTypedArray(),
                     request.esmExperimentalEnabled,
                 )
             } else {
@@ -553,6 +555,8 @@ object NativeNodeEmbeddedRuntimeBridge {
                     request.moduleSources.values.toTypedArray(),
                     request.runtimeModuleSources.keys.toTypedArray(),
                     request.runtimeModuleSources.values.toTypedArray(),
+                    request.env.keys.toTypedArray(),
+                    request.env.values.toTypedArray(),
                     request.esmExperimentalEnabled,
                 )
             }
@@ -14712,6 +14716,8 @@ object NativeNodeEmbeddedRuntimeBridge {
         source: String,
         sourceName: String,
         workingDirectory: String?,
+        envNames: Array<String>,
+        envValues: Array<String>,
         esmExperimentalEnabled: Boolean,
     ): Array<String>?
 
@@ -14721,6 +14727,8 @@ object NativeNodeEmbeddedRuntimeBridge {
         workingDirectory: String?,
         moduleSourceNames: Array<String>,
         moduleSources: Array<String>,
+        envNames: Array<String>,
+        envValues: Array<String>,
         esmExperimentalEnabled: Boolean,
     ): Array<String>?
 
@@ -14732,6 +14740,8 @@ object NativeNodeEmbeddedRuntimeBridge {
         moduleSources: Array<String>,
         runtimeModuleSourceNames: Array<String>,
         runtimeModuleSources: Array<String>,
+        envNames: Array<String>,
+        envValues: Array<String>,
         esmExperimentalEnabled: Boolean,
     ): Array<String>?
 
@@ -16961,6 +16971,7 @@ object NativeNodeEmbeddedRuntimeBridge {
         val timeoutMs: Long = BuildConfig.NODEJS_EMBEDDED_PROBE_TIMEOUT_MS.coerceAtLeast(1L),
         val captureStdout: Boolean = true,
         val captureStderr: Boolean = true,
+        val env: Map<String, String> = emptyMap(),
         val moduleSources: Map<String, String> = emptyMap(),
         val runtimeModuleSources: Map<String, String> = emptyMap(),
         val esmExperimentalEnabled: Boolean = BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED,

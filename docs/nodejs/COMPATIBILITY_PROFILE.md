@@ -243,6 +243,7 @@ Expected errors:
 
 - static ESM path: `ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED`
 - dynamic import path: legacy `code` `ERR_AUTOJS6_EMBEDDED_NODE_DYNAMIC_IMPORT_UNSUPPORTED`, canonical `autojs6Code` `ERR_AUTOJS6_DYNAMIC_IMPORT_UNSUPPORTED`
+- CJS `require()` of ESM while the experimental flag is enabled: `ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED`
 
 Default `require("autojs6:profile")` reports `esm=false`, `dynamicImport=false`, and `experimentalFlags.esm=false`.
 
@@ -251,10 +252,15 @@ With the flag enabled for an embedded script request, experimental ESM v1 suppor
 - `.mjs` entry execution
 - package `type=module` entry execution for `.js`
 - local static imports of `.mjs` files inside `workingDirectory`
+- default import from scoped CommonJS modules through the existing CommonJS loader
+- supported builtin imports such as `node:path` and `node:events`
+- bare package imports that resolve package `exports` with ESM condition order `import`, `node`, `default` and then load a CommonJS target
 - simple named exports
 - simple top-level await
 
-Experimental ESM v1 still rejects dynamic import, `import.meta`, package/builtin/bare imports, JSON modules, custom loaders, network/URL imports, and any import outside `workingDirectory`.
+CommonJS package condition order remains `require`, `node`, `default`.
+
+Experimental ESM v1 still rejects dynamic import, `import.meta`, CJS `require()` of ESM, ESM JSON import assertions, custom loaders, network/URL imports, disabled builtins, and any import outside `workingDirectory`.
 
 Runtime diagnostics include `esmEnabled`, `esmEntry`, `esmModuleGraphRoot`, `esmModuleGraphSize`, and `esmModuleGraphModules` in the embedded script result envelope.
 

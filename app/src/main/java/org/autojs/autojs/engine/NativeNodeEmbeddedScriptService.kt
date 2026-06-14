@@ -100,6 +100,7 @@ class NativeNodeEmbeddedScriptService : Service() {
         )
         val spawnDepth = intent.getIntExtra(EXTRA_SPAWN_DEPTH, 0)
             .coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH)
+        val env = intent.envExtra()
         val moduleSources = intent.moduleSourcesExtra()
         val runtimeModuleSources = intent.runtimeModuleSourcesExtra()
         val executionId = intent.getStringExtra(EXTRA_EXECUTION_ID)?.takeIf { it.isNotBlank() }
@@ -131,6 +132,7 @@ class NativeNodeEmbeddedScriptService : Service() {
             sourceName = sourceName,
             workingDirectory = workingDirectory,
             timeoutMs = timeoutMs,
+            env = env,
             moduleSources = moduleSources,
             runtimeModuleSources = enrichedRuntimeModuleSources,
             esmExperimentalEnabled = esmExperimentalEnabled,
@@ -140,8 +142,8 @@ class NativeNodeEmbeddedScriptService : Service() {
         lifecycle.transition(NodeEmbeddedRuntimeState.STARTING, "service.runScript")
         Log.i(
             TAG,
-            "script.enter executionId=$executionId processName=$processName pid=$pid sourceName=$sourceName " +
-                    "moduleSources=${moduleSources.size} runtimeModuleSources=${enrichedRuntimeModuleSources.size} " +
+                    "script.enter executionId=$executionId processName=$processName pid=$pid sourceName=$sourceName " +
+                    "env=${env.size} moduleSources=${moduleSources.size} runtimeModuleSources=${enrichedRuntimeModuleSources.size} " +
                     "esmExperimentalEnabled=$esmExperimentalEnabled " +
                     "runtimeFirst=${enrichedRuntimeModuleSources.keys.firstOrNull().orEmpty()}",
         )
@@ -550,6 +552,8 @@ class NativeNodeEmbeddedScriptService : Service() {
         private const val EXTRA_ESM_EXPERIMENTAL_ENABLED = "esm_experimental_enabled"
         private const val EXTRA_SPAWN_DEPTH = "spawn_depth"
         private const val EXTRA_EXECUTION_ID = "execution_id"
+        private const val EXTRA_ENV_NAMES = "env_names"
+        private const val EXTRA_ENV_VALUES = "env_values"
         private const val EXTRA_MODULE_SOURCE_NAMES = "module_source_names"
         private const val EXTRA_MODULE_SOURCES = "module_sources"
         private const val EXTRA_RUNTIME_MODULE_SOURCE_NAMES = "runtime_module_source_names"
@@ -606,6 +610,8 @@ class NativeNodeEmbeddedScriptService : Service() {
                 putExtra(EXTRA_ESM_EXPERIMENTAL_ENABLED, request.esmExperimentalEnabled)
                 putExtra(EXTRA_SPAWN_DEPTH, request.spawnDepth.coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH))
                 putExtra(EXTRA_EXECUTION_ID, executionId)
+                putExtra(EXTRA_ENV_NAMES, request.env.keys.toTypedArray())
+                putExtra(EXTRA_ENV_VALUES, request.env.values.toTypedArray())
                 putExtra(EXTRA_MODULE_SOURCE_NAMES, request.moduleSources.keys.toTypedArray())
                 putExtra(EXTRA_MODULE_SOURCES, request.moduleSources.values.toTypedArray())
                 putExtra(EXTRA_RUNTIME_MODULE_SOURCE_NAMES, request.runtimeModuleSources.keys.toTypedArray())
@@ -877,6 +883,10 @@ class NativeNodeEmbeddedScriptService : Service() {
 
         private fun Intent.runtimeModuleSourcesExtra(): Map<String, String> {
             return sourceMapExtra(EXTRA_RUNTIME_MODULE_SOURCE_NAMES, EXTRA_RUNTIME_MODULE_SOURCES)
+        }
+
+        private fun Intent.envExtra(): Map<String, String> {
+            return sourceMapExtra(EXTRA_ENV_NAMES, EXTRA_ENV_VALUES)
         }
 
         private fun Intent.sourceMapExtra(namesExtra: String, sourcesExtra: String): Map<String, String> {

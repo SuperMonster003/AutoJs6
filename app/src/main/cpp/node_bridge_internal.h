@@ -983,6 +983,7 @@ std::string buildEmbeddedScriptExecutionSource(
         const std::string& workingDirectory,
         const std::vector<std::pair<std::string, std::string>>& moduleSources,
         const std::vector<std::pair<std::string, std::string>>& runtimeModuleSources,
+        const std::vector<std::pair<std::string, std::string>>& env,
         bool esmExperimentalEnabled);
 void putEmbeddedScriptExecutionFields(std::vector<std::string>& payload, const std::string& text);
 std::vector<std::string> toStringVector(JNIEnv* env, jobjectArray values);

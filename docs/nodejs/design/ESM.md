@@ -56,6 +56,9 @@ With `autojs.nodejs.esm.experimental=true` or an internal embedded-script reques
 - `.mjs` entry scripts can run.
 - `.js` entry scripts can run as ESM only when the nearest scoped `package.json` contains `"type": "module"`.
 - local static imports of `.mjs` files inside `workingDirectory` are supported.
+- ESM may default-import scoped CommonJS modules (`.cjs`, `.js`, or `.json`) through the existing CommonJS loader cache.
+- ESM may import supported builtin modules through the existing Safe Node builtin allowlist and limited builtin wrappers.
+- ESM bare package imports may select package `exports` using the experimental ESM condition set `import`, `node`, `default`, then load a CommonJS target through the CommonJS loader.
 - simple named exports are supported for local `.mjs` modules.
 - top-level await is supported because the experimental graph is evaluated through an async runner.
 - diagnostics are emitted in the result envelope:
@@ -71,12 +74,9 @@ Still unsupported in v1:
 
 - dynamic `import()`
 - `import.meta`
-- package exports/imports ESM condition selection
-- ESM import of CommonJS
-- CJS `require()` of ESM
-- JSON modules
-- bare package imports
-- builtin imports such as `node:path`
+- package `imports` ESM condition coverage beyond the current resolver subset
+- CJS `require()` of ESM; when the ESM flag is enabled this fails with `ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED`
+- ESM JSON import assertions; JSON may only be reached through the CommonJS interop path
 - custom loaders and `node:module` loader hooks
 - network, `file:`, `data:`, or other URL imports
 - imports outside `workingDirectory`
@@ -130,13 +130,13 @@ The preferred long-term direction is real ESM semantics through an explicit load
 CJS `require()` targeting ESM:
 
 - Current default: reject with `ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED`.
-- Experimental v1 should still reject unless the loader can preserve Node-compatible async linking and error timing.
+- Experimental v1 rejects with `ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED`.
 - Long-term behavior may follow Node's `ERR_REQUIRE_ESM` style where appropriate, but AutoJs6 policy errors must remain stable.
 
 ESM importing CJS:
 
-- Current default: unavailable.
-- Experimental v1 may allow default and namespace import from scoped CommonJS modules if the loader can reuse the existing CommonJS cache safely.
+- Current default: unavailable because ESM is disabled.
+- Experimental v1 allows default import and namespace-style property access from scoped CommonJS modules by reusing the existing CommonJS cache.
 - No raw native handles or unrestricted builtin access may be gained through interop.
 
 CommonJS importing JSON:
@@ -192,7 +192,7 @@ Current CommonJS condition order remains:
 require, node, default
 ```
 
-Future ESM condition order should be importer-sensitive:
+Experimental ESM condition order is importer-sensitive:
 
 - CommonJS importer: `require`, `node`, `default`
 - ESM importer: `import`, `node`, `default`

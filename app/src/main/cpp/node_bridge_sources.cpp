@@ -5455,12 +5455,14 @@ std::string buildEmbeddedScriptExecutionSource(
         const std::string& workingDirectory,
         const std::vector<std::pair<std::string, std::string>>& moduleSources,
         const std::vector<std::pair<std::string, std::string>>& runtimeModuleSources,
+        const std::vector<std::pair<std::string, std::string>>& env,
         bool esmExperimentalEnabled) {
     const std::string sourceLiteral = jsonStringLiteral(source);
     const std::string sourceNameLiteral = jsonStringLiteral(sanitizeSourceUrl(sourceName));
     const std::string workingDirectoryLiteral = jsonStringLiteral(workingDirectory);
     const std::string moduleSourcesLiteral = buildEmbeddedModuleSourcesLiteral(moduleSources);
     const std::string runtimeModuleSourcesLiteral = buildEmbeddedModuleSourcesLiteral(runtimeModuleSources);
+    const std::string envLiteral = buildEmbeddedModuleSourcesLiteral(env);
     std::string script;
     script.reserve(
             source.size() +
@@ -5468,6 +5470,7 @@ std::string buildEmbeddedScriptExecutionSource(
             workingDirectory.size() +
             moduleSourcesLiteral.size() +
             runtimeModuleSourcesLiteral.size() +
+            envLiteral.size() +
             8192
     );
     script += R"JS(
@@ -5491,6 +5494,9 @@ std::string buildEmbeddedScriptExecutionSource(
     script += R"JS();
   const __autojs6_runtime_module_embedded_sources = Object.freeze()JS";
     script += runtimeModuleSourcesLiteral;
+    script += R"JS();
+  const __autojs6_request_env_sources = Object.freeze()JS";
+    script += envLiteral;
     script += R"JS();
   const __autojs6_runtime_module_records = Object.create(null);
   const __autojs6_esm_experimental_enabled = )JS";
@@ -7373,6 +7379,19 @@ std::string buildEmbeddedScriptExecutionSource(
     controlledEnv.NODE_ENV = "production";
     controlledEnv.AUTOJS6_EMBEDDED_NODE = "1";
     controlledEnv.AUTOJS6_NODE_RUNTIME = "embedded";
+    for (const key of Object.keys(__autojs6_request_env_sources || {})) {
+      if (!key || key.indexOf("\u0000") >= 0) {
+        continue;
+      }
+      const record = __autojs6_request_env_sources[key];
+      const value = record && record.source !== undefined && record.source !== null
+        ? String(record.source)
+        : "";
+      if (value.indexOf("\u0000") >= 0) {
+        continue;
+      }
+      controlledEnv[key] = value;
+    }
     if (!__autojs6_define_process_property("env", controlledEnv, true)) {
       try {
         for (const key of Object.keys(process.env || {})) {
@@ -7938,6 +7957,9 @@ std::string buildEmbeddedScriptExecutionSource(
   function __autojs6_esm_unsupported(message) {
     return __autojs6_error(message, "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED");
   }
+  function __autojs6_require_esm_unsupported(message) {
+    return __autojs6_error(message, "ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED");
+  }
   function __autojs6_dynamic_import_unsupported(message) {
     return __autojs6_error(message, "ERR_AUTOJS6_EMBEDDED_NODE_DYNAMIC_IMPORT_UNSUPPORTED");
   }
@@ -8193,6 +8215,7 @@ std::string buildEmbeddedScriptExecutionSource(
         networkPermissionDenied: "ERR_AUTOJS6_NETWORK_PERMISSION_DENIED",
         dynamicImportUnsupported: "ERR_AUTOJS6_DYNAMIC_IMPORT_UNSUPPORTED",
         esmUnsupported: "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED",
+        requireEsmUnsupported: "ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED",
         fsScopedPath: "ERR_AUTOJS6_FS_SCOPED_PATH",
         fsAbsolutePathDenied: "ERR_AUTOJS6_FS_ABSOLUTE_PATH_DENIED",
         fsPathEscape: "ERR_AUTOJS6_FS_PATH_ESCAPE",
@@ -11101,11 +11124,13 @@ std::string buildEmbeddedScriptExecutionSource(
   }
   function __autojs6_throw_if_esm_extension(extension, moduleName, context) {
     if (__autojs6_is_esm_extension(extension)) {
-      throw __autojs6_esm_unsupported(
-        __autojs6_esm_unsupported_message(
-          __autojs6_mjs_unsupported_detail(context + " resolves to an .mjs module for '" + moduleName + "'.")
-        )
-      );
+      const detail = context + " resolves to an .mjs module for '" + moduleName + "'.";
+      if (__autojs6_esm_experimental_enabled) {
+        throw __autojs6_require_esm_unsupported(
+          "CommonJS require() cannot load experimental ESM modules in AutoJs6 Safe Node Profile: " + detail
+        );
+      }
+      throw __autojs6_esm_unsupported(__autojs6_esm_unsupported_message(__autojs6_mjs_unsupported_detail(detail)));
     }
   }
   function __autojs6_source_extension(sourceName) {
@@ -11239,11 +11264,23 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     return ignored.join("|");
   }
-  function __autojs6_unsupported_package_conditions(entry) {
+  function __autojs6_package_condition_mode(mode) {
+    return mode === "esm" ? "esm" : "cjs";
+  }
+  function __autojs6_package_active_conditions(mode) {
+    return __autojs6_package_condition_mode(mode) === "esm"
+      ? ["import", "node", "default"]
+      : ["require", "node", "default"];
+  }
+  function __autojs6_package_mode_label(mode) {
+    return __autojs6_package_condition_mode(mode) === "esm" ? "ESM" : "CommonJS";
+  }
+  function __autojs6_unsupported_package_conditions(entry, mode) {
     if (!entry || typeof entry !== "object" || Array.isArray(entry)) return "";
+    const active = __autojs6_package_active_conditions(mode);
     const ignored = [];
     for (const key of Object.keys(entry)) {
-      if (key !== "require" && key !== "node" && key !== "default") {
+      if (active.indexOf(key) < 0) {
         ignored.push(key);
       }
     }
@@ -11457,7 +11494,7 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     return target.replace("*", replacement);
   }
-  function __autojs6_package_condition_target(entry, moduleName, fieldName) {
+  function __autojs6_package_condition_target(entry, moduleName, fieldName, mode) {
     if (typeof entry === "string") {
       return {
         target: entry,
@@ -11469,10 +11506,10 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     if (entry && typeof entry === "object" && !Array.isArray(entry)) {
       const conditionKeys = __autojs6_package_condition_keys(entry);
-      const ignoredConditions = __autojs6_unsupported_package_conditions(entry);
-      for (const condition of ["require", "node", "default"]) {
+      const ignoredConditions = __autojs6_unsupported_package_conditions(entry, mode);
+      for (const condition of __autojs6_package_active_conditions(mode)) {
         if (__autojs6_has_own(entry, condition)) {
-          const target = __autojs6_package_condition_target(entry[condition], moduleName, fieldName);
+          const target = __autojs6_package_condition_target(entry[condition], moduleName, fieldName, mode);
           if (target !== null) {
             const nestedIgnoredConditions = target.ignoredConditions || "";
             return {
@@ -11501,7 +11538,7 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     return null;
   }
-  function __autojs6_package_exports_target(packageData, subpath, moduleName) {
+  function __autojs6_package_exports_target(packageData, subpath, moduleName, mode) {
     if (!packageData || typeof packageData !== "object" || !__autojs6_has_own(packageData, "exports")) {
       return { present: false, target: null };
     }
@@ -11537,14 +11574,14 @@ std::string buildEmbeddedScriptExecutionSource(
       if (!matched) {
         throw __autojs6_package_path_not_exported("Embedded Node package exports does not define subpath '" + key + "' for '" + moduleName + "'.");
       }
-      const selected = __autojs6_package_condition_target(entry, moduleName, "exports");
+      const selected = __autojs6_package_condition_target(entry, moduleName, "exports", mode);
       if (selected === null) {
         const conditionKeys = __autojs6_package_condition_keys(entry);
-        const ignoredConditions = __autojs6_unsupported_package_conditions(entry);
+        const ignoredConditions = __autojs6_unsupported_package_conditions(entry, mode);
         if (conditionKeys) {
           throw __autojs6_attach_package_error_details(
             __autojs6_package_path_not_exported(
-              "Embedded Node package exports unsupported condition ignored in CommonJS MVP for '" + moduleName +
+              "Embedded Node package exports unsupported condition ignored in " + __autojs6_package_mode_label(mode) + " MVP for '" + moduleName +
                 "'; condition keys=" + conditionKeys +
                 (ignoredConditions ? "; unsupported condition ignored=" + ignoredConditions : "") + "."
             ),
@@ -11579,7 +11616,7 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     throw new Error("Unsupported Embedded Node package exports shape in MVP for '" + moduleName + "'.");
   }
-  function __autojs6_package_imports_target(packageData, specifier, moduleName) {
+  function __autojs6_package_imports_target(packageData, specifier, moduleName, mode) {
     if (!packageData || typeof packageData !== "object" || !__autojs6_has_own(packageData, "imports")) {
       return { present: false, target: null };
     }
@@ -11608,14 +11645,14 @@ std::string buildEmbeddedScriptExecutionSource(
       if (!matched) {
         throw __autojs6_package_import_not_defined("Embedded Node package imports does not define alias '" + specifier + "' for '" + moduleName + "'.");
       }
-      const selected = __autojs6_package_condition_target(entry, moduleName, "imports");
+      const selected = __autojs6_package_condition_target(entry, moduleName, "imports", mode);
       if (selected === null) {
         const conditionKeys = __autojs6_package_condition_keys(entry);
-        const ignoredConditions = __autojs6_unsupported_package_conditions(entry);
+        const ignoredConditions = __autojs6_unsupported_package_conditions(entry, mode);
         if (conditionKeys) {
           throw __autojs6_attach_package_error_details(
             __autojs6_package_import_not_defined(
-              "Embedded Node package imports unsupported condition ignored in CommonJS MVP for '" + moduleName +
+              "Embedded Node package imports unsupported condition ignored in " + __autojs6_package_mode_label(mode) + " MVP for '" + moduleName +
                 "'; condition keys=" + conditionKeys +
                 (ignoredConditions ? "; unsupported condition ignored=" + ignoredConditions : "") + "."
             ),
@@ -11650,11 +11687,11 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     throw new Error("Unsupported Embedded Node package imports shape in MVP for '" + moduleName + "'.");
   }
-  function __autojs6_resolve_package_exports(packageDir, packageData, subpath, root, moduleName, ignoredFields) {
+  function __autojs6_resolve_package_exports(packageDir, packageData, subpath, root, moduleName, ignoredFields, mode) {
     let packageExports;
     const request = subpath ? "./" + subpath : ".";
     try {
-      packageExports = __autojs6_package_exports_target(packageData, subpath, moduleName);
+      packageExports = __autojs6_package_exports_target(packageData, subpath, moduleName, mode);
     } catch (error) {
       throw __autojs6_enrich_package_error(error, packageDir, moduleName, "exports", request, undefined, "", "", ignoredFields);
     }
@@ -11697,10 +11734,10 @@ std::string buildEmbeddedScriptExecutionSource(
       );
     }
   }
-  function __autojs6_resolve_package_imports(packageDir, packageData, specifier, root, moduleName, ignoredFields) {
+  function __autojs6_resolve_package_imports(packageDir, packageData, specifier, root, moduleName, ignoredFields, mode) {
     let packageImports;
     try {
-      packageImports = __autojs6_package_imports_target(packageData, specifier, moduleName);
+      packageImports = __autojs6_package_imports_target(packageData, specifier, moduleName, mode);
     } catch (error) {
       throw __autojs6_enrich_package_error(error, packageDir, moduleName, "imports", specifier, undefined, "", "", ignoredFields);
     }
@@ -11743,7 +11780,7 @@ std::string buildEmbeddedScriptExecutionSource(
       );
     }
   }
-  function __autojs6_resolve_package_directory(packageDir, root, moduleName) {
+  function __autojs6_resolve_package_directory(packageDir, root, moduleName, mode) {
     const path = __autojs6_path_module();
     const packageJsonResolved = path.resolve(packageDir, "package.json");
     const packageData = __autojs6_path_within_root(packageJsonResolved, root)
@@ -11757,7 +11794,7 @@ std::string buildEmbeddedScriptExecutionSource(
         file: packageJsonResolved
       });
       ignoredFields = __autojs6_package_ignored_fields(packageData);
-      const packageExports = __autojs6_resolve_package_exports(packageDir, packageData, "", root, moduleName, ignoredFields);
+      const packageExports = __autojs6_resolve_package_exports(packageDir, packageData, "", root, moduleName, ignoredFields, mode);
       if (packageExports !== null) {
         return packageExports;
       }
@@ -11901,7 +11938,7 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     return null;
   }
-  function __autojs6_resolve_package_import(moduleName, parentFilename) {
+  function __autojs6_resolve_package_import(moduleName, parentFilename, mode) {
     const path = __autojs6_path_module();
     if (
       !path ||
@@ -11928,7 +11965,8 @@ std::string buildEmbeddedScriptExecutionSource(
       moduleName,
       root,
       moduleName,
-      __autojs6_package_ignored_fields(packageData)
+      __autojs6_package_ignored_fields(packageData),
+      mode
     );
     if (resolved !== null) {
       return resolved;
@@ -11948,7 +11986,7 @@ std::string buildEmbeddedScriptExecutionSource(
       __autojs6_package_ignored_fields(packageData)
     );
   }
-  function __autojs6_resolve_package_self_reference(specifier, parentFilename, root, moduleName) {
+  function __autojs6_resolve_package_self_reference(specifier, parentFilename, root, moduleName, mode) {
     const scope = __autojs6_find_package_scope(parentFilename, root);
     if (!scope) return null;
     const packageData = __autojs6_package_data(scope.packageJsonResolved, moduleName);
@@ -11961,7 +11999,8 @@ std::string buildEmbeddedScriptExecutionSource(
       specifier.subpath,
       root,
       moduleName,
-      __autojs6_package_ignored_fields(packageData)
+      __autojs6_package_ignored_fields(packageData),
+      mode
     );
     if (resolved !== null) {
       __autojs6_resolve_trace("self-reference matched", {
@@ -11990,10 +12029,10 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     return searchDirs;
   }
-  function __autojs6_resolve_node_modules_subpath(packageDir, subpath, root, moduleName) {
+  function __autojs6_resolve_node_modules_subpath(packageDir, subpath, root, moduleName, mode) {
     const path = __autojs6_path_module();
     if (!subpath) {
-      return __autojs6_resolve_package_directory(packageDir, root, moduleName);
+      return __autojs6_resolve_package_directory(packageDir, root, moduleName, mode);
     }
     const packageJsonResolved = path.resolve(packageDir, "package.json");
     const packageData = __autojs6_path_within_root(packageJsonResolved, root)
@@ -12006,7 +12045,8 @@ std::string buildEmbeddedScriptExecutionSource(
         subpath,
         root,
         moduleName,
-        __autojs6_package_ignored_fields(packageData)
+        __autojs6_package_ignored_fields(packageData),
+        mode
       );
       if (packageExports !== null) {
         return packageExports;
@@ -12030,14 +12070,14 @@ std::string buildEmbeddedScriptExecutionSource(
       return fileResolved;
     }
     if (!extension) {
-      const directoryResolved = __autojs6_resolve_package_directory(base, root, moduleName);
+      const directoryResolved = __autojs6_resolve_package_directory(base, root, moduleName, mode);
       if (directoryResolved && __autojs6_path_within_root(directoryResolved, packageDir)) {
         return directoryResolved;
       }
     }
     return null;
   }
-  function __autojs6_resolve_node_modules_module(moduleName, parentFilename) {
+  function __autojs6_resolve_node_modules_module(moduleName, parentFilename, mode) {
     const path = __autojs6_path_module();
     if (
       !path ||
@@ -12053,7 +12093,7 @@ std::string buildEmbeddedScriptExecutionSource(
       throw new Error("Invalid Embedded Node package specifier: " + moduleName);
     }
     const root = path.resolve(__autojs6_module_root || __autojs6_module_dirname(parentFilename));
-    const selfReference = __autojs6_resolve_package_self_reference(specifier, parentFilename, root, moduleName);
+    const selfReference = __autojs6_resolve_package_self_reference(specifier, parentFilename, root, moduleName, mode);
     if (selfReference !== null) {
       return selfReference;
     }
@@ -12075,7 +12115,8 @@ std::string buildEmbeddedScriptExecutionSource(
         packageDir,
         specifier.subpath,
         root,
-        moduleName
+        moduleName,
+        mode
       );
       if (resolved) {
         __autojs6_resolve_trace("final", {
@@ -23758,7 +23799,57 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     return lines;
   }
-  function __autojs6_resolve_esm_local_module(specifier, parentFilename) {
+  function __autojs6_esm_builtin_specifier(name) {
+    return __autojs6_has_own(__autojs6_require_builtin_allowlist, name) ||
+      __autojs6_has_own(__autojs6_limited_builtin_module_map, name) ||
+      __autojs6_denied_builtin_module_name(name);
+  }
+  function __autojs6_esm_namespace_from_commonjs(value) {
+    const namespace = Object.create(null);
+    namespace.default = value;
+    if (value !== null && (typeof value === "object" || typeof value === "function")) {
+      for (const key of Object.getOwnPropertyNames(value)) {
+        if (key === "default") continue;
+        try {
+          namespace[key] = value[key];
+        } catch (_) {}
+      }
+    }
+    return Object.freeze(namespace);
+  }
+  function __autojs6_esm_module_kind(resolved) {
+    const extension = __autojs6_source_extension(resolved);
+    if (__autojs6_is_esm_extension(extension)) return "esm";
+    if (__autojs6_supported_local_module_extension(extension)) return "cjs";
+    return "";
+  }
+  function __autojs6_resolve_esm_file_candidate(candidates, root, specifier, parentFilename, packageDir) {
+    const path = __autojs6_path_module();
+    for (const candidate of candidates) {
+      const resolved = path.resolve(candidate);
+      if (!__autojs6_path_within_root(resolved, root) || __autojs6_sensitive_path(resolved)) {
+        throw __autojs6_esm_error("Embedded Node experimental ESM import escapes working directory: " + specifier, "ERR_AUTOJS6_FS_PATH_ESCAPE");
+      }
+      if (packageDir && !__autojs6_path_within_root(resolved, packageDir)) {
+        throw __autojs6_esm_error("Embedded Node experimental ESM package import escapes package directory: " + specifier, "ERR_AUTOJS6_FS_PATH_ESCAPE");
+      }
+      const record = __autojs6_module_record(resolved, true);
+      if (!record) continue;
+      const kind = __autojs6_esm_module_kind(resolved);
+      if (!kind) {
+        throw __autojs6_esm_error("Unsupported Embedded Node experimental ESM import extension: " + specifier);
+      }
+      __autojs6_resolve_trace("esm import matched", {
+        request: specifier,
+        from: parentFilename,
+        final: resolved,
+        kind
+      });
+      return { kind, resolved };
+    }
+    return null;
+  }
+  function __autojs6_resolve_esm_module(specifier, parentFilename) {
     const path = __autojs6_path_module();
     if (!path || typeof path.resolve !== "function" || typeof path.extname !== "function" || typeof path.isAbsolute !== "function") {
       throw __autojs6_esm_error("Embedded Node experimental ESM needs the allowlisted path module.");
@@ -23770,38 +23861,39 @@ std::string buildEmbeddedScriptExecutionSource(
     if (path.isAbsolute(name)) {
       throw __autojs6_esm_error("Embedded Node experimental ESM rejects absolute import: " + name, "ERR_AUTOJS6_FS_ABSOLUTE_PATH_DENIED");
     }
+    if (__autojs6_esm_builtin_specifier(name)) {
+      __autojs6_resolve_trace("esm builtin matched", {
+        request: name,
+        from: parentFilename,
+        final: name
+      });
+      return { kind: "builtin", name };
+    }
     if (__autojs6_protocol_specifier(name)) {
       const code = /^https?:/i.test(name) ? "ERR_AUTOJS6_NETWORK_DISABLED" : "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED";
       throw __autojs6_esm_error("Embedded Node experimental ESM rejects protocol import: " + name, code);
     }
-    if (!__autojs6_is_relative_module_name(name)) {
-      throw __autojs6_esm_error("Embedded Node experimental ESM v1 supports only local static imports: " + name);
-    }
     const root = path.resolve(__autojs6_module_root || __autojs6_module_dirname(parentFilename));
+    if (!__autojs6_is_relative_module_name(name)) {
+      const resolved = __autojs6_resolve_node_modules_module(name, parentFilename, "esm");
+      return {
+        kind: __autojs6_esm_module_kind(resolved) || "cjs",
+        resolved
+      };
+    }
     const parentDir = __autojs6_module_dirname(parentFilename);
     const base = path.resolve(parentDir || root, name);
     if (!__autojs6_path_within_root(base, root) || __autojs6_sensitive_path(base)) {
       throw __autojs6_esm_error("Embedded Node experimental ESM import escapes working directory: " + name, "ERR_AUTOJS6_FS_PATH_ESCAPE");
     }
     const extension = __autojs6_normalized_extension(path.extname(base));
-    if (extension && !__autojs6_is_esm_extension(extension)) {
-      throw __autojs6_esm_error("Embedded Node experimental ESM v1 imports only .mjs modules: " + name);
+    if (extension && !__autojs6_is_esm_extension(extension) && !__autojs6_supported_local_module_extension(extension)) {
+      throw __autojs6_esm_error("Unsupported Embedded Node experimental ESM import extension: " + name);
     }
-    const candidates = extension ? [base] : [base + ".mjs"];
-    for (const candidate of candidates) {
-      const resolved = path.resolve(candidate);
-      if (!__autojs6_path_within_root(resolved, root) || __autojs6_sensitive_path(resolved)) {
-        throw __autojs6_esm_error("Embedded Node experimental ESM import escapes working directory: " + name, "ERR_AUTOJS6_FS_PATH_ESCAPE");
-      }
-      const record = __autojs6_module_record(resolved, true);
-      if (record) {
-        __autojs6_resolve_trace("esm import matched", {
-          request: name,
-          from: parentFilename,
-          final: resolved
-        });
-        return resolved;
-      }
+    const candidates = extension ? [base] : [base + ".mjs", base + ".cjs", base + ".json"];
+    const resolved = __autojs6_resolve_esm_file_candidate(candidates, root, name, parentFilename);
+    if (resolved) {
+      return resolved;
     }
     throw __autojs6_module_not_found("Cannot find Embedded Node experimental ESM module '" + name + "' from '" + parentFilename + "'.");
   }
@@ -23898,8 +23990,14 @@ std::string buildEmbeddedScriptExecutionSource(
     return bindingLines.join("\n") + "\n" + exportTransform.body + "\n" + exportTransform.tail;
   }
   function __autojs6_load_esm_module(specifier, parentFilename) {
-    const resolved = __autojs6_resolve_esm_local_module(specifier, parentFilename);
-    return __autojs6_execute_esm_module(resolved, null);
+    const resolved = __autojs6_resolve_esm_module(specifier, parentFilename);
+    if (resolved.kind === "builtin") {
+      return Promise.resolve(__autojs6_esm_namespace_from_commonjs(__autojs6_restricted_require(resolved.name, null)));
+    }
+    if (resolved.kind === "cjs") {
+      return Promise.resolve(__autojs6_esm_namespace_from_commonjs(__autojs6_load_local_module(resolved.resolved, null)));
+    }
+    return __autojs6_execute_esm_module(resolved.resolved, null);
   }
   function __autojs6_execute_esm_module(resolved, entryRecord) {
     if (__autojs6_has_own(__autojs6_esm_module_cache, resolved)) {

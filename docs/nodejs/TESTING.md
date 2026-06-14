@@ -225,7 +225,7 @@ Current ESM experimental focused instrumentation:
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeEsmExperimentalInstrumentationTest"
 ```
 
-This suite keeps `.mjs` rejected with the default flag, then enables the internal experimental request flag to cover `.mjs` entry execution, local static `.mjs` imports, top-level await, package `type=module` entry routing, and scoped import escape denial.
+This suite keeps `.mjs` rejected with the default flag, then enables the internal experimental request flag to cover `.mjs` entry execution, local static `.mjs` imports, top-level await, package `type=module` entry routing, scoped import escape denial, ESM default import from CommonJS, ESM import of supported builtins, disabled builtin rejection from ESM, CJS `require()` of ESM rejection with `ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED`, and package `exports` condition selection with resolver trace for both ESM and CommonJS importers.
 
 Experimental packaged `.mjs` smoke is deliberately gated behind the Gradle flag:
 
