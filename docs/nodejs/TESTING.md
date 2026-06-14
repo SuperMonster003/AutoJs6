@@ -139,6 +139,14 @@ Current process focused instrumentation:
 
 This suite verifies `process.nextTick` ordering, warning listeners, event-emitter helpers, inert `allowedNodeEnvironmentFlags`, writable `process.exitCode`, scoped `chdir` rejection, and dangerous process API denial.
 
+Current `node:module` safe subset focused instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeModuleSafeSubsetInstrumentationTest"
+```
+
+This suite verifies the partial `module`/`node:module` surface, shadowing protection, filtered `builtinModules`, scoped `createRequire` loading for local and package dependencies, `child_process` denial through created require functions, and unsafe base or target rejection.
+
 Current `os` privacy focused instrumentation:
 
 ```powershell

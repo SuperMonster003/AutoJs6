@@ -180,6 +180,31 @@ Limited builtin map currently includes:
 
 Limited means API-compatible enough for the current tests and targeted pure-JS npm packages, not full desktop Node.js compatibility.
 
+## `node:module` Safe Subset
+
+`require("module")` and `require("node:module")` are partial limited builtins for CommonJS/npm compatibility. They expose only:
+
+- `createRequire(filename)`
+- `isBuiltin(name)`
+- `builtinModules`
+- `syncBuiltinESMExports()`
+
+`createRequire(filename)` creates a CommonJS require function scoped to a file path inside the current working directory. The base path must be a file path, must not be absolute outside the scope, must not contain NUL bytes, must not be a `file:` URL, must not resolve through a symlink escape, and must not point to a directory. The created require function uses the existing AutoJs6 resolver, builtin allowlist/limited map, module cache, package `exports`/`imports` policy, and scoped filesystem checks.
+
+`builtinModules` is a frozen list of AutoJs6 known safe or limited builtins, not a promise of unrestricted desktop Node behavior. Network-shaped limited modules can appear for feature detection and stable denial wrappers, while raw network I/O remains disabled unless a future design-gated task changes that boundary.
+
+The following Node loader internals are not exposed:
+
+- `Module`
+- `_load`
+- `_resolveFilename`
+- `_compile`
+- `wrap`
+- `globalPaths`
+- `register`
+- `registerHooks`
+- custom loader hooks
+
 Design notes for the broadest limited builtins:
 
 - `fs/promises`: `docs/nodejs/design/FS_PROMISES.md`

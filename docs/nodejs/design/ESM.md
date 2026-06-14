@@ -31,7 +31,7 @@ Current wiring:
 - JavaScript profile snapshot: `require("autojs6:profile").experimentalFlags.esm`
 - Embedded script request flag: `esmExperimentalEnabled`
 
-The flag enables only AutoJs6 ESM v1. It does not enable Node's raw ESM loader, dynamic import, loader hooks, `node:module`, network imports, native addons, or unrestricted builtins.
+The flag enables only AutoJs6 ESM v1. It does not enable Node's raw ESM loader, dynamic import, loader hooks, raw `node:module` loader authority, network imports, native addons, or unrestricted builtins.
 
 Dynamic import is intentionally split into a second gate:
 
@@ -292,4 +292,4 @@ The experimental flag may not enable ESM until tests cover:
 
 ## Current Decision
 
-ESM remains disabled by default. Experimental v1 enables local static `.mjs` imports for plain working directories, simple exports, top-level await, package `type=module` entry routing, ESM-to-CJS default interop, supported builtin imports, package `exports`/`imports` ESM condition selection, nested package imports, self-reference, diagnostics, and a focused single-file packaged `.mjs` smoke when `autojs.nodejs.esm.experimental=true`. Dynamic import is a separate experiment behind `autojs.nodejs.dynamicImport.experimental=true` and is limited to local relative specifiers inside `workingDirectory`. This path still does not enable loader hooks, `node:module`, network imports, CJS `require()` of ESM, or unrestricted packaged encrypted ESM graphs.
+ESM remains disabled by default. Experimental v1 enables local static `.mjs` imports for plain working directories, simple exports, top-level await, package `type=module` entry routing, ESM-to-CJS default interop, supported builtin imports, package `exports`/`imports` ESM condition selection, nested package imports, self-reference, diagnostics, and a focused single-file packaged `.mjs` smoke when `autojs.nodejs.esm.experimental=true`. Dynamic import is a separate experiment behind `autojs.nodejs.dynamicImport.experimental=true` and is limited to local relative specifiers inside `workingDirectory`. This path still does not enable loader hooks, raw `node:module` loader authority, network imports, CJS `require()` of ESM, or unrestricted packaged encrypted ESM graphs.
