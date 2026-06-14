@@ -44,7 +44,6 @@
                         return this._exports;
                     },
                     set(val) {
-                        require.cache[this.filename] = val;
                         this._exports = val;
                     },
                 });
@@ -63,11 +62,46 @@
                 require(id, parent) {
                     return require(id, parent);
                 },
-                _load(file) {
-                    return NativeRequire.require(file);
+                _load(file, parent, core) {
+                    const cached = require.cache[file];
+                    if (cached) {
+                        return cached.exports === undefined ? cached : cached.exports;
+                    }
+
+                    const module = new Module(file, parent, core);
+                    require.cache[file] = module;
+                    try {
+                        let body = _.readFile(file, core);
+                        if (body.startsWith('#!')) {
+                            body = '//' + body;
+                        }
+                        const dirname = core ? '' : String(new File(file).getParent() || '');
+                        const moduleRequire = module.require;
+                        moduleRequire.resolve = function (id) {
+                            return require.resolve(id, module);
+                        };
+                        moduleRequire.paths = function () {
+                            return require.paths();
+                        };
+                        moduleRequire.cache = require.cache;
+                        moduleRequire.extensions = require.extensions;
+                        const wrapper = new Function('exports', 'require', 'module', '__filename', '__dirname', body);
+                        wrapper.call(module.exports, module.exports, moduleRequire, module, file, dirname);
+                        module.loaded = true;
+                        return module.exports;
+                    } catch (e) {
+                        delete require.cache[file];
+                        throw e;
+                    }
                 },
                 runMain(main) {
-                    return Module._load(require.resolve(main));
+                    const file = require.resolve(main);
+                    const exported = Module._load(file);
+                    require.main = require.cache[file] || null;
+                    if (global.process) {
+                        global.process.mainModule = require.main;
+                    }
+                    return exported;
                 },
             });
 
@@ -79,12 +113,12 @@
              */
             const RequireCtor = function () {
                 return Object.assign(function (id, parent) {
+                    if (_.isNodeProtocol(id)) {
+                        id = _.stripNodeProtocol(id);
+                    }
                     const normalizedPath = _.normalizeName(id);
                     if (_.builtInModules.includes(normalizedPath) && !runtime.files.exists(normalizedPath)) {
                         return NativeRequire.require(normalizedPath);
-                    }
-                    if (id === 'events') {
-                        return global[id];
                     }
                     // noinspection HttpUrlsUsage
                     if (id.startsWith('http://') || id.startsWith('https://')) {
@@ -107,14 +141,17 @@
                         }
                         throw new _.ModuleError('Cannot find module ' + id, 'MODULE_NOT_FOUND');
                     }
+                    let core = false;
                     if (file.core) {
+                        core = true;
                         file = file.path;
                     }
                     if (this.cache[file]) {
-                        return this.cache[file];
+                        const cached = this.cache[file];
+                        return cached.exports === undefined ? cached : cached.exports;
                     }
-                    if (file.endsWith('.js')) {
-                        return _.Module._load(file, parent);
+                    if (_.isJavaScriptFileName(file)) {
+                        return _.Module._load(file, parent, core);
                     }
                     if (file.endsWith('.json')) {
                         return _.loadJSON(file);
@@ -135,6 +172,7 @@
                         const root = roots[i];
                         const result = _.resolveCoreModule(id)
                             || _.resolveAsFile(id, root, '.js')
+                            || _.resolveAsFile(id, root, '.mjs')
                             || _.resolveAsFile(id, root, '.json')
                             || _.resolveAsDirectory(id, root)
                             || _.resolveAsNodeModule(id, root);
@@ -182,7 +220,29 @@
 
             return ModuleError;
         })(),
-        builtInModules: [ 'lodash.js' ],
+        builtInModules: [
+            'buffer.js',
+            'events.js',
+            'fs.js',
+            'lodash.js',
+            'nodejs.js',
+            'os.js',
+            'path.js',
+            'process.js',
+        ],
+        isNodeProtocol(id) {
+            return String(id).startsWith('node:');
+        },
+        stripNodeProtocol(id) {
+            return this.isNodeProtocol(id) ? String(id).slice(5) : id;
+        },
+        isJavaScriptFileName(fileName) {
+            const name = String(fileName);
+            return name.endsWith('.js') || name.endsWith('.mjs');
+        },
+        hasKnownExtension(fileName) {
+            return /\.(?:js|mjs|json)$/i.test(String(fileName));
+        },
         findRoots(parent) {
             return [ this.findRoot(parent) ].concat(require.paths());
         },
@@ -207,7 +267,7 @@
             ? paths.split(/* separator = */ System.getProperty('os.name').toLowerCase().includes('win') ? ';' : ':')
             : [],
         normalizeName(fileName, ext) {
-            if (fileName.endsWith('.json')) {
+            if (this.hasKnownExtension(fileName)) {
                 return fileName;
             }
             ext = ext || '.js';
@@ -278,6 +338,28 @@
      * @type {Internal.Require}
      */
     const require = global.require = new _.RequireCtor();
+
+    _.Module.require.resolve = function (id, parent) {
+        return require.resolve(id, parent);
+    };
+    _.Module.require.paths = function () {
+        return require.paths();
+    };
+    _.Module.require.cache = require.cache;
+    _.Module.require.extensions = require.extensions;
+    Object.defineProperty(_.Module.require, 'main', {
+        get() {
+            return require.main;
+        },
+    });
+    Object.defineProperty(_.Module.require, 'root', {
+        get() {
+            return require.root;
+        },
+        set(value) {
+            require.root = value;
+        },
+    });
 
     module.exports = _.Module;
 })();
