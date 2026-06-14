@@ -29,6 +29,12 @@ The following hooks are available in debug builds through `AceEditorTestHooks`. 
 | `forceRendererGoneFallback` | Simulate renderer-gone fallback before page load. | Fallback to Native without app crash. |
 | `forceLargeFileNativeRoute` | Force ACE large-file routing to Native. | Native editor is used even for a small test file. |
 
+## Diagnostics
+
+Use `More -> Copy ACE diagnostics` from the editor menu when reporting ACE issues. The same export is available from the isolated ACE debug page through the `Copy ACE diagnostics` button.
+
+Diagnostics should include the current engine type, ACE health state, last failure, Android/WebView versions, LSP state, file size, large-file policy, and TextMirror revision.
+
 ## Automation Status
 
 The repository currently has only lightweight instrumentation test dependencies for the app module, without a complete editor UI automation stack such as Espresso actions and ActivityScenario rules. This document is therefore the executable acceptance source for task 12. The case IDs below map directly to future smoke test names:
@@ -155,6 +161,7 @@ Steps:
 Expected:
 - Text, dirty state, cursor, selection, breakpoints, read-only state, theme, and font size are preserved as far as supported.
 - Undo/redo history is not expected to cross engines.
+- The first manual engine switch shows a one-time undo/redo history notice.
 
 Failure logs:
 - `text_editor_engine_switched`
@@ -249,6 +256,7 @@ Expected:
 - ACE falls back to Native.
 - Text, dirty state, cursor, breakpoints, debug line, read-only state, theme, and font are restored from the best available snapshot.
 - Fallback Toast is shown once.
+- `More -> Copy ACE diagnostics` still reports the last ACE health and failure state after fallback.
 
 Failure logs:
 - `READY_TIMEOUT`
@@ -385,3 +393,4 @@ ACE can remain enabled as an experimental option only if:
 - Large files route to Native under the current threshold policy.
 - No blocked URL, file bridge, or LSP error prevents basic edit/save/run.
 - Third-party asset and license checks remain clean.
+- ACE diagnostics can be copied from an active ACE editor and after ACE fallback to Native.

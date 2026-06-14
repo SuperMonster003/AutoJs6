@@ -185,6 +185,11 @@
             </item>
 
             <item
+                android:id="@+id/action_copy_ace_diagnostics"
+                android:title="@string/text_copy_ace_diagnostics"
+                app:showAsAction="never" />
+
+            <item
                 android:id="@+id/action_open_by_other_apps"
                 android:title="@string/text_open_by_other_apps"
                 app:showAsAction="never" />

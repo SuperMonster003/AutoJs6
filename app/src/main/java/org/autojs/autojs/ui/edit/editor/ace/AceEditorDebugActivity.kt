@@ -3,6 +3,8 @@ package org.autojs.autojs.ui.edit.editor.ace
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import org.autojs.autojs.ui.edit.editor.ace.diagnostics.AceDiagnostics
+import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.util.ViewUtils.showToast
 import org.autojs.autojs6.R
@@ -69,6 +71,18 @@ class AceEditorDebugActivity : BaseActivity() {
         }
         binding.actionClearBreakpoints.setOnClickListener {
             binding.aceEditor.removeAllBreakpoints()
+        }
+        binding.actionCopyDiagnostics.setOnClickListener {
+            ClipboardUtils.setClip(
+                this,
+                AceDiagnostics.format(
+                    binding.aceEditor.createDiagnosticsSnapshot(
+                        fileSizeBytes = binding.aceEditor.textSnapshot.length.toLong(),
+                        largeFilePolicy = "debug",
+                    ),
+                ),
+            )
+            showToast(this, R.string.text_ace_diagnostics_copied)
         }
     }
 

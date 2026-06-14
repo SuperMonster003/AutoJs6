@@ -13,7 +13,7 @@ body {
 }
 
 #editor {
-    font-family: Consolas, "Roboto Mono", Monaco, monospace;
+    font-family: monospace;
     line-height: 1.45;
 }
 

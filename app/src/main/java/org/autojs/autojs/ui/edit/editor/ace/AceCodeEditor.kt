@@ -25,6 +25,8 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.FrameLayout
+import org.autojs.autojs.ui.edit.editor.ace.diagnostics.AceDiagnostics
+import org.autojs.autojs.ui.edit.editor.ace.diagnostics.AceDiagnosticsSnapshot
 import org.autojs.autojs.ui.edit.editor.ace.health.AceFailure
 import org.autojs.autojs.ui.edit.editor.ace.health.AceFailureType
 import org.autojs.autojs.ui.edit.editor.ace.health.AceHealthState
@@ -111,6 +113,32 @@ class AceCodeEditor @JvmOverloads constructor(
 
     val lastFailure: AceFailure?
         get() = healthMonitor.lastFailure
+
+    fun createDiagnosticsSnapshot(
+        fileSizeBytes: Long? = null,
+        largeFilePolicy: String = "auto",
+    ): AceDiagnosticsSnapshot {
+        val failure = lastFailure
+        return AceDiagnosticsSnapshot(
+            engineType = "ACE",
+            aceHealthState = healthState.name,
+            lastFailureType = failure?.type?.name,
+            lastFailureMessage = failure?.message,
+            lastFailureFatal = failure?.fatal,
+            assetUrl = EDITOR_URL,
+            webViewVersion = AceDiagnostics.currentWebViewVersion(),
+            androidVersion = AceDiagnostics.androidVersion(),
+            lspEnabled = false,
+            lspState = AceDiagnostics.LSP_DISABLED,
+            fileSizeBytes = fileSizeBytes,
+            largeFilePolicy = largeFilePolicy,
+            textMirrorRevision = textMirrorRevision,
+            jsRevision = ACE_RUNTIME_REVISION,
+            lastReadyAtUptimeMillis = healthMonitor.lastReadyAtUptimeMillis.takeIf { it > 0L },
+            lastStateAtUptimeMillis = healthMonitor.lastStateAtUptimeMillis.takeIf { it > 0L },
+            lastHeartbeatAtUptimeMillis = healthMonitor.lastHeartbeatAtUptimeMillis.takeIf { it > 0L },
+        )
+    }
 
     init {
         addView(webView, LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
@@ -906,6 +934,7 @@ class AceCodeEditor @JvmOverloads constructor(
         private const val ASSET_URL_PREFIX = "file:///android_asset/editor/ace-builds-1.4.12/"
         private const val EDITOR_URL = "${ASSET_URL_PREFIX}autojs6_editor.html"
         private const val EDITOR_ASSET_PATH = "editor/ace-builds-1.4.12/autojs6_editor.html"
+        private const val ACE_RUNTIME_REVISION = "ace-builds-1.4.12-autojs6"
         private const val TEXT_MIRROR_CALIBRATION_DELAY_MS = 500L
 
         fun hasRequiredAssets(context: Context): Boolean {

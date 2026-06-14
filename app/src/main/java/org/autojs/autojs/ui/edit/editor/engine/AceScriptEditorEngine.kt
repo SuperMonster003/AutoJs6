@@ -5,6 +5,7 @@ import android.graphics.Color
 import android.view.View
 import org.autojs.autojs.model.autocomplete.AutoCompletion
 import org.autojs.autojs.ui.edit.editor.ace.AceCodeEditor
+import org.autojs.autojs.ui.edit.editor.ace.diagnostics.AceDiagnosticsSnapshot
 import org.autojs.autojs.ui.edit.editor.ace.health.AceFailure
 import org.autojs.autojs.ui.edit.theme.Theme
 import org.autojs.autojs.util.ClipboardUtils
@@ -34,6 +35,13 @@ class AceScriptEditorEngine(
     private var suppressProgrammaticTextChange = false
 
     var onFatalFailure: ((AceFailure) -> Unit)? = null
+
+    fun createAceDiagnosticsSnapshot(
+        fileSizeBytes: Long? = null,
+        largeFilePolicy: String = "auto",
+    ): AceDiagnosticsSnapshot {
+        return aceCodeEditor.createDiagnosticsSnapshot(fileSizeBytes, largeFilePolicy)
+    }
 
     override val view: View
         get() = aceCodeEditor

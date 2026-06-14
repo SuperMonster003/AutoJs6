@@ -20,6 +20,7 @@
     <string name="text_ace_editor_debug_status">%1$s | lines %2$d | cursor %3$d:%4$d | breakpoints %5$d | dirty %6$s</string>
     <string name="text_ace_editor_debug_status_loading">Loading ACE editor...</string>
     <string name="text_ace_editor_debug_text_length">ACE text length: %1$d</string>
+    <string name="text_ace_diagnostics_copied">ACE diagnostics copied to clipboard</string>
     <string name="text_ace_get_text">Get text</string>
     <string name="text_ace_insert">Insert</string>
     <string name="text_ace_set_sample">Set sample</string>
@@ -965,6 +966,7 @@
     <string name="text_content">Content</string>
     <string name="text_continue">Continue</string>
     <string name="text_copy">Copy</string>
+    <string name="text_copy_ace_diagnostics">Copy ACE diagnostics</string>
     <string name="text_copy_all">Copy all</string>
     <string name="text_copy_all_files_to_new_directory">Copy all files to new directory</string>
     <string name="text_copy_command">Copy cmd</string>
@@ -1061,7 +1063,8 @@
     <string name="text_editor_theme">Editor theme</string>
     <string name="text_editor_engine">Editor engine</string>
     <string name="text_editor_engine_switched" formatted="true">Editor engine switched to %s</string>
-    <string name="text_ace_editor_fallback_native" formatted="true">ACE editor failed (%1$s); switched to native editor</string>
+    <string name="text_editor_engine_switched_with_undo_notice" formatted="true">Editor engine switched to %s. Undo/redo history is not preserved across editor engines</string>
+    <string name="text_ace_editor_fallback_native" formatted="true">ACE editor failed (%1$s); switched to native editor. Copy ACE diagnostics from the More menu for details</string>
     <string name="text_ace_large_file_uses_native_editor">Large files use the native editor for responsiveness</string>
     <string name="text_email">E-mail</string>
     <string name="text_email_cannot_be_empty">E-mail cannot be empty</string>
@@ -1740,4 +1743,5 @@
     <string name="text_editor_log_button_behavior">Editor log button behavior</string>
     <string name="summary_editor_auto_show_log_bottom_sheet_on_run">Automatically open the bottom log panel after the editor Run button starts a script</string>
     <string name="description_editor_log_button_behavior_preference">Choose how the editor log button opens logs: bottom log panel or fullscreen log page.</string>
+    <string name="description_editor_engine_preference">Native remains the default editor. ACE is an experimental WebView editor; if ACE fails at runtime, AutoJs6 falls back to the native editor and keeps the best available text snapshot.</string>
 </resources>

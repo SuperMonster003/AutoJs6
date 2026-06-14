@@ -205,6 +205,9 @@ public class EditorMenu {
             mEditorView.switchEditorEngine(EditorEngineType.ACE);
             return true;
         }
+        if (itemId == R.id.action_copy_ace_diagnostics) {
+            return tryDoing(mEditorView::copyAceDiagnosticsToClipboard);
+        }
         if (itemId == R.id.action_open_by_other_apps) {
             return tryDoing(mEditorView::openByOtherApps);
         }

@@ -75,6 +75,8 @@ import org.autojs.autojs.ui.edit.completion.CodeCompletionBar.OnHintClickListene
 import org.autojs.autojs.ui.edit.debug.DebugBar
 import org.autojs.autojs.ui.edit.editor.JavaScriptHighlighter
 import org.autojs.autojs.ui.edit.editor.ace.AceEditorTestHooks
+import org.autojs.autojs.ui.edit.editor.ace.diagnostics.AceDiagnostics
+import org.autojs.autojs.ui.edit.editor.ace.diagnostics.AceDiagnosticsSnapshot
 import org.autojs.autojs.ui.edit.editor.ace.health.AceFailure
 import org.autojs.autojs.ui.edit.editor.engine.AceScriptEditorEngine
 import org.autojs.autojs.ui.edit.editor.engine.EditorEngineFactory
@@ -262,6 +264,9 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private var mSwitchingEditorEngine: Boolean = false
 
     private val mAceFallbackInProgress = AtomicBoolean(false)
+
+    @Volatile
+    private var mLastAceDiagnosticsSnapshot: AceDiagnosticsSnapshot? = null
 
     // Active large-file loading cancel flag.
     // zh-CN: 大文件加载的取消标记 (当前会话).
@@ -809,7 +814,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             showSwitchToast = false,
         )
         if (switched) {
-            showToast(context, R.string.text_ace_large_file_uses_native_editor)
+            showAceLargeFileNativeToastOnce()
         }
         return switched
     }
@@ -1475,12 +1480,18 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         mSymbolBar.codeCompletions = CodeCompletions.just(symbols)
     }
 
+    fun copyAceDiagnosticsToClipboard() {
+        val snapshot = createAceDiagnosticsSnapshot()
+        ClipboardUtils.setClip(context, AceDiagnostics.format(snapshot))
+        showToast(context, R.string.text_ace_diagnostics_copied)
+    }
+
     fun switchEditorEngine(targetType: EditorEngineType) {
         if (editor.engineType == targetType || mSwitchingEditorEngine) {
             return
         }
         if (targetType == EditorEngineType.ACE && (mLargeFileMode || AceEditorTestHooks.shouldForceLargeFileNativeRoute())) {
-            showToast(context, R.string.text_ace_large_file_uses_native_editor)
+            showAceLargeFileNativeToastOnce()
             return
         }
         if (mEditorLoading) {
@@ -1550,6 +1561,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         mFunctionsKeyboardHelper = null
         mAutoCompletion?.shutdown()
         mAutoCompletion = null
+        recordLastAceDiagnostics(oldEditor)
         (oldEditor as? AceScriptEditorEngine)?.onFatalFailure = null
         oldEditor.onUserTouchInTextArea = null
         binding.editorContainer.removeView(oldEditor.view)
@@ -1588,7 +1600,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             EditorEngineType.ACE -> context.getString(R.string.entry_editor_engine_ace)
         }
         if (showSwitchToast) {
-            showToast(context, context.getString(R.string.text_editor_engine_switched, engineName))
+            showEditorEngineSwitchedToast(engineName)
         }
         return true
     }
@@ -1621,11 +1633,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 showSwitchToast = false,
             )
             if (switched) {
-                showToast(
-                    context,
-                    context.getString(R.string.text_ace_editor_fallback_native, failureReasonForToast(failure)),
-                    true,
-                )
+                showAceFallbackToastOnce(failure)
             }
         }.onFailure { error ->
             error.printStackTrace()
@@ -1639,6 +1647,60 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         return failure.type.name
             .lowercase(Locale.getDefault())
             .replace('_', ' ')
+    }
+
+    private fun showEditorEngineSwitchedToast(engineName: String) {
+        val message = if (EditorEnginePreferences.consumeEditorSwitchUndoNotice()) {
+            context.getString(R.string.text_editor_engine_switched_with_undo_notice, engineName)
+        } else {
+            context.getString(R.string.text_editor_engine_switched, engineName)
+        }
+        showToast(context, message)
+    }
+
+    private fun showAceFallbackToastOnce(failure: AceFailure) {
+        if (!EditorEnginePreferences.consumeAceFallbackNotice()) {
+            return
+        }
+        showToast(
+            context,
+            context.getString(R.string.text_ace_editor_fallback_native, failureReasonForToast(failure)),
+            true,
+        )
+    }
+
+    private fun showAceLargeFileNativeToastOnce() {
+        if (EditorEnginePreferences.consumeAceLargeFileNotice()) {
+            showToast(context, R.string.text_ace_large_file_uses_native_editor)
+        }
+    }
+
+    private fun createAceDiagnosticsSnapshot(): AceDiagnosticsSnapshot {
+        val fileSizeBytes = currentFileSizeOrNull()
+        val largeFilePolicy = currentLargeFilePolicyLabel()
+        return (editor as? AceScriptEditorEngine)?.createAceDiagnosticsSnapshot(fileSizeBytes, largeFilePolicy)
+            ?: mLastAceDiagnosticsSnapshot
+            ?: AceDiagnostics.createNativeSnapshot(editor.engineType, fileSizeBytes, largeFilePolicy)
+    }
+
+    private fun recordLastAceDiagnostics(editor: ScriptEditorEngine) {
+        mLastAceDiagnosticsSnapshot = (editor as? AceScriptEditorEngine)
+            ?.createAceDiagnosticsSnapshot(currentFileSizeOrNull(), currentLargeFilePolicyLabel())
+            ?: mLastAceDiagnosticsSnapshot
+    }
+
+    private fun currentFileSizeOrNull(): Long? {
+        val currentUri = uri ?: return null
+        return runCatching { queryContentLengthOrNull(currentUri) }.getOrNull()
+    }
+
+    private fun currentLargeFilePolicyLabel(): String {
+        val route = when {
+            AceEditorTestHooks.shouldForceLargeFileNativeRoute() -> "debug-force-native"
+            mLargeFileMode -> "auto-native-large-file"
+            else -> "auto"
+        }
+        return "$route;thresholdBytes=$LARGE_FILE_MODE_THRESHOLD"
     }
 
     private fun setUpEditor(resetInitialState: Boolean = true) {

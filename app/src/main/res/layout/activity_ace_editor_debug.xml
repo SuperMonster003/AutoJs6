@@ -121,6 +121,14 @@
                 android:minWidth="96dp"
                 android:text="@string/text_remove_all_breakpoints" />
 
+            <Button
+                android:id="@+id/action_copy_diagnostics"
+                style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:minWidth="96dp"
+                android:text="@string/text_copy_ace_diagnostics" />
+
         </LinearLayout>
 
     </HorizontalScrollView>
