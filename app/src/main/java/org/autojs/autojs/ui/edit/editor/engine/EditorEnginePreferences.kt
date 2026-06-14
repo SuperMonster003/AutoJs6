@@ -4,7 +4,7 @@ import org.autojs.autojs.core.pref.Pref
 
 object EditorEnginePreferences {
 
-    const val KEY_EDITOR_ENGINE = "key_editor_engine"
+    const val KEY_EDITOR_ENGINE = "key_\$_editor_engine"
 
     @JvmStatic
     fun get(): EditorEngineType {

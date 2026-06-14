@@ -42,6 +42,7 @@ class AceCodeEditor @JvmOverloads constructor(
     val webView: WebView = WebView(context)
 
     var listener: Listener? = null
+    var onUserTouchInTextArea: (() -> Unit)? = null
 
     var isReady = false
         private set
@@ -73,6 +74,12 @@ class AceCodeEditor @JvmOverloads constructor(
     var breakpointsSnapshot: List<Int> = emptyList()
         private set
 
+    var selectionSnapshot: AceSelection = AceSelection.EMPTY
+        private set
+
+    var selectedTextSnapshot = ""
+        private set
+
     private var loaded = false
     private var userTouching = false
 
@@ -101,6 +108,16 @@ class AceCodeEditor @JvmOverloads constructor(
         invokeAce("setText", quote(textSnapshot))
     }
 
+    fun setTextDirty(text: String?) {
+        textSnapshot = text.orEmpty()
+        invokeAce("setTextDirty", quote(textSnapshot))
+    }
+
+    fun markClean() {
+        dirty = false
+        invokeAce("markClean")
+    }
+
     fun getText(callback: (String) -> Unit) {
         val fallback = quote(textSnapshot)
         evaluateOrQueue("window.AutoJsAce ? window.AutoJsAce.getText() : $fallback") {
@@ -116,8 +133,79 @@ class AceCodeEditor @JvmOverloads constructor(
         invokeAce("insertAtLine", "${line.coerceAtLeast(0)}, ${quote(text.orEmpty())}")
     }
 
+    fun selectRange(startOffset: Int, endOffset: Int) {
+        val safeStart = startOffset.coerceIn(0, textSnapshot.length)
+        val safeEnd = endOffset.coerceIn(0, textSnapshot.length)
+        selectionSnapshot = selectionForOffsets(safeStart, safeEnd)
+        selectedTextSnapshot = textSnapshot.substring(minOf(safeStart, safeEnd), maxOf(safeStart, safeEnd))
+        invokeAce("selectRange", "$safeStart, $safeEnd")
+    }
+
     fun jumpTo(line: Int, column: Int = 0) {
         invokeAce("jumpTo", "${line.coerceAtLeast(0)}, ${column.coerceAtLeast(0)}")
+    }
+
+    fun jumpToStart() {
+        invokeAce("jumpToStart")
+    }
+
+    fun jumpToEnd() {
+        invokeAce("jumpToEnd")
+    }
+
+    fun jumpToLineStart() {
+        invokeAce("jumpToLineStart")
+    }
+
+    fun jumpToLineEnd() {
+        invokeAce("jumpToLineEnd")
+    }
+
+    fun jumpToNextLine() {
+        invokeAce("jumpToNextLine")
+    }
+
+    fun jumpToPrevLine() {
+        invokeAce("jumpToPrevLine")
+    }
+
+    fun moveCursor(deltaChars: Int) {
+        invokeAce("moveCursor", deltaChars.toString())
+    }
+
+    fun deleteLine() {
+        invokeAce("deleteLine")
+    }
+
+    fun clear() {
+        textSnapshot = ""
+        selectionSnapshot = AceSelection.EMPTY
+        selectedTextSnapshot = ""
+        invokeAce("clear")
+    }
+
+    fun toggleComment() {
+        invokeAce("toggleComment")
+    }
+
+    fun beautify() {
+        invokeAce("beautify")
+    }
+
+    fun replaceSelection(text: String?) {
+        invokeAce("replaceSelection", quote(text.orEmpty()))
+    }
+
+    fun replaceStoredSelection() {
+        invokeAce("replaceStoredSelection")
+    }
+
+    fun setReplacement(text: String?) {
+        invokeAce("setReplacement", quote(text.orEmpty()))
+    }
+
+    fun replaceAll(query: String, replacement: String?, usingRegex: Boolean) {
+        invokeAce("replaceAll", "${quote(query)}, ${quote(replacement.orEmpty())}, $usingRegex")
     }
 
     fun undo() {
@@ -142,6 +230,10 @@ class AceCodeEditor @JvmOverloads constructor(
 
     fun toggleBreakpoint(line: Int) {
         invokeAce("toggleBreakpoint", line.coerceAtLeast(0).toString())
+    }
+
+    fun setBreakpoint(line: Int, enabled: Boolean) {
+        invokeAce("setBreakpoint", "${line.coerceAtLeast(0)}, $enabled")
     }
 
     fun addOrRemoveBreakpointAtCurrentLine() {
@@ -246,7 +338,10 @@ class AceCodeEditor @JvmOverloads constructor(
                 MotionEvent.ACTION_DOWN,
                 MotionEvent.ACTION_POINTER_DOWN,
                 MotionEvent.ACTION_MOVE,
-                    -> userTouching = true
+                    -> {
+                    userTouching = true
+                    onUserTouchInTextArea?.invoke()
+                }
 
                 MotionEvent.ACTION_UP,
                 MotionEvent.ACTION_CANCEL,
@@ -315,6 +410,8 @@ class AceCodeEditor @JvmOverloads constructor(
         cursorColumn = state.cursor.column
         cursorLineText = state.cursor.lineText
         breakpointsSnapshot = state.breakpoints
+        selectionSnapshot = state.selection
+        selectedTextSnapshot = state.selectedText
         return state
     }
 
@@ -325,6 +422,7 @@ class AceCodeEditor @JvmOverloads constructor(
         return runCatching {
             val obj = JSONObject(stateJson)
             val cursorObj = obj.optJSONObject("cursor")
+            val selectionObj = obj.optJSONObject("selection")
             val breakpointsArray = obj.optJSONArray("breakpoints") ?: JSONArray()
             val breakpoints = buildList {
                 for (i in 0 until breakpointsArray.length()) {
@@ -342,6 +440,15 @@ class AceCodeEditor @JvmOverloads constructor(
                     column = cursorObj?.optInt("column", cursorColumn) ?: cursorColumn,
                     lineText = cursorObj?.optString("lineText", cursorLineText) ?: cursorLineText,
                 ),
+                selection = AceSelection(
+                    startOffset = selectionObj?.optInt("startOffset", selectionSnapshot.startOffset) ?: selectionSnapshot.startOffset,
+                    endOffset = selectionObj?.optInt("endOffset", selectionSnapshot.endOffset) ?: selectionSnapshot.endOffset,
+                    startLine = selectionObj?.optInt("startLine", selectionSnapshot.startLine) ?: selectionSnapshot.startLine,
+                    startColumn = selectionObj?.optInt("startColumn", selectionSnapshot.startColumn) ?: selectionSnapshot.startColumn,
+                    endLine = selectionObj?.optInt("endLine", selectionSnapshot.endLine) ?: selectionSnapshot.endLine,
+                    endColumn = selectionObj?.optInt("endColumn", selectionSnapshot.endColumn) ?: selectionSnapshot.endColumn,
+                ),
+                selectedText = obj.optString("selectedText", selectedTextSnapshot),
                 breakpoints = breakpoints,
             )
         }.getOrElse {
@@ -358,6 +465,8 @@ class AceCodeEditor @JvmOverloads constructor(
             canRedo = canRedo,
             lineCount = lineCountSnapshot,
             cursor = AceCursor(cursorLine, cursorColumn, cursorLineText),
+            selection = selectionSnapshot,
+            selectedText = selectedTextSnapshot,
             breakpoints = breakpointsSnapshot,
         )
     }
@@ -380,6 +489,32 @@ class AceCodeEditor @JvmOverloads constructor(
     }
 
     private fun quote(value: String): String = JSONObject.quote(value)
+
+    private fun selectionForOffsets(start: Int, end: Int): AceSelection {
+        val startPosition = positionForOffset(start)
+        val endPosition = positionForOffset(end)
+        return AceSelection(
+            startOffset = start,
+            endOffset = end,
+            startLine = startPosition.first,
+            startColumn = startPosition.second,
+            endLine = endPosition.first,
+            endColumn = endPosition.second,
+        )
+    }
+
+    private fun positionForOffset(offset: Int): Pair<Int, Int> {
+        val safeOffset = offset.coerceIn(0, textSnapshot.length)
+        var line = 0
+        var lineStart = 0
+        for (i in 0 until safeOffset) {
+            if (textSnapshot[i] == '\n') {
+                line++
+                lineStart = i + 1
+            }
+        }
+        return line to (safeOffset - lineStart)
+    }
 
     private fun isAllowedUrl(url: String?): Boolean {
         if (url.isNullOrBlank()) {
@@ -469,6 +604,8 @@ class AceCodeEditor @JvmOverloads constructor(
         val canRedo: Boolean,
         val lineCount: Int,
         val cursor: AceCursor,
+        val selection: AceSelection,
+        val selectedText: String,
         val breakpoints: List<Int>,
     )
 
@@ -477,6 +614,26 @@ class AceCodeEditor @JvmOverloads constructor(
         val column: Int,
         val lineText: String,
     )
+
+    data class AceSelection(
+        val startOffset: Int,
+        val endOffset: Int,
+        val startLine: Int,
+        val startColumn: Int,
+        val endLine: Int,
+        val endColumn: Int,
+    ) {
+        companion object {
+            val EMPTY = AceSelection(
+                startOffset = 0,
+                endOffset = 0,
+                startLine = 0,
+                startColumn = 0,
+                endLine = 0,
+                endColumn = 0,
+            )
+        }
+    }
 
     interface Listener {
         fun onReady(state: AceEditorState) = Unit
@@ -497,5 +654,12 @@ class AceCodeEditor @JvmOverloads constructor(
         private const val JS_BRIDGE_NAME = "autojs"
         private const val ASSET_URL_PREFIX = "file:///android_asset/editor/ace-builds-1.4.12/"
         private const val EDITOR_URL = "${ASSET_URL_PREFIX}autojs6_editor.html"
+        private const val EDITOR_ASSET_PATH = "editor/ace-builds-1.4.12/autojs6_editor.html"
+
+        fun hasRequiredAssets(context: Context): Boolean {
+            return runCatching {
+                context.assets.open(EDITOR_ASSET_PATH).close()
+            }.isSuccess
+        }
     }
 }

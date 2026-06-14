@@ -9,6 +9,7 @@
     var suppressChange = false;
     var breakpoints = [];
     var debugMarker = null;
+    var storedReplacement = "";
 
     function callBridge(name, args) {
         try {
@@ -51,6 +52,7 @@
     function buildState() {
         var position = editor ? editor.getCursorPosition() : { row: 0, column: 0 };
         var undoManager = getUndoManager();
+        var selection = getSelectionState();
         return {
             text: session ? session.getValue() : "",
             dirty: dirty,
@@ -62,7 +64,47 @@
                 column: position.column || 0,
                 lineText: getLine(position.row || 0)
             },
+            selection: selection,
+            selectedText: selection.text,
             breakpoints: getBreakpoints()
+        };
+    }
+
+    function positionToIndex(position) {
+        return session ? session.doc.positionToIndex(position, 0) : 0;
+    }
+
+    function indexToPosition(index) {
+        if (!session) {
+            return { row: 0, column: 0 };
+        }
+        index = Math.max(0, Math.min(Number(index) || 0, session.getValue().length));
+        return session.doc.indexToPosition(index, 0);
+    }
+
+    function getSelectionState() {
+        if (!editor || !session) {
+            return {
+                startOffset: 0,
+                endOffset: 0,
+                startLine: 0,
+                startColumn: 0,
+                endLine: 0,
+                endColumn: 0,
+                text: ""
+            };
+        }
+        var range = editor.getSelectionRange();
+        var startOffset = positionToIndex(range.start);
+        var endOffset = positionToIndex(range.end);
+        return {
+            startOffset: startOffset,
+            endOffset: endOffset,
+            startLine: range.start.row,
+            startColumn: range.start.column,
+            endLine: range.end.row,
+            endColumn: range.end.column,
+            text: session.getTextRange(range)
         };
     }
 
@@ -125,6 +167,11 @@
         return false;
     }
 
+    function markClean() {
+        dirty = false;
+        notifyStateChanged("cleanChanged");
+    }
+
     function toggleBreakpoint(row) {
         row = clampRow(row);
         return setBreakpoint(row, breakpoints.indexOf(row) < 0, true);
@@ -170,6 +217,27 @@
         notifyCursorChanged();
     }
 
+    function setTextDirty(text) {
+        suppressChange = true;
+        session.setValue(text || "");
+        suppressChange = false;
+        dirty = true;
+        notifyTextChanged();
+        notifyCursorChanged();
+    }
+
+    function selectRange(startOffset, endOffset) {
+        if (!editor || !session || !Range) {
+            return;
+        }
+        var start = indexToPosition(startOffset);
+        var end = indexToPosition(endOffset);
+        editor.selection.setRange(new Range(start.row, start.column, end.row, end.column), false);
+        editor.renderer.scrollCursorIntoView();
+        notifyCursorChanged();
+        notifyStateChanged("selectionChanged");
+    }
+
     function insert(text) {
         editor.insert(text || "");
     }
@@ -184,6 +252,91 @@
         editor.focus();
         editor.gotoLine(row + 1, column, true);
         notifyCursorChanged();
+    }
+
+    function jumpToStart() {
+        jumpTo(0, 0);
+    }
+
+    function jumpToEnd() {
+        var row = Math.max(0, session.getLength() - 1);
+        jumpTo(row, getLine(row).length);
+    }
+
+    function jumpToLineStart() {
+        var position = editor.getCursorPosition();
+        jumpTo(position.row, 0);
+    }
+
+    function jumpToLineEnd() {
+        var position = editor.getCursorPosition();
+        jumpTo(position.row, getLine(position.row).length);
+    }
+
+    function jumpToNextLine() {
+        var position = editor.getCursorPosition();
+        jumpTo(Math.min(position.row + 1, session.getLength() - 1), position.column);
+    }
+
+    function jumpToPrevLine() {
+        var position = editor.getCursorPosition();
+        jumpTo(Math.max(position.row - 1, 0), position.column);
+    }
+
+    function moveCursor(delta) {
+        var selection = getSelectionState();
+        var next = Math.max(0, Math.min(selection.startOffset + (Number(delta) || 0), session.getValue().length));
+        selectRange(next, next);
+    }
+
+    function deleteLine() {
+        var row = editor.getCursorPosition().row;
+        var lineCount = session.getLength();
+        var start = { row: row, column: 0 };
+        var end = row + 1 < lineCount ? { row: row + 1, column: 0 } : { row: row, column: getLine(row).length };
+        session.remove(new Range(start.row, start.column, end.row, end.column));
+    }
+
+    function clear() {
+        setText("");
+    }
+
+    function toggleComment() {
+        editor.toggleCommentLines();
+        notifyStateChanged("commentChanged");
+    }
+
+    function beautify() {
+        try {
+            var beautifyExtension = global.ace.require("ace/ext/beautify");
+            beautifyExtension.beautify(session);
+            notifyStateChanged("beautified");
+        } catch (error) {
+            notifyError("Beautify failed: " + error);
+        }
+    }
+
+    function replaceSelection(text) {
+        editor.insert(text || "");
+        notifyTextChanged();
+    }
+
+    function replaceAll(query, replacement, usingRegex) {
+        var source = session.getValue();
+        var next = source;
+        if (usingRegex) {
+            next = source.replace(new RegExp(query, "g"), replacement || "");
+        } else if (query) {
+            next = source.split(query).join(replacement || "");
+        }
+        if (next !== source) {
+            session.setValue(next);
+            dirty = true;
+            notifyTextChanged();
+            return true;
+        }
+        notifyStateChanged("replaceAllNoop");
+        return false;
     }
 
     function setTheme(theme) {
@@ -256,14 +409,33 @@
         global.AutoJsAce = {
             getText: function() { return session.getValue(); },
             setText: setText,
+            setTextDirty: setTextDirty,
+            markClean: markClean,
             insert: insert,
             insertAtLine: insertAtLine,
             jumpTo: jumpTo,
+            jumpToStart: jumpToStart,
+            jumpToEnd: jumpToEnd,
+            jumpToLineStart: jumpToLineStart,
+            jumpToLineEnd: jumpToLineEnd,
+            jumpToNextLine: jumpToNextLine,
+            jumpToPrevLine: jumpToPrevLine,
+            moveCursor: moveCursor,
+            selectRange: selectRange,
+            deleteLine: deleteLine,
+            clear: clear,
+            toggleComment: toggleComment,
+            beautify: beautify,
+            replaceSelection: replaceSelection,
+            replaceAll: replaceAll,
+            setReplacement: function(value) { storedReplacement = value || ""; },
+            replaceStoredSelection: function() { replaceSelection(storedReplacement); },
             undo: function() { editor.undo(); notifyStateChanged("undo"); },
             redo: function() { editor.redo(); notifyStateChanged("redo"); },
             setReadOnly: function(readOnly) { editor.setReadOnly(!!readOnly); notifyStateChanged("readOnlyChanged"); },
             setTheme: setTheme,
             setFontSizeSp: setFontSizeSp,
+            setBreakpoint: function(row, enabled) { return setBreakpoint(row, enabled, true); },
             toggleBreakpoint: toggleBreakpoint,
             clearBreakpoints: clearBreakpoints,
             setDebuggingLine: setDebuggingLine,
