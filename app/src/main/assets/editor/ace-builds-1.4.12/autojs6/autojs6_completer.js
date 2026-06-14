@@ -20,7 +20,7 @@
             value: options && options.value || item.value || name,
             meta: options && options.meta || item.meta || item.type || "autojs",
             score: score,
-            docText: item.doc || item.summary || ""
+            docText: item.doc || item.summary || item.signature || ""
         };
         if (item.snippet) {
             completion.snippet = item.snippet;
@@ -36,6 +36,7 @@
             value: property.value,
             type: property.type || (property.variable ? "variable" : "function"),
             doc: property.doc || property.summary || "",
+            signature: property.signature,
             meta: property.meta
         };
     }

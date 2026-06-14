@@ -12,7 +12,7 @@ This document tracks the current AutoJs6 ACE editor deployment state. Native rem
 - ACE text is mirrored on the Kotlin side through change deltas, so fallback can keep recent edits even when the WebView cannot be queried.
 - ACE uses bundled JetBrains Mono WOFF2 assets by default. Source Code Pro is bundled as the second editor font, and system `monospace` remains the final fallback.
 - ACE font selection is available from settings and from the editor `More -> ACE editor font` menu.
-- AutoJs6 static completion is generated from `tools/ace-completion/autojs6_indices.source.json`; the legacy `autojs_indices.js` remains only as a compatibility fallback.
+- AutoJs6 static completion is generated from bundled selected `@sm003/autojs6-dts` declaration files under `autojs6/types/autojs6`, then emitted through `tools/ace-completion/autojs6_indices.source.json`; the legacy `autojs_indices.js` remains only as a compatibility fallback.
 - ACE LSP is an experimental setting and is disabled by default. The stable editor path does not load `lsp.js` or create a WebSocket.
 
 ## Diagnostics
@@ -58,9 +58,11 @@ Before ACE is presented as a gray-release experimental editor:
 - Verify recent small-file input survives fallback through TextMirror.
 - Copy diagnostics from both an active ACE editor and after ACE fallback to Native.
 - Confirm `app/src/main/assets/editor/ace-builds-1.4.12/autojs6/types/lib.autojs6.d.ts` is generated from the same completion source.
+- Confirm selected AutoJs6 declaration sources remain bundled under `app/src/main/assets/editor/ace-builds-1.4.12/autojs6/types/autojs6`.
 - Confirm `docs/dev/ace-lsp-design.md` still marks server-backed LSP as experimental and default-off.
 - Confirm JetBrains Mono notice files remain bundled under `fonts/jetbrains-mono`.
 - Confirm Source Code Pro `LICENSE.md` remains bundled under `fonts/source-code-pro`.
+- Confirm AutoJs6 TypeScript Declarations `LICENSE` remains bundled under `autojs6/types/autojs6`.
 - Confirm no font files with unclear redistribution rights exist under the ACE asset tree.
 - Confirm `THIRD_PARTY_NOTICES.md` and `app/src/main/assets/editor/ace-builds-1.4.12/LICENSE` are present.
 

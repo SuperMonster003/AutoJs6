@@ -1,0 +1,55 @@
+{
+  "name": "@sm003/autojs6-dts",
+  "version": "3.0.0",
+  "files": [
+    "declarations/index.d.ts",
+    "declarations/android.d.ts",
+    "declarations/collections.d.ts",
+    "declarations/libraries.d.ts",
+    "declarations/android",
+    "declarations/collections",
+    "declarations/libraries",
+    "declarations/autojs6/index.d.ts",
+    "declarations/autojs6/aj6-declarations.d.ts",
+    "declarations/autojs6/aj6-gradle-wrapper.d.ts",
+    "declarations/autojs6/aj6-int-*.d.ts",
+    "declarations/autojs6/aj6-jsx-element-extension.d.ts",
+    "declarations/autojs6/aj6-lib-*.d.ts",
+    "declarations/autojs6/aj6-main-app.d.ts",
+    "declarations/autojs6/aj6-r-string.d.ts",
+    "docs/CHANGELOG.md",
+    "jsconfig.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepack": ""
+  },
+  "publishConfig": {
+    "ignore": []
+  },
+  "description": "TypeScript Declarations for AutoJs6",
+  "keywords": [
+    "autojs",
+    "autojs6",
+    "declarations"
+  ],
+  "homepage": "http://autojs6.com",
+  "license": "MPL-2.0",
+  "author": {
+    "name": "SuperMonster003",
+    "url": "https://github.com/SuperMonster003/"
+  },
+  "main": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SuperMonster003/AutoJs6-TypeScript-Declarations.git"
+  },
+  "bugs": {
+    "url": "https://github.com/SuperMonster003/AutoJs6-TypeScript-Declarations/issues"
+  },
+  "dependencies": {
+    "@sm003/autojs6-dts": "3.0.0"
+  }
+}

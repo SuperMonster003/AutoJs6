@@ -10,8 +10,9 @@ ACE LSP support is experimental and disabled by default. The stable editor path 
 - Default bridge response: `{}`
 - Enabled bridge response: structured options with `transport=unavailable` and `fallback=static-completion`
 - Bundled declaration file: `autojs6/types/lib.autojs6.d.ts`
+- Bundled declaration source: selected `@sm003/autojs6-dts` `aj6-int-*.d.ts` files under `autojs6/types/autojs6`
 
-The current build exposes configuration only. It does not start or connect to an LSP server.
+The current build exposes configuration only. It does not start or connect to an LSP server. The selected upstream declaration files currently feed static completion generation; loading the full Android/library declaration graph into a server is still deferred.
 
 ## Server Lifecycle
 
@@ -26,6 +27,7 @@ The first supported implementation should define these items before any default-
 - Restart: failed server starts should be bounded and should never crash or replace the editor.
 - Permissions: LSP file reads must be limited to the current project root unless the user grants broader access.
 - Compatibility: Android API 24+ must fall back to static completion when WebSocket or process support is unavailable.
+- Declaration scope: start from the bundled selected `aj6-int-*.d.ts` set and avoid loading `aj6-main-app.d.ts`, Android, collections, and libraries until memory and startup cost are measured.
 
 ## Failure Policy
 

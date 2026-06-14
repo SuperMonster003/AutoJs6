@@ -17,6 +17,17 @@ This file records third-party notices relevant to the ACE editor integration.
 - Files: `autojs6_editor.html`, `autojs6_ace_bridge.js`, `autojs6_completer.js`, `autojs6_indices.js`, `autojs6.css`
 - These files are project integration code and are covered by the repository license unless a file says otherwise.
 
+## AutoJs6 TypeScript declarations
+
+- Component: AutoJs6 TypeScript Declarations
+- Package: `@sm003/autojs6-dts`
+- Version: 3.0.0
+- Path: `app/src/main/assets/editor/ace-builds-1.4.12/autojs6/types/autojs6`
+- License: MPL-2.0
+- Notice file: `app/src/main/assets/editor/ace-builds-1.4.12/autojs6/types/autojs6/LICENSE`
+
+The integration bundles selected `aj6-int-*.d.ts` files and `aj6-declarations.d.ts` as the source for ACE static completion generation. It intentionally does not bundle the full `aj6-main-app.d.ts`, Android declaration graph, collections, or libraries declaration sets.
+
 ## Font assets
 
 ### JetBrains Mono

@@ -18,6 +18,7 @@ This plan covers manual device validation for the ACE editor experiment. Native 
   - `Blocked ACE`
   - `lspError`
 - Local tool checks:
+  - `node tools/ace-completion/generate-autojs6-indices-from-dts.mjs`
   - `node tools/ace-completion/verify-autojs6-indices.mjs`
   - `node tools/ace-completion/test-completer.mjs`
 
@@ -42,8 +43,10 @@ Diagnostics should include the current engine type, ACE health state, last failu
 ## Completion And LSP Checks
 
 - `autojs6_indices.js` must be regenerated from `tools/ace-completion/autojs6_indices.source.json`.
+- `autojs6_indices.source.json` must be regenerated from the bundled selected AutoJs6 declaration files when those files change.
 - Static completion must work for `toast`, `app.launch`, `files.read`, `images.findImage`, `device.getBattery`, `console.log`, `threads.start`, and `engines.myEngine`.
 - `autojs_indices.js` is a fallback only; AutoJs6-specific entries should be added to the source JSON.
+- Broad AutoJs6 API entries should come from the bundled `aj6-int-*.d.ts` declaration source first; source JSON fallback entries are for parser gaps and curated global member exposure.
 - `ACE LSP smart completion (experimental)` is off by default.
 - With LSP off, `getLspOptions()` returns `{}` and no WebSocket is created.
 - With LSP on and no server available, ACE remains editable and static completion still works.
@@ -357,11 +360,14 @@ Preconditions:
 - Node.js is available on the development machine.
 
 Steps:
-1. Run `node tools/ace-completion/verify-autojs6-indices.mjs`.
-2. Run `node tools/ace-completion/test-completer.mjs`.
+1. Run `node tools/ace-completion/generate-autojs6-indices-from-dts.mjs`.
+2. Run `node tools/ace-completion/generate-autojs6-indices.mjs`.
+3. Run `node tools/ace-completion/generate-dts.mjs`.
+4. Run `node tools/ace-completion/verify-autojs6-indices.mjs`.
+5. Run `node tools/ace-completion/test-completer.mjs`.
 
 Expected:
-- Both commands pass.
+- All commands pass.
 - Common AutoJs6 API completions are present.
 - Missing indices and legacy fallback paths do not throw.
 
@@ -468,6 +474,7 @@ ACE can remain enabled as an experimental option only if:
 - Large files route to Native under the current threshold policy.
 - No blocked URL, file bridge, or LSP error prevents basic edit/save/run.
 - `lib.autojs6.d.ts` is generated from the same AutoJs6 completion source.
+- Selected AutoJs6 declaration files and their MPL-2.0 license are bundled under `autojs6/types/autojs6`.
 - `docs/dev/ace-lsp-design.md` still keeps server-backed LSP experimental and default-off.
 - Third-party asset and license checks remain clean.
 - ACE diagnostics can be copied from an active ACE editor and after ACE fallback to Native.

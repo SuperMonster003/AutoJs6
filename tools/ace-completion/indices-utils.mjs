@@ -28,6 +28,18 @@ export const GENERATED_DTS_PATH = path.join(
   "types",
   "lib.autojs6.d.ts",
 );
+export const BUNDLED_TYPES_ROOT = path.join(
+  PROJECT_ROOT,
+  "app",
+  "src",
+  "main",
+  "assets",
+  "editor",
+  "ace-builds-1.4.12",
+  "autojs6",
+  "types",
+);
+export const BUNDLED_AUTOJS6_DTS_ROOT = path.join(BUNDLED_TYPES_ROOT, "autojs6");
 export const REPORT_PATH = path.join(
   PROJECT_ROOT,
   "build",
@@ -42,7 +54,6 @@ const PRO_ONLY_NAMES = new Set([
   "autojspro",
   "pro",
   "uiObject",
-  "web",
 ]);
 
 export function readSource(sourcePath = SOURCE_PATH) {
@@ -266,7 +277,9 @@ export function renderDts(source) {
     lines.push(`    interface ${interfaceName(moduleName)} {`);
     for (const rawMember of moduleSpec.members) {
       const member = normalizeMember(rawMember);
-      if (member.kind === "variable") {
+      if (member.signature) {
+        lines.push(`        ${member.signature}`);
+      } else if (member.kind === "variable") {
         lines.push(`        ${member.name}: any;`);
       } else {
         lines.push(`        ${member.name}(...args: any[]): any;`);
@@ -333,6 +346,7 @@ export function renderReport(source, indices) {
     "",
     "## Notes",
     "",
+    "- Static completion source is generated from the bundled selected AutoJs6 TypeScript declarations.",
     "- Pro-only index files remain fallback inputs only; this generated source is the AutoJs6 authority.",
     "- The generated JavaScript preserves `AUTOJS_INDICES` compatibility for `autojs6_completer.js`.",
     "",
