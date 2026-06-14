@@ -16,6 +16,9 @@ object AceEditorTestHooks {
     @Volatile
     var forceRendererGoneFallback: Boolean = false
 
+    @Volatile
+    var forceLargeFileNativeRoute: Boolean = false
+
     fun shouldForceAssetMissing(): Boolean = BuildConfig.DEBUG && forceAssetMissing
 
     fun shouldForceReadyTimeout(): Boolean = BuildConfig.DEBUG && forceReadyTimeout
@@ -23,4 +26,14 @@ object AceEditorTestHooks {
     fun shouldForceJsInitThrow(): Boolean = BuildConfig.DEBUG && forceJsInitThrow
 
     fun shouldForceRendererGoneFallback(): Boolean = BuildConfig.DEBUG && forceRendererGoneFallback
+
+    fun shouldForceLargeFileNativeRoute(): Boolean = BuildConfig.DEBUG && forceLargeFileNativeRoute
+
+    fun reset() {
+        forceAssetMissing = false
+        forceReadyTimeout = false
+        forceJsInitThrow = false
+        forceRendererGoneFallback = false
+        forceLargeFileNativeRoute = false
+    }
 }

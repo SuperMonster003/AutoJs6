@@ -74,6 +74,7 @@ import org.autojs.autojs.ui.edit.completion.CodeCompletionBar
 import org.autojs.autojs.ui.edit.completion.CodeCompletionBar.OnHintClickListener
 import org.autojs.autojs.ui.edit.debug.DebugBar
 import org.autojs.autojs.ui.edit.editor.JavaScriptHighlighter
+import org.autojs.autojs.ui.edit.editor.ace.AceEditorTestHooks
 import org.autojs.autojs.ui.edit.editor.ace.health.AceFailure
 import org.autojs.autojs.ui.edit.editor.engine.AceScriptEditorEngine
 import org.autojs.autojs.ui.edit.editor.engine.EditorEngineFactory
@@ -732,11 +733,14 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         val streamThresholdBytes = LARGE_FILE_MODE_THRESHOLD
 
         val sizeOrNull = runCatching { queryContentLengthOrNull(uri) }.getOrNull()
-        if (sizeOrNull != null && sizeOrNull >= streamThresholdBytes) {
+        val shouldStreamAsLargeFile = sizeOrNull != null && sizeOrNull >= streamThresholdBytes
+        if (shouldStreamAsLargeFile || shouldForceLargeFileNativeRoute()) {
             if (!ensureNativeEditorForLargeFile()) {
                 return Observable.error(IllegalStateException(context.getString(R.string.error_ace_editor_unavailable)))
             }
+        }
 
+        if (shouldStreamAsLargeFile) {
             // Large file: show loading in enhance bar, allow viewing/scrolling (read-only).
             // zh-CN: 大文件: 在增强栏显示加载提示, 允许查看/滚动 (只读).
             beginEditorLoadingUi(context.getString(R.string.text_loading_with_dots))
@@ -808,6 +812,10 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             showToast(context, R.string.text_ace_large_file_uses_native_editor)
         }
         return switched
+    }
+
+    private fun shouldForceLargeFileNativeRoute(): Boolean {
+        return editor.engineType == EditorEngineType.ACE && AceEditorTestHooks.shouldForceLargeFileNativeRoute()
     }
 
     private fun queryContentLengthOrNull(uri: Uri): Long? {
@@ -1186,12 +1194,16 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         }
 
         val progressiveThreshold = LARGE_FILE_MODE_THRESHOLD
-        if (text.length > progressiveThreshold) {
+        val shouldLoadProgressively = text.length > progressiveThreshold
+        if (shouldLoadProgressively || shouldForceLargeFileNativeRoute()) {
             if (!ensureNativeEditorForLargeFile()) {
                 mEditorLoading = false
                 syncPrimaryMenuState()
                 return
             }
+        }
+
+        if (shouldLoadProgressively) {
             mLargeFileMode = true
             setInitialTextProgressively(text)
             return
@@ -1467,7 +1479,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         if (editor.engineType == targetType || mSwitchingEditorEngine) {
             return
         }
-        if (targetType == EditorEngineType.ACE && mLargeFileMode) {
+        if (targetType == EditorEngineType.ACE && (mLargeFileMode || AceEditorTestHooks.shouldForceLargeFileNativeRoute())) {
             showToast(context, R.string.text_ace_large_file_uses_native_editor)
             return
         }
