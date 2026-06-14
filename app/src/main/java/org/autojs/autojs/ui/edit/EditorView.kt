@@ -713,6 +713,10 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
         val sizeOrNull = runCatching { queryContentLengthOrNull(uri) }.getOrNull()
         if (sizeOrNull != null && sizeOrNull >= streamThresholdBytes) {
+            if (!ensureNativeEditorForLargeFile()) {
+                return Observable.error(IllegalStateException(context.getString(R.string.error_ace_editor_unavailable)))
+            }
+
             // Large file: show loading in enhance bar, allow viewing/scrolling (read-only).
             // zh-CN: 大文件: 在增强栏显示加载提示, 允许查看/滚动 (只读).
             beginEditorLoadingUi(context.getString(R.string.text_loading_with_dots))
@@ -766,6 +770,24 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 mEditorLoading = false
                 syncPrimaryMenuState()
             }
+    }
+
+    private fun ensureNativeEditorForLargeFile(): Boolean {
+        if (editor.engineType != EditorEngineType.ACE) {
+            return true
+        }
+
+        val switched = switchEditorEngine(
+            targetType = EditorEngineType.NATIVE,
+            oldEditor = editor,
+            latestText = editor.textSnapshot,
+            persistPreference = false,
+            showSwitchToast = false,
+        )
+        if (switched) {
+            showToast(context, R.string.text_ace_large_file_uses_native_editor)
+        }
+        return switched
     }
 
     private fun queryContentLengthOrNull(uri: Uri): Long? {
@@ -1145,6 +1167,11 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
         val progressiveThreshold = LARGE_FILE_MODE_THRESHOLD
         if (text.length > progressiveThreshold) {
+            if (!ensureNativeEditorForLargeFile()) {
+                mEditorLoading = false
+                syncPrimaryMenuState()
+                return
+            }
             mLargeFileMode = true
             setInitialTextProgressively(text)
             return
@@ -1403,6 +1430,10 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         if (editor.engineType == targetType || mSwitchingEditorEngine) {
             return
         }
+        if (targetType == EditorEngineType.ACE && mLargeFileMode) {
+            showToast(context, R.string.text_ace_large_file_uses_native_editor)
+            return
+        }
         if (mEditorLoading) {
             showToast(context, R.string.text_loading_with_dots)
             return
@@ -1430,16 +1461,22 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         }
     }
 
-    private fun switchEditorEngine(targetType: EditorEngineType, oldEditor: ScriptEditorEngine, latestText: String) {
+    private fun switchEditorEngine(
+        targetType: EditorEngineType,
+        oldEditor: ScriptEditorEngine,
+        latestText: String,
+        persistPreference: Boolean = true,
+        showSwitchToast: Boolean = true,
+    ): Boolean {
         if (oldEditor !== editor) {
-            return
+            return false
         }
 
         val newEditor = EditorEngineFactory.create(context, targetType)
         if (newEditor.engineType != targetType) {
             newEditor.destroy()
             showToast(context, R.string.error_ace_editor_unavailable, true)
-            return
+            return false
         }
 
         val wasAttached = isAttachedToWindow
@@ -1481,7 +1518,9 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         editor.setReadOnly(mReadOnly)
 
         oldEditor.destroy()
-        EditorEnginePreferences.set(targetType)
+        if (persistPreference) {
+            EditorEnginePreferences.set(targetType)
+        }
 
         mEditorLoading = oldEditorLoading
         mLargeFileMode = oldLargeFileMode
@@ -1498,7 +1537,10 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             EditorEngineType.NATIVE -> context.getString(R.string.entry_editor_engine_native)
             EditorEngineType.ACE -> context.getString(R.string.entry_editor_engine_ace)
         }
-        showToast(context, context.getString(R.string.text_editor_engine_switched, engineName))
+        if (showSwitchToast) {
+            showToast(context, context.getString(R.string.text_editor_engine_switched, engineName))
+        }
+        return true
     }
 
     private fun setUpEditor(resetInitialState: Boolean = true) {
