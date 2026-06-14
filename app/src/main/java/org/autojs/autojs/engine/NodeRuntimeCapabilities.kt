@@ -1,5 +1,17 @@
 package org.autojs.autojs.engine
 
+data class NodeRuntimeFeatureFlag(
+    val id: String,
+    val diagnosticName: String,
+    val gradleProperty: String?,
+    val defaultEnabled: Boolean,
+    val buildTimeOverrideAllowed: Boolean,
+    val projectJsonOverrideAllowed: Boolean,
+    val packagedApkOverrideAllowed: Boolean,
+    val securityLevel: String,
+    val status: String,
+)
+
 object NodeRuntimeCapabilities {
 
     const val PROFILE_NAME = "AutoJs6 Safe Node Profile"
@@ -18,12 +30,148 @@ object NodeRuntimeCapabilities {
     const val RUNTIME_MODULE_SOURCES_MAX_BYTES = 524_288
     const val RUNTIME_MODULE_SOURCE_MAX_COUNT = 64
 
-    val backendSwitches = setOf("rhino", "native", "embedded", "auto")
-    val experimentalFlags = mapOf(
-        ESM_EXPERIMENTAL_PROPERTY to ESM_EXPERIMENTAL_DEFAULT,
-        NETWORK_EXPERIMENTAL_PROPERTY to NETWORK_EXPERIMENTAL_DEFAULT,
-        WORKER_THREADS_EXPERIMENTAL_PROPERTY to WORKER_THREADS_EXPERIMENTAL_DEFAULT,
+    val featureFlags = listOf(
+        NodeRuntimeFeatureFlag(
+            id = "esm",
+            diagnosticName = "esm",
+            gradleProperty = ESM_EXPERIMENTAL_PROPERTY,
+            defaultEnabled = ESM_EXPERIMENTAL_DEFAULT,
+            buildTimeOverrideAllowed = true,
+            projectJsonOverrideAllowed = false,
+            packagedApkOverrideAllowed = false,
+            securityLevel = "medium",
+            status = "experimental",
+        ),
+        NodeRuntimeFeatureFlag(
+            id = "dynamic_import",
+            diagnosticName = "dynamicImport",
+            gradleProperty = null,
+            defaultEnabled = false,
+            buildTimeOverrideAllowed = false,
+            projectJsonOverrideAllowed = false,
+            packagedApkOverrideAllowed = false,
+            securityLevel = "medium",
+            status = "disabled",
+        ),
+        NodeRuntimeFeatureFlag(
+            id = "network",
+            diagnosticName = "network",
+            gradleProperty = NETWORK_EXPERIMENTAL_PROPERTY,
+            defaultEnabled = NETWORK_EXPERIMENTAL_DEFAULT,
+            buildTimeOverrideAllowed = true,
+            projectJsonOverrideAllowed = false,
+            packagedApkOverrideAllowed = false,
+            securityLevel = "high",
+            status = "experimental",
+        ),
+        NodeRuntimeFeatureFlag(
+            id = "raw_node_network_modules",
+            diagnosticName = "rawNodeNetworkModules",
+            gradleProperty = null,
+            defaultEnabled = false,
+            buildTimeOverrideAllowed = false,
+            projectJsonOverrideAllowed = false,
+            packagedApkOverrideAllowed = false,
+            securityLevel = "high",
+            status = "disabled",
+        ),
+        NodeRuntimeFeatureFlag(
+            id = "worker_threads",
+            diagnosticName = "workerThreads",
+            gradleProperty = WORKER_THREADS_EXPERIMENTAL_PROPERTY,
+            defaultEnabled = WORKER_THREADS_EXPERIMENTAL_DEFAULT,
+            buildTimeOverrideAllowed = true,
+            projectJsonOverrideAllowed = false,
+            packagedApkOverrideAllowed = false,
+            securityLevel = "high",
+            status = "experimental",
+        ),
+        NodeRuntimeFeatureFlag(
+            id = "fs_streams",
+            diagnosticName = "fsStreams",
+            gradleProperty = null,
+            defaultEnabled = true,
+            buildTimeOverrideAllowed = false,
+            projectJsonOverrideAllowed = false,
+            packagedApkOverrideAllowed = false,
+            securityLevel = "medium",
+            status = "partial",
+        ),
+        NodeRuntimeFeatureFlag(
+            id = "zlib_streams",
+            diagnosticName = "zlibStreams",
+            gradleProperty = null,
+            defaultEnabled = true,
+            buildTimeOverrideAllowed = false,
+            projectJsonOverrideAllowed = false,
+            packagedApkOverrideAllowed = false,
+            securityLevel = "medium",
+            status = "partial",
+        ),
+        NodeRuntimeFeatureFlag(
+            id = "vm",
+            diagnosticName = "vm",
+            gradleProperty = null,
+            defaultEnabled = false,
+            buildTimeOverrideAllowed = false,
+            projectJsonOverrideAllowed = false,
+            packagedApkOverrideAllowed = false,
+            securityLevel = "high",
+            status = "disabled",
+        ),
+        NodeRuntimeFeatureFlag(
+            id = "inspector",
+            diagnosticName = "inspector",
+            gradleProperty = null,
+            defaultEnabled = false,
+            buildTimeOverrideAllowed = false,
+            projectJsonOverrideAllowed = false,
+            packagedApkOverrideAllowed = false,
+            securityLevel = "high",
+            status = "disabled",
+        ),
+        NodeRuntimeFeatureFlag(
+            id = "java_interop",
+            diagnosticName = "javaInterop",
+            gradleProperty = null,
+            defaultEnabled = false,
+            buildTimeOverrideAllowed = false,
+            projectJsonOverrideAllowed = false,
+            packagedApkOverrideAllowed = false,
+            securityLevel = "critical",
+            status = "unsupported",
+        ),
+        NodeRuntimeFeatureFlag(
+            id = "native_addon",
+            diagnosticName = "nativeAddon",
+            gradleProperty = null,
+            defaultEnabled = false,
+            buildTimeOverrideAllowed = false,
+            projectJsonOverrideAllowed = false,
+            packagedApkOverrideAllowed = false,
+            securityLevel = "critical",
+            status = "unsupported",
+        ),
+        NodeRuntimeFeatureFlag(
+            id = "child_process",
+            diagnosticName = "childProcess",
+            gradleProperty = null,
+            defaultEnabled = false,
+            buildTimeOverrideAllowed = false,
+            projectJsonOverrideAllowed = false,
+            packagedApkOverrideAllowed = false,
+            securityLevel = "high",
+            status = "disabled",
+        ),
     )
+    val featureFlagsById = featureFlags.associateBy { it.id }
+    val enabledByDefaultFeatureFlags = featureFlags.filter { it.defaultEnabled }
+    val deniedFeatureFlags = featureFlags.filterNot { it.defaultEnabled }
+    val experimentalFlags = featureFlags
+        .filter { it.status == "experimental" && it.gradleProperty != null }
+        .associate { it.gradleProperty!! to it.defaultEnabled }
+
+    val backendSwitches = setOf("rhino", "native", "embedded", "auto")
 
     val nodeRouteFileSuffixes = setOf(".node.js", ".cjs", ".mjs")
     val commonJsModuleExtensions = setOf("js", "cjs", "json")

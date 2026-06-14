@@ -211,6 +211,14 @@ Current `worker_threads` design gate focused instrumentation:
 
 This suite verifies `BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED=false`, the Kotlin capability registry, JavaScript profile flags, bare and `node:` `worker_threads` denial, `require.resolve("worker_threads")` denial, frozen profile flags, and shadowing protection against `node_modules/worker_threads`.
 
+Current feature flag registry focused instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeFeatureFlagRegistryInstrumentationTest"
+```
+
+This suite verifies the centralized `NodeRuntimeCapabilities.featureFlags` registry, safe defaults for high and critical security flags, denied project/package override policy, expected build-time override allowlist, and JavaScript `require("autojs6:profile").featureFlags` diagnostics.
+
 Current Embedded Node performance benchmark:
 
 ```powershell

@@ -61,31 +61,6 @@ private fun extractConstBoolean(source: String, name: String): Boolean =
         ?.toBooleanStrict()
         ?: throw GradleException("Unable to find boolean constant $name.")
 
-private fun extractExperimentalFlags(source: String): List<Map<String, Any>> {
-    return Regex("""const\s+val\s+([A-Z_]+_PROPERTY)\s*=\s*"([^"]+)"""")
-        .findAll(source)
-        .map { match ->
-            val constantName = match.groupValues[1]
-            val defaultConstantName = constantName.removeSuffix("_PROPERTY") + "_DEFAULT"
-            val property = match.groupValues[2]
-            mapOf(
-                "name" to property,
-                "default" to extractConstBoolean(source, defaultConstantName),
-                "status" to "experimental",
-                "buildTimeOverride" to true,
-                "projectJsonOverrideAllowed" to false,
-                "packagedApkOverrideAllowed" to false,
-                "securityLevel" to when {
-                    property.contains("worker_threads") -> "high"
-                    property.contains("network") -> "high"
-                    property.contains("esm") -> "medium"
-                    else -> "medium"
-                },
-            )
-        }
-        .toList()
-}
-
 private fun extractJsObjectBlock(source: String, name: String): String {
     val token = "const $name = Object.freeze({"
     val start = source.indexOf(token)
@@ -206,6 +181,47 @@ private fun extractBridgeMethods(source: String): Map<String, List<String>> {
         .toSortedMap()
 }
 
+private fun extractFeatureFlagRegistry(source: String): List<Map<String, Any?>> {
+    fun entryField(entry: String, name: String): String =
+        Regex("""${Regex.escape(name)}\s*=\s*([^,\n)]+)""")
+            .find(entry)
+            ?.groupValues
+            ?.get(1)
+            ?.trim()
+            ?: throw GradleException("Unable to find feature flag field $name in $entry.")
+
+    fun stringValue(raw: String): String? = when {
+        raw == "null" -> null
+        raw.startsWith("\"") && raw.endsWith("\"") -> raw.removeSurrounding("\"")
+        else -> extractConstString(source, raw)
+    }
+
+    fun booleanValue(raw: String): Boolean = when (raw) {
+        "true" -> true
+        "false" -> false
+        else -> extractConstBoolean(source, raw)
+    }
+
+    val block = source.extractCallArguments("featureFlags")
+    return Regex("""NodeRuntimeFeatureFlag\((.*?)\)""", RegexOption.DOT_MATCHES_ALL)
+        .findAll(block)
+        .map { match ->
+            val entry = match.groupValues[1]
+            mapOf(
+                "id" to stringValue(entryField(entry, "id")),
+                "diagnosticName" to stringValue(entryField(entry, "diagnosticName")),
+                "gradleProperty" to stringValue(entryField(entry, "gradleProperty")),
+                "defaultEnabled" to booleanValue(entryField(entry, "defaultEnabled")),
+                "buildTimeOverrideAllowed" to booleanValue(entryField(entry, "buildTimeOverrideAllowed")),
+                "projectJsonOverrideAllowed" to booleanValue(entryField(entry, "projectJsonOverrideAllowed")),
+                "packagedApkOverrideAllowed" to booleanValue(entryField(entry, "packagedApkOverrideAllowed")),
+                "securityLevel" to stringValue(entryField(entry, "securityLevel")),
+                "status" to stringValue(entryField(entry, "status")),
+            )
+        }
+        .toList()
+}
+
 private fun loadVersionProperties(rootDir: File): Properties {
     val file = rootDir.resolve("version.properties")
     return Properties().apply {
@@ -269,7 +285,7 @@ val generateNodeCompatibilityProfile = tasks.register("generateNodeCompatibility
         val routeSuffixes = extractStringList(runtimeSource, "nodeRouteFileSuffixes")
         val commonJsExtensions = extractStringList(runtimeSource, "commonJsModuleExtensions")
         val packageConditions = extractStringList(runtimeSource, "packageJsonExportConditions")
-        val experimentalFlags = extractExperimentalFlags(runtimeSource)
+        val featureFlags = extractFeatureFlagRegistry(runtimeSource)
         val bridgeModules = extractBridgeMethods(bridgeSource)
 
         val bootstrapDirectAliases = extractJsStringMap(bootstrapSource, "__autojs6_require_builtin_allowlist")
@@ -381,9 +397,18 @@ val generateNodeCompatibilityProfile = tasks.register("generateNodeCompatibility
                 ),
             ),
             "statusCategories" to listOf("stable", "partial", "experimental", "disabled", "unsupported", "planned"),
-            "featureFlags" to experimentalFlags.map { flag ->
-                val property = flag["name"].toString()
-                flag + ("effective" to providers.gradleProperty(property).orElse(flag["default"].toString()).get().toBooleanStrictOrNull().let { it ?: flag["default"] })
+            "featureFlags" to featureFlags.map { flag ->
+                val property = flag["gradleProperty"]?.toString()
+                val defaultEnabled = flag["defaultEnabled"] as Boolean
+                flag + ("effectiveEnabled" to if (property.isNullOrBlank()) {
+                    defaultEnabled
+                } else {
+                    providers.gradleProperty(property)
+                        .orElse(defaultEnabled.toString())
+                        .get()
+                        .toBooleanStrictOrNull()
+                        ?: defaultEnabled
+                })
             },
             "builtins" to linkedMapOf(
                 "directAliases" to directBuiltinAliases.toSortedMap(),
@@ -459,7 +484,7 @@ val generateNodeCompatibilityProfile = tasks.register("generateNodeCompatibility
             appendLine(tableRow("---", "---", "---", "---", "---"))
             @Suppress("UNCHECKED_CAST")
             (profile["featureFlags"] as List<Map<String, Any?>>).forEach { flag ->
-                appendLine(tableRow(flag["name"], flag["default"], flag["effective"], flag["status"], flag["securityLevel"]))
+                appendLine(tableRow(flag["id"], flag["defaultEnabled"], flag["effectiveEnabled"], flag["status"], flag["securityLevel"]))
             }
             appendLine()
             appendLine("## Builtins")
@@ -536,7 +561,10 @@ val verifyNodeCompatibilityProfile = tasks.register("verifyNodeCompatibilityProf
             addAll(extractStringList(runtimeSource, "limitedBuiltinModuleNames"))
             addAll(extractStringList(runtimeSource, "disabledBuiltinModuleNames"))
             addAll(extractStringList(runtimeSource, "networkBuiltinModuleNames"))
-            extractExperimentalFlags(runtimeSource).forEach { add(it["name"].toString()) }
+            extractFeatureFlagRegistry(runtimeSource).forEach { flag ->
+                add(flag["id"].toString())
+                flag["gradleProperty"]?.toString()?.takeIf(String::isNotBlank)?.let(::add)
+            }
             addAll(extractBridgeMethods(bridgeSource).keys)
         }.distinct().sorted()
         val missing = requiredNeedles.filterNot { docsText.contains(it) }

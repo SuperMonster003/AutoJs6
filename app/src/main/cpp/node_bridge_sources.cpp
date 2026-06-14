@@ -7990,6 +7990,160 @@ std::string buildEmbeddedScriptExecutionSource(
       network: false,
       workerThreads: false
     });
+    const featureFlags = Object.freeze({
+      esm: Object.freeze({
+        id: "esm",
+        diagnosticName: "esm",
+        gradleProperty: "autojs.nodejs.esm.experimental",
+        defaultEnabled: false,
+        enabled: false,
+        buildTimeOverrideAllowed: true,
+        projectJsonOverrideAllowed: false,
+        packagedApkOverrideAllowed: false,
+        securityLevel: "medium",
+        status: "experimental"
+      }),
+      dynamic_import: Object.freeze({
+        id: "dynamic_import",
+        diagnosticName: "dynamicImport",
+        gradleProperty: null,
+        defaultEnabled: false,
+        enabled: false,
+        buildTimeOverrideAllowed: false,
+        projectJsonOverrideAllowed: false,
+        packagedApkOverrideAllowed: false,
+        securityLevel: "medium",
+        status: "disabled"
+      }),
+      network: Object.freeze({
+        id: "network",
+        diagnosticName: "network",
+        gradleProperty: "autojs.nodejs.network.experimental",
+        defaultEnabled: false,
+        enabled: false,
+        buildTimeOverrideAllowed: true,
+        projectJsonOverrideAllowed: false,
+        packagedApkOverrideAllowed: false,
+        securityLevel: "high",
+        status: "experimental"
+      }),
+      raw_node_network_modules: Object.freeze({
+        id: "raw_node_network_modules",
+        diagnosticName: "rawNodeNetworkModules",
+        gradleProperty: null,
+        defaultEnabled: false,
+        enabled: false,
+        buildTimeOverrideAllowed: false,
+        projectJsonOverrideAllowed: false,
+        packagedApkOverrideAllowed: false,
+        securityLevel: "high",
+        status: "disabled"
+      }),
+      worker_threads: Object.freeze({
+        id: "worker_threads",
+        diagnosticName: "workerThreads",
+        gradleProperty: "autojs.nodejs.worker_threads.experimental",
+        defaultEnabled: false,
+        enabled: false,
+        buildTimeOverrideAllowed: true,
+        projectJsonOverrideAllowed: false,
+        packagedApkOverrideAllowed: false,
+        securityLevel: "high",
+        status: "experimental"
+      }),
+      fs_streams: Object.freeze({
+        id: "fs_streams",
+        diagnosticName: "fsStreams",
+        gradleProperty: null,
+        defaultEnabled: true,
+        enabled: true,
+        buildTimeOverrideAllowed: false,
+        projectJsonOverrideAllowed: false,
+        packagedApkOverrideAllowed: false,
+        securityLevel: "medium",
+        status: "partial"
+      }),
+      zlib_streams: Object.freeze({
+        id: "zlib_streams",
+        diagnosticName: "zlibStreams",
+        gradleProperty: null,
+        defaultEnabled: true,
+        enabled: true,
+        buildTimeOverrideAllowed: false,
+        projectJsonOverrideAllowed: false,
+        packagedApkOverrideAllowed: false,
+        securityLevel: "medium",
+        status: "partial"
+      }),
+      vm: Object.freeze({
+        id: "vm",
+        diagnosticName: "vm",
+        gradleProperty: null,
+        defaultEnabled: false,
+        enabled: false,
+        buildTimeOverrideAllowed: false,
+        projectJsonOverrideAllowed: false,
+        packagedApkOverrideAllowed: false,
+        securityLevel: "high",
+        status: "disabled"
+      }),
+      inspector: Object.freeze({
+        id: "inspector",
+        diagnosticName: "inspector",
+        gradleProperty: null,
+        defaultEnabled: false,
+        enabled: false,
+        buildTimeOverrideAllowed: false,
+        projectJsonOverrideAllowed: false,
+        packagedApkOverrideAllowed: false,
+        securityLevel: "high",
+        status: "disabled"
+      }),
+      java_interop: Object.freeze({
+        id: "java_interop",
+        diagnosticName: "javaInterop",
+        gradleProperty: null,
+        defaultEnabled: false,
+        enabled: false,
+        buildTimeOverrideAllowed: false,
+        projectJsonOverrideAllowed: false,
+        packagedApkOverrideAllowed: false,
+        securityLevel: "critical",
+        status: "unsupported"
+      }),
+      native_addon: Object.freeze({
+        id: "native_addon",
+        diagnosticName: "nativeAddon",
+        gradleProperty: null,
+        defaultEnabled: false,
+        enabled: false,
+        buildTimeOverrideAllowed: false,
+        projectJsonOverrideAllowed: false,
+        packagedApkOverrideAllowed: false,
+        securityLevel: "critical",
+        status: "unsupported"
+      }),
+      child_process: Object.freeze({
+        id: "child_process",
+        diagnosticName: "childProcess",
+        gradleProperty: null,
+        defaultEnabled: false,
+        enabled: false,
+        buildTimeOverrideAllowed: false,
+        projectJsonOverrideAllowed: false,
+        packagedApkOverrideAllowed: false,
+        securityLevel: "high",
+        status: "disabled"
+      })
+    });
+    const enabledExperimentalFlags = Object.freeze(Object.keys(featureFlags).filter(function(name) {
+      const flag = featureFlags[name];
+      return !!(flag && flag.enabled === true && flag.status === "experimental");
+    }));
+    const deniedFeatureFlags = Object.freeze(Object.keys(featureFlags).filter(function(name) {
+      const flag = featureFlags[name];
+      return !flag || flag.enabled !== true;
+    }));
     const legacyAliases = Object.create(null);
     for (const name of Object.keys(__autojs6_error_code_aliases)) {
       legacyAliases[name] = __autojs6_error_code_aliases[name];
@@ -8011,6 +8165,9 @@ std::string buildEmbeddedScriptExecutionSource(
       networkBuiltins: Object.freeze(["dns", "dns/promises", "http", "https", "net", "tls"]),
       highRiskCapabilities,
       experimentalFlags,
+      featureFlags,
+      enabledExperimentalFlags,
+      deniedFeatureFlags,
       errorCodes: Object.freeze({
         builtinDisabled: "ERR_AUTOJS6_BUILTIN_DISABLED",
         processApiDisabled: "ERR_AUTOJS6_PROCESS_API_DISABLED",

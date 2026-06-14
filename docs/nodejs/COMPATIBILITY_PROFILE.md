@@ -35,6 +35,27 @@ The release/debug gate also runs:
 
 `verifyNodeCompatibilityProfile` fails if this document omits registry entries from `NodeRuntimeCapabilities` or `NodeBridgeModules`.
 
+## Feature Flag Registry
+
+`NodeRuntimeCapabilities.featureFlags` is the single registry for experimental, partial, disabled, and unsupported Node capability flags. Normal builds keep high and critical security features disabled by default. Project-level and packaged-APK overrides are not allowed unless a future design-gated task explicitly changes the registry.
+
+| Flag id | Gradle property | Default | Build override | project.json override | Packaged APK override | Security | Status |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `esm` | `autojs.nodejs.esm.experimental` | false | true | false | false | medium | experimental |
+| `dynamic_import` | none | false | false | false | false | medium | disabled |
+| `network` | `autojs.nodejs.network.experimental` | false | true | false | false | high | experimental |
+| `raw_node_network_modules` | none | false | false | false | false | high | disabled |
+| `worker_threads` | `autojs.nodejs.worker_threads.experimental` | false | true | false | false | high | experimental |
+| `fs_streams` | none | true | false | false | false | medium | partial |
+| `zlib_streams` | none | true | false | false | false | medium | partial |
+| `vm` | none | false | false | false | false | high | disabled |
+| `inspector` | none | false | false | false | false | high | disabled |
+| `java_interop` | none | false | false | false | false | critical | unsupported |
+| `native_addon` | none | false | false | false | false | critical | unsupported |
+| `child_process` | none | false | false | false | false | high | disabled |
+
+Runtime diagnostics expose the same state through `require("autojs6:profile").featureFlags`, `enabledExperimentalFlags`, and `deniedFeatureFlags`. The legacy `experimentalFlags` and `highRiskCapabilities` snapshots are retained for compatibility.
+
 ## Supported Entry Points
 
 - `"nodejs";` directive
