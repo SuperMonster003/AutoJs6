@@ -77,6 +77,8 @@ Checked-in Node examples live under `sample/nodejs/`. See [EXAMPLES.md](EXAMPLES
 
 Rhino users should start with [MIGRATION_FROM_RHINO.md](MIGRATION_FROM_RHINO.md). The guide covers Node entry points, global API differences, Promise-based bridge calls, scoped filesystem behavior, and packaged APK differences.
 
+Users adapting Auto.js Pro 9 or AutoX.js v7 scripts should also read [COMPATIBILITY_NOTES_PRO_AUTOX.md](COMPATIBILITY_NOTES_PRO_AUTOX.md), which documents behavior-level differences without claiming implementation equivalence.
+
 ## Routing Rules
 
 Node routing is enabled by:

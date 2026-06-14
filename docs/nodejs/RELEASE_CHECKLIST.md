@@ -162,6 +162,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `docs/nodejs/SECURITY_MODEL.md`
 - [ ] `docs/nodejs/TESTING.md`
 - [ ] `docs/nodejs/MIGRATION_FROM_RHINO.md` when entry points, bridge modules, scoped fs, or packaged behavior changes in a user-visible way
+- [ ] `docs/nodejs/COMPATIBILITY_NOTES_PRO_AUTOX.md` when AutoJs6 behavior diverges from or converges toward documented Pro/AutoX user-visible behavior
 - [ ] `docs/nodejs/EXAMPLES.md` when examples or example smoke coverage changes
 - [ ] `docs/nodejs/PERFORMANCE.md` when benchmark behavior or report schema changes
 - [ ] `docs/nodejs/NATIVE_CRASH_DIAGNOSTICS.md` when native crash capture, symbol archive, or symbolication behavior changes

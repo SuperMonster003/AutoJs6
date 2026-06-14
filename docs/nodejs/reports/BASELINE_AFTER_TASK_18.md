@@ -692,6 +692,7 @@ Verification performed while creating and extending this baseline:
 - `:app:compileAppDebugAndroidTestKotlin`: passed after wiring `sample/nodejs` into the `androidTest` asset source set.
 - `NodeExampleProjectInstrumentationTest`: 2/2 passed on a connected Android 12 device after Task 47.
 - Task 48 added `docs/nodejs/MIGRATION_FROM_RHINO.md` with Rhino-to-Node migration guidance and linked it from the main Node docs.
+- Task 49 added `docs/nodejs/COMPATIBILITY_NOTES_PRO_AUTOX.md` with behavior-oriented Auto.js Pro 9 and AutoX.js v7 compatibility notes.
 
 Instrumentation tests executed while creating and extending this baseline: 186 successful tests.
 
@@ -718,4 +719,5 @@ Recommended next tasks:
 - keep the Task 46 symbol archive report with APKs, logcat, and tombstones when triaging native crashes
 - keep Task 47 examples aligned with the documented Safe Node Profile and run `NodeExampleProjectInstrumentationTest` after changing example-facing modules
 - keep Task 48 Rhino migration examples synchronized with bridge modules, scoped fs policy, and packaged APK behavior
+- keep Task 49 Pro/AutoX notes behavior-oriented and update them only from public docs or verified behavior
 - keep high-risk features behind design gates
