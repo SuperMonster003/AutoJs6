@@ -5456,7 +5456,8 @@ std::string buildEmbeddedScriptExecutionSource(
         const std::vector<std::pair<std::string, std::string>>& moduleSources,
         const std::vector<std::pair<std::string, std::string>>& runtimeModuleSources,
         const std::vector<std::pair<std::string, std::string>>& env,
-        bool esmExperimentalEnabled) {
+        bool esmExperimentalEnabled,
+        bool dynamicImportExperimentalEnabled) {
     const std::string sourceLiteral = jsonStringLiteral(source);
     const std::string sourceNameLiteral = jsonStringLiteral(sanitizeSourceUrl(sourceName));
     const std::string workingDirectoryLiteral = jsonStringLiteral(workingDirectory);
@@ -5501,6 +5502,9 @@ std::string buildEmbeddedScriptExecutionSource(
   const __autojs6_runtime_module_records = Object.create(null);
   const __autojs6_esm_experimental_enabled = )JS";
     script += esmExperimentalEnabled ? "true" : "false";
+    script += R"JS(;
+  const __autojs6_dynamic_import_experimental_enabled = )JS";
+    script += dynamicImportExperimentalEnabled ? "true" : "false";
     script += R"JS(;
   const __autojs6_runtime_module_count_limit = 64;
   const __autojs6_runtime_module_single_source_bytes_limit = 262144;
@@ -8014,7 +8018,7 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     const highRiskCapabilities = Object.freeze({
       childProcess: false,
-      dynamicImport: false,
+      dynamicImport: __autojs6_dynamic_import_experimental_enabled,
       esm: __autojs6_esm_experimental_enabled,
       nativeAddon: false,
       network: false,
@@ -8023,6 +8027,7 @@ std::string buildEmbeddedScriptExecutionSource(
     });
     const experimentalFlags = Object.freeze({
       esm: __autojs6_esm_experimental_enabled,
+      dynamicImport: __autojs6_dynamic_import_experimental_enabled,
       network: false,
       workerThreads: false
     });
@@ -8042,14 +8047,14 @@ std::string buildEmbeddedScriptExecutionSource(
       dynamic_import: Object.freeze({
         id: "dynamic_import",
         diagnosticName: "dynamicImport",
-        gradleProperty: null,
+        gradleProperty: "autojs.nodejs.dynamicImport.experimental",
         defaultEnabled: false,
-        enabled: false,
-        buildTimeOverrideAllowed: false,
+        enabled: __autojs6_dynamic_import_experimental_enabled,
+        buildTimeOverrideAllowed: true,
         projectJsonOverrideAllowed: false,
         packagedApkOverrideAllowed: false,
         securityLevel: "medium",
-        status: "disabled"
+        status: "experimental"
       }),
       network: Object.freeze({
         id: "network",
@@ -8190,7 +8195,7 @@ std::string buildEmbeddedScriptExecutionSource(
       node: typeof process === "object" && process ? process.version : "",
       cjs: true,
       esm: __autojs6_esm_experimental_enabled,
-      dynamicImport: false,
+      dynamicImport: __autojs6_dynamic_import_experimental_enabled,
       network: false,
       workerThreads: false,
       nativeAddon: false,
@@ -23956,6 +23961,45 @@ std::string buildEmbeddedScriptExecutionSource(
       tail: tail.join("\n")
     };
   }
+  function __autojs6_contains_dynamic_import(source) {
+    const sourceText = String(source || "");
+    if (sourceText.indexOf("import") < 0) {
+      return false;
+    }
+    const masked = __autojs6_mask_non_code(sourceText);
+    for (let index = 0; index < masked.length; index += 1) {
+      if (!__autojs6_is_identifier_token_at(masked, index, "import")) continue;
+      const nextIndex = __autojs6_skip_whitespace(masked, index + "import".length);
+      if (masked.charAt(nextIndex) === "(") {
+        return true;
+      }
+    }
+    return false;
+  }
+  function __autojs6_transform_dynamic_import_calls(source, sourceName, parentExpression) {
+    const sourceText = String(source || "");
+    if (sourceText.indexOf("import") < 0) {
+      return sourceText;
+    }
+    const masked = __autojs6_mask_non_code(sourceText);
+    let output = "";
+    let cursor = 0;
+    const parent = parentExpression || "__filename";
+    for (let index = 0; index < masked.length; index += 1) {
+      if (!__autojs6_is_identifier_token_at(masked, index, "import")) continue;
+      const nextIndex = __autojs6_skip_whitespace(masked, index + "import".length);
+      if (masked.charAt(nextIndex) !== "(") continue;
+      if (!__autojs6_dynamic_import_experimental_enabled) {
+        throw __autojs6_dynamic_import_unsupported(
+          __autojs6_esm_unsupported_message("dynamic import is disabled for '" + sourceName + "'.")
+        );
+      }
+      output += sourceText.slice(cursor, index);
+      output += "__autojs6_dynamic_import(" + parent + ", ";
+      cursor = nextIndex + 1;
+    }
+    return output + sourceText.slice(cursor);
+  }
   function __autojs6_esm_transform_module_source(source, filename) {
     const sourceText = String(source || "");
     const masked = __autojs6_mask_non_code(sourceText);
@@ -23964,9 +24008,12 @@ std::string buildEmbeddedScriptExecutionSource(
       const nextIndex = __autojs6_skip_whitespace(masked, index + "import".length);
       const next = masked.charAt(nextIndex);
       if (next === "(") {
-        throw __autojs6_dynamic_import_unsupported(
-          __autojs6_esm_unsupported_message("dynamic import is disabled for experimental ESM module '" + filename + "'.")
-        );
+        if (!__autojs6_dynamic_import_experimental_enabled) {
+          throw __autojs6_dynamic_import_unsupported(
+            __autojs6_esm_unsupported_message("dynamic import is disabled for experimental ESM module '" + filename + "'.")
+          );
+        }
+        continue;
       }
       if (next === "." && masked.slice(nextIndex, nextIndex + 5) === ".meta") {
         throw __autojs6_esm_error("import.meta is disabled for experimental ESM module '" + filename + "'.");
@@ -23997,11 +24044,12 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     body += sourceText.slice(cursor);
     const exportTransform = __autojs6_esm_transform_exports(body, filename);
-    const remaining = __autojs6_mask_non_code(exportTransform.body);
+    const transformedBody = __autojs6_transform_dynamic_import_calls(exportTransform.body, filename, "__filename");
+    const remaining = __autojs6_mask_non_code(transformedBody);
     if (/(^|[\r\n;{}])\s*import\b/.test(remaining) || /(^|[\r\n;{}])\s*export\b/.test(remaining)) {
       throw __autojs6_esm_error("Embedded Node experimental ESM v1 found unsupported import/export syntax in " + filename + ".");
     }
-    return bindingLines.join("\n") + "\n" + exportTransform.body + "\n" + exportTransform.tail;
+    return bindingLines.join("\n") + "\n" + transformedBody + "\n" + exportTransform.tail;
   }
   function __autojs6_load_esm_module(specifier, parentFilename) {
     const resolved = __autojs6_resolve_esm_module(specifier, parentFilename);
@@ -24012,6 +24060,42 @@ std::string buildEmbeddedScriptExecutionSource(
       return Promise.resolve(__autojs6_esm_namespace_from_commonjs(__autojs6_load_local_module(resolved.resolved, null)));
     }
     return __autojs6_execute_esm_module(resolved.resolved, null);
+  }
+  function __autojs6_dynamic_import(parentFilename, specifier) {
+    return Promise.resolve().then(function() {
+      if (!__autojs6_dynamic_import_experimental_enabled) {
+        throw __autojs6_dynamic_import_unsupported(
+          __autojs6_esm_unsupported_message("dynamic import is disabled for '" + parentFilename + "'.")
+        );
+      }
+      if (!__autojs6_esm_experimental_enabled) {
+        throw __autojs6_esm_unsupported(
+          __autojs6_esm_unsupported_message("dynamic import requires experimental ESM to be enabled.")
+        );
+      }
+      const name = specifier === undefined || specifier === null ? "" : String(specifier);
+      if (name.indexOf("\0") >= 0) {
+        throw __autojs6_esm_error("Embedded Node experimental dynamic import rejects NUL byte in specifier.", "ERR_AUTOJS6_FS_NUL_BYTE");
+      }
+      const path = __autojs6_path_module();
+      if (path.isAbsolute(name)) {
+        throw __autojs6_esm_error("Embedded Node experimental dynamic import rejects absolute path: " + name, "ERR_AUTOJS6_FS_ABSOLUTE_PATH_DENIED");
+      }
+      const protocolMatch = /^([A-Za-z][A-Za-z0-9+.-]*):/.exec(name);
+      if (protocolMatch) {
+        const protocol = protocolMatch[1].toLowerCase();
+        if (protocol === "http" || protocol === "https") {
+          throw __autojs6_error("Embedded Node experimental dynamic import rejects network URL imports: " + name, "ERR_AUTOJS6_NETWORK_DISABLED");
+        }
+        throw __autojs6_dynamic_import_unsupported("Embedded Node experimental dynamic import rejects URL/protocol imports: " + name);
+      }
+      if (!__autojs6_is_relative_module_name(name)) {
+        throw __autojs6_dynamic_import_unsupported(
+          "Embedded Node experimental dynamic import currently allows only local relative imports; package and builtin dynamic import is disabled: " + name
+        );
+      }
+      return __autojs6_load_esm_module(name, parentFilename || __autojs6_source_name);
+    });
   }
   function __autojs6_execute_esm_module(resolved, entryRecord) {
     if (__autojs6_has_own(__autojs6_esm_module_cache, resolved)) {
@@ -24033,6 +24117,7 @@ std::string buildEmbeddedScriptExecutionSource(
       const transformed = __autojs6_esm_transform_module_source(record.source, resolved);
       const moduleFunction = __autojs6_native_async_function(
         "__autojs6_load_esm_module",
+        "__autojs6_dynamic_import",
         "__autojs6_esm_namespace",
         "require",
         "exports",
@@ -24044,6 +24129,7 @@ std::string buildEmbeddedScriptExecutionSource(
       await moduleFunction.call(
         undefined,
         __autojs6_load_esm_module,
+        __autojs6_dynamic_import,
         namespace,
         undefined,
         undefined,
@@ -24200,9 +24286,12 @@ std::string buildEmbeddedScriptExecutionSource(
       const nextIndex = __autojs6_skip_whitespace(code, index + "import".length);
       const next = code.charAt(nextIndex);
       if (next === "(") {
-        throw __autojs6_dynamic_import_unsupported(
-          __autojs6_esm_unsupported_message("dynamic import is disabled for '" + sourceName + "'.")
-        );
+        if (!__autojs6_dynamic_import_experimental_enabled) {
+          throw __autojs6_dynamic_import_unsupported(
+            __autojs6_esm_unsupported_message("dynamic import is disabled for '" + sourceName + "'.")
+          );
+        }
+        continue;
       }
       if (next === "." && code.slice(nextIndex, nextIndex + 5) === ".meta") {
         throw __autojs6_esm_unsupported(
@@ -24226,6 +24315,11 @@ std::string buildEmbeddedScriptExecutionSource(
       if (arguments.length === 0) return undefined;
       if (typeof source !== "string") return source;
       __autojs6_assert_common_js_source_supported(source, "<embedded-eval-source.js>");
+      if (__autojs6_dynamic_import_experimental_enabled && __autojs6_contains_dynamic_import(source)) {
+        throw __autojs6_dynamic_import_unsupported(
+          "Embedded Node experimental dynamic import is disabled for eval sources."
+        );
+      }
       return __autojs6_native_eval(source);
     };
     const guardedConstructor = function(nativeConstructor, sourceName) {
@@ -24233,6 +24327,11 @@ std::string buildEmbeddedScriptExecutionSource(
         const args = Array.prototype.slice.call(arguments);
         const body = args.length > 0 ? String(args[args.length - 1]) : "";
         __autojs6_assert_common_js_source_supported(body, sourceName);
+        if (__autojs6_dynamic_import_experimental_enabled && __autojs6_contains_dynamic_import(body)) {
+          throw __autojs6_dynamic_import_unsupported(
+            "Embedded Node experimental dynamic import is disabled for Function constructor sources."
+          );
+        }
         return nativeConstructor.apply(this, args);
       };
     };
@@ -24316,13 +24415,15 @@ std::string buildEmbeddedScriptExecutionSource(
       __autojs6_record_type_module_commonjs_policy(resolved);
     }
     __autojs6_assert_common_js_source_supported(record.source, resolved);
+    const transformedSource = __autojs6_transform_dynamic_import_calls(record.source, resolved, "__filename");
     const moduleFunction = __autojs6_native_function(
       "exports",
       "require",
       "module",
       "__filename",
       "__dirname",
-      "\"use strict\";\n" + record.source + "\n//# sourceURL=" + record.sourceURL
+      "__autojs6_dynamic_import",
+      "\"use strict\";\n" + transformedSource + "\n//# sourceURL=" + record.sourceURL
     );
     moduleFunction.call(
       module.exports,
@@ -24330,7 +24431,8 @@ std::string buildEmbeddedScriptExecutionSource(
       __autojs6_create_module_require(module),
       module,
       module.filename,
-      module.dirname
+      module.dirname,
+      __autojs6_dynamic_import
     );
     module.loaded = true;
     return module.exports;
@@ -24864,6 +24966,7 @@ std::string buildEmbeddedScriptExecutionSource(
     fields.esmModuleGraphModules = __autojs6_esm_diagnostics.graphModules.join("|");
     fields.esmDeniedCount = __autojs6_esm_diagnostics.deniedCount;
     fields.esmLastDeniedReason = __autojs6_esm_diagnostics.lastDeniedReason;
+    fields.dynamicImportEnabled = __autojs6_dynamic_import_experimental_enabled;
     return fields;
   }
   function __autojs6_finish_success(value) {
@@ -24933,13 +25036,19 @@ std::string buildEmbeddedScriptExecutionSource(
       __autojs6_user_result = __autojs6_run_esm_entry();
     } else {
       __autojs6_assert_common_js_source_supported(__autojs6_source, __autojs6_source_name);
+      const __autojs6_transformed_source = __autojs6_transform_dynamic_import_calls(
+        __autojs6_source,
+        __autojs6_source_name,
+        "__filename"
+      );
       const __autojs6_user_function = __autojs6_native_function(
         "exports",
         "require",
         "module",
         "__filename",
         "__dirname",
-        "\"use strict\";\n" + __autojs6_source + "\n//# sourceURL=" + __autojs6_source_name
+        "__autojs6_dynamic_import",
+        "\"use strict\";\n" + __autojs6_transformed_source + "\n//# sourceURL=" + __autojs6_source_name
       );
       __autojs6_user_result = __autojs6_user_function.call(
         globalThis,
@@ -24947,7 +25056,8 @@ std::string buildEmbeddedScriptExecutionSource(
         __autojs6_create_module_require(__autojs6_main_module),
         __autojs6_main_module,
         __autojs6_main_module.filename,
-        __autojs6_main_module.dirname
+        __autojs6_main_module.dirname,
+        __autojs6_dynamic_import
       );
     }
     __autojs6_main_module.loaded = true;

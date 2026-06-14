@@ -110,6 +110,9 @@ val nodeJsEmbeddedScriptEnabled = providers.gradleProperty("autojs.nodejs.embedd
 val nodeJsEsmExperimentalEnabled = providers.gradleProperty("autojs.nodejs.esm.experimental").orElse("false").get()
     .trim()
     .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
+val nodeJsDynamicImportExperimentalEnabled = providers.gradleProperty("autojs.nodejs.dynamicImport.experimental").orElse("false").get()
+    .trim()
+    .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
 val nodeJsNetworkExperimentalEnabled = providers.gradleProperty("autojs.nodejs.network.experimental").orElse("false").get()
     .trim()
     .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
@@ -598,6 +601,7 @@ android {
         buildConfigField("boolean", "NODEJS_EMBEDDED_PROBE_LIFECYCLE_BUILD_ENABLED", "$nodeJsEmbeddedProbeLifecycleEnabled")
         buildConfigField("boolean", "NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED", "$nodeJsEmbeddedScriptEnabled")
         buildConfigField("boolean", "NODEJS_ESM_EXPERIMENTAL_ENABLED", "$nodeJsEsmExperimentalEnabled")
+        buildConfigField("boolean", "NODEJS_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED", "$nodeJsDynamicImportExperimentalEnabled")
         buildConfigField("boolean", "NODEJS_NETWORK_EXPERIMENTAL_ENABLED", "$nodeJsNetworkExperimentalEnabled")
         buildConfigField("boolean", "NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED", "$nodeJsWorkerThreadsExperimentalEnabled")
         buildConfigField("boolean", "is${flavorNameInrt.uppercaseFirstChar()}", "false")

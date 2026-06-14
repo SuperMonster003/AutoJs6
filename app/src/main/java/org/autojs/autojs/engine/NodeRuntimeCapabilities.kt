@@ -21,6 +21,8 @@ object NodeRuntimeCapabilities {
 
     const val ESM_EXPERIMENTAL_PROPERTY = "autojs.nodejs.esm.experimental"
     const val ESM_EXPERIMENTAL_DEFAULT = false
+    const val DYNAMIC_IMPORT_EXPERIMENTAL_PROPERTY = "autojs.nodejs.dynamicImport.experimental"
+    const val DYNAMIC_IMPORT_EXPERIMENTAL_DEFAULT = false
     const val NETWORK_EXPERIMENTAL_PROPERTY = "autojs.nodejs.network.experimental"
     const val NETWORK_EXPERIMENTAL_DEFAULT = false
     const val WORKER_THREADS_EXPERIMENTAL_PROPERTY = "autojs.nodejs.worker_threads.experimental"
@@ -45,13 +47,13 @@ object NodeRuntimeCapabilities {
         NodeRuntimeFeatureFlag(
             id = "dynamic_import",
             diagnosticName = "dynamicImport",
-            gradleProperty = null,
-            defaultEnabled = false,
-            buildTimeOverrideAllowed = false,
+            gradleProperty = DYNAMIC_IMPORT_EXPERIMENTAL_PROPERTY,
+            defaultEnabled = DYNAMIC_IMPORT_EXPERIMENTAL_DEFAULT,
+            buildTimeOverrideAllowed = true,
             projectJsonOverrideAllowed = false,
             packagedApkOverrideAllowed = false,
             securityLevel = "medium",
-            status = "disabled",
+            status = "experimental",
         ),
         NodeRuntimeFeatureFlag(
             id = "network",

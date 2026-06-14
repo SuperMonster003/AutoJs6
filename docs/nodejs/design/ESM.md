@@ -33,6 +33,20 @@ Current wiring:
 
 The flag enables only AutoJs6 ESM v1. It does not enable Node's raw ESM loader, dynamic import, loader hooks, `node:module`, network imports, native addons, or unrestricted builtins.
 
+Dynamic import is intentionally split into a second gate:
+
+```properties
+autojs.nodejs.dynamicImport.experimental=false
+```
+
+Current dynamic import wiring:
+
+- Gradle property default: `false`
+- BuildConfig field: `NODEJS_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED`
+- Kotlin capability registry: `NodeRuntimeCapabilities.DYNAMIC_IMPORT_EXPERIMENTAL_PROPERTY`
+- JavaScript profile snapshot: `require("autojs6:profile").experimentalFlags.dynamicImport`
+- Embedded script request flag: `dynamicImportExperimentalEnabled`
+
 ## Current Default Behavior
 
 Default behavior with the flag off:
@@ -72,10 +86,10 @@ With `autojs.nodejs.esm.experimental=true` or an internal embedded-script reques
   - `esmModuleGraphModules`
   - `esmDeniedCount`
   - `esmLastDeniedReason`
+  - `dynamicImportEnabled`
 
 Still unsupported in v1:
 
-- dynamic `import()`
 - `import.meta`
 - CJS `require()` of ESM; when the ESM flag is enabled this fails with `ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED`
 - ESM JSON import assertions; JSON may only be reached through the CommonJS interop path
@@ -161,7 +175,23 @@ Future experimental mode may support top-level await only if:
 
 Current default: disabled.
 
-Future dynamic import must answer separately:
+Static ESM and dynamic import are separate gates. Enabling `autojs.nodejs.esm.experimental=true` does not enable `import()`.
+
+With both `autojs.nodejs.esm.experimental=true` and `autojs.nodejs.dynamicImport.experimental=true`, AutoJs6-managed dynamic import supports only:
+
+- local relative specifiers such as `./dep.mjs`
+- targets resolved inside `workingDirectory`
+- the same ESM/CJS interop path as static ESM imports
+
+It rejects:
+
+- package and builtin dynamic imports
+- absolute paths
+- `file:`, `data:`, and other protocol imports
+- `http:` and `https:` network imports
+- `..` or realpath escapes outside `workingDirectory`
+
+Dynamic import still must answer in future phases:
 
 - whether CJS may call `import()`
 - whether ESM may call `import()`
@@ -170,7 +200,7 @@ Future dynamic import must answer separately:
 - how scoped file URLs are validated
 - how service destroy cancels pending imports
 
-Do not enable dynamic import merely because static ESM is experimental.
+The current implementation rewrites `import()` to the AutoJs6-managed loader instead of using Node's raw ESM loader.
 
 ## import.meta.url
 
@@ -262,4 +292,4 @@ The experimental flag may not enable ESM until tests cover:
 
 ## Current Decision
 
-ESM remains disabled by default. Experimental v1 enables local static `.mjs` imports for plain working directories, simple exports, top-level await, package `type=module` entry routing, ESM-to-CJS default interop, supported builtin imports, package `exports`/`imports` ESM condition selection, nested package imports, self-reference, diagnostics, and a focused single-file packaged `.mjs` smoke when `autojs.nodejs.esm.experimental=true`. It does not enable dynamic import, loader hooks, `node:module`, network imports, CJS `require()` of ESM, or unrestricted packaged encrypted ESM graphs.
+ESM remains disabled by default. Experimental v1 enables local static `.mjs` imports for plain working directories, simple exports, top-level await, package `type=module` entry routing, ESM-to-CJS default interop, supported builtin imports, package `exports`/`imports` ESM condition selection, nested package imports, self-reference, diagnostics, and a focused single-file packaged `.mjs` smoke when `autojs.nodejs.esm.experimental=true`. Dynamic import is a separate experiment behind `autojs.nodejs.dynamicImport.experimental=true` and is limited to local relative specifiers inside `workingDirectory`. This path still does not enable loader hooks, `node:module`, network imports, CJS `require()` of ESM, or unrestricted packaged encrypted ESM graphs.

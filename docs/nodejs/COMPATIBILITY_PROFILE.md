@@ -42,7 +42,7 @@ The release/debug gate also runs:
 | Flag id | Gradle property | Default | Build override | project.json override | Packaged APK override | Security | Status |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | `esm` | `autojs.nodejs.esm.experimental` | false | true | false | false | medium | experimental |
-| `dynamic_import` | none | false | false | false | false | medium | disabled |
+| `dynamic_import` | `autojs.nodejs.dynamicImport.experimental` | false | true | false | false | medium | experimental |
 | `network` | `autojs.nodejs.network.experimental` | false | true | false | false | high | experimental |
 | `raw_node_network_modules` | none | false | false | false | false | high | disabled |
 | `worker_threads` | `autojs.nodejs.worker_threads.experimental` | false | true | false | false | high | experimental |
@@ -89,7 +89,7 @@ Unsupported or rejected module source forms:
 
 - native `.node` addon entries
 - static ESM import execution
-- dynamic import execution
+- dynamic import execution unless both `autojs.nodejs.esm.experimental` and `autojs.nodejs.dynamicImport.experimental` are enabled for an experimental run
 - package export/import targets that escape the package root
 - unsupported package export/import extensions
 
@@ -233,6 +233,12 @@ The explicit gate flag is:
 autojs.nodejs.esm.experimental=false
 ```
 
+Dynamic import has a separate gate and remains off when only ESM is enabled:
+
+```properties
+autojs.nodejs.dynamicImport.experimental=false
+```
+
 With the flag off, `.mjs` entry and resolution errors include:
 
 ```text
@@ -245,7 +251,7 @@ Expected errors:
 - dynamic import path: legacy `code` `ERR_AUTOJS6_EMBEDDED_NODE_DYNAMIC_IMPORT_UNSUPPORTED`, canonical `autojs6Code` `ERR_AUTOJS6_DYNAMIC_IMPORT_UNSUPPORTED`
 - CJS `require()` of ESM while the experimental flag is enabled: `ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED`
 
-Default `require("autojs6:profile")` reports `esm=false`, `dynamicImport=false`, and `experimentalFlags.esm=false`.
+Default `require("autojs6:profile")` reports `esm=false`, `dynamicImport=false`, `experimentalFlags.esm=false`, and `experimentalFlags.dynamicImport=false`.
 
 With the flag enabled for an embedded script request, experimental ESM v1 supports:
 
@@ -263,9 +269,11 @@ With the flag enabled for an embedded script request, experimental ESM v1 suppor
 
 CommonJS package condition order remains `require`, `node`, `default`.
 
-Experimental ESM v1 still rejects dynamic import, `import.meta`, CJS `require()` of ESM, ESM JSON import assertions, custom loaders, network/URL imports, disabled builtins, and any import outside `workingDirectory`.
+Experimental ESM v1 still rejects `import.meta`, CJS `require()` of ESM, ESM JSON import assertions, custom loaders, network/URL imports, disabled builtins, and any import outside `workingDirectory`.
 
-Runtime diagnostics include `esmEnabled`, `esmEntry`, `esmModuleGraphRoot`, `esmModuleGraphSize`, and `esmModuleGraphModules` in the embedded script result envelope.
+With both experimental flags enabled, dynamic `import()` is limited to local relative specifiers inside `workingDirectory`. It rejects package/builtin specifiers, absolute paths, `file:` URLs, network URLs, and path escapes with stable AutoJs6 errors.
+
+Runtime diagnostics include `esmEnabled`, `esmEntry`, `esmModuleGraphRoot`, `esmModuleGraphSize`, `esmModuleGraphModules`, and `dynamicImportEnabled` in the embedded script result envelope.
 
 See `docs/nodejs/design/ESM.md` for package `type`, CJS/ESM interop, top-level await, dynamic import, `import.meta.url`, package condition, moduleSources, encrypted graph, packaged APK, and stack trace decisions.
 

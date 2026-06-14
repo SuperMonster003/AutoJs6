@@ -94,7 +94,8 @@ static jobjectArray runEmbeddedScriptLifecycleNative(
         const std::vector<std::pair<std::string, std::string>>& moduleSourcePairs,
         const std::vector<std::pair<std::string, std::string>>& runtimeModuleSourcePairs,
         const std::vector<std::pair<std::string, std::string>>& envPairs,
-        bool esmExperimentalEnabled
+        bool esmExperimentalEnabled,
+        bool dynamicImportExperimentalEnabled
 ) {
     const auto startedAt = Clock::now();
     __android_log_print(ANDROID_LOG_INFO, kLogTag, "embedded_script.enter");
@@ -122,6 +123,7 @@ static jobjectArray runEmbeddedScriptLifecycleNative(
     putPayload(payload, "embedded_script.request.fs_allowed", "scoped_working_directory_sync_mvp");
     putPayload(payload, "embedded_script.request.import_allowed", esmExperimentalEnabled);
     putPayload(payload, "embedded_script.request.esm_experimental_enabled", esmExperimentalEnabled);
+    putPayload(payload, "embedded_script.request.dynamic_import_experimental_enabled", dynamicImportExperimentalEnabled);
     putPayload(payload, "embedded_script.request.node_modules_allowed", "working_directory_commonjs_mvp");
     putPayload(payload, "embedded_script.request.autojs_api_allowed", false);
     putPayload(payload, "embedded_script.request.android_bridge_allowed", false);
@@ -137,7 +139,8 @@ static jobjectArray runEmbeddedScriptLifecycleNative(
             moduleSourcePairs,
             runtimeModuleSourcePairs,
             envPairs,
-            esmExperimentalEnabled
+            esmExperimentalEnabled,
+            dynamicImportExperimentalEnabled
     );
     void* handle = probeLoadedLibnodeHandle(payload);
     const char* workingDirectoryPtr = workingDirectoryText.empty() ? nullptr : workingDirectoryText.c_str();
@@ -186,7 +189,8 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
         jstring workingDirectory,
         jobjectArray envNames,
         jobjectArray envValues,
-        jboolean esmExperimentalEnabled
+        jboolean esmExperimentalEnabled,
+        jboolean dynamicImportExperimentalEnabled
 ) {
     const std::vector<std::string> envNameValues = toStringVector(env, envNames);
     if (env->ExceptionCheck()) {
@@ -213,7 +217,8 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
             {},
             {},
             envPairs,
-            esmExperimentalEnabled == JNI_TRUE
+            esmExperimentalEnabled == JNI_TRUE,
+            dynamicImportExperimentalEnabled == JNI_TRUE
     );
 }
 
@@ -228,7 +233,8 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
         jobjectArray moduleSources,
         jobjectArray envNames,
         jobjectArray envValues,
-        jboolean esmExperimentalEnabled
+        jboolean esmExperimentalEnabled,
+        jboolean dynamicImportExperimentalEnabled
 ) {
     const std::vector<std::string> moduleSourceNameValues = toStringVector(env, moduleSourceNames);
     if (env->ExceptionCheck()) {
@@ -272,7 +278,8 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
             moduleSourcePairs,
             {},
             envPairs,
-            esmExperimentalEnabled == JNI_TRUE
+            esmExperimentalEnabled == JNI_TRUE,
+            dynamicImportExperimentalEnabled == JNI_TRUE
     );
 }
 
@@ -289,7 +296,8 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
         jobjectArray runtimeModuleSources,
         jobjectArray envNames,
         jobjectArray envValues,
-        jboolean esmExperimentalEnabled
+        jboolean esmExperimentalEnabled,
+        jboolean dynamicImportExperimentalEnabled
 ) {
     const std::vector<std::string> moduleSourceNameValues = toStringVector(env, moduleSourceNames);
     if (env->ExceptionCheck()) {
@@ -350,7 +358,8 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
             moduleSourcePairs,
             runtimeModuleSourcePairs,
             envPairs,
-            esmExperimentalEnabled == JNI_TRUE
+            esmExperimentalEnabled == JNI_TRUE,
+            dynamicImportExperimentalEnabled == JNI_TRUE
     );
 }
 

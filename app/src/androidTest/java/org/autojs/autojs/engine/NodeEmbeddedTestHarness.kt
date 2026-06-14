@@ -38,6 +38,7 @@ internal object NodeEmbeddedTestHarness {
         moduleSources: Map<String, String> = emptyMap(),
         runtimeModuleSources: Map<String, String> = emptyMap(),
         esmExperimentalEnabled: Boolean = BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED,
+        dynamicImportExperimentalEnabled: Boolean = BuildConfig.NODEJS_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED,
     ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
         return NativeNodeEmbeddedScriptService.runScript(
             targetContext,
@@ -50,6 +51,7 @@ internal object NodeEmbeddedTestHarness {
                 moduleSources = moduleSources,
                 runtimeModuleSources = runtimeModuleSources,
                 esmExperimentalEnabled = esmExperimentalEnabled,
+                dynamicImportExperimentalEnabled = dynamicImportExperimentalEnabled,
             ),
         )
     }

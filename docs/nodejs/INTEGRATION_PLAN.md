@@ -60,6 +60,7 @@ Related properties:
 - `autojs.nodejs.embedded.probe.timeout.ms=3000`
 - `autojs.nodejs.embedded.probe.lifecycle=false`
 - `autojs.nodejs.esm.experimental=false`
+- `autojs.nodejs.dynamicImport.experimental=false`
 - `autojs.nodejs.network.experimental=false`
 - `autojs.nodejs.worker_threads.experimental=false`
 - optional Embedded Node performance benchmark: `NodeEmbeddedPerformanceInstrumentationTest`
@@ -163,7 +164,7 @@ Important: `.mjs` currently routes to the Node backend, but ESM execution is sti
 2. Keep `toast`, `app`, `engines`, `clipboard`, `device`, `shell`, protocol-gated `dialogs`, selector-shaped disabled-path `accessibility`, and protocol-gated `media_projection`/`image` stable while designing real capability providers.
 3. Design the real accessibility and MediaProjection/image providers before enabling Android-backed actions, screenshot capture, image decoding, or live node/image handles. Accessibility selector descriptors and node snapshots must remain JSON-only.
 4. Keep scheduled/background task work behind `docs/nodejs/design/WORK_MANAGER.md`; future timed tasks should use a bridge provider and visible task descriptors.
-5. Keep ESM behind `docs/nodejs/design/ESM.md` and `autojs.nodejs.esm.experimental=false`; `.mjs` remains a Node route with default rejection.
+5. Keep ESM behind `docs/nodejs/design/ESM.md` and `autojs.nodejs.esm.experimental=false`; `.mjs` remains a Node route with default rejection. Keep dynamic import behind the separate `autojs.nodejs.dynamicImport.experimental=false` gate.
 6. Keep network behind `docs/nodejs/design/NETWORK.md` and `autojs.nodejs.network.experimental=false`; Task 41 provides a controlled fetch wrapper and fake-provider coverage, while live Android network I/O remains disabled in normal builds and raw Node network modules stay denied.
 7. Keep `worker_threads` behind `docs/nodejs/design/WORKER_THREADS.md` and `autojs.nodejs.worker_threads.experimental=false`; Task 42 freezes the worker boundary without enabling worker execution.
 8. Use `docs/nodejs/PERFORMANCE.md`, `NodeEmbeddedPerformanceInstrumentationTest`, and `NodeEmbeddedMemoryLeakStressInstrumentationTest` when changing embedded startup, native load, service lifecycle, bridge, fs, or image-handle behavior.
