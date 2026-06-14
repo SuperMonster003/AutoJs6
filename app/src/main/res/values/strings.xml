@@ -1061,6 +1061,7 @@
     <string name="text_editor_theme">Editor theme</string>
     <string name="text_editor_engine">Editor engine</string>
     <string name="text_editor_engine_switched" formatted="true">Editor engine switched to %s</string>
+    <string name="text_ace_editor_fallback_native" formatted="true">ACE editor failed (%1$s); switched to native editor</string>
     <string name="text_ace_large_file_uses_native_editor">Large files use the native editor for responsiveness</string>
     <string name="text_email">E-mail</string>
     <string name="text_email_cannot_be_empty">E-mail cannot be empty</string>

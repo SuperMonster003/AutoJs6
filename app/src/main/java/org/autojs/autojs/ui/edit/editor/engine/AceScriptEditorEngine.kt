@@ -5,6 +5,7 @@ import android.graphics.Color
 import android.view.View
 import org.autojs.autojs.model.autocomplete.AutoCompletion
 import org.autojs.autojs.ui.edit.editor.ace.AceCodeEditor
+import org.autojs.autojs.ui.edit.editor.ace.health.AceFailure
 import org.autojs.autojs.ui.edit.theme.Theme
 import org.autojs.autojs.util.ClipboardUtils
 import java.util.regex.Pattern
@@ -31,6 +32,8 @@ class AceScriptEditorEngine(
     private var foundIndex = -1
     private var foundLength = 0
     private var suppressProgrammaticTextChange = false
+
+    var onFatalFailure: ((AceFailure) -> Unit)? = null
 
     override val view: View
         get() = aceCodeEditor
@@ -440,6 +443,10 @@ class AceScriptEditorEngine(
 
             override fun onBreakpointChanged(line: Int, enabled: Boolean, state: AceCodeEditor.AceEditorState) {
                 breakpointChangeListener?.onBreakpointChange(line, enabled)
+            }
+
+            override fun onFailure(failure: AceFailure) {
+                onFatalFailure?.invoke(failure)
             }
         }
     }

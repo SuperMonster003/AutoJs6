@@ -74,6 +74,8 @@ import org.autojs.autojs.ui.edit.completion.CodeCompletionBar
 import org.autojs.autojs.ui.edit.completion.CodeCompletionBar.OnHintClickListener
 import org.autojs.autojs.ui.edit.debug.DebugBar
 import org.autojs.autojs.ui.edit.editor.JavaScriptHighlighter
+import org.autojs.autojs.ui.edit.editor.ace.health.AceFailure
+import org.autojs.autojs.ui.edit.editor.engine.AceScriptEditorEngine
 import org.autojs.autojs.ui.edit.editor.engine.EditorEngineFactory
 import org.autojs.autojs.ui.edit.editor.engine.EditorEnginePreferences
 import org.autojs.autojs.ui.edit.editor.engine.EditorCursorChangeListener
@@ -257,6 +259,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     @Volatile
     private var mSwitchingEditorEngine: Boolean = false
+
+    private val mAceFallbackInProgress = AtomicBoolean(false)
 
     // Active large-file loading cancel flag.
     // zh-CN: 大文件加载的取消标记 (当前会话).
@@ -1534,6 +1538,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         mFunctionsKeyboardHelper = null
         mAutoCompletion?.shutdown()
         mAutoCompletion = null
+        (oldEditor as? AceScriptEditorEngine)?.onFatalFailure = null
         oldEditor.onUserTouchInTextArea = null
         binding.editorContainer.removeView(oldEditor.view)
 
@@ -1576,7 +1581,56 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         return true
     }
 
+    private fun configureAceFallback(editor: ScriptEditorEngine) {
+        (editor as? AceScriptEditorEngine)?.onFatalFailure = { failure ->
+            post { fallbackToNativeFromAceFailure(failure) }
+        }
+    }
+
+    private fun fallbackToNativeFromAceFailure(failure: AceFailure) {
+        if (!mAceFallbackInProgress.compareAndSet(false, true)) {
+            return
+        }
+
+        val oldEditor = editor
+        if (oldEditor.engineType != EditorEngineType.ACE) {
+            mAceFallbackInProgress.set(false)
+            return
+        }
+
+        mSwitchingEditorEngine = true
+        runCatching {
+            (oldEditor as? AceScriptEditorEngine)?.onFatalFailure = null
+            val switched = switchEditorEngine(
+                targetType = EditorEngineType.NATIVE,
+                oldEditor = oldEditor,
+                latestText = oldEditor.textSnapshot,
+                persistPreference = false,
+                showSwitchToast = false,
+            )
+            if (switched) {
+                showToast(
+                    context,
+                    context.getString(R.string.text_ace_editor_fallback_native, failureReasonForToast(failure)),
+                    true,
+                )
+            }
+        }.onFailure { error ->
+            error.printStackTrace()
+            showToast(context, error.message ?: failure.message, true)
+        }
+        mSwitchingEditorEngine = false
+        mAceFallbackInProgress.set(false)
+    }
+
+    private fun failureReasonForToast(failure: AceFailure): String {
+        return failure.type.name
+            .lowercase(Locale.getDefault())
+            .replace('_', ' ')
+    }
+
     private fun setUpEditor(resetInitialState: Boolean = true) {
+        configureAceFallback(editor)
         editor.let { editor ->
             // Observe user touch in text area to preserve caret position after large-file load.
             // zh-CN: 监听用户在文本区域的触摸, 以便大文件加载完成后保留光标位置.

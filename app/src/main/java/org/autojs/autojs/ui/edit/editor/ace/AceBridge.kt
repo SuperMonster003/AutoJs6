@@ -53,6 +53,11 @@ class AceBridge(
     }
 
     @JavascriptInterface
+    fun shouldForceJsInitThrow(): Boolean {
+        return AceEditorTestHooks.shouldForceJsInitThrow()
+    }
+
+    @JavascriptInterface
     fun read(uri: String?): String {
         return unavailableFileAccess(uri)
     }

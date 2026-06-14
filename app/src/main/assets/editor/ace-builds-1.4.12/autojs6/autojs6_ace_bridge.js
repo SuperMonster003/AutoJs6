@@ -33,6 +33,27 @@
         }
     }
 
+    function notifyFatalError(payload) {
+        payload = payload || {};
+        if (!payload.message) {
+            payload.message = "Unknown ACE fatal error";
+        }
+        try {
+            callBridge("notifyEvent", ["fatalError", JSON.stringify(payload)]);
+        } finally {
+            notifyError(payload.message);
+        }
+    }
+
+    function notifyCompletionError(message, error) {
+        var payload = {
+            message: String(message || "ACE completion error"),
+            stack: error && error.stack ? String(error.stack) : ""
+        };
+        callBridge("notifyEvent", ["completionError", JSON.stringify(payload)]);
+        notifyError(payload.message);
+    }
+
     function clampRow(row) {
         var length = session ? session.getLength() : 1;
         return Math.max(0, Math.min(Number(row) || 0, Math.max(0, length - 1)));
@@ -387,8 +408,14 @@
 
     function initEditor() {
         if (!global.ace) {
-            notifyError("ACE core is not loaded");
+            notifyFatalError({
+                message: "ACE core is not loaded",
+                phase: "init"
+            });
             return;
+        }
+        if (callBridge("shouldForceJsInitThrow")) {
+            throw new Error("Forced ACE init throw");
         }
 
         global.ace.config.set("basePath", "./src-min-noconflict");
@@ -416,7 +443,11 @@
         editor.setFontSize("14px");
 
         if (global.AutoJsAceCompleter) {
-            global.AutoJsAceCompleter.install(global.ace);
+            try {
+                global.AutoJsAceCompleter.install(global.ace);
+            } catch (error) {
+                notifyCompletionError("ACE completion disabled: " + error, error);
+            }
         }
 
         session.on("change", function() {
@@ -445,6 +476,7 @@
         });
 
         global.AutoJsAce = {
+            isReady: function() { return !!editor && !!session; },
             getText: function() { return session.getValue(); },
             setText: setText,
             setTextDirty: setTextDirty,
@@ -490,14 +522,44 @@
         editor.focus();
     }
 
-    global.onerror = function(message, source, line, column) {
-        notifyError([message, source, line, column].join(":"));
+    function startEditor() {
+        try {
+            initEditor();
+        } catch (error) {
+            notifyFatalError({
+                message: String(error && error.message ? error.message : error),
+                source: "autojs6_ace_bridge.js",
+                line: -1,
+                column: -1,
+                stack: error && error.stack ? String(error.stack) : "",
+                phase: "init"
+            });
+            throw error;
+        }
+    }
+
+    global.onerror = function(message, source, line, column, error) {
+        notifyFatalError({
+            message: String(message || ""),
+            source: String(source || ""),
+            line: line || -1,
+            column: column || -1,
+            stack: error && error.stack ? String(error.stack) : ""
+        });
+        return false;
+    };
+
+    global.onunhandledrejection = function(event) {
+        notifyFatalError({
+            message: "Unhandled promise rejection",
+            reason: String(event && event.reason ? event.reason : "")
+        });
         return false;
     };
 
     if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", initEditor);
+        document.addEventListener("DOMContentLoaded", startEditor);
     } else {
-        initEditor();
+        startEditor();
     }
 })(window);

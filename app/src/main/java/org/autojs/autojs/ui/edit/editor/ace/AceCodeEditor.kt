@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Color
 import android.net.Uri
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.util.AttributeSet
@@ -14,6 +15,7 @@ import android.view.MotionEvent
 import android.view.ViewGroup
 import android.webkit.ConsoleMessage
 import android.webkit.PermissionRequest
+import android.webkit.RenderProcessGoneDetail
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
@@ -23,6 +25,10 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.FrameLayout
+import org.autojs.autojs.ui.edit.editor.ace.health.AceFailure
+import org.autojs.autojs.ui.edit.editor.ace.health.AceFailureType
+import org.autojs.autojs.ui.edit.editor.ace.health.AceHealthState
+import org.autojs.autojs.ui.edit.editor.ace.health.AceRuntimeHealthMonitor
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.ByteArrayInputStream
@@ -38,6 +44,9 @@ class AceCodeEditor @JvmOverloads constructor(
     private val mainHandler = Handler(Looper.getMainLooper())
     private val pendingScripts = ArrayDeque<PendingScript>()
     private val bridge = AceBridge(this)
+    private val healthMonitor = AceRuntimeHealthMonitor(mainHandler) { failure ->
+        notifyFallbackRequired(failure)
+    }
 
     val webView: WebView = WebView(context)
 
@@ -87,7 +96,14 @@ class AceCodeEditor @JvmOverloads constructor(
         private set
 
     private var loaded = false
+    private var destroyed = false
     private var userTouching = false
+
+    val healthState: AceHealthState
+        get() = healthMonitor.state
+
+    val lastFailure: AceFailure?
+        get() = healthMonitor.lastFailure
 
     init {
         addView(webView, LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
@@ -104,6 +120,14 @@ class AceCodeEditor @JvmOverloads constructor(
             return
         }
         loaded = true
+        healthMonitor.markLoadingPage()
+        if (AceEditorTestHooks.shouldForceRendererGoneFallback()) {
+            reportFatalFailure(
+                AceFailureType.RENDER_PROCESS_GONE,
+                "Forced ACE renderer fallback from debug test hook",
+            )
+            return
+        }
         webView.loadUrl(EDITOR_URL)
     }
 
@@ -127,6 +151,10 @@ class AceCodeEditor @JvmOverloads constructor(
     }
 
     fun getText(callback: (String) -> Unit) {
+        if (destroyed) {
+            callback(textSnapshot)
+            return
+        }
         val fallback = quote(textSnapshot)
         evaluateOrQueue("window.AutoJsAce ? window.AutoJsAce.getText() : $fallback") {
             callback(decodeJsStringResult(it))
@@ -272,6 +300,8 @@ class AceCodeEditor @JvmOverloads constructor(
     }
 
     fun destroy() {
+        destroyed = true
+        healthMonitor.markDestroyed()
         pendingScripts.clear()
         webView.stopLoading()
         runCatching { webView.removeJavascriptInterface(JS_BRIDGE_NAME) }
@@ -283,21 +313,50 @@ class AceCodeEditor @JvmOverloads constructor(
 
     internal fun handleEvent(name: String, payloadJson: String?) {
         postToMain {
+            healthMonitor.markStateEvent()
+            when (name) {
+                "fatalError" -> {
+                    val type = if (isReady) AceFailureType.JS_RUNTIME_ERROR else AceFailureType.JS_INIT_ERROR
+                    reportFatalFailure(type, failureMessageFromPayload(payloadJson, "ACE JavaScript fatal error"), payloadJson)
+                }
+                "lspError" -> healthMonitor.reportFailure(
+                    AceFailure(
+                        type = AceFailureType.LSP_ERROR,
+                        message = failureMessageFromPayload(payloadJson, "ACE LSP error"),
+                        detail = payloadJson,
+                        fatal = false,
+                    ),
+                )
+                "completionError" -> healthMonitor.reportFailure(
+                    AceFailure(
+                        type = AceFailureType.COMPLETION_ERROR,
+                        message = failureMessageFromPayload(payloadJson, "ACE completion error"),
+                        detail = payloadJson,
+                        fatal = false,
+                    ),
+                )
+            }
             listener?.onEvent(name, payloadJson)
         }
     }
 
     internal fun handleReady(stateJson: String?) {
         postToMain {
+            if (AceEditorTestHooks.shouldForceReadyTimeout()) {
+                return@postToMain
+            }
             val state = updateState(stateJson)
+            healthMonitor.markBridgeReady()
             isReady = true
             listener?.onReady(state)
             flushPendingScripts()
+            healthMonitor.startHeartbeat { evaluateHeartbeat() }
         }
     }
 
     internal fun handleStateChanged(stateJson: String?) {
         postToMain {
+            healthMonitor.markStateEvent()
             val state = updateState(stateJson)
             listener?.onStateChanged(state)
         }
@@ -305,6 +364,7 @@ class AceCodeEditor @JvmOverloads constructor(
 
     internal fun handleTextChanged(stateJson: String?) {
         postToMain {
+            healthMonitor.markChangeEvent()
             val state = updateState(stateJson)
             listener?.onTextChanged(state.text, state)
         }
@@ -312,6 +372,7 @@ class AceCodeEditor @JvmOverloads constructor(
 
     internal fun handleCursorChanged(lineText: String, line: Int, column: Int, stateJson: String?) {
         postToMain {
+            healthMonitor.markStateEvent()
             val state = updateState(stateJson).copy(
                 cursor = AceCursor(line = line, column = column, lineText = lineText),
             ).also {
@@ -325,6 +386,7 @@ class AceCodeEditor @JvmOverloads constructor(
 
     internal fun handleBreakpointChanged(line: Int, enabled: Boolean, stateJson: String?) {
         postToMain {
+            healthMonitor.markStateEvent()
             val state = updateState(stateJson)
             listener?.onBreakpointChanged(line, enabled, state)
         }
@@ -334,6 +396,23 @@ class AceCodeEditor @JvmOverloads constructor(
         postToMain {
             listener?.onError(message.ifBlank { "Unknown ACE editor error" })
         }
+    }
+
+    private fun notifyFallbackRequired(failure: AceFailure) {
+        postToMain {
+            listener?.onFailure(failure)
+        }
+    }
+
+    private fun reportFatalFailure(type: AceFailureType, message: String, detail: String? = null) {
+        healthMonitor.reportFailure(
+            AceFailure(
+                type = type,
+                message = message.ifBlank { "Unknown ACE editor failure" },
+                detail = detail,
+            ),
+        )
+        handleError(message)
     }
 
     internal fun bridgeTheme(): String {
@@ -406,7 +485,25 @@ class AceCodeEditor @JvmOverloads constructor(
 
     private fun evaluate(script: String, callback: ValueCallback<String>? = null) {
         postToMain {
-            webView.evaluateJavascript(script, callback)
+            if (destroyed) {
+                callback?.onReceiveValue(null)
+                return@postToMain
+            }
+            runCatching {
+                webView.evaluateJavascript(script, callback)
+            }.onFailure {
+                reportFatalFailure(
+                    AceFailureType.EVALUATE_JAVASCRIPT_ERROR,
+                    "ACE JavaScript evaluation failed: ${it.message.orEmpty()}",
+                )
+                callback?.onReceiveValue(null)
+            }
+        }
+    }
+
+    private fun evaluateHeartbeat() {
+        evaluate("!!(window.AutoJsAce && window.AutoJsAce.isReady && window.AutoJsAce.isReady())") {
+            healthMonitor.recordHeartbeatResult(it == "true")
         }
     }
 
@@ -515,6 +612,18 @@ class AceCodeEditor @JvmOverloads constructor(
 
     private fun quote(value: String): String = JSONObject.quote(value)
 
+    private fun failureMessageFromPayload(payloadJson: String?, fallback: String): String {
+        if (payloadJson.isNullOrBlank()) {
+            return fallback
+        }
+        return runCatching {
+            val obj = JSONObject(payloadJson)
+            obj.optString("message").ifBlank {
+                obj.optString("reason").ifBlank { fallback }
+            }
+        }.getOrElse { fallback }
+    }
+
     private fun selectionForOffsets(start: Int, end: Int): AceSelection {
         val startPosition = positionForOffset(start)
         val endPosition = positionForOffset(end)
@@ -552,6 +661,14 @@ class AceCodeEditor @JvmOverloads constructor(
         return WebResourceResponse("text/plain", "UTF-8", ByteArrayInputStream(ByteArray(0)))
     }
 
+    private fun reportBlockedUrl(kind: String, url: String?) {
+        reportFatalFailure(
+            AceFailureType.SECURITY_BLOCKED_URL,
+            "Blocked ACE $kind: ${url.orEmpty()}",
+            url,
+        )
+    }
+
     private inner class WhitelistWebViewClient : WebViewClient() {
 
         override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
@@ -564,36 +681,61 @@ class AceCodeEditor @JvmOverloads constructor(
 
         override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? {
             return if (isAllowedUrl(request.url.toString())) null else emptyBlockedResponse().also {
-                handleError("Blocked ACE resource: ${request.url}")
+                reportBlockedUrl("resource", request.url.toString())
             }
         }
 
         override fun shouldInterceptRequest(view: WebView, url: String): WebResourceResponse? {
             return if (isAllowedUrl(url)) null else emptyBlockedResponse().also {
-                handleError("Blocked ACE resource: $url")
+                reportBlockedUrl("resource", url)
             }
         }
 
         override fun onPageFinished(view: WebView, url: String) {
             if (!isAllowedUrl(url)) {
-                handleError("Blocked ACE page: $url")
+                reportBlockedUrl("page", url)
+            } else {
+                healthMonitor.markPageLoaded()
             }
         }
 
         override fun onReceivedError(view: WebView, request: WebResourceRequest, error: WebResourceError) {
             if (request.isForMainFrame) {
-                handleError("ACE page error: ${error.description}")
+                reportFatalFailure(
+                    AceFailureType.PAGE_LOAD_ERROR,
+                    "ACE page error: ${error.description}",
+                    request.url.toString(),
+                )
             }
         }
 
         override fun onReceivedError(view: WebView, errorCode: Int, description: String, failingUrl: String) {
-            handleError("ACE page error: $description")
+            reportFatalFailure(
+                AceFailureType.PAGE_LOAD_ERROR,
+                "ACE page error: $description",
+                failingUrl,
+            )
+        }
+
+        override fun onRenderProcessGone(view: WebView, detail: RenderProcessGoneDetail?): Boolean {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && detail != null) {
+                reportFatalFailure(
+                    AceFailureType.RENDER_PROCESS_GONE,
+                    "WebView renderer process gone. didCrash=${detail.didCrash()}",
+                )
+            } else {
+                reportFatalFailure(
+                    AceFailureType.RENDER_PROCESS_GONE,
+                    "WebView renderer process gone",
+                )
+            }
+            return true
         }
 
         private fun shouldBlockUrl(url: String?): Boolean {
             val blocked = !isAllowedUrl(url)
             if (blocked) {
-                handleError("Blocked ACE navigation: ${url.orEmpty()}")
+                reportBlockedUrl("navigation", url)
             }
             return blocked
         }
@@ -603,7 +745,16 @@ class AceCodeEditor @JvmOverloads constructor(
 
         override fun onConsoleMessage(consoleMessage: ConsoleMessage): Boolean {
             if (consoleMessage.messageLevel() == ConsoleMessage.MessageLevel.ERROR) {
-                handleError("ACE console: ${consoleMessage.message()}")
+                val message = "ACE console: ${consoleMessage.message()}"
+                if (shouldTreatConsoleErrorAsFatal(consoleMessage)) {
+                    reportFatalFailure(
+                        AceFailureType.CONSOLE_FATAL,
+                        message,
+                        consoleMessage.sourceId(),
+                    )
+                } else {
+                    handleError(message)
+                }
             }
             return true
         }
@@ -619,6 +770,18 @@ class AceCodeEditor @JvmOverloads constructor(
         ): Boolean {
             filePathCallback?.onReceiveValue(null)
             return true
+        }
+
+        private fun shouldTreatConsoleErrorAsFatal(consoleMessage: ConsoleMessage): Boolean {
+            if (isReady) {
+                return false
+            }
+            val source = consoleMessage.sourceId().orEmpty()
+            val message = consoleMessage.message().orEmpty()
+            return source.contains("autojs6_ace_bridge", ignoreCase = true) ||
+                message.contains("Uncaught", ignoreCase = true) ||
+                message.contains("ReferenceError", ignoreCase = true) ||
+                message.contains("SyntaxError", ignoreCase = true)
         }
     }
 
@@ -670,6 +833,7 @@ class AceCodeEditor @JvmOverloads constructor(
         fun onBreakpointChanged(line: Int, enabled: Boolean, state: AceEditorState) = Unit
         fun onEvent(name: String, payloadJson: String?) = Unit
         fun onError(message: String) = Unit
+        fun onFailure(failure: AceFailure) = Unit
     }
 
     private data class PendingScript(
@@ -684,6 +848,9 @@ class AceCodeEditor @JvmOverloads constructor(
         private const val EDITOR_ASSET_PATH = "editor/ace-builds-1.4.12/autojs6_editor.html"
 
         fun hasRequiredAssets(context: Context): Boolean {
+            if (AceEditorTestHooks.shouldForceAssetMissing()) {
+                return false
+            }
             return runCatching {
                 context.assets.open(EDITOR_ASSET_PATH).close()
             }.isSuccess
