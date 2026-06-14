@@ -44,8 +44,12 @@ class AceCodeEditor @JvmOverloads constructor(
     private val mainHandler = Handler(Looper.getMainLooper())
     private val pendingScripts = ArrayDeque<PendingScript>()
     private val bridge = AceBridge(this)
+    private val textMirror = AceTextMirror()
     private val healthMonitor = AceRuntimeHealthMonitor(mainHandler) { failure ->
         notifyFallbackRequired(failure)
+    }
+    private val mirrorCalibrationRunnable = Runnable {
+        calibrateTextMirrorIfSmall()
     }
 
     val webView: WebView = WebView(context)
@@ -95,6 +99,9 @@ class AceCodeEditor @JvmOverloads constructor(
     var firstVisibleColumn = 0
         private set
 
+    val textMirrorRevision: Long
+        get() = textMirror.revision
+
     private var loaded = false
     private var destroyed = false
     private var userTouching = false
@@ -134,13 +141,13 @@ class AceCodeEditor @JvmOverloads constructor(
     fun isUserTouching(): Boolean = userTouching
 
     fun setText(text: String?) {
-        textSnapshot = text.orEmpty()
+        resetTextMirror(text.orEmpty())
         dirty = false
         invokeAce("setText", quote(textSnapshot))
     }
 
     fun setTextDirty(text: String?) {
-        textSnapshot = text.orEmpty()
+        resetTextMirror(text.orEmpty())
         dirty = true
         invokeAce("setTextDirty", quote(textSnapshot))
     }
@@ -155,7 +162,7 @@ class AceCodeEditor @JvmOverloads constructor(
             callback(textSnapshot)
             return
         }
-        val fallback = quote(textSnapshot)
+        val fallback = quote(textMirror.text)
         evaluateOrQueue("window.AutoJsAce ? window.AutoJsAce.getText() : $fallback") {
             callback(decodeJsStringResult(it))
         }
@@ -214,7 +221,7 @@ class AceCodeEditor @JvmOverloads constructor(
     }
 
     fun clear() {
-        textSnapshot = ""
+        resetTextMirror("")
         selectionSnapshot = AceSelection.EMPTY
         selectedTextSnapshot = ""
         invokeAce("clear")
@@ -302,6 +309,7 @@ class AceCodeEditor @JvmOverloads constructor(
     fun destroy() {
         destroyed = true
         healthMonitor.markDestroyed()
+        mainHandler.removeCallbacks(mirrorCalibrationRunnable)
         pendingScripts.clear()
         webView.stopLoading()
         runCatching { webView.removeJavascriptInterface(JS_BRIDGE_NAME) }
@@ -335,6 +343,7 @@ class AceCodeEditor @JvmOverloads constructor(
                         fatal = false,
                     ),
                 )
+                "changeDelta" -> handleChangeDelta(payloadJson)
             }
             listener?.onEvent(name, payloadJson)
         }
@@ -345,7 +354,10 @@ class AceCodeEditor @JvmOverloads constructor(
             if (AceEditorTestHooks.shouldForceReadyTimeout()) {
                 return@postToMain
             }
-            val state = updateState(stateJson)
+            val state = updateState(
+                stateJson = stateJson,
+                acceptTextSnapshot = pendingScripts.isEmpty() || textSnapshot.isEmpty(),
+            )
             healthMonitor.markBridgeReady()
             isReady = true
             listener?.onReady(state)
@@ -401,6 +413,22 @@ class AceCodeEditor @JvmOverloads constructor(
     private fun notifyFallbackRequired(failure: AceFailure) {
         postToMain {
             listener?.onFailure(failure)
+        }
+    }
+
+    private fun handleChangeDelta(payloadJson: String?) {
+        val delta = AceTextDelta.fromJson(payloadJson)
+        if (delta == null) {
+            handleError("Invalid ACE text delta")
+            scheduleTextMirrorCalibration()
+            return
+        }
+        if (textMirror.applyDelta(delta)) {
+            textSnapshot = textMirror.text
+            scheduleTextMirrorCalibration()
+        } else {
+            handleError("ACE text mirror delta failed")
+            scheduleTextMirrorCalibration()
         }
     }
 
@@ -514,9 +542,14 @@ class AceCodeEditor @JvmOverloads constructor(
         }
     }
 
-    private fun updateState(stateJson: String?): AceEditorState {
-        val state = parseState(stateJson)
-        textSnapshot = state.text
+    private fun updateState(stateJson: String?, acceptTextSnapshot: Boolean = true): AceEditorState {
+        val parsedState = parseState(stateJson)
+        if (parsedState.textIncluded && acceptTextSnapshot) {
+            resetTextMirror(parsedState.text)
+        } else {
+            textSnapshot = textMirror.text
+        }
+        val state = parsedState.copy(text = textSnapshot)
         dirty = state.dirty
         canUndo = state.canUndo
         canRedo = state.canRedo
@@ -538,6 +571,7 @@ class AceCodeEditor @JvmOverloads constructor(
         }
         return runCatching {
             val obj = JSONObject(stateJson)
+            val textIncluded = obj.has("text")
             val cursorObj = obj.optJSONObject("cursor")
             val selectionObj = obj.optJSONObject("selection")
             val scrollObj = obj.optJSONObject("scroll")
@@ -548,7 +582,7 @@ class AceCodeEditor @JvmOverloads constructor(
                 }
             }
             AceEditorState(
-                text = obj.optString("text", textSnapshot),
+                text = if (textIncluded) obj.optString("text", textMirror.text) else textMirror.text,
                 dirty = obj.optBoolean("dirty", dirty),
                 canUndo = obj.optBoolean("canUndo", canUndo),
                 canRedo = obj.optBoolean("canRedo", canRedo),
@@ -570,6 +604,7 @@ class AceCodeEditor @JvmOverloads constructor(
                 breakpoints = breakpoints,
                 firstVisibleLine = scrollObj?.optInt("firstVisibleLine", firstVisibleLine) ?: firstVisibleLine,
                 firstVisibleColumn = scrollObj?.optInt("firstVisibleColumn", firstVisibleColumn) ?: firstVisibleColumn,
+                textIncluded = textIncluded,
             )
         }.getOrElse {
             handleError("Invalid ACE state: ${it.message}")
@@ -579,7 +614,7 @@ class AceCodeEditor @JvmOverloads constructor(
 
     private fun currentState(): AceEditorState {
         return AceEditorState(
-            text = textSnapshot,
+            text = textMirror.text,
             dirty = dirty,
             canUndo = canUndo,
             canRedo = canRedo,
@@ -591,6 +626,30 @@ class AceCodeEditor @JvmOverloads constructor(
             firstVisibleLine = firstVisibleLine,
             firstVisibleColumn = firstVisibleColumn,
         )
+    }
+
+    private fun resetTextMirror(text: String) {
+        textMirror.reset(text)
+        textSnapshot = text
+    }
+
+    private fun scheduleTextMirrorCalibration() {
+        mainHandler.removeCallbacks(mirrorCalibrationRunnable)
+        if (destroyed || !isReady || textMirror.length > AceTextMirror.SMALL_TEXT_CALIBRATION_LIMIT) {
+            return
+        }
+        mainHandler.postDelayed(mirrorCalibrationRunnable, TEXT_MIRROR_CALIBRATION_DELAY_MS)
+    }
+
+    private fun calibrateTextMirrorIfSmall() {
+        if (destroyed || !isReady || textMirror.length > AceTextMirror.SMALL_TEXT_CALIBRATION_LIMIT) {
+            return
+        }
+        getText { latestText ->
+            if (latestText.length <= AceTextMirror.SMALL_TEXT_CALIBRATION_LIMIT) {
+                resetTextMirror(latestText)
+            }
+        }
     }
 
     private fun decodeJsStringResult(result: String?): String {
@@ -797,6 +856,7 @@ class AceCodeEditor @JvmOverloads constructor(
         val breakpoints: List<Int>,
         val firstVisibleLine: Int,
         val firstVisibleColumn: Int,
+        val textIncluded: Boolean = true,
     )
 
     data class AceCursor(
@@ -846,6 +906,7 @@ class AceCodeEditor @JvmOverloads constructor(
         private const val ASSET_URL_PREFIX = "file:///android_asset/editor/ace-builds-1.4.12/"
         private const val EDITOR_URL = "${ASSET_URL_PREFIX}autojs6_editor.html"
         private const val EDITOR_ASSET_PATH = "editor/ace-builds-1.4.12/autojs6_editor.html"
+        private const val TEXT_MIRROR_CALIBRATION_DELAY_MS = 500L
 
         fun hasRequiredAssets(context: Context): Boolean {
             if (AceEditorTestHooks.shouldForceAssetMissing()) {

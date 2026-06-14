@@ -79,12 +79,11 @@
         };
     }
 
-    function buildState() {
+    function buildState(includeText) {
         var position = editor ? editor.getCursorPosition() : { row: 0, column: 0 };
         var undoManager = getUndoManager();
         var selection = getSelectionState();
-        return {
-            text: session ? session.getValue() : "",
+        var state = {
             dirty: dirty,
             canUndo: !!(undoManager && undoManager.hasUndo && undoManager.hasUndo()),
             canRedo: !!(undoManager && undoManager.hasRedo && undoManager.hasRedo()),
@@ -99,6 +98,10 @@
             scroll: getScrollState(),
             breakpoints: getBreakpoints()
         };
+        if (includeText !== false) {
+            state.text = session ? session.getValue() : "";
+        }
+        return state;
     }
 
     function positionToIndex(position) {
@@ -139,12 +142,20 @@
         };
     }
 
-    function stateJson() {
-        return JSON.stringify(buildState());
+    function stateJson(includeText) {
+        return JSON.stringify(buildState(includeText));
+    }
+
+    function fullStateJson() {
+        return stateJson(true);
+    }
+
+    function lightweightStateJson() {
+        return stateJson(false);
     }
 
     function notifyStateChanged(eventName) {
-        var json = stateJson();
+        var json = lightweightStateJson();
         callBridge("notifyStateChanged", [json]);
         callBridge("notifyEvent", [eventName || "stateChanged", json]);
     }
@@ -159,10 +170,26 @@
         }, 80);
     }
 
-    function notifyTextChanged() {
-        var json = stateJson();
+    function notifyTextChanged(includeText) {
+        var json = stateJson(includeText === true);
         callBridge("notifyTextChanged", [json]);
         callBridge("notifyEvent", ["textChanged", json]);
+    }
+
+    function notifyChangeDelta(delta) {
+        if (!delta) {
+            return false;
+        }
+        callBridge("notifyEvent", [
+            "changeDelta",
+            JSON.stringify({
+                action: String(delta.action || ""),
+                start: delta.start || { row: 0, column: 0 },
+                end: delta.end || { row: 0, column: 0 },
+                lines: delta.lines || []
+            })
+        ]);
+        return true;
     }
 
     function notifyCursorChanged() {
@@ -170,7 +197,7 @@
             return;
         }
         var position = editor.getCursorPosition();
-        var json = stateJson();
+        var json = lightweightStateJson();
         callBridge("notifyCursorChanged", [
             getLine(position.row),
             position.row || 0,
@@ -181,7 +208,7 @@
     }
 
     function notifyBreakpointChanged(row, enabled) {
-        var json = stateJson();
+        var json = lightweightStateJson();
         callBridge("notifyBreakpointChanged", [row, !!enabled, json]);
         callBridge("notifyEvent", ["breakpointChanged", json]);
     }
@@ -254,7 +281,7 @@
         }
         editor.clearSelection();
         editor.moveCursorTo(0, 0);
-        notifyTextChanged();
+        notifyTextChanged(true);
         notifyCursorChanged();
     }
 
@@ -263,7 +290,7 @@
         session.setValue(text || "");
         suppressChange = false;
         dirty = true;
-        notifyTextChanged();
+        notifyTextChanged(true);
         notifyCursorChanged();
     }
 
@@ -366,6 +393,7 @@
         try {
             var beautifyExtension = global.ace.require("ace/ext/beautify");
             beautifyExtension.beautify(session);
+            notifyTextChanged(true);
             notifyStateChanged("beautified");
         } catch (error) {
             notifyError("Beautify failed: " + error);
@@ -388,7 +416,7 @@
         if (next !== source) {
             session.setValue(next);
             dirty = true;
-            notifyTextChanged();
+            notifyTextChanged(true);
             return true;
         }
         notifyStateChanged("replaceAllNoop");
@@ -450,12 +478,12 @@
             }
         }
 
-        session.on("change", function() {
+        session.on("change", function(delta) {
             if (suppressChange) {
                 return;
             }
             dirty = true;
-            notifyTextChanged();
+            notifyTextChanged(!notifyChangeDelta(delta));
         });
 
         session.on("changeScrollTop", notifyScrollChanged);
@@ -510,13 +538,13 @@
             toggleBreakpoint: toggleBreakpoint,
             clearBreakpoints: clearBreakpoints,
             setDebuggingLine: setDebuggingLine,
-            getState: buildState,
+            getState: function() { return buildState(true); },
             read: function(uri) { return callBridge("read", [uri || ""]); },
             write: function(uri, text) { return callBridge("write", [uri || "", text || ""]); },
             getLspOptions: function() { return callBridge("getLspOptions") || "{}"; }
         };
 
-        var json = stateJson();
+        var json = fullStateJson();
         callBridge("notifyReady", [json]);
         callBridge("notifyEvent", ["ready", json]);
         editor.focus();
