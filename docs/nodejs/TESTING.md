@@ -5,6 +5,7 @@ This document records the current test commands and the expected gates for futur
 ## Baseline Reports
 
 - Post-18 baseline: `docs/nodejs/reports/BASELINE_AFTER_TASK_18.md`
+- Post-49 baseline: `docs/nodejs/reports/BASELINE_AFTER_TASK_49.md`
 
 ## Build Smoke
 
