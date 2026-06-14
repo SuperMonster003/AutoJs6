@@ -1127,12 +1127,12 @@
 * `Dependency` Upgraded ColorPicker version 2.1.5 -> 2.1.7
 * `Dependency` Upgraded Espresso Core version 3.1.1-alpha01 -> 3.5.0-alpha03
 * `Dependency` Upgraded Eventbus version 3.0.0 -> 3.2.0
-* `Dependency` Upgraded Glide Compiler version 4.8.0 -> 4.12.0 -> 4.12.0
+* `Dependency` Upgraded Glide Compiler version 4.8.0 -> 4.12.0
 * `Dependency` Upgraded Gradle Build Tool version 29.0.2 -> 30.0.2
 * `Dependency` Upgraded Gradle release version 4.10.2 -> 6.5 -> 7.0.2 -> 7.3
 * `Dependency` Upgraded Groovy-Json plugin version 3.0.7 -> 3.0.8
 * `Dependency` Upgraded Gson version 2.8.2 -> 2.8.9
-* `Dependency` Upgraded JavaVersion version 1.8 -> 11 -> 16
+* `Dependency` Upgraded Java version 8 -> 11 -> 16
 * `Dependency` Upgraded Joda Time version 2.9.9 -> 2.10.13
 * `Dependency` Upgraded Junit version 4.12 -> 4.13.2
 * `Dependency` Upgraded Kotlin Gradle plugin version 1.3.10 -> 1.4.10 -> 1.6.0
