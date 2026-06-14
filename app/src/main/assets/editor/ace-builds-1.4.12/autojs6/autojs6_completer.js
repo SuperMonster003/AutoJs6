@@ -175,7 +175,7 @@
     global.AutoJsAceCompleter = {
         install: function(ace) {
             var languageTools = ace.require("ace/ext/language_tools");
-            languageTools.addCompleter(createCompleter(global.AutoJsAceIndices || {}));
+            languageTools.addCompleter(createCompleter(global.AutoJsAceIndices || global.AUTOJS_INDICES || {}));
         }
     };
 })(window);
