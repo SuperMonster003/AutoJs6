@@ -59,6 +59,9 @@ With `autojs.nodejs.esm.experimental=true` or an internal embedded-script reques
 - ESM may default-import scoped CommonJS modules (`.cjs`, `.js`, or `.json`) through the existing CommonJS loader cache.
 - ESM may import supported builtin modules through the existing Safe Node builtin allowlist and limited builtin wrappers.
 - ESM bare package imports may select package `exports` using the experimental ESM condition set `import`, `node`, `default`, then load a CommonJS target through the CommonJS loader.
+- ESM package imports (`#alias`) may select package `imports` using the same ESM condition set.
+- ESM package `exports` and `imports` may target `.mjs` files inside the package root.
+- ESM self-reference and nested package imports use the ESM condition set.
 - simple named exports are supported for local `.mjs` modules.
 - top-level await is supported because the experimental graph is evaluated through an async runner.
 - diagnostics are emitted in the result envelope:
@@ -74,7 +77,6 @@ Still unsupported in v1:
 
 - dynamic `import()`
 - `import.meta`
-- package `imports` ESM condition coverage beyond the current resolver subset
 - CJS `require()` of ESM; when the ESM flag is enabled this fails with `ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED`
 - ESM JSON import assertions; JSON may only be reached through the CommonJS interop path
 - custom loaders and `node:module` loader hooks
@@ -197,7 +199,7 @@ Experimental ESM condition order is importer-sensitive:
 - CommonJS importer: `require`, `node`, `default`
 - ESM importer: `import`, `node`, `default`
 
-The resolver must continue to reject package export/import targets that escape the package root.
+The resolver rejects package export/import targets that escape the package root, including under ESM mode.
 
 ## moduleSources And Encrypted Graphs
 
@@ -260,4 +262,4 @@ The experimental flag may not enable ESM until tests cover:
 
 ## Current Decision
 
-ESM remains disabled by default. Experimental v1 enables only local static `.mjs` imports for plain working directories, simple named exports, top-level await, package `type=module` entry routing, diagnostics, and a focused single-file packaged `.mjs` smoke when `autojs.nodejs.esm.experimental=true`. It does not enable dynamic import, ESM/CJS interop, package exports/imports ESM conditions, loader hooks, `node:module`, network imports, or unrestricted packaged encrypted ESM graphs.
+ESM remains disabled by default. Experimental v1 enables local static `.mjs` imports for plain working directories, simple exports, top-level await, package `type=module` entry routing, ESM-to-CJS default interop, supported builtin imports, package `exports`/`imports` ESM condition selection, nested package imports, self-reference, diagnostics, and a focused single-file packaged `.mjs` smoke when `autojs.nodejs.esm.experimental=true`. It does not enable dynamic import, loader hooks, `node:module`, network imports, CJS `require()` of ESM, or unrestricted packaged encrypted ESM graphs.

@@ -255,6 +255,9 @@ With the flag enabled for an embedded script request, experimental ESM v1 suppor
 - default import from scoped CommonJS modules through the existing CommonJS loader
 - supported builtin imports such as `node:path` and `node:events`
 - bare package imports that resolve package `exports` with ESM condition order `import`, `node`, `default` and then load a CommonJS target
+- package `imports` aliases with ESM condition order `import`, `node`, `default`
+- package `exports`/`imports` targets that point to `.mjs` files inside the package root
+- nested package imports and package self-reference under ESM mode
 - simple named exports
 - simple top-level await
 

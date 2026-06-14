@@ -11195,14 +11195,14 @@ std::string buildEmbeddedScriptExecutionSource(
       subpath: parts.slice(1).join("/")
     };
   }
-  function __autojs6_first_local_module_candidate(candidates, root, moduleName) {
+  function __autojs6_first_local_module_candidate(candidates, root, moduleName, allowEsm) {
     const path = __autojs6_path_module();
     for (const candidate of candidates) {
       const resolved = path.resolve(candidate);
       if (!__autojs6_path_within_root(resolved, root)) {
         throw new Error("Relative require escapes Embedded Node working directory: " + moduleName);
       }
-      if (__autojs6_module_record(resolved)) {
+      if (__autojs6_module_record(resolved, allowEsm)) {
         return resolved;
       }
     }
@@ -11409,7 +11409,7 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     return __autojs6_append_error_context(error, context, "__autojs6PackageDiagnosticsContext");
   }
-  function __autojs6_resolve_package_path_target(packageDir, target, root, moduleName, fieldName) {
+  function __autojs6_resolve_package_path_target(packageDir, target, root, moduleName, fieldName, mode) {
     const path = __autojs6_path_module();
     if (typeof target !== "string" || target.length === 0) {
       throw __autojs6_invalid_package_target("Embedded Node package.json " + fieldName + " target must be a non-empty string for '" + moduleName + "'.");
@@ -11430,12 +11430,19 @@ std::string buildEmbeddedScriptExecutionSource(
       );
     }
     const extension = path.extname(base);
-    __autojs6_throw_if_esm_extension(extension, moduleName, "Embedded Node package " + fieldName + " target");
-    if (extension && !__autojs6_supported_local_module_extension(extension)) {
+    const allowEsm = __autojs6_package_condition_mode(mode) === "esm";
+    if (!allowEsm) {
+      __autojs6_throw_if_esm_extension(extension, moduleName, "Embedded Node package " + fieldName + " target");
+    }
+    if (extension && !__autojs6_supported_local_module_extension(extension) && !(allowEsm && __autojs6_is_esm_extension(extension))) {
       throw __autojs6_invalid_package_target("Unsupported Embedded Node package " + fieldName + " extension in MVP: " + target);
     }
-    const candidates = extension ? [base] : [base, base + ".js", base + ".cjs", base + ".json"];
-    const resolved = __autojs6_first_local_module_candidate(candidates, root, moduleName);
+    const candidates = extension
+      ? [base]
+      : allowEsm
+        ? [base, base + ".mjs", base + ".js", base + ".cjs", base + ".json"]
+        : [base, base + ".js", base + ".cjs", base + ".json"];
+    const resolved = __autojs6_first_local_module_candidate(candidates, root, moduleName, allowEsm);
     if (resolved && __autojs6_path_within_root(resolved, packageDir)) {
       return resolved;
     }
@@ -11443,7 +11450,7 @@ std::string buildEmbeddedScriptExecutionSource(
   }
   function __autojs6_resolve_package_main(packageDir, packageMain, root, moduleName, ignoredFields) {
     try {
-      return __autojs6_resolve_package_path_target(packageDir, packageMain, root, moduleName, "main");
+      return __autojs6_resolve_package_path_target(packageDir, packageMain, root, moduleName, "main", "cjs");
     } catch (error) {
       throw __autojs6_enrich_package_error(error, packageDir, moduleName, "main", moduleName, packageMain, "", "", ignoredFields);
     }
@@ -11697,7 +11704,7 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     if (!packageExports.present) return null;
     try {
-      const resolved = __autojs6_resolve_package_path_target(packageDir, packageExports.target, root, moduleName, "exports");
+      const resolved = __autojs6_resolve_package_path_target(packageDir, packageExports.target, root, moduleName, "exports", mode);
       __autojs6_resolve_trace("exports matched", {
         request,
         packageDir,
@@ -11743,7 +11750,7 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     if (!packageImports.present) return null;
     try {
-      const resolved = __autojs6_resolve_package_path_target(packageDir, packageImports.target, root, moduleName, "imports");
+      const resolved = __autojs6_resolve_package_path_target(packageDir, packageImports.target, root, moduleName, "imports", mode);
       __autojs6_resolve_trace("imports matched", {
         request: specifier,
         packageDir,
@@ -23874,6 +23881,13 @@ std::string buildEmbeddedScriptExecutionSource(
       throw __autojs6_esm_error("Embedded Node experimental ESM rejects protocol import: " + name, code);
     }
     const root = path.resolve(__autojs6_module_root || __autojs6_module_dirname(parentFilename));
+    if (name.indexOf("#") === 0) {
+      const resolved = __autojs6_resolve_package_import(name, parentFilename, "esm");
+      return {
+        kind: __autojs6_esm_module_kind(resolved) || "cjs",
+        resolved
+      };
+    }
     if (!__autojs6_is_relative_module_name(name)) {
       const resolved = __autojs6_resolve_node_modules_module(name, parentFilename, "esm");
       return {
