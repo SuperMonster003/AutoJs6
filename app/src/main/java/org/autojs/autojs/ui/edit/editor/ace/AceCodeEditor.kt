@@ -130,6 +130,7 @@ class AceCodeEditor @JvmOverloads constructor(
             androidVersion = AceDiagnostics.androidVersion(),
             lspEnabled = false,
             lspState = AceDiagnostics.LSP_DISABLED,
+            aceFont = AceEditorFontPreferences.get().preferenceValue,
             fileSizeBytes = fileSizeBytes,
             largeFilePolicy = largeFilePolicy,
             textMirrorRevision = textMirrorRevision,
@@ -297,6 +298,10 @@ class AceCodeEditor @JvmOverloads constructor(
 
     fun setTextSizeSp(size: Float) {
         invokeAce("setFontSizeSp", size.coerceIn(8f, 40f).toString())
+    }
+
+    fun setFontFamily(fontFamily: String) {
+        invokeAce("setFontFamily", quote(fontFamily))
     }
 
     fun toggleBreakpoint(line: Int) {
@@ -478,6 +483,10 @@ class AceCodeEditor @JvmOverloads constructor(
         } else {
             "ace/theme/textmate"
         }
+    }
+
+    internal fun bridgeFontFamily(): String {
+        return AceEditorFontPreferences.get().cssFontFamily
     }
 
     private fun configureWebView() {

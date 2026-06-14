@@ -10,7 +10,8 @@ This document tracks the current AutoJs6 ACE editor deployment state. Native rem
 - Runtime ACE failures fall back to Native through the editor engine switch path.
 - Fallback snapshots preserve text, dirty state, cursor, selection, breakpoints, debug line, read-only state, theme, and font size as far as each engine supports them.
 - ACE text is mirrored on the Kotlin side through change deltas, so fallback can keep recent edits even when the WebView cannot be queried.
-- ACE uses bundled JetBrains Mono WOFF2 assets by default, with `monospace` as the fallback family.
+- ACE uses bundled JetBrains Mono WOFF2 assets by default. Source Code Pro is bundled as the second editor font, and system `monospace` remains the final fallback.
+- ACE font selection is available from settings and from the editor `More -> ACE editor font` menu.
 
 ## Diagnostics
 
@@ -52,7 +53,9 @@ Before ACE is presented as a gray-release experimental editor:
 - Verify asset-missing, ready-timeout, JS-init, renderer-gone, and large-file debug hooks.
 - Verify recent small-file input survives fallback through TextMirror.
 - Copy diagnostics from both an active ACE editor and after ACE fallback to Native.
-- Confirm JetBrains Mono notice files remain bundled under `fonts/jetbrains-mono`, and no font files with unclear redistribution rights exist under the ACE asset tree.
+- Confirm JetBrains Mono notice files remain bundled under `fonts/jetbrains-mono`.
+- Confirm Source Code Pro `LICENSE.md` remains bundled under `fonts/source-code-pro`.
+- Confirm no font files with unclear redistribution rights exist under the ACE asset tree.
 - Confirm `THIRD_PARTY_NOTICES.md` and `app/src/main/assets/editor/ace-builds-1.4.12/LICENSE` are present.
 
 ## Deferred Work

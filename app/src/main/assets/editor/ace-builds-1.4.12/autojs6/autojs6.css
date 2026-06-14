@@ -30,6 +30,38 @@
     src: url("../fonts/jetbrains-mono/JetBrainsMono-BoldItalic.woff2") format("woff2");
 }
 
+@font-face {
+    font-family: "Source Code Pro";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("../fonts/source-code-pro/SourceCodePro-Regular.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "Source Code Pro";
+    font-style: italic;
+    font-weight: 400;
+    font-display: swap;
+    src: url("../fonts/source-code-pro/SourceCodePro-Italic.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "Source Code Pro";
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url("../fonts/source-code-pro/SourceCodePro-Bold.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "Source Code Pro";
+    font-style: italic;
+    font-weight: 700;
+    font-display: swap;
+    src: url("../fonts/source-code-pro/SourceCodePro-BoldItalic.woff2") format("woff2");
+}
+
 html,
 body,
 #editor {
@@ -46,7 +78,7 @@ body {
 
 #editor,
 .ace_editor {
-    font-family: "JetBrains Mono", monospace;
+    font-family: "JetBrains Mono", "Source Code Pro", monospace;
     line-height: 1.45;
 }
 

@@ -19,10 +19,24 @@ This file records third-party notices relevant to the ACE editor integration.
 
 ## Font assets
 
+### JetBrains Mono
+
 - Component: JetBrains Mono
 - Version: 2.304
 - Path: `app/src/main/assets/editor/ace-builds-1.4.12/fonts/jetbrains-mono`
 - License: SIL Open Font License 1.1
 - Notice files: `OFL.txt`, `AUTHORS.txt`
 
-The integration bundles only the Regular, Italic, Bold, and BoldItalic WOFF2 files needed by the ACE editor. No Consolas or other proprietary font file is redistributed by this integration.
+The integration bundles only the Regular, Italic, Bold, and BoldItalic WOFF2 files needed by the ACE editor.
+
+### Source Code Pro
+
+- Component: Source Code Pro
+- Version package: `2.042R-u_1.062R-i_1.026Rvf`
+- Path: `app/src/main/assets/editor/ace-builds-1.4.12/fonts/source-code-pro`
+- License: SIL Open Font License 1.1
+- Notice file: `LICENSE.md`
+
+The integration bundles only the static TTF WOFF2 Regular, Italic, Bold, and BoldItalic files. Variable font assets are intentionally not bundled because the static files are more predictable across the Android WebView compatibility range.
+
+No Consolas or other proprietary font file is redistributed by this integration.

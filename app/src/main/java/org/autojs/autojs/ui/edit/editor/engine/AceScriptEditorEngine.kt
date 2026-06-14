@@ -5,6 +5,8 @@ import android.graphics.Color
 import android.view.View
 import org.autojs.autojs.model.autocomplete.AutoCompletion
 import org.autojs.autojs.ui.edit.editor.ace.AceCodeEditor
+import org.autojs.autojs.ui.edit.editor.ace.AceEditorFont
+import org.autojs.autojs.ui.edit.editor.ace.AceEditorFontPreferences
 import org.autojs.autojs.ui.edit.editor.ace.diagnostics.AceDiagnosticsSnapshot
 import org.autojs.autojs.ui.edit.editor.ace.health.AceFailure
 import org.autojs.autojs.ui.edit.theme.Theme
@@ -26,6 +28,7 @@ class AceScriptEditorEngine(
     private var loadingText = false
     private var debuggingLine = -1
     private var fontSizeSp = DEFAULT_TEXT_SIZE_SP
+    private var editorFont = AceEditorFontPreferences.get()
     private var themeKey: String? = null
     private var searchQuery: String? = null
     private var searchOptions: EditorSearchOptions? = null
@@ -110,6 +113,12 @@ class AceScriptEditorEngine(
     init {
         aceCodeEditor.listener = createAceListener()
         aceCodeEditor.setTextSizeSp(fontSizeSp)
+        aceCodeEditor.setFontFamily(editorFont.cssFontFamily)
+    }
+
+    fun setAceEditorFont(font: AceEditorFont) {
+        editorFont = font
+        aceCodeEditor.setFontFamily(font.cssFontFamily)
     }
 
     override fun setInitialText(text: String?) {

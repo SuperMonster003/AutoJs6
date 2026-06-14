@@ -146,6 +146,15 @@
             app:itemDefaultKey="@string/default_key_editor_log_button_behavior"
             app:longClickPrompt="@string/description_editor_log_button_behavior_preference" />
 
+        <org.autojs.autojs.theme.preference.MaterialListPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_ace_editor_font"
+            app:title="@string/text_ace_editor_font"
+            app:itemKeys="@array/keys_ace_editor_font"
+            app:itemValues="@array/values_ace_editor_font"
+            app:itemDefaultKey="@string/default_key_ace_editor_font"
+            app:longClickPrompt="@string/description_ace_editor_font_preference" />
+
     </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
 
     <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory

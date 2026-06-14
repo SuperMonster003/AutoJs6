@@ -11,6 +11,7 @@ data class AceDiagnosticsSnapshot(
     val androidVersion: String,
     val lspEnabled: Boolean,
     val lspState: String,
+    val aceFont: String?,
     val fileSizeBytes: Long?,
     val largeFilePolicy: String,
     val textMirrorRevision: Long?,

@@ -22,6 +22,7 @@ object AceDiagnostics {
             androidVersion = androidVersion(),
             lspEnabled = false,
             lspState = LSP_DISABLED,
+            aceFont = null,
             fileSizeBytes = fileSizeBytes,
             largeFilePolicy = largeFilePolicy,
             textMirrorRevision = null,
@@ -46,6 +47,7 @@ object AceDiagnostics {
             appendLine("androidVersion=${snapshot.androidVersion}")
             appendLine("lspEnabled=${snapshot.lspEnabled}")
             appendLine("lspState=${snapshot.lspState}")
+            appendLine("aceFont=${snapshot.aceFont.orUnknown()}")
             appendLine("fileSizeBytes=${snapshot.fileSizeBytes?.toString().orUnknown()}")
             appendLine("largeFilePolicy=${snapshot.largeFilePolicy}")
             appendLine("textMirrorRevision=${snapshot.textMirrorRevision?.toString().orUnknown()}")

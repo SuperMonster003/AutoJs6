@@ -48,6 +48,11 @@ class AceBridge(
     }
 
     @JavascriptInterface
+    fun getFontFamily(): String {
+        return editor.bridgeFontFamily()
+    }
+
+    @JavascriptInterface
     fun getLspOptions(): String {
         return "{}"
     }

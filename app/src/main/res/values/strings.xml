@@ -30,6 +30,7 @@
     <string name="com_twofortyfouram_log_tag" tools:ignore="ResourceName" translatable="false" />
     <string name="default_build_apk_version_code" translatable="false">1</string>
     <string name="default_build_apk_version_name" translatable="false">1.0.0</string>
+    <string name="default_key_ace_editor_font" translatable="false">@string/key_ace_editor_font_jetbrains_mono</string>
     <string name="default_key_app_language" translatable="false">@string/key_app_language_auto</string>
     <string name="default_key_documentation_source" translatable="false">@string/key_documentation_source_local</string>
     <string name="default_key_editor_engine" translatable="false">@string/key_editor_engine_native</string>
@@ -69,6 +70,10 @@
     <string name="id_launcher_shortcut_plugin_center" translatable="false">shortcut_$_plugin_center</string>
     <string name="id_launcher_shortcut_settings" translatable="false">shortcut_$_settings</string>
     <string name="key_a11y_service" translatable="false">key_$_a11y_service</string>
+    <string name="key_ace_editor_font" translatable="false">key_$_ace_editor_font</string>
+    <string name="key_ace_editor_font_jetbrains_mono" translatable="false">jetbrains_mono</string>
+    <string name="key_ace_editor_font_source_code_pro" translatable="false">source_code_pro</string>
+    <string name="key_ace_editor_font_system_monospace" translatable="false">system_monospace</string>
     <string name="key_about_app_and_developer" translatable="false">key_$_about_app_and_developer</string>
     <string name="key_about_app_tips" translatable="false">key_$_about_app_tips</string>
     <string name="key_all_files_access" translatable="false">key_$_all_files_access</string>
@@ -476,6 +481,9 @@
     <string name="entry_editor_pinch_to_zoom_scale_view">Scale view</string>
     <string name="entry_editor_engine_ace">ACE editor (experimental)</string>
     <string name="entry_editor_engine_native">Native editor</string>
+    <string name="entry_ace_editor_font_jetbrains_mono">JetBrains Mono</string>
+    <string name="entry_ace_editor_font_source_code_pro">Source Code Pro</string>
+    <string name="entry_ace_editor_font_system_monospace">System monospace</string>
     <string name="entry_file_extensions_not_show">Hide all file extensions</string>
     <string name="entry_file_extensions_show_all">Show all file extensions</string>
     <string name="entry_file_extensions_show_all_but_executable">Show file extensions (exclude *.js / *.auto)</string>
@@ -1061,6 +1069,8 @@
     <string name="text_edit_prepare_script">Edit pre-execute script</string>
     <string name="text_edit_script">Edit script</string>
     <string name="text_editor_theme">Editor theme</string>
+    <string name="text_ace_editor_font">ACE editor font</string>
+    <string name="text_ace_editor_font_changed" formatted="true">ACE editor font switched to %s</string>
     <string name="text_editor_engine">Editor engine</string>
     <string name="text_editor_engine_switched" formatted="true">Editor engine switched to %s</string>
     <string name="text_editor_engine_switched_with_undo_notice" formatted="true">Editor engine switched to %s. Undo/redo history is not preserved across editor engines</string>
@@ -1744,4 +1754,5 @@
     <string name="summary_editor_auto_show_log_bottom_sheet_on_run">Automatically open the bottom log panel after the editor Run button starts a script</string>
     <string name="description_editor_log_button_behavior_preference">Choose how the editor log button opens logs: bottom log panel or fullscreen log page.</string>
     <string name="description_editor_engine_preference">Native remains the default editor. ACE is an experimental WebView editor; if ACE fails at runtime, AutoJs6 falls back to the native editor and keeps the best available text snapshot.</string>
+    <string name="description_ace_editor_font_preference">Choose the ACE editor font. JetBrains Mono is the default; Source Code Pro and system monospace are available fallbacks.</string>
 </resources>

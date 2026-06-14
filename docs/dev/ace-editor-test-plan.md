@@ -329,7 +329,9 @@ Steps:
 Expected:
 - ACE theme follows app theme.
 - Font size is restored after engine switch.
-- ACE text uses bundled JetBrains Mono, falling back to system monospace if the font asset cannot be loaded.
+- ACE text uses JetBrains Mono by default.
+- `More -> ACE editor font` can switch to Source Code Pro and system monospace.
+- The settings page persists the ACE editor font for future ACE sessions.
 - Text remains readable and markers stay visible.
 
 Failure logs:

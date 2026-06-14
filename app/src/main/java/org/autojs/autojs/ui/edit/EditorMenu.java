@@ -186,6 +186,9 @@ public class EditorMenu {
         if (itemId == R.id.action_editor_text_size) {
             return tryDoing(mEditorView::selectTextSize);
         }
+        if (itemId == R.id.action_ace_editor_font) {
+            return tryDoing(mEditorView::selectAceEditorFont);
+        }
         if (itemId == R.id.action_editor_pinch_to_zoom) {
             setPinchToZoomStrategy();
             return true;

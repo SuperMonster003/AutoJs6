@@ -143,6 +143,11 @@
                 app:showAsAction="never" />
 
             <item
+                android:id="@+id/action_ace_editor_font"
+                android:title="@string/text_ace_editor_font"
+                app:showAsAction="never" />
+
+            <item
                 android:id="@+id/action_editor_pinch_to_zoom"
                 android:title="@string/text_pinch_to_zoom"
                 app:showAsAction="never" />

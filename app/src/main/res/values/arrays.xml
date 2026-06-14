@@ -160,6 +160,18 @@
         <item>@string/entry_editor_engine_ace</item>
     </string-array>
 
+    <string-array name="keys_ace_editor_font">
+        <item>@string/key_ace_editor_font_jetbrains_mono</item>
+        <item>@string/key_ace_editor_font_source_code_pro</item>
+        <item>@string/key_ace_editor_font_system_monospace</item>
+    </string-array>
+
+    <string-array name="values_ace_editor_font">
+        <item>@string/entry_ace_editor_font_jetbrains_mono</item>
+        <item>@string/entry_ace_editor_font_source_code_pro</item>
+        <item>@string/entry_ace_editor_font_system_monospace</item>
+    </string-array>
+
     <string-array name="keys_editor_log_button_behavior">
         <item>@string/key_editor_log_button_behavior_bottom_sheet</item>
         <item>@string/key_editor_log_button_behavior_fullscreen_page</item>

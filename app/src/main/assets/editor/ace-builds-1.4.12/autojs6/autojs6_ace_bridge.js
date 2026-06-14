@@ -11,7 +11,7 @@
     var debugMarker = null;
     var storedReplacement = "";
     var scrollNotifyTimer = null;
-    var DEFAULT_FONT_FAMILY = '"JetBrains Mono", monospace';
+    var DEFAULT_FONT_FAMILY = '"JetBrains Mono", "Source Code Pro", monospace';
 
     function callBridge(name, args) {
         try {
@@ -435,6 +435,11 @@
         notifyStateChanged("fontSizeChanged");
     }
 
+    function setFontFamily(fontFamily) {
+        editor.setOption("fontFamily", fontFamily || DEFAULT_FONT_FAMILY);
+        notifyStateChanged("fontFamilyChanged");
+    }
+
     function initEditor() {
         if (!global.ace) {
             notifyFatalError({
@@ -468,7 +473,7 @@
             showPrintMargin: false,
             highlightActiveLine: true,
             wrap: false,
-            fontFamily: DEFAULT_FONT_FAMILY
+            fontFamily: callBridge("getFontFamily") || DEFAULT_FONT_FAMILY
         });
         editor.setFontSize("14px");
 
@@ -535,6 +540,7 @@
             setReadOnly: function(readOnly) { editor.setReadOnly(!!readOnly); notifyStateChanged("readOnlyChanged"); },
             setTheme: setTheme,
             setFontSizeSp: setFontSizeSp,
+            setFontFamily: setFontFamily,
             restoreScroll: restoreScroll,
             setBreakpoint: function(row, enabled) { return setBreakpoint(row, enabled, true); },
             toggleBreakpoint: toggleBreakpoint,
