@@ -235,6 +235,14 @@ Current host-side packaged checks:
 `-Pautojs.embeddedNode.packagedApk=<apk>` and optionally constrain ABI expectations with
 `-Pautojs.embeddedNode.expectedAbis=arm64-v8a,armeabi-v7a,x86_64`.
 
+If `autojs.embeddedNode.expectedAbis` is omitted, the verifier derives the ABI policy from `autojs.nodejs.releaseFlavor`:
+
+- `nodeFull`: `arm64-v8a,armeabi-v7a,x86_64`
+- `nodeMini`: `autojs.nodejs.releaseAbis`, defaulting to `arm64-v8a`
+- `rhinoOnly`: no Embedded Node runtime native libraries
+
+See `docs/nodejs/design/RELEASE_FLAVORS.md`.
+
 The packaged diagnostic report also prints whether the inspected manifest declares `android.permission.INTERNET`. Controlled fetch remains disabled in normal builds unless a future packaged project opts into network explicitly; raw Node network modules must stay denied in either state.
 
 Template refresh and smoke artifact collection:
@@ -264,7 +272,13 @@ Expected policy:
 - `arm64-v8a`: full instrumentation and packaged smoke
 - `armeabi-v7a`: smoke and lifecycle subset
 - `x86_64`: emulator smoke and resolver/fs tests
-- `x86`: explicit fail-fast until `libnode.so` exists
+- `x86`: explicit fail-fast until `libnode.so`, `libautojs6-node.so`, and smoke coverage are all added deliberately
+
+Release packaging profiles:
+
+- `nodeFull`: default, requires all supported Node ABIs
+- `nodeMini`: supports a smaller explicit ABI set
+- `rhinoOnly`: must not package `libnode.so` or `libautojs6-node.so`
 
 ## Security Negative Tests
 

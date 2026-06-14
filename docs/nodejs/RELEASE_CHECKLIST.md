@@ -73,6 +73,10 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 
 ## Native Libraries
 
+- [ ] selected release flavor is recorded: `nodeFull`, `nodeMini`, or `rhinoOnly`
+- [ ] `nodeFull` uses `arm64-v8a,armeabi-v7a,x86_64`
+- [ ] `nodeMini` records the exact `autojs.nodejs.releaseAbis` value
+- [ ] `rhinoOnly` APK contains no `libnode.so` or `libautojs6-node.so`
 - [ ] `arm64-v8a/libnode.so`
 - [ ] `arm64-v8a/libautojs6-node.so`
 - [ ] `arm64-v8a/libc++_shared.so`
@@ -82,7 +86,8 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `x86_64/libnode.so`
 - [ ] `x86_64/libautojs6-node.so`
 - [ ] `x86_64/libc++_shared.so`
-- [ ] x86 remains fail-fast or has a fully tested `libnode.so`
+- [ ] x86 remains fail-fast unless `libnode.so`, `libautojs6-node.so`, and smoke coverage are deliberately added
+- [ ] `embeddedNodePackagingPreflightAppDebug` reports release flavor policy ready
 
 ## Runtime Security
 

@@ -2,7 +2,7 @@
 
 Date: 2026-06-14
 
-This report freezes the checked-in Safe Node Profile after Tasks 1-18 and records the Task 19-44 audit, corpus, design-gate, focused-test, bridge-expansion, performance, and memory-stress gates added immediately afterward. It is an engineering baseline for the next task group, not a claim that AutoJs6 exposes unrestricted desktop Node.js.
+This report freezes the checked-in Safe Node Profile after Tasks 1-18 and records the Task 19-45 audit, corpus, design-gate, focused-test, bridge-expansion, performance, memory-stress, and release-flavor gates added immediately afterward. It is an engineering baseline for the next task group, not a claim that AutoJs6 exposes unrestricted desktop Node.js.
 
 ## Scope
 
@@ -29,6 +29,7 @@ Runtime behavior remains scoped to AutoJs6 Safe Node Profile.
 - ESM experimental flag: `autojs.nodejs.esm.experimental=false`
 - Network experimental flag: `autojs.nodejs.network.experimental=false`
 - Worker threads experimental flag: `autojs.nodejs.worker_threads.experimental=false`
+- Release packaging flavor: `autojs.nodejs.releaseFlavor=nodeFull`
 - Optional performance benchmark: `NodeEmbeddedPerformanceInstrumentationTest`
 - Extended memory leak stress gate: `NodeEmbeddedMemoryLeakStressInstrumentationTest`
 - Backend switches preserved: `rhino`, `native`, `embedded`, `auto`
@@ -240,6 +241,7 @@ The packaged diagnostic verifier checks:
 - native library entries per ABI
 - per-entry native library size and SHA-256
 - complete ABI set and x86 fail-fast state
+- release flavor native policy for `nodeFull`, `nodeMini`, or `rhinoOnly`
 - whether the manifest declares `android.permission.INTERNET`
 
 The diagnostic task requires a concrete APK:
@@ -592,6 +594,19 @@ The stress gate is intended for extended release-candidate or lifecycle-change v
 
 The gate samples RSS, Java heap, native heap, PSS, thread count, and fd count. It does not require exact stability; it fails only when a metric keeps rising across samples and exceeds conservative runaway thresholds. The same `:app:pullNodeEmbeddedPerformanceReports` task collects memory-stress JSON reports.
 
+## Release Flavor Gate Added After Task 44
+
+Task 45 adds `docs/nodejs/design/RELEASE_FLAVORS.md` and wires `autojs.nodejs.releaseFlavor` into the main APK and packaged APK verification flow.
+
+Current release flavor policy:
+
+- `nodeFull`: default; requires `arm64-v8a`, `armeabi-v7a`, and `x86_64` Embedded Node native runtime entries.
+- `nodeMini`: keeps Embedded Node enabled but narrows the ABI set with `autojs.nodejs.releaseAbis`, defaulting to `arm64-v8a`.
+- `rhinoOnly`: forces the effective runtime backend to Rhino and verifies the final APK does not package `libnode.so` or `libautojs6-node.so`.
+- `x86`: remains fail-fast when selected or when `app/src/main/jniLibs/x86/libnode.so` appears.
+
+The `embeddedNodePackagingPreflightAppDebug` report now prints release flavor, expected ABIs, complete source/merged/APK ABI sets, x86 runtime presence, and `release flavor policy ready`.
+
 ## Current Verification Status
 
 Verification performed while creating and extending this baseline:
@@ -665,6 +680,11 @@ Verification performed while creating and extending this baseline:
 - `:app:compileAppDebugAndroidTestKotlin`: passed after adding Task 44 memory leak stress instrumentation.
 - `NodeEmbeddedMemoryLeakStressInstrumentationTest`: 1/1 passed on a connected Android 12 device after Task 44.
 - `:app:pullNodeEmbeddedPerformanceReports`: passed after Task 44 and pulled performance plus memory-stress JSON reports to `app/build/reports/nodejs/perf/`.
+- `:app:compileAppDebugKotlin`: passed after adding Task 45 release flavor BuildConfig and ABI selection wiring.
+- `:app:embeddedNodePackagingPreflightAppDebug`: passed for default `nodeFull`; report showed complete `arm64-v8a`, `armeabi-v7a`, and `x86_64` runtime entries and no x86 Node runtime.
+- `:app:embeddedNodePackagingPreflightAppDebug -Pautojs.nodejs.releaseFlavor=rhinoOnly`: passed after tightening JNI packaging excludes; report verified no `libnode.so` or `libautojs6-node.so` in the APK.
+- `:app:tasks -Pautojs.nodejs.releaseFlavor=nodeMini -Pautojs.nodejs.releaseAbis=x86`: failed as expected with an actionable x86 unsupported message.
+- `:app:embeddedNodePackagedDiagnosticReport` with `PackagedNodeSmoke_v1.0.0.apk` and `arm64-v8a` expected ABI: passed after Task 45 flavor-aware packaged verifier updates.
 
 Instrumentation tests executed while creating and extending this baseline: 186 successful tests.
 
@@ -687,4 +707,5 @@ Recommended next tasks:
 - add packaged project opt-in gating for controlled network and make INTERNET permission verification actionable when that opt-in is used
 - compare Task 43 performance JSON medians when changing native load, service lifecycle, or destroy behavior
 - run Task 44 memory leak stress before merging lifecycle, bridge transport, fs, or image-handle ownership changes
+- run Task 45 release flavor preflight for `nodeFull`, `nodeMini`, and `rhinoOnly` before changing native packaging rules
 - keep high-risk features behind design gates

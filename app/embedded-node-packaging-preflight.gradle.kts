@@ -8,6 +8,9 @@ private val embeddedNodePackagingReportVariantTaskSuffix = "AppDebug"
 private val embeddedNodePackagingRequiredNodeAbis = listOf("arm64-v8a", "armeabi-v7a", "x86_64")
 private val embeddedNodePackagingKnownAbis = listOf("arm64-v8a", "armeabi-v7a", "x86_64", "x86")
 private val embeddedNodePackagingNativeLibs = listOf("libnode.so", "libc++_shared.so", "libautojs6-node.so")
+private val embeddedNodePackagingReleaseFlavorProperty = "autojs.nodejs.releaseFlavor"
+private val embeddedNodePackagingReleaseAbisProperty = "autojs.nodejs.releaseAbis"
+private val embeddedNodePackagingDefaultReleaseFlavor = "nodeFull"
 private val embeddedNodePackagingScriptServiceClassName = "org.autojs.autojs.engine.NativeNodeEmbeddedScriptService"
 private val embeddedNodePackagingScriptServiceDexDescriptor =
     "L${embeddedNodePackagingScriptServiceClassName.replace('.', '/')};"
@@ -392,8 +395,71 @@ private data class EmbeddedNodePackagedOutputVerification(
     val moduleSourcesReady: Boolean,
 )
 
+private data class EmbeddedNodeReleaseFlavorPolicy(
+    val flavor: String,
+    val expectedAbis: List<String>,
+    val expectedAbisSource: String,
+)
+
 private fun String.toEmbeddedNodePackagingBoolean(): Boolean =
     trim().let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
+
+private fun embeddedNodePackagingNormalizeReleaseFlavor(rawFlavor: String): String =
+    when (rawFlavor.trim().lowercase()) {
+        "nodefull", "node-full", "full" -> "nodeFull"
+        "nodemini", "node-mini", "mini" -> "nodeMini"
+        "rhinoonly", "rhino-only", "rhino" -> "rhinoOnly"
+        else -> throw GradleException(
+            "Unsupported Embedded Node release flavor '$rawFlavor'. Use nodeFull, nodeMini, or rhinoOnly."
+        )
+    }
+
+private fun embeddedNodePackagingReleaseAbiList(rawAbis: String?): List<String> =
+    rawAbis
+        ?.split(',')
+        ?.map { it.trim() }
+        ?.filter { it.isNotEmpty() }
+        .orEmpty()
+
+private fun embeddedNodePackagingReleaseFlavorPolicy(
+    rawFlavor: String,
+    rawReleaseAbis: String?,
+    explicitExpectedAbis: List<String> = emptyList(),
+): EmbeddedNodeReleaseFlavorPolicy {
+    val flavor = embeddedNodePackagingNormalizeReleaseFlavor(rawFlavor)
+    if (explicitExpectedAbis.isNotEmpty()) {
+        return EmbeddedNodeReleaseFlavorPolicy(
+            flavor = flavor,
+            expectedAbis = explicitExpectedAbis,
+            expectedAbisSource = "explicit autojs.embeddedNode.expectedAbis",
+        )
+    }
+
+    val releaseAbis = embeddedNodePackagingReleaseAbiList(rawReleaseAbis)
+    if (flavor == "nodeFull" &&
+        releaseAbis.isNotEmpty() &&
+        releaseAbis.toSet() != embeddedNodePackagingRequiredNodeAbis.toSet()
+    ) {
+        throw GradleException(
+            "nodeFull must package the full Embedded Node ABI set: ${embeddedNodePackagingRequiredNodeAbis.joinToString()}. " +
+                    "Use -P$embeddedNodePackagingReleaseFlavorProperty=nodeMini to publish a narrower ABI set."
+        )
+    }
+
+    return EmbeddedNodeReleaseFlavorPolicy(
+        flavor = flavor,
+        expectedAbis = when (flavor) {
+            "nodeFull" -> embeddedNodePackagingRequiredNodeAbis
+            "nodeMini" -> releaseAbis.ifEmpty { listOf("arm64-v8a") }
+            else -> emptyList()
+        },
+        expectedAbisSource = if (releaseAbis.isEmpty()) {
+            "$embeddedNodePackagingReleaseFlavorProperty default"
+        } else {
+            embeddedNodePackagingReleaseAbisProperty
+        },
+    )
+}
 
 private fun embeddedNodePackagingApkNativeEntries(apk: File, libName: String): List<String> =
     if (!apk.isFile) {
@@ -1458,7 +1524,16 @@ val embeddedNodePackagingPreflightAppDebug = tasks.register("embeddedNodePackagi
             .orElse("false")
             .get()
             .toEmbeddedNodePackagingBoolean()
-        val nativeRuntimeRequested = runtimeBackend in setOf("native", "embedded", "auto")
+        val releaseFlavorPolicy = embeddedNodePackagingReleaseFlavorPolicy(
+            rawFlavor = providers.gradleProperty(embeddedNodePackagingReleaseFlavorProperty)
+                .orElse(embeddedNodePackagingDefaultReleaseFlavor)
+                .get(),
+            rawReleaseAbis = providers.gradleProperty(embeddedNodePackagingReleaseAbisProperty).orNull,
+        )
+        val releaseFlavor = releaseFlavorPolicy.flavor
+        val releaseExpectedAbis = releaseFlavorPolicy.expectedAbis
+        val releaseUnsupportedAbis = releaseExpectedAbis.filterNot { it in embeddedNodePackagingRequiredNodeAbis }
+        val nativeRuntimeRequested = releaseFlavor != "rhinoOnly" && runtimeBackend in setOf("native", "embedded", "auto")
         val sourceJniLibsRoot = projectDir.resolve("src/main/jniLibs")
         val mergedNativeLibsRoot = layout.buildDirectory
             .dir("intermediates/merged_native_libs/$embeddedNodePackagingReportVariant/merge${embeddedNodePackagingReportVariantTaskSuffix}NativeLibs/out/lib")
@@ -1497,6 +1572,50 @@ val embeddedNodePackagingPreflightAppDebug = tasks.register("embeddedNodePackagi
         val appDebugUniversalHasLibnode = appDebugUniversalApk?.let { embeddedNodePackagingApkNativeEntries(it, "libnode.so").isNotEmpty() } == true
         val appDebugUniversalHasBridge = appDebugUniversalApk?.let { embeddedNodePackagingApkNativeEntries(it, "libautojs6-node.so").isNotEmpty() } == true
         val appDebugUniversalHasLibcxx = appDebugUniversalApk?.let { embeddedNodePackagingApkNativeEntries(it, "libc++_shared.so").isNotEmpty() } == true
+        val sourceLibnodeReadyAbis = embeddedNodePackagingKnownAbis
+            .filter { abi -> sourceJniLibsRoot.resolve("$abi/libnode.so").isFile }
+        val mergedCompleteReadyAbis = embeddedNodePackagingKnownAbis
+            .filter { abi -> embeddedNodePackagingAllNativeLibsInDirectory(mergedNativeLibsRoot, abi) }
+        val appDebugUniversalCompleteReadyAbis = appDebugUniversalApk
+            ?.let { embeddedNodePackagingCompleteReadyAbisInApk(it) }
+            .orEmpty()
+        val sourceX86NodeRuntimePresent =
+            sourceJniLibsRoot.resolve("x86/libnode.so").isFile ||
+                    sourceJniLibsRoot.resolve("x86/libautojs6-node.so").isFile
+        val mergedX86NodeRuntimePresent =
+            mergedNativeLibsRoot.resolve("x86/libnode.so").isFile ||
+                    mergedNativeLibsRoot.resolve("x86/libautojs6-node.so").isFile
+        val appDebugUniversalX86NodeRuntimePresent = appDebugUniversalApk?.let { apk ->
+            "lib/x86/libnode.so" in embeddedNodePackagingApkNativeEntries(apk, "libnode.so") ||
+                    "lib/x86/libautojs6-node.so" in embeddedNodePackagingApkNativeEntries(apk, "libautojs6-node.so")
+        } == true
+        val releaseFlavorPolicyMissing = buildList {
+            if (releaseUnsupportedAbis.isNotEmpty()) {
+                add("unsupported Embedded Node release ABI(s): ${releaseUnsupportedAbis.joinToString()}")
+            }
+            when (releaseFlavor) {
+                "rhinoOnly" -> {
+                    if (appDebugUniversalHasLibnode || appDebugUniversalHasBridge) {
+                        add("rhinoOnly appDebug APK must not package libnode.so or libautojs6-node.so")
+                    }
+                }
+                else -> {
+                    releaseExpectedAbis.filterNot { it in sourceLibnodeReadyAbis }.takeIf { it.isNotEmpty() }?.let {
+                        add("src/main/jniLibs missing libnode.so for ABI(s): ${it.joinToString()}")
+                    }
+                    releaseExpectedAbis.filterNot { it in mergedCompleteReadyAbis }.takeIf { it.isNotEmpty() }?.let {
+                        add("merged appDebug native libs missing complete Embedded Node libs for ABI(s): ${it.joinToString()}")
+                    }
+                    releaseExpectedAbis.filterNot { it in appDebugUniversalCompleteReadyAbis }.takeIf { it.isNotEmpty() }?.let {
+                        add("appDebug universal APK missing complete Embedded Node libs for ABI(s): ${it.joinToString()}")
+                    }
+                    if (sourceX86NodeRuntimePresent || mergedX86NodeRuntimePresent || appDebugUniversalX86NodeRuntimePresent) {
+                        add("x86 Embedded Node runtime must remain absent and fail-fast")
+                    }
+                }
+            }
+        }
+        val releaseFlavorPolicyReady = releaseFlavorPolicyMissing.isEmpty()
         val templateHasLibnode = templateFreshness.hasLibnode
         val templateHasBridge = templateFreshness.hasBridge
         val templateHasLibcxx = templateFreshness.hasLibcxx
@@ -1538,6 +1657,10 @@ val embeddedNodePackagingPreflightAppDebug = tasks.register("embeddedNodePackagi
 
             appendLine("Build gate and backend:")
             appendLine("  autojs.nodejs.backend: $runtimeBackend")
+            appendLine("  $embeddedNodePackagingReleaseFlavorProperty: $releaseFlavor")
+            appendLine("  release flavor expected ABI source: ${releaseFlavorPolicy.expectedAbisSource}")
+            appendLine("  release flavor expected ABIs: ${if (releaseExpectedAbis.isEmpty()) "none" else releaseExpectedAbis.joinToString()}")
+            appendLine("  release flavor unsupported ABIs: ${if (releaseUnsupportedAbis.isEmpty()) "none" else releaseUnsupportedAbis.joinToString()}")
             appendLine("  native runtime requested: $nativeRuntimeRequested")
             appendLine("  autojs.nodejs.embedded.script.enabled: $scriptExecutionEnabled")
             appendLine("  default-safe expectation: embedded script execution should remain false unless explicitly enabled")
@@ -1601,8 +1724,10 @@ val embeddedNodePackagingPreflightAppDebug = tasks.register("embeddedNodePackagi
                     appendLine("    $libName: ${embeddedNodePackagingFormatFile(sourceJniLibsRoot.resolve("$abi/$libName"))}")
                 }
             }
+            appendLine("  release flavor source libnode ABIs: ${if (sourceLibnodeReadyAbis.isEmpty()) "none" else sourceLibnodeReadyAbis.joinToString()}")
             appendLine("  required Node ABI set present in src/main/jniLibs: ${embeddedNodePackagingRequiredNodeAbis.all { sourceJniLibsRoot.resolve("$it/libnode.so").isFile }}")
             appendLine("  x86 libnode.so present: ${sourceJniLibsRoot.resolve("x86/libnode.so").isFile}")
+            appendLine("  x86 Node runtime present: $sourceX86NodeRuntimePresent")
             appendLine()
 
             appendLine("Merged appDebug native libraries:")
@@ -1612,6 +1737,8 @@ val embeddedNodePackagingPreflightAppDebug = tasks.register("embeddedNodePackagi
                     appendLine("    $libName: ${embeddedNodePackagingFormatFile(mergedNativeLibsRoot.resolve("$abi/$libName"))}")
                 }
             }
+            appendLine("  release flavor complete merged ABIs: ${if (mergedCompleteReadyAbis.isEmpty()) "none" else mergedCompleteReadyAbis.joinToString()}")
+            appendLine("  x86 Node runtime present: $mergedX86NodeRuntimePresent")
             appendLine()
 
             appendLine("appDebug APK native entries:")
@@ -1636,6 +1763,15 @@ val embeddedNodePackagingPreflightAppDebug = tasks.register("embeddedNodePackagi
                 appendLine("  appDebug universal APK missing")
             }
             appendEmbeddedNodePackagingAbiMatrix("template", templateApk, embeddedNodePackagingKnownAbis)
+            appendLine()
+
+            appendLine("Release flavor native policy:")
+            appendLine("  flavor: $releaseFlavor")
+            appendLine("  expected ABIs: ${if (releaseExpectedAbis.isEmpty()) "none" else releaseExpectedAbis.joinToString()}")
+            appendLine("  appDebug universal complete ABIs: ${if (appDebugUniversalCompleteReadyAbis.isEmpty()) "none" else appDebugUniversalCompleteReadyAbis.joinToString()}")
+            appendLine("  appDebug universal x86 Node runtime present: $appDebugUniversalX86NodeRuntimePresent")
+            appendLine("  release flavor policy ready: $releaseFlavorPolicyReady")
+            appendLine("  release flavor policy missing: ${if (releaseFlavorPolicyMissing.isEmpty()) "none" else releaseFlavorPolicyMissing.joinToString()}")
             appendLine()
 
             appendLine("Packaged app / inrt template preflight:")
@@ -1702,6 +1838,10 @@ val embeddedNodePackagingPreflightAppDebug = tasks.register("embeddedNodePackagi
             appendLine("  packaged template has FOREGROUND_SERVICE permission: ${templateManifest.declaresForegroundServicePermission}")
             appendLine("  packaged template has FOREGROUND_SERVICE_SPECIAL_USE permission: ${templateManifest.declaresForegroundServiceSpecialUsePermission}")
             appendLine("  embedded.node.host.app.ready=$hostAppReady")
+            appendLine("  embedded.node.release.flavor=$releaseFlavor")
+            appendLine("  embedded.node.release.expected_abis=${if (releaseExpectedAbis.isEmpty()) "none" else releaseExpectedAbis.joinToString()}")
+            appendLine("  embedded.node.release.flavor_policy.ready=$releaseFlavorPolicyReady")
+            appendLine("  embedded.node.release.flavor_policy.missing=${if (releaseFlavorPolicyMissing.isEmpty()) "none" else releaseFlavorPolicyMissing.joinToString()}")
             appendLine("  embedded.node.packaged.template.exists=${templateApk.isFile}")
             appendLine("  embedded.node.packaged.template.dex.bridge.ready=$templateDexBridgeReady")
             appendLine("  embedded.node.packaged.template.dex.contains.NativeNodeEmbeddedRuntimeBridge=$templateDexDefinesRuntimeBridge")
@@ -1738,6 +1878,13 @@ val embeddedNodePackagingPreflightAppDebug = tasks.register("embeddedNodePackagi
 
         reportFile.writeText(report)
         logger.lifecycle("Embedded Node.js packaging preflight report written to ${reportFile.absolutePath}")
+        if (!releaseFlavorPolicyReady) {
+            throw GradleException(
+                "Embedded Node.js release flavor policy failed for $releaseFlavor. " +
+                        "Missing: ${if (releaseFlavorPolicyMissing.isEmpty()) "unknown" else releaseFlavorPolicyMissing.joinToString()}. " +
+                        "See ${reportFile.absolutePath}"
+            )
+        }
         if (nativeRuntimeRequested && scriptExecutionEnabled && !packagedTemplateReady) {
             throw GradleException(
                 "Embedded Node.js packaged inrt template is stale or incomplete. " +
@@ -2118,14 +2265,17 @@ private fun embeddedNodePackagingVerifyPackagedApkOutput(
     rootDir: File,
     packagedApkProperty: String?,
     expectedAbiProperty: String?,
+    releaseFlavorPolicy: EmbeddedNodeReleaseFlavorPolicy,
     runtimeBackend: String,
     scriptExecutionEnabled: Boolean,
 ): EmbeddedNodePackagedOutputVerification {
     val currentBuildRuntimeConfigReady = runtimeBackend == "embedded" && scriptExecutionEnabled
     val packagedApk = embeddedNodePackagingResolveFile(rootDir, packagedApkProperty)
     val packagedApkExists = packagedApk?.isFile == true
-    val expectedAbis = embeddedNodePackagingCsvList(expectedAbiProperty)
+    val releaseFlavor = releaseFlavorPolicy.flavor
+    val expectedAbis = releaseFlavorPolicy.expectedAbis
     val unknownExpectedAbis = expectedAbis.filterNot { it in embeddedNodePackagingKnownAbis }
+    val unsupportedExpectedAbis = expectedAbis.filterNot { it in embeddedNodePackagingRequiredNodeAbis }
     val tools = findEmbeddedNodePackagingTools(rootDir)
     val manifestInfo = if (packagedApkExists) {
         embeddedNodePackagingManifestInfo(tools, packagedApk!!)
@@ -2168,7 +2318,7 @@ private fun embeddedNodePackagingVerifyPackagedApkOutput(
     } else {
         completeReadyAbis.filterNot { it in expectedAbis }
     }
-    val nativeLibsReady = unknownExpectedAbis.isEmpty() && if (expectedAbis.isEmpty()) {
+    val nativeLibsReady = unknownExpectedAbis.isEmpty() && unsupportedExpectedAbis.isEmpty() && if (expectedAbis.isEmpty()) {
         completeReadyAbis.isNotEmpty()
     } else {
         expectedAbis.all { it in completeReadyAbis } && unexpectedCompleteReadyAbis.isEmpty()
@@ -2177,6 +2327,13 @@ private fun embeddedNodePackagingVerifyPackagedApkOutput(
     val x86BridgePresent = "lib/x86/libautojs6-node.so" in nativeEntriesByLib.getValue("libautojs6-node.so")
     val x86LibcxxPresent = "lib/x86/libc++_shared.so" in nativeEntriesByLib.getValue("libc++_shared.so")
     val x86NodeRuntimePresent = x86LibnodePresent || x86BridgePresent
+    val nodeRuntimeNativeEntriesPresent =
+        nativeEntriesByLib.getValue("libnode.so").isNotEmpty() ||
+                nativeEntriesByLib.getValue("libautojs6-node.so").isNotEmpty()
+    val releaseFlavorNativePolicyReady = when (releaseFlavor) {
+        "rhinoOnly" -> !nodeRuntimeNativeEntriesPresent && !x86NodeRuntimePresent
+        else -> nativeLibsReady && !x86NodeRuntimePresent
+    }
     val manifestServiceReady = manifestInfo.declaresEmbeddedScriptService &&
             manifestInfo.embeddedScriptServiceUsesNodeProcess &&
             manifestInfo.embeddedScriptServiceUsesSpecialUseFgs &&
@@ -2333,20 +2490,23 @@ private fun embeddedNodePackagingVerifyPackagedApkOutput(
     val fullCompatibilitySmokeReady = bundledProjectConfigReady &&
             bundledMainScriptReady &&
             runtimeMatrixMarkersReady
-    val packagedOutputReady = packagedApkExists &&
-            manifestInfo.inspected &&
-            manifestServiceReady &&
-            manifestPermissionsReady &&
-            nativeLibsReady &&
-            !x86NodeRuntimePresent &&
-            dexDefinesScriptService &&
-            bundledProjectConfigReady &&
-            bundledMainScriptReady &&
-            moduleSourcesBudgetReady &&
-            realNpmCorpusReady &&
-            cjsResolverReady &&
-            dependencyResolutionReady &&
-            diagnosticsReady
+    val packagedOutputReady = if (releaseFlavor == "rhinoOnly") {
+        packagedApkExists && releaseFlavorNativePolicyReady
+    } else {
+        packagedApkExists &&
+                manifestInfo.inspected &&
+                manifestServiceReady &&
+                manifestPermissionsReady &&
+                releaseFlavorNativePolicyReady &&
+                dexDefinesScriptService &&
+                bundledProjectConfigReady &&
+                bundledMainScriptReady &&
+                moduleSourcesBudgetReady &&
+                realNpmCorpusReady &&
+                cjsResolverReady &&
+                dependencyResolutionReady &&
+                diagnosticsReady
+    }
 
     val report = buildString {
         appendLine("Embedded Node.js packaged APK output verification report")
@@ -2357,8 +2517,11 @@ private fun embeddedNodePackagingVerifyPackagedApkOutput(
         appendLine("  packaged APK property: ${packagedApkProperty ?: "not set"}")
         appendLine("  packaged APK: ${packagedApk?.let { embeddedNodePackagingFormatFile(it) } ?: "not provided"}")
         appendLine("  expected ABI property: ${expectedAbiProperty ?: "not set"}")
-        appendLine("  expected ABIs: ${if (expectedAbis.isEmpty()) "not set; verifier requires at least one complete Embedded Node ABI" else expectedAbis.joinToString()}")
+        appendLine("  release flavor: $releaseFlavor")
+        appendLine("  expected ABI source: ${releaseFlavorPolicy.expectedAbisSource}")
+        appendLine("  expected ABIs: ${if (expectedAbis.isEmpty()) "none; rhinoOnly verifier requires no Embedded Node native runtime" else expectedAbis.joinToString()}")
         appendLine("  unknown expected ABIs: ${if (unknownExpectedAbis.isEmpty()) "none" else unknownExpectedAbis.joinToString()}")
+        appendLine("  unsupported expected ABIs: ${if (unsupportedExpectedAbis.isEmpty()) "none" else unsupportedExpectedAbis.joinToString()}")
         appendLine()
 
         appendLine("Current build runtime config:")
@@ -2496,6 +2659,8 @@ private fun embeddedNodePackagingVerifyPackagedApkOutput(
         appendLine("  complete Embedded Node ABIs: ${if (completeReadyAbis.isEmpty()) "none" else completeReadyAbis.joinToString()}")
         appendLine("  unexpected complete Embedded Node ABIs for expected ABI policy: ${if (unexpectedCompleteReadyAbis.isEmpty()) "none" else unexpectedCompleteReadyAbis.joinToString()}")
         appendLine("  native libs ready for expected ABI policy: $nativeLibsReady")
+        appendLine("  Node runtime native entries present: $nodeRuntimeNativeEntriesPresent")
+        appendLine("  release flavor native policy ready: $releaseFlavorNativePolicyReady")
         appendLine("  x86 libnode.so present: $x86LibnodePresent")
         appendLine("  x86 libautojs6-node.so present: $x86BridgePresent")
         appendLine("  x86 libc++_shared.so present: $x86LibcxxPresent")
@@ -2548,6 +2713,10 @@ private fun embeddedNodePackagingVerifyPackagedApkOutput(
         appendLine("  embedded.node.packaged.output.diagnostics.encrypted_js.ready=$diagnosticsJavaScriptEncrypted")
         appendLine("  embedded.node.packaged.output.diagnostics.ready=$diagnosticsReady")
         appendLine("  embedded.node.packaged.output.current_build_config.ready=$currentBuildRuntimeConfigReady")
+        appendLine("  embedded.node.packaged.output.release.flavor=$releaseFlavor")
+        appendLine("  embedded.node.packaged.output.release.expected_abis=${if (expectedAbis.isEmpty()) "none" else expectedAbis.joinToString()}")
+        appendLine("  embedded.node.packaged.output.release.native_policy.ready=$releaseFlavorNativePolicyReady")
+        appendLine("  embedded.node.packaged.output.native_runtime_entries.present=$nodeRuntimeNativeEntriesPresent")
         appendLine("  embedded.node.packaged.output.native_libs.ready=$nativeLibsReady")
         appendLine("  embedded.node.packaged.output.native_libs.unexpected_complete_abis=${if (unexpectedCompleteReadyAbis.isEmpty()) "none" else unexpectedCompleteReadyAbis.joinToString()}")
         appendLine("  embedded.node.packaged.output.x86_node_runtime.present=$x86NodeRuntimePresent")
@@ -2558,6 +2727,7 @@ private fun embeddedNodePackagingVerifyPackagedApkOutput(
         appendLine("  This task verifies an already-created packaged APK and does not build or install it.")
         appendLine("  Pass a real output APK with -Pautojs.embeddedNode.packagedApk=<apk>.")
         appendLine("  Optionally constrain native ABI expectations with -Pautojs.embeddedNode.expectedAbis=arm64-v8a,armeabi-v7a,x86_64.")
+        appendLine("  Without an explicit expected ABI property, expected ABIs are derived from -P$embeddedNodePackagingReleaseFlavorProperty.")
     }
 
 
@@ -2598,6 +2768,13 @@ val embeddedNodePackagedApkOutputVerify = tasks.register("embeddedNodePackagedAp
                 break
             }
         }
+        val releaseFlavorPolicy = embeddedNodePackagingReleaseFlavorPolicy(
+            rawFlavor = providers.gradleProperty(embeddedNodePackagingReleaseFlavorProperty)
+                .orElse(embeddedNodePackagingDefaultReleaseFlavor)
+                .get(),
+            rawReleaseAbis = providers.gradleProperty(embeddedNodePackagingReleaseAbisProperty).orNull,
+            explicitExpectedAbis = embeddedNodePackagingCsvList(expectedAbiProperty),
+        )
 
         val runtimeBackend = providers.gradleProperty("autojs.nodejs.backend")
             .orElse("embedded")
@@ -2612,6 +2789,7 @@ val embeddedNodePackagedApkOutputVerify = tasks.register("embeddedNodePackagedAp
             rootDir = rootProject.projectDir,
             packagedApkProperty = packagedApkProperty,
             expectedAbiProperty = expectedAbiProperty,
+            releaseFlavorPolicy = releaseFlavorPolicy,
             runtimeBackend = runtimeBackend,
             scriptExecutionEnabled = scriptExecutionEnabled,
         )
@@ -2650,6 +2828,13 @@ val embeddedNodePackagedDiagnosticReport = tasks.register("embeddedNodePackagedD
                 break
             }
         }
+        val releaseFlavorPolicy = embeddedNodePackagingReleaseFlavorPolicy(
+            rawFlavor = providers.gradleProperty(embeddedNodePackagingReleaseFlavorProperty)
+                .orElse(embeddedNodePackagingDefaultReleaseFlavor)
+                .get(),
+            rawReleaseAbis = providers.gradleProperty(embeddedNodePackagingReleaseAbisProperty).orNull,
+            explicitExpectedAbis = embeddedNodePackagingCsvList(expectedAbiProperty),
+        )
 
         val runtimeBackend = providers.gradleProperty("autojs.nodejs.backend")
             .orElse("embedded")
@@ -2664,6 +2849,7 @@ val embeddedNodePackagedDiagnosticReport = tasks.register("embeddedNodePackagedD
             rootDir = rootProject.projectDir,
             packagedApkProperty = packagedApkProperty,
             expectedAbiProperty = expectedAbiProperty,
+            releaseFlavorPolicy = releaseFlavorPolicy,
             runtimeBackend = runtimeBackend,
             scriptExecutionEnabled = scriptExecutionEnabled,
         )
@@ -2726,11 +2912,19 @@ val embeddedNodePackagedSmokeHostVerify = tasks.register(embeddedNodePackagedSmo
         val expectedAbiProperty = providers.gradleProperty("autojs.embeddedNode.expectedAbis")
             .orElse("arm64-v8a")
             .get()
+        val releaseFlavorPolicy = embeddedNodePackagingReleaseFlavorPolicy(
+            rawFlavor = providers.gradleProperty(embeddedNodePackagingReleaseFlavorProperty)
+                .orElse(embeddedNodePackagingDefaultReleaseFlavor)
+                .get(),
+            rawReleaseAbis = providers.gradleProperty(embeddedNodePackagingReleaseAbisProperty).orNull,
+            explicitExpectedAbis = embeddedNodePackagingCsvList(expectedAbiProperty),
+        )
 
         val successVerification = embeddedNodePackagingVerifyPackagedApkOutput(
             rootDir = rootProject.projectDir,
             packagedApkProperty = successApk.absolutePath,
             expectedAbiProperty = expectedAbiProperty,
+            releaseFlavorPolicy = releaseFlavorPolicy,
             runtimeBackend = runtimeBackend,
             scriptExecutionEnabled = scriptExecutionEnabled,
         )
@@ -2738,6 +2932,7 @@ val embeddedNodePackagedSmokeHostVerify = tasks.register(embeddedNodePackagedSmo
             rootDir = rootProject.projectDir,
             packagedApkProperty = diagnosticsApk.absolutePath,
             expectedAbiProperty = expectedAbiProperty,
+            releaseFlavorPolicy = releaseFlavorPolicy,
             runtimeBackend = runtimeBackend,
             scriptExecutionEnabled = scriptExecutionEnabled,
         )
@@ -2760,6 +2955,7 @@ val embeddedNodePackagedSmokeHostVerify = tasks.register(embeddedNodePackagedSmo
 
             appendLine("Inputs:")
             appendLine("  host smoke APK dir: ${hostDir.absolutePath}")
+            appendLine("  release flavor: ${releaseFlavorPolicy.flavor}")
             appendLine("  expected ABI property: $expectedAbiProperty")
             appendLine("  success APK: ${embeddedNodePackagingFormatFile(successApk)}")
             appendLine("  diagnostics APK: ${embeddedNodePackagingFormatFile(diagnosticsApk)}")

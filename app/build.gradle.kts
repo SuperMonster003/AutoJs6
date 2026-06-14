@@ -43,6 +43,54 @@ val nodeJsRuntimeBackend = providers.gradleProperty("autojs.nodejs.backend").orE
     .trim()
     .lowercase()
     .let { if (it in setOf("rhino", "native", "embedded", "auto")) it else "embedded" }
+val nodeJsReleaseFlavor = providers.gradleProperty("autojs.nodejs.releaseFlavor").orElse("nodeFull").get()
+    .trim()
+    .let { requested ->
+        when (requested.lowercase()) {
+            "nodefull", "node-full", "full" -> "nodeFull"
+            "nodemini", "node-mini", "mini" -> "nodeMini"
+            "rhinoonly", "rhino-only", "rhino" -> "rhinoOnly"
+            else -> throw GradleException(
+                "Unsupported Embedded Node release flavor '$requested'. " +
+                        "Use nodeFull, nodeMini, or rhinoOnly."
+            )
+        }
+    }
+val nodeJsReleaseSupportedAbis = listOf("arm64-v8a", "armeabi-v7a", "x86_64")
+val nodeJsReleaseKnownAbis = nodeJsReleaseSupportedAbis + "x86"
+val nodeJsReleaseRequestedAbis = providers.gradleProperty("autojs.nodejs.releaseAbis").orNull
+    ?.split(',')
+    ?.map { it.trim() }
+    ?.filter { it.isNotEmpty() }
+    .orEmpty()
+if (nodeJsReleaseFlavor == "nodeFull" && nodeJsReleaseRequestedAbis.isNotEmpty() &&
+    nodeJsReleaseRequestedAbis.toSet() != nodeJsReleaseSupportedAbis.toSet()
+) {
+    throw GradleException(
+        "nodeFull must package the full Embedded Node ABI set: ${nodeJsReleaseSupportedAbis.joinToString()}. " +
+                "Use -Pautojs.nodejs.releaseFlavor=nodeMini to publish a narrower ABI set."
+    )
+}
+val nodeJsReleaseExpectedAbis = when (nodeJsReleaseFlavor) {
+    "nodeFull" -> nodeJsReleaseSupportedAbis
+    "nodeMini" -> nodeJsReleaseRequestedAbis.ifEmpty { listOf("arm64-v8a") }
+    else -> emptyList()
+}
+val nodeJsReleaseUnsupportedAbis = nodeJsReleaseExpectedAbis.filter { it !in nodeJsReleaseSupportedAbis }
+if (nodeJsReleaseUnsupportedAbis.isNotEmpty()) {
+    throw GradleException(
+        "Unsupported Embedded Node release ABI(s) for $nodeJsReleaseFlavor: " +
+                nodeJsReleaseUnsupportedAbis.joinToString() +
+                ". Supported Embedded Node ABIs are ${nodeJsReleaseSupportedAbis.joinToString()}; x86 is unsupported."
+    )
+}
+if (file("src/main/jniLibs/x86/libnode.so").isFile) {
+    throw GradleException(
+        "Unsupported Embedded Node x86 runtime detected at app/src/main/jniLibs/x86/libnode.so. " +
+                "x86 must remain fail-fast until libnode.so, libautojs6-node.so, and device coverage are explicitly supported."
+    )
+}
+val effectiveNodeJsRuntimeBackend = if (nodeJsReleaseFlavor == "rhinoOnly") "rhino" else nodeJsRuntimeBackend
 val nodeJsEmbeddedProbeLevel = providers.gradleProperty("autojs.nodejs.embedded.probe.level").orElse("0").get()
     .trim()
     .toIntOrNull()
@@ -71,9 +119,26 @@ val nodeJsWorkerThreadsExperimentalEnabled = providers.gradleProperty("autojs.no
 val leakCanaryEnabled = providers.gradleProperty("autojs.leakcanary.enabled").orElse("false").get()
     .trim()
     .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
-val isNodeJsNativeRuntimeRequested = nodeJsRuntimeBackend in setOf("native", "embedded", "auto")
-val nodeJsNativeRuntimeAbis = listOf("arm64-v8a", "armeabi-v7a", "x86_64", "x86")
+val isNodeJsNativeRuntimeRequested = effectiveNodeJsRuntimeBackend in setOf("native", "embedded", "auto")
+val nodeJsAvailableNativeRuntimeAbis = nodeJsReleaseKnownAbis
     .filter { file("src/main/jniLibs/$it/libnode.so").isFile }
+val nodeJsNativeRuntimeAbis = if (isNodeJsNativeRuntimeRequested) {
+    nodeJsReleaseExpectedAbis.filter { it in nodeJsAvailableNativeRuntimeAbis }
+} else {
+    emptyList()
+}
+val nodeJsMissingReleaseAbis = if (isNodeJsNativeRuntimeRequested) {
+    nodeJsReleaseExpectedAbis.filterNot { it in nodeJsAvailableNativeRuntimeAbis }
+} else {
+    emptyList()
+}
+if (nodeJsMissingReleaseAbis.isNotEmpty()) {
+    throw GradleException(
+        "Embedded Node $nodeJsReleaseFlavor requires native runtime ABI(s) not present in app/src/main/jniLibs: " +
+                nodeJsMissingReleaseAbis.joinToString() +
+                ". Adjust -Pautojs.nodejs.releaseAbis or provide libnode.so for the selected ABI set."
+    )
+}
 
 utils.registerTemplateApkCopy(project)
 
@@ -526,7 +591,8 @@ android {
 
         buildConfigField("String", "VERSION_DATE", "\"${utils.getDateString("MMM d, yyyy", "GMT+08:00")}\"")
         buildConfigField("String", "VSCODE_EXT_REQUIRED_VERSION", "\"${versions.vscodeExtRequiredVersion}\"")
-        buildConfigField("String", "NODEJS_RUNTIME_BACKEND", "\"$nodeJsRuntimeBackend\"")
+        buildConfigField("String", "NODEJS_RUNTIME_BACKEND", "\"$effectiveNodeJsRuntimeBackend\"")
+        buildConfigField("String", "NODEJS_RELEASE_FLAVOR", "\"$nodeJsReleaseFlavor\"")
         buildConfigField("int", "NODEJS_EMBEDDED_PROBE_LEVEL", "$nodeJsEmbeddedProbeLevel")
         buildConfigField("long", "NODEJS_EMBEDDED_PROBE_TIMEOUT_MS", "${nodeJsEmbeddedProbeTimeoutMs}L")
         buildConfigField("boolean", "NODEJS_EMBEDDED_PROBE_LIFECYCLE_BUILD_ENABLED", "$nodeJsEmbeddedProbeLifecycleEnabled")
@@ -707,7 +773,10 @@ android {
             // @Reference to kkevsekk1/AutoX (https://github.com/kkevsekk1/AutoX) by SuperMonster003 on Nov 16, 2023.
             //  ! https://github.com/kkevsekk1/AutoX/blob/a6d482189291b460c3be60970b74c5321d26e457/inrt/build.gradle.kts#L91
             if (!isNodeJsNativeRuntimeRequested) {
-                excludes += "*"
+                val allNativeLibAbis = listOf("arm64-v8a", "armeabi-v7a", "x86_64", "x86", "armeabi")
+                excludes += allNativeLibAbis.flatMap { abi ->
+                    listOf("lib/$abi/**", "**/$abi/**")
+                }
             } else {
                 val unsupportedNodeJsAbis = listOf("arm64-v8a", "armeabi-v7a", "x86_64", "x86") - nodeJsNativeRuntimeAbis.toSet()
                 excludes += unsupportedNodeJsAbis.flatMap { abi ->

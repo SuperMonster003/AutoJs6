@@ -320,6 +320,14 @@ Packaged Node APKs require:
 - Node project metadata and module source entries within current budgets
 - packaged smoke coverage for the current user-facing `toast`, `app`, `clipboard`, and `device` bridge modules
 
+Release packaging profile:
+
+- `nodeFull`: default Embedded Node profile; requires `arm64-v8a`, `armeabi-v7a`, and `x86_64`
+- `nodeMini`: Embedded Node profile with an explicit smaller ABI set, defaulting to `arm64-v8a`
+- `rhinoOnly`: no Embedded Node runtime native libraries are packaged
+
+See [RELEASE_FLAVORS.md](design/RELEASE_FLAVORS.md) for Gradle properties and validation rules.
+
 Supported ABI policy:
 
 - `arm64-v8a`: primary release target

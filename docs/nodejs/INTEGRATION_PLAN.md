@@ -53,6 +53,8 @@ Supported values:
 Related properties:
 
 - `autojs.nodejs.embedded.script.enabled=true`
+- `autojs.nodejs.releaseFlavor=nodeFull`
+- optional `autojs.nodejs.releaseAbis` for `nodeMini`
 - `autojs.nodejs.embedded.probe.level=0`
 - `autojs.nodejs.embedded.probe.timeout.ms=3000`
 - `autojs.nodejs.embedded.probe.lifecycle=false`
@@ -116,6 +118,7 @@ Important: `.mjs` currently routes to the Node backend, but ESM execution is sti
 
 - Aggregate local release verification tasks.
 - Keep device instrumentation and packaged smoke as first-class gates.
+- Keep `nodeFull`, `nodeMini`, and `rhinoOnly` release packaging policy explicit and verified. See `docs/nodejs/design/RELEASE_FLAVORS.md`.
 - Keep optional startup/RSS benchmarks available for lifecycle and native-load changes without making noisy timing data a default release failure.
 - Keep extended memory leak stress available for lifecycle, fs, bridge, and image-handle changes.
 
