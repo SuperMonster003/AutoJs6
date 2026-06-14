@@ -11,7 +11,7 @@ import org.autojs.autojs.util.DisplayUtils.pxToSp
 import java.util.IdentityHashMap
 
 class NativeCodeEditorEngine(
-    private val codeEditor: CodeEditor,
+    val codeEditor: CodeEditor,
 ) : ScriptEditorEngine {
 
     private val cursorCallbacks = IdentityHashMap<EditorCursorChangeListener, CodeEditor.CursorChangeCallback>()

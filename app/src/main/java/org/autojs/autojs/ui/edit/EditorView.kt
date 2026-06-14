@@ -24,6 +24,7 @@ import android.util.SparseBooleanArray
 import android.view.Choreographer
 import android.view.View
 import android.widget.ImageView
+import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.view.GravityCompat
@@ -73,6 +74,10 @@ import org.autojs.autojs.ui.edit.completion.CodeCompletionBar.OnHintClickListene
 import org.autojs.autojs.ui.edit.debug.DebugBar
 import org.autojs.autojs.ui.edit.editor.CodeEditor
 import org.autojs.autojs.ui.edit.editor.CodeEditor.CheckedPatternSyntaxException
+import org.autojs.autojs.ui.edit.editor.engine.EditorEngineFactory
+import org.autojs.autojs.ui.edit.editor.engine.EditorEnginePreferences
+import org.autojs.autojs.ui.edit.editor.engine.NativeCodeEditorEngine
+import org.autojs.autojs.ui.edit.editor.engine.ScriptEditorEngine
 import org.autojs.autojs.ui.edit.editor.JavaScriptHighlighter
 import org.autojs.autojs.ui.edit.editor.LayoutHelper
 import org.autojs.autojs.ui.edit.keyboard.FunctionsKeyboardHelper
@@ -146,8 +151,13 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     private var binding: EditorViewBinding = EditorViewBinding.bind(inflate(context, R.layout.editor_view, this))
 
+    private val mEditorEngine: ScriptEditorEngine = EditorEngineFactory.create(context, EditorEnginePreferences.get())
+
+    private val mNativeEditorEngine: NativeCodeEditorEngine = mEditorEngine as? NativeCodeEditorEngine
+        ?: error("Only native editor engine is supported before ACE is wired into EditorView")
+
     @JvmField
-    val editor: CodeEditor = binding.editor
+    val editor: CodeEditor = mNativeEditorEngine.codeEditor
 
     @JvmField
     val debugBar: DebugBar = binding.debugBar
@@ -371,6 +381,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
     init {
+        attachEditorEngineView()
         setUpEditor()
         setUpInputMethodEnhancedBar()
         setUpFunctionsKeyboard()
@@ -384,6 +395,18 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe { theme: Theme? -> setTheme(theme) }
         initNormalToolbar()
+    }
+
+    private fun attachEditorEngineView() {
+        if (mEditorEngine.view.parent == null) {
+            binding.editorContainer.addView(
+                mEditorEngine.view,
+                FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.MATCH_PARENT,
+                    FrameLayout.LayoutParams.MATCH_PARENT,
+                ),
+            )
+        }
     }
 
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
