@@ -147,6 +147,14 @@ Current `node:module` safe subset focused instrumentation:
 
 This suite verifies the partial `module`/`node:module` surface, shadowing protection, filtered `builtinModules`, scoped `createRequire` loading for local and package dependencies, `child_process` denial through created require functions, and unsafe base or target rejection.
 
+Current `vm` design gate focused instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeVmDesignGateInstrumentationTest"
+```
+
+This suite verifies the registry/profile disabled state for `vm`, denial for `require("vm")`, `require("node:vm")`, `require.resolve("vm")`, `require.resolve("node:vm")`, and shadowing protection against `node_modules/vm`.
+
 Current `os` privacy focused instrumentation:
 
 ```powershell

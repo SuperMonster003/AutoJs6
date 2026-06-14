@@ -87,6 +87,8 @@ If a limited module exists for npm feature detection, operations that would cros
 
 `module` and `node:module` are limited compatibility builtins, not loader authority. The safe subset exposes `createRequire`, `isBuiltin`, `builtinModules`, and a no-op `syncBuiltinESMExports` only. `createRequire` must stay scoped to a file inside the current working directory and must keep using the AutoJs6 resolver and builtin policy. Loader internals such as `Module`, `_load`, `_resolveFilename`, `_compile`, `wrap`, `globalPaths`, `register`, and `registerHooks` remain absent.
 
+`vm` remains disabled because a second JavaScript context is not a security boundary in this embedder. A limited `vm.Script` subset is deferred until timeout, global leakage, bridge leakage, and process object exposure can be proven safe.
+
 ## ESM Policy
 
 ESM is experimental and disabled by default.

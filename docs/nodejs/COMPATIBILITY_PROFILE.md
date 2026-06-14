@@ -211,6 +211,7 @@ Design notes for the broadest limited builtins:
 - file URL helpers: `docs/nodejs/design/FILE_URL_POLICY.md`
 - source maps and stack traces: `docs/nodejs/design/SOURCE_MAPS.md`
 - `stream`: `docs/nodejs/design/STREAM.md`
+- `vm`: `docs/nodejs/design/VM.md`
 - `zlib`: `docs/nodejs/design/ZLIB.md`
 - scheduled/background tasks: `docs/nodejs/design/WORK_MANAGER.md`
 - ESM: `docs/nodejs/design/ESM.md`
@@ -248,6 +249,8 @@ Registry-disabled builtin module names:
 - `zlib/promises`
 
 Network-related limited builtins may exist for feature detection and stable denial errors. That is not permission to perform network I/O.
+
+`vm` is intentionally disabled, including local `node_modules/vm` shadowing, until a future design gate explicitly proves a safe subset. See `docs/nodejs/design/VM.md`.
 
 ## ESM Status
 
