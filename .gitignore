@@ -11,6 +11,7 @@
 
 .DS_Store
 .externalNativeBuild
+.cxx/
 output.json
 output-metadata.json
 desktop.ini
