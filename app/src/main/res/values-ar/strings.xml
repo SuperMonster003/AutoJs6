@@ -1434,4 +1434,14 @@
     <string name="text_xiaomi_background_popup_permission">النوافذ المنبثقة في الخلفية</string>
     <string name="warn_continue_operation_without_saving_settings">لم يتم حفظ الاعدادات. هل تريد المتابعة?</string>
     <string name="warn_exit_without_saving_settings">لم يتم حفظ الاعدادات. هل تريد الخروج?</string>
+    <string name="error_unknown_key_code">رمز مفتاح غير معروف: %1$s</string>
+    <string name="text_maximize">تكبير</string>
+    <string name="text_stop_simplified">ايقاف</string>
+    <string name="text_code_editor">محرر الشفرة</string>
+    <string name="entry_editor_log_button_behavior_bottom_sheet">لوحة السجلات السفلية</string>
+    <string name="entry_editor_log_button_behavior_fullscreen_page">صفحة السجلات بملء الشاشة</string>
+    <string name="text_editor_auto_show_log_bottom_sheet_on_run">اظهار لوحة السجلات السفلية تلقائيا بعد التشغيل</string>
+    <string name="text_editor_log_button_behavior">سلوك زر السجلات في المحرر</string>
+    <string name="summary_editor_auto_show_log_bottom_sheet_on_run">فتح لوحة السجلات السفلية تلقائيا بعد ان يقوم زر التشغيل في المحرر بتشغيل سكربت</string>
+    <string name="description_editor_log_button_behavior_preference">اختر كيفية فتح السجلات بواسطة زر السجلات في المحرر: لوحة السجلات السفلية او صفحة السجلات بملء الشاشة.</string>
 </resources>

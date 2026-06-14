@@ -559,7 +559,7 @@
     <string name="text_at_least_one_certificate_issuer_field_is_not_empty">Al menos uno de los campos [Nombre completo, Nombre de la organización, Unidad organizacional, Código de país, Estado o provincia, Ciudad o localidad, Calle] debe estar lleno</string>
     <string name="text_attribute">Atributo</string>
     <string name="text_authorize_plugin">Autorizar plugin</string>
-    <string name="text_authorize_plugin_content">Este es un plugin de terceros. Presta atencion al origen del plugin y a la seguridad de uso.\n\nPulsa el boton \"Autorizar\" para habilitar el plugin.</string>
+    <string name="text_authorize_plugin_content">Este es un plugin de terceros. Presta atención al origen del plugin y a la seguridad de uso.\n\nPulsa el boton \"Autorizar\" para habilitar el plugin.</string>
     <string name="text_auto_check_for_updates">Comprobación automática de actualizaciones</string>
     <string name="text_auto_check_for_updates_and_show_snackbar">Comprueba las actualizaciones automáticamente y muestra una barra de snacks en la página de inicio</string>
     <string name="text_auto_night_mode">Modo nocturno automático</string>
@@ -695,7 +695,7 @@
     <string name="text_country_code">Código de país (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">El código del país debe ser de dos letras mayúsculas</string>
     <string name="text_creating_unsigned_apk">Creando APK sin firmar</string>
-    <string name="text_current_page_configuration">Configuracion de la pagina actual</string>
+    <string name="text_current_page_configuration">Configuracion de la página actual</string>
     <string name="text_current_version">Versión actual</string>
     <string name="text_daily_task">Tarea diaria</string>
     <string name="text_date">Fecha</string>
@@ -1001,7 +1001,7 @@
     <string name="text_no_root_access">Sin acceso root</string>
     <string name="text_no_scripts_to_stop_running">No hay scripts que dejen de ejecutarse</string>
     <string name="text_no_search_results_for_keyword">No se encontraron resultados para:\n\n%1$s</string>
-    <string name="text_no_symbols_hint">La configuracion actual esta vacia.\nToca aqui para crear un simbolo.</string>
+    <string name="text_no_symbols_hint">La configuracion actual esta vacia.\nToca aquí para crear un simbolo.</string>
     <string name="text_no_version_history">Sin historial de versiones</string>
     <string name="text_not_granted">No se concede</string>
     <string name="text_not_installed">No instalado</string>
@@ -1432,4 +1432,14 @@
     <string name="text_xiaomi_background_popup_permission">Ventanas emergentes en segundo plano</string>
     <string name="warn_continue_operation_without_saving_settings">La configuracion no se ha guardado. ¿Seguro que quieres continuar?</string>
     <string name="warn_exit_without_saving_settings">La configuracion no se ha guardado. ¿Seguro que quieres salir?</string>
+    <string name="error_unknown_key_code">Codigo de tecla desconocido: %1$s</string>
+    <string name="text_maximize">Maximizar</string>
+    <string name="text_stop_simplified">Detener</string>
+    <string name="text_code_editor">Editor de codigo</string>
+    <string name="entry_editor_log_button_behavior_bottom_sheet">Panel inferior de registros</string>
+    <string name="entry_editor_log_button_behavior_fullscreen_page">Página de registros a pantalla completa</string>
+    <string name="text_editor_auto_show_log_bottom_sheet_on_run">Mostrar automaticamente el panel inferior de registros tras ejecutar</string>
+    <string name="text_editor_log_button_behavior">Comportamiento del boton de registros del editor</string>
+    <string name="summary_editor_auto_show_log_bottom_sheet_on_run">Abrir automaticamente el panel inferior de registros después de que el boton Ejecutar del editor inicie un script</string>
+    <string name="description_editor_log_button_behavior_preference">Elige como el boton de registros del editor abre los registros: panel inferior de registros o página de registros a pantalla completa.</string>
 </resources>

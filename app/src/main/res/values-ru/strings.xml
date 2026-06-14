@@ -1432,4 +1432,14 @@
     <string name="text_xiaomi_background_popup_permission">Всплывающие окна в фоне</string>
     <string name="warn_continue_operation_without_saving_settings">Настройки не сохранены. Продолжить?</string>
     <string name="warn_exit_without_saving_settings">Настройки не сохранены. Выйти?</string>
+    <string name="error_unknown_key_code">Неизвестный код клавиши: %1$s</string>
+    <string name="text_maximize">Развернуть</string>
+    <string name="text_stop_simplified">Стоп</string>
+    <string name="text_code_editor">Редактор кода</string>
+    <string name="entry_editor_log_button_behavior_bottom_sheet">Нижняя панель логов</string>
+    <string name="entry_editor_log_button_behavior_fullscreen_page">Полноэкранная страница логов</string>
+    <string name="text_editor_auto_show_log_bottom_sheet_on_run">Автоматически показывать нижнюю панель логов после запуска</string>
+    <string name="text_editor_log_button_behavior">Поведение кнопки логов редактора</string>
+    <string name="summary_editor_auto_show_log_bottom_sheet_on_run">Автоматически открывать нижнюю панель логов после запуска скрипта кнопкой Запуск в редакторе</string>
+    <string name="description_editor_log_button_behavior_preference">Выберите, как кнопка логов редактора открывает логи: нижняя панель логов или полноэкранная страница логов.</string>
 </resources>

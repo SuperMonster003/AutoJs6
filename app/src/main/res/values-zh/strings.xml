@@ -938,7 +938,6 @@
     <string name="text_loading_with_dots" tools:ignore="TypographyEllipsis">加载中...</string>
     <string name="text_locate_current_theme_color">定位当前主题色</string>
     <string name="text_log">日志</string>
-    <string name="text_show_log">显示日志</string>
     <string name="text_logging_in">登录中</string>
     <string name="text_login">登录</string>
     <string name="text_login_succeed">登录成功</string>
@@ -1429,4 +1428,14 @@
     <string name="text_xiaomi_background_popup_permission">后台弹出界面</string>
     <string name="warn_continue_operation_without_saving_settings">设置尚未保存, 确定要继续操作吗</string>
     <string name="warn_exit_without_saving_settings">设置尚未保存, 确定要退出吗</string>
+    <string name="error_unknown_key_code">未知的键码: %1$s</string>
+    <string name="text_maximize">最大化</string>
+    <string name="text_stop_simplified">停止</string>
+    <string name="text_code_editor">代码编辑器</string>
+    <string name="entry_editor_log_button_behavior_bottom_sheet">底部日志面板</string>
+    <string name="entry_editor_log_button_behavior_fullscreen_page">全屏日志页面</string>
+    <string name="text_editor_auto_show_log_bottom_sheet_on_run">运行后自动显示底部日志面板</string>
+    <string name="text_editor_log_button_behavior">编辑器日志按钮行为</string>
+    <string name="summary_editor_auto_show_log_bottom_sheet_on_run">编辑器运行按钮启动脚本后自动打开底部日志面板</string>
+    <string name="description_editor_log_button_behavior_preference">选择编辑器日志按钮打开日志的方式: 底部日志面板或全屏日志页面.</string>
 </resources>

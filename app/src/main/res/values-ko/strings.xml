@@ -1434,4 +1434,14 @@
     <string name="text_xiaomi_background_popup_permission">백그라운드 팝업</string>
     <string name="warn_continue_operation_without_saving_settings">설정이 저장되지 않았습니다. 계속할까요?</string>
     <string name="warn_exit_without_saving_settings">설정이 저장되지 않았습니다. 종료할까요?</string>
+    <string name="error_unknown_key_code">알 수 없는 키 코드: %1$s</string>
+    <string name="text_maximize">최대화</string>
+    <string name="text_stop_simplified">중지</string>
+    <string name="text_code_editor">코드 편집기</string>
+    <string name="entry_editor_log_button_behavior_bottom_sheet">하단 로그 패널</string>
+    <string name="entry_editor_log_button_behavior_fullscreen_page">전체 화면 로그 페이지</string>
+    <string name="text_editor_auto_show_log_bottom_sheet_on_run">실행 후 하단 로그 패널 자동 표시</string>
+    <string name="text_editor_log_button_behavior">편집기 로그 버튼 동작</string>
+    <string name="summary_editor_auto_show_log_bottom_sheet_on_run">편집기의 실행 버튼으로 스크립트를 시작한 뒤 하단 로그 패널을 자동으로 엽니다</string>
+    <string name="description_editor_log_button_behavior_preference">편집기 로그 버튼이 로그를 여는 방식을 선택하세요: 하단 로그 패널 또는 전체 화면 로그 페이지.</string>
 </resources>

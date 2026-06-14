@@ -32,6 +32,7 @@
     <string name="default_key_app_language" translatable="false">@string/key_app_language_auto</string>
     <string name="default_key_documentation_source" translatable="false">@string/key_documentation_source_local</string>
     <string name="default_key_editor_engine" translatable="false">@string/key_editor_engine_native</string>
+    <string name="default_key_editor_log_button_behavior" translatable="false">@string/key_editor_log_button_behavior_bottom_sheet</string>
     <string name="default_key_editor_pinch_to_zoom_strategy" translatable="false">@string/key_editor_pinch_to_zoom_change_text_size</string>
     <string name="default_key_file_extensions" translatable="false">@string/key_file_extensions_show_all_but_executable</string>
     <string name="default_key_hidden_files" translatable="false">@string/key_hidden_files_not_show</string>
@@ -103,6 +104,10 @@
     <string name="key_documentation_source_online" translatable="false">key_$_documentation_source_online</string>
     <string name="key_drafts_max_days" translatable="false">key_$_drafts_max_days</string>
     <string name="key_drafts_max_total_bytes" translatable="false">key_$_drafts_max_total_bytes</string>
+    <string name="key_editor_auto_show_log_bottom_sheet_on_run" translatable="false">key_$_editor_auto_show_log_bottom_sheet_on_run</string>
+    <string name="key_editor_log_button_behavior" translatable="false">key_$_editor_log_button_behavior</string>
+    <string name="key_editor_log_button_behavior_bottom_sheet" translatable="false">key_$_editor_log_button_behavior_bottom_sheet</string>
+    <string name="key_editor_log_button_behavior_fullscreen_page" translatable="false">key_$_editor_log_button_behavior_fullscreen_page</string>
     <string name="key_editor_pinch_to_zoom_change_text_size" translatable="false">key_$_editor_pinch_to_zoom_change_text_size</string>
     <string name="key_editor_pinch_to_zoom_disable" translatable="false">key_$_editor_pinch_to_zoom_disable</string>
     <string name="key_editor_pinch_to_zoom_scale_view" translatable="false">key_$_editor_pinch_to_zoom_scale_view</string>
@@ -1234,7 +1239,6 @@
     <string name="text_loading_with_dots" tools:ignore="TypographyEllipsis">Loading...</string>
     <string name="text_locate_current_theme_color">Locate current theme color</string>
     <string name="text_log">Log</string>
-    <string name="text_show_log">Show log</string>
     <string name="text_logging_in">Logging in</string>
     <string name="text_login">Login</string>
     <string name="text_login_succeed">Login succeeded</string>
@@ -1725,4 +1729,14 @@
     <string name="text_xiaomi_background_popup_permission">Display pop-up windows while running in the background</string>
     <string name="warn_continue_operation_without_saving_settings">The settings has not been saved, are you sure to continue the operation?</string>
     <string name="warn_exit_without_saving_settings">The settings has not been saved, are you sure to exit?</string>
+    <string name="error_unknown_key_code">Unknown key code: %1$s</string>
+    <string name="text_maximize">Maximize</string>
+    <string name="text_stop_simplified">Stop</string>
+    <string name="text_code_editor">Code editor</string>
+    <string name="entry_editor_log_button_behavior_bottom_sheet">Bottom log panel</string>
+    <string name="entry_editor_log_button_behavior_fullscreen_page">Fullscreen log page</string>
+    <string name="text_editor_auto_show_log_bottom_sheet_on_run">Auto show bottom log panel after running</string>
+    <string name="text_editor_log_button_behavior">Editor log button behavior</string>
+    <string name="summary_editor_auto_show_log_bottom_sheet_on_run">Automatically open the bottom log panel after the editor Run button starts a script</string>
+    <string name="description_editor_log_button_behavior_preference">Choose how the editor log button opens logs: bottom log panel or fullscreen log page.</string>
 </resources>
