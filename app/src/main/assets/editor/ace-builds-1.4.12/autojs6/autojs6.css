@@ -1,0 +1,34 @@
+html,
+body,
+#editor {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+body {
+    background: #f7f8fa;
+}
+
+#editor {
+    font-family: Consolas, "Roboto Mono", Monaco, monospace;
+    line-height: 1.45;
+}
+
+.ace_gutter-cell.ace_breakpoint {
+    background:
+        radial-gradient(circle at 7px center, #d32f2f 0, #d32f2f 5px, transparent 6px)
+        no-repeat;
+}
+
+.autojs6_debug_line {
+    position: absolute;
+    z-index: 5;
+    background: rgba(255, 214, 0, 0.28);
+}
+
+.ace_mobile-menu {
+    display: none !important;
+}

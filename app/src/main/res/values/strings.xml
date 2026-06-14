@@ -15,6 +15,14 @@
 
     <string name="app_name" translatable="false">AutoJs6</string>
     <string name="app_name_qq" translatable="false">QQ</string>
+    <string name="text_ace_editor_debug">ACE editor debug</string>
+    <string name="text_ace_editor_debug_description">Open an isolated ACE WebView editor test page</string>
+    <string name="text_ace_editor_debug_status">%1$s | lines %2$d | cursor %3$d:%4$d | breakpoints %5$d | dirty %6$s</string>
+    <string name="text_ace_editor_debug_status_loading">Loading ACE editor...</string>
+    <string name="text_ace_editor_debug_text_length">ACE text length: %1$d</string>
+    <string name="text_ace_get_text">Get text</string>
+    <string name="text_ace_insert">Insert</string>
+    <string name="text_ace_set_sample">Set sample</string>
     <string name="color_library_identifier_android_colors" translatable="false">Android</string>
     <string name="color_library_identifier_css_colors" translatable="false">CSS</string>
     <string name="color_library_identifier_web_colors" translatable="false">WEB</string>
