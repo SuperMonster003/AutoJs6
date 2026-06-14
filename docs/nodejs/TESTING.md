@@ -245,6 +245,14 @@ adb shell am instrument -w -r -e class org.autojs.autojs.apkbuilder.EmbeddedNode
 
 With the default flags off, the packaged ESM diagnostics smoke continues to assert `ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED`, and the packaged dynamic import diagnostics smoke continues to assert `ERR_AUTOJS6_EMBEDDED_NODE_DYNAMIC_IMPORT_UNSUPPORTED`. The experimental packaged smoke intentionally requires a refreshed inrt template override because release/default templates must keep ESM and dynamic import disabled. The current packaged ESM smoke is a single-file `.mjs` entry check; encrypted packaged ESM and dynamic import module graphs are still design-gated follow-ups.
 
+Current source map stack trace focused instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeSourceMapStackTraceInstrumentationTest"
+```
+
+This suite verifies inline `sourceMappingURL=data:` stack mapping, external `.map` stack mapping inside `workingDirectory`, and scoped denial diagnostics for external source maps outside `workingDirectory`.
+
 Current Embedded Node performance benchmark:
 
 ```powershell

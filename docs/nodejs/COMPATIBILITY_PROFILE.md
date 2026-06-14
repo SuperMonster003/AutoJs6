@@ -209,6 +209,7 @@ Design notes for the broadest limited builtins:
 
 - `fs/promises`: `docs/nodejs/design/FS_PROMISES.md`
 - file URL helpers: `docs/nodejs/design/FILE_URL_POLICY.md`
+- source maps and stack traces: `docs/nodejs/design/SOURCE_MAPS.md`
 - `stream`: `docs/nodejs/design/STREAM.md`
 - `zlib`: `docs/nodejs/design/ZLIB.md`
 - scheduled/background tasks: `docs/nodejs/design/WORK_MANAGER.md`
@@ -301,6 +302,12 @@ With both experimental flags enabled, dynamic `import()` is limited to local rel
 Runtime diagnostics include `esmEnabled`, `esmEntry`, `esmModuleGraphRoot`, `esmModuleGraphSize`, `esmModuleGraphModules`, and `dynamicImportEnabled` in the embedded script result envelope.
 
 See `docs/nodejs/design/ESM.md` for package `type`, CJS/ESM interop, top-level await, dynamic import, `import.meta.url`, package condition, moduleSources, encrypted graph, packaged APK, and stack trace decisions.
+
+## Source Map Status
+
+Embedded Node result diagnostics apply source map v1 mappings to uncaught script `errorStack` output when a script or module contains a `sourceMappingURL` comment. Supported map sources are inline `data:` URLs and external `.map` files inside the scoped working directory or injected moduleSources. External map paths use the same scoped filesystem boundary: no NUL, no path escape, no sensitive path, no symlink/realpath escape.
+
+The mapper supports version 3 `sources` and `mappings` for line, column, and source-name remapping. It does not enable loader hooks, inspector, coverage, source-map consuming APIs, or automatic access to files outside the working directory.
 
 ## Network Status
 

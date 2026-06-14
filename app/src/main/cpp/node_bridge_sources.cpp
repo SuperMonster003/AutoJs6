@@ -5544,6 +5544,16 @@ std::string buildEmbeddedScriptExecutionSource(
     deniedCount: 0,
     lastDeniedReason: ""
   };
+  const __autojs6_source_map_diagnostics = {
+    enabled: true,
+    loadedCount: 0,
+    mappedFrameCount: 0,
+    deniedCount: 0,
+    lastSource: "",
+    lastMap: "",
+    lastError: ""
+  };
+  const __autojs6_source_map_cache = Object.create(null);
   let __autojs6_runtime_module_accounting = null;
   const __autojs6_native_function = Function;
   const __autojs6_native_async_function = Object.getPrototypeOf(async function() {}).constructor;
@@ -12540,6 +12550,324 @@ std::string buildEmbeddedScriptExecutionSource(
       }
     }
     return resolved;
+  }
+  function __autojs6_source_map_record_denial(sourceName, mapUrl, error) {
+    __autojs6_source_map_diagnostics.deniedCount += 1;
+    __autojs6_source_map_diagnostics.lastSource = String(sourceName || "");
+    __autojs6_source_map_diagnostics.lastMap = String(mapUrl || "");
+    __autojs6_source_map_diagnostics.lastError = error && error.message ? String(error.message) : String(error || "");
+    return null;
+  }
+  function __autojs6_source_map_url(source) {
+    const text = source === undefined || source === null ? "" : String(source);
+    const pattern = /(?:\/\/[#@]\s*sourceMappingURL=([^\r\n]+)|\/\*[#@]\s*sourceMappingURL=([^*]+)\*\/)/g;
+    let match;
+    let last = "";
+    while ((match = pattern.exec(text)) !== null) {
+      last = String(match[1] || match[2] || "").trim();
+    }
+    return last;
+  }
+  function __autojs6_source_map_embedded_source(resolved) {
+    if (__autojs6_has_own(__autojs6_module_sources, resolved)) {
+      const record = __autojs6_module_sources[resolved];
+      return record && record.source !== undefined && record.source !== null ? String(record.source) : "";
+    }
+    if (__autojs6_has_own(__autojs6_runtime_module_embedded_sources, resolved)) {
+      const record = __autojs6_runtime_module_embedded_sources[resolved];
+      return record && record.source !== undefined && record.source !== null ? String(record.source) : "";
+    }
+    const fs = __autojs6_fs_module();
+    if (!fs || typeof fs.realpathSync !== "function") {
+      return null;
+    }
+    try {
+      const real = fs.realpathSync(resolved);
+      if (real && real !== resolved) {
+        if (__autojs6_has_own(__autojs6_module_sources, real)) {
+          const record = __autojs6_module_sources[real];
+          return record && record.source !== undefined && record.source !== null ? String(record.source) : "";
+        }
+        if (__autojs6_has_own(__autojs6_runtime_module_embedded_sources, real)) {
+          const record = __autojs6_runtime_module_embedded_sources[real];
+          return record && record.source !== undefined && record.source !== null ? String(record.source) : "";
+        }
+      }
+    } catch (_) {}
+    return null;
+  }
+  function __autojs6_source_map_external_source(sourceName, mapUrl) {
+    const path = __autojs6_path_module();
+    const fs = __autojs6_fs_module();
+    if (!path || !fs || typeof path.resolve !== "function" || typeof path.isAbsolute !== "function") {
+      throw __autojs6_error("Embedded Node source map support needs allowlisted path and fs modules.", "EPERM");
+    }
+    const url = String(mapUrl || "").trim();
+    if (!url || url.indexOf("\u0000") >= 0) {
+      throw __autojs6_error("Embedded Node source map rejects empty or NUL sourceMappingURL: " + url, "ERR_INVALID_ARG_TYPE");
+    }
+    if (url.indexOf("//") === 0 || (__autojs6_protocol_specifier(url) && url.indexOf("data:") !== 0)) {
+      throw __autojs6_error("Embedded Node source map rejects protocol sourceMappingURL: " + url, "EPERM");
+    }
+    if (url.indexOf("?") >= 0 || url.indexOf("#") >= 0) {
+      throw __autojs6_error("Embedded Node source map v1 rejects query or hash sourceMappingURL: " + url, "ERR_INVALID_ARG_TYPE");
+    }
+    const baseDir = __autojs6_module_dirname(sourceName);
+    const resolved = path.isAbsolute(url) ? path.resolve(url) : path.resolve(baseDir, url);
+    const root = __autojs6_resolved_sandbox_root(path);
+    if (!__autojs6_path_within_root(resolved, root) || __autojs6_sensitive_path(resolved)) {
+      throw __autojs6_scoped_fs_policy_error(
+        "Embedded Node source map path escapes working directory: " + url + " (sandboxRoot=" + root + ")",
+        url,
+        "sourceMap",
+        "EPERM",
+        "path escapes working directory"
+      );
+    }
+    const embedded = __autojs6_source_map_embedded_source(resolved);
+    if (embedded !== null) {
+      return { path: resolved, source: embedded };
+    }
+    const readable = __autojs6_validate_fs_path(resolved, "sourceMap", {
+      allowAbsolute: true,
+      mustExist: true
+    });
+    return {
+      path: readable,
+      source: String(fs.readFileSync(readable, "utf8"))
+    };
+  }
+  function __autojs6_source_map_inline_source(sourceName, mapUrl) {
+    const url = String(mapUrl || "");
+    const comma = url.indexOf(",");
+    if (comma < 0) {
+      throw __autojs6_error("Embedded Node source map rejects malformed data sourceMappingURL.", "ERR_INVALID_ARG_TYPE");
+    }
+    const header = url.slice(0, comma).toLowerCase();
+    const payload = url.slice(comma + 1);
+    if (header.indexOf("base64") >= 0) {
+      const BufferCtor = __autojs6_buffer_constructor();
+      if (!BufferCtor || typeof BufferCtor.from !== "function") {
+        throw __autojs6_error("Embedded Node source map data URL needs Buffer support.", "EPERM");
+      }
+      return {
+        path: sourceName + "#inline-source-map",
+        source: BufferCtor.from(payload, "base64").toString("utf8")
+      };
+    }
+    return {
+      path: sourceName + "#inline-source-map",
+      source: decodeURIComponent(payload)
+    };
+  }
+  function __autojs6_source_map_json_source(sourceName, mapUrl) {
+    return String(mapUrl || "").indexOf("data:") === 0
+      ? __autojs6_source_map_inline_source(sourceName, mapUrl)
+      : __autojs6_source_map_external_source(sourceName, mapUrl);
+  }
+  const __autojs6_source_map_base64_digits = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+  function __autojs6_source_map_decode_vlq(segment, state) {
+    let result = 0;
+    let shift = 0;
+    let continuation = false;
+    do {
+      if (state.index >= segment.length) {
+        throw __autojs6_error("Embedded Node source map has a truncated VLQ segment.", "ERR_INVALID_ARG_TYPE");
+      }
+      const digit = __autojs6_source_map_base64_digits.indexOf(segment.charAt(state.index++));
+      if (digit < 0) {
+        throw __autojs6_error("Embedded Node source map has an invalid VLQ digit.", "ERR_INVALID_ARG_TYPE");
+      }
+      continuation = (digit & 32) !== 0;
+      result += (digit & 31) << shift;
+      shift += 5;
+    } while (continuation);
+    const negative = (result & 1) === 1;
+    result = result >> 1;
+    return negative ? -result : result;
+  }
+  function __autojs6_source_map_parse_mappings(map) {
+    const mappings = String(map.mappings || "");
+    const lines = [];
+    let previousSource = 0;
+    let previousOriginalLine = 0;
+    let previousOriginalColumn = 0;
+    let previousName = 0;
+    const generatedLines = mappings.split(";");
+    for (let lineIndex = 0; lineIndex < generatedLines.length; lineIndex += 1) {
+      const line = generatedLines[lineIndex];
+      const segments = line ? line.split(",") : [];
+      const parsedSegments = [];
+      let generatedColumn = 0;
+      for (const segment of segments) {
+        if (!segment) continue;
+        const state = { index: 0 };
+        generatedColumn += __autojs6_source_map_decode_vlq(segment, state);
+        if (state.index >= segment.length) {
+          continue;
+        }
+        previousSource += __autojs6_source_map_decode_vlq(segment, state);
+        previousOriginalLine += __autojs6_source_map_decode_vlq(segment, state);
+        previousOriginalColumn += __autojs6_source_map_decode_vlq(segment, state);
+        if (state.index < segment.length) {
+          previousName += __autojs6_source_map_decode_vlq(segment, state);
+        }
+        parsedSegments.push({
+          generatedColumn,
+          source: previousSource,
+          originalLine: previousOriginalLine,
+          originalColumn: previousOriginalColumn,
+          name: previousName
+        });
+      }
+      lines.push(parsedSegments);
+    }
+    return lines;
+  }
+  function __autojs6_source_map_parse(sourceName, mapPath, mapText) {
+    const map = JSON.parse(String(mapText || ""));
+    if (!map || Number(map.version) !== 3 || !Array.isArray(map.sources) || typeof map.mappings !== "string") {
+      throw __autojs6_error("Embedded Node source map v1 requires version 3 with sources and mappings.", "ERR_INVALID_ARG_TYPE");
+    }
+    return {
+      sourceName: String(sourceName || ""),
+      mapPath: String(mapPath || ""),
+      sourceRoot: map.sourceRoot === undefined || map.sourceRoot === null ? "" : String(map.sourceRoot),
+      sources: map.sources.map((source) => String(source)),
+      lines: __autojs6_source_map_parse_mappings(map)
+    };
+  }
+  function __autojs6_source_map_source_record(sourceName) {
+    const name = String(sourceName || "");
+    if (name === String(__autojs6_source_name || "")) {
+      return {
+        source: String(__autojs6_source || ""),
+        sourceURL: name,
+        lineOffset: 1
+      };
+    }
+    if (__autojs6_has_own(__autojs6_module_sources, name)) {
+      const record = __autojs6_module_sources[name];
+      return {
+        source: record && record.source !== undefined && record.source !== null ? String(record.source) : "",
+        sourceURL: record && record.sourceURL ? String(record.sourceURL) : name,
+        lineOffset: 1
+      };
+    }
+    if (__autojs6_has_own(__autojs6_runtime_module_records, name)) {
+      const record = __autojs6_runtime_module_records[name];
+      return {
+        source: record && record.source !== undefined && record.source !== null ? String(record.source) : "",
+        sourceURL: record && record.sourceURL ? String(record.sourceURL) : name,
+        lineOffset: 1
+      };
+    }
+    const sourceCollections = [__autojs6_module_sources, __autojs6_runtime_module_records, __autojs6_runtime_module_embedded_sources];
+    for (const collection of sourceCollections) {
+      for (const key of Object.keys(collection)) {
+        const record = collection[key];
+        if (record && record.sourceURL && String(record.sourceURL) === name) {
+          return {
+            source: record.source !== undefined && record.source !== null ? String(record.source) : "",
+            sourceURL: name,
+            lineOffset: 1
+          };
+        }
+      }
+    }
+    return null;
+  }
+  function __autojs6_source_map_for_source(sourceName) {
+    const sourceRecord = __autojs6_source_map_source_record(sourceName);
+    const cacheKey = String(sourceName || "");
+    if (__autojs6_has_own(__autojs6_source_map_cache, cacheKey)) {
+      return __autojs6_source_map_cache[cacheKey];
+    }
+    if (!sourceRecord) {
+      __autojs6_source_map_cache[cacheKey] = null;
+      return null;
+    }
+    const mapUrl = __autojs6_source_map_url(sourceRecord.source);
+    if (!mapUrl) {
+      __autojs6_source_map_cache[cacheKey] = null;
+      return null;
+    }
+    try {
+      const mapSource = __autojs6_source_map_json_source(sourceRecord.sourceURL || sourceName, mapUrl);
+      const parsed = __autojs6_source_map_parse(sourceRecord.sourceURL || sourceName, mapSource.path, mapSource.source);
+      parsed.lineOffset = sourceRecord.lineOffset || 0;
+      __autojs6_source_map_cache[cacheKey] = parsed;
+      __autojs6_source_map_diagnostics.loadedCount += 1;
+      __autojs6_source_map_diagnostics.lastSource = String(sourceName || "");
+      __autojs6_source_map_diagnostics.lastMap = String(mapSource.path || mapUrl);
+      __autojs6_source_map_diagnostics.lastError = "";
+      return parsed;
+    } catch (error) {
+      __autojs6_source_map_cache[cacheKey] = null;
+      return __autojs6_source_map_record_denial(sourceName, mapUrl, error);
+    }
+  }
+  function __autojs6_source_map_original_source(parsed, index) {
+    const source = parsed && parsed.sources ? parsed.sources[index] : "";
+    if (!source) return "";
+    const sourceRoot = parsed.sourceRoot || "";
+    if (!sourceRoot) return source;
+    if (__autojs6_protocol_specifier(source) || source.charAt(0) === "/") return source;
+    return sourceRoot.replace(/\/+$/, "") + "/" + source.replace(/^\/+/, "");
+  }
+  function __autojs6_source_map_lookup(parsed, generatedLine, generatedColumn) {
+    if (!parsed || generatedLine < 1) return null;
+    const line = parsed.lines[generatedLine - 1];
+    if (!line || !line.length) return null;
+    let selected = null;
+    for (const segment of line) {
+      if (segment.generatedColumn <= generatedColumn) {
+        selected = segment;
+      } else {
+        break;
+      }
+    }
+    if (!selected) return null;
+    const source = __autojs6_source_map_original_source(parsed, selected.source);
+    if (!source) return null;
+    const columnDelta = Math.max(0, generatedColumn - selected.generatedColumn);
+    return {
+      source,
+      line: selected.originalLine + 1,
+      column: selected.originalColumn + columnDelta + 1
+    };
+  }
+  function __autojs6_source_map_stack_location(fileName, lineNumber, columnNumber) {
+    const parsed = __autojs6_source_map_for_source(fileName);
+    if (!parsed) return null;
+    const line = Math.max(1, Number(lineNumber || 0) - (parsed.lineOffset || 0));
+    const column = Math.max(0, Number(columnNumber || 1) - 1);
+    return __autojs6_source_map_lookup(parsed, line, column);
+  }
+  function __autojs6_apply_source_maps_to_stack(stack) {
+    const text = stack === undefined || stack === null ? "" : String(stack);
+    if (!text) return "";
+    const lines = text.split("\n");
+    let mappedCount = 0;
+    const mappedLines = lines.map(function(line) {
+      let match = line.match(/^(\s*at\s+.*\()(.+):(\d+):(\d+)(\).*)$/);
+      if (!match) {
+        match = line.match(/^(\s*at\s+)(.+):(\d+):(\d+)()$/);
+      }
+      if (!match) return line;
+      const mapped = __autojs6_source_map_stack_location(match[2], Number(match[3]), Number(match[4]));
+      if (!mapped) return line;
+      mappedCount += 1;
+      return match[1] + mapped.source + ":" + mapped.line + ":" + mapped.column + match[5];
+    });
+    if (mappedCount > 0) {
+      __autojs6_source_map_diagnostics.mappedFrameCount += mappedCount;
+    }
+    return mappedLines.join("\n");
+  }
+  function __autojs6_error_stack(error) {
+    const stack = error && error.stack ? String(error.stack) : "";
+    return stack ? __autojs6_apply_source_maps_to_stack(stack) : "";
   }
   let __autojs6_pending_scoped_fs_callbacks = 0;
   let __autojs6_pending_crypto_callbacks = 0;
@@ -24967,6 +25295,13 @@ std::string buildEmbeddedScriptExecutionSource(
     fields.esmDeniedCount = __autojs6_esm_diagnostics.deniedCount;
     fields.esmLastDeniedReason = __autojs6_esm_diagnostics.lastDeniedReason;
     fields.dynamicImportEnabled = __autojs6_dynamic_import_experimental_enabled;
+    fields.sourceMapEnabled = __autojs6_source_map_diagnostics.enabled;
+    fields.sourceMapLoadedCount = __autojs6_source_map_diagnostics.loadedCount;
+    fields.sourceMapMappedFrameCount = __autojs6_source_map_diagnostics.mappedFrameCount;
+    fields.sourceMapDeniedCount = __autojs6_source_map_diagnostics.deniedCount;
+    fields.sourceMapLastSource = __autojs6_source_map_diagnostics.lastSource;
+    fields.sourceMapLastMap = __autojs6_source_map_diagnostics.lastMap;
+    fields.sourceMapLastError = __autojs6_source_map_diagnostics.lastError;
     return fields;
   }
   function __autojs6_finish_success(value) {
@@ -24997,7 +25332,7 @@ std::string buildEmbeddedScriptExecutionSource(
       resultText: "",
       errorName: error && error.name ? String(error.name) : "Error",
       errorMessage: error && error.message ? String(error.message) : __autojs6_result_text(error),
-      errorStack: error && error.stack ? String(error.stack) : "",
+      errorStack: __autojs6_error_stack(error),
       errorCode: error && error.code ? String(error.code) : ""
     }));
   }

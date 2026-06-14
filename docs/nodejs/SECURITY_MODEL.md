@@ -56,6 +56,8 @@ Required checks:
 
 The policy applies equally to callback, sync, and promise filesystem APIs.
 
+Source maps are diagnostics only and must not weaken scoped filesystem policy. Inline `sourceMappingURL=data:` maps are self-contained. External source maps must resolve inside the current working directory or come from already injected moduleSources; path escapes, NUL bytes, sensitive paths, and symlink/realpath escapes are denied and recorded as source-map diagnostics without replacing the original script error.
+
 ## Builtin Policy
 
 Builtins fall into four categories:
