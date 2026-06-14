@@ -1,0 +1,550 @@
+# AutoJs6 Node.js Compatibility Profile
+
+This profile describes the current Safe Node surface. It is intentionally smaller than desktop Node.js and should be updated whenever runtime behavior changes.
+
+## Runtime Identity
+
+- Profile name: `AutoJs6 Safe Node Profile`
+- Embedded Node baseline: Node.js `v24.5.0` artifacts are present in the current native tree.
+- Execution model: embedded `libnode.so` plus AutoJs6 bootstrap and CommonJS loader.
+- Process model: script service runs in `:nodejs_embedded`.
+- Project model: file entry, Node project entry, and packaged APK entry are all supported paths.
+- Kotlin capability registry: `NodeRuntimeCapabilities`
+- JavaScript profile module: `require("autojs6:profile")`
+
+## Supported Entry Points
+
+- `"nodejs";` directive
+- `"node";` directive
+- `.node.js`
+- `.cjs`
+- `.mjs` as a Node route only
+- `project.json` with `type: "node"` or `projectType: "node"`
+- package bin launch paths resolved from Node project metadata
+- encrypted script headers carrying the Node execution flag
+
+## Supported CommonJS Features
+
+- `require()`
+- `module.require()`
+- `require("autojs6:profile")` for a read-only AutoJs6 profile descriptor
+- `module.exports` and `exports`
+- JSON modules
+- local `.js`, `.cjs`, and `.json` modules
+- `node_modules` traversal
+- scoped packages
+- package `main`
+- package `exports`
+- package `imports`
+- package self-reference
+- package condition order currently oriented around CommonJS: `require`, `node`, `default`
+- module source budget checks
+- optional resolver trace through `AUTOJS6_NODE_RESOLVE_TRACE=1`, written to stderr and disabled by default
+
+Unsupported or rejected module source forms:
+
+- native `.node` addon entries
+- static ESM import execution
+- dynamic import execution
+- package export/import targets that escape the package root
+- unsupported package export/import extensions
+
+The reusable compatibility corpus lives under `app/src/androidTest/assets/node_compat_corpus/` and is executed by
+`NodeCompatCorpusInstrumentationTest`. It covers pure JavaScript CommonJS package patterns that should remain stable across
+future builtin and bridge work.
+
+## Filesystem Profile
+
+Supported:
+
+- scoped `fs`
+- scoped `fs/promises` limited surface; see `docs/nodejs/design/FS_PROMISES.md`
+- sync and callback file APIs covered by the embedded test corpus
+- path canonicalization checks
+- scoped `url.fileURLToPath()` and `url.pathToFileURL()` wrappers; see `docs/nodejs/design/FILE_URL_POLICY.md`
+- module source loading from the working directory and project root
+
+Policy:
+
+- no absolute path access from user scripts
+- no NUL byte paths
+- no `..` escape
+- no `/proc`, `/sys`, or `/dev` access
+- no realpath escape
+- no symlink escape
+- package exports/imports targets must remain inside their package root
+
+## Supported and Limited Builtins
+
+The bootstrap currently distinguishes fully allowed direct builtins from limited builtins. Both bare names and `node:` names should be treated consistently unless tests document a narrower behavior.
+
+Direct allowlist currently includes:
+
+- `path`
+- `path/posix`
+- `path/win32`
+- `util`
+- `util/types`
+- `events`
+- `async_hooks`
+- `diagnostics_channel`
+- `perf_hooks`
+
+Limited builtin map currently includes:
+
+- `assert`
+- `assert/strict`
+- `async_hooks`
+- `buffer`
+- `console`
+- `constants`
+- `crypto`
+- `diagnostics_channel`
+- `dns`
+- `dns/promises`
+- `events`
+- `fs`
+- `fs/promises`
+- `http`
+- `https`
+- `module`
+- `net`
+- `os`
+- `path`
+- `path/posix`
+- `path/win32`
+- `perf_hooks`
+- `process`
+- `punycode`
+- `querystring`
+- `readline`
+- `readline/promises`
+- `stream`
+- `stream/consumers`
+- `stream/promises`
+- `stream/web`
+- `string_decoder`
+- `timers`
+- `timers/promises`
+- `tls`
+- `tty`
+- `url`
+- `util`
+- `util/types`
+- `v8`
+- `zlib`
+
+Limited means API-compatible enough for the current tests and targeted pure-JS npm packages, not full desktop Node.js compatibility.
+
+Design notes for the broadest limited builtins:
+
+- `fs/promises`: `docs/nodejs/design/FS_PROMISES.md`
+- file URL helpers: `docs/nodejs/design/FILE_URL_POLICY.md`
+- `stream`: `docs/nodejs/design/STREAM.md`
+- `zlib`: `docs/nodejs/design/ZLIB.md`
+- scheduled/background tasks: `docs/nodejs/design/WORK_MANAGER.md`
+- ESM: `docs/nodejs/design/ESM.md`
+- network: `docs/nodejs/design/NETWORK.md`
+- worker threads: `docs/nodejs/design/WORKER_THREADS.md`
+
+## Disabled by Policy
+
+These surfaces must stay disabled unless a future task explicitly opens them behind a design gate:
+
+- unrestricted native addon loading
+- unrestricted `child_process`
+- unrestricted `worker_threads`
+- unrestricted network sockets and servers
+- unrestricted `http`, `https`, `net`, `tls`, `dns`, and `dgram`
+- unrestricted `process.binding`
+- unrestricted `process.dlopen`
+- unrestricted `process._linkedBinding`
+- unrestricted `process.getBuiltinModule`
+- unrestricted `vm`
+- inspector/debugger server
+- npm install and postinstall execution
+
+Network-related limited builtins may exist for feature detection and stable denial errors. That is not permission to perform network I/O.
+
+## ESM Status
+
+`.mjs` routes to Node so user intent is preserved. ESM execution is still not a default supported capability.
+
+The explicit gate flag is:
+
+```properties
+autojs.nodejs.esm.experimental=false
+```
+
+With the flag off, `.mjs` entry and resolution errors include:
+
+```text
+.mjs routes to Node backend, but ESM is not enabled in AutoJs6 Safe Node Profile.
+```
+
+Expected errors:
+
+- static ESM path: `ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED`
+- dynamic import path: legacy `code` `ERR_AUTOJS6_EMBEDDED_NODE_DYNAMIC_IMPORT_UNSUPPORTED`, canonical `autojs6Code` `ERR_AUTOJS6_DYNAMIC_IMPORT_UNSUPPORTED`
+
+Current `require("autojs6:profile")` reports `esm=false`, `dynamicImport=false`, and `experimentalFlags.esm=false`.
+
+See `docs/nodejs/design/ESM.md` for package `type`, CJS/ESM interop, top-level await, dynamic import, `import.meta.url`, package condition, moduleSources, encrypted graph, packaged APK, and stack trace decisions.
+
+## Network Status
+
+Network has a controlled fetch MVP, but live Android network I/O is still disabled by default. The explicit gate flag is:
+
+```properties
+autojs.nodejs.network.experimental=false
+```
+
+With the flag off:
+
+- global `fetch()` is an AutoJs6 controlled bridge wrapper, but the default Android provider rejects before performing I/O
+- `require("fetch")` exposes the same controlled wrapper for CommonJS scripts
+- `http`, `https`, `net`, `tls`, `dns`, and `dns/promises` operations reject with `ERR_AUTOJS6_NETWORK_DISABLED`
+- `dgram` remains a disabled builtin
+- raw sockets, servers, DNS queries, TLS sessions, datagrams, and unrestricted HTTP requests remain unavailable
+
+Current `require("autojs6:profile")` reports `network=false` and `experimentalFlags.network=false`.
+
+Current controlled fetch support includes `GET`/`POST`, headers, string or binary bodies, `timeoutMs`, `AbortController.signal`, `maxResponseBytes`, and text/arrayBuffer/json response helpers. The live provider is backed by Android/OkHttp behind `BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED`; normal release builds keep that flag false. No `axios` builtin adapter is exposed.
+
+Network-specific errors include:
+
+- `ERR_AUTOJS6_NETWORK_DISABLED`
+- `ERR_AUTOJS6_NETWORK_ABORTED`
+- `ERR_AUTOJS6_NETWORK_TIMEOUT`
+- `ERR_AUTOJS6_NETWORK_RESPONSE_TOO_LARGE`
+- `ERR_AUTOJS6_NETWORK_INVALID_URL`
+- `ERR_AUTOJS6_NETWORK_PERMISSION_DENIED`
+
+See `docs/nodejs/design/NETWORK.md` for INTERNET permission, packaged APK manifest diagnostics, timeout, abort, body budget, TLS, proxy, background behavior, and service-destroy cancellation policy.
+
+## Worker Threads Status
+
+`worker_threads` is design-gated and disabled by default. The explicit gate flag is:
+
+```properties
+autojs.nodejs.worker_threads.experimental=false
+```
+
+With the flag off:
+
+- `require("worker_threads")` rejects with disabled-builtin error shape
+- `require("node:worker_threads")` rejects with disabled-builtin error shape
+- `require.resolve("worker_threads")` rejects before a local `node_modules/worker_threads` package can shadow the builtin
+- no worker can access AutoJs bridge modules, Android Context, accessibility, media projection, image handles, shell, engines, raw network, child process, native addon, `vm`, inspector, or unrestricted filesystem APIs
+
+Current `require("autojs6:profile")` reports `workerThreads=false`, `highRiskCapabilities.workerThreads=false`, and `experimentalFlags.workerThreads=false`.
+
+See `docs/nodejs/design/WORKER_THREADS.md` for worker count, timeout, memory, packaged APK, bridge-denial, and lifecycle policy.
+
+## Process Profile
+
+Supported or limited:
+
+- `process.version`
+- `process.versions`
+- `process.argv`
+- `process.env`
+- `process.cwd()`
+- controlled `process.chdir()` for project bootstrap use
+- `process.nextTick`; tests lock its ordering before Promise/`queueMicrotask` callbacks and before timer callbacks
+- warning and event-emitter style process APIs where covered by tests
+
+Disabled or controlled:
+
+- `process.exit`
+- `process.abort`
+- `process.kill`
+- `process.reallyExit`
+- `process.binding`
+- `process._linkedBinding`
+- `process.dlopen`
+- privilege-changing POSIX APIs
+- report writing
+
+Scripts should use AutoJs6 lifecycle controls instead of forcing process exit.
+
+## Crypto Profile
+
+Supported or limited:
+
+- `crypto.randomBytes`
+- `crypto.randomFill` / `crypto.randomFillSync`
+- `crypto.randomInt`
+- `crypto.randomUUID`
+- `crypto.createHash` for the documented hash allowlist
+- `crypto.createHmac`
+- `crypto.createSecretKey` and secret `KeyObject`
+- `crypto.timingSafeEqual`
+- bounded PBKDF2, scrypt, and HKDF helpers where covered by tests
+- limited `crypto.webcrypto` / `crypto.subtle` for random values, digest, and HMAC key/sign/verify flows
+
+Disabled or absent:
+
+- asymmetric key creation/import/export APIs such as `createPrivateKey`, `createPublicKey`, and `generateKeyPair`
+- signing and verification streams such as `createSign` and `createVerify`
+- certificate and X.509 APIs
+- native key-store or Android keystore access
+
+The original Task 29 text expected `webcrypto` to stay absent, but the checked-in runtime already exposes a limited WebCrypto surface with regression coverage. Future work should narrow or expand that surface only with an explicit compatibility and security review.
+
+## OS Privacy Profile
+
+The `os` module is present for npm compatibility but must not expose real device fingerprinting data. Privacy-sensitive APIs return stable redacted values instead of raw host values:
+
+- `os.networkInterfaces()` returns a frozen empty object.
+- `os.userInfo()` returns the synthetic `autojs6` user and scoped cwd-backed home directory.
+- `os.cpus()` returns a single synthetic CPU entry.
+- `os.freemem()` and `os.totalmem()` return fixed coarse values.
+- `os.loadavg()` returns `[0, 0, 0]`.
+- `os.hostname()` returns `localhost`.
+- `os.tmpdir()` and `os.homedir()` return the scoped working directory.
+
+`os.availableParallelism()` may return an approximate positive integer. `os.constants` exposes frozen safe constant groups. `os.setPriority()` remains disabled.
+
+## Packaged APK Profile
+
+Packaged Node APKs require:
+
+- native libraries for each selected ABI: `libnode.so`, `libautojs6-node.so`, `libc++_shared.so`
+- `NativeNodeEmbeddedScriptService` class and manifest entry
+- `android:process=":nodejs_embedded"`
+- `android:foregroundServiceType="specialUse"` for the embedded Node service
+- `android.permission.FOREGROUND_SERVICE`
+- `android.permission.FOREGROUND_SERVICE_SPECIAL_USE`
+- `android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE`
+- Node project metadata and module source entries within current budgets
+- packaged smoke coverage for the current user-facing `toast`, `app`, `clipboard`, and `device` bridge modules
+
+Supported ABI policy:
+
+- `arm64-v8a`: primary release target
+- `armeabi-v7a`: supported when native libs and smoke tests pass
+- `x86_64`: debug/emulator target
+- `x86`: fail-fast until `libnode.so` exists for x86
+
+## AutoJs API Bridge Status
+
+The current safe profile does not expose unrestricted Android or AutoJs host objects to Node scripts.
+
+Current foundation:
+
+- Kotlin protocol data classes: `NodeBridgeRequest`, `NodeBridgeResponse`, `NodeBridgeError`
+- Kotlin module registry: `NodeBridgeModules`
+- fakeable provider contract: `NodeBridgeCapabilityProvider`
+- internal JavaScript client: `require("autojs6:bridge")`
+- private file-backed live transport in the current embedded service
+- queued host transport fallback for older packaged templates and one-way compatibility paths
+- bridge requests require non-empty `id`, `module`, and `method`; `args` must be a JSON array, `permissions` must be a string array, and `timeoutMs` must be a positive number
+- malformed live bridge requests reject with `ERR_AUTOJS6_BRIDGE_INVALID_REQUEST` when a response id can be recovered
+- provider callbacks are accepted at most once per bridge request; duplicate callbacks are ignored
+- synchronous provider dispatch exceptions are converted to bridge failure responses with stable module and method metadata
+- JS pending bridge calls reject on timeout with `ERR_AUTOJS6_BRIDGE_TIMEOUT`
+- JS pending bridge calls reject on destroy with `ERR_AUTOJS6_BRIDGE_PROCESS_DEAD`
+
+Current user-facing bridge modules:
+
+- `toast`
+  - `showToast(message, options?): Promise<void>`
+  - `toast(message, options?): Promise<void>`
+  - options: `{ duration?: "short" | "long", log?: boolean, timeoutMs?: number }`
+- `app`
+  - `packageName: string`
+  - `versionName: string`
+  - `versionCode: number`
+  - `launchPackage(packageName, options?): Promise<boolean>`
+  - `launchApp(name, options?): Promise<boolean>`
+  - `openAppSetting(packageName?, options?): Promise<void>`
+  - `startActivity(intentOptions, options?): Promise<void>`
+- `engines`
+  - `myEngine(): EngineInfo`
+  - `all(options?): Promise<EngineInfo[]>`
+  - `stopAll(options?): Promise<number>`
+  - `stopSelf(options?): Promise<boolean>`
+  - `execScript(name, script, options): Promise<ExecutionInfo>`
+  - `execScriptFile(path, options): Promise<ExecutionInfo>`
+  - current `all()` result is limited to the current embedded Node execution snapshot
+  - current `stopAll()` returns `0` until a main-process engine provider is connected
+  - current `stopSelf()` acknowledges the request; forceful embedded cancellation remains lifecycle-controller work
+  - `execScript()` and `execScriptFile()` dispatch through a main-process bridge service and return a serialized execution snapshot, not a raw `ScriptExecution`
+  - `options.timeoutMs` is required for script spawning
+  - `cwd` and `execScriptFile(path)` are scoped to the current working directory and reject absolute paths, NUL bytes, `..`, and realpath escapes
+  - `options.arguments` accepts JSON primitive values only
+  - recursive spawning is limited with `spawnDepth`; nested embedded Node child scripts are rejected until multi-instance embedded lifecycle control is available
+- `dialogs`
+  - `alert(title, message?, options?): Promise<void>`
+  - `confirm(title, message?, options?): Promise<boolean>`
+  - `input(title, prefill?, options?): Promise<string | null>`
+  - `prompt(title, prefill?, options?): Promise<string | null>`
+  - `select(title, items, options?): Promise<number>`
+  - current JavaScript API and bridge protocol are stable
+  - current Android provider rejects with `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED` until a UI capability provider is connected
+- `accessibility`
+  - `text(value): Selector`
+  - `desc(value): Selector`
+  - `id(value): Selector`
+  - `className(value): Selector`
+  - `textContains(value): Selector`
+  - `descContains(value): Selector`
+  - `isEnabled(options?): Promise<boolean>`
+  - `ensureEnabled(options?): Promise<boolean>`
+  - `click(x, y, options?): Promise<boolean>`
+  - `click(selector, options?): Promise<boolean>`
+  - `back(options?): Promise<boolean>`
+  - `home(options?): Promise<boolean>`
+  - `recentApps(options?): Promise<boolean>`
+  - `findByText(text, options?): Promise<UiNode | null>`
+  - `clickText(text, options?): Promise<boolean>`
+  - `findOne(selector, options?): Promise<UiNode | null>`
+  - `findAll(selector, options?): Promise<readonly UiNode[]>`
+  - selector descriptors are frozen plain JSON values such as `{ type: "autojs6.accessibility.selector", version: 1, text: "OK" }`
+  - returned `UiNode` values are frozen JSON snapshots only; no live `AccessibilityNodeInfo`, `UiObject`, or selector object crosses into Node
+  - current JavaScript API, fake-provider tests, and bridge protocol are stable
+  - current Android provider returns `false` for `isEnabled` and `ensureEnabled`
+  - current Android provider rejects action and query methods with `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED` until a safe accessibility capability provider is connected
+- `media_projection`
+  - `requestScreenCapture(options?): Promise<ScreenCapturer>`
+  - `ScreenCapturer.nextImage(options?): Promise<Image | null>`
+  - `ScreenCapturer.stop(options?): Promise<void>`
+  - current JavaScript API, fake-provider tests, and bridge protocol are stable
+  - current Android provider rejects with `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED` until a MediaProjection capability provider is connected
+- `image`
+  - `captureScreen(options?): Promise<Image | null>`
+  - `readImage(path, options?): Promise<Image | null>`
+  - `saveImage(image, path, options?): Promise<void>`
+  - `clip(image, x, y, w, h, options?): Promise<Image | null>`
+  - `resize(image, w, h, options?): Promise<Image | null>`
+  - `findImage(source, template, options?): Promise<Point | null>`
+  - `recycle(image, options?): Promise<void>`
+  - `images` is also reserved as an AutoJs-style alias with the same API shape
+  - `captureScreen()` requests an already-granted screen-capture path through the future MediaProjection-backed image provider; it must not prompt directly from the Node service
+  - `readImage()` and `saveImage()` accept scoped relative paths only; absolute paths, NUL bytes, and `..` escapes are rejected before bridge dispatch
+  - `clip()` and `resize()` return new opaque image handles
+  - repeated `recycle()` calls for the same normalized handle are safe from JavaScript and dispatch at most once per module instance
+  - current JavaScript API, fake-provider tests, and bridge protocol are stable
+  - current Android provider rejects with `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED` until an image capability provider is connected
+- `clipboard`
+  - `getText(options?): Promise<string>`
+  - `setText(text, options?): Promise<void>`
+  - `hasText(options?): Promise<boolean>`
+  - current Android provider accesses `ClipboardManager` on the main thread through the live bridge provider
+  - queued host fallback keeps a per-execution clipboard string for packaged templates that do not yet inject live bridge metadata
+  - no raw `ClipboardManager` object and no clipboard-change listener are exposed to JavaScript
+- `device`
+  - `sdkInt: number`
+  - `width: number`
+  - `height: number`
+  - `density: number`
+  - `isScreenOn(options?): Promise<boolean>`
+  - `wakeUp(options?): Promise<void>`
+  - `vibrate(ms, options?): Promise<void>`
+  - current Android provider uses `PowerManager` and `Vibrator` through the live bridge provider
+  - `vibrate()` clamps duration to 10 seconds and packaged APKs that use it must declare `android.permission.VIBRATE`
+  - privacy-sensitive identifiers are absent: IMEI, Android ID, serial, phone number, accounts, MAC/IP address, hardware fingerprint, brand, and manufacturer
+  - no raw `Context`, `PowerManager`, `Vibrator`, display, or build objects are exposed to JavaScript
+- `shell`
+  - `exec(command, options?): Promise<{ code: number, stdout: string, stderr: string }>`
+  - options: `{ root?: boolean, timeoutMs?: number, cwd?: string, env?: Record<string, string> }`
+  - runs through the AutoJs6 bridge provider, not Node `child_process`
+  - non-root mode uses a controlled non-interactive shell process on a provider thread; root mode is explicit and attempts `su -c`
+  - `cwd` is relative to the scoped working directory and rejects absolute paths, NUL bytes, `..` escapes, and realpath escapes
+  - `env` accepts string keys and values only
+  - command timeout returns a result with `code: 124`; invalid policy inputs reject with `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED`
+  - queued host fallback does not execute shell commands; packaged templates need live bridge metadata before `shell.exec()` can observe real command results
+  - no interactive shell, streaming stdio, process object, signal control, `spawn`, `fork`, or `open` API is exposed
+- `fetch`
+  - `fetch(url, options?): Promise<Response>` through global `fetch` and `require("fetch")`
+  - options: `{ method?: "GET" | "POST", headers?: object | array, body?: string | Buffer | ArrayBuffer | TypedArray | Blob, timeoutMs?: number, maxResponseBytes?: number, signal?: AbortSignal }`
+  - response helpers: `text()`, `arrayBuffer()`, and `json()`
+  - normal builds reject through the Android provider with `ERR_AUTOJS6_NETWORK_DISABLED`; fake-provider tests cover success, timeout, abort, and response budget paths
+  - raw `http`, `https`, `net`, `tls`, `dns`, and `dgram` modules remain unavailable for network I/O
+
+Example:
+
+```js
+"nodejs";
+
+const clipboard = require("clipboard");
+const device = require("device");
+const accessibility = require("accessibility");
+const shell = require("shell");
+const fetch = require("fetch");
+
+await clipboard.setText("hello from AutoJs6 Node");
+console.log(await clipboard.getText());
+console.log(await clipboard.hasText());
+
+console.log(device.sdkInt, device.width, device.height, device.density);
+console.log(await device.isScreenOn());
+await device.vibrate(50);
+
+const okSelector = accessibility.text("OK");
+console.log(JSON.stringify(okSelector));
+
+const result = await shell.exec("echo ok", {
+  timeoutMs: 1000,
+  cwd: ".",
+  env: { AUTOJS6_EXAMPLE: "1" },
+});
+console.log(result.code, result.stdout.trim());
+
+try {
+  await fetch("https://example.com", { timeoutMs: 1000 });
+} catch (error) {
+  console.log(error.autojs6Code || error.code);
+}
+```
+
+Explicitly unsupported `engines` APIs:
+
+- `execAutoFile`
+- raw `ScriptEngine` or `ScriptExecution` object access
+
+In the main AutoJs6 app, the embedded service injects a per-execution live bridge configuration. The JavaScript bridge writes request files into service-private cache directories, the service dispatches them through `NodeBridgeCapabilityProvider`, and JavaScript observes the provider response before the Promise resolves.
+
+If the live bridge configuration is absent, the JavaScript bridge falls back to the queued host transport. In that mode, the Promise means the request was accepted into the embedded result envelope, and the Android dispatch response is recorded after script completion as `embedded_script.bridge_responses_json`. This fallback keeps older packaged inrt templates and one-way host-effect paths working while templates are refreshed.
+
+Live bridge diagnostics are recorded in result `nativeValues`:
+
+- `embedded_script.bridge_live_enabled`
+- `embedded_script.bridge_live_dispatch_count`
+- `embedded_script.bridge_live_dispatch_failed_count`
+- `embedded_script.bridge_live_dispatch_pending_count`
+- `embedded_script.bridge_live_dispatch_status`
+- `embedded_script.bridge_live_responses_json`
+
+The packaged APK smoke requires `toast`, `app`, `clipboard`, and `device` successfully and verifies that project-local `node_modules/toast`, `node_modules/app`, `node_modules/clipboard`, and `node_modules/device` packages cannot shadow bridge modules. Packaged `app.packageName` is verified against the packaged application id. `versionName` and `versionCode` are type-checked in packaged smoke because older inrt templates do not inject host app metadata yet; refreshed templates should promote those to exact-value checks. Packaged `clipboard` and `device` smokes use the queued fallback when live bridge metadata is absent; this proves module routing, Promise behavior, packaged shadowing, and privacy-safe surface shape, while true system clipboard/device access is still provided by the live Android provider path. The `shell` module is intentionally not executed by queued fallback; packaged `shell.exec()` should remain a live-bridge-only capability.
+
+Future bridge work must keep the protocol and fakeable capability providers stable before exposing real screenshot, image decoding, template matching, or handle lifecycle implementations.
+
+Every bridge call must look asynchronous to JavaScript and must reject cleanly on timeout or service destroy.
+
+## Scheduled And Background Task Status
+
+Node scripts cannot register persistent timed, broadcast, boot, or package-event tasks yet.
+
+Current policy:
+
+- `require("tasks")` is not exposed in the Embedded Node Safe Node Profile.
+- Node scripts must not access raw WorkManager, AlarmManager, JobScheduler, BroadcastReceiver, PendingIntent, or IntentFilter objects.
+- Existing Rhino task APIs remain unchanged.
+- Future Node timed task support must go through an AutoJs6 bridge provider and the existing task manager/scheduler ownership model.
+- Future broadcast, startup, boot, and package-event task support is deferred behind a separate design gate and user-visible permission flow.
+
+See `docs/nodejs/design/WORK_MANAGER.md` for the current design decision.
+
+## Error Code Compatibility
+
+Errors keep existing Node-style or legacy `code` values for compatibility. AutoJs6-specific canonical codes are exposed through `error.autojs6Code`. When a legacy AutoJs6 code is preserved, `error.legacyCode` repeats the legacy `code`.
+
+Examples:
+
+- disabled builtin: `code=ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED`, `autojs6Code=ERR_AUTOJS6_BUILTIN_DISABLED`
+- disabled process API: `code=ERR_AUTOJS6_PROCESS_API_DISABLED`, `autojs6Code=ERR_AUTOJS6_PROCESS_API_DISABLED`
+- disabled fetch/network: `code=ERR_AUTOJS6_EMBEDDED_NODE_FETCH_DISABLED`, `autojs6Code=ERR_AUTOJS6_NETWORK_DISABLED`
+- scoped fs escape: `code=EPERM`, `autojs6Code=ERR_AUTOJS6_FS_PATH_ESCAPE`
+- malformed bridge request: `code=ERR_AUTOJS6_BRIDGE_INVALID_REQUEST`, `autojs6Code=ERR_AUTOJS6_BRIDGE_INVALID_REQUEST`
