@@ -649,6 +649,7 @@
     <string name="error_timeout_while_querying_plugin_info">Timeout while querying %1$s plugin info.</string>
     <string name="error_unable_to_display_file_details_as_current_file_path_is_unknown">Current file path is unknown, unable to display file details</string>
     <string name="error_unable_to_display_version_history_as_current_file_path_is_unknown">Current file path is unknown, unable to display version history</string>
+    <string name="error_ace_editor_unavailable">ACE editor is unavailable; native editor is still active</string>
     <string name="error_unable_to_open_with_other_apps_as_current_file_path_is_unknown">Current file path is unknown, unable to open with other apps</string>
     <string name="error_unable_to_package_application_as_current_file_path_is_unknown">Current file path is unknown, unable to package application</string>
     <string name="error_unable_to_save_file_as_current_file_path_is_unknown">Current file path is unknown, unable to save file</string>
@@ -1054,6 +1055,7 @@
     <string name="text_edit_script">Edit script</string>
     <string name="text_editor_theme">Editor theme</string>
     <string name="text_editor_engine">Editor engine</string>
+    <string name="text_editor_engine_switched" formatted="true">Editor engine switched to %s</string>
     <string name="text_email">E-mail</string>
     <string name="text_email_cannot_be_empty">E-mail cannot be empty</string>
     <string name="text_email_format_error">Invalid e-mail format</string>

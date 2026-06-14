@@ -169,6 +169,27 @@
                 app:showAsAction="never" />
 
             <item
+                android:id="@+id/action_editor_engine"
+                android:title="@string/text_editor_engine"
+                app:showAsAction="never">
+                <menu>
+                    <group android:checkableBehavior="single">
+                        <item
+                            android:id="@+id/action_editor_engine_native"
+                            android:checkable="true"
+                            android:title="@string/entry_editor_engine_native"
+                            app:showAsAction="never" />
+
+                        <item
+                            android:id="@+id/action_editor_engine_ace"
+                            android:checkable="true"
+                            android:title="@string/entry_editor_engine_ace"
+                            app:showAsAction="never" />
+                    </group>
+                </menu>
+            </item>
+
+            <item
                 android:id="@+id/action_open_by_other_apps"
                 android:title="@string/text_open_by_other_apps"
                 app:showAsAction="never" />

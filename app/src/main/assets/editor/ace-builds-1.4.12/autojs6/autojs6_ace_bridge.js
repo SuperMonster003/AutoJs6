@@ -10,6 +10,7 @@
     var breakpoints = [];
     var debugMarker = null;
     var storedReplacement = "";
+    var scrollNotifyTimer = null;
 
     function callBridge(name, args) {
         try {
@@ -49,6 +50,14 @@
         return session ? session.getUndoManager() : null;
     }
 
+    function getScrollState() {
+        var renderer = editor ? editor.renderer : null;
+        return {
+            firstVisibleLine: renderer && renderer.getFirstVisibleRow ? renderer.getFirstVisibleRow() : 0,
+            firstVisibleColumn: renderer ? Math.max(0, renderer.scrollLeft || 0) : 0
+        };
+    }
+
     function buildState() {
         var position = editor ? editor.getCursorPosition() : { row: 0, column: 0 };
         var undoManager = getUndoManager();
@@ -66,6 +75,7 @@
             },
             selection: selection,
             selectedText: selection.text,
+            scroll: getScrollState(),
             breakpoints: getBreakpoints()
         };
     }
@@ -116,6 +126,16 @@
         var json = stateJson();
         callBridge("notifyStateChanged", [json]);
         callBridge("notifyEvent", [eventName || "stateChanged", json]);
+    }
+
+    function notifyScrollChanged() {
+        if (scrollNotifyTimer !== null) {
+            clearTimeout(scrollNotifyTimer);
+        }
+        scrollNotifyTimer = setTimeout(function() {
+            scrollNotifyTimer = null;
+            notifyStateChanged("scrollChanged");
+        }, 80);
     }
 
     function notifyTextChanged() {
@@ -236,6 +256,21 @@
         editor.renderer.scrollCursorIntoView();
         notifyCursorChanged();
         notifyStateChanged("selectionChanged");
+    }
+
+    function restoreScroll(firstVisibleLine, firstVisibleColumn) {
+        if (!editor || !editor.renderer) {
+            return;
+        }
+        firstVisibleLine = clampRow(firstVisibleLine);
+        firstVisibleColumn = Math.max(0, Number(firstVisibleColumn) || 0);
+        if (editor.scrollToLine) {
+            editor.scrollToLine(firstVisibleLine, false, false, null);
+        }
+        if (editor.renderer.scrollToX) {
+            editor.renderer.scrollToX(firstVisibleColumn);
+        }
+        notifyStateChanged("scrollRestored");
     }
 
     function insert(text) {
@@ -392,6 +427,9 @@
             notifyTextChanged();
         });
 
+        session.on("changeScrollTop", notifyScrollChanged);
+        session.on("changeScrollLeft", notifyScrollChanged);
+
         editor.selection.on("changeCursor", notifyCursorChanged);
 
         editor.on("guttermousedown", function(event) {
@@ -435,6 +473,7 @@
             setReadOnly: function(readOnly) { editor.setReadOnly(!!readOnly); notifyStateChanged("readOnlyChanged"); },
             setTheme: setTheme,
             setFontSizeSp: setFontSizeSp,
+            restoreScroll: restoreScroll,
             setBreakpoint: function(row, enabled) { return setBreakpoint(row, enabled, true); },
             toggleBreakpoint: toggleBreakpoint,
             clearBreakpoints: clearBreakpoints,

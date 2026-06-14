@@ -78,6 +78,7 @@ import org.autojs.autojs.ui.edit.editor.engine.EditorEnginePreferences
 import org.autojs.autojs.ui.edit.editor.engine.EditorCursorChangeListener
 import org.autojs.autojs.ui.edit.editor.engine.EditorSearchOptions
 import org.autojs.autojs.ui.edit.editor.engine.EditorSearchSyntaxException
+import org.autojs.autojs.ui.edit.editor.engine.EditorEngineType
 import org.autojs.autojs.ui.edit.editor.engine.ScriptEditorEngine
 import org.autojs.autojs.ui.edit.keyboard.FunctionsKeyboardHelper
 import org.autojs.autojs.ui.edit.keyboard.FunctionsKeyboardView
@@ -149,7 +150,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private var binding: EditorViewBinding = EditorViewBinding.bind(inflate(context, R.layout.editor_view, this))
 
     @JvmField
-    val editor: ScriptEditorEngine = EditorEngineFactory.create(context, EditorEnginePreferences.get())
+    var editor: ScriptEditorEngine = EditorEngineFactory.create(context, EditorEnginePreferences.get())
 
     @JvmField
     val debugBar: DebugBar = binding.debugBar
@@ -240,6 +241,9 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     // zh-CN: 大文件模式标记: 为避免内存/性能问题, 保持撤销/重做不可用.
     @Volatile
     private var mLargeFileMode: Boolean = false
+
+    @Volatile
+    private var mSwitchingEditorEngine: Boolean = false
 
     // Active large-file loading cancel flag.
     // zh-CN: 大文件加载的取消标记 (当前会话).
@@ -397,6 +401,14 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         }
     }
 
+    private fun registerFunctionsKeyboardBackHandler() {
+        (context as? HostActivity)?.backPressedObserver?.registerHandler(mFunctionsKeyboardHelper)
+    }
+
+    private fun unregisterFunctionsKeyboardBackHandler() {
+        (context as? HostActivity)?.backPressedObserver?.unregisterHandler(mFunctionsKeyboardHelper)
+    }
+
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
@@ -405,7 +417,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         } else {
             context.registerReceiver(mOnRunFinishedReceiver, IntentFilter(ACTION_ON_EXECUTION_FINISHED))
         }
-        (context as? HostActivity)?.backPressedObserver?.registerHandler(mFunctionsKeyboardHelper)
+        registerFunctionsKeyboardBackHandler()
     }
 
     fun handleIntent(intent: Intent): Observable<String> {
@@ -785,7 +797,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
         super.onDetachedFromWindow()
         context.unregisterReceiver(mOnRunFinishedReceiver)
-        (context as? HostActivity)?.backPressedObserver?.unregisterHandler(mFunctionsKeyboardHelper)
+        unregisterFunctionsKeyboardBackHandler()
     }
 
     fun getPreferredSearchQueryForDialogOrNull(): String? =
@@ -1337,7 +1349,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     private fun setUpFunctionsKeyboard() {
         mFunctionsKeyboardHelper = FunctionsKeyboardHelper.with(context as Activity)
-            .setContent(editor.view)
+            .setContent(binding.editorContainer)
             .setFunctionsTrigger(mShowFunctionsButton)
             .setFunctionsView(mFunctionsKeyboard)
             .setEditView(editor.inputView)
@@ -1365,6 +1377,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     private fun setUpInputMethodEnhancedBar() {
+        mAutoCompletion?.shutdown()
+        mAutoCompletion = null
         mSymbolBar.let { bar ->
             bar.setOnHintClickListener(this)
             refreshSymbolsBar()
@@ -1385,7 +1399,109 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         mSymbolBar.codeCompletions = CodeCompletions.just(symbols)
     }
 
-    private fun setUpEditor() {
+    fun switchEditorEngine(targetType: EditorEngineType) {
+        if (editor.engineType == targetType || mSwitchingEditorEngine) {
+            return
+        }
+        if (mEditorLoading) {
+            showToast(context, R.string.text_loading_with_dots)
+            return
+        }
+
+        val oldEditor = editor
+        mSwitchingEditorEngine = true
+        runCatching {
+            oldEditor.getTextForSaving { latestText ->
+                post {
+                    try {
+                        switchEditorEngine(targetType, oldEditor, latestText)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        showToast(context, e.message, true)
+                    } finally {
+                        mSwitchingEditorEngine = false
+                    }
+                }
+            }
+        }.onFailure { error ->
+            mSwitchingEditorEngine = false
+            error.printStackTrace()
+            showToast(context, error.message, true)
+        }
+    }
+
+    private fun switchEditorEngine(targetType: EditorEngineType, oldEditor: ScriptEditorEngine, latestText: String) {
+        if (oldEditor !== editor) {
+            return
+        }
+
+        val newEditor = EditorEngineFactory.create(context, targetType)
+        if (newEditor.engineType != targetType) {
+            newEditor.destroy()
+            showToast(context, R.string.error_ace_editor_unavailable, true)
+            return
+        }
+
+        val wasAttached = isAttachedToWindow
+        val oldSaveStickyDirty = saveStickyDirty
+        val oldHadDirectEditSinceSave = mHadDirectEditSinceSave
+        val oldEditorLoading = mEditorLoading
+        val oldLargeFileMode = mLargeFileMode
+        val snapshot = oldEditor.createStateSnapshot().copy(
+            text = latestText,
+            dirty = oldSaveStickyDirty || oldEditor.isTextChanged,
+            readOnly = mReadOnly,
+            themeKey = mEditorTheme?.name,
+        )
+
+        mEditorLoading = true
+        syncPrimaryMenuState()
+
+        if (wasAttached) {
+            unregisterFunctionsKeyboardBackHandler()
+        }
+        mFunctionsKeyboardHelper?.hideFunctionsLayout(false)
+        mFunctionsKeyboardHelper = null
+        mAutoCompletion?.shutdown()
+        mAutoCompletion = null
+        oldEditor.onUserTouchInTextArea = null
+        binding.editorContainer.removeView(oldEditor.view)
+
+        editor = newEditor
+        attachEditorEngineView()
+        setUpEditor(resetInitialState = false)
+        setUpInputMethodEnhancedBar()
+        setUpFunctionsKeyboard()
+        if (wasAttached) {
+            registerFunctionsKeyboardBackHandler()
+        }
+
+        mEditorTheme?.let { editor.setTheme(it) }
+        editor.restoreStateSnapshot(snapshot)
+        editor.setReadOnly(mReadOnly)
+
+        oldEditor.destroy()
+        EditorEnginePreferences.set(targetType)
+
+        mEditorLoading = oldEditorLoading
+        mLargeFileMode = oldLargeFileMode
+        saveStickyDirty = oldSaveStickyDirty || snapshot.dirty
+        mHadDirectEditSinceSave = oldHadDirectEditSinceSave || snapshot.dirty
+
+        syncPrimaryMenuState()
+        activity.invalidateOptionsMenu()
+        if (editor.engineType == EditorEngineType.NATIVE) {
+            editor.requestEditorFocus()
+        }
+
+        val engineName = when (targetType) {
+            EditorEngineType.NATIVE -> context.getString(R.string.entry_editor_engine_native)
+            EditorEngineType.ACE -> context.getString(R.string.entry_editor_engine_ace)
+        }
+        showToast(context, context.getString(R.string.text_editor_engine_switched, engineName))
+    }
+
+    private fun setUpEditor(resetInitialState: Boolean = true) {
         editor.let { editor ->
             // Observe user touch in text area to preserve caret position after large-file load.
             // zh-CN: 监听用户在文本区域的触摸, 以便大文件加载完成后保留光标位置.
@@ -1454,14 +1570,16 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
             // Initialize to "new file" expected state: only Run enabled.
             // zh-CN: 初始化为 "新建文件" 预期状态: 仅运行可用.
-            mEditorLoading = false
-            mLargeFileMode = false
-            saveStickyDirty = false
-            mHadDirectEditSinceSave = false
-            setMenuItemStatus(R.id.run, true)
-            setMenuItemStatus(R.id.undo, false)
-            setMenuItemStatus(R.id.redo, false)
-            setMenuItemStatus(R.id.save, false)
+            if (resetInitialState) {
+                mEditorLoading = false
+                mLargeFileMode = false
+                saveStickyDirty = false
+                mHadDirectEditSinceSave = false
+                setMenuItemStatus(R.id.run, true)
+                setMenuItemStatus(R.id.undo, false)
+                setMenuItemStatus(R.id.redo, false)
+                setMenuItemStatus(R.id.save, false)
+            }
         }
     }
 

@@ -715,6 +715,10 @@ class CodeEditor : HVScrollView {
         mTextViewRedoUndo.markTextAsUnchanged()
     }
 
+    fun markTextAsChanged() {
+        mTextViewRedoUndo.markTextAsChanged()
+    }
+
     fun setDebuggingLine(line: Int) {
         codeEditText.debuggingLine = line
     }

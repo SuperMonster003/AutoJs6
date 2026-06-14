@@ -30,6 +30,7 @@ class AceScriptEditorEngine(
     private var replacementText = ""
     private var foundIndex = -1
     private var foundLength = 0
+    private var suppressProgrammaticTextChange = false
 
     override val view: View
         get() = aceCodeEditor
@@ -49,6 +50,7 @@ class AceScriptEditorEngine(
             searchQuery = null
             foundIndex = -1
             foundLength = 0
+            suppressProgrammaticTextChange = true
             aceCodeEditor.setText(value)
         }
 
@@ -100,6 +102,7 @@ class AceScriptEditorEngine(
     }
 
     override fun setInitialText(text: String?) {
+        suppressProgrammaticTextChange = true
         this.text = text.orEmpty()
         aceCodeEditor.markClean()
     }
@@ -386,8 +389,8 @@ class AceScriptEditorEngine(
             cursorLine = currentSelection.startLine,
             cursorColumn = currentSelection.startColumn,
             selection = currentSelection,
-            firstVisibleLine = null,
-            firstVisibleColumn = null,
+            firstVisibleLine = aceCodeEditor.firstVisibleLine,
+            firstVisibleColumn = aceCodeEditor.firstVisibleColumn,
             breakpoints = breakpointsSnapshot,
             debuggingLine = debuggingLine,
             readOnly = readOnly,
@@ -399,7 +402,12 @@ class AceScriptEditorEngine(
     }
 
     override fun restoreStateSnapshot(snapshot: EditorStateSnapshot) {
-        text = snapshot.text
+        suppressProgrammaticTextChange = true
+        if (snapshot.dirty) {
+            aceCodeEditor.setTextDirty(snapshot.text)
+        } else {
+            text = snapshot.text
+        }
         setReadOnly(snapshot.readOnly)
         setTextSizeSp(snapshot.fontSizeSp)
         setDebuggingLine(snapshot.debuggingLine)
@@ -407,6 +415,7 @@ class AceScriptEditorEngine(
         snapshot.selection?.let {
             selectRange(it.startOffset, it.endOffset)
         } ?: jumpTo(snapshot.cursorLine, snapshot.cursorColumn)
+        aceCodeEditor.restoreScroll(snapshot.firstVisibleLine, snapshot.firstVisibleColumn)
         searchQuery = snapshot.searchQuery
         searchOptions = snapshot.searchOptions
     }
@@ -418,6 +427,10 @@ class AceScriptEditorEngine(
     private fun createAceListener(): AceCodeEditor.Listener {
         return object : AceCodeEditor.Listener {
             override fun onTextChanged(text: String, state: AceCodeEditor.AceEditorState) {
+                if (suppressProgrammaticTextChange) {
+                    suppressProgrammaticTextChange = false
+                    return
+                }
                 textChangeCallbacks.forEach { it.onTextChanged(text) }
             }
 

@@ -80,6 +80,12 @@ class AceCodeEditor @JvmOverloads constructor(
     var selectedTextSnapshot = ""
         private set
 
+    var firstVisibleLine = 0
+        private set
+
+    var firstVisibleColumn = 0
+        private set
+
     private var loaded = false
     private var userTouching = false
 
@@ -105,11 +111,13 @@ class AceCodeEditor @JvmOverloads constructor(
 
     fun setText(text: String?) {
         textSnapshot = text.orEmpty()
+        dirty = false
         invokeAce("setText", quote(textSnapshot))
     }
 
     fun setTextDirty(text: String?) {
         textSnapshot = text.orEmpty()
+        dirty = true
         invokeAce("setTextDirty", quote(textSnapshot))
     }
 
@@ -246,6 +254,16 @@ class AceCodeEditor @JvmOverloads constructor(
 
     fun setDebuggingLine(line: Int) {
         invokeAce("setDebuggingLine", line.toString())
+    }
+
+    fun restoreScroll(firstVisibleLine: Int?, firstVisibleColumn: Int?) {
+        if (firstVisibleLine == null && firstVisibleColumn == null) {
+            return
+        }
+        invokeAce(
+            "restoreScroll",
+            "${(firstVisibleLine ?: 0).coerceAtLeast(0)}, ${(firstVisibleColumn ?: 0).coerceAtLeast(0)}",
+        )
     }
 
     fun requestEditorFocus() {
@@ -412,6 +430,8 @@ class AceCodeEditor @JvmOverloads constructor(
         breakpointsSnapshot = state.breakpoints
         selectionSnapshot = state.selection
         selectedTextSnapshot = state.selectedText
+        firstVisibleLine = state.firstVisibleLine
+        firstVisibleColumn = state.firstVisibleColumn
         return state
     }
 
@@ -423,6 +443,7 @@ class AceCodeEditor @JvmOverloads constructor(
             val obj = JSONObject(stateJson)
             val cursorObj = obj.optJSONObject("cursor")
             val selectionObj = obj.optJSONObject("selection")
+            val scrollObj = obj.optJSONObject("scroll")
             val breakpointsArray = obj.optJSONArray("breakpoints") ?: JSONArray()
             val breakpoints = buildList {
                 for (i in 0 until breakpointsArray.length()) {
@@ -450,6 +471,8 @@ class AceCodeEditor @JvmOverloads constructor(
                 ),
                 selectedText = obj.optString("selectedText", selectedTextSnapshot),
                 breakpoints = breakpoints,
+                firstVisibleLine = scrollObj?.optInt("firstVisibleLine", firstVisibleLine) ?: firstVisibleLine,
+                firstVisibleColumn = scrollObj?.optInt("firstVisibleColumn", firstVisibleColumn) ?: firstVisibleColumn,
             )
         }.getOrElse {
             handleError("Invalid ACE state: ${it.message}")
@@ -468,6 +491,8 @@ class AceCodeEditor @JvmOverloads constructor(
             selection = selectionSnapshot,
             selectedText = selectedTextSnapshot,
             breakpoints = breakpointsSnapshot,
+            firstVisibleLine = firstVisibleLine,
+            firstVisibleColumn = firstVisibleColumn,
         )
     }
 
@@ -607,6 +632,8 @@ class AceCodeEditor @JvmOverloads constructor(
         val selection: AceSelection,
         val selectedText: String,
         val breakpoints: List<Int>,
+        val firstVisibleLine: Int,
+        val firstVisibleColumn: Int,
     )
 
     data class AceCursor(

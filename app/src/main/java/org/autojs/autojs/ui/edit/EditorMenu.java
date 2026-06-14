@@ -17,6 +17,7 @@ import org.autojs.autojs.model.indices.AndroidClass;
 import org.autojs.autojs.model.indices.ClassSearchingItem;
 import org.autojs.autojs.script.JavaScriptFileSource;
 import org.autojs.autojs.ui.common.NotAskAgainDialog;
+import org.autojs.autojs.ui.edit.editor.engine.EditorEngineType;
 import org.autojs.autojs.ui.edit.editor.engine.ScriptEditorEngine;
 import org.autojs.autojs.ui.edit.keyboard.SymbolsSettingsActivity;
 import org.autojs.autojs.ui.main.scripts.EditableFileInfoDialogManager;
@@ -46,7 +47,6 @@ public class EditorMenu {
 
     private final EditorView mEditorView;
     private final Context mContext;
-    private final ScriptEditorEngine mEditor;
     private final boolean mReadOnly;
 
     public EditorMenu(EditorView editorView) {
@@ -56,7 +56,6 @@ public class EditorMenu {
     public EditorMenu(EditorView editorView, boolean readOnly) {
         mEditorView = editorView;
         mContext = editorView.getContext();
-        mEditor = editorView.editor;
         mReadOnly = readOnly;
     }
 
@@ -64,6 +63,7 @@ public class EditorMenu {
         if (menu == null) {
             return;
         }
+        prepareEditorEngineMenu(menu);
         if (!mReadOnly) {
             return;
         }
@@ -92,6 +92,22 @@ public class EditorMenu {
         }
     }
 
+    private ScriptEditorEngine currentEditor() {
+        return mEditorView.editor;
+    }
+
+    private void prepareEditorEngineMenu(Menu menu) {
+        ScriptEditorEngine editor = currentEditor();
+        MenuItem nativeItem = menu.findItem(R.id.action_editor_engine_native);
+        if (nativeItem != null) {
+            nativeItem.setChecked(editor.getEngineType() == EditorEngineType.NATIVE);
+        }
+        MenuItem aceItem = menu.findItem(R.id.action_editor_engine_ace);
+        if (aceItem != null) {
+            aceItem.setChecked(editor.getEngineType() == EditorEngineType.ACE);
+        }
+    }
+
     public boolean onOptionsItemSelected(MenuItem item) {
         int itemId = item.getItemId();
         if (itemId == R.id.action_log) {
@@ -112,7 +128,7 @@ public class EditorMenu {
     private boolean onDebugOptionsSelected(MenuItem item) {
         int itemId = item.getItemId();
         if (itemId == R.id.action_breakpoint) {
-            mEditor.addOrRemoveBreakpointAtCurrentLine();
+            currentEditor().addOrRemoveBreakpointAtCurrentLine();
             return true;
         }
         if (itemId == R.id.action_launch_debugger) {
@@ -126,7 +142,7 @@ public class EditorMenu {
             return tryDoing(mEditorView::debug);
         }
         if (itemId == R.id.action_remove_all_breakpoints) {
-            mEditor.removeAllBreakpoints();
+            currentEditor().removeAllBreakpoints();
             return true;
         }
         return false;
@@ -139,19 +155,19 @@ public class EditorMenu {
             return true;
         }
         if (itemId == R.id.action_jump_to_start) {
-            mEditor.jumpToStart();
+            currentEditor().jumpToStart();
             return true;
         }
         if (itemId == R.id.action_jump_to_end) {
-            mEditor.jumpToEnd();
+            currentEditor().jumpToEnd();
             return true;
         }
         if (itemId == R.id.action_jump_to_line_start) {
-            mEditor.jumpToLineStart();
+            currentEditor().jumpToLineStart();
             return true;
         }
         if (itemId == R.id.action_jump_to_line_end) {
-            mEditor.jumpToLineEnd();
+            currentEditor().jumpToLineEnd();
             return true;
         }
         return false;
@@ -184,6 +200,14 @@ public class EditorMenu {
         if (itemId == R.id.action_editor_theme) {
             return tryDoing(mEditorView::selectEditorTheme);
         }
+        if (itemId == R.id.action_editor_engine_native) {
+            mEditorView.switchEditorEngine(EditorEngineType.NATIVE);
+            return true;
+        }
+        if (itemId == R.id.action_editor_engine_ace) {
+            mEditorView.switchEditorEngine(EditorEngineType.ACE);
+            return true;
+        }
         if (itemId == R.id.action_open_by_other_apps) {
             return tryDoing(mEditorView::openByOtherApps);
         }
@@ -208,7 +232,7 @@ public class EditorMenu {
 
     private void importJavaPackageOrClass() {
         new ClassSearchDialogBuilder(mContext)
-                .setQuery(mEditor.getSelectedTextSnapshot())
+                .setQuery(currentEditor().getSelectedTextSnapshot())
                 .itemClick((dialog, item, pos) -> showClassSearchingItem(dialog, item))
                 .title(R.string.text_find_java_classes)
                 .show();
@@ -251,8 +275,9 @@ public class EditorMenu {
                     //  # } else {
                     //  #     mEditor.insert(0, item.getImportText() + ";\n");
                     //  # }
-                    var executionInfo = JavaScriptFileSource.parseExecutionMode(mEditor.getText());
-                    mEditor.insert(executionInfo.getLineno(), item.getImportText() + ";\n");
+                    ScriptEditorEngine editor = currentEditor();
+                    var executionInfo = JavaScriptFileSource.parseExecutionMode(editor.getText());
+                    editor.insert(executionInfo.getLineno(), item.getImportText() + ";\n");
                 })
                 .onNeutral((ignored, which) -> IntentUtils.browse(
                         mContext,
@@ -299,7 +324,7 @@ public class EditorMenu {
                     String newKey = itemKeys.get(which);
                     if (!Objects.equals(newKey, itemKey)) {
                         Pref.putString(key, newKey);
-                        mEditor.notifyPinchToZoomStrategyChanged(newKey);
+                        currentEditor().notifyPinchToZoomStrategyChanged(newKey);
                     }
                     return true;
                 })
@@ -363,10 +388,10 @@ public class EditorMenu {
             return paste();
         }
         if (itemId == R.id.action_clear) {
-            return tryDoing(() -> mEditor.setText(""));
+            return tryDoing(() -> currentEditor().setText(""));
         }
         if (itemId == R.id.action_comment) {
-            return tryDoing(mEditor::toggleComment);
+            return tryDoing(() -> currentEditor().toggleComment());
         }
         if (itemId == R.id.action_beautify) {
             return tryDoing(mEditorView::beautifyCode);
@@ -375,7 +400,7 @@ public class EditorMenu {
     }
 
     private void jumpToLine() {
-        showJumpDialog(mEditor.getLineCountSnapshot());
+        showJumpDialog(currentEditor().getLineCountSnapshot());
     }
 
     private void showJumpDialog(final int lineCount) {
@@ -388,7 +413,7 @@ public class EditorMenu {
                     }
                     try {
                         int line = Math.max(Math.min(Integer.parseInt(input.toString()), lineCount), 1);
-                        mEditor.jumpTo(line - 1, 0);
+                        currentEditor().jumpTo(line - 1, 0);
                     } catch (NumberFormatException ignored) {
                         /* Ignored. */
                     }
@@ -421,22 +446,22 @@ public class EditorMenu {
                     .positiveColorRes(R.color.dialog_button_default)::build);
             return;
         }
-        EditableFileInfoDialogManager.showEditableFileInfoDialog(mContext, new File(path), mEditor::getText);
+        EditableFileInfoDialogManager.showEditableFileInfoDialog(mContext, new File(path), () -> currentEditor().getText());
     }
 
     protected boolean copyLine() {
-        return tryDoing(mEditor::copyLine);
+        return tryDoing(() -> currentEditor().copyLine());
     }
 
     protected boolean deleteLine() {
-        return tryDoing(mEditor::deleteLine);
+        return tryDoing(() -> currentEditor().deleteLine());
     }
 
     protected boolean paste() {
         return tryDoing(() -> {
             CharSequence clip = getClip();
             if (clip != null) {
-                mEditor.insert(clip.toString());
+                currentEditor().insert(clip.toString());
             }
         });
     }
@@ -447,7 +472,7 @@ public class EditorMenu {
     }
 
     private void findOrReplace() {
-        String selectedText = mEditor.getSelectedTextSnapshot();
+        String selectedText = currentEditor().getSelectedTextSnapshot();
                     // Prefer restoring last search (even after exit search mode).
                     // zh-CN: 优先恢复 "上一次搜索" (即使已退出搜索模式), 避免 selection (命中内容) 覆盖关键词.
         String preferredQuery = mEditorView.getPreferredSearchQueryForDialogOrNull();
@@ -471,7 +496,7 @@ public class EditorMenu {
     }
 
     private void copyAll() {
-        ClipboardUtils.setClip(mContext, mEditor.getText());
+        ClipboardUtils.setClip(mContext, currentEditor().getText());
         ViewUtils.showSnack(mEditorView, R.string.text_already_copied_to_clip);
     }
 

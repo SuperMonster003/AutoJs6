@@ -427,7 +427,12 @@ class NativeCodeEditorEngine(
     }
 
     override fun restoreStateSnapshot(snapshot: EditorStateSnapshot) {
-        text = snapshot.text
+        codeEditor.setInitialText(snapshot.text)
+        if (snapshot.dirty) {
+            codeEditor.markTextAsChanged()
+        } else {
+            codeEditor.markTextAsSaved()
+        }
         setReadOnly(snapshot.readOnly)
         setTextSizeSp(snapshot.fontSizeSp)
         setDebuggingLine(snapshot.debuggingLine)
@@ -444,6 +449,7 @@ class NativeCodeEditorEngine(
 
         searchQuery = snapshot.searchQuery
         searchOptions = snapshot.searchOptions
+        restoreScroll(snapshot)
     }
 
     override fun destroy() {
@@ -520,6 +526,16 @@ class NativeCodeEditorEngine(
     private fun firstVisibleLine(): Int? {
         val layout = codeEditor.codeEditText.layout ?: return null
         return layout.getLineForVertical(codeEditor.scrollY)
+    }
+
+    private fun restoreScroll(snapshot: EditorStateSnapshot) {
+        val firstVisibleLine = snapshot.firstVisibleLine ?: return
+        codeEditor.codeEditText.post {
+            val layout = codeEditor.codeEditText.layout ?: return@post
+            val line = firstVisibleLine.coerceIn(0, (layout.lineCount - 1).coerceAtLeast(0))
+            val scrollX = (snapshot.firstVisibleColumn ?: 0).coerceAtLeast(0)
+            codeEditor.scrollTo(scrollX, layout.getLineTop(line).coerceAtLeast(0))
+        }
     }
 
     private fun restoreBreakpoints(breakpoints: List<EditorBreakpoint>) {
