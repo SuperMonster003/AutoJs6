@@ -34,7 +34,6 @@ import org.autojs.autojs.util.StringUtils.isUri
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.ImageFeatureMatching
 import org.autojs.autojs.runtime.api.ImageSimilarity
-import org.autojs.autojs.runtime.api.Images.initOpenCvIfNeeded
 import org.autojs.autojs.runtime.api.ScreenMetrics
 import org.autojs.autojs.runtime.api.ScriptPromiseAdapter
 import org.autojs.autojs.runtime.api.augment.AsEmitter
@@ -56,10 +55,12 @@ import org.autojs.autojs.util.RhinoUtils.handleAsyncOperation
 import org.autojs.autojs.util.RhinoUtils.isBackgroundThread
 import org.autojs.autojs.util.RhinoUtils.isUiThread
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
+import org.autojs.autojs.util.RhinoUtils.undefined
 import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.ScriptableObject
+import org.mozilla.javascript.Undefined
 import org.opencv.core.CvType
 import org.opencv.features2d.DescriptorMatcher
 import org.opencv.imgproc.Imgproc
@@ -84,6 +85,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
 
     @Suppress("DEPRECATION")
     override val selfAssignmentFunctions = listOf(
+        ::initOpenCvIfNeeded.name,
         ::read.name,
         ::imread.name,
         ::copy.name,
@@ -186,6 +188,12 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
 
         @JvmField
         val DEFAULT_IMAGE_SIMILARITY_METRIC = "mssim"
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun initOpenCvIfNeeded(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsIsEmpty(args) {
+            undefined { ApiImages.initOpenCvIfNeeded() }
+        }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
@@ -442,7 +450,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
             require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.threshold must be a ImageWrapper" }
             try {
-                initOpenCvIfNeeded()
+                ApiImages.initOpenCvIfNeeded()
                 val mat = AutoJsMat()
                 Imgproc.threshold(image.mat, mat, coerceNumber(threshold), coerceNumber(maxVal), parseThresholdType(type))
                 matToImage(scriptRuntime, arrayOf(mat))
@@ -458,7 +466,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
             require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.inRange must be a ImageWrapper" }
             try {
-                initOpenCvIfNeeded()
+                ApiImages.initOpenCvIfNeeded()
                 val dst = AutoJsMat()
                 OpencvCore.inRange(image.mat, parseScalar(Colors.toIntRhino(lowerBound)), parseScalar(Colors.toIntRhino(upperBound)), dst)
                 matToImage(scriptRuntime, arrayOf(dst))
@@ -474,7 +482,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
             require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.interval must be a ImageWrapper" }
             try {
-                initOpenCvIfNeeded()
+                ApiImages.initOpenCvIfNeeded()
                 val (lowerBound, upperBound) = parseScalars(Colors.toIntRhino(color), coerceNumber(threshold))
                 val dst = AutoJsMat()
                 OpencvCore.inRange(image.mat, lowerBound, upperBound, dst)
@@ -492,7 +500,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
             require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.adaptiveThreshold must be a ImageWrapper" }
             try {
-                initOpenCvIfNeeded()
+                ApiImages.initOpenCvIfNeeded()
                 val mat = AutoJsMat()
                 val adaptiveThresholdValue = Imgproc::class.java.getField("ADAPTIVE_THRESH_${coerceString(adaptiveMethod).uppercase()}").getInt(null)
                 val thresholdValue = Imgproc::class.java.getField("THRESH_${coerceString(thresholdType).uppercase()}").getInt(null)
@@ -510,7 +518,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
             require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.blur must be a ImageWrapper" }
             try {
-                initOpenCvIfNeeded()
+                ApiImages.initOpenCvIfNeeded()
                 val mat = AutoJsMat()
                 when (anchor) {
                     null -> Imgproc.blur(image.mat, mat, parseSize(ksize))
@@ -531,7 +539,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
             require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.medianBlur must be a ImageWrapper" }
             try {
-                initOpenCvIfNeeded()
+                ApiImages.initOpenCvIfNeeded()
                 val ksize = when (size) {
                     is NativeArray -> {
                         require(size.size == 2) {
@@ -569,7 +577,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.gaussianBlur must be a ImageWrapper" }
             try {
                 /* 按需初始化 OpenCV. */
-                initOpenCvIfNeeded()
+                ApiImages.initOpenCvIfNeeded()
                 /* Mat (矩阵) 对象. */
                 val mat = AutoJsMat()
                 /* sigmaX. */
@@ -593,7 +601,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
             require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.bilateralFilter must be a ImageWrapper" }
             try {
-                initOpenCvIfNeeded()
+                ApiImages.initOpenCvIfNeeded()
                 val mat = AutoJsMat()
                 val dValue = parseIntNumber(d, 0)
                 val sigmaColorValue = parseNumber(sigmaColor, 40)
@@ -612,7 +620,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
             require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.cvtColor must be a ImageWrapper" }
             try {
-                initOpenCvIfNeeded()
+                ApiImages.initOpenCvIfNeeded()
                 val mat = AutoJsMat()
                 val colorCode = Imgproc::class.java.getField("COLOR_$code").getInt(null)
                 when (dstCn) {
@@ -637,7 +645,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             var grayImage: ImageWrapper? = null
             val circles = AutoJsMat()
             try {
-                initOpenCvIfNeeded()
+                ApiImages.initOpenCvIfNeeded()
                 grayImage = if (isGrayscale(scriptRuntime, arrayOf(image))) image else grayscale(scriptRuntime, arrayOf(image)).oneShot()
                 mat = when {
                     region.isJsNullish() -> grayImage.mat
@@ -678,7 +686,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
             require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.resize must be a ImageWrapper" }
             try {
-                initOpenCvIfNeeded()
+                ApiImages.initOpenCvIfNeeded()
                 val mat = AutoJsMat()
                 resizeInternal(image, mat, size, 0.0, 0.0, interpolation)
                 matToImage(scriptRuntime, arrayOf(mat))
@@ -694,7 +702,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
             require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.scale must be a ImageWrapper" }
             try {
-                initOpenCvIfNeeded()
+                ApiImages.initOpenCvIfNeeded()
                 val mat = AutoJsMat()
                 resizeInternal(image, mat, 0, coerceNumber(fx), coerceNumber(fy), interpolation)
                 matToImage(scriptRuntime, arrayOf(mat))
@@ -710,7 +718,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
             require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.rotate must be a ImageWrapper" }
             try {
-                initOpenCvIfNeeded()
+                ApiImages.initOpenCvIfNeeded()
                 val centerX = parseNumber(centerXArg) { image.width / 2 }.toFloat()
                 val centerY = parseNumber(centerYArg) { image.height / 2 }.toFloat()
                 scriptRuntime.images.rotate(image, centerX, centerY, coerceFloatNumber(degree))
@@ -726,7 +734,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
             require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.flip must be a ImageWrapper" }
             try {
-                initOpenCvIfNeeded()
+                ApiImages.initOpenCvIfNeeded()
                 val (horizontal, vertical) = when (argList.size) {
                     1 -> true to false
                     2 -> parseFlipOrientations(arg1)
@@ -780,7 +788,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
                 val imageBRaw = if (oB.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(oB), true))?.oneShot() else oB
                 require(imageBRaw is ImageWrapper) { "Argument \"imageB\" ${imageBRaw.jsBrief()} for images.concat must be a ImageWrapper" }
                 imageB = imageBRaw
-                initOpenCvIfNeeded()
+                ApiImages.initOpenCvIfNeeded()
                 ApiImages.concat(scriptRuntime, imageA, imageB, directionToGravityToConcat(direction))
             } finally {
                 ApiImages.shoot(imageA, imageB)
@@ -801,7 +809,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
                 val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
                 require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.detectColor must be a ImageWrapper" }
                 imageRef = image
-                initOpenCvIfNeeded()
+                ApiImages.initOpenCvIfNeeded()
                 val pixel = pixel(scriptRuntime, arrayOf(image, coerceIntNumber(x), coerceIntNumber(y)))
                 return ColorDetector
                     .get(Colors.toIntRhino(color), coerceString(algorithm, DEFAULT_COLOR_ALGORITHM), parseIntNumber(threshold, DEFAULT_COLOR_THRESHOLD))
@@ -835,7 +843,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
                 require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.detectMultiColors must be a ImageWrapper" }
                 imageRef = image
                 require(paths is NativeArray) { "Argument \"paths\" ${paths.jsBrief()} for images.detectMultiColors must be a JavaScript Array" }
-                initOpenCvIfNeeded()
+                ApiImages.initOpenCvIfNeeded()
                 val opt = options as? NativeObject ?: newNativeObject()
                 return scriptRuntime.images.colorFinder.detectMultiColors(
                     image,
@@ -876,7 +884,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
                 val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
                 require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.findPointByColor must be a ImageWrapper" }
                 imageRef = image
-                initOpenCvIfNeeded()
+                ApiImages.initOpenCvIfNeeded()
                 val opt = when {
                     args.size < 3 -> newNativeObject()
                     args.size == 3 -> when {
@@ -945,7 +953,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
                 val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
                 require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.findPointsByColor must be a ImageWrapper" }
                 imageRef = image
-                initOpenCvIfNeeded()
+                ApiImages.initOpenCvIfNeeded()
                 val opt = options as? NativeObject ?: newNativeObject()
                 return scriptRuntime.images.colorFinder.findPointsByColor(
                     image,
@@ -981,7 +989,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
                 require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.findPointByColors must be a ImageWrapper" }
                 imageRef = image
                 require(paths is NativeArray) { "Argument \"paths\" ${paths.jsBrief()} for images.findPointByColors must be a JavaScript Array" }
-                initOpenCvIfNeeded()
+                ApiImages.initOpenCvIfNeeded()
                 val opt = options as? NativeObject ?: newNativeObject()
                 return scriptRuntime.images.colorFinder.findPointByColors(
                     image,
@@ -1014,7 +1022,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.findPointsByColors must be a ImageWrapper" }
             try {
                 require(paths is NativeArray) { "Argument \"paths\" ${paths.jsBrief()} for images.findPointsByColors must be a JavaScript Array" }
-                initOpenCvIfNeeded()
+                ApiImages.initOpenCvIfNeeded()
                 val opt = options as? NativeObject ?: newNativeObject()
                 scriptRuntime.images.colorFinder.findPointsByColors(
                     image,
@@ -1049,7 +1057,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
                 val template = if (oB.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(oB), true))?.oneShot() else oB
                 require(template is ImageWrapper) { "Argument \"template\" ${oB.jsBrief()} for images.$funcName must be a ImageWrapper" }
                 imageB = template
-                initOpenCvIfNeeded()
+                ApiImages.initOpenCvIfNeeded()
                 return when {
                     args.size > 2 && xOrOptions !is NativeObject -> {
                         val options = mapOf(
@@ -1104,7 +1112,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
                 val template = if (oB.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(oB), true))?.oneShot() else oB
                 require(template is ImageWrapper) { "Argument \"template\" ${template.jsBrief()} for images.matchTemplate must be a ImageWrapper" }
                 imageB = template
-                initOpenCvIfNeeded()
+                ApiImages.initOpenCvIfNeeded()
                 val opt = options as? NativeObject ?: newNativeObject()
                 val weakThreshold = parseWeakThreshold(opt, 0.6).toFloat()
                 val threshold = parseThreshold(opt, 0.9).toFloat()
@@ -1187,7 +1195,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun matToImage(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ImageWrapper = ensureArgumentsOnlyOne(args) {
-            initOpenCvIfNeeded()
+            ApiImages.initOpenCvIfNeeded()
             when (it) {
                 is AutoJsMat -> ImageWrapper.ofMat(scriptRuntime, it)
                 is OpencvMat -> ImageWrapper.ofMat(scriptRuntime, it)
@@ -1204,7 +1212,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.detectAndComputeFeatures must be a ImageWrapper" }
             var mat: AutoJsMat? = null
             try {
-                initOpenCvIfNeeded()
+                ApiImages.initOpenCvIfNeeded()
                 val opt = fillDetectAndComputeFeaturesOptions(image.height, image.width, options as? NativeObject ?: newNativeObject())
                 val rect = buildRegionInternal(image, opt.region)
                 mat = scriptRuntime.images.newMat(image.mat, rect)

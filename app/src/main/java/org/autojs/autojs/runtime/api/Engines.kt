@@ -1,5 +1,6 @@
 package org.autojs.autojs.runtime.api
 
+import androidx.annotation.VisibleForTesting
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.engine.JavaScriptEngine
 import org.autojs.autojs.engine.ScriptEngine
@@ -8,7 +9,7 @@ import org.autojs.autojs.execution.ScriptExecution
 import org.autojs.autojs.rhino.extension.IterableExtensions.toNativeArray
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.script.AutoFileSource
-import org.autojs.autojs.script.JavaScriptFileSource
+import org.autojs.autojs.script.ScriptLaunchSourceFactory
 import org.autojs.autojs.script.ScriptSource
 import org.autojs.autojs.script.StringScriptSource
 import org.mozilla.javascript.NativeArray
@@ -36,7 +37,11 @@ class Engines(private val mScriptRuntime: ScriptRuntime) {
     }
 
     fun execScriptFile(path: String, config: ExecutionConfig?): ScriptExecution {
-        return AutoJs.instance.scriptEngineService.execute(JavaScriptFileSource(mScriptRuntime.files.nonNullPath(path)), config)
+        val launch = ScriptLaunchSourceFactory.createPathLaunch(mScriptRuntime.files.nonNullPath(path))
+        return AutoJs.instance.scriptEngineService.execute(
+            launch.source,
+            createExecScriptFileExecutionConfig(launch, config),
+        )
     }
 
     fun execAutoFile(path: String, config: ExecutionConfig?): ScriptExecution {
@@ -50,6 +55,19 @@ class Engines(private val mScriptRuntime: ScriptRuntime) {
     fun stopAllAndToast(): Int = AutoJs.instance.scriptEngineService.stopAllAndToast()
 
     companion object {
+
+        @JvmStatic
+        @VisibleForTesting
+        fun createExecScriptFileExecutionConfig(
+            launch: ScriptLaunchSourceFactory.Launch,
+            config: ExecutionConfig?,
+        ): ExecutionConfig {
+            val base = config ?: ExecutionConfig()
+            return launch.createExecutionConfig(
+                base = base,
+                overrideWorkingDirectory = base.workingDirectory.isBlank() || launch.nodeProjectLaunchSource != null,
+            )
+        }
 
         private fun execScriptInternal(name: String, script: String, config: ExecutionConfig): ScriptExecution {
             val scriptSource = StringScriptSource(name, script).apply { prefix = "\$engine/" }

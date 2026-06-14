@@ -21,6 +21,8 @@ import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.core.ui.inflater.ImageLoader
 import org.autojs.autojs.core.ui.inflater.util.Drawables
+import org.autojs.autojs.engine.NativeNodeProcessService
+import org.autojs.autojs.engine.NodeRuntimeBackend
 import org.autojs.autojs.event.GlobalKeyObserver
 import org.autojs.autojs.external.receiver.DynamicBroadcastReceivers
 import org.autojs.autojs.inrt.InrtShortcuts
@@ -64,6 +66,9 @@ class App : MultiDexApplication(), WorkManagerConfiguration.Provider {
                 ThemeColorManager.init()
                 setUpDefaultNightMode()
             }
+            isNativeNodeProcess() -> {
+                setUpDebugEnvironment()
+            }
             else /* Main process. */ -> {
                 if (AbstractAutoJs.isInrt) {
                     InrtPref.syncLaunchConfigWithBuild()
@@ -71,6 +76,7 @@ class App : MultiDexApplication(), WorkManagerConfiguration.Provider {
                 }
                 setUpDebugEnvironment()
                 setUpLeakCanary()
+                prewarmNativeNodeIfNeeded()
 
                 AutoJs.initInstance(this)
                 GlobalKeyObserver.initIfNeeded(applicationContext)
@@ -241,6 +247,18 @@ class App : MultiDexApplication(), WorkManagerConfiguration.Provider {
         }
     }
 
+    private fun prewarmNativeNodeIfNeeded() {
+        when (NodeRuntimeBackend.current()) {
+            NodeRuntimeBackend.NATIVE,
+            NodeRuntimeBackend.AUTO -> {
+                runCatching { NativeNodeProcessService.prewarm(this) }
+                    .onFailure { Log.w(TAG, "Failed to prewarm native Node.js process.", it) }
+            }
+            NodeRuntimeBackend.RHINO,
+            NodeRuntimeBackend.EMBEDDED -> Unit
+        }
+    }
+
     override fun onConfigurationChanged(newConfig: Configuration) {
         ViewUtils.onConfigurationChangedForNightMode(newConfig)
         EventBus.getDefault().post(newConfig)
@@ -255,6 +273,8 @@ class App : MultiDexApplication(), WorkManagerConfiguration.Provider {
 
     companion object {
 
+        private const val TAG = "App"
+
         private lateinit var instance: WeakReference<App>
 
         val app: App
@@ -262,6 +282,11 @@ class App : MultiDexApplication(), WorkManagerConfiguration.Provider {
 
         private fun String.matchesProcessNameSuffix(): Boolean {
             return getProcessNameCompat().endsWith(this)
+        }
+
+        private fun isNativeNodeProcess(): Boolean {
+            val processSuffix = getProcessNameCompat().substringAfterLast(':')
+            return processSuffix == "nodejs" || processSuffix.startsWith("nodejs_")
         }
 
         fun getProcessNameCompat(): String {
