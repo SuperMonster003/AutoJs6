@@ -31,6 +31,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `NodeShellBridgeInstrumentationTest`
 - [ ] `NodeFetchBridgeInstrumentationTest`
 - [ ] `NodeWorkerThreadsDesignGateInstrumentationTest`
+- [ ] optional `NodeEmbeddedPerformanceInstrumentationTest` run recorded for lifecycle/native-load changes
 - [ ] live bridge smoke verifies JavaScript can observe provider results
 - [ ] bridge smoke verifies `engines` snapshots, controlled `execScript`/`execScriptFile`, scoped path policy, spawn depth, and unsupported `execAutoFile`
 - [ ] bridge smoke verifies `dialogs` fake results and stable Android provider rejection
@@ -132,6 +133,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 
 - [ ] `process.version` and `process.versions` captured in smoke
 - [ ] native dependency report generated
+- [ ] optional performance report generated with `NodeEmbeddedPerformanceInstrumentationTest` and pulled by `:app:pullNodeEmbeddedPerformanceReports` for lifecycle/native-load changes
 - [ ] packaged verifier gives actionable failures
 - [ ] `ERR_AUTOJS6_*` codes stable for documented negative paths
 - [ ] resolver trace remains off by default once implemented
@@ -144,6 +146,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `docs/nodejs/COMPATIBILITY_PROFILE.md`
 - [ ] `docs/nodejs/SECURITY_MODEL.md`
 - [ ] `docs/nodejs/TESTING.md`
+- [ ] `docs/nodejs/PERFORMANCE.md` when benchmark behavior or report schema changes
 - [ ] `docs/nodejs/design/WORK_MANAGER.md` when scheduled/background task behavior changes
 - [ ] `docs/nodejs/design/ESM.md` when ESM or dynamic import behavior changes
 - [ ] `docs/nodejs/design/NETWORK.md` when network behavior, packaging permissions, or request policy changes

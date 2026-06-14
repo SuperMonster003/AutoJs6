@@ -59,6 +59,7 @@ Related properties:
 - `autojs.nodejs.esm.experimental=false`
 - `autojs.nodejs.network.experimental=false`
 - `autojs.nodejs.worker_threads.experimental=false`
+- optional Embedded Node performance benchmark: `NodeEmbeddedPerformanceInstrumentationTest`
 
 Do not remove the non-embedded paths while embedded lifecycle stress coverage is still evolving.
 
@@ -114,6 +115,7 @@ Important: `.mjs` currently routes to the Node backend, but ESM execution is sti
 
 - Aggregate local release verification tasks.
 - Keep device instrumentation and packaged smoke as first-class gates.
+- Keep optional startup/RSS benchmarks available for lifecycle and native-load changes without making noisy timing data a default release failure.
 
 ### P6-P8 Longer-Term Compatibility
 
@@ -146,5 +148,6 @@ Important: `.mjs` currently routes to the Node backend, but ESM execution is sti
 5. Keep ESM behind `docs/nodejs/design/ESM.md` and `autojs.nodejs.esm.experimental=false`; `.mjs` remains a Node route with default rejection.
 6. Keep network behind `docs/nodejs/design/NETWORK.md` and `autojs.nodejs.network.experimental=false`; Task 41 provides a controlled fetch wrapper and fake-provider coverage, while live Android network I/O remains disabled in normal builds and raw Node network modules stay denied.
 7. Keep `worker_threads` behind `docs/nodejs/design/WORKER_THREADS.md` and `autojs.nodejs.worker_threads.experimental=false`; Task 42 freezes the worker boundary without enabling worker execution.
-8. Refresh the packaged inrt template so `app.versionName` and `app.versionCode` can become exact packaged gates.
-9. Keep packaged APK verification in the loop for every bridge-facing module.
+8. Use `docs/nodejs/PERFORMANCE.md` and `NodeEmbeddedPerformanceInstrumentationTest` when changing embedded startup, native load, service lifecycle, or destroy behavior.
+9. Refresh the packaged inrt template so `app.versionName` and `app.versionCode` can become exact packaged gates.
+10. Keep packaged APK verification in the loop for every bridge-facing module.

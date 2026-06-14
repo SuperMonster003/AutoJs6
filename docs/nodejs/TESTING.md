@@ -201,6 +201,15 @@ Current `worker_threads` design gate focused instrumentation:
 
 This suite verifies `BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED=false`, the Kotlin capability registry, JavaScript profile flags, bare and `node:` `worker_threads` denial, `require.resolve("worker_threads")` denial, frozen profile flags, and shadowing protection against `node_modules/worker_threads`.
 
+Current Embedded Node performance benchmark:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeEmbeddedPerformanceInstrumentationTest"
+.\gradlew.bat --console=plain :app:pullNodeEmbeddedPerformanceReports
+```
+
+This benchmark writes machine-readable JSON reports to `app/build/reports/nodejs/perf/` after the pull task. It records device/ABI metadata, cold and warm script wall time, runtime `elapsedMs`, native load duration when exposed, RSS/PSS/thread/fd snapshots, and Node `process.memoryUsage()`/`process.resourceUsage()`. It is optional and does not fail release builds by default; pass `autojs.nodejs.perf.failOnThreshold=true` plus threshold instrumentation arguments for controlled severe-regression checks. See `docs/nodejs/PERFORMANCE.md`.
+
 ## Packaged APK Verification
 
 Current host-side packaged checks:
@@ -326,6 +335,7 @@ Any Node-facing runtime behavior change must update:
 - `docs/nodejs/SECURITY_MODEL.md` when a boundary changes
 - `docs/nodejs/TESTING.md` when commands or suites change
 - `docs/nodejs/RELEASE_CHECKLIST.md` when a release gate changes
+- `docs/nodejs/PERFORMANCE.md` when benchmark metrics, report schema, or threshold arguments change
 - `docs/nodejs/design/` design notes when changing broad surfaces such as fs, file URL, stream, zlib, scheduled/background tasks, ESM, network, workers, or native addons
 
 ## Aggregate Tasks

@@ -29,6 +29,7 @@ Runtime behavior remains scoped to AutoJs6 Safe Node Profile.
 - ESM experimental flag: `autojs.nodejs.esm.experimental=false`
 - Network experimental flag: `autojs.nodejs.network.experimental=false`
 - Worker threads experimental flag: `autojs.nodejs.worker_threads.experimental=false`
+- Optional performance benchmark: `NodeEmbeddedPerformanceInstrumentationTest`
 - Backend switches preserved: `rhino`, `native`, `embedded`, `auto`
 - Native one-shot backend remains present as a regression oracle.
 
@@ -269,9 +270,10 @@ Primary Node instrumentation classes currently contain:
 - `NodeShellBridgeInstrumentationTest`: 3 `@Test` methods
 - `NodeFetchBridgeInstrumentationTest`: 3 `@Test` methods
 - `NodeWorkerThreadsDesignGateInstrumentationTest`: 1 `@Test` method
+- `NodeEmbeddedPerformanceInstrumentationTest`: 1 `@Test` method
 - `EmbeddedNodePackagedApkSmokeTest`: 27 `@Test` methods
 
-Total primary Node instrumentation test methods: 329.
+Total primary Node instrumentation test methods: 330.
 
 The release aggregate tasks are Gradle host/build/package gates. Focused device instrumentation classes are still invoked explicitly with `connectedAppDebugAndroidTest` class filters.
 
@@ -334,6 +336,7 @@ The original Task 22-28 text assumed several surfaces were still unimplemented. 
 - Task 39: `docs/nodejs/design/ESM.md`
 - Task 40: `docs/nodejs/design/NETWORK.md`
 - Task 42: `docs/nodejs/design/WORKER_THREADS.md`
+- Task 43: `docs/nodejs/PERFORMANCE.md`
 
 Task 22/24/25/27/38 were documentation-only updates. Task 39 also adds an explicit disabled ESM flag and clearer `.mjs` rejection assertions. Task 40 adds an explicit disabled network flag and design gate. Task 42 adds an explicit disabled worker_threads flag and design gate. None of these tasks opens ESM, dynamic import, child process, worker threads, native addons, unrestricted network, unrestricted fs, or persistent background task registration.
 
@@ -555,6 +558,22 @@ Current default remains:
 - `require("autojs6:profile").experimentalFlags.workerThreads` reports `false`
 - future workers must not access AutoJs bridge modules, Android Context, accessibility, media projection, image, UI/dialog, shell, engines, raw network, child process, native addon, `vm`, inspector, or unrestricted filesystem APIs
 
+## Performance Benchmark Added After Task 42
+
+Task 43 adds `NodeEmbeddedPerformanceInstrumentationTest`, `docs/nodejs/PERFORMANCE.md`, and `:app:pullNodeEmbeddedPerformanceReports`.
+
+The benchmark is optional and does not fail release builds by default. It records:
+
+- device and ABI metadata
+- cold and warm `runScript` wall time
+- embedded result `elapsedMs`
+- `load.duration.ms` when exposed by the runtime
+- app RSS/PSS/thread/fd snapshots before and after script execution and after destroy
+- embedded service RSS/thread/fd snapshots when `/proc/<pid>` remains readable
+- Node `process.memoryUsage()`, `process.resourceUsage()`, `process.version`, and `process.versions`
+
+Reports use schema `autojs6-node-performance-v1` and are pulled to `app/build/reports/nodejs/perf/`. Threshold mode is available through `autojs.nodejs.perf.failOnThreshold=true` and explicit max-value instrumentation arguments, but remains off by default because timing and memory results are device-sensitive.
+
 ## Current Verification Status
 
 Verification performed while creating and extending this baseline:
@@ -621,8 +640,12 @@ Verification performed while creating and extending this baseline:
 - `NodeWorkerThreadsDesignGateInstrumentationTest`: 1/1 passed on a connected Android 12 device after Task 42.
 - `EmbeddedScriptMvpInstrumentationTest#autojs6ProfileModuleExposesReadOnlyCapabilityRegistry`: 1/1 passed on a connected Android 12 device after Task 42.
 - `NodeSecurityRegressionInstrumentationTest#dangerousApisAndNetworkOperationsStayDenied`: 1/1 passed on a connected Android 12 device after Task 42.
+- `:app:compileAppDebugKotlin`: passed after adding Task 43 performance report pull task.
+- `:app:compileAppDebugAndroidTestKotlin`: passed after adding Task 43 performance benchmark instrumentation.
+- `NodeEmbeddedPerformanceInstrumentationTest`: 1/1 passed on a connected Android 12 device after Task 43.
+- `:app:pullNodeEmbeddedPerformanceReports`: passed after Task 43 and pulled JSON reports to `app/build/reports/nodejs/perf/`.
 
-Instrumentation tests executed while creating and extending this baseline: 184 successful tests.
+Instrumentation tests executed while creating and extending this baseline: 185 successful tests.
 
 A full device and packaged release-candidate run still requires:
 
@@ -641,4 +664,5 @@ Recommended next tasks:
 - connect real providers for `dialogs`, `accessibility`, `media_projection`, and `image`
 - add a true packaged APK compatibility corpus smoke in addition to the current moduleSources/preload proxy
 - add packaged project opt-in gating for controlled network and make INTERNET permission verification actionable when that opt-in is used
+- compare Task 43 performance JSON medians when changing native load, service lifecycle, or destroy behavior
 - keep high-risk features behind design gates
