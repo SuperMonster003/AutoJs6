@@ -691,6 +691,7 @@ Verification performed while creating and extending this baseline:
 - Task 47 added checked-in examples under `sample/nodejs/` and `NodeExampleProjectInstrumentationTest` smoke coverage for `hello-node` and `toast-app`.
 - `:app:compileAppDebugAndroidTestKotlin`: passed after wiring `sample/nodejs` into the `androidTest` asset source set.
 - `NodeExampleProjectInstrumentationTest`: 2/2 passed on a connected Android 12 device after Task 47.
+- Task 48 added `docs/nodejs/MIGRATION_FROM_RHINO.md` with Rhino-to-Node migration guidance and linked it from the main Node docs.
 
 Instrumentation tests executed while creating and extending this baseline: 186 successful tests.
 
@@ -716,4 +717,5 @@ Recommended next tasks:
 - run Task 45 release flavor preflight for `nodeFull`, `nodeMini`, and `rhinoOnly` before changing native packaging rules
 - keep the Task 46 symbol archive report with APKs, logcat, and tombstones when triaging native crashes
 - keep Task 47 examples aligned with the documented Safe Node Profile and run `NodeExampleProjectInstrumentationTest` after changing example-facing modules
+- keep Task 48 Rhino migration examples synchronized with bridge modules, scoped fs policy, and packaged APK behavior
 - keep high-risk features behind design gates

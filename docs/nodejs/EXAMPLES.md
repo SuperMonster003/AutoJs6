@@ -14,6 +14,8 @@ Each example contains:
 - `main.cjs`
 - `expected-output.txt`
 
+For Rhino-to-Node migration guidance, see [MIGRATION_FROM_RHINO.md](MIGRATION_FROM_RHINO.md).
+
 ## Examples
 
 - `hello-node`: minimal Node entry script and version smoke.

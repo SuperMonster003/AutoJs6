@@ -12,6 +12,8 @@ This profile describes the current Safe Node surface. It is intentionally smalle
 - Kotlin capability registry: `NodeRuntimeCapabilities`
 - JavaScript profile module: `require("autojs6:profile")`
 
+Rhino migration guidance is documented in [MIGRATION_FROM_RHINO.md](MIGRATION_FROM_RHINO.md).
+
 ## Supported Entry Points
 
 - `"nodejs";` directive

@@ -73,6 +73,10 @@ Do not remove the non-embedded paths while embedded lifecycle stress coverage is
 
 Checked-in Node examples live under `sample/nodejs/`. See [EXAMPLES.md](EXAMPLES.md) for the project list, expected output files, and smoke-test command.
 
+## Migration Guide
+
+Rhino users should start with [MIGRATION_FROM_RHINO.md](MIGRATION_FROM_RHINO.md). The guide covers Node entry points, global API differences, Promise-based bridge calls, scoped filesystem behavior, and packaged APK differences.
+
 ## Routing Rules
 
 Node routing is enabled by:
