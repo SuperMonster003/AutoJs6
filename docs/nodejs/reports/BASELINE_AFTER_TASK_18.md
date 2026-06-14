@@ -688,6 +688,9 @@ Verification performed while creating and extending this baseline:
 - `:app:compileAppDebugKotlin`: passed after adding Task 46 runtime native library hash logging.
 - `:app:nativeNodeSymbolArchiveReport`: passed after Task 46 and generated `app/build/reports/native-node/native-symbol-archive-appDebug.txt` with `embedded.node.native.symbol_archive.ready=true`.
 - `:app:verifyEmbeddedNodeReleaseCandidate --dry-run`: passed after Task 46 and confirmed `nativeNodeSymbolArchiveReport` is part of the release-candidate task graph.
+- Task 47 added checked-in examples under `sample/nodejs/` and `NodeExampleProjectInstrumentationTest` smoke coverage for `hello-node` and `toast-app`.
+- `:app:compileAppDebugAndroidTestKotlin`: passed after wiring `sample/nodejs` into the `androidTest` asset source set.
+- `NodeExampleProjectInstrumentationTest`: 2/2 passed on a connected Android 12 device after Task 47.
 
 Instrumentation tests executed while creating and extending this baseline: 186 successful tests.
 
@@ -712,4 +715,5 @@ Recommended next tasks:
 - run Task 44 memory leak stress before merging lifecycle, bridge transport, fs, or image-handle ownership changes
 - run Task 45 release flavor preflight for `nodeFull`, `nodeMini`, and `rhinoOnly` before changing native packaging rules
 - keep the Task 46 symbol archive report with APKs, logcat, and tombstones when triaging native crashes
+- keep Task 47 examples aligned with the documented Safe Node Profile and run `NodeExampleProjectInstrumentationTest` after changing example-facing modules
 - keep high-risk features behind design gates

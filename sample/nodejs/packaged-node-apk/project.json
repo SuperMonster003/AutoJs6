@@ -1,0 +1,10 @@
+{
+  "name": "packaged-node-apk",
+  "type": "node",
+  "main": "main.cjs",
+  "node": {
+    "backend": "embedded",
+    "timeoutMs": 10000,
+    "packaged": true
+  }
+}

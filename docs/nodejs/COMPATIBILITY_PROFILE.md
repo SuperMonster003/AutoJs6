@@ -328,6 +328,8 @@ Release packaging profile:
 
 See [RELEASE_FLAVORS.md](design/RELEASE_FLAVORS.md) for Gradle properties and validation rules.
 
+Checked-in examples for the current profile live under `sample/nodejs/`; see [EXAMPLES.md](EXAMPLES.md).
+
 Supported ABI policy:
 
 - `arm64-v8a`: primary release target

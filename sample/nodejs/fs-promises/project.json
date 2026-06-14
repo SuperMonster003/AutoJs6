@@ -1,0 +1,9 @@
+{
+  "name": "fs-promises",
+  "type": "node",
+  "main": "main.cjs",
+  "node": {
+    "backend": "embedded",
+    "timeoutMs": 10000
+  }
+}

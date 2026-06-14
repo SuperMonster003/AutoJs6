@@ -65,8 +65,13 @@ Related properties:
 - optional Embedded Node performance benchmark: `NodeEmbeddedPerformanceInstrumentationTest`
 - extended Embedded Node memory leak stress gate: `NodeEmbeddedMemoryLeakStressInstrumentationTest`
 - native crash symbol archive gate: `nativeNodeSymbolArchiveReport`
+- checked-in example project smoke: `NodeExampleProjectInstrumentationTest`
 
 Do not remove the non-embedded paths while embedded lifecycle stress coverage is still evolving.
+
+## Example Projects
+
+Checked-in Node examples live under `sample/nodejs/`. See [EXAMPLES.md](EXAMPLES.md) for the project list, expected output files, and smoke-test command.
 
 ## Routing Rules
 

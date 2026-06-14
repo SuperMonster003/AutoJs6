@@ -1,0 +1,2 @@
+sample.npm-pure-js-cjs.value=....autojs6-safe-node
+sample.npm-pure-js-cjs=PASS

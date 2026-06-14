@@ -1,0 +1,6 @@
+{
+  "name": "@autojs6-sample/accessibility-click-text",
+  "private": true,
+  "type": "commonjs",
+  "main": "main.cjs"
+}

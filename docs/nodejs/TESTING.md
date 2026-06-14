@@ -46,6 +46,14 @@ Focused packaged `toast` bridge smoke:
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunToastBridgeEmbeddedNodePackagedApk"
 ```
 
+Checked-in example project smoke:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeExampleProjectInstrumentationTest"
+```
+
+This runs `sample/nodejs/hello-node` and `sample/nodejs/toast-app` from the `androidTest` asset source set.
+
 Focused packaged `app` bridge smoke:
 
 ```powershell
@@ -359,6 +367,7 @@ Any Node-facing runtime behavior change must update:
 - `docs/nodejs/SECURITY_MODEL.md` when a boundary changes
 - `docs/nodejs/TESTING.md` when commands or suites change
 - `docs/nodejs/RELEASE_CHECKLIST.md` when a release gate changes
+- `docs/nodejs/EXAMPLES.md` when adding or changing checked-in examples
 - `docs/nodejs/PERFORMANCE.md` when benchmark metrics, report schema, or threshold arguments change
 - `docs/nodejs/design/` design notes when changing broad surfaces such as fs, file URL, stream, zlib, scheduled/background tasks, ESM, network, workers, or native addons
 

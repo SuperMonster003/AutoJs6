@@ -1,0 +1,3 @@
+sample.accessibility-click-text.enabled=<true or false>
+sample.accessibility-click-text.clicked=<true, false, or SKIPPED>
+sample.accessibility-click-text=PASS

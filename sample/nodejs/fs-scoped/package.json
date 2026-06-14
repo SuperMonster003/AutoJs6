@@ -1,0 +1,6 @@
+{
+  "name": "@autojs6-sample/fs-scoped",
+  "private": true,
+  "type": "commonjs",
+  "main": "main.cjs"
+}

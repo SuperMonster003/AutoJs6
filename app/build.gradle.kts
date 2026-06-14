@@ -727,6 +727,9 @@ android {
         getByName(flavorNameInrt) {
             assets.directories.add("src/main/assets-$flavorNameInrt")
         }
+        getByName("androidTest") {
+            assets.directories.add("$rootDir/sample/nodejs")
+        }
 
     }
 

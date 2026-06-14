@@ -1,0 +1,6 @@
+{
+  "name": "@autojs6-sample/hello-node",
+  "private": true,
+  "type": "commonjs",
+  "main": "main.cjs"
+}

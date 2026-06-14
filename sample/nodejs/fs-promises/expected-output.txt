@@ -1,0 +1,2 @@
+sample.fs-promises.message=promise fs ok
+sample.fs-promises=PASS

@@ -1,0 +1,9 @@
+{
+  "name": "npm-pure-js-cjs",
+  "type": "node",
+  "main": "main.cjs",
+  "node": {
+    "backend": "embedded",
+    "timeoutMs": 10000
+  }
+}

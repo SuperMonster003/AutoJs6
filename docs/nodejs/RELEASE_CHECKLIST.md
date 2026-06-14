@@ -32,6 +32,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `NodeShellBridgeInstrumentationTest`
 - [ ] `NodeFetchBridgeInstrumentationTest`
 - [ ] `NodeWorkerThreadsDesignGateInstrumentationTest`
+- [ ] `NodeExampleProjectInstrumentationTest`
 - [ ] optional `NodeEmbeddedPerformanceInstrumentationTest` run recorded for lifecycle/native-load changes
 - [ ] extended `NodeEmbeddedMemoryLeakStressInstrumentationTest` run recorded before release candidates that change lifecycle, bridge, fs, or image-handle behavior
 - [ ] live bridge smoke verifies JavaScript can observe provider results
@@ -47,6 +48,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] bridge smoke verifies controlled `fetch` fake-provider GET/POST, timeout, abort, response budget, shadowing protection, and that raw `http`/`https`/`net`/`tls`/`dns` remain disabled
 - [ ] worker gate verifies `worker_threads` stays disabled, cannot be shadowed, and reports `experimentalFlags.workerThreads=false`
 - [ ] any future `tasks` bridge smoke verifies user-visible registration, scoped Node descriptors, and denied broadcast/boot/package paths
+- [ ] checked-in examples `hello-node` and `toast-app` still run from `sample/nodejs`
 
 ## Packaged APK
 
@@ -159,6 +161,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `docs/nodejs/COMPATIBILITY_PROFILE.md`
 - [ ] `docs/nodejs/SECURITY_MODEL.md`
 - [ ] `docs/nodejs/TESTING.md`
+- [ ] `docs/nodejs/EXAMPLES.md` when examples or example smoke coverage changes
 - [ ] `docs/nodejs/PERFORMANCE.md` when benchmark behavior or report schema changes
 - [ ] `docs/nodejs/NATIVE_CRASH_DIAGNOSTICS.md` when native crash capture, symbol archive, or symbolication behavior changes
 - [ ] `docs/nodejs/design/WORK_MANAGER.md` when scheduled/background task behavior changes
