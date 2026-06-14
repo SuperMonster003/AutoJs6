@@ -32,6 +32,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `NodeFetchBridgeInstrumentationTest`
 - [ ] `NodeWorkerThreadsDesignGateInstrumentationTest`
 - [ ] optional `NodeEmbeddedPerformanceInstrumentationTest` run recorded for lifecycle/native-load changes
+- [ ] extended `NodeEmbeddedMemoryLeakStressInstrumentationTest` run recorded before release candidates that change lifecycle, bridge, fs, or image-handle behavior
 - [ ] live bridge smoke verifies JavaScript can observe provider results
 - [ ] bridge smoke verifies `engines` snapshots, controlled `execScript`/`execScriptFile`, scoped path policy, spawn depth, and unsupported `execAutoFile`
 - [ ] bridge smoke verifies `dialogs` fake results and stable Android provider rejection
@@ -134,6 +135,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `process.version` and `process.versions` captured in smoke
 - [ ] native dependency report generated
 - [ ] optional performance report generated with `NodeEmbeddedPerformanceInstrumentationTest` and pulled by `:app:pullNodeEmbeddedPerformanceReports` for lifecycle/native-load changes
+- [ ] memory leak stress report generated with `NodeEmbeddedMemoryLeakStressInstrumentationTest` for lifecycle, bridge, fs, or image-handle changes
 - [ ] packaged verifier gives actionable failures
 - [ ] `ERR_AUTOJS6_*` codes stable for documented negative paths
 - [ ] resolver trace remains off by default once implemented

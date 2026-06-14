@@ -2,7 +2,7 @@
 
 Date: 2026-06-14
 
-This report freezes the checked-in Safe Node Profile after Tasks 1-18 and records the Task 19-42 audit, corpus, design-gate, focused-test, and bridge-expansion gates added immediately afterward. It is an engineering baseline for the next task group, not a claim that AutoJs6 exposes unrestricted desktop Node.js.
+This report freezes the checked-in Safe Node Profile after Tasks 1-18 and records the Task 19-44 audit, corpus, design-gate, focused-test, bridge-expansion, performance, and memory-stress gates added immediately afterward. It is an engineering baseline for the next task group, not a claim that AutoJs6 exposes unrestricted desktop Node.js.
 
 ## Scope
 
@@ -30,6 +30,7 @@ Runtime behavior remains scoped to AutoJs6 Safe Node Profile.
 - Network experimental flag: `autojs.nodejs.network.experimental=false`
 - Worker threads experimental flag: `autojs.nodejs.worker_threads.experimental=false`
 - Optional performance benchmark: `NodeEmbeddedPerformanceInstrumentationTest`
+- Extended memory leak stress gate: `NodeEmbeddedMemoryLeakStressInstrumentationTest`
 - Backend switches preserved: `rhino`, `native`, `embedded`, `auto`
 - Native one-shot backend remains present as a regression oracle.
 
@@ -271,9 +272,10 @@ Primary Node instrumentation classes currently contain:
 - `NodeFetchBridgeInstrumentationTest`: 3 `@Test` methods
 - `NodeWorkerThreadsDesignGateInstrumentationTest`: 1 `@Test` method
 - `NodeEmbeddedPerformanceInstrumentationTest`: 1 `@Test` method
+- `NodeEmbeddedMemoryLeakStressInstrumentationTest`: 1 `@Test` method
 - `EmbeddedNodePackagedApkSmokeTest`: 27 `@Test` methods
 
-Total primary Node instrumentation test methods: 330.
+Total primary Node instrumentation test methods: 331.
 
 The release aggregate tasks are Gradle host/build/package gates. Focused device instrumentation classes are still invoked explicitly with `connectedAppDebugAndroidTest` class filters.
 
@@ -574,6 +576,22 @@ The benchmark is optional and does not fail release builds by default. It record
 
 Reports use schema `autojs6-node-performance-v1` and are pulled to `app/build/reports/nodejs/perf/`. Threshold mode is available through `autojs.nodejs.perf.failOnThreshold=true` and explicit max-value instrumentation arguments, but remains off by default because timing and memory results are device-sensitive.
 
+## Memory Leak Stress Added After Task 43
+
+Task 44 adds `NodeEmbeddedMemoryLeakStressInstrumentationTest`.
+
+The stress gate is intended for extended release-candidate or lifecycle-change validation. It records `autojs6-node-memory-leak-stress-v1` JSON reports and covers:
+
+- 100 simple scripts
+- 100 scoped fs callback scripts
+- 100 `fs.promises` scripts when available
+- 100 fake `toast`/`app` bridge scripts
+- 50 fake image-handle create/use/recycle cycles
+- timeout scripts
+- uncaught exception scripts
+
+The gate samples RSS, Java heap, native heap, PSS, thread count, and fd count. It does not require exact stability; it fails only when a metric keeps rising across samples and exceeds conservative runaway thresholds. The same `:app:pullNodeEmbeddedPerformanceReports` task collects memory-stress JSON reports.
+
 ## Current Verification Status
 
 Verification performed while creating and extending this baseline:
@@ -644,8 +662,11 @@ Verification performed while creating and extending this baseline:
 - `:app:compileAppDebugAndroidTestKotlin`: passed after adding Task 43 performance benchmark instrumentation.
 - `NodeEmbeddedPerformanceInstrumentationTest`: 1/1 passed on a connected Android 12 device after Task 43.
 - `:app:pullNodeEmbeddedPerformanceReports`: passed after Task 43 and pulled JSON reports to `app/build/reports/nodejs/perf/`.
+- `:app:compileAppDebugAndroidTestKotlin`: passed after adding Task 44 memory leak stress instrumentation.
+- `NodeEmbeddedMemoryLeakStressInstrumentationTest`: 1/1 passed on a connected Android 12 device after Task 44.
+- `:app:pullNodeEmbeddedPerformanceReports`: passed after Task 44 and pulled performance plus memory-stress JSON reports to `app/build/reports/nodejs/perf/`.
 
-Instrumentation tests executed while creating and extending this baseline: 185 successful tests.
+Instrumentation tests executed while creating and extending this baseline: 186 successful tests.
 
 A full device and packaged release-candidate run still requires:
 
@@ -665,4 +686,5 @@ Recommended next tasks:
 - add a true packaged APK compatibility corpus smoke in addition to the current moduleSources/preload proxy
 - add packaged project opt-in gating for controlled network and make INTERNET permission verification actionable when that opt-in is used
 - compare Task 43 performance JSON medians when changing native load, service lifecycle, or destroy behavior
+- run Task 44 memory leak stress before merging lifecycle, bridge transport, fs, or image-handle ownership changes
 - keep high-risk features behind design gates

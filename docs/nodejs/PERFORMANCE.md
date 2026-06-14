@@ -90,3 +90,57 @@ Recommended comparison method:
 2. Compare medians, not single samples.
 3. Keep screen, power, and background load consistent.
 4. Record the report JSON with any lifecycle or native-load change.
+
+## Memory Leak Stress
+
+Run the extended leak stress gate on a connected device:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeEmbeddedMemoryLeakStressInstrumentationTest"
+.\gradlew.bat --console=plain :app:pullNodeEmbeddedPerformanceReports
+```
+
+Reports use schema `autojs6-node-memory-leak-stress-v1` and are pulled to the same host directory:
+
+```text
+app/build/reports/nodejs/perf/
+```
+
+Default scenarios:
+
+- 100 simple Embedded Node scripts
+- 100 scoped `fs` callback scripts
+- 100 `fs.promises` scripts when available
+- 100 fake-transport `toast`/`app` bridge scripts
+- 50 fake image-handle create/use/recycle cycles
+- 10 timeout scripts
+- 10 uncaught exception scripts
+
+Recorded metrics:
+
+- RSS from `/proc/self/status`
+- Java heap and committed Java heap
+- native heap from `Debug.getNativeHeapAllocatedSize()`
+- total/dalvik/native/other PSS from `Debug.MemoryInfo`
+- thread count from `/proc/self/task`
+- fd count from `/proc/self/fd`
+
+The stress gate does not require exact memory stability. It fails only when a metric keeps rising across samples and exceeds a conservative threshold. Defaults:
+
+- `autojs.nodejs.leak.maxRssDeltaKb=262144`
+- `autojs.nodejs.leak.maxJavaHeapDeltaKb=131072`
+- `autojs.nodejs.leak.maxNativeHeapDeltaKb=131072`
+- `autojs.nodejs.leak.maxThreadDelta=24`
+- `autojs.nodejs.leak.maxFdDelta=64`
+
+Useful local overrides:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest `
+  "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeEmbeddedMemoryLeakStressInstrumentationTest" `
+  "-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.leak.iterations=20" `
+  "-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.leak.imageIterations=10" `
+  "-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.leak.faultIterations=3"
+```
+
+Set `autojs.nodejs.leak.failOnRunaway=false` to collect a report without failing the test. Use that only for exploratory local profiling.
