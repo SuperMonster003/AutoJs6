@@ -14,6 +14,10 @@ import static org.autojs.autojs.util.FileUtils.TYPE.JAVASCRIPT;
  */
 public class TmpScriptFiles {
 
+    private static final String NODEJS_TMP_SCRIPTS_DIR_NAME = "tmp-nodejs-scripts/";
+
+    public static final String RHINO_TMP_SCRIPTS_DIR_NAME = "tmp-scripts/";
+
     public static File create(Context context) throws IOException {
         ensureTmpDir(context);
         File tmp = new File(getTmpDir(context), "tmp-" + System.currentTimeMillis() + JAVASCRIPT.extensionWithDot);
@@ -32,7 +36,11 @@ public class TmpScriptFiles {
     }
 
     public static File getTmpDir(Context context) {
-        return new File(context.getCacheDir(), "tmp-scripts/");
+        return new File(context.getCacheDir(), RHINO_TMP_SCRIPTS_DIR_NAME);
+    }
+
+    public static File getNodeJsTmpDir(Context context) {
+        return new File(getTmpDir(context), NODEJS_TMP_SCRIPTS_DIR_NAME);
     }
 
     private static void ensureTmpDir(Context context) {

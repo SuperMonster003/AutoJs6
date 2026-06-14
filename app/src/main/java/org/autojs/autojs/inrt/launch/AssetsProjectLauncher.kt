@@ -7,8 +7,10 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.text.TextUtils
+import android.util.Log
+import org.autojs.autojs.engine.NativeNodeEmbeddedProjectRunner
+import org.autojs.autojs.engine.NodeProjectLaunchDiagnostics
 import org.autojs.autojs.engine.encryption.ScriptEncryption
-import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.execution.ScriptExecution
 import org.autojs.autojs.inrt.LogActivity
 import org.autojs.autojs.inrt.Pref
@@ -18,6 +20,10 @@ import org.autojs.autojs.pio.UncheckedIOException
 import org.autojs.autojs.project.ProjectConfig
 import org.autojs.autojs.script.JavaScriptFileSource
 import org.autojs.autojs.script.JavaScriptSource
+import org.autojs.autojs.script.NodeProjectLaunchDescriptor
+import org.autojs.autojs.script.NodeProjectLaunchKind
+import org.autojs.autojs.script.NodeProjectLaunchSource
+import org.autojs.autojs.script.ScriptLaunchSourceFactory
 import org.autojs.autojs.util.IntentUtils.startSafely
 import java.io.File
 import java.io.IOException
@@ -29,7 +35,7 @@ open class AssetsProjectLauncher(private val mAssetsProjectDir: String, private 
 
     private val mProjectDir: String = File(mActivity.filesDir, "project/").path
     private val mProjectConfig: ProjectConfig = ProjectConfig.fromAssets(mActivity, ProjectConfig.configFileOfDir(mAssetsProjectDir))
-    private val mMainScriptFile: File = File(mProjectDir, mProjectConfig.mainScriptFileName)
+    private val mMainScriptFile: File
     private val mHandler: Handler = Handler(Looper.getMainLooper())
     private var mScriptExecution: ScriptExecution? = null
 
@@ -40,6 +46,7 @@ open class AssetsProjectLauncher(private val mAssetsProjectDir: String, private 
 
     init {
         prepare()
+        mMainScriptFile = resolveMainScriptFile()
     }
 
     fun launch(activity: Activity) {
@@ -74,8 +81,9 @@ open class AssetsProjectLauncher(private val mAssetsProjectDir: String, private 
             return
         }
         try {
-            val source = JavaScriptFileSource("main", mMainScriptFile)
-            val config = ExecutionConfig(workingDirectory = mProjectDir)
+            val launch = createMainScriptLaunch()
+            val source = launch.source as JavaScriptSource
+            val config = launch.createExecutionConfig()
             if (source.executionMode and JavaScriptSource.EXECUTION_MODE_UI != 0) {
                 config.intentFlags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_TASK_ON_HOME
             } else {
@@ -111,7 +119,9 @@ open class AssetsProjectLauncher(private val mAssetsProjectDir: String, private 
     private fun prepare() {
         val projectConfig = ProjectConfig.fromProjectDir(mProjectDir)
         if (projectConfig != null &&
-            TextUtils.equals(projectConfig.buildInfo.buildId, mProjectConfig.buildInfo.buildId)
+            TextUtils.equals(projectConfig.buildInfo.buildId, mProjectConfig.buildInfo.buildId) &&
+            TextUtils.equals(projectConfig.mainScriptFileName, mProjectConfig.mainScriptFileName) &&
+            TextUtils.equals(projectConfig.projectType, mProjectConfig.projectType)
         ) {
             initKey(projectConfig)
             return
@@ -123,6 +133,116 @@ open class AssetsProjectLauncher(private val mAssetsProjectDir: String, private 
         } catch (e: IOException) {
             throw UncheckedIOException(e)
         }
+    }
+
+    private fun resolveMainScriptFile(): File {
+        val projectRoot = File(mProjectDir)
+        return try {
+            NativeNodeEmbeddedProjectRunner.resolveProjectEntryFileIfNodeProject(projectRoot)
+                ?.also { entryFile ->
+                    Log.d(TAG, "$INRT_NODE_PROJECT_RUNNER_TEMPLATE_MARKER entry=${entryFile.path}")
+                }
+                ?: File(mProjectDir, mProjectConfig.mainScriptFileName)
+        } catch (e: Exception) {
+            logNodeProjectLaunchFailure(
+                stage = "entry",
+                projectRoot = projectRoot,
+                entryFile = null,
+                launchSource = null,
+                request = null,
+                error = e,
+            )
+            throw e
+        }
+    }
+
+    private fun createMainScriptSource(): JavaScriptFileSource {
+        return createMainScriptLaunch().source as JavaScriptFileSource
+    }
+
+    private fun createMainScriptLaunch(): ScriptLaunchSourceFactory.Launch {
+        val projectRoot = File(mProjectDir)
+        if (!NativeNodeEmbeddedProjectRunner.isNodeProjectRoot(projectRoot)) {
+            return ScriptLaunchSourceFactory.createPathLaunch(
+                path = mMainScriptFile.path,
+                workingDirectory = mProjectDir,
+                defaultWorkingDirectory = mProjectDir,
+            )
+        }
+        val launchOptions = try {
+            NodeProjectLaunchDescriptor.readOptionsOrDefault(projectRoot)
+        } catch (e: Exception) {
+            logNodeProjectLaunchFailure("descriptor", projectRoot, mMainScriptFile, null, null, e)
+            throw e
+        }
+        val launch = try {
+            ScriptLaunchSourceFactory.createNodeProjectLaunch(
+                projectRoot = projectRoot,
+                entryFile = mMainScriptFile,
+                name = "main",
+                launchOptions = launchOptions,
+                defaultWorkingDirectory = mProjectDir,
+            )
+        } catch (e: Exception) {
+            logNodeProjectLaunchFailure("launch_source", projectRoot, mMainScriptFile, null, null, e)
+            throw e
+        }
+        val launchSource = launch.source as? NodeProjectLaunchSource
+        val request = try {
+            launch.buildNodeProjectRequestOrNull()
+        } catch (e: Exception) {
+            logNodeProjectLaunchFailure("project_request", projectRoot, mMainScriptFile, launchSource, null, e)
+            throw e
+        }
+        val requestLaunchKind = request
+            ?.let { NodeProjectLaunchKind.from(it.scriptName, it.binName).descriptorValue }
+            .orEmpty()
+        val packageDirProjectRoot = request?.packageDir?.canonicalFile == projectRoot.canonicalFile
+        val workingDirectoryProjectRoot = request?.workingDirectory?.canonicalFile == projectRoot.canonicalFile
+        Log.d(
+            TAG,
+            "$INRT_NODE_PROJECT_LAUNCH_SOURCE_TEMPLATE_MARKER root=${projectRoot.path} entry=${mMainScriptFile.path} " +
+                    "requestReady=${request != null} " +
+                    "launchKind=${launchSource?.nodeProjectLaunchKind?.descriptorValue.orEmpty()} " +
+                    "requestLaunchKind=$requestLaunchKind " +
+                    "packageDir=${request?.packageDir?.path.orEmpty()} " +
+                    "packageDirProjectRoot=$packageDirProjectRoot " +
+                    "workingDirectory=${request?.workingDirectory?.path.orEmpty()} " +
+                    "workingDirectoryProjectRoot=$workingDirectoryProjectRoot " +
+                    "argvCount=${request?.argv?.size ?: 0} " +
+                    "script=${launchSource?.nodeProjectScriptName.orEmpty()} " +
+                    "bin=${launchSource?.nodeProjectBinName.orEmpty()} " +
+                    "envKeys=${launchSource?.nodeProjectEnv?.keys?.sorted()?.joinToString(prefix = "[", postfix = "]").orEmpty()}",
+        )
+        return launch
+    }
+
+    private fun logNodeProjectLaunchFailure(
+        stage: String,
+        projectRoot: File,
+        entryFile: File?,
+        launchSource: NodeProjectLaunchSource?,
+        request: NativeNodeEmbeddedProjectRunner.ProjectRequest?,
+        error: Throwable,
+    ) {
+        val marker = NodeProjectLaunchDiagnostics.launchFailureMarker(
+            stage = stage,
+            projectRoot = projectRoot,
+            entryFile = entryFile,
+            launchSource = launchSource,
+            request = request,
+            error = error,
+        )
+        val message = if (stage == "entry") {
+            "${NodeProjectLaunchDiagnostics.INRT_PROJECT_ENTRY_RESOLUTION_FAILURE_MARKER} $marker"
+        } else {
+            marker
+        }
+        Log.e(
+            TAG,
+            message,
+            error,
+        )
     }
 
     private fun initKey(projectConfig: ProjectConfig) {
@@ -138,5 +258,12 @@ open class AssetsProjectLauncher(private val mAssetsProjectDir: String, private 
         } catch (e: Exception) {
             e.printStackTrace()
         }
+    }
+
+    private companion object {
+        private const val TAG = "AssetsProjectLauncher"
+        private const val INRT_NODE_PROJECT_RUNNER_TEMPLATE_MARKER = "autojs6.inrt.node_project_runner.v1"
+        private const val INRT_NODE_PROJECT_LAUNCH_SOURCE_TEMPLATE_MARKER =
+            "autojs6.inrt.node_project_launch_source.v2"
     }
 }

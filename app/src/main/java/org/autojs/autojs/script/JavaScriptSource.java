@@ -12,6 +12,7 @@ import org.mozilla.javascript.Token;
 
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -20,6 +21,7 @@ import java.util.Map;
 public abstract class JavaScriptSource extends ScriptSource {
 
     public static final String ENGINE = JavaScriptSource.class.getName() + ".Engine";
+    public static final String ENGINE_NODEJS = "nodejs";
 
     public static final String EXECUTION_MODE_UI_PREFIX = "\"ui\";";
 
@@ -28,6 +30,9 @@ public abstract class JavaScriptSource extends ScriptSource {
     public static final int EXECUTION_MODE_UI = 0x0001;
     public static final int EXECUTION_MODE_AUTO = 0x0002;
     public static final int EXECUTION_MODE_JSOX = 0x0004;
+    public static final int EXECUTION_MODE_NODEJS = 0x0008;
+    public static final int EXECUTION_MODE_UI_THREAD = 0x0010;
+    public static final int EXECUTION_MODE_RHINO = 0x0020;
 
     private static final String LOG_TAG = "JavaScriptSource";
 
@@ -36,6 +41,10 @@ public abstract class JavaScriptSource extends ScriptSource {
             .put("auto", EXECUTION_MODE_AUTO)
             .put("jsox", EXECUTION_MODE_JSOX)
             .put("x", EXECUTION_MODE_JSOX)
+            .put("nodejs", EXECUTION_MODE_NODEJS)
+            .put("node", EXECUTION_MODE_NODEJS)
+            .put("ui-thread", EXECUTION_MODE_UI_THREAD)
+            .put("rhino", EXECUTION_MODE_RHINO)
             .build();
 
     private static final int PARSING_MAX_TOKEN = 300;
@@ -126,9 +135,33 @@ public abstract class JavaScriptSource extends ScriptSource {
         return mode;
     }
 
+    public static String resolveEngineName(int executionMode) {
+        return (executionMode & EXECUTION_MODE_NODEJS) != 0 ? ENGINE_NODEJS : ENGINE;
+    }
+
+    public static boolean isNodeJsFileName(String fileName) {
+        if (fileName == null) {
+            return false;
+        }
+        String lowerCaseName = fileName.toLowerCase(Locale.ROOT);
+        return lowerCaseName.endsWith(".mjs") ||
+                lowerCaseName.endsWith(".cjs") ||
+                lowerCaseName.endsWith(".node.js");
+    }
+
+    public static boolean isJavaScriptFileName(String fileName) {
+        if (fileName == null) {
+            return false;
+        }
+        String lowerCaseName = fileName.toLowerCase(Locale.ROOT);
+        return lowerCaseName.endsWith(".js") ||
+                lowerCaseName.endsWith(".mjs") ||
+                lowerCaseName.endsWith(".cjs");
+    }
+
     @Override
     public String getEngineName() {
-        return ENGINE;
+        return resolveEngineName(getExecutionMode());
     }
 
     public static class ExecutionInfo {

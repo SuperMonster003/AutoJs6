@@ -2,17 +2,15 @@ package org.autojs.autojs.external
 
 import android.content.Context
 import android.content.Intent
-import org.autojs.autojs.AutoJs
+import androidx.annotation.VisibleForTesting
+import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.model.script.PathChecker
-import org.autojs.autojs.script.JavaScriptFileSource
-import org.autojs.autojs.script.ScriptSource
-import org.autojs.autojs.script.SequenceScriptSource
-import org.autojs.autojs.script.StringScriptSource
+import org.autojs.autojs.model.script.Scripts
+import org.autojs.autojs.script.ScriptLaunchSourceFactory
 import org.autojs.autojs.util.WorkingDirectoryUtils
 import org.json.JSONException
 import org.json.JSONObject
-import java.io.File
 
 /**
  * Created by Stardust on Apr 1, 2017.
@@ -28,50 +26,73 @@ object ScriptIntents {
     const val EXTRA_KEY_DELAY = "delay"
     const val EXTRA_KEY_JSON = "json"
 
+    data class PreparedLaunch(
+        val launch: ScriptLaunchSourceFactory.Launch,
+        val config: ExecutionConfig,
+    )
+
     @JvmStatic
     fun isTaskerJsonObjectValid(json: JSONObject) = json.has(EXTRA_KEY_PATH) || json.has(EXTRA_KEY_PRE_EXECUTE_SCRIPT)
 
     @JvmStatic
     fun handleIntent(context: Context?, intent: Intent) {
+        prepareLaunch(context, intent)?.let {
+            Scripts.executeLaunch(context ?: GlobalAppContext.get(), it.launch, it.config)
+        }
+    }
+
+    @JvmStatic
+    @VisibleForTesting
+    @JvmOverloads
+    fun prepareLaunch(context: Context?, intent: Intent, argumentIntent: Intent = intent): PreparedLaunch? {
         var path = getPath(intent)
         var script = intent.getStringExtra(EXTRA_KEY_PRE_EXECUTE_SCRIPT)
 
         if (intent.hasExtra(EXTRA_KEY_JSON)) {
             try {
                 JSONObject(intent.getStringExtra(EXTRA_KEY_JSON)!!).let {
-                    if (it.has(EXTRA_KEY_PATH)) {
-                        path = it[EXTRA_KEY_PATH] as String
-                    }
-                    if (it.has(EXTRA_KEY_PRE_EXECUTE_SCRIPT)) {
-                        script = it[EXTRA_KEY_PRE_EXECUTE_SCRIPT] as String
-                    }
+                    path = it.optIntentString(EXTRA_KEY_PATH) ?: path
+                    script = it.optIntentString(EXTRA_KEY_PRE_EXECUTE_SCRIPT) ?: script
                 }
             } catch (e: JSONException) {
                 /* Ignored. */
             }
         }
-        ExecutionConfig().let { config ->
-            config.apply {
-                delay = intent.getLongExtra(EXTRA_KEY_DELAY, 0)
-                loopTimes = intent.getIntExtra(EXTRA_KEY_LOOP_TIMES, 1)
-                interval = intent.getLongExtra(EXTRA_KEY_LOOP_INTERVAL, 0)
-                config.workingDirectory = WorkingDirectoryUtils.path
-                setArgument("intent", intent)
+        val launch = when {
+            path == null && script != null -> ScriptLaunchSourceFactory.createScriptLaunch(script, WorkingDirectoryUtils.path)
+            path != null && PathChecker(context).checkAndToastError(path) -> {
+                ScriptLaunchSourceFactory.createPathLaunch(path, preExecuteScript = script)
             }
-            var source: ScriptSource? = null
-            when {
-                path == null && script != null -> source = StringScriptSource(script)
-                path != null && PathChecker(context).checkAndToastError(path) -> {
-                    JavaScriptFileSource(path).let { fss: JavaScriptFileSource ->
-                        source = script?.let { SequenceScriptSource(fss.name, StringScriptSource(it), fss) } ?: fss
-                    }
-                    File(path).parent?.let { config.workingDirectory = it }
-                }
-            }
-            source?.let { AutoJs.instance.scriptEngineService.execute(it, config) }
+            else -> null
+        }
+        return launch?.let {
+            PreparedLaunch(
+                launch = it,
+                config = it.createIntentExecutionConfig(argumentIntent),
+            )
         }
     }
 
     private fun getPath(intent: Intent) = intent.data?.path ?: intent.getStringExtra(EXTRA_KEY_PATH)
+
+    private fun ScriptLaunchSourceFactory.Launch.createIntentExecutionConfig(intent: Intent): ExecutionConfig {
+        return createExecutionConfig(ExecutionConfig()).apply {
+            delay = intent.getLongExtra(EXTRA_KEY_DELAY, 0)
+            loopTimes = intent.getIntExtra(EXTRA_KEY_LOOP_TIMES, 1)
+            interval = intent.getLongExtra(EXTRA_KEY_LOOP_INTERVAL, 0)
+            setArgument("intent", intent)
+        }
+    }
+
+    private fun JSONObject.optIntentString(key: String): String? {
+        if (!has(key) || isNull(key)) {
+            return null
+        }
+        val value = opt(key)
+        require(value is String) {
+            "Script intent JSON field must be a string: $key"
+        }
+        return value
+    }
 
 }

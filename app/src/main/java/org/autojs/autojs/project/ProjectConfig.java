@@ -123,6 +123,13 @@ public class ProjectConfig implements FuzzyDeserializer.OriginalJsonKeyAware {
     private String mMainScriptFileName = DEFAULT_MAIN_SCRIPT_FILE_NAME;
 
     @Nullable
+    @SerializedName("type")
+    @SerializedNameCompatible(with = {
+            @With(value = "projectType"),
+    })
+    private String mProjectType;
+
+    @Nullable
     @SerializedName(value = "assets")
     @SerializedNameCompatible(with = {
             @With(value = "asset"),
@@ -291,6 +298,8 @@ public class ProjectConfig implements FuzzyDeserializer.OriginalJsonKeyAware {
         Pattern versionCodePattern = Pattern.compile(numberPatternWithKeyCapture("versionCode"), Pattern.CASE_INSENSITIVE);
         Pattern packageNamePattern = Pattern.compile(stringPatternWithKeyCapture("packageName"), Pattern.CASE_INSENSITIVE);
         Pattern mainPattern = Pattern.compile(stringPatternWithKeyCapture("main"), Pattern.CASE_INSENSITIVE);
+        Pattern projectTypePattern = Pattern.compile(stringPatternWithKeyCapture("type"), Pattern.CASE_INSENSITIVE);
+        Pattern projectTypeAliasPattern = Pattern.compile(stringPatternWithKeyCapture("projectType"), Pattern.CASE_INSENSITIVE);
         Pattern iconPattern = Pattern.compile(stringPatternWithKeyCapture("icon"), Pattern.CASE_INSENSITIVE);
 
         Pattern assetsPattern = Pattern.compile(listPatternWithKeyCapture("asset"), Pattern.CASE_INSENSITIVE);
@@ -325,6 +334,8 @@ public class ProjectConfig implements FuzzyDeserializer.OriginalJsonKeyAware {
         setFieldForDoubleIfMatchesWithKey(versionCodePattern, s, "versionCode", versionCode -> projectConfig.setVersionCode((int) versionCode), projectConfig, detectConflicts);
         setFieldIfMatchesWithKey(packageNamePattern, s, "packageName", projectConfig::setPackageName, projectConfig, detectConflicts);
         setFieldIfMatchesWithKey(mainPattern, s, "main", projectConfig::setMainScriptFileName, projectConfig, detectConflicts);
+        setFieldIfMatchesWithKey(projectTypePattern, s, "type", projectConfig::setProjectType, projectConfig, detectConflicts);
+        setFieldIfMatchesWithKey(projectTypeAliasPattern, s, "type", projectConfig::setProjectType, projectConfig, detectConflicts);
         setFieldIfMatchesWithKey(iconPattern, s, "icon", projectConfig::setIconPath, projectConfig, detectConflicts);
 
         setListIfMatchesWithKey(assetsPattern, s, "assets", projectConfig::setAssets, projectConfig, detectConflicts);
@@ -626,6 +637,16 @@ public class ProjectConfig implements FuzzyDeserializer.OriginalJsonKeyAware {
 
     public ProjectConfig setMainScriptFileName(String mainScriptFileName) {
         mMainScriptFileName = mainScriptFileName;
+        return this;
+    }
+
+    @Nullable
+    public String getProjectType() {
+        return mProjectType;
+    }
+
+    public ProjectConfig setProjectType(@Nullable String projectType) {
+        mProjectType = projectType;
         return this;
     }
 

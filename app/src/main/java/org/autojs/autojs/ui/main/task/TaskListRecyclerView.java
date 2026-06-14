@@ -26,6 +26,7 @@ import org.autojs.autojs.execution.SimpleScriptExecutionListener;
 import org.autojs.autojs.groundwork.WrapContentLinearLayoutManager;
 import org.autojs.autojs.script.AutoFileSource;
 import org.autojs.autojs.script.JavaScriptFileSource;
+import org.autojs.autojs.script.JavaScriptSource;
 import org.autojs.autojs.storage.database.ModelChange;
 import org.autojs.autojs.theme.ThemeColorManagerCompat;
 import org.autojs.autojs.timing.TimedTaskManager;
@@ -430,9 +431,10 @@ public class TaskListRecyclerView extends ThemeColorRecyclerView {
         public void bind(Task task) {
             mTask = task;
             FileUtils.TYPE.Icon icon;
-            if (JavaScriptFileSource.ENGINE.equals(mTask.getEngineName())) {
+            String engineName = mTask.getEngineName();
+            if (JavaScriptFileSource.ENGINE.equals(engineName) || JavaScriptSource.ENGINE_NODEJS.equals(engineName)) {
                 icon = FileUtils.TYPE.JAVASCRIPT.icon;
-            } else if (AutoFileSource.ENGINE.equals(mTask.getEngineName())) {
+            } else if (AutoFileSource.ENGINE.equals(engineName)) {
                 icon = FileUtils.TYPE.AUTO.icon;
             } else {
                 icon = FileUtils.TYPE.UNKNOWN.icon;

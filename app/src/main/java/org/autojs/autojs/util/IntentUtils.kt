@@ -30,11 +30,11 @@ import org.autojs.autojs.AutoJs
 import org.autojs.autojs.annotation.ReservedForCompatibility
 import org.autojs.autojs.core.image.capture.ScreenCapturerForegroundService
 import org.autojs.autojs.core.pref.Pref
-import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.external.fileprovider.AppFileProvider
-import org.autojs.autojs.model.script.ScriptFile
+import org.autojs.autojs.model.script.Scripts
 import org.autojs.autojs.runtime.api.Mime
 import org.autojs.autojs.runtime.api.WrappedShizuku
+import org.autojs.autojs.script.ScriptLaunchSourceFactory
 import org.autojs.autojs.ui.enhancedfloaty.FloatyService
 import org.autojs.autojs.ui.floating.FloatyWindowManger
 import org.autojs.autojs.util.ContextUtils.findActivity
@@ -510,10 +510,13 @@ object IntentUtils {
                         try {
                             val file = script.toScriptFile(workingDir)
                             when {
-                                file.exists() -> AutoJs.instance.scriptEngineService.execute(
-                                    /* source = */ ScriptFile(file.absolutePath).toSource(),
-                                    /* config = */ ExecutionConfig(workingDir),
-                                )
+                                file.exists() -> {
+                                    val launch = ScriptLaunchSourceFactory.createFileLaunch(
+                                        file = file,
+                                        defaultWorkingDirectory = workingDir,
+                                    )
+                                    Scripts.executeLaunch(activity, launch)
+                                }
                                 else -> throw FileNotFoundException(file.absolutePath)
                             }
                         } catch (e: Exception) {

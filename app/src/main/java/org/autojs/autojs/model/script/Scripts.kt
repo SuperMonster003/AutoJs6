@@ -14,6 +14,8 @@ import org.autojs.autojs.external.shortcut.Shortcut
 import org.autojs.autojs.external.shortcut.ShortcutActivity
 import org.autojs.autojs.runtime.api.Mime
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
+import org.autojs.autojs.script.JavaScriptSource
+import org.autojs.autojs.script.ScriptLaunchSourceFactory
 import org.autojs.autojs.script.ScriptSource
 import org.autojs.autojs.ui.edit.EditActivity
 import org.autojs.autojs.util.FileUtils
@@ -41,7 +43,7 @@ object Scripts {
     @JvmField
     val FILE_FILTER = FileFilter { file ->
         file.isDirectory ||
-        file.name.endsWith(FileUtils.TYPE.JAVASCRIPT.extension, true) ||
+        JavaScriptSource.isJavaScriptFileName(file.name) ||
         file.name.endsWith(FileUtils.TYPE.AUTO.extension, true)
     }
 
@@ -113,9 +115,8 @@ object Scripts {
 
     @JvmStatic
     fun run(context: Context, file: ScriptFile): ScriptExecution? = try {
-        file.parent?.let {
-            AutoJs.instance.scriptEngineService.execute(file.toSource(), ExecutionConfig(workingDirectory = it))
-        }
+        val launch = ScriptLaunchSourceFactory.createFileLaunch(file)
+        executeLaunch(context, launch)
     } catch (e: Exception) {
         e.printStackTrace()
         ViewUtils.showToast(context, e.message, true)
@@ -124,7 +125,33 @@ object Scripts {
 
     @JvmStatic
     fun run(context: Context, source: ScriptSource): ScriptExecution? = try {
-        AutoJs.instance.scriptEngineService.execute(source, ExecutionConfig(WorkingDirectoryUtils.path))
+        val launch = ScriptLaunchSourceFactory.createSourceLaunch(source)
+        executeLaunch(context, launch)
+    } catch (e: Exception) {
+        e.printStackTrace()
+        ViewUtils.showToast(context, e.message, true)
+        null
+    }
+
+    @JvmStatic
+    fun createLaunchExecutionConfig(
+        launch: ScriptLaunchSourceFactory.Launch,
+        base: ExecutionConfig,
+    ): ExecutionConfig = launch.createExecutionConfig(base)
+
+    @JvmStatic
+    fun executeLaunch(
+        context: Context,
+        launch: ScriptLaunchSourceFactory.Launch,
+    ): ScriptExecution? = executeLaunch(context, launch, launch.createExecutionConfig())
+
+    @JvmStatic
+    fun executeLaunch(
+        context: Context,
+        launch: ScriptLaunchSourceFactory.Launch,
+        config: ExecutionConfig,
+    ): ScriptExecution? = try {
+        AutoJs.instance.scriptEngineService.execute(launch.source, config)
     } catch (e: Exception) {
         e.printStackTrace()
         ViewUtils.showToast(context, e.message, true)
@@ -133,25 +160,32 @@ object Scripts {
 
     @JvmStatic
     fun runWithBroadcastSender(file: File, workingDirectory: String?, overriddenFullPath: String?): ScriptExecution? {
+        val launch = ScriptLaunchSourceFactory.createFileLaunch(
+            file = file,
+            workingDirectory = workingDirectory,
+            defaultWorkingDirectory = file.parent ?: "",
+        )
         return AutoJs.instance.scriptEngineService.execute(
-            ScriptFile(file).toSource().apply { this.overriddenFullPath = overriddenFullPath },
+            launch.source.apply { this.overriddenFullPath = overriddenFullPath },
             BROADCAST_SENDER_SCRIPT_EXECUTION_LISTENER,
-            ExecutionConfig(workingDirectory ?: file.parent ?: "")
+            launch.createExecutionConfig()
         )
     }
 
     @JvmStatic
     fun runRepeatedly(scriptFile: ScriptFile, loopTimes: Int, delay: Long, interval: Long) {
-        val source = scriptFile.toSource()
-        val directoryPath = scriptFile.parent
-        if (directoryPath != null) {
-            AutoJs.instance.scriptEngineService.execute(
-                source, ExecutionConfig(
-                    workingDirectory = directoryPath,
-                    delay = delay, loopTimes = loopTimes, interval = interval
+        val launch = ScriptLaunchSourceFactory.createFileLaunch(scriptFile)
+        executeLaunch(
+            globalAppContext,
+            launch,
+            launch.createExecutionConfig(
+                ExecutionConfig(
+                    delay = delay,
+                    loopTimes = loopTimes,
+                    interval = interval,
                 )
             )
-        }
+        )
     }
 
     fun getRhinoException(throwable: Throwable?): RhinoException? {

@@ -6,14 +6,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-import org.autojs.autojs.AutoJs;
-import org.autojs.autojs.execution.ExecutionConfig;
-import org.autojs.autojs.model.script.ScriptFile;
+import org.autojs.autojs.external.ScriptIntents;
+import org.autojs.autojs.model.script.Scripts;
 import org.autojs.autojs.timing.IntentTask;
 import org.autojs.autojs.timing.TimedTaskManager;
 import org.autojs.autojs.util.ViewUtils;
-
-import java.util.Objects;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -38,12 +35,16 @@ public class BaseBroadcastReceiver extends BroadcastReceiver {
 
     public static void runTask(Context context, Intent intent, IntentTask task) {
         Log.d(LOG_TAG, "runTask: action = " + intent.getAction() + ", script = " + task.getScriptPath());
-        ScriptFile file = new ScriptFile(task.getScriptPath());
-        ExecutionConfig config = new ExecutionConfig();
-        config.setArgument("intent", intent.clone());
-        config.setWorkingDirectory(Objects.requireNonNull(file.getParent()));
         try {
-            AutoJs.getInstance().getScriptEngineService().execute(file.toSource(), config);
+            Intent launchIntent = new Intent().putExtra(ScriptIntents.EXTRA_KEY_PATH, task.getScriptPath());
+            ScriptIntents.PreparedLaunch preparedLaunch = ScriptIntents.prepareLaunch(
+                    context,
+                    launchIntent,
+                    (Intent) intent.clone()
+            );
+            if (preparedLaunch != null) {
+                Scripts.executeLaunch(context, preparedLaunch.getLaunch(), preparedLaunch.getConfig());
+            }
         } catch (Exception e) {
             e.printStackTrace();
             ViewUtils.showToast(context, e.getMessage(), true);

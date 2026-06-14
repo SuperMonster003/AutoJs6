@@ -1,11 +1,18 @@
 package org.autojs.autojs.ui.main.task;
 
 import android.content.Context;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
+import org.autojs.autojs.engine.NativeNodeEmbeddedProjectRunner;
 import org.autojs.autojs.engine.ScriptEngine;
+import org.autojs.autojs.execution.ExecutionConfig;
 import org.autojs.autojs.execution.ScriptExecution;
 import org.autojs.autojs.pio.PFiles;
 import org.autojs.autojs.script.AutoFileSource;
 import org.autojs.autojs.script.JavaScriptSource;
+import org.autojs.autojs.script.NodeProjectLaunchKind;
+import org.autojs.autojs.script.ScriptLaunchSourceFactory;
 import org.autojs.autojs.script.ScriptSource;
 import org.autojs.autojs.timing.IntentTask;
 import org.autojs.autojs.timing.TimedTask;
@@ -15,7 +22,7 @@ import org.autojs.autojs.util.WorkingDirectoryUtils;
 import org.autojs.autojs6.R;
 import org.joda.time.format.DateTimeFormat;
 
-import static org.autojs.autojs.util.FileUtils.TYPE.JAVASCRIPT;
+import java.io.File;
 
 /**
  * Created by Stardust on Nov 28, 2017.
@@ -108,10 +115,64 @@ public abstract class Task {
 
         @Override
         public String getEngineName() {
-            if (getScriptPath().endsWith(JAVASCRIPT.extensionWithDot)) {
+            String scriptPath = getScriptPath();
+            try {
+                return createLaunch().getEngineName();
+            } catch (Exception ignored) {
+                if (!JavaScriptSource.isJavaScriptFileName(scriptPath)) {
+                    return AutoFileSource.ENGINE;
+                }
+                if (JavaScriptSource.isNodeJsFileName(scriptPath)) {
+                    return JavaScriptSource.ENGINE_NODEJS;
+                }
                 return JavaScriptSource.ENGINE;
-            } else {
-                return AutoFileSource.ENGINE;
+            }
+        }
+
+        @NonNull
+        public ScriptLaunchSourceFactory.Launch createLaunch() {
+            return ScriptLaunchSourceFactory.createFileLaunch(new File(getScriptPath()));
+        }
+
+        @NonNull
+        public ExecutionConfig createLaunchExecutionConfig() {
+            return createLaunchExecutionConfig(new ExecutionConfig());
+        }
+
+        @NonNull
+        public ExecutionConfig createLaunchExecutionConfig(@NonNull ExecutionConfig base) {
+            return createLaunchExecutionConfig(createLaunch(), base);
+        }
+
+        @NonNull
+        public ExecutionConfig createLaunchExecutionConfig(
+                @NonNull ScriptLaunchSourceFactory.Launch launch,
+                @NonNull ExecutionConfig base) {
+            return launch.createExecutionConfig(base);
+        }
+
+        @Nullable
+        public NativeNodeEmbeddedProjectRunner.ProjectRequest createNodeProjectRequestOrNull() {
+            try {
+                return createLaunch().buildNodeProjectRequestOrNull();
+            } catch (Exception ignored) {
+                return null;
+            }
+        }
+
+        @VisibleForTesting
+        public boolean isNodeProjectLaunch() {
+            return createNodeProjectRequestOrNull() != null;
+        }
+
+        @NonNull
+        @VisibleForTesting
+        public String getNodeProjectLaunchKindDescriptor() {
+            try {
+                NodeProjectLaunchKind kind = createLaunch().getNodeProjectLaunchKind();
+                return kind == null ? "" : kind.getDescriptorValue();
+            } catch (Exception ignored) {
+                return "";
             }
         }
 

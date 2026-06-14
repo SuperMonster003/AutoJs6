@@ -15,8 +15,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 
-import static org.autojs.autojs.util.FileUtils.TYPE.JAVASCRIPT;
-
 /**
  * Created by Stardust on Oct 28, 2017.
  */
@@ -59,7 +57,7 @@ public class SampleFile extends ScriptFile {
 
     @Override
     public boolean isFile() {
-        return getName().endsWith(JAVASCRIPT.extensionWithDot);
+        return JavaScriptSource.isJavaScriptFileName(getName());
     }
 
     @Override
