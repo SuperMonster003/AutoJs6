@@ -14,6 +14,7 @@ import android.graphics.Bitmap
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
+import androidx.annotation.VisibleForTesting
 import com.mcal.apksigner.ApkSigner
 import com.reandroid.arsc.chunk.TableBlock
 import org.autojs.autojs.AbstractAutoJs.Companion.isInrt
@@ -28,8 +29,9 @@ import org.autojs.autojs.project.ProjectConfig
 import org.autojs.autojs.project.ProjectConfig.CONFIG_FILE_NAME
 import org.autojs.autojs.script.EncryptedScriptFileHeader.writeHeader
 import org.autojs.autojs.script.JavaScriptFileSource
-import org.autojs.autojs.util.FileUtils.TYPE.JAVASCRIPT
+import org.autojs.autojs.script.JavaScriptSource
 import org.autojs.autojs.util.MD5Utils
+import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import org.autojs.plugin.paddle.ocr.api.IOcrPlugin
 import pxb.android.StringItem
@@ -283,7 +285,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         srcFile.listFiles()?.forEach { srcChildFile ->
             ensureNotCancelled()
             if (srcChildFile.isFile) {
-                if (srcChildFile.name.endsWith(JAVASCRIPT.extensionWithDot)) {
+                if (JavaScriptSource.isJavaScriptFileName(srcChildFile.name)) {
                     encryptToDir(context, srcChildFile, destDirFile)
                 } else {
                     val destFile = File(destDirFile, srcChildFile.name)
@@ -330,7 +332,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
     fun replaceFile(context: Context, srcFile: File, relativeDestPath: String) = also {
         ensureNotCancelled()
         val destFile = File(buildPath, relativeDestPath)
-        if (destFile.name.endsWith(JAVASCRIPT.extensionWithDot)) {
+        if (JavaScriptSource.isJavaScriptFileName(destFile.name)) {
             encrypt(context, srcFile, destFile)
         } else {
             notifyStepProgress(
@@ -399,6 +401,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
                 context.getString(R.string.text_processing),
                 context.getString(R.string.text_copying_native_libraries),
             )
+            pruneNativeLibrariesByAbiPolicy(context, this)
             copyLibrariesByConfig(context, this)
             ensureNotCancelled()
             notifyStepProgress(
@@ -415,12 +418,40 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         }
     }
 
+    private fun pruneNativeLibrariesByAbiPolicy(context: Context, config: ProjectConfig) {
+        ensureNotCancelled()
+        val libRoot = File(buildPath, "lib")
+        if (!libRoot.isDirectory || config.abis.isEmpty()) {
+            return
+        }
+
+        val allowedAbis = config.abis.toSet()
+        libRoot.listFiles()?.forEach { abiDir ->
+            ensureNotCancelled()
+            if (!abiDir.isDirectory || abiDir.name in allowedAbis) {
+                return@forEach
+            }
+            notifyStepProgress(
+                ProgressStep.BUILD,
+                context.getString(R.string.text_pruning),
+                abiDir.path,
+            )
+            PFiles.deleteRecursively(abiDir)
+        }
+    }
+
     private fun prepareManifestConfiguration(config: ProjectConfig) {
-        mManifestEditor = editManifest()
+        val manifestEditor = editManifest()
             .setAppName(config.name)
             .setVersionName(config.versionName)
             .setVersionCode(config.versionCode)
             .setPackageName(config.packageName)
+        if (config.libs.contains(Lib.EMBEDDED_NODE_JS.label)) {
+            manifestEditor
+                .addEmbeddedNodeScriptServiceIfMissing()
+                .addEmbeddedNodeForegroundServicePermissionsIfMissing()
+        }
+        mManifestEditor = manifestEditor
     }
 
     private fun retrieveSplashThemeResources(launchConfig: LaunchConfig) {
@@ -940,6 +971,12 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         }
 
         override fun isPermissionRequired(permissionName: String): Boolean {
+            if (
+                mProjectConfig.libs.contains(Lib.EMBEDDED_NODE_JS.label) &&
+                isEmbeddedNodeForegroundServicePermission(permissionName)
+            ) {
+                return true
+            }
             return mProjectConfig.permissions.contains(permissionName)
         }
     }
@@ -963,6 +1000,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
             context.getString(R.string.text_resolving_plugin_native_libraries),
         )
         ensureAndExtractPluginLibrariesIfNeeded(context, config, potentialAbiAliasList)
+        ensureEmbeddedNodeLibrariesAvailableOrThrow(config, potentialAbiAliasList)
 
         config.abis.forEach { abiCanonicalName ->
             ensureNotCancelled()
@@ -975,6 +1013,45 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
             potentialAbiAliasList[abiCanonicalName]?.let { abiAliasName ->
                 copyLibrariesByAbi(context, abiAliasName, abiCanonicalName)
             }
+        }
+    }
+
+    private fun ensureEmbeddedNodeLibrariesAvailableOrThrow(
+        config: ProjectConfig,
+        potentialAbiAliasList: Map<String, String>,
+    ) {
+        if (!config.libs.contains(Lib.EMBEDDED_NODE_JS.label)) {
+            return
+        }
+        if (!BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED) {
+            throw IllegalStateException(
+                "Embedded Node.js packaged apps require embedded script execution build support. " +
+                        "Rebuild AutoJs6 with -Pautojs.nodejs.embedded.script.enabled=true before selecting Embedded Node.js."
+            )
+        }
+
+        val missingPairs = mutableListOf<Pair<String, String>>() // (abi, soName)
+        config.abis.forEach { abiCanonicalName ->
+            ensureNotCancelled()
+            val abiCandidates = buildList {
+                add(abiCanonicalName)
+                potentialAbiAliasList[abiCanonicalName]?.let { add(it) }
+            }.distinct()
+
+            Lib.EMBEDDED_NODE_JS.libsToInclude.forEach { soName ->
+                ensureNotCancelled()
+                if (!hasHostNativeLibrary(abiCandidates, soName)) {
+                    missingPairs += abiCanonicalName to soName
+                }
+            }
+        }
+
+        if (missingPairs.isNotEmpty()) {
+            val detail = missingPairs.joinToString(", ") { (abi, so) -> "$abi/$so" }
+            throw IllegalStateException(
+                "Embedded Node.js native libraries are unavailable for selected ABI(s): $detail. " +
+                        "Supported Embedded Node.js ABIs are arm64-v8a, armeabi-v7a, and x86_64."
+            )
         }
     }
 
@@ -1065,18 +1142,16 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
             info?.let { si to it }
         }
 
-        val variantList = plugin.variants.map { it.variant?.lowercase() }
-
-        infos.filter { (_, pi) ->
-            pi.variant?.lowercase() in variantList
-        }.maxByOrNull { (_, pi) -> pi.variant?.replace(Regex("\\D"), "")?.toIntOrNull() ?: 0 }?.let {
+        selectBestPluginVariantCandidate(infos, plugin.variants)?.let {
             return it
         }
 
-        infos.firstOrNull()?.let { return it }
-
         throw IllegalStateException(
-            globalContext.getString(R.string.error_no_available_enabled_plugin_variants_found, moduleLabel, variantList.joinToString("/"))
+            globalContext.getString(
+                R.string.error_no_available_enabled_plugin_variants_found,
+                moduleLabel,
+                plugin.variants.joinToString("/") { it.variant.orEmpty() },
+            )
         )
     }
 
@@ -1337,6 +1412,29 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         return false
     }
 
+    private fun hasHostNativeLibrary(abiCandidates: List<String>, soName: String): Boolean {
+        val srcLibDir = File(appApkFile.parent, LIBRARY_DIR)
+        if (abiCandidates.any { abi -> srcLibDir.resolve("$abi/$soName").isFile }) {
+            return true
+        }
+        return getAppApkPaths().any { apkPath ->
+            abiCandidates.any { abi -> apkContainsSo(apkPath, abi, soName) }
+        }
+    }
+
+    private fun apkContainsSo(apkPath: String, abi: String, soName: String): Boolean =
+        runCatching {
+            ZipFile(apkPath).use { zip -> zip.getEntry("lib/$abi/$soName") != null }
+        }.getOrDefault(false)
+
+    private fun getAppApkPaths(): List<String> {
+        val appInfo = getApplicationInfoCompat(globalContext.packageManager, globalContext.packageName)
+        return buildList {
+            add(appInfo.sourceDir)
+            appInfo.splitSourceDirs?.forEach { add(it) }
+        }.distinct()
+    }
+
     private fun getApplicationInfoCompat(pm: PackageManager, packageName: String): ApplicationInfo {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             pm.getApplicationInfo(packageName, ApplicationInfoFlags.of(0))
@@ -1365,9 +1463,55 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
                         "${srcFile.path} -> ${destFile.path}",
                     )
                     it.copyTo(destFile, overwrite = true)
+                    return@forEach
                 }
+                extractFirstMatchedSoFromHostApks(
+                    context = context,
+                    abiCandidates = listOf(abiSrcName),
+                    soName = libName,
+                    abiDestName = abiDestName,
+                )
             }.onFailure { it.printStackTrace() }
         }
+    }
+
+    private fun extractFirstMatchedSoFromHostApks(
+        context: Context,
+        abiCandidates: List<String>,
+        soName: String,
+        abiDestName: String,
+    ): Boolean {
+        getAppApkPaths().forEach { apkPath ->
+            ensureNotCancelled()
+            runCatching {
+                ZipFile(apkPath).use { zip ->
+                    abiCandidates.forEach { abiInApk ->
+                        ensureNotCancelled()
+                        val entryName = "lib/$abiInApk/$soName"
+                        val entry = zip.getEntry(entryName) ?: return@forEach
+                        val outFile = File(buildPath, "lib/$abiDestName/$soName").apply {
+                            parentFile?.let { parent -> if (!parent.exists()) parent.mkdirs() }
+                        }
+                        notifyStepProgress(
+                            ProgressStep.BUILD,
+                            context.getString(R.string.text_copying_library),
+                            "$apkPath!/$entryName -> ${outFile.path}",
+                        )
+                        zip.getInputStream(entry).use { input ->
+                            FileOutputStream(outFile, false).use { output ->
+                                copyStreamWithCancel(input, output)
+                                output.fd.sync()
+                            }
+                        }
+                        Log.i(TAG, "Extracted so from host apk: $apkPath!/$entryName -> ${outFile.path}")
+                        return true
+                    }
+                }
+            }.onFailure {
+                it.printStackTrace()
+            }
+        }
+        return false
     }
 
     @Suppress("SpellCheckingInspection")
@@ -1388,6 +1532,16 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
             libsToInclude = listOf(
                 "libjackpal-androidterm5.so",
                 "libjackpal-termexec2.so",
+            ),
+        ),
+
+        EMBEDDED_NODE_JS(
+            label = "Embedded Node.js",
+            aliases = listOf("node", "nodejs", "node.js", "embedded-node", "embedded-nodejs", "embedded_nodejs"),
+            libsToInclude = listOf(
+                "libnode.so",
+                "libautojs6-node.so",
+                "libc++_shared.so",
             ),
         ),
 
@@ -1582,6 +1736,21 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
 
         private val globalContext: Context by lazy { GlobalAppContext.get() }
 
+        @JvmStatic
+        @VisibleForTesting
+        fun <T> selectBestPluginVariantCandidate(
+            infos: List<Pair<T, PluginLibVariant>>,
+            supportedVariants: List<PluginLibVariant>,
+        ): Pair<T, PluginLibVariant>? {
+            val supportedVariantKeys = supportedVariants
+                .map { it.variant.normalizedPluginVariantKey() }
+                .toSet()
+            return infos
+                .filter { (_, pi) -> pi.variant.normalizedPluginVariantKey() in supportedVariantKeys }
+                .maxByOrNull { (_, pi) -> pi.variant.pluginVariantNumber() }
+                ?: infos.firstOrNull()
+        }
+
         val appApkFile by lazy {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 File(globalContext.packageManager.getApplicationInfo(globalContext.packageName, ApplicationInfoFlags.of(GET_SHARED_LIBRARY_FILES.toLong())).sourceDir)
@@ -1602,6 +1771,17 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
                 out = out.removeSuffix("/")
             }
             return out
+        }
+
+        private fun String?.normalizedPluginVariantKey(): String? {
+            return this?.trim()?.takeIf { it.isNotEmpty() }?.lowercase()
+        }
+
+        private fun String?.pluginVariantNumber(): Int {
+            return normalizedPluginVariantKey()
+                ?.replace(Regex("\\D"), "")
+                ?.toIntOrNull()
+                ?: 0
         }
     }
 }
