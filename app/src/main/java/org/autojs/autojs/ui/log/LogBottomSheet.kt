@@ -79,26 +79,24 @@ class LogBottomSheet : BottomSheetDialogFragment() {
         }
 
         // Setup ConsoleView with global console
-        val autoJs = AutoJs.getInstance()
-        if (autoJs != null) {
-            binding.console.setConsole(autoJs.globalConsole)
-            
-            // Hide input container (not needed in bottom sheet)
-            binding.console.findViewById<View>(R.id.input_container)?.visibility = View.GONE
-            
-            // Enable clickable stack frame links (only in bottom sheet, not in LogActivity)
-            binding.console.setEnableStackFrameLinks(true)
-            
-            // Set up clickable stack frame listener
-            binding.console.setOnStackFrameClickListener { fileName, lineNumber, columnNumber ->
-                mStackFrameClickListener?.onStackFrameClick(fileName, lineNumber, columnNumber)
-                dismiss()
-            }
+        val autoJs = AutoJs.instance
+        binding.console.setConsole(autoJs.globalConsole)
+
+        // Hide input container (not needed in bottom sheet)
+        binding.console.findViewById<View>(R.id.input_container)?.visibility = View.GONE
+
+        // Enable clickable stack frame links (only in bottom sheet, not in LogActivity)
+        binding.console.setEnableStackFrameLinks(true)
+
+        // Set up clickable stack frame listener
+        binding.console.setOnStackFrameClickListener { fileName, lineNumber, columnNumber ->
+            mStackFrameClickListener?.onStackFrameClick(fileName, lineNumber, columnNumber)
+            dismiss()
         }
 
         // Clear button
         binding.btnClear.setOnClickListener {
-            AutoJs.getInstance()?.globalConsole?.clear()
+            AutoJs.instance.globalConsole.clear()
         }
 
         // Open full log activity button
