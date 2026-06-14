@@ -1,11 +1,14 @@
 package org.autojs.autojs.ui.edit.editor.engine
 
+import android.content.Context
 import android.view.View
+import org.autojs.autojs.model.autocomplete.AutoCompletion
 import org.autojs.autojs.ui.edit.theme.Theme
 
 interface ScriptEditorEngine {
 
     val view: View
+    val inputView: View
     val engineType: EditorEngineType
     val isReady: Boolean
 
@@ -85,6 +88,7 @@ interface ScriptEditorEngine {
     fun removeCursorChangeCallback(listener: EditorCursorChangeListener)
     fun addTextChangeListener(listener: EditorTextChangeListener)
     fun removeTextChangeListener(listener: EditorTextChangeListener)
+    fun createAutoCompletion(context: Context): AutoCompletion?
 
     fun requestEditorFocus()
     fun ensureCursorVisibleIfPossible()

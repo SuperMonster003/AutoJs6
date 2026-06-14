@@ -175,13 +175,10 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
                         // Jump to the line in editor
                         try {
                             val editor = mEditorView.editor
-                            val layout = editor.codeEditText.layout
-                            if (lineNumber >= 0 && lineNumber < layout.lineCount) {
-                                val lineStart = layout.getLineStart(lineNumber)
+                            if (lineNumber >= 0 && lineNumber < editor.lineCountSnapshot) {
                                 val column = if (columnNumber > 0) columnNumber else 0
-                                val offset = minOf(lineStart + column, layout.getLineEnd(lineNumber) - 1)
-                                editor.codeEditText.setSelection(offset)
-                                editor.codeEditText.requestFocus()
+                                editor.jumpTo(lineNumber, column)
+                                editor.requestEditorFocus()
                             }
                         } catch (e: Exception) {
                             e.printStackTrace()

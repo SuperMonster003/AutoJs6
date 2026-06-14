@@ -72,14 +72,13 @@ import org.autojs.autojs.ui.doc.ManualDialog
 import org.autojs.autojs.ui.edit.completion.CodeCompletionBar
 import org.autojs.autojs.ui.edit.completion.CodeCompletionBar.OnHintClickListener
 import org.autojs.autojs.ui.edit.debug.DebugBar
-import org.autojs.autojs.ui.edit.editor.CodeEditor
-import org.autojs.autojs.ui.edit.editor.CodeEditor.CheckedPatternSyntaxException
+import org.autojs.autojs.ui.edit.editor.JavaScriptHighlighter
 import org.autojs.autojs.ui.edit.editor.engine.EditorEngineFactory
 import org.autojs.autojs.ui.edit.editor.engine.EditorEnginePreferences
-import org.autojs.autojs.ui.edit.editor.engine.NativeCodeEditorEngine
+import org.autojs.autojs.ui.edit.editor.engine.EditorCursorChangeListener
+import org.autojs.autojs.ui.edit.editor.engine.EditorSearchOptions
+import org.autojs.autojs.ui.edit.editor.engine.EditorSearchSyntaxException
 import org.autojs.autojs.ui.edit.editor.engine.ScriptEditorEngine
-import org.autojs.autojs.ui.edit.editor.JavaScriptHighlighter
-import org.autojs.autojs.ui.edit.editor.LayoutHelper
 import org.autojs.autojs.ui.edit.keyboard.FunctionsKeyboardHelper
 import org.autojs.autojs.ui.edit.keyboard.FunctionsKeyboardView
 import org.autojs.autojs.ui.edit.keyboard.FunctionsKeyboardView.ClickCallback
@@ -93,12 +92,10 @@ import org.autojs.autojs.ui.edit.toolbar.ToolbarFragment
 import org.autojs.autojs.ui.filechooser.FileChooserDialogBuilder
 import org.autojs.autojs.ui.log.LogActivity
 import org.autojs.autojs.ui.widget.EWebView
-import org.autojs.autojs.ui.widget.SimpleTextWatcher
 import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs.util.DialogUtils.choiceWidgetThemeColor
-import org.autojs.autojs.util.DisplayUtils.pxToSp
 import org.autojs.autojs.util.DocsUtils.getUrl
 import org.autojs.autojs.util.Observers
 import org.autojs.autojs.util.StringUtils
@@ -151,13 +148,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     private var binding: EditorViewBinding = EditorViewBinding.bind(inflate(context, R.layout.editor_view, this))
 
-    private val mEditorEngine: ScriptEditorEngine = EditorEngineFactory.create(context, EditorEnginePreferences.get())
-
-    private val mNativeEditorEngine: NativeCodeEditorEngine = mEditorEngine as? NativeCodeEditorEngine
-        ?: error("Only native editor engine is supported before ACE is wired into EditorView")
-
     @JvmField
-    val editor: CodeEditor = mNativeEditorEngine.codeEditor
+    val editor: ScriptEditorEngine = EditorEngineFactory.create(context, EditorEnginePreferences.get())
 
     @JvmField
     val debugBar: DebugBar = binding.debugBar
@@ -336,10 +328,6 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     // zh-CN: 最近一次应用到编辑器 padding 的 IME 底部值.
     private var mLastImeBottomInset = 0
 
-    // Reusable rect for cursor visibility requests.
-    // zh-CN: 光标可见性请求复用 Rect.
-    private val mTmpCursorRect = Rect()
-
     // Reusable rect for window visible area.
     // zh-CN: 复用的窗口可见区域 Rect.
     private val mTmpWindowVisibleRect = Rect()
@@ -398,9 +386,9 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     private fun attachEditorEngineView() {
-        if (mEditorEngine.view.parent == null) {
+        if (editor.view.parent == null) {
             binding.editorContainer.addView(
-                mEditorEngine.view,
+                editor.view,
                 FrameLayout.LayoutParams(
                     FrameLayout.LayoutParams.MATCH_PARENT,
                     FrameLayout.LayoutParams.MATCH_PARENT,
@@ -573,8 +561,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 activity.window.decorView.getWindowVisibleDisplayFrame(mTmpWindowVisibleRect)
 
                 val loc = IntArray(2)
-                editor.getLocationOnScreen(loc)
-                val editorBottomOnScreen = loc[1] + editor.height
+                editor.view.getLocationOnScreen(loc)
+                val editorBottomOnScreen = loc[1] + editor.view.height
 
                 (editorBottomOnScreen - mTmpWindowVisibleRect.bottom).coerceAtLeast(0)
             } else {
@@ -586,7 +574,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
                 // Apply bottom padding only when the editor is actually overlapped by IME.
                 // zh-CN: 仅当 editor 实际被 IME 遮挡时才应用底部 padding.
-                val v = editor
+                val v = editor.view
                 v.setPadding(v.paddingLeft, v.paddingTop, v.paddingRight, targetBottom)
 
                 // Only ensure cursor visible when IME becomes visible.
@@ -611,51 +599,17 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private fun ensureCursorVisibleIfPossible() {
         // Bring the caret into visible area when keyboard shows, without "scrolling back" on hide.
         // zh-CN: 键盘弹起时将光标区域滚动到可见范围内, 键盘收起时不回滚.
-        val editText = editor.codeEditText
-        val textLen = editText.text?.length ?: 0
-        if (textLen <= 0) return
-
-        val layout = editText.layout ?: return
-        val sel = editText.selectionStart.coerceIn(0, textLen)
-
-        val line = LayoutHelper.getLineOfChar(layout, sel).coerceAtLeast(0)
-        val lineTop = layout.getLineTop(line)
-        val lineBottom = layout.getLineBottom(line)
-
-        // Compute a small rect around the current line/caret.
-        // zh-CN: 计算一个围绕当前行/光标的小矩形区域.
-        val x = runCatching { layout.getPrimaryHorizontal(sel).toInt() }.getOrElse { 0 }
-        val left = (x - editText.paddingLeft - 16).coerceAtLeast(0)
-        val right = left + 32
-
-        mTmpCursorRect.set(
-            /* left = */ left,
-            /* top = */ lineTop,
-            /* right = */ right,
-            /* bottom = */ lineBottom,
-        )
-
-        // Request rectangle visible inside scroll container.
-        // zh-CN: 请求在滚动容器内显示该矩形区域.
-        editText.requestRectangleOnScreen(mTmpCursorRect, true)
+        editor.ensureCursorVisibleIfPossible()
     }
 
     private fun ensureEditorHasCursorAfterLoadIfNeeded() {
         // Ensure there is a visible caret after loading, so jump operations can work.
         // zh-CN: 加载完成后确保存在可见光标, 以使跳转操作可用.
-        val editText = editor.codeEditText
-        val len = editText.text?.length ?: 0
-        if (len <= 0) return
-
-        // If selection is invalid or collapsed at -1-like state, normalize.
-        // zh-CN: 若 selection 异常, 则归一化.
-        val safeSel = editText.selectionStart.coerceIn(0, len)
+        if (editor.textSnapshot.isEmpty()) return
 
         // Request focus without forcing soft keyboard.
         // zh-CN: 请求焦点但不强制弹出软键盘.
-        editText.requestFocus()
-        editText.isCursorVisible = true
-        editText.setSelection(safeSel)
+        editor.requestEditorFocus()
 
         // Optionally ensure visible once.
         // zh-CN: 可选地确保一次可见.
@@ -999,18 +953,12 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         queue: ConcurrentLinkedQueue<String>,
         done: AtomicBoolean,
     ) {
-        val editText = editor.codeEditText
-
         mLargeFileMode = true
         mEditorLoading = true
         mUserMovedCursorDuringLoading = false
         syncPrimaryMenuState()
 
-        editText.setLoadingText(true)
-        editor.setRedoUndoEnabled(false)
-        editText.setLoadingGutterDigits(3)
-        editText.setText("")
-        editText.setSelection(0)
+        editor.beginLargeTextLoading()
 
         val choreographer = Choreographer.getInstance()
 
@@ -1033,7 +981,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 if (mLargeFileCancel.get()) {
                     // Cancel: stop immediately and do not schedule next frame.
                     // zh-CN: 取消: 立即停止且不再调度下一帧.
-                    editText.setLoadingText(false)
+                    editor.cancelLargeTextLoading()
                     mEditorLoading = false
                     syncPrimaryMenuState()
                     endEditorLoadingUi()
@@ -1043,7 +991,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
                 val finished = done.get() && queue.isEmpty()
                 if (finished) {
-                    editText.setLoadingText(false)
+                    editor.setLoadingText(false)
                     editor.setRedoUndoEnabled(false)
                     editor.markUndoRedoBaselineAsUnchanged()
 
@@ -1064,7 +1012,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                     // - 若用户在加载期间触摸过: 保持当前光标, 不强制跳回 0.
                     post {
                         if (!mUserMovedCursorDuringLoading) {
-                            runCatching { editText.setSelection(0) }
+                            runCatching { editor.jumpToStart() }
                         }
                         ensureEditorHasCursorAfterLoadIfNeeded()
                     }
@@ -1077,7 +1025,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
                 mLoadingBarText.text = context.getString(R.string.text_loading_with_dots)
 
-                val userTouching = editor.isUserTouching()
+                val userTouching = editor.isUserTouching
 
                 val budgetMs = if (userTouching) appendBudgetMsTouching else appendBudgetMsIdle
                 val maxCharsThisFrame = if (userTouching) maxCharsPerFrameTouching else maxCharsPerFrameIdle
@@ -1099,12 +1047,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 }
 
                 if (sb.isNotEmpty()) {
-                    editText.beginBatchEdit()
-                    try {
-                        editText.text?.append(sb)
-                    } finally {
-                        editText.endBatchEdit()
-                    }
+                    editor.appendTextChunk(sb)
                 }
 
                 choreographer.postFrameCallback(this)
@@ -1195,11 +1138,10 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             return
         }
 
-        val editText = editor.codeEditText
-        editText.setLoadingText(true)
+        editor.setLoadingText(true)
         editor.setRedoUndoEnabled(false)
         try {
-            editText.setText(text)
+            editor.text = text
             editor.markUndoRedoBaselineAsUnchanged()
 
             // Reset sticky dirty because we just established a new baseline.
@@ -1208,7 +1150,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             mHadDirectEditSinceSave = false
         } finally {
             editor.setRedoUndoEnabled(true)
-            editText.setLoadingText(false)
+            editor.setLoadingText(false)
         }
 
         mEditorLoading = false
@@ -1247,19 +1189,17 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 // Normal mode.
                 // zh-CN: 普通模式.
                 setMenuItemStatus(R.id.run, true)
-                setMenuItemStatus(R.id.undo, editor.canUndo())
-                setMenuItemStatus(R.id.redo, editor.canRedo())
+                setMenuItemStatus(R.id.undo, editor.canUndo)
+                setMenuItemStatus(R.id.redo, editor.canRedo)
                 setMenuItemStatus(R.id.save, saveStickyDirty)
             }
         }
     }
 
     private fun setInitialTextProgressively(text: String) {
-        val editText = editor.codeEditText
-
         // Mark loading state to suppress heavy callbacks during bulk insertion.
         // zh-CN: 标记加载状态, 在批量插入期间抑制高开销回调.
-        editText.setLoadingText(true)
+        editor.setLoadingText(true)
 
         // Disable undo/redo recording during progressive load to avoid huge history and allocations.
         // zh-CN: 渐进式加载期间禁用 undo/redo 记录, 避免巨大历史与大量分配.
@@ -1267,7 +1207,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
         // Clear existing content quickly.
         // zh-CN: 快速清空现有内容.
-        editText.setText("")
+        editor.text = ""
 
         // Do NOT call editor.setProgress(true) here.
         // zh-CN: 不要在这里再次 setProgress(true), 进度对话框已由 loadUri() 负责显示.
@@ -1292,7 +1232,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 if (index >= text.length) {
                     // Finish: mark current content as baseline without re-setting text.
                     // zh-CN: 完成: 将当前内容设为基线, 避免再次 setText.
-                    editText.setLoadingText(false)
+                    editor.setLoadingText(false)
                     editor.setRedoUndoEnabled(true)
                     editor.markUndoRedoBaselineAsUnchanged()
                     editor.setProgress(false)
@@ -1307,7 +1247,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 // zh-CN: 在单帧预算内尽可能推进加载.
                 while (index < text.length) {
                     val end = (index + chunkSize).coerceAtMost(text.length)
-                    editText.text?.append(text, index, end)
+                    editor.appendTextChunk(text.subSequence(index, end))
                     index = end
                     appendedChunks++
 
@@ -1397,10 +1337,10 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     private fun setUpFunctionsKeyboard() {
         mFunctionsKeyboardHelper = FunctionsKeyboardHelper.with(context as Activity)
-            .setContent(editor)
+            .setContent(editor.view)
             .setFunctionsTrigger(mShowFunctionsButton)
             .setFunctionsView(mFunctionsKeyboard)
-            .setEditView(editor.codeEditText)
+            .setEditView(editor.inputView)
             .build()
 
         // @TodoDiary by 抠脚本人 on Jul 10, 2023.
@@ -1431,7 +1371,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         }
         mCodeCompletionBar.let { bar ->
             bar.setOnHintClickListener(this)
-            AutoCompletion(context, editor.codeEditText).apply {
+            editor.createAutoCompletion(context)?.apply {
                 setAutoCompleteCallback { bar.codeCompletions = it }
                 mAutoCompletion = this
             }
@@ -1447,74 +1387,70 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     private fun setUpEditor() {
         editor.let { editor ->
-            editor.codeEditText.let { editText ->
-                // Observe user touch in text area to preserve caret position after large-file load.
-                // zh-CN: 监听用户在文本区域的触摸, 以便大文件加载完成后保留光标位置.
-                editText.onUserTouchInTextArea = {
-                    if (mEditorLoading && mLargeFileMode) {
-                        mUserMovedCursorDuringLoading = true
-                    }
+            // Observe user touch in text area to preserve caret position after large-file load.
+            // zh-CN: 监听用户在文本区域的触摸, 以便大文件加载完成后保留光标位置.
+            editor.onUserTouchInTextArea = {
+                if (mEditorLoading && mLargeFileMode) {
+                    mUserMovedCursorDuringLoading = true
                 }
-
-                editText.addTextChangedListener(SimpleTextWatcher { _ ->
-                    // Skip menu state updates during progressive loading.
-                    // zh-CN: 渐进式加载期间跳过菜单状态更新.
-                    if (editText.isLoadingText() || mEditorLoading) {
-                        return@SimpleTextWatcher
-                    }
-
-                    // If this change is not caused by undo/redo buttons, treat it as a direct edit.
-                    // Direct edits keep Save sticky until next successful save.
-                    //
-                    // zh-CN:
-                    // 若本次变化并非由撤销/重做按钮触发, 则视为直接编辑.
-                    // 直接编辑会使保存按钮保持 sticky, 直到下一次保存成功.
-                    if (!mUndoRedoButtonInProgress) {
-                        mHadDirectEditSinceSave = true
-                        saveStickyDirty = true
-                    } else {
-                        // Undo/redo navigation:
-                        // Save should reflect (baseline changed) OR (there has been any direct edit since save).
-                        //
-                        // zh-CN:
-                        // undo/redo 历史导航:
-                        // 保存按钮应反映 (相对基线有变化) 或 (自保存以来发生过直接编辑).
-                        saveStickyDirty = editor.isTextChanged || mHadDirectEditSinceSave
-                    }
-
-                    syncPrimaryMenuState()
-                })
-
-                editText.addTextChangedListener(SimpleTextWatcher { _ ->
-                    // Live refresh search stats in search mode (debounced).
-                    // Behavior:
-                    // - Immediately show ".../..." to indicate recounting.
-                    // - Debounce the actual background scan.
-                    //
-                    // zh-CN: 搜索模式下实时刷新统计 (带防抖).
-                    // - 立刻把 subtitle 变成 ".../..." 表示重新统计中.
-                    // - 后台扫描做 debounce, 避免频繁扫全文.
-                    if (!mInSearchMode) return@SimpleTextWatcher
-                    if (editText.isLoadingText() || mEditorLoading) return@SimpleTextWatcher
-
-                    mSearchStatsCounting = true
-                    mSearchStatsCurrentOrdinal = null
-                    mSearchStatsTotal = null
-                    mSearchStatsTotalCapped = false
-                    updateSearchSubtitleBestEffort()
-
-                    scheduleSearchStatsRefreshDebounced()
-                })
-
-                editText.textSize = getEditorTextSize(pxToSp(editText.textSize).toInt()).toFloat()
             }
 
-            editor.addCursorChangeCallback(object : CodeEditor.CursorChangeCallback {
-                override fun onCursorChange(line: String, cursor: Int) {
-                    autoComplete(line, cursor)
+            editor.addTextChangeListener {
+                // Skip menu state updates during progressive loading.
+                // zh-CN: 渐进式加载期间跳过菜单状态更新.
+                if (editor.isLoadingText || mEditorLoading) {
+                    return@addTextChangeListener
                 }
+
+                // If this change is not caused by undo/redo buttons, treat it as a direct edit.
+                // Direct edits keep Save sticky until next successful save.
+                //
+                // zh-CN:
+                // 若本次变化并非由撤销/重做按钮触发, 则视为直接编辑.
+                // 直接编辑会使保存按钮保持 sticky, 直到下一次保存成功.
+                if (!mUndoRedoButtonInProgress) {
+                    mHadDirectEditSinceSave = true
+                    saveStickyDirty = true
+                } else {
+                    // Undo/redo navigation:
+                    // Save should reflect (baseline changed) OR (there has been any direct edit since save).
+                    //
+                    // zh-CN:
+                    // undo/redo 历史导航:
+                    // 保存按钮应反映 (相对基线有变化) 或 (自保存以来发生过直接编辑).
+                    saveStickyDirty = editor.isTextChanged || mHadDirectEditSinceSave
+                }
+
+                syncPrimaryMenuState()
+            }
+
+            editor.addTextChangeListener {
+                // Live refresh search stats in search mode (debounced).
+                // Behavior:
+                // - Immediately show ".../..." to indicate recounting.
+                // - Debounce the actual background scan.
+                //
+                // zh-CN: 搜索模式下实时刷新统计 (带防抖).
+                // - 立刻把 subtitle 变成 ".../..." 表示重新统计中.
+                // - 后台扫描做 debounce, 避免频繁扫全文.
+                if (!mInSearchMode) return@addTextChangeListener
+                if (editor.isLoadingText || mEditorLoading) return@addTextChangeListener
+
+                mSearchStatsCounting = true
+                mSearchStatsCurrentOrdinal = null
+                mSearchStatsTotal = null
+                mSearchStatsTotalCapped = false
+                updateSearchSubtitleBestEffort()
+
+                scheduleSearchStatsRefreshDebounced()
+            }
+
+            editor.setTextSizeSp(getEditorTextSize(editor.getTextSizeSp().toInt()).toFloat())
+
+            editor.addCursorChangeCallback(EditorCursorChangeListener { line, cursor ->
+                autoComplete(line, cursor)
             })
-            editor.layoutDirection = LAYOUT_DIRECTION_LTR
+            editor.view.layoutDirection = LAYOUT_DIRECTION_LTR
 
             // Initialize to "new file" expected state: only Run enabled.
             // zh-CN: 初始化为 "新建文件" 预期状态: 仅运行可用.
@@ -1530,7 +1466,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     private fun autoComplete(line: String, cursor: Int) {
-        mAutoCompletion!!.onCursorChange(line, cursor)
+        mAutoCompletion?.onCursorChange(line, cursor)
     }
 
     private fun setTheme(theme: Theme?) {
@@ -1689,23 +1625,41 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         syncPrimaryMenuState()
     }
 
-    fun save(): Observable<String> =
-        Observable
-            .fromCallable {
-                when (val uri = uri) {
-                    null -> {
-                        throw IllegalStateException(context.getString(R.string.error_unable_to_save_file_as_current_file_path_is_unknown))
-                    }
-                    else -> {
-                        // Use a transactional save flow for both file:// and content://.
-                        // zh-CN: 对 file:// 与 content:// 统一使用事务式保存流程.
-                        editor.text.apply {
-                            writeTextWithCharsetTransactional(uri, this)
+    private fun getTextForSavingObservable(): Observable<String> =
+        Observable.create { emitter ->
+            post {
+                runCatching {
+                    editor.getTextForSaving { latestText ->
+                        if (!emitter.isDisposed) {
+                            emitter.onNext(latestText)
+                            emitter.onComplete()
                         }
+                    }
+                }.onFailure { error ->
+                    if (!emitter.isDisposed) {
+                        emitter.onError(error)
                     }
                 }
             }
-            .subscribeOn(Schedulers.io())
+        }
+
+    fun save(): Observable<String> =
+        getTextForSavingObservable()
+            .flatMap { latestText ->
+                Observable.fromCallable {
+                    when (val uri = uri) {
+                        null -> {
+                            throw IllegalStateException(context.getString(R.string.error_unable_to_save_file_as_current_file_path_is_unknown))
+                        }
+                        else -> {
+                            // Use a transactional save flow for both file:// and content://.
+                            // zh-CN: 对 file:// 与 content:// 统一使用事务式保存流程.
+                            writeTextWithCharsetTransactional(uri, latestText)
+                            latestText
+                        }
+                    }
+                }.subscribeOn(Schedulers.io())
+            }
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext {
                 editor.markTextAsSaved()
@@ -2149,7 +2103,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     fun selectTextSize() {
         DialogUtils.buildAndShowAdaptive {
             TextSizeSettingDialogBuilder(context)
-                .initialValue(pxToSp(editor.codeEditText.textSize).toInt())
+                .initialValue(editor.getTextSizeSp().toInt())
                 .callback { value: Int -> setTextSize(value) }
                 .build()
         }
@@ -2157,8 +2111,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     fun setTextSize(value: Int) {
         setEditorTextSize(value)
-        editor.codeEditText.textSize = value.toFloat()
-        editor.lastTextSize = value
+        editor.setTextSizeSp(value.toFloat())
     }
 
     private fun selectEditorTheme(themes: List<Theme>) {
@@ -2318,9 +2271,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         val gen = ++mSearchStatsGeneration
 
         val usingRegex = mCurrentSearchUsingRegex
-        val selStart = editor.codeEditText.selectionStart
-        val selEnd = editor.codeEditText.selectionEnd
-        val textSnapshot = editor.text
+        val currentSelection = editor.selection
+        val textSnapshot = editor.textSnapshot
 
         mSearchStatsDisposable = Observable
             .fromCallable {
@@ -2328,8 +2280,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                     text = textSnapshot,
                     query = query,
                     usingRegex = usingRegex,
-                    selectionStart = minOf(selStart, selEnd),
-                    selectionEnd = maxOf(selStart, selEnd),
+                    selectionStart = currentSelection.startOffset,
+                    selectionEnd = currentSelection.endOffset,
                     maxTotal = mSearchStatsMaxTotal,
                     generation = gen,
                 )
@@ -2440,9 +2392,9 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     // Try to start "Find" and enter search mode. Returns true if any result is found.
     // zh-CN: 尝试开始 "查找" 并进入搜索模式. 若找到任意结果则返回 true.
     fun tryFind(keywords: String, usingRegex: Boolean): Boolean {
-        editor.find(keywords, usingRegex)
+        val result = editor.find(keywords, EditorSearchOptions(usingRegex = usingRegex))
 
-        val hasResult = editor.getFoundIndex() >= 0
+        val hasResult = result.found
         if (!hasResult) {
             showNoSearchResultDialog(keywords)
             return false
@@ -2461,9 +2413,9 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     // Try to start "Replace (single)" and enter search mode. Returns true if any result is found.
     // zh-CN: 尝试开始 "替换 (单次)" 并进入搜索模式. 若找到任意结果则返回 true.
     fun tryReplace(keywords: String, replacement: String, usingRegex: Boolean): Boolean {
-        editor.replace(keywords, replacement, usingRegex)
+        val result = editor.replace(keywords, replacement, EditorSearchOptions(usingRegex = usingRegex))
 
-        val hasResult = editor.getFoundIndex() >= 0
+        val hasResult = result.found
         if (!hasResult) {
             showNoSearchResultDialog(keywords)
             return false
@@ -2484,14 +2436,14 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         showNormalToolbar()
     }
 
-    @Throws(CheckedPatternSyntaxException::class)
+    @Throws(EditorSearchSyntaxException::class)
     fun find(keywords: String, usingRegex: Boolean) {
         // Keep old API for callers that don't care about result.
         // zh-CN: 保留旧 API, 兼容不关心结果的调用方.
         tryFind(keywords, usingRegex)
     }
 
-    @Throws(CheckedPatternSyntaxException::class)
+    @Throws(EditorSearchSyntaxException::class)
     fun replace(keywords: String, replacement: String, usingRegex: Boolean) {
         // Keep old API for callers that don't care about result.
         // zh-CN: 保留旧 API, 兼容不关心结果的调用方.
@@ -2512,9 +2464,9 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         post { syncPrimaryMenuState() }
     }
 
-    @Throws(CheckedPatternSyntaxException::class)
+    @Throws(EditorSearchSyntaxException::class)
     fun replaceAll(keywords: String, replacement: String, usingRegex: Boolean) {
-        editor.replaceAll(keywords, replacement, usingRegex)
+        editor.replaceAll(keywords, replacement, EditorSearchOptions(usingRegex = usingRegex))
     }
 
     fun debug() {
@@ -2606,7 +2558,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         completions[pos].let {
             when {
                 // @Inspired by 抠脚本人 (https://github.com/little-alei) on Jul 13, 2023.
-                it.insertText == "/" -> editor.commentHelper.toggle()
+                it.insertText == "/" -> editor.toggleComment()
                 it.insertText == "=" -> editor.clear()
                 it.insertText == "-" -> editor.deleteLine()
                 it.insertText == "(" -> editor.moveCursor(-1)
@@ -2696,12 +2648,15 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     @SuppressLint("CheckResult")
     private fun saveToTmpFile(): Observable<File> {
-        return Observable.fromCallable {
-            TmpScriptFiles.create(context).also {
-                write(it, editor.text)
-                mTmpSavedFileForRunning = it
+        return getTextForSavingObservable()
+            .flatMap { latestText ->
+                Observable.fromCallable {
+                    TmpScriptFiles.create(context).also {
+                        write(it, latestText)
+                        mTmpSavedFileForRunning = it
+                    }
+                }.subscribeOn(Schedulers.io())
             }
-        }.observeOn(Schedulers.io())
     }
 
     fun cleanBeforeExit() {

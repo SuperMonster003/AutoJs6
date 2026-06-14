@@ -10,7 +10,7 @@ import androidx.appcompat.widget.AppCompatEditText
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import com.afollestad.materialdialogs.MaterialDialog
-import org.autojs.autojs.ui.edit.editor.CodeEditor.CheckedPatternSyntaxException
+import org.autojs.autojs.ui.edit.editor.engine.EditorSearchSyntaxException
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.DialogFindOrReplaceBinding
 
@@ -128,7 +128,7 @@ class FindOrReplaceDialogBuilder(context: Context, private val mEditorView: Edit
                     }
                 }
             }
-        } catch (e: CheckedPatternSyntaxException) {
+        } catch (e: EditorSearchSyntaxException) {
             e.printStackTrace()
             mKeywordsEditText.error = getContext().getString(R.string.error_pattern_syntax)
         }

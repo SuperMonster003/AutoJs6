@@ -1,8 +1,10 @@
 package org.autojs.autojs.ui.edit.editor.engine
 
+import android.content.Context
 import android.graphics.Rect
 import android.text.TextWatcher
 import android.view.View
+import org.autojs.autojs.model.autocomplete.AutoCompletion
 import org.autojs.autojs.ui.edit.editor.CodeEditor
 import org.autojs.autojs.ui.edit.editor.LayoutHelper
 import org.autojs.autojs.ui.edit.theme.Theme
@@ -26,6 +28,9 @@ class NativeCodeEditorEngine(
 
     override val view: View
         get() = codeEditor
+
+    override val inputView: View
+        get() = codeEditor.codeEditText
 
     override val engineType: EditorEngineType
         get() = EditorEngineType.NATIVE
@@ -328,6 +333,10 @@ class NativeCodeEditorEngine(
         codeEditor.codeEditText.removeTextChangedListener(watcher)
     }
 
+    override fun createAutoCompletion(context: Context): AutoCompletion {
+        return AutoCompletion(context, codeEditor.codeEditText)
+    }
+
     override fun requestEditorFocus() {
         codeEditor.codeEditText.requestFocus()
     }
@@ -368,7 +377,13 @@ class NativeCodeEditorEngine(
     }
 
     override fun appendTextChunk(chunk: CharSequence) {
-        codeEditor.codeEditText.text?.append(chunk)
+        val editText = codeEditor.codeEditText
+        editText.beginBatchEdit()
+        try {
+            editText.text?.append(chunk)
+        } finally {
+            editText.endBatchEdit()
+        }
     }
 
     override fun endLargeTextLoading(markClean: Boolean) {

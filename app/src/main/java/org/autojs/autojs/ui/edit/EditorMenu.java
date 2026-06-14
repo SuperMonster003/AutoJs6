@@ -10,7 +10,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import androidx.annotation.Nullable;
 import com.afollestad.materialdialogs.MaterialDialog;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import kotlin.Unit;
 import org.autojs.autojs.core.pref.Language;
 import org.autojs.autojs.core.pref.Pref;
@@ -18,7 +17,7 @@ import org.autojs.autojs.model.indices.AndroidClass;
 import org.autojs.autojs.model.indices.ClassSearchingItem;
 import org.autojs.autojs.script.JavaScriptFileSource;
 import org.autojs.autojs.ui.common.NotAskAgainDialog;
-import org.autojs.autojs.ui.edit.editor.CodeEditor;
+import org.autojs.autojs.ui.edit.editor.engine.ScriptEditorEngine;
 import org.autojs.autojs.ui.edit.keyboard.SymbolsSettingsActivity;
 import org.autojs.autojs.ui.main.scripts.EditableFileInfoDialogManager;
 import org.autojs.autojs.ui.project.BuildActivity;
@@ -47,7 +46,7 @@ public class EditorMenu {
 
     private final EditorView mEditorView;
     private final Context mContext;
-    private final CodeEditor mEditor;
+    private final ScriptEditorEngine mEditor;
     private final boolean mReadOnly;
 
     public EditorMenu(EditorView editorView) {
@@ -208,13 +207,11 @@ public class EditorMenu {
     }
 
     private void importJavaPackageOrClass() {
-        mEditor.getSelection()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(s -> new ClassSearchDialogBuilder(mContext)
-                        .setQuery(s)
-                        .itemClick((dialog, item, pos) -> showClassSearchingItem(dialog, item))
-                        .title(R.string.text_find_java_classes)
-                        .show());
+        new ClassSearchDialogBuilder(mContext)
+                .setQuery(mEditor.getSelectedTextSnapshot())
+                .itemClick((dialog, item, pos) -> showClassSearchingItem(dialog, item))
+                .title(R.string.text_find_java_classes)
+                .show();
     }
 
     private void showClassSearchingItem(MaterialDialog dialog, ClassSearchingItem item) {
@@ -302,7 +299,7 @@ public class EditorMenu {
                     String newKey = itemKeys.get(which);
                     if (!Objects.equals(newKey, itemKey)) {
                         Pref.putString(key, newKey);
-                        mEditorView.editor.notifyPinchToZoomStrategyChanged(newKey);
+                        mEditor.notifyPinchToZoomStrategyChanged(newKey);
                     }
                     return true;
                 })
@@ -369,7 +366,7 @@ public class EditorMenu {
             return tryDoing(() -> mEditor.setText(""));
         }
         if (itemId == R.id.action_comment) {
-            return tryDoing(mEditor.commentHelper::toggle);
+            return tryDoing(mEditor::toggleComment);
         }
         if (itemId == R.id.action_beautify) {
             return tryDoing(mEditorView::beautifyCode);
@@ -378,9 +375,7 @@ public class EditorMenu {
     }
 
     private void jumpToLine() {
-        mEditor.getLineCount()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::showJumpDialog);
+        showJumpDialog(mEditor.getLineCountSnapshot());
     }
 
     private void showJumpDialog(final int lineCount) {
@@ -452,30 +447,27 @@ public class EditorMenu {
     }
 
     private void findOrReplace() {
-        mEditor.getSelection()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(s -> {
+        String selectedText = mEditor.getSelectedTextSnapshot();
                     // Prefer restoring last search (even after exit search mode).
                     // zh-CN: 优先恢复 "上一次搜索" (即使已退出搜索模式), 避免 selection (命中内容) 覆盖关键词.
-                    String preferredQuery = mEditorView.getPreferredSearchQueryForDialogOrNull();
-                    boolean preferredRegex = mEditorView.getPreferredSearchUsingRegexForDialog();
+        String preferredQuery = mEditorView.getPreferredSearchQueryForDialogOrNull();
+        boolean preferredRegex = mEditorView.getPreferredSearchUsingRegexForDialog();
 
-                    FindOrReplaceDialogBuilder builder = new FindOrReplaceDialogBuilder(mContext, mEditorView);
+        FindOrReplaceDialogBuilder builder = new FindOrReplaceDialogBuilder(mContext, mEditorView);
 
                     // Only override regex checkbox when we are restoring an actual previous query.
                     // Otherwise keep the persisted checkbox state from SharedPreferences (restoreState()).
                     //
                     // zh-CN: 仅当我们确实在恢复 "上一次 query" 时才覆盖 regex 勾选状态;
                     // 否则使用 SharedPreferences 中持久化的勾选状态.
-                    if (preferredQuery != null) {
-                        builder.setUsingRegex(preferredRegex);
-                    }
+        if (preferredQuery != null) {
+            builder.setUsingRegex(preferredRegex);
+        }
 
-                    builder.setQueryIfNotEmpty(preferredQuery != null ? preferredQuery : s);
+        builder.setQueryIfNotEmpty(preferredQuery != null ? preferredQuery : selectedText);
 
-                    builder.positiveColorRes(R.color.dialog_button_attraction);
-                    builder.show();
-                });
+        builder.positiveColorRes(R.color.dialog_button_attraction);
+        builder.show();
     }
 
     private void copyAll() {
