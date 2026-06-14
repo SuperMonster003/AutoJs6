@@ -1,0 +1,1 @@
+{"name":"cjs-self-reference","main":"index.js","exports":{".":"./index.js","./feature":"./feature.js"}}

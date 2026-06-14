@@ -1,0 +1,1 @@
+exports.value = "imports-alias";
