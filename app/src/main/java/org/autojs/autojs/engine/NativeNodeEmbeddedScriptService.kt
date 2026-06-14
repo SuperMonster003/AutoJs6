@@ -18,6 +18,7 @@ import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.tool.ForegroundServiceCreator
 import org.autojs.autojs.ui.main.MainActivity
 import org.autojs.autojs.util.ForegroundServiceUtils.FOREGROUND_SERVICE_TYPE_UNKNOWN
+import org.autojs.autojs6.BuildConfig
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
@@ -93,6 +94,10 @@ class NativeNodeEmbeddedScriptService : Service() {
         val sourceName = intent.getStringExtra(EXTRA_SOURCE_NAME).orEmpty().ifBlank { DEFAULT_SOURCE_NAME }
         val workingDirectory = intent.getStringExtra(EXTRA_WORKING_DIRECTORY)?.takeIf { it.isNotBlank() }
         val timeoutMs = intent.getLongExtra(EXTRA_TIMEOUT_MS, DEFAULT_TIMEOUT_MS).coerceAtLeast(1L)
+        val esmExperimentalEnabled = intent.getBooleanExtra(
+            EXTRA_ESM_EXPERIMENTAL_ENABLED,
+            BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED,
+        )
         val spawnDepth = intent.getIntExtra(EXTRA_SPAWN_DEPTH, 0)
             .coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH)
         val moduleSources = intent.moduleSourcesExtra()
@@ -128,6 +133,7 @@ class NativeNodeEmbeddedScriptService : Service() {
             timeoutMs = timeoutMs,
             moduleSources = moduleSources,
             runtimeModuleSources = enrichedRuntimeModuleSources,
+            esmExperimentalEnabled = esmExperimentalEnabled,
         )
         val lifecycle = NodeEmbeddedRuntimeLifecycle(TAG, executionId, processName, pid, sourceName)
         activeLifecycle = lifecycle
@@ -136,6 +142,7 @@ class NativeNodeEmbeddedScriptService : Service() {
             TAG,
             "script.enter executionId=$executionId processName=$processName pid=$pid sourceName=$sourceName " +
                     "moduleSources=${moduleSources.size} runtimeModuleSources=${enrichedRuntimeModuleSources.size} " +
+                    "esmExperimentalEnabled=$esmExperimentalEnabled " +
                     "runtimeFirst=${enrichedRuntimeModuleSources.keys.firstOrNull().orEmpty()}",
         )
         try {
@@ -540,6 +547,7 @@ class NativeNodeEmbeddedScriptService : Service() {
         private const val EXTRA_SOURCE_NAME = "source_name"
         private const val EXTRA_WORKING_DIRECTORY = "working_directory"
         private const val EXTRA_TIMEOUT_MS = "timeout_ms"
+        private const val EXTRA_ESM_EXPERIMENTAL_ENABLED = "esm_experimental_enabled"
         private const val EXTRA_SPAWN_DEPTH = "spawn_depth"
         private const val EXTRA_EXECUTION_ID = "execution_id"
         private const val EXTRA_MODULE_SOURCE_NAMES = "module_source_names"
@@ -595,6 +603,7 @@ class NativeNodeEmbeddedScriptService : Service() {
                 putExtra(EXTRA_SOURCE_NAME, request.sourceName)
                 putExtra(EXTRA_WORKING_DIRECTORY, request.workingDirectory)
                 putExtra(EXTRA_TIMEOUT_MS, request.timeoutMs.coerceAtLeast(1L))
+                putExtra(EXTRA_ESM_EXPERIMENTAL_ENABLED, request.esmExperimentalEnabled)
                 putExtra(EXTRA_SPAWN_DEPTH, request.spawnDepth.coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH))
                 putExtra(EXTRA_EXECUTION_ID, executionId)
                 putExtra(EXTRA_MODULE_SOURCE_NAMES, request.moduleSources.keys.toTypedArray())

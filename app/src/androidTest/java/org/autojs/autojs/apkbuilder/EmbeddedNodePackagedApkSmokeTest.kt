@@ -8584,6 +8584,46 @@ class EmbeddedNodePackagedApkSmokeTest {
     }
 
     @Test
+    fun installAndRunExperimentalEsmEmbeddedNodePackagedApk() {
+        assumeTrue(
+            "Embedded Node.js packaged experimental ESM smoke requires embedded script execution build support.",
+            BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED,
+        )
+        assumeTrue(
+            "Embedded Node.js packaged experimental ESM smoke requires -Pautojs.nodejs.esm.experimental=true.",
+            BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED,
+        )
+        assumeTrue(
+            "Embedded Node.js packaged experimental ESM smoke requires a refreshed inrt template override built with " +
+                    "-Pautojs.nodejs.esm.experimental=true.",
+            isPackagedSmokeTemplateOverrideEnabled(),
+        )
+
+        assumePackagedSmokeTemplateAvailable("Packaged experimental ESM install-and-run smoke")
+
+        val outputApk = buildPackagedGateDiagnosticsApk(
+            rootName = "embedded-node-packaged-experimental-esm-smoke",
+            outputApkName = EXPERIMENTAL_ESM_APK_NAME,
+            projectName = EXPERIMENTAL_ESM_PROJECT_NAME,
+            packageName = EXPERIMENTAL_ESM_PACKAGE_NAME,
+            mainScriptName = "main.mjs",
+            mainScript = """
+                const value = 42;
+                const suffix = "esm-v1";
+                const awaited = await Promise.resolve("awaited");
+                const ready = value === 42 && suffix === "esm-v1" && awaited === "awaited";
+
+                console.log("packaged.experimental_esm.ready=" + ready);
+                console.log("packaged.experimental_esm.entry=" + (value === 42 && suffix === "esm-v1"));
+                console.log("packaged.experimental_esm.tla=" + (awaited === "awaited"));
+            """.trimIndent() + "\n",
+            runtimeMarkers = EXPERIMENTAL_ESM_RUNTIME_MARKERS,
+            requiredTemplateDexMarkers = EXPERIMENTAL_ESM_TEMPLATE_DEX_MARKERS,
+        )
+        assertInstallAndRunPackagedExperimentalEsmSmoke(outputApk)
+    }
+
+    @Test
     fun installAndRunDynamicImportDiagnosticsEmbeddedNodePackagedApk() {
         assumeTrue(
             "Embedded Node.js packaged dynamic import diagnostics install-and-run smoke requires embedded script execution build support.",
@@ -10517,6 +10557,7 @@ class EmbeddedNodePackagedApkSmokeTest {
         extraFiles: Map<String, String> = emptyMap(),
         extraPermissions: List<String> = emptyList(),
         runtimeMarkers: List<String>,
+        requiredTemplateDexMarkers: List<String> = emptyList(),
     ): File {
         val root = File(context.cacheDir, rootName).apply {
             deleteRecursively()
@@ -10599,7 +10640,7 @@ $permissionsJson
             isRunOnBoot = false
         }
 
-        openPackagedSmokeTemplate().use { templateApk ->
+        openPackagedSmokeTemplate(requiredDexMarkers = requiredTemplateDexMarkers).use { templateApk ->
             ApkBuilder(templateApk, outputApk, buildDir.absolutePath)
                 .prepare(context)
                 .withConfig(context, config)
@@ -11774,6 +11815,16 @@ $permissionsJson
         )
     }
 
+    private fun assertInstallAndRunPackagedExperimentalEsmSmoke(outputApk: File) {
+        assertInstallAndRunPackagedApk(
+            outputApk = outputApk,
+            packageName = EXPERIMENTAL_ESM_PACKAGE_NAME,
+            shellApkPath = "/data/local/tmp/autojs6-packaged-node-experimental-esm-smoke.apk",
+            label = "packaged experimental ESM smoke",
+            requiredMarkers = EXPERIMENTAL_ESM_RUNTIME_MARKERS,
+        )
+    }
+
     private fun assertInstallAndRunPackagedDynamicImportDiagnosticsSmoke(outputApk: File) {
         assertInstallAndRunPackagedApk(
             outputApk = outputApk,
@@ -12031,7 +12082,7 @@ $permissionsJson
     private fun openPackagedSmokeTemplate(
         requiredDexMarkers: List<String> = emptyList(),
     ): InputStream {
-        val source = packagedSmokeTemplateSource()
+        val source = packagedSmokeTemplateSource(requiredDexMarkers = requiredDexMarkers)
             ?: error("Packaged smoke template is unavailable.\n${packagedSmokeTemplateDiagnostics()}")
         val missingDefaultTemplateMarkers = listOf(
             INRT_NODE_PROJECT_RUNNER_TEMPLATE_MARKER,
@@ -12143,7 +12194,9 @@ $permissionsJson
         return false
     }
 
-    private fun packagedSmokeTemplateSource(): PackagedSmokeTemplateSource? {
+    private fun packagedSmokeTemplateSource(
+        requiredDexMarkers: List<String> = emptyList(),
+    ): PackagedSmokeTemplateSource? {
         val overrideEnabled = isPackagedSmokeTemplateOverrideEnabled()
         if (!overrideEnabled) {
             return if (isPackagedSmokeAssetsTemplateAvailable()) {
@@ -12156,13 +12209,44 @@ $permissionsJson
             }
         }
 
+        fun PackagedSmokeTemplateSource.containsRequiredDexMarkers(): Boolean {
+            return requiredDexMarkers.all { marker -> containsDexMarker(marker) }
+        }
+
         val override = packagedSmokeTemplateOverride()
+        if (override?.isFile == true && override.length() > 0L) {
+            val source = PackagedSmokeTemplateSource(
+                kind = PackagedSmokeTemplateSourceKind.APP_EXTERNAL_OVERRIDE,
+                summary = "app external override:${override.absolutePath}",
+                file = override,
+            )
+            if (requiredDexMarkers.isEmpty() || source.containsRequiredDexMarkers()) {
+                return source
+            }
+        }
+        val shellSources = SHELL_TEMPLATE_OVERRIDE_PATHS
+            .filter { path -> shell("ls -l $path").contains(path.substringAfterLast('/')) }
+            .map { shellPath ->
+                PackagedSmokeTemplateSource(
+                    kind = PackagedSmokeTemplateSourceKind.SHELL_OVERRIDE,
+                    summary = "shell override:$shellPath",
+                    shellPath = shellPath,
+                )
+            }
+        shellSources.firstOrNull { source ->
+            requiredDexMarkers.isEmpty() || source.containsRequiredDexMarkers()
+        }?.let { source ->
+            return source
+        }
         if (override?.isFile == true && override.length() > 0L) {
             return PackagedSmokeTemplateSource(
                 kind = PackagedSmokeTemplateSourceKind.APP_EXTERNAL_OVERRIDE,
                 summary = "app external override:${override.absolutePath}",
                 file = override,
             )
+        }
+        shellSources.firstOrNull()?.let { source ->
+            return source
         }
         shellPackagedSmokeTemplateOverridePath()?.let { shellPath ->
             return PackagedSmokeTemplateSource(
@@ -12453,6 +12537,9 @@ $permissionsJson
         private const val ESM_DIAGNOSTICS_PROJECT_NAME = "PackagedNodeEsmDiagnosticsSmoke"
         private const val ESM_DIAGNOSTICS_PACKAGE_NAME = "org.autojs6.packaged.node.esm.diagnostics.smoke"
         private const val ESM_DIAGNOSTICS_APK_NAME = "PackagedNodeEsmDiagnosticsSmoke_v1.0.0.apk"
+        private const val EXPERIMENTAL_ESM_PROJECT_NAME = "PackagedNodeExperimentalEsmSmoke"
+        private const val EXPERIMENTAL_ESM_PACKAGE_NAME = "org.autojs6.packaged.node.experimental.esm.smoke"
+        private const val EXPERIMENTAL_ESM_APK_NAME = "PackagedNodeExperimentalEsmSmoke_v1.0.0.apk"
         private const val DYNAMIC_IMPORT_DIAGNOSTICS_PROJECT_NAME = "PackagedNodeDynamicImportDiagnosticsSmoke"
         private const val DYNAMIC_IMPORT_DIAGNOSTICS_PACKAGE_NAME =
             "org.autojs6.packaged.node.dynamicimport.diagnostics.smoke"
@@ -13182,6 +13269,14 @@ $permissionsJson
         private val ESM_DIAGNOSTICS_MARKERS = listOf(
             "packaged.diagnostics.esm.code=ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED",
             "packaged.diagnostics.esm.message=true",
+        )
+        private val EXPERIMENTAL_ESM_RUNTIME_MARKERS = listOf(
+            "packaged.experimental_esm.ready=true",
+            "packaged.experimental_esm.entry=true",
+            "packaged.experimental_esm.tla=true",
+        )
+        private val EXPERIMENTAL_ESM_TEMPLATE_DEX_MARKERS = listOf(
+            "esmExperimentalEnabled=",
         )
         private val DYNAMIC_IMPORT_DIAGNOSTICS_MARKERS = listOf(
             "packaged.diagnostics.dynamic_import.code=ERR_AUTOJS6_EMBEDDED_NODE_DYNAMIC_IMPORT_UNSUPPORTED",

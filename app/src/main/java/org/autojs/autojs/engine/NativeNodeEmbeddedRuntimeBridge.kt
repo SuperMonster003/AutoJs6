@@ -542,6 +542,7 @@ object NativeNodeEmbeddedRuntimeBridge {
                     request.workingDirectory,
                     request.moduleSources.keys.toTypedArray(),
                     request.moduleSources.values.toTypedArray(),
+                    request.esmExperimentalEnabled,
                 )
             } else {
                 nativeRunEmbeddedScriptLifecycleWithRuntimeModules(
@@ -552,6 +553,7 @@ object NativeNodeEmbeddedRuntimeBridge {
                     request.moduleSources.values.toTypedArray(),
                     request.runtimeModuleSources.keys.toTypedArray(),
                     request.runtimeModuleSources.values.toTypedArray(),
+                    request.esmExperimentalEnabled,
                 )
             }
             payload ?: emptyArray()
@@ -14710,6 +14712,7 @@ object NativeNodeEmbeddedRuntimeBridge {
         source: String,
         sourceName: String,
         workingDirectory: String?,
+        esmExperimentalEnabled: Boolean,
     ): Array<String>?
 
     private external fun nativeRunEmbeddedScriptLifecycleWithModules(
@@ -14718,6 +14721,7 @@ object NativeNodeEmbeddedRuntimeBridge {
         workingDirectory: String?,
         moduleSourceNames: Array<String>,
         moduleSources: Array<String>,
+        esmExperimentalEnabled: Boolean,
     ): Array<String>?
 
     private external fun nativeRunEmbeddedScriptLifecycleWithRuntimeModules(
@@ -14728,6 +14732,7 @@ object NativeNodeEmbeddedRuntimeBridge {
         moduleSources: Array<String>,
         runtimeModuleSourceNames: Array<String>,
         runtimeModuleSources: Array<String>,
+        esmExperimentalEnabled: Boolean,
     ): Array<String>?
 
     private fun isProbePropertyEnabled(propertyName: String): Boolean {
@@ -16958,6 +16963,7 @@ object NativeNodeEmbeddedRuntimeBridge {
         val captureStderr: Boolean = true,
         val moduleSources: Map<String, String> = emptyMap(),
         val runtimeModuleSources: Map<String, String> = emptyMap(),
+        val esmExperimentalEnabled: Boolean = BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED,
         val spawnDepth: Int = 0,
     )
 

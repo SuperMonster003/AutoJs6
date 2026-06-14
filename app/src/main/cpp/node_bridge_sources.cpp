@@ -5454,7 +5454,8 @@ std::string buildEmbeddedScriptExecutionSource(
         const std::string& sourceName,
         const std::string& workingDirectory,
         const std::vector<std::pair<std::string, std::string>>& moduleSources,
-        const std::vector<std::pair<std::string, std::string>>& runtimeModuleSources) {
+        const std::vector<std::pair<std::string, std::string>>& runtimeModuleSources,
+        bool esmExperimentalEnabled) {
     const std::string sourceLiteral = jsonStringLiteral(source);
     const std::string sourceNameLiteral = jsonStringLiteral(sanitizeSourceUrl(sourceName));
     const std::string workingDirectoryLiteral = jsonStringLiteral(workingDirectory);
@@ -5492,6 +5493,9 @@ std::string buildEmbeddedScriptExecutionSource(
     script += runtimeModuleSourcesLiteral;
     script += R"JS();
   const __autojs6_runtime_module_records = Object.create(null);
+  const __autojs6_esm_experimental_enabled = )JS";
+    script += esmExperimentalEnabled ? "true" : "false";
+    script += R"JS(;
   const __autojs6_runtime_module_count_limit = 64;
   const __autojs6_runtime_module_single_source_bytes_limit = 262144;
   const __autojs6_runtime_module_total_source_bytes_limit = 524288;
@@ -5521,8 +5525,18 @@ std::string buildEmbeddedScriptExecutionSource(
     lastTypeModulePackageJson: "",
     lastTypeModuleFilename: ""
   };
+  const __autojs6_esm_diagnostics = {
+    enabled: __autojs6_esm_experimental_enabled,
+    entry: false,
+    graphRoot: "",
+    graphSize: 0,
+    graphModules: [],
+    deniedCount: 0,
+    lastDeniedReason: ""
+  };
   let __autojs6_runtime_module_accounting = null;
   const __autojs6_native_function = Function;
+  const __autojs6_native_async_function = Object.getPrototypeOf(async function() {}).constructor;
   const __autojs6_native_eval = eval;
   const __autojs6_started_at = Date.now();
   function __autojs6_node_version() {
@@ -7979,14 +7993,14 @@ std::string buildEmbeddedScriptExecutionSource(
     const highRiskCapabilities = Object.freeze({
       childProcess: false,
       dynamicImport: false,
-      esm: false,
+      esm: __autojs6_esm_experimental_enabled,
       nativeAddon: false,
       network: false,
       npmInstall: false,
       workerThreads: false
     });
     const experimentalFlags = Object.freeze({
-      esm: false,
+      esm: __autojs6_esm_experimental_enabled,
       network: false,
       workerThreads: false
     });
@@ -7996,7 +8010,7 @@ std::string buildEmbeddedScriptExecutionSource(
         diagnosticName: "esm",
         gradleProperty: "autojs.nodejs.esm.experimental",
         defaultEnabled: false,
-        enabled: false,
+        enabled: __autojs6_esm_experimental_enabled,
         buildTimeOverrideAllowed: true,
         projectJsonOverrideAllowed: false,
         packagedApkOverrideAllowed: false,
@@ -8153,7 +8167,7 @@ std::string buildEmbeddedScriptExecutionSource(
       engineVersion: "autojs6-node-profile-v1",
       node: typeof process === "object" && process ? process.version : "",
       cjs: true,
-      esm: false,
+      esm: __autojs6_esm_experimental_enabled,
       dynamicImport: false,
       network: false,
       workerThreads: false,
@@ -10869,7 +10883,7 @@ std::string buildEmbeddedScriptExecutionSource(
   function __autojs6_runtime_module_source_url(resolved) {
     return String(resolved || "").replace(/[\r\n]/g, " ");
   }
-  function __autojs6_validate_runtime_module_path(resolved) {
+  function __autojs6_validate_runtime_module_path(resolved, allowEsm) {
     const path = __autojs6_path_module();
     const fs = __autojs6_fs_module();
     if (!path || !fs || typeof fs.readFileSync !== "function" || typeof fs.lstatSync !== "function") {
@@ -10894,8 +10908,10 @@ std::string buildEmbeddedScriptExecutionSource(
       throw __autojs6_runtime_module_error("Embedded Node dynamic require fallback path escapes working directory: " + absolute);
     }
     const extension = path.extname(absolute);
-    __autojs6_throw_if_esm_extension(extension, absolute, "Embedded Node dynamic require fallback");
-    if (extension && !__autojs6_supported_local_module_extension(extension)) {
+    if (!allowEsm) {
+      __autojs6_throw_if_esm_extension(extension, absolute, "Embedded Node dynamic require fallback");
+    }
+    if (extension && !__autojs6_supported_local_module_extension(extension) && !(allowEsm && __autojs6_is_esm_extension(extension))) {
       throw __autojs6_runtime_module_error("Unsupported Embedded Node dynamic require fallback extension in MVP: " + absolute);
     }
     let lstat;
@@ -10976,11 +10992,11 @@ std::string buildEmbeddedScriptExecutionSource(
     } catch (_) {}
     return null;
   }
-  function __autojs6_module_metadata_record(resolved) {
+  function __autojs6_module_metadata_record(resolved, allowEsm) {
     if (__autojs6_has_own(__autojs6_module_sources, resolved)) {
       return __autojs6_module_sources[resolved];
     }
-    const readable = __autojs6_validate_runtime_module_path(resolved);
+    const readable = __autojs6_validate_runtime_module_path(resolved, allowEsm);
     if (!readable) {
       return null;
     }
@@ -11014,11 +11030,11 @@ std::string buildEmbeddedScriptExecutionSource(
       sourceURL: __autojs6_runtime_module_source_url(readable)
     };
   }
-  function __autojs6_runtime_module_record(resolved) {
+  function __autojs6_runtime_module_record(resolved, allowEsm) {
     if (__autojs6_has_own(__autojs6_runtime_module_records, resolved)) {
       return __autojs6_runtime_module_records[resolved];
     }
-    const readable = __autojs6_validate_runtime_module_path(resolved);
+    const readable = __autojs6_validate_runtime_module_path(resolved, allowEsm);
     if (!readable) {
       return null;
     }
@@ -11065,11 +11081,11 @@ std::string buildEmbeddedScriptExecutionSource(
     __autojs6_runtime_module_diagnostics.loadedModules.push(readable);
     return record;
   }
-  function __autojs6_module_record(resolved) {
+  function __autojs6_module_record(resolved, allowEsm) {
     if (__autojs6_has_own(__autojs6_module_sources, resolved)) {
       return __autojs6_module_sources[resolved];
     }
-    return __autojs6_runtime_module_record(resolved);
+    return __autojs6_runtime_module_record(resolved, allowEsm);
   }
   function __autojs6_normalized_extension(extension) {
     return String(extension || "").toLowerCase();
@@ -23560,6 +23576,7 @@ std::string buildEmbeddedScriptExecutionSource(
     return __autojs6_scoped_fs_cache;
   }
   const __autojs6_module_cache = Object.create(null);
+  const __autojs6_esm_module_cache = Object.create(null);
   let __autojs6_main_module_ref = null;
   function __autojs6_module_paths(filename) {
     const path = __autojs6_path_module();
@@ -23635,6 +23652,306 @@ std::string buildEmbeddedScriptExecutionSource(
       writable: false
     });
     return requireFunction;
+  }
+  function __autojs6_esm_record_denial(message) {
+    __autojs6_esm_diagnostics.deniedCount += 1;
+    __autojs6_esm_diagnostics.lastDeniedReason = String(message || "");
+  }
+  function __autojs6_esm_error(message, code) {
+    __autojs6_esm_record_denial(message);
+    return __autojs6_error(message, code || "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED");
+  }
+  function __autojs6_esm_entry_filename() {
+    const path = __autojs6_path_module();
+    const root = __autojs6_resolved_sandbox_root(path);
+    const name = String(__autojs6_source_name || "");
+    if (!path || typeof path.resolve !== "function" || typeof path.isAbsolute !== "function") {
+      return name || "<embedded-esm-entry.mjs>";
+    }
+    return path.isAbsolute(name) ? path.resolve(name) : path.resolve(root, name || "embedded-esm-entry.mjs");
+  }
+  function __autojs6_package_type_module_for_file(filename) {
+    const path = __autojs6_path_module();
+    if (!path || typeof path.resolve !== "function") return false;
+    try {
+      const root = path.resolve(__autojs6_module_root || __autojs6_module_dirname(filename));
+      const scope = __autojs6_find_package_scope(filename, root);
+      if (!scope) return false;
+      const packageData = __autojs6_package_data(scope.packageJsonResolved, filename);
+      if (!__autojs6_package_type_is_module(packageData)) return false;
+      __autojs6_package_diagnostics.lastTypeModulePolicy =
+        "type=module accepted by Embedded Node experimental ESM";
+      __autojs6_package_diagnostics.lastTypeModulePackage =
+        __autojs6_package_name(packageData) || __autojs6_diagnostic_path(scope.packageDir);
+      __autojs6_package_diagnostics.lastTypeModulePackageJson =
+        __autojs6_diagnostic_path(scope.packageJsonResolved);
+      __autojs6_package_diagnostics.lastTypeModuleFilename =
+        __autojs6_diagnostic_path(filename);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+  function __autojs6_should_run_entry_as_esm() {
+    if (!__autojs6_esm_experimental_enabled) return false;
+    const entry = __autojs6_esm_entry_filename();
+    const extension = __autojs6_source_extension(entry);
+    return __autojs6_is_esm_extension(extension) ||
+      (extension === ".js" && __autojs6_package_type_module_for_file(entry));
+  }
+  function __autojs6_esm_validate_identifier(name, context) {
+    const value = String(name || "").trim();
+    if (!/^[A-Za-z_$][0-9A-Za-z_$]*$/.test(value)) {
+      throw __autojs6_esm_error("Unsupported Embedded Node experimental ESM identifier in " + context + ": " + value);
+    }
+    return value;
+  }
+  function __autojs6_esm_split_named_list(sourceName, text) {
+    const values = [];
+    const entries = String(text || "").split(",");
+    for (const entry of entries) {
+      const trimmed = entry.trim();
+      if (!trimmed) continue;
+      const parts = trimmed.split(/\s+as\s+/);
+      const exported = __autojs6_esm_validate_identifier(parts[0], sourceName);
+      const local = __autojs6_esm_validate_identifier(parts.length > 1 ? parts[1] : parts[0], sourceName);
+      values.push({ exported, local });
+    }
+    return values;
+  }
+  function __autojs6_esm_parse_import_bindings(specifierText, importVar, sourceName) {
+    const lines = [];
+    let text = String(specifierText || "").trim();
+    if (!text) return lines;
+    function bindDefault(value) {
+      const local = __autojs6_esm_validate_identifier(value, sourceName);
+      lines.push("const " + local + " = " + importVar + "[\"default\"];");
+    }
+    function bindNamespace(value) {
+      const match = /^\*\s+as\s+([A-Za-z_$][0-9A-Za-z_$]*)$/.exec(value.trim());
+      if (!match) {
+        throw __autojs6_esm_error("Unsupported Embedded Node experimental ESM namespace import in " + sourceName + ": " + value);
+      }
+      lines.push("const " + match[1] + " = " + importVar + ";");
+    }
+    function bindNamed(value) {
+      const body = value.trim();
+      if (body.charAt(0) !== "{" || body.charAt(body.length - 1) !== "}") {
+        throw __autojs6_esm_error("Unsupported Embedded Node experimental ESM import binding in " + sourceName + ": " + value);
+      }
+      for (const item of __autojs6_esm_split_named_list(sourceName, body.slice(1, -1))) {
+        lines.push("const " + item.local + " = " + importVar + "[" + JSON.stringify(item.exported) + "];");
+      }
+    }
+    const comma = text.indexOf(",");
+    if (comma >= 0 && text.charAt(0) !== "{" && text.charAt(0) !== "*") {
+      bindDefault(text.slice(0, comma));
+      text = text.slice(comma + 1).trim();
+    }
+    if (!text) return lines;
+    if (text.charAt(0) === "{") {
+      bindNamed(text);
+    } else if (text.charAt(0) === "*") {
+      bindNamespace(text);
+    } else {
+      bindDefault(text);
+    }
+    return lines;
+  }
+  function __autojs6_resolve_esm_local_module(specifier, parentFilename) {
+    const path = __autojs6_path_module();
+    if (!path || typeof path.resolve !== "function" || typeof path.extname !== "function" || typeof path.isAbsolute !== "function") {
+      throw __autojs6_esm_error("Embedded Node experimental ESM needs the allowlisted path module.");
+    }
+    const name = String(specifier || "");
+    if (name.indexOf("\u0000") >= 0) {
+      throw __autojs6_esm_error("Embedded Node experimental ESM rejects NUL import specifier.", "ERR_AUTOJS6_FS_NUL_BYTE");
+    }
+    if (path.isAbsolute(name)) {
+      throw __autojs6_esm_error("Embedded Node experimental ESM rejects absolute import: " + name, "ERR_AUTOJS6_FS_ABSOLUTE_PATH_DENIED");
+    }
+    if (__autojs6_protocol_specifier(name)) {
+      const code = /^https?:/i.test(name) ? "ERR_AUTOJS6_NETWORK_DISABLED" : "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED";
+      throw __autojs6_esm_error("Embedded Node experimental ESM rejects protocol import: " + name, code);
+    }
+    if (!__autojs6_is_relative_module_name(name)) {
+      throw __autojs6_esm_error("Embedded Node experimental ESM v1 supports only local static imports: " + name);
+    }
+    const root = path.resolve(__autojs6_module_root || __autojs6_module_dirname(parentFilename));
+    const parentDir = __autojs6_module_dirname(parentFilename);
+    const base = path.resolve(parentDir || root, name);
+    if (!__autojs6_path_within_root(base, root) || __autojs6_sensitive_path(base)) {
+      throw __autojs6_esm_error("Embedded Node experimental ESM import escapes working directory: " + name, "ERR_AUTOJS6_FS_PATH_ESCAPE");
+    }
+    const extension = __autojs6_normalized_extension(path.extname(base));
+    if (extension && !__autojs6_is_esm_extension(extension)) {
+      throw __autojs6_esm_error("Embedded Node experimental ESM v1 imports only .mjs modules: " + name);
+    }
+    const candidates = extension ? [base] : [base + ".mjs"];
+    for (const candidate of candidates) {
+      const resolved = path.resolve(candidate);
+      if (!__autojs6_path_within_root(resolved, root) || __autojs6_sensitive_path(resolved)) {
+        throw __autojs6_esm_error("Embedded Node experimental ESM import escapes working directory: " + name, "ERR_AUTOJS6_FS_PATH_ESCAPE");
+      }
+      const record = __autojs6_module_record(resolved, true);
+      if (record) {
+        __autojs6_resolve_trace("esm import matched", {
+          request: name,
+          from: parentFilename,
+          final: resolved
+        });
+        return resolved;
+      }
+    }
+    throw __autojs6_module_not_found("Cannot find Embedded Node experimental ESM module '" + name + "' from '" + parentFilename + "'.");
+  }
+  function __autojs6_esm_transform_exports(source, sourceName) {
+    let body = String(source || "");
+    const namedExports = [];
+    let hasDefault = false;
+    const masked = __autojs6_mask_non_code(body);
+    if (/(^|[\r\n;{}])\s*export\s+(?:\*|\{[^}]*\}\s+from\b)/.test(masked)) {
+      throw __autojs6_esm_error("Embedded Node experimental ESM v1 does not support re-export syntax in " + sourceName + ".");
+    }
+    body = body.replace(/\bexport\s+default\s+/g, function() {
+      if (hasDefault) {
+        throw __autojs6_esm_error("Embedded Node experimental ESM module has more than one default export: " + sourceName);
+      }
+      hasDefault = true;
+      return "const __autojs6_esm_default = ";
+    });
+    body = body.replace(/\bexport\s+(const|let|var)\s+([A-Za-z_$][0-9A-Za-z_$]*)\b/g, function(_, kind, name) {
+      namedExports.push({ exported: name, local: name });
+      return kind + " " + name;
+    });
+    body = body.replace(/\bexport\s+(async\s+)?function\s+([A-Za-z_$][0-9A-Za-z_$]*)\s*\(/g, function(_, asyncPrefix, name) {
+      namedExports.push({ exported: name, local: name });
+      return (asyncPrefix || "") + "function " + name + "(";
+    });
+    body = body.replace(/\bexport\s+class\s+([A-Za-z_$][0-9A-Za-z_$]*)\b/g, function(_, name) {
+      namedExports.push({ exported: name, local: name });
+      return "class " + name;
+    });
+    body = body.replace(/(^|[\r\n;{}])\s*export\s*\{([^}]*)\}\s*;?/g, function(match, prefix, list) {
+      for (const item of __autojs6_esm_split_named_list(sourceName, list)) {
+        namedExports.push(item);
+      }
+      return prefix || "";
+    });
+    const tail = [];
+    if (hasDefault) {
+      tail.push("__autojs6_esm_namespace[\"default\"] = __autojs6_esm_default;");
+    }
+    for (const item of namedExports) {
+      tail.push("__autojs6_esm_namespace[" + JSON.stringify(item.exported) + "] = " + item.local + ";");
+    }
+    return {
+      body,
+      tail: tail.join("\n")
+    };
+  }
+  function __autojs6_esm_transform_module_source(source, filename) {
+    const sourceText = String(source || "");
+    const masked = __autojs6_mask_non_code(sourceText);
+    for (let index = 0; index < masked.length; index += 1) {
+      if (!__autojs6_is_identifier_token_at(masked, index, "import")) continue;
+      const nextIndex = __autojs6_skip_whitespace(masked, index + "import".length);
+      const next = masked.charAt(nextIndex);
+      if (next === "(") {
+        throw __autojs6_dynamic_import_unsupported(
+          __autojs6_esm_unsupported_message("dynamic import is disabled for experimental ESM module '" + filename + "'.")
+        );
+      }
+      if (next === "." && masked.slice(nextIndex, nextIndex + 5) === ".meta") {
+        throw __autojs6_esm_error("import.meta is disabled for experimental ESM module '" + filename + "'.");
+      }
+    }
+    const importPattern = /(^|[\r\n;])\s*import\s+(?:(.*?)\s+from\s+)?(["'])([^"'\r\n]+)\3\s*;?/g;
+    const bindingLines = [];
+    let body = "";
+    let cursor = 0;
+    let importIndex = 0;
+    let match;
+    while ((match = importPattern.exec(sourceText)) !== null) {
+      const statementStart = match.index + match[1].length;
+      const statementEnd = importPattern.lastIndex;
+      body += sourceText.slice(cursor, statementStart);
+      cursor = statementEnd;
+      const importVar = "__autojs6_esm_import_" + importIndex++;
+      const specifier = match[4];
+      bindingLines.push(
+        "const " + importVar + " = await __autojs6_load_esm_module(" +
+          JSON.stringify(specifier) + ", " + JSON.stringify(filename) + ");"
+      );
+      const specifierText = match[2] === undefined ? "" : match[2];
+      Array.prototype.push.apply(
+        bindingLines,
+        __autojs6_esm_parse_import_bindings(specifierText, importVar, filename)
+      );
+    }
+    body += sourceText.slice(cursor);
+    const exportTransform = __autojs6_esm_transform_exports(body, filename);
+    const remaining = __autojs6_mask_non_code(exportTransform.body);
+    if (/(^|[\r\n;{}])\s*import\b/.test(remaining) || /(^|[\r\n;{}])\s*export\b/.test(remaining)) {
+      throw __autojs6_esm_error("Embedded Node experimental ESM v1 found unsupported import/export syntax in " + filename + ".");
+    }
+    return bindingLines.join("\n") + "\n" + exportTransform.body + "\n" + exportTransform.tail;
+  }
+  function __autojs6_load_esm_module(specifier, parentFilename) {
+    const resolved = __autojs6_resolve_esm_local_module(specifier, parentFilename);
+    return __autojs6_execute_esm_module(resolved, null);
+  }
+  function __autojs6_execute_esm_module(resolved, entryRecord) {
+    if (__autojs6_has_own(__autojs6_esm_module_cache, resolved)) {
+      return __autojs6_esm_module_cache[resolved].promise;
+    }
+    const record = entryRecord || __autojs6_module_record(resolved, true);
+    if (!record) {
+      throw __autojs6_module_not_found("Cannot find Embedded Node experimental ESM module '" + resolved + "'.");
+    }
+    const namespace = Object.create(null);
+    const cacheRecord = {
+      namespace,
+      promise: null
+    };
+    __autojs6_esm_module_cache[resolved] = cacheRecord;
+    __autojs6_esm_diagnostics.graphSize += 1;
+    __autojs6_esm_diagnostics.graphModules.push(resolved);
+    cacheRecord.promise = (async function() {
+      const transformed = __autojs6_esm_transform_module_source(record.source, resolved);
+      const moduleFunction = __autojs6_native_async_function(
+        "__autojs6_load_esm_module",
+        "__autojs6_esm_namespace",
+        "require",
+        "exports",
+        "module",
+        "__filename",
+        "__dirname",
+        "\"use strict\";\n" + transformed + "\n//# sourceURL=" + (record.sourceURL || resolved)
+      );
+      await moduleFunction.call(
+        undefined,
+        __autojs6_load_esm_module,
+        namespace,
+        undefined,
+        undefined,
+        undefined,
+        resolved,
+        __autojs6_module_dirname(resolved)
+      );
+      return Object.freeze(namespace);
+    })();
+    return cacheRecord.promise;
+  }
+  function __autojs6_run_esm_entry() {
+    const entry = __autojs6_esm_entry_filename();
+    __autojs6_esm_diagnostics.entry = true;
+    __autojs6_esm_diagnostics.graphRoot = entry;
+    const entryRecord = {
+      source: __autojs6_source,
+      sourceURL: __autojs6_source_name
+    };
+    return __autojs6_execute_esm_module(entry, entryRecord);
   }
   function __autojs6_is_whitespace(ch) {
     return ch === " " || ch === "\t" || ch === "\n" || ch === "\r" || ch === "\f" || ch === "\v";
@@ -24428,6 +24745,13 @@ std::string buildEmbeddedScriptExecutionSource(
     fields.packageTypeModulePackage = __autojs6_package_diagnostics.lastTypeModulePackage;
     fields.packageTypeModulePackageJson = __autojs6_package_diagnostics.lastTypeModulePackageJson;
     fields.packageTypeModuleFilename = __autojs6_package_diagnostics.lastTypeModuleFilename;
+    fields.esmEnabled = __autojs6_esm_diagnostics.enabled;
+    fields.esmEntry = __autojs6_esm_diagnostics.entry;
+    fields.esmModuleGraphRoot = __autojs6_esm_diagnostics.graphRoot;
+    fields.esmModuleGraphSize = __autojs6_esm_diagnostics.graphSize;
+    fields.esmModuleGraphModules = __autojs6_esm_diagnostics.graphModules.join("|");
+    fields.esmDeniedCount = __autojs6_esm_diagnostics.deniedCount;
+    fields.esmLastDeniedReason = __autojs6_esm_diagnostics.lastDeniedReason;
     return fields;
   }
   function __autojs6_finish_success(value) {
@@ -24490,24 +24814,30 @@ std::string buildEmbeddedScriptExecutionSource(
     __autojs6_install_require_guard(__autojs6_main_module);
     __autojs6_install_builtin_module_guard();
     __autojs6_install_error_handlers();
+    const __autojs6_run_entry_as_esm = __autojs6_should_run_entry_as_esm();
     __autojs6_install_dynamic_code_guard();
-    __autojs6_assert_common_js_source_supported(__autojs6_source, __autojs6_source_name);
-    const __autojs6_user_function = __autojs6_native_function(
-      "exports",
-      "require",
-      "module",
-      "__filename",
-      "__dirname",
-      "\"use strict\";\n" + __autojs6_source + "\n//# sourceURL=" + __autojs6_source_name
-    );
-    const __autojs6_user_result = __autojs6_user_function.call(
-      globalThis,
-      __autojs6_main_module.exports,
-      __autojs6_create_module_require(__autojs6_main_module),
-      __autojs6_main_module,
-      __autojs6_main_module.filename,
-      __autojs6_main_module.dirname
-    );
+    let __autojs6_user_result;
+    if (__autojs6_run_entry_as_esm) {
+      __autojs6_user_result = __autojs6_run_esm_entry();
+    } else {
+      __autojs6_assert_common_js_source_supported(__autojs6_source, __autojs6_source_name);
+      const __autojs6_user_function = __autojs6_native_function(
+        "exports",
+        "require",
+        "module",
+        "__filename",
+        "__dirname",
+        "\"use strict\";\n" + __autojs6_source + "\n//# sourceURL=" + __autojs6_source_name
+      );
+      __autojs6_user_result = __autojs6_user_function.call(
+        globalThis,
+        __autojs6_main_module.exports,
+        __autojs6_create_module_require(__autojs6_main_module),
+        __autojs6_main_module,
+        __autojs6_main_module.filename,
+        __autojs6_main_module.dirname
+      );
+    }
     __autojs6_main_module.loaded = true;
     if (__autojs6_user_result && typeof __autojs6_user_result.then === "function") {
       __autojs6_user_result.then(__autojs6_defer_success, __autojs6_finish_error);

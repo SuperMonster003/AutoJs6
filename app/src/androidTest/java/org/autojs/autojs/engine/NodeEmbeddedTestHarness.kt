@@ -36,6 +36,7 @@ internal object NodeEmbeddedTestHarness {
         timeoutMs: Long = 10_000L,
         moduleSources: Map<String, String> = emptyMap(),
         runtimeModuleSources: Map<String, String> = emptyMap(),
+        esmExperimentalEnabled: Boolean = BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED,
     ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
         return NativeNodeEmbeddedScriptService.runScript(
             targetContext,
@@ -46,6 +47,7 @@ internal object NodeEmbeddedTestHarness {
                 timeoutMs = timeoutMs,
                 moduleSources = moduleSources,
                 runtimeModuleSources = runtimeModuleSources,
+                esmExperimentalEnabled = esmExperimentalEnabled,
             ),
         )
     }

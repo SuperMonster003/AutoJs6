@@ -1,18 +1,19 @@
-# ESM Design Gate v1
+# ESM Experimental v1
 
-Status: design gate only. `autojs.nodejs.esm.experimental=false` is the default, and ESM execution is not enabled by this task.
+Status: experimental implementation behind `autojs.nodejs.esm.experimental=false`.
+Default builds keep ESM disabled.
 
 ## Goal
 
 AutoJs6 must eventually account for `.mjs`, `package.json` `type`, static `import`/`export`, top-level await, and dynamic `import()`, because users will compare the Node entry behavior with Auto.js Pro and AutoX.
 
-The first step is to make the current rejection explicit and stable:
+The first implementation keeps the current rejection explicit and stable by default:
 
 - `.mjs` still routes to the Node backend.
 - ESM source execution is rejected by default.
 - dynamic import is rejected by default.
-- package `type=module` does not silently switch `.js` files into ESM mode.
-- encrypted and packaged module graphs are not interpreted as ESM graphs yet.
+- package `type=module` does not silently switch `.js` files into ESM mode unless the experimental flag is enabled.
+- encrypted and packaged module graphs are not interpreted as unrestricted Node ESM graphs.
 
 ## Feature Flag
 
@@ -27,9 +28,10 @@ Current wiring:
 - Gradle property default: `false`
 - BuildConfig field: `NODEJS_ESM_EXPERIMENTAL_ENABLED`
 - Kotlin capability registry: `NodeRuntimeCapabilities.ESM_EXPERIMENTAL_PROPERTY`
-- JavaScript profile snapshot: `require("autojs6:profile").experimentalFlags.esm === false`
+- JavaScript profile snapshot: `require("autojs6:profile").experimentalFlags.esm`
+- Embedded script request flag: `esmExperimentalEnabled`
 
-The flag is present as an explicit design anchor. It must not enable ESM until a later task implements and tests an experimental loader path.
+The flag enables only AutoJs6 ESM v1. It does not enable Node's raw ESM loader, dynamic import, loader hooks, `node:module`, network imports, native addons, or unrestricted builtins.
 
 ## Current Default Behavior
 
@@ -45,7 +47,39 @@ Default behavior with the flag off:
 - static `import`/`export` syntax in CommonJS sources fails with `ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED`.
 - dynamic `import()` fails with legacy `code=ERR_AUTOJS6_EMBEDDED_NODE_DYNAMIC_IMPORT_UNSUPPORTED` and canonical `autojs6Code=ERR_AUTOJS6_DYNAMIC_IMPORT_UNSUPPORTED`.
 - `import.meta` fails with `ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED`.
-- package `type=module` is recorded as a diagnostic but current `.js` loading remains CommonJS.
+- package `type=module` is recorded as a diagnostic but `.js` loading remains CommonJS.
+
+## Experimental v1 Behavior
+
+With `autojs.nodejs.esm.experimental=true` or an internal embedded-script request that explicitly enables ESM:
+
+- `.mjs` entry scripts can run.
+- `.js` entry scripts can run as ESM only when the nearest scoped `package.json` contains `"type": "module"`.
+- local static imports of `.mjs` files inside `workingDirectory` are supported.
+- simple named exports are supported for local `.mjs` modules.
+- top-level await is supported because the experimental graph is evaluated through an async runner.
+- diagnostics are emitted in the result envelope:
+  - `esmEnabled`
+  - `esmEntry`
+  - `esmModuleGraphRoot`
+  - `esmModuleGraphSize`
+  - `esmModuleGraphModules`
+  - `esmDeniedCount`
+  - `esmLastDeniedReason`
+
+Still unsupported in v1:
+
+- dynamic `import()`
+- `import.meta`
+- package exports/imports ESM condition selection
+- ESM import of CommonJS
+- CJS `require()` of ESM
+- JSON modules
+- bare package imports
+- builtin imports such as `node:path`
+- custom loaders and `node:module` loader hooks
+- network, `file:`, `data:`, or other URL imports
+- imports outside `workingDirectory`
 
 ## Routing Decisions
 
@@ -53,7 +87,7 @@ Default behavior with the flag off:
 
 - Always routes to the Node backend so user intent is preserved.
 - Default profile rejects before running code.
-- Future experimental ESM may enable only under `autojs.nodejs.esm.experimental=true`.
+- Experimental ESM may enable only under `autojs.nodejs.esm.experimental=true` or an explicit internal embedded-script request flag.
 
 `.cjs`:
 
@@ -63,12 +97,12 @@ Default behavior with the flag off:
 `.js`:
 
 - Current default remains CommonJS.
-- Future experimental ESM may treat `.js` as ESM only when the nearest scoped `package.json` has `"type": "module"` and the importer is in ESM mode.
+- Experimental ESM treats `.js` as ESM only for the entry file and only when the nearest scoped `package.json` has `"type": "module"`.
 
 `package.json` `type=module`:
 
 - Current default: diagnostic only, no execution mode switch.
-- Future experimental mode: may switch `.js` files in that package scope to ESM, subject to scoped package resolution.
+- Experimental mode: may switch only the entry `.js` file in that package scope to ESM.
 
 `package.json` `type=commonjs`:
 
@@ -79,7 +113,9 @@ Default behavior with the flag off:
 
 Current default uses a conservative preflight scan to reject obvious ESM forms before CommonJS execution.
 
-That scan is not an ESM parser. Future ESM work must use a real loader path rather than expanding regex detection into a compatibility layer.
+Experimental v1 uses a deliberately small AutoJs6-managed transform for local static `.mjs` imports and simple exports. It is not a full Node ESM parser and is documented as a safe compatibility subset.
+
+For packaged APKs, experimental v1 currently verifies single-file `.mjs` entry execution only. Packaged project files are encrypted by the existing inrt pipeline, so local static imports inside packaged encrypted graphs need explicit moduleSources/encrypted-source metadata before they can be enabled safely.
 
 Future implementation options:
 
@@ -218,10 +254,10 @@ The experimental flag may not enable ESM until tests cover:
 - dynamic import rejection or success paths, separately from static ESM
 - package `exports` condition selection for `import` vs `require`
 - scoped fs and package target escape denial in ESM graphs
-- moduleSources and encrypted packaged ESM smoke
+- moduleSources and encrypted packaged ESM graph smoke; experimental v1 currently has a focused single-file packaged `.mjs` smoke gated by `autojs.nodejs.esm.experimental=true`
 - sourceName and stack trace shape
 - service destroy while module linking/evaluation is pending
 
 ## Current Decision
 
-ESM remains disabled by default. Task 39 adds the explicit flag, documents the design, and improves the default `.mjs` rejection message. It does not enable static ESM, dynamic import, package `type=module` execution, ESM loader hooks, or packaged ESM graphs.
+ESM remains disabled by default. Experimental v1 enables only local static `.mjs` imports for plain working directories, simple named exports, top-level await, package `type=module` entry routing, diagnostics, and a focused single-file packaged `.mjs` smoke when `autojs.nodejs.esm.experimental=true`. It does not enable dynamic import, ESM/CJS interop, package exports/imports ESM conditions, loader hooks, `node:module`, network imports, or unrestricted packaged encrypted ESM graphs.

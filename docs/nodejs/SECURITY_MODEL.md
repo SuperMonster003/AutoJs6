@@ -85,7 +85,7 @@ If a limited module exists for npm feature detection, operations that would cros
 
 ## ESM Policy
 
-ESM is design-gated and disabled by default.
+ESM is experimental and disabled by default.
 
 The build flag is `autojs.nodejs.esm.experimental=false`. With the flag off:
 
@@ -95,7 +95,7 @@ The build flag is `autojs.nodejs.esm.experimental=false`. With the flag off:
 - `import.meta` is rejected
 - package `type=module` remains diagnostic-only for current CommonJS loading
 
-Future ESM support must follow `docs/nodejs/design/ESM.md` and must not bypass scoped filesystem, package target, builtin, native addon, network, or bridge policies.
+With the flag on, ESM v1 is limited to local `.mjs` imports inside `workingDirectory`, simple named exports, and top-level await. It must not bypass scoped filesystem, package target, builtin, native addon, network, or bridge policies. Dynamic import, URL imports, loader hooks, raw `node:module`, and CJS `require()` of ESM remain disabled.
 
 ## Privacy-Safe Compatibility Modules
 

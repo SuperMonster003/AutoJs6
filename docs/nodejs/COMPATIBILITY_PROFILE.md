@@ -225,7 +225,7 @@ Network-related limited builtins may exist for feature detection and stable deni
 
 ## ESM Status
 
-`.mjs` routes to Node so user intent is preserved. ESM execution is still not a default supported capability.
+`.mjs` routes to Node so user intent is preserved. ESM execution is still not a default supported capability, but an experimental v1 path exists behind the explicit flag.
 
 The explicit gate flag is:
 
@@ -244,7 +244,19 @@ Expected errors:
 - static ESM path: `ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED`
 - dynamic import path: legacy `code` `ERR_AUTOJS6_EMBEDDED_NODE_DYNAMIC_IMPORT_UNSUPPORTED`, canonical `autojs6Code` `ERR_AUTOJS6_DYNAMIC_IMPORT_UNSUPPORTED`
 
-Current `require("autojs6:profile")` reports `esm=false`, `dynamicImport=false`, and `experimentalFlags.esm=false`.
+Default `require("autojs6:profile")` reports `esm=false`, `dynamicImport=false`, and `experimentalFlags.esm=false`.
+
+With the flag enabled for an embedded script request, experimental ESM v1 supports:
+
+- `.mjs` entry execution
+- package `type=module` entry execution for `.js`
+- local static imports of `.mjs` files inside `workingDirectory`
+- simple named exports
+- simple top-level await
+
+Experimental ESM v1 still rejects dynamic import, `import.meta`, package/builtin/bare imports, JSON modules, custom loaders, network/URL imports, and any import outside `workingDirectory`.
+
+Runtime diagnostics include `esmEnabled`, `esmEntry`, `esmModuleGraphRoot`, `esmModuleGraphSize`, and `esmModuleGraphModules` in the embedded script result envelope.
 
 See `docs/nodejs/design/ESM.md` for package `type`, CJS/ESM interop, top-level await, dynamic import, `import.meta.url`, package condition, moduleSources, encrypted graph, packaged APK, and stack trace decisions.
 

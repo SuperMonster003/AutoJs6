@@ -219,6 +219,24 @@ Current feature flag registry focused instrumentation:
 
 This suite verifies the centralized `NodeRuntimeCapabilities.featureFlags` registry, safe defaults for high and critical security flags, denied project/package override policy, expected build-time override allowlist, and JavaScript `require("autojs6:profile").featureFlags` diagnostics.
 
+Current ESM experimental focused instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeEsmExperimentalInstrumentationTest"
+```
+
+This suite keeps `.mjs` rejected with the default flag, then enables the internal experimental request flag to cover `.mjs` entry execution, local static `.mjs` imports, top-level await, package `type=module` entry routing, and scoped import escape denial.
+
+Experimental packaged `.mjs` smoke is deliberately gated behind the Gradle flag:
+
+```powershell
+.\gradlew.bat --console=plain :app:assembleInrtDebug :app:assembleAppDebug :app:assembleAppDebugAndroidTest "-Pautojs.nodejs.esm.experimental=true"
+adb push app\build\outputs\apk\inrt\debug\inrt-v6.7.1-alpha4-universal.apk /sdcard/Download/AutoJs6/embedded-node-template/inrt-debug-template.apk
+adb shell am instrument -w -r -e class org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunExperimentalEsmEmbeddedNodePackagedApk -e autojs.embeddedNode.packagedSmokeTemplateOverride true org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner
+```
+
+With the default flag off, the packaged ESM diagnostics smoke continues to assert `ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED`. The experimental packaged smoke intentionally requires a refreshed inrt template override because release/default templates must keep ESM disabled. The current packaged smoke is a single-file `.mjs` entry check; encrypted packaged ESM module graphs are still a design-gated follow-up.
+
 Current Embedded Node performance benchmark:
 
 ```powershell

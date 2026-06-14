@@ -57,6 +57,13 @@ void putEmbeddedScriptExecutionFields(std::vector<std::string>& payload, const s
     putPayload(payload, "embedded_script.package_type_module_package", jsonStringField(text, "packageTypeModulePackage"));
     putPayload(payload, "embedded_script.package_type_module_package_json", jsonStringField(text, "packageTypeModulePackageJson"));
     putPayload(payload, "embedded_script.package_type_module_filename", jsonStringField(text, "packageTypeModuleFilename"));
+    putPayload(payload, "embedded_script.esm_enabled", jsonBooleanField(text, "esmEnabled"));
+    putPayload(payload, "embedded_script.esm_entry", jsonBooleanField(text, "esmEntry"));
+    putPayload(payload, "embedded_script.esm_module_graph_root", jsonStringField(text, "esmModuleGraphRoot"));
+    putPayload(payload, "embedded_script.esm_module_graph_size", jsonNumberField(text, "esmModuleGraphSize"));
+    putPayload(payload, "embedded_script.esm_module_graph_modules", jsonStringField(text, "esmModuleGraphModules"));
+    putPayload(payload, "embedded_script.esm_denied_count", jsonNumberField(text, "esmDeniedCount"));
+    putPayload(payload, "embedded_script.esm_last_denied_reason", jsonStringField(text, "esmLastDeniedReason"));
 }
 
 void putLifecycleSkippedPayload(

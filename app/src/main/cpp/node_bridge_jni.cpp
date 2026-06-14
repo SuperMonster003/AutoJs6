@@ -92,7 +92,8 @@ static jobjectArray runEmbeddedScriptLifecycleNative(
         jstring sourceName,
         jstring workingDirectory,
         const std::vector<std::pair<std::string, std::string>>& moduleSourcePairs,
-        const std::vector<std::pair<std::string, std::string>>& runtimeModuleSourcePairs
+        const std::vector<std::pair<std::string, std::string>>& runtimeModuleSourcePairs,
+        bool esmExperimentalEnabled
 ) {
     const auto startedAt = Clock::now();
     __android_log_print(ANDROID_LOG_INFO, kLogTag, "embedded_script.enter");
@@ -111,9 +112,14 @@ static jobjectArray runEmbeddedScriptLifecycleNative(
     putPayload(payload, "embedded_script.request.source_kind", "kotlin_provided_source");
     putPayload(payload, "embedded_script.request.user_file_read_by_native", false);
     putPayload(payload, "embedded_script.request.require_allowed", true);
-    putPayload(payload, "embedded_script.request.require_mode", "restricted_commonjs_mvp");
+    putPayload(
+            payload,
+            "embedded_script.request.require_mode",
+            esmExperimentalEnabled ? "restricted_commonjs_mvp_with_experimental_esm" : "restricted_commonjs_mvp"
+    );
     putPayload(payload, "embedded_script.request.fs_allowed", "scoped_working_directory_sync_mvp");
-    putPayload(payload, "embedded_script.request.import_allowed", false);
+    putPayload(payload, "embedded_script.request.import_allowed", esmExperimentalEnabled);
+    putPayload(payload, "embedded_script.request.esm_experimental_enabled", esmExperimentalEnabled);
     putPayload(payload, "embedded_script.request.node_modules_allowed", "working_directory_commonjs_mvp");
     putPayload(payload, "embedded_script.request.autojs_api_allowed", false);
     putPayload(payload, "embedded_script.request.android_bridge_allowed", false);
@@ -127,7 +133,8 @@ static jobjectArray runEmbeddedScriptLifecycleNative(
             sourceNameText,
             workingDirectoryText,
             moduleSourcePairs,
-            runtimeModuleSourcePairs
+            runtimeModuleSourcePairs,
+            esmExperimentalEnabled
     );
     void* handle = probeLoadedLibnodeHandle(payload);
     const char* workingDirectoryPtr = workingDirectoryText.empty() ? nullptr : workingDirectoryText.c_str();
@@ -173,7 +180,8 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
         jobject /* thiz */,
         jstring source,
         jstring sourceName,
-        jstring workingDirectory
+        jstring workingDirectory,
+        jboolean esmExperimentalEnabled
 ) {
     return runEmbeddedScriptLifecycleNative(
             env,
@@ -181,7 +189,8 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
             sourceName,
             workingDirectory,
             {},
-            {}
+            {},
+            esmExperimentalEnabled == JNI_TRUE
     );
 }
 
@@ -193,7 +202,8 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
         jstring sourceName,
         jstring workingDirectory,
         jobjectArray moduleSourceNames,
-        jobjectArray moduleSources
+        jobjectArray moduleSources,
+        jboolean esmExperimentalEnabled
 ) {
     const std::vector<std::string> moduleSourceNameValues = toStringVector(env, moduleSourceNames);
     if (env->ExceptionCheck()) {
@@ -218,7 +228,8 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
             sourceName,
             workingDirectory,
             moduleSourcePairs,
-            {}
+            {},
+            esmExperimentalEnabled == JNI_TRUE
     );
 }
 
@@ -232,7 +243,8 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
         jobjectArray moduleSourceNames,
         jobjectArray moduleSources,
         jobjectArray runtimeModuleSourceNames,
-        jobjectArray runtimeModuleSources
+        jobjectArray runtimeModuleSources,
+        jboolean esmExperimentalEnabled
 ) {
     const std::vector<std::string> moduleSourceNameValues = toStringVector(env, moduleSourceNames);
     if (env->ExceptionCheck()) {
@@ -274,7 +286,8 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
             sourceName,
             workingDirectory,
             moduleSourcePairs,
-            runtimeModuleSourcePairs
+            runtimeModuleSourcePairs,
+            esmExperimentalEnabled == JNI_TRUE
     );
 }
 
