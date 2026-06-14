@@ -241,6 +241,15 @@ Current host-side packaged checks:
 .\gradlew.bat --console=plain :app:embeddedNodePackagedSmokeHostVerify
 ```
 
+Current compatibility profile generation and registry/docs verification:
+
+```powershell
+.\gradlew.bat --console=plain :app:generateNodeCompatibilityProfile
+.\gradlew.bat --console=plain :app:verifyNodeCompatibilityProfile
+```
+
+This writes `build/reports/nodejs/compatibility-profile.json` and `build/reports/nodejs/compatibility-profile.md`, compares the Kotlin capability registry with the JavaScript bootstrap builtin allowlist/denylist, and fails when `docs/nodejs/COMPATIBILITY_PROFILE.md` omits registry entries.
+
 `embeddedNodePackagedApkOutputVerify` and `embeddedNodePackagedDiagnosticReport` inspect a concrete exported APK. Pass it with
 `-Pautojs.embeddedNode.packagedApk=<apk>` and optionally constrain ABI expectations with
 `-Pautojs.embeddedNode.expectedAbis=arm64-v8a,armeabi-v7a,x86_64`.
@@ -383,5 +392,6 @@ Use these aggregate tasks for local gates:
 ```
 
 `verifyEmbeddedNodeDebug` covers build, native dependency reporting, native symbol archive reporting, and packaging preflight.
+It also runs `verifyNodeCompatibilityProfile`, which generates compatibility reports and checks docs/registry agreement.
 `verifyEmbeddedNodePackagedDebug` covers packaged host verification, including the diagnostic report and smoke host verifier.
 Focused instrumentation classes still use the explicit `connectedAppDebugAndroidTest` commands above when a device gate is required.

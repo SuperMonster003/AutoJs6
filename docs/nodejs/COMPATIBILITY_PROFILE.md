@@ -14,6 +14,27 @@ This profile describes the current Safe Node surface. It is intentionally smalle
 
 Rhino migration guidance is documented in [MIGRATION_FROM_RHINO.md](MIGRATION_FROM_RHINO.md). Behavior-oriented notes for Auto.js Pro 9 and AutoX.js v7 users are documented in [COMPATIBILITY_NOTES_PRO_AUTOX.md](COMPATIBILITY_NOTES_PRO_AUTOX.md).
 
+## Generated Profile Reports
+
+The machine-readable and human-readable compatibility profile is generated from the Kotlin runtime capability registry, the bridge module registry, the JavaScript bootstrap allowlist/denylist, and the Gradle release ABI policy.
+
+```powershell
+.\gradlew.bat --console=plain :app:generateNodeCompatibilityProfile
+```
+
+Generated outputs:
+
+- `build/reports/nodejs/compatibility-profile.json`
+- `build/reports/nodejs/compatibility-profile.md`
+
+The release/debug gate also runs:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodeCompatibilityProfile
+```
+
+`verifyNodeCompatibilityProfile` fails if this document omits registry entries from `NodeRuntimeCapabilities` or `NodeBridgeModules`.
+
 ## Supported Entry Points
 
 - `"nodejs";` directive
@@ -165,6 +186,19 @@ These surfaces must stay disabled unless a future task explicitly opens them beh
 - unrestricted `vm`
 - inspector/debugger server
 - npm install and postinstall execution
+
+Registry-disabled builtin module names:
+
+- `child_process`
+- `cluster`
+- `dgram`
+- `domain`
+- `inspector`
+- `repl`
+- `vm`
+- `wasi`
+- `worker_threads`
+- `zlib/promises`
 
 Network-related limited builtins may exist for feature detection and stable denial errors. That is not permission to perform network I/O.
 

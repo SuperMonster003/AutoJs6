@@ -945,6 +945,7 @@ androidComponents {
 apply(from = "native-node-deps-report.gradle.kts")
 apply(from = "embedded-node-packaging-preflight.gradle.kts")
 apply(from = "node-performance-report.gradle.kts")
+apply(from = "node-compatibility-profile.gradle.kts")
 
 tasks {
     withType(JavaCompile::class.java) {

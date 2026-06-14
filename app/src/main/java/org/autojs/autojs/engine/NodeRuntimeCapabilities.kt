@@ -147,6 +147,7 @@ object NodeRuntimeCapabilities {
         "vm",
         "wasi",
         "worker_threads",
+        "zlib/promises",
     )
 
     val networkBuiltinModuleNames = setOf(
