@@ -1,0 +1,75 @@
+{
+  "schema": "autojs6-node-examples-v1",
+  "examples": [
+    {
+      "name": "hello-node",
+      "status": "stable",
+      "tags": ["main-app", "smoke"],
+      "mainAppSmoke": true,
+      "packagedCompatible": false
+    },
+    {
+      "name": "cjs-package",
+      "status": "stable",
+      "tags": ["main-app", "commonjs", "node_modules"],
+      "mainAppSmoke": true,
+      "packagedCompatible": false
+    },
+    {
+      "name": "fs-scoped",
+      "status": "stable",
+      "tags": ["main-app", "scoped-fs"],
+      "mainAppSmoke": true,
+      "packagedCompatible": false
+    },
+    {
+      "name": "fs-promises",
+      "status": "partial",
+      "tags": ["main-app", "scoped-fs", "fs-promises"],
+      "mainAppSmoke": true,
+      "packagedCompatible": false
+    },
+    {
+      "name": "npm-pure-js-cjs",
+      "status": "stable",
+      "tags": ["main-app", "commonjs", "pure-js-npm"],
+      "mainAppSmoke": true,
+      "packagedCompatible": false
+    },
+    {
+      "name": "toast-app",
+      "status": "stable",
+      "tags": ["main-app", "bridge", "toast", "app"],
+      "mainAppSmoke": true,
+      "packagedCompatible": false
+    },
+    {
+      "name": "accessibility-click-text",
+      "status": "stable",
+      "tags": ["main-app", "bridge", "requires-accessibility", "permission-optional"],
+      "mainAppSmoke": true,
+      "packagedCompatible": false
+    },
+    {
+      "name": "screenshot-find-image",
+      "status": "stable",
+      "tags": ["main-app", "bridge", "requires-screen-capture", "requires-image", "permission-optional"],
+      "mainAppSmoke": true,
+      "packagedCompatible": false
+    },
+    {
+      "name": "disabled-features-demo",
+      "status": "stable",
+      "tags": ["main-app", "security", "disabled-features"],
+      "mainAppSmoke": true,
+      "packagedCompatible": false
+    },
+    {
+      "name": "packaged-node-apk",
+      "status": "stable",
+      "tags": ["packaged", "bridge", "app"],
+      "mainAppSmoke": false,
+      "packagedCompatible": true
+    }
+  ]
+}

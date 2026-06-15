@@ -77,10 +77,16 @@ Focused packaged `toast` bridge smoke:
 Checked-in example project smoke:
 
 ```powershell
+.\gradlew.bat --console=plain :app:verifyNodeExamples
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeExampleProjectInstrumentationTest"
 ```
 
-This runs `sample/nodejs/hello-node` and `sample/nodejs/toast-app` from the `androidTest` asset source set.
+`verifyNodeExamples` validates `sample/nodejs/examples.json`, required files, metadata, Node directives, and PASS markers,
+then writes `app/build/reports/nodejs/examples.json` and `.md`.
+
+The instrumentation smoke runs `hello-node`, `cjs-package`, `fs-scoped`, `fs-promises`, `npm-pure-js-cjs`, `toast-app`,
+`accessibility-click-text`, `screenshot-find-image`, and `disabled-features-demo` from the `androidTest` asset source set.
+`packaged-node-apk` remains marked packaged-compatible and is covered by packaged APK smoke gates.
 
 Focused packaged `app` bridge smoke:
 

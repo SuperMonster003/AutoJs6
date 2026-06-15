@@ -74,7 +74,8 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] native addon policy verifies `.node` denial through relative require, `module.createRequire`, package `main`, package `exports`, package `imports`, and package subpath imports with `ERR_AUTOJS6_NATIVE_ADDON_DISABLED`
 - [ ] worker gate verifies `worker_threads` stays disabled, cannot be shadowed, and reports `experimentalFlags.workerThreads=false`
 - [ ] experimental worker smoke verifies pure-JS worker computation, `workerData`, `parentPort.postMessage`, `terminate()`, max-worker rejection, scoped path denial, and denied AutoJs bridge/raw network/fs/nested-worker access
-- [ ] checked-in examples `hello-node` and `toast-app` still run from `sample/nodejs`
+- [ ] `:app:verifyNodeExamples` passes and generated example report matches `sample/nodejs/examples.json`
+- [ ] checked-in main-app examples `hello-node`, `cjs-package`, `fs-scoped`, `fs-promises`, `npm-pure-js-cjs`, `toast-app`, `accessibility-click-text`, `screenshot-find-image`, and `disabled-features-demo` still run from `sample/nodejs`
 
 ## Packaged APK
 

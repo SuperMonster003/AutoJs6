@@ -15,6 +15,7 @@ Scope:
 - app and androidTest Kotlin compilation
 - compatibility profile generation and docs/registry verification
 - resolver visualizer fixtures
+- checked-in Node example manifest validation
 - dependency bundler safe/unsafe fixtures
 - main APK packaging preflight
 - template reproducibility

@@ -1148,6 +1148,7 @@ apply(from = "node-doctor-report.gradle.kts")
 apply(from = "node-resolver-visualizer.gradle.kts")
 apply(from = "node-profile-release-manifest.gradle.kts")
 apply(from = "node-error-catalog.gradle.kts")
+apply(from = "node-examples.gradle.kts")
 
 tasks {
     withType(JavaCompile::class.java) {

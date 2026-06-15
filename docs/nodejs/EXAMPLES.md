@@ -14,6 +14,9 @@ Each example contains:
 - `main.cjs`
 - `expected-output.txt`
 
+The suite manifest lives at `sample/nodejs/examples.json`. It records each example status, tags, whether it is included in
+main-app smoke, and whether it is packaged-compatible.
+
 For Rhino-to-Node migration guidance, see [MIGRATION_FROM_RHINO.md](MIGRATION_FROM_RHINO.md). For behavior differences from Auto.js Pro 9 and AutoX.js v7, see [COMPATIBILITY_NOTES_PRO_AUTOX.md](COMPATIBILITY_NOTES_PRO_AUTOX.md).
 
 For the smallest stable entry-point shape, see [QUICK_START.md](QUICK_START.md). For current release limitations and
@@ -37,13 +40,27 @@ workarounds, see [releases/NODE_PROFILE_V1_KNOWN_ISSUES.md](releases/NODE_PROFIL
 Instrumentation smoke currently runs:
 
 ```powershell
+.\gradlew.bat --console=plain :app:verifyNodeExamples
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeExampleProjectInstrumentationTest"
 ```
 
-The smoke test copies examples from `sample/nodejs` into the device cache and runs:
+`verifyNodeExamples` validates the checked-in manifest, required files, `project.json`, `package.json`, Node directives,
+PASS markers, and writes:
+
+- `app/build/reports/nodejs/examples.json`
+- `app/build/reports/nodejs/examples.md`
+
+The instrumentation smoke copies examples from `sample/nodejs` into the device cache and runs:
 
 - `hello-node`
+- `cjs-package`
+- `fs-scoped`
+- `fs-promises`
+- `npm-pure-js-cjs`
 - `toast-app`
+- `accessibility-click-text`
+- `screenshot-find-image`
+- `disabled-features-demo`
 
 The examples are also added to the `androidTest` asset source set so tests exercise the checked-in sample files directly.
 
