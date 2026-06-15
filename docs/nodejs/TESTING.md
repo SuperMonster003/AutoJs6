@@ -259,6 +259,14 @@ Current bridge resource registry focused instrumentation:
 
 This suite verifies direct registry cleanup for image-handle, screen-capturer, and WebSocket resource types; idempotent close behavior; leaked-resource diagnostics; Android provider cleanup for experimental Java object handles; `work_manager` metadata cancellation and destroy cleanup; and shell timeout cleanup through the live provider resource registry.
 
+Current bridge concurrency and resource-limit focused instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeBridgeConcurrencyLimitsInstrumentationTest"
+```
+
+This suite verifies bridge limit parsing from project/package metadata, safe override acceptance, above-hard-max rejection with warnings, JavaScript pending-call flood rejection, JavaScript image-handle quota and recycle/reuse behavior, Android provider accessibility request-rate limiting, shell command resource limiting, and the `require("autojs6:profile").bridgeLimits` report.
+
 Current `worker_threads` design gate focused instrumentation:
 
 ```powershell

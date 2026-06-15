@@ -115,6 +115,10 @@ class NativeNodeEmbeddedScriptService : Service() {
         val env = intent.envExtra()
         val moduleSources = intent.moduleSourcesExtra()
         val runtimeModuleSources = intent.runtimeModuleSourcesExtra()
+        val bridgeLimits = NodeBridgeLimits.fromRuntimeModuleOrWorkingDirectory(
+            runtimeModuleSources[NodeBridgeLimits.RUNTIME_MODULE_NAME],
+            workingDirectory,
+        )
         val executionId = intent.getStringExtra(EXTRA_EXECUTION_ID)?.takeIf { it.isNotBlank() }
             ?: newExecutionId()
         val startedAt = android.os.SystemClock.elapsedRealtime()
@@ -132,10 +136,12 @@ class NativeNodeEmbeddedScriptService : Service() {
         )
         val bridgeSession = NodeBridgeFileTransportSession(
             root = File(cacheDir, "embedded-node-bridge/$executionId"),
+            bridgeLimits = bridgeLimits,
             provider = AndroidNodeBridgeCapabilityProvider(
                 this,
                 engineInfo,
                 javaInteropExperimentalEnabled = javaInteropExperimentalEnabled,
+                bridgeLimits = bridgeLimits,
             ),
         )
         val enrichedRuntimeModuleSources = runtimeModuleSources
@@ -143,6 +149,7 @@ class NativeNodeEmbeddedScriptService : Service() {
             .withDeviceInfo()
             .withEngineInfo(engineInfo.toJson())
             .withBridgePermissionManifest(workingDirectory)
+            .withBridgeLimitPolicy(bridgeLimits)
             .withBridgeLiveConfig(bridgeSession.configJson())
         val request = NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest(
             source = source,
@@ -168,6 +175,7 @@ class NativeNodeEmbeddedScriptService : Service() {
                     "dynamicImportExperimentalEnabled=$dynamicImportExperimentalEnabled " +
                     "workerThreadsExperimentalEnabled=$workerThreadsExperimentalEnabled " +
                     "javaInteropExperimentalEnabled=$javaInteropExperimentalEnabled " +
+                    "bridgeLimits=${bridgeLimits.toJson()} " +
                     "runtimeFirst=${enrichedRuntimeModuleSources.keys.firstOrNull().orEmpty()}",
         )
         try {
@@ -353,6 +361,15 @@ class NativeNodeEmbeddedScriptService : Service() {
         }
     }
 
+    private fun Map<String, String>.withBridgeLimitPolicy(bridgeLimits: NodeBridgeLimits.Policy): Map<String, String> {
+        return linkedMapOf<String, String>().apply {
+            putAll(this@withBridgeLimitPolicy)
+            if (!containsKey(NodeBridgeLimits.RUNTIME_MODULE_NAME)) {
+                put(NodeBridgeLimits.RUNTIME_MODULE_NAME, bridgeLimits.toJson())
+            }
+        }
+    }
+
     private fun Map<String, String>.withEngineInfo(engineInfoJson: String): Map<String, String> {
         return linkedMapOf<String, String>().apply {
             putAll(this@withEngineInfo)
@@ -370,6 +387,7 @@ class NativeNodeEmbeddedScriptService : Service() {
 
     private class NodeBridgeFileTransportSession(
         root: File,
+        private val bridgeLimits: NodeBridgeLimits.Policy,
         private val provider: NodeBridgeCapabilityProvider,
     ) {
         private val requestDir = File(root, "requests")
@@ -378,6 +396,7 @@ class NativeNodeEmbeddedScriptService : Service() {
         private val completed = AtomicInteger(0)
         private val failed = AtomicInteger(0)
         private val pending = AtomicInteger(0)
+        private val resourceLimited = AtomicInteger(0)
         private val seen = mutableSetOf<String>()
         private val responsesLock = Any()
         private val responses = mutableListOf<NodeBridgeResponse>()
@@ -429,6 +448,8 @@ class NativeNodeEmbeddedScriptService : Service() {
                 put("embedded_script.bridge_live_dispatch_count", completed.get().toString())
                 put("embedded_script.bridge_live_dispatch_failed_count", failed.get().toString())
                 put("embedded_script.bridge_live_dispatch_pending_count", pending.get().coerceAtLeast(0).toString())
+                put("embedded_script.bridge_live_dispatch_pending_limit", bridgeLimits.maxPendingBridgeCalls.toString())
+                put("embedded_script.bridge_live_dispatch_resource_limited_count", resourceLimited.get().toString())
                 put(
                     "embedded_script.bridge_live_dispatch_status",
                     if (pending.get() <= 0) "done" else "pending",
@@ -480,6 +501,21 @@ class NativeNodeEmbeddedScriptService : Service() {
                 return
             }
             val responded = AtomicBoolean(false)
+            if (pending.get() >= bridgeLimits.maxPendingBridgeCalls) {
+                resourceLimited.incrementAndGet()
+                recordResponse(
+                    NodeBridgeResponse.failure(
+                        request.id,
+                        NodeBridgeError.resourceLimit(
+                            message = "AutoJs6 live bridge exceeded ${bridgeLimits.maxPendingBridgeCalls} pending calls.",
+                            module = request.module,
+                            method = request.method,
+                        ),
+                    ),
+                )
+                file.delete()
+                return
+            }
             pending.incrementAndGet()
             fun complete(response: NodeBridgeResponse) {
                 if (!responded.compareAndSet(false, true)) {

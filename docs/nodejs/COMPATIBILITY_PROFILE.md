@@ -546,15 +546,20 @@ Current foundation:
 - private file-backed live transport in the current embedded service
 - queued host transport fallback for older packaged templates and one-way compatibility paths
 - per-execution bridge resource registry: tracks provider-owned handles and closes leaked resources on destroy
+- per-execution bridge limit policy: bounds pending calls, image handles, shell commands, controlled network/WebSocket resources, and accessibility request rate
 - bridge requests require non-empty `id`, `module`, and `method`; `args` must be a JSON array, `permissions` must be a string array, and `timeoutMs` must be a positive number
 - Node projects may declare bridge capabilities in `project.json` under `node.permissions`, or in `package.json` under `autojs6.node.permissions`
 - when a bridge capability manifest is present, missing capabilities reject before dispatch with `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`
 - `require("autojs6:bridge").permissions()` and `require("autojs6:profile").bridgePermissions` expose the read-only capability report
+- Node projects may declare bridge limits in `project.json` under `node.bridgeLimits`, or in `package.json` under `autojs6.node.bridgeLimits`
+- `require("autojs6:profile").bridgeLimits` exposes the effective read-only limit report, including warnings for ignored overrides
 - malformed live bridge requests reject with `ERR_AUTOJS6_BRIDGE_INVALID_REQUEST` when a response id can be recovered
 - provider callbacks are accepted at most once per bridge request; duplicate callbacks are ignored
 - synchronous provider dispatch exceptions are converted to bridge failure responses with stable module and method metadata
 - JS pending bridge calls reject on timeout with `ERR_AUTOJS6_BRIDGE_TIMEOUT`
 - JS pending bridge calls reject on destroy with `ERR_AUTOJS6_BRIDGE_PROCESS_DEAD`
+- bridge flood/resource exhaustion rejects with `ERR_AUTOJS6_BRIDGE_RESOURCE_LIMIT`
+- accessibility bridge request-rate exhaustion rejects with `ERR_AUTOJS6_BRIDGE_RATE_LIMITED`
 
 Current user-facing bridge modules:
 
@@ -575,6 +580,17 @@ Declared capability names:
 - `java_interop`
 
 No manifest keeps the legacy compatibility mode and does not enforce bridge capability declarations. An explicit empty array such as `"node": { "permissions": [] }` enforces a deny-by-default bridge surface.
+
+Default bridge limits:
+
+- `maxPendingBridgeCalls`: `32`, hard max `128`
+- `maxImageHandles`: `32`, hard max `128`
+- `maxShellCommands`: `2`, hard max `4`
+- `maxNetworkRequests`: `4`, hard max `8`
+- `maxWebSocketConnections`: `2`, hard max `4`
+- `accessibilityQueriesPerSecond`: `20`, hard max `60`
+
+Overrides outside the documented safe range are ignored and reported in `profile.bridgeLimits.warnings`.
 
 - `toast`
   - `showToast(message, options?): Promise<void>`
@@ -769,6 +785,8 @@ Live bridge diagnostics are recorded in result `nativeValues`:
 - `embedded_script.bridge_live_dispatch_count`
 - `embedded_script.bridge_live_dispatch_failed_count`
 - `embedded_script.bridge_live_dispatch_pending_count`
+- `embedded_script.bridge_live_dispatch_pending_limit`
+- `embedded_script.bridge_live_dispatch_resource_limited_count`
 - `embedded_script.bridge_live_dispatch_status`
 - `embedded_script.bridge_live_responses_json`
 - `embedded_script.bridge_resource.active_count`
@@ -779,6 +797,9 @@ Live bridge diagnostics are recorded in result `nativeValues`:
 - `embedded_script.bridge_resource.leak_count`
 - `embedded_script.bridge_resource.active_types`
 - `embedded_script.bridge_resource.dump_json` in debug builds
+- `embedded_script.bridge_limits.*`
+- `embedded_script.bridge_resource_limit_rejection_count`
+- `embedded_script.bridge_rate_limited_count`
 
 The current Android provider registers live resources for controlled fetch calls, controlled WebSocket sessions, shell executions, `work_manager` metadata tasks, and experimental Java object handles. The registry also reserves resource types for future image handles, screen capturers, dialogs, and workers so those providers can share the same destroy path when they become live Android capabilities.
 
@@ -818,3 +839,5 @@ Examples:
 - scoped fs escape: `code=EPERM`, `autojs6Code=ERR_AUTOJS6_FS_PATH_ESCAPE`
 - undeclared bridge capability: `code=ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`, `autojs6Code=ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`
 - malformed bridge request: `code=ERR_AUTOJS6_BRIDGE_INVALID_REQUEST`, `autojs6Code=ERR_AUTOJS6_BRIDGE_INVALID_REQUEST`
+- bridge resource limit: `code=ERR_AUTOJS6_BRIDGE_RESOURCE_LIMIT`, `autojs6Code=ERR_AUTOJS6_BRIDGE_RESOURCE_LIMIT`
+- bridge rate limit: `code=ERR_AUTOJS6_BRIDGE_RATE_LIMITED`, `autojs6Code=ERR_AUTOJS6_BRIDGE_RATE_LIMITED`

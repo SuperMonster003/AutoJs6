@@ -7896,11 +7896,14 @@ std::string buildEmbeddedScriptExecutionSource(
   let __autojs6_bridge_transport = null;
   let __autojs6_bridge_live_config_cache = undefined;
   let __autojs6_bridge_permission_manifest_cache = undefined;
+  let __autojs6_bridge_limits_cache = undefined;
   let __autojs6_bridge_destroyed = false;
   let __autojs6_bridge_sequence = 0;
   const __autojs6_bridge_pending = new Map();
   const __autojs6_bridge_queued_requests = [];
   let __autojs6_bridge_queued_clipboard_text = "";
+  const __autojs6_bridge_active_image_handles = new Set();
+  let __autojs6_bridge_pending_image_handles = 0;
   let __autojs6_limited_toast_cache = null;
   let __autojs6_limited_app_cache = null;
   let __autojs6_limited_engines_cache = null;
@@ -7918,7 +7921,7 @@ std::string buildEmbeddedScriptExecutionSource(
   let __autojs6_limited_java_cache = null;
   let __autojs6_limited_worker_threads_cache = null;
   const __autojs6_fetch_policy = Object.freeze({
-    maxConcurrentRequests: 4,
+    maxConcurrentRequests: __autojs6_bridge_limits_policy().maxNetworkRequests,
     defaultTimeoutMs: 30000,
     hardTimeoutMs: 120000,
     defaultMaxResponseBytes: 1048576,
@@ -7937,7 +7940,7 @@ std::string buildEmbeddedScriptExecutionSource(
     lastPolicyRejection: ""
   };
   const __autojs6_websocket_policy = Object.freeze({
-    maxConnections: 2,
+    maxConnections: __autojs6_bridge_limits_policy().maxWebSocketConnections,
     defaultTimeoutMs: 10000,
     hardTimeoutMs: 60000,
     defaultMaxMessageBytes: 65536,
@@ -8372,6 +8375,8 @@ std::string buildEmbeddedScriptExecutionSource(
         bridgeInvalidRequest: "ERR_AUTOJS6_BRIDGE_INVALID_REQUEST",
         bridgeTimeout: "ERR_AUTOJS6_BRIDGE_TIMEOUT",
         bridgeProcessDead: "ERR_AUTOJS6_BRIDGE_PROCESS_DEAD",
+        bridgeRateLimited: "ERR_AUTOJS6_BRIDGE_RATE_LIMITED",
+        bridgeResourceLimit: "ERR_AUTOJS6_BRIDGE_RESOURCE_LIMIT",
         workerDisabled: "ERR_AUTOJS6_WORKER_DISABLED",
         workerLimitExceeded: "ERR_AUTOJS6_WORKER_LIMIT_EXCEEDED",
         workerBridgeDenied: "ERR_AUTOJS6_WORKER_BRIDGE_DENIED",
@@ -8383,7 +8388,8 @@ std::string buildEmbeddedScriptExecutionSource(
         javaReflectionDenied: "ERR_AUTOJS6_JAVA_REFLECTION_DENIED",
         legacyAliases: Object.freeze(legacyAliases)
       }),
-      bridgePermissions: __autojs6_bridge_permission_report()
+      bridgePermissions: __autojs6_bridge_permission_report(),
+      bridgeLimits: __autojs6_bridge_limits_report()
     });
     return __autojs6_profile_cache;
   }
@@ -8483,6 +8489,99 @@ std::string buildEmbeddedScriptExecutionSource(
       androidPermissions: Object.freeze(manifest.androidPermissions.slice()),
       serviceRequired: manifest.serviceRequired,
       warnings: Object.freeze(manifest.warnings.slice())
+    });
+  }
+  function __autojs6_bridge_limit_defaults() {
+    return Object.freeze({
+      maxPendingBridgeCalls: 32,
+      maxImageHandles: 32,
+      maxShellCommands: 2,
+      maxNetworkRequests: 4,
+      maxWebSocketConnections: 2,
+      accessibilityQueriesPerSecond: 20
+    });
+  }
+  function __autojs6_bridge_limit_hard_max() {
+    return Object.freeze({
+      maxPendingBridgeCalls: 128,
+      maxImageHandles: 128,
+      maxShellCommands: 4,
+      maxNetworkRequests: 8,
+      maxWebSocketConnections: 4,
+      accessibilityQueriesPerSecond: 60
+    });
+  }
+  function __autojs6_bridge_limits_policy() {
+    if (__autojs6_bridge_limits_cache !== undefined) {
+      return __autojs6_bridge_limits_cache;
+    }
+    const defaults = __autojs6_bridge_limit_defaults();
+    const hardMax = __autojs6_bridge_limit_hard_max();
+    const mins = Object.freeze({
+      maxPendingBridgeCalls: 1,
+      maxImageHandles: 0,
+      maxShellCommands: 0,
+      maxNetworkRequests: 0,
+      maxWebSocketConnections: 0,
+      accessibilityQueriesPerSecond: 1
+    });
+    const values = Object.assign({}, defaults);
+    let sources = Object.freeze(["default"]);
+    let warnings = [];
+    try {
+      const record = __autojs6_runtime_module_embedded_sources["autojs6:bridge-limits"];
+      if (record && typeof record.source === "string") {
+        const parsed = JSON.parse(record.source);
+        if (parsed && typeof parsed === "object") {
+          sources = __autojs6_bridge_freeze_string_array(parsed.sources);
+          warnings = __autojs6_bridge_freeze_string_array(parsed.warnings).slice();
+          Object.keys(defaults).forEach(function(name) {
+            if (parsed[name] === undefined || parsed[name] === null) {
+              return;
+            }
+            const number = Number(parsed[name]);
+            if (Number.isFinite(number)) {
+              const value = Math.trunc(number);
+              if (value >= mins[name] && value <= hardMax[name]) {
+                values[name] = value;
+              } else {
+                warnings.push("autojs6:bridge-limits." + name + " ignored: " + value + " is outside " + mins[name] + ".." + hardMax[name] + ".");
+              }
+            } else {
+              warnings.push("autojs6:bridge-limits." + name + " ignored: expected an integer.");
+            }
+          });
+        }
+      }
+    } catch (error) {
+      warnings.push(
+        "autojs6:bridge-limits could not be parsed: " +
+          (error && error.message ? String(error.message) : String(error))
+      );
+    }
+    __autojs6_bridge_limits_cache = Object.freeze(Object.assign(values, {
+      version: 1,
+      sources: sources.length > 0 ? sources : Object.freeze(["default"]),
+      warnings: Object.freeze(warnings),
+      defaults,
+      hardMax
+    }));
+    return __autojs6_bridge_limits_cache;
+  }
+  function __autojs6_bridge_limits_report() {
+    const policy = __autojs6_bridge_limits_policy();
+    return Object.freeze({
+      version: policy.version,
+      maxPendingBridgeCalls: policy.maxPendingBridgeCalls,
+      maxImageHandles: policy.maxImageHandles,
+      maxShellCommands: policy.maxShellCommands,
+      maxNetworkRequests: policy.maxNetworkRequests,
+      maxWebSocketConnections: policy.maxWebSocketConnections,
+      accessibilityQueriesPerSecond: policy.accessibilityQueriesPerSecond,
+      sources: Object.freeze(policy.sources.slice()),
+      warnings: Object.freeze(policy.warnings.slice()),
+      defaults: Object.freeze(Object.assign({}, policy.defaults)),
+      hardMax: Object.freeze(Object.assign({}, policy.hardMax))
     });
   }
   function __autojs6_bridge_default_permissions(moduleName, methodName) {
@@ -11936,6 +12035,43 @@ std::string buildEmbeddedScriptExecutionSource(
       height: __autojs6_number_property(value, "height")
     });
   }
+  function __autojs6_bridge_resource_limit_error(moduleName, methodName, message) {
+    return __autojs6_bridge_error(
+      message,
+      "ERR_AUTOJS6_BRIDGE_RESOURCE_LIMIT",
+      moduleName,
+      methodName
+    );
+  }
+  function __autojs6_track_image_creation(moduleName, methodName, factory) {
+    const limits = __autojs6_bridge_limits_policy();
+    if (__autojs6_bridge_active_image_handles.size + __autojs6_bridge_pending_image_handles >= limits.maxImageHandles) {
+      return Promise.reject(__autojs6_bridge_resource_limit_error(
+        moduleName,
+        methodName,
+        "AutoJs6 image bridge exceeded " + limits.maxImageHandles + " active image handles."
+      ));
+    }
+    __autojs6_bridge_pending_image_handles += 1;
+    let created;
+    try {
+      created = factory();
+    } catch (error) {
+      __autojs6_bridge_pending_image_handles = Math.max(0, __autojs6_bridge_pending_image_handles - 1);
+      return Promise.reject(error);
+    }
+    return Promise.resolve(created).then(function(handle) {
+      __autojs6_bridge_pending_image_handles = Math.max(0, __autojs6_bridge_pending_image_handles - 1);
+      const normalized = __autojs6_normalize_image_handle(handle);
+      if (normalized) {
+        __autojs6_bridge_active_image_handles.add(normalized.id);
+      }
+      return normalized;
+    }, function(error) {
+      __autojs6_bridge_pending_image_handles = Math.max(0, __autojs6_bridge_pending_image_handles - 1);
+      throw error;
+    });
+  }
   function __autojs6_normalize_point(value) {
     if (!value || typeof value !== "object") {
       return null;
@@ -11976,12 +12112,14 @@ std::string buildEmbeddedScriptExecutionSource(
         width: __autojs6_number_property(value, "width"),
         height: __autojs6_number_property(value, "height"),
         nextImage: function(options) {
-          return __autojs6_call_autojs(
-            "media_projection",
-            "nextImage",
-            [id, __autojs6_image_options(options)],
-            __autojs6_media_projection_bridge_options(__autojs6_image_options(options), 10000)
-          ).then(__autojs6_normalize_image_handle);
+          return __autojs6_track_image_creation("media_projection", "nextImage", function() {
+            return __autojs6_call_autojs(
+              "media_projection",
+              "nextImage",
+              [id, __autojs6_image_options(options)],
+              __autojs6_media_projection_bridge_options(__autojs6_image_options(options), 10000)
+            );
+          });
         },
         stop: function(options) {
           return __autojs6_call_autojs(
@@ -12023,20 +12161,22 @@ std::string buildEmbeddedScriptExecutionSource(
     const recycledImageHandles = new Set();
     function captureScreen(options) {
       const captureOptions = __autojs6_image_options(options);
-      return __autojs6_call_autojs(
-        bridgeModuleName,
-        "captureScreen",
-        [{
-          requireExistingPermission: true,
-          orientation: captureOptions.orientation === "portrait" || captureOptions.orientation === "landscape"
-            ? captureOptions.orientation
-            : "auto"
-        }],
-        {
-          timeoutMs: __autojs6_image_timeout_from_options(captureOptions, 10000),
-          permissions: ["image", "media_projection"]
-        }
-      ).then(__autojs6_normalize_image_handle);
+      return __autojs6_track_image_creation(bridgeModuleName, "captureScreen", function() {
+        return __autojs6_call_autojs(
+          bridgeModuleName,
+          "captureScreen",
+          [{
+            requireExistingPermission: true,
+            orientation: captureOptions.orientation === "portrait" || captureOptions.orientation === "landscape"
+              ? captureOptions.orientation
+              : "auto"
+          }],
+          {
+            timeoutMs: __autojs6_image_timeout_from_options(captureOptions, 10000),
+            permissions: ["image", "media_projection"]
+          }
+        );
+      });
     }
     function readImage(path, options) {
       let target;
@@ -12045,12 +12185,14 @@ std::string buildEmbeddedScriptExecutionSource(
       } catch (error) {
         return Promise.reject(error);
       }
-      return __autojs6_call_autojs(
-        bridgeModuleName,
-        "readImage",
-        [target],
-        __autojs6_image_bridge_options(__autojs6_image_options(options), 10000)
-      ).then(__autojs6_normalize_image_handle);
+      return __autojs6_track_image_creation(bridgeModuleName, "readImage", function() {
+        return __autojs6_call_autojs(
+          bridgeModuleName,
+          "readImage",
+          [target],
+          __autojs6_image_bridge_options(__autojs6_image_options(options), 10000)
+        );
+      });
     }
     function saveImage(image, path, options) {
       const imageHandle = __autojs6_normalize_image_handle(image);
@@ -12097,12 +12239,14 @@ std::string buildEmbeddedScriptExecutionSource(
       } catch (error) {
         return Promise.reject(error);
       }
-      return __autojs6_call_autojs(
-        bridgeModuleName,
-        "clip",
-        [imageHandle, region],
-        __autojs6_image_bridge_options(__autojs6_image_options(options), 10000)
-      ).then(__autojs6_normalize_image_handle);
+      return __autojs6_track_image_creation(bridgeModuleName, "clip", function() {
+        return __autojs6_call_autojs(
+          bridgeModuleName,
+          "clip",
+          [imageHandle, region],
+          __autojs6_image_bridge_options(__autojs6_image_options(options), 10000)
+        );
+      });
     }
     function resize(image, w, h, options) {
       const imageHandle = __autojs6_normalize_image_handle(image);
@@ -12122,12 +12266,14 @@ std::string buildEmbeddedScriptExecutionSource(
       } catch (error) {
         return Promise.reject(error);
       }
-      return __autojs6_call_autojs(
-        bridgeModuleName,
-        "resize",
-        [imageHandle, size],
-        __autojs6_image_bridge_options(__autojs6_image_options(options), 10000)
-      ).then(__autojs6_normalize_image_handle);
+      return __autojs6_track_image_creation(bridgeModuleName, "resize", function() {
+        return __autojs6_call_autojs(
+          bridgeModuleName,
+          "resize",
+          [imageHandle, size],
+          __autojs6_image_bridge_options(__autojs6_image_options(options), 10000)
+        );
+      });
     }
     function findImage(source, template, options) {
       const sourceId = __autojs6_image_handle_id(source);
@@ -12170,6 +12316,7 @@ std::string buildEmbeddedScriptExecutionSource(
         __autojs6_image_bridge_options(__autojs6_image_options(options), 5000)
       ).then(function() {
         recycledImageHandles.add(imageHandle.id);
+        __autojs6_bridge_active_image_handles.delete(imageHandle.id);
         return undefined;
       });
     }
@@ -12204,6 +12351,15 @@ std::string buildEmbeddedScriptExecutionSource(
       return Promise.reject(__autojs6_bridge_error(
         "AutoJs6 bridge process is not available.",
         "ERR_AUTOJS6_BRIDGE_PROCESS_DEAD",
+        moduleValue,
+        methodValue
+      ));
+    }
+    const bridgeLimits = __autojs6_bridge_limits_policy();
+    if (__autojs6_bridge_pending.size >= bridgeLimits.maxPendingBridgeCalls) {
+      return Promise.reject(__autojs6_bridge_error(
+        "AutoJs6 bridge exceeded " + bridgeLimits.maxPendingBridgeCalls + " pending calls.",
+        "ERR_AUTOJS6_BRIDGE_RESOURCE_LIMIT",
         moduleValue,
         methodValue
       ));

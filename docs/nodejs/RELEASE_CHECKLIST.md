@@ -35,6 +35,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `NodeWorkerThreadsExperimentalInstrumentationTest`
 - [ ] `NodeJavaInteropBridgeInstrumentationTest`
 - [ ] `NodeBridgeResourceRegistryInstrumentationTest`
+- [ ] `NodeBridgeConcurrencyLimitsInstrumentationTest`
 - [ ] `NodeExampleProjectInstrumentationTest`
 - [ ] optional `NodeEmbeddedPerformanceInstrumentationTest` run recorded for lifecycle/native-load changes
 - [ ] extended `NodeEmbeddedMemoryLeakStressInstrumentationTest` run recorded before release candidates that change lifecycle, bridge, fs, or image-handle behavior
@@ -52,6 +53,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] bridge smoke verifies controlled `websocket` fake-provider connect/send/receive/close, timeout, message budget, max connection, service-destroy cleanup, diagnostics counters, shadowing protection, and that raw `net`/`tls` remain disabled
 - [ ] bridge smoke verifies controlled `work_manager` schedule-once, schedule-periodic, cancel, list, scoped descriptor policy, packaged entry metadata serialization, queued-fallback rejection, shadowing protection, and that `tasks` remains unavailable
 - [ ] bridge resource registry verifies leaked image/screen/websocket resource cleanup semantics, Java handle cleanup, `work_manager` metadata cleanup, shell timeout cleanup, and `embedded_script.bridge_resource.*` diagnostics
+- [ ] bridge concurrency limits verify pending-call flood rejection, image-handle quota, shell/network/WebSocket resource limits, accessibility request-rate limiting, safe project overrides, and ignored above-hard-max overrides
 - [ ] worker gate verifies `worker_threads` stays disabled, cannot be shadowed, and reports `experimentalFlags.workerThreads=false`
 - [ ] experimental worker smoke verifies pure-JS worker computation, `workerData`, `parentPort.postMessage`, `terminate()`, max-worker rejection, scoped path denial, and denied AutoJs bridge/raw network/fs/nested-worker access
 - [ ] checked-in examples `hello-node` and `toast-app` still run from `sample/nodejs`
@@ -81,6 +83,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] if packaged timed/boot/package tasks are enabled, manifest verifier reports the exact receivers, permissions, and foreground-service requirements
 - [ ] if packaged controlled network or WebSocket is enabled, manifest verifier reports `android.permission.INTERNET`; if it is not enabled, normal builds keep `autojs.nodejs.network.experimental=false`
 - [ ] if `node.permissions` / `autojs6.node.permissions` is present, missing bridge capabilities reject with `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`
+- [ ] if `node.bridgeLimits` / `autojs6.node.bridgeLimits` is present, effective limits appear in `profile.bridgeLimits`, and unsafe overrides are ignored with warnings
 - [ ] packaged diagnostic report lists declared bridge capabilities, required Android manifest permissions, missing permissions, and unused relevant permissions
 - [ ] `network` capability maps to `android.permission.INTERNET`
 - [ ] `screen_capture` capability maps to foreground-service media-projection manifest requirements

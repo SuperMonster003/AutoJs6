@@ -261,6 +261,24 @@ data class NodeBridgeError(
             )
         }
 
+        fun rateLimited(message: String, module: String? = null, method: String? = null): NodeBridgeError {
+            return NodeBridgeError(
+                message = message,
+                code = NodeRuntimeErrorCodes.BRIDGE_RATE_LIMITED,
+                module = module,
+                method = method,
+            )
+        }
+
+        fun resourceLimit(message: String, module: String? = null, method: String? = null): NodeBridgeError {
+            return NodeBridgeError(
+                message = message,
+                code = NodeRuntimeErrorCodes.BRIDGE_RESOURCE_LIMIT,
+                module = module,
+                method = method,
+            )
+        }
+
         fun bridgeUnavailable(module: String, method: String): NodeBridgeError {
             return permissionDenied(
                 message = "AutoJs6 bridge module or method is not available: $module.$method",
@@ -481,6 +499,7 @@ class AndroidNodeBridgeCapabilityProvider(
     context: Context,
     private val engineInfo: NodeBridgeEngineInfo = NodeBridgeEngineInfo.fromContext(context),
     private val javaInteropExperimentalEnabled: Boolean = BuildConfig.NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED,
+    private val bridgeLimits: NodeBridgeLimits.Policy = NodeBridgeLimits.defaults,
 ) : NodeBridgeCapabilityProvider {
 
     private val appContext = context.applicationContext
@@ -496,6 +515,11 @@ class AndroidNodeBridgeCapabilityProvider(
     private val workManagerTasks = ConcurrentHashMap<String, JSONObject>()
     private val javaHandles = ConcurrentHashMap<String, Any>()
     private val resourceRegistry = NodeBridgeResourceRegistry(engineInfo.id)
+    private val activeShellCommands = AtomicInteger(0)
+    private val maxActiveShellCommands = AtomicInteger(0)
+    private val bridgeResourceLimitRejections = AtomicInteger(0)
+    private val bridgeRateLimitedRejections = AtomicInteger(0)
+    private val accessibilityRateLimiter = NodeBridgeRateLimiter()
 
     override fun dispatch(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
         when {
@@ -523,6 +547,11 @@ class AndroidNodeBridgeCapabilityProvider(
         put("embedded_script.work_manager_registered_task_count", workManagerTasks.size.toString())
         put("embedded_script.java_interop_handle_count", javaHandles.size.toString())
         putAll(resourceRegistry.nativeDiagnostics())
+        putAll(bridgeLimits.nativeDiagnostics())
+        put("embedded_script.bridge_resource_limit_rejection_count", bridgeResourceLimitRejections.get().toString())
+        put("embedded_script.bridge_rate_limited_count", bridgeRateLimitedRejections.get().toString())
+        put("embedded_script.shell_active_command_count", activeShellCommands.get().toString())
+        put("embedded_script.shell_max_active_command_count", maxActiveShellCommands.get().toString())
     }
 
     override fun destroy(reason: NodeBridgeError) {
@@ -601,6 +630,20 @@ class AndroidNodeBridgeCapabilityProvider(
     }
 
     private fun dispatchAccessibility(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        if (!accessibilityRateLimiter.tryAcquire(bridgeLimits.accessibilityQueriesPerSecond)) {
+            bridgeRateLimitedRejections.incrementAndGet()
+            callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.rateLimited(
+                        message = "AutoJs6 accessibility bridge exceeded ${bridgeLimits.accessibilityQueriesPerSecond} requests per second.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                ),
+            )
+            return
+        }
         val response = when (request.method) {
             "isEnabled", "ensureEnabled" -> NodeBridgeResponse.success(request.id, "false")
             else -> NodeBridgeResponse.failure(
@@ -705,25 +748,68 @@ class AndroidNodeBridgeCapabilityProvider(
     }
 
     private fun dispatchShell(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
-        thread(name = "AutoJs6NodeShellExec-${request.id}", isDaemon = true) {
-            val response = runCatching {
-                when (request.method) {
-                    "exec" -> executeShell(request)
-                    else -> unavailable(request)
-                }
-            }.getOrElse { error ->
+        if (!tryAcquireShellCommand()) {
+            bridgeResourceLimitRejections.incrementAndGet()
+            callback(
                 NodeBridgeResponse.failure(
                     request.id,
-                    NodeBridgeError(
-                        message = error.message ?: error.javaClass.name,
-                        code = NodeRuntimeErrorCodes.BRIDGE_PROCESS_DEAD,
+                    NodeBridgeError.resourceLimit(
+                        message = "AutoJs6 shell bridge exceeded ${bridgeLimits.maxShellCommands} active commands.",
                         module = request.module,
                         method = request.method,
-                        stack = error.stackTraceToString(),
                     ),
-                )
+                ),
+            )
+            return
+        }
+        thread(name = "AutoJs6NodeShellExec-${request.id}", isDaemon = true) {
+            val response = try {
+                runCatching {
+                    when (request.method) {
+                        "exec" -> executeShell(request)
+                        else -> unavailable(request)
+                    }
+                }.getOrElse { error ->
+                    NodeBridgeResponse.failure(
+                        request.id,
+                        NodeBridgeError(
+                            message = error.message ?: error.javaClass.name,
+                            code = NodeRuntimeErrorCodes.BRIDGE_PROCESS_DEAD,
+                            module = request.module,
+                            method = request.method,
+                            stack = error.stackTraceToString(),
+                        ),
+                    )
+                }
+            } finally {
+                activeShellCommands.updateAndGet { current -> (current - 1).coerceAtLeast(0) }
             }
             callback(response)
+        }
+    }
+
+    private fun tryAcquireShellCommand(): Boolean {
+        while (true) {
+            val current = activeShellCommands.get()
+            if (current >= bridgeLimits.maxShellCommands) {
+                return false
+            }
+            if (activeShellCommands.compareAndSet(current, current + 1)) {
+                recordMaxActiveShellCommands(current + 1)
+                return true
+            }
+        }
+    }
+
+    private fun recordMaxActiveShellCommands(count: Int) {
+        while (true) {
+            val current = maxActiveShellCommands.get()
+            if (count <= current) {
+                return
+            }
+            if (maxActiveShellCommands.compareAndSet(current, count)) {
+                return
+            }
         }
     }
 
@@ -958,13 +1044,14 @@ class AndroidNodeBridgeCapabilityProvider(
             callback(NodeBridgeResponse.failure(request.id, fetchRequest.error ?: NodeBridgeError.processDead()))
             return
         }
-        if (!networkDiagnostics.tryStartRequest()) {
+        if (!networkDiagnostics.tryStartRequest(bridgeLimits.maxNetworkRequests)) {
+            bridgeResourceLimitRejections.incrementAndGet()
             callback(
                 NodeBridgeResponse.failure(
                     request.id,
                     NodeBridgeError.network(
-                        message = "AutoJs6 controlled fetch exceeded ${ControlledFetchPolicy.MAX_CONCURRENT_REQUESTS} active requests.",
-                        code = NodeRuntimeErrorCodes.NETWORK_POLICY_DENIED,
+                        message = "AutoJs6 controlled fetch exceeded ${bridgeLimits.maxNetworkRequests} active requests.",
+                        code = NodeRuntimeErrorCodes.BRIDGE_RESOURCE_LIMIT,
                         module = request.module,
                         method = request.method,
                     ),
@@ -1097,13 +1184,14 @@ class AndroidNodeBridgeCapabilityProvider(
             callback(NodeBridgeResponse.failure(request.id, connectRequest.error ?: NodeBridgeError.processDead()))
             return
         }
-        if (!websocketDiagnostics.tryStartConnection()) {
+        if (!websocketDiagnostics.tryStartConnection(bridgeLimits.maxWebSocketConnections)) {
+            bridgeResourceLimitRejections.incrementAndGet()
             callback(
                 NodeBridgeResponse.failure(
                     request.id,
                     NodeBridgeError.network(
-                        message = "AutoJs6 controlled WebSocket exceeded ${ControlledWebSocketPolicy.MAX_CONNECTIONS} active connections.",
-                        code = NodeRuntimeErrorCodes.NETWORK_POLICY_DENIED,
+                        message = "AutoJs6 controlled WebSocket exceeded ${bridgeLimits.maxWebSocketConnections} active connections.",
+                        code = NodeRuntimeErrorCodes.BRIDGE_RESOURCE_LIMIT,
                         module = request.module,
                         method = request.method,
                     ),
@@ -2250,6 +2338,30 @@ private object ControlledFetchPolicy {
     const val HARD_MAX_REDIRECTS = 10
 }
 
+private class NodeBridgeRateLimiter(
+    private val clock: () -> Long = { System.currentTimeMillis() },
+) {
+    private var windowStartedAt = 0L
+    private var countInWindow = 0
+
+    @Synchronized
+    fun tryAcquire(maxPerSecond: Int): Boolean {
+        if (maxPerSecond <= 0) {
+            return false
+        }
+        val now = clock()
+        if (windowStartedAt == 0L || now - windowStartedAt >= 1000L) {
+            windowStartedAt = now
+            countInWindow = 0
+        }
+        if (countInWindow >= maxPerSecond) {
+            return false
+        }
+        countInWindow += 1
+        return true
+    }
+}
+
 private class ControlledFetchDiagnostics {
     private val activeRequestCount = AtomicInteger(0)
     private val maxActiveRequestCount = AtomicInteger(0)
@@ -2259,10 +2371,10 @@ private class ControlledFetchDiagnostics {
     private val completedCount = AtomicInteger(0)
     private val serviceDestroyCancellationCount = AtomicInteger(0)
 
-    fun tryStartRequest(): Boolean {
+    fun tryStartRequest(maxConcurrentRequests: Int): Boolean {
         while (true) {
             val current = activeRequestCount.get()
-            if (current >= ControlledFetchPolicy.MAX_CONCURRENT_REQUESTS) {
+            if (current >= maxConcurrentRequests) {
                 recordPolicyRejection()
                 return false
             }
@@ -2533,10 +2645,10 @@ private class ControlledWebSocketDiagnostics {
     private val serviceDestroyCloseCount = AtomicInteger(0)
     private val completedConnectCount = AtomicInteger(0)
 
-    fun tryStartConnection(): Boolean {
+    fun tryStartConnection(maxConnections: Int): Boolean {
         while (true) {
             val current = activeConnectionCount.get()
-            if (current >= ControlledWebSocketPolicy.MAX_CONNECTIONS) {
+            if (current >= maxConnections) {
                 recordPolicyRejection()
                 return false
             }
