@@ -16,6 +16,9 @@ Each example contains:
 
 For Rhino-to-Node migration guidance, see [MIGRATION_FROM_RHINO.md](MIGRATION_FROM_RHINO.md). For behavior differences from Auto.js Pro 9 and AutoX.js v7, see [COMPATIBILITY_NOTES_PRO_AUTOX.md](COMPATIBILITY_NOTES_PRO_AUTOX.md).
 
+For the smallest stable entry-point shape, see [QUICK_START.md](QUICK_START.md). For current release limitations and
+workarounds, see [releases/NODE_PROFILE_V1_KNOWN_ISSUES.md](releases/NODE_PROFILE_V1_KNOWN_ISSUES.md).
+
 ## Examples
 
 - `hello-node`: minimal Node entry script and version smoke.

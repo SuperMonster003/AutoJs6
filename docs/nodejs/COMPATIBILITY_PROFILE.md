@@ -2,6 +2,10 @@
 
 This profile describes the current Safe Node surface. It is intentionally smaller than desktop Node.js and should be updated whenever runtime behavior changes.
 
+For the GA-facing v1 release contract, see
+[releases/NODE_PROFILE_V1_STABLE_SURFACE.md](releases/NODE_PROFILE_V1_STABLE_SURFACE.md). For user-visible caveats and
+workarounds, see [releases/NODE_PROFILE_V1_KNOWN_ISSUES.md](releases/NODE_PROFILE_V1_KNOWN_ISSUES.md).
+
 ## Runtime Identity
 
 - Profile name: `AutoJs6 Safe Node Profile`

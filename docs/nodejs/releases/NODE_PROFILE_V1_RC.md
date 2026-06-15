@@ -225,6 +225,11 @@ adb -s 63751f63 shell am start -n org.autojs.autojs6/org.autojs.autojs.launcher.
 
 ## Migration And Reference Links
 
+- `docs/nodejs/QUICK_START.md`
+- `docs/nodejs/releases/NODE_PROFILE_V1_STABLE_SURFACE.md`
+- `docs/nodejs/releases/NODE_PROFILE_V1_KNOWN_ISSUES.md`
+- `docs/nodejs/releases/NODE_PROFILE_V1_GA.md`
+- `docs/nodejs/EXPERIMENTAL_PROMOTION_POLICY.md`
 - `docs/nodejs/COMPATIBILITY_PROFILE.md`
 - `docs/nodejs/SECURITY_MODEL.md`
 - `docs/nodejs/TESTING.md`

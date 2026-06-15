@@ -212,10 +212,17 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 
 ## Documentation
 
+- [ ] `docs/nodejs/QUICK_START.md`
 - [ ] `docs/nodejs/INTEGRATION_PLAN.md`
 - [ ] `docs/nodejs/COMPATIBILITY_PROFILE.md`
 - [ ] `docs/nodejs/SECURITY_MODEL.md`
 - [ ] `docs/nodejs/TESTING.md`
+- [ ] `docs/nodejs/releases/NODE_PROFILE_V1_STABLE_SURFACE.md`
+- [ ] `docs/nodejs/EXPERIMENTAL_PROMOTION_POLICY.md`
+- [ ] `docs/nodejs/releases/NODE_PROFILE_V1_KNOWN_ISSUES.md`
+- [ ] `docs/nodejs/releases/NODE_PROFILE_V1_GA.md`
+- [ ] generated compatibility profile agrees with `NODE_PROFILE_V1_STABLE_SURFACE.md`
+- [ ] no experimental feature is promoted without `EXPERIMENTAL_PROMOTION_POLICY.md` gates
 - [ ] `docs/nodejs/MIGRATION_FROM_RHINO.md` when entry points, bridge modules, scoped fs, or packaged behavior changes in a user-visible way
 - [ ] `docs/nodejs/COMPATIBILITY_NOTES_PRO_AUTOX.md` when AutoJs6 behavior diverges from or converges toward documented Pro/AutoX user-visible behavior
 - [ ] `docs/nodejs/EXAMPLES.md` when examples or example smoke coverage changes

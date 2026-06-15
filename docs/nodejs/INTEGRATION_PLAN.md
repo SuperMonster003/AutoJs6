@@ -74,6 +74,12 @@ Do not remove the non-embedded paths while embedded lifecycle stress coverage is
 
 Checked-in Node examples live under `sample/nodejs/`. See [EXAMPLES.md](EXAMPLES.md) for the project list, expected output files, and smoke-test command.
 
+## Quick Start And Release Surface
+
+Start with [QUICK_START.md](QUICK_START.md) for the smallest stable Node script shape. The GA-facing v1 capability
+contract is frozen in [releases/NODE_PROFILE_V1_STABLE_SURFACE.md](releases/NODE_PROFILE_V1_STABLE_SURFACE.md), with
+user-visible limitations in [releases/NODE_PROFILE_V1_KNOWN_ISSUES.md](releases/NODE_PROFILE_V1_KNOWN_ISSUES.md).
+
 ## Migration Guide
 
 Rhino users should start with [MIGRATION_FROM_RHINO.md](MIGRATION_FROM_RHINO.md). The guide covers Node entry points, global API differences, Promise-based bridge calls, scoped filesystem behavior, and packaged APK differences.
