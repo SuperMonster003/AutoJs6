@@ -7904,6 +7904,7 @@ std::string buildEmbeddedScriptExecutionSource(
   let __autojs6_limited_device_cache = null;
   let __autojs6_limited_shell_cache = null;
   let __autojs6_limited_fetch_cache = null;
+  let __autojs6_limited_websocket_cache = null;
   const __autojs6_fetch_policy = Object.freeze({
     maxConcurrentRequests: 4,
     defaultTimeoutMs: 30000,
@@ -7921,6 +7922,26 @@ std::string buildEmbeddedScriptExecutionSource(
     rejectedByPolicyCount: 0,
     abortedCount: 0,
     completedCount: 0,
+    lastPolicyRejection: ""
+  };
+  const __autojs6_websocket_policy = Object.freeze({
+    maxConnections: 2,
+    defaultTimeoutMs: 10000,
+    hardTimeoutMs: 60000,
+    defaultMaxMessageBytes: 65536,
+    hardMaxMessageBytes: 1048576,
+    defaultMaxQueueSize: 32,
+    hardMaxQueueSize: 128,
+    allowedSchemes: Object.freeze(["ws:", "wss:"]),
+    drainIntervalMs: 25
+  });
+  const __autojs6_websocket_diagnostics = {
+    activeConnectionCount: 0,
+    maxActiveConnectionCount: 0,
+    timeoutCount: 0,
+    rejectedByPolicyCount: 0,
+    closedCount: 0,
+    messageCount: 0,
     lastPolicyRejection: ""
   };
   function __autojs6_has_own(object, key) {
@@ -8120,7 +8141,7 @@ std::string buildEmbeddedScriptExecutionSource(
         projectJsonOverrideAllowed: false,
         packagedApkOverrideAllowed: false,
         securityLevel: "high",
-        status: "planned"
+        status: "experimental"
       }),
       worker_threads: Object.freeze({
         id: "worker_threads",
@@ -8509,6 +8530,17 @@ std::string buildEmbeddedScriptExecutionSource(
       const response = __autojs6_bridge_queued_host_error_response(
         request,
         "AutoJs6 controlled fetch is disabled without a live network provider.",
+        "ERR_AUTOJS6_NETWORK_DISABLED"
+      );
+      setImmediate(function() {
+        __autojs6_bridge_receive_message(response);
+      });
+      return true;
+    }
+    if (request.module === "websocket") {
+      const response = __autojs6_bridge_queued_host_error_response(
+        request,
+        "AutoJs6 controlled WebSocket is disabled without a live network provider.",
         "ERR_AUTOJS6_NETWORK_DISABLED"
       );
       setImmediate(function() {
@@ -9110,6 +9142,389 @@ std::string buildEmbeddedScriptExecutionSource(
     });
     __autojs6_limited_fetch_cache = Object.freeze(fetchModule);
     return __autojs6_limited_fetch_cache;
+  }
+  function __autojs6_websocket_error(message, code) {
+    return __autojs6_error(message, code);
+  }
+  function __autojs6_websocket_timeout_ms(value) {
+    const number = Number(value === undefined || value === null ? __autojs6_websocket_policy.defaultTimeoutMs : value);
+    if (!Number.isFinite(number) || number <= 0) {
+      return __autojs6_websocket_policy.defaultTimeoutMs;
+    }
+    return Math.max(1, Math.min(Math.floor(number), __autojs6_websocket_policy.hardTimeoutMs));
+  }
+  function __autojs6_websocket_max_message_bytes(value) {
+    const number = Number(value === undefined || value === null ? __autojs6_websocket_policy.defaultMaxMessageBytes : value);
+    if (!Number.isFinite(number) || number < 0) {
+      return __autojs6_websocket_policy.defaultMaxMessageBytes;
+    }
+    return Math.max(0, Math.min(Math.floor(number), __autojs6_websocket_policy.hardMaxMessageBytes));
+  }
+  function __autojs6_websocket_max_queue_size(value) {
+    const number = Number(value === undefined || value === null ? __autojs6_websocket_policy.defaultMaxQueueSize : value);
+    if (!Number.isFinite(number) || number <= 0) {
+      return __autojs6_websocket_policy.defaultMaxQueueSize;
+    }
+    return Math.max(1, Math.min(Math.floor(number), __autojs6_websocket_policy.hardMaxQueueSize));
+  }
+  function __autojs6_websocket_policy_snapshot() {
+    return Object.freeze({
+      maxConnections: __autojs6_websocket_policy.maxConnections,
+      defaultTimeoutMs: __autojs6_websocket_policy.defaultTimeoutMs,
+      hardTimeoutMs: __autojs6_websocket_policy.hardTimeoutMs,
+      defaultMaxMessageBytes: __autojs6_websocket_policy.defaultMaxMessageBytes,
+      hardMaxMessageBytes: __autojs6_websocket_policy.hardMaxMessageBytes,
+      defaultMaxQueueSize: __autojs6_websocket_policy.defaultMaxQueueSize,
+      hardMaxQueueSize: __autojs6_websocket_policy.hardMaxQueueSize,
+      allowedSchemes: Object.freeze(__autojs6_websocket_policy.allowedSchemes.slice())
+    });
+  }
+  function __autojs6_websocket_diagnostics_snapshot() {
+    return {
+      activeConnectionCount: __autojs6_websocket_diagnostics.activeConnectionCount,
+      maxActiveConnectionCount: __autojs6_websocket_diagnostics.maxActiveConnectionCount,
+      timeoutCount: __autojs6_websocket_diagnostics.timeoutCount,
+      rejectedByPolicyCount: __autojs6_websocket_diagnostics.rejectedByPolicyCount,
+      closedCount: __autojs6_websocket_diagnostics.closedCount,
+      messageCount: __autojs6_websocket_diagnostics.messageCount,
+      lastPolicyRejection: __autojs6_websocket_diagnostics.lastPolicyRejection
+    };
+  }
+  function __autojs6_websocket_record_policy_rejection(reason) {
+    __autojs6_websocket_diagnostics.rejectedByPolicyCount += 1;
+    __autojs6_websocket_diagnostics.lastPolicyRejection = String(reason || "");
+  }
+  function __autojs6_websocket_policy_error(message, reason, code) {
+    __autojs6_websocket_record_policy_rejection(reason || code || "policy");
+    return __autojs6_websocket_error(message, code || "ERR_AUTOJS6_NETWORK_POLICY_DENIED");
+  }
+  function __autojs6_websocket_record_error(error) {
+    const code = error && (error.autojs6Code || error.code);
+    if (code === "ERR_AUTOJS6_BRIDGE_TIMEOUT" || code === "ERR_AUTOJS6_NETWORK_TIMEOUT") {
+      __autojs6_websocket_diagnostics.timeoutCount += 1;
+      return;
+    }
+    if (
+      code === "ERR_AUTOJS6_NETWORK_POLICY_DENIED" ||
+      code === "ERR_AUTOJS6_NETWORK_RESPONSE_TOO_LARGE" ||
+      code === "ERR_AUTOJS6_NETWORK_INVALID_URL" ||
+      code === "ERR_AUTOJS6_NETWORK_PERMISSION_DENIED"
+    ) {
+      __autojs6_websocket_record_policy_rejection(code);
+    }
+  }
+  function __autojs6_websocket_normalize_error(error) {
+    __autojs6_websocket_record_error(error);
+    const code = error && (error.autojs6Code || error.code);
+    if (code === "ERR_AUTOJS6_BRIDGE_TIMEOUT") {
+      return __autojs6_websocket_error(
+        error && error.message ? error.message : "AutoJs6 controlled WebSocket timed out.",
+        "ERR_AUTOJS6_NETWORK_TIMEOUT"
+      );
+    }
+    return error;
+  }
+  function __autojs6_websocket_try_start_connection() {
+    if (__autojs6_websocket_diagnostics.activeConnectionCount >= __autojs6_websocket_policy.maxConnections) {
+      return false;
+    }
+    __autojs6_websocket_diagnostics.activeConnectionCount += 1;
+    if (__autojs6_websocket_diagnostics.activeConnectionCount > __autojs6_websocket_diagnostics.maxActiveConnectionCount) {
+      __autojs6_websocket_diagnostics.maxActiveConnectionCount = __autojs6_websocket_diagnostics.activeConnectionCount;
+    }
+    return true;
+  }
+  function __autojs6_websocket_finish_connection() {
+    __autojs6_websocket_diagnostics.activeConnectionCount = Math.max(0, __autojs6_websocket_diagnostics.activeConnectionCount - 1);
+    __autojs6_websocket_diagnostics.closedCount += 1;
+  }
+  function __autojs6_websocket_validate_url(url) {
+    const raw = String(url);
+    let parsed;
+    try {
+      if (typeof URL === "function") {
+        parsed = new URL(raw);
+      }
+    } catch (_) {
+      parsed = null;
+    }
+    if (!parsed || __autojs6_websocket_policy.allowedSchemes.indexOf(String(parsed.protocol).toLowerCase()) < 0) {
+      throw __autojs6_websocket_policy_error(
+        "AutoJs6 controlled WebSocket accepts only ws and wss URLs.",
+        "invalid_url",
+        "ERR_AUTOJS6_NETWORK_INVALID_URL"
+      );
+    }
+    return parsed.toString();
+  }
+  function __autojs6_websocket_headers_json(headers) {
+    const result = [];
+    const normalized = new Headers(headers || undefined);
+    normalized.forEach(function(value, name) {
+      result.push([String(name), String(value)]);
+    });
+    return result;
+  }
+  function __autojs6_websocket_protocols(value) {
+    if (Array.isArray(value)) {
+      return value.map(function(item) { return String(item).trim(); }).filter(Boolean);
+    }
+    if (typeof value === "string") {
+      return value.split(",").map(function(item) { return item.trim(); }).filter(Boolean);
+    }
+    return [];
+  }
+  function __autojs6_websocket_binary_base64(data) {
+    const BufferCtor = __autojs6_fetch_buffer_constructor();
+    if (!BufferCtor || typeof BufferCtor.from !== "function") {
+      throw __autojs6_websocket_policy_error(
+        "AutoJs6 controlled WebSocket binary messages require Buffer support.",
+        "buffer_missing",
+        "ERR_AUTOJS6_NETWORK_PERMISSION_DENIED"
+      );
+    }
+    return BufferCtor.from(data).toString("base64");
+  }
+  function __autojs6_websocket_send_descriptor(data, maxMessageBytes) {
+    const BufferCtor = __autojs6_fetch_buffer_constructor();
+    if (typeof data === "string") {
+      const bytes = BufferCtor && typeof BufferCtor.byteLength === "function"
+        ? BufferCtor.byteLength(data, "utf8")
+        : data.length;
+      if (bytes > maxMessageBytes) {
+        throw __autojs6_websocket_policy_error(
+          "AutoJs6 controlled WebSocket message exceeded " + maxMessageBytes + " bytes.",
+          "message_too_large",
+          "ERR_AUTOJS6_NETWORK_RESPONSE_TOO_LARGE"
+        );
+      }
+      return { text: data };
+    }
+    if (BufferCtor && typeof BufferCtor.isBuffer === "function" && BufferCtor.isBuffer(data)) {
+      if (data.length > maxMessageBytes) {
+        throw __autojs6_websocket_policy_error(
+          "AutoJs6 controlled WebSocket message exceeded " + maxMessageBytes + " bytes.",
+          "message_too_large",
+          "ERR_AUTOJS6_NETWORK_RESPONSE_TOO_LARGE"
+        );
+      }
+      return { dataBase64: data.toString("base64") };
+    }
+    if (typeof ArrayBuffer === "function" && data instanceof ArrayBuffer) {
+      if (data.byteLength > maxMessageBytes) {
+        throw __autojs6_websocket_policy_error(
+          "AutoJs6 controlled WebSocket message exceeded " + maxMessageBytes + " bytes.",
+          "message_too_large",
+          "ERR_AUTOJS6_NETWORK_RESPONSE_TOO_LARGE"
+        );
+      }
+      return { dataBase64: __autojs6_websocket_binary_base64(new Uint8Array(data)) };
+    }
+    if (typeof ArrayBuffer === "function" && ArrayBuffer.isView && ArrayBuffer.isView(data)) {
+      if (data.byteLength > maxMessageBytes) {
+        throw __autojs6_websocket_policy_error(
+          "AutoJs6 controlled WebSocket message exceeded " + maxMessageBytes + " bytes.",
+          "message_too_large",
+          "ERR_AUTOJS6_NETWORK_RESPONSE_TOO_LARGE"
+        );
+      }
+      return { dataBase64: __autojs6_websocket_binary_base64(data) };
+    }
+    return __autojs6_websocket_send_descriptor(String(data), maxMessageBytes);
+  }
+  function __autojs6_websocket_emit(connection, eventName) {
+    const listeners = connection.__listeners[eventName];
+    if (!listeners || listeners.length === 0) {
+      return;
+    }
+    const args = Array.prototype.slice.call(arguments, 2);
+    listeners.slice().forEach(function(listener) {
+      try {
+        listener.apply(connection, args);
+      } catch (error) {
+        setImmediate(function() {
+          throw error;
+        });
+      }
+    });
+  }
+  function __autojs6_websocket_mark_closed(connection, code, reason) {
+    if (connection.__closed) {
+      return;
+    }
+    connection.__closed = true;
+    connection.readyState = "closed";
+    if (connection.__drainTimer !== null) {
+      clearTimeout(connection.__drainTimer);
+      connection.__drainTimer = null;
+    }
+    __autojs6_websocket_finish_connection();
+    __autojs6_websocket_emit(connection, "close", code === undefined ? 1000 : code, reason || "");
+  }
+  function __autojs6_websocket_process_events(connection, events) {
+    const list = Array.isArray(events) ? events : [];
+    for (const event of list) {
+      if (!event || typeof event !== "object") continue;
+      if (event.type === "open") {
+        __autojs6_websocket_emit(connection, "open");
+      } else if (event.type === "message") {
+        __autojs6_websocket_diagnostics.messageCount += 1;
+        __autojs6_websocket_emit(connection, "message", event.message || {});
+      } else if (event.type === "error") {
+        const source = event.error || {};
+        const error = __autojs6_websocket_error(
+          source.message || "AutoJs6 controlled WebSocket failed.",
+          source.code || "ERR_AUTOJS6_BRIDGE_PROCESS_DEAD"
+        );
+        __autojs6_websocket_emit(connection, "error", error);
+      } else if (event.type === "close") {
+        __autojs6_websocket_mark_closed(connection, event.code, event.reason);
+      }
+    }
+  }
+  function __autojs6_websocket_schedule_drain(connection) {
+    if (connection.__closed || connection.__drainTimer !== null) {
+      return;
+    }
+    connection.__drainTimer = setTimeout(function() {
+      connection.__drainTimer = null;
+      if (connection.__closed) {
+        return;
+      }
+      __autojs6_call_autojs(
+        "websocket",
+        "drainEvents",
+        [{ id: connection.id }],
+        { timeoutMs: 5000, permissions: ["network"] }
+      ).then(function(events) {
+        __autojs6_websocket_process_events(connection, events);
+        if (!connection.__closed) {
+          __autojs6_websocket_schedule_drain(connection);
+        }
+      }, function(error) {
+        const normalized = __autojs6_websocket_normalize_error(error);
+        __autojs6_websocket_emit(connection, "error", normalized);
+        __autojs6_websocket_mark_closed(connection, 1006, normalized && normalized.message);
+      });
+    }, __autojs6_websocket_policy.drainIntervalMs);
+  }
+  function __autojs6_websocket_connection(record, options) {
+    const connectionOptions = options && typeof options === "object" ? options : {};
+    const connection = {
+      id: String(record.id || ""),
+      url: String(record.url || ""),
+      readyState: "open",
+      maxMessageBytes: __autojs6_websocket_max_message_bytes(connectionOptions.maxMessageBytes),
+      __listeners: Object.create(null),
+      __closed: false,
+      __drainTimer: null,
+      on(eventName, listener) {
+        if (typeof listener !== "function") {
+          return this;
+        }
+        const key = String(eventName);
+        (this.__listeners[key] || (this.__listeners[key] = [])).push(listener);
+        return this;
+      },
+      off(eventName, listener) {
+        const key = String(eventName);
+        const list = this.__listeners[key];
+        if (!list) return this;
+        this.__listeners[key] = list.filter(function(item) { return item !== listener; });
+        return this;
+      },
+      send(data, sendOptions) {
+        if (this.__closed) {
+          return Promise.reject(__autojs6_websocket_error(
+            "AutoJs6 controlled WebSocket connection is closed.",
+            "ERR_AUTOJS6_BRIDGE_PROCESS_DEAD"
+          ));
+        }
+        let descriptor;
+        try {
+          descriptor = __autojs6_websocket_send_descriptor(data, this.maxMessageBytes);
+        } catch (error) {
+          return Promise.reject(error);
+        }
+        descriptor.id = this.id;
+        const opts = sendOptions && typeof sendOptions === "object" ? sendOptions : {};
+        return __autojs6_call_autojs(
+          "websocket",
+          "send",
+          [descriptor],
+          { timeoutMs: __autojs6_websocket_timeout_ms(opts.timeoutMs), permissions: ["network"], signal: opts.signal }
+        ).then(function() {
+          return undefined;
+        }, function(error) {
+          throw __autojs6_websocket_normalize_error(error);
+        });
+      },
+      close(code, reason, closeOptions) {
+        if (this.__closed) {
+          return Promise.resolve(undefined);
+        }
+        this.readyState = "closing";
+        const opts = closeOptions && typeof closeOptions === "object" ? closeOptions : {};
+        return __autojs6_call_autojs(
+          "websocket",
+          "close",
+          [{ id: this.id, code: code === undefined ? 1000 : Number(code), reason: reason === undefined ? "" : String(reason) }],
+          { timeoutMs: __autojs6_websocket_timeout_ms(opts.timeoutMs), permissions: ["network"], signal: opts.signal }
+        ).then(() => {
+          __autojs6_websocket_mark_closed(this, code === undefined ? 1000 : Number(code), reason === undefined ? "" : String(reason));
+          return undefined;
+        }, (error) => {
+          throw __autojs6_websocket_normalize_error(error);
+        });
+      }
+    };
+    __autojs6_websocket_schedule_drain(connection);
+    return connection;
+  }
+  function __autojs6_websocket_connect(url, options) {
+    const opts = options && typeof options === "object" ? options : {};
+    let descriptor;
+    try {
+      descriptor = {
+        url: __autojs6_websocket_validate_url(url),
+        headers: __autojs6_websocket_headers_json(opts.headers),
+        protocols: __autojs6_websocket_protocols(opts.protocols),
+        timeoutMs: __autojs6_websocket_timeout_ms(opts.timeoutMs),
+        maxMessageBytes: __autojs6_websocket_max_message_bytes(opts.maxMessageBytes),
+        maxQueueSize: __autojs6_websocket_max_queue_size(opts.maxQueueSize)
+      };
+    } catch (error) {
+      return Promise.reject(error);
+    }
+    if (!__autojs6_websocket_try_start_connection()) {
+      return Promise.reject(__autojs6_websocket_policy_error(
+        "AutoJs6 controlled WebSocket exceeded " + __autojs6_websocket_policy.maxConnections + " active connections.",
+        "max_connections",
+        "ERR_AUTOJS6_NETWORK_POLICY_DENIED"
+      ));
+    }
+    return __autojs6_call_autojs(
+      "websocket",
+      "connect",
+      [descriptor],
+      { timeoutMs: descriptor.timeoutMs, permissions: ["network"], signal: opts.signal }
+    ).then(function(result) {
+      return __autojs6_websocket_connection(result || descriptor, descriptor);
+    }, function(error) {
+      __autojs6_websocket_finish_connection();
+      throw __autojs6_websocket_normalize_error(error);
+    });
+  }
+  function __autojs6_limited_websocket() {
+    if (__autojs6_limited_websocket_cache) {
+      return __autojs6_limited_websocket_cache;
+    }
+    __autojs6_limited_websocket_cache = Object.freeze({
+      connect: __autojs6_websocket_connect,
+      policy: __autojs6_websocket_policy_snapshot(),
+      diagnostics: __autojs6_websocket_diagnostics_snapshot
+    });
+    return __autojs6_limited_websocket_cache;
   }
   function __autojs6_limited_toast() {
     if (__autojs6_limited_toast_cache) {
@@ -25077,6 +25492,9 @@ std::string buildEmbeddedScriptExecutionSource(
     if (name === "fetch") {
       return "fetch";
     }
+    if (name === "websocket") {
+      return "websocket";
+    }
     if (name === "fs" || name === "node:fs") {
       return "fs";
     }
@@ -25276,6 +25694,9 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     if (name === "fetch") {
       return __autojs6_limited_fetch();
+    }
+    if (name === "websocket") {
+      return __autojs6_limited_websocket();
     }
     if (name === "fs" || name === "node:fs") {
       return __autojs6_scoped_fs();

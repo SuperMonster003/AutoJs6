@@ -1,10 +1,10 @@
 # Controlled WebSocket Design Gate
 
-Status: planned, disabled by default. This document defines the boundary for a future controlled WebSocket module without enabling raw `net` or `tls`.
+Status: experimental MVP, live provider disabled by default. This document defines the boundary for the controlled WebSocket module without enabling raw `net` or `tls`.
 
 ## Goal
 
-AutoJs6 may expose WebSocket support for automation scripts that need server push or realtime control channels. The Safe Node Profile must not implement this by opening Node raw socket modules.
+AutoJs6 exposes a controlled WebSocket module for automation scripts that need server push or realtime control channels. The Safe Node Profile must not implement this by opening Node raw socket modules.
 
 The target shape is:
 
@@ -46,7 +46,7 @@ await connection.close(1000, "done");
 
 The module should be a controlled AutoJs6 module, not a transparent desktop `ws` clone. A future npm-compat adapter may be layered on top, but it must use the same provider and policy.
 
-## Proposed API
+## Current API
 
 ```ts
 type WebSocketUrl = string; // ws: or wss: only
@@ -81,14 +81,14 @@ function connect(url: WebSocketUrl, options?: ConnectOptions): Promise<WebSocket
 
 ## Policy
 
-Initial policy should be intentionally small:
+The current policy is intentionally small:
 
 - max connections per script: `2`
 - default connect timeout: `10000` ms
 - hard connect timeout cap: `60000` ms
 - default inbound message budget: `65536` bytes
 - hard inbound message budget: `1048576` bytes
-- max queued inbound messages before user code drains events: `32`
+- default max queued inbound messages before user code drains events: `32`
 - accepted schemes: `ws:` and `wss:` only
 - reject `file:`, `content:`, `about:`, `data:`, `http:`, and `https:` URLs
 - no automatic reconnect in v1
@@ -147,7 +147,7 @@ Callbacks into JavaScript must be marshalled onto the Node event loop thread.
 
 ## Bridge Protocol
 
-Proposed bridge methods:
+Current bridge methods:
 
 ```text
 websocket.connect
@@ -179,54 +179,58 @@ Event delivery should not call into JavaScript directly from an OkHttp callback.
 
 ## Packaged APK
 
-Packaged APKs that opt into controlled WebSocket need:
+Packaged APKs that opt into live controlled WebSocket need:
 
 - explicit project metadata opt-in
 - `android.permission.INTERNET`
 - packaged verifier report entry
 - release checklist item proving raw `net`/`tls` still fail
 
-No INTERNET permission should be added solely because the runtime has a planned WebSocket design.
+No INTERNET permission should be added solely because the runtime contains the controlled WebSocket module. Normal builds keep `autojs.nodejs.network.experimental=false`, and the Android provider rejects with `ERR_AUTOJS6_NETWORK_DISABLED` before network I/O.
 
 ## Diagnostics
 
-The provider should expose counters similar to controlled fetch:
+The provider exposes counters similar to controlled fetch:
 
 - active connection count
 - max active connection count
 - connect timeout count
 - policy rejection count
-- aborted/closed-on-destroy count
-- inbound message dropped count
+- closed-on-destroy count
+- completed connect count
 - bytes received and sent, capped or redacted for logs
 
 Native values should use the `embedded_script.websocket_*` prefix.
 
-## Tests Before Runtime Enablement
+## MVP Tests
 
-Required tests for the MVP task:
+Current focused instrumentation:
 
-- disabled or planned state visible in `require("autojs6:profile")`
-- `require("websocket")` behavior is documented before reservation
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeWebSocketBridgeInstrumentationTest"
+```
+
+Covered paths:
+
+- experimental state visible in `require("autojs6:profile")`
+- `require("websocket")` reserved by the Safe Node Profile
 - fake provider connect/open/close
 - send text
 - receive text
-- send binary through Base64/Buffer
 - max connection rejection
 - max message size rejection
 - unsupported scheme rejection
 - connect timeout
-- abort before connect completes
-- service destroy closes active connection
+- service destroy rejects pending connection
 - raw `net.connect()` remains denied
 - raw `tls.connect()` remains denied
-- packaged verifier checks `android.permission.INTERNET` only when project metadata opts in
+- normal Android provider rejects with `ERR_AUTOJS6_NETWORK_DISABLED`
+- packaged verifier reports `android.permission.INTERNET` only when project metadata opts in
 
 ## Non-Goals
 
-Task 61 does not implement:
+The MVP does not implement:
 
-- runtime `require("websocket")`
 - desktop `ws` compatibility
 - raw socket upgrade APIs
 - reconnect helper
@@ -235,3 +239,6 @@ Task 61 does not implement:
 - proxy customization
 - background keepalive
 - worker-thread WebSocket access
+- live provider enablement in normal release builds
+- ping/pong user APIs
+- automatic packaged INTERNET permission injection solely because the module exists

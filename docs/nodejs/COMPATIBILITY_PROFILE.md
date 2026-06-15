@@ -45,7 +45,7 @@ The release/debug gate also runs:
 | `dynamic_import` | `autojs.nodejs.dynamicImport.experimental` | false | true | false | false | medium | experimental |
 | `network` | `autojs.nodejs.network.experimental` | false | true | false | false | high | experimental |
 | `raw_node_network_modules` | none | false | false | false | false | high | disabled |
-| `websocket` | none | false | false | false | false | high | planned |
+| `websocket` | none | false | false | false | false | high | experimental |
 | `worker_threads` | `autojs.nodejs.worker_threads.experimental` | false | true | false | false | high | experimental |
 | `fs_streams` | none | true | false | false | false | medium | partial |
 | `zlib_streams` | none | true | false | false | false | medium | partial |
@@ -358,15 +358,25 @@ See `docs/nodejs/design/NETWORK.md` for INTERNET permission, packaged APK manife
 
 ## WebSocket Status
 
-Controlled WebSocket support is planned but not implemented. Current `require("autojs6:profile")` reports:
+Controlled WebSocket support has an experimental MVP, but live Android network I/O remains disabled in normal builds. Current `require("autojs6:profile")` reports:
 
 - `featureFlags.websocket.enabled=false`
-- `featureFlags.websocket.status="planned"`
+- `featureFlags.websocket.status="experimental"`
 - `highRiskCapabilities.webSocket=false`
 
-No builtin `require("websocket")` module is exposed in the Safe Node Profile yet. A local user package named `websocket` may still resolve through normal CommonJS rules, but raw `net`, `tls`, and HTTP upgrade authority remains denied, so userland packages cannot open sockets through desktop Node APIs.
+`require("websocket")` is reserved as a controlled AutoJs6 module and cannot be shadowed by `node_modules/websocket`. It exposes:
 
-The planned module boundary is documented in `docs/nodejs/design/WEBSOCKET.md`. Any future implementation must remain provider-backed, bounded by connection/message limits, cancellable on service destroy, and packaged behind explicit INTERNET permission opt-in.
+- `connect(url, options?): Promise<WebSocketConnection>`
+- `connection.send(data, options?): Promise<void>`
+- `connection.close(code?, reason?, options?): Promise<void>`
+- `connection.on("open" | "message" | "close" | "error", listener)`
+- `connection.off("open" | "message" | "close" | "error", listener)`
+- `policy`
+- `diagnostics()`
+
+The MVP is provider-backed through the AutoJs6 bridge and uses bounded policy: max 2 active connections, `ws:`/`wss:` only, default timeout `10000` ms, default message budget `65536` bytes, and bounded queued events. The Android provider is backed by OkHttp only when `BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED=true`; normal builds reject with `ERR_AUTOJS6_NETWORK_DISABLED`. Fake-provider tests cover connect, send, receive, close, timeout, max-connection denial, message-size denial, service-destroy rejection, diagnostics, and raw `net`/`tls` denial.
+
+Raw `net`, `tls`, and HTTP upgrade authority remains denied, so userland packages cannot open sockets through desktop Node APIs. The module boundary is documented in `docs/nodejs/design/WEBSOCKET.md`.
 
 ## Worker Threads Status
 
@@ -619,6 +629,13 @@ Current user-facing bridge modules:
   - response helpers: `text()`, `arrayBuffer()`, and `json()`
   - normal builds reject through the Android provider with `ERR_AUTOJS6_NETWORK_DISABLED`; fake-provider tests cover success, timeout, abort, response budget, unsupported scheme, redirect limit, concurrency limit, and service-destroy paths
   - raw `http`, `https`, `net`, `tls`, `dns`, and `dgram` modules remain unavailable for network I/O
+- `websocket`
+  - `connect(url, options?): Promise<WebSocketConnection>` through `require("websocket")`
+  - options: `{ headers?: object | array, protocols?: string[] | string, timeoutMs?: number, maxMessageBytes?: number, maxQueueSize?: number, signal?: AbortSignal }`
+  - connection methods: `send(data, options?)`, `close(code?, reason?, options?)`, `on(event, listener)`, and `off(event, listener)`
+  - module diagnostics: `require("websocket").policy` and `require("websocket").diagnostics()`
+  - accepts only `ws:` and `wss:` URLs; text and binary messages are buffered and budgeted
+  - normal builds reject through the Android provider with `ERR_AUTOJS6_NETWORK_DISABLED`; fake-provider tests cover connect, send, receive, close, timeout, max connection, message budget, service destroy, diagnostics, and that raw `net`/`tls` remain disabled
 
 Example:
 

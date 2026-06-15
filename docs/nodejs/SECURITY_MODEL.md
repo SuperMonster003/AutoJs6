@@ -135,7 +135,20 @@ The AutoJs6-controlled `fetch` wrapper is the preferred network path over unrest
 
 See `docs/nodejs/design/NETWORK.md` for the current network design gate.
 
-Controlled WebSocket is planned but disabled. The profile may expose `featureFlags.websocket.status="planned"` for diagnostics, but no builtin `require("websocket")` runtime is enabled yet. Future WebSocket support must use an AutoJs6 provider, bounded connection/message budgets, service-destroy cancellation, and explicit packaged APK INTERNET opt-in. It must not open raw `net`, `tls`, or HTTP upgrade authority. See `docs/nodejs/design/WEBSOCKET.md`.
+Controlled WebSocket has an experimental bridge-backed MVP. `require("websocket")` is an AutoJs6-controlled module, not a desktop `ws` clone and not raw socket authority. The live Android/OkHttp provider remains disabled in normal builds by `autojs.nodejs.network.experimental=false`; normal provider calls reject with `ERR_AUTOJS6_NETWORK_DISABLED`.
+
+The WebSocket wrapper must keep:
+
+- max connection limits
+- bounded message size
+- bounded queued events
+- connect timeout and bridge timeout behavior
+- service-destroy cancellation
+- `ws:`/`wss:` scheme validation
+- raw `net`, `tls`, and HTTP upgrade denial
+- explicit packaged APK INTERNET opt-in before live network use
+
+See `docs/nodejs/design/WEBSOCKET.md`.
 
 ## Worker Threads Policy
 
@@ -232,6 +245,8 @@ The `device` bridge is privacy-safe by default. It exposes only coarse runtime/d
 The `shell` bridge is the controlled AutoJs6 replacement for Node `child_process`, not an unrestricted process-spawning API. It exposes only `exec(command, options?)` and returns serialized `{ code, stdout, stderr }` results. Commands run on a provider thread through a non-interactive shell; JavaScript never receives a `Process`, file descriptor, stream, signal handle, or raw Android shell object. Root mode is explicit through `options.root === true`, never default. `cwd` is scoped to the execution working directory, `env` is JSON string-only, command output is bounded, and timeouts are enforced. The queued packaged fallback must not execute shell commands; `shell.exec()` requires live bridge metadata so command results and denials are observable before the Promise settles.
 
 The `fetch` bridge is the controlled AutoJs6 replacement for Node raw network modules. JavaScript receives only a fetch-compatible Promise wrapper and buffered response helpers. Request descriptors are JSON-serialized, method-limited to `GET` and `POST`, bounded by `timeoutMs`, `maxResponseBytes`, `maxRedirects`, and max active request count, and may be cancelled through `AbortController.signal`. Only `http:` and `https:` URLs are accepted. The live Android provider is gated by `BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED`; normal builds reject before network I/O. Provider destroy cancels tracked OkHttp calls and must not call back into a destroyed Node environment.
+
+The `websocket` bridge is the controlled AutoJs6 replacement for raw WebSocket sockets. JavaScript receives a Promise-based `connect()` API plus connection `send()`, `close()`, `on()`, and `off()` methods. Request descriptors are JSON-serialized, limited to `ws:` and `wss:`, bounded by `timeoutMs`, `maxMessageBytes`, `maxQueueSize`, and max active connection count, and may be cancelled through `AbortController.signal`. Binary frames cross the bridge as Base64. Event callbacks are drained through the bridge and must not call into JavaScript directly from OkHttp callbacks. The live Android provider is gated by `BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED`; normal builds reject before network I/O. Provider destroy closes tracked WebSocket sessions and must not call back into a destroyed Node environment.
 
 ## Scheduled Background Task Policy
 

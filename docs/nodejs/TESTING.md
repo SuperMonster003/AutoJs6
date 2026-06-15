@@ -219,13 +219,13 @@ Current controlled fetch bridge focused instrumentation:
 
 This suite verifies the `fetch` bridge registry, fake provider GET/POST behavior, `require("fetch")`, global `fetch`, shadowing protection, timeout rejection, abort rejection, response-size budget rejection, unsupported URL scheme rejection, redirect limit rejection, max concurrent request rejection, service-destroy rejection cleanup, fetch diagnostics counters, raw `http`/`https`/`net` denial, pending bridge cleanup, and that normal Android providers reject with `ERR_AUTOJS6_NETWORK_DISABLED` while `autojs.nodejs.network.experimental=false`.
 
-Current WebSocket design gate focused instrumentation:
+Current controlled WebSocket bridge focused instrumentation:
 
 ```powershell
-.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeWebSocketDesignGateInstrumentationTest"
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeWebSocketBridgeInstrumentationTest"
 ```
 
-This suite verifies the registry/profile planned state for `websocket`, that no builtin `require("websocket")` runtime is exposed yet, that a local user package named `websocket` cannot gain raw `net`/`tls` authority, and that raw socket modules remain denied.
+This suite verifies the registry/profile experimental state for `websocket`, fake-provider connect/send/receive/close behavior, `require("websocket")`, shadowing protection, timeout rejection, unsupported scheme rejection, max connection rejection, message-size budget rejection, service-destroy rejection cleanup, WebSocket diagnostics counters, raw `net`/`tls` denial, pending bridge cleanup, and that normal Android providers reject with `ERR_AUTOJS6_NETWORK_DISABLED` while `autojs.nodejs.network.experimental=false`.
 
 Current `worker_threads` design gate focused instrumentation:
 
@@ -320,7 +320,7 @@ If `autojs.embeddedNode.expectedAbis` is omitted, the verifier derives the ABI p
 
 See `docs/nodejs/design/RELEASE_FLAVORS.md`.
 
-The packaged diagnostic report also prints whether the inspected manifest declares `android.permission.INTERNET`. Controlled fetch remains disabled in normal builds unless a future packaged project opts into network explicitly; raw Node network modules must stay denied in either state.
+The packaged diagnostic report also prints whether the inspected manifest declares `android.permission.INTERNET`. Controlled fetch and controlled WebSocket remain disabled in normal builds unless a packaged project opts into network explicitly; raw Node network modules must stay denied in either state.
 
 Template refresh and smoke artifact collection:
 

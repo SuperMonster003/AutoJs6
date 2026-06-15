@@ -22,18 +22,25 @@ import okhttp3.Callback
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.WebSocket
+import okhttp3.WebSocketListener
 import org.autojs.autojs6.BuildConfig
 import org.json.JSONArray
 import org.json.JSONObject
 import org.json.JSONTokener
+import okio.ByteString.Companion.decodeBase64
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.File
 import java.io.InputStream
+import java.net.URI
 import java.net.URL
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
+import java.util.UUID
 import kotlin.concurrent.thread
 
 data class NodeBridgeRequest(
@@ -377,6 +384,7 @@ object NodeBridgeModules {
     const val DEVICE = "device"
     const val SHELL = "shell"
     const val FETCH = "fetch"
+    const val WEBSOCKET = "websocket"
 
     val toastMethods = setOf("showToast", "toast")
     val appMethods = setOf("launchPackage", "launchApp", "openAppSetting", "startActivity")
@@ -401,6 +409,7 @@ object NodeBridgeModules {
     val deviceMethods = setOf("isScreenOn", "wakeUp", "vibrate")
     val shellMethods = setOf("exec")
     val fetchMethods = setOf("request")
+    val websocketMethods = setOf("connect", "send", "close", "drainEvents")
 
     val supportedMethodsByModule: Map<String, Set<String>> = mapOf(
         TOAST to toastMethods,
@@ -415,6 +424,7 @@ object NodeBridgeModules {
         DEVICE to deviceMethods,
         SHELL to shellMethods,
         FETCH to fetchMethods,
+        WEBSOCKET to websocketMethods,
     )
 
     fun supports(module: String, method: String): Boolean {
@@ -457,6 +467,8 @@ class AndroidNodeBridgeCapabilityProvider(
         .build()
     private val networkCalls = ConcurrentHashMap<String, Call>()
     private val networkDiagnostics = ControlledFetchDiagnostics()
+    private val websocketSessions = ConcurrentHashMap<String, ControlledWebSocketSession>()
+    private val websocketDiagnostics = ControlledWebSocketDiagnostics()
 
     override fun dispatch(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
         when {
@@ -471,11 +483,15 @@ class AndroidNodeBridgeCapabilityProvider(
             request.module == NodeBridgeModules.DEVICE && request.method in NodeBridgeModules.deviceMethods -> dispatchDevice(request, callback)
             request.module == NodeBridgeModules.SHELL && request.method in NodeBridgeModules.shellMethods -> dispatchShell(request, callback)
             request.module == NodeBridgeModules.FETCH && request.method in NodeBridgeModules.fetchMethods -> dispatchFetch(request, callback)
+            request.module == NodeBridgeModules.WEBSOCKET && request.method in NodeBridgeModules.websocketMethods -> dispatchWebSocket(request, callback)
             else -> callback(unavailable(request))
         }
     }
 
-    override fun nativeDiagnostics(): Map<String, String> = networkDiagnostics.nativeValues()
+    override fun nativeDiagnostics(): Map<String, String> = linkedMapOf<String, String>().apply {
+        putAll(networkDiagnostics.nativeValues())
+        putAll(websocketDiagnostics.nativeValues())
+    }
 
     override fun destroy(reason: NodeBridgeError) {
         networkDiagnostics.recordServiceDestroyCancellation(networkCalls.size)
@@ -483,6 +499,11 @@ class AndroidNodeBridgeCapabilityProvider(
             runCatching { call.cancel() }
         }
         networkCalls.clear()
+        websocketDiagnostics.recordServiceDestroyClose(websocketSessions.size)
+        websocketSessions.values.forEach { session ->
+            runCatching { session.close(1001, "AutoJs6 service destroyed") }
+        }
+        websocketSessions.clear()
     }
 
     private fun unavailable(request: NodeBridgeRequest): NodeBridgeResponse {
@@ -789,6 +810,233 @@ class AndroidNodeBridgeCapabilityProvider(
                 }
             }
         })
+    }
+
+    private fun dispatchWebSocket(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        if (!BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED) {
+            callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.network(
+                        message = "AutoJs6 controlled WebSocket is disabled; enable autojs.nodejs.network.experimental in an experimental build.",
+                        code = NodeRuntimeErrorCodes.NETWORK_DISABLED,
+                        module = request.module,
+                        method = request.method,
+                    ),
+                ),
+            )
+            return
+        }
+        when (request.method) {
+            "connect" -> dispatchWebSocketConnect(request, callback)
+            "send" -> dispatchWebSocketSend(request, callback)
+            "close" -> dispatchWebSocketClose(request, callback)
+            "drainEvents" -> dispatchWebSocketDrainEvents(request, callback)
+            else -> callback(unavailable(request))
+        }
+    }
+
+    private fun dispatchWebSocketConnect(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        val payload = request.firstObjectArg()
+        if (payload == null) {
+            callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.invalidRequest(
+                        message = "websocket.connect requires a JSON request descriptor.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                ),
+            )
+            return
+        }
+        val connectRequest = ControlledWebSocketConnectRequest.fromJson(request, payload)
+        if (connectRequest.error != null || connectRequest.value == null) {
+            websocketDiagnostics.recordPolicyRejection()
+            callback(NodeBridgeResponse.failure(request.id, connectRequest.error ?: NodeBridgeError.processDead()))
+            return
+        }
+        if (!websocketDiagnostics.tryStartConnection()) {
+            callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.network(
+                        message = "AutoJs6 controlled WebSocket exceeded ${ControlledWebSocketPolicy.MAX_CONNECTIONS} active connections.",
+                        code = NodeRuntimeErrorCodes.NETWORK_POLICY_DENIED,
+                        module = request.module,
+                        method = request.method,
+                    ),
+                ),
+            )
+            return
+        }
+
+        val controlled = connectRequest.value
+        val sessionId = "websocket-${UUID.randomUUID()}"
+        val responded = AtomicBoolean(false)
+        val session = ControlledWebSocketSession(
+            id = sessionId,
+            url = controlled.url,
+            maxMessageBytes = controlled.maxMessageBytes,
+            maxQueueSize = controlled.maxQueueSize,
+        )
+        websocketSessions[sessionId] = session
+
+        val timeoutRunnable = Runnable {
+            if (responded.compareAndSet(false, true)) {
+                websocketDiagnostics.recordTimeout()
+                websocketSessions.remove(sessionId)
+                websocketDiagnostics.finishConnection()
+                session.close(1001, "AutoJs6 WebSocket connect timed out")
+                callback(
+                    NodeBridgeResponse.failure(
+                        request.id,
+                        NodeBridgeError.network(
+                            message = "AutoJs6 controlled WebSocket connect timed out.",
+                            code = NodeRuntimeErrorCodes.NETWORK_TIMEOUT,
+                            module = request.module,
+                            method = request.method,
+                        ),
+                    ),
+                )
+            }
+        }
+        mainHandler.postDelayed(timeoutRunnable, controlled.timeoutMs)
+
+        val listener = object : WebSocketListener() {
+            override fun onOpen(webSocket: WebSocket, response: okhttp3.Response) {
+                session.attach(webSocket)
+                session.queueOpen()
+                if (responded.compareAndSet(false, true)) {
+                    mainHandler.removeCallbacks(timeoutRunnable)
+                    websocketDiagnostics.recordCompletedConnect()
+                    callback(NodeBridgeResponse.success(request.id, session.toJson().toString()))
+                }
+            }
+
+            override fun onMessage(webSocket: WebSocket, text: String) {
+                if (text.toByteArray(Charsets.UTF_8).size > session.maxMessageBytes) {
+                    websocketDiagnostics.recordPolicyRejection()
+                    session.queueError(NodeRuntimeErrorCodes.NETWORK_RESPONSE_TOO_LARGE, "AutoJs6 controlled WebSocket message exceeded ${session.maxMessageBytes} bytes.")
+                    webSocket.close(1009, "message too large")
+                    return
+                }
+                session.queueMessageText(text)
+            }
+
+            override fun onMessage(webSocket: WebSocket, bytes: okio.ByteString) {
+                if (bytes.size > session.maxMessageBytes) {
+                    websocketDiagnostics.recordPolicyRejection()
+                    session.queueError(NodeRuntimeErrorCodes.NETWORK_RESPONSE_TOO_LARGE, "AutoJs6 controlled WebSocket message exceeded ${session.maxMessageBytes} bytes.")
+                    webSocket.close(1009, "message too large")
+                    return
+                }
+                session.queueMessageBinary(bytes.base64())
+            }
+
+            override fun onFailure(webSocket: WebSocket, t: Throwable, response: okhttp3.Response?) {
+                mainHandler.removeCallbacks(timeoutRunnable)
+                websocketSessions.remove(sessionId)
+                websocketDiagnostics.finishConnection()
+                session.queueError(NodeRuntimeErrorCodes.NETWORK_TIMEOUT, t.message ?: t.javaClass.name)
+                if (responded.compareAndSet(false, true)) {
+                    websocketDiagnostics.recordTimeout()
+                    callback(
+                        NodeBridgeResponse.failure(
+                            request.id,
+                            NodeBridgeError.network(
+                                message = "AutoJs6 controlled WebSocket failed: ${t.message ?: t.javaClass.name}",
+                                code = NodeRuntimeErrorCodes.NETWORK_TIMEOUT,
+                                module = request.module,
+                                method = request.method,
+                            ),
+                        ),
+                    )
+                }
+            }
+
+            override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
+                session.queueClose(code, reason)
+                websocketSessions.remove(sessionId)
+                websocketDiagnostics.finishConnection()
+            }
+        }
+        val webSocket = networkClient.newBuilder()
+            .callTimeout(controlled.timeoutMs, TimeUnit.MILLISECONDS)
+            .build()
+            .newWebSocket(controlled.toOkHttpRequest(), listener)
+        session.attach(webSocket)
+    }
+
+    private fun dispatchWebSocketSend(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        val payload = request.firstObjectArg()
+        val sessionId = payload?.optString("id").orEmpty()
+        val session = websocketSessions[sessionId]
+        if (payload == null || session == null) {
+            callback(websocketMissingSessionResponse(request))
+            return
+        }
+        val message = ControlledWebSocketSendMessage.fromJson(request, payload, session.maxMessageBytes)
+        if (message.error != null || message.value == null) {
+            websocketDiagnostics.recordPolicyRejection()
+            callback(NodeBridgeResponse.failure(request.id, message.error ?: NodeBridgeError.processDead()))
+            return
+        }
+        val sent = message.value.send(session)
+        callback(
+            if (sent) {
+                NodeBridgeResponse.success(request.id, "true")
+            } else {
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.network(
+                        message = "AutoJs6 controlled WebSocket send failed.",
+                        code = NodeRuntimeErrorCodes.BRIDGE_PROCESS_DEAD,
+                        module = request.module,
+                        method = request.method,
+                    ),
+                )
+            },
+        )
+    }
+
+    private fun dispatchWebSocketClose(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        val payload = request.firstObjectArg()
+        val sessionId = payload?.optString("id").orEmpty()
+        val session = websocketSessions.remove(sessionId)
+        if (payload == null || session == null) {
+            callback(websocketMissingSessionResponse(request))
+            return
+        }
+        val code = payload.optInt("code", 1000).coerceIn(1000, 4999)
+        val reason = payload.optString("reason", "")
+        session.close(code, reason)
+        websocketDiagnostics.finishConnection()
+        callback(NodeBridgeResponse.success(request.id, "null"))
+    }
+
+    private fun dispatchWebSocketDrainEvents(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        val payload = request.firstObjectArg()
+        val sessionId = payload?.optString("id").orEmpty()
+        val session = websocketSessions[sessionId]
+        if (payload == null || session == null) {
+            callback(NodeBridgeResponse.success(request.id, JSONArray().toString()))
+            return
+        }
+        callback(NodeBridgeResponse.success(request.id, session.drainEvents().toString()))
+    }
+
+    private fun websocketMissingSessionResponse(request: NodeBridgeRequest): NodeBridgeResponse {
+        return NodeBridgeResponse.failure(
+            request.id,
+            NodeBridgeError.network(
+                message = "AutoJs6 controlled WebSocket session is not available.",
+                code = NodeRuntimeErrorCodes.BRIDGE_PROCESS_DEAD,
+                module = request.module,
+                method = request.method,
+            ),
+        )
     }
 
     private fun dispatchApp(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
@@ -1522,6 +1770,331 @@ private class ControlledFetchException(
     val code: String,
     message: String,
 ) : IOException(message)
+
+private object ControlledWebSocketPolicy {
+    const val MAX_CONNECTIONS = 2
+    const val DEFAULT_TIMEOUT_MS = 10_000L
+    const val HARD_TIMEOUT_MS = 60_000L
+    const val DEFAULT_MAX_MESSAGE_BYTES = 65_536
+    const val HARD_MAX_MESSAGE_BYTES = 1_048_576
+    const val DEFAULT_MAX_QUEUE_SIZE = 32
+    const val HARD_MAX_QUEUE_SIZE = 128
+}
+
+private class ControlledWebSocketDiagnostics {
+    private val activeConnectionCount = AtomicInteger(0)
+    private val maxActiveConnectionCount = AtomicInteger(0)
+    private val timeoutCount = AtomicInteger(0)
+    private val rejectedByPolicyCount = AtomicInteger(0)
+    private val serviceDestroyCloseCount = AtomicInteger(0)
+    private val completedConnectCount = AtomicInteger(0)
+
+    fun tryStartConnection(): Boolean {
+        while (true) {
+            val current = activeConnectionCount.get()
+            if (current >= ControlledWebSocketPolicy.MAX_CONNECTIONS) {
+                recordPolicyRejection()
+                return false
+            }
+            if (activeConnectionCount.compareAndSet(current, current + 1)) {
+                recordMaxActive(current + 1)
+                return true
+            }
+        }
+    }
+
+    fun finishConnection() {
+        while (true) {
+            val current = activeConnectionCount.get()
+            if (current <= 0) {
+                return
+            }
+            if (activeConnectionCount.compareAndSet(current, current - 1)) {
+                return
+            }
+        }
+    }
+
+    fun recordCompletedConnect() {
+        completedConnectCount.incrementAndGet()
+    }
+
+    fun recordTimeout() {
+        timeoutCount.incrementAndGet()
+    }
+
+    fun recordPolicyRejection() {
+        rejectedByPolicyCount.incrementAndGet()
+    }
+
+    fun recordServiceDestroyClose(activeSessions: Int) {
+        if (activeSessions > 0) {
+            serviceDestroyCloseCount.addAndGet(activeSessions)
+        }
+        activeConnectionCount.set(0)
+    }
+
+    fun nativeValues(): Map<String, String> = linkedMapOf(
+        "embedded_script.websocket_active_connection_count" to activeConnectionCount.get().toString(),
+        "embedded_script.websocket_max_active_connection_count" to maxActiveConnectionCount.get().toString(),
+        "embedded_script.websocket_timeout_count" to timeoutCount.get().toString(),
+        "embedded_script.websocket_rejected_by_policy_count" to rejectedByPolicyCount.get().toString(),
+        "embedded_script.websocket_service_destroy_close_count" to serviceDestroyCloseCount.get().toString(),
+        "embedded_script.websocket_completed_connect_count" to completedConnectCount.get().toString(),
+    )
+
+    private fun recordMaxActive(count: Int) {
+        while (true) {
+            val current = maxActiveConnectionCount.get()
+            if (count <= current) {
+                return
+            }
+            if (maxActiveConnectionCount.compareAndSet(current, count)) {
+                return
+            }
+        }
+    }
+}
+
+private data class ControlledWebSocketConnectRequest(
+    val url: String,
+    val headers: List<Pair<String, String>>,
+    val protocols: List<String>,
+    val timeoutMs: Long,
+    val maxMessageBytes: Int,
+    val maxQueueSize: Int,
+) {
+    fun toOkHttpRequest(): okhttp3.Request {
+        val builder = okhttp3.Request.Builder().url(url)
+        headers.forEach { (name, value) ->
+            if (name.isNotBlank()) {
+                builder.addHeader(name, value)
+            }
+        }
+        if (protocols.isNotEmpty()) {
+            builder.header("Sec-WebSocket-Protocol", protocols.joinToString(", "))
+        }
+        return builder.build()
+    }
+
+    companion object {
+        fun fromJson(request: NodeBridgeRequest, payload: JSONObject): ControlledWebSocketConnectParseResult {
+            val url = payload.optString("url", "").trim()
+            val scheme = runCatching { URI(url).scheme?.lowercase() }.getOrNull()
+            if (url.isBlank() || scheme !in setOf("ws", "wss")) {
+                return ControlledWebSocketConnectParseResult(
+                    error = NodeBridgeError.network(
+                        message = "websocket.connect only accepts ws and wss URLs.",
+                        code = NodeRuntimeErrorCodes.NETWORK_INVALID_URL,
+                        module = request.module,
+                        method = request.method,
+                    ),
+                )
+            }
+            return ControlledWebSocketConnectParseResult(
+                value = ControlledWebSocketConnectRequest(
+                    url = url,
+                    headers = parseHeaders(payload.opt("headers")),
+                    protocols = parseProtocols(payload.opt("protocols")),
+                    timeoutMs = parsePositiveLong(payload.opt("timeoutMs"), ControlledWebSocketPolicy.DEFAULT_TIMEOUT_MS)
+                        .coerceIn(1L, ControlledWebSocketPolicy.HARD_TIMEOUT_MS),
+                    maxMessageBytes = parsePositiveInt(payload.opt("maxMessageBytes"), ControlledWebSocketPolicy.DEFAULT_MAX_MESSAGE_BYTES)
+                        .coerceIn(0, ControlledWebSocketPolicy.HARD_MAX_MESSAGE_BYTES),
+                    maxQueueSize = parsePositiveInt(payload.opt("maxQueueSize"), ControlledWebSocketPolicy.DEFAULT_MAX_QUEUE_SIZE)
+                        .coerceIn(1, ControlledWebSocketPolicy.HARD_MAX_QUEUE_SIZE),
+                ),
+            )
+        }
+    }
+}
+
+private data class ControlledWebSocketConnectParseResult(
+    val value: ControlledWebSocketConnectRequest? = null,
+    val error: NodeBridgeError? = null,
+)
+
+private class ControlledWebSocketSession(
+    val id: String,
+    val url: String,
+    val maxMessageBytes: Int,
+    val maxQueueSize: Int,
+) {
+    private val events = ConcurrentLinkedQueue<JSONObject>()
+    @Volatile
+    private var webSocket: WebSocket? = null
+
+    fun attach(value: WebSocket) {
+        webSocket = value
+    }
+
+    fun queueOpen() {
+        queueEvent(JSONObject().put("type", "open"))
+    }
+
+    fun queueMessageText(text: String) {
+        queueEvent(
+            JSONObject()
+                .put("type", "message")
+                .put("message", JSONObject().put("type", "text").put("text", text)),
+        )
+    }
+
+    fun queueMessageBinary(dataBase64: String) {
+        queueEvent(
+            JSONObject()
+                .put("type", "message")
+                .put("message", JSONObject().put("type", "binary").put("dataBase64", dataBase64)),
+        )
+    }
+
+    fun queueClose(code: Int, reason: String) {
+        queueEvent(JSONObject().put("type", "close").put("code", code).put("reason", reason))
+    }
+
+    fun queueError(code: String, message: String) {
+        queueEvent(
+            JSONObject()
+                .put("type", "error")
+                .put("error", JSONObject().put("code", code).put("message", message)),
+        )
+    }
+
+    fun drainEvents(): JSONArray {
+        val result = JSONArray()
+        while (true) {
+            val event = events.poll() ?: break
+            result.put(event)
+        }
+        return result
+    }
+
+    fun sendText(text: String): Boolean = webSocket?.send(text) == true
+
+    fun sendBinary(base64: String): Boolean {
+        val bytes = base64.decodeBase64() ?: return false
+        return webSocket?.send(bytes) == true
+    }
+
+    fun close(code: Int, reason: String) {
+        webSocket?.close(code, reason)
+    }
+
+    fun toJson(): JSONObject = JSONObject()
+        .put("id", id)
+        .put("url", url)
+        .put("readyState", "open")
+        .put("maxMessageBytes", maxMessageBytes)
+        .put("maxQueueSize", maxQueueSize)
+
+    private fun queueEvent(event: JSONObject) {
+        while (events.size >= maxQueueSize) {
+            events.poll() ?: break
+        }
+        events.add(event)
+    }
+}
+
+private data class ControlledWebSocketSendMessage(
+    val type: String,
+    val text: String?,
+    val dataBase64: String?,
+) {
+    fun send(session: ControlledWebSocketSession): Boolean {
+        return when (type) {
+            "binary" -> session.sendBinary(dataBase64.orEmpty())
+            else -> session.sendText(text.orEmpty())
+        }
+    }
+
+    companion object {
+        fun fromJson(request: NodeBridgeRequest, payload: JSONObject, maxMessageBytes: Int): ControlledWebSocketSendParseResult {
+            val text = payload.optString("text").takeIf { payload.has("text") && !payload.isNull("text") }
+            val dataBase64 = payload.optString("dataBase64").takeIf { payload.has("dataBase64") && !payload.isNull("dataBase64") }
+            val size = when {
+                dataBase64 != null -> (dataBase64.decodeBase64()?.size ?: Int.MAX_VALUE)
+                text != null -> text.toByteArray(Charsets.UTF_8).size
+                else -> 0
+            }
+            if (size > maxMessageBytes) {
+                return ControlledWebSocketSendParseResult(
+                    error = NodeBridgeError.network(
+                        message = "websocket.send message exceeded ${maxMessageBytes} bytes.",
+                        code = NodeRuntimeErrorCodes.NETWORK_RESPONSE_TOO_LARGE,
+                        module = request.module,
+                        method = request.method,
+                    ),
+                )
+            }
+            return ControlledWebSocketSendParseResult(
+                value = ControlledWebSocketSendMessage(
+                    type = if (dataBase64 != null) "binary" else "text",
+                    text = text,
+                    dataBase64 = dataBase64,
+                ),
+            )
+        }
+    }
+}
+
+private data class ControlledWebSocketSendParseResult(
+    val value: ControlledWebSocketSendMessage? = null,
+    val error: NodeBridgeError? = null,
+)
+
+private fun parseHeaders(value: Any?): List<Pair<String, String>> {
+    return when (value) {
+        is JSONArray -> (0 until value.length()).mapNotNull { index ->
+            val pair = value.optJSONArray(index) ?: return@mapNotNull null
+            val name = pair.optString(0, "").trim()
+            val headerValue = pair.optString(1, "")
+            if (name.isBlank()) null else name to headerValue
+        }
+        is JSONObject -> value.keys().asSequence().mapNotNull { name ->
+            val headerValue = value.optString(name, "")
+            if (name.isBlank()) null else name to headerValue
+        }.toList()
+        else -> emptyList()
+    }
+}
+
+private fun parseProtocols(value: Any?): List<String> {
+    return when (value) {
+        is JSONArray -> (0 until value.length()).mapNotNull { index ->
+            value.optString(index).trim().takeIf { it.isNotBlank() }
+        }
+        is String -> value.split(",").mapNotNull { it.trim().takeIf(String::isNotBlank) }
+        else -> emptyList()
+    }
+}
+
+private fun parsePositiveLong(value: Any?, fallback: Long): Long {
+    val parsed = when (value) {
+        is Int -> value.toLong()
+        is Long -> value
+        is Number -> value.toLong()
+        is String -> value.toLongOrNull()
+        else -> null
+    }
+    return parsed?.takeIf { it >= 0L } ?: fallback
+}
+
+private fun parsePositiveInt(value: Any?, fallback: Int): Int {
+    val parsed = when (value) {
+        is Int -> value
+        is Long -> value.coerceIn(Int.MIN_VALUE.toLong(), Int.MAX_VALUE.toLong()).toInt()
+        is Number -> {
+            val doubleValue = value.toDouble()
+            if (!doubleValue.isFinite()) {
+                null
+            } else {
+                doubleValue.toInt()
+            }
+        }
+        is String -> value.toIntOrNull()
+        else -> null
+    }
+    return parsed?.takeIf { it >= 0 } ?: fallback
+}
 
 private const val SHELL_OUTPUT_LIMIT_BYTES = 1024 * 1024
 

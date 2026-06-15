@@ -46,7 +46,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] bridge smoke verifies `device` fake provider results, shadowing protection, sensitive field absence, permission tagging, and no `watch` API
 - [ ] bridge smoke verifies `shell` fake provider results, shadowing protection, timeout/cwd/env policy, explicit root permission tagging, and that `child_process` remains disabled
 - [ ] bridge smoke verifies controlled `fetch` fake-provider GET/POST, timeout, abort, response budget, unsupported scheme, redirect limit, max concurrency, service-destroy cleanup, diagnostics counters, shadowing protection, and that raw `http`/`https`/`net`/`tls`/`dns` remain disabled
-- [ ] WebSocket design gate verifies `websocket` stays planned/disabled, no builtin runtime is exposed, and raw `net`/`tls` remain denied
+- [ ] bridge smoke verifies controlled `websocket` fake-provider connect/send/receive/close, timeout, message budget, max connection, service-destroy cleanup, diagnostics counters, shadowing protection, and that raw `net`/`tls` remain disabled
 - [ ] worker gate verifies `worker_threads` stays disabled, cannot be shadowed, and reports `experimentalFlags.workerThreads=false`
 - [ ] any future `tasks` bridge smoke verifies user-visible registration, scoped Node descriptors, and denied broadcast/boot/package paths
 - [ ] checked-in examples `hello-node` and `toast-app` still run from `sample/nodejs`
@@ -73,7 +73,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `FOREGROUND_SERVICE_SPECIAL_USE` permission exists
 - [ ] packaged scheduled/background task receivers and permissions are absent unless the project explicitly opts in
 - [ ] if packaged timed/boot/package tasks are enabled, manifest verifier reports the exact receivers, permissions, and foreground-service requirements
-- [ ] if packaged controlled network is enabled, manifest verifier reports `android.permission.INTERNET`; if it is not enabled, normal builds keep `autojs.nodejs.network.experimental=false`
+- [ ] if packaged controlled network or WebSocket is enabled, manifest verifier reports `android.permission.INTERNET`; if it is not enabled, normal builds keep `autojs.nodejs.network.experimental=false`
 
 ## Native Libraries
 
@@ -115,6 +115,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] canonical `error.autojs6Code` present for AutoJs6 policy denials
 - [ ] network operations denied unless explicitly feature-gated
 - [ ] controlled `fetch` live provider disabled in normal release builds unless explicitly testing a network experiment
+- [ ] controlled `websocket` live provider disabled in normal release builds unless explicitly testing a network experiment
 - [ ] raw Node `http`, `https`, `net`, `tls`, `dns`, and `dgram` authority remains denied even if controlled fetch is enabled
 - [ ] `worker_threads` authority remains denied unless explicitly feature-gated and security-reviewed
 - [ ] direct WorkManager, AlarmManager, JobScheduler, and BroadcastReceiver authority remains denied to Node scripts

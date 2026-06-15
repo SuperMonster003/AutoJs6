@@ -86,7 +86,7 @@ object NodeRuntimeCapabilities {
             projectJsonOverrideAllowed = false,
             packagedApkOverrideAllowed = false,
             securityLevel = "high",
-            status = "planned",
+            status = "experimental",
         ),
         NodeRuntimeFeatureFlag(
             id = "worker_threads",
