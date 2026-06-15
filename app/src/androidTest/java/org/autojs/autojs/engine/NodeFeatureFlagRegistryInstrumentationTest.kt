@@ -8,8 +8,11 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import java.io.File
 
 class NodeFeatureFlagRegistryInstrumentationTest {
+
+    private val context = NodeEmbeddedTestHarness.targetContext
 
     @Before
     fun settleBefore() {
@@ -31,6 +34,7 @@ class NodeFeatureFlagRegistryInstrumentationTest {
                 "dynamic_import",
                 "network",
                 "raw_node_network_modules",
+                "websocket",
                 "worker_threads",
                 "fs_streams",
                 "zlib_streams",
@@ -69,8 +73,140 @@ class NodeFeatureFlagRegistryInstrumentationTest {
 
         val buildOverrideAllowed = flags.filter { it.buildTimeOverrideAllowed }.map { it.id }.toSet()
         assertEquals(setOf("esm", "dynamic_import", "network", "worker_threads", "java_interop"), buildOverrideAllowed)
+        assertEquals(buildOverrideAllowed, NodeRuntimeCapabilities.buildOnlyFeatureFlags.map { it.id }.toSet())
+        assertEquals(buildOverrideAllowed, NodeRuntimeCapabilities.debugOnlyFeatureFlags.map { it.id }.toSet())
+        assertEquals(emptySet<String>(), NodeRuntimeCapabilities.projectAllowedFeatureFlags.map { it.id }.toSet())
+        assertEquals(emptySet<String>(), NodeRuntimeCapabilities.packagedAllowedFeatureFlags.map { it.id }.toSet())
+        assertTrue(NodeRuntimeCapabilities.releaseForbiddenFeatureFlags.any { it.id == "network" })
+        assertTrue(NodeRuntimeCapabilities.releaseForbiddenFeatureFlags.any { it.id == "java_interop" })
+        assertFalse(NodeRuntimeCapabilities.featureFlagsById.getValue("fs_streams").releaseForbidden)
         assertNotNull(NodeRuntimeCapabilities.featureFlagsById["child_process"])
         assertTrue(NodeRuntimeCapabilities.deniedFeatureFlags.any { it.id == "native_addon" })
+    }
+
+    @Test
+    fun featureFlagAuditRejectsProjectAndPackagedMetadataOverrides() {
+        val projectAudit = NodeRuntimeCapabilities.auditProjectJsonFeatureFlags(
+            """
+            {
+              "type": "node",
+              "node": {
+                "featureFlags": {
+                  "network": true,
+                  "unknownFutureFlag": true
+                },
+                "experimentalFlags": ["javaInterop"]
+              }
+            }
+            """.trimIndent(),
+        )
+
+        assertTrue(projectAudit.hasRejectedOverrides)
+        assertEquals(
+            setOf("network", "unknownfutureflag", "java_interop"),
+            projectAudit.rejectedFeatureIds.toSet(),
+        )
+        assertTrue(projectAudit.rejected.any { it.reason == "project_json_override_denied" && it.normalizedId == "network" })
+        assertTrue(projectAudit.rejected.any { it.reason == "unknown_flag" && it.normalizedId == "unknownfutureflag" })
+        assertTrue(projectAudit.warnings.any { it.contains("unknownFutureFlag") })
+
+        val packageAudit = NodeRuntimeCapabilities.auditPackageJsonFeatureFlags(
+            """
+            {
+              "name": "feature-flag-package",
+              "autojs6": {
+                "node": {
+                  "featureFlags": {
+                    "autojs.nodejs.network.experimental": true
+                  }
+                }
+              }
+            }
+            """.trimIndent(),
+        )
+
+        assertTrue(packageAudit.hasRejectedOverrides)
+        assertEquals(listOf("network"), packageAudit.rejectedFeatureIds)
+        assertEquals("packaged_apk_override_denied", packageAudit.rejected.first().reason)
+    }
+
+    @Test
+    fun featureFlagAuditAllowsDebugBuildOverridesButRejectsReleaseOverrides() {
+        val requested = linkedMapOf(
+            "esm" to true,
+            "autojs.nodejs.network.experimental" to true,
+            "javaInterop" to true,
+        )
+
+        val debugAudit = NodeRuntimeCapabilities.auditBuildTimeFeatureFlags(
+            requestedFlags = requested,
+            releaseBuild = false,
+        )
+
+        assertFalse(debugAudit.toErrorMessage(), debugAudit.hasRejectedOverrides)
+        assertEquals(setOf("esm", "network", "java_interop"), debugAudit.accepted.keys.toSet())
+
+        val releaseAudit = NodeRuntimeCapabilities.auditBuildTimeFeatureFlags(
+            requestedFlags = requested,
+            releaseBuild = true,
+        )
+
+        assertTrue(releaseAudit.hasRejectedOverrides)
+        assertEquals(setOf("esm", "network", "java_interop"), releaseAudit.rejectedFeatureIds.toSet())
+        assertTrue(releaseAudit.rejected.all { it.reason == "release_forbidden" })
+    }
+
+    @Test
+    fun nodeProjectRejectsProjectAndPackageFeatureFlagMetadata() {
+        val projectFlagRoot = File(context.cacheDir, "node-feature-flag-project-${System.nanoTime()}").apply {
+            deleteRecursively()
+            check(mkdirs()) { "Failed to create project feature flag audit root: $absolutePath" }
+        }
+        File(projectFlagRoot, "project.json").writeText(
+            """
+            {
+              "type": "node",
+              "main": "index.js",
+              "node": {
+                "featureFlags": {
+                  "network": true
+                }
+              }
+            }
+            """.trimIndent(),
+        )
+        File(projectFlagRoot, "index.js").writeText("""console.log("blocked");""")
+
+        val projectError = runCatching {
+            NativeNodeEmbeddedProjectRunner.resolveProjectLaunchPlan(projectFlagRoot)
+        }.exceptionOrNull()
+        assertNotNull(projectError)
+        assertTrue(projectError!!.message.orEmpty(), projectError.message.orEmpty().contains("project_json_override_denied"))
+
+        val packageFlagRoot = File(context.cacheDir, "node-feature-flag-package-${System.nanoTime()}").apply {
+            deleteRecursively()
+            check(mkdirs()) { "Failed to create package feature flag audit root: $absolutePath" }
+        }
+        File(packageFlagRoot, "project.json").writeText("""{"type":"node","main":"index.js"}""")
+        File(packageFlagRoot, "package.json").writeText(
+            """
+            {
+              "name": "feature-flag-package",
+              "autojs6": {
+                "node": {
+                  "experimentalFlags": ["network"]
+                }
+              }
+            }
+            """.trimIndent(),
+        )
+        File(packageFlagRoot, "index.js").writeText("""console.log("blocked");""")
+
+        val packageError = runCatching {
+            NativeNodeEmbeddedProjectRunner.resolveProjectLaunchPlan(packageFlagRoot)
+        }.exceptionOrNull()
+        assertNotNull(packageError)
+        assertTrue(packageError!!.message.orEmpty(), packageError.message.orEmpty().contains("packaged_apk_override_denied"))
     }
 
     @Test
@@ -85,6 +221,7 @@ class NodeFeatureFlagRegistryInstrumentationTest {
               dynamic_import: false,
               network: false,
               raw_node_network_modules: false,
+              websocket: false,
               worker_threads: false,
               fs_streams: true,
               zlib_streams: true,
@@ -131,6 +268,30 @@ class NodeFeatureFlagRegistryInstrumentationTest {
             }
             if (profile.featureFlags.java_interop.buildTimeOverrideAllowed !== true) {
               throw new Error("java_interop build override mismatch");
+            }
+            if (
+              profile.featureFlags.esm.buildOnly !== true ||
+              profile.featureFlags.esm.debugOnly !== true ||
+              profile.featureFlags.esm.releaseForbidden !== true
+            ) {
+              throw new Error("esm classification mismatch");
+            }
+            if (
+              profile.featureFlags.network.buildOnly !== true ||
+              profile.featureFlags.network.debugOnly !== true ||
+              profile.featureFlags.network.releaseForbidden !== true
+            ) {
+              throw new Error("network classification mismatch");
+            }
+            if (
+              profile.featureFlags.fs_streams.buildOnly !== false ||
+              profile.featureFlags.fs_streams.debugOnly !== false ||
+              profile.featureFlags.fs_streams.releaseForbidden !== false
+            ) {
+              throw new Error("fs_streams classification mismatch");
+            }
+            if (profile.featureFlags.java_interop.projectAllowed !== false || profile.featureFlags.java_interop.packagedAllowed !== false) {
+              throw new Error("java_interop metadata override classification mismatch");
             }
             if (profile.experimentalFlags.dynamicImport !== false) {
               throw new Error("dynamicImport experimental snapshot mismatch");

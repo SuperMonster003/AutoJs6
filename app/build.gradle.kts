@@ -126,6 +126,34 @@ val nodeJsJavaInteropExperimentalEnabled = providers.gradleProperty("autojs.node
 val nodeJsTimelineTraceEnabled = providers.gradleProperty("autojs.nodejs.timelineTrace").orElse("false").get()
     .trim()
     .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
+val nodeJsReleaseTaskRequested = taskNames.any { rawTaskName ->
+    val taskName = rawTaskName.substringAfterLast(':')
+    taskName.contains("Release") &&
+            (
+                    taskName.startsWith("assemble", ignoreCase = true) ||
+                            taskName.startsWith("bundle", ignoreCase = true) ||
+                            taskName.startsWith("package", ignoreCase = true) ||
+                            taskName.startsWith("publish", ignoreCase = true) ||
+                            taskName.startsWith("verify", ignoreCase = true) ||
+                            taskName.startsWith("generate", ignoreCase = true)
+                    )
+}
+val nodeJsReleaseForbiddenExperimentalFlags = linkedMapOf(
+    "autojs.nodejs.esm.experimental" to nodeJsEsmExperimentalEnabled,
+    "autojs.nodejs.dynamicImport.experimental" to nodeJsDynamicImportExperimentalEnabled,
+    "autojs.nodejs.network.experimental" to nodeJsNetworkExperimentalEnabled,
+    "autojs.nodejs.worker_threads.experimental" to nodeJsWorkerThreadsExperimentalEnabled,
+    "autojs.nodejs.javaInterop.experimental" to nodeJsJavaInteropExperimentalEnabled,
+)
+if (nodeJsReleaseTaskRequested) {
+    val enabledForbiddenFlags = nodeJsReleaseForbiddenExperimentalFlags.filterValues { it }.keys
+    if (enabledForbiddenFlags.isNotEmpty()) {
+        throw GradleException(
+            "Release Node builds cannot enable experimental feature flag(s): ${enabledForbiddenFlags.joinToString()}. " +
+                    "Use a debug experimental build for validation and keep release builds on the Safe Node Profile defaults."
+        )
+    }
+}
 val nodeJsTestDeviceProfile = providers.gradleProperty("autojs.nodejs.test.deviceProfile").orNull
     ?.trim()
     ?.lowercase()

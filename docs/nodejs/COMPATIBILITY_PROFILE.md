@@ -43,23 +43,23 @@ The release/debug gate also runs:
 
 ## Feature Flag Registry
 
-`NodeRuntimeCapabilities.featureFlags` is the single registry for experimental, partial, disabled, and unsupported Node capability flags. Normal builds keep high and critical security features disabled by default. Project-level and packaged-APK overrides are not allowed unless a future design-gated task explicitly changes the registry.
+`NodeRuntimeCapabilities.featureFlags` is the single registry for experimental, partial, disabled, and unsupported Node capability flags. Normal builds keep high and critical security features disabled by default. Project-level and packaged-APK overrides are audited and rejected unless a future design-gated task explicitly changes the registry. Release builds reject release-forbidden experimental Gradle flags; debug experimental builds remain the validation path.
 
-| Flag id | Gradle property | Default | Build override | project.json override | Packaged APK override | Security | Status |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| `esm` | `autojs.nodejs.esm.experimental` | false | true | false | false | medium | experimental |
-| `dynamic_import` | `autojs.nodejs.dynamicImport.experimental` | false | true | false | false | medium | experimental |
-| `network` | `autojs.nodejs.network.experimental` | false | true | false | false | high | experimental |
-| `raw_node_network_modules` | none | false | false | false | false | high | disabled |
-| `websocket` | none | false | false | false | false | high | experimental |
-| `worker_threads` | `autojs.nodejs.worker_threads.experimental` | false | true | false | false | high | experimental |
-| `fs_streams` | none | true | false | false | false | medium | partial |
-| `zlib_streams` | none | true | false | false | false | medium | partial |
-| `vm` | none | false | false | false | false | high | disabled |
-| `inspector` | none | false | false | false | false | high | disabled |
-| `java_interop` | `autojs.nodejs.javaInterop.experimental` | false | true | false | false | critical | experimental |
-| `native_addon` | none | false | false | false | false | critical | unsupported |
-| `child_process` | none | false | false | false | false | high | disabled |
+| Flag id | Gradle property | Default | Build override | project.json override | Packaged APK override | Release forbidden | Security | Status |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `esm` | `autojs.nodejs.esm.experimental` | false | true | false | false | true | medium | experimental |
+| `dynamic_import` | `autojs.nodejs.dynamicImport.experimental` | false | true | false | false | true | medium | experimental |
+| `network` | `autojs.nodejs.network.experimental` | false | true | false | false | true | high | experimental |
+| `raw_node_network_modules` | none | false | false | false | false | true | high | disabled |
+| `websocket` | none | false | false | false | false | true | high | experimental |
+| `worker_threads` | `autojs.nodejs.worker_threads.experimental` | false | true | false | false | true | high | experimental |
+| `fs_streams` | none | true | false | false | false | false | medium | partial |
+| `zlib_streams` | none | true | false | false | false | false | medium | partial |
+| `vm` | none | false | false | false | false | true | high | disabled |
+| `inspector` | none | false | false | false | false | true | high | disabled |
+| `java_interop` | `autojs.nodejs.javaInterop.experimental` | false | true | false | false | true | critical | experimental |
+| `native_addon` | none | false | false | false | false | true | critical | unsupported |
+| `child_process` | none | false | false | false | false | true | high | disabled |
 
 Runtime diagnostics expose the same state through `require("autojs6:profile").featureFlags`, `enabledExperimentalFlags`, and `deniedFeatureFlags`. The legacy `experimentalFlags` and `highRiskCapabilities` snapshots are retained for compatibility.
 

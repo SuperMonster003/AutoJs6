@@ -146,10 +146,8 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] native addon denial
 - [ ] static ESM policy error
 - [ ] dynamic import policy error
-- [ ] `autojs.nodejs.esm.experimental=false` for normal release builds unless an explicit ESM experiment is being tested
-- [ ] `autojs.nodejs.dynamicImport.experimental=false` for normal release builds unless an explicit dynamic import experiment is being tested
-- [ ] `autojs.nodejs.network.experimental=false` for normal release builds unless an explicit network experiment is being tested
-- [ ] `autojs.nodejs.worker_threads.experimental=false` for normal release builds unless an explicit worker experiment is being tested
+- [ ] release build rejects release-forbidden experimental flags; ESM/dynamic import/network/worker/java interop experiments are validated only through debug experimental builds
+- [ ] project/package metadata feature flag overrides are rejected, including unknown flags and `node.featureFlags` / `autojs6.node.featureFlags`
 - [ ] dangerous process APIs denied
 - [ ] canonical `error.autojs6Code` present for AutoJs6 policy denials
 - [ ] network operations denied unless explicitly feature-gated

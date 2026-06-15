@@ -82,9 +82,9 @@ Remaining risk: Some Android providers are still fake or disabled in normal buil
 
 ### TM-Feature-Flags
 
-Risk: Project metadata or packaged assets enable experimental or high-risk features without release review.
+Risk: Project metadata, packaged assets, or release build properties enable experimental or high-risk features without release review.
 
-Mitigation: Critical flags default off, are build-time controlled, and are visible through compatibility/profile reports. Project/package metadata must not override critical gates.
+Mitigation: Critical flags default off, are build-time controlled, and are visible through compatibility/profile reports. Project/package metadata is audited and rejected for flag overrides, including unknown flags. Release builds reject release-forbidden experimental Gradle flags; debug builds remain the experimental validation path.
 
 Tests: `NodeFeatureFlagRegistryInstrumentationTest`, design-gate instrumentation for ESM, worker, Java interop, network, raw network policy tests.
 

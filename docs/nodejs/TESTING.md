@@ -440,7 +440,7 @@ Current feature flag registry focused instrumentation:
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeFeatureFlagRegistryInstrumentationTest"
 ```
 
-This suite verifies the centralized `NodeRuntimeCapabilities.featureFlags` registry, safe defaults for high and critical security flags, denied project/package override policy, expected build-time override allowlist, and JavaScript `require("autojs6:profile").featureFlags` diagnostics.
+This suite verifies the centralized `NodeRuntimeCapabilities.featureFlags` registry, safe defaults for high and critical security flags, build-only/debug-only/release-forbidden classification, denied project/package override policy, debug build-time override allowance, release build override rejection, unknown-flag rejection warnings, Node project/package metadata rejection, and JavaScript `require("autojs6:profile").featureFlags` diagnostics.
 
 Current ESM experimental focused instrumentation:
 

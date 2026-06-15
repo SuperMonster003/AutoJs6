@@ -103,6 +103,12 @@ Embedded Node execution is single-active per `:nodejs_embedded` process. Normal 
 
 Long-running Node service mode remains a design-only future capability. It must not be inferred from pending timers, open network/WebSocket handles, or package metadata. Normal scripts remain one-shot and timeout-controlled until an explicit foreground-service descriptor, user stop controls, resource quotas, packaged APK checks, and crash restart policy are implemented. See `docs/nodejs/design/LONG_RUNNING_SERVICE.md`.
 
+## Feature Flag Policy
+
+`NodeRuntimeCapabilities.featureFlags` is the source of truth for build-only, debug-only, project-allowed, packaged-allowed, and release-forbidden Node feature flags. Current experimental flags are build-time only and debug-only; `project.json` and `package.json` metadata must not enable them. Explicit `node.featureFlags`, `node.experimentalFlags`, `autojs6.node.featureFlags`, and `autojs6.node.experimentalFlags` entries are audited and rejected when they name unknown flags or flags whose project/package override policy is false.
+
+Release builds reject release-forbidden experimental flags even when a Gradle property is supplied. Use debug experimental builds for validation, then return release builds to the Safe Node Profile defaults.
+
 ## ESM Policy
 
 ESM is experimental and disabled by default.

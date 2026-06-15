@@ -224,6 +224,7 @@ object NativeNodeEmbeddedProjectRunner {
             ?: throw IllegalArgumentException(
                 "Node project config type must be node: ${File(normalizedProjectRoot, PROJECT_CONFIG_NAME).absolutePath}",
             )
+        auditPackageFeatureFlagMetadata(File(normalizedProjectRoot, "package.json"))
         require(request.scriptName == null || request.binName == null) {
             "Node project launch request cannot specify both scriptName and binName"
         }
@@ -473,6 +474,9 @@ object NativeNodeEmbeddedProjectRunner {
         if (!type.equals("node", ignoreCase = true)) {
             return null
         }
+        NodeRuntimeCapabilities.requireNoRejectedFeatureFlagOverrides(
+            NodeRuntimeCapabilities.auditProjectJsonFeatureFlags(json, projectJson.absolutePath),
+        )
         return projectJson to json
     }
 
@@ -482,6 +486,7 @@ object NativeNodeEmbeddedProjectRunner {
         require(packageJson.isFile) { "Missing package.json for package bin: ${packageJson.absolutePath}" }
 
         val json = JSONObject(packageJson.readText(StandardCharsets.UTF_8))
+        auditPackageFeatureFlagMetadata(packageJson, json)
         val binValue = json.opt("bin")
         val target = when (binValue) {
             null, JSONObject.NULL -> throw IllegalArgumentException("Missing package bin in ${packageJson.absolutePath}")
@@ -518,6 +523,7 @@ object NativeNodeEmbeddedProjectRunner {
             "Missing package.json for package script: ${packageJson.absolutePath}"
         }
         val json = JSONObject(packageJson.readText(StandardCharsets.UTF_8))
+        auditPackageFeatureFlagMetadata(packageJson, json)
         val scripts = json.opt("scripts")
         require(scripts is JSONObject) {
             "Missing package scripts in ${packageJson.absolutePath}"
@@ -935,6 +941,20 @@ object NativeNodeEmbeddedProjectRunner {
             "npm_package_name" to json.optString("name"),
             "npm_package_version" to json.optString("version"),
             "INIT_CWD" to request.workingDirectory.canonicalPath,
+        )
+    }
+
+    private fun auditPackageFeatureFlagMetadata(packageJson: File) {
+        if (!packageJson.isFile) {
+            return
+        }
+        val json = runCatching { JSONObject(packageJson.readText(StandardCharsets.UTF_8)) }.getOrNull() ?: return
+        auditPackageFeatureFlagMetadata(packageJson, json)
+    }
+
+    private fun auditPackageFeatureFlagMetadata(packageJson: File, json: JSONObject) {
+        NodeRuntimeCapabilities.requireNoRejectedFeatureFlagOverrides(
+            NodeRuntimeCapabilities.auditPackageJsonFeatureFlags(json, packageJson.absolutePath),
         )
     }
 
