@@ -1,5 +1,6 @@
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
+import org.gradle.api.tasks.Exec
 import java.io.File
 
 private val nodeExampleKnownStatuses = setOf("stable", "partial", "experimental")
@@ -21,6 +22,24 @@ private val nodeExampleKnownTags = setOf(
     "permission-optional",
     "security",
     "disabled-features",
+    "typescript",
+)
+
+private val nodeTypeDeclarationModules = listOf(
+    "toast",
+    "app",
+    "dialogs",
+    "clipboard",
+    "device",
+    "shell",
+    "engines",
+    "accessibility",
+    "media_projection",
+    "image",
+    "images",
+    "fetch",
+    "websocket",
+    "work_manager",
 )
 
 private fun nodeExampleReadJsonObject(file: File): Map<*, *> =
@@ -177,6 +196,115 @@ val verifyNodeExamples = tasks.register("verifyNodeExamples") {
     }
 }
 
+val verifyAutoJs6NodeTypeDeclarations = tasks.register("verifyAutoJs6NodeTypeDeclarations") {
+    group = "verification"
+    description = "Verifies AutoJs6 Node TypeScript declarations and the checked-in TypeScript smoke sample."
+
+    val jsonReport = layout.buildDirectory.file("reports/nodejs/typescript-declarations.json")
+    val markdownReport = layout.buildDirectory.file("reports/nodejs/typescript-declarations.md")
+
+    outputs.file(jsonReport)
+    outputs.file(markdownReport)
+
+    doLast {
+        val typesRoot = rootProject.projectDir.resolve("docs/nodejs/types/autojs6-node")
+        val sampleRoot = rootProject.projectDir.resolve("sample/nodejs/typescript-smoke")
+        val indexFile = typesRoot.resolve("index.d.ts")
+        val commonFile = typesRoot.resolve("common.d.ts")
+        val sampleTsConfig = sampleRoot.resolve("tsconfig.json")
+        val sampleSource = sampleRoot.resolve("src/main.ts")
+
+        val missingRequired = listOf(indexFile, commonFile, sampleTsConfig, sampleSource)
+            .filterNot(File::isFile)
+            .map { it.relativeTo(rootProject.projectDir).invariantSeparatorsPath }
+        if (missingRequired.isNotEmpty()) {
+            throw GradleException("Missing AutoJs6 Node TypeScript required file(s): ${missingRequired.joinToString()}")
+        }
+
+        val indexText = indexFile.readText()
+        val sampleText = sampleSource.readText()
+        val tsConfigText = sampleTsConfig.readText()
+        val rows = nodeTypeDeclarationModules.map { moduleName ->
+            val declaration = typesRoot.resolve("$moduleName.d.ts")
+            if (!declaration.isFile) {
+                throw GradleException("Missing TypeScript declaration for Node bridge module '$moduleName'.")
+            }
+            val declarationText = declaration.readText()
+            if (!declarationText.contains("""declare module "$moduleName"""")) {
+                throw GradleException("${declaration.relativeTo(rootProject.projectDir)} must declare module \"$moduleName\".")
+            }
+            if (!indexText.contains("$moduleName.d.ts")) {
+                throw GradleException("index.d.ts must reference $moduleName.d.ts.")
+            }
+            if (!sampleText.contains("""require("$moduleName")""")) {
+                throw GradleException("typescript-smoke sample must import '$moduleName'.")
+            }
+            linkedMapOf(
+                "module" to moduleName,
+                "declaration" to declaration.relativeTo(rootProject.projectDir).invariantSeparatorsPath,
+                "bytes" to declaration.length(),
+            )
+        }
+
+        if (!tsConfigText.contains("../../../docs/nodejs/types/autojs6-node/**/*.d.ts")) {
+            throw GradleException("typescript-smoke tsconfig.json must include the checked-in AutoJs6 Node declarations.")
+        }
+
+        val examplesManifest = nodeExampleReadJsonObject(rootProject.projectDir.resolve("sample/nodejs/examples.json"))
+        val examples = (examplesManifest["examples"] as? List<*>).orEmpty().map {
+            it as? Map<*, *> ?: throw GradleException("Each Node example manifest entry must be an object.")
+        }
+        val typeSmoke = examples.singleOrNull { it["name"] == "typescript-smoke" }
+            ?: throw GradleException("sample/nodejs/examples.json must include the typescript-smoke example.")
+        if ("typescript" !in nodeExampleList(typeSmoke["tags"])) {
+            throw GradleException("typescript-smoke example must carry the 'typescript' tag.")
+        }
+
+        val report = linkedMapOf<String, Any?>(
+            "schema" to "autojs6-node-types-report-v1",
+            "typesRoot" to typesRoot.relativeTo(rootProject.projectDir).invariantSeparatorsPath,
+            "sample" to sampleRoot.relativeTo(rootProject.projectDir).invariantSeparatorsPath,
+            "moduleCount" to rows.size,
+            "modules" to rows,
+        )
+        jsonReport.get().asFile.apply {
+            parentFile.mkdirs()
+            writeText(JsonOutput.prettyPrint(JsonOutput.toJson(report)) + "\n")
+        }
+        markdownReport.get().asFile.apply {
+            parentFile.mkdirs()
+            writeText(
+                buildString {
+                    appendLine("# AutoJs6 Node TypeScript Declaration Validation")
+                    appendLine()
+                    appendLine("| Module | Declaration | Bytes |")
+                    appendLine("| --- | --- | --- |")
+                    rows.forEach { row ->
+                        appendLine("| ${row["module"]} | ${row["declaration"]} | ${row["bytes"]} |")
+                    }
+                }
+            )
+        }
+        logger.lifecycle("Verified ${rows.size} AutoJs6 Node TypeScript declaration modules.")
+        logger.lifecycle("AutoJs6 Node TypeScript declaration report written to ${jsonReport.get().asFile.absolutePath}")
+    }
+}
+
+tasks.register<Exec>("typeCheckNodeTypescriptSmoke") {
+    group = "verification"
+    description = "Runs tsc against sample/nodejs/typescript-smoke using the checked-in AutoJs6 Node declarations."
+
+    dependsOn(verifyAutoJs6NodeTypeDeclarations)
+
+    val isWindows = System.getProperty("os.name").startsWith("Windows", ignoreCase = true)
+    val tsconfig = rootProject.projectDir.resolve("sample/nodejs/typescript-smoke/tsconfig.json")
+    if (isWindows) {
+        commandLine("cmd", "/c", "tsc", "-p", tsconfig.absolutePath, "--pretty", "false")
+    } else {
+        commandLine("tsc", "-p", tsconfig.absolutePath, "--pretty", "false")
+    }
+}
+
 tasks.matching {
     it.name in setOf(
         "verifyNodePrGate",
@@ -186,4 +314,5 @@ tasks.matching {
     )
 }.configureEach {
     dependsOn(verifyNodeExamples)
+    dependsOn(verifyAutoJs6NodeTypeDeclarations)
 }

@@ -34,6 +34,7 @@ workarounds, see [releases/NODE_PROFILE_V1_KNOWN_ISSUES.md](releases/NODE_PROFIL
 - `screenshot-find-image`: screenshot/image flow that exits cleanly when screen capture permission is unavailable.
 - `packaged-node-apk`: packaged APK smoke entry point.
 - `disabled-features-demo`: Safe Node Profile denied-capability examples.
+- `typescript-smoke`: compile-time smoke for the checked-in AutoJs6 Node bridge declarations.
 
 ## Smoke Coverage
 
@@ -50,6 +51,13 @@ PASS markers, and writes:
 - `app/build/reports/nodejs/examples.json`
 - `app/build/reports/nodejs/examples.md`
 
+`verifyAutoJs6NodeTypeDeclarations` validates the checked-in TypeScript declaration set under
+`docs/nodejs/types/autojs6-node/` and the `typescript-smoke` sample wiring. If `tsc` is available locally, run:
+
+```powershell
+.\gradlew.bat --console=plain :app:typeCheckNodeTypescriptSmoke
+```
+
 The instrumentation smoke copies examples from `sample/nodejs` into the device cache and runs:
 
 - `hello-node`
@@ -61,6 +69,8 @@ The instrumentation smoke copies examples from `sample/nodejs` into the device c
 - `accessibility-click-text`
 - `screenshot-find-image`
 - `disabled-features-demo`
+
+`typescript-smoke` is type-check only and is not part of the device instrumentation smoke list.
 
 The examples are also added to the `androidTest` asset source set so tests exercise the checked-in sample files directly.
 

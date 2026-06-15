@@ -81,6 +81,9 @@ await showToast(`package: ${app.packageName}`);
 
 Bridge calls are Promise-based and must remain asynchronous from JavaScript's perspective.
 
+TypeScript declarations for AutoJs6 bridge modules live under [types/autojs6-node](types/autojs6-node). See the
+`sample/nodejs/typescript-smoke` project for a minimal type-check setup.
+
 ## Scoped Filesystem
 
 Filesystem access is scoped to the script working directory. Absolute paths, NUL bytes, `..` escapes, symlink escapes,

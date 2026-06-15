@@ -1,0 +1,6 @@
+{
+  "name": "@autojs6-sample/typescript-smoke",
+  "version": "1.0.0",
+  "private": true,
+  "description": "TypeScript smoke sample for AutoJs6 Node bridge declarations."
+}

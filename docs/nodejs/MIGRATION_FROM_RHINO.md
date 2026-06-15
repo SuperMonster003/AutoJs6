@@ -114,6 +114,29 @@ const shell = require("shell");
 
 Use Node builtins only within the supported profile. Raw `child_process`, native addons, unrestricted network modules, and unrestricted filesystem access remain disabled by default.
 
+## TypeScript Declarations
+
+AutoJs6 Node bridge declarations are checked in under [types/autojs6-node](types/autojs6-node). They cover the Safe Node
+Profile bridge modules and controlled wrappers, not full desktop Node.js or Rhino globals.
+
+Use the declarations from a TypeScript project by including them in `tsconfig.json`:
+
+```json
+{
+  "include": [
+    "src/**/*.ts",
+    "path/to/AutoJs6/docs/nodejs/types/autojs6-node/**/*.d.ts"
+  ]
+}
+```
+
+The sample project [../sample/nodejs/typescript-smoke](../../sample/nodejs/typescript-smoke) exercises the declarations.
+From the repository root:
+
+```powershell
+tsc -p sample/nodejs/typescript-smoke/tsconfig.json --pretty false
+```
+
 ## Shell Commands
 
 Node `child_process` is not available in the Safe Node Profile. Use the controlled `shell` bridge for simple command

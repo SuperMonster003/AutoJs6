@@ -70,6 +70,13 @@
       "tags": ["packaged", "bridge", "app"],
       "mainAppSmoke": false,
       "packagedCompatible": true
+    },
+    {
+      "name": "typescript-smoke",
+      "status": "stable",
+      "tags": ["typescript", "bridge"],
+      "mainAppSmoke": false,
+      "packagedCompatible": false
     }
   ]
 }
