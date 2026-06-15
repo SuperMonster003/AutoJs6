@@ -39,6 +39,7 @@ class NodeFetchBridgeInstrumentationTest {
             assertEquals("https://example.invalid/get", payload.getString("url"))
             assertEquals("GET", payload.getString("method"))
             assertEquals(1024, payload.getInt("maxResponseBytes"))
+            assertEquals(5, payload.getInt("maxRedirects"))
             NodeBridgeResponse.success(
                 request.id,
                 JSONObject().apply {
@@ -65,6 +66,7 @@ class NodeFetchBridgeInstrumentationTest {
                         put("headers", JSONArray().put(JSONArray().put("x-test").put("yes")))
                         put("timeoutMs", 1000)
                         put("maxResponseBytes", 1024)
+                        put("maxRedirects", 5)
                     },
                 ).toString(),
                 timeoutMs = 1000L,
@@ -251,6 +253,229 @@ class NodeFetchBridgeInstrumentationTest {
         assertTrue(result.stdout.contains("fetch.large=ERR_AUTOJS6_NETWORK_RESPONSE_TOO_LARGE"))
         assertTrue(result.stdout.contains("fetch.raw_http=ERR_AUTOJS6_NETWORK_DISABLED"))
         assertTrue(result.stdout.contains("fetch.pending=0"))
+    }
+
+    @Test
+    fun jsFetchPolicyHardeningUsesFakeTransport() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node fetch policy hardening regression")
+
+        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+            """
+            "nodejs";
+            (async function main() {
+              const bridge = require("autojs6:bridge");
+              const fetchModule = require("fetch");
+              const { Buffer } = require("buffer");
+              const requests = [];
+              const held = [];
+              function codeOf(error) {
+                return error && (error.autojs6Code || error.code) || "";
+              }
+              function sleep(ms) {
+                return new Promise((resolve) => setTimeout(resolve, ms));
+              }
+              async function waitFor(predicate, label) {
+                for (let i = 0; i < 50; i += 1) {
+                  if (predicate()) return;
+                  await sleep(5);
+                }
+                throw new Error("timeout waiting for " + label);
+              }
+              function responseBody(text) {
+                return Buffer.from(text).toString("base64");
+              }
+              function send(request, result) {
+                setImmediate(() => {
+                  bridge.__test.receiveMessage(JSON.stringify({
+                    id: request.id,
+                    ok: true,
+                    result
+                  }));
+                });
+              }
+              function okResponse(payload, text) {
+                return {
+                  url: payload.url,
+                  status: 200,
+                  statusText: "OK",
+                  headers: [["content-type", "text/plain"]],
+                  bodyBase64: responseBody(text),
+                  bodyBytes: Buffer.byteLength(text)
+                };
+              }
+              bridge.__test.setTransport({
+                postMessage(message) {
+                  const request = JSON.parse(message);
+                  requests.push(request);
+                  const payload = request.args[0];
+                  if (payload.url.indexOf("/hold") >= 0) {
+                    held.push(request);
+                    return;
+                  }
+                  if (
+                    payload.url.indexOf("/timeout") >= 0 ||
+                    payload.url.indexOf("/abort") >= 0 ||
+                    payload.url.indexOf("/destroy") >= 0
+                  ) {
+                    return;
+                  }
+                  if (payload.url.indexOf("/redirect-loop") >= 0) {
+                    send(request, {
+                      url: payload.url,
+                      status: 302,
+                      statusText: "Found",
+                      headers: [["location", "/redirect-loop"]],
+                      bodyBase64: "",
+                      bodyBytes: 0
+                    });
+                    return;
+                  }
+                  if (payload.url.indexOf("/large") >= 0) {
+                    send(request, {
+                      url: payload.url,
+                      status: 200,
+                      statusText: "OK",
+                      headers: [["content-type", "text/plain"]],
+                      bodyBase64: responseBody("abcdef"),
+                      bodyBytes: 6
+                    });
+                    return;
+                  }
+                  send(request, okResponse(payload, "ok"));
+                }
+              });
+
+              const holdPromises = [0, 1, 2, 3].map((index) =>
+                fetch("https://example.invalid/hold?i=" + index, { timeoutMs: 1000 }).then((response) => response.text())
+              );
+              await waitFor(() => held.length === 4, "held requests");
+
+              let concurrentCode = "";
+              try {
+                await fetch("https://example.invalid/hold?overflow=true", { timeoutMs: 1000 });
+              } catch (error) {
+                concurrentCode = codeOf(error);
+              }
+
+              held.splice(0).forEach((request) => {
+                const payload = request.args[0];
+                send(request, okResponse(payload, "hold-" + payload.url.split("=").pop()));
+              });
+              const holdTexts = await Promise.all(holdPromises);
+
+              const schemeCodes = [];
+              for (const url of ["file:///tmp/a", "content://autojs6/a", "about:blank", "data:text/plain,hi"]) {
+                try {
+                  await fetch(url, { timeoutMs: 1000 });
+                } catch (error) {
+                  schemeCodes.push(codeOf(error));
+                }
+              }
+
+              let timeoutCode = "";
+              try {
+                await fetch("https://example.invalid/timeout", { timeoutMs: 25 });
+              } catch (error) {
+                timeoutCode = codeOf(error);
+              }
+
+              let abortCode = "";
+              const controller = new AbortController();
+              const abortPromise = fetch("https://example.invalid/abort", {
+                signal: controller.signal,
+                timeoutMs: 1000
+              });
+              await waitFor(() => requests.some((request) => request.args[0].url.indexOf("/abort") >= 0), "abort request");
+              controller.abort();
+              try {
+                await abortPromise;
+              } catch (error) {
+                abortCode = codeOf(error);
+              }
+
+              let redirectCode = "";
+              try {
+                await fetch("https://example.invalid/redirect-loop", { timeoutMs: 1000, maxRedirects: 1 });
+              } catch (error) {
+                redirectCode = codeOf(error);
+              }
+
+              let largeCode = "";
+              try {
+                await fetch("https://example.invalid/large", { timeoutMs: 1000, maxResponseBytes: 3 });
+              } catch (error) {
+                largeCode = codeOf(error);
+              }
+
+              let destroyCode = "";
+              const destroyPromise = fetch("https://example.invalid/destroy", { timeoutMs: 1000 }).catch(codeOf);
+              await waitFor(() => requests.some((request) => request.args[0].url.indexOf("/destroy") >= 0), "destroy request");
+              bridge.__test.destroy("service destroy test");
+              destroyCode = await destroyPromise;
+
+              let rawHttpsCode = "";
+              try {
+                require("https").request("https://example.invalid/");
+              } catch (error) {
+                rawHttpsCode = codeOf(error);
+              }
+              let rawNetCode = "";
+              try {
+                require("net").connect(443, "127.0.0.1");
+              } catch (error) {
+                rawNetCode = codeOf(error);
+              }
+
+              const diagnostics = fetchModule.diagnostics();
+              console.log("fetch.policy=" + [
+                fetchModule.policy.maxConcurrentRequests,
+                fetchModule.policy.defaultTimeoutMs,
+                fetchModule.policy.defaultMaxResponseBytes,
+                fetchModule.policy.defaultMaxRedirects
+              ].join("|"));
+              console.log("fetch.harden.codes=" + [
+                concurrentCode,
+                timeoutCode,
+                abortCode,
+                redirectCode,
+                largeCode,
+                destroyCode,
+                rawHttpsCode,
+                rawNetCode
+              ].join("|"));
+              console.log("fetch.harden.schemes=" + schemeCodes.join("|"));
+              console.log("fetch.harden.redirect_requests=" + requests.filter((request) => request.args[0].url.indexOf("/redirect-loop") >= 0).length);
+              console.log("fetch.harden.holds=" + holdTexts.join("|"));
+              console.log("fetch.harden.diagnostics=" + [
+                diagnostics.activeRequestCount,
+                diagnostics.maxActiveRequestCount,
+                diagnostics.timeoutCount,
+                diagnostics.rejectedByPolicyCount,
+                diagnostics.abortedCount
+              ].join("|"));
+              console.log("fetch.harden.pending=" + bridge.__test.pendingCount());
+            })();
+            """.trimIndent(),
+            "<embedded-autojs-fetch-policy-source.js>",
+            timeoutMs = 10_000L,
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("fetch policy hardening", result)
+        assertTrue(result.stdout.contains("fetch.policy=4|30000|1048576|5"))
+        assertTrue(
+            result.stdout.contains(
+                "fetch.harden.codes=ERR_AUTOJS6_NETWORK_POLICY_DENIED|ERR_AUTOJS6_NETWORK_TIMEOUT|ERR_AUTOJS6_NETWORK_ABORTED|ERR_AUTOJS6_NETWORK_POLICY_DENIED|ERR_AUTOJS6_NETWORK_RESPONSE_TOO_LARGE|ERR_AUTOJS6_BRIDGE_PROCESS_DEAD|ERR_AUTOJS6_NETWORK_DISABLED|ERR_AUTOJS6_NETWORK_DISABLED",
+            ),
+        )
+        assertTrue(
+            result.stdout.contains(
+                "fetch.harden.schemes=ERR_AUTOJS6_NETWORK_INVALID_URL|ERR_AUTOJS6_NETWORK_INVALID_URL|ERR_AUTOJS6_NETWORK_INVALID_URL|ERR_AUTOJS6_NETWORK_INVALID_URL",
+            ),
+        )
+        assertTrue(result.stdout.contains("fetch.harden.redirect_requests=2"))
+        assertTrue(result.stdout.contains("fetch.harden.holds=hold-0|hold-1|hold-2|hold-3"))
+        assertTrue(result.stdout.contains("fetch.harden.diagnostics=0|4|1|7|1"))
+        assertTrue(result.stdout.contains("fetch.harden.pending=0"))
     }
 
     @Test

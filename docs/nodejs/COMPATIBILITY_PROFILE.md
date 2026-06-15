@@ -330,7 +330,16 @@ With the flag off:
 
 Current `require("autojs6:profile")` reports `network=false` and `experimentalFlags.network=false`.
 
-Current controlled fetch support includes `GET`/`POST`, headers, string or binary bodies, `timeoutMs`, `AbortController.signal`, `maxResponseBytes`, and text/arrayBuffer/json response helpers. The live provider is backed by Android/OkHttp behind `BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED`; normal release builds keep that flag false. No `axios` builtin adapter is exposed.
+Current controlled fetch support includes `GET`/`POST`, headers, string or binary bodies, `timeoutMs`, `AbortController.signal`, `maxResponseBytes`, `maxRedirects`, and text/arrayBuffer/json response helpers. The live provider is backed by Android/OkHttp behind `BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED`; normal release builds keep that flag false. No `axios` builtin adapter is exposed.
+
+The controlled request policy is bounded even when fake or experimental live providers are used:
+
+- max concurrent user fetches: `4`
+- default timeout: `30000` ms, hard cap `120000` ms
+- default response budget: `1048576` bytes, hard cap `16777216` bytes
+- default redirect budget: `5`, hard cap `10`
+- allowed URL schemes: `http:` and `https:` only
+- `file:`, `content:`, `about:`, `data:`, malformed URLs, and redirect targets outside `http:`/`https:` are rejected before raw network authority is reached
 
 Network-specific errors include:
 
@@ -340,6 +349,7 @@ Network-specific errors include:
 - `ERR_AUTOJS6_NETWORK_RESPONSE_TOO_LARGE`
 - `ERR_AUTOJS6_NETWORK_INVALID_URL`
 - `ERR_AUTOJS6_NETWORK_PERMISSION_DENIED`
+- `ERR_AUTOJS6_NETWORK_POLICY_DENIED`
 
 See `docs/nodejs/design/NETWORK.md` for INTERNET permission, packaged APK manifest diagnostics, timeout, abort, body budget, TLS, proxy, background behavior, and service-destroy cancellation policy.
 
@@ -589,9 +599,10 @@ Current user-facing bridge modules:
   - no interactive shell, streaming stdio, process object, signal control, `spawn`, `fork`, or `open` API is exposed
 - `fetch`
   - `fetch(url, options?): Promise<Response>` through global `fetch` and `require("fetch")`
-  - options: `{ method?: "GET" | "POST", headers?: object | array, body?: string | Buffer | ArrayBuffer | TypedArray | Blob, timeoutMs?: number, maxResponseBytes?: number, signal?: AbortSignal }`
+  - options: `{ method?: "GET" | "POST", headers?: object | array, body?: string | Buffer | ArrayBuffer | TypedArray | Blob, timeoutMs?: number, maxResponseBytes?: number, maxRedirects?: number, signal?: AbortSignal }`
+  - module diagnostics: `require("fetch").policy` and `require("fetch").diagnostics()`
   - response helpers: `text()`, `arrayBuffer()`, and `json()`
-  - normal builds reject through the Android provider with `ERR_AUTOJS6_NETWORK_DISABLED`; fake-provider tests cover success, timeout, abort, and response budget paths
+  - normal builds reject through the Android provider with `ERR_AUTOJS6_NETWORK_DISABLED`; fake-provider tests cover success, timeout, abort, response budget, unsupported scheme, redirect limit, concurrency limit, and service-destroy paths
   - raw `http`, `https`, `net`, `tls`, `dns`, and `dgram` modules remain unavailable for network I/O
 
 Example:

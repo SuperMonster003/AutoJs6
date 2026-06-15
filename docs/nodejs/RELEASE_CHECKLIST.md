@@ -45,7 +45,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] bridge smoke verifies `clipboard` fake provider results, shadowing protection, permission tagging, and no `watch` API
 - [ ] bridge smoke verifies `device` fake provider results, shadowing protection, sensitive field absence, permission tagging, and no `watch` API
 - [ ] bridge smoke verifies `shell` fake provider results, shadowing protection, timeout/cwd/env policy, explicit root permission tagging, and that `child_process` remains disabled
-- [ ] bridge smoke verifies controlled `fetch` fake-provider GET/POST, timeout, abort, response budget, shadowing protection, and that raw `http`/`https`/`net`/`tls`/`dns` remain disabled
+- [ ] bridge smoke verifies controlled `fetch` fake-provider GET/POST, timeout, abort, response budget, unsupported scheme, redirect limit, max concurrency, service-destroy cleanup, diagnostics counters, shadowing protection, and that raw `http`/`https`/`net`/`tls`/`dns` remain disabled
 - [ ] worker gate verifies `worker_threads` stays disabled, cannot be shadowed, and reports `experimentalFlags.workerThreads=false`
 - [ ] any future `tasks` bridge smoke verifies user-visible registration, scoped Node descriptors, and denied broadcast/boot/package paths
 - [ ] checked-in examples `hello-node` and `toast-app` still run from `sample/nodejs`

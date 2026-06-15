@@ -64,6 +64,7 @@ const response = await fetch("https://example.com/data.json", {
   method: "GET",
   timeoutMs: 30000,
   maxResponseBytes: 1048576,
+  maxRedirects: 5,
   signal: abortController.signal,
 });
 ```
@@ -78,6 +79,7 @@ const response = await fetch("https://example.com/data.json", {
   headers: { "content-type": "application/json" },
   timeoutMs: 30000,
   maxResponseBytes: 1048576,
+  maxRedirects: 5,
 });
 ```
 
@@ -89,7 +91,10 @@ The wrapper supports:
 - `timeoutMs`
 - `AbortController.signal`
 - `maxResponseBytes`
+- `maxRedirects`
 - `Response.text()`, `Response.arrayBuffer()`, and `Response.json()`
+- `require("fetch").policy`
+- `require("fetch").diagnostics()`
 
 The first implementation intentionally does not add a builtin `require("axios")` adapter.
 
@@ -120,6 +125,32 @@ The current Android provider owns:
 The JavaScript wrapper owns only argument normalization, Promise lifecycle, and stable error conversion.
 
 Normal builds still reject at provider entry because `BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED` is false.
+
+## Request Policy
+
+Controlled fetch is bounded before it reaches any raw network authority. Current policy:
+
+- max concurrent user fetches per script: `4`
+- default timeout: `30000` ms
+- hard timeout cap: `120000` ms
+- default max response body: `1048576` bytes
+- hard max response body: `16777216` bytes
+- default redirect count: `5`
+- hard redirect count: `10`
+- allowed URL schemes: `http:` and `https:` only
+
+The JavaScript wrapper rejects `file:`, `content:`, `about:`, `data:`, malformed URLs, redirect targets outside `http:`/`https:`, GET bodies, redirect overflow, and concurrent-request overflow with stable `ERR_AUTOJS6_NETWORK_*` errors. The Android provider repeats the core policy for live OkHttp requests so fake-provider behavior and live-provider behavior do not diverge.
+
+Diagnostics are intentionally exposed as counters, not raw provider handles:
+
+```js
+const fetch = require("fetch");
+
+console.log(fetch.policy.maxConcurrentRequests);
+console.log(fetch.diagnostics());
+```
+
+The diagnostics snapshot includes active request count, max active request count, timeout count, policy rejection count, abort count, and completed count. Native live bridge results also append provider-side fetch counters under `embedded_script.fetch_*`.
 
 ## Raw Module Policy
 
@@ -186,6 +217,19 @@ Required behavior:
 - abort during dispatch cancels provider I/O
 - abort after completion is ignored
 - service destroy behaves like a provider-side abort for every pending request
+
+## Redirects
+
+The live provider does not follow redirects implicitly. The controlled JavaScript wrapper receives each 3xx response, validates the `Location` target against the same scheme policy, and dispatches the next request only while the request still has redirect budget remaining.
+
+Current behavior:
+
+- default redirect budget: `5`
+- hard redirect cap: `10`
+- redirect overflow rejects with `ERR_AUTOJS6_NETWORK_POLICY_DENIED`
+- malformed or unsupported redirect targets reject with `ERR_AUTOJS6_NETWORK_INVALID_URL`
+- `redirect: "manual"` returns the 3xx response to user code
+- `redirect: "error"` rejects on the first redirect
 
 ## Body Budgets
 
@@ -264,6 +308,7 @@ Controlled client errors include:
 - `ERR_AUTOJS6_NETWORK_RESPONSE_TOO_LARGE`
 - `ERR_AUTOJS6_NETWORK_INVALID_URL`
 - `ERR_AUTOJS6_NETWORK_PERMISSION_DENIED`
+- `ERR_AUTOJS6_NETWORK_POLICY_DENIED`
 
 Bridge transport failures should continue to use bridge-level errors such as `ERR_AUTOJS6_BRIDGE_TIMEOUT` and `ERR_AUTOJS6_BRIDGE_PROCESS_DEAD`.
 
@@ -279,9 +324,14 @@ Before live network capability is enabled in release builds, tests must cover:
 - timeout cancellation: covered by `NodeFetchBridgeInstrumentationTest`
 - abort before dispatch and during dispatch: covered by `NodeFetchBridgeInstrumentationTest`
 - response body budget rejection: covered by `NodeFetchBridgeInstrumentationTest`
+- max concurrent request rejection: covered by `NodeFetchBridgeInstrumentationTest`
+- unsupported scheme rejection: covered by `NodeFetchBridgeInstrumentationTest`
+- redirect limit rejection: covered by `NodeFetchBridgeInstrumentationTest`
+- service destroy rejection and active-count cleanup: covered by `NodeFetchBridgeInstrumentationTest`
+- diagnostics counters for active, timeout, policy rejection, and abort paths: covered by `NodeFetchBridgeInstrumentationTest`
 - raw modules still denied: covered by `NodeFetchBridgeInstrumentationTest` and security regression tests
 - default Android provider disabled with the flag off: covered by `NodeFetchBridgeInstrumentationTest`
-- service destroy cancellation: provider destroy cancels tracked OkHttp calls; broader lifecycle stress remains a follow-up
+- service destroy cancellation: provider destroy cancels tracked OkHttp calls; broader live-provider lifecycle stress remains a follow-up
 - packaged APK manifest behavior with and without opt-in: current verifier reports INTERNET presence; opt-in gating remains a follow-up
 
 ## Non-Goals

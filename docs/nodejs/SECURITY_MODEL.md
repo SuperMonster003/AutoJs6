@@ -131,7 +131,7 @@ Network enablement requires:
 - privacy review
 - tests for denied and allowed paths
 
-The AutoJs6-controlled `fetch` wrapper is the preferred network path over unrestricted socket modules. It supports request timeout, abort, response-size budgeting, and provider-side cancellation. The Android provider tracks live OkHttp calls and cancels them on provider destroy. Raw `http`, `https`, `net`, `tls`, `dns`, and `dgram` authority must remain denied unless a later design gate explicitly changes that boundary.
+The AutoJs6-controlled `fetch` wrapper is the preferred network path over unrestricted socket modules. It supports request timeout, abort, response-size budgeting, redirect budgeting, concurrent-request limits, unsupported-scheme rejection, and provider-side cancellation. The Android provider tracks live OkHttp calls and cancels them on provider destroy. Raw `http`, `https`, `net`, `tls`, `dns`, and `dgram` authority must remain denied unless a later design gate explicitly changes that boundary.
 
 See `docs/nodejs/design/NETWORK.md` for the current network design gate.
 
@@ -229,7 +229,7 @@ The `device` bridge is privacy-safe by default. It exposes only coarse runtime/d
 
 The `shell` bridge is the controlled AutoJs6 replacement for Node `child_process`, not an unrestricted process-spawning API. It exposes only `exec(command, options?)` and returns serialized `{ code, stdout, stderr }` results. Commands run on a provider thread through a non-interactive shell; JavaScript never receives a `Process`, file descriptor, stream, signal handle, or raw Android shell object. Root mode is explicit through `options.root === true`, never default. `cwd` is scoped to the execution working directory, `env` is JSON string-only, command output is bounded, and timeouts are enforced. The queued packaged fallback must not execute shell commands; `shell.exec()` requires live bridge metadata so command results and denials are observable before the Promise settles.
 
-The `fetch` bridge is the controlled AutoJs6 replacement for Node raw network modules. JavaScript receives only a fetch-compatible Promise wrapper and buffered response helpers. Request descriptors are JSON-serialized, method-limited to `GET` and `POST`, bounded by `timeoutMs` and `maxResponseBytes`, and may be cancelled through `AbortController.signal`. The live Android provider is gated by `BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED`; normal builds reject before network I/O. Provider destroy cancels tracked OkHttp calls and must not call back into a destroyed Node environment.
+The `fetch` bridge is the controlled AutoJs6 replacement for Node raw network modules. JavaScript receives only a fetch-compatible Promise wrapper and buffered response helpers. Request descriptors are JSON-serialized, method-limited to `GET` and `POST`, bounded by `timeoutMs`, `maxResponseBytes`, `maxRedirects`, and max active request count, and may be cancelled through `AbortController.signal`. Only `http:` and `https:` URLs are accepted. The live Android provider is gated by `BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED`; normal builds reject before network I/O. Provider destroy cancels tracked OkHttp calls and must not call back into a destroyed Node environment.
 
 ## Scheduled Background Task Policy
 

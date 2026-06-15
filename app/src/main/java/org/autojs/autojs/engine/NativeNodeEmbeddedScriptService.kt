@@ -405,6 +405,7 @@ class NativeNodeEmbeddedScriptService : Service() {
                     if (pending.get() <= 0) "done" else "pending",
                 )
                 put("embedded_script.bridge_live_responses_json", bridgeResponsesJsonSnapshot())
+                putAll(provider.nativeDiagnostics())
             }
             return result.copy(nativeValues = nativeValues)
         }

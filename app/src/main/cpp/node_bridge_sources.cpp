@@ -7904,6 +7904,25 @@ std::string buildEmbeddedScriptExecutionSource(
   let __autojs6_limited_device_cache = null;
   let __autojs6_limited_shell_cache = null;
   let __autojs6_limited_fetch_cache = null;
+  const __autojs6_fetch_policy = Object.freeze({
+    maxConcurrentRequests: 4,
+    defaultTimeoutMs: 30000,
+    hardTimeoutMs: 120000,
+    defaultMaxResponseBytes: 1048576,
+    hardMaxResponseBytes: 16777216,
+    defaultMaxRedirects: 5,
+    hardMaxRedirects: 10,
+    allowedSchemes: Object.freeze(["http:", "https:"])
+  });
+  const __autojs6_fetch_diagnostics = {
+    activeRequestCount: 0,
+    maxActiveRequestCount: 0,
+    timeoutCount: 0,
+    rejectedByPolicyCount: 0,
+    abortedCount: 0,
+    completedCount: 0,
+    lastPolicyRejection: ""
+  };
   function __autojs6_has_own(object, key) {
     return Object.prototype.hasOwnProperty.call(object, key);
   }
@@ -8228,6 +8247,7 @@ std::string buildEmbeddedScriptExecutionSource(
         networkResponseTooLarge: "ERR_AUTOJS6_NETWORK_RESPONSE_TOO_LARGE",
         networkInvalidUrl: "ERR_AUTOJS6_NETWORK_INVALID_URL",
         networkPermissionDenied: "ERR_AUTOJS6_NETWORK_PERMISSION_DENIED",
+        networkPolicyDenied: "ERR_AUTOJS6_NETWORK_POLICY_DENIED",
         dynamicImportUnsupported: "ERR_AUTOJS6_DYNAMIC_IMPORT_UNSUPPORTED",
         esmUnsupported: "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED",
         requireEsmUnsupported: "ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED",
@@ -8641,18 +8661,132 @@ std::string buildEmbeddedScriptExecutionSource(
     return bufferModule && typeof bufferModule.Buffer === "function" ? bufferModule.Buffer : null;
   }
   function __autojs6_fetch_timeout_ms(value) {
-    const number = Number(value === undefined || value === null ? 30000 : value);
+    const number = Number(value === undefined || value === null ? __autojs6_fetch_policy.defaultTimeoutMs : value);
     if (!Number.isFinite(number) || number <= 0) {
-      return 30000;
+      return __autojs6_fetch_policy.defaultTimeoutMs;
     }
-    return Math.max(1, Math.min(Math.floor(number), 120000));
+    return Math.max(1, Math.min(Math.floor(number), __autojs6_fetch_policy.hardTimeoutMs));
   }
   function __autojs6_fetch_max_response_bytes(value) {
-    const number = Number(value === undefined || value === null ? 1048576 : value);
+    const number = Number(value === undefined || value === null ? __autojs6_fetch_policy.defaultMaxResponseBytes : value);
     if (!Number.isFinite(number) || number < 0) {
-      return 1048576;
+      return __autojs6_fetch_policy.defaultMaxResponseBytes;
     }
-    return Math.max(0, Math.min(Math.floor(number), 16777216));
+    return Math.max(0, Math.min(Math.floor(number), __autojs6_fetch_policy.hardMaxResponseBytes));
+  }
+  function __autojs6_fetch_max_redirects(value) {
+    const number = Number(value === undefined || value === null ? __autojs6_fetch_policy.defaultMaxRedirects : value);
+    if (!Number.isFinite(number) || number < 0) {
+      return __autojs6_fetch_policy.defaultMaxRedirects;
+    }
+    return Math.max(0, Math.min(Math.floor(number), __autojs6_fetch_policy.hardMaxRedirects));
+  }
+  function __autojs6_fetch_policy_snapshot() {
+    return Object.freeze({
+      maxConcurrentRequests: __autojs6_fetch_policy.maxConcurrentRequests,
+      defaultTimeoutMs: __autojs6_fetch_policy.defaultTimeoutMs,
+      hardTimeoutMs: __autojs6_fetch_policy.hardTimeoutMs,
+      defaultMaxResponseBytes: __autojs6_fetch_policy.defaultMaxResponseBytes,
+      hardMaxResponseBytes: __autojs6_fetch_policy.hardMaxResponseBytes,
+      defaultMaxRedirects: __autojs6_fetch_policy.defaultMaxRedirects,
+      hardMaxRedirects: __autojs6_fetch_policy.hardMaxRedirects,
+      allowedSchemes: Object.freeze(__autojs6_fetch_policy.allowedSchemes.slice())
+    });
+  }
+  function __autojs6_fetch_diagnostics_snapshot() {
+    return {
+      activeRequestCount: __autojs6_fetch_diagnostics.activeRequestCount,
+      maxActiveRequestCount: __autojs6_fetch_diagnostics.maxActiveRequestCount,
+      timeoutCount: __autojs6_fetch_diagnostics.timeoutCount,
+      rejectedByPolicyCount: __autojs6_fetch_diagnostics.rejectedByPolicyCount,
+      abortedCount: __autojs6_fetch_diagnostics.abortedCount,
+      completedCount: __autojs6_fetch_diagnostics.completedCount,
+      lastPolicyRejection: __autojs6_fetch_diagnostics.lastPolicyRejection
+    };
+  }
+  function __autojs6_fetch_mark_diagnostic_recorded(error) {
+    if (!error || typeof error !== "object") {
+      return error;
+    }
+    try {
+      Object.defineProperty(error, "__autojs6FetchDiagnosticRecorded", {
+        value: true,
+        configurable: true
+      });
+    } catch (_) {
+      try {
+        error.__autojs6FetchDiagnosticRecorded = true;
+      } catch (_) {}
+    }
+    return error;
+  }
+  function __autojs6_fetch_record_policy_rejection(reason) {
+    __autojs6_fetch_diagnostics.rejectedByPolicyCount += 1;
+    __autojs6_fetch_diagnostics.lastPolicyRejection = String(reason || "");
+  }
+  function __autojs6_fetch_policy_error(message, reason, code) {
+    __autojs6_fetch_record_policy_rejection(reason || code || "policy");
+    return __autojs6_fetch_mark_diagnostic_recorded(__autojs6_fetch_error(
+      message,
+      code || "ERR_AUTOJS6_NETWORK_POLICY_DENIED"
+    ));
+  }
+  function __autojs6_fetch_record_error(error) {
+    if (!error || typeof error !== "object" || error.__autojs6FetchDiagnosticRecorded) {
+      return;
+    }
+    const code = error.autojs6Code || error.code;
+    if (code === "ERR_AUTOJS6_BRIDGE_TIMEOUT" || code === "ERR_AUTOJS6_NETWORK_TIMEOUT") {
+      __autojs6_fetch_diagnostics.timeoutCount += 1;
+      __autojs6_fetch_mark_diagnostic_recorded(error);
+      return;
+    }
+    if (code === "ERR_AUTOJS6_NETWORK_ABORTED") {
+      __autojs6_fetch_diagnostics.abortedCount += 1;
+      __autojs6_fetch_mark_diagnostic_recorded(error);
+      return;
+    }
+    if (
+      code === "ERR_AUTOJS6_NETWORK_POLICY_DENIED" ||
+      code === "ERR_AUTOJS6_NETWORK_RESPONSE_TOO_LARGE" ||
+      code === "ERR_AUTOJS6_NETWORK_INVALID_URL" ||
+      code === "ERR_AUTOJS6_NETWORK_PERMISSION_DENIED"
+    ) {
+      __autojs6_fetch_record_policy_rejection(code);
+      __autojs6_fetch_mark_diagnostic_recorded(error);
+    }
+  }
+  function __autojs6_fetch_try_start_request() {
+    if (__autojs6_fetch_diagnostics.activeRequestCount >= __autojs6_fetch_policy.maxConcurrentRequests) {
+      return false;
+    }
+    __autojs6_fetch_diagnostics.activeRequestCount += 1;
+    if (__autojs6_fetch_diagnostics.activeRequestCount > __autojs6_fetch_diagnostics.maxActiveRequestCount) {
+      __autojs6_fetch_diagnostics.maxActiveRequestCount = __autojs6_fetch_diagnostics.activeRequestCount;
+    }
+    return true;
+  }
+  function __autojs6_fetch_finish_request() {
+    __autojs6_fetch_diagnostics.activeRequestCount = Math.max(0, __autojs6_fetch_diagnostics.activeRequestCount - 1);
+  }
+  function __autojs6_fetch_validate_url(url) {
+    const raw = String(url);
+    let parsed;
+    try {
+      if (typeof URL === "function") {
+        parsed = new URL(raw);
+      }
+    } catch (_) {
+      parsed = null;
+    }
+    if (!parsed || __autojs6_fetch_policy.allowedSchemes.indexOf(String(parsed.protocol).toLowerCase()) < 0) {
+      throw __autojs6_fetch_policy_error(
+        "AutoJs6 controlled fetch accepts only http and https URLs.",
+        "invalid_url",
+        "ERR_AUTOJS6_NETWORK_INVALID_URL"
+      );
+    }
+    return parsed.toString();
   }
   function __autojs6_fetch_headers_json(headers) {
     const result = [];
@@ -8706,7 +8840,13 @@ std::string buildEmbeddedScriptExecutionSource(
   function __autojs6_fetch_request_descriptor(input, init) {
     const requestInit = init && typeof init === "object" ? init : {};
     const source = typeof Request === "function" && input instanceof Request ? input : null;
-    const url = source ? source.url : String(input);
+    const rawUrl = source ? source.url : String(input);
+    let url;
+    try {
+      url = __autojs6_fetch_validate_url(rawUrl);
+    } catch (error) {
+      return Promise.reject(error);
+    }
     const method = String(requestInit.method || (source && source.method) || "GET").toUpperCase();
     if (method !== "GET" && method !== "POST") {
       return Promise.reject(__autojs6_fetch_error(
@@ -8716,6 +8856,13 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     const headers = __autojs6_fetch_merge_headers(source && source.headers, requestInit.headers);
     const hasInitBody = __autojs6_has_own(requestInit, "body");
+    if (method === "GET" && hasInitBody && requestInit.body !== undefined && requestInit.body !== null) {
+      return Promise.reject(__autojs6_fetch_policy_error(
+        "AutoJs6 controlled fetch GET requests must not include a body.",
+        "get_body",
+        "ERR_AUTOJS6_NETWORK_POLICY_DENIED"
+      ));
+    }
     let bodyPromise;
     if (hasInitBody) {
       bodyPromise = __autojs6_fetch_body_descriptor(requestInit.body);
@@ -8728,13 +8875,16 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     const timeoutMs = __autojs6_fetch_timeout_ms(requestInit.timeoutMs);
     const maxResponseBytes = __autojs6_fetch_max_response_bytes(requestInit.maxResponseBytes);
+    const maxRedirects = __autojs6_fetch_max_redirects(requestInit.maxRedirects);
+    const redirectMode = String(requestInit.redirect || "follow").toLowerCase();
     return bodyPromise.then(function(bodyDescriptor) {
       const descriptor = {
         url,
         method,
         headers: __autojs6_fetch_headers_json(headers),
         timeoutMs,
-        maxResponseBytes
+        maxResponseBytes,
+        maxRedirects
       };
       if (bodyDescriptor.bodyBase64 !== undefined) {
         descriptor.bodyBase64 = bodyDescriptor.bodyBase64;
@@ -8746,7 +8896,11 @@ std::string buildEmbeddedScriptExecutionSource(
         descriptor,
         signal: requestInit.signal,
         bridgeTimeoutMs: timeoutMs,
-        maxResponseBytes
+        maxResponseBytes,
+        maxRedirects,
+        redirectsRemaining: maxRedirects,
+        redirectMode,
+        redirectCount: 0
       };
     });
   }
@@ -8786,22 +8940,110 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     return buffer;
   }
+  function __autojs6_fetch_header_value(headers, name) {
+    const lower = String(name).toLowerCase();
+    const normalized = __autojs6_fetch_response_headers(headers);
+    for (const entry of normalized) {
+      if (entry && String(entry[0]).toLowerCase() === lower) {
+        return entry[1] === undefined || entry[1] === null ? "" : String(entry[1]);
+      }
+    }
+    return "";
+  }
+  function __autojs6_fetch_is_redirect_status(status) {
+    return status === 301 || status === 302 || status === 303 || status === 307 || status === 308;
+  }
+  function __autojs6_fetch_redirect_request(request, result) {
+    const response = result && typeof result === "object" ? result : {};
+    const status = Number(response.status);
+    if (!__autojs6_fetch_is_redirect_status(status)) {
+      return null;
+    }
+    if (request.redirectMode === "manual") {
+      return null;
+    }
+    if (request.redirectMode === "error") {
+      throw __autojs6_fetch_policy_error(
+        "AutoJs6 controlled fetch rejected a redirect because redirect='error'.",
+        "redirect_error",
+        "ERR_AUTOJS6_NETWORK_POLICY_DENIED"
+      );
+    }
+    const location = __autojs6_fetch_header_value(response.headers, "location");
+    if (!location) {
+      return null;
+    }
+    if (request.redirectsRemaining <= 0) {
+      throw __autojs6_fetch_policy_error(
+        "AutoJs6 controlled fetch exceeded the redirect limit of " + request.maxRedirects + ".",
+        "redirect_limit",
+        "ERR_AUTOJS6_NETWORK_POLICY_DENIED"
+      );
+    }
+    let redirectedUrl;
+    try {
+      redirectedUrl = __autojs6_fetch_validate_url(new URL(location, request.descriptor.url).toString());
+    } catch (error) {
+      if (error && (error.autojs6Code || error.code)) {
+        throw error;
+      }
+      throw __autojs6_fetch_policy_error(
+        "AutoJs6 controlled fetch rejected a malformed redirect URL.",
+        "redirect_invalid_url",
+        "ERR_AUTOJS6_NETWORK_INVALID_URL"
+      );
+    }
+    const descriptor = Object.assign({}, request.descriptor, {
+      url: redirectedUrl,
+      maxRedirects: request.maxRedirects,
+      redirectCount: request.redirectCount + 1
+    });
+    if (status === 303 || ((status === 301 || status === 302) && descriptor.method === "POST")) {
+      descriptor.method = "GET";
+      delete descriptor.bodyBase64;
+      delete descriptor.bodyText;
+    }
+    return Object.assign({}, request, {
+      descriptor,
+      redirectsRemaining: request.redirectsRemaining - 1,
+      redirectCount: request.redirectCount + 1
+    });
+  }
   function __autojs6_fetch_normalize_error(error) {
+    __autojs6_fetch_record_error(error);
     const code = error && (error.autojs6Code || error.code);
     if (code === "ERR_AUTOJS6_NETWORK_DISABLED") {
-      return __autojs6_error(
+      return __autojs6_fetch_mark_diagnostic_recorded(__autojs6_error(
         error && error.message ? error.message : "AutoJs6 controlled fetch is disabled.",
         "ERR_AUTOJS6_EMBEDDED_NODE_FETCH_DISABLED",
         "ERR_AUTOJS6_NETWORK_DISABLED"
-      );
+      ));
     }
     if (code === "ERR_AUTOJS6_BRIDGE_TIMEOUT") {
-      return __autojs6_error(
+      return __autojs6_fetch_mark_diagnostic_recorded(__autojs6_error(
         error && error.message ? error.message : "AutoJs6 controlled fetch timed out.",
         "ERR_AUTOJS6_NETWORK_TIMEOUT"
-      );
+      ));
     }
     return error;
+  }
+  function __autojs6_fetch_dispatch(request) {
+    return __autojs6_call_autojs(
+      "fetch",
+      "request",
+      [request.descriptor],
+      {
+        timeoutMs: request.bridgeTimeoutMs,
+        permissions: ["network"],
+        signal: request.signal
+      }
+    ).then(function(result) {
+      const redirect = __autojs6_fetch_redirect_request(request, result);
+      if (redirect) {
+        return __autojs6_fetch_dispatch(redirect);
+      }
+      return result;
+    });
   }
   function __autojs6_fetch_to_response(result, maxResponseBytes) {
     const response = result && typeof result === "object" ? result : {};
@@ -8817,17 +9059,23 @@ std::string buildEmbeddedScriptExecutionSource(
   }
   function __autojs6_controlled_fetch(input, init) {
     return __autojs6_fetch_request_descriptor(input, init).then(function(request) {
-      return __autojs6_call_autojs(
-        "fetch",
-        "request",
-        [request.descriptor],
-        {
-          timeoutMs: request.bridgeTimeoutMs,
-          permissions: ["network"],
-          signal: request.signal
-        }
-      ).then(function(result) {
+      if (!__autojs6_fetch_try_start_request()) {
+        throw __autojs6_fetch_policy_error(
+          "AutoJs6 controlled fetch exceeded " + __autojs6_fetch_policy.maxConcurrentRequests + " active requests.",
+          "max_concurrent_requests",
+          "ERR_AUTOJS6_NETWORK_POLICY_DENIED"
+        );
+      }
+      return __autojs6_fetch_dispatch(request).then(function(result) {
         return __autojs6_fetch_to_response(result, request.maxResponseBytes);
+      }).then(function(response) {
+        __autojs6_fetch_diagnostics.completedCount += 1;
+        __autojs6_fetch_finish_request();
+        return response;
+      }, function(error) {
+        const normalized = __autojs6_fetch_normalize_error(error);
+        __autojs6_fetch_finish_request();
+        throw normalized;
       });
     }).catch(function(error) {
       throw __autojs6_fetch_normalize_error(error);
@@ -8843,7 +9091,9 @@ std::string buildEmbeddedScriptExecutionSource(
     Object.defineProperties(fetchModule, {
       fetch: { value: fetchModule, enumerable: true },
       request: { value: fetchModule, enumerable: true },
-      default: { value: fetchModule, enumerable: true }
+      default: { value: fetchModule, enumerable: true },
+      policy: { value: __autojs6_fetch_policy_snapshot(), enumerable: true },
+      diagnostics: { value: __autojs6_fetch_diagnostics_snapshot, enumerable: true }
     });
     __autojs6_limited_fetch_cache = Object.freeze(fetchModule);
     return __autojs6_limited_fetch_cache;

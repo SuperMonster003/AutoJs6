@@ -33,6 +33,7 @@ import java.io.InputStream
 import java.net.URL
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.concurrent.thread
 
 data class NodeBridgeRequest(
@@ -424,6 +425,8 @@ object NodeBridgeModules {
 interface NodeBridgeCapabilityProvider {
     fun dispatch(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit)
 
+    fun nativeDiagnostics(): Map<String, String> = emptyMap()
+
     fun destroy(reason: NodeBridgeError = NodeBridgeError.processDead()) = Unit
 }
 
@@ -449,10 +452,11 @@ class AndroidNodeBridgeCapabilityProvider(
     private val appContext = context.applicationContext
     private val mainHandler = Handler(Looper.getMainLooper())
     private val networkClient = OkHttpClient.Builder()
-        .followRedirects(true)
-        .followSslRedirects(true)
+        .followRedirects(false)
+        .followSslRedirects(false)
         .build()
     private val networkCalls = ConcurrentHashMap<String, Call>()
+    private val networkDiagnostics = ControlledFetchDiagnostics()
 
     override fun dispatch(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
         when {
@@ -471,7 +475,10 @@ class AndroidNodeBridgeCapabilityProvider(
         }
     }
 
+    override fun nativeDiagnostics(): Map<String, String> = networkDiagnostics.nativeValues()
+
     override fun destroy(reason: NodeBridgeError) {
+        networkDiagnostics.recordServiceDestroyCancellation(networkCalls.size)
         networkCalls.values.forEach { call ->
             runCatching { call.cancel() }
         }
@@ -699,7 +706,22 @@ class AndroidNodeBridgeCapabilityProvider(
         }
         val fetchRequest = ControlledFetchRequest.fromJson(request, payload)
         if (fetchRequest.error != null || fetchRequest.value == null) {
+            networkDiagnostics.recordPolicyRejection()
             callback(NodeBridgeResponse.failure(request.id, fetchRequest.error ?: NodeBridgeError.processDead()))
+            return
+        }
+        if (!networkDiagnostics.tryStartRequest()) {
+            callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.network(
+                        message = "AutoJs6 controlled fetch exceeded ${ControlledFetchPolicy.MAX_CONCURRENT_REQUESTS} active requests.",
+                        code = NodeRuntimeErrorCodes.NETWORK_POLICY_DENIED,
+                        module = request.module,
+                        method = request.method,
+                    ),
+                ),
+            )
             return
         }
 
@@ -710,10 +732,20 @@ class AndroidNodeBridgeCapabilityProvider(
             .build()
         val call = client.newCall(okHttpRequest)
         networkCalls[request.id] = call
+        fun complete(response: NodeBridgeResponse) {
+            networkCalls.remove(request.id)
+            networkDiagnostics.finishRequest()
+            callback(response)
+        }
         call.enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                networkCalls.remove(request.id)
-                callback(
+                val code = if (call.isCanceled()) NodeRuntimeErrorCodes.NETWORK_ABORTED else NodeRuntimeErrorCodes.NETWORK_TIMEOUT
+                if (code == NodeRuntimeErrorCodes.NETWORK_ABORTED) {
+                    networkDiagnostics.recordAbort()
+                } else {
+                    networkDiagnostics.recordTimeout()
+                }
+                complete(
                     NodeBridgeResponse.failure(
                         request.id,
                         NodeBridgeError.network(
@@ -722,7 +754,7 @@ class AndroidNodeBridgeCapabilityProvider(
                             } else {
                                 "AutoJs6 controlled fetch timed out or failed: ${e.message ?: e.javaClass.name}"
                             },
-                            code = if (call.isCanceled()) NodeRuntimeErrorCodes.NETWORK_ABORTED else NodeRuntimeErrorCodes.NETWORK_TIMEOUT,
+                            code = code,
                             module = request.module,
                             method = request.method,
                         ),
@@ -731,13 +763,15 @@ class AndroidNodeBridgeCapabilityProvider(
             }
 
             override fun onResponse(call: Call, response: okhttp3.Response) {
-                networkCalls.remove(request.id)
                 response.use { okResponse ->
                     val result = runCatching {
                         controlled.toBridgeResponse(okResponse)
                     }.getOrElse { error ->
                         val code = (error as? ControlledFetchException)?.code ?: NodeRuntimeErrorCodes.BRIDGE_PROCESS_DEAD
-                        callback(
+                        if (code == NodeRuntimeErrorCodes.NETWORK_RESPONSE_TOO_LARGE || code == NodeRuntimeErrorCodes.NETWORK_POLICY_DENIED) {
+                            networkDiagnostics.recordPolicyRejection()
+                        }
+                        complete(
                             NodeBridgeResponse.failure(
                                 request.id,
                                 NodeBridgeError.network(
@@ -750,7 +784,8 @@ class AndroidNodeBridgeCapabilityProvider(
                         )
                         return
                     }
-                    callback(NodeBridgeResponse.success(request.id, result.toString()))
+                    networkDiagnostics.recordCompleted()
+                    complete(NodeBridgeResponse.success(request.id, result.toString()))
                 }
             }
         })
@@ -1213,6 +1248,98 @@ private data class ShellExecResult(
     }
 }
 
+private object ControlledFetchPolicy {
+    const val MAX_CONCURRENT_REQUESTS = 4
+    const val DEFAULT_TIMEOUT_MS = 30_000L
+    const val HARD_TIMEOUT_MS = 120_000L
+    const val DEFAULT_MAX_RESPONSE_BYTES = 1_048_576L
+    const val HARD_MAX_RESPONSE_BYTES = 16_777_216L
+    const val DEFAULT_MAX_REDIRECTS = 5
+    const val HARD_MAX_REDIRECTS = 10
+}
+
+private class ControlledFetchDiagnostics {
+    private val activeRequestCount = AtomicInteger(0)
+    private val maxActiveRequestCount = AtomicInteger(0)
+    private val timeoutCount = AtomicInteger(0)
+    private val rejectedByPolicyCount = AtomicInteger(0)
+    private val abortedCount = AtomicInteger(0)
+    private val completedCount = AtomicInteger(0)
+    private val serviceDestroyCancellationCount = AtomicInteger(0)
+
+    fun tryStartRequest(): Boolean {
+        while (true) {
+            val current = activeRequestCount.get()
+            if (current >= ControlledFetchPolicy.MAX_CONCURRENT_REQUESTS) {
+                recordPolicyRejection()
+                return false
+            }
+            if (activeRequestCount.compareAndSet(current, current + 1)) {
+                recordMaxActive(current + 1)
+                return true
+            }
+        }
+    }
+
+    fun finishRequest() {
+        while (true) {
+            val current = activeRequestCount.get()
+            if (current <= 0) {
+                return
+            }
+            if (activeRequestCount.compareAndSet(current, current - 1)) {
+                return
+            }
+        }
+    }
+
+    fun recordCompleted() {
+        completedCount.incrementAndGet()
+    }
+
+    fun recordTimeout() {
+        timeoutCount.incrementAndGet()
+    }
+
+    fun recordAbort() {
+        abortedCount.incrementAndGet()
+    }
+
+    fun recordPolicyRejection() {
+        rejectedByPolicyCount.incrementAndGet()
+    }
+
+    fun recordServiceDestroyCancellation(activeCalls: Int) {
+        if (activeCalls > 0) {
+            serviceDestroyCancellationCount.addAndGet(activeCalls)
+            abortedCount.addAndGet(activeCalls)
+        }
+        activeRequestCount.set(0)
+    }
+
+    fun nativeValues(): Map<String, String> = linkedMapOf(
+        "embedded_script.fetch_active_request_count" to activeRequestCount.get().toString(),
+        "embedded_script.fetch_max_active_request_count" to maxActiveRequestCount.get().toString(),
+        "embedded_script.fetch_timeout_count" to timeoutCount.get().toString(),
+        "embedded_script.fetch_rejected_by_policy_count" to rejectedByPolicyCount.get().toString(),
+        "embedded_script.fetch_aborted_count" to abortedCount.get().toString(),
+        "embedded_script.fetch_completed_count" to completedCount.get().toString(),
+        "embedded_script.fetch_service_destroy_cancellation_count" to serviceDestroyCancellationCount.get().toString(),
+    )
+
+    private fun recordMaxActive(count: Int) {
+        while (true) {
+            val current = maxActiveRequestCount.get()
+            if (count <= current) {
+                return
+            }
+            if (maxActiveRequestCount.compareAndSet(current, count)) {
+                return
+            }
+        }
+    }
+}
+
 private data class ControlledFetchRequest(
     val url: String,
     val method: String,
@@ -1220,6 +1347,7 @@ private data class ControlledFetchRequest(
     val body: ByteArray?,
     val timeoutMs: Long,
     val maxResponseBytes: Long,
+    val maxRedirects: Int,
 ) {
     fun toOkHttpRequest(): okhttp3.Request {
         val builder = okhttp3.Request.Builder().url(url)
@@ -1248,6 +1376,8 @@ private data class ControlledFetchRequest(
             put("headers", headersJson)
             put("bodyBase64", Base64.encodeToString(bytes, Base64.NO_WRAP))
             put("bodyBytes", bytes.size)
+            put("redirected", response.isRedirect)
+            put("maxRedirects", maxRedirects)
         }
     }
 
@@ -1275,9 +1405,6 @@ private data class ControlledFetchRequest(
     }
 
     companion object {
-        const val DEFAULT_MAX_RESPONSE_BYTES = 1_048_576L
-        const val HARD_MAX_RESPONSE_BYTES = 16_777_216L
-
         fun fromJson(request: NodeBridgeRequest, payload: JSONObject): ControlledFetchParseResult {
             val url = payload.optString("url", "").trim()
             val protocol = runCatching { URL(url).protocol.lowercase() }.getOrNull()
@@ -1319,9 +1446,12 @@ private data class ControlledFetchRequest(
                     method = method,
                     headers = parseHeaders(payload.opt("headers")),
                     body = if (method == "POST") body ?: ByteArray(0) else null,
-                    timeoutMs = parsePositiveLong(payload.opt("timeoutMs"), request.timeoutMs).coerceIn(1L, 120_000L),
-                    maxResponseBytes = parsePositiveLong(payload.opt("maxResponseBytes"), DEFAULT_MAX_RESPONSE_BYTES)
-                        .coerceIn(0L, HARD_MAX_RESPONSE_BYTES),
+                    timeoutMs = parsePositiveLong(payload.opt("timeoutMs"), request.timeoutMs)
+                        .coerceIn(1L, ControlledFetchPolicy.HARD_TIMEOUT_MS),
+                    maxResponseBytes = parsePositiveLong(payload.opt("maxResponseBytes"), ControlledFetchPolicy.DEFAULT_MAX_RESPONSE_BYTES)
+                        .coerceIn(0L, ControlledFetchPolicy.HARD_MAX_RESPONSE_BYTES),
+                    maxRedirects = parsePositiveInt(payload.opt("maxRedirects"), ControlledFetchPolicy.DEFAULT_MAX_REDIRECTS)
+                        .coerceIn(0, ControlledFetchPolicy.HARD_MAX_REDIRECTS),
                 ),
             )
         }
@@ -1361,6 +1491,24 @@ private data class ControlledFetchRequest(
                 else -> null
             }
             return parsed?.takeIf { it >= 0L } ?: fallback
+        }
+
+        private fun parsePositiveInt(value: Any?, fallback: Int): Int {
+            val parsed = when (value) {
+                is Int -> value
+                is Long -> value.coerceIn(Int.MIN_VALUE.toLong(), Int.MAX_VALUE.toLong()).toInt()
+                is Number -> {
+                    val doubleValue = value.toDouble()
+                    if (!doubleValue.isFinite()) {
+                        null
+                    } else {
+                        doubleValue.toInt()
+                    }
+                }
+                is String -> value.toIntOrNull()
+                else -> null
+            }
+            return parsed?.takeIf { it >= 0 } ?: fallback
         }
     }
 }
