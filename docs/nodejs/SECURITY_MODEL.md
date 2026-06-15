@@ -135,6 +135,8 @@ The AutoJs6-controlled `fetch` wrapper is the preferred network path over unrest
 
 See `docs/nodejs/design/NETWORK.md` for the current network design gate.
 
+Controlled WebSocket is planned but disabled. The profile may expose `featureFlags.websocket.status="planned"` for diagnostics, but no builtin `require("websocket")` runtime is enabled yet. Future WebSocket support must use an AutoJs6 provider, bounded connection/message budgets, service-destroy cancellation, and explicit packaged APK INTERNET opt-in. It must not open raw `net`, `tls`, or HTTP upgrade authority. See `docs/nodejs/design/WEBSOCKET.md`.
+
 ## Worker Threads Policy
 
 `worker_threads` is not enabled in the default Safe Node Profile. The explicit design-gate flag is:

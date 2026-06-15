@@ -8052,6 +8052,7 @@ std::string buildEmbeddedScriptExecutionSource(
       nativeAddon: false,
       network: false,
       npmInstall: false,
+      webSocket: false,
       workerThreads: false
     });
     const experimentalFlags = Object.freeze({
@@ -8108,6 +8109,18 @@ std::string buildEmbeddedScriptExecutionSource(
         packagedApkOverrideAllowed: false,
         securityLevel: "high",
         status: "disabled"
+      }),
+      websocket: Object.freeze({
+        id: "websocket",
+        diagnosticName: "webSocket",
+        gradleProperty: null,
+        defaultEnabled: false,
+        enabled: false,
+        buildTimeOverrideAllowed: false,
+        projectJsonOverrideAllowed: false,
+        packagedApkOverrideAllowed: false,
+        securityLevel: "high",
+        status: "planned"
       }),
       worker_threads: Object.freeze({
         id: "worker_threads",

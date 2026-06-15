@@ -45,6 +45,7 @@ The release/debug gate also runs:
 | `dynamic_import` | `autojs.nodejs.dynamicImport.experimental` | false | true | false | false | medium | experimental |
 | `network` | `autojs.nodejs.network.experimental` | false | true | false | false | high | experimental |
 | `raw_node_network_modules` | none | false | false | false | false | high | disabled |
+| `websocket` | none | false | false | false | false | high | planned |
 | `worker_threads` | `autojs.nodejs.worker_threads.experimental` | false | true | false | false | high | experimental |
 | `fs_streams` | none | true | false | false | false | medium | partial |
 | `zlib_streams` | none | true | false | false | false | medium | partial |
@@ -216,6 +217,7 @@ Design notes for the broadest limited builtins:
 - scheduled/background tasks: `docs/nodejs/design/WORK_MANAGER.md`
 - ESM: `docs/nodejs/design/ESM.md`
 - network: `docs/nodejs/design/NETWORK.md`
+- WebSocket: `docs/nodejs/design/WEBSOCKET.md`
 - worker threads: `docs/nodejs/design/WORKER_THREADS.md`
 
 ## Disabled by Policy
@@ -226,6 +228,7 @@ These surfaces must stay disabled unless a future task explicitly opens them beh
 - unrestricted `child_process`
 - unrestricted `worker_threads`
 - unrestricted network sockets and servers
+- unrestricted WebSocket sockets or HTTP upgrade authority
 - unrestricted `http`, `https`, `net`, `tls`, `dns`, and `dgram`
 - unrestricted `process.binding`
 - unrestricted `process.dlopen`
@@ -352,6 +355,18 @@ Network-specific errors include:
 - `ERR_AUTOJS6_NETWORK_POLICY_DENIED`
 
 See `docs/nodejs/design/NETWORK.md` for INTERNET permission, packaged APK manifest diagnostics, timeout, abort, body budget, TLS, proxy, background behavior, and service-destroy cancellation policy.
+
+## WebSocket Status
+
+Controlled WebSocket support is planned but not implemented. Current `require("autojs6:profile")` reports:
+
+- `featureFlags.websocket.enabled=false`
+- `featureFlags.websocket.status="planned"`
+- `highRiskCapabilities.webSocket=false`
+
+No builtin `require("websocket")` module is exposed in the Safe Node Profile yet. A local user package named `websocket` may still resolve through normal CommonJS rules, but raw `net`, `tls`, and HTTP upgrade authority remains denied, so userland packages cannot open sockets through desktop Node APIs.
+
+The planned module boundary is documented in `docs/nodejs/design/WEBSOCKET.md`. Any future implementation must remain provider-backed, bounded by connection/message limits, cancellable on service destroy, and packaged behind explicit INTERNET permission opt-in.
 
 ## Worker Threads Status
 

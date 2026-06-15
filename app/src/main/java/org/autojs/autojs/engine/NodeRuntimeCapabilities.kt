@@ -78,6 +78,17 @@ object NodeRuntimeCapabilities {
             status = "disabled",
         ),
         NodeRuntimeFeatureFlag(
+            id = "websocket",
+            diagnosticName = "webSocket",
+            gradleProperty = null,
+            defaultEnabled = false,
+            buildTimeOverrideAllowed = false,
+            projectJsonOverrideAllowed = false,
+            packagedApkOverrideAllowed = false,
+            securityLevel = "high",
+            status = "planned",
+        ),
+        NodeRuntimeFeatureFlag(
             id = "worker_threads",
             diagnosticName = "workerThreads",
             gradleProperty = WORKER_THREADS_EXPERIMENTAL_PROPERTY,

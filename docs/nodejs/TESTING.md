@@ -219,6 +219,14 @@ Current controlled fetch bridge focused instrumentation:
 
 This suite verifies the `fetch` bridge registry, fake provider GET/POST behavior, `require("fetch")`, global `fetch`, shadowing protection, timeout rejection, abort rejection, response-size budget rejection, unsupported URL scheme rejection, redirect limit rejection, max concurrent request rejection, service-destroy rejection cleanup, fetch diagnostics counters, raw `http`/`https`/`net` denial, pending bridge cleanup, and that normal Android providers reject with `ERR_AUTOJS6_NETWORK_DISABLED` while `autojs.nodejs.network.experimental=false`.
 
+Current WebSocket design gate focused instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeWebSocketDesignGateInstrumentationTest"
+```
+
+This suite verifies the registry/profile planned state for `websocket`, that no builtin `require("websocket")` runtime is exposed yet, that a local user package named `websocket` cannot gain raw `net`/`tls` authority, and that raw socket modules remain denied.
+
 Current `worker_threads` design gate focused instrumentation:
 
 ```powershell
