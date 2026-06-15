@@ -340,8 +340,12 @@ assertIncludes(draftService, "stableDraftFileHelper.deleteDraft()");
 assertNotIncludes(draftService, "CodeEditText");
 
 assertIncludes(roadmap, "node tools/ace-hardening/check-editor-surface.mjs");
-assertIncludes(roadmap, "- [x] Add ACE IME show/hide manual test checklist.");
-assertIncludes(roadmap, "- [x] Review whether ACE needs an explicit clean-host layout experiment flag.");
+assertIncludes(roadmap, "# AutoJs6 ACE Stage 3 v2 Roadmap");
+assertIncludes(roadmap, "## Phase 3: IME State Machine");
+assertIncludes(roadmap, "## Phase 4: Fallback Classification And Event History");
+assertIncludes(roadmap, "## Phase 7: Keyboard And Viewport Test Matrix");
+assertIncludes(roadmap, "ACE clean-host behavior remains the default ACE path.");
+assertIncludes(roadmap, "LSP and VisualEditorAce remain deferred until this gate is satisfied.");
 
 assertIncludes(aceEditorTestPlan, "## IME Show/Hide Manual Checklist");
 assertIncludes(aceEditorTestPlan, "### ACE-IME-001: Input method and symbols/function bars");
