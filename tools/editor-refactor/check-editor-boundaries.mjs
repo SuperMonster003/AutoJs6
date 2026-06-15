@@ -108,6 +108,7 @@ const aceFallbackPolicy = "app/src/main/java/org/autojs/autojs/ui/edit/editor/ac
 const aceLspClient = "app/src/main/assets/editor/ace-builds-1.4.12/autojs6/autojs6_lsp_client.js";
 const aceTooltip = "app/src/main/assets/editor/ace-builds-1.4.12/autojs6/autojs6_tooltip.js";
 const aceCiGate = "tools/ace-ci/check-ace-editor-gate.mjs";
+const aceReleaseGate = "tools/ace-ci/check-ace-release-gate.mjs";
 const aceSurfaceSmoke = "tools/ace-hardening/check-editor-surface.mjs";
 const aceLspClientTest = "tools/ace-lsp/test-lsp-client.mjs";
 const aceTooltipTest = "tools/ace-tooltip/test-tooltip.mjs";
@@ -115,6 +116,7 @@ const roadmap = "Roadmap.md";
 const aceEditorTestPlan = "docs/dev/ace-editor-test-plan.md";
 const aceKeyboardViewportTestPlan = "docs/dev/ace-keyboard-viewport-test-plan.md";
 const aceEditorIntegrationDoc = "docs/dev/ace-editor-integration.md";
+const aceReleaseGateStatus = "docs/dev/ace-release-gate-status.md";
 const visualEditorAceInvestigation = "docs/dev/visual-editor-ace-investigation.md";
 const nativeOnlyAudit = "docs/dev/editor-native-only-audit.md";
 const engineNeutralServicesDoc = "docs/dev/editor-engine-neutral-services.md";
@@ -420,9 +422,13 @@ assertIncludes(roadmap, "- [x] The same matrix can be rerun after WebView or And
 assertIncludes(roadmap, "- [x] CI gate for editor boundary and ACE hardening scripts.");
 assertIncludes(roadmap, "- [x] Optional tooltip/markdown loading.");
 assertIncludes(roadmap, "- [x] VisualEditorAce investigation only after ordinary ACE is stable.");
+assertIncludes(roadmap, "`node tools/ace-ci/check-ace-release-gate.mjs`");
+assertIncludes(roadmap, "Automated/static gate:");
+assertIncludes(roadmap, "Manual device gate:");
 assertIncludes(roadmap, "ACE clean-host behavior remains the default ACE path.");
 assertIncludes(roadmap, "ACE editor CI gate passes.");
 assertIncludes(roadmap, "Keyboard and viewport matrix passes on representative devices.");
+assertIncludes(roadmap, "Fallback preserves recent text through TextMirror in device/debug-hook");
 assertIncludes(roadmap, "Server-backed LSP transport and VisualEditorAce remain deferred until this");
 
 assertIncludes(nativeOnlyAudit, "# Editor Native-Only Audit");
@@ -510,6 +516,7 @@ assertIncludes(aceKeyboardViewportTestPlan, "maxBridgeEventWindowCount");
 assertIncludes(aceKeyboardViewportTestPlan, "runtimeEventHistory");
 assertIncludes(aceKeyboardViewportTestPlan, "runtimeEvent=bridge_event_storm");
 assertIncludes(aceKeyboardViewportTestPlan, "file-manager open first paint");
+assertIncludes(aceKeyboardViewportTestPlan, "Sony XQ-AT72");
 assertIncludes(aceKeyboardViewportTestPlan, "Top, middle, and lower tap anchors");
 assertIncludes(aceKeyboardViewportTestPlan, "The isolated ACE debug activity also exposes an `IME stress` button.");
 assertIncludes(aceKeyboardViewportTestPlan, "120-line sample");
@@ -519,8 +526,10 @@ assertIncludes(aceKeyboardViewportTestPlan, "public VisualEditorAce engine expos
 assertIncludes(aceKeyboardViewportTestPlan, "Server-backed LSP transport and public VisualEditorAce engine exposure");
 
 assertIncludes(aceEditorIntegrationDoc, "Run the `IME Show/Hide Manual Checklist`");
+assertIncludes(aceEditorIntegrationDoc, "Run `node tools/ace-ci/check-ace-release-gate.mjs`.");
 assertIncludes(aceEditorIntegrationDoc, "Run `node tools/ace-ci/check-ace-editor-gate.mjs`.");
 assertIncludes(aceEditorIntegrationDoc, "docs/dev/ace-keyboard-viewport-test-plan.md");
+assertIncludes(aceEditorIntegrationDoc, "docs/dev/ace-release-gate-status.md");
 assertIncludes(aceEditorIntegrationDoc, "## Clean Host Layout Decision");
 assertIncludes(aceEditorIntegrationDoc, "ACE does not need a separate clean-host experiment flag at this stage.");
 assertIncludes(aceEditorIntegrationDoc, "Do not add `key_ace_clean_host_layout`");
@@ -530,6 +539,14 @@ assertIncludes(aceEditorIntegrationDoc, "The isolated ACE debug activity include
 assertIncludes(aceEditorIntegrationDoc, "do not treat it as a replacement for physical tap-anchor and CJK validation");
 assertIncludes(aceEditorIntegrationDoc, "docs/dev/visual-editor-ace-investigation.md");
 assertIncludes(aceEditorIntegrationDoc, "Server-backed LSP transport and public VisualEditorAce engine exposure are");
+
+assertIncludes(aceReleaseGateStatus, "# ACE Release Gate Status");
+assertIncludes(aceReleaseGateStatus, "node tools/ace-ci/check-ace-release-gate.mjs");
+assertIncludes(aceReleaseGateStatus, "## Automated Gate");
+assertIncludes(aceReleaseGateStatus, "## Manual Gate");
+assertIncludes(aceReleaseGateStatus, "Sony XQ-AT72");
+assertIncludes(aceReleaseGateStatus, "Server-backed LSP transport remains unavailable");
+assertIncludes(aceReleaseGateStatus, "Public `VisualEditorAce` exposure remains deferred");
 
 assertIncludes(visualEditorAceInvestigation, "# VisualEditorAce Investigation");
 assertIncludes(visualEditorAceInvestigation, "No `VisualEditorAce` or `VISUAL_ACE` implementation exists");
@@ -573,6 +590,20 @@ assertIncludes(aceCiGate, "tools/ace-lsp/test-lsp-client.mjs");
 assertIncludes(aceCiGate, "ACE tooltip tests");
 assertIncludes(aceCiGate, "tools/ace-tooltip/test-tooltip.mjs");
 assertIncludes(aceCiGate, "ACE editor CI gate passed.");
+
+assertIncludes(aceReleaseGate, "check-ace-editor-gate.mjs");
+assertIncludes(aceReleaseGate, "Native editor resource default");
+assertIncludes(aceReleaseGate, "factory default to Native");
+assertIncludes(aceReleaseGate, "EditorEngineType.ACE -> AceEditorViewportPolicy(editor)");
+assertIncludes(aceReleaseGate, "key_ace_clean_host_layout");
+assertIncludes(aceReleaseGate, "ACE fallback switches to Native with the latest TextMirror-backed snapshot");
+assertIncludes(aceReleaseGate, "forceRendererGoneFallback");
+assertIncludes(aceReleaseGate, "forceJsInitThrow");
+assertIncludes(aceReleaseGate, "serverAvailable = false");
+assertIncludes(aceReleaseGate, "WebSocket");
+assertIncludes(aceReleaseGate, "VISUAL_ACE");
+assertIncludes(aceReleaseGate, "Sony XQ-AT72");
+assertIncludes(aceReleaseGate, "ACE release gate automated checks passed.");
 
 assertIncludes(androidWorkflow, "Set up Node.js 24");
 assertIncludes(androidWorkflow, "actions/setup-node@v4");

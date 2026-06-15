@@ -188,6 +188,7 @@ Acceptance:
 
 ## Verification Commands
 
+- `node tools/ace-ci/check-ace-release-gate.mjs`
 - `node tools/ace-ci/check-ace-editor-gate.mjs`
 - `node tools/editor-refactor/check-editor-boundaries.mjs`
 - `node tools/ace-hardening/check-editor-surface.mjs`
@@ -204,16 +205,23 @@ Acceptance:
 
 ## Release Gate
 
-- [ ] Native remains the default editor.
-- [ ] ACE clean-host behavior remains the default ACE path.
-- [ ] Native-only boundary checks pass.
-- [ ] ACE first-paint and surface smoke checks pass.
-- [ ] ACE completion checks pass.
-- [ ] ACE editor CI gate passes.
+Automated/static gate:
+
+- [x] Native remains the default editor.
+- [x] ACE clean-host behavior remains the default ACE path.
+- [x] Native-only boundary checks pass.
+- [x] ACE first-paint and surface smoke checks pass.
+- [x] ACE completion checks pass.
+- [x] ACE editor CI gate passes.
+- [x] Server-backed LSP transport and VisualEditorAce remain deferred until this
+  gate is satisfied.
+
+Manual device gate:
+
 - [ ] IME show/hide manual checklist passes on representative devices.
 - [ ] Keyboard and viewport matrix passes on representative devices.
 - [ ] Continuous keyboard show/hide does not fallback ACE.
-- [ ] Fallback preserves recent text through TextMirror.
-- [ ] Renderer-gone and initialization fatal fallback still work.
-- [ ] Server-backed LSP transport and VisualEditorAce remain deferred until this
-  gate is satisfied.
+- [ ] Fallback preserves recent text through TextMirror in device/debug-hook
+  validation.
+- [ ] Renderer-gone and initialization fatal fallback still work in
+  device/debug-hook validation.

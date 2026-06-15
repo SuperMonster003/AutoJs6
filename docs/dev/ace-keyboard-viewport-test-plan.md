@@ -32,6 +32,9 @@ Those features stay deferred until this matrix is stable.
 Record the Android System WebView package and version from copied ACE
 diagnostics for every run.
 
+For this branch, Sony XQ-AT72 is the preferred high-stability physical device
+for the current-baseline gesture-navigation run.
+
 | Device class | Android API | Navigation mode | IME | Required |
 | --- | --- | --- | --- | --- |
 | Legacy baseline | 26 or nearest available | 3-button | Latin | Yes when available |

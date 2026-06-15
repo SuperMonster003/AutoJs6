@@ -87,6 +87,7 @@ is a real second host or lifecycle requirement.
 
 Before ACE is presented as a gray-release experimental editor:
 
+- Run `node tools/ace-ci/check-ace-release-gate.mjs`.
 - Run `node tools/ace-ci/check-ace-editor-gate.mjs`.
 - Run `node tools/ace-completion/verify-autojs6-api-model.mjs`.
 - Run `node tools/ace-completion/verify-autojs6-pro-only.mjs`.
@@ -101,6 +102,8 @@ Before ACE is presented as a gray-release experimental editor:
 - Run the `IME Show/Hide Manual Checklist` in `docs/dev/ace-editor-test-plan.md`.
 - Run the dedicated keyboard and viewport matrix in
   `docs/dev/ace-keyboard-viewport-test-plan.md`.
+- Track the automated/manual split in
+  `docs/dev/ace-release-gate-status.md`.
 - Use the isolated ACE debug activity `IME stress` helper as a quick preflight;
   do not treat it as a replacement for physical tap-anchor and CJK validation.
 - Verify asset-missing, ready-timeout, JS-init, renderer-gone, and large-file debug hooks.

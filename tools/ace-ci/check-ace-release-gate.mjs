@@ -1,0 +1,221 @@
+#!/usr/bin/env node
+
+import fs from "node:fs";
+import { spawnSync } from "node:child_process";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const PROJECT_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
+const STATIC_ONLY = process.argv.includes("--static-only");
+
+const FILES = {
+  roadmap: "Roadmap.md",
+  releaseStatus: "docs/dev/ace-release-gate-status.md",
+  integrationDoc: "docs/dev/ace-editor-integration.md",
+  keyboardViewportPlan: "docs/dev/ace-keyboard-viewport-test-plan.md",
+  visualInvestigation: "docs/dev/visual-editor-ace-investigation.md",
+  strings: "app/src/main/res/values/strings.xml",
+  arrays: "app/src/main/res/values/arrays.xml",
+  fragmentPreferences: "app/src/main/res/xml/fragment_preferences.xml",
+  editorEngineType: "app/src/main/java/org/autojs/autojs/ui/edit/editor/engine/EditorEngineType.kt",
+  editorEnginePreferences: "app/src/main/java/org/autojs/autojs/ui/edit/editor/engine/EditorEnginePreferences.kt",
+  editorEngineFactory: "app/src/main/java/org/autojs/autojs/ui/edit/editor/engine/EditorEngineFactory.kt",
+  policyFactory: "app/src/main/java/org/autojs/autojs/ui/edit/editor/viewport/EditorViewportPolicyFactory.kt",
+  acePolicy: "app/src/main/java/org/autojs/autojs/ui/edit/editor/viewport/AceEditorViewportPolicy.kt",
+  aceCodeEditor: "app/src/main/java/org/autojs/autojs/ui/edit/editor/ace/AceCodeEditor.kt",
+  aceBridge: "app/src/main/java/org/autojs/autojs/ui/edit/editor/ace/AceBridge.kt",
+  aceBridgeAsset: "app/src/main/assets/editor/ace-builds-1.4.12/autojs6/autojs6_ace_bridge.js",
+  aceTestHooks: "app/src/main/java/org/autojs/autojs/ui/edit/editor/ace/AceEditorTestHooks.kt",
+  aceJsErrorClassifier: "app/src/main/java/org/autojs/autojs/ui/edit/editor/ace/health/AceJsErrorClassifier.kt",
+  aceFallbackPolicy: "app/src/main/java/org/autojs/autojs/ui/edit/editor/ace/health/AceFallbackPolicy.kt",
+  aceLspServerManager: "app/src/main/java/org/autojs/autojs/ui/edit/editor/ace/lsp/AceLspServerManager.kt",
+  aceLspClient: "app/src/main/assets/editor/ace-builds-1.4.12/autojs6/autojs6_lsp_client.js",
+  editorView: "app/src/main/java/org/autojs/autojs/ui/edit/EditorView.kt",
+};
+
+function read(relativePath) {
+  return fs.readFileSync(path.join(PROJECT_ROOT, relativePath), "utf8").replaceAll("\r\n", "\n");
+}
+
+function assertIncludes(file, text, label = text) {
+  const content = read(file);
+  if (!content.includes(text)) {
+    throw new Error(`${file}: missing ${label}`);
+  }
+}
+
+function assertNotIncludes(file, text, label = text) {
+  const content = read(file);
+  if (content.includes(text)) {
+    throw new Error(`${file}: must not contain ${label}`);
+  }
+}
+
+function assertMatch(file, regex, label = regex.toString()) {
+  const content = read(file);
+  if (!regex.test(content)) {
+    throw new Error(`${file}: missing ${label}`);
+  }
+}
+
+function assertOrder(file, items, label) {
+  const content = read(file);
+  let lastIndex = -1;
+  for (const item of items) {
+    const index = content.indexOf(item);
+    if (index < 0) {
+      throw new Error(`${file}: ${label}: missing ${item}`);
+    }
+    if (index <= lastIndex) {
+      throw new Error(`${file}: ${label}: ${item} appears out of order`);
+    }
+    lastIndex = index;
+  }
+}
+
+function listTextFiles(rootRelativePath) {
+  const root = path.join(PROJECT_ROOT, rootRelativePath);
+  const result = [];
+  for (const entry of fs.readdirSync(root, { withFileTypes: true })) {
+    const fullPath = path.join(root, entry.name);
+    if (entry.isDirectory()) {
+      result.push(...listTextFiles(path.relative(PROJECT_ROOT, fullPath)));
+    } else if (/\.(kt|java|xml|js|mjs|kts|gradle)$/.test(entry.name)) {
+      result.push(fullPath);
+    }
+  }
+  return result;
+}
+
+function relativeToRoot(filePath) {
+  return path.relative(PROJECT_ROOT, filePath).replaceAll(path.sep, "/");
+}
+
+function assertTextAbsentInRoots(text, rootRelativePaths) {
+  const offenders = [];
+  for (const root of rootRelativePaths) {
+    for (const filePath of listTextFiles(root)) {
+      if (fs.readFileSync(filePath, "utf8").includes(text)) {
+        offenders.push(relativeToRoot(filePath));
+      }
+    }
+  }
+  if (offenders.length) {
+    throw new Error(`${text} must stay absent from release-gated code/resources; found in ${offenders.join(", ")}`);
+  }
+}
+
+function runNodeScript(label, script) {
+  console.log(`\n[ACE release gate] ${label}`);
+  const result = spawnSync(process.execPath, [script], {
+    cwd: PROJECT_ROOT,
+    stdio: "inherit",
+  });
+  if (result.error) {
+    throw new Error(`Failed to start ${script}: ${result.error.message}`);
+  }
+  if (result.status !== 0) {
+    process.exit(result.status || 1);
+  }
+}
+
+if (!STATIC_ONLY) {
+  runNodeScript("ACE editor CI gate", "tools/ace-ci/check-ace-editor-gate.mjs");
+}
+
+assertIncludes(FILES.roadmap, "`node tools/ace-ci/check-ace-release-gate.mjs`");
+assertIncludes(FILES.roadmap, "Automated/static gate:");
+assertIncludes(FILES.roadmap, "Manual device gate:");
+assertIncludes(FILES.releaseStatus, "# ACE Release Gate Status");
+assertIncludes(FILES.integrationDoc, "Run `node tools/ace-ci/check-ace-release-gate.mjs`.");
+assertIncludes(FILES.keyboardViewportPlan, "Sony XQ-AT72");
+
+assertIncludes(
+  FILES.strings,
+  '<string name="default_key_editor_engine" translatable="false">@string/key_editor_engine_native</string>',
+  "Native editor resource default",
+);
+assertIncludes(FILES.strings, '<string name="key_editor_engine_native" translatable="false">native</string>');
+assertIncludes(FILES.strings, '<string name="key_editor_engine_ace" translatable="false">ace</string>');
+assertOrder(
+  FILES.arrays,
+  [
+    '<string-array name="keys_editor_engine">',
+    '<item>@string/key_editor_engine_native</item>',
+    '<item>@string/key_editor_engine_ace</item>',
+  ],
+  "editor engine key order",
+);
+assertIncludes(FILES.fragmentPreferences, 'app:itemDefaultKey="@string/default_key_editor_engine"');
+assertMatch(
+  FILES.editorEngineType,
+  /enum class EditorEngineType\(val preferenceValue: String\) \{\s*NATIVE\("native"\),\s*ACE\("ace"\);/s,
+  "only Native and ordinary ACE engine types",
+);
+assertIncludes(FILES.editorEngineType, "?: NATIVE", "invalid preference fallback to Native");
+assertIncludes(
+  FILES.editorEnginePreferences,
+  "Pref.getString(KEY_EDITOR_ENGINE, EditorEngineType.NATIVE.preferenceValue)",
+  "stored editor preference default to Native",
+);
+assertIncludes(
+  FILES.editorEngineFactory,
+  "fun create(context: Context, preferredType: EditorEngineType = EditorEngineType.NATIVE)",
+  "factory default to Native",
+);
+
+assertIncludes(FILES.policyFactory, "EditorEngineType.NATIVE -> NativeEditorViewportPolicy(editor, hostView)");
+assertIncludes(FILES.policyFactory, "EditorEngineType.ACE -> AceEditorViewportPolicy(editor)");
+assertIncludes(FILES.acePolicy, "view.setPadding(view.paddingLeft, view.paddingTop, view.paddingRight, 0)");
+assertIncludes(FILES.acePolicy, "editor.onImeInsetsChanged(visible, bottomInset)");
+assertNotIncludes(FILES.acePolicy, "requestRectangleOnScreen");
+assertNotIncludes(FILES.acePolicy, "ensureCursorVisibleIfPossible");
+assertTextAbsentInRoots("key_ace_clean_host_layout", [
+  "app/src/main/java/org/autojs/autojs/ui/edit",
+  "app/src/main/res/menu",
+  "app/src/main/res/xml",
+  "app/src/main/res/values",
+]);
+
+assertIncludes(FILES.aceCodeEditor, "private val textMirror = AceTextMirror()");
+assertIncludes(FILES.aceCodeEditor, "val fallback = quote(textMirror.text)");
+assertIncludes(FILES.aceCodeEditor, "textSnapshot = textMirror.text");
+assertIncludes(FILES.aceCodeEditor, "runtimeEventHistory = eventHistory.snapshot()");
+assertMatch(
+  FILES.editorView,
+  /latestText = oldEditor\.textSnapshot,\s*persistPreference = false,\s*showSwitchToast = false,/s,
+  "ACE fallback switches to Native with the latest TextMirror-backed snapshot",
+);
+
+assertIncludes(FILES.aceTestHooks, "var forceRendererGoneFallback: Boolean = false");
+assertIncludes(FILES.aceTestHooks, "var forceJsInitThrow: Boolean = false");
+assertIncludes(FILES.aceBridge, "fun shouldForceJsInitThrow(): Boolean");
+assertIncludes(FILES.aceBridgeAsset, 'callBridge("shouldForceJsInitThrow")');
+assertIncludes(FILES.aceCodeEditor, "AceEditorTestHooks.shouldForceRendererGoneFallback()");
+assertIncludes(FILES.aceCodeEditor, "AceFailureType.RENDER_PROCESS_GONE");
+assertIncludes(FILES.aceCodeEditor, "override fun onRenderProcessGone");
+assertIncludes(FILES.aceJsErrorClassifier, "AceFailureType.JS_INIT_ERROR");
+assertIncludes(FILES.aceFallbackPolicy, "else -> true");
+
+assertIncludes(FILES.aceLspServerManager, 'STATE_DISABLED = "disabled"');
+assertIncludes(FILES.aceLspServerManager, 'STATE_CONFIGURED_NO_SERVER = "configured-no-server"');
+assertIncludes(FILES.aceLspServerManager, 'TRANSPORT_UNAVAILABLE = "unavailable"');
+assertIncludes(FILES.aceLspServerManager, "startSupported = false");
+assertIncludes(FILES.aceLspServerManager, "serverAvailable = false");
+assertNotIncludes(FILES.aceLspServerManager, "WebSocket");
+assertNotIncludes(FILES.aceLspServerManager, "ProcessBuilder");
+assertNotIncludes(FILES.aceLspServerManager, "Runtime.getRuntime()");
+assertNotIncludes(FILES.aceLspClient, "WebSocket");
+assertNotIncludes(FILES.aceLspClient, "new Worker");
+assertNotIncludes(FILES.editorEngineType, "VISUAL_ACE");
+assertNotIncludes(FILES.editorEngineFactory, "Visual");
+assertNotIncludes(FILES.policyFactory, "VISUAL_ACE");
+assertTextAbsentInRoots("visual_ace", [
+  "app/src/main/java/org/autojs/autojs/ui/edit",
+  "app/src/main/res/menu",
+  "app/src/main/res/xml",
+  "app/src/main/res/values",
+]);
+assertIncludes(FILES.visualInvestigation, "Keep `VisualEditorAce` deferred.");
+
+console.log("\nACE release gate automated checks passed.");
