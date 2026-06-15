@@ -1,0 +1,463 @@
+package org.autojs.autojs.engine
+
+import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Before
+import org.junit.Test
+import java.io.File
+
+class NodeBridgeConformanceInstrumentationTest {
+
+    private val context = NodeEmbeddedTestHarness.targetContext
+
+    @Before
+    fun settleBefore() {
+        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+    }
+
+    @After
+    fun settleAfter() {
+        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+    }
+
+    @Test
+    fun kotlinStableBridgeRegistryMatchesConformanceSurface() {
+        stableDispatchMethods.forEach { (module, methods) ->
+            assertEquals("$module dispatch methods drifted", methods, NodeBridgeModules.supportedMethodsByModule.getValue(module))
+            methods.forEach { method ->
+                assertTrue("$module.$method must be supported", NodeBridgeModules.supports(module, method))
+                assertTrue(
+                    "$module.$method must declare bridge capabilities",
+                    NodeBridgePermissionManifest.requiredCapabilitiesFor(module, method).isNotEmpty(),
+                )
+            }
+        }
+    }
+
+    @Test
+    fun jsStableBridgeModuleExportsAndPromiseContractsAreStable() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node bridge conformance suite")
+
+        val workDir = File(context.cacheDir, "node-bridge-conformance").apply {
+            deleteRecursively()
+            check(mkdirs()) { "Failed to create bridge conformance working directory: $absolutePath" }
+        }
+        File(workDir, "main.cjs").writeText("""console.log("scheduled");""")
+
+        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+            """
+            "nodejs";
+            (async function main() {
+              const assert = require("assert");
+              const bridge = require("autojs6:bridge");
+              const requests = [];
+
+              function respond(request, ok, result, error) {
+                setImmediate(() => bridge.__test.receiveMessage(JSON.stringify({
+                  id: request.id,
+                  ok,
+                  result,
+                  error
+                })));
+              }
+              function imageHandle(id, width, height) {
+                return { id, __autojs6ImageHandle: id, width, height };
+              }
+              function uiNode(text) {
+                return {
+                  text,
+                  desc: "desc-" + text,
+                  id: "id/" + text,
+                  className: "android.widget.TextView",
+                  bounds: { left: 1, top: 2, right: 3, bottom: 4 },
+                  clickable: true,
+                  enabled: true
+                };
+              }
+              function engineResult(sourceName) {
+                return {
+                  id: 1,
+                  engineName: "nodejs",
+                  sourceName,
+                  workingDirectory: ".",
+                  spawnDepth: 1
+                };
+              }
+              function workTask(id, type) {
+                return {
+                  id,
+                  type,
+                  status: "registered",
+                  scheduler: "fake",
+                  backend: "embedded",
+                  scriptPath: "main.cjs",
+                  entryKind: "scriptPath",
+                  packaged: false,
+                  delayMs: 0,
+                  intervalMs: type === "periodic" ? 900000 : null,
+                  constraints: { charging: false, network: false, idle: false },
+                  packageName: "org.autojs.autojs6",
+                  createdAtEpochMs: 1
+                };
+              }
+
+              bridge.__test.setTransport({
+                postMessage(message) {
+                  const request = JSON.parse(message);
+                  requests.push(request);
+                  const moduleName = request.module;
+                  const method = request.method;
+                  let result = null;
+
+                  if (moduleName === "toast") {
+                    result = null;
+                  } else if (moduleName === "app") {
+                    result = method === "launchPackage" || method === "launchApp" ? true : null;
+                  } else if (moduleName === "dialogs") {
+                    result = method === "confirm" ? true : (method === "input" ? "typed" : (method === "select" ? 1 : null));
+                  } else if (moduleName === "clipboard") {
+                    result = method === "getText" ? "clip" : (method === "hasText" ? true : null);
+                  } else if (moduleName === "device") {
+                    result = method === "isScreenOn" ? true : null;
+                  } else if (moduleName === "shell") {
+                    result = { code: 0, stdout: "ok\n", stderr: "" };
+                  } else if (moduleName === "engines") {
+                    if (method === "all") result = request.args[0];
+                    else if (method === "stopAll") result = 2;
+                    else if (method === "stopSelf") result = true;
+                    else if (method === "execScript") result = engineResult("inline");
+                    else if (method === "execScriptFile") result = engineResult(request.args[0]);
+                  } else if (moduleName === "accessibility") {
+                    if (method === "isEnabled" || method === "ensureEnabled" || method === "click" || method === "back" || method === "home" || method === "recentApps" || method === "clickText") result = true;
+                    else if (method === "findByText" || method === "findOne") result = uiNode(method);
+                    else if (method === "findAll") result = [uiNode("one"), uiNode("two")];
+                  } else if (moduleName === "media_projection") {
+                    if (method === "requestScreenCapture") result = { id: "capture-session", width: 100, height: 200 };
+                    else if (method === "nextImage") result = imageHandle("capture-frame", 100, 200);
+                    else if (method === "stop") result = null;
+                  } else if (moduleName === "image" || moduleName === "images") {
+                    if (method === "captureScreen") result = imageHandle(moduleName + "-capture", 100, 200);
+                    else if (method === "readImage") result = imageHandle(moduleName + "-read", 10, 20);
+                    else if (method === "clip") result = imageHandle(moduleName + "-clip", request.args[1].width, request.args[1].height);
+                    else if (method === "resize") result = imageHandle(moduleName + "-resize", request.args[1].width, request.args[1].height);
+                    else if (method === "findImage") result = { x: 7, y: 8 };
+                    else if (method === "saveImage" || method === "recycle") result = null;
+                  } else if (moduleName === "work_manager") {
+                    if (method === "scheduleOnce") result = "work-once";
+                    else if (method === "schedulePeriodic") result = "work-periodic";
+                    else if (method === "cancel") result = null;
+                    else if (method === "list") result = [workTask("work-periodic", "periodic")];
+                  }
+                  respond(request, true, result);
+                }
+              });
+
+              function expectFrozen(name, value) {
+                assert.strictEqual(Object.isFrozen(value), true, name + " must be frozen");
+              }
+              function expectExports(name, moduleValue, expected) {
+                expected.forEach((entry) => assert.strictEqual(typeof moduleValue[entry], "function", name + "." + entry));
+              }
+              function expectPromise(name, value) {
+                assert(value && typeof value.then === "function", name + " must return a Promise");
+                return value;
+              }
+
+              const toast = require("toast");
+              const app = require("app");
+              const dialogs = require("dialogs");
+              const clipboard = require("clipboard");
+              const device = require("device");
+              const shell = require("shell");
+              const engines = require("engines");
+              const accessibility = require("accessibility");
+              const mediaProjection = require("media_projection");
+              const image = require("image");
+              const images = require("images");
+              const workManager = require("work_manager");
+
+              [
+                ["toast", toast],
+                ["app", app],
+                ["dialogs", dialogs],
+                ["clipboard", clipboard],
+                ["device", device],
+                ["shell", shell],
+                ["engines", engines],
+                ["accessibility", accessibility],
+                ["media_projection", mediaProjection],
+                ["image", image],
+                ["images", images],
+                ["work_manager", workManager]
+              ].forEach(([name, moduleValue]) => expectFrozen(name, moduleValue));
+
+              expectExports("toast", toast, ["showToast", "toast"]);
+              expectExports("app", app, ["launchPackage", "launchApp", "openAppSetting", "startActivity"]);
+              expectExports("dialogs", dialogs, ["alert", "confirm", "input", "prompt", "select"]);
+              expectExports("clipboard", clipboard, ["getText", "setText", "hasText"]);
+              expectExports("device", device, ["isScreenOn", "wakeUp", "vibrate"]);
+              expectExports("shell", shell, ["exec"]);
+              expectExports("engines", engines, ["myEngine", "all", "stopAll", "stopSelf", "execScript", "execScriptFile"]);
+              expectExports("accessibility", accessibility, ["isEnabled", "ensureEnabled", "click", "back", "home", "recentApps", "findByText", "clickText", "findOne", "findAll", "text", "desc", "id", "className", "textContains", "descContains"]);
+              expectExports("media_projection", mediaProjection, ["requestScreenCapture"]);
+              expectExports("image", image, ["captureScreen", "readImage", "saveImage", "clip", "resize", "findImage", "recycle"]);
+              expectExports("images", images, ["captureScreen", "readImage", "saveImage", "clip", "resize", "findImage", "recycle"]);
+              expectExports("work_manager", workManager, ["scheduleOnce", "schedulePeriodic", "cancel", "list"]);
+
+              assert.strictEqual(typeof app.packageName, "string");
+              assert.strictEqual(typeof app.versionName, "string");
+              assert.strictEqual(typeof app.versionCode, "number");
+              assert.strictEqual(typeof device.sdkInt, "number");
+              assert.strictEqual(typeof device.width, "number");
+              assert.strictEqual(typeof device.height, "number");
+              assert.strictEqual(typeof device.density, "number");
+              assert.strictEqual(typeof workManager.policy.maxTasksPerProvider, "number");
+              assert.strictEqual(engines.myEngine().engineName, "nodejs");
+
+              await expectPromise("toast.showToast", toast.showToast("hello", { timeoutMs: 1010 }));
+              await expectPromise("toast.toast", toast.toast("alias", { timeoutMs: 1011 }));
+              await expectPromise("app.launchPackage", app.launchPackage("org.autojs.autojs6", { timeoutMs: 1012 }));
+              await expectPromise("app.launchApp", app.launchApp("AutoJs6", { timeoutMs: 1013 }));
+              await expectPromise("app.openAppSetting", app.openAppSetting("org.autojs.autojs6", { timeoutMs: 1014 }));
+              await expectPromise("app.startActivity", app.startActivity({ action: "android.intent.action.VIEW", data: "https://example.com" }, { timeoutMs: 1015 }));
+              await expectPromise("dialogs.alert", dialogs.alert("title", "message", { timeoutMs: 1016 }));
+              assert.strictEqual(await expectPromise("dialogs.confirm", dialogs.confirm("title", "message", { timeoutMs: 1017 })), true);
+              assert.strictEqual(await expectPromise("dialogs.input", dialogs.input("title", "prefill", { timeoutMs: 1018 })), "typed");
+              assert.strictEqual(await expectPromise("dialogs.prompt", dialogs.prompt("title", { timeoutMs: 1019 })), "typed");
+              assert.strictEqual(await expectPromise("dialogs.select", dialogs.select("title", ["a", "b"], { timeoutMs: 1020 })), 1);
+              assert.strictEqual(await expectPromise("clipboard.getText", clipboard.getText({ timeoutMs: 1021 })), "clip");
+              await expectPromise("clipboard.setText", clipboard.setText("clip", { timeoutMs: 1022 }));
+              assert.strictEqual(await expectPromise("clipboard.hasText", clipboard.hasText({ timeoutMs: 1023 })), true);
+              assert.strictEqual(await expectPromise("device.isScreenOn", device.isScreenOn({ timeoutMs: 1024 })), true);
+              await expectPromise("device.wakeUp", device.wakeUp({ timeoutMs: 1025 }));
+              await expectPromise("device.vibrate", device.vibrate(5, { timeoutMs: 1026 }));
+              assert.strictEqual((await expectPromise("shell.exec", shell.exec("echo ok", { timeoutMs: 1027 }))).code, 0);
+              assert.strictEqual((await expectPromise("engines.all", engines.all({ timeoutMs: 1028 }))).length >= 1, true);
+              assert.strictEqual(await expectPromise("engines.stopAll", engines.stopAll({ timeoutMs: 1029 })), 2);
+              assert.strictEqual(await expectPromise("engines.stopSelf", engines.stopSelf({ timeoutMs: 1030 })), true);
+              assert.strictEqual((await expectPromise("engines.execScript", engines.execScript("inline", "console.log(1)", { timeoutMs: 1031 }))).sourceName, "inline");
+              assert.strictEqual((await expectPromise("engines.execScriptFile", engines.execScriptFile("main.cjs", { timeoutMs: 1032 }))).sourceName, "main.cjs");
+              assert.strictEqual(await expectPromise("accessibility.isEnabled", accessibility.isEnabled({ timeoutMs: 1033 })), true);
+              assert.strictEqual(await expectPromise("accessibility.ensureEnabled", accessibility.ensureEnabled({ prompt: false, timeoutMs: 1034 })), true);
+              assert.strictEqual(await expectPromise("accessibility.click", accessibility.click(1, 2, { timeoutMs: 1035 })), true);
+              assert.strictEqual(await expectPromise("accessibility.back", accessibility.back({ timeoutMs: 1036 })), true);
+              assert.strictEqual(await expectPromise("accessibility.home", accessibility.home({ timeoutMs: 1037 })), true);
+              assert.strictEqual(await expectPromise("accessibility.recentApps", accessibility.recentApps({ timeoutMs: 1038 })), true);
+              assert.strictEqual((await expectPromise("accessibility.findByText", accessibility.findByText("OK", { timeoutMs: 1039 }))).text, "findByText");
+              assert.strictEqual(await expectPromise("accessibility.clickText", accessibility.clickText("OK", { timeoutMs: 1040 })), true);
+              assert.strictEqual((await expectPromise("accessibility.findOne", accessibility.findOne(accessibility.text("OK"), { timeoutMs: 1041 }))).text, "findOne");
+              assert.strictEqual((await expectPromise("accessibility.findAll", accessibility.findAll(accessibility.textContains("O"), { timeoutMs: 1042 }))).length, 2);
+
+              const capturer = await expectPromise("media_projection.requestScreenCapture", mediaProjection.requestScreenCapture({ timeoutMs: 1043 }));
+              expectFrozen("media_projection.capturer", capturer);
+              expectExports("media_projection.capturer", capturer, ["nextImage", "stop"]);
+              const frame = await expectPromise("media_projection.nextImage", capturer.nextImage({ timeoutMs: 1044 }));
+              await expectPromise("media_projection.stop", capturer.stop({ timeoutMs: 1045 }));
+              const capture = await expectPromise("image.captureScreen", image.captureScreen({ timeoutMs: 1046 }));
+              const template = await expectPromise("image.readImage", image.readImage("template.png", { timeoutMs: 1047 }));
+              await expectPromise("image.saveImage", image.saveImage(capture, "out.png", { timeoutMs: 1048 }));
+              const clipped = await expectPromise("image.clip", image.clip(capture, 0, 0, 5, 5, { timeoutMs: 1049 }));
+              const resized = await expectPromise("image.resize", image.resize(clipped, 4, 4, { timeoutMs: 1050 }));
+              assert.deepStrictEqual(await expectPromise("image.findImage", image.findImage(resized, template, { timeoutMs: 1051 })), { x: 7, y: 8 });
+              await expectPromise("image.recycle", image.recycle(template, { timeoutMs: 1052 }));
+              assert.strictEqual((await expectPromise("images.resize", images.resize(frame, 3, 3, { timeoutMs: 1053 }))).__autojs6ImageHandle, "images-resize");
+              assert.strictEqual(await expectPromise("work_manager.scheduleOnce", workManager.scheduleOnce({ scriptPath: "main.cjs", timeoutMs: 1054 })), "work-once");
+              assert.strictEqual(await expectPromise("work_manager.schedulePeriodic", workManager.schedulePeriodic({ scriptPath: "main.cjs", intervalMs: workManager.policy.minPeriodicIntervalMs, timeoutMs: 1055 })), "work-periodic");
+              await expectPromise("work_manager.cancel", workManager.cancel("work-once", { timeoutMs: 1056 }));
+              assert.strictEqual((await expectPromise("work_manager.list", workManager.list({ timeoutMs: 1057 }))).length, 1);
+
+              assert.strictEqual(bridge.__test.pendingCount(), 0);
+              const trace = requests.map((request) => request.module + "." + request.method);
+              [
+                "toast.showToast",
+                "app.startActivity",
+                "dialogs.input",
+                "clipboard.hasText",
+                "device.vibrate",
+                "shell.exec",
+                "engines.execScriptFile",
+                "accessibility.findAll",
+                "media_projection.nextImage",
+                "image.findImage",
+                "images.resize",
+                "work_manager.list"
+              ].forEach((entry) => assert(trace.indexOf(entry) >= 0, "missing request " + entry));
+              console.log("bridge.conformance.request_count=" + requests.length);
+              console.log("bridge.conformance.pending=" + bridge.__test.pendingCount());
+              console.log("bridge.conformance=PASS");
+            })();
+            """.trimIndent(),
+            "<embedded-autojs-bridge-conformance.js>",
+            workingDirectory = workDir,
+            timeoutMs = 30_000L,
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("bridge API conformance", result)
+        assertTrue(result.stdout.contains("bridge.conformance=PASS"))
+        assertTrue(result.stdout.contains("bridge.conformance.pending=0"))
+    }
+
+    @Test
+    fun jsBridgeConformanceErrorCapabilityAndDestroyCleanupAreStable() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node bridge conformance error semantics")
+
+        val fullManifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(
+            listOf(
+                "toast",
+                "dialogs",
+                "accessibility",
+            ),
+        )
+        val errorResult = NodeEmbeddedTestHarness.runEmbeddedScript(
+            """
+            "nodejs";
+            (async function main() {
+              const assert = require("assert");
+              const bridge = require("autojs6:bridge");
+              bridge.__test.setTransport({
+                postMessage(message) {
+                  const request = JSON.parse(message);
+                  if (request.method === "isEnabled") {
+                    return;
+                  }
+                  setImmediate(() => bridge.__test.receiveMessage(JSON.stringify({
+                    id: request.id,
+                    ok: false,
+                    error: {
+                      name: "Error",
+                      message: "denied by fake provider",
+                      code: "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED",
+                      module: request.module,
+                      method: request.method
+                    }
+                  })));
+                }
+              });
+
+              let providerErrorCode = "";
+              let providerErrorModule = "";
+              let providerErrorMethod = "";
+              try {
+                await require("dialogs").alert("denied", { timeoutMs: 1000 });
+              } catch (error) {
+                providerErrorCode = String(error && (error.autojs6Code || error.code || ""));
+                providerErrorModule = String(error && error.module || "");
+                providerErrorMethod = String(error && error.method || "");
+              }
+
+              const pending = require("accessibility").isEnabled({ timeoutMs: 5000 });
+              assert.strictEqual(bridge.__test.pendingCount(), 1);
+              bridge.__test.destroy("service destroyed");
+              let destroyCode = "";
+              let destroyModule = "";
+              let destroyMethod = "";
+              try {
+                await pending;
+              } catch (error) {
+                destroyCode = String(error && (error.autojs6Code || error.code || ""));
+                destroyModule = String(error && error.module || "");
+                destroyMethod = String(error && error.method || "");
+              }
+
+              console.log("bridge.conformance.error=" + [providerErrorCode, providerErrorModule, providerErrorMethod].join("|"));
+              console.log("bridge.conformance.destroy=" + [destroyCode, destroyModule, destroyMethod, bridge.__test.pendingCount()].join("|"));
+            })();
+            """.trimIndent(),
+            "<embedded-autojs-bridge-conformance-errors.js>",
+            runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to fullManifest.toJson()),
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("bridge API conformance errors", errorResult)
+        assertTrue(
+            errorResult.stdout.contains(
+                "bridge.conformance.error=${NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED}|dialogs|alert",
+            ),
+        )
+        assertTrue(
+            errorResult.stdout.contains(
+                "bridge.conformance.destroy=${NodeRuntimeErrorCodes.BRIDGE_PROCESS_DEAD}|accessibility|isEnabled|0",
+            ),
+        )
+
+        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+
+        val restrictedManifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(listOf("toast"))
+        val capabilityResult = NodeEmbeddedTestHarness.runEmbeddedScript(
+            """
+            "nodejs";
+            (async function main() {
+              const bridge = require("autojs6:bridge");
+              const requests = [];
+              bridge.__test.setTransport({
+                postMessage(message) {
+                  const request = JSON.parse(message);
+                  requests.push(request);
+                  bridge.__test.receiveMessage(JSON.stringify({
+                    id: request.id,
+                    ok: false,
+                    error: {
+                      name: "Error",
+                      message: "capability guard did not reject before dispatch",
+                      code: "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED",
+                      module: request.module,
+                      method: request.method
+                    }
+                  }));
+                }
+              });
+              let deniedCode = "";
+              let deniedModule = "";
+              let deniedMethod = "";
+              let missing = "";
+              try {
+                await require("dialogs").alert("blocked", { timeoutMs: 1000 });
+              } catch (error) {
+                deniedCode = String(error && (error.autojs6Code || error.code || ""));
+                deniedModule = String(error && error.module || "");
+                deniedMethod = String(error && error.method || "");
+                missing = Array.isArray(error && error.missingCapabilities) ? error.missingCapabilities.join("|") : "";
+              }
+              console.log("bridge.conformance.capability=" + [deniedCode, deniedModule, deniedMethod, missing, requests.length, bridge.__test.pendingCount()].join("|"));
+            })();
+            """.trimIndent(),
+            "<embedded-autojs-bridge-conformance-capabilities.js>",
+            runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to restrictedManifest.toJson()),
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("bridge API conformance capabilities", capabilityResult)
+        assertTrue(
+            capabilityResult.stdout.contains(
+                "bridge.conformance.capability=${NodeRuntimeErrorCodes.BRIDGE_CAPABILITY_NOT_DECLARED}|dialogs|alert|dialogs|0|0",
+            ),
+        )
+    }
+
+    private companion object {
+        private val stableDispatchMethods: Map<String, Set<String>> = linkedMapOf(
+            NodeBridgeModules.TOAST to setOf("showToast", "toast"),
+            NodeBridgeModules.APP to setOf("launchPackage", "launchApp", "openAppSetting", "startActivity"),
+            NodeBridgeModules.DIALOGS to setOf("alert", "confirm", "input", "select"),
+            NodeBridgeModules.CLIPBOARD to setOf("getText", "setText", "hasText"),
+            NodeBridgeModules.DEVICE to setOf("isScreenOn", "wakeUp", "vibrate"),
+            NodeBridgeModules.SHELL to setOf("exec"),
+            NodeBridgeModules.ENGINES to setOf("myEngine", "all", "stopAll", "stopSelf", "execScript", "execScriptFile"),
+            NodeBridgeModules.ACCESSIBILITY to setOf(
+                "isEnabled",
+                "ensureEnabled",
+                "click",
+                "back",
+                "home",
+                "recentApps",
+                "findByText",
+                "clickText",
+                "findOne",
+                "findAll",
+            ),
+            NodeBridgeModules.MEDIA_PROJECTION to setOf("requestScreenCapture", "nextImage", "stop"),
+            NodeBridgeModules.IMAGE to setOf("captureScreen", "readImage", "saveImage", "clip", "resize", "findImage", "recycle"),
+            NodeBridgeModules.IMAGES to setOf("captureScreen", "readImage", "saveImage", "clip", "resize", "findImage", "recycle"),
+            NodeBridgeModules.WORK_MANAGER to setOf("scheduleOnce", "schedulePeriodic", "cancel", "list"),
+        )
+    }
+}

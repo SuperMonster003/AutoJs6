@@ -27,6 +27,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `EmbeddedNodePackagedApkSmokeTest`
 - [ ] `NodeEmbeddedLifecycleStressInstrumentationTest`
 - [ ] `NodeAutoJsBridgeInstrumentationTest`
+- [ ] `NodeBridgeConformanceInstrumentationTest`
 - [ ] `NodeCompatCorpusInstrumentationTest`
 - [ ] `NodeRealNpmCompatInstrumentationTest`
 - [ ] `NodeSecurityRegressionInstrumentationTest`
@@ -68,6 +69,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] bridge smoke verifies controlled `fetch` fake-provider GET/POST, timeout, abort, response budget, unsupported scheme, redirect limit, max concurrency, service-destroy cleanup, diagnostics counters, shadowing protection, and that raw `http`/`https`/`net`/`tls`/`dns` remain disabled
 - [ ] bridge smoke verifies controlled `websocket` fake-provider connect/send/receive/close, timeout, message budget, max connection, service-destroy cleanup, diagnostics counters, shadowing protection, and that raw `net`/`tls` remain disabled
 - [ ] bridge smoke verifies controlled `work_manager` schedule-once, schedule-periodic, cancel, list, scoped descriptor policy, packaged entry metadata serialization, queued-fallback rejection, shadowing protection, and that `tasks` remains unavailable
+- [ ] bridge conformance verifies stable module exports, Promise-returning bridge calls, provider error shape, capability rejection, handle methods, and zero pending calls after destroy
 - [ ] bridge resource registry verifies leaked image/screen/websocket resource cleanup semantics, Java handle cleanup, `work_manager` metadata cleanup, shell timeout cleanup, and `embedded_script.bridge_resource.*` diagnostics
 - [ ] bridge concurrency limits verify pending-call flood rejection, image-handle quota, shell/network/WebSocket resource limits, accessibility request-rate limiting, safe project overrides, and ignored above-hard-max overrides
 - [ ] bridge RPC fuzzer verifies malformed request parsing, unknown dispatch paths, fake-provider mode, malformed responses, service-destroy rejection, and zero pending calls after cleanup
