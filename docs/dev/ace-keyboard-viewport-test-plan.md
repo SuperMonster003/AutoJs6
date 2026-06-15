@@ -88,12 +88,15 @@ Existing debug-only hooks remain the fallback and routing controls:
 - `AceEditorTestHooks.forceRendererGoneFallback`
 - `AceEditorTestHooks.forceLargeFileNativeRoute`
 
-Repeated keyboard show/hide is currently a manual stress method, not an
-automatic hook. Programmatic IME toggling does not reliably reproduce user tap
-anchors, touch focus, WebView selection handles, or CJK composition behavior.
-Use `ACE-KV-003` and preserve diagnostics after the run. A debug-only automated
-helper can be added later when there is a device-side UI automation harness that
-can tap real viewport coordinates and collect diagnostics.
+The isolated ACE debug activity also exposes an `IME stress` button. It loads a
+120-line sample, alternates top/middle/lower cursor anchors, and runs 20
+programmatic show/hide cycles through the same ACE bridge and diagnostics path.
+Use it as a quick regression helper before running the full device matrix.
+
+Programmatic IME toggling still does not reliably reproduce user tap anchors,
+touch focus, WebView selection handles, or CJK composition behavior. `ACE-KV-003`
+therefore remains the release source of truth: run the manual repeated
+show/hide case on real devices and preserve diagnostics after the run.
 
 ## Test Matrix
 
@@ -101,7 +104,7 @@ can tap real viewport coordinates and collect diagnostics.
 | --- | --- | --- | --- | --- | --- |
 | ACE-KV-001 | File-manager open first paint | ACE selected, open `ace-basic.js` from File Manager | Open the file 10 times from a cold editor page, alternating light and dark theme when practical | No white or old-page flash. No persistent gutter-only flicker. First visible frame background matches the editor theme | `lastFirstPaintAtUptimeMillis`, `runtimeEvent=first_paint`, `lastAceResizeCompletedReason` |
 | ACE-KV-002 | Top, middle, and lower tap anchors | File has at least 80 lines, keyboard hidden | Tap a top line, a middle line, and a lower visible line. Let the keyboard show and type a marker each time | Marker appears at the tapped line. Keyboard show does not push the intended caret out of view. Gutter and text columns stay aligned | `lastHostImeBottomInset`, `lastViewportPolicyBottomInset`, `lastAceResizeCompletedReason` |
-| ACE-KV-003 | Repeated IME show/hide stress | Same file, gesture and 3-button navigation when available | Tap to show keyboard, press Back to hide it, repeat at least 20 times, then copy diagnostics | ACE remains active. No fallback. No persistent white/black flash. Heartbeat resumes after IME settles | `lastImeState`, `lastImeIgnoredRequestReason`, `heartbeatSuspendedReason`, `runtimeEventHistory` |
+| ACE-KV-003 | Repeated IME show/hide stress | Same file, gesture and 3-button navigation when available | First run the isolated debug activity `IME stress` helper, then manually tap to show keyboard, press Back to hide it, repeat at least 20 times, and copy diagnostics | ACE remains active. No fallback. No persistent white/black flash. Heartbeat resumes after IME settles | `lastImeState`, `lastImeIgnoredRequestReason`, `heartbeatSuspendedReason`, `runtimeEventHistory` |
 | ACE-KV-004 | Completion popup accept | Static completion available | Type `console.lo`, accept highlighted completion with keyboard Enter. Type `app.la`, accept by touch | Completion inserts the selected item. No fallback, no `JS_RUNTIME_ERROR`, no keyboard focus loop | `lastBridgeEventName`, `completionError`, `recoverableError`, `lastAceResizeCompletedReason` |
 | ACE-KV-005 | Long-press, double-tap, copy, paste, and CJK | Physical WebView device preferred, CJK IME when available | Long-press a word, double-tap a word, adjust selection, copy, paste on another line, then type CJK composition text | No fallback. Copy/paste works through WebView/ACE mobile path. CJK composition remains usable after action-mode entry and exit | `lastActionModeAtUptimeMillis`, `maxBridgeEventWindowCount`, `runtimeEvent=bridge_event_storm` |
 | ACE-KV-006 | Rotation and background restore | Unsaved text in ACE | Type a marker, rotate, background the app, return to editor | Text and dirty state survive. Cursor remains visible. Old WebView callbacks do not trigger duplicate fallback | `runtimeEventHistory`, `lastReadyAtUptimeMillis`, `textMirrorRevision` |

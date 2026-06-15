@@ -154,9 +154,10 @@ Acceptance:
 
 - [x] Add `docs/dev/ace-keyboard-viewport-test-plan.md` or extend the existing
   ACE test plan with a dedicated matrix section.
-- [ ] Add a debug action or debug-only helper to run repeated keyboard
-  show/hide stress when feasible. Current manual stress remains documented until
-  a device-side UI automation harness can tap real viewport coordinates.
+- [x] Add a debug action or debug-only helper to run repeated keyboard
+  show/hide stress when feasible. The isolated ACE debug activity now has an
+  IME stress helper; real tap-anchor validation still belongs to the device
+  matrix.
 - [x] Add diagnostics dump coverage for event history once Phase 4 lands.
 - [x] Cover file-manager open first paint, top/middle/bottom tap anchors,
   completion popup accept, long-press selection, CJK input, rotation, fallback,

@@ -41,6 +41,11 @@ Use `More -> Copy ACE diagnostics` from the editor menu when reporting ACE issue
 
 Diagnostics should include the current engine type, ACE health state, last failure, Android/WebView versions, LSP state, file size, large-file policy, TextMirror revision, viewport policy, host IME event, ACE resize schedule/dispatch/complete fields, bridge event window counters, and recent runtime event history.
 
+The isolated ACE debug page also has an `IME stress` action. It is a quick
+debug-only helper for repeated programmatic show/hide cycles and diagnostics,
+but it does not replace the manual device cases that validate real tap anchors,
+selection handles, and CJK composition.
+
 ## Completion And LSP Checks
 
 - `autojs6_indices.js` must be regenerated from `tools/ace-completion/autojs6_indices.source.json`.

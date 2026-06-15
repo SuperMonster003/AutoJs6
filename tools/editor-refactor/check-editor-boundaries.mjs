@@ -71,6 +71,8 @@ const editorView = "app/src/main/java/org/autojs/autojs/ui/edit/EditorView.kt";
 const editActivity = "app/src/main/java/org/autojs/autojs/ui/edit/EditActivity.kt";
 const editorMenu = "app/src/main/java/org/autojs/autojs/ui/edit/EditorMenu.java";
 const debugToolbarFragment = "app/src/main/java/org/autojs/autojs/ui/edit/toolbar/DebugToolbarFragment.java";
+const aceEditorDebugActivity = "app/src/main/java/org/autojs/autojs/ui/edit/editor/ace/AceEditorDebugActivity.kt";
+const aceEditorDebugLayout = "app/src/main/res/layout/activity_ace_editor_debug.xml";
 const scriptEngine = "app/src/main/java/org/autojs/autojs/ui/edit/editor/engine/ScriptEditorEngine.kt";
 const nativePolicy = "app/src/main/java/org/autojs/autojs/ui/edit/editor/viewport/NativeEditorViewportPolicy.kt";
 const acePolicy = "app/src/main/java/org/autojs/autojs/ui/edit/editor/viewport/AceEditorViewportPolicy.kt";
@@ -105,6 +107,7 @@ const aceEditorIntegrationDoc = "docs/dev/ace-editor-integration.md";
 const nativeOnlyAudit = "docs/dev/editor-native-only-audit.md";
 const engineNeutralServicesDoc = "docs/dev/editor-engine-neutral-services.md";
 const viewportPolicyDoc = "docs/dev/editor-viewport-policy.md";
+const strings = "app/src/main/res/values/strings.xml";
 
 assertIncludes(editorView, "mViewportPolicy.onImeInsetsChanged(imeVisible, targetBottom)");
 assertIncludes(editorView, "EditorViewportPolicyFactory.create(editor, this)");
@@ -378,8 +381,8 @@ assertIncludes(roadmap, "- [x] Audit `user-select`, `.ace_mobile-menu`, selectio
 assertIncludes(roadmap, "- [x] Keep breakpoint and debug-line styles stable.");
 assertIncludes(roadmap, "- [x] If selection suppression is needed, scope it narrowly instead of hiding");
 assertIncludes(roadmap, "- [x] Add `docs/dev/ace-keyboard-viewport-test-plan.md` or extend the existing");
-assertIncludes(roadmap, "- [ ] Add a debug action or debug-only helper to run repeated keyboard");
-assertIncludes(roadmap, "a device-side UI automation harness can tap real viewport coordinates.");
+assertIncludes(roadmap, "- [x] Add a debug action or debug-only helper to run repeated keyboard");
+assertIncludes(roadmap, "IME stress helper; real tap-anchor validation still belongs to the device");
 assertIncludes(roadmap, "- [x] Add diagnostics dump coverage for event history once Phase 4 lands.");
 assertIncludes(roadmap, "- [x] Cover file-manager open first paint, top/middle/bottom tap anchors,");
 assertIncludes(roadmap, "- [x] Update release gates so LSP alpha is not the primary target until the");
@@ -443,6 +446,7 @@ assertIncludes(aceEditorTestPlan, "viewportPolicy=AceEditorViewportPolicy");
 assertIncludes(aceEditorTestPlan, "lastAceResizeCompletedReason");
 assertIncludes(aceEditorTestPlan, "heartbeatSuspendedReason");
 assertIncludes(aceEditorTestPlan, "runtime event history and bridge event window counters");
+assertIncludes(aceEditorTestPlan, "The isolated ACE debug page also has an `IME stress` action.");
 assertIncludes(aceEditorTestPlan, "LSP alpha, hover/markdown tooltip loading, and VisualEditorAce remain deferred");
 
 assertIncludes(aceKeyboardViewportTestPlan, "# ACE Keyboard And Viewport Test Plan");
@@ -472,8 +476,10 @@ assertIncludes(aceKeyboardViewportTestPlan, "runtimeEventHistory");
 assertIncludes(aceKeyboardViewportTestPlan, "runtimeEvent=bridge_event_storm");
 assertIncludes(aceKeyboardViewportTestPlan, "file-manager open first paint");
 assertIncludes(aceKeyboardViewportTestPlan, "Top, middle, and lower tap anchors");
-assertIncludes(aceKeyboardViewportTestPlan, "Repeated keyboard show/hide is currently a manual stress method");
-assertIncludes(aceKeyboardViewportTestPlan, "device-side UI automation harness");
+assertIncludes(aceKeyboardViewportTestPlan, "The isolated ACE debug activity also exposes an `IME stress` button.");
+assertIncludes(aceKeyboardViewportTestPlan, "120-line sample");
+assertIncludes(aceKeyboardViewportTestPlan, "programmatic show/hide cycles");
+assertIncludes(aceKeyboardViewportTestPlan, "Programmatic IME toggling still does not reliably reproduce user tap anchors");
 assertIncludes(aceKeyboardViewportTestPlan, "LSP alpha, hover/markdown tooltip loading, and VisualEditorAce");
 
 assertIncludes(aceEditorIntegrationDoc, "Run the `IME Show/Hide Manual Checklist`");
@@ -483,7 +489,23 @@ assertIncludes(aceEditorIntegrationDoc, "ACE does not need a separate clean-host
 assertIncludes(aceEditorIntegrationDoc, "Do not add `key_ace_clean_host_layout`");
 assertIncludes(aceEditorIntegrationDoc, "docs/dev/editor-viewport-policy.md");
 assertIncludes(aceEditorIntegrationDoc, "runtime event history and bridge event window");
+assertIncludes(aceEditorIntegrationDoc, "The isolated ACE debug activity includes an `IME stress` helper");
+assertIncludes(aceEditorIntegrationDoc, "do not treat it as a replacement for physical tap-anchor and CJK validation");
 assertIncludes(aceEditorIntegrationDoc, "LSP alpha, hover/markdown tooltip loading, and VisualEditorAce are not primary");
+
+assertIncludes(aceEditorDebugActivity, "binding.actionImeStress.setOnClickListener");
+assertIncludes(aceEditorDebugActivity, "private fun startImeStress()");
+assertIncludes(aceEditorDebugActivity, "private fun runImeStressStep()");
+assertIncludes(aceEditorDebugActivity, "private fun finishImeStress()");
+assertIncludes(aceEditorDebugActivity, "IME_STRESS_CYCLES = 20");
+assertIncludes(aceEditorDebugActivity, "binding.aceEditor.showSoftInput()");
+assertIncludes(aceEditorDebugActivity, "binding.aceEditor.hideSoftInput()");
+assertIncludes(aceEditorDebugActivity, "binding.aceEditor.ensureCursorVisible(\"debug_ime_stress_done\")");
+assertIncludes(aceEditorDebugLayout, "android:id=\"@+id/action_ime_stress\"");
+assertIncludes(aceEditorDebugLayout, "@string/text_ace_ime_stress");
+assertIncludes(strings, "text_ace_ime_stress");
+assertIncludes(strings, "text_ace_ime_stress_running");
+assertIncludes(strings, "text_ace_ime_stress_done");
 
 assertIncludes(aceSurfaceSmoke, "ACE editor bootstrap order");
 assertIncludes(aceSurfaceSmoke, "hidden editor before first paint");

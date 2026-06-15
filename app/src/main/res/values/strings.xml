@@ -22,6 +22,9 @@
     <string name="text_ace_editor_debug_text_length">ACE text length: %1$d</string>
     <string name="text_ace_diagnostics_copied">ACE diagnostics copied to clipboard</string>
     <string name="text_ace_get_text">Get text</string>
+    <string name="text_ace_ime_stress">IME stress</string>
+    <string name="text_ace_ime_stress_done">IME stress finished: %1$d cycles</string>
+    <string name="text_ace_ime_stress_running">IME stress: %1$d/%2$d</string>
     <string name="text_ace_insert">Insert</string>
     <string name="text_ace_set_sample">Set sample</string>
     <string name="color_library_identifier_android_colors" translatable="false">Android</string>

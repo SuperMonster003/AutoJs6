@@ -67,6 +67,8 @@ ACE does not need a separate clean-host experiment flag at this stage. The ACE p
   anchors, repeated IME stress, completion accept, long-press selection, CJK
   input, rotation, fallback, large-file routing, and bridge event storm
   diagnostics.
+- The isolated ACE debug activity includes an `IME stress` helper for quick
+  repeated show/hide diagnostics before running the full physical-device matrix.
 
 Do not add `key_ace_clean_host_layout` unless there is a concrete second ACE host layout to compare. A flag without another implementation would add state, test matrix size, and ambiguous diagnostics without improving the stable path.
 
@@ -85,6 +87,8 @@ Before ACE is presented as a gray-release experimental editor:
 - Run the `IME Show/Hide Manual Checklist` in `docs/dev/ace-editor-test-plan.md`.
 - Run the dedicated keyboard and viewport matrix in
   `docs/dev/ace-keyboard-viewport-test-plan.md`.
+- Use the isolated ACE debug activity `IME stress` helper as a quick preflight;
+  do not treat it as a replacement for physical tap-anchor and CJK validation.
 - Verify asset-missing, ready-timeout, JS-init, renderer-gone, and large-file debug hooks.
 - Verify recent small-file input survives fallback through TextMirror.
 - Copy diagnostics from both an active ACE editor and after ACE fallback to Native.
