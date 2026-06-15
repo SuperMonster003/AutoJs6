@@ -120,6 +120,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] scoped fs `/proc`, `/sys`, and `/dev` denial
 - [ ] realpath escape denial
 - [ ] symlink escape denial
+- [ ] extended scoped fs fuzzer passes for path normalization, encoded-looking names, NUL, Windows-style separators, long paths, and symlink chains
 - [ ] package exports/imports escape denial
 - [ ] extended resolver fuzzer passes for package exports/imports maps and prints reproducible seeds on failure
 - [ ] native addon denial
@@ -191,6 +192,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] memory leak stress report generated with `NodeEmbeddedMemoryLeakStressInstrumentationTest` for lifecycle, bridge, fs, or image-handle changes
 - [ ] packaged verifier gives actionable failures
 - [ ] `ERR_AUTOJS6_*` codes stable for documented negative paths
+- [ ] scoped fs fuzzer failure diagnostics include base seed, path case, expected code, observed code, and summary JSON
 - [ ] resolver trace remains off by default once implemented
 - [ ] resolver visualizer fixture parses search paths, package.json fields, null blocking, and final errors
 - [ ] resolver fuzzer failure diagnostics include base seed, case seed, request, result record, and generated package.json

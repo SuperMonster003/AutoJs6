@@ -180,6 +180,14 @@ Current resolver fuzzer extended instrumentation:
 
 This extended security suite creates a deterministic set of generated packages under a scoped `node_modules` tree and fuzzes package `exports` and `imports` resolver inputs: string targets, condition objects, unsupported arrays, `null` blocking, wildcard patterns, unsupported pattern forms, invalid targets, and package-root traversal attempts. It runs in one embedded Node execution, asserts that no escape marker outside the package is loaded, and requires all resolver failures to use stable codes such as `MODULE_NOT_FOUND`, `ERR_PACKAGE_PATH_NOT_EXPORTED`, `ERR_PACKAGE_IMPORT_NOT_DEFINED`, or `ERR_INVALID_PACKAGE_TARGET`. Assertion failures print the base seed, case seed, request, result record, and generated `package.json`.
 
+Current scoped fs fuzzer extended instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeScopedFsFuzzerInstrumentationTest"
+```
+
+This extended security suite creates safe files, an outside secret marker, inside symlink chains, and outside symlink chains, then fuzzes scoped fs path normalization with `.`, `..`, repeated slashes, encoded-looking names, NUL bytes, Unicode slash-like characters, Windows-style backslashes, long paths, `fs.realpathSync`, sync reads, sync `stat`/`access`, and `fs.promises.readFile`. Accepted paths must resolve to a real path inside `workingDirectory`, rejected policy paths must use stable `ERR_AUTOJS6_FS_*` codes, and the outside marker must never be read. Failure diagnostics include the base seed, path case, expected code, observed code, and summary JSON.
+
 Current `fs.promises` focused instrumentation:
 
 ```powershell
