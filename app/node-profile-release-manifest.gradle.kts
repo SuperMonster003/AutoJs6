@@ -1,0 +1,308 @@
+import groovy.json.JsonOutput
+import java.io.File
+import java.security.MessageDigest
+import java.time.ZonedDateTime
+import java.util.Properties
+
+private fun nodeProfileReleaseManifestJson(value: Any?): String =
+    JsonOutput.prettyPrint(JsonOutput.toJson(value))
+
+private fun nodeProfileReleaseManifestSha256(file: File): String? {
+    if (!file.isFile) return null
+    val digest = MessageDigest.getInstance("SHA-256")
+    file.inputStream().use { input ->
+        val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+        while (true) {
+            val read = input.read(buffer)
+            if (read < 0) break
+            digest.update(buffer, 0, read)
+        }
+    }
+    return digest.digest().joinToString("") { "%02x".format(it) }
+}
+
+private fun nodeProfileReleaseManifestGit(vararg args: String): String {
+    return try {
+        val process = ProcessBuilder(listOf("git", *args))
+            .directory(rootProject.projectDir)
+            .redirectErrorStream(true)
+            .start()
+        val output = process.inputStream.bufferedReader().readText().trim()
+        if (process.waitFor() == 0) output else "unavailable"
+    } catch (_: Exception) {
+        "unavailable"
+    }
+}
+
+private fun nodeProfileReleaseManifestLoadVersionProperties(root: File): Properties {
+    val properties = Properties()
+    root.resolve("version.properties").inputStream().use(properties::load)
+    return properties
+}
+
+private fun nodeProfileReleaseManifestBooleanProperty(name: String, defaultValue: Boolean): Boolean =
+    providers.gradleProperty(name)
+        .orElse(defaultValue.toString())
+        .get()
+        .trim()
+        .let { value ->
+            value.equals("true", ignoreCase = true) ||
+                    value.equals("yes", ignoreCase = true) ||
+                    value == "1"
+        }
+
+private fun nodeProfileReleaseManifestNormalizeFlavor(value: String): String =
+    when (value.trim().lowercase()) {
+        "nodefull", "node-full", "full" -> "nodeFull"
+        "nodemini", "node-mini", "mini" -> "nodeMini"
+        "rhinoonly", "rhino-only", "rhino" -> "rhinoOnly"
+        else -> "nodeFull"
+    }
+
+private fun nodeProfileReleaseManifestExpectedAbis(releaseFlavor: String, requestedAbis: List<String>): List<String> =
+    when (releaseFlavor) {
+        "nodeFull" -> listOf("arm64-v8a", "armeabi-v7a", "x86_64")
+        "nodeMini" -> requestedAbis.ifEmpty { listOf("arm64-v8a") }
+        "rhinoOnly" -> emptyList()
+        else -> emptyList()
+    }
+
+private fun nodeProfileReleaseManifestNativeLibHashes(
+    mergedLibRoot: File,
+    expectedAbis: List<String>,
+): Map<String, Map<String, Any?>> {
+    val libNames = listOf("libnode.so", "libautojs6-node.so", "libc++_shared.so")
+    return expectedAbis.associateWith { abi ->
+        libNames.associateWith { libName ->
+            val file = mergedLibRoot.resolve("$abi/$libName")
+            linkedMapOf(
+                "path" to file.relativeToOrSelf(projectDir).invariantSeparatorsPath,
+                "exists" to file.isFile,
+                "sizeBytes" to file.takeIf { it.isFile }?.length(),
+                "sha256" to nodeProfileReleaseManifestSha256(file),
+            )
+        }
+    }
+}
+
+val generateNodeProfileReleaseManifest = tasks.register("generateNodeProfileReleaseManifest") {
+    group = "verification"
+    description = "Generates the AutoJs6 Node Profile v1 release artifact manifest."
+
+    dependsOn(
+        "generateNodeCompatibilityProfile",
+        "nativeNodeDependencyReportAppDebug",
+        "nativeNodeSymbolArchiveReport",
+        "embeddedNodePackagingPreflightAppDebug",
+        "mergeAppDebugNativeLibs",
+    )
+
+    val reportDirProvider = layout.buildDirectory.dir("reports/nodejs")
+    val jsonReportProvider = reportDirProvider.map { it.file("release-manifest.json") }
+    val markdownReportProvider = reportDirProvider.map { it.file("release-manifest.md") }
+
+    outputs.file(jsonReportProvider)
+    outputs.file(markdownReportProvider)
+    outputs.upToDateWhen { false }
+
+    doLast {
+        val versionProperties = nodeProfileReleaseManifestLoadVersionProperties(rootProject.projectDir)
+        val releaseFlavor = nodeProfileReleaseManifestNormalizeFlavor(
+            providers.gradleProperty("autojs.nodejs.releaseFlavor").orElse("nodeFull").get()
+        )
+        val requestedAbis = providers.gradleProperty("autojs.nodejs.releaseAbis").orNull
+            ?.split(',')
+            ?.map(String::trim)
+            ?.filter(String::isNotEmpty)
+            .orEmpty()
+        val expectedAbis = nodeProfileReleaseManifestExpectedAbis(releaseFlavor, requestedAbis)
+        val effectiveBackend = if (releaseFlavor == "rhinoOnly") {
+            "rhino"
+        } else {
+            providers.gradleProperty("autojs.nodejs.backend").orElse("embedded").get().trim().lowercase()
+        }
+        val mergedLibRoot = layout.buildDirectory
+            .dir("intermediates/merged_native_libs/appDebug/mergeAppDebugNativeLibs/out/lib")
+            .get()
+            .asFile
+        val templateApk = projectDir.resolve("src/main/assets-app/template.apk")
+        val compatibilityJson = layout.buildDirectory
+            .file("reports/nodejs/compatibility-profile.json")
+            .get()
+            .asFile
+        val compatibilityMarkdown = layout.buildDirectory
+            .file("reports/nodejs/compatibility-profile.md")
+            .get()
+            .asFile
+        val stableSurfaceDoc = rootProject.projectDir
+            .resolve("docs/nodejs/releases/NODE_PROFILE_V1_STABLE_SURFACE.md")
+        val nativeDependencyReport = layout.buildDirectory
+            .file("reports/native-node/native-deps-appDebug.txt")
+            .get()
+            .asFile
+        val nativeSymbolReport = layout.buildDirectory
+            .file("reports/native-node/native-symbol-archive-appDebug.txt")
+            .get()
+            .asFile
+        val packagingPreflightReport = layout.buildDirectory
+            .file("reports/embedded-node/packaging-preflight-appDebug.txt")
+            .get()
+            .asFile
+
+        val featureFlagDefaults = linkedMapOf(
+            "autojs.nodejs.backend" to effectiveBackend,
+            "autojs.nodejs.releaseFlavor" to releaseFlavor,
+            "autojs.nodejs.releaseAbis" to expectedAbis,
+            "autojs.nodejs.embedded.script.enabled" to nodeProfileReleaseManifestBooleanProperty(
+                "autojs.nodejs.embedded.script.enabled",
+                true,
+            ),
+            "autojs.nodejs.esm.experimental" to nodeProfileReleaseManifestBooleanProperty(
+                "autojs.nodejs.esm.experimental",
+                false,
+            ),
+            "autojs.nodejs.dynamicImport.experimental" to nodeProfileReleaseManifestBooleanProperty(
+                "autojs.nodejs.dynamicImport.experimental",
+                false,
+            ),
+            "autojs.nodejs.network.experimental" to nodeProfileReleaseManifestBooleanProperty(
+                "autojs.nodejs.network.experimental",
+                false,
+            ),
+            "autojs.nodejs.worker_threads.experimental" to nodeProfileReleaseManifestBooleanProperty(
+                "autojs.nodejs.worker_threads.experimental",
+                false,
+            ),
+            "autojs.nodejs.javaInterop.experimental" to nodeProfileReleaseManifestBooleanProperty(
+                "autojs.nodejs.javaInterop.experimental",
+                false,
+            ),
+            "autojs.nodejs.timelineTrace" to nodeProfileReleaseManifestBooleanProperty(
+                "autojs.nodejs.timelineTrace",
+                false,
+            ),
+        )
+
+        val manifest = linkedMapOf<String, Any?>(
+            "schema" to "autojs6-node-profile-release-manifest-v1",
+            "generatedAt" to ZonedDateTime.now().toString(),
+            "git" to linkedMapOf(
+                "commit" to nodeProfileReleaseManifestGit("rev-parse", "HEAD"),
+                "shortCommit" to nodeProfileReleaseManifestGit("rev-parse", "--short", "HEAD"),
+                "statusPorcelain" to nodeProfileReleaseManifestGit("status", "--short"),
+            ),
+            "app" to linkedMapOf(
+                "versionName" to versionProperties.getProperty("VERSION_NAME"),
+                "versionCode" to versionProperties.getProperty("VERSION_BUILD")?.toIntOrNull(),
+                "compileSdk" to versionProperties.getProperty("COMPILE_SDK_VERSION")?.toIntOrNull(),
+                "targetSdk" to versionProperties.getProperty("TARGET_SDK_VERSION")?.toIntOrNull(),
+                "minSdk" to versionProperties.getProperty("MIN_SDK_VERSION")?.toIntOrNull(),
+            ),
+            "nodeProfile" to linkedMapOf(
+                "name" to "AutoJs6 Safe Node Profile",
+                "engine" to "autojs6-node-profile-v1",
+                "expectedNode" to "v24.5.0",
+                "releaseFlavor" to releaseFlavor,
+                "backend" to effectiveBackend,
+                "expectedAbis" to expectedAbis,
+                "unsupportedAbis" to listOf("x86"),
+            ),
+            "nativeLibraries" to nodeProfileReleaseManifestNativeLibHashes(mergedLibRoot, expectedAbis),
+            "artifacts" to linkedMapOf(
+                "packagedTemplate" to linkedMapOf(
+                    "path" to templateApk.relativeToOrSelf(projectDir).invariantSeparatorsPath,
+                    "exists" to templateApk.isFile,
+                    "sizeBytes" to templateApk.takeIf { it.isFile }?.length(),
+                    "sha256" to nodeProfileReleaseManifestSha256(templateApk),
+                ),
+                "compatibilityProfileJson" to linkedMapOf(
+                    "path" to compatibilityJson.relativeToOrSelf(projectDir).invariantSeparatorsPath,
+                    "exists" to compatibilityJson.isFile,
+                    "sha256" to nodeProfileReleaseManifestSha256(compatibilityJson),
+                ),
+                "compatibilityProfileMarkdown" to linkedMapOf(
+                    "path" to compatibilityMarkdown.relativeToOrSelf(projectDir).invariantSeparatorsPath,
+                    "exists" to compatibilityMarkdown.isFile,
+                    "sha256" to nodeProfileReleaseManifestSha256(compatibilityMarkdown),
+                ),
+                "stableSurfaceDoc" to linkedMapOf(
+                    "path" to stableSurfaceDoc.relativeToOrSelf(rootProject.projectDir).invariantSeparatorsPath,
+                    "exists" to stableSurfaceDoc.isFile,
+                    "sha256" to nodeProfileReleaseManifestSha256(stableSurfaceDoc),
+                ),
+                "nativeDependencyReport" to linkedMapOf(
+                    "path" to nativeDependencyReport.relativeToOrSelf(projectDir).invariantSeparatorsPath,
+                    "exists" to nativeDependencyReport.isFile,
+                    "sha256" to nodeProfileReleaseManifestSha256(nativeDependencyReport),
+                ),
+                "nativeSymbolReport" to linkedMapOf(
+                    "path" to nativeSymbolReport.relativeToOrSelf(projectDir).invariantSeparatorsPath,
+                    "exists" to nativeSymbolReport.isFile,
+                    "sha256" to nodeProfileReleaseManifestSha256(nativeSymbolReport),
+                ),
+                "packagingPreflightReport" to linkedMapOf(
+                    "path" to packagingPreflightReport.relativeToOrSelf(projectDir).invariantSeparatorsPath,
+                    "exists" to packagingPreflightReport.isFile,
+                    "sha256" to nodeProfileReleaseManifestSha256(packagingPreflightReport),
+                ),
+            ),
+            "featureFlagDefaults" to featureFlagDefaults,
+        )
+
+        val reportDir = reportDirProvider.get().asFile
+        reportDir.mkdirs()
+        val jsonReport = jsonReportProvider.get().asFile
+        val markdownReport = markdownReportProvider.get().asFile
+        jsonReport.writeText(nodeProfileReleaseManifestJson(manifest))
+        markdownReport.writeText(
+            buildString {
+                appendLine("# AutoJs6 Node Profile Release Manifest")
+                appendLine()
+                appendLine("- schema: `${manifest["schema"]}`")
+                appendLine("- generatedAt: `${manifest["generatedAt"]}`")
+                appendLine("- git commit: `${(manifest["git"] as Map<*, *>)["shortCommit"]}`")
+                appendLine("- app version: `${versionProperties.getProperty("VERSION_NAME")}`")
+                appendLine("- version code: `${versionProperties.getProperty("VERSION_BUILD")}`")
+                appendLine("- release flavor: `$releaseFlavor`")
+                appendLine("- backend: `$effectiveBackend`")
+                appendLine("- expected ABIs: `${expectedAbis.joinToString()}`")
+                appendLine()
+                appendLine("## Native Libraries")
+                appendLine()
+                appendLine("| ABI | Library | Exists | Size | SHA-256 |")
+                appendLine("| --- | --- | --- | ---: | --- |")
+                val nativeLibraries = manifest["nativeLibraries"] as Map<*, *>
+                nativeLibraries.forEach { (abi, libs) ->
+                    @Suppress("UNCHECKED_CAST")
+                    (libs as Map<String, Map<String, Any?>>).forEach { (name, info) ->
+                        appendLine(
+                            "| $abi | `$name` | ${info["exists"]} | ${info["sizeBytes"] ?: "n/a"} | `${info["sha256"] ?: "unavailable"}` |"
+                        )
+                    }
+                }
+                appendLine()
+                appendLine("## Artifact Hashes")
+                appendLine()
+                appendLine("| Artifact | Exists | SHA-256 |")
+                appendLine("| --- | --- | --- |")
+                val artifacts = manifest["artifacts"] as Map<*, *>
+                artifacts.forEach { (name, infoAny) ->
+                    @Suppress("UNCHECKED_CAST")
+                    val info = infoAny as Map<String, Any?>
+                    appendLine("| `$name` | ${info["exists"]} | `${info["sha256"] ?: "unavailable"}` |")
+                }
+                appendLine()
+                appendLine("## Feature Flags")
+                appendLine()
+                appendLine("| Property | Effective value |")
+                appendLine("| --- | --- |")
+                featureFlagDefaults.forEach { (name, value) ->
+                    appendLine("| `$name` | `$value` |")
+                }
+            }
+        )
+
+        logger.lifecycle("Node Profile release manifest written to ${jsonReport.absolutePath}")
+        logger.lifecycle("Node Profile release manifest markdown written to ${markdownReport.absolutePath}")
+    }
+}

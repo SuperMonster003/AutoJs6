@@ -11,6 +11,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `:app:nativeNodeSymbolArchiveReport`
 - [ ] `:app:embeddedNodeDoctorReport`
 - [ ] `:app:verifyNodeResolverVisualizerFixtures`
+- [ ] `:app:generateNodeProfileReleaseManifest`
 
 ## Device Tests
 
@@ -192,6 +193,9 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `process.version` and `process.versions` captured in smoke
 - [ ] native dependency report generated
 - [ ] native symbol archive report generated
+- [ ] release manifest generated at `app/build/reports/nodejs/release-manifest.json`
+- [ ] release manifest Markdown generated at `app/build/reports/nodejs/release-manifest.md`
+- [ ] release manifest records app version, git commit, release flavor, ABI list, native library hashes, template hash, compatibility profile hash, stable surface hash, and feature flag defaults
 - [ ] Embedded Node doctor text and JSON reports generated under `app/build/reports/nodejs/doctor/`
 - [ ] doctor report lists backend, expected Node version, feature flags, enabled/disabled modules, native hashes, packaged status, last-error/lifecycle/resource-count availability, and dependency bundle status
 - [ ] runtime probe logs `libnode.so.sha256` and `libautojs6-node.so.sha256`

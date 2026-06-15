@@ -182,7 +182,8 @@ Expected GA artifact set:
 
 - `build/reports/nodejs/compatibility-profile.json`
 - `build/reports/nodejs/compatibility-profile.md`
-- release manifest JSON and Markdown after Task 100
+- `build/reports/nodejs/release-manifest.json`
+- `build/reports/nodejs/release-manifest.md`
 - native dependency report
 - native symbol archive report
 - Node Doctor text and JSON reports
