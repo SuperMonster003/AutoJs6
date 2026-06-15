@@ -52,16 +52,17 @@ Reports use schema `autojs6-node-performance-v1` and include:
 
 ## Threshold Mode
 
-Threshold checks are off by default. Enable them only for controlled local regression runs:
+Threshold checks are off by default. Enable them only for controlled local regression runs. For the current GA gate, pin the device to Sony XQ-AT72 `QV710AF65F` and use the failure thresholds from the `sony-xq-at72-arm64-ga` profile:
 
 ```powershell
+$env:ANDROID_SERIAL = "QV710AF65F"
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest `
   "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeEmbeddedPerformanceInstrumentationTest" `
   "-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.perf.failOnThreshold=true" `
-  "-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.perf.maxColdWallMs=5000" `
-  "-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.perf.maxWarmWallMs=3000" `
-  "-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.perf.maxAppRssDeltaAfterDestroyKb=65536" `
-  "-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.perf.maxServiceRssKb=262144"
+  "-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.perf.maxColdWallMs=6000" `
+  "-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.perf.maxWarmWallMs=4000" `
+  "-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.perf.maxAppRssDeltaAfterDestroyKb=131072" `
+  "-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.perf.maxServiceRssKb=393216"
 ```
 
 Available arguments:
@@ -73,6 +74,56 @@ Available arguments:
 - `autojs.nodejs.perf.maxServiceRssKb`
 
 Use threshold mode for severe regression detection only. Do not use one device's raw numbers as a universal release policy.
+
+## Release Threshold Profiles
+
+Warning thresholds are advisory review lines for mild regressions. Failure thresholds are the severe-regression lines that should fail a release gate when the corresponding instrumentation argument exists.
+
+Current evidence:
+
+- Sony XQ-AT72 Android 12 arm64 benchmark: cold run `1130 ms`, warm run `1050 ms`, first script `132 ms`, warm script `127 ms`, app RSS retained after destroy `17540 KB`, embedded service RSS about `253004 KB`, app thread delta `-4`, app fd delta `0`.
+- Sony XQ-AT72 full memory stress: no failures; largest per-scenario RSS sample range `67940 KB`, thread sample range `4`, fd sample range `1`.
+- OnePlus OPD2413 Android 15 arm64 reduced stress: no failures; largest per-scenario RSS sample range `4348 KB`, thread sample range `3`, fd sample range `1`. This is historical evidence only; do not use OnePlus OPD2413 for current unattended gates because APK installation requires manual confirmation.
+
+### `sony-xq-at72-arm64-ga`
+
+Use this as the primary Node Profile v1 GA release gate profile.
+
+| Metric | Report field or source | Warning | Failure | Enforcement |
+| --- | --- | ---: | ---: | --- |
+| Cold embedded startup | `metrics.coldRunWallMs` | `3000 ms` | `6000 ms` | `autojs.nodejs.perf.maxColdWallMs` |
+| Warm script startup | `metrics.warmRunWallMs` | `2500 ms` | `4000 ms` | `autojs.nodejs.perf.maxWarmWallMs` |
+| Packaged startup | launch-to-success diagnostic marker, excluding build/install | `30000 ms` | `60000 ms` | release review until packaged smoke exports a startup metric |
+| App RSS after simple script | `metrics.appRssDeltaAfterDestroyKb` | `65536 KB` | `131072 KB` | `autojs.nodejs.perf.maxAppRssDeltaAfterDestroyKb` |
+| Embedded service RSS after simple script | max service snapshot `rssKb` | `307200 KB` | `393216 KB` | `autojs.nodejs.perf.maxServiceRssKb` |
+| RSS after stress | per-scenario final-minus-baseline runaway delta | `196608 KB` | `262144 KB` | `autojs.nodejs.leak.maxRssDeltaKb` |
+| Java heap after stress | per-scenario final-minus-baseline runaway delta | `98304 KB` | `131072 KB` | `autojs.nodejs.leak.maxJavaHeapDeltaKb` |
+| Native heap after stress | per-scenario final-minus-baseline runaway delta | `98304 KB` | `131072 KB` | `autojs.nodejs.leak.maxNativeHeapDeltaKb` |
+| Thread count after stress | per-scenario final-minus-baseline runaway delta | `16` | `24` | `autojs.nodejs.leak.maxThreadDelta` |
+| FD count after stress | per-scenario final-minus-baseline runaway delta | `48` | `64` | `autojs.nodejs.leak.maxFdDelta` |
+
+The cold and warm failure lines are deliberately several times higher than the current Sony benchmark sample so thermal or background noise does not fail a normal gate. RSS, thread, and fd failure lines match the existing conservative runaway defaults unless the performance benchmark already exposes a stricter supported argument.
+
+Run the stress gate with the same failure profile:
+
+```powershell
+$env:ANDROID_SERIAL = "QV710AF65F"
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest `
+  "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeEmbeddedMemoryLeakStressInstrumentationTest" `
+  "-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.leak.maxRssDeltaKb=262144" `
+  "-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.leak.maxJavaHeapDeltaKb=131072" `
+  "-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.leak.maxNativeHeapDeltaKb=131072" `
+  "-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.leak.maxThreadDelta=24" `
+  "-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.leak.maxFdDelta=64"
+```
+
+### Historical and Triage Profiles
+
+`oneplus-opd2413-arm64-historical` is a comparison profile, not a current gate profile. Its Android 15 reduced stress report used the same runaway failure defaults (`262144 KB` RSS, `131072 KB` Java/native heap, `24` threads, `64` fds) and passed with small deltas. Because the device requires manual APK install confirmation, use the report only to spot obvious cross-device regressions or to justify keeping the default failure lines broad.
+
+`low-power-arm64-triage` is for exploratory devices such as older or thermally constrained phones. Treat warnings as notes and do not fail GA solely on this profile unless the Sony GA profile also fails or the report shows monotonic runaway growth. Suggested failure lines are `10000 ms` cold startup, `7000 ms` warm startup, `131072 KB` app RSS retained after simple script, and the same runaway failure defaults as the Sony profile.
+
+Packaged startup is currently a release-review threshold, not a separate machine-enforced argument. A severe packaged startup regression is any packaged smoke run where the app installs and launches but no success or diagnostic marker appears within `60000 ms` from launch, or where the existing packaged smoke method times out. When packaged smoke starts exporting a launch-to-marker metric, wire the failure line above into the aggregate gate.
 
 ## Reading Results
 
