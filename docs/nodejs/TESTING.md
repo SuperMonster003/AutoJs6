@@ -550,6 +550,14 @@ Release packaging profiles:
 - `nodeMini`: supports a smaller explicit ABI set
 - `rhinoOnly`: must not package `libnode.so` or `libautojs6-node.so`
 
+Rollback flavor verification:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyRhinoOnlyBuild "-Pautojs.nodejs.releaseFlavor=rhinoOnly"
+```
+
+See `docs/nodejs/ROLLBACK_PLAYBOOK.md` for when to use this path and what release notes must record.
+
 ## Security Negative Tests
 
 Every release candidate should cover these classes of denial:

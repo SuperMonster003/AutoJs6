@@ -3208,6 +3208,56 @@ val verifyEmbeddedNodePackagedDebug = tasks.register("verifyEmbeddedNodePackaged
     }
 }
 
+val verifyRhinoOnlyBuild = tasks.register("verifyRhinoOnlyBuild") {
+    group = "verification"
+    description = "Verifies the rhinoOnly rollback flavor does not package Embedded Node native libraries."
+
+    val configuredReleaseFlavor = embeddedNodePackagingReleaseFlavorPolicy(
+        rawFlavor = providers.gradleProperty(embeddedNodePackagingReleaseFlavorProperty)
+            .orElse(embeddedNodePackagingDefaultReleaseFlavor)
+            .get(),
+        rawReleaseAbis = providers.gradleProperty(embeddedNodePackagingReleaseAbisProperty).orNull,
+    ).flavor
+    val reportFile = layout.buildDirectory
+        .file("reports/embedded-node/packaging-preflight-$embeddedNodePackagingReportVariant.txt")
+        .get()
+        .asFile
+
+    if (configuredReleaseFlavor == "rhinoOnly") {
+        dependsOn(embeddedNodePackagingPreflightAppDebug)
+    }
+
+    outputs.upToDateWhen { false }
+
+    doLast {
+        if (configuredReleaseFlavor != "rhinoOnly") {
+            throw GradleException(
+                "verifyRhinoOnlyBuild must be run with -Pautojs.nodejs.releaseFlavor=rhinoOnly. " +
+                        "Current release flavor is $configuredReleaseFlavor."
+            )
+        }
+        if (!reportFile.isFile) {
+            throw GradleException(
+                "rhinoOnly packaging preflight report is missing: ${reportFile.absolutePath}"
+            )
+        }
+        val reportText = reportFile.readText()
+        val missingMarkers = listOf(
+            "embedded.node.release.flavor=rhinoOnly",
+            "embedded.node.release.flavor_policy.ready=true",
+            "embedded.node.release.flavor_policy.missing=none",
+        ).filterNot { marker -> reportText.contains(marker) }
+        if (missingMarkers.isNotEmpty()) {
+            throw GradleException(
+                "rhinoOnly packaging preflight report is not ready; missing marker(s): " +
+                        missingMarkers.joinToString() +
+                        ". See ${reportFile.absolutePath}"
+            )
+        }
+        logger.lifecycle("rhinoOnly rollback build verification passed. See ${reportFile.absolutePath}")
+    }
+}
+
 tasks.register("verifyEmbeddedNodeReleaseCandidate") {
     group = "verification"
     description = "Runs the local Embedded Node release-candidate verification gate."

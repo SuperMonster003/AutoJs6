@@ -12,6 +12,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `:app:embeddedNodeDoctorReport`
 - [ ] `:app:verifyNodeResolverVisualizerFixtures`
 - [ ] `:app:generateNodeProfileReleaseManifest`
+- [ ] rollback path reviewed against [ROLLBACK_PLAYBOOK.md](ROLLBACK_PLAYBOOK.md)
 
 ## Device Tests
 
