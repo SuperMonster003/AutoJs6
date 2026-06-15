@@ -85,6 +85,22 @@ class NodeJavaInteropBridgeInstrumentationTest {
         assertFalse(classLoaderDenied.ok)
         assertEquals(NodeRuntimeErrorCodes.JAVA_CLASS_DENIED, classLoaderDenied.error?.code)
 
+        val processBuilderDenied = dispatchJava(
+            enabledProvider,
+            "type",
+            """[{"className":"java.lang.ProcessBuilder"}]""",
+        )
+        assertFalse(processBuilderDenied.ok)
+        assertEquals(NodeRuntimeErrorCodes.JAVA_CLASS_DENIED, processBuilderDenied.error?.code)
+
+        val systemLoadLibraryDenied = dispatchJava(
+            enabledProvider,
+            "callStatic",
+            """[{"className":"java.lang.System","method":"loadLibrary","args":["autojs6-node"]}]""",
+        )
+        assertFalse(systemLoadLibraryDenied.ok)
+        assertEquals(NodeRuntimeErrorCodes.JAVA_CLASS_DENIED, systemLoadLibraryDenied.error?.code)
+
         val reflectionDenied = dispatchJava(
             enabledProvider,
             "type",
@@ -246,6 +262,18 @@ class NodeJavaInteropBridgeInstrumentationTest {
               } catch (error) {
                 reflectionCode = codeOf(error);
               }
+              let processBuilderCode = "";
+              try {
+                java.type("java.lang.ProcessBuilder");
+              } catch (error) {
+                processBuilderCode = codeOf(error);
+              }
+              let systemLoadLibraryCode = "";
+              try {
+                await java.callStatic("java.lang.System", "loadLibrary", ["autojs6-node"]);
+              } catch (error) {
+                systemLoadLibraryCode = codeOf(error);
+              }
 
               console.log("java.resolve=" + require.resolve("java"));
               console.log("java.shadow=" + (java.shadow === true));
@@ -261,7 +289,12 @@ class NodeJavaInteropBridgeInstrumentationTest {
               console.log("java.permissions=" + requests.every((request) => request.permissions.indexOf("java_interop") >= 0));
               console.log("java.timeout=" + requests[0].timeoutMs);
               console.log("java.invalid_no_request=" + (requests.length === beforeInvalid));
-              console.log("java.codes=" + runtimeCode + "|" + reflectionCode);
+              console.log("java.codes=" + [
+                runtimeCode,
+                reflectionCode,
+                processBuilderCode,
+                systemLoadLibraryCode
+              ].join("|"));
               console.log("java.pending=" + bridge.__test.pendingCount());
             })();
             """.trimIndent(),
@@ -282,7 +315,12 @@ class NodeJavaInteropBridgeInstrumentationTest {
         assertTrue(result.stdout, result.stdout.contains("java.permissions=true"))
         assertTrue(result.stdout, result.stdout.contains("java.timeout=1234"))
         assertTrue(result.stdout, result.stdout.contains("java.invalid_no_request=true"))
-        assertTrue(result.stdout, result.stdout.contains("java.codes=ERR_AUTOJS6_JAVA_CLASS_DENIED|ERR_AUTOJS6_JAVA_REFLECTION_DENIED"))
+        assertTrue(
+            result.stdout,
+            result.stdout.contains(
+                "java.codes=ERR_AUTOJS6_JAVA_CLASS_DENIED|ERR_AUTOJS6_JAVA_REFLECTION_DENIED|ERR_AUTOJS6_JAVA_CLASS_DENIED|ERR_AUTOJS6_JAVA_CLASS_DENIED",
+            ),
+        )
         assertTrue(result.stdout, result.stdout.contains("java.pending=0"))
     }
 

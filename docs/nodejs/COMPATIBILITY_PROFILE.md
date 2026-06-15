@@ -307,6 +307,8 @@ The MVP allowlist includes:
 
 Runtime, ProcessBuilder, System, ClassLoader, reflection, raw Android `Context`, filesystem, network, native library loading, and raw object graph traversal remain denied. `require("java")` and `require.resolve("java")` are intercepted before `node_modules` lookup, so a local `node_modules/java` package cannot shadow the disabled policy or the experimental bridge module.
 
+Current GA evaluation: `docs/nodejs/reports/JAVA_INTEROP_EVALUATION.md`.
+
 ## Disabled by Policy
 
 These surfaces must stay disabled unless a future task explicitly opens them behind a design gate:
