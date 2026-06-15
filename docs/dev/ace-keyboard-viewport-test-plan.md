@@ -22,7 +22,7 @@ tests:
 Out of scope for this gate:
 
 - server-backed LSP transport
-- VisualEditorAce
+- public VisualEditorAce engine exposure
 - broad UI automation coverage
 
 Those features stay deferred until this matrix is stable.
@@ -133,5 +133,6 @@ ACE keyboard and viewport work is gate-complete only when:
 - large files still route to Native under the current policy
 - Native remains the default editor
 
-Server-backed LSP transport and VisualEditorAce are not primary release targets
-until these keyboard and viewport gates pass on representative devices.
+Server-backed LSP transport and public VisualEditorAce engine exposure are not
+primary release targets until these keyboard and viewport gates pass on
+representative devices.

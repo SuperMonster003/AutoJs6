@@ -119,9 +119,14 @@ Before ACE is presented as a gray-release experimental editor:
 
 ## Deferred Work
 
-- VisualEditorAce from the Pro layout remains deferred. Do not add an exposed `VISUAL_ACE` enum or UI entry until the ordinary ACE editor is stable.
+- VisualEditorAce from the Pro layout remains deferred. The Stage 3 v2
+  investigation is recorded in
+  `docs/dev/visual-editor-ace-investigation.md`; do not add an exposed
+  `VISUAL_ACE` enum or UI entry until the ordinary ACE editor has recorded
+  keyboard and viewport matrix results on representative devices.
 - LSP remains a separate experimental path. The native alpha manager, diagnostics
   schema, feature flag, and client-side completion/hover fallback hooks are in
   place, but server startup and WebSocket transport are deferred.
-- Server-backed LSP transport and VisualEditorAce are not primary targets until
-  the keyboard and viewport matrix is stable on representative devices.
+- Server-backed LSP transport and public VisualEditorAce engine exposure are not
+  primary targets until the keyboard and viewport matrix is stable on
+  representative devices.

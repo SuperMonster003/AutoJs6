@@ -184,7 +184,7 @@ Acceptance:
 - [x] LSP server manager alpha.
 - [x] LSP completion and hover.
 - [x] Optional tooltip/markdown loading.
-- [ ] VisualEditorAce investigation only after ordinary ACE is stable.
+- [x] VisualEditorAce investigation only after ordinary ACE is stable.
 
 ## Verification Commands
 

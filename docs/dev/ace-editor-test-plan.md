@@ -691,5 +691,7 @@ ACE can remain enabled as an experimental option only if:
 - ACE diagnostics can be copied from an active ACE editor and after ACE fallback to Native.
 - ACE diagnostics include runtime event history and bridge event window counters
   for keyboard and viewport failures.
-- Server-backed LSP transport and VisualEditorAce remain deferred
-  until the keyboard and viewport matrix is stable on representative devices.
+- Server-backed LSP transport remains deferred until the keyboard and viewport
+  matrix is stable on representative devices.
+- `docs/dev/visual-editor-ace-investigation.md` keeps VisualEditorAce
+  investigation-only with no public enum, settings entry, or menu item.

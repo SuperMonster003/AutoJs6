@@ -73,7 +73,12 @@ const editorMenu = "app/src/main/java/org/autojs/autojs/ui/edit/EditorMenu.java"
 const debugToolbarFragment = "app/src/main/java/org/autojs/autojs/ui/edit/toolbar/DebugToolbarFragment.java";
 const aceEditorDebugActivity = "app/src/main/java/org/autojs/autojs/ui/edit/editor/ace/AceEditorDebugActivity.kt";
 const aceEditorDebugLayout = "app/src/main/res/layout/activity_ace_editor_debug.xml";
+const editorMenuXml = "app/src/main/res/menu/menu_editor.xml";
+const arrays = "app/src/main/res/values/arrays.xml";
+const fragmentPreferences = "app/src/main/res/xml/fragment_preferences.xml";
 const scriptEngine = "app/src/main/java/org/autojs/autojs/ui/edit/editor/engine/ScriptEditorEngine.kt";
+const editorEngineType = "app/src/main/java/org/autojs/autojs/ui/edit/editor/engine/EditorEngineType.kt";
+const editorEngineFactory = "app/src/main/java/org/autojs/autojs/ui/edit/editor/engine/EditorEngineFactory.kt";
 const nativePolicy = "app/src/main/java/org/autojs/autojs/ui/edit/editor/viewport/NativeEditorViewportPolicy.kt";
 const acePolicy = "app/src/main/java/org/autojs/autojs/ui/edit/editor/viewport/AceEditorViewportPolicy.kt";
 const policyFactory = "app/src/main/java/org/autojs/autojs/ui/edit/editor/viewport/EditorViewportPolicyFactory.kt";
@@ -110,6 +115,7 @@ const roadmap = "Roadmap.md";
 const aceEditorTestPlan = "docs/dev/ace-editor-test-plan.md";
 const aceKeyboardViewportTestPlan = "docs/dev/ace-keyboard-viewport-test-plan.md";
 const aceEditorIntegrationDoc = "docs/dev/ace-editor-integration.md";
+const visualEditorAceInvestigation = "docs/dev/visual-editor-ace-investigation.md";
 const nativeOnlyAudit = "docs/dev/editor-native-only-audit.md";
 const engineNeutralServicesDoc = "docs/dev/editor-engine-neutral-services.md";
 const viewportPolicyDoc = "docs/dev/editor-viewport-policy.md";
@@ -213,8 +219,23 @@ assertNotIncludes(editActivity, "Observable.just(path)");
 assertNotIncludes(editActivity, "draftFileHelper");
 
 assertIncludes(scriptEngine, "fun onImeInsetsChanged(visible: Boolean, bottomInset: Int) = Unit");
+assertIncludes(editorEngineType, "NATIVE(\"native\")");
+assertIncludes(editorEngineType, "ACE(\"ace\")");
+assertNotIncludes(editorEngineType, "VISUAL_ACE");
+assertIncludes(editorEngineFactory, "EditorEngineType.NATIVE -> createNativeCodeEditorEngine(context)");
+assertIncludes(editorEngineFactory, "EditorEngineType.ACE -> createAceOrFallback(context)");
+assertNotIncludes(editorEngineFactory, "Visual");
+assertNotIncludes(editorView, "entry_editor_engine_visual_ace");
+assertNotIncludes(editorMenu, "action_editor_engine_visual_ace");
+assertNotIncludes(editorMenuXml, "action_editor_engine_visual_ace");
+assertNotIncludes(arrays, "key_editor_engine_visual_ace");
+assertNotIncludes(arrays, "entry_editor_engine_visual_ace");
+assertNotIncludes(fragmentPreferences, "visual_ace");
+assertNotIncludes(strings, "key_editor_engine_visual_ace");
+assertNotIncludes(strings, "entry_editor_engine_visual_ace");
 assertIncludes(policyFactory, "EditorEngineType.NATIVE -> NativeEditorViewportPolicy(editor, hostView)");
 assertIncludes(policyFactory, "EditorEngineType.ACE -> AceEditorViewportPolicy(editor)");
+assertNotIncludes(policyFactory, "VISUAL_ACE");
 
 assertIncludes(nativePolicy, "view.setPadding(view.paddingLeft, view.paddingTop, view.paddingRight, bottomInset)");
 assertIncludes(nativePolicy, "editor.ensureCursorVisibleIfPossible()");
@@ -398,6 +419,7 @@ assertIncludes(roadmap, "- [x] The original flicker, anchor drift, and keyboard 
 assertIncludes(roadmap, "- [x] The same matrix can be rerun after WebView or Android version changes.");
 assertIncludes(roadmap, "- [x] CI gate for editor boundary and ACE hardening scripts.");
 assertIncludes(roadmap, "- [x] Optional tooltip/markdown loading.");
+assertIncludes(roadmap, "- [x] VisualEditorAce investigation only after ordinary ACE is stable.");
 assertIncludes(roadmap, "ACE clean-host behavior remains the default ACE path.");
 assertIncludes(roadmap, "ACE editor CI gate passes.");
 assertIncludes(roadmap, "Keyboard and viewport matrix passes on representative devices.");
@@ -459,7 +481,8 @@ assertIncludes(aceEditorTestPlan, "lastAceResizeCompletedReason");
 assertIncludes(aceEditorTestPlan, "heartbeatSuspendedReason");
 assertIncludes(aceEditorTestPlan, "runtime event history and bridge event window counters");
 assertIncludes(aceEditorTestPlan, "The isolated ACE debug page also has an `IME stress` action.");
-assertIncludes(aceEditorTestPlan, "Server-backed LSP transport and VisualEditorAce remain deferred");
+assertIncludes(aceEditorTestPlan, "docs/dev/visual-editor-ace-investigation.md");
+assertIncludes(aceEditorTestPlan, "investigation-only with no public enum, settings entry, or menu item");
 
 assertIncludes(aceKeyboardViewportTestPlan, "# ACE Keyboard And Viewport Test Plan");
 assertIncludes(aceKeyboardViewportTestPlan, "ACE-KV-001");
@@ -492,7 +515,8 @@ assertIncludes(aceKeyboardViewportTestPlan, "The isolated ACE debug activity als
 assertIncludes(aceKeyboardViewportTestPlan, "120-line sample");
 assertIncludes(aceKeyboardViewportTestPlan, "programmatic show/hide cycles");
 assertIncludes(aceKeyboardViewportTestPlan, "Programmatic IME toggling still does not reliably reproduce user tap anchors");
-assertIncludes(aceKeyboardViewportTestPlan, "Server-backed LSP transport and VisualEditorAce");
+assertIncludes(aceKeyboardViewportTestPlan, "public VisualEditorAce engine exposure");
+assertIncludes(aceKeyboardViewportTestPlan, "Server-backed LSP transport and public VisualEditorAce engine exposure");
 
 assertIncludes(aceEditorIntegrationDoc, "Run the `IME Show/Hide Manual Checklist`");
 assertIncludes(aceEditorIntegrationDoc, "Run `node tools/ace-ci/check-ace-editor-gate.mjs`.");
@@ -504,7 +528,17 @@ assertIncludes(aceEditorIntegrationDoc, "docs/dev/editor-viewport-policy.md");
 assertIncludes(aceEditorIntegrationDoc, "runtime event history and bridge event window");
 assertIncludes(aceEditorIntegrationDoc, "The isolated ACE debug activity includes an `IME stress` helper");
 assertIncludes(aceEditorIntegrationDoc, "do not treat it as a replacement for physical tap-anchor and CJK validation");
-assertIncludes(aceEditorIntegrationDoc, "Server-backed LSP transport and VisualEditorAce are");
+assertIncludes(aceEditorIntegrationDoc, "docs/dev/visual-editor-ace-investigation.md");
+assertIncludes(aceEditorIntegrationDoc, "Server-backed LSP transport and public VisualEditorAce engine exposure are");
+
+assertIncludes(visualEditorAceInvestigation, "# VisualEditorAce Investigation");
+assertIncludes(visualEditorAceInvestigation, "No `VisualEditorAce` or `VISUAL_ACE` implementation exists");
+assertIncludes(visualEditorAceInvestigation, "`EditorEngineType` exposes only `NATIVE` and ordinary `ACE`.");
+assertIncludes(visualEditorAceInvestigation, "Keep `VisualEditorAce` deferred.");
+assertIncludes(visualEditorAceInvestigation, "Do not add a `VISUAL_ACE` enum value");
+assertIncludes(visualEditorAceInvestigation, "`EditorEngineType.VISUAL_ACE` with a stable preference value");
+assertIncludes(visualEditorAceInvestigation, "Do not add `key_editor_engine_visual_ace`");
+assertIncludes(visualEditorAceInvestigation, "Do not add `action_editor_engine_visual_ace`");
 
 assertIncludes(aceEditorDebugActivity, "binding.actionImeStress.setOnClickListener");
 assertIncludes(aceEditorDebugActivity, "private fun startImeStress()");
@@ -718,6 +752,9 @@ assertIncludes(editorView, "private fun schedulePrimaryMenuStateSync()");
 assertIncludes(editorView, "schedulePrimaryMenuStateSync()");
 
 assertOnlyIn("key_ace_clean_host_layout", []);
+assertOnlyIn("VISUAL_ACE", []);
+assertOnlyIn("VisualEditorAce", []);
+assertOnlyIn("visual_ace", []);
 
 assertOnlyIn("requestRectangleOnScreen", [
   "app/src/main/java/org/autojs/autojs/ui/edit/editor/engine/NativeCodeEditorEngine.kt",
