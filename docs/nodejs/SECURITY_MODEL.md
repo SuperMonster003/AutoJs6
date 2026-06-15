@@ -231,6 +231,7 @@ Required bridge properties:
 - project-declared bridge capability gate with `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`
 - malformed request errors with `ERR_AUTOJS6_BRIDGE_INVALID_REQUEST`
 - a centralized module/method registry for provider routing and diagnostics
+- a per-execution resource registry for provider-owned handles
 - main/UI/IO dispatcher separation
 - callbacks into JS marshalled onto the Node event loop thread
 
@@ -241,6 +242,8 @@ Canonical capability names are `toast`, `app.launch`, `app.settings`, `app.activ
 Current `toast` and `app` support uses a private live transport in the main embedded service. The service injects per-execution bridge directories under its private cache, the JavaScript bootstrap writes JSON request files with an internal native filesystem helper, and the service writes JSON responses back for the pending Promise. User scripts are not given the bridge directory paths or raw Android objects.
 
 When the live transport configuration is absent, such as in older packaged inrt templates, the bridge falls back to the queued host-effect envelope. In queued mode JavaScript only observes that the request was accepted; the Android dispatch result is diagnostic output after script completion.
+
+Any provider-owned resource created through the bridge must be registered with the current execution id before JavaScript receives or depends on its handle. Registry records include an id, type, creation timestamp, owner execution id, metadata, and an idempotent close/recycle callback. On execution stop or service destroy, the provider closes all remaining registry entries, clears stale handle maps, and logs a leaked-resource summary through `embedded_script.bridge_resource.*` diagnostics. Current live registrations cover controlled fetch calls, controlled WebSocket sessions, shell executions, `work_manager` metadata tasks, and experimental Java object handles; image handles, screen capturers, dialogs, and workers must use the same registry when their Android providers become live.
 
 The `app` bridge exposes JSON-only intent descriptors and read-only package metadata. It does not expose raw Android `Intent`, `Context`, `PackageManager`, or `Activity` objects to JavaScript. Invalid intent descriptors must fail with a stable bridge policy error.
 

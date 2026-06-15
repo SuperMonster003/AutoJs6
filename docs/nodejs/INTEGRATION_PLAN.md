@@ -126,6 +126,7 @@ Important: `.mjs` currently routes to the Node backend, but ESM execution is sti
 - Add an asynchronous bridge protocol before exposing user modules.
 - Route Android and AutoJs API calls through capability providers.
 - Reject pending bridge calls when the script service stops.
+- Track provider-owned bridge resources per execution and close leaked handles on stop/destroy.
 - Current user-facing MVP modules: `toast`, `app`, `engines`, `clipboard`, `device`, `shell`, `work_manager` metadata registration, protocol-gated `dialogs`, selector-shaped disabled-path `accessibility`, and protocol-gated `media_projection`/`image`.
 
 ### P5 Release Gates

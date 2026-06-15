@@ -545,6 +545,7 @@ Current foundation:
 - internal JavaScript client: `require("autojs6:bridge")`
 - private file-backed live transport in the current embedded service
 - queued host transport fallback for older packaged templates and one-way compatibility paths
+- per-execution bridge resource registry: tracks provider-owned handles and closes leaked resources on destroy
 - bridge requests require non-empty `id`, `module`, and `method`; `args` must be a JSON array, `permissions` must be a string array, and `timeoutMs` must be a positive number
 - Node projects may declare bridge capabilities in `project.json` under `node.permissions`, or in `package.json` under `autojs6.node.permissions`
 - when a bridge capability manifest is present, missing capabilities reject before dispatch with `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`
@@ -697,6 +698,7 @@ No manifest keeps the legacy compatibility mode and does not enforce bridge capa
   - module diagnostics: `require("websocket").policy` and `require("websocket").diagnostics()`
   - accepts only `ws:` and `wss:` URLs; text and binary messages are buffered and budgeted
   - normal builds reject through the Android provider with `ERR_AUTOJS6_NETWORK_DISABLED`; fake-provider tests cover connect, send, receive, close, timeout, max connection, message budget, service destroy, diagnostics, and that raw `net`/`tls` remain disabled
+  - live Android sessions are registered as bridge resources and are closed on execution destroy
 - `work_manager`
   - `scheduleOnce(options): Promise<string>`
   - `schedulePeriodic(options): Promise<string>`
@@ -706,6 +708,7 @@ No manifest keeps the legacy compatibility mode and does not enforce bridge capa
   - current MVP registers provider-owned task metadata only; it does not launch background Node executions yet
   - `backend` is restricted to `embedded`, paths must stay relative to the scoped working directory, and periodic intervals are bounded to at least `900000` ms
   - packaged metadata can mark project entries with `packaged: true`, but older packaged templates without live bridge metadata do not queue persistent registration
+  - provider-owned task metadata is registered as a bridge resource and is cleared on execution destroy
   - raw WorkManager, AlarmManager, JobScheduler, BroadcastReceiver, PendingIntent, and IntentFilter objects remain unavailable to JavaScript
 
 Example:
@@ -768,6 +771,16 @@ Live bridge diagnostics are recorded in result `nativeValues`:
 - `embedded_script.bridge_live_dispatch_pending_count`
 - `embedded_script.bridge_live_dispatch_status`
 - `embedded_script.bridge_live_responses_json`
+- `embedded_script.bridge_resource.active_count`
+- `embedded_script.bridge_resource.max_active_count`
+- `embedded_script.bridge_resource.created_count`
+- `embedded_script.bridge_resource.closed_count`
+- `embedded_script.bridge_resource.destroy_closed_count`
+- `embedded_script.bridge_resource.leak_count`
+- `embedded_script.bridge_resource.active_types`
+- `embedded_script.bridge_resource.dump_json` in debug builds
+
+The current Android provider registers live resources for controlled fetch calls, controlled WebSocket sessions, shell executions, `work_manager` metadata tasks, and experimental Java object handles. The registry also reserves resource types for future image handles, screen capturers, dialogs, and workers so those providers can share the same destroy path when they become live Android capabilities.
 
 The packaged APK smoke requires `toast`, `app`, `clipboard`, and `device` successfully and verifies that project-local `node_modules/toast`, `node_modules/app`, `node_modules/clipboard`, and `node_modules/device` packages cannot shadow bridge modules. Packaged `app.packageName` is verified against the packaged application id. `versionName` and `versionCode` are type-checked in packaged smoke because older inrt templates do not inject host app metadata yet; refreshed templates should promote those to exact-value checks. Packaged `clipboard` and `device` smokes use the queued fallback when live bridge metadata is absent; this proves module routing, Promise behavior, packaged shadowing, and privacy-safe surface shape, while true system clipboard/device access is still provided by the live Android provider path. The `shell` and `work_manager` modules are intentionally not executed by queued fallback; packaged `shell.exec()` and `work_manager.schedule*()` should remain live-bridge-only capabilities.
 

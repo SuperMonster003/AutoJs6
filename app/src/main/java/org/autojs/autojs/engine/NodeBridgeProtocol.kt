@@ -495,6 +495,7 @@ class AndroidNodeBridgeCapabilityProvider(
     private val websocketDiagnostics = ControlledWebSocketDiagnostics()
     private val workManagerTasks = ConcurrentHashMap<String, JSONObject>()
     private val javaHandles = ConcurrentHashMap<String, Any>()
+    private val resourceRegistry = NodeBridgeResourceRegistry(engineInfo.id)
 
     override fun dispatch(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
         when {
@@ -521,18 +522,16 @@ class AndroidNodeBridgeCapabilityProvider(
         putAll(websocketDiagnostics.nativeValues())
         put("embedded_script.work_manager_registered_task_count", workManagerTasks.size.toString())
         put("embedded_script.java_interop_handle_count", javaHandles.size.toString())
+        putAll(resourceRegistry.nativeDiagnostics())
     }
 
     override fun destroy(reason: NodeBridgeError) {
+        val destroyReason = reason.code.ifBlank { reason.message }
         networkDiagnostics.recordServiceDestroyCancellation(networkCalls.size)
-        networkCalls.values.forEach { call ->
-            runCatching { call.cancel() }
-        }
-        networkCalls.clear()
         websocketDiagnostics.recordServiceDestroyClose(websocketSessions.size)
-        websocketSessions.values.forEach { session ->
-            runCatching { session.close(1001, "AutoJs6 service destroyed") }
-        }
+        resourceRegistry.closeAll(destroyReason)
+        networkCalls.values.forEach { call -> runCatching { call.cancel() } }
+        networkCalls.clear()
         websocketSessions.clear()
         workManagerTasks.clear()
         javaHandles.clear()
@@ -755,6 +754,16 @@ class AndroidNodeBridgeCapabilityProvider(
         val id = "node-work-${UUID.randomUUID()}"
         val task = parsed.value.toJson(id, engineInfo)
         workManagerTasks[id] = task
+        resourceRegistry.register(
+            type = NodeBridgeResourceType.WORK_MANAGER_TASK,
+            id = id,
+            metadata = mapOf(
+                "kind" to kind.name.lowercase(),
+                "scheduler" to task.optString("scheduler", "metadata"),
+            ),
+        ) {
+            workManagerTasks.remove(id)
+        }
         return NodeBridgeResponse.success(request.id, NodeBridgeJson.valueToJson(id))
     }
 
@@ -763,7 +772,9 @@ class AndroidNodeBridgeCapabilityProvider(
         if (id.isBlank()) {
             return workManagerPolicyFailure(request, "work_manager.cancel requires a non-empty task id.")
         }
-        workManagerTasks.remove(id)
+        if (!resourceRegistry.close(id, "work_manager.cancel")) {
+            workManagerTasks.remove(id)
+        }
         return NodeBridgeResponse.success(request.id, "null")
     }
 
@@ -877,6 +888,13 @@ class AndroidNodeBridgeCapabilityProvider(
             ?: return javaPolicyFailure(request, "AutoJs6 Java interop constructor returned an unsupported value.")
         val handleId = "java-${UUID.randomUUID()}"
         javaHandles[handleId] = rect
+        resourceRegistry.register(
+            type = NodeBridgeResourceType.JAVA_OBJECT,
+            id = handleId,
+            metadata = mapOf("className" to className),
+        ) {
+            javaHandles.remove(handleId)
+        }
         return NodeBridgeResponse.success(request.id, javaHandleJson(handleId, className, rect).toString())
     }
 
@@ -962,8 +980,21 @@ class AndroidNodeBridgeCapabilityProvider(
             .build()
         val call = client.newCall(okHttpRequest)
         networkCalls[request.id] = call
+        val networkResource = resourceRegistry.register(
+            type = NodeBridgeResourceType.NETWORK_CALL,
+            id = "network-${request.id}",
+            metadata = mapOf(
+                "method" to controlled.method,
+                "url" to controlled.url,
+            ),
+        ) {
+            networkCalls.remove(request.id)
+            call.cancel()
+            networkDiagnostics.finishRequest()
+        }
         fun complete(response: NodeBridgeResponse) {
             networkCalls.remove(request.id)
+            networkResource.release("fetch.complete")
             networkDiagnostics.finishRequest()
             callback(response)
         }
@@ -1091,13 +1122,23 @@ class AndroidNodeBridgeCapabilityProvider(
             maxQueueSize = controlled.maxQueueSize,
         )
         websocketSessions[sessionId] = session
+        val websocketResource = resourceRegistry.register(
+            type = NodeBridgeResourceType.WEBSOCKET_CONNECTION,
+            id = sessionId,
+            metadata = mapOf(
+                "url" to controlled.url,
+                "maxMessageBytes" to controlled.maxMessageBytes.toString(),
+            ),
+        ) { closeReason ->
+            websocketSessions.remove(sessionId)
+            session.close(1001, closeReason.take(123))
+            websocketDiagnostics.finishConnection()
+        }
 
         val timeoutRunnable = Runnable {
             if (responded.compareAndSet(false, true)) {
                 websocketDiagnostics.recordTimeout()
-                websocketSessions.remove(sessionId)
-                websocketDiagnostics.finishConnection()
-                session.close(1001, "AutoJs6 WebSocket connect timed out")
+                websocketResource.close("AutoJs6 WebSocket connect timed out")
                 callback(
                     NodeBridgeResponse.failure(
                         request.id,
@@ -1147,7 +1188,9 @@ class AndroidNodeBridgeCapabilityProvider(
             override fun onFailure(webSocket: WebSocket, t: Throwable, response: okhttp3.Response?) {
                 mainHandler.removeCallbacks(timeoutRunnable)
                 websocketSessions.remove(sessionId)
-                websocketDiagnostics.finishConnection()
+                if (websocketResource.release("websocket.failure")) {
+                    websocketDiagnostics.finishConnection()
+                }
                 session.queueError(NodeRuntimeErrorCodes.NETWORK_TIMEOUT, t.message ?: t.javaClass.name)
                 if (responded.compareAndSet(false, true)) {
                     websocketDiagnostics.recordTimeout()
@@ -1168,7 +1211,9 @@ class AndroidNodeBridgeCapabilityProvider(
             override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
                 session.queueClose(code, reason)
                 websocketSessions.remove(sessionId)
-                websocketDiagnostics.finishConnection()
+                if (websocketResource.release("websocket.closed")) {
+                    websocketDiagnostics.finishConnection()
+                }
             }
         }
         val webSocket = networkClient.newBuilder()
@@ -1221,7 +1266,9 @@ class AndroidNodeBridgeCapabilityProvider(
         val code = payload.optInt("code", 1000).coerceIn(1000, 4999)
         val reason = payload.optString("reason", "")
         session.close(code, reason)
-        websocketDiagnostics.finishConnection()
+        if (resourceRegistry.release(sessionId, "websocket.close")) {
+            websocketDiagnostics.finishConnection()
+        }
         callback(NodeBridgeResponse.success(request.id, "null"))
     }
 
@@ -1393,6 +1440,7 @@ class AndroidNodeBridgeCapabilityProvider(
             ?: return shellPolicyFailure(request, "shell.exec env must be a JSON object with string keys and string values.")
 
         val result = runControlledShellCommand(
+            requestId = request.id,
             command = command,
             root = root,
             cwd = cwd,
@@ -1459,6 +1507,7 @@ class AndroidNodeBridgeCapabilityProvider(
     }
 
     private fun runControlledShellCommand(
+        requestId: String,
         command: String,
         root: Boolean,
         cwd: File,
@@ -1482,15 +1531,29 @@ class AndroidNodeBridgeCapabilityProvider(
                 stderr = error.message ?: error.javaClass.name,
             )
         }
+        val resource = resourceRegistry.register(
+            type = NodeBridgeResourceType.SHELL_EXECUTION,
+            id = "shell-$requestId",
+            metadata = mapOf(
+                "cwd" to cwd.absolutePath,
+                "root" to root.toString(),
+            ),
+        ) {
+            if (process.isAlive) {
+                process.destroyForcibly()
+            }
+        }
         val stdout = StreamCapture(process.inputStream)
         val stderr = StreamCapture(process.errorStream)
         val stdoutThread = thread(name = "AutoJs6NodeShellStdout", isDaemon = true) { stdout.read() }
         val stderrThread = thread(name = "AutoJs6NodeShellStderr", isDaemon = true) { stderr.read() }
         val finished = runCatching { process.waitFor(timeoutMs, TimeUnit.MILLISECONDS) }.getOrDefault(false)
         val code = if (finished) {
-            process.exitValue()
+            process.exitValue().also { exitCode ->
+                resource.release("exit:$exitCode")
+            }
         } else {
-            process.destroyForcibly()
+            resource.close("timeout:$timeoutMs")
             124
         }
         stdoutThread.join(SHELL_STREAM_JOIN_MS)

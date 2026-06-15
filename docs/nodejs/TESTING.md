@@ -251,6 +251,14 @@ Current Java interop allowlist focused instrumentation:
 
 This suite verifies `BuildConfig.NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED=false`, disabled default `require("java")`, shadowing protection against `node_modules/java`, request-local experimental enablement, fake transport serialization, `java.lang.Math`, `java.util.UUID`, opaque `android.graphics.Rect` handles, provider destroy cleanup, and denial of Runtime, ClassLoader, and reflection classes.
 
+Current bridge resource registry focused instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeBridgeResourceRegistryInstrumentationTest"
+```
+
+This suite verifies direct registry cleanup for image-handle, screen-capturer, and WebSocket resource types; idempotent close behavior; leaked-resource diagnostics; Android provider cleanup for experimental Java object handles; `work_manager` metadata cancellation and destroy cleanup; and shell timeout cleanup through the live provider resource registry.
+
 Current `worker_threads` design gate focused instrumentation:
 
 ```powershell

@@ -1,0 +1,213 @@
+package org.autojs.autojs.engine
+
+import android.util.Log
+import org.autojs.autojs6.BuildConfig
+import org.json.JSONArray
+import org.json.JSONObject
+import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
+
+enum class NodeBridgeResourceType(val idPrefix: String) {
+    IMAGE_HANDLE("image"),
+    SCREEN_CAPTURER("screen-capturer"),
+    WEBSOCKET_CONNECTION("websocket"),
+    SHELL_EXECUTION("shell"),
+    DIALOG("dialog"),
+    WORK_MANAGER_TASK("work"),
+    JAVA_OBJECT("java"),
+    WORKER("worker"),
+    NETWORK_CALL("network"),
+}
+
+class NodeBridgeResourceHandle internal constructor(
+    private val registry: NodeBridgeResourceRegistry,
+    val id: String,
+    val type: NodeBridgeResourceType,
+) {
+    fun release(reason: String = "released"): Boolean = registry.release(id, reason)
+
+    fun close(reason: String = "closed"): Boolean = registry.close(id, reason)
+}
+
+data class NodeBridgeResourceCleanupSummary(
+    val ownerExecutionId: String,
+    val reason: String,
+    val closedCount: Int,
+    val leakedCount: Int,
+    val closeErrorCount: Int,
+    val activeTypeCounts: Map<String, Int>,
+) {
+    fun toJson(): String = JSONObject()
+        .put("ownerExecutionId", ownerExecutionId)
+        .put("reason", reason)
+        .put("closedCount", closedCount)
+        .put("leakedCount", leakedCount)
+        .put("closeErrorCount", closeErrorCount)
+        .put("activeTypeCounts", JSONObject(activeTypeCounts))
+        .toString()
+}
+
+class NodeBridgeResourceRegistry(
+    private val ownerExecutionId: String,
+    private val clock: () -> Long = { System.currentTimeMillis() },
+) {
+    private val active = ConcurrentHashMap<String, ResourceRecord>()
+    private val createdCount = AtomicInteger(0)
+    private val closedCount = AtomicInteger(0)
+    private val destroyClosedCount = AtomicInteger(0)
+    private val leakCount = AtomicInteger(0)
+    private val closeErrorCount = AtomicInteger(0)
+    private val maxActiveCount = AtomicInteger(0)
+    @Volatile
+    private var lastCleanupSummary: NodeBridgeResourceCleanupSummary? = null
+
+    fun register(
+        type: NodeBridgeResourceType,
+        id: String = "${type.idPrefix}-${UUID.randomUUID()}",
+        metadata: Map<String, String> = emptyMap(),
+        close: (String) -> Unit = {},
+    ): NodeBridgeResourceHandle {
+        val record = ResourceRecord(
+            id = id,
+            type = type,
+            createdAtEpochMs = clock(),
+            ownerExecutionId = ownerExecutionId,
+            metadata = metadata.toSortedMap(),
+            close = close,
+        )
+        require(active.putIfAbsent(id, record) == null) {
+            "AutoJs6 bridge resource already exists for execution $ownerExecutionId: $id"
+        }
+        createdCount.incrementAndGet()
+        recordMaxActive(active.size)
+        return NodeBridgeResourceHandle(this, id, type)
+    }
+
+    fun release(id: String, reason: String = "released"): Boolean {
+        val record = active.remove(id) ?: return false
+        if (record.closed.compareAndSet(false, true)) {
+            closedCount.incrementAndGet()
+        }
+        return true
+    }
+
+    fun close(id: String, reason: String = "closed"): Boolean {
+        val record = active.remove(id) ?: return false
+        closeRecord(record, reason, fromDestroy = false)
+        return true
+    }
+
+    fun closeAll(reason: String = "destroy"): NodeBridgeResourceCleanupSummary {
+        val records = active.values.sortedWith(compareBy<ResourceRecord> { it.type.name }.thenBy { it.createdAtEpochMs })
+        val activeTypeCounts = typeCounts(records)
+        var closedByDestroy = 0
+        records.forEach { record ->
+            if (active.remove(record.id, record)) {
+                if (closeRecord(record, reason, fromDestroy = true)) {
+                    closedByDestroy += 1
+                }
+            }
+        }
+        val summary = NodeBridgeResourceCleanupSummary(
+            ownerExecutionId = ownerExecutionId,
+            reason = reason,
+            closedCount = closedByDestroy,
+            leakedCount = records.size,
+            closeErrorCount = closeErrorCount.get(),
+            activeTypeCounts = activeTypeCounts,
+        )
+        lastCleanupSummary = summary
+        leakCount.addAndGet(records.size)
+        if (records.isNotEmpty()) {
+            Log.w(TAG, "Closed leaked AutoJs6 Node bridge resources: ${summary.toJson()}")
+        }
+        return summary
+    }
+
+    fun activeCount(): Int = active.size
+
+    fun nativeDiagnostics(): Map<String, String> = linkedMapOf<String, String>().apply {
+        put("embedded_script.bridge_resource.owner_execution_id", ownerExecutionId)
+        put("embedded_script.bridge_resource.active_count", active.size.toString())
+        put("embedded_script.bridge_resource.max_active_count", maxActiveCount.get().toString())
+        put("embedded_script.bridge_resource.created_count", createdCount.get().toString())
+        put("embedded_script.bridge_resource.closed_count", closedCount.get().toString())
+        put("embedded_script.bridge_resource.destroy_closed_count", destroyClosedCount.get().toString())
+        put("embedded_script.bridge_resource.leak_count", leakCount.get().toString())
+        put("embedded_script.bridge_resource.close_error_count", closeErrorCount.get().toString())
+        put("embedded_script.bridge_resource.active_types", JSONObject(typeCounts(active.values)).toString())
+        put("embedded_script.bridge_resource.last_cleanup_summary", lastCleanupSummary?.toJson().orEmpty())
+        if (BuildConfig.DEBUG) {
+            put("embedded_script.bridge_resource.dump_json", dumpActiveResources().toString())
+        }
+    }
+
+    private fun closeRecord(record: ResourceRecord, reason: String, fromDestroy: Boolean): Boolean {
+        if (!record.closed.compareAndSet(false, true)) {
+            return false
+        }
+        runCatching {
+            record.close(reason)
+        }.onFailure { error ->
+            closeErrorCount.incrementAndGet()
+            Log.w(TAG, "Failed to close AutoJs6 Node bridge resource ${record.id}: ${error.message}", error)
+        }
+        closedCount.incrementAndGet()
+        if (fromDestroy) {
+            destroyClosedCount.incrementAndGet()
+        }
+        return true
+    }
+
+    private fun dumpActiveResources(): JSONArray {
+        val dump = JSONArray()
+        active.values
+            .sortedWith(compareBy<ResourceRecord> { it.type.name }.thenBy { it.createdAtEpochMs })
+            .forEach { record ->
+                dump.put(
+                    JSONObject()
+                        .put("id", record.id)
+                        .put("type", record.type.name)
+                        .put("createdAtEpochMs", record.createdAtEpochMs)
+                        .put("ownerExecutionId", record.ownerExecutionId)
+                        .put("metadata", JSONObject(record.metadata)),
+                )
+            }
+        return dump
+    }
+
+    private fun typeCounts(records: Collection<ResourceRecord>): Map<String, Int> {
+        return records
+            .groupingBy { it.type.name }
+            .eachCount()
+            .toSortedMap()
+    }
+
+    private fun recordMaxActive(count: Int) {
+        while (true) {
+            val current = maxActiveCount.get()
+            if (count <= current) {
+                return
+            }
+            if (maxActiveCount.compareAndSet(current, count)) {
+                return
+            }
+        }
+    }
+
+    private data class ResourceRecord(
+        val id: String,
+        val type: NodeBridgeResourceType,
+        val createdAtEpochMs: Long,
+        val ownerExecutionId: String,
+        val metadata: Map<String, String>,
+        val close: (String) -> Unit,
+        val closed: AtomicBoolean = AtomicBoolean(false),
+    )
+
+    companion object {
+        private const val TAG = "NodeBridgeResource"
+    }
+}

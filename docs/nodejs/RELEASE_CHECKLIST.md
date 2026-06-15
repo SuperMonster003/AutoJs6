@@ -34,6 +34,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `NodeWorkerThreadsDesignGateInstrumentationTest`
 - [ ] `NodeWorkerThreadsExperimentalInstrumentationTest`
 - [ ] `NodeJavaInteropBridgeInstrumentationTest`
+- [ ] `NodeBridgeResourceRegistryInstrumentationTest`
 - [ ] `NodeExampleProjectInstrumentationTest`
 - [ ] optional `NodeEmbeddedPerformanceInstrumentationTest` run recorded for lifecycle/native-load changes
 - [ ] extended `NodeEmbeddedMemoryLeakStressInstrumentationTest` run recorded before release candidates that change lifecycle, bridge, fs, or image-handle behavior
@@ -50,6 +51,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] bridge smoke verifies controlled `fetch` fake-provider GET/POST, timeout, abort, response budget, unsupported scheme, redirect limit, max concurrency, service-destroy cleanup, diagnostics counters, shadowing protection, and that raw `http`/`https`/`net`/`tls`/`dns` remain disabled
 - [ ] bridge smoke verifies controlled `websocket` fake-provider connect/send/receive/close, timeout, message budget, max connection, service-destroy cleanup, diagnostics counters, shadowing protection, and that raw `net`/`tls` remain disabled
 - [ ] bridge smoke verifies controlled `work_manager` schedule-once, schedule-periodic, cancel, list, scoped descriptor policy, packaged entry metadata serialization, queued-fallback rejection, shadowing protection, and that `tasks` remains unavailable
+- [ ] bridge resource registry verifies leaked image/screen/websocket resource cleanup semantics, Java handle cleanup, `work_manager` metadata cleanup, shell timeout cleanup, and `embedded_script.bridge_resource.*` diagnostics
 - [ ] worker gate verifies `worker_threads` stays disabled, cannot be shadowed, and reports `experimentalFlags.workerThreads=false`
 - [ ] experimental worker smoke verifies pure-JS worker computation, `workerData`, `parentPort.postMessage`, `terminate()`, max-worker rejection, scoped path denial, and denied AutoJs bridge/raw network/fs/nested-worker access
 - [ ] checked-in examples `hello-node` and `toast-app` still run from `sample/nodejs`
