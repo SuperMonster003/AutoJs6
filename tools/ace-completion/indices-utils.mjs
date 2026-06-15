@@ -181,6 +181,9 @@ export function validateSource(source) {
       if (seenMembers.has(member.name)) {
         errors.push(`module ${moduleName} has duplicate member: ${member.name}`);
       }
+      if (member.signature != null && typeof member.signature !== "string") {
+        errors.push(`module ${moduleName}.${member.name} signature must be a string`);
+      }
       seenMembers.add(member.name);
     }
   }
@@ -339,11 +342,25 @@ export function renderDts(source) {
   for (const moduleName of Object.keys(source.modules)) {
     lines.push(`declare const ${moduleName}: AutoJs6.${interfaceName(moduleName)};`);
   }
+  const globalMemberDeclarations = collectGlobalMemberDeclarations(source);
+  const emittedGlobals = new Set();
   for (const name of source.globals) {
-    lines.push(`declare function ${name}(...args: any[]): any;`);
+    const member = globalMemberDeclarations.get(name);
+    if (member && member.kind !== "variable") {
+      lines.push(renderGlobalMemberDeclaration(member));
+      emittedGlobals.add(name);
+    } else {
+      lines.push(`declare function ${name}(...args: any[]): any;`);
+    }
   }
   for (const name of source.variables) {
-    lines.push(`declare const ${name}: any;`);
+    const member = globalMemberDeclarations.get(name);
+    if (member && member.kind === "variable") {
+      lines.push(renderGlobalMemberDeclaration(member));
+      emittedGlobals.add(name);
+    } else {
+      lines.push(`declare const ${name}: any;`);
+    }
   }
   for (const [moduleName, memberNames] of Object.entries(source.globalMembers)) {
     const moduleMembers = source.modules[moduleName].members.map(normalizeMember);
@@ -351,14 +368,13 @@ export function renderDts(source) {
       ? moduleMembers
       : moduleMembers.filter((member) => memberNames.includes(member.name));
     for (const member of selected) {
-      if (source.globals.includes(member.name) || source.variables.includes(member.name)) {
+      if (emittedGlobals.has(member.name) ||
+        source.globals.includes(member.name) ||
+        source.variables.includes(member.name)) {
         continue;
       }
-      if (member.kind === "variable") {
-        lines.push(`declare const ${member.name}: any;`);
-      } else {
-        lines.push(`declare function ${member.name}(...args: any[]): any;`);
-      }
+      lines.push(renderGlobalMemberDeclaration(member));
+      emittedGlobals.add(member.name);
     }
   }
   lines.push("");
@@ -413,16 +429,91 @@ export function relativeToRoot(filePath) {
 
 function dedupeEntries(entries) {
   const seen = new Set();
+  const positions = new Map();
   const result = [];
   for (const entry of entries) {
     const key = `${entry.type}:${entry.name}`;
     if (seen.has(key)) {
+      const index = positions.get(key);
+      result[index] = mergeCompletionEntry(result[index], entry);
       continue;
     }
     seen.add(key);
+    positions.set(key, result.length);
     result.push(entry);
   }
   return result;
+}
+
+function collectGlobalMemberDeclarations(source) {
+  const declarations = new Map();
+  for (const [moduleName, memberNames] of Object.entries(source.globalMembers || {})) {
+    const moduleSpec = source.modules[moduleName];
+    if (!moduleSpec) {
+      continue;
+    }
+    const moduleMembers = moduleSpec.members.map(normalizeMember);
+    const selected = memberNames === "*"
+      ? moduleMembers
+      : moduleMembers.filter((member) => memberNames.includes(member.name));
+    for (const member of selected) {
+      declarations.set(member.name, mergeCompletionEntry(declarations.get(member.name), member));
+    }
+  }
+  return declarations;
+}
+
+function renderGlobalMemberDeclaration(member) {
+  if (member.kind === "variable") {
+    return renderGlobalVariableDeclaration(member);
+  }
+  return renderGlobalFunctionDeclaration(member);
+}
+
+function renderGlobalFunctionDeclaration(member) {
+  if (member.signature) {
+    const suffix = member.signature.replace(new RegExp(`^${escapeRegExp(member.name)}\\??\\s*`), "");
+    if (suffix.startsWith("(") || suffix.startsWith("<")) {
+      return `declare function ${member.name}${suffix}`;
+    }
+  }
+  return `declare function ${member.name}(...args: any[]): any;`;
+}
+
+function renderGlobalVariableDeclaration(member) {
+  if (member.signature) {
+    const propertyMatch = new RegExp(`^${escapeRegExp(member.name)}\\??\\s*:\\s*(.+);$`).exec(member.signature);
+    if (propertyMatch) {
+      return `declare const ${member.name}: ${propertyMatch[1]};`;
+    }
+  }
+  return `declare const ${member.name}: any;`;
+}
+
+function mergeCompletionEntry(existing, candidate) {
+  if (!existing) {
+    return candidate;
+  }
+  if (!candidate) {
+    return existing;
+  }
+  const existingScore = completionEntryQuality(existing);
+  const candidateScore = completionEntryQuality(candidate);
+  const primary = candidateScore > existingScore ? candidate : existing;
+  const secondary = primary === candidate ? existing : candidate;
+  return {
+    ...secondary,
+    ...primary,
+    doc: primary.doc || secondary.doc,
+    signature: primary.signature || secondary.signature,
+    score: primary.score ?? secondary.score,
+  };
+}
+
+function completionEntryQuality(entry) {
+  return (entry && entry.signature ? 8 : 0) +
+    (entry && entry.doc ? 4 : 0) +
+    (entry && entry.score != null ? 2 : 0);
 }
 
 function recordProOnly(entries, entryPath, name) {
@@ -442,4 +533,8 @@ function indentJson(value, spaces) {
 
 function interfaceName(moduleName) {
   return moduleName.charAt(0).toUpperCase() + moduleName.slice(1);
+}
+
+function escapeRegExp(value) {
+  return String(value || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }

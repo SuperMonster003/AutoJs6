@@ -138,6 +138,11 @@ function valuesFor(completer, line, prefix) {
   return complete(completer, line, prefix).map((item) => item.value || item.caption);
 }
 
+function completionFor(completer, line, prefix, value) {
+  return complete(completer, line, prefix)
+    .find((item) => (item.value || item.caption) === value);
+}
+
 function assertIncludes(actual, expected, label) {
   for (const value of expected) {
     if (!actual.includes(value)) {
@@ -151,6 +156,18 @@ function assertNoThrow(label, block) {
     block();
   } catch (error) {
     throw new Error(`${label}: ${error.stack || error}`);
+  }
+}
+
+function assertDocIncludes(completer, line, prefix, value, expected) {
+  const completion = completionFor(completer, line, prefix, value);
+  if (!completion) {
+    throw new Error(`${line}: missing completion ${value}`);
+  }
+  const tooltip = completer.getDocTooltip(completion);
+  const docText = tooltip && tooltip.docText || completion.docText || "";
+  if (!docText.includes(expected)) {
+    throw new Error(`${line}: completion ${value} is missing doc text ${expected}; actual=${docText}`);
   }
 }
 
@@ -217,6 +234,20 @@ assertIncludes(valuesFor(completer, "device.getB", "getB"), ["getBattery"], "dev
 assertIncludes(valuesFor(completer, "console.lo", "lo"), ["log"], "console.lo");
 assertIncludes(valuesFor(completer, "threads.st", "st"), ["start"], "threads.st");
 assertIncludes(valuesFor(completer, "engines.my", "my"), ["myEngine"], "engines.my");
+assertDocIncludes(
+  completer,
+  "app.la",
+  "la",
+  "launch",
+  "launch(app: App | App.Alias | App.PackageName): boolean;",
+);
+assertDocIncludes(
+  completer,
+  "launch",
+  "launch",
+  "launch",
+  "launch(app: App | App.Alias | App.PackageName): boolean;",
+);
 
 const fallbackCompleter = createFallbackCompleter();
 assertIncludes(valuesFor(fallbackCompleter, "app.la", "la"), ["launch", "launchApp"], "fallback app.la");

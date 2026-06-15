@@ -524,6 +524,8 @@ assertIncludes(aceCiGate, "AutoJs6 Pro-only API detection");
 assertIncludes(aceCiGate, "tools/ace-completion/verify-autojs6-pro-only.mjs");
 assertIncludes(aceCiGate, "AutoJs6 completion index verification");
 assertIncludes(aceCiGate, "tools/ace-completion/verify-autojs6-indices.mjs");
+assertIncludes(aceCiGate, "AutoJs6 generated d.ts verification");
+assertIncludes(aceCiGate, "tools/ace-completion/verify-autojs6-dts.mjs");
 assertIncludes(aceCiGate, "ACE completer tests");
 assertIncludes(aceCiGate, "tools/ace-completion/test-completer.mjs");
 assertIncludes(aceCiGate, "ACE editor CI gate passed.");

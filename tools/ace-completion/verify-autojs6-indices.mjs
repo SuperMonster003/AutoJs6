@@ -62,4 +62,24 @@ for (const [moduleName, memberName] of Object.entries(requiredMembers)) {
   }
 }
 
+const requiredSignatures = {
+  "app.launch": "launch(app: App | App.Alias | App.PackageName): boolean;",
+  "files.read": "read(path: string, encoding?: StandardCharsets): string;",
+};
+for (const [qualifiedName, signature] of Object.entries(requiredSignatures)) {
+  const [moduleName, memberName] = qualifiedName.split(".");
+  const member = (indices.modules && indices.modules[moduleName] || [])
+    .find((entry) => entry.name === memberName);
+  if (!member || member.signature !== signature) {
+    console.error(`Missing required member signature: ${qualifiedName} -> ${signature}`);
+    process.exit(1);
+  }
+}
+
+const launchGlobal = (indices.globals || []).find((entry) => entry.name === "launch" && entry.type === "function");
+if (!launchGlobal || launchGlobal.signature !== requiredSignatures["app.launch"]) {
+  console.error("Global launch completion did not preserve declaration-backed signature.");
+  process.exit(1);
+}
+
 console.log("AutoJs6 ACE completion indices verified.");

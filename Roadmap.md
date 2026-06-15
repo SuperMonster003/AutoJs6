@@ -179,7 +179,7 @@ Acceptance:
 - [x] CI gate for editor boundary and ACE hardening scripts.
 - [x] AutoJs6 API index intermediate model improvements.
 - [x] Pro-only API detection.
-- [ ] Declaration and completion quality improvements.
+- [x] Declaration and completion quality improvements.
 - [ ] LSP server manager alpha.
 - [ ] LSP completion and hover.
 - [ ] Optional tooltip/markdown loading.
@@ -193,6 +193,7 @@ Acceptance:
 - `node tools/ace-completion/verify-autojs6-pro-only.mjs`
 - `node tools/ace-completion/test-completer.mjs`
 - `node tools/ace-completion/verify-autojs6-indices.mjs`
+- `node tools/ace-completion/verify-autojs6-dts.mjs`
 - `.\gradlew.bat :app:compileAppDebugKotlin`
 - `.\gradlew.bat :app:compileAppDebugJavaWithJavac`
 - `.\gradlew.bat :app:mergeAppDebugAssets`

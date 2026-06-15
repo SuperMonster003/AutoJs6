@@ -315,28 +315,34 @@ function parseMemberDeclaration(rawDeclaration) {
 
   const accessorMatch = /^(?:get|set)\s+([A-Za-z_$][A-Za-z0-9_$]*)\s*\(/.exec(declaration);
   if (accessorMatch) {
+    const signature = memberSignature(declaration, "variable", accessorMatch[1]);
     return {
       name: accessorMatch[1],
       kind: "variable",
-      doc: declaration,
+      doc: signature,
+      signature,
     };
   }
 
   const methodMatch = /^([A-Za-z_$][A-Za-z0-9_$]*)\??\s*(?:<[^(){};]*>)?\s*\(/.exec(declaration);
   if (methodMatch) {
+    const signature = memberSignature(declaration, "function", methodMatch[1]);
     return {
       name: methodMatch[1],
       kind: "function",
-      doc: declaration,
+      doc: signature,
+      signature,
     };
   }
 
   const propertyMatch = /^([A-Za-z_$][A-Za-z0-9_$]*)\??\s*:/.exec(declaration);
   if (propertyMatch) {
+    const signature = memberSignature(declaration, "variable", propertyMatch[1]);
     return {
       name: propertyMatch[1],
       kind: "variable",
-      doc: declaration,
+      doc: signature,
+      signature,
     };
   }
 
@@ -539,6 +545,9 @@ function validateModelModule(moduleSpec, errors, seenModules) {
     }
     if (!MEMBER_KINDS.has(member.kind || "function")) {
       errors.push(`api model module ${moduleSpec.name}.${member.name} has invalid kind: ${member.kind}`);
+    }
+    if (member.signature != null && typeof member.signature !== "string") {
+      errors.push(`api model module ${moduleSpec.name}.${member.name} signature must be a string`);
     }
     if (seenMembers.has(member.name)) {
       errors.push(`api model module ${moduleSpec.name} has duplicate member: ${member.name}`);
@@ -823,6 +832,34 @@ function isPublicCompletionName(name) {
   return isIdentifierName(name) && !completionFilterReason(name);
 }
 
+function memberSignature(declaration, kind, name) {
+  const signature = ensureTrailingSemicolon(declaration);
+  if (kind !== "variable") {
+    return signature;
+  }
+
+  const getAccessorMatch = new RegExp(
+    `^get\\s+${escapeRegExp(name)}\\s*\\(\\s*\\)\\s*:\\s*([^;]+);?$`,
+  ).exec(signature);
+  if (getAccessorMatch) {
+    return `${name}: ${getAccessorMatch[1].trim()};`;
+  }
+
+  const setAccessorMatch = new RegExp(
+    `^set\\s+${escapeRegExp(name)}\\s*\\(\\s*[A-Za-z_$][A-Za-z0-9_$]*\\s*:\\s*([^,)]+)(?:,[^)]*)?\\)\\s*(?::\\s*[^;]+)?;?$`,
+  ).exec(signature);
+  if (setAccessorMatch) {
+    return `${name}: ${setAccessorMatch[1].trim()};`;
+  }
+
+  return signature;
+}
+
+function ensureTrailingSemicolon(value) {
+  const signature = collapseWhitespace(value);
+  return signature.endsWith(";") ? signature : `${signature};`;
+}
+
 function isIdentifierName(name) {
   return IDENTIFIER_PATTERN.test(String(name || ""));
 }
@@ -866,6 +903,10 @@ function summarizeFilteredEntries(entries) {
 
 function collapseWhitespace(value) {
   return String(value || "").replace(/\s+/g, " ").trim();
+}
+
+function escapeRegExp(value) {
+  return String(value || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 function moduleDoc(moduleName, typeName) {

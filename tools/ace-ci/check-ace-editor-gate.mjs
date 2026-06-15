@@ -28,6 +28,10 @@ const CHECKS = [
     script: "tools/ace-completion/verify-autojs6-indices.mjs",
   },
   {
+    label: "AutoJs6 generated d.ts verification",
+    script: "tools/ace-completion/verify-autojs6-dts.mjs",
+  },
+  {
     label: "ACE completer tests",
     script: "tools/ace-completion/test-completer.mjs",
   },

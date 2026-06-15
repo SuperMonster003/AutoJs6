@@ -84,6 +84,7 @@ Before ACE is presented as a gray-release experimental editor:
 - Run `node tools/ace-completion/verify-autojs6-api-model.mjs`.
 - Run `node tools/ace-completion/verify-autojs6-pro-only.mjs`.
 - Run `node tools/ace-completion/verify-autojs6-indices.mjs`.
+- Run `node tools/ace-completion/verify-autojs6-dts.mjs`.
 - Run `node tools/ace-completion/test-completer.mjs`.
 - Run `node tools/ace-hardening/check-editor-surface.mjs`.
 - Run the manual cases in `docs/dev/ace-editor-test-plan.md`.

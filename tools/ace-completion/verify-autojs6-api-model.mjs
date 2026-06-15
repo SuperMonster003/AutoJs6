@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 
 import {
+  SOURCE_PATH,
   assertValidSource,
   readSource,
+  relativeToRoot,
 } from "./indices-utils.mjs";
 import {
   assertValidApiModel,
@@ -13,8 +15,13 @@ import {
 const apiModel = buildAutoJs6ApiModel();
 assertValidApiModel(apiModel);
 
-const source = buildAutoJs6CompletionSource(readSource(), apiModel);
+const persistedSource = readSource();
+const source = buildAutoJs6CompletionSource(persistedSource, apiModel);
 assertValidSource(source);
+if (JSON.stringify(source, null, 2) + "\n" !== JSON.stringify(persistedSource, null, 2) + "\n") {
+  console.error(`${relativeToRoot(SOURCE_PATH)} is stale. Run node tools/ace-completion/generate-autojs6-indices-from-dts.mjs.`);
+  process.exit(1);
+}
 
 const moduleMap = new Map(apiModel.modules.map((moduleSpec) => [moduleSpec.name, moduleSpec]));
 const requiredDeclarationMembers = {
@@ -27,6 +34,11 @@ const requiredDeclarationMembers = {
   engines: "myEngine",
   toast: "dismissAll",
 };
+const requiredDeclarationSignatures = {
+  "app.launch": "launch(app: App | App.Alias | App.PackageName): boolean;",
+  "files.read": "read(path: string, encoding?: StandardCharsets): string;",
+  "device.getBattery": "getBattery(): number;",
+};
 
 for (const [moduleName, memberName] of Object.entries(requiredDeclarationMembers)) {
   const moduleSpec = moduleMap.get(moduleName);
@@ -36,6 +48,16 @@ for (const [moduleName, memberName] of Object.entries(requiredDeclarationMembers
   }
   if (!moduleSpec.members.some((member) => member.name === memberName)) {
     console.error(`Missing declaration-backed API model member: ${moduleName}.${memberName}`);
+    process.exit(1);
+  }
+}
+
+for (const [qualifiedName, signature] of Object.entries(requiredDeclarationSignatures)) {
+  const [moduleName, memberName] = qualifiedName.split(".");
+  const moduleSpec = moduleMap.get(moduleName);
+  const member = moduleSpec && moduleSpec.members.find((entry) => entry.name === memberName);
+  if (!member || member.signature !== signature) {
+    console.error(`Missing declaration-backed API model signature: ${qualifiedName} -> ${signature}`);
     process.exit(1);
   }
 }

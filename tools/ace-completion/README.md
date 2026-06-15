@@ -14,6 +14,7 @@ This directory owns the generated ACE completion artifacts for AutoJs6.
 - `verify-autojs6-api-model.mjs`: verifies declaration-backed API model coverage.
 - `verify-autojs6-pro-only.mjs`: detects reserved Pro-only API names in source and runtime indices.
 - `verify-autojs6-indices.mjs`: verifies source structure and generated JS freshness.
+- `verify-autojs6-dts.mjs`: verifies generated `lib.autojs6.d.ts` freshness and typed signatures.
 - `test-completer.mjs`: runs the real browser completer in a Node VM.
 
 ## Commands
@@ -26,6 +27,7 @@ node tools/ace-completion/generate-dts.mjs
 node tools/ace-completion/verify-autojs6-api-model.mjs
 node tools/ace-completion/verify-autojs6-pro-only.mjs
 node tools/ace-completion/verify-autojs6-indices.mjs
+node tools/ace-completion/verify-autojs6-dts.mjs
 node tools/ace-completion/test-completer.mjs
 ```
 
