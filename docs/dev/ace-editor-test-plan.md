@@ -61,7 +61,15 @@ selection handles, and CJK composition.
 
 ## Automation Status
 
-The repository currently has only lightweight instrumentation test dependencies for the app module, without a complete editor UI automation stack such as Espresso actions and ActivityScenario rules. This document is therefore the executable acceptance source for task 12. The case IDs below map directly to future smoke test names:
+The app module keeps a lightweight instrumentation setup without a complete
+editor UI automation stack such as Espresso actions and ActivityScenario rules.
+`AceCodeEditorSmokeTest` covers the current ACE basics by launching the isolated
+debug activity, waiting for WebView ready/first-paint diagnostics, round-tripping
+text through the bridge, and checking breakpoint/resize diagnostics.
+
+This document remains the broader acceptance source for the richer editor flows
+that still need future automation. The case IDs below map directly to future
+smoke test names:
 
 - `openAceEditorAndTypeText`
 - `saveAceEditorText`

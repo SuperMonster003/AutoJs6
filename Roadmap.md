@@ -175,7 +175,7 @@ Acceptance:
 
 ## Phase 8: Resume Deferred Advanced Work
 
-- [ ] Instrumentation smoke tests for ACE basics.
+- [x] Instrumentation smoke tests for ACE basics.
 - [x] CI gate for editor boundary and ACE hardening scripts.
 - [ ] AutoJs6 API index intermediate model improvements.
 - [ ] Pro-only API detection.
