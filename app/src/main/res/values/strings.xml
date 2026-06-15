@@ -13,7 +13,7 @@
     <!-- Forcibly use LeakCanary to detect memory leaks. -->
     <string name="leak_canary_test_class_name" translatable="false">assertk.Assert</string>
 
-    <string name="app_name" translatable="false">AutoJs6</string>
+    <string name="app_name" translatable="false">AutoJs6 ACE</string>
     <string name="app_name_qq" translatable="false">QQ</string>
     <string name="text_ace_editor_debug">ACE editor debug</string>
     <string name="text_ace_editor_debug_description">Open an isolated ACE WebView editor test page</string>
