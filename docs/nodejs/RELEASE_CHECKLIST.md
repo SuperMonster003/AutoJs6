@@ -121,6 +121,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] realpath escape denial
 - [ ] symlink escape denial
 - [ ] package exports/imports escape denial
+- [ ] extended resolver fuzzer passes for package exports/imports maps and prints reproducible seeds on failure
 - [ ] native addon denial
 - [ ] static ESM policy error
 - [ ] dynamic import policy error
@@ -192,6 +193,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `ERR_AUTOJS6_*` codes stable for documented negative paths
 - [ ] resolver trace remains off by default once implemented
 - [ ] resolver visualizer fixture parses search paths, package.json fields, null blocking, and final errors
+- [ ] resolver fuzzer failure diagnostics include base seed, case seed, request, result record, and generated package.json
 - [ ] runtime timeline trace is available only with `autojs.nodejs.timelineTrace=true` or `AUTOJS6_NODE_TIMELINE_TRACE=1`
 - [ ] execution queue diagnostics report queue mode, queue status, wait time, and max queued executions
 - [ ] bridge live diagnostics are present for main-app bridge smoke

@@ -172,6 +172,14 @@ This suite verifies dangerous process APIs, disabled builtins, network operation
 
 The network portion also asserts that normal builds keep `BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED=false`; raw network operations must stay denied until `docs/nodejs/design/NETWORK.md` is implemented by a later task.
 
+Current resolver fuzzer extended instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeResolverFuzzerInstrumentationTest"
+```
+
+This extended security suite creates a deterministic set of generated packages under a scoped `node_modules` tree and fuzzes package `exports` and `imports` resolver inputs: string targets, condition objects, unsupported arrays, `null` blocking, wildcard patterns, unsupported pattern forms, invalid targets, and package-root traversal attempts. It runs in one embedded Node execution, asserts that no escape marker outside the package is loaded, and requires all resolver failures to use stable codes such as `MODULE_NOT_FOUND`, `ERR_PACKAGE_PATH_NOT_EXPORTED`, `ERR_PACKAGE_IMPORT_NOT_DEFINED`, or `ERR_INVALID_PACKAGE_TARGET`. Assertion failures print the base seed, case seed, request, result record, and generated `package.json`.
+
 Current `fs.promises` focused instrumentation:
 
 ```powershell

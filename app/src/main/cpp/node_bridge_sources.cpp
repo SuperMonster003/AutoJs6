@@ -13566,17 +13566,17 @@ std::string buildEmbeddedScriptExecutionSource(
   function __autojs6_validate_package_pattern_replacement(replacement, moduleName, fieldName) {
     const path = __autojs6_path_module();
     if (replacement.length === 0) {
-      throw new Error("Embedded Node package " + fieldName + " wildcard replacement must be non-empty for '" + moduleName + "'.");
+      throw __autojs6_invalid_package_target("Embedded Node package " + fieldName + " wildcard replacement must be non-empty for '" + moduleName + "'.");
     }
     if (replacement.indexOf("\u0000") >= 0) {
-      throw new Error("Embedded Node package " + fieldName + " wildcard replacement rejects NUL for '" + moduleName + "'.");
+      throw __autojs6_invalid_package_target("Embedded Node package " + fieldName + " wildcard replacement rejects NUL for '" + moduleName + "'.");
     }
     if (path.isAbsolute(replacement)) {
-      throw new Error("Embedded Node package " + fieldName + " wildcard replacement rejects absolute path for '" + moduleName + "'.");
+      throw __autojs6_invalid_package_target("Embedded Node package " + fieldName + " wildcard replacement rejects absolute path for '" + moduleName + "'.");
     }
     for (const part of replacement.split("/")) {
       if (part === "" || part === "." || part === "..") {
-        throw new Error("Embedded Node package " + fieldName + " wildcard replacement rejects unsafe segment for '" + moduleName + "'.");
+        throw __autojs6_invalid_package_target("Embedded Node package " + fieldName + " wildcard replacement rejects unsafe segment for '" + moduleName + "'.");
       }
     }
     return replacement;
@@ -13588,7 +13588,7 @@ std::string buildEmbeddedScriptExecutionSource(
     const prefix = patternKey.slice(0, firstStar);
     if (key.indexOf(prefix) !== 0) return null;
     if (starCount !== 1) {
-      throw new Error("Unsupported Embedded Node package " + fieldName + " multiple wildcard pattern in MVP for '" + moduleName + "': " + patternKey);
+      throw __autojs6_invalid_package_target("Unsupported Embedded Node package " + fieldName + " multiple wildcard pattern in MVP for '" + moduleName + "': " + patternKey);
     }
     const suffix = patternKey.slice(firstStar + 1);
     if (suffix && key.slice(-suffix.length) !== suffix) return null;
@@ -13602,7 +13602,7 @@ std::string buildEmbeddedScriptExecutionSource(
   function __autojs6_apply_package_pattern_target(target, replacement, moduleName, fieldName) {
     if (replacement === null) return target;
     if (__autojs6_star_count(target) !== 1) {
-      throw new Error("Embedded Node package " + fieldName + " pattern target must contain exactly one '*' for '" + moduleName + "': " + target);
+      throw __autojs6_invalid_package_target("Embedded Node package " + fieldName + " pattern target must contain exactly one '*' for '" + moduleName + "': " + target);
     }
     return target.replace("*", replacement);
   }
@@ -13703,7 +13703,7 @@ std::string buildEmbeddedScriptExecutionSource(
             }
           );
         }
-        throw new Error("Unsupported Embedded Node package exports target in MVP for '" + moduleName + "'.");
+        throw __autojs6_invalid_package_target("Unsupported Embedded Node package exports target in MVP for '" + moduleName + "'.");
       }
       if (selected.blocked) {
         __autojs6_resolve_trace("exports blocked", {
@@ -13734,14 +13734,14 @@ std::string buildEmbeddedScriptExecutionSource(
     if (exportsValue === null) {
       throw __autojs6_package_path_not_exported("Embedded Node package exports null targets are not supported in MVP for '" + moduleName + "'.");
     }
-    throw new Error("Unsupported Embedded Node package exports shape in MVP for '" + moduleName + "'.");
+    throw __autojs6_invalid_package_target("Unsupported Embedded Node package exports shape in MVP for '" + moduleName + "'.");
   }
   function __autojs6_package_imports_target(packageData, specifier, moduleName, mode) {
     if (!packageData || typeof packageData !== "object" || !__autojs6_has_own(packageData, "imports")) {
       return { present: false, target: null };
     }
     if (specifier === "#" || specifier.indexOf("#/") === 0 || specifier.indexOf("\u0000") >= 0) {
-      throw new Error("Invalid Embedded Node package imports specifier: " + specifier);
+      throw __autojs6_invalid_package_target("Invalid Embedded Node package imports specifier: " + specifier);
     }
     const importsValue = packageData.imports;
     if (importsValue && typeof importsValue === "object" && !Array.isArray(importsValue)) {
@@ -13782,7 +13782,7 @@ std::string buildEmbeddedScriptExecutionSource(
             }
           );
         }
-        throw new Error("Unsupported Embedded Node package imports target in MVP for '" + moduleName + "'.");
+        throw __autojs6_invalid_package_target("Unsupported Embedded Node package imports target in MVP for '" + moduleName + "'.");
       }
       if (selected.blocked) {
         __autojs6_resolve_trace("imports blocked", {
@@ -13813,7 +13813,7 @@ std::string buildEmbeddedScriptExecutionSource(
     if (importsValue === null) {
       throw __autojs6_package_import_not_defined("Embedded Node package imports null targets are not supported in MVP for '" + moduleName + "'.");
     }
-    throw new Error("Unsupported Embedded Node package imports shape in MVP for '" + moduleName + "'.");
+    throw __autojs6_invalid_package_target("Unsupported Embedded Node package imports shape in MVP for '" + moduleName + "'.");
   }
   function __autojs6_resolve_package_exports(packageDir, packageData, subpath, root, moduleName, ignoredFields, mode) {
     let packageExports;
