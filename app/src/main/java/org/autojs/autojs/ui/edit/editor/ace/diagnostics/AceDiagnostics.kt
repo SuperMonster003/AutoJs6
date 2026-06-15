@@ -40,6 +40,10 @@ object AceDiagnostics {
             lastHideSoftInputAtUptimeMillis = null,
             lastResizeAtUptimeMillis = null,
             lastActionModeAtUptimeMillis = null,
+            viewportPolicy = null,
+            lastHostImeVisible = null,
+            lastHostImeBottomInset = null,
+            lastHostImeEventAtUptimeMillis = null,
         )
     }
 
@@ -74,6 +78,10 @@ object AceDiagnostics {
             appendLine("lastHideSoftInputAtUptimeMillis=${snapshot.lastHideSoftInputAtUptimeMillis?.toString().orUnknown()}")
             appendLine("lastResizeAtUptimeMillis=${snapshot.lastResizeAtUptimeMillis?.toString().orUnknown()}")
             appendLine("lastActionModeAtUptimeMillis=${snapshot.lastActionModeAtUptimeMillis?.toString().orUnknown()}")
+            appendLine("viewportPolicy=${snapshot.viewportPolicy.orUnknown()}")
+            appendLine("lastHostImeVisible=${snapshot.lastHostImeVisible?.toString().orUnknown()}")
+            appendLine("lastHostImeBottomInset=${snapshot.lastHostImeBottomInset?.toString().orUnknown()}")
+            appendLine("lastHostImeEventAtUptimeMillis=${snapshot.lastHostImeEventAtUptimeMillis?.toString().orUnknown()}")
         }.trimEnd()
     }
 

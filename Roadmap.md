@@ -34,8 +34,8 @@ goal is to make editor behavior engine-neutral where possible, and keep native
 - [x] Make `EditorView` dispatch IME state to the current viewport policy.
 - [x] Keep Native editor bottom padding and cursor-visible workaround native-only.
 - [x] Keep ACE viewport handling limited to ACE resize/scroll settling.
-- [ ] Add focused regression checks for viewport-policy wiring.
-- [ ] Add optional debug diagnostics for active viewport policy and last IME event.
+- [x] Add focused regression checks for viewport-policy wiring.
+- [x] Add optional debug diagnostics for active viewport policy and last IME event.
 
 ## Phase 2: Input Commands and Keyboard UI
 
@@ -85,3 +85,10 @@ goal is to make editor behavior engine-neutral where possible, and keep native
   cursor-visibility workarounds.
 - A third editor core can be integrated by implementing `ScriptEditorEngine` and
   the required policies/adapters.
+
+## Verification Commands
+
+- `node tools/editor-refactor/check-editor-boundaries.mjs`
+- `node tools/ace-completion/test-completer.mjs`
+- `.\gradlew.bat :app:compileAppDebugKotlin`
+- `.\gradlew.bat :app:mergeAppDebugAssets`

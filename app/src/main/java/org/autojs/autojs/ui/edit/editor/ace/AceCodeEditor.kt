@@ -170,6 +170,10 @@ class AceCodeEditor @JvmOverloads constructor(
             lastHideSoftInputAtUptimeMillis = lastHideSoftInputAtUptimeMillis.takeIf { it > 0L },
             lastResizeAtUptimeMillis = lastResizeAtUptimeMillis.takeIf { it > 0L },
             lastActionModeAtUptimeMillis = lastActionModeAtUptimeMillis.takeIf { it > 0L },
+            viewportPolicy = null,
+            lastHostImeVisible = null,
+            lastHostImeBottomInset = null,
+            lastHostImeEventAtUptimeMillis = null,
         )
     }
 

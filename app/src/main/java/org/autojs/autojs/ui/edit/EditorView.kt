@@ -362,6 +362,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     // zh-CN: 最近一次应用到编辑器 padding 的 IME 底部值.
     private var mLastImeBottomInset = 0
     private var mLastImeVisible = false
+    private var mLastImeEventAtUptimeMillis = 0L
 
     // Reusable rect for window visible area.
     // zh-CN: 复用的窗口可见区域 Rect.
@@ -620,6 +621,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             if (imeStateChanged) {
                 mLastImeBottomInset = targetBottom
                 mLastImeVisible = imeVisible
+                mLastImeEventAtUptimeMillis = SystemClock.uptimeMillis()
 
                 mViewportPolicy.onImeInsetsChanged(imeVisible, targetBottom)
             }
@@ -1685,15 +1687,27 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private fun createAceDiagnosticsSnapshot(): AceDiagnosticsSnapshot {
         val fileSizeBytes = currentFileSizeOrNull()
         val largeFilePolicy = currentLargeFilePolicyLabel()
-        return (editor as? AceScriptEditorEngine)?.createAceDiagnosticsSnapshot(fileSizeBytes, largeFilePolicy)
+        return (editor as? AceScriptEditorEngine)?.createHostAceDiagnosticsSnapshot(fileSizeBytes, largeFilePolicy)
             ?: mLastAceDiagnosticsSnapshot
             ?: AceDiagnostics.createNativeSnapshot(editor.engineType, fileSizeBytes, largeFilePolicy)
     }
 
     private fun recordLastAceDiagnostics(editor: ScriptEditorEngine) {
         mLastAceDiagnosticsSnapshot = (editor as? AceScriptEditorEngine)
-            ?.createAceDiagnosticsSnapshot(currentFileSizeOrNull(), currentLargeFilePolicyLabel())
+            ?.createHostAceDiagnosticsSnapshot(currentFileSizeOrNull(), currentLargeFilePolicyLabel())
             ?: mLastAceDiagnosticsSnapshot
+    }
+
+    private fun AceScriptEditorEngine.createHostAceDiagnosticsSnapshot(
+        fileSizeBytes: Long?,
+        largeFilePolicy: String,
+    ): AceDiagnosticsSnapshot {
+        return createAceDiagnosticsSnapshot(fileSizeBytes, largeFilePolicy).copy(
+            viewportPolicy = mViewportPolicy.javaClass.simpleName,
+            lastHostImeVisible = mLastImeVisible,
+            lastHostImeBottomInset = mLastImeBottomInset.takeIf { it >= 0 },
+            lastHostImeEventAtUptimeMillis = mLastImeEventAtUptimeMillis.takeIf { it > 0L },
+        )
     }
 
     private fun currentFileSizeOrNull(): Long? {

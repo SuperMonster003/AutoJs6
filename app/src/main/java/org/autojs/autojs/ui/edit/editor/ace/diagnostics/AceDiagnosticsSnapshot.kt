@@ -28,5 +28,9 @@ data class AceDiagnosticsSnapshot(
     val lastHideSoftInputAtUptimeMillis: Long?,
     val lastResizeAtUptimeMillis: Long?,
     val lastActionModeAtUptimeMillis: Long?,
+    val viewportPolicy: String?,
+    val lastHostImeVisible: Boolean?,
+    val lastHostImeBottomInset: Int?,
+    val lastHostImeEventAtUptimeMillis: Long?,
     val createdAtEpochMillis: Long = System.currentTimeMillis(),
 )
