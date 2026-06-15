@@ -29,6 +29,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.autojs.core.plugin.center.PluginTrustManager
 import org.autojs.autojs.core.plugin.center.PluginVariantPriorityStore
+import org.autojs.autojs6.BuildConfig
 import org.autojs.plugin.common.api.PluginInfo
 import org.autojs.plugin.paddle.ocr.api.IOcrPlugin
 import org.autojs.plugin.paddle.ocr.api.OcrOptions
@@ -59,6 +60,7 @@ object PaddleOcrPluginHost {
     private const val EXTRA_RAW_STRIDE = "rawStride"
     private const val EXTRA_RAW_CONFIG = "rawConfig"
     private const val IDLE_UNBIND_MS = 30_000L
+    private val pluginPermission = "${BuildConfig.APPLICATION_ID}.permission.PLUGIN"
 
     private val externalServiceFlag = runCatching { ServiceInfo::class.java.getField("FLAG_EXTERNAL_SERVICE").getInt(null) }.getOrNull() ?: 0
     private val bindExternalServiceFlag = runCatching { Context::class.java.getField("BIND_EXTERNAL_SERVICE").getInt(null) }.getOrNull() ?: 0
@@ -492,7 +494,7 @@ object PaddleOcrPluginHost {
             failWaiters(
                 entry,
                 IllegalStateException(
-                    "bindService SecurityException: ${entry.cn}. Please make sure the plugin declares <uses-permission android:name=\"org.autojs.permission.PLUGIN\"/> and the Service uses this permission.",
+                    "bindService SecurityException: ${entry.cn}. Please make sure the plugin declares <uses-permission android:name=\"$pluginPermission\"/> and the Service uses this permission.",
                     se
                 )
             )
@@ -505,7 +507,7 @@ object PaddleOcrPluginHost {
                 failWaiters(
                     entry,
                     IllegalStateException(
-                        "bindService SecurityException: ${entry.cn}. Please make sure the plugin declares <uses-permission android:name=\"org.autojs.permission.PLUGIN\"/> and the Service uses this permission.",
+                        "bindService SecurityException: ${entry.cn}. Please make sure the plugin declares <uses-permission android:name=\"$pluginPermission\"/> and the Service uses this permission.",
                         se
                     )
                 )

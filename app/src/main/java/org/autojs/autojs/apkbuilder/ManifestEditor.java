@@ -22,6 +22,8 @@ public class ManifestEditor {
     private static final String EMBEDDED_NODE_PROCESS = ":nodejs_embedded";
     private static final String FOREGROUND_SERVICE_PERMISSION = "android.permission.FOREGROUND_SERVICE";
     private static final String FOREGROUND_SERVICE_SPECIAL_USE_PERMISSION = "android.permission.FOREGROUND_SERVICE_SPECIAL_USE";
+    private static final String LEGACY_PLUGIN_PERMISSION = "org.autojs.permission.PLUGIN";
+    private static final String TEMPLATE_PLUGIN_PERMISSION = INRT_APP_ID + ".permission.PLUGIN";
     private static final int FOREGROUND_SERVICE_TYPE_SPECIAL_USE = 0x40000000;
     private final InputStream mManifestInputStream;
     private int mVersionCode = -1;
@@ -121,6 +123,11 @@ public class ManifestEditor {
             || FOREGROUND_SERVICE_SPECIAL_USE_PERMISSION.equals(permissionName);
     }
 
+    protected boolean isTemplatePluginPermission(String permissionName) {
+        return LEGACY_PLUGIN_PERMISSION.equals(permissionName)
+            || TEMPLATE_PLUGIN_PERMISSION.equals(permissionName);
+    }
+
     public boolean shouldIgnoreComponentNode(String nodeName, String componentClassName) {
         return false;
     }
@@ -173,7 +180,7 @@ public class ManifestEditor {
                         super.onAttr(a);
                         return;
                     }
-                    if ("org.autojs.permission.PLUGIN".equals(((StringItem) a.value).data)) {
+                    if (isTemplatePluginPermission(((StringItem) a.value).data)) {
                         this.ignore = true;
                         return;
                     }

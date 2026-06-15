@@ -28,10 +28,10 @@
     <!--  ! Target API >= 30: WRT + [ MSV<29> ] + LGC  + MAN -->
 
     <permission
-        android:name="org.autojs.permission.PLUGIN"
+        android:name="${applicationId}.permission.PLUGIN"
         android:protectionLevel="signature" />
 
-    <uses-permission android:name="org.autojs.permission.PLUGIN" />
+    <uses-permission android:name="${applicationId}.permission.PLUGIN" />
 
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"

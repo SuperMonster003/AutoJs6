@@ -26,7 +26,8 @@ idea {
     }
 }
 
-val globalApplicationId = "org.autojs.autojs6"
+val globalNamespace = "org.autojs.autojs6"
+val globalApplicationId = "org.autojs.autojs6.nodejs"
 
 val flavorDimension = "channel"
 val flavorNameApp = "app"
@@ -691,11 +692,11 @@ dependencies /* Reserved for auto append by IDE */ {
 
 android {
 
-    namespace = globalApplicationId
+    namespace = globalNamespace
     compileSdk = versions.sdkVersionCompile
 
     defaultConfig {
-        applicationId = applicationId
+        applicationId = globalApplicationId
 
         minSdk = versions.sdkVersionMin
         targetSdk = versions.sdkVersionTarget
@@ -748,7 +749,7 @@ android {
         javaCompileOptions {
             annotationProcessorOptions {
                 mapOf(
-                    "resourcePackageName" to (this@defaultConfig.applicationId ?: globalApplicationId),
+                    "resourcePackageName" to globalNamespace,
                     "androidManifestFile" to ("$projectDir/src/main/AndroidManifest.xml")
                 ).let { arguments(it) }
             }
@@ -771,7 +772,7 @@ android {
                     "appName" to "@string/app_name",
                     "intentCategory" to "android.intent.category.LAUNCHER",
                     "intentCategoryInrt" to "android.intent.category.DEFAULT",
-                    "authorities" to "org.autojs.autojs6.fileprovider",
+                    "authorities" to "$globalApplicationId.fileprovider",
                     "icon" to "@mipmap/ic_app_launcher_adaptive",
                 )
             )
@@ -795,7 +796,7 @@ android {
                     "appName" to "AutoJs6.$flavorNameInrt",
                     "intentCategory" to "android.intent.category.DEFAULT",
                     "intentCategoryInrt" to "android.intent.category.LAUNCHER",
-                    "authorities" to "org.autojs.autojs6.$flavorNameInrt.fileprovider",
+                    "authorities" to "$globalApplicationId.$flavorNameInrt.fileprovider",
                     "icon" to "@mipmap/ic_launcher",
                 )
             )
