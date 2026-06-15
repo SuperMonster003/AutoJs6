@@ -164,18 +164,20 @@ Acceptance:
 
 - [x] Long-press a word.
 - [ ] Drag selection handles.
-- [ ] Double-tap a word.
+- [x] Double-tap a word.
 - [x] Copy selected text.
 - [x] Paste single-line text.
-- [ ] Paste multi-line text.
-- [ ] Paste Chinese text, emoji, quotes, and backslashes.
+- [x] Paste multi-line text.
+- [x] Paste Chinese text, emoji, quotes, and backslashes.
 - [ ] Type CJK composition text such as `toast("你好")`.
-- [ ] Move the cursor and hide the keyboard while composition is uncommitted.
+  Partial ADB-driven Gboard composition smoke is recorded; exact target text
+  still needs human candidate selection.
+- [x] Move the cursor and hide the keyboard while composition is uncommitted.
 
 Acceptance:
 
 - [ ] No lost or duplicated characters.
-- [ ] Copy/paste content is correct.
+- [x] Copy/paste content is correct.
 - [ ] TextMirror and saved text match the ACE display.
 - [ ] Mobile selection paths do not fallback ACE.
 

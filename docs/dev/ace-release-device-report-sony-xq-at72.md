@@ -10,10 +10,12 @@ path has a recorded result.
 - Android version: 12
 - API level: 31
 - Android System WebView version: com.google.android.webview 145.0.7632.120
-- Repository baseline commit: 5b205d04
-- Installed app: 6.7.1 Alpha5, versionCode 3821, DEBUGGABLE TEST_ONLY
-- Installed app update time: 2026-06-15 20:35:58
+- Repository baseline commit: 4a4563e4
+- Installed app: 6.7.1 Alpha5, versionCode 3824, DEBUGGABLE TEST_ONLY
+- Installed app update time: 2026-06-16 01:32:18
 - Test package: org.autojs.autojs6.ace
+- Plugin permission declaration: `org.autojs.autojs6.ace.permission.PLUGIN`;
+  requested plugin permission remains `org.autojs.permission.PLUGIN`
 - ACE enabled: yes, `key_$_editor_engine=ace`; static default remains Native
 - LSP enabled: false, `key_$_ace_lsp_enabled=false`
 - Clean host enabled: yes
@@ -49,9 +51,9 @@ path has a recorded result.
 | Click anchor accuracy | DEVICE SMOKE PASS | Top, middle, and lower visible-line taps landed on the observed target rows with keyboard hidden before each tap. |
 | Lower viewport tap anchor | DEVICE SMOKE PASS | Low-screen taps kept the caret visible just above the IME/symbol toolbar and did not fallback ACE. |
 | Long-press selection | DEVICE SMOKE PASS | Long-press selected `copyAlphaTarget` and displayed the ACE host ActionMode menu; see Gate 5 notes. |
-| Double-tap selection | TBD | |
-| Copy/paste | DEVICE PARTIAL PASS | Copy selected text and paste single-line text passed; drag handles, double-tap, multi-line paste, Unicode paste, and CJK composition remain TBD. |
-| CJK composition | TBD | |
+| Double-tap selection | DEVICE SMOKE PASS | Double-tap selected `doubleTapTarget`; copying the selection and reading the clipboard returned `doubleTapTarget`. |
+| Copy/paste | DEVICE SMOKE PASS | Copy, single-line paste, multi-line paste, and Unicode paste passed. Drag handles and exact CJK target composition remain TBD. |
+| CJK composition | DEVICE PARTIAL PASS | Gboard Pinyin composition entered candidates, survived cursor move and keyboard hide without ACE fallback, and committed CJK text through the keyboard path; exact `toast("你好")` candidate selection remains a human hand-test item. |
 | Completion accept | TBD | |
 | Tooltip fallback | TBD | |
 | Rotation | TBD | |
@@ -195,6 +197,40 @@ Record copied ACE diagnostics for every failure or ambiguous result.
   - A focused logcat scan after the passing copy/paste run had no
     `AndroidRuntime FATAL EXCEPTION`, `fatalError`, ACE fallback,
     renderer-gone, `JS_RUNTIME_ERROR`, or `bridge_event_storm` match.
+- Extended Gate 5 validation:
+  - Time: 2026-06-16 01:34-01:48 CST, after reinstalling
+    `org.autojs.autojs6.ace` versionCode 3824 on Sony XQ-AT72.
+  - Double-tapped `doubleTapTarget`, copied the selected text, and read the
+    system clipboard through `/sdcard/Scripts/ace-gate5-readclip-probe.js`.
+    The probe file contained `doubleTapTarget`.
+  - Tried two ADB drag gestures from the selected `dragAlphaTarget` range
+    toward the following token. The visible selection did not reliably expand,
+    and copying afterward still returned `dragAlphaTarget`; selection-handle
+    dragging remains unpassed and needs direct hand testing.
+  - Set the clipboard from a foreground AutoJs6 script to
+    `gate5MultiLineA`, `gate5MultiLineB`, and `gate5MultiLineC` separated by
+    newlines, long-pressed `pasteMultiAnchor`, tapped ActionMode `粘贴`, saved,
+    and read `/sdcard/Scripts/ace-gate5-selection.js` back. The saved
+    `paste_multi` value contained the three pasted lines.
+  - Set the clipboard to `中文🙂 "quotes" \\ backslash`, long-pressed
+    `pasteUnicodeAnchor`, tapped ActionMode `粘贴`, saved, and read the script
+    back. The saved `paste_unicode` line contained the Chinese text, emoji,
+    double quotes, and backslashes.
+  - Used `/sdcard/Scripts/ace-gate5-cjk-composition.js` and Gboard Pinyin.
+    `adb shell input text nihao` entered an uncommitted composition with
+    visible candidates including `你好`. Pressing Back while the composition was
+    uncommitted canceled it without changing focus away from `EditActivity` or
+    producing an ACE fallback/fatal log signal.
+  - Repeated the uncommitted composition smoke, tapped another code line to
+    move the cursor, then hid the keyboard. The editor stayed focused, the
+    uncommitted text did not pollute the saved file, and the focused log scan
+    had no `AndroidRuntime FATAL EXCEPTION`, `fatalError`, ACE fallback,
+    renderer-gone, `JS_RUNTIME_ERROR`, or `bridge_event_storm` match.
+  - A screen-keyboard coordinate run in `/sdcard/Scripts/ace-gate5-cjk-ui.js`
+    committed CJK text through Gboard, but the ADB-driven second candidate
+    selection resolved to `你haozip` rather than the intended `你好`. Treat this
+    as CJK composition partial coverage only; exact `toast("你好")` entry still
+    needs human hand testing.
 - Development-only finding fixed before the passing smoke:
   - A first implementation added a seventh `selectedText` argument to
     `autojs.startActionMode(...)`; WebView's JavaScriptInterface reported
@@ -203,9 +239,8 @@ Record copied ACE diagnostics for every failure or ambiguous result.
   - The final implementation restored the original six-argument bridge and
     sends the lightweight selection state immediately before starting
     ActionMode.
-- Remaining Gate 5 items not yet completed: drag selection handles,
-  double-tap word selection, multi-line paste, Unicode paste, CJK composition,
-  and cursor/keyboard behavior while composition is uncommitted.
+- Remaining Gate 5 items not yet completed: drag selection handles and exact
+  CJK candidate entry such as `toast("你好")`.
 
 ## Blockers
 

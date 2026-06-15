@@ -176,7 +176,9 @@ assertIncludes(aceCodeEditor, "hideLoadingOverlay()", "first-paint overlay hide"
 assertIncludes(aceCodeEditor, '"resizeDone" -> handleResizeDone(payloadJson)', "native resizeDone handler");
 assertIncludes(aceCodeEditor, "lastAceResizeCompletedReason = resizeReasonFromPayload", "native resize completion reason");
 assertIncludes(aceCodeEditor, "BRIDGE_EVENT_STORM_THRESHOLD", "bridge event storm threshold");
-assertIncludes(aceCodeEditor, 'eventHistory.record(\n                "bridge_event_storm"', "bridge event storm diagnostics");
+assertIncludes(aceCodeEditor, "if (bridgeEventWindowCount == BRIDGE_EVENT_STORM_THRESHOLD)", "bridge event storm threshold gate");
+assertIncludes(aceCodeEditor, '"bridge_event_storm",', "bridge event storm diagnostics event");
+assertIncludes(aceCodeEditor, '"count=$bridgeEventWindowCount,windowMillis=$BRIDGE_EVENT_WINDOW_MS,last=$name"', "bridge event storm diagnostics payload");
 assertIncludes(aceCodeEditor, "private val lspServerManager = AceLspServerManager()", "ACE LSP manager");
 assertIncludes(aceCodeEditor, "lspServerManager.bridgeOptionsJson()", "ACE LSP bridge options");
 assertIncludes(aceCodeEditor, 'eventHistory.record("lsp_manager"', "ACE LSP manager event history");
