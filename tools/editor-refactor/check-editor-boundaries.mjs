@@ -79,6 +79,8 @@ const functionsKeyboardHelper = "app/src/main/java/org/autojs/autojs/ui/edit/key
 const fileReadPipeline = "app/src/main/java/org/autojs/autojs/ui/edit/editor/loading/EditorFileReadPipeline.kt";
 const textLoadPolicy = "app/src/main/java/org/autojs/autojs/ui/edit/editor/loading/EditorTextLoadPolicy.kt";
 const textLoadTarget = "app/src/main/java/org/autojs/autojs/ui/edit/editor/loading/EditorTextLoadTarget.kt";
+const editorTextProvider = "app/src/main/java/org/autojs/autojs/ui/edit/editor/service/EditorTextProvider.kt";
+const runScriptTextProvider = "app/src/main/java/org/autojs/autojs/ui/edit/editor/service/RunScriptTextProvider.kt";
 
 assertIncludes(editorView, "mViewportPolicy.onImeInsetsChanged(imeVisible, targetBottom)");
 assertIncludes(editorView, "EditorViewportPolicyFactory.create(editor, this)");
@@ -92,6 +94,10 @@ assertIncludes(editorView, "private val fileReadPipeline = EditorFileReadPipelin
 assertIncludes(editorView, "fileReadPipeline.readText(uri)");
 assertIncludes(editorView, ".streamTextChunks(");
 assertIncludes(editorView, "private fun applyReadMetadata(metadata: EditorFileReadMetadata)");
+assertIncludes(editorView, "private val editorTextProvider = EditorTextProvider(this) { editor }");
+assertIncludes(editorView, "private val runScriptTextProvider = RunScriptTextProvider(");
+assertIncludes(editorView, "runScriptTextProvider.saveToTmpFile()");
+assertIncludes(editorView, "editorTextProvider.getTextForSaving()");
 assertIncludes(editorView, "private val textLoadTarget: EditorTextLoadTarget");
 assertIncludes(editorView, "EditorTextLoadPolicy.shouldStreamAsLargeFile(sizeOrNull)");
 assertIncludes(editorView, "EditorTextLoadPolicy.shouldLoadProgressively(text.length)");
@@ -109,6 +115,8 @@ assertNotIncludes(editorView, "OpenableColumns");
 assertNotIncludes(editorView, "StringUtils.detectCharset");
 assertNotIncludes(editorView, "StringUtils.hasBom");
 assertNotIncludes(editorView, "streamDecodeAndEmit(");
+assertNotIncludes(editorView, "getTextForSavingObservable");
+assertNotIncludes(editorView, "TmpScriptFiles");
 
 assertIncludes(scriptEngine, "fun onImeInsetsChanged(visible: Boolean, bottomInset: Int) = Unit");
 assertIncludes(policyFactory, "EditorEngineType.NATIVE -> NativeEditorViewportPolicy(editor, hostView)");
@@ -146,6 +154,15 @@ assertIncludes(textLoadTarget, "private val editor: ScriptEditorEngine");
 assertNotIncludes(textLoadTarget, "CodeEditText");
 assertNotIncludes(scriptEngine, "setLoadingGutterDigits");
 
+assertIncludes(editorTextProvider, "currentEditor: () -> ScriptEditorEngine");
+assertIncludes(editorTextProvider, "currentEditor().getTextForSaving");
+assertNotIncludes(editorTextProvider, "CodeEditText");
+
+assertIncludes(runScriptTextProvider, "class RunScriptTextProvider(");
+assertIncludes(runScriptTextProvider, "TmpScriptFiles.create(context)");
+assertIncludes(runScriptTextProvider, "write(tmpFile, latestText)");
+assertNotIncludes(runScriptTextProvider, "CodeEditText");
+
 assertOnlyIn("requestRectangleOnScreen", [
   "app/src/main/java/org/autojs/autojs/ui/edit/editor/engine/NativeCodeEditorEngine.kt",
 ]);
@@ -177,6 +194,14 @@ assertOnlyIn("StringUtils.detectCharset", [
 
 assertOnlyIn("StringUtils.hasBom", [
   "app/src/main/java/org/autojs/autojs/ui/edit/editor/loading/EditorFileReadPipeline.kt",
+]);
+
+assertOnlyIn("TmpScriptFiles.create(context)", [
+  "app/src/main/java/org/autojs/autojs/ui/edit/editor/service/RunScriptTextProvider.kt",
+]);
+
+assertOnlyIn("write(tmpFile, latestText)", [
+  "app/src/main/java/org/autojs/autojs/ui/edit/editor/service/RunScriptTextProvider.kt",
 ]);
 
 console.log("Editor boundary checks passed.");

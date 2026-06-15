@@ -56,9 +56,7 @@ import org.autojs.autojs.model.script.Scripts.EXTRA_EXCEPTION_MESSAGE
 import org.autojs.autojs.model.script.Scripts.openByOtherApps
 import org.autojs.autojs.model.script.Scripts.runWithBroadcastSender
 import org.autojs.autojs.pio.PFiles.getNameWithoutExtension
-import org.autojs.autojs.pio.PFiles.write
 import org.autojs.autojs.storage.file.StableDraftFileHelper
-import org.autojs.autojs.storage.file.TmpScriptFiles
 import org.autojs.autojs.storage.history.HistoryPrefs
 import org.autojs.autojs.storage.history.HistoryRepository
 import org.autojs.autojs.storage.history.HistoryUriUtils
@@ -90,6 +88,8 @@ import org.autojs.autojs.ui.edit.editor.loading.EditorFileReadPipeline
 import org.autojs.autojs.ui.edit.editor.loading.EditorTextLoadPolicy
 import org.autojs.autojs.ui.edit.editor.loading.EditorTextLoadTarget
 import org.autojs.autojs.ui.edit.editor.loading.EngineTextLoadTarget
+import org.autojs.autojs.ui.edit.editor.service.EditorTextProvider
+import org.autojs.autojs.ui.edit.editor.service.RunScriptTextProvider
 import org.autojs.autojs.ui.edit.editor.viewport.EditorViewportPolicy
 import org.autojs.autojs.ui.edit.editor.viewport.EditorViewportPolicyFactory
 import org.autojs.autojs.ui.edit.keyboard.FunctionsKeyboardHelper
@@ -180,6 +180,12 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private val fileReadPipeline = EditorFileReadPipeline(context)
     private val textLoadTarget: EditorTextLoadTarget
         get() = EngineTextLoadTarget(editor)
+    private val editorTextProvider = EditorTextProvider(this) { editor }
+    private val runScriptTextProvider = RunScriptTextProvider(
+        context = context,
+        editorTextProvider = editorTextProvider,
+        onTmpFileCreated = { mTmpSavedFileForRunning = it },
+    )
 
     @JvmField
     val debugBar: DebugBar = binding.debugBar
@@ -1777,7 +1783,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     @SuppressLint("CheckResult")
     fun runAndSaveFileIfNeeded(showLogPanelAfterRun: Boolean = true) {
-        saveToTmpFile()
+        runScriptTextProvider.saveToTmpFile()
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({ file: File ->
                 val execution = runTmpFile(file)
@@ -1852,26 +1858,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         syncPrimaryMenuState()
     }
 
-    private fun getTextForSavingObservable(): Observable<String> =
-        Observable.create { emitter ->
-            post {
-                runCatching {
-                    editor.getTextForSaving { latestText ->
-                        if (!emitter.isDisposed) {
-                            emitter.onNext(latestText)
-                            emitter.onComplete()
-                        }
-                    }
-                }.onFailure { error ->
-                    if (!emitter.isDisposed) {
-                        emitter.onError(error)
-                    }
-                }
-            }
-        }
-
     fun save(): Observable<String> =
-        getTextForSavingObservable()
+        editorTextProvider.getTextForSaving()
             .flatMap { latestText ->
                 Observable.fromCallable {
                     when (val uri = uri) {
@@ -2875,19 +2863,6 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             exitDebugging()
             forceStop()
         }
-    }
-
-    @SuppressLint("CheckResult")
-    private fun saveToTmpFile(): Observable<File> {
-        return getTextForSavingObservable()
-            .flatMap { latestText ->
-                Observable.fromCallable {
-                    TmpScriptFiles.create(context).also {
-                        write(it, latestText)
-                        mTmpSavedFileForRunning = it
-                    }
-                }.subscribeOn(Schedulers.io())
-            }
     }
 
     fun cleanBeforeExit() {
