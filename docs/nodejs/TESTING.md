@@ -43,6 +43,14 @@ Focused embedded execution queue coverage:
 
 These tests verify that default concurrent starts still reject, explicit enqueue runs after the active script, queued executions can be cancelled by execution id, and the one-entry queue limit returns `ERR_AUTOJS6_NODE_QUEUE_FULL`.
 
+Long-running service mode is currently a design gate only:
+
+```text
+docs/nodejs/design/LONG_RUNNING_SERVICE.md
+```
+
+There is no service-mode runtime test yet because no runtime implementation exists. Until that changes, lifecycle tests must continue to verify that normal scripts are one-shot executions controlled by `timeoutMs`, including timeout recovery and uncleared interval timeout behavior.
+
 Current packaged APK smoke instrumentation:
 
 ```powershell

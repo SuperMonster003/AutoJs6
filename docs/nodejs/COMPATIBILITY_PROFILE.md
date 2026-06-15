@@ -9,6 +9,7 @@ This profile describes the current Safe Node surface. It is intentionally smalle
 - Execution model: embedded `libnode.so` plus AutoJs6 bootstrap and CommonJS loader.
 - Process model: script service runs in `:nodejs_embedded`.
 - Concurrency model: one active execution per embedded process; default concurrent starts reject, while explicit enqueue uses the bounded execution queue.
+- Service model: long-running Node service mode is design-only and not implemented; normal scripts remain one-shot and timeout-controlled.
 - Project model: file entry, Node project entry, and packaged APK entry are all supported paths.
 - Kotlin capability registry: `NodeRuntimeCapabilities`
 - JavaScript profile module: `require("autojs6:profile")`
@@ -102,6 +103,19 @@ Stable queue errors:
 - `ERR_AUTOJS6_NODE_QUEUE_CANCELLED`
 
 See [design/EXECUTION_QUEUE.md](design/EXECUTION_QUEUE.md).
+
+## Long-Running Service Mode
+
+Long-running Node service mode is not part of the current Safe Node Profile runtime. Pending timers, WebSocket handles, network requests, or open bridge resources do not convert a normal script into a service.
+
+Current behavior remains:
+
+- normal embedded scripts require `timeoutMs`
+- timeout produces the existing timeout diagnostic shape
+- service process exit is expected after one-shot execution settles
+- packaged Node entries remain one-shot unless a future explicit service descriptor is implemented
+
+The future design gate is documented in [design/LONG_RUNNING_SERVICE.md](design/LONG_RUNNING_SERVICE.md).
 
 Unsupported or rejected module source forms:
 
