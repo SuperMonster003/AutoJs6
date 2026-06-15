@@ -449,6 +449,8 @@ Network-specific errors include:
 
 See `docs/nodejs/design/NETWORK.md` for INTERNET permission, packaged APK manifest diagnostics, timeout, abort, body budget, TLS, proxy, background behavior, and service-destroy cancellation policy.
 
+Current GA evaluation: `docs/nodejs/reports/NETWORK_EVALUATION.md`.
+
 ## WebSocket Status
 
 Controlled WebSocket support has an experimental MVP, but live Android network I/O remains disabled in normal builds. Current `require("autojs6:profile")` reports:
@@ -470,6 +472,8 @@ Controlled WebSocket support has an experimental MVP, but live Android network I
 The MVP is provider-backed through the AutoJs6 bridge and uses bounded policy: max 2 active connections, `ws:`/`wss:` only, default timeout `10000` ms, default message budget `65536` bytes, and bounded queued events. The Android provider is backed by OkHttp only when `BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED=true`; normal builds reject with `ERR_AUTOJS6_NETWORK_DISABLED`. Fake-provider tests cover connect, send, receive, close, timeout, max-connection denial, message-size denial, service-destroy rejection, diagnostics, and raw `net`/`tls` denial.
 
 Raw `net`, `tls`, and HTTP upgrade authority remains denied, so userland packages cannot open sockets through desktop Node APIs. The module boundary is documented in `docs/nodejs/design/WEBSOCKET.md`.
+
+Current GA evaluation: `docs/nodejs/reports/NETWORK_EVALUATION.md`.
 
 ## Worker Threads Status
 

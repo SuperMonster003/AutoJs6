@@ -424,6 +424,8 @@ Current raw network policy focused instrumentation:
 
 This suite verifies that controlled `fetch` and `websocket` modules cannot be shadowed, raw `http`, `https`, `net`, `tls`, `dns`, `dns/promises`, and `dgram` stay denied, `node:` aliases stay denied or limited in the same way, and local `node_modules` fixtures cannot bypass the Safe Node Profile network policy.
 
+Task 123 GA evaluation report: [reports/NETWORK_EVALUATION.md](reports/NETWORK_EVALUATION.md).
+
 Current controlled work_manager bridge focused instrumentation:
 
 ```powershell
