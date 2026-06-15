@@ -88,6 +88,8 @@ import org.autojs.autojs.ui.edit.editor.engine.EditorSearchOptions
 import org.autojs.autojs.ui.edit.editor.engine.EditorSearchSyntaxException
 import org.autojs.autojs.ui.edit.editor.engine.EditorEngineType
 import org.autojs.autojs.ui.edit.editor.engine.ScriptEditorEngine
+import org.autojs.autojs.ui.edit.editor.viewport.EditorViewportPolicy
+import org.autojs.autojs.ui.edit.editor.viewport.EditorViewportPolicyFactory
 import org.autojs.autojs.ui.edit.keyboard.FunctionsKeyboardHelper
 import org.autojs.autojs.ui.edit.keyboard.FunctionsKeyboardView
 import org.autojs.autojs.ui.edit.keyboard.FunctionsKeyboardView.ClickCallback
@@ -169,6 +171,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     @JvmField
     var editor: ScriptEditorEngine = EditorEngineFactory.create(context, EditorEnginePreferences.get())
+
+    private var mViewportPolicy: EditorViewportPolicy = EditorViewportPolicyFactory.create(editor, this)
 
     @JvmField
     val debugBar: DebugBar = binding.debugBar
@@ -358,7 +362,6 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     // zh-CN: 最近一次应用到编辑器 padding 的 IME 底部值.
     private var mLastImeBottomInset = 0
     private var mLastImeVisible = false
-    private var mLastImeEngineType: EditorEngineType? = null
 
     // Reusable rect for window visible area.
     // zh-CN: 复用的窗口可见区域 Rect.
@@ -611,33 +614,14 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 0
             }
 
-            val engineType = editor.engineType
             val imeStateChanged = targetBottom != mLastImeBottomInset ||
-                imeVisible != mLastImeVisible ||
-                engineType != mLastImeEngineType
+                imeVisible != mLastImeVisible
 
             if (imeStateChanged) {
                 mLastImeBottomInset = targetBottom
                 mLastImeVisible = imeVisible
-                mLastImeEngineType = engineType
 
-                // Apply bottom padding only when the editor is actually overlapped by IME.
-                // zh-CN: 仅当 editor 实际被 IME 遮挡时才应用底部 padding.
-                val v = editor.view
-                if (engineType == EditorEngineType.ACE) {
-                    if (v.paddingBottom != 0) {
-                        v.setPadding(v.paddingLeft, v.paddingTop, v.paddingRight, 0)
-                    }
-                } else {
-                    v.setPadding(v.paddingLeft, v.paddingTop, v.paddingRight, targetBottom)
-                }
-                editor.onImeInsetsChanged(imeVisible, targetBottom)
-
-                // Only ensure cursor visible when IME becomes visible.
-                // zh-CN: 仅在 IME 变为可见时确保光标可见.
-                if (engineType != EditorEngineType.ACE && imeVisible) {
-                    post { ensureCursorVisibleIfPossible() }
-                }
+                mViewportPolicy.onImeInsetsChanged(imeVisible, targetBottom)
             }
 
             // Do not consume insets.
@@ -1587,11 +1571,12 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         binding.editorContainer.removeView(oldEditor.view)
 
         editor = newEditor
+        mViewportPolicy = EditorViewportPolicyFactory.create(editor, this)
         attachEditorEngineView()
         setUpEditor(resetInitialState = false)
         setUpInputMethodEnhancedBar()
         setUpFunctionsKeyboard()
-        mLastImeEngineType = null
+        mLastImeBottomInset = -1
         requestApplyInsetsSoon()
         if (wasAttached) {
             registerFunctionsKeyboardBackHandler()
