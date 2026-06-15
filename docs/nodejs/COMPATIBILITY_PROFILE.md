@@ -305,6 +305,8 @@ Network-related limited builtins may exist for feature detection and stable deni
 
 `vm` is intentionally disabled, including local `node_modules/vm` shadowing, until a future design gate explicitly proves a safe subset. See `docs/nodejs/design/VM.md`.
 
+`inspector` is intentionally disabled, including debugger port binding and script-visible inspector APIs, until a future debug-build-only design gate explicitly proves user consent, loopback binding, lifecycle close, and packaged APK denial. See `docs/nodejs/design/INSPECTOR.md`.
+
 ## ESM Status
 
 `.mjs` routes to Node so user intent is preserved. ESM execution is still not a default supported capability, but an experimental v1 path exists behind the explicit flag.

@@ -1,0 +1,151 @@
+# Embedded Node Inspector Design Gate
+
+Status: disabled. This document records the policy boundary for Node/V8 inspector support and does not enable any runtime capability.
+
+## Goal
+
+Decide whether AutoJs6 can ever expose Node inspector debugging without weakening the Safe Node Profile. The current answer is:
+
+- no inspector in normal builds
+- no inspector in release packaged APKs
+- no automatic port binding
+- no project-level opt-in that silently opens a debugger
+
+Any future implementation must be debug-build-only and must require an explicit user action for each debugging session.
+
+## Current Behavior
+
+The current runtime keeps inspector disabled:
+
+- `require("inspector")` and `require("node:inspector")` reject with the disabled-builtin error shape.
+- `require.resolve("inspector")` rejects before `node_modules/inspector` can shadow the disabled builtin.
+- `process._debugProcess` is disabled.
+- `NodeRuntimeCapabilities.featureFlagsById["inspector"]` is `status=disabled`, `securityLevel=high`, and has no build, project, or packaged APK override.
+- No embedded Node service binds an inspector TCP or WebSocket port.
+- Packaged APK verification does not accept inspector metadata.
+
+## Risk Model
+
+Node inspector is not a log viewer. It is a debugging control channel for a live V8/Node environment. A connected debugger can normally inspect globals, evaluate JavaScript, set breakpoints, pause execution, collect heap snapshots, and observe source text.
+
+In AutoJs6 this must be treated as full control of the running script because inspected code may:
+
+- access allowed AutoJs bridge modules
+- read scoped project files
+- inspect in-memory secrets, bridge handles, and request payloads
+- alter lifecycle timing by pausing the Node event loop
+- create denial-of-service conditions through breakpoints or heap snapshots
+- expose script sources from packaged projects
+
+The existing Safe Node Profile restrictions, such as disabled `process.binding`, native addon denial, and scoped filesystem policy, must still apply after a debugger attaches. However, debugger-side `Runtime.evaluate` is still powerful enough to invoke any capability the current script could invoke.
+
+## Android Port Binding
+
+Inspector must not bind a public interface.
+
+If a future task implements inspector support, the minimum binding policy is:
+
+- bind only to loopback, preferably `127.0.0.1`
+- never bind `0.0.0.0`, Wi-Fi, cellular, or LAN interfaces
+- choose a random ephemeral port unless the user explicitly selects one
+- prefer `adb forward` or `adb reverse` for desktop access
+- display the active endpoint and execution id in a visible debug UI or notification
+- close the listener on script stop, timeout, service destroy, or user revoke
+- allow at most one inspector session per execution unless a later design proves otherwise
+
+On Android, opening a socket may require `android.permission.INTERNET`. That permission is broad, so inspector support must not add it to normal main-app or packaged APK release manifests merely for debugging. Debug variants may opt in explicitly.
+
+## WebSocket Transport
+
+The Node inspector protocol uses WebSocket transport, but it is not the same as AutoJs6's controlled `websocket` bridge module.
+
+A future inspector implementation must not:
+
+- enable raw `net`, `tls`, `http`, or `https`
+- reuse the user-facing controlled `websocket` module as authority to open debugger ports
+- expose inspector transport to scripts
+- allow script code to create or manage inspector sessions
+
+The inspector transport belongs to the embedder lifecycle, not the script API surface.
+
+## Relation To V8 Inspector
+
+Embedded Node inspector support sits at the V8 isolate and Node environment boundary. AutoJs6 already owns a `v8::Isolate`, `uv_loop_t`, and `node::Environment` per embedded execution, so any debugger attach/detach must be coordinated with the same lifecycle.
+
+Future design must prove:
+
+- attach and detach happen on the correct Node/V8 event loop thread
+- debugger callbacks do not call into JavaScript from arbitrary Java/Kotlin/native threads
+- pause/resume does not deadlock bridge RPC, stdout/stderr capture, service stop, or Android UI providers
+- `node::Stop()` and service destroy close the inspector session deterministically
+- heap snapshot and CPU profile operations are bounded or explicitly user-controlled
+- crash diagnostics distinguish inspector crashes from script crashes
+
+## Packaged APK Policy
+
+Packaged APKs must not silently inherit inspector capability from a project file.
+
+If inspector is ever implemented, packaged behavior should be:
+
+- release packaged APK: hard disabled
+- debug packaged APK: allowed only when the template and build command explicitly enable a debug inspector mode
+- manifest verifier reports any added `INTERNET` permission or debugger metadata
+- generated diagnostic report labels the APK as debugger-enabled
+- user-facing UI makes the debugger session visible and revocable
+
+Do not allow encrypted packaged scripts to open an inspector endpoint by metadata alone. A debugger can reveal live source text and runtime values, so this must be an explicit developer/debug action.
+
+## User Consent
+
+Inspector support requires explicit consent per session:
+
+- the user starts a debug session from a trusted AutoJs6 UI or debug command
+- AutoJs6 shows the target script, process, execution id, host, port, and expiry
+- the session has a short TTL or closes with the script
+- the user can revoke it immediately
+- release builds and background starts cannot open an inspector automatically
+
+Optional future hardening:
+
+- random one-time token in the WebSocket URL
+- pairing prompt before first attach
+- debugger access audit log in `nativeValues`
+- deny attach while sensitive permission prompts are active
+
+## Recommendation
+
+Keep inspector disabled by default.
+
+The first acceptable implementation, if ever needed, should be:
+
+```properties
+autojs.nodejs.inspector.experimental=false
+```
+
+with all of these constraints:
+
+- debug builds only
+- explicit user action required
+- loopback binding only
+- no project.json or packaged APK override in release builds
+- no raw network module enablement
+- no script-visible `inspector` builtin
+- deterministic close on stop, timeout, crash, and service destroy
+- focused security and lifecycle instrumentation tests
+
+Until that task exists, the disabled builtin and profile registry entries are the intended product behavior.
+
+## Future Acceptance Gate
+
+Any future enablement must include:
+
+- design update and security review
+- positive debug-build attach smoke
+- negative release-build denial test
+- negative packaged release denial test
+- loopback-only port binding test
+- user-consent and revoke test
+- service stop and timeout close tests
+- bridge pending-call behavior while paused
+- source and heap privacy documentation
+- rollback path that returns to current disabled behavior

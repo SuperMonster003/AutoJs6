@@ -142,6 +142,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] direct Java/Android interop remains disabled unless `autojs.nodejs.javaInterop.experimental=true` is explicitly tested
 - [ ] experimental Java interop, when explicitly tested, exposes only the documented allowlist and provider-owned opaque handles
 - [ ] reflection, class loaders, raw `Context`, native library loading, and Java process execution remain unavailable to Node scripts
+- [ ] inspector/debugger server remains disabled; future support requires `docs/nodejs/design/INSPECTOR.md` update and debug-build-only gate
 
 ## Compatibility
 

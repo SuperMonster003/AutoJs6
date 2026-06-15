@@ -94,6 +94,8 @@ Runtime package installation is not a Safe Node Profile capability. Projects may
 
 `vm` remains disabled because a second JavaScript context is not a security boundary in this embedder. A limited `vm.Script` subset is deferred until timeout, global leakage, bridge leakage, and process object exposure can be proven safe.
 
+Inspector remains disabled because it is a live debugger control channel, not a passive diagnostic API. Any future support must be debug-build-only, loopback-only, explicitly user-started, and closed through the embedded service lifecycle. See `docs/nodejs/design/INSPECTOR.md`.
+
 ## ESM Policy
 
 ESM is experimental and disabled by default.
