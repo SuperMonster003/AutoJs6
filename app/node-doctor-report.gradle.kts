@@ -258,6 +258,7 @@ val embeddedNodeDoctorReport = tasks.register("embeddedNodeDoctorReport") {
         val nativeSymbolsFile = reportsRoot.resolve("native-node/native-symbol-archive-appDebug.txt")
         val packagedDiagnosticFile = reportsRoot.resolve("embedded-node/packaged-diagnostic-report.txt")
         val dependencyManifestFile = reportsRoot.resolve("nodejs/dependencies/dependency-manifest.json")
+        val dependencySbomFile = reportsRoot.resolve("nodejs/dependencies/dependency-sbom-lite.json")
         val differentialFile = reportsRoot.resolve("nodejs/differential/desktop-node-differential.json")
 
         val compatibility = nodeDoctorReadJsonObject(compatibilityFile).orEmpty()
@@ -286,6 +287,7 @@ val embeddedNodeDoctorReport = tasks.register("embeddedNodeDoctorReport") {
             .sorted()
 
         val dependencyManifest = nodeDoctorReadJsonObject(dependencyManifestFile)
+        val dependencySbom = nodeDoctorReadJsonObject(dependencySbomFile)
         val dependencyTotals = dependencyManifest?.get("totals").nodeDoctorMap()
         val dependencyIssues = dependencyManifest?.get("issues").nodeDoctorListOfMaps()
         val differential = nodeDoctorReadJsonObject(differentialFile)
@@ -381,9 +383,12 @@ val embeddedNodeDoctorReport = tasks.register("embeddedNodeDoctorReport") {
             ),
             "dependencyBundle" to linkedMapOf(
                 "manifest" to nodeDoctorReportReference(dependencyManifestFile, rootProject.projectDir),
+                "sbomLite" to nodeDoctorReportReference(dependencySbomFile, rootProject.projectDir),
                 "projectRoot" to dependencyManifest?.get("projectRoot"),
                 "sanitizedBundle" to dependencyManifest?.get("sanitizedBundle"),
+                "packagedLayout" to dependencyManifest?.get("packagedLayout"),
                 "totals" to dependencyTotals,
+                "sbomTotals" to dependencySbom?.get("totals"),
                 "issues" to dependencyIssues,
                 "ready" to (dependencyManifestFile.isFile && dependencyIssues.isEmpty()),
             ),
@@ -397,6 +402,7 @@ val embeddedNodeDoctorReport = tasks.register("embeddedNodeDoctorReport") {
                 nativeSymbolsFile,
                 packagedDiagnosticFile,
                 dependencyManifestFile,
+                dependencySbomFile,
                 differentialFile,
             ).map { nodeDoctorReportReference(it, rootProject.projectDir) },
         )
@@ -463,7 +469,10 @@ val embeddedNodeDoctorReport = tasks.register("embeddedNodeDoctorReport") {
             appendLine()
             appendLine("Dependency Bundle:")
             appendLine("  manifest: ${dependencyManifestFile.nodeDoctorPathRelativeTo(rootProject.projectDir)} available=${dependencyManifestFile.isFile}")
+            appendLine("  SBOM-lite: ${dependencySbomFile.nodeDoctorPathRelativeTo(rootProject.projectDir)} available=${dependencySbomFile.isFile}")
             appendLine("  projectRoot: ${dependencyManifest?.get("projectRoot") ?: "unavailable"}")
+            appendLine("  sanitizedBundle: ${dependencyManifest?.get("sanitizedBundle") ?: "unavailable"}")
+            appendLine("  packagedLayout: ${dependencyManifest?.get("packagedLayout") ?: "unavailable"}")
             appendLine("  totals: packages=${dependencyTotals["packages"] ?: "unavailable"} files=${dependencyTotals["files"] ?: "unavailable"} bytes=${dependencyTotals["bytes"] ?: "unavailable"}")
             appendLine("  issues: ${dependencyIssues.size}")
             appendLine()

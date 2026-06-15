@@ -181,10 +181,13 @@ Current dependency bundler verification:
 ```
 
 `bundleNodeDependencies` validates an existing project root with `package.json` and `node_modules`, then writes a
-sanitized bundle plus `dependency-manifest.json`, `dependency-size-report.txt`, and `dependency-rejections.txt`.
-`verifyNodeDependencyBundlerFixtures` confirms the checked-in sample project passes and an unsafe fixture is rejected for
-native addon, node-gyp build artifacts, lifecycle script, and unchecked `.bin` entries. Native addon binaries are
-reported as `NATIVE_ADDON_DISABLED`; `binding.gyp` and `build/{Release,Debug}` files are reported as
+sanitized bundle plus `dependency-manifest.json`, `dependency-sbom-lite.json`, `dependency-size-report.txt`, and
+`dependency-rejections.txt`.
+`verifyNodeDependencyBundlerFixtures` confirms the checked-in sample project passes, the sanitized bundle can be used as
+the packaged APK `assets/project` layout, and unsafe fixtures are rejected for native addon, node-gyp build artifacts,
+lifecycle script, unchecked `.bin` entries, npm cache/postinstall artifacts, suspicious executables, absolute or
+escaping package metadata references, and oversized files/packages/trees. Native addon binaries are reported as
+`NATIVE_ADDON_DISABLED`; `binding.gyp` and `build/{Release,Debug}` files are reported as
 `NODE_GYP_ARTIFACT_UNSUPPORTED`.
 
 Current doctor diagnostics:

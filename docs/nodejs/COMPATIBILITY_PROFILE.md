@@ -153,9 +153,13 @@ message pattern, then classifies differences as matched, expected AutoJs6 restri
 `:app:bundleNodeDependencies` is the host-side dependency bundling gate. It consumes a project that already has
 `package.json` and `node_modules`, validates the tree without running package code, copies a sanitized bundle to
 `app/build/nodejs/dependency-bundle/project/`, and writes a manifest plus size/rejection reports under
-`app/build/reports/nodejs/dependencies/`.
+`app/build/reports/nodejs/dependencies/`. The report set includes `dependency-manifest.json`,
+`dependency-sbom-lite.json`, `dependency-size-report.txt`, and `dependency-rejections.txt`.
 Native addon binaries are rejected as `NATIVE_ADDON_DISABLED`; node-gyp build traces such as `binding.gyp` and
-`build/{Release,Debug}` artifacts are rejected as `NODE_GYP_ARTIFACT_UNSUPPORTED`.
+`build/{Release,Debug}` artifacts are rejected as `NODE_GYP_ARTIFACT_UNSUPPORTED`. The bundler also rejects lifecycle
+scripts, unchecked `.bin` entries, npm install/cache artifacts, suspicious executable files, absolute or escaping
+package metadata path references, and file/package/tree size limit violations. The sanitized bundle uses the same
+`package.json` plus `node_modules` layout expected under packaged APK `assets/project/`.
 
 ## Filesystem Profile
 
