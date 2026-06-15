@@ -17,6 +17,7 @@ Supported values:
 - `emulator`: x86_64 emulator profile for resolver, corpus, and policy subsets
 - `smoke`: short physical-device smoke profile
 - `accessibility`: optional real-device accessibility smoke, requiring the AutoJs6 accessibility service to be enabled manually
+- `screen_capture`: optional real-device screen-capture smoke, requiring manual approval of the Android MediaProjection prompt
 - `full`: expanded stress profile for nightly or release investigation
 
 If `android.testInstrumentationRunnerArguments.class` is passed explicitly, it wins and the device profile does not override it. This keeps focused single-class and single-method commands deterministic.
@@ -99,6 +100,22 @@ $env:ANDROID_SERIAL="QV710AF65F"
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pautojs.nodejs.test.deviceProfile=accessibility"
 ```
 
+## Screen Capture Smoke Profile
+
+Use `screen_capture` only for manual physical-device validation after preparing the Sony test device and approving the Android screen-capture prompt. It is intentionally excluded from `sony`, `smoke`, `full`, PR, nightly, and release gates.
+
+- profile: `screen_capture`
+- primary device: Sony XQ-AT72 `QV710AF65F`
+- use: real-device MediaProjection and image-frame smoke for permission request, one captured frame, dimension checks, bitmap decode/recycle, and capturer shutdown
+- expected denial behavior: if the system prompt is denied or canceled, the optional test fails with a clear permission-denied message
+
+Recommended command:
+
+```powershell
+$env:ANDROID_SERIAL="QV710AF65F"
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pautojs.nodejs.test.deviceProfile=screen_capture"
+```
+
 ## Full Stress Profile
 
 Use `full` for nightly gates or targeted release investigations.
@@ -124,5 +141,6 @@ OnePlus OPD2413 is excluded from current unattended Node Profile v1 gates becaus
 - Do not use OnePlus OPD2413 for unattended current-branch gates.
 - Use x86_64 emulator for resolver/corpus/policy feedback, not for final packaged APK confidence.
 - Use `smoke` profile for quick validation on optional secondary devices.
+- Use `accessibility` and `screen_capture` only for manual capability-provider validation that requires device-side user action.
 - Avoid low-performance devices for memory/lifecycle stress unless the task is explicitly classifying device-specific flake.
 - Always record serial, model, profile, ABI, package identity, and command line in `docs/nodejs/reports/phase4/` or later release report directories.

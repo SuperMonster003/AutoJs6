@@ -56,6 +56,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] timeline trace smoke verifies default-off behavior and required `embedded_script.timeline_json` events when opted in
 - [ ] optional `NodeEmbeddedPerformanceInstrumentationTest` run recorded for lifecycle/native-load changes
 - [ ] extended `NodeEmbeddedMemoryLeakStressInstrumentationTest` run recorded before release candidates that change lifecycle, bridge, fs, or image-handle behavior
+- [ ] optional `NodeScreenCaptureRealDeviceSmokeInstrumentationTest` run recorded when MediaProjection, screen capture, or image-frame behavior changes
 - [ ] live bridge smoke verifies JavaScript can observe provider results
 - [ ] bridge smoke verifies `engines` snapshots, controlled `execScript`/`execScriptFile`, scoped path policy, spawn depth, and unsupported `execAutoFile`
 - [ ] bridge smoke verifies `dialogs` fake results and stable Android provider rejection

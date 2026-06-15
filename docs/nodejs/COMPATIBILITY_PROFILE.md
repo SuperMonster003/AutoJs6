@@ -750,6 +750,7 @@ Overrides outside the documented safe range are ignored and reported in `profile
   - `ScreenCapturer.stop(options?): Promise<void>`
   - current JavaScript API, fake-provider tests, and bridge protocol are stable
   - current Android provider rejects with `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED` until a MediaProjection capability provider is connected
+  - optional real-device `screen_capture` smoke validates the underlying Activity-owned Android MediaProjection and `ScreenCapturer` frame path without enabling the Node provider by default
 - `image`
   - `captureScreen(options?): Promise<Image | null>`
   - `readImage(path, options?): Promise<Image | null>`
@@ -765,6 +766,7 @@ Overrides outside the documented safe range are ignored and reported in `profile
   - repeated `recycle()` calls for the same normalized handle are safe from JavaScript and dispatch at most once per module instance
   - current JavaScript API, fake-provider tests, and bridge protocol are stable
   - current Android provider rejects with `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED` until an image capability provider is connected
+  - optional real-device `screen_capture` smoke validates frame decode and recycle behavior against the Android capture pipeline while JavaScript still receives only opaque future handles
 - `clipboard`
   - `getText(options?): Promise<string>`
   - `setText(text, options?): Promise<void>`
