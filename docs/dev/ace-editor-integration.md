@@ -59,6 +59,10 @@ ACE does not need a separate clean-host experiment flag at this stage. The ACE p
 
 Do not add `key_ace_clean_host_layout` unless there is a concrete second ACE host layout to compare. A flag without another implementation would add state, test matrix size, and ambiguous diagnostics without improving the stable path.
 
+See `docs/dev/editor-viewport-policy.md` for the Stage 3 v2 decision to keep
+`EditorViewportPolicy` narrow and avoid adding `EditorViewportHost` until there
+is a real second host or lifecycle requirement.
+
 ## Release Gate
 
 Before ACE is presented as a gray-release experimental editor:

@@ -59,21 +59,21 @@ Acceptance:
 
 ## Phase 2: Viewport Policy Deepening
 
-- [ ] Decide whether the existing simple `EditorViewportPolicy` is enough or
+- [x] Decide whether the existing simple `EditorViewportPolicy` is enough or
   should grow `attach`, `detach`, IME animation start/end, and host callbacks.
-- [ ] If needed, add `EditorViewportHost` without moving ACE back onto Native
+- [x] If needed, add `EditorViewportHost` without moving ACE back onto Native
   workaround paths.
-- [ ] Keep Native bottom padding and cursor-visible logic Native-only.
-- [ ] Keep ACE policy limited to residual padding cleanup and ACE resize/scroll
+- [x] Keep Native bottom padding and cursor-visible logic Native-only.
+- [x] Keep ACE policy limited to residual padding cleanup and ACE resize/scroll
   settling.
-- [ ] Keep the clean-host no-flag decision documented unless a real second host
+- [x] Keep the clean-host no-flag decision documented unless a real second host
   implementation appears.
 
 Acceptance:
 
-- [ ] `EditorView` continues to avoid direct `CodeEditText` access.
-- [ ] `requestRectangleOnScreen` remains Native-only.
-- [ ] ACE diagnostics identify `viewportPolicy=AceEditorViewportPolicy`.
+- [x] `EditorView` continues to avoid direct `CodeEditText` access.
+- [x] `requestRectangleOnScreen` remains Native-only.
+- [x] ACE diagnostics identify `viewportPolicy=AceEditorViewportPolicy`.
 
 ## Phase 3: IME State Machine
 

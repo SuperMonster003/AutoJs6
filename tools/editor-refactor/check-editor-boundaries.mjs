@@ -98,6 +98,7 @@ const aceEditorTestPlan = "docs/dev/ace-editor-test-plan.md";
 const aceEditorIntegrationDoc = "docs/dev/ace-editor-integration.md";
 const nativeOnlyAudit = "docs/dev/editor-native-only-audit.md";
 const engineNeutralServicesDoc = "docs/dev/editor-engine-neutral-services.md";
+const viewportPolicyDoc = "docs/dev/editor-viewport-policy.md";
 
 assertIncludes(editorView, "mViewportPolicy.onImeInsetsChanged(imeVisible, targetBottom)");
 assertIncludes(editorView, "EditorViewportPolicyFactory.create(editor, this)");
@@ -349,6 +350,11 @@ assertIncludes(roadmap, "## Phase 7: Keyboard And Viewport Test Matrix");
 assertIncludes(roadmap, "- [x] Add `docs/dev/editor-native-only-audit.md`.");
 assertIncludes(roadmap, "- [x] Add `docs/dev/editor-engine-neutral-services.md`.");
 assertIncludes(roadmap, "- [x] Extend boundary checks to cover the audit lists.");
+assertIncludes(roadmap, "- [x] Decide whether the existing simple `EditorViewportPolicy` is enough or");
+assertIncludes(roadmap, "- [x] If needed, add `EditorViewportHost` without moving ACE back onto Native");
+assertIncludes(roadmap, "- [x] Keep Native bottom padding and cursor-visible logic Native-only.");
+assertIncludes(roadmap, "- [x] Keep ACE policy limited to residual padding cleanup and ACE resize/scroll");
+assertIncludes(roadmap, "- [x] ACE diagnostics identify `viewportPolicy=AceEditorViewportPolicy`.");
 assertIncludes(roadmap, "ACE clean-host behavior remains the default ACE path.");
 assertIncludes(roadmap, "LSP and VisualEditorAce remain deferred until this gate is satisfied.");
 
@@ -385,6 +391,17 @@ assertIncludes(engineNeutralServicesDoc, "must not depend on");
 assertIncludes(engineNeutralServicesDoc, "`CodeEditText`");
 assertIncludes(engineNeutralServicesDoc, "`WebView` or `AceCodeEditor`");
 
+assertIncludes(viewportPolicyDoc, "# Editor Viewport Policy Decision");
+assertIncludes(viewportPolicyDoc, "The existing simple `EditorViewportPolicy` contract is enough");
+assertIncludes(viewportPolicyDoc, "Do not add `EditorViewportHost` in this stage.");
+assertIncludes(viewportPolicyDoc, "`EditorView` owns:");
+assertIncludes(viewportPolicyDoc, "`NativeEditorViewportPolicy` owns:");
+assertIncludes(viewportPolicyDoc, "`AceEditorViewportPolicy` owns:");
+assertIncludes(viewportPolicyDoc, "Native bottom padding as an IME workaround");
+assertIncludes(viewportPolicyDoc, "`requestRectangleOnScreen`");
+assertIncludes(viewportPolicyDoc, "viewportPolicy=AceEditorViewportPolicy");
+assertIncludes(viewportPolicyDoc, "ACE diagnostics identify `viewportPolicy=AceEditorViewportPolicy`.");
+
 assertIncludes(aceEditorTestPlan, "## IME Show/Hide Manual Checklist");
 assertIncludes(aceEditorTestPlan, "### ACE-IME-001: Input method and symbols/function bars");
 assertIncludes(aceEditorTestPlan, "### ACE-IME-002: Repeated soft keyboard show/hide stress");
@@ -398,6 +415,7 @@ assertIncludes(aceEditorIntegrationDoc, "Run the `IME Show/Hide Manual Checklist
 assertIncludes(aceEditorIntegrationDoc, "## Clean Host Layout Decision");
 assertIncludes(aceEditorIntegrationDoc, "ACE does not need a separate clean-host experiment flag at this stage.");
 assertIncludes(aceEditorIntegrationDoc, "Do not add `key_ace_clean_host_layout`");
+assertIncludes(aceEditorIntegrationDoc, "docs/dev/editor-viewport-policy.md");
 
 assertIncludes(aceSurfaceSmoke, "ACE editor bootstrap order");
 assertIncludes(aceSurfaceSmoke, "hidden editor before first paint");
@@ -414,6 +432,7 @@ assertIncludes(aceDiagnosticsSnapshot, "val lastAceResizeCompletedReason: String
 assertIncludes(aceDiagnosticsSnapshot, "val lastViewportPolicyEvent: String?");
 assertIncludes(aceDiagnosticsSnapshot, "val lastViewportPolicyImeVisible: Boolean?");
 
+assertIncludes(aceDiagnostics, "viewportPolicy=${snapshot.viewportPolicy.orUnknown()}");
 assertIncludes(aceDiagnostics, "pendingAceResizeReason=${snapshot.pendingAceResizeReason.orUnknown()}");
 assertIncludes(aceDiagnostics, "lastAceResizeScheduledReason=${snapshot.lastAceResizeScheduledReason.orUnknown()}");
 assertIncludes(aceDiagnostics, "lastAceResizeDispatchedReason=${snapshot.lastAceResizeDispatchedReason.orUnknown()}");
