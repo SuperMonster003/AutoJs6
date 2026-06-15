@@ -78,6 +78,24 @@ Do not assume Rhino globals are present:
 
 If a script needs Android or AutoJs functionality, use an AutoJs bridge module.
 
+## Rhino Compatibility Shim
+
+There is no `require("rhino")` compatibility module in the default Safe Node Profile, and Node does not support `rhino.install()` or automatic installation of old AutoJs globals.
+
+Do not migrate scripts by expecting these Rhino-era surfaces to appear inside Node:
+
+- `importClass`
+- `importPackage`
+- `Packages`
+- `JavaAdapter`
+- direct `java.*`
+- direct `android.*`
+- old global AutoJs APIs such as `toast`, `files`, `images`, selector globals, or `threads`
+
+The recommended migration path is to rewrite those calls to explicit Node bridge modules. If a legacy Rhino script must remain Rhino, keep it on the Rhino engine or dispatch it explicitly through the script manager rather than mixing Rhino globals into Node.
+
+The design gate for a possible future shim is documented in [RHINO_SHIM.md](design/RHINO_SHIM.md). Its recommendation is that any future shim should be explicit, isolated, JSON-serialized, timeout-bounded, and used only for migration.
+
 ## Modules Instead Of Globals
 
 Common bridge modules:
@@ -321,6 +339,7 @@ For release flavors and ABI policy, see `docs/nodejs/design/RELEASE_FLAVORS.md`.
 - Replace `files` helpers with scoped `fs` or `fs/promises`.
 - Keep file paths relative to the project working directory.
 - Remove direct Java object access.
+- Do not rely on `require("rhino")`, `rhino.install()`, `importClass`, `importPackage`, `Packages`, or `JavaAdapter` inside Node.
 - Confirm unsupported builtins still fail with `ERR_AUTOJS6_*`.
 - Run examples under `sample/nodejs/` for reference.
 - Re-run packaged APK verification when the script is packaged.

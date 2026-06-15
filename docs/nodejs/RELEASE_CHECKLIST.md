@@ -185,4 +185,5 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `docs/nodejs/design/NETWORK.md` when network behavior, packaging permissions, or request policy changes
 - [ ] `docs/nodejs/design/WORKER_THREADS.md` when worker behavior or worker policy changes
 - [ ] `docs/nodejs/design/JAVA_INTEROP.md` when Java/Android interop, Rhino compatibility shims, or Java allowlist policy changes
+- [ ] `docs/nodejs/design/RHINO_SHIM.md` when `require("rhino")`, old global API installation, or mixed Rhino/Node migration behavior changes
 - [ ] packaged APK user docs or examples if packaging behavior changed

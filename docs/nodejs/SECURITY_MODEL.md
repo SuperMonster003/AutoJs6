@@ -201,6 +201,8 @@ The `java_interop` feature flag is critical, disabled by default, build-time exp
 
 See `docs/nodejs/design/JAVA_INTEROP.md` for the mode comparison, allowlist candidates, Rhino compatibility boundary, and future test gate.
 
+Rhino compatibility shims are a separate migration concern. Node must not install Rhino globals, `importClass`, `Packages`, or `JavaAdapter` by default. See `docs/nodejs/design/RHINO_SHIM.md`.
+
 ## AutoJs API Bridge Policy
 
 Node scripts must not hold raw Android or AutoJs privileged objects.

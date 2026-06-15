@@ -220,6 +220,7 @@ Design notes for the broadest limited builtins:
 - WebSocket: `docs/nodejs/design/WEBSOCKET.md`
 - worker threads: `docs/nodejs/design/WORKER_THREADS.md`
 - Java interop: `docs/nodejs/design/JAVA_INTEROP.md`
+- Rhino shim: `docs/nodejs/design/RHINO_SHIM.md`
 
 ## Java Interop Experimental Allowlist
 
@@ -259,6 +260,7 @@ These surfaces must stay disabled unless a future task explicitly opens them beh
 - unrestricted `process.getBuiltinModule`
 - unrestricted `vm`
 - unrestricted Java/Android interop
+- Rhino compatibility shim and old global AutoJs API installation
 - inspector/debugger server
 - npm install and postinstall execution
 

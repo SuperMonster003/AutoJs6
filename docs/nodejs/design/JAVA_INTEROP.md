@@ -224,6 +224,8 @@ Node must not silently emulate these in-process. If a compatibility shim is ever
 - never pass Java object references into Node
 - record compatibility diagnostics so users can migrate to bridge modules
 
+Detailed Rhino shim policy is tracked in `docs/nodejs/design/RHINO_SHIM.md`.
+
 ## Packaged APK Policy
 
 Packaged APKs must not gain Java interop by bundling the Node runtime.

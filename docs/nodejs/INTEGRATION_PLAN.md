@@ -143,6 +143,7 @@ Important: `.mjs` currently routes to the Node backend, but ESM execution is sti
 - Treat controlled `fetch` as the only approved network MVP; live provider enablement remains behind `autojs.nodejs.network.experimental=false` by default.
 - Keep `worker_threads` behind `docs/nodejs/design/WORKER_THREADS.md` and `autojs.nodejs.worker_threads.experimental=false`; workers must not access AutoJs bridge modules or Android objects.
 - Keep Java/Android interop behind `docs/nodejs/design/JAVA_INTEROP.md` and `autojs.nodejs.javaInterop.experimental=false`; the default product path is explicit AutoJs bridge modules, not raw `java.*`, `android.*`, reflection, class loaders, or Rhino adapter APIs.
+- Keep Rhino compatibility shims behind `docs/nodejs/design/RHINO_SHIM.md`; Node must not install old Rhino globals or Java bridge globals by default.
 - Each high-risk feature needs a design document, flag, tests, packaged smoke, and rollback path.
 - Keep current design gates in `docs/nodejs/design/` synchronized when broad compatibility surfaces change.
 
