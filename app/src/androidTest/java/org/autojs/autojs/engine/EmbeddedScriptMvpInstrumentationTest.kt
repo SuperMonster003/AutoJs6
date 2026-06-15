@@ -27452,7 +27452,11 @@ class EmbeddedScriptMvpInstrumentationTest {
                     try {
                       require("trace-pkg/private");
                     } catch (error) {
+                      const message = String(error.message);
                       console.log("trace.blocked.code=" + error.code);
+                      console.log("trace.blocked.explain=" + message.includes("AutoJs6 resolver explanation:"));
+                      console.log("trace.blocked.search_paths=" + message.includes("search paths='"));
+                      console.log("trace.blocked.null_branch=" + message.includes("[resolve] exports blocked"));
                     }
                     console.log("trace.values=" + local.value + "/" + pkg.value + "/" + root.value);
                     """.trimIndent(),
@@ -27523,8 +27527,12 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertTrue(trace, trace.contains("[resolve] package scope request=\"#root\""))
             assertTrue(trace, trace.contains("[resolve] imports matched request=\"#root\""))
             assertTrue(trace, trace.contains("[resolve] request request=\"trace-pkg/private\""))
+            assertTrue(trace, trace.contains("[resolve] exports blocked request=\"./private\""))
             assertTrue(trace, trace.contains("[resolve] error request=\"trace-pkg/private\""))
             assertTrue(trace, trace.contains("code=\"ERR_PACKAGE_PATH_NOT_EXPORTED\""))
+            assertTrue(traced.stdout, traced.stdout.contains("trace.blocked.explain=true"))
+            assertTrue(traced.stdout, traced.stdout.contains("trace.blocked.search_paths=true"))
+            assertTrue(traced.stdout, traced.stdout.contains("trace.blocked.null_branch=true"))
             assertOutputOrder(
                 trace,
                 "[resolve] request request=\"./local\"",

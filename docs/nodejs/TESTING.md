@@ -507,6 +507,19 @@ Project runner callers may pass `AUTOJS6_NODE_RESOLVE_TRACE=1` in the request en
 
 When enabled, trace lines are written to stderr with a deterministic `[resolve]` prefix. The trace includes request/referrer, local and `node_modules` finals, package scope discovery, package `exports`/`imports` matches, and resolver errors. Do not rely on this output in production scripts.
 
+Resolver visualizer:
+
+```powershell
+node tools/nodejs/resolver/explain-node-resolve.js --request trace-pkg/private --from app/src/main.js --trace-file path\to\resolve-stderr.log
+.\gradlew.bat --console=plain :app:explainNodeResolve "-Pautojs.nodejs.resolve.request=trace-pkg/private" "-Pautojs.nodejs.resolve.from=app/src/main.js" "-Pautojs.nodejs.resolve.traceFile=path\to\resolve-stderr.log"
+.\gradlew.bat --console=plain :app:verifyNodeResolverVisualizerFixtures
+```
+
+The resolver visualizer does not run a second resolver. It formats the real Embedded Node `[resolve]` trace captured with
+`AUTOJS6_NODE_RESOLVE_TRACE=1` into `app/build/reports/nodejs/resolver/resolve-explanation.txt` and `.json`. The report
+lists the original request, parent module, `node_modules` search paths, package.json files read, selected
+`exports`/`imports`/`main` branch, `target=null` blocking, and the final error.
+
 ## Lifecycle Tests
 
 The embedded service must be verified beyond one successful script.

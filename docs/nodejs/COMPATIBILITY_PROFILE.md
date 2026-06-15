@@ -85,6 +85,7 @@ Runtime diagnostics expose the same state through `require("autojs6:profile").fe
 - package condition order currently oriented around CommonJS: `require`, `node`, `default`
 - module source budget checks
 - optional resolver trace through `AUTOJS6_NODE_RESOLVE_TRACE=1`, written to stderr and disabled by default
+- resolver visualizer report through `node tools/nodejs/resolver/explain-node-resolve.js --request <specifier> --from <file> --trace-file <stderr-log>` or `:app:explainNodeResolve` with `-Pautojs.nodejs.resolve.*`
 
 Unsupported or rejected module source forms:
 

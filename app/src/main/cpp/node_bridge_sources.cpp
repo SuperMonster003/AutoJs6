@@ -7850,6 +7850,7 @@ std::string buildEmbeddedScriptExecutionSource(
     return values;
   })());
   const __autojs6_require_builtin_cache = Object.create(null);
+  const __autojs6_resolve_trace_stack = [];
   let __autojs6_scoped_fs_cache = null;
   let __autojs6_limited_fs_promises_cache = null;
   let __autojs6_limited_buffer_cache = null;
@@ -8099,6 +8100,29 @@ std::string buildEmbeddedScriptExecutionSource(
     if (value === undefined || value === null) return "\"\"";
     return JSON.stringify(String(value).replace(/[\r\n]+/g, " "));
   }
+  function __autojs6_resolve_trace_current() {
+    return __autojs6_resolve_trace_stack.length
+      ? __autojs6_resolve_trace_stack[__autojs6_resolve_trace_stack.length - 1]
+      : null;
+  }
+  function __autojs6_resolve_trace_begin(request, from) {
+    if (!__autojs6_resolve_trace_enabled()) return null;
+    const record = {
+      request: String(request === undefined ? "" : request),
+      from: String(from === undefined || from === null ? "" : from),
+      events: [],
+      lines: []
+    };
+    __autojs6_resolve_trace_stack.push(record);
+    return record;
+  }
+  function __autojs6_resolve_trace_end(record) {
+    if (!record) return;
+    const index = __autojs6_resolve_trace_stack.lastIndexOf(record);
+    if (index >= 0) {
+      __autojs6_resolve_trace_stack.splice(index, 1);
+    }
+  }
   function __autojs6_resolve_trace(event, fields) {
     if (!__autojs6_resolve_trace_enabled()) return;
     const parts = [];
@@ -8107,11 +8131,74 @@ std::string buildEmbeddedScriptExecutionSource(
       parts.push(key + "=" + __autojs6_resolve_trace_value(data[key]));
     }
     const line = "[resolve] " + event + (parts.length ? " " + parts.join(" ") : "");
+    const record = __autojs6_resolve_trace_current();
+    if (record) {
+      const copied = Object.create(null);
+      for (const key of Object.keys(data)) {
+        copied[key] = data[key] === undefined || data[key] === null ? "" : String(data[key]);
+      }
+      record.events.push({ event: event, fields: copied, line: line });
+      record.lines.push(line);
+    }
     try {
       if (typeof process === "object" && process && process.stderr && typeof process.stderr.write === "function") {
         process.stderr.write(line + "\n");
       }
     } catch (_) {}
+  }
+  function __autojs6_resolve_trace_join(values) {
+    return values.length ? values.join("|") : "none observed";
+  }
+  function __autojs6_resolve_trace_report(record, error) {
+    if (!record || !record.lines || !record.lines.length) return "";
+    const events = record.events || [];
+    const searchPaths = [];
+    const packageJsonFiles = [];
+    const packageBranches = [];
+    const nullBlocking = [];
+    for (const item of events) {
+      const fields = item.fields || {};
+      if (item.event === "node_modules search" && fields.paths) {
+        searchPaths.push(fields.paths);
+      }
+      if (item.event === "package.json found" || item.event === "package scope") {
+        packageJsonFiles.push(fields.file || fields.packageDir || "");
+      }
+      if (
+        item.event.indexOf("exports") === 0 ||
+        item.event.indexOf("imports") === 0 ||
+        item.event === "main matched" ||
+        item.event === "index matched" ||
+        item.event === "self-reference matched"
+      ) {
+        packageBranches.push(item.line);
+      }
+      if (item.event.indexOf("blocked") >= 0 || fields.target === "null") {
+        nullBlocking.push(item.line);
+      }
+    }
+    const message = error && error.message ? String(error.message).replace(/[\r\n]+/g, " ") : String(error);
+    const code = error && error.code ? String(error.code) : "";
+    const autojs6Code = error && error.autojs6Code ? String(error.autojs6Code) : "";
+    return [
+      "AutoJs6 resolver explanation:",
+      "request='" + __autojs6_diagnostic_path(record.request) + "'",
+      "parent='" + __autojs6_diagnostic_path(record.from) + "'",
+      "search paths='" + __autojs6_resolve_trace_join(searchPaths) + "'",
+      "package.json fields read='" + __autojs6_resolve_trace_join(packageJsonFiles) + "'",
+      "package branch selected='" + __autojs6_resolve_trace_join(packageBranches) + "'",
+      "null blocking='" + __autojs6_resolve_trace_join(nullBlocking) + "'",
+      "final error code='" + __autojs6_diagnostic_path(code || autojs6Code) + "'",
+      "final error message='" + __autojs6_diagnostic_path(message) + "'",
+      "trace:\n" + record.lines.map(function(line) { return "  " + line; }).join("\n")
+    ].join("\n");
+  }
+  function __autojs6_attach_resolve_trace(error, record) {
+    return __autojs6_append_error_context(
+      error,
+      __autojs6_resolve_trace_report(record, error),
+      "__autojs6ResolveTraceContext"
+    );
   }
   function __autojs6_freeze_sorted_copy(values) {
     const copy = Array.prototype.slice.call(values || []);
@@ -13619,6 +13706,14 @@ std::string buildEmbeddedScriptExecutionSource(
         throw new Error("Unsupported Embedded Node package exports target in MVP for '" + moduleName + "'.");
       }
       if (selected.blocked) {
+        __autojs6_resolve_trace("exports blocked", {
+          request: key,
+          module: moduleName,
+          target: "null",
+          selectedCondition: selected.selectedCondition,
+          conditionKeys: selected.conditionKeys,
+          ignoredConditions: selected.ignoredConditions
+        });
         throw __autojs6_attach_package_error_details(
           __autojs6_package_path_not_exported("Embedded Node package subpath is not exported '" + key + "' for '" + moduleName + "': target=null."),
           {
@@ -13690,6 +13785,14 @@ std::string buildEmbeddedScriptExecutionSource(
         throw new Error("Unsupported Embedded Node package imports target in MVP for '" + moduleName + "'.");
       }
       if (selected.blocked) {
+        __autojs6_resolve_trace("imports blocked", {
+          request: specifier,
+          module: moduleName,
+          target: "null",
+          selectedCondition: selected.selectedCondition,
+          conditionKeys: selected.conditionKeys,
+          ignoredConditions: selected.ignoredConditions
+        });
         throw __autojs6_attach_package_error_details(
           __autojs6_package_import_not_defined("Embedded Node package import is blocked '" + specifier + "' for '" + moduleName + "': target=null."),
           {
@@ -26777,6 +26880,7 @@ std::string buildEmbeddedScriptExecutionSource(
   }
   function __autojs6_restricted_require_resolve(moduleName, parentFilename) {
     const name = moduleName === undefined ? "" : String(moduleName);
+    const traceRecord = __autojs6_resolve_trace_begin(name, parentFilename);
     __autojs6_resolve_trace("request", {
       request: name,
       from: parentFilename
@@ -26986,12 +27090,18 @@ std::string buildEmbeddedScriptExecutionSource(
         autojs6Code: error && error.autojs6Code,
         message: error && error.message
       });
-      throw __autojs6_enrich_require_error(error, name, parentFilename);
+      throw __autojs6_attach_resolve_trace(
+        __autojs6_enrich_require_error(error, name, parentFilename),
+        traceRecord
+      );
+    } finally {
+      __autojs6_resolve_trace_end(traceRecord);
     }
   }
   function __autojs6_restricted_require(moduleName, parentModule) {
     const name = moduleName === undefined ? "" : String(moduleName);
     const parentFilename = parentModule ? parentModule.filename : __autojs6_source_name;
+    const traceRecord = __autojs6_resolve_trace_begin(name, parentFilename);
     __autojs6_resolve_trace("request", {
       request: name,
       from: parentFilename
@@ -27208,7 +27318,12 @@ std::string buildEmbeddedScriptExecutionSource(
         autojs6Code: error && error.autojs6Code,
         message: error && error.message
       });
-      throw __autojs6_enrich_require_error(error, name, parentFilename);
+      throw __autojs6_attach_resolve_trace(
+        __autojs6_enrich_require_error(error, name, parentFilename),
+        traceRecord
+      );
+    } finally {
+      __autojs6_resolve_trace_end(traceRecord);
     }
   }
   function __autojs6_disabled_builtin_module(moduleName) {

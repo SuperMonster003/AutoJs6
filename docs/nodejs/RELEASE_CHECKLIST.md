@@ -10,6 +10,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `:app:nativeNodeDependencyReportAppDebug`
 - [ ] `:app:nativeNodeSymbolArchiveReport`
 - [ ] `:app:embeddedNodeDoctorReport`
+- [ ] `:app:verifyNodeResolverVisualizerFixtures`
 
 ## Device Tests
 
@@ -184,6 +185,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] packaged verifier gives actionable failures
 - [ ] `ERR_AUTOJS6_*` codes stable for documented negative paths
 - [ ] resolver trace remains off by default once implemented
+- [ ] resolver visualizer fixture parses search paths, package.json fields, null blocking, and final errors
 - [ ] bridge live diagnostics are present for main-app bridge smoke
 - [ ] docs updated for any changed capability
 

@@ -956,6 +956,7 @@ apply(from = "node-performance-report.gradle.kts")
 apply(from = "node-compatibility-profile.gradle.kts")
 apply(from = "node-dependency-bundler.gradle.kts")
 apply(from = "node-doctor-report.gradle.kts")
+apply(from = "node-resolver-visualizer.gradle.kts")
 
 tasks {
     withType(JavaCompile::class.java) {
