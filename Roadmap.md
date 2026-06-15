@@ -180,7 +180,7 @@ Acceptance:
 - [x] AutoJs6 API index intermediate model improvements.
 - [x] Pro-only API detection.
 - [x] Declaration and completion quality improvements.
-- [ ] LSP server manager alpha.
+- [x] LSP server manager alpha.
 - [ ] LSP completion and hover.
 - [ ] Optional tooltip/markdown loading.
 - [ ] VisualEditorAce investigation only after ordinary ACE is stable.
@@ -194,6 +194,7 @@ Acceptance:
 - `node tools/ace-completion/test-completer.mjs`
 - `node tools/ace-completion/verify-autojs6-indices.mjs`
 - `node tools/ace-completion/verify-autojs6-dts.mjs`
+- `.\gradlew.bat :app:testAppDebugUnitTest --tests org.autojs.autojs.ui.edit.editor.ace.lsp.AceLspServerManagerTest`
 - `.\gradlew.bat :app:compileAppDebugKotlin`
 - `.\gradlew.bat :app:compileAppDebugJavaWithJavac`
 - `.\gradlew.bat :app:mergeAppDebugAssets`

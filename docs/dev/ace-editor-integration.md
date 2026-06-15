@@ -13,7 +13,10 @@ This document tracks the current AutoJs6 ACE editor deployment state. Native rem
 - ACE uses bundled JetBrains Mono WOFF2 assets by default. Source Code Pro is bundled as the second editor font, and system `monospace` remains the final fallback.
 - ACE font selection is available from settings and from the editor `More -> ACE editor font` menu.
 - AutoJs6 static completion is generated from bundled selected `@sm003/autojs6-dts` declaration files under `autojs6/types/autojs6`, then emitted through `tools/ace-completion/autojs6_indices.source.json`; the legacy `autojs_indices.js` remains only as a compatibility fallback.
-- ACE LSP is an experimental setting and is disabled by default. The stable editor path does not load `lsp.js` or create a WebSocket.
+- ACE LSP is an experimental setting and is disabled by default. The native
+  alpha manager exposes deterministic no-server options when enabled, but the
+  stable editor path does not load `lsp.js`, create a WebSocket, or start a
+  server.
 
 ## Diagnostics
 
@@ -33,7 +36,7 @@ The snapshot includes:
 - asset URL
 - WebView package version
 - Android version
-- LSP enabled/state fields
+- LSP enabled/state, transport, URI, fallback, and server availability fields
 - file size and large-file policy
 - TextMirror revision
 - ready/state/heartbeat timestamps
@@ -87,6 +90,7 @@ Before ACE is presented as a gray-release experimental editor:
 - Run `node tools/ace-completion/verify-autojs6-dts.mjs`.
 - Run `node tools/ace-completion/test-completer.mjs`.
 - Run `node tools/ace-hardening/check-editor-surface.mjs`.
+- Run `.\gradlew.bat :app:testAppDebugUnitTest --tests org.autojs.autojs.ui.edit.editor.ace.lsp.AceLspServerManagerTest`.
 - Run the manual cases in `docs/dev/ace-editor-test-plan.md`.
 - Run the `IME Show/Hide Manual Checklist` in `docs/dev/ace-editor-test-plan.md`.
 - Run the dedicated keyboard and viewport matrix in
@@ -110,7 +114,9 @@ Before ACE is presented as a gray-release experimental editor:
 ## Deferred Work
 
 - VisualEditorAce from the Pro layout remains deferred. Do not add an exposed `VISUAL_ACE` enum or UI entry until the ordinary ACE editor is stable.
-- LSP remains a separate experimental path. The diagnostics schema and feature flag are in place, but server startup and WebSocket transport are deferred.
+- LSP remains a separate experimental path. The native alpha manager, diagnostics
+  schema, and feature flag are in place, but server startup and WebSocket
+  transport are deferred.
 - LSP alpha, hover/markdown tooltip loading, and VisualEditorAce are not primary
   targets until the keyboard and viewport matrix is stable on representative
   devices.

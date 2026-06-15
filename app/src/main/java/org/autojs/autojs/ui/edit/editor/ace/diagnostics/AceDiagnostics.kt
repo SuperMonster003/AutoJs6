@@ -2,7 +2,7 @@ package org.autojs.autojs.ui.edit.editor.ace.diagnostics
 
 import android.os.Build
 import android.webkit.WebView
-import org.autojs.autojs.ui.edit.editor.ace.AceEditorLspPreferences
+import org.autojs.autojs.ui.edit.editor.ace.lsp.AceLspServerManager
 import org.autojs.autojs.ui.edit.editor.engine.EditorEngineType
 
 object AceDiagnostics {
@@ -12,6 +12,7 @@ object AceDiagnostics {
         fileSizeBytes: Long?,
         largeFilePolicy: String,
     ): AceDiagnosticsSnapshot {
+        val lspSnapshot = AceLspServerManager.preferenceSnapshot()
         return AceDiagnosticsSnapshot(
             engineType = engineType.name,
             aceHealthState = null,
@@ -21,8 +22,16 @@ object AceDiagnostics {
             assetUrl = null,
             webViewVersion = currentWebViewVersion(),
             androidVersion = androidVersion(),
-            lspEnabled = AceEditorLspPreferences.isEnabled(),
-            lspState = lspState(),
+            lspEnabled = lspSnapshot.enabled,
+            lspState = lspSnapshot.state,
+            lspTransport = lspSnapshot.transport,
+            lspServerUri = lspSnapshot.serverUri,
+            lspRootUri = lspSnapshot.rootUri,
+            lspDocumentUri = lspSnapshot.documentUri,
+            lspFallback = lspSnapshot.fallback,
+            lspServerAvailable = lspSnapshot.serverAvailable,
+            lspStartSupported = lspSnapshot.startSupported,
+            lspSessionRevision = lspSnapshot.sessionRevision,
             aceFont = null,
             fileSizeBytes = fileSizeBytes,
             largeFilePolicy = largeFilePolicy,
@@ -83,6 +92,14 @@ object AceDiagnostics {
             appendLine("androidVersion=${snapshot.androidVersion}")
             appendLine("lspEnabled=${snapshot.lspEnabled}")
             appendLine("lspState=${snapshot.lspState}")
+            appendLine("lspTransport=${snapshot.lspTransport.orUnknown()}")
+            appendLine("lspServerUri=${snapshot.lspServerUri.orUnknown()}")
+            appendLine("lspRootUri=${snapshot.lspRootUri.orUnknown()}")
+            appendLine("lspDocumentUri=${snapshot.lspDocumentUri.orUnknown()}")
+            appendLine("lspFallback=${snapshot.lspFallback.orUnknown()}")
+            appendLine("lspServerAvailable=${snapshot.lspServerAvailable}")
+            appendLine("lspStartSupported=${snapshot.lspStartSupported}")
+            appendLine("lspSessionRevision=${snapshot.lspSessionRevision}")
             appendLine("aceFont=${snapshot.aceFont.orUnknown()}")
             appendLine("fileSizeBytes=${snapshot.fileSizeBytes?.toString().orUnknown()}")
             appendLine("largeFilePolicy=${snapshot.largeFilePolicy}")
@@ -151,11 +168,11 @@ object AceDiagnostics {
     }
 
     fun lspState(): String {
-        return if (AceEditorLspPreferences.isEnabled()) LSP_CONFIGURED_NO_SERVER else LSP_DISABLED
+        return AceLspServerManager.preferenceSnapshot().state
     }
 
     private fun String?.orUnknown(): String = this?.takeIf { it.isNotBlank() } ?: "unknown"
 
-    const val LSP_DISABLED = "disabled"
-    const val LSP_CONFIGURED_NO_SERVER = "configured-no-server"
+    const val LSP_DISABLED = AceLspServerManager.STATE_DISABLED
+    const val LSP_CONFIGURED_NO_SERVER = AceLspServerManager.STATE_CONFIGURED_NO_SERVER
 }

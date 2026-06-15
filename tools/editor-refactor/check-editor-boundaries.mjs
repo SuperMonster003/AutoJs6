@@ -94,6 +94,7 @@ const draftService = "app/src/main/java/org/autojs/autojs/ui/edit/editor/service
 const aceCodeEditor = "app/src/main/java/org/autojs/autojs/ui/edit/editor/ace/AceCodeEditor.kt";
 const aceImeController = "app/src/main/java/org/autojs/autojs/ui/edit/editor/ace/AceImeController.kt";
 const aceImeState = "app/src/main/java/org/autojs/autojs/ui/edit/editor/ace/AceImeState.kt";
+const aceLspServerManager = "app/src/main/java/org/autojs/autojs/ui/edit/editor/ace/lsp/AceLspServerManager.kt";
 const aceDiagnostics = "app/src/main/java/org/autojs/autojs/ui/edit/editor/ace/diagnostics/AceDiagnostics.kt";
 const aceDiagnosticsSnapshot = "app/src/main/java/org/autojs/autojs/ui/edit/editor/ace/diagnostics/AceDiagnosticsSnapshot.kt";
 const aceRuntimeEventHistory = "app/src/main/java/org/autojs/autojs/ui/edit/editor/ace/diagnostics/AceRuntimeEventHistory.kt";
@@ -561,7 +562,20 @@ assertIncludes(aceDiagnosticsSnapshot, "val lastBridgeEventWindowCount: Int");
 assertIncludes(aceDiagnosticsSnapshot, "val maxBridgeEventWindowCount: Int");
 assertIncludes(aceDiagnosticsSnapshot, "val maxBridgeEventWindowStartedAtUptimeMillis: Long?");
 assertIncludes(aceDiagnosticsSnapshot, "val runtimeEventHistory: List<String>");
+assertIncludes(aceDiagnosticsSnapshot, "val lspTransport: String?");
+assertIncludes(aceDiagnosticsSnapshot, "val lspServerUri: String?");
+assertIncludes(aceDiagnosticsSnapshot, "val lspRootUri: String?");
+assertIncludes(aceDiagnosticsSnapshot, "val lspDocumentUri: String?");
+assertIncludes(aceDiagnosticsSnapshot, "val lspFallback: String?");
+assertIncludes(aceDiagnosticsSnapshot, "val lspServerAvailable: Boolean");
+assertIncludes(aceDiagnosticsSnapshot, "val lspStartSupported: Boolean");
 
+assertIncludes(aceDiagnostics, "AceLspServerManager.preferenceSnapshot()");
+assertIncludes(aceDiagnostics, "lspTransport=${snapshot.lspTransport.orUnknown()}");
+assertIncludes(aceDiagnostics, "lspServerUri=${snapshot.lspServerUri.orUnknown()}");
+assertIncludes(aceDiagnostics, "lspRootUri=${snapshot.lspRootUri.orUnknown()}");
+assertIncludes(aceDiagnostics, "lspDocumentUri=${snapshot.lspDocumentUri.orUnknown()}");
+assertIncludes(aceDiagnostics, "lspFallback=${snapshot.lspFallback.orUnknown()}");
 assertIncludes(aceDiagnostics, "viewportPolicy=${snapshot.viewportPolicy.orUnknown()}");
 assertIncludes(aceDiagnostics, "lastImeState=${snapshot.lastImeState.orUnknown()}");
 assertIncludes(aceDiagnostics, "lastImeHeight=${snapshot.lastImeHeight?.toString().orUnknown()}");
@@ -583,6 +597,11 @@ assertIncludes(aceDiagnostics, "lastViewportPolicyImeVisible=${snapshot.lastView
 assertIncludes(aceCodeEditor, "private var lastAceResizeScheduledReason");
 assertIncludes(aceCodeEditor, "private val imeController = AceImeController(IME_REQUEST_COALESCE_MS)");
 assertIncludes(aceCodeEditor, "private val eventHistory = AceRuntimeEventHistory()");
+assertIncludes(aceCodeEditor, "private val lspServerManager = AceLspServerManager()");
+assertIncludes(aceCodeEditor, "lspServerManager.attach()");
+assertIncludes(aceCodeEditor, "lspServerManager.detach()");
+assertIncludes(aceCodeEditor, "lspServerManager.bridgeOptionsJson()");
+assertIncludes(aceCodeEditor, "eventHistory.record(\"lsp_manager\"");
 assertIncludes(aceCodeEditor, "lastImeState = imeController.state.name");
 assertIncludes(aceCodeEditor, "lastImeIgnoredRequestReason = imeController.lastIgnoredRequestReason");
 assertIncludes(aceCodeEditor, "runtimeEventHistory = eventHistory.snapshot()");
@@ -638,6 +657,19 @@ assertIncludes(aceJsErrorClassifier, "AceFailureType.JS_INIT_ERROR");
 
 assertIncludes(aceFallbackPolicy, "AceFailureType.LSP_ERROR");
 assertIncludes(aceFallbackPolicy, "AceFailureType.COMPLETION_ERROR");
+
+assertIncludes(aceLspServerManager, "class AceLspServerManager(");
+assertIncludes(aceLspServerManager, "STATE_DISABLED = \"disabled\"");
+assertIncludes(aceLspServerManager, "STATE_CONFIGURED_NO_SERVER = \"configured-no-server\"");
+assertIncludes(aceLspServerManager, "TRANSPORT_UNAVAILABLE = \"unavailable\"");
+assertIncludes(aceLspServerManager, "FALLBACK_STATIC_COMPLETION = \"static-completion\"");
+assertIncludes(aceLspServerManager, "SYNTHETIC_DOCUMENT_URI = \"file:///autojs6/editor/current.js\"");
+assertIncludes(aceLspServerManager, "serverAvailable = false");
+assertIncludes(aceLspServerManager, "startSupported = false");
+assertIncludes(aceLspServerManager, "fun bridgeOptionsJson(): String");
+assertNotIncludes(aceLspServerManager, "WebSocket");
+assertNotIncludes(aceLspServerManager, "ProcessBuilder");
+assertNotIncludes(aceLspServerManager, "Runtime.getRuntime()");
 
 assertIncludes(editorView, "private val mPrimaryMenuStateSyncDebounceMs = 80L");
 assertIncludes(editorView, "private fun schedulePrimaryMenuStateSync()");

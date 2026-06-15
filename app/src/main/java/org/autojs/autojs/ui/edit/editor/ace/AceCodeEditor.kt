@@ -37,6 +37,7 @@ import org.autojs.autojs.ui.edit.editor.ace.health.AceFailureType
 import org.autojs.autojs.ui.edit.editor.ace.health.AceHealthState
 import org.autojs.autojs.ui.edit.editor.ace.health.AceJsErrorClassifier
 import org.autojs.autojs.ui.edit.editor.ace.health.AceRuntimeHealthMonitor
+import org.autojs.autojs.ui.edit.editor.ace.lsp.AceLspServerManager
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.ByteArrayInputStream
@@ -55,6 +56,7 @@ class AceCodeEditor @JvmOverloads constructor(
     private val textMirror = AceTextMirror()
     private val imeController = AceImeController(IME_REQUEST_COALESCE_MS)
     private val eventHistory = AceRuntimeEventHistory()
+    private val lspServerManager = AceLspServerManager()
     private val healthMonitor = AceRuntimeHealthMonitor(mainHandler) { failure ->
         notifyFallbackRequired(failure)
     }
@@ -155,6 +157,7 @@ class AceCodeEditor @JvmOverloads constructor(
         largeFilePolicy: String = "auto",
     ): AceDiagnosticsSnapshot {
         val failure = lastFailure
+        val lspSnapshot = lspServerManager.snapshot()
         return AceDiagnosticsSnapshot(
             engineType = "ACE",
             aceHealthState = healthState.name,
@@ -164,8 +167,16 @@ class AceCodeEditor @JvmOverloads constructor(
             assetUrl = EDITOR_URL,
             webViewVersion = AceDiagnostics.currentWebViewVersion(),
             androidVersion = AceDiagnostics.androidVersion(),
-            lspEnabled = AceEditorLspPreferences.isEnabled(),
-            lspState = AceDiagnostics.lspState(),
+            lspEnabled = lspSnapshot.enabled,
+            lspState = lspSnapshot.state,
+            lspTransport = lspSnapshot.transport,
+            lspServerUri = lspSnapshot.serverUri,
+            lspRootUri = lspSnapshot.rootUri,
+            lspDocumentUri = lspSnapshot.documentUri,
+            lspFallback = lspSnapshot.fallback,
+            lspServerAvailable = lspSnapshot.serverAvailable,
+            lspStartSupported = lspSnapshot.startSupported,
+            lspSessionRevision = lspSnapshot.sessionRevision,
             aceFont = AceEditorFontPreferences.get().preferenceValue,
             fileSizeBytes = fileSizeBytes,
             largeFilePolicy = largeFilePolicy,
@@ -221,6 +232,9 @@ class AceCodeEditor @JvmOverloads constructor(
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
+        lspServerManager.attach()
+        val lspSnapshot = lspServerManager.snapshot()
+        eventHistory.record("lsp_manager", "state=${lspSnapshot.state},attached=${lspSnapshot.attached}")
         loadEditor()
     }
 
@@ -418,6 +432,7 @@ class AceCodeEditor @JvmOverloads constructor(
     fun destroy() {
         destroyed = true
         eventHistory.record("destroy", "AceCodeEditor.destroy")
+        lspServerManager.detach()
         healthMonitor.markDestroyed()
         mainHandler.removeCallbacks(mirrorCalibrationRunnable)
         mainHandler.removeCallbacks(scheduledResizeRunnable)
@@ -656,18 +671,7 @@ class AceCodeEditor @JvmOverloads constructor(
     }
 
     internal fun bridgeLspOptions(): String {
-        if (!AceEditorLspPreferences.isEnabled()) {
-            return "{}"
-        }
-        return JSONObject()
-            .put("enabled", true)
-            .put("transport", "unavailable")
-            .put("serverUri", JSONObject.NULL)
-            .put("documentUri", "file:///autojs6/editor/current.js")
-            .put("libraryUris", JSONArray().put("autojs6/types/lib.autojs6.d.ts"))
-            .put("fallback", "static-completion")
-            .put("state", AceDiagnostics.LSP_CONFIGURED_NO_SERVER)
-            .toString()
+        return lspServerManager.bridgeOptionsJson()
     }
 
     internal fun showSoftInput() {

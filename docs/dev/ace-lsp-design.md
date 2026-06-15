@@ -8,11 +8,18 @@ ACE LSP support is experimental and disabled by default. The stable editor path 
 - Default: `false`
 - Bridge method: `autojs.getLspOptions()`
 - Default bridge response: `{}`
-- Enabled bridge response: structured options with `transport=unavailable` and `fallback=static-completion`
+- Native manager: `AceLspServerManager`
+- Enabled bridge response: structured options with `manager=native-alpha`,
+  `transport=unavailable`, `serverAvailable=false`,
+  `startSupported=false`, and `fallback=static-completion`
 - Bundled declaration file: `autojs6/types/lib.autojs6.d.ts`
 - Bundled declaration source: selected `@sm003/autojs6-dts` `aj6-int-*.d.ts` files under `autojs6/types/autojs6`
 
-The current build exposes configuration only. It does not start or connect to an LSP server. The selected upstream declaration files currently feed static completion generation; loading the full Android/library declaration graph into a server is still deferred.
+The current build has a native alpha manager for deterministic state,
+diagnostics, and bridge options. It does not start or connect to an LSP server,
+open a WebSocket, or load `lsp.js`. The selected upstream declaration files
+currently feed static completion generation; loading the full Android/library
+declaration graph into a server is still deferred.
 
 ## Server Lifecycle
 
@@ -56,5 +63,6 @@ Deferred:
 
 - Default setting produces no WebSocket.
 - `getLspOptions()` returns `{}` when disabled.
-- Enabling the setting returns structured options but still preserves static completion when no server exists.
-- `AceDiagnostics` reports `lspEnabled` and `lspState`.
+- Enabling the setting returns native-alpha structured options but still preserves static completion when no server exists.
+- `AceDiagnostics` reports `lspEnabled`, `lspState`, `lspTransport`,
+  `lspRootUri`, `lspDocumentUri`, and `lspFallback`.

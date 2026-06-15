@@ -141,11 +141,17 @@ assertIncludes(aceCodeEditor, '"resizeDone" -> handleResizeDone(payloadJson)', "
 assertIncludes(aceCodeEditor, "lastAceResizeCompletedReason = resizeReasonFromPayload", "native resize completion reason");
 assertIncludes(aceCodeEditor, "BRIDGE_EVENT_STORM_THRESHOLD", "bridge event storm threshold");
 assertIncludes(aceCodeEditor, 'eventHistory.record(\n                "bridge_event_storm"', "bridge event storm diagnostics");
+assertIncludes(aceCodeEditor, "private val lspServerManager = AceLspServerManager()", "ACE LSP manager");
+assertIncludes(aceCodeEditor, "lspServerManager.bridgeOptionsJson()", "ACE LSP bridge options");
+assertIncludes(aceCodeEditor, 'eventHistory.record("lsp_manager"', "ACE LSP manager event history");
 
 assertIncludes(diagnostics, "lastFirstPaintAtUptimeMillis", "first-paint diagnostics field");
 assertIncludes(diagnostics, "lastAceResizeScheduledReason", "resize scheduled diagnostics field");
 assertIncludes(diagnostics, "lastAceResizeDispatchedReason", "resize dispatched diagnostics field");
 assertIncludes(diagnostics, "lastAceResizeCompletedReason", "resize completed diagnostics field");
 assertIncludes(diagnostics, "maxBridgeEventWindowCount", "bridge event window diagnostics field");
+assertIncludes(diagnostics, "lspTransport=${snapshot.lspTransport.orUnknown()}", "LSP transport diagnostics field");
+assertIncludes(diagnostics, "lspDocumentUri=${snapshot.lspDocumentUri.orUnknown()}", "LSP document diagnostics field");
+assertIncludes(diagnostics, "lspFallback=${snapshot.lspFallback.orUnknown()}", "LSP fallback diagnostics field");
 
 console.log("ACE editor surface smoke checks passed.");

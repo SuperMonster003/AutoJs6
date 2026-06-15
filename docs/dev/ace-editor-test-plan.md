@@ -463,6 +463,7 @@ Steps:
 Expected:
 - ACE opens normally.
 - Diagnostics include `lspEnabled=false` and `lspState=disabled`.
+- `getLspOptions()` returns `{}`.
 - Static completion continues to work.
 
 Failure logs:
@@ -484,6 +485,11 @@ Expected:
 - ACE remains editable.
 - Static completion returns `console.log`.
 - Diagnostics include `lspEnabled=true` and `lspState=configured-no-server`.
+- Diagnostics include `lspTransport=unavailable`,
+  `lspDocumentUri=file:///autojs6/editor/current.js`, and
+  `lspFallback=static-completion`.
+- `getLspOptions()` includes `manager=native-alpha`,
+  `serverAvailable=false`, and `startSupported=false`.
 
 Failure logs:
 - `lspError`
