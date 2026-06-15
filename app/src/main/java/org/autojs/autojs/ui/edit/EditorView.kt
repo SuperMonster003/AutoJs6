@@ -55,9 +55,6 @@ import org.autojs.autojs.model.script.Scripts.runWithBroadcastSender
 import org.autojs.autojs.pio.PFiles.getNameWithoutExtension
 import org.autojs.autojs.storage.file.StableDraftFileHelper
 import org.autojs.autojs.storage.history.HistoryPrefs
-import org.autojs.autojs.storage.history.HistoryRepository
-import org.autojs.autojs.storage.history.HistoryUriUtils
-import org.autojs.autojs.storage.history.VersionHistoryController
 import org.autojs.autojs.tool.Callback
 import org.autojs.autojs.ui.doc.ManualDialog
 import org.autojs.autojs.ui.edit.completion.CodeCompletionBar
@@ -85,6 +82,7 @@ import org.autojs.autojs.ui.edit.editor.loading.EngineTextLoadTarget
 import org.autojs.autojs.ui.edit.editor.service.EditorBreakpointModelStore
 import org.autojs.autojs.ui.edit.editor.service.EditorTextProvider
 import org.autojs.autojs.ui.edit.editor.service.EditorThemeFontService
+import org.autojs.autojs.ui.edit.editor.service.EditorVersionHistoryService
 import org.autojs.autojs.ui.edit.editor.service.RunScriptTextProvider
 import org.autojs.autojs.ui.edit.editor.viewport.EditorViewportPolicy
 import org.autojs.autojs.ui.edit.editor.viewport.EditorViewportPolicyFactory
@@ -204,6 +202,18 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     // - 仅在保存成功或加载新基线文本时重置为 false.
     @Volatile
     var saveStickyDirty: Boolean = false
+
+    private val versionHistoryService = EditorVersionHistoryService(
+        context = context,
+        currentEditor = { editor },
+        onRestoredToEditor = {
+            saveStickyDirty = true
+        },
+        onRestoredUi = {
+            syncPrimaryMenuState()
+            showSnack(this@EditorView, R.string.text_done)
+        },
+    )
 
     // Whether we have had any direct edits since last save/baseline.
     // Direct edits mean changes NOT caused by undo/redo buttons.
@@ -1925,17 +1935,13 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
         // Track history only when within size guardrails and inside internal storage.
         // zh-CN: 仅在满足大小护栏且位于内部存储时纳管历史.
-        val logicalPath = HistoryUriUtils.toLogicalPathOrNull(uri)
-        if (logicalPath != null && shouldTrackHistory(oldBytes, newBytes) && oldBytes != null) {
-            runCatching {
-                HistoryRepository(context.applicationContext).recordSavePre(
-                    logicalPath = logicalPath,
-                    oldBytes = oldBytes,
-                    encodingName = targetCharset.name(),
-                    hadBom = needBom,
-                )
-            }
-        }
+        versionHistoryService.recordSavePreIfNeeded(
+            uri = uri,
+            oldBytes = oldBytes,
+            newBytes = newBytes,
+            encodingName = targetCharset.name(),
+            hadBom = needBom,
+        )
 
         val newHash = sha256(newBytes)
 
@@ -2108,14 +2114,6 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         }
     }
 
-    private fun shouldTrackHistory(oldBytes: ByteArray?, newBytes: ByteArray): Boolean {
-        val oldSize = oldBytes?.size ?: 0
-        val newSize = newBytes.size
-        val limit = HistoryPrefs.maxFileSizeToTrackBytes().coerceAtLeast(0L)
-
-        return oldSize.toLong() <= limit && newSize.toLong() <= limit
-    }
-
     private fun sha256(bytes: ByteArray): ByteArray {
         return MessageDigest.getInstance("SHA-256").digest(bytes)
     }
@@ -2135,36 +2133,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     fun showVersionHistoryDialog() {
-        when (val uri = uri) {
-            null -> {
-                DialogUtils.buildAndShowAdaptive {
-                    MaterialDialog.Builder(context)
-                        .title(R.string.text_prompt)
-                        .content(R.string.error_unable_to_display_version_history_as_current_file_path_is_unknown)
-                        .positiveText(R.string.dialog_button_dismiss)
-                        .positiveColorRes(R.color.dialog_button_default)
-                        .build()
-                }
-            }
-            else -> {
-                // Delegate to controller to unify editor/explorer/history page behavior.
-                // zh-CN: 委托给 Controller, 统一 editor/explorer/history page 的行为.
-                VersionHistoryController(context).showForEditor(
-                    uri = uri,
-                    onRestoreToEditor = { restoredText ->
-                        editor.text = restoredText
-
-                        // Restoring changes content => mark sticky dirty.
-                        // zh-CN: 恢复版本会改变内容, 因此置 sticky 脏标记.
-                        saveStickyDirty = true
-                    },
-                    onRestoredUi = {
-                        syncPrimaryMenuState()
-                        showSnack(this@EditorView, R.string.text_done)
-                    },
-                )
-            }
-        }
+        versionHistoryService.showDialog(uri)
     }
 
     // A minimal emergency draft store.

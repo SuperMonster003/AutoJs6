@@ -85,6 +85,7 @@ const editorTextProvider = "app/src/main/java/org/autojs/autojs/ui/edit/editor/s
 const runScriptTextProvider = "app/src/main/java/org/autojs/autojs/ui/edit/editor/service/RunScriptTextProvider.kt";
 const themeFontService = "app/src/main/java/org/autojs/autojs/ui/edit/editor/service/EditorThemeFontService.kt";
 const breakpointModelStore = "app/src/main/java/org/autojs/autojs/ui/edit/editor/service/EditorBreakpointModelStore.kt";
+const versionHistoryService = "app/src/main/java/org/autojs/autojs/ui/edit/editor/service/EditorVersionHistoryService.kt";
 
 assertIncludes(editorView, "mViewportPolicy.onImeInsetsChanged(imeVisible, targetBottom)");
 assertIncludes(editorView, "EditorViewportPolicyFactory.create(editor, this)");
@@ -108,6 +109,9 @@ assertIncludes(editorView, "private val editorTextProvider = EditorTextProvider(
 assertIncludes(editorView, "private val runScriptTextProvider = RunScriptTextProvider(");
 assertIncludes(editorView, "runScriptTextProvider.saveToTmpFile()");
 assertIncludes(editorView, "editorTextProvider.getTextForSaving()");
+assertIncludes(editorView, "private val versionHistoryService = EditorVersionHistoryService(");
+assertIncludes(editorView, "versionHistoryService.recordSavePreIfNeeded(");
+assertIncludes(editorView, "versionHistoryService.showDialog(uri)");
 assertIncludes(editorView, "private val themeFontService = EditorThemeFontService(");
 assertIncludes(editorView, "themeFontService.applyEditorPreferences()");
 assertIncludes(editorView, "themeFontService.applyTheme(theme)");
@@ -132,6 +136,10 @@ assertNotIncludes(editorView, "StringUtils.hasBom");
 assertNotIncludes(editorView, "streamDecodeAndEmit(");
 assertNotIncludes(editorView, "getTextForSavingObservable");
 assertNotIncludes(editorView, "TmpScriptFiles");
+assertNotIncludes(editorView, "HistoryRepository");
+assertNotIncludes(editorView, "HistoryUriUtils");
+assertNotIncludes(editorView, "VersionHistoryController");
+assertNotIncludes(editorView, "shouldTrackHistory");
 assertNotIncludes(editorView, "mEditorTheme");
 assertNotIncludes(editorView, "getEditorTextSize");
 assertNotIncludes(editorView, "setEditorTextSize");
@@ -244,6 +252,15 @@ assertIncludes(breakpointModelStore, "fun onEditorChanged()");
 assertIncludes(breakpointModelStore, "listenerOwner?.setBreakpointChangeListener(null)");
 assertIncludes(breakpointModelStore, "owner.setBreakpointChangeListener(listener)");
 assertNotIncludes(breakpointModelStore, "CodeEditText");
+
+assertIncludes(versionHistoryService, "class EditorVersionHistoryService(");
+assertIncludes(versionHistoryService, "private val currentEditor: () -> ScriptEditorEngine");
+assertIncludes(versionHistoryService, "fun recordSavePreIfNeeded(");
+assertIncludes(versionHistoryService, "HistoryUriUtils.toLogicalPathOrNull(uri)");
+assertIncludes(versionHistoryService, "HistoryRepository(context.applicationContext).recordSavePre(");
+assertIncludes(versionHistoryService, "VersionHistoryController(context).showForEditor(");
+assertIncludes(versionHistoryService, "currentEditor().text = restoredText");
+assertNotIncludes(versionHistoryService, "CodeEditText");
 
 assertOnlyIn("requestRectangleOnScreen", [
   "app/src/main/java/org/autojs/autojs/ui/edit/editor/engine/NativeCodeEditorEngine.kt",
