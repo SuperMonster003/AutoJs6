@@ -9,6 +9,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `:app:externalNativeBuildAppDebug`
 - [ ] `:app:nativeNodeDependencyReportAppDebug`
 - [ ] `:app:nativeNodeSymbolArchiveReport`
+- [ ] `:app:embeddedNodeDoctorReport`
 
 ## Device Tests
 
@@ -174,6 +175,8 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `process.version` and `process.versions` captured in smoke
 - [ ] native dependency report generated
 - [ ] native symbol archive report generated
+- [ ] Embedded Node doctor text and JSON reports generated under `app/build/reports/nodejs/doctor/`
+- [ ] doctor report lists backend, expected Node version, feature flags, enabled/disabled modules, native hashes, packaged status, last-error/lifecycle/resource-count availability, and dependency bundle status
 - [ ] runtime probe logs `libnode.so.sha256` and `libautojs6-node.so.sha256`
 - [ ] logcat/tombstone or bugreport collection steps in `NATIVE_CRASH_DIAGNOSTICS.md` remain current
 - [ ] optional performance report generated with `NodeEmbeddedPerformanceInstrumentationTest` and pulled by `:app:pullNodeEmbeddedPerformanceReports` for lifecycle/native-load changes

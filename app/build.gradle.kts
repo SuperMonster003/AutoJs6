@@ -955,6 +955,7 @@ apply(from = "embedded-node-packaging-preflight.gradle.kts")
 apply(from = "node-performance-report.gradle.kts")
 apply(from = "node-compatibility-profile.gradle.kts")
 apply(from = "node-dependency-bundler.gradle.kts")
+apply(from = "node-doctor-report.gradle.kts")
 
 tasks {
     withType(JavaCompile::class.java) {

@@ -131,6 +131,19 @@ sanitized bundle plus `dependency-manifest.json`, `dependency-size-report.txt`, 
 `verifyNodeDependencyBundlerFixtures` confirms the checked-in sample project passes and an unsafe fixture is rejected for
 native addon, lifecycle script, and unchecked `.bin` entries.
 
+Current doctor diagnostics:
+
+```powershell
+.\gradlew.bat --console=plain :app:embeddedNodeDoctorReport
+```
+
+`embeddedNodeDoctorReport` writes attachable text and JSON reports under
+`app/build/reports/nodejs/doctor/`. It aggregates the compatibility profile, backend and feature flags, enabled/disabled
+modules, native library hashes from the symbol archive report, optional packaged APK diagnostics, dependency bundler
+status, and differential harness status when those reports are available. Host-only fields such as live
+`workingDirectory`, last error, lifecycle state, and resource counts are marked as unavailable until a device/runtime
+diagnostic is attached.
+
 Current security regression instrumentation:
 
 ```powershell
@@ -548,6 +561,7 @@ Use these aggregate tasks for local gates:
 ```
 
 `verifyEmbeddedNodeDebug` covers build, native dependency reporting, native symbol archive reporting, and packaging preflight.
-It also runs `verifyNodeCompatibilityProfile`, which generates compatibility reports and checks docs/registry agreement.
+It also runs `verifyNodeCompatibilityProfile` and `embeddedNodeDoctorReport`, which generate compatibility and attachable
+doctor reports.
 `verifyEmbeddedNodePackagedDebug` covers packaged host verification, including the diagnostic report and smoke host verifier.
 Focused instrumentation classes still use the explicit `connectedAppDebugAndroidTest` commands above when a device gate is required.
