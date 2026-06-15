@@ -1,0 +1,435 @@
+Embedded Node.js packaged APK output verification report
+Generated at: 2026-06-15T19:21:31.356131300+08:00[Asia/Shanghai]
+
+Inputs:
+  packaged APK property: D:\idea-projects\AutoJs6\app\build\embedded-node-packaged-smoke\PackagedNodeSmoke_v1.0.0.apk
+  packaged APK: D:\idea-projects\AutoJs6\app\build\embedded-node-packaged-smoke\PackagedNodeSmoke_v1.0.0.apk (85114435 bytes)
+  expected ABI property: arm64-v8a
+  release flavor: nodeFull
+  expected ABI source: explicit autojs.embeddedNode.expectedAbis
+  expected ABIs: arm64-v8a
+  unknown expected ABIs: none
+  unsupported expected ABIs: none
+
+Current build runtime config:
+  autojs.nodejs.backend: embedded
+  autojs.nodejs.embedded.script.enabled: true
+  current build runtime config ready: true
+
+Manifest verification:
+  packaged APK manifest inspected: true
+  packaged APK manifest parser: E:\.android\sdk\build-tools\36.1.0\aapt2.exe
+  packaged APK package: org.autojs6.packaged.node.smoke
+  packaged APK minSdkVersion: 24
+  packaged APK targetSdkVersion: 29
+  packaged APK declares INTERNET permission: true
+  packaged APK declares FOREGROUND_SERVICE permission: true
+  packaged APK declares FOREGROUND_SERVICE_MEDIA_PROJECTION permission: false
+  packaged APK declares FOREGROUND_SERVICE_SPECIAL_USE permission: true
+  packaged APK declares NativeNodeEmbeddedProbeService: true
+  packaged APK probe service process is :nodejs_embedded: true
+  packaged APK probe service specialUse FGS: true
+  packaged APK declares NativeNodeEmbeddedScriptService: true
+  packaged APK script service process is :nodejs_embedded: true
+  packaged APK script service specialUse FGS: true
+  packaged APK script service declares specialUse subtype property: true
+  manifest service ready: true
+  manifest FGS permissions ready: true
+
+DEX verification:
+  DEX entries: classes.dex, classes10.dex, classes2.dex, classes3.dex, classes4.dex, classes5.dex, classes6.dex, classes7.dex, classes8.dex, classes9.dex
+  dex contains NativeNodeEmbeddedScriptService class_def: true
+
+Project runtime verification:
+  project config entry: assets/project/project.json
+  project config present: true
+  project config selects Embedded Node.js: true
+  project config expected ABI policy ready: true
+  project main script entry: assets/project/src/main.js
+  project main script present: true
+  project main script appears encrypted: true
+  bundled project config ready: true
+  bundled main script ready: true
+  full compatibility smoke marker entry: assets/project/runtime-matrix.expected.txt
+  full compatibility smoke marker present: true
+  full compatibility smoke markers ready: false
+    marker 'packaged.node.version=v24.5.0': true
+    marker 'packaged.text=packaged': true
+    marker 'packaged.hash=a3453242': true
+    marker 'packaged.stream=stream': true
+    marker 'packaged.promise=drained': true
+    marker 'packaged.cwd=project': true
+    marker 'packaged.project_runner.ready=true': true
+    marker 'packaged.project_runner.entry=src/main.js:true': true
+    marker 'packaged.project_runner.cwd=project:true': true
+    marker 'packaged.project_runner.require_main=true': true
+    marker 'packaged.project_runner.root_fs=true': true
+    marker 'packaged.project_runner.root_require=true': true
+    marker 'packaged.project_runner.script_argv=true': true
+    marker 'packaged.project_runner.lifecycle_env=true': true
+    marker 'packaged.fs.mkdir=true': true
+    marker 'packaged.fs.readdir=true': true
+    marker 'packaged.fs.stat=true': true
+    marker 'packaged.fs.lstat=true': true
+    marker 'packaged.fs.append=true': true
+    marker 'packaged.fs.copy=true': true
+    marker 'packaged.fs.realpath=true': true
+    marker 'packaged.fs.rm=true': true
+    marker 'packaged.fs.promisify.extended=true': true
+    marker 'packaged.fs.promises.ready=true': true
+    marker 'packaged.fs.promises.alias=true': true
+    marker 'packaged.buffer.builtin=true': true
+    marker 'packaged.process.builtin=true': true
+    marker 'packaged.process.alias=true': true
+    marker 'packaged.constants.builtin=true': true
+    marker 'packaged.constants.fs=true': true
+    marker 'packaged.dynamic_require.ready=true': true
+    marker 'packaged.dynamic_require.cache=true': true
+    marker 'packaged.dynamic_require.json=true': true
+    marker 'packaged.module.create_require.ready=true': true
+    marker 'packaged.module.create_require.resolve=true': true
+    marker 'packaged.module.create_require.cache=true': true
+    marker 'packaged.cli.ready=true': true
+    marker 'packaged.cli.argv=true': true
+    marker 'packaged.cli.require_main=true': true
+    marker 'packaged.cli.combo=true': true
+    marker 'packaged.cli.process_constants=true': true
+    marker 'packaged.glob.ready=true': true
+    marker 'packaged.glob.matches=true': true
+    marker 'packaged.glob.ignore=true': true
+    marker 'packaged.glob.fs_promises=true': true
+    marker 'packaged.dirent.ready=true': true
+    marker 'packaged.dirent.readdir=true': true
+    marker 'packaged.dirent.opendir=true': true
+    marker 'packaged.dirent.async_iterator=true': true
+    marker 'packaged.readlink.surface=true': true
+    marker 'packaged.readlink.symlink_disabled=true': false
+    marker 'packaged.config.ready=true': true
+    marker 'packaged.config.plugin=true': true
+    marker 'packaged.config.scoped=true': true
+    marker 'packaged.config.output=true': true
+    marker 'packaged.discovery.ready=true': true
+    marker 'packaged.discovery.package_json=true': true
+    marker 'packaged.discovery.plugin=true': true
+    marker 'packaged.discovery.output=true': true
+    marker 'packaged.url.file_url=true': true
+    marker 'packaged.url.fs_url=true': true
+    marker 'packaged.url.opendir_url=true': true
+    marker 'packaged.url.sandbox=true': true
+    marker 'packaged.cp.ready=true': true
+    marker 'packaged.cp.recursive=true': true
+    marker 'packaged.cp.url=true': true
+    marker 'packaged.cp.callback=true': true
+    marker 'packaged.utimes.ready=true': true
+    marker 'packaged.cp.preserve_timestamps=true': true
+    marker 'packaged.mkdtemp.ready=true': true
+    marker 'packaged.rename.ready=true': true
+    marker 'packaged.atomic.ready=true': true
+    marker 'packaged.atomic.url=true': true
+    marker 'packaged.cache_copy.ready=true': true
+    marker 'packaged.chdir.ready=true': true
+    marker 'packaged.chdir.fs=true': true
+    marker 'packaged.chdir.require=true': true
+    marker 'packaged.node_modules_scope.ready=true': false
+    marker 'packaged.node_modules_scope.nearest=true': false
+    marker 'packaged.node_modules_scope.imports=true': false
+
+Node bridge capability manifest verification:
+  capability manifest enforced: false
+  capability manifest sources: none
+  declared bridge capabilities: none
+  unknown bridge capabilities: none
+  required Android manifest permissions: none
+  declared relevant Android manifest permissions: android.permission.INTERNET, android.permission.FOREGROUND_SERVICE, android.permission.FOREGROUND_SERVICE_SPECIAL_USE
+  missing required Android manifest permissions: none
+  unused relevant Android manifest permissions: android.permission.INTERNET, android.permission.FOREGROUND_SERVICE, android.permission.FOREGROUND_SERVICE_SPECIAL_USE
+  required Android manifest permissions ready: true
+  relevant Android manifest permissions required-only clean: false
+
+Packaged moduleSources budget verification:
+  moduleSources budget requested by full smoke marker: true
+  moduleSources budget entry: assets/project/preload-budget.expected.txt
+  moduleSources budget present: true
+  moduleSources estimated count: 60
+  moduleSources limit: 64
+  moduleSources ready marker: true
+  package.json count: 15
+  JSON module count: 0
+  static require count: 166
+  dynamic require ignored count: 19
+  unresolved static require count: 94
+  max depth: 3
+  moduleSources budget ready: true
+
+Packaged real npm corpus verification:
+  real npm corpus requested by marker: false
+  real npm corpus markers ready: true
+    marker 'packaged.real_npm_corpus.ready=true': false
+    marker 'packaged.real.npm.ok=true': false
+    marker 'packaged.real.npm.debug=pkg:test ready +2ms optional=true': false
+    marker 'packaged.real.npm.buffer=ok': false
+    marker 'packaged.real.npm.cache=true': false
+    marker 'packaged.real.npm.batch2.ready=true': false
+    marker 'packaged.real.npm.batch2.ok=true': false
+    marker 'packaged.real.npm.string_width=true': false
+    marker 'packaged.real.npm.strip_ansi=true': false
+    marker 'packaged.real.npm.camelcase=true': false
+    marker 'packaged.real.npm.brace_expansion=true': false
+  real npm corpus package.json entries present: true
+    package_json 'assets/project/node_modules/is-number/package.json': true
+    package_json 'assets/project/node_modules/is-odd/package.json': true
+    package_json 'assets/project/node_modules/kind-of/package.json': true
+    package_json 'assets/project/node_modules/once/package.json': true
+    package_json 'assets/project/node_modules/wrappy/package.json': true
+    package_json 'assets/project/node_modules/ms/package.json': true
+    package_json 'assets/project/node_modules/debug/package.json': true
+    package_json 'assets/project/node_modules/debug/node_modules/ms/package.json': true
+    package_json 'assets/project/node_modules/picocolors/package.json': true
+    package_json 'assets/project/node_modules/safe-buffer/package.json': true
+    package_json 'assets/project/node_modules/camelcase/package.json': true
+    package_json 'assets/project/node_modules/decamelize/package.json': true
+    package_json 'assets/project/node_modules/ansi-regex/package.json': true
+    package_json 'assets/project/node_modules/strip-ansi/package.json': true
+    package_json 'assets/project/node_modules/is-fullwidth-code-point/package.json': true
+    package_json 'assets/project/node_modules/east-asian-width-lite/package.json': true
+    package_json 'assets/project/node_modules/emoji-regex-lite/package.json': true
+    package_json 'assets/project/node_modules/string-width/package.json': true
+    package_json 'assets/project/node_modules/has-flag/package.json': true
+    package_json 'assets/project/node_modules/supports-color-lite/package.json': true
+    package_json 'assets/project/node_modules/yargs-parser-lite/package.json': true
+    package_json 'assets/project/node_modules/escape-string-regexp/package.json': true
+    package_json 'assets/project/node_modules/balanced-match/package.json': true
+    package_json 'assets/project/node_modules/concat-map/package.json': true
+    package_json 'assets/project/node_modules/brace-expansion-lite/package.json': true
+  real npm corpus JavaScript entries present: true
+    javascript 'assets/project/node_modules/is-number/index.js': true
+    javascript 'assets/project/node_modules/is-odd/index.js': true
+    javascript 'assets/project/node_modules/kind-of/index.js': true
+    javascript 'assets/project/node_modules/once/once.js': true
+    javascript 'assets/project/node_modules/wrappy/wrappy.js': true
+    javascript 'assets/project/node_modules/ms/index.js': true
+    javascript 'assets/project/node_modules/debug/src/index.js': true
+    javascript 'assets/project/node_modules/debug/src/common.js': true
+    javascript 'assets/project/node_modules/debug/node_modules/ms/index.js': true
+    javascript 'assets/project/node_modules/picocolors/picocolors.js': true
+    javascript 'assets/project/node_modules/safe-buffer/index.js': true
+    javascript 'assets/project/node_modules/camelcase/index.js': true
+    javascript 'assets/project/node_modules/decamelize/index.js': true
+    javascript 'assets/project/node_modules/ansi-regex/index.js': true
+    javascript 'assets/project/node_modules/strip-ansi/index.js': true
+    javascript 'assets/project/node_modules/is-fullwidth-code-point/index.js': true
+    javascript 'assets/project/node_modules/east-asian-width-lite/source/index.js': true
+    javascript 'assets/project/node_modules/emoji-regex-lite/index.js': true
+    javascript 'assets/project/node_modules/string-width/index.js': true
+    javascript 'assets/project/node_modules/has-flag/index.js': true
+    javascript 'assets/project/node_modules/supports-color-lite/index.js': true
+    javascript 'assets/project/node_modules/supports-color-lite/node.js': true
+    javascript 'assets/project/node_modules/yargs-parser-lite/build/index.cjs': true
+    javascript 'assets/project/node_modules/escape-string-regexp/index.js': true
+    javascript 'assets/project/node_modules/balanced-match/index.js': true
+    javascript 'assets/project/node_modules/concat-map/index.js': true
+    javascript 'assets/project/node_modules/brace-expansion-lite/index.js': true
+  real npm corpus JavaScript entries appear encrypted: true
+  real npm corpus ready: true
+
+Packaged CommonJS resolver corpus verification:
+  CommonJS resolver corpus requested by marker: false
+  CommonJS resolver corpus markers ready: true
+    marker 'packaged.cjs.resolver.ready=true': false
+    marker 'packaged.cjs.resolver.ok=true': false
+    marker 'packaged.cjs.exports=true': false
+    marker 'packaged.cjs.imports=true': false
+    marker 'packaged.cjs.self_reference=true': false
+    marker 'packaged.cjs.scoped_self_reference=true': false
+    marker 'packaged.cjs.require_resolve=true': false
+    marker 'packaged.cjs.blocked=true': false
+    marker 'packaged.cjs.esm_rejected=true': false
+  CommonJS resolver corpus package.json entries present: true
+    package_json 'assets/project/node_modules/resolver-edge-pkg/package.json': true
+    package_json 'assets/project/node_modules/imports-edge-pkg/package.json': true
+    package_json 'assets/project/node_modules/@scope/resolver-self-pkg/package.json': true
+    package_json 'assets/project/node_modules/fallback-main-pkg/package.json': true
+  CommonJS resolver corpus JavaScript entries present: true
+    javascript 'assets/project/node_modules/resolver-edge-pkg/index.js': true
+    javascript 'assets/project/node_modules/resolver-edge-pkg/features/a.js': true
+    javascript 'assets/project/node_modules/resolver-edge-pkg/condition/require.js': true
+    javascript 'assets/project/node_modules/resolver-edge-pkg/condition/node.js': true
+    javascript 'assets/project/node_modules/resolver-edge-pkg/condition/default.js': true
+    javascript 'assets/project/node_modules/resolver-edge-pkg/private/secret.js': true
+    javascript 'assets/project/node_modules/resolver-edge-pkg/esm.mjs': true
+    javascript 'assets/project/node_modules/imports-edge-pkg/index.js': true
+    javascript 'assets/project/node_modules/imports-edge-pkg/lib/alias.js': true
+    javascript 'assets/project/node_modules/imports-edge-pkg/lib/wild/a.js': true
+    javascript 'assets/project/node_modules/imports-edge-pkg/lib/condition/require.js': true
+    javascript 'assets/project/node_modules/imports-edge-pkg/lib/condition/node.js': true
+    javascript 'assets/project/node_modules/imports-edge-pkg/lib/condition/default.js': true
+    javascript 'assets/project/node_modules/imports-edge-pkg/lib/private.js': true
+    javascript 'assets/project/node_modules/imports-edge-pkg/esm.mjs': true
+    javascript 'assets/project/node_modules/@scope/resolver-self-pkg/index.js': true
+    javascript 'assets/project/node_modules/@scope/resolver-self-pkg/feature.js': true
+    javascript 'assets/project/node_modules/fallback-main-pkg/index.js': true
+  CommonJS resolver corpus JavaScript entries appear encrypted: true
+  CommonJS resolver corpus ready: true
+
+Packaged dependency resolution verification:
+  dependency resolution requested by marker: false
+  dependency resolution markers ready: true
+    marker 'packaged.cjs.dependency_resolution.ready=true': false
+    marker 'packaged.cjs.dependency_resolution.ok=true': false
+    marker 'packaged.cjs.builtin_precedence=true': false
+    marker 'packaged.cjs.nested_dependency=true': false
+    marker 'packaged.cjs.subpath_resolution=true': false
+    marker 'packaged.cjs.cache_identity=true': false
+    marker 'packaged.node_modules_scope.ready=true': false
+    marker 'packaged.node_modules_scope.nearest=true': false
+    marker 'packaged.node_modules_scope.imports=true': false
+  dependency resolution package.json entries present: true
+    package_json 'assets/project/node_modules/path/package.json': true
+    package_json 'assets/project/node_modules/fs/package.json': true
+    package_json 'assets/project/node_modules/util/package.json': true
+    package_json 'assets/project/node_modules/resolution-shared/package.json': true
+    package_json 'assets/project/node_modules/resolution-parent/package.json': true
+    package_json 'assets/project/node_modules/resolution-parent/node_modules/resolution-shared/package.json': true
+  dependency resolution JavaScript entries present: true
+    javascript 'assets/project/node_modules/path/index.js': true
+    javascript 'assets/project/node_modules/fs/index.js': true
+    javascript 'assets/project/node_modules/util/index.js': true
+    javascript 'assets/project/node_modules/resolution-shared/index.js': true
+    javascript 'assets/project/node_modules/resolution-shared/subpath.js': true
+    javascript 'assets/project/node_modules/resolution-parent/index.js': true
+    javascript 'assets/project/node_modules/resolution-parent/node_modules/resolution-shared/index.js': true
+    javascript 'assets/project/node_modules/resolution-parent/node_modules/resolution-shared/subpath.js': true
+  dependency resolution JavaScript entries appear encrypted: true
+  dependency resolution ready: true
+
+Packaged diagnostics verification:
+  diagnostics requested by marker: false
+  diagnostics markers ready: true
+    marker 'packaged.diagnostics.ready=true': false
+    marker 'packaged.diagnostics.disabled_builtin.code=ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED': false
+    marker 'packaged.diagnostics.disabled_builtin.message=true': false
+    marker 'packaged.diagnostics.fs_escape.message=true': false
+    marker 'packaged.diagnostics.fs_absolute.message=true': false
+    marker 'packaged.diagnostics.cjs_stack.message=true': false
+    marker 'packaged.diagnostics.cjs_stack.source=true': false
+    marker 'packaged.diagnostics.esm.type_module.message=true': false
+    marker 'packaged.diagnostics.esm.exports_context=true': false
+    marker 'packaged.diagnostics.after_failure.ok=true': false
+    marker 'packaged.diagnostics.esm.code=ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED': false
+    marker 'packaged.diagnostics.dynamic_import.code=ERR_AUTOJS6_EMBEDDED_NODE_DYNAMIC_IMPORT_UNSUPPORTED': false
+    marker 'packaged.diagnostics.timeout.code=ERR_AUTOJS6_EMBEDDED_NODE_SCRIPT_TIMEOUT': false
+    marker 'packaged.diagnostics.timeout.timedOut=true': false
+    marker 'packaged.diagnostics.timeout.pendingTimers=true': false
+  diagnostics package.json entries present: true
+    package_json 'assets/project/node_modules/diagnostic-boom/package.json': false
+    package_json 'assets/project/node_modules/diagnostic-type-module/package.json': false
+    package_json 'assets/project/node_modules/diagnostic-esm-export-context/package.json': false
+  diagnostics JavaScript entries present: true
+    javascript 'assets/project/main.js': true
+    javascript 'assets/project/esm-entry.mjs': false
+    javascript 'assets/project/dynamic-import.js': false
+    javascript 'assets/project/dynamic-target.js': false
+    javascript 'assets/project/timeout.js': false
+    javascript 'assets/project/node_modules/diagnostic-boom/index.js': false
+    javascript 'assets/project/node_modules/diagnostic-type-module/index.mjs': false
+    javascript 'assets/project/node_modules/diagnostic-esm-export-context/esm.mjs': false
+  diagnostics JavaScript entries appear encrypted: true
+  diagnostics ready: true
+
+Native library verification:
+  libnode.so entries: lib/arm64-v8a/libnode.so
+    lib/arm64-v8a/libnode.so size: 84619560
+    lib/arm64-v8a/libnode.so sha256: edf81883fad5cb2e5756ac603cf2d1140e252599caf01eefaf218b5ad16aa34f
+  libc++_shared.so entries: lib/arm64-v8a/libc++_shared.so
+    lib/arm64-v8a/libc++_shared.so size: 1330832
+    lib/arm64-v8a/libc++_shared.so sha256: 69e517e645a6d38f7536d64108d245f5a8208a4a5cd43375b4906f60a60a86c4
+  libautojs6-node.so entries: lib/arm64-v8a/libautojs6-node.so
+    lib/arm64-v8a/libautojs6-node.so size: 5825544
+    lib/arm64-v8a/libautojs6-node.so sha256: e5ccf9e9d6b7cb47476a0848247088a39b3b8ff10ff5cd776352e086b0dac98c
+  complete Embedded Node ABIs: arm64-v8a
+  unexpected complete Embedded Node ABIs for expected ABI policy: none
+  native libs ready for expected ABI policy: true
+  Node runtime native entries present: true
+  release flavor native policy ready: true
+  x86 libnode.so present: false
+  x86 libautojs6-node.so present: false
+  x86 libc++_shared.so present: false
+  x86 Node runtime present: false
+  packaged APK ABI matrix:
+    ABI: arm64-v8a
+      libnode.so: true
+      libc++_shared.so: true
+      libautojs6-node.so: true
+    ABI: armeabi-v7a
+      libnode.so: false
+      libc++_shared.so: false
+      libautojs6-node.so: false
+    ABI: x86_64
+      libnode.so: false
+      libc++_shared.so: false
+      libautojs6-node.so: false
+    ABI: x86
+      libnode.so: false
+      libc++_shared.so: false
+      libautojs6-node.so: false
+
+Output summary:
+  embedded.node.packaged.output.apk.exists=true
+  embedded.node.packaged.output.manifest.service.ready=true
+  embedded.node.packaged.output.manifest.fgs_permission.ready=true
+  embedded.node.packaged.output.dex.contains.NativeNodeEmbeddedScriptService=true
+  embedded.node.packaged.output.project_config.ready=true
+  embedded.node.packaged.output.bridge_capabilities.enforced=false
+  embedded.node.packaged.output.bridge_capabilities.required_android_permissions.ready=true
+  embedded.node.packaged.output.bridge_capabilities.required_only.ready=false
+  embedded.node.packaged.output.main_script.ready=true
+  embedded.node.packaged.output.full_compatibility_smoke.ready=false
+  embedded.node.packaged.output.module_sources.requested=true
+  embedded.node.packaged.output.module_sources.budget.present=true
+  embedded.node.packaged.output.module_sources.estimated_count=60
+  embedded.node.packaged.output.module_sources.limit=64
+  embedded.node.packaged.output.module_sources.package_json_count=15
+  embedded.node.packaged.output.module_sources.json_module_count=0
+  embedded.node.packaged.output.module_sources.static_require_count=166
+  embedded.node.packaged.output.module_sources.dynamic_require_ignored_count=19
+  embedded.node.packaged.output.module_sources.unresolved_static_require_count=94
+  embedded.node.packaged.output.module_sources.max_depth=3
+  embedded.node.packaged.output.module_sources.ready=true
+  embedded.node.packaged.output.real_npm_corpus.requested=false
+  embedded.node.packaged.output.real_npm_corpus.package_json.present=true
+  embedded.node.packaged.output.real_npm_corpus.node_modules.present=true
+  embedded.node.packaged.output.real_npm_corpus.encrypted_js.ready=true
+  embedded.node.packaged.output.real_npm_corpus.ready=true
+  embedded.node.packaged.output.cjs_resolver.requested=false
+  embedded.node.packaged.output.cjs_resolver.markers.ready=true
+  embedded.node.packaged.output.cjs_resolver.package_json.present=true
+  embedded.node.packaged.output.cjs_resolver.scripts.present=true
+  embedded.node.packaged.output.cjs_resolver.encrypted_js.ready=true
+  embedded.node.packaged.output.cjs_resolver.ready=true
+  embedded.node.packaged.output.dependency_resolution.requested=false
+  embedded.node.packaged.output.dependency_resolution.markers.ready=true
+  embedded.node.packaged.output.dependency_resolution.package_json.present=true
+  embedded.node.packaged.output.dependency_resolution.scripts.present=true
+  embedded.node.packaged.output.dependency_resolution.encrypted_js.ready=true
+  embedded.node.packaged.output.dependency_resolution.ready=true
+  embedded.node.packaged.output.diagnostics.requested=false
+  embedded.node.packaged.output.diagnostics.markers.ready=true
+  embedded.node.packaged.output.diagnostics.package_json.present=true
+  embedded.node.packaged.output.diagnostics.scripts.present=true
+  embedded.node.packaged.output.diagnostics.encrypted_js.ready=true
+  embedded.node.packaged.output.diagnostics.ready=true
+  embedded.node.packaged.output.current_build_config.ready=true
+  embedded.node.packaged.output.release.flavor=nodeFull
+  embedded.node.packaged.output.release.expected_abis=arm64-v8a
+  embedded.node.packaged.output.release.native_policy.ready=true
+  embedded.node.packaged.output.native_runtime_entries.present=true
+  embedded.node.packaged.output.native_libs.ready=true
+  embedded.node.packaged.output.native_libs.unexpected_complete_abis=none
+  embedded.node.packaged.output.x86_node_runtime.present=false
+  embedded.node.packaged.output.ready=true
+
+Notes:
+  This task verifies an already-created packaged APK and does not build or install it.
+  Pass a real output APK with -Pautojs.embeddedNode.packagedApk=<apk>.
+  Optionally constrain native ABI expectations with -Pautojs.embeddedNode.expectedAbis=arm64-v8a,armeabi-v7a,x86_64.
+  Without an explicit expected ABI property, expected ABIs are derived from -Pautojs.nodejs.releaseFlavor.

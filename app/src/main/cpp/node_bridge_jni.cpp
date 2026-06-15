@@ -12,7 +12,7 @@ Java_org_autojs_autojs_engine_NativeNodeRuntimeBridge_nativeRunMain(
         jobject outputSink
 ) {
     const auto startedAt = Clock::now();
-    std::vector<std::string> args = toStringVector(env, argv);
+    std::vector<std::string> args = toStringVector(env, argv, "argv");
     if (env->ExceptionCheck()) {
         return -1;
     }
@@ -186,8 +186,34 @@ static jobjectArray runEmbeddedScriptLifecycleNative(
     return toJavaStringArray(env, payload);
 }
 
+// Keep the unversioned JNI symbols compatible with already-packaged INRT
+// templates. Current app builds call the V2 symbols below so new arguments can
+// be added without breaking older packaged APK smoke artifacts.
 extern "C" JNIEXPORT jobjectArray JNICALL
 Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedScriptLifecycle(
+        JNIEnv* env,
+        jobject /* thiz */,
+        jstring source,
+        jstring sourceName,
+        jstring workingDirectory
+) {
+    return runEmbeddedScriptLifecycleNative(
+            env,
+            source,
+            sourceName,
+            workingDirectory,
+            {},
+            {},
+            {},
+            false,
+            false,
+            false,
+            false
+    );
+}
+
+extern "C" JNIEXPORT jobjectArray JNICALL
+Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedScriptLifecycleV2(
         JNIEnv* env,
         jobject /* thiz */,
         jstring source,
@@ -200,11 +226,11 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
         jboolean workerThreadsExperimentalEnabled,
         jboolean javaInteropExperimentalEnabled
 ) {
-    const std::vector<std::string> envNameValues = toStringVector(env, envNames);
+    const std::vector<std::string> envNameValues = toStringVectorOrEmpty(env, envNames, "envNames");
     if (env->ExceptionCheck()) {
         return nullptr;
     }
-    const std::vector<std::string> envValueValues = toStringVector(env, envValues);
+    const std::vector<std::string> envValueValues = toStringVectorOrEmpty(env, envValues, "envValues");
     if (env->ExceptionCheck()) {
         return nullptr;
     }
@@ -232,8 +258,52 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
     );
 }
 
+// Legacy packaged templates pass only module source arrays here. They do not
+// know about request environment or experimental feature flags.
 extern "C" JNIEXPORT jobjectArray JNICALL
 Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedScriptLifecycleWithModules(
+        JNIEnv* env,
+        jobject /* thiz */,
+        jstring source,
+        jstring sourceName,
+        jstring workingDirectory,
+        jobjectArray moduleSourceNames,
+        jobjectArray moduleSources
+) {
+    const std::vector<std::string> moduleSourceNameValues = toStringVectorOrEmpty(env, moduleSourceNames, "moduleSourceNames");
+    if (env->ExceptionCheck()) {
+        return nullptr;
+    }
+    const std::vector<std::string> moduleSourceValues = toStringVectorOrEmpty(env, moduleSources, "moduleSources");
+    if (env->ExceptionCheck()) {
+        return nullptr;
+    }
+    if (moduleSourceNameValues.size() != moduleSourceValues.size()) {
+        throwJava(env, "java/lang/IllegalArgumentException", "moduleSourceNames.size != moduleSources.size");
+        return nullptr;
+    }
+    std::vector<std::pair<std::string, std::string>> moduleSourcePairs;
+    moduleSourcePairs.reserve(moduleSourceNameValues.size());
+    for (size_t index = 0; index < moduleSourceNameValues.size(); ++index) {
+        moduleSourcePairs.emplace_back(moduleSourceNameValues[index], moduleSourceValues[index]);
+    }
+    return runEmbeddedScriptLifecycleNative(
+            env,
+            source,
+            sourceName,
+            workingDirectory,
+            moduleSourcePairs,
+            {},
+            {},
+            false,
+            false,
+            false,
+            false
+    );
+}
+
+extern "C" JNIEXPORT jobjectArray JNICALL
+Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedScriptLifecycleWithModulesV2(
         JNIEnv* env,
         jobject /* thiz */,
         jstring source,
@@ -248,19 +318,19 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
         jboolean workerThreadsExperimentalEnabled,
         jboolean javaInteropExperimentalEnabled
 ) {
-    const std::vector<std::string> moduleSourceNameValues = toStringVector(env, moduleSourceNames);
+    const std::vector<std::string> moduleSourceNameValues = toStringVectorOrEmpty(env, moduleSourceNames, "moduleSourceNames");
     if (env->ExceptionCheck()) {
         return nullptr;
     }
-    const std::vector<std::string> moduleSourceValues = toStringVector(env, moduleSources);
+    const std::vector<std::string> moduleSourceValues = toStringVectorOrEmpty(env, moduleSources, "moduleSources");
     if (env->ExceptionCheck()) {
         return nullptr;
     }
-    const std::vector<std::string> envNameValues = toStringVector(env, envNames);
+    const std::vector<std::string> envNameValues = toStringVectorOrEmpty(env, envNames, "envNames");
     if (env->ExceptionCheck()) {
         return nullptr;
     }
-    const std::vector<std::string> envValueValues = toStringVector(env, envValues);
+    const std::vector<std::string> envValueValues = toStringVectorOrEmpty(env, envValues, "envValues");
     if (env->ExceptionCheck()) {
         return nullptr;
     }
@@ -297,8 +367,71 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
     );
 }
 
+// Legacy packaged templates with runtime module sources pass seven JNI
+// arguments. Keep this entry point separate from the current V2 signature.
 extern "C" JNIEXPORT jobjectArray JNICALL
 Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedScriptLifecycleWithRuntimeModules(
+        JNIEnv* env,
+        jobject /* thiz */,
+        jstring source,
+        jstring sourceName,
+        jstring workingDirectory,
+        jobjectArray moduleSourceNames,
+        jobjectArray moduleSources,
+        jobjectArray runtimeModuleSourceNames,
+        jobjectArray runtimeModuleSources
+) {
+    const std::vector<std::string> moduleSourceNameValues = toStringVectorOrEmpty(env, moduleSourceNames, "moduleSourceNames");
+    if (env->ExceptionCheck()) {
+        return nullptr;
+    }
+    const std::vector<std::string> moduleSourceValues = toStringVectorOrEmpty(env, moduleSources, "moduleSources");
+    if (env->ExceptionCheck()) {
+        return nullptr;
+    }
+    const std::vector<std::string> runtimeModuleSourceNameValues = toStringVectorOrEmpty(env, runtimeModuleSourceNames, "runtimeModuleSourceNames");
+    if (env->ExceptionCheck()) {
+        return nullptr;
+    }
+    const std::vector<std::string> runtimeModuleSourceValues = toStringVectorOrEmpty(env, runtimeModuleSources, "runtimeModuleSources");
+    if (env->ExceptionCheck()) {
+        return nullptr;
+    }
+    if (moduleSourceNameValues.size() != moduleSourceValues.size()) {
+        throwJava(env, "java/lang/IllegalArgumentException", "moduleSourceNames.size != moduleSources.size");
+        return nullptr;
+    }
+    if (runtimeModuleSourceNameValues.size() != runtimeModuleSourceValues.size()) {
+        throwJava(env, "java/lang/IllegalArgumentException", "runtimeModuleSourceNames.size != runtimeModuleSources.size");
+        return nullptr;
+    }
+    std::vector<std::pair<std::string, std::string>> moduleSourcePairs;
+    moduleSourcePairs.reserve(moduleSourceNameValues.size());
+    for (size_t index = 0; index < moduleSourceNameValues.size(); ++index) {
+        moduleSourcePairs.emplace_back(moduleSourceNameValues[index], moduleSourceValues[index]);
+    }
+    std::vector<std::pair<std::string, std::string>> runtimeModuleSourcePairs;
+    runtimeModuleSourcePairs.reserve(runtimeModuleSourceNameValues.size());
+    for (size_t index = 0; index < runtimeModuleSourceNameValues.size(); ++index) {
+        runtimeModuleSourcePairs.emplace_back(runtimeModuleSourceNameValues[index], runtimeModuleSourceValues[index]);
+    }
+    return runEmbeddedScriptLifecycleNative(
+            env,
+            source,
+            sourceName,
+            workingDirectory,
+            moduleSourcePairs,
+            runtimeModuleSourcePairs,
+            {},
+            false,
+            false,
+            false,
+            false
+    );
+}
+
+extern "C" JNIEXPORT jobjectArray JNICALL
+Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedScriptLifecycleWithRuntimeModulesV2(
         JNIEnv* env,
         jobject /* thiz */,
         jstring source,
@@ -315,27 +448,27 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
         jboolean workerThreadsExperimentalEnabled,
         jboolean javaInteropExperimentalEnabled
 ) {
-    const std::vector<std::string> moduleSourceNameValues = toStringVector(env, moduleSourceNames);
+    const std::vector<std::string> moduleSourceNameValues = toStringVectorOrEmpty(env, moduleSourceNames, "moduleSourceNames");
     if (env->ExceptionCheck()) {
         return nullptr;
     }
-    const std::vector<std::string> moduleSourceValues = toStringVector(env, moduleSources);
+    const std::vector<std::string> moduleSourceValues = toStringVectorOrEmpty(env, moduleSources, "moduleSources");
     if (env->ExceptionCheck()) {
         return nullptr;
     }
-    const std::vector<std::string> runtimeModuleSourceNameValues = toStringVector(env, runtimeModuleSourceNames);
+    const std::vector<std::string> runtimeModuleSourceNameValues = toStringVectorOrEmpty(env, runtimeModuleSourceNames, "runtimeModuleSourceNames");
     if (env->ExceptionCheck()) {
         return nullptr;
     }
-    const std::vector<std::string> runtimeModuleSourceValues = toStringVector(env, runtimeModuleSources);
+    const std::vector<std::string> runtimeModuleSourceValues = toStringVectorOrEmpty(env, runtimeModuleSources, "runtimeModuleSources");
     if (env->ExceptionCheck()) {
         return nullptr;
     }
-    const std::vector<std::string> envNameValues = toStringVector(env, envNames);
+    const std::vector<std::string> envNameValues = toStringVectorOrEmpty(env, envNames, "envNames");
     if (env->ExceptionCheck()) {
         return nullptr;
     }
-    const std::vector<std::string> envValueValues = toStringVector(env, envValues);
+    const std::vector<std::string> envValueValues = toStringVectorOrEmpty(env, envValues, "envValues");
     if (env->ExceptionCheck()) {
         return nullptr;
     }

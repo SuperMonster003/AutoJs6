@@ -989,7 +989,8 @@ std::string buildEmbeddedScriptExecutionSource(
         bool workerThreadsExperimentalEnabled,
         bool javaInteropExperimentalEnabled);
 void putEmbeddedScriptExecutionFields(std::vector<std::string>& payload, const std::string& text);
-std::vector<std::string> toStringVector(JNIEnv* env, jobjectArray values);
+std::vector<std::string> toStringVector(JNIEnv* env, jobjectArray values, const char* label = "array");
+std::vector<std::string> toStringVectorOrEmpty(JNIEnv* env, jobjectArray values, const char* label = "array");
 NodeStart resolveNodeStart(JNIEnv* env);
 SymbolLookup lookupSymbol(void* handle, const char* symbol);
 SymbolLookup lookupAnySymbol(void* handle, const SymbolRequirement& requirement);

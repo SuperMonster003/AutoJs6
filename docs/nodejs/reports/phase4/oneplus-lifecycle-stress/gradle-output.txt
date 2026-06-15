@@ -1,0 +1,543 @@
+Type-safe project accessors is an incubating feature.
+
+> Configure project :build-logic
+JDK versions: min [17] / select [21] / current [21] / max [26]
+JVM target: min [17] / select [21] / max [25]
+
+> Task :build-logic:convention:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :build-logic:convention:compileKotlin UP-TO-DATE
+> Task :build-logic:convention:compileJava NO-SOURCE
+> Task :build-logic:convention:pluginDescriptors UP-TO-DATE
+> Task :build-logic:convention:processResources UP-TO-DATE
+> Task :build-logic:convention:classes UP-TO-DATE
+> Task :build-logic:convention:jar UP-TO-DATE
+
+> Configure project :app
+WARNING: The multidex library is included as a dependency, but it is not needed for apps
+with minSdk >= 21. Please remove dependency 'androidx.multidex:multidex:2.0.1' from ':app'.
+See https://developer.android.com/build/multidex for more information.
+======================================
+Information for concerned properties
+--------------------------------------
+[ java.vendor: Oracle Corporation ]
+[ java.vm.vendor: Oracle Corporation ]
+[ os.name: Windows 11 ]
+[ os.version: 10.0 ]
+[ os.arch: amd64 ]
+======================================
+
+=================================================================================
+Version information for IDE platform and Gradle plugins
+---------------------------------------------------------------------------------
+Platform: Windows 11
+Classpath: "com.android.tools.build:gradle:9.2.1" [auto-specified]
+Classpath: "org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.20" [auto-specified]
+Classpath: "org.apache.commons:commons-compress:1.28.0" [toml-specified]
+Classpath: "org.tukaani:xz:1.10" [toml-specified]
+Plugin: "com.google.devtools.ksp:2.3.8" [auto-specified] [nearest-lower-matched]
+Plugin: "org.gradle.toolchains.foojay-resolver-convention:1.0.0" [toml-specified]
+---------------------------------------------------------------------------------
+Gradle version: 9.5.1
+=================================================================================
+
+==============================================================
+Version information for AutoJs6 app library
+--------------------------------------------------------------
+Version name: 6.7.1 Alpha4
+Version code: 3925
+SDK versions: min [24] / target [36] / compile [36]
+JDK versions: min [17] / select [21] / current [21] / max [26]
+Java version: 21
+==============================================================
+
+==================================================
+Version information for Image Quantization library
+--------------------------------------------------
+libimagequant: 2.17.0
+libpng: 1.6.49
+NDK: 26.1.10909125
+Cmake: 3.22.1
+==================================================
+
+=========================================
+Version information for Rapid OCR library
+-----------------------------------------
+OpenCV Mobile: 4.5.3
+OpenCV Mobile Label: 13
+Onnx: 1.2.2
+Onnx Runtime: 1.14.0
+NDK: 23.1.7779620
+Cmake: 3.22.1
+=========================================
+
+No need to download or extract "OpenCV Mobile" archive file as the "skip file" exists
+
+No need to download or extract "Onnx" archive file as the "skip file" exists
+
+No need to download or extract "Onnx Runtime" archive file as the "skip file" exists
+
+
+> Task :build-logic:ksp-version-codes-processor:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :plugin-api:common-plugin-api:preBuild UP-TO-DATE
+> Task :plugin-api:common-plugin-api:preDebugBuild UP-TO-DATE
+> Task :modules:apk-parser:preBuild UP-TO-DATE
+> Task :modules:apk-signer:preBuild UP-TO-DATE
+> Task :libs:rapidocr:preBuild UP-TO-DATE
+> Task :libs:rapidocr:preDebugBuild UP-TO-DATE
+> Task :libs:imagequant:preBuild UP-TO-DATE
+> Task :modules:color-picker:preBuild UP-TO-DATE
+> Task :libs:imagequant:preDebugBuild UP-TO-DATE
+> Task :modules:apk-parser:preDebugBuild UP-TO-DATE
+> Task :plugin-api:paddle-ocr-api:preBuild UP-TO-DATE
+> Task :plugin-api:paddle-ocr-api:preDebugBuild UP-TO-DATE
+> Task :modules:apk-signer:preDebugBuild UP-TO-DATE
+> Task :modules:color-picker:preDebugBuild UP-TO-DATE
+> Task :modules:expandable-layout:preBuild UP-TO-DATE
+> Task :modules:expandable-layout:preDebugBuild UP-TO-DATE
+> Task :modules:expandable-recyclerview:preBuild UP-TO-DATE
+> Task :modules:jieba-analysis:preBuild UP-TO-DATE
+> Task :plugin-api:common-plugin-api:compileDebugAidl UP-TO-DATE
+> Task :modules:material-date-time-picker:preBuild UP-TO-DATE
+> Task :modules:jieba-analysis:preDebugBuild UP-TO-DATE
+> Task :libs:rapidocr:generateDebugResources UP-TO-DATE
+> Task :libs:imagequant:generateDebugResources UP-TO-DATE
+> Task :modules:apk-signer:generateDebugResources UP-TO-DATE
+> Task :modules:expandable-recyclerview:preDebugBuild UP-TO-DATE
+> Task :modules:apk-parser:generateDebugResources UP-TO-DATE
+> Task :modules:expandable-layout:generateDebugResources UP-TO-DATE
+> Task :modules:color-picker:generateDebugResources UP-TO-DATE
+> Task :modules:jieba-analysis:generateDebugResources UP-TO-DATE
+> Task :modules:expandable-recyclerview:generateDebugResources UP-TO-DATE
+> Task :modules:material-date-time-picker:preDebugBuild UP-TO-DATE
+> Task :libs:imagequant:packageDebugResources UP-TO-DATE
+> Task :plugin-api:paddle-ocr-api:compileDebugAidl UP-TO-DATE
+> Task :modules:color-picker:packageDebugResources UP-TO-DATE
+> Task :modules:jieba-analysis:packageDebugResources UP-TO-DATE
+> Task :modules:apk-signer:packageDebugResources UP-TO-DATE
+> Task :modules:expandable-layout:packageDebugResources UP-TO-DATE
+> Task :modules:expandable-recyclerview:packageDebugResources UP-TO-DATE
+> Task :modules:apk-parser:packageDebugResources UP-TO-DATE
+> Task :libs:rapidocr:packageDebugResources UP-TO-DATE
+> Task :modules:material-date-time-picker:generateDebugResources UP-TO-DATE
+> Task :plugin-api:paddle-ocr-engine:preBuild UP-TO-DATE
+> Task :plugin-api:common-plugin-api:generateDebugResources UP-TO-DATE
+> Task :modules:recyclerview-flexibledivider:preBuild UP-TO-DATE
+> Task :modules:material-dialogs:preBuild UP-TO-DATE
+> Task :modules:recyclerview-flexibledivider:preDebugBuild UP-TO-DATE
+> Task :plugin-api:paddle-ocr-api:generateDebugResources UP-TO-DATE
+> Task :modules:material-date-time-picker:packageDebugResources UP-TO-DATE
+> Task :modules:recyclerview-flexibledivider:generateDebugResources UP-TO-DATE
+> Task :modules:material-dialogs:preDebugBuild UP-TO-DATE
+> Task :modules:material-dialogs:generateDebugResources UP-TO-DATE
+> Task :plugin-api:paddle-ocr-api:packageDebugResources UP-TO-DATE
+> Task :plugin-api:common-plugin-api:packageDebugResources UP-TO-DATE
+> Task :plugin-api:paddle-ocr-engine:preDebugBuild UP-TO-DATE
+> Task :libs:rapidocr:processDebugNavigationResources UP-TO-DATE
+> Task :modules:apk-parser:processDebugNavigationResources UP-TO-DATE
+> Task :modules:apk-signer:processDebugNavigationResources UP-TO-DATE
+> Task :libs:imagequant:processDebugNavigationResources UP-TO-DATE
+> Task :modules:recyclerview-flexibledivider:packageDebugResources UP-TO-DATE
+> Task :modules:expandable-layout:processDebugNavigationResources UP-TO-DATE
+> Task :modules:expandable-recyclerview:processDebugNavigationResources UP-TO-DATE
+> Task :plugin-api:paddle-ocr-engine:generateDebugResources UP-TO-DATE
+> Task :modules:material-date-time-picker:processDebugNavigationResources UP-TO-DATE
+> Task :modules:recyclerview-flexibledivider:processDebugNavigationResources UP-TO-DATE
+> Task :plugin-api:paddle-ocr-api:processDebugNavigationResources UP-TO-DATE
+> Task :modules:color-picker:processDebugNavigationResources UP-TO-DATE
+> Task :modules:material-dialogs:packageDebugResources UP-TO-DATE
+> Task :plugin-api:common-plugin-api:processDebugNavigationResources UP-TO-DATE
+> Task :modules:jieba-analysis:processDebugNavigationResources UP-TO-DATE
+> Task :plugin-api:paddle-ocr-engine:packageDebugResources UP-TO-DATE
+> Task :modules:apk-signer:parseDebugLocalResources UP-TO-DATE
+> Task :libs:imagequant:parseDebugLocalResources UP-TO-DATE
+> Task :libs:rapidocr:parseDebugLocalResources UP-TO-DATE
+> Task :modules:expandable-layout:parseDebugLocalResources UP-TO-DATE
+> Task :modules:expandable-recyclerview:parseDebugLocalResources UP-TO-DATE
+> Task :plugin-api:paddle-ocr-engine:processDebugNavigationResources UP-TO-DATE
+> Task :modules:jieba-analysis:parseDebugLocalResources UP-TO-DATE
+> Task :modules:apk-signer:generateDebugRFile UP-TO-DATE
+> Task :modules:color-picker:parseDebugLocalResources UP-TO-DATE
+> Task :modules:material-date-time-picker:parseDebugLocalResources UP-TO-DATE
+> Task :modules:material-dialogs:processDebugNavigationResources UP-TO-DATE
+> Task :modules:jieba-analysis:generateDebugRFile UP-TO-DATE
+> Task :modules:color-picker:generateDebugRFile UP-TO-DATE
+> Task :modules:apk-parser:parseDebugLocalResources UP-TO-DATE
+> Task :libs:imagequant:generateDebugRFile UP-TO-DATE
+> Task :modules:expandable-recyclerview:generateDebugRFile UP-TO-DATE
+> Task :modules:material-date-time-picker:generateDebugRFile UP-TO-DATE
+> Task :libs:rapidocr:generateDebugRFile UP-TO-DATE
+> Task :plugin-api:common-plugin-api:parseDebugLocalResources UP-TO-DATE
+> Task :modules:recyclerview-flexibledivider:parseDebugLocalResources UP-TO-DATE
+> Task :modules:material-dialogs:parseDebugLocalResources UP-TO-DATE
+> Task :modules:expandable-layout:generateDebugRFile UP-TO-DATE
+> Task :modules:apk-parser:generateDebugRFile UP-TO-DATE
+> Task :plugin-api:paddle-ocr-api:parseDebugLocalResources UP-TO-DATE
+> Task :plugin-api:common-plugin-api:generateDebugRFile UP-TO-DATE
+> Task :plugin-api:paddle-ocr-api:generateDebugRFile UP-TO-DATE
+> Task :libs:imagequant:compileDebugKotlin NO-SOURCE
+> Task :libs:imagequant:javaPreCompileDebug UP-TO-DATE
+> Task :libs:imagequant:compileDebugJavaWithJavac NO-SOURCE
+> Task :libs:imagequant:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :plugin-api:paddle-ocr-engine:parseDebugLocalResources UP-TO-DATE
+> Task :modules:material-dialogs:generateDebugRFile UP-TO-DATE
+> Task :modules:expandable-layout:compileDebugKotlin NO-SOURCE
+> Task :modules:recyclerview-flexibledivider:generateDebugRFile UP-TO-DATE
+> Task :plugin-api:paddle-ocr-engine:generateDebugRFile UP-TO-DATE
+> Task :modules:expandable-recyclerview:compileDebugKotlin NO-SOURCE
+> Task :modules:expandable-layout:javaPreCompileDebug UP-TO-DATE
+> Task :modules:expandable-recyclerview:javaPreCompileDebug UP-TO-DATE
+> Task :modules:recyclerview-flexibledivider:compileDebugKotlin NO-SOURCE
+> Task :modules:material-date-time-picker:compileDebugKotlin NO-SOURCE
+> Task :modules:recyclerview-flexibledivider:javaPreCompileDebug UP-TO-DATE
+> Task :modules:material-date-time-picker:javaPreCompileDebug UP-TO-DATE
+> Task :modules:material-dialogs:compileDebugKotlin NO-SOURCE
+> Task :modules:material-dialogs:javaPreCompileDebug UP-TO-DATE
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preAppDebugBuild UP-TO-DATE
+> Task :modules:expandable-layout:compileDebugJavaWithJavac UP-TO-DATE
+> Task :build-logic:ksp-version-codes-processor:compileKotlin UP-TO-DATE
+> Task :modules:expandable-layout:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :modules:expandable-recyclerview:compileDebugJavaWithJavac UP-TO-DATE
+> Task :modules:material-date-time-picker:compileDebugJavaWithJavac UP-TO-DATE
+> Task :plugin-api:paddle-ocr-api:javaPreCompileDebug UP-TO-DATE
+> Task :modules:expandable-recyclerview:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :modules:recyclerview-flexibledivider:compileDebugJavaWithJavac UP-TO-DATE
+> Task :modules:material-dialogs:compileDebugJavaWithJavac UP-TO-DATE
+> Task :modules:material-date-time-picker:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :plugin-api:paddle-ocr-engine:javaPreCompileDebug UP-TO-DATE
+> Task :modules:recyclerview-flexibledivider:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :modules:material-dialogs:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :libs:imagequant:writeDebugAarMetadata UP-TO-DATE
+> Task :modules:expandable-layout:writeDebugAarMetadata UP-TO-DATE
+> Task :modules:expandable-recyclerview:writeDebugAarMetadata UP-TO-DATE
+> Task :modules:material-date-time-picker:writeDebugAarMetadata UP-TO-DATE
+> Task :modules:recyclerview-flexibledivider:writeDebugAarMetadata UP-TO-DATE
+> Task :modules:jieba-analysis:compileDebugKotlin UP-TO-DATE
+> Task :libs:rapidocr:compileDebugKotlin UP-TO-DATE
+> Task :plugin-api:common-plugin-api:compileDebugKotlin UP-TO-DATE
+> Task :plugin-api:paddle-ocr-api:writeDebugAarMetadata UP-TO-DATE
+> Task :modules:material-dialogs:writeDebugAarMetadata UP-TO-DATE
+> Task :plugin-api:paddle-ocr-engine:writeDebugAarMetadata UP-TO-DATE
+> Task :modules:jieba-analysis:javaPreCompileDebug UP-TO-DATE
+> Task :plugin-api:common-plugin-api:javaPreCompileDebug UP-TO-DATE
+> Task :modules:apk-parser:compileDebugKotlin UP-TO-DATE
+> Task :libs:rapidocr:javaPreCompileDebug UP-TO-DATE
+> Task :modules:color-picker:compileDebugKotlin UP-TO-DATE
+> Task :modules:color-picker:javaPreCompileDebug UP-TO-DATE
+> Task :plugin-api:common-plugin-api:compileDebugJavaWithJavac UP-TO-DATE
+> Task :plugin-api:common-plugin-api:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :libs:rapidocr:compileDebugJavaWithJavac NO-SOURCE
+> Task :libs:rapidocr:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :modules:jieba-analysis:compileDebugJavaWithJavac UP-TO-DATE
+> Task :modules:color-picker:compileDebugJavaWithJavac UP-TO-DATE
+> Task :modules:expandable-layout:extractDeepLinksDebug UP-TO-DATE
+> Task :modules:jieba-analysis:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :modules:expandable-layout:processDebugManifest UP-TO-DATE
+> Task :modules:jieba-analysis:writeDebugAarMetadata UP-TO-DATE
+> Task :modules:expandable-recyclerview:extractDeepLinksDebug UP-TO-DATE
+> Task :modules:jieba-analysis:extractDeepLinksDebug UP-TO-DATE
+> Task :modules:material-date-time-picker:extractDeepLinksDebug UP-TO-DATE
+> Task :modules:jieba-analysis:processDebugManifest UP-TO-DATE
+> Task :modules:material-dialogs:extractDeepLinksDebug UP-TO-DATE
+> Task :app:compileAppDebugAidl UP-TO-DATE
+> Task :modules:apk-parser:javaPreCompileDebug UP-TO-DATE
+> Task :plugin-api:paddle-ocr-api:compileDebugKotlin NO-SOURCE
+> Task :modules:color-picker:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :libs:imagequant:extractDeepLinksDebug UP-TO-DATE
+> Task :libs:rapidocr:writeDebugAarMetadata UP-TO-DATE
+> Task :modules:recyclerview-flexibledivider:extractDeepLinksDebug UP-TO-DATE
+> Task :plugin-api:common-plugin-api:writeDebugAarMetadata UP-TO-DATE
+> Task :modules:material-date-time-picker:processDebugManifest UP-TO-DATE
+> Task :libs:rapidocr:extractDeepLinksDebug UP-TO-DATE
+> Task :modules:color-picker:writeDebugAarMetadata UP-TO-DATE
+> Task :plugin-api:common-plugin-api:extractDeepLinksDebug UP-TO-DATE
+> Task :modules:expandable-recyclerview:processDebugManifest UP-TO-DATE
+> Task :plugin-api:paddle-ocr-engine:extractDeepLinksDebug UP-TO-DATE
+> Task :plugin-api:paddle-ocr-api:compileDebugJavaWithJavac UP-TO-DATE
+> Task :modules:material-dialogs:processDebugManifest UP-TO-DATE
+> Task :libs:imagequant:processDebugManifest UP-TO-DATE
+> Task :modules:recyclerview-flexibledivider:processDebugManifest UP-TO-DATE
+> Task :plugin-api:paddle-ocr-api:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :libs:rapidocr:processDebugManifest UP-TO-DATE
+> Task :modules:jieba-analysis:mapDebugSourceSetPaths UP-TO-DATE
+> Task :modules:expandable-layout:mapDebugSourceSetPaths UP-TO-DATE
+> Task :plugin-api:paddle-ocr-engine:processDebugManifest UP-TO-DATE
+> Task :modules:jieba-analysis:compileDebugLibraryResources UP-TO-DATE
+> Task :plugin-api:paddle-ocr-api:extractDeepLinksDebug UP-TO-DATE
+> Task :modules:expandable-layout:compileDebugLibraryResources UP-TO-DATE
+> Task :libs:imagequant:mapDebugSourceSetPaths UP-TO-DATE
+> Task :libs:rapidocr:mapDebugSourceSetPaths UP-TO-DATE
+> Task :libs:imagequant:compileDebugLibraryResources UP-TO-DATE
+> Task :modules:color-picker:extractDeepLinksDebug UP-TO-DATE
+> Task :libs:rapidocr:compileDebugLibraryResources UP-TO-DATE
+> Task :plugin-api:paddle-ocr-api:processDebugManifest UP-TO-DATE
+> Task :plugin-api:common-plugin-api:processDebugManifest UP-TO-DATE
+> Task :modules:material-date-time-picker:mapDebugSourceSetPaths UP-TO-DATE
+> Task :modules:material-dialogs:mapDebugSourceSetPaths UP-TO-DATE
+> Task :modules:material-date-time-picker:compileDebugLibraryResources UP-TO-DATE
+> Task :modules:material-dialogs:compileDebugLibraryResources UP-TO-DATE
+> Task :modules:recyclerview-flexibledivider:mapDebugSourceSetPaths UP-TO-DATE
+> Task :modules:recyclerview-flexibledivider:compileDebugLibraryResources UP-TO-DATE
+> Task :plugin-api:paddle-ocr-api:mapDebugSourceSetPaths UP-TO-DATE
+> Task :plugin-api:common-plugin-api:mapDebugSourceSetPaths UP-TO-DATE
+> Task :modules:color-picker:processDebugManifest UP-TO-DATE
+> Task :libs:rapidocr:generateDebugAssets UP-TO-DATE
+> Task :plugin-api:paddle-ocr-api:compileDebugLibraryResources UP-TO-DATE
+> Task :modules:expandable-layout:generateDebugAssets UP-TO-DATE
+> Task :libs:rapidocr:mergeDebugAssets UP-TO-DATE
+> Task :modules:jieba-analysis:generateDebugAssets UP-TO-DATE
+> Task :modules:expandable-layout:mergeDebugAssets UP-TO-DATE
+> Task :modules:material-date-time-picker:generateDebugAssets UP-TO-DATE
+> Task :modules:apk-parser:compileDebugJavaWithJavac UP-TO-DATE
+> Task :modules:expandable-recyclerview:mapDebugSourceSetPaths UP-TO-DATE
+> Task :modules:material-dialogs:generateDebugAssets UP-TO-DATE
+> Task :modules:jieba-analysis:mergeDebugAssets UP-TO-DATE
+> Task :plugin-api:common-plugin-api:compileDebugLibraryResources UP-TO-DATE
+> Task :libs:imagequant:generateDebugAssets UP-TO-DATE
+> Task :modules:apk-parser:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :plugin-api:common-plugin-api:generateDebugAssets UP-TO-DATE
+> Task :modules:material-dialogs:mergeDebugAssets UP-TO-DATE
+> Task :plugin-api:paddle-ocr-api:generateDebugAssets UP-TO-DATE
+> Task :plugin-api:paddle-ocr-api:mergeDebugAssets UP-TO-DATE
+> Task :modules:color-picker:mapDebugSourceSetPaths UP-TO-DATE
+> Task :modules:material-date-time-picker:mergeDebugAssets UP-TO-DATE
+> Task :modules:recyclerview-flexibledivider:generateDebugAssets UP-TO-DATE
+> Task :modules:recyclerview-flexibledivider:mergeDebugAssets UP-TO-DATE
+> Task :modules:expandable-layout:processDebugJavaRes NO-SOURCE
+> Task :libs:rapidocr:processDebugJavaRes UP-TO-DATE
+> Task :modules:jieba-analysis:processDebugJavaRes UP-TO-DATE
+> Task :modules:expandable-recyclerview:compileDebugLibraryResources UP-TO-DATE
+> Task :modules:material-dialogs:processDebugJavaRes NO-SOURCE
+> Task :modules:recyclerview-flexibledivider:processDebugJavaRes NO-SOURCE
+> Task :libs:rapidocr:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :app:dataBindingMergeDependencyArtifactsAppDebug UP-TO-DATE
+> Task :app:generateAppDebugResources UP-TO-DATE
+> Task :modules:expandable-recyclerview:generateDebugAssets UP-TO-DATE
+> Task :plugin-api:paddle-ocr-api:processDebugJavaRes NO-SOURCE
+> Task :modules:jieba-analysis:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :modules:color-picker:compileDebugLibraryResources UP-TO-DATE
+> Task :modules:expandable-recyclerview:mergeDebugAssets UP-TO-DATE
+> Task :modules:material-date-time-picker:processDebugJavaRes NO-SOURCE
+> Task :plugin-api:common-plugin-api:mergeDebugAssets UP-TO-DATE
+> Task :modules:color-picker:generateDebugAssets UP-TO-DATE
+> Task :modules:apk-parser:writeDebugAarMetadata UP-TO-DATE
+> Task :modules:expandable-recyclerview:processDebugJavaRes NO-SOURCE
+> Task :libs:imagequant:mergeDebugAssets UP-TO-DATE
+> Task :modules:color-picker:mergeDebugAssets UP-TO-DATE
+> Task :modules:apk-parser:extractDeepLinksDebug UP-TO-DATE
+> Task :modules:material-date-time-picker:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :modules:material-dialogs:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :modules:expandable-recyclerview:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :libs:imagequant:processDebugJavaRes NO-SOURCE
+> Task :modules:recyclerview-flexibledivider:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :plugin-api:paddle-ocr-api:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :modules:color-picker:processDebugJavaRes UP-TO-DATE
+> Task :libs:imagequant:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :plugin-api:common-plugin-api:processDebugJavaRes UP-TO-DATE
+> Task :modules:color-picker:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :modules:apk-parser:processDebugManifest UP-TO-DATE
+> Task :plugin-api:common-plugin-api:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :modules:expandable-layout:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :modules:apk-parser:mapDebugSourceSetPaths UP-TO-DATE
+> Task :modules:apk-parser:compileDebugLibraryResources UP-TO-DATE
+> Task :modules:apk-parser:generateDebugAssets UP-TO-DATE
+> Task :app:mergeAppDebugResources UP-TO-DATE
+> Task :modules:apk-parser:mergeDebugAssets UP-TO-DATE
+> Task :modules:apk-signer:compileDebugKotlin UP-TO-DATE
+> Task :modules:apk-signer:javaPreCompileDebug UP-TO-DATE
+> Task :modules:apk-parser:processDebugJavaRes UP-TO-DATE
+> Task :app:packageAppDebugResources UP-TO-DATE
+> Task :modules:apk-parser:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :modules:expandable-recyclerview:mergeDebugJniLibFolders UP-TO-DATE
+> Task :modules:color-picker:mergeDebugJniLibFolders UP-TO-DATE
+> Task :modules:expandable-layout:mergeDebugJniLibFolders UP-TO-DATE
+> Task :modules:jieba-analysis:mergeDebugJniLibFolders UP-TO-DATE
+> Task :modules:apk-parser:mergeDebugJniLibFolders UP-TO-DATE
+> Task :modules:color-picker:mergeDebugNativeLibs NO-SOURCE
+> Task :modules:apk-parser:mergeDebugNativeLibs NO-SOURCE
+> Task :modules:color-picker:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :modules:apk-parser:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :modules:expandable-layout:mergeDebugNativeLibs NO-SOURCE
+> Task :modules:expandable-layout:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :modules:material-date-time-picker:mergeDebugJniLibFolders UP-TO-DATE
+> Task :modules:material-dialogs:mergeDebugJniLibFolders UP-TO-DATE
+> Task :modules:material-dialogs:mergeDebugNativeLibs NO-SOURCE
+> Task :modules:material-dialogs:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :modules:recyclerview-flexibledivider:mergeDebugJniLibFolders UP-TO-DATE
+> Task :plugin-api:paddle-ocr-engine:compileDebugKotlin UP-TO-DATE
+> Task :modules:recyclerview-flexibledivider:mergeDebugNativeLibs NO-SOURCE
+> Task :modules:recyclerview-flexibledivider:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :libs:rapidocr:configureCMakeDebug[arm64-v8a]
+> Task :modules:apk-signer:compileDebugJavaWithJavac UP-TO-DATE
+> Task :modules:apk-signer:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :libs:imagequant:configureCMakeDebug[arm64-v8a]
+> Task :plugin-api:common-plugin-api:mergeDebugJniLibFolders UP-TO-DATE
+> Task :modules:apk-signer:writeDebugAarMetadata UP-TO-DATE
+> Task :modules:material-date-time-picker:mergeDebugNativeLibs NO-SOURCE
+> Task :modules:jieba-analysis:mergeDebugNativeLibs NO-SOURCE
+> Task :modules:material-date-time-picker:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :modules:expandable-recyclerview:mergeDebugNativeLibs NO-SOURCE
+> Task :plugin-api:paddle-ocr-engine:compileDebugJavaWithJavac UP-TO-DATE
+> Task :build-logic:ksp-version-codes-processor:compileJava NO-SOURCE
+> Task :modules:apk-signer:extractDeepLinksDebug UP-TO-DATE
+> Task :plugin-api:paddle-ocr-engine:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :plugin-api:common-plugin-api:mergeDebugNativeLibs NO-SOURCE
+> Task :plugin-api:paddle-ocr-api:mergeDebugJniLibFolders UP-TO-DATE
+> Task :plugin-api:common-plugin-api:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :modules:apk-signer:processDebugManifest UP-TO-DATE
+> Task :app:processAppDebugNavigationResources UP-TO-DATE
+> Task :plugin-api:paddle-ocr-engine:mapDebugSourceSetPaths UP-TO-DATE
+> Task :plugin-api:paddle-ocr-engine:compileDebugLibraryResources UP-TO-DATE
+> Task :plugin-api:paddle-ocr-engine:generateDebugAssets UP-TO-DATE
+> Task :plugin-api:paddle-ocr-engine:mergeDebugAssets UP-TO-DATE
+> Task :app:parseAppDebugLocalResources UP-TO-DATE
+> Task :build-logic:ksp-version-codes-processor:pluginDescriptors UP-TO-DATE
+> Task :plugin-api:paddle-ocr-api:mergeDebugNativeLibs NO-SOURCE
+> Task :modules:expandable-recyclerview:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :build-logic:ksp-version-codes-processor:processResources UP-TO-DATE
+> Task :build-logic:ksp-version-codes-processor:classes UP-TO-DATE
+> Task :modules:jieba-analysis:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :modules:apk-signer:mapDebugSourceSetPaths UP-TO-DATE
+> Task :plugin-api:paddle-ocr-api:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :plugin-api:paddle-ocr-engine:processDebugJavaRes UP-TO-DATE
+> Task :modules:apk-signer:compileDebugLibraryResources UP-TO-DATE
+> Task :modules:apk-signer:generateDebugAssets UP-TO-DATE
+> Task :plugin-api:paddle-ocr-engine:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :build-logic:ksp-version-codes-processor:jar UP-TO-DATE
+> Task :modules:apk-signer:mergeDebugAssets UP-TO-DATE
+> Task :plugin-api:paddle-ocr-engine:mergeDebugJniLibFolders UP-TO-DATE
+> Task :plugin-api:paddle-ocr-engine:mergeDebugNativeLibs NO-SOURCE
+> Task :modules:apk-signer:processDebugJavaRes UP-TO-DATE
+> Task :plugin-api:paddle-ocr-engine:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :modules:apk-signer:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :modules:apk-signer:mergeDebugJniLibFolders UP-TO-DATE
+> Task :modules:apk-signer:mergeDebugNativeLibs NO-SOURCE
+> Task :modules:apk-signer:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :app:dataBindingGenBaseClassesAppDebug UP-TO-DATE
+> Task :app:generateAppDebugBuildConfig UP-TO-DATE
+> Task :app:generateAppDebugRFile UP-TO-DATE
+> Task :app:kspAppDebugKotlin UP-TO-DATE
+> Task :libs:rapidocr:buildCMakeDebug[arm64-v8a]
+> Task :libs:imagequant:buildCMakeDebug[arm64-v8a]
+> Task :libs:rapidocr:configureCMakeDebug[armeabi-v7a]
+> Task :libs:imagequant:configureCMakeDebug[armeabi-v7a]
+> Task :libs:rapidocr:buildCMakeDebug[armeabi-v7a]
+> Task :libs:rapidocr:configureCMakeDebug[x86]
+> Task :libs:imagequant:buildCMakeDebug[armeabi-v7a]
+> Task :libs:imagequant:configureCMakeDebug[x86]
+> Task :libs:rapidocr:buildCMakeDebug[x86]
+> Task :libs:rapidocr:configureCMakeDebug[x86_64]
+> Task :libs:imagequant:buildCMakeDebug[x86]
+> Task :libs:imagequant:configureCMakeDebug[x86_64]
+> Task :libs:rapidocr:buildCMakeDebug[x86_64]
+> Task :libs:rapidocr:mergeDebugJniLibFolders UP-TO-DATE
+> Task :libs:rapidocr:mergeDebugNativeLibs UP-TO-DATE
+> Task :libs:rapidocr:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :libs:imagequant:buildCMakeDebug[x86_64]
+> Task :libs:imagequant:mergeDebugJniLibFolders UP-TO-DATE
+> Task :libs:imagequant:mergeDebugNativeLibs UP-TO-DATE
+> Task :libs:imagequant:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :app:compileAppDebugKotlin UP-TO-DATE
+> Task :app:javaPreCompileAppDebug UP-TO-DATE
+> Task :app:compileAppDebugJavaWithJavac UP-TO-DATE
+> Task :app:checkAppDebugAarMetadata UP-TO-DATE
+> Task :app:mapAppDebugSourceSetPaths UP-TO-DATE
+> Task :app:compileAppDebugNavigationResources UP-TO-DATE
+> Task :app:createAppDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksAppDebug UP-TO-DATE
+> Task :app:processAppDebugMainManifest UP-TO-DATE
+> Task :app:processAppDebugManifest UP-TO-DATE
+> Task :app:processAppDebugManifestForPackage UP-TO-DATE
+> Task :app:processAppDebugResources UP-TO-DATE
+> Task :app:bundleAppDebugClassesToCompileJar UP-TO-DATE
+> Task :app:preAppDebugAndroidTestBuild SKIPPED
+> Task :app:compileAppDebugAndroidTestAidl NO-SOURCE
+> Task :app:dataBindingMergeDependencyArtifactsAppDebugAndroidTest UP-TO-DATE
+> Task :app:generateAppDebugAndroidTestResources UP-TO-DATE
+> Task :app:mergeAppDebugAndroidTestResources UP-TO-DATE
+> Task :app:dataBindingGenBaseClassesAppDebugAndroidTest UP-TO-DATE
+> Task :app:processAppDebugAndroidTestManifest UP-TO-DATE
+> Task :app:generateAppDebugAndroidTestBuildConfig UP-TO-DATE
+> Task :app:packageAppDebugAndroidTestResources UP-TO-DATE
+> Task :app:processAppDebugAndroidTestNavigationResources UP-TO-DATE
+> Task :app:parseAppDebugAndroidTestLocalResources UP-TO-DATE
+> Task :app:generateAppDebugAndroidTestRFile UP-TO-DATE
+> Task :app:kspAppDebugAndroidTestKotlin UP-TO-DATE
+> Task :app:compileAppDebugAndroidTestKotlin UP-TO-DATE
+> Task :app:javaPreCompileAppDebugAndroidTest UP-TO-DATE
+> Task :app:compileAppDebugAndroidTestJavaWithJavac UP-TO-DATE
+> Task :app:generateAppDebugAssets UP-TO-DATE
+> Task :app:mergeAppDebugAssets
+> Task :app:compressAppDebugAssets UP-TO-DATE
+> Task :app:generateAppDebugGlobalSynthetics UP-TO-DATE
+> Task :app:l8DexDesugarLibAppDebug UP-TO-DATE
+> Task :app:processAppDebugJavaRes UP-TO-DATE
+> Task :app:mergeAppDebugJavaResource UP-TO-DATE
+> Task :app:checkAppDebugDuplicateClasses UP-TO-DATE
+> Task :app:desugarAppDebugFileDependencies UP-TO-DATE
+> Task :app:mergeExtDexAppDebug UP-TO-DATE
+> Task :app:mergeLibDexAppDebug UP-TO-DATE
+> Task :app:dexBuilderAppDebug UP-TO-DATE
+> Task :app:mergeProjectDexAppDebug UP-TO-DATE
+> Task :app:preInrtDebugBuild UP-TO-DATE
+> Task :app:configureCMakeDebug[arm64-v8a]
+> Task :app:buildCMakeDebug[arm64-v8a]
+> Task :app:configureCMakeDebug[armeabi-v7a]
+> Task :app:buildCMakeDebug[armeabi-v7a]
+> Task :app:configureCMakeDebug[x86_64]
+> Task :app:buildCMakeDebug[x86_64]
+> Task :app:mergeAppDebugJniLibFolders UP-TO-DATE
+> Task :app:mergeAppDebugNativeLibs UP-TO-DATE
+> Task :app:stripAppDebugDebugSymbols UP-TO-DATE
+> Task :app:validateSigningAppDebug UP-TO-DATE
+> Task :app:writeAppDebugAppMetadata UP-TO-DATE
+> Task :app:writeAppDebugSigningConfigVersions UP-TO-DATE
+> Task :app:packageAppDebug UP-TO-DATE
+> Task :app:nativeNodeDependencyReportAppDebug
+Native Node dependency report written to D:\idea-projects\AutoJs6\app\build\reports\native-node\native-deps-appDebug.txt
+
+> Task :app:createAppDebugApkListingFileRedirect UP-TO-DATE
+> Task :app:generateAppDebugAndroidTestAssets UP-TO-DATE
+> Task :app:mergeAppDebugAndroidTestAssets
+> Task :app:compressAppDebugAndroidTestAssets UP-TO-DATE
+> Task :app:generateAppDebugAndroidTestGlobalSynthetics UP-TO-DATE
+> Task :app:processAppDebugAndroidTestJavaRes UP-TO-DATE
+> Task :app:mergeAppDebugAndroidTestJavaResource UP-TO-DATE
+> Task :app:checkAppDebugAndroidTestDuplicateClasses UP-TO-DATE
+> Task :app:desugarAppDebugAndroidTestFileDependencies UP-TO-DATE
+> Task :app:mergeExtDexAppDebugAndroidTest UP-TO-DATE
+> Task :app:mergeLibDexAppDebugAndroidTest UP-TO-DATE
+> Task :app:checkAppDebugAndroidTestAarMetadata UP-TO-DATE
+> Task :app:mapAppDebugAndroidTestSourceSetPaths UP-TO-DATE
+> Task :app:compileAppDebugAndroidTestNavigationResources UP-TO-DATE
+> Task :app:processAppDebugAndroidTestResources UP-TO-DATE
+> Task :app:dexBuilderAppDebugAndroidTest UP-TO-DATE
+> Task :app:mergeProjectDexAppDebugAndroidTest UP-TO-DATE
+> Task :app:mergeAppDebugAndroidTestJniLibFolders UP-TO-DATE
+> Task :app:mergeAppDebugAndroidTestNativeLibs NO-SOURCE
+> Task :app:stripAppDebugAndroidTestDebugSymbols NO-SOURCE
+> Task :app:validateSigningAppDebugAndroidTest UP-TO-DATE
+> Task :app:writeAppDebugAndroidTestSigningConfigVersions UP-TO-DATE
+> Task :app:packageAppDebugAndroidTest UP-TO-DATE
+> Task :app:createAppDebugAndroidTestApkListingFileRedirect UP-TO-DATE
+Starting 11 tests on OPD2413 - 15
+OPD2413 - 15 Tests 2/11 completed. (0 skipped) (0 failed)
+OPD2413 - 15 Tests 5/11 completed. (0 skipped) (0 failed)
+> Task :app:connectedAppDebugAndroidTest
+
+OPD2413 - 15 Tests 7/11 completed. (0 skipped) (0 failed)
+OPD2413 - 15 Tests 9/11 completed. (0 skipped) (0 failed)
+OPD2413 - 15 Tests 10/11 completed. (0 skipped) (0 failed)
+Finished 11 tests on OPD2413 - 15
+
+[Incubating] Problems report is available at: file:///D:/idea-projects/AutoJs6/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.5.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 3m 30s
+364 actionable tasks: 26 executed, 338 up-to-date
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.5.1/userguide/configuration_cache_enabling.html

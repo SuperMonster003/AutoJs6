@@ -13457,17 +13457,29 @@ $permissionsJson
                 null,
                 null,
             )
-            return
+        } else {
+            val downloads = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+            val targetDir = File(downloads, exportDir).apply {
+                check(mkdirs() || isDirectory) { "Failed to create smoke APK export dir: $absolutePath" }
+            }
+            outputApk.copyTo(File(targetDir, exportName), overwrite = true)
         }
-
-        val downloads = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-        val targetDir = File(downloads, exportDir).apply {
-            check(mkdirs() || isDirectory) { "Failed to create smoke APK export dir: $absolutePath" }
-        }
-        outputApk.copyTo(File(targetDir, exportName), overwrite = true)
+        cleanupLocalPackagedSmokeBuildRoot(outputApk)
     }
 
     private fun deletePublicPackagedSmokeApkExports(outputApk: File) {
         shell("rm -f $PACKAGED_SMOKE_PUBLIC_EXPORT_DIR/${outputApk.name}")
+    }
+
+    private fun cleanupLocalPackagedSmokeBuildRoot(outputApk: File) {
+        val root = outputApk.parentFile?.parentFile ?: return
+        val cacheRoot = context.cacheDir.canonicalFile
+        val canonicalRoot = root.canonicalFile
+        check(canonicalRoot.path.startsWith(cacheRoot.path)) {
+            "Refusing to delete packaged smoke build root outside instrumentation cache: ${canonicalRoot.absolutePath}"
+        }
+        canonicalRoot.deleteRecursively()
+        System.runFinalization()
+        Runtime.getRuntime().gc()
     }
 }

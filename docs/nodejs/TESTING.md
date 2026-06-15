@@ -458,6 +458,27 @@ Current Embedded Node memory leak stress gate:
 
 This extended gate repeatedly runs simple scripts, scoped fs callbacks, `fs.promises`, fake `toast`/`app` bridge calls, fake image-handle create/recycle cycles, timeout scripts, and uncaught exception scripts. It writes `autojs6-node-memory-leak-stress-v1` JSON reports and fails only on conservative monotonic runaway detection for RSS, Java heap, native heap, thread count, or fd count. Use `autojs.nodejs.leak.iterations`, `autojs.nodejs.leak.imageIterations`, and `autojs.nodejs.leak.faultIterations` for shorter local probes.
 
+OnePlus OPD2413 / Android 15 test preparation:
+
+```powershell
+adb -s 63751f63 shell cmd deviceidle whitelist +org.autojs.autojs6
+adb -s 63751f63 shell cmd deviceidle whitelist +org.autojs.autojs6.test
+adb -s 63751f63 shell am start -n org.autojs.autojs6/org.autojs.autojs.launcher.AdaptiveIconAlias
+```
+
+On this device, OPlus background-start policy can prevent `NativeNodeEmbeddedScriptService` from entering `script.enter` after instrumentation force-stops the target package. The failure shape is a script timeout with logcat entries such as `OplusAppStartupManager: prevent start` and `Bringing down service while still waiting for start foreground`. Treat that as device setup until the same focused test still fails after whitelisting and foreground-starting the app.
+
+Direct reduced stress probe used for OnePlus RC triage:
+
+```powershell
+adb -s 63751f63 shell am instrument -w -r `
+  -e class org.autojs.autojs.engine.NodeEmbeddedMemoryLeakStressInstrumentationTest `
+  -e autojs.nodejs.leak.iterations 5 `
+  -e autojs.nodejs.leak.imageIterations 3 `
+  -e autojs.nodejs.leak.faultIterations 2 `
+  org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner
+```
+
 ## Packaged APK Verification
 
 Current host-side packaged checks:
@@ -465,8 +486,6 @@ Current host-side packaged checks:
 ```powershell
 .\gradlew.bat --console=plain :app:embeddedNodePackagingPreflightAppDebug
 .\gradlew.bat --console=plain :app:embeddedNodePackagedAppIntegrationDryRunAppDebug
-.\gradlew.bat --console=plain :app:embeddedNodePackagedApkOutputVerify
-.\gradlew.bat --console=plain :app:embeddedNodePackagedDiagnosticReport
 .\gradlew.bat --console=plain :app:embeddedNodePackagedSmokeHostVerify
 ```
 
@@ -482,6 +501,9 @@ This writes `build/reports/nodejs/compatibility-profile.json` and `build/reports
 `embeddedNodePackagedApkOutputVerify` and `embeddedNodePackagedDiagnosticReport` inspect a concrete exported APK. Pass it with
 `-Pautojs.embeddedNode.packagedApk=<apk>` and optionally constrain ABI expectations with
 `-Pautojs.embeddedNode.expectedAbis=arm64-v8a,armeabi-v7a,x86_64`.
+`verifyEmbeddedNodePackagedDebug` runs these standalone verifier tasks only when an explicit packaged APK property is present.
+Without that property, the aggregate gate relies on `embeddedNodePackagedSmokeHostVerify`, which verifies the success and
+diagnostics APKs pulled from the device and writes separate verifier reports for both artifacts.
 
 If `autojs.embeddedNode.expectedAbis` is omitted, the verifier derives the ABI policy from `autojs.nodejs.releaseFlavor`:
 
@@ -661,5 +683,7 @@ Use these aggregate tasks for local gates:
 `verifyEmbeddedNodeDebug` covers build, native dependency reporting, native symbol archive reporting, and packaging preflight.
 It also runs `verifyNodeCompatibilityProfile` and `embeddedNodeDoctorReport`, which generate compatibility and attachable
 doctor reports.
-`verifyEmbeddedNodePackagedDebug` covers packaged host verification, including the diagnostic report and smoke host verifier.
+`verifyEmbeddedNodePackagedDebug` covers packaged host verification. With `-Pautojs.embeddedNode.packagedApk=<apk>` it also
+runs the standalone output verifier and gated diagnostic report for that APK; otherwise it uses the packaged smoke host
+aggregate reports produced from device-exported APKs.
 Focused instrumentation classes still use the explicit `connectedAppDebugAndroidTest` commands above when a device gate is required.

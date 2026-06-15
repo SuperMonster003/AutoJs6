@@ -1,0 +1,3 @@
+List of devices attached
+63751f63	device
+QV710AF65F	device

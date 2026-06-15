@@ -14,6 +14,8 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 
 ## Device Tests
 
+- [ ] approved device serial selected with `ANDROID_SERIAL` or the matching Gradle property
+- [ ] OnePlus OPD2413 gates use device-idle whitelist and foreground app start before focused embedded-service instrumentation
 - [ ] `EmbeddedScriptMvpInstrumentationTest`
 - [ ] `EmbeddedNodePackagedApkSmokeTest`
 - [ ] `NodeEmbeddedLifecycleStressInstrumentationTest`
@@ -71,9 +73,10 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 
 - [ ] `:app:embeddedNodePackagingPreflightAppDebug`
 - [ ] `:app:embeddedNodePackagedAppIntegrationDryRunAppDebug`
-- [ ] `:app:embeddedNodePackagedApkOutputVerify`
-- [ ] `:app:embeddedNodePackagedDiagnosticReport`
 - [ ] `:app:embeddedNodePackagedSmokeHostVerify`
+- [ ] `:app:embeddedNodePackagedApkOutputVerify` with `-Pautojs.embeddedNode.packagedApk=<apk>` when verifying a specific exported APK
+- [ ] `:app:embeddedNodePackagedDiagnosticReport` with `-Pautojs.embeddedNode.packagedApk=<apk>` when gating a specific exported APK
+- [ ] packaged smoke host aggregate includes success and diagnostics APK verifier reports
 - [ ] packaged `toast` bridge smoke passes and cannot be shadowed by `node_modules/toast`
 - [ ] packaged `app` bridge smoke passes, reports the packaged app id, and cannot be shadowed by `node_modules/app`
 - [ ] packaged `clipboard` bridge smoke passes and cannot be shadowed by `node_modules/clipboard`
@@ -205,6 +208,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] execution queue diagnostics report queue mode, queue status, wait time, and max queued executions
 - [ ] bridge live diagnostics are present for main-app bridge smoke
 - [ ] docs updated for any changed capability
+- [ ] `docs/nodejs/FLAKE_POLICY.md` reviewed; only infrastructure/adb setup failures may be retried, and security, leak, packaged script, and runtime assertions are not hidden behind retries
 
 ## Documentation
 
@@ -217,6 +221,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `docs/nodejs/EXAMPLES.md` when examples or example smoke coverage changes
 - [ ] `docs/nodejs/PERFORMANCE.md` when benchmark behavior or report schema changes
 - [ ] `docs/nodejs/NATIVE_CRASH_DIAGNOSTICS.md` when native crash capture, symbol archive, or symbolication behavior changes
+- [ ] `docs/nodejs/FLAKE_POLICY.md` when release-gate retry policy, flaky category definitions, or device-infrastructure handling changes
 - [ ] `docs/nodejs/design/WORK_MANAGER.md` when scheduled/background task behavior changes
 - [ ] `docs/nodejs/design/BROADCAST_TASKS.md` when boot, package-event, startup, or custom broadcast task behavior changes
 - [ ] `docs/nodejs/design/ESM.md` when ESM or dynamic import behavior changes

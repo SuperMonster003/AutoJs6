@@ -112,10 +112,11 @@ void putPayloadRaw(std::vector<std::string>& payload, const std::string& key, co
 }
 
 
-std::vector<std::string> toStringVector(JNIEnv* env, jobjectArray values) {
+std::vector<std::string> toStringVector(JNIEnv* env, jobjectArray values, const char* label) {
     std::vector<std::string> result;
+    const std::string fieldName = label == nullptr || std::strlen(label) == 0 ? "array" : label;
     if (values == nullptr) {
-        throwJava(env, "java/lang/NullPointerException", "argv == null");
+        throwJava(env, "java/lang/NullPointerException", fieldName + " == null");
         return result;
     }
 
@@ -124,7 +125,7 @@ std::vector<std::string> toStringVector(JNIEnv* env, jobjectArray values) {
     for (jsize i = 0; i < length; ++i) {
         auto value = static_cast<jstring>(env->GetObjectArrayElement(values, i));
         if (value == nullptr) {
-            throwJava(env, "java/lang/IllegalArgumentException", "argv contains null value");
+            throwJava(env, "java/lang/IllegalArgumentException", fieldName + " contains null value");
             return {};
         }
         result.emplace_back(toStdString(env, value));
@@ -134,6 +135,19 @@ std::vector<std::string> toStringVector(JNIEnv* env, jobjectArray values) {
         }
     }
     return result;
+}
+
+std::vector<std::string> toStringVectorOrEmpty(JNIEnv* env, jobjectArray values, const char* label) {
+    if (values == nullptr) {
+        __android_log_print(
+                ANDROID_LOG_WARN,
+                kLogTag,
+                "optional string array %s was null; treating it as empty",
+                label == nullptr || std::strlen(label) == 0 ? "array" : label
+        );
+        return {};
+    }
+    return toStringVector(env, values, label);
 }
 
 NodeStart resolveNodeStart(JNIEnv* env) {

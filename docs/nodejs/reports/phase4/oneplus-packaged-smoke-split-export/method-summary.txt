@@ -1,0 +1,8 @@
+method=buildFullCompatibilityEmbeddedNodePackagedApk exit=0 bad=False
+method=buildPackageScriptLaunchEmbeddedNodePackagedApk exit=0 bad=False
+method=buildPackageBinLaunchEmbeddedNodePackagedApk exit=0 bad=False
+method=buildPackageBinStringScriptLaunchEmbeddedNodePackagedApk exit=0 bad=False
+method=buildDiagnosticsEmbeddedNodePackagedApk exit=0 bad=False
+method=installAndRunEsmDiagnosticsEmbeddedNodePackagedApk exit=0 bad=True
+method=installAndRunDynamicImportDiagnosticsEmbeddedNodePackagedApk exit=0 bad=True
+method=installAndRunTimeoutDiagnosticsEmbeddedNodePackagedApk exit=0 bad=True

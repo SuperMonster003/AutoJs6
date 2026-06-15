@@ -536,7 +536,7 @@ object NativeNodeEmbeddedRuntimeBridge {
 
         val nativeCall = runCatching {
             val payload = if (request.runtimeModuleSources.isEmpty()) {
-                nativeRunEmbeddedScriptLifecycleWithModules(
+                nativeRunEmbeddedScriptLifecycleWithModulesV2(
                     request.source,
                     request.sourceName,
                     request.workingDirectory,
@@ -550,7 +550,7 @@ object NativeNodeEmbeddedRuntimeBridge {
                     request.javaInteropExperimentalEnabled,
                 )
             } else {
-                nativeRunEmbeddedScriptLifecycleWithRuntimeModules(
+                nativeRunEmbeddedScriptLifecycleWithRuntimeModulesV2(
                     request.source,
                     request.sourceName,
                     request.workingDirectory,
@@ -14720,7 +14720,7 @@ object NativeNodeEmbeddedRuntimeBridge {
     private external fun nativeEmbeddedProbeV8UvEmbeddedMvpTimeoutIsolationReadinessLifecycle(): Array<String>?
     private external fun nativeEmbeddedProbeV8UvEmbeddedMvpSecurityPolicyReadinessLifecycle(): Array<String>?
     private external fun nativeEmbeddedProbeV8UvEmbeddedMvpGoNoGoReadinessLifecycle(): Array<String>?
-    private external fun nativeRunEmbeddedScriptLifecycle(
+    private external fun nativeRunEmbeddedScriptLifecycleV2(
         source: String,
         sourceName: String,
         workingDirectory: String?,
@@ -14732,7 +14732,7 @@ object NativeNodeEmbeddedRuntimeBridge {
         javaInteropExperimentalEnabled: Boolean,
     ): Array<String>?
 
-    private external fun nativeRunEmbeddedScriptLifecycleWithModules(
+    private external fun nativeRunEmbeddedScriptLifecycleWithModulesV2(
         source: String,
         sourceName: String,
         workingDirectory: String?,
@@ -14746,7 +14746,7 @@ object NativeNodeEmbeddedRuntimeBridge {
         javaInteropExperimentalEnabled: Boolean,
     ): Array<String>?
 
-    private external fun nativeRunEmbeddedScriptLifecycleWithRuntimeModules(
+    private external fun nativeRunEmbeddedScriptLifecycleWithRuntimeModulesV2(
         source: String,
         sourceName: String,
         workingDirectory: String?,

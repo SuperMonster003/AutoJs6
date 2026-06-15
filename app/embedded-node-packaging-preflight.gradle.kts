@@ -3190,13 +3190,22 @@ val verifyEmbeddedNodePackagedDebug = tasks.register("verifyEmbeddedNodePackaged
     group = "verification"
     description = "Runs Embedded Node packaged debug host verification gates."
 
+    val explicitPackagedApkProperty = listOf("autojs.embeddedNode.packagedApk", "embeddedNodePackagedApk")
+        .firstNotNullOfOrNull { propertyName ->
+            providers.gradleProperty(propertyName).orNull?.trim()?.takeIf { it.isNotEmpty() }
+        }
+
     dependsOn(
         embeddedNodePackagingPreflightAppDebug,
         embeddedNodePackagedAppIntegrationDryRunAppDebug,
-        embeddedNodePackagedApkOutputVerify,
-        embeddedNodePackagedDiagnosticReport,
         embeddedNodePackagedSmokeHostVerify,
     )
+    if (explicitPackagedApkProperty != null) {
+        dependsOn(
+            embeddedNodePackagedApkOutputVerify,
+            embeddedNodePackagedDiagnosticReport,
+        )
+    }
 }
 
 tasks.register("verifyEmbeddedNodeReleaseCandidate") {
