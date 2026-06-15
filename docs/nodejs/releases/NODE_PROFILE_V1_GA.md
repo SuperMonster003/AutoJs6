@@ -117,6 +117,8 @@ Release flavors:
 
 `x86` remains unsupported and must fail fast.
 
+Release size review is tracked by `:app:nativeNodeAbiSizeReport`, which writes `app/build/reports/nodejs/abi-size-report.md` with APK artifact size, packaged template size, per-ABI native library payload, and `nodeFull` / `nodeMini` / `rhinoOnly` payload comparison.
+
 ## Experimental Features
 
 The following remain default-off:
@@ -189,6 +191,7 @@ Expected GA artifact set:
 - `build/reports/nodejs/release-manifest.md`
 - native dependency report
 - native symbol archive report
+- ABI size report: `app/build/reports/nodejs/abi-size-report.md`
 - Node Doctor text and JSON reports
 - packaged APK smoke host report
 - memory stress report

@@ -658,6 +658,14 @@ Rollback flavor verification:
 .\gradlew.bat --console=plain :app:verifyRhinoOnlyBuild "-Pautojs.nodejs.releaseFlavor=rhinoOnly"
 ```
 
+ABI size and distribution report:
+
+```powershell
+.\gradlew.bat --console=plain :app:nativeNodeAbiSizeReport
+```
+
+This writes `app/build/reports/nodejs/abi-size-report.md` with APK artifact sizes, packaged template size, per-ABI native payload, APK native entry compression, and `nodeFull` / `nodeMini` / `rhinoOnly` payload comparison.
+
 See `docs/nodejs/ROLLBACK_PLAYBOOK.md` for when to use this path and what release notes must record.
 
 ## Security Negative Tests

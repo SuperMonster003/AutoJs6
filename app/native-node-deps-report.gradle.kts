@@ -46,6 +46,25 @@ private data class NativeNodeLibcxxCandidate(
     val length: Long,
 )
 
+private data class NativeNodeAbiSizeApkEntry(
+    val apkName: String,
+    val abi: String,
+    val libraryName: String,
+    val entryName: String,
+    val size: Long,
+    val compressedSize: Long,
+)
+
+private data class NativeNodeAbiSizeFlavor(
+    val name: String,
+    val abis: List<String>,
+    val nativePayloadBytes: Long,
+    val missingLibraries: List<String>,
+) {
+    val ready: Boolean
+        get() = missingLibraries.isEmpty()
+}
+
 private data class NativeNodeSymbolSectionEvidence(
     val debugInfo: Boolean,
     val symtab: Boolean,
@@ -432,6 +451,79 @@ private fun scanNativeNodeReportAarLibcxxEntries(
         .toList()
 }
 
+private fun scanNativeNodeAbiSizeApkEntries(apkFiles: List<File>): List<NativeNodeAbiSizeApkEntry> {
+    val entryPattern = Regex("""^lib/([^/]+)/([^/]+\.so)$""")
+    return apkFiles.flatMap { apk ->
+        runCatching {
+            ZipFile(apk).use { zip ->
+                zip.entries().asSequence()
+                    .filterNot { it.isDirectory }
+                    .mapNotNull { entry ->
+                        val match = entryPattern.matchEntire(entry.name) ?: return@mapNotNull null
+                        val size = entry.size.takeIf { it >= 0L } ?: 0L
+                        val compressedSize = entry.compressedSize.takeIf { it >= 0L } ?: 0L
+                        NativeNodeAbiSizeApkEntry(
+                            apkName = apk.name,
+                            abi = match.groupValues[1],
+                            libraryName = match.groupValues[2],
+                            entryName = entry.name,
+                            size = size,
+                            compressedSize = compressedSize,
+                        )
+                    }
+                    .toList()
+            }
+        }.getOrDefault(emptyList())
+    }
+}
+
+private fun nativeNodeAbiSizeReleaseFlavor(rawFlavor: String): String =
+    when (rawFlavor.trim().lowercase()) {
+        "nodefull", "node-full", "full" -> "nodeFull"
+        "nodemini", "node-mini", "mini" -> "nodeMini"
+        "rhinoonly", "rhino-only", "rhino" -> "rhinoOnly"
+        else -> rawFlavor.trim().ifBlank { "nodeFull" }
+    }
+
+private fun nativeNodeAbiSizeCsvList(rawValue: String?): List<String> =
+    rawValue
+        ?.split(',')
+        ?.map { it.trim() }
+        ?.filter { it.isNotEmpty() }
+        .orEmpty()
+
+private fun nativeNodeAbiSizeFlavorAbis(flavor: String, requestedAbis: List<String>): List<String> =
+    when (flavor) {
+        "nodeFull" -> nativeNodeReportRequiredLibcxxAbis
+        "nodeMini" -> requestedAbis.ifEmpty { listOf("arm64-v8a") }
+        "rhinoOnly" -> emptyList()
+        else -> nativeNodeReportRequiredLibcxxAbis
+    }
+
+private fun Long.formatNativeNodeAbiSizeBytes(): String {
+    val mib = this.toDouble() / (1024.0 * 1024.0)
+    return "%,d bytes (%.2f MiB)".format(this, mib)
+}
+
+private fun Long?.formatNativeNodeAbiSizeBytesOrMissing(): String =
+    this?.formatNativeNodeAbiSizeBytes() ?: "missing"
+
+private fun nativeNodeAbiSizeEntryLabel(entry: NativeNodeAbiSizeApkEntry?): String =
+    if (entry == null) {
+        "missing"
+    } else {
+        "${entry.size.formatNativeNodeAbiSizeBytes()} / compressed ${entry.compressedSize.formatNativeNodeAbiSizeBytes()} (${entry.apkName})"
+    }
+
+private fun StringBuilder.appendNativeNodeAbiSizeFlavorLine(flavor: NativeNodeAbiSizeFlavor) {
+    appendLine(
+        "| `${flavor.name}` | ${if (flavor.abis.isEmpty()) "none" else flavor.abis.joinToString()} | " +
+                "${flavor.nativePayloadBytes.formatNativeNodeAbiSizeBytes()} | " +
+                "${if (flavor.ready) "yes" else "no"} | " +
+                "${if (flavor.missingLibraries.isEmpty()) "none" else flavor.missingLibraries.joinToString()} |"
+    )
+}
+
 val nativeNodeDependencyReportAppDebug = tasks.register("nativeNodeDependencyReportAppDebug") {
     group = "verification"
     description = "Writes the appDebug native dependency report for Node.js/libc++ diagnostics."
@@ -791,6 +883,196 @@ val nativeNodeSymbolArchiveReport = tasks.register("nativeNodeSymbolArchiveRepor
     }
 }
 
+val nativeNodeAbiSizeReport = tasks.register("nativeNodeAbiSizeReport") {
+    group = "verification"
+    description = "Writes the Node Profile v1 ABI size and release flavor distribution report."
+
+    dependsOn("package${nativeNodeReportVariantTaskSuffix}")
+    outputs.file(layout.buildDirectory.file("reports/nodejs/abi-size-report.md"))
+    outputs.upToDateWhen { false }
+
+    doLast {
+        val reportFile = layout.buildDirectory.file("reports/nodejs/abi-size-report.md").get().asFile
+        reportFile.parentFile.mkdirs()
+
+        val sourceJniLibsRoot = projectDir.resolve("src/main/jniLibs")
+        val cxxNativeLibsRoot = layout.buildDirectory.dir("intermediates/cxx").get().asFile
+        val mergedNativeLibsRoot = layout.buildDirectory
+            .dir("intermediates/merged_native_libs/$nativeNodeReportVariant/merge${nativeNodeReportVariantTaskSuffix}NativeLibs/out/lib")
+            .get()
+            .asFile
+        val strippedNativeLibsRoot = layout.buildDirectory
+            .dir("intermediates/stripped_native_libs/$nativeNodeReportVariant/strip${nativeNodeReportVariantTaskSuffix}DebugSymbols/out/lib")
+            .get()
+            .asFile
+        val apkDir = layout.buildDirectory.dir("outputs/apk/app/debug").get().asFile
+        val apkFiles = apkDir.listFiles { file -> file.isFile && file.extension.equals("apk", ignoreCase = true) }
+            ?.sortedBy(File::getName)
+            .orEmpty()
+        val universalApk = apkFiles.firstOrNull { it.name.contains("universal", ignoreCase = true) }
+            ?: apkFiles.maxByOrNull(File::length)
+        val templateApk = projectDir.resolve("src/main/assets-app/template.apk")
+        val apkEntries = scanNativeNodeAbiSizeApkEntries(apkFiles)
+        val reportLibraries = listOf(
+            nativeNodeReportNodeLibraryName,
+            nativeNodeReportBridgeLibraryName,
+            "libc++_shared.so",
+        )
+        fun libraryFile(abi: String, libraryName: String): File? =
+            listOfNotNull(
+                strippedNativeLibsRoot.resolve("$abi/$libraryName").takeIf(File::isFile),
+                mergedNativeLibsRoot.resolve("$abi/$libraryName").takeIf(File::isFile),
+                if (libraryName == nativeNodeReportBridgeLibraryName) {
+                    latestNativeNodeReportLibraryFile(cxxNativeLibsRoot, abi, libraryName)
+                } else {
+                    null
+                },
+                sourceJniLibsRoot.resolve("$abi/$libraryName").takeIf(File::isFile),
+            ).firstOrNull()
+
+        fun preferredApkEntry(abi: String, libraryName: String): NativeNodeAbiSizeApkEntry? =
+            apkEntries.firstOrNull {
+                it.abi == abi && it.libraryName == libraryName && it.apkName.contains("universal", ignoreCase = true)
+            } ?: apkEntries.firstOrNull { it.abi == abi && it.libraryName == libraryName }
+
+        fun flavor(name: String, abis: List<String>): NativeNodeAbiSizeFlavor {
+            val missing = mutableListOf<String>()
+            val payloadBytes = abis.sumOf { abi ->
+                reportLibraries.sumOf { libraryName ->
+                    val file = libraryFile(abi, libraryName)
+                    if (file == null) {
+                        missing += "$abi/$libraryName"
+                        0L
+                    } else {
+                        file.length()
+                    }
+                }
+            }
+            return NativeNodeAbiSizeFlavor(
+                name = name,
+                abis = abis,
+                nativePayloadBytes = payloadBytes,
+                missingLibraries = missing,
+            )
+        }
+
+        val selectedReleaseFlavor = nativeNodeAbiSizeReleaseFlavor(
+            providers.gradleProperty("autojs.nodejs.releaseFlavor").orElse("nodeFull").get()
+        )
+        val requestedReleaseAbis = nativeNodeAbiSizeCsvList(providers.gradleProperty("autojs.nodejs.releaseAbis").orNull)
+        val selectedReleaseAbis = nativeNodeAbiSizeFlavorAbis(selectedReleaseFlavor, requestedReleaseAbis)
+        val flavorComparisons = listOf(
+            flavor("nodeFull", nativeNodeReportRequiredLibcxxAbis),
+            flavor("nodeMini", nativeNodeAbiSizeFlavorAbis("nodeMini", requestedReleaseAbis)),
+            NativeNodeAbiSizeFlavor("rhinoOnly", emptyList(), 0L, emptyList()),
+        )
+        val selectedFlavorReady = flavor(selectedReleaseFlavor, selectedReleaseAbis).ready
+        val ready = apkFiles.isNotEmpty() && templateApk.isFile && selectedFlavorReady
+
+        val report = buildString {
+            appendLine("# Node Profile v1 ABI Size Report")
+            appendLine()
+            appendLine("Generated at: ${java.time.ZonedDateTime.now()}")
+            appendLine()
+
+            appendLine("## Inputs")
+            appendLine()
+            appendLine("- variant: `$nativeNodeReportVariant`")
+            appendLine("- selected release flavor: `$selectedReleaseFlavor`")
+            appendLine("- selected release ABIs: `${if (selectedReleaseAbis.isEmpty()) "none" else selectedReleaseAbis.joinToString()}`")
+            appendLine("- requested `autojs.nodejs.releaseAbis`: `${if (requestedReleaseAbis.isEmpty()) "not set" else requestedReleaseAbis.joinToString()}`")
+            appendLine("- source native libs: `${sourceJniLibsRoot.absolutePath}`")
+            appendLine("- stripped native libs: `${strippedNativeLibsRoot.absolutePath}`")
+            appendLine("- APK output dir: `${apkDir.absolutePath}`")
+            appendLine()
+
+            appendLine("## APK Artifacts")
+            appendLine()
+            appendLine("| APK | Size |")
+            appendLine("| --- | ---: |")
+            if (apkFiles.isEmpty()) {
+                appendLine("| missing | missing |")
+            } else {
+                apkFiles.forEach { apk ->
+                    appendLine("| `${apk.name}` | ${apk.length().formatNativeNodeAbiSizeBytes()} |")
+                }
+            }
+            appendLine()
+            appendLine("- APK total used for summary: `${universalApk?.name ?: "missing"}` (${universalApk?.length().formatNativeNodeAbiSizeBytesOrMissing()})")
+            appendLine("- packaged template: `${templateApk.absolutePath}` (${templateApk.takeIf(File::isFile)?.length().formatNativeNodeAbiSizeBytesOrMissing()})")
+            appendLine()
+
+            appendLine("## Per-ABI Native Payload")
+            appendLine()
+            appendLine("| ABI | libnode.so | libautojs6-node.so | libc++_shared.so | Total |")
+            appendLine("| --- | ---: | ---: | ---: | ---: |")
+            nativeNodeReportRequiredLibcxxAbis.forEach { abi ->
+                val sizes = reportLibraries.associateWith { libraryFile(abi, it)?.length() }
+                val total = sizes.values.filterNotNull().sum()
+                appendLine(
+                    "| `$abi` | " +
+                            "${sizes[nativeNodeReportNodeLibraryName].formatNativeNodeAbiSizeBytesOrMissing()} | " +
+                            "${sizes[nativeNodeReportBridgeLibraryName].formatNativeNodeAbiSizeBytesOrMissing()} | " +
+                            "${sizes["libc++_shared.so"].formatNativeNodeAbiSizeBytesOrMissing()} | " +
+                            "${total.formatNativeNodeAbiSizeBytes()} |"
+                )
+            }
+            appendLine()
+
+            appendLine("## APK Native Entries")
+            appendLine()
+            appendLine("| ABI | Library | APK entry size |")
+            appendLine("| --- | --- | ---: |")
+            nativeNodeReportRequiredLibcxxAbis.forEach { abi ->
+                reportLibraries.forEach { libraryName ->
+                    appendLine("| `$abi` | `$libraryName` | ${nativeNodeAbiSizeEntryLabel(preferredApkEntry(abi, libraryName))} |")
+                }
+            }
+            appendLine()
+
+            appendLine("## Release Flavor Comparison")
+            appendLine()
+            appendLine("| Flavor | ABIs | Estimated Embedded Node native payload | Ready | Missing |")
+            appendLine("| --- | --- | ---: | --- | --- |")
+            flavorComparisons.forEach { appendNativeNodeAbiSizeFlavorLine(it) }
+            appendLine()
+            appendLine("Notes:")
+            appendLine("- `nodeFull` is the complete Node Profile v1 release shape.")
+            appendLine("- `nodeMini` uses `autojs.nodejs.releaseAbis`, defaulting to `arm64-v8a`, and is the practical smaller side-load profile.")
+            appendLine("- `rhinoOnly` removes Embedded Node native runtime libraries; it is a compatibility fallback, not a Node Profile v1 artifact.")
+            appendLine("- The flavor payload estimate is based on final stripped/native packaging inputs, not Play Store compression or transport compression.")
+            appendLine()
+
+            appendLine("## Summary")
+            appendLine()
+            appendLine("```properties")
+            appendLine("embedded.node.abi_size.report=${reportFile.absolutePath}")
+            appendLine("embedded.node.abi_size.ready=$ready")
+            appendLine("embedded.node.abi_size.selected_flavor=$selectedReleaseFlavor")
+            appendLine("embedded.node.abi_size.selected_abis=${if (selectedReleaseAbis.isEmpty()) "none" else selectedReleaseAbis.joinToString()}")
+            appendLine("embedded.node.abi_size.apk_total_bytes=${universalApk?.length() ?: "missing"}")
+            appendLine("embedded.node.abi_size.packaged_template_bytes=${templateApk.takeIf(File::isFile)?.length() ?: "missing"}")
+            flavorComparisons.forEach { comparison ->
+                appendLine("embedded.node.abi_size.${comparison.name}.native_payload_bytes=${comparison.nativePayloadBytes}")
+                appendLine("embedded.node.abi_size.${comparison.name}.ready=${comparison.ready}")
+                appendLine(
+                    "embedded.node.abi_size.${comparison.name}.missing=" +
+                            if (comparison.missingLibraries.isEmpty()) "none" else comparison.missingLibraries.joinToString()
+                )
+            }
+            appendLine("```")
+        }
+
+        reportFile.writeText(report)
+        logger.lifecycle("Node Profile v1 ABI size report written to ${reportFile.absolutePath}")
+        logger.lifecycle("Node Profile v1 ABI size report ready: $ready")
+    }
+}
+
 tasks.matching { it.name == "package${nativeNodeReportVariantTaskSuffix}" }.configureEach {
     finalizedBy(nativeNodeDependencyReportAppDebug)
+}
+
+tasks.matching { it.name == "verifyEmbeddedNodeDebug" }.configureEach {
+    dependsOn(nativeNodeAbiSizeReport)
 }

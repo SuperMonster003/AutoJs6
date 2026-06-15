@@ -107,6 +107,14 @@ Main APK validation:
 .\gradlew.bat --console=plain :app:embeddedNodePackagingPreflightAppDebug
 ```
 
+ABI size report:
+
+```powershell
+.\gradlew.bat --console=plain :app:nativeNodeAbiSizeReport
+```
+
+The report is written to `app/build/reports/nodejs/abi-size-report.md`. It records APK artifact sizes, the packaged template size, per-ABI `libnode.so` / `libautojs6-node.so` / `libc++_shared.so` payloads, and an estimated native payload comparison for `nodeFull`, `nodeMini`, and `rhinoOnly`.
+
 Packaged APK validation:
 
 ```powershell
@@ -125,10 +133,10 @@ Smoke APK checks can still pass an explicit `autojs.embeddedNode.expectedAbis` v
 
 ## APK Size Tradeoff
 
-`libnode.so` dominates APK size. The recommended release shape is:
+`libnode.so` dominates APK size. Use `nativeNodeAbiSizeReport` before release so the APK total, packaged template size, and per-ABI native payload are visible in one place. The recommended release shape is:
 
 - publish `nodeFull` as per-ABI APKs or split APKs when possible
 - use `nodeMini` for arm64-only side-load channels
 - keep `rhinoOnly` as a small fallback profile
 
-Avoid making universal multi-ABI Embedded Node APKs the default distribution unless the larger download size is acceptable for that channel.
+User-facing download notes should call out that `nodeFull` carries the full Embedded Node runtime for all supported ABIs, `nodeMini` narrows the ABI set for smaller side-load builds, and `rhinoOnly` is a no-Node compatibility fallback. Avoid making universal multi-ABI Embedded Node APKs the default distribution unless the larger download size is acceptable for that channel.
