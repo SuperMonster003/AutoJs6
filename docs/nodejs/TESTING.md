@@ -356,7 +356,16 @@ Current `accessibility` selector bridge focused instrumentation:
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeAccessibilitySelectorBridgeInstrumentationTest"
 ```
 
-This suite verifies selector v1 builder shape, bridge registry entries for `findOne`/`findAll`, fake provider request/response behavior, `require("accessibility")`, shadowing protection, frozen selector descriptors, frozen node snapshots, invalid descriptor pre-dispatch rejection, timeout and permission propagation, and stable Android provider rejection until a safe accessibility provider is connected.
+This suite verifies selector v1 builder shape, bridge registry entries for `findOne`/`findAll`, fake provider request/response behavior, `require("accessibility")`, shadowing protection, frozen selector descriptors, frozen node snapshots, invalid descriptor pre-dispatch rejection, timeout and permission propagation, and stable Android provider rejection when an accessibility provider is unavailable in the current process.
+
+Optional real-device `accessibility` smoke:
+
+```powershell
+$env:ANDROID_SERIAL="QV710AF65F"
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pautojs.nodejs.test.deviceProfile=accessibility"
+```
+
+Enable the current branch's AutoJs6 accessibility service manually before running it. The profile is not part of normal PR, Sony, full, nightly, or release gates; it launches a controlled test UI and validates `isEnabled`, `ensureEnabled`, `findByText`, and `clickText` through the Android provider path. Add `-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.accessibilitySmoke.globalActions=true` only when it is safe for the test to trigger Back/Home.
 
 Current `image` bridge expansion focused instrumentation:
 

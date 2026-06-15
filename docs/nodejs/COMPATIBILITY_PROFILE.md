@@ -742,8 +742,8 @@ Overrides outside the documented safe range are ignored and reported in `profile
   - selector descriptors are frozen plain JSON values such as `{ type: "autojs6.accessibility.selector", version: 1, text: "OK" }`
   - returned `UiNode` values are frozen JSON snapshots only; no live `AccessibilityNodeInfo`, `UiObject`, or selector object crosses into Node
   - current JavaScript API, fake-provider tests, and bridge protocol are stable
-  - current Android provider returns `false` for `isEnabled` and `ensureEnabled`
-  - current Android provider rejects action and query methods with `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED` until a safe accessibility capability provider is connected
+  - when an operational AutoJs6 accessibility service is visible in the current process, the Android provider can validate `isEnabled`, `ensureEnabled`, `findByText`, `clickText`, selector `findOne`/`findAll`, selector `click`, and Back/Home/Recents global actions through controlled JSON snapshots and booleans
+  - when an accessibility provider is unavailable in the current process, including isolated embedded service processes that cannot see the main-process service instance, `isEnabled`/`ensureEnabled` return `false` and action/query methods reject with `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED`
 - `media_projection`
   - `requestScreenCapture(options?): Promise<ScreenCapturer>`
   - `ScreenCapturer.nextImage(options?): Promise<Image | null>`

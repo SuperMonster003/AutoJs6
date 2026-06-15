@@ -1,11 +1,13 @@
 package org.autojs.autojs.engine
 
+import org.autojs.autojs.core.accessibility.AccessibilityService as AutoJsAccessibilityService
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Test
 import java.io.File
@@ -267,6 +269,10 @@ class NodeAccessibilitySelectorBridgeInstrumentationTest {
     @Test
     fun androidAccessibilitySelectorV1RejectsUntilProviderIsConnected() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node accessibility selector Android rejection regression")
+        assumeTrue(
+            "This rejection-path regression applies when the accessibility provider is not connected in the current process.",
+            !AutoJsAccessibilityService.hasInstance() || !AutoJsAccessibilityService.hasOperationalState,
+        )
 
         val result = NodeEmbeddedTestHarness.runEmbeddedScript(
             """

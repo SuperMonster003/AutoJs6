@@ -1,5 +1,6 @@
 package org.autojs.autojs.engine
 
+import android.accessibilityservice.AccessibilityService as AndroidAccessibilityService
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -17,6 +18,7 @@ import android.os.VibratorManager
 import android.provider.Settings
 import android.util.Base64
 import android.util.Log
+import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.Toast
 import okhttp3.Call
 import okhttp3.Callback
@@ -25,6 +27,7 @@ import okhttp3.OkHttpClient
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
+import org.autojs.autojs.core.accessibility.AccessibilityService as AutoJsAccessibilityService
 import org.autojs.autojs6.BuildConfig
 import org.json.JSONArray
 import org.json.JSONObject
@@ -713,17 +716,196 @@ class AndroidNodeBridgeCapabilityProvider(
             return
         }
         val response = when (request.method) {
-            "isEnabled", "ensureEnabled" -> NodeBridgeResponse.success(request.id, "false")
-            else -> NodeBridgeResponse.failure(
+            "isEnabled", "ensureEnabled" -> NodeBridgeResponse.success(request.id, accessibilityBridgeOperational().toString())
+            else -> dispatchAccessibilityOperation(request)
+        }
+        callback(response)
+    }
+
+    private fun accessibilityBridgeOperational(): Boolean {
+        return AutoJsAccessibilityService.hasInstance() &&
+                AutoJsAccessibilityService.hasOperationalState &&
+                AutoJsAccessibilityService.instance != null
+    }
+
+    private fun dispatchAccessibilityOperation(request: NodeBridgeRequest): NodeBridgeResponse {
+        val service = AutoJsAccessibilityService.instance
+        if (service == null || !AutoJsAccessibilityService.hasOperationalState) {
+            return NodeBridgeResponse.failure(
                 request.id,
                 NodeBridgeError.capabilityProviderMissing(
                     module = request.module,
                     method = request.method,
-                    requirement = "an enabled accessibility capability provider",
+                    requirement = "an enabled accessibility capability provider in the current process",
                 ),
             )
         }
-        callback(response)
+        return when (request.method) {
+            "back" -> NodeBridgeResponse.success(
+                request.id,
+                service.performGlobalAction(AndroidAccessibilityService.GLOBAL_ACTION_BACK).toString(),
+            )
+            "home" -> NodeBridgeResponse.success(
+                request.id,
+                service.performGlobalAction(AndroidAccessibilityService.GLOBAL_ACTION_HOME).toString(),
+            )
+            "recentApps" -> NodeBridgeResponse.success(
+                request.id,
+                service.performGlobalAction(AndroidAccessibilityService.GLOBAL_ACTION_RECENTS).toString(),
+            )
+            "findByText" -> dispatchAccessibilityFindByText(request, service)
+            "clickText" -> dispatchAccessibilityClickText(request, service)
+            "findOne" -> dispatchAccessibilityFindOne(request, service)
+            "findAll" -> dispatchAccessibilityFindAll(request, service)
+            "click" -> dispatchAccessibilityClick(request, service)
+            else -> unavailable(request)
+        }
+    }
+
+    private fun dispatchAccessibilityFindByText(
+        request: NodeBridgeRequest,
+        service: AutoJsAccessibilityService,
+    ): NodeBridgeResponse {
+        val text = request.args().optString(0)
+        val node = service.accessibilityRoot()?.findAccessibilityNodeInfosByText(text).orEmpty().firstOrNull()
+        return NodeBridgeResponse.success(request.id, node?.toAccessibilityJson()?.toString() ?: "null")
+    }
+
+    private fun dispatchAccessibilityClickText(
+        request: NodeBridgeRequest,
+        service: AutoJsAccessibilityService,
+    ): NodeBridgeResponse {
+        val text = request.args().optString(0)
+        val node = service.accessibilityRoot()?.findAccessibilityNodeInfosByText(text).orEmpty().firstOrNull()
+        return NodeBridgeResponse.success(request.id, node?.clickAccessibilityNode().toString())
+    }
+
+    private fun dispatchAccessibilityFindOne(
+        request: NodeBridgeRequest,
+        service: AutoJsAccessibilityService,
+    ): NodeBridgeResponse {
+        val selector = request.args().optJSONObject(0) ?: return NodeBridgeResponse.success(request.id, "null")
+        val node = service.findAccessibilityNodes(selector).firstOrNull()
+        return NodeBridgeResponse.success(request.id, node?.toAccessibilityJson()?.toString() ?: "null")
+    }
+
+    private fun dispatchAccessibilityFindAll(
+        request: NodeBridgeRequest,
+        service: AutoJsAccessibilityService,
+    ): NodeBridgeResponse {
+        val selector = request.args().optJSONObject(0) ?: JSONObject()
+        val nodes = JSONArray()
+        service.findAccessibilityNodes(selector).forEach { node ->
+            nodes.put(node.toAccessibilityJson())
+        }
+        return NodeBridgeResponse.success(request.id, nodes.toString())
+    }
+
+    private fun dispatchAccessibilityClick(
+        request: NodeBridgeRequest,
+        service: AutoJsAccessibilityService,
+    ): NodeBridgeResponse {
+        val args = request.args()
+        val selector = args.optJSONObject(0) ?: return NodeBridgeResponse.failure(
+            request.id,
+            NodeBridgeError.permissionDenied(
+                message = "AutoJs6 accessibility bridge supports real-device click only through selector descriptors.",
+                module = request.module,
+                method = request.method,
+            ),
+        )
+        val node = service.findAccessibilityNodes(selector).firstOrNull()
+        return NodeBridgeResponse.success(request.id, node?.clickAccessibilityNode().toString())
+    }
+
+    private fun NodeBridgeRequest.args(): JSONArray {
+        return runCatching { JSONArray(argsJson) }.getOrDefault(JSONArray())
+    }
+
+    private fun AutoJsAccessibilityService.accessibilityRoot(): AccessibilityNodeInfo? {
+        return runCatching { rootInActiveWindow ?: fastRootInActiveWindow }.getOrNull()
+    }
+
+    private fun AutoJsAccessibilityService.findAccessibilityNodes(selector: JSONObject): List<AccessibilityNodeInfo> {
+        val root = accessibilityRoot() ?: return emptyList()
+        val text = selector.optString("text").takeIf { it.isNotBlank() }
+        if (text != null) {
+            return root.findAccessibilityNodeInfosByText(text).orEmpty()
+        }
+        val textContains = selector.optString("textContains").takeIf { it.isNotBlank() }
+        if (textContains != null) {
+            return root.findAccessibilityNodeInfosByText(textContains).orEmpty()
+        }
+        val nodes = mutableListOf<AccessibilityNodeInfo>()
+        collectAccessibilityNodes(root, selector, nodes)
+        return nodes
+    }
+
+    private fun collectAccessibilityNodes(
+        node: AccessibilityNodeInfo?,
+        selector: JSONObject,
+        output: MutableList<AccessibilityNodeInfo>,
+    ) {
+        if (node == null) {
+            return
+        }
+        if (node.matchesAccessibilitySelector(selector)) {
+            output += node
+        }
+        repeat(node.childCount) { index ->
+            collectAccessibilityNodes(runCatching { node.getChild(index) }.getOrNull(), selector, output)
+        }
+    }
+
+    private fun AccessibilityNodeInfo.matchesAccessibilitySelector(selector: JSONObject): Boolean {
+        val desc = selector.optString("desc").takeIf { it.isNotBlank() }
+        if (desc != null && contentDescription?.toString() != desc) {
+            return false
+        }
+        val descContains = selector.optString("descContains").takeIf { it.isNotBlank() }
+        if (descContains != null && contentDescription?.toString()?.contains(descContains) != true) {
+            return false
+        }
+        val id = selector.optString("id").takeIf { it.isNotBlank() }
+        if (id != null && viewIdResourceName != id) {
+            return false
+        }
+        val className = selector.optString("className").takeIf { it.isNotBlank() }
+        if (className != null && this.className?.toString() != className) {
+            return false
+        }
+        return desc != null || descContains != null || id != null || className != null
+    }
+
+    private fun AccessibilityNodeInfo.toAccessibilityJson(): JSONObject {
+        val bounds = Rect()
+        getBoundsInScreen(bounds)
+        return JSONObject()
+            .put("text", text?.toString().orEmpty())
+            .put("desc", contentDescription?.toString().orEmpty())
+            .put("id", viewIdResourceName.orEmpty())
+            .put("className", className?.toString().orEmpty())
+            .put(
+                "bounds",
+                JSONObject()
+                    .put("left", bounds.left)
+                    .put("top", bounds.top)
+                    .put("right", bounds.right)
+                    .put("bottom", bounds.bottom),
+            )
+            .put("clickable", isClickable)
+            .put("enabled", isEnabled)
+    }
+
+    private fun AccessibilityNodeInfo.clickAccessibilityNode(): Boolean {
+        var current: AccessibilityNodeInfo? = this
+        while (current != null) {
+            if (current.isEnabled && current.isClickable && current.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                return true
+            }
+            current = runCatching { current.parent }.getOrNull()
+        }
+        return runCatching { performAction(AccessibilityNodeInfo.ACTION_CLICK) }.getOrDefault(false)
     }
 
     private fun dispatchMediaProjection(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {

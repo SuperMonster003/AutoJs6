@@ -16,6 +16,7 @@ Supported values:
 - `sony`: primary full-gate physical device profile
 - `emulator`: x86_64 emulator profile for resolver, corpus, and policy subsets
 - `smoke`: short physical-device smoke profile
+- `accessibility`: optional real-device accessibility smoke, requiring the AutoJs6 accessibility service to be enabled manually
 - `full`: expanded stress profile for nightly or release investigation
 
 If `android.testInstrumentationRunnerArguments.class` is passed explicitly, it wins and the device profile does not override it. This keeps focused single-class and single-method commands deterministic.
@@ -80,6 +81,22 @@ Recommended command:
 
 ```powershell
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pautojs.nodejs.test.deviceProfile=smoke"
+```
+
+## Accessibility Smoke Profile
+
+Use `accessibility` only for manual physical-device validation after enabling the current branch's AutoJs6 accessibility service in Android settings. It is intentionally excluded from `sony`, `smoke`, `full`, PR, nightly, and release gates.
+
+- profile: `accessibility`
+- primary device: Sony XQ-AT72 `QV710AF65F`
+- use: controlled real-device `accessibility` provider smoke for `isEnabled`, `ensureEnabled`, `findByText`, and `clickText`
+- optional extra: pass `-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.accessibilitySmoke.globalActions=true` only when it is safe for the test to trigger Back/Home
+
+Recommended command:
+
+```powershell
+$env:ANDROID_SERIAL="QV710AF65F"
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pautojs.nodejs.test.deviceProfile=accessibility"
 ```
 
 ## Full Stress Profile
