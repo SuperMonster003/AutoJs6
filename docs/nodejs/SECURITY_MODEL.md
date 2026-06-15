@@ -90,6 +90,8 @@ If a limited module exists for npm feature detection, operations that would cros
 
 `module` and `node:module` are limited compatibility builtins, not loader authority. The safe subset exposes `createRequire`, `isBuiltin`, `builtinModules`, and a no-op `syncBuiltinESMExports` only. `createRequire` must stay scoped to a file inside the current working directory and must keep using the AutoJs6 resolver and builtin policy. Loader internals such as `Module`, `_load`, `_resolveFilename`, `_compile`, `wrap`, `globalPaths`, `register`, and `registerHooks` remain absent.
 
+Runtime package installation is not a Safe Node Profile capability. Projects may vendor pure JavaScript CommonJS dependencies, and future tooling may sanitize them at build time, but AutoJs6 must not run package lifecycle scripts, native addon builds, arbitrary `.bin` commands, or registry downloads inside the Android runtime. See `docs/nodejs/design/PACKAGE_MANAGER.md`.
+
 `vm` remains disabled because a second JavaScript context is not a security boundary in this embedder. A limited `vm.Script` subset is deferred until timeout, global leakage, bridge leakage, and process object exposure can be proven safe.
 
 ## ESM Policy

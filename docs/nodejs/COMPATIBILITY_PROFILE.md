@@ -279,7 +279,7 @@ These surfaces must stay disabled unless a future task explicitly opens them beh
 - unrestricted Java/Android interop
 - Rhino compatibility shim and old global AutoJs API installation
 - inspector/debugger server
-- npm install and postinstall execution
+- npm install and postinstall execution; dependency handling is vendored/build-time only, see `docs/nodejs/design/PACKAGE_MANAGER.md`
 
 Registry-disabled builtin module names:
 
