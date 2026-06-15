@@ -51,7 +51,7 @@ The release/debug gate also runs:
 | `zlib_streams` | none | true | false | false | false | medium | partial |
 | `vm` | none | false | false | false | false | high | disabled |
 | `inspector` | none | false | false | false | false | high | disabled |
-| `java_interop` | none | false | false | false | false | critical | unsupported |
+| `java_interop` | `autojs.nodejs.javaInterop.experimental` | false | true | false | false | critical | experimental |
 | `native_addon` | none | false | false | false | false | critical | unsupported |
 | `child_process` | none | false | false | false | false | high | disabled |
 
@@ -220,6 +220,28 @@ Design notes for the broadest limited builtins:
 - WebSocket: `docs/nodejs/design/WEBSOCKET.md`
 - worker threads: `docs/nodejs/design/WORKER_THREADS.md`
 - Java interop: `docs/nodejs/design/JAVA_INTEROP.md`
+
+## Java Interop Experimental Allowlist
+
+Direct Java and Android interop is disabled by default. Normal builds keep:
+
+```properties
+autojs.nodejs.javaInterop.experimental=false
+```
+
+When explicitly enabled for an experimental build or focused test run, `require("java")` exposes only an allowlist bridge:
+
+- `java.type(className)`
+- `java.callStatic(className, method, args)`
+- `java.new(className, args)`
+
+The MVP allowlist includes:
+
+- `java.lang.Math` selected static numeric helpers
+- `java.util.UUID` selected static UUID helpers
+- `android.graphics.Rect` construction as an opaque provider-owned handle
+
+Runtime, ProcessBuilder, System, ClassLoader, reflection, raw Android `Context`, filesystem, network, native library loading, and raw object graph traversal remain denied. `require("java")` and `require.resolve("java")` are intercepted before `node_modules` lookup, so a local `node_modules/java` package cannot shadow the disabled policy or the experimental bridge module.
 
 ## Disabled by Policy
 

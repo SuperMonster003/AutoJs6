@@ -195,9 +195,9 @@ Future support, if any, should be developer-mode only and separately gated.
 
 ## Java Interop Policy
 
-Direct Java and Android interop is unsupported in the default Safe Node Profile. Node scripts must use AutoJs bridge modules instead of raw `java.*`, `android.*`, Rhino `importClass`, `Packages`, `$autojs.java`, reflection, class loaders, or Android object references.
+Direct Java and Android interop is disabled in the default Safe Node Profile. Node scripts must use AutoJs bridge modules instead of raw `java.*`, `android.*`, Rhino `importClass`, `Packages`, `$autojs.java`, reflection, class loaders, or Android object references.
 
-The `java_interop` feature flag is critical, disabled, and not overrideable by normal builds, `project.json`, or packaged APK metadata. Future support may only start as an explicit allowlist experiment and must not expose `Context`, `Activity`, `Service`, `AccessibilityService`, `MediaProjection`, `Intent`, Binder, `ClassLoader`, reflection, filesystem, process, native-library, or raw UI objects.
+The `java_interop` feature flag is critical, disabled by default, build-time experimental only, and not overrideable by `project.json` or packaged APK metadata. The current experiment exposes only `require("java")` with a tiny allowlist for `java.lang.Math`, `java.util.UUID`, and opaque `android.graphics.Rect` handles. It must not expose `Context`, `Activity`, `Service`, `AccessibilityService`, `MediaProjection`, `Intent`, Binder, `ClassLoader`, reflection, filesystem, process, native-library, or raw UI objects.
 
 See `docs/nodejs/design/JAVA_INTEROP.md` for the mode comparison, allowlist candidates, Rhino compatibility boundary, and future test gate.
 

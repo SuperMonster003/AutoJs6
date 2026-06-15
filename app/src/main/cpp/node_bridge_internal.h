@@ -986,7 +986,8 @@ std::string buildEmbeddedScriptExecutionSource(
         const std::vector<std::pair<std::string, std::string>>& env,
         bool esmExperimentalEnabled,
         bool dynamicImportExperimentalEnabled,
-        bool workerThreadsExperimentalEnabled);
+        bool workerThreadsExperimentalEnabled,
+        bool javaInteropExperimentalEnabled);
 void putEmbeddedScriptExecutionFields(std::vector<std::string>& payload, const std::string& text);
 std::vector<std::string> toStringVector(JNIEnv* env, jobjectArray values);
 NodeStart resolveNodeStart(JNIEnv* env);

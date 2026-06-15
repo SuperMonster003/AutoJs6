@@ -27,6 +27,8 @@ object NodeRuntimeCapabilities {
     const val NETWORK_EXPERIMENTAL_DEFAULT = false
     const val WORKER_THREADS_EXPERIMENTAL_PROPERTY = "autojs.nodejs.worker_threads.experimental"
     const val WORKER_THREADS_EXPERIMENTAL_DEFAULT = false
+    const val JAVA_INTEROP_EXPERIMENTAL_PROPERTY = "autojs.nodejs.javaInterop.experimental"
+    const val JAVA_INTEROP_EXPERIMENTAL_DEFAULT = false
 
     const val RUNTIME_MODULE_SOURCE_MAX_BYTES = 262_144
     const val RUNTIME_MODULE_SOURCES_MAX_BYTES = 524_288
@@ -146,13 +148,13 @@ object NodeRuntimeCapabilities {
         NodeRuntimeFeatureFlag(
             id = "java_interop",
             diagnosticName = "javaInterop",
-            gradleProperty = null,
-            defaultEnabled = false,
-            buildTimeOverrideAllowed = false,
+            gradleProperty = JAVA_INTEROP_EXPERIMENTAL_PROPERTY,
+            defaultEnabled = JAVA_INTEROP_EXPERIMENTAL_DEFAULT,
+            buildTimeOverrideAllowed = true,
             projectJsonOverrideAllowed = false,
             packagedApkOverrideAllowed = false,
             securityLevel = "critical",
-            status = "unsupported",
+            status = "experimental",
         ),
         NodeRuntimeFeatureFlag(
             id = "native_addon",

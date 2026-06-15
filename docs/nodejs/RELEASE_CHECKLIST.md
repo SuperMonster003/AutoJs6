@@ -33,6 +33,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `NodeFetchBridgeInstrumentationTest`
 - [ ] `NodeWorkerThreadsDesignGateInstrumentationTest`
 - [ ] `NodeWorkerThreadsExperimentalInstrumentationTest`
+- [ ] `NodeJavaInteropBridgeInstrumentationTest`
 - [ ] `NodeExampleProjectInstrumentationTest`
 - [ ] optional `NodeEmbeddedPerformanceInstrumentationTest` run recorded for lifecycle/native-load changes
 - [ ] extended `NodeEmbeddedMemoryLeakStressInstrumentationTest` run recorded before release candidates that change lifecycle, bridge, fs, or image-handle behavior
@@ -125,7 +126,8 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] experimental worker resource stress, when explicitly tested, shows no active worker after completion cleanup and no unbounded RSS/thread growth
 - [ ] direct WorkManager, AlarmManager, JobScheduler, and BroadcastReceiver authority remains denied to Node scripts
 - [ ] `work_manager` registration accepts only embedded backend, scoped relative paths, bounded intervals, and boolean constraint descriptors
-- [ ] direct Java/Android interop remains disabled; `java_interop` stays unsupported unless a separate design-gated experiment is explicitly tested
+- [ ] direct Java/Android interop remains disabled unless `autojs.nodejs.javaInterop.experimental=true` is explicitly tested
+- [ ] experimental Java interop, when explicitly tested, exposes only the documented allowlist and provider-owned opaque handles
 - [ ] reflection, class loaders, raw `Context`, native library loading, and Java process execution remain unavailable to Node scripts
 
 ## Compatibility

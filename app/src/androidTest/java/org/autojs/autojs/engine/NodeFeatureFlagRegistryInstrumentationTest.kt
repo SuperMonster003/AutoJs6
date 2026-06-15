@@ -47,10 +47,12 @@ class NodeFeatureFlagRegistryInstrumentationTest {
         assertFalse(BuildConfig.NODEJS_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED)
         assertFalse(BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED)
         assertFalse(BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED)
+        assertFalse(BuildConfig.NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED)
         assertEquals(false, NodeRuntimeCapabilities.experimentalFlags[NodeRuntimeCapabilities.ESM_EXPERIMENTAL_PROPERTY])
         assertEquals(false, NodeRuntimeCapabilities.experimentalFlags[NodeRuntimeCapabilities.DYNAMIC_IMPORT_EXPERIMENTAL_PROPERTY])
         assertEquals(false, NodeRuntimeCapabilities.experimentalFlags[NodeRuntimeCapabilities.NETWORK_EXPERIMENTAL_PROPERTY])
         assertEquals(false, NodeRuntimeCapabilities.experimentalFlags[NodeRuntimeCapabilities.WORKER_THREADS_EXPERIMENTAL_PROPERTY])
+        assertEquals(false, NodeRuntimeCapabilities.experimentalFlags[NodeRuntimeCapabilities.JAVA_INTEROP_EXPERIMENTAL_PROPERTY])
 
         flags
             .filter { it.securityLevel == "high" || it.securityLevel == "critical" }
@@ -66,7 +68,7 @@ class NodeFeatureFlagRegistryInstrumentationTest {
             }
 
         val buildOverrideAllowed = flags.filter { it.buildTimeOverrideAllowed }.map { it.id }.toSet()
-        assertEquals(setOf("esm", "dynamic_import", "network", "worker_threads"), buildOverrideAllowed)
+        assertEquals(setOf("esm", "dynamic_import", "network", "worker_threads", "java_interop"), buildOverrideAllowed)
         assertNotNull(NodeRuntimeCapabilities.featureFlagsById["child_process"])
         assertTrue(NodeRuntimeCapabilities.deniedFeatureFlags.any { it.id == "native_addon" })
     }
@@ -115,14 +117,26 @@ class NodeFeatureFlagRegistryInstrumentationTest {
             if (profile.featureFlags.dynamic_import.gradleProperty !== "autojs.nodejs.dynamicImport.experimental") {
               throw new Error("dynamic_import gradle property mismatch");
             }
+            if (profile.featureFlags.java_interop.gradleProperty !== "autojs.nodejs.javaInterop.experimental") {
+              throw new Error("java_interop gradle property mismatch");
+            }
             if (profile.featureFlags.dynamic_import.status !== "experimental") {
               throw new Error("dynamic_import status mismatch");
+            }
+            if (profile.featureFlags.java_interop.status !== "experimental") {
+              throw new Error("java_interop status mismatch");
             }
             if (profile.featureFlags.dynamic_import.buildTimeOverrideAllowed !== true) {
               throw new Error("dynamic_import build override mismatch");
             }
+            if (profile.featureFlags.java_interop.buildTimeOverrideAllowed !== true) {
+              throw new Error("java_interop build override mismatch");
+            }
             if (profile.experimentalFlags.dynamicImport !== false) {
               throw new Error("dynamicImport experimental snapshot mismatch");
+            }
+            if (profile.experimentalFlags.javaInterop !== false) {
+              throw new Error("javaInterop experimental snapshot mismatch");
             }
             for (const id of ["esm", "dynamic_import", "network", "worker_threads", "child_process", "native_addon", "java_interop"]) {
               if (!profile.deniedFeatureFlags.includes(id)) {

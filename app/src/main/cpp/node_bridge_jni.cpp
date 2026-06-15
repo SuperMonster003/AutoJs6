@@ -96,7 +96,8 @@ static jobjectArray runEmbeddedScriptLifecycleNative(
         const std::vector<std::pair<std::string, std::string>>& envPairs,
         bool esmExperimentalEnabled,
         bool dynamicImportExperimentalEnabled,
-        bool workerThreadsExperimentalEnabled
+        bool workerThreadsExperimentalEnabled,
+        bool javaInteropExperimentalEnabled
 ) {
     const auto startedAt = Clock::now();
     __android_log_print(ANDROID_LOG_INFO, kLogTag, "embedded_script.enter");
@@ -126,6 +127,7 @@ static jobjectArray runEmbeddedScriptLifecycleNative(
     putPayload(payload, "embedded_script.request.esm_experimental_enabled", esmExperimentalEnabled);
     putPayload(payload, "embedded_script.request.dynamic_import_experimental_enabled", dynamicImportExperimentalEnabled);
     putPayload(payload, "embedded_script.request.worker_threads_experimental_enabled", workerThreadsExperimentalEnabled);
+    putPayload(payload, "embedded_script.request.java_interop_experimental_enabled", javaInteropExperimentalEnabled);
     putPayload(payload, "embedded_script.request.node_modules_allowed", "working_directory_commonjs_mvp");
     putPayload(payload, "embedded_script.request.autojs_api_allowed", false);
     putPayload(payload, "embedded_script.request.android_bridge_allowed", false);
@@ -143,7 +145,8 @@ static jobjectArray runEmbeddedScriptLifecycleNative(
             envPairs,
             esmExperimentalEnabled,
             dynamicImportExperimentalEnabled,
-            workerThreadsExperimentalEnabled
+            workerThreadsExperimentalEnabled,
+            javaInteropExperimentalEnabled
     );
     void* handle = probeLoadedLibnodeHandle(payload);
     const char* workingDirectoryPtr = workingDirectoryText.empty() ? nullptr : workingDirectoryText.c_str();
@@ -194,7 +197,8 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
         jobjectArray envValues,
         jboolean esmExperimentalEnabled,
         jboolean dynamicImportExperimentalEnabled,
-        jboolean workerThreadsExperimentalEnabled
+        jboolean workerThreadsExperimentalEnabled,
+        jboolean javaInteropExperimentalEnabled
 ) {
     const std::vector<std::string> envNameValues = toStringVector(env, envNames);
     if (env->ExceptionCheck()) {
@@ -223,7 +227,8 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
             envPairs,
             esmExperimentalEnabled == JNI_TRUE,
             dynamicImportExperimentalEnabled == JNI_TRUE,
-            workerThreadsExperimentalEnabled == JNI_TRUE
+            workerThreadsExperimentalEnabled == JNI_TRUE,
+            javaInteropExperimentalEnabled == JNI_TRUE
     );
 }
 
@@ -240,7 +245,8 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
         jobjectArray envValues,
         jboolean esmExperimentalEnabled,
         jboolean dynamicImportExperimentalEnabled,
-        jboolean workerThreadsExperimentalEnabled
+        jboolean workerThreadsExperimentalEnabled,
+        jboolean javaInteropExperimentalEnabled
 ) {
     const std::vector<std::string> moduleSourceNameValues = toStringVector(env, moduleSourceNames);
     if (env->ExceptionCheck()) {
@@ -286,7 +292,8 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
             envPairs,
             esmExperimentalEnabled == JNI_TRUE,
             dynamicImportExperimentalEnabled == JNI_TRUE,
-            workerThreadsExperimentalEnabled == JNI_TRUE
+            workerThreadsExperimentalEnabled == JNI_TRUE,
+            javaInteropExperimentalEnabled == JNI_TRUE
     );
 }
 
@@ -305,7 +312,8 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
         jobjectArray envValues,
         jboolean esmExperimentalEnabled,
         jboolean dynamicImportExperimentalEnabled,
-        jboolean workerThreadsExperimentalEnabled
+        jboolean workerThreadsExperimentalEnabled,
+        jboolean javaInteropExperimentalEnabled
 ) {
     const std::vector<std::string> moduleSourceNameValues = toStringVector(env, moduleSourceNames);
     if (env->ExceptionCheck()) {
@@ -368,7 +376,8 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
             envPairs,
             esmExperimentalEnabled == JNI_TRUE,
             dynamicImportExperimentalEnabled == JNI_TRUE,
-            workerThreadsExperimentalEnabled == JNI_TRUE
+            workerThreadsExperimentalEnabled == JNI_TRUE,
+            javaInteropExperimentalEnabled == JNI_TRUE
     );
 }
 

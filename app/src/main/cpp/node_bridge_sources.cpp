@@ -5458,7 +5458,8 @@ std::string buildEmbeddedScriptExecutionSource(
         const std::vector<std::pair<std::string, std::string>>& env,
         bool esmExperimentalEnabled,
         bool dynamicImportExperimentalEnabled,
-        bool workerThreadsExperimentalEnabled) {
+        bool workerThreadsExperimentalEnabled,
+        bool javaInteropExperimentalEnabled) {
     const std::string sourceLiteral = jsonStringLiteral(source);
     const std::string sourceNameLiteral = jsonStringLiteral(sanitizeSourceUrl(sourceName));
     const std::string workingDirectoryLiteral = jsonStringLiteral(workingDirectory);
@@ -5509,6 +5510,9 @@ std::string buildEmbeddedScriptExecutionSource(
     script += R"JS(;
   const __autojs6_worker_threads_experimental_enabled = )JS";
     script += workerThreadsExperimentalEnabled ? "true" : "false";
+    script += R"JS(;
+  const __autojs6_java_interop_experimental_enabled = )JS";
+    script += javaInteropExperimentalEnabled ? "true" : "false";
     script += R"JS(;
   const __autojs6_runtime_module_count_limit = 64;
   const __autojs6_runtime_module_single_source_bytes_limit = 262144;
@@ -7910,6 +7914,7 @@ std::string buildEmbeddedScriptExecutionSource(
   let __autojs6_limited_fetch_cache = null;
   let __autojs6_limited_websocket_cache = null;
   let __autojs6_limited_work_manager_cache = null;
+  let __autojs6_limited_java_cache = null;
   let __autojs6_limited_worker_threads_cache = null;
   const __autojs6_fetch_policy = Object.freeze({
     maxConcurrentRequests: 4,
@@ -7956,6 +7961,23 @@ std::string buildEmbeddedScriptExecutionSource(
     minPeriodicIntervalMs: 900000,
     maxPeriodicIntervalMs: 2592000000,
     allowedConstraints: Object.freeze(["charging", "network", "idle"])
+  });
+  const __autojs6_java_interop_policy = Object.freeze({
+    enabled: __autojs6_java_interop_experimental_enabled,
+    allowedClasses: Object.freeze(["android.graphics.Rect", "java.lang.Math", "java.util.UUID"]),
+    deniedClassPrefixes: Object.freeze([
+      "android.accessibilityservice.",
+      "android.app.",
+      "android.content.",
+      "android.media.projection.",
+      "android.view.",
+      "java.io.",
+      "java.lang.invoke.",
+      "java.lang.reflect.",
+      "java.net.",
+      "java.nio.file.",
+      "kotlin.reflect."
+    ])
   });
   const __autojs6_worker_threads_policy = Object.freeze({
     maxWorkers: 1,
@@ -8120,13 +8142,15 @@ std::string buildEmbeddedScriptExecutionSource(
       network: false,
       npmInstall: false,
       webSocket: false,
-      workerThreads: __autojs6_worker_threads_experimental_enabled
+      workerThreads: __autojs6_worker_threads_experimental_enabled,
+      javaInterop: __autojs6_java_interop_experimental_enabled
     });
     const experimentalFlags = Object.freeze({
       esm: __autojs6_esm_experimental_enabled,
       dynamicImport: __autojs6_dynamic_import_experimental_enabled,
       network: false,
-      workerThreads: __autojs6_worker_threads_experimental_enabled
+      workerThreads: __autojs6_worker_threads_experimental_enabled,
+      javaInterop: __autojs6_java_interop_experimental_enabled
     });
     const featureFlags = Object.freeze({
       esm: Object.freeze({
@@ -8252,14 +8276,14 @@ std::string buildEmbeddedScriptExecutionSource(
       java_interop: Object.freeze({
         id: "java_interop",
         diagnosticName: "javaInterop",
-        gradleProperty: null,
+        gradleProperty: "autojs.nodejs.javaInterop.experimental",
         defaultEnabled: false,
-        enabled: false,
-        buildTimeOverrideAllowed: false,
+        enabled: __autojs6_java_interop_experimental_enabled,
+        buildTimeOverrideAllowed: true,
         projectJsonOverrideAllowed: false,
         packagedApkOverrideAllowed: false,
         securityLevel: "critical",
-        status: "unsupported"
+        status: "experimental"
       }),
       native_addon: Object.freeze({
         id: "native_addon",
@@ -8307,6 +8331,7 @@ std::string buildEmbeddedScriptExecutionSource(
       dynamicImport: __autojs6_dynamic_import_experimental_enabled,
       network: false,
       workerThreads: __autojs6_worker_threads_experimental_enabled,
+      javaInterop: __autojs6_java_interop_experimental_enabled,
       nativeAddon: false,
       scopedFs: true,
       directBuiltinAliases: Object.freeze(directBuiltinAliases),
@@ -8350,6 +8375,10 @@ std::string buildEmbeddedScriptExecutionSource(
         workerBridgeDenied: "ERR_AUTOJS6_WORKER_BRIDGE_DENIED",
         workerTimeout: "ERR_AUTOJS6_WORKER_TIMEOUT",
         workerTerminated: "ERR_AUTOJS6_WORKER_TERMINATED",
+        javaInteropDisabled: "ERR_AUTOJS6_JAVA_INTEROP_DISABLED",
+        javaClassDenied: "ERR_AUTOJS6_JAVA_CLASS_DENIED",
+        javaMethodDenied: "ERR_AUTOJS6_JAVA_METHOD_DENIED",
+        javaReflectionDenied: "ERR_AUTOJS6_JAVA_REFLECTION_DENIED",
         legacyAliases: Object.freeze(legacyAliases)
       })
     });
@@ -10580,6 +10609,216 @@ std::string buildEmbeddedScriptExecutionSource(
       policy: __autojs6_work_manager_policy_snapshot()
     });
     return __autojs6_limited_work_manager_cache;
+  }
+  function __autojs6_java_interop_error(message, code, className, methodName) {
+    const error = __autojs6_error(message, code || "ERR_AUTOJS6_JAVA_METHOD_DENIED");
+    if (className) __autojs6_define_error_property(error, "className", String(className));
+    if (methodName) __autojs6_define_error_property(error, "javaMethod", String(methodName));
+    return error;
+  }
+  function __autojs6_java_interop_disabled_error() {
+    return __autojs6_java_interop_error(
+      "AutoJs6 Java interop is disabled; enable autojs.nodejs.javaInterop.experimental for an allowlist-only experiment.",
+      "ERR_AUTOJS6_JAVA_INTEROP_DISABLED"
+    );
+  }
+  function __autojs6_java_policy_snapshot() {
+    return Object.freeze({
+      enabled: __autojs6_java_interop_policy.enabled,
+      allowedClasses: Object.freeze(__autojs6_java_interop_policy.allowedClasses.slice()),
+      deniedClassPrefixes: Object.freeze(__autojs6_java_interop_policy.deniedClassPrefixes.slice())
+    });
+  }
+  function __autojs6_java_check_enabled() {
+    if (!__autojs6_java_interop_experimental_enabled) {
+      throw __autojs6_java_interop_disabled_error();
+    }
+  }
+  function __autojs6_java_class_name(value) {
+    __autojs6_java_check_enabled();
+    const className = value === undefined || value === null ? "" : String(value).trim();
+    if (!className) {
+      throw __autojs6_java_interop_error(
+        "AutoJs6 Java interop requires a non-empty class name.",
+        "ERR_AUTOJS6_JAVA_CLASS_DENIED"
+      );
+    }
+    if (
+      className.indexOf("java.lang.reflect.") === 0 ||
+      className.indexOf("kotlin.reflect.") === 0 ||
+      className.indexOf("java.lang.invoke.") === 0
+    ) {
+      throw __autojs6_java_interop_error(
+        "AutoJs6 Java interop denies reflection class " + className + ".",
+        "ERR_AUTOJS6_JAVA_REFLECTION_DENIED",
+        className
+      );
+    }
+    const deniedExact = [
+      "java.lang.Class",
+      "java.lang.ClassLoader",
+      "java.lang.Runtime",
+      "java.lang.Process",
+      "java.lang.ProcessBuilder",
+      "java.lang.System",
+      "dalvik.system.DexClassLoader",
+      "dalvik.system.PathClassLoader",
+      "dalvik.system.InMemoryDexClassLoader"
+    ];
+    if (deniedExact.indexOf(className) >= 0) {
+      throw __autojs6_java_interop_error(
+        "AutoJs6 Java interop denies class " + className + ".",
+        "ERR_AUTOJS6_JAVA_CLASS_DENIED",
+        className
+      );
+    }
+    for (const prefix of __autojs6_java_interop_policy.deniedClassPrefixes) {
+      if (className.indexOf(prefix) === 0) {
+        throw __autojs6_java_interop_error(
+          "AutoJs6 Java interop denies class " + className + ".",
+          "ERR_AUTOJS6_JAVA_CLASS_DENIED",
+          className
+        );
+      }
+    }
+    if (__autojs6_java_interop_policy.allowedClasses.indexOf(className) < 0) {
+      throw __autojs6_java_interop_error(
+        "AutoJs6 Java interop allowlist does not include " + className + ".",
+        "ERR_AUTOJS6_JAVA_CLASS_DENIED",
+        className
+      );
+    }
+    return className;
+  }
+  function __autojs6_java_method_name(value, className) {
+    const methodName = value === undefined || value === null ? "" : String(value).trim();
+    if (!methodName) {
+      throw __autojs6_java_interop_error(
+        "AutoJs6 Java interop requires a non-empty method name.",
+        "ERR_AUTOJS6_JAVA_METHOD_DENIED",
+        className
+      );
+    }
+    return methodName;
+  }
+  function __autojs6_java_argument_value(value, className, methodName) {
+    if (value === undefined) {
+      return null;
+    }
+    if (value === null || typeof value === "string" || typeof value === "boolean") {
+      return value;
+    }
+    if (typeof value === "number") {
+      if (!Number.isFinite(value)) {
+        throw __autojs6_java_interop_error(
+          "AutoJs6 Java interop numeric arguments must be finite.",
+          "ERR_AUTOJS6_JAVA_METHOD_DENIED",
+          className,
+          methodName
+        );
+      }
+      return value;
+    }
+    throw __autojs6_java_interop_error(
+      "AutoJs6 Java interop arguments must be JSON primitives in the MVP.",
+      "ERR_AUTOJS6_JAVA_METHOD_DENIED",
+      className,
+      methodName
+    );
+  }
+  function __autojs6_java_argument_array(value, className, methodName) {
+    if (value === undefined || value === null) {
+      return [];
+    }
+    if (!Array.isArray(value)) {
+      throw __autojs6_java_interop_error(
+        "AutoJs6 Java interop args must be an array.",
+        "ERR_AUTOJS6_JAVA_METHOD_DENIED",
+        className,
+        methodName
+      );
+    }
+    return value.map(function(item) {
+      return __autojs6_java_argument_value(item, className, methodName);
+    });
+  }
+  function __autojs6_java_timeout(options) {
+    const opts = options && typeof options === "object" ? options : {};
+    return __autojs6_bridge_timeout_ms(opts.timeoutMs || 5000);
+  }
+  function __autojs6_java_class_descriptor(className) {
+    const checkedClassName = __autojs6_java_class_name(className);
+    return Object.freeze({
+      className: checkedClassName,
+      name: checkedClassName,
+      callStatic: function(methodName, args, options) {
+        return __autojs6_java_call_static(checkedClassName, methodName, args, options);
+      },
+      new: function(args, options) {
+        return __autojs6_java_new(checkedClassName, args, options);
+      }
+    });
+  }
+  function __autojs6_java_call_static(className, methodName, args, options) {
+    let descriptor;
+    try {
+      const checkedClassName = __autojs6_java_class_name(className);
+      const checkedMethodName = __autojs6_java_method_name(methodName, checkedClassName);
+      descriptor = {
+        className: checkedClassName,
+        method: checkedMethodName,
+        args: __autojs6_java_argument_array(args, checkedClassName, checkedMethodName)
+      };
+    } catch (error) {
+      return Promise.reject(error);
+    }
+    return __autojs6_call_autojs(
+      "java",
+      "callStatic",
+      [descriptor],
+      {
+        timeoutMs: __autojs6_java_timeout(options),
+        permissions: ["java_interop"]
+      }
+    );
+  }
+  function __autojs6_java_new(className, args, options) {
+    let descriptor;
+    try {
+      const checkedClassName = __autojs6_java_class_name(className);
+      descriptor = {
+        className: checkedClassName,
+        args: __autojs6_java_argument_array(args, checkedClassName, "<init>")
+      };
+    } catch (error) {
+      return Promise.reject(error);
+    }
+    return __autojs6_call_autojs(
+      "java",
+      "new",
+      [descriptor],
+      {
+        timeoutMs: __autojs6_java_timeout(options),
+        permissions: ["java_interop"]
+      }
+    ).then(function(result) {
+      return result && typeof result === "object" ? Object.freeze(result) : result;
+    });
+  }
+  function __autojs6_limited_java() {
+    if (!__autojs6_java_interop_experimental_enabled) {
+      throw __autojs6_java_interop_disabled_error();
+    }
+    if (__autojs6_limited_java_cache) {
+      return __autojs6_limited_java_cache;
+    }
+    __autojs6_limited_java_cache = Object.freeze({
+      type: __autojs6_java_class_descriptor,
+      callStatic: __autojs6_java_call_static,
+      new: __autojs6_java_new,
+      policy: __autojs6_java_policy_snapshot()
+    });
+    return __autojs6_limited_java_cache;
   }
   function __autojs6_host_app_info() {
     const fallback = {
@@ -26249,6 +26488,12 @@ std::string buildEmbeddedScriptExecutionSource(
     if (name === "work_manager") {
       return "work_manager";
     }
+    if (name === "java") {
+      if (!__autojs6_java_interop_experimental_enabled) {
+        throw __autojs6_java_interop_disabled_error();
+      }
+      return "java";
+    }
     if ((name === "worker_threads" || name === "node:worker_threads") && __autojs6_worker_threads_experimental_enabled) {
       return "worker_threads";
     }
@@ -26457,6 +26702,9 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     if (name === "work_manager") {
       return __autojs6_limited_work_manager();
+    }
+    if (name === "java") {
+      return __autojs6_limited_java();
     }
     if ((name === "worker_threads" || name === "node:worker_threads") && __autojs6_worker_threads_experimental_enabled) {
       return __autojs6_limited_worker_threads();

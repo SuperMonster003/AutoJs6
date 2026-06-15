@@ -547,6 +547,7 @@ object NativeNodeEmbeddedRuntimeBridge {
                     request.esmExperimentalEnabled,
                     request.dynamicImportExperimentalEnabled,
                     request.workerThreadsExperimentalEnabled,
+                    request.javaInteropExperimentalEnabled,
                 )
             } else {
                 nativeRunEmbeddedScriptLifecycleWithRuntimeModules(
@@ -562,6 +563,7 @@ object NativeNodeEmbeddedRuntimeBridge {
                     request.esmExperimentalEnabled,
                     request.dynamicImportExperimentalEnabled,
                     request.workerThreadsExperimentalEnabled,
+                    request.javaInteropExperimentalEnabled,
                 )
             }
             payload ?: emptyArray()
@@ -14727,6 +14729,7 @@ object NativeNodeEmbeddedRuntimeBridge {
         esmExperimentalEnabled: Boolean,
         dynamicImportExperimentalEnabled: Boolean,
         workerThreadsExperimentalEnabled: Boolean,
+        javaInteropExperimentalEnabled: Boolean,
     ): Array<String>?
 
     private external fun nativeRunEmbeddedScriptLifecycleWithModules(
@@ -14740,6 +14743,7 @@ object NativeNodeEmbeddedRuntimeBridge {
         esmExperimentalEnabled: Boolean,
         dynamicImportExperimentalEnabled: Boolean,
         workerThreadsExperimentalEnabled: Boolean,
+        javaInteropExperimentalEnabled: Boolean,
     ): Array<String>?
 
     private external fun nativeRunEmbeddedScriptLifecycleWithRuntimeModules(
@@ -14755,6 +14759,7 @@ object NativeNodeEmbeddedRuntimeBridge {
         esmExperimentalEnabled: Boolean,
         dynamicImportExperimentalEnabled: Boolean,
         workerThreadsExperimentalEnabled: Boolean,
+        javaInteropExperimentalEnabled: Boolean,
     ): Array<String>?
 
     private fun isProbePropertyEnabled(propertyName: String): Boolean {
@@ -16989,6 +16994,7 @@ object NativeNodeEmbeddedRuntimeBridge {
         val esmExperimentalEnabled: Boolean = BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED,
         val dynamicImportExperimentalEnabled: Boolean = BuildConfig.NODEJS_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED,
         val workerThreadsExperimentalEnabled: Boolean = BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED,
+        val javaInteropExperimentalEnabled: Boolean = BuildConfig.NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED,
         val spawnDepth: Int = 0,
     )
 

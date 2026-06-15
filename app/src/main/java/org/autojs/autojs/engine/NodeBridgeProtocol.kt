@@ -4,6 +4,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.graphics.Rect
 import android.net.Uri
 import android.os.Build
 import android.os.Handler
@@ -284,6 +285,22 @@ data class NodeBridgeError(
                 method = method,
             )
         }
+
+        fun javaInterop(
+            message: String,
+            code: String,
+            module: String? = null,
+            method: String? = null,
+            stack: String? = null,
+        ): NodeBridgeError {
+            return NodeBridgeError(
+                message = message,
+                code = code,
+                module = module,
+                method = method,
+                stack = stack,
+            )
+        }
     }
 }
 
@@ -386,6 +403,7 @@ object NodeBridgeModules {
     const val FETCH = "fetch"
     const val WEBSOCKET = "websocket"
     const val WORK_MANAGER = "work_manager"
+    const val JAVA = "java"
 
     val toastMethods = setOf("showToast", "toast")
     val appMethods = setOf("launchPackage", "launchApp", "openAppSetting", "startActivity")
@@ -412,6 +430,7 @@ object NodeBridgeModules {
     val fetchMethods = setOf("request")
     val websocketMethods = setOf("connect", "send", "close", "drainEvents")
     val workManagerMethods = setOf("scheduleOnce", "schedulePeriodic", "cancel", "list")
+    val javaMethods = setOf("type", "callStatic", "new")
 
     val supportedMethodsByModule: Map<String, Set<String>> = mapOf(
         TOAST to toastMethods,
@@ -428,6 +447,7 @@ object NodeBridgeModules {
         FETCH to fetchMethods,
         WEBSOCKET to websocketMethods,
         WORK_MANAGER to workManagerMethods,
+        JAVA to javaMethods,
     )
 
     fun supports(module: String, method: String): Boolean {
@@ -460,6 +480,7 @@ class FakeNodeBridgeCapabilityProvider(
 class AndroidNodeBridgeCapabilityProvider(
     context: Context,
     private val engineInfo: NodeBridgeEngineInfo = NodeBridgeEngineInfo.fromContext(context),
+    private val javaInteropExperimentalEnabled: Boolean = BuildConfig.NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED,
 ) : NodeBridgeCapabilityProvider {
 
     private val appContext = context.applicationContext
@@ -473,6 +494,7 @@ class AndroidNodeBridgeCapabilityProvider(
     private val websocketSessions = ConcurrentHashMap<String, ControlledWebSocketSession>()
     private val websocketDiagnostics = ControlledWebSocketDiagnostics()
     private val workManagerTasks = ConcurrentHashMap<String, JSONObject>()
+    private val javaHandles = ConcurrentHashMap<String, Any>()
 
     override fun dispatch(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
         when {
@@ -489,6 +511,7 @@ class AndroidNodeBridgeCapabilityProvider(
             request.module == NodeBridgeModules.FETCH && request.method in NodeBridgeModules.fetchMethods -> dispatchFetch(request, callback)
             request.module == NodeBridgeModules.WEBSOCKET && request.method in NodeBridgeModules.websocketMethods -> dispatchWebSocket(request, callback)
             request.module == NodeBridgeModules.WORK_MANAGER && request.method in NodeBridgeModules.workManagerMethods -> dispatchWorkManager(request, callback)
+            request.module == NodeBridgeModules.JAVA && request.method in NodeBridgeModules.javaMethods -> dispatchJava(request, callback)
             else -> callback(unavailable(request))
         }
     }
@@ -497,6 +520,7 @@ class AndroidNodeBridgeCapabilityProvider(
         putAll(networkDiagnostics.nativeValues())
         putAll(websocketDiagnostics.nativeValues())
         put("embedded_script.work_manager_registered_task_count", workManagerTasks.size.toString())
+        put("embedded_script.java_interop_handle_count", javaHandles.size.toString())
     }
 
     override fun destroy(reason: NodeBridgeError) {
@@ -511,6 +535,7 @@ class AndroidNodeBridgeCapabilityProvider(
         }
         websocketSessions.clear()
         workManagerTasks.clear()
+        javaHandles.clear()
     }
 
     private fun unavailable(request: NodeBridgeRequest): NodeBridgeResponse {
@@ -756,6 +781,124 @@ class AndroidNodeBridgeCapabilityProvider(
             request.id,
             NodeBridgeError.permissionDenied(
                 message = message,
+                module = request.module,
+                method = request.method,
+            ),
+        )
+    }
+
+    private fun dispatchJava(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        val response = runCatching {
+            if (!javaInteropExperimentalEnabled) {
+                return@runCatching NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.javaInterop(
+                        message = "AutoJs6 Java interop is disabled; enable autojs.nodejs.javaInterop.experimental for an allowlist-only experiment.",
+                        code = NodeRuntimeErrorCodes.JAVA_INTEROP_DISABLED,
+                        module = request.module,
+                        method = request.method,
+                    ),
+                )
+            }
+            when (request.method) {
+                "type" -> describeJavaType(request)
+                "callStatic" -> callJavaStatic(request)
+                "new" -> newJavaObject(request)
+                else -> unavailable(request)
+            }
+        }.getOrElse { error ->
+            NodeBridgeResponse.failure(
+                request.id,
+                NodeBridgeError.javaInterop(
+                    message = error.message ?: error.javaClass.name,
+                    code = NodeRuntimeErrorCodes.JAVA_METHOD_DENIED,
+                    module = request.module,
+                    method = request.method,
+                    stack = error.stackTraceToString(),
+                ),
+            )
+        }
+        callback(response)
+    }
+
+    private fun describeJavaType(request: NodeBridgeRequest): NodeBridgeResponse {
+        val payload = request.firstObjectArg()
+            ?: return javaPolicyFailure(request, "java.type requires a class descriptor.")
+        val className = payload.optNonBlankString("className")
+            ?: return javaPolicyFailure(request, "java.type requires a non-empty className.")
+        ControlledJavaInteropPolicy.validateClass(className)?.let { return NodeBridgeResponse.failure(request.id, it.toBridgeError(request)) }
+        return NodeBridgeResponse.success(
+            request.id,
+            ControlledJavaInteropPolicy.describeClass(className).toString(),
+        )
+    }
+
+    private fun callJavaStatic(request: NodeBridgeRequest): NodeBridgeResponse {
+        val payload = request.firstObjectArg()
+            ?: return javaPolicyFailure(request, "java.callStatic requires a call descriptor.")
+        val className = payload.optNonBlankString("className")
+            ?: return javaPolicyFailure(request, "java.callStatic requires a non-empty className.")
+        val method = payload.optNonBlankString("method")
+            ?: return javaPolicyFailure(request, "java.callStatic requires a non-empty method.")
+        ControlledJavaInteropPolicy.validateClass(className)?.let { return NodeBridgeResponse.failure(request.id, it.toBridgeError(request)) }
+        val args = payload.optJSONArray("args") ?: JSONArray()
+        val result = when (className) {
+            "java.lang.Math" -> ControlledJavaInteropPolicy.callMath(method, args)
+            "java.util.UUID" -> ControlledJavaInteropPolicy.callUuid(method, args)
+            else -> ControlledJavaInteropPolicy.Result.denied(
+                NodeRuntimeErrorCodes.JAVA_METHOD_DENIED,
+                "AutoJs6 Java interop does not allow static calls on $className.",
+            )
+        }
+        if (result.error != null) {
+            return NodeBridgeResponse.failure(request.id, result.error.toBridgeError(request))
+        }
+        return NodeBridgeResponse.success(request.id, NodeBridgeJson.valueToJson(result.value))
+    }
+
+    private fun newJavaObject(request: NodeBridgeRequest): NodeBridgeResponse {
+        val payload = request.firstObjectArg()
+            ?: return javaPolicyFailure(request, "java.new requires a constructor descriptor.")
+        val className = payload.optNonBlankString("className")
+            ?: return javaPolicyFailure(request, "java.new requires a non-empty className.")
+        ControlledJavaInteropPolicy.validateClass(className)?.let { return NodeBridgeResponse.failure(request.id, it.toBridgeError(request)) }
+        val args = payload.optJSONArray("args") ?: JSONArray()
+        val result = when (className) {
+            "android.graphics.Rect" -> ControlledJavaInteropPolicy.newRect(args)
+            else -> ControlledJavaInteropPolicy.Result.denied(
+                NodeRuntimeErrorCodes.JAVA_METHOD_DENIED,
+                "AutoJs6 Java interop does not allow constructing $className.",
+            )
+        }
+        if (result.error != null) {
+            return NodeBridgeResponse.failure(request.id, result.error.toBridgeError(request))
+        }
+        val rect = result.value as? Rect
+            ?: return javaPolicyFailure(request, "AutoJs6 Java interop constructor returned an unsupported value.")
+        val handleId = "java-${UUID.randomUUID()}"
+        javaHandles[handleId] = rect
+        return NodeBridgeResponse.success(request.id, javaHandleJson(handleId, className, rect).toString())
+    }
+
+    private fun javaHandleJson(handleId: String, className: String, rect: Rect): JSONObject {
+        return JSONObject().apply {
+            put("__autojs6JavaHandle", handleId)
+            put("className", className)
+            put("value", JSONObject().apply {
+                put("left", rect.left)
+                put("top", rect.top)
+                put("right", rect.right)
+                put("bottom", rect.bottom)
+            })
+        }
+    }
+
+    private fun javaPolicyFailure(request: NodeBridgeRequest, message: String): NodeBridgeResponse {
+        return NodeBridgeResponse.failure(
+            request.id,
+            NodeBridgeError.javaInterop(
+                message = message,
+                code = NodeRuntimeErrorCodes.JAVA_METHOD_DENIED,
                 module = request.module,
                 method = request.method,
             ),
@@ -1794,6 +1937,245 @@ private data class ControlledWorkTaskParseResult(
     val value: ControlledWorkTaskDescriptor? = null,
     val error: NodeBridgeError? = null,
 )
+
+private object ControlledJavaInteropPolicy {
+
+    private val allowedClasses = setOf(
+        "java.lang.Math",
+        "java.util.UUID",
+        "android.graphics.Rect",
+    )
+
+    private val deniedExactClasses = setOf(
+        "java.lang.Class",
+        "java.lang.ClassLoader",
+        "java.lang.Runtime",
+        "java.lang.Process",
+        "java.lang.ProcessBuilder",
+        "java.lang.System",
+        "dalvik.system.DexClassLoader",
+        "dalvik.system.PathClassLoader",
+        "dalvik.system.InMemoryDexClassLoader",
+    )
+
+    private val deniedPrefixes = listOf(
+        "java.io.",
+        "java.nio.file.",
+        "java.net.",
+        "android.content.",
+        "android.app.",
+        "android.view.",
+        "android.accessibilityservice.",
+        "android.media.projection.",
+    )
+
+    private val reflectionPrefixes = listOf(
+        "java.lang.reflect.",
+        "kotlin.reflect.",
+        "java.lang.invoke.",
+    )
+
+    fun validateClass(className: String): ErrorDescriptor? {
+        val normalized = className.trim()
+        if (normalized.isBlank()) {
+            return ErrorDescriptor(
+                code = NodeRuntimeErrorCodes.JAVA_CLASS_DENIED,
+                message = "AutoJs6 Java interop requires a non-empty className.",
+            )
+        }
+        if (normalized in reflectionPrefixes || reflectionPrefixes.any { normalized.startsWith(it) }) {
+            return ErrorDescriptor(
+                code = NodeRuntimeErrorCodes.JAVA_REFLECTION_DENIED,
+                message = "AutoJs6 Java interop denies reflection class $normalized.",
+            )
+        }
+        if (normalized in deniedExactClasses || deniedPrefixes.any { normalized.startsWith(it) }) {
+            return ErrorDescriptor(
+                code = NodeRuntimeErrorCodes.JAVA_CLASS_DENIED,
+                message = "AutoJs6 Java interop denies class $normalized.",
+            )
+        }
+        if (normalized !in allowedClasses) {
+            return ErrorDescriptor(
+                code = NodeRuntimeErrorCodes.JAVA_CLASS_DENIED,
+                message = "AutoJs6 Java interop allowlist does not include $normalized.",
+            )
+        }
+        return null
+    }
+
+    fun describeClass(className: String): JSONObject {
+        return JSONObject().apply {
+            put("className", className)
+            put("experimental", true)
+            put("constructable", className == "android.graphics.Rect")
+            put(
+                "staticMethods",
+                JSONArray(
+                    when (className) {
+                        "java.lang.Math" -> listOf("abs", "ceil", "floor", "max", "min", "pow", "round", "sqrt")
+                        "java.util.UUID" -> listOf("fromString", "randomUUID")
+                        else -> emptyList()
+                    },
+                ),
+            )
+        }
+    }
+
+    fun callMath(method: String, args: JSONArray): Result {
+        return when (method) {
+            "max" -> binaryNumber(args, method) { a, b -> kotlin.math.max(a, b) }
+            "min" -> binaryNumber(args, method) { a, b -> kotlin.math.min(a, b) }
+            "pow" -> binaryNumber(args, method) { a, b -> java.lang.Math.pow(a, b) }
+            "abs" -> unaryNumber(args, method) { value -> kotlin.math.abs(value) }
+            "ceil" -> unaryNumber(args, method) { value -> kotlin.math.ceil(value) }
+            "floor" -> unaryNumber(args, method) { value -> kotlin.math.floor(value) }
+            "round" -> unaryNumber(args, method) { value -> kotlin.math.round(value) }
+            "sqrt" -> unaryNumber(args, method) { value -> kotlin.math.sqrt(value) }
+            else -> Result.denied(
+                NodeRuntimeErrorCodes.JAVA_METHOD_DENIED,
+                "AutoJs6 Java interop does not allow java.lang.Math.$method.",
+            )
+        }
+    }
+
+    fun callUuid(method: String, args: JSONArray): Result {
+        return when (method) {
+            "randomUUID" -> {
+                if (args.length() != 0) {
+                    Result.denied(
+                        NodeRuntimeErrorCodes.JAVA_METHOD_DENIED,
+                        "java.util.UUID.randomUUID requires no arguments.",
+                    )
+                } else {
+                    Result.value(UUID.randomUUID().toString())
+                }
+            }
+            "fromString" -> {
+                if (args.length() != 1) {
+                    Result.denied(
+                        NodeRuntimeErrorCodes.JAVA_METHOD_DENIED,
+                        "java.util.UUID.fromString requires one string argument.",
+                    )
+                } else {
+                    runCatching {
+                        UUID.fromString(args.optString(0)).toString()
+                    }.fold(
+                        onSuccess = Result::value,
+                        onFailure = {
+                            Result.denied(
+                                NodeRuntimeErrorCodes.JAVA_METHOD_DENIED,
+                                "java.util.UUID.fromString rejected the supplied value.",
+                            )
+                        },
+                    )
+                }
+            }
+            else -> Result.denied(
+                NodeRuntimeErrorCodes.JAVA_METHOD_DENIED,
+                "AutoJs6 Java interop does not allow java.util.UUID.$method.",
+            )
+        }
+    }
+
+    fun newRect(args: JSONArray): Result {
+        if (args.length() != 4) {
+            return Result.denied(
+                NodeRuntimeErrorCodes.JAVA_METHOD_DENIED,
+                "android.graphics.Rect requires four integer arguments.",
+            )
+        }
+        val left = args.optIntOrNull(0) ?: return invalidRectArg()
+        val top = args.optIntOrNull(1) ?: return invalidRectArg()
+        val right = args.optIntOrNull(2) ?: return invalidRectArg()
+        val bottom = args.optIntOrNull(3) ?: return invalidRectArg()
+        return Result.value(Rect(left, top, right, bottom))
+    }
+
+    private fun invalidRectArg(): Result {
+        return Result.denied(
+            NodeRuntimeErrorCodes.JAVA_METHOD_DENIED,
+            "android.graphics.Rect constructor arguments must be finite integers.",
+        )
+    }
+
+    private fun unaryNumber(args: JSONArray, method: String, operation: (Double) -> Double): Result {
+        if (args.length() != 1) {
+            return Result.denied(
+                NodeRuntimeErrorCodes.JAVA_METHOD_DENIED,
+                "java.lang.Math.$method requires one numeric argument.",
+            )
+        }
+        val value = args.optDoubleOrNull(0) ?: return Result.denied(
+            NodeRuntimeErrorCodes.JAVA_METHOD_DENIED,
+            "java.lang.Math.$method argument must be a finite number.",
+        )
+        return Result.value(operation(value))
+    }
+
+    private fun binaryNumber(args: JSONArray, method: String, operation: (Double, Double) -> Double): Result {
+        if (args.length() != 2) {
+            return Result.denied(
+                NodeRuntimeErrorCodes.JAVA_METHOD_DENIED,
+                "java.lang.Math.$method requires two numeric arguments.",
+            )
+        }
+        val first = args.optDoubleOrNull(0) ?: return Result.denied(
+            NodeRuntimeErrorCodes.JAVA_METHOD_DENIED,
+            "java.lang.Math.$method arguments must be finite numbers.",
+        )
+        val second = args.optDoubleOrNull(1) ?: return Result.denied(
+            NodeRuntimeErrorCodes.JAVA_METHOD_DENIED,
+            "java.lang.Math.$method arguments must be finite numbers.",
+        )
+        return Result.value(operation(first, second))
+    }
+
+    data class ErrorDescriptor(
+        val code: String,
+        val message: String,
+    ) {
+        fun toBridgeError(request: NodeBridgeRequest): NodeBridgeError {
+            return NodeBridgeError.javaInterop(
+                message = message,
+                code = code,
+                module = request.module,
+                method = request.method,
+            )
+        }
+    }
+
+    data class Result(
+        val value: Any? = null,
+        val error: ErrorDescriptor? = null,
+    ) {
+        companion object {
+            fun value(value: Any?): Result = Result(value = value)
+
+            fun denied(code: String, message: String): Result = Result(
+                error = ErrorDescriptor(code = code, message = message),
+            )
+        }
+    }
+}
+
+private fun JSONArray.optDoubleOrNull(index: Int): Double? {
+    val value = opt(index)
+    val number = when (value) {
+        is Number -> value.toDouble()
+        is String -> value.toDoubleOrNull()
+        else -> null
+    } ?: return null
+    return number.takeIf { it.isFinite() }
+}
+
+private fun JSONArray.optIntOrNull(index: Int): Int? {
+    val value = optDoubleOrNull(index) ?: return null
+    if (value % 1.0 != 0.0 || value < Int.MIN_VALUE || value > Int.MAX_VALUE) {
+        return null
+    }
+    return value.toInt()
+}
 
 private object ControlledFetchPolicy {
     const val MAX_CONCURRENT_REQUESTS = 4

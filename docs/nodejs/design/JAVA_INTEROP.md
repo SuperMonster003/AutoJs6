@@ -1,6 +1,6 @@
 # Java Interop Design Gate
 
-Status: design gate only. No runtime behavior is enabled by this document. Embedded Node scripts cannot access Java, Android classes, Rhino Java adapters, class loaders, reflection, or raw Android objects through this design.
+Status: experimental allowlist prototype. Default builds keep Java interop disabled. Embedded Node scripts cannot access unrestricted Java, unrestricted Android classes, Rhino Java adapters, class loaders, reflection, or raw Android objects.
 
 ## Goal
 
@@ -17,19 +17,20 @@ Any future interop must preserve the Safe Node Profile:
 
 ## Current Decision
 
-`java_interop` is registered as a critical unsupported feature flag:
+`java_interop` is registered as a critical experimental feature flag:
 
 ```text
 id: java_interop
 diagnosticName: javaInterop
+gradleProperty: autojs.nodejs.javaInterop.experimental
 defaultEnabled: false
-buildTimeOverrideAllowed: false
+buildTimeOverrideAllowed: true
 projectJsonOverrideAllowed: false
 packagedApkOverrideAllowed: false
-status: unsupported
+status: experimental
 ```
 
-The runtime must keep `require("java")`, `$autojs.java`, `Packages`, `importClass`, direct `java.*`, direct `android.*`, reflection, and Rhino Java adapter style APIs unavailable until a later implementation task explicitly changes the policy.
+With the flag off, the runtime keeps `require("java")`, `$autojs.java`, `Packages`, `importClass`, direct `java.*`, direct `android.*`, reflection, and Rhino Java adapter style APIs unavailable. With the flag on, only `require("java")` is exposed, and it is restricted to a bridge-backed allowlist.
 
 ## Mode Comparison
 
@@ -44,11 +45,11 @@ The runtime must keep `require("java")`, `$autojs.java`, `Packages`, `importClas
 
 Use Mode A as the product default:
 
-- direct Java interop remains unsupported
+- direct Java interop remains disabled by default
 - AutoJs bridge modules are the only path to Android and AutoJs capabilities
 - high-risk APIs continue to be represented as denied or absent capabilities in `require("autojs6:profile")`
 
-If Java interop is later required, start with Mode B:
+The current prototype starts with Mode B for a tiny build-time experiment:
 
 - opt-in experimental flag only
 - allowlist classes and methods explicitly
@@ -157,6 +158,12 @@ Possible candidates:
 - selected immutable collection conversion helpers, if they only produce JSON-compatible data
 - `android.graphics.Rect` as a value snapshot with numeric fields
 
+Current experimental MVP:
+
+- `java.lang.Math` selected static numeric helpers
+- `java.util.UUID` selected static UUID helpers
+- `android.graphics.Rect` construction as an opaque provider-owned handle
+
 The phrase `java.util.*` must not mean package-wide authority. It can only mean selected classes and selected methods documented in an allowlist table.
 
 Default denials:
@@ -174,18 +181,18 @@ Default denials:
 - `kotlin.reflect.*`
 - Android `Context`, `Activity`, `Service`, `View`, `Intent`, Binder, `PackageManager`, `ContentResolver`, `AccessibilityService`, `AccessibilityNodeInfo`, `MediaProjection`, and raw image classes
 
-## Possible Future API Shape
+## Current Experimental API Shape
 
-No JavaScript API is committed by this design. A future allowlist-only experiment could use an AutoJs-owned module name:
+When `autojs.nodejs.javaInterop.experimental=true` is enabled for an experimental run, the module name is:
 
 ```js
-const java = require("autojs6:java");
+const java = require("java");
 
 const uuid = await java.callStatic("java.util.UUID", "randomUUID", []);
 console.log(String(uuid));
 ```
 
-Preferred constraints:
+Current constraints:
 
 - calls return Promises unless they are proven pure and fast
 - all class names and method names are checked against a static allowlist

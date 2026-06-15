@@ -40,6 +40,7 @@ internal object NodeEmbeddedTestHarness {
         esmExperimentalEnabled: Boolean = BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED,
         dynamicImportExperimentalEnabled: Boolean = BuildConfig.NODEJS_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED,
         workerThreadsExperimentalEnabled: Boolean = BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED,
+        javaInteropExperimentalEnabled: Boolean = BuildConfig.NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED,
     ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
         return NativeNodeEmbeddedScriptService.runScript(
             targetContext,
@@ -54,6 +55,7 @@ internal object NodeEmbeddedTestHarness {
                 esmExperimentalEnabled = esmExperimentalEnabled,
                 dynamicImportExperimentalEnabled = dynamicImportExperimentalEnabled,
                 workerThreadsExperimentalEnabled = workerThreadsExperimentalEnabled,
+                javaInteropExperimentalEnabled = javaInteropExperimentalEnabled,
             ),
         )
     }
