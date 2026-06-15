@@ -99,6 +99,7 @@ const aceDiagnosticsSnapshot = "app/src/main/java/org/autojs/autojs/ui/edit/edit
 const aceRuntimeEventHistory = "app/src/main/java/org/autojs/autojs/ui/edit/editor/ace/diagnostics/AceRuntimeEventHistory.kt";
 const aceJsErrorClassifier = "app/src/main/java/org/autojs/autojs/ui/edit/editor/ace/health/AceJsErrorClassifier.kt";
 const aceFallbackPolicy = "app/src/main/java/org/autojs/autojs/ui/edit/editor/ace/health/AceFallbackPolicy.kt";
+const aceCiGate = "tools/ace-ci/check-ace-editor-gate.mjs";
 const aceSurfaceSmoke = "tools/ace-hardening/check-editor-surface.mjs";
 const roadmap = "Roadmap.md";
 const aceEditorTestPlan = "docs/dev/ace-editor-test-plan.md";
@@ -108,6 +109,7 @@ const nativeOnlyAudit = "docs/dev/editor-native-only-audit.md";
 const engineNeutralServicesDoc = "docs/dev/editor-engine-neutral-services.md";
 const viewportPolicyDoc = "docs/dev/editor-viewport-policy.md";
 const strings = "app/src/main/res/values/strings.xml";
+const androidWorkflow = ".github/workflows/android.yml";
 
 assertIncludes(editorView, "mViewportPolicy.onImeInsetsChanged(imeVisible, targetBottom)");
 assertIncludes(editorView, "EditorViewportPolicyFactory.create(editor, this)");
@@ -353,6 +355,7 @@ assertIncludes(draftService, "stableDraftFileHelper.deleteDraft()");
 assertNotIncludes(draftService, "CodeEditText");
 
 assertIncludes(roadmap, "node tools/ace-hardening/check-editor-surface.mjs");
+assertIncludes(roadmap, "node tools/ace-ci/check-ace-editor-gate.mjs");
 assertIncludes(roadmap, "# AutoJs6 ACE Stage 3 v2 Roadmap");
 assertIncludes(roadmap, "## Phase 3: IME State Machine");
 assertIncludes(roadmap, "## Phase 4: Fallback Classification And Event History");
@@ -388,7 +391,9 @@ assertIncludes(roadmap, "- [x] Cover file-manager open first paint, top/middle/b
 assertIncludes(roadmap, "- [x] Update release gates so LSP alpha is not the primary target until the");
 assertIncludes(roadmap, "- [x] The original flicker, anchor drift, and keyboard fallback issues are");
 assertIncludes(roadmap, "- [x] The same matrix can be rerun after WebView or Android version changes.");
+assertIncludes(roadmap, "- [x] CI gate for editor boundary and ACE hardening scripts.");
 assertIncludes(roadmap, "ACE clean-host behavior remains the default ACE path.");
+assertIncludes(roadmap, "ACE editor CI gate passes.");
 assertIncludes(roadmap, "Keyboard and viewport matrix passes on representative devices.");
 assertIncludes(roadmap, "LSP and VisualEditorAce remain deferred until this gate is satisfied.");
 
@@ -437,6 +442,7 @@ assertIncludes(viewportPolicyDoc, "viewportPolicy=AceEditorViewportPolicy");
 assertIncludes(viewportPolicyDoc, "ACE diagnostics identify `viewportPolicy=AceEditorViewportPolicy`.");
 
 assertIncludes(aceEditorTestPlan, "## IME Show/Hide Manual Checklist");
+assertIncludes(aceEditorTestPlan, "node tools/ace-ci/check-ace-editor-gate.mjs");
 assertIncludes(aceEditorTestPlan, "docs/dev/ace-keyboard-viewport-test-plan.md");
 assertIncludes(aceEditorTestPlan, "### ACE-IME-001: Input method and symbols/function bars");
 assertIncludes(aceEditorTestPlan, "### ACE-IME-002: Repeated soft keyboard show/hide stress");
@@ -483,6 +489,7 @@ assertIncludes(aceKeyboardViewportTestPlan, "Programmatic IME toggling still doe
 assertIncludes(aceKeyboardViewportTestPlan, "LSP alpha, hover/markdown tooltip loading, and VisualEditorAce");
 
 assertIncludes(aceEditorIntegrationDoc, "Run the `IME Show/Hide Manual Checklist`");
+assertIncludes(aceEditorIntegrationDoc, "Run `node tools/ace-ci/check-ace-editor-gate.mjs`.");
 assertIncludes(aceEditorIntegrationDoc, "docs/dev/ace-keyboard-viewport-test-plan.md");
 assertIncludes(aceEditorIntegrationDoc, "## Clean Host Layout Decision");
 assertIncludes(aceEditorIntegrationDoc, "ACE does not need a separate clean-host experiment flag at this stage.");
@@ -506,6 +513,22 @@ assertIncludes(aceEditorDebugLayout, "@string/text_ace_ime_stress");
 assertIncludes(strings, "text_ace_ime_stress");
 assertIncludes(strings, "text_ace_ime_stress_running");
 assertIncludes(strings, "text_ace_ime_stress_done");
+
+assertIncludes(aceCiGate, "Editor boundary checks");
+assertIncludes(aceCiGate, "tools/editor-refactor/check-editor-boundaries.mjs");
+assertIncludes(aceCiGate, "ACE surface hardening checks");
+assertIncludes(aceCiGate, "tools/ace-hardening/check-editor-surface.mjs");
+assertIncludes(aceCiGate, "AutoJs6 completion index verification");
+assertIncludes(aceCiGate, "tools/ace-completion/verify-autojs6-indices.mjs");
+assertIncludes(aceCiGate, "ACE completer tests");
+assertIncludes(aceCiGate, "tools/ace-completion/test-completer.mjs");
+assertIncludes(aceCiGate, "ACE editor CI gate passed.");
+
+assertIncludes(androidWorkflow, "Set up Node.js 24");
+assertIncludes(androidWorkflow, "actions/setup-node@v4");
+assertIncludes(androidWorkflow, "node-version: '24'");
+assertIncludes(androidWorkflow, "Run ACE editor gate");
+assertIncludes(androidWorkflow, "node tools/ace-ci/check-ace-editor-gate.mjs");
 
 assertIncludes(aceSurfaceSmoke, "ACE editor bootstrap order");
 assertIncludes(aceSurfaceSmoke, "hidden editor before first paint");

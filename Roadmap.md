@@ -34,6 +34,8 @@ and fallback behavior, then resume CI, API-index, and LSP work.
   are already partially engine-neutral.
 - [x] `tools/editor-refactor/check-editor-boundaries.mjs` guards the current
   boundaries.
+- [x] `tools/ace-ci/check-ace-editor-gate.mjs` runs the local/CI ACE editor
+  gate.
 - [x] `docs/dev/ace-editor-test-plan.md` contains the IME show/hide manual
   checklist.
 - [x] `docs/dev/ace-keyboard-viewport-test-plan.md` contains the dedicated
@@ -174,7 +176,7 @@ Acceptance:
 ## Phase 8: Resume Deferred Advanced Work
 
 - [ ] Instrumentation smoke tests for ACE basics.
-- [ ] CI gate for editor boundary and ACE hardening scripts.
+- [x] CI gate for editor boundary and ACE hardening scripts.
 - [ ] AutoJs6 API index intermediate model improvements.
 - [ ] Pro-only API detection.
 - [ ] Declaration and completion quality improvements.
@@ -185,6 +187,7 @@ Acceptance:
 
 ## Verification Commands
 
+- `node tools/ace-ci/check-ace-editor-gate.mjs`
 - `node tools/editor-refactor/check-editor-boundaries.mjs`
 - `node tools/ace-hardening/check-editor-surface.mjs`
 - `node tools/ace-completion/test-completer.mjs`
@@ -200,6 +203,7 @@ Acceptance:
 - [ ] Native-only boundary checks pass.
 - [ ] ACE first-paint and surface smoke checks pass.
 - [ ] ACE completion checks pass.
+- [ ] ACE editor CI gate passes.
 - [ ] IME show/hide manual checklist passes on representative devices.
 - [ ] Keyboard and viewport matrix passes on representative devices.
 - [ ] Continuous keyboard show/hide does not fallback ACE.

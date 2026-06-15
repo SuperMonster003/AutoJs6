@@ -18,6 +18,7 @@ This plan covers manual device validation for the ACE editor experiment. Native 
   - `Blocked ACE`
   - `lspError`
 - Local tool checks:
+  - `node tools/ace-ci/check-ace-editor-gate.mjs`
   - `node tools/ace-completion/generate-autojs6-indices-from-dts.mjs`
   - `node tools/ace-completion/verify-autojs6-indices.mjs`
   - `node tools/ace-completion/test-completer.mjs`
