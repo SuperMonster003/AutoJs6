@@ -60,7 +60,7 @@ goal is to make editor behavior engine-neutral where possible, and keep native
 - [x] Extract run-text provider.
 - [ ] Expand editor command dispatcher beyond input-keyboard commands.
 - [ ] Extract breakpoint model store.
-- [ ] Extract theme/font application service.
+- [x] Extract theme/font application service.
 
 ## Phase 5: Native Editor Containment
 

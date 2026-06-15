@@ -81,6 +81,7 @@ const textLoadPolicy = "app/src/main/java/org/autojs/autojs/ui/edit/editor/loadi
 const textLoadTarget = "app/src/main/java/org/autojs/autojs/ui/edit/editor/loading/EditorTextLoadTarget.kt";
 const editorTextProvider = "app/src/main/java/org/autojs/autojs/ui/edit/editor/service/EditorTextProvider.kt";
 const runScriptTextProvider = "app/src/main/java/org/autojs/autojs/ui/edit/editor/service/RunScriptTextProvider.kt";
+const themeFontService = "app/src/main/java/org/autojs/autojs/ui/edit/editor/service/EditorThemeFontService.kt";
 
 assertIncludes(editorView, "mViewportPolicy.onImeInsetsChanged(imeVisible, targetBottom)");
 assertIncludes(editorView, "EditorViewportPolicyFactory.create(editor, this)");
@@ -98,6 +99,11 @@ assertIncludes(editorView, "private val editorTextProvider = EditorTextProvider(
 assertIncludes(editorView, "private val runScriptTextProvider = RunScriptTextProvider(");
 assertIncludes(editorView, "runScriptTextProvider.saveToTmpFile()");
 assertIncludes(editorView, "editorTextProvider.getTextForSaving()");
+assertIncludes(editorView, "private val themeFontService = EditorThemeFontService(");
+assertIncludes(editorView, "themeFontService.applyEditorPreferences()");
+assertIncludes(editorView, "themeFontService.applyTheme(theme)");
+assertIncludes(editorView, "themeFontService.persistAndApplyAceFont(font)");
+assertIncludes(editorView, "themeFontService.persistAndApplyTheme(it)");
 assertIncludes(editorView, "private val textLoadTarget: EditorTextLoadTarget");
 assertIncludes(editorView, "EditorTextLoadPolicy.shouldStreamAsLargeFile(sizeOrNull)");
 assertIncludes(editorView, "EditorTextLoadPolicy.shouldLoadProgressively(text.length)");
@@ -117,6 +123,12 @@ assertNotIncludes(editorView, "StringUtils.hasBom");
 assertNotIncludes(editorView, "streamDecodeAndEmit(");
 assertNotIncludes(editorView, "getTextForSavingObservable");
 assertNotIncludes(editorView, "TmpScriptFiles");
+assertNotIncludes(editorView, "mEditorTheme");
+assertNotIncludes(editorView, "getEditorTextSize");
+assertNotIncludes(editorView, "setEditorTextSize");
+assertNotIncludes(editorView, "AceEditorFontPreferences");
+assertNotIncludes(editorView, "ThemeColorManager");
+assertNotIncludes(editorView, "ColorUtils");
 
 assertIncludes(scriptEngine, "fun onImeInsetsChanged(visible: Boolean, bottomInset: Int) = Unit");
 assertIncludes(policyFactory, "EditorEngineType.NATIVE -> NativeEditorViewportPolicy(editor, hostView)");
@@ -163,6 +175,15 @@ assertIncludes(runScriptTextProvider, "TmpScriptFiles.create(context)");
 assertIncludes(runScriptTextProvider, "write(tmpFile, latestText)");
 assertNotIncludes(runScriptTextProvider, "CodeEditText");
 
+assertIncludes(themeFontService, "class EditorThemeFontService(");
+assertIncludes(themeFontService, "var currentTheme: Theme? = null");
+assertIncludes(themeFontService, "fun applyTheme(theme: Theme?): Theme?");
+assertIncludes(themeFontService, "fun applyEditorPreferences()");
+assertIncludes(themeFontService, "AceEditorFontPreferences.set(font)");
+assertIncludes(themeFontService, "Themes.setCurrent(theme.name)");
+assertIncludes(themeFontService, "ThemeColorManager.colorPrimary");
+assertNotIncludes(themeFontService, "CodeEditText");
+
 assertOnlyIn("requestRectangleOnScreen", [
   "app/src/main/java/org/autojs/autojs/ui/edit/editor/engine/NativeCodeEditorEngine.kt",
 ]);
@@ -202,6 +223,14 @@ assertOnlyIn("TmpScriptFiles.create(context)", [
 
 assertOnlyIn("write(tmpFile, latestText)", [
   "app/src/main/java/org/autojs/autojs/ui/edit/editor/service/RunScriptTextProvider.kt",
+]);
+
+assertOnlyIn("AceEditorFontPreferences.set(font)", [
+  "app/src/main/java/org/autojs/autojs/ui/edit/editor/service/EditorThemeFontService.kt",
+]);
+
+assertOnlyIn("Themes.setCurrent(theme.name)", [
+  "app/src/main/java/org/autojs/autojs/ui/edit/editor/service/EditorThemeFontService.kt",
 ]);
 
 console.log("Editor boundary checks passed.");

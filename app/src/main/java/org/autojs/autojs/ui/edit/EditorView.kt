@@ -7,7 +7,6 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
 import android.content.IntentFilter
-import android.graphics.Color
 import android.graphics.Rect
 import android.net.Uri
 import android.os.Build
@@ -39,8 +38,6 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.core.pref.Pref
-import org.autojs.autojs.core.pref.Pref.getEditorTextSize
-import org.autojs.autojs.core.pref.Pref.setEditorTextSize
 import org.autojs.autojs.engine.JavaScriptEngine
 import org.autojs.autojs.engine.ScriptEngine
 import org.autojs.autojs.event.BackPressedHandler.HostActivity
@@ -61,15 +58,12 @@ import org.autojs.autojs.storage.history.HistoryPrefs
 import org.autojs.autojs.storage.history.HistoryRepository
 import org.autojs.autojs.storage.history.HistoryUriUtils
 import org.autojs.autojs.storage.history.VersionHistoryController
-import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.tool.Callback
 import org.autojs.autojs.ui.doc.ManualDialog
 import org.autojs.autojs.ui.edit.completion.CodeCompletionBar
 import org.autojs.autojs.ui.edit.completion.CodeCompletionBar.OnHintClickListener
 import org.autojs.autojs.ui.edit.debug.DebugBar
 import org.autojs.autojs.ui.edit.editor.JavaScriptHighlighter
-import org.autojs.autojs.ui.edit.editor.ace.AceEditorFont
-import org.autojs.autojs.ui.edit.editor.ace.AceEditorFontPreferences
 import org.autojs.autojs.ui.edit.editor.ace.AceEditorTestHooks
 import org.autojs.autojs.ui.edit.editor.ace.diagnostics.AceDiagnostics
 import org.autojs.autojs.ui.edit.editor.ace.diagnostics.AceDiagnosticsSnapshot
@@ -89,6 +83,7 @@ import org.autojs.autojs.ui.edit.editor.loading.EditorTextLoadPolicy
 import org.autojs.autojs.ui.edit.editor.loading.EditorTextLoadTarget
 import org.autojs.autojs.ui.edit.editor.loading.EngineTextLoadTarget
 import org.autojs.autojs.ui.edit.editor.service.EditorTextProvider
+import org.autojs.autojs.ui.edit.editor.service.EditorThemeFontService
 import org.autojs.autojs.ui.edit.editor.service.RunScriptTextProvider
 import org.autojs.autojs.ui.edit.editor.viewport.EditorViewportPolicy
 import org.autojs.autojs.ui.edit.editor.viewport.EditorViewportPolicyFactory
@@ -106,7 +101,6 @@ import org.autojs.autojs.ui.filechooser.FileChooserDialogBuilder
 import org.autojs.autojs.ui.log.LogActivity
 import org.autojs.autojs.ui.widget.EWebView
 import org.autojs.autojs.util.ClipboardUtils
-import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs.util.DialogUtils.choiceWidgetThemeColor
 import org.autojs.autojs.util.DocsUtils.getUrl
@@ -318,7 +312,6 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private var mHadBom = false
     private var mReadOnly = false
     private var mAutoCompletion: AutoCompletion? = null
-    private var mEditorTheme: Theme? = null
     private var mFunctionsKeyboardHelper: FunctionsKeyboardHelper? = null
     private val mOnRunFinishedReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -357,6 +350,18 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     private val mLoadingBarContainer: View = binding.loadingBarContainer
     private val mLoadingBarText: TextView = binding.loadingBarText
+    private val themeFontService = EditorThemeFontService(
+        context = context,
+        activity = activity,
+        currentEditor = { editor },
+        inputMethodEnhanceBar = mInputMethodEnhanceBar,
+        loadingBarContainer = mLoadingBarContainer,
+        loadingBarText = mLoadingBarText,
+        codeCompletionBar = mCodeCompletionBar,
+        symbolBar = mSymbolBar,
+        showFunctionsButton = mShowFunctionsButton,
+        invalidateHost = { invalidate() },
+    )
 
     private var mLoadingBarRequested = false
     private var mLoadingBarShownAtMs = 0L
@@ -428,7 +433,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             webView.settings.displayZoomControls = true
             webView.loadUrl(getUrl("index.html"))
         }
-        Themes.getCurrent(context)
+        themeFontService.loadCurrentTheme()
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe { theme: Theme? -> setTheme(theme) }
         initNormalToolbar()
@@ -572,7 +577,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         syncPrimaryMenuState()
     }
 
-    fun getEditorTheme() = mEditorTheme
+    fun getEditorTheme() = themeFontService.currentTheme
 
     private fun handleText(intent: Intent): Observable<String> {
         val content = intent.getStringExtra(EXTRA_CONTENT)
@@ -1432,7 +1437,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             text = latestText,
             dirty = oldSaveStickyDirty || oldEditor.isTextChanged,
             readOnly = mReadOnly,
-            themeKey = mEditorTheme?.name,
+            themeKey = themeFontService.currentTheme?.name,
         )
 
         mEditorLoading = true
@@ -1462,7 +1467,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             registerFunctionsKeyboardBackHandler()
         }
 
-        mEditorTheme?.let { editor.setTheme(it) }
+        themeFontService.currentTheme?.let { themeFontService.applyTheme(it) }
         editor.restoreStateSnapshot(snapshot)
         editor.setReadOnly(mReadOnly)
 
@@ -1661,8 +1666,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 scheduleSearchStatsRefreshDebounced()
             }
 
-            editor.setTextSizeSp(getEditorTextSize(editor.getTextSizeSp().toInt()).toFloat())
-            (editor as? AceScriptEditorEngine)?.setAceEditorFont(AceEditorFontPreferences.get())
+            themeFontService.applyEditorPreferences()
 
             editor.addCursorChangeCallback(EditorCursorChangeListener { line, cursor ->
                 autoComplete(line, cursor)
@@ -1689,34 +1693,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     private fun setTheme(theme: Theme?) {
-        theme?.let {
-            mEditorTheme = it
-
-            val appThemeColor = ThemeColorManager.colorPrimary
-            val imeBarBackgroundColor = it.imeBarBackgroundColor
-
-            editor.setTheme(it)
-
-            mInputMethodEnhanceBar.setBackgroundColor(imeBarBackgroundColor)
-            mLoadingBarContainer.setBackgroundColor(imeBarBackgroundColor)
-
-            run {
-                val adjustedImageContrastColor = ColorUtils.adjustColorForContrast(imeBarBackgroundColor, appThemeColor, 3.6)
-                mLoadingBarText.setTextColor(adjustedImageContrastColor)
-            }
-
-            val textColor = it.imeBarForegroundColor
-            mCodeCompletionBar.setTextColor(textColor)
-            mSymbolBar.setTextColor(textColor)
-            mShowFunctionsButton.setColorFilter(textColor)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                ViewUtils.setNavigationBarBackgroundColor(activity, imeBarBackgroundColor)
-            } else {
-                val adjustedImageContrastColor = ColorUtils.adjustColorForContrast(Color.WHITE, ColorUtils.applyAlpha(imeBarBackgroundColor, 1.0), 2.3)
-                ViewUtils.setNavigationBarBackgroundColor(activity, adjustedImageContrastColor)
-            }
-            invalidate()
-        }
+        themeFontService.applyTheme(theme)
     }
 
     fun onBackPressed(): Boolean {
@@ -2318,17 +2295,17 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     fun selectTextSize() {
         DialogUtils.buildAndShowAdaptive {
             TextSizeSettingDialogBuilder(context)
-                .initialValue(editor.getTextSizeSp().toInt())
+                .initialValue(themeFontService.currentTextSize())
                 .callback { value: Int -> setTextSize(value) }
                 .build()
         }
     }
 
     fun selectAceEditorFont() {
-        val fonts = AceEditorFont.entries.toList()
-        val current = AceEditorFontPreferences.get()
+        val fonts = themeFontService.availableAceFonts()
+        val current = themeFontService.currentAceFont()
         val currentIndex = fonts.indexOf(current).coerceAtLeast(0)
-        val labels = fonts.map { aceEditorFontLabel(it) }
+        val labels = fonts.map { themeFontService.aceEditorFontLabel(it) }
 
         DialogUtils.buildAndShowAdaptive {
             MaterialDialog.Builder(context)
@@ -2337,11 +2314,10 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 .choiceWidgetThemeColor()
                 .itemsCallbackSingleChoice(currentIndex) { _, _, which, _ ->
                     val font = fonts[which]
-                    AceEditorFontPreferences.set(font)
-                    (editor as? AceScriptEditorEngine)?.setAceEditorFont(font)
+                    themeFontService.persistAndApplyAceFont(font)
                     showToast(
                         context,
-                        context.getString(R.string.text_ace_editor_font_changed, aceEditorFontLabel(font)),
+                        context.getString(R.string.text_ace_editor_font_changed, themeFontService.aceEditorFontLabel(font)),
                     )
                     true
                 }
@@ -2354,20 +2330,11 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     fun setTextSize(value: Int) {
-        setEditorTextSize(value)
-        editor.setTextSizeSp(value.toFloat())
-    }
-
-    private fun aceEditorFontLabel(font: AceEditorFont): String {
-        return when (font) {
-            AceEditorFont.JETBRAINS_MONO -> context.getString(R.string.entry_ace_editor_font_jetbrains_mono)
-            AceEditorFont.SOURCE_CODE_PRO -> context.getString(R.string.entry_ace_editor_font_source_code_pro)
-            AceEditorFont.SYSTEM_MONOSPACE -> context.getString(R.string.entry_ace_editor_font_system_monospace)
-        }
+        themeFontService.setTextSize(value)
     }
 
     private fun selectEditorTheme(themes: List<Theme>) {
-        val i = themes.indexOf(mEditorTheme).coerceAtLeast(0)
+        val i = themes.indexOf(themeFontService.currentTheme).coerceAtLeast(0)
         DialogUtils.buildAndShowAdaptive {
             MaterialDialog.Builder(context)
                 .title(R.string.text_editor_theme)
@@ -2375,8 +2342,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 .choiceWidgetThemeColor()
                 .itemsCallbackSingleChoice(i) { _, _, which, _ ->
                     themes[which].let {
-                        setTheme(it)
-                        Themes.setCurrent(it.name)
+                        themeFontService.persistAndApplyTheme(it)
                     }
                     true
                 }
