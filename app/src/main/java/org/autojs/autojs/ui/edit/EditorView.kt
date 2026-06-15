@@ -7,7 +7,6 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
 import android.content.IntentFilter
-import android.database.Cursor
 import android.graphics.Color
 import android.graphics.Rect
 import android.net.Uri
@@ -17,7 +16,6 @@ import android.os.Handler
 import android.os.Looper
 import android.os.Parcelable
 import android.os.SystemClock
-import android.provider.OpenableColumns
 import android.util.AttributeSet
 import android.util.SparseBooleanArray
 import android.view.Choreographer
@@ -36,7 +34,6 @@ import androidx.fragment.app.FragmentActivity
 import com.afollestad.materialdialogs.MaterialDialog
 import com.google.android.material.snackbar.Snackbar
 import io.reactivex.Observable
-import io.reactivex.ObservableEmitter
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
@@ -88,6 +85,8 @@ import org.autojs.autojs.ui.edit.editor.engine.EditorSearchOptions
 import org.autojs.autojs.ui.edit.editor.engine.EditorSearchSyntaxException
 import org.autojs.autojs.ui.edit.editor.engine.EditorEngineType
 import org.autojs.autojs.ui.edit.editor.engine.ScriptEditorEngine
+import org.autojs.autojs.ui.edit.editor.loading.EditorFileReadMetadata
+import org.autojs.autojs.ui.edit.editor.loading.EditorFileReadPipeline
 import org.autojs.autojs.ui.edit.editor.loading.EditorTextLoadPolicy
 import org.autojs.autojs.ui.edit.editor.loading.EditorTextLoadTarget
 import org.autojs.autojs.ui.edit.editor.loading.EngineTextLoadTarget
@@ -119,18 +118,15 @@ import org.autojs.autojs.util.ViewUtils.showToast
 import org.autojs.autojs6.R
 import org.autojs.autojs6.R.string.text_unknown
 import org.autojs.autojs6.databinding.EditorViewBinding
-import java.io.BufferedInputStream
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
-import java.io.InputStreamReader
 import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.util.Locale
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
 import java.util.regex.Pattern
 
@@ -181,6 +177,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         showManual = { urlSuffix, title -> showManual(urlSuffix, title) },
         hideFunctionsKeyboard = { showSoftInput -> mFunctionsKeyboardHelper?.hideFunctionsLayout(showSoftInput) },
     )
+    private val fileReadPipeline = EditorFileReadPipeline(context)
     private val textLoadTarget: EditorTextLoadTarget
         get() = EngineTextLoadTarget(editor)
 
@@ -751,7 +748,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     private fun loadUri(uri: Uri): Observable<String> {
-        val sizeOrNull = runCatching { queryContentLengthOrNull(uri) }.getOrNull()
+        val sizeOrNull = runCatching { fileReadPipeline.queryContentLengthOrNull(uri) }.getOrNull()
         val shouldStreamAsLargeFile = EditorTextLoadPolicy.shouldStreamAsLargeFile(sizeOrNull)
         if (EditorTextLoadPolicy.shouldRouteAceToNative(editor.engineType, shouldStreamAsLargeFile, shouldForceLargeFileNativeRoute())) {
             if (!ensureNativeEditorForLargeFile()) {
@@ -768,20 +765,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
         return Observable
             .fromCallable {
-                val resolver = context.contentResolver
-                val rawBytes = resolver.openInputStream(uri)?.use { it.readBytes() } ?: ByteArray(0)
-
-                val detectedCharsetWrapper = StringUtils.detectCharset(rawBytes)
-                mCurrentCharsetConfidence = detectedCharsetWrapper.confidence ?: 0
-                mCurrentCharset = detectedCharsetWrapper.charsetOrDefault()
-                mHadBom = StringUtils.hasBom(rawBytes, mCurrentCharset)
-
-                val offset = if (mHadBom) {
-                    StringUtils.bomBytes(mCurrentCharset).size.coerceAtMost(rawBytes.size)
-                } else 0
-                val len = (rawBytes.size - offset).coerceAtLeast(0)
-
-                String(rawBytes, offset, len, mCurrentCharset)
+                fileReadPipeline.readText(uri)
             }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -790,10 +774,11 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 mEditorLoading = true
                 syncPrimaryMenuState()
             }
-            .doOnNext { text: String ->
+            .doOnNext { result ->
                 post {
                     runCatching {
-                        setInitialText(text)
+                        applyReadMetadata(result.metadata)
+                        setInitialText(result.text)
 
                         // IMPORTANT: end loading UI on success.
                         // zh-CN: 重要: 成功时必须结束加载 UI.
@@ -808,6 +793,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                     }
                 }
             }
+            .map { it.text }
             .doOnError {
                 endEditorLoadingUi()
                 mEditorLoading = false
@@ -835,28 +821,6 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     private fun shouldForceLargeFileNativeRoute(): Boolean {
         return editor.engineType == EditorEngineType.ACE && AceEditorTestHooks.shouldForceLargeFileNativeRoute()
-    }
-
-    private fun queryContentLengthOrNull(uri: Uri): Long? {
-        return when (uri.scheme?.lowercase()) {
-            "file" -> uri.path?.let { File(it).length().coerceAtLeast(0L) }
-            "content" -> {
-                val resolver = context.contentResolver
-                var cursor: Cursor? = null
-                try {
-                    cursor = resolver.query(uri, arrayOf(OpenableColumns.SIZE), null, null, null)
-                    if (cursor != null && cursor.moveToFirst()) {
-                        val idx = cursor.getColumnIndex(OpenableColumns.SIZE)
-                        if (idx >= 0 && !cursor.isNull(idx)) {
-                            cursor.getLong(idx).coerceAtLeast(0L)
-                        } else null
-                    } else null
-                } finally {
-                    runCatching { cursor?.close() }
-                }
-            }
-            else -> null
-        }
     }
 
     override fun onDetachedFromWindow() {
@@ -914,67 +878,17 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     private fun loadUriStreamed(uri: Uri): Observable<String> {
-        val readBytes = AtomicLong(0L)
-
         // Reset cancel state for a new session.
         // zh-CN: 新的加载会话开始前重置取消标记.
         mLargeFileCancel.set(false)
 
-        return Observable
-            .create { emitter ->
-                val resolver = context.contentResolver
-
-                // Emit an early placeholder so handleIntent() can proceed.
-                // zh-CN: 提前发出占位字符串, 使 handleIntent() 能继续运行.
-                emitter.onNext("")
-
-                val raw = resolver.openInputStream(uri) ?: run {
-                    emitter.onError(IllegalStateException("Cannot open input stream for $uri"))
-                    return@create
-                }
-
-                // Keep a reference for cancellation.
-                // zh-CN: 保存引用以便取消时强制 close.
-                mLargeFileStreamRef.set(raw)
-
-                val counted = CountingInputStream(raw, readBytes)
-                val bis = BufferedInputStream(counted)
-
-                try {
-                    bis.use { input ->
-                        if (mLargeFileCancel.get() || emitter.isDisposed) {
-                            // Cancel early.
-                            // zh-CN: 提前取消.
-                            return@use
-                        }
-
-                        val sampleLimitBytes = 64 * 1024
-                        input.mark(sampleLimitBytes + 8)
-
-                        val sample = ByteArray(sampleLimitBytes)
-                        val sampleRead = input.read(sample).coerceAtLeast(0)
-                        val sampleBytes = if (sampleRead == sample.size) sample else sample.copyOf(sampleRead)
-
-                        val detected = StringUtils.detectCharset(sampleBytes)
-                        mCurrentCharsetConfidence = detected.confidence ?: 0
-                        mCurrentCharset = detected.charsetOrDefault()
-                        mHadBom = StringUtils.hasBom(sampleBytes, mCurrentCharset)
-
-                        runCatching { input.reset() }.getOrElse {
-                            if (!emitter.isDisposed && !mLargeFileCancel.get()) {
-                                emitter.onError(IllegalStateException("Stream reset failed for $uri"))
-                            }
-                            return@use
-                        }
-
-                        streamDecodeAndEmit(input, emitter)
-                    }
-                } finally {
-                    // Clear reference when finished/failed.
-                    // zh-CN: 结束/失败后清理引用.
-                    mLargeFileStreamRef.set(null)
-                }
-            }
+        return fileReadPipeline
+            .streamTextChunks(
+                uri = uri,
+                cancel = mLargeFileCancel,
+                streamRef = mLargeFileStreamRef,
+                onMetadata = ::applyReadMetadata,
+            )
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .let { upstream ->
@@ -982,6 +896,12 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                     upstream = upstream,
                 )
             }
+    }
+
+    private fun applyReadMetadata(metadata: EditorFileReadMetadata) {
+        mCurrentCharsetConfidence = metadata.charsetConfidence
+        mCurrentCharset = metadata.charset
+        mHadBom = metadata.hadBom
     }
 
     private fun bridgeStreamToUiWithProgress(
@@ -1138,37 +1058,6 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         // zh-CN: 保存引用以便取消.
         mLargeFileFrameCallback = callback
         choreographer.postFrameCallback(callback)
-    }
-
-    private fun streamDecodeAndEmit(input: BufferedInputStream, emitter: ObservableEmitter<String>) {
-        // Skip BOM bytes by consuming from raw stream before decoding.
-        // zh-CN: 在解码前先从原始字节流中消费 BOM 字节.
-        val bomBytes = StringUtils.bomBytes(mCurrentCharset)
-        if (mHadBom && bomBytes.isNotEmpty()) {
-            var skipped = 0
-            while (skipped < bomBytes.size) {
-                if (mLargeFileCancel.get() || emitter.isDisposed) {
-                    // Cancel early.
-                    // zh-CN: 提前取消.
-                    return
-                }
-                val r = input.read()
-                if (r == -1) break
-                skipped++
-            }
-        }
-
-        val reader = InputStreamReader(input, mCurrentCharset)
-        val buf = CharArray(32 * 1024)
-        while (!emitter.isDisposed && !mLargeFileCancel.get()) {
-            val n = reader.read(buf)
-            if (n <= 0) break
-            emitter.onNext(String(buf, 0, n))
-        }
-
-        if (!emitter.isDisposed && !mLargeFileCancel.get()) {
-            emitter.onComplete()
-        }
     }
 
     private fun setInitialText(text: String) {
@@ -1695,7 +1584,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     private fun currentFileSizeOrNull(): Long? {
         val currentUri = uri ?: return null
-        return runCatching { queryContentLengthOrNull(currentUri) }.getOrNull()
+        return runCatching { fileReadPipeline.queryContentLengthOrNull(currentUri) }.getOrNull()
     }
 
     private fun currentLargeFilePolicyLabel(): String {
@@ -3003,32 +2892,6 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     fun cleanBeforeExit() {
         mTmpSavedFileForRunning?.deleteOnExit()
-    }
-
-    private class CountingInputStream(private val delegate: InputStream, private val counter: AtomicLong) : InputStream() {
-        override fun read(): Int {
-            val r = delegate.read()
-            if (r >= 0) counter.incrementAndGet()
-            return r
-        }
-
-        override fun read(b: ByteArray, off: Int, len: Int): Int {
-            val n = delegate.read(b, off, len)
-            if (n > 0) counter.addAndGet(n.toLong())
-            return n
-        }
-
-        override fun skip(n: Long): Long {
-            val s = delegate.skip(n)
-            if (s > 0) counter.addAndGet(s)
-            return s
-        }
-
-        override fun available(): Int = delegate.available()
-        override fun close() = delegate.close()
-        override fun mark(readlimit: Int) = delegate.mark(readlimit)
-        override fun reset() = delegate.reset()
-        override fun markSupported(): Boolean = delegate.markSupported()
     }
 
     companion object {

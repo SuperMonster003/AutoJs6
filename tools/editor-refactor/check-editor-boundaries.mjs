@@ -76,6 +76,7 @@ const commandDispatcher = "app/src/main/java/org/autojs/autojs/ui/edit/editor/co
 const nativeEngine = "app/src/main/java/org/autojs/autojs/ui/edit/editor/engine/NativeCodeEditorEngine.kt";
 const aceEngine = "app/src/main/java/org/autojs/autojs/ui/edit/editor/engine/AceScriptEditorEngine.kt";
 const functionsKeyboardHelper = "app/src/main/java/org/autojs/autojs/ui/edit/keyboard/FunctionsKeyboardHelper.java";
+const fileReadPipeline = "app/src/main/java/org/autojs/autojs/ui/edit/editor/loading/EditorFileReadPipeline.kt";
 const textLoadPolicy = "app/src/main/java/org/autojs/autojs/ui/edit/editor/loading/EditorTextLoadPolicy.kt";
 const textLoadTarget = "app/src/main/java/org/autojs/autojs/ui/edit/editor/loading/EditorTextLoadTarget.kt";
 
@@ -87,6 +88,10 @@ assertIncludes(editorView, "mCommandDispatcher.onCompletionLongClick(completions
 assertIncludes(editorView, "mCommandDispatcher.onModuleLongClick(module)");
 assertIncludes(editorView, "mCommandDispatcher.onPropertyClick(m, property)");
 assertIncludes(editorView, "mCommandDispatcher.onPropertyLongClick(m, property)");
+assertIncludes(editorView, "private val fileReadPipeline = EditorFileReadPipeline(context)");
+assertIncludes(editorView, "fileReadPipeline.readText(uri)");
+assertIncludes(editorView, ".streamTextChunks(");
+assertIncludes(editorView, "private fun applyReadMetadata(metadata: EditorFileReadMetadata)");
 assertIncludes(editorView, "private val textLoadTarget: EditorTextLoadTarget");
 assertIncludes(editorView, "EditorTextLoadPolicy.shouldStreamAsLargeFile(sizeOrNull)");
 assertIncludes(editorView, "EditorTextLoadPolicy.shouldLoadProgressively(text.length)");
@@ -100,6 +105,10 @@ assertNotIncludes(editorView, "editor.setLoadingText(");
 assertNotIncludes(editorView, "editor.appendTextChunk(");
 assertNotIncludes(editorView, "editor.beginLargeTextLoading(");
 assertNotIncludes(editorView, "editor.cancelLargeTextLoading(");
+assertNotIncludes(editorView, "OpenableColumns");
+assertNotIncludes(editorView, "StringUtils.detectCharset");
+assertNotIncludes(editorView, "StringUtils.hasBom");
+assertNotIncludes(editorView, "streamDecodeAndEmit(");
 
 assertIncludes(scriptEngine, "fun onImeInsetsChanged(visible: Boolean, bottomInset: Int) = Unit");
 assertIncludes(policyFactory, "EditorEngineType.NATIVE -> NativeEditorViewportPolicy(editor, hostView)");
@@ -120,6 +129,15 @@ assertNotIncludes(aceEngine, "setLoadingGutterDigits");
 assertIncludes(nativeEngine, "return AutoCompletion(context, codeEditor.codeEditText)");
 assertNotIncludes(functionsKeyboardHelper, "CodeEditText");
 assertNotIncludes(functionsKeyboardHelper, "Editable");
+
+assertIncludes(fileReadPipeline, "class EditorFileReadPipeline(");
+assertIncludes(fileReadPipeline, "fun readText(uri: Uri): EditorFileReadResult");
+assertIncludes(fileReadPipeline, "fun streamTextChunks(");
+assertIncludes(fileReadPipeline, "data class EditorFileReadMetadata(");
+assertIncludes(fileReadPipeline, "StringUtils.detectCharset(bytes)");
+assertIncludes(fileReadPipeline, "StringUtils.hasBom(bytes, charset)");
+assertNotIncludes(fileReadPipeline, "ScriptEditorEngine");
+assertNotIncludes(fileReadPipeline, "CodeEditText");
 
 assertIncludes(textLoadPolicy, "const val LARGE_FILE_THRESHOLD_BYTES = 512 * 1024");
 assertIncludes(textLoadPolicy, "fun shouldRouteAceToNative(");
@@ -147,6 +165,18 @@ assertOnlyIn("editText.text?.append(chunk)", [
 
 assertOnlyIn("beginBatchEdit()", [
   "app/src/main/java/org/autojs/autojs/ui/edit/editor/engine/NativeCodeEditorEngine.kt",
+]);
+
+assertOnlyIn("OpenableColumns", [
+  "app/src/main/java/org/autojs/autojs/ui/edit/editor/loading/EditorFileReadPipeline.kt",
+]);
+
+assertOnlyIn("StringUtils.detectCharset", [
+  "app/src/main/java/org/autojs/autojs/ui/edit/editor/loading/EditorFileReadPipeline.kt",
+]);
+
+assertOnlyIn("StringUtils.hasBom", [
+  "app/src/main/java/org/autojs/autojs/ui/edit/editor/loading/EditorFileReadPipeline.kt",
 ]);
 
 console.log("Editor boundary checks passed.");

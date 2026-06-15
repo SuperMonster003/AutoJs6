@@ -47,7 +47,7 @@ goal is to make editor behavior engine-neutral where possible, and keep native
 ## Phase 3: Loading and Large File Boundaries
 
 - [x] Add `EditorTextLoadTarget` between `EditorView` loading flow and engine-specific text mutation.
-- [ ] Split common file-read pipeline from engine-specific text load target.
+- [x] Split common file-read pipeline from engine-specific text load target.
 - [x] Keep `Editable.append`, loading gutter, and `CodeEditText` batching native-only.
 - [x] Define ACE small/medium/large text loading policy.
 - [x] Keep large-file Native route explicit and diagnosable.
