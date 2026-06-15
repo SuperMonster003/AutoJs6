@@ -60,6 +60,11 @@ object AceDiagnostics {
             lastHostImeVisible = null,
             lastHostImeBottomInset = null,
             lastHostImeEventAtUptimeMillis = null,
+            lastBridgeEventName = null,
+            currentBridgeEventWindowCount = 0,
+            lastBridgeEventWindowCount = 0,
+            maxBridgeEventWindowCount = 0,
+            maxBridgeEventWindowStartedAtUptimeMillis = null,
             runtimeEventHistory = emptyList(),
         )
     }
@@ -115,6 +120,11 @@ object AceDiagnostics {
             appendLine("lastHostImeVisible=${snapshot.lastHostImeVisible?.toString().orUnknown()}")
             appendLine("lastHostImeBottomInset=${snapshot.lastHostImeBottomInset?.toString().orUnknown()}")
             appendLine("lastHostImeEventAtUptimeMillis=${snapshot.lastHostImeEventAtUptimeMillis?.toString().orUnknown()}")
+            appendLine("lastBridgeEventName=${snapshot.lastBridgeEventName.orUnknown()}")
+            appendLine("currentBridgeEventWindowCount=${snapshot.currentBridgeEventWindowCount}")
+            appendLine("lastBridgeEventWindowCount=${snapshot.lastBridgeEventWindowCount}")
+            appendLine("maxBridgeEventWindowCount=${snapshot.maxBridgeEventWindowCount}")
+            appendLine("maxBridgeEventWindowStartedAtUptimeMillis=${snapshot.maxBridgeEventWindowStartedAtUptimeMillis?.toString().orUnknown()}")
             if (snapshot.runtimeEventHistory.isEmpty()) {
                 appendLine("runtimeEventHistory=empty")
             } else {

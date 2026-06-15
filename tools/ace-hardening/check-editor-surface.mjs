@@ -103,12 +103,24 @@ assertMatch(css, /body\.ace-ready #editor\s*\{[\s\S]*visibility:\s*visible/, "vi
 assertMatch(css, /html\s*\{[\s\S]*background:\s*#f7f8fa/, "light first-paint background");
 assertMatch(css, /html\.ace-theme-dark,\s*body\.ace-theme-dark,\s*body\.ace-theme-dark #editor\s*\{[\s\S]*background:\s*#1e1e1e/, "dark first-paint background");
 assertMatch(css, /#editor,\s*\.ace_editor\s*\{[\s\S]*JetBrains Mono/, "stable ACE font stack");
+assertMatch(css, /#editor,\s*\.ace_editor\s*\{[\s\S]*-webkit-user-select:\s*text/, "ACE text selection enabled");
 assertMatch(css, /\.ace_gutter-cell\.ace_breakpoint\s*\{[\s\S]*radial-gradient/, "breakpoint gutter marker");
 assertMatch(css, /\.ace_gutter-cell\.ace_breakpoint\s*\{[\s\S]*7px center/, "breakpoint gutter marker anchor");
 assertMatch(css, /\.autojs6_debug_line\s*\{[\s\S]*position:\s*absolute/, "debug line marker positioning");
 assertMatch(css, /\.autojs6_debug_line\s*\{[\s\S]*z-index:\s*5/, "debug line marker z-index");
+assertMatch(css, /\.ace_gutter,\s*\.ace_gutter-cell\s*\{[\s\S]*user-select:\s*none/, "gutter selection suppression");
+assertMatch(css, /\.ace_mobile-menu\s*\{[\s\S]*z-index:\s*20/, "mobile menu remains available");
+if (css.includes(".ace_mobile-menu {\n    display: none")) {
+  throw new Error("ACE mobile menu must not be globally hidden");
+}
 
 assertIncludes(bridge, "var firstPaintNotified = false;", "first-paint idempotency flag");
+assertIncludes(bridge, "var STATE_NOTIFY_THROTTLE_MS = 100;", "state event throttle");
+assertIncludes(bridge, "var TEXT_NOTIFY_THROTTLE_MS = 100;", "text event throttle");
+assertIncludes(bridge, "var CURSOR_NOTIFY_THROTTLE_MS = 50;", "cursor event throttle");
+assertIncludes(bridge, "function flushCursorChanged()", "cursor event flush");
+assertIncludes(bridge, "function flushStateChanged()", "state event flush");
+assertIncludes(bridge, "function flushTextChanged()", "text event flush");
 assertIncludes(bridge, 'document.body.classList.add("ace-ready")', "ACE ready class add");
 assertIncludes(bridge, 'callBridge("notifyEvent", ["firstPaint", lightweightStateJson()])', "first-paint bridge event");
 assertMatch(bridge, /function afterTwoFrames\(callback\)[\s\S]*raf\(function\(\)[\s\S]*raf\(callback\);[\s\S]*\}\);[\s\S]*\}/, "double requestAnimationFrame first-paint guard");
@@ -127,10 +139,13 @@ assertIncludes(aceCodeEditor, "private fun handleFirstPaint()", "native first-pa
 assertIncludes(aceCodeEditor, "hideLoadingOverlay()", "first-paint overlay hide");
 assertIncludes(aceCodeEditor, '"resizeDone" -> handleResizeDone(payloadJson)', "native resizeDone handler");
 assertIncludes(aceCodeEditor, "lastAceResizeCompletedReason = resizeReasonFromPayload", "native resize completion reason");
+assertIncludes(aceCodeEditor, "BRIDGE_EVENT_STORM_THRESHOLD", "bridge event storm threshold");
+assertIncludes(aceCodeEditor, 'eventHistory.record(\n                "bridge_event_storm"', "bridge event storm diagnostics");
 
 assertIncludes(diagnostics, "lastFirstPaintAtUptimeMillis", "first-paint diagnostics field");
 assertIncludes(diagnostics, "lastAceResizeScheduledReason", "resize scheduled diagnostics field");
 assertIncludes(diagnostics, "lastAceResizeDispatchedReason", "resize dispatched diagnostics field");
 assertIncludes(diagnostics, "lastAceResizeCompletedReason", "resize completed diagnostics field");
+assertIncludes(diagnostics, "maxBridgeEventWindowCount", "bridge event window diagnostics field");
 
 console.log("ACE editor surface smoke checks passed.");

@@ -48,6 +48,11 @@ data class AceDiagnosticsSnapshot(
     val lastHostImeVisible: Boolean?,
     val lastHostImeBottomInset: Int?,
     val lastHostImeEventAtUptimeMillis: Long?,
+    val lastBridgeEventName: String?,
+    val currentBridgeEventWindowCount: Int,
+    val lastBridgeEventWindowCount: Int,
+    val maxBridgeEventWindowCount: Int,
+    val maxBridgeEventWindowStartedAtUptimeMillis: Long?,
     val runtimeEventHistory: List<String>,
     val createdAtEpochMillis: Long = System.currentTimeMillis(),
 )

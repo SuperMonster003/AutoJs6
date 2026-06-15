@@ -119,27 +119,27 @@ Acceptance:
 
 ## Phase 5: Bridge Event Throttling
 
-- [ ] Audit JS-to-Kotlin event frequency during IME animation.
-- [ ] Throttle cursor events to a bounded cadence.
-- [ ] Throttle selection/state events while preserving text deltas.
-- [ ] Keep `changeDelta` reliable and ordered.
-- [ ] Debounce UI menu/save-button refreshes triggered by high-frequency editor
+- [x] Audit JS-to-Kotlin event frequency during IME animation.
+- [x] Throttle cursor events to a bounded cadence.
+- [x] Throttle selection/state events while preserving text deltas.
+- [x] Keep `changeDelta` reliable and ordered.
+- [x] Debounce UI menu/save-button refreshes triggered by high-frequency editor
   state changes.
-- [ ] Add smoke or diagnostic checks that expose event storms.
+- [x] Add smoke or diagnostic checks that expose event storms.
 
 Acceptance:
 
-- [ ] Keyboard animation does not produce unbounded cursor/state event bursts.
-- [ ] Text edits remain lossless through TextMirror.
+- [x] Keyboard animation does not produce unbounded cursor/state event bursts.
+- [x] Text edits remain lossless through TextMirror.
 
 ## Phase 6: Mobile Selection CSS Review
 
-- [ ] Audit `user-select`, `.ace_mobile-menu`, selection handles, and
+- [x] Audit `user-select`, `.ace_mobile-menu`, selection handles, and
   action-mode behavior on Android WebView.
 - [ ] Test long-press, double-tap, copy, paste, CJK composition, completion
   accept, and IME show/hide with mobile selection paths.
-- [ ] Keep breakpoint and debug-line styles stable.
-- [ ] If selection suppression is needed, scope it narrowly instead of hiding
+- [x] Keep breakpoint and debug-line styles stable.
+- [x] If selection suppression is needed, scope it narrowly instead of hiding
   all mobile behavior.
 
 Acceptance:

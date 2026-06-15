@@ -363,6 +363,11 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     private val mUiHandler = Handler(Looper.getMainLooper())
 
+    private val mPrimaryMenuStateSyncDebounceMs = 80L
+    private val mPrimaryMenuStateSyncRunnable = Runnable {
+        syncPrimaryMenuState()
+    }
+
     // Delay showing loading bar to avoid flicker.
     // zh-CN: 延迟显示加载提示条, 避免闪烁.
     private val mLoadingBarShowDelayMs = 300L
@@ -1288,6 +1293,11 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         }
     }
 
+    private fun schedulePrimaryMenuStateSync() {
+        mUiHandler.removeCallbacks(mPrimaryMenuStateSyncRunnable)
+        mUiHandler.postDelayed(mPrimaryMenuStateSyncRunnable, mPrimaryMenuStateSyncDebounceMs)
+    }
+
     private fun notifyScriptRunningStateChanged() {
         val isRunning = isScriptRunning()
         updateRunButtonVisualState()
@@ -1672,7 +1682,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                     saveStickyDirty = editor.isTextChanged || mHadDirectEditSinceSave
                 }
 
-                syncPrimaryMenuState()
+                schedulePrimaryMenuStateSync()
             }
 
             editor.addTextChangeListener {

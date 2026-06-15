@@ -367,6 +367,15 @@ assertIncludes(roadmap, "- [x] Make `showSoftInput` / `hideSoftInput` explicitly
 assertIncludes(roadmap, "- [x] Add a bounded ACE runtime event history for the last 30 key events:");
 assertIncludes(roadmap, "- [x] Add `AceJsErrorClassifier`.");
 assertIncludes(roadmap, "- [x] Diagnostics contain enough event history to explain the fallback decision.");
+assertIncludes(roadmap, "- [x] Audit JS-to-Kotlin event frequency during IME animation.");
+assertIncludes(roadmap, "- [x] Throttle cursor events to a bounded cadence.");
+assertIncludes(roadmap, "- [x] Throttle selection/state events while preserving text deltas.");
+assertIncludes(roadmap, "- [x] Keep `changeDelta` reliable and ordered.");
+assertIncludes(roadmap, "- [x] Debounce UI menu/save-button refreshes triggered by high-frequency editor");
+assertIncludes(roadmap, "- [x] Add smoke or diagnostic checks that expose event storms.");
+assertIncludes(roadmap, "- [x] Audit `user-select`, `.ace_mobile-menu`, selection handles, and");
+assertIncludes(roadmap, "- [x] Keep breakpoint and debug-line styles stable.");
+assertIncludes(roadmap, "- [x] If selection suppression is needed, scope it narrowly instead of hiding");
 assertIncludes(roadmap, "ACE clean-host behavior remains the default ACE path.");
 assertIncludes(roadmap, "LSP and VisualEditorAce remain deferred until this gate is satisfied.");
 
@@ -448,6 +457,11 @@ assertIncludes(aceDiagnosticsSnapshot, "val lastImeHeight: Int?");
 assertIncludes(aceDiagnosticsSnapshot, "val lastImeTransitionStartedAtUptimeMillis: Long?");
 assertIncludes(aceDiagnosticsSnapshot, "val lastImeTransitionEndedAtUptimeMillis: Long?");
 assertIncludes(aceDiagnosticsSnapshot, "val lastImeIgnoredRequestReason: String?");
+assertIncludes(aceDiagnosticsSnapshot, "val lastBridgeEventName: String?");
+assertIncludes(aceDiagnosticsSnapshot, "val currentBridgeEventWindowCount: Int");
+assertIncludes(aceDiagnosticsSnapshot, "val lastBridgeEventWindowCount: Int");
+assertIncludes(aceDiagnosticsSnapshot, "val maxBridgeEventWindowCount: Int");
+assertIncludes(aceDiagnosticsSnapshot, "val maxBridgeEventWindowStartedAtUptimeMillis: Long?");
 assertIncludes(aceDiagnosticsSnapshot, "val runtimeEventHistory: List<String>");
 
 assertIncludes(aceDiagnostics, "viewportPolicy=${snapshot.viewportPolicy.orUnknown()}");
@@ -456,6 +470,9 @@ assertIncludes(aceDiagnostics, "lastImeHeight=${snapshot.lastImeHeight?.toString
 assertIncludes(aceDiagnostics, "lastImeTransitionStartedAtUptimeMillis=${snapshot.lastImeTransitionStartedAtUptimeMillis?.toString().orUnknown()}");
 assertIncludes(aceDiagnostics, "lastImeTransitionEndedAtUptimeMillis=${snapshot.lastImeTransitionEndedAtUptimeMillis?.toString().orUnknown()}");
 assertIncludes(aceDiagnostics, "lastImeIgnoredRequestReason=${snapshot.lastImeIgnoredRequestReason.orUnknown()}");
+assertIncludes(aceDiagnostics, "lastBridgeEventName=${snapshot.lastBridgeEventName.orUnknown()}");
+assertIncludes(aceDiagnostics, "currentBridgeEventWindowCount=${snapshot.currentBridgeEventWindowCount}");
+assertIncludes(aceDiagnostics, "maxBridgeEventWindowCount=${snapshot.maxBridgeEventWindowCount}");
 assertIncludes(aceDiagnostics, "runtimeEventHistory=${snapshot.runtimeEventHistory.size}");
 assertIncludes(aceDiagnostics, "runtimeEvent=$it");
 assertIncludes(aceDiagnostics, "pendingAceResizeReason=${snapshot.pendingAceResizeReason.orUnknown()}");
@@ -471,6 +488,13 @@ assertIncludes(aceCodeEditor, "private val eventHistory = AceRuntimeEventHistory
 assertIncludes(aceCodeEditor, "lastImeState = imeController.state.name");
 assertIncludes(aceCodeEditor, "lastImeIgnoredRequestReason = imeController.lastIgnoredRequestReason");
 assertIncludes(aceCodeEditor, "runtimeEventHistory = eventHistory.snapshot()");
+assertIncludes(aceCodeEditor, "lastBridgeEventName = lastBridgeEventName");
+assertIncludes(aceCodeEditor, "currentBridgeEventWindowCount = bridgeEventWindowCount");
+assertIncludes(aceCodeEditor, "maxBridgeEventWindowCount = maxBridgeEventWindowCount");
+assertIncludes(aceCodeEditor, "private fun recordBridgeEvent(name: String)");
+assertIncludes(aceCodeEditor, "BRIDGE_EVENT_WINDOW_MS = 1_000L");
+assertIncludes(aceCodeEditor, "BRIDGE_EVENT_STORM_THRESHOLD = 60");
+assertIncludes(aceCodeEditor, "\"bridge_event_storm\"");
 assertIncludes(aceCodeEditor, "val decision = imeController.requestShow(now)");
 assertIncludes(aceCodeEditor, "val decision = imeController.requestHide(now)");
 assertIncludes(aceCodeEditor, "imeController.onHostImeInsetsChanged(visible, bottomInset, now)");
@@ -516,6 +540,10 @@ assertIncludes(aceJsErrorClassifier, "AceFailureType.JS_INIT_ERROR");
 
 assertIncludes(aceFallbackPolicy, "AceFailureType.LSP_ERROR");
 assertIncludes(aceFallbackPolicy, "AceFailureType.COMPLETION_ERROR");
+
+assertIncludes(editorView, "private val mPrimaryMenuStateSyncDebounceMs = 80L");
+assertIncludes(editorView, "private fun schedulePrimaryMenuStateSync()");
+assertIncludes(editorView, "schedulePrimaryMenuStateSync()");
 
 assertOnlyIn("key_ace_clean_host_layout", []);
 

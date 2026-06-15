@@ -39,7 +39,7 @@ The following hooks are available in debug builds through `AceEditorTestHooks`. 
 
 Use `More -> Copy ACE diagnostics` from the editor menu when reporting ACE issues. The same export is available from the isolated ACE debug page through the `Copy ACE diagnostics` button.
 
-Diagnostics should include the current engine type, ACE health state, last failure, Android/WebView versions, LSP state, file size, large-file policy, TextMirror revision, viewport policy, host IME event, and ACE resize schedule/dispatch/complete fields.
+Diagnostics should include the current engine type, ACE health state, last failure, Android/WebView versions, LSP state, file size, large-file policy, TextMirror revision, viewport policy, host IME event, ACE resize schedule/dispatch/complete fields, bridge event window counters, and recent runtime event history.
 
 ## Completion And LSP Checks
 
@@ -68,6 +68,7 @@ The repository currently has only lightweight instrumentation test dependencies 
 - `aceImeShowHideStress`
 - `aceImeLowerViewportAnchor`
 - `aceImeCompletionAndSelection`
+- `aceMobileSelectionCopyPaste`
 
 ## IME Show/Hide Manual Checklist
 
@@ -554,6 +555,33 @@ Failure logs:
 - `completionError`
 - `recoverableError`
 - `lastActionModeAtUptimeMillis`
+
+### ACE-MOBILE-001: Mobile selection, copy, paste, and CJK composition
+
+Preconditions:
+- ACE editor is active on a physical Android WebView device when available.
+- Open a file with several lines of mixed ASCII, punctuation, and CJK text.
+
+Steps:
+1. Long-press a word and confirm the ACE mobile selection menu appears when available.
+2. Double-tap a word, expand the selection handles, and dismiss action mode.
+3. Copy selected text and paste it on another line.
+4. Type CJK composition text before and after selection mode.
+5. Tap the gutter before and after selection mode to toggle a breakpoint.
+6. Copy ACE diagnostics.
+
+Expected:
+- Long-press and double-tap do not fallback ACE.
+- Copy and paste are usable through the WebView/ACE mobile path.
+- CJK composition remains usable after selection/action-mode entry and exit.
+- Gutter breakpoint taps and debug-line markers remain aligned.
+- Diagnostics do not show unbounded bridge event bursts.
+
+Failure logs:
+- `lastActionModeAtUptimeMillis`
+- `maxBridgeEventWindowCount`
+- `runtimeEvent=bridge_event_storm`
+- `.ace_mobile-menu`
 
 ### ACE-LIFECYCLE-001: Rotation and background restore
 

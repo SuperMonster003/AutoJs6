@@ -137,6 +137,12 @@ class AceCodeEditor @JvmOverloads constructor(
     private var lastAceResizeCompletedAtUptimeMillis = 0L
     private var lastActionModeAtUptimeMillis = 0L
     private var actionModeActive = false
+    private var bridgeEventWindowStartedAtUptimeMillis = 0L
+    private var bridgeEventWindowCount = 0
+    private var lastBridgeEventWindowCount = 0
+    private var maxBridgeEventWindowCount = 0
+    private var maxBridgeEventWindowStartedAtUptimeMillis = 0L
+    private var lastBridgeEventName: String? = null
 
     val healthState: AceHealthState
         get() = healthMonitor.state
@@ -197,6 +203,11 @@ class AceCodeEditor @JvmOverloads constructor(
             lastHostImeVisible = null,
             lastHostImeBottomInset = null,
             lastHostImeEventAtUptimeMillis = null,
+            lastBridgeEventName = lastBridgeEventName,
+            currentBridgeEventWindowCount = bridgeEventWindowCount,
+            lastBridgeEventWindowCount = lastBridgeEventWindowCount,
+            maxBridgeEventWindowCount = maxBridgeEventWindowCount,
+            maxBridgeEventWindowStartedAtUptimeMillis = maxBridgeEventWindowStartedAtUptimeMillis.takeIf { it > 0L },
             runtimeEventHistory = eventHistory.snapshot(),
         )
     }
@@ -443,6 +454,7 @@ class AceCodeEditor @JvmOverloads constructor(
 
     internal fun handleEvent(name: String, payloadJson: String?) {
         postToMain {
+            recordBridgeEvent("notifyEvent:$name")
             healthMonitor.markStateEvent()
             eventHistory.record("js_event", "name=$name")
             when (name) {
@@ -461,6 +473,7 @@ class AceCodeEditor @JvmOverloads constructor(
 
     internal fun handleReady(stateJson: String?) {
         postToMain {
+            recordBridgeEvent("notifyReady")
             if (AceEditorTestHooks.shouldForceReadyTimeout()) {
                 return@postToMain
             }
@@ -482,6 +495,7 @@ class AceCodeEditor @JvmOverloads constructor(
 
     internal fun handleStateChanged(stateJson: String?) {
         postToMain {
+            recordBridgeEvent("notifyStateChanged")
             healthMonitor.markStateEvent()
             val state = updateState(stateJson)
             listener?.onStateChanged(state)
@@ -490,6 +504,7 @@ class AceCodeEditor @JvmOverloads constructor(
 
     internal fun handleTextChanged(stateJson: String?) {
         postToMain {
+            recordBridgeEvent("notifyTextChanged")
             healthMonitor.markChangeEvent()
             val state = updateState(stateJson)
             listener?.onTextChanged(state.text, state)
@@ -498,6 +513,7 @@ class AceCodeEditor @JvmOverloads constructor(
 
     internal fun handleCursorChanged(lineText: String, line: Int, column: Int, stateJson: String?) {
         postToMain {
+            recordBridgeEvent("notifyCursorChanged")
             healthMonitor.markStateEvent()
             val state = updateState(stateJson).copy(
                 cursor = AceCursor(line = line, column = column, lineText = lineText),
@@ -512,6 +528,7 @@ class AceCodeEditor @JvmOverloads constructor(
 
     internal fun handleBreakpointChanged(line: Int, enabled: Boolean, stateJson: String?) {
         postToMain {
+            recordBridgeEvent("notifyBreakpointChanged")
             healthMonitor.markStateEvent()
             val state = updateState(stateJson)
             listener?.onBreakpointChanged(line, enabled, state)
@@ -520,6 +537,7 @@ class AceCodeEditor @JvmOverloads constructor(
 
     internal fun handleError(message: String) {
         postToMain {
+            recordBridgeEvent("notifyError")
             listener?.onError(message.ifBlank { "Unknown ACE editor error" })
         }
     }
@@ -528,6 +546,31 @@ class AceCodeEditor @JvmOverloads constructor(
         postToMain {
             eventHistory.record("fallback", "type=${failure.type.name},fatal=${failure.fatal},message=${failure.message}")
             listener?.onFailure(failure)
+        }
+    }
+
+    private fun recordBridgeEvent(name: String) {
+        val now = SystemClock.uptimeMillis()
+        if (bridgeEventWindowStartedAtUptimeMillis <= 0L) {
+            bridgeEventWindowStartedAtUptimeMillis = now
+        }
+        if (now - bridgeEventWindowStartedAtUptimeMillis >= BRIDGE_EVENT_WINDOW_MS) {
+            lastBridgeEventWindowCount = bridgeEventWindowCount
+            bridgeEventWindowStartedAtUptimeMillis = now
+            bridgeEventWindowCount = 0
+        }
+        bridgeEventWindowCount += 1
+        lastBridgeEventName = name
+        if (bridgeEventWindowCount > maxBridgeEventWindowCount) {
+            maxBridgeEventWindowCount = bridgeEventWindowCount
+            maxBridgeEventWindowStartedAtUptimeMillis = bridgeEventWindowStartedAtUptimeMillis
+        }
+        if (bridgeEventWindowCount == BRIDGE_EVENT_STORM_THRESHOLD) {
+            eventHistory.record(
+                "bridge_event_storm",
+                "count=$bridgeEventWindowCount,windowMillis=$BRIDGE_EVENT_WINDOW_MS,last=$name",
+                now,
+            )
         }
     }
 
@@ -1280,6 +1323,8 @@ class AceCodeEditor @JvmOverloads constructor(
         private const val IME_TRANSITION_HEARTBEAT_SUSPEND_MS = 800L
         private const val RESIZE_SETTLE_DELAY_MS = 120L
         private const val IME_HEIGHT_THRESHOLD_DP = 80f
+        private const val BRIDGE_EVENT_WINDOW_MS = 1_000L
+        private const val BRIDGE_EVENT_STORM_THRESHOLD = 60
 
         fun hasRequiredAssets(context: Context): Boolean {
             if (AceEditorTestHooks.shouldForceAssetMissing()) {

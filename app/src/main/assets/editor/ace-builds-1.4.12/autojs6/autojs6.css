@@ -99,6 +99,8 @@ body.ace-ready #editor {
 .ace_editor {
     font-family: "JetBrains Mono", "Source Code Pro", monospace;
     line-height: 1.45;
+    -webkit-user-select: text;
+    user-select: text;
 }
 
 .ace_gutter-cell.ace_breakpoint {
@@ -113,6 +115,14 @@ body.ace-ready #editor {
     background: rgba(255, 214, 0, 0.28);
 }
 
+.ace_gutter,
+.ace_gutter-cell {
+    -webkit-user-select: none;
+    user-select: none;
+}
+
 .ace_mobile-menu {
-    display: none !important;
+    z-index: 20;
+    -webkit-user-select: none;
+    user-select: none;
 }

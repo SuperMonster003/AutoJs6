@@ -11,11 +11,22 @@
     var debugMarker = null;
     var storedReplacement = "";
     var scrollNotifyTimer = null;
+    var stateNotifyTimer = null;
+    var stateNotifyEventName = "";
+    var textNotifyTimer = null;
+    var textNotifyIncludeText = false;
+    var cursorNotifyTimer = null;
+    var lastStateNotifyAt = 0;
+    var lastTextNotifyAt = 0;
+    var lastCursorNotifyAt = 0;
     var resizeScheduled = false;
     var resizeFallbackTimer = null;
     var resizeReason = "";
     var firstPaintNotified = false;
     var DEFAULT_FONT_FAMILY = '"JetBrains Mono", "Source Code Pro", monospace';
+    var STATE_NOTIFY_THROTTLE_MS = 100;
+    var TEXT_NOTIFY_THROTTLE_MS = 100;
+    var CURSOR_NOTIFY_THROTTLE_MS = 50;
 
     function callBridge(name, args) {
         try {
@@ -197,10 +208,31 @@
         return stateJson(false);
     }
 
-    function notifyStateChanged(eventName) {
+    function dispatchStateChanged(eventName) {
         var json = lightweightStateJson();
         callBridge("notifyStateChanged", [json]);
         callBridge("notifyEvent", [eventName || "stateChanged", json]);
+    }
+
+    function flushStateChanged() {
+        var eventName = stateNotifyEventName || "stateChanged";
+        stateNotifyTimer = null;
+        stateNotifyEventName = "";
+        lastStateNotifyAt = Date.now();
+        dispatchStateChanged(eventName);
+    }
+
+    function notifyStateChanged(eventName) {
+        stateNotifyEventName = eventName || stateNotifyEventName || "stateChanged";
+        var now = Date.now();
+        var elapsed = now - lastStateNotifyAt;
+        if (elapsed >= STATE_NOTIFY_THROTTLE_MS && stateNotifyTimer === null) {
+            flushStateChanged();
+            return;
+        }
+        if (stateNotifyTimer === null) {
+            stateNotifyTimer = setTimeout(flushStateChanged, Math.max(0, STATE_NOTIFY_THROTTLE_MS - elapsed));
+        }
     }
 
     function notifyScrollChanged() {
@@ -213,10 +245,41 @@
         }, 80);
     }
 
-    function notifyTextChanged(includeText) {
+    function dispatchTextChanged(includeText) {
         var json = stateJson(includeText === true);
         callBridge("notifyTextChanged", [json]);
         callBridge("notifyEvent", ["textChanged", json]);
+    }
+
+    function flushTextChanged() {
+        var includeText = textNotifyIncludeText;
+        textNotifyTimer = null;
+        textNotifyIncludeText = false;
+        lastTextNotifyAt = Date.now();
+        dispatchTextChanged(includeText);
+    }
+
+    function notifyTextChanged(includeText) {
+        if (includeText === true) {
+            if (textNotifyTimer !== null) {
+                clearTimeout(textNotifyTimer);
+                textNotifyTimer = null;
+            }
+            textNotifyIncludeText = false;
+            lastTextNotifyAt = Date.now();
+            dispatchTextChanged(true);
+            return;
+        }
+        textNotifyIncludeText = textNotifyIncludeText || includeText === true;
+        var now = Date.now();
+        var elapsed = now - lastTextNotifyAt;
+        if (elapsed >= TEXT_NOTIFY_THROTTLE_MS && textNotifyTimer === null) {
+            flushTextChanged();
+            return;
+        }
+        if (textNotifyTimer === null) {
+            textNotifyTimer = setTimeout(flushTextChanged, Math.max(0, TEXT_NOTIFY_THROTTLE_MS - elapsed));
+        }
     }
 
     function notifyChangeDelta(delta) {
@@ -235,7 +298,7 @@
         return true;
     }
 
-    function notifyCursorChanged() {
+    function dispatchCursorChanged() {
         if (!editor) {
             return;
         }
@@ -248,6 +311,24 @@
             json
         ]);
         callBridge("notifyEvent", ["cursorChanged", json]);
+    }
+
+    function flushCursorChanged() {
+        cursorNotifyTimer = null;
+        lastCursorNotifyAt = Date.now();
+        dispatchCursorChanged();
+    }
+
+    function notifyCursorChanged() {
+        var now = Date.now();
+        var elapsed = now - lastCursorNotifyAt;
+        if (elapsed >= CURSOR_NOTIFY_THROTTLE_MS && cursorNotifyTimer === null) {
+            flushCursorChanged();
+            return;
+        }
+        if (cursorNotifyTimer === null) {
+            cursorNotifyTimer = setTimeout(flushCursorChanged, Math.max(0, CURSOR_NOTIFY_THROTTLE_MS - elapsed));
+        }
     }
 
     function notifyBreakpointChanged(row, enabled) {

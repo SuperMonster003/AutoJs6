@@ -39,6 +39,7 @@ The snapshot includes:
 - ready/state/heartbeat timestamps
 - IME state, height, transition timestamps, and ignored IME request reason
 - viewport policy, host IME event, and ACE resize schedule/dispatch/complete fields
+- bridge event window counters for spotting JS-to-Kotlin event storms
 - runtime event history for the last 30 ACE keyboard, resize, heartbeat,
   JavaScript, console, renderer, and fallback events
 
@@ -59,6 +60,8 @@ ACE does not need a separate clean-host experiment flag at this stage. The ACE p
 - `AceEditorViewportPolicy` clears any residual bottom padding and delegates IME geometry to the ACE engine.
 - Native bottom padding, Android `TextView` cursor math, and `requestRectangleOnScreen` stay native-only.
 - ACE resize behavior is observable through diagnostics and covered by the IME show/hide checklist.
+- ACE bridge cursor, text, and state events are throttled so keyboard animation
+  does not create unbounded JS-to-Kotlin callback bursts.
 
 Do not add `key_ace_clean_host_layout` unless there is a concrete second ACE host layout to compare. A flag without another implementation would add state, test matrix size, and ambiguous diagnostics without improving the stable path.
 
