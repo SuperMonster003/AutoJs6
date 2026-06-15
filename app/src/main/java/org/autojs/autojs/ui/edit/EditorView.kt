@@ -18,7 +18,6 @@ import android.os.Looper
 import android.os.Parcelable
 import android.os.SystemClock
 import android.provider.OpenableColumns
-import android.text.TextUtils
 import android.util.AttributeSet
 import android.util.SparseBooleanArray
 import android.view.Choreographer
@@ -80,6 +79,7 @@ import org.autojs.autojs.ui.edit.editor.ace.AceEditorTestHooks
 import org.autojs.autojs.ui.edit.editor.ace.diagnostics.AceDiagnostics
 import org.autojs.autojs.ui.edit.editor.ace.diagnostics.AceDiagnosticsSnapshot
 import org.autojs.autojs.ui.edit.editor.ace.health.AceFailure
+import org.autojs.autojs.ui.edit.editor.command.EditorCommandDispatcher
 import org.autojs.autojs.ui.edit.editor.engine.AceScriptEditorEngine
 import org.autojs.autojs.ui.edit.editor.engine.EditorEngineFactory
 import org.autojs.autojs.ui.edit.editor.engine.EditorEnginePreferences
@@ -173,6 +173,11 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     var editor: ScriptEditorEngine = EditorEngineFactory.create(context, EditorEnginePreferences.get())
 
     private var mViewportPolicy: EditorViewportPolicy = EditorViewportPolicyFactory.create(editor, this)
+    private val mCommandDispatcher = EditorCommandDispatcher(
+        currentEditor = { editor },
+        showManual = { urlSuffix, title -> showManual(urlSuffix, title) },
+        hideFunctionsKeyboard = { showSoftInput -> mFunctionsKeyboardHelper?.hideFunctionsLayout(showSoftInput) },
+    )
 
     @JvmField
     val debugBar: DebugBar = binding.debugBar
@@ -2904,8 +2909,6 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     override fun onHintClick(completions: CodeCompletions, pos: Int) {
-        val completion = completions[pos]
-
         // @Overruled by SuperMonster003 on Jul 12, 2023.
         //  ! Author: 抠脚本人
         //  ! Related PR: http://pr.autojs6.com/98
@@ -2923,7 +2926,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         //  #     editor!!.commentLine()
         //  # } else editor!!.insert(completion.insertText)
 
-        editor.insert(completion.insertText)
+        mCommandDispatcher.onCompletionClick(completions, pos)
     }
 
     override fun onHintLongClick(completions: CodeCompletions, pos: Int) {
@@ -2949,23 +2952,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         //  #     return
         //  # }
 
-        completions[pos].let {
-            when {
-                // @Inspired by 抠脚本人 (https://github.com/little-alei) on Jul 13, 2023.
-                it.insertText == "/" -> editor.toggleComment()
-                it.insertText == "=" -> editor.clear()
-                it.insertText == "-" -> editor.deleteLine()
-                it.insertText == "(" -> editor.moveCursor(-1)
-                it.insertText == ")" -> editor.moveCursor(1)
-                it.insertText == "[" -> editor.jumpToLineStart()
-                it.insertText == "]" -> editor.jumpToLineEnd()
-                it.insertText == "{" -> editor.jumpToStart()
-                it.insertText == "}" -> editor.jumpToEnd()
-                it.insertText == "<" -> editor.jumpToPrevLine()
-                it.insertText == ">" -> editor.jumpToNextLine()
-                it.url != null -> showManual(it.url, it.hint)
-            }
-        }
+        mCommandDispatcher.onCompletionLongClick(completions, pos)
     }
 
     private fun showManual(urlSuffix: String, title: String) {
@@ -2981,31 +2968,15 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     override fun onModuleLongClick(module: Module) {
-        showManual(module.url, module.name)
+        mCommandDispatcher.onModuleLongClick(module)
     }
 
     override fun onPropertyClick(m: Module, property: Property) {
-        var p = property.key
-        if (!property.isVariable) {
-            p = "$p()"
-        }
-        if (property.isGlobal) {
-            editor.insert(p)
-        } else {
-            editor.insert(m.name + "." + p)
-        }
-        if (!property.isVariable) {
-            editor.moveCursor(-1)
-        }
-        mFunctionsKeyboardHelper!!.hideFunctionsLayout(true)
+        mCommandDispatcher.onPropertyClick(m, property)
     }
 
     override fun onPropertyLongClick(m: Module, property: Property) {
-        if (TextUtils.isEmpty(property.url)) {
-            showManual(m.url, property.key)
-        } else {
-            showManual(property.url, property.key)
-        }
+        mCommandDispatcher.onPropertyLongClick(m, property)
     }
 
     override fun onSaveInstanceState() = Bundle().apply {

@@ -72,11 +72,22 @@ const scriptEngine = "app/src/main/java/org/autojs/autojs/ui/edit/editor/engine/
 const nativePolicy = "app/src/main/java/org/autojs/autojs/ui/edit/editor/viewport/NativeEditorViewportPolicy.kt";
 const acePolicy = "app/src/main/java/org/autojs/autojs/ui/edit/editor/viewport/AceEditorViewportPolicy.kt";
 const policyFactory = "app/src/main/java/org/autojs/autojs/ui/edit/editor/viewport/EditorViewportPolicyFactory.kt";
+const commandDispatcher = "app/src/main/java/org/autojs/autojs/ui/edit/editor/command/EditorCommandDispatcher.kt";
+const nativeEngine = "app/src/main/java/org/autojs/autojs/ui/edit/editor/engine/NativeCodeEditorEngine.kt";
+const aceEngine = "app/src/main/java/org/autojs/autojs/ui/edit/editor/engine/AceScriptEditorEngine.kt";
+const functionsKeyboardHelper = "app/src/main/java/org/autojs/autojs/ui/edit/keyboard/FunctionsKeyboardHelper.java";
 
 assertIncludes(editorView, "mViewportPolicy.onImeInsetsChanged(imeVisible, targetBottom)");
 assertIncludes(editorView, "EditorViewportPolicyFactory.create(editor, this)");
+assertIncludes(editorView, "EditorCommandDispatcher(");
+assertIncludes(editorView, "mCommandDispatcher.onCompletionClick(completions, pos)");
+assertIncludes(editorView, "mCommandDispatcher.onCompletionLongClick(completions, pos)");
+assertIncludes(editorView, "mCommandDispatcher.onModuleLongClick(module)");
+assertIncludes(editorView, "mCommandDispatcher.onPropertyClick(m, property)");
+assertIncludes(editorView, "mCommandDispatcher.onPropertyLongClick(m, property)");
 assertNotIncludes(editorView, "requestRectangleOnScreen");
 assertNotIncludes(editorView, ".setPadding(");
+assertNotIncludes(editorView, "TextUtils");
 
 assertIncludes(scriptEngine, "fun onImeInsetsChanged(visible: Boolean, bottomInset: Int) = Unit");
 assertIncludes(policyFactory, "EditorEngineType.NATIVE -> NativeEditorViewportPolicy(editor, hostView)");
@@ -89,7 +100,19 @@ assertIncludes(acePolicy, "editor.onImeInsetsChanged(visible, bottomInset)");
 assertNotIncludes(acePolicy, "ensureCursorVisibleIfPossible");
 assertNotIncludes(acePolicy, "requestRectangleOnScreen");
 
+assertIncludes(commandDispatcher, "private val currentEditor: () -> ScriptEditorEngine");
+assertNotIncludes(commandDispatcher, "CodeEditText");
+
+assertIncludes(aceEngine, "override fun createAutoCompletion(context: Context): AutoCompletion? = null");
+assertIncludes(nativeEngine, "return AutoCompletion(context, codeEditor.codeEditText)");
+assertNotIncludes(functionsKeyboardHelper, "CodeEditText");
+assertNotIncludes(functionsKeyboardHelper, "Editable");
+
 assertOnlyIn("requestRectangleOnScreen", [
+  "app/src/main/java/org/autojs/autojs/ui/edit/editor/engine/NativeCodeEditorEngine.kt",
+]);
+
+assertOnlyIn("AutoCompletion(context, codeEditor.codeEditText)", [
   "app/src/main/java/org/autojs/autojs/ui/edit/editor/engine/NativeCodeEditorEngine.kt",
 ]);
 

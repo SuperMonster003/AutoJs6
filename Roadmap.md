@@ -39,10 +39,10 @@ goal is to make editor behavior engine-neutral where possible, and keep native
 
 ## Phase 2: Input Commands and Keyboard UI
 
-- [ ] Make symbol bar and function keyboard depend only on editor commands.
-- [ ] Keep `AutoCompletion(context, CodeEditText)` native-only.
-- [ ] Confirm ACE completion uses only ACE completer/LSP paths.
-- [ ] Remove direct `CodeEditText` access from common input UI setup.
+- [x] Make symbol bar and function keyboard depend only on editor commands.
+- [x] Keep `AutoCompletion(context, CodeEditText)` native-only.
+- [x] Confirm ACE completion uses only ACE completer/LSP paths.
+- [x] Remove direct `CodeEditText` access from common input UI setup.
 
 ## Phase 3: Loading and Large File Boundaries
 
@@ -57,7 +57,7 @@ goal is to make editor behavior engine-neutral where possible, and keep native
 - [ ] Extract draft restore/save service.
 - [ ] Extract version history service.
 - [ ] Extract run-text provider.
-- [ ] Extract editor command dispatcher.
+- [ ] Expand editor command dispatcher beyond input-keyboard commands.
 - [ ] Extract breakpoint model store.
 - [ ] Extract theme/font application service.
 
