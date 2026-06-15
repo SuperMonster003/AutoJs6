@@ -27,6 +27,11 @@ idea {
 }
 
 val globalApplicationId = "org.autojs.autojs6"
+val appApplicationId = globalApplicationId
+val autojsPluginPermission = "org.autojs.permission.PLUGIN"
+
+fun autojsPluginPermissionDeclarationFor(applicationId: String) =
+    if (applicationId == globalApplicationId) autojsPluginPermission else "$applicationId.permission.PLUGIN"
 
 val flavorDimension = "channel"
 val flavorNameApp = "app"
@@ -460,7 +465,7 @@ android {
     compileSdk = versions.sdkVersionCompile
 
     defaultConfig {
-        applicationId = applicationId
+        applicationId = appApplicationId
 
         minSdk = versions.sdkVersionMin
         targetSdk = versions.sdkVersionTarget
@@ -502,7 +507,8 @@ android {
                     "appName" to "@string/app_name",
                     "intentCategory" to "android.intent.category.LAUNCHER",
                     "intentCategoryInrt" to "android.intent.category.DEFAULT",
-                    "authorities" to "org.autojs.autojs6.fileprovider",
+                    "authorities" to "$appApplicationId.fileprovider",
+                    "autojsPluginPermissionDeclaration" to autojsPluginPermissionDeclarationFor(appApplicationId),
                     "icon" to "@mipmap/ic_app_launcher_adaptive",
                 )
             )
@@ -526,7 +532,8 @@ android {
                     "appName" to "AutoJs6.$flavorNameInrt",
                     "intentCategory" to "android.intent.category.DEFAULT",
                     "intentCategoryInrt" to "android.intent.category.LAUNCHER",
-                    "authorities" to "org.autojs.autojs6.$flavorNameInrt.fileprovider",
+                    "authorities" to "$appApplicationId.$flavorNameInrt.fileprovider",
+                    "autojsPluginPermissionDeclaration" to autojsPluginPermissionDeclarationFor("$appApplicationId.$flavorNameInrt"),
                     "icon" to "@mipmap/ic_launcher",
                 )
             )

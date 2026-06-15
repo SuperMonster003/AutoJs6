@@ -28,7 +28,7 @@
     <!--  ! Target API >= 30: WRT + [ MSV<29> ] + LGC  + MAN -->
 
     <permission
-        android:name="org.autojs.permission.PLUGIN"
+        android:name="${autojsPluginPermissionDeclaration}"
         android:protectionLevel="signature" />
 
     <uses-permission android:name="org.autojs.permission.PLUGIN" />
