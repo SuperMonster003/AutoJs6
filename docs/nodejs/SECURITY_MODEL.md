@@ -263,6 +263,8 @@ Future support must follow `docs/nodejs/design/WORK_MANAGER.md`:
 - persistent registration must be visible in task UI and must be cancellable by the user
 - packaged APKs must opt in before boot/package receivers or exact-alarm permissions are injected
 
+Boot, package-event, startup, and custom broadcast task behavior is design-gated separately in `docs/nodejs/design/BROADCAST_TASKS.md`.
+
 Node scheduled runs must launch through the same lifecycle and scoped filesystem controls as manual Embedded Node runs.
 
 ## Packaged APK Policy

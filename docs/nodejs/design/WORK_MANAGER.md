@@ -276,6 +276,8 @@ Avoid adding metadata or a future persistent task if any descriptor validation o
 
 ## Future Broadcast Design Gate
 
+Detailed boot, package-event, and custom broadcast policy is tracked in `docs/nodejs/design/BROADCAST_TASKS.md`.
+
 Before enabling broadcast, startup, boot, or package-event tasks from Node, write a follow-up design that answers:
 
 - exact action allowlist

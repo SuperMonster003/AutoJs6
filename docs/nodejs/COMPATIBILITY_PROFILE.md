@@ -742,7 +742,7 @@ Current policy:
 - Node scripts must not access raw WorkManager, AlarmManager, JobScheduler, BroadcastReceiver, PendingIntent, or IntentFilter objects.
 - Existing Rhino task APIs remain unchanged.
 - Future execution of scheduled Node tasks must go through an AutoJs6 bridge provider and the existing task manager/scheduler ownership model.
-- Future broadcast, startup, boot, and package-event task support is deferred behind a separate design gate and user-visible permission flow.
+- Future broadcast, startup, boot, and package-event task support is deferred behind `docs/nodejs/design/BROADCAST_TASKS.md` and a user-visible permission flow.
 
 See `docs/nodejs/design/WORK_MANAGER.md` for the current design decision.
 
