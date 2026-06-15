@@ -149,16 +149,16 @@ Acceptance:
 
 ### Gate 4: Keyboard Stress
 
-- [ ] Run the isolated ACE debug activity `IME stress` helper.
-- [ ] Manually repeat show/hide keyboard 20 times on a small file.
-- [ ] Repeat on a 100-line sample.
-- [ ] Repeat on a 1000-line sample when practical.
+- [x] Run the isolated ACE debug activity `IME stress` helper.
+- [x] Manually repeat show/hide keyboard 20 times on a small file.
+- [x] Repeat on a 100-line sample.
+- [x] Repeat on a 1000-line sample when practical.
 
 Acceptance:
 
-- [ ] ACE remains active.
-- [ ] No persistent flicker, WebView blanking, or heartbeat-triggered fallback.
-- [ ] Diagnostics do not show an unbounded bridge event storm.
+- [x] ACE remains active.
+- [x] No persistent flicker, WebView blanking, or heartbeat-triggered fallback.
+- [x] Diagnostics do not show an unbounded bridge event storm.
 
 ### Gate 5: Mobile Selection, Clipboard, And CJK
 

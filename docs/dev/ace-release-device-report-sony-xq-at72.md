@@ -45,7 +45,7 @@ path has a recorded result.
 | First paint | DEVICE SMOKE PASS | File-manager open sampling showed coherent ACE surfaces in dark and light themes; see Gate 2 notes. |
 | File-manager open repeat | DEVICE SMOKE PASS | 10 dark-theme opens and 5 light-theme opens of `ace-release-gate.js` reached `EditActivity`; no fallback/fatal signal in logcat. |
 | Keyboard show/hide | DEVICE SMOKE PASS | Three IME show/hide rounds kept `EditActivity` focused; see Gate 3 notes. |
-| Keyboard stress | TBD | |
+| Keyboard stress | DEVICE SMOKE PASS | Debug IME stress helper completed 20 cycles; ordinary `EditActivity` show/hide stress completed 20/20 cycles on small, 100-line, and 1000-line samples; see Gate 4 notes. |
 | Click anchor accuracy | DEVICE SMOKE PASS | Top, middle, and lower visible-line taps landed on the observed target rows with keyboard hidden before each tap. |
 | Lower viewport tap anchor | DEVICE SMOKE PASS | Low-screen taps kept the caret visible just above the IME/symbol toolbar and did not fallback ACE. |
 | Long-press selection | TBD | |
@@ -74,6 +74,7 @@ Record copied ACE diagnostics for every failure or ambiguous result.
 | --- | --- | --- |
 | Gate 2 file-manager open smoke | N/A | No failure diagnostics were produced; screenshot samples were reviewed during the run. |
 | Gate 3 IME/tap-anchor smoke | N/A | No failure diagnostics were produced; screenshot samples and logcat were reviewed during the run. |
+| Gate 4 keyboard stress | Inline Gate 4 notes | Temporary pasted diagnostics from the 1000-line sample: `aceHealthState=RUNNING`, `lastFailureType=unknown`, `lastImeState=HIDDEN`, `maxBridgeEventWindowCount=18` in a 1000 ms window, below the storm threshold of 60; event history had no `bridge_event_storm` and heartbeat checks were OK. |
 
 ## Gate 2 Notes
 
@@ -129,12 +130,58 @@ Record copied ACE diagnostics for every failure or ambiguous result.
   human-observed tap-anchor mismatch or transition flash as a new Gate 3
   finding.
 
+## Gate 4 Notes
+
+- Time: 2026-06-15 23:38-23:54 CST.
+- Isolated debug helper:
+  - Direct shell launch of `AceEditorDebugActivity` was blocked because the
+    activity is not exported, and `run-as` launch was rejected by
+    ActivityManager UID ownership checks.
+  - Entered the helper through Settings -> About app and developer ->
+    long-press app icon -> Developer Options -> ACE editor debug.
+  - Pressed `IME STRESS`; the status reached
+    `IME stress finished: 20 cycles`, with `AceEditorDebugActivity` still
+    focused. The helper uses a 122-line stress sample and jumps among line 1,
+    line 48, and line 96.
+- Ordinary editor stress:
+  - `/sdcard/Scripts/ace-gate4-small.js`: 20/20 tap-to-show and Back-to-hide
+    IME cycles passed in `EditActivity`.
+  - `/sdcard/Scripts/ace-gate4-100.js`: 101 lines by `wc -l`; 20/20
+    tap-to-show and Back-to-hide cycles passed in `EditActivity`.
+  - `/sdcard/Scripts/ace-gate4-1000.js`: 1001 lines by `wc -l`; 20/20
+    tap-to-show and Back-to-hide cycles passed in `EditActivity`.
+  - Every ordinary editor cycle kept `EditActivity` focused, observed
+    `mInputShown=true` after tap and `mInputShown=false` after Back, and ended
+    with ACE still active.
+- Diagnostics:
+  - Copied ACE diagnostics from the editor More menu, pasted them into
+    `/sdcard/Scripts/ace-gate4-diagnostics.txt`, saved the temporary file, and
+    read it back from the device before cleanup.
+  - The pasted diagnostics reported `aceHealthState=RUNNING`,
+    `lastFailureType=unknown`, `lastImeState=HIDDEN`,
+    `fileSizeBytes=22924`, `largeFilePolicy=auto;thresholdBytes=524288`,
+    `currentBridgeEventWindowCount=2`, `lastBridgeEventWindowCount=5`, and
+    `maxBridgeEventWindowCount=18`. The code threshold for
+    `bridge_event_storm` is 60 events per 1000 ms window.
+  - Runtime event history contained resize and heartbeat records, including
+    heartbeat checks with `ok=true`, and no `bridge_event_storm`.
+  - Broad logcat greps matched unrelated Google IME speech fallback messages.
+    A narrower AutoJs6/ACE scan found only Google IME start-input records for
+    `org.autojs.autojs6.ace`, with no `AndroidRuntime FATAL EXCEPTION`, ACE
+    fallback, renderer-gone, heartbeat fallback, or app fatal signal.
+- Debug-only observation:
+  - After hiding the IME inside `AceEditorDebugActivity`, repeated ADB taps on
+    the already-focused debug sample did not reopen the IME until switching
+    back to ordinary `EditActivity`. The ordinary editor path used by release
+    users passed the 20-cycle small/100-line/1000-line stress runs above.
+
 ## Blockers
 
 ### P0
 
-- No automated P0 blocker found in preflight. Gate 2 and Gate 3 device smoke
-  found no P0 first-paint, file-open, IME, or tap-anchor blocker.
+- No automated P0 blocker found in preflight. Gate 2, Gate 3, and Gate 4
+  device smoke found no P0 first-paint, file-open, IME, tap-anchor, keyboard
+  stress, fallback, or bridge-event-storm blocker.
 
 ### P1
 
@@ -142,7 +189,10 @@ Record copied ACE diagnostics for every failure or ambiguous result.
 
 ### P2
 
-- TBD after device gate.
+- Debug-only `AceEditorDebugActivity` did not reopen IME from repeated ADB
+  taps after Back hid the keyboard while the debug sample stayed focused.
+  Ordinary `EditActivity` stress passed and this is not treated as a release
+  blocker for the experimental ACE editor.
 
 ## Final Decision
 
