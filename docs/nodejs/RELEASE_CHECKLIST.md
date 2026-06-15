@@ -173,6 +173,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] stdout/stderr are captured and closed
 - [ ] native handle diagnostics are available when debugging
 - [ ] runtime timeline trace remains off by default and records service/native/bootstrap/stdout/pending/bridge/stop/drain/destroy events when opted in
+- [ ] concurrent embedded Node starts reject with `ERR_AUTOJS6_NODE_ENGINE_BUSY`, and a later run succeeds after the active execution finishes
 
 ## Diagnostics
 

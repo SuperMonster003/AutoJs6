@@ -490,6 +490,16 @@ Disabled or controlled:
 
 Scripts should use AutoJs6 lifecycle controls instead of forcing process exit.
 
+## Embedded Execution Lifecycle
+
+The `:nodejs_embedded` service process allows one active embedded Node execution at a time. A concurrent start in the same process is rejected, not queued, with:
+
+- `errorCode=ERR_AUTOJS6_NODE_ENGINE_BUSY`
+- `nativeValues.embedded_script.engine_busy=true`
+- `nativeValues.embedded_script.concurrent_policy=single-active-execution-per-process`
+
+After the active execution completes and the service settles, a later execution can run normally. Queueing remains a separate design gate; see `docs/nodejs/design/MULTI_INSTANCE.md`.
+
 ## Crypto Profile
 
 Supported or limited:
@@ -867,3 +877,4 @@ Examples:
 - malformed bridge request: `code=ERR_AUTOJS6_BRIDGE_INVALID_REQUEST`, `autojs6Code=ERR_AUTOJS6_BRIDGE_INVALID_REQUEST`
 - bridge resource limit: `code=ERR_AUTOJS6_BRIDGE_RESOURCE_LIMIT`, `autojs6Code=ERR_AUTOJS6_BRIDGE_RESOURCE_LIMIT`
 - bridge rate limit: `code=ERR_AUTOJS6_BRIDGE_RATE_LIMITED`, `autojs6Code=ERR_AUTOJS6_BRIDGE_RATE_LIMITED`
+- concurrent embedded execution: `errorCode=ERR_AUTOJS6_NODE_ENGINE_BUSY`

@@ -124,6 +124,21 @@ class NativeNodeEmbeddedScriptService : Service() {
         val startedAt = android.os.SystemClock.elapsedRealtime()
         val processName = currentProcessName()
         val pid = Process.myPid()
+        if (!ACTIVE_EXECUTION_ID.compareAndSet(null, executionId)) {
+            receiver?.send(
+                RESULT_SCRIPT,
+                engineBusyResult(
+                    executionId = executionId,
+                    activeExecutionId = ACTIVE_EXECUTION_ID.get().orEmpty(),
+                    sourceName = sourceName,
+                    workingDirectory = workingDirectory,
+                    startedAt = startedAt,
+                    processName = processName,
+                    pid = pid,
+                ).toBundle(),
+            )
+            return
+        }
         val engineInfo = NodeBridgeEngineInfo.fromContext(
             context = this,
             id = executionId,
@@ -264,6 +279,7 @@ class NativeNodeEmbeddedScriptService : Service() {
             )
         } finally {
             bridgeSession.stop()
+            ACTIVE_EXECUTION_ID.compareAndSet(executionId, null)
             val elapsed = android.os.SystemClock.elapsedRealtime() - startedAt
             Log.i(
                 TAG,
@@ -419,6 +435,46 @@ class NativeNodeEmbeddedScriptService : Service() {
                 put(JSONObject(response.toJson()))
             }
         }.toString()
+    }
+
+    private fun engineBusyResult(
+        executionId: String,
+        activeExecutionId: String,
+        sourceName: String,
+        workingDirectory: String?,
+        startedAt: Long,
+        processName: String,
+        pid: Int,
+    ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+        val lifecycle = NodeEmbeddedRuntimeLifecycle(TAG, executionId, processName, pid, sourceName)
+            .apply {
+                transition(NodeEmbeddedRuntimeState.FAILED, "service.engine_busy")
+            }
+        val elapsedMs = (android.os.SystemClock.elapsedRealtime() - startedAt).coerceAtLeast(0L)
+        val nativeValues = linkedMapOf(
+            "embedded_script.engine_busy" to "true",
+            "embedded_script.concurrent_policy" to "single-active-execution-per-process",
+            "embedded_script.active_execution_id" to activeExecutionId,
+            "embedded_script.rejected_execution_id" to executionId,
+            "embedded_script.error_code" to NodeRuntimeErrorCodes.NODE_ENGINE_BUSY,
+        )
+        return NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult(
+            succeeded = false,
+            exitCode = 1,
+            resultText = null,
+            stdout = "",
+            stderr = "",
+            errorName = "EmbeddedNodeEngineBusyError",
+            errorMessage = "Embedded Node.js engine is busy; only one active execution is allowed per :nodejs_embedded process.",
+            errorStack = null,
+            errorCode = NodeRuntimeErrorCodes.NODE_ENGINE_BUSY,
+            elapsedMs = elapsedMs,
+            processName = processName,
+            pid = pid,
+            sourceName = sourceName,
+            nativeValues = nativeValues,
+            workingDirectory = workingDirectory,
+        ).withLifecycle(lifecycle)
     }
 
     private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult.withTimeline(
@@ -665,6 +721,7 @@ class NativeNodeEmbeddedScriptService : Service() {
     companion object {
 
         private const val TAG = "NativeNodeEmbeddedScriptService"
+        private val ACTIVE_EXECUTION_ID = AtomicReference<String?>(null)
         private const val ACTION_RUN_SCRIPT = "org.autojs.autojs.engine.action.RUN_NATIVE_NODE_EMBEDDED_SCRIPT"
         private const val EXTRA_RESULT_RECEIVER = "result_receiver"
         private const val EXTRA_SOURCE = "source"

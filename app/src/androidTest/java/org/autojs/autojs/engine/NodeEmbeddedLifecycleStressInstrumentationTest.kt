@@ -13,6 +13,7 @@ import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Test
 import java.io.File
+import java.util.concurrent.atomic.AtomicReference
 
 class NodeEmbeddedLifecycleStressInstrumentationTest {
 
@@ -234,6 +235,82 @@ class NodeEmbeddedLifecycleStressInstrumentationTest {
         assertFalse(second.stderr.contains("stress.stderr.first"))
     }
 
+    @Test
+    fun concurrentExecutionIsRejectedAndNextRunWorks() {
+        assumeEmbeddedScriptExecutionEnabled()
+
+        val scriptDir = File(context.cacheDir, "embedded-concurrent-${System.nanoTime()}").apply {
+            check(mkdirs()) { "Failed to create concurrent execution dir: $absolutePath" }
+        }
+        val firstStarted = File(scriptDir, "first-started.txt")
+        val firstResult = AtomicReference<NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult?>()
+        val firstFailure = AtomicReference<Throwable?>()
+        val firstThread = Thread {
+            runCatching {
+                runEmbeddedScript(
+                    source = """
+                        "nodejs";
+                        const fs = require("fs");
+                        fs.writeFileSync("./first-started.txt", "started");
+                        console.log("stress.concurrent.first.started");
+                        return new Promise((resolve) => setTimeout(() => {
+                          console.log("stress.concurrent.first.done");
+                          resolve();
+                        }, 3000));
+                    """.trimIndent(),
+                    sourceName = "<lifecycle-stress-concurrent-first.js>",
+                    workingDirectory = scriptDir.absolutePath,
+                    timeoutMs = CONCURRENT_TIMEOUT_MS,
+                )
+            }.onSuccess { result ->
+                firstResult.set(result)
+            }.onFailure { error ->
+                firstFailure.set(error)
+            }
+        }.apply {
+            name = "AutoJs6NodeConcurrentFirst"
+            start()
+        }
+
+        try {
+            assertTrue(
+                "First concurrent run did not enter user script before timeout.",
+                waitUntil(5000L) { firstStarted.isFile },
+            )
+
+            val second = runEmbeddedScript(
+                source = """
+                    "nodejs";
+                    console.log("stress.concurrent.second.unexpected");
+                """.trimIndent(),
+                sourceName = "<lifecycle-stress-concurrent-second.js>",
+                timeoutMs = SIMPLE_TIMEOUT_MS,
+            )
+
+            firstThread.join(CONCURRENT_TIMEOUT_MS + 3000L)
+            firstFailure.get()?.let { error ->
+                throw AssertionError("First concurrent run failed before producing a result.", error)
+            }
+            assertFalse("First concurrent run did not finish.", firstThread.isAlive)
+            val first = firstResult.get()
+            assertTrue("First concurrent run did not produce a result.", first != null)
+            assertSucceeded("concurrent first", first!!)
+            assertTrue(first.stdout, first.stdout.contains("stress.concurrent.first.done"))
+
+            assertFalse("Second concurrent run must be rejected, not queued silently.", second.succeeded)
+            assertFalse("Engine-busy rejection should not be reported as script timeout.", second.timedOut)
+            assertEquals(NodeRuntimeErrorCodes.NODE_ENGINE_BUSY, second.errorCode)
+            assertEquals("true", second.nativeValues["embedded_script.engine_busy"])
+            assertEquals("single-active-execution-per-process", second.nativeValues["embedded_script.concurrent_policy"])
+            assertTrue(second.errorMessage.orEmpty(), second.errorMessage.orEmpty().contains("only one active execution"))
+
+            settleEmbeddedScriptServiceProcess()
+            assertRecoveryRun("after.concurrent.busy")
+        } finally {
+            scriptDir.deleteRecursively()
+        }
+    }
+
     private fun assertRecoveryRun(label: String): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
         val result = runEmbeddedScript(
             source = """
@@ -307,9 +384,21 @@ class NodeEmbeddedLifecycleStressInstrumentationTest {
         SystemClock.sleep(600L)
     }
 
+    private fun waitUntil(timeoutMs: Long, condition: () -> Boolean): Boolean {
+        val deadline = SystemClock.elapsedRealtime() + timeoutMs
+        while (SystemClock.elapsedRealtime() < deadline) {
+            if (condition()) {
+                return true
+            }
+            SystemClock.sleep(50L)
+        }
+        return condition()
+    }
+
     private companion object {
         private const val STRESS_ITERATIONS = 100
         private const val SIMPLE_TIMEOUT_MS = 5000L
         private const val FAULT_TIMEOUT_MS = 900L
+        private const val CONCURRENT_TIMEOUT_MS = 10000L
     }
 }

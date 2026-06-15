@@ -568,6 +568,7 @@ Current lifecycle stress cases:
 - uncleared interval times out and next run succeeds
 - nested callbacks drain before success
 - stdout and stderr close after run
+- concurrent embedded execution rejects with `ERR_AUTOJS6_NODE_ENGINE_BUSY` and a later run succeeds
 
 Planned lifecycle stress cases:
 
@@ -585,7 +586,7 @@ Any Node-facing runtime behavior change must update:
 - `docs/nodejs/RELEASE_CHECKLIST.md` when a release gate changes
 - `docs/nodejs/EXAMPLES.md` when adding or changing checked-in examples
 - `docs/nodejs/PERFORMANCE.md` when benchmark metrics, report schema, or threshold arguments change
-- `docs/nodejs/design/` design notes when changing broad surfaces such as fs, file URL, stream, zlib, scheduled/background tasks, ESM, network, workers, Java interop, Rhino shims, or native addons
+- `docs/nodejs/design/` design notes when changing broad surfaces such as fs, file URL, stream, zlib, scheduled/background tasks, ESM, network, workers, Java interop, multi-instance lifecycle, Rhino shims, or native addons
 
 ## Aggregate Tasks
 
