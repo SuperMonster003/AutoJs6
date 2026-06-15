@@ -496,6 +496,7 @@ class NodeResolverFuzzerInstrumentationTest {
             "ERR_PACKAGE_PATH_NOT_EXPORTED",
             "ERR_PACKAGE_IMPORT_NOT_DEFINED",
             "ERR_INVALID_PACKAGE_TARGET",
+            "ERR_AUTOJS6_NATIVE_ADDON_DISABLED",
         )
     }
 }
