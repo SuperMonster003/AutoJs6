@@ -19,6 +19,8 @@
     var textNotifyTimer = null;
     var textNotifyIncludeText = false;
     var cursorNotifyTimer = null;
+    var actionModeNotifyTimer = null;
+    var lastActionModeSelectedText = "";
     var lastStateNotifyAt = 0;
     var lastTextNotifyAt = 0;
     var lastCursorNotifyAt = 0;
@@ -30,6 +32,7 @@
     var STATE_NOTIFY_THROTTLE_MS = 100;
     var TEXT_NOTIFY_THROTTLE_MS = 100;
     var CURSOR_NOTIFY_THROTTLE_MS = 50;
+    var ACTION_MODE_NOTIFY_THROTTLE_MS = 80;
 
     function callBridge(name, args) {
         try {
@@ -208,6 +211,74 @@
         };
     }
 
+    function getSelectionScreenRect() {
+        var fallback = { left: 0, top: 0, right: 1, bottom: 1 };
+        if (!editor || !editor.renderer || !editor.renderer.textToScreenCoordinates) {
+            return fallback;
+        }
+        var range = editor.getSelectionRange();
+        if (!range) {
+            return fallback;
+        }
+        var renderer = editor.renderer;
+        var start = renderer.textToScreenCoordinates(range.start.row, range.start.column);
+        var end = renderer.textToScreenCoordinates(range.end.row, range.end.column);
+        var lineHeight = renderer.lineHeight ||
+            (renderer.layerConfig && renderer.layerConfig.lineHeight) ||
+            20;
+        var startX = Number(start && start.pageX) || 0;
+        var startY = Number(start && start.pageY) || 0;
+        var endX = Number(end && end.pageX) || startX;
+        var endY = Number(end && end.pageY) || startY;
+        var left = Math.min(startX, endX);
+        var top = Math.min(startY, endY);
+        var right = Math.max(startX, endX);
+        var bottom = Math.max(startY, endY) + lineHeight;
+        if (right <= left) {
+            right = left + 1;
+        }
+        if (bottom <= top) {
+            bottom = top + lineHeight;
+        }
+        return {
+            left: left,
+            top: top,
+            right: right,
+            bottom: bottom
+        };
+    }
+
+    function updateActionModeFromSelection() {
+        actionModeNotifyTimer = null;
+        var selection = getSelectionState();
+        if (!selection.text) {
+            if (lastActionModeSelectedText) {
+                lastActionModeSelectedText = "";
+                dispatchSelectionActionModeState("selectionActionModeFinished");
+                callBridge("finishActionMode");
+            }
+            return;
+        }
+        var rect = getSelectionScreenRect();
+        lastActionModeSelectedText = selection.text;
+        dispatchSelectionActionModeState("selectionActionModeStarted");
+        callBridge("startActionMode", [
+            rect.left,
+            rect.top,
+            rect.right,
+            rect.bottom,
+            true,
+            false
+        ]);
+    }
+
+    function scheduleActionModeSelectionUpdate() {
+        if (actionModeNotifyTimer !== null) {
+            clearTimeout(actionModeNotifyTimer);
+        }
+        actionModeNotifyTimer = setTimeout(updateActionModeFromSelection, ACTION_MODE_NOTIFY_THROTTLE_MS);
+    }
+
     function stateJson(includeText) {
         return JSON.stringify(buildState(includeText));
     }
@@ -245,6 +316,16 @@
         if (stateNotifyTimer === null) {
             stateNotifyTimer = setTimeout(flushStateChanged, Math.max(0, STATE_NOTIFY_THROTTLE_MS - elapsed));
         }
+    }
+
+    function dispatchSelectionActionModeState(eventName) {
+        if (stateNotifyTimer !== null) {
+            clearTimeout(stateNotifyTimer);
+            stateNotifyTimer = null;
+        }
+        stateNotifyEventName = "";
+        lastStateNotifyAt = Date.now();
+        dispatchStateChanged(eventName || "selectionActionMode");
     }
 
     function notifyScrollChanged() {
@@ -341,6 +422,14 @@
         if (cursorNotifyTimer === null) {
             cursorNotifyTimer = setTimeout(flushCursorChanged, Math.max(0, CURSOR_NOTIFY_THROTTLE_MS - elapsed));
         }
+    }
+
+    function notifySelectionChanged() {
+        var selection = getSelectionState();
+        if (selection.text || lastActionModeSelectedText) {
+            notifyStateChanged("selectionChanged");
+        }
+        scheduleActionModeSelectionUpdate();
     }
 
     function notifyBreakpointChanged(row, enabled) {
@@ -486,7 +575,7 @@
         editor.selection.setRange(new Range(start.row, start.column, end.row, end.column), false);
         scrollCursorIntoViewSafely("selectRange");
         notifyCursorChanged();
-        notifyStateChanged("selectionChanged");
+        notifySelectionChanged();
     }
 
     function restoreScroll(firstVisibleLine, firstVisibleColumn) {
@@ -687,6 +776,7 @@
         session.on("changeScrollLeft", notifyScrollChanged);
 
         editor.selection.on("changeCursor", notifyCursorChanged);
+        editor.selection.on("changeSelection", notifySelectionChanged);
         global.addEventListener("resize", function() {
             scheduleResize("window_resize");
         });

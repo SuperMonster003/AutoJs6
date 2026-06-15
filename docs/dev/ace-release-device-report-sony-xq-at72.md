@@ -48,9 +48,9 @@ path has a recorded result.
 | Keyboard stress | DEVICE SMOKE PASS | Debug IME stress helper completed 20 cycles; ordinary `EditActivity` show/hide stress completed 20/20 cycles on small, 100-line, and 1000-line samples; see Gate 4 notes. |
 | Click anchor accuracy | DEVICE SMOKE PASS | Top, middle, and lower visible-line taps landed on the observed target rows with keyboard hidden before each tap. |
 | Lower viewport tap anchor | DEVICE SMOKE PASS | Low-screen taps kept the caret visible just above the IME/symbol toolbar and did not fallback ACE. |
-| Long-press selection | TBD | |
+| Long-press selection | DEVICE SMOKE PASS | Long-press selected `copyAlphaTarget` and displayed the ACE host ActionMode menu; see Gate 5 notes. |
 | Double-tap selection | TBD | |
-| Copy/paste | TBD | |
+| Copy/paste | DEVICE PARTIAL PASS | Copy selected text and paste single-line text passed; drag handles, double-tap, multi-line paste, Unicode paste, and CJK composition remain TBD. |
 | CJK composition | TBD | |
 | Completion accept | TBD | |
 | Tooltip fallback | TBD | |
@@ -75,6 +75,7 @@ Record copied ACE diagnostics for every failure or ambiguous result.
 | Gate 2 file-manager open smoke | N/A | No failure diagnostics were produced; screenshot samples were reviewed during the run. |
 | Gate 3 IME/tap-anchor smoke | N/A | No failure diagnostics were produced; screenshot samples and logcat were reviewed during the run. |
 | Gate 4 keyboard stress | Inline Gate 4 notes | Temporary pasted diagnostics from the 1000-line sample: `aceHealthState=RUNNING`, `lastFailureType=unknown`, `lastImeState=HIDDEN`, `maxBridgeEventWindowCount=18` in a 1000 ms window, below the storm threshold of 60; event history had no `bridge_event_storm` and heartbeat checks were OK. |
+| Gate 5 ActionMode bridge mismatch | Inline Gate 5 notes | A development-only 7-argument `startActionMode` bridge attempt produced `Error invoking startActionMode: Method not found`; the final implementation restored the six-argument bridge and passed the copy/paste smoke below. |
 
 ## Gate 2 Notes
 
@@ -174,6 +175,37 @@ Record copied ACE diagnostics for every failure or ambiguous result.
     the already-focused debug sample did not reopen the IME until switching
     back to ordinary `EditActivity`. The ordinary editor path used by release
     users passed the 20-cycle small/100-line/1000-line stress runs above.
+
+## Gate 5 Notes
+
+- Time: 2026-06-16 00:40-00:49 CST.
+- Test script: `/sdcard/Scripts/ace-gate5-selection.js`, containing
+  `copyAlphaTarget`, paste marker rows, and a CJK marker row.
+- Selection ActionMode fix validation:
+  - Long-pressed `copyAlphaTarget` in ACE. The word was selected and the host
+    ActionMode menu displayed `复制`, `粘贴`, `全选`, `删除行`, and `复制行`.
+  - Copied the selected text through the ActionMode `复制` item.
+  - Read the system clipboard back through
+    `/sdcard/Scripts/ace-gate5-readclip-probe.js`; the file
+    `/sdcard/Scripts/ace-gate5-clip-probe.txt` contained `copyAlphaTarget`.
+  - Set the clipboard to `gate5PasteSingle`, long-pressed
+    `copyAlphaTarget`, tapped ActionMode `粘贴`, saved, and read the script
+    back from `/sdcard/Scripts/ace-gate5-selection.js`. The saved line was
+    `const copy_source = "gate5PasteSingle copyBetaTarget";`.
+  - A focused logcat scan after the passing copy/paste run had no
+    `AndroidRuntime FATAL EXCEPTION`, `fatalError`, ACE fallback,
+    renderer-gone, `JS_RUNTIME_ERROR`, or `bridge_event_storm` match.
+- Development-only finding fixed before the passing smoke:
+  - A first implementation added a seventh `selectedText` argument to
+    `autojs.startActionMode(...)`; WebView's JavaScriptInterface reported
+    `Error invoking startActionMode: Method not found`, and diagnostics showed
+    `aceHealthState=FALLING_BACK` with `lastFailureType=JS_RUNTIME_ERROR`.
+  - The final implementation restored the original six-argument bridge and
+    sends the lightweight selection state immediately before starting
+    ActionMode.
+- Remaining Gate 5 items not yet completed: drag selection handles,
+  double-tap word selection, multi-line paste, Unicode paste, CJK composition,
+  and cursor/keyboard behavior while composition is uncommitted.
 
 ## Blockers
 

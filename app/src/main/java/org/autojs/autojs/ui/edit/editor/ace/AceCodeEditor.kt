@@ -6,13 +6,17 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Color
+import android.graphics.Rect
 import android.net.Uri
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
 import android.util.AttributeSet
+import android.view.ActionMode
 import android.view.HapticFeedbackConstants
+import android.view.Menu
+import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -28,7 +32,6 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.FrameLayout
-import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.ui.edit.editor.ace.diagnostics.AceDiagnostics
 import org.autojs.autojs.ui.edit.editor.ace.diagnostics.AceDiagnosticsSnapshot
 import org.autojs.autojs.ui.edit.editor.ace.diagnostics.AceRuntimeEventHistory
@@ -38,6 +41,9 @@ import org.autojs.autojs.ui.edit.editor.ace.health.AceHealthState
 import org.autojs.autojs.ui.edit.editor.ace.health.AceJsErrorClassifier
 import org.autojs.autojs.ui.edit.editor.ace.health.AceRuntimeHealthMonitor
 import org.autojs.autojs.ui.edit.editor.ace.lsp.AceLspServerManager
+import org.autojs.autojs.util.ClipboardUtils
+import org.autojs.autojs.util.ViewUtils
+import org.autojs.autojs6.R
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.ByteArrayInputStream
@@ -139,6 +145,8 @@ class AceCodeEditor @JvmOverloads constructor(
     private var lastAceResizeCompletedAtUptimeMillis = 0L
     private var lastActionModeAtUptimeMillis = 0L
     private var actionModeActive = false
+    private var selectionActionMode: ActionMode? = null
+    private val selectionActionModeRect = Rect()
     private var bridgeEventWindowStartedAtUptimeMillis = 0L
     private var bridgeEventWindowCount = 0
     private var lastBridgeEventWindowCount = 0
@@ -432,6 +440,7 @@ class AceCodeEditor @JvmOverloads constructor(
     fun destroy() {
         destroyed = true
         eventHistory.record("destroy", "AceCodeEditor.destroy")
+        finishSelectionActionMode()
         lspServerManager.detach()
         healthMonitor.markDestroyed()
         mainHandler.removeCallbacks(mirrorCalibrationRunnable)
@@ -742,9 +751,24 @@ class AceCodeEditor @JvmOverloads constructor(
         selectAll: Boolean,
     ) {
         postToMain {
+            updateSelectionActionModeRect(left, top, right, bottom)
+            if (!hasSelection || selectedTextSnapshot.isEmpty()) {
+                finishSelectionActionMode()
+                return@postToMain
+            }
             actionModeActive = true
             lastActionModeAtUptimeMillis = SystemClock.uptimeMillis()
             healthMonitor.markStateEvent()
+            if (selectionActionMode == null) {
+                selectionActionMode = startSelectionActionMode()
+                if (selectionActionMode == null) {
+                    actionModeActive = false
+                    eventHistory.record("action_mode_unavailable", "selectionLength=${selectedTextSnapshot.length}")
+                    return@postToMain
+                }
+            } else {
+                selectionActionMode?.invalidate()
+            }
             scheduleAceResize(
                 "action_mode_started:${left.toFloat()},${top.toFloat()},${right.toFloat()},${bottom.toFloat()},$hasSelection,$selectAll",
                 RESIZE_SETTLE_DELAY_MS,
@@ -754,12 +778,7 @@ class AceCodeEditor @JvmOverloads constructor(
 
     internal fun finishActionMode() {
         postToMain {
-            if (!actionModeActive) {
-                return@postToMain
-            }
-            actionModeActive = false
-            lastActionModeAtUptimeMillis = SystemClock.uptimeMillis()
-            healthMonitor.markStateEvent()
+            finishSelectionActionMode()
         }
     }
 
@@ -767,6 +786,117 @@ class AceCodeEditor @JvmOverloads constructor(
         postToMain {
             webView.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
         }
+    }
+
+    private fun startSelectionActionMode(): ActionMode? {
+        val callback = createSelectionActionModeCallback()
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            webView.startActionMode(callback, ActionMode.TYPE_FLOATING)
+        } else {
+            webView.startActionMode(callback)
+        }
+    }
+
+    private fun createSelectionActionModeCallback(): ActionMode.Callback {
+        return object : ActionMode.Callback2() {
+
+            override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
+                mode.title = null
+                menu.add(0, ACTION_MODE_COPY, 0, android.R.string.copy)
+                    .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
+                menu.add(0, ACTION_MODE_PASTE, 1, android.R.string.paste)
+                    .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM)
+                menu.add(0, ACTION_MODE_SELECT_ALL, 2, R.string.text_select_all)
+                    .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM)
+                return true
+            }
+
+            override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
+                menu.findItem(ACTION_MODE_COPY)?.isEnabled = selectedTextSnapshot.isNotEmpty()
+                menu.findItem(ACTION_MODE_PASTE)?.isEnabled = ClipboardUtils.getClipOrEmpty(context).isNotEmpty()
+                menu.findItem(ACTION_MODE_SELECT_ALL)?.isEnabled = textSnapshot.isNotEmpty()
+                return true
+            }
+
+            override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
+                return when (item.itemId) {
+                    ACTION_MODE_COPY -> {
+                        copySelectedTextToClipboard()
+                        mode.finish()
+                        true
+                    }
+                    ACTION_MODE_PASTE -> {
+                        pasteClipboardIntoSelection()
+                        mode.finish()
+                        true
+                    }
+                    ACTION_MODE_SELECT_ALL -> {
+                        selectRange(0, textSnapshot.length)
+                        mode.invalidate()
+                        true
+                    }
+                    else -> false
+                }
+            }
+
+            override fun onDestroyActionMode(mode: ActionMode) {
+                markSelectionActionModeFinished(mode)
+            }
+
+            override fun onGetContentRect(mode: ActionMode, view: View, outRect: Rect) {
+                outRect.set(selectionActionModeRect)
+            }
+        }
+    }
+
+    private fun updateSelectionActionModeRect(left: Double, top: Double, right: Double, bottom: Double) {
+        val scale = resources.displayMetrics.density.toDouble().takeIf { it > 0.0 } ?: 1.0
+        val maxRight = webView.width.takeIf { it > 1 } ?: Int.MAX_VALUE
+        val maxBottom = webView.height.takeIf { it > 1 } ?: Int.MAX_VALUE
+        val safeLeft = (minOf(left, right) * scale).toInt().coerceIn(0, maxRight - 1)
+        val safeTop = (minOf(top, bottom) * scale).toInt().coerceIn(0, maxBottom - 1)
+        val safeRight = (maxOf(left, right) * scale).toInt().coerceIn(safeLeft + 1, maxRight)
+        val safeBottom = (maxOf(top, bottom) * scale).toInt().coerceIn(safeTop + 1, maxBottom)
+        selectionActionModeRect.set(safeLeft, safeTop, safeRight, safeBottom)
+    }
+
+    private fun copySelectedTextToClipboard() {
+        if (selectedTextSnapshot.isEmpty()) {
+            return
+        }
+        ClipboardUtils.setClip(context, selectedTextSnapshot)
+        eventHistory.record("action_mode_copy", "length=${selectedTextSnapshot.length}")
+    }
+
+    private fun pasteClipboardIntoSelection() {
+        val clip = ClipboardUtils.getClipOrEmpty(context).toString()
+        if (clip.isEmpty()) {
+            return
+        }
+        replaceSelection(clip)
+        eventHistory.record("action_mode_paste", "length=${clip.length}")
+    }
+
+    private fun finishSelectionActionMode() {
+        val mode = selectionActionMode
+        if (mode != null) {
+            mode.finish()
+            return
+        }
+        markSelectionActionModeFinished()
+    }
+
+    private fun markSelectionActionModeFinished(mode: ActionMode? = null) {
+        if (mode == null || selectionActionMode === mode) {
+            selectionActionMode = null
+        }
+        if (!actionModeActive) {
+            return
+        }
+        actionModeActive = false
+        lastActionModeAtUptimeMillis = SystemClock.uptimeMillis()
+        healthMonitor.markStateEvent()
+        eventHistory.record("action_mode_finished")
     }
 
     private fun scheduleTransientResize(reason: String, delayMillis: Long) {
@@ -1329,6 +1459,9 @@ class AceCodeEditor @JvmOverloads constructor(
         private const val IME_HEIGHT_THRESHOLD_DP = 80f
         private const val BRIDGE_EVENT_WINDOW_MS = 1_000L
         private const val BRIDGE_EVENT_STORM_THRESHOLD = 60
+        private const val ACTION_MODE_COPY = 1
+        private const val ACTION_MODE_PASTE = 2
+        private const val ACTION_MODE_SELECT_ALL = 3
 
         fun hasRequiredAssets(context: Context): Boolean {
             if (AceEditorTestHooks.shouldForceAssetMissing()) {

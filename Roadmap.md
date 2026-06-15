@@ -162,11 +162,11 @@ Acceptance:
 
 ### Gate 5: Mobile Selection, Clipboard, And CJK
 
-- [ ] Long-press a word.
+- [x] Long-press a word.
 - [ ] Drag selection handles.
 - [ ] Double-tap a word.
-- [ ] Copy selected text.
-- [ ] Paste single-line text.
+- [x] Copy selected text.
+- [x] Paste single-line text.
 - [ ] Paste multi-line text.
 - [ ] Paste Chinese text, emoji, quotes, and backslashes.
 - [ ] Type CJK composition text such as `toast("你好")`.
