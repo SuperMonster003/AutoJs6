@@ -16,6 +16,10 @@ const CHECKS = [
     script: "tools/ace-hardening/check-editor-surface.mjs",
   },
   {
+    label: "AutoJs6 API model verification",
+    script: "tools/ace-completion/verify-autojs6-api-model.mjs",
+  },
+  {
     label: "AutoJs6 completion index verification",
     script: "tools/ace-completion/verify-autojs6-indices.mjs",
   },

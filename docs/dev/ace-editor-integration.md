@@ -81,6 +81,7 @@ is a real second host or lifecycle requirement.
 Before ACE is presented as a gray-release experimental editor:
 
 - Run `node tools/ace-ci/check-ace-editor-gate.mjs`.
+- Run `node tools/ace-completion/verify-autojs6-api-model.mjs`.
 - Run `node tools/ace-completion/verify-autojs6-indices.mjs`.
 - Run `node tools/ace-completion/test-completer.mjs`.
 - Run `node tools/ace-hardening/check-editor-surface.mjs`.

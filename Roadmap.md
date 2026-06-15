@@ -177,7 +177,7 @@ Acceptance:
 
 - [x] Instrumentation smoke tests for ACE basics.
 - [x] CI gate for editor boundary and ACE hardening scripts.
-- [ ] AutoJs6 API index intermediate model improvements.
+- [x] AutoJs6 API index intermediate model improvements.
 - [ ] Pro-only API detection.
 - [ ] Declaration and completion quality improvements.
 - [ ] LSP server manager alpha.

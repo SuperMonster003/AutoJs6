@@ -40,13 +40,18 @@ export const BUNDLED_TYPES_ROOT = path.join(
   "types",
 );
 export const BUNDLED_AUTOJS6_DTS_ROOT = path.join(BUNDLED_TYPES_ROOT, "autojs6");
-export const REPORT_PATH = path.join(
+export const REPORT_DIR = path.join(
   PROJECT_ROOT,
   "build",
   "reports",
   "ace-completion",
+);
+export const REPORT_PATH = path.join(
+  REPORT_DIR,
   "autojs6-indices-report.md",
 );
+export const API_MODEL_JSON_PATH = path.join(REPORT_DIR, "autojs6-api-model.json");
+export const API_MODEL_REPORT_PATH = path.join(REPORT_DIR, "autojs6-api-model-report.md");
 
 const IDENTIFIER_PATTERN = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
 const PRO_ONLY_NAMES = new Set([

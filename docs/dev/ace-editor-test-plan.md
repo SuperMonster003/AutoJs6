@@ -427,12 +427,14 @@ Steps:
 1. Run `node tools/ace-completion/generate-autojs6-indices-from-dts.mjs`.
 2. Run `node tools/ace-completion/generate-autojs6-indices.mjs`.
 3. Run `node tools/ace-completion/generate-dts.mjs`.
-4. Run `node tools/ace-completion/verify-autojs6-indices.mjs`.
-5. Run `node tools/ace-completion/test-completer.mjs`.
+4. Run `node tools/ace-completion/verify-autojs6-api-model.mjs`.
+5. Run `node tools/ace-completion/verify-autojs6-indices.mjs`.
+6. Run `node tools/ace-completion/test-completer.mjs`.
 
 Expected:
 - All commands pass.
 - Common AutoJs6 API completions are present.
+- Common AutoJs6 module member completions are declaration-backed in the intermediate API model.
 - Accepting a popup item by Enter and by touch does not report `JS_RUNTIME_ERROR`.
 - Missing indices and legacy fallback paths do not throw.
 
