@@ -187,7 +187,7 @@ function assertLanguageToolsAcceptShim() {
 
 function assertMobileBridgeStabilityHooks() {
   const bridge = fs.readFileSync(BRIDGE_PATH, "utf8");
-  for (const expected of ["scheduleResize", "recoverableError", "firstPaint"]) {
+  for (const expected of ["scheduleResize", "recoverableError", "firstPaint", "requestFirstPaint"]) {
     if (!bridge.includes(expected)) {
       throw new Error(`ACE mobile stability hook is missing from bridge: ${expected}`);
     }

@@ -357,6 +357,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     // IME bottom inset last applied to editor padding.
     // zh-CN: 最近一次应用到编辑器 padding 的 IME 底部值.
     private var mLastImeBottomInset = 0
+    private var mLastImeVisible = false
+    private var mLastImeEngineType: EditorEngineType? = null
 
     // Reusable rect for window visible area.
     // zh-CN: 复用的窗口可见区域 Rect.
@@ -609,17 +611,31 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 0
             }
 
-            if (targetBottom != mLastImeBottomInset) {
+            val engineType = editor.engineType
+            val imeStateChanged = targetBottom != mLastImeBottomInset ||
+                imeVisible != mLastImeVisible ||
+                engineType != mLastImeEngineType
+
+            if (imeStateChanged) {
                 mLastImeBottomInset = targetBottom
+                mLastImeVisible = imeVisible
+                mLastImeEngineType = engineType
 
                 // Apply bottom padding only when the editor is actually overlapped by IME.
                 // zh-CN: 仅当 editor 实际被 IME 遮挡时才应用底部 padding.
                 val v = editor.view
-                v.setPadding(v.paddingLeft, v.paddingTop, v.paddingRight, targetBottom)
+                if (engineType == EditorEngineType.ACE) {
+                    if (v.paddingBottom != 0) {
+                        v.setPadding(v.paddingLeft, v.paddingTop, v.paddingRight, 0)
+                    }
+                } else {
+                    v.setPadding(v.paddingLeft, v.paddingTop, v.paddingRight, targetBottom)
+                }
+                editor.onImeInsetsChanged(imeVisible, targetBottom)
 
                 // Only ensure cursor visible when IME becomes visible.
                 // zh-CN: 仅在 IME 变为可见时确保光标可见.
-                if (imeVisible) {
+                if (engineType != EditorEngineType.ACE && imeVisible) {
                     post { ensureCursorVisibleIfPossible() }
                 }
             }
@@ -649,7 +665,9 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
         // Request focus without forcing soft keyboard.
         // zh-CN: 请求焦点但不强制弹出软键盘.
-        editor.requestEditorFocus()
+        if (editor.engineType != EditorEngineType.ACE) {
+            editor.requestEditorFocus()
+        }
 
         // Optionally ensure visible once.
         // zh-CN: 可选地确保一次可见.
@@ -1573,6 +1591,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         setUpEditor(resetInitialState = false)
         setUpInputMethodEnhancedBar()
         setUpFunctionsKeyboard()
+        mLastImeEngineType = null
+        requestApplyInsetsSoon()
         if (wasAttached) {
             registerFunctionsKeyboardBackHandler()
         }

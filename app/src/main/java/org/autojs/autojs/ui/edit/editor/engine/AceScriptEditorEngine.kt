@@ -359,7 +359,11 @@ class AceScriptEditorEngine(
     }
 
     override fun ensureCursorVisibleIfPossible() {
-        aceCodeEditor.requestEditorFocus()
+        aceCodeEditor.ensureCursorVisible()
+    }
+
+    override fun onImeInsetsChanged(visible: Boolean, bottomInset: Int) {
+        aceCodeEditor.onHostImeInsetsChanged(visible, bottomInset)
     }
 
     override fun refreshHighlightTokensIfAllowed() {

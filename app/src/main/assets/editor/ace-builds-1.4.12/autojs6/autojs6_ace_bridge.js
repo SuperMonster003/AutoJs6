@@ -92,6 +92,11 @@
         });
     }
 
+    function requestFirstPaint(reason) {
+        scheduleResize(reason || "first_paint");
+        afterTwoFrames(notifyFirstPaint);
+    }
+
     function clampRow(row) {
         var length = session ? session.getLength() : 1;
         return Math.max(0, Math.min(Number(row) || 0, Math.max(0, length - 1)));
@@ -637,6 +642,7 @@
             setFontSizeSp: setFontSizeSp,
             setFontFamily: setFontFamily,
             scheduleResize: scheduleResize,
+            requestFirstPaint: requestFirstPaint,
             restoreScroll: restoreScroll,
             setBreakpoint: function(row, enabled) { return setBreakpoint(row, enabled, true); },
             toggleBreakpoint: toggleBreakpoint,
@@ -652,7 +658,6 @@
         callBridge("notifyReady", [json]);
         callBridge("notifyEvent", ["ready", json]);
         scheduleResize("init");
-        afterTwoFrames(notifyFirstPaint);
         editor.focus();
     }
 

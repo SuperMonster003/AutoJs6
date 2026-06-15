@@ -92,6 +92,7 @@ interface ScriptEditorEngine {
 
     fun requestEditorFocus()
     fun ensureCursorVisibleIfPossible()
+    fun onImeInsetsChanged(visible: Boolean, bottomInset: Int) = Unit
     fun refreshHighlightTokensIfAllowed()
     fun setProgress(progress: Boolean, interactive: Boolean = false)
 

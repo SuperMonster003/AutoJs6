@@ -463,6 +463,7 @@ class AceCodeEditor @JvmOverloads constructor(
             listener?.onReady(state)
             flushPendingScripts()
             scheduleAceResize("bridge_ready", 0L)
+            requestFirstPaintWhenStable()
             healthMonitor.startHeartbeat { evaluateHeartbeat() }
         }
     }
@@ -608,6 +609,23 @@ class AceCodeEditor @JvmOverloads constructor(
         }
     }
 
+    fun ensureCursorVisible(reason: String = "ensure_cursor_visible") {
+        postToMain {
+            scheduleAceResize(reason, RESIZE_SETTLE_DELAY_MS)
+        }
+    }
+
+    fun onHostImeInsetsChanged(visible: Boolean, bottomInset: Int) {
+        postToMain {
+            val reason = if (visible) {
+                "host_ime_visible:$bottomInset"
+            } else {
+                "host_ime_hidden"
+            }
+            scheduleTransientResize(reason, RESIZE_SETTLE_DELAY_MS)
+        }
+    }
+
     internal fun startActionMode(
         left: Double,
         top: Double,
@@ -661,6 +679,10 @@ class AceCodeEditor @JvmOverloads constructor(
         pendingResizeReason = reason
         mainHandler.removeCallbacks(scheduledResizeRunnable)
         mainHandler.postDelayed(scheduledResizeRunnable, delayMillis.coerceAtLeast(0L))
+    }
+
+    private fun requestFirstPaintWhenStable() {
+        invokeAce("requestFirstPaint", quote("native_ready"))
     }
 
     private fun runScheduledResize() {
