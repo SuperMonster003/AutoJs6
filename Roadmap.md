@@ -137,15 +137,15 @@ Acceptance:
 
 ### Gate 3: IME Show/Hide And Tap Anchors
 
-- [ ] Tap top, middle, and lower visible code lines with keyboard hidden.
-- [ ] Show and hide the keyboard at least three rounds.
-- [ ] Check lower-viewport tap anchors near the keyboard edge.
+- [x] Tap top, middle, and lower visible code lines with keyboard hidden.
+- [x] Show and hide the keyboard at least three rounds.
+- [x] Check lower-viewport tap anchors near the keyboard edge.
 
 Acceptance:
 
-- [ ] ACE does not white-screen, black-screen, jump unexpectedly, or fallback.
-- [ ] Caret lands on the intended line.
-- [ ] IME hide does not leave stale scroll or bottom padding.
+- [x] ACE does not white-screen, black-screen, jump unexpectedly, or fallback.
+- [x] Caret lands on the intended line.
+- [x] IME hide does not leave stale scroll or bottom padding.
 
 ### Gate 4: Keyboard Stress
 

@@ -44,10 +44,10 @@ path has a recorded result.
 | VisualEditorAce unavailable | STATIC PASS | Confirmed by release gate; device UI sweep still TBD. |
 | First paint | DEVICE SMOKE PASS | File-manager open sampling showed coherent ACE surfaces in dark and light themes; see Gate 2 notes. |
 | File-manager open repeat | DEVICE SMOKE PASS | 10 dark-theme opens and 5 light-theme opens of `ace-release-gate.js` reached `EditActivity`; no fallback/fatal signal in logcat. |
-| Keyboard show/hide | TBD | |
+| Keyboard show/hide | DEVICE SMOKE PASS | Three IME show/hide rounds kept `EditActivity` focused; see Gate 3 notes. |
 | Keyboard stress | TBD | |
-| Click anchor accuracy | TBD | |
-| Lower viewport tap anchor | TBD | |
+| Click anchor accuracy | DEVICE SMOKE PASS | Top, middle, and lower visible-line taps landed on the observed target rows with keyboard hidden before each tap. |
+| Lower viewport tap anchor | DEVICE SMOKE PASS | Low-screen taps kept the caret visible just above the IME/symbol toolbar and did not fallback ACE. |
 | Long-press selection | TBD | |
 | Double-tap selection | TBD | |
 | Copy/paste | TBD | |
@@ -73,6 +73,7 @@ Record copied ACE diagnostics for every failure or ambiguous result.
 | Scenario | Diagnostics reference | Notes |
 | --- | --- | --- |
 | Gate 2 file-manager open smoke | N/A | No failure diagnostics were produced; screenshot samples were reviewed during the run. |
+| Gate 3 IME/tap-anchor smoke | N/A | No failure diagnostics were produced; screenshot samples and logcat were reviewed during the run. |
 
 ## Gate 2 Notes
 
@@ -97,12 +98,43 @@ Record copied ACE diagnostics for every failure or ambiguous result.
   capture. Treat any later human-observed transition flash as a new Gate 2
   finding.
 
+## Gate 3 Notes
+
+- Time: 2026-06-15 23:27-23:32 CST.
+- Test script: `/sdcard/Scripts/ace-gate3-anchors.js`, 120 labeled
+  `console.log("anchor-line-NNN")` rows, created for this gate and removed
+  after the run.
+- Tap-anchor smoke:
+  - Opened the script through `EditIntentActivity`; initial state had
+    `mInputShown=false` and `EditActivity` focused.
+  - With the keyboard hidden before each tap, tapped upper, middle, and lower
+    visible code rows.
+  - Screenshots showed the upper tap on line 2, the middle tap around line 19,
+    and the low tap on line 38 just above the IME/symbol toolbar.
+  - Each tap showed the IME and kept `EditActivity` focused.
+- IME show/hide smoke:
+  - Ran three explicit cycles from a focused ACE editor.
+  - Each cycle had `mInputShown=true` before hide,
+    `mInputShown=false` after Back, and `mInputShown=true` after a low
+    viewport tap.
+  - `EditActivity` stayed focused after every hide and show step.
+  - Hide screenshots showed the editor expanding back to the symbol toolbar
+    with no stale bottom padding. Show screenshots kept the caret visible above
+    the IME after low-viewport taps.
+- Logcat during Gate 3 had no `AndroidRuntime FATAL EXCEPTION`, ACE fallback,
+  renderer-gone, or fatal ACE signal.
+- Device cleanup left AutoJs6 ACE at `MainActivity` with `mInputShown=false`;
+  the temporary test script was removed.
+- This is an ADB screenshot-sampling smoke result. Keep any later
+  human-observed tap-anchor mismatch or transition flash as a new Gate 3
+  finding.
+
 ## Blockers
 
 ### P0
 
-- No automated P0 blocker found in preflight. Gate 2 device smoke found no P0
-  first-paint or file-open blocker.
+- No automated P0 blocker found in preflight. Gate 2 and Gate 3 device smoke
+  found no P0 first-paint, file-open, IME, or tap-anchor blocker.
 
 ### P1
 
