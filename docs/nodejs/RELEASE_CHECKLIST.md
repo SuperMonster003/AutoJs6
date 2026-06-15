@@ -40,6 +40,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `NodeBridgeResourceRegistryInstrumentationTest`
 - [ ] `NodeBridgeConcurrencyLimitsInstrumentationTest`
 - [ ] `NodeExampleProjectInstrumentationTest`
+- [ ] timeline trace smoke verifies default-off behavior and required `embedded_script.timeline_json` events when opted in
 - [ ] optional `NodeEmbeddedPerformanceInstrumentationTest` run recorded for lifecycle/native-load changes
 - [ ] extended `NodeEmbeddedMemoryLeakStressInstrumentationTest` run recorded before release candidates that change lifecycle, bridge, fs, or image-handle behavior
 - [ ] live bridge smoke verifies JavaScript can observe provider results
@@ -170,6 +171,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] unhandled rejection returns stable error shape
 - [ ] stdout/stderr are captured and closed
 - [ ] native handle diagnostics are available when debugging
+- [ ] runtime timeline trace remains off by default and records service/native/bootstrap/stdout/pending/bridge/stop/drain/destroy events when opted in
 
 ## Diagnostics
 
@@ -186,6 +188,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `ERR_AUTOJS6_*` codes stable for documented negative paths
 - [ ] resolver trace remains off by default once implemented
 - [ ] resolver visualizer fixture parses search paths, package.json fields, null blocking, and final errors
+- [ ] runtime timeline trace is available only with `autojs.nodejs.timelineTrace=true` or `AUTOJS6_NODE_TIMELINE_TRACE=1`
 - [ ] bridge live diagnostics are present for main-app bridge smoke
 - [ ] docs updated for any changed capability
 

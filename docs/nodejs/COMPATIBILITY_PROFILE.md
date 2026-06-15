@@ -86,6 +86,7 @@ Runtime diagnostics expose the same state through `require("autojs6:profile").fe
 - module source budget checks
 - optional resolver trace through `AUTOJS6_NODE_RESOLVE_TRACE=1`, written to stderr and disabled by default
 - resolver visualizer report through `node tools/nodejs/resolver/explain-node-resolve.js --request <specifier> --from <file> --trace-file <stderr-log>` or `:app:explainNodeResolve` with `-Pautojs.nodejs.resolve.*`
+- optional embedded runtime timeline trace through `autojs.nodejs.timelineTrace=true` or `AUTOJS6_NODE_TIMELINE_TRACE=1`, reported as `embedded_script.timeline_json` and disabled by default
 
 Unsupported or rejected module source forms:
 

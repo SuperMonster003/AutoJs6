@@ -165,6 +165,24 @@ class NativeNodeEmbeddedScriptService : Service() {
             javaInteropExperimentalEnabled = javaInteropExperimentalEnabled,
         )
         val lifecycle = NodeEmbeddedRuntimeLifecycle(TAG, executionId, processName, pid, sourceName)
+        val timeline = NodeEmbeddedRuntimeTimeline.create(
+            env = env,
+            executionId = executionId,
+            processName = processName,
+            pid = pid,
+            sourceName = sourceName,
+            startedAtElapsedMs = startedAt,
+        )
+        timeline?.mark(
+            "service_start",
+            mapOf(
+                "startId" to startId,
+                "workingDirectory" to workingDirectory.orEmpty(),
+                "timeoutMs" to timeoutMs,
+                "moduleSourceCount" to moduleSources.size,
+                "runtimeModuleSourceCount" to enrichedRuntimeModuleSources.size,
+            ),
+        )
         activeLifecycle = lifecycle
         lifecycle.transition(NodeEmbeddedRuntimeState.STARTING, "service.runScript")
         Log.i(
@@ -179,35 +197,53 @@ class NativeNodeEmbeddedScriptService : Service() {
                     "runtimeFirst=${enrichedRuntimeModuleSources.keys.firstOrNull().orEmpty()}",
         )
         try {
+            timeline?.mark("bridge_transport_start", mapOf("transport" to "file"))
             bridgeSession.start()
+            timeline?.mark("bridge_transport_ready", mapOf("transport" to "file"))
             lifecycle.transition(NodeEmbeddedRuntimeState.RUNNING, "native.enter")
+            timeline?.mark("native_enter")
             val nativeResult = NativeNodeEmbeddedRuntimeBridge.runEmbeddedScriptInCurrentProcess(
                 context = this,
                 request = request,
             )
+            timeline?.recordNativeResult(nativeResult)
             val result = dispatchQueuedBridgeRequests(bridgeSession.appendNativeValues(nativeResult))
+            timeline?.recordBridge(result)
             val completed = when {
                 result.succeeded -> {
+                    timeline?.mark("stop_requested", mapOf("reason" to "script.success"))
                     lifecycle.transition(NodeEmbeddedRuntimeState.DRAINING, "script.success")
                     lifecycle.transition(NodeEmbeddedRuntimeState.STOPPED, "script.success")
+                    timeline?.mark("drain_complete", mapOf("state" to lifecycle.state.name))
                     result
                 }
                 result.timedOut -> {
+                    timeline?.mark("stop_requested", mapOf("reason" to "script.timeout"))
                     lifecycle.transition(NodeEmbeddedRuntimeState.TIMED_OUT, "script.timeout")
                     lifecycle.transition(NodeEmbeddedRuntimeState.STOPPING, "script.timeout")
                     result
                 }
                 else -> {
+                    timeline?.mark("stop_requested", mapOf("reason" to "script.failure"))
                     lifecycle.transition(NodeEmbeddedRuntimeState.FAILED, "script.failure")
                     lifecycle.transition(NodeEmbeddedRuntimeState.STOPPING, "script.failure")
                     result
                 }
             }
-            receiver?.send(RESULT_SCRIPT, completed.withLifecycle(lifecycle).toBundle())
+            timeline?.mark("destroy_complete", mapOf("state" to lifecycle.state.name))
+            receiver?.send(RESULT_SCRIPT, completed.withLifecycle(lifecycle).withTimeline(timeline).toBundle())
         } catch (e: Throwable) {
+            timeline?.mark(
+                "stop_requested",
+                mapOf(
+                    "reason" to "service.exception",
+                    "error" to (e.message ?: e.javaClass.name),
+                ),
+            )
             lifecycle.transition(NodeEmbeddedRuntimeState.FAILED, "service.exception")
             lifecycle.transition(NodeEmbeddedRuntimeState.STOPPING, "service.exception")
             Log.e(TAG, "Native Node embedded script service failed.", e)
+            timeline?.mark("destroy_complete", mapOf("state" to lifecycle.state.name))
             receiver?.send(
                 RESULT_SCRIPT,
                 NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult(
@@ -224,7 +260,7 @@ class NativeNodeEmbeddedScriptService : Service() {
                     pid = pid,
                     sourceName = sourceName,
                     nativeValues = emptyMap(),
-                ).withLifecycle(lifecycle).toBundle(),
+                ).withLifecycle(lifecycle).withTimeline(timeline).toBundle(),
             )
         } finally {
             bridgeSession.stop()
@@ -383,6 +419,20 @@ class NativeNodeEmbeddedScriptService : Service() {
                 put(JSONObject(response.toJson()))
             }
         }.toString()
+    }
+
+    private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult.withTimeline(
+        timeline: NodeEmbeddedRuntimeTimeline?,
+    ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+        if (timeline == null) {
+            return this
+        }
+        return copy(
+            nativeValues = linkedMapOf<String, String>().apply {
+                putAll(nativeValues)
+                putAll(timeline.nativeValues())
+            },
+        )
     }
 
     private class NodeBridgeFileTransportSession(

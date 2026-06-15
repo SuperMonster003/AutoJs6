@@ -520,6 +520,29 @@ The resolver visualizer does not run a second resolver. It formats the real Embe
 lists the original request, parent module, `node_modules` search paths, package.json files read, selected
 `exports`/`imports`/`main` branch, `target=null` blocking, and the final error.
 
+## Runtime Timeline Trace
+
+Embedded runtime timeline tracing is available for targeted lifecycle diagnostics and is off by default. It can be enabled
+for a build with:
+
+```powershell
+.\gradlew.bat --console=plain :app:assembleAppDebug "-Pautojs.nodejs.timelineTrace=true"
+```
+
+Project runner and instrumentation callers may enable it for one request by passing `AUTOJS6_NODE_TIMELINE_TRACE=1` in the
+embedded script environment.
+
+When enabled, the embedded result `nativeValues` include:
+
+- `embedded_script.timeline_trace_enabled=true`
+- `embedded_script.timeline_event_count`
+- `embedded_script.timeline_json`
+
+The JSON timeline records compact events such as service start, native library load, inferred V8 and Node environment
+creation, bootstrap load, user script entry, first stdout, pending callback and timer counts, bridge call counts, stop
+request, drain completion, and destroy completion. It is intended for diagnosing slow startup and false completion only;
+normal production scripts should leave it disabled.
+
 ## Lifecycle Tests
 
 The embedded service must be verified beyond one successful script.
@@ -529,6 +552,7 @@ Current lifecycle diagnostics:
 - every embedded script service execution gets `embedded_script.execution_id`
 - result `nativeValues` include `embedded_script.runtime_state`
 - result `nativeValues` include `embedded_script.lifecycle_transitions`
+- opt-in timeline trace uses `embedded_script.timeline_json`
 - bridge live transport diagnostics use `embedded_script.bridge_live_*`
 - logcat uses `node.runtime.state executionId=<id> FROM -> TO`
 - normal completion should include `CREATED -> STARTING -> RUNNING -> DRAINING -> STOPPED`

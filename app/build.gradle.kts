@@ -122,6 +122,9 @@ val nodeJsWorkerThreadsExperimentalEnabled = providers.gradleProperty("autojs.no
 val nodeJsJavaInteropExperimentalEnabled = providers.gradleProperty("autojs.nodejs.javaInterop.experimental").orElse("false").get()
     .trim()
     .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
+val nodeJsTimelineTraceEnabled = providers.gradleProperty("autojs.nodejs.timelineTrace").orElse("false").get()
+    .trim()
+    .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
 val leakCanaryEnabled = providers.gradleProperty("autojs.leakcanary.enabled").orElse("false").get()
     .trim()
     .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
@@ -608,6 +611,7 @@ android {
         buildConfigField("boolean", "NODEJS_NETWORK_EXPERIMENTAL_ENABLED", "$nodeJsNetworkExperimentalEnabled")
         buildConfigField("boolean", "NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED", "$nodeJsWorkerThreadsExperimentalEnabled")
         buildConfigField("boolean", "NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED", "$nodeJsJavaInteropExperimentalEnabled")
+        buildConfigField("boolean", "NODEJS_TIMELINE_TRACE_ENABLED", "$nodeJsTimelineTraceEnabled")
         buildConfigField("boolean", "is${flavorNameInrt.uppercaseFirstChar()}", "false")
 
         javaCompileOptions {

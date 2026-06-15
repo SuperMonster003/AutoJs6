@@ -1283,6 +1283,94 @@ class EmbeddedScriptMvpInstrumentationTest {
     }
 
     @Test
+    fun embeddedRuntimeTimelineTraceIsOptInAndContainsRequiredEvents() {
+        assumeEmbeddedScriptExecutionEnabled()
+
+        val quiet = runEmbeddedScript(
+            """
+            "nodejs";
+            console.log("timeline.quiet");
+            """.trimIndent(),
+            "<embedded-timeline-quiet-source.js>",
+        )
+        assertTrue(quiet.errorMessage.orEmpty(), quiet.succeeded)
+        assertFalse(
+            "Timeline trace should stay off unless explicitly enabled.",
+            quiet.nativeValues.containsKey("embedded_script.timeline_json"),
+        )
+
+        settleEmbeddedScriptServiceProcess()
+
+        val traced = runEmbeddedScript(
+            """
+            "nodejs";
+            setTimeout(() => console.log("timeline.async"), 0);
+            console.log("timeline.sync");
+            """.trimIndent(),
+            "<embedded-timeline-trace-source.js>",
+            env = mapOf("AUTOJS6_NODE_TIMELINE_TRACE" to "1"),
+        )
+        assertTrue(traced.errorMessage.orEmpty(), traced.succeeded)
+        assertEquals("true", traced.nativeValues["embedded_script.timeline_trace_enabled"])
+
+        val timeline = JSONArray(traced.nativeValues["embedded_script.timeline_json"].orEmpty())
+        assertEquals(
+            timeline.length().toString(),
+            traced.nativeValues["embedded_script.timeline_event_count"],
+        )
+        val names = (0 until timeline.length()).map { index ->
+            timeline.getJSONObject(index).getString("name")
+        }
+        listOf(
+            "service_start",
+            "bridge_transport_start",
+            "bridge_transport_ready",
+            "native_enter",
+            "native_libs_loaded",
+            "v8_initialized",
+            "node_env_created",
+            "bootstrap_loaded",
+            "user_script_entered",
+            "first_stdout",
+            "pending_callbacks",
+            "timers_scheduled",
+            "bridge_calls",
+            "stop_requested",
+            "drain_complete",
+            "destroy_complete",
+        ).forEach { required ->
+            assertTrue("Missing timeline event $required in $names", names.contains(required))
+        }
+        assertOutputOrder(
+            names.joinToString("|"),
+            "service_start",
+            "bridge_transport_start",
+            "bridge_transport_ready",
+            "native_enter",
+            "native_libs_loaded",
+            "bootstrap_loaded",
+            "user_script_entered",
+            "first_stdout",
+            "stop_requested",
+            "drain_complete",
+            "destroy_complete",
+        )
+
+        var previousElapsed = -1L
+        for (index in 0 until timeline.length()) {
+            val event = timeline.getJSONObject(index)
+            assertEquals(index, event.getInt("index"))
+            val elapsedMs = event.getLong("elapsedMs")
+            assertTrue("Timeline elapsedMs must be monotonic at index $index", elapsedMs >= previousElapsed)
+            previousElapsed = elapsedMs
+            assertTrue(
+                "Timeline event $index should carry execution id.",
+                event.getJSONObject("details").getString("executionId").isNotBlank(),
+            )
+        }
+    }
+
+    @Test
     fun timeoutDoesNotPoisonNextEmbeddedScriptRun() {
         assumeEmbeddedScriptExecutionEnabled()
 
@@ -31126,6 +31214,7 @@ class EmbeddedScriptMvpInstrumentationTest {
         timeoutMs: Long = 5000L,
         moduleSources: Map<String, String> = emptyMap(),
         runtimeModuleSources: Map<String, String> = emptyMap(),
+        env: Map<String, String> = emptyMap(),
     ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
         return NativeNodeEmbeddedScriptService.runScript(
             context,
@@ -31134,6 +31223,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                 sourceName = sourceName,
                 workingDirectory = workingDirectory,
                 timeoutMs = timeoutMs,
+                env = env,
                 moduleSources = moduleSources,
                 runtimeModuleSources = runtimeModuleSources,
             ),
