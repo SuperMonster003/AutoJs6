@@ -112,15 +112,15 @@ Acceptance:
 
 ### Gate 1: Automated Preflight
 
-- [ ] Run `node tools/ace-ci/check-ace-release-gate.mjs`.
-- [ ] Run `node tools/ace-ci/check-ace-editor-gate.mjs`.
-- [ ] Run `git diff --check`.
-- [ ] Record command results in the Sony XQ-AT72 report.
+- [x] Run `node tools/ace-ci/check-ace-release-gate.mjs`.
+- [x] Run `node tools/ace-ci/check-ace-editor-gate.mjs`.
+- [x] Run `git diff --check`.
+- [x] Record command results in the Sony XQ-AT72 report.
 
 Acceptance:
 
-- [ ] All commands exit 0.
-- [ ] Any LF/CRLF warnings are recorded as non-blocking if no whitespace errors
+- [x] All commands exit 0.
+- [x] Any LF/CRLF warnings are recorded as non-blocking if no whitespace errors
   are present.
 
 ### Gate 2: First Paint And File Open

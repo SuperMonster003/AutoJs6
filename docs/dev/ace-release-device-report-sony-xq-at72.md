@@ -10,10 +10,10 @@ path has a recorded result.
 - Android version: TBD
 - API level: TBD
 - Android System WebView version: TBD
-- AutoJs6 build commit: TBD
-- Test package: TBD
-- ACE enabled: TBD
-- LSP enabled: TBD
+- AutoJs6 build commit: 920c9f61
+- Test package: org.autojs.autojs6.ace
+- ACE enabled: TBD on device; explicit opt-in confirmed by static gate
+- LSP enabled: TBD on device; default-off confirmed by static gate
 - Clean host enabled: yes
 - IME: TBD
 - Navigation mode: TBD
@@ -27,17 +27,17 @@ path has a recorded result.
 
 | Command | Result | Notes |
 | --- | --- | --- |
-| `node tools/ace-ci/check-ace-release-gate.mjs` | TBD | |
-| `node tools/ace-ci/check-ace-editor-gate.mjs` | TBD | |
-| `git diff --check` | TBD | |
+| `node tools/ace-ci/check-ace-release-gate.mjs` | PASS | Runs the full ACE editor CI gate first, then release static invariants. |
+| `node tools/ace-ci/check-ace-editor-gate.mjs` | PASS | Boundary, surface, API model, Pro-only, completion, d.ts, LSP client, and tooltip checks passed. |
+| `git diff --check` | PASS | Exit code 0 with no whitespace errors; follow-up doc-only diff check emitted LF/CRLF warnings only. |
 
 ## Manual Gate Summary
 
 | Area | Result | Notes |
 | --- | --- | --- |
-| Native default | TBD | |
-| LSP default-off | TBD | |
-| VisualEditorAce unavailable | TBD | |
+| Native default | STATIC PASS | Confirmed by release gate; device launch still TBD. |
+| LSP default-off | STATIC PASS | Confirmed by release gate; device setting still TBD. |
+| VisualEditorAce unavailable | STATIC PASS | Confirmed by release gate; device UI sweep still TBD. |
 | First paint | TBD | |
 | File-manager open repeat | TBD | |
 | Keyboard show/hide | TBD | |
@@ -67,21 +67,21 @@ Record copied ACE diagnostics for every failure or ambiguous result.
 
 | Scenario | Diagnostics reference | Notes |
 | --- | --- | --- |
-| TBD | TBD | |
+| No device diagnostics yet | TBD | Awaiting Sony XQ-AT72 manual gate. |
 
 ## Blockers
 
 ### P0
 
-- TBD
+- No automated P0 blocker found in preflight. Device P0 status is TBD.
 
 ### P1
 
-- TBD
+- TBD after device gate.
 
 ### P2
 
-- TBD
+- TBD after device gate.
 
 ## Final Decision
 
