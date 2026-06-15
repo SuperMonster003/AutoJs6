@@ -94,6 +94,8 @@ const aceDiagnostics = "app/src/main/java/org/autojs/autojs/ui/edit/editor/ace/d
 const aceDiagnosticsSnapshot = "app/src/main/java/org/autojs/autojs/ui/edit/editor/ace/diagnostics/AceDiagnosticsSnapshot.kt";
 const aceSurfaceSmoke = "tools/ace-hardening/check-editor-surface.mjs";
 const roadmap = "Roadmap.md";
+const aceEditorTestPlan = "docs/dev/ace-editor-test-plan.md";
+const aceEditorIntegrationDoc = "docs/dev/ace-editor-integration.md";
 
 assertIncludes(editorView, "mViewportPolicy.onImeInsetsChanged(imeVisible, targetBottom)");
 assertIncludes(editorView, "EditorViewportPolicyFactory.create(editor, this)");
@@ -337,6 +339,18 @@ assertIncludes(draftService, "stableDraftFileHelper.deleteDraft()");
 assertNotIncludes(draftService, "CodeEditText");
 
 assertIncludes(roadmap, "node tools/ace-hardening/check-editor-surface.mjs");
+assertIncludes(roadmap, "- [x] Add ACE IME show/hide manual test checklist.");
+
+assertIncludes(aceEditorTestPlan, "## IME Show/Hide Manual Checklist");
+assertIncludes(aceEditorTestPlan, "### ACE-IME-001: Input method and symbols/function bars");
+assertIncludes(aceEditorTestPlan, "### ACE-IME-002: Repeated soft keyboard show/hide stress");
+assertIncludes(aceEditorTestPlan, "### ACE-IME-003: Lower viewport tap anchor remains visible");
+assertIncludes(aceEditorTestPlan, "### ACE-IME-004: Completion and selection while IME is visible");
+assertIncludes(aceEditorTestPlan, "viewportPolicy=AceEditorViewportPolicy");
+assertIncludes(aceEditorTestPlan, "lastAceResizeCompletedReason");
+assertIncludes(aceEditorTestPlan, "heartbeatSuspendedReason");
+
+assertIncludes(aceEditorIntegrationDoc, "Run the `IME Show/Hide Manual Checklist`");
 
 assertIncludes(aceSurfaceSmoke, "ACE editor bootstrap order");
 assertIncludes(aceSurfaceSmoke, "hidden editor before first paint");

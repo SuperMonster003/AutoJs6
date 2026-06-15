@@ -56,6 +56,7 @@ Before ACE is presented as a gray-release experimental editor:
 - Run `node tools/ace-completion/test-completer.mjs`.
 - Run `node tools/ace-hardening/check-editor-surface.mjs`.
 - Run the manual cases in `docs/dev/ace-editor-test-plan.md`.
+- Run the `IME Show/Hide Manual Checklist` in `docs/dev/ace-editor-test-plan.md`.
 - Verify asset-missing, ready-timeout, JS-init, renderer-gone, and large-file debug hooks.
 - Verify recent small-file input survives fallback through TextMirror.
 - Copy diagnostics from both an active ACE editor and after ACE fallback to Native.

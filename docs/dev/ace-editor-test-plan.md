@@ -21,6 +21,7 @@ This plan covers manual device validation for the ACE editor experiment. Native 
   - `node tools/ace-completion/generate-autojs6-indices-from-dts.mjs`
   - `node tools/ace-completion/verify-autojs6-indices.mjs`
   - `node tools/ace-completion/test-completer.mjs`
+  - `node tools/ace-hardening/check-editor-surface.mjs`
 
 ## Debug Hooks
 
@@ -38,7 +39,7 @@ The following hooks are available in debug builds through `AceEditorTestHooks`. 
 
 Use `More -> Copy ACE diagnostics` from the editor menu when reporting ACE issues. The same export is available from the isolated ACE debug page through the `Copy ACE diagnostics` button.
 
-Diagnostics should include the current engine type, ACE health state, last failure, Android/WebView versions, LSP state, file size, large-file policy, and TextMirror revision.
+Diagnostics should include the current engine type, ACE health state, last failure, Android/WebView versions, LSP state, file size, large-file policy, TextMirror revision, viewport policy, host IME event, and ACE resize schedule/dispatch/complete fields.
 
 ## Completion And LSP Checks
 
@@ -64,6 +65,47 @@ The repository currently has only lightweight instrumentation test dependencies 
 - `searchReplaceInAce`
 - `toggleBreakpointInAce`
 - `largeFileRoutesToNative`
+- `aceImeShowHideStress`
+- `aceImeLowerViewportAnchor`
+- `aceImeCompletionAndSelection`
+
+## IME Show/Hide Manual Checklist
+
+Run this checklist on at least one gesture-navigation device and one 3-button-navigation device when available. Record the Android System WebView version from `More -> Copy ACE diagnostics`.
+
+Setup:
+- ACE editor is selected in settings.
+- Open `ace-basic.js` with at least 80 lines so the top, middle, and bottom viewport areas can be tested.
+- Use JetBrains Mono first, then repeat a quick pass with Source Code Pro.
+- Test with the default Latin keyboard and one CJK IME when available.
+
+Checklist:
+1. Open the file from File Manager and wait for ACE first paint.
+2. Tap near the top, middle, and bottom of the visible code area to show the soft keyboard.
+3. Hide the keyboard with Back, then show it again by tapping code.
+4. Repeat show/hide at least 20 times without leaving the editor.
+5. Tap a lower-screen line while the keyboard is hidden, then let the keyboard show.
+6. Type ASCII text, punctuation, newline, and CJK composition text.
+7. Trigger completion while the keyboard is visible, accept the highlighted item with Enter, then accept another item by touch.
+8. Long-press and double-tap text to enter selection/action-mode paths.
+9. Use the symbol bar and function keyboard while the soft keyboard has recently shown and hidden.
+10. Copy ACE diagnostics before leaving the editor.
+
+Expected:
+- No white/black flash, old file-list flash, or persistent gutter-only flicker.
+- The tapped line becomes the caret anchor; keyboard show must not push the intended caret out of view.
+- Cursor remains visible after show/hide, Back, completion accept, and action-mode entry/exit.
+- ACE does not fallback to Native during repeated show/hide.
+- Completion popup touch/Enter accept does not report `JS_RUNTIME_ERROR`.
+- Diagnostics show `viewportPolicy=AceEditorViewportPolicy`, recent host IME fields, and ACE resize scheduled/dispatched/completed reasons.
+
+Failure logs:
+- `ACE console`
+- `AceFailureType`
+- `lastViewportPolicyEvent`
+- `lastAceResizeScheduledReason`
+- `lastAceResizeCompletedReason`
+- `heartbeatSuspendedReason`
 
 ## Cases
 
@@ -421,19 +463,97 @@ Failure logs:
 
 Preconditions:
 - ACE editor is active.
+- Open `ace-basic.js`.
 
 Steps:
 1. Focus the editor and show the soft keyboard.
 2. Type ASCII, Chinese input, punctuation, and newline.
 3. Use symbol bar and function keyboard entries.
+4. Hide the keyboard with Back and type again.
 
 Expected:
 - Keyboard does not cover the cursor.
 - Inserted snippets appear at the cursor.
 - No layout overlap occurs after keyboard show/hide.
+- Diagnostics include `viewportPolicy=AceEditorViewportPolicy`.
 
 Failure logs:
 - `WindowInsets`
+- `lastHostImeVisible`
+- `lastAceResizeCompletedReason`
+
+### ACE-IME-002: Repeated soft keyboard show/hide stress
+
+Preconditions:
+- ACE editor is active.
+- Open a file with at least 80 lines.
+
+Steps:
+1. Tap a visible line to show the keyboard.
+2. Hide the keyboard with Back.
+3. Repeat steps 1 and 2 at least 20 times.
+4. Copy ACE diagnostics.
+
+Expected:
+- ACE remains active and does not fallback to Native.
+- No persistent white/black flash appears during resize.
+- Heartbeat suspension, if present, is transient and resumes after IME settles.
+- Diagnostics include recent `lastViewportPolicyEvent`, `lastAceResizeScheduledReason`, `lastAceResizeDispatchedReason`, and `lastAceResizeCompletedReason`.
+
+Failure logs:
+- `HEARTBEAT_TIMEOUT`
+- `EVALUATE_JAVASCRIPT_ERROR`
+- `heartbeatSuspendedReason`
+- `lastAceResizeCompletedReason`
+
+### ACE-IME-003: Lower viewport tap anchor remains visible
+
+Preconditions:
+- ACE editor is active.
+- Open a file with enough lines to scroll.
+
+Steps:
+1. Hide the keyboard.
+2. Scroll so a target line is near the bottom of the visible editor.
+3. Tap the target line and allow the keyboard to show.
+4. Type a marker such as `// ime-anchor`.
+5. Hide and show the keyboard once more without moving the cursor.
+
+Expected:
+- The typed marker appears at the tapped line, not above or below it.
+- Keyboard show scrolls enough to keep the caret visible without jumping to an unrelated line.
+- Hiding the keyboard does not over-scroll back past the original viewport.
+- Gutter and text columns remain aligned after resize.
+
+Failure logs:
+- `lastHostImeBottomInset`
+- `lastViewportPolicyBottomInset`
+- `lastAceResizeCompletedReason`
+
+### ACE-IME-004: Completion and selection while IME is visible
+
+Preconditions:
+- ACE editor is active.
+- Static completion is available.
+
+Steps:
+1. Show the keyboard and type `console.lo`.
+2. Accept the highlighted completion with the keyboard Enter key.
+3. Type `app.la` and accept a completion by tapping the popup.
+4. Long-press a word and adjust selection.
+5. Double-tap a word and dismiss selection/action mode.
+
+Expected:
+- Completion accept by Enter and touch inserts the selected item.
+- Long-press and double-tap do not fallback ACE.
+- Action-mode bridge calls are handled without `autojs.startActionMode is not a function`.
+- Selection entry/exit does not leave the keyboard or editor in a stuck focus state.
+
+Failure logs:
+- `JS_RUNTIME_ERROR`
+- `completionError`
+- `recoverableError`
+- `lastActionModeAtUptimeMillis`
 
 ### ACE-LIFECYCLE-001: Rotation and background restore
 
