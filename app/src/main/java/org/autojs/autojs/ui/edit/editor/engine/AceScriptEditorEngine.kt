@@ -401,10 +401,6 @@ class AceScriptEditorEngine(
         loadingText = loading
     }
 
-    override fun setLoadingGutterDigits(digits: Int) {
-        /* ACE gutter width is managed by the renderer. */
-    }
-
     override fun createStateSnapshot(): EditorStateSnapshot {
         val currentSelection = selection
         return EditorStateSnapshot(

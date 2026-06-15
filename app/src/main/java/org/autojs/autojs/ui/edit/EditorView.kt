@@ -88,6 +88,9 @@ import org.autojs.autojs.ui.edit.editor.engine.EditorSearchOptions
 import org.autojs.autojs.ui.edit.editor.engine.EditorSearchSyntaxException
 import org.autojs.autojs.ui.edit.editor.engine.EditorEngineType
 import org.autojs.autojs.ui.edit.editor.engine.ScriptEditorEngine
+import org.autojs.autojs.ui.edit.editor.loading.EditorTextLoadPolicy
+import org.autojs.autojs.ui.edit.editor.loading.EditorTextLoadTarget
+import org.autojs.autojs.ui.edit.editor.loading.EngineTextLoadTarget
 import org.autojs.autojs.ui.edit.editor.viewport.EditorViewportPolicy
 import org.autojs.autojs.ui.edit.editor.viewport.EditorViewportPolicyFactory
 import org.autojs.autojs.ui.edit.keyboard.FunctionsKeyboardHelper
@@ -178,6 +181,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         showManual = { urlSuffix, title -> showManual(urlSuffix, title) },
         hideFunctionsKeyboard = { showSoftInput -> mFunctionsKeyboardHelper?.hideFunctionsLayout(showSoftInput) },
     )
+    private val textLoadTarget: EditorTextLoadTarget
+        get() = EngineTextLoadTarget(editor)
 
     @JvmField
     val debugBar: DebugBar = binding.debugBar
@@ -746,11 +751,9 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     private fun loadUri(uri: Uri): Observable<String> {
-        val streamThresholdBytes = LARGE_FILE_MODE_THRESHOLD
-
         val sizeOrNull = runCatching { queryContentLengthOrNull(uri) }.getOrNull()
-        val shouldStreamAsLargeFile = sizeOrNull != null && sizeOrNull >= streamThresholdBytes
-        if (shouldStreamAsLargeFile || shouldForceLargeFileNativeRoute()) {
+        val shouldStreamAsLargeFile = EditorTextLoadPolicy.shouldStreamAsLargeFile(sizeOrNull)
+        if (EditorTextLoadPolicy.shouldRouteAceToNative(editor.engineType, shouldStreamAsLargeFile, shouldForceLargeFileNativeRoute())) {
             if (!ensureNativeEditorForLargeFile()) {
                 return Observable.error(IllegalStateException(context.getString(R.string.error_ace_editor_unavailable)))
             }
@@ -1036,7 +1039,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         mUserMovedCursorDuringLoading = false
         syncPrimaryMenuState()
 
-        editor.beginLargeTextLoading()
+        val loadTarget = textLoadTarget
+        loadTarget.beginStreamedLargeTextLoad()
 
         val choreographer = Choreographer.getInstance()
 
@@ -1059,7 +1063,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 if (mLargeFileCancel.get()) {
                     // Cancel: stop immediately and do not schedule next frame.
                     // zh-CN: 取消: 立即停止且不再调度下一帧.
-                    editor.cancelLargeTextLoading()
+                    loadTarget.cancelStreamedLargeTextLoad()
                     mEditorLoading = false
                     syncPrimaryMenuState()
                     endEditorLoadingUi()
@@ -1069,9 +1073,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
                 val finished = done.get() && queue.isEmpty()
                 if (finished) {
-                    editor.setLoadingText(false)
-                    editor.setRedoUndoEnabled(false)
-                    editor.markUndoRedoBaselineAsUnchanged()
+                    loadTarget.finishStreamedLargeTextLoad(markClean = true)
 
                     mEditorLoading = false
                     syncPrimaryMenuState()
@@ -1103,7 +1105,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
                 mLoadingBarText.text = context.getString(R.string.text_loading_with_dots)
 
-                val userTouching = editor.isUserTouching
+                val userTouching = loadTarget.isUserTouching
 
                 val budgetMs = if (userTouching) appendBudgetMsTouching else appendBudgetMsIdle
                 val maxCharsThisFrame = if (userTouching) maxCharsPerFrameTouching else maxCharsPerFrameIdle
@@ -1125,7 +1127,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 }
 
                 if (sb.isNotEmpty()) {
-                    editor.appendTextChunk(sb)
+                    loadTarget.appendTextChunk(sb)
                 }
 
                 choreographer.postFrameCallback(this)
@@ -1188,11 +1190,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         }
 
         if (mRestoredText != null) {
-            editor.text = mRestoredText!!
+            textLoadTarget.loadRestoredText(mRestoredText!!, undoRedoEnabled = !mLargeFileMode)
             mRestoredText = null
-
-            editor.markUndoRedoBaselineAsUnchanged()
-            editor.setRedoUndoEnabled(!mLargeFileMode)
 
             // Reset sticky dirty because we just established a new baseline.
             // zh-CN: 因刚刚建立了新的基线, 重置 sticky 脏标记.
@@ -1209,9 +1208,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             return
         }
 
-        val progressiveThreshold = LARGE_FILE_MODE_THRESHOLD
-        val shouldLoadProgressively = text.length > progressiveThreshold
-        if (shouldLoadProgressively || shouldForceLargeFileNativeRoute()) {
+        val shouldLoadProgressively = EditorTextLoadPolicy.shouldLoadProgressively(text.length)
+        if (EditorTextLoadPolicy.shouldRouteAceToNative(editor.engineType, shouldLoadProgressively, shouldForceLargeFileNativeRoute())) {
             if (!ensureNativeEditorForLargeFile()) {
                 mEditorLoading = false
                 syncPrimaryMenuState()
@@ -1225,20 +1223,12 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             return
         }
 
-        editor.setLoadingText(true)
-        editor.setRedoUndoEnabled(false)
-        try {
-            editor.text = text
-            editor.markUndoRedoBaselineAsUnchanged()
+        textLoadTarget.loadSmallText(text)
 
-            // Reset sticky dirty because we just established a new baseline.
-            // zh-CN: 因刚刚建立了新的基线, 重置 sticky 脏标记.
-            saveStickyDirty = false
-            mHadDirectEditSinceSave = false
-        } finally {
-            editor.setRedoUndoEnabled(true)
-            editor.setLoadingText(false)
-        }
+        // Reset sticky dirty because we just established a new baseline.
+        // zh-CN: 因刚刚建立了新的基线, 重置 sticky 脏标记.
+        saveStickyDirty = false
+        mHadDirectEditSinceSave = false
 
         mEditorLoading = false
         syncPrimaryMenuState()
@@ -1285,17 +1275,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     private fun setInitialTextProgressively(text: String) {
-        // Mark loading state to suppress heavy callbacks during bulk insertion.
-        // zh-CN: 标记加载状态, 在批量插入期间抑制高开销回调.
-        editor.setLoadingText(true)
-
-        // Disable undo/redo recording during progressive load to avoid huge history and allocations.
-        // zh-CN: 渐进式加载期间禁用 undo/redo 记录, 避免巨大历史与大量分配.
-        editor.setRedoUndoEnabled(false)
-
-        // Clear existing content quickly.
-        // zh-CN: 快速清空现有内容.
-        editor.text = ""
+        val loadTarget = textLoadTarget
+        loadTarget.beginProgressiveTextLoad()
 
         // Do NOT call editor.setProgress(true) here.
         // zh-CN: 不要在这里再次 setProgress(true), 进度对话框已由 loadUri() 负责显示.
@@ -1320,10 +1301,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 if (index >= text.length) {
                     // Finish: mark current content as baseline without re-setting text.
                     // zh-CN: 完成: 将当前内容设为基线, 避免再次 setText.
-                    editor.setLoadingText(false)
-                    editor.setRedoUndoEnabled(true)
-                    editor.markUndoRedoBaselineAsUnchanged()
-                    editor.setProgress(false)
+                    loadTarget.finishProgressiveTextLoad(markClean = true)
                     return
                 }
 
@@ -1335,7 +1313,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 // zh-CN: 在单帧预算内尽可能推进加载.
                 while (index < text.length) {
                     val end = (index + chunkSize).coerceAtMost(text.length)
-                    editor.appendTextChunk(text.subSequence(index, end))
+                    loadTarget.appendTextChunk(text.subSequence(index, end))
                     index = end
                     appendedChunks++
 
@@ -1721,12 +1699,10 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     private fun currentLargeFilePolicyLabel(): String {
-        val route = when {
-            AceEditorTestHooks.shouldForceLargeFileNativeRoute() -> "debug-force-native"
-            mLargeFileMode -> "auto-native-large-file"
-            else -> "auto"
-        }
-        return "$route;thresholdBytes=$LARGE_FILE_MODE_THRESHOLD"
+        return EditorTextLoadPolicy.largeFilePolicyLabel(
+            largeFileMode = mLargeFileMode,
+            forceNativeRoute = AceEditorTestHooks.shouldForceLargeFileNativeRoute(),
+        )
     }
 
     private fun setUpEditor(resetInitialState: Boolean = true) {
@@ -3059,8 +3035,6 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
         private const val MIN_CONFIDENCE_TO_WRITE_FILE = 90
         private val DEFAULT_CHARSET_TO_WRITE_FILE = StandardCharsets.UTF_8
-
-        private const val LARGE_FILE_MODE_THRESHOLD = 512 * 1024
 
         // Internal storage root (no external SD).
         // zh-CN: 内部存储根目录 (不访问外置 SD).

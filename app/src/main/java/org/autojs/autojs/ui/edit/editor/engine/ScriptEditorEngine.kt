@@ -101,7 +101,6 @@ interface ScriptEditorEngine {
     fun endLargeTextLoading(markClean: Boolean)
     fun cancelLargeTextLoading()
     fun setLoadingText(loading: Boolean)
-    fun setLoadingGutterDigits(digits: Int)
 
     fun createStateSnapshot(): EditorStateSnapshot
     fun restoreStateSnapshot(snapshot: EditorStateSnapshot)

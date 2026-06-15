@@ -402,10 +402,6 @@ class NativeCodeEditorEngine(
         codeEditor.codeEditText.setLoadingText(loading)
     }
 
-    override fun setLoadingGutterDigits(digits: Int) {
-        codeEditor.codeEditText.setLoadingGutterDigits(digits)
-    }
-
     override fun createStateSnapshot(): EditorStateSnapshot {
         val currentSelection = selection
         return EditorStateSnapshot(
