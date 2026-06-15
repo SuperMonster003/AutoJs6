@@ -697,10 +697,16 @@ Any Node-facing runtime behavior change must update:
 Use these aggregate tasks for local gates:
 
 ```powershell
+.\gradlew.bat --console=plain :app:verifyNodePrGate
+.\gradlew.bat --console=plain :app:verifyNodeNightlyGate "-Pautojs.nodejs.test.deviceProfile=oneplus"
+.\gradlew.bat --console=plain :app:verifyNodeReleaseGate "-Pautojs.nodejs.test.deviceProfile=oneplus"
 .\gradlew.bat --console=plain :app:verifyEmbeddedNodeDebug
 .\gradlew.bat --console=plain :app:verifyEmbeddedNodePackagedDebug
 .\gradlew.bat --console=plain :app:verifyEmbeddedNodeReleaseCandidate
 ```
+
+`verifyNodePrGate` is the fast host-side PR gate. `verifyNodeNightlyGate` and `verifyNodeReleaseGate` require
+`autojs.nodejs.test.deviceProfile=oneplus` or `full`; see [CI_GATES.md](CI_GATES.md).
 
 `verifyEmbeddedNodeDebug` covers build, native dependency reporting, native symbol archive reporting, and packaging preflight.
 It also runs `verifyNodeCompatibilityProfile` and `embeddedNodeDoctorReport`, which generate compatibility and attachable

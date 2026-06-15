@@ -142,6 +142,7 @@ Important: `.mjs` currently routes to the Node backend, but ESM execution is sti
 - Keep device instrumentation and packaged smoke as first-class gates.
 - Keep `nodeFull`, `nodeMini`, and `rhinoOnly` release packaging policy explicit and verified. See `docs/nodejs/design/RELEASE_FLAVORS.md`.
 - Keep rollback steps explicit and auditable. See `docs/nodejs/ROLLBACK_PLAYBOOK.md`.
+- Keep PR, nightly, and release gates split so routine checks stay fast while release gates remain complete. See `docs/nodejs/CI_GATES.md`.
 - Keep optional startup/RSS benchmarks available for lifecycle and native-load changes without making noisy timing data a default release failure.
 - Keep extended memory leak stress available for lifecycle, fs, bridge, and image-handle changes.
 - Keep device-specific gates reproducible through `docs/nodejs/DEVICE_MATRIX.md` and `autojs.nodejs.test.deviceProfile`.

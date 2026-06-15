@@ -12,6 +12,7 @@ private val embeddedNodePackagingKnownAbis = listOf("arm64-v8a", "armeabi-v7a", 
 private val embeddedNodePackagingNativeLibs = listOf("libnode.so", "libc++_shared.so", "libautojs6-node.so")
 private val embeddedNodePackagingReleaseFlavorProperty = "autojs.nodejs.releaseFlavor"
 private val embeddedNodePackagingReleaseAbisProperty = "autojs.nodejs.releaseAbis"
+private val embeddedNodePackagingTestDeviceProfileProperty = "autojs.nodejs.test.deviceProfile"
 private val embeddedNodePackagingDefaultReleaseFlavor = "nodeFull"
 private val embeddedNodePackagingScriptServiceClassName = "org.autojs.autojs.engine.NativeNodeEmbeddedScriptService"
 private val embeddedNodePackagingScriptServiceDexDescriptor =
@@ -997,6 +998,29 @@ private fun embeddedNodePackagingCsvList(value: String?): List<String> =
         .map(String::trim)
         .filter(String::isNotEmpty)
         .distinct()
+
+private fun embeddedNodePackagingTestDeviceProfile(): String? =
+    providers.gradleProperty(embeddedNodePackagingTestDeviceProfileProperty).orNull
+        ?.trim()
+        ?.lowercase()
+        ?.takeIf { it.isNotEmpty() }
+        ?.also { profile ->
+            if (profile !in setOf("oneplus", "emulator", "smoke", "full")) {
+                throw GradleException(
+                    "Unsupported Embedded Node test device profile '$profile'. " +
+                            "Use oneplus, emulator, smoke, or full."
+                )
+            }
+        }
+
+private fun embeddedNodePackagingRequiresHeavyDeviceProfile(taskName: String, profile: String?) {
+    if (profile !in setOf("oneplus", "full")) {
+        throw GradleException(
+            "$taskName requires -P$embeddedNodePackagingTestDeviceProfileProperty=oneplus or full " +
+                    "so heavy connected-device stress gates are selected explicitly. Current profile: ${profile ?: "unset"}."
+        )
+    }
+}
 
 private fun embeddedNodePackagingResolveFile(rootDir: File, path: String?): File? =
     path?.trim()
@@ -3376,6 +3400,70 @@ val verifyRhinoOnlyBuild = tasks.register("verifyRhinoOnlyBuild") {
             )
         }
         logger.lifecycle("rhinoOnly rollback build verification passed. See ${reportFile.absolutePath}")
+    }
+}
+
+val generateDesktopNodeDifferentialReport = tasks.register(
+    "generateDesktopNodeDifferentialReport",
+    org.gradle.api.tasks.Exec::class,
+) {
+    group = "verification"
+    description = "Runs the desktop Node differential harness for fixed real npm corpus fixtures."
+
+    workingDir(rootProject.projectDir)
+    commandLine("node", rootProject.projectDir.resolve("tools/nodejs/differential/run-differential-tests.js").absolutePath)
+}
+
+val verifyNodePrGate = tasks.register("verifyNodePrGate") {
+    group = "verification"
+    description = "Runs fast host-side Embedded Node PR checks without connected-device stress or packaged smoke launch."
+
+    dependsOn(
+        "compileAppDebugKotlin",
+        "compileAppDebugAndroidTestKotlin",
+        embeddedNodePackagingPreflightAppDebug,
+        verifyNodeTemplateReproducibility,
+        embeddedNodePackagedAppIntegrationDryRunAppDebug,
+        "verifyNodeCompatibilityProfile",
+        "verifyNodeResolverVisualizerFixtures",
+        "verifyNodeDependencyBundlerFixtures",
+    )
+}
+
+val verifyNodeNightlyGate = tasks.register("verifyNodeNightlyGate") {
+    group = "verification"
+    description = "Runs heavy Embedded Node nightly checks; requires an explicit oneplus/full device profile."
+
+    val deviceProfile = embeddedNodePackagingTestDeviceProfile()
+    if (deviceProfile in setOf("oneplus", "full")) {
+        dependsOn(
+            verifyNodePrGate,
+            generateDesktopNodeDifferentialReport,
+            verifyEmbeddedNodeDebug,
+            verifyEmbeddedNodePackagedDebug,
+            "connectedAppDebugAndroidTest",
+        )
+    }
+    doFirst {
+        embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
+    }
+}
+
+val verifyNodeReleaseGate = tasks.register("verifyNodeReleaseGate") {
+    group = "verification"
+    description = "Runs the Embedded Node release gate with RC host checks, desktop differential, and explicit heavy device profile."
+
+    val deviceProfile = embeddedNodePackagingTestDeviceProfile()
+    if (deviceProfile in setOf("oneplus", "full")) {
+        dependsOn(
+            "generateNodeProfileReleaseManifest",
+            generateDesktopNodeDifferentialReport,
+            "verifyEmbeddedNodeReleaseCandidate",
+            "connectedAppDebugAndroidTest",
+        )
+    }
+    doFirst {
+        embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
     }
 }
 
