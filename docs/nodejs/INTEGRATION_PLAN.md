@@ -126,7 +126,7 @@ Important: `.mjs` currently routes to the Node backend, but ESM execution is sti
 - Add an asynchronous bridge protocol before exposing user modules.
 - Route Android and AutoJs API calls through capability providers.
 - Reject pending bridge calls when the script service stops.
-- Current user-facing MVP modules: `toast`, `app`, `engines`, `clipboard`, `device`, `shell`, protocol-gated `dialogs`, selector-shaped disabled-path `accessibility`, and protocol-gated `media_projection`/`image`.
+- Current user-facing MVP modules: `toast`, `app`, `engines`, `clipboard`, `device`, `shell`, `work_manager` metadata registration, protocol-gated `dialogs`, selector-shaped disabled-path `accessibility`, and protocol-gated `media_projection`/`image`.
 
 ### P5 Release Gates
 
@@ -139,7 +139,7 @@ Important: `.mjs` currently routes to the Node backend, but ESM execution is sti
 ### P6-P8 Longer-Term Compatibility
 
 - Evaluate `fs.promises`, stream, zlib, ESM, network, workers, and native addons one at a time.
-- Keep scheduled/background task registration design-gated; Node must not get raw Android scheduler or broadcast authority.
+- Keep scheduled/background task execution design-gated; Task 65 permits only controlled `work_manager` metadata registration, and Node must not get raw Android scheduler or broadcast authority.
 - Treat controlled `fetch` as the only approved network MVP; live provider enablement remains behind `autojs.nodejs.network.experimental=false` by default.
 - Keep `worker_threads` behind `docs/nodejs/design/WORKER_THREADS.md` and `autojs.nodejs.worker_threads.experimental=false`; workers must not access AutoJs bridge modules or Android objects.
 - Each high-risk feature needs a design document, flag, tests, packaged smoke, and rollback path.
@@ -163,7 +163,7 @@ Important: `.mjs` currently routes to the Node backend, but ESM execution is sti
 1. Harden the private live bridge transport and refresh packaged templates so packaged apps can use the same live path.
 2. Keep `toast`, `app`, `engines`, `clipboard`, `device`, `shell`, protocol-gated `dialogs`, selector-shaped disabled-path `accessibility`, and protocol-gated `media_projection`/`image` stable while designing real capability providers.
 3. Design the real accessibility and MediaProjection/image providers before enabling Android-backed actions, screenshot capture, image decoding, or live node/image handles. Accessibility selector descriptors and node snapshots must remain JSON-only.
-4. Keep scheduled/background task work behind `docs/nodejs/design/WORK_MANAGER.md`; future timed tasks should use a bridge provider and visible task descriptors.
+4. Keep scheduled/background task execution behind `docs/nodejs/design/WORK_MANAGER.md`; `work_manager` currently registers controlled metadata only, and future timed execution should use a bridge provider, persistent user-visible descriptors, and packaged manifest gates.
 5. Keep ESM behind `docs/nodejs/design/ESM.md` and `autojs.nodejs.esm.experimental=false`; `.mjs` remains a Node route with default rejection. Keep dynamic import behind the separate `autojs.nodejs.dynamicImport.experimental=false` gate.
 6. Keep network behind `docs/nodejs/design/NETWORK.md` and `autojs.nodejs.network.experimental=false`; Task 41 provides a controlled fetch wrapper and fake-provider coverage, while live Android network I/O remains disabled in normal builds and raw Node network modules stay denied.
 7. Keep `worker_threads` behind `docs/nodejs/design/WORKER_THREADS.md` and `autojs.nodejs.worker_threads.experimental=false`; Task 42 freezes the worker boundary without enabling worker execution.

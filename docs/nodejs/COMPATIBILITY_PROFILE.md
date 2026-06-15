@@ -650,6 +650,16 @@ Current user-facing bridge modules:
   - module diagnostics: `require("websocket").policy` and `require("websocket").diagnostics()`
   - accepts only `ws:` and `wss:` URLs; text and binary messages are buffered and budgeted
   - normal builds reject through the Android provider with `ERR_AUTOJS6_NETWORK_DISABLED`; fake-provider tests cover connect, send, receive, close, timeout, max connection, message budget, service destroy, diagnostics, and that raw `net`/`tls` remain disabled
+- `work_manager`
+  - `scheduleOnce(options): Promise<string>`
+  - `schedulePeriodic(options): Promise<string>`
+  - `cancel(taskId, options?): Promise<void>`
+  - `list(options?): Promise<readonly TaskInfo[]>`
+  - options: `{ scriptPath?: string, entry?: string, backend?: "embedded", delayMs?: number, intervalMs?: number, packaged?: boolean, constraints?: { charging?: boolean, network?: boolean, idle?: boolean }, timeoutMs?: number }`
+  - current MVP registers provider-owned task metadata only; it does not launch background Node executions yet
+  - `backend` is restricted to `embedded`, paths must stay relative to the scoped working directory, and periodic intervals are bounded to at least `900000` ms
+  - packaged metadata can mark project entries with `packaged: true`, but older packaged templates without live bridge metadata do not queue persistent registration
+  - raw WorkManager, AlarmManager, JobScheduler, BroadcastReceiver, PendingIntent, and IntentFilter objects remain unavailable to JavaScript
 
 Example:
 
@@ -661,6 +671,7 @@ const device = require("device");
 const accessibility = require("accessibility");
 const shell = require("shell");
 const fetch = require("fetch");
+const workManager = require("work_manager");
 
 await clipboard.setText("hello from AutoJs6 Node");
 console.log(await clipboard.getText());
@@ -685,6 +696,12 @@ try {
 } catch (error) {
   console.log(error.autojs6Code || error.code);
 }
+
+const taskId = await workManager.scheduleOnce({
+  scriptPath: "./main.cjs",
+  delayMs: 1000,
+});
+console.log(taskId);
 ```
 
 Explicitly unsupported `engines` APIs:
@@ -705,7 +722,7 @@ Live bridge diagnostics are recorded in result `nativeValues`:
 - `embedded_script.bridge_live_dispatch_status`
 - `embedded_script.bridge_live_responses_json`
 
-The packaged APK smoke requires `toast`, `app`, `clipboard`, and `device` successfully and verifies that project-local `node_modules/toast`, `node_modules/app`, `node_modules/clipboard`, and `node_modules/device` packages cannot shadow bridge modules. Packaged `app.packageName` is verified against the packaged application id. `versionName` and `versionCode` are type-checked in packaged smoke because older inrt templates do not inject host app metadata yet; refreshed templates should promote those to exact-value checks. Packaged `clipboard` and `device` smokes use the queued fallback when live bridge metadata is absent; this proves module routing, Promise behavior, packaged shadowing, and privacy-safe surface shape, while true system clipboard/device access is still provided by the live Android provider path. The `shell` module is intentionally not executed by queued fallback; packaged `shell.exec()` should remain a live-bridge-only capability.
+The packaged APK smoke requires `toast`, `app`, `clipboard`, and `device` successfully and verifies that project-local `node_modules/toast`, `node_modules/app`, `node_modules/clipboard`, and `node_modules/device` packages cannot shadow bridge modules. Packaged `app.packageName` is verified against the packaged application id. `versionName` and `versionCode` are type-checked in packaged smoke because older inrt templates do not inject host app metadata yet; refreshed templates should promote those to exact-value checks. Packaged `clipboard` and `device` smokes use the queued fallback when live bridge metadata is absent; this proves module routing, Promise behavior, packaged shadowing, and privacy-safe surface shape, while true system clipboard/device access is still provided by the live Android provider path. The `shell` and `work_manager` modules are intentionally not executed by queued fallback; packaged `shell.exec()` and `work_manager.schedule*()` should remain live-bridge-only capabilities.
 
 Future bridge work must keep the protocol and fakeable capability providers stable before exposing real screenshot, image decoding, template matching, or handle lifecycle implementations.
 
@@ -713,14 +730,18 @@ Every bridge call must look asynchronous to JavaScript and must reject cleanly o
 
 ## Scheduled And Background Task Status
 
-Node scripts cannot register persistent timed, broadcast, boot, or package-event tasks yet.
+Node scripts can register controlled scheduled-task metadata through `require("work_manager")`.
 
 Current policy:
 
+- `require("work_manager")` is exposed as a Promise bridge module for `scheduleOnce`, `schedulePeriodic`, `cancel`, and `list`.
+- Task 65 stores provider-owned metadata only; it does not execute background Node scripts yet.
+- `work_manager` is a live-bridge capability. Queued host fallback rejects it with `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED` so older packaged templates cannot create persistent tasks as one-way effects.
+- Registered descriptors accept only `backend: "embedded"`, scoped relative `scriptPath` or packaged project `entry`, bounded delay/interval values, and boolean `charging`, `network`, and `idle` constraints.
 - `require("tasks")` is not exposed in the Embedded Node Safe Node Profile.
 - Node scripts must not access raw WorkManager, AlarmManager, JobScheduler, BroadcastReceiver, PendingIntent, or IntentFilter objects.
 - Existing Rhino task APIs remain unchanged.
-- Future Node timed task support must go through an AutoJs6 bridge provider and the existing task manager/scheduler ownership model.
+- Future execution of scheduled Node tasks must go through an AutoJs6 bridge provider and the existing task manager/scheduler ownership model.
 - Future broadcast, startup, boot, and package-event task support is deferred behind a separate design gate and user-visible permission flow.
 
 See `docs/nodejs/design/WORK_MANAGER.md` for the current design decision.

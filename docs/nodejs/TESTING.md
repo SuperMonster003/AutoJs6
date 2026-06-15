@@ -227,6 +227,14 @@ Current controlled WebSocket bridge focused instrumentation:
 
 This suite verifies the registry/profile experimental state for `websocket`, fake-provider connect/send/receive/close behavior, `require("websocket")`, shadowing protection, timeout rejection, unsupported scheme rejection, max connection rejection, message-size budget rejection, service-destroy rejection cleanup, WebSocket diagnostics counters, raw `net`/`tls` denial, pending bridge cleanup, and that normal Android providers reject with `ERR_AUTOJS6_NETWORK_DISABLED` while `autojs.nodejs.network.experimental=false`.
 
+Current controlled work_manager bridge focused instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeWorkManagerBridgeInstrumentationTest"
+```
+
+This suite verifies the `work_manager` bridge registry, fake-provider schedule-once and schedule-periodic descriptors, `require("work_manager")`, shadowing protection, packaged project-entry metadata serialization, scoped path rejection, interval/backend policy rejection, permission tagging, Android provider metadata storage, `cancel()`, `list()`, and that `require("tasks")` remains unavailable. Packaged queued-fallback rejection remains a release/template gate because the normal instrumentation harness injects live bridge metadata.
+
 Current `worker_threads` design gate focused instrumentation:
 
 ```powershell

@@ -48,9 +48,9 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] bridge smoke verifies `shell` fake provider results, shadowing protection, timeout/cwd/env policy, explicit root permission tagging, and that `child_process` remains disabled
 - [ ] bridge smoke verifies controlled `fetch` fake-provider GET/POST, timeout, abort, response budget, unsupported scheme, redirect limit, max concurrency, service-destroy cleanup, diagnostics counters, shadowing protection, and that raw `http`/`https`/`net`/`tls`/`dns` remain disabled
 - [ ] bridge smoke verifies controlled `websocket` fake-provider connect/send/receive/close, timeout, message budget, max connection, service-destroy cleanup, diagnostics counters, shadowing protection, and that raw `net`/`tls` remain disabled
+- [ ] bridge smoke verifies controlled `work_manager` schedule-once, schedule-periodic, cancel, list, scoped descriptor policy, packaged entry metadata serialization, queued-fallback rejection, shadowing protection, and that `tasks` remains unavailable
 - [ ] worker gate verifies `worker_threads` stays disabled, cannot be shadowed, and reports `experimentalFlags.workerThreads=false`
 - [ ] experimental worker smoke verifies pure-JS worker computation, `workerData`, `parentPort.postMessage`, `terminate()`, max-worker rejection, scoped path denial, and denied AutoJs bridge/raw network/fs/nested-worker access
-- [ ] any future `tasks` bridge smoke verifies user-visible registration, scoped Node descriptors, and denied broadcast/boot/package paths
 - [ ] checked-in examples `hello-node` and `toast-app` still run from `sample/nodejs`
 
 ## Packaged APK
@@ -74,6 +74,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `FOREGROUND_SERVICE` permission exists
 - [ ] `FOREGROUND_SERVICE_SPECIAL_USE` permission exists
 - [ ] packaged scheduled/background task receivers and permissions are absent unless the project explicitly opts in
+- [ ] packaged `work_manager` metadata registration requires live bridge metadata and is not accepted by queued fallback
 - [ ] if packaged timed/boot/package tasks are enabled, manifest verifier reports the exact receivers, permissions, and foreground-service requirements
 - [ ] if packaged controlled network or WebSocket is enabled, manifest verifier reports `android.permission.INTERNET`; if it is not enabled, normal builds keep `autojs.nodejs.network.experimental=false`
 
@@ -123,6 +124,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] experimental workers, when explicitly tested, expose a smaller capability set than parent Node scripts and cannot access AutoJs bridge modules
 - [ ] experimental worker resource stress, when explicitly tested, shows no active worker after completion cleanup and no unbounded RSS/thread growth
 - [ ] direct WorkManager, AlarmManager, JobScheduler, and BroadcastReceiver authority remains denied to Node scripts
+- [ ] `work_manager` registration accepts only embedded backend, scoped relative paths, bounded intervals, and boolean constraint descriptors
 
 ## Compatibility
 

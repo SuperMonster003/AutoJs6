@@ -385,6 +385,7 @@ object NodeBridgeModules {
     const val SHELL = "shell"
     const val FETCH = "fetch"
     const val WEBSOCKET = "websocket"
+    const val WORK_MANAGER = "work_manager"
 
     val toastMethods = setOf("showToast", "toast")
     val appMethods = setOf("launchPackage", "launchApp", "openAppSetting", "startActivity")
@@ -410,6 +411,7 @@ object NodeBridgeModules {
     val shellMethods = setOf("exec")
     val fetchMethods = setOf("request")
     val websocketMethods = setOf("connect", "send", "close", "drainEvents")
+    val workManagerMethods = setOf("scheduleOnce", "schedulePeriodic", "cancel", "list")
 
     val supportedMethodsByModule: Map<String, Set<String>> = mapOf(
         TOAST to toastMethods,
@@ -425,6 +427,7 @@ object NodeBridgeModules {
         SHELL to shellMethods,
         FETCH to fetchMethods,
         WEBSOCKET to websocketMethods,
+        WORK_MANAGER to workManagerMethods,
     )
 
     fun supports(module: String, method: String): Boolean {
@@ -469,6 +472,7 @@ class AndroidNodeBridgeCapabilityProvider(
     private val networkDiagnostics = ControlledFetchDiagnostics()
     private val websocketSessions = ConcurrentHashMap<String, ControlledWebSocketSession>()
     private val websocketDiagnostics = ControlledWebSocketDiagnostics()
+    private val workManagerTasks = ConcurrentHashMap<String, JSONObject>()
 
     override fun dispatch(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
         when {
@@ -484,6 +488,7 @@ class AndroidNodeBridgeCapabilityProvider(
             request.module == NodeBridgeModules.SHELL && request.method in NodeBridgeModules.shellMethods -> dispatchShell(request, callback)
             request.module == NodeBridgeModules.FETCH && request.method in NodeBridgeModules.fetchMethods -> dispatchFetch(request, callback)
             request.module == NodeBridgeModules.WEBSOCKET && request.method in NodeBridgeModules.websocketMethods -> dispatchWebSocket(request, callback)
+            request.module == NodeBridgeModules.WORK_MANAGER && request.method in NodeBridgeModules.workManagerMethods -> dispatchWorkManager(request, callback)
             else -> callback(unavailable(request))
         }
     }
@@ -491,6 +496,7 @@ class AndroidNodeBridgeCapabilityProvider(
     override fun nativeDiagnostics(): Map<String, String> = linkedMapOf<String, String>().apply {
         putAll(networkDiagnostics.nativeValues())
         putAll(websocketDiagnostics.nativeValues())
+        put("embedded_script.work_manager_registered_task_count", workManagerTasks.size.toString())
     }
 
     override fun destroy(reason: NodeBridgeError) {
@@ -504,6 +510,7 @@ class AndroidNodeBridgeCapabilityProvider(
             runCatching { session.close(1001, "AutoJs6 service destroyed") }
         }
         websocketSessions.clear()
+        workManagerTasks.clear()
     }
 
     private fun unavailable(request: NodeBridgeRequest): NodeBridgeResponse {
@@ -694,6 +701,65 @@ class AndroidNodeBridgeCapabilityProvider(
             }
             callback(response)
         }
+    }
+
+    private fun dispatchWorkManager(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        val response = when (request.method) {
+            "scheduleOnce" -> scheduleWorkManagerTask(request, ControlledWorkTaskKind.ONCE)
+            "schedulePeriodic" -> scheduleWorkManagerTask(request, ControlledWorkTaskKind.PERIODIC)
+            "cancel" -> cancelWorkManagerTask(request)
+            "list" -> listWorkManagerTasks(request)
+            else -> unavailable(request)
+        }
+        callback(response)
+    }
+
+    private fun scheduleWorkManagerTask(request: NodeBridgeRequest, kind: ControlledWorkTaskKind): NodeBridgeResponse {
+        val payload = request.firstObjectArg()
+            ?: return workManagerPolicyFailure(request, "work_manager.${request.method} requires a JSON task descriptor.")
+        if (workManagerTasks.size >= ControlledWorkManagerPolicy.MAX_TASKS_PER_PROVIDER) {
+            return workManagerPolicyFailure(
+                request,
+                "AutoJs6 work_manager exceeded ${ControlledWorkManagerPolicy.MAX_TASKS_PER_PROVIDER} registered tasks for this provider.",
+            )
+        }
+        val parsed = ControlledWorkTaskDescriptor.fromJson(request, kind, payload, appContext, engineInfo)
+        if (parsed.error != null || parsed.value == null) {
+            return NodeBridgeResponse.failure(request.id, parsed.error ?: NodeBridgeError.processDead())
+        }
+        val id = "node-work-${UUID.randomUUID()}"
+        val task = parsed.value.toJson(id, engineInfo)
+        workManagerTasks[id] = task
+        return NodeBridgeResponse.success(request.id, NodeBridgeJson.valueToJson(id))
+    }
+
+    private fun cancelWorkManagerTask(request: NodeBridgeRequest): NodeBridgeResponse {
+        val id = request.firstStringArg().trim()
+        if (id.isBlank()) {
+            return workManagerPolicyFailure(request, "work_manager.cancel requires a non-empty task id.")
+        }
+        workManagerTasks.remove(id)
+        return NodeBridgeResponse.success(request.id, "null")
+    }
+
+    private fun listWorkManagerTasks(request: NodeBridgeRequest): NodeBridgeResponse {
+        val tasks = workManagerTasks.values
+            .map { value -> JSONObject(value.toString()) }
+            .sortedBy { value -> value.optLong("createdAtEpochMs", 0L) }
+        val result = JSONArray()
+        tasks.forEach { task -> result.put(task) }
+        return NodeBridgeResponse.success(request.id, result.toString())
+    }
+
+    private fun workManagerPolicyFailure(request: NodeBridgeRequest, message: String): NodeBridgeResponse {
+        return NodeBridgeResponse.failure(
+            request.id,
+            NodeBridgeError.permissionDenied(
+                message = message,
+                module = request.module,
+                method = request.method,
+            ),
+        )
     }
 
     private fun dispatchFetch(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
@@ -1495,6 +1561,239 @@ private data class ShellExecResult(
         }.toString()
     }
 }
+
+private enum class ControlledWorkTaskKind(val wireName: String) {
+    ONCE("once"),
+    PERIODIC("periodic"),
+}
+
+private object ControlledWorkManagerPolicy {
+    const val MAX_TASKS_PER_PROVIDER = 64
+    const val MAX_DELAY_MS = 2_592_000_000L
+    const val MIN_PERIODIC_INTERVAL_MS = 900_000L
+    const val MAX_PERIODIC_INTERVAL_MS = 2_592_000_000L
+}
+
+private data class ControlledWorkTaskDescriptor(
+    val kind: ControlledWorkTaskKind,
+    val scriptPath: String,
+    val entryKind: String,
+    val backend: String,
+    val packaged: Boolean,
+    val delayMs: Long,
+    val intervalMs: Long?,
+    val constraints: JSONObject,
+) {
+    fun toJson(id: String, engineInfo: NodeBridgeEngineInfo): JSONObject {
+        return JSONObject().apply {
+            put("id", id)
+            put("type", kind.wireName)
+            put("status", "registered")
+            put("scheduler", "metadata")
+            put("backend", backend)
+            put("scriptPath", scriptPath)
+            put("entryKind", entryKind)
+            put("packaged", packaged)
+            put("delayMs", delayMs)
+            intervalMs?.let { put("intervalMs", it) }
+            put("constraints", JSONObject(constraints.toString()))
+            put("engineId", engineInfo.id)
+            put("sourceName", engineInfo.sourceName)
+            put("workingDirectory", engineInfo.cwd)
+            put("packageName", engineInfo.packageName)
+            put("versionName", engineInfo.versionName)
+            put("versionCode", engineInfo.versionCode)
+            put("createdAtEpochMs", System.currentTimeMillis())
+        }
+    }
+
+    companion object {
+        fun fromJson(
+            request: NodeBridgeRequest,
+            kind: ControlledWorkTaskKind,
+            payload: JSONObject,
+            appContext: Context,
+            engineInfo: NodeBridgeEngineInfo,
+        ): ControlledWorkTaskParseResult {
+            val backend = payload.optString("backend", "embedded").ifBlank { "embedded" }
+            if (!backend.equals("embedded", ignoreCase = true)) {
+                return ControlledWorkTaskParseResult(
+                    error = workTaskError(request, "work_manager supports only the embedded Node backend."),
+                )
+            }
+
+            val hasScriptPath = payload.has("scriptPath") && !payload.isNull("scriptPath")
+            val hasEntry = payload.has("entry") && !payload.isNull("entry")
+            val rawScriptPath = when {
+                hasScriptPath -> payload.optString("scriptPath", "")
+                hasEntry -> payload.optString("entry", "")
+                else -> ""
+            }
+            val entryKind = when {
+                hasScriptPath -> "scriptPath"
+                hasEntry -> "projectEntry"
+                else -> ""
+            }
+            val scriptPath = normalizeRelativeScriptPath(rawScriptPath)
+                ?: return ControlledWorkTaskParseResult(
+                    error = workTaskError(request, "work_manager task path must be a non-empty relative path inside the scoped project."),
+                )
+            val packaged = payload.optBoolean("packaged", false)
+            if (resolveScopedScriptPath(appContext, engineInfo, scriptPath, packaged) == null) {
+                return ControlledWorkTaskParseResult(
+                    error = workTaskError(request, "work_manager task path must resolve inside the scoped working directory."),
+                )
+            }
+
+            val delayMs = parseDuration(
+                payload = payload,
+                name = "delayMs",
+                fallback = 0L,
+                min = 0L,
+                max = ControlledWorkManagerPolicy.MAX_DELAY_MS,
+            ) ?: return ControlledWorkTaskParseResult(
+                error = workTaskError(request, "work_manager delayMs must be between 0 and ${ControlledWorkManagerPolicy.MAX_DELAY_MS}."),
+            )
+            val intervalMs = when (kind) {
+                ControlledWorkTaskKind.ONCE -> null
+                ControlledWorkTaskKind.PERIODIC -> {
+                    if (!payload.has("intervalMs") || payload.isNull("intervalMs")) {
+                        return ControlledWorkTaskParseResult(
+                            error = workTaskError(request, "work_manager.schedulePeriodic requires intervalMs."),
+                        )
+                    }
+                    parseDuration(
+                        payload = payload,
+                        name = "intervalMs",
+                        fallback = ControlledWorkManagerPolicy.MIN_PERIODIC_INTERVAL_MS,
+                        min = ControlledWorkManagerPolicy.MIN_PERIODIC_INTERVAL_MS,
+                        max = ControlledWorkManagerPolicy.MAX_PERIODIC_INTERVAL_MS,
+                    ) ?: return ControlledWorkTaskParseResult(
+                        error = workTaskError(
+                            request,
+                            "work_manager intervalMs must be between ${ControlledWorkManagerPolicy.MIN_PERIODIC_INTERVAL_MS} and ${ControlledWorkManagerPolicy.MAX_PERIODIC_INTERVAL_MS}.",
+                        ),
+                    )
+                }
+            }
+            val constraints = parseConstraints(payload)
+                ?: return ControlledWorkTaskParseResult(
+                    error = workTaskError(request, "work_manager constraints may contain only boolean charging, network, and idle fields."),
+                )
+
+            return ControlledWorkTaskParseResult(
+                value = ControlledWorkTaskDescriptor(
+                    kind = kind,
+                    scriptPath = scriptPath,
+                    entryKind = entryKind,
+                    backend = "embedded",
+                    packaged = packaged,
+                    delayMs = delayMs,
+                    intervalMs = intervalMs,
+                    constraints = constraints,
+                ),
+            )
+        }
+
+        private fun normalizeRelativeScriptPath(value: String): String? {
+            val text = value.trim()
+            if (text.isBlank() || text.indexOf('\u0000') >= 0) {
+                return null
+            }
+            if (File(text).isAbsolute || text.startsWith("/") || WINDOWS_ABSOLUTE_PATH.matches(text)) {
+                return null
+            }
+            val segments = text.replace('\\', '/')
+                .split('/')
+                .filter { it.isNotBlank() && it != "." }
+            if (segments.isEmpty() || segments.any { it == ".." }) {
+                return null
+            }
+            return segments.joinToString("/")
+        }
+
+        private fun resolveScopedScriptPath(
+            appContext: Context,
+            engineInfo: NodeBridgeEngineInfo,
+            scriptPath: String,
+            packaged: Boolean,
+        ): File? {
+            val base = runCatching {
+                File(engineInfo.cwd.takeIf { it.isNotBlank() } ?: appContext.filesDir.absolutePath).canonicalFile
+            }.getOrNull() ?: return null
+            val candidate = runCatching { File(base, scriptPath).canonicalFile }.getOrNull() ?: return null
+            val basePath = base.path.trimEnd(File.separatorChar)
+            val candidatePath = candidate.path
+            if (candidatePath != basePath && !candidatePath.startsWith(basePath + File.separator)) {
+                return null
+            }
+            if (!packaged && !candidate.isFile) {
+                return null
+            }
+            return candidate
+        }
+
+        private fun parseDuration(payload: JSONObject, name: String, fallback: Long, min: Long, max: Long): Long? {
+            if (!payload.has(name) || payload.isNull(name)) {
+                return fallback
+            }
+            val value = payload.opt(name)
+            val parsed = when (value) {
+                is Int -> value.toLong()
+                is Long -> value
+                is Number -> {
+                    val doubleValue = value.toDouble()
+                    if (!doubleValue.isFinite()) null else doubleValue.toLong()
+                }
+                is String -> value.toLongOrNull()
+                else -> null
+            } ?: return null
+            return parsed.takeIf { it in min..max }
+        }
+
+        private fun parseConstraints(payload: JSONObject): JSONObject? {
+            if (!payload.has("constraints") || payload.isNull("constraints")) {
+                return defaultConstraints()
+            }
+            val source = payload.optJSONObject("constraints") ?: return null
+            val allowed = setOf("charging", "network", "idle")
+            val keys = source.keys()
+            while (keys.hasNext()) {
+                val key = keys.next()
+                if (key !in allowed || source.opt(key) !is Boolean) {
+                    return null
+                }
+            }
+            return JSONObject().apply {
+                put("charging", source.optBoolean("charging", false))
+                put("network", source.optBoolean("network", false))
+                put("idle", source.optBoolean("idle", false))
+            }
+        }
+
+        private fun defaultConstraints(): JSONObject {
+            return JSONObject()
+                .put("charging", false)
+                .put("network", false)
+                .put("idle", false)
+        }
+
+        private fun workTaskError(request: NodeBridgeRequest, message: String): NodeBridgeError {
+            return NodeBridgeError.permissionDenied(
+                message = message,
+                module = request.module,
+                method = request.method,
+            )
+        }
+
+        private val WINDOWS_ABSOLUTE_PATH = Regex("""^[A-Za-z]:[\\/].*""")
+    }
+}
+
+private data class ControlledWorkTaskParseResult(
+    val value: ControlledWorkTaskDescriptor? = null,
+    val error: NodeBridgeError? = null,
+)
 
 private object ControlledFetchPolicy {
     const val MAX_CONCURRENT_REQUESTS = 4

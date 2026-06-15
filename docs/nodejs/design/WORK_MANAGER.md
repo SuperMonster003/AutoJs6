@@ -1,6 +1,6 @@
-# Work Manager Design Gate
+# Work Manager Design And MVP Gate
 
-Status: design gate only. No runtime behavior is enabled by this document, and `require("tasks")` is not exposed to Embedded Node scripts yet.
+Status: Task 65 exposes `require("work_manager")` as a controlled bridge MVP for scheduled-task metadata registration. It does not launch background Node executions yet. `require("tasks")` remains unavailable to Embedded Node scripts.
 
 ## Goal
 
@@ -32,73 +32,87 @@ This means the Node design should extend AutoJs6 task descriptors and launch rou
 
 | Capability | Decision | Reason |
 | --- | --- | --- |
-| Timed tasks | Future MVP | One-shot, daily, and weekly schedules map cleanly to existing `TimedTask` semantics and can be made user-visible. |
+| Timed metadata | MVP | One-shot and bounded periodic descriptors can be registered through the controlled `work_manager` bridge without exposing Android scheduler objects. |
+| Timed execution | Future MVP | Actual scheduled execution must map to existing AutoJs6 task ownership and be user-visible before it can run in the background. |
 | Broadcast tasks | Deferred | Broadcast registration has exported receiver, action allowlist, privacy, and Android background-start implications. |
 | App startup tasks | Deferred | Existing `ACTION_STARTUP` behavior is an intent task; Node should not silently persist app-start execution until prompts and storage are designed. |
 | Boot tasks | Deferred | Boot execution requires manifest permission, user visibility, background-start policy, and packaged opt-in. |
 | Package events | Deferred | Package add/remove/replace actions require manifest filters, `package` data scheme, privacy review, and rate limiting. |
 | Raw WorkManager/AlarmManager/JobScheduler APIs | Unsupported | They would let Node bypass AutoJs6 prompts, task UI, packaged manifest checks, and lifecycle ownership. |
 
-## MVP Scope
+## Implemented MVP Scope
 
-The first implementation should expose only timed task registration through a future `tasks` bridge module.
+The Task 65 implementation exposes scheduled-task metadata registration through `require("work_manager")`.
 
-Proposed JavaScript shape:
+Current JavaScript shape:
 
 ```js
-const tasks = require("tasks");
+const workManager = require("work_manager");
 
-const task = await tasks.createTimedTask({
-  name: "daily-node-job",
-  entry: "./main.cjs",
+const taskId = await workManager.scheduleOnce({
+  scriptPath: "./main.cjs",
   backend: "embedded",
-  schedule: {
-    type: "daily",
-    time: "09:30",
-  },
-  timeoutMs: 30000,
-  arguments: ["from-scheduler"],
+  delayMs: 1000,
+  constraints: { network: true },
 });
 
-console.log(task.id, task.nextRunAt);
+console.log(taskId);
+console.log(await workManager.list());
 ```
 
 MVP methods:
 
-- `createTimedTask(options): Promise<TaskInfo>`
-- `list(options?): Promise<TaskInfo[]>`
-- `get(id): Promise<TaskInfo | null>`
-- `cancel(id): Promise<boolean>`
-- `setEnabled(id, enabled): Promise<boolean>`
+- `scheduleOnce(options): Promise<TaskId>`
+- `schedulePeriodic(options): Promise<TaskId>`
+- `cancel(taskId): Promise<void>`
+- `list(): Promise<TaskInfo[]>`
 
-MVP schedule kinds:
+Implemented descriptor fields:
 
-- `once`: absolute local date/time
-- `daily`: local time
-- `weekly`: local time plus day-of-week list
+- `scriptPath` or `entry`
+- `backend`, currently `embedded` only
+- `delayMs`
+- `intervalMs` for periodic tasks
+- `packaged` for packaged project-entry metadata
+- `constraints.charging`
+- `constraints.network`
+- `constraints.idle`
+
+Current behavior:
+
+- descriptors are stored in provider-owned metadata for the current bridge provider instance
+- the Android provider validates descriptor policy again after JavaScript validation
+- `scriptPath` and `entry` must be relative, non-empty, NUL-free, and scoped to the working directory
+- non-packaged paths must resolve to an existing file inside the working directory
+- packaged project entries can serialize metadata without requiring a plaintext file path
+- periodic intervals are bounded to at least `900000` ms
+- queued host fallback rejects `work_manager` requests with `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED`
 
 MVP exclusions:
 
+- no background execution launch
+- no persisted task database entry yet
+- no user-visible task UI entry yet
 - no `createBroadcastTask`
 - no boot task registration
 - no package event task registration
 - no custom Android `IntentFilter` registration
-- no direct WorkManager constraints API
+- no raw WorkManager constraints API
 - no exact-alarm opt-in from Node
 - no background service control from Node
 
 ## Bridge Ownership
 
-The future `tasks` module must be a bridge module, not a Node builtin backed by Android objects.
+The `work_manager` module is a bridge module, not a Node builtin backed by Android objects.
 
 Required flow:
 
 ```text
-Node JS tasks module
+Node JS work_manager module
   -> autojs6:bridge request
   -> NativeNodeEmbeddedScriptService
-  -> main-process task capability provider
-  -> TimedTaskManager / task database / scheduler
+  -> NodeBridgeCapabilityProvider
+  -> metadata store now; future TimedTaskManager / task database / scheduler handoff
 ```
 
 The Node service must not directly instantiate or register:
@@ -195,7 +209,7 @@ Suggested packaged project metadata:
 }
 ```
 
-If the packaged template does not carry live bridge metadata, `require("tasks")` must remain unavailable or reject with a stable unsupported error. It must not queue persistent task registration as a one-way host effect.
+If the packaged template does not carry live bridge metadata, `require("work_manager")` must reject with a stable bridge policy error. It must not queue persistent task registration as a one-way host effect. `require("tasks")` remains unavailable until a compatibility alias is deliberately designed.
 
 ## Manifest Requirements
 
@@ -248,9 +262,9 @@ Policy limits should include:
 
 ## Error Policy
 
-Future implementation should use bridge errors rather than ad hoc exceptions.
+The MVP uses bridge errors rather than ad hoc exceptions.
 
-Suggested canonical errors:
+Canonical errors:
 
 - `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED` for missing user approval or disallowed task type
 - `ERR_AUTOJS6_BRIDGE_TIMEOUT` for provider timeout
@@ -258,7 +272,7 @@ Suggested canonical errors:
 - `ERR_AUTOJS6_FS_PATH_ESCAPE` or the existing scoped fs codes for invalid entries
 - `ERR_AUTOJS6_BUILTIN_DISABLED` if `require("tasks")` remains unavailable in a profile
 
-Avoid adding a persistent task if any descriptor validation or prompt step fails.
+Avoid adding metadata or a future persistent task if any descriptor validation or prompt step fails.
 
 ## Future Broadcast Design Gate
 
@@ -277,13 +291,24 @@ Before enabling broadcast, startup, boot, or package-event tasks from Node, writ
 
 The JavaScript result should receive a serialized trigger object, not a raw Android intent.
 
-## Tests Required For Implementation
+## Tests Required
 
-Future runtime work needs both positive and negative coverage:
+Task 65 coverage:
 
-- `require("tasks")` unavailable until the feature is implemented
-- timed task descriptor serialization and migration
-- positive once/daily/weekly registration through a fake provider
+- `require("work_manager")` module routing and shadowing protection
+- `require("tasks")` remains unavailable
+- positive once and periodic metadata registration through a fake provider
+- `cancel` and `list`
+- packaged project-entry metadata serialization
+- queued fallback rejection
+- Android provider metadata storage
+- scoped entry path denial for absolute, NUL, `..`, and missing non-packaged files
+- bounded periodic interval denial
+- non-embedded backend denial
+
+Future execution work needs additional coverage:
+
+- timed task descriptor persistence and migration
 - scoped entry path denial for absolute, NUL, `..`, symlink, and realpath escapes
 - user-denied prompt path
 - provider timeout path
@@ -295,4 +320,4 @@ Future runtime work needs both positive and negative coverage:
 
 ## Current Decision
 
-Task 38 does not implement `require("tasks")`. The current Safe Node Profile should continue to deny direct scheduling authority. Timed task registration is the only approved MVP direction, and even that must land later through a bridge provider, user-visible registration, descriptor storage, scoped path validation, packaged manifest verification, and focused tests.
+Task 65 implements `require("work_manager")` as a controlled metadata-registration MVP. The Safe Node Profile still denies direct Android scheduler authority and does not execute scheduled Node work in the background yet. Timed execution remains the only approved next scheduling direction, and it must land through a bridge provider, user-visible registration, descriptor persistence, scoped path validation, packaged manifest verification, and focused tests. Broadcast, startup, boot, and package-event registration remain deferred.

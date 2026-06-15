@@ -7909,6 +7909,7 @@ std::string buildEmbeddedScriptExecutionSource(
   let __autojs6_limited_shell_cache = null;
   let __autojs6_limited_fetch_cache = null;
   let __autojs6_limited_websocket_cache = null;
+  let __autojs6_limited_work_manager_cache = null;
   let __autojs6_limited_worker_threads_cache = null;
   const __autojs6_fetch_policy = Object.freeze({
     maxConcurrentRequests: 4,
@@ -7949,6 +7950,13 @@ std::string buildEmbeddedScriptExecutionSource(
     messageCount: 0,
     lastPolicyRejection: ""
   };
+  const __autojs6_work_manager_policy = Object.freeze({
+    maxTasksPerProvider: 64,
+    maxDelayMs: 2592000000,
+    minPeriodicIntervalMs: 900000,
+    maxPeriodicIntervalMs: 2592000000,
+    allowedConstraints: Object.freeze(["charging", "network", "idle"])
+  });
   const __autojs6_worker_threads_policy = Object.freeze({
     maxWorkers: 1,
     startupTimeoutMs: 5000,
@@ -10298,6 +10306,280 @@ std::string buildEmbeddedScriptExecutionSource(
       exec
     });
     return __autojs6_limited_shell_cache;
+  }
+  function __autojs6_work_manager_options(value) {
+    return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  }
+  function __autojs6_work_manager_invalid_argument_error(methodName, message) {
+    return __autojs6_bridge_error(
+      message,
+      "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED",
+      "work_manager",
+      methodName
+    );
+  }
+  function __autojs6_work_manager_timeout_from_options(options, fallbackMs) {
+    return options && typeof options === "object" && options.timeoutMs !== undefined
+      ? options.timeoutMs
+      : fallbackMs;
+  }
+  function __autojs6_work_manager_duration_ms(value, fallback, min, max, methodName, propertyName, required) {
+    if (value === undefined || value === null || value === "") {
+      if (required) {
+        throw __autojs6_work_manager_invalid_argument_error(
+          methodName,
+          "work_manager." + methodName + " requires " + propertyName + "."
+        );
+      }
+      return fallback;
+    }
+    const number = Number(value);
+    if (!Number.isFinite(number)) {
+      throw __autojs6_work_manager_invalid_argument_error(
+        methodName,
+        "work_manager." + methodName + " " + propertyName + " must be a finite number."
+      );
+    }
+    const duration = Math.trunc(number);
+    if (duration < min || duration > max) {
+      throw __autojs6_work_manager_invalid_argument_error(
+        methodName,
+        "work_manager." + methodName + " " + propertyName + " must be between " + min + " and " + max + "."
+      );
+    }
+    return duration;
+  }
+  function __autojs6_work_manager_normalize_path(options, methodName) {
+    const hasScriptPath = Object.prototype.hasOwnProperty.call(options, "scriptPath") &&
+      options.scriptPath !== undefined &&
+      options.scriptPath !== null;
+    const hasEntry = Object.prototype.hasOwnProperty.call(options, "entry") &&
+      options.entry !== undefined &&
+      options.entry !== null;
+    const raw = hasScriptPath ? options.scriptPath : (hasEntry ? options.entry : "");
+    const text = String(raw).trim();
+    if (!text || text.indexOf("\u0000") >= 0) {
+      throw __autojs6_work_manager_invalid_argument_error(
+        methodName,
+        "work_manager." + methodName + " requires scriptPath or entry without NUL bytes."
+      );
+    }
+    if (text.charAt(0) === "/" || /^[A-Za-z]:[\\/]/.test(text)) {
+      throw __autojs6_work_manager_invalid_argument_error(
+        methodName,
+        "work_manager." + methodName + " path must be relative to the scoped working directory."
+      );
+    }
+    const parts = text.replace(/\\/g, "/").split("/").filter(function(part) {
+      return part && part !== ".";
+    });
+    if (!parts.length || parts.indexOf("..") >= 0) {
+      throw __autojs6_work_manager_invalid_argument_error(
+        methodName,
+        "work_manager." + methodName + " path must not escape the scoped working directory."
+      );
+    }
+    return {
+      scriptPath: parts.join("/"),
+      entryKind: hasEntry && !hasScriptPath ? "projectEntry" : "scriptPath"
+    };
+  }
+  function __autojs6_work_manager_constraints(value, methodName) {
+    if (value === undefined || value === null) {
+      return { charging: false, network: false, idle: false };
+    }
+    if (!value || typeof value !== "object" || Array.isArray(value)) {
+      throw __autojs6_work_manager_invalid_argument_error(
+        methodName,
+        "work_manager." + methodName + " constraints must be a JSON object."
+      );
+    }
+    const result = { charging: false, network: false, idle: false };
+    for (const key of Object.keys(value)) {
+      if (key !== "charging" && key !== "network" && key !== "idle") {
+        throw __autojs6_work_manager_invalid_argument_error(
+          methodName,
+          "work_manager." + methodName + " constraints may contain only charging, network, and idle."
+        );
+      }
+      if (typeof value[key] !== "boolean") {
+        throw __autojs6_work_manager_invalid_argument_error(
+          methodName,
+          "work_manager." + methodName + " constraint " + key + " must be boolean."
+        );
+      }
+      result[key] = value[key];
+    }
+    return result;
+  }
+  function __autojs6_work_manager_descriptor(methodName, kind, options) {
+    const input = __autojs6_work_manager_options(options);
+    const path = __autojs6_work_manager_normalize_path(input, methodName);
+    const backend = input.backend === undefined || input.backend === null || input.backend === ""
+      ? "embedded"
+      : String(input.backend);
+    if (backend !== "embedded") {
+      throw __autojs6_work_manager_invalid_argument_error(
+        methodName,
+        "work_manager." + methodName + " supports only backend=\"embedded\"."
+      );
+    }
+    const descriptor = {
+      scriptPath: path.scriptPath,
+      entryKind: path.entryKind,
+      backend: "embedded",
+      packaged: input.packaged === true,
+      delayMs: __autojs6_work_manager_duration_ms(
+        input.delayMs,
+        0,
+        0,
+        __autojs6_work_manager_policy.maxDelayMs,
+        methodName,
+        "delayMs",
+        false
+      ),
+      constraints: __autojs6_work_manager_constraints(input.constraints, methodName)
+    };
+    if (kind === "periodic") {
+      descriptor.intervalMs = __autojs6_work_manager_duration_ms(
+        input.intervalMs,
+        __autojs6_work_manager_policy.minPeriodicIntervalMs,
+        __autojs6_work_manager_policy.minPeriodicIntervalMs,
+        __autojs6_work_manager_policy.maxPeriodicIntervalMs,
+        methodName,
+        "intervalMs",
+        true
+      );
+    }
+    return descriptor;
+  }
+  function __autojs6_work_manager_task_id(value) {
+    const id = value === undefined || value === null ? "" : String(value).trim();
+    if (!id) {
+      throw __autojs6_work_manager_invalid_argument_error(
+        "cancel",
+        "work_manager.cancel requires a non-empty task id."
+      );
+    }
+    return id;
+  }
+  function __autojs6_work_manager_task_info(value) {
+    const source = value && typeof value === "object" ? value : {};
+    return Object.freeze({
+      id: source.id === undefined || source.id === null ? "" : String(source.id),
+      type: source.type === undefined || source.type === null ? "" : String(source.type),
+      status: source.status === undefined || source.status === null ? "" : String(source.status),
+      scheduler: source.scheduler === undefined || source.scheduler === null ? "" : String(source.scheduler),
+      backend: source.backend === undefined || source.backend === null ? "" : String(source.backend),
+      scriptPath: source.scriptPath === undefined || source.scriptPath === null ? "" : String(source.scriptPath),
+      entryKind: source.entryKind === undefined || source.entryKind === null ? "" : String(source.entryKind),
+      packaged: source.packaged === true,
+      delayMs: Number(source.delayMs) || 0,
+      intervalMs: source.intervalMs === undefined || source.intervalMs === null ? null : Number(source.intervalMs),
+      constraints: Object.freeze({
+        charging: !!(source.constraints && source.constraints.charging === true),
+        network: !!(source.constraints && source.constraints.network === true),
+        idle: !!(source.constraints && source.constraints.idle === true)
+      }),
+      packageName: source.packageName === undefined || source.packageName === null ? "" : String(source.packageName),
+      createdAtEpochMs: Number(source.createdAtEpochMs) || 0
+    });
+  }
+  function __autojs6_work_manager_policy_snapshot() {
+    return Object.freeze({
+      maxTasksPerProvider: __autojs6_work_manager_policy.maxTasksPerProvider,
+      maxDelayMs: __autojs6_work_manager_policy.maxDelayMs,
+      minPeriodicIntervalMs: __autojs6_work_manager_policy.minPeriodicIntervalMs,
+      maxPeriodicIntervalMs: __autojs6_work_manager_policy.maxPeriodicIntervalMs,
+      allowedConstraints: Object.freeze(__autojs6_work_manager_policy.allowedConstraints.slice())
+    });
+  }
+  function __autojs6_limited_work_manager() {
+    if (__autojs6_limited_work_manager_cache) {
+      return __autojs6_limited_work_manager_cache;
+    }
+    function scheduleOnce(options) {
+      let descriptor;
+      try {
+        descriptor = __autojs6_work_manager_descriptor("scheduleOnce", "once", options);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      const input = __autojs6_work_manager_options(options);
+      return __autojs6_call_autojs(
+        "work_manager",
+        "scheduleOnce",
+        [descriptor],
+        {
+          timeoutMs: __autojs6_work_manager_timeout_from_options(input, 5000),
+          permissions: ["work_manager"]
+        }
+      ).then(function(result) {
+        return result === undefined || result === null ? "" : String(result);
+      });
+    }
+    function schedulePeriodic(options) {
+      let descriptor;
+      try {
+        descriptor = __autojs6_work_manager_descriptor("schedulePeriodic", "periodic", options);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      const input = __autojs6_work_manager_options(options);
+      return __autojs6_call_autojs(
+        "work_manager",
+        "schedulePeriodic",
+        [descriptor],
+        {
+          timeoutMs: __autojs6_work_manager_timeout_from_options(input, 5000),
+          permissions: ["work_manager"]
+        }
+      ).then(function(result) {
+        return result === undefined || result === null ? "" : String(result);
+      });
+    }
+    function cancel(taskId, options) {
+      let id;
+      try {
+        id = __autojs6_work_manager_task_id(taskId);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      const input = __autojs6_work_manager_options(options);
+      return __autojs6_call_autojs(
+        "work_manager",
+        "cancel",
+        [id],
+        {
+          timeoutMs: __autojs6_work_manager_timeout_from_options(input, 5000),
+          permissions: ["work_manager"]
+        }
+      ).then(function() {
+        return undefined;
+      });
+    }
+    function list(options) {
+      const input = __autojs6_work_manager_options(options);
+      return __autojs6_call_autojs(
+        "work_manager",
+        "list",
+        [],
+        {
+          timeoutMs: __autojs6_work_manager_timeout_from_options(input, 5000),
+          permissions: ["work_manager"]
+        }
+      ).then(function(result) {
+        return Array.isArray(result) ? Object.freeze(result.map(__autojs6_work_manager_task_info)) : Object.freeze([]);
+      });
+    }
+    __autojs6_limited_work_manager_cache = Object.freeze({
+      scheduleOnce,
+      schedulePeriodic,
+      cancel,
+      list,
+      policy: __autojs6_work_manager_policy_snapshot()
+    });
+    return __autojs6_limited_work_manager_cache;
   }
   function __autojs6_host_app_info() {
     const fallback = {
@@ -25964,6 +26246,9 @@ std::string buildEmbeddedScriptExecutionSource(
     if (name === "websocket") {
       return "websocket";
     }
+    if (name === "work_manager") {
+      return "work_manager";
+    }
     if ((name === "worker_threads" || name === "node:worker_threads") && __autojs6_worker_threads_experimental_enabled) {
       return "worker_threads";
     }
@@ -26169,6 +26454,9 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     if (name === "websocket") {
       return __autojs6_limited_websocket();
+    }
+    if (name === "work_manager") {
+      return __autojs6_limited_work_manager();
     }
     if ((name === "worker_threads" || name === "node:worker_threads") && __autojs6_worker_threads_experimental_enabled) {
       return __autojs6_limited_worker_threads();

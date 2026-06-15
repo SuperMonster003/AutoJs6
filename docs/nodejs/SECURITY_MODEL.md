@@ -248,13 +248,15 @@ The `fetch` bridge is the controlled AutoJs6 replacement for Node raw network mo
 
 The `websocket` bridge is the controlled AutoJs6 replacement for raw WebSocket sockets. JavaScript receives a Promise-based `connect()` API plus connection `send()`, `close()`, `on()`, and `off()` methods. Request descriptors are JSON-serialized, limited to `ws:` and `wss:`, bounded by `timeoutMs`, `maxMessageBytes`, `maxQueueSize`, and max active connection count, and may be cancelled through `AbortController.signal`. Binary frames cross the bridge as Base64. Event callbacks are drained through the bridge and must not call into JavaScript directly from OkHttp callbacks. The live Android provider is gated by `BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED`; normal builds reject before network I/O. Provider destroy closes tracked WebSocket sessions and must not call back into a destroyed Node environment.
 
+The `work_manager` bridge is a controlled scheduled-task metadata surface, not direct Android scheduler access. JavaScript can call `scheduleOnce()`, `schedulePeriodic()`, `cancel()`, and `list()` through `require("work_manager")`; descriptors are JSON-only, `backend` is restricted to `embedded`, entries must be scoped relative paths, and periodic intervals are bounded. The current MVP stores provider-owned metadata and does not launch background Node executions. Queued host fallback rejects work-manager requests so packaged templates without live bridge metadata cannot create persistent tasks as one-way effects. Raw WorkManager, AlarmManager, JobScheduler, BroadcastReceiver, PendingIntent, IntentFilter, exact-alarm, boot, package-event, and custom broadcast authority remain denied.
+
 ## Scheduled Background Task Policy
 
-Node scripts do not currently have authority to register persistent timed, broadcast, boot, or package-event tasks.
+Node scripts have only the Task 65 `work_manager` metadata-registration MVP. They do not yet have authority to execute persistent timed, broadcast, boot, or package-event tasks.
 
 Future support must follow `docs/nodejs/design/WORK_MANAGER.md`:
 
-- timed task registration may be added only through a Promise bridge provider
+- timed task execution may be added only through a Promise bridge provider
 - the main app or packaged app owns prompts, persistence, receivers, and scheduler calls
 - direct access to WorkManager, AlarmManager, JobScheduler, BroadcastReceiver, PendingIntent, and IntentFilter remains denied
 - task descriptors must store Node backend, entry, project root, encrypted entry/module source ids, timeout, and JSON arguments explicitly
