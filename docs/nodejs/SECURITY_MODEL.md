@@ -2,6 +2,8 @@
 
 The embedded Node runtime is an Android automation runtime, not a desktop shell. The security model is based on process isolation, scoped filesystem access, builtin restrictions, packaged APK verification, and explicit feature gates.
 
+The release threat model for Node Profile v1 is tracked in [security/THREAT_MODEL_V1.md](security/THREAT_MODEL_V1.md). Keep that document updated when adding or promoting any resolver, filesystem, bridge, bundler, packaged APK, or experimental feature surface.
+
 ## Trust Boundary
 
 User scripts are untrusted relative to the AutoJs6 app process and Android privileged services.

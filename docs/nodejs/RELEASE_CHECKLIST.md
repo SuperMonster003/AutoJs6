@@ -230,6 +230,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `docs/nodejs/INTEGRATION_PLAN.md`
 - [ ] `docs/nodejs/COMPATIBILITY_PROFILE.md`
 - [ ] `docs/nodejs/SECURITY_MODEL.md`
+- [ ] `docs/nodejs/security/THREAT_MODEL_V1.md`
 - [ ] `docs/nodejs/TESTING.md`
 - [ ] `docs/nodejs/releases/NODE_PROFILE_V1_STABLE_SURFACE.md`
 - [ ] `docs/nodejs/EXPERIMENTAL_PROMOTION_POLICY.md`
