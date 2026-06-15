@@ -14,6 +14,14 @@ canonical AutoJs6 value through `autojs6Code` and `legacyCode`.
 - How to fix: declare the required bridge capability, or remove the manifest while migrating legacy scripts.
 - Related docs: [SECURITY_MODEL.md](SECURITY_MODEL.md), [COMPATIBILITY_PROFILE.md](COMPATIBILITY_PROFILE.md).
 
+## ERR_AUTOJS6_BRIDGE_CANCELLED
+
+- Meaning: A Node bridge call was cancelled before the provider completed it.
+- Common cause: an `AbortSignal` fired, a provider-owned permission UI was dismissed, or a resource was closed while a bridge call was pending.
+- Example: aborting `dialogs.alert()` through an `AbortController`.
+- How to fix: treat cancellation as a normal control path and clean local state in `finally`.
+- Related docs: [COMPATIBILITY_PROFILE.md](COMPATIBILITY_PROFILE.md), [TESTING.md](TESTING.md).
+
 ## ERR_AUTOJS6_BRIDGE_INVALID_REQUEST
 
 - Meaning: A bridge RPC message is malformed or cannot be dispatched safely.
@@ -33,7 +41,7 @@ canonical AutoJs6 value through `autojs6Code` and `legacyCode`.
 ## ERR_AUTOJS6_BRIDGE_PROCESS_DEAD
 
 - Meaning: The bridge process or service was destroyed before a pending request completed.
-- Common cause: user stop, service shutdown, timeout cleanup, or native process termination.
+- Common cause: user stop, service shutdown, or native process termination.
 - Example: a pending dialog or image request rejects after the Node service is stopped.
 - How to fix: handle rejection, clean resources in `finally`, and avoid assuming long bridge calls survive service stop.
 - Related docs: [TESTING.md](TESTING.md), [docs/nodejs/design/LONG_RUNNING_SERVICE.md](design/LONG_RUNNING_SERVICE.md).

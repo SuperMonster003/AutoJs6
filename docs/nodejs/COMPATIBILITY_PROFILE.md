@@ -641,9 +641,19 @@ Current foundation:
 - provider callbacks are accepted at most once per bridge request; duplicate callbacks are ignored
 - synchronous provider dispatch exceptions are converted to bridge failure responses with stable module and method metadata
 - JS pending bridge calls reject on timeout with `ERR_AUTOJS6_BRIDGE_TIMEOUT`
+- JS pending bridge calls reject on `AbortSignal` cancellation with `ERR_AUTOJS6_BRIDGE_CANCELLED`
 - JS pending bridge calls reject on destroy with `ERR_AUTOJS6_BRIDGE_PROCESS_DEAD`
+- controlled fetch and WebSocket wrappers map bridge cancellation to their public network abort code `ERR_AUTOJS6_NETWORK_ABORTED`
 - bridge flood/resource exhaustion rejects with `ERR_AUTOJS6_BRIDGE_RESOURCE_LIMIT`
 - accessibility bridge request-rate exhaustion rejects with `ERR_AUTOJS6_BRIDGE_RATE_LIMITED`
+
+Cancellation policy:
+
+- service stop, user stop, or native bridge destruction rejects pending calls with `ERR_AUTOJS6_BRIDGE_PROCESS_DEAD`
+- bridge timeouts reject with `ERR_AUTOJS6_BRIDGE_TIMEOUT`
+- explicit JavaScript `AbortSignal` cancellation rejects pending bridge calls with `ERR_AUTOJS6_BRIDGE_CANCELLED`
+- provider-owned permission UI dismissal and manual resource closure should use `ERR_AUTOJS6_BRIDGE_CANCELLED` when the provider can distinguish cancellation from policy denial
+- unavailable Android authorities, undeclared capabilities, or policy denial continue to use `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED` or `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`
 
 Current user-facing bridge modules:
 
@@ -923,6 +933,7 @@ Examples:
 - disabled fetch/network: `code=ERR_AUTOJS6_EMBEDDED_NODE_FETCH_DISABLED`, `autojs6Code=ERR_AUTOJS6_NETWORK_DISABLED`
 - scoped fs escape: `code=EPERM`, `autojs6Code=ERR_AUTOJS6_FS_PATH_ESCAPE`
 - undeclared bridge capability: `code=ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`, `autojs6Code=ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`
+- cancelled bridge call: `code=ERR_AUTOJS6_BRIDGE_CANCELLED`, `autojs6Code=ERR_AUTOJS6_BRIDGE_CANCELLED`
 - malformed bridge request: `code=ERR_AUTOJS6_BRIDGE_INVALID_REQUEST`, `autojs6Code=ERR_AUTOJS6_BRIDGE_INVALID_REQUEST`
 - bridge resource limit: `code=ERR_AUTOJS6_BRIDGE_RESOURCE_LIMIT`, `autojs6Code=ERR_AUTOJS6_BRIDGE_RESOURCE_LIMIT`
 - bridge rate limit: `code=ERR_AUTOJS6_BRIDGE_RATE_LIMITED`, `autojs6Code=ERR_AUTOJS6_BRIDGE_RATE_LIMITED`

@@ -1140,6 +1140,135 @@ class NodeAutoJsBridgeInstrumentationTest {
     }
 
     @Test
+    fun jsBridgeAbortSignalRejectsAndClearsPendingCalls() {
+        assumeEmbeddedScriptExecutionEnabled()
+
+        val result = runEmbeddedScript(
+            """
+            "nodejs";
+            (async function main() {
+              const bridge = require("autojs6:bridge");
+              const requests = [];
+              bridge.__test.setTransport({
+                postMessage(message) {
+                  const request = JSON.parse(message);
+                  requests.push(request);
+                  console.log("bridge.abort.request=" + request.module + "/" + request.method);
+                }
+              });
+
+              const preController = new AbortController();
+              preController.abort();
+              const preError = await bridge.callAutoJs("dialogs", "alert", [], {
+                timeoutMs: 1000,
+                signal: preController.signal
+              }).then(
+                () => "unexpected",
+                (error) => error
+              );
+              console.log("bridge.abort.pre.code=" + preError.code + "/" + preError.autojs6Code);
+              console.log("bridge.abort.pre.requests=" + requests.length);
+              console.log("bridge.abort.pre.pending=" + bridge.__test.pendingCount());
+
+              const controller = new AbortController();
+              const pending = bridge.callAutoJs("accessibility", "findOne", [], {
+                timeoutMs: 1000,
+                signal: controller.signal
+              }).then(
+                () => "unexpected",
+                (error) => error
+              );
+              setImmediate(() => {
+                controller.abort();
+              });
+              const duringError = await pending;
+              const request = requests[0];
+              console.log("bridge.abort.during.code=" + duringError.code + "/" + duringError.autojs6Code);
+              console.log("bridge.abort.during.target=" + duringError.module + "/" + duringError.method);
+              console.log("bridge.abort.during.pending=" + bridge.__test.pendingCount());
+              console.log("bridge.abort.during.late=" + bridge.__test.receiveMessage(JSON.stringify({
+                id: request.id,
+                ok: true,
+                result: "late"
+              })));
+            })();
+            """.trimIndent(),
+            "<embedded-autojs-bridge-abort-source.js>",
+        )
+
+        assertTrue(result.errorMessage.orEmpty() + "\n" + result.stdout, result.succeeded)
+        assertTrue(result.stdout.contains("bridge.abort.pre.code=ERR_AUTOJS6_BRIDGE_CANCELLED/ERR_AUTOJS6_BRIDGE_CANCELLED"))
+        assertTrue(result.stdout.contains("bridge.abort.pre.requests=0"))
+        assertTrue(result.stdout.contains("bridge.abort.pre.pending=0"))
+        assertTrue(result.stdout.contains("bridge.abort.request=accessibility/findOne"))
+        assertTrue(result.stdout.contains("bridge.abort.during.code=ERR_AUTOJS6_BRIDGE_CANCELLED/ERR_AUTOJS6_BRIDGE_CANCELLED"))
+        assertTrue(result.stdout.contains("bridge.abort.during.target=accessibility/findOne"))
+        assertTrue(result.stdout.contains("bridge.abort.during.pending=0"))
+        assertTrue(result.stdout.contains("bridge.abort.during.late=false"))
+    }
+
+    @Test
+    fun jsBridgeModuleAbortSignalsAreForwarded() {
+        assumeEmbeddedScriptExecutionEnabled()
+
+        val result = runEmbeddedScript(
+            """
+            "nodejs";
+            (async function main() {
+              const bridge = require("autojs6:bridge");
+              const dialogs = require("dialogs");
+              const accessibility = require("accessibility");
+              const image = require("image");
+              const shell = require("shell");
+              const requests = [];
+              bridge.__test.setTransport({
+                postMessage(message) {
+                  const request = JSON.parse(message);
+                  requests.push(request);
+                }
+              });
+
+              function capture(promise) {
+                return promise.then(
+                  () => "unexpected",
+                  (error) => error
+                );
+              }
+              function imageHandle(id) {
+                return {
+                  id,
+                  __autojs6ImageHandle: id,
+                  width: 1,
+                  height: 1
+                };
+              }
+
+              const controller = new AbortController();
+              const options = { timeoutMs: 5000, signal: controller.signal };
+              const errorsPromise = Promise.all([
+                capture(dialogs.alert("Title", "Message", options)),
+                capture(accessibility.findByText("OK", options)),
+                capture(image.findImage(imageHandle("source"), imageHandle("template"), options)),
+                capture(shell.exec("echo ok", options))
+              ]);
+              await new Promise((resolve) => setImmediate(resolve));
+              console.log("bridge.abort.wrapper.requests=" + requests.map((request) => request.module + "/" + request.method).join(","));
+              controller.abort();
+              const errors = await errorsPromise;
+              console.log("bridge.abort.wrapper.codes=" + errors.map((error) => error.code).join(","));
+              console.log("bridge.abort.wrapper.pending=" + bridge.__test.pendingCount());
+            })();
+            """.trimIndent(),
+            "<embedded-autojs-bridge-wrapper-abort-source.js>",
+        )
+
+        assertTrue(result.errorMessage.orEmpty() + "\n" + result.stdout, result.succeeded)
+        assertTrue(result.stdout.contains("bridge.abort.wrapper.requests=dialogs/alert,accessibility/findByText,image/findImage,shell/exec"))
+        assertTrue(result.stdout.contains("bridge.abort.wrapper.codes=ERR_AUTOJS6_BRIDGE_CANCELLED,ERR_AUTOJS6_BRIDGE_CANCELLED,ERR_AUTOJS6_BRIDGE_CANCELLED,ERR_AUTOJS6_BRIDGE_CANCELLED"))
+        assertTrue(result.stdout.contains("bridge.abort.wrapper.pending=0"))
+    }
+
+    @Test
     fun jsBridgeDestroyRejectsPendingCalls() {
         assumeEmbeddedScriptExecutionEnabled()
 

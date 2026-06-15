@@ -8528,6 +8528,7 @@ std::string buildEmbeddedScriptExecutionSource(
         bridgePermissionDenied: "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED",
         bridgeCapabilityNotDeclared: "ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED",
         bridgeInvalidRequest: "ERR_AUTOJS6_BRIDGE_INVALID_REQUEST",
+        bridgeCancelled: "ERR_AUTOJS6_BRIDGE_CANCELLED",
         bridgeTimeout: "ERR_AUTOJS6_BRIDGE_TIMEOUT",
         bridgeProcessDead: "ERR_AUTOJS6_BRIDGE_PROCESS_DEAD",
         bridgeRateLimited: "ERR_AUTOJS6_BRIDGE_RATE_LIMITED",
@@ -8827,6 +8828,9 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     return Math.max(1, Math.min(Math.floor(number), 2147483647));
   }
+  function __autojs6_bridge_signal_from_options(options) {
+    return options && typeof options === "object" ? options.signal : undefined;
+  }
   function __autojs6_bridge_permissions(value) {
     if (!Array.isArray(value)) {
       return [];
@@ -8857,6 +8861,15 @@ std::string buildEmbeddedScriptExecutionSource(
       } catch (_) {}
     }
     return error;
+  }
+  function __autojs6_bridge_cancelled_error(moduleName, methodName, sourceError) {
+    return __autojs6_bridge_error(
+      "AutoJs6 bridge call was cancelled.",
+      "ERR_AUTOJS6_BRIDGE_CANCELLED",
+      moduleName,
+      methodName,
+      sourceError
+    );
   }
   function __autojs6_bridge_response_error(responseError, request) {
     const source = responseError && typeof responseError === "object" ? responseError : {};
@@ -9301,7 +9314,7 @@ std::string buildEmbeddedScriptExecutionSource(
       __autojs6_fetch_mark_diagnostic_recorded(error);
       return;
     }
-    if (code === "ERR_AUTOJS6_NETWORK_ABORTED") {
+    if (code === "ERR_AUTOJS6_NETWORK_ABORTED" || code === "ERR_AUTOJS6_BRIDGE_CANCELLED") {
       __autojs6_fetch_diagnostics.abortedCount += 1;
       __autojs6_fetch_mark_diagnostic_recorded(error);
       return;
@@ -9585,6 +9598,12 @@ std::string buildEmbeddedScriptExecutionSource(
         "ERR_AUTOJS6_NETWORK_TIMEOUT"
       ));
     }
+    if (code === "ERR_AUTOJS6_BRIDGE_CANCELLED") {
+      return __autojs6_fetch_mark_diagnostic_recorded(__autojs6_error(
+        error && error.message ? error.message : "AutoJs6 controlled fetch was aborted.",
+        "ERR_AUTOJS6_NETWORK_ABORTED"
+      ));
+    }
     return error;
   }
   function __autojs6_fetch_dispatch(request) {
@@ -9735,6 +9754,12 @@ std::string buildEmbeddedScriptExecutionSource(
       return __autojs6_websocket_error(
         error && error.message ? error.message : "AutoJs6 controlled WebSocket timed out.",
         "ERR_AUTOJS6_NETWORK_TIMEOUT"
+      );
+    }
+    if (code === "ERR_AUTOJS6_BRIDGE_CANCELLED") {
+      return __autojs6_websocket_error(
+        error && error.message ? error.message : "AutoJs6 controlled WebSocket was aborted.",
+        "ERR_AUTOJS6_NETWORK_ABORTED"
       );
     }
     return error;
@@ -10479,7 +10504,7 @@ std::string buildEmbeddedScriptExecutionSource(
         "toast",
         "showToast",
         [text, normalizeOptions(options)],
-        { timeoutMs: timeoutFromOptions(options) }
+        { timeoutMs: timeoutFromOptions(options), signal: __autojs6_bridge_signal_from_options(options) }
       );
     }
     __autojs6_limited_toast_cache = Object.freeze({
@@ -10499,7 +10524,8 @@ std::string buildEmbeddedScriptExecutionSource(
   function __autojs6_clipboard_bridge_options(options, fallbackMs) {
     return {
       timeoutMs: __autojs6_clipboard_timeout_from_options(options, fallbackMs),
-      permissions: ["clipboard"]
+      permissions: ["clipboard"],
+      signal: __autojs6_bridge_signal_from_options(options)
     };
   }
   function __autojs6_limited_clipboard() {
@@ -10558,7 +10584,8 @@ std::string buildEmbeddedScriptExecutionSource(
   function __autojs6_device_bridge_options(options, fallbackMs) {
     return {
       timeoutMs: __autojs6_device_timeout_from_options(options, fallbackMs),
-      permissions: ["device"]
+      permissions: ["device"],
+      signal: __autojs6_bridge_signal_from_options(options)
     };
   }
   function __autojs6_device_invalid_argument_error(methodName, message) {
@@ -10739,8 +10766,9 @@ std::string buildEmbeddedScriptExecutionSource(
         ));
       }
       let normalizedOptions;
+      let inputOptions;
       try {
-        const inputOptions = __autojs6_shell_options(options);
+        inputOptions = __autojs6_shell_options(options);
         const timeoutMs = __autojs6_shell_timeout_ms(inputOptions.timeoutMs);
         normalizedOptions = {
           root: inputOptions.root === true,
@@ -10758,7 +10786,8 @@ std::string buildEmbeddedScriptExecutionSource(
         [commandText, normalizedOptions],
         {
           timeoutMs: __autojs6_shell_bridge_timeout_ms(normalizedOptions.timeoutMs),
-          permissions
+          permissions,
+          signal: __autojs6_bridge_signal_from_options(inputOptions)
         }
       ).then(__autojs6_shell_result);
     }
@@ -10972,7 +11001,8 @@ std::string buildEmbeddedScriptExecutionSource(
         [descriptor],
         {
           timeoutMs: __autojs6_work_manager_timeout_from_options(input, 5000),
-          permissions: ["work_manager"]
+          permissions: ["work_manager"],
+          signal: __autojs6_bridge_signal_from_options(input)
         }
       ).then(function(result) {
         return result === undefined || result === null ? "" : String(result);
@@ -10992,7 +11022,8 @@ std::string buildEmbeddedScriptExecutionSource(
         [descriptor],
         {
           timeoutMs: __autojs6_work_manager_timeout_from_options(input, 5000),
-          permissions: ["work_manager"]
+          permissions: ["work_manager"],
+          signal: __autojs6_bridge_signal_from_options(input)
         }
       ).then(function(result) {
         return result === undefined || result === null ? "" : String(result);
@@ -11012,7 +11043,8 @@ std::string buildEmbeddedScriptExecutionSource(
         [id],
         {
           timeoutMs: __autojs6_work_manager_timeout_from_options(input, 5000),
-          permissions: ["work_manager"]
+          permissions: ["work_manager"],
+          signal: __autojs6_bridge_signal_from_options(input)
         }
       ).then(function() {
         return undefined;
@@ -11026,7 +11058,8 @@ std::string buildEmbeddedScriptExecutionSource(
         [],
         {
           timeoutMs: __autojs6_work_manager_timeout_from_options(input, 5000),
-          permissions: ["work_manager"]
+          permissions: ["work_manager"],
+          signal: __autojs6_bridge_signal_from_options(input)
         }
       ).then(function(result) {
         return Array.isArray(result) ? Object.freeze(result.map(__autojs6_work_manager_task_info)) : Object.freeze([]);
@@ -11209,6 +11242,7 @@ std::string buildEmbeddedScriptExecutionSource(
       [descriptor],
       {
         timeoutMs: __autojs6_java_timeout(options),
+        signal: __autojs6_bridge_signal_from_options(options),
         permissions: ["java_interop"]
       }
     );
@@ -11230,6 +11264,7 @@ std::string buildEmbeddedScriptExecutionSource(
       [descriptor],
       {
         timeoutMs: __autojs6_java_timeout(options),
+        signal: __autojs6_bridge_signal_from_options(options),
         permissions: ["java_interop"]
       }
     ).then(function(result) {
@@ -11304,7 +11339,8 @@ std::string buildEmbeddedScriptExecutionSource(
   }
   function __autojs6_app_bridge_options(options, fallbackMs) {
     return {
-      timeoutMs: __autojs6_app_timeout_from_options(options, fallbackMs)
+      timeoutMs: __autojs6_app_timeout_from_options(options, fallbackMs),
+      signal: __autojs6_bridge_signal_from_options(options)
     };
   }
   function __autojs6_app_invalid_argument_error(methodName, message) {
@@ -11421,7 +11457,8 @@ std::string buildEmbeddedScriptExecutionSource(
   }
   function __autojs6_engine_bridge_options(options, fallbackMs) {
     return {
-      timeoutMs: __autojs6_engine_timeout_from_options(options, fallbackMs)
+      timeoutMs: __autojs6_engine_timeout_from_options(options, fallbackMs),
+      signal: __autojs6_bridge_signal_from_options(options)
     };
   }
   function __autojs6_engine_info_fallback_cwd() {
@@ -11631,7 +11668,8 @@ std::string buildEmbeddedScriptExecutionSource(
         [scriptName, scriptText, payloadOptions],
         {
           timeoutMs: __autojs6_engine_bridge_timeout_ms(payloadOptions.timeoutMs),
-          permissions: ["engines", "engines:exec"]
+          permissions: ["engines", "engines:exec"],
+          signal: __autojs6_bridge_signal_from_options(options)
         }
       ).then(__autojs6_engine_execution_result);
     }
@@ -11656,7 +11694,8 @@ std::string buildEmbeddedScriptExecutionSource(
         [filePath, payloadOptions],
         {
           timeoutMs: __autojs6_engine_bridge_timeout_ms(payloadOptions.timeoutMs),
-          permissions: ["engines", "engines:exec"]
+          permissions: ["engines", "engines:exec"],
+          signal: __autojs6_bridge_signal_from_options(options)
         }
       ).then(__autojs6_engine_execution_result);
     }
@@ -11677,7 +11716,8 @@ std::string buildEmbeddedScriptExecutionSource(
   }
   function __autojs6_dialogs_bridge_options(options, fallbackMs) {
     return {
-      timeoutMs: __autojs6_dialogs_timeout_from_options(options, fallbackMs)
+      timeoutMs: __autojs6_dialogs_timeout_from_options(options, fallbackMs),
+      signal: __autojs6_bridge_signal_from_options(options)
     };
   }
   function __autojs6_dialogs_string(value) {
@@ -11783,7 +11823,8 @@ std::string buildEmbeddedScriptExecutionSource(
   function __autojs6_accessibility_bridge_options(options, fallbackMs) {
     return {
       timeoutMs: __autojs6_accessibility_timeout_from_options(options, fallbackMs),
-      permissions: ["accessibility"]
+      permissions: ["accessibility"],
+      signal: __autojs6_bridge_signal_from_options(options)
     };
   }
   function __autojs6_accessibility_options(value) {
@@ -12103,12 +12144,14 @@ std::string buildEmbeddedScriptExecutionSource(
   function __autojs6_image_bridge_options(options, fallbackMs) {
     return {
       timeoutMs: __autojs6_image_timeout_from_options(options, fallbackMs),
+      signal: __autojs6_bridge_signal_from_options(options),
       permissions: ["image"]
     };
   }
   function __autojs6_media_projection_bridge_options(options, fallbackMs) {
     return {
       timeoutMs: __autojs6_image_timeout_from_options(options, fallbackMs),
+      signal: __autojs6_bridge_signal_from_options(options),
       permissions: ["media_projection"]
     };
   }
@@ -12329,6 +12372,7 @@ std::string buildEmbeddedScriptExecutionSource(
           }],
           {
             timeoutMs: __autojs6_image_timeout_from_options(captureOptions, 10000),
+            signal: __autojs6_bridge_signal_from_options(captureOptions),
             permissions: ["image", "media_projection"]
           }
         );
@@ -12533,9 +12577,7 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     const signal = opts.signal;
     if (signal && signal.aborted === true) {
-      return Promise.reject(__autojs6_bridge_error(
-        "AutoJs6 bridge call was aborted.",
-        "ERR_AUTOJS6_NETWORK_ABORTED",
+      return Promise.reject(__autojs6_bridge_cancelled_error(
         moduleValue,
         methodValue
       ));
@@ -12564,9 +12606,7 @@ std::string buildEmbeddedScriptExecutionSource(
           }
           __autojs6_bridge_reject_pending(
             record,
-            __autojs6_bridge_error(
-              "AutoJs6 bridge call was aborted.",
-              "ERR_AUTOJS6_NETWORK_ABORTED",
+            __autojs6_bridge_cancelled_error(
               moduleValue,
               methodValue,
               { id: request.id }
