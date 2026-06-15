@@ -131,7 +131,7 @@ Network is not a default live I/O capability of the Safe Node Profile. The contr
 autojs.nodejs.network.experimental=false
 ```
 
-Do not treat a present `http`, `https`, `net`, `tls`, `dns`, or fetch-shaped API as permission to perform I/O. The current `fetch` and `require("fetch")` APIs route through the AutoJs6 bridge and reject with `ERR_AUTOJS6_NETWORK_DISABLED` when the live provider is gated off. Raw network modules remain denied.
+Do not treat a present `http`, `https`, `net`, `tls`, `dns`, or fetch-shaped API as permission to perform I/O. The current `fetch` and `require("fetch")` APIs route through the AutoJs6 bridge and reject with `ERR_AUTOJS6_NETWORK_DISABLED` when the live provider is gated off. Raw network modules remain denied. The denial applies to bare imports, `node:` aliases, and `node_modules` shadow attempts.
 
 Network enablement requires:
 
@@ -143,7 +143,7 @@ Network enablement requires:
 - privacy review
 - tests for denied and allowed paths
 
-The AutoJs6-controlled `fetch` wrapper is the preferred network path over unrestricted socket modules. It supports request timeout, abort, response-size budgeting, redirect budgeting, concurrent-request limits, unsupported-scheme rejection, and provider-side cancellation. The Android provider tracks live OkHttp calls and cancels them on provider destroy. Raw `http`, `https`, `net`, `tls`, `dns`, and `dgram` authority must remain denied unless a later design gate explicitly changes that boundary.
+The AutoJs6-controlled `fetch` wrapper is the preferred network path over unrestricted socket modules. Userland HTTP clients must use this controlled path or another explicit AutoJs6 bridge adapter; desktop Node adapters based on `http`, `https`, `net`, `tls`, `dns`, or `dgram` are outside the Safe Node Profile. The wrapper supports request timeout, abort, response-size budgeting, redirect budgeting, concurrent-request limits, unsupported-scheme rejection, and provider-side cancellation. The Android provider tracks live OkHttp calls and cancels them on provider destroy. Raw network authority must remain denied unless a later design gate explicitly changes that boundary.
 
 See `docs/nodejs/design/NETWORK.md` for the current network design gate.
 

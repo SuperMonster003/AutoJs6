@@ -414,6 +414,8 @@ With the flag off:
 - `dgram` remains a disabled builtin
 - raw sockets, servers, DNS queries, TLS sessions, datagrams, and unrestricted HTTP requests remain unavailable
 
+Use global `fetch()` or `require("fetch")` for controlled request experiments, and use `require("websocket")` for the controlled WebSocket bridge. Userland packages such as `axios` must run on the controlled fetch path or another AutoJs6 bridge adapter; they cannot assume desktop Node `http`/`https` adapters. Raw Node networking is not part of the Safe Node Profile: bare names and `node:` aliases are intercepted, and local `node_modules/http`, `node_modules/https`, `node_modules/net`, `node_modules/tls`, `node_modules/dns`, `node_modules/dns/promises`, or `node_modules/dgram` fixtures cannot bypass the policy.
+
 Current `require("autojs6:profile")` reports `network=false` and `experimentalFlags.network=false`.
 
 Current controlled fetch support includes `GET`/`POST`, headers, string or binary bodies, `timeoutMs`, `AbortController.signal`, `maxResponseBytes`, `maxRedirects`, and text/arrayBuffer/json response helpers. The live provider is backed by Android/OkHttp behind `BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED`; normal release builds keep that flag false. No `axios` builtin adapter is exposed.
@@ -774,14 +776,14 @@ Overrides outside the documented safe range are ignored and reported in `profile
   - module diagnostics: `require("fetch").policy` and `require("fetch").diagnostics()`
   - response helpers: `text()`, `arrayBuffer()`, and `json()`
   - normal builds reject through the Android provider with `ERR_AUTOJS6_NETWORK_DISABLED`; fake-provider tests cover success, timeout, abort, response budget, unsupported scheme, redirect limit, concurrency limit, and service-destroy paths
-  - raw `http`, `https`, `net`, `tls`, `dns`, and `dgram` modules remain unavailable for network I/O
+  - raw `http`, `https`, `net`, `tls`, `dns`, and `dgram` modules remain unavailable for network I/O, including `node:` aliases and local `node_modules` shadow attempts
 - `websocket`
   - `connect(url, options?): Promise<WebSocketConnection>` through `require("websocket")`
   - options: `{ headers?: object | array, protocols?: string[] | string, timeoutMs?: number, maxMessageBytes?: number, maxQueueSize?: number, signal?: AbortSignal }`
   - connection methods: `send(data, options?)`, `close(code?, reason?, options?)`, `on(event, listener)`, and `off(event, listener)`
   - module diagnostics: `require("websocket").policy` and `require("websocket").diagnostics()`
   - accepts only `ws:` and `wss:` URLs; text and binary messages are buffered and budgeted
-  - normal builds reject through the Android provider with `ERR_AUTOJS6_NETWORK_DISABLED`; fake-provider tests cover connect, send, receive, close, timeout, max connection, message budget, service destroy, diagnostics, and that raw `net`/`tls` remain disabled
+  - normal builds reject through the Android provider with `ERR_AUTOJS6_NETWORK_DISABLED`; fake-provider tests cover connect, send, receive, close, timeout, max connection, message budget, service destroy, diagnostics, and that raw `net`/`tls` plus their `node:` aliases remain disabled
   - live Android sessions are registered as bridge resources and are closed on execution destroy
 - `work_manager`
   - `scheduleOnce(options): Promise<string>`

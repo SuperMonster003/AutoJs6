@@ -342,6 +342,14 @@ Current controlled WebSocket bridge focused instrumentation:
 
 This suite verifies the registry/profile experimental state for `websocket`, fake-provider connect/send/receive/close behavior, `require("websocket")`, shadowing protection, timeout rejection, unsupported scheme rejection, max connection rejection, message-size budget rejection, service-destroy rejection cleanup, WebSocket diagnostics counters, raw `net`/`tls` denial, pending bridge cleanup, and that normal Android providers reject with `ERR_AUTOJS6_NETWORK_DISABLED` while `autojs.nodejs.network.experimental=false`.
 
+Current raw network policy focused instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeRawNetworkPolicyInstrumentationTest"
+```
+
+This suite verifies that controlled `fetch` and `websocket` modules cannot be shadowed, raw `http`, `https`, `net`, `tls`, `dns`, `dns/promises`, and `dgram` stay denied, `node:` aliases stay denied or limited in the same way, and local `node_modules` fixtures cannot bypass the Safe Node Profile network policy.
+
 Current controlled work_manager bridge focused instrumentation:
 
 ```powershell

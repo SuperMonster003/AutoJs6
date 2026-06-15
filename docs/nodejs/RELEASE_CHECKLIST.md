@@ -36,6 +36,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `NodeShellBridgeInstrumentationTest`
 - [ ] `NodeFetchBridgeInstrumentationTest`
 - [ ] `NodeWorkerThreadsDesignGateInstrumentationTest`
+- [ ] `NodeRawNetworkPolicyInstrumentationTest`
 - [ ] `NodeWorkerThreadsExperimentalInstrumentationTest`
 - [ ] `NodeJavaInteropBridgeInstrumentationTest`
 - [ ] `NodeBridgeResourceRegistryInstrumentationTest`
@@ -139,7 +140,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] network operations denied unless explicitly feature-gated
 - [ ] controlled `fetch` live provider disabled in normal release builds unless explicitly testing a network experiment
 - [ ] controlled `websocket` live provider disabled in normal release builds unless explicitly testing a network experiment
-- [ ] raw Node `http`, `https`, `net`, `tls`, `dns`, and `dgram` authority remains denied even if controlled fetch is enabled
+- [ ] raw Node `http`, `https`, `net`, `tls`, `dns`, and `dgram` authority remains denied even if controlled fetch or WebSocket is enabled, including `node:` aliases and `node_modules` shadow attempts
 - [ ] `worker_threads` authority remains denied unless explicitly feature-gated and security-reviewed
 - [ ] experimental workers, when explicitly tested, expose a smaller capability set than parent Node scripts and cannot access AutoJs bridge modules
 - [ ] experimental worker resource stress, when explicitly tested, shows no active worker after completion cleanup and no unbounded RSS/thread growth
