@@ -82,7 +82,7 @@ Automated/static gate:
 
 Manual device gate:
 
-- [ ] Sony XQ-AT72 device environment is recorded.
+- [x] Sony XQ-AT72 device environment is recorded.
 - [ ] IME show/hide manual checklist passes on representative devices.
 - [ ] Keyboard and viewport matrix passes on representative devices.
 - [ ] Continuous keyboard show/hide does not fallback ACE.
@@ -100,14 +100,14 @@ Manual device gate:
 ### Gate 0: Device Report Setup
 
 - [x] Add `docs/dev/ace-release-device-report-sony-xq-at72.md`.
-- [ ] Record Sony XQ-AT72 device metadata:
+- [x] Record Sony XQ-AT72 device metadata:
   Android version, API level, WebView version, IME, theme, font, font scale,
   AutoJs6 build commit, test package, ACE state, and LSP state.
 
 Acceptance:
 
-- [ ] The report identifies the exact tested build and environment.
-- [ ] Native default, explicit ACE opt-in, LSP default-off, and no
+- [x] The report identifies the exact tested build and environment.
+- [x] Native default, explicit ACE opt-in, LSP default-off, and no
   VisualEditorAce user entry are confirmed.
 
 ### Gate 1: Automated Preflight

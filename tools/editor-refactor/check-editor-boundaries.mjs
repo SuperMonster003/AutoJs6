@@ -536,7 +536,7 @@ assertIncludes(aceReleaseGateStatus, "Do not expand the ACE feature surface duri
 assertIncludes(aceSonyReleaseReport, "# ACE Release Device Report - Sony XQ-AT72");
 assertIncludes(aceSonyReleaseReport, "## Device");
 assertIncludes(aceSonyReleaseReport, "Android System WebView version");
-assertIncludes(aceSonyReleaseReport, "AutoJs6 build commit");
+assertIncludes(aceSonyReleaseReport, "Repository baseline commit");
 assertIncludes(aceSonyReleaseReport, "LSP enabled");
 assertIncludes(aceSonyReleaseReport, "Clean host enabled: yes");
 assertIncludes(aceSonyReleaseReport, "## Automated Gate");

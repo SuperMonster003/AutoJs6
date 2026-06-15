@@ -7,21 +7,25 @@ path has a recorded result.
 ## Device
 
 - Device: Sony XQ-AT72
-- Android version: TBD
-- API level: TBD
-- Android System WebView version: TBD
-- AutoJs6 build commit: 920c9f61
+- Android version: 12
+- API level: 31
+- Android System WebView version: com.google.android.webview 145.0.7632.120
+- Repository baseline commit: 5b205d04
+- Installed app: 6.7.1 Alpha5, versionCode 3821, DEBUGGABLE TEST_ONLY
+- Installed app update time: 2026-06-15 20:35:58
 - Test package: org.autojs.autojs6.ace
-- ACE enabled: TBD on device; explicit opt-in confirmed by static gate
-- LSP enabled: TBD on device; default-off confirmed by static gate
+- ACE enabled: yes, `key_$_editor_engine=ace`; static default remains Native
+- LSP enabled: false, `key_$_ace_lsp_enabled=false`
 - Clean host enabled: yes
-- IME: TBD
-- Navigation mode: TBD
-- Display size: TBD
-- Font scale: TBD
-- Theme: TBD
-- Font: TBD
-- Font size: TBD
+- IME: com.google.android.inputmethod.latin/com.android.inputmethod.latin.LatinIME
+- Installed IMEs: Google voice input, Google LatinIME, Baidu OEM IME
+- Navigation mode: 2 (gesture navigation setting)
+- Display size: 1096x2560
+- Display density: 420 dpi
+- Font scale: 1.0
+- Theme: dark; device night mode is yes and app `key_$_night_mode_enabled=true`
+- Font: JetBrains Mono default; no `key_$_ace_editor_font` override persisted
+- Font size: 14sp default; no `key_$_editor_text_size` override persisted
 
 ## Automated Gate
 
@@ -35,8 +39,8 @@ path has a recorded result.
 
 | Area | Result | Notes |
 | --- | --- | --- |
-| Native default | STATIC PASS | Confirmed by release gate; device launch still TBD. |
-| LSP default-off | STATIC PASS | Confirmed by release gate; device setting still TBD. |
+| Native default | STATIC PASS | Release gate confirms Native resource/default path; device preference is ACE explicit opt-in. |
+| LSP default-off | DEVICE PASS | Device preference has `key_$_ace_lsp_enabled=false`. |
 | VisualEditorAce unavailable | STATIC PASS | Confirmed by release gate; device UI sweep still TBD. |
 | First paint | TBD | |
 | File-manager open repeat | TBD | |
