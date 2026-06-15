@@ -133,6 +133,10 @@ assertIncludes(editorView, "EditorTextLoadPolicy.shouldLoadProgressively(text.le
 assertIncludes(editorView, "EditorTextLoadPolicy.largeFilePolicyLabel(");
 assertIncludes(editorView, "textLoadTarget.loadSmallText(text)");
 assertNotIncludes(editorView, "requestRectangleOnScreen");
+assertNotIncludes(editorView, "CodeEditor");
+assertNotIncludes(editorView, "CodeEditText");
+assertNotIncludes(editorView, "LayoutHelper");
+assertNotIncludes(editorView, "TextViewUndoRedo");
 assertNotIncludes(editorView, ".setPadding(");
 assertNotIncludes(editorView, "TextUtils");
 assertNotIncludes(editorView, "LARGE_FILE_MODE_THRESHOLD");
@@ -325,6 +329,27 @@ assertNotIncludes(draftService, "CodeEditText");
 
 assertOnlyIn("requestRectangleOnScreen", [
   "app/src/main/java/org/autojs/autojs/ui/edit/editor/engine/NativeCodeEditorEngine.kt",
+]);
+
+assertOnlyIn("CodeEditText", [
+  "app/src/main/java/org/autojs/autojs/ui/edit/editor/AutoIndent.java",
+  "app/src/main/java/org/autojs/autojs/ui/edit/editor/CodeEditText.kt",
+  "app/src/main/java/org/autojs/autojs/ui/edit/editor/CodeEditor.kt",
+  "app/src/main/java/org/autojs/autojs/ui/edit/editor/JavaScriptHighlighter.java",
+  "app/src/main/java/org/autojs/autojs/ui/edit/editor/engine/NativeCodeEditorEngine.kt",
+]);
+
+assertOnlyIn("LayoutHelper", [
+  "app/src/main/java/org/autojs/autojs/ui/edit/editor/AutoIndent.java",
+  "app/src/main/java/org/autojs/autojs/ui/edit/editor/CodeEditText.kt",
+  "app/src/main/java/org/autojs/autojs/ui/edit/editor/CodeEditor.kt",
+  "app/src/main/java/org/autojs/autojs/ui/edit/editor/LayoutHelper.java",
+  "app/src/main/java/org/autojs/autojs/ui/edit/editor/engine/NativeCodeEditorEngine.kt",
+]);
+
+assertOnlyIn("TextViewUndoRedo", [
+  "app/src/main/java/org/autojs/autojs/ui/edit/editor/CodeEditor.kt",
+  "app/src/main/java/org/autojs/autojs/ui/edit/editor/TextViewUndoRedo.java",
 ]);
 
 assertOnlyIn("AutoCompletion(context, codeEditor.codeEditText)", [

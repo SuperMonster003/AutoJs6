@@ -66,11 +66,11 @@ goal is to make editor behavior engine-neutral where possible, and keep native
 
 ## Phase 5: Native Editor Containment
 
-- [ ] Move remaining `CodeEditor` / `CodeEditText` assumptions out of `EditorView`.
-- [ ] Keep `requestRectangleOnScreen` native-only.
-- [ ] Keep `LayoutHelper` and Android `Layout` cursor math native-only.
-- [ ] Keep `TextViewUndoRedo` native-only.
-- [ ] Keep native gutter/debug-line drawing native-only.
+- [x] Move remaining `CodeEditor` / `CodeEditText` assumptions out of `EditorView`.
+- [x] Keep `requestRectangleOnScreen` native-only.
+- [x] Keep `LayoutHelper` and Android `Layout` cursor math native-only.
+- [x] Keep `TextViewUndoRedo` native-only.
+- [x] Keep native gutter/debug-line drawing native-only.
 
 ## Phase 6: ACE Hardening
 
