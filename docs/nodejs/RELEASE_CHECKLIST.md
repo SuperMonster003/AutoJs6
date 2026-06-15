@@ -74,6 +74,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 ## Packaged APK
 
 - [ ] `:app:embeddedNodePackagingPreflightAppDebug`
+- [ ] `:app:verifyNodeTemplateReproducibility`
 - [ ] `:app:embeddedNodePackagedAppIntegrationDryRunAppDebug`
 - [ ] `:app:embeddedNodePackagedSmokeHostVerify`
 - [ ] `:app:embeddedNodePackagedApkOutputVerify` with `-Pautojs.embeddedNode.packagedApk=<apk>` when verifying a specific exported APK
@@ -85,6 +86,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] packaged `device` bridge smoke passes, keeps sensitive identifiers absent, declares `android.permission.VIBRATE`, and cannot be shadowed by `node_modules/device`
 - [ ] packaged `engines` bridge smoke passes after the inrt template carries live bridge metadata
 - [ ] template APK refreshed when inrt bytecode or manifest changes
+- [ ] template reproducibility report records `template.refresh.ready=true`, template APK SHA-256, normalized manifest SHA-256, and native lib injection policy
 - [ ] `NativeNodeEmbeddedScriptService` exists in manifest
 - [ ] `NativeNodeEmbeddedScriptService` exists in Dex
 - [ ] service uses `android:process=":nodejs_embedded"`

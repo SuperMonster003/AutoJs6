@@ -1,5 +1,6 @@
 import groovy.json.JsonSlurper
 import java.io.File
+import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.util.Properties
 import java.util.zip.ZipFile
@@ -727,6 +728,12 @@ private fun embeddedNodePackagingSha256(file: File): String? {
     return digest.digest().joinToString("") { "%02x".format(it) }
 }
 
+private fun embeddedNodePackagingSha256Text(text: String): String {
+    val digest = MessageDigest.getInstance("SHA-256")
+    digest.update(text.toByteArray(StandardCharsets.UTF_8))
+    return digest.digest().joinToString("") { "%02x".format(it) }
+}
+
 private fun embeddedNodePackagingApkEntrySha256(apk: File, entryName: String): String? {
     if (!apk.isFile) {
         return null
@@ -1138,6 +1145,25 @@ private fun embeddedNodePackagingManifestInfo(tools: EmbeddedNodePackagingTools?
     )
 }
 
+private fun embeddedNodePackagingNormalizedManifestText(info: EmbeddedNodePackagingManifestInfo): String =
+    buildString {
+        appendLine("inspected=${info.inspected}")
+        appendLine("packageName=${info.packageName.orEmpty()}")
+        appendLine("minSdkVersion=${info.minSdkVersion.orEmpty()}")
+        appendLine("targetSdkVersion=${info.targetSdkVersion.orEmpty()}")
+        appendLine("declaresInternetPermission=${info.declaresInternetPermission}")
+        appendLine("declaresForegroundServicePermission=${info.declaresForegroundServicePermission}")
+        appendLine("declaresForegroundServiceMediaProjectionPermission=${info.declaresForegroundServiceMediaProjectionPermission}")
+        appendLine("declaresForegroundServiceSpecialUsePermission=${info.declaresForegroundServiceSpecialUsePermission}")
+        appendLine("declaresEmbeddedProbeService=${info.declaresEmbeddedProbeService}")
+        appendLine("embeddedProbeServiceUsesNodeProcess=${info.embeddedProbeServiceUsesNodeProcess}")
+        appendLine("embeddedProbeServiceUsesSpecialUseFgs=${info.embeddedProbeServiceUsesSpecialUseFgs}")
+        appendLine("declaresEmbeddedScriptService=${info.declaresEmbeddedScriptService}")
+        appendLine("embeddedScriptServiceUsesNodeProcess=${info.embeddedScriptServiceUsesNodeProcess}")
+        appendLine("embeddedScriptServiceUsesSpecialUseFgs=${info.embeddedScriptServiceUsesSpecialUseFgs}")
+        appendLine("embeddedScriptServiceDeclaresSpecialUseSubtypeProperty=${info.embeddedScriptServiceDeclaresSpecialUseSubtypeProperty}")
+    }
+
 private fun StringBuilder.appendEmbeddedNodePackagingManifestInfo(label: String, info: EmbeddedNodePackagingManifestInfo) {
     appendLine("  $label manifest inspected: ${info.inspected}")
     appendLine("  $label manifest parser: ${info.tool?.absolutePath ?: "unavailable"}")
@@ -1468,6 +1494,100 @@ val embeddedNodeRefreshInrtTemplateApk = tasks.register(embeddedNodePackagingRef
             throw GradleException(
                 "Refreshed template.apk is stale or incomplete. " +
                         "Missing: ${if (targetFreshness.missing.isEmpty()) "unknown" else targetFreshness.missing.joinToString()}. " +
+                        "See ${reportFile.absolutePath}"
+            )
+        }
+    }
+}
+
+val verifyNodeTemplateReproducibility = tasks.register("verifyNodeTemplateReproducibility") {
+    group = "verification"
+    description = "Verifies current inrt template freshness, deterministic manifest summary, and native lib injection policy."
+
+    val templateApk = projectDir.resolve("src/main/assets-app/template.apk")
+    val reportFile = layout.buildDirectory
+        .file("reports/embedded-node/template-reproducibility.txt")
+        .get()
+        .asFile
+
+    outputs.file(reportFile)
+    outputs.upToDateWhen { false }
+
+    doLast {
+        val tools = findEmbeddedNodePackagingTools(rootProject.projectDir)
+        val freshness = embeddedNodePackagingTemplateFreshness(tools, templateApk)
+        val templateSha256 = embeddedNodePackagingSha256(templateApk)
+        val normalizedManifest = embeddedNodePackagingNormalizedManifestText(freshness.manifest)
+        val normalizedManifestSha256 = embeddedNodePackagingSha256Text(normalizedManifest)
+        val manifestHashReady = freshness.manifest.inspected && normalizedManifestSha256.isNotBlank()
+        val manifestPatchDeterministic = manifestHashReady &&
+                freshness.manifestServiceReady &&
+                freshness.manifestPermissionsReady
+        val nativeLibInjectionPolicy = "template-arm64-runtime-seed; packaged-output-injects-selected-abis-from-host-provider; x86-denied"
+        val nativeLibInjectionPolicyReady = freshness.nativeLibsReady && !freshness.x86NodeRuntimePresent
+        val missing = buildList {
+            addAll(freshness.missing)
+            if (templateSha256.isNullOrBlank()) {
+                add("template APK SHA-256")
+            }
+            if (!manifestHashReady) {
+                add("normalized manifest SHA-256")
+            }
+            if (!manifestPatchDeterministic) {
+                add("deterministic manifest patch summary")
+            }
+            if (!nativeLibInjectionPolicyReady) {
+                add("native lib injection policy")
+            }
+        }.distinct()
+        val ready = freshness.ready &&
+                !templateSha256.isNullOrBlank() &&
+                manifestPatchDeterministic &&
+                nativeLibInjectionPolicyReady
+
+        reportFile.parentFile.mkdirs()
+        reportFile.writeText(
+            buildString {
+                appendLine("Embedded Node.js template reproducibility report")
+                appendLine("Generated at: ${java.time.ZonedDateTime.now()}")
+                appendLine()
+                appendLine("Template:")
+                appendLine("  APK: ${embeddedNodePackagingFormatFile(templateApk)}")
+                appendLine("  SHA-256: ${templateSha256 ?: "unavailable"}")
+                appendEmbeddedNodePackagingTemplateFreshness("template", freshness)
+                appendLine()
+                appendLine("Manifest reproducibility:")
+                appendLine("  normalized manifest SHA-256: $normalizedManifestSha256")
+                appendLine("  normalized manifest hash ready: $manifestHashReady")
+                appendLine("  manifest patch deterministic: $manifestPatchDeterministic")
+                appendLine("  normalized manifest fields:")
+                normalizedManifest.lineSequence()
+                    .filter { it.isNotBlank() }
+                    .forEach { line -> appendLine("    $line") }
+                appendLine()
+                appendLine("Native lib injection policy:")
+                appendLine("  policy: $nativeLibInjectionPolicy")
+                appendLine("  policy ready: $nativeLibInjectionPolicyReady")
+                appendLine("  arm64 template seed ready: ${freshness.arm64HasLibnode && freshness.arm64HasBridge && freshness.arm64HasLibcxx}")
+                appendLine("  x86 runtime absent: ${!freshness.x86NodeRuntimePresent}")
+                appendLine()
+                appendLine("Summary:")
+                appendLine("  template.reproducibility.ready=$ready")
+                appendLine("  template.reproducibility.missing=${if (missing.isEmpty()) "none" else missing.joinToString()}")
+                appendLine("  template.refresh.ready=${freshness.ready}")
+                appendLine("  template.refresh.missing=${if (freshness.missing.isEmpty()) "none" else freshness.missing.joinToString()}")
+                appendLine("  template.apk.sha256=${templateSha256 ?: "unavailable"}")
+                appendLine("  template.manifest.normalized.sha256=$normalizedManifestSha256")
+                appendLine("  template.manifest.patch.deterministic=$manifestPatchDeterministic")
+                appendLine("  template.native_lib_injection.policy=$nativeLibInjectionPolicy")
+            }
+        )
+        logger.lifecycle("Embedded Node.js template reproducibility ready: $ready")
+        logger.lifecycle("Embedded Node.js template reproducibility report: ${reportFile.absolutePath}")
+        if (!ready) {
+            throw GradleException(
+                "Embedded Node.js template reproducibility failed. " +
+                        "Missing: ${if (missing.isEmpty()) "unknown" else missing.joinToString()}. " +
                         "See ${reportFile.absolutePath}"
             )
         }
@@ -3197,6 +3317,7 @@ val verifyEmbeddedNodePackagedDebug = tasks.register("verifyEmbeddedNodePackaged
 
     dependsOn(
         embeddedNodePackagingPreflightAppDebug,
+        verifyNodeTemplateReproducibility,
         embeddedNodePackagedAppIntegrationDryRunAppDebug,
         embeddedNodePackagedSmokeHostVerify,
     )

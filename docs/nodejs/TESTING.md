@@ -519,8 +519,13 @@ Template refresh and smoke artifact collection:
 
 ```powershell
 .\gradlew.bat --console=plain :app:embeddedNodeRefreshInrtTemplateApk
+.\gradlew.bat --console=plain :app:verifyNodeTemplateReproducibility
 .\gradlew.bat --console=plain :app:embeddedNodePullPackagedSmokeApks
 ```
+
+`verifyNodeTemplateReproducibility` writes `app/build/reports/embedded-node/template-reproducibility.txt` and fails before
+packaged smoke when the checked-in template is stale, missing the embedded script service, missing the expected arm64
+native runtime seed, carrying x86 Node runtime entries, or unable to produce a deterministic normalized manifest hash.
 
 ## ABI Matrix
 
@@ -691,7 +696,7 @@ Use these aggregate tasks for local gates:
 `verifyEmbeddedNodeDebug` covers build, native dependency reporting, native symbol archive reporting, and packaging preflight.
 It also runs `verifyNodeCompatibilityProfile` and `embeddedNodeDoctorReport`, which generate compatibility and attachable
 doctor reports.
-`verifyEmbeddedNodePackagedDebug` covers packaged host verification. With `-Pautojs.embeddedNode.packagedApk=<apk>` it also
-runs the standalone output verifier and gated diagnostic report for that APK; otherwise it uses the packaged smoke host
-aggregate reports produced from device-exported APKs.
+`verifyEmbeddedNodePackagedDebug` covers template reproducibility and packaged host verification. With
+`-Pautojs.embeddedNode.packagedApk=<apk>` it also runs the standalone output verifier and gated diagnostic report for that
+APK; otherwise it uses the packaged smoke host aggregate reports produced from device-exported APKs.
 Focused instrumentation classes still use the explicit `connectedAppDebugAndroidTest` commands above when a device gate is required.
