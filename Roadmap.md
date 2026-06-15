@@ -13,8 +13,9 @@ and fallback behavior, then resume CI, API-index, and LSP work.
   `requestRectangleOnScreen` workarounds.
 - Make ACE soft-keyboard show/hide, first paint, completion accept, selection,
   and fallback behavior repeatable and diagnosable.
-- Defer LSP alpha, tooltip/markdown enhancements, and VisualEditorAce until the
-  ordinary ACE editor passes keyboard/viewport release gates.
+- Defer server-backed LSP transport, tooltip/markdown enhancements, and
+  VisualEditorAce until the ordinary ACE editor passes keyboard/viewport
+  release gates.
 
 ## Current Baseline
 
@@ -181,7 +182,7 @@ Acceptance:
 - [x] Pro-only API detection.
 - [x] Declaration and completion quality improvements.
 - [x] LSP server manager alpha.
-- [ ] LSP completion and hover.
+- [x] LSP completion and hover.
 - [ ] Optional tooltip/markdown loading.
 - [ ] VisualEditorAce investigation only after ordinary ACE is stable.
 
@@ -192,6 +193,7 @@ Acceptance:
 - `node tools/ace-hardening/check-editor-surface.mjs`
 - `node tools/ace-completion/verify-autojs6-pro-only.mjs`
 - `node tools/ace-completion/test-completer.mjs`
+- `node tools/ace-lsp/test-lsp-client.mjs`
 - `node tools/ace-completion/verify-autojs6-indices.mjs`
 - `node tools/ace-completion/verify-autojs6-dts.mjs`
 - `.\gradlew.bat :app:testAppDebugUnitTest --tests org.autojs.autojs.ui.edit.editor.ace.lsp.AceLspServerManagerTest`
@@ -212,4 +214,5 @@ Acceptance:
 - [ ] Continuous keyboard show/hide does not fallback ACE.
 - [ ] Fallback preserves recent text through TextMirror.
 - [ ] Renderer-gone and initialization fatal fallback still work.
-- [ ] LSP and VisualEditorAce remain deferred until this gate is satisfied.
+- [ ] Server-backed LSP transport and VisualEditorAce remain deferred until this
+  gate is satisfied.

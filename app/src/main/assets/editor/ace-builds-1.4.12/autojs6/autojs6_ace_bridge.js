@@ -5,6 +5,8 @@
     var editor = null;
     var session = null;
     var Range = null;
+    var staticCompleter = null;
+    var lspClient = null;
     var dirty = false;
     var suppressChange = false;
     var breakpoints = [];
@@ -67,6 +69,15 @@
             stack: error && error.stack ? String(error.stack) : ""
         };
         callBridge("notifyEvent", ["completionError", JSON.stringify(payload)]);
+        notifyError(payload.message);
+    }
+
+    function notifyLspError(message, error) {
+        var payload = {
+            message: String(message || "ACE LSP error"),
+            stack: error && error.stack ? String(error.stack) : ""
+        };
+        callBridge("notifyEvent", ["lspError", JSON.stringify(payload)]);
         notifyError(payload.message);
     }
 
@@ -657,7 +668,7 @@
 
         if (global.AutoJsAceCompleter) {
             try {
-                global.AutoJsAceCompleter.install(global.ace);
+                staticCompleter = global.AutoJsAceCompleter.install(global.ace);
             } catch (error) {
                 notifyCompletionError("ACE completion disabled: " + error, error);
             }
@@ -732,8 +743,32 @@
             getState: function() { return buildState(true); },
             read: function(uri) { return callBridge("read", [uri || ""]); },
             write: function(uri, text) { return callBridge("write", [uri || "", text || ""]); },
-            getLspOptions: function() { return callBridge("getLspOptions") || "{}"; }
+            getLspOptions: function() { return callBridge("getLspOptions") || "{}"; },
+            refreshLsp: function() { return lspClient ? lspClient.refresh() : null; },
+            getLspState: function() { return lspClient ? lspClient.getState() : null; },
+            getLspHover: function(row, column) {
+                return lspClient ? lspClient.getHover({ row: row, column: column }) : null;
+            }
         };
+
+        if (global.AutoJsAceLspClient) {
+            try {
+                lspClient = global.AutoJsAceLspClient.install({
+                    editor: editor,
+                    session: session,
+                    getOptions: function() { return callBridge("getLspOptions") || "{}"; },
+                    getStaticCompleter: function() {
+                        return staticCompleter ||
+                            (global.AutoJsAceCompleter &&
+                                global.AutoJsAceCompleter.getActiveCompleter &&
+                                global.AutoJsAceCompleter.getActiveCompleter());
+                    },
+                    notifyError: notifyLspError
+                });
+            } catch (error) {
+                notifyLspError("ACE LSP client disabled: " + error, error);
+            }
+        }
 
         var json = fullStateJson();
         callBridge("notifyReady", [json]);

@@ -171,6 +171,24 @@ function assertDocIncludes(completer, line, prefix, value, expected) {
   }
 }
 
+function assertHoverIncludes(completer, line, token, expectedCaption, expectedDoc) {
+  const column = line.indexOf(token) + Math.floor(token.length / 2);
+  const hover = completer.getHover({
+    getLine(row) {
+      return row === 0 ? line : "";
+    },
+  }, { row: 0, column });
+  if (!hover) {
+    throw new Error(`${line}: missing hover for ${token}`);
+  }
+  if (hover.caption !== expectedCaption) {
+    throw new Error(`${line}: unexpected hover caption ${hover.caption}; expected=${expectedCaption}`);
+  }
+  if (!hover.docText.includes(expectedDoc)) {
+    throw new Error(`${line}: hover ${token} is missing doc text ${expectedDoc}; actual=${hover.docText}`);
+  }
+}
+
 function createAutoJs6Completer() {
   const sandbox = createSandbox();
   runScript(sandbox, GENERATED_INDEX_PATH);
@@ -246,6 +264,13 @@ assertDocIncludes(
   "launch",
   "launch",
   "launch",
+  "launch(app: App | App.Alias | App.PackageName): boolean;",
+);
+assertHoverIncludes(
+  completer,
+  'app.launch("org.autojs.autojs6");',
+  "launch",
+  "app.launch",
   "launch(app: App | App.Alias | App.PackageName): boolean;",
 );
 

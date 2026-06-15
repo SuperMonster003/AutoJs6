@@ -100,8 +100,10 @@ const aceDiagnosticsSnapshot = "app/src/main/java/org/autojs/autojs/ui/edit/edit
 const aceRuntimeEventHistory = "app/src/main/java/org/autojs/autojs/ui/edit/editor/ace/diagnostics/AceRuntimeEventHistory.kt";
 const aceJsErrorClassifier = "app/src/main/java/org/autojs/autojs/ui/edit/editor/ace/health/AceJsErrorClassifier.kt";
 const aceFallbackPolicy = "app/src/main/java/org/autojs/autojs/ui/edit/editor/ace/health/AceFallbackPolicy.kt";
+const aceLspClient = "app/src/main/assets/editor/ace-builds-1.4.12/autojs6/autojs6_lsp_client.js";
 const aceCiGate = "tools/ace-ci/check-ace-editor-gate.mjs";
 const aceSurfaceSmoke = "tools/ace-hardening/check-editor-surface.mjs";
+const aceLspClientTest = "tools/ace-lsp/test-lsp-client.mjs";
 const roadmap = "Roadmap.md";
 const aceEditorTestPlan = "docs/dev/ace-editor-test-plan.md";
 const aceKeyboardViewportTestPlan = "docs/dev/ace-keyboard-viewport-test-plan.md";
@@ -396,7 +398,7 @@ assertIncludes(roadmap, "- [x] CI gate for editor boundary and ACE hardening scr
 assertIncludes(roadmap, "ACE clean-host behavior remains the default ACE path.");
 assertIncludes(roadmap, "ACE editor CI gate passes.");
 assertIncludes(roadmap, "Keyboard and viewport matrix passes on representative devices.");
-assertIncludes(roadmap, "LSP and VisualEditorAce remain deferred until this gate is satisfied.");
+assertIncludes(roadmap, "Server-backed LSP transport and VisualEditorAce remain deferred until this");
 
 assertIncludes(nativeOnlyAudit, "# Editor Native-Only Audit");
 assertIncludes(nativeOnlyAudit, "Native-only implementation detail");
@@ -454,7 +456,7 @@ assertIncludes(aceEditorTestPlan, "lastAceResizeCompletedReason");
 assertIncludes(aceEditorTestPlan, "heartbeatSuspendedReason");
 assertIncludes(aceEditorTestPlan, "runtime event history and bridge event window counters");
 assertIncludes(aceEditorTestPlan, "The isolated ACE debug page also has an `IME stress` action.");
-assertIncludes(aceEditorTestPlan, "LSP alpha, hover/markdown tooltip loading, and VisualEditorAce remain deferred");
+assertIncludes(aceEditorTestPlan, "Server-backed LSP transport, markdown tooltip loading, and VisualEditorAce remain deferred");
 
 assertIncludes(aceKeyboardViewportTestPlan, "# ACE Keyboard And Viewport Test Plan");
 assertIncludes(aceKeyboardViewportTestPlan, "ACE-KV-001");
@@ -487,7 +489,7 @@ assertIncludes(aceKeyboardViewportTestPlan, "The isolated ACE debug activity als
 assertIncludes(aceKeyboardViewportTestPlan, "120-line sample");
 assertIncludes(aceKeyboardViewportTestPlan, "programmatic show/hide cycles");
 assertIncludes(aceKeyboardViewportTestPlan, "Programmatic IME toggling still does not reliably reproduce user tap anchors");
-assertIncludes(aceKeyboardViewportTestPlan, "LSP alpha, hover/markdown tooltip loading, and VisualEditorAce");
+assertIncludes(aceKeyboardViewportTestPlan, "Server-backed LSP transport, markdown tooltip loading, and VisualEditorAce");
 
 assertIncludes(aceEditorIntegrationDoc, "Run the `IME Show/Hide Manual Checklist`");
 assertIncludes(aceEditorIntegrationDoc, "Run `node tools/ace-ci/check-ace-editor-gate.mjs`.");
@@ -499,7 +501,7 @@ assertIncludes(aceEditorIntegrationDoc, "docs/dev/editor-viewport-policy.md");
 assertIncludes(aceEditorIntegrationDoc, "runtime event history and bridge event window");
 assertIncludes(aceEditorIntegrationDoc, "The isolated ACE debug activity includes an `IME stress` helper");
 assertIncludes(aceEditorIntegrationDoc, "do not treat it as a replacement for physical tap-anchor and CJK validation");
-assertIncludes(aceEditorIntegrationDoc, "LSP alpha, hover/markdown tooltip loading, and VisualEditorAce are not primary");
+assertIncludes(aceEditorIntegrationDoc, "Server-backed LSP transport, markdown tooltip loading, and VisualEditorAce are");
 
 assertIncludes(aceEditorDebugActivity, "binding.actionImeStress.setOnClickListener");
 assertIncludes(aceEditorDebugActivity, "private fun startImeStress()");
@@ -529,6 +531,8 @@ assertIncludes(aceCiGate, "AutoJs6 generated d.ts verification");
 assertIncludes(aceCiGate, "tools/ace-completion/verify-autojs6-dts.mjs");
 assertIncludes(aceCiGate, "ACE completer tests");
 assertIncludes(aceCiGate, "tools/ace-completion/test-completer.mjs");
+assertIncludes(aceCiGate, "ACE LSP client tests");
+assertIncludes(aceCiGate, "tools/ace-lsp/test-lsp-client.mjs");
 assertIncludes(aceCiGate, "ACE editor CI gate passed.");
 
 assertIncludes(androidWorkflow, "Set up Node.js 24");
@@ -544,6 +548,8 @@ assertIncludes(aceSurfaceSmoke, "double requestAnimationFrame first-paint guard"
 assertIncludes(aceSurfaceSmoke, "resizeDone reason payload");
 assertIncludes(aceSurfaceSmoke, "gutter breakpoint tap zone");
 assertIncludes(aceSurfaceSmoke, "native first-paint request hook");
+assertIncludes(aceSurfaceSmoke, "autojs6_lsp_client.js");
+assertIncludes(aceSurfaceSmoke, "LSP client must stay off WebSocket and worker transports");
 
 assertIncludes(aceDiagnosticsSnapshot, "val pendingAceResizeReason: String?");
 assertIncludes(aceDiagnosticsSnapshot, "val lastAceResizeScheduledReason: String?");
@@ -670,6 +676,21 @@ assertIncludes(aceLspServerManager, "fun bridgeOptionsJson(): String");
 assertNotIncludes(aceLspServerManager, "WebSocket");
 assertNotIncludes(aceLspServerManager, "ProcessBuilder");
 assertNotIncludes(aceLspServerManager, "Runtime.getRuntime()");
+
+assertIncludes(aceLspClient, "global.AutoJsAceLspClient");
+assertIncludes(aceLspClient, "completionProvider: serverReady ? \"server\" : COMPLETION_PROVIDER_STATIC");
+assertIncludes(aceLspClient, "hoverProvider: serverReady ? \"server\" : HOVER_PROVIDER_STATIC");
+assertIncludes(aceLspClient, "serverAvailable === true");
+assertIncludes(aceLspClient, "typeof options.serverUri === \"string\"");
+assertIncludes(aceLspClient, "getCompletions: getCompletions");
+assertIncludes(aceLspClient, "getHover: getHover");
+assertNotIncludes(aceLspClient, "WebSocket");
+assertNotIncludes(aceLspClient, "new Worker");
+
+assertIncludes(aceLspClientTest, "NO_SERVER_OPTIONS");
+assertIncludes(aceLspClientTest, "completionProvider === \"static-fallback\"");
+assertIncludes(aceLspClientTest, "hoverProvider === \"static-fallback\"");
+assertIncludes(aceLspClientTest, "app.launch");
 
 assertIncludes(editorView, "private val mPrimaryMenuStateSyncDebounceMs = 80L");
 assertIncludes(editorView, "private fun schedulePrimaryMenuStateSync()");

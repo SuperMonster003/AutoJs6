@@ -21,6 +21,15 @@ open a WebSocket, or load `lsp.js`. The selected upstream declaration files
 currently feed static completion generation; loading the full Android/library
 declaration graph into a server is still deferred.
 
+The ACE page also has a small LSP client facade. It reads
+`autojs.getLspOptions()`, exposes completion and hover hooks, and reports
+`static-fallback` providers when LSP is disabled or when the native alpha
+manager reports no server. In the current alpha path those hooks delegate to the
+generated static AutoJs6 completion index, including hover doc text for known
+globals and module members. The facade must not create a transport unless
+native options later report both `serverAvailable=true` and a non-empty
+`serverUri`.
+
 ## Server Lifecycle
 
 The first supported implementation should define these items before any default-on behavior:
@@ -47,22 +56,29 @@ LSP failures are non-fatal editor failures.
 
 ## Minimal Feature Scope
 
-The first server-backed version should support:
+The current client-side alpha supports:
 
-- completion
-- hover, optional
+- completion hooks with static fallback
+- hover hooks with static fallback
 
 Deferred:
 
+- server-backed completion transport
+- server-backed hover transport
 - diagnostics
 - definition
 - rename
 - project-wide indexing
+- markdown tooltip UI
 
 ## Verification
 
 - Default setting produces no WebSocket.
 - `getLspOptions()` returns `{}` when disabled.
 - Enabling the setting returns native-alpha structured options but still preserves static completion when no server exists.
+- `AutoJsAceLspClient` reports `completionProvider=static-fallback` and
+  `hoverProvider=static-fallback` when no server exists.
 - `AceDiagnostics` reports `lspEnabled`, `lspState`, `lspTransport`,
   `lspRootUri`, `lspDocumentUri`, and `lspFallback`.
+- `node tools/ace-lsp/test-lsp-client.mjs` passes and verifies static fallback
+  completion/hover behavior without WebSocket or worker transport.

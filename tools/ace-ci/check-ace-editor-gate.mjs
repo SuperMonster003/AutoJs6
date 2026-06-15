@@ -35,6 +35,10 @@ const CHECKS = [
     label: "ACE completer tests",
     script: "tools/ace-completion/test-completer.mjs",
   },
+  {
+    label: "ACE LSP client tests",
+    script: "tools/ace-lsp/test-lsp-client.mjs",
+  },
 ];
 
 for (const check of CHECKS) {

@@ -22,6 +22,7 @@ This plan covers manual device validation for the ACE editor experiment. Native 
   - `node tools/ace-completion/generate-autojs6-indices-from-dts.mjs`
   - `node tools/ace-completion/verify-autojs6-indices.mjs`
   - `node tools/ace-completion/test-completer.mjs`
+  - `node tools/ace-lsp/test-lsp-client.mjs`
   - `node tools/ace-hardening/check-editor-surface.mjs`
 
 ## Debug Hooks
@@ -57,7 +58,11 @@ selection handles, and CJK composition.
 - Broad AutoJs6 API entries should come from the bundled `aj6-int-*.d.ts` declaration source first; source JSON fallback entries are for parser gaps and curated global member exposure.
 - `ACE LSP smart completion (experimental)` is off by default.
 - With LSP off, `getLspOptions()` returns `{}` and no WebSocket is created.
-- With LSP on and no server available, ACE remains editable and static completion still works.
+- With LSP off or on without a server, `AutoJsAceLspClient` reports
+  `completionProvider=static-fallback` and `hoverProvider=static-fallback`.
+- With LSP on and no server available, ACE remains editable, static completion
+  still works, and hover hooks can resolve AutoJs6 declaration doc text from
+  the static index.
 
 ## Automation Status
 
@@ -432,6 +437,7 @@ Steps:
 6. Run `node tools/ace-completion/verify-autojs6-indices.mjs`.
 7. Run `node tools/ace-completion/verify-autojs6-dts.mjs`.
 8. Run `node tools/ace-completion/test-completer.mjs`.
+9. Run `node tools/ace-lsp/test-lsp-client.mjs`.
 
 Expected:
 - All commands pass.
@@ -464,6 +470,8 @@ Expected:
 - ACE opens normally.
 - Diagnostics include `lspEnabled=false` and `lspState=disabled`.
 - `getLspOptions()` returns `{}`.
+- `getLspState()` reports `completionProvider=static-fallback` and
+  `hoverProvider=static-fallback`.
 - Static completion continues to work.
 
 Failure logs:
@@ -479,7 +487,8 @@ Preconditions:
 Steps:
 1. Open `ace-basic.js`.
 2. Trigger completion for `console.lo`.
-3. Copy ACE diagnostics.
+3. Hover-query or debug-query `app.launch`.
+4. Copy ACE diagnostics.
 
 Expected:
 - ACE remains editable.
@@ -490,6 +499,10 @@ Expected:
   `lspFallback=static-completion`.
 - `getLspOptions()` includes `manager=native-alpha`,
   `serverAvailable=false`, and `startSupported=false`.
+- `getLspState()` reports `completionProvider=static-fallback` and
+  `hoverProvider=static-fallback`.
+- `getLspHover()` can return declaration doc text for `app.launch` from the
+  static index.
 
 Failure logs:
 - `lspError`
@@ -657,7 +670,8 @@ ACE can remain enabled as an experimental option only if:
   for first paint, top/middle/bottom tap anchors, repeated IME stress,
   completion accept, long-press selection, CJK input, rotation, fallback, and
   large-file Native routing.
-- `verify-autojs6-indices.mjs` and `test-completer.mjs` pass.
+- `verify-autojs6-indices.mjs`, `test-completer.mjs`, and
+  `test-lsp-client.mjs` pass.
 - All fallback cases above return to Native without app crash.
 - Recent small-file input survives fallback through TextMirror in practical tests.
 - Large files route to Native under the current threshold policy.
@@ -669,5 +683,5 @@ ACE can remain enabled as an experimental option only if:
 - ACE diagnostics can be copied from an active ACE editor and after ACE fallback to Native.
 - ACE diagnostics include runtime event history and bridge event window counters
   for keyboard and viewport failures.
-- LSP alpha, hover/markdown tooltip loading, and VisualEditorAce remain deferred
+- Server-backed LSP transport, markdown tooltip loading, and VisualEditorAce remain deferred
   until the keyboard and viewport matrix is stable on representative devices.

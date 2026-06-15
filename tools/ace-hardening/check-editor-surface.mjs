@@ -17,6 +17,7 @@ const ACE_ROOT = path.join(
 const HTML_PATH = path.join(ACE_ROOT, "autojs6_editor.html");
 const CSS_PATH = path.join(ACE_ROOT, "autojs6", "autojs6.css");
 const BRIDGE_PATH = path.join(ACE_ROOT, "autojs6", "autojs6_ace_bridge.js");
+const LSP_CLIENT_PATH = path.join(ACE_ROOT, "autojs6", "autojs6_lsp_client.js");
 const ACE_CODE_EDITOR_PATH = path.join(
   PROJECT_ROOT,
   "app",
@@ -82,6 +83,7 @@ function assertOrder(content, items, label) {
 const html = read(HTML_PATH);
 const css = read(CSS_PATH);
 const bridge = read(BRIDGE_PATH);
+const lspClient = read(LSP_CLIENT_PATH);
 const aceCodeEditor = read(ACE_CODE_EDITOR_PATH);
 const diagnostics = read(DIAGNOSTICS_PATH);
 
@@ -92,6 +94,7 @@ assertOrder(
     '<div id="editor"></div>',
     '<script src="./src-min-noconflict/ace.js"></script>',
     '<script src="./autojs6/autojs6_completer.js"></script>',
+    '<script src="./autojs6/autojs6_lsp_client.js"></script>',
     '<script src="./autojs6/autojs6_ace_bridge.js"></script>',
   ],
   "ACE editor bootstrap order",
@@ -132,6 +135,21 @@ assertIncludes(bridge, 'editor.on("guttermousedown", function(event)', "gutter m
 assertIncludes(bridge, 'target.className.indexOf("ace_gutter-cell")', "gutter-cell guard");
 assertIncludes(bridge, "getBoundingClientRect().left + 24", "gutter breakpoint tap zone");
 assertIncludes(bridge, "event.stop();", "gutter click event stop");
+assertIncludes(bridge, "var lspClient = null;", "ACE LSP client bridge slot");
+assertIncludes(bridge, "global.AutoJsAceLspClient.install", "ACE LSP client install");
+assertIncludes(bridge, "getLspState: function()", "ACE LSP state public API");
+assertIncludes(bridge, "getLspHover: function(row, column)", "ACE LSP hover public API");
+
+assertIncludes(lspClient, "global.AutoJsAceLspClient", "ACE LSP client global");
+assertIncludes(lspClient, "completionProvider: serverReady ? \"server\" : COMPLETION_PROVIDER_STATIC", "ACE LSP completion fallback provider");
+assertIncludes(lspClient, "hoverProvider: serverReady ? \"server\" : HOVER_PROVIDER_STATIC", "ACE LSP hover fallback provider");
+assertIncludes(lspClient, "serverAvailable === true", "ACE LSP server availability gate");
+assertIncludes(lspClient, "typeof options.serverUri === \"string\"", "ACE LSP server URI gate");
+assertIncludes(lspClient, "getCompletions: getCompletions", "ACE LSP completion hook");
+assertIncludes(lspClient, "getHover: getHover", "ACE LSP hover hook");
+if (lspClient.includes("WebSocket") || lspClient.includes("new Worker")) {
+  throw new Error("LSP client must stay off WebSocket and worker transports in alpha path");
+}
 
 assertIncludes(aceCodeEditor, "private fun requestFirstPaintWhenStable()", "native first-paint request hook");
 assertIncludes(aceCodeEditor, 'invokeAce("requestFirstPaint", quote("native_ready"))', "native first-paint bridge call");

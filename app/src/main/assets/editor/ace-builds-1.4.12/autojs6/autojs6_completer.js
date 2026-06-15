@@ -93,6 +93,84 @@
         };
     }
 
+    function identifierAt(line, column) {
+        line = String(line || "");
+        column = Math.max(0, Math.min(Number(column) || 0, line.length));
+        var probe = column;
+        if (probe >= line.length || !IDENTIFIER_REGEX.test(line.charAt(probe))) {
+            probe = column - 1;
+        }
+        if (probe < 0 || !IDENTIFIER_REGEX.test(line.charAt(probe))) {
+            return null;
+        }
+        var start = probe;
+        var end = probe + 1;
+        while (start > 0 && IDENTIFIER_REGEX.test(line.charAt(start - 1))) {
+            start--;
+        }
+        while (end < line.length && IDENTIFIER_REGEX.test(line.charAt(end))) {
+            end++;
+        }
+        return {
+            name: line.substring(start, end),
+            startColumn: start,
+            endColumn: end
+        };
+    }
+
+    function findByName(items, name) {
+        var expected = String(name || "");
+        for (var i = 0; i < (items || []).length; i++) {
+            if (nameOf(items[i]) === expected) {
+                return items[i];
+            }
+        }
+        return null;
+    }
+
+    function toHover(item, caption, meta, row, token) {
+        if (!item) {
+            return null;
+        }
+        var docText = item.doc || item.summary || item.signature || "";
+        if (!docText) {
+            return null;
+        }
+        return {
+            caption: caption || nameOf(item),
+            value: item.value || nameOf(item),
+            meta: meta || item.meta || item.type || "autojs",
+            docText: docText,
+            signature: item.signature || "",
+            range: {
+                start: { row: row, column: token.startColumn },
+                end: { row: row, column: token.endColumn }
+            }
+        };
+    }
+
+    function findHover(source, session, pos) {
+        if (!session || !session.getLine || !pos) {
+            return null;
+        }
+        var row = Math.max(0, Number(pos.row) || 0);
+        var line = session.getLine(row) || "";
+        var token = identifierAt(line, pos.column);
+        if (!token) {
+            return null;
+        }
+
+        var beforeToken = line.substring(0, token.startColumn);
+        var memberMatch = /([A-Za-z_$][A-Za-z0-9_$]*)\s*\.\s*$/.exec(beforeToken);
+        if (memberMatch && source.modules[memberMatch[1]]) {
+            var member = findByName(source.modules[memberMatch[1]], token.name);
+            return toHover(member, memberMatch[1] + "." + token.name, memberMatch[1], row, token);
+        }
+
+        var globalItem = findByName(source.globals, token.name);
+        return toHover(globalItem, token.name, globalItem && (globalItem.meta || globalItem.type), row, token);
+    }
+
     function retrievePrecedingIdentifier(text, pos) {
         var buf = [];
         for (var i = pos - 1; i >= 0; i--) {
@@ -169,14 +247,28 @@
                     return null;
                 }
                 return { docText: item.docText };
+            },
+
+            getHover: function(session, pos) {
+                return findHover(source, session, pos);
             }
         };
     }
 
+    var activeCompleter = null;
+
     global.AutoJsAceCompleter = {
+        createCompleter: createCompleter,
+
         install: function(ace) {
             var languageTools = ace.require("ace/ext/language_tools");
-            languageTools.addCompleter(createCompleter(global.AutoJsAceIndices || global.AUTOJS_INDICES || {}));
+            activeCompleter = createCompleter(global.AutoJsAceIndices || global.AUTOJS_INDICES || {});
+            languageTools.addCompleter(activeCompleter);
+            return activeCompleter;
+        },
+
+        getActiveCompleter: function() {
+            return activeCompleter;
         }
     };
 })(window);
