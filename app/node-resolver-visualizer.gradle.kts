@@ -17,7 +17,9 @@ private data class NodeResolveTraceGroup(
 
 private data class NodeResolveVisualizerReport(
     val json: Map<String, Any?>,
-    val text: String,
+    val compactText: String,
+    val verboseText: String,
+    val jsonText: String,
 )
 
 private val nodeResolveTraceFieldPattern = Regex("""([A-Za-z0-9_]+)=("(?:\\.|[^"])*"|[^\s]+)""")
@@ -32,6 +34,14 @@ private fun nodeResolveUnquote(value: String): String {
     }
     return runCatching { JsonSlurper().parseText(trimmed).toString() }
         .getOrElse { trimmed.removeSurrounding("\"") }
+}
+
+private fun nodeResolveNormalizeMode(value: String): String {
+    val mode = value.trim().lowercase().ifBlank { "verbose" }
+    if (mode !in setOf("compact", "verbose", "json")) {
+        throw GradleException("Unsupported autojs.nodejs.resolve.mode='$value'. Expected compact, verbose, or json.")
+    }
+    return mode
 }
 
 private fun nodeResolveParseTraceLine(line: String): NodeResolveTraceEvent? {
@@ -101,6 +111,54 @@ private fun nodeResolveSelectGroups(
 private fun nodeResolveDistinct(values: Iterable<String>): List<String> =
     values.map(String::trim).filter(String::isNotBlank).distinct()
 
+private fun nodeResolveDiagnosis(
+    request: String,
+    finalErrors: List<Map<String, String?>>,
+    nullBlocking: List<String>,
+    packageBranches: List<String>,
+): String {
+    val codes = finalErrors.flatMap { listOfNotNull(it["autojs6Code"], it["code"]) }.filter(String::isNotBlank)
+    return when {
+        "ERR_AUTOJS6_BUILTIN_DISABLED" in codes -> "disabled-builtin"
+        codes.any { it.startsWith("ERR_AUTOJS6_FS_") } -> "scoped-fs-policy"
+        "ERR_PACKAGE_PATH_NOT_EXPORTED" in codes -> "package-exports"
+        "ERR_PACKAGE_IMPORT_NOT_DEFINED" in codes -> "package-imports"
+        "ERR_AUTOJS6_MODULE_NOT_FOUND" in codes || "MODULE_NOT_FOUND" in codes -> "module-not-found"
+        nullBlocking.isNotEmpty() -> "package-null-blocking"
+        packageBranches.isNotEmpty() -> "package-branch-selected"
+        request.isNotBlank() -> "unclassified"
+        else -> "no-request-selected"
+    }
+}
+
+private fun nodeResolveRecommendations(diagnosis: String): List<String> = when (diagnosis) {
+    "disabled-builtin" -> listOf("Use the Safe Node Profile replacement module, or remove the dependency on the disabled builtin.")
+    "scoped-fs-policy" -> listOf("Keep module specifiers and package targets inside the working directory; remove absolute paths, parent escapes, and escaping symlinks.")
+    "package-exports" -> listOf("Check package.json exports; import only exported subpaths or update the dependency package entry.")
+    "package-imports" -> listOf("Check package.json imports aliases; define the alias or use a relative CommonJS path.")
+    "module-not-found" -> listOf("Verify the dependency is vendored under node_modules and that package main/exports/imports targets point to existing files.")
+    "package-null-blocking" -> listOf("A package target explicitly blocked this path with null; choose a public export or change package metadata.")
+    "package-branch-selected" -> listOf("Review the selected package branch and final error; the resolver reached package metadata but did not complete successfully.")
+    "no-request-selected" -> listOf("Pass --request and --from to focus the report, or omit both to inspect all trace groups.")
+    else -> listOf("Inspect finalErrors and rawTrace; attach the JSON report when filing a bug.")
+}
+
+private fun nodeResolveAppendList(
+    builder: StringBuilder,
+    title: String,
+    values: List<String>,
+    emptyText: String = "none observed",
+) {
+    builder.appendLine(title)
+    if (values.isEmpty()) {
+        builder.appendLine("  $emptyText")
+        builder.appendLine()
+        return
+    }
+    values.forEach { builder.appendLine("  $it") }
+    builder.appendLine()
+}
+
 private fun nodeResolveExplainGroups(
     request: String,
     from: String,
@@ -135,7 +193,7 @@ private fun nodeResolveExplainGroups(
     val finalErrors = selectedEvents
         .filter { it.event == "error" }
         .map { event ->
-            linkedMapOf(
+            linkedMapOf<String, String?>(
                 "code" to event.fields["code"],
                 "autojs6Code" to event.fields["autojs6Code"],
                 "message" to event.fields["message"],
@@ -144,6 +202,8 @@ private fun nodeResolveExplainGroups(
         }
     val rawTrace = selectedEvents.map { it.raw }
     val traceAvailable = traceText != null
+    val diagnosis = nodeResolveDiagnosis(request, finalErrors, nullBlocking, packageBranches)
+    val recommendations = nodeResolveRecommendations(diagnosis)
     val report = linkedMapOf<String, Any?>(
         "schema" to "autojs6-node-resolver-visualizer-v1",
         "generatedAt" to ZonedDateTime.now().toString(),
@@ -158,10 +218,13 @@ private fun nodeResolveExplainGroups(
         "packageBranchesSelected" to packageBranches,
         "nullBlocking" to nullBlocking,
         "finalErrors" to finalErrors,
+        "diagnosis" to diagnosis,
+        "recommendations" to recommendations,
         "rawTrace" to rawTrace,
     )
-    val text = buildString {
+    val verboseText = buildString {
         appendLine("AutoJs6 Node Resolver Explanation")
+        appendLine("Mode: verbose")
         appendLine("Generated at: ${report["generatedAt"]}")
         appendLine("Request: ${request.ifBlank { "not specified" }}")
         appendLine("From: ${from.ifBlank { "not specified" }}")
@@ -169,57 +232,43 @@ private fun nodeResolveExplainGroups(
         appendLine("Trace available: $traceAvailable")
         appendLine("Trace groups: ${groups.size}")
         appendLine("Selected groups: ${selectedGroups.size}")
+        appendLine("Diagnosis: $diagnosis")
         appendLine()
         if (!traceAvailable) {
             appendLine("No trace file was available.")
             appendLine("Run the failing script with AUTOJS6_NODE_RESOLVE_TRACE=1, capture stderr/logcat, then pass --trace-file <file>.")
             appendLine()
         }
-        appendLine("Search paths:")
-        if (searchPaths.isEmpty()) {
-            appendLine("  none observed")
-        } else {
-            searchPaths.forEach { appendLine("  $it") }
-        }
-        appendLine()
-        appendLine("package.json fields read:")
-        if (packageJsonFiles.isEmpty()) {
-            appendLine("  none observed")
-        } else {
-            packageJsonFiles.forEach { appendLine("  $it") }
-        }
-        appendLine()
-        appendLine("Exports/imports/main branch:")
-        if (packageBranches.isEmpty()) {
-            appendLine("  none observed")
-        } else {
-            packageBranches.forEach { appendLine("  $it") }
-        }
-        appendLine()
-        appendLine("Null blocking:")
-        if (nullBlocking.isEmpty()) {
-            appendLine("  none observed")
-        } else {
-            nullBlocking.forEach { appendLine("  $it") }
-        }
-        appendLine()
-        appendLine("Final errors:")
-        if (finalErrors.isEmpty()) {
-            appendLine("  none observed")
-        } else {
-            finalErrors.forEach { error ->
-                appendLine("  code=${error["code"]} autojs6Code=${error["autojs6Code"]} message=${error["message"]}")
-            }
-        }
-        appendLine()
-        appendLine("Raw trace:")
-        if (rawTrace.isEmpty()) {
-            appendLine("  none selected")
-        } else {
-            rawTrace.forEach { appendLine("  $it") }
-        }
+        nodeResolveAppendList(this, "Search paths:", searchPaths)
+        nodeResolveAppendList(this, "package.json fields read:", packageJsonFiles)
+        nodeResolveAppendList(this, "Exports/imports/main branch:", packageBranches)
+        nodeResolveAppendList(this, "Null blocking:", nullBlocking)
+        nodeResolveAppendList(
+            this,
+            "Final errors:",
+            finalErrors.map { "code=${it["code"]} autojs6Code=${it["autojs6Code"]} message=${it["message"]}" },
+        )
+        nodeResolveAppendList(this, "Recommendations:", recommendations)
+        nodeResolveAppendList(this, "Raw trace:", rawTrace, "none selected")
     }
-    return NodeResolveVisualizerReport(report, text)
+    val compactText = buildString {
+        appendLine("AutoJs6 Node Resolver Explanation")
+        appendLine("Mode: compact")
+        appendLine("Request: ${request.ifBlank { "not specified" }}")
+        appendLine("From: ${from.ifBlank { "not specified" }}")
+        appendLine("Diagnosis: $diagnosis")
+        appendLine()
+        nodeResolveAppendList(this, "Recommendations:", recommendations)
+        nodeResolveAppendList(
+            this,
+            "Final errors:",
+            finalErrors.map { "code=${it["code"]} autojs6Code=${it["autojs6Code"]} message=${it["message"]}" },
+        )
+        nodeResolveAppendList(this, "Package branch:", packageBranches.take(3))
+        nodeResolveAppendList(this, "Null blocking:", nullBlocking.take(3))
+        nodeResolveAppendList(this, "Search paths:", searchPaths.take(5))
+    }
+    return NodeResolveVisualizerReport(report, compactText, verboseText, nodeResolveJson(report) + "\n")
 }
 
 tasks.register("explainNodeResolve") {
@@ -234,15 +283,21 @@ tasks.register("explainNodeResolve") {
         val requestValue = providers.gradleProperty("autojs.nodejs.resolve.request").orNull.orEmpty()
         val fromValue = providers.gradleProperty("autojs.nodejs.resolve.from").orNull.orEmpty()
         val traceFileValue = providers.gradleProperty("autojs.nodejs.resolve.traceFile").orNull.orEmpty()
+        val mode = nodeResolveNormalizeMode(providers.gradleProperty("autojs.nodejs.resolve.mode").orNull.orEmpty())
         val traceFile = traceFileValue.takeIf(String::isNotBlank)?.let { rootProject.file(it) }
         val traceText = traceFile?.takeIf(File::isFile)?.readText()
         val report = nodeResolveExplainGroups(requestValue, fromValue, traceFile, traceText)
+        val text = when (mode) {
+            "compact" -> report.compactText
+            "json" -> report.jsonText
+            else -> report.verboseText
+        }
         val outputDir = layout.buildDirectory.dir("reports/nodejs/resolver").get().asFile
         outputDir.mkdirs()
         val jsonFile = outputDir.resolve("resolve-explanation.json")
         val textFile = outputDir.resolve("resolve-explanation.txt")
         jsonFile.writeText(nodeResolveJson(report.json) + "\n")
-        textFile.writeText(report.text)
+        textFile.writeText(text)
         logger.lifecycle("Node resolver explanation JSON written to ${jsonFile.absolutePath}")
         logger.lifecycle("Node resolver explanation text written to ${textFile.absolutePath}")
     }
@@ -255,23 +310,85 @@ val verifyNodeResolverVisualizerFixtures = tasks.register("verifyNodeResolverVis
     doLast {
         val fixtureDir = layout.buildDirectory.dir("tmp/nodejs/resolver-visualizer").get().asFile
         fixtureDir.mkdirs()
-        val traceFile = fixtureDir.resolve("sample-resolve-trace.log")
-        traceFile.writeText(
-            """
-            [resolve] request request="trace-pkg/private" from="/work/main.js"
-            [resolve] node_modules search request="trace-pkg/private" from="/work/main.js" paths="/work/node_modules"
-            [resolve] package.json found request="trace-pkg/private" packageDir="/work/node_modules/trace-pkg" file="/work/node_modules/trace-pkg/package.json"
-            [resolve] exports blocked request="./private" module="trace-pkg/private" target="null" selectedCondition="" conditionKeys="" ignoredConditions=""
-            [resolve] error request="trace-pkg/private" from="/work/main.js" code="ERR_PACKAGE_PATH_NOT_EXPORTED" autojs6Code="ERR_AUTOJS6_PACKAGE_PATH_NOT_EXPORTED" message="target=null"
-            """.trimIndent()
+        data class ResolverFixture(
+            val name: String,
+            val request: String,
+            val from: String,
+            val trace: String,
+            val diagnosis: String,
+            val needles: List<String>,
         )
-        val report = nodeResolveExplainGroups("trace-pkg/private", "/work/main.js", traceFile, traceFile.readText())
-        val text = report.text
-        check(text.contains("/work/node_modules")) { "Search path missing from resolver visualizer report:\n$text" }
-        check(text.contains("/work/node_modules/trace-pkg/package.json")) { "package.json field missing from resolver visualizer report:\n$text" }
-        check(text.contains("exports blocked")) { "Null blocking branch missing from resolver visualizer report:\n$text" }
-        check(text.contains("ERR_PACKAGE_PATH_NOT_EXPORTED")) { "Final error code missing from resolver visualizer report:\n$text" }
-        logger.lifecycle("Node resolver visualizer fixture report parsed expected package failure details.")
+
+        val fixtures = listOf(
+            ResolverFixture(
+                name = "package-exports",
+                request = "trace-pkg/private",
+                from = "/work/main.js",
+                trace = """
+                [resolve] request request="trace-pkg/private" from="/work/main.js"
+                [resolve] node_modules search request="trace-pkg/private" from="/work/main.js" paths="/work/node_modules"
+                [resolve] package.json found request="trace-pkg/private" packageDir="/work/node_modules/trace-pkg" file="/work/node_modules/trace-pkg/package.json"
+                [resolve] exports blocked request="./private" module="trace-pkg/private" target="null" selectedCondition="" conditionKeys="" ignoredConditions=""
+                [resolve] error request="trace-pkg/private" from="/work/main.js" code="ERR_PACKAGE_PATH_NOT_EXPORTED" autojs6Code="ERR_AUTOJS6_PACKAGE_PATH_NOT_EXPORTED" message="target=null"
+                """.trimIndent(),
+                diagnosis = "package-exports",
+                needles = listOf("/work/node_modules", "/work/node_modules/trace-pkg/package.json", "exports blocked", "ERR_PACKAGE_PATH_NOT_EXPORTED"),
+            ),
+            ResolverFixture(
+                name = "package-imports",
+                request = "#missing",
+                from = "/work/main.js",
+                trace = """
+                [resolve] request request="#missing" from="/work/main.js"
+                [resolve] package scope request="#missing" packageDir="/work" file="/work/package.json"
+                [resolve] error request="#missing" from="/work/main.js" code="ERR_PACKAGE_IMPORT_NOT_DEFINED" autojs6Code="" message="imports alias not defined"
+                """.trimIndent(),
+                diagnosis = "package-imports",
+                needles = listOf("/work/package.json", "ERR_PACKAGE_IMPORT_NOT_DEFINED", "imports alias"),
+            ),
+            ResolverFixture(
+                name = "builtin-disabled",
+                request = "child_process",
+                from = "/work/main.js",
+                trace = """
+                [resolve] request request="child_process" from="/work/main.js"
+                [resolve] error request="child_process" from="/work/main.js" code="ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED" autojs6Code="ERR_AUTOJS6_BUILTIN_DISABLED" message="disabled builtin"
+                """.trimIndent(),
+                diagnosis = "disabled-builtin",
+                needles = listOf("ERR_AUTOJS6_BUILTIN_DISABLED", "disabled builtin", "Safe Node Profile replacement"),
+            ),
+            ResolverFixture(
+                name = "scoped-path-escape",
+                request = "../secret.js",
+                from = "/work/main.js",
+                trace = """
+                [resolve] request request="../secret.js" from="/work/main.js"
+                [resolve] error request="../secret.js" from="/work/main.js" code="ERR_AUTOJS6_MODULE_NOT_FOUND" autojs6Code="ERR_AUTOJS6_FS_PATH_ESCAPE" message="path escapes workingDirectory"
+                """.trimIndent(),
+                diagnosis = "scoped-fs-policy",
+                needles = listOf("ERR_AUTOJS6_FS_PATH_ESCAPE", "workingDirectory", "escaping symlinks"),
+            ),
+        )
+
+        fixtures.forEach { fixture ->
+            val traceFile = fixtureDir.resolve("${fixture.name}.log")
+            traceFile.writeText(fixture.trace)
+            val report = nodeResolveExplainGroups(fixture.request, fixture.from, traceFile, traceFile.readText())
+            val verbose = report.verboseText
+            val compact = report.compactText
+            val jsonText = report.jsonText
+            check(report.json["diagnosis"] == fixture.diagnosis) {
+                "Resolver visualizer diagnosis mismatch for ${fixture.name}: expected ${fixture.diagnosis}, got ${report.json["diagnosis"]}"
+            }
+            check(compact.contains("Mode: compact")) { "Compact mode missing for ${fixture.name}:\n$compact" }
+            check(jsonText.contains("\"diagnosis\"")) { "JSON mode missing diagnosis for ${fixture.name}:\n$jsonText" }
+            fixture.needles.forEach { needle ->
+                check(verbose.contains(needle) || compact.contains(needle) || jsonText.contains(needle)) {
+                    "Resolver visualizer report for ${fixture.name} missing '$needle':\n$verbose"
+                }
+            }
+        }
+        logger.lifecycle("Node resolver visualizer fixtures parsed exports, imports, disabled builtin, and scoped path failures.")
     }
 }
 

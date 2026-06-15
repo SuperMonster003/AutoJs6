@@ -219,7 +219,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `:app:verifyNodeErrorCatalog` passes and `build/reports/nodejs/error-catalog.json` has no missing, stale, or unregistered runtime codes
 - [ ] scoped fs fuzzer failure diagnostics include base seed, path case, expected code, observed code, and summary JSON
 - [ ] resolver trace remains off by default once implemented
-- [ ] resolver visualizer fixture parses search paths, package.json fields, null blocking, and final errors
+- [ ] resolver visualizer fixture parses exports failure, imports failure, disabled builtin, scoped path escape, compact text, verbose text, and JSON diagnostics
 - [ ] resolver fuzzer failure diagnostics include base seed, case seed, request, result record, and generated package.json
 - [ ] runtime timeline trace is available only with `autojs.nodejs.timelineTrace=true` or `AUTOJS6_NODE_TIMELINE_TRACE=1`
 - [ ] execution queue diagnostics report queue mode, queue status, wait time, and max queued executions

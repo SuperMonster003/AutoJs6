@@ -12,11 +12,13 @@ function main() {
   const reportDir = path.resolve(options.reportDir || path.join(repoRoot, "app/build/reports/nodejs/resolver"));
   const traceFile = options.traceFile ? path.resolve(options.traceFile) : null;
   const traceText = traceFile && fs.existsSync(traceFile) ? fs.readFileSync(traceFile, "utf8") : null;
+  const mode = normalizeMode(options.mode || "verbose");
   const report = buildReport({
     request: options.request || "",
     from: options.from || "",
     traceFile,
     traceText,
+    mode,
   });
 
   fs.mkdirSync(reportDir, { recursive: true });
@@ -25,11 +27,23 @@ function main() {
   fs.writeFileSync(jsonPath, JSON.stringify(report.json, null, 2) + "\n");
   fs.writeFileSync(textPath, report.text);
 
+  if (mode === "json") {
+    console.log(JSON.stringify(report.json, null, 2));
+    return;
+  }
   console.log("Resolver explanation JSON: " + jsonPath);
   console.log("Resolver explanation text: " + textPath);
   if (!traceText) {
     console.log("No trace file was available. Capture stderr/logcat with AUTOJS6_NODE_RESOLVE_TRACE=1 and pass --trace-file <file>.");
   }
+}
+
+function normalizeMode(value) {
+  const mode = String(value || "verbose").trim().toLowerCase();
+  if (mode === "compact" || mode === "verbose" || mode === "json") {
+    return mode;
+  }
+  throw new Error("Unsupported mode: " + value + ". Expected compact, verbose, or json.");
 }
 
 function parseArgs(argv) {
@@ -66,6 +80,7 @@ function printHelp() {
     "  --request <specifier>   Module specifier to explain.",
     "  --from <file>           Parent module filename from the failing require/import.",
     "  --trace-file <file>     File containing AUTOJS6_NODE_RESOLVE_TRACE=1 output.",
+    "  --mode <mode>           compact, verbose, or json. Defaults to verbose.",
     "  --report-dir <dir>      Output directory. Defaults to build/reports/nodejs/resolver.",
   ].join("\n"));
 }
@@ -151,7 +166,7 @@ function distinct(values) {
   return Array.from(new Set(values.map((value) => String(value || "").trim()).filter(Boolean)));
 }
 
-function buildReport({ request, from, traceFile, traceText }) {
+function buildReport({ request, from, traceFile, traceText, mode }) {
   const groups = traceText ? parseTrace(traceText) : [];
   const selectedGroups = selectGroups(groups, request, from);
   const events = selectedGroups.flatMap((group) => group.events);
@@ -186,9 +201,12 @@ function buildReport({ request, from, traceFile, traceText }) {
       raw: event.raw,
     }));
   const rawTrace = events.map((event) => event.raw);
+  const diagnosis = diagnoseResolverFailure({ finalErrors, nullBlocking, packageBranchesSelected, request });
+  const recommendations = recommendationsForDiagnosis(diagnosis);
   const json = {
     schema: "autojs6-node-resolver-visualizer-v1",
     generatedAt: new Date().toISOString(),
+    mode,
     request,
     from,
     traceFile,
@@ -200,17 +218,96 @@ function buildReport({ request, from, traceFile, traceText }) {
     packageBranchesSelected,
     nullBlocking,
     finalErrors,
+    diagnosis,
+    recommendations,
     rawTrace,
   };
   return {
     json,
-    text: renderText(json),
+    text: mode === "json" ? JSON.stringify(json, null, 2) + "\n" : renderText(json, mode),
   };
 }
 
-function renderText(report) {
+function diagnoseResolverFailure({ finalErrors, nullBlocking, packageBranchesSelected, request }) {
+  const codes = finalErrors.flatMap((error) => [error.autojs6Code, error.code]).filter(Boolean);
+  if (codes.includes("ERR_AUTOJS6_BUILTIN_DISABLED")) {
+    return "disabled-builtin";
+  }
+  if (codes.some((code) => code.startsWith("ERR_AUTOJS6_FS_"))) {
+    return "scoped-fs-policy";
+  }
+  if (codes.includes("ERR_PACKAGE_PATH_NOT_EXPORTED")) {
+    return "package-exports";
+  }
+  if (codes.includes("ERR_PACKAGE_IMPORT_NOT_DEFINED")) {
+    return "package-imports";
+  }
+  if (codes.includes("ERR_AUTOJS6_MODULE_NOT_FOUND") || codes.includes("MODULE_NOT_FOUND")) {
+    return "module-not-found";
+  }
+  if (nullBlocking.length > 0) {
+    return "package-null-blocking";
+  }
+  if (packageBranchesSelected.length > 0) {
+    return "package-branch-selected";
+  }
+  if (request) {
+    return "unclassified";
+  }
+  return "no-request-selected";
+}
+
+function recommendationsForDiagnosis(diagnosis) {
+  switch (diagnosis) {
+    case "disabled-builtin":
+      return ["Use the Safe Node Profile replacement module, or remove the dependency on the disabled builtin."];
+    case "scoped-fs-policy":
+      return ["Keep module specifiers and package targets inside the working directory; remove absolute paths, parent escapes, and escaping symlinks."];
+    case "package-exports":
+      return ["Check package.json exports; import only exported subpaths or update the dependency package entry."];
+    case "package-imports":
+      return ["Check package.json imports aliases; define the alias or use a relative CommonJS path."];
+    case "module-not-found":
+      return ["Verify the dependency is vendored under node_modules and that package main/exports/imports targets point to existing files."];
+    case "package-null-blocking":
+      return ["A package target explicitly blocked this path with null; choose a public export or change package metadata."];
+    case "package-branch-selected":
+      return ["Review the selected package branch and final error; the resolver reached package metadata but did not complete successfully."];
+    case "no-request-selected":
+      return ["Pass --request and --from to focus the report, or omit both to inspect all trace groups."];
+    default:
+      return ["Inspect finalErrors and rawTrace; attach the JSON report when filing a bug."];
+  }
+}
+
+function renderText(report, mode) {
+  if (mode === "compact") {
+    return renderCompactText(report);
+  }
+  return renderVerboseText(report);
+}
+
+function renderCompactText(report) {
   const lines = [
     "AutoJs6 Node Resolver Explanation",
+    "Mode: compact",
+    "Request: " + (report.request || "not specified"),
+    "From: " + (report.from || "not specified"),
+    "Diagnosis: " + report.diagnosis,
+    "",
+  ];
+  appendList(lines, "Recommendations:", report.recommendations);
+  appendList(lines, "Final errors:", report.finalErrors.map((error) => "code=" + error.code + " autojs6Code=" + error.autojs6Code + " message=" + error.message));
+  appendList(lines, "Package branch:", report.packageBranchesSelected.slice(0, 3));
+  appendList(lines, "Null blocking:", report.nullBlocking.slice(0, 3));
+  appendList(lines, "Search paths:", report.searchPaths.slice(0, 5));
+  return lines.join("\n") + "\n";
+}
+
+function renderVerboseText(report) {
+  const lines = [
+    "AutoJs6 Node Resolver Explanation",
+    "Mode: verbose",
     "Generated at: " + report.generatedAt,
     "Request: " + (report.request || "not specified"),
     "From: " + (report.from || "not specified"),
@@ -218,6 +315,7 @@ function renderText(report) {
     "Trace available: " + report.traceAvailable,
     "Trace groups: " + report.traceGroups,
     "Selected groups: " + report.selectedGroups,
+    "Diagnosis: " + report.diagnosis,
     "",
   ];
   if (!report.traceAvailable) {
@@ -232,6 +330,7 @@ function renderText(report) {
   appendList(lines, "Exports/imports/main branch:", report.packageBranchesSelected);
   appendList(lines, "Null blocking:", report.nullBlocking);
   appendList(lines, "Final errors:", report.finalErrors.map((error) => "code=" + error.code + " autojs6Code=" + error.autojs6Code + " message=" + error.message));
+  appendList(lines, "Recommendations:", report.recommendations);
   appendList(lines, "Raw trace:", report.rawTrace, "none selected");
   return lines.join("\n") + "\n";
 }

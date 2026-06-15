@@ -654,14 +654,24 @@ Resolver visualizer:
 
 ```powershell
 node tools/nodejs/resolver/explain-node-resolve.js --request trace-pkg/private --from app/src/main.js --trace-file path\to\resolve-stderr.log
+node tools/nodejs/resolver/explain-node-resolve.js --mode compact --request trace-pkg/private --from app/src/main.js --trace-file path\to\resolve-stderr.log
+node tools/nodejs/resolver/explain-node-resolve.js --mode json --request trace-pkg/private --from app/src/main.js --trace-file path\to\resolve-stderr.log
 .\gradlew.bat --console=plain :app:explainNodeResolve "-Pautojs.nodejs.resolve.request=trace-pkg/private" "-Pautojs.nodejs.resolve.from=app/src/main.js" "-Pautojs.nodejs.resolve.traceFile=path\to\resolve-stderr.log"
+.\gradlew.bat --console=plain :app:explainNodeResolve "-Pautojs.nodejs.resolve.mode=compact" "-Pautojs.nodejs.resolve.request=trace-pkg/private" "-Pautojs.nodejs.resolve.from=app/src/main.js" "-Pautojs.nodejs.resolve.traceFile=path\to\resolve-stderr.log"
 .\gradlew.bat --console=plain :app:verifyNodeResolverVisualizerFixtures
 ```
 
 The resolver visualizer does not run a second resolver. It formats the real Embedded Node `[resolve]` trace captured with
 `AUTOJS6_NODE_RESOLVE_TRACE=1` into `app/build/reports/nodejs/resolver/resolve-explanation.txt` and `.json`. The report
 lists the original request, parent module, `node_modules` search paths, package.json files read, selected
-`exports`/`imports`/`main` branch, `target=null` blocking, and the final error.
+`exports`/`imports`/`main` branch, `target=null` blocking, the final error, a compact diagnosis, and suggested next
+steps. `compact` mode is intended for user bug reports, `verbose` mode keeps raw trace lines, and `json` mode is intended
+for scripts and issue attachments.
+
+`verifyNodeResolverVisualizerFixtures` covers package exports failure, package imports alias failure, disabled builtin
+failure, and scoped path escape failure. These examples correspond to the common user reports `MODULE_NOT_FOUND`,
+`ERR_PACKAGE_PATH_NOT_EXPORTED`, `ERR_PACKAGE_IMPORT_NOT_DEFINED`, `ERR_AUTOJS6_BUILTIN_DISABLED`, and
+`ERR_AUTOJS6_FS_PATH_ESCAPE`.
 
 ## Runtime Timeline Trace
 
