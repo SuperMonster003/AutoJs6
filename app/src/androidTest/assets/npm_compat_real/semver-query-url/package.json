@@ -1,0 +1,13 @@
+{
+  "name": "@autojs6-fixtures/semver-query-url-app",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "test": "node test.cjs"
+  },
+  "dependencies": {
+    "semver": "7.6.3",
+    "qs": "6.13.0"
+  }
+}

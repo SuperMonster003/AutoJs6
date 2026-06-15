@@ -98,6 +98,18 @@ The reusable compatibility corpus lives under `app/src/androidTest/assets/node_c
 `NodeCompatCorpusInstrumentationTest`. It covers pure JavaScript CommonJS package patterns that should remain stable across
 future builtin and bridge work.
 
+The fixed real package corpus lives under `app/src/androidTest/assets/npm_compat_real/` and is executed by
+`NodeRealNpmCompatInstrumentationTest`. It vendors offline, license-noted CommonJS package snapshots that cover tested
+patterns rather than broad npm compatibility claims:
+
+- small utility and nested dependency packages
+- semver parsing plus querystring/URL utility use
+- glob/path matching plus crypto hash utility use
+- stream utility plus zlib buffer utility use
+
+These fixtures are intentionally checked in. Tests must not fetch packages from the network, run install/postinstall
+scripts, load native addons, or include ESM-only packages.
+
 ## Filesystem Profile
 
 Supported:

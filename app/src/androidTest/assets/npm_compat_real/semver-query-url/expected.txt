@@ -1,0 +1,1 @@
+realnpm.semver-query-url=2|true|node+safe|AutoJs6

@@ -89,6 +89,17 @@ Current compatibility corpus instrumentation:
 
 This suite copies `app/src/androidTest/assets/node_compat_corpus/` into a scoped working directory and verifies pure JavaScript CommonJS package patterns: basic CJS, deep dependencies, package `exports`, package `imports`, self-reference, JSON module caching, `util.promisify(fs)`, `Buffer`/`path`/`util`, and disabled-feature detection. It also runs a moduleSources/preload-shaped fixture as a packaged-preload proxy; a true packaged APK corpus smoke remains a follow-up.
 
+Current fixed real npm corpus instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeRealNpmCompatInstrumentationTest"
+```
+
+This suite copies `app/src/androidTest/assets/npm_compat_real/` into a scoped working directory and runs fixed, offline,
+license-noted CommonJS package snapshots. It covers small utilities, nested dependencies, semver parsing,
+querystring/URL utilities, glob/path matching, crypto hashing, stream utilities, and zlib buffer utilities. It also
+checks that the corpus contains no native addons, no install/postinstall scripts, and no ESM-only package metadata.
+
 Current security regression instrumentation:
 
 ```powershell
