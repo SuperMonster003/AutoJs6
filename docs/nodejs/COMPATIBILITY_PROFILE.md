@@ -537,6 +537,13 @@ The `:nodejs_embedded` service process allows one active embedded Node execution
 
 After the active execution completes and the service settles, a later execution can run normally. Queueing remains a separate design gate; see `docs/nodejs/design/MULTI_INSTANCE.md`.
 
+If Embedded Node script execution is disabled at build time, embedded execution fails before service startup or native entry with:
+
+- `errorCode=ERR_AUTOJS6_NODE_DISABLED`
+- `nativeValues.embedded_script.error_code=ERR_AUTOJS6_NODE_DISABLED`
+
+The actionable message names `-Pautojs.nodejs.embedded.script.enabled=true`. This is a release fallback and diagnostic path, not a silent conversion of Node-marked scripts into ordinary Rhino scripts.
+
 ## Crypto Profile
 
 Supported or limited:
@@ -915,4 +922,5 @@ Examples:
 - malformed bridge request: `code=ERR_AUTOJS6_BRIDGE_INVALID_REQUEST`, `autojs6Code=ERR_AUTOJS6_BRIDGE_INVALID_REQUEST`
 - bridge resource limit: `code=ERR_AUTOJS6_BRIDGE_RESOURCE_LIMIT`, `autojs6Code=ERR_AUTOJS6_BRIDGE_RESOURCE_LIMIT`
 - bridge rate limit: `code=ERR_AUTOJS6_BRIDGE_RATE_LIMITED`, `autojs6Code=ERR_AUTOJS6_BRIDGE_RATE_LIMITED`
+- embedded Node disabled: `errorCode=ERR_AUTOJS6_NODE_DISABLED`
 - concurrent embedded execution: `errorCode=ERR_AUTOJS6_NODE_ENGINE_BUSY`

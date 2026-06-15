@@ -107,6 +107,8 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `nodeFull` uses `arm64-v8a,armeabi-v7a,x86_64`
 - [ ] `nodeMini` records the exact `autojs.nodejs.releaseAbis` value
 - [ ] `rhinoOnly` APK contains no `libnode.so` or `libautojs6-node.so`
+- [ ] Node-marked scripts in Node-disabled builds fail clearly with `ERR_AUTOJS6_NODE_DISABLED` and are not silently treated as ordinary Rhino scripts
+- [ ] any explicit legacy Rhino-backed Node compatibility diagnostic run is recorded in the release notes
 - [ ] `arm64-v8a/libnode.so`
 - [ ] `arm64-v8a/libautojs6-node.so`
 - [ ] `arm64-v8a/libc++_shared.so`

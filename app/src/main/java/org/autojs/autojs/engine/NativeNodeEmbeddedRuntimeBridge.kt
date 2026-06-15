@@ -489,6 +489,7 @@ object NativeNodeEmbeddedRuntimeBridge {
                 pid = pid,
                 startedAt = startedAt,
                 message = embeddedScriptExecutionDisabledMessage(),
+                errorCode = NodeRuntimeErrorCodes.NODE_DISABLED,
             )
         }
 
@@ -656,21 +657,31 @@ object NativeNodeEmbeddedRuntimeBridge {
         message: String,
         nativeError: Throwable? = null,
         nativeValues: Map<String, String> = emptyMap(),
+        errorCode: String? = null,
     ): EmbeddedScriptResult {
+        val resolvedErrorCode = errorCode
+            ?: nativeValues["embedded_script.error_code"].takeUnless { it.isNullOrBlank() }
+        val resultNativeValues = when {
+            resolvedErrorCode.isNullOrBlank() -> nativeValues
+            nativeValues["embedded_script.error_code"].isNullOrBlank() ->
+                nativeValues + ("embedded_script.error_code" to resolvedErrorCode)
+            else -> nativeValues
+        }
         return EmbeddedScriptResult(
             succeeded = false,
             exitCode = 1,
             resultText = null,
-            stdout = nativeValues["stdout_capture.text"].orEmpty(),
-            stderr = nativeValues["stderr_capture.text"].orEmpty(),
+            stdout = resultNativeValues["stdout_capture.text"].orEmpty(),
+            stderr = resultNativeValues["stderr_capture.text"].orEmpty(),
             errorName = nativeError?.javaClass?.simpleName ?: "EmbeddedScriptExecutionError",
             errorMessage = message,
             errorStack = nativeError?.stackTraceToString(),
+            errorCode = resolvedErrorCode,
             elapsedMs = SystemClock.elapsedRealtime() - startedAt,
             processName = processName,
             pid = pid,
             sourceName = request.sourceName,
-            nativeValues = nativeValues,
+            nativeValues = resultNativeValues,
             workingDirectory = request.workingDirectory,
         )
     }
@@ -686,6 +697,7 @@ object NativeNodeEmbeddedRuntimeBridge {
                 pid = pid,
                 startedAt = startedAt,
                 message = embeddedScriptExecutionDisabledMessage(),
+                errorCode = NodeRuntimeErrorCodes.NODE_DISABLED,
             )
         }
         val sourceBytes = request.source.toByteArray(StandardCharsets.UTF_8).size

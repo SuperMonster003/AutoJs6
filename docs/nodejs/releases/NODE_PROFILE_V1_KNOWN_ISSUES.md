@@ -87,6 +87,18 @@ is unsupported and must fail fast.
 Workaround: prefer split or per-ABI APKs for distribution. Use `nodeMini` or `rhinoOnly` only when the release flavor is
 explicitly selected and verified.
 
+## Embedded Node Disabled Builds
+
+Builds that disable Embedded Node script execution, or `rhinoOnly` compatibility releases that do not ship Node native
+libraries, are rollback tools. They preserve legacy Rhino scripts but are not allowed to hide a Node Profile v1 runtime
+failure by silently treating a Node-marked script as an ordinary Rhino script.
+
+Expected behavior: embedded Node execution fails clearly with `ERR_AUTOJS6_NODE_DISABLED` and the diagnostic message
+names `-Pautojs.nodejs.embedded.script.enabled=true`.
+
+Workaround: publish a Node-enabled `nodeFull` or `nodeMini` build for Node Profile v1 scripts. Use the legacy
+Rhino-backed Node compatibility backend only as an explicit diagnostic choice and record it in release notes.
+
 ## Android Foreground Service Constraints
 
 Packaged Node scripts use an embedded service process and Android foreground-service requirements. Android 14 and later

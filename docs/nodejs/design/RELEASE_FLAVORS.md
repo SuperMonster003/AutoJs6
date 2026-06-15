@@ -68,7 +68,9 @@ Expected use:
 
 ## rhinoOnly
 
-`rhinoOnly` disables Embedded Node native packaging and forces the effective Node runtime backend to Rhino for the build.
+`rhinoOnly` disables Embedded Node native packaging and is intended for compatibility releases that preserve legacy Rhino scripts without shipping Node native libraries.
+
+Node Profile v1 scripts must not be silently reinterpreted as ordinary Rhino scripts when Embedded Node is disabled or missing. Release gates should treat a Node-marked entry in a Node-disabled build as a clear fail-fast path with `ERR_AUTOJS6_NODE_DISABLED`, unless a maintainer explicitly selected the legacy Rhino-backed Node compatibility backend for diagnostics and recorded that choice in the release notes.
 
 The final APK must not package:
 

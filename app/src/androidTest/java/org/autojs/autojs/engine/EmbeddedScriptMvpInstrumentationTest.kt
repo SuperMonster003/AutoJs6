@@ -68,6 +68,8 @@ class EmbeddedScriptMvpInstrumentationTest {
 
         assertFalse(result.succeeded)
         assertEquals("EmbeddedScriptExecutionError", result.errorName)
+        assertEquals("ERR_AUTOJS6_NODE_DISABLED", result.errorCode)
+        assertEquals("ERR_AUTOJS6_NODE_DISABLED", result.nativeValues["embedded_script.error_code"])
         assertTrue(result.errorMessage.orEmpty().contains("Embedded Node.js script execution is disabled."))
         assertTrue(result.errorMessage.orEmpty().contains("-Pautojs.nodejs.embedded.script.enabled=true"))
     }
