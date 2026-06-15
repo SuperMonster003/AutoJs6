@@ -104,6 +104,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] if packaged timed/boot/package tasks are enabled, manifest verifier reports the exact receivers, permissions, and foreground-service requirements
 - [ ] if packaged controlled network or WebSocket is enabled, manifest verifier reports `android.permission.INTERNET`; if it is not enabled, normal builds keep `autojs.nodejs.network.experimental=false`
 - [ ] if `node.permissions` / `autojs6.node.permissions` is present, missing bridge capabilities reject with `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`
+- [ ] Android bridge provider rejects supported module/method dispatch when the request omits required capabilities
 - [ ] if `node.bridgeLimits` / `autojs6.node.bridgeLimits` is present, effective limits appear in `profile.bridgeLimits`, and unsafe overrides are ignored with warnings
 - [ ] packaged diagnostic report lists declared bridge capabilities, required Android manifest permissions, missing permissions, and unused relevant permissions
 - [ ] `network` capability maps to `android.permission.INTERNET`

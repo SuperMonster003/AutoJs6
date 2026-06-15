@@ -215,6 +215,55 @@ class NodeBridgeResourceRegistryInstrumentationTest {
         assertEquals("1", diagnostics["embedded_script.bridge_resource.max_active_count"])
     }
 
+    @Test
+    fun androidProviderDestroyClosesPendingPrivilegedShellResource() {
+        val workDir = File(context.cacheDir, "node-bridge-resource-shell-destroy").apply {
+            deleteRecursively()
+            check(mkdirs()) { "Failed to create bridge resource shell destroy directory: $absolutePath" }
+        }
+        val provider = AndroidNodeBridgeCapabilityProvider(
+            context,
+            NodeBridgeEngineInfo.fromContext(
+                context,
+                id = "resource-shell-destroy-provider",
+                sourceName = "shell-destroy.cjs",
+                cwd = workDir.absolutePath,
+            ),
+        )
+        val latch = CountDownLatch(1)
+        var response: NodeBridgeResponse? = null
+        provider.dispatch(
+            NodeBridgeRequest(
+                id = "shell-destroy-${System.nanoTime()}",
+                module = "shell",
+                method = "exec",
+                argsJson = """["sleep 5",{"timeoutMs":10000}]""",
+                timeoutMs = 11_000L,
+                permissions = listOf("shell"),
+            ),
+        ) { bridgeResponse ->
+            response = bridgeResponse
+            latch.countDown()
+        }
+
+        assertTrue(
+            "Timed out waiting for shell resource to become active",
+            waitUntil { provider.nativeDiagnostics()["embedded_script.bridge_resource.active_count"] == "1" },
+        )
+        provider.destroy(NodeBridgeError.processDead("test service destroy"))
+        var diagnostics = provider.nativeDiagnostics()
+        assertEquals("0", diagnostics["embedded_script.bridge_resource.active_count"])
+        assertEquals("1", diagnostics["embedded_script.bridge_resource.destroy_closed_count"])
+        assertEquals("1", diagnostics["embedded_script.bridge_resource.leak_count"])
+
+        assertTrue("Timed out waiting for shell callback after destroy", latch.await(5, TimeUnit.SECONDS))
+        assertTrue(checkNotNull(response).toString(), checkNotNull(response).ok)
+        diagnostics = provider.nativeDiagnostics()
+        assertEquals("0", diagnostics["embedded_script.shell_active_command_count"])
+        assertEquals("1", diagnostics["embedded_script.bridge_resource.created_count"])
+        assertEquals("1", diagnostics["embedded_script.bridge_resource.closed_count"])
+    }
+
     private fun dispatch(
         provider: NodeBridgeCapabilityProvider,
         module: String,
@@ -248,5 +297,16 @@ class NodeBridgeResourceRegistryInstrumentationTest {
 
     private fun jsonString(raw: String): String {
         return JSONTokener(raw).nextValue() as String
+    }
+
+    private fun waitUntil(timeoutMs: Long = 3_000L, predicate: () -> Boolean): Boolean {
+        val deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(timeoutMs)
+        while (System.nanoTime() < deadline) {
+            if (predicate()) {
+                return true
+            }
+            Thread.sleep(25L)
+        }
+        return predicate()
     }
 }

@@ -96,8 +96,8 @@ class NodeBridgeRpcFuzzerInstrumentationTest {
         val requests = budget.selectCases(listOf(
             NodeBridgeRequest("unknown-module", "missing", "method", "[]", 1000L),
             NodeBridgeRequest("unknown-method", "app", "execScript", "[]", 1000L),
-            NodeBridgeRequest("wrong-arg-type", "app", "startActivity", "[42]", 1000L),
-            NodeBridgeRequest("too-many-args", "app", "startActivity", "[{},1,2,3]", 1000L),
+            NodeBridgeRequest("wrong-arg-type", "app", "startActivity", "[42]", 1000L, listOf("app.activity")),
+            NodeBridgeRequest("too-many-args", "app", "startActivity", "[{},1,2,3]", 1000L, listOf("app.activity")),
             NodeBridgeRequest("extended-unknown-module", "missingExtended", "method", "[]", 1000L),
             NodeBridgeRequest("extended-unknown-method", "dialogs", "missingExtended", "[]", 1000L),
         ), quick = 2, normal = 4)

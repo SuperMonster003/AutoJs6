@@ -344,7 +344,7 @@ Current bridge permission manifest focused instrumentation:
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeBridgePermissionManifestInstrumentationTest"
 ```
 
-This suite verifies `project.json node.permissions`, `package.json autojs6.node.permissions`, capability normalization, Android manifest permission mapping, declared `toast` dispatch, undeclared `accessibility` pre-dispatch rejection with `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`, and the JavaScript capability report exposed through `autojs6:bridge` and `autojs6:profile`.
+This suite verifies `project.json node.permissions`, `package.json autojs6.node.permissions`, capability normalization, Android manifest permission mapping, provider-side module/method capability coverage, declared `toast` dispatch, undeclared provider requests, enforced-manifest provider rejection, root-shell capability rejection before execution, packaged manifest permission mismatch detection, and the JavaScript capability report exposed through `autojs6:bridge` and `autojs6:profile`.
 
 Current `shell` bridge focused instrumentation:
 

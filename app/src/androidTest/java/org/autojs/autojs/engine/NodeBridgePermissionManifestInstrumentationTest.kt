@@ -2,10 +2,13 @@ package org.autojs.autojs.engine
 
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import java.io.File
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 class NodeBridgePermissionManifestInstrumentationTest {
 
@@ -72,6 +75,191 @@ class NodeBridgePermissionManifestInstrumentationTest {
     }
 
     @Test
+    fun kotlinRegistryDeclaresCapabilitiesForEverySupportedBridgeMethod() {
+        NodeBridgeModules.supportedMethodsByModule.forEach { (module, methods) ->
+            methods.forEach { method ->
+                val required = NodeBridgePermissionManifest.requiredCapabilitiesFor(module, method)
+                assertTrue("$module.$method must declare at least one bridge capability", required.isNotEmpty())
+                required.forEach { capability ->
+                    assertTrue(
+                        "$module.$method declares unknown bridge capability: $capability",
+                        NodeBridgePermissionManifest.definedCapabilities.contains(capability),
+                    )
+                }
+            }
+        }
+        assertEquals(
+            listOf(NodeBridgePermissionManifest.SHELL),
+            NodeBridgePermissionManifest.requiredCapabilitiesFor("shell", "exec", """["id",{"root":false}]"""),
+        )
+        assertEquals(
+            listOf(NodeBridgePermissionManifest.SHELL, NodeBridgePermissionManifest.SHELL_ROOT),
+            NodeBridgePermissionManifest.requiredCapabilitiesFor("shell", "exec", """["id",{"root":true}]"""),
+        )
+        assertEquals(
+            listOf(NodeBridgePermissionManifest.IMAGE, NodeBridgePermissionManifest.SCREEN_CAPTURE),
+            NodeBridgePermissionManifest.requiredCapabilitiesFor("image", "captureScreen"),
+        )
+    }
+
+    @Test
+    fun androidProviderRejectsUndeclaredCapabilityBeforeDispatch() {
+        val provider = AndroidNodeBridgeCapabilityProvider(context)
+        val response = dispatch(
+            provider,
+            NodeBridgeRequest(
+                id = "provider-undeclared-toast",
+                module = "toast",
+                method = "showToast",
+                argsJson = """["blocked"]""",
+                timeoutMs = 1000L,
+            ),
+        )
+
+        assertFalse(response.toString(), response.ok)
+        assertEquals(NodeRuntimeErrorCodes.BRIDGE_CAPABILITY_NOT_DECLARED, response.error?.code)
+        assertEquals("toast", response.error?.module)
+        assertEquals("showToast", response.error?.method)
+        assertEquals(listOf("toast"), response.error?.missingCapabilities)
+    }
+
+    @Test
+    fun androidProviderRejectsManifestMissingCapabilityBeforeDispatch() {
+        val workDir = File(context.cacheDir, "node-bridge-permission-provider-manifest").apply {
+            deleteRecursively()
+            check(mkdirs()) { "Failed to create bridge permission provider manifest directory: $absolutePath" }
+        }
+        File(workDir, "project.json").writeText(
+            """
+            {
+              "type": "node",
+              "node": {
+                "permissions": ["toast"]
+              }
+            }
+            """.trimIndent(),
+        )
+        val provider = AndroidNodeBridgeCapabilityProvider(
+            context,
+            NodeBridgeEngineInfo.fromContext(
+                context,
+                id = "provider-manifest-missing-capability",
+                cwd = workDir.absolutePath,
+            ),
+        )
+        val response = dispatch(
+            provider,
+            NodeBridgeRequest(
+                id = "provider-manifest-a11y",
+                module = "accessibility",
+                method = "isEnabled",
+                argsJson = "[]",
+                timeoutMs = 1000L,
+                permissions = listOf("accessibility"),
+            ),
+        )
+
+        assertFalse(response.toString(), response.ok)
+        assertEquals(NodeRuntimeErrorCodes.BRIDGE_CAPABILITY_NOT_DECLARED, response.error?.code)
+        assertEquals("accessibility", response.error?.module)
+        assertEquals("isEnabled", response.error?.method)
+        assertEquals(listOf("accessibility"), response.error?.missingCapabilities)
+    }
+
+    @Test
+    fun androidProviderRejectsRootShellWithoutRootCapabilityBeforeExecution() {
+        val workDir = File(context.cacheDir, "node-bridge-permission-root-shell").apply {
+            deleteRecursively()
+            check(mkdirs()) { "Failed to create bridge permission root shell directory: $absolutePath" }
+        }
+        val provider = AndroidNodeBridgeCapabilityProvider(
+            context,
+            NodeBridgeEngineInfo.fromContext(
+                context,
+                id = "provider-root-shell",
+                cwd = workDir.absolutePath,
+            ),
+        )
+        val response = dispatch(
+            provider,
+            NodeBridgeRequest(
+                id = "provider-root-shell-denied",
+                module = "shell",
+                method = "exec",
+                argsJson = """["id",{"root":true,"timeoutMs":1000}]""",
+                timeoutMs = 2000L,
+                permissions = listOf("shell"),
+            ),
+        )
+
+        assertFalse(response.toString(), response.ok)
+        assertEquals(NodeRuntimeErrorCodes.BRIDGE_CAPABILITY_NOT_DECLARED, response.error?.code)
+        assertEquals(listOf("shell.root"), response.error?.missingCapabilities)
+        assertEquals("0", provider.nativeDiagnostics()["embedded_script.bridge_resource.created_count"])
+    }
+
+    @Test
+    fun androidPermissionMismatchIsDerivedFromCapabilityManifest() {
+        val missing = NodeBridgePermissionManifest.missingAndroidPermissionsForCapabilities(
+            capabilities = listOf("network", "screen_capture"),
+            declaredAndroidPermissions = listOf(NodeBridgePermissionManifest.ANDROID_PERMISSION_INTERNET),
+        )
+
+        assertEquals(
+            listOf(
+                NodeBridgePermissionManifest.ANDROID_PERMISSION_FOREGROUND_SERVICE,
+                NodeBridgePermissionManifest.ANDROID_PERMISSION_FOREGROUND_SERVICE_MEDIA_PROJECTION,
+                NodeBridgePermissionManifest.ANDROID_PERMISSION_FOREGROUND_SERVICE_SPECIAL_USE,
+            ),
+            missing,
+        )
+    }
+
+    @Test
+    fun packagedManifestMismatchUsesCapabilityManifestPermissions() {
+        val workDir = File(context.cacheDir, "node-bridge-permission-packaged-mismatch").apply {
+            deleteRecursively()
+            check(mkdirs()) { "Failed to create bridge permission packaged mismatch directory: $absolutePath" }
+        }
+        File(workDir, "package.json").writeText(
+            """
+            {
+              "name": "packaged-capability-mismatch",
+              "autojs6": {
+                "node": {
+                  "permissions": ["network", "media_projection"]
+                }
+              }
+            }
+            """.trimIndent(),
+        )
+        val manifest = NodeBridgePermissionManifest.fromWorkingDirectory(workDir.absolutePath)
+
+        assertEquals(
+            listOf(
+                NodeBridgePermissionManifest.ANDROID_PERMISSION_INTERNET,
+                NodeBridgePermissionManifest.ANDROID_PERMISSION_FOREGROUND_SERVICE,
+                NodeBridgePermissionManifest.ANDROID_PERMISSION_FOREGROUND_SERVICE_MEDIA_PROJECTION,
+                NodeBridgePermissionManifest.ANDROID_PERMISSION_FOREGROUND_SERVICE_SPECIAL_USE,
+            ),
+            manifest.androidPermissions,
+        )
+        assertEquals(
+            listOf(
+                NodeBridgePermissionManifest.ANDROID_PERMISSION_FOREGROUND_SERVICE_MEDIA_PROJECTION,
+                NodeBridgePermissionManifest.ANDROID_PERMISSION_FOREGROUND_SERVICE_SPECIAL_USE,
+            ),
+            NodeBridgePermissionManifest.missingAndroidPermissionsForCapabilities(
+                manifest.permissions,
+                listOf(
+                    NodeBridgePermissionManifest.ANDROID_PERMISSION_INTERNET,
+                    NodeBridgePermissionManifest.ANDROID_PERMISSION_FOREGROUND_SERVICE,
+                ),
+            ),
+        )
+    }
+
+    @Test
     fun jsManifestAllowsDeclaredToastRejectsUndeclaredAccessibilityAndReportsCapabilities() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node bridge permission manifest focused regression")
 
@@ -128,5 +316,19 @@ class NodeBridgePermissionManifestInstrumentationTest {
         )
         assertTrue(result.stdout.contains("bridge.perm.report=true/toast/true"))
         assertTrue(result.stdout.contains("bridge.perm.pending=0"))
+    }
+
+    private fun dispatch(
+        provider: NodeBridgeCapabilityProvider,
+        request: NodeBridgeRequest,
+    ): NodeBridgeResponse {
+        val latch = CountDownLatch(1)
+        var response: NodeBridgeResponse? = null
+        provider.dispatch(request) { bridgeResponse ->
+            response = bridgeResponse
+            latch.countDown()
+        }
+        assertTrue("Timed out waiting for ${request.module}.${request.method}", latch.await(2, TimeUnit.SECONDS))
+        return checkNotNull(response) { "Missing ${request.module}.${request.method} response" }
     }
 }

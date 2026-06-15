@@ -162,6 +162,110 @@ object NodeBridgePermissionManifest {
         return values.sortedWith(compareBy({ androidPermissionOrder.indexOf(it).let { index -> if (index < 0) Int.MAX_VALUE else index } }, { it }))
     }
 
+    fun missingAndroidPermissionsForCapabilities(
+        capabilities: Iterable<String>,
+        declaredAndroidPermissions: Iterable<String>,
+    ): List<String> {
+        val declared = declaredAndroidPermissions.toSet()
+        return androidPermissionsForCapabilities(capabilities).filterNot { it in declared }
+    }
+
+    fun requiredCapabilitiesFor(request: NodeBridgeRequest): List<String> {
+        return requiredCapabilitiesFor(request.module, request.method, request.argsJson)
+    }
+
+    fun requiredCapabilitiesFor(module: String, method: String, argsJson: String = "[]"): List<String> {
+        if (!NodeBridgeModules.supports(module, method)) {
+            return emptyList()
+        }
+        val required = when (module) {
+            NodeBridgeModules.TOAST -> listOf(TOAST)
+            NodeBridgeModules.APP -> when (method) {
+                "launchPackage", "launchApp" -> listOf(APP_LAUNCH)
+                "openAppSetting" -> listOf(APP_SETTINGS)
+                "startActivity" -> listOf(APP_ACTIVITY)
+                else -> listOf(APP)
+            }
+            NodeBridgeModules.ENGINES -> when (method) {
+                "execScript", "execScriptFile" -> listOf(ENGINES, ENGINES_EXEC)
+                else -> listOf(ENGINES)
+            }
+            NodeBridgeModules.DIALOGS -> listOf(DIALOGS)
+            NodeBridgeModules.ACCESSIBILITY -> listOf(ACCESSIBILITY)
+            NodeBridgeModules.MEDIA_PROJECTION -> listOf(SCREEN_CAPTURE)
+            NodeBridgeModules.IMAGE, NodeBridgeModules.IMAGES -> when (method) {
+                "captureScreen" -> listOf(IMAGE, SCREEN_CAPTURE)
+                else -> listOf(IMAGE)
+            }
+            NodeBridgeModules.CLIPBOARD -> listOf(CLIPBOARD)
+            NodeBridgeModules.DEVICE -> listOf(DEVICE)
+            NodeBridgeModules.SHELL -> shellRequiredCapabilities(method, argsJson)
+            NodeBridgeModules.FETCH, NodeBridgeModules.WEBSOCKET -> listOf(NETWORK)
+            NodeBridgeModules.WORK_MANAGER -> listOf(WORK_MANAGER)
+            NodeBridgeModules.JAVA -> listOf(JAVA_INTEROP)
+            else -> emptyList()
+        }
+        return required.map(::normalizeCapability).distinct()
+    }
+
+    fun missingRequestCapabilitiesFor(request: NodeBridgeRequest): List<String> {
+        return missingCapabilities(
+            declaredCapabilities = request.permissions,
+            requiredCapabilities = requiredCapabilitiesFor(request),
+        )
+    }
+
+    fun missingManifestCapabilitiesFor(request: NodeBridgeRequest, manifest: Manifest): List<String> {
+        if (!manifest.enforced) {
+            return emptyList()
+        }
+        return missingCapabilities(
+            declaredCapabilities = manifest.permissions,
+            requiredCapabilities = requiredCapabilitiesFor(request),
+        )
+    }
+
+    fun missingCapabilities(
+        declaredCapabilities: Iterable<String>,
+        requiredCapabilities: Iterable<String>,
+    ): List<String> {
+        val declared = declaredCapabilities
+            .map(::normalizeCapability)
+            .filter { it.isNotEmpty() }
+            .toSet()
+        return requiredCapabilities
+            .map(::normalizeCapability)
+            .filter { it.isNotEmpty() }
+            .distinct()
+            .filterNot { required -> declaresCapability(declared, required) }
+    }
+
+    private fun shellRequiredCapabilities(method: String, argsJson: String): List<String> {
+        if (method != "exec") {
+            return listOf(SHELL)
+        }
+        val root = runCatching {
+            val args = JSONArray(argsJson.ifBlank { "[]" })
+            args.optJSONObject(1)?.optBoolean("root", false) ?: false
+        }.getOrDefault(false)
+        return if (root) {
+            listOf(SHELL, SHELL_ROOT)
+        } else {
+            listOf(SHELL)
+        }
+    }
+
+    private fun declaresCapability(declared: Set<String>, required: String): Boolean {
+        if (required == SHELL_ROOT) {
+            return SHELL_ROOT in declared
+        }
+        if (required in declared) {
+            return true
+        }
+        val dotIndex = required.indexOf('.')
+        return dotIndex > 0 && required.substring(0, dotIndex) in declared
+    }
+
     private fun buildManifest(
         enforced: Boolean,
         permissions: List<String>,

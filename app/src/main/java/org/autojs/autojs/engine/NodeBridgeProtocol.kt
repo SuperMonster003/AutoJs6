@@ -212,6 +212,7 @@ data class NodeBridgeError(
     val module: String? = null,
     val method: String? = null,
     val stack: String? = null,
+    val missingCapabilities: List<String> = emptyList(),
 ) {
     fun toJsonObject(): JSONObject = JSONObject().apply {
         put("name", name)
@@ -220,6 +221,9 @@ data class NodeBridgeError(
         module?.let { put("module", it) }
         method?.let { put("method", it) }
         stack?.let { put("stack", it) }
+        if (missingCapabilities.isNotEmpty()) {
+            put("missingCapabilities", JSONArray(missingCapabilities))
+        }
     }
 
     companion object {
@@ -231,6 +235,7 @@ data class NodeBridgeError(
                 module = value.optString("module").takeIf { it.isNotBlank() },
                 method = value.optString("method").takeIf { it.isNotBlank() },
                 stack = value.optString("stack").takeIf { it.isNotBlank() },
+                missingCapabilities = value.optionalStringArray("missingCapabilities"),
             )
         }
 
@@ -302,6 +307,17 @@ data class NodeBridgeError(
             )
         }
 
+        fun capabilityNotDeclared(module: String, method: String, missingCapabilities: List<String>): NodeBridgeError {
+            val missing = missingCapabilities.filter { it.isNotBlank() }.distinct()
+            return NodeBridgeError(
+                message = "AutoJs6 bridge capability is not declared for $module.$method: ${missing.joinToString(", ")}",
+                code = NodeRuntimeErrorCodes.BRIDGE_CAPABILITY_NOT_DECLARED,
+                module = module,
+                method = method,
+                missingCapabilities = missing,
+            )
+        }
+
         fun network(message: String, code: String, module: String? = null, method: String? = null): NodeBridgeError {
             return NodeBridgeError(
                 message = message,
@@ -331,6 +347,13 @@ data class NodeBridgeError(
 
 private fun JSONObject.optNonBlankString(name: String): String? {
     return optString(name).takeIf { it.isNotBlank() }
+}
+
+private fun JSONObject.optionalStringArray(name: String): List<String> {
+    val array = optJSONArray(name) ?: return emptyList()
+    return (0 until array.length()).mapNotNull { index ->
+        (array.opt(index) as? String)?.takeIf { it.isNotBlank() }
+    }
 }
 
 data class NodeBridgeEngineInfo(
@@ -519,6 +542,9 @@ class AndroidNodeBridgeCapabilityProvider(
     private val networkDiagnostics = ControlledFetchDiagnostics()
     private val websocketSessions = ConcurrentHashMap<String, ControlledWebSocketSession>()
     private val websocketDiagnostics = ControlledWebSocketDiagnostics()
+    private val bridgePermissionManifest by lazy {
+        NodeBridgePermissionManifest.fromWorkingDirectory(engineInfo.cwd)
+    }
     private val workManagerTasks = ConcurrentHashMap<String, JSONObject>()
     private val javaHandles = ConcurrentHashMap<String, Any>()
     private val resourceRegistry = NodeBridgeResourceRegistry(engineInfo.id)
@@ -529,6 +555,11 @@ class AndroidNodeBridgeCapabilityProvider(
     private val accessibilityRateLimiter = NodeBridgeRateLimiter()
 
     override fun dispatch(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        val auditFailure = capabilityAuditFailure(request)
+        if (auditFailure != null) {
+            callback(NodeBridgeResponse.failure(request.id, auditFailure))
+            return
+        }
         when {
             request.module == NodeBridgeModules.TOAST && request.method in NodeBridgeModules.toastMethods -> dispatchToast(request, callback)
             request.module == NodeBridgeModules.APP && request.method in NodeBridgeModules.appMethods -> dispatchApp(request, callback)
@@ -578,6 +609,36 @@ class AndroidNodeBridgeCapabilityProvider(
             request.id,
             NodeBridgeError.bridgeUnavailable(request.module, request.method),
         )
+    }
+
+    private fun capabilityAuditFailure(request: NodeBridgeRequest): NodeBridgeError? {
+        val requiredCapabilities = NodeBridgePermissionManifest.requiredCapabilitiesFor(request)
+        if (requiredCapabilities.isEmpty()) {
+            return null
+        }
+        val missingRequestCapabilities = NodeBridgePermissionManifest.missingCapabilities(
+            declaredCapabilities = request.permissions,
+            requiredCapabilities = requiredCapabilities,
+        )
+        if (missingRequestCapabilities.isNotEmpty()) {
+            return NodeBridgeError.capabilityNotDeclared(
+                request.module,
+                request.method,
+                missingRequestCapabilities,
+            )
+        }
+        val missingManifestCapabilities = NodeBridgePermissionManifest.missingCapabilities(
+            declaredCapabilities = bridgePermissionManifest.permissions,
+            requiredCapabilities = requiredCapabilities,
+        )
+        if (bridgePermissionManifest.enforced && missingManifestCapabilities.isNotEmpty()) {
+            return NodeBridgeError.capabilityNotDeclared(
+                request.module,
+                request.method,
+                missingManifestCapabilities,
+            )
+        }
+        return null
     }
 
     private fun dispatchEngines(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {

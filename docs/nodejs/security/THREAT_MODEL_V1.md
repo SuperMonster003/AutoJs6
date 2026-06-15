@@ -74,7 +74,7 @@ Remaining risk: Desktop Node parity is not complete. Any compatibility expansion
 
 Risk: Malformed request/response payloads, duplicate callbacks, missing capability declarations, pending privileged calls, or service destroy can leak privilege or hang Node.
 
-Mitigation: Strict JSON request shape, stable malformed errors, capability manifest, provider dispatch registry, at-most-once callback completion, timeout, pending-call cleanup, fake providers, service-destroy rejection.
+Mitigation: Strict JSON request shape, stable malformed errors, capability manifest, provider-side pre-dispatch capability audit, provider dispatch registry, at-most-once callback completion, timeout, pending-call cleanup, fake providers, service-destroy rejection.
 
 Tests: `NodeAutoJsBridgeInstrumentationTest`, `NodeBridgeRpcFuzzerInstrumentationTest`, `NodeBridgePermissionManifestInstrumentationTest`, `NodeBridgeResourceRegistryInstrumentationTest`, `NodeBridgeConcurrencyLimitsInstrumentationTest`.
 
@@ -134,7 +134,7 @@ Remaining risk: Live provider enablement needs privacy, permission, TLS, proxy, 
 
 Risk: Packaged APK misses `NativeNodeEmbeddedScriptService`, native libraries, ABI pruning, foreground-service permissions, bridge-required permissions, or encrypted entry metadata.
 
-Mitigation: Packaged preflight and output verifier check service manifest, native libraries per ABI, FGS permissions, x86 fail-fast, moduleSources, encrypted entry, and capability-derived Android permissions.
+Mitigation: Packaged preflight and output verifier check service manifest, native libraries per ABI, FGS permissions, x86 fail-fast, moduleSources, encrypted entry, and capability-derived Android permissions from `NodeBridgePermissionManifest`.
 
 Tests: `EmbeddedNodePackagedApkSmokeTest`, `embeddedNodePackagedApkOutputVerify`, `embeddedNodePackagedDiagnosticReport`, `verifyNodeTemplateReproducibility`.
 

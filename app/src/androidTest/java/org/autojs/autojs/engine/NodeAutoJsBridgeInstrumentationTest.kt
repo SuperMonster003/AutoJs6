@@ -786,6 +786,7 @@ class NodeAutoJsBridgeInstrumentationTest {
                 method = "isEnabled",
                 argsJson = "[]",
                 timeoutMs = 1000L,
+                permissions = listOf("accessibility"),
             ),
             NodeBridgeRequest(
                 id = "accessibility-click",
@@ -793,6 +794,7 @@ class NodeAutoJsBridgeInstrumentationTest {
                 method = "click",
                 argsJson = "[1,2]",
                 timeoutMs = 1000L,
+                permissions = listOf("accessibility"),
             ),
         ).forEach { request ->
             provider.dispatch(request) { response ->
@@ -986,6 +988,7 @@ class NodeAutoJsBridgeInstrumentationTest {
                 method = "requestScreenCapture",
                 argsJson = """[{"orientation":"auto"}]""",
                 timeoutMs = 1000L,
+                permissions = listOf("media_projection"),
             ),
             NodeBridgeRequest(
                 id = "image-unavailable",
@@ -993,6 +996,7 @@ class NodeAutoJsBridgeInstrumentationTest {
                 method = "readImage",
                 argsJson = """["./template.png"]""",
                 timeoutMs = 1000L,
+                permissions = listOf("image"),
             ),
         ).forEach { request ->
             provider.dispatch(request) { response ->
@@ -1057,6 +1061,7 @@ class NodeAutoJsBridgeInstrumentationTest {
                 method = "startActivity",
                 argsJson = "[{}]",
                 timeoutMs = 1000L,
+                permissions = listOf("app.activity"),
             ),
         ) {
             response = it
@@ -1083,6 +1088,7 @@ class NodeAutoJsBridgeInstrumentationTest {
                 method = "confirm",
                 argsJson = """["Title","Message"]""",
                 timeoutMs = 1000L,
+                permissions = listOf("dialogs"),
             ),
         ) {
             response = it
