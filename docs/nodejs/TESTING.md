@@ -100,6 +100,25 @@ license-noted CommonJS package snapshots. It covers small utilities, nested depe
 querystring/URL utilities, glob/path matching, crypto hashing, stream utilities, and zlib buffer utilities. It also
 checks that the corpus contains no native addons, no install/postinstall scripts, and no ESM-only package metadata.
 
+Desktop Node differential harness:
+
+```powershell
+node tools/nodejs/differential/run-differential-tests.js
+```
+
+This host-side script runs the fixed real npm fixtures under desktop Node 24 and writes:
+
+```text
+build/reports/nodejs/differential/desktop-node-differential.json
+build/reports/nodejs/differential/desktop-node-differential.md
+```
+
+`NodeRealNpmCompatInstrumentationTest` emits `realnpm.differential.result=...` JSON lines for each fixture. The Android
+Gradle plugin stores these lines in the connected test logcat output, for example under
+`app/build/outputs/androidTest-results/connected/.../logcat-org.autojs.autojs.engine.NodeRealNpmCompatInstrumentationTest-realPureJavaScriptPackageCorpusPasses.txt`.
+Pass that file to the harness with `--autojs-log <file>` to compare AutoJs6 against the desktop baseline. Differences are
+classified as matched, expected AutoJs6 restriction, unsupported, flaky, or bug.
+
 Current security regression instrumentation:
 
 ```powershell

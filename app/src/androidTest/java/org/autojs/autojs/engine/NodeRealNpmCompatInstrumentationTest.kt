@@ -77,18 +77,60 @@ class NodeRealNpmCompatInstrumentationTest {
             val corpusRoot = File(workDir, CORPUS_ASSET_DIR)
             val fixtures = readFixtures(corpusRoot)
             val fixtureNames = fixtures.map { it.name }
+            val expectedByFixture = fixtures.associate { fixture ->
+                fixture.name to File(corpusRoot, "${fixture.name}/expected.txt").readText().trim()
+            }
             val source = """
                 "nodejs";
                 (async () => {
                   const fixtures = ${fixtureNames.joinToString(prefix = "[", postfix = "]") { jsString(it) }};
+                  const expected = ${jsObject(expectedByFixture)};
                   for (const name of fixtures) {
                     const run = require("./$CORPUS_ASSET_DIR/" + name + "/test.cjs");
                     if (typeof run !== "function") {
                       throw new Error("real npm fixture " + name + " does not export a runner");
                     }
-                    const result = await run();
-                    if (result !== "PASS") {
-                      throw new Error("real npm fixture " + name + " returned " + result);
+                    const captured = [];
+                    const originalLog = console.log;
+                    console.log = function captureFixtureLog() {
+                      const line = Array.prototype.map.call(arguments, String).join(" ");
+                      captured.push(line);
+                      return originalLog.apply(console, arguments);
+                    };
+                    try {
+                      const result = await run();
+                      if (result !== "PASS") {
+                        throw new Error("real npm fixture " + name + " returned " + result);
+                      }
+                      console.log = originalLog;
+                      const stdout = captured.join("\n");
+                      originalLog("realnpm.differential.result=" + JSON.stringify({
+                        runtime: "autojs6",
+                        fixture: name,
+                        exitCode: 0,
+                        stdout,
+                        stderr: "",
+                        errorCode: "",
+                        errorMessage: "",
+                        errorMessagePattern: "",
+                        expectedOutput: expected[name] || "",
+                        expectedOutputFound: stdout.indexOf(expected[name] || "") >= 0,
+                      }));
+                    } catch (error) {
+                      console.log = originalLog;
+                      originalLog("realnpm.differential.result=" + JSON.stringify({
+                        runtime: "autojs6",
+                        fixture: name,
+                        exitCode: 1,
+                        stdout: captured.join("\n"),
+                        stderr: "",
+                        errorCode: String(error && error.code || ""),
+                        errorMessage: String(error && error.message || error),
+                        errorMessagePattern: String(error && error.message || error).replace(/\d+/g, "<n>"),
+                        expectedOutput: expected[name] || "",
+                        expectedOutputFound: false,
+                      }));
+                      throw error;
                     }
                     console.log("realnpm.fixture." + name + "=PASS");
                   }
@@ -117,8 +159,16 @@ class NodeRealNpmCompatInstrumentationTest {
                     NodeEmbeddedTestHarness.describeResult("missing fixture pass marker for ${fixture.name}", result),
                     result.stdout.contains("realnpm.fixture.${fixture.name}=PASS"),
                 )
+                assertTrue(
+                    NodeEmbeddedTestHarness.describeResult("missing differential JSON for ${fixture.name}", result),
+                    result.stdout.contains("\"runtime\":\"autojs6\",\"fixture\":\"${fixture.name}\""),
+                )
             }
             assertTrue(result.stdout.contains("realnpm.corpus.total=${fixtures.size}"))
+
+            result.stdout.lineSequence()
+                .filter { it.startsWith("realnpm.differential.result=") }
+                .forEach(::println)
         } finally {
             workDir.deleteRecursively()
         }
@@ -155,6 +205,12 @@ class NodeRealNpmCompatInstrumentationTest {
                 }
             }
             append('"')
+        }
+    }
+
+    private fun jsObject(values: Map<String, String>): String {
+        return values.entries.joinToString(prefix = "{", postfix = "}") { (key, value) ->
+            "${jsString(key)}:${jsString(value)}"
         }
     }
 

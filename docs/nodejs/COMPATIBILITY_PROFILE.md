@@ -110,6 +110,11 @@ patterns rather than broad npm compatibility claims:
 These fixtures are intentionally checked in. Tests must not fetch packages from the network, run install/postinstall
 scripts, load native addons, or include ESM-only packages.
 
+`tools/nodejs/differential/run-differential-tests.js` runs the same fixed fixtures under desktop Node 24 and writes a
+JSON/Markdown report under `build/reports/nodejs/differential/`. When supplied with `realnpm.differential.result=...`
+lines emitted by `NodeRealNpmCompatInstrumentationTest`, it compares normalized stdout, exit code, error code, and error
+message pattern, then classifies differences as matched, expected AutoJs6 restriction, unsupported, flaky, or bug.
+
 ## Filesystem Profile
 
 Supported:

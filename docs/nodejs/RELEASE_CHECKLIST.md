@@ -154,6 +154,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] pure-JS npm corpus smoke
 - [ ] fixed real npm package corpus smoke
 - [ ] real npm corpus has license notes, no install scripts, no native addons, and no ESM-only packages
+- [ ] desktop Node differential report generated for fixed real npm corpus
 
 ## Lifecycle
 
