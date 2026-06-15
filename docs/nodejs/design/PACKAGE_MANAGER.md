@@ -102,7 +102,7 @@ AutoJs6 should use a two-stage model:
 1. User or CI vendors dependencies outside the Android runtime.
 2. AutoJs6 verifies and bundles the dependency tree without executing package code.
 
-The future `bundleNodeDependencies` task should consume an existing project directory and produce:
+The `:app:bundleNodeDependencies` task consumes an existing project directory and produces:
 
 - sanitized dependency bundle
 - dependency manifest
@@ -190,4 +190,24 @@ Unsupported:
 
 ## Follow-Up Implementation
 
-Task 76 should implement the safe build-time dependency bundler. It must not execute package code, and it must produce machine-readable diagnostics that can be consumed by release gates.
+Task 76 adds the first build-time dependency bundler:
+
+```powershell
+.\gradlew.bat --console=plain :app:bundleNodeDependencies
+.\gradlew.bat --console=plain :app:verifyNodeDependencyBundlerFixtures
+```
+
+Default input is `sample/nodejs/npm-pure-js-cjs`. Override with:
+
+```powershell
+.\gradlew.bat --console=plain :app:bundleNodeDependencies "-Pautojs.nodejs.bundle.projectRoot=D:\path\to\project"
+```
+
+Outputs:
+
+- `app/build/nodejs/dependency-bundle/project/`
+- `app/build/reports/nodejs/dependencies/dependency-manifest.json`
+- `app/build/reports/nodejs/dependencies/dependency-size-report.txt`
+- `app/build/reports/nodejs/dependencies/dependency-rejections.txt`
+
+The task does not execute package code. It rejects native addon files, lifecycle scripts, unsupported `.bin` entries, symlinks, path escapes, oversized files/packages/trees, excessive package counts, and default-profile ESM-only package metadata.

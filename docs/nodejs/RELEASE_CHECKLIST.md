@@ -156,6 +156,8 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] real npm corpus has license notes, no install scripts, no native addons, and no ESM-only packages
 - [ ] desktop Node differential report generated for fixed real npm corpus
 - [ ] package manager policy remains vendored/build-time only; no runtime install, lifecycle scripts, native addons, or unchecked `.bin` execution
+- [ ] `:app:bundleNodeDependencies` generated sanitized bundle manifest, size report, and rejection report
+- [ ] `:app:verifyNodeDependencyBundlerFixtures` rejects unsafe native addon, lifecycle script, and `.bin` fixture
 
 ## Lifecycle
 

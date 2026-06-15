@@ -115,6 +115,11 @@ JSON/Markdown report under `build/reports/nodejs/differential/`. When supplied w
 lines emitted by `NodeRealNpmCompatInstrumentationTest`, it compares normalized stdout, exit code, error code, and error
 message pattern, then classifies differences as matched, expected AutoJs6 restriction, unsupported, flaky, or bug.
 
+`:app:bundleNodeDependencies` is the host-side dependency bundling gate. It consumes a project that already has
+`package.json` and `node_modules`, validates the tree without running package code, copies a sanitized bundle to
+`app/build/nodejs/dependency-bundle/project/`, and writes a manifest plus size/rejection reports under
+`app/build/reports/nodejs/dependencies/`.
+
 ## Filesystem Profile
 
 Supported:

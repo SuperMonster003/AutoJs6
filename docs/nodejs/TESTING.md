@@ -119,6 +119,18 @@ Gradle plugin stores these lines in the connected test logcat output, for exampl
 Pass that file to the harness with `--autojs-log <file>` to compare AutoJs6 against the desktop baseline. Differences are
 classified as matched, expected AutoJs6 restriction, unsupported, flaky, or bug.
 
+Current dependency bundler verification:
+
+```powershell
+.\gradlew.bat --console=plain :app:bundleNodeDependencies
+.\gradlew.bat --console=plain :app:verifyNodeDependencyBundlerFixtures
+```
+
+`bundleNodeDependencies` validates an existing project root with `package.json` and `node_modules`, then writes a
+sanitized bundle plus `dependency-manifest.json`, `dependency-size-report.txt`, and `dependency-rejections.txt`.
+`verifyNodeDependencyBundlerFixtures` confirms the checked-in sample project passes and an unsafe fixture is rejected for
+native addon, lifecycle script, and unchecked `.bin` entries.
+
 Current security regression instrumentation:
 
 ```powershell
