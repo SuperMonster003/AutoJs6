@@ -125,15 +125,15 @@ Acceptance:
 
 ### Gate 2: First Paint And File Open
 
-- [ ] Open a normal `.js` file from the AutoJs6 file manager 10 times.
-- [ ] Repeat 5 times in dark theme.
-- [ ] Repeat 5 times in light theme.
+- [x] Open a normal `.js` file from the AutoJs6 file manager 10 times.
+- [x] Repeat 5 times in dark theme.
+- [x] Repeat 5 times in light theme.
 
 Acceptance:
 
-- [ ] No old file-list frame flashes.
-- [ ] No white first frame or half-initialized ACE surface appears.
-- [ ] First-paint overlay and editor background remain coherent.
+- [x] No old file-list frame flashes.
+- [x] No white first frame or half-initialized ACE surface appears.
+- [x] First-paint overlay and editor background remain coherent.
 
 ### Gate 3: IME Show/Hide And Tap Anchors
 

@@ -42,8 +42,8 @@ path has a recorded result.
 | Native default | STATIC PASS | Release gate confirms Native resource/default path; device preference is ACE explicit opt-in. |
 | LSP default-off | DEVICE PASS | Device preference has `key_$_ace_lsp_enabled=false`. |
 | VisualEditorAce unavailable | STATIC PASS | Confirmed by release gate; device UI sweep still TBD. |
-| First paint | TBD | |
-| File-manager open repeat | TBD | |
+| First paint | DEVICE SMOKE PASS | File-manager open sampling showed coherent ACE surfaces in dark and light themes; see Gate 2 notes. |
+| File-manager open repeat | DEVICE SMOKE PASS | 10 dark-theme opens and 5 light-theme opens of `ace-release-gate.js` reached `EditActivity`; no fallback/fatal signal in logcat. |
 | Keyboard show/hide | TBD | |
 | Keyboard stress | TBD | |
 | Click anchor accuracy | TBD | |
@@ -72,13 +72,37 @@ Record copied ACE diagnostics for every failure or ambiguous result.
 
 | Scenario | Diagnostics reference | Notes |
 | --- | --- | --- |
-| No device diagnostics yet | TBD | Awaiting Sony XQ-AT72 manual gate. |
+| Gate 2 file-manager open smoke | N/A | No failure diagnostics were produced; screenshot samples were reviewed during the run. |
+
+## Gate 2 Notes
+
+- Time: 2026-06-15 23:14-23:20 CST.
+- Test script: `/sdcard/Scripts/ace-release-gate.js`, 119 B, created for
+  this gate and removed after the run.
+- Dark theme: 10 opens from the AutoJs6 file manager edit icon. Screenshots
+  were sampled at about 350 ms and 1200 ms after each tap; `EditActivity`
+  focus was observed in 10/10 rounds.
+- Light theme: temporarily set the test package prefs to
+  `key_$_night_mode_enabled=false`,
+  `key_$_auto_night_mode_enabled=false`, and
+  `key_$_night_mode=key_$_night_mode_always_off`; restored the original prefs
+  immediately after the five light-theme rounds. `EditActivity` focus was
+  observed in 5/5 rounds.
+- Reviewed dark samples from rounds 1, 5, and 10 and light samples from rounds
+  1 and 5. The samples showed the correct file content, coherent ACE editor
+  background, and no white/black/half-initialized editor surface.
+- Logcat during both runs had no `AndroidRuntime FATAL EXCEPTION`, ACE
+  fallback, renderer-gone, or fatal ACE signal. IME remained hidden.
+- This is an ADB screenshot-sampling smoke result, not a high-frame-rate video
+  capture. Treat any later human-observed transition flash as a new Gate 2
+  finding.
 
 ## Blockers
 
 ### P0
 
-- No automated P0 blocker found in preflight. Device P0 status is TBD.
+- No automated P0 blocker found in preflight. Gate 2 device smoke found no P0
+  first-paint or file-open blocker.
 
 ### P1
 
