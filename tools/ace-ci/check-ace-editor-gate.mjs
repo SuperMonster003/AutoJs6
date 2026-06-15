@@ -20,6 +20,10 @@ const CHECKS = [
     script: "tools/ace-completion/verify-autojs6-api-model.mjs",
   },
   {
+    label: "AutoJs6 Pro-only API detection",
+    script: "tools/ace-completion/verify-autojs6-pro-only.mjs",
+  },
+  {
     label: "AutoJs6 completion index verification",
     script: "tools/ace-completion/verify-autojs6-indices.mjs",
   },

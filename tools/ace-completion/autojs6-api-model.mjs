@@ -2,13 +2,14 @@ import fs from "node:fs";
 import path from "node:path";
 import {
   BUNDLED_AUTOJS6_DTS_ROOT,
+  PRO_ONLY_COMPLETION_NAMES,
+  isProOnlyCompletionName,
   normalizeMember,
   relativeToRoot,
 } from "./indices-utils.mjs";
 
 const API_MODEL_VERSION = 1;
 const IDENTIFIER_PATTERN = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
-const PRO_ONLY_NAMES = new Set(["autojsPro", "autojspro", "pro", "uiObject"]);
 const INTERNAL_GLOBAL_PREFIXES = ["$", "__"];
 const MEMBER_KINDS = new Set(["function", "member", "module", "variable"]);
 
@@ -27,13 +28,15 @@ export function buildAutoJs6ApiModel(dtsRoot = BUNDLED_AUTOJS6_DTS_ROOT) {
     .map((fileName) => `\n// ${fileName}\n${fs.readFileSync(path.join(resolvedRoot, fileName), "utf8")}`)
     .join("\n");
   const parsedText = stripComments(dtsText);
-  const internalTypes = parseInternalTypes(parsedText);
-  const globalDeclarations = parseGlobalDeclarations(parsedText);
+  const filteredEntries = [];
+  const internalTypes = parseInternalTypes(parsedText, filteredEntries);
+  const globalDeclarations = parseGlobalDeclarations(parsedText, filteredEntries);
   const globalFunctions = dedupeNames(globalDeclarations.functions);
   const globalVariables = dedupeNames(globalDeclarations.variables);
-  const modules = buildDeclarationModules(internalTypes, globalDeclarations.moduleBindings);
+  const modules = buildDeclarationModules(internalTypes, globalDeclarations.moduleBindings, filteredEntries);
   const declarationBackedMemberCount = modules
     .reduce((count, moduleSpec) => count + moduleSpec.members.length, 0);
+  const filteredSummary = summarizeFilteredEntries(filteredEntries);
 
   return {
     version: API_MODEL_VERSION,
@@ -43,9 +46,10 @@ export function buildAutoJs6ApiModel(dtsRoot = BUNDLED_AUTOJS6_DTS_ROOT) {
       path: relativeToRoot(path.join(resolvedRoot, fileName)),
     })),
     filters: {
-      proOnlyNames: [...PRO_ONLY_NAMES].sort((a, b) => a.localeCompare(b)),
+      proOnlyNames: [...PRO_ONLY_COMPLETION_NAMES].sort((a, b) => a.localeCompare(b)),
       internalGlobalPrefixes: [...INTERNAL_GLOBAL_PREFIXES],
     },
+    filteredEntries,
     moduleBindings: [...globalDeclarations.moduleBindings.entries()]
       .map(([moduleName, typeName]) => ({
         moduleName,
@@ -64,6 +68,8 @@ export function buildAutoJs6ApiModel(dtsRoot = BUNDLED_AUTOJS6_DTS_ROOT) {
       declarationBackedMemberCount,
       globalFunctionCount: globalFunctions.length,
       globalVariableCount: globalVariables.length,
+      proOnlyFilteredCount: filteredSummary.proOnly,
+      internalFilteredCount: filteredSummary.internal,
     },
   };
 }
@@ -103,6 +109,9 @@ export function validateApiModel(apiModel) {
   if (!Array.isArray(apiModel.files) || apiModel.files.length === 0) {
     errors.push("api model files must be a non-empty array");
   }
+  if (!Array.isArray(apiModel.filteredEntries)) {
+    errors.push("api model filteredEntries must be an array");
+  }
   if (!Array.isArray(apiModel.moduleBindings)) {
     errors.push("api model moduleBindings must be an array");
   }
@@ -139,6 +148,10 @@ export function validateApiModel(apiModel) {
     validateModelModule(moduleSpec, errors, seenModules);
   }
 
+  for (const entry of apiModel.filteredEntries || []) {
+    validateFilteredEntry(entry, errors);
+  }
+
   for (const field of ["functions", "variables"]) {
     const entries = apiModel.globals && apiModel.globals[field];
     if (!Array.isArray(entries)) {
@@ -169,6 +182,13 @@ export function validateApiModel(apiModel) {
   if (summary.declarationBackedMemberCount !== actualMemberCount) {
     errors.push("api model summary declarationBackedMemberCount is stale");
   }
+  const filteredSummary = summarizeFilteredEntries(apiModel.filteredEntries || []);
+  if (summary.proOnlyFilteredCount !== filteredSummary.proOnly) {
+    errors.push("api model summary proOnlyFilteredCount is stale");
+  }
+  if (summary.internalFilteredCount !== filteredSummary.internal) {
+    errors.push("api model summary internalFilteredCount is stale");
+  }
 
   return errors;
 }
@@ -192,6 +212,8 @@ export function renderApiModelReport(apiModel) {
     `- Declaration-backed member count: ${apiModel.summary.declarationBackedMemberCount}`,
     `- Global function count: ${apiModel.summary.globalFunctionCount}`,
     `- Global variable count: ${apiModel.summary.globalVariableCount}`,
+    `- Pro-only filtered count: ${apiModel.summary.proOnlyFilteredCount}`,
+    `- Internal filtered count: ${apiModel.summary.internalFilteredCount}`,
     "",
     "## Declaration Files",
     "",
@@ -212,7 +234,7 @@ function listAutoJs6DtsFiles(dtsRoot) {
     .sort((a, b) => a.localeCompare(b));
 }
 
-function parseInternalTypes(text) {
+function parseInternalTypes(text, filteredEntries) {
   const types = new Map();
   const namespaceRegex = /declare\s+namespace\s+Internal\s*\{/g;
   let match;
@@ -223,7 +245,7 @@ function parseInternalTypes(text) {
       continue;
     }
     const namespaceBody = text.slice(openBrace + 1, closeBrace);
-    for (const declaration of parseTopLevelTypeDeclarations(namespaceBody)) {
+    for (const declaration of parseTopLevelTypeDeclarations(namespaceBody, filteredEntries)) {
       const existing = types.get(declaration.name) || [];
       types.set(declaration.name, mergeMembers(existing, declaration.members));
     }
@@ -232,7 +254,7 @@ function parseInternalTypes(text) {
   return types;
 }
 
-function parseTopLevelTypeDeclarations(namespaceBody) {
+function parseTopLevelTypeDeclarations(namespaceBody, filteredEntries) {
   const declarations = [];
   const typeRegex = /\b(?:export\s+)?(?:abstract\s+)?(?:class|interface)\s+([A-Za-z_$][A-Za-z0-9_$]*)[^{};]*\{/g;
   let match;
@@ -247,18 +269,30 @@ function parseTopLevelTypeDeclarations(namespaceBody) {
     }
     declarations.push({
       name: match[1],
-      members: parseTypeMembers(namespaceBody.slice(openBrace + 1, closeBrace)),
+      members: parseTypeMembers(
+        namespaceBody.slice(openBrace + 1, closeBrace),
+        match[1],
+        filteredEntries,
+      ),
     });
     typeRegex.lastIndex = closeBrace + 1;
   }
   return declarations;
 }
 
-function parseTypeMembers(body) {
+function parseTypeMembers(body, owner, filteredEntries) {
   const members = [];
   for (const declaration of splitTopLevelStatements(body)) {
     const member = parseMemberDeclaration(declaration);
-    if (member && isPublicCompletionName(member.name)) {
+    if (!member) {
+      continue;
+    }
+    const filterReason = completionFilterReason(member.name);
+    if (filterReason) {
+      recordFilteredEntry(filteredEntries, member.name, filterReason, "member", owner);
+      continue;
+    }
+    if (isIdentifierName(member.name)) {
       members.push(member);
     }
   }
@@ -309,7 +343,7 @@ function parseMemberDeclaration(rawDeclaration) {
   return null;
 }
 
-function parseGlobalDeclarations(text) {
+function parseGlobalDeclarations(text, filteredEntries) {
   const functions = [];
   const variables = [];
   const moduleBindings = new Map();
@@ -318,7 +352,15 @@ function parseGlobalDeclarations(text) {
   let match;
   while ((match = functionRegex.exec(text)) !== null) {
     const name = match[1];
-    if (braceDepthAt(text, match.index) === 0 && isPublicCompletionName(name)) {
+    if (braceDepthAt(text, match.index) !== 0) {
+      continue;
+    }
+    const filterReason = completionFilterReason(name);
+    if (filterReason) {
+      recordFilteredEntry(filteredEntries, name, filterReason, "global_function");
+      continue;
+    }
+    if (isIdentifierName(name)) {
       functions.push(name);
     }
   }
@@ -327,7 +369,15 @@ function parseGlobalDeclarations(text) {
   while ((match = variableRegex.exec(text)) !== null) {
     const name = match[1];
     const type = collapseWhitespace(match[2]);
-    if (braceDepthAt(text, match.index) !== 0 || !isPublicCompletionName(name)) {
+    if (braceDepthAt(text, match.index) !== 0) {
+      continue;
+    }
+    const filterReason = completionFilterReason(name);
+    if (filterReason) {
+      recordFilteredEntry(filteredEntries, name, filterReason, "global_variable");
+      continue;
+    }
+    if (!isIdentifierName(name)) {
       continue;
     }
     const internalTypeMatch = /^Internal\.([A-Za-z_$][A-Za-z0-9_$]*)$/.exec(type);
@@ -345,11 +395,16 @@ function parseGlobalDeclarations(text) {
   };
 }
 
-function buildDeclarationModules(internalTypes, moduleBindings) {
+function buildDeclarationModules(internalTypes, moduleBindings, filteredEntries) {
   const modules = [];
   for (const [moduleName, typeName] of moduleBindings.entries()) {
     const members = internalTypes.get(typeName) || [];
-    if (members.length === 0 || !isPublicCompletionName(moduleName)) {
+    const filterReason = completionFilterReason(moduleName);
+    if (filterReason) {
+      recordFilteredEntry(filteredEntries, moduleName, filterReason, "module_binding", typeName);
+      continue;
+    }
+    if (members.length === 0 || !isIdentifierName(moduleName)) {
       continue;
     }
     modules.push({
@@ -503,6 +558,25 @@ function validateModelGlobal(entry, field, errors) {
   const expectedKind = field === "functions" ? "function" : "variable";
   if (entry.kind !== expectedKind) {
     errors.push(`api model globals.${field}.${entry.name} kind must be ${expectedKind}`);
+  }
+}
+
+function validateFilteredEntry(entry, errors) {
+  if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
+    errors.push(`api model filtered entry must be an object: ${JSON.stringify(entry)}`);
+    return;
+  }
+  if (!isIdentifierName(entry.name)) {
+    errors.push(`api model filtered entry has invalid name: ${entry.name}`);
+  }
+  if (!["pro_only", "internal_global"].includes(entry.reason)) {
+    errors.push(`api model filtered entry has invalid reason: ${entry.reason}`);
+  }
+  if (!["global_function", "global_variable", "member", "module_binding"].includes(entry.scope)) {
+    errors.push(`api model filtered entry has invalid scope: ${entry.scope}`);
+  }
+  if (entry.owner != null && typeof entry.owner !== "string") {
+    errors.push(`api model filtered entry owner must be a string: ${JSON.stringify(entry)}`);
   }
 }
 
@@ -746,9 +820,48 @@ function stripComments(text) {
 }
 
 function isPublicCompletionName(name) {
-  return IDENTIFIER_PATTERN.test(name) &&
-    !PRO_ONLY_NAMES.has(name) &&
-    !INTERNAL_GLOBAL_PREFIXES.some((prefix) => name.startsWith(prefix));
+  return isIdentifierName(name) && !completionFilterReason(name);
+}
+
+function isIdentifierName(name) {
+  return IDENTIFIER_PATTERN.test(String(name || ""));
+}
+
+function completionFilterReason(name) {
+  const value = String(name || "");
+  if (!isIdentifierName(value)) {
+    return null;
+  }
+  if (isProOnlyCompletionName(value)) {
+    return "pro_only";
+  }
+  if (INTERNAL_GLOBAL_PREFIXES.some((prefix) => value.startsWith(prefix))) {
+    return "internal_global";
+  }
+  return null;
+}
+
+function recordFilteredEntry(entries, name, reason, scope, owner) {
+  if (!entries) {
+    return;
+  }
+  const entry = {
+    name,
+    reason,
+    scope,
+    ...(owner ? { owner } : {}),
+  };
+  const key = `${entry.reason}:${entry.scope}:${entry.owner || ""}:${entry.name}`;
+  if (!entries.some((existing) => `${existing.reason}:${existing.scope}:${existing.owner || ""}:${existing.name}` === key)) {
+    entries.push(entry);
+  }
+}
+
+function summarizeFilteredEntries(entries) {
+  return {
+    proOnly: entries.filter((entry) => entry.reason === "pro_only").length,
+    internal: entries.filter((entry) => entry.reason === "internal_global").length,
+  };
 }
 
 function collapseWhitespace(value) {

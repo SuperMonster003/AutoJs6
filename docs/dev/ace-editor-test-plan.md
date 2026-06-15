@@ -428,19 +428,22 @@ Steps:
 2. Run `node tools/ace-completion/generate-autojs6-indices.mjs`.
 3. Run `node tools/ace-completion/generate-dts.mjs`.
 4. Run `node tools/ace-completion/verify-autojs6-api-model.mjs`.
-5. Run `node tools/ace-completion/verify-autojs6-indices.mjs`.
-6. Run `node tools/ace-completion/test-completer.mjs`.
+5. Run `node tools/ace-completion/verify-autojs6-pro-only.mjs`.
+6. Run `node tools/ace-completion/verify-autojs6-indices.mjs`.
+7. Run `node tools/ace-completion/test-completer.mjs`.
 
 Expected:
 - All commands pass.
 - Common AutoJs6 API completions are present.
 - Common AutoJs6 module member completions are declaration-backed in the intermediate API model.
+- Reserved Pro-only API names are absent from source and runtime indices.
 - Accepting a popup item by Enter and by touch does not report `JS_RUNTIME_ERROR`.
 - Missing indices and legacy fallback paths do not throw.
 
 Failure logs:
 - `Missing required global completion`
 - `Missing required member completion`
+- `contains Pro-only completion`
 
 ### ACE-LSP-001: LSP default-off behavior
 

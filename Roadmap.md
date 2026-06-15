@@ -178,7 +178,7 @@ Acceptance:
 - [x] Instrumentation smoke tests for ACE basics.
 - [x] CI gate for editor boundary and ACE hardening scripts.
 - [x] AutoJs6 API index intermediate model improvements.
-- [ ] Pro-only API detection.
+- [x] Pro-only API detection.
 - [ ] Declaration and completion quality improvements.
 - [ ] LSP server manager alpha.
 - [ ] LSP completion and hover.
@@ -190,6 +190,7 @@ Acceptance:
 - `node tools/ace-ci/check-ace-editor-gate.mjs`
 - `node tools/editor-refactor/check-editor-boundaries.mjs`
 - `node tools/ace-hardening/check-editor-surface.mjs`
+- `node tools/ace-completion/verify-autojs6-pro-only.mjs`
 - `node tools/ace-completion/test-completer.mjs`
 - `node tools/ace-completion/verify-autojs6-indices.mjs`
 - `.\gradlew.bat :app:compileAppDebugKotlin`

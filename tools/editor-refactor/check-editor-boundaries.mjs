@@ -520,6 +520,8 @@ assertIncludes(aceCiGate, "ACE surface hardening checks");
 assertIncludes(aceCiGate, "tools/ace-hardening/check-editor-surface.mjs");
 assertIncludes(aceCiGate, "AutoJs6 API model verification");
 assertIncludes(aceCiGate, "tools/ace-completion/verify-autojs6-api-model.mjs");
+assertIncludes(aceCiGate, "AutoJs6 Pro-only API detection");
+assertIncludes(aceCiGate, "tools/ace-completion/verify-autojs6-pro-only.mjs");
 assertIncludes(aceCiGate, "AutoJs6 completion index verification");
 assertIncludes(aceCiGate, "tools/ace-completion/verify-autojs6-indices.mjs");
 assertIncludes(aceCiGate, "ACE completer tests");

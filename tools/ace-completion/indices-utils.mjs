@@ -54,12 +54,13 @@ export const API_MODEL_JSON_PATH = path.join(REPORT_DIR, "autojs6-api-model.json
 export const API_MODEL_REPORT_PATH = path.join(REPORT_DIR, "autojs6-api-model-report.md");
 
 const IDENTIFIER_PATTERN = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
-const PRO_ONLY_NAMES = new Set([
+export const PRO_ONLY_COMPLETION_NAMES = [
   "autojsPro",
   "autojspro",
   "pro",
   "uiObject",
-]);
+];
+const PRO_ONLY_NAMES = new Set(PRO_ONLY_COMPLETION_NAMES.map((name) => name.toLowerCase()));
 
 export function readSource(sourcePath = SOURCE_PATH) {
   return JSON.parse(fs.readFileSync(sourcePath, "utf8"));
@@ -80,6 +81,57 @@ export function normalizeMember(member) {
     signature: member.signature,
     score: member.score,
   };
+}
+
+export function isProOnlyCompletionName(name) {
+  return PRO_ONLY_NAMES.has(String(name || "").toLowerCase());
+}
+
+export function findProOnlyEntriesInSource(source) {
+  const entries = [];
+  const modules = source && source.modules || {};
+  for (const moduleName of Object.keys(modules)) {
+    recordProOnly(entries, `modules.${moduleName}`, moduleName);
+    for (const rawMember of modules[moduleName].members || []) {
+      const member = normalizeMember(rawMember);
+      recordProOnly(entries, `modules.${moduleName}.members.${member.name}`, member.name);
+    }
+  }
+  for (const name of source && source.globals || []) {
+    recordProOnly(entries, `globals.${name}`, name);
+  }
+  for (const name of source && source.variables || []) {
+    recordProOnly(entries, `variables.${name}`, name);
+  }
+  for (const snippet of source && source.snippets || []) {
+    recordProOnly(entries, `snippets.${snippet && snippet.name}`, snippet && snippet.name);
+  }
+  for (const [moduleName, members] of Object.entries(source && source.globalMembers || {})) {
+    recordProOnly(entries, `globalMembers.${moduleName}`, moduleName);
+    if (Array.isArray(members)) {
+      for (const memberName of members) {
+        recordProOnly(entries, `globalMembers.${moduleName}.${memberName}`, memberName);
+      }
+    }
+  }
+  return entries;
+}
+
+export function findProOnlyEntriesInRuntimeIndices(indices) {
+  const entries = [];
+  for (const entry of indices && indices.globals || []) {
+    recordProOnly(entries, `globals.${entry && entry.name}`, entry && entry.name);
+  }
+  for (const [moduleName, members] of Object.entries(indices && indices.modules || {})) {
+    recordProOnly(entries, `modules.${moduleName}`, moduleName);
+    for (const member of members || []) {
+      recordProOnly(entries, `modules.${moduleName}.${member && member.name}`, member && member.name);
+    }
+  }
+  for (const snippet of indices && indices.snippets || []) {
+    recordProOnly(entries, `snippets.${snippet && snippet.name}`, snippet && snippet.name);
+  }
+  return entries;
 }
 
 export function validateSource(source) {
@@ -166,20 +218,8 @@ export function validateSource(source) {
     }
   }
 
-  const flatNames = new Set([
-    ...Object.keys(modules),
-    ...(source.globals || []),
-    ...(source.variables || []),
-  ]);
-  for (const moduleSpec of Object.values(modules)) {
-    for (const rawMember of moduleSpec.members || []) {
-      flatNames.add(normalizeMember(rawMember).name);
-    }
-  }
-  for (const name of flatNames) {
-    if (PRO_ONLY_NAMES.has(name)) {
-      errors.push(`source contains reserved Pro-only name: ${name}`);
-    }
+  for (const entry of findProOnlyEntriesInSource(source)) {
+    errors.push(`source contains reserved Pro-only name at ${entry.path}: ${entry.name}`);
   }
 
   return errors;
@@ -383,6 +423,15 @@ function dedupeEntries(entries) {
     result.push(entry);
   }
   return result;
+}
+
+function recordProOnly(entries, entryPath, name) {
+  if (isProOnlyCompletionName(name)) {
+    entries.push({
+      path: entryPath,
+      name: String(name),
+    });
+  }
 }
 
 function indentJson(value, spaces) {
