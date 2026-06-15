@@ -31,9 +31,11 @@ import android.widget.FrameLayout
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.ui.edit.editor.ace.diagnostics.AceDiagnostics
 import org.autojs.autojs.ui.edit.editor.ace.diagnostics.AceDiagnosticsSnapshot
+import org.autojs.autojs.ui.edit.editor.ace.diagnostics.AceRuntimeEventHistory
 import org.autojs.autojs.ui.edit.editor.ace.health.AceFailure
 import org.autojs.autojs.ui.edit.editor.ace.health.AceFailureType
 import org.autojs.autojs.ui.edit.editor.ace.health.AceHealthState
+import org.autojs.autojs.ui.edit.editor.ace.health.AceJsErrorClassifier
 import org.autojs.autojs.ui.edit.editor.ace.health.AceRuntimeHealthMonitor
 import org.json.JSONArray
 import org.json.JSONObject
@@ -51,6 +53,8 @@ class AceCodeEditor @JvmOverloads constructor(
     private val pendingScripts = ArrayDeque<PendingScript>()
     private val bridge = AceBridge(this)
     private val textMirror = AceTextMirror()
+    private val imeController = AceImeController(IME_REQUEST_COALESCE_MS)
+    private val eventHistory = AceRuntimeEventHistory()
     private val healthMonitor = AceRuntimeHealthMonitor(mainHandler) { failure ->
         notifyFallbackRequired(failure)
     }
@@ -124,9 +128,6 @@ class AceCodeEditor @JvmOverloads constructor(
     private var firstPaintReceived = false
     private var pendingResizeReason: String? = null
     private var lastFirstPaintAtUptimeMillis = 0L
-    private var lastImeRequestAtUptimeMillis = 0L
-    private var lastShowSoftInputAtUptimeMillis = 0L
-    private var lastHideSoftInputAtUptimeMillis = 0L
     private var lastResizeAtUptimeMillis = 0L
     private var lastAceResizeScheduledReason: String? = null
     private var lastAceResizeScheduledAtUptimeMillis = 0L
@@ -171,9 +172,14 @@ class AceCodeEditor @JvmOverloads constructor(
             lastHeartbeatSuspendedAtUptimeMillis = healthMonitor.lastHeartbeatSuspendedAtUptimeMillis.takeIf { it > 0L },
             lastHeartbeatResumedAtUptimeMillis = healthMonitor.lastHeartbeatResumedAtUptimeMillis.takeIf { it > 0L },
             heartbeatSuspendedReason = healthMonitor.heartbeatSuspendedReason,
-            lastImeRequestAtUptimeMillis = lastImeRequestAtUptimeMillis.takeIf { it > 0L },
-            lastShowSoftInputAtUptimeMillis = lastShowSoftInputAtUptimeMillis.takeIf { it > 0L },
-            lastHideSoftInputAtUptimeMillis = lastHideSoftInputAtUptimeMillis.takeIf { it > 0L },
+            lastImeState = imeController.state.name,
+            lastImeHeight = imeController.lastImeHeight,
+            lastImeRequestAtUptimeMillis = imeController.lastImeRequestAtUptimeMillis.takeIf { it > 0L },
+            lastShowSoftInputAtUptimeMillis = imeController.lastShowSoftInputAtUptimeMillis.takeIf { it > 0L },
+            lastHideSoftInputAtUptimeMillis = imeController.lastHideSoftInputAtUptimeMillis.takeIf { it > 0L },
+            lastImeTransitionStartedAtUptimeMillis = imeController.lastImeTransitionStartedAtUptimeMillis.takeIf { it > 0L },
+            lastImeTransitionEndedAtUptimeMillis = imeController.lastImeTransitionEndedAtUptimeMillis.takeIf { it > 0L },
+            lastImeIgnoredRequestReason = imeController.lastIgnoredRequestReason,
             lastResizeAtUptimeMillis = lastResizeAtUptimeMillis.takeIf { it > 0L },
             pendingAceResizeReason = pendingResizeReason,
             lastAceResizeScheduledReason = lastAceResizeScheduledReason,
@@ -191,6 +197,7 @@ class AceCodeEditor @JvmOverloads constructor(
             lastHostImeVisible = null,
             lastHostImeBottomInset = null,
             lastHostImeEventAtUptimeMillis = null,
+            runtimeEventHistory = eventHistory.snapshot(),
         )
     }
 
@@ -212,6 +219,7 @@ class AceCodeEditor @JvmOverloads constructor(
         }
         loaded = true
         showLoadingOverlay()
+        eventHistory.record("page_load_start", EDITOR_URL)
         healthMonitor.markLoadingPage()
         if (AceEditorTestHooks.shouldForceRendererGoneFallback()) {
             reportFatalFailure(
@@ -391,12 +399,14 @@ class AceCodeEditor @JvmOverloads constructor(
     }
 
     fun requestEditorFocus() {
+        eventHistory.record("focus_request", "requestEditorFocus")
         webView.requestFocus()
         evaluateOrQueue("window.AutoJsAce && window.AutoJsAce.jumpTo($cursorLine, $cursorColumn);")
     }
 
     fun destroy() {
         destroyed = true
+        eventHistory.record("destroy", "AceCodeEditor.destroy")
         healthMonitor.markDestroyed()
         mainHandler.removeCallbacks(mirrorCalibrationRunnable)
         mainHandler.removeCallbacks(scheduledResizeRunnable)
@@ -427,41 +437,20 @@ class AceCodeEditor @JvmOverloads constructor(
         } else {
             "view_size_changed"
         }
+        eventHistory.record("view_size_changed", "reason=$reason,old=${oldw}x$oldh,new=${w}x$h")
         scheduleTransientResize(reason, RESIZE_SETTLE_DELAY_MS)
     }
 
     internal fun handleEvent(name: String, payloadJson: String?) {
         postToMain {
             healthMonitor.markStateEvent()
+            eventHistory.record("js_event", "name=$name")
             when (name) {
-                "fatalError" -> {
-                    val type = if (isReady) AceFailureType.JS_RUNTIME_ERROR else AceFailureType.JS_INIT_ERROR
-                    reportFatalFailure(type, failureMessageFromPayload(payloadJson, "ACE JavaScript fatal error"), payloadJson)
-                }
-                "lspError" -> healthMonitor.reportFailure(
-                    AceFailure(
-                        type = AceFailureType.LSP_ERROR,
-                        message = failureMessageFromPayload(payloadJson, "ACE LSP error"),
-                        detail = payloadJson,
-                        fatal = false,
-                    ),
-                )
-                "completionError" -> healthMonitor.reportFailure(
-                    AceFailure(
-                        type = AceFailureType.COMPLETION_ERROR,
-                        message = failureMessageFromPayload(payloadJson, "ACE completion error"),
-                        detail = payloadJson,
-                        fatal = false,
-                    ),
-                )
-                "recoverableError" -> healthMonitor.reportFailure(
-                    AceFailure(
-                        type = AceFailureType.JS_RUNTIME_ERROR,
-                        message = failureMessageFromPayload(payloadJson, "ACE recoverable JavaScript error"),
-                        detail = payloadJson,
-                        fatal = false,
-                    ),
-                )
+                "fatalError",
+                "lspError",
+                "completionError",
+                "recoverableError",
+                    -> reportClassifiedJsFailure(name, payloadJson)
                 "firstPaint" -> handleFirstPaint()
                 "resizeDone" -> handleResizeDone(payloadJson)
                 "changeDelta" -> handleChangeDelta(payloadJson)
@@ -475,6 +464,7 @@ class AceCodeEditor @JvmOverloads constructor(
             if (AceEditorTestHooks.shouldForceReadyTimeout()) {
                 return@postToMain
             }
+            eventHistory.record("bridge_ready")
             val state = updateState(
                 stateJson = stateJson,
                 acceptTextSnapshot = pendingScripts.isEmpty() || textSnapshot.isEmpty(),
@@ -486,6 +476,7 @@ class AceCodeEditor @JvmOverloads constructor(
             scheduleAceResize("bridge_ready", 0L)
             requestFirstPaintWhenStable()
             healthMonitor.startHeartbeat { evaluateHeartbeat() }
+            eventHistory.record("heartbeat_start")
         }
     }
 
@@ -535,6 +526,7 @@ class AceCodeEditor @JvmOverloads constructor(
 
     private fun notifyFallbackRequired(failure: AceFailure) {
         postToMain {
+            eventHistory.record("fallback", "type=${failure.type.name},fatal=${failure.fatal},message=${failure.message}")
             listener?.onFailure(failure)
         }
     }
@@ -561,6 +553,7 @@ class AceCodeEditor @JvmOverloads constructor(
         }
         firstPaintReceived = true
         lastFirstPaintAtUptimeMillis = SystemClock.uptimeMillis()
+        eventHistory.record("first_paint")
         hideLoadingOverlay()
     }
 
@@ -569,10 +562,11 @@ class AceCodeEditor @JvmOverloads constructor(
         lastResizeAtUptimeMillis = now
         lastAceResizeCompletedAtUptimeMillis = now
         lastAceResizeCompletedReason = resizeReasonFromPayload(payloadJson, lastAceResizeDispatchedReason)
+        eventHistory.record("resize_done", "reason=${lastAceResizeCompletedReason.orEmpty()}", now)
     }
 
     private fun reportFatalFailure(type: AceFailureType, message: String, detail: String? = null) {
-        healthMonitor.reportFailure(
+        reportFailure(
             AceFailure(
                 type = type,
                 message = message.ifBlank { "Unknown ACE editor failure" },
@@ -580,6 +574,29 @@ class AceCodeEditor @JvmOverloads constructor(
             ),
         )
         handleError(message)
+    }
+
+    private fun reportClassifiedJsFailure(name: String, payloadJson: String?) {
+        val classification = AceJsErrorClassifier.classifyBridgeEvent(name, isReady, payloadJson)
+        reportFailure(
+            AceFailure(
+                type = classification.type,
+                message = classification.message,
+                detail = payloadJson,
+                fatal = classification.fatal,
+            ),
+            "js_${classification.category}",
+        )
+        handleError(classification.message)
+    }
+
+    private fun reportFailure(failure: AceFailure, eventType: String = "failure") {
+        eventHistory.record(
+            eventType,
+            "type=${failure.type.name},fatal=${failure.fatal},message=${failure.message}",
+            failure.timestampUptimeMillis,
+        )
+        healthMonitor.reportFailure(failure)
     }
 
     internal fun bridgeTheme(): String {
@@ -613,11 +630,15 @@ class AceCodeEditor @JvmOverloads constructor(
     internal fun showSoftInput() {
         postToMain {
             val now = SystemClock.uptimeMillis()
-            if (now - lastImeRequestAtUptimeMillis < IME_REQUEST_COALESCE_MS) {
+            val decision = imeController.requestShow(now)
+            eventHistory.record(
+                "ime_show_request",
+                "accepted=${decision.accepted},reason=${decision.reason},state=${imeController.state.name}",
+                now,
+            )
+            if (!decision.accepted) {
                 return@postToMain
             }
-            lastImeRequestAtUptimeMillis = now
-            lastShowSoftInputAtUptimeMillis = now
             webView.requestFocus()
             scheduleTransientResize("ime_show_requested", RESIZE_SETTLE_DELAY_MS)
             ViewUtils.showSoftInput(webView)
@@ -627,11 +648,15 @@ class AceCodeEditor @JvmOverloads constructor(
     internal fun hideSoftInput() {
         postToMain {
             val now = SystemClock.uptimeMillis()
-            if (now - lastImeRequestAtUptimeMillis < IME_REQUEST_COALESCE_MS) {
+            val decision = imeController.requestHide(now)
+            eventHistory.record(
+                "ime_hide_request",
+                "accepted=${decision.accepted},reason=${decision.reason},state=${imeController.state.name}",
+                now,
+            )
+            if (!decision.accepted) {
                 return@postToMain
             }
-            lastImeRequestAtUptimeMillis = now
-            lastHideSoftInputAtUptimeMillis = now
             scheduleTransientResize("ime_hide_requested", RESIZE_SETTLE_DELAY_MS)
             ViewUtils.hideSoftInput(webView)
         }
@@ -645,6 +670,13 @@ class AceCodeEditor @JvmOverloads constructor(
 
     fun onHostImeInsetsChanged(visible: Boolean, bottomInset: Int) {
         postToMain {
+            val now = SystemClock.uptimeMillis()
+            imeController.onHostImeInsetsChanged(visible, bottomInset, now)
+            eventHistory.record(
+                "ime_insets",
+                "visible=$visible,bottomInset=$bottomInset,state=${imeController.state.name}",
+                now,
+            )
             val reason = if (visible) {
                 "host_ime_visible:$bottomInset"
             } else {
@@ -694,6 +726,7 @@ class AceCodeEditor @JvmOverloads constructor(
         if (destroyed) {
             return
         }
+        eventHistory.record("transient_resize", "reason=$reason,delayMillis=$delayMillis")
         healthMonitor.suspendHeartbeat(reason, IME_TRANSITION_HEARTBEAT_SUSPEND_MS)
         scheduleAceResize(reason, delayMillis)
         mainHandler.removeCallbacks(imeSettleRunnable)
@@ -708,6 +741,7 @@ class AceCodeEditor @JvmOverloads constructor(
         pendingResizeReason = reason
         lastAceResizeScheduledReason = reason
         lastAceResizeScheduledAtUptimeMillis = now
+        eventHistory.record("resize_scheduled", "reason=$reason,delayMillis=$delayMillis", now)
         mainHandler.removeCallbacks(scheduledResizeRunnable)
         mainHandler.postDelayed(scheduledResizeRunnable, delayMillis.coerceAtLeast(0L))
     }
@@ -726,6 +760,7 @@ class AceCodeEditor @JvmOverloads constructor(
         lastResizeAtUptimeMillis = now
         lastAceResizeDispatchedReason = reason
         lastAceResizeDispatchedAtUptimeMillis = now
+        eventHistory.record("resize_dispatched", "reason=$reason", now)
         invokeAce("scheduleResize", quote(reason))
     }
 
@@ -769,6 +804,9 @@ class AceCodeEditor @JvmOverloads constructor(
         webView.isFocusableInTouchMode = true
         webView.isHorizontalScrollBarEnabled = true
         webView.isVerticalScrollBarEnabled = true
+        webView.setOnFocusChangeListener { _, hasFocus ->
+            eventHistory.record(if (hasFocus) "focus" else "blur", "webView")
+        }
         webView.setOnTouchListener { _, event ->
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN,
@@ -832,13 +870,19 @@ class AceCodeEditor @JvmOverloads constructor(
                 webView.evaluateJavascript(script, callback)
             }.onFailure {
                 val message = "ACE JavaScript evaluation failed: ${it.message.orEmpty()}"
-                if (healthMonitor.isHeartbeatSuspended()) {
-                    healthMonitor.reportFailure(
+                val retryableDuringIme = healthMonitor.isHeartbeatSuspended() || imeController.isTransitioning
+                eventHistory.record(
+                    "evaluateJavascript_error",
+                    "retryable=$retryableDuringIme,message=$message",
+                )
+                if (retryableDuringIme) {
+                    reportFailure(
                         AceFailure(
                             type = AceFailureType.EVALUATE_JAVASCRIPT_ERROR,
                             message = message,
                             fatal = false,
                         ),
+                        "evaluate_retryable",
                     )
                     handleError(message)
                 } else {
@@ -850,8 +894,11 @@ class AceCodeEditor @JvmOverloads constructor(
     }
 
     private fun evaluateHeartbeat() {
+        eventHistory.record("heartbeat_check")
         evaluate("!!(window.AutoJsAce && window.AutoJsAce.isReady && window.AutoJsAce.isReady())") {
-            healthMonitor.recordHeartbeatResult(it == "true")
+            val ok = it == "true"
+            eventHistory.record("heartbeat_result", "ok=$ok")
+            healthMonitor.recordHeartbeatResult(ok)
         }
     }
 
@@ -991,18 +1038,6 @@ class AceCodeEditor @JvmOverloads constructor(
 
     private fun quote(value: String): String = JSONObject.quote(value)
 
-    private fun failureMessageFromPayload(payloadJson: String?, fallback: String): String {
-        if (payloadJson.isNullOrBlank()) {
-            return fallback
-        }
-        return runCatching {
-            val obj = JSONObject(payloadJson)
-            obj.optString("message").ifBlank {
-                obj.optString("reason").ifBlank { fallback }
-            }
-        }.getOrElse { fallback }
-    }
-
     private fun resizeReasonFromPayload(payloadJson: String?, fallback: String?): String? {
         if (payloadJson.isNullOrBlank()) {
             return fallback
@@ -1083,6 +1118,7 @@ class AceCodeEditor @JvmOverloads constructor(
             if (!isAllowedUrl(url)) {
                 reportBlockedUrl("page", url)
             } else {
+                eventHistory.record("page_loaded", url)
                 healthMonitor.markPageLoaded()
             }
         }
@@ -1107,11 +1143,13 @@ class AceCodeEditor @JvmOverloads constructor(
 
         override fun onRenderProcessGone(view: WebView, detail: RenderProcessGoneDetail?): Boolean {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && detail != null) {
+                eventHistory.record("renderer_gone", "didCrash=${detail.didCrash()}")
                 reportFatalFailure(
                     AceFailureType.RENDER_PROCESS_GONE,
                     "WebView renderer process gone. didCrash=${detail.didCrash()}",
                 )
             } else {
+                eventHistory.record("renderer_gone")
                 reportFatalFailure(
                     AceFailureType.RENDER_PROCESS_GONE,
                     "WebView renderer process gone",
@@ -1134,7 +1172,12 @@ class AceCodeEditor @JvmOverloads constructor(
         override fun onConsoleMessage(consoleMessage: ConsoleMessage): Boolean {
             if (consoleMessage.messageLevel() == ConsoleMessage.MessageLevel.ERROR) {
                 val message = "ACE console: ${consoleMessage.message()}"
-                if (shouldTreatConsoleErrorAsFatal(consoleMessage)) {
+                val fatal = shouldTreatConsoleErrorAsFatal(consoleMessage)
+                eventHistory.record(
+                    "console_error",
+                    "fatal=$fatal,source=${consoleMessage.sourceId()},message=${consoleMessage.message()}",
+                )
+                if (fatal) {
                     reportFatalFailure(
                         AceFailureType.CONSOLE_FATAL,
                         message,
@@ -1161,15 +1204,11 @@ class AceCodeEditor @JvmOverloads constructor(
         }
 
         private fun shouldTreatConsoleErrorAsFatal(consoleMessage: ConsoleMessage): Boolean {
-            if (isReady) {
-                return false
-            }
-            val source = consoleMessage.sourceId().orEmpty()
-            val message = consoleMessage.message().orEmpty()
-            return source.contains("autojs6_ace_bridge", ignoreCase = true) ||
-                message.contains("Uncaught", ignoreCase = true) ||
-                message.contains("ReferenceError", ignoreCase = true) ||
-                message.contains("SyntaxError", ignoreCase = true)
+            return AceJsErrorClassifier.shouldTreatConsoleErrorAsFatal(
+                isReady = isReady,
+                source = consoleMessage.sourceId(),
+                message = consoleMessage.message(),
+            )
         }
     }
 

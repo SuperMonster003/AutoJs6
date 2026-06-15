@@ -90,8 +90,13 @@ const breakpointModelStore = "app/src/main/java/org/autojs/autojs/ui/edit/editor
 const versionHistoryService = "app/src/main/java/org/autojs/autojs/ui/edit/editor/service/EditorVersionHistoryService.kt";
 const draftService = "app/src/main/java/org/autojs/autojs/ui/edit/editor/service/EditorDraftService.kt";
 const aceCodeEditor = "app/src/main/java/org/autojs/autojs/ui/edit/editor/ace/AceCodeEditor.kt";
+const aceImeController = "app/src/main/java/org/autojs/autojs/ui/edit/editor/ace/AceImeController.kt";
+const aceImeState = "app/src/main/java/org/autojs/autojs/ui/edit/editor/ace/AceImeState.kt";
 const aceDiagnostics = "app/src/main/java/org/autojs/autojs/ui/edit/editor/ace/diagnostics/AceDiagnostics.kt";
 const aceDiagnosticsSnapshot = "app/src/main/java/org/autojs/autojs/ui/edit/editor/ace/diagnostics/AceDiagnosticsSnapshot.kt";
+const aceRuntimeEventHistory = "app/src/main/java/org/autojs/autojs/ui/edit/editor/ace/diagnostics/AceRuntimeEventHistory.kt";
+const aceJsErrorClassifier = "app/src/main/java/org/autojs/autojs/ui/edit/editor/ace/health/AceJsErrorClassifier.kt";
+const aceFallbackPolicy = "app/src/main/java/org/autojs/autojs/ui/edit/editor/ace/health/AceFallbackPolicy.kt";
 const aceSurfaceSmoke = "tools/ace-hardening/check-editor-surface.mjs";
 const roadmap = "Roadmap.md";
 const aceEditorTestPlan = "docs/dev/ace-editor-test-plan.md";
@@ -146,6 +151,7 @@ assertIncludes(editorView, "lastViewportPolicyEvent = viewportPolicyEventAt?.let
 assertIncludes(editorView, "lastViewportPolicyEventAtUptimeMillis = viewportPolicyEventAt");
 assertIncludes(editorView, "lastViewportPolicyImeVisible = viewportPolicyEventAt?.let");
 assertIncludes(editorView, "lastViewportPolicyBottomInset = viewportPolicyEventAt?.let");
+assertIncludes(editorView, "latestText = oldEditor.textSnapshot");
 assertNotIncludes(editorView, "requestRectangleOnScreen");
 assertNotIncludes(editorView, "CodeEditor");
 assertNotIncludes(editorView, "CodeEditText");
@@ -355,6 +361,12 @@ assertIncludes(roadmap, "- [x] If needed, add `EditorViewportHost` without movin
 assertIncludes(roadmap, "- [x] Keep Native bottom padding and cursor-visible logic Native-only.");
 assertIncludes(roadmap, "- [x] Keep ACE policy limited to residual padding cleanup and ACE resize/scroll");
 assertIncludes(roadmap, "- [x] ACE diagnostics identify `viewportPolicy=AceEditorViewportPolicy`.");
+assertIncludes(roadmap, "- [x] Add `AceImeState`.");
+assertIncludes(roadmap, "- [x] Add `AceImeController`.");
+assertIncludes(roadmap, "- [x] Make `showSoftInput` / `hideSoftInput` explicitly idempotent.");
+assertIncludes(roadmap, "- [x] Add a bounded ACE runtime event history for the last 30 key events:");
+assertIncludes(roadmap, "- [x] Add `AceJsErrorClassifier`.");
+assertIncludes(roadmap, "- [x] Diagnostics contain enough event history to explain the fallback decision.");
 assertIncludes(roadmap, "ACE clean-host behavior remains the default ACE path.");
 assertIncludes(roadmap, "LSP and VisualEditorAce remain deferred until this gate is satisfied.");
 
@@ -431,8 +443,21 @@ assertIncludes(aceDiagnosticsSnapshot, "val lastAceResizeDispatchedReason: Strin
 assertIncludes(aceDiagnosticsSnapshot, "val lastAceResizeCompletedReason: String?");
 assertIncludes(aceDiagnosticsSnapshot, "val lastViewportPolicyEvent: String?");
 assertIncludes(aceDiagnosticsSnapshot, "val lastViewportPolicyImeVisible: Boolean?");
+assertIncludes(aceDiagnosticsSnapshot, "val lastImeState: String?");
+assertIncludes(aceDiagnosticsSnapshot, "val lastImeHeight: Int?");
+assertIncludes(aceDiagnosticsSnapshot, "val lastImeTransitionStartedAtUptimeMillis: Long?");
+assertIncludes(aceDiagnosticsSnapshot, "val lastImeTransitionEndedAtUptimeMillis: Long?");
+assertIncludes(aceDiagnosticsSnapshot, "val lastImeIgnoredRequestReason: String?");
+assertIncludes(aceDiagnosticsSnapshot, "val runtimeEventHistory: List<String>");
 
 assertIncludes(aceDiagnostics, "viewportPolicy=${snapshot.viewportPolicy.orUnknown()}");
+assertIncludes(aceDiagnostics, "lastImeState=${snapshot.lastImeState.orUnknown()}");
+assertIncludes(aceDiagnostics, "lastImeHeight=${snapshot.lastImeHeight?.toString().orUnknown()}");
+assertIncludes(aceDiagnostics, "lastImeTransitionStartedAtUptimeMillis=${snapshot.lastImeTransitionStartedAtUptimeMillis?.toString().orUnknown()}");
+assertIncludes(aceDiagnostics, "lastImeTransitionEndedAtUptimeMillis=${snapshot.lastImeTransitionEndedAtUptimeMillis?.toString().orUnknown()}");
+assertIncludes(aceDiagnostics, "lastImeIgnoredRequestReason=${snapshot.lastImeIgnoredRequestReason.orUnknown()}");
+assertIncludes(aceDiagnostics, "runtimeEventHistory=${snapshot.runtimeEventHistory.size}");
+assertIncludes(aceDiagnostics, "runtimeEvent=$it");
 assertIncludes(aceDiagnostics, "pendingAceResizeReason=${snapshot.pendingAceResizeReason.orUnknown()}");
 assertIncludes(aceDiagnostics, "lastAceResizeScheduledReason=${snapshot.lastAceResizeScheduledReason.orUnknown()}");
 assertIncludes(aceDiagnostics, "lastAceResizeDispatchedReason=${snapshot.lastAceResizeDispatchedReason.orUnknown()}");
@@ -441,11 +466,56 @@ assertIncludes(aceDiagnostics, "lastViewportPolicyEvent=${snapshot.lastViewportP
 assertIncludes(aceDiagnostics, "lastViewportPolicyImeVisible=${snapshot.lastViewportPolicyImeVisible?.toString().orUnknown()}");
 
 assertIncludes(aceCodeEditor, "private var lastAceResizeScheduledReason");
+assertIncludes(aceCodeEditor, "private val imeController = AceImeController(IME_REQUEST_COALESCE_MS)");
+assertIncludes(aceCodeEditor, "private val eventHistory = AceRuntimeEventHistory()");
+assertIncludes(aceCodeEditor, "lastImeState = imeController.state.name");
+assertIncludes(aceCodeEditor, "lastImeIgnoredRequestReason = imeController.lastIgnoredRequestReason");
+assertIncludes(aceCodeEditor, "runtimeEventHistory = eventHistory.snapshot()");
+assertIncludes(aceCodeEditor, "val decision = imeController.requestShow(now)");
+assertIncludes(aceCodeEditor, "val decision = imeController.requestHide(now)");
+assertIncludes(aceCodeEditor, "imeController.onHostImeInsetsChanged(visible, bottomInset, now)");
+assertIncludes(aceCodeEditor, "retryableDuringIme = healthMonitor.isHeartbeatSuspended() || imeController.isTransitioning");
+assertIncludes(aceCodeEditor, "AceJsErrorClassifier.classifyBridgeEvent(name, isReady, payloadJson)");
+assertIncludes(aceCodeEditor, "AceJsErrorClassifier.shouldTreatConsoleErrorAsFatal(");
+assertIncludes(aceCodeEditor, "eventHistory.record(\"fallback\"");
+assertIncludes(aceCodeEditor, "eventHistory.record(\"renderer_gone\"");
+assertIncludes(aceCodeEditor, "\"console_error\",");
+assertIncludes(aceCodeEditor, "eventHistory.record(\"heartbeat_result\"");
 assertIncludes(aceCodeEditor, "private var lastAceResizeDispatchedReason");
 assertIncludes(aceCodeEditor, "private var lastAceResizeCompletedReason");
 assertIncludes(aceCodeEditor, "private fun handleResizeDone(payloadJson: String?)");
 assertIncludes(aceCodeEditor, "lastAceResizeDispatchedReason = reason");
 assertIncludes(aceCodeEditor, "lastAceResizeCompletedReason = resizeReasonFromPayload(payloadJson, lastAceResizeDispatchedReason)");
+
+assertIncludes(aceImeState, "enum class AceImeState");
+assertIncludes(aceImeState, "SHOWING");
+assertIncludes(aceImeState, "HIDING");
+
+assertIncludes(aceImeController, "class AceImeController(");
+assertIncludes(aceImeController, "coalesced:${state.name.lowercase()}");
+assertIncludes(aceImeController, "reverse_during_hiding");
+assertIncludes(aceImeController, "reverse_during_showing");
+assertIncludes(aceImeController, "lastImeTransitionStartedAtUptimeMillis");
+assertIncludes(aceImeController, "lastImeTransitionEndedAtUptimeMillis");
+assertIncludes(aceImeController, "lastIgnoredRequestReason");
+
+assertIncludes(aceRuntimeEventHistory, "class AceRuntimeEventHistory(");
+assertIncludes(aceRuntimeEventHistory, "const val MAX_EVENTS = 30");
+assertIncludes(aceRuntimeEventHistory, "events.removeFirst()");
+
+assertIncludes(aceJsErrorClassifier, "object AceJsErrorClassifier");
+assertIncludes(aceJsErrorClassifier, "scheduleResize");
+assertIncludes(aceJsErrorClassifier, "scrollCursorIntoView");
+assertIncludes(aceJsErrorClassifier, "focus");
+assertIncludes(aceJsErrorClassifier, "blur");
+assertIncludes(aceJsErrorClassifier, "completion");
+assertIncludes(aceJsErrorClassifier, "lsp");
+assertIncludes(aceJsErrorClassifier, "tooltip");
+assertIncludes(aceJsErrorClassifier, "markdown");
+assertIncludes(aceJsErrorClassifier, "AceFailureType.JS_INIT_ERROR");
+
+assertIncludes(aceFallbackPolicy, "AceFailureType.LSP_ERROR");
+assertIncludes(aceFallbackPolicy, "AceFailureType.COMPLETION_ERROR");
 
 assertOnlyIn("key_ace_clean_host_layout", []);
 

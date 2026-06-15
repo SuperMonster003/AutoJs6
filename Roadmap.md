@@ -77,45 +77,45 @@ Acceptance:
 
 ## Phase 3: IME State Machine
 
-- [ ] Add `AceImeState`.
-- [ ] Add `AceImeController`.
-- [ ] Make `showSoftInput` / `hideSoftInput` explicitly idempotent.
-- [ ] Coalesce duplicate IME requests inside the existing 150 ms window.
-- [ ] Delay or ignore reverse show/hide requests during transitions.
-- [ ] Record `lastImeState`, `lastImeHeight`,
+- [x] Add `AceImeState`.
+- [x] Add `AceImeController`.
+- [x] Make `showSoftInput` / `hideSoftInput` explicitly idempotent.
+- [x] Coalesce duplicate IME requests inside the existing 150 ms window.
+- [x] Delay or ignore reverse show/hide requests during transitions.
+- [x] Record `lastImeState`, `lastImeHeight`,
   `lastImeTransitionStartedAtUptimeMillis`,
   `lastImeTransitionEndedAtUptimeMillis`, and ignored request reasons in ACE
   diagnostics.
-- [ ] Confirm cursor/selection changes do not directly trigger keyboard
+- [x] Confirm cursor/selection changes do not directly trigger keyboard
   show/hide feedback loops.
 
 Acceptance:
 
-- [ ] Fast repeated taps do not create an IME feedback loop.
-- [ ] Consecutive show/hide cycles keep ACE active and diagnostics explain the
+- [x] Fast repeated taps do not create an IME feedback loop.
+- [x] Consecutive show/hide cycles keep ACE active and diagnostics explain the
   last IME transition.
 
 ## Phase 4: Fallback Classification And Event History
 
-- [ ] Add a bounded ACE runtime event history for the last 30 key events:
+- [x] Add a bounded ACE runtime event history for the last 30 key events:
   IME show/hide, resize, focus, blur, heartbeat, evaluateJavascript,
   JS fatal, console error, renderer gone, and fallback.
-- [ ] Add `AceJsErrorClassifier`.
-- [ ] Treat resize, focus, and `scrollCursorIntoView` errors as recoverable
+- [x] Add `AceJsErrorClassifier`.
+- [x] Treat resize, focus, and `scrollCursorIntoView` errors as recoverable
   after ACE is running.
-- [ ] Keep completion, LSP, tooltip, and markdown failures feature-local.
-- [ ] During IME transitions, report transient evaluateJavascript failures as
+- [x] Keep completion, LSP, tooltip, and markdown failures feature-local.
+- [x] During IME transitions, report transient evaluateJavascript failures as
   degraded/retryable instead of immediate fallback.
-- [ ] Preserve immediate fallback for renderer-gone and initialization fatal
+- [x] Preserve immediate fallback for renderer-gone and initialization fatal
   failures.
-- [ ] Ensure fallback text prefers `AceTextMirror`.
+- [x] Ensure fallback text prefers `AceTextMirror`.
 
 Acceptance:
 
-- [ ] Repeated keyboard show/hide does not fallback from heartbeat or transient
+- [x] Repeated keyboard show/hide does not fallback from heartbeat or transient
   evaluateJavascript failures.
-- [ ] Forced renderer-gone and forced init fatal still fallback.
-- [ ] Diagnostics contain enough event history to explain the fallback decision.
+- [x] Forced renderer-gone and forced init fatal still fallback.
+- [x] Diagnostics contain enough event history to explain the fallback decision.
 
 ## Phase 5: Bridge Event Throttling
 

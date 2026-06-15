@@ -35,9 +35,14 @@ object AceDiagnostics {
             lastHeartbeatSuspendedAtUptimeMillis = null,
             lastHeartbeatResumedAtUptimeMillis = null,
             heartbeatSuspendedReason = null,
+            lastImeState = null,
+            lastImeHeight = null,
             lastImeRequestAtUptimeMillis = null,
             lastShowSoftInputAtUptimeMillis = null,
             lastHideSoftInputAtUptimeMillis = null,
+            lastImeTransitionStartedAtUptimeMillis = null,
+            lastImeTransitionEndedAtUptimeMillis = null,
+            lastImeIgnoredRequestReason = null,
             lastResizeAtUptimeMillis = null,
             pendingAceResizeReason = null,
             lastAceResizeScheduledReason = null,
@@ -55,6 +60,7 @@ object AceDiagnostics {
             lastHostImeVisible = null,
             lastHostImeBottomInset = null,
             lastHostImeEventAtUptimeMillis = null,
+            runtimeEventHistory = emptyList(),
         )
     }
 
@@ -84,9 +90,14 @@ object AceDiagnostics {
             appendLine("lastHeartbeatSuspendedAtUptimeMillis=${snapshot.lastHeartbeatSuspendedAtUptimeMillis?.toString().orUnknown()}")
             appendLine("lastHeartbeatResumedAtUptimeMillis=${snapshot.lastHeartbeatResumedAtUptimeMillis?.toString().orUnknown()}")
             appendLine("heartbeatSuspendedReason=${snapshot.heartbeatSuspendedReason.orUnknown()}")
+            appendLine("lastImeState=${snapshot.lastImeState.orUnknown()}")
+            appendLine("lastImeHeight=${snapshot.lastImeHeight?.toString().orUnknown()}")
             appendLine("lastImeRequestAtUptimeMillis=${snapshot.lastImeRequestAtUptimeMillis?.toString().orUnknown()}")
             appendLine("lastShowSoftInputAtUptimeMillis=${snapshot.lastShowSoftInputAtUptimeMillis?.toString().orUnknown()}")
             appendLine("lastHideSoftInputAtUptimeMillis=${snapshot.lastHideSoftInputAtUptimeMillis?.toString().orUnknown()}")
+            appendLine("lastImeTransitionStartedAtUptimeMillis=${snapshot.lastImeTransitionStartedAtUptimeMillis?.toString().orUnknown()}")
+            appendLine("lastImeTransitionEndedAtUptimeMillis=${snapshot.lastImeTransitionEndedAtUptimeMillis?.toString().orUnknown()}")
+            appendLine("lastImeIgnoredRequestReason=${snapshot.lastImeIgnoredRequestReason.orUnknown()}")
             appendLine("lastResizeAtUptimeMillis=${snapshot.lastResizeAtUptimeMillis?.toString().orUnknown()}")
             appendLine("pendingAceResizeReason=${snapshot.pendingAceResizeReason.orUnknown()}")
             appendLine("lastAceResizeScheduledReason=${snapshot.lastAceResizeScheduledReason.orUnknown()}")
@@ -104,6 +115,14 @@ object AceDiagnostics {
             appendLine("lastHostImeVisible=${snapshot.lastHostImeVisible?.toString().orUnknown()}")
             appendLine("lastHostImeBottomInset=${snapshot.lastHostImeBottomInset?.toString().orUnknown()}")
             appendLine("lastHostImeEventAtUptimeMillis=${snapshot.lastHostImeEventAtUptimeMillis?.toString().orUnknown()}")
+            if (snapshot.runtimeEventHistory.isEmpty()) {
+                appendLine("runtimeEventHistory=empty")
+            } else {
+                appendLine("runtimeEventHistory=${snapshot.runtimeEventHistory.size}")
+                snapshot.runtimeEventHistory.forEach {
+                    appendLine("runtimeEvent=$it")
+                }
+            }
         }.trimEnd()
     }
 
