@@ -536,9 +536,15 @@ Current compatibility profile generation and registry/docs verification:
 ```powershell
 .\gradlew.bat --console=plain :app:generateNodeCompatibilityProfile
 .\gradlew.bat --console=plain :app:verifyNodeCompatibilityProfile
+.\gradlew.bat --console=plain :app:verifyNodeErrorCatalog
 ```
 
 This writes `build/reports/nodejs/compatibility-profile.json` and `build/reports/nodejs/compatibility-profile.md`, compares the Kotlin capability registry with the JavaScript bootstrap builtin allowlist/denylist, and fails when `docs/nodejs/COMPATIBILITY_PROFILE.md` omits registry entries.
+
+`verifyNodeErrorCatalog` scans `NodeRuntimeErrorCodes.kt` and the Embedded Node runtime bootstrap sources for
+`ERR_AUTOJS6_*` codes, verifies every runtime code has a matching `##` entry in
+`docs/nodejs/ERROR_CATALOG.md`, verifies runtime codes are present in the Kotlin registry, and writes
+`build/reports/nodejs/error-catalog.json`.
 
 `embeddedNodePackagedApkOutputVerify` and `embeddedNodePackagedDiagnosticReport` inspect a concrete exported APK. Pass it with
 `-Pautojs.embeddedNode.packagedApk=<apk>` and optionally constrain ABI expectations with

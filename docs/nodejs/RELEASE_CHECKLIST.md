@@ -216,6 +216,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] memory leak stress report generated with `NodeEmbeddedMemoryLeakStressInstrumentationTest` for lifecycle, bridge, fs, or image-handle changes
 - [ ] packaged verifier gives actionable failures
 - [ ] `ERR_AUTOJS6_*` codes stable for documented negative paths
+- [ ] `:app:verifyNodeErrorCatalog` passes and `build/reports/nodejs/error-catalog.json` has no missing, stale, or unregistered runtime codes
 - [ ] scoped fs fuzzer failure diagnostics include base seed, path case, expected code, observed code, and summary JSON
 - [ ] resolver trace remains off by default once implemented
 - [ ] resolver visualizer fixture parses search paths, package.json fields, null blocking, and final errors
@@ -232,6 +233,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `docs/nodejs/INTEGRATION_PLAN.md`
 - [ ] `docs/nodejs/COMPATIBILITY_PROFILE.md`
 - [ ] `docs/nodejs/SECURITY_MODEL.md`
+- [ ] `docs/nodejs/ERROR_CATALOG.md`
 - [ ] `docs/nodejs/security/THREAT_MODEL_V1.md`
 - [ ] `docs/nodejs/TESTING.md`
 - [ ] `docs/nodejs/releases/NODE_PROFILE_V1_STABLE_SURFACE.md`

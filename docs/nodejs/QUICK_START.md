@@ -90,6 +90,7 @@ realpath escapes, and `/proc`, `/sys`, or `/dev` access are rejected.
 
 - Examples: [EXAMPLES.md](EXAMPLES.md)
 - Rhino migration: [MIGRATION_FROM_RHINO.md](MIGRATION_FROM_RHINO.md)
+- Error catalog: [ERROR_CATALOG.md](ERROR_CATALOG.md)
 - Known issues: [releases/NODE_PROFILE_V1_KNOWN_ISSUES.md](releases/NODE_PROFILE_V1_KNOWN_ISSUES.md)
 - GA release notes draft: [releases/NODE_PROFILE_V1_GA.md](releases/NODE_PROFILE_V1_GA.md)
 - Testing and device gates: [TESTING.md](TESTING.md)
