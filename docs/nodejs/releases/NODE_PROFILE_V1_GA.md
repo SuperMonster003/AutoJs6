@@ -101,7 +101,7 @@ Packaged Node APKs verify:
 - embedded service manifest entry
 - foreground-service permissions and `specialUse` policy
 - ABI pruning
-- moduleSources and encrypted entry metadata
+- moduleSources budget metadata: max `64` modules, `262144` bytes per module, `524288` bytes total
 - packaged smoke output
 
 Phase 4 keeps legacy unversioned JNI entry points compatible for stale packaged templates while current app builds call

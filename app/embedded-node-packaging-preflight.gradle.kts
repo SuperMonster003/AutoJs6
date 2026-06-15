@@ -32,6 +32,9 @@ private val embeddedNodePackagingPackageJsonEntry = "assets/project/package.json
 private val embeddedNodePackagingRuntimeMatrixEntry = "assets/project/runtime-matrix.expected.txt"
 private val embeddedNodePackagingPreloadBudgetEntry = "assets/project/preload-budget.expected.txt"
 private val embeddedNodePackagingModuleSourcesLimit = 64
+private val embeddedNodePackagingModuleSourceMaxBytes = 262_144
+private val embeddedNodePackagingModuleSourcesMaxBytes = 524_288
+private val embeddedNodePackagingModuleSourceBudgetExceededCode = "ERR_AUTOJS6_MODULE_SOURCE_BUDGET_EXCEEDED"
 private val embeddedNodePackagingInrtNodeProjectLaunchSourceMarker =
     "autojs6.inrt.node_project_launch_source.v2"
 private val embeddedNodePackagingInrtNodeProjectStableRequestMarkers = listOf(
@@ -436,6 +439,12 @@ private data class EmbeddedNodePackagedOutputVerification(
     val moduleSourcesReady: Boolean,
 )
 
+private data class EmbeddedNodePackagingModuleSourceBudgetEntry(
+    val index: Int,
+    val sourceName: String,
+    val bytes: Int?,
+)
+
 private data class EmbeddedNodePackagingBridgeCapabilityReport(
     val enforced: Boolean,
     val sources: List<String>,
@@ -659,6 +668,28 @@ private fun EmbeddedNodePackagingManifestInfo.declaresAndroidPermission(permissi
 
 private fun Map<String, String>.embeddedNodePackagingIntValue(key: String): Int? =
     this[key]?.toIntOrNull()
+
+private fun embeddedNodePackagingModuleSourceBudgetEntries(
+    values: Map<String, String>,
+    prefix: String = "packaged.preload.module_sources.",
+): List<EmbeddedNodePackagingModuleSourceBudgetEntry> =
+    values.entries
+        .asSequence()
+        .mapNotNull { entry ->
+            entry.key
+                .removePrefix(prefix)
+                .takeIf { it != entry.key }
+                ?.toIntOrNull()
+                ?.let { index ->
+                    EmbeddedNodePackagingModuleSourceBudgetEntry(
+                        index = index,
+                        sourceName = entry.value,
+                        bytes = values["$prefix$index.bytes"]?.toIntOrNull(),
+                    )
+                }
+        }
+        .sortedBy { it.index }
+        .toList()
 
 private fun ByteArray.embeddedNodePackagingContainsBytes(needle: ByteArray): Boolean {
     if (needle.isEmpty()) {
@@ -2655,6 +2686,14 @@ private fun embeddedNodePackagingVerifyPackagedApkOutput(
             preloadBudgetValues.embeddedNodePackagingIntValue("packaged.preload.module_sources.count")
     val moduleSourcesBudgetLimit =
             preloadBudgetValues.embeddedNodePackagingIntValue("packaged.preload.module_sources.limit")
+    val moduleSourcesMaxBytesPerSource =
+            preloadBudgetValues.embeddedNodePackagingIntValue("packaged.preload.module_sources.max_bytes_per_source")
+    val moduleSourcesMaxBytesTotal =
+            preloadBudgetValues.embeddedNodePackagingIntValue("packaged.preload.module_sources.max_bytes_total")
+    val moduleSourcesTotalBytes =
+            preloadBudgetValues.embeddedNodePackagingIntValue("packaged.preload.module_sources.total_bytes")
+    val moduleSourcesMaxObservedBytes =
+            preloadBudgetValues.embeddedNodePackagingIntValue("packaged.preload.module_sources.max_observed_bytes")
     val moduleSourcesPackageJsonCount =
             preloadBudgetValues.embeddedNodePackagingIntValue("packaged.preload.package_json.count")
     val moduleSourcesJsonModuleCount =
@@ -2668,12 +2707,34 @@ private fun embeddedNodePackagingVerifyPackagedApkOutput(
     val moduleSourcesMaxDepth =
             preloadBudgetValues.embeddedNodePackagingIntValue("packaged.preload.max_depth")
     val moduleSourcesReadyMarker = preloadBudgetValues["packaged.preload.module_sources.ready"] == "true"
+    val moduleSourceBudgetEntries = embeddedNodePackagingModuleSourceBudgetEntries(preloadBudgetValues)
+    val moduleSourceLargestEntries = embeddedNodePackagingModuleSourceBudgetEntries(
+            preloadBudgetValues,
+            prefix = "packaged.preload.module_sources.largest.",
+    )
+    val moduleSourcesCountReady =
+            moduleSourcesEstimatedCount != null &&
+                    moduleSourcesBudgetLimit == embeddedNodePackagingModuleSourcesLimit &&
+                    moduleSourcesEstimatedCount <= embeddedNodePackagingModuleSourcesLimit
+    val moduleSourcesTotalBytesReady =
+            moduleSourcesTotalBytes != null &&
+                    moduleSourcesMaxBytesTotal == embeddedNodePackagingModuleSourcesMaxBytes &&
+                    moduleSourcesTotalBytes <= embeddedNodePackagingModuleSourcesMaxBytes
+    val moduleSourcesPerModuleBytesReady =
+            moduleSourcesMaxBytesPerSource == embeddedNodePackagingModuleSourceMaxBytes &&
+                    moduleSourcesMaxObservedBytes != null &&
+                    moduleSourcesMaxObservedBytes <= embeddedNodePackagingModuleSourceMaxBytes &&
+                    moduleSourcesEstimatedCount != null &&
+                    moduleSourceBudgetEntries.size == moduleSourcesEstimatedCount &&
+                    moduleSourceBudgetEntries.all { entry ->
+                        entry.bytes != null && entry.bytes <= embeddedNodePackagingModuleSourceMaxBytes
+                    }
     val moduleSourcesBudgetReady = !moduleSourcesBudgetRequested ||
             (preloadBudgetPresent &&
                     moduleSourcesReadyMarker &&
-                    moduleSourcesEstimatedCount != null &&
-                    moduleSourcesBudgetLimit == embeddedNodePackagingModuleSourcesLimit &&
-                    moduleSourcesEstimatedCount <= embeddedNodePackagingModuleSourcesLimit)
+                    moduleSourcesCountReady &&
+                    moduleSourcesTotalBytesReady &&
+                    moduleSourcesPerModuleBytesReady)
     val realNpmCorpusRequested = runtimeMatrixText?.contains(embeddedNodePackagingRealNpmCorpusReadyMarker) == true
     val realNpmCorpusMarkersReady = !realNpmCorpusRequested ||
             embeddedNodePackagingRealNpmCorpusMarkers.all { marker -> runtimeMatrixText?.contains(marker) == true }
@@ -2866,13 +2927,29 @@ private fun embeddedNodePackagingVerifyPackagedApkOutput(
         appendLine("  moduleSources budget present: $preloadBudgetPresent")
         appendLine("  moduleSources estimated count: ${moduleSourcesEstimatedCount ?: "unknown"}")
         appendLine("  moduleSources limit: ${moduleSourcesBudgetLimit ?: embeddedNodePackagingModuleSourcesLimit}")
+        appendLine("  moduleSources count ready: $moduleSourcesCountReady")
+        appendLine("  moduleSources total bytes: ${moduleSourcesTotalBytes ?: "unknown"}")
+        appendLine("  moduleSources total bytes limit: ${moduleSourcesMaxBytesTotal ?: embeddedNodePackagingModuleSourcesMaxBytes}")
+        appendLine("  moduleSources total bytes ready: $moduleSourcesTotalBytesReady")
+        appendLine("  moduleSources max observed bytes: ${moduleSourcesMaxObservedBytes ?: "unknown"}")
+        appendLine("  moduleSources per-module bytes limit: ${moduleSourcesMaxBytesPerSource ?: embeddedNodePackagingModuleSourceMaxBytes}")
+        appendLine("  moduleSources per-module bytes ready: $moduleSourcesPerModuleBytesReady")
         appendLine("  moduleSources ready marker: $moduleSourcesReadyMarker")
+        appendLine("  moduleSources budget failure code: $embeddedNodePackagingModuleSourceBudgetExceededCode")
         appendLine("  package.json count: ${moduleSourcesPackageJsonCount ?: "unknown"}")
         appendLine("  JSON module count: ${moduleSourcesJsonModuleCount ?: "unknown"}")
         appendLine("  static require count: ${moduleSourcesStaticRequireCount ?: "unknown"}")
         appendLine("  dynamic require ignored count: ${moduleSourcesDynamicRequireIgnoredCount ?: "unknown"}")
         appendLine("  unresolved static require count: ${moduleSourcesUnresolvedStaticRequireCount ?: "unknown"}")
         appendLine("  max depth: ${moduleSourcesMaxDepth ?: "unknown"}")
+        appendLine("  largest moduleSources:")
+        if (moduleSourceLargestEntries.isEmpty()) {
+            appendLine("    none")
+        } else {
+            moduleSourceLargestEntries.forEach { entry ->
+                appendLine("    ${entry.sourceName}: ${entry.bytes ?: "unknown"} bytes")
+            }
+        }
         appendLine("  moduleSources budget ready: $moduleSourcesBudgetReady")
         appendLine()
 
@@ -2986,12 +3063,20 @@ private fun embeddedNodePackagingVerifyPackagedApkOutput(
         appendLine("  embedded.node.packaged.output.module_sources.budget.present=$preloadBudgetPresent")
         appendLine("  embedded.node.packaged.output.module_sources.estimated_count=${moduleSourcesEstimatedCount ?: "unknown"}")
         appendLine("  embedded.node.packaged.output.module_sources.limit=${moduleSourcesBudgetLimit ?: embeddedNodePackagingModuleSourcesLimit}")
+        appendLine("  embedded.node.packaged.output.module_sources.count.ready=$moduleSourcesCountReady")
+        appendLine("  embedded.node.packaged.output.module_sources.total_bytes=${moduleSourcesTotalBytes ?: "unknown"}")
+        appendLine("  embedded.node.packaged.output.module_sources.max_bytes_total=${moduleSourcesMaxBytesTotal ?: embeddedNodePackagingModuleSourcesMaxBytes}")
+        appendLine("  embedded.node.packaged.output.module_sources.total_bytes.ready=$moduleSourcesTotalBytesReady")
+        appendLine("  embedded.node.packaged.output.module_sources.max_observed_bytes=${moduleSourcesMaxObservedBytes ?: "unknown"}")
+        appendLine("  embedded.node.packaged.output.module_sources.max_bytes_per_source=${moduleSourcesMaxBytesPerSource ?: embeddedNodePackagingModuleSourceMaxBytes}")
+        appendLine("  embedded.node.packaged.output.module_sources.per_module_bytes.ready=$moduleSourcesPerModuleBytesReady")
         appendLine("  embedded.node.packaged.output.module_sources.package_json_count=${moduleSourcesPackageJsonCount ?: "unknown"}")
         appendLine("  embedded.node.packaged.output.module_sources.json_module_count=${moduleSourcesJsonModuleCount ?: "unknown"}")
         appendLine("  embedded.node.packaged.output.module_sources.static_require_count=${moduleSourcesStaticRequireCount ?: "unknown"}")
         appendLine("  embedded.node.packaged.output.module_sources.dynamic_require_ignored_count=${moduleSourcesDynamicRequireIgnoredCount ?: "unknown"}")
         appendLine("  embedded.node.packaged.output.module_sources.unresolved_static_require_count=${moduleSourcesUnresolvedStaticRequireCount ?: "unknown"}")
         appendLine("  embedded.node.packaged.output.module_sources.max_depth=${moduleSourcesMaxDepth ?: "unknown"}")
+        appendLine("  embedded.node.packaged.output.module_sources.error_code=${if (moduleSourcesBudgetReady) "none" else embeddedNodePackagingModuleSourceBudgetExceededCode}")
         appendLine("  embedded.node.packaged.output.module_sources.ready=$moduleSourcesBudgetReady")
         appendLine("  embedded.node.packaged.output.real_npm_corpus.requested=$realNpmCorpusRequested")
         appendLine("  embedded.node.packaged.output.real_npm_corpus.package_json.present=$realNpmCorpusPackageJsonPresent")

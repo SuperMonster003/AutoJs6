@@ -90,6 +90,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `:app:embeddedNodePackagedApkOutputVerify` with `-Pautojs.embeddedNode.packagedApk=<apk>` when verifying a specific exported APK
 - [ ] `:app:embeddedNodePackagedDiagnosticReport` with `-Pautojs.embeddedNode.packagedApk=<apk>` when gating a specific exported APK
 - [ ] packaged smoke host aggregate includes success and diagnostics APK verifier reports
+- [ ] packaged verifier reports `embedded.node.packaged.output.module_sources.ready=true` with count, total-byte, per-module-byte, and largest-module fields
 - [ ] packaged `toast` bridge smoke passes and cannot be shadowed by `node_modules/toast`
 - [ ] packaged `app` bridge smoke passes, reports the packaged app id, and cannot be shadowed by `node_modules/app`
 - [ ] packaged `clipboard` bridge smoke passes and cannot be shadowed by `node_modules/clipboard`

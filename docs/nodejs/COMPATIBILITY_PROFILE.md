@@ -402,6 +402,18 @@ Runtime diagnostics include `esmEnabled`, `esmEntry`, `esmModuleGraphRoot`, `esm
 
 See `docs/nodejs/design/ESM.md` for package `type`, CJS/ESM interop, top-level await, dynamic import, `import.meta.url`, package condition, moduleSources, encrypted graph, packaged APK, and stack trace decisions.
 
+## moduleSources Budget
+
+Injected `moduleSources` are bounded before native runtime startup. The v1 limits are:
+
+- module count: `64`
+- per-module UTF-8 source bytes: `262144`
+- total UTF-8 source bytes: `524288`
+
+The limits apply to CommonJS preload records and encrypted packaged/runtime module source records. Over-budget requests fail with `ERR_AUTOJS6_MODULE_SOURCE_BUDGET_EXCEEDED` before the embedded service starts native Node.
+
+Packaged APKs carry `assets/project/preload-budget.expected.txt` when full smoke moduleSources are requested. The packaged verifier checks the budget marker, count, total bytes, per-module maximum, and largest-module report before runtime smoke execution.
+
 ## Source Map Status
 
 Embedded Node result diagnostics apply source map v1 mappings to uncaught script `errorStack` output when a script or module contains a `sourceMappingURL` comment. Supported map sources are inline `data:` URLs and external `.map` files inside the scoped working directory or injected moduleSources. External map paths use the same scoped filesystem boundary: no NUL, no path escape, no sensitive path, no symlink/realpath escape.
@@ -606,7 +618,7 @@ Packaged Node APKs require:
 - `android.permission.FOREGROUND_SERVICE`
 - `android.permission.FOREGROUND_SERVICE_SPECIAL_USE`
 - `android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE`
-- Node project metadata and module source entries within current budgets
+- Node project metadata and module source entries within the `64` module, `262144` byte per-module, and `524288` byte total budgets
 - packaged smoke coverage for the current user-facing `toast`, `app`, `clipboard`, and `device` bridge modules
 
 Release packaging profile:

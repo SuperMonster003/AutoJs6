@@ -227,9 +227,9 @@ object NativeNodeEmbeddedRuntimeBridge {
     private const val PROBE_LEVEL_MIN = 0
     private const val PROBE_LEVEL_MAX = 209
     private const val EMBEDDED_SCRIPT_SOURCE_MAX_BYTES = 262_144
-    private const val EMBEDDED_SCRIPT_MODULE_SOURCE_MAX_BYTES = 262_144
-    private const val EMBEDDED_SCRIPT_MODULE_SOURCES_MAX_BYTES = 524_288
-    private const val EMBEDDED_SCRIPT_MODULE_SOURCE_MAX_COUNT = 64
+    private const val EMBEDDED_SCRIPT_MODULE_SOURCE_MAX_BYTES = NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCE_MAX_BYTES
+    private const val EMBEDDED_SCRIPT_MODULE_SOURCES_MAX_BYTES = NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCES_MAX_BYTES
+    private const val EMBEDDED_SCRIPT_MODULE_SOURCE_MAX_COUNT = NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCE_MAX_COUNT
     const val PROBE_LEVEL_KOTLIN_ROUND_TRIP = 0
     private const val PROBE_LEVEL_BRIDGE_PING = 1
     private const val PROBE_LEVEL_LOAD_LIBNODE = 2
@@ -720,42 +720,131 @@ object NativeNodeEmbeddedRuntimeBridge {
         pid: Int,
         startedAt: Long,
     ): EmbeddedScriptResult? {
+        val stats = moduleSourcesBudgetStats(request.moduleSources)
         if (request.moduleSources.size > EMBEDDED_SCRIPT_MODULE_SOURCE_MAX_COUNT) {
             return failureEmbeddedScriptResult(
                 request = request,
                 processName = processName,
                 pid = pid,
                 startedAt = startedAt,
-                message = "Embedded script module source count is too large for ${request.sourceName}: " +
-                        "${request.moduleSources.size} > $EMBEDDED_SCRIPT_MODULE_SOURCE_MAX_COUNT.",
+                message = moduleSourcesBudgetExceededMessage(
+                    sourceName = request.sourceName,
+                    detail = "module source count is too large (${request.moduleSources.size} > $EMBEDDED_SCRIPT_MODULE_SOURCE_MAX_COUNT)",
+                ),
+                nativeValues = moduleSourcesBudgetNativeValues(
+                    exceeded = "count",
+                    count = request.moduleSources.size,
+                    totalBytes = stats.totalBytes,
+                    largestModuleName = stats.largestModuleName,
+                    largestModuleBytes = stats.largestModuleBytes,
+                ),
+                errorCode = NodeRuntimeErrorCodes.MODULE_SOURCE_BUDGET_EXCEEDED,
             )
         }
-        var totalBytes = 0
-        request.moduleSources.forEach { (moduleName, moduleSource) ->
-            val moduleBytes = moduleSource.toByteArray(StandardCharsets.UTF_8).size
-            if (moduleBytes > EMBEDDED_SCRIPT_MODULE_SOURCE_MAX_BYTES) {
-                return failureEmbeddedScriptResult(
-                    request = request,
-                    processName = processName,
-                    pid = pid,
-                    startedAt = startedAt,
-                    message = "Embedded script module source is too large for $moduleName: " +
-                            "$moduleBytes bytes > $EMBEDDED_SCRIPT_MODULE_SOURCE_MAX_BYTES bytes.",
-                )
-            }
-            totalBytes += moduleBytes
-        }
-        if (totalBytes > EMBEDDED_SCRIPT_MODULE_SOURCES_MAX_BYTES) {
+        if (stats.firstOversizedModuleName != null && stats.firstOversizedModuleBytes != null) {
             return failureEmbeddedScriptResult(
                 request = request,
                 processName = processName,
                 pid = pid,
                 startedAt = startedAt,
-                message = "Embedded script module sources are too large for ${request.sourceName}: " +
-                        "$totalBytes bytes > $EMBEDDED_SCRIPT_MODULE_SOURCES_MAX_BYTES bytes.",
+                message = moduleSourcesBudgetExceededMessage(
+                    sourceName = request.sourceName,
+                    detail = "module source is too large for ${stats.firstOversizedModuleName}: " +
+                            "${stats.firstOversizedModuleBytes} bytes > $EMBEDDED_SCRIPT_MODULE_SOURCE_MAX_BYTES bytes",
+                ),
+                nativeValues = moduleSourcesBudgetNativeValues(
+                    exceeded = "per-module",
+                    count = request.moduleSources.size,
+                    totalBytes = stats.totalBytes,
+                    largestModuleName = stats.largestModuleName,
+                    largestModuleBytes = stats.largestModuleBytes,
+                ),
+                errorCode = NodeRuntimeErrorCodes.MODULE_SOURCE_BUDGET_EXCEEDED,
+            )
+        }
+        if (stats.totalBytes > EMBEDDED_SCRIPT_MODULE_SOURCES_MAX_BYTES) {
+            return failureEmbeddedScriptResult(
+                request = request,
+                processName = processName,
+                pid = pid,
+                startedAt = startedAt,
+                message = moduleSourcesBudgetExceededMessage(
+                    sourceName = request.sourceName,
+                    detail = "module sources are too large: " +
+                            "${stats.totalBytes} bytes > $EMBEDDED_SCRIPT_MODULE_SOURCES_MAX_BYTES bytes",
+                ),
+                nativeValues = moduleSourcesBudgetNativeValues(
+                    exceeded = "total",
+                    count = request.moduleSources.size,
+                    totalBytes = stats.totalBytes,
+                    largestModuleName = stats.largestModuleName,
+                    largestModuleBytes = stats.largestModuleBytes,
+                ),
+                errorCode = NodeRuntimeErrorCodes.MODULE_SOURCE_BUDGET_EXCEEDED,
             )
         }
         return null
+    }
+
+    private data class ModuleSourcesBudgetStats(
+        val totalBytes: Int,
+        val largestModuleName: String,
+        val largestModuleBytes: Int,
+        val firstOversizedModuleName: String?,
+        val firstOversizedModuleBytes: Int?,
+    )
+
+    private fun moduleSourcesBudgetStats(moduleSources: Map<String, String>): ModuleSourcesBudgetStats {
+        var totalBytes = 0
+        var largestModuleName = ""
+        var largestModuleBytes = 0
+        var firstOversizedModuleName: String? = null
+        var firstOversizedModuleBytes: Int? = null
+        moduleSources.forEach { (moduleName, moduleSource) ->
+            val moduleBytes = moduleSource.toByteArray(StandardCharsets.UTF_8).size
+            totalBytes += moduleBytes
+            if (moduleBytes > largestModuleBytes) {
+                largestModuleName = moduleName
+                largestModuleBytes = moduleBytes
+            }
+            if (moduleBytes > EMBEDDED_SCRIPT_MODULE_SOURCE_MAX_BYTES && firstOversizedModuleName == null) {
+                firstOversizedModuleName = moduleName
+                firstOversizedModuleBytes = moduleBytes
+            }
+        }
+        return ModuleSourcesBudgetStats(
+            totalBytes = totalBytes,
+            largestModuleName = largestModuleName,
+            largestModuleBytes = largestModuleBytes,
+            firstOversizedModuleName = firstOversizedModuleName,
+            firstOversizedModuleBytes = firstOversizedModuleBytes,
+        )
+    }
+
+    private fun moduleSourcesBudgetExceededMessage(sourceName: String, detail: String): String {
+        return "Embedded script moduleSources budget exceeded for $sourceName: $detail. " +
+                "Limits: maxCount=$EMBEDDED_SCRIPT_MODULE_SOURCE_MAX_COUNT, " +
+                "maxBytesPerSource=$EMBEDDED_SCRIPT_MODULE_SOURCE_MAX_BYTES, " +
+                "maxBytesTotal=$EMBEDDED_SCRIPT_MODULE_SOURCES_MAX_BYTES."
+    }
+
+    private fun moduleSourcesBudgetNativeValues(
+        exceeded: String,
+        count: Int,
+        totalBytes: Int? = null,
+        largestModuleName: String? = null,
+        largestModuleBytes: Int? = null,
+    ): Map<String, String> = buildMap {
+        put("embedded_script.module_sources.budget.exceeded", exceeded)
+        put("embedded_script.module_sources.count", count.toString())
+        put("embedded_script.module_sources.max_count", EMBEDDED_SCRIPT_MODULE_SOURCE_MAX_COUNT.toString())
+        put("embedded_script.module_sources.max_bytes_per_source", EMBEDDED_SCRIPT_MODULE_SOURCE_MAX_BYTES.toString())
+        put("embedded_script.module_sources.max_bytes_total", EMBEDDED_SCRIPT_MODULE_SOURCES_MAX_BYTES.toString())
+        totalBytes?.let { put("embedded_script.module_sources.total_bytes", it.toString()) }
+        largestModuleName?.takeIf { it.isNotBlank() }?.let {
+            put("embedded_script.module_sources.largest.name", it)
+        }
+        largestModuleBytes?.let { put("embedded_script.module_sources.largest.bytes", it.toString()) }
     }
 
     private fun embeddedScriptExecutionDisabledMessage(): String {

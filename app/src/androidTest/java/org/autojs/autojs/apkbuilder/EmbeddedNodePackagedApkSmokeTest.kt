@@ -10,6 +10,7 @@ import android.provider.MediaStore
 import androidx.test.platform.app.InstrumentationRegistry
 import org.autojs.autojs.engine.EmbeddedNodeFixtureCorpus
 import org.autojs.autojs.engine.NativeNodeEmbeddedJavaScriptEngine
+import org.autojs.autojs.engine.NodeRuntimeCapabilities
 import org.autojs.autojs.engine.NodeProjectLaunchDiagnostics
 import org.autojs.autojs.project.LaunchConfig
 import org.autojs.autojs.project.ProjectConfig
@@ -10671,13 +10672,19 @@ $permissionsJson
         projectDir: File,
         mainScript: File,
     ): PackagedModuleSourcesBudget {
-        val diagnostics = collectPackagedPreloadDiagnostics(projectDir, mainScript)
-        val relativeSourceNames = diagnostics.moduleSourceNames.map { sourceName ->
-            sourceName.relativeToProject(projectDir)
+        val preload = collectPackagedPreloadCollection(projectDir, mainScript)
+        val diagnostics = preload.diagnostics
+        val moduleSourceBytes = preload.moduleSources.map { (sourceName, source) ->
+            PackagedModuleSourceBudgetEntry(
+                sourceName = sourceName.relativeToProject(projectDir),
+                bytes = source.toByteArray(StandardCharsets.UTF_8).size,
+            )
         }
         val budget = PackagedModuleSourcesBudget(
             moduleSourceCount = diagnostics.moduleCount,
             limit = PACKAGED_MODULE_SOURCES_LIMIT,
+            maxBytesPerSource = PACKAGED_MODULE_SOURCE_MAX_BYTES,
+            maxBytesTotal = PACKAGED_MODULE_SOURCES_MAX_BYTES,
             packageJsonCount = diagnostics.packageJsonCount,
             jsonModuleCount = diagnostics.jsonModuleCount,
             staticRequireCount = diagnostics.staticRequireCount,
@@ -10686,12 +10693,14 @@ $permissionsJson
             duplicateSkippedCount = diagnostics.duplicateSkippedCount,
             maxDepth = diagnostics.maxDepth,
             totalSourceBytes = diagnostics.totalSourceBytes,
-            moduleSourceNames = relativeSourceNames,
+            moduleSourceBytes = moduleSourceBytes,
         )
         File(projectDir, PACKAGED_PRELOAD_BUDGET_FILE).writeText(budget.toReportText(), StandardCharsets.UTF_8)
         assertTrue(
             "Packaged Node smoke moduleSources budget exceeded: " +
-                    "${budget.moduleSourceCount} > ${budget.limit}\n${budget.toReportText()}",
+                    "count=${budget.moduleSourceCount}/${budget.limit}, " +
+                    "totalBytes=${budget.totalSourceBytes}/${budget.maxBytesTotal}, " +
+                    "maxModuleBytes=${budget.maxObservedBytes}/${budget.maxBytesPerSource}\n${budget.toReportText()}",
             budget.ready,
         )
         assertTrue("Packaged Node smoke should preload at least one module", budget.moduleSourceCount > 0)
@@ -10699,10 +10708,10 @@ $permissionsJson
         return budget
     }
 
-    private fun collectPackagedPreloadDiagnostics(
+    private fun collectPackagedPreloadCollection(
         projectDir: File,
         mainScript: File,
-    ): NativeNodeEmbeddedJavaScriptEngine.CommonJsPreloadDiagnostics {
+    ): PackagedPreloadCollection {
         val engine = NativeNodeEmbeddedJavaScriptEngine(context)
         return try {
             val method = NativeNodeEmbeddedJavaScriptEngine::class.java.getDeclaredMethod(
@@ -10722,7 +10731,14 @@ $permissionsJson
             ) { "CommonJS preload reflection returned null" }
             val diagnosticsGetter = result.javaClass.getDeclaredMethod("getDiagnostics")
             diagnosticsGetter.isAccessible = true
-            diagnosticsGetter.invoke(result) as NativeNodeEmbeddedJavaScriptEngine.CommonJsPreloadDiagnostics
+            val moduleSourcesGetter = result.javaClass.getDeclaredMethod("getModuleSources")
+            moduleSourcesGetter.isAccessible = true
+            @Suppress("UNCHECKED_CAST")
+            val moduleSources = moduleSourcesGetter.invoke(result) as Map<String, String>
+            PackagedPreloadCollection(
+                diagnostics = diagnosticsGetter.invoke(result) as NativeNodeEmbeddedJavaScriptEngine.CommonJsPreloadDiagnostics,
+                moduleSources = moduleSources,
+            )
         } finally {
             runCatching { RhinoContext.exit() }
         }
@@ -10735,6 +10751,8 @@ $permissionsJson
         val text = readZipText(zip, "assets/project/$PACKAGED_PRELOAD_BUDGET_FILE")
         val actualBudget = PackagedModuleSourcesBudget.fromReportText(text)
         assertEquals(PACKAGED_MODULE_SOURCES_LIMIT, actualBudget.limit)
+        assertEquals(PACKAGED_MODULE_SOURCE_MAX_BYTES, actualBudget.maxBytesPerSource)
+        assertEquals(PACKAGED_MODULE_SOURCES_MAX_BYTES, actualBudget.maxBytesTotal)
         assertEquals(expectedBudget.moduleSourceCount, actualBudget.moduleSourceCount)
         assertEquals(expectedBudget.packageJsonCount, actualBudget.packageJsonCount)
         assertEquals(expectedBudget.jsonModuleCount, actualBudget.jsonModuleCount)
@@ -10743,6 +10761,9 @@ $permissionsJson
         assertEquals(expectedBudget.unresolvedStaticRequireCount, actualBudget.unresolvedStaticRequireCount)
         assertEquals(expectedBudget.duplicateSkippedCount, actualBudget.duplicateSkippedCount)
         assertEquals(expectedBudget.maxDepth, actualBudget.maxDepth)
+        assertEquals(expectedBudget.totalSourceBytes, actualBudget.totalSourceBytes)
+        assertEquals(expectedBudget.maxObservedBytes, actualBudget.maxObservedBytes)
+        assertEquals(expectedBudget.moduleSourceBytes, actualBudget.moduleSourceBytes)
         assertTrue(
             "Packaged moduleSources budget should be ready: $text",
             actualBudget.ready,
@@ -12430,9 +12451,21 @@ $permissionsJson
         return Base64.getEncoder().encodeToString(output.toByteArray())
     }
 
+    private data class PackagedPreloadCollection(
+        val diagnostics: NativeNodeEmbeddedJavaScriptEngine.CommonJsPreloadDiagnostics,
+        val moduleSources: Map<String, String>,
+    )
+
+    private data class PackagedModuleSourceBudgetEntry(
+        val sourceName: String,
+        val bytes: Int,
+    )
+
     private data class PackagedModuleSourcesBudget(
         val moduleSourceCount: Int,
         val limit: Int,
+        val maxBytesPerSource: Int,
+        val maxBytesTotal: Int,
         val packageJsonCount: Int,
         val jsonModuleCount: Int,
         val staticRequireCount: Int,
@@ -12441,14 +12474,28 @@ $permissionsJson
         val duplicateSkippedCount: Int,
         val maxDepth: Int,
         val totalSourceBytes: Int,
-        val moduleSourceNames: List<String>,
+        val moduleSourceBytes: List<PackagedModuleSourceBudgetEntry>,
     ) {
+        val maxObservedBytes: Int
+            get() = moduleSourceBytes.maxOfOrNull { it.bytes } ?: 0
+
         val ready: Boolean
-            get() = moduleSourceCount <= limit
+            get() = moduleSourceCount <= limit &&
+                    totalSourceBytes <= maxBytesTotal &&
+                    moduleSourceBytes.all { it.bytes <= maxBytesPerSource }
+
+        val largestModules: List<PackagedModuleSourceBudgetEntry>
+            get() = moduleSourceBytes
+                .sortedWith(compareByDescending<PackagedModuleSourceBudgetEntry> { it.bytes }.thenBy { it.sourceName })
+                .take(LARGEST_REPORT_LIMIT)
 
         fun toReportText(): String = buildString {
             appendLine("packaged.preload.module_sources.count=$moduleSourceCount")
             appendLine("packaged.preload.module_sources.limit=$limit")
+            appendLine("packaged.preload.module_sources.max_bytes_per_source=$maxBytesPerSource")
+            appendLine("packaged.preload.module_sources.max_bytes_total=$maxBytesTotal")
+            appendLine("packaged.preload.module_sources.total_bytes=$totalSourceBytes")
+            appendLine("packaged.preload.module_sources.max_observed_bytes=$maxObservedBytes")
             appendLine("packaged.preload.module_sources.ready=$ready")
             appendLine("packaged.preload.package_json.count=$packageJsonCount")
             appendLine("packaged.preload.json_module.count=$jsonModuleCount")
@@ -12458,12 +12505,19 @@ $permissionsJson
             appendLine("packaged.preload.duplicate_skipped.count=$duplicateSkippedCount")
             appendLine("packaged.preload.max_depth=$maxDepth")
             appendLine("packaged.preload.total_source_bytes=$totalSourceBytes")
-            moduleSourceNames.forEachIndexed { index, sourceName ->
-                appendLine("packaged.preload.module_sources.$index=$sourceName")
+            largestModules.forEachIndexed { index, entry ->
+                appendLine("packaged.preload.module_sources.largest.$index=${entry.sourceName}")
+                appendLine("packaged.preload.module_sources.largest.$index.bytes=${entry.bytes}")
+            }
+            moduleSourceBytes.forEachIndexed { index, entry ->
+                appendLine("packaged.preload.module_sources.$index=${entry.sourceName}")
+                appendLine("packaged.preload.module_sources.$index.bytes=${entry.bytes}")
             }
         }
 
         companion object {
+            private const val LARGEST_REPORT_LIMIT = 5
+
             fun fromReportText(text: String): PackagedModuleSourcesBudget {
                 val values = text.lineSequence()
                     .mapNotNull { line ->
@@ -12486,9 +12540,17 @@ $permissionsJson
                     .sortedBy { it.first }
                     .map { it.second }
                     .toList()
+                val moduleSourceBytes = moduleSourceNames.mapIndexed { index, sourceName ->
+                    PackagedModuleSourceBudgetEntry(
+                        sourceName = sourceName,
+                        bytes = values.intValue("packaged.preload.module_sources.$index.bytes"),
+                    )
+                }
                 return PackagedModuleSourcesBudget(
                     moduleSourceCount = values.intValue("packaged.preload.module_sources.count"),
                     limit = values.intValue("packaged.preload.module_sources.limit"),
+                    maxBytesPerSource = values.intValue("packaged.preload.module_sources.max_bytes_per_source"),
+                    maxBytesTotal = values.intValue("packaged.preload.module_sources.max_bytes_total"),
                     packageJsonCount = values.intValue("packaged.preload.package_json.count"),
                     jsonModuleCount = values.intValue("packaged.preload.json_module.count"),
                     staticRequireCount = values.intValue("packaged.preload.static_require.count"),
@@ -12497,7 +12559,7 @@ $permissionsJson
                     duplicateSkippedCount = values.intValue("packaged.preload.duplicate_skipped.count"),
                     maxDepth = values.intValue("packaged.preload.max_depth"),
                     totalSourceBytes = values.intValue("packaged.preload.total_source_bytes"),
-                    moduleSourceNames = moduleSourceNames,
+                    moduleSourceBytes = moduleSourceBytes,
                 )
             }
 
@@ -13311,6 +13373,8 @@ $permissionsJson
             "envKeys=",
         )
         private const val ENRICHED_INRT_LAUNCH_SOURCE_DEX_MARKER = "requestLaunchKind="
+        private const val PACKAGED_MODULE_SOURCE_MAX_BYTES = NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCE_MAX_BYTES
+        private const val PACKAGED_MODULE_SOURCES_MAX_BYTES = NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCES_MAX_BYTES
     }
 
     private fun readZipText(zip: ZipFile, entryName: String): String =

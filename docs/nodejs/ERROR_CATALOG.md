@@ -238,6 +238,14 @@ canonical AutoJs6 value through `autojs6Code` and `legacyCode`.
 - How to fix: vendor the dependency, fix `package.json`, or run resolver trace/visualizer diagnostics.
 - Related docs: [COMPATIBILITY_PROFILE.md](COMPATIBILITY_PROFILE.md), [TESTING.md](TESTING.md).
 
+## ERR_AUTOJS6_MODULE_SOURCE_BUDGET_EXCEEDED
+
+- Meaning: injected moduleSources exceeded the Safe Node Profile budget before native Node startup.
+- Common cause: too many preloaded modules, a single module over `262144` UTF-8 bytes, or total moduleSources over `524288` UTF-8 bytes.
+- Example: packaging a large CommonJS graph into encrypted moduleSources.
+- How to fix: reduce bundled dependencies, split unsupported packages out of the packaged graph, or keep the app on disk-backed scoped `fs` instead of injected moduleSources.
+- Related docs: [COMPATIBILITY_PROFILE.md](COMPATIBILITY_PROFILE.md), [TESTING.md](TESTING.md).
+
 ## ERR_AUTOJS6_NATIVE_ADDON_DISABLED
 
 - Meaning: native `.node` addons are disabled.

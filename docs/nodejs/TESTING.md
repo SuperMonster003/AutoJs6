@@ -155,7 +155,7 @@ Current compatibility corpus instrumentation:
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeCompatCorpusInstrumentationTest"
 ```
 
-This suite copies `app/src/androidTest/assets/node_compat_corpus/` into a scoped working directory and verifies pure JavaScript CommonJS package patterns: basic CJS, deep dependencies, package `exports`, package `imports`, self-reference, JSON module caching, `util.promisify(fs)`, `Buffer`/`path`/`util`, and disabled-feature detection. It also runs a moduleSources/preload-shaped fixture as a packaged-preload proxy; a true packaged APK corpus smoke remains a follow-up.
+This suite copies `app/src/androidTest/assets/node_compat_corpus/` into a scoped working directory and verifies pure JavaScript CommonJS package patterns: basic CJS, deep dependencies, package `exports`, package `imports`, self-reference, JSON module caching, `util.promisify(fs)`, `Buffer`/`path`/`util`, and disabled-feature detection. It also runs a moduleSources/preload-shaped fixture as a packaged-preload proxy and verifies moduleSources budget behavior: within-budget execution passes, over-count and over-byte requests fail with `ERR_AUTOJS6_MODULE_SOURCE_BUDGET_EXCEEDED`.
 
 Current fixed real npm corpus instrumentation:
 
@@ -593,6 +593,14 @@ This writes `build/reports/nodejs/compatibility-profile.json` and `build/reports
 `verifyEmbeddedNodePackagedDebug` runs these standalone verifier tasks only when an explicit packaged APK property is present.
 Without that property, the aggregate gate relies on `embeddedNodePackagedSmokeHostVerify`, which verifies the success and
 diagnostics APKs pulled from the device and writes separate verifier reports for both artifacts.
+
+For packaged Node outputs that request full smoke moduleSources, the verifier requires
+`assets/project/preload-budget.expected.txt` and fails before runtime when any budget is exceeded or missing:
+
+- module count must be at most `64`
+- total moduleSources bytes must be at most `524288`
+- every module source must be at most `262144` UTF-8 bytes
+- the report must include largest moduleSources for triage
 
 If `autojs.embeddedNode.expectedAbis` is omitted, the verifier derives the ABI policy from `autojs.nodejs.releaseFlavor`:
 

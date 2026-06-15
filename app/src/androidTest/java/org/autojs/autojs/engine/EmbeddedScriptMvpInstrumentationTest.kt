@@ -26695,6 +26695,7 @@ class EmbeddedScriptMvpInstrumentationTest {
             val failure = runCatching { engine.doExecution(JavaScriptFileSource(main)) }.exceptionOrNull()
             assertTrue("Expected pre-service module source limit rejection", failure != null)
             val message = failure?.message.orEmpty()
+            assertTrue(message, message.contains(NodeRuntimeErrorCodes.MODULE_SOURCE_BUDGET_EXCEEDED))
             assertTrue(message, message.contains("module source count is too large"))
             assertTrue(message, message.contains("65 > 64"))
 
@@ -26714,9 +26715,24 @@ class EmbeddedScriptMvpInstrumentationTest {
     fun embeddedScriptModuleSourcesLimitsAreRejectedBeforeServiceStart() {
         assumeEmbeddedScriptExecutionEnabled()
 
+        val withinBudgetModule = File(context.cacheDir, "embedded-module-budget-within.js")
+        val withinBudget = runEmbeddedScript(
+            source = """
+                "nodejs";
+                console.log("moduleSources.budget.within=" + require("./embedded-module-budget-within"));
+            """.trimIndent(),
+            sourceName = "<embedded-module-budget-within-source.js>",
+            moduleSources = mapOf(withinBudgetModule.absolutePath to "module.exports = 42;"),
+        )
+        assertTrue(withinBudget.errorMessage.orEmpty(), withinBudget.succeeded)
+        assertTrue(withinBudget.stdout, withinBudget.stdout.contains("moduleSources.budget.within=42"))
+
+        settleEmbeddedScriptServiceProcess()
+
         val tooManySources = (0..64).associate { index ->
             "${context.cacheDir.absolutePath}/embedded-module-limit-$index.js" to "module.exports = $index;"
         }
+        val tooManySourceBytes = tooManySources.values.map { it.toByteArray(StandardCharsets.UTF_8).size }
         val tooMany = runEmbeddedScript(
             source = """"nodejs";""",
             sourceName = "<embedded-module-count-limit-source.js>",
@@ -26724,8 +26740,18 @@ class EmbeddedScriptMvpInstrumentationTest {
         )
         assertFalse(tooMany.succeeded)
         assertEquals("EmbeddedScriptExecutionError", tooMany.errorName)
+        assertEquals(NodeRuntimeErrorCodes.MODULE_SOURCE_BUDGET_EXCEEDED, tooMany.errorCode)
         assertTrue(tooMany.errorMessage.orEmpty().contains("module source count is too large"))
         assertTrue(tooMany.errorMessage.orEmpty().contains("65 > 64"))
+        assertEquals("count", tooMany.nativeValues["embedded_script.module_sources.budget.exceeded"])
+        assertEquals("65", tooMany.nativeValues["embedded_script.module_sources.count"])
+        assertEquals("64", tooMany.nativeValues["embedded_script.module_sources.max_count"])
+        assertEquals(tooManySourceBytes.sum().toString(), tooMany.nativeValues["embedded_script.module_sources.total_bytes"])
+        assertEquals(tooManySourceBytes.maxOrNull().toString(), tooMany.nativeValues["embedded_script.module_sources.largest.bytes"])
+        assertTrue(
+            tooMany.nativeValues["embedded_script.module_sources.largest.name"].orEmpty(),
+            tooMany.nativeValues["embedded_script.module_sources.largest.name"].orEmpty().contains("embedded-module-limit-"),
+        )
 
         val singleTooLarge = runEmbeddedScript(
             source = """"nodejs";""",
@@ -26734,8 +26760,16 @@ class EmbeddedScriptMvpInstrumentationTest {
         )
         assertFalse(singleTooLarge.succeeded)
         assertEquals("EmbeddedScriptExecutionError", singleTooLarge.errorName)
+        assertEquals(NodeRuntimeErrorCodes.MODULE_SOURCE_BUDGET_EXCEEDED, singleTooLarge.errorCode)
         assertTrue(singleTooLarge.errorMessage.orEmpty().contains("module source is too large"))
         assertTrue(singleTooLarge.errorMessage.orEmpty().contains("262145 bytes > 262144 bytes"))
+        assertEquals("per-module", singleTooLarge.nativeValues["embedded_script.module_sources.budget.exceeded"])
+        assertEquals("262145", singleTooLarge.nativeValues["embedded_script.module_sources.largest.bytes"])
+        assertEquals("262145", singleTooLarge.nativeValues["embedded_script.module_sources.total_bytes"])
+        assertTrue(
+            singleTooLarge.nativeValues["embedded_script.module_sources.largest.name"].orEmpty(),
+            singleTooLarge.nativeValues["embedded_script.module_sources.largest.name"].orEmpty().contains("single-too-large.js"),
+        )
 
         val totalTooLarge = runEmbeddedScript(
             source = """"nodejs";""",
@@ -26748,8 +26782,12 @@ class EmbeddedScriptMvpInstrumentationTest {
         )
         assertFalse(totalTooLarge.succeeded)
         assertEquals("EmbeddedScriptExecutionError", totalTooLarge.errorName)
+        assertEquals(NodeRuntimeErrorCodes.MODULE_SOURCE_BUDGET_EXCEEDED, totalTooLarge.errorCode)
         assertTrue(totalTooLarge.errorMessage.orEmpty().contains("module sources are too large"))
         assertTrue(totalTooLarge.errorMessage.orEmpty().contains("600000 bytes > 524288 bytes"))
+        assertEquals("total", totalTooLarge.nativeValues["embedded_script.module_sources.budget.exceeded"])
+        assertEquals("600000", totalTooLarge.nativeValues["embedded_script.module_sources.total_bytes"])
+        assertEquals("200000", totalTooLarge.nativeValues["embedded_script.module_sources.largest.bytes"])
     }
 
     @Test
