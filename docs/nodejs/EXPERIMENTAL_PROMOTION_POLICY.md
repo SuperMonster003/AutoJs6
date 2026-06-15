@@ -83,7 +83,8 @@ Promotion requires:
 - denial of Android, Java, raw network, nested worker, and native addon access
 - packaged smoke
 
-Default v1 status: experimental and off by default.
+Default v1 status: experimental and off by default. Task 122 currently blocks runnable worker advertising until native
+availability plus the worker execution and resource stress suites pass.
 
 ### Controlled Network And Fetch
 

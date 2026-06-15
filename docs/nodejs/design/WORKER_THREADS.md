@@ -1,10 +1,10 @@
 # Worker Threads Design Gate v1
 
-Status: experimental pure-JS MVP. `autojs.nodejs.worker_threads.experimental=false` is the default, and `worker_threads` remains disabled in normal AutoJs6 Safe Node Profile runs.
+Status: experimental design gate, blocked for Node Profile v1 GA execution. `autojs.nodejs.worker_threads.experimental=false` is the default, and `worker_threads` remains disabled in normal AutoJs6 Safe Node Profile runs. Task 122 found that the current Embedded Node build does not expose a usable native `worker_threads` module even when the experimental flag is enabled.
 
 ## Goal
 
-AutoJs6 supports an experimental worker_threads MVP for bounded pure JavaScript computation, but the default runtime must not expose desktop Node worker authority.
+AutoJs6 keeps an experimental worker_threads design for bounded pure JavaScript computation, but the default runtime must not expose desktop Node worker authority.
 
 Workers are high risk in AutoJs6 because they multiply:
 
@@ -15,7 +15,7 @@ Workers are high risk in AutoJs6 because they multiply:
 - access-control surfaces for AutoJs bridge modules
 - packaged APK compatibility state
 
-Task 42 froze the boundary. Task 63 adds a request-local experimental MVP that can run local CommonJS worker scripts with a smaller capability set than the parent script.
+Task 42 froze the boundary. Task 63 added a request-local experimental path intended to run local CommonJS worker scripts with a smaller capability set than the parent script. Task 122 blocks publishing that path as runnable for GA because native `worker_threads` is unavailable in the evaluated Embedded Node build.
 
 ## Feature Flag
 
@@ -47,9 +47,9 @@ With the flag off:
 
 `node_modules/worker_threads` must not shadow the disabled builtin.
 
-## Current Experimental Scope
+## Intended Experimental Scope
 
-When the request-local experimental flag is enabled, the first allowed scope is:
+When the request-local experimental flag is enabled and the Embedded Node build exposes native `worker_threads`, the first allowed scope is:
 
 - pure JavaScript CPU work
 - JSON-serializable `workerData`
@@ -193,9 +193,11 @@ Experimental worker-specific errors:
 Current gates:
 
 - `NodeWorkerThreadsDesignGateInstrumentationTest` verifies the BuildConfig flag, Kotlin registry, JavaScript profile, bare and `node:` require denial, `require.resolve` denial, and shadowing protection.
-- `NodeWorkerThreadsExperimentalInstrumentationTest` verifies the default disabled path, request-local experimental enablement, local worker script loading, `workerData`, `parentPort.postMessage`, `terminate()`, max worker rejection, scoped path escape denial, Worker diagnostics, and denial of AutoJs bridge modules, `fs`, raw `net`, and nested workers inside worker scope.
-- `NodeWorkerThreadsResourceStressInstrumentationTest` verifies sequential create/terminate behavior, worker exception recovery, infinite-loop timeout recovery, parent-completion cleanup, cleanup diagnostics, and coarse RSS/thread snapshots.
+- `NodeWorkerThreadsExperimentalInstrumentationTest` verifies the default disabled path and is the promotion gate for request-local experimental enablement, local worker script loading, `workerData`, `parentPort.postMessage`, `terminate()`, max worker rejection, scoped path escape denial, Worker diagnostics, and denial of AutoJs bridge modules, `fs`, raw `net`, and nested workers inside worker scope.
+- `NodeWorkerThreadsResourceStressInstrumentationTest` is the promotion gate for sequential create/terminate behavior, worker exception recovery, infinite-loop timeout recovery, parent-completion cleanup, cleanup diagnostics, and coarse RSS/thread snapshots.
 - `NodeSecurityRegressionInstrumentationTest` keeps `worker_threads` in the dangerous builtin denial corpus.
+
+Current GA evaluation: [../reports/WORKER_EXPERIMENTAL_EVALUATION.md](../reports/WORKER_EXPERIMENTAL_EVALUATION.md). The default design gate passes, but worker execution/stress suites are blocked by native module availability.
 
 Follow-up gates should add:
 

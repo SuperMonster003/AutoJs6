@@ -1,0 +1,134 @@
+# Worker Threads Experimental Evaluation
+
+Date: 2026-06-16
+
+Device: Sony XQ-AT72 (`QV710AF65F`), Android 12
+
+Branch/package identity: `feature/nodejs-runtime`, `org.autojs.autojs6.nodejs`
+
+## Recommendation
+
+Do not promote or expose `worker_threads` as a runnable experiment for Node Profile v1 GA.
+
+Keep `worker_threads` disabled by default, and document the current experimental path as blocked in this Embedded Node
+build. The JavaScript/Kotlin gate behaves correctly, but enabling the experimental flag reaches a native availability
+failure before any Worker can be created:
+
+```text
+ERR_AUTOJS6_WORKER_DISABLED
+AutoJs6 experimental worker_threads is unavailable in this Embedded Node build.
+```
+
+Until a libnode build exposes a usable native `worker_threads` module and the focused worker suites pass on the Sony gate
+device, the release contract should treat workers as unavailable, not as a supported or advertised experimental runtime
+surface.
+
+## Commands Run
+
+Default design gate:
+
+```powershell
+$env:ANDROID_SERIAL='QV710AF65F'
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeWorkerThreadsDesignGateInstrumentationTest"
+```
+
+Result: passed, 1/1 tests.
+
+Focused experimental execution with the Gradle flag enabled:
+
+```powershell
+$env:ANDROID_SERIAL='QV710AF65F'
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pautojs.nodejs.worker_threads.experimental=true" "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeWorkerThreadsExperimentalInstrumentationTest#experimentalWorkerThreadsRunPureJsWorkersOnly"
+```
+
+Result: failed, 1/1 tests. The request reached `embedded_script.request.worker_threads_experimental_enabled=true`, then
+failed with `ERR_AUTOJS6_WORKER_DISABLED` because native `worker_threads` was unavailable.
+
+Earlier exploratory runs also checked the full worker group:
+
+```powershell
+$env:ANDROID_SERIAL='QV710AF65F'
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeWorkerThreadsDesignGateInstrumentationTest,org.autojs.autojs.engine.NodeWorkerThreadsExperimentalInstrumentationTest,org.autojs.autojs.engine.NodeWorkerThreadsResourceStressInstrumentationTest"
+```
+
+Result: failed, 5/7 tests. The default-off design/default tests passed; all worker creation/stress paths failed with the
+same native availability error.
+
+```powershell
+$env:ANDROID_SERIAL='QV710AF65F'
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pautojs.nodejs.worker_threads.experimental=true" "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeWorkerThreadsDesignGateInstrumentationTest,org.autojs.autojs.engine.NodeWorkerThreadsExperimentalInstrumentationTest,org.autojs.autojs.engine.NodeWorkerThreadsResourceStressInstrumentationTest"
+```
+
+Result: failed, 7/7 tests. The default-off assertions failed by construction because the build flag changed
+`BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED` to `true`; all worker creation/stress paths still failed with the
+same native availability error.
+
+## Supported Cases
+
+The default-disabled gate is supported and passed on the Sony device:
+
+- `BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED=false` in normal builds
+- Kotlin capability registry reports the flag disabled by default
+- JavaScript profile reports `workerThreads=false`
+- `require("worker_threads")` rejects
+- `require("node:worker_threads")` rejects
+- `require.resolve("worker_threads")` rejects before local package shadowing
+- a local `node_modules/worker_threads` package cannot override the builtin denial
+
+No worker execution case was proven supported in this Embedded Node build.
+
+## Blocked Cases
+
+The following intended experimental cases could not be validated because execution fails before Worker construction:
+
+- local CommonJS worker loading
+- `workerData`
+- `parentPort.postMessage(...)`
+- `worker.postMessage(...)`
+- `worker.terminate()`
+- max-worker rejection
+- scoped worker path escape denial
+- worker diagnostics counters
+- worker-local denial of AutoJs bridge modules
+- worker-local denial of `fs`
+- worker-local denial of raw `net`
+- nested worker denial inside worker scope
+
+## Resource Stress Status
+
+The Task 122 stress requirements remain blocked:
+
+- sequential worker create/terminate cycles: not validated
+- worker exception recovery: not validated
+- worker terminate behavior: not validated
+- parent stop/completion cleanup: not validated
+- memory and thread count bounds: not validated
+
+`NodeWorkerThreadsResourceStressInstrumentationTest` contains the right gates for these behaviors, but every method reaches
+the same native availability failure before the stress condition begins.
+
+## Bridge Isolation Status
+
+The default profile still prevents worker access to AutoJs bridge authority because workers cannot be created and
+`worker_threads` is denied.
+
+The stronger worker-local isolation test, where a running worker attempts to require bridge modules, could not execute in
+this build. It must pass before any future worker experiment can be shown to users.
+
+## Release Decision
+
+Node Profile v1 GA should document `worker_threads` as:
+
+- disabled by default
+- unavailable in the current Embedded Node build even when the experimental flag is enabled
+- not part of the stable Node Profile v1 surface
+- not an advertised runnable experiment for GA
+
+The next unblock gate should:
+
+- make native `process.getBuiltinModule("worker_threads")` availability explicit in the worker preflight
+- provide or select a libnode build with usable native `worker_threads`
+- rerun `NodeWorkerThreadsExperimentalInstrumentationTest` on Sony
+- rerun `NodeWorkerThreadsResourceStressInstrumentationTest` on Sony
+- keep worker-local AutoJs bridge denial mandatory
+- keep packaged worker source graphs out of scope until the live worker path passes

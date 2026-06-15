@@ -48,8 +48,10 @@ Do not assume raw Node networking exists.
 
 ## Worker Threads
 
-`worker_threads` remains experimental and off by default. Workers, when explicitly tested, have a smaller capability set
-than parent scripts and must not access AutoJs bridge modules or Android objects.
+`worker_threads` remains off by default and is not a runnable Node Profile v1 GA feature. The Task 122 Sony evaluation
+found that the current Embedded Node build does not expose native `worker_threads` even when the experimental flag is
+enabled. Future worker support must use a smaller capability set than parent scripts and must not access AutoJs bridge
+modules or Android objects.
 
 Workaround: keep stable automation scripts single-execution and Promise-based.
 

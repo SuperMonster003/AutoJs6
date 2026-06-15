@@ -464,13 +464,15 @@ Current `worker_threads` design gate focused instrumentation:
 
 This suite verifies `BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED=false`, the Kotlin capability registry, JavaScript profile flags, bare and `node:` `worker_threads` denial, `require.resolve("worker_threads")` denial, frozen profile flags, and shadowing protection against `node_modules/worker_threads`.
 
+Task 122 GA evaluation report: [reports/WORKER_EXPERIMENTAL_EVALUATION.md](reports/WORKER_EXPERIMENTAL_EVALUATION.md).
+
 Current experimental worker_threads focused instrumentation:
 
 ```powershell
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeWorkerThreadsExperimentalInstrumentationTest"
 ```
 
-This suite verifies the default disabled path, then enables the request-local experimental flag to cover local CommonJS worker scripts, `workerData`, `parentPort.postMessage`, `terminate()`, max-worker rejection, scoped path escape rejection, shadowing protection, Worker diagnostics counters, and denial of AutoJs bridge modules, `fs`, raw `net`, and nested workers inside worker scope.
+This suite verifies the default disabled path, then enables the request-local experimental flag to cover local CommonJS worker scripts, `workerData`, `parentPort.postMessage`, `terminate()`, max-worker rejection, scoped path escape rejection, shadowing protection, Worker diagnostics counters, and denial of AutoJs bridge modules, `fs`, raw `net`, and nested workers inside worker scope. It is currently an unblock gate: on the Task 122 Sony GA evaluation build, worker creation fails before these semantics run because native `worker_threads` is unavailable.
 
 Current experimental worker_threads resource stress instrumentation:
 
@@ -478,7 +480,7 @@ Current experimental worker_threads resource stress instrumentation:
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeWorkerThreadsResourceStressInstrumentationTest"
 ```
 
-This suite verifies 50 sequential worker create/terminate cycles, worker exception recovery, infinite-loop worker timeout recovery, parent-completion cleanup for pending worker messages, worker cleanup diagnostics counters, and coarse RSS/thread-count snapshots around the sequential stress case.
+This suite verifies 50 sequential worker create/terminate cycles, worker exception recovery, infinite-loop worker timeout recovery, parent-completion cleanup for pending worker messages, worker cleanup diagnostics counters, and coarse RSS/thread-count snapshots around the sequential stress case. It must pass on the Sony gate device before workers can be advertised as a runnable experiment.
 
 Current feature flag registry focused instrumentation:
 
