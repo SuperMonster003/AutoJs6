@@ -18,6 +18,7 @@ const HTML_PATH = path.join(ACE_ROOT, "autojs6_editor.html");
 const CSS_PATH = path.join(ACE_ROOT, "autojs6", "autojs6.css");
 const BRIDGE_PATH = path.join(ACE_ROOT, "autojs6", "autojs6_ace_bridge.js");
 const LSP_CLIENT_PATH = path.join(ACE_ROOT, "autojs6", "autojs6_lsp_client.js");
+const TOOLTIP_PATH = path.join(ACE_ROOT, "autojs6", "autojs6_tooltip.js");
 const ACE_CODE_EDITOR_PATH = path.join(
   PROJECT_ROOT,
   "app",
@@ -84,6 +85,7 @@ const html = read(HTML_PATH);
 const css = read(CSS_PATH);
 const bridge = read(BRIDGE_PATH);
 const lspClient = read(LSP_CLIENT_PATH);
+const tooltip = read(TOOLTIP_PATH);
 const aceCodeEditor = read(ACE_CODE_EDITOR_PATH);
 const diagnostics = read(DIAGNOSTICS_PATH);
 
@@ -95,6 +97,7 @@ assertOrder(
     '<script src="./src-min-noconflict/ace.js"></script>',
     '<script src="./autojs6/autojs6_completer.js"></script>',
     '<script src="./autojs6/autojs6_lsp_client.js"></script>',
+    '<script src="./autojs6/autojs6_tooltip.js"></script>',
     '<script src="./autojs6/autojs6_ace_bridge.js"></script>',
   ],
   "ACE editor bootstrap order",
@@ -113,6 +116,8 @@ assertMatch(css, /\.autojs6_debug_line\s*\{[\s\S]*position:\s*absolute/, "debug 
 assertMatch(css, /\.autojs6_debug_line\s*\{[\s\S]*z-index:\s*5/, "debug line marker z-index");
 assertMatch(css, /\.ace_gutter,\s*\.ace_gutter-cell\s*\{[\s\S]*user-select:\s*none/, "gutter selection suppression");
 assertMatch(css, /\.ace_mobile-menu\s*\{[\s\S]*z-index:\s*20/, "mobile menu remains available");
+assertMatch(css, /\.autojs6_hover_tooltip\s*\{[\s\S]*pointer-events:\s*none/, "ACE hover tooltip must not steal touch input");
+assertMatch(css, /body\.ace-theme-dark \.autojs6_hover_tooltip\s*\{[\s\S]*background:\s*#20242b/, "ACE hover tooltip dark style");
 if (css.includes(".ace_mobile-menu {\n    display: none")) {
   throw new Error("ACE mobile menu must not be globally hidden");
 }
@@ -139,6 +144,9 @@ assertIncludes(bridge, "var lspClient = null;", "ACE LSP client bridge slot");
 assertIncludes(bridge, "global.AutoJsAceLspClient.install", "ACE LSP client install");
 assertIncludes(bridge, "getLspState: function()", "ACE LSP state public API");
 assertIncludes(bridge, "getLspHover: function(row, column)", "ACE LSP hover public API");
+assertIncludes(bridge, "global.AutoJsAceTooltip.install", "ACE tooltip install");
+assertIncludes(bridge, "showLspTooltip: function(row, column)", "ACE tooltip public show API");
+assertIncludes(bridge, "getTooltipState: function()", "ACE tooltip state public API");
 
 assertIncludes(lspClient, "global.AutoJsAceLspClient", "ACE LSP client global");
 assertIncludes(lspClient, "completionProvider: serverReady ? \"server\" : COMPLETION_PROVIDER_STATIC", "ACE LSP completion fallback provider");
@@ -149,6 +157,16 @@ assertIncludes(lspClient, "getCompletions: getCompletions", "ACE LSP completion 
 assertIncludes(lspClient, "getHover: getHover", "ACE LSP hover hook");
 if (lspClient.includes("WebSocket") || lspClient.includes("new Worker")) {
   throw new Error("LSP client must stay off WebSocket and worker transports in alpha path");
+}
+
+assertIncludes(tooltip, "global.AutoJsAceTooltip", "ACE tooltip global");
+assertIncludes(tooltip, "loadMarkdownRenderer: function()", "ACE tooltip lazy markdown renderer");
+assertIncludes(tooltip, "escapeHtml", "ACE tooltip HTML escaping");
+assertIncludes(tooltip, "pointerType === \"touch\"", "ACE tooltip touch guard");
+assertIncludes(tooltip, "domCreated: !!element", "ACE tooltip lazy DOM state");
+assertIncludes(tooltip, "markdownRenderer: markdownLoaded ? \"safe-subset\" : \"not-loaded\"", "ACE tooltip markdown state");
+if (tooltip.includes("fetch(") || tooltip.includes("XMLHttpRequest") || tooltip.includes("innerHTML = hover.docText")) {
+  throw new Error("Tooltip must keep markdown local and escaped");
 }
 
 assertIncludes(aceCodeEditor, "private fun requestFirstPaintWhenStable()", "native first-paint request hook");

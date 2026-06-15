@@ -22,7 +22,6 @@ tests:
 Out of scope for this gate:
 
 - server-backed LSP transport
-- markdown tooltip rendering
 - VisualEditorAce
 - broad UI automation coverage
 
@@ -134,6 +133,5 @@ ACE keyboard and viewport work is gate-complete only when:
 - large files still route to Native under the current policy
 - Native remains the default editor
 
-Server-backed LSP transport, markdown tooltip loading, and VisualEditorAce are
-not primary release targets until these keyboard and viewport gates pass on
-representative devices.
+Server-backed LSP transport and VisualEditorAce are not primary release targets
+until these keyboard and viewport gates pass on representative devices.

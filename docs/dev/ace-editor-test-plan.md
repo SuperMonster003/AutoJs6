@@ -23,6 +23,7 @@ This plan covers manual device validation for the ACE editor experiment. Native 
   - `node tools/ace-completion/verify-autojs6-indices.mjs`
   - `node tools/ace-completion/test-completer.mjs`
   - `node tools/ace-lsp/test-lsp-client.mjs`
+  - `node tools/ace-tooltip/test-tooltip.mjs`
   - `node tools/ace-hardening/check-editor-surface.mjs`
 
 ## Debug Hooks
@@ -63,6 +64,10 @@ selection handles, and CJK composition.
 - With LSP on and no server available, ACE remains editable, static completion
   still works, and hover hooks can resolve AutoJs6 declaration doc text from
   the static index.
+- `AutoJsAceTooltip` creates its DOM and safe markdown renderer lazily when a
+  hover tooltip is requested.
+- Tooltip markdown rendering is local only, escapes raw HTML, and does not fetch
+  external markdown resources.
 
 ## Automation Status
 
@@ -438,6 +443,7 @@ Steps:
 7. Run `node tools/ace-completion/verify-autojs6-dts.mjs`.
 8. Run `node tools/ace-completion/test-completer.mjs`.
 9. Run `node tools/ace-lsp/test-lsp-client.mjs`.
+10. Run `node tools/ace-tooltip/test-tooltip.mjs`.
 
 Expected:
 - All commands pass.
@@ -503,6 +509,8 @@ Expected:
   `hoverProvider=static-fallback`.
 - `getLspHover()` can return declaration doc text for `app.launch` from the
   static index.
+- `showLspTooltip()` can show the same hover content through the local tooltip
+  renderer without external resource loading.
 
 Failure logs:
 - `lspError`
@@ -670,8 +678,8 @@ ACE can remain enabled as an experimental option only if:
   for first paint, top/middle/bottom tap anchors, repeated IME stress,
   completion accept, long-press selection, CJK input, rotation, fallback, and
   large-file Native routing.
-- `verify-autojs6-indices.mjs`, `test-completer.mjs`, and
-  `test-lsp-client.mjs` pass.
+- `verify-autojs6-indices.mjs`, `test-completer.mjs`,
+  `test-lsp-client.mjs`, and `test-tooltip.mjs` pass.
 - All fallback cases above return to Native without app crash.
 - Recent small-file input survives fallback through TextMirror in practical tests.
 - Large files route to Native under the current threshold policy.
@@ -683,5 +691,5 @@ ACE can remain enabled as an experimental option only if:
 - ACE diagnostics can be copied from an active ACE editor and after ACE fallback to Native.
 - ACE diagnostics include runtime event history and bridge event window counters
   for keyboard and viewport failures.
-- Server-backed LSP transport, markdown tooltip loading, and VisualEditorAce remain deferred
+- Server-backed LSP transport and VisualEditorAce remain deferred
   until the keyboard and viewport matrix is stable on representative devices.

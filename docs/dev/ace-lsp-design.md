@@ -30,6 +30,11 @@ globals and module members. The facade must not create a transport unless
 native options later report both `serverAvailable=true` and a non-empty
 `serverUri`.
 
+Hover tooltip rendering is handled by `AutoJsAceTooltip`. It is optional at the
+bridge boundary, creates its DOM lazily, and loads only the local safe markdown
+subset renderer when a tooltip is requested. The renderer escapes raw HTML and
+does not fetch markdown resources.
+
 ## Server Lifecycle
 
 The first supported implementation should define these items before any default-on behavior:
@@ -60,6 +65,7 @@ The current client-side alpha supports:
 
 - completion hooks with static fallback
 - hover hooks with static fallback
+- optional hover tooltip rendering with local safe markdown
 
 Deferred:
 
@@ -69,7 +75,6 @@ Deferred:
 - definition
 - rename
 - project-wide indexing
-- markdown tooltip UI
 
 ## Verification
 
@@ -82,3 +87,5 @@ Deferred:
   `lspRootUri`, `lspDocumentUri`, and `lspFallback`.
 - `node tools/ace-lsp/test-lsp-client.mjs` passes and verifies static fallback
   completion/hover behavior without WebSocket or worker transport.
+- `node tools/ace-tooltip/test-tooltip.mjs` passes and verifies lazy tooltip DOM
+  creation plus local escaped markdown rendering.

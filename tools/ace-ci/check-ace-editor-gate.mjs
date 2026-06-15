@@ -39,6 +39,10 @@ const CHECKS = [
     label: "ACE LSP client tests",
     script: "tools/ace-lsp/test-lsp-client.mjs",
   },
+  {
+    label: "ACE tooltip tests",
+    script: "tools/ace-tooltip/test-tooltip.mjs",
+  },
 ];
 
 for (const check of CHECKS) {

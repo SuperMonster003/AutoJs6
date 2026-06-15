@@ -7,6 +7,7 @@
     var Range = null;
     var staticCompleter = null;
     var lspClient = null;
+    var tooltipController = null;
     var dirty = false;
     var suppressChange = false;
     var breakpoints = [];
@@ -748,6 +749,19 @@
             getLspState: function() { return lspClient ? lspClient.getState() : null; },
             getLspHover: function(row, column) {
                 return lspClient ? lspClient.getHover({ row: row, column: column }) : null;
+            },
+            showLspTooltip: function(row, column) {
+                return tooltipController ?
+                    tooltipController.showAtPosition({ row: row, column: column }) :
+                    false;
+            },
+            hideLspTooltip: function() {
+                if (tooltipController) {
+                    tooltipController.hide();
+                }
+            },
+            getTooltipState: function() {
+                return tooltipController ? tooltipController.getState() : null;
             }
         };
 
@@ -767,6 +781,23 @@
                 });
             } catch (error) {
                 notifyLspError("ACE LSP client disabled: " + error, error);
+            }
+        }
+
+        if (global.AutoJsAceTooltip) {
+            try {
+                tooltipController = global.AutoJsAceTooltip.install({
+                    editor: editor,
+                    session: session,
+                    getHover: function(pos) {
+                        return lspClient ? lspClient.getHover(pos) : null;
+                    },
+                    notifyError: function(message, error) {
+                        notifyRecoverableError("tooltip", error || message);
+                    }
+                });
+            } catch (error) {
+                notifyRecoverableError("tooltip", error);
             }
         }
 

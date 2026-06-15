@@ -18,6 +18,9 @@ This document tracks the current AutoJs6 ACE editor deployment state. Native rem
   LSP client facade exposes completion and hover hooks, but default-off and
   no-server paths use the static completion index as fallback and do not load
   `lsp.js`, create a WebSocket, or start a server.
+- ACE hover tooltips are optional at the bridge boundary. The tooltip layer
+  creates DOM lazily, uses the local safe markdown subset renderer, escapes raw
+  HTML, and does not fetch external markdown resources.
 
 ## Diagnostics
 
@@ -91,6 +94,7 @@ Before ACE is presented as a gray-release experimental editor:
 - Run `node tools/ace-completion/verify-autojs6-dts.mjs`.
 - Run `node tools/ace-completion/test-completer.mjs`.
 - Run `node tools/ace-lsp/test-lsp-client.mjs`.
+- Run `node tools/ace-tooltip/test-tooltip.mjs`.
 - Run `node tools/ace-hardening/check-editor-surface.mjs`.
 - Run `.\gradlew.bat :app:testAppDebugUnitTest --tests org.autojs.autojs.ui.edit.editor.ace.lsp.AceLspServerManagerTest`.
 - Run the manual cases in `docs/dev/ace-editor-test-plan.md`.
@@ -119,6 +123,5 @@ Before ACE is presented as a gray-release experimental editor:
 - LSP remains a separate experimental path. The native alpha manager, diagnostics
   schema, feature flag, and client-side completion/hover fallback hooks are in
   place, but server startup and WebSocket transport are deferred.
-- Server-backed LSP transport, markdown tooltip loading, and VisualEditorAce are
-  not primary targets until the keyboard and viewport matrix is stable on
-  representative devices.
+- Server-backed LSP transport and VisualEditorAce are not primary targets until
+  the keyboard and viewport matrix is stable on representative devices.

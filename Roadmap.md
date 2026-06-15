@@ -183,7 +183,7 @@ Acceptance:
 - [x] Declaration and completion quality improvements.
 - [x] LSP server manager alpha.
 - [x] LSP completion and hover.
-- [ ] Optional tooltip/markdown loading.
+- [x] Optional tooltip/markdown loading.
 - [ ] VisualEditorAce investigation only after ordinary ACE is stable.
 
 ## Verification Commands
@@ -194,6 +194,7 @@ Acceptance:
 - `node tools/ace-completion/verify-autojs6-pro-only.mjs`
 - `node tools/ace-completion/test-completer.mjs`
 - `node tools/ace-lsp/test-lsp-client.mjs`
+- `node tools/ace-tooltip/test-tooltip.mjs`
 - `node tools/ace-completion/verify-autojs6-indices.mjs`
 - `node tools/ace-completion/verify-autojs6-dts.mjs`
 - `.\gradlew.bat :app:testAppDebugUnitTest --tests org.autojs.autojs.ui.edit.editor.ace.lsp.AceLspServerManagerTest`

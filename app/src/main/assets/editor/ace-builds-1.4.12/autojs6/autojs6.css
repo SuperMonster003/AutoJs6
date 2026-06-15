@@ -126,3 +126,99 @@ body.ace-ready #editor {
     -webkit-user-select: none;
     user-select: none;
 }
+
+.autojs6_hover_tooltip {
+    position: fixed;
+    z-index: 30;
+    box-sizing: border-box;
+    max-width: 480px;
+    max-height: 320px;
+    overflow: auto;
+    padding: 8px 10px;
+    border: 1px solid rgba(31, 41, 55, 0.18);
+    border-radius: 6px;
+    background: #ffffff;
+    color: #172033;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
+    font-family: "JetBrains Mono", "Source Code Pro", monospace;
+    font-size: 12px;
+    line-height: 1.45;
+    pointer-events: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+@media (max-width: 496px) {
+    .autojs6_hover_tooltip {
+        max-width: calc(100vw - 16px);
+    }
+}
+
+@media (max-height: 336px) {
+    .autojs6_hover_tooltip {
+        max-height: calc(100vh - 16px);
+    }
+}
+
+.autojs6_hover_tooltip_caption {
+    margin-bottom: 6px;
+    font-weight: 700;
+    color: #0f5e5e;
+}
+
+.autojs6_hover_tooltip_content p {
+    margin: 0 0 6px;
+}
+
+.autojs6_hover_tooltip_content p:last-child,
+.autojs6_hover_tooltip_content ul:last-child,
+.autojs6_hover_tooltip_content pre:last-child {
+    margin-bottom: 0;
+}
+
+.autojs6_hover_tooltip_content ul {
+    margin: 0 0 6px 18px;
+    padding: 0;
+}
+
+.autojs6_hover_tooltip_content li {
+    margin: 2px 0;
+}
+
+.autojs6_hover_tooltip_content code {
+    padding: 1px 3px;
+    border-radius: 3px;
+    background: rgba(15, 23, 42, 0.08);
+}
+
+.autojs6_hover_tooltip_content pre {
+    margin: 0 0 6px;
+    padding: 6px;
+    overflow: auto;
+    border-radius: 4px;
+    background: #f1f5f9;
+}
+
+.autojs6_hover_tooltip_heading {
+    margin: 0 0 6px;
+    font-weight: 700;
+}
+
+body.ace-theme-dark .autojs6_hover_tooltip {
+    border-color: rgba(226, 232, 240, 0.18);
+    background: #20242b;
+    color: #e5e7eb;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.38);
+}
+
+body.ace-theme-dark .autojs6_hover_tooltip_caption {
+    color: #8bd7d2;
+}
+
+body.ace-theme-dark .autojs6_hover_tooltip_content code {
+    background: rgba(226, 232, 240, 0.12);
+}
+
+body.ace-theme-dark .autojs6_hover_tooltip_content pre {
+    background: #111827;
+}
