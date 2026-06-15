@@ -199,6 +199,7 @@ assertIncludes(policyFactory, "EditorEngineType.ACE -> AceEditorViewportPolicy(e
 assertIncludes(nativePolicy, "view.setPadding(view.paddingLeft, view.paddingTop, view.paddingRight, bottomInset)");
 assertIncludes(nativePolicy, "editor.ensureCursorVisibleIfPossible()");
 
+assertIncludes(acePolicy, "view.setPadding(view.paddingLeft, view.paddingTop, view.paddingRight, 0)");
 assertIncludes(acePolicy, "editor.onImeInsetsChanged(visible, bottomInset)");
 assertNotIncludes(acePolicy, "ensureCursorVisibleIfPossible");
 assertNotIncludes(acePolicy, "requestRectangleOnScreen");
@@ -340,6 +341,7 @@ assertNotIncludes(draftService, "CodeEditText");
 
 assertIncludes(roadmap, "node tools/ace-hardening/check-editor-surface.mjs");
 assertIncludes(roadmap, "- [x] Add ACE IME show/hide manual test checklist.");
+assertIncludes(roadmap, "- [x] Review whether ACE needs an explicit clean-host layout experiment flag.");
 
 assertIncludes(aceEditorTestPlan, "## IME Show/Hide Manual Checklist");
 assertIncludes(aceEditorTestPlan, "### ACE-IME-001: Input method and symbols/function bars");
@@ -351,6 +353,9 @@ assertIncludes(aceEditorTestPlan, "lastAceResizeCompletedReason");
 assertIncludes(aceEditorTestPlan, "heartbeatSuspendedReason");
 
 assertIncludes(aceEditorIntegrationDoc, "Run the `IME Show/Hide Manual Checklist`");
+assertIncludes(aceEditorIntegrationDoc, "## Clean Host Layout Decision");
+assertIncludes(aceEditorIntegrationDoc, "ACE does not need a separate clean-host experiment flag at this stage.");
+assertIncludes(aceEditorIntegrationDoc, "Do not add `key_ace_clean_host_layout`");
 
 assertIncludes(aceSurfaceSmoke, "ACE editor bootstrap order");
 assertIncludes(aceSurfaceSmoke, "hidden editor before first paint");
@@ -380,6 +385,8 @@ assertIncludes(aceCodeEditor, "private var lastAceResizeCompletedReason");
 assertIncludes(aceCodeEditor, "private fun handleResizeDone(payloadJson: String?)");
 assertIncludes(aceCodeEditor, "lastAceResizeDispatchedReason = reason");
 assertIncludes(aceCodeEditor, "lastAceResizeCompletedReason = resizeReasonFromPayload(payloadJson, lastAceResizeDispatchedReason)");
+
+assertOnlyIn("key_ace_clean_host_layout", []);
 
 assertOnlyIn("requestRectangleOnScreen", [
   "app/src/main/java/org/autojs/autojs/ui/edit/editor/engine/NativeCodeEditorEngine.kt",

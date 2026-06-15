@@ -48,6 +48,17 @@ When ACE falls back to Native, `EditorView` keeps the last ACE diagnostics snaps
 - Large-file auto-Native routing shows a one-time Toast.
 - Settings details state that ACE is experimental and Native remains the default.
 
+## Clean Host Layout Decision
+
+ACE does not need a separate clean-host experiment flag at this stage. The ACE path is already clean-host by default:
+
+- `EditorViewportPolicyFactory` routes ACE to `AceEditorViewportPolicy`, not `NativeEditorViewportPolicy`.
+- `AceEditorViewportPolicy` clears any residual bottom padding and delegates IME geometry to the ACE engine.
+- Native bottom padding, Android `TextView` cursor math, and `requestRectangleOnScreen` stay native-only.
+- ACE resize behavior is observable through diagnostics and covered by the IME show/hide checklist.
+
+Do not add `key_ace_clean_host_layout` unless there is a concrete second ACE host layout to compare. A flag without another implementation would add state, test matrix size, and ambiguous diagnostics without improving the stable path.
+
 ## Release Gate
 
 Before ACE is presented as a gray-release experimental editor:

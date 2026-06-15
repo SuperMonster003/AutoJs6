@@ -77,7 +77,7 @@ goal is to make editor behavior engine-neutral where possible, and keep native
 - [x] Add ACE viewport diagnostics snapshot fields for policy events.
 - [x] Add ACE first-paint and gutter stability smoke checks.
 - [x] Add ACE IME show/hide manual test checklist.
-- [ ] Review whether ACE needs an explicit clean-host layout experiment flag.
+- [x] Review whether ACE needs an explicit clean-host layout experiment flag.
 
 ## Acceptance Targets
 
