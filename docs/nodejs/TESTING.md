@@ -155,7 +155,9 @@ Current dependency bundler verification:
 `bundleNodeDependencies` validates an existing project root with `package.json` and `node_modules`, then writes a
 sanitized bundle plus `dependency-manifest.json`, `dependency-size-report.txt`, and `dependency-rejections.txt`.
 `verifyNodeDependencyBundlerFixtures` confirms the checked-in sample project passes and an unsafe fixture is rejected for
-native addon, lifecycle script, and unchecked `.bin` entries.
+native addon, node-gyp build artifacts, lifecycle script, and unchecked `.bin` entries. Native addon binaries are
+reported as `NATIVE_ADDON_DISABLED`; `binding.gyp` and `build/{Release,Debug}` files are reported as
+`NODE_GYP_ARTIFACT_UNSUPPORTED`.
 
 Current doctor diagnostics:
 
@@ -177,6 +179,14 @@ Current security regression instrumentation:
 ```
 
 This suite verifies dangerous process APIs, disabled builtins, network operation denial, scoped fs escape denial, native addon extension denial, and package exports/imports escape denial with stable error codes or documented current denial shape. `process.chdir` is treated as scoped and controlled; the security tests verify absolute and escaping chdir targets are rejected.
+
+Focused native addon policy instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeNativeAddonPolicyInstrumentationTest"
+```
+
+This suite verifies that `.node` native addon targets reject with `ERR_AUTOJS6_NATIVE_ADDON_DISABLED` through direct relative `require()`, `module.createRequire()`, package `main`, package `exports`, package `imports`, and package subpath imports. It also verifies the profile reports `native_addon.enabled=false` and exposes the native-addon error code.
 
 The network portion also asserts that normal builds keep `BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED=false`; raw network operations must stay denied until `docs/nodejs/design/NETWORK.md` is implemented by a later task.
 

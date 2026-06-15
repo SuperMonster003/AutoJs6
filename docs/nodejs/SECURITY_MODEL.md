@@ -91,6 +91,7 @@ If a limited module exists for npm feature detection, operations that would cros
 `module` and `node:module` are limited compatibility builtins, not loader authority. The safe subset exposes `createRequire`, `isBuiltin`, `builtinModules`, and a no-op `syncBuiltinESMExports` only. `createRequire` must stay scoped to a file inside the current working directory and must keep using the AutoJs6 resolver and builtin policy. Loader internals such as `Module`, `_load`, `_resolveFilename`, `_compile`, `wrap`, `globalPaths`, `register`, and `registerHooks` remain absent.
 
 Runtime package installation is not a Safe Node Profile capability. Projects may vendor pure JavaScript CommonJS dependencies, and future tooling may sanitize them at build time, but AutoJs6 must not run package lifecycle scripts, native addon builds, arbitrary `.bin` commands, or registry downloads inside the Android runtime. See `docs/nodejs/design/PACKAGE_MANAGER.md`.
+The host dependency bundler rejects native addon binaries and node-gyp build traces before packaging. `.node` files are reported as `NATIVE_ADDON_DISABLED`; `binding.gyp` and `build/{Release,Debug}` artifacts are reported as `NODE_GYP_ARTIFACT_UNSUPPORTED`.
 
 `vm` remains disabled because a second JavaScript context is not a security boundary in this embedder. A limited `vm.Script` subset is deferred until timeout, global leakage, bridge leakage, and process object exposure can be proven safe.
 
@@ -189,7 +190,9 @@ See `docs/nodejs/design/WORKER_THREADS.md` for the current worker boundary.
 
 ## Native Code Policy
 
-Native addons are disabled by default.
+Native addons are disabled by default. Any CommonJS path that resolves to a `.node` binary must fail with
+`ERR_AUTOJS6_NATIVE_ADDON_DISABLED`, including direct relative imports, `module.createRequire()`, package `main`,
+package `exports`, package `imports`, and package subpath imports.
 
 Reasons:
 
@@ -199,7 +202,8 @@ Reasons:
 - packaged APK injection is complex
 - they can bypass scoped filesystem and builtin restrictions
 
-Future support, if any, should be developer-mode only and separately gated.
+Future support, if any, should be developer-mode only, separately gated, and based on an explicit plugin model with ABI,
+signature, packaging, and review policy. Runtime npm/native build tooling must not be used as the enablement path.
 
 ## Java Interop Policy
 

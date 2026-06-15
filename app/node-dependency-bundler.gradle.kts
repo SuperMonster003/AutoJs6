@@ -74,6 +74,13 @@ private fun File.nodeDependencyBundlerRelativeTo(root: File): String =
         .toString()
         .replace(File.separatorChar, '/')
 
+private fun String.nodeDependencyBundlerIsNodeGypArtifact(): Boolean {
+    val path = lowercase()
+    return path.endsWith("/binding.gyp") ||
+            path.contains("/build/release/") ||
+            path.contains("/build/debug/")
+}
+
 private fun nodeDependencyBundlerReadJsonObject(file: File): Map<*, *>? =
     runCatching { JsonSlurper().parse(file) as? Map<*, *> }.getOrNull()
 
@@ -154,10 +161,13 @@ private fun scanNodeDependencyBundle(projectRoot: File, policy: NodeDependencyBu
             if (file.length() > policy.maxFileBytes) {
                 issue("FILE_SIZE_LIMIT", file, "File exceeds maxFileBytes=${policy.maxFileBytes}.")
             }
+            val relativePath = file.nodeDependencyBundlerRelativeTo(root)
             if (file.name.endsWith(".node", ignoreCase = true)) {
                 issue("NATIVE_ADDON_DISABLED", file, "Native addon files are not part of Safe Node Profile.")
             }
-            val relativePath = file.nodeDependencyBundlerRelativeTo(root)
+            if (relativePath.nodeDependencyBundlerIsNodeGypArtifact()) {
+                issue("NODE_GYP_ARTIFACT_UNSUPPORTED", file, "node-gyp build artifacts are not bundled by Safe Node Profile.")
+            }
             if (relativePath == "node_modules/.bin" ||
                 relativePath.startsWith("node_modules/.bin/") ||
                 relativePath.contains("/node_modules/.bin/")
@@ -372,11 +382,19 @@ val verifyNodeDependencyBundlerFixtures = tasks.register("verifyNodeDependencyBu
             """.trimIndent() + "\n"
         )
         unsafeRoot.resolve("node_modules/unsafe-package/binding.node").writeBytes(byteArrayOf(0, 1, 2, 3))
+        unsafeRoot.resolve("node_modules/unsafe-package/binding.gyp").writeText("{}\n")
+        unsafeRoot.resolve("node_modules/unsafe-package/build/Release").mkdirs()
+        unsafeRoot.resolve("node_modules/unsafe-package/build/Release/addon.o").writeBytes(byteArrayOf(4, 5, 6, 7))
         unsafeRoot.resolve("node_modules/.bin/unsafe").writeText("node ../unsafe-package/postinstall.js\n")
 
         val unsafeScan = scanNodeDependencyBundle(unsafeRoot, policy)
         val rejectionCodes = unsafeScan.issues.map { it.code }.toSet()
-        val requiredCodes = setOf("LIFECYCLE_SCRIPT_DISABLED", "NATIVE_ADDON_DISABLED", "BIN_ENTRY_UNSUPPORTED")
+        val requiredCodes = setOf(
+            "LIFECYCLE_SCRIPT_DISABLED",
+            "NATIVE_ADDON_DISABLED",
+            "NODE_GYP_ARTIFACT_UNSUPPORTED",
+            "BIN_ENTRY_UNSUPPORTED",
+        )
         val missingCodes = requiredCodes - rejectionCodes
         if (missingCodes.isNotEmpty()) {
             throw GradleException("Unsafe dependency fixture did not produce expected rejection codes: $missingCodes; actual=$rejectionCodes")

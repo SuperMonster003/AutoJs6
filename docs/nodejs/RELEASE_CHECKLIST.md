@@ -27,6 +27,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `NodeCryptoExpansionInstrumentationTest`
 - [ ] `NodeProcessSweepInstrumentationTest`
 - [ ] `NodeOsPrivacyInstrumentationTest`
+- [ ] `NodeNativeAddonPolicyInstrumentationTest`
 - [ ] `NodeEnginesBridgeInstrumentationTest`
 - [ ] `NodeAccessibilitySelectorBridgeInstrumentationTest`
 - [ ] `NodeImageBridgeExpansionInstrumentationTest`
@@ -60,6 +61,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] bridge resource registry verifies leaked image/screen/websocket resource cleanup semantics, Java handle cleanup, `work_manager` metadata cleanup, shell timeout cleanup, and `embedded_script.bridge_resource.*` diagnostics
 - [ ] bridge concurrency limits verify pending-call flood rejection, image-handle quota, shell/network/WebSocket resource limits, accessibility request-rate limiting, safe project overrides, and ignored above-hard-max overrides
 - [ ] bridge RPC fuzzer verifies malformed request parsing, unknown dispatch paths, fake-provider mode, malformed responses, service-destroy rejection, and zero pending calls after cleanup
+- [ ] native addon policy verifies `.node` denial through relative require, `module.createRequire`, package `main`, package `exports`, package `imports`, and package subpath imports with `ERR_AUTOJS6_NATIVE_ADDON_DISABLED`
 - [ ] worker gate verifies `worker_threads` stays disabled, cannot be shadowed, and reports `experimentalFlags.workerThreads=false`
 - [ ] experimental worker smoke verifies pure-JS worker computation, `workerData`, `parentPort.postMessage`, `terminate()`, max-worker rejection, scoped path denial, and denied AutoJs bridge/raw network/fs/nested-worker access
 - [ ] checked-in examples `hello-node` and `toast-app` still run from `sample/nodejs`
@@ -165,7 +167,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] desktop Node differential report generated for fixed real npm corpus
 - [ ] package manager policy remains vendored/build-time only; no runtime install, lifecycle scripts, native addons, or unchecked `.bin` execution
 - [ ] `:app:bundleNodeDependencies` generated sanitized bundle manifest, size report, and rejection report
-- [ ] `:app:verifyNodeDependencyBundlerFixtures` rejects unsafe native addon, lifecycle script, and `.bin` fixture
+- [ ] `:app:verifyNodeDependencyBundlerFixtures` rejects unsafe native addon, node-gyp artifact, lifecycle script, and `.bin` fixture
 
 ## Lifecycle
 

@@ -8087,6 +8087,9 @@ std::string buildEmbeddedScriptExecutionSource(
   function __autojs6_dynamic_import_unsupported(message) {
     return __autojs6_error(message, "ERR_AUTOJS6_EMBEDDED_NODE_DYNAMIC_IMPORT_UNSUPPORTED");
   }
+  function __autojs6_native_addon_disabled(message) {
+    return __autojs6_error(message, "ERR_AUTOJS6_NATIVE_ADDON_DISABLED");
+  }
   function __autojs6_resolve_trace_enabled() {
     try {
       if (typeof process !== "object" || !process || !process.env) return false;
@@ -8473,6 +8476,7 @@ std::string buildEmbeddedScriptExecutionSource(
         javaClassDenied: "ERR_AUTOJS6_JAVA_CLASS_DENIED",
         javaMethodDenied: "ERR_AUTOJS6_JAVA_METHOD_DENIED",
         javaReflectionDenied: "ERR_AUTOJS6_JAVA_REFLECTION_DENIED",
+        nativeAddonDisabled: "ERR_AUTOJS6_NATIVE_ADDON_DISABLED",
         legacyAliases: Object.freeze(legacyAliases)
       }),
       bridgePermissions: __autojs6_bridge_permission_report(),
@@ -13039,6 +13043,12 @@ std::string buildEmbeddedScriptExecutionSource(
     if (!allowEsm) {
       __autojs6_throw_if_esm_extension(extension, absolute, "Embedded Node dynamic require fallback");
     }
+    __autojs6_throw_if_native_addon_extension(
+      extension,
+      absolute,
+      "Embedded Node dynamic require fallback",
+      "Unsupported Embedded Node dynamic require fallback extension in MVP: " + absolute
+    );
     if (extension && !__autojs6_supported_local_module_extension(extension) && !(allowEsm && __autojs6_is_esm_extension(extension))) {
       throw __autojs6_runtime_module_error("Unsupported Embedded Node dynamic require fallback extension in MVP: " + absolute);
     }
@@ -13227,6 +13237,9 @@ std::string buildEmbeddedScriptExecutionSource(
   function __autojs6_is_esm_extension(extension) {
     return __autojs6_normalized_extension(extension) === ".mjs";
   }
+  function __autojs6_is_native_addon_extension(extension) {
+    return __autojs6_normalized_extension(extension) === ".node";
+  }
   function __autojs6_throw_if_esm_extension(extension, moduleName, context) {
     if (__autojs6_is_esm_extension(extension)) {
       const detail = context + " resolves to an .mjs module for '" + moduleName + "'.";
@@ -13236,6 +13249,14 @@ std::string buildEmbeddedScriptExecutionSource(
         );
       }
       throw __autojs6_esm_unsupported(__autojs6_esm_unsupported_message(__autojs6_mjs_unsupported_detail(detail)));
+    }
+  }
+  function __autojs6_throw_if_native_addon_extension(extension, moduleName, context, legacyMessage) {
+    if (__autojs6_is_native_addon_extension(extension)) {
+      throw __autojs6_native_addon_disabled(
+        legacyMessage + ". Native addon loading is disabled in AutoJs6 Safe Node Profile; " +
+          context + " resolves to a .node native addon for '" + moduleName + "'."
+      );
     }
   }
   function __autojs6_source_extension(sourceName) {
@@ -13539,6 +13560,12 @@ std::string buildEmbeddedScriptExecutionSource(
     if (!allowEsm) {
       __autojs6_throw_if_esm_extension(extension, moduleName, "Embedded Node package " + fieldName + " target");
     }
+    __autojs6_throw_if_native_addon_extension(
+      extension,
+      moduleName,
+      "Embedded Node package " + fieldName + " target",
+      "Unsupported Embedded Node package " + fieldName + " extension in MVP: " + target
+    );
     if (extension && !__autojs6_supported_local_module_extension(extension) && !(allowEsm && __autojs6_is_esm_extension(extension))) {
       throw __autojs6_invalid_package_target("Unsupported Embedded Node package " + fieldName + " extension in MVP: " + target);
     }
@@ -13995,6 +14022,12 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     const extension = path.extname(base);
     __autojs6_throw_if_esm_extension(extension, moduleName, "Embedded Node local module");
+    __autojs6_throw_if_native_addon_extension(
+      extension,
+      moduleName,
+      "Embedded Node local module",
+      "Unsupported Embedded Node local module extension in MVP: " + moduleName
+    );
     if (extension && !__autojs6_supported_local_module_extension(extension)) {
       throw new Error("Unsupported Embedded Node local module extension in MVP: " + moduleName);
     }
@@ -14186,6 +14219,12 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     const extension = path.extname(base);
     __autojs6_throw_if_esm_extension(extension, moduleName, "Embedded Node node_modules module");
+    __autojs6_throw_if_native_addon_extension(
+      extension,
+      moduleName,
+      "Embedded Node node_modules module",
+      "Unsupported Embedded Node node_modules module extension in MVP: " + moduleName
+    );
     if (extension && !__autojs6_supported_local_module_extension(extension)) {
       throw new Error("Unsupported Embedded Node node_modules module extension in MVP: " + moduleName);
     }
@@ -26290,6 +26329,13 @@ std::string buildEmbeddedScriptExecutionSource(
       if (!record) continue;
       const kind = __autojs6_esm_module_kind(resolved);
       if (!kind) {
+        const extension = __autojs6_source_extension(resolved);
+        __autojs6_throw_if_native_addon_extension(
+          extension,
+          specifier,
+          "Embedded Node experimental ESM import",
+          "Unsupported Embedded Node experimental ESM import extension: " + specifier
+        );
         throw __autojs6_esm_error("Unsupported Embedded Node experimental ESM import extension: " + specifier);
       }
       __autojs6_resolve_trace("esm import matched", {
@@ -26347,6 +26393,12 @@ std::string buildEmbeddedScriptExecutionSource(
       throw __autojs6_esm_error("Embedded Node experimental ESM import escapes working directory: " + name, "ERR_AUTOJS6_FS_PATH_ESCAPE");
     }
     const extension = __autojs6_normalized_extension(path.extname(base));
+    __autojs6_throw_if_native_addon_extension(
+      extension,
+      name,
+      "Embedded Node experimental ESM import",
+      "Unsupported Embedded Node experimental ESM import extension: " + name
+    );
     if (extension && !__autojs6_is_esm_extension(extension) && !__autojs6_supported_local_module_extension(extension)) {
       throw __autojs6_esm_error("Unsupported Embedded Node experimental ESM import extension: " + name);
     }

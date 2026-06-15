@@ -119,7 +119,7 @@ The future design gate is documented in [design/LONG_RUNNING_SERVICE.md](design/
 
 Unsupported or rejected module source forms:
 
-- native `.node` addon entries
+- native `.node` addon entries, rejected with `ERR_AUTOJS6_NATIVE_ADDON_DISABLED` from direct relative imports, `module.createRequire()`, package `main`, package `exports`, package `imports`, and package subpath imports
 - static ESM import execution
 - dynamic import execution unless both `autojs.nodejs.esm.experimental` and `autojs.nodejs.dynamicImport.experimental` are enabled for an experimental run
 - package export/import targets that escape the package root
@@ -150,6 +150,8 @@ message pattern, then classifies differences as matched, expected AutoJs6 restri
 `package.json` and `node_modules`, validates the tree without running package code, copies a sanitized bundle to
 `app/build/nodejs/dependency-bundle/project/`, and writes a manifest plus size/rejection reports under
 `app/build/reports/nodejs/dependencies/`.
+Native addon binaries are rejected as `NATIVE_ADDON_DISABLED`; node-gyp build traces such as `binding.gyp` and
+`build/{Release,Debug}` artifacts are rejected as `NODE_GYP_ARTIFACT_UNSUPPORTED`.
 
 ## Filesystem Profile
 

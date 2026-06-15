@@ -210,7 +210,7 @@ class NodeSecurityRegressionInstrumentationTest {
                   await expectDeniedAsync("fsp.escape", () => fsp.readFile("../secret.txt", "utf8"), "ERR_AUTOJS6_FS_PATH_ESCAPE");
                   expectDenied("process.chdir.absolute", () => process.chdir("$absoluteSecret"), "EPERM");
                   expectDenied("process.chdir.escape", () => process.chdir(".."), "EPERM");
-                  expectDenied("native_addon", () => require("./native.node"), null, ".node");
+                  expectDenied("native_addon", () => require("./native.node"), "ERR_AUTOJS6_NATIVE_ADDON_DISABLED", ".node");
                   expectDenied("package.exports.escape", () => require("bad-exports"), "ERR_INVALID_PACKAGE_TARGET");
                   expectDenied("package.imports.escape", () => require("bad-imports"), "ERR_INVALID_PACKAGE_TARGET");
 
