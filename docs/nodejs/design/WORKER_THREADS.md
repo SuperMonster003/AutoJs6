@@ -1,10 +1,10 @@
 # Worker Threads Design Gate v1
 
-Status: design gate only. `autojs.nodejs.worker_threads.experimental=false` is the default, and `worker_threads` remains disabled in AutoJs6 Safe Node Profile.
+Status: experimental pure-JS MVP. `autojs.nodejs.worker_threads.experimental=false` is the default, and `worker_threads` remains disabled in normal AutoJs6 Safe Node Profile runs.
 
 ## Goal
 
-AutoJs6 may eventually support worker threads for bounded pure JavaScript computation, but the default runtime must not expose desktop Node worker authority.
+AutoJs6 supports an experimental worker_threads MVP for bounded pure JavaScript computation, but the default runtime must not expose desktop Node worker authority.
 
 Workers are high risk in AutoJs6 because they multiply:
 
@@ -15,7 +15,7 @@ Workers are high risk in AutoJs6 because they multiply:
 - access-control surfaces for AutoJs bridge modules
 - packaged APK compatibility state
 
-Task 42 freezes the boundary. It does not create workers, load worker scripts, or enable `require("worker_threads")`.
+Task 42 froze the boundary. Task 63 adds a request-local experimental MVP that can run local CommonJS worker scripts with a smaller capability set than the parent script.
 
 ## Feature Flag
 
@@ -32,7 +32,7 @@ Current wiring:
 - Kotlin capability registry: `NodeRuntimeCapabilities.WORKER_THREADS_EXPERIMENTAL_PROPERTY`
 - JavaScript profile snapshot: `require("autojs6:profile").experimentalFlags.workerThreads === false`
 
-The flag is a design anchor only. A later implementation task must still add a separate runtime gate, tests, lifecycle ownership, and rollback path before any worker can run.
+The flag remains off by default. Instrumentation can enable it per embedded script request for focused experimental coverage.
 
 ## Current Default Behavior
 
@@ -47,18 +47,22 @@ With the flag off:
 
 `node_modules/worker_threads` must not shadow the disabled builtin.
 
-## Future Worker Scope
+## Current Experimental Scope
 
-If worker support is ever enabled, the first allowed scope should be:
+When the request-local experimental flag is enabled, the first allowed scope is:
 
 - pure JavaScript CPU work
 - JSON-serializable `workerData`
-- structured-clone-compatible primitive values and ArrayBuffers only where safe
-- safe limited builtins such as `buffer`, `path`, `util`, `events`, `assert`, `querystring`, `string_decoder`, `crypto` subsets, and privacy-safe `os` subsets
-- explicit timeout and worker count limits
-- parent-owned lifecycle and cancellation
+- `parentPort.postMessage(...)`
+- `worker.postMessage(...)`
+- `worker.terminate()`
+- safe pure-JS builtins such as `buffer`, `path`, `util`, `events`, `assert`, `querystring`, `string_decoder`, `timers`, and `url`
+- explicit startup timeout and worker count limits
+- parent-owned lifecycle and cancellation through `terminate()`
 
-The first version should not allow workers to spawn more workers.
+Workers are loaded by the parent scoped resolver and executed from a generated native Worker `eval` wrapper. Worker scripts do not get the parent AutoJs6 loader or bridge.
+
+The first version does not allow workers to spawn more workers.
 
 ## Forbidden Worker Access
 
@@ -83,9 +87,9 @@ Bridge modules are intentionally parent-thread capabilities. A worker may send p
 
 ## Builtin Policy
 
-Future worker builtins should start from a separate worker-safe allowlist, not the parent profile by default.
+Worker builtins start from a separate worker-safe allowlist, not the parent profile by default.
 
-Suggested first allowlist:
+Current first allowlist:
 
 - `assert`
 - `buffer`
@@ -94,10 +98,8 @@ Suggested first allowlist:
 - `querystring`
 - `string_decoder`
 - `timers`
-- `url` without file URL escape
+- `url`
 - `util`
-- safe crypto subsets
-- privacy-safe `os` subset
 
 Denied in workers:
 
@@ -117,16 +119,15 @@ Denied in workers:
 - `worker_threads` nested spawning
 - native `.node` addons
 
-`fs` should remain denied in the first worker version unless a scoped, parent-owned policy is designed for worker filesystem access.
+`fs` remains denied in the first worker version. Worker source loading is parent-owned and scoped to the working directory.
 
 ## Limits
 
-Recommended defaults for a future experimental implementation:
+Current defaults:
 
 - `maxWorkers`: 1 per script execution
-- hard upper bound: 2 workers per execution
 - default worker startup timeout: 5000 ms
-- default worker run timeout: parent script timeout remaining time
+- default worker run timeout: parent script timeout remains the outer guard; per-worker execution timeout is Task 64 work
 - per-worker memory budget: design before implementation; do not rely on V8 defaults alone
 - maximum worker source size: reuse module source budgets unless a lower worker-specific budget is set
 
@@ -134,16 +135,22 @@ Workers must count as pending lifecycle work. The parent script cannot complete 
 
 ## Lifecycle Policy
 
-A future worker implementation must define:
+Current MVP defines:
 
 - creation from the Node event loop thread
-- callback marshaling back to the parent event loop
-- parent timeout cancels all workers
-- service destroy terminates all workers
+- callback delivery through Node `worker_threads` events
+- explicit parent-side `worker.terminate()`
 - uncaught worker exception rejects or emits through the parent according to documented Node-compatible behavior
-- unhandled worker rejection is surfaced to parent diagnostics
 - worker termination is idempotent
-- native handles are enumerable in debug diagnostics
+- diagnostics for active, max active, created, terminated, startup timeout, and policy rejection counts
+
+Task 64 must harden:
+
+- tracking all workers per execution
+- parent timeout cancellation of all workers
+- service destroy termination of all workers
+- worker infinite-loop timeout behavior
+- native handle/thread leak diagnostics
 
 No callback from a worker may re-enter a destroyed parent environment.
 
@@ -173,7 +180,7 @@ autojs6Code=ERR_AUTOJS6_BUILTIN_DISABLED
 legacyCode=ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED
 ```
 
-Future worker-specific errors should be added before implementation, for example:
+Experimental worker-specific errors:
 
 - `ERR_AUTOJS6_WORKER_DISABLED`
 - `ERR_AUTOJS6_WORKER_LIMIT_EXCEEDED`
@@ -183,33 +190,31 @@ Future worker-specific errors should be added before implementation, for example
 
 ## Test Gate
 
-Current gate:
+Current gates:
 
 - `NodeWorkerThreadsDesignGateInstrumentationTest` verifies the BuildConfig flag, Kotlin registry, JavaScript profile, bare and `node:` require denial, `require.resolve` denial, and shadowing protection.
+- `NodeWorkerThreadsExperimentalInstrumentationTest` verifies the default disabled path, request-local experimental enablement, local worker script loading, `workerData`, `parentPort.postMessage`, `terminate()`, max worker rejection, scoped path escape denial, Worker diagnostics, and denial of AutoJs bridge modules, `fs`, raw `net`, and nested workers inside worker scope.
 - `NodeSecurityRegressionInstrumentationTest` keeps `worker_threads` in the dangerous builtin denial corpus.
 
-Before future worker support is enabled, tests must cover:
+Task 64 should add:
 
-- default flag off keeps workers denied
-- flag on still denies AutoJs bridge modules inside workers
-- max worker count
 - timeout termination
 - service destroy termination
 - uncaught exception propagation
 - unhandled rejection propagation
-- nested worker denial
-- worker cannot access raw network, child process, native addon, vm, inspector, or unrestricted fs
 - packaged APK worker source graph and verifier behavior
 
 ## Non-Goals
 
-Task 42 does not enable:
+The MVP does not enable:
 
-- `require("worker_threads")`
-- `new Worker(...)`
 - nested workers
 - shared memory or `SharedArrayBuffer`
 - `MessageChannel` compatibility beyond what already exists elsewhere
 - AutoJs bridge access from workers
 - Android Context access from workers
 - packaged worker source graphs
+- worker access to `fs`
+- worker access to raw network
+- worker access to full parent Safe Node builtins
+- service-destroy worker cleanup stress guarantees

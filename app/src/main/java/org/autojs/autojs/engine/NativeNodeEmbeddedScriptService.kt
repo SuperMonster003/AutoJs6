@@ -102,6 +102,10 @@ class NativeNodeEmbeddedScriptService : Service() {
             EXTRA_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED,
             BuildConfig.NODEJS_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED,
         )
+        val workerThreadsExperimentalEnabled = intent.getBooleanExtra(
+            EXTRA_WORKER_THREADS_EXPERIMENTAL_ENABLED,
+            BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED,
+        )
         val spawnDepth = intent.getIntExtra(EXTRA_SPAWN_DEPTH, 0)
             .coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH)
         val env = intent.envExtra()
@@ -141,6 +145,7 @@ class NativeNodeEmbeddedScriptService : Service() {
             runtimeModuleSources = enrichedRuntimeModuleSources,
             esmExperimentalEnabled = esmExperimentalEnabled,
             dynamicImportExperimentalEnabled = dynamicImportExperimentalEnabled,
+            workerThreadsExperimentalEnabled = workerThreadsExperimentalEnabled,
         )
         val lifecycle = NodeEmbeddedRuntimeLifecycle(TAG, executionId, processName, pid, sourceName)
         activeLifecycle = lifecycle
@@ -151,6 +156,7 @@ class NativeNodeEmbeddedScriptService : Service() {
                     "env=${env.size} moduleSources=${moduleSources.size} runtimeModuleSources=${enrichedRuntimeModuleSources.size} " +
                     "esmExperimentalEnabled=$esmExperimentalEnabled " +
                     "dynamicImportExperimentalEnabled=$dynamicImportExperimentalEnabled " +
+                    "workerThreadsExperimentalEnabled=$workerThreadsExperimentalEnabled " +
                     "runtimeFirst=${enrichedRuntimeModuleSources.keys.firstOrNull().orEmpty()}",
         )
         try {
@@ -558,6 +564,7 @@ class NativeNodeEmbeddedScriptService : Service() {
         private const val EXTRA_TIMEOUT_MS = "timeout_ms"
         private const val EXTRA_ESM_EXPERIMENTAL_ENABLED = "esm_experimental_enabled"
         private const val EXTRA_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED = "dynamic_import_experimental_enabled"
+        private const val EXTRA_WORKER_THREADS_EXPERIMENTAL_ENABLED = "worker_threads_experimental_enabled"
         private const val EXTRA_SPAWN_DEPTH = "spawn_depth"
         private const val EXTRA_EXECUTION_ID = "execution_id"
         private const val EXTRA_ENV_NAMES = "env_names"
@@ -617,6 +624,7 @@ class NativeNodeEmbeddedScriptService : Service() {
                 putExtra(EXTRA_TIMEOUT_MS, request.timeoutMs.coerceAtLeast(1L))
                 putExtra(EXTRA_ESM_EXPERIMENTAL_ENABLED, request.esmExperimentalEnabled)
                 putExtra(EXTRA_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED, request.dynamicImportExperimentalEnabled)
+                putExtra(EXTRA_WORKER_THREADS_EXPERIMENTAL_ENABLED, request.workerThreadsExperimentalEnabled)
                 putExtra(EXTRA_SPAWN_DEPTH, request.spawnDepth.coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH))
                 putExtra(EXTRA_EXECUTION_ID, executionId)
                 putExtra(EXTRA_ENV_NAMES, request.env.keys.toTypedArray())

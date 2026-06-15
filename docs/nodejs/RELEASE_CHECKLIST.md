@@ -32,6 +32,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `NodeShellBridgeInstrumentationTest`
 - [ ] `NodeFetchBridgeInstrumentationTest`
 - [ ] `NodeWorkerThreadsDesignGateInstrumentationTest`
+- [ ] `NodeWorkerThreadsExperimentalInstrumentationTest`
 - [ ] `NodeExampleProjectInstrumentationTest`
 - [ ] optional `NodeEmbeddedPerformanceInstrumentationTest` run recorded for lifecycle/native-load changes
 - [ ] extended `NodeEmbeddedMemoryLeakStressInstrumentationTest` run recorded before release candidates that change lifecycle, bridge, fs, or image-handle behavior
@@ -48,6 +49,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] bridge smoke verifies controlled `fetch` fake-provider GET/POST, timeout, abort, response budget, unsupported scheme, redirect limit, max concurrency, service-destroy cleanup, diagnostics counters, shadowing protection, and that raw `http`/`https`/`net`/`tls`/`dns` remain disabled
 - [ ] bridge smoke verifies controlled `websocket` fake-provider connect/send/receive/close, timeout, message budget, max connection, service-destroy cleanup, diagnostics counters, shadowing protection, and that raw `net`/`tls` remain disabled
 - [ ] worker gate verifies `worker_threads` stays disabled, cannot be shadowed, and reports `experimentalFlags.workerThreads=false`
+- [ ] experimental worker smoke verifies pure-JS worker computation, `workerData`, `parentPort.postMessage`, `terminate()`, max-worker rejection, scoped path denial, and denied AutoJs bridge/raw network/fs/nested-worker access
 - [ ] any future `tasks` bridge smoke verifies user-visible registration, scoped Node descriptors, and denied broadcast/boot/package paths
 - [ ] checked-in examples `hello-node` and `toast-app` still run from `sample/nodejs`
 
@@ -118,6 +120,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] controlled `websocket` live provider disabled in normal release builds unless explicitly testing a network experiment
 - [ ] raw Node `http`, `https`, `net`, `tls`, `dns`, and `dgram` authority remains denied even if controlled fetch is enabled
 - [ ] `worker_threads` authority remains denied unless explicitly feature-gated and security-reviewed
+- [ ] experimental workers, when explicitly tested, expose a smaller capability set than parent Node scripts and cannot access AutoJs bridge modules
 - [ ] direct WorkManager, AlarmManager, JobScheduler, and BroadcastReceiver authority remains denied to Node scripts
 
 ## Compatibility

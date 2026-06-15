@@ -5457,7 +5457,8 @@ std::string buildEmbeddedScriptExecutionSource(
         const std::vector<std::pair<std::string, std::string>>& runtimeModuleSources,
         const std::vector<std::pair<std::string, std::string>>& env,
         bool esmExperimentalEnabled,
-        bool dynamicImportExperimentalEnabled) {
+        bool dynamicImportExperimentalEnabled,
+        bool workerThreadsExperimentalEnabled) {
     const std::string sourceLiteral = jsonStringLiteral(source);
     const std::string sourceNameLiteral = jsonStringLiteral(sanitizeSourceUrl(sourceName));
     const std::string workingDirectoryLiteral = jsonStringLiteral(workingDirectory);
@@ -5505,6 +5506,9 @@ std::string buildEmbeddedScriptExecutionSource(
     script += R"JS(;
   const __autojs6_dynamic_import_experimental_enabled = )JS";
     script += dynamicImportExperimentalEnabled ? "true" : "false";
+    script += R"JS(;
+  const __autojs6_worker_threads_experimental_enabled = )JS";
+    script += workerThreadsExperimentalEnabled ? "true" : "false";
     script += R"JS(;
   const __autojs6_runtime_module_count_limit = 64;
   const __autojs6_runtime_module_single_source_bytes_limit = 262144;
@@ -7905,6 +7909,7 @@ std::string buildEmbeddedScriptExecutionSource(
   let __autojs6_limited_shell_cache = null;
   let __autojs6_limited_fetch_cache = null;
   let __autojs6_limited_websocket_cache = null;
+  let __autojs6_limited_worker_threads_cache = null;
   const __autojs6_fetch_policy = Object.freeze({
     maxConcurrentRequests: 4,
     defaultTimeoutMs: 30000,
@@ -7942,6 +7947,30 @@ std::string buildEmbeddedScriptExecutionSource(
     rejectedByPolicyCount: 0,
     closedCount: 0,
     messageCount: 0,
+    lastPolicyRejection: ""
+  };
+  const __autojs6_worker_threads_policy = Object.freeze({
+    maxWorkers: 1,
+    startupTimeoutMs: 5000,
+    allowedBuiltins: Object.freeze([
+      "assert",
+      "buffer",
+      "events",
+      "path",
+      "querystring",
+      "string_decoder",
+      "timers",
+      "url",
+      "util"
+    ])
+  });
+  const __autojs6_worker_threads_diagnostics = {
+    activeWorkerCount: 0,
+    maxActiveWorkerCount: 0,
+    createdCount: 0,
+    terminatedCount: 0,
+    startupTimeoutCount: 0,
+    rejectedByPolicyCount: 0,
     lastPolicyRejection: ""
   };
   function __autojs6_has_own(object, key) {
@@ -8055,6 +8084,9 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     const disabledBuiltins = [];
     for (const name of Object.keys(__autojs6_require_builtin_denylist)) {
+      if (name === "worker_threads" && __autojs6_worker_threads_experimental_enabled) {
+        continue;
+      }
       if (
         !__autojs6_has_own(__autojs6_limited_builtin_module_map, name) &&
         !__autojs6_has_own(__autojs6_require_builtin_allowlist, name)
@@ -8074,13 +8106,13 @@ std::string buildEmbeddedScriptExecutionSource(
       network: false,
       npmInstall: false,
       webSocket: false,
-      workerThreads: false
+      workerThreads: __autojs6_worker_threads_experimental_enabled
     });
     const experimentalFlags = Object.freeze({
       esm: __autojs6_esm_experimental_enabled,
       dynamicImport: __autojs6_dynamic_import_experimental_enabled,
       network: false,
-      workerThreads: false
+      workerThreads: __autojs6_worker_threads_experimental_enabled
     });
     const featureFlags = Object.freeze({
       esm: Object.freeze({
@@ -8148,7 +8180,7 @@ std::string buildEmbeddedScriptExecutionSource(
         diagnosticName: "workerThreads",
         gradleProperty: "autojs.nodejs.worker_threads.experimental",
         defaultEnabled: false,
-        enabled: false,
+        enabled: __autojs6_worker_threads_experimental_enabled,
         buildTimeOverrideAllowed: true,
         projectJsonOverrideAllowed: false,
         packagedApkOverrideAllowed: false,
@@ -8260,11 +8292,15 @@ std::string buildEmbeddedScriptExecutionSource(
       esm: __autojs6_esm_experimental_enabled,
       dynamicImport: __autojs6_dynamic_import_experimental_enabled,
       network: false,
-      workerThreads: false,
+      workerThreads: __autojs6_worker_threads_experimental_enabled,
       nativeAddon: false,
       scopedFs: true,
       directBuiltinAliases: Object.freeze(directBuiltinAliases),
-      limitedBuiltins: __autojs6_freeze_sorted_copy(__autojs6_limited_builtin_module_names),
+      limitedBuiltins: __autojs6_freeze_sorted_copy(
+        __autojs6_worker_threads_experimental_enabled
+          ? __autojs6_limited_builtin_module_names.concat(["worker_threads"])
+          : __autojs6_limited_builtin_module_names
+      ),
       disabledBuiltins: __autojs6_freeze_sorted_copy(disabledBuiltins),
       networkBuiltins: Object.freeze(["dns", "dns/promises", "http", "https", "net", "tls"]),
       highRiskCapabilities,
@@ -8295,6 +8331,11 @@ std::string buildEmbeddedScriptExecutionSource(
         bridgeInvalidRequest: "ERR_AUTOJS6_BRIDGE_INVALID_REQUEST",
         bridgeTimeout: "ERR_AUTOJS6_BRIDGE_TIMEOUT",
         bridgeProcessDead: "ERR_AUTOJS6_BRIDGE_PROCESS_DEAD",
+        workerDisabled: "ERR_AUTOJS6_WORKER_DISABLED",
+        workerLimitExceeded: "ERR_AUTOJS6_WORKER_LIMIT_EXCEEDED",
+        workerBridgeDenied: "ERR_AUTOJS6_WORKER_BRIDGE_DENIED",
+        workerTimeout: "ERR_AUTOJS6_WORKER_TIMEOUT",
+        workerTerminated: "ERR_AUTOJS6_WORKER_TERMINATED",
         legacyAliases: Object.freeze(legacyAliases)
       })
     });
@@ -9525,6 +9566,339 @@ std::string buildEmbeddedScriptExecutionSource(
       diagnostics: __autojs6_websocket_diagnostics_snapshot
     });
     return __autojs6_limited_websocket_cache;
+  }
+  function __autojs6_worker_threads_error(message, code) {
+    return __autojs6_error(message, code || "ERR_AUTOJS6_WORKER_BRIDGE_DENIED");
+  }
+  function __autojs6_worker_threads_disabled_error() {
+    return __autojs6_worker_threads_error(
+      "AutoJs6 experimental worker_threads is disabled; enable autojs.nodejs.worker_threads.experimental for an experimental run.",
+      "ERR_AUTOJS6_WORKER_DISABLED"
+    );
+  }
+  function __autojs6_worker_threads_record_policy_rejection(reason) {
+    __autojs6_worker_threads_diagnostics.rejectedByPolicyCount += 1;
+    __autojs6_worker_threads_diagnostics.lastPolicyRejection = String(reason || "");
+  }
+  function __autojs6_worker_threads_policy_error(message, reason, code) {
+    __autojs6_worker_threads_record_policy_rejection(reason || code || "policy");
+    return __autojs6_worker_threads_error(message, code || "ERR_AUTOJS6_WORKER_BRIDGE_DENIED");
+  }
+  function __autojs6_worker_threads_try_start() {
+    if (__autojs6_worker_threads_diagnostics.activeWorkerCount >= __autojs6_worker_threads_policy.maxWorkers) {
+      __autojs6_worker_threads_record_policy_rejection("max_workers");
+      return false;
+    }
+    __autojs6_worker_threads_diagnostics.activeWorkerCount += 1;
+    __autojs6_worker_threads_diagnostics.createdCount += 1;
+    if (__autojs6_worker_threads_diagnostics.activeWorkerCount > __autojs6_worker_threads_diagnostics.maxActiveWorkerCount) {
+      __autojs6_worker_threads_diagnostics.maxActiveWorkerCount = __autojs6_worker_threads_diagnostics.activeWorkerCount;
+    }
+    return true;
+  }
+  function __autojs6_worker_threads_finish(worker) {
+    if (!worker || worker.__autojs6Finished) {
+      return;
+    }
+    worker.__autojs6Finished = true;
+    __autojs6_worker_threads_diagnostics.activeWorkerCount = Math.max(
+      0,
+      __autojs6_worker_threads_diagnostics.activeWorkerCount - 1
+    );
+  }
+  function __autojs6_worker_threads_policy_snapshot() {
+    return Object.freeze({
+      maxWorkers: __autojs6_worker_threads_policy.maxWorkers,
+      startupTimeoutMs: __autojs6_worker_threads_policy.startupTimeoutMs,
+      allowedBuiltins: Object.freeze(__autojs6_worker_threads_policy.allowedBuiltins.slice())
+    });
+  }
+  function __autojs6_worker_threads_diagnostics_snapshot() {
+    return {
+      activeWorkerCount: __autojs6_worker_threads_diagnostics.activeWorkerCount,
+      maxActiveWorkerCount: __autojs6_worker_threads_diagnostics.maxActiveWorkerCount,
+      createdCount: __autojs6_worker_threads_diagnostics.createdCount,
+      terminatedCount: __autojs6_worker_threads_diagnostics.terminatedCount,
+      startupTimeoutCount: __autojs6_worker_threads_diagnostics.startupTimeoutCount,
+      rejectedByPolicyCount: __autojs6_worker_threads_diagnostics.rejectedByPolicyCount,
+      lastPolicyRejection: __autojs6_worker_threads_diagnostics.lastPolicyRejection
+    };
+  }
+  function __autojs6_assert_worker_source_supported(source, sourceName) {
+    const extension = __autojs6_source_extension(sourceName);
+    if (__autojs6_is_esm_extension(extension)) {
+      throw __autojs6_worker_threads_policy_error(
+        "AutoJs6 experimental worker_threads accepts CommonJS worker scripts only: " + sourceName,
+        "esm_worker",
+        "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED"
+      );
+    }
+    const sourceText = String(source || "");
+    const masked = __autojs6_mask_non_code(sourceText);
+    if (__autojs6_contains_dynamic_import(sourceText)) {
+      throw __autojs6_worker_threads_policy_error(
+        "AutoJs6 experimental worker_threads disables dynamic import in workers: " + sourceName,
+        "dynamic_import",
+        "ERR_AUTOJS6_DYNAMIC_IMPORT_UNSUPPORTED"
+      );
+    }
+    if (/(^|[\r\n;{}])\s*import\b\s*(["'{*]|[A-Za-z_$])/.test(masked) ||
+        /(^|[\r\n;{}])\s*export\b\s*([{*]|default\b|class\b|function\b|const\b|let\b|var\b|[A-Za-z_$])/.test(masked)) {
+      throw __autojs6_worker_threads_policy_error(
+        "AutoJs6 experimental worker_threads disables ESM syntax in workers: " + sourceName,
+        "esm_syntax",
+        "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED"
+      );
+    }
+  }
+  function __autojs6_worker_threads_resolve_script(filename, parentFilename) {
+    const name = filename === undefined || filename === null ? "" : String(filename);
+    if (!name || !__autojs6_is_relative_module_name(name)) {
+      throw __autojs6_worker_threads_policy_error(
+        "AutoJs6 experimental worker_threads accepts only local relative worker scripts.",
+        "non_relative_script",
+        "ERR_AUTOJS6_FS_SCOPED_PATH"
+      );
+    }
+    let resolved;
+    try {
+      resolved = __autojs6_resolve_local_module(name, parentFilename || __autojs6_source_name);
+    } catch (error) {
+      throw __autojs6_worker_threads_policy_error(
+        error && error.message ? error.message : "AutoJs6 experimental worker_threads script path is outside the working directory.",
+        "script_path",
+        error && (error.autojs6Code || error.code) ? (error.autojs6Code || error.code) : "ERR_AUTOJS6_FS_PATH_ESCAPE"
+      );
+    }
+    const extension = __autojs6_source_extension(resolved);
+    if (extension !== ".js" && extension !== ".cjs") {
+      throw __autojs6_worker_threads_policy_error(
+        "AutoJs6 experimental worker_threads accepts only .js and .cjs worker scripts: " + name,
+        "unsupported_extension",
+        "ERR_AUTOJS6_WORKER_BRIDGE_DENIED"
+      );
+    }
+    const record = __autojs6_module_record(resolved, false);
+    if (!record || typeof record.source !== "string") {
+      throw __autojs6_worker_threads_policy_error(
+        "Cannot find AutoJs6 experimental worker script: " + name,
+        "missing_script",
+        "ERR_AUTOJS6_MODULE_NOT_FOUND"
+      );
+    }
+    __autojs6_assert_worker_source_supported(record.source, resolved);
+    return {
+      filename: resolved,
+      dirname: __autojs6_module_dirname(resolved),
+      source: record.source,
+      sourceURL: record.sourceURL || resolved
+    };
+  }
+  function __autojs6_worker_threads_bootstrap_source(descriptor) {
+    const filename = descriptor.filename;
+    const dirname = descriptor.dirname;
+    const sourceURL = String(descriptor.sourceURL || filename).replace(/[\r\n]/g, " ");
+    return [
+      "\"use strict\";",
+      "(function() {",
+      "  const __nativeRequire = require;",
+      "  const __workerThreads = __nativeRequire(\"worker_threads\");",
+      "  const __parentPort = __workerThreads.parentPort;",
+      "  const __workerDataEnvelope = __workerThreads.workerData || {};",
+      "  const __workerData = __workerDataEnvelope.__autojs6UserWorkerData;",
+      "  function __error(message, code) {",
+      "    const error = new Error(message);",
+      "    Object.defineProperty(error, \"code\", { value: code, enumerable: true, configurable: true });",
+      "    Object.defineProperty(error, \"autojs6Code\", { value: code, enumerable: true, configurable: true });",
+      "    return error;",
+      "  }",
+      "  function __deny(moduleName) {",
+      "    throw __error(\"AutoJs6 experimental worker_threads denies module '\" + moduleName + \"' in workers.\", \"ERR_AUTOJS6_WORKER_BRIDGE_DENIED\");",
+      "  }",
+      "  function __disabledProcess(name) {",
+      "    return function() {",
+      "      throw __error(\"AutoJs6 experimental worker_threads disables process.\" + name + \" in workers.\", \"ERR_AUTOJS6_PROCESS_API_DISABLED\");",
+      "    };",
+      "  }",
+      "  if (typeof process === \"object\" && process) {",
+      "    [\"binding\", \"_linkedBinding\", \"dlopen\", \"getBuiltinModule\", \"chdir\", \"exit\", \"abort\", \"kill\"].forEach(function(name) {",
+      "      try { Object.defineProperty(process, name, { value: __disabledProcess(name), configurable: true, writable: false }); } catch (_) { try { process[name] = __disabledProcess(name); } catch (_) {} }",
+      "    });",
+      "  }",
+      "  const __allowed = Object.freeze({",
+      "    assert: \"assert\",",
+      "    \"assert/strict\": \"assert/strict\",",
+      "    buffer: \"buffer\",",
+      "    events: \"events\",",
+      "    path: \"path\",",
+      "    \"path/posix\": \"path/posix\",",
+      "    \"path/win32\": \"path/win32\",",
+      "    querystring: \"querystring\",",
+      "    string_decoder: \"string_decoder\",",
+      "    timers: \"timers\",",
+      "    url: \"url\",",
+      "    util: \"util\",",
+      "    \"util/types\": \"util/types\"",
+      "  });",
+      "  const __limitedWorkerThreads = Object.freeze({",
+      "    isMainThread: false,",
+      "    parentPort: __parentPort,",
+      "    workerData: __workerData,",
+      "    threadId: __workerThreads.threadId,",
+      "    Worker: function Worker() { throw __error(\"Nested AutoJs6 worker_threads workers are disabled.\", \"ERR_AUTOJS6_WORKER_DISABLED\"); }",
+      "  });",
+      "  function __restrictedRequire(request) {",
+      "    const raw = String(request || \"\");",
+      "    const name = raw.indexOf(\"node:\") === 0 ? raw.slice(5) : raw;",
+      "    if (name === \"worker_threads\") return __limitedWorkerThreads;",
+      "    if (Object.prototype.hasOwnProperty.call(__allowed, name)) return __nativeRequire(__allowed[name]);",
+      "    return __deny(raw);",
+      "  }",
+      "  __restrictedRequire.resolve = function(request) {",
+      "    const raw = String(request || \"\");",
+      "    const name = raw.indexOf(\"node:\") === 0 ? raw.slice(5) : raw;",
+      "    if (name === \"worker_threads\") return \"worker_threads\";",
+      "    if (Object.prototype.hasOwnProperty.call(__allowed, name)) return __allowed[name];",
+      "    return __deny(raw);",
+      "  };",
+      "  const module = { id: " + JSON.stringify(filename) + ", filename: " + JSON.stringify(filename) + ", dirname: " + JSON.stringify(dirname) + ", exports: {}, loaded: false };",
+      "  module.require = __restrictedRequire;",
+      "  const exports = module.exports;",
+      "  const Buffer = __nativeRequire(\"buffer\").Buffer;",
+      "  const __run = new Function(\"require\", \"exports\", \"module\", \"__filename\", \"__dirname\", \"parentPort\", \"workerData\", \"Buffer\", " +
+        JSON.stringify("\"use strict\";\n" + descriptor.source + "\n//# sourceURL=" + sourceURL) + ");",
+      "  __run(__restrictedRequire, exports, module, module.filename, module.dirname, __parentPort, __workerData, Buffer);",
+      "  module.loaded = true;",
+      "})();"
+    ].join("\n");
+  }
+  function __autojs6_limited_worker_threads() {
+    if (__autojs6_limited_worker_threads_cache) {
+      return __autojs6_limited_worker_threads_cache;
+    }
+    if (!__autojs6_worker_threads_experimental_enabled) {
+      throw __autojs6_worker_threads_disabled_error();
+    }
+    const nativeModule = __autojs6_builtin_module("worker_threads");
+    const eventsModule = __autojs6_events_module();
+    if (!nativeModule || typeof nativeModule.Worker !== "function" || !eventsModule || typeof eventsModule.EventEmitter !== "function") {
+      throw __autojs6_worker_threads_error(
+        "AutoJs6 experimental worker_threads is unavailable in this Embedded Node build.",
+        "ERR_AUTOJS6_WORKER_DISABLED"
+      );
+    }
+    function AutoJs6Worker(filename, options) {
+      if (!(this instanceof AutoJs6Worker)) {
+        return new AutoJs6Worker(filename, options);
+      }
+      if (!__autojs6_worker_threads_try_start()) {
+        throw __autojs6_worker_threads_error(
+          "AutoJs6 experimental worker_threads exceeded " + __autojs6_worker_threads_policy.maxWorkers + " active worker.",
+          "ERR_AUTOJS6_WORKER_LIMIT_EXCEEDED"
+        );
+      }
+      eventsModule.EventEmitter.call(this);
+      this.__autojs6Finished = false;
+      this.__autojs6StartupTimer = null;
+      this.__autojs6NativeWorker = null;
+      const opts = options && typeof options === "object" ? options : {};
+      let nativeWorker = null;
+      try {
+        const descriptor = __autojs6_worker_threads_resolve_script(filename, __autojs6_source_name);
+        nativeWorker = new nativeModule.Worker(
+          __autojs6_worker_threads_bootstrap_source(descriptor),
+          {
+            eval: true,
+            workerData: { __autojs6UserWorkerData: opts.workerData }
+          }
+        );
+        this.__autojs6NativeWorker = nativeWorker;
+        try {
+          Object.defineProperty(this, "threadId", {
+            value: nativeWorker.threadId,
+            enumerable: true,
+            configurable: true
+          });
+        } catch (_) {
+          this.threadId = nativeWorker.threadId;
+        }
+        const self = this;
+        const clearStartupTimer = function() {
+          if (self.__autojs6StartupTimer !== null) {
+            clearTimeout(self.__autojs6StartupTimer);
+            self.__autojs6StartupTimer = null;
+          }
+        };
+        this.__autojs6StartupTimer = setTimeout(function() {
+          if (self.__autojs6Finished) return;
+          __autojs6_worker_threads_diagnostics.startupTimeoutCount += 1;
+          const error = __autojs6_worker_threads_error(
+            "AutoJs6 experimental worker_threads startup timed out.",
+            "ERR_AUTOJS6_WORKER_TIMEOUT"
+          );
+          try {
+            nativeWorker.terminate();
+          } catch (_) {}
+          self.emit("error", error);
+        }, __autojs6_worker_threads_policy.startupTimeoutMs);
+        nativeWorker.on("online", function() {
+          clearStartupTimer();
+          self.emit("online");
+        });
+        nativeWorker.on("message", function(message) {
+          clearStartupTimer();
+          self.emit("message", message);
+        });
+        nativeWorker.on("error", function(error) {
+          clearStartupTimer();
+          self.emit("error", error);
+        });
+        nativeWorker.on("exit", function(code) {
+          clearStartupTimer();
+          __autojs6_worker_threads_finish(self);
+          self.emit("exit", code);
+        });
+      } catch (error) {
+        if (nativeWorker && typeof nativeWorker.terminate === "function") {
+          try {
+            nativeWorker.terminate();
+          } catch (_) {}
+        }
+        __autojs6_worker_threads_finish(this);
+        throw error;
+      }
+    }
+    AutoJs6Worker.prototype = Object.create(eventsModule.EventEmitter.prototype);
+    AutoJs6Worker.prototype.constructor = AutoJs6Worker;
+    AutoJs6Worker.prototype.postMessage = function(message) {
+      if (!this.__autojs6NativeWorker || this.__autojs6Finished) {
+        throw __autojs6_worker_threads_error(
+          "AutoJs6 experimental worker_threads worker is already terminated.",
+          "ERR_AUTOJS6_WORKER_TERMINATED"
+        );
+      }
+      return this.__autojs6NativeWorker.postMessage(message);
+    };
+    AutoJs6Worker.prototype.terminate = function() {
+      if (!this.__autojs6NativeWorker || this.__autojs6Finished) {
+        return Promise.resolve(0);
+      }
+      const nativeWorker = this.__autojs6NativeWorker;
+      return Promise.resolve(nativeWorker.terminate()).then((code) => {
+        __autojs6_worker_threads_diagnostics.terminatedCount += 1;
+        __autojs6_worker_threads_finish(this);
+        return code;
+      });
+    };
+    __autojs6_limited_worker_threads_cache = Object.freeze({
+      Worker: AutoJs6Worker,
+      isMainThread: true,
+      parentPort: null,
+      workerData: undefined,
+      policy: __autojs6_worker_threads_policy_snapshot(),
+      diagnostics: __autojs6_worker_threads_diagnostics_snapshot
+    });
+    return __autojs6_limited_worker_threads_cache;
   }
   function __autojs6_limited_toast() {
     if (__autojs6_limited_toast_cache) {
@@ -23309,6 +23683,9 @@ std::string buildEmbeddedScriptExecutionSource(
   }
   function __autojs6_limited_module_is_builtin(name) {
     const key = name === undefined ? "" : String(name);
+    if (__autojs6_worker_threads_experimental_enabled && (key === "worker_threads" || key === "node:worker_threads")) {
+      return true;
+    }
     return __autojs6_has_own(__autojs6_limited_builtin_module_map, key);
   }
   function __autojs6_limited_module_sync_builtin_esm_exports() {
@@ -23329,7 +23706,11 @@ std::string buildEmbeddedScriptExecutionSource(
         enumerable: true
       },
       builtinModules: {
-        value: Object.freeze(__autojs6_limited_builtin_module_names.slice()),
+        value: Object.freeze(
+          __autojs6_worker_threads_experimental_enabled
+            ? __autojs6_limited_builtin_module_names.concat(["worker_threads"])
+            : __autojs6_limited_builtin_module_names.slice()
+        ),
         enumerable: true
       },
       syncBuiltinESMExports: {
@@ -25495,6 +25876,9 @@ std::string buildEmbeddedScriptExecutionSource(
     if (name === "websocket") {
       return "websocket";
     }
+    if ((name === "worker_threads" || name === "node:worker_threads") && __autojs6_worker_threads_experimental_enabled) {
+      return "worker_threads";
+    }
     if (name === "fs" || name === "node:fs") {
       return "fs";
     }
@@ -25697,6 +26081,9 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     if (name === "websocket") {
       return __autojs6_limited_websocket();
+    }
+    if ((name === "worker_threads" || name === "node:worker_threads") && __autojs6_worker_threads_experimental_enabled) {
+      return __autojs6_limited_worker_threads();
     }
     if (name === "fs" || name === "node:fs") {
       return __autojs6_scoped_fs();
@@ -25979,6 +26366,14 @@ std::string buildEmbeddedScriptExecutionSource(
     fields.esmDeniedCount = __autojs6_esm_diagnostics.deniedCount;
     fields.esmLastDeniedReason = __autojs6_esm_diagnostics.lastDeniedReason;
     fields.dynamicImportEnabled = __autojs6_dynamic_import_experimental_enabled;
+    fields.workerThreadsEnabled = __autojs6_worker_threads_experimental_enabled;
+    fields.workerActiveCount = __autojs6_worker_threads_diagnostics.activeWorkerCount;
+    fields.workerMaxActiveCount = __autojs6_worker_threads_diagnostics.maxActiveWorkerCount;
+    fields.workerCreatedCount = __autojs6_worker_threads_diagnostics.createdCount;
+    fields.workerTerminatedCount = __autojs6_worker_threads_diagnostics.terminatedCount;
+    fields.workerStartupTimeoutCount = __autojs6_worker_threads_diagnostics.startupTimeoutCount;
+    fields.workerRejectedByPolicyCount = __autojs6_worker_threads_diagnostics.rejectedByPolicyCount;
+    fields.workerLastPolicyRejection = __autojs6_worker_threads_diagnostics.lastPolicyRejection;
     fields.sourceMapEnabled = __autojs6_source_map_diagnostics.enabled;
     fields.sourceMapLoadedCount = __autojs6_source_map_diagnostics.loadedCount;
     fields.sourceMapMappedFrameCount = __autojs6_source_map_diagnostics.mappedFrameCount;

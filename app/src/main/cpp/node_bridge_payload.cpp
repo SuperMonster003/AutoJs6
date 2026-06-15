@@ -64,6 +64,15 @@ void putEmbeddedScriptExecutionFields(std::vector<std::string>& payload, const s
     putPayload(payload, "embedded_script.esm_module_graph_modules", jsonStringField(text, "esmModuleGraphModules"));
     putPayload(payload, "embedded_script.esm_denied_count", jsonNumberField(text, "esmDeniedCount"));
     putPayload(payload, "embedded_script.esm_last_denied_reason", jsonStringField(text, "esmLastDeniedReason"));
+    putPayload(payload, "embedded_script.dynamic_import_enabled", jsonBooleanField(text, "dynamicImportEnabled"));
+    putPayload(payload, "embedded_script.worker_threads_enabled", jsonBooleanField(text, "workerThreadsEnabled"));
+    putPayload(payload, "embedded_script.worker_active_count", jsonNumberField(text, "workerActiveCount"));
+    putPayload(payload, "embedded_script.worker_max_active_count", jsonNumberField(text, "workerMaxActiveCount"));
+    putPayload(payload, "embedded_script.worker_created_count", jsonNumberField(text, "workerCreatedCount"));
+    putPayload(payload, "embedded_script.worker_terminated_count", jsonNumberField(text, "workerTerminatedCount"));
+    putPayload(payload, "embedded_script.worker_startup_timeout_count", jsonNumberField(text, "workerStartupTimeoutCount"));
+    putPayload(payload, "embedded_script.worker_rejected_by_policy_count", jsonNumberField(text, "workerRejectedByPolicyCount"));
+    putPayload(payload, "embedded_script.worker_last_policy_rejection", jsonStringField(text, "workerLastPolicyRejection"));
     putPayload(payload, "embedded_script.source_map_enabled", jsonBooleanField(text, "sourceMapEnabled"));
     putPayload(payload, "embedded_script.source_map_loaded_count", jsonNumberField(text, "sourceMapLoadedCount"));
     putPayload(payload, "embedded_script.source_map_mapped_frame_count", jsonNumberField(text, "sourceMapMappedFrameCount"));

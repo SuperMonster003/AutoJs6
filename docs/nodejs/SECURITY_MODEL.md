@@ -152,7 +152,7 @@ See `docs/nodejs/design/WEBSOCKET.md`.
 
 ## Worker Threads Policy
 
-`worker_threads` is not enabled in the default Safe Node Profile. The explicit design-gate flag is:
+`worker_threads` is not enabled in the default Safe Node Profile. The explicit experimental flag is:
 
 ```properties
 autojs.nodejs.worker_threads.experimental=false
@@ -160,7 +160,7 @@ autojs.nodejs.worker_threads.experimental=false
 
 With the flag off, `require("worker_threads")` and `require("node:worker_threads")` reject with the disabled-builtin error shape. A local `node_modules/worker_threads` package must not shadow that denial.
 
-Future workers, if enabled experimentally, must be treated as pure JavaScript compute workers. They must not access:
+With the experimental request flag on, workers are pure JavaScript compute workers with a smaller capability set than the parent script. Worker source is resolved and read by the parent scoped resolver, then executed through a worker-local restricted `require`. Worker scripts must not access:
 
 - AutoJs bridge modules or `autojs6:bridge`
 - Android `Context`
@@ -172,7 +172,7 @@ Future workers, if enabled experimentally, must be treated as pure JavaScript co
 - inspector
 - unrestricted filesystem APIs
 
-Bridge ownership remains in the parent script. Workers may exchange pure data with the parent only after lifecycle, timeout, memory, and package-source policies are implemented.
+Bridge ownership remains in the parent script. Workers may exchange pure data with the parent through `parentPort.postMessage`, `worker.postMessage`, and `workerData`; the worker itself may not call bridge modules. The MVP allows one active worker, uses a startup timeout, denies nested workers, and keeps packaged worker source graphs and deeper lifecycle stress as follow-up work.
 
 See `docs/nodejs/design/WORKER_THREADS.md` for the current worker boundary.
 

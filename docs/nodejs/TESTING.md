@@ -235,6 +235,14 @@ Current `worker_threads` design gate focused instrumentation:
 
 This suite verifies `BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED=false`, the Kotlin capability registry, JavaScript profile flags, bare and `node:` `worker_threads` denial, `require.resolve("worker_threads")` denial, frozen profile flags, and shadowing protection against `node_modules/worker_threads`.
 
+Current experimental worker_threads focused instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeWorkerThreadsExperimentalInstrumentationTest"
+```
+
+This suite verifies the default disabled path, then enables the request-local experimental flag to cover local CommonJS worker scripts, `workerData`, `parentPort.postMessage`, `terminate()`, max-worker rejection, scoped path escape rejection, shadowing protection, Worker diagnostics counters, and denial of AutoJs bridge modules, `fs`, raw `net`, and nested workers inside worker scope.
+
 Current feature flag registry focused instrumentation:
 
 ```powershell
