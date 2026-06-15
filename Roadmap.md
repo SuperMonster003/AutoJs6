@@ -39,22 +39,22 @@ and fallback behavior, then resume CI, API-index, and LSP work.
 
 ## Phase 1: Native-Only Audit Documents
 
-- [ ] Add `docs/dev/editor-native-only-audit.md`.
-- [ ] Classify Native-only dependencies:
+- [x] Add `docs/dev/editor-native-only-audit.md`.
+- [x] Classify Native-only dependencies:
   `CodeEditor`, `CodeEditText`, `TextViewUndoRedo`, `HVScrollView`,
   `JavaScriptHighlighter`, `LayoutHelper`, Android `Layout`,
   `Editable.append`, `requestRectangleOnScreen`, `selectionStart`,
   `selectionEnd`, `setLoadingText`, `setLoadingGutterDigits`,
   `setRedoUndoEnabled`, and `AutoCompletion(context, CodeEditText)`.
-- [ ] Add `docs/dev/editor-engine-neutral-services.md`.
-- [ ] Document engine-neutral service owners and allowed dependencies.
-- [ ] Extend boundary checks to cover the audit lists.
+- [x] Add `docs/dev/editor-engine-neutral-services.md`.
+- [x] Document engine-neutral service owners and allowed dependencies.
+- [x] Extend boundary checks to cover the audit lists.
 
 Acceptance:
 
-- [ ] Native-only APIs are categorized as Native-only, per-engine interface,
+- [x] Native-only APIs are categorized as Native-only, per-engine interface,
   public service, or removed-from-ACE.
-- [ ] Common editor services are documented as depending only on
+- [x] Common editor services are documented as depending only on
   `ScriptEditorEngine` and neutral editor models.
 
 ## Phase 2: Viewport Policy Deepening
