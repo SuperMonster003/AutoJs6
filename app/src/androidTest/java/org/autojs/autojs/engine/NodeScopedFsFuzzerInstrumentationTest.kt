@@ -31,6 +31,8 @@ class NodeScopedFsFuzzerInstrumentationTest {
     fun scopedFsPathNormalizationFuzzerDoesNotEscape() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node scoped fs fuzzer")
 
+        val budget = NodeFuzzerBudget.current()
+        val baseSeed = NodeFuzzerSupport.baseSeed(FUZZER_NAME, DEFAULT_BASE_SEED)
         val workDir = File(context.cacheDir, "node-scoped-fs-fuzzer-${System.nanoTime()}").apply {
             deleteRecursively()
             check(mkdirs()) { "Failed to create scoped fs fuzzer work dir: $absolutePath" }
@@ -40,21 +42,42 @@ class NodeScopedFsFuzzerInstrumentationTest {
             check(mkdirs()) { "Failed to create scoped fs fuzzer outside dir: $absolutePath" }
         }
         val links = mutableListOf<File>()
+        var selectedCaseCount = 0
         try {
             val fixtures = writeFixtures(workDir, outsideDir, links)
             assumeTrue("Symlink creation unavailable on this device", fixtures.symlinkReady)
 
-            val cases = buildCases(fixtures)
-            val source = buildRunnerSource(cases)
+            val cases = budget.selectCases(
+                buildCases(fixtures, includeExtended = budget == NodeFuzzerBudget.EXTENDED),
+                quick = QUICK_CASE_COUNT,
+            )
+            selectedCaseCount = cases.size
+            val source = buildRunnerSource(cases, baseSeed, budget)
             val result = NodeEmbeddedTestHarness.runEmbeddedScript(
                 source = source,
                 sourceName = "<node-scoped-fs-fuzzer.js>",
                 workingDirectory = workDir,
-                timeoutMs = 15_000L,
+                timeoutMs = budget.timeoutMs(8_000L, 15_000L, 25_000L),
             )
 
+            if (!result.succeeded || result.timedOut) {
+                NodeFuzzerSupport.reportFailure(
+                    fuzzer = FUZZER_NAME,
+                    budget = budget,
+                    baseSeed = baseSeed,
+                    caseCount = cases.size,
+                    replayClass = TEST_CLASS,
+                    replayMethod = "scopedFsPathNormalizationFuzzerDoesNotEscape",
+                    failure = JSONObject()
+                        .put("phase", "script-result")
+                        .put("errorCode", result.errorCode ?: JSONObject.NULL)
+                        .put("errorMessage", result.errorMessage ?: JSONObject.NULL)
+                        .put("timedOut", result.timedOut),
+                )
+            }
             NodeEmbeddedTestHarness.assertSucceeded("Node scoped fs fuzzer", result)
-            assertTrue(result.stdout, result.stdout.contains("scopedfs.fuzzer.seed=$BASE_SEED"))
+            assertTrue(result.stdout, result.stdout.contains("scopedfs.fuzzer.seed=$baseSeed"))
+            assertTrue(result.stdout, result.stdout.contains("scopedfs.fuzzer.budget=${budget.id}"))
             assertTrue(result.stdout, result.stdout.contains("scopedfs.fuzzer.done=true"))
             assertFalse(
                 NodeEmbeddedTestHarness.describeResult("scoped fs fuzzer loaded outside marker", result),
@@ -66,12 +89,34 @@ class NodeScopedFsFuzzerInstrumentationTest {
                 .firstOrNull { it.startsWith(SUMMARY_PREFIX) }
                 ?.let { JSONObject(it.removePrefix(SUMMARY_PREFIX)) }
                 ?: error(NodeEmbeddedTestHarness.describeResult("missing scoped fs fuzzer summary", result))
-            val failureContext = buildSummaryFailureContext(summary, result)
+            val failureContext = buildSummaryFailureContext(summary, result, baseSeed)
+            if (!summary.isNull("firstFailure")) {
+                NodeFuzzerSupport.reportFailure(
+                    fuzzer = FUZZER_NAME,
+                    budget = budget,
+                    baseSeed = baseSeed,
+                    caseCount = cases.size,
+                    replayClass = TEST_CLASS,
+                    replayMethod = "scopedFsPathNormalizationFuzzerDoesNotEscape",
+                    failure = summary.getJSONObject("firstFailure"),
+                )
+            }
             assertEquals(failureContext, cases.size, summary.getInt("attempts"))
             assertEquals(failureContext, 0, summary.getInt("escapes"))
             assertEquals(failureContext, 0, summary.getInt("unstableErrors"))
             assertEquals(failureContext, 0, summary.getInt("unexpected"))
             assertTrue(failureContext, summary.isNull("firstFailure"))
+        } catch (throwable: Throwable) {
+            NodeFuzzerSupport.reportFailure(
+                fuzzer = FUZZER_NAME,
+                budget = budget,
+                baseSeed = baseSeed,
+                caseCount = selectedCaseCount,
+                replayClass = TEST_CLASS,
+                replayMethod = "scopedFsPathNormalizationFuzzerDoesNotEscape",
+                throwable = throwable,
+            )
+            throw throwable
         } finally {
             deleteLinks(links)
             workDir.deleteRecursively()
@@ -147,9 +192,9 @@ class NodeScopedFsFuzzerInstrumentationTest {
         }
     }
 
-    private fun buildCases(fixtures: FsFuzzerFixtures): List<PathFuzzCase> {
+    private fun buildCases(fixtures: FsFuzzerFixtures, includeExtended: Boolean): List<PathFuzzCase> {
         val escapedAbsolute = fixtures.outsideSecretAbsolute.replace("\\", "\\\\")
-        return listOf(
+        val baseCases = listOf(
             allow("read.safe", "read", "safe.txt"),
             allow("read.dot", "read", "./safe.txt"),
             allow("read.dotdot_inside", "read", "dir/nested/../nested/file.txt"),
@@ -183,6 +228,20 @@ class NodeScopedFsFuzzerInstrumentationTest {
             deny("read.symlink_chain_escape", "read", "chain-outside-a/secret.txt", "ERR_AUTOJS6_FS_REALPATH_ESCAPE"),
             deny("realpath.symlink_chain_escape", "realpath", "chain-outside-a/secret.txt", "ERR_AUTOJS6_FS_REALPATH_ESCAPE"),
         )
+        if (!includeExtended) {
+            return baseCases
+        }
+        return baseCases + listOf(
+            allow("read.extended_dot_segments", "read", "./dir/./nested/./file.txt"),
+            allow("promise.extended_repeated_slashes", "promiseRead", "dir////nested////repeated.txt"),
+            allow("stat.extended_safe", "stat", "./dir/./nested/file.txt"),
+            allow("access.extended_safe", "access", "./dir/nested/../nested/file.txt"),
+            deny("read.dev_absolute", "read", "/dev/null", "ERR_AUTOJS6_FS_ABSOLUTE_PATH_DENIED"),
+            deny("read.sys_absolute", "read", "/sys/kernel", "ERR_AUTOJS6_FS_ABSOLUTE_PATH_DENIED"),
+            deny("promise.nul", "promiseRead", "bad\u0000promise", "ERR_AUTOJS6_FS_NUL_BYTE"),
+            deny("access.escape_parent", "access", "../${fixtures.outsideDirName}/secret.txt", "ERR_AUTOJS6_FS_PATH_ESCAPE"),
+            deny("stat.escape_absolute", "stat", escapedAbsolute, "ERR_AUTOJS6_FS_ABSOLUTE_PATH_DENIED"),
+        )
     }
 
     private fun allow(label: String, op: String, path: String): PathFuzzCase {
@@ -197,7 +256,7 @@ class NodeScopedFsFuzzerInstrumentationTest {
         return PathFuzzCase(label, op, path, mode = "flex")
     }
 
-    private fun buildRunnerSource(cases: List<PathFuzzCase>): String {
+    private fun buildRunnerSource(cases: List<PathFuzzCase>, baseSeed: Long, budget: NodeFuzzerBudget): String {
         val casesJson = JSONArray()
         cases.forEach { fuzzCase ->
             casesJson.put(
@@ -226,7 +285,8 @@ class NodeScopedFsFuzzerInstrumentationTest {
                 unexpected: 0,
                 firstFailure: null
               };
-              console.log("scopedfs.fuzzer.seed=$BASE_SEED");
+              console.log("scopedfs.fuzzer.seed=$baseSeed");
+              console.log("scopedfs.fuzzer.budget=${budget.id}");
               console.log("scopedfs.fuzzer.cases=" + cases.length);
 
               function normalize(value) {
@@ -334,10 +394,11 @@ class NodeScopedFsFuzzerInstrumentationTest {
     private fun buildSummaryFailureContext(
         summary: JSONObject,
         result: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult,
+        baseSeed: Long,
     ): String {
         return buildString {
             appendLine("scoped fs fuzzer failed")
-            appendLine("baseSeed=$BASE_SEED")
+            appendLine("baseSeed=$baseSeed")
             appendLine("summary=${summary.toString(2)}")
             appendLine(NodeEmbeddedTestHarness.describeResult("scoped fs fuzzer result", result))
         }
@@ -365,7 +426,10 @@ class NodeScopedFsFuzzerInstrumentationTest {
     )
 
     companion object {
-        private const val BASE_SEED = 85001285L
+        private const val TEST_CLASS = "org.autojs.autojs.engine.NodeScopedFsFuzzerInstrumentationTest"
+        private const val FUZZER_NAME = "scopedfs"
+        private const val DEFAULT_BASE_SEED = 85001285L
+        private const val QUICK_CASE_COUNT = 12
         private const val SUMMARY_PREFIX = "scopedfs.fuzzer.summary="
         private const val ESCAPE_MARKER = "AUTOJS6_SCOPED_FS_FUZZ_ESCAPE_LOADED"
         private const val WINDOWS_STYLE_SAFE = "windows\\safe.txt"

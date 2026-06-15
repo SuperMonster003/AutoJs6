@@ -20,6 +20,14 @@ Supported values:
 
 If `android.testInstrumentationRunnerArguments.class` is passed explicitly, it wins and the device profile does not override it. This keeps focused single-class and single-method commands deterministic.
 
+Fuzzer budget selection is independent:
+
+- `autojs.nodejs.fuzzerBudget=quick`: short PR/emulator feedback
+- `autojs.nodejs.fuzzerBudget=normal`: focused local default
+- `autojs.nodejs.fuzzerBudget=extended`: nightly, release, and failure investigation
+
+The `full` profile and nightly/release gate tasks default to `extended`; `emulator` and `smoke` default to `quick`.
+
 ## Primary Device
 
 OnePlus OPD2413 is the primary full-gate device for the current branch.
@@ -75,7 +83,7 @@ Recommended command:
 Use `full` for nightly gates or targeted release investigations.
 
 - profile: `full`
-- use: broad embedded/bridge/security/corpus/stress coverage
+- use: broad embedded/bridge/security/corpus/stress coverage, including resolver/scoped fs/bridge RPC fuzzers
 - includes worker resource stress in addition to memory leak stress
 - must be run on a prepared high-performance device
 

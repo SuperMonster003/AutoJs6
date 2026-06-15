@@ -32,6 +32,8 @@ class NodeBridgeRpcFuzzerInstrumentationTest {
 
     @Test
     fun liveBridgeMalformedRequestFuzzerReturnsStableErrorsAndCleansFiles() {
+        val budget = NodeFuzzerBudget.current()
+        val baseSeed = NodeFuzzerSupport.baseSeed(FUZZER_NAME, DEFAULT_BASE_SEED)
         val dispatched = mutableListOf<NodeBridgeRequest>()
         val provider = FakeNodeBridgeCapabilityProvider { request ->
             dispatched += request
@@ -40,107 +42,16 @@ class NodeBridgeRpcFuzzerInstrumentationTest {
         val fixture = newLiveBridgeSession("node-bridge-rpc-fuzzer-session", provider)
         val requestDir = File(fixture.config.getString("requestDir"))
         val responseDir = File(fixture.config.getString("responseDir"))
-
-        val malformedCases = listOf(
-            LiveRequestCase("invalid-json", "{"),
-            LiveRequestCase("top-level-array", "[]"),
-            LiveRequestCase("missing-id", """{"module":"toast","method":"showToast","args":[]}"""),
-            LiveRequestCase("blank-id", """{"id":"","module":"toast","method":"showToast","args":[]}"""),
-            LiveRequestCase("numeric-id", """{"id":42,"module":"toast","method":"showToast","args":[]}"""),
-            LiveRequestCase("missing-module", """{"id":"missing-module","method":"showToast","args":[]}"""),
-            LiveRequestCase("numeric-module", """{"id":"numeric-module","module":7,"method":"showToast","args":[]}"""),
-            LiveRequestCase("missing-method", """{"id":"missing-method","module":"toast","args":[]}"""),
-            LiveRequestCase("boolean-method", """{"id":"boolean-method","module":"toast","method":true,"args":[]}"""),
-            LiveRequestCase(
-                "wrong-args-object",
-                """{"id":"wrong-args-object","module":"app","method":"startActivity","args":{"action":"android.intent.action.VIEW"}}""",
-                expectedModule = "app",
-                expectedMethod = "startActivity",
-            ),
-            LiveRequestCase(
-                "wrong-args-string",
-                """{"id":"wrong-args-string","module":"toast","method":"showToast","args":"hello"}""",
-                expectedModule = "toast",
-                expectedMethod = "showToast",
-            ),
-            LiveRequestCase(
-                "permissions-string",
-                """{"id":"permissions-string","module":"toast","method":"showToast","args":[],"permissions":"toast"}""",
-                expectedModule = "toast",
-                expectedMethod = "showToast",
-            ),
-            LiveRequestCase(
-                "permissions-blank",
-                """{"id":"permissions-blank","module":"toast","method":"showToast","args":[],"permissions":[""]}""",
-                expectedModule = "toast",
-                expectedMethod = "showToast",
-            ),
-            LiveRequestCase(
-                "permissions-number",
-                """{"id":"permissions-number","module":"toast","method":"showToast","args":[],"permissions":[1]}""",
-                expectedModule = "toast",
-                expectedMethod = "showToast",
-            ),
-            LiveRequestCase(
-                "timeout-zero",
-                """{"id":"timeout-zero","module":"toast","method":"showToast","args":[],"timeoutMs":0}""",
-                expectedModule = "toast",
-                expectedMethod = "showToast",
-            ),
-            LiveRequestCase(
-                "timeout-negative",
-                """{"id":"timeout-negative","module":"toast","method":"showToast","args":[],"timeoutMs":-1}""",
-                expectedModule = "toast",
-                expectedMethod = "showToast",
-            ),
-            LiveRequestCase(
-                "timeout-string",
-                """{"id":"timeout-string","module":"toast","method":"showToast","args":[],"timeoutMs":"fast"}""",
-                expectedModule = "toast",
-                expectedMethod = "showToast",
-            ),
-        )
-        val validCases = listOf(
-            LiveRequestCase(
-                "huge-args",
-                JSONObject()
-                    .put("id", "huge-args")
-                    .put("module", "fake")
-                    .put("method", "echo")
-                    .put("args", hugeArgs())
-                    .put("timeoutMs", 1000)
-                    .toString(),
-            ),
-            LiveRequestCase(
-                "too-many-args",
-                JSONObject()
-                    .put("id", "too-many-args")
-                    .put("module", "fake")
-                    .put("method", "many")
-                    .put("args", JSONArray().apply { repeat(160) { put(it) } })
-                    .put("timeoutMs", 1000)
-                    .toString(),
-            ),
-            LiveRequestCase(
-                "binary-like-args",
-                JSONObject()
-                    .put("id", "binary-like-args")
-                    .put("module", "fake")
-                    .put("method", "binary")
-                    .put("args", JSONArray().put(JSONObject().put("dataBase64", "AAH/").put("text", "line\\u0000value")))
-                    .put("timeoutMs", 1000)
-                    .toString(),
-            ),
-        )
-
-        (malformedCases + validCases).forEach { request ->
-            File(requestDir, "${request.fileId}.json").writeText(request.json)
-        }
-
+        val malformedCases = budget.selectCases(liveMalformedCases(budget), quick = 8, normal = NORMAL_LIVE_MALFORMED_CASES)
+        val validCases = budget.selectCases(liveValidCases(budget), quick = 1, normal = NORMAL_LIVE_VALID_CASES)
+        val responseTimeoutMs = budget.timeoutMs(2_000L, 3_000L, 5_000L)
         try {
+            (malformedCases + validCases).forEach { request ->
+                File(requestDir, "${request.fileId}.json").writeText(request.json)
+            }
             fixture.start()
             malformedCases.forEach { request ->
-                val response = NodeBridgeResponse.fromJson(waitForBridgeResponse(responseDir, request.fileId).readText())
+                val response = NodeBridgeResponse.fromJson(waitForBridgeResponse(responseDir, request.fileId, responseTimeoutMs).readText())
                 assertEquals(request.fileId, response.id)
                 assertFalse(response.ok)
                 assertEquals(NodeRuntimeErrorCodes.BRIDGE_INVALID_REQUEST, response.error?.code)
@@ -149,7 +60,7 @@ class NodeBridgeRpcFuzzerInstrumentationTest {
                 request.expectedMethod?.let { assertEquals(it, response.error?.method) }
             }
             validCases.forEach { request ->
-                val response = NodeBridgeResponse.fromJson(waitForBridgeResponse(responseDir, request.fileId).readText())
+                val response = NodeBridgeResponse.fromJson(waitForBridgeResponse(responseDir, request.fileId, responseTimeoutMs).readText())
                 assertEquals(request.fileId, response.id)
                 assertTrue(response.toJson(), response.ok)
                 assertEquals("ok", response.resultJson?.trim('"'))
@@ -161,6 +72,17 @@ class NodeBridgeRpcFuzzerInstrumentationTest {
                 "Live bridge request directory should be drained",
                 requestDir.listFiles { file -> file.isFile && file.name.endsWith(".json") }.orEmpty().isEmpty(),
             )
+        } catch (throwable: Throwable) {
+            NodeFuzzerSupport.reportFailure(
+                fuzzer = FUZZER_NAME,
+                budget = budget,
+                baseSeed = baseSeed,
+                caseCount = malformedCases.size + validCases.size,
+                replayClass = TEST_CLASS,
+                replayMethod = "liveBridgeMalformedRequestFuzzerReturnsStableErrorsAndCleansFiles",
+                throwable = throwable,
+            )
+            throw throwable
         } finally {
             fixture.stop()
         }
@@ -168,13 +90,17 @@ class NodeBridgeRpcFuzzerInstrumentationTest {
 
     @Test
     fun kotlinBridgeDispatchFuzzerReturnsStableProviderErrors() {
+        val budget = NodeFuzzerBudget.current()
+        val baseSeed = NodeFuzzerSupport.baseSeed(FUZZER_NAME, DEFAULT_BASE_SEED)
         val provider = AndroidNodeBridgeCapabilityProvider(context)
-        val requests = listOf(
+        val requests = budget.selectCases(listOf(
             NodeBridgeRequest("unknown-module", "missing", "method", "[]", 1000L),
             NodeBridgeRequest("unknown-method", "app", "execScript", "[]", 1000L),
             NodeBridgeRequest("wrong-arg-type", "app", "startActivity", "[42]", 1000L),
             NodeBridgeRequest("too-many-args", "app", "startActivity", "[{},1,2,3]", 1000L),
-        )
+            NodeBridgeRequest("extended-unknown-module", "missingExtended", "method", "[]", 1000L),
+            NodeBridgeRequest("extended-unknown-method", "dialogs", "missingExtended", "[]", 1000L),
+        ), quick = 2, normal = 4)
         val latch = CountDownLatch(requests.size)
         val responses = mutableListOf<NodeBridgeResponse>()
 
@@ -188,13 +114,26 @@ class NodeBridgeRpcFuzzerInstrumentationTest {
         }
 
         try {
-            assertTrue("Timed out waiting for bridge dispatch fuzzer responses", latch.await(2, TimeUnit.SECONDS))
+            assertTrue(
+                "Timed out waiting for bridge dispatch fuzzer responses",
+                latch.await(budget.timeoutMs(1_500L, 2_000L, 4_000L), TimeUnit.MILLISECONDS),
+            )
             val byId = synchronized(responses) { responses.associateBy { it.id } }
-            assertStableProviderError(byId.getValue("unknown-module"), "missing", "method")
-            assertStableProviderError(byId.getValue("unknown-method"), "app", "execScript")
-            assertStableProviderError(byId.getValue("wrong-arg-type"), "app", "startActivity")
-            assertStableProviderError(byId.getValue("too-many-args"), "app", "startActivity")
+            requests.forEach { request ->
+                assertStableProviderError(byId.getValue(request.id), request.module, request.method)
+            }
             assertTrue(provider.nativeDiagnostics()["embedded_script.bridge_resource_limit_rejection_count"] == "0")
+        } catch (throwable: Throwable) {
+            NodeFuzzerSupport.reportFailure(
+                fuzzer = FUZZER_NAME,
+                budget = budget,
+                baseSeed = baseSeed,
+                caseCount = requests.size,
+                replayClass = TEST_CLASS,
+                replayMethod = "kotlinBridgeDispatchFuzzerReturnsStableProviderErrors",
+                throwable = throwable,
+            )
+            throw throwable
         } finally {
             provider.destroy()
         }
@@ -204,10 +143,13 @@ class NodeBridgeRpcFuzzerInstrumentationTest {
     fun jsBridgeRpcFuzzerIgnoresMalformedResponsesAndCleansPendingMap() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node bridge RPC fuzzer")
 
-        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
-            """
-            "nodejs";
-            (async function main() {
+        val budget = NodeFuzzerBudget.current()
+        val baseSeed = NodeFuzzerSupport.baseSeed(FUZZER_NAME, DEFAULT_BASE_SEED)
+        try {
+            val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+                """
+                "nodejs";
+                (async function main() {
               const bridge = require("autojs6:bridge");
               function fail(message) {
                 throw new Error(message);
@@ -310,25 +252,56 @@ class NodeBridgeRpcFuzzerInstrumentationTest {
               codes.push(await destroyPromise);
               if (bridge.__test.pendingCount() !== 0) fail("destroy did not clean pending");
 
+              console.log("bridge.rpc.fuzzer.seed=$baseSeed");
+              console.log("bridge.rpc.fuzzer.budget=${budget.id}");
               console.log("bridge.rpc.fuzzer.invalid=" + ignored + "/" + thrown + "/" + falseBeforeCleanup);
               console.log("bridge.rpc.fuzzer.codes=" + codes.join("|"));
               console.log("bridge.rpc.fuzzer.requests=" + requests.length);
               console.log("bridge.rpc.fuzzer.pending=" + bridge.__test.pendingCount());
             })();
-            """.trimIndent(),
-            "<embedded-autojs-bridge-rpc-fuzzer-source.js>",
-            timeoutMs = 10_000L,
-        )
+                """.trimIndent(),
+                "<embedded-autojs-bridge-rpc-fuzzer-source.js>",
+                timeoutMs = budget.timeoutMs(7_000L, 10_000L, 15_000L),
+            )
 
-        NodeEmbeddedTestHarness.assertSucceeded("bridge RPC fuzzer", result)
-        assertTrue(result.stdout.contains("bridge.rpc.fuzzer.invalid=9/0/3"))
-        assertTrue(
-            result.stdout.contains(
-                "bridge.rpc.fuzzer.codes=ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED|ERR_AUTOJS6_BRIDGE_INVALID_REQUEST|ERR_AUTOJS6_BRIDGE_INVALID_REQUEST|ERR_AUTOJS6_BRIDGE_PROCESS_DEAD|ERR_AUTOJS6_BRIDGE_PROCESS_DEAD|ERR_AUTOJS6_BRIDGE_PROCESS_DEAD|ERR_AUTOJS6_BRIDGE_PROCESS_DEAD",
-            ),
-        )
-        assertTrue(result.stdout.contains("bridge.rpc.fuzzer.requests=5"))
-        assertTrue(result.stdout.contains("bridge.rpc.fuzzer.pending=0"))
+            if (!result.succeeded || result.timedOut) {
+                NodeFuzzerSupport.reportFailure(
+                    fuzzer = FUZZER_NAME,
+                    budget = budget,
+                    baseSeed = baseSeed,
+                    caseCount = JS_BRIDGE_CASE_COUNT,
+                    replayClass = TEST_CLASS,
+                    replayMethod = "jsBridgeRpcFuzzerIgnoresMalformedResponsesAndCleansPendingMap",
+                    failure = JSONObject()
+                        .put("phase", "script-result")
+                        .put("errorCode", result.errorCode ?: JSONObject.NULL)
+                        .put("errorMessage", result.errorMessage ?: JSONObject.NULL)
+                        .put("timedOut", result.timedOut),
+                )
+            }
+            NodeEmbeddedTestHarness.assertSucceeded("bridge RPC fuzzer", result)
+            assertTrue(result.stdout.contains("bridge.rpc.fuzzer.seed=$baseSeed"))
+            assertTrue(result.stdout.contains("bridge.rpc.fuzzer.budget=${budget.id}"))
+            assertTrue(result.stdout.contains("bridge.rpc.fuzzer.invalid=9/0/3"))
+            assertTrue(
+                result.stdout.contains(
+                    "bridge.rpc.fuzzer.codes=ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED|ERR_AUTOJS6_BRIDGE_INVALID_REQUEST|ERR_AUTOJS6_BRIDGE_INVALID_REQUEST|ERR_AUTOJS6_BRIDGE_PROCESS_DEAD|ERR_AUTOJS6_BRIDGE_PROCESS_DEAD|ERR_AUTOJS6_BRIDGE_PROCESS_DEAD|ERR_AUTOJS6_BRIDGE_PROCESS_DEAD",
+                ),
+            )
+            assertTrue(result.stdout.contains("bridge.rpc.fuzzer.requests=5"))
+            assertTrue(result.stdout.contains("bridge.rpc.fuzzer.pending=0"))
+        } catch (throwable: Throwable) {
+            NodeFuzzerSupport.reportFailure(
+                fuzzer = FUZZER_NAME,
+                budget = budget,
+                baseSeed = baseSeed,
+                caseCount = JS_BRIDGE_CASE_COUNT,
+                replayClass = TEST_CLASS,
+                replayMethod = "jsBridgeRpcFuzzerIgnoresMalformedResponsesAndCleansPendingMap",
+                throwable = throwable,
+            )
+            throw throwable
+        }
     }
 
     private fun assertStableProviderError(
@@ -340,6 +313,141 @@ class NodeBridgeRpcFuzzerInstrumentationTest {
         assertEquals(NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED, response.error?.code)
         assertEquals(module, response.error?.module)
         assertEquals(method, response.error?.method)
+    }
+
+    private fun liveMalformedCases(budget: NodeFuzzerBudget): List<LiveRequestCase> {
+        val baseCases = listOf(
+            LiveRequestCase("invalid-json", "{"),
+            LiveRequestCase("top-level-array", "[]"),
+            LiveRequestCase("missing-id", """{"module":"toast","method":"showToast","args":[]}"""),
+            LiveRequestCase("blank-id", """{"id":"","module":"toast","method":"showToast","args":[]}"""),
+            LiveRequestCase("numeric-id", """{"id":42,"module":"toast","method":"showToast","args":[]}"""),
+            LiveRequestCase("missing-module", """{"id":"missing-module","method":"showToast","args":[]}"""),
+            LiveRequestCase("numeric-module", """{"id":"numeric-module","module":7,"method":"showToast","args":[]}"""),
+            LiveRequestCase("missing-method", """{"id":"missing-method","module":"toast","args":[]}"""),
+            LiveRequestCase("boolean-method", """{"id":"boolean-method","module":"toast","method":true,"args":[]}"""),
+            LiveRequestCase(
+                "wrong-args-object",
+                """{"id":"wrong-args-object","module":"app","method":"startActivity","args":{"action":"android.intent.action.VIEW"}}""",
+                expectedModule = "app",
+                expectedMethod = "startActivity",
+            ),
+            LiveRequestCase(
+                "wrong-args-string",
+                """{"id":"wrong-args-string","module":"toast","method":"showToast","args":"hello"}""",
+                expectedModule = "toast",
+                expectedMethod = "showToast",
+            ),
+            LiveRequestCase(
+                "permissions-string",
+                """{"id":"permissions-string","module":"toast","method":"showToast","args":[],"permissions":"toast"}""",
+                expectedModule = "toast",
+                expectedMethod = "showToast",
+            ),
+            LiveRequestCase(
+                "permissions-blank",
+                """{"id":"permissions-blank","module":"toast","method":"showToast","args":[],"permissions":[""]}""",
+                expectedModule = "toast",
+                expectedMethod = "showToast",
+            ),
+            LiveRequestCase(
+                "permissions-number",
+                """{"id":"permissions-number","module":"toast","method":"showToast","args":[],"permissions":[1]}""",
+                expectedModule = "toast",
+                expectedMethod = "showToast",
+            ),
+            LiveRequestCase(
+                "timeout-zero",
+                """{"id":"timeout-zero","module":"toast","method":"showToast","args":[],"timeoutMs":0}""",
+                expectedModule = "toast",
+                expectedMethod = "showToast",
+            ),
+            LiveRequestCase(
+                "timeout-negative",
+                """{"id":"timeout-negative","module":"toast","method":"showToast","args":[],"timeoutMs":-1}""",
+                expectedModule = "toast",
+                expectedMethod = "showToast",
+            ),
+            LiveRequestCase(
+                "timeout-string",
+                """{"id":"timeout-string","module":"toast","method":"showToast","args":[],"timeoutMs":"fast"}""",
+                expectedModule = "toast",
+                expectedMethod = "showToast",
+            ),
+        )
+        if (budget != NodeFuzzerBudget.EXTENDED) {
+            return baseCases
+        }
+        return baseCases + listOf(
+            LiveRequestCase("empty-object", "{}"),
+            LiveRequestCase("null-id", """{"id":null,"module":"toast","method":"showToast","args":[]}"""),
+            LiveRequestCase(
+                "args-number",
+                """{"id":"args-number","module":"toast","method":"showToast","args":7}""",
+                expectedModule = "toast",
+                expectedMethod = "showToast",
+            ),
+            LiveRequestCase(
+                "permissions-object",
+                """{"id":"permissions-object","module":"toast","method":"showToast","args":[],"permissions":{}}""",
+                expectedModule = "toast",
+                expectedMethod = "showToast",
+            ),
+            LiveRequestCase(
+                "timeout-object",
+                """{"id":"timeout-object","module":"toast","method":"showToast","args":[],"timeoutMs":{}}""",
+                expectedModule = "toast",
+                expectedMethod = "showToast",
+            ),
+        )
+    }
+
+    private fun liveValidCases(budget: NodeFuzzerBudget): List<LiveRequestCase> {
+        val baseCases = listOf(
+            LiveRequestCase(
+                "huge-args",
+                JSONObject()
+                    .put("id", "huge-args")
+                    .put("module", "fake")
+                    .put("method", "echo")
+                    .put("args", hugeArgs())
+                    .put("timeoutMs", 1000)
+                    .toString(),
+            ),
+            LiveRequestCase(
+                "too-many-args",
+                JSONObject()
+                    .put("id", "too-many-args")
+                    .put("module", "fake")
+                    .put("method", "many")
+                    .put("args", JSONArray().apply { repeat(160) { put(it) } })
+                    .put("timeoutMs", 1000)
+                    .toString(),
+            ),
+            LiveRequestCase(
+                "binary-like-args",
+                JSONObject()
+                    .put("id", "binary-like-args")
+                    .put("module", "fake")
+                    .put("method", "binary")
+                    .put("args", JSONArray().put(JSONObject().put("dataBase64", "AAH/").put("text", "line\\u0000value")))
+                    .put("timeoutMs", 1000)
+                    .toString(),
+            ),
+        )
+        if (budget != NodeFuzzerBudget.EXTENDED) {
+            return baseCases
+        }
+        return baseCases + LiveRequestCase(
+            "nested-valid-args",
+            JSONObject()
+                .put("id", "nested-valid-args")
+                .put("module", "fake")
+                .put("method", "nested")
+                .put("args", JSONArray().put(JSONObject().put("nested", JSONArray().put(true).put(JSONObject().put("n", 1)))))
+                .put("timeoutMs", 1000)
+                .toString(),
+        )
     }
 
     private fun hugeArgs(): JSONArray {
@@ -390,9 +498,9 @@ class NodeBridgeRpcFuzzerInstrumentationTest {
         )
     }
 
-    private fun waitForBridgeResponse(responseDir: File, requestId: String): File {
+    private fun waitForBridgeResponse(responseDir: File, requestId: String, timeoutMs: Long): File {
         val responseFile = File(responseDir, "$requestId.json")
-        val deadline = SystemClock.uptimeMillis() + 3_000L
+        val deadline = SystemClock.uptimeMillis() + timeoutMs
         while (!responseFile.isFile && SystemClock.uptimeMillis() < deadline) {
             SystemClock.sleep(25L)
         }
@@ -419,4 +527,13 @@ class NodeBridgeRpcFuzzerInstrumentationTest {
         val start: () -> Unit,
         val stop: () -> Unit,
     )
+
+    companion object {
+        private const val TEST_CLASS = "org.autojs.autojs.engine.NodeBridgeRpcFuzzerInstrumentationTest"
+        private const val FUZZER_NAME = "bridge-rpc"
+        private const val DEFAULT_BASE_SEED = 44040103L
+        private const val NORMAL_LIVE_MALFORMED_CASES = 17
+        private const val NORMAL_LIVE_VALID_CASES = 3
+        private const val JS_BRIDGE_CASE_COUNT = 17
+    }
 }

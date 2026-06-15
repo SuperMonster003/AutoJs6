@@ -1,6 +1,7 @@
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import java.io.File
+import java.security.MessageDigest
 import java.time.ZonedDateTime
 
 private fun nodeDoctorJson(value: Any?): String =
@@ -185,6 +186,51 @@ private fun nodeNightlyCommandText(workingDir: File, vararg command: String): St
         val exitCode = process.waitFor()
         output.trim().takeIf { exitCode == 0 && it.isNotEmpty() }
     }.getOrNull()
+
+private val nodeFuzzerSeedPrefix = "autojs6.fuzzer.seed="
+
+private fun nodeFuzzerSha256(text: String): String =
+    MessageDigest.getInstance("SHA-256")
+        .digest(text.toByteArray(Charsets.UTF_8))
+        .joinToString("") { "%02x".format(it) }
+
+private fun nodeFuzzerSafeFilePart(value: Any?): String =
+    value?.toString()
+        ?.replace(Regex("""[^A-Za-z0-9_.-]+"""), "-")
+        ?.trim('-')
+        ?.takeIf { it.isNotBlank() }
+        ?: "unknown"
+
+private fun nodeFuzzerDecodeXmlText(value: String): String =
+    value
+        .replace("&quot;", "\"")
+        .replace("&apos;", "'")
+        .replace("&lt;", "<")
+        .replace("&gt;", ">")
+        .replace("&amp;", "&")
+
+private fun nodeFuzzerSeedJsonFromLine(line: String): String? {
+    val markerIndex = line.indexOf(nodeFuzzerSeedPrefix)
+    if (markerIndex < 0) {
+        return null
+    }
+    val decoded = nodeFuzzerDecodeXmlText(line.substring(markerIndex + nodeFuzzerSeedPrefix.length).trim())
+    val end = decoded.lastIndexOf('}')
+    return decoded.takeIf { end >= 0 }?.substring(0, end + 1)
+}
+
+private fun nodeFuzzerSeedJsons(file: File): List<String> =
+    runCatching {
+        file.readLines(Charsets.UTF_8).mapNotNull(::nodeFuzzerSeedJsonFromLine)
+    }.getOrElse { emptyList() }
+
+private fun nodeFuzzerSeedFileName(seed: Map<*, *>, json: String): String {
+    val fuzzer = nodeFuzzerSafeFilePart(seed["fuzzer"])
+    val budget = nodeFuzzerSafeFilePart(seed["budget"])
+    val baseSeed = nodeFuzzerSafeFilePart(seed["baseSeed"])
+    val hash = nodeFuzzerSha256(json).take(12)
+    return "$fuzzer-$budget-$baseSeed-$hash.json"
+}
 
 val embeddedNodeDoctorReport = tasks.register("embeddedNodeDoctorReport") {
     group = "verification"
@@ -439,6 +485,58 @@ val embeddedNodeDoctorReport = tasks.register("embeddedNodeDoctorReport") {
     }
 }
 
+val collectNodeFuzzerSeeds = tasks.register("collectNodeFuzzerSeeds") {
+    group = "verification"
+    description = "Collects Embedded Node fuzzer failure seed JSON lines from connected-test reports."
+
+    val seedDirProvider = rootProject.layout.buildDirectory.dir("reports/nodejs/fuzz-seeds")
+    outputs.dir(seedDirProvider)
+    outputs.upToDateWhen { false }
+
+    doLast {
+        val searchRoots = listOf(
+            layout.buildDirectory.dir("outputs/androidTest-results").get().asFile,
+            layout.buildDirectory.dir("reports/androidTests").get().asFile,
+        )
+        val seedDir = seedDirProvider.get().asFile
+        seedDir.mkdirs()
+
+        var discovered = 0
+        var written = 0
+        val parseFailures = mutableListOf<String>()
+        searchRoots
+            .filter(File::isDirectory)
+            .flatMap { root -> root.walkTopDown().filter(File::isFile).toList() }
+            .filter { it.extension in setOf("xml", "txt", "log") }
+            .forEach { file ->
+                nodeFuzzerSeedJsons(file).forEach { seedJson ->
+                    discovered += 1
+                    val parsed = runCatching { JsonSlurper().parseText(seedJson) as? Map<*, *> }.getOrNull()
+                    if (parsed == null) {
+                        parseFailures += file.nodeDoctorPathRelativeTo(rootProject.projectDir)
+                        return@forEach
+                    }
+                    val enriched = LinkedHashMap<Any?, Any?>(parsed)
+                    enriched["sourceReport"] = file.nodeDoctorPathRelativeTo(rootProject.projectDir)
+                    val target = seedDir.resolve(nodeFuzzerSeedFileName(parsed, seedJson))
+                    target.writeText(nodeDoctorJson(enriched) + "\n")
+                    written += 1
+                }
+            }
+
+        if (parseFailures.isNotEmpty()) {
+            logger.warn("Embedded Node fuzzer seed parse failures: ${parseFailures.joinToString()}")
+        }
+        logger.lifecycle(
+            "Embedded Node fuzzer seed collection complete: discovered=$discovered written=$written dir=${seedDir.absolutePath}",
+        )
+    }
+}
+
+tasks.matching { it.name == "connectedAppDebugAndroidTest" }.configureEach {
+    finalizedBy(collectNodeFuzzerSeeds)
+}
+
 tasks.matching { it.name == "verifyEmbeddedNodeDebug" }.configureEach {
     dependsOn(embeddedNodeDoctorReport)
 }
@@ -448,6 +546,7 @@ val generateNodeNightlyReport = tasks.register("generateNodeNightlyReport") {
     description = "Writes a single Embedded Node nightly JSON/Markdown report from available build and device reports."
 
     dependsOn(
+        collectNodeFuzzerSeeds,
         embeddedNodeDoctorReport,
         "generateNodeProfileReleaseManifest",
     )

@@ -15,6 +15,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `:app:verifyNodePrGate`
 - [ ] release candidates use `:app:verifyNodeReleaseGate` with `autojs.nodejs.test.deviceProfile=oneplus` or `full`
 - [ ] `:app:generateNodeNightlyReport` output attached when publishing nightly or release-candidate results
+- [ ] fuzzer failures, if any, have seed JSON files under `build/reports/nodejs/fuzz-seeds/` and replay with `:app:replayNodeFuzzerSeed`
 - [ ] rollback path reviewed against [ROLLBACK_PLAYBOOK.md](ROLLBACK_PLAYBOOK.md)
 
 ## Device Tests

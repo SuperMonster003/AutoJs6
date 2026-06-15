@@ -36,6 +36,7 @@ val buildTypeRelease = "release"
 val buildActionAssemble = "assemble"
 
 val taskNames: List<String> = gradle.startParameter.taskNames
+val isNodeFuzzerSeedReplayRequested = taskNames.any { it.contains("replayNodeFuzzerSeed", ignoreCase = true) }
 val isAppAssembleTaskRequested = taskNames.any { it.contains(Regex("^(:?$flavorNameApp:)?$buildActionAssemble", IGNORE_CASE)) }
 val isInrtAssembleTaskRequested = taskNames.any { it.contains(Regex("^(:?$flavorNameApp:)?$buildActionAssemble$flavorNameInrt", IGNORE_CASE)) }
 val isInrtTaskRequested = taskNames.any { it.contains(flavorNameInrt, true) }
@@ -138,6 +139,45 @@ val nodeJsTestDeviceProfile = providers.gradleProperty("autojs.nodejs.test.devic
             )
         }
     }
+val nodeJsFuzzerSeedFile = providers.gradleProperty("autojs.nodejs.fuzzerSeedFile").orNull
+    ?.trim()
+    ?.takeIf { it.isNotEmpty() }
+val nodeJsFuzzerSeedFileText = nodeJsFuzzerSeedFile
+    ?.let { rootProject.file(it) }
+    ?.takeIf { it.isFile }
+    ?.readText()
+private fun String.nodeJsSeedJsonString(name: String): String? =
+    Regex(""""$name"\s*:\s*"([^"]*)"""").find(this)?.groupValues?.get(1)
+private fun String.nodeJsSeedJsonLong(name: String): String? =
+    Regex(""""$name"\s*:\s*([0-9]+)""").find(this)?.groupValues?.get(1)
+private fun normalizeNodeJsFuzzerBudget(requested: String): String =
+    requested.trim().lowercase().let { normalized ->
+        when (normalized) {
+            "quick", "normal", "extended" -> normalized
+            else -> throw GradleException(
+                "Unsupported Embedded Node fuzzer budget '$requested'. Use quick, normal, or extended."
+            )
+        }
+    }
+val nodeJsFuzzerReplayClass = nodeJsFuzzerSeedFileText?.nodeJsSeedJsonString("replayClass")
+val nodeJsFuzzerReplayMethod = nodeJsFuzzerSeedFileText?.nodeJsSeedJsonString("replayMethod")
+    ?.takeUnless { it == "null" || it.isBlank() }
+val nodeJsFuzzerReplayBudget = nodeJsFuzzerSeedFileText?.nodeJsSeedJsonString("budget")
+val nodeJsFuzzerReplaySeed = nodeJsFuzzerSeedFileText?.nodeJsSeedJsonLong("baseSeed")
+val nodeJsFuzzerDefaultBudget = when {
+    taskNames.any { it.contains("verifyNodeNightlyGate", ignoreCase = true) || it.contains("verifyNodeReleaseGate", ignoreCase = true) } -> "extended"
+    nodeJsTestDeviceProfile == "full" -> "extended"
+    nodeJsTestDeviceProfile in setOf("emulator", "smoke") -> "quick"
+    else -> "normal"
+}
+val nodeJsFuzzerBudget = normalizeNodeJsFuzzerBudget(
+    providers.gradleProperty("autojs.nodejs.fuzzerBudget").orNull
+        ?: nodeJsFuzzerReplayBudget
+        ?: nodeJsFuzzerDefaultBudget
+)
+val nodeJsFuzzerReplayRunnerClass = nodeJsFuzzerReplayClass?.let { replayClass ->
+    nodeJsFuzzerReplayMethod?.let { "$replayClass#$it" } ?: replayClass
+}
 val nodeJsTestDeviceProfileClasses = when (nodeJsTestDeviceProfile) {
     "oneplus" -> listOf(
         "org.autojs.autojs.engine.EmbeddedScriptMvpInstrumentationTest",
@@ -166,6 +206,8 @@ val nodeJsTestDeviceProfileClasses = when (nodeJsTestDeviceProfile) {
         "org.autojs.autojs.engine.NodeEmbeddedLifecycleStressInstrumentationTest",
         "org.autojs.autojs.engine.NodeAutoJsBridgeInstrumentationTest",
         "org.autojs.autojs.engine.NodeBridgeRpcFuzzerInstrumentationTest",
+        "org.autojs.autojs.engine.NodeResolverFuzzerInstrumentationTest",
+        "org.autojs.autojs.engine.NodeScopedFsFuzzerInstrumentationTest",
         "org.autojs.autojs.engine.NodeSecurityRegressionInstrumentationTest",
         "org.autojs.autojs.engine.NodeNativeAddonPolicyInstrumentationTest",
         "org.autojs.autojs.engine.NodeCompatCorpusInstrumentationTest",
@@ -634,12 +676,16 @@ android {
         versionName = versions.appVersionName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        if (nodeJsTestDeviceProfile != null &&
-            providers.gradleProperty("android.testInstrumentationRunnerArguments.class").orNull.isNullOrBlank()
-        ) {
+        val explicitInstrumentationClass =
+            providers.gradleProperty("android.testInstrumentationRunnerArguments.class").orNull.isNullOrBlank().not()
+        if (nodeJsFuzzerReplayRunnerClass != null && !explicitInstrumentationClass) {
+            testInstrumentationRunnerArguments["class"] = nodeJsFuzzerReplayRunnerClass
+        } else if (nodeJsTestDeviceProfile != null && !explicitInstrumentationClass) {
             testInstrumentationRunnerArguments["class"] = nodeJsTestDeviceProfileClasses.joinToString(",")
             testInstrumentationRunnerArguments["autojs.nodejs.test.deviceProfile"] = nodeJsTestDeviceProfile
         }
+        testInstrumentationRunnerArguments["autojs.nodejs.fuzzerBudget"] = nodeJsFuzzerBudget
+        nodeJsFuzzerReplaySeed?.let { testInstrumentationRunnerArguments["autojs.nodejs.fuzzerSeed"] = it }
 
         multiDexEnabled = true
 
@@ -1017,12 +1063,49 @@ tasks.register("printNodeTestDeviceProfile") {
 
     doLast {
         println("Embedded Node test device profile: ${nodeJsTestDeviceProfile ?: "unset"}")
+        println("Embedded Node fuzzer budget: $nodeJsFuzzerBudget")
+        if (nodeJsFuzzerSeedFile != null) {
+            println("Embedded Node fuzzer seed file: $nodeJsFuzzerSeedFile")
+            println("Embedded Node fuzzer replay class: ${nodeJsFuzzerReplayRunnerClass ?: "unavailable"}")
+            println("Embedded Node fuzzer replay seed: ${nodeJsFuzzerReplaySeed ?: "unavailable"}")
+        }
         if (nodeJsTestDeviceProfileClasses.isEmpty()) {
             println("Embedded Node selected instrumentation classes: none; pass -Pautojs.nodejs.test.deviceProfile=oneplus|emulator|smoke|full")
         } else {
             println("Embedded Node selected instrumentation classes:")
             nodeJsTestDeviceProfileClasses.forEach { className ->
                 println("  $className")
+            }
+        }
+    }
+}
+
+tasks.register("replayNodeFuzzerSeed") {
+    group = "verification"
+    description = "Replays a saved Embedded Node fuzzer seed with connected Android instrumentation."
+
+    dependsOn("connectedAppDebugAndroidTest")
+
+    doFirst {
+        val seedFile = nodeJsFuzzerSeedFile
+            ?: throw GradleException("Pass -Pautojs.nodejs.fuzzerSeedFile=<build/reports/nodejs/fuzz-seeds/*.json>.")
+        if (nodeJsFuzzerReplayRunnerClass.isNullOrBlank() || nodeJsFuzzerReplaySeed.isNullOrBlank()) {
+            throw GradleException("Fuzzer seed file '$seedFile' is missing replayClass/baseSeed fields.")
+        }
+        println("Replaying Embedded Node fuzzer seed: $seedFile")
+        println("  class: $nodeJsFuzzerReplayRunnerClass")
+        println("  budget: $nodeJsFuzzerBudget")
+        println("  seed: $nodeJsFuzzerReplaySeed")
+    }
+}
+
+if (isNodeFuzzerSeedReplayRequested) {
+    tasks.matching { it.name == "connectedAppDebugAndroidTest" }.configureEach {
+        doFirst {
+            val seedFile = nodeJsFuzzerSeedFile
+                ?: throw GradleException("Pass -Pautojs.nodejs.fuzzerSeedFile=<build/reports/nodejs/fuzz-seeds/*.json>.")
+            if (nodeJsFuzzerReplayRunnerClass.isNullOrBlank() || nodeJsFuzzerReplaySeed.isNullOrBlank()) {
+                throw GradleException("Fuzzer seed file '$seedFile' is missing replayClass/baseSeed fields.")
             }
         }
     }

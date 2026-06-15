@@ -116,6 +116,25 @@ Focused bridge RPC fuzzer:
 
 This suite fuzzes bridge request parsing, live file transport dispatch, Android provider unavailable/error paths, JavaScript `autojs6:bridge` malformed response handling, and pending-call cleanup. It covers missing or wrongly typed `id`/`module`/`method`, invalid JSON, non-array `args`, malformed `permissions`, invalid `timeoutMs`, huge arguments, too many arguments, binary-like payloads, unknown modules, unknown methods, same-id malformed responses, service destroy rejection, and fake-provider mode.
 
+Fuzzer budgets are controlled by `autojs.nodejs.fuzzerBudget`:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeResolverFuzzerInstrumentationTest" "-Pautojs.nodejs.fuzzerBudget=quick"
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeResolverFuzzerInstrumentationTest" "-Pautojs.nodejs.fuzzerBudget=extended"
+```
+
+Supported values are `quick`, `normal`, and `extended`. `full` and nightly/release gates default to `extended`; emulator and smoke profiles default to `quick`; focused runs default to `normal` unless the property is set. Fuzzer failures print an `autojs6.fuzzer.seed=` JSON line, and `collectNodeFuzzerSeeds` copies parsed seed files to:
+
+```text
+build/reports/nodejs/fuzz-seeds/
+```
+
+Replay a saved seed with:
+
+```powershell
+.\gradlew.bat --console=plain :app:replayNodeFuzzerSeed "-Pautojs.nodejs.fuzzerSeedFile=build/reports/nodejs/fuzz-seeds/<seed>.json"
+```
+
 Current compatibility corpus instrumentation:
 
 ```powershell

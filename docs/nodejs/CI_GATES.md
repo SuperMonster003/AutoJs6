@@ -63,6 +63,8 @@ Scope:
 - fuzzers and real npm corpus through the selected device profile
 
 The task fails immediately if `autojs.nodejs.test.deviceProfile` is not `oneplus` or `full`.
+When the requested task is `verifyNodeNightlyGate` or `verifyNodeReleaseGate`, fuzzer instrumentation defaults to
+`autojs.nodejs.fuzzerBudget=extended` unless the property is explicitly overridden.
 
 After nightly or release gates finish, `generateNodeNightlyReport` writes:
 
@@ -72,6 +74,7 @@ build/reports/nodejs/nightly-report.md
 ```
 
 The report summarizes commit state, device/profile, latest connected-test XML counts and failures, perf and memory reports, fuzzer seeds, packaged smoke readiness, native hashes, and experimental feature flags.
+Fuzzer failure seeds are collected from connected-test XML into `build/reports/nodejs/fuzz-seeds/` and can be replayed with `:app:replayNodeFuzzerSeed`.
 
 ## Release Gate
 

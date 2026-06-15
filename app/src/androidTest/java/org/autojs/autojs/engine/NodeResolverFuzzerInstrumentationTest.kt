@@ -30,27 +30,50 @@ class NodeResolverFuzzerInstrumentationTest {
     fun packageExportsImportsResolverFuzzerDoesNotCrashOrEscape() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node resolver fuzzer")
 
+        val budget = NodeFuzzerBudget.current()
+        val baseSeed = NodeFuzzerSupport.baseSeed(FUZZER_NAME, DEFAULT_BASE_SEED)
+        val caseCount = budget.caseCount(
+            quick = QUICK_CASE_COUNT,
+            normal = NORMAL_CASE_COUNT,
+            extended = EXTENDED_CASE_COUNT,
+        )
         val workDir = File(context.cacheDir, "node-resolver-fuzzer-${System.nanoTime()}").apply {
             deleteRecursively()
             check(mkdirs()) { "Failed to create resolver fuzzer work dir: $absolutePath" }
         }
         try {
-            val cases = (0 until CASE_COUNT).map { index ->
-                generateFuzzCase(index, BASE_SEED + (index * CASE_SEED_STEP))
+            val cases = (0 until caseCount).map { index ->
+                generateFuzzCase(index, baseSeed + (index * CASE_SEED_STEP))
             }
             writeEscapeFixtures(workDir)
             cases.forEach { fuzzCase -> writeFuzzPackage(workDir, fuzzCase) }
 
-            val source = buildRunnerSource(cases)
+            val source = buildRunnerSource(cases, baseSeed, budget)
             val result = NodeEmbeddedTestHarness.runEmbeddedScript(
                 source = source,
                 sourceName = "<node-resolver-fuzzer.js>",
                 workingDirectory = workDir,
-                timeoutMs = 20_000L,
+                timeoutMs = budget.timeoutMs(10_000L, 20_000L, 45_000L),
             )
 
+            if (!result.succeeded || result.timedOut) {
+                NodeFuzzerSupport.reportFailure(
+                    fuzzer = FUZZER_NAME,
+                    budget = budget,
+                    baseSeed = baseSeed,
+                    caseCount = caseCount,
+                    replayClass = TEST_CLASS,
+                    replayMethod = "packageExportsImportsResolverFuzzerDoesNotCrashOrEscape",
+                    failure = JSONObject()
+                        .put("phase", "script-result")
+                        .put("errorCode", result.errorCode ?: JSONObject.NULL)
+                        .put("errorMessage", result.errorMessage ?: JSONObject.NULL)
+                        .put("timedOut", result.timedOut),
+                )
+            }
             NodeEmbeddedTestHarness.assertSucceeded("Node resolver fuzzer", result)
-            assertTrue(result.stdout, result.stdout.contains("resolver.fuzzer.seed=$BASE_SEED"))
+            assertTrue(result.stdout, result.stdout.contains("resolver.fuzzer.seed=$baseSeed"))
+            assertTrue(result.stdout, result.stdout.contains("resolver.fuzzer.budget=${budget.id}"))
             assertTrue(result.stdout, result.stdout.contains("resolver.fuzzer.done=true"))
             assertFalse(
                 NodeEmbeddedTestHarness.describeResult("resolver fuzzer loaded escape marker", result),
@@ -65,12 +88,34 @@ class NodeResolverFuzzerInstrumentationTest {
             val expectedRecords = cases.fold(0) { total, fuzzCase ->
                 total + fuzzCase.exportRequests.size + fuzzCase.importRequests.size
             }
-            val failureContext = buildSummaryFailureContext(summary, result)
-            assertEquals(failureContext, CASE_COUNT, summary.getInt("cases"))
+            val failureContext = buildSummaryFailureContext(summary, result, baseSeed)
+            if (!summary.isNull("firstFailure")) {
+                NodeFuzzerSupport.reportFailure(
+                    fuzzer = FUZZER_NAME,
+                    budget = budget,
+                    baseSeed = baseSeed,
+                    caseCount = caseCount,
+                    replayClass = TEST_CLASS,
+                    replayMethod = "packageExportsImportsResolverFuzzerDoesNotCrashOrEscape",
+                    failure = summary.getJSONObject("firstFailure"),
+                )
+            }
+            assertEquals(failureContext, caseCount, summary.getInt("cases"))
             assertEquals(failureContext, expectedRecords, summary.getInt("attempts"))
             assertEquals(failureContext, 0, summary.getInt("escapes"))
             assertEquals(failureContext, 0, summary.getInt("unstableErrors"))
             assertTrue(failureContext, summary.isNull("firstFailure"))
+        } catch (throwable: Throwable) {
+            NodeFuzzerSupport.reportFailure(
+                fuzzer = FUZZER_NAME,
+                budget = budget,
+                baseSeed = baseSeed,
+                caseCount = caseCount,
+                replayClass = TEST_CLASS,
+                replayMethod = "packageExportsImportsResolverFuzzerDoesNotCrashOrEscape",
+                throwable = throwable,
+            )
+            throw throwable
         } finally {
             workDir.deleteRecursively()
         }
@@ -240,7 +285,7 @@ class NodeResolverFuzzerInstrumentationTest {
         """.trimIndent()
     }
 
-    private fun buildRunnerSource(cases: List<FuzzCase>): String {
+    private fun buildRunnerSource(cases: List<FuzzCase>, baseSeed: Long, budget: NodeFuzzerBudget): String {
         val casesJson = JSONArray()
         cases.forEach { fuzzCase ->
             casesJson.put(
@@ -266,7 +311,8 @@ class NodeResolverFuzzerInstrumentationTest {
                 unstableErrors: 0,
                 firstFailure: null
               };
-              console.log("resolver.fuzzer.seed=$BASE_SEED");
+              console.log("resolver.fuzzer.seed=$baseSeed");
+              console.log("resolver.fuzzer.budget=${budget.id}");
               console.log("resolver.fuzzer.cases=" + cases.length);
               function codeOf(error) {
                 return String(error && (error.autojs6Code || error.code || error.name || ""));
@@ -376,10 +422,11 @@ class NodeResolverFuzzerInstrumentationTest {
     private fun buildSummaryFailureContext(
         summary: JSONObject,
         result: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult,
+        baseSeed: Long,
     ): String {
         return buildString {
             appendLine("resolver fuzzer failed")
-            appendLine("baseSeed=$BASE_SEED")
+            appendLine("baseSeed=$baseSeed")
             appendLine("summary=${summary.toString(2)}")
             appendLine(NodeEmbeddedTestHarness.describeResult("resolver fuzzer result", result))
         }
@@ -460,9 +507,13 @@ class NodeResolverFuzzerInstrumentationTest {
     )
 
     companion object {
-        private const val BASE_SEED = 108820612L
+        private const val TEST_CLASS = "org.autojs.autojs.engine.NodeResolverFuzzerInstrumentationTest"
+        private const val FUZZER_NAME = "resolver"
+        private const val DEFAULT_BASE_SEED = 108820612L
         private const val CASE_SEED_STEP = 104729L
-        private const val CASE_COUNT = 21
+        private const val QUICK_CASE_COUNT = 7
+        private const val NORMAL_CASE_COUNT = 21
+        private const val EXTENDED_CASE_COUNT = 63
         private const val SUMMARY_PREFIX = "resolver.fuzzer.summary="
         private const val ESCAPE_MARKER = "AUTOJS6_RESOLVER_FUZZ_ESCAPE_LOADED"
 
