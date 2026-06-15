@@ -37,6 +37,7 @@ The snapshot includes:
 - file size and large-file policy
 - TextMirror revision
 - ready/state/heartbeat timestamps
+- viewport policy, host IME event, and ACE resize schedule/dispatch/complete fields
 
 When ACE falls back to Native, `EditorView` keeps the last ACE diagnostics snapshot so the menu can still copy the failed ACE state after the Native editor is already active.
 

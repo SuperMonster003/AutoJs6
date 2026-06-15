@@ -1609,8 +1609,14 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         fileSizeBytes: Long?,
         largeFilePolicy: String,
     ): AceDiagnosticsSnapshot {
+        val viewportPolicyEventAt = mLastImeEventAtUptimeMillis.takeIf { it > 0L }
+        val viewportPolicyName = mViewportPolicy.javaClass.simpleName
         return createAceDiagnosticsSnapshot(fileSizeBytes, largeFilePolicy).copy(
-            viewportPolicy = mViewportPolicy.javaClass.simpleName,
+            viewportPolicy = viewportPolicyName,
+            lastViewportPolicyEvent = viewportPolicyEventAt?.let { "$viewportPolicyName.onImeInsetsChanged" },
+            lastViewportPolicyEventAtUptimeMillis = viewportPolicyEventAt,
+            lastViewportPolicyImeVisible = viewportPolicyEventAt?.let { mLastImeVisible },
+            lastViewportPolicyBottomInset = viewportPolicyEventAt?.let { mLastImeBottomInset },
             lastHostImeVisible = mLastImeVisible,
             lastHostImeBottomInset = mLastImeBottomInset.takeIf { it >= 0 },
             lastHostImeEventAtUptimeMillis = mLastImeEventAtUptimeMillis.takeIf { it > 0L },

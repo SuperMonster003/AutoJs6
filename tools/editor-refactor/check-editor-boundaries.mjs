@@ -89,6 +89,9 @@ const themeFontService = "app/src/main/java/org/autojs/autojs/ui/edit/editor/ser
 const breakpointModelStore = "app/src/main/java/org/autojs/autojs/ui/edit/editor/service/EditorBreakpointModelStore.kt";
 const versionHistoryService = "app/src/main/java/org/autojs/autojs/ui/edit/editor/service/EditorVersionHistoryService.kt";
 const draftService = "app/src/main/java/org/autojs/autojs/ui/edit/editor/service/EditorDraftService.kt";
+const aceCodeEditor = "app/src/main/java/org/autojs/autojs/ui/edit/editor/ace/AceCodeEditor.kt";
+const aceDiagnostics = "app/src/main/java/org/autojs/autojs/ui/edit/editor/ace/diagnostics/AceDiagnostics.kt";
+const aceDiagnosticsSnapshot = "app/src/main/java/org/autojs/autojs/ui/edit/editor/ace/diagnostics/AceDiagnosticsSnapshot.kt";
 
 assertIncludes(editorView, "mViewportPolicy.onImeInsetsChanged(imeVisible, targetBottom)");
 assertIncludes(editorView, "EditorViewportPolicyFactory.create(editor, this)");
@@ -132,6 +135,10 @@ assertIncludes(editorView, "EditorTextLoadPolicy.shouldStreamAsLargeFile(sizeOrN
 assertIncludes(editorView, "EditorTextLoadPolicy.shouldLoadProgressively(text.length)");
 assertIncludes(editorView, "EditorTextLoadPolicy.largeFilePolicyLabel(");
 assertIncludes(editorView, "textLoadTarget.loadSmallText(text)");
+assertIncludes(editorView, "lastViewportPolicyEvent = viewportPolicyEventAt?.let");
+assertIncludes(editorView, "lastViewportPolicyEventAtUptimeMillis = viewportPolicyEventAt");
+assertIncludes(editorView, "lastViewportPolicyImeVisible = viewportPolicyEventAt?.let");
+assertIncludes(editorView, "lastViewportPolicyBottomInset = viewportPolicyEventAt?.let");
 assertNotIncludes(editorView, "requestRectangleOnScreen");
 assertNotIncludes(editorView, "CodeEditor");
 assertNotIncludes(editorView, "CodeEditText");
@@ -326,6 +333,27 @@ assertIncludes(draftService, "PFiles.read(it)");
 assertIncludes(draftService, "stableDraftFileHelper.saveDraft(text)");
 assertIncludes(draftService, "stableDraftFileHelper.deleteDraft()");
 assertNotIncludes(draftService, "CodeEditText");
+
+assertIncludes(aceDiagnosticsSnapshot, "val pendingAceResizeReason: String?");
+assertIncludes(aceDiagnosticsSnapshot, "val lastAceResizeScheduledReason: String?");
+assertIncludes(aceDiagnosticsSnapshot, "val lastAceResizeDispatchedReason: String?");
+assertIncludes(aceDiagnosticsSnapshot, "val lastAceResizeCompletedReason: String?");
+assertIncludes(aceDiagnosticsSnapshot, "val lastViewportPolicyEvent: String?");
+assertIncludes(aceDiagnosticsSnapshot, "val lastViewportPolicyImeVisible: Boolean?");
+
+assertIncludes(aceDiagnostics, "pendingAceResizeReason=${snapshot.pendingAceResizeReason.orUnknown()}");
+assertIncludes(aceDiagnostics, "lastAceResizeScheduledReason=${snapshot.lastAceResizeScheduledReason.orUnknown()}");
+assertIncludes(aceDiagnostics, "lastAceResizeDispatchedReason=${snapshot.lastAceResizeDispatchedReason.orUnknown()}");
+assertIncludes(aceDiagnostics, "lastAceResizeCompletedReason=${snapshot.lastAceResizeCompletedReason.orUnknown()}");
+assertIncludes(aceDiagnostics, "lastViewportPolicyEvent=${snapshot.lastViewportPolicyEvent.orUnknown()}");
+assertIncludes(aceDiagnostics, "lastViewportPolicyImeVisible=${snapshot.lastViewportPolicyImeVisible?.toString().orUnknown()}");
+
+assertIncludes(aceCodeEditor, "private var lastAceResizeScheduledReason");
+assertIncludes(aceCodeEditor, "private var lastAceResizeDispatchedReason");
+assertIncludes(aceCodeEditor, "private var lastAceResizeCompletedReason");
+assertIncludes(aceCodeEditor, "private fun handleResizeDone(payloadJson: String?)");
+assertIncludes(aceCodeEditor, "lastAceResizeDispatchedReason = reason");
+assertIncludes(aceCodeEditor, "lastAceResizeCompletedReason = resizeReasonFromPayload(payloadJson, lastAceResizeDispatchedReason)");
 
 assertOnlyIn("requestRectangleOnScreen", [
   "app/src/main/java/org/autojs/autojs/ui/edit/editor/engine/NativeCodeEditorEngine.kt",

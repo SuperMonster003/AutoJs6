@@ -128,6 +128,12 @@ class AceCodeEditor @JvmOverloads constructor(
     private var lastShowSoftInputAtUptimeMillis = 0L
     private var lastHideSoftInputAtUptimeMillis = 0L
     private var lastResizeAtUptimeMillis = 0L
+    private var lastAceResizeScheduledReason: String? = null
+    private var lastAceResizeScheduledAtUptimeMillis = 0L
+    private var lastAceResizeDispatchedReason: String? = null
+    private var lastAceResizeDispatchedAtUptimeMillis = 0L
+    private var lastAceResizeCompletedReason: String? = null
+    private var lastAceResizeCompletedAtUptimeMillis = 0L
     private var lastActionModeAtUptimeMillis = 0L
     private var actionModeActive = false
 
@@ -169,8 +175,19 @@ class AceCodeEditor @JvmOverloads constructor(
             lastShowSoftInputAtUptimeMillis = lastShowSoftInputAtUptimeMillis.takeIf { it > 0L },
             lastHideSoftInputAtUptimeMillis = lastHideSoftInputAtUptimeMillis.takeIf { it > 0L },
             lastResizeAtUptimeMillis = lastResizeAtUptimeMillis.takeIf { it > 0L },
+            pendingAceResizeReason = pendingResizeReason,
+            lastAceResizeScheduledReason = lastAceResizeScheduledReason,
+            lastAceResizeScheduledAtUptimeMillis = lastAceResizeScheduledAtUptimeMillis.takeIf { it > 0L },
+            lastAceResizeDispatchedReason = lastAceResizeDispatchedReason,
+            lastAceResizeDispatchedAtUptimeMillis = lastAceResizeDispatchedAtUptimeMillis.takeIf { it > 0L },
+            lastAceResizeCompletedReason = lastAceResizeCompletedReason,
+            lastAceResizeCompletedAtUptimeMillis = lastAceResizeCompletedAtUptimeMillis.takeIf { it > 0L },
             lastActionModeAtUptimeMillis = lastActionModeAtUptimeMillis.takeIf { it > 0L },
             viewportPolicy = null,
+            lastViewportPolicyEvent = null,
+            lastViewportPolicyEventAtUptimeMillis = null,
+            lastViewportPolicyImeVisible = null,
+            lastViewportPolicyBottomInset = null,
             lastHostImeVisible = null,
             lastHostImeBottomInset = null,
             lastHostImeEventAtUptimeMillis = null,
@@ -446,7 +463,7 @@ class AceCodeEditor @JvmOverloads constructor(
                     ),
                 )
                 "firstPaint" -> handleFirstPaint()
-                "resizeDone" -> lastResizeAtUptimeMillis = SystemClock.uptimeMillis()
+                "resizeDone" -> handleResizeDone(payloadJson)
                 "changeDelta" -> handleChangeDelta(payloadJson)
             }
             listener?.onEvent(name, payloadJson)
@@ -545,6 +562,13 @@ class AceCodeEditor @JvmOverloads constructor(
         firstPaintReceived = true
         lastFirstPaintAtUptimeMillis = SystemClock.uptimeMillis()
         hideLoadingOverlay()
+    }
+
+    private fun handleResizeDone(payloadJson: String?) {
+        val now = SystemClock.uptimeMillis()
+        lastResizeAtUptimeMillis = now
+        lastAceResizeCompletedAtUptimeMillis = now
+        lastAceResizeCompletedReason = resizeReasonFromPayload(payloadJson, lastAceResizeDispatchedReason)
     }
 
     private fun reportFatalFailure(type: AceFailureType, message: String, detail: String? = null) {
@@ -680,7 +704,10 @@ class AceCodeEditor @JvmOverloads constructor(
         if (destroyed) {
             return
         }
+        val now = SystemClock.uptimeMillis()
         pendingResizeReason = reason
+        lastAceResizeScheduledReason = reason
+        lastAceResizeScheduledAtUptimeMillis = now
         mainHandler.removeCallbacks(scheduledResizeRunnable)
         mainHandler.postDelayed(scheduledResizeRunnable, delayMillis.coerceAtLeast(0L))
     }
@@ -695,7 +722,10 @@ class AceCodeEditor @JvmOverloads constructor(
         }
         val reason = pendingResizeReason ?: "scheduled_resize"
         pendingResizeReason = null
-        lastResizeAtUptimeMillis = SystemClock.uptimeMillis()
+        val now = SystemClock.uptimeMillis()
+        lastResizeAtUptimeMillis = now
+        lastAceResizeDispatchedReason = reason
+        lastAceResizeDispatchedAtUptimeMillis = now
         invokeAce("scheduleResize", quote(reason))
     }
 
@@ -970,6 +1000,15 @@ class AceCodeEditor @JvmOverloads constructor(
             obj.optString("message").ifBlank {
                 obj.optString("reason").ifBlank { fallback }
             }
+        }.getOrElse { fallback }
+    }
+
+    private fun resizeReasonFromPayload(payloadJson: String?, fallback: String?): String? {
+        if (payloadJson.isNullOrBlank()) {
+            return fallback
+        }
+        return runCatching {
+            JSONObject(payloadJson).optString("reason").ifBlank { fallback }
         }.getOrElse { fallback }
     }
 
