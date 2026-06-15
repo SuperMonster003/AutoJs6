@@ -33,6 +33,16 @@ Current lifecycle stress instrumentation:
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeEmbeddedLifecycleStressInstrumentationTest"
 ```
 
+Focused embedded execution queue coverage:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeEmbeddedLifecycleStressInstrumentationTest#queuedExecutionRunsAfterActiveExecution"
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeEmbeddedLifecycleStressInstrumentationTest#queuedExecutionCanBeCancelled"
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeEmbeddedLifecycleStressInstrumentationTest#queueLimitReachedReturnsStableError"
+```
+
+These tests verify that default concurrent starts still reject, explicit enqueue runs after the active script, queued executions can be cancelled by execution id, and the one-entry queue limit returns `ERR_AUTOJS6_NODE_QUEUE_FULL`.
+
 Current packaged APK smoke instrumentation:
 
 ```powershell

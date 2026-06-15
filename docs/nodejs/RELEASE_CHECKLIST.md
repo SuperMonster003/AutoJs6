@@ -174,6 +174,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] native handle diagnostics are available when debugging
 - [ ] runtime timeline trace remains off by default and records service/native/bootstrap/stdout/pending/bridge/stop/drain/destroy events when opted in
 - [ ] concurrent embedded Node starts reject with `ERR_AUTOJS6_NODE_ENGINE_BUSY`, and a later run succeeds after the active execution finishes
+- [ ] explicit embedded execution queue runs a second script after the first, supports queued cancellation, and returns `ERR_AUTOJS6_NODE_QUEUE_FULL` when the queue is full
 
 ## Diagnostics
 
@@ -191,6 +192,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] resolver trace remains off by default once implemented
 - [ ] resolver visualizer fixture parses search paths, package.json fields, null blocking, and final errors
 - [ ] runtime timeline trace is available only with `autojs.nodejs.timelineTrace=true` or `AUTOJS6_NODE_TIMELINE_TRACE=1`
+- [ ] execution queue diagnostics report queue mode, queue status, wait time, and max queued executions
 - [ ] bridge live diagnostics are present for main-app bridge smoke
 - [ ] docs updated for any changed capability
 
@@ -212,4 +214,5 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `docs/nodejs/design/WORKER_THREADS.md` when worker behavior or worker policy changes
 - [ ] `docs/nodejs/design/JAVA_INTEROP.md` when Java/Android interop, Rhino compatibility shims, or Java allowlist policy changes
 - [ ] `docs/nodejs/design/RHINO_SHIM.md` when `require("rhino")`, old global API installation, or mixed Rhino/Node migration behavior changes
+- [ ] `docs/nodejs/design/EXECUTION_QUEUE.md` when embedded execution queue behavior changes
 - [ ] packaged APK user docs or examples if packaging behavior changed

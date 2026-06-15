@@ -22,6 +22,7 @@ import org.autojs.autojs6.BuildConfig
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
+import java.util.ArrayDeque
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
@@ -52,6 +53,7 @@ class NativeNodeEmbeddedScriptService : Service() {
     }
 
     override fun onDestroy() {
+        cancelAllQueuedExecutionsInService()
         activeLifecycle?.let { lifecycle ->
             if (lifecycle.state !in setOf(
                     NodeEmbeddedRuntimeState.STOPPED,
@@ -124,12 +126,19 @@ class NativeNodeEmbeddedScriptService : Service() {
         val startedAt = android.os.SystemClock.elapsedRealtime()
         val processName = currentProcessName()
         val pid = Process.myPid()
-        if (!ACTIVE_EXECUTION_ID.compareAndSet(null, executionId)) {
+        val queueMode = NodeExecutionQueuePolicy.MODE_REJECT_WHEN_BUSY
+        val queueTimeoutMs = 0L
+        val slotDecision = acquireExecutionSlot(
+            executionId = executionId,
+            queueMode = queueMode,
+            queueTimeoutMs = queueTimeoutMs,
+        )
+        if (slotDecision is ExecutionSlotDecision.Rejected) {
             receiver?.send(
                 RESULT_SCRIPT,
-                engineBusyResult(
+                queueFailureResult(
+                    failure = slotDecision.failure,
                     executionId = executionId,
-                    activeExecutionId = ACTIVE_EXECUTION_ID.get().orEmpty(),
                     sourceName = sourceName,
                     workingDirectory = workingDirectory,
                     startedAt = startedAt,
@@ -137,8 +146,10 @@ class NativeNodeEmbeddedScriptService : Service() {
                     pid = pid,
                 ).toBundle(),
             )
+            stopServiceIfQueueIdle(startId)
             return
         }
+        val slotLease = (slotDecision as ExecutionSlotDecision.Acquired).lease
         val engineInfo = NodeBridgeEngineInfo.fromContext(
             context = this,
             id = executionId,
@@ -178,6 +189,9 @@ class NativeNodeEmbeddedScriptService : Service() {
             dynamicImportExperimentalEnabled = dynamicImportExperimentalEnabled,
             workerThreadsExperimentalEnabled = workerThreadsExperimentalEnabled,
             javaInteropExperimentalEnabled = javaInteropExperimentalEnabled,
+            executionId = executionId,
+            queueMode = queueMode,
+            queueTimeoutMs = NodeExecutionQueuePolicy.normalizedQueueTimeoutMs(queueMode, queueTimeoutMs),
         )
         val lifecycle = NodeEmbeddedRuntimeLifecycle(TAG, executionId, processName, pid, sourceName)
         val timeline = NodeEmbeddedRuntimeTimeline.create(
@@ -198,6 +212,15 @@ class NativeNodeEmbeddedScriptService : Service() {
                 "runtimeModuleSourceCount" to enrichedRuntimeModuleSources.size,
             ),
         )
+        if (slotLease.queued) {
+            timeline?.mark(
+                "queue_dequeue",
+                mapOf(
+                    "queueWaitMs" to slotLease.queueWaitMs,
+                    "queuePosition" to slotLease.queuePosition,
+                ),
+            )
+        }
         activeLifecycle = lifecycle
         lifecycle.transition(NodeEmbeddedRuntimeState.STARTING, "service.runScript")
         Log.i(
@@ -208,6 +231,7 @@ class NativeNodeEmbeddedScriptService : Service() {
                     "dynamicImportExperimentalEnabled=$dynamicImportExperimentalEnabled " +
                     "workerThreadsExperimentalEnabled=$workerThreadsExperimentalEnabled " +
                     "javaInteropExperimentalEnabled=$javaInteropExperimentalEnabled " +
+                    "queueMode=$queueMode queued=${slotLease.queued} queueWaitMs=${slotLease.queueWaitMs} " +
                     "bridgeLimits=${bridgeLimits.toJson()} " +
                     "runtimeFirst=${enrichedRuntimeModuleSources.keys.firstOrNull().orEmpty()}",
         )
@@ -246,7 +270,7 @@ class NativeNodeEmbeddedScriptService : Service() {
                 }
             }
             timeline?.mark("destroy_complete", mapOf("state" to lifecycle.state.name))
-            receiver?.send(RESULT_SCRIPT, completed.withLifecycle(lifecycle).withTimeline(timeline).toBundle())
+            receiver?.send(RESULT_SCRIPT, completed.withLifecycle(lifecycle).withQueueLease(slotLease).withTimeline(timeline).toBundle())
         } catch (e: Throwable) {
             timeline?.mark(
                 "stop_requested",
@@ -275,17 +299,32 @@ class NativeNodeEmbeddedScriptService : Service() {
                     pid = pid,
                     sourceName = sourceName,
                     nativeValues = emptyMap(),
-                ).withLifecycle(lifecycle).withTimeline(timeline).toBundle(),
+                ).withLifecycle(lifecycle).withQueueLease(slotLease).withTimeline(timeline).toBundle(),
             )
         } finally {
             bridgeSession.stop()
-            ACTIVE_EXECUTION_ID.compareAndSet(executionId, null)
+            val queueStatus = releaseExecutionSlot(executionId)
             val elapsed = android.os.SystemClock.elapsedRealtime() - startedAt
             Log.i(
                 TAG,
                 "script.exit executionId=$executionId processName=$processName pid=$pid " +
                         "sourceName=$sourceName state=${lifecycle.state.name} elapsed=${elapsed}ms",
             )
+            if (queueStatus.idle) {
+                stopSelf(startId)
+                scheduleProcessExit(0)
+            } else {
+                Log.i(
+                    TAG,
+                    "script.queue.keep_service_alive executionId=$executionId active=${queueStatus.activeExecutionId.orEmpty()} " +
+                        "queued=${queueStatus.queuedCount}",
+                )
+            }
+        }
+    }
+
+    private fun stopServiceIfQueueIdle(startId: Int) {
+        if (queueStatusSnapshot().idle) {
             stopSelf(startId)
             scheduleProcessExit(0)
         }
@@ -437,9 +476,9 @@ class NativeNodeEmbeddedScriptService : Service() {
         }.toString()
     }
 
-    private fun engineBusyResult(
+    private fun queueFailureResult(
+        failure: ExecutionSlotFailure,
         executionId: String,
-        activeExecutionId: String,
         sourceName: String,
         workingDirectory: String?,
         startedAt: Long,
@@ -448,26 +487,36 @@ class NativeNodeEmbeddedScriptService : Service() {
     ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
         val lifecycle = NodeEmbeddedRuntimeLifecycle(TAG, executionId, processName, pid, sourceName)
             .apply {
-                transition(NodeEmbeddedRuntimeState.FAILED, "service.engine_busy")
+                transition(NodeEmbeddedRuntimeState.FAILED, "service.${failure.reason}")
             }
         val elapsedMs = (android.os.SystemClock.elapsedRealtime() - startedAt).coerceAtLeast(0L)
-        val nativeValues = linkedMapOf(
-            "embedded_script.engine_busy" to "true",
-            "embedded_script.concurrent_policy" to "single-active-execution-per-process",
-            "embedded_script.active_execution_id" to activeExecutionId,
-            "embedded_script.rejected_execution_id" to executionId,
-            "embedded_script.error_code" to NodeRuntimeErrorCodes.NODE_ENGINE_BUSY,
-        )
+        val nativeValues = linkedMapOf<String, String>().apply {
+            put("embedded_script.queue_mode", failure.queueMode)
+            put("embedded_script.queue_status", failure.reason)
+            put("embedded_script.queue_wait_ms", failure.queueWaitMs.toString())
+            put("embedded_script.queue_queued_count", failure.queuedCount.toString())
+            put("embedded_script.queue_max_queued_executions", failure.maxQueuedExecutions.toString())
+            put("embedded_script.concurrent_policy", "single-active-execution-per-process")
+            put("embedded_script.active_execution_id", failure.activeExecutionId.orEmpty())
+            put("embedded_script.rejected_execution_id", executionId)
+            put("embedded_script.error_code", failure.errorCode)
+            when (failure.errorCode) {
+                NodeRuntimeErrorCodes.NODE_ENGINE_BUSY -> put("embedded_script.engine_busy", "true")
+                NodeRuntimeErrorCodes.NODE_QUEUE_FULL -> put("embedded_script.queue_full", "true")
+                NodeRuntimeErrorCodes.NODE_QUEUE_TIMEOUT -> put("embedded_script.queue_timeout", "true")
+                NodeRuntimeErrorCodes.NODE_QUEUE_CANCELLED -> put("embedded_script.queue_cancelled", "true")
+            }
+        }
         return NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult(
             succeeded = false,
             exitCode = 1,
             resultText = null,
             stdout = "",
             stderr = "",
-            errorName = "EmbeddedNodeEngineBusyError",
-            errorMessage = "Embedded Node.js engine is busy; only one active execution is allowed per :nodejs_embedded process.",
+            errorName = failure.errorName,
+            errorMessage = failure.errorMessage,
             errorStack = null,
-            errorCode = NodeRuntimeErrorCodes.NODE_ENGINE_BUSY,
+            errorCode = failure.errorCode,
             elapsedMs = elapsedMs,
             processName = processName,
             pid = pid,
@@ -475,6 +524,22 @@ class NativeNodeEmbeddedScriptService : Service() {
             nativeValues = nativeValues,
             workingDirectory = workingDirectory,
         ).withLifecycle(lifecycle)
+    }
+
+    private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult.withQueueLease(
+        lease: ExecutionSlotLease,
+    ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+        return copy(
+            nativeValues = linkedMapOf<String, String>().apply {
+                putAll(nativeValues)
+                put("embedded_script.queue_mode", lease.queueMode)
+                put("embedded_script.queue_status", if (lease.queued) "dequeued" else "not_queued")
+                put("embedded_script.queue_queued", lease.queued.toString())
+                put("embedded_script.queue_wait_ms", lease.queueWaitMs.toString())
+                put("embedded_script.queue_position", lease.queuePosition.toString())
+                put("embedded_script.queue_max_queued_executions", lease.maxQueuedExecutions.toString())
+            },
+        )
     }
 
     private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult.withTimeline(
@@ -718,10 +783,42 @@ class NativeNodeEmbeddedScriptService : Service() {
     private fun currentProcessName(): String = runCatching { App.getProcessNameCompat() }
         .getOrElse { "unknown" }
 
+    private sealed class ExecutionSlotDecision {
+
+        data class Acquired(val lease: ExecutionSlotLease) : ExecutionSlotDecision()
+
+        data class Rejected(val failure: ExecutionSlotFailure) : ExecutionSlotDecision()
+    }
+
+    private data class ExecutionSlotLease(
+        val executionId: String,
+        val queueMode: String,
+        val queued: Boolean,
+        val queueWaitMs: Long,
+        val queuePosition: Int,
+        val maxQueuedExecutions: Int,
+    )
+
+    private data class ExecutionSlotFailure(
+        val errorName: String,
+        val errorCode: String,
+        val errorMessage: String,
+        val queueMode: String,
+        val reason: String,
+        val activeExecutionId: String?,
+        val queueWaitMs: Long,
+        val queuedCount: Int,
+        val maxQueuedExecutions: Int,
+    )
+
     companion object {
 
         private const val TAG = "NativeNodeEmbeddedScriptService"
         private val ACTIVE_EXECUTION_ID = AtomicReference<String?>(null)
+        @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
+        private val EXECUTION_QUEUE_LOCK = Object()
+        private val QUEUED_EXECUTION_IDS = ArrayDeque<String>()
+        private val CANCELLED_QUEUED_EXECUTION_IDS = mutableSetOf<String>()
         private const val ACTION_RUN_SCRIPT = "org.autojs.autojs.engine.action.RUN_NATIVE_NODE_EMBEDDED_SCRIPT"
         private const val EXTRA_RESULT_RECEIVER = "result_receiver"
         private const val EXTRA_SOURCE = "source"
@@ -747,6 +844,7 @@ class NativeNodeEmbeddedScriptService : Service() {
         private const val RESULT_SCRIPT = 1
         private const val NOTIFICATION_ID = 0xA6E4
         private const val PROCESS_EXIT_DELAY_MS = 250L
+        private const val CLIENT_QUEUE_PROCESS_SETTLE_MS = 650L
         private const val BRIDGE_DISPATCH_WAIT_MS = 1000L
         private const val BRIDGE_LIVE_POLL_INTERVAL_MS = 10L
         private const val BRIDGE_LIVE_STOP_JOIN_MS = 1000L
@@ -761,11 +859,65 @@ class NativeNodeEmbeddedScriptService : Service() {
         private val DNS_CALLBACK_SOURCE_HINT_PATTERN = Regex("""\bdns\.[A-Za-z_$][\w$]*\s*\([^)]*,\s*(?:function\b|\([^)]*\)\s*=>|[A-Za-z_$][\w$]*\s*=>)""")
         private val ZLIB_CALLBACK_SOURCE_HINT_PATTERN = Regex("""\bzlib\.[A-Za-z_$][\w$]*\s*\([^)]*,\s*(?:function\b|\([^)]*\)\s*=>|[A-Za-z_$][\w$]*\s*=>)""")
 
+        fun enqueueScript(
+            context: Context,
+            request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
+        ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+            val executionId = request.executionId?.takeIf { it.isNotBlank() } ?: newExecutionId()
+            val queueTimeoutMs = NodeExecutionQueuePolicy.normalizedQueueTimeoutMs(
+                NodeExecutionQueuePolicy.MODE_ENQUEUE_WHEN_BUSY,
+                request.queueTimeoutMs,
+            )
+            val startedAt = android.os.SystemClock.elapsedRealtime()
+            val slotDecision = acquireExecutionSlot(
+                executionId = executionId,
+                queueMode = NodeExecutionQueuePolicy.MODE_ENQUEUE_WHEN_BUSY,
+                queueTimeoutMs = queueTimeoutMs,
+            )
+            if (slotDecision is ExecutionSlotDecision.Rejected) {
+                return clientQueueFailureResult(
+                    failure = slotDecision.failure,
+                    executionId = executionId,
+                    request = request,
+                    startedAt = startedAt,
+                )
+            }
+            val slotLease = (slotDecision as ExecutionSlotDecision.Acquired).lease
+            try {
+                return runScript(
+                    context,
+                    request.copy(
+                        executionId = executionId,
+                        queueMode = NodeExecutionQueuePolicy.MODE_REJECT_WHEN_BUSY,
+                        queueTimeoutMs = 0L,
+                    ),
+                ).withClientQueueLease(slotLease)
+            } finally {
+                settleBetweenQueuedExecutions()
+                releaseExecutionSlot(executionId)
+            }
+        }
+
+        fun queueStatus(
+            context: Context,
+            timeoutMs: Long = NodeExecutionQueuePolicy.CONTROL_TIMEOUT_MS,
+        ): NodeExecutionQueueStatus {
+            return queueStatusSnapshot()
+        }
+
+        fun cancelQueuedExecution(
+            context: Context,
+            executionId: String,
+            timeoutMs: Long = NodeExecutionQueuePolicy.CONTROL_TIMEOUT_MS,
+        ): Boolean {
+            return cancelQueuedExecutionInService(executionId)
+        }
+
         fun runScript(
             context: Context,
             request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
         ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
-            val executionId = newExecutionId()
+            val executionId = request.executionId?.takeIf { it.isNotBlank() } ?: newExecutionId()
             NativeNodeEmbeddedRuntimeBridge.validateEmbeddedScriptRequestBeforeServiceStart(request)?.let {
                 return it.withLifecycle(preflightFailureLifecycle(executionId, request))
             }
@@ -847,6 +999,304 @@ class NativeNodeEmbeddedScriptService : Service() {
                 startedAt = startedAt,
                 executionId = executionId,
             )
+        }
+
+        private fun acquireExecutionSlot(
+            executionId: String,
+            queueMode: String,
+            queueTimeoutMs: Long,
+        ): ExecutionSlotDecision {
+            val normalizedMode = NodeExecutionQueuePolicy.normalizeMode(queueMode)
+            val normalizedQueueTimeoutMs = NodeExecutionQueuePolicy.normalizedQueueTimeoutMs(normalizedMode, queueTimeoutMs)
+            val queuedAt = android.os.SystemClock.elapsedRealtime()
+            synchronized(EXECUTION_QUEUE_LOCK) {
+                if (ACTIVE_EXECUTION_ID.get() == null && QUEUED_EXECUTION_IDS.isEmpty()) {
+                    ACTIVE_EXECUTION_ID.set(executionId)
+                    return ExecutionSlotDecision.Acquired(
+                        ExecutionSlotLease(
+                            executionId = executionId,
+                            queueMode = normalizedMode,
+                            queued = false,
+                            queueWaitMs = 0L,
+                            queuePosition = 0,
+                            maxQueuedExecutions = NodeExecutionQueuePolicy.DEFAULT_MAX_QUEUED_EXECUTIONS,
+                        ),
+                    )
+                }
+                if (normalizedMode != NodeExecutionQueuePolicy.MODE_ENQUEUE_WHEN_BUSY) {
+                    return ExecutionSlotDecision.Rejected(
+                        busyFailure(
+                            executionId = executionId,
+                            queueMode = normalizedMode,
+                            queuedAt = queuedAt,
+                        ),
+                    )
+                }
+                if (QUEUED_EXECUTION_IDS.size >= NodeExecutionQueuePolicy.DEFAULT_MAX_QUEUED_EXECUTIONS) {
+                    return ExecutionSlotDecision.Rejected(
+                        queueFullFailure(
+                            executionId = executionId,
+                            queueMode = normalizedMode,
+                            queuedAt = queuedAt,
+                        ),
+                    )
+                }
+                QUEUED_EXECUTION_IDS.addLast(executionId)
+                EXECUTION_QUEUE_LOCK.notifyAll()
+            }
+
+            val deadline = queuedAt + normalizedQueueTimeoutMs
+            while (true) {
+                synchronized(EXECUTION_QUEUE_LOCK) {
+                    val now = android.os.SystemClock.elapsedRealtime()
+                    if (CANCELLED_QUEUED_EXECUTION_IDS.remove(executionId)) {
+                        QUEUED_EXECUTION_IDS.remove(executionId)
+                        EXECUTION_QUEUE_LOCK.notifyAll()
+                        return ExecutionSlotDecision.Rejected(
+                            queueCancelledFailure(
+                                executionId = executionId,
+                                queueMode = normalizedMode,
+                                queueWaitMs = (now - queuedAt).coerceAtLeast(0L),
+                            ),
+                        )
+                    }
+                    if (QUEUED_EXECUTION_IDS.peekFirst() == executionId && ACTIVE_EXECUTION_ID.get() == null) {
+                        ACTIVE_EXECUTION_ID.set(executionId)
+                        QUEUED_EXECUTION_IDS.removeFirst()
+                        EXECUTION_QUEUE_LOCK.notifyAll()
+                        return ExecutionSlotDecision.Acquired(
+                            ExecutionSlotLease(
+                                executionId = executionId,
+                                queueMode = normalizedMode,
+                                queued = true,
+                                queueWaitMs = (now - queuedAt).coerceAtLeast(0L),
+                                queuePosition = 1,
+                                maxQueuedExecutions = NodeExecutionQueuePolicy.DEFAULT_MAX_QUEUED_EXECUTIONS,
+                            ),
+                        )
+                    }
+                    val remainingMs = deadline - now
+                    if (remainingMs <= 0L) {
+                        QUEUED_EXECUTION_IDS.remove(executionId)
+                        CANCELLED_QUEUED_EXECUTION_IDS.remove(executionId)
+                        EXECUTION_QUEUE_LOCK.notifyAll()
+                        return ExecutionSlotDecision.Rejected(
+                            queueTimeoutFailure(
+                                executionId = executionId,
+                                queueMode = normalizedMode,
+                                queueWaitMs = (now - queuedAt).coerceAtLeast(0L),
+                            ),
+                        )
+                    }
+                    try {
+                        EXECUTION_QUEUE_LOCK.wait(remainingMs.coerceAtMost(100L))
+                    } catch (e: InterruptedException) {
+                        Thread.currentThread().interrupt()
+                        QUEUED_EXECUTION_IDS.remove(executionId)
+                        CANCELLED_QUEUED_EXECUTION_IDS.remove(executionId)
+                        EXECUTION_QUEUE_LOCK.notifyAll()
+                        return ExecutionSlotDecision.Rejected(
+                            queueCancelledFailure(
+                                executionId = executionId,
+                                queueMode = normalizedMode,
+                                queueWaitMs = (android.os.SystemClock.elapsedRealtime() - queuedAt).coerceAtLeast(0L),
+                            ),
+                        )
+                    }
+                }
+            }
+        }
+
+        private fun releaseExecutionSlot(executionId: String): NodeExecutionQueueStatus {
+            synchronized(EXECUTION_QUEUE_LOCK) {
+                if (ACTIVE_EXECUTION_ID.get() == executionId) {
+                    ACTIVE_EXECUTION_ID.set(null)
+                }
+                EXECUTION_QUEUE_LOCK.notifyAll()
+                return queueStatusSnapshotLocked()
+            }
+        }
+
+        private fun cancelQueuedExecutionInService(executionId: String): Boolean {
+            if (executionId.isBlank()) {
+                return false
+            }
+            synchronized(EXECUTION_QUEUE_LOCK) {
+                if (!QUEUED_EXECUTION_IDS.contains(executionId)) {
+                    return false
+                }
+                CANCELLED_QUEUED_EXECUTION_IDS.add(executionId)
+                EXECUTION_QUEUE_LOCK.notifyAll()
+                return true
+            }
+        }
+
+        private fun cancelAllQueuedExecutionsInService() {
+            synchronized(EXECUTION_QUEUE_LOCK) {
+                CANCELLED_QUEUED_EXECUTION_IDS.addAll(QUEUED_EXECUTION_IDS)
+                EXECUTION_QUEUE_LOCK.notifyAll()
+            }
+        }
+
+        private fun queueStatusSnapshot(): NodeExecutionQueueStatus {
+            synchronized(EXECUTION_QUEUE_LOCK) {
+                return queueStatusSnapshotLocked()
+            }
+        }
+
+        private fun queueStatusSnapshotLocked(): NodeExecutionQueueStatus {
+            return NodeExecutionQueueStatus(
+                activeExecutionId = ACTIVE_EXECUTION_ID.get(),
+                queuedExecutionIds = QUEUED_EXECUTION_IDS.toList(),
+                maxQueuedExecutions = NodeExecutionQueuePolicy.DEFAULT_MAX_QUEUED_EXECUTIONS,
+            )
+        }
+
+        private fun busyFailure(
+            executionId: String,
+            queueMode: String,
+            queuedAt: Long,
+        ): ExecutionSlotFailure {
+            return ExecutionSlotFailure(
+                errorName = "EmbeddedNodeEngineBusyError",
+                errorCode = NodeRuntimeErrorCodes.NODE_ENGINE_BUSY,
+                errorMessage = "Embedded Node.js engine is busy; only one active execution is allowed per :nodejs_embedded process.",
+                queueMode = queueMode,
+                reason = "engine_busy",
+                activeExecutionId = ACTIVE_EXECUTION_ID.get(),
+                queueWaitMs = (android.os.SystemClock.elapsedRealtime() - queuedAt).coerceAtLeast(0L),
+                queuedCount = QUEUED_EXECUTION_IDS.size,
+                maxQueuedExecutions = NodeExecutionQueuePolicy.DEFAULT_MAX_QUEUED_EXECUTIONS,
+            )
+        }
+
+        private fun queueFullFailure(
+            executionId: String,
+            queueMode: String,
+            queuedAt: Long,
+        ): ExecutionSlotFailure {
+            return ExecutionSlotFailure(
+                errorName = "EmbeddedNodeQueueFullError",
+                errorCode = NodeRuntimeErrorCodes.NODE_QUEUE_FULL,
+                errorMessage = "Embedded Node.js execution queue is full; maxQueuedExecutions=${NodeExecutionQueuePolicy.DEFAULT_MAX_QUEUED_EXECUTIONS}.",
+                queueMode = queueMode,
+                reason = "queue_full",
+                activeExecutionId = ACTIVE_EXECUTION_ID.get(),
+                queueWaitMs = (android.os.SystemClock.elapsedRealtime() - queuedAt).coerceAtLeast(0L),
+                queuedCount = QUEUED_EXECUTION_IDS.size,
+                maxQueuedExecutions = NodeExecutionQueuePolicy.DEFAULT_MAX_QUEUED_EXECUTIONS,
+            )
+        }
+
+        private fun queueTimeoutFailure(
+            executionId: String,
+            queueMode: String,
+            queueWaitMs: Long,
+        ): ExecutionSlotFailure {
+            return ExecutionSlotFailure(
+                errorName = "EmbeddedNodeQueueTimeoutError",
+                errorCode = NodeRuntimeErrorCodes.NODE_QUEUE_TIMEOUT,
+                errorMessage = "Embedded Node.js execution waited ${queueWaitMs}ms in queue and timed out before starting.",
+                queueMode = queueMode,
+                reason = "queue_timeout",
+                activeExecutionId = ACTIVE_EXECUTION_ID.get(),
+                queueWaitMs = queueWaitMs,
+                queuedCount = QUEUED_EXECUTION_IDS.size,
+                maxQueuedExecutions = NodeExecutionQueuePolicy.DEFAULT_MAX_QUEUED_EXECUTIONS,
+            )
+        }
+
+        private fun queueCancelledFailure(
+            executionId: String,
+            queueMode: String,
+            queueWaitMs: Long,
+        ): ExecutionSlotFailure {
+            return ExecutionSlotFailure(
+                errorName = "EmbeddedNodeQueueCancelledError",
+                errorCode = NodeRuntimeErrorCodes.NODE_QUEUE_CANCELLED,
+                errorMessage = "Embedded Node.js queued execution was cancelled before starting.",
+                queueMode = queueMode,
+                reason = "queue_cancelled",
+                activeExecutionId = ACTIVE_EXECUTION_ID.get(),
+                queueWaitMs = queueWaitMs,
+                queuedCount = QUEUED_EXECUTION_IDS.size,
+                maxQueuedExecutions = NodeExecutionQueuePolicy.DEFAULT_MAX_QUEUED_EXECUTIONS,
+            )
+        }
+
+        private fun clientQueueFailureResult(
+            failure: ExecutionSlotFailure,
+            executionId: String,
+            request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
+            startedAt: Long,
+        ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+            val processName = currentProcessNameCompat()
+            val pid = Process.myPid()
+            val lifecycle = NodeEmbeddedRuntimeLifecycle(TAG, executionId, processName, pid, request.sourceName)
+                .apply {
+                    transition(NodeEmbeddedRuntimeState.FAILED, "client.${failure.reason}")
+                }
+            val elapsedMs = (android.os.SystemClock.elapsedRealtime() - startedAt).coerceAtLeast(0L)
+            val nativeValues = linkedMapOf<String, String>().apply {
+                put("embedded_script.queue_mode", failure.queueMode)
+                put("embedded_script.queue_status", failure.reason)
+                put("embedded_script.queue_wait_ms", failure.queueWaitMs.toString())
+                put("embedded_script.queue_queued_count", failure.queuedCount.toString())
+                put("embedded_script.queue_max_queued_executions", failure.maxQueuedExecutions.toString())
+                put("embedded_script.concurrent_policy", "single-active-execution-per-process")
+                put("embedded_script.active_execution_id", failure.activeExecutionId.orEmpty())
+                put("embedded_script.rejected_execution_id", executionId)
+                put("embedded_script.error_code", failure.errorCode)
+                when (failure.errorCode) {
+                    NodeRuntimeErrorCodes.NODE_ENGINE_BUSY -> put("embedded_script.engine_busy", "true")
+                    NodeRuntimeErrorCodes.NODE_QUEUE_FULL -> put("embedded_script.queue_full", "true")
+                    NodeRuntimeErrorCodes.NODE_QUEUE_TIMEOUT -> put("embedded_script.queue_timeout", "true")
+                    NodeRuntimeErrorCodes.NODE_QUEUE_CANCELLED -> put("embedded_script.queue_cancelled", "true")
+                }
+            }
+            return NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult(
+                succeeded = false,
+                exitCode = 1,
+                resultText = null,
+                stdout = "",
+                stderr = "",
+                errorName = failure.errorName,
+                errorMessage = failure.errorMessage,
+                errorStack = null,
+                errorCode = failure.errorCode,
+                elapsedMs = elapsedMs,
+                processName = processName,
+                pid = pid,
+                sourceName = request.sourceName,
+                nativeValues = nativeValues,
+                workingDirectory = request.workingDirectory,
+            ).withLifecycle(lifecycle)
+        }
+
+        private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult.withClientQueueLease(
+            lease: ExecutionSlotLease,
+        ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+            return copy(
+                nativeValues = linkedMapOf<String, String>().apply {
+                    putAll(nativeValues)
+                    put("embedded_script.queue_mode", lease.queueMode)
+                    put("embedded_script.queue_status", if (lease.queued) "dequeued" else "not_queued")
+                    put("embedded_script.queue_queued", lease.queued.toString())
+                    put("embedded_script.queue_wait_ms", lease.queueWaitMs.toString())
+                    put("embedded_script.queue_position", lease.queuePosition.toString())
+                    put("embedded_script.queue_max_queued_executions", lease.maxQueuedExecutions.toString())
+                },
+            )
+        }
+
+        private fun settleBetweenQueuedExecutions() {
+            runCatching {
+                Thread.sleep(CLIENT_QUEUE_PROCESS_SETTLE_MS)
+            }.onFailure { error ->
+                if (error is InterruptedException) {
+                    Thread.currentThread().interrupt()
+                }
+            }
         }
 
         private fun processCrashedOrTimedOut(

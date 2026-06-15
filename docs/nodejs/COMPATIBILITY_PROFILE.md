@@ -8,6 +8,7 @@ This profile describes the current Safe Node surface. It is intentionally smalle
 - Embedded Node baseline: Node.js `v24.5.0` artifacts are present in the current native tree.
 - Execution model: embedded `libnode.so` plus AutoJs6 bootstrap and CommonJS loader.
 - Process model: script service runs in `:nodejs_embedded`.
+- Concurrency model: one active execution per embedded process; default concurrent starts reject, while explicit enqueue uses the bounded execution queue.
 - Project model: file entry, Node project entry, and packaged APK entry are all supported paths.
 - Kotlin capability registry: `NodeRuntimeCapabilities`
 - JavaScript profile module: `require("autojs6:profile")`
@@ -87,6 +88,20 @@ Runtime diagnostics expose the same state through `require("autojs6:profile").fe
 - optional resolver trace through `AUTOJS6_NODE_RESOLVE_TRACE=1`, written to stderr and disabled by default
 - resolver visualizer report through `node tools/nodejs/resolver/explain-node-resolve.js --request <specifier> --from <file> --trace-file <stderr-log>` or `:app:explainNodeResolve` with `-Pautojs.nodejs.resolve.*`
 - optional embedded runtime timeline trace through `autojs.nodejs.timelineTrace=true` or `AUTOJS6_NODE_TIMELINE_TRACE=1`, reported as `embedded_script.timeline_json` and disabled by default
+
+## Execution Queue
+
+Embedded Node is not multi-instance inside a single `:nodejs_embedded` process. The default behavior rejects concurrent starts with `ERR_AUTOJS6_NODE_ENGINE_BUSY`.
+
+Callers that need ordered execution can opt in to the bounded caller-side queue through `NativeNodeEmbeddedScriptService.enqueueScript(...)`. The queue currently allows one waiting execution, supports cancellation by execution id, exposes queue status for queue participants, and separates queue timeout from script execution timeout. Each dequeued item starts a normal one-shot embedded service execution after the previous service process has settled.
+
+Stable queue errors:
+
+- `ERR_AUTOJS6_NODE_QUEUE_FULL`
+- `ERR_AUTOJS6_NODE_QUEUE_TIMEOUT`
+- `ERR_AUTOJS6_NODE_QUEUE_CANCELLED`
+
+See [design/EXECUTION_QUEUE.md](design/EXECUTION_QUEUE.md).
 
 Unsupported or rejected module source forms:
 

@@ -96,7 +96,7 @@ Runtime package installation is not a Safe Node Profile capability. Projects may
 
 Inspector remains disabled because it is a live debugger control channel, not a passive diagnostic API. Any future support must be debug-build-only, loopback-only, explicitly user-started, and closed through the embedded service lifecycle. See `docs/nodejs/design/INSPECTOR.md`.
 
-Embedded Node execution is single-active per `:nodejs_embedded` process. Concurrent starts reject with `ERR_AUTOJS6_NODE_ENGINE_BUSY` instead of overlapping V8/libuv lifecycle ownership or silently queuing. See `docs/nodejs/design/MULTI_INSTANCE.md`.
+Embedded Node execution is single-active per `:nodejs_embedded` process. Normal concurrent starts reject with `ERR_AUTOJS6_NODE_ENGINE_BUSY` instead of overlapping V8/libuv lifecycle ownership or silently queuing. A bounded execution queue exists only for explicit enqueue requests; queue full, timeout, and cancellation paths use stable `ERR_AUTOJS6_NODE_QUEUE_*` errors. See `docs/nodejs/design/MULTI_INSTANCE.md` and `docs/nodejs/design/EXECUTION_QUEUE.md`.
 
 ## ESM Policy
 

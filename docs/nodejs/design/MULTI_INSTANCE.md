@@ -1,6 +1,6 @@
 # Embedded Node Multi-Instance Policy
 
-Status: enforced single active execution per `:nodejs_embedded` process. This task prevents accidental overlapping V8/libuv lifecycle ownership. It does not add an execution queue.
+Status: enforced single active execution per `:nodejs_embedded` process, with an explicit opt-in queue documented in [EXECUTION_QUEUE.md](EXECUTION_QUEUE.md).
 
 ## Decision
 
@@ -18,6 +18,8 @@ ERR_AUTOJS6_NODE_ENGINE_BUSY
 
 The rejected request is not queued silently.
 
+Callers that deliberately want queueing must use the controlled caller-side enqueue API. Queueing is not the default startup behavior.
+
 ## Rationale
 
 Embedded Node execution owns process-local native state:
@@ -32,7 +34,7 @@ Embedded Node execution owns process-local native state:
 
 The current service process is intentionally short-lived and schedules process exit after an execution finishes. Allowing overlapping executions in the same process would make stop, timeout, native handle cleanup, bridge callbacks, and stdout capture ambiguous.
 
-Rejecting concurrent starts is safer than queuing until Task 82 defines cancellation, fairness, queue limits, timeout ownership, and user-visible status.
+Rejecting concurrent starts by default is safer than silent queueing. The controlled queue keeps max queued executions, timeout ownership, cancellation, status, and service-exit behavior explicit.
 
 ## Current Runtime Behavior
 
@@ -60,6 +62,17 @@ start request
   -> nativeValues.embedded_script.concurrent_policy=single-active-execution-per-process
 ```
 
+Explicit queued execution:
+
+```text
+enqueue request
+  -> caller-side queue slot already owned
+  -> enter bounded caller-side execution queue
+  -> previous service execution exits and process settles
+  -> start a normal one-shot service execution
+  -> return queue diagnostics in nativeValues
+```
+
 Timeout or process crash still follows the existing timeout/crash diagnostics. If the client times out and stops the service, the process exits rather than admitting another execution into an uncertain native lifecycle.
 
 ## Packaged APK Behavior
@@ -71,24 +84,20 @@ Packaged behavior is:
 - first active execution owns the process
 - concurrent starts reject with `ERR_AUTOJS6_NODE_ENGINE_BUSY`
 - after the first execution exits and the service settles, a later execution may run normally
-- future packaged queue metadata must be explicit and verified by the packaged diagnostic report
+- explicit queue metadata is caller-local and must remain visible through diagnostics when packaged callers opt in
 
 ## Queue Boundary
 
-Task 81 deliberately does not implement a queue.
+The execution queue is intentionally small and explicit. It does not make embedded Node multi-instance:
 
-Task 82 may add a controlled queue only after defining:
+- still one active V8/libuv/Node environment per `:nodejs_embedded` process
+- queued executions are serialized before service start and run as separate one-shot service executions
+- max queued executions is currently `1`
+- queue cancellation works only before the queued script starts
+- queue timeout is separate from script execution timeout
+- queue failures return stable `ERR_AUTOJS6_NODE_QUEUE_*` codes
 
-- max queued executions
-- per-execution timeout ownership
-- cancellation semantics
-- user stop behavior
-- queue status diagnostics
-- packaged APK behavior
-- interaction with service process exit
-- behavior when the active execution crashes or times out
-
-Until then, `ERR_AUTOJS6_NODE_ENGINE_BUSY` is the stable behavior.
+See [EXECUTION_QUEUE.md](EXECUTION_QUEUE.md).
 
 ## Future Process-Per-Execution Option
 
@@ -112,5 +121,8 @@ Current focused coverage:
 - assert the second returns `ERR_AUTOJS6_NODE_ENGINE_BUSY`
 - assert the first completes normally
 - assert a later script runs after the active slot is released
+- enqueue a second script explicitly and assert it runs after the first
+- cancel a queued script by execution id
+- assert a third enqueue returns `ERR_AUTOJS6_NODE_QUEUE_FULL` when the queue is full
 
-Release candidates should also verify packaged smoke still uses one embedded service process and does not add queue metadata unless Task 82 implements it.
+Release candidates should also verify packaged smoke still uses one embedded service process and does not treat queue support as concurrent execution support.
