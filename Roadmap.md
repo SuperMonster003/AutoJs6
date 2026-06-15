@@ -245,15 +245,15 @@ Acceptance:
 
 ### Gate 10: Publishing Cleanup
 
-- [ ] Check whether the temporary ACE test package and app label affect release
+- [x] Check whether the temporary ACE test package and app label affect release
   builds.
 - [ ] Restore the official application id and label before final merge, or limit
   the test package to debug/test-only scope.
-- [ ] Classify the `version.properties` change as release version bump, build
+- [x] Classify the `version.properties` change as release version bump, build
   auto-change, or accidental change.
-- [ ] Confirm ACE still is not the default editor.
-- [ ] Confirm LSP still is default-off.
-- [ ] Confirm VisualEditorAce still has no user entry.
+- [x] Confirm ACE still is not the default editor.
+- [x] Confirm LSP still is default-off.
+- [x] Confirm VisualEditorAce still has no user entry.
 
 Acceptance:
 

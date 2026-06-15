@@ -106,6 +106,8 @@ Before ACE is presented as a gray-release experimental editor:
   `docs/dev/ace-release-gate-status.md`.
 - Record Sony XQ-AT72 physical-device results in
   `docs/dev/ace-release-device-report-sony-xq-at72.md`.
+- Track package/label and `version.properties` cleanup in
+  `docs/dev/ace-release-publishing-cleanup.md`.
 - Use the isolated ACE debug activity `IME stress` helper as a quick preflight;
   do not treat it as a replacement for physical tap-anchor and CJK validation.
 - Verify asset-missing, ready-timeout, JS-init, renderer-gone, and large-file debug hooks.

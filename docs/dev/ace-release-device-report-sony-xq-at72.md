@@ -64,6 +64,7 @@ path has a recorded result.
 | Large-file Native routing | TBD | |
 | Native editor regression | TBD | |
 | Diagnostics export | TBD | |
+| Publishing cleanup audit | STATIC PASS | See `docs/dev/ace-release-publishing-cleanup.md`; final package/label restore is still pending before merge or non-test release. |
 
 ## Diagnostics Snapshots
 

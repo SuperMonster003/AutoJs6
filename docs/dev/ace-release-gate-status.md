@@ -17,6 +17,12 @@ report for the preferred representative device is:
 docs/dev/ace-release-device-report-sony-xq-at72.md
 ```
 
+Publishing cleanup audit:
+
+```text
+docs/dev/ace-release-publishing-cleanup.md
+```
+
 ## Automated Gate
 
 - Native remains the default editor in resources, preferences, enum fallback,

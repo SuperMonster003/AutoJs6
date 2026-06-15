@@ -12,6 +12,7 @@ const FILES = {
   roadmap: "Roadmap.md",
   releaseStatus: "docs/dev/ace-release-gate-status.md",
   sonyReport: "docs/dev/ace-release-device-report-sony-xq-at72.md",
+  publishingCleanup: "docs/dev/ace-release-publishing-cleanup.md",
   integrationDoc: "docs/dev/ace-editor-integration.md",
   keyboardViewportPlan: "docs/dev/ace-keyboard-viewport-test-plan.md",
   visualInvestigation: "docs/dev/visual-editor-ace-investigation.md",
@@ -132,11 +133,19 @@ assertIncludes(FILES.roadmap, "Automated/static gate:");
 assertIncludes(FILES.roadmap, "Manual device gate:");
 assertIncludes(FILES.releaseStatus, "# ACE Release Gate Status");
 assertIncludes(FILES.releaseStatus, "docs/dev/ace-release-device-report-sony-xq-at72.md");
+assertIncludes(FILES.releaseStatus, "docs/dev/ace-release-publishing-cleanup.md");
 assertIncludes(FILES.releaseStatus, "## Feature Freeze");
 assertIncludes(FILES.sonyReport, "# ACE Release Device Report - Sony XQ-AT72");
+assertIncludes(FILES.sonyReport, "Publishing cleanup audit");
 assertIncludes(FILES.sonyReport, "## Automated Gate");
 assertIncludes(FILES.sonyReport, "## Manual Gate Summary");
 assertIncludes(FILES.sonyReport, "Release candidate accepted");
+assertIncludes(FILES.publishingCleanup, "# ACE Release Publishing Cleanup");
+assertIncludes(FILES.publishingCleanup, "defaultConfig.applicationId");
+assertIncludes(FILES.publishingCleanup, "VERSION_BUILD");
+assertIncludes(FILES.publishingCleanup, "Native is still the static default editor");
+assertIncludes(FILES.publishingCleanup, "LSP remains default-off");
+assertIncludes(FILES.publishingCleanup, "VisualEditorAce has no public enum");
 assertIncludes(FILES.integrationDoc, "Run `node tools/ace-ci/check-ace-release-gate.mjs`.");
 assertIncludes(FILES.integrationDoc, "docs/dev/ace-release-device-report-sony-xq-at72.md");
 assertIncludes(FILES.keyboardViewportPlan, "Sony XQ-AT72");
