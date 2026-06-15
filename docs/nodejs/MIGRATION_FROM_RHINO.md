@@ -114,6 +114,22 @@ const shell = require("shell");
 
 Use Node builtins only within the supported profile. Raw `child_process`, native addons, unrestricted network modules, and unrestricted filesystem access remain disabled by default.
 
+## Shell Commands
+
+Node `child_process` is not available in the Safe Node Profile. Use the controlled `shell` bridge for simple command
+execution:
+
+```js
+"nodejs";
+
+const shell = require("shell");
+const result = await shell.exec("echo ok", { timeoutMs: 1000 });
+console.log(result.code, result.stdout.trim());
+```
+
+Projects that use a bridge permission manifest must declare `shell`; root execution also requires `shell.root`.
+`spawn()`, `fork()`, streaming stdio, and interactive shells are not supported.
+
 ## Threads And Async Work
 
 Rhino scripts may use older thread APIs. Node scripts should prefer:

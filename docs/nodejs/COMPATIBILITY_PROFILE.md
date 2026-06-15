@@ -761,6 +761,7 @@ Overrides outside the documented safe range are ignored and reported in `profile
   - `exec(command, options?): Promise<{ code: number, stdout: string, stderr: string }>`
   - options: `{ root?: boolean, timeoutMs?: number, cwd?: string, env?: Record<string, string> }`
   - runs through the AutoJs6 bridge provider, not Node `child_process`
+  - migration mapping: `child_process.exec()` -> `require("shell").exec()` with declared `shell` capability; `child_process.spawn()`, `fork()`, streaming stdio, and interactive shells are not supported by the Safe Node Profile
   - non-root mode uses a controlled non-interactive shell process on a provider thread; root mode is explicit and attempts `su -c`
   - `cwd` is relative to the scoped working directory and rejects absolute paths, NUL bytes, `..` escapes, and realpath escapes
   - `env` accepts string keys and values only

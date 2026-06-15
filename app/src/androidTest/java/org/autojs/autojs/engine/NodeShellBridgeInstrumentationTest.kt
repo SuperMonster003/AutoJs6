@@ -170,6 +170,131 @@ class NodeShellBridgeInstrumentationTest {
     }
 
     @Test
+    fun jsShellModuleIsChildProcessAlternativeAndRequiresDeclaredCapability() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node shell child_process alternative policy")
+
+        val shellManifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(listOf("shell"))
+        val allowed = NodeEmbeddedTestHarness.runEmbeddedScript(
+            """
+            "nodejs";
+            (async function main() {
+              const bridge = require("autojs6:bridge");
+              const requests = [];
+              bridge.__test.setTransport({
+                postMessage(message) {
+                  const request = JSON.parse(message);
+                  requests.push(request);
+                  setImmediate(() => bridge.__test.receiveMessage(JSON.stringify({
+                    id: request.id,
+                    ok: true,
+                    result: { code: 0, stdout: "allowed\n", stderr: "" }
+                  })));
+                }
+              });
+
+              let childProcessCode = "";
+              try {
+                require("child_process").exec("echo denied");
+              } catch (error) {
+                childProcessCode = String(error && (error.autojs6Code || error.code || ""));
+              }
+
+              const shell = require("shell");
+              const result = await shell.exec("echo allowed", { timeoutMs: 1234 });
+              let rootDeniedCode = "";
+              let rootMissing = "";
+              try {
+                await shell.exec("id", { root: true, timeoutMs: 1234 });
+              } catch (error) {
+                rootDeniedCode = String(error && (error.autojs6Code || error.code || ""));
+                rootMissing = Array.isArray(error && error.missingCapabilities)
+                  ? error.missingCapabilities.join("|")
+                  : "";
+              }
+
+              console.log("shell.policy.child_process=" + childProcessCode);
+              console.log("shell.policy.exec=" + result.code + "/" + result.stdout.trim() + "/" + requests.length);
+              console.log("shell.policy.permissions=" + requests[0].permissions.join("|"));
+              console.log("shell.policy.root_denied=" + rootDeniedCode + "/" + rootMissing + "/" + requests.length);
+              console.log("shell.policy.methods=" + [typeof shell.exec, typeof shell.spawn, typeof shell.open].join("|"));
+              console.log("shell.policy.pending=" + bridge.__test.pendingCount());
+            })();
+            """.trimIndent(),
+            "<embedded-autojs-shell-child-process-policy.js>",
+            runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to shellManifest.toJson()),
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("shell child_process alternative declared capability", allowed)
+        assertTrue(allowed.stdout.contains("shell.policy.child_process=ERR_AUTOJS6_BUILTIN_DISABLED"))
+        assertTrue(allowed.stdout.contains("shell.policy.exec=0/allowed/1"))
+        assertTrue(allowed.stdout.contains("shell.policy.permissions=shell"))
+        assertTrue(
+            allowed.stdout.contains(
+                "shell.policy.root_denied=${NodeRuntimeErrorCodes.BRIDGE_CAPABILITY_NOT_DECLARED}/shell.root/1",
+            ),
+        )
+        assertTrue(allowed.stdout.contains("shell.policy.methods=function|undefined|undefined"))
+        assertTrue(allowed.stdout.contains("shell.policy.pending=0"))
+
+        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+
+        val toastOnlyManifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(listOf("toast"))
+        val denied = NodeEmbeddedTestHarness.runEmbeddedScript(
+            """
+            "nodejs";
+            (async function main() {
+              const bridge = require("autojs6:bridge");
+              const profile = require("autojs6:profile");
+              const requests = [];
+              bridge.__test.setTransport({
+                postMessage(message) {
+                  const request = JSON.parse(message);
+                  requests.push(request);
+                  setImmediate(() => bridge.__test.receiveMessage(JSON.stringify({
+                    id: request.id,
+                    ok: false,
+                    error: {
+                      name: "Error",
+                      message: "shell request unexpectedly reached transport",
+                      code: "ERR_TEST_SHELL_TRANSPORT_REACHED",
+                      module: request.module,
+                      method: request.method
+                    }
+                  })));
+                }
+              });
+
+              let deniedCode = "";
+              let missing = "";
+              try {
+                await require("shell").exec("echo denied", { timeoutMs: 1000 });
+              } catch (error) {
+                deniedCode = String(error && (error.autojs6Code || error.code || ""));
+                missing = Array.isArray(error && error.missingCapabilities)
+                  ? error.missingCapabilities.join("|")
+                  : "";
+              }
+
+              console.log("shell.policy.manifest_denied=" + deniedCode + "/" + missing + "/" + requests.length);
+              console.log("shell.policy.manifest_report=" + profile.bridgePermissions.enforced + "/" + profile.bridgePermissions.normalizedPermissions.join("|"));
+              console.log("shell.policy.manifest_pending=" + bridge.__test.pendingCount());
+            })();
+            """.trimIndent(),
+            "<embedded-autojs-shell-missing-capability-policy.js>",
+            runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to toastOnlyManifest.toJson()),
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("shell child_process alternative missing capability", denied)
+        assertTrue(
+            denied.stdout.contains(
+                "shell.policy.manifest_denied=${NodeRuntimeErrorCodes.BRIDGE_CAPABILITY_NOT_DECLARED}/shell/0",
+            ),
+        )
+        assertTrue(denied.stdout.contains("shell.policy.manifest_report=true/toast"))
+        assertTrue(denied.stdout.contains("shell.policy.manifest_pending=0"))
+    }
+
+    @Test
     fun androidShellProviderRunsNonRootCommandAndEnforcesPolicy() {
         val workDir = File(context.cacheDir, "node-bridge-shell-provider").apply {
             deleteRecursively()

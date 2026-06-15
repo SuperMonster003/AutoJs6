@@ -54,7 +54,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] bridge smoke verifies `image`/`images` capture/read/save/clip/resize/find/recycle shape, scoped path rejection, idempotent recycle, and stable Android provider rejection
 - [ ] bridge smoke verifies `clipboard` fake provider results, shadowing protection, permission tagging, and no `watch` API
 - [ ] bridge smoke verifies `device` fake provider results, shadowing protection, sensitive field absence, permission tagging, and no `watch` API
-- [ ] bridge smoke verifies `shell` fake provider results, shadowing protection, timeout/cwd/env policy, explicit root permission tagging, and that `child_process` remains disabled
+- [ ] bridge smoke verifies `shell` fake provider results, shadowing protection, timeout/cwd/env policy, declared `shell`/`shell.root` capability behavior, explicit root permission tagging, and that `child_process` remains disabled
 - [ ] bridge smoke verifies controlled `fetch` fake-provider GET/POST, timeout, abort, response budget, unsupported scheme, redirect limit, max concurrency, service-destroy cleanup, diagnostics counters, shadowing protection, and that raw `http`/`https`/`net`/`tls`/`dns` remain disabled
 - [ ] bridge smoke verifies controlled `websocket` fake-provider connect/send/receive/close, timeout, message budget, max connection, service-destroy cleanup, diagnostics counters, shadowing protection, and that raw `net`/`tls` remain disabled
 - [ ] bridge smoke verifies controlled `work_manager` schedule-once, schedule-periodic, cancel, list, scoped descriptor policy, packaged entry metadata serialization, queued-fallback rejection, shadowing protection, and that `tasks` remains unavailable

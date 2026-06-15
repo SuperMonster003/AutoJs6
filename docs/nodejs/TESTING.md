@@ -324,7 +324,7 @@ Current `shell` bridge focused instrumentation:
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeShellBridgeInstrumentationTest"
 ```
 
-This suite verifies the `shell` bridge registry, fake provider request/response behavior, `require("shell")`, shadowing protection, timeout propagation, `cwd` and `env` normalization, explicit root permission tagging, real Android non-root command execution, non-zero exit results, timeout result shape, policy denials, and that `child_process` remains disabled.
+This suite verifies the `shell` bridge registry, fake provider request/response behavior, `require("shell")`, shadowing protection, timeout propagation, `cwd` and `env` normalization, explicit root permission tagging, manifest-declared `shell`/`shell.root` capability behavior, real Android non-root command execution, non-zero exit results, timeout result shape, policy denials, and that `child_process` remains disabled.
 
 Current controlled fetch bridge focused instrumentation:
 
