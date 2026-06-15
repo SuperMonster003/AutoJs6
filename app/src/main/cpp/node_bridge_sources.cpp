@@ -7971,8 +7971,14 @@ std::string buildEmbeddedScriptExecutionSource(
     terminatedCount: 0,
     startupTimeoutCount: 0,
     rejectedByPolicyCount: 0,
+    cleanupRequestedCount: 0,
+    cleanupTerminateRequestedCount: 0,
+    cleanupErrorCount: 0,
+    cleanupPendingMessageRejectedCount: 0,
     lastPolicyRejection: ""
   };
+  const __autojs6_worker_threads_records = new Set();
+  let __autojs6_worker_threads_shutdown_reason = "";
   function __autojs6_has_own(object, key) {
     return Object.prototype.hasOwnProperty.call(object, key);
   }
@@ -9600,11 +9606,77 @@ std::string buildEmbeddedScriptExecutionSource(
     if (!worker || worker.__autojs6Finished) {
       return;
     }
+    if (worker.__autojs6StartupTimer !== null && worker.__autojs6StartupTimer !== undefined) {
+      try {
+        clearTimeout(worker.__autojs6StartupTimer);
+      } catch (_) {}
+      worker.__autojs6StartupTimer = null;
+    }
     worker.__autojs6Finished = true;
+    __autojs6_worker_threads_records.delete(worker);
     __autojs6_worker_threads_diagnostics.activeWorkerCount = Math.max(
       0,
       __autojs6_worker_threads_diagnostics.activeWorkerCount - 1
     );
+  }
+  function __autojs6_worker_threads_listener_count(worker, eventName) {
+    if (!worker || typeof worker.listenerCount !== "function") {
+      return 0;
+    }
+    try {
+      return Math.max(0, Number(worker.listenerCount(eventName)) || 0);
+    } catch (_) {
+      return 0;
+    }
+  }
+  function __autojs6_worker_threads_emit_cleanup_error(worker, reason) {
+    if (__autojs6_worker_threads_listener_count(worker, "error") <= 0) {
+      return;
+    }
+    try {
+      worker.emit(
+        "error",
+        __autojs6_worker_threads_error(
+          "AutoJs6 experimental worker_threads terminated worker during " + reason + ".",
+          "ERR_AUTOJS6_WORKER_TERMINATED"
+        )
+      );
+      __autojs6_worker_threads_diagnostics.cleanupPendingMessageRejectedCount += 1;
+    } catch (_) {
+      __autojs6_worker_threads_diagnostics.cleanupErrorCount += 1;
+    }
+  }
+  function __autojs6_terminate_all_worker_threads(reason) {
+    const shutdownReason = String(reason || "runtime shutdown");
+    __autojs6_worker_threads_shutdown_reason = shutdownReason;
+    const workers = Array.from(__autojs6_worker_threads_records).filter(function(worker) {
+      return worker && !worker.__autojs6Finished;
+    });
+    if (workers.length === 0) {
+      return;
+    }
+    __autojs6_worker_threads_diagnostics.cleanupRequestedCount += workers.length;
+    for (const worker of workers) {
+      __autojs6_worker_threads_emit_cleanup_error(worker, shutdownReason);
+      const nativeWorker = worker.__autojs6NativeWorker;
+      if (nativeWorker && typeof nativeWorker.terminate === "function") {
+        try {
+          const termination = nativeWorker.terminate();
+          __autojs6_worker_threads_diagnostics.cleanupTerminateRequestedCount += 1;
+          if (termination && typeof termination.then === "function") {
+            termination.then(
+              function() {},
+              function() {
+                __autojs6_worker_threads_diagnostics.cleanupErrorCount += 1;
+              }
+            );
+          }
+        } catch (_) {
+          __autojs6_worker_threads_diagnostics.cleanupErrorCount += 1;
+        }
+      }
+      __autojs6_worker_threads_finish(worker);
+    }
   }
   function __autojs6_worker_threads_policy_snapshot() {
     return Object.freeze({
@@ -9621,6 +9693,10 @@ std::string buildEmbeddedScriptExecutionSource(
       terminatedCount: __autojs6_worker_threads_diagnostics.terminatedCount,
       startupTimeoutCount: __autojs6_worker_threads_diagnostics.startupTimeoutCount,
       rejectedByPolicyCount: __autojs6_worker_threads_diagnostics.rejectedByPolicyCount,
+      cleanupRequestedCount: __autojs6_worker_threads_diagnostics.cleanupRequestedCount,
+      cleanupTerminateRequestedCount: __autojs6_worker_threads_diagnostics.cleanupTerminateRequestedCount,
+      cleanupErrorCount: __autojs6_worker_threads_diagnostics.cleanupErrorCount,
+      cleanupPendingMessageRejectedCount: __autojs6_worker_threads_diagnostics.cleanupPendingMessageRejectedCount,
       lastPolicyRejection: __autojs6_worker_threads_diagnostics.lastPolicyRejection
     };
   }
@@ -9791,6 +9867,13 @@ std::string buildEmbeddedScriptExecutionSource(
       if (!(this instanceof AutoJs6Worker)) {
         return new AutoJs6Worker(filename, options);
       }
+      if (__autojs6_worker_threads_shutdown_reason) {
+        throw __autojs6_worker_threads_error(
+          "AutoJs6 experimental worker_threads worker creation is disabled during " +
+            __autojs6_worker_threads_shutdown_reason + ".",
+          "ERR_AUTOJS6_WORKER_TERMINATED"
+        );
+      }
       if (!__autojs6_worker_threads_try_start()) {
         throw __autojs6_worker_threads_error(
           "AutoJs6 experimental worker_threads exceeded " + __autojs6_worker_threads_policy.maxWorkers + " active worker.",
@@ -9813,6 +9896,7 @@ std::string buildEmbeddedScriptExecutionSource(
           }
         );
         this.__autojs6NativeWorker = nativeWorker;
+        __autojs6_worker_threads_records.add(this);
         try {
           Object.defineProperty(this, "threadId", {
             value: nativeWorker.threadId,
@@ -9842,20 +9926,24 @@ std::string buildEmbeddedScriptExecutionSource(
           self.emit("error", error);
         }, __autojs6_worker_threads_policy.startupTimeoutMs);
         nativeWorker.on("online", function() {
+          if (__autojs6_finished || __autojs6_worker_threads_shutdown_reason) return;
           clearStartupTimer();
           self.emit("online");
         });
         nativeWorker.on("message", function(message) {
+          if (__autojs6_finished || __autojs6_worker_threads_shutdown_reason) return;
           clearStartupTimer();
           self.emit("message", message);
         });
         nativeWorker.on("error", function(error) {
+          if (__autojs6_finished || __autojs6_worker_threads_shutdown_reason) return;
           clearStartupTimer();
           self.emit("error", error);
         });
         nativeWorker.on("exit", function(code) {
           clearStartupTimer();
           __autojs6_worker_threads_finish(self);
+          if (__autojs6_finished || __autojs6_worker_threads_shutdown_reason) return;
           self.emit("exit", code);
         });
       } catch (error) {
@@ -26302,10 +26390,12 @@ std::string buildEmbeddedScriptExecutionSource(
       pendingScopedFsCallbacks: __autojs6_pending_scoped_fs_callbacks,
       pendingScopedFsWatchCount: __autojs6_scoped_fs_watch_records.length,
       pendingScopedFsWatchFileCount: __autojs6_scoped_watch_file_records.length,
+      pendingWorkerCount: __autojs6_worker_threads_diagnostics.activeWorkerCount,
       pendingCryptoCallbacks: __autojs6_pending_crypto_callbacks,
       pendingDnsCallbacks: __autojs6_pending_dns_callbacks,
       pendingZlibCallbacks: __autojs6_pending_zlib_callbacks,
       pendingAsyncCallbacks,
+      pendingWorkers: __autojs6_worker_threads_diagnostics.activeWorkerCount > 0,
       pendingCallbacks: pendingAsyncCallbacks > 0
     };
   }
@@ -26329,6 +26419,8 @@ std::string buildEmbeddedScriptExecutionSource(
     fields.pendingScopedFsCallbacks = summary.pendingScopedFsCallbacks;
     fields.pendingScopedFsWatchCount = summary.pendingScopedFsWatchCount;
     fields.pendingScopedFsWatchFileCount = summary.pendingScopedFsWatchFileCount;
+    fields.pendingWorkers = summary.pendingWorkers;
+    fields.pendingWorkerCount = summary.pendingWorkerCount;
     fields.pendingCryptoCallbacks = summary.pendingCryptoCallbacks;
     fields.pendingDnsCallbacks = summary.pendingDnsCallbacks;
     fields.pendingZlibCallbacks = summary.pendingZlibCallbacks;
@@ -26373,6 +26465,10 @@ std::string buildEmbeddedScriptExecutionSource(
     fields.workerTerminatedCount = __autojs6_worker_threads_diagnostics.terminatedCount;
     fields.workerStartupTimeoutCount = __autojs6_worker_threads_diagnostics.startupTimeoutCount;
     fields.workerRejectedByPolicyCount = __autojs6_worker_threads_diagnostics.rejectedByPolicyCount;
+    fields.workerCleanupRequestedCount = __autojs6_worker_threads_diagnostics.cleanupRequestedCount;
+    fields.workerCleanupTerminateRequestedCount = __autojs6_worker_threads_diagnostics.cleanupTerminateRequestedCount;
+    fields.workerCleanupErrorCount = __autojs6_worker_threads_diagnostics.cleanupErrorCount;
+    fields.workerCleanupPendingMessageRejectedCount = __autojs6_worker_threads_diagnostics.cleanupPendingMessageRejectedCount;
     fields.workerLastPolicyRejection = __autojs6_worker_threads_diagnostics.lastPolicyRejection;
     fields.sourceMapEnabled = __autojs6_source_map_diagnostics.enabled;
     fields.sourceMapLoadedCount = __autojs6_source_map_diagnostics.loadedCount;
@@ -26385,6 +26481,7 @@ std::string buildEmbeddedScriptExecutionSource(
   }
   function __autojs6_finish_success(value) {
     if (__autojs6_finished) return;
+    __autojs6_terminate_all_worker_threads("script success");
     __autojs6_close_all_scoped_fs_watches();
     __autojs6_close_all_scoped_watch_files();
     __autojs6_close_all_scoped_fds();
@@ -26401,6 +26498,7 @@ std::string buildEmbeddedScriptExecutionSource(
   }
   function __autojs6_finish_error(error) {
     if (__autojs6_finished) return;
+    __autojs6_terminate_all_worker_threads("script failure");
     __autojs6_close_all_scoped_fs_watches();
     __autojs6_close_all_scoped_watch_files();
     __autojs6_close_all_scoped_fds();

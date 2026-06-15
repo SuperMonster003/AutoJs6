@@ -29,6 +29,8 @@ void putEmbeddedScriptExecutionFields(std::vector<std::string>& payload, const s
     putPayload(payload, "embedded_script.pending_interval_count", jsonNumberField(text, "pendingIntervalCount"));
     putPayload(payload, "embedded_script.pending_immediate_count", jsonNumberField(text, "pendingImmediateCount"));
     putPayload(payload, "embedded_script.pending_scoped_fs_callbacks", jsonNumberField(text, "pendingScopedFsCallbacks"));
+    putPayload(payload, "embedded_script.pending_workers", jsonBooleanField(text, "pendingWorkers"));
+    putPayload(payload, "embedded_script.pending_worker_count", jsonNumberField(text, "pendingWorkerCount"));
     putPayload(payload, "embedded_script.pending_crypto_callbacks", jsonNumberField(text, "pendingCryptoCallbacks"));
     putPayload(payload, "embedded_script.pending_dns_callbacks", jsonNumberField(text, "pendingDnsCallbacks"));
     putPayload(payload, "embedded_script.pending_zlib_callbacks", jsonNumberField(text, "pendingZlibCallbacks"));
@@ -72,6 +74,10 @@ void putEmbeddedScriptExecutionFields(std::vector<std::string>& payload, const s
     putPayload(payload, "embedded_script.worker_terminated_count", jsonNumberField(text, "workerTerminatedCount"));
     putPayload(payload, "embedded_script.worker_startup_timeout_count", jsonNumberField(text, "workerStartupTimeoutCount"));
     putPayload(payload, "embedded_script.worker_rejected_by_policy_count", jsonNumberField(text, "workerRejectedByPolicyCount"));
+    putPayload(payload, "embedded_script.worker_cleanup_requested_count", jsonNumberField(text, "workerCleanupRequestedCount"));
+    putPayload(payload, "embedded_script.worker_cleanup_terminate_requested_count", jsonNumberField(text, "workerCleanupTerminateRequestedCount"));
+    putPayload(payload, "embedded_script.worker_cleanup_error_count", jsonNumberField(text, "workerCleanupErrorCount"));
+    putPayload(payload, "embedded_script.worker_cleanup_pending_message_rejected_count", jsonNumberField(text, "workerCleanupPendingMessageRejectedCount"));
     putPayload(payload, "embedded_script.worker_last_policy_rejection", jsonStringField(text, "workerLastPolicyRejection"));
     putPayload(payload, "embedded_script.source_map_enabled", jsonBooleanField(text, "sourceMapEnabled"));
     putPayload(payload, "embedded_script.source_map_loaded_count", jsonNumberField(text, "sourceMapLoadedCount"));

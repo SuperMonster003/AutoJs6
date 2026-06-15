@@ -121,6 +121,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] raw Node `http`, `https`, `net`, `tls`, `dns`, and `dgram` authority remains denied even if controlled fetch is enabled
 - [ ] `worker_threads` authority remains denied unless explicitly feature-gated and security-reviewed
 - [ ] experimental workers, when explicitly tested, expose a smaller capability set than parent Node scripts and cannot access AutoJs bridge modules
+- [ ] experimental worker resource stress, when explicitly tested, shows no active worker after completion cleanup and no unbounded RSS/thread growth
 - [ ] direct WorkManager, AlarmManager, JobScheduler, and BroadcastReceiver authority remains denied to Node scripts
 
 ## Compatibility

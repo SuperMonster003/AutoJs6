@@ -172,7 +172,7 @@ With the experimental request flag on, workers are pure JavaScript compute worke
 - inspector
 - unrestricted filesystem APIs
 
-Bridge ownership remains in the parent script. Workers may exchange pure data with the parent through `parentPort.postMessage`, `worker.postMessage`, and `workerData`; the worker itself may not call bridge modules. The MVP allows one active worker, uses a startup timeout, denies nested workers, and keeps packaged worker source graphs and deeper lifecycle stress as follow-up work.
+Bridge ownership remains in the parent script. Workers may exchange pure data with the parent through `parentPort.postMessage`, `worker.postMessage`, and `workerData`; the worker itself may not call bridge modules. The MVP allows one active worker, uses a startup timeout, denies nested workers, tracks active workers per execution, and terminates active workers during parent success/failure cleanup. Packaged worker source graphs remain follow-up work.
 
 See `docs/nodejs/design/WORKER_THREADS.md` for the current worker boundary.
 

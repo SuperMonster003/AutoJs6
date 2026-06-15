@@ -409,7 +409,7 @@ When the experimental request flag is enabled, `require("worker_threads")` and `
 
 The MVP loads worker source through the parent scoped resolver, then executes it in a native Node Worker with a worker-local restricted `require`. Worker-local `require("worker_threads")` exposes only `parentPort`, `workerData`, `isMainThread`, `threadId`, and a disabled nested `Worker`. Worker-local `require` denies AutoJs bridge modules, `autojs6:bridge`, `fs`, raw network, `shell`, `child_process`, native addons, `vm`, inspector, and nested workers. The first policy allows one active worker, a `5000` ms startup timeout, and safe pure-JS builtins only.
 
-See `docs/nodejs/design/WORKER_THREADS.md` for worker count, timeout, memory, packaged APK, bridge-denial, and lifecycle policy. Task 64 remains responsible for deeper lifecycle stress and service-destroy worker cleanup.
+Worker instances are tracked per execution. Parent success/failure cleanup performs best-effort termination of any active worker before writing the result envelope, and exposes pending-worker and cleanup counters through native diagnostics. See `docs/nodejs/design/WORKER_THREADS.md` for worker count, timeout, memory, packaged APK, bridge-denial, and lifecycle policy.
 
 ## Process Profile
 

@@ -243,6 +243,14 @@ Current experimental worker_threads focused instrumentation:
 
 This suite verifies the default disabled path, then enables the request-local experimental flag to cover local CommonJS worker scripts, `workerData`, `parentPort.postMessage`, `terminate()`, max-worker rejection, scoped path escape rejection, shadowing protection, Worker diagnostics counters, and denial of AutoJs bridge modules, `fs`, raw `net`, and nested workers inside worker scope.
 
+Current experimental worker_threads resource stress instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeWorkerThreadsResourceStressInstrumentationTest"
+```
+
+This suite verifies 50 sequential worker create/terminate cycles, worker exception recovery, infinite-loop worker timeout recovery, parent-completion cleanup for pending worker messages, worker cleanup diagnostics counters, and coarse RSS/thread-count snapshots around the sequential stress case.
+
 Current feature flag registry focused instrumentation:
 
 ```powershell

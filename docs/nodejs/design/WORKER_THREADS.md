@@ -144,13 +144,13 @@ Current MVP defines:
 - worker termination is idempotent
 - diagnostics for active, max active, created, terminated, startup timeout, and policy rejection counts
 
-Task 64 must harden:
+Task 64 hardens the MVP with:
 
-- tracking all workers per execution
-- parent timeout cancellation of all workers
-- service destroy termination of all workers
-- worker infinite-loop timeout behavior
-- native handle/thread leak diagnostics
+- a per-execution worker registry in the JavaScript bootstrap
+- automatic best-effort termination of active workers during parent success or failure cleanup
+- cleanup diagnostics for requested worker termination, termination errors, and rejected pending worker-message listeners
+- pending-worker fields in the Embedded Node result envelope
+- focused instrumentation for 50 sequential worker create/terminate cycles, worker exceptions, infinite-loop worker timeout recovery, and parent-completion cleanup
 
 No callback from a worker may re-enter a destroyed parent environment.
 
@@ -194,15 +194,13 @@ Current gates:
 
 - `NodeWorkerThreadsDesignGateInstrumentationTest` verifies the BuildConfig flag, Kotlin registry, JavaScript profile, bare and `node:` require denial, `require.resolve` denial, and shadowing protection.
 - `NodeWorkerThreadsExperimentalInstrumentationTest` verifies the default disabled path, request-local experimental enablement, local worker script loading, `workerData`, `parentPort.postMessage`, `terminate()`, max worker rejection, scoped path escape denial, Worker diagnostics, and denial of AutoJs bridge modules, `fs`, raw `net`, and nested workers inside worker scope.
+- `NodeWorkerThreadsResourceStressInstrumentationTest` verifies sequential create/terminate behavior, worker exception recovery, infinite-loop timeout recovery, parent-completion cleanup, cleanup diagnostics, and coarse RSS/thread snapshots.
 - `NodeSecurityRegressionInstrumentationTest` keeps `worker_threads` in the dangerous builtin denial corpus.
 
-Task 64 should add:
+Follow-up gates should add:
 
-- timeout termination
-- service destroy termination
-- uncaught exception propagation
-- unhandled rejection propagation
 - packaged APK worker source graph and verifier behavior
+- stronger native handle/thread leak diagnostics once worker support graduates beyond experimental mode
 
 ## Non-Goals
 
@@ -217,4 +215,4 @@ The MVP does not enable:
 - worker access to `fs`
 - worker access to raw network
 - worker access to full parent Safe Node builtins
-- service-destroy worker cleanup stress guarantees
+- unrestricted service-destroy worker cleanup guarantees beyond the current process-isolation and focused timeout recovery gates
