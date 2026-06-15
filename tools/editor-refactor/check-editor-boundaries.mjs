@@ -80,6 +80,7 @@ const nativeEngine = "app/src/main/java/org/autojs/autojs/ui/edit/editor/engine/
 const aceEngine = "app/src/main/java/org/autojs/autojs/ui/edit/editor/engine/AceScriptEditorEngine.kt";
 const functionsKeyboardHelper = "app/src/main/java/org/autojs/autojs/ui/edit/keyboard/FunctionsKeyboardHelper.java";
 const fileReadPipeline = "app/src/main/java/org/autojs/autojs/ui/edit/editor/loading/EditorFileReadPipeline.kt";
+const fileService = "app/src/main/java/org/autojs/autojs/ui/edit/editor/service/EditorFileService.kt";
 const textLoadPolicy = "app/src/main/java/org/autojs/autojs/ui/edit/editor/loading/EditorTextLoadPolicy.kt";
 const textLoadTarget = "app/src/main/java/org/autojs/autojs/ui/edit/editor/loading/EditorTextLoadTarget.kt";
 const editorTextProvider = "app/src/main/java/org/autojs/autojs/ui/edit/editor/service/EditorTextProvider.kt";
@@ -103,8 +104,10 @@ assertIncludes(editorView, "mCommandDispatcher.onCompletionLongClick(completions
 assertIncludes(editorView, "mCommandDispatcher.onModuleLongClick(module)");
 assertIncludes(editorView, "mCommandDispatcher.onPropertyClick(m, property)");
 assertIncludes(editorView, "mCommandDispatcher.onPropertyLongClick(m, property)");
-assertIncludes(editorView, "private val fileReadPipeline = EditorFileReadPipeline(context)");
-assertIncludes(editorView, "fileReadPipeline.readText(uri)");
+assertIncludes(editorView, "private val fileService = EditorFileService(");
+assertIncludes(editorView, "fileService.queryContentLengthOrNull(uri)");
+assertIncludes(editorView, "fileService.readText(uri)");
+assertIncludes(editorView, "return fileService");
 assertIncludes(editorView, ".streamTextChunks(");
 assertIncludes(editorView, "private fun applyReadMetadata(metadata: EditorFileReadMetadata)");
 assertIncludes(editorView, "private val editorTextProvider = EditorTextProvider(this) { editor }");
@@ -133,6 +136,7 @@ assertNotIncludes(editorView, "editor.appendTextChunk(");
 assertNotIncludes(editorView, "editor.beginLargeTextLoading(");
 assertNotIncludes(editorView, "editor.cancelLargeTextLoading(");
 assertNotIncludes(editorView, "OpenableColumns");
+assertNotIncludes(editorView, "EditorFileReadPipeline(context)");
 assertNotIncludes(editorView, "StringUtils.detectCharset");
 assertNotIncludes(editorView, "StringUtils.hasBom");
 assertNotIncludes(editorView, "streamDecodeAndEmit(");
@@ -229,6 +233,16 @@ assertIncludes(fileReadPipeline, "StringUtils.detectCharset(bytes)");
 assertIncludes(fileReadPipeline, "StringUtils.hasBom(bytes, charset)");
 assertNotIncludes(fileReadPipeline, "ScriptEditorEngine");
 assertNotIncludes(fileReadPipeline, "CodeEditText");
+
+assertIncludes(fileService, "class EditorFileService(");
+assertIncludes(fileService, "private val fileReadPipeline = EditorFileReadPipeline(context)");
+assertIncludes(fileService, "fun queryContentLengthOrNull(uri: Uri): Long?");
+assertIncludes(fileService, "fun readText(uri: Uri): EditorFileReadResult");
+assertIncludes(fileService, "fun streamTextChunks(");
+assertIncludes(fileService, "fileReadPipeline.queryContentLengthOrNull(uri)");
+assertIncludes(fileService, "fileReadPipeline.readText(uri)");
+assertIncludes(fileService, "fileReadPipeline.streamTextChunks(");
+assertNotIncludes(fileService, "CodeEditText");
 
 assertIncludes(textLoadPolicy, "const val LARGE_FILE_THRESHOLD_BYTES = 512 * 1024");
 assertIncludes(textLoadPolicy, "fun shouldRouteAceToNative(");

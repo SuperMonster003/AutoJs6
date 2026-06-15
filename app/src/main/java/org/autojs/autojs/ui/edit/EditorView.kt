@@ -75,11 +75,11 @@ import org.autojs.autojs.ui.edit.editor.engine.EditorSearchSyntaxException
 import org.autojs.autojs.ui.edit.editor.engine.EditorEngineType
 import org.autojs.autojs.ui.edit.editor.engine.ScriptEditorEngine
 import org.autojs.autojs.ui.edit.editor.loading.EditorFileReadMetadata
-import org.autojs.autojs.ui.edit.editor.loading.EditorFileReadPipeline
 import org.autojs.autojs.ui.edit.editor.loading.EditorTextLoadPolicy
 import org.autojs.autojs.ui.edit.editor.loading.EditorTextLoadTarget
 import org.autojs.autojs.ui.edit.editor.loading.EngineTextLoadTarget
 import org.autojs.autojs.ui.edit.editor.service.EditorBreakpointModelStore
+import org.autojs.autojs.ui.edit.editor.service.EditorFileService
 import org.autojs.autojs.ui.edit.editor.service.EditorTextProvider
 import org.autojs.autojs.ui.edit.editor.service.EditorThemeFontService
 import org.autojs.autojs.ui.edit.editor.service.EditorVersionHistoryService
@@ -175,7 +175,6 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     val commandDispatcher: EditorCommandDispatcher
         get() = mCommandDispatcher
 
-    private val fileReadPipeline = EditorFileReadPipeline(context)
     private val textLoadTarget: EditorTextLoadTarget
         get() = EngineTextLoadTarget(editor)
     private val editorTextProvider = EditorTextProvider(this) { editor }
@@ -223,6 +222,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     // 直接编辑指不是由撤销/重做按钮触发的文本变化.
     @Volatile
     private var mHadDirectEditSinceSave: Boolean = false
+
+    private val fileService = EditorFileService(context)
 
     // Whether a draft has been restored in this session.
     // If true, subsequent async file-load setInitialText() must NOT overwrite the restored draft.
@@ -775,7 +776,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     private fun loadUri(uri: Uri): Observable<String> {
-        val sizeOrNull = runCatching { fileReadPipeline.queryContentLengthOrNull(uri) }.getOrNull()
+        val sizeOrNull = runCatching { fileService.queryContentLengthOrNull(uri) }.getOrNull()
         val shouldStreamAsLargeFile = EditorTextLoadPolicy.shouldStreamAsLargeFile(sizeOrNull)
         if (EditorTextLoadPolicy.shouldRouteAceToNative(editor.engineType, shouldStreamAsLargeFile, shouldForceLargeFileNativeRoute())) {
             if (!ensureNativeEditorForLargeFile()) {
@@ -792,7 +793,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
         return Observable
             .fromCallable {
-                fileReadPipeline.readText(uri)
+                fileService.readText(uri)
             }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -909,7 +910,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         // zh-CN: 新的加载会话开始前重置取消标记.
         mLargeFileCancel.set(false)
 
-        return fileReadPipeline
+        return fileService
             .streamTextChunks(
                 uri = uri,
                 cancel = mLargeFileCancel,
@@ -1612,7 +1613,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     private fun currentFileSizeOrNull(): Long? {
         val currentUri = uri ?: return null
-        return runCatching { fileReadPipeline.queryContentLengthOrNull(currentUri) }.getOrNull()
+        return runCatching { fileService.queryContentLengthOrNull(currentUri) }.getOrNull()
     }
 
     private fun currentLargeFilePolicyLabel(): String {
