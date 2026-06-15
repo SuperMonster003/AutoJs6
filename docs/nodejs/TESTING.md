@@ -99,6 +99,14 @@ Current bridge protocol instrumentation:
 
 This suite covers the Kotlin bridge protocol, strict malformed request shape checks, bridge module registry, unavailable module/method errors, malformed live request responses, duplicate provider callback suppression, provider dispatch exception conversion, JavaScript fake transport, timeout/destroy handling, the current private live file transport, and the `toast`/`app`/`engines`/`dialogs`/`accessibility`/`media_projection`/`image` bridge smoke. The `app` smoke verifies that JavaScript can observe a real provider result, including a missing application lookup returning `false`. The `engines` smoke verifies current engine snapshots, bridge-module shadowing protection, live `all`/`stopAll`/`stopSelf` responses, and the controlled `execScript`/`execScriptFile` method shape. The `dialogs` smoke verifies fake provider results and the stable Android rejection path while the UI provider is not connected. The `accessibility` smoke verifies fake provider results, shadowing protection, disabled status reporting, and stable action rejection until an accessibility provider is connected. The `media_projection` and `image` smoke verifies fake opaque handles, `image`/`images` shadowing protection, and stable Android provider rejection until screenshot and image providers are connected. The `clipboard` and `device` bridges have their own focused test classes.
 
+Focused bridge RPC fuzzer:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeBridgeRpcFuzzerInstrumentationTest"
+```
+
+This suite fuzzes bridge request parsing, live file transport dispatch, Android provider unavailable/error paths, JavaScript `autojs6:bridge` malformed response handling, and pending-call cleanup. It covers missing or wrongly typed `id`/`module`/`method`, invalid JSON, non-array `args`, malformed `permissions`, invalid `timeoutMs`, huge arguments, too many arguments, binary-like payloads, unknown modules, unknown methods, same-id malformed responses, service destroy rejection, and fake-provider mode.
+
 Current compatibility corpus instrumentation:
 
 ```powershell

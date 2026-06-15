@@ -64,12 +64,9 @@ data class NodeBridgeRequest(
     companion object {
         fun fromJson(json: String): NodeBridgeRequest {
             val value = JSONObject(json)
-            val id = value.optNonBlankString("id")
-                ?: throw IllegalArgumentException("Node bridge request id must be non-empty.")
-            val module = value.optNonBlankString("module")
-                ?: throw IllegalArgumentException("Node bridge request module must be non-empty.")
-            val method = value.optNonBlankString("method")
-                ?: throw IllegalArgumentException("Node bridge request method must be non-empty.")
+            val id = value.requiredRequestString("id")
+            val module = value.requiredRequestString("module")
+            val method = value.requiredRequestString("method")
             return NodeBridgeRequest(
                 id = id,
                 module = module,
@@ -99,8 +96,18 @@ data class NodeBridgeRequest(
 
         private fun recoverString(json: String, name: String): String? {
             return runCatching {
-                JSONObject(json).optNonBlankString(name)
+                JSONObject(json).optionalRequestString(name)
             }.getOrNull()
+        }
+
+        private fun JSONObject.requiredRequestString(name: String): String {
+            return optionalRequestString(name)
+                ?: throw IllegalArgumentException("Node bridge request $name must be a non-empty string.")
+        }
+
+        private fun JSONObject.optionalRequestString(name: String): String? {
+            val value = opt(name)
+            return (value as? String)?.takeIf { it.isNotBlank() }
         }
 
         private fun parseArgs(value: JSONObject): JSONArray {

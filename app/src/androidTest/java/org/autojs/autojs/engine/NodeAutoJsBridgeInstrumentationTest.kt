@@ -1213,11 +1213,12 @@ class NodeAutoJsBridgeInstrumentationTest {
         )
         val constructor = sessionClass.getDeclaredConstructor(
             File::class.java,
+            NodeBridgeLimits.Policy::class.java,
             NodeBridgeCapabilityProvider::class.java,
         ).apply {
             isAccessible = true
         }
-        val session = constructor.newInstance(root, provider)
+        val session = constructor.newInstance(root, NodeBridgeLimits.defaults, provider)
         val configJson = sessionClass.getDeclaredMethod("configJson").apply {
             isAccessible = true
         }.invoke(session) as String
