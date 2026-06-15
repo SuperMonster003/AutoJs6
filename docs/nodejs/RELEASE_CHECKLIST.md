@@ -13,7 +13,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `:app:verifyNodeResolverVisualizerFixtures`
 - [ ] `:app:generateNodeProfileReleaseManifest`
 - [ ] `:app:verifyNodePrGate`
-- [ ] release candidates use `:app:verifyNodeReleaseGate` with `autojs.nodejs.test.deviceProfile=oneplus` or `full`
+- [ ] release candidates use `:app:verifyNodeReleaseGate` with `autojs.nodejs.test.deviceProfile=sony` or `full`
 - [ ] `:app:generateNodeNightlyReport` output attached when publishing nightly or release-candidate results
 - [ ] fuzzer failures, if any, have seed JSON files under `build/reports/nodejs/fuzz-seeds/` and replay with `:app:replayNodeFuzzerSeed`
 - [ ] rollback path reviewed against [ROLLBACK_PLAYBOOK.md](ROLLBACK_PLAYBOOK.md)
@@ -22,7 +22,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 
 - [ ] approved device serial selected with `ANDROID_SERIAL` or the matching Gradle property
 - [ ] `autojs.nodejs.test.deviceProfile` selected according to [DEVICE_MATRIX.md](DEVICE_MATRIX.md)
-- [ ] OnePlus OPD2413 gates use device-idle whitelist and foreground app start before focused embedded-service instrumentation
+- [ ] Sony XQ-AT72 gates use explicit serial `QV710AF65F`; OnePlus OPD2413 is not used for unattended current-branch gates
 - [ ] `EmbeddedScriptMvpInstrumentationTest`
 - [ ] `EmbeddedNodePackagedApkSmokeTest`
 - [ ] `NodeEmbeddedLifecycleStressInstrumentationTest`

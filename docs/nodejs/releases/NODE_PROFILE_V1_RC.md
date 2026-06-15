@@ -179,24 +179,25 @@ The full release-candidate gate is not green yet.
 4. A full `NodeEmbeddedMemoryLeakStressInstrumentationTest` run exceeded 11 minutes and was stopped.
 5. A shortened memory stress probe failed due to device disconnection during test teardown: `device 'bek749scrwv4wo8h' not found`.
 6. After that teardown failure, Xiaomi was no longer present in `adb devices`; only Sony `QV710AF65F` and an unapproved `OPD2413` device were visible. Per test policy at that time, this RC did not switch to those devices.
-7. Phase 4 approved OnePlus OPD2413 `63751f63` as the primary current-branch test device. The first OnePlus aggregate run exposed a packaged diagnostic gate wiring issue before packaged smoke or memory stress ran.
-8. OnePlus OPD2413 requires documented whitelist/foreground-start preparation for focused embedded-service instrumentation; without it, OPlus background-start policy can cause false script timeouts before `script.enter`.
-9. The default memory leak stress profile is still too long for the current local command timeout. The reduced profile is green after device preparation, but the full default profile remains a pre-publication rerun item.
+7. Phase 4 initially approved OnePlus OPD2413 `63751f63` as the primary current-branch test device. The first OnePlus aggregate run exposed a packaged diagnostic gate wiring issue before packaged smoke or memory stress ran.
+8. OnePlus OPD2413 is now excluded from current unattended gates because APK installation requires manual confirmation on that device.
+9. Sony XQ-AT72 `QV710AF65F` is the current primary device after the branch moved to the temporary `org.autojs.autojs6.nodejs` package identity for side-by-side testing.
+10. The default memory leak stress profile is still too long for the current local command timeout. The reduced profile is green after device preparation, but the full default profile remains a pre-publication rerun item.
 
 These blockers are environmental or gate-completeness blockers, not evidence that raw network, child process, native addon, scoped fs, or resolver policies were loosened.
 
 ## Required Rerun Before Publication
 
-Use OnePlus OPD2413 `63751f63` as the current primary device. Do not use Sony `QV710AF65F` for this branch while it is reserved for another AutoJs6 branch.
+Use Sony XQ-AT72 `QV710AF65F` as the current primary device. Do not use OnePlus OPD2413 for unattended current-branch gates.
 
 ```powershell
-$env:ANDROID_SERIAL='63751f63'
+$env:ANDROID_SERIAL='QV710AF65F'
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest"
 
-$env:ANDROID_SERIAL='63751f63'
-.\gradlew.bat --console=plain :app:verifyEmbeddedNodeReleaseCandidate "-Pautojs.embeddedNode.adbSerial=63751f63"
+$env:ANDROID_SERIAL='QV710AF65F'
+.\gradlew.bat --console=plain :app:verifyEmbeddedNodeReleaseCandidate "-Pautojs.embeddedNode.adbSerial=QV710AF65F"
 
-$env:ANDROID_SERIAL='63751f63'
+$env:ANDROID_SERIAL='QV710AF65F'
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeEmbeddedMemoryLeakStressInstrumentationTest"
 .\gradlew.bat --console=plain :app:pullNodeEmbeddedPerformanceReports
 ```
@@ -204,16 +205,17 @@ $env:ANDROID_SERIAL='63751f63'
 Optional shorter memory probe for local triage:
 
 ```powershell
-$env:ANDROID_SERIAL='63751f63'
+$env:ANDROID_SERIAL='QV710AF65F'
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeEmbeddedMemoryLeakStressInstrumentationTest" "-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.leak.iterations=5" "-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.leak.imageIterations=3" "-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.leak.faultIterations=2"
 ```
 
-OnePlus OPD2413 preparation before focused service gates:
+Sony XQ-AT72 preparation before focused service gates:
 
 ```powershell
-adb -s 63751f63 shell cmd deviceidle whitelist +org.autojs.autojs6
-adb -s 63751f63 shell cmd deviceidle whitelist +org.autojs.autojs6.test
-adb -s 63751f63 shell am start -n org.autojs.autojs6/org.autojs.autojs.launcher.AdaptiveIconAlias
+$env:ANDROID_SERIAL='QV710AF65F'
+adb -s QV710AF65F shell cmd deviceidle whitelist +org.autojs.autojs6.nodejs
+adb -s QV710AF65F shell cmd deviceidle whitelist +org.autojs.autojs6.nodejs.test
+adb -s QV710AF65F shell am start -n org.autojs.autojs6.nodejs/org.autojs.autojs.launcher.AdaptiveIconAlias
 ```
 
 ## Known Issues List
@@ -221,6 +223,7 @@ adb -s 63751f63 shell am start -n org.autojs.autojs6/org.autojs.autojs.launcher.
 - Packaged smoke generation is too slow for the current tool timeout when run as the full instrumentation class.
 - Memory leak stress is too slow for the current tool timeout with default iterations.
 - RC aggregate needs a stable way to declare the approved adb serial in multi-device environments.
+- OnePlus OPD2413 is no longer suitable for unattended gates because APK installation requires manual confirmation.
 - `version.properties` is auto-touched by assemble/debug gates and should not be included in Node Profile RC commits unless the release process intentionally bumps it.
 
 ## Migration And Reference Links
@@ -242,4 +245,4 @@ adb -s 63751f63 shell am start -n org.autojs.autojs6/org.autojs.autojs.launcher.
 
 ## RC Decision
 
-AutoJs6 Node Profile v1 has a coherent stable surface. Current host/security/compatibility gates are passing after the resolver fuzzer update, packaged smoke host verification is green on OnePlus after the JNI compatibility fix, and the reduced memory stress profile is green after documented OnePlus device preparation. Publication should still wait until the full default memory stress profile and full release-candidate aggregate complete with the same device preparation and the resulting reports are attached to this RC record.
+AutoJs6 Node Profile v1 has a coherent stable surface. Current host/security/compatibility gates are passing after the resolver fuzzer update, packaged smoke host verification is green after the JNI compatibility fix, and the reduced memory stress profile is green in the Phase 4 evidence set. Publication should still wait until the full default memory stress profile and full release-candidate aggregate complete on Sony XQ-AT72 with the resulting reports attached to this RC record.

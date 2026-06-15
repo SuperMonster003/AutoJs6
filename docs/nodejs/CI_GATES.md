@@ -49,8 +49,8 @@ Use explicit single-class or single-method commands for focused fixes. Passing `
 Use `verifyNodeNightlyGate` only with an explicit heavy device profile:
 
 ```powershell
-$env:ANDROID_SERIAL="63751f63"
-.\gradlew.bat --console=plain :app:verifyNodeNightlyGate "-Pautojs.nodejs.test.deviceProfile=oneplus"
+$env:ANDROID_SERIAL="QV710AF65F"
+.\gradlew.bat --console=plain :app:verifyNodeNightlyGate "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
 
 Scope:
@@ -59,11 +59,11 @@ Scope:
 - debug host gate
 - packaged host gate
 - desktop Node differential harness
-- connected device instrumentation selected by `oneplus` or `full`
+- connected device instrumentation selected by `sony` or `full`
 - lifecycle and memory stress through the selected device profile
 - fuzzers and real npm corpus through the selected device profile
 
-The task fails immediately if `autojs.nodejs.test.deviceProfile` is not `oneplus` or `full`.
+The task fails immediately if `autojs.nodejs.test.deviceProfile` is not `sony` or `full`.
 When the requested task is `verifyNodeNightlyGate` or `verifyNodeReleaseGate`, fuzzer instrumentation defaults to
 `autojs.nodejs.fuzzerBudget=extended` unless the property is explicitly overridden.
 
@@ -82,8 +82,8 @@ Fuzzer failure seeds are collected from connected-test XML into `build/reports/n
 Use `verifyNodeReleaseGate` for release candidates:
 
 ```powershell
-$env:ANDROID_SERIAL="63751f63"
-.\gradlew.bat --console=plain :app:verifyNodeReleaseGate "-Pautojs.nodejs.test.deviceProfile=oneplus"
+$env:ANDROID_SERIAL="QV710AF65F"
+.\gradlew.bat --console=plain :app:verifyNodeReleaseGate "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
 
 Scope:
@@ -91,7 +91,7 @@ Scope:
 - release manifest generation
 - desktop Node differential harness
 - `verifyEmbeddedNodeReleaseCandidate`
-- connected device instrumentation selected by `oneplus` or `full`
+- connected device instrumentation selected by `sony` or `full`
 
 The release gate still relies on packaged smoke APK artifacts being current when packaged host verification is part of the selected path. See [TESTING.md](TESTING.md) for packaged smoke artifact collection.
 

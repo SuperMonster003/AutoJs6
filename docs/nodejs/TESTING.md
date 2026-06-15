@@ -24,8 +24,8 @@ Run these before device tests:
 Device-specific gates should use `autojs.nodejs.test.deviceProfile`; see [DEVICE_MATRIX.md](DEVICE_MATRIX.md).
 
 ```powershell
-.\gradlew.bat --console=plain :app:printNodeTestDeviceProfile "-Pautojs.nodejs.test.deviceProfile=oneplus"
-.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pautojs.nodejs.test.deviceProfile=oneplus"
+.\gradlew.bat --console=plain :app:printNodeTestDeviceProfile "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
 
 When `android.testInstrumentationRunnerArguments.class` is passed explicitly, it overrides the device profile selection.
@@ -514,25 +514,26 @@ Current Embedded Node memory leak stress gate:
 
 This extended gate repeatedly runs simple scripts, scoped fs callbacks, `fs.promises`, fake `toast`/`app` bridge calls, fake image-handle create/recycle cycles, timeout scripts, and uncaught exception scripts. It writes `autojs6-node-memory-leak-stress-v1` JSON reports and fails only on conservative monotonic runaway detection for RSS, Java heap, native heap, thread count, or fd count. Use `autojs.nodejs.leak.iterations`, `autojs.nodejs.leak.imageIterations`, and `autojs.nodejs.leak.faultIterations` for shorter local probes.
 
-OnePlus OPD2413 / Android 15 test preparation:
+Sony XQ-AT72 test preparation for the current temporary Node package identity:
 
 ```powershell
-adb -s 63751f63 shell cmd deviceidle whitelist +org.autojs.autojs6
-adb -s 63751f63 shell cmd deviceidle whitelist +org.autojs.autojs6.test
-adb -s 63751f63 shell am start -n org.autojs.autojs6/org.autojs.autojs.launcher.AdaptiveIconAlias
+$env:ANDROID_SERIAL="QV710AF65F"
+adb -s QV710AF65F shell cmd deviceidle whitelist +org.autojs.autojs6.nodejs
+adb -s QV710AF65F shell cmd deviceidle whitelist +org.autojs.autojs6.nodejs.test
+adb -s QV710AF65F shell am start -n org.autojs.autojs6.nodejs/org.autojs.autojs.launcher.AdaptiveIconAlias
 ```
 
-On this device, OPlus background-start policy can prevent `NativeNodeEmbeddedScriptService` from entering `script.enter` after instrumentation force-stops the target package. The failure shape is a script timeout with logcat entries such as `OplusAppStartupManager: prevent start` and `Bringing down service while still waiting for start foreground`. Treat that as device setup until the same focused test still fails after whitelisting and foreground-starting the app.
+The current branch uses `org.autojs.autojs6.nodejs` so it can coexist with other AutoJs6 branches on the Sony device. Keep the serial explicit when more than one Android device is attached.
 
-Direct reduced stress probe used for OnePlus RC triage:
+Direct reduced stress probe for Sony GA triage:
 
 ```powershell
-adb -s 63751f63 shell am instrument -w -r `
+adb -s QV710AF65F shell am instrument -w -r `
   -e class org.autojs.autojs.engine.NodeEmbeddedMemoryLeakStressInstrumentationTest `
   -e autojs.nodejs.leak.iterations 5 `
   -e autojs.nodejs.leak.imageIterations 3 `
   -e autojs.nodejs.leak.faultIterations 2 `
-  org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner
+  org.autojs.autojs6.nodejs.test/androidx.test.runner.AndroidJUnitRunner
 ```
 
 ## Packaged APK Verification
@@ -761,15 +762,15 @@ Use these aggregate tasks for local gates:
 
 ```powershell
 .\gradlew.bat --console=plain :app:verifyNodePrGate
-.\gradlew.bat --console=plain :app:verifyNodeNightlyGate "-Pautojs.nodejs.test.deviceProfile=oneplus"
-.\gradlew.bat --console=plain :app:verifyNodeReleaseGate "-Pautojs.nodejs.test.deviceProfile=oneplus"
+.\gradlew.bat --console=plain :app:verifyNodeNightlyGate "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:verifyNodeReleaseGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyEmbeddedNodeDebug
 .\gradlew.bat --console=plain :app:verifyEmbeddedNodePackagedDebug
 .\gradlew.bat --console=plain :app:verifyEmbeddedNodeReleaseCandidate
 ```
 
 `verifyNodePrGate` is the fast host-side PR gate. `verifyNodeNightlyGate` and `verifyNodeReleaseGate` require
-`autojs.nodejs.test.deviceProfile=oneplus` or `full`; see [CI_GATES.md](CI_GATES.md).
+`autojs.nodejs.test.deviceProfile=sony` or `full`; see [CI_GATES.md](CI_GATES.md).
 `generateNodeNightlyReport` can also be run directly to summarize the currently available build/device reports:
 
 ```powershell

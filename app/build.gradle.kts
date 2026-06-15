@@ -161,10 +161,10 @@ val nodeJsTestDeviceProfile = providers.gradleProperty("autojs.nodejs.test.devic
     ?.takeIf { it.isNotEmpty() }
     ?.let { requested ->
         when (requested) {
-            "oneplus", "emulator", "smoke", "full" -> requested
+            "sony", "emulator", "smoke", "full" -> requested
             else -> throw GradleException(
                 "Unsupported Embedded Node test device profile '$requested'. " +
-                        "Use oneplus, emulator, smoke, or full."
+                        "Use sony, emulator, smoke, or full."
             )
         }
     }
@@ -208,7 +208,7 @@ val nodeJsFuzzerReplayRunnerClass = nodeJsFuzzerReplayClass?.let { replayClass -
     nodeJsFuzzerReplayMethod?.let { "$replayClass#$it" } ?: replayClass
 }
 val nodeJsTestDeviceProfileClasses = when (nodeJsTestDeviceProfile) {
-    "oneplus" -> listOf(
+    "sony" -> listOf(
         "org.autojs.autojs.engine.EmbeddedScriptMvpInstrumentationTest",
         "org.autojs.autojs.engine.NodeEmbeddedLifecycleStressInstrumentationTest",
         "org.autojs.autojs.engine.NodeAutoJsBridgeInstrumentationTest",
@@ -1099,7 +1099,7 @@ tasks.register("printNodeTestDeviceProfile") {
             println("Embedded Node fuzzer replay seed: ${nodeJsFuzzerReplaySeed ?: "unavailable"}")
         }
         if (nodeJsTestDeviceProfileClasses.isEmpty()) {
-            println("Embedded Node selected instrumentation classes: none; pass -Pautojs.nodejs.test.deviceProfile=oneplus|emulator|smoke|full")
+            println("Embedded Node selected instrumentation classes: none; pass -Pautojs.nodejs.test.deviceProfile=sony|emulator|smoke|full")
         } else {
             println("Embedded Node selected instrumentation classes:")
             nodeJsTestDeviceProfileClasses.forEach { className ->

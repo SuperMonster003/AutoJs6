@@ -190,4 +190,4 @@ Before GA publication, the maintainer must verify:
 - [NODE_PROFILE_V1_GA.md](NODE_PROFILE_V1_GA.md) references this document
 - [NODE_PROFILE_V1_KNOWN_ISSUES.md](NODE_PROFILE_V1_KNOWN_ISSUES.md) lists known limitations and workarounds
 - [../RELEASE_CHECKLIST.md](../RELEASE_CHECKLIST.md) includes the stable surface and promotion-policy review
-- OnePlus OPD2413 release-gate result is recorded in the RC or GA report
+- Sony XQ-AT72 release-gate result is recorded in the RC or GA report

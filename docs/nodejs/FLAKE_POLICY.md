@@ -108,16 +108,17 @@ A release gate may be marked green after an infrastructure or ADB/device retry o
 
 ## Device Profiles
 
-Heavy stress gates should use an explicit device profile. The current primary full-gate device is OnePlus OPD2413, serial `63751f63`.
+Heavy stress gates should use an explicit device profile. The current primary full-gate device is Sony XQ-AT72, serial `QV710AF65F`, with profile `sony`.
 
-OnePlus OPD2413 on Android 15 requires this preparation before focused embedded-service gates:
+Current-branch Sony gates use the temporary Node package identity and should keep the serial explicit:
 
 ```powershell
-adb -s 63751f63 shell cmd deviceidle whitelist +org.autojs.autojs6
-adb -s 63751f63 shell cmd deviceidle whitelist +org.autojs.autojs6.test
-adb -s 63751f63 shell am start -n org.autojs.autojs6/org.autojs.autojs.launcher.AdaptiveIconAlias
+$env:ANDROID_SERIAL="QV710AF65F"
+adb -s QV710AF65F shell cmd deviceidle whitelist +org.autojs.autojs6.nodejs
+adb -s QV710AF65F shell cmd deviceidle whitelist +org.autojs.autojs6.nodejs.test
+adb -s QV710AF65F shell am start -n org.autojs.autojs6.nodejs/org.autojs.autojs.launcher.AdaptiveIconAlias
 ```
 
-Classify the unprepared failure as `adb-device-flake` only when logcat shows OPlus background-start prevention before `script.enter` and the prepared rerun passes. If the prepared rerun reaches `script.enter` and then fails a runtime/security/resource assertion, classify it by the real assertion category instead.
+Classify Sony device failures by the actual failing layer. ADB disconnection, unauthorized state, or missing app install may be `adb-device-flake`; runtime/security/resource assertions are never hidden behind device preparation.
 
-Sony XQ-AT72 is excluded from this branch while it is reserved for another AutoJs6 branch and may have signing conflicts.
+OnePlus OPD2413 is excluded from current unattended gates because APK installation requires manual confirmation on that device.

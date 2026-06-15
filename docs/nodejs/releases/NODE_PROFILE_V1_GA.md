@@ -164,15 +164,18 @@ The following remain disabled in normal v1 builds:
 - Native crash diagnostics: [../NATIVE_CRASH_DIAGNOSTICS.md](../NATIVE_CRASH_DIAGNOSTICS.md)
 - Flake policy: [../FLAKE_POLICY.md](../FLAKE_POLICY.md)
 
-## OnePlus RC Gate Result
+## Sony GA Gate Status
 
-Current Phase 4 OnePlus OPD2413 result:
+Current Phase 4 Sony XQ-AT72 status:
 
-- packaged smoke host verification: passed after JNI compatibility fix
-- lifecycle stress: passed
-- reduced memory stress: passed after documented OnePlus device preparation
+- selected primary device: Sony XQ-AT72 `QV710AF65F`
+- selected device profile: `sony`
+- current branch package identity: `org.autojs.autojs6.nodejs`
+- prior packaged smoke host verification: passed after JNI compatibility fix
+- prior lifecycle stress: passed
+- prior reduced memory stress: passed in the Phase 4 evidence set
 - full default memory stress: final publication rerun still required
-- full aggregate release-candidate rerun: final publication rerun still required
+- full aggregate release-candidate rerun on Sony: final publication rerun still required
 
 Evidence is stored under `docs/nodejs/reports/phase4/`.
 
@@ -199,6 +202,6 @@ Before tagging GA:
 - final commit and tag replace the `TBD` placeholders
 - [NODE_PROFILE_V1_STABLE_SURFACE.md](NODE_PROFILE_V1_STABLE_SURFACE.md) matches the generated compatibility profile
 - [NODE_PROFILE_V1_KNOWN_ISSUES.md](NODE_PROFILE_V1_KNOWN_ISSUES.md) is current
-- full OnePlus GA candidate gate result is attached
+- full Sony GA candidate gate result is attached
 - release manifest is generated
 - no experimental feature is promoted without the documented gates

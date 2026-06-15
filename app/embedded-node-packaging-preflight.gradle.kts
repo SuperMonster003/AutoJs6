@@ -1005,18 +1005,18 @@ private fun embeddedNodePackagingTestDeviceProfile(): String? =
         ?.lowercase()
         ?.takeIf { it.isNotEmpty() }
         ?.also { profile ->
-            if (profile !in setOf("oneplus", "emulator", "smoke", "full")) {
+            if (profile !in setOf("sony", "emulator", "smoke", "full")) {
                 throw GradleException(
                     "Unsupported Embedded Node test device profile '$profile'. " +
-                            "Use oneplus, emulator, smoke, or full."
+                            "Use sony, emulator, smoke, or full."
                 )
             }
         }
 
 private fun embeddedNodePackagingRequiresHeavyDeviceProfile(taskName: String, profile: String?) {
-    if (profile !in setOf("oneplus", "full")) {
+    if (profile !in setOf("sony", "full")) {
         throw GradleException(
-            "$taskName requires -P$embeddedNodePackagingTestDeviceProfileProperty=oneplus or full " +
+            "$taskName requires -P$embeddedNodePackagingTestDeviceProfileProperty=sony or full " +
                     "so heavy connected-device stress gates are selected explicitly. Current profile: ${profile ?: "unset"}."
         )
     }
@@ -3432,10 +3432,10 @@ val verifyNodePrGate = tasks.register("verifyNodePrGate") {
 
 val verifyNodeNightlyGate = tasks.register("verifyNodeNightlyGate") {
     group = "verification"
-    description = "Runs heavy Embedded Node nightly checks; requires an explicit oneplus/full device profile."
+    description = "Runs heavy Embedded Node nightly checks; requires an explicit sony/full device profile."
 
     val deviceProfile = embeddedNodePackagingTestDeviceProfile()
-    if (deviceProfile in setOf("oneplus", "full")) {
+    if (deviceProfile in setOf("sony", "full")) {
         dependsOn(
             verifyNodePrGate,
             generateDesktopNodeDifferentialReport,
@@ -3454,7 +3454,7 @@ val verifyNodeReleaseGate = tasks.register("verifyNodeReleaseGate") {
     description = "Runs the Embedded Node release gate with RC host checks, desktop differential, and explicit heavy device profile."
 
     val deviceProfile = embeddedNodePackagingTestDeviceProfile()
-    if (deviceProfile in setOf("oneplus", "full")) {
+    if (deviceProfile in setOf("sony", "full")) {
         dependsOn(
             "generateNodeProfileReleaseManifest",
             generateDesktopNodeDifferentialReport,

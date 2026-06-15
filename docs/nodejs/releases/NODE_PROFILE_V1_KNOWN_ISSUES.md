@@ -106,25 +106,28 @@ enforce service types and permissions more strictly.
 
 Workaround: keep packaged manifest verification in the release gate and use the generated packaged diagnostic report.
 
-## OnePlus OPD2413 Test Preparation
+## Current Sony Gate Device
 
-On OnePlus OPD2413, OPlus background-start policy can block focused embedded-service instrumentation before `script.enter`.
+Current unattended Node Profile v1 gates use Sony XQ-AT72 `QV710AF65F` with the temporary package identity `org.autojs.autojs6.nodejs`.
 
-Workaround for local gates:
+Preparation for local focused gates:
 
 ```powershell
-adb -s 63751f63 shell cmd deviceidle whitelist +org.autojs.autojs6
-adb -s 63751f63 shell cmd deviceidle whitelist +org.autojs.autojs6.test
-adb -s 63751f63 shell am start -n org.autojs.autojs6/org.autojs.autojs.launcher.AdaptiveIconAlias
+$env:ANDROID_SERIAL="QV710AF65F"
+adb -s QV710AF65F shell cmd deviceidle whitelist +org.autojs.autojs6.nodejs
+adb -s QV710AF65F shell cmd deviceidle whitelist +org.autojs.autojs6.nodejs.test
+adb -s QV710AF65F shell am start -n org.autojs.autojs6.nodejs/org.autojs.autojs.launcher.AdaptiveIconAlias
 ```
+
+OnePlus OPD2413 is a legacy Phase 4 evidence device only. It is excluded from current unattended gates because APK installation requires manual confirmation.
 
 ## Current RC Gate Caveats
 
 As of the Phase 4 RC record:
 
-- OnePlus packaged smoke host verification is green after the JNI compatibility fix.
-- OnePlus lifecycle stress is green.
-- Reduced memory stress is green after device preparation.
-- Full default memory stress and the full aggregate release-candidate rerun still need a final publication report.
+- Packaged smoke host verification is green after the JNI compatibility fix.
+- Lifecycle stress is green in the Phase 4 evidence set.
+- Reduced memory stress is green in the Phase 4 evidence set.
+- Full default memory stress and the full aggregate release-candidate rerun still need a final Sony publication report.
 
 See [NODE_PROFILE_V1_RC.md](NODE_PROFILE_V1_RC.md).
