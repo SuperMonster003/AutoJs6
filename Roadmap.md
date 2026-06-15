@@ -54,9 +54,9 @@ goal is to make editor behavior engine-neutral where possible, and keep native
 
 ## Phase 4: Editor Services
 
-- [ ] Extract file open/save service.
+- [x] Extract file open/save service.
   - [x] Route file open reads through `EditorFileService`.
-  - [ ] Move transactional save/write failure handling into `EditorFileService`.
+  - [x] Move transactional save/write failure handling into `EditorFileService`.
 - [x] Extract draft restore/save service.
 - [x] Extract version history service.
 - [x] Extract run-text provider.
