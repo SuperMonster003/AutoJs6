@@ -72,6 +72,12 @@ The repository currently has only lightweight instrumentation test dependencies 
 
 ## IME Show/Hide Manual Checklist
 
+The dedicated keyboard and viewport release matrix lives in
+`docs/dev/ace-keyboard-viewport-test-plan.md`. Use this checklist as the short
+manual pass, and use the dedicated matrix for release decisions, WebView
+regression checks, and issue reports about flicker, tap-anchor drift, mobile
+selection, or keyboard-triggered fallback.
+
 Run this checklist on at least one gesture-navigation device and one 3-button-navigation device when available. Record the Android System WebView version from `More -> Copy ACE diagnostics`.
 
 Setup:
@@ -618,6 +624,10 @@ Record each run with the actual Android System WebView version from device setti
 ACE can remain enabled as an experimental option only if:
 
 - Native remains the default editor.
+- The dedicated `docs/dev/ace-keyboard-viewport-test-plan.md` matrix is runnable
+  for first paint, top/middle/bottom tap anchors, repeated IME stress,
+  completion accept, long-press selection, CJK input, rotation, fallback, and
+  large-file Native routing.
 - `verify-autojs6-indices.mjs` and `test-completer.mjs` pass.
 - All fallback cases above return to Native without app crash.
 - Recent small-file input survives fallback through TextMirror in practical tests.
@@ -628,3 +638,7 @@ ACE can remain enabled as an experimental option only if:
 - `docs/dev/ace-lsp-design.md` still keeps server-backed LSP experimental and default-off.
 - Third-party asset and license checks remain clean.
 - ACE diagnostics can be copied from an active ACE editor and after ACE fallback to Native.
+- ACE diagnostics include runtime event history and bridge event window counters
+  for keyboard and viewport failures.
+- LSP alpha, hover/markdown tooltip loading, and VisualEditorAce remain deferred
+  until the keyboard and viewport matrix is stable on representative devices.

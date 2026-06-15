@@ -100,6 +100,7 @@ const aceFallbackPolicy = "app/src/main/java/org/autojs/autojs/ui/edit/editor/ac
 const aceSurfaceSmoke = "tools/ace-hardening/check-editor-surface.mjs";
 const roadmap = "Roadmap.md";
 const aceEditorTestPlan = "docs/dev/ace-editor-test-plan.md";
+const aceKeyboardViewportTestPlan = "docs/dev/ace-keyboard-viewport-test-plan.md";
 const aceEditorIntegrationDoc = "docs/dev/ace-editor-integration.md";
 const nativeOnlyAudit = "docs/dev/editor-native-only-audit.md";
 const engineNeutralServicesDoc = "docs/dev/editor-engine-neutral-services.md";
@@ -376,7 +377,16 @@ assertIncludes(roadmap, "- [x] Add smoke or diagnostic checks that expose event 
 assertIncludes(roadmap, "- [x] Audit `user-select`, `.ace_mobile-menu`, selection handles, and");
 assertIncludes(roadmap, "- [x] Keep breakpoint and debug-line styles stable.");
 assertIncludes(roadmap, "- [x] If selection suppression is needed, scope it narrowly instead of hiding");
+assertIncludes(roadmap, "- [x] Add `docs/dev/ace-keyboard-viewport-test-plan.md` or extend the existing");
+assertIncludes(roadmap, "- [ ] Add a debug action or debug-only helper to run repeated keyboard");
+assertIncludes(roadmap, "a device-side UI automation harness can tap real viewport coordinates.");
+assertIncludes(roadmap, "- [x] Add diagnostics dump coverage for event history once Phase 4 lands.");
+assertIncludes(roadmap, "- [x] Cover file-manager open first paint, top/middle/bottom tap anchors,");
+assertIncludes(roadmap, "- [x] Update release gates so LSP alpha is not the primary target until the");
+assertIncludes(roadmap, "- [x] The original flicker, anchor drift, and keyboard fallback issues are");
+assertIncludes(roadmap, "- [x] The same matrix can be rerun after WebView or Android version changes.");
 assertIncludes(roadmap, "ACE clean-host behavior remains the default ACE path.");
+assertIncludes(roadmap, "Keyboard and viewport matrix passes on representative devices.");
 assertIncludes(roadmap, "LSP and VisualEditorAce remain deferred until this gate is satisfied.");
 
 assertIncludes(nativeOnlyAudit, "# Editor Native-Only Audit");
@@ -424,6 +434,7 @@ assertIncludes(viewportPolicyDoc, "viewportPolicy=AceEditorViewportPolicy");
 assertIncludes(viewportPolicyDoc, "ACE diagnostics identify `viewportPolicy=AceEditorViewportPolicy`.");
 
 assertIncludes(aceEditorTestPlan, "## IME Show/Hide Manual Checklist");
+assertIncludes(aceEditorTestPlan, "docs/dev/ace-keyboard-viewport-test-plan.md");
 assertIncludes(aceEditorTestPlan, "### ACE-IME-001: Input method and symbols/function bars");
 assertIncludes(aceEditorTestPlan, "### ACE-IME-002: Repeated soft keyboard show/hide stress");
 assertIncludes(aceEditorTestPlan, "### ACE-IME-003: Lower viewport tap anchor remains visible");
@@ -431,12 +442,48 @@ assertIncludes(aceEditorTestPlan, "### ACE-IME-004: Completion and selection whi
 assertIncludes(aceEditorTestPlan, "viewportPolicy=AceEditorViewportPolicy");
 assertIncludes(aceEditorTestPlan, "lastAceResizeCompletedReason");
 assertIncludes(aceEditorTestPlan, "heartbeatSuspendedReason");
+assertIncludes(aceEditorTestPlan, "runtime event history and bridge event window counters");
+assertIncludes(aceEditorTestPlan, "LSP alpha, hover/markdown tooltip loading, and VisualEditorAce remain deferred");
+
+assertIncludes(aceKeyboardViewportTestPlan, "# ACE Keyboard And Viewport Test Plan");
+assertIncludes(aceKeyboardViewportTestPlan, "ACE-KV-001");
+assertIncludes(aceKeyboardViewportTestPlan, "ACE-KV-002");
+assertIncludes(aceKeyboardViewportTestPlan, "ACE-KV-003");
+assertIncludes(aceKeyboardViewportTestPlan, "ACE-KV-004");
+assertIncludes(aceKeyboardViewportTestPlan, "ACE-KV-005");
+assertIncludes(aceKeyboardViewportTestPlan, "ACE-KV-006");
+assertIncludes(aceKeyboardViewportTestPlan, "ACE-KV-007");
+assertIncludes(aceKeyboardViewportTestPlan, "ACE-KV-008");
+assertIncludes(aceKeyboardViewportTestPlan, "ACE-KV-009");
+assertIncludes(aceKeyboardViewportTestPlan, "More -> Copy ACE diagnostics");
+assertIncludes(aceKeyboardViewportTestPlan, "viewportPolicy=AceEditorViewportPolicy");
+assertIncludes(aceKeyboardViewportTestPlan, "lastImeState");
+assertIncludes(aceKeyboardViewportTestPlan, "lastImeHeight");
+assertIncludes(aceKeyboardViewportTestPlan, "lastImeTransitionStartedAtUptimeMillis");
+assertIncludes(aceKeyboardViewportTestPlan, "lastImeTransitionEndedAtUptimeMillis");
+assertIncludes(aceKeyboardViewportTestPlan, "lastImeIgnoredRequestReason");
+assertIncludes(aceKeyboardViewportTestPlan, "lastAceResizeScheduledReason");
+assertIncludes(aceKeyboardViewportTestPlan, "lastAceResizeDispatchedReason");
+assertIncludes(aceKeyboardViewportTestPlan, "lastAceResizeCompletedReason");
+assertIncludes(aceKeyboardViewportTestPlan, "lastBridgeEventName");
+assertIncludes(aceKeyboardViewportTestPlan, "currentBridgeEventWindowCount");
+assertIncludes(aceKeyboardViewportTestPlan, "maxBridgeEventWindowCount");
+assertIncludes(aceKeyboardViewportTestPlan, "runtimeEventHistory");
+assertIncludes(aceKeyboardViewportTestPlan, "runtimeEvent=bridge_event_storm");
+assertIncludes(aceKeyboardViewportTestPlan, "file-manager open first paint");
+assertIncludes(aceKeyboardViewportTestPlan, "Top, middle, and lower tap anchors");
+assertIncludes(aceKeyboardViewportTestPlan, "Repeated keyboard show/hide is currently a manual stress method");
+assertIncludes(aceKeyboardViewportTestPlan, "device-side UI automation harness");
+assertIncludes(aceKeyboardViewportTestPlan, "LSP alpha, hover/markdown tooltip loading, and VisualEditorAce");
 
 assertIncludes(aceEditorIntegrationDoc, "Run the `IME Show/Hide Manual Checklist`");
+assertIncludes(aceEditorIntegrationDoc, "docs/dev/ace-keyboard-viewport-test-plan.md");
 assertIncludes(aceEditorIntegrationDoc, "## Clean Host Layout Decision");
 assertIncludes(aceEditorIntegrationDoc, "ACE does not need a separate clean-host experiment flag at this stage.");
 assertIncludes(aceEditorIntegrationDoc, "Do not add `key_ace_clean_host_layout`");
 assertIncludes(aceEditorIntegrationDoc, "docs/dev/editor-viewport-policy.md");
+assertIncludes(aceEditorIntegrationDoc, "runtime event history and bridge event window");
+assertIncludes(aceEditorIntegrationDoc, "LSP alpha, hover/markdown tooltip loading, and VisualEditorAce are not primary");
 
 assertIncludes(aceSurfaceSmoke, "ACE editor bootstrap order");
 assertIncludes(aceSurfaceSmoke, "hidden editor before first paint");

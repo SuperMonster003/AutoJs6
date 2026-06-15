@@ -62,6 +62,11 @@ ACE does not need a separate clean-host experiment flag at this stage. The ACE p
 - ACE resize behavior is observable through diagnostics and covered by the IME show/hide checklist.
 - ACE bridge cursor, text, and state events are throttled so keyboard animation
   does not create unbounded JS-to-Kotlin callback bursts.
+- Dedicated keyboard and viewport coverage lives in
+  `docs/dev/ace-keyboard-viewport-test-plan.md`, including first paint, tap
+  anchors, repeated IME stress, completion accept, long-press selection, CJK
+  input, rotation, fallback, large-file routing, and bridge event storm
+  diagnostics.
 
 Do not add `key_ace_clean_host_layout` unless there is a concrete second ACE host layout to compare. A flag without another implementation would add state, test matrix size, and ambiguous diagnostics without improving the stable path.
 
@@ -78,9 +83,13 @@ Before ACE is presented as a gray-release experimental editor:
 - Run `node tools/ace-hardening/check-editor-surface.mjs`.
 - Run the manual cases in `docs/dev/ace-editor-test-plan.md`.
 - Run the `IME Show/Hide Manual Checklist` in `docs/dev/ace-editor-test-plan.md`.
+- Run the dedicated keyboard and viewport matrix in
+  `docs/dev/ace-keyboard-viewport-test-plan.md`.
 - Verify asset-missing, ready-timeout, JS-init, renderer-gone, and large-file debug hooks.
 - Verify recent small-file input survives fallback through TextMirror.
 - Copy diagnostics from both an active ACE editor and after ACE fallback to Native.
+- Confirm diagnostics include runtime event history and bridge event window
+  counters for keyboard and viewport failures.
 - Confirm `app/src/main/assets/editor/ace-builds-1.4.12/autojs6/types/lib.autojs6.d.ts` is generated from the same completion source.
 - Confirm selected AutoJs6 declaration sources remain bundled under `app/src/main/assets/editor/ace-builds-1.4.12/autojs6/types/autojs6`.
 - Confirm `docs/dev/ace-lsp-design.md` still marks server-backed LSP as experimental and default-off.
@@ -94,3 +103,6 @@ Before ACE is presented as a gray-release experimental editor:
 
 - VisualEditorAce from the Pro layout remains deferred. Do not add an exposed `VISUAL_ACE` enum or UI entry until the ordinary ACE editor is stable.
 - LSP remains a separate experimental path. The diagnostics schema and feature flag are in place, but server startup and WebSocket transport are deferred.
+- LSP alpha, hover/markdown tooltip loading, and VisualEditorAce are not primary
+  targets until the keyboard and viewport matrix is stable on representative
+  devices.

@@ -36,6 +36,8 @@ and fallback behavior, then resume CI, API-index, and LSP work.
   boundaries.
 - [x] `docs/dev/ace-editor-test-plan.md` contains the IME show/hide manual
   checklist.
+- [x] `docs/dev/ace-keyboard-viewport-test-plan.md` contains the dedicated
+  keyboard and viewport release matrix.
 
 ## Phase 1: Native-Only Audit Documents
 
@@ -150,22 +152,23 @@ Acceptance:
 
 ## Phase 7: Keyboard And Viewport Test Matrix
 
-- [ ] Add `docs/dev/ace-keyboard-viewport-test-plan.md` or extend the existing
+- [x] Add `docs/dev/ace-keyboard-viewport-test-plan.md` or extend the existing
   ACE test plan with a dedicated matrix section.
 - [ ] Add a debug action or debug-only helper to run repeated keyboard
-  show/hide stress when feasible.
-- [ ] Add diagnostics dump coverage for event history once Phase 4 lands.
-- [ ] Cover file-manager open first paint, top/middle/bottom tap anchors,
+  show/hide stress when feasible. Current manual stress remains documented until
+  a device-side UI automation harness can tap real viewport coordinates.
+- [x] Add diagnostics dump coverage for event history once Phase 4 lands.
+- [x] Cover file-manager open first paint, top/middle/bottom tap anchors,
   completion popup accept, long-press selection, CJK input, rotation, fallback,
   and large-file Native routing.
-- [ ] Update release gates so LSP alpha is not the primary target until the
+- [x] Update release gates so LSP alpha is not the primary target until the
   keyboard/viewport matrix is stable.
 
 Acceptance:
 
-- [ ] The original flicker, anchor drift, and keyboard fallback issues are
+- [x] The original flicker, anchor drift, and keyboard fallback issues are
   reproducible as test cases.
-- [ ] The same matrix can be rerun after WebView or Android version changes.
+- [x] The same matrix can be rerun after WebView or Android version changes.
 
 ## Phase 8: Resume Deferred Advanced Work
 
@@ -197,6 +200,7 @@ Acceptance:
 - [ ] ACE first-paint and surface smoke checks pass.
 - [ ] ACE completion checks pass.
 - [ ] IME show/hide manual checklist passes on representative devices.
+- [ ] Keyboard and viewport matrix passes on representative devices.
 - [ ] Continuous keyboard show/hide does not fallback ACE.
 - [ ] Fallback preserves recent text through TextMirror.
 - [ ] Renderer-gone and initialization fatal fallback still work.
