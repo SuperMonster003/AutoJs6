@@ -73,6 +73,28 @@ class AceBridge(
     }
 
     @JavascriptInterface
+    fun startActionMode(
+        left: Double,
+        top: Double,
+        right: Double,
+        bottom: Double,
+        hasSelection: Boolean,
+        selectAll: Boolean,
+    ) {
+        editor.startActionMode(left, top, right, bottom, hasSelection, selectAll)
+    }
+
+    @JavascriptInterface
+    fun finishActionMode() {
+        editor.finishActionMode()
+    }
+
+    @JavascriptInterface
+    fun performLongPressFeedback() {
+        editor.performLongPressFeedback()
+    }
+
+    @JavascriptInterface
     fun read(uri: String?): String {
         return unavailableFileAccess(uri)
     }

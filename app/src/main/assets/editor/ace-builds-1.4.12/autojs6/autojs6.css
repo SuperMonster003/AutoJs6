@@ -72,8 +72,27 @@ body,
     overflow: hidden;
 }
 
+html {
+    background: #f7f8fa;
+}
+
 body {
     background: #f7f8fa;
+}
+
+#editor {
+    background: #f7f8fa;
+    visibility: hidden;
+}
+
+html.ace-theme-dark,
+body.ace-theme-dark,
+body.ace-theme-dark #editor {
+    background: #1e1e1e;
+}
+
+body.ace-ready #editor {
+    visibility: visible;
 }
 
 #editor,

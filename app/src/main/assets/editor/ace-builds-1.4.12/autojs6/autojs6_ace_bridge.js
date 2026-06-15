@@ -11,6 +11,10 @@
     var debugMarker = null;
     var storedReplacement = "";
     var scrollNotifyTimer = null;
+    var resizeScheduled = false;
+    var resizeFallbackTimer = null;
+    var resizeReason = "";
+    var firstPaintNotified = false;
     var DEFAULT_FONT_FAMILY = '"JetBrains Mono", "Source Code Pro", monospace';
 
     function callBridge(name, args) {
@@ -53,6 +57,39 @@
         };
         callBridge("notifyEvent", ["completionError", JSON.stringify(payload)]);
         notifyError(payload.message);
+    }
+
+    function notifyRecoverableError(source, error) {
+        var payload = {
+            message: String(source || "ACE recoverable error") + ": " + String(error && error.message ? error.message : error),
+            source: String(source || ""),
+            stack: error && error.stack ? String(error.stack) : ""
+        };
+        callBridge("notifyEvent", ["recoverableError", JSON.stringify(payload)]);
+        notifyError(payload.message);
+    }
+
+    function applyThemeClass(theme) {
+        var dark = String(theme || "").toLowerCase().indexOf("night") >= 0 ||
+            String(theme || "").toLowerCase().indexOf("dark") >= 0;
+        document.documentElement.classList.toggle("ace-theme-dark", dark);
+        document.body.classList.toggle("ace-theme-dark", dark);
+    }
+
+    function notifyFirstPaint() {
+        if (firstPaintNotified) {
+            return;
+        }
+        firstPaintNotified = true;
+        document.body.classList.add("ace-ready");
+        callBridge("notifyEvent", ["firstPaint", lightweightStateJson()]);
+    }
+
+    function afterTwoFrames(callback) {
+        var raf = global.requestAnimationFrame || function(run) { return setTimeout(run, 16); };
+        raf(function() {
+            raf(callback);
+        });
     }
 
     function clampRow(row) {
@@ -214,6 +251,53 @@
         callBridge("notifyEvent", ["breakpointChanged", json]);
     }
 
+    function scrollCursorIntoViewSafely(reason) {
+        if (!editor || !editor.renderer || !editor.renderer.scrollCursorIntoView) {
+            return;
+        }
+        try {
+            editor.renderer.scrollCursorIntoView();
+        } catch (error) {
+            notifyRecoverableError(reason || "scrollCursorIntoView", error);
+        }
+    }
+
+    function runResize(reason) {
+        if (!editor) {
+            return;
+        }
+        try {
+            editor.resize(true);
+            scrollCursorIntoViewSafely("resize:" + (reason || ""));
+            callBridge("notifyEvent", [
+                "resizeDone",
+                JSON.stringify({ reason: String(reason || "") })
+            ]);
+        } catch (error) {
+            notifyRecoverableError("scheduleResize", error);
+        }
+    }
+
+    function scheduleResize(reason) {
+        resizeReason = reason || resizeReason || "scheduled";
+        if (resizeFallbackTimer !== null) {
+            clearTimeout(resizeFallbackTimer);
+        }
+        resizeFallbackTimer = setTimeout(function() {
+            resizeFallbackTimer = null;
+            runResize(resizeReason || "resize_fallback");
+        }, 140);
+        if (resizeScheduled) {
+            return;
+        }
+        resizeScheduled = true;
+        var raf = global.requestAnimationFrame || function(run) { return setTimeout(run, 16); };
+        raf(function() {
+            resizeScheduled = false;
+            runResize(resizeReason || "resize_frame");
+        });
+    }
+
     function setBreakpoint(row, enabled, notify) {
         row = clampRow(row);
         var index = breakpoints.indexOf(row);
@@ -302,7 +386,7 @@
         var start = indexToPosition(startOffset);
         var end = indexToPosition(endOffset);
         editor.selection.setRange(new Range(start.row, start.column, end.row, end.column), false);
-        editor.renderer.scrollCursorIntoView();
+        scrollCursorIntoViewSafely("selectRange");
         notifyCursorChanged();
         notifyStateChanged("selectionChanged");
     }
@@ -319,6 +403,7 @@
         if (editor.renderer.scrollToX) {
             editor.renderer.scrollToX(firstVisibleColumn);
         }
+        scheduleResize("scroll_restored");
         notifyStateChanged("scrollRestored");
     }
 
@@ -335,6 +420,7 @@
         column = Math.max(0, Number(column) || 0);
         editor.focus();
         editor.gotoLine(row + 1, column, true);
+        scheduleResize("jump_to");
         notifyCursorChanged();
     }
 
@@ -425,7 +511,9 @@
     }
 
     function setTheme(theme) {
-        editor.setTheme(theme || "ace/theme/textmate");
+        var nextTheme = theme || "ace/theme/textmate";
+        applyThemeClass(nextTheme);
+        editor.setTheme(nextTheme);
         notifyStateChanged("themeChanged");
     }
 
@@ -467,7 +555,9 @@
         session.setTabSize(4);
         session.setUseSoftTabs(true);
 
-        editor.setTheme(callBridge("getTheme") || "ace/theme/textmate");
+        var initialTheme = callBridge("getTheme") || "ace/theme/textmate";
+        applyThemeClass(initialTheme);
+        editor.setTheme(initialTheme);
         editor.setOptions({
             enableBasicAutocompletion: true,
             enableLiveAutocompletion: true,
@@ -499,6 +589,9 @@
         session.on("changeScrollLeft", notifyScrollChanged);
 
         editor.selection.on("changeCursor", notifyCursorChanged);
+        global.addEventListener("resize", function() {
+            scheduleResize("window_resize");
+        });
 
         editor.on("guttermousedown", function(event) {
             var target = event.domEvent.target;
@@ -543,6 +636,7 @@
             setTheme: setTheme,
             setFontSizeSp: setFontSizeSp,
             setFontFamily: setFontFamily,
+            scheduleResize: scheduleResize,
             restoreScroll: restoreScroll,
             setBreakpoint: function(row, enabled) { return setBreakpoint(row, enabled, true); },
             toggleBreakpoint: toggleBreakpoint,
@@ -557,6 +651,8 @@
         var json = fullStateJson();
         callBridge("notifyReady", [json]);
         callBridge("notifyEvent", ["ready", json]);
+        scheduleResize("init");
+        afterTwoFrames(notifyFirstPaint);
         editor.focus();
     }
 

@@ -31,6 +31,32 @@ const BRIDGE_PATH = path.join(
   "autojs6",
   "autojs6_ace_bridge.js",
 );
+const CSS_PATH = path.join(
+  PROJECT_ROOT,
+  "app",
+  "src",
+  "main",
+  "assets",
+  "editor",
+  "ace-builds-1.4.12",
+  "autojs6",
+  "autojs6.css",
+);
+const ACE_BRIDGE_KT_PATH = path.join(
+  PROJECT_ROOT,
+  "app",
+  "src",
+  "main",
+  "java",
+  "org",
+  "autojs",
+  "autojs",
+  "ui",
+  "edit",
+  "editor",
+  "ace",
+  "AceBridge.kt",
+);
 const LANGUAGE_TOOLS_PATH = path.join(
   PROJECT_ROOT,
   "app",
@@ -159,6 +185,29 @@ function assertLanguageToolsAcceptShim() {
   }
 }
 
+function assertMobileBridgeStabilityHooks() {
+  const bridge = fs.readFileSync(BRIDGE_PATH, "utf8");
+  for (const expected of ["scheduleResize", "recoverableError", "firstPaint"]) {
+    if (!bridge.includes(expected)) {
+      throw new Error(`ACE mobile stability hook is missing from bridge: ${expected}`);
+    }
+  }
+
+  const css = fs.readFileSync(CSS_PATH, "utf8");
+  for (const expected of ["visibility: hidden", "body.ace-ready #editor"]) {
+    if (!css.includes(expected)) {
+      throw new Error(`ACE first-paint CSS guard is missing: ${expected}`);
+    }
+  }
+
+  const nativeBridge = fs.readFileSync(ACE_BRIDGE_KT_PATH, "utf8");
+  for (const expected of ["fun startActionMode", "fun finishActionMode", "fun performLongPressFeedback"]) {
+    if (!nativeBridge.includes(expected)) {
+      throw new Error(`ACE native mobile bridge method is missing: ${expected}`);
+    }
+  }
+}
+
 const completer = createAutoJs6Completer();
 assertIncludes(valuesFor(completer, "toast", "toast"), ["toast"], "toast");
 assertIncludes(valuesFor(completer, "app.la", "la"), ["launch", "launchApp"], "app.la");
@@ -179,5 +228,6 @@ assertNoThrow("missing indices should not throw", () => {
 });
 
 assertLanguageToolsAcceptShim();
+assertMobileBridgeStabilityHooks();
 
 console.log(`AutoJs6 ACE completer tests passed (${relativeToRoot(COMPLETER_PATH)}).`);

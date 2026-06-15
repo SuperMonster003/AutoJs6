@@ -29,8 +29,17 @@ object AceDiagnostics {
             textMirrorRevision = null,
             jsRevision = null,
             lastReadyAtUptimeMillis = null,
+            lastFirstPaintAtUptimeMillis = null,
             lastStateAtUptimeMillis = null,
             lastHeartbeatAtUptimeMillis = null,
+            lastHeartbeatSuspendedAtUptimeMillis = null,
+            lastHeartbeatResumedAtUptimeMillis = null,
+            heartbeatSuspendedReason = null,
+            lastImeRequestAtUptimeMillis = null,
+            lastShowSoftInputAtUptimeMillis = null,
+            lastHideSoftInputAtUptimeMillis = null,
+            lastResizeAtUptimeMillis = null,
+            lastActionModeAtUptimeMillis = null,
         )
     }
 
@@ -54,8 +63,17 @@ object AceDiagnostics {
             appendLine("textMirrorRevision=${snapshot.textMirrorRevision?.toString().orUnknown()}")
             appendLine("jsRevision=${snapshot.jsRevision.orUnknown()}")
             appendLine("lastReadyAtUptimeMillis=${snapshot.lastReadyAtUptimeMillis?.toString().orUnknown()}")
+            appendLine("lastFirstPaintAtUptimeMillis=${snapshot.lastFirstPaintAtUptimeMillis?.toString().orUnknown()}")
             appendLine("lastStateAtUptimeMillis=${snapshot.lastStateAtUptimeMillis?.toString().orUnknown()}")
             appendLine("lastHeartbeatAtUptimeMillis=${snapshot.lastHeartbeatAtUptimeMillis?.toString().orUnknown()}")
+            appendLine("lastHeartbeatSuspendedAtUptimeMillis=${snapshot.lastHeartbeatSuspendedAtUptimeMillis?.toString().orUnknown()}")
+            appendLine("lastHeartbeatResumedAtUptimeMillis=${snapshot.lastHeartbeatResumedAtUptimeMillis?.toString().orUnknown()}")
+            appendLine("heartbeatSuspendedReason=${snapshot.heartbeatSuspendedReason.orUnknown()}")
+            appendLine("lastImeRequestAtUptimeMillis=${snapshot.lastImeRequestAtUptimeMillis?.toString().orUnknown()}")
+            appendLine("lastShowSoftInputAtUptimeMillis=${snapshot.lastShowSoftInputAtUptimeMillis?.toString().orUnknown()}")
+            appendLine("lastHideSoftInputAtUptimeMillis=${snapshot.lastHideSoftInputAtUptimeMillis?.toString().orUnknown()}")
+            appendLine("lastResizeAtUptimeMillis=${snapshot.lastResizeAtUptimeMillis?.toString().orUnknown()}")
+            appendLine("lastActionModeAtUptimeMillis=${snapshot.lastActionModeAtUptimeMillis?.toString().orUnknown()}")
         }.trimEnd()
     }
 

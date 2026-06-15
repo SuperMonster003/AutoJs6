@@ -34,9 +34,22 @@ class AceRuntimeHealthMonitor(
     var lastHeartbeatAtUptimeMillis: Long = 0L
         private set
 
+    @Volatile
+    var lastHeartbeatSuspendedAtUptimeMillis: Long = 0L
+        private set
+
+    @Volatile
+    var lastHeartbeatResumedAtUptimeMillis: Long = 0L
+        private set
+
+    @Volatile
+    var heartbeatSuspendedReason: String? = null
+        private set
+
     private val fallbackStarted = AtomicBoolean(false)
     private var heartbeatCheck: (() -> Unit)? = null
     private var heartbeatFailures = 0
+    private var heartbeatSuspendedUntilUptimeMillis = 0L
 
     private val readyTimeoutRunnable = Runnable {
         if (!isTerminal() && state != AceHealthState.RUNNING && state != AceHealthState.BRIDGE_READY) {
@@ -51,6 +64,11 @@ class AceRuntimeHealthMonitor(
 
     private val heartbeatRunnable = Runnable {
         if (isTerminal() || state != AceHealthState.RUNNING) {
+            return@Runnable
+        }
+        val suspendedDelay = heartbeatSuspendedDelayMillis()
+        if (suspendedDelay > 0L) {
+            scheduleHeartbeat(suspendedDelay)
             return@Runnable
         }
         heartbeatCheck?.invoke()
@@ -94,8 +112,41 @@ class AceRuntimeHealthMonitor(
         scheduleHeartbeat()
     }
 
+    fun suspendHeartbeat(reason: String, durationMillis: Long) {
+        if (isTerminal()) {
+            return
+        }
+        val now = SystemClock.uptimeMillis()
+        heartbeatSuspendedReason = reason
+        lastHeartbeatSuspendedAtUptimeMillis = now
+        heartbeatSuspendedUntilUptimeMillis = maxOf(
+            heartbeatSuspendedUntilUptimeMillis,
+            now + durationMillis.coerceAtLeast(0L),
+        )
+    }
+
+    fun resumeHeartbeat(reason: String? = null) {
+        if (isTerminal()) {
+            return
+        }
+        if (reason != null && heartbeatSuspendedReason != null && heartbeatSuspendedReason != reason) {
+            return
+        }
+        heartbeatSuspendedUntilUptimeMillis = 0L
+        heartbeatSuspendedReason = null
+        lastHeartbeatResumedAtUptimeMillis = SystemClock.uptimeMillis()
+        scheduleHeartbeat()
+    }
+
+    fun isHeartbeatSuspended(): Boolean {
+        return heartbeatSuspendedDelayMillis() > 0L
+    }
+
     fun recordHeartbeatResult(ok: Boolean) {
         if (isTerminal()) {
+            return
+        }
+        if (isHeartbeatSuspended()) {
             return
         }
         lastHeartbeatAtUptimeMillis = SystemClock.uptimeMillis()
@@ -144,14 +195,31 @@ class AceRuntimeHealthMonitor(
         transitionTo(AceHealthState.DESTROYED)
         mainHandler.removeCallbacks(readyTimeoutRunnable)
         mainHandler.removeCallbacks(heartbeatRunnable)
+        heartbeatSuspendedUntilUptimeMillis = 0L
+        heartbeatSuspendedReason = null
         heartbeatCheck = null
     }
 
-    private fun scheduleHeartbeat() {
+    private fun scheduleHeartbeat(delayMillis: Long = HEARTBEAT_INTERVAL_MS) {
         mainHandler.removeCallbacks(heartbeatRunnable)
         if (!isTerminal()) {
-            mainHandler.postDelayed(heartbeatRunnable, HEARTBEAT_INTERVAL_MS)
+            mainHandler.postDelayed(heartbeatRunnable, delayMillis.coerceAtLeast(0L))
         }
+    }
+
+    private fun heartbeatSuspendedDelayMillis(): Long {
+        val until = heartbeatSuspendedUntilUptimeMillis
+        if (until <= 0L) {
+            return 0L
+        }
+        val remaining = until - SystemClock.uptimeMillis()
+        if (remaining <= 0L) {
+            heartbeatSuspendedUntilUptimeMillis = 0L
+            heartbeatSuspendedReason = null
+            lastHeartbeatResumedAtUptimeMillis = SystemClock.uptimeMillis()
+            return 0L
+        }
+        return remaining
     }
 
     private fun transitionTo(next: AceHealthState) {

@@ -10,8 +10,11 @@ import android.net.Uri
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.util.AttributeSet
+import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
+import android.view.View
 import android.view.ViewGroup
 import android.webkit.ConsoleMessage
 import android.webkit.PermissionRequest
@@ -54,8 +57,18 @@ class AceCodeEditor @JvmOverloads constructor(
     private val mirrorCalibrationRunnable = Runnable {
         calibrateTextMirrorIfSmall()
     }
+    private val scheduledResizeRunnable = Runnable {
+        runScheduledResize()
+    }
+    private val imeSettleRunnable = Runnable {
+        scheduleAceResize("ime_settle", RESIZE_SETTLE_DELAY_MS)
+        healthMonitor.resumeHeartbeat()
+    }
 
     val webView: WebView = WebView(context)
+    private val loadingOverlay: View = View(context).apply {
+        setBackgroundColor(editorBackgroundColor())
+    }
 
     var listener: Listener? = null
     var onUserTouchInTextArea: (() -> Unit)? = null
@@ -108,6 +121,15 @@ class AceCodeEditor @JvmOverloads constructor(
     private var loaded = false
     private var destroyed = false
     private var userTouching = false
+    private var firstPaintReceived = false
+    private var pendingResizeReason: String? = null
+    private var lastFirstPaintAtUptimeMillis = 0L
+    private var lastImeRequestAtUptimeMillis = 0L
+    private var lastShowSoftInputAtUptimeMillis = 0L
+    private var lastHideSoftInputAtUptimeMillis = 0L
+    private var lastResizeAtUptimeMillis = 0L
+    private var lastActionModeAtUptimeMillis = 0L
+    private var actionModeActive = false
 
     val healthState: AceHealthState
         get() = healthMonitor.state
@@ -137,13 +159,24 @@ class AceCodeEditor @JvmOverloads constructor(
             textMirrorRevision = textMirrorRevision,
             jsRevision = ACE_RUNTIME_REVISION,
             lastReadyAtUptimeMillis = healthMonitor.lastReadyAtUptimeMillis.takeIf { it > 0L },
+            lastFirstPaintAtUptimeMillis = lastFirstPaintAtUptimeMillis.takeIf { it > 0L },
             lastStateAtUptimeMillis = healthMonitor.lastStateAtUptimeMillis.takeIf { it > 0L },
             lastHeartbeatAtUptimeMillis = healthMonitor.lastHeartbeatAtUptimeMillis.takeIf { it > 0L },
+            lastHeartbeatSuspendedAtUptimeMillis = healthMonitor.lastHeartbeatSuspendedAtUptimeMillis.takeIf { it > 0L },
+            lastHeartbeatResumedAtUptimeMillis = healthMonitor.lastHeartbeatResumedAtUptimeMillis.takeIf { it > 0L },
+            heartbeatSuspendedReason = healthMonitor.heartbeatSuspendedReason,
+            lastImeRequestAtUptimeMillis = lastImeRequestAtUptimeMillis.takeIf { it > 0L },
+            lastShowSoftInputAtUptimeMillis = lastShowSoftInputAtUptimeMillis.takeIf { it > 0L },
+            lastHideSoftInputAtUptimeMillis = lastHideSoftInputAtUptimeMillis.takeIf { it > 0L },
+            lastResizeAtUptimeMillis = lastResizeAtUptimeMillis.takeIf { it > 0L },
+            lastActionModeAtUptimeMillis = lastActionModeAtUptimeMillis.takeIf { it > 0L },
         )
     }
 
     init {
+        setBackgroundColor(editorBackgroundColor())
         addView(webView, LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
+        addView(loadingOverlay, LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
         configureWebView()
     }
 
@@ -157,6 +190,7 @@ class AceCodeEditor @JvmOverloads constructor(
             return
         }
         loaded = true
+        showLoadingOverlay()
         healthMonitor.markLoadingPage()
         if (AceEditorTestHooks.shouldForceRendererGoneFallback()) {
             reportFatalFailure(
@@ -344,13 +378,35 @@ class AceCodeEditor @JvmOverloads constructor(
         destroyed = true
         healthMonitor.markDestroyed()
         mainHandler.removeCallbacks(mirrorCalibrationRunnable)
+        mainHandler.removeCallbacks(scheduledResizeRunnable)
+        mainHandler.removeCallbacks(imeSettleRunnable)
         pendingScripts.clear()
         webView.stopLoading()
         runCatching { webView.removeJavascriptInterface(JS_BRIDGE_NAME) }
         webView.webChromeClient = null
         webView.webViewClient = WebViewClient()
+        removeView(loadingOverlay)
         removeView(webView)
         webView.destroy()
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        applyEditorBackground()
+    }
+
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        if (oldw <= 0 || oldh <= 0 || w <= 0 || h <= 0 || (w == oldw && h == oldh)) {
+            return
+        }
+        val heightDelta = kotlin.math.abs(h - oldh)
+        val reason = if (heightDelta >= imeHeightThresholdPx()) {
+            "ime_or_view_size_changed"
+        } else {
+            "view_size_changed"
+        }
+        scheduleTransientResize(reason, RESIZE_SETTLE_DELAY_MS)
     }
 
     internal fun handleEvent(name: String, payloadJson: String?) {
@@ -377,6 +433,16 @@ class AceCodeEditor @JvmOverloads constructor(
                         fatal = false,
                     ),
                 )
+                "recoverableError" -> healthMonitor.reportFailure(
+                    AceFailure(
+                        type = AceFailureType.JS_RUNTIME_ERROR,
+                        message = failureMessageFromPayload(payloadJson, "ACE recoverable JavaScript error"),
+                        detail = payloadJson,
+                        fatal = false,
+                    ),
+                )
+                "firstPaint" -> handleFirstPaint()
+                "resizeDone" -> lastResizeAtUptimeMillis = SystemClock.uptimeMillis()
                 "changeDelta" -> handleChangeDelta(payloadJson)
             }
             listener?.onEvent(name, payloadJson)
@@ -396,6 +462,7 @@ class AceCodeEditor @JvmOverloads constructor(
             isReady = true
             listener?.onReady(state)
             flushPendingScripts()
+            scheduleAceResize("bridge_ready", 0L)
             healthMonitor.startHeartbeat { evaluateHeartbeat() }
         }
     }
@@ -466,6 +533,15 @@ class AceCodeEditor @JvmOverloads constructor(
         }
     }
 
+    private fun handleFirstPaint() {
+        if (firstPaintReceived) {
+            return
+        }
+        firstPaintReceived = true
+        lastFirstPaintAtUptimeMillis = SystemClock.uptimeMillis()
+        hideLoadingOverlay()
+    }
+
     private fun reportFatalFailure(type: AceFailureType, message: String, detail: String? = null) {
         healthMonitor.reportFailure(
             AceFailure(
@@ -507,18 +583,132 @@ class AceCodeEditor @JvmOverloads constructor(
 
     internal fun showSoftInput() {
         postToMain {
+            val now = SystemClock.uptimeMillis()
+            if (now - lastImeRequestAtUptimeMillis < IME_REQUEST_COALESCE_MS) {
+                return@postToMain
+            }
+            lastImeRequestAtUptimeMillis = now
+            lastShowSoftInputAtUptimeMillis = now
+            webView.requestFocus()
+            scheduleTransientResize("ime_show_requested", RESIZE_SETTLE_DELAY_MS)
             ViewUtils.showSoftInput(webView)
         }
     }
 
     internal fun hideSoftInput() {
         postToMain {
+            val now = SystemClock.uptimeMillis()
+            if (now - lastImeRequestAtUptimeMillis < IME_REQUEST_COALESCE_MS) {
+                return@postToMain
+            }
+            lastImeRequestAtUptimeMillis = now
+            lastHideSoftInputAtUptimeMillis = now
+            scheduleTransientResize("ime_hide_requested", RESIZE_SETTLE_DELAY_MS)
             ViewUtils.hideSoftInput(webView)
         }
     }
 
+    internal fun startActionMode(
+        left: Double,
+        top: Double,
+        right: Double,
+        bottom: Double,
+        hasSelection: Boolean,
+        selectAll: Boolean,
+    ) {
+        postToMain {
+            actionModeActive = true
+            lastActionModeAtUptimeMillis = SystemClock.uptimeMillis()
+            healthMonitor.markStateEvent()
+            scheduleAceResize(
+                "action_mode_started:${left.toFloat()},${top.toFloat()},${right.toFloat()},${bottom.toFloat()},$hasSelection,$selectAll",
+                RESIZE_SETTLE_DELAY_MS,
+            )
+        }
+    }
+
+    internal fun finishActionMode() {
+        postToMain {
+            if (!actionModeActive) {
+                return@postToMain
+            }
+            actionModeActive = false
+            lastActionModeAtUptimeMillis = SystemClock.uptimeMillis()
+            healthMonitor.markStateEvent()
+        }
+    }
+
+    internal fun performLongPressFeedback() {
+        postToMain {
+            webView.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+        }
+    }
+
+    private fun scheduleTransientResize(reason: String, delayMillis: Long) {
+        if (destroyed) {
+            return
+        }
+        healthMonitor.suspendHeartbeat(reason, IME_TRANSITION_HEARTBEAT_SUSPEND_MS)
+        scheduleAceResize(reason, delayMillis)
+        mainHandler.removeCallbacks(imeSettleRunnable)
+        mainHandler.postDelayed(imeSettleRunnable, IME_TRANSITION_HEARTBEAT_SUSPEND_MS)
+    }
+
+    private fun scheduleAceResize(reason: String, delayMillis: Long) {
+        if (destroyed) {
+            return
+        }
+        pendingResizeReason = reason
+        mainHandler.removeCallbacks(scheduledResizeRunnable)
+        mainHandler.postDelayed(scheduledResizeRunnable, delayMillis.coerceAtLeast(0L))
+    }
+
+    private fun runScheduledResize() {
+        if (destroyed) {
+            return
+        }
+        val reason = pendingResizeReason ?: "scheduled_resize"
+        pendingResizeReason = null
+        lastResizeAtUptimeMillis = SystemClock.uptimeMillis()
+        invokeAce("scheduleResize", quote(reason))
+    }
+
+    private fun showLoadingOverlay() {
+        applyEditorBackground()
+        firstPaintReceived = false
+        loadingOverlay.animate().cancel()
+        loadingOverlay.alpha = 1f
+        loadingOverlay.visibility = View.VISIBLE
+        loadingOverlay.bringToFront()
+    }
+
+    private fun hideLoadingOverlay() {
+        loadingOverlay.animate().cancel()
+        loadingOverlay.visibility = View.GONE
+    }
+
+    private fun applyEditorBackground() {
+        val color = editorBackgroundColor()
+        setBackgroundColor(color)
+        webView.setBackgroundColor(color)
+        loadingOverlay.setBackgroundColor(color)
+    }
+
+    private fun editorBackgroundColor(): Int {
+        val nightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        return if (nightMode == Configuration.UI_MODE_NIGHT_YES) {
+            Color.rgb(30, 30, 30)
+        } else {
+            Color.rgb(247, 248, 250)
+        }
+    }
+
+    private fun imeHeightThresholdPx(): Int {
+        return (resources.displayMetrics.density * IME_HEIGHT_THRESHOLD_DP).toInt()
+    }
+
     private fun configureWebView() {
-        webView.setBackgroundColor(Color.TRANSPARENT)
+        webView.setBackgroundColor(editorBackgroundColor())
         webView.isFocusable = true
         webView.isFocusableInTouchMode = true
         webView.isHorizontalScrollBarEnabled = true
@@ -585,10 +775,19 @@ class AceCodeEditor @JvmOverloads constructor(
             runCatching {
                 webView.evaluateJavascript(script, callback)
             }.onFailure {
-                reportFatalFailure(
-                    AceFailureType.EVALUATE_JAVASCRIPT_ERROR,
-                    "ACE JavaScript evaluation failed: ${it.message.orEmpty()}",
-                )
+                val message = "ACE JavaScript evaluation failed: ${it.message.orEmpty()}"
+                if (healthMonitor.isHeartbeatSuspended()) {
+                    healthMonitor.reportFailure(
+                        AceFailure(
+                            type = AceFailureType.EVALUATE_JAVASCRIPT_ERROR,
+                            message = message,
+                            fatal = false,
+                        ),
+                    )
+                    handleError(message)
+                } else {
+                    reportFatalFailure(AceFailureType.EVALUATE_JAVASCRIPT_ERROR, message)
+                }
                 callback?.onReceiveValue(null)
             }
         }
@@ -973,6 +1172,10 @@ class AceCodeEditor @JvmOverloads constructor(
         private const val EDITOR_ASSET_PATH = "editor/ace-builds-1.4.12/autojs6_editor.html"
         private const val ACE_RUNTIME_REVISION = "ace-builds-1.4.12-autojs6"
         private const val TEXT_MIRROR_CALIBRATION_DELAY_MS = 500L
+        private const val IME_REQUEST_COALESCE_MS = 150L
+        private const val IME_TRANSITION_HEARTBEAT_SUSPEND_MS = 800L
+        private const val RESIZE_SETTLE_DELAY_MS = 120L
+        private const val IME_HEIGHT_THRESHOLD_DP = 80f
 
         fun hasRequiredAssets(context: Context): Boolean {
             if (AceEditorTestHooks.shouldForceAssetMissing()) {
