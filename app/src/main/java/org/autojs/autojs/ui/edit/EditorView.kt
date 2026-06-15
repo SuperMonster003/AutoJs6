@@ -82,6 +82,7 @@ import org.autojs.autojs.ui.edit.editor.loading.EditorFileReadPipeline
 import org.autojs.autojs.ui.edit.editor.loading.EditorTextLoadPolicy
 import org.autojs.autojs.ui.edit.editor.loading.EditorTextLoadTarget
 import org.autojs.autojs.ui.edit.editor.loading.EngineTextLoadTarget
+import org.autojs.autojs.ui.edit.editor.service.EditorBreakpointModelStore
 import org.autojs.autojs.ui.edit.editor.service.EditorTextProvider
 import org.autojs.autojs.ui.edit.editor.service.EditorThemeFontService
 import org.autojs.autojs.ui.edit.editor.service.RunScriptTextProvider
@@ -166,8 +167,10 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     var editor: ScriptEditorEngine = EditorEngineFactory.create(context, EditorEnginePreferences.get())
 
     private var mViewportPolicy: EditorViewportPolicy = EditorViewportPolicyFactory.create(editor, this)
+    val breakpointModelStore = EditorBreakpointModelStore { editor }
     private val mCommandDispatcher = EditorCommandDispatcher(
         currentEditor = { editor },
+        breakpointModelStore = breakpointModelStore,
         showManual = { urlSuffix, title -> showManual(urlSuffix, title) },
         hideFunctionsKeyboard = { showSoftInput -> mFunctionsKeyboardHelper?.hideFunctionsLayout(showSoftInput) },
     )
@@ -1459,6 +1462,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         binding.editorContainer.removeView(oldEditor.view)
 
         editor = newEditor
+        breakpointModelStore.onEditorChanged()
         mViewportPolicy = EditorViewportPolicyFactory.create(editor, this)
         attachEditorEngineView()
         setUpEditor(resetInitialState = false)

@@ -4,9 +4,11 @@ import org.autojs.autojs.model.autocomplete.CodeCompletions
 import org.autojs.autojs.model.indices.Module
 import org.autojs.autojs.model.indices.Property
 import org.autojs.autojs.ui.edit.editor.engine.ScriptEditorEngine
+import org.autojs.autojs.ui.edit.editor.service.EditorBreakpointModelStore
 
 class EditorCommandDispatcher(
     private val currentEditor: () -> ScriptEditorEngine,
+    private val breakpointModelStore: EditorBreakpointModelStore,
     private val showManual: (urlSuffix: String, title: String) -> Unit,
     private val hideFunctionsKeyboard: (showSoftInput: Boolean) -> Unit,
 ) {
@@ -72,11 +74,11 @@ class EditorCommandDispatcher(
     }
 
     fun addOrRemoveBreakpointAtCurrentLine() {
-        currentEditor().addOrRemoveBreakpointAtCurrentLine()
+        breakpointModelStore.addOrRemoveAtCurrentLine()
     }
 
     fun removeAllBreakpoints() {
-        currentEditor().removeAllBreakpoints()
+        breakpointModelStore.removeAll()
     }
 
     fun onCompletionClick(completions: CodeCompletions, position: Int) {

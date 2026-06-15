@@ -59,7 +59,7 @@ goal is to make editor behavior engine-neutral where possible, and keep native
 - [ ] Extract version history service.
 - [x] Extract run-text provider.
 - [x] Expand editor command dispatcher beyond input-keyboard commands.
-- [ ] Extract breakpoint model store.
+- [x] Extract breakpoint model store.
 - [x] Extract theme/font application service.
 
 ## Phase 5: Native Editor Containment

@@ -127,7 +127,7 @@ public class DebugToolbarFragment extends ToolbarFragment<FragmentDebugToolbarBi
         ScriptEditorEngine editor = mEditorView.editor;
         editor.setRedoUndoEnabled(false);
         editor.addCursorChangeCallback(this);
-        editor.setBreakpointChangeListener(mBreakpointChangeListener);
+        mEditorView.getBreakpointModelStore().setChangeListener(mBreakpointChangeListener);
         DebugBar debugBar = mEditorView.debugBar;
         debugBar.registerVariableChangeObserver(mVariableChangeObserver);
         debugBar.setCodeEvaluator(this);
@@ -191,7 +191,7 @@ public class DebugToolbarFragment extends ToolbarFragment<FragmentDebugToolbarBi
     public void updateSourceText(Dim.SourceInfo sourceInfo) {
         Log.d(LOG_TAG, "updateSourceText: url = " + sourceInfo.url());
         sourceInfo.removeAllBreakpoints();
-        for (EditorBreakpoint breakpoint : mEditorView.editor.getBreakpoints().values()) {
+        for (EditorBreakpoint breakpoint : mEditorView.getBreakpointModelStore().getBreakpoints()) {
             int line = breakpoint.getLine() + 1;
             if (sourceInfo.breakableLine(line)) {
                 sourceInfo.breakpoint(line, breakpoint.getEnabled());
@@ -313,7 +313,7 @@ public class DebugToolbarFragment extends ToolbarFragment<FragmentDebugToolbarBi
         if (mEditorView != null) {
             ScriptEditorEngine editor = mEditorView.editor;
             editor.removeCursorChangeCallback(this);
-            editor.setBreakpointChangeListener(null);
+            mEditorView.getBreakpointModelStore().clearChangeListener();
             DebugBar debugBar = mEditorView.debugBar;
             debugBar.unregisterVariableChangeObserver(mVariableChangeObserver);
         }

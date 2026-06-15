@@ -69,6 +69,7 @@ function assertOnlyIn(pattern, allowedFiles) {
 
 const editorView = "app/src/main/java/org/autojs/autojs/ui/edit/EditorView.kt";
 const editorMenu = "app/src/main/java/org/autojs/autojs/ui/edit/EditorMenu.java";
+const debugToolbarFragment = "app/src/main/java/org/autojs/autojs/ui/edit/toolbar/DebugToolbarFragment.java";
 const scriptEngine = "app/src/main/java/org/autojs/autojs/ui/edit/editor/engine/ScriptEditorEngine.kt";
 const nativePolicy = "app/src/main/java/org/autojs/autojs/ui/edit/editor/viewport/NativeEditorViewportPolicy.kt";
 const acePolicy = "app/src/main/java/org/autojs/autojs/ui/edit/editor/viewport/AceEditorViewportPolicy.kt";
@@ -83,9 +84,12 @@ const textLoadTarget = "app/src/main/java/org/autojs/autojs/ui/edit/editor/loadi
 const editorTextProvider = "app/src/main/java/org/autojs/autojs/ui/edit/editor/service/EditorTextProvider.kt";
 const runScriptTextProvider = "app/src/main/java/org/autojs/autojs/ui/edit/editor/service/RunScriptTextProvider.kt";
 const themeFontService = "app/src/main/java/org/autojs/autojs/ui/edit/editor/service/EditorThemeFontService.kt";
+const breakpointModelStore = "app/src/main/java/org/autojs/autojs/ui/edit/editor/service/EditorBreakpointModelStore.kt";
 
 assertIncludes(editorView, "mViewportPolicy.onImeInsetsChanged(imeVisible, targetBottom)");
 assertIncludes(editorView, "EditorViewportPolicyFactory.create(editor, this)");
+assertIncludes(editorView, "val breakpointModelStore = EditorBreakpointModelStore { editor }");
+assertIncludes(editorView, "breakpointModelStore.onEditorChanged()");
 assertIncludes(editorView, "EditorCommandDispatcher(");
 assertIncludes(editorView, "val commandDispatcher: EditorCommandDispatcher");
 assertIncludes(editorView, "mCommandDispatcher.undo()");
@@ -147,6 +151,7 @@ assertNotIncludes(acePolicy, "ensureCursorVisibleIfPossible");
 assertNotIncludes(acePolicy, "requestRectangleOnScreen");
 
 assertIncludes(commandDispatcher, "private val currentEditor: () -> ScriptEditorEngine");
+assertIncludes(commandDispatcher, "private val breakpointModelStore: EditorBreakpointModelStore");
 assertIncludes(commandDispatcher, "fun insert(text: CharSequence?)");
 assertIncludes(commandDispatcher, "fun copyLine()");
 assertIncludes(commandDispatcher, "fun deleteLine()");
@@ -158,6 +163,8 @@ assertIncludes(commandDispatcher, "fun redo()");
 assertIncludes(commandDispatcher, "fun replaceSelection()");
 assertIncludes(commandDispatcher, "fun addOrRemoveBreakpointAtCurrentLine()");
 assertIncludes(commandDispatcher, "fun removeAllBreakpoints()");
+assertIncludes(commandDispatcher, "breakpointModelStore.addOrRemoveAtCurrentLine()");
+assertIncludes(commandDispatcher, "breakpointModelStore.removeAll()");
 assertNotIncludes(commandDispatcher, "CodeEditText");
 
 assertIncludes(editorMenu, "commandDispatcher().addOrRemoveBreakpointAtCurrentLine()");
@@ -182,6 +189,12 @@ assertNotIncludes(editorMenu, "currentEditor().deleteLine");
 assertNotIncludes(editorMenu, "currentEditor().toggleComment");
 assertNotIncludes(editorMenu, "currentEditor().beautifyCode");
 assertNotIncludes(editorMenu, "currentEditor().setText(\"\")");
+
+assertIncludes(debugToolbarFragment, "mEditorView.getBreakpointModelStore().setChangeListener(mBreakpointChangeListener)");
+assertIncludes(debugToolbarFragment, "mEditorView.getBreakpointModelStore().getBreakpoints()");
+assertIncludes(debugToolbarFragment, "mEditorView.getBreakpointModelStore().clearChangeListener()");
+assertNotIncludes(debugToolbarFragment, "editor.setBreakpointChangeListener");
+assertNotIncludes(debugToolbarFragment, "mEditorView.editor.getBreakpoints()");
 
 assertIncludes(aceEngine, "override fun createAutoCompletion(context: Context): AutoCompletion? = null");
 assertNotIncludes(aceEngine, "setLoadingGutterDigits");
@@ -222,6 +235,15 @@ assertIncludes(themeFontService, "AceEditorFontPreferences.set(font)");
 assertIncludes(themeFontService, "Themes.setCurrent(theme.name)");
 assertIncludes(themeFontService, "ThemeColorManager.colorPrimary");
 assertNotIncludes(themeFontService, "CodeEditText");
+
+assertIncludes(breakpointModelStore, "class EditorBreakpointModelStore(");
+assertIncludes(breakpointModelStore, "private val currentEditor: () -> ScriptEditorEngine");
+assertIncludes(breakpointModelStore, "fun getBreakpoints(): Collection<EditorBreakpoint>");
+assertIncludes(breakpointModelStore, "fun setChangeListener(listener: EditorBreakpointChangeListener?)");
+assertIncludes(breakpointModelStore, "fun onEditorChanged()");
+assertIncludes(breakpointModelStore, "listenerOwner?.setBreakpointChangeListener(null)");
+assertIncludes(breakpointModelStore, "owner.setBreakpointChangeListener(listener)");
+assertNotIncludes(breakpointModelStore, "CodeEditText");
 
 assertOnlyIn("requestRectangleOnScreen", [
   "app/src/main/java/org/autojs/autojs/ui/edit/editor/engine/NativeCodeEditorEngine.kt",
