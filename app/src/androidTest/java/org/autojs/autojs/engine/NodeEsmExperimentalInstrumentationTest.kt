@@ -461,7 +461,8 @@ class NodeEsmExperimentalInstrumentationTest {
 
         NodeEmbeddedTestHarness.assertSucceeded("esm nested package and self-reference", result)
         assertTrue(result.stdout.contains("esm.nested.self=inner-esm/outer/self-feature-esm/self"))
-        assertTrue(result.stderr, result.stderr.contains("[resolve] self-reference matched request=\"self-pkg/feature\""))
+        assertTrue(result.stderr, result.stderr.contains("[resolve] exports matched request=\"./feature\""))
+        assertTrue(result.stderr, result.stderr.contains("/node_modules/self-pkg\" target=\"./feature.mjs\""))
         assertTrue(result.stderr, result.stderr.contains("selectedCondition=\"import\""))
     }
 
