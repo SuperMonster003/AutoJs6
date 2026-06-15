@@ -203,6 +203,17 @@ status, and differential harness status when those reports are available. Host-o
 `workingDirectory`, last error, lifecycle state, and resource counts are marked as unavailable until a device/runtime
 diagnostic is attached.
 
+The app UI also exposes `Developer options > Node.js > Node.js Doctor`. It exports privacy-redacted text or JSON reports
+through the system share sheet. Device reports include backend, expected and observed Node version when the native probe
+is available, ABI, feature flags, native library hashes, capability profile, packaged template presence, and last-error
+availability. They do not include user script contents or environment values.
+
+Focused device report generator instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.ui.settings.NodeDoctorReportGeneratorInstrumentationTest"
+```
+
 Current security regression instrumentation:
 
 ```powershell

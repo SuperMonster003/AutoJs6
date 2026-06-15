@@ -20,4 +20,17 @@
 
     </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
 
+    <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
+        app:layout="@layout/preference_category_custom"
+        app:title="@string/text_nodejs">
+
+        <org.autojs.autojs.ui.settings.NodeDoctorReportPreference
+            app:key="@string/key_nodejs_doctor_report"
+            app:layout="@layout/preference_custom"
+            app:summary="@string/summary_nodejs_doctor_report"
+            app:title="@string/text_nodejs_doctor"
+            app:longClickPrompt="@string/description_nodejs_doctor_report_preference" />
+
+    </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
+
 </PreferenceScreen>

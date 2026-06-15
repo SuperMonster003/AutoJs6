@@ -208,6 +208,8 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] release manifest records app version, git commit, release flavor, ABI list, native library hashes, template hash, compatibility profile hash, stable surface hash, and feature flag defaults
 - [ ] Embedded Node doctor text and JSON reports generated under `app/build/reports/nodejs/doctor/`
 - [ ] doctor report lists backend, expected Node version, feature flags, enabled/disabled modules, native hashes, packaged status, last-error/lifecycle/resource-count availability, and dependency bundle status
+- [ ] app UI exposes Developer options > Node.js > Node.js Doctor and can export text and JSON reports
+- [ ] device Node Doctor report omits user script contents and environment values and redacts app-private paths
 - [ ] runtime probe logs `libnode.so.sha256` and `libautojs6-node.so.sha256`
 - [ ] logcat/tombstone or bugreport collection steps in `NATIVE_CRASH_DIAGNOSTICS.md` remain current
 - [ ] optional performance report generated with `NodeEmbeddedPerformanceInstrumentationTest` and pulled by `:app:pullNodeEmbeddedPerformanceReports` for lifecycle/native-load changes
