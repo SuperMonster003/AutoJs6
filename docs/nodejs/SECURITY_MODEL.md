@@ -228,10 +228,15 @@ Required bridge properties:
 - synchronous provider exceptions converted to bridge error responses
 - fake providers for tests
 - permission error codes
+- project-declared bridge capability gate with `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`
 - malformed request errors with `ERR_AUTOJS6_BRIDGE_INVALID_REQUEST`
 - a centralized module/method registry for provider routing and diagnostics
 - main/UI/IO dispatcher separation
 - callbacks into JS marshalled onto the Node event loop thread
+
+Bridge capability manifests are optional for legacy compatibility. When a Node project declares `node.permissions` in `project.json` or `autojs6.node.permissions` in `package.json`, the bridge becomes deny-by-default for that execution. Missing declarations reject in JavaScript before the request reaches the native or Android provider.
+
+Canonical capability names are `toast`, `app.launch`, `app.settings`, `app.activity`, `dialogs`, `engines`, `engines.exec`, `accessibility`, `screen_capture`, `image`, `clipboard`, `device`, `shell`, `shell.root`, `network`, `work_manager`, and `java_interop`. Declaring a parent such as `app` or `engines` grants its non-root child methods; `shell.root` must be declared explicitly. `media_projection` is accepted as an alias for `screen_capture`.
 
 Current `toast` and `app` support uses a private live transport in the main embedded service. The service injects per-execution bridge directories under its private cache, the JavaScript bootstrap writes JSON request files with an internal native filesystem helper, and the service writes JSON responses back for the pending Promise. User scripts are not given the bridge directory paths or raw Android objects.
 

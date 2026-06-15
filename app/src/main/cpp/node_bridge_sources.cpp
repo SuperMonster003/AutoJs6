@@ -7895,6 +7895,7 @@ std::string buildEmbeddedScriptExecutionSource(
   let __autojs6_bridge_cache = null;
   let __autojs6_bridge_transport = null;
   let __autojs6_bridge_live_config_cache = undefined;
+  let __autojs6_bridge_permission_manifest_cache = undefined;
   let __autojs6_bridge_destroyed = false;
   let __autojs6_bridge_sequence = 0;
   const __autojs6_bridge_pending = new Map();
@@ -8367,6 +8368,7 @@ std::string buildEmbeddedScriptExecutionSource(
         fsSymlinkEscape: "ERR_AUTOJS6_FS_SYMLINK_ESCAPE",
         fsNulByte: "ERR_AUTOJS6_FS_NUL_BYTE",
         bridgePermissionDenied: "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED",
+        bridgeCapabilityNotDeclared: "ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED",
         bridgeInvalidRequest: "ERR_AUTOJS6_BRIDGE_INVALID_REQUEST",
         bridgeTimeout: "ERR_AUTOJS6_BRIDGE_TIMEOUT",
         bridgeProcessDead: "ERR_AUTOJS6_BRIDGE_PROCESS_DEAD",
@@ -8380,9 +8382,183 @@ std::string buildEmbeddedScriptExecutionSource(
         javaMethodDenied: "ERR_AUTOJS6_JAVA_METHOD_DENIED",
         javaReflectionDenied: "ERR_AUTOJS6_JAVA_REFLECTION_DENIED",
         legacyAliases: Object.freeze(legacyAliases)
-      })
+      }),
+      bridgePermissions: __autojs6_bridge_permission_report()
     });
     return __autojs6_profile_cache;
+  }
+  function __autojs6_bridge_normalize_capability(value) {
+    const text = String(value === undefined || value === null ? "" : value)
+      .trim()
+      .toLowerCase()
+      .replace(/:/g, ".");
+    if (text === "media_projection" || text === "media.projection" || text === "screen.capture" || text === "screencapture") {
+      return "screen_capture";
+    }
+    if (text === "engine.exec") {
+      return "engines.exec";
+    }
+    if (text === "java") {
+      return "java_interop";
+    }
+    return text;
+  }
+  function __autojs6_bridge_freeze_string_array(value) {
+    if (!Array.isArray(value)) {
+      return Object.freeze([]);
+    }
+    const output = [];
+    for (let i = 0; i < value.length; i++) {
+      const item = value[i];
+      if (typeof item === "string" && item.length > 0) {
+        output.push(item);
+      }
+    }
+    return Object.freeze(output);
+  }
+  function __autojs6_bridge_permission_manifest() {
+    if (__autojs6_bridge_permission_manifest_cache !== undefined) {
+      return __autojs6_bridge_permission_manifest_cache;
+    }
+    const fallback = Object.freeze({
+      version: 1,
+      enforced: false,
+      permissions: Object.freeze([]),
+      normalizedPermissions: Object.freeze([]),
+      sources: Object.freeze(["none"]),
+      knownCapabilities: Object.freeze([]),
+      unknownPermissions: Object.freeze([]),
+      androidPermissions: Object.freeze([]),
+      serviceRequired: false,
+      warnings: Object.freeze([])
+    });
+    try {
+      const record = __autojs6_runtime_module_embedded_sources["autojs6:bridge-permissions"];
+      if (!record || typeof record.source !== "string") {
+        __autojs6_bridge_permission_manifest_cache = fallback;
+        return fallback;
+      }
+      const parsed = JSON.parse(record.source);
+      if (!parsed || typeof parsed !== "object") {
+        __autojs6_bridge_permission_manifest_cache = fallback;
+        return fallback;
+      }
+      const permissions = __autojs6_bridge_freeze_string_array(parsed.permissions);
+      const normalized = Object.freeze(permissions.map(__autojs6_bridge_normalize_capability).filter(function(item) {
+        return item.length > 0;
+      }));
+      __autojs6_bridge_permission_manifest_cache = Object.freeze({
+        version: Number.isFinite(Number(parsed.version)) ? Math.trunc(Number(parsed.version)) : 1,
+        enforced: parsed.enforced === true,
+        permissions,
+        normalizedPermissions: normalized,
+        sources: __autojs6_bridge_freeze_string_array(parsed.sources),
+        knownCapabilities: __autojs6_bridge_freeze_string_array(parsed.knownCapabilities),
+        unknownPermissions: __autojs6_bridge_freeze_string_array(parsed.unknownPermissions),
+        androidPermissions: __autojs6_bridge_freeze_string_array(parsed.androidPermissions),
+        serviceRequired: parsed.serviceRequired === true,
+        warnings: __autojs6_bridge_freeze_string_array(parsed.warnings)
+      });
+      return __autojs6_bridge_permission_manifest_cache;
+    } catch (error) {
+      __autojs6_bridge_permission_manifest_cache = Object.freeze(Object.assign({}, fallback, {
+        warnings: Object.freeze([
+          "autojs6:bridge-permissions could not be parsed: " +
+            (error && error.message ? String(error.message) : String(error))
+        ])
+      }));
+      return __autojs6_bridge_permission_manifest_cache;
+    }
+  }
+  function __autojs6_bridge_permission_report() {
+    const manifest = __autojs6_bridge_permission_manifest();
+    return Object.freeze({
+      version: manifest.version,
+      enforced: manifest.enforced,
+      permissions: Object.freeze(manifest.permissions.slice()),
+      normalizedPermissions: Object.freeze(manifest.normalizedPermissions.slice()),
+      sources: Object.freeze(manifest.sources.slice()),
+      knownCapabilities: Object.freeze(manifest.knownCapabilities.slice()),
+      unknownPermissions: Object.freeze(manifest.unknownPermissions.slice()),
+      androidPermissions: Object.freeze(manifest.androidPermissions.slice()),
+      serviceRequired: manifest.serviceRequired,
+      warnings: Object.freeze(manifest.warnings.slice())
+    });
+  }
+  function __autojs6_bridge_default_permissions(moduleName, methodName) {
+    if (moduleName === "toast") return ["toast"];
+    if (moduleName === "app") {
+      if (methodName === "launchPackage" || methodName === "launchApp") return ["app.launch"];
+      if (methodName === "openAppSetting") return ["app.settings"];
+      if (methodName === "startActivity") return ["app.activity"];
+      return ["app"];
+    }
+    if (moduleName === "dialogs") return ["dialogs"];
+    if (moduleName === "engines") {
+      if (methodName === "execScript" || methodName === "execScriptFile") return ["engines", "engines.exec"];
+      return ["engines"];
+    }
+    if (moduleName === "accessibility") return ["accessibility"];
+    if (moduleName === "media_projection") return ["screen_capture"];
+    if (moduleName === "image" || moduleName === "images") {
+      if (methodName === "captureScreen") return ["image", "screen_capture"];
+      return ["image"];
+    }
+    if (moduleName === "clipboard") return ["clipboard"];
+    if (moduleName === "device") return ["device"];
+    if (moduleName === "shell") return ["shell"];
+    if (moduleName === "fetch" || moduleName === "websocket") return ["network"];
+    if (moduleName === "work_manager") return ["work_manager"];
+    if (moduleName === "java") return ["java_interop"];
+    return [];
+  }
+  function __autojs6_bridge_effective_permissions(moduleName, methodName, optionPermissions) {
+    const explicit = __autojs6_bridge_permissions(optionPermissions);
+    return explicit.length > 0 ? explicit : __autojs6_bridge_default_permissions(moduleName, methodName);
+  }
+  function __autojs6_bridge_declares_capability(declared, required) {
+    if (required === "shell.root") {
+      return declared.indexOf("shell.root") >= 0;
+    }
+    if (declared.indexOf(required) >= 0) {
+      return true;
+    }
+    const dotIndex = required.indexOf(".");
+    if (dotIndex > 0) {
+      return declared.indexOf(required.slice(0, dotIndex)) >= 0;
+    }
+    return false;
+  }
+  function __autojs6_bridge_missing_capabilities(requiredPermissions) {
+    const manifest = __autojs6_bridge_permission_manifest();
+    if (!manifest.enforced) {
+      return [];
+    }
+    const declared = manifest.normalizedPermissions;
+    const missing = [];
+    const seen = Object.create(null);
+    for (let i = 0; i < requiredPermissions.length; i++) {
+      const required = __autojs6_bridge_normalize_capability(requiredPermissions[i]);
+      if (!required || seen[required]) {
+        continue;
+      }
+      seen[required] = true;
+      if (!__autojs6_bridge_declares_capability(declared, required)) {
+        missing.push(required);
+      }
+    }
+    return missing;
+  }
+  function __autojs6_bridge_capability_not_declared_error(moduleName, methodName, missingCapabilities) {
+    const missing = missingCapabilities.slice();
+    const error = __autojs6_bridge_error(
+      "AutoJs6 bridge capability is not declared for " + moduleName + "." + methodName + ": " + missing.join(", "),
+      "ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED",
+      moduleName,
+      methodName
+    );
+    __autojs6_define_error_property(error, "missingCapabilities", Object.freeze(missing));
+    return error;
   }
   function __autojs6_bridge_next_id() {
     __autojs6_bridge_sequence += 1;
@@ -12034,6 +12210,15 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     const opts = options && typeof options === "object" ? options : {};
     const timeoutMs = __autojs6_bridge_timeout_ms(opts.timeoutMs);
+    const effectivePermissions = __autojs6_bridge_effective_permissions(moduleValue, methodValue, opts.permissions);
+    const missingCapabilities = __autojs6_bridge_missing_capabilities(effectivePermissions);
+    if (missingCapabilities.length > 0) {
+      return Promise.reject(__autojs6_bridge_capability_not_declared_error(
+        moduleValue,
+        methodValue,
+        missingCapabilities
+      ));
+    }
     const signal = opts.signal;
     if (signal && signal.aborted === true) {
       return Promise.reject(__autojs6_bridge_error(
@@ -12049,7 +12234,7 @@ std::string buildEmbeddedScriptExecutionSource(
       method: methodValue,
       args: __autojs6_bridge_args(args),
       timeoutMs,
-      permissions: __autojs6_bridge_permissions(opts.permissions)
+      permissions: effectivePermissions
     };
     return new Promise(function(resolve, reject) {
       const record = {
@@ -12137,6 +12322,7 @@ std::string buildEmbeddedScriptExecutionSource(
     });
     __autojs6_bridge_cache = Object.freeze({
       callAutoJs: __autojs6_call_autojs,
+      permissions: __autojs6_bridge_permission_report,
       __test: testApi
     });
     return __autojs6_bridge_cache;

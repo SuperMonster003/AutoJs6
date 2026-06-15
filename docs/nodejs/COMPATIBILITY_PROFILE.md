@@ -546,6 +546,9 @@ Current foundation:
 - private file-backed live transport in the current embedded service
 - queued host transport fallback for older packaged templates and one-way compatibility paths
 - bridge requests require non-empty `id`, `module`, and `method`; `args` must be a JSON array, `permissions` must be a string array, and `timeoutMs` must be a positive number
+- Node projects may declare bridge capabilities in `project.json` under `node.permissions`, or in `package.json` under `autojs6.node.permissions`
+- when a bridge capability manifest is present, missing capabilities reject before dispatch with `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`
+- `require("autojs6:bridge").permissions()` and `require("autojs6:profile").bridgePermissions` expose the read-only capability report
 - malformed live bridge requests reject with `ERR_AUTOJS6_BRIDGE_INVALID_REQUEST` when a response id can be recovered
 - provider callbacks are accepted at most once per bridge request; duplicate callbacks are ignored
 - synchronous provider dispatch exceptions are converted to bridge failure responses with stable module and method metadata
@@ -553,6 +556,24 @@ Current foundation:
 - JS pending bridge calls reject on destroy with `ERR_AUTOJS6_BRIDGE_PROCESS_DEAD`
 
 Current user-facing bridge modules:
+
+Declared capability names:
+
+- `toast`
+- `app`, `app.launch`, `app.settings`, `app.activity`
+- `dialogs`
+- `engines`, `engines.exec`
+- `accessibility`
+- `screen_capture` (`media_projection` is accepted as an alias)
+- `image`
+- `clipboard`
+- `device`
+- `shell`, `shell.root`
+- `network`
+- `work_manager`
+- `java_interop`
+
+No manifest keeps the legacy compatibility mode and does not enforce bridge capability declarations. An explicit empty array such as `"node": { "permissions": [] }` enforces a deny-by-default bridge surface.
 
 - `toast`
   - `showToast(message, options?): Promise<void>`
@@ -782,4 +803,5 @@ Examples:
 - disabled process API: `code=ERR_AUTOJS6_PROCESS_API_DISABLED`, `autojs6Code=ERR_AUTOJS6_PROCESS_API_DISABLED`
 - disabled fetch/network: `code=ERR_AUTOJS6_EMBEDDED_NODE_FETCH_DISABLED`, `autojs6Code=ERR_AUTOJS6_NETWORK_DISABLED`
 - scoped fs escape: `code=EPERM`, `autojs6Code=ERR_AUTOJS6_FS_PATH_ESCAPE`
+- undeclared bridge capability: `code=ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`, `autojs6Code=ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`
 - malformed bridge request: `code=ERR_AUTOJS6_BRIDGE_INVALID_REQUEST`, `autojs6Code=ERR_AUTOJS6_BRIDGE_INVALID_REQUEST`

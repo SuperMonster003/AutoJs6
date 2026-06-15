@@ -21,6 +21,7 @@ import org.autojs.autojs.AbstractAutoJs.Companion.isInrt
 import org.autojs.autojs.apkbuilder.keystore.AESUtils
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
+import org.autojs.autojs.engine.NodeBridgePermissionManifest
 import org.autojs.autojs.engine.encryption.AdvancedEncryptionStandard
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.project.BuildInfo
@@ -366,6 +367,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
                 context.getString(R.string.text_configuring_manifest),
                 mManifestFile.path,
             )
+            applyNodeBridgeAndroidManifestPermissions(this)
             prepareManifestConfiguration(this)
             ensureNotCancelled()
             notifyStepProgress(
@@ -452,6 +454,19 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
                 .addEmbeddedNodeForegroundServicePermissionsIfMissing()
         }
         mManifestEditor = manifestEditor
+    }
+
+    private fun applyNodeBridgeAndroidManifestPermissions(config: ProjectConfig) {
+        if (!config.libs.contains(Lib.EMBEDDED_NODE_JS.label) || !PFiles.isDir(config.sourcePath)) {
+            return
+        }
+        val requiredPermissions = NodeBridgePermissionManifest.androidPermissionsForWorkingDirectory(config.sourcePath)
+        if (requiredPermissions.isEmpty()) {
+            return
+        }
+        val mergedPermissions = LinkedHashSet(config.permissions)
+        mergedPermissions.addAll(requiredPermissions)
+        config.setPermissions(ArrayList(mergedPermissions))
     }
 
     private fun retrieveSplashThemeResources(launchConfig: LaunchConfig) {

@@ -56,3 +56,17 @@ The examples target AutoJs6 Safe Node Profile. They avoid:
 - unrestricted filesystem access
 
 Examples that use Android capabilities such as accessibility or media projection are written to handle unavailable permissions without crashing.
+
+Node bridge examples may declare the capability surface in `project.json`:
+
+```json
+{
+  "type": "node",
+  "main": "main.cjs",
+  "node": {
+    "permissions": ["toast", "app.launch", "accessibility", "screen_capture"]
+  }
+}
+```
+
+When `node.permissions` is present, undeclared bridge calls reject before dispatch with `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`. Older examples without the field keep compatibility mode.

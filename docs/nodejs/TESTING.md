@@ -203,6 +203,14 @@ Current `image` bridge expansion focused instrumentation:
 
 This suite verifies the `image`/`images` bridge registry, fake provider request/response behavior, `captureScreen`, scoped `readImage`/`saveImage` path rejection, `clip`, `resize`, `findImage`, idempotent `recycle`, shadowing protection, opaque handle normalization, timeout and permission propagation, and stable Android provider rejection until a real image capability provider is connected.
 
+Current bridge permission manifest focused instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeBridgePermissionManifestInstrumentationTest"
+```
+
+This suite verifies `project.json node.permissions`, `package.json autojs6.node.permissions`, capability normalization, Android manifest permission mapping, declared `toast` dispatch, undeclared `accessibility` pre-dispatch rejection with `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`, and the JavaScript capability report exposed through `autojs6:bridge` and `autojs6:profile`.
+
 Current `shell` bridge focused instrumentation:
 
 ```powershell

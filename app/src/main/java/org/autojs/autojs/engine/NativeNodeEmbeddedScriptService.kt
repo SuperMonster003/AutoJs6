@@ -142,6 +142,7 @@ class NativeNodeEmbeddedScriptService : Service() {
             .withHostAppInfo()
             .withDeviceInfo()
             .withEngineInfo(engineInfo.toJson())
+            .withBridgePermissionManifest(workingDirectory)
             .withBridgeLiveConfig(bridgeSession.configJson())
         val request = NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest(
             source = source,
@@ -337,6 +338,18 @@ class NativeNodeEmbeddedScriptService : Service() {
         return linkedMapOf<String, String>().apply {
             putAll(this@withBridgeLiveConfig)
             put(BRIDGE_LIVE_CONFIG_RUNTIME_MODULE_NAME, configJson)
+        }
+    }
+
+    private fun Map<String, String>.withBridgePermissionManifest(workingDirectory: String?): Map<String, String> {
+        return linkedMapOf<String, String>().apply {
+            putAll(this@withBridgePermissionManifest)
+            if (!containsKey(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME)) {
+                put(
+                    NodeBridgePermissionManifest.RUNTIME_MODULE_NAME,
+                    NodeBridgePermissionManifest.runtimeModuleSourceForWorkingDirectory(workingDirectory),
+                )
+            }
         }
     }
 

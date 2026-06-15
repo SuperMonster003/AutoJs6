@@ -173,6 +173,10 @@ public class ProjectConfig implements FuzzyDeserializer.OriginalJsonKeyAware {
     })
     private List<String> mLibs = new ArrayList<>();
 
+    @Nullable
+    @SerializedName("node")
+    private NodeConfig mNodeConfig;
+
     @SerializedName("permissions")
     @SerializedNameCompatible(with = {
             @With(value = "permission"),
@@ -883,6 +887,16 @@ public class ProjectConfig implements FuzzyDeserializer.OriginalJsonKeyAware {
         return this;
     }
 
+    @Nullable
+    public NodeConfig getNodeConfig() {
+        return mNodeConfig;
+    }
+
+    public ProjectConfig setNodeConfig(@Nullable NodeConfig nodeConfig) {
+        mNodeConfig = nodeConfig;
+        return this;
+    }
+
     public String getSignatureScheme() {
         return mSignatureScheme;
     }
@@ -900,6 +914,50 @@ public class ProjectConfig implements FuzzyDeserializer.OriginalJsonKeyAware {
     public ProjectConfig setKeyStore(@Nullable KeyStore keyStore) {
         mKeyStore = keyStore;
         return this;
+    }
+
+    public static class NodeConfig {
+
+        @Nullable
+        @SerializedName("backend")
+        private String mBackend;
+
+        @Nullable
+        @SerializedName("timeoutMs")
+        private Long mTimeoutMs;
+
+        @Nullable
+        @SerializedName("permissions")
+        private List<String> mPermissions;
+
+        @Nullable
+        public String getBackend() {
+            return mBackend;
+        }
+
+        public NodeConfig setBackend(@Nullable String backend) {
+            mBackend = backend;
+            return this;
+        }
+
+        @Nullable
+        public Long getTimeoutMs() {
+            return mTimeoutMs;
+        }
+
+        public NodeConfig setTimeoutMs(@Nullable Long timeoutMs) {
+            mTimeoutMs = timeoutMs;
+            return this;
+        }
+
+        public List<String> getPermissions() {
+            return Objects.requireNonNullElse(mPermissions, Collections.emptyList());
+        }
+
+        public NodeConfig setPermissions(@Nullable List<String> permissions) {
+            mPermissions = permissions;
+            return this;
+        }
     }
 
 }

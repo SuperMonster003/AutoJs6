@@ -164,6 +164,7 @@ Important: `.mjs` currently routes to the Node backend, but ESM execution is sti
 
 1. Harden the private live bridge transport and refresh packaged templates so packaged apps can use the same live path.
 2. Keep `toast`, `app`, `engines`, `clipboard`, `device`, `shell`, protocol-gated `dialogs`, selector-shaped disabled-path `accessibility`, and protocol-gated `media_projection`/`image` stable while designing real capability providers.
+3. Treat `project.json node.permissions` and `package.json autojs6.node.permissions` as the bridge capability manifest when present; missing declarations reject with `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`.
 3. Design the real accessibility and MediaProjection/image providers before enabling Android-backed actions, screenshot capture, image decoding, or live node/image handles. Accessibility selector descriptors and node snapshots must remain JSON-only.
 4. Keep scheduled/background task execution behind `docs/nodejs/design/WORK_MANAGER.md`; `work_manager` currently registers controlled metadata only, and future timed execution should use a bridge provider, persistent user-visible descriptors, and packaged manifest gates.
 5. Keep ESM behind `docs/nodejs/design/ESM.md` and `autojs.nodejs.esm.experimental=false`; `.mjs` remains a Node route with default rejection. Keep dynamic import behind the separate `autojs.nodejs.dynamicImport.experimental=false` gate.

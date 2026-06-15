@@ -1,3 +1,4 @@
+import groovy.json.JsonSlurper
 import java.io.File
 import java.security.MessageDigest
 import java.util.Properties
@@ -25,6 +26,7 @@ private val embeddedNodePackagingLegacyLifecycleJniSymbol =
 private val embeddedNodePackagingLifecycleWithModulesJniSymbol =
     "Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedScriptLifecycleWithModules"
 private val embeddedNodePackagingProjectConfigEntry = "assets/project/project.json"
+private val embeddedNodePackagingPackageJsonEntry = "assets/project/package.json"
 private val embeddedNodePackagingRuntimeMatrixEntry = "assets/project/runtime-matrix.expected.txt"
 private val embeddedNodePackagingPreloadBudgetEntry = "assets/project/preload-budget.expected.txt"
 private val embeddedNodePackagingModuleSourcesLimit = 64
@@ -296,8 +298,44 @@ private val embeddedNodePackagingDiagnosticsJavaScriptEntries = listOf(
     "assets/project/node_modules/diagnostic-esm-export-context/esm.mjs",
 )
 private val embeddedNodePackagingForegroundServicePermission = "android.permission.FOREGROUND_SERVICE"
+private val embeddedNodePackagingForegroundServiceMediaProjectionPermission =
+    "android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION"
 private val embeddedNodePackagingForegroundServiceSpecialUsePermission = "android.permission.FOREGROUND_SERVICE_SPECIAL_USE"
 private val embeddedNodePackagingInternetPermission = "android.permission.INTERNET"
+private val embeddedNodePackagingKnownBridgeCapabilities = listOf(
+    "toast",
+    "app",
+    "app.launch",
+    "app.settings",
+    "app.activity",
+    "dialogs",
+    "engines",
+    "engines.exec",
+    "accessibility",
+    "screen_capture",
+    "image",
+    "clipboard",
+    "device",
+    "shell",
+    "shell.root",
+    "network",
+    "work_manager",
+    "java_interop",
+)
+private val embeddedNodePackagingRelevantAndroidPermissions = listOf(
+    embeddedNodePackagingInternetPermission,
+    embeddedNodePackagingForegroundServicePermission,
+    embeddedNodePackagingForegroundServiceMediaProjectionPermission,
+    embeddedNodePackagingForegroundServiceSpecialUsePermission,
+)
+private val embeddedNodePackagingAndroidPermissionsByBridgeCapability = mapOf(
+    "network" to listOf(embeddedNodePackagingInternetPermission),
+    "screen_capture" to listOf(
+        embeddedNodePackagingForegroundServicePermission,
+        embeddedNodePackagingForegroundServiceMediaProjectionPermission,
+        embeddedNodePackagingForegroundServiceSpecialUsePermission,
+    ),
+)
 private val embeddedNodePackagingSpecialUseFgsSubtypeProperty = "android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
 private val embeddedNodePackagingRefreshTaskName = "embeddedNodeRefreshInrtTemplateApk"
 private val embeddedNodePackagedSmokePullTaskName = "embeddedNodePullPackagedSmokeApks"
@@ -344,6 +382,7 @@ private data class EmbeddedNodePackagingManifestInfo(
     val targetSdkVersion: String?,
     val declaresInternetPermission: Boolean,
     val declaresForegroundServicePermission: Boolean,
+    val declaresForegroundServiceMediaProjectionPermission: Boolean,
     val declaresForegroundServiceSpecialUsePermission: Boolean,
     val declaresEmbeddedProbeService: Boolean,
     val embeddedProbeServiceUsesNodeProcess: Boolean,
@@ -394,6 +433,23 @@ private data class EmbeddedNodePackagedOutputVerification(
     val ready: Boolean,
     val moduleSourcesReady: Boolean,
 )
+
+private data class EmbeddedNodePackagingBridgeCapabilityReport(
+    val enforced: Boolean,
+    val sources: List<String>,
+    val capabilities: List<String>,
+    val unknownCapabilities: List<String>,
+    val requiredAndroidPermissions: List<String>,
+    val declaredRelevantAndroidPermissions: List<String>,
+    val missingAndroidPermissions: List<String>,
+    val unusedRelevantAndroidPermissions: List<String>,
+) {
+    val requiredManifestReady: Boolean
+        get() = missingAndroidPermissions.isEmpty()
+
+    val requiredOnlyReady: Boolean
+        get() = unusedRelevantAndroidPermissions.isEmpty()
+}
 
 private data class EmbeddedNodeReleaseFlavorPolicy(
     val flavor: String,
@@ -521,6 +577,83 @@ private fun embeddedNodePackagingPropertyMap(text: String?): Map<String, String>
         }
         ?.toMap()
         .orEmpty()
+
+private fun embeddedNodePackagingJsonMap(text: String?): Map<*, *>? =
+    text
+        ?.takeIf { it.isNotBlank() }
+        ?.let { runCatching { JsonSlurper().parseText(it) as? Map<*, *> }.getOrNull() }
+
+private fun embeddedNodePackagingBridgeCapabilityReport(
+    projectConfigText: String?,
+    packageJsonText: String?,
+    manifestInfo: EmbeddedNodePackagingManifestInfo,
+): EmbeddedNodePackagingBridgeCapabilityReport {
+    val sources = mutableListOf<String>()
+    val capabilities = linkedSetOf<String>()
+    fun collect(sourceName: String, value: Any?) {
+        if (value !is Iterable<*>) {
+            return
+        }
+        sources += sourceName
+        value.forEach { item ->
+            if (item is String && item.isNotBlank()) {
+                capabilities += embeddedNodePackagingNormalizeBridgeCapability(item)
+            }
+        }
+    }
+
+    val projectJson = embeddedNodePackagingJsonMap(projectConfigText)
+    val projectNode = projectJson?.get("node") as? Map<*, *>
+    collect("project.json:node.permissions", projectNode?.get("permissions"))
+    collect("project.json:node.bridgePermissions", projectNode?.get("bridgePermissions"))
+
+    val packageJson = embeddedNodePackagingJsonMap(packageJsonText)
+    val autojs6 = packageJson?.get("autojs6") as? Map<*, *>
+    collect("package.json:autojs6.permissions", autojs6?.get("permissions"))
+    collect("package.json:autojs6.bridgePermissions", autojs6?.get("bridgePermissions"))
+    val autojs6Node = autojs6?.get("node") as? Map<*, *>
+    collect("package.json:autojs6.node.permissions", autojs6Node?.get("permissions"))
+    collect("package.json:autojs6.node.bridgePermissions", autojs6Node?.get("bridgePermissions"))
+
+    val normalizedCapabilities = capabilities.filter { it.isNotEmpty() }.sorted()
+    val unknownCapabilities = normalizedCapabilities.filterNot { it in embeddedNodePackagingKnownBridgeCapabilities }
+    val requiredAndroidPermissions = normalizedCapabilities
+        .flatMap { embeddedNodePackagingAndroidPermissionsByBridgeCapability[it].orEmpty() }
+        .distinct()
+        .sortedWith(compareBy({ embeddedNodePackagingRelevantAndroidPermissions.indexOf(it).let { index -> if (index < 0) Int.MAX_VALUE else index } }, { it }))
+    val declaredRelevantAndroidPermissions = embeddedNodePackagingRelevantAndroidPermissions.filter { permission ->
+        manifestInfo.declaresAndroidPermission(permission)
+    }
+    return EmbeddedNodePackagingBridgeCapabilityReport(
+        enforced = sources.isNotEmpty(),
+        sources = sources.distinct(),
+        capabilities = normalizedCapabilities,
+        unknownCapabilities = unknownCapabilities,
+        requiredAndroidPermissions = requiredAndroidPermissions,
+        declaredRelevantAndroidPermissions = declaredRelevantAndroidPermissions,
+        missingAndroidPermissions = requiredAndroidPermissions.filterNot { it in declaredRelevantAndroidPermissions },
+        unusedRelevantAndroidPermissions = declaredRelevantAndroidPermissions.filterNot { it in requiredAndroidPermissions },
+    )
+}
+
+private fun embeddedNodePackagingNormalizeBridgeCapability(value: String): String =
+    value.trim().lowercase().replace(':', '.').let { normalized ->
+        when (normalized) {
+            "media_projection", "media.projection", "screen.capture", "screencapture" -> "screen_capture"
+            "engine.exec" -> "engines.exec"
+            "java" -> "java_interop"
+            else -> normalized
+        }
+    }
+
+private fun EmbeddedNodePackagingManifestInfo.declaresAndroidPermission(permission: String): Boolean =
+    when (permission) {
+        embeddedNodePackagingInternetPermission -> declaresInternetPermission
+        embeddedNodePackagingForegroundServicePermission -> declaresForegroundServicePermission
+        embeddedNodePackagingForegroundServiceMediaProjectionPermission -> declaresForegroundServiceMediaProjectionPermission
+        embeddedNodePackagingForegroundServiceSpecialUsePermission -> declaresForegroundServiceSpecialUsePermission
+        else -> false
+    }
 
 private fun Map<String, String>.embeddedNodePackagingIntValue(key: String): Int? =
     this[key]?.toIntOrNull()
@@ -665,6 +798,7 @@ private fun embeddedNodePackagingMissingManifestInfo(
         targetSdkVersion = null,
         declaresInternetPermission = false,
         declaresForegroundServicePermission = false,
+        declaresForegroundServiceMediaProjectionPermission = false,
         declaresForegroundServiceSpecialUsePermission = false,
         declaresEmbeddedProbeService = false,
         embeddedProbeServiceUsesNodeProcess = false,
@@ -992,6 +1126,7 @@ private fun embeddedNodePackagingManifestInfo(tools: EmbeddedNodePackagingTools?
         targetSdkVersion = embeddedNodePackagingRegexValue(xmlTree, Regex("""targetSdkVersion[^\n=]*=(\d+)""")),
         declaresInternetPermission = xmlTree.contains("$embeddedNodePackagingInternetPermission\""),
         declaresForegroundServicePermission = xmlTree.contains("$embeddedNodePackagingForegroundServicePermission\""),
+        declaresForegroundServiceMediaProjectionPermission = xmlTree.contains("$embeddedNodePackagingForegroundServiceMediaProjectionPermission\""),
         declaresForegroundServiceSpecialUsePermission = xmlTree.contains("$embeddedNodePackagingForegroundServiceSpecialUsePermission\""),
         declaresEmbeddedProbeService = probeBlock != null,
         embeddedProbeServiceUsesNodeProcess = probeBlock?.contains("\":nodejs_embedded\"") == true,
@@ -1012,6 +1147,7 @@ private fun StringBuilder.appendEmbeddedNodePackagingManifestInfo(label: String,
     appendLine("  $label targetSdkVersion: ${info.targetSdkVersion ?: "unknown"}")
     appendLine("  $label declares INTERNET permission: ${info.declaresInternetPermission}")
     appendLine("  $label declares FOREGROUND_SERVICE permission: ${info.declaresForegroundServicePermission}")
+    appendLine("  $label declares FOREGROUND_SERVICE_MEDIA_PROJECTION permission: ${info.declaresForegroundServiceMediaProjectionPermission}")
     appendLine("  $label declares FOREGROUND_SERVICE_SPECIAL_USE permission: ${info.declaresForegroundServiceSpecialUsePermission}")
     appendLine("  $label declares NativeNodeEmbeddedProbeService: ${info.declaresEmbeddedProbeService}")
     appendLine("  $label probe service process is :nodejs_embedded: ${info.embeddedProbeServiceUsesNodeProcess}")
@@ -2297,6 +2433,14 @@ private fun embeddedNodePackagingVerifyPackagedApkOutput(
     val projectConfigText = packagedApk
         ?.takeIf { it.isFile }
         ?.let { embeddedNodePackagingApkEntryText(it, embeddedNodePackagingProjectConfigEntry) }
+    val packageJsonText = packagedApk
+        ?.takeIf { it.isFile }
+        ?.let { embeddedNodePackagingApkEntryText(it, embeddedNodePackagingPackageJsonEntry) }
+    val bridgeCapabilityReport = embeddedNodePackagingBridgeCapabilityReport(
+        projectConfigText = projectConfigText,
+        packageJsonText = packageJsonText,
+        manifestInfo = manifestInfo,
+    )
     val projectMainEntry = embeddedNodePackagingProjectScriptEntry(projectConfigText)
     val mainScriptBytes = packagedApk
         ?.takeIf { it.isFile }
@@ -2559,6 +2703,19 @@ private fun embeddedNodePackagingVerifyPackagedApkOutput(
         }
         appendLine()
 
+        appendLine("Node bridge capability manifest verification:")
+        appendLine("  capability manifest enforced: ${bridgeCapabilityReport.enforced}")
+        appendLine("  capability manifest sources: ${if (bridgeCapabilityReport.sources.isEmpty()) "none" else bridgeCapabilityReport.sources.joinToString()}")
+        appendLine("  declared bridge capabilities: ${if (bridgeCapabilityReport.capabilities.isEmpty()) "none" else bridgeCapabilityReport.capabilities.joinToString()}")
+        appendLine("  unknown bridge capabilities: ${if (bridgeCapabilityReport.unknownCapabilities.isEmpty()) "none" else bridgeCapabilityReport.unknownCapabilities.joinToString()}")
+        appendLine("  required Android manifest permissions: ${if (bridgeCapabilityReport.requiredAndroidPermissions.isEmpty()) "none" else bridgeCapabilityReport.requiredAndroidPermissions.joinToString()}")
+        appendLine("  declared relevant Android manifest permissions: ${if (bridgeCapabilityReport.declaredRelevantAndroidPermissions.isEmpty()) "none" else bridgeCapabilityReport.declaredRelevantAndroidPermissions.joinToString()}")
+        appendLine("  missing required Android manifest permissions: ${if (bridgeCapabilityReport.missingAndroidPermissions.isEmpty()) "none" else bridgeCapabilityReport.missingAndroidPermissions.joinToString()}")
+        appendLine("  unused relevant Android manifest permissions: ${if (bridgeCapabilityReport.unusedRelevantAndroidPermissions.isEmpty()) "none" else bridgeCapabilityReport.unusedRelevantAndroidPermissions.joinToString()}")
+        appendLine("  required Android manifest permissions ready: ${bridgeCapabilityReport.requiredManifestReady}")
+        appendLine("  relevant Android manifest permissions required-only clean: ${bridgeCapabilityReport.requiredOnlyReady}")
+        appendLine()
+
         appendLine("Packaged moduleSources budget verification:")
         appendLine("  moduleSources budget requested by full smoke marker: $moduleSourcesBudgetRequested")
         appendLine("  moduleSources budget entry: $embeddedNodePackagingPreloadBudgetEntry")
@@ -2676,6 +2833,9 @@ private fun embeddedNodePackagingVerifyPackagedApkOutput(
         appendLine("  embedded.node.packaged.output.manifest.fgs_permission.ready=$manifestPermissionsReady")
         appendLine("  embedded.node.packaged.output.dex.contains.NativeNodeEmbeddedScriptService=$dexDefinesScriptService")
         appendLine("  embedded.node.packaged.output.project_config.ready=$bundledProjectConfigReady")
+        appendLine("  embedded.node.packaged.output.bridge_capabilities.enforced=${bridgeCapabilityReport.enforced}")
+        appendLine("  embedded.node.packaged.output.bridge_capabilities.required_android_permissions.ready=${bridgeCapabilityReport.requiredManifestReady}")
+        appendLine("  embedded.node.packaged.output.bridge_capabilities.required_only.ready=${bridgeCapabilityReport.requiredOnlyReady}")
         appendLine("  embedded.node.packaged.output.main_script.ready=$bundledMainScriptReady")
         appendLine("  embedded.node.packaged.output.full_compatibility_smoke.ready=$fullCompatibilitySmokeReady")
         appendLine("  embedded.node.packaged.output.module_sources.requested=$moduleSourcesBudgetRequested")
