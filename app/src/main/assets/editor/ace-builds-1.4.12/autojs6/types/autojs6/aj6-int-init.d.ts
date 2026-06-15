@@ -7,7 +7,7 @@
 //
 // noinspection JSUnusedGlobalSymbols
 
-/// <reference path="../index.d.ts" />
+/// <reference path="./index.d.ts" />
 
 /**
  * @Source %AutoJs6%/app/src/main/java/org/autojs/autojs/runtime/ScriptRuntime.kt

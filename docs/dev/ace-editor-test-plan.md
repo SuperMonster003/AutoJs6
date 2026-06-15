@@ -45,6 +45,7 @@ Diagnostics should include the current engine type, ACE health state, last failu
 - `autojs6_indices.js` must be regenerated from `tools/ace-completion/autojs6_indices.source.json`.
 - `autojs6_indices.source.json` must be regenerated from the bundled selected AutoJs6 declaration files when those files change.
 - Static completion must work for `toast`, `app.launch`, `files.read`, `images.findImage`, `device.getBattery`, `console.log`, `threads.start`, and `engines.myEngine`.
+- Accepting a highlighted completion with Enter or by tapping the popup must insert the item without an ACE fallback.
 - `autojs_indices.js` is a fallback only; AutoJs6-specific entries should be added to the source JSON.
 - Broad AutoJs6 API entries should come from the bundled `aj6-int-*.d.ts` declaration source first; source JSON fallback entries are for parser gaps and curated global member exposure.
 - `ACE LSP smart completion (experimental)` is off by default.
@@ -369,6 +370,7 @@ Steps:
 Expected:
 - All commands pass.
 - Common AutoJs6 API completions are present.
+- Accepting a popup item by Enter and by touch does not report `JS_RUNTIME_ERROR`.
 - Missing indices and legacy fallback paths do not throw.
 
 Failure logs:

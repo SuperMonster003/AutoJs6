@@ -7,7 +7,7 @@
 //
 // See: https://www.cdnpkg.com/object-observe/file/object-observe-lite.js
 
-/// <reference path="../index.d.ts" />
+/// <reference path="./index.d.ts" />
 
 /**
  * @Source %AutoJs6Assets%/modules/object-observe-lite.min.js

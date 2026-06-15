@@ -5,7 +5,7 @@
 //
 // Last modified: Jul 3, 2022
 
-/// <reference path="../index.d.ts" />
+/// <reference path="./index.d.ts" />
 
 /**
  * @Source %AutoJs6Assets%/modules/__i18n__.js

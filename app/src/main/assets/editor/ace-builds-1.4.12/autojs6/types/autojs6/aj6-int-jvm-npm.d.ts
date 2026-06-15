@@ -5,7 +5,7 @@
 //
 // Last modified: Oct 21, 2021
 
-/// <reference path="../index.d.ts" />
+/// <reference path="./index.d.ts" />
 
 /**
  * @Source %AutoJs6Assets%/modules/jvm-npm.js

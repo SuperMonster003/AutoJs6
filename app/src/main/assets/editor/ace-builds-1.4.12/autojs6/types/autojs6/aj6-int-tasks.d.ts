@@ -6,7 +6,7 @@
 // Last modified: Jun 14, 2026
 // noinspection JSUnusedGlobalSymbols
 
-/// <reference path="../index.d.ts" />
+/// <reference path="./index.d.ts" />
 /// <reference path="../android.d.ts" />
 
 /**

@@ -5,7 +5,7 @@
 //
 // Last modified: Oct 24, 2022
 
-/// <reference path="../index.d.ts" />
+/// <reference path="./index.d.ts" />
 
 /**
  * @Source %AutoJs6Assets%/modules/__Arrayx__.js

@@ -20,6 +20,28 @@ const COMPLETER_PATH = path.join(
   "autojs6",
   "autojs6_completer.js",
 );
+const BRIDGE_PATH = path.join(
+  PROJECT_ROOT,
+  "app",
+  "src",
+  "main",
+  "assets",
+  "editor",
+  "ace-builds-1.4.12",
+  "autojs6",
+  "autojs6_ace_bridge.js",
+);
+const LANGUAGE_TOOLS_PATH = path.join(
+  PROJECT_ROOT,
+  "app",
+  "src",
+  "main",
+  "assets",
+  "editor",
+  "ace-builds-1.4.12",
+  "src-min-noconflict",
+  "ext-language_tools.js",
+);
 const FALLBACK_INDEX_PATH = path.join(
   PROJECT_ROOT,
   "app",
@@ -126,6 +148,17 @@ function createMissingIndicesCompleter() {
   return installCompleter(sandbox);
 }
 
+function assertLanguageToolsAcceptShim() {
+  const languageTools = fs.readFileSync(LANGUAGE_TOOLS_PATH, "utf8");
+  if (!languageTools.includes("editor.renderer.scrollCursorIntoView()")) {
+    return;
+  }
+  const bridge = fs.readFileSync(BRIDGE_PATH, "utf8");
+  if (!bridge.includes("global.editor = editor;")) {
+    throw new Error("ACE language tools completion accept shim is missing");
+  }
+}
+
 const completer = createAutoJs6Completer();
 assertIncludes(valuesFor(completer, "toast", "toast"), ["toast"], "toast");
 assertIncludes(valuesFor(completer, "app.la", "la"), ["launch", "launchApp"], "app.la");
@@ -144,5 +177,7 @@ assertNoThrow("missing indices should not throw", () => {
   valuesFor(missingIndicesCompleter, "toast", "toast");
   valuesFor(missingIndicesCompleter, "app.la", "la");
 });
+
+assertLanguageToolsAcceptShim();
 
 console.log(`AutoJs6 ACE completer tests passed (${relativeToRoot(COMPLETER_PATH)}).`);

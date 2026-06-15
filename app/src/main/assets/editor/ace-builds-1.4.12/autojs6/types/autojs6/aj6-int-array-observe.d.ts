@@ -7,7 +7,7 @@
 //
 // See: https://github.com/MaxArt2501/array-observe/blob/master/array-observe.js
 
-/// <reference path="../index.d.ts" />
+/// <reference path="./index.d.ts" />
 
 /**
  * @Source %AutoJs6Assets%/modules/array-observe.min.js

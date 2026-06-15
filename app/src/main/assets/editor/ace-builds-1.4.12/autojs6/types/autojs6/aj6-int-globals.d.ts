@@ -7,7 +7,7 @@
 //
 // Last modified: Jun 15, 2026
 
-/// <reference path="../index.d.ts" />
+/// <reference path="./index.d.ts" />
 
 /**
  * @Source %AutoJs6%/app/src/main/java/org/autojs/autojs/runtime/api/augment/global/Global.kt

@@ -459,6 +459,8 @@
 
         Range = global.ace.require("ace/range").Range;
         editor = global.ace.edit("editor");
+        // ACE 1.4.12 ext-language_tools references a global `editor` in insertMatch().
+        global.editor = editor;
         session = editor.getSession();
         session.setMode("ace/mode/javascript");
         session.setUseWorker(false);

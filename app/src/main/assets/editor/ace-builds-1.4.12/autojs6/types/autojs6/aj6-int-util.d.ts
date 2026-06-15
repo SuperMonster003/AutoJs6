@@ -5,7 +5,7 @@
 //
 // Last modified: Nov 8, 2021
 
-/// <reference path="../index.d.ts" />
+/// <reference path="./index.d.ts" />
 
 /**
  * @Source %AutoJs6Assets%/modules/__util__.js

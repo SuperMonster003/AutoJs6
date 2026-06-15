@@ -40,10 +40,11 @@ for (const staleFile of fs.readdirSync(BUNDLED_AUTOJS6_DTS_ROOT)) {
 }
 
 for (const fileName of dtsFiles) {
-  fs.copyFileSync(
-    path.join(sourceAutoJs6Root, fileName),
-    path.join(BUNDLED_AUTOJS6_DTS_ROOT, fileName),
-  );
+  const sourcePath = path.join(sourceAutoJs6Root, fileName);
+  const destinationPath = path.join(BUNDLED_AUTOJS6_DTS_ROOT, fileName);
+  const content = fs.readFileSync(sourcePath, "utf8")
+    .replaceAll('/// <reference path="../index.d.ts" />', '/// <reference path="./index.d.ts" />');
+  writeIfChanged(destinationPath, content);
 }
 
 for (const fileName of ["LICENSE", "package.json"]) {

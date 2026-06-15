@@ -5,7 +5,7 @@
 //
 // Last modified: Jan 11, 2023
 
-/// <reference path="../index.d.ts" />
+/// <reference path="./index.d.ts" />
 
 /**
  * @Source %AutoJs6Assets%/modules/__Numberx__.js

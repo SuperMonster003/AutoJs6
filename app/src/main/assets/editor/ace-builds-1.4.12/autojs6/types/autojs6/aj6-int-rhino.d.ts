@@ -2,7 +2,7 @@
 
 /// <reference path="../android.d.ts"/>
 /// <reference path="../libraries.d.ts"/>
-/// <reference path="../index.d.ts" />
+/// <reference path="./index.d.ts" />
 
 /**
  * @Source %RhinoJar%/org/mozilla/javascript/ImporterTopLevel

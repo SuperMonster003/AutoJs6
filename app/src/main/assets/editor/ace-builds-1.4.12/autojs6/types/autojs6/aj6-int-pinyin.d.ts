@@ -9,7 +9,7 @@
 
 /// <reference path="../android.d.ts"/>
 /// <reference path="../libraries.d.ts"/>
-/// <reference path="../index.d.ts" />
+/// <reference path="./index.d.ts" />
 
 /**
  * @Source /src/main/java/org/autojs/autojs/runtime/api/augment/pinyin/Pinyin.kt

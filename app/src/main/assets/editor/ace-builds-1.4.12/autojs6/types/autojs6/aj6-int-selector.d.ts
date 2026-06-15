@@ -7,7 +7,7 @@
 //
 // Last modified: Jun 14, 2026
 
-/// <reference path="../index.d.ts" />
+/// <reference path="./index.d.ts" />
 
 /**
  * @Source %AutoJs6%/app/src/main/java/org/autojs/autojs/runtime/api/augment/selector/Selector.kt
