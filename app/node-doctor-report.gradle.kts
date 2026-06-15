@@ -141,6 +141,51 @@ private fun nodeDoctorPackageSummary(text: String?, reportFile: File): Map<Strin
 private fun nodeDoctorTextList(values: List<Any?>, emptyText: String = "none"): String =
     if (values.isEmpty()) emptyText else values.joinToString()
 
+private fun nodeNightlyLatestFile(root: File, predicate: (File) -> Boolean): File? =
+    root.takeIf(File::isDirectory)
+        ?.walkTopDown()
+        ?.filter(File::isFile)
+        ?.filter(predicate)
+        ?.maxByOrNull(File::lastModified)
+
+private fun nodeNightlyXmlAttribute(text: String?, attribute: String): String? =
+    text?.let { Regex("""\b$attribute="([^"]*)"""").find(it)?.groupValues?.get(1) }
+
+private fun nodeNightlyXmlDevice(text: String?): String? =
+    text?.let { Regex("""<property\s+name="device"\s+value="([^"]*)"""").find(it)?.groupValues?.get(1) }
+
+private fun nodeNightlyTagAttribute(tag: String, attribute: String): String? =
+    Regex("""\b$attribute="([^"]*)"""").find(tag)?.groupValues?.get(1)
+
+private fun nodeNightlyFailedTests(text: String?): List<Map<String, String>> {
+    if (text.isNullOrBlank()) {
+        return emptyList()
+    }
+    val testCaseRegex = Regex("""(<testcase\b[^>]*>)(.*?)</testcase>""", setOf(RegexOption.DOT_MATCHES_ALL))
+    val failureRegex = Regex("""<(failure|error)\b[^>]*>(.*?)</\1>""", setOf(RegexOption.DOT_MATCHES_ALL))
+    return testCaseRegex.findAll(text).mapNotNull { match ->
+        val failure = failureRegex.find(match.groupValues[2]) ?: return@mapNotNull null
+        val tag = match.groupValues[1]
+        linkedMapOf(
+            "className" to (nodeNightlyTagAttribute(tag, "classname") ?: "unknown"),
+            "name" to (nodeNightlyTagAttribute(tag, "name") ?: "unknown"),
+            "type" to failure.groupValues[1],
+            "message" to failure.groupValues[2].lineSequence().firstOrNull().orEmpty().take(240),
+        )
+    }.toList()
+}
+
+private fun nodeNightlyCommandText(workingDir: File, vararg command: String): String? =
+    runCatching {
+        val process = ProcessBuilder(command.toList())
+            .directory(workingDir)
+            .redirectErrorStream(true)
+            .start()
+        val output = process.inputStream.bufferedReader().use { it.readText() }
+        val exitCode = process.waitFor()
+        output.trim().takeIf { exitCode == 0 && it.isNotEmpty() }
+    }.getOrNull()
+
 val embeddedNodeDoctorReport = tasks.register("embeddedNodeDoctorReport") {
     group = "verification"
     description = "Writes an attachable Embedded Node doctor report with runtime, native, packaging, and dependency diagnostics."
@@ -396,6 +441,205 @@ val embeddedNodeDoctorReport = tasks.register("embeddedNodeDoctorReport") {
 
 tasks.matching { it.name == "verifyEmbeddedNodeDebug" }.configureEach {
     dependsOn(embeddedNodeDoctorReport)
+}
+
+val generateNodeNightlyReport = tasks.register("generateNodeNightlyReport") {
+    group = "verification"
+    description = "Writes a single Embedded Node nightly JSON/Markdown report from available build and device reports."
+
+    dependsOn(
+        embeddedNodeDoctorReport,
+        "generateNodeProfileReleaseManifest",
+    )
+
+    val nightlyDirProvider = rootProject.layout.buildDirectory.dir("reports/nodejs")
+    val nightlyJsonProvider = nightlyDirProvider.map { it.file("nightly-report.json") }
+    val nightlyMarkdownProvider = nightlyDirProvider.map { it.file("nightly-report.md") }
+
+    outputs.file(nightlyJsonProvider)
+    outputs.file(nightlyMarkdownProvider)
+    outputs.upToDateWhen { false }
+
+    doLast {
+        val now = ZonedDateTime.now().toString()
+        val reportsRoot = layout.buildDirectory.dir("reports").get().asFile
+        val rootReportsRoot = rootProject.layout.buildDirectory.dir("reports").get().asFile
+        val androidResultsRoot = layout.buildDirectory
+            .dir("outputs/androidTest-results/connected")
+            .get()
+            .asFile
+        val doctorJsonFile = reportsRoot.resolve("nodejs/doctor/node-doctor-report.json")
+        val releaseManifestFile = reportsRoot.resolve("nodejs/release-manifest.json")
+        val packagedSmokeFile = reportsRoot.resolve("embedded-node/packaged-smoke-aggregate.txt")
+        val packagedDiagnosticFile = reportsRoot.resolve("embedded-node/packaged-diagnostic-report.txt")
+        val perfDir = reportsRoot.resolve("nodejs/perf")
+        val latestPerformanceFile = nodeNightlyLatestFile(perfDir) {
+            it.name.startsWith("embedded-node-performance-") && it.extension == "json"
+        }
+        val latestMemoryFile = nodeNightlyLatestFile(perfDir) {
+            it.name.startsWith("embedded-node-memory-leak-stress-") && it.extension == "json"
+        }
+        val latestAndroidXml = nodeNightlyLatestFile(androidResultsRoot) {
+            it.name.startsWith("TEST-") && it.extension == "xml"
+        }
+        val fuzzSeedDir = rootReportsRoot.resolve("nodejs/fuzz-seeds")
+        val fuzzSeedFiles = fuzzSeedDir.takeIf(File::isDirectory)
+            ?.walkTopDown()
+            ?.filter(File::isFile)
+            ?.toList()
+            .orEmpty()
+
+        val doctor = nodeDoctorReadJsonObject(doctorJsonFile).orEmpty()
+        val releaseManifest = nodeDoctorReadJsonObject(releaseManifestFile)
+        val performance = latestPerformanceFile?.let(::nodeDoctorReadJsonObject)
+        val memory = latestMemoryFile?.let(::nodeDoctorReadJsonObject)
+        val androidXmlText = latestAndroidXml?.readText()
+        val packagedSmokeText = packagedSmokeFile.takeIf(File::isFile)?.readText()
+        val packagedSmokeSummary = nodeDoctorSummaryProperties(packagedSmokeText, "embedded.node.packaged.smoke.")
+        val nativeLibraries = doctor["nativeLibraries"].nodeDoctorMap()
+        val featureFlags = doctor["featureFlags"] as? List<*> ?: emptyList<Any?>()
+        val memoryScenarios = (memory?.get("scenarios") as? List<*>).orEmpty()
+        val memoryFailures = (memory?.get("failures") as? List<*>).orEmpty()
+        val testFailures = nodeNightlyFailedTests(androidXmlText)
+        val gitCommit = nodeNightlyCommandText(rootProject.projectDir, "git", "rev-parse", "HEAD") ?: "unknown"
+        val gitStatus = nodeNightlyCommandText(rootProject.projectDir, "git", "status", "--short").orEmpty()
+        val deviceProfile = providers.gradleProperty("autojs.nodejs.test.deviceProfile").orNull
+        val adbSerial = providers.gradleProperty("autojs.embeddedNode.adbSerial").orNull
+            ?: System.getenv("ANDROID_SERIAL")
+
+        val report = linkedMapOf<String, Any?>(
+            "schema" to "autojs6-node-nightly-report-v1",
+            "generatedAt" to now,
+            "git" to linkedMapOf(
+                "commit" to gitCommit,
+                "dirty" to gitStatus.isNotBlank(),
+                "statusShort" to gitStatus.lineSequence().take(80).toList(),
+            ),
+            "device" to linkedMapOf(
+                "profile" to (deviceProfile ?: "unset"),
+                "adbSerial" to (adbSerial ?: "unset"),
+                "latestAndroidTestDevice" to (nodeNightlyXmlDevice(androidXmlText) ?: "unavailable"),
+                "performanceDevice" to (performance?.get("device") ?: "unavailable"),
+                "memoryDevice" to (memory?.get("device") ?: "unavailable"),
+            ),
+            "abi" to linkedMapOf(
+                "releaseFlavor" to providers.gradleProperty("autojs.nodejs.releaseFlavor").orNull,
+                "releaseManifest" to (releaseManifest ?: "unavailable"),
+            ),
+            "tests" to linkedMapOf(
+                "latestXml" to latestAndroidXml?.let { nodeDoctorReportReference(it, rootProject.projectDir) },
+                "tests" to nodeNightlyXmlAttribute(androidXmlText, "tests")?.toIntOrNull(),
+                "failures" to nodeNightlyXmlAttribute(androidXmlText, "failures")?.toIntOrNull(),
+                "errors" to nodeNightlyXmlAttribute(androidXmlText, "errors")?.toIntOrNull(),
+                "skipped" to nodeNightlyXmlAttribute(androidXmlText, "skipped")?.toIntOrNull(),
+                "failedTests" to testFailures,
+            ),
+            "performance" to linkedMapOf(
+                "report" to latestPerformanceFile?.let { nodeDoctorReportReference(it, rootProject.projectDir) },
+                "metrics" to (performance?.get("metrics") ?: "unavailable"),
+            ),
+            "memory" to linkedMapOf(
+                "report" to latestMemoryFile?.let { nodeDoctorReportReference(it, rootProject.projectDir) },
+                "configuration" to (memory?.get("configuration") ?: "unavailable"),
+                "scenarioCount" to memoryScenarios.size,
+                "failureCount" to memoryFailures.size,
+                "failures" to memoryFailures,
+            ),
+            "fuzzers" to linkedMapOf(
+                "seedDir" to nodeDoctorReportReference(fuzzSeedDir, rootProject.projectDir),
+                "seedCount" to fuzzSeedFiles.size,
+                "seeds" to fuzzSeedFiles.take(100).map { nodeDoctorReportReference(it, rootProject.projectDir) },
+            ),
+            "packagedApkSmoke" to linkedMapOf(
+                "aggregateReport" to nodeDoctorReportReference(packagedSmokeFile, rootProject.projectDir),
+                "diagnosticReport" to nodeDoctorReportReference(packagedDiagnosticFile, rootProject.projectDir),
+                "ready" to packagedSmokeSummary["embedded.node.packaged.smoke.aggregate.ready"],
+                "pullReady" to packagedSmokeSummary["embedded.node.packaged.smoke.pull.ready"],
+                "successOutputReady" to packagedSmokeSummary["embedded.node.packaged.smoke.success.output.ready"],
+                "diagnosticsOutputReady" to packagedSmokeSummary["embedded.node.packaged.smoke.diagnostics.output.ready"],
+                "templateReady" to packagedSmokeSummary["embedded.node.packaged.smoke.template.ready"],
+                "moduleSourcesReady" to packagedSmokeSummary["embedded.node.packaged.smoke.module_sources.ready"],
+            ),
+            "nativeLibraries" to nativeLibraries,
+            "experimentalFeatures" to featureFlags,
+            "inputs" to listOfNotNull(
+                doctorJsonFile,
+                releaseManifestFile,
+                packagedSmokeFile,
+                packagedDiagnosticFile,
+                latestPerformanceFile,
+                latestMemoryFile,
+                latestAndroidXml,
+            ).map { nodeDoctorReportReference(it, rootProject.projectDir) },
+        )
+
+        val markdown = buildString {
+            appendLine("# Embedded Node Nightly Report")
+            appendLine()
+            appendLine("- generated: `$now`")
+            appendLine("- commit: `$gitCommit`${if (gitStatus.isBlank()) "" else " (dirty)"}")
+            appendLine("- device profile: `${deviceProfile ?: "unset"}`")
+            appendLine("- adb serial: `${adbSerial ?: "unset"}`")
+            appendLine("- latest Android test device: `${nodeNightlyXmlDevice(androidXmlText) ?: "unavailable"}`")
+            appendLine()
+            appendLine("## Tests")
+            appendLine()
+            appendLine("- report: `${latestAndroidXml?.nodeDoctorPathRelativeTo(rootProject.projectDir) ?: "unavailable"}`")
+            appendLine("- tests: `${nodeNightlyXmlAttribute(androidXmlText, "tests") ?: "unavailable"}`")
+            appendLine("- failures: `${nodeNightlyXmlAttribute(androidXmlText, "failures") ?: "unavailable"}`")
+            appendLine("- errors: `${nodeNightlyXmlAttribute(androidXmlText, "errors") ?: "unavailable"}`")
+            appendLine("- skipped: `${nodeNightlyXmlAttribute(androidXmlText, "skipped") ?: "unavailable"}`")
+            if (testFailures.isNotEmpty()) {
+                appendLine()
+                appendLine("Failed tests:")
+                testFailures.take(20).forEach {
+                    appendLine("- `${it["className"]}#${it["name"]}`: ${it["message"]}")
+                }
+            }
+            appendLine()
+            appendLine("## Packaged Smoke")
+            appendLine()
+            appendLine("- aggregate ready: `${packagedSmokeSummary["embedded.node.packaged.smoke.aggregate.ready"] ?: "unavailable"}`")
+            appendLine("- pull ready: `${packagedSmokeSummary["embedded.node.packaged.smoke.pull.ready"] ?: "unavailable"}`")
+            appendLine("- success output ready: `${packagedSmokeSummary["embedded.node.packaged.smoke.success.output.ready"] ?: "unavailable"}`")
+            appendLine("- diagnostics output ready: `${packagedSmokeSummary["embedded.node.packaged.smoke.diagnostics.output.ready"] ?: "unavailable"}`")
+            appendLine("- template ready: `${packagedSmokeSummary["embedded.node.packaged.smoke.template.ready"] ?: "unavailable"}`")
+            appendLine()
+            appendLine("## Performance")
+            appendLine()
+            appendLine("- report: `${latestPerformanceFile?.nodeDoctorPathRelativeTo(rootProject.projectDir) ?: "unavailable"}`")
+            appendLine("- metrics: `${performance?.get("metrics") ?: "unavailable"}`")
+            appendLine()
+            appendLine("## Memory")
+            appendLine()
+            appendLine("- report: `${latestMemoryFile?.nodeDoctorPathRelativeTo(rootProject.projectDir) ?: "unavailable"}`")
+            appendLine("- scenarios: `${memoryScenarios.size}`")
+            appendLine("- failures: `${memoryFailures.size}`")
+            appendLine()
+            appendLine("## Fuzzers")
+            appendLine()
+            appendLine("- seed directory: `${fuzzSeedDir.nodeDoctorPathRelativeTo(rootProject.projectDir)}`")
+            appendLine("- saved seeds: `${fuzzSeedFiles.size}`")
+            appendLine()
+            appendLine("## Native And Feature Flags")
+            appendLine()
+            appendLine("- native hash entries: `${(nativeLibraries["hashEntries"] as? List<*>)?.size ?: "unavailable"}`")
+            appendLine("- experimental feature entries: `${featureFlags.size}`")
+            appendLine()
+            appendLine("JSON report: `${nightlyJsonProvider.get().asFile.nodeDoctorPathRelativeTo(rootProject.projectDir)}`")
+        }
+
+        val nightlyDir = nightlyDirProvider.get().asFile
+        nightlyDir.mkdirs()
+        nightlyJsonProvider.get().asFile.writeText(nodeDoctorJson(report) + "\n")
+        nightlyMarkdownProvider.get().asFile.writeText(markdown)
+        logger.lifecycle("Embedded Node nightly JSON report written to ${nightlyJsonProvider.get().asFile.absolutePath}")
+        logger.lifecycle("Embedded Node nightly Markdown report written to ${nightlyMarkdownProvider.get().asFile.absolutePath}")
+    }
+}
+
+tasks.matching { it.name in setOf("verifyNodeNightlyGate", "verifyNodeReleaseGate") }.configureEach {
+    finalizedBy(generateNodeNightlyReport)
 }
 
 tasks.matching { it.name == "verifyEmbeddedNodeReleaseCandidate" }.configureEach {

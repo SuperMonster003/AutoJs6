@@ -707,6 +707,11 @@ Use these aggregate tasks for local gates:
 
 `verifyNodePrGate` is the fast host-side PR gate. `verifyNodeNightlyGate` and `verifyNodeReleaseGate` require
 `autojs.nodejs.test.deviceProfile=oneplus` or `full`; see [CI_GATES.md](CI_GATES.md).
+`generateNodeNightlyReport` can also be run directly to summarize the currently available build/device reports:
+
+```powershell
+.\gradlew.bat --console=plain :app:generateNodeNightlyReport
+```
 
 `verifyEmbeddedNodeDebug` covers build, native dependency reporting, native symbol archive reporting, and packaging preflight.
 It also runs `verifyNodeCompatibilityProfile` and `embeddedNodeDoctorReport`, which generate compatibility and attachable

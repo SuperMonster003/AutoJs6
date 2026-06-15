@@ -14,6 +14,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `:app:generateNodeProfileReleaseManifest`
 - [ ] `:app:verifyNodePrGate`
 - [ ] release candidates use `:app:verifyNodeReleaseGate` with `autojs.nodejs.test.deviceProfile=oneplus` or `full`
+- [ ] `:app:generateNodeNightlyReport` output attached when publishing nightly or release-candidate results
 - [ ] rollback path reviewed against [ROLLBACK_PLAYBOOK.md](ROLLBACK_PLAYBOOK.md)
 
 ## Device Tests

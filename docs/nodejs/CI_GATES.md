@@ -64,6 +64,15 @@ Scope:
 
 The task fails immediately if `autojs.nodejs.test.deviceProfile` is not `oneplus` or `full`.
 
+After nightly or release gates finish, `generateNodeNightlyReport` writes:
+
+```text
+build/reports/nodejs/nightly-report.json
+build/reports/nodejs/nightly-report.md
+```
+
+The report summarizes commit state, device/profile, latest connected-test XML counts and failures, perf and memory reports, fuzzer seeds, packaged smoke readiness, native hashes, and experimental feature flags.
+
 ## Release Gate
 
 Use `verifyNodeReleaseGate` for release candidates:
