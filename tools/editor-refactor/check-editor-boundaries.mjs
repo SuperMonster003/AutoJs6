@@ -68,6 +68,7 @@ function assertOnlyIn(pattern, allowedFiles) {
 }
 
 const editorView = "app/src/main/java/org/autojs/autojs/ui/edit/EditorView.kt";
+const editActivity = "app/src/main/java/org/autojs/autojs/ui/edit/EditActivity.kt";
 const editorMenu = "app/src/main/java/org/autojs/autojs/ui/edit/EditorMenu.java";
 const debugToolbarFragment = "app/src/main/java/org/autojs/autojs/ui/edit/toolbar/DebugToolbarFragment.java";
 const scriptEngine = "app/src/main/java/org/autojs/autojs/ui/edit/editor/engine/ScriptEditorEngine.kt";
@@ -86,6 +87,7 @@ const runScriptTextProvider = "app/src/main/java/org/autojs/autojs/ui/edit/edito
 const themeFontService = "app/src/main/java/org/autojs/autojs/ui/edit/editor/service/EditorThemeFontService.kt";
 const breakpointModelStore = "app/src/main/java/org/autojs/autojs/ui/edit/editor/service/EditorBreakpointModelStore.kt";
 const versionHistoryService = "app/src/main/java/org/autojs/autojs/ui/edit/editor/service/EditorVersionHistoryService.kt";
+const draftService = "app/src/main/java/org/autojs/autojs/ui/edit/editor/service/EditorDraftService.kt";
 
 assertIncludes(editorView, "mViewportPolicy.onImeInsetsChanged(imeVisible, targetBottom)");
 assertIncludes(editorView, "EditorViewportPolicyFactory.create(editor, this)");
@@ -146,6 +148,15 @@ assertNotIncludes(editorView, "setEditorTextSize");
 assertNotIncludes(editorView, "AceEditorFontPreferences");
 assertNotIncludes(editorView, "ThemeColorManager");
 assertNotIncludes(editorView, "ColorUtils");
+
+assertIncludes(editActivity, "private lateinit var draftService: EditorDraftService");
+assertIncludes(editActivity, "draftService.restoreDraftForThisSession(savedInstanceState)");
+assertIncludes(editActivity, "draftService.deleteDraft()");
+assertIncludes(editActivity, "draftService.saveDraftToInstanceState(outState)");
+assertNotIncludes(editActivity, "StableDraftFileHelper");
+assertNotIncludes(editActivity, "PFiles.read");
+assertNotIncludes(editActivity, "Observable.just(path)");
+assertNotIncludes(editActivity, "draftFileHelper");
 
 assertIncludes(scriptEngine, "fun onImeInsetsChanged(visible: Boolean, bottomInset: Int) = Unit");
 assertIncludes(policyFactory, "EditorEngineType.NATIVE -> NativeEditorViewportPolicy(editor, hostView)");
@@ -261,6 +272,16 @@ assertIncludes(versionHistoryService, "HistoryRepository(context.applicationCont
 assertIncludes(versionHistoryService, "VersionHistoryController(context).showForEditor(");
 assertIncludes(versionHistoryService, "currentEditor().text = restoredText");
 assertNotIncludes(versionHistoryService, "CodeEditText");
+
+assertIncludes(draftService, "class EditorDraftService(");
+assertIncludes(draftService, "private val currentEditor: () -> ScriptEditorEngine");
+assertIncludes(draftService, "StableDraftFileHelper(context, draftKeyPath)");
+assertIncludes(draftService, "fun restoreDraftForThisSession(savedInstanceState: Bundle?)");
+assertIncludes(draftService, "fun saveDraftToInstanceState(outState: Bundle): Boolean");
+assertIncludes(draftService, "PFiles.read(it)");
+assertIncludes(draftService, "stableDraftFileHelper.saveDraft(text)");
+assertIncludes(draftService, "stableDraftFileHelper.deleteDraft()");
+assertNotIncludes(draftService, "CodeEditText");
 
 assertOnlyIn("requestRectangleOnScreen", [
   "app/src/main/java/org/autojs/autojs/ui/edit/editor/engine/NativeCodeEditorEngine.kt",

@@ -55,7 +55,7 @@ goal is to make editor behavior engine-neutral where possible, and keep native
 ## Phase 4: Editor Services
 
 - [ ] Extract file open/save service.
-- [ ] Extract draft restore/save service.
+- [x] Extract draft restore/save service.
 - [x] Extract version history service.
 - [x] Extract run-text provider.
 - [x] Expand editor command dispatcher beyond input-keyboard commands.
