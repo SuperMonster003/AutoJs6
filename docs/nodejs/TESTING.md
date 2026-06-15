@@ -21,6 +21,15 @@ Run these before device tests:
 
 ## Device Instrumentation
 
+Device-specific gates should use `autojs.nodejs.test.deviceProfile`; see [DEVICE_MATRIX.md](DEVICE_MATRIX.md).
+
+```powershell
+.\gradlew.bat --console=plain :app:printNodeTestDeviceProfile "-Pautojs.nodejs.test.deviceProfile=oneplus"
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pautojs.nodejs.test.deviceProfile=oneplus"
+```
+
+When `android.testInstrumentationRunnerArguments.class` is passed explicitly, it overrides the device profile selection.
+
 Current embedded runtime regression suite:
 
 ```powershell

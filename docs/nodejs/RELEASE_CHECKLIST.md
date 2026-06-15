@@ -17,6 +17,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 ## Device Tests
 
 - [ ] approved device serial selected with `ANDROID_SERIAL` or the matching Gradle property
+- [ ] `autojs.nodejs.test.deviceProfile` selected according to [DEVICE_MATRIX.md](DEVICE_MATRIX.md)
 - [ ] OnePlus OPD2413 gates use device-idle whitelist and foreground app start before focused embedded-service instrumentation
 - [ ] `EmbeddedScriptMvpInstrumentationTest`
 - [ ] `EmbeddedNodePackagedApkSmokeTest`

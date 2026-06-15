@@ -125,6 +125,57 @@ val nodeJsJavaInteropExperimentalEnabled = providers.gradleProperty("autojs.node
 val nodeJsTimelineTraceEnabled = providers.gradleProperty("autojs.nodejs.timelineTrace").orElse("false").get()
     .trim()
     .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
+val nodeJsTestDeviceProfile = providers.gradleProperty("autojs.nodejs.test.deviceProfile").orNull
+    ?.trim()
+    ?.lowercase()
+    ?.takeIf { it.isNotEmpty() }
+    ?.let { requested ->
+        when (requested) {
+            "oneplus", "emulator", "smoke", "full" -> requested
+            else -> throw GradleException(
+                "Unsupported Embedded Node test device profile '$requested'. " +
+                        "Use oneplus, emulator, smoke, or full."
+            )
+        }
+    }
+val nodeJsTestDeviceProfileClasses = when (nodeJsTestDeviceProfile) {
+    "oneplus" -> listOf(
+        "org.autojs.autojs.engine.EmbeddedScriptMvpInstrumentationTest",
+        "org.autojs.autojs.engine.NodeEmbeddedLifecycleStressInstrumentationTest",
+        "org.autojs.autojs.engine.NodeAutoJsBridgeInstrumentationTest",
+        "org.autojs.autojs.engine.NodeSecurityRegressionInstrumentationTest",
+        "org.autojs.autojs.engine.NodeCompatCorpusInstrumentationTest",
+        "org.autojs.autojs.engine.NodeRealNpmCompatInstrumentationTest",
+        "org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest",
+        "org.autojs.autojs.engine.NodeEmbeddedMemoryLeakStressInstrumentationTest",
+    )
+    "emulator" -> listOf(
+        "org.autojs.autojs.engine.EmbeddedScriptMvpInstrumentationTest",
+        "org.autojs.autojs.engine.NodeCompatCorpusInstrumentationTest",
+        "org.autojs.autojs.engine.NodeRealNpmCompatInstrumentationTest",
+        "org.autojs.autojs.engine.NodeResolverFuzzerInstrumentationTest",
+        "org.autojs.autojs.engine.NodeScopedFsFuzzerInstrumentationTest",
+    )
+    "smoke" -> listOf(
+        "org.autojs.autojs.engine.EmbeddedScriptMvpInstrumentationTest",
+        "org.autojs.autojs.engine.NodeAutoJsBridgeInstrumentationTest",
+        "org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunToastBridgeEmbeddedNodePackagedApk",
+    )
+    "full" -> listOf(
+        "org.autojs.autojs.engine.EmbeddedScriptMvpInstrumentationTest",
+        "org.autojs.autojs.engine.NodeEmbeddedLifecycleStressInstrumentationTest",
+        "org.autojs.autojs.engine.NodeAutoJsBridgeInstrumentationTest",
+        "org.autojs.autojs.engine.NodeBridgeRpcFuzzerInstrumentationTest",
+        "org.autojs.autojs.engine.NodeSecurityRegressionInstrumentationTest",
+        "org.autojs.autojs.engine.NodeNativeAddonPolicyInstrumentationTest",
+        "org.autojs.autojs.engine.NodeCompatCorpusInstrumentationTest",
+        "org.autojs.autojs.engine.NodeRealNpmCompatInstrumentationTest",
+        "org.autojs.autojs.engine.NodeEmbeddedMemoryLeakStressInstrumentationTest",
+        "org.autojs.autojs.engine.NodeWorkerThreadsResourceStressInstrumentationTest",
+        "org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest",
+    )
+    else -> emptyList()
+}
 val leakCanaryEnabled = providers.gradleProperty("autojs.leakcanary.enabled").orElse("false").get()
     .trim()
     .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
@@ -583,6 +634,12 @@ android {
         versionName = versions.appVersionName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        if (nodeJsTestDeviceProfile != null &&
+            providers.gradleProperty("android.testInstrumentationRunnerArguments.class").orNull.isNullOrBlank()
+        ) {
+            testInstrumentationRunnerArguments["class"] = nodeJsTestDeviceProfileClasses.joinToString(",")
+            testInstrumentationRunnerArguments["autojs.nodejs.test.deviceProfile"] = nodeJsTestDeviceProfile
+        }
 
         multiDexEnabled = true
 
@@ -950,6 +1007,23 @@ androidComponents {
                     "$autojs-v$version-$architecture.$extension".lowercase()
                 }
             )
+        }
+    }
+}
+
+tasks.register("printNodeTestDeviceProfile") {
+    group = "verification"
+    description = "Prints the Embedded Node instrumentation classes selected by autojs.nodejs.test.deviceProfile."
+
+    doLast {
+        println("Embedded Node test device profile: ${nodeJsTestDeviceProfile ?: "unset"}")
+        if (nodeJsTestDeviceProfileClasses.isEmpty()) {
+            println("Embedded Node selected instrumentation classes: none; pass -Pautojs.nodejs.test.deviceProfile=oneplus|emulator|smoke|full")
+        } else {
+            println("Embedded Node selected instrumentation classes:")
+            nodeJsTestDeviceProfileClasses.forEach { className ->
+                println("  $className")
+            }
         }
     }
 }

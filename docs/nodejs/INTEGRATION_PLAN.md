@@ -144,6 +144,7 @@ Important: `.mjs` currently routes to the Node backend, but ESM execution is sti
 - Keep rollback steps explicit and auditable. See `docs/nodejs/ROLLBACK_PLAYBOOK.md`.
 - Keep optional startup/RSS benchmarks available for lifecycle and native-load changes without making noisy timing data a default release failure.
 - Keep extended memory leak stress available for lifecycle, fs, bridge, and image-handle changes.
+- Keep device-specific gates reproducible through `docs/nodejs/DEVICE_MATRIX.md` and `autojs.nodejs.test.deviceProfile`.
 
 ### P6-P8 Longer-Term Compatibility
 
