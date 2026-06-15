@@ -92,6 +92,8 @@ const draftService = "app/src/main/java/org/autojs/autojs/ui/edit/editor/service
 const aceCodeEditor = "app/src/main/java/org/autojs/autojs/ui/edit/editor/ace/AceCodeEditor.kt";
 const aceDiagnostics = "app/src/main/java/org/autojs/autojs/ui/edit/editor/ace/diagnostics/AceDiagnostics.kt";
 const aceDiagnosticsSnapshot = "app/src/main/java/org/autojs/autojs/ui/edit/editor/ace/diagnostics/AceDiagnosticsSnapshot.kt";
+const aceSurfaceSmoke = "tools/ace-hardening/check-editor-surface.mjs";
+const roadmap = "Roadmap.md";
 
 assertIncludes(editorView, "mViewportPolicy.onImeInsetsChanged(imeVisible, targetBottom)");
 assertIncludes(editorView, "EditorViewportPolicyFactory.create(editor, this)");
@@ -333,6 +335,16 @@ assertIncludes(draftService, "PFiles.read(it)");
 assertIncludes(draftService, "stableDraftFileHelper.saveDraft(text)");
 assertIncludes(draftService, "stableDraftFileHelper.deleteDraft()");
 assertNotIncludes(draftService, "CodeEditText");
+
+assertIncludes(roadmap, "node tools/ace-hardening/check-editor-surface.mjs");
+
+assertIncludes(aceSurfaceSmoke, "ACE editor bootstrap order");
+assertIncludes(aceSurfaceSmoke, "hidden editor before first paint");
+assertIncludes(aceSurfaceSmoke, "visible editor after first paint");
+assertIncludes(aceSurfaceSmoke, "double requestAnimationFrame first-paint guard");
+assertIncludes(aceSurfaceSmoke, "resizeDone reason payload");
+assertIncludes(aceSurfaceSmoke, "gutter breakpoint tap zone");
+assertIncludes(aceSurfaceSmoke, "native first-paint request hook");
 
 assertIncludes(aceDiagnosticsSnapshot, "val pendingAceResizeReason: String?");
 assertIncludes(aceDiagnosticsSnapshot, "val lastAceResizeScheduledReason: String?");
