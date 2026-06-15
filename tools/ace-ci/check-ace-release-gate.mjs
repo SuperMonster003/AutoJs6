@@ -11,6 +11,7 @@ const STATIC_ONLY = process.argv.includes("--static-only");
 const FILES = {
   roadmap: "Roadmap.md",
   releaseStatus: "docs/dev/ace-release-gate-status.md",
+  sonyReport: "docs/dev/ace-release-device-report-sony-xq-at72.md",
   integrationDoc: "docs/dev/ace-editor-integration.md",
   keyboardViewportPlan: "docs/dev/ace-keyboard-viewport-test-plan.md",
   visualInvestigation: "docs/dev/visual-editor-ace-investigation.md",
@@ -124,10 +125,20 @@ if (!STATIC_ONLY) {
 }
 
 assertIncludes(FILES.roadmap, "`node tools/ace-ci/check-ace-release-gate.mjs`");
+assertIncludes(FILES.roadmap, "# AutoJs6 ACE Phase 9 Roadmap");
+assertIncludes(FILES.roadmap, "## Feature Freeze");
+assertIncludes(FILES.roadmap, "Sony XQ-AT72");
 assertIncludes(FILES.roadmap, "Automated/static gate:");
 assertIncludes(FILES.roadmap, "Manual device gate:");
 assertIncludes(FILES.releaseStatus, "# ACE Release Gate Status");
+assertIncludes(FILES.releaseStatus, "docs/dev/ace-release-device-report-sony-xq-at72.md");
+assertIncludes(FILES.releaseStatus, "## Feature Freeze");
+assertIncludes(FILES.sonyReport, "# ACE Release Device Report - Sony XQ-AT72");
+assertIncludes(FILES.sonyReport, "## Automated Gate");
+assertIncludes(FILES.sonyReport, "## Manual Gate Summary");
+assertIncludes(FILES.sonyReport, "Release candidate accepted");
 assertIncludes(FILES.integrationDoc, "Run `node tools/ace-ci/check-ace-release-gate.mjs`.");
+assertIncludes(FILES.integrationDoc, "docs/dev/ace-release-device-report-sony-xq-at72.md");
 assertIncludes(FILES.keyboardViewportPlan, "Sony XQ-AT72");
 
 assertIncludes(

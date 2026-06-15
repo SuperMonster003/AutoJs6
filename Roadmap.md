@@ -1,190 +1,52 @@
-# AutoJs6 ACE Stage 3 v2 Roadmap
+# AutoJs6 ACE Phase 9 Roadmap
 
-This roadmap replaces the completed editor-refactor roadmap and tracks the next
-stage of ACE work. Stage 3 v2 is stability-first: cleanly isolate old Native
-`CodeEditText` behavior, keep ACE in a predictable host layout, harden keyboard
-and fallback behavior, then resume CI, API-index, and LSP work.
+This roadmap replaces the completed Stage 3 v2 implementation roadmap. Phase 9
+is the release-candidate stabilization stage for the ordinary ACE experimental
+editor: freeze the feature surface, validate the risky paths on real hardware,
+fix only release-blocking issues, then prepare the branch for gray release.
 
-## Goals
+## Current State
 
-- Keep Native editor behavior stable while ACE remains experimental.
-- Make Native-only editor code visibly bounded and mechanically guarded.
-- Keep ACE free from Native IME padding, Android `TextView` cursor math, and
-  `requestRectangleOnScreen` workarounds.
-- Make ACE soft-keyboard show/hide, first paint, completion accept, selection,
-  and fallback behavior repeatable and diagnosable.
-- Defer server-backed LSP transport, tooltip/markdown enhancements, and
-  VisualEditorAce until the ordinary ACE editor passes keyboard/viewport
-  release gates.
+- ACE integration is complete as an explicit experimental editor engine.
+- Native remains the default editor and Native fallback is implemented.
+- Old Native `CodeEditor` / `CodeEditText` behavior is bounded by editor
+  boundary checks.
+- ACE clean-host viewport, first paint, IME state, event throttling,
+  TextMirror, fallback classification, diagnostics, static completion, LSP alpha
+  hooks, and tooltip fallback are implemented.
+- Phase 8 automated and static gates are in place.
+- LSP alpha hooks are present but default-off and server-backed transport is
+  deferred.
+- VisualEditorAce has been investigated but is intentionally not exposed.
+- The remaining release risk is real-device validation.
 
-## Current Baseline
+## Phase 9 Goal
 
-- [x] ACE engine exists behind `ScriptEditorEngine`.
-- [x] Native remains the default editor; ACE is explicit and experimental.
-- [x] ACE diagnostics, health monitor, TextMirror, and Native fallback exist.
-- [x] JetBrains Mono and Source Code Pro font assets are bundled.
-- [x] AutoJs6 declaration-backed static completion is bundled.
-- [x] Completion accept crash and mobile action-mode bridge crash are fixed.
-- [x] `EditorViewportPolicy`, `NativeEditorViewportPolicy`, and
-  `AceEditorViewportPolicy` exist.
-- [x] ACE uses the clean-host viewport policy by default; no separate
-  `key_ace_clean_host_layout` flag is currently needed.
-- [x] ACE first-paint overlay, initial background, and surface smoke checks
-  exist.
-- [x] Symbol/function keyboard command paths and large-file loading boundaries
-  are already partially engine-neutral.
-- [x] `tools/editor-refactor/check-editor-boundaries.mjs` guards the current
-  boundaries.
-- [x] `tools/ace-ci/check-ace-editor-gate.mjs` runs the local/CI ACE editor
-  gate.
-- [x] `docs/dev/ace-editor-test-plan.md` contains the IME show/hide manual
-  checklist.
-- [x] `docs/dev/ace-keyboard-viewport-test-plan.md` contains the dedicated
-  keyboard and viewport release matrix.
+Move ACE from code-level readiness to device-level release readiness.
 
-## Phase 1: Native-Only Audit Documents
+ACE can be considered a gray-release experimental editor only after a
+representative physical-device run proves that IME, viewport, selection,
+clipboard, CJK composition, completion accept, fallback, TextMirror,
+diagnostics, large-file routing, and Native regression paths are stable enough
+for opt-in users.
 
-- [x] Add `docs/dev/editor-native-only-audit.md`.
-- [x] Classify Native-only dependencies:
-  `CodeEditor`, `CodeEditText`, `TextViewUndoRedo`, `HVScrollView`,
-  `JavaScriptHighlighter`, `LayoutHelper`, Android `Layout`,
-  `Editable.append`, `requestRectangleOnScreen`, `selectionStart`,
-  `selectionEnd`, `setLoadingText`, `setLoadingGutterDigits`,
-  `setRedoUndoEnabled`, and `AutoCompletion(context, CodeEditText)`.
-- [x] Add `docs/dev/editor-engine-neutral-services.md`.
-- [x] Document engine-neutral service owners and allowed dependencies.
-- [x] Extend boundary checks to cover the audit lists.
+## Feature Freeze
 
-Acceptance:
+Allowed work in Phase 9:
 
-- [x] Native-only APIs are categorized as Native-only, per-engine interface,
-  public service, or removed-from-ACE.
-- [x] Common editor services are documented as depending only on
-  `ScriptEditorEngine` and neutral editor models.
+- P0/P1 device bug fixes found by the release gate.
+- Diagnostics, test-plan, and report updates needed to explain failures.
+- Release packaging cleanup, including temporary package-name handling.
+- Documentation of known issues and release decisions.
 
-## Phase 2: Viewport Policy Deepening
+Deferred until after Phase 9:
 
-- [x] Decide whether the existing simple `EditorViewportPolicy` is enough or
-  should grow `attach`, `detach`, IME animation start/end, and host callbacks.
-- [x] If needed, add `EditorViewportHost` without moving ACE back onto Native
-  workaround paths.
-- [x] Keep Native bottom padding and cursor-visible logic Native-only.
-- [x] Keep ACE policy limited to residual padding cleanup and ACE resize/scroll
-  settling.
-- [x] Keep the clean-host no-flag decision documented unless a real second host
-  implementation appears.
-
-Acceptance:
-
-- [x] `EditorView` continues to avoid direct `CodeEditText` access.
-- [x] `requestRectangleOnScreen` remains Native-only.
-- [x] ACE diagnostics identify `viewportPolicy=AceEditorViewportPolicy`.
-
-## Phase 3: IME State Machine
-
-- [x] Add `AceImeState`.
-- [x] Add `AceImeController`.
-- [x] Make `showSoftInput` / `hideSoftInput` explicitly idempotent.
-- [x] Coalesce duplicate IME requests inside the existing 150 ms window.
-- [x] Delay or ignore reverse show/hide requests during transitions.
-- [x] Record `lastImeState`, `lastImeHeight`,
-  `lastImeTransitionStartedAtUptimeMillis`,
-  `lastImeTransitionEndedAtUptimeMillis`, and ignored request reasons in ACE
-  diagnostics.
-- [x] Confirm cursor/selection changes do not directly trigger keyboard
-  show/hide feedback loops.
-
-Acceptance:
-
-- [x] Fast repeated taps do not create an IME feedback loop.
-- [x] Consecutive show/hide cycles keep ACE active and diagnostics explain the
-  last IME transition.
-
-## Phase 4: Fallback Classification And Event History
-
-- [x] Add a bounded ACE runtime event history for the last 30 key events:
-  IME show/hide, resize, focus, blur, heartbeat, evaluateJavascript,
-  JS fatal, console error, renderer gone, and fallback.
-- [x] Add `AceJsErrorClassifier`.
-- [x] Treat resize, focus, and `scrollCursorIntoView` errors as recoverable
-  after ACE is running.
-- [x] Keep completion, LSP, tooltip, and markdown failures feature-local.
-- [x] During IME transitions, report transient evaluateJavascript failures as
-  degraded/retryable instead of immediate fallback.
-- [x] Preserve immediate fallback for renderer-gone and initialization fatal
-  failures.
-- [x] Ensure fallback text prefers `AceTextMirror`.
-
-Acceptance:
-
-- [x] Repeated keyboard show/hide does not fallback from heartbeat or transient
-  evaluateJavascript failures.
-- [x] Forced renderer-gone and forced init fatal still fallback.
-- [x] Diagnostics contain enough event history to explain the fallback decision.
-
-## Phase 5: Bridge Event Throttling
-
-- [x] Audit JS-to-Kotlin event frequency during IME animation.
-- [x] Throttle cursor events to a bounded cadence.
-- [x] Throttle selection/state events while preserving text deltas.
-- [x] Keep `changeDelta` reliable and ordered.
-- [x] Debounce UI menu/save-button refreshes triggered by high-frequency editor
-  state changes.
-- [x] Add smoke or diagnostic checks that expose event storms.
-
-Acceptance:
-
-- [x] Keyboard animation does not produce unbounded cursor/state event bursts.
-- [x] Text edits remain lossless through TextMirror.
-
-## Phase 6: Mobile Selection CSS Review
-
-- [x] Audit `user-select`, `.ace_mobile-menu`, selection handles, and
-  action-mode behavior on Android WebView.
-- [ ] Test long-press, double-tap, copy, paste, CJK composition, completion
-  accept, and IME show/hide with mobile selection paths.
-- [x] Keep breakpoint and debug-line styles stable.
-- [x] If selection suppression is needed, scope it narrowly instead of hiding
-  all mobile behavior.
-
-Acceptance:
-
-- [ ] Long-press and double-tap do not fallback ACE.
-- [ ] Copy/paste and CJK input remain usable.
-- [ ] Touch location, selection, and gutter alignment remain coherent.
-
-## Phase 7: Keyboard And Viewport Test Matrix
-
-- [x] Add `docs/dev/ace-keyboard-viewport-test-plan.md` or extend the existing
-  ACE test plan with a dedicated matrix section.
-- [x] Add a debug action or debug-only helper to run repeated keyboard
-  show/hide stress when feasible. The isolated ACE debug activity now has an
-  IME stress helper; real tap-anchor validation still belongs to the device
-  matrix.
-- [x] Add diagnostics dump coverage for event history once Phase 4 lands.
-- [x] Cover file-manager open first paint, top/middle/bottom tap anchors,
-  completion popup accept, long-press selection, CJK input, rotation, fallback,
-  and large-file Native routing.
-- [x] Update release gates so LSP alpha is not the primary target until the
-  keyboard/viewport matrix is stable.
-
-Acceptance:
-
-- [x] The original flicker, anchor drift, and keyboard fallback issues are
-  reproducible as test cases.
-- [x] The same matrix can be rerun after WebView or Android version changes.
-
-## Phase 8: Resume Deferred Advanced Work
-
-- [x] Instrumentation smoke tests for ACE basics.
-- [x] CI gate for editor boundary and ACE hardening scripts.
-- [x] AutoJs6 API index intermediate model improvements.
-- [x] Pro-only API detection.
-- [x] Declaration and completion quality improvements.
-- [x] LSP server manager alpha.
-- [x] LSP completion and hover.
-- [x] Optional tooltip/markdown loading.
-- [x] VisualEditorAce investigation only after ordinary ACE is stable.
+- Server-backed LSP transport.
+- Public VisualEditorAce engine exposure.
+- Making ACE the default editor.
+- Broad completion-model rewrites.
+- New tooltip rendering dependencies.
+- New editor-engine abstractions without a release-gate failure requiring them.
 
 ## Verification Commands
 
@@ -202,8 +64,9 @@ Acceptance:
 - `.\gradlew.bat :app:compileAppDebugKotlin`
 - `.\gradlew.bat :app:compileAppDebugJavaWithJavac`
 - `.\gradlew.bat :app:mergeAppDebugAssets`
+- `git diff --check`
 
-## Release Gate
+## Release Gate Status
 
 Automated/static gate:
 
@@ -211,17 +74,270 @@ Automated/static gate:
 - [x] ACE clean-host behavior remains the default ACE path.
 - [x] Native-only boundary checks pass.
 - [x] ACE first-paint and surface smoke checks pass.
-- [x] ACE completion checks pass.
+- [x] ACE completion, LSP fallback, tooltip, and API-index checks pass.
 - [x] ACE editor CI gate passes.
-- [x] Server-backed LSP transport and VisualEditorAce remain deferred until this
-  gate is satisfied.
+- [x] Server-backed LSP transport remains deferred until this gate is
+  satisfied.
+- [x] VisualEditorAce remains deferred until this gate is satisfied.
 
 Manual device gate:
 
+- [ ] Sony XQ-AT72 device environment is recorded.
 - [ ] IME show/hide manual checklist passes on representative devices.
 - [ ] Keyboard and viewport matrix passes on representative devices.
 - [ ] Continuous keyboard show/hide does not fallback ACE.
+- [ ] Long-press, double-tap, copy, paste, and CJK composition remain usable.
+- [ ] Completion accept and tooltip fallback do not destabilize editing.
+- [ ] Rotation and Native/ACE switching preserve text and dirty state.
 - [ ] Fallback preserves recent text through TextMirror in device/debug-hook
   validation.
 - [ ] Renderer-gone and initialization fatal fallback still work in
   device/debug-hook validation.
+- [ ] Native editor behavior has no regression from the ACE host work.
+
+## Phase 9 Tasks
+
+### Gate 0: Device Report Setup
+
+- [x] Add `docs/dev/ace-release-device-report-sony-xq-at72.md`.
+- [ ] Record Sony XQ-AT72 device metadata:
+  Android version, API level, WebView version, IME, theme, font, font scale,
+  AutoJs6 build commit, test package, ACE state, and LSP state.
+
+Acceptance:
+
+- [ ] The report identifies the exact tested build and environment.
+- [ ] Native default, explicit ACE opt-in, LSP default-off, and no
+  VisualEditorAce user entry are confirmed.
+
+### Gate 1: Automated Preflight
+
+- [ ] Run `node tools/ace-ci/check-ace-release-gate.mjs`.
+- [ ] Run `node tools/ace-ci/check-ace-editor-gate.mjs`.
+- [ ] Run `git diff --check`.
+- [ ] Record command results in the Sony XQ-AT72 report.
+
+Acceptance:
+
+- [ ] All commands exit 0.
+- [ ] Any LF/CRLF warnings are recorded as non-blocking if no whitespace errors
+  are present.
+
+### Gate 2: First Paint And File Open
+
+- [ ] Open a normal `.js` file from the AutoJs6 file manager 10 times.
+- [ ] Repeat 5 times in dark theme.
+- [ ] Repeat 5 times in light theme.
+
+Acceptance:
+
+- [ ] No old file-list frame flashes.
+- [ ] No white first frame or half-initialized ACE surface appears.
+- [ ] First-paint overlay and editor background remain coherent.
+
+### Gate 3: IME Show/Hide And Tap Anchors
+
+- [ ] Tap top, middle, and lower visible code lines with keyboard hidden.
+- [ ] Show and hide the keyboard at least three rounds.
+- [ ] Check lower-viewport tap anchors near the keyboard edge.
+
+Acceptance:
+
+- [ ] ACE does not white-screen, black-screen, jump unexpectedly, or fallback.
+- [ ] Caret lands on the intended line.
+- [ ] IME hide does not leave stale scroll or bottom padding.
+
+### Gate 4: Keyboard Stress
+
+- [ ] Run the isolated ACE debug activity `IME stress` helper.
+- [ ] Manually repeat show/hide keyboard 20 times on a small file.
+- [ ] Repeat on a 100-line sample.
+- [ ] Repeat on a 1000-line sample when practical.
+
+Acceptance:
+
+- [ ] ACE remains active.
+- [ ] No persistent flicker, WebView blanking, or heartbeat-triggered fallback.
+- [ ] Diagnostics do not show an unbounded bridge event storm.
+
+### Gate 5: Mobile Selection, Clipboard, And CJK
+
+- [ ] Long-press a word.
+- [ ] Drag selection handles.
+- [ ] Double-tap a word.
+- [ ] Copy selected text.
+- [ ] Paste single-line text.
+- [ ] Paste multi-line text.
+- [ ] Paste Chinese text, emoji, quotes, and backslashes.
+- [ ] Type CJK composition text such as `toast("你好")`.
+- [ ] Move the cursor and hide the keyboard while composition is uncommitted.
+
+Acceptance:
+
+- [ ] No lost or duplicated characters.
+- [ ] Copy/paste content is correct.
+- [ ] TextMirror and saved text match the ACE display.
+- [ ] Mobile selection paths do not fallback ACE.
+
+### Gate 6: Completion, Tooltip, And LSP Default-Off
+
+- [ ] Trigger and accept static completions for `toast`, `app.`, `files.`,
+  `images.`, and `device.`.
+- [ ] Confirm tooltip fallback does not load external resources.
+- [ ] Confirm LSP disabled returns no WebSocket or server transport.
+- [ ] Enable the LSP alpha flag and confirm no-server fallback remains static
+  and feature-local.
+
+Acceptance:
+
+- [ ] Completion accept inserts at the intended location.
+- [ ] Tooltip failures do not affect editing.
+- [ ] LSP failures degrade to static completion and do not fallback ACE.
+
+### Gate 7: Rotation, Restore, And Engine Switching
+
+- [ ] Type unsaved text in ACE.
+- [ ] Show the keyboard.
+- [ ] Rotate to landscape and back to portrait.
+- [ ] Background and restore the app.
+- [ ] Save.
+- [ ] Switch to Native.
+- [ ] Switch back to ACE.
+
+Acceptance:
+
+- [ ] Text and dirty state survive.
+- [ ] Cursor visibility remains acceptable.
+- [ ] No double-padding, tap offset, or duplicate fallback occurs.
+
+### Gate 8: Fallback Hooks And TextMirror
+
+- [ ] Enter unsaved recent text before every fallback hook test.
+- [ ] Validate `forceReadyTimeout`.
+- [ ] Validate `forceJsInitThrow`.
+- [ ] Validate `forceRendererGoneFallback`.
+- [ ] Validate `forceAssetMissing`.
+
+Acceptance:
+
+- [ ] ACE falls back to Native exactly once.
+- [ ] Recent text is preserved through TextMirror.
+- [ ] Dirty state is preserved.
+- [ ] Diagnostics include a clear failure type and runtime event history.
+- [ ] Renderer-gone fallback does not rely on querying a dead WebView.
+
+### Gate 9: Native Regression
+
+- [ ] Set Native editor.
+- [ ] Open and edit a file.
+- [ ] Show and hide the keyboard.
+- [ ] Save.
+- [ ] Search and replace.
+- [ ] Add and remove breakpoints.
+- [ ] Open a large file.
+- [ ] Run a script.
+
+Acceptance:
+
+- [ ] Native editor behavior is not degraded.
+- [ ] Native IME workaround behavior remains Native-only.
+- [ ] Native auto-completion and large-file loading still work.
+
+### Gate 10: Publishing Cleanup
+
+- [ ] Check whether the temporary ACE test package and app label affect release
+  builds.
+- [ ] Restore the official application id and label before final merge, or limit
+  the test package to debug/test-only scope.
+- [ ] Classify the `version.properties` change as release version bump, build
+  auto-change, or accidental change.
+- [ ] Confirm ACE still is not the default editor.
+- [ ] Confirm LSP still is default-off.
+- [ ] Confirm VisualEditorAce still has no user entry.
+
+Acceptance:
+
+- [ ] No temporary package-name or label change leaks into an unintended release
+  build.
+- [ ] `version.properties` handling is documented or committed separately as
+  appropriate.
+
+### Gate 11: Final Release Decision
+
+- [ ] Generate a final release-gate decision from the Sony XQ-AT72 report and
+  automated gate output.
+- [ ] List P0 blockers.
+- [ ] List P1 known issues.
+- [ ] List P2 follow-ups.
+- [ ] Decide whether ACE can ship as an experimental editor.
+- [ ] Decide that ACE must not become the default editor unless all manual
+  device gates pass.
+
+Acceptance:
+
+- [ ] Any P0 blocker rejects the ACE release gate.
+- [ ] P1-only issues can be accepted only with known-issue documentation.
+- [ ] Missing keyboard/viewport device results prevent making ACE default.
+
+## Blocker Classification
+
+### P0 Blockers
+
+- Normal input or save loses text.
+- CJK composition loses or duplicates text.
+- Continuous keyboard show/hide frequently falls back ACE.
+- Tap anchors are visibly wrong.
+- Fallback does not preserve recent text through TextMirror.
+- Renderer-gone fallback crashes the app.
+- Native editor behavior regresses.
+- ACE becomes default.
+- LSP becomes default-on or LSP failure falls back the whole editor.
+- Diagnostics leak script text.
+
+### P1 Known Issues
+
+- Occasional minor first-frame flicker.
+- Tooltip content is incomplete.
+- Long-press selection experience is rough but copy/paste has a reliable
+  alternative path.
+- Large-file Native routing message is unclear.
+- Rotation restores text but not exact scroll position.
+
+### P2 Follow-Ups
+
+- Richer LSP hover.
+- Better declaration typing coverage.
+- Completion ranking improvements.
+- VisualEditorAce implementation.
+
+## Release Decision Templates
+
+Accepted:
+
+```text
+ACE experimental editor release gate accepted.
+
+Native editor remains the default engine.
+ACE can be enabled manually from settings.
+LSP remains disabled by default.
+VisualEditorAce remains unavailable.
+```
+
+Conditionally accepted:
+
+```text
+ACE experimental editor release gate conditionally accepted.
+
+ACE may be exposed as an experimental editor.
+Native remains default.
+Known issues must be documented in release notes.
+ACE must not become the default editor.
+```
+
+Rejected:
+
+```text
+ACE release gate rejected.
+
+ACE should remain hidden or debug-only until blockers are fixed.
+```

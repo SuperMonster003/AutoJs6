@@ -10,6 +10,13 @@ node tools/ace-ci/check-ace-release-gate.mjs
 The script first runs the existing ACE editor CI gate, then verifies release
 invariants that are easy to regress during later ACE work.
 
+Phase 9 is the active release-candidate stabilization phase. The release device
+report for the preferred representative device is:
+
+```text
+docs/dev/ace-release-device-report-sony-xq-at72.md
+```
+
 ## Automated Gate
 
 - Native remains the default editor in resources, preferences, enum fallback,
@@ -34,6 +41,8 @@ These items need real-device validation and must not be marked complete from
 static checks alone. The preferred representative device for this branch is
 Sony XQ-AT72.
 
+- Record the device environment and every result in
+  `docs/dev/ace-release-device-report-sony-xq-at72.md`.
 - Phase 6 mobile selection paths: long-press, double-tap, copy, paste, CJK
   composition, completion accept, and IME show/hide.
 - Keyboard and viewport matrix: file-manager open first paint, top/middle/bottom
@@ -44,6 +53,13 @@ Sony XQ-AT72.
 - Fallback debug hooks must preserve recent small-file text through TextMirror.
 - Renderer-gone and JS-init fatal debug hooks must still switch to Native and
   record useful diagnostics.
+
+## Feature Freeze
+
+Do not expand the ACE feature surface during this gate. Server-backed LSP,
+public VisualEditorAce exposure, making ACE default, broad completion rewrites,
+new tooltip dependencies, and new editor-engine abstractions stay deferred
+unless a P0/P1 release-gate failure requires a targeted fix.
 
 ## Merge Note
 
