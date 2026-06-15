@@ -68,6 +68,7 @@ function assertOnlyIn(pattern, allowedFiles) {
 }
 
 const editorView = "app/src/main/java/org/autojs/autojs/ui/edit/EditorView.kt";
+const editorMenu = "app/src/main/java/org/autojs/autojs/ui/edit/EditorMenu.java";
 const scriptEngine = "app/src/main/java/org/autojs/autojs/ui/edit/editor/engine/ScriptEditorEngine.kt";
 const nativePolicy = "app/src/main/java/org/autojs/autojs/ui/edit/editor/viewport/NativeEditorViewportPolicy.kt";
 const acePolicy = "app/src/main/java/org/autojs/autojs/ui/edit/editor/viewport/AceEditorViewportPolicy.kt";
@@ -86,6 +87,10 @@ const themeFontService = "app/src/main/java/org/autojs/autojs/ui/edit/editor/ser
 assertIncludes(editorView, "mViewportPolicy.onImeInsetsChanged(imeVisible, targetBottom)");
 assertIncludes(editorView, "EditorViewportPolicyFactory.create(editor, this)");
 assertIncludes(editorView, "EditorCommandDispatcher(");
+assertIncludes(editorView, "val commandDispatcher: EditorCommandDispatcher");
+assertIncludes(editorView, "mCommandDispatcher.undo()");
+assertIncludes(editorView, "mCommandDispatcher.redo()");
+assertIncludes(editorView, "mCommandDispatcher.replaceSelection()");
 assertIncludes(editorView, "mCommandDispatcher.onCompletionClick(completions, pos)");
 assertIncludes(editorView, "mCommandDispatcher.onCompletionLongClick(completions, pos)");
 assertIncludes(editorView, "mCommandDispatcher.onModuleLongClick(module)");
@@ -142,7 +147,41 @@ assertNotIncludes(acePolicy, "ensureCursorVisibleIfPossible");
 assertNotIncludes(acePolicy, "requestRectangleOnScreen");
 
 assertIncludes(commandDispatcher, "private val currentEditor: () -> ScriptEditorEngine");
+assertIncludes(commandDispatcher, "fun insert(text: CharSequence?)");
+assertIncludes(commandDispatcher, "fun copyLine()");
+assertIncludes(commandDispatcher, "fun deleteLine()");
+assertIncludes(commandDispatcher, "fun clear()");
+assertIncludes(commandDispatcher, "fun toggleComment()");
+assertIncludes(commandDispatcher, "fun beautifyCode()");
+assertIncludes(commandDispatcher, "fun undo()");
+assertIncludes(commandDispatcher, "fun redo()");
+assertIncludes(commandDispatcher, "fun replaceSelection()");
+assertIncludes(commandDispatcher, "fun addOrRemoveBreakpointAtCurrentLine()");
+assertIncludes(commandDispatcher, "fun removeAllBreakpoints()");
 assertNotIncludes(commandDispatcher, "CodeEditText");
+
+assertIncludes(editorMenu, "commandDispatcher().addOrRemoveBreakpointAtCurrentLine()");
+assertIncludes(editorMenu, "commandDispatcher().removeAllBreakpoints()");
+assertIncludes(editorMenu, "commandDispatcher().jumpToStart()");
+assertIncludes(editorMenu, "commandDispatcher().jumpToEnd()");
+assertIncludes(editorMenu, "commandDispatcher().jumpToLineStart()");
+assertIncludes(editorMenu, "commandDispatcher().jumpToLineEnd()");
+assertIncludes(editorMenu, "commandDispatcher().clear()");
+assertIncludes(editorMenu, "commandDispatcher().toggleComment()");
+assertIncludes(editorMenu, "commandDispatcher().beautifyCode()");
+assertIncludes(editorMenu, "commandDispatcher().copyLine()");
+assertIncludes(editorMenu, "commandDispatcher().deleteLine()");
+assertNotIncludes(editorMenu, "currentEditor().addOrRemoveBreakpointAtCurrentLine");
+assertNotIncludes(editorMenu, "currentEditor().removeAllBreakpoints");
+assertNotIncludes(editorMenu, "currentEditor().jumpToStart");
+assertNotIncludes(editorMenu, "currentEditor().jumpToEnd");
+assertNotIncludes(editorMenu, "currentEditor().jumpToLineStart");
+assertNotIncludes(editorMenu, "currentEditor().jumpToLineEnd");
+assertNotIncludes(editorMenu, "currentEditor().copyLine");
+assertNotIncludes(editorMenu, "currentEditor().deleteLine");
+assertNotIncludes(editorMenu, "currentEditor().toggleComment");
+assertNotIncludes(editorMenu, "currentEditor().beautifyCode");
+assertNotIncludes(editorMenu, "currentEditor().setText(\"\")");
 
 assertIncludes(aceEngine, "override fun createAutoCompletion(context: Context): AutoCompletion? = null");
 assertNotIncludes(aceEngine, "setLoadingGutterDigits");

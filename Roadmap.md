@@ -58,7 +58,7 @@ goal is to make editor behavior engine-neutral where possible, and keep native
 - [ ] Extract draft restore/save service.
 - [ ] Extract version history service.
 - [x] Extract run-text provider.
-- [ ] Expand editor command dispatcher beyond input-keyboard commands.
+- [x] Expand editor command dispatcher beyond input-keyboard commands.
 - [ ] Extract breakpoint model store.
 - [x] Extract theme/font application service.
 

@@ -11,25 +11,92 @@ class EditorCommandDispatcher(
     private val hideFunctionsKeyboard: (showSoftInput: Boolean) -> Unit,
 ) {
 
+    fun insert(text: CharSequence?) {
+        text?.let { currentEditor().insert(it.toString()) }
+    }
+
+    fun insert(line: Int, text: String?) {
+        currentEditor().insert(line, text)
+    }
+
+    fun copyLine() {
+        currentEditor().copyLine()
+    }
+
+    fun deleteLine() {
+        currentEditor().deleteLine()
+    }
+
+    fun clear() {
+        currentEditor().clear()
+    }
+
+    fun toggleComment() {
+        currentEditor().toggleComment()
+    }
+
+    fun beautifyCode() {
+        currentEditor().beautifyCode()
+    }
+
+    fun undo() {
+        currentEditor().undo()
+    }
+
+    fun redo() {
+        currentEditor().redo()
+    }
+
+    fun replaceSelection() {
+        currentEditor().replaceSelection()
+    }
+
+    fun jumpTo(line: Int, column: Int) {
+        currentEditor().jumpTo(line, column)
+    }
+
+    fun jumpToStart() {
+        currentEditor().jumpToStart()
+    }
+
+    fun jumpToEnd() {
+        currentEditor().jumpToEnd()
+    }
+
+    fun jumpToLineStart() {
+        currentEditor().jumpToLineStart()
+    }
+
+    fun jumpToLineEnd() {
+        currentEditor().jumpToLineEnd()
+    }
+
+    fun addOrRemoveBreakpointAtCurrentLine() {
+        currentEditor().addOrRemoveBreakpointAtCurrentLine()
+    }
+
+    fun removeAllBreakpoints() {
+        currentEditor().removeAllBreakpoints()
+    }
+
     fun onCompletionClick(completions: CodeCompletions, position: Int) {
-        currentEditor().insert(completions[position].insertText)
+        insert(completions[position].insertText)
     }
 
     fun onCompletionLongClick(completions: CodeCompletions, position: Int) {
         val completion = completions[position]
-        val editor = currentEditor()
         when {
-            completion.insertText == "/" -> editor.toggleComment()
-            completion.insertText == "=" -> editor.clear()
-            completion.insertText == "-" -> editor.deleteLine()
-            completion.insertText == "(" -> editor.moveCursor(-1)
-            completion.insertText == ")" -> editor.moveCursor(1)
-            completion.insertText == "[" -> editor.jumpToLineStart()
-            completion.insertText == "]" -> editor.jumpToLineEnd()
-            completion.insertText == "{" -> editor.jumpToStart()
-            completion.insertText == "}" -> editor.jumpToEnd()
-            completion.insertText == "<" -> editor.jumpToPrevLine()
-            completion.insertText == ">" -> editor.jumpToNextLine()
+            completion.insertText == "/" -> toggleComment()
+            completion.insertText == "=" -> clear()
+            completion.insertText == "-" -> deleteLine()
+            completion.insertText == "(" -> currentEditor().moveCursor(-1)
+            completion.insertText == ")" -> currentEditor().moveCursor(1)
+            completion.insertText == "[" -> jumpToLineStart()
+            completion.insertText == "]" -> jumpToLineEnd()
+            completion.insertText == "{" -> jumpToStart()
+            completion.insertText == "}" -> jumpToEnd()
+            completion.insertText == "<" -> currentEditor().jumpToPrevLine()
+            completion.insertText == ">" -> currentEditor().jumpToNextLine()
             completion.url != null -> showManual(completion.url, completion.hint)
         }
     }
@@ -39,15 +106,14 @@ class EditorCommandDispatcher(
     }
 
     fun onPropertyClick(module: Module, property: Property) {
-        val editor = currentEditor()
         val propertyText = if (property.isVariable) property.key else "${property.key}()"
         if (property.isGlobal) {
-            editor.insert(propertyText)
+            insert(propertyText)
         } else {
-            editor.insert("${module.name}.$propertyText")
+            insert("${module.name}.$propertyText")
         }
         if (!property.isVariable) {
-            editor.moveCursor(-1)
+            currentEditor().moveCursor(-1)
         }
         hideFunctionsKeyboard(true)
     }

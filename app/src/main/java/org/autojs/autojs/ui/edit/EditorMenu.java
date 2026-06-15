@@ -17,6 +17,7 @@ import org.autojs.autojs.model.indices.AndroidClass;
 import org.autojs.autojs.model.indices.ClassSearchingItem;
 import org.autojs.autojs.script.JavaScriptFileSource;
 import org.autojs.autojs.ui.common.NotAskAgainDialog;
+import org.autojs.autojs.ui.edit.editor.command.EditorCommandDispatcher;
 import org.autojs.autojs.ui.edit.editor.engine.EditorEngineType;
 import org.autojs.autojs.ui.edit.editor.engine.ScriptEditorEngine;
 import org.autojs.autojs.ui.edit.keyboard.SymbolsSettingsActivity;
@@ -96,6 +97,10 @@ public class EditorMenu {
         return mEditorView.editor;
     }
 
+    private EditorCommandDispatcher commandDispatcher() {
+        return mEditorView.getCommandDispatcher();
+    }
+
     private void prepareEditorEngineMenu(Menu menu) {
         ScriptEditorEngine editor = currentEditor();
         MenuItem nativeItem = menu.findItem(R.id.action_editor_engine_native);
@@ -125,7 +130,7 @@ public class EditorMenu {
     private boolean onDebugOptionsSelected(MenuItem item) {
         int itemId = item.getItemId();
         if (itemId == R.id.action_breakpoint) {
-            currentEditor().addOrRemoveBreakpointAtCurrentLine();
+            commandDispatcher().addOrRemoveBreakpointAtCurrentLine();
             return true;
         }
         if (itemId == R.id.action_launch_debugger) {
@@ -139,7 +144,7 @@ public class EditorMenu {
             return tryDoing(mEditorView::debug);
         }
         if (itemId == R.id.action_remove_all_breakpoints) {
-            currentEditor().removeAllBreakpoints();
+            commandDispatcher().removeAllBreakpoints();
             return true;
         }
         return false;
@@ -152,19 +157,19 @@ public class EditorMenu {
             return true;
         }
         if (itemId == R.id.action_jump_to_start) {
-            currentEditor().jumpToStart();
+            commandDispatcher().jumpToStart();
             return true;
         }
         if (itemId == R.id.action_jump_to_end) {
-            currentEditor().jumpToEnd();
+            commandDispatcher().jumpToEnd();
             return true;
         }
         if (itemId == R.id.action_jump_to_line_start) {
-            currentEditor().jumpToLineStart();
+            commandDispatcher().jumpToLineStart();
             return true;
         }
         if (itemId == R.id.action_jump_to_line_end) {
-            currentEditor().jumpToLineEnd();
+            commandDispatcher().jumpToLineEnd();
             return true;
         }
         return false;
@@ -280,7 +285,7 @@ public class EditorMenu {
                     //  # }
                     ScriptEditorEngine editor = currentEditor();
                     var executionInfo = JavaScriptFileSource.parseExecutionMode(editor.getText());
-                    editor.insert(executionInfo.getLineno(), item.getImportText() + ";\n");
+                    commandDispatcher().insert(executionInfo.getLineno(), item.getImportText() + ";\n");
                 })
                 .onNeutral((ignored, which) -> IntentUtils.browse(
                         mContext,
@@ -391,13 +396,13 @@ public class EditorMenu {
             return paste();
         }
         if (itemId == R.id.action_clear) {
-            return tryDoing(() -> currentEditor().setText(""));
+            return tryDoing(() -> commandDispatcher().clear());
         }
         if (itemId == R.id.action_comment) {
-            return tryDoing(() -> currentEditor().toggleComment());
+            return tryDoing(() -> commandDispatcher().toggleComment());
         }
         if (itemId == R.id.action_beautify) {
-            return tryDoing(mEditorView::beautifyCode);
+            return tryDoing(() -> commandDispatcher().beautifyCode());
         }
         return false;
     }
@@ -416,7 +421,7 @@ public class EditorMenu {
                     }
                     try {
                         int line = Math.max(Math.min(Integer.parseInt(input.toString()), lineCount), 1);
-                        currentEditor().jumpTo(line - 1, 0);
+                        commandDispatcher().jumpTo(line - 1, 0);
                     } catch (NumberFormatException ignored) {
                         /* Ignored. */
                     }
@@ -465,18 +470,18 @@ public class EditorMenu {
     }
 
     protected boolean copyLine() {
-        return tryDoing(() -> currentEditor().copyLine());
+        return tryDoing(() -> commandDispatcher().copyLine());
     }
 
     protected boolean deleteLine() {
-        return tryDoing(() -> currentEditor().deleteLine());
+        return tryDoing(() -> commandDispatcher().deleteLine());
     }
 
     protected boolean paste() {
         return tryDoing(() -> {
             CharSequence clip = getClip();
             if (clip != null) {
-                currentEditor().insert(clip.toString());
+                commandDispatcher().insert(clip);
             }
         });
     }

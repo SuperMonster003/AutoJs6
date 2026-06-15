@@ -171,6 +171,9 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         showManual = { urlSuffix, title -> showManual(urlSuffix, title) },
         hideFunctionsKeyboard = { showSoftInput -> mFunctionsKeyboardHelper?.hideFunctionsLayout(showSoftInput) },
     )
+    val commandDispatcher: EditorCommandDispatcher
+        get() = mCommandDispatcher
+
     private val fileReadPipeline = EditorFileReadPipeline(context)
     private val textLoadTarget: EditorTextLoadTarget
         get() = EngineTextLoadTarget(editor)
@@ -1342,7 +1345,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         mFunctionsKeyboard.setClickCallback(this)
 
         mShowFunctionsButton.setOnLongClickListener {
-            true.also { editor.beautifyCode() }
+            true.also { mCommandDispatcher.beautifyCode() }
         }
     }
 
@@ -1802,7 +1805,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         // zh-CN: 标记撤销/重做按钮动作, 以便 TextWatcher 区分来源.
         mUndoRedoButtonInProgress = true
         try {
-            editor.undo()
+            mCommandDispatcher.undo()
         } finally {
             mUndoRedoButtonInProgress = false
         }
@@ -1818,7 +1821,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         // zh-CN: 标记撤销/重做按钮动作, 以便 TextWatcher 区分来源.
         mUndoRedoButtonInProgress = true
         try {
-            editor.redo()
+            mCommandDispatcher.redo()
         } finally {
             mUndoRedoButtonInProgress = false
         }
@@ -2256,7 +2259,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     fun replace() {
-        editor.replaceSelection()
+        mCommandDispatcher.replaceSelection()
     }
 
     fun showConsole() {
@@ -2277,7 +2280,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     fun beautifyCode() {
-        editor.beautifyCode()
+        mCommandDispatcher.beautifyCode()
     }
 
     @SuppressLint("CheckResult")
