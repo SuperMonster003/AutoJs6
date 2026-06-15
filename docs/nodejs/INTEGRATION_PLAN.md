@@ -138,10 +138,11 @@ Important: `.mjs` currently routes to the Node backend, but ESM execution is sti
 
 ### P6-P8 Longer-Term Compatibility
 
-- Evaluate `fs.promises`, stream, zlib, ESM, network, workers, and native addons one at a time.
+- Evaluate `fs.promises`, stream, zlib, ESM, network, workers, Java interop, and native addons one at a time.
 - Keep scheduled/background task execution design-gated; Task 65 permits only controlled `work_manager` metadata registration, and Node must not get raw Android scheduler or broadcast authority.
 - Treat controlled `fetch` as the only approved network MVP; live provider enablement remains behind `autojs.nodejs.network.experimental=false` by default.
 - Keep `worker_threads` behind `docs/nodejs/design/WORKER_THREADS.md` and `autojs.nodejs.worker_threads.experimental=false`; workers must not access AutoJs bridge modules or Android objects.
+- Keep Java/Android interop behind `docs/nodejs/design/JAVA_INTEROP.md`; the default product path is explicit AutoJs bridge modules, not raw `java.*`, `android.*`, reflection, class loaders, or Rhino adapter APIs.
 - Each high-risk feature needs a design document, flag, tests, packaged smoke, and rollback path.
 - Keep current design gates in `docs/nodejs/design/` synchronized when broad compatibility surfaces change.
 
@@ -167,6 +168,7 @@ Important: `.mjs` currently routes to the Node backend, but ESM execution is sti
 5. Keep ESM behind `docs/nodejs/design/ESM.md` and `autojs.nodejs.esm.experimental=false`; `.mjs` remains a Node route with default rejection. Keep dynamic import behind the separate `autojs.nodejs.dynamicImport.experimental=false` gate.
 6. Keep network behind `docs/nodejs/design/NETWORK.md` and `autojs.nodejs.network.experimental=false`; Task 41 provides a controlled fetch wrapper and fake-provider coverage, while live Android network I/O remains disabled in normal builds and raw Node network modules stay denied.
 7. Keep `worker_threads` behind `docs/nodejs/design/WORKER_THREADS.md` and `autojs.nodejs.worker_threads.experimental=false`; Task 42 freezes the worker boundary without enabling worker execution.
-8. Use `docs/nodejs/PERFORMANCE.md`, `NodeEmbeddedPerformanceInstrumentationTest`, and `NodeEmbeddedMemoryLeakStressInstrumentationTest` when changing embedded startup, native load, service lifecycle, bridge, fs, or image-handle behavior.
-9. Refresh the packaged inrt template so `app.versionName` and `app.versionCode` can become exact packaged gates.
-10. Keep packaged APK verification in the loop for every bridge-facing module.
+8. Keep Java/Android interop behind `docs/nodejs/design/JAVA_INTEROP.md`; `java_interop` remains unsupported until a later task deliberately implements an allowlist experiment.
+9. Use `docs/nodejs/PERFORMANCE.md`, `NodeEmbeddedPerformanceInstrumentationTest`, and `NodeEmbeddedMemoryLeakStressInstrumentationTest` when changing embedded startup, native load, service lifecycle, bridge, fs, or image-handle behavior.
+10. Refresh the packaged inrt template so `app.versionName` and `app.versionCode` can become exact packaged gates.
+11. Keep packaged APK verification in the loop for every bridge-facing module.

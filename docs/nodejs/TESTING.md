@@ -461,7 +461,7 @@ Any Node-facing runtime behavior change must update:
 - `docs/nodejs/RELEASE_CHECKLIST.md` when a release gate changes
 - `docs/nodejs/EXAMPLES.md` when adding or changing checked-in examples
 - `docs/nodejs/PERFORMANCE.md` when benchmark metrics, report schema, or threshold arguments change
-- `docs/nodejs/design/` design notes when changing broad surfaces such as fs, file URL, stream, zlib, scheduled/background tasks, ESM, network, workers, or native addons
+- `docs/nodejs/design/` design notes when changing broad surfaces such as fs, file URL, stream, zlib, scheduled/background tasks, ESM, network, workers, Java interop, or native addons
 
 ## Aggregate Tasks
 

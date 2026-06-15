@@ -219,6 +219,7 @@ Design notes for the broadest limited builtins:
 - network: `docs/nodejs/design/NETWORK.md`
 - WebSocket: `docs/nodejs/design/WEBSOCKET.md`
 - worker threads: `docs/nodejs/design/WORKER_THREADS.md`
+- Java interop: `docs/nodejs/design/JAVA_INTEROP.md`
 
 ## Disabled by Policy
 
@@ -235,6 +236,7 @@ These surfaces must stay disabled unless a future task explicitly opens them beh
 - unrestricted `process._linkedBinding`
 - unrestricted `process.getBuiltinModule`
 - unrestricted `vm`
+- unrestricted Java/Android interop
 - inspector/debugger server
 - npm install and postinstall execution
 

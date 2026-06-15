@@ -13,6 +13,8 @@ The embedded runtime may execute user-provided JavaScript, npm-style CommonJS pa
 - `MediaProjection` instances
 - `Activity` or view objects
 - Binder objects
+- Java or Android class objects
+- Java reflection or class-loader objects
 - native pointers or raw image handles
 - unrestricted process, network, or native addon APIs
 
@@ -82,6 +84,7 @@ High-risk modules and APIs:
 - unrestricted `net`, `tls`, `http`, `https`, `dns`, and `dgram`
 - unrestricted `vm`
 - inspector
+- direct Java or Android interop
 
 If a limited module exists for npm feature detection, operations that would cross the security boundary must fail with a stable policy error.
 
@@ -189,6 +192,14 @@ Reasons:
 - they can bypass scoped filesystem and builtin restrictions
 
 Future support, if any, should be developer-mode only and separately gated.
+
+## Java Interop Policy
+
+Direct Java and Android interop is unsupported in the default Safe Node Profile. Node scripts must use AutoJs bridge modules instead of raw `java.*`, `android.*`, Rhino `importClass`, `Packages`, `$autojs.java`, reflection, class loaders, or Android object references.
+
+The `java_interop` feature flag is critical, disabled, and not overrideable by normal builds, `project.json`, or packaged APK metadata. Future support may only start as an explicit allowlist experiment and must not expose `Context`, `Activity`, `Service`, `AccessibilityService`, `MediaProjection`, `Intent`, Binder, `ClassLoader`, reflection, filesystem, process, native-library, or raw UI objects.
+
+See `docs/nodejs/design/JAVA_INTEROP.md` for the mode comparison, allowlist candidates, Rhino compatibility boundary, and future test gate.
 
 ## AutoJs API Bridge Policy
 
@@ -316,5 +327,6 @@ Every Node release candidate must verify:
 - native addon loading denied
 - ESM and dynamic import paths return stable policy errors
 - network operations are denied unless explicitly feature-gated
+- direct Java/Android interop, reflection, class loaders, native library loading, and raw Android objects remain unavailable
 - packaged APK verifier passes
 - lifecycle timeout does not poison the next run

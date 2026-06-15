@@ -125,6 +125,8 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] experimental worker resource stress, when explicitly tested, shows no active worker after completion cleanup and no unbounded RSS/thread growth
 - [ ] direct WorkManager, AlarmManager, JobScheduler, and BroadcastReceiver authority remains denied to Node scripts
 - [ ] `work_manager` registration accepts only embedded backend, scoped relative paths, bounded intervals, and boolean constraint descriptors
+- [ ] direct Java/Android interop remains disabled; `java_interop` stays unsupported unless a separate design-gated experiment is explicitly tested
+- [ ] reflection, class loaders, raw `Context`, native library loading, and Java process execution remain unavailable to Node scripts
 
 ## Compatibility
 
@@ -180,4 +182,5 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `docs/nodejs/design/ESM.md` when ESM or dynamic import behavior changes
 - [ ] `docs/nodejs/design/NETWORK.md` when network behavior, packaging permissions, or request policy changes
 - [ ] `docs/nodejs/design/WORKER_THREADS.md` when worker behavior or worker policy changes
+- [ ] `docs/nodejs/design/JAVA_INTEROP.md` when Java/Android interop, Rhino compatibility shims, or Java allowlist policy changes
 - [ ] packaged APK user docs or examples if packaging behavior changed
