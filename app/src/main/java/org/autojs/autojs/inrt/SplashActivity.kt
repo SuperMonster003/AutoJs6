@@ -88,6 +88,7 @@ class SplashActivity : AppCompatActivity() {
                     Toast.makeText(context, e.message, Toast.LENGTH_LONG).show()
                     startActivity(Intent(context, LogActivity::class.java))
                     AutoJs.instance.globalConsole.printAllStackTrace(e)
+                    finishAfterLaunchFailure()
                 }
             }
         }
@@ -125,6 +126,19 @@ class SplashActivity : AppCompatActivity() {
         )
     }
 
+    private fun finishAfterLaunchFailure() {
+        if (isFinishing || isDestroyed) {
+            return
+        }
+        finish()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            overrideActivityTransition(OVERRIDE_TRANSITION_CLOSE, 0, 0)
+        } else {
+            @Suppress("DEPRECATION")
+            overridePendingTransition(0, 0)
+        }
+    }
+
     companion object {
 
         private const val PERMISSION_REQUEST_CODE = 11186
@@ -132,4 +146,3 @@ class SplashActivity : AppCompatActivity() {
     }
 
 }
-

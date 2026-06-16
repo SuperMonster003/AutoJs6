@@ -12200,23 +12200,23 @@ $permissionsJson
             copyOutput.contains("READY"),
         )
         try {
-            shell("am force-stop ${failureCase.packageName}")
-            shell("pm uninstall ${failureCase.packageName}")
-            shell("logcat -c")
+            shellWithTimeout("am force-stop ${failureCase.packageName}")
+            shellWithTimeout("pm uninstall ${failureCase.packageName}")
+            shellWithTimeout("logcat -c", PACKAGED_SMOKE_LOGCAT_DUMP_TIMEOUT_SECONDS)
 
-            val installOutput = shell("pm install -r -t ${failureCase.shellApkPath}")
+            val installOutput = shellWithTimeout("pm install -r -t ${failureCase.shellApkPath}")
             assumeTrue(
                 "Package manager could not install packaged launch failure APK.\n$installOutput",
                 installOutput.contains("Success", ignoreCase = true),
             )
 
-            val packagePath = shell("pm path ${failureCase.packageName}")
+            val packagePath = shellWithTimeout("pm path ${failureCase.packageName}")
             assumeTrue(
                 "Package manager did not expose installed packaged launch failure APK path.\n$packagePath",
                 packagePath.contains("package:", ignoreCase = true),
             )
 
-            val launchOutput = shell("am start -n ${failureCase.packageName}/org.autojs.autojs.inrt.SplashActivity")
+            val launchOutput = shellWithTimeout("am start -n ${failureCase.packageName}/org.autojs.autojs.inrt.SplashActivity")
             assumeTrue(
                 "Could not launch packaged launch failure SplashActivity.\n$launchOutput",
                 launchOutput.contains("Starting", ignoreCase = true) ||
@@ -12252,9 +12252,9 @@ $permissionsJson
                 logcat.contains(PACKAGED_LAUNCH_FAILURE_SECRET_VALUE),
             )
         } finally {
-            shell("am force-stop ${failureCase.packageName}")
-            shell("pm uninstall ${failureCase.packageName}")
-            shell("rm -f ${failureCase.shellApkPath}")
+            shellWithTimeout("am force-stop ${failureCase.packageName}")
+            shellWithTimeout("pm uninstall ${failureCase.packageName}")
+            shellWithTimeout("rm -f ${failureCase.shellApkPath}", PACKAGED_SMOKE_FILE_SHELL_TIMEOUT_SECONDS)
         }
     }
 
@@ -12272,23 +12272,23 @@ $permissionsJson
             copyOutput.contains("READY"),
         )
         try {
-            shell("am force-stop $packageName")
-            shell("pm uninstall $packageName")
-            shell("logcat -c")
+            shellWithTimeout("am force-stop $packageName")
+            shellWithTimeout("pm uninstall $packageName")
+            shellWithTimeout("logcat -c", PACKAGED_SMOKE_LOGCAT_DUMP_TIMEOUT_SECONDS)
 
-            val installOutput = shell("pm install -r -t $shellApkPath")
+            val installOutput = shellWithTimeout("pm install -r -t $shellApkPath")
             assumeTrue(
                 "Package manager could not install $label APK.\n$installOutput",
                 installOutput.contains("Success", ignoreCase = true),
             )
 
-            val packagePath = shell("pm path $packageName")
+            val packagePath = shellWithTimeout("pm path $packageName")
             assumeTrue(
                 "Package manager did not expose installed $label APK path.\n$packagePath",
                 packagePath.contains("package:", ignoreCase = true),
             )
 
-            val launchOutput = shell("am start -n $packageName/org.autojs.autojs.inrt.SplashActivity")
+            val launchOutput = shellWithTimeout("am start -n $packageName/org.autojs.autojs.inrt.SplashActivity")
             assumeTrue(
                 "Could not launch $label SplashActivity.\n$launchOutput",
                 launchOutput.contains("Starting", ignoreCase = true) ||
@@ -12313,19 +12313,19 @@ $permissionsJson
                 missingMarkers.isEmpty(),
             )
         } finally {
-            shell("am force-stop $packageName")
-            shell("pm uninstall $packageName")
-            shell("rm -f $shellApkPath")
+            shellWithTimeout("am force-stop $packageName")
+            shellWithTimeout("pm uninstall $packageName")
+            shellWithTimeout("rm -f $shellApkPath", PACKAGED_SMOKE_FILE_SHELL_TIMEOUT_SECONDS)
         }
     }
 
     private fun copyPublicApkToShellPath(publicApkPath: String, shellApkPath: String): String {
         val output = listOf(
-            "public:\n${shell("ls -l $publicApkPath")}",
-            "remove:\n${shell("rm -f $shellApkPath")}",
-            "copy:\n${shell("cp $publicApkPath $shellApkPath")}",
-            "chmod:\n${shell("chmod 0644 $shellApkPath")}",
-            "shell:\n${shell("ls -l $shellApkPath")}",
+            "public:\n${shellWithTimeout("ls -l $publicApkPath", PACKAGED_SMOKE_FILE_SHELL_TIMEOUT_SECONDS)}",
+            "remove:\n${shellWithTimeout("rm -f $shellApkPath", PACKAGED_SMOKE_FILE_SHELL_TIMEOUT_SECONDS)}",
+            "copy:\n${shellWithTimeout("cp $publicApkPath $shellApkPath", PACKAGED_SMOKE_FILE_SHELL_TIMEOUT_SECONDS)}",
+            "chmod:\n${shellWithTimeout("chmod 0644 $shellApkPath", PACKAGED_SMOKE_FILE_SHELL_TIMEOUT_SECONDS)}",
+            "shell:\n${shellWithTimeout("ls -l $shellApkPath", PACKAGED_SMOKE_FILE_SHELL_TIMEOUT_SECONDS)}",
         ).joinToString("\n")
         return if (output.contains(shellApkPath.substringAfterLast('/'))) {
             "$output\nREADY"
@@ -12339,7 +12339,7 @@ $permissionsJson
         var logcat = ""
         while (SystemClock.elapsedRealtime() < deadline) {
             Thread.sleep(1_000L)
-            logcat = shell("logcat -d -v time")
+            logcat = shellWithTimeout("logcat -d -v time", PACKAGED_SMOKE_LOGCAT_DUMP_TIMEOUT_SECONDS)
             if (requiredMarkers.all { logcat.contains(it) }) {
                 return logcat
             }
@@ -12394,6 +12394,13 @@ $permissionsJson
 
     private fun shell(command: String): String {
         return shellInputStream(command).bufferedReader().use { it.readText() }
+    }
+
+    private fun shellWithTimeout(
+        command: String,
+        timeoutSeconds: Long = PACKAGED_SMOKE_SHELL_TIMEOUT_SECONDS,
+    ): String {
+        return shell("timeout -k 5s ${timeoutSeconds}s $command")
     }
 
     private fun shellInputStream(command: String): InputStream {
@@ -13454,6 +13461,9 @@ $permissionsJson
         )
         private const val PACKAGED_SMOKE_PUBLIC_EXPORT_DIR =
             "/sdcard/Download/AutoJs6/embedded-node-packaged-smoke"
+        private const val PACKAGED_SMOKE_SHELL_TIMEOUT_SECONDS = 90L
+        private const val PACKAGED_SMOKE_FILE_SHELL_TIMEOUT_SECONDS = 15L
+        private const val PACKAGED_SMOKE_LOGCAT_DUMP_TIMEOUT_SECONDS = 15L
         private val SHELL_TEMPLATE_OVERRIDE_PATHS = listOf(
             "/data/local/tmp/autojs6-inrt-debug-template.apk",
             "/sdcard/Download/AutoJs6/embedded-node-template/inrt-debug-template.apk",
