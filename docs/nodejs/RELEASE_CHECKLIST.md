@@ -255,6 +255,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `docs/nodejs/PERFORMANCE.md` when benchmark behavior or report schema changes
 - [ ] `docs/nodejs/NATIVE_CRASH_DIAGNOSTICS.md` when native crash capture, symbol archive, or symbolication behavior changes
 - [ ] `docs/nodejs/FLAKE_POLICY.md` when release-gate retry policy, flaky category definitions, or device-infrastructure handling changes
+- [ ] `docs/nodejs/MAINTENANCE_PLAN.md` when GA cadence, versioning, deprecation, crash triage, or experimental review policy changes
 - [ ] `docs/nodejs/design/WORK_MANAGER.md` when scheduled/background task behavior changes
 - [ ] `docs/nodejs/design/BROADCAST_TASKS.md` when boot, package-event, startup, or custom broadcast task behavior changes
 - [ ] `docs/nodejs/design/ESM.md` when ESM or dynamic import behavior changes

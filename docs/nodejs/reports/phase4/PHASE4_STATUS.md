@@ -24,6 +24,7 @@ OnePlus OPD2413 `63751f63` is now excluded from unattended current-branch gates 
 - Confirmed the post-gate Sony crash buffer was clean for foreground-service startup, fatal exception, request spool, and embedded service crash markers.
 - Regenerated the Task 129 pre-tag artifact set from commit `7e047953`.
 - Added `docs/nodejs/releases/NODE_PROFILE_V1_GA_CHECKLIST.md`.
+- Added the Task 130 post-GA maintenance plan.
 
 ## Evidence
 
@@ -35,6 +36,8 @@ OnePlus OPD2413 `63751f63` is now excluded from unattended current-branch gates 
 - Reduced memory stress pass: `docs/nodejs/reports/phase4/oneplus-memory-leak-stress-reduced-whitelisted/`
 - Sony device transition: `docs/nodejs/reports/phase4/sony-device-transition/`
 - Sony GA candidate gate: `docs/nodejs/reports/phase4/sony-ga-candidate/`
+- GA tag checklist: `docs/nodejs/releases/NODE_PROFILE_V1_GA_CHECKLIST.md`
+- Post-GA maintenance plan: `docs/nodejs/MAINTENANCE_PLAN.md`
 
 ## Still Required Before Publication
 

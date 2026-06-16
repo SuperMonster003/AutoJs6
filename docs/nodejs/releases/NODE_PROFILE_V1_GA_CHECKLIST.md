@@ -84,6 +84,7 @@ Expected skips:
 - [ ] [../ERROR_CATALOG.md](../ERROR_CATALOG.md) passes `:app:verifyNodeErrorCatalog`.
 - [ ] [../RELEASE_CHECKLIST.md](../RELEASE_CHECKLIST.md) remains the broad release checklist.
 - [ ] [../FLAKE_POLICY.md](../FLAKE_POLICY.md) is reviewed before any rerun classification.
+- [ ] [../MAINTENANCE_PLAN.md](../MAINTENANCE_PLAN.md) covers the post-GA cadence, versioning, deprecation, and triage process.
 
 ## Do Not Tag If
 

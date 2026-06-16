@@ -164,6 +164,7 @@ The following remain disabled in normal v1 builds:
 - Known issues: [NODE_PROFILE_V1_KNOWN_ISSUES.md](NODE_PROFILE_V1_KNOWN_ISSUES.md)
 - Testing: [../TESTING.md](../TESTING.md)
 - Release checklist: [../RELEASE_CHECKLIST.md](../RELEASE_CHECKLIST.md)
+- Maintenance plan: [../MAINTENANCE_PLAN.md](../MAINTENANCE_PLAN.md)
 - Native crash diagnostics: [../NATIVE_CRASH_DIAGNOSTICS.md](../NATIVE_CRASH_DIAGNOSTICS.md)
 - Flake policy: [../FLAKE_POLICY.md](../FLAKE_POLICY.md)
 
