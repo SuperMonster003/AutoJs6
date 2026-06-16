@@ -56,8 +56,8 @@ path has a recorded result.
 | CJK composition | DEVICE PARTIAL PASS | Gboard Pinyin composition entered candidates, survived cursor move and keyboard hide without ACE fallback, and committed CJK text through the keyboard path; exact `toast("你好")` candidate selection remains a human hand-test item. |
 | Completion accept | DEVICE SMOKE PASS | Instrumentation smoke accepted `toast`, `app.launch`, `files.read`, `images.findImage`, and `device.getBattery` through the ACE popup path; see Gate 6 notes. |
 | Tooltip fallback | DEVICE SMOKE PASS | Instrumentation smoke showed local tooltip DOM/render state with `markdownRenderer=safe-subset`; static source checks reject `fetch`, XHR, and raw hover `innerHTML`. |
-| Rotation | TBD | |
-| Native/ACE switching | TBD | |
+| Rotation | DEVICE SMOKE PASS | Instrumentation smoke typed unsaved text in ACE, requested IME show, rotated landscape and portrait, and preserved text, dirty state, and cursor visibility; see Gate 7 notes. |
+| Native/ACE switching | DEVICE SMOKE PASS | Instrumentation smoke saved, switched ACE -> Native -> ACE, preserved text and clean state, and produced no ACE fallback diagnostics; see Gate 7 notes. |
 | TextMirror fallback | TBD | |
 | Ready-timeout fallback | TBD | |
 | JS-init fatal fallback | TBD | |
@@ -79,6 +79,7 @@ Record copied ACE diagnostics for every failure or ambiguous result.
 | Gate 4 keyboard stress | Inline Gate 4 notes | Temporary pasted diagnostics from the 1000-line sample: `aceHealthState=RUNNING`, `lastFailureType=unknown`, `lastImeState=HIDDEN`, `maxBridgeEventWindowCount=18` in a 1000 ms window, below the storm threshold of 60; event history had no `bridge_event_storm` and heartbeat checks were OK. |
 | Gate 5 ActionMode bridge mismatch | Inline Gate 5 notes | A development-only 7-argument `startActionMode` bridge attempt produced `Error invoking startActionMode: Method not found`; the final implementation restored the six-argument bridge and passed the copy/paste smoke below. |
 | Gate 6 completion/tooltip/LSP smoke | Instrumentation PASS | `AceCodeEditorSmokeTest` ran 5/5 tests on Sony XQ-AT72 with no failures, including popup completion accept, tooltip local rendering, LSP disabled state, and LSP enabled no-server static fallback. |
+| Gate 7 rotation/restore/switching smoke | Instrumentation PASS | `AceCodeEditorSmokeTest` ran 6/6 tests on Sony XQ-AT72 with no failures, including `EditActivity` rotation, background restore, save, ACE -> Native -> ACE switching, dirty-state checks, cursor visibility checks, and no ACE fallback diagnostics. |
 
 ## Gate 2 Notes
 
@@ -278,14 +279,45 @@ Record copied ACE diagnostics for every failure or ambiguous result.
   - Completion accept still used the static fallback path and did not produce
     ACE fallback or fatal diagnostics.
 
+## Gate 7 Notes
+
+- Time: 2026-06-16 08:36-08:37 CST.
+- Command:
+  `.\gradlew.bat :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.ui.edit.editor.ace.AceCodeEditorSmokeTest"`
+- Result: PASS on Sony XQ-AT72; 6 tests completed, 0 skipped, 0 failed.
+- Rotation and restore smoke:
+  - The instrumentation test opened a real `EditActivity` with ACE selected and
+    loaded a temporary JavaScript file from the app cache.
+  - It inserted an unsaved marker through the active ACE engine, requested IME
+    show best-effort through the editor input view, and verified that ACE text,
+    editor dirty state, and sticky save dirty state were all true.
+  - It requested landscape, then portrait, and verified after each orientation
+    change that the same unsaved text and dirty state remained present.
+  - It moved the task to the background, brought the activity back to the
+    foreground, and verified that text and dirty state still matched the ACE
+    display.
+  - WebView-side ACE cursor bounds checks passed before rotation, after each
+    orientation change, after background restore, and after switching back to
+    ACE.
+- Save and engine switching smoke:
+  - Saving returned the expected text, wrote the same text to the temporary
+    file, and cleared both editor dirty state and sticky save dirty state.
+  - Switching from ACE to Native preserved the saved text and clean state.
+  - Switching from Native back to ACE preserved the saved text and clean state,
+    restored ACE to `aceHealthState=RUNNING`, and produced no
+    `lastFailureType` or runtime event history entry containing `fallback`.
+- This is an instrumentation smoke for the release gate. Any later
+  human-observed rotation flash, double padding, or post-rotation tap-anchor
+  mismatch should be recorded as a new Gate 7 finding.
+
 ## Blockers
 
 ### P0
 
-- No automated P0 blocker found in preflight. Gate 2, Gate 3, Gate 4, and
-  Gate 6 device smoke found no P0 first-paint, file-open, IME, tap-anchor,
-  keyboard stress, completion, tooltip, LSP fallback, ACE fallback, or
-  bridge-event-storm blocker.
+- No automated P0 blocker found in preflight. Gate 2, Gate 3, Gate 4, Gate 6,
+  and Gate 7 device smoke found no P0 first-paint, file-open, IME, tap-anchor,
+  keyboard stress, completion, tooltip, LSP fallback, rotation, restore,
+  engine-switching, ACE fallback, or bridge-event-storm blocker.
 
 ### P1
 

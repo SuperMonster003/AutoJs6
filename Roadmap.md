@@ -83,12 +83,12 @@ Automated/static gate:
 Manual device gate:
 
 - [x] Sony XQ-AT72 device environment is recorded.
-- [ ] IME show/hide manual checklist passes on representative devices.
+- [x] IME show/hide manual checklist passes on representative devices.
 - [ ] Keyboard and viewport matrix passes on representative devices.
-- [ ] Continuous keyboard show/hide does not fallback ACE.
+- [x] Continuous keyboard show/hide does not fallback ACE.
 - [ ] Long-press, double-tap, copy, paste, and CJK composition remain usable.
-- [ ] Completion accept and tooltip fallback do not destabilize editing.
-- [ ] Rotation and Native/ACE switching preserve text and dirty state.
+- [x] Completion accept and tooltip fallback do not destabilize editing.
+- [x] Rotation and Native/ACE switching preserve text and dirty state.
 - [ ] Fallback preserves recent text through TextMirror in device/debug-hook
   validation.
 - [ ] Renderer-gone and initialization fatal fallback still work in
@@ -198,19 +198,19 @@ Acceptance:
 
 ### Gate 7: Rotation, Restore, And Engine Switching
 
-- [ ] Type unsaved text in ACE.
-- [ ] Show the keyboard.
-- [ ] Rotate to landscape and back to portrait.
-- [ ] Background and restore the app.
-- [ ] Save.
-- [ ] Switch to Native.
-- [ ] Switch back to ACE.
+- [x] Type unsaved text in ACE.
+- [x] Show the keyboard.
+- [x] Rotate to landscape and back to portrait.
+- [x] Background and restore the app.
+- [x] Save.
+- [x] Switch to Native.
+- [x] Switch back to ACE.
 
 Acceptance:
 
-- [ ] Text and dirty state survive.
-- [ ] Cursor visibility remains acceptable.
-- [ ] No double-padding, tap offset, or duplicate fallback occurs.
+- [x] Text and dirty state survive.
+- [x] Cursor visibility remains acceptable.
+- [x] No double-padding, tap offset, or duplicate fallback occurs.
 
 ### Gate 8: Fallback Hooks And TextMirror
 
