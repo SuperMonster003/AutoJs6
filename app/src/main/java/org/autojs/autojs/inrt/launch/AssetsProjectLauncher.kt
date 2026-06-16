@@ -59,6 +59,7 @@ open class AssetsProjectLauncher(private val mAssetsProjectDir: String, private 
             if (activity is LogActivity) {
                 runScript(null)
             } else {
+                createMainScriptLaunch()
                 // 否则显示日志界面并在日志界面中运行脚本
                 mHandler.post {
                     Intent(mActivity, LogActivity::class.java)
@@ -192,6 +193,12 @@ open class AssetsProjectLauncher(private val mAssetsProjectDir: String, private 
             launch.buildNodeProjectRequestOrNull()
         } catch (e: Exception) {
             logNodeProjectLaunchFailure("project_request", projectRoot, mMainScriptFile, launchSource, null, e)
+            throw e
+        }
+        try {
+            request?.let { NativeNodeEmbeddedProjectRunner.resolveProjectLaunchPlanWithDescriptor(it) }
+        } catch (e: Exception) {
+            logNodeProjectLaunchFailure("project_request", projectRoot, mMainScriptFile, launchSource, request, e)
             throw e
         }
         val requestLaunchKind = request

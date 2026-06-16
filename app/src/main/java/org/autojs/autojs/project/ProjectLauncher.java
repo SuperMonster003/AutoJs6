@@ -88,10 +88,19 @@ public class ProjectLauncher {
             throw e;
         }
         NodeProjectLaunchSource launchSource = launch.getNodeProjectLaunchSource();
+        NativeNodeEmbeddedProjectRunner.ProjectRequest request;
         try {
-            launch.buildNodeProjectRequestOrNull();
+            request = launch.buildNodeProjectRequestOrNull();
         } catch (RuntimeException e) {
             logNodeProjectLaunchFailure("project_request", launchSource, null, e);
+            throw e;
+        }
+        try {
+            if (request != null) {
+                NativeNodeEmbeddedProjectRunner.INSTANCE.resolveProjectLaunchPlanWithDescriptor(request);
+            }
+        } catch (RuntimeException e) {
+            logNodeProjectLaunchFailure("project_request", launchSource, request, e);
             throw e;
         }
         return launch;
