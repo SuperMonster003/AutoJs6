@@ -1,11 +1,13 @@
 # AutoJs6 Node Profile v1 GA Release Notes
 
-Status: draft. This document is prepared for GA but must not be treated as a publication record until the final GA gate
-and tag are approved.
+Status: draft. This document is prepared for GA but must not be treated as a publication record until the final version
+state and tag are approved.
 
 Target profile: AutoJs6 Safe Node Profile v1
 
-GA candidate gate commit: `7e047953`
+Test-identity GA candidate gate commit: `7e047953`
+
+Production-identity final gate commit: `857e6e82`
 
 Final GA commit/tag: `TBD`
 
@@ -178,7 +180,13 @@ Current Phase 4 Sony XQ-AT72 status:
 - selected device profile: `sony`
 - default public package identity: `org.autojs.autojs6`
 - side-by-side test identity: `org.autojs.autojs6.nodejs` via `-Pautojs.nodejs.identity=nodejsTest`
-- release identity decision: production identity selected; final production-identity gate pending; see [NODE_PROFILE_V1_RELEASE_IDENTITY.md](NODE_PROFILE_V1_RELEASE_IDENTITY.md)
+- release identity decision: production identity selected; production-identity final gate passed; see [NODE_PROFILE_V1_RELEASE_IDENTITY.md](NODE_PROFILE_V1_RELEASE_IDENTITY.md)
+- production-identity final gate: passed on 2026-06-17 from commit `857e6e82`
+- production command: `:app:verifyNodeReleaseGate "-Pautojs.nodejs.identity=production" "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.fuzzerBudget=normal"`
+- production identity under test: `org.autojs.autojs6` / `AutoJs6`
+- production gate duration: `2h 2m 10s`
+- production Android test XML: `310` tests, `0` failures, `0` errors, `2` expected skips
+- production release gate: `BUILD SUCCESSFUL`; Gradle stderr empty
 - Task 128 test-identity GA candidate gate: passed on 2026-06-16
 - command: `:app:verifyNodeReleaseGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.fuzzerBudget=normal"`
 - identity under test: `org.autojs.autojs6.nodejs` / `AutoJs6 Node`
@@ -196,8 +204,9 @@ stress remains outside the default full profile unless `autojs.nodejs.worker_thr
 An earlier Sony full-profile attempt was invalidated because unrelated `org.autojs.autojs6.ace` activity overlapped the
 packaged smoke marker window. The final aggregate pass above is the valid GA candidate gate evidence.
 
-Evidence is stored under `docs/nodejs/reports/phase4/sony-ga-candidate/`. Public GA still requires the final
-production-identity gate under `org.autojs.autojs6`.
+Test-identity evidence is stored under `docs/nodejs/reports/phase4/sony-ga-candidate/`. Production-identity evidence is
+stored under `docs/nodejs/reports/phase4/sony-production-identity-final-gate/`. Public GA still requires the approved
+final version state, release tag, and release manifest regeneration.
 
 ## Generated Artifacts
 
@@ -219,6 +228,10 @@ Expected GA artifact set:
 Task 129 regenerated the pre-tag artifact set on 2026-06-16 from commit `7e047953`; see
 [NODE_PROFILE_V1_GA_CHECKLIST.md](NODE_PROFILE_V1_GA_CHECKLIST.md). The final public tag must regenerate the release
 manifest from the approved final version state.
+
+The production-identity gate regenerated local release reports on 2026-06-17 from commit `857e6e82`. Because
+`assembleAppDebug` auto-incremented local `version.properties` during that run, final publication must still choose and
+commit the approved version/build state before regenerating the manifest with the approved tag.
 
 ## Publication Checklist
 

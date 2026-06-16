@@ -1,6 +1,6 @@
 # Phase 4 Embedded Node RC Status
 
-Date: 2026-06-16
+Date: 2026-06-17
 
 Primary device: Sony XQ-AT72 `QV710AF65F`
 
@@ -33,6 +33,8 @@ OnePlus OPD2413 `63751f63` is now excluded from unattended current-branch gates 
 - Added Task 138 post-tag verification script.
 - Restored production AutoJs6 identity as the default build identity and kept `nodejsTest` as an explicit side-by-side
   identity profile.
+- Passed the Sony production-identity final gate from commit `857e6e82` with
+  `:app:verifyNodeReleaseGate "-Pautojs.nodejs.identity=production" "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.fuzzerBudget=normal"`.
 
 ## Evidence
 
@@ -44,6 +46,7 @@ OnePlus OPD2413 `63751f63` is now excluded from unattended current-branch gates 
 - Reduced memory stress pass: `docs/nodejs/reports/phase4/oneplus-memory-leak-stress-reduced-whitelisted/`
 - Sony device transition: `docs/nodejs/reports/phase4/sony-device-transition/`
 - Sony GA candidate gate: `docs/nodejs/reports/phase4/sony-ga-candidate/`
+- Sony production-identity final gate: `docs/nodejs/reports/phase4/sony-production-identity-final-gate/`
 - GA tag checklist: `docs/nodejs/releases/NODE_PROFILE_V1_GA_CHECKLIST.md`
 - Release identity decision record: `docs/nodejs/releases/NODE_PROFILE_V1_RELEASE_IDENTITY.md`
 - Post-GA maintenance plan: `docs/nodejs/MAINTENANCE_PLAN.md`
@@ -53,8 +56,8 @@ OnePlus OPD2413 `63751f63` is now excluded from unattended current-branch gates 
 
 ## Still Required Before Publication
 
-- Run the production-identity Sony final gate after restoring `org.autojs.autojs6`.
 - Select the final `VERSION_BUILD` / `BUILD_TIME` state and regenerate the release manifest from that clean state.
-- Regenerate the final release manifest and nightly report after the final version/package identity state is committed.
+- Regenerate the final release manifest and nightly report with the approved tag and
+  `-Pautojs.nodejs.releaseIdentityStatus=production-identity-final-gate-passed`.
 - Replace `TBD` placeholders in GA release notes with the approved final commit and tag.
 - Create the tag only after maintainer approval.

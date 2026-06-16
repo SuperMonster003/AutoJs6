@@ -1,6 +1,6 @@
 # AutoJs6 Node Profile v1 Release Identity
 
-Status: production identity selected; final identity gate pending.
+Status: production identity selected; final identity gate passed on Sony XQ-AT72.
 
 This document makes the Node Profile v1 release identity explicit. The public AutoJs6 GA identity is the production
 AutoJs6 identity. A separate `nodejsTest` Gradle identity profile remains available for side-by-side device gates.
@@ -62,14 +62,22 @@ This profile appends `.nodejs` through Gradle configuration. It keeps existing t
 ## Gate Implications
 
 Because the public release identity is now `org.autojs.autojs6`, the Task 128 Sony gate must be treated as a
-test-identity GA candidate. A final-identity validation gate is required before public GA:
+test-identity GA candidate. The required final-identity validation gate passed on 2026-06-17 from commit `857e6e82`:
 
 ```powershell
 $env:ANDROID_SERIAL="QV710AF65F"
 .\gradlew.bat --console=plain :app:verifyNodeReleaseGate "-Pautojs.nodejs.identity=production" "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.fuzzerBudget=normal"
 ```
 
-At minimum, the final-identity gate must confirm:
+Evidence:
+
+- production gate record: [sony-production-identity-final-gate](../reports/phase4/sony-production-identity-final-gate/README.md)
+- identity under test: `org.autojs.autojs6` / `AutoJs6`
+- duration: `2h 2m 10s`
+- Android test XML: `310` tests, `0` failures, `0` errors, `2` expected skips
+- Gradle result: `BUILD SUCCESSFUL`
+
+The final-identity gate confirmed:
 
 - main APK installs with `org.autojs.autojs6`;
 - packaged APK full smoke passes;
@@ -115,5 +123,5 @@ Allowed `identityStatus` values are documentation-level labels. Suggested values
 - `production-identity-final-gate-passed`
 - `preview-identity-approved`
 
-Do not create a GA tag until the production-identity gate evidence exists and the release manifest is regenerated from
-the approved final commit.
+Production-identity gate evidence now exists. Do not create a GA tag until the release manifest is regenerated from the
+approved final commit, version state, release tag, and `production-identity-final-gate-passed` status.

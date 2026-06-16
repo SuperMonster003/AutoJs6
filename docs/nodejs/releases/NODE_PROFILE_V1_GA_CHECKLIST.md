@@ -4,9 +4,9 @@ Status: pre-tag checklist. Do not create a GA tag from this document unless the 
 
 Target profile: AutoJs6 Safe Node Profile v1
 
-Current GA candidate evidence commit: `7e047953`
+Current production-identity gate commit: `857e6e82`
 
-Current GA candidate device: Sony XQ-AT72 `QV710AF65F`
+Current Sony gate device: Sony XQ-AT72 `QV710AF65F`
 
 ## Tag Preconditions
 
@@ -14,7 +14,7 @@ Current GA candidate device: Sony XQ-AT72 `QV710AF65F`
 - [x] [NODE_PROFILE_V1_RELEASE_IDENTITY.md](NODE_PROFILE_V1_RELEASE_IDENTITY.md) records the approved identity decision.
 - [x] Final public package identity is approved as `org.autojs.autojs6` / `AutoJs6`.
 - [x] Temporary current-branch test identity `org.autojs.autojs6.nodejs` is no longer the default public identity.
-- [ ] Production-identity Sony gate has passed after restoring `org.autojs.autojs6`.
+- [x] Production-identity Sony gate has passed after restoring `org.autojs.autojs6`.
 - [ ] Final `VERSION_BUILD` and `BUILD_TIME` churn in `version.properties` is reviewed and intentional.
 - [ ] `NODE_PROFILE_V1_GA.md` replaces `TBD` placeholders with the approved final commit and tag.
 - [ ] No experimental feature is promoted without `EXPERIMENTAL_PROMOTION_POLICY.md` evidence.
@@ -26,10 +26,11 @@ Run from a clean worktree with Sony selected when connected-device evidence is n
 
 ```powershell
 $env:ANDROID_SERIAL="QV710AF65F"
-.\gradlew.bat --console=plain :app:generateNodeCompatibilityProfile :app:generateDesktopNodeDifferentialReport :app:nativeNodeDependencyReportAppDebug :app:nativeNodeSymbolArchiveReport :app:embeddedNodeDoctorReport :app:embeddedNodePackagingPreflightAppDebug :app:verifyNodeTemplateReproducibility :app:embeddedNodePackagedSmokeHostVerify :app:nativeNodeAbiSizeReport :app:pullNodeEmbeddedPerformanceReports :app:generateNodeProfileReleaseManifest :app:generateNodeNightlyReport "-Pautojs.nodejs.identity=production" "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.fuzzerBudget=normal"
+.\gradlew.bat --console=plain :app:generateNodeCompatibilityProfile :app:generateDesktopNodeDifferentialReport :app:nativeNodeDependencyReportAppDebug :app:nativeNodeSymbolArchiveReport :app:embeddedNodeDoctorReport :app:embeddedNodePackagingPreflightAppDebug :app:verifyNodeTemplateReproducibility :app:embeddedNodePackagedSmokeHostVerify :app:nativeNodeAbiSizeReport :app:pullNodeEmbeddedPerformanceReports :app:generateNodeProfileReleaseManifest :app:generateNodeNightlyReport "-Pautojs.nodejs.identity=production" "-Pautojs.nodejs.releaseTag=<approved-tag>" "-Pautojs.nodejs.releaseIdentityStatus=production-identity-final-gate-passed" "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.fuzzerBudget=normal"
 ```
 
-Because the production identity now differs from the Task 128 test identity, rerun the full release gate:
+The production-identity final gate has passed from commit `857e6e82`. Rerun the full release gate if source, identity,
+or final version state changes before tagging:
 
 ```powershell
 $env:ANDROID_SERIAL="QV710AF65F"
@@ -67,6 +68,20 @@ ambiguous.
 
 ## Device Gate Evidence
 
+The valid production-identity final gate is recorded in
+[../reports/phase4/sony-production-identity-final-gate/README.md](../reports/phase4/sony-production-identity-final-gate/README.md):
+
+- command: `:app:verifyNodeReleaseGate "-Pautojs.nodejs.identity=production" "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.fuzzerBudget=normal"`
+- identity: `org.autojs.autojs6` / `AutoJs6`
+- device: Sony XQ-AT72 `QV710AF65F`
+- commit: `857e6e82`
+- duration: `2h 2m 10s`
+- Android tests: `310`
+- failures: `0`
+- errors: `0`
+- skipped: `2`
+- Gradle result: `BUILD SUCCESSFUL`
+
 The valid test-identity GA candidate gate is recorded in [../reports/phase4/sony-ga-candidate/README.md](../reports/phase4/sony-ga-candidate/README.md):
 
 - command: `:app:verifyNodeReleaseGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.fuzzerBudget=normal"`
@@ -101,7 +116,7 @@ Expected skips:
 
 - the worktree is dirty for unreviewed source, docs, or version files;
 - `version.properties` changed only because a local debug assemble ran;
-- the production identity gate has not been rerun after restoring `org.autojs.autojs6`;
+- the production identity gate has not passed for the final source, identity, and approved version state;
 - temporary package identity appears in a public GA manifest without explicit preview/test approval;
 - any default-off experimental feature was enabled without promotion evidence;
 - security, scoped fs, native addon, child process, raw network, Java interop, or packaged smoke failures were retried away instead of fixed or explicitly blocked.
