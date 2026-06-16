@@ -1450,6 +1450,11 @@
     <string name="text_ace_read_only_mode_disabled">ACE 只读模式已关闭</string>
     <string name="text_ace_action_favorites">ACE 行为收藏夹</string>
     <string name="text_ace_action_history_empty">暂无编辑器行为历史</string>
+    <string name="text_ace_action_pin">固定</string>
+    <string name="text_ace_action_pinned">已固定</string>
+    <string name="text_ace_action_unpin">取消固定</string>
+    <string name="text_ace_action_clear_confirm">是否清空全部 ACE 编辑器行为历史?</string>
+    <string name="text_ace_action_delete_confirm" formatted="true">是否从 ACE 编辑器行为历史中删除 "%1$s"?</string>
     <string name="text_ace_no_last_action">暂无上一次编辑器操作</string>
     <string name="text_ace_get_text">获取文本</string>
     <string name="text_ace_ime_stress">IME 压力测试</string>
@@ -1479,4 +1484,8 @@
     <string name="text_editor_log_button_behavior">编辑器日志按钮行为</string>
     <string name="summary_editor_auto_show_log_bottom_sheet_on_run">编辑器运行按钮启动脚本后自动打开底部日志面板</string>
     <string name="description_editor_log_button_behavior_preference">选择编辑器日志按钮打开日志的方式: 底部日志面板或全屏日志页面.</string>
+    <plurals name="text_ace_action_used_times">
+        <item quantity="other">使用 %1$d 次</item>
+    </plurals>
+
 </resources>

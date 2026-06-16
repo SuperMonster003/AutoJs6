@@ -104,6 +104,20 @@ const ACE_ACTION_HISTORY_STORE_PATH = path.join(
   "keyboard",
   "AceActionHistoryStore.kt",
 );
+const ACE_ACTION_FAVORITES_DIALOG_PATH = path.join(
+  PROJECT_ROOT,
+  "app",
+  "src",
+  "main",
+  "java",
+  "org",
+  "autojs",
+  "autojs",
+  "ui",
+  "edit",
+  "keyboard",
+  "AceActionFavoritesDialog.kt",
+);
 const DIAGNOSTICS_PATH = path.join(
   PROJECT_ROOT,
   "app",
@@ -163,6 +177,7 @@ const editorMenu = read(EDITOR_MENU_PATH);
 const editorView = read(EDITOR_VIEW_PATH);
 const aceShortcutPanel = read(ACE_SHORTCUT_PANEL_PATH);
 const aceActionHistoryStore = read(ACE_ACTION_HISTORY_STORE_PATH);
+const aceActionFavoritesDialog = read(ACE_ACTION_FAVORITES_DIALOG_PATH);
 const diagnostics = read(DIAGNOSTICS_PATH);
 
 assertOrder(
@@ -307,6 +322,7 @@ assertIncludes(editorView, "handleAceShortcutClick", "ACE shortcut click handler
 assertIncludes(editorView, "handleAceShortcutLongClick", "ACE shortcut long-click handler");
 assertIncludes(editorView, "showAceActionHistoryDialog", "ACE action history dialog");
 assertIncludes(editorView, "repeatLastAceAction", "ACE repeat last action handler");
+assertIncludes(editorView, "AceActionFavoritesDialog.show", "ACE action favorites dialog integration");
 
 assertIncludes(aceShortcutPanel, 'command("ESC", Command.Escape)', "ACE shortcut ESC key");
 assertIncludes(aceShortcutPanel, 'command("TAB", Command.Tab)', "ACE shortcut TAB key");
@@ -318,9 +334,17 @@ assertIncludes(aceShortcutPanel, "fun actionById", "ACE shortcut stable action l
 assertIncludes(aceActionHistoryStore, "fun record(", "ACE action history record API");
 assertIncludes(aceActionHistoryStore, "fun getRankedEntries", "ACE action history ranking API");
 assertIncludes(aceActionHistoryStore, "fun getLastActionId", "ACE action history last action API");
+assertIncludes(aceActionHistoryStore, "fun applyFavoritesOrder", "ACE action favorites order API");
 assertIncludes(aceActionHistoryStore, "usageCount", "ACE action history frequency field");
 assertIncludes(aceActionHistoryStore, "lastUsedAt", "ACE action history recency field");
 assertIncludes(aceActionHistoryStore, "manualOrder", "ACE action history manual order field");
+
+assertIncludes(aceActionFavoritesDialog, "ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT", "ACE action favorites swipe gestures");
+assertIncludes(aceActionFavoritesDialog, "ItemTouchHelper.UP or ItemTouchHelper.DOWN", "ACE action favorites drag reorder");
+assertIncludes(aceActionFavoritesDialog, "confirmDelete", "ACE action favorites delete confirmation");
+assertIncludes(aceActionFavoritesDialog, "confirmClear", "ACE action favorites clear confirmation");
+assertIncludes(aceActionFavoritesDialog, "togglePinned", "ACE action favorites pin toggle");
+assertIncludes(aceActionFavoritesDialog, "persistOrder", "ACE action favorites order persistence");
 
 assertIncludes(diagnostics, "lastFirstPaintAtUptimeMillis", "first-paint diagnostics field");
 assertIncludes(diagnostics, "lastAceResizeScheduledReason", "resize scheduled diagnostics field");

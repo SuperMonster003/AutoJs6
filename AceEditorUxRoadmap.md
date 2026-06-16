@@ -101,7 +101,7 @@ Acceptance:
 - [x] Replace the Pro-style lower-left figure icon with a star action-favorites
   entry.
 - [x] Track action history by recency and frequency.
-- [ ] Support pinned actions, manual reorder, left-swipe delete, right-swipe pin
+- [x] Support pinned actions, manual reorder, left-swipe delete, right-swipe pin
   or unpin, and clear confirmation.
 - [x] Long-press the star to repeat the last command, independent of favorites
   list state.
@@ -109,8 +109,8 @@ Acceptance:
 Acceptance:
 
 - [ ] ACE shortcut panel is visually coherent in light and dark themes.
-- [ ] Favorites ordering rules are deterministic.
-- [ ] Repeating the last command handles the no-last-command case with a toast.
+- [x] Favorites ordering rules are deterministic.
+- [x] Repeating the last command handles the no-last-command case with a toast.
 
 ## Gate UX-6: Pinch Zoom
 

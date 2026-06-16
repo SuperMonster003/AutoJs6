@@ -89,6 +89,7 @@ import org.autojs.autojs.ui.edit.editor.service.EditorVersionHistoryService
 import org.autojs.autojs.ui.edit.editor.service.RunScriptTextProvider
 import org.autojs.autojs.ui.edit.editor.viewport.EditorViewportPolicy
 import org.autojs.autojs.ui.edit.editor.viewport.EditorViewportPolicyFactory
+import org.autojs.autojs.ui.edit.keyboard.AceActionFavoritesDialog
 import org.autojs.autojs.ui.edit.keyboard.AceActionHistoryStore
 import org.autojs.autojs.ui.edit.keyboard.AceShortcutPanel
 import org.autojs.autojs.ui.edit.keyboard.FunctionsKeyboardHelper
@@ -2588,27 +2589,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     private fun showAceActionHistoryDialog() {
-        val entries = AceActionHistoryStore.getRankedEntries(context)
-        if (entries.isEmpty()) {
-            showToast(context, R.string.text_ace_action_history_empty)
-            return
-        }
-        val labels = entries.map { entry ->
-            if (entry.usageCount > 1) "${entry.label} x${entry.usageCount}" else entry.label
-        }
-        DialogUtils.buildAndShowAdaptive {
-            MaterialDialog.Builder(context)
-                .title(R.string.text_ace_action_favorites)
-                .items(labels)
-                .itemsCallback { dialog, _, which, _ ->
-                    val entry = entries.getOrNull(which) ?: return@itemsCallback
-                    val action = AceShortcutPanel.actionById(entry.id) ?: return@itemsCallback
-                    dialog.dismiss()
-                    executeAceShortcutAction(action, record = true)
-                }
-                .negativeText(R.string.dialog_button_cancel)
-                .negativeColorRes(R.color.dialog_button_default)
-                .build()
+        AceActionFavoritesDialog.show(context) { action ->
+            executeAceShortcutAction(action, record = true)
         }
     }
 

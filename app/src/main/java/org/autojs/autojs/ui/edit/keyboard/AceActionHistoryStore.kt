@@ -83,6 +83,23 @@ object AceActionHistoryStore {
         persistRoot(context, root, entries.values)
     }
 
+    fun applyFavoritesOrder(context: Context, orderedIds: List<String>, pinnedCount: Int) {
+        val root = readRoot(context)
+        val entries = readEntries(root).toMutableMap()
+        val now = System.currentTimeMillis()
+        val safePinnedCount = pinnedCount.coerceIn(0, orderedIds.size)
+        orderedIds.forEachIndexed { index, id ->
+            val current = entries[id] ?: return@forEachIndexed
+            val pinned = index < safePinnedCount
+            entries[id] = current.copy(
+                pinned = pinned,
+                pinnedAt = if (pinned) current.pinnedAt.takeIf { it > 0L } ?: now else 0L,
+                manualOrder = if (pinned) index else DEFAULT_MANUAL_ORDER,
+            )
+        }
+        persistRoot(context, root, entries.values)
+    }
+
     fun delete(context: Context, id: String) {
         val root = readRoot(context)
         val entries = readEntries(root).toMutableMap()

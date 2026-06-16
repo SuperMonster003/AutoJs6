@@ -14,6 +14,7 @@ import org.autojs.autojs.ui.edit.EditorView
 import org.autojs.autojs.model.autocomplete.CodeCompletions
 import org.autojs.autojs.ui.edit.completion.CodeCompletionBar
 import org.autojs.autojs.ui.edit.keyboard.AceActionHistoryStore
+import org.autojs.autojs.ui.edit.keyboard.AceShortcutPanel
 import org.autojs.autojs.ui.edit.editor.ace.health.AceHealthState
 import org.autojs.autojs.ui.edit.editor.ace.health.AceFailureType
 import org.autojs.autojs.ui.edit.editor.engine.AceScriptEditorEngine
@@ -25,6 +26,7 @@ import org.autojs.autojs6.R
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.After
+import org.junit.Before
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -44,8 +46,17 @@ class AceCodeEditorSmokeTest {
     private var activity: Activity? = null
     private val launchedEditActivities = CopyOnWriteArrayList<Activity>()
 
+    @Before
+    fun setUp() {
+        resetSharedEditorState()
+    }
+
     @After
     fun tearDown() {
+        resetSharedEditorState()
+    }
+
+    private fun resetSharedEditorState() {
         AceEditorTestHooks.reset()
         AceEditorDisplayPreferences.setWordWrapEnabled(false)
         AceEditorDisplayPreferences.setLineNumbersEnabled(true)
@@ -216,6 +227,35 @@ class AceCodeEditorSmokeTest {
             }
             assertEquals("TAB", repeatedEntry.label)
             assertEquals(2, repeatedEntry.usageCount)
+
+            runOnMainSync {
+                val firstRow = editorView.findViewById<CodeCompletionBar>(R.id.code_completion_bar)
+                    .codeCompletions
+                val parenAction = AceShortcutPanel.actionOf(firstRow[3])
+                    ?: error("Expected ACE shortcut action for left paren")
+                AceActionHistoryStore.record(instrumentation.targetContext, parenAction, now = 2_000L)
+                AceActionHistoryStore.setPinned(instrumentation.targetContext, repeatedEntry.id, true, now = 3_000L)
+                AceActionHistoryStore.applyFavoritesOrder(
+                    instrumentation.targetContext,
+                    orderedIds = listOf(parenAction.id, repeatedEntry.id),
+                    pinnedCount = 1,
+                )
+            }
+            val reorderedEntries = runOnMainSync {
+                AceActionHistoryStore.getRankedEntries(instrumentation.targetContext)
+            }
+            assertEquals(listOf("(", "TAB"), reorderedEntries.map { it.label })
+            assertTrue(reorderedEntries[0].pinned)
+            assertFalse(reorderedEntries[1].pinned)
+
+            runOnMainSync {
+                AceActionHistoryStore.delete(instrumentation.targetContext, reorderedEntries[0].id)
+            }
+            val afterDeleteEntries = runOnMainSync {
+                AceActionHistoryStore.getRankedEntries(instrumentation.targetContext)
+            }
+            assertEquals(listOf("TAB"), afterDeleteEntries.map { it.label })
+            assertFalse(afterDeleteEntries.single().pinned)
         } finally {
             finishLaunchedActivity()
             file.delete()

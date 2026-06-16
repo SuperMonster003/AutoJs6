@@ -1083,6 +1083,11 @@
     <string name="text_ace_line_numbers_enabled">ACE line numbers</string>
     <string name="text_ace_action_favorites">ACE action favorites</string>
     <string name="text_ace_action_history_empty">No editor action history</string>
+    <string name="text_ace_action_pin">Pin</string>
+    <string name="text_ace_action_pinned">Pinned</string>
+    <string name="text_ace_action_unpin">Unpin</string>
+    <string name="text_ace_action_clear_confirm">Clear all ACE action history?</string>
+    <string name="text_ace_action_delete_confirm" formatted="true">Delete \"%1$s\" from ACE action history?</string>
     <string name="text_ace_no_last_action">No last editor action</string>
     <string name="text_editor_engine">Editor engine</string>
     <string name="text_editor_engine_switched" formatted="true">Editor engine switched to %s</string>
@@ -1090,6 +1095,11 @@
     <string name="text_ace_editor_fallback_native" formatted="true">ACE editor failed (%1$s); switched to native editor. Copy ACE diagnostics from the More menu for details</string>
     <string name="text_ace_large_file_uses_native_editor">ACE editor is routed to the native editor by the active fallback policy</string>
     <string name="text_ace_word_wrap_enabled">ACE word wrap</string>
+
+    <plurals name="text_ace_action_used_times">
+        <item quantity="one">Used %1$d time</item>
+        <item quantity="other">Used %1$d times</item>
+    </plurals>
     <string name="text_email">E-mail</string>
     <string name="text_email_cannot_be_empty">E-mail cannot be empty</string>
     <string name="text_email_format_error">Invalid e-mail format</string>
