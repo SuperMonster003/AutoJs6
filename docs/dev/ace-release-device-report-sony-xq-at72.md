@@ -54,8 +54,8 @@ path has a recorded result.
 | Double-tap selection | DEVICE SMOKE PASS | Double-tap selected `doubleTapTarget`; copying the selection and reading the clipboard returned `doubleTapTarget`. |
 | Copy/paste | DEVICE SMOKE PASS | Copy, single-line paste, multi-line paste, and Unicode paste passed. Drag handles and exact CJK target composition remain TBD. |
 | CJK composition | DEVICE PARTIAL PASS | Gboard Pinyin composition entered candidates, survived cursor move and keyboard hide without ACE fallback, and committed CJK text through the keyboard path; exact `toast("你好")` candidate selection remains a human hand-test item. |
-| Completion accept | TBD | |
-| Tooltip fallback | TBD | |
+| Completion accept | DEVICE SMOKE PASS | Instrumentation smoke accepted `toast`, `app.launch`, `files.read`, `images.findImage`, and `device.getBattery` through the ACE popup path; see Gate 6 notes. |
+| Tooltip fallback | DEVICE SMOKE PASS | Instrumentation smoke showed local tooltip DOM/render state with `markdownRenderer=safe-subset`; static source checks reject `fetch`, XHR, and raw hover `innerHTML`. |
 | Rotation | TBD | |
 | Native/ACE switching | TBD | |
 | TextMirror fallback | TBD | |
@@ -78,6 +78,7 @@ Record copied ACE diagnostics for every failure or ambiguous result.
 | Gate 3 IME/tap-anchor smoke | N/A | No failure diagnostics were produced; screenshot samples and logcat were reviewed during the run. |
 | Gate 4 keyboard stress | Inline Gate 4 notes | Temporary pasted diagnostics from the 1000-line sample: `aceHealthState=RUNNING`, `lastFailureType=unknown`, `lastImeState=HIDDEN`, `maxBridgeEventWindowCount=18` in a 1000 ms window, below the storm threshold of 60; event history had no `bridge_event_storm` and heartbeat checks were OK. |
 | Gate 5 ActionMode bridge mismatch | Inline Gate 5 notes | A development-only 7-argument `startActionMode` bridge attempt produced `Error invoking startActionMode: Method not found`; the final implementation restored the six-argument bridge and passed the copy/paste smoke below. |
+| Gate 6 completion/tooltip/LSP smoke | Instrumentation PASS | `AceCodeEditorSmokeTest` ran 5/5 tests on Sony XQ-AT72 with no failures, including popup completion accept, tooltip local rendering, LSP disabled state, and LSP enabled no-server static fallback. |
 
 ## Gate 2 Notes
 
@@ -242,13 +243,49 @@ Record copied ACE diagnostics for every failure or ambiguous result.
 - Remaining Gate 5 items not yet completed: drag selection handles and exact
   CJK candidate entry such as `toast("你好")`.
 
+## Gate 6 Notes
+
+- Time: 2026-06-16 02:06-02:07 CST.
+- Command:
+  `.\gradlew.bat :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.ui.edit.editor.ace.AceCodeEditorSmokeTest"`
+- Result: PASS on Sony XQ-AT72; 5 tests completed, 0 skipped, 0 failed.
+- Completion accept smoke:
+  - The instrumentation test opened `AceEditorDebugActivity`, waited for ACE
+    ready/first-paint, then drove the real ACE autocomplete popup and
+    `insertMatch` path from WebView JavaScript.
+  - Static completions accepted through the popup inserted the expected
+    prefixes for `toast`, `app.launch`, `files.read`, `images.findImage`, and
+    `device.getBattery`.
+  - The final diagnostics snapshot stayed `aceHealthState=RUNNING` with no
+    `lastFailureType` and no runtime event history entry containing
+    `fallback`.
+- Tooltip and LSP default-off smoke:
+  - With `key_$_ace_lsp_enabled=false`, `window.AutoJsAce.getLspState()`
+    reported `enabled=false`, `state=disabled`, `serverReady=false`, and
+    `completionProvider=static-fallback` / `hoverProvider=static-fallback`.
+  - `window.AutoJsAce.showLspTooltip(0, 5)` for `app.launch(...)` returned
+    true. Tooltip state reported `domCreated=true`, `markdownLoaded=true`, and
+    `markdownRenderer=safe-subset`.
+  - Static source gates continue to reject tooltip `fetch`, XHR, and raw hover
+    `innerHTML` assignment.
+- LSP alpha no-server fallback smoke:
+  - The instrumentation test enabled `AceEditorLspPreferences` before launching
+    a fresh ACE editor instance.
+  - `window.AutoJsAce.getLspState()` reported `enabled=true`,
+    `state=configured-no-server`, `transport=unavailable`,
+    `fallback=static-completion`, `serverReady=false`, and
+    `serverAvailable=false`.
+  - Completion accept still used the static fallback path and did not produce
+    ACE fallback or fatal diagnostics.
+
 ## Blockers
 
 ### P0
 
-- No automated P0 blocker found in preflight. Gate 2, Gate 3, and Gate 4
-  device smoke found no P0 first-paint, file-open, IME, tap-anchor, keyboard
-  stress, fallback, or bridge-event-storm blocker.
+- No automated P0 blocker found in preflight. Gate 2, Gate 3, Gate 4, and
+  Gate 6 device smoke found no P0 first-paint, file-open, IME, tap-anchor,
+  keyboard stress, completion, tooltip, LSP fallback, ACE fallback, or
+  bridge-event-storm blocker.
 
 ### P1
 

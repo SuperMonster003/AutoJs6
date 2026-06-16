@@ -183,18 +183,18 @@ Acceptance:
 
 ### Gate 6: Completion, Tooltip, And LSP Default-Off
 
-- [ ] Trigger and accept static completions for `toast`, `app.`, `files.`,
+- [x] Trigger and accept static completions for `toast`, `app.`, `files.`,
   `images.`, and `device.`.
-- [ ] Confirm tooltip fallback does not load external resources.
-- [ ] Confirm LSP disabled returns no WebSocket or server transport.
-- [ ] Enable the LSP alpha flag and confirm no-server fallback remains static
+- [x] Confirm tooltip fallback does not load external resources.
+- [x] Confirm LSP disabled returns no WebSocket or server transport.
+- [x] Enable the LSP alpha flag and confirm no-server fallback remains static
   and feature-local.
 
 Acceptance:
 
-- [ ] Completion accept inserts at the intended location.
-- [ ] Tooltip failures do not affect editing.
-- [ ] LSP failures degrade to static completion and do not fallback ACE.
+- [x] Completion accept inserts at the intended location.
+- [x] Tooltip failures do not affect editing.
+- [x] LSP failures degrade to static completion and do not fallback ACE.
 
 ### Gate 7: Rotation, Restore, And Engine Switching
 
