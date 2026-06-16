@@ -91,6 +91,8 @@ Expected skips:
 - [ ] [../RELEASE_CHECKLIST.md](../RELEASE_CHECKLIST.md) remains the broad release checklist.
 - [ ] [../FLAKE_POLICY.md](../FLAKE_POLICY.md) is reviewed before any rerun classification.
 - [ ] [../MAINTENANCE_PLAN.md](../MAINTENANCE_PLAN.md) covers the post-GA cadence, versioning, deprecation, and triage process.
+- [ ] [NODE_PROFILE_V1_TAG_DRY_RUN.md](NODE_PROFILE_V1_TAG_DRY_RUN.md) has been reviewed before creating the tag.
+- [ ] `tools/nodejs/verify-node-profile-tag.ps1 -Tag <approved-tag>` passes before pushing the tag.
 
 ## Do Not Tag If
 

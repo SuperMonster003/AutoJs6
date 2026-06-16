@@ -165,6 +165,7 @@ The following remain disabled in normal v1 builds:
 - Testing: [../TESTING.md](../TESTING.md)
 - Release checklist: [../RELEASE_CHECKLIST.md](../RELEASE_CHECKLIST.md)
 - Release identity: [NODE_PROFILE_V1_RELEASE_IDENTITY.md](NODE_PROFILE_V1_RELEASE_IDENTITY.md)
+- Tag dry run: [NODE_PROFILE_V1_TAG_DRY_RUN.md](NODE_PROFILE_V1_TAG_DRY_RUN.md)
 - Maintenance plan: [../MAINTENANCE_PLAN.md](../MAINTENANCE_PLAN.md)
 - Native crash diagnostics: [../NATIVE_CRASH_DIAGNOSTICS.md](../NATIVE_CRASH_DIAGNOSTICS.md)
 - Flake policy: [../FLAKE_POLICY.md](../FLAKE_POLICY.md)

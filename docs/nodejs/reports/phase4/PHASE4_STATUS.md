@@ -27,6 +27,8 @@ OnePlus OPD2413 `63751f63` is now excluded from unattended current-branch gates 
 - Added the Task 130 post-GA maintenance plan.
 - Added Task 131 release identity wiring and manifest identity fields.
 - Added Task 136 GA artifact bundle collection.
+- Added Task 137 tag dry-run instructions.
+- Added Task 138 post-tag verification script.
 
 ## Evidence
 
@@ -42,6 +44,8 @@ OnePlus OPD2413 `63751f63` is now excluded from unattended current-branch gates 
 - Release identity decision record: `docs/nodejs/releases/NODE_PROFILE_V1_RELEASE_IDENTITY.md`
 - Post-GA maintenance plan: `docs/nodejs/MAINTENANCE_PLAN.md`
 - GA artifact bundle task: `:app:collectNodeProfileGaArtifacts`
+- Tag dry run: `docs/nodejs/releases/NODE_PROFILE_V1_TAG_DRY_RUN.md`
+- Post-tag verification script: `tools/nodejs/verify-node-profile-tag.ps1`
 
 ## Still Required Before Publication
 
