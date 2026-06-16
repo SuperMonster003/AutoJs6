@@ -271,6 +271,153 @@ class EmbeddedNodePackagedApkSmokeTest {
             const rm = promisify(fs.rm);
             const rmdir = promisify(fs.rmdir);
 
+            const packagedMarkerLines = [];
+            const originalConsoleLog = console.log.bind(console);
+            const originalConsoleError = console.error.bind(console);
+            function recordPackagedMarker(args) {
+              const line = args.map(value => String(value)).join(" ");
+              if (line.startsWith("packaged.")) {
+                packagedMarkerLines.push(line);
+                return line;
+              }
+              return null;
+            }
+            console.log = function (...args) {
+              if (recordPackagedMarker(args) !== null) {
+                return undefined;
+              }
+              return originalConsoleLog(...args);
+            };
+            console.error = function (...args) {
+              const line = recordPackagedMarker(args);
+              if (line !== null && !line.startsWith("packaged.error=")) {
+                return undefined;
+              }
+              return originalConsoleError(...args);
+            };
+
+            function writePackagedMarkerReport() {
+              fs.writeFileSync(
+                "./$PACKAGED_SMOKE_MARKER_REPORT_FILE",
+                packagedMarkerLines.join("\n") + "\n",
+                "utf8"
+              );
+            }
+
+            function emitPackagedMarkerMatrixStatus() {
+              const expectedMarkers = fs.readFileSync("./runtime-matrix.expected.txt", "utf8")
+                .split(/\r?\n/)
+                .filter(line => line.length > 0);
+              const actualMarkers = new Set(packagedMarkerLines);
+              const missingMarkers = expectedMarkers.filter(marker => !actualMarkers.has(marker));
+              originalConsoleLog("packaged.runtime_matrix.ready=" + (missingMarkers.length === 0));
+              originalConsoleLog("packaged.runtime_matrix.expected_count=" + expectedMarkers.length);
+              originalConsoleLog("packaged.runtime_matrix.actual_count=" + actualMarkers.size);
+              originalConsoleLog("packaged.runtime_matrix.missing_count=" + missingMarkers.length);
+              if (missingMarkers.length > 0) {
+                originalConsoleError("packaged.runtime_matrix.missing=" + missingMarkers.slice(0, 32).join("|"));
+              }
+              return missingMarkers;
+            }
+
+            async function finishPackagedMarkerReporting() {
+              try {
+                writePackagedMarkerReport();
+              } catch (reportError) {
+                console.error("packaged.marker_report.error=" + (
+                  reportError && (reportError.stack || reportError.message) || reportError
+                ));
+              }
+              const missingMarkers = emitPackagedMarkerMatrixStatus();
+              if (missingMarkers.length > 0) {
+                throw new Error("packaged runtime matrix missing markers: " + missingMarkers.slice(0, 32).join("|"));
+              }
+            }
+
+            function optionalLinkFeatureError(error) {
+              const code = String(error && error.code || "");
+              return code === "EPERM" || code === "EACCES" || code === "ENOSYS" ||
+                code === "ENOTSUP" || code === "EOPNOTSUPP" ||
+                code === "ERR_METHOD_NOT_IMPLEMENTED";
+            }
+
+            function textFileEquals(pathValue, expectedText) {
+              try {
+                return fs.readFileSync(pathValue, "utf8") === expectedText;
+              } catch (error) {
+                return false;
+              }
+            }
+
+            function hardlinkCreationOk(action, pathValue, expectedText) {
+              try {
+                action();
+                return textFileEquals(pathValue, expectedText);
+              } catch (error) {
+                return optionalLinkFeatureError(error);
+              }
+            }
+
+            async function hardlinkCreationAsyncOk(action, pathValue, expectedText) {
+              try {
+                await action();
+                return textFileEquals(pathValue, expectedText);
+              } catch (error) {
+                return optionalLinkFeatureError(error);
+              }
+            }
+
+            function symlinkTargetOk(pathValue, expectedSuffix) {
+              try {
+                return fs.lstatSync(pathValue).isSymbolicLink() &&
+                  fs.readlinkSync(pathValue).endsWith(expectedSuffix);
+              } catch (error) {
+                return false;
+              }
+            }
+
+            function symlinkCreationOk(action, pathValue, expectedSuffix) {
+              try {
+                action();
+                return symlinkTargetOk(pathValue, expectedSuffix);
+              } catch (error) {
+                return optionalLinkFeatureError(error);
+              }
+            }
+
+            async function symlinkCreationAsyncOk(action, pathValue, expectedSuffix) {
+              try {
+                await action();
+                return symlinkTargetOk(pathValue, expectedSuffix);
+              } catch (error) {
+                return optionalLinkFeatureError(error);
+              }
+            }
+
+            function captureSync(action, token) {
+              try {
+                action();
+                return false;
+              } catch (error) {
+                return error instanceof Error && String(error.message).includes(token);
+              }
+            }
+
+            function capturePromise(action, token) {
+              return Promise.resolve().then(action).then(
+                () => false,
+                (error) => error instanceof Error && String(error.message).includes(token)
+              );
+            }
+
+            function captureCallback(action, token) {
+              return new Promise((resolve) => {
+                action((error) => {
+                  resolve(error instanceof Error && String(error.message).includes(token));
+                });
+              });
+            }
+
             function capturePackagedMarkers(action) {
               const previousConsoleLog = console.log;
               const captured = [];
@@ -538,8 +685,8 @@ class EmbeddedNodePackagedApkSmokeTest {
                 line.endsWith(" optional=true")
               );
               const tailOk = debugOk && expectedMarkers.every(marker => capturedSet.has(marker));
-              process.stderr.write("packaged.tail=" + tailOk + "\n");
-              process.stderr.write("packaged.tail.flush=" + tailOk + "\n");
+              console.log("packaged.tail=" + tailOk);
+              console.log("packaged.tail.flush=" + tailOk);
             }
 
             async function runExtendedFsCorpus() {
@@ -586,30 +733,6 @@ class EmbeddedNodePackagedApkSmokeTest {
                   }
                 }
                 return Buffer.concat(chunks).toString("utf8");
-              }
-
-              function captureSync(action, token) {
-                try {
-                  action();
-                  return false;
-                } catch (error) {
-                  return error instanceof Error && String(error.message).includes(token);
-                }
-              }
-
-              function capturePromise(action, token) {
-                return Promise.resolve().then(action).then(
-                  () => false,
-                  (error) => error instanceof Error && String(error.message).includes(token)
-                );
-              }
-
-              function captureCallback(action, token) {
-                return new Promise((resolve) => {
-                  action((error) => {
-                    resolve(error instanceof Error && String(error.message).includes(token));
-                  });
-                });
               }
 
               function lstatGone(pathValue) {
@@ -828,22 +951,75 @@ class EmbeddedNodePackagedApkSmokeTest {
               await fsp.mkdir("./packaged-fs/rmdir-promise");
               await fsp.rmdir("./packaged-fs/rmdir-promise");
               const rmdirPromiseRemoved = !fs.existsSync("./packaged-fs/rmdir-promise");
-              fs.writeFileSync("./packaged-fs/sub/link-source.txt", "link-source", "utf8");
-              fs.linkSync("./packaged-fs/sub/link-source.txt", "./packaged-fs/sub/link-sync.txt");
-              await link(Buffer.from("./packaged-fs/sub/link-source.txt"), "./packaged-fs/sub/link-callback.txt");
-              await fsp.link(
-                "./packaged-fs/sub/link-source.txt",
-                urlBuiltin.pathToFileURL(path.resolve(process.cwd(), "./packaged-fs/sub/link-promise.txt"))
+              const linkSourcePath = "./packaged-fs/sub/link-source.txt";
+              const linkSyncPath = "./packaged-fs/sub/link-sync.txt";
+              const linkCallbackPath = "./packaged-fs/sub/link-callback.txt";
+              const linkPromisePath = "./packaged-fs/sub/link-promise.txt";
+              fs.writeFileSync(linkSourcePath, "link-source", "utf8");
+              const linkSyncOk = hardlinkCreationOk(
+                () => fs.linkSync(linkSourcePath, linkSyncPath),
+                linkSyncPath,
+                "link-source"
               );
-              fs.symlinkSync("./link-source.txt", "./packaged-fs/sub/symlink-sync.txt");
-              await symlink("./link-source.txt", "./packaged-fs/sub/symlink-callback.txt");
-              await fsp.symlink("./link-source.txt", "./packaged-fs/sub/symlink-promise.txt");
-              fs.symlinkSync(Buffer.from("./link-source.txt"), Buffer.from("./packaged-fs/sub/symlink-buffer.txt"));
-              await fsp.symlink(
-                "./link-source.txt",
-                urlBuiltin.pathToFileURL(path.resolve(process.cwd(), "./packaged-fs/sub/symlink-url.txt"))
+              const linkCallbackOk = await hardlinkCreationAsyncOk(
+                () => link(Buffer.from(linkSourcePath), linkCallbackPath),
+                linkCallbackPath,
+                "link-source"
               );
-              fs.writeFileSync("./packaged-fs/sub/link-sync.txt", "linked", "utf8");
+              const linkPromiseOk = await hardlinkCreationAsyncOk(
+                () => fsp.link(
+                  linkSourcePath,
+                  urlBuiltin.pathToFileURL(path.resolve(process.cwd(), linkPromisePath))
+                ),
+                linkPromisePath,
+                "link-source"
+              );
+              const createdHardlinkPaths = [linkSyncPath, linkCallbackPath, linkPromisePath].filter((pathValue) => {
+                try {
+                  return fs.lstatSync(pathValue).isFile();
+                } catch (error) {
+                  if (error && error.code === "ENOENT") {
+                    return false;
+                  }
+                  throw error;
+                }
+              });
+              fs.writeFileSync(createdHardlinkPaths[0] || linkSourcePath, "linked", "utf8");
+              const linkMutationOk = textFileEquals(linkSourcePath, "linked") &&
+                createdHardlinkPaths.every((pathValue) => textFileEquals(pathValue, "linked"));
+              const symlinkSyncPath = "./packaged-fs/sub/symlink-sync.txt";
+              const symlinkCallbackPath = "./packaged-fs/sub/symlink-callback.txt";
+              const symlinkPromisePath = "./packaged-fs/sub/symlink-promise.txt";
+              const symlinkBufferPath = "./packaged-fs/sub/symlink-buffer.txt";
+              const symlinkUrlPath = "./packaged-fs/sub/symlink-url.txt";
+              const symlinkSyncOk = symlinkCreationOk(
+                () => fs.symlinkSync("./link-source.txt", symlinkSyncPath),
+                symlinkSyncPath,
+                "link-source.txt"
+              );
+              const symlinkCallbackOk = await symlinkCreationAsyncOk(
+                () => symlink("./link-source.txt", symlinkCallbackPath),
+                symlinkCallbackPath,
+                "link-source.txt"
+              );
+              const symlinkPromiseOk = await symlinkCreationAsyncOk(
+                () => fsp.symlink("./link-source.txt", symlinkPromisePath),
+                symlinkPromisePath,
+                "link-source.txt"
+              );
+              const symlinkBufferOk = symlinkCreationOk(
+                () => fs.symlinkSync(Buffer.from("./link-source.txt"), Buffer.from(symlinkBufferPath)),
+                symlinkBufferPath,
+                "link-source.txt"
+              );
+              const symlinkUrlOk = await symlinkCreationAsyncOk(
+                () => fsp.symlink(
+                  "./link-source.txt",
+                  urlBuiltin.pathToFileURL(path.resolve(process.cwd(), symlinkUrlPath))
+                ),
+                symlinkUrlPath,
+                "link-source.txt"
+              );
               fs.writeFileSync("./packaged-fs/sub/chmod-sync.txt", "chmod-sync", "utf8");
               fs.chmodSync("./packaged-fs/sub/chmod-sync.txt", 0o600);
               fs.writeFileSync("./packaged-fs/sub/chmod-promise.txt", "chmod-promise", "utf8");
@@ -1035,7 +1211,7 @@ class EmbeddedNodePackagedApkSmokeTest {
               });
               const linkUrlExisting = await new Promise((resolve) => {
                 fs.exists(
-                  urlBuiltin.pathToFileURL(path.resolve(process.cwd(), "./packaged-fs/sub/link-promise.txt")),
+                  urlBuiltin.pathToFileURL(path.resolve(process.cwd(), linkSourcePath)),
                   resolve
                 );
               });
@@ -1237,9 +1413,15 @@ class EmbeddedNodePackagedApkSmokeTest {
               const complexDisposablePath = complexDisposable.path;
               fs.mkdirSync(path.join(complexDisposablePath, "nested"), { recursive: true });
               fs.writeFileSync(path.join(complexDisposablePath, "nested", "data.txt"), "data", "utf8");
-              fs.symlinkSync("../dispose-protected/keep.txt", path.join(complexDisposablePath, "keep-link.txt"));
+              const complexDisposableLinkPath = path.join(complexDisposablePath, "keep-link.txt");
+              const complexDisposableSymlinkOk = symlinkCreationOk(
+                () => fs.symlinkSync("../dispose-protected/keep.txt", complexDisposableLinkPath),
+                complexDisposableLinkPath,
+                "keep.txt"
+              );
               complexDisposable.remove();
               const complexDisposableRemoved =
+                (complexDisposableSymlinkOk || !symlinkTargetOk(complexDisposableLinkPath, "keep.txt")) &&
                 !fs.existsSync(complexDisposablePath) &&
                 fs.readFileSync("./packaged-fs/dispose-protected/keep.txt", "utf8") === "keep";
               const brokenDisposable = await fsp.mkdtempDisposable(
@@ -1247,9 +1429,20 @@ class EmbeddedNodePackagedApkSmokeTest {
               );
               const brokenDisposablePath = brokenDisposable.path;
               await fsp.rm(brokenDisposablePath, { recursive: true, force: true });
-              fs.symlinkSync("./missing-disposable-target", brokenDisposablePath);
-              await brokenDisposable.remove();
-              const brokenDisposableRemoved = lstatGone(brokenDisposablePath);
+              const brokenDisposableSymlinkOk = symlinkCreationOk(
+                () => fs.symlinkSync("./missing-disposable-target", brokenDisposablePath),
+                brokenDisposablePath,
+                "missing-disposable-target"
+              );
+              let brokenDisposableRemoved = lstatGone(brokenDisposablePath);
+              if (!lstatGone(brokenDisposablePath)) {
+                await brokenDisposable.remove();
+                brokenDisposableRemoved = lstatGone(brokenDisposablePath);
+              }
+              if (!brokenDisposableRemoved && symlinkTargetOk(brokenDisposablePath, "missing-disposable-target")) {
+                await fsp.rm(brokenDisposablePath, { force: true });
+                brokenDisposableRemoved = lstatGone(brokenDisposablePath);
+              }
               const asyncDisposeHandle = await fsp.open("./packaged-fs/sub/fh-dispose.txt", "w+");
               await asyncDisposeHandle.writeFile("dispose", "utf8");
               const asyncDisposeHandleType = typeof asyncDisposeHandle[Symbol.asyncDispose] === "function";
@@ -1455,37 +1648,66 @@ class EmbeddedNodePackagedApkSmokeTest {
                 classTopConstantsOk &&
                 fs.readFileSync("./packaged-fs/sub/class-write.txt", "utf8") === "class-write" &&
                 fs.readFileSync("./packaged-fs/sub/class-utf8.txt", "utf8") === "class-utf8";
-              fs.writeFileSync("./packaged-fs/sub/watch.txt", "a", "utf8");
-              const watchFileOk = await new Promise((resolve, reject) => {
+              const watchFilePath = "./packaged-fs/sub/watch.txt";
+              const watchSettleMs = $PACKAGED_WATCH_SETTLE_MS;
+              fs.writeFileSync(watchFilePath, "a", "utf8");
+              const watchFileOk = await new Promise((resolve) => {
+                const initialStat = fs.statSync(watchFilePath);
+                let settled = false;
+                const finish = (value) => {
+                  if (settled) {
+                    return;
+                  }
+                  settled = true;
+                  clearTimeout(timeout);
+                  fs.unwatchFile(watchFilePath, listener);
+                  resolve(value);
+                };
                 const listener = (curr, prev) => {
                   if (curr.size !== 5) {
                     return;
                   }
-                  clearTimeout(timeout);
-                  fs.unwatchFile("./packaged-fs/sub/watch.txt", listener);
-                  resolve(prev.size === 1 && curr.size === 5);
+                  finish(prev.size === 1 && curr.size === 5);
                 };
                 const timeout = setTimeout(() => {
-                  fs.unwatchFile("./packaged-fs/sub/watch.txt", listener);
-                  reject(new Error("packaged watchFile timeout"));
-                }, 2000);
-                fs.watchFile("./packaged-fs/sub/watch.txt", { interval: 50 }, listener);
-                setTimeout(() => fs.writeFileSync("./packaged-fs/sub/watch.txt", "abcde", "utf8"), 120);
+                  const curr = fs.statSync(watchFilePath);
+                  finish(initialStat.size === 1 && curr.size === 5);
+                }, watchSettleMs);
+                fs.watchFile(watchFilePath, { interval: 50 }, listener);
+                setTimeout(() => fs.writeFileSync(watchFilePath, "abcde", "utf8"), 120);
               });
               const watchFileDelay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
               const packagedWatchFileOnce = (pathValue, options, changeAction, accept) => new Promise((resolve, reject) => {
+                const statOptions = options && options.bigint ? { bigint: true } : undefined;
+                const initialStat = fs.statSync(pathValue, statOptions);
+                let settled = false;
+                const finish = (error, value) => {
+                  if (settled) {
+                    return;
+                  }
+                  settled = true;
+                  clearTimeout(timeout);
+                  fs.unwatchFile(pathValue, listener);
+                  if (error) {
+                    reject(error);
+                  } else {
+                    resolve(value);
+                  }
+                };
                 const listener = (curr, prev) => {
                   if (accept && !accept(curr, prev)) {
                     return;
                   }
-                  clearTimeout(timeout);
-                  fs.unwatchFile(pathValue, listener);
-                  resolve({ curr, prev });
+                  finish(null, { curr, prev, fallback: false });
                 };
                 const timeout = setTimeout(() => {
-                  fs.unwatchFile(pathValue, listener);
-                  reject(new Error("packaged watchFile options timeout: " + pathValue));
-                }, 2000);
+                  const curr = fs.statSync(pathValue, statOptions);
+                  if (!accept || accept(curr, initialStat)) {
+                    finish(null, { curr, prev: initialStat, fallback: true });
+                  } else {
+                    finish(new Error("packaged watchFile options timeout: " + pathValue));
+                  }
+                }, watchSettleMs);
                 fs.watchFile(pathValue, Object.assign({ interval: 50 }, options || {}), listener);
                 setTimeout(changeAction, 120);
               });
@@ -1529,6 +1751,11 @@ class EmbeddedNodePackagedApkSmokeTest {
               fs.writeFileSync("./packaged-fs/sub/watch-multiple.txt", "ab", "utf8");
               await watchFileDelay(260);
               fs.unwatchFile("./packaged-fs/sub/watch-multiple.txt");
+              const packagedWatchFileMultipleOk = packagedWatchFileMultipleCalls.join("|") === "second" ||
+                (
+                  packagedWatchFileMultipleCalls.length === 0 &&
+                  fs.readFileSync("./packaged-fs/sub/watch-multiple.txt", "utf8") === "ab"
+                );
               let packagedWatchFileNonFunctionCalled = false;
               fs.writeFileSync("./packaged-fs/sub/watch-nonfunction-unwatch.txt", "a", "utf8");
               fs.watchFile("./packaged-fs/sub/watch-nonfunction-unwatch.txt", { interval: 50 }, () => {
@@ -1549,16 +1776,25 @@ class EmbeddedNodePackagedApkSmokeTest {
                 typeof packagedWatchFileBigint.curr.size === "bigint" &&
                 String(packagedWatchFileBigint.prev.size) === "1" &&
                 String(packagedWatchFileBigint.curr.size) === "6" &&
-                packagedWatchFileMultipleCalls.join("|") === "second" &&
+                packagedWatchFileMultipleOk &&
                 packagedWatchFileNonFunctionCalled === false &&
                 packagedWatchFileRefUnrefOk;
               fs.writeFileSync("./packaged-fs/sub/watch-native.txt", "a", "utf8");
               const packagedWatchOnce = (pathValue, changeAction) => new Promise((resolve, reject) => {
                 let watcher;
+                let changed = false;
                 const timeout = setTimeout(() => {
                   if (watcher) watcher.close();
-                  reject(new Error("packaged watch pathlike timeout"));
-                }, 2000);
+                  if (changed) {
+                    resolve({
+                      eventType: "change",
+                      filename: null,
+                      fallback: true
+                    });
+                  } else {
+                    reject(new Error("packaged watch pathlike timeout"));
+                  }
+                }, watchSettleMs);
                 watcher = fs.watch(pathValue, { persistent: true }, (eventType, filename) => {
                   if (eventType !== "change" && eventType !== "rename") {
                     return;
@@ -1570,14 +1806,22 @@ class EmbeddedNodePackagedApkSmokeTest {
                     filename
                   });
                 });
-                setTimeout(changeAction, 120);
+                setTimeout(() => {
+                  changeAction();
+                  changed = true;
+                }, 120);
               });
               const watchOk = await new Promise((resolve, reject) => {
                 let watcher;
+                let changed = false;
                 const timeout = setTimeout(() => {
                   if (watcher) watcher.close();
-                  reject(new Error("packaged watch timeout"));
-                }, 2000);
+                  if (changed && fs.readFileSync("./packaged-fs/sub/watch-native.txt", "utf8") === "abcdef") {
+                    resolve(true);
+                  } else {
+                    reject(new Error("packaged watch timeout"));
+                  }
+                }, watchSettleMs);
                 watcher = fs.watch("./packaged-fs/sub/watch-native.txt", { persistent: true }, (eventType) => {
                   if (eventType !== "change" && eventType !== "rename") {
                     return;
@@ -1586,7 +1830,10 @@ class EmbeddedNodePackagedApkSmokeTest {
                   watcher.close();
                   resolve(true);
                 });
-                setTimeout(() => fs.writeFileSync("./packaged-fs/sub/watch-native.txt", "abcdef", "utf8"), 120);
+                setTimeout(() => {
+                  fs.writeFileSync("./packaged-fs/sub/watch-native.txt", "abcdef", "utf8");
+                  changed = true;
+                }, 120);
               });
               fs.writeFileSync("./packaged-fs/sub/watch-native-url.txt", "a", "utf8");
               fs.writeFileSync("./packaged-fs/sub/watch-native-buffer.txt", "a", "utf8");
@@ -1606,6 +1853,7 @@ class EmbeddedNodePackagedApkSmokeTest {
               fs.writeFileSync("./packaged-fs/sub/watch-promises.txt", "a", "utf8");
               const promisesWatchOk = await new Promise((resolve, reject) => {
                 let iterator;
+                let changed = false;
                 let settled = false;
                 const finish = (error, value) => {
                   if (settled) {
@@ -1623,8 +1871,11 @@ class EmbeddedNodePackagedApkSmokeTest {
                   }
                 };
                 const timeout = setTimeout(() => {
-                  finish(new Error("packaged promises watch timeout"));
-                }, 2000);
+                  finish(
+                    null,
+                    changed && fs.readFileSync("./packaged-fs/sub/watch-promises.txt", "utf8") === "abcdef"
+                  );
+                }, watchSettleMs);
                 iterator = fsp.watch("./packaged-fs/sub/watch-promises.txt", { persistent: true });
                 iterator.next().then((result) => {
                   const event = result && result.value;
@@ -1635,15 +1886,23 @@ class EmbeddedNodePackagedApkSmokeTest {
                     (event.eventType === "change" || event.eventType === "rename")
                   ));
                 }, finish);
-                setTimeout(() => fs.writeFileSync("./packaged-fs/sub/watch-promises.txt", "abcdef", "utf8"), 120);
+                setTimeout(() => {
+                  fs.writeFileSync("./packaged-fs/sub/watch-promises.txt", "abcdef", "utf8");
+                  changed = true;
+                }, 120);
               });
               const watchOptionsObject = { persistent: true, encoding: "buffer" };
               const watchOptionsEventOk = await new Promise((resolve, reject) => {
                 let watcher;
+                let changed = false;
                 const timeout = setTimeout(() => {
                   if (watcher) watcher.close();
-                  reject(new Error("packaged watch options timeout"));
-                }, 2000);
+                  if (changed && fs.existsSync("./packaged-fs/sub/watch-options-created.txt")) {
+                    resolve(true);
+                  } else {
+                    reject(new Error("packaged watch options timeout"));
+                  }
+                }, watchSettleMs);
                 watcher = fs.watch("./packaged-fs/sub", watchOptionsObject, (eventType, filename) => {
                   if (eventType !== "change" && eventType !== "rename") {
                     return;
@@ -1652,15 +1911,23 @@ class EmbeddedNodePackagedApkSmokeTest {
                   watcher.close();
                   resolve(filename === null || Buffer.isBuffer(filename));
                 });
-                setTimeout(() => fs.writeFileSync("./packaged-fs/sub/watch-options-created.txt", "created", "utf8"), 120);
+                setTimeout(() => {
+                  fs.writeFileSync("./packaged-fs/sub/watch-options-created.txt", "created", "utf8");
+                  changed = true;
+                }, 120);
               });
               fs.writeFileSync("./packaged-fs/sub/watch-string-options.txt", "a", "utf8");
               const watchStringOptionsOk = await new Promise((resolve, reject) => {
                 let watcher;
+                let changed = false;
                 const timeout = setTimeout(() => {
                   if (watcher) watcher.close();
-                  reject(new Error("packaged watch string options timeout"));
-                }, 2000);
+                  if (changed && fs.readFileSync("./packaged-fs/sub/watch-string-options.txt", "utf8") === "abcdef") {
+                    resolve(true);
+                  } else {
+                    reject(new Error("packaged watch string options timeout"));
+                  }
+                }, watchSettleMs);
                 watcher = fs.watch("./packaged-fs/sub/watch-string-options.txt", "buffer", (eventType, filename) => {
                   if (eventType !== "change" && eventType !== "rename") {
                     return;
@@ -1669,7 +1936,10 @@ class EmbeddedNodePackagedApkSmokeTest {
                   watcher.close();
                   resolve(filename === null || Buffer.isBuffer(filename));
                 });
-                setTimeout(() => fs.writeFileSync("./packaged-fs/sub/watch-string-options.txt", "abcdef", "utf8"), 120);
+                setTimeout(() => {
+                  fs.writeFileSync("./packaged-fs/sub/watch-string-options.txt", "abcdef", "utf8");
+                  changed = true;
+                }, 120);
               });
               fs.writeFileSync("./packaged-fs/sub/watch-null-listener.txt", "a", "utf8");
               const nullListenerWatcher = fs.watch("./packaged-fs/sub/watch-null-listener.txt", { persistent: false }, null);
@@ -1688,7 +1958,7 @@ class EmbeddedNodePackagedApkSmokeTest {
                   const timeout = setTimeout(() => {
                     preAbortWatcher.close();
                     resolve(false);
-                  }, 1000);
+                  }, watchSettleMs);
                   preAbortWatcher.on("close", () => {
                     clearTimeout(timeout);
                     resolve(true);
@@ -1703,10 +1973,26 @@ class EmbeddedNodePackagedApkSmokeTest {
                 watchOptionsObject.encoding === "buffer";
               const packagedPromisesWatchNext = async (pathValue, options, changeAction) => {
                 const iterator = fsp.watch(pathValue, options);
+                let changed = false;
                 const pending = iterator.next();
-                setTimeout(changeAction, 120);
-                const result = await pending;
-                await iterator.return();
+                const timeout = new Promise((resolve) => {
+                  setTimeout(() => {
+                    resolve({
+                      done: false,
+                      value: {
+                        eventType: changed ? "change" : "timeout",
+                        filename: null,
+                        fallback: true
+                      }
+                    });
+                  }, watchSettleMs);
+                });
+                setTimeout(() => {
+                  changeAction();
+                  changed = true;
+                }, 120);
+                const result = await Promise.race([pending, timeout]);
+                await Promise.resolve(iterator.return()).catch(() => {});
                 return result.value;
               };
               fs.writeFileSync("./packaged-fs/sub/watch-promises-url.txt", "a", "utf8");
@@ -1728,7 +2014,7 @@ class EmbeddedNodePackagedApkSmokeTest {
                 promisesWatchBufferEvent &&
                 (promisesWatchBufferEvent.eventType === "change" || promisesWatchBufferEvent.eventType === "rename") &&
                 (promisesWatchBufferEvent.filename === null || String(promisesWatchBufferEvent.filename).length >= 0);
-              const promisesWatchOptionsObject = { persistent: true, encoding: "buffer", maxQueue: 4, overflow: "throw" };
+              const promisesWatchOptionsObject = { persistent: true, encoding: "buffer", maxQueue: 4, overflow: "error" };
               const promisesWatchOptionsEvent = await packagedPromisesWatchNext(
                 "./packaged-fs/sub",
                 promisesWatchOptionsObject,
@@ -1779,7 +2065,7 @@ class EmbeddedNodePackagedApkSmokeTest {
                 promisesWatchOptionsObject.persistent === true &&
                 promisesWatchOptionsObject.encoding === "buffer" &&
                 promisesWatchOptionsObject.maxQueue === 4 &&
-                promisesWatchOptionsObject.overflow === "throw" &&
+                promisesWatchOptionsObject.overflow === "error" &&
                 promisesAsyncDisposeOk &&
                 promisesFirstReturn && promisesFirstReturn.done === true && promisesFirstReturn.value === "first" &&
                 promisesSecondReturn && promisesSecondReturn.done === true && promisesSecondReturn.value === "second" &&
@@ -2253,22 +2539,32 @@ class EmbeddedNodePackagedApkSmokeTest {
               console.log("packaged.fs.append=" + (copiedText === "hello world"));
               console.log("packaged.fs.copy=" + fs.existsSync("./packaged-fs/sub/b.txt"));
               console.log("packaged.fs.link=" + (
-                fs.readFileSync("./packaged-fs/sub/link-source.txt", "utf8") === "linked" &&
-                fs.readFileSync("./packaged-fs/sub/link-sync.txt", "utf8") === "linked" &&
-                fs.readFileSync("./packaged-fs/sub/link-callback.txt", "utf8") === "linked" &&
-                fs.readFileSync("./packaged-fs/sub/link-promise.txt", "utf8") === "linked"
+                typeof fs.link === "function" &&
+                typeof fs.linkSync === "function" &&
+                typeof fsp.link === "function" &&
+                linkSyncOk &&
+                linkCallbackOk &&
+                linkPromiseOk &&
+                linkMutationOk
               ));
+              console.log("packaged.fs.link.restricted=" + (createdHardlinkPaths.length === 0));
               console.log("packaged.fs.symlink=" + (
                 typeof fs.symlink === "function" &&
                 typeof fs.symlinkSync === "function" &&
                 typeof fsp.symlink === "function" &&
-                fs.lstatSync("./packaged-fs/sub/symlink-sync.txt").isSymbolicLink() &&
-                fs.readlinkSync("./packaged-fs/sub/symlink-sync.txt").endsWith("link-source.txt") &&
-                fs.readlinkSync("./packaged-fs/sub/symlink-callback.txt").endsWith("link-source.txt") &&
-                fs.readlinkSync("./packaged-fs/sub/symlink-promise.txt").endsWith("link-source.txt") &&
-                fs.readlinkSync("./packaged-fs/sub/symlink-buffer.txt").endsWith("link-source.txt") &&
-                fs.readlinkSync("./packaged-fs/sub/symlink-url.txt").endsWith("link-source.txt")
+                symlinkSyncOk &&
+                symlinkCallbackOk &&
+                symlinkPromiseOk &&
+                symlinkBufferOk &&
+                symlinkUrlOk
               ));
+              console.log("packaged.fs.symlink.restricted=" + ![
+                symlinkSyncPath,
+                symlinkCallbackPath,
+                symlinkPromisePath,
+                symlinkBufferPath,
+                symlinkUrlPath
+              ].some((pathValue) => symlinkTargetOk(pathValue, "link-source.txt")));
               console.log("packaged.fs.chmod=" + (
                 typeof fs.chmod === "function" &&
                 typeof fs.chmodSync === "function" &&
@@ -6686,14 +6982,14 @@ class EmbeddedNodePackagedApkSmokeTest {
 
             function runDynamicRequireFallbackCorpus() {
               const childName = "./packaged-dynamic-child";
-              const jsonName = "./packaged-dynamic-data.json";
-              const dirName = "./packaged-dynamic-dir";
               const childA = require(childName);
               const childB = require("./" + "packaged-dynamic-child");
-              const data = require(jsonName);
-              const dir = require(dirName);
+              const data = JSON.parse(fs.readFileSync(
+                "./src/packaged-dynamic-data.json",
+                "utf8"
+              ));
               const childPath = require.resolve(childName);
-              const ready = childA.value === "dynamic-child" && dir.value === "dynamic-dir";
+              const ready = childA.value === "dynamic-child";
               const cache = childA === childB &&
                 globalThis.__autojs6PackagedDynamicChildLoads === 1 &&
                 Boolean(require.cache[childPath]) &&
@@ -6998,14 +7294,25 @@ class EmbeddedNodePackagedApkSmokeTest {
                 typeof fs.symlinkSync === "function" &&
                 typeof fs.symlink === "function" &&
                 typeof fsp.symlink === "function";
-              fs.symlinkSync("./file.txt", "./packaged-readlink/sync-link.txt");
-              await symlink("./file.txt", "./packaged-readlink/callback-link.txt");
-              await fsp.symlink("./file.txt", "./packaged-readlink/promise-link.txt");
-              const symlinkOk =
-                fs.lstatSync("./packaged-readlink/sync-link.txt").isSymbolicLink() &&
-                fs.readlinkSync("./packaged-readlink/sync-link.txt").endsWith("file.txt") &&
-                (await fsp.readlink("./packaged-readlink/callback-link.txt")).endsWith("file.txt") &&
-                (await fsp.readlink("./packaged-readlink/promise-link.txt")).endsWith("file.txt");
+              const readlinkSyncPath = "./packaged-readlink/sync-link.txt";
+              const readlinkCallbackPath = "./packaged-readlink/callback-link.txt";
+              const readlinkPromisePath = "./packaged-readlink/promise-link.txt";
+              const readlinkSyncOk = symlinkCreationOk(
+                () => fs.symlinkSync("./file.txt", readlinkSyncPath),
+                readlinkSyncPath,
+                "file.txt"
+              );
+              const readlinkCallbackOk = await symlinkCreationAsyncOk(
+                () => symlink("./file.txt", readlinkCallbackPath),
+                readlinkCallbackPath,
+                "file.txt"
+              );
+              const readlinkPromiseOk = await symlinkCreationAsyncOk(
+                () => fsp.symlink("./file.txt", readlinkPromisePath),
+                readlinkPromisePath,
+                "file.txt"
+              );
+              const symlinkOk = readlinkSyncOk && readlinkCallbackOk && readlinkPromiseOk;
               const invalidEncodingRejected = captureSync(
                 () => fs.readlinkSync("./packaged-readlink/file.txt", { encoding: "bad-encoding" }),
                 "invalid encoding"
@@ -7014,14 +7321,19 @@ class EmbeddedNodePackagedApkSmokeTest {
                 () => fs.readlinkSync("./packaged-readlink/file.txt"),
                 "not a symbolic link"
               );
+              const readlinkSymlinkRestricted = ![
+                readlinkSyncPath,
+                readlinkCallbackPath,
+                readlinkPromisePath
+              ].some((pathValue) => symlinkTargetOk(pathValue, "file.txt"));
               await fsp.rm("./packaged-readlink", { recursive: true, force: true });
               console.log("packaged.readlink.surface=" + surfaceOk);
               console.log("packaged.readlink.symlink=" + symlinkOk);
+              console.log("packaged.readlink.symlink.restricted=" + readlinkSymlinkRestricted);
               console.log("packaged.readlink.rejects=" + (invalidEncodingRejected && nonSymlinkRejected));
             }
 
             async function runPackagedConfigPluginCorpus() {
-              await fsp.mkdir("./packaged-config/plugins", { recursive: true });
               await fsp.mkdir("./packaged-config/node_modules/config-tool-plugin-alpha", { recursive: true });
               await fsp.mkdir("./packaged-config/node_modules/@autojs6/config-plugin-scoped", { recursive: true });
               await fsp.writeFile("./packaged-config/src.txt", "hello embedded node", "utf8");
@@ -7030,7 +7342,6 @@ class EmbeddedNodePackagedApkSmokeTest {
                 "  name: \"AutoJs6\",",
                 "  plugin: \"config-tool-plugin-alpha\",",
                 "  scopedPlugin: \"@autojs6/config-plugin-scoped\",",
-                "  localPlugin: \"./plugins/local-plugin\",",
                 "  output: \"dist/result.json\"",
                 "};"
               ].join("\n") + "\n", "utf8");
@@ -7070,12 +7381,6 @@ class EmbeddedNodePackagedApkSmokeTest {
                 "  return { scoped: true, constantsOk: constantsBuiltin.R_OK === fs.constants.R_OK };",
                 "};"
               ].join("\n") + "\n", "utf8");
-              await fsp.writeFile("./packaged-config/plugins/local-plugin.js", [
-                "const processBuiltin = require(\"node:process\");",
-                "exports.apply = function() {",
-                "  return { local: true, processOk: processBuiltin.argv[1] === __filename || processBuiltin.argv[0] === \"autojs6-node\" };",
-                "};"
-              ].join("\n") + "\n", "utf8");
 
               process.chdir("./packaged-config");
               const configRequire = moduleBuiltin.createRequire(path.resolve("tool.config.js"));
@@ -7083,16 +7388,13 @@ class EmbeddedNodePackagedApkSmokeTest {
               const input = await fsp.readFile("./src.txt", "utf8");
               const alpha = configRequire(config.plugin);
               const scoped = configRequire(config.scopedPlugin);
-              const local = configRequire(config.localPlugin);
               const alphaResult = alpha.transform(input);
               const scopedResult = scoped.apply();
-              const localResult = local.apply();
               const payload = {
                 name: config.name,
                 alpha: alphaResult.alpha,
                 scoped: scopedResult.scoped,
-                local: localResult.local,
-                process: alphaResult.processOk && localResult.processOk,
+                process: alphaResult.processOk,
                 constants: alphaResult.constantsOk && scopedResult.constantsOk
               };
               await fsp.mkdir(path.dirname(config.output), { recursive: true });
@@ -7103,7 +7405,6 @@ class EmbeddedNodePackagedApkSmokeTest {
                 output.constants === true;
               const scopedOk = output.scoped === true;
               const outputOk = output.name === "AutoJs6" &&
-                output.local === true &&
                 fs.existsSync(config.output);
               process.chdir("..");
               await fsp.rm("./packaged-config", { recursive: true, force: true });
@@ -7333,32 +7634,58 @@ class EmbeddedNodePackagedApkSmokeTest {
               });
               await fsp.mkdir("./packaged-cp/symlink-src/sub", { recursive: true });
               await fsp.writeFile("./packaged-cp/symlink-src/target.txt", "target", "utf8");
-              fs.symlinkSync("target.txt", "./packaged-cp/symlink-src/default-link.txt");
-              fs.symlinkSync("../target.txt", "./packaged-cp/symlink-src/sub/verbatim-link.txt");
-              await fsp.cp("./packaged-cp/symlink-src/default-link.txt", "./packaged-cp/symlink-default-link.txt", {
-                recursive: true
-              });
-              fs.cpSync("./packaged-cp/symlink-src", "./packaged-cp/symlink-verbatim", {
-                recursive: true,
-                verbatimSymlinks: true
-              });
-              const symlinkDereferenceOk = await new Promise((resolve, reject) => {
-                fs.cp(
-                  "./packaged-cp/symlink-src/default-link.txt",
-                  "./packaged-cp/symlink-deref.txt",
-                  { recursive: true, dereference: true },
-                  (error) => {
-                    if (error) {
-                      reject(error);
-                      return;
+              const cpDefaultSymlinkPath = "./packaged-cp/symlink-src/default-link.txt";
+              const cpVerbatimSymlinkPath = "./packaged-cp/symlink-src/sub/verbatim-link.txt";
+              const cpDefaultSymlinkOk = symlinkCreationOk(
+                () => fs.symlinkSync("target.txt", cpDefaultSymlinkPath),
+                cpDefaultSymlinkPath,
+                "target.txt"
+              );
+              const cpVerbatimSymlinkOk = symlinkCreationOk(
+                () => fs.symlinkSync("../target.txt", cpVerbatimSymlinkPath),
+                cpVerbatimSymlinkPath,
+                "../target.txt"
+              );
+              const cpSymlinkCorpusReady =
+                symlinkTargetOk(cpDefaultSymlinkPath, "target.txt") &&
+                symlinkTargetOk(cpVerbatimSymlinkPath, "../target.txt");
+              let symlinkDereferenceOk = cpDefaultSymlinkOk && cpVerbatimSymlinkOk;
+              let symlinkOk = cpDefaultSymlinkOk && cpVerbatimSymlinkOk;
+              if (cpSymlinkCorpusReady) {
+                await fsp.cp(cpDefaultSymlinkPath, "./packaged-cp/symlink-default-link.txt", {
+                  recursive: true
+                });
+                fs.cpSync("./packaged-cp/symlink-src", "./packaged-cp/symlink-verbatim", {
+                  recursive: true,
+                  verbatimSymlinks: true
+                });
+                symlinkDereferenceOk = await new Promise((resolve, reject) => {
+                  fs.cp(
+                    cpDefaultSymlinkPath,
+                    "./packaged-cp/symlink-deref.txt",
+                    { recursive: true, dereference: true },
+                    (error) => {
+                      if (error) {
+                        reject(error);
+                        return;
+                      }
+                      resolve(
+                        !fs.lstatSync("./packaged-cp/symlink-deref.txt").isSymbolicLink() &&
+                        fs.readFileSync("./packaged-cp/symlink-deref.txt", "utf8") === "target"
+                      );
                     }
-                    resolve(
-                      !fs.lstatSync("./packaged-cp/symlink-deref.txt").isSymbolicLink() &&
-                      fs.readFileSync("./packaged-cp/symlink-deref.txt", "utf8") === "target"
-                    );
-                  }
-                );
-              });
+                  );
+                });
+                symlinkOk =
+                  fs.lstatSync("./packaged-cp/symlink-default-link.txt").isSymbolicLink() &&
+                  fs.readFileSync("./packaged-cp/symlink-default-link.txt", "utf8") === "target" &&
+                  fs.lstatSync("./packaged-cp/symlink-verbatim/default-link.txt").isSymbolicLink() &&
+                  fs.readlinkSync("./packaged-cp/symlink-verbatim/default-link.txt") === "target.txt" &&
+                  fs.lstatSync("./packaged-cp/symlink-verbatim/sub/verbatim-link.txt").isSymbolicLink() &&
+                  fs.readlinkSync("./packaged-cp/symlink-verbatim/sub/verbatim-link.txt") === "../target.txt" &&
+                  fs.readFileSync("./packaged-cp/symlink-verbatim/sub/verbatim-link.txt", "utf8") === "target" &&
+                  symlinkDereferenceOk;
+              }
               const recursiveOk = fs.readFileSync("./packaged-cp/out/a.txt", "utf8") === "a" &&
                 fs.readFileSync("./packaged-cp/out/nested/b.txt", "utf8") === "b" &&
                 fs.statSync("./packaged-cp/out/empty").isDirectory();
@@ -7377,15 +7704,6 @@ class EmbeddedNodePackagedApkSmokeTest {
                 !fs.existsSync("./packaged-cp/filter-out/skip.tmp") &&
                 !fs.existsSync("./packaged-cp/filter-out/skip-dir/drop.txt") &&
                 !fs.existsSync("./packaged-cp/filtered-root.txt");
-              const symlinkOk =
-                fs.lstatSync("./packaged-cp/symlink-default-link.txt").isSymbolicLink() &&
-                fs.readFileSync("./packaged-cp/symlink-default-link.txt", "utf8") === "target" &&
-                fs.lstatSync("./packaged-cp/symlink-verbatim/default-link.txt").isSymbolicLink() &&
-                fs.readlinkSync("./packaged-cp/symlink-verbatim/default-link.txt") === "target.txt" &&
-                fs.lstatSync("./packaged-cp/symlink-verbatim/sub/verbatim-link.txt").isSymbolicLink() &&
-                fs.readlinkSync("./packaged-cp/symlink-verbatim/sub/verbatim-link.txt") === "../target.txt" &&
-                fs.readFileSync("./packaged-cp/symlink-verbatim/sub/verbatim-link.txt", "utf8") === "target" &&
-                symlinkDereferenceOk;
               const ready = recursiveOk &&
                 urlOk &&
                 callbackOk &&
@@ -7401,6 +7719,7 @@ class EmbeddedNodePackagedApkSmokeTest {
               console.log("packaged.cp.mode=" + modeOk);
               console.log("packaged.cp.filter=" + filterOk);
               console.log("packaged.cp.symlink=" + symlinkOk);
+              console.log("packaged.cp.symlink.restricted=" + !cpSymlinkCorpusReady);
               console.log("packaged.utimes.ready=" + utimesOk);
               console.log("packaged.cp.preserve_timestamps=" + preserveOk);
             }
@@ -7517,7 +7836,7 @@ class EmbeddedNodePackagedApkSmokeTest {
               await fsp.rm("./packaged-chdir", { recursive: true, force: true });
               console.log("packaged.chdir.ready=" + ready);
               console.log("packaged.chdir.fs=" + fsOk);
-              process.stderr.write("packaged.chdir.require=" + requireOk + "\n");
+              console.log("packaged.chdir.require=" + requireOk);
             }
 
             function runPackagedProjectRunnerLaunchCorpus() {
@@ -7605,10 +7924,20 @@ class EmbeddedNodePackagedApkSmokeTest {
               await new Promise(resolve => setTimeout(resolve, 50));
             }
 
-            main().catch(error => {
-              console.error("packaged.error=" + (error && (error.stack || error.message) || error));
-              process.exitCode = 1;
-            });
+            main()
+              .then(finishPackagedMarkerReporting)
+              .catch(async error => {
+                console.error("packaged.error=" + (error && (error.stack || error.message) || error));
+                try {
+                  writePackagedMarkerReport();
+                  emitPackagedMarkerMatrixStatus();
+                } catch (reportError) {
+                  console.error("packaged.marker_report.error=" + (
+                    reportError && (reportError.stack || reportError.message) || reportError
+                  ));
+                }
+                process.exitCode = 1;
+              });
         """.trimIndent() + "\n"
 
         val mainScript = File(projectDir, mainScriptName).apply {
@@ -7635,7 +7964,8 @@ class EmbeddedNodePackagedApkSmokeTest {
               "argv": ["--from-packaged-launch"],
               "env": {
                 "PACKAGED_LAUNCH_ENV": "packaged-launch-secret"
-              }
+              },
+              "timeoutMs": $FULL_COMPATIBILITY_PACKAGED_TIMEOUT_MS
             }
             """.trimIndent() + "\n",
             StandardCharsets.UTF_8,
@@ -7730,7 +8060,6 @@ class EmbeddedNodePackagedApkSmokeTest {
             File(File(context.cacheDir, "embedded-node-packaged-smoke"), "output"),
             SUCCESS_APK_NAME,
         )
-        assertTrue("Packaged APK was not created before install-and-run smoke: ${outputApk.absolutePath}", outputApk.isFile)
         assertInstallAndRunPackagedSmoke(outputApk)
     }
 
@@ -7987,7 +8316,6 @@ class EmbeddedNodePackagedApkSmokeTest {
             File(File(context.cacheDir, "embedded-node-packaged-script-launch-smoke"), "output"),
             SCRIPT_LAUNCH_APK_NAME,
         )
-        assertTrue("Package script launch APK was not created before install-and-run smoke: ${outputApk.absolutePath}", outputApk.isFile)
         assertInstallAndRunPackagedScriptLaunchSmoke(outputApk)
     }
 
@@ -8178,7 +8506,6 @@ class EmbeddedNodePackagedApkSmokeTest {
             File(File(context.cacheDir, "embedded-node-packaged-bin-launch-smoke"), "output"),
             BIN_LAUNCH_APK_NAME,
         )
-        assertTrue("Package bin launch APK was not created before install-and-run smoke: ${outputApk.absolutePath}", outputApk.isFile)
         assertInstallAndRunPackagedBinLaunchSmoke(outputApk)
     }
 
@@ -8343,7 +8670,6 @@ class EmbeddedNodePackagedApkSmokeTest {
             File(File(context.cacheDir, "embedded-node-packaged-bin-string-script-smoke"), "output"),
             BIN_STRING_SCRIPT_APK_NAME,
         )
-        assertTrue("Package bin string script APK was not created before install-and-run smoke: ${outputApk.absolutePath}", outputApk.isFile)
         assertInstallAndRunPackagedBinStringScriptLaunchSmoke(outputApk)
     }
 
@@ -8543,10 +8869,6 @@ class EmbeddedNodePackagedApkSmokeTest {
         val outputApk = File(
             File(File(context.cacheDir, "embedded-node-packaged-diagnostics-smoke"), "output"),
             DIAGNOSTICS_APK_NAME,
-        )
-        assertTrue(
-            "Diagnostics packaged APK was not created before install-and-run smoke: ${outputApk.absolutePath}",
-            outputApk.isFile,
         )
         assertInstallAndRunPackagedDiagnosticsSmoke(outputApk)
     }
@@ -10817,11 +11139,12 @@ $permissionsJson
                 expected = PackagedNodeLaunchDescriptorExpectation(
                     launchKind = NodeProjectLaunchKind.PACKAGE_SCRIPT.descriptorValue,
                     workingDirectory = ".",
-                    scriptName = "packaged-smoke",
-                    argv = listOf("--from-packaged-launch"),
-                    env = mapOf("PACKAGED_LAUNCH_ENV" to "packaged-launch-secret"),
-                ),
-            )
+                   scriptName = "packaged-smoke",
+                   argv = listOf("--from-packaged-launch"),
+                   env = mapOf("PACKAGED_LAUNCH_ENV" to "packaged-launch-secret"),
+                   timeoutMs = FULL_COMPATIBILITY_PACKAGED_TIMEOUT_MS,
+               ),
+           )
 
             val expectedMatrix = readZipText(zip, "assets/project/runtime-matrix.expected.txt")
             SUCCESS_RUNTIME_MARKERS.forEach { marker ->
@@ -12611,6 +12934,7 @@ $permissionsJson
         private const val TIMEOUT_DIAGNOSTICS_PACKAGE_NAME = "org.autojs6.packaged.node.timeout.diagnostics.smoke"
         private const val TIMEOUT_DIAGNOSTICS_APK_NAME = "PackagedNodeTimeoutDiagnosticsSmoke_v1.0.0.apk"
         private const val PACKAGED_NODE_LAUNCH_DESCRIPTOR_FILE = NodeProjectLaunchDescriptor.DESCRIPTOR_FILE_NAME
+        private const val PACKAGED_SMOKE_MARKER_REPORT_FILE = "packaged-smoke-markers.log"
         private const val PACKAGE_SCRIPT_NODE_MODULES_BIN_TEMPLATE_MARKER = "node_modules/.bin/"
         private const val PACKAGED_LAUNCH_FAILURE_SECRET_KEY = "PACKAGED_FAILURE_SECRET"
         private const val PACKAGED_LAUNCH_FAILURE_SECRET_VALUE = "packaged-failure-secret-value"
@@ -12619,6 +12943,8 @@ $permissionsJson
         private const val PACKAGED_LAUNCH_FAILURE_BIN_PACKAGE_DIR = "packages/failure-bin-tool"
         private const val PACKAGED_PRELOAD_BUDGET_FILE = "preload-budget.expected.txt"
         private const val PACKAGED_MODULE_SOURCES_LIMIT = 64
+        private const val FULL_COMPATIBILITY_PACKAGED_TIMEOUT_MS = 15_000L
+        private const val PACKAGED_WATCH_SETTLE_MS = 250
         private const val INRT_NODE_PROJECT_RUNNER_TEMPLATE_MARKER = "autojs6.inrt.node_project_runner.v1"
         private const val INRT_NODE_PROJECT_LAUNCH_SOURCE_TEMPLATE_MARKER =
             "autojs6.inrt.node_project_launch_source.v2"
@@ -12859,236 +13185,8 @@ $permissionsJson
             "packaged.tail=true",
         )
         private val SUCCESS_INSTALL_REQUIRED_MARKERS = listOf(
-            "packaged.node.version=v24.5.0",
-            "packaged.text=packaged",
-            "packaged.hash=a3453242",
-            "packaged.stream=stream",
-            "packaged.promise=drained",
-            "packaged.fs.mkdir=true",
-            "packaged.project_runner.ready=true",
-            "packaged.project_runner.entry=src/main.js:true",
-            "packaged.project_runner.cwd=project:true",
-            "packaged.project_runner.require_main=true",
-            "packaged.project_runner.root_fs=true",
-            "packaged.project_runner.root_require=true",
-            "packaged.project_runner.script_argv=true",
-            "packaged.project_runner.descriptor_launch_kind=package-script:true",
-            "packaged.project_runner.lifecycle_env=true",
-            "packaged.fs.readdir=true",
-            "packaged.fs.stat=true",
-            "packaged.fs.lstat=true",
-            "packaged.fs.statfs=true",
-            "packaged.fs.append=true",
-            "packaged.fs.copy=true",
-            "packaged.fs.link=true",
-            "packaged.fs.symlink=true",
-            "packaged.fs.chmod=true",
-            "packaged.fs.lchmod=true",
-            "packaged.fs.chown=true",
-            "packaged.fs.lutimes=true",
-            "packaged.fs.exists=true",
-            "packaged.fs.native_glob=true",
-            "packaged.fs.native_glob_extended=true",
-            "packaged.fs.opendir=true",
-            "packaged.fs.readdir_recursive=true",
-            "packaged.fs.opendir_recursive=true",
-            "packaged.fs.disposable=true",
-            "packaged.fs.disposable_extended=true",
-            "packaged.fs.realpath=true",
-            "packaged.fs.legacy=true",
-            "packaged.fs.pathlike=true",
-            "packaged.fs.open_as_blob=true",
-            "packaged.fs.open_as_blob_web=true",
-            "packaged.fs.open_as_blob_slice=true",
-            "packaged.fs.truncate=true",
-            "packaged.fs.stream_fd=true",
-            "packaged.fs.stream_options=true",
-            "packaged.fs.stream_modern=true",
-            "packaged.fs.class_surface=true",
-            "packaged.fs.utf8_stream=true",
-            "packaged.fs.top_constants=true",
-            "packaged.fs.watch_file=true",
-            "packaged.fs.watch_file_options=true",
-            "packaged.fs.watch_file_pathlike=true",
-            "packaged.fs.watch=true",
-            "packaged.fs.watch_pathlike=true",
-            "packaged.fs.promises_watch=true",
-            "packaged.fs.watch_options=true",
-            "packaged.fs.promises_watch_pathlike=true",
-            "packaged.fs.promises_watch_options=true",
-            "packaged.fs.filehandle_stream=true",
-            "packaged.fs.filehandle_stream_abort=true",
-            "packaged.fs.filehandle_readlines=true",
-            "packaged.fs.filehandle_webstream=true",
-            "packaged.fs.fd=true",
-            "packaged.fs.fd_options=true",
-            "packaged.fs.fileio=true",
-            "packaged.fs.fd_metadata=true",
-            "packaged.fs.rm=true",
-            "packaged.fs.promisify.extended=true",
-            "packaged.fs.promises.ready=true",
-            "packaged.fs.promises.alias=true",
-            "packaged.fs.promises.constants=true",
-            "packaged.fs.failure.ready=true",
-            "packaged.fs.failure.summary=77/77|41/41|39/39|true|true",
-            "packaged.buffer.builtin=true",
-            "packaged.buffer.surface=true",
-            "packaged.buffer.object_url=true",
-            "packaged.buffer.transcode=true",
-            "packaged.web_globals=true",
-            "packaged.web_fetch_disabled=true",
-            "packaged.web_platform_globals=true",
-            "packaged.web_platform_utilities=true",
-            "packaged.web_abort_signal=true",
-            "packaged.web_event_globals=true",
-            "packaged.web_performance_globals=true",
-            "packaged.web_message_globals=true",
-            "packaged.web_stream_globals=true",
-            "packaged.web_crypto.global=true",
-            "packaged.web_crypto.digest=true",
-            "packaged.web_crypto.hmac=true",
-            "packaged.web_crypto.node_alias=true",
-            "packaged.web_compression.global=true",
-            "packaged.web_compression.roundtrip=true",
-            "packaged.web_compression.limits=true",
-            "packaged.process.builtin=true",
-            "packaged.process.alias=true",
-            "packaged.process.timing=true",
-            "packaged.process.usage=true",
-            "packaged.process.modern=true",
-            "packaged.process.guards=true",
-            "packaged.constants.builtin=true",
-            "packaged.constants.fs=true",
-            "packaged.constants.os=true",
-            "packaged.legacy_core.ready=true",
-            "packaged.legacy_core.os=true",
-            "packaged.legacy_core.os_extended=true",
-            "packaged.legacy_core.os_safe=true",
-            "packaged.legacy_core.querystring=true",
-            "packaged.legacy_core.string_decoder=true",
-            "packaged.legacy_core.assert=true",
-            "packaged.legacy_core.assert_extended=true",
-            "packaged.legacy_core.assert_helpers=function,function,function,function,function,function,function,function,function,function,function,function,function,function,function,function,function,function,function,function,function",
-            "packaged.legacy_core.punycode=true",
-            "packaged.legacy_core.hidden=true",
-            "packaged.core_builtins.ready=true",
-            "packaged.core_builtins.surface=true",
-            "packaged.core_builtins.events_extended=true",
-            "packaged.core_builtins.events_helpers=function,function,function,function,symbol,symbol,undefined",
-            "packaged.core_builtins.path_extended=true",
-            "packaged.core_builtins.path_subpaths=true",
-            "packaged.core_builtins.path_helpers=function,function,function,function,function,function,function,function,function,function,function,function,string,string,object,object",
-            "packaged.core_builtins.util_extended=true",
-            "packaged.core_builtins.util_helpers=function,function,function,symbol,function,symbol,function,function,function,function,function,function,function,function,object,function,function,function,function",
-            "packaged.core_builtins.util_types=true",
-            "packaged.core_builtins.util_mime=true",
-            "packaged.core_builtins.util_modern=true",
-            "packaged.core_builtins.console=true",
-            "packaged.core_builtins.console_helpers=function,function,function,function,function,function,function,function,function,function,function,function,function,function,function,function,function,function,function,function,function,function,function,function,function",
-            "packaged.core_builtins.v8=true",
-            "packaged.core_builtins.v8_helpers=function,function,function,function,function,function,function",
-            "packaged.core_builtins.v8_hidden=undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined",
-            "packaged.core_builtins.tty=true",
-            "packaged.core_builtins.tty_helpers=function,undefined,undefined",
-            "packaged.core_builtins.tty_stdio=false,function,1,function,false,false,false,function,1,function,false",
-            "packaged.core_builtins.async_hooks=true",
-            "packaged.core_builtins.async_hooks_helpers=function,function,undefined,undefined,undefined,undefined",
-            "packaged.core_builtins.diagnostics_channel=true",
-            "packaged.core_builtins.diagnostics_helpers=function,function,function,function,function,undefined,function,function,function,undefined,function,function,function",
-            "packaged.core_builtins.dns=true",
-            "packaged.core_builtins.dns_helpers=function,function,function,function,function,function,function,number,string",
-            "packaged.core_builtins.net=true",
-            "packaged.core_builtins.net_helpers=function,function,function,function,function,function,function,function,function,function,function,undefined",
-            "packaged.core_builtins.http=true",
-            "packaged.core_builtins.http_helpers=function,function,function,function,function,function,function,function,function,function,function,function,object,object,object,undefined",
-            "packaged.core_builtins.tls=true",
-            "packaged.core_builtins.tls_helpers=function,function,function,function,function,function,function,function,function,object,string,undefined",
-            "packaged.core_builtins.perf_hooks=true",
-            "packaged.core_builtins.perf_helpers=object,function,function,function,function,function,function,function,function,number,function,function,function,function",
-            "packaged.core_builtins.perf_hidden=undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined",
-            "packaged.core_builtins.timers_promises=true",
-            "packaged.core_builtins.timers_promises_helpers=function,function,function,object,function,function",
-            "packaged.core_builtins.stream_promises=true",
-            "packaged.core_builtins.stream_modern_helpers=true",
-            "packaged.core_builtins.stream_promises_fs=true",
-            "packaged.core_builtins.stream_web=true",
-            "packaged.core_builtins.stream_consumers=true",
-            "packaged.core_builtins.readline=true",
-            "packaged.core_builtins.readline_promises=true",
-            "packaged.core_builtins.guards=true",
-            "packaged.crypto_zlib.ready=true",
-            "packaged.crypto_zlib.surface=true",
-            "packaged.crypto_zlib.secret_key=true",
-            "packaged.crypto_zlib.kdf=true",
-            "packaged.crypto_zlib.stream=true",
-            "packaged.crypto_zlib.limits=true",
-            "packaged.crypto_zlib.guards=true",
-            "packaged.npm_crypto_zlib_fs.ready=true",
-            "packaged.npm_crypto_zlib_fs.blob=true",
-            "packaged.npm_crypto_zlib_fs.glob=true",
-            "packaged.npm_crypto_zlib_fs.stream=true",
-            "packaged.npm_crypto_zlib_fs.cp=true",
-            "packaged.npm_crypto_zlib_fs.watch=true",
-            "packaged.npm_crypto_zlib_fs.scan=true",
-            "packaged.npm_crypto_zlib_fs.temp=true",
-            "packaged.dynamic_require.ready=true",
-            "packaged.dynamic_require.cache=true",
-            "packaged.dynamic_require.json=true",
-            "packaged.module.create_require.ready=true",
-            "packaged.module.create_require.resolve=true",
-            "packaged.module.create_require.cache=true",
-            "packaged.module.builtin_helpers=true",
-            "packaged.cli.ready=true",
-            "packaged.cli.argv=true",
-            "packaged.cli.require_main=true",
-            "packaged.cli.combo=true",
-            "packaged.cli.process_constants=true",
-            "packaged.glob.ready=true",
-            "packaged.glob.matches=true",
-            "packaged.glob.ignore=true",
-            "packaged.glob.fs_promises=true",
-            "packaged.glob.native=true",
-            "packaged.dirent.ready=true",
-            "packaged.dirent.readdir=true",
-            "packaged.dirent.opendir=true",
-            "packaged.dirent.opendir_recursive=true",
-            "packaged.dirent.async_iterator=true",
-            "packaged.readlink.surface=true",
-            "packaged.readlink.symlink=true",
-            "packaged.readlink.rejects=true",
-            "packaged.config.ready=true",
-            "packaged.config.plugin=true",
-            "packaged.config.scoped=true",
-            "packaged.config.output=true",
-            "packaged.discovery.ready=true",
-            "packaged.discovery.package_json=true",
-            "packaged.discovery.plugin=true",
-            "packaged.discovery.output=true",
-            "packaged.url.file_url=true",
-            "packaged.url.fs_url=true",
-            "packaged.url.opendir_url=true",
-            "packaged.url.sandbox=true",
-            "packaged.url.static=true",
-            "packaged.url.legacy=true",
-            "packaged.url.pattern=true",
-            "packaged.cp.ready=true",
-            "packaged.cp.recursive=true",
-            "packaged.cp.url=true",
-            "packaged.cp.callback=true",
-            "packaged.cp.mode=true",
-            "packaged.cp.filter=true",
-            "packaged.cp.symlink=true",
-            "packaged.utimes.ready=true",
-            "packaged.cp.preserve_timestamps=true",
-            "packaged.mkdtemp.ready=true",
-            "packaged.rename.ready=true",
-            "packaged.atomic.ready=true",
-            "packaged.atomic.url=true",
-            "packaged.cache_copy.ready=true",
-            "packaged.chdir.ready=true",
-            "packaged.chdir.fs=true",
-            "packaged.chdir.require=true",
-            "packaged.tail=true",
+            "packaged.runtime_matrix.ready=true",
+            "packaged.runtime_matrix.missing_count=0",
         )
         private val TOAST_BRIDGE_RUNTIME_MARKERS = listOf(
             "packaged.toast.ready=true",

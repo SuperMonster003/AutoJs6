@@ -92,38 +92,40 @@ class NativeNodeEmbeddedScriptService : Service() {
 
     private fun runScript(intent: Intent, startId: Int) {
         val receiver = intent.resultReceiverExtra(EXTRA_RESULT_RECEIVER)
-        val source = intent.getStringExtra(EXTRA_SOURCE).orEmpty()
-        val sourceName = intent.getStringExtra(EXTRA_SOURCE_NAME).orEmpty().ifBlank { DEFAULT_SOURCE_NAME }
-        val workingDirectory = intent.getStringExtra(EXTRA_WORKING_DIRECTORY)?.takeIf { it.isNotBlank() }
-        val timeoutMs = intent.getLongExtra(EXTRA_TIMEOUT_MS, DEFAULT_TIMEOUT_MS).coerceAtLeast(1L)
-        val esmExperimentalEnabled = intent.getBooleanExtra(
-            EXTRA_ESM_EXPERIMENTAL_ENABLED,
-            BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED,
-        )
-        val dynamicImportExperimentalEnabled = intent.getBooleanExtra(
-            EXTRA_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED,
-            BuildConfig.NODEJS_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED,
-        )
-        val workerThreadsExperimentalEnabled = intent.getBooleanExtra(
-            EXTRA_WORKER_THREADS_EXPERIMENTAL_ENABLED,
-            BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED,
-        )
-        val javaInteropExperimentalEnabled = intent.getBooleanExtra(
-            EXTRA_JAVA_INTEROP_EXPERIMENTAL_ENABLED,
-            BuildConfig.NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED,
-        )
-        val spawnDepth = intent.getIntExtra(EXTRA_SPAWN_DEPTH, 0)
-            .coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH)
-        val env = intent.envExtra()
-        val moduleSources = intent.moduleSourcesExtra()
-        val runtimeModuleSources = intent.runtimeModuleSourcesExtra()
+        val startedAt = android.os.SystemClock.elapsedRealtime()
+        val serviceRequest = try {
+            intent.embeddedScriptRequestExtra(this)
+        } catch (e: Throwable) {
+            Log.e(TAG, "Native Node embedded script request transport failed.", e)
+            receiver?.send(
+                RESULT_SCRIPT,
+                requestTransportFailureResult(
+                    intent = intent,
+                    throwable = e,
+                    startedAt = startedAt,
+                ).toBundle(),
+            )
+            stopServiceIfQueueIdle(startId)
+            return
+        }
+        val source = serviceRequest.source
+        val sourceName = serviceRequest.sourceName.ifBlank { DEFAULT_SOURCE_NAME }
+        val workingDirectory = serviceRequest.workingDirectory?.takeIf { it.isNotBlank() }
+        val timeoutMs = serviceRequest.timeoutMs.coerceAtLeast(1L)
+        val esmExperimentalEnabled = serviceRequest.esmExperimentalEnabled
+        val dynamicImportExperimentalEnabled = serviceRequest.dynamicImportExperimentalEnabled
+        val workerThreadsExperimentalEnabled = serviceRequest.workerThreadsExperimentalEnabled
+        val javaInteropExperimentalEnabled = serviceRequest.javaInteropExperimentalEnabled
+        val spawnDepth = serviceRequest.spawnDepth.coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH)
+        val env = serviceRequest.env
+        val moduleSources = serviceRequest.moduleSources
+        val runtimeModuleSources = serviceRequest.runtimeModuleSources
         val bridgeLimits = NodeBridgeLimits.fromRuntimeModuleOrWorkingDirectory(
             runtimeModuleSources[NodeBridgeLimits.RUNTIME_MODULE_NAME],
             workingDirectory,
         )
-        val executionId = intent.getStringExtra(EXTRA_EXECUTION_ID)?.takeIf { it.isNotBlank() }
+        val executionId = serviceRequest.executionId?.takeIf { it.isNotBlank() }
             ?: newExecutionId()
-        val startedAt = android.os.SystemClock.elapsedRealtime()
         val processName = currentProcessName()
         val pid = Process.myPid()
         val queueMode = NodeExecutionQueuePolicy.MODE_REJECT_WHEN_BUSY
@@ -182,6 +184,8 @@ class NativeNodeEmbeddedScriptService : Service() {
             sourceName = sourceName,
             workingDirectory = workingDirectory,
             timeoutMs = timeoutMs,
+            captureStdout = serviceRequest.captureStdout,
+            captureStderr = serviceRequest.captureStderr,
             env = env,
             moduleSources = moduleSources,
             runtimeModuleSources = enrichedRuntimeModuleSources,
@@ -302,6 +306,7 @@ class NativeNodeEmbeddedScriptService : Service() {
                 ).withLifecycle(lifecycle).withQueueLease(slotLease).withTimeline(timeline).toBundle(),
             )
         } finally {
+            File(File(cacheDir, REQUEST_SPOOL_DIR), safeRequestSpoolName(executionId)).deleteRecursively()
             bridgeSession.stop()
             val queueStatus = releaseExecutionSlot(executionId)
             val elapsed = android.os.SystemClock.elapsedRealtime() - startedAt
@@ -321,6 +326,47 @@ class NativeNodeEmbeddedScriptService : Service() {
                 )
             }
         }
+    }
+
+    private fun requestTransportFailureResult(
+        intent: Intent,
+        throwable: Throwable,
+        startedAt: Long,
+    ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+        val executionId = intent.getStringExtra(EXTRA_EXECUTION_ID)?.takeIf { it.isNotBlank() } ?: newExecutionId()
+        val sourceName = intent.getStringExtra(EXTRA_SOURCE_NAME).orEmpty().ifBlank { DEFAULT_SOURCE_NAME }
+        val workingDirectory = intent.getStringExtra(EXTRA_WORKING_DIRECTORY)?.takeIf { it.isNotBlank() }
+        val processName = currentProcessName()
+        val pid = Process.myPid()
+        val elapsedMs = (android.os.SystemClock.elapsedRealtime() - startedAt).coerceAtLeast(0L)
+        val lifecycle = NodeEmbeddedRuntimeLifecycle(TAG, executionId, processName, pid, sourceName)
+            .apply { transition(NodeEmbeddedRuntimeState.FAILED, "service.request_transport") }
+        val message = "Embedded script request transport failed: ${throwable.message ?: throwable.javaClass.name}"
+        val nativeValues = linkedMapOf(
+            "embedded_script.request_transport_failed" to "true",
+            "embedded_script.error_code" to NodeRuntimeErrorCodes.EMBEDDED_NODE_INVALID_STATE,
+            "embedded_script.error_name" to "EmbeddedScriptRequestTransportError",
+            "embedded_script.source_name" to sourceName,
+            "embedded_script.working_directory" to workingDirectory.orEmpty(),
+            "embedded_script.elapsed_ms" to elapsedMs.toString(),
+        )
+        return NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult(
+            succeeded = false,
+            exitCode = 1,
+            resultText = null,
+            stdout = "",
+            stderr = "",
+            errorName = "EmbeddedScriptRequestTransportError",
+            errorMessage = message,
+            errorStack = throwable.stackTraceToString(),
+            errorCode = NodeRuntimeErrorCodes.EMBEDDED_NODE_INVALID_STATE,
+            elapsedMs = elapsedMs,
+            processName = processName,
+            pid = pid,
+            sourceName = sourceName,
+            nativeValues = nativeValues,
+            workingDirectory = workingDirectory,
+        ).withLifecycle(lifecycle)
     }
 
     private fun stopServiceIfQueueIdle(startId: Int) {
@@ -837,10 +883,14 @@ class NativeNodeEmbeddedScriptService : Service() {
         private const val EXTRA_MODULE_SOURCES = "module_sources"
         private const val EXTRA_RUNTIME_MODULE_SOURCE_NAMES = "runtime_module_source_names"
         private const val EXTRA_RUNTIME_MODULE_SOURCES = "runtime_module_sources"
+        private const val EXTRA_REQUEST_SPOOL_FILE = "request_spool_file"
         private const val HOST_APP_INFO_RUNTIME_MODULE_NAME = "autojs6:host-app-info"
         private const val DEVICE_INFO_RUNTIME_MODULE_NAME = "autojs6:device-info"
         private const val ENGINE_INFO_RUNTIME_MODULE_NAME = "autojs6:engine-info"
         private const val BRIDGE_LIVE_CONFIG_RUNTIME_MODULE_NAME = "autojs6:bridge-live-config"
+        private const val REQUEST_SPOOL_DIR = "embedded-node-script-requests"
+        private const val REQUEST_SPOOL_FILE_NAME = "request.json"
+        private const val REQUEST_SPOOL_VERSION = 1
         private const val RESULT_SCRIPT = 1
         private const val NOTIFICATION_ID = 0xA6E4
         private const val PROCESS_EXIT_DELAY_MS = 250L
@@ -849,6 +899,8 @@ class NativeNodeEmbeddedScriptService : Service() {
         private const val BRIDGE_LIVE_POLL_INTERVAL_MS = 10L
         private const val BRIDGE_LIVE_STOP_JOIN_MS = 1000L
         private const val BRIDGE_LIVE_DRAIN_ITERATIONS = 25
+        private const val RESULT_TRANSPORT_STRING_MAX_CHARS = 32_768
+        private const val CLIENT_SERVICE_START_GRACE_MS = 10_000L
         private const val TIMEOUT_EXIT_CODE = 124
         private const val TIMEOUT_ERROR_CODE = NodeRuntimeErrorCodes.LEGACY_SCRIPT_TIMEOUT
         private const val DEFAULT_SOURCE_NAME = "<embedded-script>"
@@ -934,10 +986,11 @@ class NativeNodeEmbeddedScriptService : Service() {
                     completion.countDown()
                 }
             }
+            val requestForService = request.copy(executionId = executionId)
+            var requestSpoolFile: File? = null
             val intent = Intent(appContext, NativeNodeEmbeddedScriptService::class.java).apply {
                 action = ACTION_RUN_SCRIPT
                 putExtra(EXTRA_RESULT_RECEIVER, receiver)
-                putExtra(EXTRA_SOURCE, request.source)
                 putExtra(EXTRA_SOURCE_NAME, request.sourceName)
                 putExtra(EXTRA_WORKING_DIRECTORY, request.workingDirectory)
                 putExtra(EXTRA_TIMEOUT_MS, request.timeoutMs.coerceAtLeast(1L))
@@ -947,15 +1000,11 @@ class NativeNodeEmbeddedScriptService : Service() {
                 putExtra(EXTRA_JAVA_INTEROP_EXPERIMENTAL_ENABLED, request.javaInteropExperimentalEnabled)
                 putExtra(EXTRA_SPAWN_DEPTH, request.spawnDepth.coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH))
                 putExtra(EXTRA_EXECUTION_ID, executionId)
-                putExtra(EXTRA_ENV_NAMES, request.env.keys.toTypedArray())
-                putExtra(EXTRA_ENV_VALUES, request.env.values.toTypedArray())
-                putExtra(EXTRA_MODULE_SOURCE_NAMES, request.moduleSources.keys.toTypedArray())
-                putExtra(EXTRA_MODULE_SOURCES, request.moduleSources.values.toTypedArray())
-                putExtra(EXTRA_RUNTIME_MODULE_SOURCE_NAMES, request.runtimeModuleSources.keys.toTypedArray())
-                putExtra(EXTRA_RUNTIME_MODULE_SOURCES, request.runtimeModuleSources.values.toTypedArray())
             }
             var component: android.content.ComponentName? = null
             try {
+                requestSpoolFile = writeEmbeddedScriptRequestSpool(appContext, executionId, requestForService)
+                intent.putExtra(EXTRA_REQUEST_SPOOL_FILE, requestSpoolFile.absolutePath)
                 component = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     appContext.startForegroundService(intent)
                 } else {
@@ -966,7 +1015,7 @@ class NativeNodeEmbeddedScriptService : Service() {
                     startedAt = startedAt,
                     executionId = executionId,
                 )
-                val completed = completion.await(request.timeoutMs.coerceAtLeast(1L), TimeUnit.MILLISECONDS)
+                val completed = completion.await(clientAwaitTimeoutMs(request.timeoutMs), TimeUnit.MILLISECONDS)
                 if (!completed) {
                     appContext.stopService(Intent().setComponent(component))
                     val lifecycle = timeoutLifecycle(executionId, request)
@@ -992,6 +1041,8 @@ class NativeNodeEmbeddedScriptService : Service() {
                     startedAt = startedAt,
                     executionId = executionId,
                 )
+            } finally {
+                requestSpoolFile?.parentFile?.deleteRecursively()
             }
             return result.get() ?: processCrashedOrTimedOut(
                 request = request,
@@ -1406,6 +1457,11 @@ class NativeNodeEmbeddedScriptService : Service() {
         private fun currentProcessNameCompat(): String = runCatching { App.getProcessNameCompat() }
             .getOrElse { "unknown" }
 
+        private fun clientAwaitTimeoutMs(requestTimeoutMs: Long): Long {
+            val scriptTimeoutMs = requestTimeoutMs.coerceAtLeast(1L)
+            return (scriptTimeoutMs + CLIENT_SERVICE_START_GRACE_MS).coerceAtLeast(scriptTimeoutMs)
+        }
+
         private fun timeoutNativeValues(
             request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
             elapsedMs: Long,
@@ -1507,6 +1563,169 @@ class NativeNodeEmbeddedScriptService : Service() {
             return ZLIB_CALLBACK_SOURCE_HINT_PATTERN.containsMatchIn(source)
         }
 
+        private fun writeEmbeddedScriptRequestSpool(
+            context: Context,
+            executionId: String,
+            request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
+        ): File {
+            val root = File(File(context.cacheDir, REQUEST_SPOOL_DIR), safeRequestSpoolName(executionId))
+            root.deleteRecursively()
+            if (!root.mkdirs() && !root.isDirectory) {
+                error("Failed to create embedded script request spool directory: ${root.absolutePath}")
+            }
+            val target = File(root, REQUEST_SPOOL_FILE_NAME)
+            val temp = File(root, "$REQUEST_SPOOL_FILE_NAME.tmp")
+            temp.writeText(embeddedScriptRequestJson(request).toString(), Charsets.UTF_8)
+            if (!temp.renameTo(target)) {
+                temp.copyTo(target, overwrite = true)
+                temp.delete()
+            }
+            return target
+        }
+
+        private fun safeRequestSpoolName(executionId: String): String {
+            return executionId
+                .filter { it.isLetterOrDigit() || it == '-' || it == '_' }
+                .take(96)
+                .ifBlank { newExecutionId() }
+        }
+
+        private fun Intent.embeddedScriptRequestExtra(
+            context: Context,
+        ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest {
+            requestSpoolFileExtra(context)?.let { file ->
+                return embeddedScriptRequestFromJson(JSONObject(file.readText(Charsets.UTF_8)))
+            }
+            return NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest(
+                source = getStringExtra(EXTRA_SOURCE).orEmpty(),
+                sourceName = getStringExtra(EXTRA_SOURCE_NAME).orEmpty().ifBlank { DEFAULT_SOURCE_NAME },
+                workingDirectory = getStringExtra(EXTRA_WORKING_DIRECTORY)?.takeIf { it.isNotBlank() },
+                executionId = getStringExtra(EXTRA_EXECUTION_ID)?.takeIf { it.isNotBlank() },
+                timeoutMs = getLongExtra(EXTRA_TIMEOUT_MS, DEFAULT_TIMEOUT_MS).coerceAtLeast(1L),
+                env = envExtra(),
+                moduleSources = moduleSourcesExtra(),
+                runtimeModuleSources = runtimeModuleSourcesExtra(),
+                esmExperimentalEnabled = getBooleanExtra(
+                    EXTRA_ESM_EXPERIMENTAL_ENABLED,
+                    BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED,
+                ),
+                dynamicImportExperimentalEnabled = getBooleanExtra(
+                    EXTRA_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED,
+                    BuildConfig.NODEJS_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED,
+                ),
+                workerThreadsExperimentalEnabled = getBooleanExtra(
+                    EXTRA_WORKER_THREADS_EXPERIMENTAL_ENABLED,
+                    BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED,
+                ),
+                javaInteropExperimentalEnabled = getBooleanExtra(
+                    EXTRA_JAVA_INTEROP_EXPERIMENTAL_ENABLED,
+                    BuildConfig.NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED,
+                ),
+                spawnDepth = getIntExtra(EXTRA_SPAWN_DEPTH, 0).coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH),
+            )
+        }
+
+        private fun Intent.requestSpoolFileExtra(context: Context): File? {
+            val path = getStringExtra(EXTRA_REQUEST_SPOOL_FILE)?.takeIf { it.isNotBlank() } ?: return null
+            val root = File(context.cacheDir, REQUEST_SPOOL_DIR).canonicalFile
+            val file = File(path).canonicalFile
+            val rootPrefix = root.path + File.separator
+            require(file.path == root.path || file.path.startsWith(rootPrefix)) {
+                "Embedded script request spool path escapes cache directory: $path"
+            }
+            require(file.isFile) {
+                "Embedded script request spool file is missing: ${file.absolutePath}"
+            }
+            return file
+        }
+
+        private fun embeddedScriptRequestJson(
+            request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
+        ): JSONObject {
+            return JSONObject().apply {
+                put("version", REQUEST_SPOOL_VERSION)
+                put("source", request.source)
+                put("sourceName", request.sourceName)
+                put("workingDirectory", request.workingDirectory)
+                put("executionId", request.executionId)
+                put("timeoutMs", request.timeoutMs.coerceAtLeast(1L))
+                put("queueMode", request.queueMode)
+                put("queueTimeoutMs", request.queueTimeoutMs)
+                put("captureStdout", request.captureStdout)
+                put("captureStderr", request.captureStderr)
+                put("env", orderedStringMapJson(request.env))
+                put("moduleSources", orderedStringMapJson(request.moduleSources))
+                put("runtimeModuleSources", orderedStringMapJson(request.runtimeModuleSources))
+                put("esmExperimentalEnabled", request.esmExperimentalEnabled)
+                put("dynamicImportExperimentalEnabled", request.dynamicImportExperimentalEnabled)
+                put("workerThreadsExperimentalEnabled", request.workerThreadsExperimentalEnabled)
+                put("javaInteropExperimentalEnabled", request.javaInteropExperimentalEnabled)
+                put("spawnDepth", request.spawnDepth.coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH))
+            }
+        }
+
+        private fun embeddedScriptRequestFromJson(
+            json: JSONObject,
+        ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest {
+            require(json.optInt("version") == REQUEST_SPOOL_VERSION) {
+                "Unsupported embedded script request spool version: ${json.optInt("version")}"
+            }
+            return NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest(
+                source = json.optString("source"),
+                sourceName = json.optString("sourceName").ifBlank { DEFAULT_SOURCE_NAME },
+                workingDirectory = json.optString("workingDirectory").takeIf { it.isNotBlank() },
+                executionId = json.optString("executionId").takeIf { it.isNotBlank() },
+                timeoutMs = json.optLong("timeoutMs", DEFAULT_TIMEOUT_MS).coerceAtLeast(1L),
+                queueMode = json.optString("queueMode").ifBlank { NodeExecutionQueuePolicy.MODE_REJECT_WHEN_BUSY },
+                queueTimeoutMs = json.optLong("queueTimeoutMs", 0L),
+                captureStdout = json.optBoolean("captureStdout", true),
+                captureStderr = json.optBoolean("captureStderr", true),
+                env = orderedStringMapFromJson(json.optJSONArray("env")),
+                moduleSources = orderedStringMapFromJson(json.optJSONArray("moduleSources")),
+                runtimeModuleSources = orderedStringMapFromJson(json.optJSONArray("runtimeModuleSources")),
+                esmExperimentalEnabled = json.optBoolean(
+                    "esmExperimentalEnabled",
+                    BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED,
+                ),
+                dynamicImportExperimentalEnabled = json.optBoolean(
+                    "dynamicImportExperimentalEnabled",
+                    BuildConfig.NODEJS_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED,
+                ),
+                workerThreadsExperimentalEnabled = json.optBoolean(
+                    "workerThreadsExperimentalEnabled",
+                    BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED,
+                ),
+                javaInteropExperimentalEnabled = json.optBoolean(
+                    "javaInteropExperimentalEnabled",
+                    BuildConfig.NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED,
+                ),
+                spawnDepth = json.optInt("spawnDepth", 0).coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH),
+            )
+        }
+
+        private fun orderedStringMapJson(map: Map<String, String>): JSONArray {
+            return JSONArray().apply {
+                map.forEach { (name, source) ->
+                    put(JSONArray().put(name).put(source))
+                }
+            }
+        }
+
+        private fun orderedStringMapFromJson(array: JSONArray?): Map<String, String> {
+            if (array == null) {
+                return emptyMap()
+            }
+            return linkedMapOf<String, String>().apply {
+                for (index in 0 until array.length()) {
+                    val pair = array.optJSONArray(index) ?: continue
+                    val name = pair.optString(0)
+                    if (name.isNotBlank()) {
+                        put(name, pair.optString(1))
+                    }
+                }
+            }
+        }
+
         @Suppress("DEPRECATION")
         private fun Intent.resultReceiverExtra(name: String): ResultReceiver? {
             return getParcelableExtra(name)
@@ -1534,14 +1753,15 @@ class NativeNodeEmbeddedScriptService : Service() {
         }
 
         private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult.toBundle(): Bundle = Bundle().apply {
+            val truncations = linkedMapOf<String, Int>()
             putBoolean(EXTRA_RESULT_SUCCEEDED, succeeded)
             exitCode?.let { putInt(EXTRA_RESULT_EXIT_CODE, it) }
-            putString(EXTRA_RESULT_TEXT, resultText)
-            putString(EXTRA_RESULT_STDOUT, stdout)
-            putString(EXTRA_RESULT_STDERR, stderr)
+            putString(EXTRA_RESULT_TEXT, resultText?.limitResultTransportString(EXTRA_RESULT_TEXT, truncations))
+            putString(EXTRA_RESULT_STDOUT, stdout.limitResultTransportString(EXTRA_RESULT_STDOUT, truncations))
+            putString(EXTRA_RESULT_STDERR, stderr.limitResultTransportString(EXTRA_RESULT_STDERR, truncations))
             putString(EXTRA_RESULT_ERROR_NAME, errorName)
-            putString(EXTRA_RESULT_ERROR_MESSAGE, errorMessage)
-            putString(EXTRA_RESULT_ERROR_STACK, errorStack)
+            putString(EXTRA_RESULT_ERROR_MESSAGE, errorMessage?.limitResultTransportString(EXTRA_RESULT_ERROR_MESSAGE, truncations))
+            putString(EXTRA_RESULT_ERROR_STACK, errorStack?.limitResultTransportString(EXTRA_RESULT_ERROR_STACK, truncations))
             putString(EXTRA_RESULT_ERROR_CODE, errorCode)
             putLong(EXTRA_RESULT_ELAPSED_MS, elapsedMs)
             putString(EXTRA_RESULT_PROCESS_NAME, processName)
@@ -1561,7 +1781,30 @@ class NativeNodeEmbeddedScriptService : Service() {
             pendingZlibCallbacks?.let { putInt(EXTRA_RESULT_PENDING_ZLIB_CALLBACKS, it) }
             pendingAsyncCallbacks?.let { putInt(EXTRA_RESULT_PENDING_ASYNC_CALLBACKS, it) }
             pendingCallbacks?.let { putBoolean(EXTRA_RESULT_PENDING_CALLBACKS, it) }
-            putStringArray(EXTRA_RESULT_NATIVE_PAYLOAD, nativeValues.map { (key, value) -> "$key=$value" }.toTypedArray())
+            val transportNativeValues = nativeValues
+                .mapValues { (key, value) -> value.limitResultTransportString("native:$key", truncations) }
+                .toMutableMap()
+            if (truncations.isNotEmpty()) {
+                transportNativeValues["embedded_script.result_transport.truncated"] = "true"
+                transportNativeValues["embedded_script.result_transport.truncated_fields"] = truncations.keys.joinToString(",")
+                truncations.forEach { (key, originalChars) ->
+                    transportNativeValues["embedded_script.result_transport.original_chars.$key"] = originalChars.toString()
+                }
+            }
+            putStringArray(EXTRA_RESULT_NATIVE_PAYLOAD, transportNativeValues.map { (key, value) -> "$key=$value" }.toTypedArray())
+        }
+
+        private fun String.limitResultTransportString(
+            key: String,
+            truncations: MutableMap<String, Int>,
+        ): String {
+            if (length <= RESULT_TRANSPORT_STRING_MAX_CHARS) {
+                return this
+            }
+            truncations[key] = length
+            val suffix = "\n...[truncated by AutoJs6 Embedded Node result transport; originalChars=$length]"
+            val keep = (RESULT_TRANSPORT_STRING_MAX_CHARS - suffix.length).coerceAtLeast(0)
+            return take(keep) + suffix
         }
 
         private fun Bundle?.toEmbeddedScriptResult(): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {

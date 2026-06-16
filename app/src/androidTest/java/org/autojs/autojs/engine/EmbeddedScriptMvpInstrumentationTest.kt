@@ -26504,7 +26504,10 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertTrue(result.stdout.contains("scoped.root=scoped-root"))
             assertTrue(result.stdout.contains("scoped.sub=scoped-sub"))
             assertTrue(result.stdout.contains("main.unsafe.code=ERR_INVALID_PACKAGE_TARGET"))
-            assertTrue(result.stdout.contains("main.native.code=ERR_INVALID_PACKAGE_TARGET"))
+            assertTrue(
+                result.stdout,
+                result.stdout.contains("main.native.code=${NodeRuntimeErrorCodes.NATIVE_ADDON_DISABLED}"),
+            )
             assertTrue(result.stdout.contains("exports.noFallback.code=ERR_PACKAGE_PATH_NOT_EXPORTED"))
             assertTrue(result.stdout, result.stdout.contains("scoped.only.message=Invalid Embedded Node scoped package specifier"))
             assertTrue(result.stdout, result.stdout.contains("scoped.empty.message=Invalid Embedded Node package specifier"))
@@ -30807,13 +30810,19 @@ class EmbeddedScriptMvpInstrumentationTest {
         assumeEmbeddedScriptExecutionEnabled()
 
         val sourceName = "<embedded-too-large-source.js>"
-        val result = runEmbeddedScript("x".repeat(262_145), sourceName)
+        val tooLargeSourceBytes = NodeRuntimeCapabilities.RUNTIME_SCRIPT_SOURCE_MAX_BYTES + 1
+        val result = runEmbeddedScript("x".repeat(tooLargeSourceBytes), sourceName)
 
         assertFalse(result.succeeded)
         assertEquals("EmbeddedScriptExecutionError", result.errorName)
         assertTrue(result.errorMessage.orEmpty().contains("too large"))
         assertTrue(result.errorMessage.orEmpty().contains(sourceName))
-        assertTrue(result.errorMessage.orEmpty().contains("262145 bytes > 262144 bytes"))
+        assertTrue(
+            result.errorMessage.orEmpty(),
+            result.errorMessage.orEmpty().contains(
+                "$tooLargeSourceBytes bytes > ${NodeRuntimeCapabilities.RUNTIME_SCRIPT_SOURCE_MAX_BYTES} bytes",
+            ),
+        )
     }
 
     @Test

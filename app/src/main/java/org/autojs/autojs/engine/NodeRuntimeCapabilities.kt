@@ -87,6 +87,7 @@ object NodeRuntimeCapabilities {
     const val JAVA_INTEROP_EXPERIMENTAL_PROPERTY = "autojs.nodejs.javaInterop.experimental"
     const val JAVA_INTEROP_EXPERIMENTAL_DEFAULT = false
 
+    const val RUNTIME_SCRIPT_SOURCE_MAX_BYTES = 524_288
     const val RUNTIME_MODULE_SOURCE_MAX_BYTES = 262_144
     const val RUNTIME_MODULE_SOURCES_MAX_BYTES = 524_288
     const val RUNTIME_MODULE_SOURCE_MAX_COUNT = 64

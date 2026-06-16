@@ -226,7 +226,7 @@ object NativeNodeEmbeddedRuntimeBridge {
     private const val EMBEDDED_PROBE_PROCESS_SUFFIX = ":nodejs_embedded"
     private const val PROBE_LEVEL_MIN = 0
     private const val PROBE_LEVEL_MAX = 209
-    private const val EMBEDDED_SCRIPT_SOURCE_MAX_BYTES = 262_144
+    private const val EMBEDDED_SCRIPT_SOURCE_MAX_BYTES = NodeRuntimeCapabilities.RUNTIME_SCRIPT_SOURCE_MAX_BYTES
     private const val EMBEDDED_SCRIPT_MODULE_SOURCE_MAX_BYTES = NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCE_MAX_BYTES
     private const val EMBEDDED_SCRIPT_MODULE_SOURCES_MAX_BYTES = NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCES_MAX_BYTES
     private const val EMBEDDED_SCRIPT_MODULE_SOURCE_MAX_COUNT = NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCE_MAX_COUNT

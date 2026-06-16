@@ -22,11 +22,15 @@ private val embeddedNodePackagingRuntimeBridgeDexDescriptor =
     "L${embeddedNodePackagingRuntimeBridgeClassName.replace('.', '/')};"
 private val embeddedNodePackagingLegacyLifecycleMethodName = "nativeRunEmbeddedScriptLifecycle"
 private val embeddedNodePackagingLifecycleWithModulesMethodName = "nativeRunEmbeddedScriptLifecycleWithModules"
+private val embeddedNodePackagingCurrentLifecycleWithModulesMethodName =
+    "${embeddedNodePackagingLifecycleWithModulesMethodName}V2"
 private val embeddedNodePackagingInrtNodeProjectRunnerMarker = "autojs6.inrt.node_project_runner.v1"
 private val embeddedNodePackagingLegacyLifecycleJniSymbol =
     "Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedScriptLifecycle"
 private val embeddedNodePackagingLifecycleWithModulesJniSymbol =
     "Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedScriptLifecycleWithModules"
+private val embeddedNodePackagingCurrentLifecycleWithModulesJniSymbol =
+    "${embeddedNodePackagingLifecycleWithModulesJniSymbol}V2"
 private val embeddedNodePackagingProjectConfigEntry = "assets/project/project.json"
 private val embeddedNodePackagingPackageJsonEntry = "assets/project/package.json"
 private val embeddedNodePackagingRuntimeMatrixEntry = "assets/project/runtime-matrix.expected.txt"
@@ -406,6 +410,7 @@ private data class EmbeddedNodePackagingTemplateFreshness(
     val dexDefinesRuntimeBridge: Boolean,
     val dexContainsLegacyLifecycleMethod: Boolean,
     val dexContainsLifecycleWithModulesMethod: Boolean,
+    val dexContainsCurrentLifecycleWithModulesMethod: Boolean,
     val dexContainsInrtNodeProjectRunnerMarker: Boolean,
     val dexContainsInrtNodeProjectLaunchSourceMarker: Boolean,
     val dexContainsInrtNodeProjectStableRequestMarkers: Map<String, Boolean>,
@@ -421,6 +426,7 @@ private data class EmbeddedNodePackagingTemplateFreshness(
     val x86NodeRuntimePresent: Boolean,
     val bridgeLibContainsLegacyLifecycleSymbol: Boolean,
     val bridgeLibContainsLifecycleWithModulesSymbol: Boolean,
+    val bridgeLibContainsCurrentLifecycleWithModulesSymbol: Boolean,
     val manifestServiceReady: Boolean,
     val manifestPermissionsReady: Boolean,
     val dexBridgeReady: Boolean,
@@ -1268,6 +1274,8 @@ private fun embeddedNodePackagingTemplateFreshness(
         embeddedNodePackagingApkDexContainsString(templateApk, embeddedNodePackagingLegacyLifecycleMethodName)
     val dexContainsLifecycleWithModulesMethod =
         embeddedNodePackagingApkDexContainsString(templateApk, embeddedNodePackagingLifecycleWithModulesMethodName)
+    val dexContainsCurrentLifecycleWithModulesMethod =
+        embeddedNodePackagingApkDexContainsString(templateApk, embeddedNodePackagingCurrentLifecycleWithModulesMethodName)
     val dexContainsInrtNodeProjectRunnerMarker =
         embeddedNodePackagingApkDexContainsString(templateApk, embeddedNodePackagingInrtNodeProjectRunnerMarker)
     val dexContainsInrtNodeProjectLaunchSourceMarker =
@@ -1294,13 +1302,15 @@ private fun embeddedNodePackagingTemplateFreshness(
         embeddedNodePackagingApkEntryContainsUtf8(templateApk, bridgeLibEntry, embeddedNodePackagingLegacyLifecycleJniSymbol)
     val bridgeLibContainsLifecycleWithModulesSymbol =
         embeddedNodePackagingApkEntryContainsUtf8(templateApk, bridgeLibEntry, embeddedNodePackagingLifecycleWithModulesJniSymbol)
+    val bridgeLibContainsCurrentLifecycleWithModulesSymbol =
+        embeddedNodePackagingApkEntryContainsUtf8(templateApk, bridgeLibEntry, embeddedNodePackagingCurrentLifecycleWithModulesJniSymbol)
     val manifestServiceReady = manifest.declaresEmbeddedScriptService &&
             manifest.embeddedScriptServiceUsesNodeProcess &&
             manifest.embeddedScriptServiceUsesSpecialUseFgs &&
             manifest.embeddedScriptServiceDeclaresSpecialUseSubtypeProperty
     val manifestPermissionsReady = manifest.declaresForegroundServicePermission &&
             manifest.declaresForegroundServiceSpecialUsePermission
-    val dexBridgeReady = dexDefinesRuntimeBridge && dexContainsLifecycleWithModulesMethod
+    val dexBridgeReady = dexDefinesRuntimeBridge && dexContainsCurrentLifecycleWithModulesMethod
     val inrtNodeProjectRunnerReady = dexContainsInrtNodeProjectRunnerMarker
     val inrtNodeProjectLaunchSourceReady = dexContainsInrtNodeProjectLaunchSourceMarker
     val inrtNodeProjectStableRequestDiagnosticsReady =
@@ -1335,7 +1345,9 @@ private fun embeddedNodePackagingTemplateFreshness(
         if (!manifestServiceReady) add("NativeNodeEmbeddedScriptService manifest declaration")
         if (!dexDefinesScriptService) add("dex class_def for NativeNodeEmbeddedScriptService")
         if (!dexDefinesRuntimeBridge) add("dex class_def for NativeNodeEmbeddedRuntimeBridge")
-        if (!dexContainsLifecycleWithModulesMethod) add("dex string nativeRunEmbeddedScriptLifecycleWithModules")
+        if (!dexContainsCurrentLifecycleWithModulesMethod) {
+            add("dex string $embeddedNodePackagingCurrentLifecycleWithModulesMethodName")
+        }
         if (!inrtNodeProjectRunnerReady) add("dex string $embeddedNodePackagingInrtNodeProjectRunnerMarker")
         if (!inrtNodeProjectLaunchSourceReady) {
             add("dex string $embeddedNodePackagingInrtNodeProjectLaunchSourceMarker")
@@ -1357,6 +1369,7 @@ private fun embeddedNodePackagingTemplateFreshness(
         dexDefinesRuntimeBridge = dexDefinesRuntimeBridge,
         dexContainsLegacyLifecycleMethod = dexContainsLegacyLifecycleMethod,
         dexContainsLifecycleWithModulesMethod = dexContainsLifecycleWithModulesMethod,
+        dexContainsCurrentLifecycleWithModulesMethod = dexContainsCurrentLifecycleWithModulesMethod,
         dexContainsInrtNodeProjectRunnerMarker = dexContainsInrtNodeProjectRunnerMarker,
         dexContainsInrtNodeProjectLaunchSourceMarker = dexContainsInrtNodeProjectLaunchSourceMarker,
         dexContainsInrtNodeProjectStableRequestMarkers = dexContainsInrtNodeProjectStableRequestMarkers,
@@ -1372,6 +1385,7 @@ private fun embeddedNodePackagingTemplateFreshness(
         x86NodeRuntimePresent = x86NodeRuntimePresent,
         bridgeLibContainsLegacyLifecycleSymbol = bridgeLibContainsLegacyLifecycleSymbol,
         bridgeLibContainsLifecycleWithModulesSymbol = bridgeLibContainsLifecycleWithModulesSymbol,
+        bridgeLibContainsCurrentLifecycleWithModulesSymbol = bridgeLibContainsCurrentLifecycleWithModulesSymbol,
         manifestServiceReady = manifestServiceReady,
         manifestPermissionsReady = manifestPermissionsReady,
         dexBridgeReady = dexBridgeReady,
@@ -1394,7 +1408,8 @@ private fun StringBuilder.appendEmbeddedNodePackagingTemplateFreshness(
     appendLine("  $label dex contains NativeNodeEmbeddedScriptService: ${freshness.dexDefinesScriptService}")
     appendLine("  $label dex contains NativeNodeEmbeddedRuntimeBridge: ${freshness.dexDefinesRuntimeBridge}")
     appendLine("  $label dex contains $embeddedNodePackagingLegacyLifecycleMethodName: ${freshness.dexContainsLegacyLifecycleMethod}")
-    appendLine("  $label dex contains $embeddedNodePackagingLifecycleWithModulesMethodName: ${freshness.dexContainsLifecycleWithModulesMethod}")
+    appendLine("  $label dex contains legacy $embeddedNodePackagingLifecycleWithModulesMethodName: ${freshness.dexContainsLifecycleWithModulesMethod}")
+    appendLine("  $label dex contains current $embeddedNodePackagingCurrentLifecycleWithModulesMethodName: ${freshness.dexContainsCurrentLifecycleWithModulesMethod}")
     appendLine("  $label dex contains inrt node project runner marker: ${freshness.dexContainsInrtNodeProjectRunnerMarker}")
     appendLine("  $label dex contains inrt node project launch source marker: ${freshness.dexContainsInrtNodeProjectLaunchSourceMarker}")
     freshness.dexContainsInrtNodeProjectStableRequestMarkers.forEach { (marker, present) ->
@@ -1412,7 +1427,8 @@ private fun StringBuilder.appendEmbeddedNodePackagingTemplateFreshness(
     appendLine("  $label native libs ready: ${freshness.nativeLibsReady}")
     appendLine("  $label bridge JNI symbols report-only:")
     appendLine("    legacy $embeddedNodePackagingLegacyLifecycleMethodName: ${freshness.bridgeLibContainsLegacyLifecycleSymbol}")
-    appendLine("    current $embeddedNodePackagingLifecycleWithModulesMethodName: ${freshness.bridgeLibContainsLifecycleWithModulesSymbol}")
+    appendLine("    legacy $embeddedNodePackagingLifecycleWithModulesMethodName: ${freshness.bridgeLibContainsLifecycleWithModulesSymbol}")
+    appendLine("    current $embeddedNodePackagingCurrentLifecycleWithModulesMethodName: ${freshness.bridgeLibContainsCurrentLifecycleWithModulesSymbol}")
     appendLine("  $label freshness ready: ${freshness.ready}")
     appendLine("  $label freshness missing: ${if (freshness.missing.isEmpty()) "none" else freshness.missing.joinToString()}")
 }
@@ -1533,8 +1549,10 @@ val embeddedNodeRefreshInrtTemplateApk = tasks.register(embeddedNodePackagingRef
             appendLine("  template.refresh.target=${targetApk.absolutePath}")
             appendLine("  template.refresh.sha256.source=${sourceSha256 ?: "unavailable"}")
             appendLine("  template.refresh.sha256.target=${targetSha256 ?: "unavailable"}")
-            appendLine("  template.refresh.dex.with_modules=${targetFreshness.dexContainsLifecycleWithModulesMethod}")
-            appendLine("  template.refresh.native.with_modules=${targetFreshness.bridgeLibContainsLifecycleWithModulesSymbol}")
+            appendLine("  template.refresh.dex.legacy_with_modules=${targetFreshness.dexContainsLifecycleWithModulesMethod}")
+            appendLine("  template.refresh.dex.with_modules=${targetFreshness.dexContainsCurrentLifecycleWithModulesMethod}")
+            appendLine("  template.refresh.native.legacy_with_modules=${targetFreshness.bridgeLibContainsLifecycleWithModulesSymbol}")
+            appendLine("  template.refresh.native.with_modules=${targetFreshness.bridgeLibContainsCurrentLifecycleWithModulesSymbol}")
             appendLine("  template.refresh.ready=${targetFreshness.ready}")
             appendLine("  template.refresh.missing=${if (targetFreshness.missing.isEmpty()) "none" else targetFreshness.missing.joinToString()}")
             appendLine()
@@ -1873,6 +1891,8 @@ val embeddedNodePackagingPreflightAppDebug = tasks.register("embeddedNodePackagi
         val templateDexDefinesRuntimeBridge = templateFreshness.dexDefinesRuntimeBridge
         val templateDexContainsLegacyLifecycleMethod = templateFreshness.dexContainsLegacyLifecycleMethod
         val templateDexContainsLifecycleWithModulesMethod = templateFreshness.dexContainsLifecycleWithModulesMethod
+        val templateDexContainsCurrentLifecycleWithModulesMethod =
+            templateFreshness.dexContainsCurrentLifecycleWithModulesMethod
         val templateDexContainsInrtNodeProjectRunnerMarker = templateFreshness.dexContainsInrtNodeProjectRunnerMarker
         val templateDexContainsInrtNodeProjectLaunchSourceMarker =
             templateFreshness.dexContainsInrtNodeProjectLaunchSourceMarker
@@ -1938,6 +1958,8 @@ val embeddedNodePackagingPreflightAppDebug = tasks.register("embeddedNodePackagi
         val templateX86NodeRuntimePresent = templateFreshness.x86NodeRuntimePresent
         val templateBridgeLibContainsLegacyLifecycleSymbol = templateFreshness.bridgeLibContainsLegacyLifecycleSymbol
         val templateBridgeLibContainsLifecycleWithModulesSymbol = templateFreshness.bridgeLibContainsLifecycleWithModulesSymbol
+        val templateBridgeLibContainsCurrentLifecycleWithModulesSymbol =
+            templateFreshness.bridgeLibContainsCurrentLifecycleWithModulesSymbol
         val templateManifestServiceReady = templateFreshness.manifestServiceReady
         val templateManifestPermissionsReady = templateFreshness.manifestPermissionsReady
         val templateDexBridgeReady = templateFreshness.dexBridgeReady
@@ -2017,7 +2039,8 @@ val embeddedNodePackagingPreflightAppDebug = tasks.register("embeddedNodePackagi
             appendLine("  template dex contains NativeNodeEmbeddedScriptService class_def: $templateDexDefinesScriptService")
             appendLine("  template dex contains NativeNodeEmbeddedRuntimeBridge class_def: $templateDexDefinesRuntimeBridge")
             appendLine("  template dex contains $embeddedNodePackagingLegacyLifecycleMethodName: $templateDexContainsLegacyLifecycleMethod")
-            appendLine("  template dex contains $embeddedNodePackagingLifecycleWithModulesMethodName: $templateDexContainsLifecycleWithModulesMethod")
+            appendLine("  template dex contains legacy $embeddedNodePackagingLifecycleWithModulesMethodName: $templateDexContainsLifecycleWithModulesMethod")
+            appendLine("  template dex contains current $embeddedNodePackagingCurrentLifecycleWithModulesMethodName: $templateDexContainsCurrentLifecycleWithModulesMethod")
             appendLine("  template dex contains inrt node project runner marker: $templateDexContainsInrtNodeProjectRunnerMarker")
             appendLine("  template dex contains inrt node project launch source marker: $templateDexContainsInrtNodeProjectLaunchSourceMarker")
             templateDexContainsInrtNodeProjectStableRequestMarkers.forEach { (marker, present) ->
@@ -2098,7 +2121,8 @@ val embeddedNodePackagingPreflightAppDebug = tasks.register("embeddedNodePackagi
                 appendLine("  template arm64-v8a libc++_shared.so present: $templateArm64HasLibcxx")
                 appendLine("  template x86 Node runtime present: $templateX86NodeRuntimePresent")
                 appendLine("  template libautojs6-node.so contains legacy JNI symbol: $templateBridgeLibContainsLegacyLifecycleSymbol")
-                appendLine("  template libautojs6-node.so contains WithModules JNI symbol: $templateBridgeLibContainsLifecycleWithModulesSymbol")
+                appendLine("  template libautojs6-node.so contains legacy WithModules JNI symbol: $templateBridgeLibContainsLifecycleWithModulesSymbol")
+                appendLine("  template libautojs6-node.so contains current WithModules JNI symbol: $templateBridgeLibContainsCurrentLifecycleWithModulesSymbol")
             } else {
                 appendLine("  template inspection skipped because template.apk is missing.")
                 appendLine("  Generate it with the existing inrt assemble/template copy flow before validating packaged-app embedded Node distribution.")
@@ -2109,7 +2133,8 @@ val embeddedNodePackagingPreflightAppDebug = tasks.register("embeddedNodePackagi
             appendLine("  template APK exists: ${templateApk.isFile}")
             appendLine("  template dex contains NativeNodeEmbeddedScriptService: $templateDexDefinesScriptService")
             appendLine("  template dex contains NativeNodeEmbeddedRuntimeBridge: $templateDexDefinesRuntimeBridge")
-            appendLine("  template dex contains $embeddedNodePackagingLifecycleWithModulesMethodName: $templateDexContainsLifecycleWithModulesMethod")
+            appendLine("  template dex contains legacy $embeddedNodePackagingLifecycleWithModulesMethodName: $templateDexContainsLifecycleWithModulesMethod")
+            appendLine("  template dex contains current $embeddedNodePackagingCurrentLifecycleWithModulesMethodName: $templateDexContainsCurrentLifecycleWithModulesMethod")
             appendLine("  template dex contains inrt node project runner marker: $templateDexContainsInrtNodeProjectRunnerMarker")
             appendLine("  template manifest service ready: $templateManifestServiceReady")
             appendLine("  template manifest foreground-service permissions ready: $templateManifestPermissionsReady")
@@ -2123,7 +2148,8 @@ val embeddedNodePackagingPreflightAppDebug = tasks.register("embeddedNodePackagi
             appendLine("  template native libs ready: $templateNativeLibsReady")
             appendLine("  template bridge JNI symbols report-only:")
             appendLine("    legacy $embeddedNodePackagingLegacyLifecycleMethodName: $templateBridgeLibContainsLegacyLifecycleSymbol")
-            appendLine("    current $embeddedNodePackagingLifecycleWithModulesMethodName: $templateBridgeLibContainsLifecycleWithModulesSymbol")
+            appendLine("    legacy $embeddedNodePackagingLifecycleWithModulesMethodName: $templateBridgeLibContainsLifecycleWithModulesSymbol")
+            appendLine("    current $embeddedNodePackagingCurrentLifecycleWithModulesMethodName: $templateBridgeLibContainsCurrentLifecycleWithModulesSymbol")
             appendLine("  template freshness ready: $packagedTemplateReady")
             appendLine("  template freshness missing: ${if (packagedTemplateMissing.isEmpty()) "none" else packagedTemplateMissing.joinToString()}")
             appendLine()
@@ -2141,7 +2167,7 @@ val embeddedNodePackagingPreflightAppDebug = tasks.register("embeddedNodePackagi
             appendLine("  packaged template has embedded service declaration: ${templateManifest.declaresEmbeddedScriptService}")
             appendLine("  packaged template has embedded service dex class_def: $templateDexDefinesScriptService")
             appendLine("  packaged template has runtime bridge dex class_def: $templateDexDefinesRuntimeBridge")
-            appendLine("  packaged template has WithModules bridge method: $templateDexContainsLifecycleWithModulesMethod")
+            appendLine("  packaged template has current WithModules bridge method: $templateDexContainsCurrentLifecycleWithModulesMethod")
             appendLine("  packaged template has inrt node project runner marker: $templateDexContainsInrtNodeProjectRunnerMarker")
             appendLine("  packaged template has inrt node project launch source marker: $templateDexContainsInrtNodeProjectLaunchSourceMarker")
             appendLine("  packaged template has inrt node project stable request diagnostics: $templateInrtNodeProjectStableRequestDiagnosticsReady")
@@ -2157,6 +2183,7 @@ val embeddedNodePackagingPreflightAppDebug = tasks.register("embeddedNodePackagi
             appendLine("  embedded.node.packaged.template.dex.bridge.ready=$templateDexBridgeReady")
             appendLine("  embedded.node.packaged.template.dex.contains.NativeNodeEmbeddedRuntimeBridge=$templateDexDefinesRuntimeBridge")
             appendLine("  embedded.node.packaged.template.dex.contains.$embeddedNodePackagingLifecycleWithModulesMethodName=$templateDexContainsLifecycleWithModulesMethod")
+            appendLine("  embedded.node.packaged.template.dex.contains.$embeddedNodePackagingCurrentLifecycleWithModulesMethodName=$templateDexContainsCurrentLifecycleWithModulesMethod")
             appendLine("  embedded.node.packaged.template.dex.contains.inrt_node_project_runner_marker=$templateDexContainsInrtNodeProjectRunnerMarker")
             appendLine("  embedded.node.packaged.template.dex.contains.inrt_node_project_launch_source_marker=$templateDexContainsInrtNodeProjectLaunchSourceMarker")
             templateDexContainsInrtNodeProjectStableRequestMarkers.forEach { (marker, present) ->
@@ -2173,7 +2200,8 @@ val embeddedNodePackagingPreflightAppDebug = tasks.register("embeddedNodePackagi
             appendLine("  embedded.node.packaged.template.inrt.node_project_stable_failure_diagnostics.ready=$templateInrtNodeProjectStableFailureDiagnosticsReady")
             appendLine("  embedded.node.packaged.template.native_libs.ready=$templateNativeLibsReady")
             appendLine("  embedded.node.packaged.template.native_symbols.legacy_lifecycle.present=$templateBridgeLibContainsLegacyLifecycleSymbol")
-            appendLine("  embedded.node.packaged.template.native_symbols.with_modules_lifecycle.present=$templateBridgeLibContainsLifecycleWithModulesSymbol")
+            appendLine("  embedded.node.packaged.template.native_symbols.legacy_with_modules_lifecycle.present=$templateBridgeLibContainsLifecycleWithModulesSymbol")
+            appendLine("  embedded.node.packaged.template.native_symbols.with_modules_lifecycle.present=$templateBridgeLibContainsCurrentLifecycleWithModulesSymbol")
             appendLine("  embedded.node.packaged.template.ready=$packagedTemplateReady")
             appendLine("  embedded.node.packaged.template.dex.contains.NativeNodeEmbeddedScriptService=$templateDexDefinesScriptService")
             appendLine("  embedded.node.packaged.template.missing=${if (packagedTemplateMissing.isEmpty()) "none" else packagedTemplateMissing.joinToString()}")

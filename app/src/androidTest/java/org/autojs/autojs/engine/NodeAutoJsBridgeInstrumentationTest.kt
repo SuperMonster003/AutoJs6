@@ -755,7 +755,12 @@ class NodeAutoJsBridgeInstrumentationTest {
         assertTrue(result.stdout.contains("accessibility.android.ensured=false"))
         assertTrue(result.stdout.contains("accessibility.android.code=ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED"))
         assertTrue(result.stdout.contains("accessibility.android.target=accessibility/click"))
-        assertTrue(result.stdout.contains("accessibility.android.message=AutoJs6 accessibility bridge requires an enabled accessibility capability provider."))
+        assertTrue(
+            result.stdout,
+            result.stdout.contains(
+                "accessibility.android.message=AutoJs6 accessibility bridge requires an enabled accessibility capability provider in the current process.",
+            ),
+        )
         assertFalse(result.stdout.contains("accessibility.android.unexpected=true"))
         assertEquals("true", result.nativeValues["embedded_script.bridge_live_enabled"])
         assertEquals("3", result.nativeValues["embedded_script.bridge_live_dispatch_count"])

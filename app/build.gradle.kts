@@ -248,9 +248,11 @@ val nodeJsTestDeviceProfileClasses = when (nodeJsTestDeviceProfile) {
         "org.autojs.autojs.engine.NodeCompatCorpusInstrumentationTest",
         "org.autojs.autojs.engine.NodeRealNpmCompatInstrumentationTest",
         "org.autojs.autojs.engine.NodeEmbeddedMemoryLeakStressInstrumentationTest",
-        "org.autojs.autojs.engine.NodeWorkerThreadsResourceStressInstrumentationTest",
-        "org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest",
-    )
+    ) + if (nodeJsWorkerThreadsExperimentalEnabled) {
+        listOf("org.autojs.autojs.engine.NodeWorkerThreadsResourceStressInstrumentationTest")
+    } else {
+        emptyList()
+    } + listOf("org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest")
     else -> emptyList()
 }
 val leakCanaryEnabled = providers.gradleProperty("autojs.leakcanary.enabled").orElse("false").get()

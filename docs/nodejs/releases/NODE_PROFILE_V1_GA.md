@@ -101,6 +101,7 @@ Packaged Node APKs verify:
 - embedded service manifest entry
 - foreground-service permissions and `specialUse` policy
 - ABI pruning
+- entry script budget metadata: max `524288` bytes
 - moduleSources budget metadata: max `64` modules, `262144` bytes per module, `524288` bytes total
 - packaged smoke output
 
@@ -173,13 +174,23 @@ Current Phase 4 Sony XQ-AT72 status:
 - selected primary device: Sony XQ-AT72 `QV710AF65F`
 - selected device profile: `sony`
 - current branch package identity: `org.autojs.autojs6.nodejs`
-- prior packaged smoke host verification: passed after JNI compatibility fix
-- prior lifecycle stress: passed
-- prior reduced memory stress: passed in the Phase 4 evidence set
-- full default memory stress: final publication rerun still required
-- full aggregate release-candidate rerun on Sony: final publication rerun still required
+- Task 128 GA candidate gate: passed on 2026-06-16
+- command: `:app:verifyNodeReleaseGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.fuzzerBudget=normal"`
+- duration: `2h 5m 30s`
+- Android test XML: `310` tests, `0` failures, `0` errors, `2` expected skips
+- packaged smoke aggregate: ready
+- memory stress: `7` scenarios, `0` failures
+- focused normal-budget fuzzer sweep: passed before the aggregate gate
+- crash buffer after the final aggregate: clean for foreground-service startup, fatal exception, request spool, and embedded service crash markers
 
-Evidence is stored under `docs/nodejs/reports/phase4/`.
+The expected skips are `disabledBuildGateReturnsActionableMessage`, because this build has embedded script execution
+enabled, and packaged experimental ESM smoke, because the GA profile keeps ESM and dynamic import default-off. Worker
+stress remains outside the default full profile unless `autojs.nodejs.worker_threads.experimental=true`.
+
+An earlier Sony full-profile attempt was invalidated because unrelated `org.autojs.autojs6.ace` activity overlapped the
+packaged smoke marker window. The final aggregate pass above is the valid GA candidate gate evidence.
+
+Evidence is stored under `docs/nodejs/reports/phase4/sony-ga-candidate/`.
 
 ## Generated Artifacts
 

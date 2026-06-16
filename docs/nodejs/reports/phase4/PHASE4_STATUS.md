@@ -19,6 +19,9 @@ OnePlus OPD2413 `63751f63` is now excluded from unattended current-branch gates 
 - Passed reduced `NodeEmbeddedMemoryLeakStressInstrumentationTest` after OnePlus device preparation.
 - Kept legacy packaged INRT JNI symbols backward-compatible and moved current app calls to V2 JNI symbols.
 - Switched the current unattended GA gate target to Sony XQ-AT72 after the temporary Node package identity allowed side-by-side branch testing.
+- Passed the Task 128 Sony GA candidate gate with `:app:verifyNodeReleaseGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.fuzzerBudget=normal"`.
+- Passed full default `NodeEmbeddedMemoryLeakStressInstrumentationTest` on Sony as part of the GA candidate gate.
+- Confirmed the post-gate Sony crash buffer was clean for foreground-service startup, fatal exception, request spool, and embedded service crash markers.
 
 ## Evidence
 
@@ -29,9 +32,11 @@ OnePlus OPD2413 `63751f63` is now excluded from unattended current-branch gates 
 - OnePlus whitelist/focused smoke recovery: `docs/nodejs/reports/phase4/oneplus-device-whitelist-smoke/`
 - Reduced memory stress pass: `docs/nodejs/reports/phase4/oneplus-memory-leak-stress-reduced-whitelisted/`
 - Sony device transition: `docs/nodejs/reports/phase4/sony-device-transition/`
+- Sony GA candidate gate: `docs/nodejs/reports/phase4/sony-ga-candidate/`
 
 ## Still Required Before Publication
 
-- Full default `NodeEmbeddedMemoryLeakStressInstrumentationTest` on Sony with explicit serial `QV710AF65F`.
-- Full `:app:verifyEmbeddedNodeReleaseCandidate "-Pautojs.embeddedNode.adbSerial=QV710AF65F"` rerun after packaged smoke artifacts are present.
-- Commit-scoped review of generated `version.properties` churn before release tagging.
+- Commit the Task 128 GA candidate hardening changes.
+- Generate the final release manifest and nightly report from the clean GA commit/tag.
+- Replace `TBD` placeholders in GA release notes with the approved final commit and tag.
+- Review generated `version.properties` churn before release tagging.

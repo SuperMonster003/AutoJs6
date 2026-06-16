@@ -387,6 +387,10 @@ val generateNodeCompatibilityProfile = tasks.register("generateNodeCompatibility
                 "routeSuffixes" to routeSuffixes.sorted(),
                 "commonJsModuleExtensions" to commonJsExtensions.sorted(),
                 "packageJsonExportConditions" to packageConditions,
+                "scriptSourceBudget" to linkedMapOf(
+                    "maxBytes" to Regex("""RUNTIME_SCRIPT_SOURCE_MAX_BYTES\s*=\s*([0-9_]+)""")
+                        .find(runtimeSource)?.groupValues?.get(1)?.replace("_", "")?.toLong(),
+                ),
                 "moduleSourceBudgets" to linkedMapOf(
                     "maxBytesPerSource" to Regex("""RUNTIME_MODULE_SOURCE_MAX_BYTES\s*=\s*([0-9_]+)""")
                         .find(runtimeSource)?.groupValues?.get(1)?.replace("_", "")?.toLong(),

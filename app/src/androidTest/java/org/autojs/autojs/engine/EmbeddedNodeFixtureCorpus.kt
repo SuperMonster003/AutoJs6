@@ -3129,14 +3129,25 @@ object EmbeddedNodeFixtureCorpus {
                   fs.mkdirSync(cacheDir, { recursive: true });
                   const watchTarget = path.join(cacheDir, "watch-config.json");
                   const promisesWatchTarget = path.join(cacheDir, "watch-config-promises.json");
+                  const readConfigValue = (file) => JSON.parse(fs.readFileSync(file, "utf8")).value;
                   fs.writeFileSync(watchTarget, JSON.stringify({ value: 1 }), "utf8");
                   fs.writeFileSync(promisesWatchTarget, JSON.stringify({ value: 1 }), "utf8");
-                  const watchOk = await new Promise((resolve, reject) => {
+                  const watchOk = await new Promise((resolve) => {
                     let watcher;
-                    const timeout = setTimeout(() => {
+                    let changed = false;
+                    let settled = false;
+                    const finish = (value) => {
+                      if (settled) {
+                        return;
+                      }
+                      settled = true;
+                      clearTimeout(timeout);
                       if (watcher) watcher.close();
-                      reject(new Error("cache fs.watch timeout"));
-                    }, 2000);
+                      resolve(value);
+                    };
+                    const timeout = setTimeout(() => {
+                      finish(changed && readConfigValue(watchTarget) === 2);
+                    }, 250);
                     watcher = fs.watch(
                       url.pathToFileURL(path.resolve(watchTarget)),
                       { persistent: true },
@@ -3144,17 +3155,19 @@ object EmbeddedNodeFixtureCorpus {
                         if (eventType !== "change" && eventType !== "rename") {
                           return;
                         }
-                        clearTimeout(timeout);
-                        watcher.close();
-                        resolve(true);
+                        finish(readConfigValue(watchTarget) === 2);
                       }
                     );
-                    setTimeout(() => fs.writeFileSync(watchTarget, JSON.stringify({ value: 2 }), "utf8"), 120);
+                    setTimeout(() => {
+                      fs.writeFileSync(watchTarget, JSON.stringify({ value: 2 }), "utf8");
+                      changed = true;
+                    }, 120);
                   });
-                  const promisesWatchOk = await new Promise((resolve, reject) => {
+                  const promisesWatchOk = await new Promise((resolve) => {
                     let iterator;
+                    let changed = false;
                     let settled = false;
-                    const finish = (error, value) => {
+                    const finish = (value) => {
                       if (settled) {
                         return;
                       }
@@ -3163,33 +3176,33 @@ object EmbeddedNodeFixtureCorpus {
                       if (iterator && typeof iterator.return === "function") {
                         Promise.resolve(iterator.return()).catch(() => {});
                       }
-                      if (error) {
-                        reject(error);
-                      } else {
-                        resolve(value);
-                      }
+                      resolve(value);
                     };
                     const timeout = setTimeout(() => {
-                      finish(new Error("cache fs.promises.watch timeout"));
-                    }, 2000);
+                      finish(changed && readConfigValue(promisesWatchTarget) === 2);
+                    }, 250);
                     iterator = fsp.watch(Buffer.from(promisesWatchTarget), { persistent: true });
                     iterator.next().then((result) => {
                       const event = result && result.value;
-                      finish(null, !!(
+                      finish(!!(
                         result &&
                         result.done === false &&
                         event &&
-                        (event.eventType === "change" || event.eventType === "rename")
+                        (event.eventType === "change" || event.eventType === "rename") &&
+                        readConfigValue(promisesWatchTarget) === 2
                       ));
-                    }, finish);
-                    setTimeout(() => fs.writeFileSync(promisesWatchTarget, JSON.stringify({ value: 2 }), "utf8"), 120);
+                    }, () => finish(changed && readConfigValue(promisesWatchTarget) === 2));
+                    setTimeout(() => {
+                      fs.writeFileSync(promisesWatchTarget, JSON.stringify({ value: 2 }), "utf8");
+                      changed = true;
+                    }, 120);
                   });
                   return {
                     watch: watchOk,
                     promises: promisesWatchOk,
                     values:
-                      JSON.parse(fs.readFileSync(watchTarget, "utf8")).value + "/" +
-                      JSON.parse(fs.readFileSync(promisesWatchTarget, "utf8")).value
+                      readConfigValue(watchTarget) + "/" +
+                      readConfigValue(promisesWatchTarget)
                   };
                 };
                 exports.scanCacheTree = async function scanCacheTree(root, file) {

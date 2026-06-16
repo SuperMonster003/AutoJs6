@@ -602,6 +602,9 @@ For packaged Node outputs that request full smoke moduleSources, the verifier re
 - every module source must be at most `262144` UTF-8 bytes
 - the report must include largest moduleSources for triage
 
+The entry script budget is tracked separately from injected moduleSources. Runtime rejects a single entry script over
+`524288` UTF-8 bytes, while moduleSources keep the stricter per-module `262144` byte limit.
+
 If `autojs.embeddedNode.expectedAbis` is omitted, the verifier derives the ABI policy from `autojs.nodejs.releaseFlavor`:
 
 - `nodeFull`: `arm64-v8a,armeabi-v7a,x86_64`
