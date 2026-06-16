@@ -100,10 +100,10 @@ Acceptance:
   candidate strip.
 - [x] Replace the Pro-style lower-left figure icon with a star action-favorites
   entry.
-- [ ] Track action history by recency and frequency.
+- [x] Track action history by recency and frequency.
 - [ ] Support pinned actions, manual reorder, left-swipe delete, right-swipe pin
   or unpin, and clear confirmation.
-- [ ] Long-press the star to repeat the last command, independent of favorites
+- [x] Long-press the star to repeat the last command, independent of favorites
   list state.
 
 Acceptance:

@@ -1081,7 +1081,8 @@
     <string name="text_ace_read_only_mode_enabled">ACE read-only mode enabled</string>
     <string name="text_ace_read_only_mode_disabled">ACE read-only mode disabled</string>
     <string name="text_ace_line_numbers_enabled">ACE line numbers</string>
-    <string name="text_ace_action_favorites_not_ready">ACE action favorites are not ready yet</string>
+    <string name="text_ace_action_favorites">ACE action favorites</string>
+    <string name="text_ace_action_history_empty">No editor action history</string>
     <string name="text_ace_no_last_action">No last editor action</string>
     <string name="text_editor_engine">Editor engine</string>
     <string name="text_editor_engine_switched" formatted="true">Editor engine switched to %s</string>

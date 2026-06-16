@@ -89,10 +89,11 @@ import org.autojs.autojs.ui.edit.editor.service.EditorVersionHistoryService
 import org.autojs.autojs.ui.edit.editor.service.RunScriptTextProvider
 import org.autojs.autojs.ui.edit.editor.viewport.EditorViewportPolicy
 import org.autojs.autojs.ui.edit.editor.viewport.EditorViewportPolicyFactory
+import org.autojs.autojs.ui.edit.keyboard.AceActionHistoryStore
+import org.autojs.autojs.ui.edit.keyboard.AceShortcutPanel
 import org.autojs.autojs.ui.edit.keyboard.FunctionsKeyboardHelper
 import org.autojs.autojs.ui.edit.keyboard.FunctionsKeyboardView
 import org.autojs.autojs.ui.edit.keyboard.FunctionsKeyboardView.ClickCallback
-import org.autojs.autojs.ui.edit.keyboard.AceShortcutPanel
 import org.autojs.autojs.ui.edit.keyboard.SymbolsConfigStore
 import org.autojs.autojs.ui.edit.theme.Theme
 import org.autojs.autojs.ui.edit.theme.Themes
@@ -2564,22 +2565,13 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         if (editor.engineType != EditorEngineType.ACE) {
             return false
         }
-        return when (AceShortcutPanel.commandOf(completion)) {
-            AceShortcutPanel.Command.Escape -> true.also {
-                (editor as? AceScriptEditorEngine)?.handleEscapeKey()
-            }
-            AceShortcutPanel.Command.MoveUp -> true.also { editor.jumpToPrevLine() }
-            AceShortcutPanel.Command.MoveDown -> true.also { editor.jumpToNextLine() }
-            AceShortcutPanel.Command.MoveLeft -> true.also { editor.moveCursor(-1) }
-            AceShortcutPanel.Command.MoveRight -> true.also { editor.moveCursor(1) }
-            AceShortcutPanel.Command.Tab -> true.also {
-                (editor as? AceScriptEditorEngine)?.insertTab()
-            }
-            AceShortcutPanel.Command.ActionFavorites -> true.also {
-                showToast(context, R.string.text_ace_action_favorites_not_ready)
-            }
-            null -> false
+        if (AceShortcutPanel.commandOf(completion) == AceShortcutPanel.Command.ActionFavorites) {
+            showAceActionHistoryDialog()
+            return true
         }
+        return AceShortcutPanel.actionOf(completion)
+            ?.let { executeAceShortcutAction(it, record = true) }
+            ?: false
     }
 
     private fun handleAceShortcutLongClick(completion: CodeCompletion): Boolean {
@@ -2588,11 +2580,68 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         }
         return when (AceShortcutPanel.commandOf(completion)) {
             AceShortcutPanel.Command.ActionFavorites -> true.also {
-                showToast(context, R.string.text_ace_no_last_action)
+                repeatLastAceAction()
             }
             null -> false
             else -> handleAceShortcutClick(completion)
         }
+    }
+
+    private fun showAceActionHistoryDialog() {
+        val entries = AceActionHistoryStore.getRankedEntries(context)
+        if (entries.isEmpty()) {
+            showToast(context, R.string.text_ace_action_history_empty)
+            return
+        }
+        val labels = entries.map { entry ->
+            if (entry.usageCount > 1) "${entry.label} x${entry.usageCount}" else entry.label
+        }
+        DialogUtils.buildAndShowAdaptive {
+            MaterialDialog.Builder(context)
+                .title(R.string.text_ace_action_favorites)
+                .items(labels)
+                .itemsCallback { dialog, _, which, _ ->
+                    val entry = entries.getOrNull(which) ?: return@itemsCallback
+                    val action = AceShortcutPanel.actionById(entry.id) ?: return@itemsCallback
+                    dialog.dismiss()
+                    executeAceShortcutAction(action, record = true)
+                }
+                .negativeText(R.string.dialog_button_cancel)
+                .negativeColorRes(R.color.dialog_button_default)
+                .build()
+        }
+    }
+
+    private fun repeatLastAceAction() {
+        val action = AceShortcutPanel.actionById(AceActionHistoryStore.getLastActionId(context))
+        if (action == null) {
+            showToast(context, R.string.text_ace_no_last_action)
+            return
+        }
+        executeAceShortcutAction(action, record = true)
+    }
+
+    private fun executeAceShortcutAction(
+        action: AceShortcutPanel.Action,
+        record: Boolean,
+    ): Boolean {
+        if (action.mutatesText && editor.isReadOnly) {
+            return true
+        }
+        when (action.command) {
+            AceShortcutPanel.Command.Escape -> (editor as? AceScriptEditorEngine)?.handleEscapeKey()
+            AceShortcutPanel.Command.MoveUp -> editor.jumpToPrevLine()
+            AceShortcutPanel.Command.MoveDown -> editor.jumpToNextLine()
+            AceShortcutPanel.Command.MoveLeft -> editor.moveCursor(-1)
+            AceShortcutPanel.Command.MoveRight -> editor.moveCursor(1)
+            AceShortcutPanel.Command.Tab -> (editor as? AceScriptEditorEngine)?.insertTab()
+            AceShortcutPanel.Command.ActionFavorites -> return true
+            null -> mCommandDispatcher.insert(action.insertText)
+        }
+        if (record) {
+            AceActionHistoryStore.record(context, action)
+        }
+        return true
     }
 
     private fun showManual(urlSuffix: String, title: String) {

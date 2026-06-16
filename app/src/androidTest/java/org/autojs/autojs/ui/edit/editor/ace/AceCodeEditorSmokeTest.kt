@@ -13,6 +13,7 @@ import org.autojs.autojs.ui.edit.EditActivity
 import org.autojs.autojs.ui.edit.EditorView
 import org.autojs.autojs.model.autocomplete.CodeCompletions
 import org.autojs.autojs.ui.edit.completion.CodeCompletionBar
+import org.autojs.autojs.ui.edit.keyboard.AceActionHistoryStore
 import org.autojs.autojs.ui.edit.editor.ace.health.AceHealthState
 import org.autojs.autojs.ui.edit.editor.ace.health.AceFailureType
 import org.autojs.autojs.ui.edit.editor.engine.AceScriptEditorEngine
@@ -49,6 +50,7 @@ class AceCodeEditorSmokeTest {
         AceEditorDisplayPreferences.setWordWrapEnabled(false)
         AceEditorDisplayPreferences.setLineNumbersEnabled(true)
         AceEditorLspPreferences.setEnabled(false)
+        AceActionHistoryStore.clear(instrumentation.targetContext)
         EditorEnginePreferences.set(EditorEngineType.NATIVE)
         finishLaunchedActivity()
     }
@@ -168,6 +170,18 @@ class AceCodeEditorSmokeTest {
             )
 
             runOnMainSync {
+                val secondRow = editorView.findViewById<CodeCompletionBar>(R.id.symbol_bar)
+                    .codeCompletions
+                editorView.onHintLongClick(secondRow, 0)
+            }
+            waitForEditorViewText(
+                editorView,
+                initialText,
+                "ACE star shortcut should not mutate text when there is no last action",
+            )
+            assertTrue(runOnMainSync { AceActionHistoryStore.getRankedEntries(instrumentation.targetContext).isEmpty() })
+
+            runOnMainSync {
                 val firstRow = editorView.findViewById<CodeCompletionBar>(R.id.code_completion_bar)
                     .codeCompletions
                 editorView.editor.jumpTo(0, 0)
@@ -179,6 +193,29 @@ class AceCodeEditorSmokeTest {
                 "    $initialText",
                 "ACE TAB shortcut should execute the ACE indent command",
             )
+            val firstEntry = runOnMainSync {
+                AceActionHistoryStore.getRankedEntries(instrumentation.targetContext).single()
+            }
+            assertEquals("TAB", firstEntry.label)
+            assertEquals(1, firstEntry.usageCount)
+            assertEquals(firstEntry.id, runOnMainSync { AceActionHistoryStore.getLastActionId(instrumentation.targetContext) })
+
+            runOnMainSync {
+                val secondRow = editorView.findViewById<CodeCompletionBar>(R.id.symbol_bar)
+                    .codeCompletions
+                editorView.onHintLongClick(secondRow, 0)
+            }
+
+            waitForEditorViewText(
+                editorView,
+                "        $initialText",
+                "ACE star long-press should repeat the last editor shortcut",
+            )
+            val repeatedEntry = runOnMainSync {
+                AceActionHistoryStore.getRankedEntries(instrumentation.targetContext).single()
+            }
+            assertEquals("TAB", repeatedEntry.label)
+            assertEquals(2, repeatedEntry.usageCount)
         } finally {
             finishLaunchedActivity()
             file.delete()
