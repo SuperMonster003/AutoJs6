@@ -48,7 +48,6 @@ public class EditorMenu {
 
     private final EditorView mEditorView;
     private final Context mContext;
-    private final boolean mReadOnly;
 
     public EditorMenu(EditorView editorView) {
         this(editorView, false);
@@ -57,7 +56,6 @@ public class EditorMenu {
     public EditorMenu(EditorView editorView, boolean readOnly) {
         mEditorView = editorView;
         mContext = editorView.getContext();
-        mReadOnly = readOnly;
     }
 
     public void prepareOptionsMenu(Menu menu) {
@@ -65,31 +63,33 @@ public class EditorMenu {
             return;
         }
         prepareEditorEngineMenu(menu);
-        if (!mReadOnly) {
-            return;
-        }
-        setMenuItemInvisible(menu, R.id.action_find_or_replace);
-        setMenuItemInvisible(menu, R.id.action_copy_line);
-        setMenuItemInvisible(menu, R.id.action_paste);
-        setMenuItemInvisible(menu, R.id.action_delete_line);
-        setMenuItemInvisible(menu, R.id.action_clear);
-        setMenuItemInvisible(menu, R.id.action_comment);
-        setMenuItemInvisible(menu, R.id.action_beautify);
-        setMenuItemInvisible(menu, R.id.action_jump);
-        setMenuItemInvisible(menu, R.id.action_debug);
-        setMenuItemInvisible(menu, R.id.action_build_apk);
-        setMenuItemInvisible(menu, R.id.action_console);
-        setMenuItemInvisible(menu, R.id.action_import_java_class);
-        setMenuItemInvisible(menu, R.id.action_file_details);
-        setMenuItemInvisible(menu, R.id.action_version_history);
-        setMenuItemInvisible(menu, R.id.action_fx_keyboard);
-        setMenuItemInvisible(menu, R.id.action_open_by_other_apps);
+        prepareAceReadOnlyMenu(menu);
+        setReadOnlySensitiveMenuItemsVisible(menu, !mEditorView.isReadOnly());
     }
 
-    private void setMenuItemInvisible(Menu menu, int itemId) {
+    private void setReadOnlySensitiveMenuItemsVisible(Menu menu, boolean visible) {
+        setMenuItemVisible(menu, R.id.action_find_or_replace, visible);
+        setMenuItemVisible(menu, R.id.action_copy_line, visible);
+        setMenuItemVisible(menu, R.id.action_paste, visible);
+        setMenuItemVisible(menu, R.id.action_delete_line, visible);
+        setMenuItemVisible(menu, R.id.action_clear, visible);
+        setMenuItemVisible(menu, R.id.action_comment, visible);
+        setMenuItemVisible(menu, R.id.action_beautify, visible);
+        setMenuItemVisible(menu, R.id.action_jump, visible);
+        setMenuItemVisible(menu, R.id.action_debug, visible);
+        setMenuItemVisible(menu, R.id.action_build_apk, visible);
+        setMenuItemVisible(menu, R.id.action_console, visible);
+        setMenuItemVisible(menu, R.id.action_import_java_class, visible);
+        setMenuItemVisible(menu, R.id.action_file_details, visible);
+        setMenuItemVisible(menu, R.id.action_version_history, visible);
+        setMenuItemVisible(menu, R.id.action_fx_keyboard, visible);
+        setMenuItemVisible(menu, R.id.action_open_by_other_apps, visible);
+    }
+
+    private void setMenuItemVisible(Menu menu, int itemId, boolean visible) {
         MenuItem item = menu.findItem(itemId);
         if (item != null) {
-            item.setVisible(false);
+            item.setVisible(visible);
         }
     }
 
@@ -111,6 +111,17 @@ public class EditorMenu {
         if (aceItem != null) {
             aceItem.setChecked(editor.getEngineType() == EditorEngineType.ACE);
         }
+    }
+
+    private void prepareAceReadOnlyMenu(Menu menu) {
+        MenuItem item = menu.findItem(R.id.action_ace_read_only_mode);
+        if (item == null) {
+            return;
+        }
+        boolean visible = currentEditor().getEngineType() == EditorEngineType.ACE && !mEditorView.isReadOnlyLockedByIntent();
+        item.setVisible(visible);
+        item.setEnabled(mEditorView.canToggleAceReadOnlyMode());
+        item.setChecked(mEditorView.isReadOnly());
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -193,6 +204,9 @@ public class EditorMenu {
         }
         if (itemId == R.id.action_ace_editor_font) {
             return tryDoing(mEditorView::selectAceEditorFont);
+        }
+        if (itemId == R.id.action_ace_read_only_mode) {
+            return tryDoing(mEditorView::toggleAceReadOnlyMode);
         }
         if (itemId == R.id.action_editor_pinch_to_zoom) {
             setPinchToZoomStrategy();

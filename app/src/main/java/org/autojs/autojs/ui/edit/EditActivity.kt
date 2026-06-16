@@ -361,7 +361,7 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
         val menu = mode.menu
         val item = menu[menu.size - 1]
 
-        if (!mReadOnly) {
+        if (!mReadOnly && !mEditorView.isReadOnly()) {
             addMenuItem(menu, item.groupId, R.id.action_delete_line, 10000, R.string.text_delete_line) { mEditorMenu.deleteLine() }
         }
         addMenuItem(menu, item.groupId, R.id.action_copy_line, 20000, R.string.text_copy_line) { mEditorMenu.copyLine() }

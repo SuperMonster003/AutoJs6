@@ -37,7 +37,7 @@ Acceptance:
 - [x] Increase dark-theme selection contrast.
 - [x] Stabilize gutter width to avoid shifts around 99/100 and 999/1000.
 - [x] Allow clicking folded-code placeholders to unfold.
-- [ ] Preserve expected automatic cursor reveal on IME/panel changes, but avoid
+- [x] Preserve expected automatic cursor reveal on IME/panel changes, but avoid
   unsolicited pull-back while browsing selected code.
 
 Acceptance:
@@ -46,7 +46,7 @@ Acceptance:
 - [x] Gutter width does not shrink during the editing session and grows only
   when higher line-number digits become visible.
 - [x] Fold placeholders unfold without requiring the gutter triangle.
-- [ ] Scrolling selected text offscreen does not pull the editor back unless an
+- [x] Scrolling selected text offscreen does not pull the editor back unless an
   explicit viewport event such as IME or panel resize requires it.
 
 ## Gate UX-2: Mobile Selection And Gesture Bugs
@@ -70,16 +70,16 @@ Acceptance:
 ## Gate UX-3: Input, Keyboard, And Read-Only Mode
 
 - [ ] Support IME spacebar cursor movement in ACE.
-- [ ] Add ACE read-only mode, default off for every new editor session.
-- [ ] Strictly block text mutation paths while read-only is enabled.
-- [ ] Improve read-only scrolling performance where possible.
+- [x] Add ACE read-only mode, default off for every new editor session.
+- [x] Strictly block text mutation paths while read-only is enabled.
+- [x] Improve read-only scrolling performance where possible.
 
 Acceptance:
 
 - [ ] Gboard spacebar cursor movement updates the ACE caret without text loss.
-- [ ] Read-only mode blocks typing, paste, delete, replacement, formatting, and
+- [x] Read-only mode blocks typing, paste, delete, replacement, formatting, and
   script-mutating editor actions.
-- [ ] Read-only state is not persisted after leaving the editor.
+- [x] Read-only state is not persisted after leaving the editor.
 
 ## Gate UX-4: Completion And Signature Help
 

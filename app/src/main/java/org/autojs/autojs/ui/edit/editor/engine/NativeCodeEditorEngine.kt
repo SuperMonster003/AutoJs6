@@ -51,10 +51,10 @@ class NativeCodeEditorEngine(
         get() = codeEditor.isTextChanged
 
     override val canUndo: Boolean
-        get() = codeEditor.canUndo()
+        get() = !readOnly && codeEditor.canUndo()
 
     override val canRedo: Boolean
-        get() = codeEditor.canRedo()
+        get() = !readOnly && codeEditor.canRedo()
 
     override val lineCountSnapshot: Int
         get() = codeEditor.codeEditText.layout?.lineCount ?: codeEditor.codeEditText.lineCount
@@ -91,6 +91,9 @@ class NativeCodeEditorEngine(
     override val isLoadingText: Boolean
         get() = codeEditor.codeEditText.isLoadingText()
 
+    override val isReadOnly: Boolean
+        get() = readOnly
+
     override var onUserTouchInTextArea: (() -> Unit)?
         get() = codeEditor.codeEditText.onUserTouchInTextArea
         set(value) {
@@ -110,10 +113,16 @@ class NativeCodeEditorEngine(
     }
 
     override fun insert(text: String?) {
+        if (!canMutateText()) {
+            return
+        }
         codeEditor.insert(text)
     }
 
     override fun insert(line: Int, text: String?) {
+        if (!canMutateText()) {
+            return
+        }
         if (line in 0 until lineCountSnapshot) {
             codeEditor.insert(line, text)
         }
@@ -124,26 +133,44 @@ class NativeCodeEditorEngine(
     }
 
     override fun deleteLine() {
+        if (!canMutateText()) {
+            return
+        }
         codeEditor.deleteLine()
     }
 
     override fun clear() {
+        if (!canMutateText()) {
+            return
+        }
         codeEditor.clear()
     }
 
     override fun toggleComment() {
+        if (!canMutateText()) {
+            return
+        }
         codeEditor.commentHelper.toggle()
     }
 
     override fun beautifyCode() {
+        if (!canMutateText()) {
+            return
+        }
         codeEditor.beautifyCode()
     }
 
     override fun undo() {
+        if (!canMutateText()) {
+            return
+        }
         codeEditor.undo()
     }
 
     override fun redo() {
+        if (!canMutateText()) {
+            return
+        }
         codeEditor.redo()
     }
 
@@ -223,12 +250,18 @@ class NativeCodeEditorEngine(
     }
 
     override fun replaceSelection(): EditorSearchResult {
+        if (!canMutateText()) {
+            return currentSearchResult(searchQuery).copy(found = false)
+        }
         codeEditor.replaceSelection()
         return currentSearchResult(searchQuery)
     }
 
     @Throws(EditorSearchSyntaxException::class)
     override fun replaceAll(query: String, replacement: String?, options: EditorSearchOptions): EditorSearchResult {
+        if (!canMutateText()) {
+            return EditorSearchResult(found = false, foundIndex = codeEditor.getFoundIndex(), query = query)
+        }
         searchQuery = query
         searchOptions = options
         try {
@@ -456,6 +489,8 @@ class NativeCodeEditorEngine(
         val index = codeEditor.getFoundIndex()
         return EditorSearchResult(found = index >= 0, foundIndex = index, query = query)
     }
+
+    private fun canMutateText(): Boolean = !readOnly || isLoadingText
 
     private fun createSelection(start: Int, end: Int): EditorSelection {
         val startPosition = positionForOffset(start)

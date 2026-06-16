@@ -75,10 +75,10 @@ class AceScriptEditorEngine(
         get() = aceCodeEditor.dirty
 
     override val canUndo: Boolean
-        get() = redoUndoEnabled && aceCodeEditor.canUndo
+        get() = !readOnly && redoUndoEnabled && aceCodeEditor.canUndo
 
     override val canRedo: Boolean
-        get() = redoUndoEnabled && aceCodeEditor.canRedo
+        get() = !readOnly && redoUndoEnabled && aceCodeEditor.canRedo
 
     override val lineCountSnapshot: Int
         get() = aceCodeEditor.lineCountSnapshot
@@ -103,6 +103,9 @@ class AceScriptEditorEngine(
 
     override val isLoadingText: Boolean
         get() = loadingText
+
+    override val isReadOnly: Boolean
+        get() = readOnly
 
     override var onUserTouchInTextArea: (() -> Unit)?
         get() = aceCodeEditor.onUserTouchInTextArea
@@ -136,10 +139,16 @@ class AceScriptEditorEngine(
     }
 
     override fun insert(text: String?) {
+        if (!canMutateText()) {
+            return
+        }
         aceCodeEditor.insert(text.orEmpty())
     }
 
     override fun insert(line: Int, text: String?) {
+        if (!canMutateText()) {
+            return
+        }
         aceCodeEditor.insert(line, text.orEmpty())
     }
 
@@ -148,30 +157,42 @@ class AceScriptEditorEngine(
     }
 
     override fun deleteLine() {
+        if (!canMutateText()) {
+            return
+        }
         aceCodeEditor.deleteLine()
     }
 
     override fun clear() {
+        if (!canMutateText()) {
+            return
+        }
         aceCodeEditor.clear()
         resetSearchState()
     }
 
     override fun toggleComment() {
+        if (!canMutateText()) {
+            return
+        }
         aceCodeEditor.toggleComment()
     }
 
     override fun beautifyCode() {
+        if (!canMutateText()) {
+            return
+        }
         aceCodeEditor.beautify()
     }
 
     override fun undo() {
-        if (redoUndoEnabled) {
+        if (redoUndoEnabled && canMutateText()) {
             aceCodeEditor.undo()
         }
     }
 
     override fun redo() {
-        if (redoUndoEnabled) {
+        if (redoUndoEnabled && canMutateText()) {
             aceCodeEditor.redo()
         }
     }
@@ -255,6 +276,9 @@ class AceScriptEditorEngine(
     }
 
     override fun replaceSelection(): EditorSearchResult {
+        if (!canMutateText()) {
+            return EditorSearchResult(found = false, foundIndex = foundIndex, query = searchQuery)
+        }
         val currentSelection = selection
         if (!currentSelection.isCollapsed) {
             val start = currentSelection.startOffset
@@ -269,6 +293,9 @@ class AceScriptEditorEngine(
 
     @Throws(EditorSearchSyntaxException::class)
     override fun replaceAll(query: String, replacement: String?, options: EditorSearchOptions): EditorSearchResult {
+        if (!canMutateText()) {
+            return EditorSearchResult(found = false, foundIndex = foundIndex, query = query)
+        }
         validatePatternIfNeeded(query, options)
         val next = replaceAllInText(textSnapshot, query, replacement.orEmpty(), options)
         val changed = next != textSnapshot
@@ -381,7 +408,7 @@ class AceScriptEditorEngine(
     }
 
     override fun appendTextChunk(chunk: CharSequence) {
-        aceCodeEditor.insert(chunk.toString())
+        aceCodeEditor.appendTextChunk(chunk.toString())
     }
 
     override fun endLargeTextLoading(markClean: Boolean) {
@@ -467,6 +494,8 @@ class AceScriptEditorEngine(
             }
         }
     }
+
+    private fun canMutateText(): Boolean = !readOnly || loadingText
 
     @Throws(EditorSearchSyntaxException::class)
     private fun findFrom(query: String, options: EditorSearchOptions, start: Int, backwards: Boolean): EditorSearchResult {

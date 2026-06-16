@@ -28,11 +28,14 @@
     var resizeFallbackTimer = null;
     var resizeReason = "";
     var firstPaintNotified = false;
+    var lastSelectionBrowseScrollAt = 0;
+    var programmaticScrollUntil = 0;
     var DEFAULT_FONT_FAMILY = '"JetBrains Mono", "Source Code Pro", monospace';
     var STATE_NOTIFY_THROTTLE_MS = 100;
     var TEXT_NOTIFY_THROTTLE_MS = 100;
     var CURSOR_NOTIFY_THROTTLE_MS = 50;
     var ACTION_MODE_NOTIFY_THROTTLE_MS = 80;
+    var SELECTION_BROWSE_REVEAL_SUPPRESS_MS = 1600;
 
     function callBridge(name, args) {
         try {
@@ -148,6 +151,10 @@
         return session ? session.getUndoManager() : null;
     }
 
+    function isReadOnly() {
+        return !!(editor && editor.getReadOnly && editor.getReadOnly());
+    }
+
     function getScrollState() {
         var renderer = editor ? editor.renderer : null;
         return {
@@ -160,10 +167,12 @@
         var position = editor ? editor.getCursorPosition() : { row: 0, column: 0 };
         var undoManager = getUndoManager();
         var selection = getSelectionState();
+        var readOnly = isReadOnly();
         var state = {
             dirty: dirty,
-            canUndo: !!(undoManager && undoManager.hasUndo && undoManager.hasUndo()),
-            canRedo: !!(undoManager && undoManager.hasRedo && undoManager.hasRedo()),
+            readOnly: readOnly,
+            canUndo: !readOnly && !!(undoManager && undoManager.hasUndo && undoManager.hasUndo()),
+            canRedo: !readOnly && !!(undoManager && undoManager.hasRedo && undoManager.hasRedo()),
             lineCount: session ? session.getLength() : 1,
             cursor: {
                 row: position.row || 0,
@@ -217,6 +226,10 @@
             endColumn: range.end.column,
             text: session.getTextRange(range)
         };
+    }
+
+    function hasActiveSelection() {
+        return !!getSelectionState().text;
     }
 
     function getSelectionScreenRect() {
@@ -337,6 +350,9 @@
     }
 
     function notifyScrollChanged() {
+        if (hasActiveSelection() && Date.now() > programmaticScrollUntil) {
+            lastSelectionBrowseScrollAt = Date.now();
+        }
         if (scrollNotifyTimer !== null) {
             clearTimeout(scrollNotifyTimer);
         }
@@ -450,11 +466,67 @@
         if (!editor || !editor.renderer || !editor.renderer.scrollCursorIntoView) {
             return;
         }
+        if (shouldSkipCursorReveal(reason)) {
+            callBridge("notifyEvent", [
+                "cursorRevealSkipped",
+                JSON.stringify({ reason: String(reason || "") })
+            ]);
+            return;
+        }
         try {
+            programmaticScrollUntil = Date.now() + 300;
             editor.renderer.scrollCursorIntoView();
         } catch (error) {
             notifyRecoverableError(reason || "scrollCursorIntoView", error);
         }
+    }
+
+    function shouldSkipCursorReveal(reason) {
+        if (!hasActiveSelection()) {
+            return false;
+        }
+        reason = String(reason || "").toLowerCase();
+        if (isExplicitViewportRevealReason(reason)) {
+            return false;
+        }
+        if (isActiveSelectionOffscreen()) {
+            return true;
+        }
+        if (Date.now() - lastSelectionBrowseScrollAt > SELECTION_BROWSE_REVEAL_SUPPRESS_MS) {
+            return false;
+        }
+        return !reason ||
+            reason.indexOf("resize:") === 0 ||
+            reason.indexOf("action_mode") >= 0 ||
+            reason.indexOf("window_resize") >= 0;
+    }
+
+    function isExplicitViewportRevealReason(reason) {
+        return reason.indexOf("ime") >= 0 ||
+            reason.indexOf("keyboard") >= 0 ||
+            reason.indexOf("panel") >= 0 ||
+            reason.indexOf("native_ready") >= 0 ||
+            reason.indexOf("bridge_ready") >= 0 ||
+            reason.indexOf("first_paint") >= 0 ||
+            reason.indexOf("init") >= 0 ||
+            reason.indexOf("jump") >= 0 ||
+            reason.indexOf("restore") >= 0;
+    }
+
+    function isActiveSelectionOffscreen() {
+        if (!editor || !editor.renderer || !editor.getSelectionRange) {
+            return false;
+        }
+        var range = editor.getSelectionRange();
+        if (!range || range.isEmpty && range.isEmpty()) {
+            return false;
+        }
+        var renderer = editor.renderer;
+        var first = renderer.getFirstVisibleRow ? renderer.getFirstVisibleRow() : 0;
+        var last = renderer.getLastVisibleRow ?
+            renderer.getLastVisibleRow() :
+            first + Math.ceil((renderer.container && renderer.container.clientHeight || 0) / (renderer.lineHeight || 16));
+        return range.end.row < first || range.start.row > last;
     }
 
     function runResize(reason) {
@@ -518,6 +590,22 @@
     function markClean() {
         dirty = false;
         notifyStateChanged("cleanChanged");
+    }
+
+    function notifyReadOnlyMutationBlocked(operation) {
+        callBridge("notifyEvent", [
+            "readOnlyMutationBlocked",
+            JSON.stringify({ operation: String(operation || "") })
+        ]);
+        notifyStateChanged("readOnlyMutationBlocked");
+    }
+
+    function runTextMutation(operation, callback, defaultValue) {
+        if (isReadOnly()) {
+            notifyReadOnlyMutationBlocked(operation);
+            return defaultValue;
+        }
+        return callback();
     }
 
     function toggleBreakpoint(row) {
@@ -603,11 +691,22 @@
     }
 
     function insert(text) {
-        editor.insert(text || "");
+        return runTextMutation("insert", function() {
+            editor.insert(text || "");
+            return true;
+        }, false);
     }
 
     function insertAtLine(row, text) {
-        session.insert({ row: clampRow(row), column: 0 }, text || "");
+        return runTextMutation("insertAtLine", function() {
+            session.insert({ row: clampRow(row), column: 0 }, text || "");
+            return true;
+        }, false);
+    }
+
+    function appendTextChunk(text) {
+        session.insert(indexToPosition(session.getValue().length), text || "");
+        return true;
     }
 
     function jumpTo(row, column) {
@@ -655,54 +754,72 @@
     }
 
     function deleteLine() {
-        var row = editor.getCursorPosition().row;
-        var lineCount = session.getLength();
-        var start = { row: row, column: 0 };
-        var end = row + 1 < lineCount ? { row: row + 1, column: 0 } : { row: row, column: getLine(row).length };
-        session.remove(new Range(start.row, start.column, end.row, end.column));
+        return runTextMutation("deleteLine", function() {
+            var row = editor.getCursorPosition().row;
+            var lineCount = session.getLength();
+            var start = { row: row, column: 0 };
+            var end = row + 1 < lineCount ? { row: row + 1, column: 0 } : { row: row, column: getLine(row).length };
+            session.remove(new Range(start.row, start.column, end.row, end.column));
+            return true;
+        }, false);
     }
 
     function clear() {
-        setText("");
+        return runTextMutation("clear", function() {
+            setText("");
+            return true;
+        }, false);
     }
 
     function toggleComment() {
-        editor.toggleCommentLines();
-        notifyStateChanged("commentChanged");
+        return runTextMutation("toggleComment", function() {
+            editor.toggleCommentLines();
+            notifyStateChanged("commentChanged");
+            return true;
+        }, false);
     }
 
     function beautify() {
-        try {
-            var beautifyExtension = global.ace.require("ace/ext/beautify");
-            beautifyExtension.beautify(session);
-            notifyTextChanged(true);
-            notifyStateChanged("beautified");
-        } catch (error) {
-            notifyError("Beautify failed: " + error);
-        }
+        return runTextMutation("beautify", function() {
+            try {
+                var beautifyExtension = global.ace.require("ace/ext/beautify");
+                beautifyExtension.beautify(session);
+                notifyTextChanged(true);
+                notifyStateChanged("beautified");
+                return true;
+            } catch (error) {
+                notifyError("Beautify failed: " + error);
+                return false;
+            }
+        }, false);
     }
 
     function replaceSelection(text) {
-        editor.insert(text || "");
-        notifyTextChanged();
+        return runTextMutation("replaceSelection", function() {
+            editor.insert(text || "");
+            notifyTextChanged();
+            return true;
+        }, false);
     }
 
     function replaceAll(query, replacement, usingRegex) {
-        var source = session.getValue();
-        var next = source;
-        if (usingRegex) {
-            next = source.replace(new RegExp(query, "g"), replacement || "");
-        } else if (query) {
-            next = source.split(query).join(replacement || "");
-        }
-        if (next !== source) {
-            session.setValue(next);
-            dirty = true;
-            notifyTextChanged(true);
-            return true;
-        }
-        notifyStateChanged("replaceAllNoop");
-        return false;
+        return runTextMutation("replaceAll", function() {
+            var source = session.getValue();
+            var next = source;
+            if (usingRegex) {
+                next = source.replace(new RegExp(query, "g"), replacement || "");
+            } else if (query) {
+                next = source.split(query).join(replacement || "");
+            }
+            if (next !== source) {
+                session.setValue(next);
+                dirty = true;
+                notifyTextChanged(true);
+                return true;
+            }
+            notifyStateChanged("replaceAllNoop");
+            return false;
+        }, false);
     }
 
     function setTheme(theme) {
@@ -735,6 +852,31 @@
         editor.setOption("showLineNumbers", !!enabled);
         scheduleResize("line_numbers_changed");
         notifyStateChanged("lineNumbersChanged");
+    }
+
+    function setReadOnlyMode(readOnly) {
+        readOnly = !!readOnly;
+        editor.setReadOnly(readOnly);
+        editor.setOption("highlightActiveLine", !readOnly);
+        editor.setOption("highlightGutterLine", !readOnly);
+        editor.container.classList.toggle("autojs6-read-only", readOnly);
+        notifyStateChanged("readOnlyChanged");
+    }
+
+    function undo() {
+        return runTextMutation("undo", function() {
+            editor.undo();
+            notifyStateChanged("undo");
+            return true;
+        }, false);
+    }
+
+    function redo() {
+        return runTextMutation("redo", function() {
+            editor.redo();
+            notifyStateChanged("redo");
+            return true;
+        }, false);
     }
 
     function expandFoldAt(row, column) {
@@ -865,6 +1007,7 @@
             markClean: markClean,
             insert: insert,
             insertAtLine: insertAtLine,
+            appendTextChunk: appendTextChunk,
             jumpTo: jumpTo,
             jumpToStart: jumpToStart,
             jumpToEnd: jumpToEnd,
@@ -882,9 +1025,9 @@
             replaceAll: replaceAll,
             setReplacement: function(value) { storedReplacement = value || ""; },
             replaceStoredSelection: function() { replaceSelection(storedReplacement); },
-            undo: function() { editor.undo(); notifyStateChanged("undo"); },
-            redo: function() { editor.redo(); notifyStateChanged("redo"); },
-            setReadOnly: function(readOnly) { editor.setReadOnly(!!readOnly); notifyStateChanged("readOnlyChanged"); },
+            undo: undo,
+            redo: redo,
+            setReadOnly: setReadOnlyMode,
             setTheme: setTheme,
             setFontSizeSp: setFontSizeSp,
             setFontFamily: setFontFamily,

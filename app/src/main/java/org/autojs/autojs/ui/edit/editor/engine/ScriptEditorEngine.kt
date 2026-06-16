@@ -25,6 +25,7 @@ interface ScriptEditorEngine {
     val foundIndexSnapshot: Int
     val isUserTouching: Boolean
     val isLoadingText: Boolean
+    val isReadOnly: Boolean
 
     var onUserTouchInTextArea: (() -> Unit)?
 

@@ -1077,6 +1077,9 @@
     <string name="text_editor_theme">Editor theme</string>
     <string name="text_ace_editor_font">ACE editor font</string>
     <string name="text_ace_editor_font_changed" formatted="true">ACE editor font switched to %s</string>
+    <string name="text_ace_read_only_mode">ACE read-only mode</string>
+    <string name="text_ace_read_only_mode_enabled">ACE read-only mode enabled</string>
+    <string name="text_ace_read_only_mode_disabled">ACE read-only mode disabled</string>
     <string name="text_ace_line_numbers_enabled">ACE line numbers</string>
     <string name="text_editor_engine">Editor engine</string>
     <string name="text_editor_engine_switched" formatted="true">Editor engine switched to %s</string>

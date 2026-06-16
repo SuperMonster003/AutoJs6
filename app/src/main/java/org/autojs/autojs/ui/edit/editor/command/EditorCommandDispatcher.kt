@@ -14,11 +14,11 @@ class EditorCommandDispatcher(
 ) {
 
     fun insert(text: CharSequence?) {
-        text?.let { currentEditor().insert(it.toString()) }
+        text?.let { currentMutableEditor()?.insert(it.toString()) }
     }
 
     fun insert(line: Int, text: String?) {
-        currentEditor().insert(line, text)
+        currentMutableEditor()?.insert(line, text)
     }
 
     fun copyLine() {
@@ -26,31 +26,31 @@ class EditorCommandDispatcher(
     }
 
     fun deleteLine() {
-        currentEditor().deleteLine()
+        currentMutableEditor()?.deleteLine()
     }
 
     fun clear() {
-        currentEditor().clear()
+        currentMutableEditor()?.clear()
     }
 
     fun toggleComment() {
-        currentEditor().toggleComment()
+        currentMutableEditor()?.toggleComment()
     }
 
     fun beautifyCode() {
-        currentEditor().beautifyCode()
+        currentMutableEditor()?.beautifyCode()
     }
 
     fun undo() {
-        currentEditor().undo()
+        currentMutableEditor()?.undo()
     }
 
     fun redo() {
-        currentEditor().redo()
+        currentMutableEditor()?.redo()
     }
 
     fun replaceSelection() {
-        currentEditor().replaceSelection()
+        currentMutableEditor()?.replaceSelection()
     }
 
     fun jumpTo(line: Int, column: Int) {
@@ -108,14 +108,15 @@ class EditorCommandDispatcher(
     }
 
     fun onPropertyClick(module: Module, property: Property) {
+        val editor = currentMutableEditor() ?: return
         val propertyText = if (property.isVariable) property.key else "${property.key}()"
         if (property.isGlobal) {
-            insert(propertyText)
+            editor.insert(propertyText)
         } else {
-            insert("${module.name}.$propertyText")
+            editor.insert("${module.name}.$propertyText")
         }
         if (!property.isVariable) {
-            currentEditor().moveCursor(-1)
+            editor.moveCursor(-1)
         }
         hideFunctionsKeyboard(true)
     }
@@ -123,5 +124,9 @@ class EditorCommandDispatcher(
     fun onPropertyLongClick(module: Module, property: Property) {
         val url = property.url?.takeIf { it.isNotEmpty() } ?: module.url
         showManual(url, property.key)
+    }
+
+    private fun currentMutableEditor(): ScriptEditorEngine? {
+        return currentEditor().takeUnless { it.isReadOnly }
     }
 }

@@ -363,6 +363,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private val mNormalToolbar = NormalToolbarFragment()
     private var mDebugging = false
     private var mTmpSavedFileForRunning: File? = null
+    private var mReadOnlyLockedByIntent = false
 
     private val mUiHandler = Handler(Looper.getMainLooper())
 
@@ -528,6 +529,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         }
         val readOnly = intent.getBooleanExtra(EXTRA_READ_ONLY, false).also {
             mReadOnly = it
+            mReadOnlyLockedByIntent = it
         }
         if (readOnly) {
             mInputMethodEnhanceBar.visibility = GONE
@@ -1198,8 +1200,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 // Normal mode.
                 // zh-CN: 普通模式.
                 setMenuItemStatus(R.id.run, true)
-                setMenuItemStatus(R.id.undo, editor.canUndo)
-                setMenuItemStatus(R.id.redo, editor.canRedo)
+                setMenuItemStatus(R.id.undo, !mReadOnly && editor.canUndo)
+                setMenuItemStatus(R.id.redo, !mReadOnly && editor.canRedo)
                 setMenuItemStatus(R.id.save, saveStickyDirty)
             }
         }
@@ -1412,6 +1414,48 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         showToast(context, R.string.text_ace_diagnostics_copied)
     }
 
+    fun isReadOnly(): Boolean = mReadOnly
+
+    fun isReadOnlyLockedByIntent(): Boolean = mReadOnlyLockedByIntent
+
+    fun canToggleAceReadOnlyMode(): Boolean {
+        return editor.engineType == EditorEngineType.ACE && !mReadOnlyLockedByIntent && !mEditorLoading
+    }
+
+    fun toggleAceReadOnlyMode() {
+        if (!canToggleAceReadOnlyMode()) {
+            return
+        }
+        setAceReadOnlyMode(!mReadOnly, toast = true)
+    }
+
+    private fun setAceReadOnlyMode(readOnly: Boolean, toast: Boolean = false) {
+        if (mReadOnlyLockedByIntent || editor.engineType != EditorEngineType.ACE) {
+            return
+        }
+        applySessionReadOnly(readOnly)
+        if (toast) {
+            showToast(
+                context,
+                if (readOnly) R.string.text_ace_read_only_mode_enabled else R.string.text_ace_read_only_mode_disabled,
+            )
+        }
+    }
+
+    private fun applySessionReadOnly(readOnly: Boolean) {
+        if (mReadOnly == readOnly) {
+            return
+        }
+        mReadOnly = readOnly
+        editor.setReadOnly(readOnly)
+        setEnhanceBarInteractive(!readOnly && !mEditorLoading)
+        if (readOnly) {
+            mFunctionsKeyboardHelper?.hideFunctionsLayout(false)
+        }
+        syncPrimaryMenuState()
+        activity.invalidateOptionsMenu()
+    }
+
     fun switchEditorEngine(targetType: EditorEngineType) {
         if (editor.engineType == targetType || mSwitchingEditorEngine) {
             return
@@ -1423,6 +1467,9 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         if (mEditorLoading) {
             showToast(context, R.string.text_loading_with_dots)
             return
+        }
+        if (!mReadOnlyLockedByIntent && targetType != EditorEngineType.ACE && mReadOnly) {
+            applySessionReadOnly(false)
         }
 
         val oldEditor = editor

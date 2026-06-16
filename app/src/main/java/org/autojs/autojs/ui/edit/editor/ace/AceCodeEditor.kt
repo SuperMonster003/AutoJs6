@@ -132,6 +132,7 @@ class AceCodeEditor @JvmOverloads constructor(
 
     private var loaded = false
     private var destroyed = false
+    private var readOnly = false
     private var userTouching = false
     private var firstPaintReceived = false
     private var pendingResizeReason: String? = null
@@ -295,11 +296,21 @@ class AceCodeEditor @JvmOverloads constructor(
     }
 
     fun insert(text: String?) {
+        if (!canMutateText("insert")) {
+            return
+        }
         invokeAce("insert", quote(text.orEmpty()))
     }
 
     fun insert(line: Int, text: String?) {
+        if (!canMutateText("insertAtLine")) {
+            return
+        }
         invokeAce("insertAtLine", "${line.coerceAtLeast(0)}, ${quote(text.orEmpty())}")
+    }
+
+    fun appendTextChunk(text: String?) {
+        invokeAce("appendTextChunk", quote(text.orEmpty()))
     }
 
     fun selectRange(startOffset: Int, endOffset: Int) {
@@ -343,10 +354,16 @@ class AceCodeEditor @JvmOverloads constructor(
     }
 
     fun deleteLine() {
+        if (!canMutateText("deleteLine")) {
+            return
+        }
         invokeAce("deleteLine")
     }
 
     fun clear() {
+        if (!canMutateText("clear")) {
+            return
+        }
         resetTextMirror("")
         selectionSnapshot = AceSelection.EMPTY
         selectedTextSnapshot = ""
@@ -354,18 +371,30 @@ class AceCodeEditor @JvmOverloads constructor(
     }
 
     fun toggleComment() {
+        if (!canMutateText("toggleComment")) {
+            return
+        }
         invokeAce("toggleComment")
     }
 
     fun beautify() {
+        if (!canMutateText("beautify")) {
+            return
+        }
         invokeAce("beautify")
     }
 
     fun replaceSelection(text: String?) {
+        if (!canMutateText("replaceSelection")) {
+            return
+        }
         invokeAce("replaceSelection", quote(text.orEmpty()))
     }
 
     fun replaceStoredSelection() {
+        if (!canMutateText("replaceStoredSelection")) {
+            return
+        }
         invokeAce("replaceStoredSelection")
     }
 
@@ -374,18 +403,29 @@ class AceCodeEditor @JvmOverloads constructor(
     }
 
     fun replaceAll(query: String, replacement: String?, usingRegex: Boolean) {
+        if (!canMutateText("replaceAll")) {
+            return
+        }
         invokeAce("replaceAll", "${quote(query)}, ${quote(replacement.orEmpty())}, $usingRegex")
     }
 
     fun undo() {
+        if (!canMutateText("undo")) {
+            return
+        }
         invokeAce("undo")
     }
 
     fun redo() {
+        if (!canMutateText("redo")) {
+            return
+        }
         invokeAce("redo")
     }
 
     fun setReadOnly(readOnly: Boolean) {
+        this.readOnly = readOnly
+        selectionActionMode?.invalidate()
         invokeAce("setReadOnly", readOnly.toString())
     }
 
@@ -821,7 +861,7 @@ class AceCodeEditor @JvmOverloads constructor(
 
             override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
                 menu.findItem(ACTION_MODE_COPY)?.isEnabled = selectedTextSnapshot.isNotEmpty()
-                menu.findItem(ACTION_MODE_PASTE)?.isEnabled = ClipboardUtils.getClipOrEmpty(context).isNotEmpty()
+                menu.findItem(ACTION_MODE_PASTE)?.isEnabled = !readOnly && ClipboardUtils.getClipOrEmpty(context).isNotEmpty()
                 menu.findItem(ACTION_MODE_SELECT_ALL)?.isEnabled = textSnapshot.isNotEmpty()
                 return true
             }
@@ -877,12 +917,23 @@ class AceCodeEditor @JvmOverloads constructor(
     }
 
     private fun pasteClipboardIntoSelection() {
+        if (!canMutateText("actionModePaste")) {
+            return
+        }
         val clip = ClipboardUtils.getClipOrEmpty(context).toString()
         if (clip.isEmpty()) {
             return
         }
         replaceSelection(clip)
         eventHistory.record("action_mode_paste", "length=${clip.length}")
+    }
+
+    private fun canMutateText(operation: String): Boolean {
+        if (!readOnly) {
+            return true
+        }
+        eventHistory.record("read_only_blocked", operation)
+        return false
     }
 
     private fun finishSelectionActionMode() {

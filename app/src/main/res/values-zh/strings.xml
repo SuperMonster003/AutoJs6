@@ -1445,6 +1445,9 @@
     <string name="text_ace_editor_fallback_native" formatted="true">ACE 编辑器失败 (%1$s); 已切换到原生编辑器。可在更多菜单中复制 ACE 诊断信息</string>
     <string name="text_ace_editor_font">ACE 编辑器字体</string>
     <string name="text_ace_editor_font_changed" formatted="true">ACE 编辑器字体已切换为 %s</string>
+    <string name="text_ace_read_only_mode">ACE 只读模式</string>
+    <string name="text_ace_read_only_mode_enabled">ACE 只读模式已启用</string>
+    <string name="text_ace_read_only_mode_disabled">ACE 只读模式已关闭</string>
     <string name="text_ace_get_text">获取文本</string>
     <string name="text_ace_ime_stress">IME 压力测试</string>
     <string name="text_ace_ime_stress_done">IME 压力测试完成: %1$d 轮</string>

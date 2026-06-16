@@ -243,6 +243,133 @@ class AceCodeEditorSmokeTest {
     }
 
     @Test
+    fun selectedTextBrowseScrollDoesNotPullBackOnGenericResize() {
+        val editor = launchReadyEditor()
+
+        val result = waitForJsonResult(
+            editor,
+            """
+                (function() {
+                    if (window.__aceSelectionBrowseResult) {
+                        return window.__aceSelectionBrowseResult;
+                    }
+                    if (window.__aceSelectionBrowseStarted) {
+                        return "";
+                    }
+                    window.__aceSelectionBrowseStarted = true;
+
+                    var lines = [];
+                    for (var i = 0; i < 320; i++) {
+                        var label = ("000" + i).slice(-3);
+                        lines.push("line_" + label + "();");
+                    }
+                    var text = lines.join("\n") + "\n";
+                    window.AutoJsAce.setText(text);
+                    var selected = "line_005";
+                    var start = text.indexOf(selected);
+                    window.AutoJsAce.selectRange(start, start + selected.length);
+
+                    setTimeout(function() {
+                        var renderer = editor.renderer;
+                        var lineHeight = renderer.lineHeight ||
+                            (renderer.layerConfig && renderer.layerConfig.lineHeight) ||
+                            16;
+                        if (editor.scrollToLine) {
+                            editor.scrollToLine(240, true, false, null);
+                        }
+                        renderer.scrollToY(lineHeight * 240);
+                        setTimeout(function() {
+                            var before = renderer.getFirstVisibleRow();
+                            window.AutoJsAce.scheduleResize("selection_browse_smoke");
+                            setTimeout(function() {
+                                var state = window.AutoJsAce.getState();
+                                window.__aceSelectionBrowseResult = JSON.stringify({
+                                    before: before,
+                                    after: renderer.getFirstVisibleRow(),
+                                    selectedText: state.selectedText
+                                });
+                            }, 420);
+                        }, 120);
+                    }, 520);
+                    return "";
+                })();
+            """.trimIndent(),
+        )
+
+        assertEquals("line_005", result.getString("selectedText"))
+        assertTrue(
+            "Selection should have been scrolled offscreen before resize: $result",
+            result.getInt("before") >= 180,
+        )
+        assertTrue(
+            "Generic resize should not reveal the offscreen selection again: $result",
+            result.getInt("after") >= result.getInt("before") - 20,
+        )
+    }
+
+    @Test
+    fun aceReadOnlyModeBlocksMutationsAndDoesNotPersist() {
+        val editor = launchReadyEditor()
+        val initialText = "alpha();\nbeta();\ngamma();\n"
+
+        runOnMainSync {
+            editor.setText(initialText)
+        }
+        waitForEditorText(editor, initialText, "ACE text should be ready before read-only smoke")
+
+        runOnMainSync {
+            editor.setReadOnly(true)
+            editor.jumpToEnd()
+            editor.insert("kotlinInsert();\n")
+            editor.deleteLine()
+            editor.replaceSelection("kotlinReplace();")
+            editor.undo()
+            editor.redo()
+            editor.clear()
+        }
+        waitUntil("ACE runtime should report read-only") {
+            evaluateJsonObject(editor, "JSON.stringify(window.AutoJsAce.getState());")
+                .getBoolean("readOnly")
+        }
+
+        val blockedState = evaluateJsonObject(
+            editor,
+            """
+                (function() {
+                    window.AutoJsAce.insert("jsInsert();\n");
+                    window.AutoJsAce.insertAtLine(0, "jsInsertAtLine();\n");
+                    window.AutoJsAce.deleteLine();
+                    window.AutoJsAce.replaceSelection("jsReplace();");
+                    window.AutoJsAce.replaceAll("alpha", "omega", false);
+                    window.AutoJsAce.undo();
+                    window.AutoJsAce.redo();
+                    return JSON.stringify(window.AutoJsAce.getState());
+                })();
+            """.trimIndent(),
+        )
+        assertTrue(blockedState.getBoolean("readOnly"))
+        waitForEditorText(editor, initialText, "ACE read-only mode should block Kotlin and JS mutations")
+
+        runOnMainSync {
+            editor.setReadOnly(false)
+            editor.jumpToEnd()
+            editor.insert("delta();\n")
+        }
+        waitForEditorText(editor, initialText + "delta();\n", "ACE should mutate again after read-only is disabled")
+
+        runOnMainSync {
+            editor.destroy()
+            activity?.finish()
+        }
+        instrumentation.waitForIdleSync()
+        activity = null
+
+        val freshEditor = launchReadyEditor()
+        val freshState = evaluateJsonObject(freshEditor, "JSON.stringify(window.AutoJsAce.getState());")
+        assertFalse("ACE read-only mode must default off for a new session", freshState.getBoolean("readOnly"))
+    }
+
+    @Test
     fun acceptsStaticCompletionsThroughAcePopup() {
         val editor = launchReadyEditor(lspEnabled = false)
 
