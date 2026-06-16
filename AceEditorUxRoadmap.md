@@ -56,9 +56,9 @@ Acceptance:
   upper-left editor area.
 - [x] Prevent transient short-menu flashes while dragging selection handles.
 - [x] Prevent stale upper-left menus after scroll, app switch, or return.
-- [ ] Investigate Sony XQ-AT72 right-edge back gesture touch propagation into
+- [x] Investigate Sony XQ-AT72 right-edge back gesture touch propagation into
   ACE long-press selection.
-- [ ] Add device notes for behavior that also reproduces in Auto.js Pro.
+- [x] Add device notes for behavior that also reproduces in Auto.js Pro.
 
 Acceptance:
 
@@ -76,6 +76,12 @@ Notes:
 - Browsing code while a selection is active now suppresses both the Android
   `ActionMode` and ACE short menu until the selection changes, avoiding stale
   menus after scroll or app visibility transitions.
+- Sony right-edge back gestures appear to leak the edge `ACTION_DOWN` into
+  WebView/ACE before the system consumes the back gesture, matching the same
+  behavior observed in Auto.js Pro. AutoJs6 now guards only the reported right
+  system-gesture inset so ACE does not start long-press selection from that
+  edge sequence; manual Sony verification is still required for the acceptance
+  gate.
 
 ## Gate UX-3: Input, Keyboard, And Read-Only Mode
 

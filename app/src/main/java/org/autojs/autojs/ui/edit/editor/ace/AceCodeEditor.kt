@@ -36,6 +36,7 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.FrameLayout
+import androidx.annotation.VisibleForTesting
 import org.autojs.autojs.core.pref.Pref.getString
 import org.autojs.autojs.ui.edit.editor.ace.diagnostics.AceDiagnostics
 import org.autojs.autojs.ui.edit.editor.ace.diagnostics.AceDiagnosticsSnapshot
@@ -160,6 +161,7 @@ class AceCodeEditor @JvmOverloads constructor(
     private var actionModeActive = false
     private var selectionActionMode: ActionMode? = null
     private val selectionActionModeRect = Rect()
+    private var rightEdgeBackGestureTouchGuardActive = false
     private var bridgeEventWindowStartedAtUptimeMillis = 0L
     private var bridgeEventWindowCount = 0
     private var lastBridgeEventWindowCount = 0
@@ -505,6 +507,69 @@ class AceCodeEditor @JvmOverloads constructor(
         }
         return pinchGestureActive || detector.isInProgress || event.pointerCount > 1
     }
+
+    private fun handleRightEdgeBackGestureTouch(event: MotionEvent): Boolean {
+        when (event.actionMasked) {
+            MotionEvent.ACTION_DOWN -> {
+                val systemGestureInsetRight = currentSystemGestureInsetRight()
+                rightEdgeBackGestureTouchGuardActive = shouldGuardRightEdgeBackGestureTouchStart(
+                    x = event.x,
+                    viewWidth = webView.width,
+                    systemGestureInsetRight = systemGestureInsetRight,
+                )
+                if (rightEdgeBackGestureTouchGuardActive) {
+                    userTouching = false
+                    eventHistory.record(
+                        "right_edge_back_gesture_guard",
+                        "x=${event.x.roundToInt()},width=${webView.width},insetRight=$systemGestureInsetRight",
+                    )
+                }
+            }
+            MotionEvent.ACTION_UP,
+            MotionEvent.ACTION_CANCEL,
+                -> {
+                val consumed = rightEdgeBackGestureTouchGuardActive
+                rightEdgeBackGestureTouchGuardActive = false
+                if (consumed) {
+                    userTouching = false
+                }
+                return consumed
+            }
+        }
+        return rightEdgeBackGestureTouchGuardActive
+    }
+
+    private fun currentSystemGestureInsetRight(): Int {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            return 0
+        }
+        return webView.rootWindowInsets?.systemGestureInsets?.right ?: 0
+    }
+
+    private fun shouldGuardRightEdgeBackGestureTouchStart(
+        x: Float,
+        viewWidth: Int,
+        systemGestureInsetRight: Int,
+    ): Boolean {
+        val guardWidth = rightEdgeBackGestureGuardWidth(viewWidth, systemGestureInsetRight)
+        return guardWidth > 0 && x >= viewWidth - guardWidth && x <= viewWidth
+    }
+
+    private fun rightEdgeBackGestureGuardWidth(viewWidth: Int, systemGestureInsetRight: Int): Int {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q || viewWidth <= 0 || systemGestureInsetRight <= 0) {
+            return 0
+        }
+        val minimumGuardWidth = (resources.displayMetrics.density * RIGHT_EDGE_BACK_GESTURE_MIN_GUARD_DP).roundToInt()
+        val maximumGuardWidth = (viewWidth * RIGHT_EDGE_BACK_GESTURE_MAX_WIDTH_RATIO).roundToInt().coerceAtLeast(1)
+        return maxOf(systemGestureInsetRight, minimumGuardWidth).coerceAtMost(maximumGuardWidth)
+    }
+
+    @VisibleForTesting
+    internal fun shouldGuardRightEdgeBackGestureTouchStartForTest(
+        x: Float,
+        viewWidth: Int,
+        systemGestureInsetRight: Int,
+    ): Boolean = shouldGuardRightEdgeBackGestureTouchStart(x, viewWidth, systemGestureInsetRight)
 
     private fun changeBaseTextSizeBy(delta: Int, focusX: Float, focusY: Float) {
         val next = (baseTextSizeSp.roundToInt() + delta)
@@ -1147,6 +1212,9 @@ class AceCodeEditor @JvmOverloads constructor(
             eventHistory.record(if (hasFocus) "focus" else "blur", "webView")
         }
         webView.setOnTouchListener { _, event ->
+            if (handleRightEdgeBackGestureTouch(event)) {
+                return@setOnTouchListener true
+            }
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN,
                 MotionEvent.ACTION_POINTER_DOWN,
@@ -1715,6 +1783,8 @@ class AceCodeEditor @JvmOverloads constructor(
         private const val IME_TRANSITION_HEARTBEAT_SUSPEND_MS = 800L
         private const val RESIZE_SETTLE_DELAY_MS = 120L
         private const val IME_HEIGHT_THRESHOLD_DP = 80f
+        private const val RIGHT_EDGE_BACK_GESTURE_MIN_GUARD_DP = 24f
+        private const val RIGHT_EDGE_BACK_GESTURE_MAX_WIDTH_RATIO = 0.16f
         private const val BRIDGE_EVENT_WINDOW_MS = 1_000L
         private const val BRIDGE_EVENT_STORM_THRESHOLD = 60
         private const val ACTION_MODE_COPY = 1
