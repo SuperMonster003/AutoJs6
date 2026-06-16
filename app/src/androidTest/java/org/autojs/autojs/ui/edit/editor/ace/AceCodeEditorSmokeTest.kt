@@ -8,6 +8,7 @@ import android.content.res.Configuration
 import android.os.SystemClock
 import android.view.inputmethod.InputMethodManager
 import android.webkit.WebView
+import android.widget.TextView
 import androidx.test.platform.app.InstrumentationRegistry
 import org.autojs.autojs.ui.edit.EditActivity
 import org.autojs.autojs.ui.edit.EditorView
@@ -179,6 +180,23 @@ class AceCodeEditorSmokeTest {
                 listOf("*", "<", "v", ">", "{", "}", "[", "]", "`", "<", ">", "-"),
                 rows.second,
             )
+            assertEquals(
+                R.drawable.ic_star_black_48dp,
+                runOnMainSync {
+                    editorView.findViewById<CodeCompletionBar>(R.id.symbol_bar)
+                        .codeCompletions[0]
+                        .iconResId
+                },
+            )
+            waitUntil("ACE action favorites shortcut should render as a themed star icon") {
+                runOnMainSync {
+                    val starCell = editorView.findViewById<CodeCompletionBar>(R.id.symbol_bar)
+                        .getChildAt(0) as? TextView
+                    starCell != null &&
+                        starCell.text.isEmpty() &&
+                        starCell.compoundDrawables[0] != null
+                }
+            }
 
             runOnMainSync {
                 val secondRow = editorView.findViewById<CodeCompletionBar>(R.id.symbol_bar)

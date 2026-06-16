@@ -108,7 +108,7 @@ Acceptance:
 
 Acceptance:
 
-- [ ] ACE shortcut panel is visually coherent in light and dark themes.
+- [x] ACE shortcut panel is visually coherent in light and dark themes.
 - [x] Favorites ordering rules are deterministic.
 - [x] Repeating the last command handles the no-last-command case with a toast.
 

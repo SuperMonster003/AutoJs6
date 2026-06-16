@@ -1,6 +1,7 @@
 package org.autojs.autojs.ui.edit.completion;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.os.Looper;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -10,9 +11,12 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import org.autojs.autojs.groundwork.WrapContentLinearLayoutManager;
 import org.autojs.autojs.model.autocomplete.CodeCompletions;
+import org.autojs.autojs.util.DisplayUtils;
 import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs6.R;
 
@@ -21,6 +25,11 @@ import org.autojs.autojs6.R;
  * Modified by SuperMonster003 as of Mar 8, 2026.
  */
 public class CodeCompletionBar extends RecyclerView {
+
+    private static final int ITEM_HORIZONTAL_PADDING_DP = 12;
+    private static final int ICON_ITEM_HORIZONTAL_PADDING_DP = 10;
+    private static final int ICON_ITEM_MIN_WIDTH_DP = 40;
+    private static final int ICON_SIZE_DP = 20;
 
     private int mTextColor;
     private CodeCompletions mCodeCompletions;
@@ -103,16 +112,59 @@ public class CodeCompletionBar extends RecyclerView {
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
             TextView textView = ((TextView) holder.itemView);
-            textView.setText(mCodeCompletions.getHint(position));
             if (mTextColor != 0) {
                 textView.setTextColor(mTextColor);
             }
+            bindCompletionItem(textView, position);
         }
 
         @Override
         public int getItemCount() {
             return mCodeCompletions == null ? 0 : mCodeCompletions.size();
         }
+    }
+
+    private void bindCompletionItem(TextView textView, int position) {
+        int iconResId = mCodeCompletions.getIconResId(position);
+        if (iconResId == 0) {
+            textView.setText(mCodeCompletions.getHint(position));
+            textView.setContentDescription(null);
+            textView.setMinWidth(0);
+            textView.setPadding(
+                    dp(ITEM_HORIZONTAL_PADDING_DP),
+                    0,
+                    dp(ITEM_HORIZONTAL_PADDING_DP),
+                    0
+            );
+            textView.setCompoundDrawables(null, null, null, null);
+            return;
+        }
+
+        Drawable icon = ContextCompat.getDrawable(getContext(), iconResId);
+        textView.setText("");
+        textView.setContentDescription(mCodeCompletions.getHint(position));
+        textView.setMinWidth(dp(ICON_ITEM_MIN_WIDTH_DP));
+        textView.setPadding(
+                dp(ICON_ITEM_HORIZONTAL_PADDING_DP),
+                0,
+                dp(ICON_ITEM_HORIZONTAL_PADDING_DP),
+                0
+        );
+        if (icon == null) {
+            textView.setCompoundDrawables(null, null, null, null);
+            return;
+        }
+
+        Drawable wrappedIcon = DrawableCompat.wrap(icon.mutate());
+        DrawableCompat.setTint(wrappedIcon, mTextColor != 0 ? mTextColor : textView.getCurrentTextColor());
+        int iconSize = dp(ICON_SIZE_DP);
+        wrappedIcon.setBounds(0, 0, iconSize, iconSize);
+        textView.setCompoundDrawables(wrappedIcon, null, null, null);
+        textView.setCompoundDrawablePadding(0);
+    }
+
+    private static int dp(int value) {
+        return Math.round(DisplayUtils.dpToPx(value));
     }
 
     private class ViewHolder extends RecyclerView.ViewHolder {

@@ -2,6 +2,7 @@ package org.autojs.autojs.ui.edit.keyboard
 
 import org.autojs.autojs.model.autocomplete.CodeCompletion
 import org.autojs.autojs.model.autocomplete.CodeCompletions
+import org.autojs.autojs6.R
 
 object AceShortcutPanel {
 
@@ -45,10 +46,10 @@ object AceShortcutPanel {
         val action: Action?,
     )
 
-    private fun command(label: String, command: Command): ShortcutItem {
+    private fun command(label: String, command: Command, iconResId: Int = 0): ShortcutItem {
         val insertText = command.insertText
         return ShortcutItem(
-            completion = CodeCompletion(label, null, insertText),
+            completion = CodeCompletion(label, null, insertText, iconResId),
             action = when (command) {
                 Command.ActionFavorites -> null
                 else -> Action(
@@ -90,7 +91,7 @@ object AceShortcutPanel {
     )
 
     private val SECOND_ROW = listOf(
-        command("*", Command.ActionFavorites),
+        command("*", Command.ActionFavorites, R.drawable.ic_star_black_48dp),
         command("<", Command.MoveLeft),
         command("v", Command.MoveDown),
         command(">", Command.MoveRight),

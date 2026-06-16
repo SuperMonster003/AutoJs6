@@ -76,6 +76,33 @@ const EDITOR_VIEW_PATH = path.join(
   "edit",
   "EditorView.kt",
 );
+const CODE_COMPLETION_PATH = path.join(
+  PROJECT_ROOT,
+  "app",
+  "src",
+  "main",
+  "java",
+  "org",
+  "autojs",
+  "autojs",
+  "model",
+  "autocomplete",
+  "CodeCompletion.kt",
+);
+const CODE_COMPLETION_BAR_PATH = path.join(
+  PROJECT_ROOT,
+  "app",
+  "src",
+  "main",
+  "java",
+  "org",
+  "autojs",
+  "autojs",
+  "ui",
+  "edit",
+  "completion",
+  "CodeCompletionBar.java",
+);
 const ACE_SHORTCUT_PANEL_PATH = path.join(
   PROJECT_ROOT,
   "app",
@@ -175,6 +202,8 @@ const aceCodeEditor = read(ACE_CODE_EDITOR_PATH);
 const aceScriptEditorEngine = read(ACE_SCRIPT_EDITOR_ENGINE_PATH);
 const editorMenu = read(EDITOR_MENU_PATH);
 const editorView = read(EDITOR_VIEW_PATH);
+const codeCompletion = read(CODE_COMPLETION_PATH);
+const codeCompletionBar = read(CODE_COMPLETION_BAR_PATH);
 const aceShortcutPanel = read(ACE_SHORTCUT_PANEL_PATH);
 const aceActionHistoryStore = read(ACE_ACTION_HISTORY_STORE_PATH);
 const aceActionFavoritesDialog = read(ACE_ACTION_FAVORITES_DIALOG_PATH);
@@ -324,9 +353,14 @@ assertIncludes(editorView, "showAceActionHistoryDialog", "ACE action history dia
 assertIncludes(editorView, "repeatLastAceAction", "ACE repeat last action handler");
 assertIncludes(editorView, "AceActionFavoritesDialog.show", "ACE action favorites dialog integration");
 
+assertIncludes(codeCompletion, "val iconResId", "code completion optional icon model");
+assertIncludes(codeCompletionBar, "getIconResId(position)", "code completion optional icon lookup");
+assertIncludes(codeCompletionBar, "setCompoundDrawables(wrappedIcon, null, null, null)", "completion bar icon rendering");
+assertIncludes(codeCompletionBar, "DrawableCompat.setTint", "completion bar themed icon tint");
+
 assertIncludes(aceShortcutPanel, 'command("ESC", Command.Escape)', "ACE shortcut ESC key");
 assertIncludes(aceShortcutPanel, 'command("TAB", Command.Tab)', "ACE shortcut TAB key");
-assertIncludes(aceShortcutPanel, 'command("*", Command.ActionFavorites)', "ACE shortcut favorites entry");
+assertIncludes(aceShortcutPanel, 'command("*", Command.ActionFavorites, R.drawable.ic_star_black_48dp)', "ACE shortcut favorites star entry");
 assertIncludes(aceShortcutPanel, 'insert("`")', "ACE shortcut backtick key");
 assertIncludes(aceShortcutPanel, "data class Action", "ACE shortcut action model");
 assertIncludes(aceShortcutPanel, "fun actionById", "ACE shortcut stable action lookup");

@@ -13,6 +13,10 @@ class CodeCompletions(val from: Int, private val mCompletions: List<CodeCompleti
         return mCompletions[position].hint
     }
 
+    fun getIconResId(position: Int): Int {
+        return mCompletions[position].iconResId
+    }
+
     operator fun get(pos: Int): CodeCompletion {
         return mCompletions[pos]
     }
