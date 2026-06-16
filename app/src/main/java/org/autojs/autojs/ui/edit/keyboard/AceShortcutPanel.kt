@@ -8,7 +8,6 @@ object AceShortcutPanel {
 
     private const val COMMAND_PREFIX = "__autojs6_ace_shortcut:"
     private const val ACTION_PREFIX_COMMAND = "command:"
-    private const val ACTION_PREFIX_INSERT = "insert:"
 
     enum class Command(val id: String, val mutatesText: Boolean) {
         Escape("escape", mutatesText = false),
@@ -63,61 +62,32 @@ object AceShortcutPanel {
         )
     }
 
-    private fun insert(text: String): ShortcutItem {
-        return ShortcutItem(
-            completion = CodeCompletion(text, null, text),
-            action = Action(
-                id = ACTION_PREFIX_INSERT + text,
-                label = text,
-                insertText = text,
-                command = null,
-                mutatesText = true,
-            ),
-        )
-    }
-
-    private val FIRST_ROW = listOf(
+    private val TOP_ROW = listOf(
         command("ESC", Command.Escape),
-        command("^", Command.MoveUp),
+        command("Up", Command.MoveUp, R.drawable.ic_keyboard_arrow_up_black_48dp),
         command("TAB", Command.Tab),
-        insert("("),
-        insert(")"),
-        insert("/"),
-        insert("="),
-        insert(","),
-        insert(";"),
-        insert("\""),
-        insert("'"),
     )
 
-    private val SECOND_ROW = listOf(
-        command("*", Command.ActionFavorites, R.drawable.ic_star_black_48dp),
-        command("<", Command.MoveLeft),
-        command("v", Command.MoveDown),
-        command(">", Command.MoveRight),
-        insert("{"),
-        insert("}"),
-        insert("["),
-        insert("]"),
-        insert("`"),
-        insert("<"),
-        insert(">"),
-        insert("-"),
+    private val BOTTOM_ROW = listOf(
+        command("★", Command.ActionFavorites, R.drawable.ic_star_black_48dp),
+        command("Left", Command.MoveLeft, R.drawable.ic_keyboard_arrow_left_black_48dp),
+        command("Down", Command.MoveDown, R.drawable.ic_keyboard_arrow_down_black_48dp),
+        command("Right", Command.MoveRight, R.drawable.ic_keyboard_arrow_right_black_48dp),
     )
 
-    val firstRowCompletions: CodeCompletions = CodeCompletions.fromCompletions(
-        FIRST_ROW.map { it.completion },
+    val topRowCompletions: CodeCompletions = CodeCompletions.fromCompletions(
+        TOP_ROW.map { it.completion },
     )
 
-    val secondRowCompletions: CodeCompletions = CodeCompletions.fromCompletions(
-        SECOND_ROW.map { it.completion },
+    val bottomRowCompletions: CodeCompletions = CodeCompletions.fromCompletions(
+        BOTTOM_ROW.map { it.completion },
     )
 
-    private val actionsByInsertText: Map<String, Action> = (FIRST_ROW + SECOND_ROW)
+    private val actionsByInsertText: Map<String, Action> = (TOP_ROW + BOTTOM_ROW)
         .mapNotNull { it.action }
         .associateBy { it.insertText }
 
-    private val actionsById: Map<String, Action> = (FIRST_ROW + SECOND_ROW)
+    private val actionsById: Map<String, Action> = (TOP_ROW + BOTTOM_ROW)
         .mapNotNull { it.action }
         .associateBy { it.id }
 
@@ -127,6 +97,10 @@ object AceShortcutPanel {
 
     fun actionOf(completion: CodeCompletion): Action? {
         return actionsByInsertText[completion.insertText]
+    }
+
+    fun actionOf(command: Command): Action? {
+        return actionsByInsertText[command.insertText]
     }
 
     fun actionById(id: String?): Action? {

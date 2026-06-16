@@ -26,7 +26,6 @@ import android.widget.TextView
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.FragmentActivity
@@ -74,6 +73,7 @@ import org.autojs.autojs.ui.edit.editor.engine.EditorEnginePreferences
 import org.autojs.autojs.ui.edit.editor.engine.EditorCursorChangeListener
 import org.autojs.autojs.ui.edit.editor.engine.EditorSearchOptions
 import org.autojs.autojs.ui.edit.editor.engine.EditorSearchSyntaxException
+import org.autojs.autojs.ui.edit.editor.engine.EditorSelection
 import org.autojs.autojs.ui.edit.editor.engine.EditorEngineType
 import org.autojs.autojs.ui.edit.editor.engine.ScriptEditorEngine
 import org.autojs.autojs.ui.edit.editor.loading.EditorFileReadMetadata
@@ -331,8 +331,14 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     private val mCodeCompletionBar: CodeCompletionBar = binding.codeCompletionBar
     private val mInputMethodEnhanceBar: View = binding.inputMethodEnhanceBar
+    private val mNativeInputMethodEnhanceContent: View = binding.nativeInputMethodEnhanceContent
+    private val mAceInputMethodEnhanceContent: View = binding.aceInputMethodEnhanceContent
     private val mSymbolBar: CodeCompletionBar = binding.symbolBar
     private val mShowFunctionsButton: ImageView = binding.functions
+    private val mAceShowFunctionsButton: ImageView = binding.aceFunctions
+    private val mAceShortcutTopBar: CodeCompletionBar = binding.aceShortcutTopBar
+    private val mAceShortcutBottomBar: CodeCompletionBar = binding.aceShortcutBottomBar
+    private val mAceSymbolsBar: CodeCompletionBar = binding.aceSymbolsBar
     private val mFunctionsKeyboard: FunctionsKeyboardView = binding.functionsKeyboard
     private val mDocsWebView: EWebView = binding.docs
     private val mDrawerLayout: DrawerLayout = binding.drawerLayout
@@ -368,6 +374,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private var mDebugging = false
     private var mTmpSavedFileForRunning: File? = null
     private var mReadOnlyLockedByIntent = false
+    private var mAceShortcutReturnSelection: EditorSelection? = null
 
     private val mUiHandler = Handler(Looper.getMainLooper())
 
@@ -393,9 +400,17 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         inputMethodEnhanceBar = mInputMethodEnhanceBar,
         loadingBarContainer = mLoadingBarContainer,
         loadingBarText = mLoadingBarText,
-        codeCompletionBar = mCodeCompletionBar,
-        symbolBar = mSymbolBar,
-        showFunctionsButton = mShowFunctionsButton,
+        completionBars = listOf(
+            mCodeCompletionBar,
+            mSymbolBar,
+            mAceShortcutTopBar,
+            mAceShortcutBottomBar,
+            mAceSymbolsBar,
+        ),
+        showFunctionsButtons = listOf(
+            mShowFunctionsButton,
+            mAceShowFunctionsButton,
+        ),
         invalidateHost = { invalidate() },
     )
 
@@ -750,26 +765,19 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private fun setEnhanceBarInteractive(interactive: Boolean) {
         // When not interactive, hide function/completion bars and show loading bar.
         // zh-CN: 非可操作状态时隐藏功能/补全栏, 显示加载提示条.
-        when (interactive) {
-            true -> {
-                mShowFunctionsButton.visibility = VISIBLE
-                mCodeCompletionBar.visibility = VISIBLE
-            }
-            else -> {
-                mShowFunctionsButton.visibility = INVISIBLE
-                mCodeCompletionBar.visibility = INVISIBLE
-            }
+        val activeContent = if (editor.engineType == EditorEngineType.ACE) {
+            mAceInputMethodEnhanceContent
+        } else {
+            mNativeInputMethodEnhanceContent
         }
-        if (!mSymbolBar.isGone) {
-            when (interactive) {
-                true -> {
-                    mSymbolBar.visibility = VISIBLE
-                }
-                else -> {
-                    mSymbolBar.visibility = INVISIBLE
-                }
-            }
+        val inactiveContent = if (editor.engineType == EditorEngineType.ACE) {
+            mNativeInputMethodEnhanceContent
+        } else {
+            mAceInputMethodEnhanceContent
         }
+
+        inactiveContent.visibility = GONE
+        activeContent.visibility = if (interactive) VISIBLE else INVISIBLE
     }
 
     private fun beginEditorLoadingUi(initialMessage: String) {
@@ -1363,9 +1371,12 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private fun setUpFunctionsKeyboard() {
         mFunctionsKeyboardHelper = FunctionsKeyboardHelper.with(context as Activity)
             .setContent(binding.editorContainer)
-            .setFunctionsTrigger(mShowFunctionsButton)
             .setFunctionsView(mFunctionsKeyboard)
             .setEditView(editor.inputView)
+            .apply {
+                setFunctionsTrigger(mShowFunctionsButton)
+                setFunctionsTrigger(mAceShowFunctionsButton)
+            }
             .build()
 
         // @TodoDiary by 抠脚本人 on Jul 10, 2023.
@@ -1384,36 +1395,72 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         //  ! 长按: 以浮动窗口形式展示 [方法/属性/模块] 对应的文档内容 (如果存在的话).
         mFunctionsKeyboard.setClickCallback(this)
 
-        mShowFunctionsButton.setOnLongClickListener {
+        val beautifyOnLongClick = View.OnLongClickListener {
             true.also { mCommandDispatcher.beautifyCode() }
         }
+        mShowFunctionsButton.setOnLongClickListener(beautifyOnLongClick)
+        mAceShowFunctionsButton.setOnLongClickListener(beautifyOnLongClick)
     }
 
     private fun setUpInputMethodEnhancedBar() {
         mAutoCompletion?.shutdown()
         mAutoCompletion = null
-        mSymbolBar.let { bar ->
+        configureInputMethodEnhancedBars()
+        listOf(
+            mSymbolBar,
+            mCodeCompletionBar,
+            mAceShortcutTopBar,
+            mAceShortcutBottomBar,
+            mAceSymbolsBar,
+        ).forEach { bar ->
             bar.setOnHintClickListener(this)
+        }
+
+        if (editor.engineType == EditorEngineType.ACE) {
+            mCodeCompletionBar.codeCompletions = CodeCompletions.just(emptyList())
+            mSymbolBar.codeCompletions = CodeCompletions.just(emptyList())
+            mAceShortcutTopBar.codeCompletions = AceShortcutPanel.topRowCompletions
+            mAceShortcutBottomBar.codeCompletions = AceShortcutPanel.bottomRowCompletions
             refreshSymbolsBar()
+            setEnhanceBarInteractive(!mReadOnly && !mEditorLoading)
+            return
         }
-        mCodeCompletionBar.let { bar ->
-            bar.setOnHintClickListener(this)
-            if (editor.engineType == EditorEngineType.ACE) {
-                bar.codeCompletions = AceShortcutPanel.firstRowCompletions
-                return
-            }
-            bar.codeCompletions = CodeCompletions.just(emptyList())
-            editor.createAutoCompletion(context)?.apply {
-                setAutoCompleteCallback { bar.codeCompletions = it }
-                mAutoCompletion = this
-            }
+
+        mAceShortcutReturnSelection = null
+        mAceShortcutTopBar.codeCompletions = CodeCompletions.just(emptyList())
+        mAceShortcutBottomBar.codeCompletions = CodeCompletions.just(emptyList())
+        mAceSymbolsBar.codeCompletions = CodeCompletions.just(emptyList())
+        mCodeCompletionBar.codeCompletions = CodeCompletions.just(emptyList())
+        refreshSymbolsBar()
+        editor.createAutoCompletion(context)?.apply {
+            setAutoCompleteCallback { mCodeCompletionBar.codeCompletions = it }
+            mAutoCompletion = this
         }
+        setEnhanceBarInteractive(!mReadOnly && !mEditorLoading)
+    }
+
+    private fun configureInputMethodEnhancedBars() {
+        mCodeCompletionBar.useHorizontalLayout()
+        mCodeCompletionBar.resetItemSize()
+        mSymbolBar.useHorizontalLayout()
+        mSymbolBar.resetItemSize()
+        mAceShortcutTopBar.useHorizontalLayout()
+        mAceShortcutTopBar.setFixedItemSizeDp(40, 35)
+        mAceShortcutBottomBar.useHorizontalLayout()
+        mAceShortcutBottomBar.setFixedItemSizeDp(40, 35)
+        mAceSymbolsBar.useFlowLayout()
+        mAceSymbolsBar.setItemHeightDp(35)
     }
 
     fun refreshSymbolsBar() {
         if (editor.engineType == EditorEngineType.ACE) {
-            mSymbolBar.isVisible = true
-            mSymbolBar.codeCompletions = AceShortcutPanel.secondRowCompletions
+            SymbolsConfigStore.ensureDefaultProfileExists(context)
+            val symbols = SymbolsConfigStore.getEnabledSymbolsForActiveProfile(
+                context,
+                SymbolsConfigStore.DefaultSymbolSet.ACE,
+            )
+            mAceSymbolsBar.isVisible = symbols.isNotEmpty()
+            mAceSymbolsBar.codeCompletions = CodeCompletions.just(symbols)
             return
         }
         SymbolsConfigStore.ensureDefaultProfileExists(context)
@@ -2583,8 +2630,25 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             AceShortcutPanel.Command.ActionFavorites -> true.also {
                 repeatLastAceAction()
             }
+            AceShortcutPanel.Command.Escape -> true.also {
+                triggerHostBackPress()
+            }
+            AceShortcutPanel.Command.MoveUp -> true.also {
+                jumpWithAceShortcutReturnPoint { editor.jumpToStart() }
+            }
+            AceShortcutPanel.Command.MoveDown -> true.also {
+                jumpWithAceShortcutReturnPoint { editor.jumpToEnd() }
+            }
+            AceShortcutPanel.Command.MoveLeft -> true.also {
+                jumpWithAceShortcutReturnPoint { editor.jumpToLineStart() }
+            }
+            AceShortcutPanel.Command.MoveRight -> true.also {
+                jumpWithAceShortcutReturnPoint { editor.jumpToLineEnd() }
+            }
+            AceShortcutPanel.Command.Tab -> true.also {
+                toggleAceShortcutReturnPoint()
+            }
             null -> false
-            else -> handleAceShortcutClick(completion)
         }
     }
 
@@ -2612,11 +2676,13 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         }
         when (action.command) {
             AceShortcutPanel.Command.Escape -> (editor as? AceScriptEditorEngine)?.handleEscapeKey()
-            AceShortcutPanel.Command.MoveUp -> editor.jumpToPrevLine()
-            AceShortcutPanel.Command.MoveDown -> editor.jumpToNextLine()
+            AceShortcutPanel.Command.MoveUp -> (editor as? AceScriptEditorEngine)?.moveCompletionSelectionOrCursor(-1)
+                ?: editor.jumpToPrevLine()
+            AceShortcutPanel.Command.MoveDown -> (editor as? AceScriptEditorEngine)?.moveCompletionSelectionOrCursor(1)
+                ?: editor.jumpToNextLine()
             AceShortcutPanel.Command.MoveLeft -> editor.moveCursor(-1)
             AceShortcutPanel.Command.MoveRight -> editor.moveCursor(1)
-            AceShortcutPanel.Command.Tab -> (editor as? AceScriptEditorEngine)?.insertTab()
+            AceShortcutPanel.Command.Tab -> (editor as? AceScriptEditorEngine)?.acceptCompletionOrInsertTab()
             AceShortcutPanel.Command.ActionFavorites -> return true
             null -> mCommandDispatcher.insert(action.insertText)
         }
@@ -2624,6 +2690,24 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             AceActionHistoryStore.record(context, action)
         }
         return true
+    }
+
+    private fun jumpWithAceShortcutReturnPoint(jump: () -> Unit) {
+        mAceShortcutReturnSelection = editor.selection
+        jump()
+    }
+
+    private fun toggleAceShortcutReturnPoint() {
+        val target = mAceShortcutReturnSelection ?: return
+        val current = editor.selection
+        mAceShortcutReturnSelection = current
+        editor.jumpTo(target.startLine, target.startColumn)
+    }
+
+    private fun triggerHostBackPress() {
+        post {
+            activity.onBackPressedDispatcher.onBackPressed()
+        }
     }
 
     private fun showManual(urlSuffix: String, title: String) {

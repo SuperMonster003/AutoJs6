@@ -846,6 +846,39 @@
         }, false);
     }
 
+    function isCompletionPopupOpen() {
+        var completer = editor && editor.completer;
+        var popup = completer && completer.popup;
+        return !!(completer && completer.activated && popup && popup.isOpen);
+    }
+
+    function moveCompletionSelectionOrCursor(delta) {
+        delta = Number(delta) || 0;
+        if (isCompletionPopupOpen() && editor.completer.goTo) {
+            editor.completer.goTo(delta < 0 ? "up" : "down");
+            notifyStateChanged("completionSelectionChanged");
+            return true;
+        }
+        if (delta < 0) {
+            jumpToPrevLine();
+        } else if (delta > 0) {
+            jumpToNextLine();
+        }
+        return false;
+    }
+
+    function acceptCompletionOrInsertTab() {
+        if (isCompletionPopupOpen() && editor.completer.insertMatch) {
+            return runTextMutation("acceptCompletion", function() {
+                var accepted = editor.completer.insertMatch();
+                notifyTextChanged();
+                notifyCursorChanged();
+                return accepted !== false;
+            }, false);
+        }
+        return insertTab();
+    }
+
     function handleEscapeKey() {
         if (!editor) {
             return false;
@@ -1221,6 +1254,8 @@
             markClean: markClean,
             insert: insert,
             insertTab: insertTab,
+            acceptCompletionOrInsertTab: acceptCompletionOrInsertTab,
+            moveCompletionSelectionOrCursor: moveCompletionSelectionOrCursor,
             handleEscapeKey: handleEscapeKey,
             insertAtLine: insertAtLine,
             appendTextChunk: appendTextChunk,

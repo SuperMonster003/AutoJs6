@@ -29,9 +29,8 @@ class EditorThemeFontService(
     private val inputMethodEnhanceBar: View,
     private val loadingBarContainer: View,
     private val loadingBarText: TextView,
-    private val codeCompletionBar: CodeCompletionBar,
-    private val symbolBar: CodeCompletionBar,
-    private val showFunctionsButton: ImageView,
+    private val completionBars: List<CodeCompletionBar>,
+    private val showFunctionsButtons: List<ImageView>,
     private val invalidateHost: () -> Unit,
 ) {
 
@@ -61,9 +60,8 @@ class EditorThemeFontService(
             loadingBarText.setTextColor(loadingTextColor)
 
             val textColor = it.imeBarForegroundColor
-            codeCompletionBar.setTextColor(textColor)
-            symbolBar.setTextColor(textColor)
-            showFunctionsButton.setColorFilter(textColor)
+            completionBars.forEach { bar -> bar.setTextColor(textColor) }
+            showFunctionsButtons.forEach { button -> button.setColorFilter(textColor) }
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 ViewUtils.setNavigationBarBackgroundColor(activity, imeBarBackgroundColor)

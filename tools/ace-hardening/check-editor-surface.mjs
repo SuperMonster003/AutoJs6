@@ -290,8 +290,13 @@ assertIncludes(bridge, "setLineNumbersEnabled: setLineNumbersEnabled", "ACE line
 assertIncludes(bridge, "function setFontSizeSpKeepingFocus", "ACE focus-preserving zoom helper");
 assertIncludes(bridge, "setFontSizeSpKeepingFocus: setFontSizeSpKeepingFocus", "ACE focus-preserving zoom public API");
 assertIncludes(bridge, "function insertTab()", "ACE shortcut TAB helper");
+assertIncludes(bridge, "function isCompletionPopupOpen()", "ACE completion popup state helper");
+assertIncludes(bridge, "function moveCompletionSelectionOrCursor(delta)", "ACE completion selection shortcut helper");
+assertIncludes(bridge, "function acceptCompletionOrInsertTab()", "ACE completion accept shortcut helper");
 assertIncludes(bridge, "function handleEscapeKey()", "ACE shortcut ESC helper");
 assertIncludes(bridge, "insertTab: insertTab", "ACE shortcut TAB public API");
+assertIncludes(bridge, "acceptCompletionOrInsertTab: acceptCompletionOrInsertTab", "ACE completion accept public API");
+assertIncludes(bridge, "moveCompletionSelectionOrCursor: moveCompletionSelectionOrCursor", "ACE completion selection public API");
 assertIncludes(bridge, "handleEscapeKey: handleEscapeKey", "ACE shortcut ESC public API");
 assertIncludes(bridge, "var lspClient = null;", "ACE LSP client bridge slot");
 assertIncludes(bridge, "global.AutoJsAceLspClient.install", "ACE LSP client install");
@@ -353,6 +358,8 @@ assertIncludes(aceCodeEditor, "handlePinchToZoomTouch", "ACE pinch zoom touch ha
 assertIncludes(aceCodeEditor, "scaleViewBy", "ACE scale-view zoom handler");
 assertIncludes(aceCodeEditor, "setFontSizeSpKeepingFocus", "ACE focus-preserving zoom native call");
 assertIncludes(aceCodeEditor, "fun insertTab()", "native ACE shortcut TAB bridge call");
+assertIncludes(aceCodeEditor, "fun acceptCompletionOrInsertTab()", "native ACE completion accept bridge call");
+assertIncludes(aceCodeEditor, "fun moveCompletionSelectionOrCursor", "native ACE completion navigation bridge call");
 assertIncludes(aceCodeEditor, "fun handleEscapeKey()", "native ACE shortcut ESC bridge call");
 assertIncludes(aceCodeEditor, "handleSoftKeyboardCursorKey", "ACE soft-keyboard cursor key handler");
 assertIncludes(aceCodeEditor, "KeyEvent.KEYCODE_DPAD_LEFT", "ACE soft-keyboard cursor left key");
@@ -364,10 +371,16 @@ assertIncludes(aceScriptEditorEngine, "onTextSizeSpChangedByGesture", "ACE pinch
 assertIncludes(editorMenu, "currentEditor().getEngineType() == EditorEngineType.ACE", "ACE-only scale-view menu enablement");
 assertIncludes(editorMenu, "makeEditorPinchToZoomScaleViewUnderDev", "Native scale-view menu remains disabled");
 
-assertIncludes(editorView, "AceShortcutPanel.firstRowCompletions", "ACE shortcut first row binding");
-assertIncludes(editorView, "AceShortcutPanel.secondRowCompletions", "ACE shortcut second row binding");
+assertIncludes(editorView, "AceShortcutPanel.topRowCompletions", "ACE shortcut top row binding");
+assertIncludes(editorView, "AceShortcutPanel.bottomRowCompletions", "ACE shortcut bottom row binding");
+assertIncludes(editorView, "SymbolsConfigStore.DefaultSymbolSet.ACE", "ACE shortcut symbol defaults binding");
+assertIncludes(editorView, "mAceSymbolsBar.useFlowLayout()", "ACE shortcut symbol flow layout");
+assertIncludes(editorView, "mAceShortcutTopBar.setFixedItemSizeDp(40, 35)", "ACE shortcut fixed top key size");
+assertIncludes(editorView, "mAceShortcutBottomBar.setFixedItemSizeDp(40, 35)", "ACE shortcut fixed bottom key size");
 assertIncludes(editorView, "handleAceShortcutClick", "ACE shortcut click handler");
 assertIncludes(editorView, "handleAceShortcutLongClick", "ACE shortcut long-click handler");
+assertIncludes(editorView, "jumpWithAceShortcutReturnPoint", "ACE shortcut long-press return point");
+assertIncludes(editorView, "toggleAceShortcutReturnPoint", "ACE shortcut TAB return toggle");
 assertIncludes(editorView, "showAceActionHistoryDialog", "ACE action history dialog");
 assertIncludes(editorView, "repeatLastAceAction", "ACE repeat last action handler");
 assertIncludes(editorView, "AceActionFavoritesDialog.show", "ACE action favorites dialog integration");
@@ -376,12 +389,18 @@ assertIncludes(codeCompletion, "val iconResId", "code completion optional icon m
 assertIncludes(codeCompletionBar, "getIconResId(position)", "code completion optional icon lookup");
 assertIncludes(codeCompletionBar, "setCompoundDrawables(wrappedIcon, null, null, null)", "completion bar icon rendering");
 assertIncludes(codeCompletionBar, "DrawableCompat.setTint", "completion bar themed icon tint");
+assertIncludes(codeCompletionBar, "useFlowLayout()", "completion bar flow layout mode");
+assertIncludes(codeCompletionBar, "setFixedItemSizeDp", "completion bar fixed item size mode");
 
 assertIncludes(aceShortcutPanel, 'command("ESC", Command.Escape)', "ACE shortcut ESC key");
 assertIncludes(aceShortcutPanel, 'command("TAB", Command.Tab)', "ACE shortcut TAB key");
-assertIncludes(aceShortcutPanel, 'command("*", Command.ActionFavorites, R.drawable.ic_star_black_48dp)', "ACE shortcut favorites star entry");
-assertIncludes(aceShortcutPanel, 'insert("`")', "ACE shortcut backtick key");
+assertIncludes(aceShortcutPanel, 'command("★", Command.ActionFavorites, R.drawable.ic_star_black_48dp)', "ACE shortcut favorites star entry");
+assertIncludes(aceShortcutPanel, 'R.drawable.ic_keyboard_arrow_up_black_48dp', "ACE shortcut arrow-up drawable");
+assertIncludes(aceShortcutPanel, 'R.drawable.ic_keyboard_arrow_down_black_48dp', "ACE shortcut arrow-down drawable");
+assertIncludes(aceShortcutPanel, 'R.drawable.ic_keyboard_arrow_left_black_48dp', "ACE shortcut arrow-left drawable");
+assertIncludes(aceShortcutPanel, 'R.drawable.ic_keyboard_arrow_right_black_48dp', "ACE shortcut arrow-right drawable");
 assertIncludes(aceShortcutPanel, "data class Action", "ACE shortcut action model");
+assertIncludes(aceShortcutPanel, "fun actionOf(command: Command)", "ACE shortcut command action lookup");
 assertIncludes(aceShortcutPanel, "fun actionById", "ACE shortcut stable action lookup");
 
 assertIncludes(aceActionHistoryStore, "fun record(", "ACE action history record API");

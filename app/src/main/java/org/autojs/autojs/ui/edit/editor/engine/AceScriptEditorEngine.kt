@@ -167,6 +167,17 @@ class AceScriptEditorEngine(
         aceCodeEditor.insertTab()
     }
 
+    fun acceptCompletionOrInsertTab() {
+        if (!canMutateText()) {
+            return
+        }
+        aceCodeEditor.acceptCompletionOrInsertTab()
+    }
+
+    fun moveCompletionSelectionOrCursor(delta: Int) {
+        aceCodeEditor.moveCompletionSelectionOrCursor(delta)
+    }
+
     fun handleEscapeKey() {
         aceCodeEditor.handleEscapeKey()
     }

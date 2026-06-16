@@ -331,6 +331,17 @@ class AceCodeEditor @JvmOverloads constructor(
         invokeAce("insertTab")
     }
 
+    fun acceptCompletionOrInsertTab() {
+        if (!canMutateText("acceptCompletionOrInsertTab")) {
+            return
+        }
+        invokeAce("acceptCompletionOrInsertTab")
+    }
+
+    fun moveCompletionSelectionOrCursor(delta: Int) {
+        invokeAce("moveCompletionSelectionOrCursor", delta.toString())
+    }
+
     fun handleEscapeKey() {
         invokeAce("handleEscapeKey")
     }

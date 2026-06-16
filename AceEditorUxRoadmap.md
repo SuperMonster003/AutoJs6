@@ -113,6 +113,14 @@ Acceptance:
 ## Gate UX-5: ACE Shortcut Panel And Action Favorites
 
 - [x] Build an ACE-specific two-row function keyboard layout.
+- [x] Split the ACE shortcut panel into a fixed 2x4 left block and a
+  vertically scrollable right symbol flow.
+- [x] Keep Native and ACE on the same symbol profile store while giving ACE an
+  independent built-in default symbol set.
+- [x] Let ACE shortcut UP/DOWN/TAB control the completion popup highlight and
+  acceptance when the popup is open.
+- [x] Add ACE shortcut long-press navigation for file start/end, line
+  start/end, host back, and previous cursor return.
 - [x] Use text drawables or equivalent for `ESC` and `TAB`.
 - [x] Reuse the unused right-side area after ACE completion replaces the old
   candidate strip.
