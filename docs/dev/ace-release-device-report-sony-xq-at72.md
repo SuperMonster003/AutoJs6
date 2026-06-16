@@ -65,7 +65,7 @@ path has a recorded result.
 | Asset-missing fallback | DEVICE SMOKE PASS | `forceAssetMissing` routed directly to Native and preserved an `ASSET_MISSING` diagnostics snapshot. |
 | Large-file Native routing | DEVICE SMOKE PASS | Native large-file instrumentation loaded a script larger than the 512 KiB threshold through the Native editor, preserving length, prefix/suffix text, clean state, and Native engine routing. |
 | Native editor regression | DEVICE SMOKE PASS | Instrumentation opened Native editor, edited, showed/hidden IME, saved, searched/replaced, toggled breakpoints, opened a large file, and ran a script without ACE fallback dependency. |
-| Diagnostics export | TBD | |
+| Diagnostics export | DEVICE SMOKE PASS | `EditorView.copyAceDiagnosticsToClipboard()` exported ACE diagnostics from a real `EditActivity` without including the loaded script's unique identifier, string literal, or function name. |
 | Publishing cleanup audit | STATIC PASS | See `docs/dev/ace-release-publishing-cleanup.md`; final package/label restore is still pending before merge or non-test release. |
 
 ## Diagnostics Snapshots
@@ -82,6 +82,7 @@ Record copied ACE diagnostics for every failure or ambiguous result.
 | Gate 7 rotation/restore/switching smoke | Instrumentation PASS | `AceCodeEditorSmokeTest` ran 6/6 tests on Sony XQ-AT72 with no failures, including `EditActivity` rotation, background restore, save, ACE -> Native -> ACE switching, dirty-state checks, cursor visibility checks, and no ACE fallback diagnostics. |
 | Gate 8 fallback hook smoke | Instrumentation PASS | `AceCodeEditorSmokeTest` ran 8/8 tests on Sony XQ-AT72 with no failures, including ready-timeout TextMirror preservation, startup fatal fallback hooks, and diagnostics checks for `READY_TIMEOUT`, `JS_INIT_ERROR`, `RENDER_PROCESS_GONE`, and `ASSET_MISSING`. |
 | Gate 9 Native regression smoke | Instrumentation PASS | `NativeEditorRegressionSmokeTest` ran 2/2 tests on Sony XQ-AT72 with no failures, including Native edit/save/search/replace/breakpoint/run coverage and large-file loading above the 512 KiB threshold. |
+| Diagnostics export smoke | Instrumentation PASS | `AceCodeEditorSmokeTest` ran 9/9 tests on Sony XQ-AT72 with no failures after adding the diagnostics export no-script-text check. |
 
 ## Gate 2 Notes
 
@@ -376,6 +377,24 @@ Record copied ACE diagnostics for every failure or ambiguous result.
   not a substitute for later manual Native UI exploration if a human-observed
   regression appears.
 
+## Diagnostics Export Notes
+
+- Time: 2026-06-16 09:53 CST.
+- Command:
+  `.\gradlew.bat :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.ui.edit.editor.ace.AceCodeEditorSmokeTest"`
+- Result: PASS on Sony XQ-AT72; 9 tests completed, 0 skipped, 0 failed.
+- The new smoke opened a real `EditActivity` with ACE selected and loaded a
+  temporary JavaScript file containing a unique identifier, string literal, and
+  function name.
+- It exported diagnostics through `EditorView.copyAceDiagnosticsToClipboard()`
+  and verified the clipboard starts with `ACE diagnostics`, reports
+  `engineType=ACE`, reports `aceHealthState=RUNNING`, and includes file-size
+  metadata.
+- The exported diagnostics did not contain the unique identifier, string
+  literal, or function name from the loaded script.
+- Gate 8 continues to cover fallback diagnostics export. This smoke covers the
+  normal user-facing ACE export path.
+
 ## Blockers
 
 ### P0
@@ -386,6 +405,8 @@ Record copied ACE diagnostics for every failure or ambiguous result.
   restore, engine-switching, fallback hook, TextMirror, diagnostics, or
   bridge-event-storm blocker. Gate 9 also found no P0 Native editor edit/save,
   search/replace, breakpoint, run, auto-completion, or large-file regression.
+  Diagnostics export smoke found no script-text leak in the user-facing ACE
+  diagnostics clipboard path.
 
 ### P1
 

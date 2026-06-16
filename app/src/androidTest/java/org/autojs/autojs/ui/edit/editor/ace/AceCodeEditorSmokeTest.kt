@@ -97,6 +97,39 @@ class AceCodeEditorSmokeTest {
     }
 
     @Test
+    fun diagnosticsExportOmitsScriptText() {
+        val secretIdentifier = "gateDiagnosticsSecret${SystemClock.uptimeMillis()}"
+        val secretLiteral = "diagnostics-token-${SystemClock.uptimeMillis()}-do-not-export"
+        val secretFunction = "diagnosticsExportSourceShouldStayPrivate"
+        val initialText = """
+            const $secretIdentifier = "$secretLiteral";
+            function $secretFunction() {
+                return $secretIdentifier;
+            }
+        """.trimIndent() + "\n"
+        val file = createTempScriptFile("ace-gate-diagnostics-export", initialText)
+        try {
+            val editorView = launchReadyEditActivity(file, initialText)
+            waitForAceRuntimeText(editorView, initialText, "ACE runtime text should be loaded before diagnostics export")
+
+            val diagnostics = copyAceDiagnostics(editorView)
+            assertTrue(diagnostics.startsWith("ACE diagnostics"))
+            assertTrue(diagnostics.contains("engineType=${EditorEngineType.ACE.name}"))
+            assertTrue(diagnostics.contains("aceHealthState=${AceHealthState.RUNNING.name}"))
+            assertTrue(diagnostics.contains("fileSizeBytes="))
+            listOf(secretIdentifier, secretLiteral, secretFunction).forEach { scriptText ->
+                assertFalse(
+                    "ACE diagnostics export should not contain script text: $scriptText",
+                    diagnostics.contains(scriptText),
+                )
+            }
+        } finally {
+            finishLaunchedActivity()
+            file.delete()
+        }
+    }
+
+    @Test
     fun breakpointAndResizeEventsUpdateDiagnostics() {
         val editor = launchReadyEditor()
 
