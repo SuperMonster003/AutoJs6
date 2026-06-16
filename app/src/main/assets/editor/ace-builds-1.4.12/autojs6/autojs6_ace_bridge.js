@@ -22,6 +22,7 @@
     var cursorNotifyTimer = null;
     var actionModeNotifyTimer = null;
     var lastActionModeSelectedText = "";
+    var nativeActionModeActive = false;
     var lastStateNotifyAt = 0;
     var lastTextNotifyAt = 0;
     var lastCursorNotifyAt = 0;
@@ -233,8 +234,47 @@
         return !!getSelectionState().text;
     }
 
+    function setNativeActionModeActive(active) {
+        active = !!active;
+        if (nativeActionModeActive === active) {
+            return;
+        }
+        nativeActionModeActive = active;
+        if (document && document.body && document.body.classList) {
+            document.body.classList.toggle("autojs6-native-action-mode", active);
+        }
+    }
+
+    function getActionModeFallbackRect() {
+        var width = Math.max(
+            1,
+            Number(global.innerWidth) ||
+                Number(document.documentElement && document.documentElement.clientWidth) ||
+                Number(editor && editor.container && editor.container.clientWidth) ||
+                1
+        );
+        var height = Math.max(
+            1,
+            Number(global.innerHeight) ||
+                Number(document.documentElement && document.documentElement.clientHeight) ||
+                Number(editor && editor.container && editor.container.clientHeight) ||
+                1
+        );
+        var lineHeight = editor && editor.renderer && editor.renderer.lineHeight || 20;
+        var centerX = Math.max(0, Math.round(width / 2));
+        var centerY = Math.max(0, Math.round(height / 2));
+        var left = Math.max(0, Math.min(width - 1, centerX - 1));
+        var top = Math.max(0, Math.min(height - 1, centerY - 1));
+        return {
+            left: left,
+            top: top,
+            right: Math.max(left + 1, Math.min(width, left + 2)),
+            bottom: Math.max(top + 1, Math.min(height, top + lineHeight))
+        };
+    }
+
     function getSelectionScreenRect() {
-        var fallback = { left: 0, top: 0, right: 1, bottom: 1 };
+        var fallback = getActionModeFallbackRect();
         if (!editor || !editor.renderer || !editor.renderer.textToScreenCoordinates) {
             return fallback;
         }
@@ -248,10 +288,17 @@
         var lineHeight = renderer.lineHeight ||
             (renderer.layerConfig && renderer.layerConfig.lineHeight) ||
             20;
-        var startX = Number(start && start.pageX) || 0;
-        var startY = Number(start && start.pageY) || 0;
-        var endX = Number(end && end.pageX) || startX;
-        var endY = Number(end && end.pageY) || startY;
+        var startX = Number(start && start.pageX);
+        var startY = Number(start && start.pageY);
+        var endX = Number(end && end.pageX);
+        var endY = Number(end && end.pageY);
+        if (!isFinite(startX) || !isFinite(startY)) {
+            return fallback;
+        }
+        if (!isFinite(endX) || !isFinite(endY)) {
+            endX = startX;
+            endY = startY;
+        }
         var left = Math.min(startX, endX);
         var top = Math.min(startY, endY);
         var right = Math.max(startX, endX);
@@ -274,6 +321,7 @@
         actionModeNotifyTimer = null;
         var selection = getSelectionState();
         if (!selection.text) {
+            setNativeActionModeActive(false);
             if (lastActionModeSelectedText) {
                 lastActionModeSelectedText = "";
                 dispatchSelectionActionModeState("selectionActionModeFinished");
@@ -283,6 +331,7 @@
         }
         var rect = getSelectionScreenRect();
         lastActionModeSelectedText = selection.text;
+        setNativeActionModeActive(true);
         dispatchSelectionActionModeState("selectionActionModeStarted");
         callBridge("startActionMode", [
             rect.left,
@@ -452,7 +501,10 @@
     function notifySelectionChanged() {
         var selection = getSelectionState();
         if (selection.text || lastActionModeSelectedText) {
+            setNativeActionModeActive(true);
             notifyStateChanged("selectionChanged");
+        } else {
+            setNativeActionModeActive(false);
         }
         scheduleActionModeSelectionUpdate();
     }

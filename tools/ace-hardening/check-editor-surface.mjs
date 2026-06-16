@@ -237,12 +237,14 @@ assertMatch(css, /\.autojs6_debug_line\s*\{[\s\S]*position:\s*absolute/, "debug 
 assertMatch(css, /\.autojs6_debug_line\s*\{[\s\S]*z-index:\s*5/, "debug line marker z-index");
 assertMatch(css, /\.ace_gutter,\s*\.ace_gutter-cell\s*\{[\s\S]*user-select:\s*none/, "gutter selection suppression");
 assertMatch(css, /\.ace_mobile-menu\s*\{[\s\S]*z-index:\s*20/, "mobile menu remains available");
+assertMatch(css, /body\.autojs6-native-action-mode \.ace_mobile-menu\s*\{[\s\S]*display:\s*none !important/, "native action-mode suppresses ACE mobile menu");
+assertMatch(css, /body\.autojs6-native-action-mode \.ace_mobile-menu\s*\{[\s\S]*pointer-events:\s*none !important/, "suppressed ACE mobile menu cannot steal touch input");
 assertMatch(css, /body\.ace-theme-dark \.ace_marker-layer \.ace_selection\s*\{[\s\S]*rgba\(88,\s*166,\s*255,\s*0\.42\)/, "dark selection contrast");
 assertMatch(css, /\.autojs6_hover_tooltip\s*\{[\s\S]*pointer-events:\s*none/, "ACE hover tooltip must not steal touch input");
 assertMatch(css, /body\.ace-theme-dark \.autojs6_hover_tooltip\s*\{[\s\S]*background:\s*#20242b/, "ACE hover tooltip dark style");
 assertMatch(css, /\.autojs6_signature_tooltip\s*\{[\s\S]*pointer-events:\s*none/, "ACE signature tooltip must not steal touch input");
 assertMatch(css, /body\.ace-theme-dark \.autojs6_signature_tooltip\s*\{[\s\S]*background:\s*#f7f7f7/, "ACE signature tooltip dark editor contrast");
-if (css.includes(".ace_mobile-menu {\n    display: none")) {
+if (/^\.ace_mobile-menu\s*\{[^}]*display:\s*none/m.test(css)) {
   throw new Error("ACE mobile menu must not be globally hidden");
 }
 
@@ -256,6 +258,10 @@ assertIncludes(bridge, "function flushStateChanged()", "state event flush");
 assertIncludes(bridge, "function flushTextChanged()", "text event flush");
 assertIncludes(bridge, 'document.body.classList.add("ace-ready")', "ACE ready class add");
 assertIncludes(bridge, 'callBridge("notifyEvent", ["firstPaint", lightweightStateJson()])', "first-paint bridge event");
+assertIncludes(bridge, "var nativeActionModeActive = false;", "native action-mode state flag");
+assertIncludes(bridge, "function setNativeActionModeActive(active)", "native action-mode state class helper");
+assertIncludes(bridge, 'document.body.classList.toggle("autojs6-native-action-mode", active)', "native action-mode host class toggle");
+assertIncludes(bridge, "function getActionModeFallbackRect()", "non-zero action-mode fallback anchor");
 assertMatch(bridge, /function afterTwoFrames\(callback\)[\s\S]*raf\(function\(\)[\s\S]*raf\(callback\);[\s\S]*\}\);[\s\S]*\}/, "double requestAnimationFrame first-paint guard");
 assertMatch(bridge, /function requestFirstPaint\(reason\)[\s\S]*scheduleResize\(reason \|\| "first_paint"\);[\s\S]*afterTwoFrames\(notifyFirstPaint\);[\s\S]*\}/, "first-paint resize before reveal");
 assertIncludes(bridge, "requestFirstPaint: requestFirstPaint", "first-paint public API");

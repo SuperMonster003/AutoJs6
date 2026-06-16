@@ -197,6 +197,36 @@ class AceCodeEditorSmokeTest {
     }
 
     @Test
+    fun nativeActionModeSuppressesAceMobileMenu() {
+        val editor = launchReadyEditor()
+        val initialText = "alpha beta gamma\n"
+
+        runOnMainSync {
+            editor.setText(initialText)
+        }
+        waitForEditorText(editor, initialText, "ACE text should be ready before action-mode menu smoke")
+
+        runOnMainSync {
+            editor.selectRange(0, 5)
+        }
+        waitUntil("ACE selection should activate native action-mode host class") {
+            val state = evaluateJsonObject(editor, ACTION_MODE_MENU_STATE_SCRIPT)
+            state.getBoolean("nativeActionModeActive") &&
+                state.getString("mobileMenuDisplay") == "none" &&
+                state.getString("mobileMenuPointerEvents") == "none"
+        }
+
+        runOnMainSync {
+            editor.selectRange(0, 0)
+        }
+        waitUntil("Clearing ACE selection should release native action-mode host class") {
+            val state = evaluateJsonObject(editor, ACTION_MODE_MENU_STATE_SCRIPT)
+            !state.getBoolean("nativeActionModeActive") &&
+                state.getString("mobileMenuDisplay") != "none"
+        }
+    }
+
+    @Test
     fun aceShortcutPanelUsesTwoRowsAndExecutesTab() {
         val initialText = "const value = 1;\n"
         val file = createTempScriptFile("ace-shortcut-panel", initialText)
@@ -1418,6 +1448,24 @@ class AceCodeEditorSmokeTest {
                     bottom: rect.bottom,
                     left: rect.left,
                     right: rect.right
+                });
+            })();
+        """.trimIndent()
+        private val ACTION_MODE_MENU_STATE_SCRIPT = """
+            (function() {
+                var menu = document.getElementById("__autojs6_action_mode_menu_smoke");
+                if (!menu) {
+                    menu = document.createElement("div");
+                    menu.id = "__autojs6_action_mode_menu_smoke";
+                    menu.className = "ace_mobile-menu";
+                    menu.textContent = "menu";
+                    document.body.appendChild(menu);
+                }
+                var style = window.getComputedStyle(menu);
+                return JSON.stringify({
+                    nativeActionModeActive: document.body.classList.contains("autojs6-native-action-mode"),
+                    mobileMenuDisplay: style.display,
+                    mobileMenuPointerEvents: style.pointerEvents
                 });
             })();
         """.trimIndent()

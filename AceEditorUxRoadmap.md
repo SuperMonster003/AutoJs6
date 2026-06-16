@@ -51,10 +51,10 @@ Acceptance:
 
 ## Gate UX-2: Mobile Selection And Gesture Bugs
 
-- [ ] Diagnose short-menu/long-menu transitions on double-tap and long-press.
-- [ ] Keep the floating action mode near the selection instead of jumping to the
+- [x] Diagnose short-menu/long-menu transitions on double-tap and long-press.
+- [x] Keep the floating action mode near the selection instead of jumping to the
   upper-left editor area.
-- [ ] Prevent transient short-menu flashes while dragging selection handles.
+- [x] Prevent transient short-menu flashes while dragging selection handles.
 - [ ] Prevent stale upper-left menus after scroll, app switch, or return.
 - [ ] Investigate Sony XQ-AT72 right-edge back gesture touch propagation into
   ACE long-press selection.
@@ -66,6 +66,13 @@ Acceptance:
 - [ ] Right-edge system-back gestures close IME or editor without triggering
   ACE long-press selection/haptic feedback on Sony XQ-AT72 when technically
   preventable from the app side.
+
+Notes:
+
+- AutoJs6 now treats Android `ActionMode` as the host-owned ACE selection menu
+  and suppresses ACE's `.ace_mobile-menu` while that path is active. If ACE
+  cannot measure the selection rect, it uses a non-zero viewport fallback anchor
+  instead of the upper-left corner.
 
 ## Gate UX-3: Input, Keyboard, And Read-Only Mode
 
