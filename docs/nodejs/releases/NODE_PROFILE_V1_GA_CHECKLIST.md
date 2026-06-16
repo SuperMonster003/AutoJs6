@@ -1,0 +1,95 @@
+# AutoJs6 Node Profile v1 GA Tag Checklist
+
+Status: pre-tag checklist. Do not create a GA tag from this document unless the maintainer explicitly approves the final commit, package identity, version code, and tag name.
+
+Target profile: AutoJs6 Safe Node Profile v1
+
+Current GA candidate evidence commit: `7e047953`
+
+Current GA candidate device: Sony XQ-AT72 `QV710AF65F`
+
+## Tag Preconditions
+
+- [ ] Worktree is clean: `git status --short --branch` prints only the branch line.
+- [ ] Final public package identity is approved.
+- [ ] Temporary current-branch test identity `org.autojs.autojs6.nodejs` is either intentionally retained for a test tag or restored before a public AutoJs6 release.
+- [ ] Final `VERSION_BUILD` and `BUILD_TIME` churn in `version.properties` is reviewed and intentional.
+- [ ] `NODE_PROFILE_V1_GA.md` replaces `TBD` placeholders with the approved final commit and tag.
+- [ ] No experimental feature is promoted without `EXPERIMENTAL_PROMOTION_POLICY.md` evidence.
+- [ ] Rhino fallback, backend switches, native one-shot backend, scoped fs, and high-risk default-off policies are unchanged.
+
+## Required Final Commands
+
+Run from a clean worktree with Sony selected when connected-device evidence is needed:
+
+```powershell
+$env:ANDROID_SERIAL="QV710AF65F"
+.\gradlew.bat --console=plain :app:generateNodeCompatibilityProfile :app:generateDesktopNodeDifferentialReport :app:nativeNodeDependencyReportAppDebug :app:nativeNodeSymbolArchiveReport :app:embeddedNodeDoctorReport :app:embeddedNodePackagingPreflightAppDebug :app:verifyNodeTemplateReproducibility :app:embeddedNodePackagedSmokeHostVerify :app:nativeNodeAbiSizeReport :app:pullNodeEmbeddedPerformanceReports :app:generateNodeProfileReleaseManifest :app:generateNodeNightlyReport "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.fuzzerBudget=normal"
+```
+
+If the final tag commit differs from the Task 128 gate commit, rerun the full release gate:
+
+```powershell
+$env:ANDROID_SERIAL="QV710AF65F"
+.\gradlew.bat --console=plain :app:verifyNodeReleaseGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.fuzzerBudget=normal"
+```
+
+`assembleAppDebug` may auto-increment `version.properties`; restore or commit that churn deliberately before tagging.
+
+## Artifact Ledger
+
+Task 129 generated the current artifact set on 2026-06-16 from commit `7e047953`. The run passed and produced:
+
+- compatibility profile: `app/build/reports/nodejs/compatibility-profile.json`
+- compatibility profile Markdown: `app/build/reports/nodejs/compatibility-profile.md`
+- desktop differential report: `build/reports/nodejs/differential/desktop-node-differential.json`
+- native dependency report: `app/build/reports/native-node/native-deps-appDebug.txt`
+- native symbol report: `app/build/reports/native-node/native-symbol-archive-appDebug.txt`
+- Node Doctor report: `app/build/reports/nodejs/doctor/node-doctor-report.json`
+- packaging preflight: `app/build/reports/embedded-node/packaging-preflight-appDebug.txt`
+- template reproducibility: `app/build/reports/embedded-node/template-reproducibility.txt`
+- packaged smoke aggregate: `app/build/reports/embedded-node/packaged-smoke-aggregate.txt`
+- ABI size report: `app/build/reports/nodejs/abi-size-report.md`
+- release manifest: `app/build/reports/nodejs/release-manifest.json`
+- nightly report: `build/reports/nodejs/nightly-report.json`
+- performance reports: `app/build/reports/nodejs/perf/`
+- fuzzer seed directory: `build/reports/nodejs/fuzz-seeds/`
+
+The release manifest generated during this prep run records version code `3924` because `assembleAppDebug` auto-incremented the local build. The tracked `version.properties` file was restored afterward; regenerate the manifest from the approved final version state before publication.
+
+## Device Gate Evidence
+
+The valid GA candidate gate is recorded in [../reports/phase4/sony-ga-candidate/README.md](../reports/phase4/sony-ga-candidate/README.md):
+
+- command: `:app:verifyNodeReleaseGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.fuzzerBudget=normal"`
+- device: Sony XQ-AT72 `QV710AF65F`
+- duration: `2h 5m 30s`
+- Android tests: `310`
+- failures: `0`
+- errors: `0`
+- skipped: `2`
+- packaged smoke aggregate: ready
+- memory stress: `7` scenarios, `0` failures
+
+Expected skips:
+
+- `EmbeddedScriptMvpInstrumentationTest#disabledBuildGateReturnsActionableMessage`
+- `EmbeddedNodePackagedApkSmokeTest#installAndRunExperimentalEsmEmbeddedNodePackagedApk`
+
+## Documentation Check
+
+- [ ] [NODE_PROFILE_V1_GA.md](NODE_PROFILE_V1_GA.md) is current.
+- [ ] [NODE_PROFILE_V1_STABLE_SURFACE.md](NODE_PROFILE_V1_STABLE_SURFACE.md) matches the generated compatibility profile.
+- [ ] [NODE_PROFILE_V1_KNOWN_ISSUES.md](NODE_PROFILE_V1_KNOWN_ISSUES.md) lists current Sony GA caveats.
+- [ ] [../ERROR_CATALOG.md](../ERROR_CATALOG.md) passes `:app:verifyNodeErrorCatalog`.
+- [ ] [../RELEASE_CHECKLIST.md](../RELEASE_CHECKLIST.md) remains the broad release checklist.
+- [ ] [../FLAKE_POLICY.md](../FLAKE_POLICY.md) is reviewed before any rerun classification.
+
+## Do Not Tag If
+
+- the worktree is dirty for unreviewed source, docs, or version files;
+- `version.properties` changed only because a local debug assemble ran;
+- the final commit differs from the Sony GA candidate commit and the release gate has not been rerun;
+- temporary package identity is not an intentional release decision;
+- any default-off experimental feature was enabled without promotion evidence;
+- security, scoped fs, native addon, child process, raw network, Java interop, or packaged smoke failures were retried away instead of fixed or explicitly blocked.

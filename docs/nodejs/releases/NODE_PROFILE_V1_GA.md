@@ -5,7 +5,7 @@ and tag are approved.
 
 Target profile: AutoJs6 Safe Node Profile v1
 
-Draft commit: `30f5d44e`
+GA candidate gate commit: `7e047953`
 
 Final GA commit/tag: `TBD`
 
@@ -209,10 +209,15 @@ Expected GA artifact set:
 - performance report when lifecycle or native-load behavior changes
 - dependency bundler manifest and rejection report
 
+Task 129 regenerated the pre-tag artifact set on 2026-06-16 from commit `7e047953`; see
+[NODE_PROFILE_V1_GA_CHECKLIST.md](NODE_PROFILE_V1_GA_CHECKLIST.md). The final public tag must regenerate the release
+manifest from the approved final version state.
+
 ## Publication Checklist
 
 Before tagging GA:
 
+- complete [NODE_PROFILE_V1_GA_CHECKLIST.md](NODE_PROFILE_V1_GA_CHECKLIST.md)
 - final commit and tag replace the `TBD` placeholders
 - [NODE_PROFILE_V1_STABLE_SURFACE.md](NODE_PROFILE_V1_STABLE_SURFACE.md) matches the generated compatibility profile
 - [NODE_PROFILE_V1_KNOWN_ISSUES.md](NODE_PROFILE_V1_KNOWN_ISSUES.md) is current

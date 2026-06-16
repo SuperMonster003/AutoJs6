@@ -123,13 +123,15 @@ adb -s QV710AF65F shell am start -n org.autojs.autojs6.nodejs/org.autojs.autojs.
 
 OnePlus OPD2413 is a legacy Phase 4 evidence device only. It is excluded from current unattended gates because APK installation requires manual confirmation.
 
-## Current RC Gate Caveats
+## Current GA Candidate Gate
 
-As of the Phase 4 RC record:
+As of the Phase 4 GA candidate record:
 
-- Packaged smoke host verification is green after the JNI compatibility fix.
-- Lifecycle stress is green in the Phase 4 evidence set.
-- Reduced memory stress is green in the Phase 4 evidence set.
-- Full default memory stress and the full aggregate release-candidate rerun still need a final Sony publication report.
+- Sony XQ-AT72 `QV710AF65F` passed the full `:app:verifyNodeReleaseGate` candidate run.
+- Android instrumentation reported `310` tests, `0` failures, `0` errors, and `2` expected skips.
+- Packaged smoke aggregate verification is green.
+- Full default memory stress reports `7` scenarios and `0` failures.
+- Worker stress is not part of the default GA device profile because `worker_threads` remains experimental and default-off.
 
-See [NODE_PROFILE_V1_RC.md](NODE_PROFILE_V1_RC.md).
+See [NODE_PROFILE_V1_GA.md](NODE_PROFILE_V1_GA.md) and
+[sony-ga-candidate](../reports/phase4/sony-ga-candidate/README.md).

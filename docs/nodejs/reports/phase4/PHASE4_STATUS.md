@@ -22,6 +22,8 @@ OnePlus OPD2413 `63751f63` is now excluded from unattended current-branch gates 
 - Passed the Task 128 Sony GA candidate gate with `:app:verifyNodeReleaseGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.fuzzerBudget=normal"`.
 - Passed full default `NodeEmbeddedMemoryLeakStressInstrumentationTest` on Sony as part of the GA candidate gate.
 - Confirmed the post-gate Sony crash buffer was clean for foreground-service startup, fatal exception, request spool, and embedded service crash markers.
+- Regenerated the Task 129 pre-tag artifact set from commit `7e047953`.
+- Added `docs/nodejs/releases/NODE_PROFILE_V1_GA_CHECKLIST.md`.
 
 ## Evidence
 
@@ -36,7 +38,8 @@ OnePlus OPD2413 `63751f63` is now excluded from unattended current-branch gates 
 
 ## Still Required Before Publication
 
-- Commit the Task 128 GA candidate hardening changes.
-- Generate the final release manifest and nightly report from the clean GA commit/tag.
+- Restore or explicitly approve the temporary current-branch package identity before a public AutoJs6 GA tag.
+- Select the final `VERSION_BUILD` / `BUILD_TIME` state and regenerate the release manifest from that clean state.
+- Regenerate the final release manifest and nightly report after the final version/package identity state is committed.
 - Replace `TBD` placeholders in GA release notes with the approved final commit and tag.
-- Review generated `version.properties` churn before release tagging.
+- Create the tag only after maintainer approval.
