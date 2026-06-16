@@ -1745,7 +1745,8 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         const val LIBRARY_DIR = "lib"
 
         const val TEMPLATE_APK_NAME = "template.apk"
-        const val INRT_APP_ID = "org.autojs.autojs6.nodejs.inrt"
+        @JvmField
+        val INRT_APP_ID = "${BuildConfig.APPLICATION_ID}.inrt"
 
         private val TAG = ApkBuilder::class.java.simpleName
 

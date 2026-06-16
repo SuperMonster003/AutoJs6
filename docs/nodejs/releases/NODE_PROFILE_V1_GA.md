@@ -176,10 +176,12 @@ Current Phase 4 Sony XQ-AT72 status:
 
 - selected primary device: Sony XQ-AT72 `QV710AF65F`
 - selected device profile: `sony`
-- current branch package identity: `org.autojs.autojs6.nodejs`
-- release identity decision: pending maintainer sign-off; see [NODE_PROFILE_V1_RELEASE_IDENTITY.md](NODE_PROFILE_V1_RELEASE_IDENTITY.md)
-- Task 128 GA candidate gate: passed on 2026-06-16
+- default public package identity: `org.autojs.autojs6`
+- side-by-side test identity: `org.autojs.autojs6.nodejs` via `-Pautojs.nodejs.identity=nodejsTest`
+- release identity decision: production identity selected; final production-identity gate pending; see [NODE_PROFILE_V1_RELEASE_IDENTITY.md](NODE_PROFILE_V1_RELEASE_IDENTITY.md)
+- Task 128 test-identity GA candidate gate: passed on 2026-06-16
 - command: `:app:verifyNodeReleaseGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.fuzzerBudget=normal"`
+- identity under test: `org.autojs.autojs6.nodejs` / `AutoJs6 Node`
 - duration: `2h 5m 30s`
 - Android test XML: `310` tests, `0` failures, `0` errors, `2` expected skips
 - packaged smoke aggregate: ready
@@ -194,7 +196,8 @@ stress remains outside the default full profile unless `autojs.nodejs.worker_thr
 An earlier Sony full-profile attempt was invalidated because unrelated `org.autojs.autojs6.ace` activity overlapped the
 packaged smoke marker window. The final aggregate pass above is the valid GA candidate gate evidence.
 
-Evidence is stored under `docs/nodejs/reports/phase4/sony-ga-candidate/`.
+Evidence is stored under `docs/nodejs/reports/phase4/sony-ga-candidate/`. Public GA still requires the final
+production-identity gate under `org.autojs.autojs6`.
 
 ## Generated Artifacts
 
@@ -225,6 +228,6 @@ Before tagging GA:
 - final commit and tag replace the `TBD` placeholders
 - [NODE_PROFILE_V1_STABLE_SURFACE.md](NODE_PROFILE_V1_STABLE_SURFACE.md) matches the generated compatibility profile
 - [NODE_PROFILE_V1_KNOWN_ISSUES.md](NODE_PROFILE_V1_KNOWN_ISSUES.md) is current
-- full Sony GA candidate gate result is attached
+- full Sony production-identity GA gate result is attached
 - release manifest is generated
 - no experimental feature is promoted without the documented gates

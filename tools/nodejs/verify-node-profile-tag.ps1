@@ -5,6 +5,12 @@ param(
 
     [string] $ExpectedCommit = "",
 
+    [string] $ExpectedIdentityProfile = "production",
+
+    [string] $ExpectedApplicationId = "org.autojs.autojs6",
+
+    [string] $ExpectedAppLabel = "AutoJs6",
+
     [switch] $RunStaticChecks,
 
     [switch] $RunDeviceSmoke,
@@ -79,8 +85,29 @@ if ([string]::IsNullOrWhiteSpace([string] $manifest.app.applicationId)) {
     throw "Release manifest app.applicationId is missing."
 }
 
+if (-not [string]::IsNullOrWhiteSpace($ExpectedIdentityProfile)) {
+    $manifestIdentityProfile = [string] $manifest.app.identityProfile
+    if ($manifestIdentityProfile -ne $ExpectedIdentityProfile) {
+        throw "Release manifest identity profile '$manifestIdentityProfile' does not match expected '$ExpectedIdentityProfile'."
+    }
+}
+
+if (-not [string]::IsNullOrWhiteSpace($ExpectedApplicationId)) {
+    $manifestApplicationId = [string] $manifest.app.applicationId
+    if ($manifestApplicationId -ne $ExpectedApplicationId) {
+        throw "Release manifest application id '$manifestApplicationId' does not match expected '$ExpectedApplicationId'."
+    }
+}
+
 if ([string]::IsNullOrWhiteSpace([string] $manifest.app.label)) {
     throw "Release manifest app.label is missing."
+}
+
+if (-not [string]::IsNullOrWhiteSpace($ExpectedAppLabel)) {
+    $manifestAppLabel = [string] $manifest.app.label
+    if ($manifestAppLabel -ne $ExpectedAppLabel) {
+        throw "Release manifest app label '$manifestAppLabel' does not match expected '$ExpectedAppLabel'."
+    }
 }
 
 if ([string]::IsNullOrWhiteSpace([string] $manifest.release.identityStatus)) {
@@ -88,6 +115,7 @@ if ([string]::IsNullOrWhiteSpace([string] $manifest.release.identityStatus)) {
 }
 
 Write-Host "Node Profile tag manifest checks passed for $Tag at $headCommit."
+Write-Host "Identity profile: $($manifest.app.identityProfile)"
 Write-Host "Application ID: $($manifest.app.applicationId)"
 Write-Host "App label: $($manifest.app.label)"
 Write-Host "Identity status: $($manifest.release.identityStatus)"
@@ -99,7 +127,8 @@ if ($RunStaticChecks) {
         ":app:verifyNodeErrorCatalog",
         ":app:verifyNodeTemplateReproducibility",
         ":app:embeddedNodePackagingPreflightAppDebug",
-        ":app:collectNodeProfileGaArtifacts"
+        ":app:collectNodeProfileGaArtifacts",
+        "-Pautojs.nodejs.identity=$ExpectedIdentityProfile"
     )
 }
 
@@ -111,6 +140,7 @@ if ($RunDeviceSmoke) {
     Invoke-NodeProfileCommand ".\gradlew.bat" @(
         "--console=plain",
         ":app:connectedAppDebugAndroidTest",
+        "-Pautojs.nodejs.identity=$ExpectedIdentityProfile",
         "-Pautojs.nodejs.test.deviceProfile=smoke",
         "-Pautojs.nodejs.fuzzerBudget=quick"
     )

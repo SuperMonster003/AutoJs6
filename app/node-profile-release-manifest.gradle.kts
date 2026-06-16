@@ -73,6 +73,13 @@ private fun nodeProfileReleaseManifestNormalizeFlavor(value: String): String =
         else -> "nodeFull"
     }
 
+private fun nodeProfileReleaseManifestNormalizeIdentity(value: String): String =
+    when (value.trim().lowercase()) {
+        "production", "prod", "release" -> "production"
+        "nodejstest", "nodejs-test", "nodejs_test", "test" -> "nodejsTest"
+        else -> "production"
+    }
+
 private fun nodeProfileReleaseManifestExpectedAbis(releaseFlavor: String, requestedAbis: List<String>): List<String> =
     when (releaseFlavor) {
         "nodeFull" -> listOf("arm64-v8a", "armeabi-v7a", "x86_64")
@@ -130,20 +137,35 @@ val generateNodeProfileReleaseManifest = tasks.register("generateNodeProfileRele
             buildGradle,
             Regex("""val\s+globalNamespace\s*=\s*"([^"]+)""""),
         )
-        val appLabel = nodeProfileReleaseManifestXmlStringValue(
-            projectDir.resolve("src/main/res/values/strings.xml"),
-            "app_name",
-        )
         val releaseTag = providers.gradleProperty("autojs.nodejs.releaseTag")
             .orElse("TBD")
             .get()
             .trim()
             .ifBlank { "TBD" }
+        val identityProfile = nodeProfileReleaseManifestNormalizeIdentity(
+            providers.gradleProperty("autojs.nodejs.identity").orElse("production").get()
+        )
+        val applicationIdSuffix = when (identityProfile) {
+            "nodejsTest" -> ".nodejs"
+            else -> ""
+        }
+        val effectiveApplicationId = applicationId?.let { "$it$applicationIdSuffix" }
+        val appLabel = when (identityProfile) {
+            "nodejsTest" -> "AutoJs6 Node"
+            else -> nodeProfileReleaseManifestXmlStringValue(
+                projectDir.resolve("src/main/res/values/strings.xml"),
+                "app_name",
+            ) ?: "AutoJs6"
+        }
+        val defaultIdentityStatus = when (identityProfile) {
+            "nodejsTest" -> "test-identity-ga-candidate"
+            else -> "production-identity-pending-final-gate"
+        }
         val releaseIdentityStatus = providers.gradleProperty("autojs.nodejs.releaseIdentityStatus")
-            .orElse("test-identity-ga-candidate")
+            .orElse(defaultIdentityStatus)
             .get()
             .trim()
-            .ifBlank { "test-identity-ga-candidate" }
+            .ifBlank { defaultIdentityStatus }
         val releaseFlavor = nodeProfileReleaseManifestNormalizeFlavor(
             providers.gradleProperty("autojs.nodejs.releaseFlavor").orElse("nodeFull").get()
         )
@@ -229,12 +251,15 @@ val generateNodeProfileReleaseManifest = tasks.register("generateNodeProfileRele
                 "statusPorcelain" to nodeProfileReleaseManifestGit("status", "--short"),
             ),
             "app" to linkedMapOf(
-                "applicationId" to applicationId,
+                "applicationId" to effectiveApplicationId,
+                "baseApplicationId" to applicationId,
+                "identityProfile" to identityProfile,
+                "applicationIdSuffix" to applicationIdSuffix,
                 "namespace" to namespace,
                 "label" to appLabel,
-                "testApplicationId" to applicationId?.let { "$it.test" },
-                "inrtApplicationId" to applicationId?.let { "$it.inrt" },
-                "inrtApplicationIdSuffix" to ".inrt",
+                "testApplicationId" to effectiveApplicationId?.let { "$it.test" },
+                "inrtApplicationId" to effectiveApplicationId?.let { "$it.inrt" },
+                "inrtApplicationIdSuffix" to "$applicationIdSuffix.inrt",
                 "inrtLabel" to "AutoJs6.inrt",
                 "versionName" to versionProperties.getProperty("VERSION_NAME"),
                 "versionCode" to versionProperties.getProperty("VERSION_BUILD")?.toIntOrNull(),
@@ -313,7 +338,8 @@ val generateNodeProfileReleaseManifest = tasks.register("generateNodeProfileRele
                 appendLine("- git commit: `${(manifest["git"] as Map<*, *>)["shortCommit"]}`")
                 appendLine("- release tag: `$releaseTag`")
                 appendLine("- release identity status: `$releaseIdentityStatus`")
-                appendLine("- application id: `${applicationId ?: "unknown"}`")
+                appendLine("- identity profile: `$identityProfile`")
+                appendLine("- application id: `${effectiveApplicationId ?: "unknown"}`")
                 appendLine("- app label: `${appLabel ?: "unknown"}`")
                 appendLine("- app version: `${versionProperties.getProperty("VERSION_NAME")}`")
                 appendLine("- version code: `${versionProperties.getProperty("VERSION_BUILD")}`")

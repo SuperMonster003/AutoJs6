@@ -110,14 +110,17 @@ A release gate may be marked green after an infrastructure or ADB/device retry o
 
 Heavy stress gates should use an explicit device profile. The current primary full-gate device is Sony XQ-AT72, serial `QV710AF65F`, with profile `sony`.
 
-Current-branch Sony gates use the temporary Node package identity and should keep the serial explicit:
+Production-identity Sony gates should keep the serial explicit:
 
 ```powershell
 $env:ANDROID_SERIAL="QV710AF65F"
-adb -s QV710AF65F shell cmd deviceidle whitelist +org.autojs.autojs6.nodejs
-adb -s QV710AF65F shell cmd deviceidle whitelist +org.autojs.autojs6.nodejs.test
-adb -s QV710AF65F shell am start -n org.autojs.autojs6.nodejs/org.autojs.autojs.launcher.AdaptiveIconAlias
+adb -s QV710AF65F shell cmd deviceidle whitelist +org.autojs.autojs6
+adb -s QV710AF65F shell cmd deviceidle whitelist +org.autojs.autojs6.test
+adb -s QV710AF65F shell am start -n org.autojs.autojs6/org.autojs.autojs.launcher.AdaptiveIconAlias
 ```
+
+Side-by-side branch gates may pass `-Pautojs.nodejs.identity=nodejsTest` and prepare `org.autojs.autojs6.nodejs`
+instead. Reports must record which identity was used.
 
 Classify Sony device failures by the actual failing layer. ADB disconnection, unauthorized state, or missing app install may be `adb-device-flake`; runtime/security/resource assertions are never hidden behind device preparation.
 

@@ -11,9 +11,10 @@ Current GA candidate device: Sony XQ-AT72 `QV710AF65F`
 ## Tag Preconditions
 
 - [ ] Worktree is clean: `git status --short --branch` prints only the branch line.
-- [ ] [NODE_PROFILE_V1_RELEASE_IDENTITY.md](NODE_PROFILE_V1_RELEASE_IDENTITY.md) records the approved identity decision.
-- [ ] Final public package identity is approved.
-- [ ] Temporary current-branch test identity `org.autojs.autojs6.nodejs` is either intentionally retained for a test tag or restored before a public AutoJs6 release.
+- [x] [NODE_PROFILE_V1_RELEASE_IDENTITY.md](NODE_PROFILE_V1_RELEASE_IDENTITY.md) records the approved identity decision.
+- [x] Final public package identity is approved as `org.autojs.autojs6` / `AutoJs6`.
+- [x] Temporary current-branch test identity `org.autojs.autojs6.nodejs` is no longer the default public identity.
+- [ ] Production-identity Sony gate has passed after restoring `org.autojs.autojs6`.
 - [ ] Final `VERSION_BUILD` and `BUILD_TIME` churn in `version.properties` is reviewed and intentional.
 - [ ] `NODE_PROFILE_V1_GA.md` replaces `TBD` placeholders with the approved final commit and tag.
 - [ ] No experimental feature is promoted without `EXPERIMENTAL_PROMOTION_POLICY.md` evidence.
@@ -25,14 +26,14 @@ Run from a clean worktree with Sony selected when connected-device evidence is n
 
 ```powershell
 $env:ANDROID_SERIAL="QV710AF65F"
-.\gradlew.bat --console=plain :app:generateNodeCompatibilityProfile :app:generateDesktopNodeDifferentialReport :app:nativeNodeDependencyReportAppDebug :app:nativeNodeSymbolArchiveReport :app:embeddedNodeDoctorReport :app:embeddedNodePackagingPreflightAppDebug :app:verifyNodeTemplateReproducibility :app:embeddedNodePackagedSmokeHostVerify :app:nativeNodeAbiSizeReport :app:pullNodeEmbeddedPerformanceReports :app:generateNodeProfileReleaseManifest :app:generateNodeNightlyReport "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.fuzzerBudget=normal"
+.\gradlew.bat --console=plain :app:generateNodeCompatibilityProfile :app:generateDesktopNodeDifferentialReport :app:nativeNodeDependencyReportAppDebug :app:nativeNodeSymbolArchiveReport :app:embeddedNodeDoctorReport :app:embeddedNodePackagingPreflightAppDebug :app:verifyNodeTemplateReproducibility :app:embeddedNodePackagedSmokeHostVerify :app:nativeNodeAbiSizeReport :app:pullNodeEmbeddedPerformanceReports :app:generateNodeProfileReleaseManifest :app:generateNodeNightlyReport "-Pautojs.nodejs.identity=production" "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.fuzzerBudget=normal"
 ```
 
-If the final tag commit differs from the Task 128 gate commit, rerun the full release gate:
+Because the production identity now differs from the Task 128 test identity, rerun the full release gate:
 
 ```powershell
 $env:ANDROID_SERIAL="QV710AF65F"
-.\gradlew.bat --console=plain :app:verifyNodeReleaseGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.fuzzerBudget=normal"
+.\gradlew.bat --console=plain :app:verifyNodeReleaseGate "-Pautojs.nodejs.identity=production" "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.fuzzerBudget=normal"
 ```
 
 `assembleAppDebug` may auto-increment `version.properties`; restore or commit that churn deliberately before tagging.
@@ -60,14 +61,16 @@ Task 129 generated the current artifact set on 2026-06-16 from commit `7e047953`
 The release manifest generated during this prep run records version code `3924` because `assembleAppDebug` auto-incremented the local build. The tracked `version.properties` file was restored afterward; regenerate the manifest from the approved final version state before publication.
 
 Task 131 adds explicit release identity fields to the manifest. Final generation must pass
-`-Pautojs.nodejs.releaseTag=<approved-tag>` and `-Pautojs.nodejs.releaseIdentityStatus=<approved-status>` so `release.tag`
-and `release.identityStatus` do not remain ambiguous.
+`-Pautojs.nodejs.identity=production`, `-Pautojs.nodejs.releaseTag=<approved-tag>`, and
+`-Pautojs.nodejs.releaseIdentityStatus=<approved-status>` so `release.tag` and `release.identityStatus` do not remain
+ambiguous.
 
 ## Device Gate Evidence
 
-The valid GA candidate gate is recorded in [../reports/phase4/sony-ga-candidate/README.md](../reports/phase4/sony-ga-candidate/README.md):
+The valid test-identity GA candidate gate is recorded in [../reports/phase4/sony-ga-candidate/README.md](../reports/phase4/sony-ga-candidate/README.md):
 
 - command: `:app:verifyNodeReleaseGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.fuzzerBudget=normal"`
+- identity: `org.autojs.autojs6.nodejs` / `AutoJs6 Node`
 - device: Sony XQ-AT72 `QV710AF65F`
 - duration: `2h 5m 30s`
 - Android tests: `310`
@@ -98,7 +101,7 @@ Expected skips:
 
 - the worktree is dirty for unreviewed source, docs, or version files;
 - `version.properties` changed only because a local debug assemble ran;
-- the final commit differs from the Sony GA candidate commit and the release gate has not been rerun;
-- temporary package identity is not an intentional release decision;
+- the production identity gate has not been rerun after restoring `org.autojs.autojs6`;
+- temporary package identity appears in a public GA manifest without explicit preview/test approval;
 - any default-off experimental feature was enabled without promotion evidence;
 - security, scoped fs, native addon, child process, raw network, Java interop, or packaged smoke failures were retried away instead of fixed or explicitly blocked.

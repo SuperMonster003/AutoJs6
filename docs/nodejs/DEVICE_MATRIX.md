@@ -39,22 +39,26 @@ Sony XQ-AT72 is the primary full-gate device for the current branch.
 - Android: 12 / API 31
 - ABI: `arm64-v8a`
 - use: release-candidate and GA verification, packaged APK smoke, lifecycle stress, reduced/full memory stress, bridge/security/corpus coverage
-- current branch package identity: `org.autojs.autojs6.nodejs`
+- default package identity: `org.autojs.autojs6`
+- side-by-side test identity: `org.autojs.autojs6.nodejs` with `-Pautojs.nodejs.identity=nodejsTest`
 - preparation:
 
 ```powershell
 $env:ANDROID_SERIAL="QV710AF65F"
-adb -s QV710AF65F shell cmd deviceidle whitelist +org.autojs.autojs6.nodejs
-adb -s QV710AF65F shell cmd deviceidle whitelist +org.autojs.autojs6.nodejs.test
-adb -s QV710AF65F shell am start -n org.autojs.autojs6.nodejs/org.autojs.autojs.launcher.AdaptiveIconAlias
+adb -s QV710AF65F shell cmd deviceidle whitelist +org.autojs.autojs6
+adb -s QV710AF65F shell cmd deviceidle whitelist +org.autojs.autojs6.test
+adb -s QV710AF65F shell am start -n org.autojs.autojs6/org.autojs.autojs.launcher.AdaptiveIconAlias
 ```
 
 Recommended command:
 
 ```powershell
 $env:ANDROID_SERIAL="QV710AF65F"
-.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pautojs.nodejs.identity=production" "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
+
+For a side-by-side branch gate, add `-Pautojs.nodejs.identity=nodejsTest` and use the `.nodejs` package in the
+preparation commands.
 
 ## x86_64 Emulator
 

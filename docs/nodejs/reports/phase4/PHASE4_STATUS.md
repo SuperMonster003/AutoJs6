@@ -4,7 +4,9 @@ Date: 2026-06-16
 
 Primary device: Sony XQ-AT72 `QV710AF65F`
 
-Current package identity: `org.autojs.autojs6.nodejs`
+Current default package identity: `org.autojs.autojs6`
+
+Side-by-side test identity: `org.autojs.autojs6.nodejs`, selected only with `-Pautojs.nodejs.identity=nodejsTest`.
 
 OnePlus OPD2413 `63751f63` is now excluded from unattended current-branch gates because APK installation requires manual confirmation on that device. Existing OnePlus directories remain historical Phase 4 evidence.
 
@@ -29,6 +31,8 @@ OnePlus OPD2413 `63751f63` is now excluded from unattended current-branch gates 
 - Added Task 136 GA artifact bundle collection.
 - Added Task 137 tag dry-run instructions.
 - Added Task 138 post-tag verification script.
+- Restored production AutoJs6 identity as the default build identity and kept `nodejsTest` as an explicit side-by-side
+  identity profile.
 
 ## Evidence
 
@@ -49,7 +53,7 @@ OnePlus OPD2413 `63751f63` is now excluded from unattended current-branch gates 
 
 ## Still Required Before Publication
 
-- Restore or explicitly approve the temporary current-branch package identity before a public AutoJs6 GA tag.
+- Run the production-identity Sony final gate after restoring `org.autojs.autojs6`.
 - Select the final `VERSION_BUILD` / `BUILD_TIME` state and regenerate the release manifest from that clean state.
 - Regenerate the final release manifest and nightly report after the final version/package identity state is committed.
 - Replace `TBD` placeholders in GA release notes with the approved final commit and tag.

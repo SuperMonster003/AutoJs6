@@ -27,7 +27,7 @@ idea {
 }
 
 val globalNamespace = "org.autojs.autojs6"
-val globalApplicationId = "org.autojs.autojs6.nodejs"
+val globalApplicationId = "org.autojs.autojs6"
 
 val flavorDimension = "channel"
 val flavorNameApp = "app"
@@ -37,6 +37,27 @@ val buildTypeRelease = "release"
 val buildActionAssemble = "assemble"
 
 val taskNames: List<String> = gradle.startParameter.taskNames
+val nodeJsIdentityProfile = providers.gradleProperty("autojs.nodejs.identity").orElse("production").get()
+    .trim()
+    .lowercase()
+    .let { requested ->
+        when (requested) {
+            "production", "prod", "release" -> "production"
+            "nodejstest", "nodejs-test", "nodejs_test", "test" -> "nodejsTest"
+            else -> throw GradleException(
+                "Unsupported Node.js identity profile '$requested'. Use production or nodejsTest."
+            )
+        }
+    }
+val nodeJsApplicationIdSuffix = when (nodeJsIdentityProfile) {
+    "nodejsTest" -> ".nodejs"
+    else -> ""
+}
+val nodeJsEffectiveApplicationId = "$globalApplicationId$nodeJsApplicationIdSuffix"
+val nodeJsAppLabel = when (nodeJsIdentityProfile) {
+    "nodejsTest" -> "AutoJs6 Node"
+    else -> "AutoJs6"
+}
 val isNodeFuzzerSeedReplayRequested = taskNames.any { it.contains("replayNodeFuzzerSeed", ignoreCase = true) }
 val isAppAssembleTaskRequested = taskNames.any { it.contains(Regex("^(:?$flavorNameApp:)?$buildActionAssemble", IGNORE_CASE)) }
 val isInrtAssembleTaskRequested = taskNames.any { it.contains(Regex("^(:?$flavorNameApp:)?$buildActionAssemble$flavorNameInrt", IGNORE_CASE)) }
@@ -740,6 +761,8 @@ android {
 
         buildConfigField("String", "VERSION_DATE", "\"${utils.getDateString("MMM d, yyyy", "GMT+08:00")}\"")
         buildConfigField("String", "VSCODE_EXT_REQUIRED_VERSION", "\"${versions.vscodeExtRequiredVersion}\"")
+        buildConfigField("String", "NODEJS_IDENTITY_PROFILE", "\"$nodeJsIdentityProfile\"")
+        buildConfigField("String", "NODEJS_APPLICATION_ID_SUFFIX", "\"$nodeJsApplicationIdSuffix\"")
         buildConfigField("String", "NODEJS_RUNTIME_BACKEND", "\"$effectiveNodeJsRuntimeBackend\"")
         buildConfigField("String", "NODEJS_RELEASE_FLAVOR", "\"$nodeJsReleaseFlavor\"")
         buildConfigField("int", "NODEJS_EMBEDDED_PROBE_LEVEL", "$nodeJsEmbeddedProbeLevel")
@@ -753,6 +776,8 @@ android {
         buildConfigField("boolean", "NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED", "$nodeJsJavaInteropExperimentalEnabled")
         buildConfigField("boolean", "NODEJS_TIMELINE_TRACE_ENABLED", "$nodeJsTimelineTraceEnabled")
         buildConfigField("boolean", "is${flavorNameInrt.uppercaseFirstChar()}", "false")
+        resValue("string", "node_identity_application_id", nodeJsEffectiveApplicationId)
+        resValue("string", "node_identity_app_label", nodeJsAppLabel)
 
         javaCompileOptions {
             annotationProcessorOptions {
@@ -770,6 +795,9 @@ android {
 
         create(flavorNameApp) {
             dimension = flavorDimension
+            if (nodeJsApplicationIdSuffix.isNotEmpty()) {
+                applicationIdSuffix = nodeJsApplicationIdSuffix
+            }
             versionCode = versions.appVersionCode
             versionName = versions.appVersionName
             buildConfigField("String", "CHANNEL", "\"$flavorNameApp\"")
@@ -777,10 +805,10 @@ android {
             manifestPlaceholders.putAll(
                 mapOf(
                     "CHANNEL" to flavorNameApp,
-                    "appName" to "@string/app_name",
+                    "appName" to "@string/node_identity_app_label",
                     "intentCategory" to "android.intent.category.LAUNCHER",
                     "intentCategoryInrt" to "android.intent.category.DEFAULT",
-                    "authorities" to "$globalApplicationId.fileprovider",
+                    "authorities" to "$nodeJsEffectiveApplicationId.fileprovider",
                     "icon" to "@mipmap/ic_app_launcher_adaptive",
                 )
             )
@@ -788,7 +816,7 @@ android {
 
         create(flavorNameInrt) {
             dimension = flavorDimension
-            applicationIdSuffix = ".$flavorNameInrt"
+            applicationIdSuffix = "$nodeJsApplicationIdSuffix.$flavorNameInrt"
             minSdk = versions.sdkVersionMin
             targetSdk = versions.sdkVersionTargetInrt
             compileSdk = versions.sdkVersionCompile
@@ -804,7 +832,7 @@ android {
                     "appName" to "AutoJs6.$flavorNameInrt",
                     "intentCategory" to "android.intent.category.DEFAULT",
                     "intentCategoryInrt" to "android.intent.category.LAUNCHER",
-                    "authorities" to "$globalApplicationId.$flavorNameInrt.fileprovider",
+                    "authorities" to "$nodeJsEffectiveApplicationId.$flavorNameInrt.fileprovider",
                     "icon" to "@mipmap/ic_launcher",
                 )
             )
@@ -987,6 +1015,7 @@ android {
         //  ! Substitution of "android.defaults.buildfeatures.buildconfig=true"
         //  ! zh-CN: "android.defaults.buildfeatures.buildconfig=true" 鐨勬浛浠ｆ柟锟?
         buildConfig = true
+        resValues = true
 
         // @Archived by SuperMonster003 on Sep 23, 2024.
         //  ! Jetpack Compose

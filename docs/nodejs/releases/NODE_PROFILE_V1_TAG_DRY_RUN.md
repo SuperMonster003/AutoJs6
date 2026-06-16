@@ -25,7 +25,9 @@ Required state:
 - `app/build/reports/nodejs/release-manifest.json` was regenerated from the approved final commit and version state;
 - the release manifest `git.commit` equals `git rev-parse HEAD`;
 - the release manifest `release.tag` equals `<approved-tag>`;
-- final Sony gate evidence is recorded if the public release identity differs from the Task 128 test identity.
+- the release manifest `app.identityProfile` equals `production`;
+- production-identity Sony gate evidence is recorded because the public release identity differs from the Task 128 test
+  identity.
 
 ## Dry-Run Checks
 
@@ -47,7 +49,7 @@ Get-Content app\build\reports\nodejs\release-manifest.json | ConvertFrom-Json | 
 Regenerate and collect final artifacts after the approved identity and version state are committed:
 
 ```powershell
-.\gradlew.bat --console=plain :app:generateNodeCompatibilityProfile :app:generateDesktopNodeDifferentialReport :app:nativeNodeDependencyReportAppDebug :app:nativeNodeSymbolArchiveReport :app:embeddedNodeDoctorReport :app:embeddedNodePackagingPreflightAppDebug :app:verifyNodeTemplateReproducibility :app:embeddedNodePackagedSmokeHostVerify :app:nativeNodeAbiSizeReport :app:pullNodeEmbeddedPerformanceReports :app:generateNodeProfileReleaseManifest :app:generateNodeNightlyReport "-Pautojs.nodejs.releaseTag=<approved-tag>" "-Pautojs.nodejs.releaseIdentityStatus=<approved-status>" "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.fuzzerBudget=normal"
+.\gradlew.bat --console=plain :app:generateNodeCompatibilityProfile :app:generateDesktopNodeDifferentialReport :app:nativeNodeDependencyReportAppDebug :app:nativeNodeSymbolArchiveReport :app:embeddedNodeDoctorReport :app:embeddedNodePackagingPreflightAppDebug :app:verifyNodeTemplateReproducibility :app:embeddedNodePackagedSmokeHostVerify :app:nativeNodeAbiSizeReport :app:pullNodeEmbeddedPerformanceReports :app:generateNodeProfileReleaseManifest :app:generateNodeNightlyReport "-Pautojs.nodejs.identity=production" "-Pautojs.nodejs.releaseTag=<approved-tag>" "-Pautojs.nodejs.releaseIdentityStatus=<approved-status>" "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.fuzzerBudget=normal"
 .\gradlew.bat --console=plain :app:collectNodeProfileGaArtifacts
 ```
 
@@ -75,6 +77,9 @@ Optional static checks:
 .\tools\nodejs\verify-node-profile-tag.ps1 -Tag <approved-tag> -RunStaticChecks
 ```
 
+The script defaults to `-ExpectedIdentityProfile production`, `-ExpectedApplicationId org.autojs.autojs6`, and
+`-ExpectedAppLabel AutoJs6`. Override those only for an explicitly approved preview/test tag.
+
 Optional device smoke:
 
 ```powershell
@@ -86,7 +91,7 @@ $env:ANDROID_SERIAL="QV710AF65F"
 
 Do not tag if:
 
-- release identity is still pending;
+- release identity is still pending or the manifest identity profile is not `production`;
 - release notes still contain final `TBD` placeholders;
 - release manifest commit differs from `HEAD`;
 - release manifest tag differs from the approved tag;

@@ -110,7 +110,9 @@ Workaround: keep packaged manifest verification in the release gate and use the 
 
 ## Current Sony Gate Device
 
-Current unattended Node Profile v1 gates use Sony XQ-AT72 `QV710AF65F` with the temporary package identity `org.autojs.autojs6.nodejs`.
+Current unattended Node Profile v1 gates use Sony XQ-AT72 `QV710AF65F`. Public GA sign-off uses the production package
+identity `org.autojs.autojs6`; side-by-side branch gates can still use `-Pautojs.nodejs.identity=nodejsTest` to build
+`org.autojs.autojs6.nodejs`.
 
 Preparation for local focused gates:
 
@@ -119,6 +121,15 @@ $env:ANDROID_SERIAL="QV710AF65F"
 adb -s QV710AF65F shell cmd deviceidle whitelist +org.autojs.autojs6.nodejs
 adb -s QV710AF65F shell cmd deviceidle whitelist +org.autojs.autojs6.nodejs.test
 adb -s QV710AF65F shell am start -n org.autojs.autojs6.nodejs/org.autojs.autojs.launcher.AdaptiveIconAlias
+```
+
+Production-identity final gates should prepare and launch `org.autojs.autojs6` instead:
+
+```powershell
+$env:ANDROID_SERIAL="QV710AF65F"
+adb -s QV710AF65F shell cmd deviceidle whitelist +org.autojs.autojs6
+adb -s QV710AF65F shell cmd deviceidle whitelist +org.autojs.autojs6.test
+adb -s QV710AF65F shell am start -n org.autojs.autojs6/org.autojs.autojs.launcher.AdaptiveIconAlias
 ```
 
 OnePlus OPD2413 is a legacy Phase 4 evidence device only. It is excluded from current unattended gates because APK installation requires manual confirmation.
