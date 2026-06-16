@@ -45,6 +45,14 @@
         return null;
     }
 
+    function callBridgeBoolean(name, defaultValue) {
+        var value = callBridge(name);
+        if (value === null || typeof value === "undefined") {
+            return !!defaultValue;
+        }
+        return value === true || String(value).toLowerCase() === "true";
+    }
+
     function notifyError(message) {
         try {
             if (bridge && typeof bridge.notifyError === "function") {
@@ -715,6 +723,45 @@
         notifyStateChanged("fontFamilyChanged");
     }
 
+    function setWordWrapEnabled(enabled) {
+        enabled = !!enabled;
+        session.setUseWrapMode(enabled);
+        editor.setOption("wrap", enabled);
+        scheduleResize("word_wrap_changed");
+        notifyStateChanged("wordWrapChanged");
+    }
+
+    function setLineNumbersEnabled(enabled) {
+        editor.setOption("showLineNumbers", !!enabled);
+        scheduleResize("line_numbers_changed");
+        notifyStateChanged("lineNumbersChanged");
+    }
+
+    function expandFoldAt(row, column) {
+        if (!session) {
+            return false;
+        }
+        try {
+            var fold = session.getFoldAt &&
+                (session.getFoldAt(row, column, 1) ||
+                    session.getFoldAt(row, column, -1) ||
+                    session.getFoldAt(row, column, 0));
+            if (fold && session.expandFold) {
+                session.expandFold(fold);
+                notifyStateChanged("foldExpanded");
+                return true;
+            }
+            if (session.unfold) {
+                session.unfold(row, true);
+                notifyStateChanged("foldExpanded");
+                return true;
+            }
+        } catch (error) {
+            notifyRecoverableError("foldExpand", error);
+        }
+        return false;
+    }
+
     function initEditor() {
         if (!global.ace) {
             notifyFatalError({
@@ -743,6 +790,8 @@
         session.setUseSoftTabs(true);
 
         var initialTheme = callBridge("getTheme") || "ace/theme/textmate";
+        var wordWrapEnabled = callBridgeBoolean("isWordWrapEnabled", false);
+        var lineNumbersEnabled = callBridgeBoolean("isLineNumbersEnabled", true);
         applyThemeClass(initialTheme);
         editor.setTheme(initialTheme);
         editor.setOptions({
@@ -750,10 +799,13 @@
             enableLiveAutocompletion: true,
             enableSnippets: true,
             showPrintMargin: false,
+            showLineNumbers: lineNumbersEnabled,
+            fixedWidthGutter: true,
             highlightActiveLine: true,
-            wrap: false,
+            wrap: wordWrapEnabled,
             fontFamily: callBridge("getFontFamily") || DEFAULT_FONT_FAMILY
         });
+        session.setUseWrapMode(wordWrapEnabled);
         editor.setFontSize("14px");
 
         if (global.AutoJsAceCompleter) {
@@ -793,6 +845,18 @@
             event.stop();
         });
 
+        editor.on("click", function(event) {
+            var target = event.domEvent && event.domEvent.target;
+            var className = target ? String(target.className || "") : "";
+            if (className.indexOf("ace_fold") < 0) {
+                return;
+            }
+            var position = event.getDocumentPosition();
+            if (expandFoldAt(position.row, position.column)) {
+                event.stop();
+            }
+        });
+
         global.AutoJsAce = {
             isReady: function() { return !!editor && !!session; },
             getText: function() { return session.getValue(); },
@@ -824,6 +888,8 @@
             setTheme: setTheme,
             setFontSizeSp: setFontSizeSp,
             setFontFamily: setFontFamily,
+            setWordWrapEnabled: setWordWrapEnabled,
+            setLineNumbersEnabled: setLineNumbersEnabled,
             scheduleResize: scheduleResize,
             requestFirstPaint: requestFirstPaint,
             restoreScroll: restoreScroll,

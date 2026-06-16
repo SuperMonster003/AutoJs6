@@ -60,15 +60,6 @@
             app:longClickPrompt="@string/description_documentation_source_preference"
             app:longClickPromptMore="@string/description_documentation_source_preference_more" />
 
-        <org.autojs.autojs.theme.preference.MaterialListPreference
-            app:layout="@layout/preference_custom"
-            app:key="@string/key_editor_engine"
-            app:title="@string/text_editor_engine"
-            app:itemKeys="@array/keys_editor_engine"
-            app:itemValues="@array/values_editor_engine"
-            app:itemDefaultKey="@string/default_key_editor_engine"
-            app:longClickPrompt="@string/description_editor_engine_preference" />
-
         <org.autojs.autojs.ui.settings.RestartStrategyPreference
             app:layout="@layout/preference_custom"
             app:key="@string/key_restart_strategy"
@@ -130,6 +121,15 @@
         app:layout="@layout/preference_category_custom"
         app:title="@string/text_code_editor">
 
+        <org.autojs.autojs.theme.preference.MaterialListPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_editor_engine"
+            app:title="@string/text_editor_engine"
+            app:itemKeys="@array/keys_editor_engine"
+            app:itemValues="@array/values_editor_engine"
+            app:itemDefaultKey="@string/default_key_editor_engine"
+            app:longClickPrompt="@string/description_editor_engine_preference" />
+
         <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
             app:layout="@layout/preference_custom"
             app:key="@string/key_editor_auto_show_log_bottom_sheet_on_run"
@@ -154,6 +154,22 @@
             app:itemValues="@array/values_ace_editor_font"
             app:itemDefaultKey="@string/default_key_ace_editor_font"
             app:longClickPrompt="@string/description_ace_editor_font_preference" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_ace_word_wrap_enabled"
+            app:defaultValue="@bool/pref_ace_word_wrap_enabled"
+            app:title="@string/text_ace_word_wrap_enabled"
+            app:summary="@string/summary_ace_word_wrap_enabled"
+            app:longClickPrompt="@string/description_ace_word_wrap_enabled_preference" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_ace_line_numbers_enabled"
+            app:defaultValue="@bool/pref_ace_line_numbers_enabled"
+            app:title="@string/text_ace_line_numbers_enabled"
+            app:summary="@string/summary_ace_line_numbers_enabled"
+            app:longClickPrompt="@string/description_ace_line_numbers_enabled_preference" />
 
         <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
             app:layout="@layout/preference_custom"

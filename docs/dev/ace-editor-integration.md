@@ -1,12 +1,13 @@
 # ACE Editor Integration
 
-This document tracks the current AutoJs6 ACE editor deployment state. Native remains the default editor; ACE is an explicit experimental option.
+This document tracks the current AutoJs6 ACE editor deployment state. ACE is the default editor when bundled assets are present. Native remains selectable and is still the fallback target.
 
 ## Stable Path
 
-- Native is still the default value for `Editor engine`.
-- ACE opens only when the user selects `ACE editor (experimental)` and the bundled ACE assets are present.
-- Large files route back to Native under the current 512 KiB threshold policy.
+- ACE is the default value for `Editor engine`.
+- Native remains available from settings and from the editor engine menu.
+- ACE opens when bundled assets are present; if required assets are missing, the editor falls back to Native.
+- Ordinary large files stay on ACE. The old progressive large-file path remains Native-only.
 - Runtime ACE failures fall back to Native through the editor engine switch path.
 - Fallback snapshots preserve text, dirty state, cursor, selection, breakpoints, debug line, read-only state, theme, and font size as far as each engine supports them.
 - ACE text is mirrored on the Kotlin side through change deltas, so fallback can keep recent edits even when the WebView cannot be queried.
@@ -56,8 +57,8 @@ When ACE falls back to Native, `EditorView` keeps the last ACE diagnostics snaps
 
 - First manual Native/ACE switch shows that undo/redo history is not preserved across engines.
 - ACE fallback shows a one-time Toast and points users to diagnostics.
-- Large-file auto-Native routing shows a one-time Toast.
-- Settings details state that ACE is experimental and Native remains the default.
+- Debug-forced Native routing shows a one-time Toast.
+- Settings details state that ACE is the default editor and Native remains available as a fallback.
 
 ## Clean Host Layout Decision
 
@@ -72,7 +73,7 @@ ACE does not need a separate clean-host experiment flag at this stage. The ACE p
 - Dedicated keyboard and viewport coverage lives in
   `docs/dev/ace-keyboard-viewport-test-plan.md`, including first paint, tap
   anchors, repeated IME stress, completion accept, long-press selection, CJK
-  input, rotation, fallback, large-file routing, and bridge event storm
+  input, rotation, fallback, ACE large-file direct loading, and bridge event storm
   diagnostics.
 - The isolated ACE debug activity includes an `IME stress` helper for quick
   repeated show/hide diagnostics before running the full physical-device matrix.

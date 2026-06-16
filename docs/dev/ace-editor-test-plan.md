@@ -1,12 +1,12 @@
 # ACE Editor Test Plan
 
-This plan covers manual device validation for the ACE editor experiment. Native remains the default editor. ACE should only be enabled explicitly, and every fatal ACE failure must fall back to Native without losing the best available editor state.
+This plan covers manual device validation for the ACE editor experiment. ACE is the default editor when bundled assets are present. Native remains selectable and every fatal ACE failure must fall back to Native without losing the best available editor state.
 
 ## Prerequisites
 
 - Build variant: debug app build.
 - Test devices or emulators: at least API 26, API 29, API 33, and API 35 when available.
-- Settings: set `Editor engine` to `ACE editor (experimental)` for ACE cases, and to `Native editor` for native comparison cases.
+- Settings: keep `Editor engine` on `ACE editor (experimental)` for ACE cases, and switch to `Native editor` for native comparison cases.
 - Test files:
   - `ace-basic.js`: small JavaScript file under 512 KB.
   - `ace-large-512k.js`: file at or above the current 512 KB large-file threshold.
@@ -671,18 +671,19 @@ Record each run with the actual Android System WebView version from device setti
 
 ## Release Gate
 
-ACE can remain enabled as an experimental option only if:
+ACE can remain the default experimental editor only if:
 
-- Native remains the default editor.
+- ACE remains the default editor and Native remains a selectable fallback.
 - The dedicated `docs/dev/ace-keyboard-viewport-test-plan.md` matrix is runnable
   for first paint, top/middle/bottom tap anchors, repeated IME stress,
   completion accept, long-press selection, CJK input, rotation, fallback, and
-  large-file Native routing.
+  ACE large-file direct loading.
 - `verify-autojs6-indices.mjs`, `test-completer.mjs`,
   `test-lsp-client.mjs`, and `test-tooltip.mjs` pass.
 - All fallback cases above return to Native without app crash.
 - Recent small-file input survives fallback through TextMirror in practical tests.
-- Large files route to Native under the current threshold policy.
+- Ordinary large files stay on ACE while Native large-file regression coverage
+  remains passing.
 - No blocked URL, file bridge, or LSP error prevents basic edit/save/run.
 - `lib.autojs6.d.ts` is generated from the same AutoJs6 completion source.
 - Selected AutoJs6 declaration files and their MPL-2.0 license are bundled under `autojs6/types/autojs6`.

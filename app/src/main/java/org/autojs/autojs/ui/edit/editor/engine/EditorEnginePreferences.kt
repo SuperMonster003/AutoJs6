@@ -11,7 +11,7 @@ object EditorEnginePreferences {
 
     @JvmStatic
     fun get(): EditorEngineType {
-        return EditorEngineType.fromPreferenceValue(Pref.getString(KEY_EDITOR_ENGINE, EditorEngineType.NATIVE.preferenceValue))
+        return EditorEngineType.fromPreferenceValue(Pref.getString(KEY_EDITOR_ENGINE, EditorEngineType.ACE.preferenceValue))
     }
 
     @JvmStatic

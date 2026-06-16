@@ -679,6 +679,14 @@ class AceCodeEditor @JvmOverloads constructor(
         return AceEditorFontPreferences.get().cssFontFamily
     }
 
+    internal fun bridgeWordWrapEnabled(): Boolean {
+        return AceEditorDisplayPreferences.isWordWrapEnabled()
+    }
+
+    internal fun bridgeLineNumbersEnabled(): Boolean {
+        return AceEditorDisplayPreferences.isLineNumbersEnabled()
+    }
+
     internal fun bridgeLspOptions(): String {
         return lspServerManager.bridgeOptionsJson()
     }

@@ -7,7 +7,7 @@ import org.autojs.autojs.ui.edit.editor.CodeEditor
 object EditorEngineFactory {
 
     @JvmStatic
-    fun create(context: Context, preferredType: EditorEngineType = EditorEngineType.NATIVE): ScriptEditorEngine {
+    fun create(context: Context, preferredType: EditorEngineType = EditorEngineType.ACE): ScriptEditorEngine {
         return when (preferredType) {
             EditorEngineType.NATIVE -> createNativeCodeEditorEngine(context)
             EditorEngineType.ACE -> createAceOrFallback(context)

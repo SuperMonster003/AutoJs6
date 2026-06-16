@@ -16,6 +16,7 @@ import org.autojs.autojs.ui.edit.editor.ace.health.AceFailureType
 import org.autojs.autojs.ui.edit.editor.engine.AceScriptEditorEngine
 import org.autojs.autojs.ui.edit.editor.engine.EditorEnginePreferences
 import org.autojs.autojs.ui.edit.editor.engine.EditorEngineType
+import org.autojs.autojs.ui.edit.editor.loading.EditorTextLoadPolicy
 import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs6.R
 import org.json.JSONArray
@@ -43,6 +44,8 @@ class AceCodeEditorSmokeTest {
     @After
     fun tearDown() {
         AceEditorTestHooks.reset()
+        AceEditorDisplayPreferences.setWordWrapEnabled(false)
+        AceEditorDisplayPreferences.setLineNumbersEnabled(true)
         AceEditorLspPreferences.setEnabled(false)
         EditorEnginePreferences.set(EditorEngineType.NATIVE)
         finishLaunchedActivity()
@@ -94,6 +97,80 @@ class AceCodeEditorSmokeTest {
         assertEquals(expectedText, runOnMainSync { editor.textSnapshot })
         assertFalse(snapshot.runtimeEventHistory.any { it.contains("fallback") })
         assertNull(snapshot.lastFailureType)
+    }
+
+    @Test
+    fun displayPreferencesApplyToAceSession() {
+        AceEditorDisplayPreferences.setWordWrapEnabled(true)
+        AceEditorDisplayPreferences.setLineNumbersEnabled(false)
+        val editor = launchReadyEditor()
+
+        val initialState = evaluateJsonObject(
+            editor,
+            """
+                (function() {
+                    return JSON.stringify({
+                        wrap: editor.session.getUseWrapMode(),
+                        showLineNumbers: editor.getOption("showLineNumbers"),
+                        fixedWidthGutter: editor.getOption("fixedWidthGutter") === true,
+                        hasRuntimeApi:
+                            typeof window.AutoJsAce.setWordWrapEnabled === "function" &&
+                            typeof window.AutoJsAce.setLineNumbersEnabled === "function"
+                    });
+                })();
+            """.trimIndent(),
+        )
+        assertTrue(initialState.getBoolean("wrap"))
+        assertFalse(initialState.getBoolean("showLineNumbers"))
+        assertTrue(initialState.getBoolean("fixedWidthGutter"))
+        assertTrue(initialState.getBoolean("hasRuntimeApi"))
+
+        val toggledState = evaluateJsonObject(
+            editor,
+            """
+                (function() {
+                    window.AutoJsAce.setWordWrapEnabled(false);
+                    window.AutoJsAce.setLineNumbersEnabled(true);
+                    return JSON.stringify({
+                        wrap: editor.session.getUseWrapMode(),
+                        showLineNumbers: editor.getOption("showLineNumbers")
+                    });
+                })();
+            """.trimIndent(),
+        )
+        assertFalse(toggledState.getBoolean("wrap"))
+        assertTrue(toggledState.getBoolean("showLineNumbers"))
+    }
+
+    @Test
+    fun aceLargeFileStaysOnAceEditor() {
+        val largeText = buildLargeScriptText()
+        val file = createTempScriptFile("ace-ux-large", largeText)
+        try {
+            assertTrue(file.length() >= EditorTextLoadPolicy.LARGE_FILE_THRESHOLD_BYTES)
+
+            val editorView = startEditActivitySync(file)
+            waitUntil("ACE large file should load without Native routing", timeoutMillis = LARGE_FILE_TIMEOUT_MS) {
+                runOnMainSync {
+                    editorView.editor.engineType == EditorEngineType.ACE &&
+                        editorView.editor.isReady &&
+                        !editorView.editor.isLoadingText &&
+                        editorView.editor.textSnapshot.length == largeText.length &&
+                        !editorView.isTextChanged &&
+                        !editorView.saveStickyDirty
+                }
+            }
+            assertEquals(largeText.take(128), runOnMainSync { editorView.editor.textSnapshot.take(128) })
+            assertEquals(largeText.takeLast(128), runOnMainSync { editorView.editor.textSnapshot.takeLast(128) })
+
+            val diagnostics = copyAceDiagnostics(editorView)
+            assertTrue(diagnostics.contains("engineType=${EditorEngineType.ACE.name}"))
+            assertTrue(diagnostics.contains("largeFilePolicy=auto;"))
+            assertFalse(diagnostics.contains("auto-native-large-file"))
+        } finally {
+            finishLaunchedActivity()
+            file.delete()
+        }
     }
 
     @Test
@@ -637,6 +714,18 @@ class AceCodeEditorSmokeTest {
         }
     }
 
+    private fun buildLargeScriptText(): String {
+        val builder = StringBuilder(EditorTextLoadPolicy.LARGE_FILE_THRESHOLD_BYTES + 64 * 1024)
+        var index = 0
+        while (builder.length < EditorTextLoadPolicy.LARGE_FILE_THRESHOLD_BYTES + 32 * 1024) {
+            builder.append("log(\"ace ux large line ")
+                .append(index.toString().padStart(5, '0'))
+                .append("\");\n")
+            index++
+        }
+        return builder.toString()
+    }
+
     private fun rotateAndAssertEditorState(
         activity: Activity,
         editorView: EditorView,
@@ -916,6 +1005,7 @@ class AceCodeEditorSmokeTest {
     companion object {
         private const val READY_TIMEOUT_MS = 10_000L
         private const val TEXT_ROUND_TRIP_TIMEOUT_MS = 5_000L
+        private const val LARGE_FILE_TIMEOUT_MS = 20_000L
         private const val JS_SMOKE_TIMEOUT_MS = 10_000L
         private const val JS_CALLBACK_TIMEOUT_MS = 5_000L
         private const val SAVE_TIMEOUT_MS = 10_000L

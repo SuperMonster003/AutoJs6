@@ -333,6 +333,7 @@ assertNotIncludes(fileService, "CodeEditText");
 
 assertIncludes(textLoadPolicy, "const val LARGE_FILE_THRESHOLD_BYTES = 512 * 1024");
 assertIncludes(textLoadPolicy, "fun shouldRouteAceToNative(");
+assertIncludes(textLoadPolicy, "return engineType == EditorEngineType.ACE && forceNativeRoute");
 assertIncludes(textLoadTarget, "class EngineTextLoadTarget(");
 assertIncludes(textLoadTarget, "private val editor: ScriptEditorEngine");
 assertNotIncludes(textLoadTarget, "CodeEditText");
@@ -546,7 +547,7 @@ assertIncludes(aceSonyReleaseReport, "Clean host enabled: yes");
 assertIncludes(aceSonyReleaseReport, "## Automated Gate");
 assertIncludes(aceSonyReleaseReport, "`node tools/ace-ci/check-ace-release-gate.mjs`");
 assertIncludes(aceSonyReleaseReport, "## Manual Gate Summary");
-assertIncludes(aceSonyReleaseReport, "Native default");
+assertIncludes(aceSonyReleaseReport, "ACE default");
 assertIncludes(aceSonyReleaseReport, "LSP default-off");
 assertIncludes(aceSonyReleaseReport, "VisualEditorAce unavailable");
 assertIncludes(aceSonyReleaseReport, "TextMirror fallback");
@@ -563,7 +564,7 @@ assertIncludes(acePublishingCleanup, "Restore `defaultConfig.applicationId` to `
 assertIncludes(acePublishingCleanup, "`BUILD_TIME`");
 assertIncludes(acePublishingCleanup, "`VERSION_BUILD`");
 assertIncludes(acePublishingCleanup, "build-generated churn");
-assertIncludes(acePublishingCleanup, "Native is still the static default editor");
+assertIncludes(acePublishingCleanup, "ACE is now the static default editor");
 assertIncludes(acePublishingCleanup, "LSP remains default-off");
 assertIncludes(acePublishingCleanup, "VisualEditorAce has no public enum");
 
@@ -615,8 +616,10 @@ assertIncludes(aceReleaseGate, "docs/dev/ace-release-device-report-sony-xq-at72.
 assertIncludes(aceReleaseGate, "# AutoJs6 ACE Phase 9 Roadmap");
 assertIncludes(aceReleaseGate, "## Feature Freeze");
 assertIncludes(aceReleaseGate, "# ACE Release Device Report - Sony XQ-AT72");
-assertIncludes(aceReleaseGate, "Native editor resource default");
-assertIncludes(aceReleaseGate, "factory default to Native");
+assertIncludes(aceReleaseGate, "ACE editor resource default");
+assertIncludes(aceReleaseGate, "factory default to ACE");
+assertIncludes(aceReleaseGate, "code editor preference order");
+assertIncludes(aceReleaseGate, "Simplified Chinese ACE word wrap string");
 assertIncludes(aceReleaseGate, "EditorEngineType.ACE -> AceEditorViewportPolicy(editor)");
 assertIncludes(aceReleaseGate, "key_ace_clean_host_layout");
 assertIncludes(aceReleaseGate, "ACE fallback switches to Native with the latest TextMirror-backed snapshot");

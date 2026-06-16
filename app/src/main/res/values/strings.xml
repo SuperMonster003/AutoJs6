@@ -36,7 +36,7 @@
     <string name="default_key_ace_editor_font" translatable="false">@string/key_ace_editor_font_jetbrains_mono</string>
     <string name="default_key_app_language" translatable="false">@string/key_app_language_auto</string>
     <string name="default_key_documentation_source" translatable="false">@string/key_documentation_source_local</string>
-    <string name="default_key_editor_engine" translatable="false">@string/key_editor_engine_native</string>
+    <string name="default_key_editor_engine" translatable="false">@string/key_editor_engine_ace</string>
     <string name="default_key_editor_log_button_behavior" translatable="false">@string/key_editor_log_button_behavior_bottom_sheet</string>
     <string name="default_key_editor_pinch_to_zoom_strategy" translatable="false">@string/key_editor_pinch_to_zoom_change_text_size</string>
     <string name="default_key_file_extensions" translatable="false">@string/key_file_extensions_show_all_but_executable</string>
@@ -77,7 +77,9 @@
     <string name="key_ace_editor_font_jetbrains_mono" translatable="false">jetbrains_mono</string>
     <string name="key_ace_editor_font_source_code_pro" translatable="false">source_code_pro</string>
     <string name="key_ace_editor_font_system_monospace" translatable="false">system_monospace</string>
+    <string name="key_ace_line_numbers_enabled" translatable="false">key_$_ace_line_numbers_enabled</string>
     <string name="key_ace_lsp_enabled" translatable="false">key_$_ace_lsp_enabled</string>
+    <string name="key_ace_word_wrap_enabled" translatable="false">key_$_ace_word_wrap_enabled</string>
     <string name="key_about_app_and_developer" translatable="false">key_$_about_app_and_developer</string>
     <string name="key_about_app_tips" translatable="false">key_$_about_app_tips</string>
     <string name="key_all_files_access" translatable="false">key_$_all_files_access</string>
@@ -1075,11 +1077,13 @@
     <string name="text_editor_theme">Editor theme</string>
     <string name="text_ace_editor_font">ACE editor font</string>
     <string name="text_ace_editor_font_changed" formatted="true">ACE editor font switched to %s</string>
+    <string name="text_ace_line_numbers_enabled">ACE line numbers</string>
     <string name="text_editor_engine">Editor engine</string>
     <string name="text_editor_engine_switched" formatted="true">Editor engine switched to %s</string>
     <string name="text_editor_engine_switched_with_undo_notice" formatted="true">Editor engine switched to %s. Undo/redo history is not preserved across editor engines</string>
     <string name="text_ace_editor_fallback_native" formatted="true">ACE editor failed (%1$s); switched to native editor. Copy ACE diagnostics from the More menu for details</string>
-    <string name="text_ace_large_file_uses_native_editor">Large files use the native editor for responsiveness</string>
+    <string name="text_ace_large_file_uses_native_editor">ACE editor is routed to the native editor by the active fallback policy</string>
+    <string name="text_ace_word_wrap_enabled">ACE word wrap</string>
     <string name="text_email">E-mail</string>
     <string name="text_email_cannot_be_empty">E-mail cannot be empty</string>
     <string name="text_email_format_error">Invalid e-mail format</string>
@@ -1756,10 +1760,14 @@
     <string name="text_editor_auto_show_log_bottom_sheet_on_run">Auto show bottom log panel after running</string>
     <string name="text_editor_log_button_behavior">Editor log button behavior</string>
     <string name="summary_editor_auto_show_log_bottom_sheet_on_run">Automatically open the bottom log panel after the editor Run button starts a script</string>
+    <string name="summary_ace_line_numbers_enabled">Show line numbers in the ACE gutter.</string>
     <string name="summary_ace_lsp_enabled">Enable experimental ACE LSP configuration; static completion remains the fallback.</string>
+    <string name="summary_ace_word_wrap_enabled">Wrap long lines inside the ACE editor viewport.</string>
     <string name="text_ace_lsp_enabled">ACE LSP smart completion (experimental)</string>
     <string name="description_editor_log_button_behavior_preference">Choose how the editor log button opens logs: bottom log panel or fullscreen log page.</string>
-    <string name="description_editor_engine_preference">Native remains the default editor. ACE is an experimental WebView editor; if ACE fails at runtime, AutoJs6 falls back to the native editor and keeps the best available text snapshot.</string>
+    <string name="description_editor_engine_preference">ACE is the default editor. Native remains available as a fallback and can be selected explicitly.</string>
     <string name="description_ace_editor_font_preference">Choose the ACE editor font. JetBrains Mono is the default; Source Code Pro and system monospace are available fallbacks.</string>
+    <string name="description_ace_line_numbers_enabled_preference">Show or hide ACE gutter line numbers. Folding, breakpoints, and gutter layout remain available.</string>
     <string name="description_ace_lsp_enabled_preference">Experimental ACE LSP support is off by default. The current build only exposes bridge options; if no LSP server is available, ACE keeps using static completion.</string>
+    <string name="description_ace_word_wrap_enabled_preference">Enable ACE session wrap mode for long lines. This does not modify file contents.</string>
 </resources>

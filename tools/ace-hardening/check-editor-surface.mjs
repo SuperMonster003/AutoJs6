@@ -116,6 +116,7 @@ assertMatch(css, /\.autojs6_debug_line\s*\{[\s\S]*position:\s*absolute/, "debug 
 assertMatch(css, /\.autojs6_debug_line\s*\{[\s\S]*z-index:\s*5/, "debug line marker z-index");
 assertMatch(css, /\.ace_gutter,\s*\.ace_gutter-cell\s*\{[\s\S]*user-select:\s*none/, "gutter selection suppression");
 assertMatch(css, /\.ace_mobile-menu\s*\{[\s\S]*z-index:\s*20/, "mobile menu remains available");
+assertMatch(css, /body\.ace-theme-dark \.ace_marker-layer \.ace_selection\s*\{[\s\S]*rgba\(88,\s*166,\s*255,\s*0\.42\)/, "dark selection contrast");
 assertMatch(css, /\.autojs6_hover_tooltip\s*\{[\s\S]*pointer-events:\s*none/, "ACE hover tooltip must not steal touch input");
 assertMatch(css, /body\.ace-theme-dark \.autojs6_hover_tooltip\s*\{[\s\S]*background:\s*#20242b/, "ACE hover tooltip dark style");
 if (css.includes(".ace_mobile-menu {\n    display: none")) {
@@ -123,6 +124,7 @@ if (css.includes(".ace_mobile-menu {\n    display: none")) {
 }
 
 assertIncludes(bridge, "var firstPaintNotified = false;", "first-paint idempotency flag");
+assertIncludes(bridge, "function callBridgeBoolean(name, defaultValue)", "bridge boolean option helper");
 assertIncludes(bridge, "var STATE_NOTIFY_THROTTLE_MS = 100;", "state event throttle");
 assertIncludes(bridge, "var TEXT_NOTIFY_THROTTLE_MS = 100;", "text event throttle");
 assertIncludes(bridge, "var CURSOR_NOTIFY_THROTTLE_MS = 50;", "cursor event throttle");
@@ -140,6 +142,13 @@ assertIncludes(bridge, 'editor.on("guttermousedown", function(event)', "gutter m
 assertIncludes(bridge, 'target.className.indexOf("ace_gutter-cell")', "gutter-cell guard");
 assertIncludes(bridge, "getBoundingClientRect().left + 24", "gutter breakpoint tap zone");
 assertIncludes(bridge, "event.stop();", "gutter click event stop");
+assertIncludes(bridge, 'callBridgeBoolean("isWordWrapEnabled", false)', "ACE word wrap preference bridge");
+assertIncludes(bridge, 'callBridgeBoolean("isLineNumbersEnabled", true)', "ACE line number preference bridge");
+assertIncludes(bridge, "fixedWidthGutter: true", "fixed-width ACE gutter");
+assertIncludes(bridge, "function expandFoldAt(row, column)", "fold placeholder expansion helper");
+assertIncludes(bridge, 'editor.on("click", function(event)', "fold placeholder click handler");
+assertIncludes(bridge, "setWordWrapEnabled: setWordWrapEnabled", "ACE word wrap runtime API");
+assertIncludes(bridge, "setLineNumbersEnabled: setLineNumbersEnabled", "ACE line number runtime API");
 assertIncludes(bridge, "var lspClient = null;", "ACE LSP client bridge slot");
 assertIncludes(bridge, "global.AutoJsAceLspClient.install", "ACE LSP client install");
 assertIncludes(bridge, "getLspState: function()", "ACE LSP state public API");

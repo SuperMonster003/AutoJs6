@@ -1431,6 +1431,41 @@
     <string name="error_unknown_key_code">未知的键码: %1$s</string>
     <string name="text_maximize">最大化</string>
     <string name="text_stop_simplified">停止</string>
+    <string name="entry_ace_editor_font_jetbrains_mono">JetBrains Mono</string>
+    <string name="entry_ace_editor_font_source_code_pro">Source Code Pro</string>
+    <string name="entry_ace_editor_font_system_monospace">系统等宽字体</string>
+    <string name="entry_editor_engine_ace">ACE 编辑器 (实验性)</string>
+    <string name="entry_editor_engine_native">原生编辑器</string>
+    <string name="text_ace_diagnostics_copied">ACE 诊断信息已复制到剪贴板</string>
+    <string name="text_ace_editor_debug">ACE 编辑器调试</string>
+    <string name="text_ace_editor_debug_description">打开独立的 ACE WebView 编辑器测试页面</string>
+    <string name="text_ace_editor_debug_status">%1$s | 行 %2$d | 光标 %3$d:%4$d | 断点 %5$d | 已修改 %6$s</string>
+    <string name="text_ace_editor_debug_status_loading">正在加载 ACE 编辑器...</string>
+    <string name="text_ace_editor_debug_text_length">ACE 文本长度: %1$d</string>
+    <string name="text_ace_editor_fallback_native" formatted="true">ACE 编辑器失败 (%1$s); 已切换到原生编辑器。可在更多菜单中复制 ACE 诊断信息</string>
+    <string name="text_ace_editor_font">ACE 编辑器字体</string>
+    <string name="text_ace_editor_font_changed" formatted="true">ACE 编辑器字体已切换为 %s</string>
+    <string name="text_ace_get_text">获取文本</string>
+    <string name="text_ace_ime_stress">IME 压力测试</string>
+    <string name="text_ace_ime_stress_done">IME 压力测试完成: %1$d 轮</string>
+    <string name="text_ace_ime_stress_running">IME 压力测试: %1$d/%2$d</string>
+    <string name="text_ace_insert">插入</string>
+    <string name="text_ace_large_file_uses_native_editor">当前 fallback 策略已将 ACE 编辑器切换到原生编辑器</string>
+    <string name="text_ace_line_numbers_enabled">ACE 行号</string>
+    <string name="text_ace_lsp_enabled">ACE LSP 智能补全 (实验性)</string>
+    <string name="text_ace_set_sample">设置示例</string>
+    <string name="text_ace_word_wrap_enabled">ACE 自动换行</string>
+    <string name="text_editor_engine">编辑器引擎</string>
+    <string name="text_editor_engine_switched" formatted="true">编辑器引擎已切换为 %s</string>
+    <string name="text_editor_engine_switched_with_undo_notice" formatted="true">编辑器引擎已切换为 %s。不同编辑器引擎之间不会保留撤销/重做历史</string>
+    <string name="summary_ace_line_numbers_enabled">在 ACE Gutter 中显示行号。</string>
+    <string name="summary_ace_lsp_enabled">启用实验性的 ACE LSP 配置；静态补全仍作为 fallback。</string>
+    <string name="summary_ace_word_wrap_enabled">在 ACE 编辑器可视区域内对长行自动换行。</string>
+    <string name="description_ace_editor_font_preference">选择 ACE 编辑器字体。JetBrains Mono 为默认字体；Source Code Pro 和系统等宽字体作为 fallback。</string>
+    <string name="description_ace_line_numbers_enabled_preference">显示或隐藏 ACE Gutter 行号。代码折叠、断点和 Gutter 布局仍然可用。</string>
+    <string name="description_ace_lsp_enabled_preference">实验性 ACE LSP 支持默认关闭。当前版本仅暴露桥接配置；如果没有可用的 LSP server，ACE 会继续使用静态补全。</string>
+    <string name="description_ace_word_wrap_enabled_preference">为长行启用 ACE session wrap mode。此设置不会修改文件内容。</string>
+    <string name="description_editor_engine_preference">ACE 是默认编辑器。原生编辑器仍可作为 fallback 使用，也可以手动选择。</string>
     <string name="text_code_editor">代码编辑器</string>
     <string name="entry_editor_log_button_behavior_bottom_sheet">底部日志面板</string>
     <string name="entry_editor_log_button_behavior_fullscreen_page">全屏日志页面</string>

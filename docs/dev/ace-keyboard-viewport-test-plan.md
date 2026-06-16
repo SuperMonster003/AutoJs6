@@ -1,9 +1,9 @@
 # ACE Keyboard And Viewport Test Plan
 
 This plan is the dedicated release matrix for ACE keyboard, viewport, mobile
-selection, fallback, and large-file routing behavior. Native remains the default
-editor. ACE can stay experimental only while this matrix is repeatable on the
-representative Android and WebView combinations below.
+selection, fallback, and large-file routing behavior. ACE is now the default
+editor when assets are present. Native remains selectable and is still the
+fallback target.
 
 ## Scope
 
@@ -15,7 +15,8 @@ tests:
 - tap anchor accuracy in top, middle, and lower viewport areas
 - completion popup accept by keyboard Enter and touch
 - long-press, double-tap, copy, paste, and CJK composition paths
-- rotation, background restore, fallback, and large-file Native routing
+- rotation, background restore, fallback, ACE large-file direct loading, and
+  Native large-file regression routing
 - diagnostics needed to distinguish real WebView/JS failures from transient IME
   stalls
 
@@ -111,7 +112,7 @@ show/hide case on real devices and preserve diagnostics after the run.
 | ACE-KV-005 | Long-press, double-tap, copy, paste, and CJK | Physical WebView device preferred, CJK IME when available | Long-press a word, double-tap a word, adjust selection, copy, paste on another line, then type CJK composition text | No fallback. Copy/paste works through WebView/ACE mobile path. CJK composition remains usable after action-mode entry and exit | `lastActionModeAtUptimeMillis`, `maxBridgeEventWindowCount`, `runtimeEvent=bridge_event_storm` |
 | ACE-KV-006 | Rotation and background restore | Unsaved text in ACE | Type a marker, rotate, background the app, return to editor | Text and dirty state survive. Cursor remains visible. Old WebView callbacks do not trigger duplicate fallback | `runtimeEventHistory`, `lastReadyAtUptimeMillis`, `textMirrorRevision` |
 | ACE-KV-007 | Fallback classifications | Use debug hooks one at a time | Force ready timeout, JS init throw, renderer-gone fallback, and asset-missing fallback | Real fatal paths still fallback to Native. Diagnostics name the failure. Recent text is preserved through TextMirror when applicable | `lastFailureType`, `lastFailureFatal`, `runtimeEvent=fallback`, `textMirrorRevision` |
-| ACE-KV-008 | Large-file Native routing | ACE selected, file at or above current threshold | Open `ace-large-512k.js`, then force small-file Native route with debug hook | Large files use Native under policy. Forced hook also routes small files to Native. No CodeEditText loading APIs run on ACE path | `largeFilePolicy`, `text_ace_large_file_uses_native_editor` |
+| ACE-KV-008 | ACE large-file direct load | ACE selected, file at or above current threshold | Open `ace-large-512k.js`, then force small-file Native route with debug hook | Ordinary large files stay on ACE. Forced debug hook still routes to Native. No CodeEditText loading APIs run on ACE path | `largeFilePolicy`, `text_ace_large_file_uses_native_editor` |
 | ACE-KV-009 | Bridge event storm diagnostics | ACE active during repeated IME and selection actions | Run `ACE-KV-003`, then `ACE-KV-005`, then copy diagnostics | Diagnostics expose event-window counters. A storm, if present, is visible in event history instead of silent fallback | `currentBridgeEventWindowCount`, `lastBridgeEventWindowCount`, `maxBridgeEventWindowCount`, `runtimeEvent=bridge_event_storm` |
 
 ## Result Table
@@ -133,8 +134,9 @@ ACE keyboard and viewport work is gate-complete only when:
 - repeated keyboard show/hide does not fallback ACE
 - lower-viewport tap anchors remain accurate when IME appears
 - long-press, double-tap, copy, paste, and CJK paths remain usable
-- large files still route to Native under the current policy
-- Native remains the default editor
+- ordinary large files stay on ACE while Native large-file regression coverage
+  remains passing
+- ACE remains the default editor and Native remains a selectable fallback
 
 Server-backed LSP transport and public VisualEditorAce engine exposure are not
 primary release targets until these keyboard and viewport gates pass on

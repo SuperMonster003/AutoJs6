@@ -16,7 +16,7 @@ path has a recorded result.
 - Test package: org.autojs.autojs6.ace
 - Plugin permission declaration: `org.autojs.autojs6.ace.permission.PLUGIN`;
   requested plugin permission remains `org.autojs.permission.PLUGIN`
-- ACE enabled: yes, `key_$_editor_engine=ace`; static default remains Native
+- ACE enabled: yes, `key_$_editor_engine=ace`; static default is now ACE
 - LSP enabled: false, `key_$_ace_lsp_enabled=false`
 - Clean host enabled: yes
 - IME: com.google.android.inputmethod.latin/com.android.inputmethod.latin.LatinIME
@@ -41,7 +41,7 @@ path has a recorded result.
 
 | Area | Result | Notes |
 | --- | --- | --- |
-| Native default | STATIC PASS | Release gate confirms Native resource/default path; device preference is ACE explicit opt-in. |
+| ACE default | STATIC PASS | Release gate confirms ACE resource/default path; Native remains selectable and available for fallback. |
 | LSP default-off | DEVICE PASS | Device preference has `key_$_ace_lsp_enabled=false`. |
 | VisualEditorAce unavailable | STATIC PASS | Confirmed by release gate; device UI sweep still TBD. |
 | First paint | DEVICE SMOKE PASS | File-manager open sampling showed coherent ACE surfaces in dark and light themes; see Gate 2 notes. |
@@ -63,7 +63,7 @@ path has a recorded result.
 | JS-init fatal fallback | DEVICE SMOKE PASS | `forceJsInitThrow` reached Native with loaded file text and `JS_INIT_ERROR` diagnostics. |
 | Renderer-gone fallback | DEVICE SMOKE PASS | `forceRendererGoneFallback` reached Native with loaded file text and `RENDER_PROCESS_GONE` diagnostics without querying a dead WebView. |
 | Asset-missing fallback | DEVICE SMOKE PASS | `forceAssetMissing` routed directly to Native and preserved an `ASSET_MISSING` diagnostics snapshot. |
-| Large-file Native routing | DEVICE SMOKE PASS | Native large-file instrumentation loaded a script larger than the 512 KiB threshold through the Native editor, preserving length, prefix/suffix text, clean state, and Native engine routing. |
+| Large-file routing | DEVICE SMOKE PASS | ACE large-file instrumentation keeps ordinary large files on ACE; Native large-file instrumentation still covers the Native progressive path above the 512 KiB threshold. |
 | Native editor regression | DEVICE SMOKE PASS | Instrumentation opened Native editor, edited, showed/hidden IME, saved, searched/replaced, toggled breakpoints, opened a large file, and ran a script without ACE fallback dependency. |
 | Diagnostics export | DEVICE SMOKE PASS | `EditorView.copyAceDiagnosticsToClipboard()` exported ACE diagnostics from a real `EditActivity` without including the loaded script's unique identifier, string literal, or function name. |
 | Publishing cleanup audit | STATIC PASS | See `docs/dev/ace-release-publishing-cleanup.md`; final package/label restore is still pending before merge or non-test release. |
@@ -382,7 +382,13 @@ Record copied ACE diagnostics for every failure or ambiguous result.
 - Time: 2026-06-16 09:53 CST.
 - Command:
   `.\gradlew.bat :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.ui.edit.editor.ace.AceCodeEditorSmokeTest"`
-- Result: PASS on Sony XQ-AT72; 9 tests completed, 0 skipped, 0 failed.
+- Result: PASS on Sony XQ-AT72; 11 tests completed, 0 skipped, 0 failed.
+- New UX smoke coverage verifies ACE display preferences at startup and runtime:
+  word wrap on/off, line-number visibility on/off, and fixed-width gutter
+  activation.
+- New ACE large-file smoke opens a script above
+  `EditorTextLoadPolicy.LARGE_FILE_THRESHOLD_BYTES` with ACE selected and
+  verifies the editor stays on ACE with `largeFilePolicy=auto`.
 - The new smoke opened a real `EditActivity` with ACE selected and loaded a
   temporary JavaScript file containing a unique identifier, string literal, and
   function name.
@@ -406,7 +412,9 @@ Record copied ACE diagnostics for every failure or ambiguous result.
   bridge-event-storm blocker. Gate 9 also found no P0 Native editor edit/save,
   search/replace, breakpoint, run, auto-completion, or large-file regression.
   Diagnostics export smoke found no script-text leak in the user-facing ACE
-  diagnostics clipboard path.
+  diagnostics clipboard path. UX display preference and ACE large-file smoke
+  found no default-engine, gutter, line-number, word-wrap, or large-file routing
+  blocker.
 
 ### P1
 

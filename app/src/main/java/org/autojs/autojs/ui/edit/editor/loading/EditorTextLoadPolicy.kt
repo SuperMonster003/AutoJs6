@@ -19,7 +19,7 @@ object EditorTextLoadPolicy {
         largeText: Boolean,
         forceNativeRoute: Boolean,
     ): Boolean {
-        return engineType == EditorEngineType.ACE && (largeText || forceNativeRoute)
+        return engineType == EditorEngineType.ACE && forceNativeRoute
     }
 
     fun largeFilePolicyLabel(

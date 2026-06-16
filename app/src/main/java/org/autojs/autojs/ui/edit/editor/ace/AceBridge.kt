@@ -53,6 +53,16 @@ class AceBridge(
     }
 
     @JavascriptInterface
+    fun isWordWrapEnabled(): Boolean {
+        return editor.bridgeWordWrapEnabled()
+    }
+
+    @JavascriptInterface
+    fun isLineNumbersEnabled(): Boolean {
+        return editor.bridgeLineNumbersEnabled()
+    }
+
+    @JavascriptInterface
     fun getLspOptions(): String {
         return editor.bridgeLspOptions()
     }

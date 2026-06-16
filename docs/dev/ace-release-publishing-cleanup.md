@@ -59,15 +59,15 @@ Handling:
 
 Confirmed:
 
-- Native is still the static default editor:
-  `default_key_editor_engine` points to `key_editor_engine_native`.
-- ACE remains an explicit opt-in editor entry.
+- ACE is now the static default editor:
+  `default_key_editor_engine` points to `key_editor_engine_ace`.
+- Native remains an explicit editor entry and the runtime fallback target.
 - LSP remains default-off:
   `AceEditorLspPreferences.isEnabled()` uses `Pref.getBoolean(..., false)`.
 - VisualEditorAce has no public enum, settings entry, or editor menu item.
 
 Device note:
 
-- The Sony XQ-AT72 test install currently has `key_$_editor_engine=ace` because
-  ACE is explicitly enabled for the device gate. This does not change the
-  static default for a fresh install.
+- The Sony XQ-AT72 test install may still carry an explicit
+  `key_$_editor_engine=ace` preference from earlier gates. A fresh install now
+  reaches ACE from the static default as long as ACE assets are present.

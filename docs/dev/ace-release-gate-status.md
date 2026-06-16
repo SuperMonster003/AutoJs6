@@ -25,8 +25,9 @@ docs/dev/ace-release-publishing-cleanup.md
 
 ## Automated Gate
 
-- Native remains the default editor in resources, preferences, enum fallback,
-  and `EditorEngineFactory`.
+- ACE is the default editor in resources, preferences, enum fallback, and
+  `EditorEngineFactory`; Native remains selectable and is still the fallback
+  target.
 - ACE remains on the clean-host viewport path through
   `AceEditorViewportPolicy`; no `key_ace_clean_host_layout` flag is exposed.
 - Native-only boundary checks, ACE surface smoke checks, API model checks,
@@ -53,7 +54,7 @@ Sony XQ-AT72.
   composition, completion accept, and IME show/hide.
 - Keyboard and viewport matrix: file-manager open first paint, top/middle/bottom
   tap anchors, lower-screen cursor anchors, rotation, completion popup accept,
-  and large-file Native routing.
+  ACE large-file direct loading, and Native large-file regression coverage.
 - Continuous user-driven keyboard show/hide cycles must keep ACE active and
   avoid fallback.
 - Fallback debug hooks must preserve recent small-file text through TextMirror.
@@ -63,8 +64,8 @@ Sony XQ-AT72.
 ## Feature Freeze
 
 Do not expand the ACE feature surface during this gate. Server-backed LSP,
-public VisualEditorAce exposure, making ACE default, broad completion rewrites,
-new tooltip dependencies, and new editor-engine abstractions stay deferred
+public VisualEditorAce exposure, broad completion rewrites, new tooltip
+dependencies, and new editor-engine abstractions stay deferred
 unless a P0/P1 release-gate failure requires a targeted fix.
 
 ## Merge Note

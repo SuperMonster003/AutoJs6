@@ -1,0 +1,127 @@
+# ACE Editor UX Roadmap
+
+This roadmap tracks the post-release-gate ACE editor UX feedback without
+replacing `Roadmap.md`.
+
+## Current Principles
+
+- Keep Native and ACE editor behavior isolated.
+- Keep user-facing strings bilingual for English and Simplified Chinese.
+- Keep ACE as the preferred editor while LSP remains disabled by default.
+- Prefer instrumentation or static gates for every small UX fix; record manual
+  device-only items explicitly.
+
+## Gate UX-0: Settings, Localization, And Routing
+
+- [x] Add Simplified Chinese translations for ACE/editor strings added during
+  the ACE work.
+- [x] Move `Editor engine` to the first item in the Code editor settings group.
+- [x] Make ACE the default editor engine while preserving Native fallback.
+- [x] Hide ACE-only settings when Native is selected.
+- [x] Add ACE word wrap setting.
+- [x] Add ACE line-number visibility setting.
+- [x] Stop routing ordinary ACE large-file opens through the Native large-file
+  pipeline.
+
+Acceptance:
+
+- [x] English and Simplified Chinese resources both contain every new or
+  changed editor string.
+- [x] Settings and editor menu agree on the selected engine.
+- [x] LSP stays default-off.
+- [x] Large files opened with ACE remain ACE unless an ACE failure or explicit
+  debug hook requests Native fallback.
+
+## Gate UX-1: Immediate ACE Surface Fixes
+
+- [x] Increase dark-theme selection contrast.
+- [x] Stabilize gutter width to avoid shifts around 99/100 and 999/1000.
+- [x] Allow clicking folded-code placeholders to unfold.
+- [ ] Preserve expected automatic cursor reveal on IME/panel changes, but avoid
+  unsolicited pull-back while browsing selected code.
+
+Acceptance:
+
+- [x] Selection is visible in dark theme.
+- [x] Gutter width does not shrink during the editing session and grows only
+  when higher line-number digits become visible.
+- [x] Fold placeholders unfold without requiring the gutter triangle.
+- [ ] Scrolling selected text offscreen does not pull the editor back unless an
+  explicit viewport event such as IME or panel resize requires it.
+
+## Gate UX-2: Mobile Selection And Gesture Bugs
+
+- [ ] Diagnose short-menu/long-menu transitions on double-tap and long-press.
+- [ ] Keep the floating action mode near the selection instead of jumping to the
+  upper-left editor area.
+- [ ] Prevent transient short-menu flashes while dragging selection handles.
+- [ ] Prevent stale upper-left menus after scroll, app switch, or return.
+- [ ] Investigate Sony XQ-AT72 right-edge back gesture touch propagation into
+  ACE long-press selection.
+- [ ] Add device notes for behavior that also reproduces in Auto.js Pro.
+
+Acceptance:
+
+- [ ] Double-tap, long-press, and selection-drag menus stay anchored and stable.
+- [ ] Right-edge system-back gestures close IME or editor without triggering
+  ACE long-press selection/haptic feedback on Sony XQ-AT72 when technically
+  preventable from the app side.
+
+## Gate UX-3: Input, Keyboard, And Read-Only Mode
+
+- [ ] Support IME spacebar cursor movement in ACE.
+- [ ] Add ACE read-only mode, default off for every new editor session.
+- [ ] Strictly block text mutation paths while read-only is enabled.
+- [ ] Improve read-only scrolling performance where possible.
+
+Acceptance:
+
+- [ ] Gboard spacebar cursor movement updates the ACE caret without text loss.
+- [ ] Read-only mode blocks typing, paste, delete, replacement, formatting, and
+  script-mutating editor actions.
+- [ ] Read-only state is not persisted after leaving the editor.
+
+## Gate UX-4: Completion And Signature Help
+
+- [ ] Add ECMAScript built-in function parameter/signature help.
+- [ ] Prioritize common built-ins such as `Function.prototype.apply`.
+- [ ] Keep static completion working when LSP is disabled or unavailable.
+
+Acceptance:
+
+- [ ] Built-in signature help appears without requiring LSP.
+- [ ] Tooltip/signature failures do not fallback the whole editor.
+
+## Gate UX-5: ACE Shortcut Panel And Action Favorites
+
+- [ ] Build an ACE-specific two-row function keyboard layout.
+- [ ] Use text drawables or equivalent for `ESC` and `TAB`.
+- [ ] Reuse the unused right-side area after ACE completion replaces the old
+  candidate strip.
+- [ ] Replace the Pro-style lower-left figure icon with a star action-favorites
+  entry.
+- [ ] Track action history by recency and frequency.
+- [ ] Support pinned actions, manual reorder, left-swipe delete, right-swipe pin
+  or unpin, and clear confirmation.
+- [ ] Long-press the star to repeat the last command, independent of favorites
+  list state.
+
+Acceptance:
+
+- [ ] ACE shortcut panel is visually coherent in light and dark themes.
+- [ ] Favorites ordering rules are deterministic.
+- [ ] Repeating the last command handles the no-last-command case with a toast.
+
+## Gate UX-6: Pinch Zoom
+
+- [ ] Implement the existing View zoom strategy or replace it with a better
+  continuous zoom model.
+- [ ] Keep the zoom center near the user's fingers.
+- [ ] Avoid moving the visible code unexpectedly during pinch gestures.
+
+Acceptance:
+
+- [ ] Pinch zoom is continuous.
+- [ ] The content near the gesture center remains visible after zoom.
+- [ ] Native and ACE behavior are documented separately if implementation
+  differs.

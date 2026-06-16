@@ -215,6 +215,15 @@ body.ace-theme-dark .autojs6_hover_tooltip_caption {
     color: #8bd7d2;
 }
 
+body.ace-theme-dark .ace_marker-layer .ace_selection {
+    background: rgba(88, 166, 255, 0.42);
+}
+
+body.ace-theme-dark .ace_marker-layer .ace_selected-word {
+    background: rgba(88, 166, 255, 0.24);
+    border-color: rgba(125, 190, 255, 0.72);
+}
+
 body.ace-theme-dark .autojs6_hover_tooltip_content code {
     background: rgba(226, 232, 240, 0.12);
 }

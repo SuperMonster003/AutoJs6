@@ -6,7 +6,7 @@ enum class EditorEngineType(val preferenceValue: String) {
 
     companion object {
         fun fromPreferenceValue(value: String?): EditorEngineType {
-            return entries.firstOrNull { it.preferenceValue == value } ?: NATIVE
+            return entries.firstOrNull { it.preferenceValue == value } ?: ACE
         }
     }
 }

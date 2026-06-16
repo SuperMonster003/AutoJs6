@@ -17,6 +17,7 @@ const FILES = {
   keyboardViewportPlan: "docs/dev/ace-keyboard-viewport-test-plan.md",
   visualInvestigation: "docs/dev/visual-editor-ace-investigation.md",
   strings: "app/src/main/res/values/strings.xml",
+  stringsZh: "app/src/main/res/values-zh/strings.xml",
   arrays: "app/src/main/res/values/arrays.xml",
   fragmentPreferences: "app/src/main/res/xml/fragment_preferences.xml",
   editorEngineType: "app/src/main/java/org/autojs/autojs/ui/edit/editor/engine/EditorEngineType.kt",
@@ -143,7 +144,7 @@ assertIncludes(FILES.sonyReport, "Release candidate accepted");
 assertIncludes(FILES.publishingCleanup, "# ACE Release Publishing Cleanup");
 assertIncludes(FILES.publishingCleanup, "defaultConfig.applicationId");
 assertIncludes(FILES.publishingCleanup, "VERSION_BUILD");
-assertIncludes(FILES.publishingCleanup, "Native is still the static default editor");
+assertIncludes(FILES.publishingCleanup, "ACE is now the static default editor");
 assertIncludes(FILES.publishingCleanup, "LSP remains default-off");
 assertIncludes(FILES.publishingCleanup, "VisualEditorAce has no public enum");
 assertIncludes(FILES.integrationDoc, "Run `node tools/ace-ci/check-ace-release-gate.mjs`.");
@@ -152,36 +153,53 @@ assertIncludes(FILES.keyboardViewportPlan, "Sony XQ-AT72");
 
 assertIncludes(
   FILES.strings,
-  '<string name="default_key_editor_engine" translatable="false">@string/key_editor_engine_native</string>',
-  "Native editor resource default",
+  '<string name="default_key_editor_engine" translatable="false">@string/key_editor_engine_ace</string>',
+  "ACE editor resource default",
 );
 assertIncludes(FILES.strings, '<string name="key_editor_engine_native" translatable="false">native</string>');
 assertIncludes(FILES.strings, '<string name="key_editor_engine_ace" translatable="false">ace</string>');
+assertIncludes(FILES.stringsZh, 'name="text_editor_engine"', "Simplified Chinese editor engine string");
+assertIncludes(FILES.stringsZh, 'name="text_ace_word_wrap_enabled"', "Simplified Chinese ACE word wrap string");
+assertIncludes(FILES.stringsZh, 'name="text_ace_line_numbers_enabled"', "Simplified Chinese ACE line number string");
 assertOrder(
   FILES.arrays,
   [
     '<string-array name="keys_editor_engine">',
-    '<item>@string/key_editor_engine_native</item>',
     '<item>@string/key_editor_engine_ace</item>',
+    '<item>@string/key_editor_engine_native</item>',
   ],
   "editor engine key order",
 );
 assertIncludes(FILES.fragmentPreferences, 'app:itemDefaultKey="@string/default_key_editor_engine"');
+assertOrder(
+  FILES.fragmentPreferences,
+  [
+    'app:title="@string/text_code_editor"',
+    'app:key="@string/key_editor_engine"',
+    'app:key="@string/key_editor_auto_show_log_bottom_sheet_on_run"',
+    'app:key="@string/key_editor_log_button_behavior"',
+    'app:key="@string/key_ace_editor_font"',
+    'app:key="@string/key_ace_word_wrap_enabled"',
+    'app:key="@string/key_ace_line_numbers_enabled"',
+    'app:key="@string/key_ace_lsp_enabled"',
+  ],
+  "code editor preference order",
+);
 assertMatch(
   FILES.editorEngineType,
   /enum class EditorEngineType\(val preferenceValue: String\) \{\s*NATIVE\("native"\),\s*ACE\("ace"\);/s,
   "only Native and ordinary ACE engine types",
 );
-assertIncludes(FILES.editorEngineType, "?: NATIVE", "invalid preference fallback to Native");
+assertIncludes(FILES.editorEngineType, "?: ACE", "invalid preference fallback to ACE");
 assertIncludes(
   FILES.editorEnginePreferences,
-  "Pref.getString(KEY_EDITOR_ENGINE, EditorEngineType.NATIVE.preferenceValue)",
-  "stored editor preference default to Native",
+  "Pref.getString(KEY_EDITOR_ENGINE, EditorEngineType.ACE.preferenceValue)",
+  "stored editor preference default to ACE",
 );
 assertIncludes(
   FILES.editorEngineFactory,
-  "fun create(context: Context, preferredType: EditorEngineType = EditorEngineType.NATIVE)",
-  "factory default to Native",
+  "fun create(context: Context, preferredType: EditorEngineType = EditorEngineType.ACE)",
+  "factory default to ACE",
 );
 
 assertIncludes(FILES.policyFactory, "EditorEngineType.NATIVE -> NativeEditorViewportPolicy(editor, hostView)");

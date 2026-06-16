@@ -799,7 +799,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             }
         }
 
-        if (shouldStreamAsLargeFile) {
+        if (shouldStreamAsLargeFile && editor.engineType == EditorEngineType.NATIVE) {
             // Large file: show loading in enhance bar, allow viewing/scrolling (read-only).
             // zh-CN: 大文件: 在增强栏显示加载提示, 允许查看/滚动 (只读).
             beginEditorLoadingUi(context.getString(R.string.text_loading_with_dots))
@@ -1149,7 +1149,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             }
         }
 
-        if (shouldLoadProgressively) {
+        if (shouldLoadProgressively && editor.engineType == EditorEngineType.NATIVE) {
             mLargeFileMode = true
             setInitialTextProgressively(text)
             return
@@ -1416,7 +1416,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         if (editor.engineType == targetType || mSwitchingEditorEngine) {
             return
         }
-        if (targetType == EditorEngineType.ACE && (mLargeFileMode || AceEditorTestHooks.shouldForceLargeFileNativeRoute())) {
+        if (targetType == EditorEngineType.ACE && AceEditorTestHooks.shouldForceLargeFileNativeRoute()) {
             showAceLargeFileNativeToastOnce()
             return
         }
@@ -1515,7 +1515,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         }
 
         mEditorLoading = oldEditorLoading
-        mLargeFileMode = oldLargeFileMode
+        mLargeFileMode = oldLargeFileMode && editor.engineType == EditorEngineType.NATIVE
         saveStickyDirty = oldSaveStickyDirty || snapshot.dirty
         mHadDirectEditSinceSave = oldHadDirectEditSinceSave || snapshot.dirty
 
