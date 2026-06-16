@@ -164,6 +164,7 @@ The following remain disabled in normal v1 builds:
 - Known issues: [NODE_PROFILE_V1_KNOWN_ISSUES.md](NODE_PROFILE_V1_KNOWN_ISSUES.md)
 - Testing: [../TESTING.md](../TESTING.md)
 - Release checklist: [../RELEASE_CHECKLIST.md](../RELEASE_CHECKLIST.md)
+- Release identity: [NODE_PROFILE_V1_RELEASE_IDENTITY.md](NODE_PROFILE_V1_RELEASE_IDENTITY.md)
 - Maintenance plan: [../MAINTENANCE_PLAN.md](../MAINTENANCE_PLAN.md)
 - Native crash diagnostics: [../NATIVE_CRASH_DIAGNOSTICS.md](../NATIVE_CRASH_DIAGNOSTICS.md)
 - Flake policy: [../FLAKE_POLICY.md](../FLAKE_POLICY.md)
@@ -175,6 +176,7 @@ Current Phase 4 Sony XQ-AT72 status:
 - selected primary device: Sony XQ-AT72 `QV710AF65F`
 - selected device profile: `sony`
 - current branch package identity: `org.autojs.autojs6.nodejs`
+- release identity decision: pending maintainer sign-off; see [NODE_PROFILE_V1_RELEASE_IDENTITY.md](NODE_PROFILE_V1_RELEASE_IDENTITY.md)
 - Task 128 GA candidate gate: passed on 2026-06-16
 - command: `:app:verifyNodeReleaseGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.fuzzerBudget=normal"`
 - duration: `2h 5m 30s`

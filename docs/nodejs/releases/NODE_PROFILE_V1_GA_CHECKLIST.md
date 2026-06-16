@@ -11,6 +11,7 @@ Current GA candidate device: Sony XQ-AT72 `QV710AF65F`
 ## Tag Preconditions
 
 - [ ] Worktree is clean: `git status --short --branch` prints only the branch line.
+- [ ] [NODE_PROFILE_V1_RELEASE_IDENTITY.md](NODE_PROFILE_V1_RELEASE_IDENTITY.md) records the approved identity decision.
 - [ ] Final public package identity is approved.
 - [ ] Temporary current-branch test identity `org.autojs.autojs6.nodejs` is either intentionally retained for a test tag or restored before a public AutoJs6 release.
 - [ ] Final `VERSION_BUILD` and `BUILD_TIME` churn in `version.properties` is reviewed and intentional.
@@ -56,6 +57,10 @@ Task 129 generated the current artifact set on 2026-06-16 from commit `7e047953`
 - fuzzer seed directory: `build/reports/nodejs/fuzz-seeds/`
 
 The release manifest generated during this prep run records version code `3924` because `assembleAppDebug` auto-incremented the local build. The tracked `version.properties` file was restored afterward; regenerate the manifest from the approved final version state before publication.
+
+Task 131 adds explicit release identity fields to the manifest. Final generation must pass
+`-Pautojs.nodejs.releaseTag=<approved-tag>` and `-Pautojs.nodejs.releaseIdentityStatus=<approved-status>` so `release.tag`
+and `release.identityStatus` do not remain ambiguous.
 
 ## Device Gate Evidence
 
