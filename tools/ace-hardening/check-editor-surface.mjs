@@ -35,6 +35,34 @@ const ACE_CODE_EDITOR_PATH = path.join(
   "ace",
   "AceCodeEditor.kt",
 );
+const ACE_SCRIPT_EDITOR_ENGINE_PATH = path.join(
+  PROJECT_ROOT,
+  "app",
+  "src",
+  "main",
+  "java",
+  "org",
+  "autojs",
+  "autojs",
+  "ui",
+  "edit",
+  "editor",
+  "engine",
+  "AceScriptEditorEngine.kt",
+);
+const EDITOR_MENU_PATH = path.join(
+  PROJECT_ROOT,
+  "app",
+  "src",
+  "main",
+  "java",
+  "org",
+  "autojs",
+  "autojs",
+  "ui",
+  "edit",
+  "EditorMenu.java",
+);
 const EDITOR_VIEW_PATH = path.join(
   PROJECT_ROOT,
   "app",
@@ -130,6 +158,8 @@ const lspClient = read(LSP_CLIENT_PATH);
 const tooltip = read(TOOLTIP_PATH);
 const signatureHelp = read(SIGNATURE_HELP_PATH);
 const aceCodeEditor = read(ACE_CODE_EDITOR_PATH);
+const aceScriptEditorEngine = read(ACE_SCRIPT_EDITOR_ENGINE_PATH);
+const editorMenu = read(EDITOR_MENU_PATH);
 const editorView = read(EDITOR_VIEW_PATH);
 const aceShortcutPanel = read(ACE_SHORTCUT_PANEL_PATH);
 const aceActionHistoryStore = read(ACE_ACTION_HISTORY_STORE_PATH);
@@ -198,6 +228,8 @@ assertIncludes(bridge, "function expandFoldAt(row, column)", "fold placeholder e
 assertIncludes(bridge, 'editor.on("click", function(event)', "fold placeholder click handler");
 assertIncludes(bridge, "setWordWrapEnabled: setWordWrapEnabled", "ACE word wrap runtime API");
 assertIncludes(bridge, "setLineNumbersEnabled: setLineNumbersEnabled", "ACE line number runtime API");
+assertIncludes(bridge, "function setFontSizeSpKeepingFocus", "ACE focus-preserving zoom helper");
+assertIncludes(bridge, "setFontSizeSpKeepingFocus: setFontSizeSpKeepingFocus", "ACE focus-preserving zoom public API");
 assertIncludes(bridge, "function insertTab()", "ACE shortcut TAB helper");
 assertIncludes(bridge, "function handleEscapeKey()", "ACE shortcut ESC helper");
 assertIncludes(bridge, "insertTab: insertTab", "ACE shortcut TAB public API");
@@ -256,8 +288,18 @@ assertIncludes(aceCodeEditor, '"count=$bridgeEventWindowCount,windowMillis=$BRID
 assertIncludes(aceCodeEditor, "private val lspServerManager = AceLspServerManager()", "ACE LSP manager");
 assertIncludes(aceCodeEditor, "lspServerManager.bridgeOptionsJson()", "ACE LSP bridge options");
 assertIncludes(aceCodeEditor, 'eventHistory.record("lsp_manager"', "ACE LSP manager event history");
+assertIncludes(aceCodeEditor, "ScaleGestureDetector", "ACE pinch zoom detector");
+assertIncludes(aceCodeEditor, "PinchZoomStrategy", "ACE pinch zoom strategy model");
+assertIncludes(aceCodeEditor, "handlePinchToZoomTouch", "ACE pinch zoom touch handler");
+assertIncludes(aceCodeEditor, "scaleViewBy", "ACE scale-view zoom handler");
+assertIncludes(aceCodeEditor, "setFontSizeSpKeepingFocus", "ACE focus-preserving zoom native call");
 assertIncludes(aceCodeEditor, "fun insertTab()", "native ACE shortcut TAB bridge call");
 assertIncludes(aceCodeEditor, "fun handleEscapeKey()", "native ACE shortcut ESC bridge call");
+
+assertIncludes(aceScriptEditorEngine, "notifyPinchToZoomStrategyChanged", "ACE pinch zoom strategy forwarding");
+assertIncludes(aceScriptEditorEngine, "onTextSizeSpChangedByGesture", "ACE pinch text-size state callback");
+assertIncludes(editorMenu, "currentEditor().getEngineType() == EditorEngineType.ACE", "ACE-only scale-view menu enablement");
+assertIncludes(editorMenu, "makeEditorPinchToZoomScaleViewUnderDev", "Native scale-view menu remains disabled");
 
 assertIncludes(editorView, "AceShortcutPanel.firstRowCompletions", "ACE shortcut first row binding");
 assertIncludes(editorView, "AceShortcutPanel.secondRowCompletions", "ACE shortcut second row binding");

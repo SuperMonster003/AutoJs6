@@ -3,6 +3,7 @@ package org.autojs.autojs.ui.edit.editor.engine
 import android.content.Context
 import android.graphics.Color
 import android.view.View
+import org.autojs.autojs.core.pref.Pref.setEditorTextSize
 import org.autojs.autojs.model.autocomplete.AutoCompletion
 import org.autojs.autojs.ui.edit.editor.ace.AceCodeEditor
 import org.autojs.autojs.ui.edit.editor.ace.AceEditorFont
@@ -13,6 +14,7 @@ import org.autojs.autojs.ui.edit.theme.Theme
 import org.autojs.autojs.util.ClipboardUtils
 import java.util.regex.Pattern
 import java.util.regex.PatternSyntaxException
+import kotlin.math.roundToInt
 
 class AceScriptEditorEngine(
     private val context: Context,
@@ -115,6 +117,12 @@ class AceScriptEditorEngine(
 
     init {
         aceCodeEditor.listener = createAceListener()
+        aceCodeEditor.onTextSizeSpChangedByGesture = { size, persist ->
+            fontSizeSp = size.coerceIn(8f, 40f)
+            if (persist) {
+                setEditorTextSize(fontSizeSp.roundToInt())
+            }
+        }
         aceCodeEditor.setTextSizeSp(fontSizeSp)
         aceCodeEditor.setFontFamily(editorFont.cssFontFamily)
     }
@@ -371,7 +379,7 @@ class AceScriptEditorEngine(
     override fun getTextSizeSp(): Float = fontSizeSp
 
     override fun notifyPinchToZoomStrategyChanged(newKey: String?) {
-        /* ACE pinch-to-zoom is handled by WebView for now. */
+        aceCodeEditor.notifyPinchToZoomStrategyChanged(newKey)
     }
 
     override fun addCursorChangeCallback(listener: EditorCursorChangeListener) {

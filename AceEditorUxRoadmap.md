@@ -114,14 +114,20 @@ Acceptance:
 
 ## Gate UX-6: Pinch Zoom
 
-- [ ] Implement the existing View zoom strategy or replace it with a better
+- [x] Implement the existing View zoom strategy or replace it with a better
   continuous zoom model.
-- [ ] Keep the zoom center near the user's fingers.
-- [ ] Avoid moving the visible code unexpectedly during pinch gestures.
+- [x] Keep the zoom center near the user's fingers.
+- [x] Avoid moving the visible code unexpectedly during pinch gestures.
 
 Acceptance:
 
-- [ ] Pinch zoom is continuous.
-- [ ] The content near the gesture center remains visible after zoom.
-- [ ] Native and ACE behavior are documented separately if implementation
+- [x] Pinch zoom is continuous.
+- [x] The content near the gesture center remains visible after zoom.
+- [x] Native and ACE behavior are documented separately if implementation
   differs.
+
+Notes:
+
+- ACE `Scale view` is enabled in the pinch-to-zoom menu and uses session-local
+  focus-preserving visual zoom. Native `Scale view` remains disabled as under
+  development.

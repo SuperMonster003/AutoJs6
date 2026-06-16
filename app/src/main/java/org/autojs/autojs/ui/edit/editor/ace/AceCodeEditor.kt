@@ -18,6 +18,8 @@ import android.view.HapticFeedbackConstants
 import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
+import android.view.ScaleGestureDetector
+import android.view.ScaleGestureDetector.SimpleOnScaleGestureListener
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.ConsoleMessage
@@ -32,6 +34,7 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.FrameLayout
+import org.autojs.autojs.core.pref.Pref.getString
 import org.autojs.autojs.ui.edit.editor.ace.diagnostics.AceDiagnostics
 import org.autojs.autojs.ui.edit.editor.ace.diagnostics.AceDiagnosticsSnapshot
 import org.autojs.autojs.ui.edit.editor.ace.diagnostics.AceRuntimeEventHistory
@@ -42,12 +45,16 @@ import org.autojs.autojs.ui.edit.editor.ace.health.AceJsErrorClassifier
 import org.autojs.autojs.ui.edit.editor.ace.health.AceRuntimeHealthMonitor
 import org.autojs.autojs.ui.edit.editor.ace.lsp.AceLspServerManager
 import org.autojs.autojs.util.ClipboardUtils
+import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.ByteArrayInputStream
 import java.util.ArrayDeque
+import kotlin.math.abs
+import kotlin.math.floor
+import kotlin.math.roundToInt
 
 @SuppressLint("SetJavaScriptEnabled")
 class AceCodeEditor @JvmOverloads constructor(
@@ -84,6 +91,7 @@ class AceCodeEditor @JvmOverloads constructor(
 
     var listener: Listener? = null
     var onUserTouchInTextArea: (() -> Unit)? = null
+    var onTextSizeSpChangedByGesture: ((Float, Boolean) -> Unit)? = null
 
     var isReady = false
         private set
@@ -154,6 +162,13 @@ class AceCodeEditor @JvmOverloads constructor(
     private var maxBridgeEventWindowCount = 0
     private var maxBridgeEventWindowStartedAtUptimeMillis = 0L
     private var lastBridgeEventName: String? = null
+    private var baseTextSizeSp = DEFAULT_TEXT_SIZE_SP
+    private var viewZoomScale = 1f
+    private var pinchGestureActive = false
+    private var pinchZoomStrategy = PinchZoomStrategy.CHANGE_TEXT_SIZE
+    private var lastTextSizeScaleFactor = 1.0
+    private val changeTextSizeScaleGestureDetector = ScaleGestureDetector(context, ChangeTextSizeScaleListener())
+    private val scaleViewScaleGestureDetector = ScaleGestureDetector(context, ScaleViewScaleListener())
 
     val healthState: AceHealthState
         get() = healthMonitor.state
@@ -236,6 +251,7 @@ class AceCodeEditor @JvmOverloads constructor(
         setBackgroundColor(editorBackgroundColor())
         addView(webView, LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
         addView(loadingOverlay, LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
+        applyPinchToZoomStrategy(null)
         configureWebView()
     }
 
@@ -445,11 +461,83 @@ class AceCodeEditor @JvmOverloads constructor(
     }
 
     fun setTextSizeSp(size: Float) {
-        invokeAce("setFontSizeSp", size.coerceIn(8f, 40f).toString())
+        baseTextSizeSp = size.coerceIn(MIN_TEXT_SIZE_SP, MAX_TEXT_SIZE_SP)
+        viewZoomScale = 1f
+        applyEffectiveTextSizeSp(baseTextSizeSp, focusX = null, focusY = null)
+    }
+
+    fun notifyPinchToZoomStrategyChanged(newKey: String?) {
+        applyPinchToZoomStrategy(newKey)
     }
 
     fun setFontFamily(fontFamily: String) {
         invokeAce("setFontFamily", quote(fontFamily))
+    }
+
+    private fun applyPinchToZoomStrategy(newKey: String?) {
+        pinchZoomStrategy = PinchZoomStrategy.fromKey(newKey ?: currentPinchToZoomStrategyKey())
+        pinchGestureActive = false
+        lastTextSizeScaleFactor = 1.0
+        if (pinchZoomStrategy != PinchZoomStrategy.SCALE_VIEW && viewZoomScale != 1f) {
+            viewZoomScale = 1f
+            applyEffectiveTextSizeSp(baseTextSizeSp, focusX = null, focusY = null)
+        }
+    }
+
+    private fun currentPinchToZoomStrategyKey(): String {
+        return getString(R.string.key_editor_pinch_to_zoom_strategy, R.string.default_key_editor_pinch_to_zoom_strategy)
+    }
+
+    private fun handlePinchToZoomTouch(event: MotionEvent): Boolean {
+        val detector = when (pinchZoomStrategy) {
+            PinchZoomStrategy.CHANGE_TEXT_SIZE -> changeTextSizeScaleGestureDetector
+            PinchZoomStrategy.SCALE_VIEW -> scaleViewScaleGestureDetector
+            PinchZoomStrategy.DISABLED -> null
+        } ?: return false
+
+        detector.onTouchEvent(event)
+        if (event.actionMasked == MotionEvent.ACTION_UP || event.actionMasked == MotionEvent.ACTION_CANCEL) {
+            pinchGestureActive = false
+        }
+        return pinchGestureActive || detector.isInProgress || event.pointerCount > 1
+    }
+
+    private fun changeBaseTextSizeBy(delta: Int, focusX: Float, focusY: Float) {
+        val next = (baseTextSizeSp.roundToInt() + delta)
+            .coerceIn(MIN_TEXT_SIZE_SP.roundToInt(), MAX_TEXT_SIZE_SP.roundToInt())
+            .toFloat()
+        if (next == baseTextSizeSp) {
+            return
+        }
+        baseTextSizeSp = next
+        viewZoomScale = 1f
+        applyEffectiveTextSizeSp(next, focusX, focusY)
+        onTextSizeSpChangedByGesture?.invoke(next, false)
+    }
+
+    private fun scaleViewBy(scaleFactor: Float, focusX: Float, focusY: Float) {
+        if (scaleFactor <= 0f || baseTextSizeSp <= 0f) {
+            return
+        }
+        val currentSize = (baseTextSizeSp * viewZoomScale).coerceIn(MIN_TEXT_SIZE_SP, MAX_TEXT_SIZE_SP)
+        val nextSize = (currentSize * scaleFactor).coerceIn(MIN_TEXT_SIZE_SP, MAX_TEXT_SIZE_SP)
+        if (abs(nextSize - currentSize) < MIN_SCALE_VIEW_TEXT_SIZE_DELTA_SP) {
+            return
+        }
+        viewZoomScale = (nextSize / baseTextSizeSp).coerceIn(MIN_VIEW_ZOOM_SCALE, MAX_VIEW_ZOOM_SCALE)
+        applyEffectiveTextSizeSp(nextSize, focusX, focusY)
+    }
+
+    private fun applyEffectiveTextSizeSp(size: Float, focusX: Float?, focusY: Float?) {
+        val safeSize = size.coerceIn(MIN_TEXT_SIZE_SP, MAX_TEXT_SIZE_SP)
+        if (focusX == null || focusY == null) {
+            invokeAce("setFontSizeSp", safeSize.toString())
+            return
+        }
+        val cssScale = resources.displayMetrics.density.takeIf { it > 0f } ?: 1f
+        val focusCssX = focusX / cssScale
+        val focusCssY = focusY / cssScale
+        invokeAce("setFontSizeSpKeepingFocus", "$safeSize, $focusCssX, $focusCssY")
     }
 
     fun toggleBreakpoint(line: Int) {
@@ -1069,7 +1157,7 @@ class AceCodeEditor @JvmOverloads constructor(
                 MotionEvent.ACTION_POINTER_UP,
                     -> userTouching = false
             }
-            false
+            handlePinchToZoomTouch(event)
         }
 
         webView.settings.apply {
@@ -1459,6 +1547,68 @@ class AceCodeEditor @JvmOverloads constructor(
         }
     }
 
+    private inner class ChangeTextSizeScaleListener : SimpleOnScaleGestureListener() {
+
+        override fun onScaleBegin(detector: ScaleGestureDetector): Boolean {
+            pinchGestureActive = true
+            lastTextSizeScaleFactor = 1.0
+            return true
+        }
+
+        override fun onScale(detector: ScaleGestureDetector): Boolean {
+            val currentFactor = floor((detector.scaleFactor * 10).toDouble()) / 10
+            if (currentFactor > 0 && currentFactor != lastTextSizeScaleFactor) {
+                changeBaseTextSizeBy(
+                    delta = if (currentFactor > lastTextSizeScaleFactor) 1 else -1,
+                    focusX = detector.focusX,
+                    focusY = detector.focusY,
+                )
+                lastTextSizeScaleFactor = currentFactor
+            }
+            return true
+        }
+
+        override fun onScaleEnd(detector: ScaleGestureDetector) {
+            pinchGestureActive = false
+            lastTextSizeScaleFactor = 1.0
+            onTextSizeSpChangedByGesture?.invoke(baseTextSizeSp, true)
+            super.onScaleEnd(detector)
+        }
+    }
+
+    private inner class ScaleViewScaleListener : SimpleOnScaleGestureListener() {
+
+        override fun onScaleBegin(detector: ScaleGestureDetector): Boolean {
+            pinchGestureActive = true
+            return true
+        }
+
+        override fun onScale(detector: ScaleGestureDetector): Boolean {
+            scaleViewBy(detector.scaleFactor, detector.focusX, detector.focusY)
+            return true
+        }
+
+        override fun onScaleEnd(detector: ScaleGestureDetector) {
+            pinchGestureActive = false
+            super.onScaleEnd(detector)
+        }
+    }
+
+    private enum class PinchZoomStrategy {
+        CHANGE_TEXT_SIZE,
+        SCALE_VIEW,
+        DISABLED,
+        ;
+
+        companion object {
+            fun fromKey(key: String?): PinchZoomStrategy = when (key) {
+                key(R.string.key_editor_pinch_to_zoom_scale_view) -> SCALE_VIEW
+                key(R.string.key_editor_pinch_to_zoom_disable) -> DISABLED
+                else -> CHANGE_TEXT_SIZE
+            }
+        }
+    }
+
     data class AceEditorState(
         val text: String,
         val dirty: Boolean,
@@ -1531,6 +1681,12 @@ class AceCodeEditor @JvmOverloads constructor(
         private const val ACTION_MODE_COPY = 1
         private const val ACTION_MODE_PASTE = 2
         private const val ACTION_MODE_SELECT_ALL = 3
+        private const val DEFAULT_TEXT_SIZE_SP = 14f
+        private const val MIN_TEXT_SIZE_SP = 8f
+        private const val MAX_TEXT_SIZE_SP = 40f
+        private const val MIN_VIEW_ZOOM_SCALE = MIN_TEXT_SIZE_SP / DEFAULT_TEXT_SIZE_SP
+        private const val MAX_VIEW_ZOOM_SCALE = MAX_TEXT_SIZE_SP / DEFAULT_TEXT_SIZE_SP
+        private const val MIN_SCALE_VIEW_TEXT_SIZE_DELTA_SP = 0.05f
 
         fun hasRequiredAssets(context: Context): Boolean {
             return AceEditorAssets.hasRequired(context)

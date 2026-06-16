@@ -865,7 +865,47 @@
     function setFontSizeSp(size) {
         var sp = Math.max(8, Math.min(Number(size) || 14, 40));
         editor.setFontSize(sp + "px");
+        scheduleResize("font_size_changed");
         notifyStateChanged("fontSizeChanged");
+    }
+
+    function scrollByDelta(deltaX, deltaY) {
+        if (!editor || !editor.renderer) {
+            return;
+        }
+        var renderer = editor.renderer;
+        if (renderer.scrollToX) {
+            renderer.scrollToX(Math.max(0, (Number(renderer.scrollLeft) || 0) + (Number(deltaX) || 0)));
+        }
+        var currentTop = session && session.getScrollTop ? session.getScrollTop() : (Number(renderer.scrollTop) || 0);
+        var nextTop = Math.max(0, currentTop + (Number(deltaY) || 0));
+        if (renderer.scrollToY) {
+            renderer.scrollToY(nextTop);
+        } else if (session && session.setScrollTop) {
+            session.setScrollTop(nextTop);
+        }
+    }
+
+    function setFontSizeSpKeepingFocus(size, focusX, focusY) {
+        if (!editor || !editor.renderer || !editor.renderer.screenToTextCoordinates || !editor.renderer.textToScreenCoordinates) {
+            setFontSizeSp(size);
+            return;
+        }
+        var renderer = editor.renderer;
+        var x = Number(focusX);
+        var y = Number(focusY);
+        if (!isFinite(x) || !isFinite(y)) {
+            setFontSizeSp(size);
+            return;
+        }
+        var anchor = renderer.screenToTextCoordinates(x, y);
+        setFontSizeSp(size);
+        if (editor.resize) {
+            editor.resize(true);
+        }
+        var after = renderer.textToScreenCoordinates(anchor.row, anchor.column);
+        scrollByDelta(after.pageX - x, after.pageY - y);
+        notifyStateChanged("fontSizeFocusChanged");
     }
 
     function setFontFamily(fontFamily) {
@@ -1065,6 +1105,7 @@
             setReadOnly: setReadOnlyMode,
             setTheme: setTheme,
             setFontSizeSp: setFontSizeSp,
+            setFontSizeSpKeepingFocus: setFontSizeSpKeepingFocus,
             setFontFamily: setFontFamily,
             setWordWrapEnabled: setWordWrapEnabled,
             setLineNumbersEnabled: setLineNumbersEnabled,

@@ -368,10 +368,12 @@ public class EditorMenu {
 
         DialogUtils.choiceWidgetThemeColor(builder);
 
-        // TODO by SuperMonster003 on Oct 17, 2022.
-        //  ! Implementation for "scale view".
-        //  ! zh-CN: 实现 "scale view".
-        makeEditorPinchToZoomScaleViewUnderDev(builder, itemKeys.indexOf(key(R.string.key_editor_pinch_to_zoom_scale_view)));
+        // Native scale-view zoom is still under development; ACE handles it in WebView.
+        if (currentEditor().getEngineType() == EditorEngineType.ACE) {
+            DialogUtils.buildAndShowAdaptive(builder::build);
+        } else {
+            makeEditorPinchToZoomScaleViewUnderDev(builder, itemKeys.indexOf(key(R.string.key_editor_pinch_to_zoom_scale_view)));
+        }
     }
 
     private void makeEditorPinchToZoomScaleViewUnderDev(MaterialDialog.Builder builder, int i) {
