@@ -698,6 +698,38 @@
         }, false);
     }
 
+    function insertTab() {
+        return runTextMutation("insertTab", function() {
+            if (editor.commands && editor.commands.exec) {
+                editor.commands.exec("indent", editor);
+            } else {
+                editor.insert("\t");
+            }
+            notifyTextChanged();
+            return true;
+        }, false);
+    }
+
+    function handleEscapeKey() {
+        if (!editor) {
+            return false;
+        }
+        try {
+            if (editor.completer && editor.completer.detach) {
+                editor.completer.detach();
+            }
+            if (editor.commands && editor.commands.exec) {
+                editor.commands.exec("esc", editor);
+            }
+            editor.focus();
+            notifyStateChanged("escapeKey");
+            return true;
+        } catch (error) {
+            notifyRecoverableError("escapeKey", error);
+            return false;
+        }
+    }
+
     function insertAtLine(row, text) {
         return runTextMutation("insertAtLine", function() {
             session.insert({ row: clampRow(row), column: 0 }, text || "");
@@ -1007,6 +1039,8 @@
             setTextDirty: setTextDirty,
             markClean: markClean,
             insert: insert,
+            insertTab: insertTab,
+            handleEscapeKey: handleEscapeKey,
             insertAtLine: insertAtLine,
             appendTextChunk: appendTextChunk,
             jumpTo: jumpTo,

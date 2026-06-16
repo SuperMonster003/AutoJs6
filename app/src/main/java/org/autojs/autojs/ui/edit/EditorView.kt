@@ -43,6 +43,7 @@ import org.autojs.autojs.engine.ScriptEngine
 import org.autojs.autojs.event.BackPressedHandler.HostActivity
 import org.autojs.autojs.execution.ScriptExecution
 import org.autojs.autojs.model.autocomplete.AutoCompletion
+import org.autojs.autojs.model.autocomplete.CodeCompletion
 import org.autojs.autojs.model.autocomplete.CodeCompletions
 import org.autojs.autojs.model.indices.Module
 import org.autojs.autojs.model.indices.Property
@@ -91,6 +92,7 @@ import org.autojs.autojs.ui.edit.editor.viewport.EditorViewportPolicyFactory
 import org.autojs.autojs.ui.edit.keyboard.FunctionsKeyboardHelper
 import org.autojs.autojs.ui.edit.keyboard.FunctionsKeyboardView
 import org.autojs.autojs.ui.edit.keyboard.FunctionsKeyboardView.ClickCallback
+import org.autojs.autojs.ui.edit.keyboard.AceShortcutPanel
 import org.autojs.autojs.ui.edit.keyboard.SymbolsConfigStore
 import org.autojs.autojs.ui.edit.theme.Theme
 import org.autojs.autojs.ui.edit.theme.Themes
@@ -1394,6 +1396,11 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         }
         mCodeCompletionBar.let { bar ->
             bar.setOnHintClickListener(this)
+            if (editor.engineType == EditorEngineType.ACE) {
+                bar.codeCompletions = AceShortcutPanel.firstRowCompletions
+                return
+            }
+            bar.codeCompletions = CodeCompletions.just(emptyList())
             editor.createAutoCompletion(context)?.apply {
                 setAutoCompleteCallback { bar.codeCompletions = it }
                 mAutoCompletion = this
@@ -1402,6 +1409,11 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     fun refreshSymbolsBar() {
+        if (editor.engineType == EditorEngineType.ACE) {
+            mSymbolBar.isVisible = true
+            mSymbolBar.codeCompletions = AceShortcutPanel.secondRowCompletions
+            return
+        }
         SymbolsConfigStore.ensureDefaultProfileExists(context)
         val symbols = SymbolsConfigStore.getEnabledSymbolsForActiveProfile(context)
         mSymbolBar.isVisible = symbols.isNotEmpty()
@@ -2513,6 +2525,9 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         //  #     editor!!.commentLine()
         //  # } else editor!!.insert(completion.insertText)
 
+        if (handleAceShortcutClick(completions[pos])) {
+            return
+        }
         mCommandDispatcher.onCompletionClick(completions, pos)
     }
 
@@ -2539,7 +2554,45 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         //  #     return
         //  # }
 
+        if (handleAceShortcutLongClick(completions[pos])) {
+            return
+        }
         mCommandDispatcher.onCompletionLongClick(completions, pos)
+    }
+
+    private fun handleAceShortcutClick(completion: CodeCompletion): Boolean {
+        if (editor.engineType != EditorEngineType.ACE) {
+            return false
+        }
+        return when (AceShortcutPanel.commandOf(completion)) {
+            AceShortcutPanel.Command.Escape -> true.also {
+                (editor as? AceScriptEditorEngine)?.handleEscapeKey()
+            }
+            AceShortcutPanel.Command.MoveUp -> true.also { editor.jumpToPrevLine() }
+            AceShortcutPanel.Command.MoveDown -> true.also { editor.jumpToNextLine() }
+            AceShortcutPanel.Command.MoveLeft -> true.also { editor.moveCursor(-1) }
+            AceShortcutPanel.Command.MoveRight -> true.also { editor.moveCursor(1) }
+            AceShortcutPanel.Command.Tab -> true.also {
+                (editor as? AceScriptEditorEngine)?.insertTab()
+            }
+            AceShortcutPanel.Command.ActionFavorites -> true.also {
+                showToast(context, R.string.text_ace_action_favorites_not_ready)
+            }
+            null -> false
+        }
+    }
+
+    private fun handleAceShortcutLongClick(completion: CodeCompletion): Boolean {
+        if (editor.engineType != EditorEngineType.ACE) {
+            return false
+        }
+        return when (AceShortcutPanel.commandOf(completion)) {
+            AceShortcutPanel.Command.ActionFavorites -> true.also {
+                showToast(context, R.string.text_ace_no_last_action)
+            }
+            null -> false
+            else -> handleAceShortcutClick(completion)
+        }
     }
 
     private fun showManual(urlSuffix: String, title: String) {

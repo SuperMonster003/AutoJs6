@@ -152,6 +152,17 @@ class AceScriptEditorEngine(
         aceCodeEditor.insert(line, text.orEmpty())
     }
 
+    fun insertTab() {
+        if (!canMutateText()) {
+            return
+        }
+        aceCodeEditor.insertTab()
+    }
+
+    fun handleEscapeKey() {
+        aceCodeEditor.handleEscapeKey()
+    }
+
     override fun copyLine() {
         ClipboardUtils.setClip(context, aceCodeEditor.cursorLineText)
     }

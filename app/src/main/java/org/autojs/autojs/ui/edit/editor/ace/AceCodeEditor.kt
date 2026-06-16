@@ -302,6 +302,17 @@ class AceCodeEditor @JvmOverloads constructor(
         invokeAce("insert", quote(text.orEmpty()))
     }
 
+    fun insertTab() {
+        if (!canMutateText("insertTab")) {
+            return
+        }
+        invokeAce("insertTab")
+    }
+
+    fun handleEscapeKey() {
+        invokeAce("handleEscapeKey")
+    }
+
     fun insert(line: Int, text: String?) {
         if (!canMutateText("insertAtLine")) {
             return

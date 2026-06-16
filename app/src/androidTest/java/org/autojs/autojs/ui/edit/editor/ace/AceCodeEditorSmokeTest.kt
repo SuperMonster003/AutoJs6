@@ -11,6 +11,8 @@ import android.webkit.WebView
 import androidx.test.platform.app.InstrumentationRegistry
 import org.autojs.autojs.ui.edit.EditActivity
 import org.autojs.autojs.ui.edit.EditorView
+import org.autojs.autojs.model.autocomplete.CodeCompletions
+import org.autojs.autojs.ui.edit.completion.CodeCompletionBar
 import org.autojs.autojs.ui.edit.editor.ace.health.AceHealthState
 import org.autojs.autojs.ui.edit.editor.ace.health.AceFailureType
 import org.autojs.autojs.ui.edit.editor.engine.AceScriptEditorEngine
@@ -140,6 +142,47 @@ class AceCodeEditorSmokeTest {
         )
         assertFalse(toggledState.getBoolean("wrap"))
         assertTrue(toggledState.getBoolean("showLineNumbers"))
+    }
+
+    @Test
+    fun aceShortcutPanelUsesTwoRowsAndExecutesTab() {
+        val initialText = "const value = 1;\n"
+        val file = createTempScriptFile("ace-shortcut-panel", initialText)
+        try {
+            val editorView = launchReadyEditActivity(file, initialText)
+            val rows = runOnMainSync {
+                val firstRow = editorView.findViewById<CodeCompletionBar>(R.id.code_completion_bar)
+                    .codeCompletions
+                val secondRow = editorView.findViewById<CodeCompletionBar>(R.id.symbol_bar)
+                    .codeCompletions
+                shortcutHints(firstRow) to shortcutHints(secondRow)
+            }
+
+            assertEquals(
+                listOf("ESC", "^", "TAB", "(", ")", "/", "=", ",", ";", "\"", "'"),
+                rows.first,
+            )
+            assertEquals(
+                listOf("*", "<", "v", ">", "{", "}", "[", "]", "`", "<", ">", "-"),
+                rows.second,
+            )
+
+            runOnMainSync {
+                val firstRow = editorView.findViewById<CodeCompletionBar>(R.id.code_completion_bar)
+                    .codeCompletions
+                editorView.editor.jumpTo(0, 0)
+                editorView.onHintClick(firstRow, 2)
+            }
+
+            waitForEditorViewText(
+                editorView,
+                "    $initialText",
+                "ACE TAB shortcut should execute the ACE indent command",
+            )
+        } finally {
+            finishLaunchedActivity()
+            file.delete()
+        }
     }
 
     @Test
@@ -1073,6 +1116,10 @@ class AceCodeEditorSmokeTest {
             }
         }
         fail("Missing completion result for $name")
+    }
+
+    private fun shortcutHints(completions: CodeCompletions): List<String> {
+        return (0 until completions.size()).map { completions.getHint(it) }
     }
 
     private fun waitForJsonResult(editor: AceCodeEditor, script: String): JSONObject {

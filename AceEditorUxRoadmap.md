@@ -94,11 +94,11 @@ Acceptance:
 
 ## Gate UX-5: ACE Shortcut Panel And Action Favorites
 
-- [ ] Build an ACE-specific two-row function keyboard layout.
-- [ ] Use text drawables or equivalent for `ESC` and `TAB`.
-- [ ] Reuse the unused right-side area after ACE completion replaces the old
+- [x] Build an ACE-specific two-row function keyboard layout.
+- [x] Use text drawables or equivalent for `ESC` and `TAB`.
+- [x] Reuse the unused right-side area after ACE completion replaces the old
   candidate strip.
-- [ ] Replace the Pro-style lower-left figure icon with a star action-favorites
+- [x] Replace the Pro-style lower-left figure icon with a star action-favorites
   entry.
 - [ ] Track action history by recency and frequency.
 - [ ] Support pinned actions, manual reorder, left-swipe delete, right-swipe pin

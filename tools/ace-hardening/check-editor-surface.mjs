@@ -35,6 +35,33 @@ const ACE_CODE_EDITOR_PATH = path.join(
   "ace",
   "AceCodeEditor.kt",
 );
+const EDITOR_VIEW_PATH = path.join(
+  PROJECT_ROOT,
+  "app",
+  "src",
+  "main",
+  "java",
+  "org",
+  "autojs",
+  "autojs",
+  "ui",
+  "edit",
+  "EditorView.kt",
+);
+const ACE_SHORTCUT_PANEL_PATH = path.join(
+  PROJECT_ROOT,
+  "app",
+  "src",
+  "main",
+  "java",
+  "org",
+  "autojs",
+  "autojs",
+  "ui",
+  "edit",
+  "keyboard",
+  "AceShortcutPanel.kt",
+);
 const DIAGNOSTICS_PATH = path.join(
   PROJECT_ROOT,
   "app",
@@ -89,6 +116,8 @@ const lspClient = read(LSP_CLIENT_PATH);
 const tooltip = read(TOOLTIP_PATH);
 const signatureHelp = read(SIGNATURE_HELP_PATH);
 const aceCodeEditor = read(ACE_CODE_EDITOR_PATH);
+const editorView = read(EDITOR_VIEW_PATH);
+const aceShortcutPanel = read(ACE_SHORTCUT_PANEL_PATH);
 const diagnostics = read(DIAGNOSTICS_PATH);
 
 assertOrder(
@@ -154,6 +183,10 @@ assertIncludes(bridge, "function expandFoldAt(row, column)", "fold placeholder e
 assertIncludes(bridge, 'editor.on("click", function(event)', "fold placeholder click handler");
 assertIncludes(bridge, "setWordWrapEnabled: setWordWrapEnabled", "ACE word wrap runtime API");
 assertIncludes(bridge, "setLineNumbersEnabled: setLineNumbersEnabled", "ACE line number runtime API");
+assertIncludes(bridge, "function insertTab()", "ACE shortcut TAB helper");
+assertIncludes(bridge, "function handleEscapeKey()", "ACE shortcut ESC helper");
+assertIncludes(bridge, "insertTab: insertTab", "ACE shortcut TAB public API");
+assertIncludes(bridge, "handleEscapeKey: handleEscapeKey", "ACE shortcut ESC public API");
 assertIncludes(bridge, "var lspClient = null;", "ACE LSP client bridge slot");
 assertIncludes(bridge, "global.AutoJsAceLspClient.install", "ACE LSP client install");
 assertIncludes(bridge, "getLspState: function()", "ACE LSP state public API");
@@ -208,6 +241,18 @@ assertIncludes(aceCodeEditor, '"count=$bridgeEventWindowCount,windowMillis=$BRID
 assertIncludes(aceCodeEditor, "private val lspServerManager = AceLspServerManager()", "ACE LSP manager");
 assertIncludes(aceCodeEditor, "lspServerManager.bridgeOptionsJson()", "ACE LSP bridge options");
 assertIncludes(aceCodeEditor, 'eventHistory.record("lsp_manager"', "ACE LSP manager event history");
+assertIncludes(aceCodeEditor, "fun insertTab()", "native ACE shortcut TAB bridge call");
+assertIncludes(aceCodeEditor, "fun handleEscapeKey()", "native ACE shortcut ESC bridge call");
+
+assertIncludes(editorView, "AceShortcutPanel.firstRowCompletions", "ACE shortcut first row binding");
+assertIncludes(editorView, "AceShortcutPanel.secondRowCompletions", "ACE shortcut second row binding");
+assertIncludes(editorView, "handleAceShortcutClick", "ACE shortcut click handler");
+assertIncludes(editorView, "handleAceShortcutLongClick", "ACE shortcut long-click handler");
+
+assertIncludes(aceShortcutPanel, 'command("ESC", Command.Escape)', "ACE shortcut ESC key");
+assertIncludes(aceShortcutPanel, 'command("TAB", Command.Tab)', "ACE shortcut TAB key");
+assertIncludes(aceShortcutPanel, 'command("*", Command.ActionFavorites)', "ACE shortcut favorites entry");
+assertIncludes(aceShortcutPanel, 'insert("`")', "ACE shortcut backtick key");
 
 assertIncludes(diagnostics, "lastFirstPaintAtUptimeMillis", "first-paint diagnostics field");
 assertIncludes(diagnostics, "lastAceResizeScheduledReason", "resize scheduled diagnostics field");

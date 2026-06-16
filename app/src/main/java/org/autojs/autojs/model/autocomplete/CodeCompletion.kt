@@ -17,7 +17,7 @@ class CodeCompletion {
         mInsertText = null
     }
 
-    constructor(hint: String, url: String, insertText: String?) {
+    constructor(hint: String, url: String?, insertText: String?) {
         this.hint = hint
         this.url = url
         mInsertText = insertText

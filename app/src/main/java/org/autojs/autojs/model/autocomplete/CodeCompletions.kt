@@ -23,6 +23,11 @@ class CodeCompletions(val from: Int, private val mCompletions: List<CodeCompleti
 
     companion object {
         @JvmStatic
+        fun fromCompletions(completions: List<CodeCompletion>): CodeCompletions {
+            return CodeCompletions(-1, completions)
+        }
+
+        @JvmStatic
         fun just(hints: List<String?>): CodeCompletions {
             val completions: MutableList<CodeCompletion> = ArrayList(hints.size)
             for (hint in hints) {
