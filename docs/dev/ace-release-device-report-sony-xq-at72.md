@@ -58,11 +58,11 @@ path has a recorded result.
 | Tooltip fallback | DEVICE SMOKE PASS | Instrumentation smoke showed local tooltip DOM/render state with `markdownRenderer=safe-subset`; static source checks reject `fetch`, XHR, and raw hover `innerHTML`. |
 | Rotation | DEVICE SMOKE PASS | Instrumentation smoke typed unsaved text in ACE, requested IME show, rotated landscape and portrait, and preserved text, dirty state, and cursor visibility; see Gate 7 notes. |
 | Native/ACE switching | DEVICE SMOKE PASS | Instrumentation smoke saved, switched ACE -> Native -> ACE, preserved text and clean state, and produced no ACE fallback diagnostics; see Gate 7 notes. |
-| TextMirror fallback | TBD | |
-| Ready-timeout fallback | TBD | |
-| JS-init fatal fallback | TBD | |
-| Renderer-gone fallback | TBD | |
-| Asset-missing fallback | TBD | |
+| TextMirror fallback | DEVICE SMOKE PASS | Ready-timeout instrumentation entered unsaved text before fallback and verified Native received the TextMirror text with dirty state preserved. |
+| Ready-timeout fallback | DEVICE SMOKE PASS | `forceReadyTimeout` reached Native with `READY_TIMEOUT` diagnostics and runtime event history. |
+| JS-init fatal fallback | DEVICE SMOKE PASS | `forceJsInitThrow` reached Native with loaded file text and `JS_INIT_ERROR` diagnostics. |
+| Renderer-gone fallback | DEVICE SMOKE PASS | `forceRendererGoneFallback` reached Native with loaded file text and `RENDER_PROCESS_GONE` diagnostics without querying a dead WebView. |
+| Asset-missing fallback | DEVICE SMOKE PASS | `forceAssetMissing` routed directly to Native and preserved an `ASSET_MISSING` diagnostics snapshot. |
 | Large-file Native routing | TBD | |
 | Native editor regression | TBD | |
 | Diagnostics export | TBD | |
@@ -80,6 +80,7 @@ Record copied ACE diagnostics for every failure or ambiguous result.
 | Gate 5 ActionMode bridge mismatch | Inline Gate 5 notes | A development-only 7-argument `startActionMode` bridge attempt produced `Error invoking startActionMode: Method not found`; the final implementation restored the six-argument bridge and passed the copy/paste smoke below. |
 | Gate 6 completion/tooltip/LSP smoke | Instrumentation PASS | `AceCodeEditorSmokeTest` ran 5/5 tests on Sony XQ-AT72 with no failures, including popup completion accept, tooltip local rendering, LSP disabled state, and LSP enabled no-server static fallback. |
 | Gate 7 rotation/restore/switching smoke | Instrumentation PASS | `AceCodeEditorSmokeTest` ran 6/6 tests on Sony XQ-AT72 with no failures, including `EditActivity` rotation, background restore, save, ACE -> Native -> ACE switching, dirty-state checks, cursor visibility checks, and no ACE fallback diagnostics. |
+| Gate 8 fallback hook smoke | Instrumentation PASS | `AceCodeEditorSmokeTest` ran 8/8 tests on Sony XQ-AT72 with no failures, including ready-timeout TextMirror preservation, startup fatal fallback hooks, and diagnostics checks for `READY_TIMEOUT`, `JS_INIT_ERROR`, `RENDER_PROCESS_GONE`, and `ASSET_MISSING`. |
 
 ## Gate 2 Notes
 
@@ -310,14 +311,51 @@ Record copied ACE diagnostics for every failure or ambiguous result.
   human-observed rotation flash, double padding, or post-rotation tap-anchor
   mismatch should be recorded as a new Gate 7 finding.
 
+## Gate 8 Notes
+
+- Time: 2026-06-16 09:16-09:22 CST.
+- Command:
+  `.\gradlew.bat :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.ui.edit.editor.ace.AceCodeEditorSmokeTest"`
+- Result: PASS on Sony XQ-AT72; 8 tests completed, 0 skipped, 0 failed.
+- Ready-timeout TextMirror smoke:
+  - The instrumentation test opened a real `EditActivity` with ACE selected,
+    entered unsaved draft text before the ready timeout fallback, and verified
+    ACE TextMirror plus sticky dirty state before fallback completed.
+  - Native fallback received the unsaved text, `EditorView` dirty state stayed
+    true, and diagnostics contained `lastFailureType=READY_TIMEOUT` plus a
+    runtime event history entry.
+- Startup fatal fallback smoke:
+  - `forceJsInitThrow` reached Native with the loaded file text and
+    `lastFailureType=JS_INIT_ERROR`.
+  - `forceRendererGoneFallback` reached Native with the loaded file text and
+    `lastFailureType=RENDER_PROCESS_GONE`, without relying on a query against a
+    dead WebView.
+  - `forceAssetMissing` routed directly to Native with the loaded file text and
+    an `ASSET_MISSING` diagnostics snapshot.
+  - Startup fatal hooks fire before ACE is editable, so they validate
+    loaded-file text and diagnostics rather than unsaved typed text. Unsaved
+    text preservation is covered by the ready-timeout hook above.
+- Test harness hardening:
+  - `EditActivity` startup fallback hooks now use instrumentation
+    `ActivityMonitor`, which waits for launch without waiting for fallback
+    startup idle.
+  - Instrumentation cleanup removes launched editor tasks directly, avoiding
+    the dirty-editor exit confirmation dialog from leaking a fallback activity
+    into the next smoke test.
+- Source boundary follow-up:
+  - ACE asset availability is exposed through `AceEditorAssets`, so
+    `EditorView` can record asset-missing diagnostics without depending on the
+    concrete ACE view class.
+
 ## Blockers
 
 ### P0
 
 - No automated P0 blocker found in preflight. Gate 2, Gate 3, Gate 4, Gate 6,
-  and Gate 7 device smoke found no P0 first-paint, file-open, IME, tap-anchor,
-  keyboard stress, completion, tooltip, LSP fallback, rotation, restore,
-  engine-switching, ACE fallback, or bridge-event-storm blocker.
+  Gate 7, and Gate 8 device smoke found no P0 first-paint, file-open, IME,
+  tap-anchor, keyboard stress, completion, tooltip, LSP fallback, rotation,
+  restore, engine-switching, fallback hook, TextMirror, diagnostics, or
+  bridge-event-storm blocker.
 
 ### P1
 

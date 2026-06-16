@@ -59,10 +59,13 @@ import org.autojs.autojs.ui.edit.completion.CodeCompletionBar
 import org.autojs.autojs.ui.edit.completion.CodeCompletionBar.OnHintClickListener
 import org.autojs.autojs.ui.edit.debug.DebugBar
 import org.autojs.autojs.ui.edit.editor.JavaScriptHighlighter
+import org.autojs.autojs.ui.edit.editor.ace.AceEditorAssets
 import org.autojs.autojs.ui.edit.editor.ace.AceEditorTestHooks
 import org.autojs.autojs.ui.edit.editor.ace.diagnostics.AceDiagnostics
 import org.autojs.autojs.ui.edit.editor.ace.diagnostics.AceDiagnosticsSnapshot
 import org.autojs.autojs.ui.edit.editor.ace.health.AceFailure
+import org.autojs.autojs.ui.edit.editor.ace.health.AceFailureType
+import org.autojs.autojs.ui.edit.editor.ace.health.AceHealthState
 import org.autojs.autojs.ui.edit.editor.command.EditorCommandDispatcher
 import org.autojs.autojs.ui.edit.editor.engine.AceScriptEditorEngine
 import org.autojs.autojs.ui.edit.editor.engine.EditorEngineFactory
@@ -451,6 +454,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
     init {
+        recordAceAssetMissingFallbackIfNeeded()
         attachEditorEngineView()
         setUpEditor()
         setUpInputMethodEnhancedBar()
@@ -1599,6 +1603,28 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         if (EditorEnginePreferences.consumeAceLargeFileNotice()) {
             showToast(context, R.string.text_ace_large_file_uses_native_editor)
         }
+    }
+
+    private fun recordAceAssetMissingFallbackIfNeeded() {
+        if (EditorEnginePreferences.get() != EditorEngineType.ACE) {
+            return
+        }
+        if (editor.engineType == EditorEngineType.ACE || AceEditorAssets.hasRequired(context)) {
+            return
+        }
+        val now = SystemClock.uptimeMillis()
+        val message = "ACE editor assets are unavailable"
+        mLastAceDiagnosticsSnapshot = AceDiagnostics
+            .createNativeSnapshot(EditorEngineType.ACE, fileSizeBytes = null, largeFilePolicy = "auto")
+            .copy(
+                aceHealthState = AceHealthState.FAILED.name,
+                lastFailureType = AceFailureType.ASSET_MISSING.name,
+                lastFailureMessage = message,
+                lastFailureFatal = true,
+                runtimeEventHistory = listOf(
+                    "$now:failure:type=${AceFailureType.ASSET_MISSING.name},fatal=true,message=$message",
+                ),
+            )
     }
 
     private fun createAceDiagnosticsSnapshot(): AceDiagnosticsSnapshot {

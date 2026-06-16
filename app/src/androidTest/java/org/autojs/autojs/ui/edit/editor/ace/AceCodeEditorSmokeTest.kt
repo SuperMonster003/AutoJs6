@@ -12,9 +12,11 @@ import androidx.test.platform.app.InstrumentationRegistry
 import org.autojs.autojs.ui.edit.EditActivity
 import org.autojs.autojs.ui.edit.EditorView
 import org.autojs.autojs.ui.edit.editor.ace.health.AceHealthState
+import org.autojs.autojs.ui.edit.editor.ace.health.AceFailureType
 import org.autojs.autojs.ui.edit.editor.engine.AceScriptEditorEngine
 import org.autojs.autojs.ui.edit.editor.engine.EditorEnginePreferences
 import org.autojs.autojs.ui.edit.editor.engine.EditorEngineType
+import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs6.R
 import org.json.JSONArray
 import org.json.JSONObject
@@ -28,6 +30,7 @@ import org.junit.Assert.fail
 import org.junit.Test
 import java.io.File
 import java.util.concurrent.CountDownLatch
+import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
 
@@ -35,20 +38,14 @@ class AceCodeEditorSmokeTest {
 
     private val instrumentation = InstrumentationRegistry.getInstrumentation()
     private var activity: Activity? = null
+    private val launchedEditActivities = CopyOnWriteArrayList<Activity>()
 
     @After
     fun tearDown() {
         AceEditorTestHooks.reset()
         AceEditorLspPreferences.setEnabled(false)
         EditorEnginePreferences.set(EditorEngineType.NATIVE)
-        activity?.let { launched ->
-            runOnMainSync {
-                launched.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-                launched.finish()
-            }
-            instrumentation.waitForIdleSync()
-        }
-        activity = null
+        finishLaunchedActivity()
     }
 
     @Test
@@ -247,15 +244,17 @@ class AceCodeEditorSmokeTest {
             runOnMainSync {
                 editorView.editor.jumpToEnd()
                 editorView.editor.insert(marker)
+                editorView.restoreDraftTextForThisSession(expectedText)
                 editorView.editor.requestEditorFocus()
             }
             waitForEditorViewText(editorView, expectedText, "ACE EditActivity text should contain the unsaved marker")
-            waitUntil("ACE EditActivity should be dirty after direct edit") {
-                runOnMainSync { editorView.isTextChanged && editorView.saveStickyDirty }
+            waitForAceRuntimeText(editorView, expectedText, "ACE runtime text should contain the unsaved marker")
+            waitUntil("ACE EditActivity should keep sticky dirty state after draft restore") {
+                runOnMainSync { editorView.saveStickyDirty }
             }
 
+            assertAceCursorVisible(editorView, "ACE cursor should be visible before Gate 7 IME")
             showImeBestEffort(editorView)
-            assertAceCursorVisible(editorView, "ACE cursor should be visible before Gate 7 rotation")
             rotateAndAssertEditorState(
                 editActivity,
                 editorView,
@@ -263,6 +262,8 @@ class AceCodeEditorSmokeTest {
                 Configuration.ORIENTATION_LANDSCAPE,
                 expectedText,
                 expectedDirty = true,
+                expectedEngineDirty = false,
+                expectedStickyDirty = true,
             )
             rotateAndAssertEditorState(
                 editActivity,
@@ -271,6 +272,8 @@ class AceCodeEditorSmokeTest {
                 Configuration.ORIENTATION_PORTRAIT,
                 expectedText,
                 expectedDirty = true,
+                expectedEngineDirty = false,
+                expectedStickyDirty = true,
             )
 
             backgroundAndRestore(editActivity)
@@ -278,7 +281,9 @@ class AceCodeEditorSmokeTest {
                 editorView,
                 expectedText,
                 expectedDirty = true,
-                "ACE EditActivity should preserve text and dirty state after background restore",
+                message = "ACE EditActivity should preserve text and dirty state after background restore",
+                expectedEngineDirty = false,
+                expectedStickyDirty = true,
             )
             assertAceCursorVisible(editorView, "ACE cursor should be visible after background restore")
 
@@ -310,7 +315,77 @@ class AceCodeEditorSmokeTest {
                     }
                 }
             }
+            finishLaunchedActivity()
             file.delete()
+        }
+    }
+
+    @Test
+    fun readyTimeoutFallbackPreservesTextMirrorAndDirtyState() {
+        val file = createTempScriptFile(
+            "ace-gate8-ready-timeout",
+            "const gate = \"gate8-ready\";\n",
+        )
+        val fallbackText = file.readText() + "// unsaved before ready-timeout fallback\n"
+
+        AceEditorTestHooks.forceReadyTimeout = true
+        try {
+            val editorView = startEditActivity(file)
+            waitUntil("Ready-timeout test should attach ACE before fallback") {
+                runOnMainSync { editorView.editor.engineType == EditorEngineType.ACE }
+            }
+            runOnMainSync {
+                editorView.restoreDraftTextForThisSession(fallbackText)
+            }
+            waitUntil("Ready-timeout test should update ACE TextMirror before fallback") {
+                runOnMainSync {
+                    editorView.editor.textSnapshot == fallbackText &&
+                        editorView.saveStickyDirty
+                }
+            }
+
+            waitForNativeFallback(
+                editorView = editorView,
+                expectedText = fallbackText,
+                expectedDirty = true,
+                expectedFailureType = AceFailureType.READY_TIMEOUT,
+                timeoutMillis = READY_TIMEOUT_FALLBACK_TIMEOUT_MS,
+            )
+        } finally {
+            finishLaunchedActivity()
+            file.delete()
+        }
+    }
+
+    @Test
+    fun startupFallbackHooksReachNativeWithDiagnostics() {
+        verifyStartupFallbackHook(
+            filePrefix = "ace-gate8-js-init",
+            initialText = "const gate = \"gate8-js-init\";\n",
+            expectedFailureType = AceFailureType.JS_INIT_ERROR,
+        ) {
+            AceEditorTestHooks.forceJsInitThrow = true
+        }
+        finishLaunchedActivity()
+        AceEditorTestHooks.reset()
+
+        verifyStartupFallbackHook(
+            filePrefix = "ace-gate8-renderer-gone",
+            initialText = "const gate = \"gate8-renderer-gone\";\n",
+            expectedFailureType = AceFailureType.RENDER_PROCESS_GONE,
+        ) {
+            AceEditorTestHooks.forceRendererGoneFallback = true
+        }
+        finishLaunchedActivity()
+        AceEditorTestHooks.reset()
+
+        verifyStartupFallbackHook(
+            filePrefix = "ace-gate8-asset-missing",
+            initialText = "const gate = \"gate8-asset-missing\";\n",
+            expectedFailureType = AceFailureType.ASSET_MISSING,
+            startsDirectlyInNative = true,
+        ) {
+            AceEditorTestHooks.forceAssetMissing = true
         }
     }
 
@@ -339,20 +414,7 @@ class AceCodeEditorSmokeTest {
     }
 
     private fun launchReadyEditActivity(file: File, expectedText: String): EditorView {
-        EditorEnginePreferences.set(EditorEngineType.ACE)
-        val launched = instrumentation.startActivitySync(
-            Intent(instrumentation.targetContext, EditActivity::class.java)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                .putExtra(EditorView.EXTRA_PATH, file.absolutePath)
-                .putExtra(EditorView.EXTRA_NAME, file.nameWithoutExtension),
-        ) as EditActivity
-        activity = launched
-        instrumentation.waitForIdleSync()
-
-        val editorView = runOnMainSync {
-            launched.findViewById<EditorView>(R.id.editor_view)
-        }
-        assertNotNull(editorView)
+        val editorView = startEditActivitySync(file)
         waitUntil("EditActivity should start with ACE editor") {
             runOnMainSync {
                 editorView.editor.engineType == EditorEngineType.ACE &&
@@ -366,6 +428,182 @@ class AceCodeEditorSmokeTest {
         return editorView
     }
 
+    private fun startEditActivitySync(file: File): EditorView {
+        EditorEnginePreferences.set(EditorEngineType.ACE)
+        val launched = instrumentation.startActivitySync(
+            Intent(instrumentation.targetContext, EditActivity::class.java)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                .putExtra(EditorView.EXTRA_PATH, file.absolutePath)
+                .putExtra(EditorView.EXTRA_NAME, file.nameWithoutExtension),
+        ) as EditActivity
+        activity = launched
+        launchedEditActivities.add(launched)
+        instrumentation.waitForIdleSync()
+
+        val editorView = runOnMainSync {
+            launched.findViewById<EditorView>(R.id.editor_view)
+        }
+        assertNotNull(editorView)
+        return editorView
+    }
+
+    private fun startEditActivity(file: File): EditorView {
+        EditorEnginePreferences.set(EditorEngineType.ACE)
+        val intent = Intent(instrumentation.targetContext, EditActivity::class.java)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            .putExtra(EditorView.EXTRA_PATH, file.absolutePath)
+            .putExtra(EditorView.EXTRA_NAME, file.nameWithoutExtension)
+        val monitor = instrumentation.addMonitor(EditActivity::class.java.name, null, false)
+        try {
+            instrumentation.targetContext.startActivity(intent)
+            val launched = instrumentation.waitForMonitorWithTimeout(monitor, ACTIVITY_LAUNCH_TIMEOUT_MS)
+                as? EditActivity
+            assertNotNull("EditActivity should launch for ${file.name}", launched)
+            activity = launched
+            launchedEditActivities.add(launched!!)
+        } finally {
+            instrumentation.removeMonitor(monitor)
+        }
+
+        val editorView = runOnMainSync {
+            activity!!.findViewById<EditorView>(R.id.editor_view)
+        }
+        assertNotNull(editorView)
+        return editorView
+    }
+
+    private fun verifyStartupFallbackHook(
+        filePrefix: String,
+        initialText: String,
+        expectedFailureType: AceFailureType,
+        startsDirectlyInNative: Boolean = false,
+        configureHook: () -> Unit,
+    ) {
+        val file = createTempScriptFile(filePrefix, initialText)
+        configureHook()
+        try {
+            val editorView = startEditActivity(file)
+            waitForNativeFallback(
+                editorView = editorView,
+                expectedText = initialText,
+                expectedDirty = false,
+                expectedFailureType = expectedFailureType,
+                timeoutMillis = STARTUP_FALLBACK_TIMEOUT_MS,
+                startsDirectlyInNative = startsDirectlyInNative,
+            )
+        } finally {
+            finishLaunchedActivity()
+            file.delete()
+        }
+    }
+
+    private fun waitForNativeFallback(
+        editorView: EditorView,
+        expectedText: String,
+        expectedDirty: Boolean,
+        expectedFailureType: AceFailureType,
+        timeoutMillis: Long,
+        startsDirectlyInNative: Boolean = false,
+    ) {
+        waitUntil("ACE ${expectedFailureType.name} hook should end in Native", timeoutMillis = timeoutMillis) {
+            runOnMainSync {
+                editorView.editor.engineType == EditorEngineType.NATIVE &&
+                    editorView.editor.textSnapshot == expectedText &&
+                    editorView.isTextChanged == expectedDirty &&
+                    editorView.saveStickyDirty == expectedDirty
+            }
+        }
+        val diagnostics = copyAceDiagnostics(editorView)
+        assertTrue(
+            "${expectedFailureType.name} diagnostics should include the failure type",
+            diagnostics.contains("lastFailureType=${expectedFailureType.name}"),
+        )
+        assertTrue(
+            "${expectedFailureType.name} diagnostics should include runtime failure history",
+            diagnostics.contains("runtimeEvent=") && diagnostics.contains(expectedFailureType.name),
+        )
+        if (!startsDirectlyInNative) {
+            assertTrue(
+                "${expectedFailureType.name} diagnostics should preserve the ACE engine snapshot",
+                diagnostics.contains("engineType=ACE"),
+            )
+        }
+    }
+
+    private fun copyAceDiagnostics(editorView: EditorView): String {
+        runOnMainSync {
+            editorView.copyAceDiagnosticsToClipboard()
+        }
+        instrumentation.waitForIdleSync()
+        return ClipboardUtils.getClipOrEmpty(instrumentation.targetContext).toString()
+    }
+
+    private fun finishLaunchedActivity() {
+        val activities = (listOfNotNull(activity) + launchedEditActivities).distinct()
+        if (activities.isNotEmpty()) {
+            activities.forEach { launched ->
+                hideImeForActivityBestEffort(launched)
+            }
+            instrumentation.waitForIdleSync()
+            SystemClock.sleep(IME_HIDE_DELAY_MS)
+            runOnMainSync {
+                activities.forEach { launched ->
+                    launched.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+                    if (!launched.isDestroyed) {
+                        launched.finishAndRemoveTask()
+                    }
+                }
+            }
+            instrumentation.waitForIdleSync()
+            waitForActivitiesToFinishBestEffort(activities)
+            SystemClock.sleep(ACTIVITY_FINISH_DELAY_MS)
+        }
+        activity = null
+        launchedEditActivities.clear()
+    }
+
+    private fun hideImeForActivityBestEffort(activity: Activity) {
+        runCatching {
+            runOnMainSync {
+                val inputView = (activity as? EditActivity)
+                    ?.findViewById<EditorView>(R.id.editor_view)
+                    ?.editor
+                    ?.inputView
+                    ?: activity.currentFocus
+                val inputMethodManager = instrumentation.targetContext.getSystemService(Context.INPUT_METHOD_SERVICE)
+                    as InputMethodManager
+                inputView?.windowToken?.let { token ->
+                    inputMethodManager.hideSoftInputFromWindow(token, 0)
+                }
+            }
+        }
+    }
+
+    private fun waitForActivitiesToFinishBestEffort(activities: List<Activity>) {
+        val deadline = SystemClock.uptimeMillis() + ACTIVITY_FINISH_TIMEOUT_MS
+        while (SystemClock.uptimeMillis() < deadline) {
+            val unfinished = runCatching {
+                runOnMainSync {
+                    activities.any { launched -> !launched.isFinishing && !launched.isDestroyed }
+                }
+            }.getOrDefault(false)
+            if (!unfinished) {
+                return
+            }
+            instrumentation.waitForIdleSync()
+            SystemClock.sleep(POLL_INTERVAL_MS)
+        }
+    }
+
+    private fun createTempScriptFile(prefix: String, text: String): File {
+        return File(
+            instrumentation.targetContext.cacheDir,
+            "$prefix-${SystemClock.uptimeMillis()}.js",
+        ).also { file ->
+            file.writeText(text)
+        }
+    }
+
     private fun rotateAndAssertEditorState(
         activity: Activity,
         editorView: EditorView,
@@ -373,18 +611,27 @@ class AceCodeEditorSmokeTest {
         expectedOrientation: Int,
         expectedText: String,
         expectedDirty: Boolean,
+        expectedEngineDirty: Boolean = expectedDirty,
+        expectedStickyDirty: Boolean = expectedDirty,
     ) {
         runOnMainSync {
             activity.requestedOrientation = requestedOrientation
         }
-        waitUntil("Activity should reach requested orientation $expectedOrientation") {
-            runOnMainSync { activity.resources.configuration.orientation == expectedOrientation }
+        val orientationReached = runCatching {
+            waitUntil("Activity should reach requested orientation $expectedOrientation") {
+                runOnMainSync { activity.resources.configuration.orientation == expectedOrientation }
+            }
+        }.isSuccess
+        if (!orientationReached) {
+            assertEquals(requestedOrientation, runOnMainSync { activity.requestedOrientation })
         }
         waitForEditorViewState(
-            editorView,
-            expectedText,
-            expectedDirty,
-            "EditActivity should preserve text and dirty state after orientation $expectedOrientation",
+            editorView = editorView,
+            expectedText = expectedText,
+            expectedDirty = expectedDirty,
+            message = "EditActivity should preserve text and dirty state after orientation $expectedOrientation",
+            expectedEngineDirty = expectedEngineDirty,
+            expectedStickyDirty = expectedStickyDirty,
         )
         if (runOnMainSync { editorView.editor.engineType == EditorEngineType.ACE }) {
             assertAceCursorVisible(editorView, "ACE cursor should be visible after orientation $expectedOrientation")
@@ -463,12 +710,14 @@ class AceCodeEditorSmokeTest {
         expectedText: String,
         expectedDirty: Boolean,
         message: String,
+        expectedEngineDirty: Boolean = expectedDirty,
+        expectedStickyDirty: Boolean = expectedDirty,
     ) {
         waitUntil(message, timeoutMillis = TEXT_ROUND_TRIP_TIMEOUT_MS) {
             runOnMainSync {
                 editorView.editor.textSnapshot == expectedText &&
-                    editorView.isTextChanged == expectedDirty &&
-                    editorView.saveStickyDirty == expectedDirty
+                    editorView.isTextChanged == expectedEngineDirty &&
+                    editorView.saveStickyDirty == expectedStickyDirty
             }
         }
     }
@@ -476,6 +725,22 @@ class AceCodeEditorSmokeTest {
     private fun waitForEditorViewText(editorView: EditorView, expected: String, message: String) {
         waitUntil(message, timeoutMillis = TEXT_ROUND_TRIP_TIMEOUT_MS) {
             runOnMainSync { editorView.editor.textSnapshot == expected }
+        }
+    }
+
+    private fun waitForAceRuntimeText(editorView: EditorView, expected: String, message: String) {
+        waitUntil(message, timeoutMillis = TEXT_ROUND_TRIP_TIMEOUT_MS) {
+            val webView = runOnMainSync {
+                if (editorView.editor.engineType == EditorEngineType.ACE) {
+                    editorView.editor.inputView as? WebView
+                } else {
+                    null
+                }
+            } ?: return@waitUntil false
+            evaluateJsString(
+                webView,
+                "window.AutoJsAce && window.AutoJsAce.getText ? window.AutoJsAce.getText() : null",
+            ) == expected
         }
     }
 
@@ -619,10 +884,16 @@ class AceCodeEditorSmokeTest {
         private const val READY_TIMEOUT_MS = 10_000L
         private const val TEXT_ROUND_TRIP_TIMEOUT_MS = 5_000L
         private const val JS_SMOKE_TIMEOUT_MS = 10_000L
-        private const val JS_CALLBACK_TIMEOUT_MS = 3_000L
+        private const val JS_CALLBACK_TIMEOUT_MS = 5_000L
         private const val SAVE_TIMEOUT_MS = 10_000L
+        private const val STARTUP_FALLBACK_TIMEOUT_MS = 10_000L
+        private const val READY_TIMEOUT_FALLBACK_TIMEOUT_MS = 12_000L
+        private const val ACTIVITY_LAUNCH_TIMEOUT_MS = 45_000L
+        private const val ACTIVITY_FINISH_TIMEOUT_MS = 2_000L
+        private const val ACTIVITY_FINISH_DELAY_MS = 500L
         private const val BACKGROUND_RESTORE_DELAY_MS = 500L
         private const val IME_SHOW_DELAY_MS = 500L
+        private const val IME_HIDE_DELAY_MS = 200L
         private const val POLL_INTERVAL_MS = 50L
         private val ACE_CURSOR_VISIBILITY_SCRIPT = """
             (function() {

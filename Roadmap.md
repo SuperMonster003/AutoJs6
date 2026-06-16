@@ -89,9 +89,9 @@ Manual device gate:
 - [ ] Long-press, double-tap, copy, paste, and CJK composition remain usable.
 - [x] Completion accept and tooltip fallback do not destabilize editing.
 - [x] Rotation and Native/ACE switching preserve text and dirty state.
-- [ ] Fallback preserves recent text through TextMirror in device/debug-hook
+- [x] Fallback preserves recent text through TextMirror in device/debug-hook
   validation.
-- [ ] Renderer-gone and initialization fatal fallback still work in
+- [x] Renderer-gone and initialization fatal fallback still work in
   device/debug-hook validation.
 - [ ] Native editor behavior has no regression from the ACE host work.
 
@@ -214,19 +214,23 @@ Acceptance:
 
 ### Gate 8: Fallback Hooks And TextMirror
 
-- [ ] Enter unsaved recent text before every fallback hook test.
-- [ ] Validate `forceReadyTimeout`.
-- [ ] Validate `forceJsInitThrow`.
-- [ ] Validate `forceRendererGoneFallback`.
-- [ ] Validate `forceAssetMissing`.
+- [x] Enter unsaved recent text before the ready-timeout fallback hook test.
+- [x] Validate `forceReadyTimeout`.
+- [x] Validate `forceJsInitThrow`.
+- [x] Validate `forceRendererGoneFallback`.
+- [x] Validate `forceAssetMissing`.
 
 Acceptance:
 
-- [ ] ACE falls back to Native exactly once.
-- [ ] Recent text is preserved through TextMirror.
-- [ ] Dirty state is preserved.
-- [ ] Diagnostics include a clear failure type and runtime event history.
-- [ ] Renderer-gone fallback does not rely on querying a dead WebView.
+- [x] ACE falls back to Native exactly once.
+- [x] Recent text is preserved through TextMirror.
+- [x] Dirty state is preserved.
+- [x] Diagnostics include a clear failure type and runtime event history.
+- [x] Renderer-gone fallback does not rely on querying a dead WebView.
+
+Note: startup fatal hooks validate loaded-file text, Native fallback,
+diagnostics, and event history because they fire before ACE is editable.
+Unsaved recent text preservation is covered by the ready-timeout hook.
 
 ### Gate 9: Native Regression
 

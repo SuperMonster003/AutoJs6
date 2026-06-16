@@ -1450,7 +1450,6 @@ class AceCodeEditor @JvmOverloads constructor(
         private const val JS_BRIDGE_NAME = "autojs"
         private const val ASSET_URL_PREFIX = "file:///android_asset/editor/ace-builds-1.4.12/"
         private const val EDITOR_URL = "${ASSET_URL_PREFIX}autojs6_editor.html"
-        private const val EDITOR_ASSET_PATH = "editor/ace-builds-1.4.12/autojs6_editor.html"
         private const val ACE_RUNTIME_REVISION = "ace-builds-1.4.12-autojs6"
         private const val TEXT_MIRROR_CALIBRATION_DELAY_MS = 500L
         private const val IME_REQUEST_COALESCE_MS = 150L
@@ -1464,12 +1463,7 @@ class AceCodeEditor @JvmOverloads constructor(
         private const val ACTION_MODE_SELECT_ALL = 3
 
         fun hasRequiredAssets(context: Context): Boolean {
-            if (AceEditorTestHooks.shouldForceAssetMissing()) {
-                return false
-            }
-            return runCatching {
-                context.assets.open(EDITOR_ASSET_PATH).close()
-            }.isSuccess
+            return AceEditorAssets.hasRequired(context)
         }
     }
 }
