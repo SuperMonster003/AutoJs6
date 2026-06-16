@@ -7924,7 +7924,7 @@ class EmbeddedNodePackagedApkSmokeTest {
               await new Promise(resolve => setTimeout(resolve, 50));
             }
 
-            main()
+            return main()
               .then(finishPackagedMarkerReporting)
               .catch(async error => {
                 console.error("packaged.error=" + (error && (error.stack || error.message) || error));
@@ -10679,7 +10679,7 @@ class EmbeddedNodePackagedApkSmokeTest {
               console.log("packaged.toast.shadow=" + shadowOk);
             }
 
-            main().catch(error => {
+            return main().catch(error => {
               console.error("packaged.toast.error=" + (error && (error.stack || error.message) || error));
               process.exitCode = 1;
             });
@@ -10729,7 +10729,7 @@ class EmbeddedNodePackagedApkSmokeTest {
               console.log("packaged.app.shadow=" + shadowOk);
             }
 
-            main().catch(error => {
+            return main().catch(error => {
               console.error("packaged.app.error=" + (error && (error.stack || error.message) || error));
               process.exitCode = 1;
             });
@@ -10780,7 +10780,7 @@ class EmbeddedNodePackagedApkSmokeTest {
               console.log("packaged.clipboard.shadow=" + shadowOk);
             }
 
-            main().catch(error => {
+            return main().catch(error => {
               console.error("packaged.clipboard.error=" + (error && (error.stack || error.message) || error));
               process.exitCode = 1;
             });
@@ -10850,7 +10850,7 @@ class EmbeddedNodePackagedApkSmokeTest {
               console.log("packaged.device.shadow=" + shadowOk);
             }
 
-            main().catch(error => {
+            return main().catch(error => {
               console.error("packaged.device.error=" + (error && (error.stack || error.message) || error));
               process.exitCode = 1;
             });

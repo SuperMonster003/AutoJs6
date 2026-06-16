@@ -1115,7 +1115,7 @@ class NodeAutoJsBridgeInstrumentationTest {
         val result = runEmbeddedScript(
             """
             "nodejs";
-            (async function main() {
+            return (async function main() {
               const bridge = require("autojs6:bridge");
               bridge.__test.setTransport({
                 postMessage(message) {
@@ -1124,7 +1124,7 @@ class NodeAutoJsBridgeInstrumentationTest {
                 }
               });
               try {
-                await bridge.callAutoJs("fake", "never", [], { timeoutMs: 25 });
+                await bridge.callAutoJs("fake", "never", [], { timeoutMs: 100 });
                 console.log("bridge.timeout.unexpected=true");
               } catch (error) {
                 console.log("bridge.timeout.code=" + error.code + "/" + error.autojs6Code);
@@ -1137,7 +1137,7 @@ class NodeAutoJsBridgeInstrumentationTest {
         )
 
         assertTrue(result.errorMessage.orEmpty() + "\n" + result.stdout, result.succeeded)
-        assertTrue(result.stdout.contains("bridge.timeout.request=fake/never/25"))
+        assertTrue(result.stdout.contains("bridge.timeout.request=fake/never/100"))
         assertTrue(result.stdout.contains("bridge.timeout.code=ERR_AUTOJS6_BRIDGE_TIMEOUT/ERR_AUTOJS6_BRIDGE_TIMEOUT"))
         assertTrue(result.stdout.contains("bridge.timeout.target=fake/never"))
         assertTrue(result.stdout.contains("bridge.timeout.pending=0"))

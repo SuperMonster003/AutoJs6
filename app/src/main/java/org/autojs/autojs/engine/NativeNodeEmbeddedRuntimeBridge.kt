@@ -613,13 +613,17 @@ object NativeNodeEmbeddedRuntimeBridge {
         val elapsedMs = nativeValues["timing.total.ms"].toLongValue()
             .takeIf { it > 0L }
             ?: (SystemClock.elapsedRealtime() - startedAt)
+        val embeddedStdout = nativeValues["embedded_script.stdout"].orEmpty()
+        val embeddedStderr = nativeValues["embedded_script.stderr"].orEmpty()
+        val stdoutCaptureText = nativeValues["stdout_capture.text"].orEmpty()
+        val stderrCaptureText = nativeValues["stderr_capture.text"].orEmpty()
         return EmbeddedScriptResult(
             succeeded = succeeded,
             exitCode = nativeValues["embedded_script.exit_code"]?.toIntOrNull()
                 ?: if (succeeded) 0 else 1,
             resultText = nativeValues["embedded_script.result_text"].takeUnless { it.isNullOrBlank() },
-            stdout = nativeValues["embedded_script.stdout"] ?: nativeValues["stdout_capture.text"].orEmpty(),
-            stderr = nativeValues["embedded_script.stderr"] ?: nativeValues["stderr_capture.text"].orEmpty(),
+            stdout = preferMoreCompleteCapture(embeddedStdout, stdoutCaptureText),
+            stderr = preferMoreCompleteCapture(embeddedStderr, stderrCaptureText),
             errorName = nativeValues["embedded_script.error_name"].takeUnless { it.isNullOrBlank() },
             errorMessage = nativeFailure ?: nativeValues["embedded_script.error_message"].takeUnless { it.isNullOrBlank() },
             errorStack = nativeValues["embedded_script.error_stack"].takeUnless { it.isNullOrBlank() },
@@ -647,6 +651,16 @@ object NativeNodeEmbeddedRuntimeBridge {
             pendingAsyncCallbacks = nativeValues["embedded_script.pending_async_callbacks"].toOptionalInt(),
             pendingCallbacks = nativeValues["embedded_script.pending_callbacks"].toOptionalBoolean(),
         )
+    }
+
+    private fun preferMoreCompleteCapture(embeddedText: String, captureText: String): String {
+        if (embeddedText.isEmpty()) {
+            return captureText
+        }
+        if (captureText.length > embeddedText.length) {
+            return captureText
+        }
+        return embeddedText
     }
 
     private fun failureEmbeddedScriptResult(

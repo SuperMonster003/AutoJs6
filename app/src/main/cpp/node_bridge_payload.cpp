@@ -17,6 +17,12 @@ void putEmbeddedScriptExecutionFields(std::vector<std::string>& payload, const s
     putPayload(payload, "embedded_script.working_directory", jsonStringField(text, "workingDirectory"));
     putPayload(payload, "embedded_script.sandbox_root", jsonStringField(text, "sandboxRoot"));
     putPayload(payload, "embedded_script.current_working_directory", jsonStringField(text, "currentWorkingDirectory"));
+    putPayloadRaw(payload, "embedded_script.stdout", jsonStringField(text, "stdout"));
+    putPayloadRaw(payload, "embedded_script.stderr", jsonStringField(text, "stderr"));
+    putPayload(payload, "embedded_script.stdout.bytes", jsonNumberField(text, "stdoutBytes"));
+    putPayload(payload, "embedded_script.stderr.bytes", jsonNumberField(text, "stderrBytes"));
+    putPayload(payload, "embedded_script.stdout.truncated", jsonBooleanField(text, "stdoutTruncated"));
+    putPayload(payload, "embedded_script.stderr.truncated", jsonBooleanField(text, "stderrTruncated"));
     putPayload(payload, "embedded_script.chdir_failure_reason", jsonStringField(text, "chdirFailureReason"));
     putPayload(payload, "embedded_script.create_require_failure_reason", jsonStringField(text, "createRequireFailureReason"));
     putPayload(payload, "embedded_script.node_version", jsonStringField(text, "nodeVersion"));

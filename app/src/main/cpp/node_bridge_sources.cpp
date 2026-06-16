@@ -5629,6 +5629,97 @@ std::string buildEmbeddedScriptExecutionSource(
     const text = Array.prototype.map.call(values, __autojs6_console_text).join(" ");
     stream.write(text + "\n");
   }
+  const __autojs6_output_capture_text_max = 4096;
+  const __autojs6_output_capture_state = {
+    stdout: "",
+    stderr: "",
+    stdoutBytes: 0,
+    stderrBytes: 0,
+    stdoutTruncated: false,
+    stderrTruncated: false
+  };
+  function __autojs6_output_capture_text(chunk) {
+    if (chunk === undefined || chunk === null) return "";
+    try {
+      if (typeof Buffer === "function" && typeof Buffer.isBuffer === "function" && Buffer.isBuffer(chunk)) {
+        return chunk.toString();
+      }
+    } catch (_) {}
+    if (typeof chunk === "string") return chunk;
+    try {
+      return String(chunk);
+    } catch (_) {
+      return "";
+    }
+  }
+  function __autojs6_output_capture_byte_length(text) {
+    try {
+      if (typeof Buffer === "function" && typeof Buffer.byteLength === "function") {
+        return Buffer.byteLength(text);
+      }
+    } catch (_) {}
+    return text.length;
+  }
+  function __autojs6_output_capture_append(streamName, chunk) {
+    const text = __autojs6_output_capture_text(chunk);
+    const textKey = streamName === "stderr" ? "stderr" : "stdout";
+    const bytesKey = textKey + "Bytes";
+    const truncatedKey = textKey + "Truncated";
+    __autojs6_output_capture_state[bytesKey] += __autojs6_output_capture_byte_length(text);
+    if (__autojs6_output_capture_state[textKey].length >= __autojs6_output_capture_text_max) {
+      if (text.length > 0) __autojs6_output_capture_state[truncatedKey] = true;
+      return;
+    }
+    const available = __autojs6_output_capture_text_max - __autojs6_output_capture_state[textKey].length;
+    const copied = text.slice(0, available);
+    __autojs6_output_capture_state[textKey] += copied;
+    if (copied.length < text.length) {
+      __autojs6_output_capture_state[truncatedKey] = true;
+    }
+  }
+  function __autojs6_install_output_capture() {
+    if (typeof process !== "object" || !process) return;
+    function wrap(streamName, stream) {
+      if (!stream || typeof stream.write !== "function" || stream.__autojs6OutputCaptureWrapped) return;
+      const originalWrite = stream.write;
+      const wrappedWrite = function (chunk) {
+        __autojs6_output_capture_append(streamName, chunk);
+        return originalWrite.apply(this, arguments);
+      };
+      try {
+        Object.defineProperty(wrappedWrite, "__autojs6OriginalWrite", {
+          value: originalWrite,
+          configurable: false,
+          enumerable: false,
+          writable: false
+        });
+      } catch (_) {}
+      try {
+        Object.defineProperty(stream, "write", {
+          value: wrappedWrite,
+          configurable: true,
+          enumerable: false,
+          writable: true
+        });
+      } catch (_) {
+        try {
+          stream.write = wrappedWrite;
+        } catch (_) {
+          return;
+        }
+      }
+      try {
+        Object.defineProperty(stream, "__autojs6OutputCaptureWrapped", {
+          value: true,
+          configurable: false,
+          enumerable: false,
+          writable: false
+        });
+      } catch (_) {}
+    }
+    wrap("stdout", process.stdout);
+    wrap("stderr", process.stderr);
+  }
   function __autojs6_install_console_shim() {
     const existing = typeof globalThis.console === "object" && globalThis.console
       ? globalThis.console
@@ -27555,6 +27646,12 @@ std::string buildEmbeddedScriptExecutionSource(
     fields.workingDirectory = __autojs6_module_root;
     fields.sandboxRoot = __autojs6_resolved_sandbox_root(__autojs6_path_module());
     fields.currentWorkingDirectory = __autojs6_scoped_process_cwd();
+    fields.stdout = __autojs6_output_capture_state.stdout;
+    fields.stderr = __autojs6_output_capture_state.stderr;
+    fields.stdoutBytes = __autojs6_output_capture_state.stdoutBytes;
+    fields.stderrBytes = __autojs6_output_capture_state.stderrBytes;
+    fields.stdoutTruncated = __autojs6_output_capture_state.stdoutTruncated;
+    fields.stderrTruncated = __autojs6_output_capture_state.stderrTruncated;
     fields.chdirFailureReason = __autojs6_chdir_last_failure_reason;
     fields.createRequireFailureReason = __autojs6_create_require_last_failure_reason;
     fields.nodeVersion = __autojs6_node_version();
@@ -27684,6 +27781,7 @@ std::string buildEmbeddedScriptExecutionSource(
     __autojs6_install_safe_globals();
     __autojs6_install_timer_diagnostics();
     __autojs6_install_process_mvp();
+    __autojs6_install_output_capture();
     __autojs6_install_tty_stdio_helpers();
     const __autojs6_main_module = __autojs6_create_module(__autojs6_source_name, null);
     __autojs6_main_module_ref = __autojs6_main_module;

@@ -19512,12 +19512,6 @@ void appendEmbeddedV8UvIsolateLifecycleProbePayload(
         putPayload(payload, "stderr_capture.text", stderrText);
         putPayload(payload, "stderr_capture.truncated", outputCapture.stderrTruncated());
         putPayload(payload, "stderr_capture.contains_expected", stderrContainsExpected);
-        if (scriptExecution) {
-            putPayloadRaw(payload, "embedded_script.stdout", stdoutText);
-            putPayloadRaw(payload, "embedded_script.stderr", stderrText);
-            putPayload(payload, "embedded_script.stdout.bytes", stdoutBytes);
-            putPayload(payload, "embedded_script.stderr.bytes", stderrBytes);
-        }
         if (outputEvents) {
             const bool fdStdoutMatches = !outputEventsResultText.empty() &&
                     containsExpected &&

@@ -55,7 +55,26 @@ std::string jsonStringField(const std::string& text, const char* key) {
     for (size_t i = valueStart + needle.size(); i < text.size(); ++i) {
         const char ch = text[i];
         if (escaped) {
-            value.push_back(ch);
+            switch (ch) {
+                case 'n':
+                    value.push_back('\n');
+                    break;
+                case 'r':
+                    value.push_back('\r');
+                    break;
+                case 't':
+                    value.push_back('\t');
+                    break;
+                case 'b':
+                    value.push_back('\b');
+                    break;
+                case 'f':
+                    value.push_back('\f');
+                    break;
+                default:
+                    value.push_back(ch);
+                    break;
+            }
             escaped = false;
             continue;
         }
