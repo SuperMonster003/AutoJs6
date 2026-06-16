@@ -615,8 +615,8 @@ object NativeNodeEmbeddedRuntimeBridge {
             ?: (SystemClock.elapsedRealtime() - startedAt)
         val embeddedStdout = nativeValues["embedded_script.stdout"].orEmpty()
         val embeddedStderr = nativeValues["embedded_script.stderr"].orEmpty()
-        val stdoutCaptureText = nativeValues["stdout_capture.text"].orEmpty()
-        val stderrCaptureText = nativeValues["stderr_capture.text"].orEmpty()
+        val stdoutCaptureText = nativeValues.captureText("stdout_capture")
+        val stderrCaptureText = nativeValues.captureText("stderr_capture")
         return EmbeddedScriptResult(
             succeeded = succeeded,
             exitCode = nativeValues["embedded_script.exit_code"]?.toIntOrNull()
@@ -685,8 +685,8 @@ object NativeNodeEmbeddedRuntimeBridge {
             succeeded = false,
             exitCode = 1,
             resultText = null,
-            stdout = resultNativeValues["stdout_capture.text"].orEmpty(),
-            stderr = resultNativeValues["stderr_capture.text"].orEmpty(),
+            stdout = resultNativeValues.captureText("stdout_capture"),
+            stderr = resultNativeValues.captureText("stderr_capture"),
             errorName = nativeError?.javaClass?.simpleName ?: "EmbeddedScriptExecutionError",
             errorMessage = message,
             errorStack = nativeError?.stackTraceToString(),
@@ -3842,12 +3842,12 @@ object NativeNodeEmbeddedRuntimeBridge {
             consoleJsSpinEventLoopResult = nativeValues["console_js.spin_event_loop.result"].takeUnless { it.isNullOrBlank() },
             stdoutCaptureProbe = probe("stdout_capture", skippedDetails.stdoutCaptureSkippedDetail),
             stdoutCaptureBytes = nativeValues["stdout_capture.bytes"]?.toLongOrNull() ?: 0L,
-            stdoutCaptureText = nativeValues["stdout_capture.text"].takeUnless { it.isNullOrBlank() },
+            stdoutCaptureText = nativeValues.captureText("stdout_capture").takeUnless { it.isBlank() },
             stdoutCaptureTextMax = nativeValues["stdout_capture.text.max"]?.toLongOrNull() ?: 0L,
             stdoutCaptureTruncated = nativeValues["stdout_capture.truncated"].toBooleanValue(),
             stdoutCaptureContainsExpected = nativeValues["stdout_capture.contains_expected"].toBooleanValue(),
             stderrCaptureBytes = nativeValues["stderr_capture.bytes"]?.toLongOrNull() ?: 0L,
-            stderrCaptureText = nativeValues["stderr_capture.text"].takeUnless { it.isNullOrBlank() },
+            stderrCaptureText = nativeValues.captureText("stderr_capture").takeUnless { it.isBlank() },
             stderrCaptureTextMax = nativeValues["stderr_capture.text.max"]?.toLongOrNull() ?: 0L,
             stderrCaptureTruncated = nativeValues["stderr_capture.truncated"].toBooleanValue(),
             stderrCaptureContainsExpected = nativeValues["stderr_capture.contains_expected"].toBooleanValue(),
@@ -15344,6 +15344,25 @@ object NativeNodeEmbeddedRuntimeBridge {
                 entry.substring(0, separator) to entry.substring(separator + 1)
             }
         }.toMap()
+    }
+
+    private fun Map<String, String>.captureText(prefix: String): String {
+        val direct = this["$prefix.text"].orEmpty()
+        if (direct.isNotEmpty()) {
+            return direct
+        }
+        return this["$prefix.text.hex"].decodeHexUtf8OrEmpty()
+    }
+
+    private fun String?.decodeHexUtf8OrEmpty(): String {
+        val hex = this?.takeIf { it.isNotEmpty() && it.length % 2 == 0 } ?: return ""
+        val bytes = ByteArray(hex.length / 2)
+        for (index in bytes.indices) {
+            val high = hex[index * 2].digitToIntOrNull(16) ?: return ""
+            val low = hex[index * 2 + 1].digitToIntOrNull(16) ?: return ""
+            bytes[index] = ((high shl 4) or low).toByte()
+        }
+        return String(bytes, StandardCharsets.UTF_8)
     }
 
     private fun parseSymbolProbes(values: Map<String, String>): List<SymbolProbe> {

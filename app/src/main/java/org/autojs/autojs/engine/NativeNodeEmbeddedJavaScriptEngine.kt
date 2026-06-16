@@ -2,6 +2,7 @@ package org.autojs.autojs.engine
 
 import android.content.Context
 import android.util.Log
+import org.autojs.autojs.core.console.GlobalConsole
 import org.json.JSONObject
 import org.autojs.autojs.engine.encryption.ScriptEncryption
 import org.autojs.autojs.pio.PFiles
@@ -211,12 +212,38 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         }
         val console = runCatching { runtime.console }.getOrNull()
         text.lineSequence().forEach { line ->
-            if (console != null) {
-                console.println(level, line)
-            } else {
-                Log.println(level, TAG, line)
+            if (line.isEmpty()) {
+                printScriptOutputChunk(level, line, console)
+                return@forEach
+            }
+            var start = 0
+            while (start < line.length) {
+                val end = outputChunkEnd(line, start)
+                printScriptOutputChunk(level, line.substring(start, end), console)
+                start = end
             }
         }
+    }
+
+    private fun printScriptOutputChunk(level: Int, chunk: String, console: GlobalConsole?) {
+        if (console != null) {
+            console.println(level, chunk)
+        } else {
+            Log.println(level, TAG, chunk)
+        }
+    }
+
+    private fun outputChunkEnd(line: String, start: Int): Int {
+        val maxEnd = (start + SCRIPT_OUTPUT_LOG_LINE_MAX_CHARS).coerceAtMost(line.length)
+        if (maxEnd >= line.length) {
+            return line.length
+        }
+        for (index in maxEnd - 1 downTo start + 1) {
+            if (line[index].isWhitespace()) {
+                return index + 1
+            }
+        }
+        return maxEnd
     }
 
     private fun buildEmbeddedScriptRequest(source: JavaScriptSource): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest {
@@ -963,6 +990,7 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
 
     private companion object {
         private const val TAG = "NativeNodeEmbeddedJavaScriptEngine"
+        private const val SCRIPT_OUTPUT_LOG_LINE_MAX_CHARS = 1800
         const val DEFAULT_SOURCE_NAME = "<embedded-user-script.js>"
         const val BOM = "\uFEFF"
         const val SHEBANG_PREFIX = "#!"

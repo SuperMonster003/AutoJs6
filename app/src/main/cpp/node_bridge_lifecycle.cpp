@@ -19505,10 +19505,12 @@ void appendEmbeddedV8UvIsolateLifecycleProbePayload(
                         : "stdout fd/pipe capture did not contain expected text"
         );
         putPayload(payload, "stdout_capture.bytes", stdoutBytes);
+        putPayload(payload, "stdout_capture.text.hex", hexEncodeBytes(stdoutText));
         putPayload(payload, "stdout_capture.text", stdoutText);
         putPayload(payload, "stdout_capture.truncated", outputCapture.stdoutTruncated());
         putPayload(payload, "stdout_capture.contains_expected", containsExpected);
         putPayload(payload, "stderr_capture.bytes", stderrBytes);
+        putPayload(payload, "stderr_capture.text.hex", hexEncodeBytes(stderrText));
         putPayload(payload, "stderr_capture.text", stderrText);
         putPayload(payload, "stderr_capture.truncated", outputCapture.stderrTruncated());
         putPayload(payload, "stderr_capture.contains_expected", stderrContainsExpected);

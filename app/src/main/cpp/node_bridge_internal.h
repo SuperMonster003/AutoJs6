@@ -974,6 +974,7 @@ std::string classifyDlopenFailure(const char* libraryName, const std::string& er
 std::string buildDlopenFailureMessage(const char* libraryName, const char* rawError);
 std::string toStdString(JNIEnv* env, jstring value);
 void putPayloadRaw(std::vector<std::string>& payload, const std::string& key, const std::string& value);
+std::string hexEncodeBytes(const std::string& value);
 std::string jsonStringLiteral(const std::string& value);
 std::string sanitizeSourceUrl(const std::string& value);
 std::string buildEmbeddedModuleSourcesLiteral(const std::vector<std::pair<std::string, std::string>>& moduleSources);

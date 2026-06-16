@@ -111,6 +111,17 @@ void putPayloadRaw(std::vector<std::string>& payload, const std::string& key, co
     payload.push_back(key + "=" + value);
 }
 
+std::string hexEncodeBytes(const std::string& value) {
+    static constexpr char kHexDigits[] = "0123456789abcdef";
+    std::string result;
+    result.reserve(value.size() * 2);
+    for (const unsigned char byte : value) {
+        result.push_back(kHexDigits[(byte >> 4) & 0x0f]);
+        result.push_back(kHexDigits[byte & 0x0f]);
+    }
+    return result;
+}
+
 
 std::vector<std::string> toStringVector(JNIEnv* env, jobjectArray values, const char* label) {
     std::vector<std::string> result;
