@@ -23,6 +23,7 @@
     var actionModeNotifyTimer = null;
     var lastActionModeSelectedText = "";
     var nativeActionModeActive = false;
+    var selectionMenuSuppressed = false;
     var lastStateNotifyAt = 0;
     var lastTextNotifyAt = 0;
     var lastCursorNotifyAt = 0;
@@ -245,6 +246,52 @@
         }
     }
 
+    function setSelectionMenuSuppressed(suppressed) {
+        suppressed = !!suppressed;
+        if (selectionMenuSuppressed === suppressed) {
+            return;
+        }
+        selectionMenuSuppressed = suppressed;
+        if (document && document.body && document.body.classList) {
+            document.body.classList.toggle("autojs6-selection-menu-suppressed", suppressed);
+        }
+    }
+
+    function finishNativeActionMode(eventName) {
+        var hadHostActionMode = nativeActionModeActive || !!lastActionModeSelectedText;
+        if (actionModeNotifyTimer !== null) {
+            clearTimeout(actionModeNotifyTimer);
+            actionModeNotifyTimer = null;
+        }
+        setNativeActionModeActive(false);
+        if (lastActionModeSelectedText) {
+            lastActionModeSelectedText = "";
+            dispatchSelectionActionModeState(eventName || "selectionActionModeFinished");
+        }
+        if (hadHostActionMode) {
+            callBridge("finishActionMode");
+        }
+    }
+
+    function suppressSelectionActionModeMenu(reason) {
+        if (!hasActiveSelection()) {
+            setSelectionMenuSuppressed(false);
+            finishNativeActionMode("selectionActionModeFinished");
+            return;
+        }
+        var alreadySuppressed = selectionMenuSuppressed &&
+            !nativeActionModeActive &&
+            !lastActionModeSelectedText;
+        setSelectionMenuSuppressed(true);
+        finishNativeActionMode("selectionActionModeSuppressed");
+        if (!alreadySuppressed) {
+            callBridge("notifyEvent", [
+                "selectionActionModeSuppressed",
+                JSON.stringify({ reason: String(reason || "") })
+            ]);
+        }
+    }
+
     function getActionModeFallbackRect() {
         var width = Math.max(
             1,
@@ -321,12 +368,12 @@
         actionModeNotifyTimer = null;
         var selection = getSelectionState();
         if (!selection.text) {
-            setNativeActionModeActive(false);
-            if (lastActionModeSelectedText) {
-                lastActionModeSelectedText = "";
-                dispatchSelectionActionModeState("selectionActionModeFinished");
-                callBridge("finishActionMode");
-            }
+            setSelectionMenuSuppressed(false);
+            finishNativeActionMode("selectionActionModeFinished");
+            return;
+        }
+        if (selectionMenuSuppressed) {
+            finishNativeActionMode("selectionActionModeSuppressed");
             return;
         }
         var rect = getSelectionScreenRect();
@@ -402,6 +449,7 @@
     function notifyScrollChanged() {
         if (hasActiveSelection() && Date.now() > programmaticScrollUntil) {
             lastSelectionBrowseScrollAt = Date.now();
+            suppressSelectionActionModeMenu("browse_scroll");
         }
         if (scrollNotifyTimer !== null) {
             clearTimeout(scrollNotifyTimer);
@@ -410,6 +458,31 @@
             scrollNotifyTimer = null;
             notifyStateChanged("scrollChanged");
         }, 80);
+    }
+
+    function wrapScrollMethod(owner, methodName) {
+        if (!owner || typeof owner[methodName] !== "function" || owner[methodName].__autojs6ScrollHooked) {
+            return;
+        }
+        var original = owner[methodName];
+        var wrapped = function() {
+            var result = original.apply(this, arguments);
+            notifyScrollChanged();
+            return result;
+        };
+        wrapped.__autojs6ScrollHooked = true;
+        wrapped.__autojs6Original = original;
+        owner[methodName] = wrapped;
+    }
+
+    function installScrollChangeHooks() {
+        wrapScrollMethod(session, "setScrollTop");
+        wrapScrollMethod(session, "setScrollLeft");
+        if (editor && editor.renderer) {
+            wrapScrollMethod(editor.renderer, "scrollToY");
+            wrapScrollMethod(editor.renderer, "scrollToX");
+        }
+        wrapScrollMethod(editor, "scrollToLine");
     }
 
     function dispatchTextChanged(includeText) {
@@ -499,6 +572,7 @@
     }
 
     function notifySelectionChanged() {
+        setSelectionMenuSuppressed(false);
         var selection = getSelectionState();
         if (selection.text || lastActionModeSelectedText) {
             setNativeActionModeActive(true);
@@ -507,6 +581,15 @@
             setNativeActionModeActive(false);
         }
         scheduleActionModeSelectionUpdate();
+    }
+
+    function handleDocumentVisibilityChanged() {
+        if (document.hidden || document.visibilityState === "hidden") {
+            suppressSelectionActionModeMenu("document_hidden");
+            return;
+        }
+        scheduleResize("document_visible");
+        notifyStateChanged("document_visible");
     }
 
     function notifyBreakpointChanged(row, enabled) {
@@ -733,6 +816,7 @@
         }
         firstVisibleLine = clampRow(firstVisibleLine);
         firstVisibleColumn = Math.max(0, Number(firstVisibleColumn) || 0);
+        programmaticScrollUntil = Date.now() + 300;
         if (editor.scrollToLine) {
             editor.scrollToLine(firstVisibleLine, false, false, null);
         }
@@ -1093,11 +1177,16 @@
 
         session.on("changeScrollTop", notifyScrollChanged);
         session.on("changeScrollLeft", notifyScrollChanged);
+        installScrollChangeHooks();
 
         editor.selection.on("changeCursor", notifyCursorChanged);
         editor.selection.on("changeSelection", notifySelectionChanged);
         global.addEventListener("resize", function() {
             scheduleResize("window_resize");
+        });
+        document.addEventListener("visibilitychange", handleDocumentVisibilityChanged);
+        global.addEventListener("pagehide", function() {
+            suppressSelectionActionModeMenu("page_hidden");
         });
 
         editor.on("guttermousedown", function(event) {

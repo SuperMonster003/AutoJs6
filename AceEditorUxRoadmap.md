@@ -55,7 +55,7 @@ Acceptance:
 - [x] Keep the floating action mode near the selection instead of jumping to the
   upper-left editor area.
 - [x] Prevent transient short-menu flashes while dragging selection handles.
-- [ ] Prevent stale upper-left menus after scroll, app switch, or return.
+- [x] Prevent stale upper-left menus after scroll, app switch, or return.
 - [ ] Investigate Sony XQ-AT72 right-edge back gesture touch propagation into
   ACE long-press selection.
 - [ ] Add device notes for behavior that also reproduces in Auto.js Pro.
@@ -73,6 +73,9 @@ Notes:
   and suppresses ACE's `.ace_mobile-menu` while that path is active. If ACE
   cannot measure the selection rect, it uses a non-zero viewport fallback anchor
   instead of the upper-left corner.
+- Browsing code while a selection is active now suppresses both the Android
+  `ActionMode` and ACE short menu until the selection changes, avoiding stale
+  menus after scroll or app visibility transitions.
 
 ## Gate UX-3: Input, Keyboard, And Read-Only Mode
 

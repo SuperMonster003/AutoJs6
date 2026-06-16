@@ -212,6 +212,7 @@ class AceCodeEditorSmokeTest {
         waitUntil("ACE selection should activate native action-mode host class") {
             val state = evaluateJsonObject(editor, ACTION_MODE_MENU_STATE_SCRIPT)
             state.getBoolean("nativeActionModeActive") &&
+                !state.getBoolean("selectionMenuSuppressed") &&
                 state.getString("mobileMenuDisplay") == "none" &&
                 state.getString("mobileMenuPointerEvents") == "none"
         }
@@ -222,6 +223,53 @@ class AceCodeEditorSmokeTest {
         waitUntil("Clearing ACE selection should release native action-mode host class") {
             val state = evaluateJsonObject(editor, ACTION_MODE_MENU_STATE_SCRIPT)
             !state.getBoolean("nativeActionModeActive") &&
+                !state.getBoolean("selectionMenuSuppressed") &&
+                state.getString("mobileMenuDisplay") != "none"
+        }
+    }
+
+    @Test
+    fun browsingSelectedTextSuppressesStaleActionModeMenus() {
+        val editor = launchReadyEditor()
+        val initialText = (0 until 120).joinToString(separator = "\n") { index ->
+            "line ${index.toString().padStart(3, '0')} alpha beta gamma"
+        } + "\n"
+
+        runOnMainSync {
+            editor.setText(initialText)
+        }
+        waitForEditorText(editor, initialText, "ACE text should be ready before selected-scroll smoke")
+
+        runOnMainSync {
+            editor.selectRange(0, 5)
+        }
+        waitUntil("ACE selection should activate action mode before browse scroll") {
+            evaluateJsonObject(editor, ACTION_MODE_MENU_STATE_SCRIPT).getBoolean("nativeActionModeActive")
+        }
+
+        SystemClock.sleep(PROGRAMMATIC_SCROLL_SUPPRESS_DELAY_MS)
+        val scrollResult = evaluateJsonObject(editor, SCROLL_SELECTED_TEXT_SCRIPT)
+        var lastState = JSONObject()
+        try {
+            waitUntil("Browsing selected ACE text should suppress stale action-mode menus") {
+                val state = evaluateJsonObject(editor, ACTION_MODE_MENU_STATE_SCRIPT)
+                lastState = state
+                !state.getBoolean("nativeActionModeActive") &&
+                    state.getBoolean("selectionMenuSuppressed") &&
+                    state.getString("mobileMenuDisplay") == "none" &&
+                    state.getString("mobileMenuPointerEvents") == "none"
+            }
+        } catch (error: AssertionError) {
+            fail("Browsing selected ACE text should suppress stale action-mode menus; scroll=$scrollResult state=$lastState")
+        }
+
+        runOnMainSync {
+            editor.selectRange(0, 0)
+        }
+        waitUntil("Clearing ACE selection should release stale-menu suppression") {
+            val state = evaluateJsonObject(editor, ACTION_MODE_MENU_STATE_SCRIPT)
+            !state.getBoolean("nativeActionModeActive") &&
+                !state.getBoolean("selectionMenuSuppressed") &&
                 state.getString("mobileMenuDisplay") != "none"
         }
     }
@@ -1416,6 +1464,7 @@ class AceCodeEditorSmokeTest {
         private const val BACKGROUND_RESTORE_DELAY_MS = 500L
         private const val IME_SHOW_DELAY_MS = 500L
         private const val IME_HIDE_DELAY_MS = 200L
+        private const val PROGRAMMATIC_SCROLL_SUPPRESS_DELAY_MS = 350L
         private const val POLL_INTERVAL_MS = 50L
         private val ACE_CURSOR_VISIBILITY_SCRIPT = """
             (function() {
@@ -1464,8 +1513,29 @@ class AceCodeEditorSmokeTest {
                 var style = window.getComputedStyle(menu);
                 return JSON.stringify({
                     nativeActionModeActive: document.body.classList.contains("autojs6-native-action-mode"),
+                    selectionMenuSuppressed: document.body.classList.contains("autojs6-selection-menu-suppressed"),
                     mobileMenuDisplay: style.display,
                     mobileMenuPointerEvents: style.pointerEvents
+                });
+            })();
+        """.trimIndent()
+        private val SCROLL_SELECTED_TEXT_SCRIPT = """
+            (function() {
+                if (!window.editor || !editor.renderer) {
+                    return JSON.stringify({ scrolled: false, reason: "missing_editor" });
+                }
+                var session = editor.getSession ? editor.getSession() : editor.session;
+                var lineHeight = editor.renderer.lineHeight || 16;
+                var targetTop = lineHeight * 80;
+                if (session && session.setScrollTop) {
+                    session.setScrollTop(targetTop);
+                } else if (editor.renderer.scrollToY) {
+                    editor.renderer.scrollToY(targetTop);
+                }
+                return JSON.stringify({
+                    scrolled: true,
+                    targetTop: targetTop,
+                    scrollTop: session && session.getScrollTop ? session.getScrollTop() : editor.renderer.scrollTop
                 });
             })();
         """.trimIndent()
