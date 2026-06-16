@@ -93,7 +93,7 @@ Manual device gate:
   validation.
 - [x] Renderer-gone and initialization fatal fallback still work in
   device/debug-hook validation.
-- [ ] Native editor behavior has no regression from the ACE host work.
+- [x] Native editor behavior has no regression from the ACE host work.
 
 ## Phase 9 Tasks
 
@@ -234,20 +234,20 @@ Unsaved recent text preservation is covered by the ready-timeout hook.
 
 ### Gate 9: Native Regression
 
-- [ ] Set Native editor.
-- [ ] Open and edit a file.
-- [ ] Show and hide the keyboard.
-- [ ] Save.
-- [ ] Search and replace.
-- [ ] Add and remove breakpoints.
-- [ ] Open a large file.
-- [ ] Run a script.
+- [x] Set Native editor.
+- [x] Open and edit a file.
+- [x] Show and hide the keyboard.
+- [x] Save.
+- [x] Search and replace.
+- [x] Add and remove breakpoints.
+- [x] Open a large file.
+- [x] Run a script.
 
 Acceptance:
 
-- [ ] Native editor behavior is not degraded.
-- [ ] Native IME workaround behavior remains Native-only.
-- [ ] Native auto-completion and large-file loading still work.
+- [x] Native editor behavior is not degraded.
+- [x] Native IME workaround behavior remains Native-only.
+- [x] Native auto-completion and large-file loading still work.
 
 ### Gate 10: Publishing Cleanup
 

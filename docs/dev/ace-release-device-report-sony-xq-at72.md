@@ -63,8 +63,8 @@ path has a recorded result.
 | JS-init fatal fallback | DEVICE SMOKE PASS | `forceJsInitThrow` reached Native with loaded file text and `JS_INIT_ERROR` diagnostics. |
 | Renderer-gone fallback | DEVICE SMOKE PASS | `forceRendererGoneFallback` reached Native with loaded file text and `RENDER_PROCESS_GONE` diagnostics without querying a dead WebView. |
 | Asset-missing fallback | DEVICE SMOKE PASS | `forceAssetMissing` routed directly to Native and preserved an `ASSET_MISSING` diagnostics snapshot. |
-| Large-file Native routing | TBD | |
-| Native editor regression | TBD | |
+| Large-file Native routing | DEVICE SMOKE PASS | Native large-file instrumentation loaded a script larger than the 512 KiB threshold through the Native editor, preserving length, prefix/suffix text, clean state, and Native engine routing. |
+| Native editor regression | DEVICE SMOKE PASS | Instrumentation opened Native editor, edited, showed/hidden IME, saved, searched/replaced, toggled breakpoints, opened a large file, and ran a script without ACE fallback dependency. |
 | Diagnostics export | TBD | |
 | Publishing cleanup audit | STATIC PASS | See `docs/dev/ace-release-publishing-cleanup.md`; final package/label restore is still pending before merge or non-test release. |
 
@@ -81,6 +81,7 @@ Record copied ACE diagnostics for every failure or ambiguous result.
 | Gate 6 completion/tooltip/LSP smoke | Instrumentation PASS | `AceCodeEditorSmokeTest` ran 5/5 tests on Sony XQ-AT72 with no failures, including popup completion accept, tooltip local rendering, LSP disabled state, and LSP enabled no-server static fallback. |
 | Gate 7 rotation/restore/switching smoke | Instrumentation PASS | `AceCodeEditorSmokeTest` ran 6/6 tests on Sony XQ-AT72 with no failures, including `EditActivity` rotation, background restore, save, ACE -> Native -> ACE switching, dirty-state checks, cursor visibility checks, and no ACE fallback diagnostics. |
 | Gate 8 fallback hook smoke | Instrumentation PASS | `AceCodeEditorSmokeTest` ran 8/8 tests on Sony XQ-AT72 with no failures, including ready-timeout TextMirror preservation, startup fatal fallback hooks, and diagnostics checks for `READY_TIMEOUT`, `JS_INIT_ERROR`, `RENDER_PROCESS_GONE`, and `ASSET_MISSING`. |
+| Gate 9 Native regression smoke | Instrumentation PASS | `NativeEditorRegressionSmokeTest` ran 2/2 tests on Sony XQ-AT72 with no failures, including Native edit/save/search/replace/breakpoint/run coverage and large-file loading above the 512 KiB threshold. |
 
 ## Gate 2 Notes
 
@@ -347,15 +348,44 @@ Record copied ACE diagnostics for every failure or ambiguous result.
     `EditorView` can record asset-missing diagnostics without depending on the
     concrete ACE view class.
 
+## Gate 9 Notes
+
+- Time: 2026-06-16 09:49 CST.
+- Command:
+  `.\gradlew.bat :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.ui.edit.editor.NativeEditorRegressionSmokeTest"`
+- Result: PASS on Sony XQ-AT72; 2 tests completed, 0 skipped, 0 failed.
+- Native core workflow smoke:
+  - The instrumentation test selected the Native editor before launch and
+    opened a real `EditActivity` on a temporary JavaScript file.
+  - Direct text insertion appended an edit marker, preserved the Native engine,
+    and set both editor dirty state and sticky save dirty state.
+  - Best-effort IME show/hide kept the editor on Native. The test also created
+    and shut down the Native auto-completion provider.
+  - Search/replace updated the expected token. Breakpoint add/remove changed
+    `breakpointsSnapshot` for line 1 as expected.
+  - Save wrote the same text to disk and cleared dirty state.
+  - Run returned a script execution, entered the running state, and returned to
+    stopped state after `forceStop()`.
+- Native large-file smoke:
+  - The instrumentation test created a temporary script larger than
+    `EditorTextLoadPolicy.LARGE_FILE_THRESHOLD_BYTES` (512 KiB).
+  - The real `EditActivity` stayed on the Native engine, completed loading,
+    preserved the exact text length, matched prefix/suffix samples, reported
+    more than 2000 lines, and remained clean.
+- Coverage note: this is an instrumentation smoke for Native regression. It is
+  not a substitute for later manual Native UI exploration if a human-observed
+  regression appears.
+
 ## Blockers
 
 ### P0
 
 - No automated P0 blocker found in preflight. Gate 2, Gate 3, Gate 4, Gate 6,
-  Gate 7, and Gate 8 device smoke found no P0 first-paint, file-open, IME,
+  Gate 7, Gate 8, and Gate 9 device smoke found no P0 first-paint, file-open, IME,
   tap-anchor, keyboard stress, completion, tooltip, LSP fallback, rotation,
   restore, engine-switching, fallback hook, TextMirror, diagnostics, or
-  bridge-event-storm blocker.
+  bridge-event-storm blocker. Gate 9 also found no P0 Native editor edit/save,
+  search/replace, breakpoint, run, auto-completion, or large-file regression.
 
 ### P1
 
