@@ -83,14 +83,14 @@ Acceptance:
 
 ## Gate UX-4: Completion And Signature Help
 
-- [ ] Add ECMAScript built-in function parameter/signature help.
-- [ ] Prioritize common built-ins such as `Function.prototype.apply`.
-- [ ] Keep static completion working when LSP is disabled or unavailable.
+- [x] Add ECMAScript built-in function parameter/signature help.
+- [x] Prioritize common built-ins such as `Function.prototype.apply`.
+- [x] Keep static completion working when LSP is disabled or unavailable.
 
 Acceptance:
 
-- [ ] Built-in signature help appears without requiring LSP.
-- [ ] Tooltip/signature failures do not fallback the whole editor.
+- [x] Built-in signature help appears without requiring LSP.
+- [x] Tooltip/signature failures do not fallback the whole editor.
 
 ## Gate UX-5: ACE Shortcut Panel And Action Favorites
 

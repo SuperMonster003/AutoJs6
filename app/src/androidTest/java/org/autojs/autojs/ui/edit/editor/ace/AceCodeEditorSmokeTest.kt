@@ -461,6 +461,47 @@ class AceCodeEditorSmokeTest {
     }
 
     @Test
+    fun ecmaScriptBuiltInSignatureHelpStaysStaticAndLocal() {
+        val editor = launchReadyEditor(lspEnabled = false)
+        val text = "Function.prototype.apply(this, args);\n"
+        runOnMainSync {
+            editor.setText(text)
+        }
+        waitForEditorText(editor, text, "ACE text should be ready before signature help smoke")
+
+        val result = evaluateJsonObject(
+            editor,
+            """
+                (function() {
+                    var column = "Function.prototype.apply(this, ".length;
+                    var shown = window.AutoJsAce.showSignatureHelp(0, column);
+                    return JSON.stringify({
+                        shown: shown,
+                        help: window.AutoJsAce.getSignatureHelp(0, column),
+                        state: window.AutoJsAce.getSignatureHelpState()
+                    });
+                })();
+            """.trimIndent(),
+        )
+
+        assertTrue("ACE built-in signature help should show for Function.prototype.apply", result.getBoolean("shown"))
+        val help = result.getJSONObject("help")
+        assertEquals("Function.prototype.apply", help.getString("caption"))
+        assertEquals("apply(thisArg: any, argArray?: any): any", help.getString("signature"))
+        assertEquals(1, help.getInt("activeParameter"))
+        val state = result.getJSONObject("state")
+        assertTrue(state.getBoolean("domCreated"))
+        assertTrue(state.getBoolean("visible"))
+        assertEquals("apply(thisArg: any, argArray?: any): any", state.getString("signature"))
+        assertEquals(1, state.getInt("activeParameter"))
+
+        val snapshot = runOnMainSync { editor.createDiagnosticsSnapshot() }
+        assertEquals(AceHealthState.RUNNING.name, snapshot.aceHealthState)
+        assertNull(snapshot.lastFailureType)
+        assertFalse(snapshot.runtimeEventHistory.any { it.contains("fallback") })
+    }
+
+    @Test
     fun editActivityRotationRestoreAndEngineSwitchPreserveTextAndDirtyState() {
         val file = File(
             instrumentation.targetContext.cacheDir,

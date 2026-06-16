@@ -43,6 +43,10 @@ const CHECKS = [
     label: "ACE tooltip tests",
     script: "tools/ace-tooltip/test-tooltip.mjs",
   },
+  {
+    label: "ACE signature help tests",
+    script: "tools/ace-signature/test-signature-help.mjs",
+  },
 ];
 
 for (const check of CHECKS) {

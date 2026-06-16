@@ -8,6 +8,7 @@
     var staticCompleter = null;
     var lspClient = null;
     var tooltipController = null;
+    var signatureHelpController = null;
     var dirty = false;
     var suppressChange = false;
     var breakpoints = [];
@@ -1061,6 +1062,24 @@
             },
             getTooltipState: function() {
                 return tooltipController ? tooltipController.getState() : null;
+            },
+            getSignatureHelp: function(row, column) {
+                return global.AutoJsAceSignatureHelp ?
+                    global.AutoJsAceSignatureHelp.findSignatureHelp(session, { row: row, column: column }) :
+                    null;
+            },
+            showSignatureHelp: function(row, column) {
+                return signatureHelpController ?
+                    signatureHelpController.showAtPosition({ row: row, column: column }) :
+                    false;
+            },
+            hideSignatureHelp: function() {
+                if (signatureHelpController) {
+                    signatureHelpController.hide();
+                }
+            },
+            getSignatureHelpState: function() {
+                return signatureHelpController ? signatureHelpController.getState() : null;
             }
         };
 
@@ -1097,6 +1116,20 @@
                 });
             } catch (error) {
                 notifyRecoverableError("tooltip", error);
+            }
+        }
+
+        if (global.AutoJsAceSignatureHelp) {
+            try {
+                signatureHelpController = global.AutoJsAceSignatureHelp.install({
+                    editor: editor,
+                    session: session,
+                    notifyError: function(message, error) {
+                        notifyRecoverableError(message, error);
+                    }
+                });
+            } catch (error) {
+                notifyRecoverableError("signatureHelp", error);
             }
         }
 

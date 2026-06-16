@@ -19,6 +19,7 @@ const CSS_PATH = path.join(ACE_ROOT, "autojs6", "autojs6.css");
 const BRIDGE_PATH = path.join(ACE_ROOT, "autojs6", "autojs6_ace_bridge.js");
 const LSP_CLIENT_PATH = path.join(ACE_ROOT, "autojs6", "autojs6_lsp_client.js");
 const TOOLTIP_PATH = path.join(ACE_ROOT, "autojs6", "autojs6_tooltip.js");
+const SIGNATURE_HELP_PATH = path.join(ACE_ROOT, "autojs6", "autojs6_signature_help.js");
 const ACE_CODE_EDITOR_PATH = path.join(
   PROJECT_ROOT,
   "app",
@@ -86,6 +87,7 @@ const css = read(CSS_PATH);
 const bridge = read(BRIDGE_PATH);
 const lspClient = read(LSP_CLIENT_PATH);
 const tooltip = read(TOOLTIP_PATH);
+const signatureHelp = read(SIGNATURE_HELP_PATH);
 const aceCodeEditor = read(ACE_CODE_EDITOR_PATH);
 const diagnostics = read(DIAGNOSTICS_PATH);
 
@@ -98,6 +100,7 @@ assertOrder(
     '<script src="./autojs6/autojs6_completer.js"></script>',
     '<script src="./autojs6/autojs6_lsp_client.js"></script>',
     '<script src="./autojs6/autojs6_tooltip.js"></script>',
+    '<script src="./autojs6/autojs6_signature_help.js"></script>',
     '<script src="./autojs6/autojs6_ace_bridge.js"></script>',
   ],
   "ACE editor bootstrap order",
@@ -119,6 +122,8 @@ assertMatch(css, /\.ace_mobile-menu\s*\{[\s\S]*z-index:\s*20/, "mobile menu rema
 assertMatch(css, /body\.ace-theme-dark \.ace_marker-layer \.ace_selection\s*\{[\s\S]*rgba\(88,\s*166,\s*255,\s*0\.42\)/, "dark selection contrast");
 assertMatch(css, /\.autojs6_hover_tooltip\s*\{[\s\S]*pointer-events:\s*none/, "ACE hover tooltip must not steal touch input");
 assertMatch(css, /body\.ace-theme-dark \.autojs6_hover_tooltip\s*\{[\s\S]*background:\s*#20242b/, "ACE hover tooltip dark style");
+assertMatch(css, /\.autojs6_signature_tooltip\s*\{[\s\S]*pointer-events:\s*none/, "ACE signature tooltip must not steal touch input");
+assertMatch(css, /body\.ace-theme-dark \.autojs6_signature_tooltip\s*\{[\s\S]*background:\s*#f7f7f7/, "ACE signature tooltip dark editor contrast");
 if (css.includes(".ace_mobile-menu {\n    display: none")) {
   throw new Error("ACE mobile menu must not be globally hidden");
 }
@@ -156,6 +161,11 @@ assertIncludes(bridge, "getLspHover: function(row, column)", "ACE LSP hover publ
 assertIncludes(bridge, "global.AutoJsAceTooltip.install", "ACE tooltip install");
 assertIncludes(bridge, "showLspTooltip: function(row, column)", "ACE tooltip public show API");
 assertIncludes(bridge, "getTooltipState: function()", "ACE tooltip state public API");
+assertIncludes(bridge, "var signatureHelpController = null;", "ACE signature help bridge slot");
+assertIncludes(bridge, "global.AutoJsAceSignatureHelp.install", "ACE signature help install");
+assertIncludes(bridge, "getSignatureHelp: function(row, column)", "ACE signature help public lookup API");
+assertIncludes(bridge, "showSignatureHelp: function(row, column)", "ACE signature help public show API");
+assertIncludes(bridge, "getSignatureHelpState: function()", "ACE signature help state public API");
 
 assertIncludes(lspClient, "global.AutoJsAceLspClient", "ACE LSP client global");
 assertIncludes(lspClient, "completionProvider: serverReady ? \"server\" : COMPLETION_PROVIDER_STATIC", "ACE LSP completion fallback provider");
@@ -176,6 +186,13 @@ assertIncludes(tooltip, "domCreated: !!element", "ACE tooltip lazy DOM state");
 assertIncludes(tooltip, "markdownRenderer: markdownLoaded ? \"safe-subset\" : \"not-loaded\"", "ACE tooltip markdown state");
 if (tooltip.includes("fetch(") || tooltip.includes("XMLHttpRequest") || tooltip.includes("innerHTML = hover.docText")) {
   throw new Error("Tooltip must keep markdown local and escaped");
+}
+
+assertIncludes(signatureHelp, "Function.prototype.apply", "ECMAScript apply signature help");
+assertIncludes(signatureHelp, "findSignatureHelpFromText", "ACE signature help pure lookup");
+assertIncludes(signatureHelp, "global.AutoJsAceSignatureHelp", "ACE signature help global");
+if (signatureHelp.includes("fetch(") || signatureHelp.includes("XMLHttpRequest") || signatureHelp.includes("eval(")) {
+  throw new Error("Signature help must stay local and parser-only");
 }
 
 assertIncludes(aceCodeEditor, "private fun requestFirstPaintWhenStable()", "native first-paint request hook");

@@ -148,8 +148,32 @@ body.ace-ready #editor {
     user-select: none;
 }
 
+.autojs6_signature_tooltip {
+    position: fixed;
+    z-index: 31;
+    box-sizing: border-box;
+    max-width: 560px;
+    overflow: hidden;
+    padding: 7px 10px;
+    border: 1px solid rgba(31, 41, 55, 0.2);
+    border-radius: 2px;
+    background: #ffffff;
+    color: #172033;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.2);
+    font-family: "JetBrains Mono", "Source Code Pro", monospace;
+    font-size: 13px;
+    line-height: 1.35;
+    pointer-events: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
 @media (max-width: 496px) {
     .autojs6_hover_tooltip {
+        max-width: calc(100vw - 16px);
+    }
+
+    .autojs6_signature_tooltip {
         max-width: calc(100vw - 16px);
     }
 }
@@ -164,6 +188,28 @@ body.ace-ready #editor {
     margin-bottom: 6px;
     font-weight: 700;
     color: #0f5e5e;
+}
+
+.autojs6_signature_tooltip_caption {
+    margin-bottom: 3px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #0f5e5e;
+}
+
+.autojs6_signature_tooltip_signature {
+    white-space: nowrap;
+}
+
+.autojs6_signature_tooltip_active {
+    font-weight: 700;
+}
+
+.autojs6_signature_tooltip_summary {
+    margin-top: 4px;
+    color: #4b5563;
+    font-size: 11px;
+    white-space: nowrap;
 }
 
 .autojs6_hover_tooltip_content p {
@@ -211,8 +257,23 @@ body.ace-theme-dark .autojs6_hover_tooltip {
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.38);
 }
 
+body.ace-theme-dark .autojs6_signature_tooltip {
+    border-color: rgba(226, 232, 240, 0.2);
+    background: #f7f7f7;
+    color: #111827;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.42);
+}
+
 body.ace-theme-dark .autojs6_hover_tooltip_caption {
     color: #8bd7d2;
+}
+
+body.ace-theme-dark .autojs6_signature_tooltip_caption {
+    color: #0f5e5e;
+}
+
+body.ace-theme-dark .autojs6_signature_tooltip_summary {
+    color: #4b5563;
 }
 
 body.ace-theme-dark .ace_marker-layer .ace_selection {

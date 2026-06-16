@@ -107,11 +107,13 @@ const aceJsErrorClassifier = "app/src/main/java/org/autojs/autojs/ui/edit/editor
 const aceFallbackPolicy = "app/src/main/java/org/autojs/autojs/ui/edit/editor/ace/health/AceFallbackPolicy.kt";
 const aceLspClient = "app/src/main/assets/editor/ace-builds-1.4.12/autojs6/autojs6_lsp_client.js";
 const aceTooltip = "app/src/main/assets/editor/ace-builds-1.4.12/autojs6/autojs6_tooltip.js";
+const aceSignatureHelp = "app/src/main/assets/editor/ace-builds-1.4.12/autojs6/autojs6_signature_help.js";
 const aceCiGate = "tools/ace-ci/check-ace-editor-gate.mjs";
 const aceReleaseGate = "tools/ace-ci/check-ace-release-gate.mjs";
 const aceSurfaceSmoke = "tools/ace-hardening/check-editor-surface.mjs";
 const aceLspClientTest = "tools/ace-lsp/test-lsp-client.mjs";
 const aceTooltipTest = "tools/ace-tooltip/test-tooltip.mjs";
+const aceSignatureHelpTest = "tools/ace-signature/test-signature-help.mjs";
 const roadmap = "Roadmap.md";
 const aceEditorTestPlan = "docs/dev/ace-editor-test-plan.md";
 const aceKeyboardViewportTestPlan = "docs/dev/ace-keyboard-viewport-test-plan.md";
@@ -609,6 +611,8 @@ assertIncludes(aceCiGate, "ACE LSP client tests");
 assertIncludes(aceCiGate, "tools/ace-lsp/test-lsp-client.mjs");
 assertIncludes(aceCiGate, "ACE tooltip tests");
 assertIncludes(aceCiGate, "tools/ace-tooltip/test-tooltip.mjs");
+assertIncludes(aceCiGate, "ACE signature help tests");
+assertIncludes(aceCiGate, "tools/ace-signature/test-signature-help.mjs");
 assertIncludes(aceCiGate, "ACE editor CI gate passed.");
 
 assertIncludes(aceReleaseGate, "check-ace-editor-gate.mjs");
@@ -803,6 +807,18 @@ assertNotIncludes(aceTooltip, "innerHTML = hover.docText");
 assertIncludes(aceTooltipTest, "Markdown renderer must escape HTML");
 assertIncludes(aceTooltipTest, "Tooltip DOM should be lazy");
 assertIncludes(aceTooltipTest, "safe-subset");
+
+assertIncludes(aceSignatureHelp, "global.AutoJsAceSignatureHelp");
+assertIncludes(aceSignatureHelp, "Function.prototype.apply");
+assertIncludes(aceSignatureHelp, "findSignatureHelpFromText");
+assertIncludes(aceSignatureHelp, "createController");
+assertNotIncludes(aceSignatureHelp, "fetch(");
+assertNotIncludes(aceSignatureHelp, "XMLHttpRequest");
+assertNotIncludes(aceSignatureHelp, "eval(");
+
+assertIncludes(aceSignatureHelpTest, "Function.prototype.apply");
+assertIncludes(aceSignatureHelpTest, "getSignatureHelpState");
+assertIncludes(aceSignatureHelpTest, "ACE signature help tests passed.");
 
 assertIncludes(editorView, "private val mPrimaryMenuStateSyncDebounceMs = 80L");
 assertIncludes(editorView, "private fun schedulePrimaryMenuStateSync()");
