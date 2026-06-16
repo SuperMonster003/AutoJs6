@@ -15,6 +15,8 @@ import android.os.SystemClock
 import android.util.AttributeSet
 import android.view.ActionMode
 import android.view.HapticFeedbackConstants
+import android.view.KeyCharacterMap
+import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
@@ -84,7 +86,9 @@ class AceCodeEditor @JvmOverloads constructor(
         healthMonitor.resumeHeartbeat()
     }
 
-    val webView: WebView = WebView(context)
+    val webView: WebView = AceWebView(context) { keyCode, event ->
+        handleSoftKeyboardCursorKey(keyCode, event)
+    }
     private val loadingOverlay: View = View(context).apply {
         setBackgroundColor(editorBackgroundColor())
     }
@@ -1181,6 +1185,41 @@ class AceCodeEditor @JvmOverloads constructor(
         webView.addJavascriptInterface(bridge, JS_BRIDGE_NAME)
         webView.webViewClient = WhitelistWebViewClient()
         webView.webChromeClient = AceWebChromeClient()
+    }
+
+    private fun handleSoftKeyboardCursorKey(keyCode: Int, event: KeyEvent): Boolean {
+        if (!isReady || !isSoftKeyboardCursorKey(keyCode, event)) {
+            return false
+        }
+        if (event.action == KeyEvent.ACTION_DOWN) {
+            val step = event.repeatCount.coerceAtLeast(0) + 1
+            val delta = if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT) -step else step
+            eventHistory.record(
+                "ime_cursor_key",
+                "keyCode=$keyCode,repeat=${event.repeatCount},delta=$delta",
+            )
+            moveCursor(delta)
+        }
+        return event.action == KeyEvent.ACTION_DOWN || event.action == KeyEvent.ACTION_UP
+    }
+
+    private fun isSoftKeyboardCursorKey(keyCode: Int, event: KeyEvent): Boolean {
+        if (keyCode != KeyEvent.KEYCODE_DPAD_LEFT && keyCode != KeyEvent.KEYCODE_DPAD_RIGHT) {
+            return false
+        }
+        val fromSoftKeyboard = event.flags and KeyEvent.FLAG_SOFT_KEYBOARD != 0 ||
+            event.deviceId == KeyCharacterMap.VIRTUAL_KEYBOARD
+        return fromSoftKeyboard &&
+            (event.action == KeyEvent.ACTION_DOWN || event.action == KeyEvent.ACTION_UP)
+    }
+
+    private class AceWebView(
+        context: Context,
+        private val softKeyboardCursorKeyHandler: (Int, KeyEvent) -> Boolean,
+    ) : WebView(context) {
+        override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+            return softKeyboardCursorKeyHandler(event.keyCode, event) || super.dispatchKeyEvent(event)
+        }
     }
 
     private fun invokeAce(method: String, args: String = "") {

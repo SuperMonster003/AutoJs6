@@ -69,14 +69,16 @@ Acceptance:
 
 ## Gate UX-3: Input, Keyboard, And Read-Only Mode
 
-- [ ] Support IME spacebar cursor movement in ACE.
+- [x] Support IME spacebar cursor movement in ACE through soft-keyboard cursor
+  key events.
 - [x] Add ACE read-only mode, default off for every new editor session.
 - [x] Strictly block text mutation paths while read-only is enabled.
 - [x] Improve read-only scrolling performance where possible.
 
 Acceptance:
 
-- [ ] Gboard spacebar cursor movement updates the ACE caret without text loss.
+- [x] Soft-keyboard cursor key events update the ACE caret without text loss.
+- [ ] Manual Gboard spacebar cursor movement verification on Sony XQ-DQ72.
 - [x] Read-only mode blocks typing, paste, delete, replacement, formatting, and
   script-mutating editor actions.
 - [x] Read-only state is not persisted after leaving the editor.

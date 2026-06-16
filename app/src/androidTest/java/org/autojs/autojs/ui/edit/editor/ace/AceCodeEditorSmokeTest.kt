@@ -6,6 +6,8 @@ import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.os.SystemClock
+import android.view.KeyCharacterMap
+import android.view.KeyEvent
 import android.view.inputmethod.InputMethodManager
 import android.webkit.WebView
 import android.widget.TextView
@@ -156,6 +158,42 @@ class AceCodeEditorSmokeTest {
         )
         assertFalse(toggledState.getBoolean("wrap"))
         assertTrue(toggledState.getBoolean("showLineNumbers"))
+    }
+
+    @Test
+    fun softKeyboardDpadMovesAceCursorWithoutTextMutation() {
+        val editor = launchReadyEditor()
+        val initialText = "const value = 1;\nconsole.log(value);\n"
+
+        runOnMainSync {
+            editor.setText(initialText)
+        }
+        waitForEditorText(editor, initialText, "ACE text should be ready before soft-keyboard cursor smoke")
+
+        runOnMainSync {
+            editor.jumpToStart()
+        }
+        waitUntil("ACE cursor should start at document start") {
+            runOnMainSync { editor.selectionSnapshot.startOffset == 0 }
+        }
+
+        assertTrue(runOnMainSync { dispatchSoftKeyboardDpad(editor, KeyEvent.KEYCODE_DPAD_RIGHT, repeatCount = 2) })
+        waitUntil("Soft-keyboard DPAD right should move ACE cursor without text mutation") {
+            runOnMainSync {
+                editor.selectionSnapshot.startOffset == 3 &&
+                    editor.cursorColumn == 3 &&
+                    editor.textSnapshot == initialText
+            }
+        }
+
+        assertTrue(runOnMainSync { dispatchSoftKeyboardDpad(editor, KeyEvent.KEYCODE_DPAD_LEFT) })
+        waitUntil("Soft-keyboard DPAD left should move ACE cursor without text mutation") {
+            runOnMainSync {
+                editor.selectionSnapshot.startOffset == 2 &&
+                    editor.cursorColumn == 2 &&
+                    editor.textSnapshot == initialText
+            }
+        }
     }
 
     @Test
@@ -1271,6 +1309,27 @@ class AceCodeEditorSmokeTest {
         }
         assertTrue("ACE getText callback should return", latch.await(JS_CALLBACK_TIMEOUT_MS, TimeUnit.MILLISECONDS))
         return text.get().orEmpty()
+    }
+
+    private fun dispatchSoftKeyboardDpad(
+        editor: AceCodeEditor,
+        keyCode: Int,
+        repeatCount: Int = 0,
+    ): Boolean {
+        val now = SystemClock.uptimeMillis()
+        return editor.webView.dispatchKeyEvent(
+            KeyEvent(
+                now,
+                now,
+                KeyEvent.ACTION_DOWN,
+                keyCode,
+                repeatCount,
+                0,
+                KeyCharacterMap.VIRTUAL_KEYBOARD,
+                0,
+                KeyEvent.FLAG_SOFT_KEYBOARD,
+            ),
+        )
     }
 
     private fun waitUntil(
