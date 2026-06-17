@@ -99,6 +99,33 @@ The `v1_1_alpha` profile uses shorter default stress budgets than nightly: `auto
 
 The task fails unless `autojs.nodejs.test.deviceProfile=v1_1_alpha` is explicit. Keep `ANDROID_SERIAL` pointed at the Sony unattended device when multiple devices are attached.
 
+## v1.1 Beta Gate
+
+Use `verifyNodeV11BetaGate` after the alpha milestone when stabilizing v1.1 for
+release-candidate planning:
+
+```powershell
+$env:ANDROID_SERIAL="QV710AF65F"
+.\gradlew.bat --console=plain :app:verifyNodeV11BetaGate "-Pautojs.nodejs.test.deviceProfile=v1_1_beta"
+```
+
+Scope:
+
+- all v1.1 alpha capability coverage
+- baseline runtime, lifecycle, fs promises, native-addon denial, resolver
+  fuzzer, and scoped-fs fuzzer regressions
+- packaged host verification
+- error catalog, project wizard, and TypeScript declaration checks
+- JSON summary at `build/reports/nodejs/v1.1-beta-summary.json`
+
+Packaged `.mjs` and local dynamic import install-and-run smokes remain explicit
+template-override subgates until the refreshed inrt template is the default. See
+[reports/v1.1-beta/README.md](reports/v1.1-beta/README.md).
+
+The task fails unless `autojs.nodejs.test.deviceProfile=v1_1_beta` is explicit.
+Keep `ANDROID_SERIAL` pointed at the Sony unattended device when multiple
+devices are attached.
+
 ## Release Gate
 
 Use `verifyNodeReleaseGate` for release candidates:

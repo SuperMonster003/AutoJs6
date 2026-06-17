@@ -185,10 +185,10 @@ val nodeJsTestDeviceProfile = providers.gradleProperty("autojs.nodejs.test.devic
     ?.takeIf { it.isNotEmpty() }
     ?.let { requested ->
         when (requested) {
-            "sony", "emulator", "smoke", "accessibility", "screen_capture", "v1_1_alpha", "full" -> requested
+            "sony", "emulator", "smoke", "accessibility", "screen_capture", "v1_1_alpha", "v1_1_beta", "full" -> requested
             else -> throw GradleException(
                 "Unsupported Embedded Node test device profile '$requested'. " +
-                        "Use sony, emulator, smoke, accessibility, screen_capture, v1_1_alpha, or full."
+                        "Use sony, emulator, smoke, accessibility, screen_capture, v1_1_alpha, v1_1_beta, or full."
             )
         }
     }
@@ -219,6 +219,7 @@ val nodeJsFuzzerReplayBudget = nodeJsFuzzerSeedFileText?.nodeJsSeedJsonString("b
 val nodeJsFuzzerReplaySeed = nodeJsFuzzerSeedFileText?.nodeJsSeedJsonLong("baseSeed")
 val nodeJsFuzzerDefaultBudget = when {
     taskNames.any { it.contains("verifyNodeNightlyGate", ignoreCase = true) || it.contains("verifyNodeReleaseGate", ignoreCase = true) } -> "extended"
+    nodeJsTestDeviceProfile == "v1_1_beta" -> "extended"
     nodeJsTestDeviceProfile == "full" -> "extended"
     nodeJsTestDeviceProfile in setOf("emulator", "smoke") -> "quick"
     else -> "normal"
@@ -267,6 +268,16 @@ val nodeJsV11AlphaInstrumentationClasses = listOf(
 } else {
     listOf("org.autojs.autojs.engine.NodeWorkerThreadsDesignGateInstrumentationTest")
 }
+val nodeJsV11BetaInstrumentationClasses = (
+        listOf(
+            "org.autojs.autojs.engine.EmbeddedScriptMvpInstrumentationTest",
+            "org.autojs.autojs.engine.NodeEmbeddedLifecycleStressInstrumentationTest",
+            "org.autojs.autojs.engine.NodeFsPromisesInstrumentationTest",
+            "org.autojs.autojs.engine.NodeNativeAddonPolicyInstrumentationTest",
+            "org.autojs.autojs.engine.NodeResolverFuzzerInstrumentationTest",
+            "org.autojs.autojs.engine.NodeScopedFsFuzzerInstrumentationTest",
+        ) + nodeJsV11AlphaInstrumentationClasses
+        ).distinct()
 val nodeJsTestDeviceProfileClasses = when (nodeJsTestDeviceProfile) {
     "sony" -> listOf(
         "org.autojs.autojs.engine.EmbeddedScriptMvpInstrumentationTest",
@@ -297,6 +308,7 @@ val nodeJsTestDeviceProfileClasses = when (nodeJsTestDeviceProfile) {
         "org.autojs.autojs.engine.NodeScreenCaptureRealDeviceSmokeInstrumentationTest",
     )
     "v1_1_alpha" -> nodeJsV11AlphaInstrumentationClasses
+    "v1_1_beta" -> nodeJsV11BetaInstrumentationClasses
     "full" -> listOf(
         "org.autojs.autojs.engine.EmbeddedScriptMvpInstrumentationTest",
         "org.autojs.autojs.engine.NodeEmbeddedLifecycleStressInstrumentationTest",
@@ -782,17 +794,21 @@ android {
             testInstrumentationRunnerArguments["class"] = nodeJsTestDeviceProfileClasses.joinToString(",")
             testInstrumentationRunnerArguments["autojs.nodejs.test.deviceProfile"] = nodeJsTestDeviceProfile
         }
-        if (nodeJsTestDeviceProfile == "v1_1_alpha") {
+        if (nodeJsTestDeviceProfile in setOf("v1_1_alpha", "v1_1_beta")) {
             fun alphaStressArgument(name: String, defaultValue: String): String =
                 providers.gradleProperty(name).orElse(defaultValue).get()
+            val defaultLeakIterations = if (nodeJsTestDeviceProfile == "v1_1_beta") "20" else "12"
+            val defaultImageIterations = if (nodeJsTestDeviceProfile == "v1_1_beta") "8" else "6"
+            val defaultFaultIterations = if (nodeJsTestDeviceProfile == "v1_1_beta") "5" else "3"
+            val defaultBridgeStressIterations = if (nodeJsTestDeviceProfile == "v1_1_beta") "12" else "8"
             testInstrumentationRunnerArguments["autojs.nodejs.leak.iterations"] =
-                alphaStressArgument("autojs.nodejs.leak.iterations", "12")
+                alphaStressArgument("autojs.nodejs.leak.iterations", defaultLeakIterations)
             testInstrumentationRunnerArguments["autojs.nodejs.leak.imageIterations"] =
-                alphaStressArgument("autojs.nodejs.leak.imageIterations", "6")
+                alphaStressArgument("autojs.nodejs.leak.imageIterations", defaultImageIterations)
             testInstrumentationRunnerArguments["autojs.nodejs.leak.faultIterations"] =
-                alphaStressArgument("autojs.nodejs.leak.faultIterations", "3")
+                alphaStressArgument("autojs.nodejs.leak.faultIterations", defaultFaultIterations)
             testInstrumentationRunnerArguments["autojs.nodejs.bridgeStress.iterations"] =
-                alphaStressArgument("autojs.nodejs.bridgeStress.iterations", "8")
+                alphaStressArgument("autojs.nodejs.bridgeStress.iterations", defaultBridgeStressIterations)
         }
         testInstrumentationRunnerArguments["autojs.nodejs.fuzzerBudget"] = nodeJsFuzzerBudget
         nodeJsFuzzerReplaySeed?.let { testInstrumentationRunnerArguments["autojs.nodejs.fuzzerSeed"] = it }
@@ -1243,6 +1259,7 @@ apply(from = "node-error-catalog.gradle.kts")
 apply(from = "node-examples.gradle.kts")
 apply(from = "node-project-wizard.gradle.kts")
 apply(from = "node-v1-1-alpha-gate.gradle.kts")
+apply(from = "node-v1-1-beta-gate.gradle.kts")
 
 tasks {
     withType(JavaCompile::class.java) {

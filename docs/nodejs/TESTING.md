@@ -633,7 +633,7 @@ This suite verifies that `.mjs` can still be rejected by an explicit ESM-off dia
 Packaged `.mjs` and dynamic import local smokes require a refreshed inrt template built with ESM and local dynamic import enabled:
 
 ```powershell
-.\gradlew.bat --console=plain :app:assembleInrtDebug :app:assembleAppDebug :app:assembleAppDebugAndroidTest "-Pautojs.nodejs.esm.experimental=true" "-Pautojs.nodejs.dynamicImport.local=true"
+.\gradlew.bat --console=plain :app:assembleInrtDebug :app:assembleAppDebug :app:assembleAppDebugAndroidTest "-Pautojs.nodejs.esm.experimental=true" "-Pautojs.nodejs.dynamicImport.local=true" "-Pautojs.nodejs.dynamicImport.experimental=true"
 adb push app\build\outputs\apk\inrt\debug\inrt-v6.7.1-alpha4-universal.apk /sdcard/Download/AutoJs6/embedded-node-template/inrt-debug-template.apk
 adb shell am instrument -w -r -e class org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunExperimentalEsmEmbeddedNodePackagedApk,org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunDynamicImportLocalEmbeddedNodePackagedApk -e autojs.embeddedNode.packagedSmokeTemplateOverride true org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner
 ```
@@ -937,6 +937,7 @@ Use these aggregate tasks for local gates:
 ```powershell
 .\gradlew.bat --console=plain :app:verifyNodePrGate
 .\gradlew.bat --console=plain :app:verifyNodeV11AlphaGate "-Pautojs.nodejs.test.deviceProfile=v1_1_alpha"
+.\gradlew.bat --console=plain :app:verifyNodeV11BetaGate "-Pautojs.nodejs.test.deviceProfile=v1_1_beta"
 .\gradlew.bat --console=plain :app:verifyNodeNightlyGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeReleaseGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyEmbeddedNodeDebug
@@ -946,6 +947,8 @@ Use these aggregate tasks for local gates:
 
 `verifyNodePrGate` is the fast host-side PR gate. `verifyNodeV11AlphaGate` is the v1.1 functional milestone gate and
 requires `autojs.nodejs.test.deviceProfile=v1_1_alpha`; see [reports/v1.1-alpha/README.md](reports/v1.1-alpha/README.md).
+`verifyNodeV11BetaGate` is the v1.1 stabilization gate and requires
+`autojs.nodejs.test.deviceProfile=v1_1_beta`; see [reports/v1.1-beta/README.md](reports/v1.1-beta/README.md).
 `verifyNodeNightlyGate` and `verifyNodeReleaseGate` require `autojs.nodejs.test.deviceProfile=sony` or `full`; see
 [CI_GATES.md](CI_GATES.md).
 `generateNodeNightlyReport` can also be run directly to summarize the currently available build/device reports:
@@ -956,6 +959,8 @@ requires `autojs.nodejs.test.deviceProfile=v1_1_alpha`; see [reports/v1.1-alpha/
 
 `generateNodeV11AlphaSummary` writes `build/reports/nodejs/v1.1-alpha-summary.json` from the current build and device
 reports. Running `verifyNodeV11AlphaGate` finalizes with this summary automatically.
+`generateNodeV11BetaSummary` writes `build/reports/nodejs/v1.1-beta-summary.json` from the current build, packaged host,
+tooling, and device reports. Running `verifyNodeV11BetaGate` finalizes with this summary automatically.
 
 `verifyEmbeddedNodeDebug` covers build, native dependency reporting, native symbol archive reporting, and packaging preflight.
 It also runs `verifyNodeCompatibilityProfile` and `embeddedNodeDoctorReport`, which generate compatibility and attachable

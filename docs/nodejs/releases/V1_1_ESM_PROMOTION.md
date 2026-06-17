@@ -50,7 +50,7 @@ Packaged ESM and dynamic import local diagnostics:
 
 ```powershell
 $env:ANDROID_SERIAL="QV710AF65F"
-.\gradlew.bat --console=plain :app:assembleInrtDebug "-Pautojs.nodejs.esm.experimental=true" "-Pautojs.nodejs.dynamicImport.local=true"
+.\gradlew.bat --console=plain :app:assembleInrtDebug "-Pautojs.nodejs.esm.experimental=true" "-Pautojs.nodejs.dynamicImport.local=true" "-Pautojs.nodejs.dynamicImport.experimental=true"
 adb -s QV710AF65F push app\build\outputs\apk\inrt\debug\inrt-v6.7.1-alpha4-universal.apk /data/local/tmp/autojs6-inrt-debug-template.apk
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest `
   "-Pautojs.nodejs.identity=production" `
