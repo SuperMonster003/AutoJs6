@@ -557,6 +557,19 @@ Current bridge resource registry focused instrumentation:
 
 This suite verifies direct registry cleanup for image-handle, screen-capturer, and WebSocket resource types; idempotent close behavior; leaked-resource diagnostics; Android provider cleanup for experimental Java object handles; `work_manager` metadata cancellation and destroy cleanup; and shell timeout cleanup through the live provider resource registry.
 
+Current Phase 5 bridge resource leak stress instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeBridgeResourceLeakStressInstrumentationTest" "-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.bridgeStress.iterations=8"
+```
+
+This suite loops the v1.1 bridge module surface through JS fake transport and Android provider paths. It covers repeated
+OCR calls, storage CRUD, notifications post/cancel or permission-denied cleanup, sensors subscribe/unsubscribe when a
+supported sensor is available, accessibility selector queries, image operations and recycle calls, UI show/close,
+shell timeout cleanup, and WebSocket open/close or default-disabled provider denial. It asserts JS pending calls drain to
+zero and Android diagnostics report no active bridge resources, shell commands, WebSocket connections, leaked resources,
+or resource close errors. Use `autojs.nodejs.bridgeStress.iterations` to scale the loop for local triage or nightly gates.
+
 Current bridge concurrency and resource-limit focused instrumentation:
 
 ```powershell

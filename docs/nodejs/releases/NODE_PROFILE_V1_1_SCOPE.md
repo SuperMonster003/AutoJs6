@@ -181,6 +181,10 @@ small set of already-gated features toward practical use.
   exposure, plugin `.node` rejection, worker bridge access denial or
   unavailable-worker fail-closed behavior, shell `child_process` denial, and
   zlib stream error cleanup.
+- Bridge resource leak stress passes for repeated OCR, storage,
+  notifications, sensors, accessibility selector, image, UI, shell timeout,
+  and WebSocket loops with zero active provider resources, shell commands,
+  WebSocket connections, leaked resources, or close errors after cleanup.
 - Execution queue smoke passes for default `ERR_AUTOJS6_NODE_ENGINE_BUSY`
   rejection, explicit enqueue order, queued cancellation, queued timeout before
   user code runs, one-entry queue-full denial, queue status diagnostics, and
