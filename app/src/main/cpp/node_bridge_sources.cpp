@@ -15084,7 +15084,9 @@ std::string buildEmbeddedScriptExecutionSource(
       return {
         source: String(__autojs6_source || ""),
         sourceURL: name,
-        lineOffset: 1
+        // Function constructor frames include wrapper prologue lines before the
+        // user source that already contains one injected "use strict" line.
+        lineOffset: 3
       };
     }
     if (__autojs6_has_own(__autojs6_module_sources, name)) {
