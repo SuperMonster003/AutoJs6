@@ -26,7 +26,7 @@ class Timer {
     private var mRuntime: WeakReference<ScriptRuntime>
     private var mTimerId = 0
 
-    constructor(scriptRuntime: ScriptRuntime, maxCallbackMillisForAllThread: VolatileBox<Long>, timerId: Int) : this(scriptRuntime, maxCallbackMillisForAllThread, Looper.myLooper()!!, timerId)
+    constructor(scriptRuntime: ScriptRuntime, maxCallbackMillisForAllThread: VolatileBox<Long>, timerId: Int) : this(scriptRuntime, maxCallbackMillisForAllThread, currentOrPreparedLooper(), timerId)
 
     constructor(scriptRuntime: ScriptRuntime, maxCallbackMillisForAllThread: VolatileBox<Long>, looper: Looper, timerId: Int) {
         mRuntime = WeakReference(scriptRuntime)
@@ -151,6 +151,12 @@ class Timer {
 
         @JvmStatic
         fun getTimerId(n: Double) = (n.toLong() shr 32).toInt()
+
+        private fun currentOrPreparedLooper(): Looper {
+            LooperHelper.prepare()
+            return Looper.myLooper()
+                ?: throw IllegalStateException("Failed to prepare looper for script timer")
+        }
 
     }
 

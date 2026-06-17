@@ -1,0 +1,9 @@
+{
+  "name": "screenshot-find-image",
+  "type": "node",
+  "main": "main.cjs",
+  "node": {
+    "backend": "embedded",
+    "timeoutMs": 15000
+  }
+}

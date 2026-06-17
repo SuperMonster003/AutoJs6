@@ -1,0 +1,7 @@
+assembleExitCode=0
+appInstallExitCode=0
+testInstallExitCode=0
+instrumentationExitCode=0
+processCrashed=False
+failureMarkerCount=0
+Finished: 2026-06-15T18:39:44.4176261+08:00

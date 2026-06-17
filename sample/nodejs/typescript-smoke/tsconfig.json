@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": false,
+    "lib": ["ES2020"],
+    "types": []
+  },
+  "include": [
+    "src/**/*.ts",
+    "../../../docs/nodejs/types/autojs6-node/**/*.d.ts"
+  ]
+}

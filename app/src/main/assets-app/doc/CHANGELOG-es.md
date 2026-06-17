@@ -1127,12 +1127,12 @@
 * `Dependencia` Actualización de ColorPicker de la versión 2.1.5 -> 2.1.7
 * `Dependencia` Actualización de Espresso Core de la versión 3.1.1-alpha01 -> 3.5.0-alpha03
 * `Dependencia` Actualización de Eventbus de la versión 3.0.0 -> 3.2.0
-* `Dependencia` Actualización del compilador de Glide de la versión 4.8.0 -> 4.12.0 -> 4.12.0
+* `Dependencia` Actualización del compilador de Glide de la versión 4.8.0 -> 4.12.0
 * `Dependencia` Actualización de las herramientas de construcción de Gradle de la versión 29.0.2 -> 30.0.2
 * `Dependencia` Actualización de Gradle de la versión 4.10.2 -> 6.5 -> 7.0.2 -> 7.3
 * `Dependencia` Actualización del plugin Groovy-Json de la versión 3.0.7 -> 3.0.8
 * `Dependencia` Actualización de Gson de la versión 2.8.2 -> 2.8.9
-* `Dependencia` Actualización de la versión de Java de 1.8 -> 11 -> 16
+* `Dependencia` Actualización de la versión de Java de 8 -> 11 -> 16
 * `Dependencia` Actualización de Joda Time de la versión 2.9.9 -> 2.10.13
 * `Dependencia` Actualización de Junit de la versión 4.12 -> 4.13.2
 * `Dependencia` Actualización del plugin de Gradle de Kotlin de la versión 1.3.10 -> 1.4.10 -> 1.6.0

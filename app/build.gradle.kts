@@ -26,6 +26,7 @@ idea {
     }
 }
 
+val globalNamespace = "org.autojs.autojs6"
 val globalApplicationId = "org.autojs.autojs6"
 
 val flavorDimension = "channel"
@@ -36,9 +37,268 @@ val buildTypeRelease = "release"
 val buildActionAssemble = "assemble"
 
 val taskNames: List<String> = gradle.startParameter.taskNames
+val nodeJsIdentityProfile = providers.gradleProperty("autojs.nodejs.identity").orElse("production").get()
+    .trim()
+    .lowercase()
+    .let { requested ->
+        when (requested) {
+            "production", "prod", "release" -> "production"
+            "nodejstest", "nodejs-test", "nodejs_test", "test" -> "nodejsTest"
+            else -> throw GradleException(
+                "Unsupported Node.js identity profile '$requested'. Use production or nodejsTest."
+            )
+        }
+    }
+val nodeJsApplicationIdSuffix = when (nodeJsIdentityProfile) {
+    "nodejsTest" -> ".nodejs"
+    else -> ""
+}
+val nodeJsEffectiveApplicationId = "$globalApplicationId$nodeJsApplicationIdSuffix"
+val nodeJsAppLabel = when (nodeJsIdentityProfile) {
+    "nodejsTest" -> "AutoJs6 Node"
+    else -> "AutoJs6"
+}
+val isNodeFuzzerSeedReplayRequested = taskNames.any { it.contains("replayNodeFuzzerSeed", ignoreCase = true) }
 val isAppAssembleTaskRequested = taskNames.any { it.contains(Regex("^(:?$flavorNameApp:)?$buildActionAssemble", IGNORE_CASE)) }
 val isInrtAssembleTaskRequested = taskNames.any { it.contains(Regex("^(:?$flavorNameApp:)?$buildActionAssemble$flavorNameInrt", IGNORE_CASE)) }
 val isInrtTaskRequested = taskNames.any { it.contains(flavorNameInrt, true) }
+val nodeJsRuntimeBackend = providers.gradleProperty("autojs.nodejs.backend").orElse("embedded").get()
+    .trim()
+    .lowercase()
+    .let { if (it in setOf("rhino", "native", "embedded", "auto")) it else "embedded" }
+val nodeJsReleaseFlavor = providers.gradleProperty("autojs.nodejs.releaseFlavor").orElse("nodeFull").get()
+    .trim()
+    .let { requested ->
+        when (requested.lowercase()) {
+            "nodefull", "node-full", "full" -> "nodeFull"
+            "nodemini", "node-mini", "mini" -> "nodeMini"
+            "rhinoonly", "rhino-only", "rhino" -> "rhinoOnly"
+            else -> throw GradleException(
+                "Unsupported Embedded Node release flavor '$requested'. " +
+                        "Use nodeFull, nodeMini, or rhinoOnly."
+            )
+        }
+    }
+val nodeJsReleaseSupportedAbis = listOf("arm64-v8a", "armeabi-v7a", "x86_64")
+val nodeJsReleaseKnownAbis = nodeJsReleaseSupportedAbis + "x86"
+val nodeJsReleaseRequestedAbis = providers.gradleProperty("autojs.nodejs.releaseAbis").orNull
+    ?.split(',')
+    ?.map { it.trim() }
+    ?.filter { it.isNotEmpty() }
+    .orEmpty()
+if (nodeJsReleaseFlavor == "nodeFull" && nodeJsReleaseRequestedAbis.isNotEmpty() &&
+    nodeJsReleaseRequestedAbis.toSet() != nodeJsReleaseSupportedAbis.toSet()
+) {
+    throw GradleException(
+        "nodeFull must package the full Embedded Node ABI set: ${nodeJsReleaseSupportedAbis.joinToString()}. " +
+                "Use -Pautojs.nodejs.releaseFlavor=nodeMini to publish a narrower ABI set."
+    )
+}
+val nodeJsReleaseExpectedAbis = when (nodeJsReleaseFlavor) {
+    "nodeFull" -> nodeJsReleaseSupportedAbis
+    "nodeMini" -> nodeJsReleaseRequestedAbis.ifEmpty { listOf("arm64-v8a") }
+    else -> emptyList()
+}
+val nodeJsReleaseUnsupportedAbis = nodeJsReleaseExpectedAbis.filter { it !in nodeJsReleaseSupportedAbis }
+if (nodeJsReleaseUnsupportedAbis.isNotEmpty()) {
+    throw GradleException(
+        "Unsupported Embedded Node release ABI(s) for $nodeJsReleaseFlavor: " +
+                nodeJsReleaseUnsupportedAbis.joinToString() +
+                ". Supported Embedded Node ABIs are ${nodeJsReleaseSupportedAbis.joinToString()}; x86 is unsupported."
+    )
+}
+if (file("src/main/jniLibs/x86/libnode.so").isFile) {
+    throw GradleException(
+        "Unsupported Embedded Node x86 runtime detected at app/src/main/jniLibs/x86/libnode.so. " +
+                "x86 must remain fail-fast until libnode.so, libautojs6-node.so, and device coverage are explicitly supported."
+    )
+}
+val effectiveNodeJsRuntimeBackend = if (nodeJsReleaseFlavor == "rhinoOnly") "rhino" else nodeJsRuntimeBackend
+val nodeJsEmbeddedProbeLevel = providers.gradleProperty("autojs.nodejs.embedded.probe.level").orElse("0").get()
+    .trim()
+    .toIntOrNull()
+    ?.coerceIn(0, 209)
+    ?: 0
+val nodeJsEmbeddedProbeTimeoutMs = providers.gradleProperty("autojs.nodejs.embedded.probe.timeout.ms").orElse("3000").get()
+    .trim()
+    .toLongOrNull()
+    ?.coerceAtLeast(1L)
+    ?: 3000L
+val nodeJsEmbeddedProbeLifecycleEnabled = providers.gradleProperty("autojs.nodejs.embedded.probe.lifecycle").orElse("false").get()
+    .trim()
+    .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
+val nodeJsEmbeddedScriptEnabled = providers.gradleProperty("autojs.nodejs.embedded.script.enabled").orElse("true").get()
+    .trim()
+    .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
+val nodeJsEsmExperimentalEnabled = providers.gradleProperty("autojs.nodejs.esm.experimental").orElse("false").get()
+    .trim()
+    .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
+val nodeJsDynamicImportExperimentalEnabled = providers.gradleProperty("autojs.nodejs.dynamicImport.experimental").orElse("false").get()
+    .trim()
+    .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
+val nodeJsNetworkExperimentalEnabled = providers.gradleProperty("autojs.nodejs.network.experimental").orElse("false").get()
+    .trim()
+    .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
+val nodeJsWorkerThreadsExperimentalEnabled = providers.gradleProperty("autojs.nodejs.worker_threads.experimental").orElse("false").get()
+    .trim()
+    .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
+val nodeJsJavaInteropExperimentalEnabled = providers.gradleProperty("autojs.nodejs.javaInterop.experimental").orElse("false").get()
+    .trim()
+    .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
+val nodeJsTimelineTraceEnabled = providers.gradleProperty("autojs.nodejs.timelineTrace").orElse("false").get()
+    .trim()
+    .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
+val nodeJsReleaseTaskRequested = taskNames.any { rawTaskName ->
+    val taskName = rawTaskName.substringAfterLast(':')
+    taskName.contains("Release") &&
+            (
+                    taskName.startsWith("assemble", ignoreCase = true) ||
+                            taskName.startsWith("bundle", ignoreCase = true) ||
+                            taskName.startsWith("package", ignoreCase = true) ||
+                            taskName.startsWith("publish", ignoreCase = true) ||
+                            taskName.startsWith("verify", ignoreCase = true) ||
+                            taskName.startsWith("generate", ignoreCase = true)
+                    )
+}
+val nodeJsReleaseForbiddenExperimentalFlags = linkedMapOf(
+    "autojs.nodejs.esm.experimental" to nodeJsEsmExperimentalEnabled,
+    "autojs.nodejs.dynamicImport.experimental" to nodeJsDynamicImportExperimentalEnabled,
+    "autojs.nodejs.network.experimental" to nodeJsNetworkExperimentalEnabled,
+    "autojs.nodejs.worker_threads.experimental" to nodeJsWorkerThreadsExperimentalEnabled,
+    "autojs.nodejs.javaInterop.experimental" to nodeJsJavaInteropExperimentalEnabled,
+)
+if (nodeJsReleaseTaskRequested) {
+    val enabledForbiddenFlags = nodeJsReleaseForbiddenExperimentalFlags.filterValues { it }.keys
+    if (enabledForbiddenFlags.isNotEmpty()) {
+        throw GradleException(
+            "Release Node builds cannot enable experimental feature flag(s): ${enabledForbiddenFlags.joinToString()}. " +
+                    "Use a debug experimental build for validation and keep release builds on the Safe Node Profile defaults."
+        )
+    }
+}
+val nodeJsTestDeviceProfile = providers.gradleProperty("autojs.nodejs.test.deviceProfile").orNull
+    ?.trim()
+    ?.lowercase()
+    ?.takeIf { it.isNotEmpty() }
+    ?.let { requested ->
+        when (requested) {
+            "sony", "emulator", "smoke", "accessibility", "screen_capture", "full" -> requested
+            else -> throw GradleException(
+                "Unsupported Embedded Node test device profile '$requested'. " +
+                        "Use sony, emulator, smoke, accessibility, screen_capture, or full."
+            )
+        }
+    }
+val nodeJsFuzzerSeedFile = providers.gradleProperty("autojs.nodejs.fuzzerSeedFile").orNull
+    ?.trim()
+    ?.takeIf { it.isNotEmpty() }
+val nodeJsFuzzerSeedFileText = nodeJsFuzzerSeedFile
+    ?.let { rootProject.file(it) }
+    ?.takeIf { it.isFile }
+    ?.readText()
+private fun String.nodeJsSeedJsonString(name: String): String? =
+    Regex(""""$name"\s*:\s*"([^"]*)"""").find(this)?.groupValues?.get(1)
+private fun String.nodeJsSeedJsonLong(name: String): String? =
+    Regex(""""$name"\s*:\s*([0-9]+)""").find(this)?.groupValues?.get(1)
+private fun normalizeNodeJsFuzzerBudget(requested: String): String =
+    requested.trim().lowercase().let { normalized ->
+        when (normalized) {
+            "quick", "normal", "extended" -> normalized
+            else -> throw GradleException(
+                "Unsupported Embedded Node fuzzer budget '$requested'. Use quick, normal, or extended."
+            )
+        }
+    }
+val nodeJsFuzzerReplayClass = nodeJsFuzzerSeedFileText?.nodeJsSeedJsonString("replayClass")
+val nodeJsFuzzerReplayMethod = nodeJsFuzzerSeedFileText?.nodeJsSeedJsonString("replayMethod")
+    ?.takeUnless { it == "null" || it.isBlank() }
+val nodeJsFuzzerReplayBudget = nodeJsFuzzerSeedFileText?.nodeJsSeedJsonString("budget")
+val nodeJsFuzzerReplaySeed = nodeJsFuzzerSeedFileText?.nodeJsSeedJsonLong("baseSeed")
+val nodeJsFuzzerDefaultBudget = when {
+    taskNames.any { it.contains("verifyNodeNightlyGate", ignoreCase = true) || it.contains("verifyNodeReleaseGate", ignoreCase = true) } -> "extended"
+    nodeJsTestDeviceProfile == "full" -> "extended"
+    nodeJsTestDeviceProfile in setOf("emulator", "smoke") -> "quick"
+    else -> "normal"
+}
+val nodeJsFuzzerBudget = normalizeNodeJsFuzzerBudget(
+    providers.gradleProperty("autojs.nodejs.fuzzerBudget").orNull
+        ?: nodeJsFuzzerReplayBudget
+        ?: nodeJsFuzzerDefaultBudget
+)
+val nodeJsFuzzerReplayRunnerClass = nodeJsFuzzerReplayClass?.let { replayClass ->
+    nodeJsFuzzerReplayMethod?.let { "$replayClass#$it" } ?: replayClass
+}
+val nodeJsTestDeviceProfileClasses = when (nodeJsTestDeviceProfile) {
+    "sony" -> listOf(
+        "org.autojs.autojs.engine.EmbeddedScriptMvpInstrumentationTest",
+        "org.autojs.autojs.engine.NodeEmbeddedLifecycleStressInstrumentationTest",
+        "org.autojs.autojs.engine.NodeAutoJsBridgeInstrumentationTest",
+        "org.autojs.autojs.engine.NodeSecurityRegressionInstrumentationTest",
+        "org.autojs.autojs.engine.NodeCompatCorpusInstrumentationTest",
+        "org.autojs.autojs.engine.NodeRealNpmCompatInstrumentationTest",
+        "org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest",
+        "org.autojs.autojs.engine.NodeEmbeddedMemoryLeakStressInstrumentationTest",
+    )
+    "emulator" -> listOf(
+        "org.autojs.autojs.engine.EmbeddedScriptMvpInstrumentationTest",
+        "org.autojs.autojs.engine.NodeCompatCorpusInstrumentationTest",
+        "org.autojs.autojs.engine.NodeRealNpmCompatInstrumentationTest",
+        "org.autojs.autojs.engine.NodeResolverFuzzerInstrumentationTest",
+        "org.autojs.autojs.engine.NodeScopedFsFuzzerInstrumentationTest",
+    )
+    "smoke" -> listOf(
+        "org.autojs.autojs.engine.EmbeddedScriptMvpInstrumentationTest",
+        "org.autojs.autojs.engine.NodeAutoJsBridgeInstrumentationTest",
+        "org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunToastBridgeEmbeddedNodePackagedApk",
+    )
+    "accessibility" -> listOf(
+        "org.autojs.autojs.engine.NodeAccessibilityRealDeviceSmokeInstrumentationTest",
+    )
+    "screen_capture" -> listOf(
+        "org.autojs.autojs.engine.NodeScreenCaptureRealDeviceSmokeInstrumentationTest",
+    )
+    "full" -> listOf(
+        "org.autojs.autojs.engine.EmbeddedScriptMvpInstrumentationTest",
+        "org.autojs.autojs.engine.NodeEmbeddedLifecycleStressInstrumentationTest",
+        "org.autojs.autojs.engine.NodeAutoJsBridgeInstrumentationTest",
+        "org.autojs.autojs.engine.NodeBridgeRpcFuzzerInstrumentationTest",
+        "org.autojs.autojs.engine.NodeResolverFuzzerInstrumentationTest",
+        "org.autojs.autojs.engine.NodeScopedFsFuzzerInstrumentationTest",
+        "org.autojs.autojs.engine.NodeSecurityRegressionInstrumentationTest",
+        "org.autojs.autojs.engine.NodeNativeAddonPolicyInstrumentationTest",
+        "org.autojs.autojs.engine.NodeCompatCorpusInstrumentationTest",
+        "org.autojs.autojs.engine.NodeRealNpmCompatInstrumentationTest",
+        "org.autojs.autojs.engine.NodeEmbeddedMemoryLeakStressInstrumentationTest",
+    ) + if (nodeJsWorkerThreadsExperimentalEnabled) {
+        listOf("org.autojs.autojs.engine.NodeWorkerThreadsResourceStressInstrumentationTest")
+    } else {
+        emptyList()
+    } + listOf("org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest")
+    else -> emptyList()
+}
+val leakCanaryEnabled = providers.gradleProperty("autojs.leakcanary.enabled").orElse("false").get()
+    .trim()
+    .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
+val isNodeJsNativeRuntimeRequested = effectiveNodeJsRuntimeBackend in setOf("native", "embedded", "auto")
+val nodeJsAvailableNativeRuntimeAbis = nodeJsReleaseKnownAbis
+    .filter { file("src/main/jniLibs/$it/libnode.so").isFile }
+val nodeJsNativeRuntimeAbis = if (isNodeJsNativeRuntimeRequested) {
+    nodeJsReleaseExpectedAbis.filter { it in nodeJsAvailableNativeRuntimeAbis }
+} else {
+    emptyList()
+}
+val nodeJsMissingReleaseAbis = if (isNodeJsNativeRuntimeRequested) {
+    nodeJsReleaseExpectedAbis.filterNot { it in nodeJsAvailableNativeRuntimeAbis }
+} else {
+    emptyList()
+}
+if (nodeJsMissingReleaseAbis.isNotEmpty()) {
+    throw GradleException(
+        "Embedded Node $nodeJsReleaseFlavor requires native runtime ABI(s) not present in app/src/main/jniLibs: " +
+                nodeJsMissingReleaseAbis.joinToString() +
+                ". Adjust -Pautojs.nodejs.releaseAbis or provide libnode.so for the selected ABI set."
+    )
+}
 
 utils.registerTemplateApkCopy(project)
 
@@ -56,7 +316,9 @@ dependencies /* Unclassified */ {
     implementation(libs.activity.ktx)
 
     // LeakCanary
-    debugImplementation(libs.leakcanary)
+    if (leakCanaryEnabled) {
+        debugImplementation(libs.leakcanary)
+    }
 
     // Android supports
     implementation(libs.cardview)
@@ -123,14 +385,14 @@ dependencies /* Unclassified */ {
     //  !
     //  ! zh-CN:
     //  !
-    //  ! 依赖库 log4j (第一版本) 是易受攻击的 (含 5 项漏洞):
-    //  ! - CVE-2022-23307, 评分: 8.8
-    //  ! - CVE-2022-23305, 评分: 9.8
-    //  ! - CVE-2022-23302, 评分: 8.8
-    //  ! - CVE-2021-4104, 评分: 7.5
-    //  ! - CVE-2019-17571, 评分: 9.8
-    //  ! 但 log4j 第二版本要求安卓 API 级别不低于 26,
-    //  ! 与最低 API 级别为 24 的当前项目无法兼容.
+    //  ! 渚濊禆锟?log4j (绗竴鐗堟湰) 鏄槗鍙楁敾鍑荤殑 (锟?5 椤规紡锟?:
+    //  ! - CVE-2022-23307, 璇勫垎: 8.8
+    //  ! - CVE-2022-23305, 璇勫垎: 9.8
+    //  ! - CVE-2022-23302, 璇勫垎: 8.8
+    //  ! - CVE-2021-4104, 璇勫垎: 7.5
+    //  ! - CVE-2019-17571, 璇勫垎: 9.8
+    //  ! 锟?log4j 绗簩鐗堟湰瑕佹眰瀹夊崜 API 绾у埆涓嶄綆锟?26,
+    //  ! 涓庢渶锟?API 绾у埆锟?24 鐨勫綋鍓嶉」鐩棤娉曞吋锟?
     // Log4j
     implementation(libs.log4j)
 
@@ -219,7 +481,7 @@ dependencies /* Unclassified */ {
     // Pinyin4j
     implementation(libs.pinyin4j)
 
-    // Jieba Analysis (zh-CN: 结巴分词)
+    // Jieba Analysis (zh-CN: 缁撳反鍒嗚瘝)
     // implementation("com.huaban:jieba-analysis:1.0.2")
     implementation(project(":modules:jieba-analysis"))
 
@@ -270,7 +532,7 @@ dependencies /* Unclassified */ {
 dependencies /* MIME */ {
     // @Hint by SuperMonster003 on Oct 5, 2023.
     //  ! Only for Android API 26 (8.0) [O] and above.
-    //  ! zh-CN: 仅适用于安卓 API 级别 26 (8.0) [O] 及以上.
+    //  ! zh-CN: 浠呴€傜敤浜庡畨锟?API 绾у埆 26 (8.0) [O] 鍙婁互锟?
     // Apache Tika Core
     // implementation("org.apache.tika:tika-core:2.9.2")
 
@@ -303,8 +565,8 @@ dependencies /* AppCompat */ {
     //  ! To check the releases for Appcompat library,
     //  ! visit https://developer.android.com/jetpack/androidx/releases/appcompat.
     //  ! zh-CN:
-    //  ! 查看 Appcompat 库的发行版本,
-    //  ! 可访问 https://developer.android.com/jetpack/androidx/releases/appcompat.
+    //  ! 鏌ョ湅 Appcompat 搴撶殑鍙戣鐗堟湰,
+    //  ! 鍙锟?https://developer.android.com/jetpack/androidx/releases/appcompat.
     implementation(libs.appcompat)
 
     // AppCompat for legacy views (such as JsTextViewLegacy)
@@ -316,7 +578,7 @@ dependencies /* AppCompat */ {
 dependencies /* Material Dialogs */ {
     // TODO by SuperMonster003 on Feb 5, 2022.
     //  ! Upgrade to 3.3.0 (more difficult than expected).
-    //  ! zh-CN: 升级至 3.3.0 (实际难度超出预期较多).
+    //  ! zh-CN: 鍗囩骇锟?3.3.0 (瀹為檯闅惧害瓒呭嚭棰勬湡杈冨).
     //  # val configuration: (ExternalModuleDependency).() -> Unit = {
     //  #     version {
     //  #         prefer("0.9.6.0")
@@ -423,21 +685,21 @@ dependencies /* Archived */ {
     //  ! The dependency is added by default.
     //  ! See https://kotlinlang.org/docs/gradle.html#dependency-on-the-standard-library.
     //  ! zh-CN:
-    //  ! 已无需在 Kotlin Gradle 项目中显式声明标准库 (stdlib).
-    //  ! 相关依赖已默认被添加.
-    //  ! 参阅 https://kotlinlang.org/docs/gradle.html#dependency-on-the-standard-library.
+    //  ! 宸叉棤闇€锟?Kotlin Gradle 椤圭洰涓樉寮忓０鏄庢爣鍑嗗簱 (stdlib).
+    //  ! 鐩稿叧渚濊禆宸查粯璁よ娣诲姞.
+    //  ! 鍙傞槄 https://kotlinlang.org/docs/gradle.html#dependency-on-the-standard-library.
     // Kotlin
     // implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.6.21")
 
     // @Comment by SuperMonster003 on Jun 1, 2022.
     //  ! Not necessary for current project but worth keeping the trace.
-    //  ! zh-CN: 于当前项目已不再需要, 但依然值得留存其踪迹 (以备不时之需).
+    //  ! zh-CN: 浜庡綋鍓嶉」鐩凡涓嶅啀闇€锟? 浣嗕緷鐒跺€煎緱鐣欏瓨鍏惰釜锟?(浠ュ涓嶆椂涔嬮渶).
     // Google Guava
     // implementation("com.google.guava:guava:31.1-jre")
 
     // @Comment by SuperMonster003 on Apr 9, 2024.
     //  ! It was ever imported and used for MediaType constants.
-    //  ! zh-CN: 曾用于 MediaType 常量的导入及使用.
+    //  ! zh-CN: 鏇剧敤锟?MediaType 甯搁噺鐨勫鍏ュ強浣跨敤.
     // Javax WS RS API (Java API for RESTful Web Services)
     // implementation("javax.ws.rs:javax.ws.rs-api:2.1.1")
 
@@ -446,9 +708,9 @@ dependencies /* Archived */ {
     //  ! replaced by LiveData and SharedFlow.
     //  ! It is only retained for dependencies of certain libraries (such as MQTT).
     //  ! zh-CN:
-    //  ! AutoJs6 核心项目已弃用 Local Broadcast Manager 库,
-    //  ! 由 LiveData 及 SharedFlow 替代.
-    //  ! 仅用于某些库 (如 MQTT) 的依赖而保留.
+    //  ! AutoJs6 鏍稿績椤圭洰宸插純锟?Local Broadcast Manager 锟?
+    //  ! 锟?LiveData 锟?SharedFlow 鏇夸唬.
+    //  ! 浠呯敤浜庢煇浜涘簱 (锟?MQTT) 鐨勪緷璧栬€屼繚锟?
     // Local Broadcast Manager
     implementation(libs.localbroadcastmanager)
 }
@@ -459,11 +721,11 @@ dependencies /* Reserved for auto append by IDE */ {
 
 android {
 
-    namespace = globalApplicationId
+    namespace = globalNamespace
     compileSdk = versions.sdkVersionCompile
 
     defaultConfig {
-        applicationId = applicationId
+        applicationId = globalApplicationId
 
         minSdk = versions.sdkVersionMin
         targetSdk = versions.sdkVersionTarget
@@ -472,17 +734,55 @@ android {
         versionName = versions.appVersionName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        val explicitInstrumentationClass =
+            providers.gradleProperty("android.testInstrumentationRunnerArguments.class").orNull.isNullOrBlank().not()
+        if (nodeJsFuzzerReplayRunnerClass != null && !explicitInstrumentationClass) {
+            testInstrumentationRunnerArguments["class"] = nodeJsFuzzerReplayRunnerClass
+        } else if (nodeJsTestDeviceProfile != null && !explicitInstrumentationClass) {
+            testInstrumentationRunnerArguments["class"] = nodeJsTestDeviceProfileClasses.joinToString(",")
+            testInstrumentationRunnerArguments["autojs.nodejs.test.deviceProfile"] = nodeJsTestDeviceProfile
+        }
+        testInstrumentationRunnerArguments["autojs.nodejs.fuzzerBudget"] = nodeJsFuzzerBudget
+        nodeJsFuzzerReplaySeed?.let { testInstrumentationRunnerArguments["autojs.nodejs.fuzzerSeed"] = it }
 
         multiDexEnabled = true
 
+        if (isNodeJsNativeRuntimeRequested && nodeJsNativeRuntimeAbis.isNotEmpty()) {
+            ndk.abiFilters += nodeJsNativeRuntimeAbis
+            externalNativeBuild {
+                cmake {
+                    abiFilters += nodeJsNativeRuntimeAbis
+                    arguments += "-DAUTOJS6_NODE_ENABLE_EMBEDDED_LIFECYCLE_PROBE=${if (nodeJsEmbeddedProbeLifecycleEnabled) "ON" else "OFF"}"
+                    arguments += "-DAUTOJS6_NODE_ENABLE_EMBEDDED_SCRIPT_EXECUTION=${if (nodeJsEmbeddedScriptEnabled) "ON" else "OFF"}"
+                    cppFlags += "-std=c++20"
+                }
+            }
+        }
+
         buildConfigField("String", "VERSION_DATE", "\"${utils.getDateString("MMM d, yyyy", "GMT+08:00")}\"")
         buildConfigField("String", "VSCODE_EXT_REQUIRED_VERSION", "\"${versions.vscodeExtRequiredVersion}\"")
+        buildConfigField("String", "NODEJS_IDENTITY_PROFILE", "\"$nodeJsIdentityProfile\"")
+        buildConfigField("String", "NODEJS_APPLICATION_ID_SUFFIX", "\"$nodeJsApplicationIdSuffix\"")
+        buildConfigField("String", "NODEJS_RUNTIME_BACKEND", "\"$effectiveNodeJsRuntimeBackend\"")
+        buildConfigField("String", "NODEJS_RELEASE_FLAVOR", "\"$nodeJsReleaseFlavor\"")
+        buildConfigField("int", "NODEJS_EMBEDDED_PROBE_LEVEL", "$nodeJsEmbeddedProbeLevel")
+        buildConfigField("long", "NODEJS_EMBEDDED_PROBE_TIMEOUT_MS", "${nodeJsEmbeddedProbeTimeoutMs}L")
+        buildConfigField("boolean", "NODEJS_EMBEDDED_PROBE_LIFECYCLE_BUILD_ENABLED", "$nodeJsEmbeddedProbeLifecycleEnabled")
+        buildConfigField("boolean", "NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED", "$nodeJsEmbeddedScriptEnabled")
+        buildConfigField("boolean", "NODEJS_ESM_EXPERIMENTAL_ENABLED", "$nodeJsEsmExperimentalEnabled")
+        buildConfigField("boolean", "NODEJS_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED", "$nodeJsDynamicImportExperimentalEnabled")
+        buildConfigField("boolean", "NODEJS_NETWORK_EXPERIMENTAL_ENABLED", "$nodeJsNetworkExperimentalEnabled")
+        buildConfigField("boolean", "NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED", "$nodeJsWorkerThreadsExperimentalEnabled")
+        buildConfigField("boolean", "NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED", "$nodeJsJavaInteropExperimentalEnabled")
+        buildConfigField("boolean", "NODEJS_TIMELINE_TRACE_ENABLED", "$nodeJsTimelineTraceEnabled")
         buildConfigField("boolean", "is${flavorNameInrt.uppercaseFirstChar()}", "false")
+        resValue("string", "node_identity_application_id", nodeJsEffectiveApplicationId)
+        resValue("string", "node_identity_app_label", nodeJsAppLabel)
 
         javaCompileOptions {
             annotationProcessorOptions {
                 mapOf(
-                    "resourcePackageName" to (this@defaultConfig.applicationId ?: globalApplicationId),
+                    "resourcePackageName" to globalNamespace,
                     "androidManifestFile" to ("$projectDir/src/main/AndroidManifest.xml")
                 ).let { arguments(it) }
             }
@@ -495,6 +795,9 @@ android {
 
         create(flavorNameApp) {
             dimension = flavorDimension
+            if (nodeJsApplicationIdSuffix.isNotEmpty()) {
+                applicationIdSuffix = nodeJsApplicationIdSuffix
+            }
             versionCode = versions.appVersionCode
             versionName = versions.appVersionName
             buildConfigField("String", "CHANNEL", "\"$flavorNameApp\"")
@@ -502,10 +805,10 @@ android {
             manifestPlaceholders.putAll(
                 mapOf(
                     "CHANNEL" to flavorNameApp,
-                    "appName" to "@string/app_name",
+                    "appName" to "@string/node_identity_app_label",
                     "intentCategory" to "android.intent.category.LAUNCHER",
                     "intentCategoryInrt" to "android.intent.category.DEFAULT",
-                    "authorities" to "org.autojs.autojs6.fileprovider",
+                    "authorities" to "$nodeJsEffectiveApplicationId.fileprovider",
                     "icon" to "@mipmap/ic_app_launcher_adaptive",
                 )
             )
@@ -513,7 +816,7 @@ android {
 
         create(flavorNameInrt) {
             dimension = flavorDimension
-            applicationIdSuffix = ".$flavorNameInrt"
+            applicationIdSuffix = "$nodeJsApplicationIdSuffix.$flavorNameInrt"
             minSdk = versions.sdkVersionMin
             targetSdk = versions.sdkVersionTargetInrt
             compileSdk = versions.sdkVersionCompile
@@ -529,7 +832,7 @@ android {
                     "appName" to "AutoJs6.$flavorNameInrt",
                     "intentCategory" to "android.intent.category.DEFAULT",
                     "intentCategoryInrt" to "android.intent.category.LAUNCHER",
-                    "authorities" to "org.autojs.autojs6.$flavorNameInrt.fileprovider",
+                    "authorities" to "$nodeJsEffectiveApplicationId.$flavorNameInrt.fileprovider",
                     "icon" to "@mipmap/ic_launcher",
                 )
             )
@@ -537,7 +840,9 @@ android {
             // @Reference to kkevsekk1/AutoX (https://github.com/kkevsekk1/AutoX) by SuperMonster003 on Nov 16, 2023.
             //  ! https://github.com/kkevsekk1/AutoX/blob/a6d482189291b460c3be60970b74c5321d26e457/inrt/build.gradle.kts#L93
             // noinspection ChromeOsAbiSupport
-            ndk.abiFilters += ""
+            if (!isNodeJsNativeRuntimeRequested) {
+                ndk.abiFilters += ""
+            }
         }
 
         androidResources {
@@ -549,8 +854,8 @@ android {
                 //  ! Runtime assets will be copied from flavor "app"
                 //  ! while building an apk on org.autojs.autojs.ui.project.BuildActivity.
                 //  ! zh-CN:
-                //  ! 类 org.autojs.autojs.ui.project.BuildActivity 构建 APK 时,
-                //  ! 运行时资产文件 (runtime assets) 将由名为 "app" 的 Gradle flavor 作为源地址进行复制.
+                //  ! 锟?org.autojs.autojs.ui.project.BuildActivity 鏋勫缓 APK 锟?
+                //  ! 杩愯鏃惰祫浜ф枃锟?(runtime assets) 灏嗙敱鍚嶄负 "app" 锟?Gradle flavor 浣滀负婧愬湴鍧€杩涜澶嶅埗.
                 ignoreAssetsPatterns.addAll(emptyList())
             }
         }
@@ -563,12 +868,12 @@ android {
         //  ! The assets file is divided into three directories according to different flavors.
         //  ! But the files are not actually moved to avoid conflicts with the latest modifications.
         //  ! zh-CN (translated by SuperMonster003 on Jul 26, 2024):
-        //  ! 资产文件根据不同的 Gradle flavor 被隔离为三个不同的目录.
-        //  ! 不过真实文件并没有进行移动, 以避免与最新的项目修改发生冲突.
+        //  ! 璧勪骇鏂囦欢鏍规嵁涓嶅悓锟?Gradle flavor 琚殧绂讳负涓変釜涓嶅悓鐨勭洰锟?
+        //  ! 涓嶈繃鐪熷疄鏂囦欢骞舵病鏈夎繘琛岀Щ锟? 浠ラ伩鍏嶄笌鏈€鏂扮殑椤圭洰淇敼鍙戠敓鍐茬獊.
         //  !
         // @Hint by SuperMonster003 on Nov 16, 2023.
         //  ! The assets division idea was accepted, and it wouldn't hurt to try. :)
-        //  ! zh-CN: 资产隔离的想法可以被接受, 毕竟试一下也无妨. [笑脸符号]
+        //  ! zh-CN: 璧勪骇闅旂鐨勬兂娉曞彲浠ヨ鎺ュ彈, 姣曠珶璇曚竴涓嬩篃鏃犲Θ. [绗戣劯绗﹀彿]
 
         // @Archived by JetBrains AI Assistant (GPT-5.3-Codex (xhigh)) on Mar 7, 2026.
         //  # getByName("main") {
@@ -601,6 +906,9 @@ android {
         }
         getByName(flavorNameInrt) {
             assets.directories.add("src/main/assets-$flavorNameInrt")
+        }
+        getByName("androidTest") {
+            assets.directories.add("$rootDir/sample/nodejs")
         }
 
     }
@@ -639,15 +947,25 @@ android {
 
         if (isInrtTaskRequested) {
             listOf(
-                "**/prob_emit.txt", // Jieba Analysis (zh-CN: 结巴分词)
-                "**/dict-chinese-*.db.gzip", // Jieba Analysis (zh-CN: 结巴分词)
+                "**/prob_emit.txt", // Jieba Analysis (zh-CN: 缁撳反鍒嗚瘝)
+                "**/dict-chinese-*.db.gzip", // Jieba Analysis (zh-CN: 缁撳反鍒嗚瘝)
             ).let { resources.excludes.addAll(it) }
         }
 
         jniLibs {
             // @Reference to kkevsekk1/AutoX (https://github.com/kkevsekk1/AutoX) by SuperMonster003 on Nov 16, 2023.
             //  ! https://github.com/kkevsekk1/AutoX/blob/a6d482189291b460c3be60970b74c5321d26e457/inrt/build.gradle.kts#L91
-            excludes += "*"
+            if (!isNodeJsNativeRuntimeRequested) {
+                val allNativeLibAbis = listOf("arm64-v8a", "armeabi-v7a", "x86_64", "x86", "armeabi")
+                excludes += allNativeLibAbis.flatMap { abi ->
+                    listOf("lib/$abi/**", "**/$abi/**")
+                }
+            } else {
+                val unsupportedNodeJsAbis = listOf("arm64-v8a", "armeabi-v7a", "x86_64", "x86") - nodeJsNativeRuntimeAbis.toSet()
+                excludes += unsupportedNodeJsAbis.flatMap { abi ->
+                    listOf("lib/$abi/**", "**/$abi/**")
+                }
+            }
             useLegacyPackaging = true
         }
     }
@@ -695,8 +1013,9 @@ android {
 
         // @Hint by SuperMonster003 on Aug 14, 2023.
         //  ! Substitution of "android.defaults.buildfeatures.buildconfig=true"
-        //  ! zh-CN: "android.defaults.buildfeatures.buildconfig=true" 的替代方案
+        //  ! zh-CN: "android.defaults.buildfeatures.buildconfig=true" 鐨勬浛浠ｆ柟锟?
         buildConfig = true
+        resValues = true
 
         // @Archived by SuperMonster003 on Sep 23, 2024.
         //  ! Jetpack Compose
@@ -706,6 +1025,13 @@ android {
         //  # }
     }
 
+    if (isNodeJsNativeRuntimeRequested && nodeJsNativeRuntimeAbis.isNotEmpty()) {
+        externalNativeBuild {
+            cmake {
+                path = file("src/main/cpp/CMakeLists.txt")
+            }
+        }
+    }
 
     splits {
         // Configures multiple APKs based on ABI.
@@ -717,7 +1043,11 @@ android {
             // Resets the list of ABIs that Gradle should create APKs for to none.
             reset()
             // Specifies a list of ABIs that Gradle should create APKs for.
-            include("arm64-v8a", "x86_64", "armeabi-v7a", "x86", "armeabi")
+            val splitAbis = when {
+                isNodeJsNativeRuntimeRequested && nodeJsNativeRuntimeAbis.isNotEmpty() -> nodeJsNativeRuntimeAbis
+                else -> listOf("arm64-v8a", "x86_64", "armeabi-v7a", "x86", "armeabi")
+            }
+            include(*splitAbis.toTypedArray())
             // Specifies that we do not want to also generate a universal APK that includes all ABIs.
             isUniversalApk = true
         }
@@ -793,13 +1123,79 @@ androidComponents {
     }
 }
 
+tasks.register("printNodeTestDeviceProfile") {
+    group = "verification"
+    description = "Prints the Embedded Node instrumentation classes selected by autojs.nodejs.test.deviceProfile."
+
+    doLast {
+        println("Embedded Node test device profile: ${nodeJsTestDeviceProfile ?: "unset"}")
+        println("Embedded Node fuzzer budget: $nodeJsFuzzerBudget")
+        if (nodeJsFuzzerSeedFile != null) {
+            println("Embedded Node fuzzer seed file: $nodeJsFuzzerSeedFile")
+            println("Embedded Node fuzzer replay class: ${nodeJsFuzzerReplayRunnerClass ?: "unavailable"}")
+            println("Embedded Node fuzzer replay seed: ${nodeJsFuzzerReplaySeed ?: "unavailable"}")
+        }
+        if (nodeJsTestDeviceProfileClasses.isEmpty()) {
+            println("Embedded Node selected instrumentation classes: none; pass -Pautojs.nodejs.test.deviceProfile=sony|emulator|smoke|accessibility|screen_capture|full")
+        } else {
+            println("Embedded Node selected instrumentation classes:")
+            nodeJsTestDeviceProfileClasses.forEach { className ->
+                println("  $className")
+            }
+        }
+    }
+}
+
+tasks.register("replayNodeFuzzerSeed") {
+    group = "verification"
+    description = "Replays a saved Embedded Node fuzzer seed with connected Android instrumentation."
+
+    dependsOn("connectedAppDebugAndroidTest")
+
+    doFirst {
+        val seedFile = nodeJsFuzzerSeedFile
+            ?: throw GradleException("Pass -Pautojs.nodejs.fuzzerSeedFile=<build/reports/nodejs/fuzz-seeds/*.json>.")
+        if (nodeJsFuzzerReplayRunnerClass.isNullOrBlank() || nodeJsFuzzerReplaySeed.isNullOrBlank()) {
+            throw GradleException("Fuzzer seed file '$seedFile' is missing replayClass/baseSeed fields.")
+        }
+        println("Replaying Embedded Node fuzzer seed: $seedFile")
+        println("  class: $nodeJsFuzzerReplayRunnerClass")
+        println("  budget: $nodeJsFuzzerBudget")
+        println("  seed: $nodeJsFuzzerReplaySeed")
+    }
+}
+
+if (isNodeFuzzerSeedReplayRequested) {
+    tasks.matching { it.name == "connectedAppDebugAndroidTest" }.configureEach {
+        doFirst {
+            val seedFile = nodeJsFuzzerSeedFile
+                ?: throw GradleException("Pass -Pautojs.nodejs.fuzzerSeedFile=<build/reports/nodejs/fuzz-seeds/*.json>.")
+            if (nodeJsFuzzerReplayRunnerClass.isNullOrBlank() || nodeJsFuzzerReplaySeed.isNullOrBlank()) {
+                throw GradleException("Fuzzer seed file '$seedFile' is missing replayClass/baseSeed fields.")
+            }
+        }
+    }
+}
+
+apply(from = "native-node-deps-report.gradle.kts")
+apply(from = "embedded-node-packaging-preflight.gradle.kts")
+apply(from = "node-performance-report.gradle.kts")
+apply(from = "node-compatibility-profile.gradle.kts")
+apply(from = "node-dependency-bundler.gradle.kts")
+apply(from = "node-doctor-report.gradle.kts")
+apply(from = "node-resolver-visualizer.gradle.kts")
+apply(from = "node-profile-release-manifest.gradle.kts")
+apply(from = "node-profile-ga-artifacts.gradle.kts")
+apply(from = "node-error-catalog.gradle.kts")
+apply(from = "node-examples.gradle.kts")
+
 tasks {
     withType(JavaCompile::class.java) {
         options.encoding = "UTF-8"
 
         // @Hint by SuperMonster003 on May 18, 2022.
         //  ! Comment or remove this option if you are tired of plenty of warnings. :)
-        //  ! zh-CN: 注释或移除此选项可避免过多警告消息造成的困扰. [笑脸符号]
+        //  ! zh-CN: 娉ㄩ噴鎴栫Щ闄ゆ閫夐」鍙伩鍏嶈繃澶氳鍛婃秷鎭€犳垚鐨勫洶锟? [绗戣劯绗﹀彿]
         // options.compilerArgs.addAll(listOf("-Xlint:deprecation", "-Xlint:unchecked"))
     }
 

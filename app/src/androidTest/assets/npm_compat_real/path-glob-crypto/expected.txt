@@ -1,0 +1,1 @@
+realnpm.path-glob-crypto=src/index.js,src/index.test.js|index.js|e98fe7a460ea

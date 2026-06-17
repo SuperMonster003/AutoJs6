@@ -1,0 +1,6 @@
+{
+  "name": "@autojs6-sample/toast-app",
+  "private": true,
+  "type": "commonjs",
+  "main": "main.cjs"
+}

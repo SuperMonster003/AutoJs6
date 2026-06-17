@@ -1,0 +1,1 @@
+{"name":"cjs-package-exports","main":"index.js","exports":{".":"./index.js","./feature":"./feature.js","./private":null}}

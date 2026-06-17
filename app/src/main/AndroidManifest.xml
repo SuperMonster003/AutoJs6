@@ -28,10 +28,10 @@
     <!--  ! Target API >= 30: WRT + [ MSV<29> ] + LGC  + MAN -->
 
     <permission
-        android:name="org.autojs.permission.PLUGIN"
+        android:name="${applicationId}.permission.PLUGIN"
         android:protectionLevel="signature" />
 
-    <uses-permission android:name="org.autojs.permission.PLUGIN" />
+    <uses-permission android:name="${applicationId}.permission.PLUGIN" />
 
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
@@ -422,6 +422,42 @@
         </service>
 
         <service android:name="org.autojs.autojs.external.ScriptExecutionIntentService" />
+
+        <service
+            android:name="org.autojs.autojs.engine.NativeNodeProcessService"
+            android:exported="false"
+            android:process=":nodejs" />
+
+        <service
+            android:name="org.autojs.autojs.engine.NativeNodeProcessServiceSlot1"
+            android:exported="false"
+            android:process=":nodejs_1" />
+
+        <service
+            android:name="org.autojs.autojs.engine.NodeBridgeEngineDispatchService"
+            android:exported="false" />
+
+        <service
+            android:name="org.autojs.autojs.engine.NativeNodeEmbeddedProbeService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse"
+            android:process=":nodejs_embedded">
+
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Run isolated embedded Node diagnostics without touching the main app process" />
+        </service>
+
+        <service
+            android:name="org.autojs.autojs.engine.NativeNodeEmbeddedScriptService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse"
+            android:process=":nodejs_embedded">
+
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Run isolated embedded Node scripts without touching the main app process" />
+        </service>
 
         <activity android:name="org.autojs.autojs.external.tasker.TaskPrefEditActivity" />
 

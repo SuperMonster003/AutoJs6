@@ -1,0 +1,101 @@
+INSTRUMENTATION_STATUS: class=org.autojs.autojs.engine.NodeAutoJsBridgeInstrumentationTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=
+org.autojs.autojs.engine.NodeAutoJsBridgeInstrumentationTest:
+INSTRUMENTATION_STATUS: test=jsBridgeFakeTransportEchoesArgs
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=org.autojs.autojs.engine.NodeAutoJsBridgeInstrumentationTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stack=java.lang.AssertionError: Embedded Node.js script timed out after 5000ms
+source=<embedded-autojs-bridge-echo-source.js>
+workingDirectory=/data/user/0/org.autojs.autojs6/cache
+elapsedMs=5006
+timeoutMs=5000
+pendingTimers=true
+pendingScopedFsCallbacks=0
+pendingCryptoCallbacks=0
+pendingDnsCallbacks=0
+pendingZlibCallbacks=0
+
+	at org.junit.Assert.fail(Assert.java:88)
+	at org.junit.Assert.assertTrue(Assert.java:41)
+	at org.autojs.autojs.engine.NodeAutoJsBridgeInstrumentationTest.jsBridgeFakeTransportEchoesArgs(NodeAutoJsBridgeInstrumentationTest.kt:303)
+
+INSTRUMENTATION_STATUS: stream=
+Error in jsBridgeFakeTransportEchoesArgs(org.autojs.autojs.engine.NodeAutoJsBridgeInstrumentationTest):
+java.lang.AssertionError: Embedded Node.js script timed out after 5000ms
+source=<embedded-autojs-bridge-echo-source.js>
+workingDirectory=/data/user/0/org.autojs.autojs6/cache
+elapsedMs=5006
+timeoutMs=5000
+pendingTimers=true
+pendingScopedFsCallbacks=0
+pendingCryptoCallbacks=0
+pendingDnsCallbacks=0
+pendingZlibCallbacks=0
+
+	at org.junit.Assert.fail(Assert.java:88)
+	at org.junit.Assert.assertTrue(Assert.java:41)
+	at org.autojs.autojs.engine.NodeAutoJsBridgeInstrumentationTest.jsBridgeFakeTransportEchoesArgs(NodeAutoJsBridgeInstrumentationTest.kt:303)
+
+INSTRUMENTATION_STATUS: test=jsBridgeFakeTransportEchoesArgs
+INSTRUMENTATION_STATUS_CODE: -2
+INSTRUMENTATION_RESULT: stream=
+
+Time: 6.257
+There was 1 failure:
+1) jsBridgeFakeTransportEchoesArgs(org.autojs.autojs.engine.NodeAutoJsBridgeInstrumentationTest)
+java.lang.AssertionError: Embedded Node.js script timed out after 5000ms
+source=<embedded-autojs-bridge-echo-source.js>
+workingDirectory=/data/user/0/org.autojs.autojs6/cache
+elapsedMs=5006
+timeoutMs=5000
+pendingTimers=true
+pendingScopedFsCallbacks=0
+pendingCryptoCallbacks=0
+pendingDnsCallbacks=0
+pendingZlibCallbacks=0
+
+	at org.junit.Assert.fail(Assert.java:88)
+	at org.junit.Assert.assertTrue(Assert.java:41)
+	at org.autojs.autojs.engine.NodeAutoJsBridgeInstrumentationTest.jsBridgeFakeTransportEchoesArgs(NodeAutoJsBridgeInstrumentationTest.kt:303)
+	at java.lang.reflect.Method.invoke(Native Method)
+	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:50)
+	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
+	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:47)
+	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
+	at androidx.test.internal.runner.junit4.statement.RunBefores.evaluate(RunBefores.java:80)
+	at androidx.test.internal.runner.junit4.statement.RunAfters.evaluate(RunAfters.java:61)
+	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:325)
+	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:78)
+	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:57)
+	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:290)
+	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:71)
+	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:288)
+	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:58)
+	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:268)
+	at org.junit.runners.ParentRunner.run(ParentRunner.java:363)
+	at org.junit.runners.Suite.runChild(Suite.java:128)
+	at org.junit.runners.Suite.runChild(Suite.java:27)
+	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:290)
+	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:71)
+	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:288)
+	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:58)
+	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:268)
+	at org.junit.runners.ParentRunner.run(ParentRunner.java:363)
+	at org.junit.runner.JUnitCore.run(JUnitCore.java:137)
+	at org.junit.runner.JUnitCore.run(JUnitCore.java:115)
+	at androidx.test.internal.runner.TestExecutor.execute(TestExecutor.java:68)
+	at androidx.test.internal.runner.TestExecutor.execute(TestExecutor.java:59)
+	at androidx.test.runner.AndroidJUnitRunner.onStart(AndroidJUnitRunner.java:467)
+	at android.app.Instrumentation$InstrumentationThread.run(Instrumentation.java:2619)
+
+FAILURES!!!
+Tests run: 1,  Failures: 1
+
+
+INSTRUMENTATION_CODE: -1

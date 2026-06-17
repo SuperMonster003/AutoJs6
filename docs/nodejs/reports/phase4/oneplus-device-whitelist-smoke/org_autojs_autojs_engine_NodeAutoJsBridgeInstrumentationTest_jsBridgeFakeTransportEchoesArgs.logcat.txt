@@ -1,0 +1,44 @@
+06-15 20:14:58.439 15548 15548 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+06-15 20:14:58.441 15548 15548 I AndroidRuntime: Using default boot image
+06-15 20:14:58.441 15548 15548 I AndroidRuntime: Leaving lock profiling enabled
+06-15 20:14:58.496 15548 15548 D AndroidRuntime: Calling main entry com.android.commands.am.Am
+06-15 20:14:58.498  3120  7140 I ActivityManager: Force stopping org.autojs.autojs6 appid=10372 user=0: start instr
+06-15 20:14:58.499  3120  7140 D ActivityManager: Async freezing 10708 com.oplus.notificationmanager
+06-15 20:14:58.499  3120  7140 D ActivityManager: Async freezing 11272 com.oplus.dmp:main
+06-15 20:14:58.499  3120  7140 D ActivityManager: Async freezing 12632 com.coloros.securepay
+06-15 20:14:58.499  3120  7140 D ActivityManager: Async freezing 10735 com.coloros.phonemanager
+06-15 20:14:58.500  3120  7140 W ActivityManager: ProcessRecord{7033ffa 0:org.autojs.autojs6/u0a372}: ART verification disabled
+06-15 20:14:58.515  3120  3281 I ActivityManager: Start proc 15562:org.autojs.autojs6/u0a372 for added application org.autojs.autojs6
+06-15 20:14:58.562 15562 15562 D OplusActivityManager: get AMS extension: android.os.BinderProxy@7bace0b
+06-15 20:14:58.828  3120  3522 D ActivityManager: Freezer deadlock watchdog
+06-15 20:14:59.183  3120  4021 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 10372. pid: 15562
+06-15 20:14:59.188  3120  4021 E ActivityManager: registerReceiver failed.
+06-15 20:14:59.188  3120  4021 W System.err: 	at com.android.server.am.ActivityManagerService.registerReceiverWithFeatureTraced(ActivityManagerService.java:16066)
+06-15 20:14:59.188  3120  4021 W System.err: 	at com.android.server.am.ActivityManagerService.registerReceiverWithFeature(ActivityManagerService.java:15845)
+06-15 20:14:59.188  3120  4021 W System.err: 	at android.app.IActivityManager$Stub.onTransact(IActivityManager.java:2757)
+06-15 20:14:59.188  3120  4021 W System.err: 	at com.android.server.am.ActivityManagerService.onTransact(ActivityManagerService.java:3085)
+06-15 20:14:59.833  3120  7140 I ActivityManager: Background started FGS: Allowed [callingPackage: org.autojs.autojs6; callingUid: 10372; uidState: FGS ; uidBFSL: [BFSL]; intent: Intent { act=org.autojs.autojs.engine.action.RUN_NATIVE_NODE_EMBEDDED_SCRIPT cmp=org.autojs.autojs6/org.autojs.autojs.engine.NativeNodeEmbeddedScriptService (has extras) mCallingUid=10372 }; code:ACTIVITY_STARTER; tempAllowListReason:<,reasonCode:SYSTEM_ALLOW_LISTED,duration:9223372036854775807,callingUid:-1>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+06-15 20:14:59.835  3120  7140 W ActivityManager: ProcessRecord{a65f03 0:org.autojs.autojs6:nodejs_embedded/u0a372}: ART verification disabled
+06-15 20:14:59.844  3120  3281 I ActivityManager: Start proc 15704:org.autojs.autojs6:nodejs_embedded/u0a372 for service {org.autojs.autojs6/org.autojs.autojs.engine.NativeNodeEmbeddedScriptService}
+06-15 20:14:59.876 15704 15704 D OplusActivityManager: get AMS extension: android.os.BinderProxy@7bace0b
+06-15 20:15:00.072  3120  6530 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 10372. pid: 15704
+06-15 20:15:00.077 15704 15704 I NativeNodeEmbeddedScriptService: PROCESS STARTED processName=org.autojs.autojs6:nodejs_embedded pid=15704
+06-15 20:15:00.091 15704 15722 I NativeNodeEmbeddedScriptService: node.runtime.state executionId=03215429-6523-4898-baad-0b478f9d3b28 CREATED -> STARTING reason=service.runScript processName=org.autojs.autojs6:nodejs_embedded pid=15704 sourceName=<embedded-autojs-bridge-echo-source.js>
+06-15 20:15:00.091 15704 15722 I NativeNodeEmbeddedScriptService: script.enter executionId=03215429-6523-4898-baad-0b478f9d3b28 processName=org.autojs.autojs6:nodejs_embedded pid=15704 sourceName=<embedded-autojs-bridge-echo-source.js> env=0 moduleSources=0 runtimeModuleSources=6 esmExperimentalEnabled=false dynamicImportExperimentalEnabled=false workerThreadsExperimentalEnabled=false javaInteropExperimentalEnabled=false queueMode=reject_when_busy queued=false queueWaitMs=0 bridgeLimits={"version":1,"maxPendingBridgeCalls":32,"maxImageHandles":32,"maxShellCommands":2,"maxNetworkRequests":4,"maxWebSocketConnections":2,"accessibilityQueriesPerSecond":20,"sources":["default"],"warnings":[],"defaults":{"maxPendingBridgeCalls":32,"maxImageHandles":32,"maxShellCommands":2,"maxNetworkRequests":4,"maxWebSocketConnections":2,"accessibilityQueriesPerSecond":20},"hardMax":{"maxPendingBridgeCalls":128,"maxImageHandles":128,"maxShellCommands":4,"maxNetworkRequests":8,"maxWebSocketConnections":4,"accessibilityQueriesPerSecond":60}} runtimeFirst=autojs6:host-app-info
+06-15 20:15:00.092 15704 15722 I NativeNodeEmbeddedScriptService: node.runtime.state executionId=03215429-6523-4898-baad-0b478f9d3b28 STARTING -> RUNNING reason=native.enter processName=org.autojs.autojs6:nodejs_embedded pid=15704 sourceName=<embedded-autojs-bridge-echo-source.js>
+06-15 20:15:00.117 15704 15722 I AutoJs6NodeBridge: embedded_script.enter
+06-15 20:15:00.179 15704 15722 I AutoJs6NodeBridge: embedded_script.exit elapsed=61ms
+06-15 20:15:00.193 15704 15722 I NativeNodeEmbeddedScriptService: node.runtime.state executionId=03215429-6523-4898-baad-0b478f9d3b28 RUNNING -> DRAINING reason=script.success processName=org.autojs.autojs6:nodejs_embedded pid=15704 sourceName=<embedded-autojs-bridge-echo-source.js>
+06-15 20:15:00.193 15704 15722 I NativeNodeEmbeddedScriptService: node.runtime.state executionId=03215429-6523-4898-baad-0b478f9d3b28 DRAINING -> STOPPED reason=script.success processName=org.autojs.autojs6:nodejs_embedded pid=15704 sourceName=<embedded-autojs-bridge-echo-source.js>
+06-15 20:15:00.205 15704 15722 I NativeNodeEmbeddedScriptService: script.exit executionId=03215429-6523-4898-baad-0b478f9d3b28 processName=org.autojs.autojs6:nodejs_embedded pid=15704 sourceName=<embedded-autojs-bridge-echo-source.js> state=STOPPED elapsed=125ms
+06-15 20:15:00.210 15704 15704 I NativeNodeEmbeddedScriptService: node.runtime.state executionId=03215429-6523-4898-baad-0b478f9d3b28 STOPPED -> DESTROYED reason=service.onDestroy processName=org.autojs.autojs6:nodejs_embedded pid=15704 sourceName=<embedded-autojs-bridge-echo-source.js>
+06-15 20:15:00.459 15704 15704 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
+06-15 20:15:00.505  3120  6530 I ActivityManager: Death received, pid = 15704, processName = org.autojs.autojs6:nodejs_embedded for thread android.os.BinderProxy@1433147
+06-15 20:15:00.506  3120  3976 I ActivityManager: Process org.autojs.autojs6:nodejs_embedded (pid 15704) has died: cch+5 CEM
+06-15 20:15:00.506  3120  3976 D OplusAppStartupManager: prevent restart service, pkgName = org.autojs.autojs6, scenePriority = -1
+06-15 20:15:00.865  3120  4021 I ActivityManager: Force stopping org.autojs.autojs6 appid=10372 user=0: finished inst
+06-15 20:15:00.865  3120  4021 E ActivityManager: Unable to freeze binder for 15562: -11
+06-15 20:15:00.866 15548 15548 I AndroidRuntime: VM exiting with result code 0.
+06-15 20:15:00.867  3120  4021 I ActivityManager: Killing 15562:org.autojs.autojs6/u0a372 (adj 0): stop org.autojs.autojs6 due to finished inst
+06-15 20:15:00.895  3120  4021 I ActivityManager: Death received, pid = 0, processName = org.autojs.autojs6 for thread android.os.BinderProxy@fe029d
+06-15 20:15:00.895  3120  7735 V ActivityManager: Got obituary of 15562:org.autojs.autojs6

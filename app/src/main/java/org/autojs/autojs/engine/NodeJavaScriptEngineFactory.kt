@@ -1,0 +1,91 @@
+package org.autojs.autojs.engine
+
+import android.content.Context
+import android.util.Log
+import org.autojs.autojs6.BuildConfig
+import java.util.Locale
+
+object NodeJavaScriptEngineFactory {
+
+    fun create(context: Context): JavaScriptEngine {
+        if (BuildConfig.NODEJS_RELEASE_FLAVOR == RHINO_ONLY_RELEASE_FLAVOR) {
+            return NodeDisabledJavaScriptEngine(
+                message = "Node.js scripts are disabled for the rhinoOnly release flavor. " +
+                        "Use nodeFull/nodeMini for Node Profile v1 scripts, or explicitly run a legacy " +
+                        "Rhino-backed Node compatibility diagnostic outside rhinoOnly. " +
+                        "code=${NodeRuntimeErrorCodes.NODE_DISABLED}",
+            )
+        }
+        return when (NodeRuntimeBackend.current()) {
+            NodeRuntimeBackend.RHINO -> NodeJavaScriptEngine(context)
+            NodeRuntimeBackend.NATIVE -> NativeNodeJavaScriptEngine(context)
+            NodeRuntimeBackend.EMBEDDED -> NativeNodeEmbeddedJavaScriptEngine(context)
+            NodeRuntimeBackend.AUTO -> when {
+                NativeNodeRuntimeBridge.isAvailable -> NativeNodeJavaScriptEngine(context)
+                else -> {
+                    Log.i(TAG, "Native Node.js backend is unavailable; using Rhino compatibility backend.")
+                    NodeJavaScriptEngine(context)
+                }
+            }
+        }
+    }
+
+    private const val TAG = "NodeJavaScriptEngineFactory"
+    private const val RHINO_ONLY_RELEASE_FLAVOR = "rhinoOnly"
+
+}
+
+class NodeDisabledJavaScriptEngine(
+    private val message: String,
+) : JavaScriptEngine() {
+
+    override fun put(name: String, value: Any?) {
+        // The disabled engine never evaluates script source, but JavaScriptEngine.setRuntime()
+        // still installs standard host objects before execution starts.
+    }
+
+    override fun init() = Unit
+
+    override fun forceStop() = Unit
+
+    override fun doExecution(scriptSource: org.autojs.autojs.script.JavaScriptSource): Any? {
+        throw NodeRuntimeDisabledException(message)
+    }
+
+    override fun toString(): String {
+        return "NodeDisabledJavaScriptEngine@" + Integer.toHexString(hashCode()) +
+                "{id=" + id + ",source='" + getTag(TAG_SOURCE) + "',cwd='" + cwd() + "'}"
+    }
+}
+
+class NodeRuntimeDisabledException(
+    message: String,
+) : IllegalStateException(message)
+
+enum class NodeRuntimeBackend {
+
+    RHINO,
+    NATIVE,
+    EMBEDDED,
+    AUTO,
+    ;
+
+    companion object {
+
+        private const val PROPERTY_NAME = "autojs.nodejs.backend"
+
+        fun current(): NodeRuntimeBackend {
+            val raw = System.getProperty(PROPERTY_NAME)
+                ?.takeIf { it.isNotBlank() }
+                ?: BuildConfig.NODEJS_RUNTIME_BACKEND
+            return from(raw)
+        }
+
+        private fun from(value: String?): NodeRuntimeBackend = when (value?.trim()?.lowercase(Locale.ROOT)) {
+            "native", "v8", "node", "nodejs" -> NATIVE
+            "embedded", "embed" -> EMBEDDED
+            "auto" -> AUTO
+            else -> RHINO
+        }
+    }
+}

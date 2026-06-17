@@ -154,6 +154,7 @@
     <string name="key_night_mode_enabled" translatable="false">key_$_night_mode_enabled</string>
     <string name="key_night_mode_follow_system" translatable="false">key_$_night_mode_follow_system</string>
     <string name="key_night_mode_null" translatable="false">key_$_night_mode_null</string>
+    <string name="key_nodejs_doctor_report" translatable="false">key_$_nodejs_doctor_report</string>
     <string name="key_not_showing_main_activity" translatable="false">key_$_not_showing_main_activity</string>
     <string name="key_pc_server_address_history" translatable="false">key_$_pc_server_address_histories</string>
     <string name="key_post_notifications_permission" translatable="false">key_$_post_notifications_permission</string>
@@ -1327,6 +1328,14 @@
     <string name="text_new_intelligent_color_library">New intelligent color library</string>
     <string name="text_new_key_store">New Key Store</string>
     <string name="text_new_path">New path</string>
+    <string name="text_nodejs">Node.js</string>
+    <string name="text_nodejs_doctor">Node.js Doctor</string>
+    <string name="text_nodejs_doctor_export_json">JSON report</string>
+    <string name="text_nodejs_doctor_export_text">Text report</string>
+    <string name="text_nodejs_doctor_generating" tools:ignore="TypographyEllipsis">Generating Node.js Doctor report...</string>
+    <string name="text_nodejs_doctor_generation_failed">Failed to generate Node.js Doctor report</string>
+    <string name="summary_nodejs_doctor_report">Generate a privacy-redacted Node runtime diagnostic report for bug reports</string>
+    <string name="description_nodejs_doctor_report_preference">Exports backend, Node version, ABI, feature flags, native library hashes, capability profile, last-error status, and packaged template status. User script contents and sensitive environment values are not included.</string>
     <string name="text_new_path_is_same_as_old_path">New path is same as old path</string>
     <string name="text_new_project">New project</string>
     <string name="text_new_version_found">New version found</string>

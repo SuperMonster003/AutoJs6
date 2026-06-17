@@ -16,6 +16,7 @@ import org.autojs.autojs.core.accessibility.monitor.CloseableManager
 import org.autojs.autojs.core.activity.ActivityInfoProvider
 import org.autojs.autojs.core.console.GlobalConsole
 import org.autojs.autojs.core.image.capture.ScreenCaptureRequester
+import org.autojs.autojs.core.looper.LooperHelper
 import org.autojs.autojs.core.looper.Loopers
 import org.autojs.autojs.core.plugin.center.PluginAutoMountManager
 import org.autojs.autojs.core.pref.Pref
@@ -171,6 +172,7 @@ import org.autojs.autojs.runtime.api.augment.util.Java as UtilJava
 import org.autojs.autojs.runtime.api.augment.util.MorseCode as UtilMorseCode
 import org.autojs.autojs.runtime.api.augment.util.Version as UtilVersion
 import org.autojs.autojs.runtime.api.augment.util.VersionCodes as UtilVersionCodes
+import org.autojs.autojs.script.JavaScriptSource
 
 /**
  * Created by Stardust on Jan 27, 2017.
@@ -484,6 +486,7 @@ class ScriptRuntime private constructor(builder: Builder) {
     }
 
     fun initPrologue() {
+        LooperHelper.prepare()
         mThread = Thread.currentThread()
         threads = ApiThreads(this)
         timers = ApiTimers(this)
@@ -493,7 +496,7 @@ class ScriptRuntime private constructor(builder: Builder) {
         plugins = ApiPlugins.PluginRuntime(
             topLevelScope = topLevelScope,
             pluginSearchDir = PFiles.join(engines.myEngine().cwd(), "plugins"),
-            engine = "rhino",
+            engine = engines.myEngine().source?.engineName ?: JavaScriptSource.ENGINE,
         ).let { ApiPlugins(mUiHandlerAppContext, it) }
 
         augment(topLevelScope)
@@ -634,20 +637,20 @@ class ScriptRuntime private constructor(builder: Builder) {
         // 以免出现恶意脚本全屏浮动窗口遮蔽屏幕并且在 exit 中写死循环的问题.
         ignoresException { floaty.closeAll() }
 
-        ignoresException("Exception on exit: %s") {
+        if (::events.isInitialized) ignoresException("Exception on exit: %s") {
             events.emit("exit")
         }
 
-        ignoresException { threads.shutDownAll() }
-        ignoresException { events.recycle() }
+        if (::threads.isInitialized) ignoresException { threads.shutDownAll() }
+        if (::events.isInitialized) ignoresException { events.recycle() }
         ignoresException { media.recycle() }
-        ignoresException { loopers.recycle() }
+        if (::loopers.isInitialized) ignoresException { loopers.recycle() }
         ignoresException { recycleShell() }
         ignoresException { images.releaseScreenCapturer() }
         ignoresException { images.stopScreenCapturerForegroundService() }
         ignoresException { ocrMLKit.release() }
-        ignoresException { sensors.unregisterAll() }
-        ignoresException { timers.recycle() }
+        if (::sensors.isInitialized) ignoresException { sensors.unregisterAll() }
+        if (::timers.isInitialized) ignoresException { timers.recycle() }
         ignoresException { ui.recycle() }
         ignoresException { closeableManager.recycleAll() }
     }

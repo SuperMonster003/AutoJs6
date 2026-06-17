@@ -1,0 +1,23 @@
+{
+  "name": "typescript-smoke",
+  "type": "node",
+  "main": "main.cjs",
+  "node": {
+    "permissions": [
+      "toast",
+      "app",
+      "dialogs",
+      "clipboard",
+      "device",
+      "shell",
+      "shell.root",
+      "engines",
+      "engines.exec",
+      "accessibility",
+      "screen_capture",
+      "image",
+      "network",
+      "work_manager"
+    ]
+  }
+}

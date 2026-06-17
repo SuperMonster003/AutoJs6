@@ -1,0 +1,8 @@
+ro.product.manufacturer=Sony
+ro.product.model=XQ-AT72
+ro.product.name=XQ-AT72_CN
+ro.product.device=XQ-AT72
+ro.build.version.release=12
+ro.build.version.sdk=31
+ro.product.cpu.abi=arm64-v8a
+ro.build.fingerprint=Sony/XQ-AT72_CN/XQ-AT72:12/58.2.A.10.44A/058002A0100044A0891821322:user/release-keys

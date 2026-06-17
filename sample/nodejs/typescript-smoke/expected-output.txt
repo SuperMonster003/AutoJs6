@@ -1,0 +1,1 @@
+sample.typescript-smoke=PASS

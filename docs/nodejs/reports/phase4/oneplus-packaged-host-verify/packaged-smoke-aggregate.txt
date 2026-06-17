@@ -1,0 +1,104 @@
+Embedded Node.js packaged smoke aggregate verification report
+Generated at: 2026-06-14T19:50:38.060818+08:00[Asia/Shanghai]
+
+Inputs:
+  host smoke APK dir: D:\idea-projects\AutoJs6\app\build\embedded-node-packaged-smoke
+  release flavor: nodeFull
+  expected ABI property: arm64-v8a
+  success APK: D:\idea-projects\AutoJs6\app\build\embedded-node-packaged-smoke\PackagedNodeSmoke_v1.0.0.apk (84912275 bytes)
+  diagnostics APK: D:\idea-projects\AutoJs6\app\build\embedded-node-packaged-smoke\PackagedNodeDiagnosticsSmoke_v1.0.0.apk (84463088 bytes)
+  template APK: D:\idea-projects\AutoJs6\app\src\main\assets-app\template.apk (210800712 bytes)
+  success verifier report: D:\idea-projects\AutoJs6\app\build\reports\embedded-node\packaged-apk-output-verify-success.txt
+  diagnostics verifier report: D:\idea-projects\AutoJs6\app\build\reports\embedded-node\packaged-apk-output-verify-diagnostics.txt
+
+Pulled smoke APKs:
+  PackagedNodeSmoke_v1.0.0.apk:
+    path: D:\idea-projects\AutoJs6\app\build\embedded-node-packaged-smoke\PackagedNodeSmoke_v1.0.0.apk
+    exists: true
+    size: 84912275
+    sha256: 940daddb404bd992e0da7fce4fbd9fa05bdfba63c6cc2107d8deee158c255c1a
+  PackagedNodeScriptLaunchSmoke_v1.0.0.apk:
+    path: D:\idea-projects\AutoJs6\app\build\embedded-node-packaged-smoke\PackagedNodeScriptLaunchSmoke_v1.0.0.apk
+    exists: true
+    size: 84484167
+    sha256: 0349a51efa95cad139acc8dccc6c07a649eafce3ea01a10d86e4de0720eb7e2b
+  PackagedNodeBinLaunchSmoke_v1.0.0.apk:
+    path: D:\idea-projects\AutoJs6\app\build\embedded-node-packaged-smoke\PackagedNodeBinLaunchSmoke_v1.0.0.apk
+    exists: true
+    size: 84484029
+    sha256: a5d105c65de344fff0073a85dddb9ecf8b7f7b83b16ae82dda087264409736d6
+  PackagedNodeBinStringScriptSmoke_v1.0.0.apk:
+    path: D:\idea-projects\AutoJs6\app\build\embedded-node-packaged-smoke\PackagedNodeBinStringScriptSmoke_v1.0.0.apk
+    exists: true
+    size: 84509788
+    sha256: 51db67c5cbd1b6d6037d91ad84530d8c2b11a4e4d2b8345bda3ebf99ea22b2f8
+  PackagedNodeDiagnosticsSmoke_v1.0.0.apk:
+    path: D:\idea-projects\AutoJs6\app\build\embedded-node-packaged-smoke\PackagedNodeDiagnosticsSmoke_v1.0.0.apk
+    exists: true
+    size: 84463088
+    sha256: 25884b2c2984f135670b9ddac5ae3e47c23ea263172a2d7270d3d140788eb0c2
+  PackagedNodeEsmDiagnosticsSmoke_v1.0.0.apk:
+    path: D:\idea-projects\AutoJs6\app\build\embedded-node-packaged-smoke\PackagedNodeEsmDiagnosticsSmoke_v1.0.0.apk
+    exists: true
+    size: 84454027
+    sha256: 3a360a56484bf01c47471c590c1c625bbe25bcf17e6a7b338b6b5f8173608be4
+  PackagedNodeDynamicImportDiagnosticsSmoke_v1.0.0.apk:
+    path: D:\idea-projects\AutoJs6\app\build\embedded-node-packaged-smoke\PackagedNodeDynamicImportDiagnosticsSmoke_v1.0.0.apk
+    exists: true
+    size: 84454109
+    sha256: 07a7e344893dc98853ea7ee80e01a9af4439b5183b1256c2f4e2220e35f82f5a
+  PackagedNodeTimeoutDiagnosticsSmoke_v1.0.0.apk:
+    path: D:\idea-projects\AutoJs6\app\build\embedded-node-packaged-smoke\PackagedNodeTimeoutDiagnosticsSmoke_v1.0.0.apk
+    exists: true
+    size: 84454024
+    sha256: 808005d8e60979ecdb8dd76ceed145f5469e79ef877e7ae074d1d20202780ff1
+
+Template freshness:
+  template APK exists: true
+  template DEX entries: classes.dex, classes10.dex, classes2.dex, classes3.dex, classes4.dex, classes5.dex, classes6.dex, classes7.dex, classes8.dex, classes9.dex
+  template dex contains NativeNodeEmbeddedScriptService: true
+  template dex contains NativeNodeEmbeddedRuntimeBridge: true
+  template dex contains nativeRunEmbeddedScriptLifecycle: true
+  template dex contains nativeRunEmbeddedScriptLifecycleWithModules: true
+  template dex contains inrt node project runner marker: true
+  template dex contains inrt node project launch source marker: true
+  template dex contains inrt node project request marker requestReady=: true
+  template dex contains inrt node project request marker requestLaunchKind=: true
+  template dex contains inrt node project request marker packageDirProjectRoot=: true
+  template dex contains inrt node project request marker workingDirectoryProjectRoot=: true
+  template dex contains inrt node project request marker argvCount=: true
+  template dex contains inrt node project request marker envKeys=: true
+  template dex contains inrt node project failure marker autojs6.node_project_launch.failure.v1: true
+  template dex contains inrt node project failure marker autojs6.node_project_runner.request_failure.v1: true
+  template manifest service ready: true
+  template manifest foreground-service permissions ready: true
+  template inrt node project runner ready: true
+  template inrt node project launch source ready: true
+  template inrt node project stable request diagnostics ready: true
+  template inrt node project stable failure diagnostics ready: true
+  template native libs ready: true
+  template bridge JNI symbols report-only:
+    legacy nativeRunEmbeddedScriptLifecycle: true
+    current nativeRunEmbeddedScriptLifecycleWithModules: true
+  template freshness ready: true
+  template freshness missing: none
+
+Summary:
+  embedded.node.packaged.smoke.aggregate.host_dir=D:\idea-projects\AutoJs6\app\build\embedded-node-packaged-smoke
+  embedded.node.packaged.smoke.aggregate.success.apk=D:\idea-projects\AutoJs6\app\build\embedded-node-packaged-smoke\PackagedNodeSmoke_v1.0.0.apk
+  embedded.node.packaged.smoke.aggregate.success.sha256=940daddb404bd992e0da7fce4fbd9fa05bdfba63c6cc2107d8deee158c255c1a
+  embedded.node.packaged.smoke.aggregate.diagnostics.apk=D:\idea-projects\AutoJs6\app\build\embedded-node-packaged-smoke\PackagedNodeDiagnosticsSmoke_v1.0.0.apk
+  embedded.node.packaged.smoke.aggregate.diagnostics.sha256=25884b2c2984f135670b9ddac5ae3e47c23ea263172a2d7270d3d140788eb0c2
+  embedded.node.packaged.smoke.pull.ready=true
+  embedded.node.packaged.smoke.pull.missing=none
+  embedded.node.packaged.smoke.success.output.ready=true
+  embedded.node.packaged.smoke.diagnostics.output.ready=true
+  embedded.node.packaged.smoke.template.ready=true
+  embedded.node.packaged.smoke.template.missing=none
+  embedded.node.packaged.smoke.module_sources.ready=true
+  embedded.node.packaged.smoke.aggregate.ready=true
+
+Notes:
+  Run EmbeddedNodePackagedApkSmokeTest before this task so device public storage contains current smoke APKs.
+  This task does not build, install, or launch packaged APKs; it verifies pulled APK artifacts on the host.
+  It does not recursively invoke Gradle.

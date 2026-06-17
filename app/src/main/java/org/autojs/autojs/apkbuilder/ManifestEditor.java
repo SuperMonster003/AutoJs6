@@ -18,12 +18,25 @@ import static org.autojs.autojs.apkbuilder.ApkBuilder.INRT_APP_ID;
 public class ManifestEditor {
 
     private static final String NS_ANDROID = "http://schemas.android.com/apk/res/android";
+    private static final String EMBEDDED_NODE_SCRIPT_SERVICE = "org.autojs.autojs.engine.NativeNodeEmbeddedScriptService";
+    private static final String EMBEDDED_NODE_PROCESS = ":nodejs_embedded";
+    private static final String FOREGROUND_SERVICE_PERMISSION = "android.permission.FOREGROUND_SERVICE";
+    private static final String FOREGROUND_SERVICE_SPECIAL_USE_PERMISSION = "android.permission.FOREGROUND_SERVICE_SPECIAL_USE";
+    private static final String LEGACY_PLUGIN_PERMISSION = "org.autojs.permission.PLUGIN";
+    private static final String TEMPLATE_PLUGIN_PERMISSION = INRT_APP_ID + ".permission.PLUGIN";
+    private static final int FOREGROUND_SERVICE_TYPE_SPECIAL_USE = 0x40000000;
     private final InputStream mManifestInputStream;
     private int mVersionCode = -1;
     private String mVersionName;
     private CharSequence mAppName;
     private String mPackageName;
     private byte[] mManifestData;
+    private boolean mShouldAddEmbeddedNodeScriptService;
+    private boolean mShouldAddEmbeddedNodeForegroundServicePermissions;
+    private boolean mHasEmbeddedNodeScriptService;
+    private boolean mHasForegroundServicePermission;
+    private boolean mHasForegroundServiceSpecialUsePermission;
+    private boolean mHasAddedEmbeddedNodeForegroundServicePermissions;
 
     public ManifestEditor(InputStream manifestInputStream) {
         mManifestInputStream = manifestInputStream;
@@ -46,6 +59,16 @@ public class ManifestEditor {
 
     public ManifestEditor setPackageName(String packageName) {
         mPackageName = packageName;
+        return this;
+    }
+
+    public ManifestEditor addEmbeddedNodeScriptServiceIfMissing() {
+        mShouldAddEmbeddedNodeScriptService = true;
+        return this;
+    }
+
+    public ManifestEditor addEmbeddedNodeForegroundServicePermissionsIfMissing() {
+        mShouldAddEmbeddedNodeForegroundServicePermissions = true;
         return this;
     }
 
@@ -95,12 +118,26 @@ public class ManifestEditor {
         return true;
     }
 
+    protected boolean isEmbeddedNodeForegroundServicePermission(String permissionName) {
+        return FOREGROUND_SERVICE_PERMISSION.equals(permissionName)
+            || FOREGROUND_SERVICE_SPECIAL_USE_PERMISSION.equals(permissionName);
+    }
+
+    protected boolean isTemplatePluginPermission(String permissionName) {
+        return LEGACY_PLUGIN_PERMISSION.equals(permissionName)
+            || TEMPLATE_PLUGIN_PERMISSION.equals(permissionName);
+    }
+
     public boolean shouldIgnoreComponentNode(String nodeName, String componentClassName) {
         return false;
     }
 
     private class MutableAxmlWriter extends AxmlWriter {
         private class MutableNodeImpl extends AxmlWriter.NodeImpl {
+            private String mComponentClassName;
+            private boolean mHasExportedAttr;
+            private boolean mHasForegroundServiceTypeAttr;
+            private boolean mHasProcessAttr;
 
             MutableNodeImpl(String ns, String name) {
                 super(ns, name);
@@ -108,6 +145,23 @@ public class ManifestEditor {
 
             @Override
             protected void onAttr(AxmlWriter.Attr a) {
+                if ("service".equals(this.name.data)
+                    && a.ns != null
+                    && NS_ANDROID.equals(a.ns.data)
+                ) {
+                    if ("name".equals(a.name.data) && a.value instanceof StringItem) {
+                        mComponentClassName = ((StringItem) a.value).data;
+                        if (EMBEDDED_NODE_SCRIPT_SERVICE.equals(mComponentClassName)) {
+                            mHasEmbeddedNodeScriptService = true;
+                        }
+                    } else if ("exported".equals(a.name.data)) {
+                        mHasExportedAttr = true;
+                    } else if ("foregroundServiceType".equals(a.name.data)) {
+                        mHasForegroundServiceTypeAttr = true;
+                    } else if ("process".equals(a.name.data)) {
+                        mHasProcessAttr = true;
+                    }
+                }
                 if (a.ns != null
                     && NS_ANDROID.equals(a.ns.data)
                     && "name".equals(a.name.data)
@@ -126,7 +180,7 @@ public class ManifestEditor {
                         super.onAttr(a);
                         return;
                     }
-                    if ("org.autojs.permission.PLUGIN".equals(((StringItem) a.value).data)) {
+                    if (isTemplatePluginPermission(((StringItem) a.value).data)) {
                         this.ignore = true;
                         return;
                     }
@@ -135,6 +189,12 @@ public class ManifestEditor {
                     && "name".equals(a.name.data)
                     && a.value instanceof StringItem
                 ) {
+                    String permissionName = ((StringItem) a.value).data;
+                    if (FOREGROUND_SERVICE_PERMISSION.equals(permissionName)) {
+                        mHasForegroundServicePermission = true;
+                    } else if (FOREGROUND_SERVICE_SPECIAL_USE_PERMISSION.equals(permissionName)) {
+                        mHasForegroundServiceSpecialUsePermission = true;
+                    }
                     this.ignore = !ManifestEditor.this.isPermissionRequired(((StringItem) a.value).data);
                 }
                 ManifestEditor.this.onAttr(a);
@@ -142,10 +202,75 @@ public class ManifestEditor {
             }
 
             @Override
+            public void end() {
+                if (EMBEDDED_NODE_SCRIPT_SERVICE.equals(mComponentClassName)) {
+                    ensureEmbeddedNodeScriptServiceAttrs();
+                }
+                if ("application".equals(this.name.data)
+                    && mShouldAddEmbeddedNodeScriptService
+                    && !mHasEmbeddedNodeScriptService
+                ) {
+                    addEmbeddedNodeScriptServiceNode();
+                    mHasEmbeddedNodeScriptService = true;
+                }
+                if ("manifest".equals(this.name.data)) {
+                    addMissingEmbeddedNodeForegroundServicePermissionNodes();
+                }
+                super.end();
+            }
+
+            @Override
             public NodeVisitor child(String ns, String name) {
+                if ("manifest".equals(this.name.data) && "application".equals(name)) {
+                    addMissingEmbeddedNodeForegroundServicePermissionNodes();
+                }
                 NodeImpl child = new MutableNodeImpl(ns, name);
                 this.children.add(child);
                 return child;
+            }
+
+            private void ensureEmbeddedNodeScriptServiceAttrs() {
+                if (!mHasExportedAttr) {
+                    attr(NS_ANDROID, "exported", android.R.attr.exported, NodeVisitor.TYPE_INT_BOOLEAN, Boolean.FALSE);
+                }
+                if (!mHasForegroundServiceTypeAttr) {
+                    attr(NS_ANDROID, "foregroundServiceType", android.R.attr.foregroundServiceType, NodeVisitor.TYPE_INT_HEX, FOREGROUND_SERVICE_TYPE_SPECIAL_USE);
+                }
+                if (!mHasProcessAttr) {
+                    attr(NS_ANDROID, "process", android.R.attr.process, NodeVisitor.TYPE_STRING, EMBEDDED_NODE_PROCESS);
+                }
+            }
+
+            private void addEmbeddedNodeScriptServiceNode() {
+                NodeVisitor service = child(null, "service");
+                service.attr(NS_ANDROID, "name", android.R.attr.name, NodeVisitor.TYPE_STRING, EMBEDDED_NODE_SCRIPT_SERVICE);
+                service.attr(NS_ANDROID, "exported", android.R.attr.exported, NodeVisitor.TYPE_INT_BOOLEAN, Boolean.FALSE);
+                service.attr(NS_ANDROID, "foregroundServiceType", android.R.attr.foregroundServiceType, NodeVisitor.TYPE_INT_HEX, FOREGROUND_SERVICE_TYPE_SPECIAL_USE);
+                service.attr(NS_ANDROID, "process", android.R.attr.process, NodeVisitor.TYPE_STRING, EMBEDDED_NODE_PROCESS);
+
+                NodeVisitor property = service.child(null, "property");
+                property.attr(NS_ANDROID, "name", android.R.attr.name, NodeVisitor.TYPE_STRING, "android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE");
+                property.attr(NS_ANDROID, "value", android.R.attr.value, NodeVisitor.TYPE_STRING, "Run isolated embedded Node scripts without touching the main app process");
+            }
+
+            private void addMissingEmbeddedNodeForegroundServicePermissionNodes() {
+                if (!mShouldAddEmbeddedNodeForegroundServicePermissions || mHasAddedEmbeddedNodeForegroundServicePermissions) {
+                    return;
+                }
+                if (!mHasForegroundServicePermission) {
+                    addUsesPermissionNode(FOREGROUND_SERVICE_PERMISSION);
+                    mHasForegroundServicePermission = true;
+                }
+                if (!mHasForegroundServiceSpecialUsePermission) {
+                    addUsesPermissionNode(FOREGROUND_SERVICE_SPECIAL_USE_PERMISSION);
+                    mHasForegroundServiceSpecialUsePermission = true;
+                }
+                mHasAddedEmbeddedNodeForegroundServicePermissions = true;
+            }
+
+            private void addUsesPermissionNode(String permissionName) {
+                NodeVisitor usesPermission = child(null, "uses-permission");
+                usesPermission.attr(NS_ANDROID, "name", android.R.attr.name, NodeVisitor.TYPE_STRING, permissionName);
             }
 
         }

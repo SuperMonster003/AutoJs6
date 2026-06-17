@@ -10,6 +10,7 @@ object EncryptedScriptFileHeader {
 
     const val FLAG_EXECUTION_MODE_UI: Short = JavaScriptSource.EXECUTION_MODE_UI.toShort()
     const val FLAG_EXECUTION_MODE_AUTO: Short = JavaScriptSource.EXECUTION_MODE_AUTO.toShort()
+    const val FLAG_EXECUTION_MODE_NODEJS: Short = JavaScriptSource.EXECUTION_MODE_NODEJS.toShort()
 
     const val BLOCK_SIZE = 8
     private val BLOCK = byteArrayOf(0x77, 0x01, 0x17, 0x7F, 0x12, 0x12)

@@ -1,14 +1,13 @@
 package org.autojs.autojs.model.script;
 
 import org.autojs.autojs.pio.PFile;
-import org.autojs.autojs.script.AutoFileSource;
-import org.autojs.autojs.script.JavaScriptFileSource;
+import org.autojs.autojs.script.JavaScriptSource;
+import org.autojs.autojs.script.ScriptLaunchSourceFactory;
 import org.autojs.autojs.script.ScriptSource;
 
 import java.io.File;
 
 import static org.autojs.autojs.util.FileUtils.TYPE.AUTO;
-import static org.autojs.autojs.util.FileUtils.TYPE.JAVASCRIPT;
 
 /**
  * Created by Stardust on Jan 23, 2017.
@@ -39,7 +38,7 @@ public class ScriptFile extends PFile {
 
     public int getType() {
         if (mType == -1) {
-            mType = getName().endsWith(JAVASCRIPT.extensionWithDot) ? TYPE_JAVASCRIPT :
+            mType = JavaScriptSource.isJavaScriptFileName(getName()) ? TYPE_JAVASCRIPT :
                     getName().endsWith(AUTO.extensionWithDot) ? TYPE_AUTO : TYPE_UNKNOWN;
         }
         return mType;
@@ -54,10 +53,6 @@ public class ScriptFile extends PFile {
     }
 
     public ScriptSource toSource() {
-        if (getType() == TYPE_JAVASCRIPT) {
-            return new JavaScriptFileSource(this);
-        } else {
-            return new AutoFileSource(this);
-        }
+        return ScriptLaunchSourceFactory.createFileSource(this);
     }
 }

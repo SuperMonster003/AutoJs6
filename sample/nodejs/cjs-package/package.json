@@ -1,0 +1,9 @@
+{
+  "name": "@autojs6-sample/cjs-package",
+  "private": true,
+  "type": "commonjs",
+  "main": "main.cjs",
+  "dependencies": {
+    "sample-answer": "file:node_modules/sample-answer"
+  }
+}

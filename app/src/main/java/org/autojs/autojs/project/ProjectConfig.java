@@ -123,6 +123,13 @@ public class ProjectConfig implements FuzzyDeserializer.OriginalJsonKeyAware {
     private String mMainScriptFileName = DEFAULT_MAIN_SCRIPT_FILE_NAME;
 
     @Nullable
+    @SerializedName("type")
+    @SerializedNameCompatible(with = {
+            @With(value = "projectType"),
+    })
+    private String mProjectType;
+
+    @Nullable
     @SerializedName(value = "assets")
     @SerializedNameCompatible(with = {
             @With(value = "asset"),
@@ -165,6 +172,10 @@ public class ProjectConfig implements FuzzyDeserializer.OriginalJsonKeyAware {
             @With(value = "libList"),
     })
     private List<String> mLibs = new ArrayList<>();
+
+    @Nullable
+    @SerializedName("node")
+    private NodeConfig mNodeConfig;
 
     @SerializedName("permissions")
     @SerializedNameCompatible(with = {
@@ -291,6 +302,8 @@ public class ProjectConfig implements FuzzyDeserializer.OriginalJsonKeyAware {
         Pattern versionCodePattern = Pattern.compile(numberPatternWithKeyCapture("versionCode"), Pattern.CASE_INSENSITIVE);
         Pattern packageNamePattern = Pattern.compile(stringPatternWithKeyCapture("packageName"), Pattern.CASE_INSENSITIVE);
         Pattern mainPattern = Pattern.compile(stringPatternWithKeyCapture("main"), Pattern.CASE_INSENSITIVE);
+        Pattern projectTypePattern = Pattern.compile(stringPatternWithKeyCapture("type"), Pattern.CASE_INSENSITIVE);
+        Pattern projectTypeAliasPattern = Pattern.compile(stringPatternWithKeyCapture("projectType"), Pattern.CASE_INSENSITIVE);
         Pattern iconPattern = Pattern.compile(stringPatternWithKeyCapture("icon"), Pattern.CASE_INSENSITIVE);
 
         Pattern assetsPattern = Pattern.compile(listPatternWithKeyCapture("asset"), Pattern.CASE_INSENSITIVE);
@@ -325,6 +338,8 @@ public class ProjectConfig implements FuzzyDeserializer.OriginalJsonKeyAware {
         setFieldForDoubleIfMatchesWithKey(versionCodePattern, s, "versionCode", versionCode -> projectConfig.setVersionCode((int) versionCode), projectConfig, detectConflicts);
         setFieldIfMatchesWithKey(packageNamePattern, s, "packageName", projectConfig::setPackageName, projectConfig, detectConflicts);
         setFieldIfMatchesWithKey(mainPattern, s, "main", projectConfig::setMainScriptFileName, projectConfig, detectConflicts);
+        setFieldIfMatchesWithKey(projectTypePattern, s, "type", projectConfig::setProjectType, projectConfig, detectConflicts);
+        setFieldIfMatchesWithKey(projectTypeAliasPattern, s, "type", projectConfig::setProjectType, projectConfig, detectConflicts);
         setFieldIfMatchesWithKey(iconPattern, s, "icon", projectConfig::setIconPath, projectConfig, detectConflicts);
 
         setListIfMatchesWithKey(assetsPattern, s, "assets", projectConfig::setAssets, projectConfig, detectConflicts);
@@ -629,6 +644,16 @@ public class ProjectConfig implements FuzzyDeserializer.OriginalJsonKeyAware {
         return this;
     }
 
+    @Nullable
+    public String getProjectType() {
+        return mProjectType;
+    }
+
+    public ProjectConfig setProjectType(@Nullable String projectType) {
+        mProjectType = projectType;
+        return this;
+    }
+
     public List<String> getAssets() {
         if (mAssets == null) {
             mAssets = Collections.emptyList();
@@ -862,6 +887,16 @@ public class ProjectConfig implements FuzzyDeserializer.OriginalJsonKeyAware {
         return this;
     }
 
+    @Nullable
+    public NodeConfig getNodeConfig() {
+        return mNodeConfig;
+    }
+
+    public ProjectConfig setNodeConfig(@Nullable NodeConfig nodeConfig) {
+        mNodeConfig = nodeConfig;
+        return this;
+    }
+
     public String getSignatureScheme() {
         return mSignatureScheme;
     }
@@ -879,6 +914,50 @@ public class ProjectConfig implements FuzzyDeserializer.OriginalJsonKeyAware {
     public ProjectConfig setKeyStore(@Nullable KeyStore keyStore) {
         mKeyStore = keyStore;
         return this;
+    }
+
+    public static class NodeConfig {
+
+        @Nullable
+        @SerializedName("backend")
+        private String mBackend;
+
+        @Nullable
+        @SerializedName("timeoutMs")
+        private Long mTimeoutMs;
+
+        @Nullable
+        @SerializedName("permissions")
+        private List<String> mPermissions;
+
+        @Nullable
+        public String getBackend() {
+            return mBackend;
+        }
+
+        public NodeConfig setBackend(@Nullable String backend) {
+            mBackend = backend;
+            return this;
+        }
+
+        @Nullable
+        public Long getTimeoutMs() {
+            return mTimeoutMs;
+        }
+
+        public NodeConfig setTimeoutMs(@Nullable Long timeoutMs) {
+            mTimeoutMs = timeoutMs;
+            return this;
+        }
+
+        public List<String> getPermissions() {
+            return Objects.requireNonNullElse(mPermissions, Collections.emptyList());
+        }
+
+        public NodeConfig setPermissions(@Nullable List<String> permissions) {
+            mPermissions = permissions;
+            return this;
+        }
     }
 
 }

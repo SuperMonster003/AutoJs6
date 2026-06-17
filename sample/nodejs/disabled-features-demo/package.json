@@ -1,0 +1,6 @@
+{
+  "name": "@autojs6-sample/disabled-features-demo",
+  "private": true,
+  "type": "commonjs",
+  "main": "main.cjs"
+}

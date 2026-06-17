@@ -1,0 +1,10 @@
+{
+  "name": "@autojs6-sample/npm-pure-js-cjs",
+  "private": true,
+  "type": "commonjs",
+  "main": "main.cjs",
+  "dependencies": {
+    "left-pad-lite": "file:node_modules/left-pad-lite",
+    "slugify-lite": "file:node_modules/slugify-lite"
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "fixtures": [
+    {
+      "name": "utility-chain",
+      "patterns": [
+        "small utility",
+        "nested CommonJS dependency",
+        "event callback utility"
+      ]
+    },
+    {
+      "name": "semver-query-url",
+      "patterns": [
+        "semver parsing",
+        "querystring utility",
+        "URL utility"
+      ]
+    },
+    {
+      "name": "path-glob-crypto",
+      "patterns": [
+        "glob/path matching",
+        "crypto hash utility"
+      ]
+    },
+    {
+      "name": "stream-zlib",
+      "patterns": [
+        "stream utility",
+        "zlib buffer utility"
+      ]
+    }
+  ]
+}

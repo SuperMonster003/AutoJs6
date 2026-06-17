@@ -1,0 +1,7 @@
+sample.disabled.child_process=ERR_AUTOJS6_BUILTIN_DISABLED
+sample.disabled.worker_threads=ERR_AUTOJS6_BUILTIN_DISABLED
+sample.disabled.http=ERR_AUTOJS6_NETWORK_DISABLED
+sample.disabled.native_addon=ERR_AUTOJS6_NATIVE_ADDON_DISABLED
+sample.disabled.process_binding=ERR_AUTOJS6_PROCESS_API_DISABLED
+sample.disabled.process_chdir=ERR_AUTOJS6_PROCESS_API_DISABLED
+sample.disabled-features-demo=PASS

@@ -1,0 +1,435 @@
+INSTRUMENTATION_STATUS: class=org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=
+org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest:
+INSTRUMENTATION_STATUS: test=installAndRunEsmDiagnosticsEmbeddedNodePackagedApk
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stack=java.lang.AssertionError: packaged ESM diagnostics smoke logcat did not contain expected runtime markers: [packaged.diagnostics.esm.code=ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED, packaged.diagnostics.esm.message=true]
+06-15 18:45:15.295 W/RunnableJSExecution(25936): 	at org.autojs.autojs.engine.NativeNodeEmbeddedJavaScriptEngine.finishEmbeddedScriptExecution(NativeNodeEmbeddedJavaScriptEngine.kt:157)
+06-15 18:45:15.295 W/RunnableJSExecution(25936): 	at org.autojs.autojs.engine.NativeNodeEmbeddedJavaScriptEngine.doExecution(NativeNodeEmbeddedJavaScriptEngine.kt:37)
+06-15 18:45:15.295 W/System.err(25936): org.autojs.autojs.engine.NativeNodeRuntimeUnavailableException: Native Node embedded script failed with exitCode=1: Embedded script native runner failed: argv == null
+06-15 18:45:15.295 W/System.err(25936): 	at org.autojs.autojs.engine.NativeNodeEmbeddedJavaScriptEngine.finishEmbeddedScriptExecution(NativeNodeEmbeddedJavaScriptEngine.kt:157)
+06-15 18:45:15.295 W/System.err(25936): 	at org.autojs.autojs.engine.NativeNodeEmbeddedJavaScriptEngine.doExecution(NativeNodeEmbeddedJavaScriptEngine.kt:37)
+06-15 18:45:15.295 D/GlobalConsole(25936): 18:45:15.295/E: Native Node embedded script failed with exitCode=1: Embedded script native runner failed: argv == null
+06-15 18:45:15.295 D/GlobalConsole(25936): org.autojs.autojs.engine.NativeNodeRuntimeUnavailableException: Native Node embedded script failed with exitCode=1: Embedded script native runner failed: argv == null
+06-15 18:45:15.295 D/GlobalConsole(25936):     at org.autojs.autojs.engine.NativeNodeEmbeddedJavaScriptEngine.finishEmbeddedScriptExecution(NativeNodeEmbeddedJavaScriptEngine.kt:157)
+06-15 18:45:15.295 D/GlobalConsole(25936):     at org.autojs.autojs.engine.NativeNodeEmbeddedJavaScriptEngine.doExecution(NativeNodeEmbeddedJavaScriptEngine.kt:37)
+06-15 18:45:15.295 D/GlobalConsole(25936):     at org.autojs.autojs.engine.JavaScriptEngine.execute(JavaScriptEngine.java:32)
+06-15 18:45:15.295 D/GlobalConsole(25936):     at org.autojs.autojs.engine.JavaScriptEngine.execute(JavaScriptEngine.java:19)
+06-15 18:45:15.295 D/GlobalConsole(25936):     at org.autojs.autojs.execution.RunnableScriptExecution.execute(RunnableScriptExecution.java:89)
+06-15 18:45:15.295 D/GlobalConsole(25936):     at org.autojs.autojs.execution.RunnableScriptExecution.doExecution(RunnableScriptExecution.java:81)
+06-15 18:45:15.295 D/GlobalConsole(25936):     at org.autojs.autojs.execution.LoopedBasedJavaScriptExecution.doExecution(LoopedBasedJavaScriptExecution.java:21)
+06-15 18:45:15.295 D/GlobalConsole(25936):     at org.autojs.autojs.execution.RunnableScriptExecution.execute(RunnableScriptExecution.java:39)
+06-15 18:45:15.295 D/GlobalConsole(25936):     at org.autojs.autojs.execution.RunnableScriptExecution.execute(RunnableScriptExecution.java:33)
+06-15 18:45:15.295 D/GlobalConsole(25936):     at org.autojs.autojs.execution.RunnableScriptExecution.run(RunnableScriptExecution.java:27)
+06-15 18:45:15.295 D/GlobalConsole(25936):     at java.lang.Thread.run(Thread.java:1012)
+06-15 18:45:15.295 D/GlobalConsole(25936):
+06-15 18:45:15.296 D/GlobalConsole(25936): 18:45:15.296/V: [$files/project/main.js] finished in 0.078 seconds.
+06-15 18:45:15.385 D/AdfrV32FrameRateUtils( 3872): set frameRate in trantion end, leash=Surface(name=ActivityRecord{fbae7ab u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity t860})/@0x5c030e0, transaction=android.view.SurfaceControl$Transaction@ce6d1bb, precisionType=1, typeId=20101, typeEnable=true
+06-15 18:45:15.385 E/DynamicFramerate [DynamicFrameRateManagerImpl]( 3872): setFrameRateInternalForWindow: TIMING_DO_WINDOW_ANIMATION request is = FrameRateRequest: {  mUniqueID = 96481504, mVelocity = -2, mPreviousFrameRate = 120, mBindWithSC = true, mSc = Surface(name=ActivityRecord{fbae7ab u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity t860})/@0x5c030e0, mTransaction = android.view.SurfaceControl$Transaction@ce6d1bb, Type = 20101 } , frameRate 0
+06-15 18:45:15.444 D/Transition( 3120): finishTransition ar ActivityRecord{61cfbff u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.SplashActivity t860 f}}, isVisibleRequested=false, state=STOPPING, visibleAtTransitionEndTokens={ActivityRecord{fbae7ab u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity t860}}, this=TransitionRecord{97a69b2 id=116 track=0 type=OPEN flags=0x0 state=2}
+06-15 18:45:15.444 D/ActivityTaskManager( 3120): commitVisibility: ActivityRecord{61cfbff u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.SplashActivity t860 f}}: visible=false visibleRequested=false, isInTransition=false, runningAnimation=false
+06-15 18:45:15.444 D/WindowManager( 3120): NFW_setClientVisible:ActivityRecord{61cfbff u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.SplashActivity t860 f}} clientVisible:false
+06-15 18:45:15.445 D/Transition( 3120): finishTransition ar ActivityRecord{eb3d3c7 u0 com.oplus.appdetail/.model.finish.InstallFinishActivity t859}, isVisibleRequested=false, state=PAUSED, visibleAtTransitionEndTokens={ActivityRecord{fbae7ab u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity t860}}, this=TransitionRecord{97a69b2 id=116 track=0 type=OPEN flags=0x0 state=2}
+06-15 18:45:15.445 D/Transition( 3120): finishTransition ar ActivityRecord{fbae7ab u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity t860}, isVisibleRequested=true, state=RESUMED, visibleAtTransitionEndTokens={ActivityRecord{fbae7ab u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity t860}}, this=TransitionRecord{97a69b2 id=116 track=0 type=OPEN flags=0x0 state=2}
+06-15 18:45:15.445 I/OplusAppSwitchManagerService( 3120):  handleAppVisible , r = ActivityRecord{fbae7ab u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity t860}
+06-15 18:45:15.446 D/RefreshRate( 3120):     | COURSE[; Win preferred rateId=0, appReqFirst=false, data= RateData{} ;win name:org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity]
+06-15 18:45:15.447 D/WindowManager( 3120): NFW_findFocusedWindowIfNeeded:Window{a06e87c u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity} mCurrentFocus:Window{a06e87c u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity}
+06-15 18:45:15.451 D/CompactWindowManagerService( 3120): shortComponentName = org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity
+06-15 18:45:15.452 D/WindowManager( 3120): NFW_findFocusedWindowIfNeeded:Window{a06e87c u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity} mCurrentFocus:Window{a06e87c u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity}
+06-15 18:45:15.452 D/WindowManagerServiceExtImpl( 3120): extractConfigInfoAndRealFlags rotation=3, screenDp=914, residentWS:0, scenario:0, bounds:3392, serverWinBounds:Rect(0, 0 - 3392, 2400), win=Window{37b18eb u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.SplashActivity}
+06-15 18:45:15.452 V/WindowManager( 3120): Relayout Window{37b18eb u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.SplashActivity}: viewVisibility=8, oldvis=0, req=3392x2400, vsysui=
+06-15 18:45:15.453 D/WindowManager( 3120): NFW_findFocusedWindowIfNeeded:Window{a06e87c u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity} mCurrentFocus:Window{a06e87c u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity}
+06-15 18:45:15.453 D/CompactWindowManagerService( 3120): shortComponentName = org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity
+06-15 18:45:15.457 D/CoreBackPreview( 3120): Window{37b18eb u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.SplashActivity}: Setting back callback null
+06-15 18:45:15.457 I/InputDispatcher( 3120): channel '37b18eb org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.SplashActivity (server)'~ abortBrokenDispatchCycleLocked - notify=false
+06-15 18:45:15.457 W/InputManager-JNI( 3120): Input channel object '37b18eb org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.SplashActivity (client)' was disposed without first being removed with the input manager!
+06-15 18:45:15.458 I/WindowManager( 3120): Window{37b18eb u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.SplashActivity} state from HAS_DRAWN to NO_SURFACE; reason: destroySurface
+06-15 18:45:15.458 D/WindowManager( 3120): NFW_findFocusedWindowIfNeeded:Window{a06e87c u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity} mCurrentFocus:Window{a06e87c u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity}
+06-15 18:45:15.460 D/WindowManager( 3120): NFW_findFocusedWindowIfNeeded:Window{a06e87c u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity} mCurrentFocus:Window{a06e87c u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity}
+06-15 18:45:15.460 D/CompactWindowManagerService( 3120): shortComponentName = org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity
+06-15 18:45:15.460 D/ActivityTaskManager( 3120): removeAppToken: ActivityRecord{61cfbff u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.SplashActivity t860 f}} delayed=false parent=Task{ab4d815 #860 type=standard A=10351:org.autojs6.packaged.node.esm.diagnostics.smoke} animating=false Callers=com.android.server.wm.DisplayContent.removeAppToken:1735 com.android.server.wm.ActivityRecord.removeFromHistory:5084 com.android.server.wm.ActivityRecord.destroyed:5170 com.android.server.wm.ActivityClientController.activityDestroyed:337
+06-15 18:45:15.475 D/AudioFlingerExtImpl( 2053): updateForegroundInfo mForegroundMap(1)|[org.autojs6.packaged.node.esm.diagnostics.smoke]=1
+06-15 18:45:15.554 I/ActivityManager( 3120): Death received, pid = 26247, processName = org.autojs6.packaged.node.esm.diagnostics.smoke:nodejs_embedded for thread android.os.BinderProxy@7ed79de
+06-15 18:45:15.554 I/ActivityManager( 3120): Process org.autojs6.packaged.node.esm.diagnostics.smoke:nodejs_embedded (pid 26247) has died: cch+5 CEM
+06-15 18:45:15.554 D/OplusAppStartupManager( 3120): prevent restart service, pkgName = org.autojs6.packaged.node.esm.diagnostics.smoke, scenePriority = -1
+06-15 18:45:15.554 I/UserAwareMgr( 3120): process killed: {pkgName='org.autojs6.packaged.node.esm.diagnostics.smoke', processName='org.autojs6.packaged.node.esm.diagnostics.smoke:nodejs_embedded', pid=26247, uid=10351, flags='associated', renderTid=0, hwuiTids=null, glTids=null, threadInfos=null}
+06-15 18:45:15.554 I/UserAwareMgr( 3120): handleProcessKilled, pkgName: org.autojs6.packaged.node.esm.diagnostics.smoke, pid: 26247
+06-15 18:45:15.555 I/PluginSeedling--Base( 3872): SeedlingPluginService-->onStateChange: Bundle[{pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke, pid=26247, uid=10351, state=onProcessDied}]
+06-15 18:45:15.555 D/HoloAudio::SpecailizerPLService_Aidl( 2483): getMssEnable --- org.autojs6.packaged.node.esm.diagnostics.smoke[0]
+06-15 18:45:15.555 I/OPM     ( 3120): handlePackageAppDied pkg: org.autojs6.packaged.node.esm.diagnostics.smoke, uid: 10351, pid: 26247
+06-15 18:45:15.744 I/AppsFilter( 3120): interaction: PackageSetting{57a4ea6 com.android.microdroid.empty_payload/10253} -> PackageSetting{7f83324 org.autojs6.packaged.node.esm.diagnostics.smoke/10351} BLOCKED
+06-15 18:45:15.744 I/AppsFilter( 3120): interaction: PackageSetting{7623494 cn.lzx284.p7zip/10336} -> PackageSetting{7f83324 org.autojs6.packaged.node.esm.diagnostics.smoke/10351} BLOCKED
+06-15 18:45:15.744 I/AppsFilter( 3120): interaction: PackageSetting{f4dab3d com.oplus.locationproxy/10167} -> PackageSetting{7f83324 org.autojs6.packaged.node.esm.diagnostics.smoke/10351} BLOCKED
+06-15 18:45:15.744 I/AppsFilter( 3120): interaction: PackageSetting{c6caf32 com.android.certinstaller/10217} -> PackageSetting{7f83324 org.autojs6.packaged.node.esm.diagnostics.smoke/10351} BLOCKED
+06-15 18:45:15.745 I/AppsFilter( 3120): interaction: PackageSetting{a540483 com.oplus.location/10235} -> PackageSetting{7f83324 org.autojs6.packaged.node.esm.diagnostics.smoke/10351} BLOCKED
+06-15 18:45:15.745 I/AppsFilter( 3120): interaction: PackageSetting{f780600 org.autojs.autojs6.test/10350} -> PackageSetting{7f83324 org.autojs6.packaged.node.esm.diagnostics.smoke/10351} BLOCKED
+06-15 18:45:15.747 W/LOG_FLOWCTRL(25936): ==LOGS OVER PROC QUOTA(300), rows(14) bytes(1810) org.autojs6.packaged.node.esm.diagnostics.smoke DROPPED==
+06-15 18:45:15.751 D/ShortcutService( 3120): changing package: org.autojs6.packaged.node.esm.diagnostics.smoke userId0
+06-15 18:45:15.751 D/ShortcutService( 3120): handlePackageChanged: org.autojs6.packaged.node.esm.diagnostics.smoke user=0
+06-15 18:45:15.751 D/ShortcutService( 3120): rescanPackageIfNeeded 0@org.autojs6.packaged.node.esm.diagnostics.smoke, forceRescan=true , isNewApp=false
+06-15 18:45:15.751 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.751 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.751 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.751 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.751 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.751 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.751 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.752 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.752 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.752 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.752 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.752 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.752 I/PTC.DATATRANS.d( 6524): The current enabled state for org.autojs6.packaged.node.esm.diagnostics.smoke : 0
+06-15 18:45:15.752 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.752 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.752 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.752 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.752 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.752 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.752 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.752 D/ShortcutService( 3120): Package org.autojs6.packaged.node.esm.diagnostics.smoke has 0 manifest shortcut(s), and 0 share target(s)
+06-15 18:45:15.752 D/ShortcutService( 3120): Package org.autojs6.packaged.node.esm.diagnostics.smoke updated, version 1 -> 1
+06-15 18:45:15.752 D/CarrierSvcBindHelper( 4113): onPackageModified: org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.752 D/ShortcutService( 3120): Package org.autojs6.packaged.node.esm.diagnostics.smoke: publishing manifest shortcuts
+06-15 18:45:15.752 D/ImsResolver( 4113): maybeAddedImsService, packageName: org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.852 D/ShortcutService( 3120): Saving package item org.autojs6.packaged.node.esm.diagnostics.smoke to /data/system_ce/0/shortcut_service/packages/org.autojs6.packaged.node.esm.diagnostics.smoke.xml
+06-15 18:45:15.852 D/ShortcutService( 3120): Getting shortcuts for launcher= com.android.systemuiuser=0 pkg=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.853 D/ShortcutService( 3120): Getting shortcuts for launcher= com.android.launcheruser=0 pkg=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:16.126 D/OplusScrollToTopManager(25936): org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity,This com.android.internal.policy.DecorView{a76dd6d V.E...... R....... 0,0-3392,2400 aid=1 alpha=1.0 viewInfo = }[LogActivity] change focus to true
+06-15 18:45:16.247 I/PluginManagerImpl( 4395): actionManager.reloadPackage, pkg: org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:16.247 I/PluginManagerImpl( 4395): actionManager.reloadPackage, pkg: org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:16.247 I/PluginManagerImpl( 4395): actionManager.reloadPackage, pkg: org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:16.247 I/PluginManagerImpl( 4395): actionManager.reloadPackage, pkg: org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:16.250 I/SG::OCSCacheHelper( 6482): checkFromPackageReceiver, start scan single pkg: org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:16.250 I/SG::UmsScanner( 6482): scan pkg: org.autojs6.packaged.node.esm.diagnostics.smoke start...
+06-15 18:45:16.250 E/SG::OCSCacheHelper( 6482): checkFromPackageReceiver resolvedInfo is empty,pkg = org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:16.270 D/ActivityTaskManager( 3120): pre-Filtered:org.autojs6.packaged.node.esm.diagnostics.smoke # com.halfbrick.fruitninjafree # com.v2ray.ang # com.mxtech.videoplayer.pro #
+06-15 18:45:16.300 D/ActivityTaskManager( 3120): pre-Filtered:org.autojs6.packaged.node.esm.diagnostics.smoke # com.halfbrick.fruitninjafree # com.v2ray.ang # com.mxtech.videoplayer.pro #
+06-15 18:45:16.925 I/SurfaceFlinger( 2072): [SF client] NEW(0xb4000078fe8647a0) for (25936:org.autojs6.packaged.node.esm.diagnostics.smoke)
+06-15 18:45:16.928 D/WindowManager(25936): Add to mViews: com.oplus.internal.widget.OplusToastLayout{cef9be3 V.E...... ......I. 0,0-0,0 #c020084 oplus:id/oplus_toast_layout alpha=1.0 viewInfo = },pkg= org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:16.934 D/CompactWindowManagerService( 3120): shortComponentName = org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity
+06-15 18:45:16.950 D/OplusLayer( 2072): setProcInfo (1397,Toast#1397,org.autojs6.packaged.node.esm.diagnostics.smoke,0x4E62D348)
+06-15 18:45:16.955 D/WindowManager( 3120): NFW_findFocusedWindowIfNeeded:Window{a06e87c u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity} mCurrentFocus:Window{a06e87c u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity}
+06-15 18:45:16.955 D/CompactWindowManagerService( 3120): shortComponentName = org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity
+06-15 18:45:17.136 D/CompactWindowManagerService( 3120): shortComponentName = org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity
+06-15 18:45:17.136 D/WindowManager( 3120): NFW_findFocusedWindowIfNeeded:Window{a06e87c u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity} mCurrentFocus:Window{a06e87c u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity}
+06-15 18:45:19.628 W/PTC.DATATRANS.d( 6524): [org.autojs6.packaged.node.esm.diagnostics.smoke] removed. Stop sending intent
+06-15 18:45:19.900 D/ProfileInstaller(25936): Installing profile for org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:20.688 D/WindowManager( 3120): NFW_findFocusedWindowIfNeeded:Window{a06e87c u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity} mCurrentFocus:Window{a06e87c u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity}
+06-15 18:45:20.692 W/NotificationService( 3120): Toast already killed. pkg=org.autojs6.packaged.node.esm.diagnostics.smoke token=android.os.BinderProxy@96ea9ef
+06-15 18:45:20.718 D/SensorServiceExtImpl( 3120): notifyApplicationLaunchStage processName=org.autojs6.packaged.node.esm.diagnostics.smoke, uid=10351, pid=25936, stage=0
+06-15 18:45:20.932 D/OplusAONSmartDim( 3120): onWakeLockReleaseLocked: lock=107643483, flags=0x2000000a, packageName=android, tag="WindowManager/displayId:0", ws=WorkSource{10351 org.autojs6.packaged.node.esm.diagnostics.smoke}, uid=1000, pid=3120
+06-15 18:45:23.732 D/OplusDexOptimizeManager( 3120):  Do not in AppLaunchOptList! org.autojs6.packaged.node.esm.diagnostics.smoke or need repair:false
+06-15 18:45:24.901 I/SurfaceFlinger( 2072): [SF client] REMOVE (0xb4000078c25cf1a0) for (25936:org.autojs6.packaged.node.esm.diagnostics.smoke)
+06-15 18:45:24.901 I/SurfaceFlinger( 2072): [SF client] REMOVE (0xb4000078fe8647a0) for (25936:org.autojs6.packaged.node.esm.diagnostics.smoke)
+06-15 18:45:25.146 I/DMP-AbstractWorker(11272): parseData, resource: localApp, method1:onReceive, work: onReceiveWork, extras: Bundle[{action=android.intent.action.PACKAGE_ADDED, package=org.autojs6.packaged.node.esm.diagnostics.smoke}], initIndexCount:5000
+06-15 18:45:26.745 D/ActivityTaskManager( 3120): pre-Filtered:org.autojs6.packaged.node.esm.diagnostics.smoke # com.halfbrick.fruitninjafree # com.v2ray.ang # com.mxtech.videoplayer.pro #
+	at org.junit.Assert.fail(Assert.java:88)
+	at org.junit.Assert.assertTrue(Assert.java:41)
+	at org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest.assertInstallAndRunPackagedApk(EmbeddedNodePackagedApkSmokeTest.kt:11967)
+	at org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest.assertInstallAndRunPackagedEsmDiagnosticsSmoke(EmbeddedNodePackagedApkSmokeTest.kt:11809)
+	at org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest.installAndRunEsmDiagnosticsEmbeddedNodePackagedApk(EmbeddedNodePackagedApkSmokeTest.kt:8583)
+
+INSTRUMENTATION_STATUS: stream=
+Error in installAndRunEsmDiagnosticsEmbeddedNodePackagedApk(org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest):
+java.lang.AssertionError: packaged ESM diagnostics smoke logcat did not contain expected runtime markers: [packaged.diagnostics.esm.code=ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED, packaged.diagnostics.esm.message=true]
+06-15 18:45:15.295 W/RunnableJSExecution(25936): 	at org.autojs.autojs.engine.NativeNodeEmbeddedJavaScriptEngine.finishEmbeddedScriptExecution(NativeNodeEmbeddedJavaScriptEngine.kt:157)
+06-15 18:45:15.295 W/RunnableJSExecution(25936): 	at org.autojs.autojs.engine.NativeNodeEmbeddedJavaScriptEngine.doExecution(NativeNodeEmbeddedJavaScriptEngine.kt:37)
+06-15 18:45:15.295 W/System.err(25936): org.autojs.autojs.engine.NativeNodeRuntimeUnavailableException: Native Node embedded script failed with exitCode=1: Embedded script native runner failed: argv == null
+06-15 18:45:15.295 W/System.err(25936): 	at org.autojs.autojs.engine.NativeNodeEmbeddedJavaScriptEngine.finishEmbeddedScriptExecution(NativeNodeEmbeddedJavaScriptEngine.kt:157)
+06-15 18:45:15.295 W/System.err(25936): 	at org.autojs.autojs.engine.NativeNodeEmbeddedJavaScriptEngine.doExecution(NativeNodeEmbeddedJavaScriptEngine.kt:37)
+06-15 18:45:15.295 D/GlobalConsole(25936): 18:45:15.295/E: Native Node embedded script failed with exitCode=1: Embedded script native runner failed: argv == null
+06-15 18:45:15.295 D/GlobalConsole(25936): org.autojs.autojs.engine.NativeNodeRuntimeUnavailableException: Native Node embedded script failed with exitCode=1: Embedded script native runner failed: argv == null
+06-15 18:45:15.295 D/GlobalConsole(25936):     at org.autojs.autojs.engine.NativeNodeEmbeddedJavaScriptEngine.finishEmbeddedScriptExecution(NativeNodeEmbeddedJavaScriptEngine.kt:157)
+06-15 18:45:15.295 D/GlobalConsole(25936):     at org.autojs.autojs.engine.NativeNodeEmbeddedJavaScriptEngine.doExecution(NativeNodeEmbeddedJavaScriptEngine.kt:37)
+06-15 18:45:15.295 D/GlobalConsole(25936):     at org.autojs.autojs.engine.JavaScriptEngine.execute(JavaScriptEngine.java:32)
+06-15 18:45:15.295 D/GlobalConsole(25936):     at org.autojs.autojs.engine.JavaScriptEngine.execute(JavaScriptEngine.java:19)
+06-15 18:45:15.295 D/GlobalConsole(25936):     at org.autojs.autojs.execution.RunnableScriptExecution.execute(RunnableScriptExecution.java:89)
+06-15 18:45:15.295 D/GlobalConsole(25936):     at org.autojs.autojs.execution.RunnableScriptExecution.doExecution(RunnableScriptExecution.java:81)
+06-15 18:45:15.295 D/GlobalConsole(25936):     at org.autojs.autojs.execution.LoopedBasedJavaScriptExecution.doExecution(LoopedBasedJavaScriptExecution.java:21)
+06-15 18:45:15.295 D/GlobalConsole(25936):     at org.autojs.autojs.execution.RunnableScriptExecution.execute(RunnableScriptExecution.java:39)
+06-15 18:45:15.295 D/GlobalConsole(25936):     at org.autojs.autojs.execution.RunnableScriptExecution.execute(RunnableScriptExecution.java:33)
+06-15 18:45:15.295 D/GlobalConsole(25936):     at org.autojs.autojs.execution.RunnableScriptExecution.run(RunnableScriptExecution.java:27)
+06-15 18:45:15.295 D/GlobalConsole(25936):     at java.lang.Thread.run(Thread.java:1012)
+06-15 18:45:15.295 D/GlobalConsole(25936):
+06-15 18:45:15.296 D/GlobalConsole(25936): 18:45:15.296/V: [$files/project/main.js] finished in 0.078 seconds.
+06-15 18:45:15.385 D/AdfrV32FrameRateUtils( 3872): set frameRate in trantion end, leash=Surface(name=ActivityRecord{fbae7ab u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity t860})/@0x5c030e0, transaction=android.view.SurfaceControl$Transaction@ce6d1bb, precisionType=1, typeId=20101, typeEnable=true
+06-15 18:45:15.385 E/DynamicFramerate [DynamicFrameRateManagerImpl]( 3872): setFrameRateInternalForWindow: TIMING_DO_WINDOW_ANIMATION request is = FrameRateRequest: {  mUniqueID = 96481504, mVelocity = -2, mPreviousFrameRate = 120, mBindWithSC = true, mSc = Surface(name=ActivityRecord{fbae7ab u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity t860})/@0x5c030e0, mTransaction = android.view.SurfaceControl$Transaction@ce6d1bb, Type = 20101 } , frameRate 0
+06-15 18:45:15.444 D/Transition( 3120): finishTransition ar ActivityRecord{61cfbff u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.SplashActivity t860 f}}, isVisibleRequested=false, state=STOPPING, visibleAtTransitionEndTokens={ActivityRecord{fbae7ab u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity t860}}, this=TransitionRecord{97a69b2 id=116 track=0 type=OPEN flags=0x0 state=2}
+06-15 18:45:15.444 D/ActivityTaskManager( 3120): commitVisibility: ActivityRecord{61cfbff u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.SplashActivity t860 f}}: visible=false visibleRequested=false, isInTransition=false, runningAnimation=false
+06-15 18:45:15.444 D/WindowManager( 3120): NFW_setClientVisible:ActivityRecord{61cfbff u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.SplashActivity t860 f}} clientVisible:false
+06-15 18:45:15.445 D/Transition( 3120): finishTransition ar ActivityRecord{eb3d3c7 u0 com.oplus.appdetail/.model.finish.InstallFinishActivity t859}, isVisibleRequested=false, state=PAUSED, visibleAtTransitionEndTokens={ActivityRecord{fbae7ab u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity t860}}, this=TransitionRecord{97a69b2 id=116 track=0 type=OPEN flags=0x0 state=2}
+06-15 18:45:15.445 D/Transition( 3120): finishTransition ar ActivityRecord{fbae7ab u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity t860}, isVisibleRequested=true, state=RESUMED, visibleAtTransitionEndTokens={ActivityRecord{fbae7ab u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity t860}}, this=TransitionRecord{97a69b2 id=116 track=0 type=OPEN flags=0x0 state=2}
+06-15 18:45:15.445 I/OplusAppSwitchManagerService( 3120):  handleAppVisible , r = ActivityRecord{fbae7ab u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity t860}
+06-15 18:45:15.446 D/RefreshRate( 3120):     | COURSE[; Win preferred rateId=0, appReqFirst=false, data= RateData{} ;win name:org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity]
+06-15 18:45:15.447 D/WindowManager( 3120): NFW_findFocusedWindowIfNeeded:Window{a06e87c u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity} mCurrentFocus:Window{a06e87c u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity}
+06-15 18:45:15.451 D/CompactWindowManagerService( 3120): shortComponentName = org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity
+06-15 18:45:15.452 D/WindowManager( 3120): NFW_findFocusedWindowIfNeeded:Window{a06e87c u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity} mCurrentFocus:Window{a06e87c u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity}
+06-15 18:45:15.452 D/WindowManagerServiceExtImpl( 3120): extractConfigInfoAndRealFlags rotation=3, screenDp=914, residentWS:0, scenario:0, bounds:3392, serverWinBounds:Rect(0, 0 - 3392, 2400), win=Window{37b18eb u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.SplashActivity}
+06-15 18:45:15.452 V/WindowManager( 3120): Relayout Window{37b18eb u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.SplashActivity}: viewVisibility=8, oldvis=0, req=3392x2400, vsysui=
+06-15 18:45:15.453 D/WindowManager( 3120): NFW_findFocusedWindowIfNeeded:Window{a06e87c u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity} mCurrentFocus:Window{a06e87c u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity}
+06-15 18:45:15.453 D/CompactWindowManagerService( 3120): shortComponentName = org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity
+06-15 18:45:15.457 D/CoreBackPreview( 3120): Window{37b18eb u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.SplashActivity}: Setting back callback null
+06-15 18:45:15.457 I/InputDispatcher( 3120): channel '37b18eb org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.SplashActivity (server)'~ abortBrokenDispatchCycleLocked - notify=false
+06-15 18:45:15.457 W/InputManager-JNI( 3120): Input channel object '37b18eb org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.SplashActivity (client)' was disposed without first being removed with the input manager!
+06-15 18:45:15.458 I/WindowManager( 3120): Window{37b18eb u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.SplashActivity} state from HAS_DRAWN to NO_SURFACE; reason: destroySurface
+06-15 18:45:15.458 D/WindowManager( 3120): NFW_findFocusedWindowIfNeeded:Window{a06e87c u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity} mCurrentFocus:Window{a06e87c u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity}
+06-15 18:45:15.460 D/WindowManager( 3120): NFW_findFocusedWindowIfNeeded:Window{a06e87c u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity} mCurrentFocus:Window{a06e87c u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity}
+06-15 18:45:15.460 D/CompactWindowManagerService( 3120): shortComponentName = org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity
+06-15 18:45:15.460 D/ActivityTaskManager( 3120): removeAppToken: ActivityRecord{61cfbff u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.SplashActivity t860 f}} delayed=false parent=Task{ab4d815 #860 type=standard A=10351:org.autojs6.packaged.node.esm.diagnostics.smoke} animating=false Callers=com.android.server.wm.DisplayContent.removeAppToken:1735 com.android.server.wm.ActivityRecord.removeFromHistory:5084 com.android.server.wm.ActivityRecord.destroyed:5170 com.android.server.wm.ActivityClientController.activityDestroyed:337
+06-15 18:45:15.475 D/AudioFlingerExtImpl( 2053): updateForegroundInfo mForegroundMap(1)|[org.autojs6.packaged.node.esm.diagnostics.smoke]=1
+06-15 18:45:15.554 I/ActivityManager( 3120): Death received, pid = 26247, processName = org.autojs6.packaged.node.esm.diagnostics.smoke:nodejs_embedded for thread android.os.BinderProxy@7ed79de
+06-15 18:45:15.554 I/ActivityManager( 3120): Process org.autojs6.packaged.node.esm.diagnostics.smoke:nodejs_embedded (pid 26247) has died: cch+5 CEM
+06-15 18:45:15.554 D/OplusAppStartupManager( 3120): prevent restart service, pkgName = org.autojs6.packaged.node.esm.diagnostics.smoke, scenePriority = -1
+06-15 18:45:15.554 I/UserAwareMgr( 3120): process killed: {pkgName='org.autojs6.packaged.node.esm.diagnostics.smoke', processName='org.autojs6.packaged.node.esm.diagnostics.smoke:nodejs_embedded', pid=26247, uid=10351, flags='associated', renderTid=0, hwuiTids=null, glTids=null, threadInfos=null}
+06-15 18:45:15.554 I/UserAwareMgr( 3120): handleProcessKilled, pkgName: org.autojs6.packaged.node.esm.diagnostics.smoke, pid: 26247
+06-15 18:45:15.555 I/PluginSeedling--Base( 3872): SeedlingPluginService-->onStateChange: Bundle[{pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke, pid=26247, uid=10351, state=onProcessDied}]
+06-15 18:45:15.555 D/HoloAudio::SpecailizerPLService_Aidl( 2483): getMssEnable --- org.autojs6.packaged.node.esm.diagnostics.smoke[0]
+06-15 18:45:15.555 I/OPM     ( 3120): handlePackageAppDied pkg: org.autojs6.packaged.node.esm.diagnostics.smoke, uid: 10351, pid: 26247
+06-15 18:45:15.744 I/AppsFilter( 3120): interaction: PackageSetting{57a4ea6 com.android.microdroid.empty_payload/10253} -> PackageSetting{7f83324 org.autojs6.packaged.node.esm.diagnostics.smoke/10351} BLOCKED
+06-15 18:45:15.744 I/AppsFilter( 3120): interaction: PackageSetting{7623494 cn.lzx284.p7zip/10336} -> PackageSetting{7f83324 org.autojs6.packaged.node.esm.diagnostics.smoke/10351} BLOCKED
+06-15 18:45:15.744 I/AppsFilter( 3120): interaction: PackageSetting{f4dab3d com.oplus.locationproxy/10167} -> PackageSetting{7f83324 org.autojs6.packaged.node.esm.diagnostics.smoke/10351} BLOCKED
+06-15 18:45:15.744 I/AppsFilter( 3120): interaction: PackageSetting{c6caf32 com.android.certinstaller/10217} -> PackageSetting{7f83324 org.autojs6.packaged.node.esm.diagnostics.smoke/10351} BLOCKED
+06-15 18:45:15.745 I/AppsFilter( 3120): interaction: PackageSetting{a540483 com.oplus.location/10235} -> PackageSetting{7f83324 org.autojs6.packaged.node.esm.diagnostics.smoke/10351} BLOCKED
+06-15 18:45:15.745 I/AppsFilter( 3120): interaction: PackageSetting{f780600 org.autojs.autojs6.test/10350} -> PackageSetting{7f83324 org.autojs6.packaged.node.esm.diagnostics.smoke/10351} BLOCKED
+06-15 18:45:15.747 W/LOG_FLOWCTRL(25936): ==LOGS OVER PROC QUOTA(300), rows(14) bytes(1810) org.autojs6.packaged.node.esm.diagnostics.smoke DROPPED==
+06-15 18:45:15.751 D/ShortcutService( 3120): changing package: org.autojs6.packaged.node.esm.diagnostics.smoke userId0
+06-15 18:45:15.751 D/ShortcutService( 3120): handlePackageChanged: org.autojs6.packaged.node.esm.diagnostics.smoke user=0
+06-15 18:45:15.751 D/ShortcutService( 3120): rescanPackageIfNeeded 0@org.autojs6.packaged.node.esm.diagnostics.smoke, forceRescan=true , isNewApp=false
+06-15 18:45:15.751 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.751 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.751 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.751 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.751 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.751 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.751 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.752 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.752 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.752 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.752 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.752 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.752 I/PTC.DATATRANS.d( 6524): The current enabled state for org.autojs6.packaged.node.esm.diagnostics.smoke : 0
+06-15 18:45:15.752 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.752 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.752 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.752 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.752 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.752 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.752 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.752 D/ShortcutService( 3120): Package org.autojs6.packaged.node.esm.diagnostics.smoke has 0 manifest shortcut(s), and 0 share target(s)
+06-15 18:45:15.752 D/ShortcutService( 3120): Package org.autojs6.packaged.node.esm.diagnostics.smoke updated, version 1 -> 1
+06-15 18:45:15.752 D/CarrierSvcBindHelper( 4113): onPackageModified: org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.752 D/ShortcutService( 3120): Package org.autojs6.packaged.node.esm.diagnostics.smoke: publishing manifest shortcuts
+06-15 18:45:15.752 D/ImsResolver( 4113): maybeAddedImsService, packageName: org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.852 D/ShortcutService( 3120): Saving package item org.autojs6.packaged.node.esm.diagnostics.smoke to /data/system_ce/0/shortcut_service/packages/org.autojs6.packaged.node.esm.diagnostics.smoke.xml
+06-15 18:45:15.852 D/ShortcutService( 3120): Getting shortcuts for launcher= com.android.systemuiuser=0 pkg=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.853 D/ShortcutService( 3120): Getting shortcuts for launcher= com.android.launcheruser=0 pkg=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:16.126 D/OplusScrollToTopManager(25936): org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity,This com.android.internal.policy.DecorView{a76dd6d V.E...... R....... 0,0-3392,2400 aid=1 alpha=1.0 viewInfo = }[LogActivity] change focus to true
+06-15 18:45:16.247 I/PluginManagerImpl( 4395): actionManager.reloadPackage, pkg: org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:16.247 I/PluginManagerImpl( 4395): actionManager.reloadPackage, pkg: org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:16.247 I/PluginManagerImpl( 4395): actionManager.reloadPackage, pkg: org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:16.247 I/PluginManagerImpl( 4395): actionManager.reloadPackage, pkg: org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:16.250 I/SG::OCSCacheHelper( 6482): checkFromPackageReceiver, start scan single pkg: org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:16.250 I/SG::UmsScanner( 6482): scan pkg: org.autojs6.packaged.node.esm.diagnostics.smoke start...
+06-15 18:45:16.250 E/SG::OCSCacheHelper( 6482): checkFromPackageReceiver resolvedInfo is empty,pkg = org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:16.270 D/ActivityTaskManager( 3120): pre-Filtered:org.autojs6.packaged.node.esm.diagnostics.smoke # com.halfbrick.fruitninjafree # com.v2ray.ang # com.mxtech.videoplayer.pro #
+06-15 18:45:16.300 D/ActivityTaskManager( 3120): pre-Filtered:org.autojs6.packaged.node.esm.diagnostics.smoke # com.halfbrick.fruitninjafree # com.v2ray.ang # com.mxtech.videoplayer.pro #
+06-15 18:45:16.925 I/SurfaceFlinger( 2072): [SF client] NEW(0xb4000078fe8647a0) for (25936:org.autojs6.packaged.node.esm.diagnostics.smoke)
+06-15 18:45:16.928 D/WindowManager(25936): Add to mViews: com.oplus.internal.widget.OplusToastLayout{cef9be3 V.E...... ......I. 0,0-0,0 #c020084 oplus:id/oplus_toast_layout alpha=1.0 viewInfo = },pkg= org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:16.934 D/CompactWindowManagerService( 3120): shortComponentName = org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity
+06-15 18:45:16.950 D/OplusLayer( 2072): setProcInfo (1397,Toast#1397,org.autojs6.packaged.node.esm.diagnostics.smoke,0x4E62D348)
+06-15 18:45:16.955 D/WindowManager( 3120): NFW_findFocusedWindowIfNeeded:Window{a06e87c u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity} mCurrentFocus:Window{a06e87c u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity}
+06-15 18:45:16.955 D/CompactWindowManagerService( 3120): shortComponentName = org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity
+06-15 18:45:17.136 D/CompactWindowManagerService( 3120): shortComponentName = org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity
+06-15 18:45:17.136 D/WindowManager( 3120): NFW_findFocusedWindowIfNeeded:Window{a06e87c u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity} mCurrentFocus:Window{a06e87c u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity}
+06-15 18:45:19.628 W/PTC.DATATRANS.d( 6524): [org.autojs6.packaged.node.esm.diagnostics.smoke] removed. Stop sending intent
+06-15 18:45:19.900 D/ProfileInstaller(25936): Installing profile for org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:20.688 D/WindowManager( 3120): NFW_findFocusedWindowIfNeeded:Window{a06e87c u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity} mCurrentFocus:Window{a06e87c u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity}
+06-15 18:45:20.692 W/NotificationService( 3120): Toast already killed. pkg=org.autojs6.packaged.node.esm.diagnostics.smoke token=android.os.BinderProxy@96ea9ef
+06-15 18:45:20.718 D/SensorServiceExtImpl( 3120): notifyApplicationLaunchStage processName=org.autojs6.packaged.node.esm.diagnostics.smoke, uid=10351, pid=25936, stage=0
+06-15 18:45:20.932 D/OplusAONSmartDim( 3120): onWakeLockReleaseLocked: lock=107643483, flags=0x2000000a, packageName=android, tag="WindowManager/displayId:0", ws=WorkSource{10351 org.autojs6.packaged.node.esm.diagnostics.smoke}, uid=1000, pid=3120
+06-15 18:45:23.732 D/OplusDexOptimizeManager( 3120):  Do not in AppLaunchOptList! org.autojs6.packaged.node.esm.diagnostics.smoke or need repair:false
+06-15 18:45:24.901 I/SurfaceFlinger( 2072): [SF client] REMOVE (0xb4000078c25cf1a0) for (25936:org.autojs6.packaged.node.esm.diagnostics.smoke)
+06-15 18:45:24.901 I/SurfaceFlinger( 2072): [SF client] REMOVE (0xb4000078fe8647a0) for (25936:org.autojs6.packaged.node.esm.diagnostics.smoke)
+06-15 18:45:25.146 I/DMP-AbstractWorker(11272): parseData, resource: localApp, method1:onReceive, work: onReceiveWork, extras: Bundle[{action=android.intent.action.PACKAGE_ADDED, package=org.autojs6.packaged.node.esm.diagnostics.smoke}], initIndexCount:5000
+06-15 18:45:26.745 D/ActivityTaskManager( 3120): pre-Filtered:org.autojs6.packaged.node.esm.diagnostics.smoke # com.halfbrick.fruitninjafree # com.v2ray.ang # com.mxtech.videoplayer.pro #
+	at org.junit.Assert.fail(Assert.java:88)
+	at org.junit.Assert.assertTrue(Assert.java:41)
+	at org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest.assertInstallAndRunPackagedApk(EmbeddedNodePackagedApkSmokeTest.kt:11967)
+	at org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest.assertInstallAndRunPackagedEsmDiagnosticsSmoke(EmbeddedNodePackagedApkSmokeTest.kt:11809)
+	at org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest.installAndRunEsmDiagnosticsEmbeddedNodePackagedApk(EmbeddedNodePackagedApkSmokeTest.kt:8583)
+
+INSTRUMENTATION_STATUS: test=installAndRunEsmDiagnosticsEmbeddedNodePackagedApk
+INSTRUMENTATION_STATUS_CODE: -2
+INSTRUMENTATION_RESULT: stream=
+
+Time: 74.038
+There was 1 failure:
+1) installAndRunEsmDiagnosticsEmbeddedNodePackagedApk(org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest)
+java.lang.AssertionError: packaged ESM diagnostics smoke logcat did not contain expected runtime markers: [packaged.diagnostics.esm.code=ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED, packaged.diagnostics.esm.message=true]
+06-15 18:45:15.295 W/RunnableJSExecution(25936): 	at org.autojs.autojs.engine.NativeNodeEmbeddedJavaScriptEngine.finishEmbeddedScriptExecution(NativeNodeEmbeddedJavaScriptEngine.kt:157)
+06-15 18:45:15.295 W/RunnableJSExecution(25936): 	at org.autojs.autojs.engine.NativeNodeEmbeddedJavaScriptEngine.doExecution(NativeNodeEmbeddedJavaScriptEngine.kt:37)
+06-15 18:45:15.295 W/System.err(25936): org.autojs.autojs.engine.NativeNodeRuntimeUnavailableException: Native Node embedded script failed with exitCode=1: Embedded script native runner failed: argv == null
+06-15 18:45:15.295 W/System.err(25936): 	at org.autojs.autojs.engine.NativeNodeEmbeddedJavaScriptEngine.finishEmbeddedScriptExecution(NativeNodeEmbeddedJavaScriptEngine.kt:157)
+06-15 18:45:15.295 W/System.err(25936): 	at org.autojs.autojs.engine.NativeNodeEmbeddedJavaScriptEngine.doExecution(NativeNodeEmbeddedJavaScriptEngine.kt:37)
+06-15 18:45:15.295 D/GlobalConsole(25936): 18:45:15.295/E: Native Node embedded script failed with exitCode=1: Embedded script native runner failed: argv == null
+06-15 18:45:15.295 D/GlobalConsole(25936): org.autojs.autojs.engine.NativeNodeRuntimeUnavailableException: Native Node embedded script failed with exitCode=1: Embedded script native runner failed: argv == null
+06-15 18:45:15.295 D/GlobalConsole(25936):     at org.autojs.autojs.engine.NativeNodeEmbeddedJavaScriptEngine.finishEmbeddedScriptExecution(NativeNodeEmbeddedJavaScriptEngine.kt:157)
+06-15 18:45:15.295 D/GlobalConsole(25936):     at org.autojs.autojs.engine.NativeNodeEmbeddedJavaScriptEngine.doExecution(NativeNodeEmbeddedJavaScriptEngine.kt:37)
+06-15 18:45:15.295 D/GlobalConsole(25936):     at org.autojs.autojs.engine.JavaScriptEngine.execute(JavaScriptEngine.java:32)
+06-15 18:45:15.295 D/GlobalConsole(25936):     at org.autojs.autojs.engine.JavaScriptEngine.execute(JavaScriptEngine.java:19)
+06-15 18:45:15.295 D/GlobalConsole(25936):     at org.autojs.autojs.execution.RunnableScriptExecution.execute(RunnableScriptExecution.java:89)
+06-15 18:45:15.295 D/GlobalConsole(25936):     at org.autojs.autojs.execution.RunnableScriptExecution.doExecution(RunnableScriptExecution.java:81)
+06-15 18:45:15.295 D/GlobalConsole(25936):     at org.autojs.autojs.execution.LoopedBasedJavaScriptExecution.doExecution(LoopedBasedJavaScriptExecution.java:21)
+06-15 18:45:15.295 D/GlobalConsole(25936):     at org.autojs.autojs.execution.RunnableScriptExecution.execute(RunnableScriptExecution.java:39)
+06-15 18:45:15.295 D/GlobalConsole(25936):     at org.autojs.autojs.execution.RunnableScriptExecution.execute(RunnableScriptExecution.java:33)
+06-15 18:45:15.295 D/GlobalConsole(25936):     at org.autojs.autojs.execution.RunnableScriptExecution.run(RunnableScriptExecution.java:27)
+06-15 18:45:15.295 D/GlobalConsole(25936):     at java.lang.Thread.run(Thread.java:1012)
+06-15 18:45:15.295 D/GlobalConsole(25936):
+06-15 18:45:15.296 D/GlobalConsole(25936): 18:45:15.296/V: [$files/project/main.js] finished in 0.078 seconds.
+06-15 18:45:15.385 D/AdfrV32FrameRateUtils( 3872): set frameRate in trantion end, leash=Surface(name=ActivityRecord{fbae7ab u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity t860})/@0x5c030e0, transaction=android.view.SurfaceControl$Transaction@ce6d1bb, precisionType=1, typeId=20101, typeEnable=true
+06-15 18:45:15.385 E/DynamicFramerate [DynamicFrameRateManagerImpl]( 3872): setFrameRateInternalForWindow: TIMING_DO_WINDOW_ANIMATION request is = FrameRateRequest: {  mUniqueID = 96481504, mVelocity = -2, mPreviousFrameRate = 120, mBindWithSC = true, mSc = Surface(name=ActivityRecord{fbae7ab u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity t860})/@0x5c030e0, mTransaction = android.view.SurfaceControl$Transaction@ce6d1bb, Type = 20101 } , frameRate 0
+06-15 18:45:15.444 D/Transition( 3120): finishTransition ar ActivityRecord{61cfbff u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.SplashActivity t860 f}}, isVisibleRequested=false, state=STOPPING, visibleAtTransitionEndTokens={ActivityRecord{fbae7ab u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity t860}}, this=TransitionRecord{97a69b2 id=116 track=0 type=OPEN flags=0x0 state=2}
+06-15 18:45:15.444 D/ActivityTaskManager( 3120): commitVisibility: ActivityRecord{61cfbff u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.SplashActivity t860 f}}: visible=false visibleRequested=false, isInTransition=false, runningAnimation=false
+06-15 18:45:15.444 D/WindowManager( 3120): NFW_setClientVisible:ActivityRecord{61cfbff u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.SplashActivity t860 f}} clientVisible:false
+06-15 18:45:15.445 D/Transition( 3120): finishTransition ar ActivityRecord{eb3d3c7 u0 com.oplus.appdetail/.model.finish.InstallFinishActivity t859}, isVisibleRequested=false, state=PAUSED, visibleAtTransitionEndTokens={ActivityRecord{fbae7ab u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity t860}}, this=TransitionRecord{97a69b2 id=116 track=0 type=OPEN flags=0x0 state=2}
+06-15 18:45:15.445 D/Transition( 3120): finishTransition ar ActivityRecord{fbae7ab u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity t860}, isVisibleRequested=true, state=RESUMED, visibleAtTransitionEndTokens={ActivityRecord{fbae7ab u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity t860}}, this=TransitionRecord{97a69b2 id=116 track=0 type=OPEN flags=0x0 state=2}
+06-15 18:45:15.445 I/OplusAppSwitchManagerService( 3120):  handleAppVisible , r = ActivityRecord{fbae7ab u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity t860}
+06-15 18:45:15.446 D/RefreshRate( 3120):     | COURSE[; Win preferred rateId=0, appReqFirst=false, data= RateData{} ;win name:org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity]
+06-15 18:45:15.447 D/WindowManager( 3120): NFW_findFocusedWindowIfNeeded:Window{a06e87c u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity} mCurrentFocus:Window{a06e87c u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity}
+06-15 18:45:15.451 D/CompactWindowManagerService( 3120): shortComponentName = org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity
+06-15 18:45:15.452 D/WindowManager( 3120): NFW_findFocusedWindowIfNeeded:Window{a06e87c u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity} mCurrentFocus:Window{a06e87c u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity}
+06-15 18:45:15.452 D/WindowManagerServiceExtImpl( 3120): extractConfigInfoAndRealFlags rotation=3, screenDp=914, residentWS:0, scenario:0, bounds:3392, serverWinBounds:Rect(0, 0 - 3392, 2400), win=Window{37b18eb u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.SplashActivity}
+06-15 18:45:15.452 V/WindowManager( 3120): Relayout Window{37b18eb u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.SplashActivity}: viewVisibility=8, oldvis=0, req=3392x2400, vsysui=
+06-15 18:45:15.453 D/WindowManager( 3120): NFW_findFocusedWindowIfNeeded:Window{a06e87c u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity} mCurrentFocus:Window{a06e87c u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity}
+06-15 18:45:15.453 D/CompactWindowManagerService( 3120): shortComponentName = org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity
+06-15 18:45:15.457 D/CoreBackPreview( 3120): Window{37b18eb u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.SplashActivity}: Setting back callback null
+06-15 18:45:15.457 I/InputDispatcher( 3120): channel '37b18eb org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.SplashActivity (server)'~ abortBrokenDispatchCycleLocked - notify=false
+06-15 18:45:15.457 W/InputManager-JNI( 3120): Input channel object '37b18eb org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.SplashActivity (client)' was disposed without first being removed with the input manager!
+06-15 18:45:15.458 I/WindowManager( 3120): Window{37b18eb u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.SplashActivity} state from HAS_DRAWN to NO_SURFACE; reason: destroySurface
+06-15 18:45:15.458 D/WindowManager( 3120): NFW_findFocusedWindowIfNeeded:Window{a06e87c u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity} mCurrentFocus:Window{a06e87c u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity}
+06-15 18:45:15.460 D/WindowManager( 3120): NFW_findFocusedWindowIfNeeded:Window{a06e87c u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity} mCurrentFocus:Window{a06e87c u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity}
+06-15 18:45:15.460 D/CompactWindowManagerService( 3120): shortComponentName = org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity
+06-15 18:45:15.460 D/ActivityTaskManager( 3120): removeAppToken: ActivityRecord{61cfbff u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.SplashActivity t860 f}} delayed=false parent=Task{ab4d815 #860 type=standard A=10351:org.autojs6.packaged.node.esm.diagnostics.smoke} animating=false Callers=com.android.server.wm.DisplayContent.removeAppToken:1735 com.android.server.wm.ActivityRecord.removeFromHistory:5084 com.android.server.wm.ActivityRecord.destroyed:5170 com.android.server.wm.ActivityClientController.activityDestroyed:337
+06-15 18:45:15.475 D/AudioFlingerExtImpl( 2053): updateForegroundInfo mForegroundMap(1)|[org.autojs6.packaged.node.esm.diagnostics.smoke]=1
+06-15 18:45:15.554 I/ActivityManager( 3120): Death received, pid = 26247, processName = org.autojs6.packaged.node.esm.diagnostics.smoke:nodejs_embedded for thread android.os.BinderProxy@7ed79de
+06-15 18:45:15.554 I/ActivityManager( 3120): Process org.autojs6.packaged.node.esm.diagnostics.smoke:nodejs_embedded (pid 26247) has died: cch+5 CEM
+06-15 18:45:15.554 D/OplusAppStartupManager( 3120): prevent restart service, pkgName = org.autojs6.packaged.node.esm.diagnostics.smoke, scenePriority = -1
+06-15 18:45:15.554 I/UserAwareMgr( 3120): process killed: {pkgName='org.autojs6.packaged.node.esm.diagnostics.smoke', processName='org.autojs6.packaged.node.esm.diagnostics.smoke:nodejs_embedded', pid=26247, uid=10351, flags='associated', renderTid=0, hwuiTids=null, glTids=null, threadInfos=null}
+06-15 18:45:15.554 I/UserAwareMgr( 3120): handleProcessKilled, pkgName: org.autojs6.packaged.node.esm.diagnostics.smoke, pid: 26247
+06-15 18:45:15.555 I/PluginSeedling--Base( 3872): SeedlingPluginService-->onStateChange: Bundle[{pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke, pid=26247, uid=10351, state=onProcessDied}]
+06-15 18:45:15.555 D/HoloAudio::SpecailizerPLService_Aidl( 2483): getMssEnable --- org.autojs6.packaged.node.esm.diagnostics.smoke[0]
+06-15 18:45:15.555 I/OPM     ( 3120): handlePackageAppDied pkg: org.autojs6.packaged.node.esm.diagnostics.smoke, uid: 10351, pid: 26247
+06-15 18:45:15.744 I/AppsFilter( 3120): interaction: PackageSetting{57a4ea6 com.android.microdroid.empty_payload/10253} -> PackageSetting{7f83324 org.autojs6.packaged.node.esm.diagnostics.smoke/10351} BLOCKED
+06-15 18:45:15.744 I/AppsFilter( 3120): interaction: PackageSetting{7623494 cn.lzx284.p7zip/10336} -> PackageSetting{7f83324 org.autojs6.packaged.node.esm.diagnostics.smoke/10351} BLOCKED
+06-15 18:45:15.744 I/AppsFilter( 3120): interaction: PackageSetting{f4dab3d com.oplus.locationproxy/10167} -> PackageSetting{7f83324 org.autojs6.packaged.node.esm.diagnostics.smoke/10351} BLOCKED
+06-15 18:45:15.744 I/AppsFilter( 3120): interaction: PackageSetting{c6caf32 com.android.certinstaller/10217} -> PackageSetting{7f83324 org.autojs6.packaged.node.esm.diagnostics.smoke/10351} BLOCKED
+06-15 18:45:15.745 I/AppsFilter( 3120): interaction: PackageSetting{a540483 com.oplus.location/10235} -> PackageSetting{7f83324 org.autojs6.packaged.node.esm.diagnostics.smoke/10351} BLOCKED
+06-15 18:45:15.745 I/AppsFilter( 3120): interaction: PackageSetting{f780600 org.autojs.autojs6.test/10350} -> PackageSetting{7f83324 org.autojs6.packaged.node.esm.diagnostics.smoke/10351} BLOCKED
+06-15 18:45:15.747 W/LOG_FLOWCTRL(25936): ==LOGS OVER PROC QUOTA(300), rows(14) bytes(1810) org.autojs6.packaged.node.esm.diagnostics.smoke DROPPED==
+06-15 18:45:15.751 D/ShortcutService( 3120): changing package: org.autojs6.packaged.node.esm.diagnostics.smoke userId0
+06-15 18:45:15.751 D/ShortcutService( 3120): handlePackageChanged: org.autojs6.packaged.node.esm.diagnostics.smoke user=0
+06-15 18:45:15.751 D/ShortcutService( 3120): rescanPackageIfNeeded 0@org.autojs6.packaged.node.esm.diagnostics.smoke, forceRescan=true , isNewApp=false
+06-15 18:45:15.751 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.751 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.751 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.751 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.751 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.751 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.751 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.752 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.752 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.752 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.752 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.752 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.752 I/PTC.DATATRANS.d( 6524): The current enabled state for org.autojs6.packaged.node.esm.diagnostics.smoke : 0
+06-15 18:45:15.752 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.752 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.752 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.752 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.752 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.752 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.752 W/PluginActionManager( 3872): handleQueryPlugins, not in mPrivilegedPlugins, pkgName=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.752 D/ShortcutService( 3120): Package org.autojs6.packaged.node.esm.diagnostics.smoke has 0 manifest shortcut(s), and 0 share target(s)
+06-15 18:45:15.752 D/ShortcutService( 3120): Package org.autojs6.packaged.node.esm.diagnostics.smoke updated, version 1 -> 1
+06-15 18:45:15.752 D/CarrierSvcBindHelper( 4113): onPackageModified: org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.752 D/ShortcutService( 3120): Package org.autojs6.packaged.node.esm.diagnostics.smoke: publishing manifest shortcuts
+06-15 18:45:15.752 D/ImsResolver( 4113): maybeAddedImsService, packageName: org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.852 D/ShortcutService( 3120): Saving package item org.autojs6.packaged.node.esm.diagnostics.smoke to /data/system_ce/0/shortcut_service/packages/org.autojs6.packaged.node.esm.diagnostics.smoke.xml
+06-15 18:45:15.852 D/ShortcutService( 3120): Getting shortcuts for launcher= com.android.systemuiuser=0 pkg=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:15.853 D/ShortcutService( 3120): Getting shortcuts for launcher= com.android.launcheruser=0 pkg=org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:16.126 D/OplusScrollToTopManager(25936): org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity,This com.android.internal.policy.DecorView{a76dd6d V.E...... R....... 0,0-3392,2400 aid=1 alpha=1.0 viewInfo = }[LogActivity] change focus to true
+06-15 18:45:16.247 I/PluginManagerImpl( 4395): actionManager.reloadPackage, pkg: org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:16.247 I/PluginManagerImpl( 4395): actionManager.reloadPackage, pkg: org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:16.247 I/PluginManagerImpl( 4395): actionManager.reloadPackage, pkg: org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:16.247 I/PluginManagerImpl( 4395): actionManager.reloadPackage, pkg: org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:16.250 I/SG::OCSCacheHelper( 6482): checkFromPackageReceiver, start scan single pkg: org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:16.250 I/SG::UmsScanner( 6482): scan pkg: org.autojs6.packaged.node.esm.diagnostics.smoke start...
+06-15 18:45:16.250 E/SG::OCSCacheHelper( 6482): checkFromPackageReceiver resolvedInfo is empty,pkg = org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:16.270 D/ActivityTaskManager( 3120): pre-Filtered:org.autojs6.packaged.node.esm.diagnostics.smoke # com.halfbrick.fruitninjafree # com.v2ray.ang # com.mxtech.videoplayer.pro #
+06-15 18:45:16.300 D/ActivityTaskManager( 3120): pre-Filtered:org.autojs6.packaged.node.esm.diagnostics.smoke # com.halfbrick.fruitninjafree # com.v2ray.ang # com.mxtech.videoplayer.pro #
+06-15 18:45:16.925 I/SurfaceFlinger( 2072): [SF client] NEW(0xb4000078fe8647a0) for (25936:org.autojs6.packaged.node.esm.diagnostics.smoke)
+06-15 18:45:16.928 D/WindowManager(25936): Add to mViews: com.oplus.internal.widget.OplusToastLayout{cef9be3 V.E...... ......I. 0,0-0,0 #c020084 oplus:id/oplus_toast_layout alpha=1.0 viewInfo = },pkg= org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:16.934 D/CompactWindowManagerService( 3120): shortComponentName = org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity
+06-15 18:45:16.950 D/OplusLayer( 2072): setProcInfo (1397,Toast#1397,org.autojs6.packaged.node.esm.diagnostics.smoke,0x4E62D348)
+06-15 18:45:16.955 D/WindowManager( 3120): NFW_findFocusedWindowIfNeeded:Window{a06e87c u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity} mCurrentFocus:Window{a06e87c u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity}
+06-15 18:45:16.955 D/CompactWindowManagerService( 3120): shortComponentName = org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity
+06-15 18:45:17.136 D/CompactWindowManagerService( 3120): shortComponentName = org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity
+06-15 18:45:17.136 D/WindowManager( 3120): NFW_findFocusedWindowIfNeeded:Window{a06e87c u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity} mCurrentFocus:Window{a06e87c u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity}
+06-15 18:45:19.628 W/PTC.DATATRANS.d( 6524): [org.autojs6.packaged.node.esm.diagnostics.smoke] removed. Stop sending intent
+06-15 18:45:19.900 D/ProfileInstaller(25936): Installing profile for org.autojs6.packaged.node.esm.diagnostics.smoke
+06-15 18:45:20.688 D/WindowManager( 3120): NFW_findFocusedWindowIfNeeded:Window{a06e87c u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity} mCurrentFocus:Window{a06e87c u0 org.autojs6.packaged.node.esm.diagnostics.smoke/org.autojs.autojs.inrt.LogActivity}
+06-15 18:45:20.692 W/NotificationService( 3120): Toast already killed. pkg=org.autojs6.packaged.node.esm.diagnostics.smoke token=android.os.BinderProxy@96ea9ef
+06-15 18:45:20.718 D/SensorServiceExtImpl( 3120): notifyApplicationLaunchStage processName=org.autojs6.packaged.node.esm.diagnostics.smoke, uid=10351, pid=25936, stage=0
+06-15 18:45:20.932 D/OplusAONSmartDim( 3120): onWakeLockReleaseLocked: lock=107643483, flags=0x2000000a, packageName=android, tag="WindowManager/displayId:0", ws=WorkSource{10351 org.autojs6.packaged.node.esm.diagnostics.smoke}, uid=1000, pid=3120
+06-15 18:45:23.732 D/OplusDexOptimizeManager( 3120):  Do not in AppLaunchOptList! org.autojs6.packaged.node.esm.diagnostics.smoke or need repair:false
+06-15 18:45:24.901 I/SurfaceFlinger( 2072): [SF client] REMOVE (0xb4000078c25cf1a0) for (25936:org.autojs6.packaged.node.esm.diagnostics.smoke)
+06-15 18:45:24.901 I/SurfaceFlinger( 2072): [SF client] REMOVE (0xb4000078fe8647a0) for (25936:org.autojs6.packaged.node.esm.diagnostics.smoke)
+06-15 18:45:25.146 I/DMP-AbstractWorker(11272): parseData, resource: localApp, method1:onReceive, work: onReceiveWork, extras: Bundle[{action=android.intent.action.PACKAGE_ADDED, package=org.autojs6.packaged.node.esm.diagnostics.smoke}], initIndexCount:5000
+06-15 18:45:26.745 D/ActivityTaskManager( 3120): pre-Filtered:org.autojs6.packaged.node.esm.diagnostics.smoke # com.halfbrick.fruitninjafree # com.v2ray.ang # com.mxtech.videoplayer.pro #
+	at org.junit.Assert.fail(Assert.java:88)
+	at org.junit.Assert.assertTrue(Assert.java:41)
+	at org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest.assertInstallAndRunPackagedApk(EmbeddedNodePackagedApkSmokeTest.kt:11967)
+	at org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest.assertInstallAndRunPackagedEsmDiagnosticsSmoke(EmbeddedNodePackagedApkSmokeTest.kt:11809)
+	at org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest.installAndRunEsmDiagnosticsEmbeddedNodePackagedApk(EmbeddedNodePackagedApkSmokeTest.kt:8583)
+	at java.lang.reflect.Method.invoke(Native Method)
+	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:50)
+	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
+	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:47)
+	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
+	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:325)
+	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:78)
+	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:57)
+	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:290)
+	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:71)
+	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:288)
+	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:58)
+	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:268)
+	at org.junit.runners.ParentRunner.run(ParentRunner.java:363)
+	at org.junit.runners.Suite.runChild(Suite.java:128)
+	at org.junit.runners.Suite.runChild(Suite.java:27)
+	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:290)
+	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:71)
+	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:288)
+	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:58)
+	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:268)
+	at org.junit.runners.ParentRunner.run(ParentRunner.java:363)
+	at org.junit.runner.JUnitCore.run(JUnitCore.java:137)
+	at org.junit.runner.JUnitCore.run(JUnitCore.java:115)
+	at androidx.test.internal.runner.TestExecutor.execute(TestExecutor.java:68)
+	at androidx.test.internal.runner.TestExecutor.execute(TestExecutor.java:59)
+	at androidx.test.runner.AndroidJUnitRunner.onStart(AndroidJUnitRunner.java:467)
+	at android.app.Instrumentation$InstrumentationThread.run(Instrumentation.java:2619)
+
+FAILURES!!!
+Tests run: 1,  Failures: 1
+
+
+INSTRUMENTATION_CODE: -1
