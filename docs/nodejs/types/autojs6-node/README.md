@@ -23,8 +23,9 @@ These declarations describe the AutoJs6 Safe Node Profile bridge modules exposed
 - `axios`
 - `websocket`
 - `work_manager`
+- `plugins`
 
-They intentionally do not declare experimental Java interop or unrestricted desktop Node.js capabilities. The declarations are checked by `:app:verifyAutoJs6NodeTypeDeclarations`; the sample project at `sample/nodejs/typescript-smoke` can be type-checked with:
+They intentionally do not declare experimental Java interop, native plugin loading, Android plugin adapters, or unrestricted desktop Node.js capabilities. The declarations are checked by `:app:verifyAutoJs6NodeTypeDeclarations`; the sample project at `sample/nodejs/typescript-smoke` can be type-checked with:
 
 ```powershell
 tsc -p sample/nodejs/typescript-smoke/tsconfig.json --pretty false

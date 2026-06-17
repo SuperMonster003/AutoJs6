@@ -46,6 +46,7 @@ private val nodeTypeDeclarationModules = listOf(
     "axios",
     "websocket",
     "work_manager",
+    "plugins",
 )
 
 private fun nodeExampleReadJsonObject(file: File): Map<*, *> =

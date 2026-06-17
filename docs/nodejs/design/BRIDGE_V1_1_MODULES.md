@@ -86,7 +86,7 @@ for risk/impact:
 | controlled `http` wrapper | 4 | 4 | 3 | 4 | 4 | Defer until network promotion gates pass. |
 | `ui` | 5 | 5 | 3 | 5 | 3 | Protocol gate reserved in Task 182; live Activity provider remains design-gated. |
 | `floaty` | 4 | 5 | 2 | 5 | 5 | Design gate recorded in Task 183; no runtime module. |
-| `plugins` | 4 | 5 | 2 | 5 | 4 | Design gate only for v1.1. |
+| `plugins` | 4 | 5 | 3 | 5 | 4 | JS-only local prototype in Task 184; full signed/native/plugin-center model remains gated. |
 | Shizuku/root shell | 3 | 5 | 2 | 5 | 5 | Not a v1.1 bridge expansion. |
 
 ## Recommended v1.1 Scope
@@ -314,19 +314,22 @@ cleanup, and no-raw-Window/View tests are accepted.
 #### `plugins`
 
 Plugins can imply downloaded code, Java/Android interop, native code, signatures,
-updates, and permission delegation. This must remain design-only until
-`docs/nodejs/design/PLUGIN_SYSTEM.md` defines:
+updates, and permission delegation. Task 184 adds only a project-local JS-only
+prototype:
 
-- package format;
-- permission declaration;
-- native code policy;
-- Java interop policy;
-- update/signature policy;
-- packaged APK policy.
+- `require("plugins").load(id)`
+- `manifest(id)` and `resolve(id)` diagnostics
+- package metadata from `./plugins/<id>/package.json`
+- `autojs6.plugin.permissions` capability declaration
+- exact project opt-in through `plugin.<id>`
+- no `.node` native addons
+- plugin entry path escape denial
 
-Task 150 adds that gate in [PLUGIN_SYSTEM.md](PLUGIN_SYSTEM.md). The current
-decision remains no Node plugin runtime in v1.1, and native addons stay disabled
-unless a separate signed-native-provider model is accepted.
+Task 150 added the full design gate in [PLUGIN_SYSTEM.md](PLUGIN_SYSTEM.md).
+The current decision remains no installer, signed archive update path, Android
+plugin APK adapter, packaged APK plugin runtime, or native plugin model in
+v1.1. Native addons stay disabled unless a separate signed-native-provider model
+is accepted.
 
 #### Shizuku/Root Advanced Shell
 

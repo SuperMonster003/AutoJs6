@@ -1,7 +1,9 @@
-# Node Plugin System Design Gate
+# Node Plugin System JS-Only Prototype
 
-Status: design gate only. No Node plugin runtime, installer, resolver, native
-plugin loader, or `require("plugins")` API is implemented by this document.
+Status: Task 184 implements a local JS-only prototype through
+`require("plugins")`. There is still no plugin installer, signed archive
+verifier, update channel, Android plugin adapter, native provider, native
+plugin loader, or packaged APK plugin runtime.
 
 ## Goal
 
@@ -21,7 +23,44 @@ ordinary pure JavaScript npm packages and named AutoJs bridge modules only.
 
 ## Current Decision
 
-Do not expose a Node plugin system in v1.1.
+Expose only a project-local, JS-only prototype in v1.1:
+
+```js
+const plugins = require("plugins");
+const info = plugins.manifest("org.example.demo");
+const entryPath = plugins.resolve("org.example.demo");
+const demo = plugins.load("org.example.demo");
+```
+
+Prototype rules:
+
+- plugin id resolves from `./plugins/<id>` under the Node working directory
+- `package.json` must contain `autojs6.plugin`
+- `autojs6.plugin.permissions` must be a string array
+- project metadata must declare exact `plugin.<id>` capability and every
+  plugin-requested capability before plugin code executes
+- local `node_modules/plugins` cannot shadow `require("plugins")`
+- plugin entry must be `.js` or `.cjs` and stay inside the plugin directory
+- plugin-relative and plugin package resolution use the plugin directory as the
+  resolver root
+- `.node` files anywhere below the plugin directory reject with
+  `ERR_AUTOJS6_NATIVE_ADDON_DISABLED`; common native library/object file
+  extensions are rejected by the JS-only plugin policy
+- plugin symlinks are rejected in this prototype
+
+Illustrative project metadata:
+
+```json
+{
+  "type": "node",
+  "node": {
+    "permissions": [
+      "plugin.org.example.demo",
+      "toast"
+    ]
+  }
+}
+```
 
 Native addons remain disabled:
 
@@ -56,7 +95,43 @@ capabilities and tests.
 | Node native addon | Node loads `.node` directly into embedded process. | Rejected for default profile. |
 | Unrestricted downloaded code | Plugin downloads and runs new code after install. | Rejected. |
 
-## Package Format
+## Prototype Package Format
+
+The Task 184 prototype loads unpacked project-local directories only:
+
+```text
+project/
+  main.cjs
+  project.json
+  plugins/
+    org.example.demo/
+      package.json
+      index.cjs
+      lib/
+        helper.cjs
+```
+
+Minimum package metadata:
+
+```json
+{
+  "name": "org.example.demo",
+  "version": "1.0.0",
+  "main": "index.cjs",
+  "autojs6": {
+    "plugin": {
+      "id": "org.example.demo",
+      "permissions": ["toast"]
+    }
+  }
+}
+```
+
+`autojs6.plugin.id` must match the requested id. If the id field is omitted,
+`package.json name` must match. `autojs6.plugin.entry` may override `main`, but
+the target must remain a `.js` or `.cjs` file under the plugin directory.
+
+## Future Package Format
 
 A future Node plugin should be a deterministic archive with a top-level manifest:
 
@@ -157,6 +232,10 @@ Rules:
 - `shell.root`, `ui.overlay`, native code, Java interop, and network remain
   explicit high-risk declarations
 - missing declarations reject before code execution or provider dispatch
+- the Task 184 prototype treats `plugin.<id>` as an exact declaration; a generic
+  `plugin` permission does not grant access to every plugin id
+- legacy compatibility mode does not apply to `plugins.load()`; no enforced
+  project/package capability manifest means the plugin load is denied
 
 Example project metadata:
 
@@ -280,8 +359,13 @@ Rules:
 - signed plugin packages cannot shadow core bridge modules
 - plugin code uses the same scoped resolver and builtin allowlist as user code
 - plugin package dependencies are vendored or resolved inside the plugin archive
-- plugin code cannot reach the host app filesystem outside its scoped plugin
-  unpack directory
+- a future signed archive runtime must keep plugin code from reaching outside
+  its scoped plugin unpack directory
+- the Task 184 prototype reserves only `require("plugins")`; it does not make
+  plugin ids directly require-able as package names
+- the Task 184 prototype enforces plugin-directory resolution for plugin
+  `require()` calls, but it is not a separate process, context, or filesystem
+  authority
 
 Pure npm packages remain separate from the plugin resolver. They do not receive
 plugin privileges.
@@ -353,10 +437,11 @@ Before any implementation, add tests for:
 
 ## Recommendation
 
-Keep plugins as a v1.1 design gate. The first shippable direction, if pursued,
-should be manifested pure JavaScript plugins with signed archives, explicit
-project opt-in, no native code, no Java interop expansion, and no packaged APK
-runtime downloads.
+Keep the Task 184 implementation as a local JS-only prototype, not a full plugin
+system. The first shippable direction beyond this prototype should still be
+manifested pure JavaScript plugins with signed archives, explicit project
+opt-in, no native code, no Java interop expansion, and no packaged APK runtime
+downloads.
 
 Signed native provider plugins require a separate design and must not relax the
 default native addon denial.

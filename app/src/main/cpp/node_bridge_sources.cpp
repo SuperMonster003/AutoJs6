@@ -8017,6 +8017,7 @@ std::string buildEmbeddedScriptExecutionSource(
   let __autojs6_limited_axios_cache = null;
   let __autojs6_limited_websocket_cache = null;
   let __autojs6_limited_work_manager_cache = null;
+  let __autojs6_limited_plugins_cache = null;
   let __autojs6_limited_java_cache = null;
   let __autojs6_limited_worker_threads_cache = null;
   const __autojs6_fetch_policy = Object.freeze({
@@ -14420,6 +14421,415 @@ std::string buildEmbeddedScriptExecutionSource(
     });
     return __autojs6_bridge_cache;
   }
+  function __autojs6_plugins_invalid_request(methodName, message) {
+    return __autojs6_bridge_error(
+      message,
+      "ERR_AUTOJS6_BRIDGE_INVALID_REQUEST",
+      "plugins",
+      methodName
+    );
+  }
+  function __autojs6_plugins_permission_denied(methodName, message) {
+    return __autojs6_bridge_error(
+      message,
+      "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED",
+      "plugins",
+      methodName
+    );
+  }
+  function __autojs6_plugins_path_escape(methodName, message, pathValue) {
+    const error = __autojs6_error(message, "EPERM", "ERR_AUTOJS6_FS_PATH_ESCAPE");
+    __autojs6_define_error_property(error, "module", "plugins");
+    __autojs6_define_error_property(error, "method", methodName);
+    if (pathValue !== undefined) {
+      __autojs6_define_error_property(error, "path", __autojs6_path_value_display(pathValue));
+    }
+    return error;
+  }
+  function __autojs6_plugin_id(value, methodName) {
+    if (typeof value !== "string") {
+      throw __autojs6_plugins_invalid_request(methodName, "plugins." + methodName + " requires a plugin id string.");
+    }
+    const id = value.trim();
+    if (
+      !/^[a-z0-9][a-z0-9_.-]{0,127}$/.test(id) ||
+      id === "." ||
+      id === ".." ||
+      id.indexOf("..") >= 0 ||
+      id.indexOf("/") >= 0 ||
+      id.indexOf("\\") >= 0
+    ) {
+      throw __autojs6_plugins_invalid_request(
+        methodName,
+        "plugins." + methodName + " rejects unsafe plugin id: " + String(value)
+      );
+    }
+    return id;
+  }
+  function __autojs6_plugins_scope(methodName) {
+    const path = __autojs6_path_module();
+    const fs = __autojs6_fs_module();
+    if (
+      !path ||
+      !fs ||
+      typeof path.resolve !== "function" ||
+      typeof path.extname !== "function" ||
+      typeof path.isAbsolute !== "function" ||
+      typeof fs.existsSync !== "function" ||
+      typeof fs.lstatSync !== "function" ||
+      typeof fs.realpathSync !== "function" ||
+      typeof fs.readdirSync !== "function"
+    ) {
+      throw __autojs6_plugins_permission_denied(
+        methodName,
+        "AutoJs6 JS plugins require the allowlisted path and fs modules."
+      );
+    }
+    const scope = __autojs6_fs_root(path, fs);
+    const pluginsDir = path.resolve(scope.root, "plugins");
+    if (!__autojs6_path_within_root(pluginsDir, scope.root) || __autojs6_sensitive_path(pluginsDir)) {
+      throw __autojs6_plugins_path_escape(methodName, "AutoJs6 JS plugin root escapes working directory.", pluginsDir);
+    }
+    return {
+      path,
+      fs,
+      root: scope.root,
+      realRoot: scope.realRoot,
+      pluginsDir
+    };
+  }
+  function __autojs6_plugin_manifest_field(packageData, id, methodName) {
+    let plugin = null;
+    if (
+      packageData &&
+      typeof packageData === "object" &&
+      packageData.autojs6 &&
+      typeof packageData.autojs6 === "object" &&
+      !Array.isArray(packageData.autojs6) &&
+      packageData.autojs6.plugin !== undefined
+    ) {
+      plugin = packageData.autojs6.plugin;
+    } else if (
+      packageData &&
+      typeof packageData === "object" &&
+      __autojs6_has_own(packageData, "autojs6.plugin")
+    ) {
+      plugin = packageData["autojs6.plugin"];
+    }
+    if (!plugin || typeof plugin !== "object" || Array.isArray(plugin)) {
+      throw __autojs6_plugins_invalid_request(
+        methodName,
+        "AutoJs6 JS plugin '" + id + "' requires package.json autojs6.plugin metadata."
+      );
+    }
+    return plugin;
+  }
+  function __autojs6_plugin_permissions(plugin, id, methodName) {
+    let permissions = plugin.permissions;
+    if (
+      permissions &&
+      typeof permissions === "object" &&
+      !Array.isArray(permissions) &&
+      Array.isArray(permissions.requires)
+    ) {
+      permissions = permissions.requires;
+    }
+    if (!Array.isArray(permissions)) {
+      throw __autojs6_plugins_invalid_request(
+        methodName,
+        "AutoJs6 JS plugin '" + id + "' requires autojs6.plugin.permissions as a string array."
+      );
+    }
+    const output = [];
+    const seen = Object.create(null);
+    for (let i = 0; i < permissions.length; i += 1) {
+      const value = permissions[i];
+      if (typeof value !== "string" || value.trim().length === 0) {
+        throw __autojs6_plugins_invalid_request(
+          methodName,
+          "AutoJs6 JS plugin '" + id + "' has a non-string permission at index " + i + "."
+        );
+      }
+      const normalized = __autojs6_bridge_normalize_capability(value);
+      if (normalized && !seen[normalized]) {
+        seen[normalized] = true;
+        output.push(normalized);
+      }
+    }
+    return Object.freeze(output);
+  }
+  function __autojs6_plugin_package_descriptor(id, methodName) {
+    const scope = __autojs6_plugins_scope(methodName);
+    const path = scope.path;
+    const fs = scope.fs;
+    const pluginDir = path.resolve(scope.pluginsDir, id);
+    if (!__autojs6_path_within_root(pluginDir, scope.pluginsDir) || __autojs6_sensitive_path(pluginDir)) {
+      throw __autojs6_plugins_path_escape(
+        methodName,
+        "AutoJs6 JS plugin path escapes the project plugins directory: " + id,
+        pluginDir
+      );
+    }
+    let lstat;
+    try {
+      lstat = fs.lstatSync(pluginDir);
+    } catch (error) {
+      if (error && (error.code === "ENOENT" || error.code === "ENOTDIR")) {
+        throw __autojs6_module_not_found("Cannot find AutoJs6 JS plugin '" + id + "' under ./plugins.");
+      }
+      throw error;
+    }
+    if (!lstat || typeof lstat.isDirectory !== "function" || !lstat.isDirectory()) {
+      throw __autojs6_plugins_invalid_request(
+        methodName,
+        "AutoJs6 JS plugin '" + id + "' must be installed as a directory under ./plugins."
+      );
+    }
+    const realPluginDir = fs.realpathSync(pluginDir);
+    if (!__autojs6_path_within_root(realPluginDir, scope.realRoot) || __autojs6_sensitive_path(realPluginDir)) {
+      throw __autojs6_plugins_path_escape(
+        methodName,
+        "AutoJs6 JS plugin real path escapes the project working directory: " + id,
+        pluginDir
+      );
+    }
+    const packageJsonResolved = path.resolve(pluginDir, "package.json");
+    const packageData = __autojs6_package_data(packageJsonResolved, "plugins:" + id);
+    if (!packageData) {
+      throw __autojs6_module_not_found("Cannot find AutoJs6 JS plugin package.json for '" + id + "'.");
+    }
+    const plugin = __autojs6_plugin_manifest_field(packageData, id, methodName);
+    const manifestId = typeof plugin.id === "string" && plugin.id.trim().length > 0
+      ? plugin.id.trim()
+      : __autojs6_package_name(packageData);
+    if (manifestId !== id) {
+      throw __autojs6_plugins_invalid_request(
+        methodName,
+        "AutoJs6 JS plugin id mismatch: requested '" + id + "' but package declares '" + String(manifestId || "") + "'."
+      );
+    }
+    const permissions = __autojs6_plugin_permissions(plugin, id, methodName);
+    const entry = plugin.entry !== undefined ? plugin.entry : (packageData.main !== undefined ? packageData.main : "index.cjs");
+    return {
+      scope,
+      id,
+      packageName: __autojs6_package_name(packageData) || id,
+      version: typeof packageData.version === "string" ? packageData.version : "",
+      plugin,
+      permissions,
+      entry,
+      pluginDir,
+      realPluginDir
+    };
+  }
+  function __autojs6_plugin_native_file_extension(extension) {
+    const normalized = __autojs6_normalized_extension(extension);
+    return normalized === ".so" ||
+      normalized === ".dll" ||
+      normalized === ".dylib" ||
+      normalized === ".a" ||
+      normalized === ".o";
+  }
+  function __autojs6_plugin_scan_native_files(descriptor, methodName) {
+    const path = descriptor.scope.path;
+    const fs = descriptor.scope.fs;
+    const stack = [{ dir: descriptor.pluginDir, depth: 0 }];
+    let visited = 0;
+    while (stack.length > 0) {
+      const current = stack.pop();
+      visited += 1;
+      if (visited > 512) {
+        throw __autojs6_plugins_permission_denied(
+          methodName,
+          "AutoJs6 JS plugin '" + descriptor.id + "' exceeds the prototype scan file budget."
+        );
+      }
+      if (current.depth > 16) {
+        throw __autojs6_plugins_permission_denied(
+          methodName,
+          "AutoJs6 JS plugin '" + descriptor.id + "' exceeds the prototype scan directory depth."
+        );
+      }
+      const entries = fs.readdirSync(current.dir, { withFileTypes: true });
+      for (const entry of entries) {
+        const name = String(entry && entry.name || "");
+        if (!name || name === "." || name === "..") continue;
+        const absolute = path.resolve(current.dir, name);
+        if (!__autojs6_path_within_root(absolute, descriptor.pluginDir) || __autojs6_sensitive_path(absolute)) {
+          throw __autojs6_plugins_path_escape(
+            methodName,
+            "AutoJs6 JS plugin file escapes the plugin directory: " + name,
+            absolute
+          );
+        }
+        const extension = __autojs6_normalized_extension(path.extname(absolute));
+        __autojs6_throw_if_native_addon_extension(
+          extension,
+          absolute,
+          "AutoJs6 JS plugin scan",
+          "AutoJs6 JS plugin '" + descriptor.id + "' contains a .node native addon: " + absolute
+        );
+        if (__autojs6_plugin_native_file_extension(extension)) {
+          throw __autojs6_plugins_permission_denied(
+            methodName,
+            "AutoJs6 JS plugin '" + descriptor.id + "' contains a native file unsupported by the JS-only prototype: " + absolute
+          );
+        }
+        const lstat = fs.lstatSync(absolute);
+        if (lstat && typeof lstat.isSymbolicLink === "function" && lstat.isSymbolicLink()) {
+          const real = fs.realpathSync(absolute);
+          if (!__autojs6_path_within_root(real, descriptor.realPluginDir) || __autojs6_sensitive_path(real)) {
+            throw __autojs6_plugins_path_escape(
+              methodName,
+              "AutoJs6 JS plugin symlink escapes the plugin directory: " + name,
+              absolute
+            );
+          }
+          throw __autojs6_plugins_permission_denied(
+            methodName,
+            "AutoJs6 JS plugin '" + descriptor.id + "' cannot contain symlinks in the JS-only prototype."
+          );
+        }
+        if (lstat && typeof lstat.isDirectory === "function" && lstat.isDirectory()) {
+          stack.push({ dir: absolute, depth: current.depth + 1 });
+        }
+      }
+    }
+  }
+  function __autojs6_plugin_entry_path(descriptor, methodName) {
+    const path = descriptor.scope.path;
+    const fs = descriptor.scope.fs;
+    if (typeof descriptor.entry !== "string" || descriptor.entry.trim().length === 0) {
+      throw __autojs6_plugins_invalid_request(
+        methodName,
+        "AutoJs6 JS plugin '" + descriptor.id + "' entry must be a non-empty string."
+      );
+    }
+    const entry = descriptor.entry.trim();
+    if (entry.indexOf("\u0000") >= 0) {
+      throw __autojs6_plugins_invalid_request(
+        methodName,
+        "AutoJs6 JS plugin '" + descriptor.id + "' entry rejects NUL paths."
+      );
+    }
+    if (path.isAbsolute(entry) || __autojs6_protocol_specifier(entry)) {
+      throw __autojs6_plugins_path_escape(
+        methodName,
+        "AutoJs6 JS plugin '" + descriptor.id + "' entry must be relative to the plugin directory: " + entry,
+        entry
+      );
+    }
+    const base = path.resolve(descriptor.pluginDir, entry);
+    if (!__autojs6_path_within_root(base, descriptor.pluginDir) || __autojs6_sensitive_path(base)) {
+      throw __autojs6_plugins_path_escape(
+        methodName,
+        "AutoJs6 JS plugin '" + descriptor.id + "' entry escapes the plugin directory: " + entry,
+        entry
+      );
+    }
+    const extension = __autojs6_normalized_extension(path.extname(base));
+    __autojs6_throw_if_native_addon_extension(
+      extension,
+      descriptor.id,
+      "AutoJs6 JS plugin entry",
+      "AutoJs6 JS plugin '" + descriptor.id + "' entry resolves to a .node native addon: " + entry
+    );
+    if (extension !== ".js" && extension !== ".cjs") {
+      throw __autojs6_plugins_permission_denied(
+        methodName,
+        "AutoJs6 JS plugin '" + descriptor.id + "' entry must be a .js or .cjs file in the JS-only prototype."
+      );
+    }
+    const record = __autojs6_module_record(base, false);
+    if (!record) {
+      throw __autojs6_module_not_found("Cannot find AutoJs6 JS plugin entry '" + entry + "' for '" + descriptor.id + "'.");
+    }
+    const realEntry = fs.realpathSync(base);
+    if (!__autojs6_path_within_root(realEntry, descriptor.realPluginDir) || __autojs6_sensitive_path(realEntry)) {
+      throw __autojs6_plugins_path_escape(
+        methodName,
+        "AutoJs6 JS plugin '" + descriptor.id + "' entry real path escapes the plugin directory: " + entry,
+        entry
+      );
+    }
+    return base;
+  }
+  function __autojs6_plugin_required_capabilities(descriptor) {
+    return Object.freeze(["plugin." + descriptor.id].concat(descriptor.permissions));
+  }
+  function __autojs6_plugins_missing_capabilities(descriptor) {
+    const manifest = __autojs6_bridge_permission_manifest();
+    const required = __autojs6_plugin_required_capabilities(descriptor);
+    if (!manifest.enforced) {
+      return required.slice();
+    }
+    const declared = manifest.normalizedPermissions;
+    const missing = [];
+    const pluginCapability = __autojs6_bridge_normalize_capability("plugin." + descriptor.id);
+    if (declared.indexOf(pluginCapability) < 0) {
+      missing.push(pluginCapability);
+    }
+    for (const permission of descriptor.permissions) {
+      const normalized = __autojs6_bridge_normalize_capability(permission);
+      if (normalized && !__autojs6_bridge_declares_capability(declared, normalized) && missing.indexOf(normalized) < 0) {
+        missing.push(normalized);
+      }
+    }
+    return missing;
+  }
+  function __autojs6_plugin_descriptor(idValue, methodName) {
+    const id = __autojs6_plugin_id(idValue, methodName);
+    const descriptor = __autojs6_plugin_package_descriptor(id, methodName);
+    __autojs6_plugin_scan_native_files(descriptor, methodName);
+    descriptor.entryPath = __autojs6_plugin_entry_path(descriptor, methodName);
+    descriptor.capability = __autojs6_bridge_normalize_capability("plugin." + descriptor.id);
+    return descriptor;
+  }
+  function __autojs6_plugins_assert_capabilities(descriptor, methodName) {
+    const missing = __autojs6_plugins_missing_capabilities(descriptor);
+    if (missing.length > 0) {
+      throw __autojs6_bridge_capability_not_declared_error("plugins", methodName, missing);
+    }
+  }
+  function __autojs6_plugin_public_manifest(descriptor) {
+    return Object.freeze({
+      id: descriptor.id,
+      packageName: descriptor.packageName,
+      version: descriptor.version,
+      capability: descriptor.capability,
+      entry: descriptor.entry,
+      entryPath: descriptor.entryPath,
+      permissions: Object.freeze(descriptor.permissions.slice()),
+      jsOnly: true,
+      nativeAddons: false
+    });
+  }
+  function __autojs6_limited_plugins() {
+    if (__autojs6_limited_plugins_cache) {
+      return __autojs6_limited_plugins_cache;
+    }
+    function manifest(id) {
+      const descriptor = __autojs6_plugin_descriptor(id, "manifest");
+      return __autojs6_plugin_public_manifest(descriptor);
+    }
+    function resolve(id) {
+      const descriptor = __autojs6_plugin_descriptor(id, "resolve");
+      __autojs6_plugins_assert_capabilities(descriptor, "resolve");
+      return descriptor.entryPath;
+    }
+    function load(id) {
+      const descriptor = __autojs6_plugin_descriptor(id, "load");
+      __autojs6_plugins_assert_capabilities(descriptor, "load");
+      __autojs6_plugin_module_roots[descriptor.pluginDir] = true;
+      return __autojs6_load_local_module(descriptor.entryPath, null);
+    }
+    __autojs6_limited_plugins_cache = Object.freeze({
+      load,
+      resolve,
+      manifest
+    });
+    return __autojs6_limited_plugins_cache;
+  }
   function __autojs6_invalid_package_target(message) {
     return __autojs6_error(message, "ERR_INVALID_PACKAGE_TARGET");
   }
@@ -15879,7 +16289,7 @@ std::string buildEmbeddedScriptExecutionSource(
     if (path.isAbsolute(moduleName)) {
       throw new Error("Embedded Node local require rejects absolute path: " + moduleName);
     }
-    const root = path.resolve(__autojs6_module_root || __autojs6_module_dirname(parentFilename));
+    const root = __autojs6_module_resolution_root(parentFilename);
     const parentDir = __autojs6_module_dirname(parentFilename);
     const base = path.resolve(parentDir || root, moduleName);
     if (!__autojs6_path_within_root(base, root)) {
@@ -15974,7 +16384,7 @@ std::string buildEmbeddedScriptExecutionSource(
     ) {
       throw new Error("Embedded Node.js package imports require needs the allowlisted path module.");
     }
-    const root = path.resolve(__autojs6_module_root || __autojs6_module_dirname(parentFilename));
+    const root = __autojs6_module_resolution_root(parentFilename);
     const scope = __autojs6_find_package_scope(parentFilename, root);
     if (!scope) {
       throw __autojs6_package_import_not_defined("Cannot find Embedded Node package imports scope for '" + moduleName + "' from '" + parentFilename + "'.");
@@ -16124,7 +16534,7 @@ std::string buildEmbeddedScriptExecutionSource(
     if (!specifier) {
       throw new Error("Invalid Embedded Node package specifier: " + moduleName);
     }
-    const root = path.resolve(__autojs6_module_root || __autojs6_module_dirname(parentFilename));
+    const root = __autojs6_module_resolution_root(parentFilename);
     const selfReference = __autojs6_resolve_package_self_reference(specifier, parentFilename, root, moduleName, mode);
     if (selfReference !== null) {
       return selfReference;
@@ -16171,7 +16581,7 @@ std::string buildEmbeddedScriptExecutionSource(
     const path = __autojs6_path_module();
     if (!path || typeof path.resolve !== "function") return;
     try {
-      const root = path.resolve(__autojs6_module_root || __autojs6_module_dirname(filename));
+      const root = __autojs6_module_resolution_root(filename);
       const scope = __autojs6_find_package_scope(filename, root);
       if (!scope) return;
       const packageData = __autojs6_package_data(scope.packageJsonResolved, filename);
@@ -28087,14 +28497,29 @@ std::string buildEmbeddedScriptExecutionSource(
     return __autojs6_scoped_fs_cache;
   }
   const __autojs6_module_cache = Object.create(null);
+  const __autojs6_plugin_module_roots = Object.create(null);
   const __autojs6_esm_module_cache = Object.create(null);
   let __autojs6_main_module_ref = null;
+  function __autojs6_module_resolution_root(filename) {
+    const path = __autojs6_path_module();
+    if (!path || typeof path.resolve !== "function") {
+      return __autojs6_module_root || __autojs6_module_dirname(filename);
+    }
+    const fallbackRoot = path.resolve(__autojs6_module_root || __autojs6_module_dirname(filename));
+    const resolvedFilename = path.resolve(filename || fallbackRoot);
+    for (const root of Object.keys(__autojs6_plugin_module_roots)) {
+      if (__autojs6_path_within_root(resolvedFilename, root)) {
+        return root;
+      }
+    }
+    return fallbackRoot;
+  }
   function __autojs6_module_paths(filename) {
     const path = __autojs6_path_module();
     if (!path || typeof path.resolve !== "function") {
       return [];
     }
-    const root = path.resolve(__autojs6_module_root || __autojs6_module_dirname(filename));
+    const root = __autojs6_module_resolution_root(filename);
     return __autojs6_node_modules_search_dirs(filename, root).slice();
   }
   function __autojs6_create_module(filename, parentModule) {
@@ -28185,7 +28610,7 @@ std::string buildEmbeddedScriptExecutionSource(
     const path = __autojs6_path_module();
     if (!path || typeof path.resolve !== "function") return false;
     try {
-      const root = path.resolve(__autojs6_module_root || __autojs6_module_dirname(filename));
+      const root = __autojs6_module_resolution_root(filename);
       const scope = __autojs6_find_package_scope(filename, root);
       if (!scope) return false;
       const packageData = __autojs6_package_data(scope.packageJsonResolved, filename);
@@ -28350,7 +28775,7 @@ std::string buildEmbeddedScriptExecutionSource(
       const code = /^https?:/i.test(name) ? "ERR_AUTOJS6_NETWORK_DISABLED" : "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED";
       throw __autojs6_esm_error("Embedded Node partial ESM rejects protocol import: " + name, code);
     }
-    const root = path.resolve(__autojs6_module_root || __autojs6_module_dirname(parentFilename));
+    const root = __autojs6_module_resolution_root(parentFilename);
     if (name.indexOf("#") === 0) {
       const resolved = __autojs6_resolve_package_import(name, parentFilename, "esm");
       return {
@@ -28980,6 +29405,9 @@ std::string buildEmbeddedScriptExecutionSource(
     if (name === "work_manager") {
       return "work_manager";
     }
+    if (name === "plugins") {
+      return "plugins";
+    }
     if (name === "java") {
       if (!__autojs6_java_interop_experimental_enabled) {
         throw __autojs6_java_interop_disabled_error();
@@ -29221,6 +29649,9 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     if (name === "work_manager") {
       return __autojs6_limited_work_manager();
+    }
+    if (name === "plugins") {
+      return __autojs6_limited_plugins();
     }
     if (name === "java") {
       return __autojs6_limited_java();

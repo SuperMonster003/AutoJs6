@@ -94,6 +94,34 @@ Runtime diagnostics expose the same state through `require("autojs6:profile").fe
 - resolver visualizer report through `node tools/nodejs/resolver/explain-node-resolve.js --mode compact|verbose|json --request <specifier> --from <file> --trace-file <stderr-log>` or `:app:explainNodeResolve` with `-Pautojs.nodejs.resolve.*`
 - optional embedded runtime timeline trace through `autojs.nodejs.timelineTrace=true` or `AUTOJS6_NODE_TIMELINE_TRACE=1`, reported as `embedded_script.timeline_json` and disabled by default
 
+## JS-Only Plugin Prototype
+
+`require("plugins")` is reserved by the Safe Node Profile and cannot be
+shadowed by `node_modules/plugins`.
+
+Prototype API:
+
+```js
+const plugins = require("plugins");
+const info = plugins.manifest("org.example.demo");
+const entryPath = plugins.resolve("org.example.demo");
+const demo = plugins.load("org.example.demo");
+```
+
+The prototype loads only project-local directories under `./plugins/<id>`.
+Each plugin must provide `package.json` metadata with `autojs6.plugin` and an
+`autojs6.plugin.permissions` string array. `plugins.load(id)` requires an
+enforced project/package capability manifest that declares the exact
+`plugin.<id>` capability and every capability requested by the plugin manifest
+before plugin code executes.
+
+Only `.js` and `.cjs` plugin entries are accepted. Plugin-relative `require()`
+uses the plugin directory as its resolver root, so plugin code cannot use
+relative package resolution to escape into sibling project files. This is a
+local JS-only prototype, not an installer, signed archive verifier, Android
+plugin adapter, packaged APK plugin runtime, native provider model, or isolated
+process/context.
+
 ## Execution Queue
 
 Embedded Node is not multi-instance inside a single `:nodejs_embedded` process. The default behavior rejects concurrent starts with `ERR_AUTOJS6_NODE_ENGINE_BUSY`.
@@ -128,6 +156,12 @@ The future design gate is documented in [design/LONG_RUNNING_SERVICE.md](design/
 Unsupported or rejected module source forms:
 
 - native `.node` addon entries, rejected with `ERR_AUTOJS6_NATIVE_ADDON_DISABLED` from direct relative imports, `module.createRequire()`, package `main`, package `exports`, package `imports`, and package subpath imports
+- `.node` files anywhere inside a JS-only plugin directory, rejected before the
+  plugin entry executes
+- `plugins.load(id)` without exact `plugin.<id>` project opt-in or without the
+  plugin-requested capabilities
+- plugin entry paths that are absolute, protocol-based, NUL-containing, or
+  escape the plugin directory
 - static ESM import execution only from ESM entries and ESM graph modules
 - dynamic import from `eval`, `Function`, URL/protocol specifiers, absolute paths, or outside `workingDirectory`
 - package export/import targets that escape the package root

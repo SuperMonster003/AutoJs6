@@ -69,6 +69,7 @@ small set of already-gated features toward practical use.
 | Accessibility selector v2 | partial | `require("accessibility")` expands selector descriptors with regex, clickable/enabled, depth, and bounds fields plus selector actions for long-click, set-text, and scroll while keeping JSON-only snapshots and explicit `accessibility` capability checks. |
 | Shell controls | partial | `require("shell")` remains the only child_process alternative and adds `execFile`, `checkAccess`, and `setDefaultTimeout` over the same controlled `exec` bridge while keeping Shizuku unsupported. |
 | Work Manager metadata | partial | `require("work_manager")` registers controlled scheduled-task metadata for `scheduleOnce`, `schedulePeriodic`, `cancel`, and `list`, stores embedded backend plus `scriptPath`/project `entry` metadata, supports packaged entry descriptors, and still does not launch background Node executions. |
+| Plugin system | JS-only prototype | `require("plugins")` loads project-local `./plugins/<id>` CommonJS plugins with `autojs6.plugin.permissions`, exact `plugin.<id>` project opt-in, `.node` rejection, and plugin entry path escape denial; installers, signatures, native plugins, Android plugin adapters, and packaged plugin runtime stay gated. |
 | Execution queue policy | partial | Embedded Node remains one active execution per `:nodejs_embedded` process; explicit caller-side enqueue supports one queued execution, queue status, cancellation, queue timeout, and stable busy/full/timeout/cancelled errors. |
 | Long-running mode | blocked | Request protocol carries `executionMode`, but v1.1 currently supports only `one_shot`; explicit `long_running`/`service` requests are rejected before user code runs. |
 | Worker threads | blocked | Disabled by default. Task 170 rechecked the pure-JS worker target, but the current Embedded Node build still lacks native `worker_threads`; no runnable v1.1 partial support is advertised. |
@@ -160,6 +161,11 @@ small set of already-gated features toward practical use.
   `scriptPath`/project `entry` metadata, packaged entry descriptors, scoped
   path and missing-file denial, minimum periodic interval enforcement, and
   `tasks`/raw scheduler denial.
+- Plugin system smoke passes for reserved `require("plugins")`,
+  project-local safe plugin loading, exact `plugin.<id>` opt-in, plugin
+  requested-permission denial before code execution, `.node` rejection,
+  plugin entry path escape denial, `node_modules/plugins` shadow denial, and
+  TypeScript declarations.
 - Execution queue smoke passes for default `ERR_AUTOJS6_NODE_ENGINE_BUSY`
   rejection, explicit enqueue order, queued cancellation, queued timeout before
   user code runs, one-entry queue-full denial, queue status diagnostics, and

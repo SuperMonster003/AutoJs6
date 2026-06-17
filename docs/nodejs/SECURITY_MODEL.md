@@ -95,6 +95,16 @@ If a limited module exists for npm feature detection, operations that would cros
 Runtime package installation is not a Safe Node Profile capability. Projects may vendor pure JavaScript CommonJS dependencies, and future tooling may sanitize them at build time, but AutoJs6 must not run package lifecycle scripts, native addon builds, arbitrary `.bin` commands, or registry downloads inside the Android runtime. See `docs/nodejs/design/PACKAGE_MANAGER.md`.
 The host dependency bundler rejects unsafe dependency trees before packaging. `.node` files are reported as `NATIVE_ADDON_DISABLED`; `binding.gyp` and `build/{Release,Debug}` artifacts are reported as `NODE_GYP_ARTIFACT_UNSUPPORTED`. It also rejects lifecycle scripts, unchecked `.bin` entries, npm cache/log artifacts, suspicious executable/native binaries, oversized files/packages/trees, and package metadata path references that are absolute, protocol-based, NUL-containing, or escape through `..`. A sanitized bundle is copied only after the scan reports zero issues, and the dependency report includes an SBOM-lite file for packaged APK review.
 
+The `require("plugins")` surface is a JS-only local prototype, not a package
+installer or a native/plugin-center bridge. It can load only
+`./plugins/<id>/package.json` packages that declare `autojs6.plugin` metadata.
+`plugins.load(id)` requires exact project opt-in through `plugin.<id>` and the
+plugin's requested capabilities before any plugin code runs. `.node` files
+below the plugin directory, common native library/object files, escaping entry
+paths, and symlinks are rejected. The prototype does not grant Java interop,
+Android plugin APK access, native provider loading, update authority, package
+download authority, or packaged APK manifest injection.
+
 `vm` remains disabled because a second JavaScript context is not a security boundary in this embedder. A limited `vm.Script` subset is deferred until timeout, global leakage, bridge leakage, and process object exposure can be proven safe.
 
 Inspector remains disabled because it is a live debugger control channel, not a passive diagnostic API. Any future support must be debug-build-only, loopback-only, explicitly user-started, and closed through the embedded service lifecycle. See `docs/nodejs/design/INSPECTOR.md`.

@@ -19,6 +19,12 @@ import fetchModule = require("fetch");
 import axios = require("axios");
 import websocket = require("websocket");
 import workManager = require("work_manager");
+import plugins = require("plugins");
+
+interface TypeSmokePlugin {
+  readonly ready: boolean;
+  run(): string;
+}
 
 async function smoke(): Promise<void> {
   await toast.showToast("hello", { duration: "short", log: true, timeoutMs: 1000 });
@@ -117,7 +123,7 @@ async function smoke(): Promise<void> {
   });
   const store: storage.StorageStore = storage.create("settings");
   await store.put("enabled", true, { timeoutMs: 1000 });
-  const storedEnabled: boolean = await storages.open("settings").get("enabled", false, { timeoutMs: 1000 });
+  const storedEnabled: boolean = (await storages.open("settings").get("enabled", false, { timeoutMs: 1000 })) === true;
   const storageKeys: readonly string[] = await store.keys({ timeoutMs: 1000 });
   const storageContains: boolean = await store.contains("enabled", { timeoutMs: 1000 });
   await store.remove("enabled", { timeoutMs: 1000 });
@@ -195,7 +201,7 @@ async function smoke(): Promise<void> {
   };
   connection.onclose = (event) => {
     void event.code;
-  });
+  };
   connection.on("message", (message) => {
     const maybeText: string | undefined = message.text;
     void maybeText;
@@ -219,6 +225,11 @@ async function smoke(): Promise<void> {
   });
   const tasks: readonly workManager.WorkTask[] = await workManager.list({ timeoutMs: 1000 });
   await workManager.cancel(onceId, { timeoutMs: 1000 });
+
+  const pluginInfo: plugins.PluginManifest = plugins.manifest("org.example.types");
+  const pluginEntry: string = plugins.resolve("org.example.types");
+  const typedPlugin: TypeSmokePlugin = plugins.load<TypeSmokePlugin>("org.example.types");
+  const pluginResult: string = typedPlugin.run();
 
   void launched;
   void launchByName;
@@ -271,6 +282,9 @@ async function smoke(): Promise<void> {
   void websocketDiagnostics;
   void periodicId;
   void tasks;
+  void pluginInfo;
+  void pluginEntry;
+  void pluginResult;
 }
 
 void smoke;

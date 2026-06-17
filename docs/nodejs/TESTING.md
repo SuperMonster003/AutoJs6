@@ -442,6 +442,14 @@ Current `ui` bridge protocol-gate focused instrumentation:
 
 This suite verifies the `ui` bridge registry, capability manifest mapping, fake-provider `showLayout`, `drainEvents`, `update`, and `close`, shadowing protection for `require("ui")`, opaque handle shape, button/click event delivery through drained JSON snapshots, timeout and permission propagation, JSON-only invalid descriptor rejection before dispatch, absence of raw View/Activity handle properties, and the current Android provider fail-closed path until an Activity-owned UI provider exists.
 
+Current JS-only plugin prototype focused instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodePluginSystemInstrumentationTest"
+```
+
+This suite verifies reserved `require("plugins")` and `require.resolve("plugins")`, local `node_modules/plugins` shadowing denial, project-local `./plugins/<id>` package loading, `autojs6.plugin.permissions` metadata, exact `plugin.<id>` opt-in, plugin-requested permission denial before code execution, `.node` rejection with `ERR_AUTOJS6_NATIVE_ADDON_DISABLED`, plugin entry path escape denial, plugin-root relative resolution, and TypeScript declaration coverage.
+
 Current bridge permission manifest focused instrumentation:
 
 ```powershell
