@@ -1242,11 +1242,43 @@ class AceCodeEditor @JvmOverloads constructor(
             )
             return
         }
+        if (isProbablyInvalidActionModeRect(left, top, right, bottom)) {
+            if (!selectionActionModeRect.isEmpty) {
+                return
+            }
+            setFallbackSelectionActionModeRect(maxRight, maxBottom)
+            return
+        }
         val safeLeft = (minOf(left, right) * scale).toInt().coerceIn(0, maxRight - 1)
         val safeTop = (minOf(top, bottom) * scale).toInt().coerceIn(0, maxBottom - 1)
         val safeRight = (maxOf(left, right) * scale).toInt().coerceIn(safeLeft + 1, maxRight)
         val safeBottom = (maxOf(top, bottom) * scale).toInt().coerceIn(safeTop + 1, maxBottom)
         selectionActionModeRect.set(safeLeft, safeTop, safeRight, safeBottom)
+    }
+
+    private fun setFallbackSelectionActionModeRect(maxRight: Int, maxBottom: Int) {
+        val safeMaxRight = maxRight.takeIf { it != Int.MAX_VALUE } ?: resources.displayMetrics.widthPixels.coerceAtLeast(1)
+        val safeMaxBottom = maxBottom.takeIf { it != Int.MAX_VALUE } ?: resources.displayMetrics.heightPixels.coerceAtLeast(1)
+        val lineHeight = (resources.displayMetrics.density * ACTION_MODE_TOUCH_ANCHOR_HEIGHT_DP)
+            .roundToInt()
+            .coerceAtLeast(1)
+        val centerLeft = (safeMaxRight / 2).coerceIn(0, safeMaxRight - 1)
+        val centerTop = (safeMaxBottom / 2).coerceIn(0, safeMaxBottom - 1)
+        selectionActionModeRect.set(
+            centerLeft,
+            centerTop,
+            (centerLeft + 1).coerceAtMost(safeMaxRight),
+            (centerTop + lineHeight).coerceAtMost(safeMaxBottom),
+        )
+    }
+
+    private fun isProbablyInvalidActionModeRect(left: Double, top: Double, right: Double, bottom: Double): Boolean {
+        if (!left.isFinite() || !top.isFinite() || !right.isFinite() || !bottom.isFinite()) {
+            return true
+        }
+        val width = abs(right - left)
+        val height = abs(bottom - top)
+        return minOf(left, right) <= 1.0 && minOf(top, bottom) <= 1.0 && width <= 2.0 && height <= 2.0
     }
 
     private fun hasRecentTextTouchAnchor(): Boolean {

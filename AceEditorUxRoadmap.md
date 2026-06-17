@@ -62,7 +62,7 @@ Acceptance:
 
 Acceptance:
 
-- [ ] Double-tap, long-press, and selection-drag menus stay anchored and stable.
+- [x] Double-tap, long-press, and selection-drag menus stay anchored and stable.
 - [ ] Right-edge system-back gestures close IME or editor without triggering
   ACE long-press selection/haptic feedback on Sony XQ-AT72 when technically
   preventable from the app side.
@@ -162,7 +162,7 @@ Notes:
 
 - [x] Stabilize Gboard spacebar cursor direction in ACE without treating IME
   selection offsets as document-absolute offsets.
-- [ ] Keep double-tap and long-press host action modes anchored near the user's
+- [x] Keep double-tap and long-press host action modes anchored near the user's
   touch point without upper-left fallback flicker.
 - [x] Preserve gutter fold toggle while keeping folded-code placeholder unfold
   support.
@@ -232,3 +232,6 @@ Notes:
   calls outside text mutation windows and treats Gboard spacebar cursor updates
   as relative deltas only, preventing local IME offsets from jumping the cursor
   back near the beginning of the document.
+- ACE host action mode now rejects invalid tiny 0,0 content rects, preserving
+  the current good anchor or falling back to a centered non-zero rect instead
+  of letting Android place the selection menu at the upper-left corner.
