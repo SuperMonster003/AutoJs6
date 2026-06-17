@@ -6,7 +6,6 @@ import android.graphics.Canvas
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
-import android.text.Layout
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -393,10 +392,13 @@ class CodeEditor : HVScrollView {
 
     fun deleteLine() {
         val text = codeEditText.text ?: return
-        val layout = codeEditText.layout
-        val line = LayoutHelper.getLineOfChar(layout, minOf(codeEditText.selectionStart, codeEditText.selectionEnd))
-        if (line >= 0 && line < layout.lineCount) {
-            text.replace(layout.getLineStart(line), layout.getLineEnd(line), "")
+        val line = currentLogicalLine()
+        if (line >= 0 && line < codeEditText.getLogicalLineCount()) {
+            text.replace(
+                codeEditText.getLogicalLineStart(line),
+                codeEditText.getLogicalLineEnd(line, includeTrailingNewline = true),
+                "",
+            )
         }
     }
 
@@ -418,58 +420,46 @@ class CodeEditor : HVScrollView {
     }
 
     fun jumpToLineStart() {
-        val layout = codeEditText.layout
-        val line = LayoutHelper.getLineOfChar(layout, minOf(codeEditText.selectionStart, codeEditText.selectionEnd))
-        if (line >= 0 && line < layout.lineCount) {
-            codeEditText.setSelection(layout.getLineStart(line))
+        val line = currentLogicalLine()
+        if (line >= 0 && line < codeEditText.getLogicalLineCount()) {
+            codeEditText.setSelection(codeEditText.getLogicalLineStart(line))
         }
     }
 
     fun jumpToLineEnd() {
-        val layout = codeEditText.layout
-        val line = LayoutHelper.getLineOfChar(layout, minOf(codeEditText.selectionStart, codeEditText.selectionEnd))
-        if (line >= 0 && line < layout.lineCount) {
-            codeEditText.setSelection(getLineEndWithoutTrailingNewline(layout, line))
+        val line = currentLogicalLine()
+        if (line >= 0 && line < codeEditText.getLogicalLineCount()) {
+            codeEditText.setSelection(codeEditText.getLogicalLineEnd(line))
         }
     }
 
     fun jumpToNextLine() {
-        val layout = codeEditText.layout
         val cursor = minOf(codeEditText.selectionStart, codeEditText.selectionEnd)
-        val line = LayoutHelper.getLineOfChar(layout, cursor)
-        jumpToLinePreservingColumn(layout, line, line + 1, cursor)
+        val line = codeEditText.getLogicalLineForOffset(cursor)
+        jumpToLogicalLinePreservingColumn(line, line + 1, cursor)
     }
 
     fun jumpToPrevLine() {
-        val layout = codeEditText.layout
         val cursor = minOf(codeEditText.selectionStart, codeEditText.selectionEnd)
-        val line = LayoutHelper.getLineOfChar(layout, cursor)
-        jumpToLinePreservingColumn(layout, line, line - 1, cursor)
+        val line = codeEditText.getLogicalLineForOffset(cursor)
+        jumpToLogicalLinePreservingColumn(line, line - 1, cursor)
     }
 
-    private fun jumpToLinePreservingColumn(layout: Layout, fromLine: Int, targetLine: Int, cursor: Int) {
-        if (fromLine !in 0 until layout.lineCount || targetLine !in 0 until layout.lineCount) {
+    private fun currentLogicalLine(): Int {
+        return codeEditText.getLogicalLineForOffset(minOf(codeEditText.selectionStart, codeEditText.selectionEnd))
+    }
+
+    private fun jumpToLogicalLinePreservingColumn(fromLine: Int, targetLine: Int, cursor: Int) {
+        val lineCount = codeEditText.getLogicalLineCount()
+        if (fromLine !in 0 until lineCount || targetLine !in 0 until lineCount) {
             return
         }
-        val fromLineStart = layout.getLineStart(fromLine)
-        val fromLineEnd = getLineEndWithoutTrailingNewline(layout, fromLine)
-        val fromLineCursor = cursor.coerceIn(fromLineStart, fromLineEnd)
-        val desiredColumn = fromLineCursor - fromLineStart
-
-        val targetLineStart = layout.getLineStart(targetLine)
-        val targetLineEnd = getLineEndWithoutTrailingNewline(layout, targetLine)
-        val targetCursor = (targetLineStart + desiredColumn).coerceAtMost(targetLineEnd)
-        codeEditText.setSelection(targetCursor)
-    }
-
-    private fun getLineEndWithoutTrailingNewline(layout: Layout, line: Int): Int {
-        val lineEnd = layout.getLineEnd(line)
-        val text = codeEditText.text ?: return lineEnd
-        return if (lineEnd > 0 && lineEnd <= text.length && text[lineEnd - 1] == '\n') {
-            lineEnd - 1
-        } else {
-            lineEnd
-        }
+        val fromLineStart = codeEditText.getLogicalLineStart(fromLine)
+        val fromLineEnd = codeEditText.getLogicalLineEnd(fromLine)
+        val desiredColumn = cursor.coerceIn(fromLineStart, fromLineEnd) - fromLineStart
+        val targetLineStart = codeEditText.getLogicalLineStart(targetLine)
+        val targetLineEnd = codeEditText.getLogicalLineEnd(targetLine)
+        codeEditText.setSelection((targetLineStart + desiredColumn).coerceAtMost(targetLineEnd))
     }
 
     fun setTheme(theme: Theme) {
@@ -494,9 +484,17 @@ class CodeEditor : HVScrollView {
     }
 
     fun jumpTo(line: Int, col: Int) {
-        val layout = codeEditText.layout
-        if (line >= 0 && (layout == null || line < layout.lineCount)) {
-            codeEditText.setSelection(codeEditText.layout.getLineStart(line) + col)
+        if (line >= 0 && line < codeEditText.getLogicalLineCount()) {
+            val lineStart = codeEditText.getLogicalLineStart(line)
+            val lineEnd = codeEditText.getLogicalLineEnd(line)
+            codeEditText.setSelection((lineStart + col.coerceAtLeast(0)).coerceAtMost(lineEnd))
+        }
+    }
+
+    fun setWordWrapEnabled(enabled: Boolean) {
+        codeEditText.setWordWrapEnabled(enabled)
+        if (enabled && scrollX != 0) {
+            scrollTo(0, scrollY)
         }
     }
 
@@ -747,9 +745,8 @@ class CodeEditor : HVScrollView {
     }
 
     fun addOrRemoveBreakpointAtCurrentLine() {
-        val layout = codeEditText.layout
-        val line = LayoutHelper.getLineOfChar(layout, minOf(codeEditText.selectionStart, codeEditText.selectionEnd))
-        if (line >= 0 && line < layout.lineCount) {
+        val line = currentLogicalLine()
+        if (line >= 0 && line < codeEditText.getLogicalLineCount()) {
             addOrRemoveBreakpoint(line)
         }
     }

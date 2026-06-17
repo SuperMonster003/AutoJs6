@@ -50,6 +50,35 @@ const ACE_SCRIPT_EDITOR_ENGINE_PATH = path.join(
   "engine",
   "AceScriptEditorEngine.kt",
 );
+const NATIVE_CODE_EDITOR_ENGINE_PATH = path.join(
+  PROJECT_ROOT,
+  "app",
+  "src",
+  "main",
+  "java",
+  "org",
+  "autojs",
+  "autojs",
+  "ui",
+  "edit",
+  "editor",
+  "engine",
+  "NativeCodeEditorEngine.kt",
+);
+const CODE_EDIT_TEXT_PATH = path.join(
+  PROJECT_ROOT,
+  "app",
+  "src",
+  "main",
+  "java",
+  "org",
+  "autojs",
+  "autojs",
+  "ui",
+  "edit",
+  "editor",
+  "CodeEditText.kt",
+);
 const EDITOR_MENU_PATH = path.join(
   PROJECT_ROOT,
   "app",
@@ -213,6 +242,8 @@ const tooltip = read(TOOLTIP_PATH);
 const signatureHelp = read(SIGNATURE_HELP_PATH);
 const aceCodeEditor = read(ACE_CODE_EDITOR_PATH);
 const aceScriptEditorEngine = read(ACE_SCRIPT_EDITOR_ENGINE_PATH);
+const nativeCodeEditorEngine = read(NATIVE_CODE_EDITOR_ENGINE_PATH);
+const codeEditText = read(CODE_EDIT_TEXT_PATH);
 const editorMenu = read(EDITOR_MENU_PATH);
 const editorView = read(EDITOR_VIEW_PATH);
 const editorPinchToZoomPreference = read(EDITOR_PINCH_TO_ZOOM_PREFERENCE_PATH);
@@ -422,6 +453,9 @@ assertIncludes(aceCodeEditor, "RIGHT_EDGE_BACK_GESTURE_MIN_GUARD_DP = 24f", "ACE
 
 assertIncludes(aceScriptEditorEngine, "notifyPinchToZoomStrategyChanged", "ACE pinch zoom strategy forwarding");
 assertIncludes(aceScriptEditorEngine, "onTextSizeSpChangedByGesture", "ACE pinch text-size state callback");
+assertIncludes(nativeCodeEditorEngine, "codeEditor.setWordWrapEnabled(EditorDisplayPreferences.isWordWrapEnabled())", "Native word wrap preference application");
+assertIncludes(codeEditText, "fun setWordWrapEnabled(enabled: Boolean)", "Native word wrap edit text toggle");
+assertIncludes(codeEditText, "fun getLogicalLineForVisualLine", "Native wrapped visual-line to logical-line mapping");
 assertIncludes(editorPinchToZoomPreference, "EditorEnginePreferences.get() == EditorEngineType.ACE", "ACE-only scale-view preference enablement");
 assertIncludes(editorPinchToZoomPreference, "indexOf(key(R.string.key_editor_pinch_to_zoom_scale_view))", "Native scale-view preference remains disabled");
 

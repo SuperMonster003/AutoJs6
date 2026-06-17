@@ -23,6 +23,7 @@ const FILES = {
   codeEditorSettings: "app/src/main/res/xml/fragment_code_editor_settings.xml",
   editorMenu: "app/src/main/res/menu/menu_editor.xml",
   codeEditorSettingsDialog: "app/src/main/java/org/autojs/autojs/ui/settings/CodeEditorSettingsDialog.kt",
+  codeEditorSettingsFragment: "app/src/main/java/org/autojs/autojs/ui/settings/CodeEditorSettingsFragment.kt",
   editorMenuHandler: "app/src/main/java/org/autojs/autojs/ui/edit/EditorMenu.java",
   editorEngineType: "app/src/main/java/org/autojs/autojs/ui/edit/editor/engine/EditorEngineType.kt",
   editorEnginePreferences: "app/src/main/java/org/autojs/autojs/ui/edit/editor/engine/EditorEnginePreferences.kt",
@@ -247,6 +248,7 @@ assertNotIncludes(FILES.editorMenu, 'android:id="@+id/action_editor_pinch_to_zoo
 assertNotIncludes(FILES.editorMenu, 'android:id="@+id/action_fx_keyboard"', "editor shortcut input menu item moved to settings page");
 assertNotIncludes(FILES.editorMenu, 'android:id="@+id/action_editor_theme"', "editor theme menu item moved to settings page");
 assertNotIncludes(FILES.editorMenu, 'android:id="@+id/action_editor_engine"', "editor engine menu item moved to settings page");
+assertNotIncludes(FILES.codeEditorSettingsFragment, "setPreferenceAvailable(R.string.key_ace_word_wrap_enabled", "word wrap remains available across editor engines");
 assertIncludes(FILES.codeEditorSettingsDialog, "CodeEditorSettingsFragment.newInstance(embeddedInDialog = true)", "in-editor settings dialog uses shared settings fragment");
 assertIncludes(FILES.editorMenuHandler, "CodeEditorSettingsDialog.show(mContext)", "editor settings menu opens in-editor settings dialog");
 assertMatch(

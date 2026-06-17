@@ -92,6 +92,8 @@ class CodeEditText : AppCompatEditText {
     private var mShowBreakpointMarkers = true
     private var mShowLineNumbers = true
     private var mShowFoldMarkers = true
+    var isWordWrapEnabled = false
+        private set
 
     // Callback when user touches the editor text area (not gutter).
     // This is used by large-file loader to avoid forcing caret to 0 after user interaction.
@@ -196,6 +198,99 @@ class CodeEditText : AppCompatEditText {
         mShowFoldMarkers = showFoldMarkers
         updatePaddingForGutter()
         invalidate()
+    }
+
+    fun setWordWrapEnabled(enabled: Boolean) {
+        if (isWordWrapEnabled == enabled) {
+            return
+        }
+        isWordWrapEnabled = enabled
+        setHorizontallyScrolling(!enabled)
+        isHorizontalScrollBarEnabled = !enabled
+        requestLayout()
+        invalidate()
+    }
+
+    fun getLogicalLineCount(): Int {
+        val value = text ?: return 1
+        if (value.isEmpty()) {
+            return 1
+        }
+        var lines = 1
+        for (i in 0 until value.length) {
+            if (value[i] == '\n') {
+                lines++
+            }
+        }
+        return lines
+    }
+
+    fun getLogicalLineForOffset(offset: Int): Int {
+        val value = text ?: return 0
+        val safeOffset = offset.coerceIn(0, value.length)
+        var line = 0
+        for (i in 0 until safeOffset) {
+            if (value[i] == '\n') {
+                line++
+            }
+        }
+        return line
+    }
+
+    fun getLogicalColumnForOffset(offset: Int): Int {
+        val lineStart = getLogicalLineStart(getLogicalLineForOffset(offset))
+        return (offset.coerceAtLeast(0) - lineStart).coerceAtLeast(0)
+    }
+
+    fun getLogicalLineStart(line: Int): Int {
+        val value = text ?: return 0
+        if (line <= 0) {
+            return 0
+        }
+        var currentLine = 0
+        for (i in 0 until value.length) {
+            if (value[i] == '\n') {
+                currentLine++
+                if (currentLine == line) {
+                    return i + 1
+                }
+            }
+        }
+        return value.length
+    }
+
+    fun getLogicalLineEnd(line: Int, includeTrailingNewline: Boolean = false): Int {
+        val value = text ?: return 0
+        val lineStart = getLogicalLineStart(line)
+        for (i in lineStart until value.length) {
+            if (value[i] == '\n') {
+                return if (includeTrailingNewline) i + 1 else i
+            }
+        }
+        return value.length
+    }
+
+    fun getLogicalLineForVisualLine(visualLine: Int): Int {
+        val currentLayout = layout ?: return visualLine.coerceAtLeast(0)
+        val safeVisualLine = visualLine.coerceIn(0, (currentLayout.lineCount - 1).coerceAtLeast(0))
+        return getLogicalLineForOffset(currentLayout.getLineStart(safeVisualLine))
+    }
+
+    fun getVisualLineForLogicalLine(logicalLine: Int): Int {
+        val currentLayout = layout ?: return logicalLine.coerceAtLeast(0)
+        val value = text ?: return logicalLine.coerceAtLeast(0)
+        val offset = getLogicalLineStart(logicalLine).coerceIn(0, value.length)
+        return currentLayout.getLineForOffset(offset)
+    }
+
+    fun isFirstVisualLineOfLogicalLine(visualLine: Int): Boolean {
+        val currentLayout = layout ?: return true
+        if (visualLine <= 0) {
+            return true
+        }
+        val start = currentLayout.getLineStart(visualLine)
+        val value = text ?: return true
+        return start <= 0 || start > value.length || value[start - 1] == '\n'
     }
 
     // Configure a fixed gutter width for loading.
@@ -385,7 +480,7 @@ class CodeEditText : AppCompatEditText {
         }
 
         // 根据行号计算左边距 padding 留出绘制行号的空间
-        val gutterWidth = calculateGutterWidth(lineCount.toString().length)
+        val gutterWidth = calculateGutterWidth(getLogicalLineCount().toString().length)
         if (paddingLeft != gutterWidth) {
             setPadding(gutterWidth, 0, 0, 0)
         }
@@ -418,14 +513,16 @@ class CodeEditText : AppCompatEditText {
         for (line in mFirstLineForDraw..lineCount.coerceAtMost(mLastLineForDraw)) {
             if (line >= lineCount) continue
 
-            val lineNumber = line + 1
+            val logicalLine = getLogicalLineForVisualLine(line)
+            val lineNumber = logicalLine + 1
             val lineNumberText = "$lineNumber"
-            val lineBottom = layout.getLineTop(lineNumber)
+            val isLogicalLineStart = isFirstVisualLineOfLogicalLine(line)
+            val lineBottom = layout.getLineTop(line + 1)
             val lineTop = layout.getLineTop(line)
             val lineBaseline = lineBottom - layout.getLineDescent(line)
 
             // if there is a breakpoint at this line, draw a highlight background for line number
-            if (mShowBreakpointMarkers && breakpoints.containsKey(line)) {
+            if (mShowBreakpointMarkers && isLogicalLineStart && breakpoints.containsKey(logicalLine)) {
                 canvas.drawRect(
                     /* left = */ 0f,
                     /* top = */ lineTop.toFloat(),
@@ -434,7 +531,7 @@ class CodeEditText : AppCompatEditText {
                     /* paint = */ paint.apply { color = mTheme.breakpointColor },
                 )
             }
-            if (mShowLineNumbers) {
+            if (mShowLineNumbers && isLogicalLineStart) {
                 canvas.drawText(
                     /* text = */ lineNumberText,
                     /* start = */ 0,
@@ -760,16 +857,17 @@ class CodeEditText : AppCompatEditText {
         // 如果行号区域被按下
         if (mShowBreakpointMarkers && event.action == MotionEvent.ACTION_DOWN && event.x < paddingLeft) {
             // 则计算当前行, 如果行号有效, 记录起来
-            val line = layout.getLineForVertical(event.y.toInt())
-            if (line >= 0) {
-                mTouchedLine = line
+            val visualLine = layout.getLineForVertical(event.y.toInt())
+            if (visualLine >= 0) {
+                mTouchedLine = getLogicalLineForVisualLine(visualLine)
                 mTouchValid = true
                 return true
             }
         } else if (mTouchedLine >= 0) {
             // 如果之前已经是行号区域被按下了, 则之后的事件也要处理
             // 如果之后的触摸区域超出行号区域, 或者触摸的行号与第一次触摸事件时的不同, 则这一系列的触摸无效
-            if (event.x >= paddingLeft || layout.getLineForVertical(event.y.toInt()) != mTouchedLine) {
+            val currentLogicalLine = getLogicalLineForVisualLine(layout.getLineForVertical(event.y.toInt()))
+            if (event.x >= paddingLeft || currentLogicalLine != mTouchedLine) {
                 mTouchValid = false
             }
             if (event.action == MotionEvent.ACTION_UP) {

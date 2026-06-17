@@ -169,7 +169,7 @@ Notes:
 - [ ] Keep Sony right-edge back gesture protection while preserving normal tap,
   long-press, double-tap, and vertical scroll behavior outside the narrow
   system gesture edge.
-- [ ] Add word wrap support to the Native editor if technically feasible.
+- [x] Add word wrap support to the Native editor if technically feasible.
 - [ ] Add a wrap indentation style setting: continuation indent, default, and
   classic flush continuation.
 - [x] Expand line-number visibility into independent gutter visibility controls
@@ -217,3 +217,6 @@ Notes:
 - Settings labels now avoid exposing the ACE implementation name on the
   dedicated settings surface. Engine-specific preferences stay visible but
   disabled with a current-engine availability hint when they do not apply.
+- Native editor now applies the shared word-wrap preference. Wrapped visual
+  lines are mapped back to logical file lines for line numbers, breakpoint
+  gutter taps, cursor positions, and jump operations.

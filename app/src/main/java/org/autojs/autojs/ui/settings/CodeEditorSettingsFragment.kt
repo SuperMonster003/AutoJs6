@@ -63,7 +63,6 @@ class CodeEditorSettingsFragment : PreferenceFragmentCompat(), SharedPreferences
     private fun syncEditorEnginePreferenceAvailability() {
         val aceSelected = EditorEnginePreferences.get() == EditorEngineType.ACE
         setPreferenceAvailable(R.string.key_ace_editor_font, aceSelected)
-        setPreferenceAvailable(R.string.key_ace_word_wrap_enabled, aceSelected, R.string.summary_ace_word_wrap_enabled)
         setPreferenceAvailable(R.string.key_ace_lsp_enabled, aceSelected, R.string.summary_ace_lsp_enabled)
         setPreferenceAvailable(R.string.key_editor_fold_markers_enabled, aceSelected, R.string.summary_editor_fold_markers_enabled)
 

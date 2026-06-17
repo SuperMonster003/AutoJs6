@@ -62,7 +62,7 @@ class NativeCodeEditorEngine(
         get() = !readOnly && codeEditor.canRedo()
 
     override val lineCountSnapshot: Int
-        get() = codeEditor.codeEditText.layout?.lineCount ?: codeEditor.codeEditText.lineCount
+        get() = codeEditor.codeEditText.getLogicalLineCount()
 
     override val selection: EditorSelection
         get() {
@@ -346,6 +346,7 @@ class NativeCodeEditorEngine(
     }
 
     private fun applyDisplayPreferences() {
+        codeEditor.setWordWrapEnabled(EditorDisplayPreferences.isWordWrapEnabled())
         codeEditor.setGutterDisplayOptions(
             showBreakpointMarkers = EditorDisplayPreferences.isBreakpointMarkersEnabled(),
             showLineNumbers = EditorDisplayPreferences.isLineNumbersEnabled(),
@@ -525,63 +526,36 @@ class NativeCodeEditorEngine(
     private fun positionForOffset(offset: Int): Pair<Int, Int> {
         val text = textSnapshot
         val safeOffset = offset.coerceIn(0, text.length)
-        codeEditor.codeEditText.layout?.let { layout ->
-            val line = layout.getLineForOffset(safeOffset)
-            return line to (safeOffset - layout.getLineStart(line)).coerceAtLeast(0)
-        }
-
-        var line = 0
-        var lineStart = 0
-        for (i in 0 until safeOffset) {
-            if (text[i] == '\n') {
-                line++
-                lineStart = i + 1
-            }
-        }
-        return line to (safeOffset - lineStart)
+        val editText = codeEditor.codeEditText
+        return editText.getLogicalLineForOffset(safeOffset) to editText.getLogicalColumnForOffset(safeOffset)
     }
 
     private fun offsetForLineColumn(line: Int, column: Int): Int? {
         if (line < 0) return null
-        codeEditor.codeEditText.layout?.let { layout ->
-            if (line !in 0 until layout.lineCount) return null
-            val lineStart = layout.getLineStart(line)
-            val lineEnd = layout.getLineEnd(line)
-            return (lineStart + column.coerceAtLeast(0)).coerceAtMost(lineEnd)
-        }
-
-        val text = textSnapshot
-        var currentLine = 0
-        var lineStart = 0
-        for (i in text.indices) {
-            if (currentLine == line) break
-            if (text[i] == '\n') {
-                currentLine++
-                lineStart = i + 1
-            }
-        }
-        if (currentLine != line) return null
-        var lineEnd = text.length
-        for (i in lineStart until text.length) {
-            if (text[i] == '\n') {
-                lineEnd = i
-                break
-            }
-        }
+        val editText = codeEditor.codeEditText
+        if (line !in 0 until editText.getLogicalLineCount()) return null
+        val lineStart = editText.getLogicalLineStart(line)
+        val lineEnd = editText.getLogicalLineEnd(line)
         return (lineStart + column.coerceAtLeast(0)).coerceAtMost(lineEnd)
     }
 
     private fun firstVisibleLine(): Int? {
         val layout = codeEditor.codeEditText.layout ?: return null
-        return layout.getLineForVertical(codeEditor.scrollY)
+        return codeEditor.codeEditText.getLogicalLineForVisualLine(layout.getLineForVertical(codeEditor.scrollY))
     }
 
     private fun restoreScroll(snapshot: EditorStateSnapshot) {
         val firstVisibleLine = snapshot.firstVisibleLine ?: return
         codeEditor.codeEditText.post {
             val layout = codeEditor.codeEditText.layout ?: return@post
-            val line = firstVisibleLine.coerceIn(0, (layout.lineCount - 1).coerceAtLeast(0))
-            val scrollX = (snapshot.firstVisibleColumn ?: 0).coerceAtLeast(0)
+            val line = codeEditor.codeEditText
+                .getVisualLineForLogicalLine(firstVisibleLine)
+                .coerceIn(0, (layout.lineCount - 1).coerceAtLeast(0))
+            val scrollX = if (codeEditor.codeEditText.isWordWrapEnabled) {
+                0
+            } else {
+                (snapshot.firstVisibleColumn ?: 0).coerceAtLeast(0)
+            }
             codeEditor.scrollTo(scrollX, layout.getLineTop(line).coerceAtLeast(0))
         }
     }
