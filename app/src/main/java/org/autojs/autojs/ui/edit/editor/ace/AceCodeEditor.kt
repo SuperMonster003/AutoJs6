@@ -24,6 +24,9 @@ import android.view.ScaleGestureDetector
 import android.view.ScaleGestureDetector.SimpleOnScaleGestureListener
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputConnection
+import android.view.inputmethod.InputConnectionWrapper
 import android.webkit.ConsoleMessage
 import android.webkit.PermissionRequest
 import android.webkit.RenderProcessGoneDetail
@@ -87,9 +90,21 @@ class AceCodeEditor @JvmOverloads constructor(
         healthMonitor.resumeHeartbeat()
     }
 
-    val webView: WebView = AceWebView(context) { keyCode, event ->
-        handleSoftKeyboardCursorKey(keyCode, event)
-    }
+    val webView: WebView = AceWebView(
+        context = context,
+        softKeyboardCursorKeyHandler = { keyCode, event ->
+            handleSoftKeyboardCursorKey(keyCode, event)
+        },
+        softKeyboardSelectionHandler = { delta, source ->
+            handleSoftKeyboardCursorSelection(delta, source)
+        },
+        allowHostActionModeStart = {
+            startingHostSelectionActionMode
+        },
+        onSuppressedActionModeStart = {
+            eventHistory.record("webview_action_mode_suppressed")
+        },
+    )
     private val loadingOverlay: View = View(context).apply {
         setBackgroundColor(editorBackgroundColor())
     }
@@ -161,6 +176,7 @@ class AceCodeEditor @JvmOverloads constructor(
     private var actionModeActive = false
     private var selectionActionMode: ActionMode? = null
     private val selectionActionModeRect = Rect()
+    private var startingHostSelectionActionMode = false
     private var rightEdgeBackGestureTouchGuardActive = false
     private var bridgeEventWindowStartedAtUptimeMillis = 0L
     private var bridgeEventWindowCount = 0
@@ -530,6 +546,7 @@ class AceCodeEditor @JvmOverloads constructor(
                 )
                 if (rightEdgeBackGestureTouchGuardActive) {
                     userTouching = false
+                    suppressSelectionActionModeForPointerGuard("right_edge_back_gesture")
                     eventHistory.record(
                         "right_edge_back_gesture_guard",
                         "x=${event.x.roundToInt()},width=${webView.width},insetRight=$systemGestureInsetRight",
@@ -567,12 +584,17 @@ class AceCodeEditor @JvmOverloads constructor(
     }
 
     private fun rightEdgeBackGestureGuardWidth(viewWidth: Int, systemGestureInsetRight: Int): Int {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q || viewWidth <= 0 || systemGestureInsetRight <= 0) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q || viewWidth <= 0) {
             return 0
         }
         val minimumGuardWidth = (resources.displayMetrics.density * RIGHT_EDGE_BACK_GESTURE_MIN_GUARD_DP).roundToInt()
         val maximumGuardWidth = (viewWidth * RIGHT_EDGE_BACK_GESTURE_MAX_WIDTH_RATIO).roundToInt().coerceAtLeast(1)
-        return maxOf(systemGestureInsetRight, minimumGuardWidth).coerceAtMost(maximumGuardWidth)
+        val insetOrFallback = if (systemGestureInsetRight > 0) {
+            systemGestureInsetRight
+        } else {
+            minimumGuardWidth
+        }
+        return maxOf(insetOrFallback, minimumGuardWidth).coerceAtMost(maximumGuardWidth)
     }
 
     @VisibleForTesting
@@ -1017,10 +1039,15 @@ class AceCodeEditor @JvmOverloads constructor(
 
     private fun startSelectionActionMode(): ActionMode? {
         val callback = createSelectionActionModeCallback()
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            webView.startActionMode(callback, ActionMode.TYPE_FLOATING)
-        } else {
-            webView.startActionMode(callback)
+        startingHostSelectionActionMode = true
+        return try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                webView.startActionMode(callback, ActionMode.TYPE_FLOATING)
+            } else {
+                webView.startActionMode(callback)
+            }
+        } finally {
+            startingHostSelectionActionMode = false
         }
     }
 
@@ -1135,6 +1162,13 @@ class AceCodeEditor @JvmOverloads constructor(
         lastActionModeAtUptimeMillis = SystemClock.uptimeMillis()
         healthMonitor.markStateEvent()
         eventHistory.record("action_mode_finished")
+    }
+
+    private fun suppressSelectionActionModeForPointerGuard(reason: String) {
+        finishSelectionActionMode()
+        if (isReady) {
+            invokeAce("suppressSelectionActionModeMenu", quote(reason))
+        }
     }
 
     private fun scheduleTransientResize(reason: String, delayMillis: Long) {
@@ -1282,6 +1316,18 @@ class AceCodeEditor @JvmOverloads constructor(
         return event.action == KeyEvent.ACTION_DOWN || event.action == KeyEvent.ACTION_UP
     }
 
+    private fun handleSoftKeyboardCursorSelection(delta: Int, source: String): Boolean {
+        if (!isReady || delta == 0 || abs(delta) > IME_SELECTION_CURSOR_MAX_DELTA) {
+            return false
+        }
+        eventHistory.record(
+            "ime_cursor_selection",
+            "source=$source,delta=$delta",
+        )
+        moveCursor(delta)
+        return true
+    }
+
     private fun isSoftKeyboardCursorKey(keyCode: Int, event: KeyEvent): Boolean {
         if (keyCode != KeyEvent.KEYCODE_DPAD_LEFT && keyCode != KeyEvent.KEYCODE_DPAD_RIGHT) {
             return false
@@ -1295,9 +1341,80 @@ class AceCodeEditor @JvmOverloads constructor(
     private class AceWebView(
         context: Context,
         private val softKeyboardCursorKeyHandler: (Int, KeyEvent) -> Boolean,
+        private val softKeyboardSelectionHandler: (Int, String) -> Boolean,
+        private val allowHostActionModeStart: () -> Boolean,
+        private val onSuppressedActionModeStart: () -> Unit,
     ) : WebView(context) {
         override fun dispatchKeyEvent(event: KeyEvent): Boolean {
             return softKeyboardCursorKeyHandler(event.keyCode, event) || super.dispatchKeyEvent(event)
+        }
+
+        override fun onCreateInputConnection(outAttrs: EditorInfo): InputConnection? {
+            val baseConnection = super.onCreateInputConnection(outAttrs) ?: return null
+            return object : InputConnectionWrapper(baseConnection, true) {
+                private var lastCollapsedSelection = -1
+                private var ignoreSelectionUntilUptimeMillis = 0L
+
+                override fun commitText(text: CharSequence?, newCursorPosition: Int): Boolean {
+                    markImeTextMutation()
+                    return super.commitText(text, newCursorPosition)
+                }
+
+                override fun setComposingText(text: CharSequence?, newCursorPosition: Int): Boolean {
+                    markImeTextMutation()
+                    return super.setComposingText(text, newCursorPosition)
+                }
+
+                override fun deleteSurroundingText(beforeLength: Int, afterLength: Int): Boolean {
+                    markImeTextMutation()
+                    return super.deleteSurroundingText(beforeLength, afterLength)
+                }
+
+                override fun setSelection(start: Int, end: Int): Boolean {
+                    if (start == end && start >= 0) {
+                        val previousSelection = lastCollapsedSelection
+                        lastCollapsedSelection = start
+                        val delta = start - previousSelection
+                        if (
+                            previousSelection >= 0 &&
+                            SystemClock.uptimeMillis() >= ignoreSelectionUntilUptimeMillis &&
+                            abs(delta) in 1..IME_SELECTION_CURSOR_MAX_DELTA &&
+                            softKeyboardSelectionHandler(delta, "InputConnection.setSelection")
+                        ) {
+                            return true
+                        }
+                    } else {
+                        lastCollapsedSelection = -1
+                    }
+                    return super.setSelection(start, end)
+                }
+
+                private fun markImeTextMutation() {
+                    lastCollapsedSelection = -1
+                    ignoreSelectionUntilUptimeMillis =
+                        SystemClock.uptimeMillis() + IME_TEXT_INPUT_SELECTION_SUPPRESS_MS
+                }
+            }
+        }
+
+        override fun startActionMode(callback: ActionMode.Callback): ActionMode? {
+            return startHostActionModeIfAllowed {
+                super.startActionMode(callback)
+            }
+        }
+
+        override fun startActionMode(callback: ActionMode.Callback, type: Int): ActionMode? {
+            return startHostActionModeIfAllowed {
+                super.startActionMode(callback, type)
+            }
+        }
+
+        private fun startHostActionModeIfAllowed(block: () -> ActionMode?): ActionMode? {
+            if (allowHostActionModeStart()) {
+                return block()
+            }
+            onSuppressedActionModeStart()
+            return null
         }
     }
 
@@ -1792,6 +1909,8 @@ class AceCodeEditor @JvmOverloads constructor(
         private const val TEXT_MIRROR_CALIBRATION_DELAY_MS = 500L
         private const val IME_REQUEST_COALESCE_MS = 150L
         private const val IME_TRANSITION_HEARTBEAT_SUSPEND_MS = 800L
+        private const val IME_SELECTION_CURSOR_MAX_DELTA = 8
+        private const val IME_TEXT_INPUT_SELECTION_SUPPRESS_MS = 120L
         private const val RESIZE_SETTLE_DELAY_MS = 120L
         private const val IME_HEIGHT_THRESHOLD_DP = 80f
         private const val RIGHT_EDGE_BACK_GESTURE_MIN_GUARD_DP = 24f

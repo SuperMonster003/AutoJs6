@@ -37,7 +37,7 @@
     var STATE_NOTIFY_THROTTLE_MS = 100;
     var TEXT_NOTIFY_THROTTLE_MS = 100;
     var CURSOR_NOTIFY_THROTTLE_MS = 50;
-    var ACTION_MODE_NOTIFY_THROTTLE_MS = 80;
+    var ACTION_MODE_NOTIFY_THROTTLE_MS = 0;
     var SELECTION_BROWSE_REVEAL_SUPPRESS_MS = 1600;
 
     function callBridge(name, args) {
@@ -393,6 +393,11 @@
     function scheduleActionModeSelectionUpdate() {
         if (actionModeNotifyTimer !== null) {
             clearTimeout(actionModeNotifyTimer);
+            actionModeNotifyTimer = null;
+        }
+        if (ACTION_MODE_NOTIFY_THROTTLE_MS <= 0) {
+            updateActionModeFromSelection();
+            return;
         }
         actionModeNotifyTimer = setTimeout(updateActionModeFromSelection, ACTION_MODE_NOTIFY_THROTTLE_MS);
     }
@@ -1135,6 +1140,25 @@
                 notifyStateChanged("foldExpanded");
                 return true;
             }
+            var foldLine = session.getFoldLine && session.getFoldLine(row);
+            if (foldLine && foldLine.folds && foldLine.folds.length && session.expandFold) {
+                session.expandFold(foldLine.folds[0]);
+                notifyStateChanged("foldExpanded");
+                return true;
+            }
+            var lineLength = getLine(row).length;
+            if (session.getFoldAt && session.expandFold) {
+                for (var probeColumn = 0; probeColumn <= lineLength; probeColumn += 1) {
+                    fold = session.getFoldAt(row, probeColumn, 1) ||
+                        session.getFoldAt(row, probeColumn, -1) ||
+                        session.getFoldAt(row, probeColumn, 0);
+                    if (fold) {
+                        session.expandFold(fold);
+                        notifyStateChanged("foldExpanded");
+                        return true;
+                    }
+                }
+            }
             if (session.unfold) {
                 session.unfold(row, true);
                 notifyStateChanged("foldExpanded");
@@ -1142,6 +1166,16 @@
             }
         } catch (error) {
             notifyRecoverableError("foldExpand", error);
+        }
+        return false;
+    }
+
+    function isFoldPlaceholderTarget(target) {
+        while (target && target !== editor.container) {
+            if (String(target.className || "").indexOf("ace_fold") >= 0) {
+                return true;
+            }
+            target = target.parentNode;
         }
         return false;
     }
@@ -1236,8 +1270,7 @@
 
         editor.on("click", function(event) {
             var target = event.domEvent && event.domEvent.target;
-            var className = target ? String(target.className || "") : "";
-            if (className.indexOf("ace_fold") < 0) {
+            if (!isFoldPlaceholderTarget(target)) {
                 return;
             }
             var position = event.getDocumentPosition();
@@ -1257,6 +1290,7 @@
             acceptCompletionOrInsertTab: acceptCompletionOrInsertTab,
             moveCompletionSelectionOrCursor: moveCompletionSelectionOrCursor,
             handleEscapeKey: handleEscapeKey,
+            suppressSelectionActionModeMenu: suppressSelectionActionModeMenu,
             insertAtLine: insertAtLine,
             appendTextChunk: appendTextChunk,
             jumpTo: jumpTo,

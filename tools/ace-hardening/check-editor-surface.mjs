@@ -262,9 +262,11 @@ assertIncludes(bridge, 'document.body.classList.add("ace-ready")', "ACE ready cl
 assertIncludes(bridge, 'callBridge("notifyEvent", ["firstPaint", lightweightStateJson()])', "first-paint bridge event");
 assertIncludes(bridge, "var nativeActionModeActive = false;", "native action-mode state flag");
 assertIncludes(bridge, "var selectionMenuSuppressed = false;", "selection menu suppression state flag");
+assertIncludes(bridge, "var ACTION_MODE_NOTIFY_THROTTLE_MS = 0;", "selection action-mode immediate handoff");
 assertIncludes(bridge, "function setNativeActionModeActive(active)", "native action-mode state class helper");
 assertIncludes(bridge, 'document.body.classList.toggle("autojs6-native-action-mode", active)', "native action-mode host class toggle");
 assertIncludes(bridge, "function suppressSelectionActionModeMenu(reason)", "stale selection menu suppression helper");
+assertIncludes(bridge, "suppressSelectionActionModeMenu: suppressSelectionActionModeMenu", "native pointer guard selection menu suppression API");
 assertIncludes(bridge, "function wrapScrollMethod(owner, methodName)", "scroll method hook wrapper");
 assertIncludes(bridge, 'wrapScrollMethod(editor.renderer, "scrollToY")', "renderer vertical scroll hook");
 assertIncludes(bridge, 'wrapScrollMethod(session, "setScrollTop")', "session vertical scroll hook");
@@ -284,6 +286,8 @@ assertIncludes(bridge, 'callBridgeBoolean("isWordWrapEnabled", false)', "ACE wor
 assertIncludes(bridge, 'callBridgeBoolean("isLineNumbersEnabled", true)', "ACE line number preference bridge");
 assertIncludes(bridge, "fixedWidthGutter: true", "fixed-width ACE gutter");
 assertIncludes(bridge, "function expandFoldAt(row, column)", "fold placeholder expansion helper");
+assertIncludes(bridge, "session.getFoldLine && session.getFoldLine(row)", "fold placeholder row fallback");
+assertIncludes(bridge, "function isFoldPlaceholderTarget(target)", "fold placeholder target helper");
 assertIncludes(bridge, 'editor.on("click", function(event)', "fold placeholder click handler");
 assertIncludes(bridge, "setWordWrapEnabled: setWordWrapEnabled", "ACE word wrap runtime API");
 assertIncludes(bridge, "setLineNumbersEnabled: setLineNumbersEnabled", "ACE line number runtime API");
@@ -362,9 +366,18 @@ assertIncludes(aceCodeEditor, "fun acceptCompletionOrInsertTab()", "native ACE c
 assertIncludes(aceCodeEditor, "fun moveCompletionSelectionOrCursor", "native ACE completion navigation bridge call");
 assertIncludes(aceCodeEditor, "fun handleEscapeKey()", "native ACE shortcut ESC bridge call");
 assertIncludes(aceCodeEditor, "handleSoftKeyboardCursorKey", "ACE soft-keyboard cursor key handler");
+assertIncludes(aceCodeEditor, "handleSoftKeyboardCursorSelection", "ACE soft-keyboard InputConnection cursor selection handler");
+assertIncludes(aceCodeEditor, "InputConnectionWrapper", "ACE WebView InputConnection wrapper");
+assertIncludes(aceCodeEditor, "override fun setSelection(start: Int, end: Int)", "ACE IME setSelection cursor interception");
+assertIncludes(aceCodeEditor, '"ime_cursor_selection"', "ACE IME setSelection diagnostics event");
 assertIncludes(aceCodeEditor, "KeyEvent.KEYCODE_DPAD_LEFT", "ACE soft-keyboard cursor left key");
 assertIncludes(aceCodeEditor, "KeyEvent.KEYCODE_DPAD_RIGHT", "ACE soft-keyboard cursor right key");
 assertIncludes(aceCodeEditor, "KeyEvent.FLAG_SOFT_KEYBOARD", "ACE soft-keyboard cursor source guard");
+assertIncludes(aceCodeEditor, "startingHostSelectionActionMode", "ACE host-owned action-mode guard");
+assertIncludes(aceCodeEditor, "override fun startActionMode(callback: ActionMode.Callback", "ACE WebView action-mode suppression");
+assertIncludes(aceCodeEditor, '"webview_action_mode_suppressed"', "ACE WebView action-mode suppression diagnostics");
+assertIncludes(aceCodeEditor, "suppressSelectionActionModeForPointerGuard", "ACE right-edge gesture selection suppression");
+assertIncludes(aceCodeEditor, "val insetOrFallback = if (systemGestureInsetRight > 0)", "ACE right-edge gesture fallback width");
 
 assertIncludes(aceScriptEditorEngine, "notifyPinchToZoomStrategyChanged", "ACE pinch zoom strategy forwarding");
 assertIncludes(aceScriptEditorEngine, "onTextSizeSpChangedByGesture", "ACE pinch text-size state callback");

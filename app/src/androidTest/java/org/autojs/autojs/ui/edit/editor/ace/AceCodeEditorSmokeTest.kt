@@ -276,7 +276,7 @@ class AceCodeEditorSmokeTest {
     }
 
     @Test
-    fun rightEdgeGestureGuardOnlyCoversSystemGestureInset() {
+    fun rightEdgeGestureGuardUsesSystemGestureInsetOrFallback() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
             return
         }
@@ -302,10 +302,19 @@ class AceCodeEditorSmokeTest {
                 )
             },
         )
-        assertFalse(
+        assertTrue(
             runOnMainSync {
                 editor.shouldGuardRightEdgeBackGestureTouchStartForTest(
                     x = viewWidth - 1f,
+                    viewWidth = viewWidth,
+                    systemGestureInsetRight = 0,
+                )
+            },
+        )
+        assertFalse(
+            runOnMainSync {
+                editor.shouldGuardRightEdgeBackGestureTouchStartForTest(
+                    x = viewWidth - 200f,
                     viewWidth = viewWidth,
                     systemGestureInsetRight = 0,
                 )
@@ -320,32 +329,32 @@ class AceCodeEditorSmokeTest {
         try {
             val editorView = launchReadyEditActivity(file, initialText)
             val rows = runOnMainSync {
-                val firstRow = editorView.findViewById<CodeCompletionBar>(R.id.code_completion_bar)
+                val firstRow = editorView.findViewById<CodeCompletionBar>(R.id.ace_shortcut_top_bar)
                     .codeCompletions
-                val secondRow = editorView.findViewById<CodeCompletionBar>(R.id.symbol_bar)
+                val secondRow = editorView.findViewById<CodeCompletionBar>(R.id.ace_shortcut_bottom_bar)
                     .codeCompletions
                 shortcutHints(firstRow) to shortcutHints(secondRow)
             }
 
             assertEquals(
-                listOf("ESC", "^", "TAB", "(", ")", "/", "=", ",", ";", "\"", "'"),
+                listOf("ESC", "Up", "TAB"),
                 rows.first,
             )
             assertEquals(
-                listOf("*", "<", "v", ">", "{", "}", "[", "]", "`", "<", ">", "-"),
-                rows.second,
+                listOf("Left", "Down", "Right"),
+                rows.second.drop(1),
             )
             assertEquals(
                 R.drawable.ic_star_black_48dp,
                 runOnMainSync {
-                    editorView.findViewById<CodeCompletionBar>(R.id.symbol_bar)
+                    editorView.findViewById<CodeCompletionBar>(R.id.ace_shortcut_bottom_bar)
                         .codeCompletions[0]
                         .iconResId
                 },
             )
             waitUntil("ACE action favorites shortcut should render as a themed star icon") {
                 runOnMainSync {
-                    val starCell = editorView.findViewById<CodeCompletionBar>(R.id.symbol_bar)
+                    val starCell = editorView.findViewById<CodeCompletionBar>(R.id.ace_shortcut_bottom_bar)
                         .getChildAt(0) as? TextView
                     starCell != null &&
                         starCell.text.isEmpty() &&
@@ -354,7 +363,7 @@ class AceCodeEditorSmokeTest {
             }
 
             runOnMainSync {
-                val secondRow = editorView.findViewById<CodeCompletionBar>(R.id.symbol_bar)
+                val secondRow = editorView.findViewById<CodeCompletionBar>(R.id.ace_shortcut_bottom_bar)
                     .codeCompletions
                 editorView.onHintLongClick(secondRow, 0)
             }
@@ -366,7 +375,7 @@ class AceCodeEditorSmokeTest {
             assertTrue(runOnMainSync { AceActionHistoryStore.getRankedEntries(instrumentation.targetContext).isEmpty() })
 
             runOnMainSync {
-                val firstRow = editorView.findViewById<CodeCompletionBar>(R.id.code_completion_bar)
+                val firstRow = editorView.findViewById<CodeCompletionBar>(R.id.ace_shortcut_top_bar)
                     .codeCompletions
                 editorView.editor.jumpTo(0, 0)
                 editorView.onHintClick(firstRow, 2)
@@ -385,7 +394,7 @@ class AceCodeEditorSmokeTest {
             assertEquals(firstEntry.id, runOnMainSync { AceActionHistoryStore.getLastActionId(instrumentation.targetContext) })
 
             runOnMainSync {
-                val secondRow = editorView.findViewById<CodeCompletionBar>(R.id.symbol_bar)
+                val secondRow = editorView.findViewById<CodeCompletionBar>(R.id.ace_shortcut_bottom_bar)
                     .codeCompletions
                 editorView.onHintLongClick(secondRow, 0)
             }
@@ -402,22 +411,20 @@ class AceCodeEditorSmokeTest {
             assertEquals(2, repeatedEntry.usageCount)
 
             runOnMainSync {
-                val firstRow = editorView.findViewById<CodeCompletionBar>(R.id.code_completion_bar)
-                    .codeCompletions
-                val parenAction = AceShortcutPanel.actionOf(firstRow[3])
-                    ?: error("Expected ACE shortcut action for left paren")
-                AceActionHistoryStore.record(instrumentation.targetContext, parenAction, now = 2_000L)
+                val moveUpAction = AceShortcutPanel.actionOf(AceShortcutPanel.Command.MoveUp)
+                    ?: error("Expected ACE shortcut action for up")
+                AceActionHistoryStore.record(instrumentation.targetContext, moveUpAction, now = 2_000L)
                 AceActionHistoryStore.setPinned(instrumentation.targetContext, repeatedEntry.id, true, now = 3_000L)
                 AceActionHistoryStore.applyFavoritesOrder(
                     instrumentation.targetContext,
-                    orderedIds = listOf(parenAction.id, repeatedEntry.id),
+                    orderedIds = listOf(moveUpAction.id, repeatedEntry.id),
                     pinnedCount = 1,
                 )
             }
             val reorderedEntries = runOnMainSync {
                 AceActionHistoryStore.getRankedEntries(instrumentation.targetContext)
             }
-            assertEquals(listOf("(", "TAB"), reorderedEntries.map { it.label })
+            assertEquals(listOf("Up", "TAB"), reorderedEntries.map { it.label })
             assertTrue(reorderedEntries[0].pinned)
             assertFalse(reorderedEntries[1].pinned)
 
