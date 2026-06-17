@@ -263,6 +263,11 @@ Open questions:
 No v1.1 implementation should start until `docs/nodejs/design/UI_BRIDGE.md`
 answers these questions.
 
+Task 149 adds that design gate in [UI_BRIDGE.md](UI_BRIDGE.md). The current
+decision remains no `require("ui")` runtime module until an Activity-owned
+provider, lifecycle, packaged APK behavior, Rhino compatibility boundary, and
+test gate are accepted.
+
 #### `floaty`
 
 Floaty is a UI and overlay-permission feature, not a small bridge addition.
