@@ -185,10 +185,10 @@ val nodeJsTestDeviceProfile = providers.gradleProperty("autojs.nodejs.test.devic
     ?.takeIf { it.isNotEmpty() }
     ?.let { requested ->
         when (requested) {
-            "sony", "emulator", "smoke", "accessibility", "screen_capture", "full" -> requested
+            "sony", "emulator", "smoke", "accessibility", "screen_capture", "v1_1_alpha", "full" -> requested
             else -> throw GradleException(
                 "Unsupported Embedded Node test device profile '$requested'. " +
-                        "Use sony, emulator, smoke, accessibility, screen_capture, or full."
+                        "Use sony, emulator, smoke, accessibility, screen_capture, v1_1_alpha, or full."
             )
         }
     }
@@ -231,6 +231,42 @@ val nodeJsFuzzerBudget = normalizeNodeJsFuzzerBudget(
 val nodeJsFuzzerReplayRunnerClass = nodeJsFuzzerReplayClass?.let { replayClass ->
     nodeJsFuzzerReplayMethod?.let { "$replayClass#$it" } ?: replayClass
 }
+val nodeJsV11AlphaInstrumentationClasses = listOf(
+    "org.autojs.autojs.engine.NodeEsmExperimentalInstrumentationTest",
+    "org.autojs.autojs.engine.NodeSourceMapStackTraceInstrumentationTest",
+    "org.autojs.autojs.engine.NodeCompatCorpusInstrumentationTest",
+    "org.autojs.autojs.engine.NodeRealNpmCompatInstrumentationTest",
+    "org.autojs.autojs.engine.NodeCoreBuiltinCompatibilityInstrumentationTest",
+    "org.autojs.autojs.engine.NodeStreamMvpInstrumentationTest",
+    "org.autojs.autojs.engine.NodeZlibBufferInstrumentationTest",
+    "org.autojs.autojs.engine.NodeFetchBridgeInstrumentationTest",
+    "org.autojs.autojs.engine.NodeWebSocketBridgeInstrumentationTest",
+    "org.autojs.autojs.engine.NodeBridgeConformanceInstrumentationTest",
+    "org.autojs.autojs.engine.NodeBridgePermissionManifestInstrumentationTest",
+    "org.autojs.autojs.engine.NodeBridgeConcurrencyLimitsInstrumentationTest",
+    "org.autojs.autojs.engine.NodeAutoJsBridgeInstrumentationTest",
+    "org.autojs.autojs.engine.NodeOcrBridgeInstrumentationTest",
+    "org.autojs.autojs.engine.NodeImageBridgeExpansionInstrumentationTest",
+    "org.autojs.autojs.engine.NodeStorageBridgeInstrumentationTest",
+    "org.autojs.autojs.engine.NodeNotificationsBridgeInstrumentationTest",
+    "org.autojs.autojs.engine.NodeSensorsBridgeInstrumentationTest",
+    "org.autojs.autojs.engine.NodeUiBridgeInstrumentationTest",
+    "org.autojs.autojs.engine.NodeWorkManagerBridgeInstrumentationTest",
+    "org.autojs.autojs.engine.NodeShellBridgeInstrumentationTest",
+    "org.autojs.autojs.engine.NodeAccessibilitySelectorBridgeInstrumentationTest",
+    "org.autojs.autojs.engine.NodeSecurityRegressionInstrumentationTest",
+    "org.autojs.autojs.engine.NodeBridgeResourceLeakStressInstrumentationTest",
+    "org.autojs.autojs.engine.NodeEmbeddedMemoryLeakStressInstrumentationTest",
+    "org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunV11BridgeEmbeddedNodePackagedApk",
+) + if (nodeJsWorkerThreadsExperimentalEnabled) {
+    listOf(
+        "org.autojs.autojs.engine.NodeWorkerThreadsDesignGateInstrumentationTest",
+        "org.autojs.autojs.engine.NodeWorkerThreadsExperimentalInstrumentationTest",
+        "org.autojs.autojs.engine.NodeWorkerThreadsResourceStressInstrumentationTest",
+    )
+} else {
+    listOf("org.autojs.autojs.engine.NodeWorkerThreadsDesignGateInstrumentationTest")
+}
 val nodeJsTestDeviceProfileClasses = when (nodeJsTestDeviceProfile) {
     "sony" -> listOf(
         "org.autojs.autojs.engine.EmbeddedScriptMvpInstrumentationTest",
@@ -260,6 +296,7 @@ val nodeJsTestDeviceProfileClasses = when (nodeJsTestDeviceProfile) {
     "screen_capture" -> listOf(
         "org.autojs.autojs.engine.NodeScreenCaptureRealDeviceSmokeInstrumentationTest",
     )
+    "v1_1_alpha" -> nodeJsV11AlphaInstrumentationClasses
     "full" -> listOf(
         "org.autojs.autojs.engine.EmbeddedScriptMvpInstrumentationTest",
         "org.autojs.autojs.engine.NodeEmbeddedLifecycleStressInstrumentationTest",
@@ -745,6 +782,18 @@ android {
             testInstrumentationRunnerArguments["class"] = nodeJsTestDeviceProfileClasses.joinToString(",")
             testInstrumentationRunnerArguments["autojs.nodejs.test.deviceProfile"] = nodeJsTestDeviceProfile
         }
+        if (nodeJsTestDeviceProfile == "v1_1_alpha") {
+            fun alphaStressArgument(name: String, defaultValue: String): String =
+                providers.gradleProperty(name).orElse(defaultValue).get()
+            testInstrumentationRunnerArguments["autojs.nodejs.leak.iterations"] =
+                alphaStressArgument("autojs.nodejs.leak.iterations", "12")
+            testInstrumentationRunnerArguments["autojs.nodejs.leak.imageIterations"] =
+                alphaStressArgument("autojs.nodejs.leak.imageIterations", "6")
+            testInstrumentationRunnerArguments["autojs.nodejs.leak.faultIterations"] =
+                alphaStressArgument("autojs.nodejs.leak.faultIterations", "3")
+            testInstrumentationRunnerArguments["autojs.nodejs.bridgeStress.iterations"] =
+                alphaStressArgument("autojs.nodejs.bridgeStress.iterations", "8")
+        }
         testInstrumentationRunnerArguments["autojs.nodejs.fuzzerBudget"] = nodeJsFuzzerBudget
         nodeJsFuzzerReplaySeed?.let { testInstrumentationRunnerArguments["autojs.nodejs.fuzzerSeed"] = it }
 
@@ -1193,6 +1242,7 @@ apply(from = "node-profile-ga-artifacts.gradle.kts")
 apply(from = "node-error-catalog.gradle.kts")
 apply(from = "node-examples.gradle.kts")
 apply(from = "node-project-wizard.gradle.kts")
+apply(from = "node-v1-1-alpha-gate.gradle.kts")
 
 tasks {
     withType(JavaCompile::class.java) {

@@ -936,6 +936,7 @@ Use these aggregate tasks for local gates:
 
 ```powershell
 .\gradlew.bat --console=plain :app:verifyNodePrGate
+.\gradlew.bat --console=plain :app:verifyNodeV11AlphaGate "-Pautojs.nodejs.test.deviceProfile=v1_1_alpha"
 .\gradlew.bat --console=plain :app:verifyNodeNightlyGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeReleaseGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyEmbeddedNodeDebug
@@ -943,13 +944,18 @@ Use these aggregate tasks for local gates:
 .\gradlew.bat --console=plain :app:verifyEmbeddedNodeReleaseCandidate
 ```
 
-`verifyNodePrGate` is the fast host-side PR gate. `verifyNodeNightlyGate` and `verifyNodeReleaseGate` require
-`autojs.nodejs.test.deviceProfile=sony` or `full`; see [CI_GATES.md](CI_GATES.md).
+`verifyNodePrGate` is the fast host-side PR gate. `verifyNodeV11AlphaGate` is the v1.1 functional milestone gate and
+requires `autojs.nodejs.test.deviceProfile=v1_1_alpha`; see [reports/v1.1-alpha/README.md](reports/v1.1-alpha/README.md).
+`verifyNodeNightlyGate` and `verifyNodeReleaseGate` require `autojs.nodejs.test.deviceProfile=sony` or `full`; see
+[CI_GATES.md](CI_GATES.md).
 `generateNodeNightlyReport` can also be run directly to summarize the currently available build/device reports:
 
 ```powershell
 .\gradlew.bat --console=plain :app:generateNodeNightlyReport
 ```
+
+`generateNodeV11AlphaSummary` writes `build/reports/nodejs/v1.1-alpha-summary.json` from the current build and device
+reports. Running `verifyNodeV11AlphaGate` finalizes with this summary automatically.
 
 `verifyEmbeddedNodeDebug` covers build, native dependency reporting, native symbol archive reporting, and packaging preflight.
 It also runs `verifyNodeCompatibilityProfile` and `embeddedNodeDoctorReport`, which generate compatibility and attachable
