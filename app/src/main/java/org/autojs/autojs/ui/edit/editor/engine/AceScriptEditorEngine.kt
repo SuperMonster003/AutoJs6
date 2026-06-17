@@ -178,6 +178,10 @@ class AceScriptEditorEngine(
         aceCodeEditor.moveCompletionSelectionOrCursor(delta)
     }
 
+    fun isCompletionPopupOpen(): Boolean {
+        return aceCodeEditor.completionPopupOpen
+    }
+
     fun handleEscapeKey() {
         aceCodeEditor.handleEscapeKey()
     }

@@ -375,6 +375,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private var mTmpSavedFileForRunning: File? = null
     private var mReadOnlyLockedByIntent = false
     private var mAceShortcutReturnSelection: EditorSelection? = null
+    private var mAceShortcutLastObservedSelection: EditorSelection? = null
+    private var mAceShortcutReturnJumpInProgress = false
 
     private val mUiHandler = Handler(Looper.getMainLooper())
 
@@ -1427,6 +1429,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         }
 
         mAceShortcutReturnSelection = null
+        mAceShortcutLastObservedSelection = null
+        mAceShortcutReturnJumpInProgress = false
         mAceShortcutTopBar.codeCompletions = CodeCompletions.just(emptyList())
         mAceShortcutBottomBar.codeCompletions = CodeCompletions.just(emptyList())
         mAceSymbolsBar.codeCompletions = CodeCompletions.just(emptyList())
@@ -1844,6 +1848,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
             editor.addCursorChangeCallback(EditorCursorChangeListener { line, cursor ->
                 autoComplete(line, cursor)
+                recordAceShortcutCursorHistory()
             })
             editor.view.layoutDirection = LAYOUT_DIRECTION_LTR
 
@@ -2609,6 +2614,20 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         mCommandDispatcher.onCompletionLongClick(completions, pos)
     }
 
+    override fun shouldRepeatHintLongClick(completions: CodeCompletions, pos: Int): Boolean {
+        if (pos < 0 || pos >= completions.size()) {
+            return false
+        }
+        return shouldRepeatAceShortcutLongClick(completions[pos])
+    }
+
+    override fun onHintLongClickRepeat(completions: CodeCompletions, pos: Int): Boolean {
+        if (pos < 0 || pos >= completions.size()) {
+            return false
+        }
+        return handleAceShortcutLongClickRepeat(completions[pos])
+    }
+
     private fun handleAceShortcutClick(completion: CodeCompletion): Boolean {
         if (editor.engineType != EditorEngineType.ACE) {
             return false
@@ -2634,10 +2653,14 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 triggerHostBackPress()
             }
             AceShortcutPanel.Command.MoveUp -> true.also {
-                jumpWithAceShortcutReturnPoint { editor.jumpToStart() }
+                handleAceShortcutVerticalLongClick(-1) {
+                    editor.jumpToStart()
+                }
             }
             AceShortcutPanel.Command.MoveDown -> true.also {
-                jumpWithAceShortcutReturnPoint { editor.jumpToEnd() }
+                handleAceShortcutVerticalLongClick(1) {
+                    editor.jumpToEnd()
+                }
             }
             AceShortcutPanel.Command.MoveLeft -> true.also {
                 jumpWithAceShortcutReturnPoint { editor.jumpToLineStart() }
@@ -2692,8 +2715,42 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         return true
     }
 
+    private fun shouldRepeatAceShortcutLongClick(completion: CodeCompletion): Boolean {
+        if (editor.engineType != EditorEngineType.ACE) {
+            return false
+        }
+        return when (AceShortcutPanel.commandOf(completion)) {
+            AceShortcutPanel.Command.MoveUp,
+            AceShortcutPanel.Command.MoveDown -> (editor as? AceScriptEditorEngine)?.isCompletionPopupOpen() == true
+            else -> false
+        }
+    }
+
+    private fun handleAceShortcutLongClickRepeat(completion: CodeCompletion): Boolean {
+        val aceEditor = editor as? AceScriptEditorEngine ?: return false
+        if (!aceEditor.isCompletionPopupOpen()) {
+            return false
+        }
+        val delta = when (AceShortcutPanel.commandOf(completion)) {
+            AceShortcutPanel.Command.MoveUp -> -1
+            AceShortcutPanel.Command.MoveDown -> 1
+            else -> return false
+        }
+        aceEditor.moveCompletionSelectionOrCursor(delta)
+        return true
+    }
+
+    private fun handleAceShortcutVerticalLongClick(delta: Int, jumpWhenNoCompletion: () -> Unit) {
+        val aceEditor = editor as? AceScriptEditorEngine
+        if (aceEditor?.isCompletionPopupOpen() == true) {
+            aceEditor.moveCompletionSelectionOrCursor(delta)
+            return
+        }
+        jumpWithAceShortcutReturnPoint(jumpWhenNoCompletion)
+    }
+
     private fun jumpWithAceShortcutReturnPoint(jump: () -> Unit) {
-        mAceShortcutReturnSelection = editor.selection
+        rememberAceShortcutReturnPoint()
         jump()
     }
 
@@ -2701,7 +2758,46 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         val target = mAceShortcutReturnSelection ?: return
         val current = editor.selection
         mAceShortcutReturnSelection = current
+        mAceShortcutLastObservedSelection = current
+        mAceShortcutReturnJumpInProgress = true
         editor.jumpTo(target.startLine, target.startColumn)
+    }
+
+    private fun rememberAceShortcutReturnPoint() {
+        val current = editor.selection
+        if (!current.isCollapsed) {
+            return
+        }
+        mAceShortcutReturnSelection = current
+        mAceShortcutLastObservedSelection = current
+    }
+
+    private fun recordAceShortcutCursorHistory() {
+        if (editor.engineType != EditorEngineType.ACE) {
+            return
+        }
+        val current = editor.selection
+        if (!current.isCollapsed) {
+            mAceShortcutLastObservedSelection = current
+            return
+        }
+        if (mAceShortcutReturnJumpInProgress) {
+            mAceShortcutReturnJumpInProgress = false
+            mAceShortcutLastObservedSelection = current
+            return
+        }
+        val previous = mAceShortcutLastObservedSelection
+        if (previous != null && previous.isCollapsed && !previous.isSameCollapsedCursor(current)) {
+            mAceShortcutReturnSelection = previous
+        }
+        mAceShortcutLastObservedSelection = current
+    }
+
+    private fun EditorSelection.isSameCollapsedCursor(other: EditorSelection): Boolean {
+        return startLine == other.startLine &&
+            startColumn == other.startColumn &&
+            endLine == other.endLine &&
+            endColumn == other.endColumn
     }
 
     private fun triggerHostBackPress() {

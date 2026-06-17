@@ -175,10 +175,10 @@ Notes:
 - [ ] Expand line-number visibility into independent gutter visibility controls
   for breakpoints, line numbers, and fold markers across ACE and Native where
   feasible.
-- [ ] Slightly enlarge ACE shortcut arrow icons to better match Auto.js Pro.
-- [ ] Make ACE shortcut long-press UP/DOWN repeat completion highlight movement
+- [x] Slightly enlarge ACE shortcut arrow icons to better match Auto.js Pro.
+- [x] Make ACE shortcut long-press UP/DOWN repeat completion highlight movement
   while the completion popup is open instead of jumping to file start/end.
-- [ ] Record every cursor location change as a TAB long-press return point,
+- [x] Record every cursor location change as a TAB long-press return point,
   independent of which command caused the jump.
 - [ ] Add a standalone Code editor settings page and an in-editor settings
   dialog using the same content model.
@@ -188,7 +188,7 @@ Notes:
 - [ ] Keep all code editor setting labels engine-neutral; show unsupported
   options disabled with a hint explaining that they are not available for the
   current engine.
-- [ ] Ensure Clear is undoable and enables the undo affordance after clearing
+- [x] Ensure Clear is undoable and enables the undo affordance after clearing
   non-empty editor text.
 
 Acceptance:

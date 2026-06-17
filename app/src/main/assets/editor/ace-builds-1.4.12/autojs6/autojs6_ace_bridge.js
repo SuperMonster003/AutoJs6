@@ -199,6 +199,7 @@
             },
             selection: selection,
             selectedText: selection.text,
+            completionPopupOpen: isCompletionPopupOpen(),
             scroll: getScrollState(),
             breakpoints: getBreakpoints()
         };

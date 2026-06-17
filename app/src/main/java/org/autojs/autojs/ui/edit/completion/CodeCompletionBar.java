@@ -5,7 +5,9 @@ import android.graphics.drawable.Drawable;
 import android.os.Looper;
 import android.util.AttributeSet;
 import android.util.TypedValue;
+import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
@@ -18,7 +20,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import org.autojs.autojs.groundwork.WrapContentLinearLayoutManager;
 import org.autojs.autojs.model.autocomplete.CodeCompletions;
 import org.autojs.autojs.util.DisplayUtils;
-import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs6.R;
 
 /**
@@ -30,7 +31,8 @@ public class CodeCompletionBar extends RecyclerView {
     private static final int ITEM_HORIZONTAL_PADDING_DP = 12;
     private static final int ICON_ITEM_HORIZONTAL_PADDING_DP = 10;
     private static final int ICON_ITEM_MIN_WIDTH_DP = 40;
-    private static final int ICON_SIZE_DP = 20;
+    private static final int ICON_SIZE_DP = 24;
+    private static final long LONG_PRESS_REPEAT_INTERVAL_MS = 80;
 
     private int mTextColor;
     private int mFixedItemWidthPx;
@@ -301,12 +303,140 @@ public class CodeCompletionBar extends RecyclerView {
             super(itemView);
             itemView.setOnClickListener(mOnCodeCompletionItemClickListener);
             itemView.setOnLongClickListener(mOnCodeCompletionItemLongClickListener);
-            itemView.setOnTouchListener(
-                    new ViewUtils.DelayedLongPressTouchListener(
-                            itemView.getContext(),
-                            (long) (ViewConfiguration.getLongPressTimeout() * 1.25)
-                    )
-            );
+            itemView.setOnTouchListener(new CompletionItemTouchListener(itemView.getContext()));
+        }
+    }
+
+    private class CompletionItemTouchListener implements View.OnTouchListener {
+
+        private final long mLongPressDelayMs;
+        private final int mTouchSlop;
+
+        private float mDownX;
+        private float mDownY;
+        private boolean mTracking;
+        private boolean mLongPressed;
+        private boolean mRepeating;
+        private Runnable mPendingLongPress;
+        private Runnable mPendingRepeat;
+
+        CompletionItemTouchListener(Context context) {
+            mLongPressDelayMs = (long) (ViewConfiguration.getLongPressTimeout() * 1.25);
+            mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
+        }
+
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            switch (event.getActionMasked()) {
+                case MotionEvent.ACTION_DOWN:
+                    mDownX = event.getX();
+                    mDownY = event.getY();
+                    mTracking = true;
+                    mLongPressed = false;
+                    mRepeating = false;
+                    v.setPressed(true);
+                    cancelPending(v);
+                    mPendingLongPress = () -> fireLongPress(v);
+                    v.postDelayed(mPendingLongPress, mLongPressDelayMs);
+                    return true;
+                case MotionEvent.ACTION_MOVE:
+                    if (mTracking) {
+                        float dx = Math.abs(event.getX() - mDownX);
+                        float dy = Math.abs(event.getY() - mDownY);
+                        if (dx > mTouchSlop || dy > mTouchSlop) {
+                            cancelGesture(v);
+                        }
+                    }
+                    return true;
+                case MotionEvent.ACTION_UP:
+                    cancelPending(v);
+                    v.setPressed(false);
+                    boolean shouldClick = mTracking && !mLongPressed;
+                    mTracking = false;
+                    mRepeating = false;
+                    if (shouldClick) {
+                        v.performClick();
+                    }
+                    return true;
+                case MotionEvent.ACTION_CANCEL:
+                    cancelGesture(v);
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        private void fireLongPress(View view) {
+            if (!mTracking || !view.isPressed()) {
+                return;
+            }
+            int position = getBindingAdapterPosition(view);
+            if (!isValidPosition(position) || mOnHintClickListener == null) {
+                cancelGesture(view);
+                return;
+            }
+            if (!mOnHintClickListener.shouldRepeatHintLongClick(mCodeCompletions, position)) {
+                mLongPressed = view.performLongClick();
+                return;
+            }
+            mLongPressed = true;
+            mRepeating = true;
+            view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+            if (mOnHintClickListener.onHintLongClickRepeat(mCodeCompletions, position)) {
+                scheduleRepeat(view);
+            } else {
+                mRepeating = false;
+            }
+        }
+
+        private void scheduleRepeat(View view) {
+            cancelRepeat(view);
+            mPendingRepeat = () -> {
+                if (!mTracking || !mRepeating || !view.isPressed() || mOnHintClickListener == null) {
+                    return;
+                }
+                int position = getBindingAdapterPosition(view);
+                if (!isValidPosition(position) ||
+                        !mOnHintClickListener.shouldRepeatHintLongClick(mCodeCompletions, position) ||
+                        !mOnHintClickListener.onHintLongClickRepeat(mCodeCompletions, position)) {
+                    mRepeating = false;
+                    return;
+                }
+                scheduleRepeat(view);
+            };
+            view.postDelayed(mPendingRepeat, LONG_PRESS_REPEAT_INTERVAL_MS);
+        }
+
+        private int getBindingAdapterPosition(View view) {
+            RecyclerView.ViewHolder holder = getChildViewHolder(view);
+            return holder == null ? RecyclerView.NO_POSITION : holder.getBindingAdapterPosition();
+        }
+
+        private boolean isValidPosition(int position) {
+            return position >= 0 && mCodeCompletions != null && position < mCodeCompletions.size();
+        }
+
+        private void cancelPending(View view) {
+            if (mPendingLongPress != null) {
+                view.removeCallbacks(mPendingLongPress);
+                mPendingLongPress = null;
+            }
+            cancelRepeat(view);
+        }
+
+        private void cancelRepeat(View view) {
+            if (mPendingRepeat != null) {
+                view.removeCallbacks(mPendingRepeat);
+                mPendingRepeat = null;
+            }
+        }
+
+        private void cancelGesture(View view) {
+            cancelPending(view);
+            view.setPressed(false);
+            mTracking = false;
+            mLongPressed = false;
+            mRepeating = false;
         }
     }
 
@@ -314,5 +444,14 @@ public class CodeCompletionBar extends RecyclerView {
         void onHintClick(CodeCompletions completions, int pos);
 
         void onHintLongClick(CodeCompletions completions, int pos);
+
+        default boolean shouldRepeatHintLongClick(CodeCompletions completions, int pos) {
+            return false;
+        }
+
+        default boolean onHintLongClickRepeat(CodeCompletions completions, int pos) {
+            onHintLongClick(completions, pos);
+            return true;
+        }
     }
 }

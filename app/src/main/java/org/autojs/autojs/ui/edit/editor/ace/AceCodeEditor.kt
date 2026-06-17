@@ -155,6 +155,9 @@ class AceCodeEditor @JvmOverloads constructor(
     var selectedTextSnapshot = ""
         private set
 
+    var completionPopupOpen = false
+        private set
+
     var firstVisibleLine = 0
         private set
 
@@ -1647,6 +1650,7 @@ class AceCodeEditor @JvmOverloads constructor(
         breakpointsSnapshot = state.breakpoints
         selectionSnapshot = state.selection
         selectedTextSnapshot = state.selectedText
+        completionPopupOpen = state.completionPopupOpen
         firstVisibleLine = state.firstVisibleLine
         firstVisibleColumn = state.firstVisibleColumn
         return state
@@ -1688,6 +1692,7 @@ class AceCodeEditor @JvmOverloads constructor(
                     endColumn = selectionObj?.optInt("endColumn", selectionSnapshot.endColumn) ?: selectionSnapshot.endColumn,
                 ),
                 selectedText = obj.optString("selectedText", selectedTextSnapshot),
+                completionPopupOpen = obj.optBoolean("completionPopupOpen", completionPopupOpen),
                 breakpoints = breakpoints,
                 firstVisibleLine = scrollObj?.optInt("firstVisibleLine", firstVisibleLine) ?: firstVisibleLine,
                 firstVisibleColumn = scrollObj?.optInt("firstVisibleColumn", firstVisibleColumn) ?: firstVisibleColumn,
@@ -1709,6 +1714,7 @@ class AceCodeEditor @JvmOverloads constructor(
             cursor = AceCursor(cursorLine, cursorColumn, cursorLineText),
             selection = selectionSnapshot,
             selectedText = selectedTextSnapshot,
+            completionPopupOpen = completionPopupOpen,
             breakpoints = breakpointsSnapshot,
             firstVisibleLine = firstVisibleLine,
             firstVisibleColumn = firstVisibleColumn,
@@ -2003,6 +2009,7 @@ class AceCodeEditor @JvmOverloads constructor(
         val cursor: AceCursor,
         val selection: AceSelection,
         val selectedText: String,
+        val completionPopupOpen: Boolean = false,
         val breakpoints: List<Int>,
         val firstVisibleLine: Int,
         val firstVisibleColumn: Int,
