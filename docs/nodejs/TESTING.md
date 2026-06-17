@@ -426,6 +426,8 @@ This suite verifies that controlled `fetch` and `websocket` modules cannot be sh
 
 Task 123 GA evaluation report: [reports/NETWORK_EVALUATION.md](reports/NETWORK_EVALUATION.md).
 
+Task 145 v1.1 promotion evaluation: [releases/V1_1_NETWORK_PROMOTION.md](releases/V1_1_NETWORK_PROMOTION.md).
+
 Current controlled work_manager bridge focused instrumentation:
 
 ```powershell
