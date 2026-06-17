@@ -182,7 +182,7 @@ Notes:
   independent of which command caused the jump.
 - [ ] Add a standalone Code editor settings page and an in-editor settings
   dialog using the same content model.
-- [ ] Reorganize global settings and editor overflow menus so top-level editor
+- [x] Reorganize global settings and editor overflow menus so top-level editor
   settings stay concise and advanced options move into the dedicated page or
   dialog.
 - [ ] Keep all code editor setting labels engine-neutral; show unsupported
@@ -210,5 +210,6 @@ Notes:
   marker surface.
 - The standalone Code editor settings page now exists and the global settings
   Code editor group has been reduced to engine, log behavior, auto-show log
-  panel, and an All settings entry. The in-editor settings dialog and editor
-  overflow menu reorganization are still pending.
+  panel, and an All settings entry. The editor overflow menu now keeps only
+  common editor actions at the top level and moves advanced editor preferences
+  behind the Settings entry; the in-editor settings dialog is still pending.

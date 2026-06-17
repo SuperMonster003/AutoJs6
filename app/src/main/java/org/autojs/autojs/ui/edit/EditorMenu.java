@@ -2,7 +2,6 @@ package org.autojs.autojs.ui.edit;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.Intent;
 import android.net.Uri;
 import android.text.InputType;
 import android.text.TextUtils;
@@ -10,8 +9,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import androidx.annotation.Nullable;
 import com.afollestad.materialdialogs.MaterialDialog;
-import kotlin.Unit;
-import org.autojs.autojs.core.pref.Language;
 import org.autojs.autojs.core.pref.Pref;
 import org.autojs.autojs.model.indices.AndroidClass;
 import org.autojs.autojs.model.indices.ClassSearchingItem;
@@ -20,10 +17,10 @@ import org.autojs.autojs.ui.common.NotAskAgainDialog;
 import org.autojs.autojs.ui.edit.editor.command.EditorCommandDispatcher;
 import org.autojs.autojs.ui.edit.editor.engine.EditorEngineType;
 import org.autojs.autojs.ui.edit.editor.engine.ScriptEditorEngine;
-import org.autojs.autojs.ui.edit.keyboard.SymbolsSettingsActivity;
 import org.autojs.autojs.ui.log.LogActivity;
 import org.autojs.autojs.ui.main.scripts.EditableFileInfoDialogManager;
 import org.autojs.autojs.ui.project.BuildActivity;
+import org.autojs.autojs.ui.settings.CodeEditorSettingsActivity;
 import org.autojs.autojs.util.ClipboardUtils;
 import org.autojs.autojs.util.DialogUtils;
 import org.autojs.autojs.util.IntentUtils;
@@ -32,8 +29,6 @@ import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs6.R;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 
 import static org.autojs.autojs.util.StringUtils.key;
@@ -62,7 +57,6 @@ public class EditorMenu {
         if (menu == null) {
             return;
         }
-        prepareEditorEngineMenu(menu);
         prepareAceReadOnlyMenu(menu);
         setReadOnlySensitiveMenuItemsVisible(menu, !mEditorView.isReadOnly());
     }
@@ -82,7 +76,6 @@ public class EditorMenu {
         setMenuItemVisible(menu, R.id.action_import_java_class, visible);
         setMenuItemVisible(menu, R.id.action_file_details, visible);
         setMenuItemVisible(menu, R.id.action_version_history, visible);
-        setMenuItemVisible(menu, R.id.action_fx_keyboard, visible);
         setMenuItemVisible(menu, R.id.action_open_by_other_apps, visible);
     }
 
@@ -99,18 +92,6 @@ public class EditorMenu {
 
     private EditorCommandDispatcher commandDispatcher() {
         return mEditorView.getCommandDispatcher();
-    }
-
-    private void prepareEditorEngineMenu(Menu menu) {
-        ScriptEditorEngine editor = currentEditor();
-        MenuItem nativeItem = menu.findItem(R.id.action_editor_engine_native);
-        if (nativeItem != null) {
-            nativeItem.setChecked(editor.getEngineType() == EditorEngineType.NATIVE);
-        }
-        MenuItem aceItem = menu.findItem(R.id.action_editor_engine_ace);
-        if (aceItem != null) {
-            aceItem.setChecked(editor.getEngineType() == EditorEngineType.ACE);
-        }
     }
 
     private void prepareAceReadOnlyMenu(Menu menu) {
@@ -131,6 +112,10 @@ public class EditorMenu {
         }
         if (itemId == R.id.action_force_stop) {
             return tryDoing(mEditorView::forceStop);
+        }
+        if (itemId == R.id.action_editor_settings) {
+            CodeEditorSettingsActivity.launch(mContext);
+            return true;
         }
         return onEditOptionsSelected(item)
                || onJumpOptionsSelected(item)
@@ -199,33 +184,8 @@ public class EditorMenu {
             importJavaPackageOrClass();
             return true;
         }
-        if (itemId == R.id.action_editor_text_size) {
-            return tryDoing(mEditorView::selectTextSize);
-        }
-        if (itemId == R.id.action_ace_editor_font) {
-            return tryDoing(mEditorView::selectAceEditorFont);
-        }
         if (itemId == R.id.action_ace_read_only_mode) {
             return tryDoing(mEditorView::toggleAceReadOnlyMode);
-        }
-        if (itemId == R.id.action_editor_pinch_to_zoom) {
-            setPinchToZoomStrategy();
-            return true;
-        }
-        if (itemId == R.id.action_editor_fx_symbols_settings) {
-            startSymbolsSettingsActivity();
-            return true;
-        }
-        if (itemId == R.id.action_editor_theme) {
-            return tryDoing(mEditorView::selectEditorTheme);
-        }
-        if (itemId == R.id.action_editor_engine_native) {
-            mEditorView.switchEditorEngine(EditorEngineType.NATIVE);
-            return true;
-        }
-        if (itemId == R.id.action_editor_engine_ace) {
-            mEditorView.switchEditorEngine(EditorEngineType.ACE);
-            return true;
         }
         if (itemId == R.id.action_copy_ace_diagnostics) {
             return tryDoing(mEditorView::copyAceDiagnosticsToClipboard);
@@ -327,69 +287,6 @@ public class EditorMenu {
             return;
         }
         BuildActivity.launch(mContext, path);
-    }
-
-    private void setPinchToZoomStrategy() {
-        String key = key(R.string.key_editor_pinch_to_zoom_strategy);
-
-        String defItemKey = key(R.string.default_key_editor_pinch_to_zoom_strategy);
-        String itemKey = Pref.getString(key, defItemKey);
-
-        List<String> itemKeys = Arrays.asList(mContext.getResources().getStringArray(R.array.keys_editor_pinch_to_zoom_strategy));
-
-        int defSelectedIndex = Math.max(0, itemKeys.indexOf(itemKey));
-
-        MaterialDialog.Builder builder = new MaterialDialog.Builder(mContext)
-                .title(R.string.text_pinch_to_zoom)
-                .items(R.array.values_editor_pinch_to_zoom_strategy)
-                .itemsCallbackSingleChoice(defSelectedIndex, (dialog, itemView, which, text) -> {
-                    String newKey = itemKeys.get(which);
-                    if (!Objects.equals(newKey, itemKey)) {
-                        Pref.putString(key, newKey);
-                        currentEditor().notifyPinchToZoomStrategyChanged(newKey);
-                    }
-                    return true;
-                })
-
-                // TODO by SuperMonster003 on Oct 17, 2022.
-
-                // .neutralText(R.string.dialog_button_details)
-                // .neutralColorRes(R.color.dialog_button_hint)
-                // .onNeutral((dialog, which) -> {
-                //     // Hint dialog.
-                // })
-                .negativeText(R.string.dialog_button_cancel)
-                .negativeColorRes(R.color.dialog_button_default)
-                .onNegative((dialog, which) -> dialog.dismiss())
-                .positiveText(R.string.dialog_button_confirm)
-                .positiveColorRes(R.color.dialog_button_attraction)
-                .onPositive((dialog, which) -> dialog.dismiss())
-                .autoDismiss(false);
-
-        DialogUtils.choiceWidgetThemeColor(builder);
-
-        // Native scale-view zoom is still under development; ACE handles it in WebView.
-        if (currentEditor().getEngineType() == EditorEngineType.ACE) {
-            DialogUtils.buildAndShowAdaptive(builder::build);
-        } else {
-            makeEditorPinchToZoomScaleViewUnderDev(builder, itemKeys.indexOf(key(R.string.key_editor_pinch_to_zoom_scale_view)));
-        }
-    }
-
-    private void makeEditorPinchToZoomScaleViewUnderDev(MaterialDialog.Builder builder, int i) {
-        builder.itemsDisabledIndices(i);
-        MaterialDialog built = builder.build();
-        assert built.getItems() != null;
-        built.getItems().set(i, built.getItems().get(i) + " (" + builder.getContext().getString(R.string.text_under_development).toLowerCase(Language.getPrefLanguage().getLocale()) + ")");
-        built.show();
-    }
-
-    private void startSymbolsSettingsActivity() {
-        Intent intent = new Intent(mContext, SymbolsSettingsActivity.class);
-        IntentUtils.startSafely(intent, mContext, true, (t -> {
-            ViewUtils.showToast(mContext, t.getMessage(), true);
-            return Unit.INSTANCE;
-        }));
     }
 
     private boolean onEditOptionsSelected(MenuItem item) {

@@ -21,6 +21,7 @@ const FILES = {
   arrays: "app/src/main/res/values/arrays.xml",
   fragmentPreferences: "app/src/main/res/xml/fragment_preferences.xml",
   codeEditorSettings: "app/src/main/res/xml/fragment_code_editor_settings.xml",
+  editorMenu: "app/src/main/res/menu/menu_editor.xml",
   editorEngineType: "app/src/main/java/org/autojs/autojs/ui/edit/editor/engine/EditorEngineType.kt",
   editorEnginePreferences: "app/src/main/java/org/autojs/autojs/ui/edit/editor/engine/EditorEnginePreferences.kt",
   editorEngineFactory: "app/src/main/java/org/autojs/autojs/ui/edit/editor/engine/EditorEngineFactory.kt",
@@ -212,6 +213,32 @@ assertOrder(
   ],
   "dedicated code editor preference order",
 );
+assertOrder(
+  FILES.editorMenu,
+  [
+    'android:id="@+id/action_force_stop"',
+    'android:title="@string/text_edit"',
+    'android:id="@+id/action_jump"',
+    'android:id="@+id/action_debug"',
+    'android:id="@+id/action_build_apk"',
+    'android:id="@+id/action_log"',
+    'android:id="@+id/action_editor_settings"',
+    'android:title="@string/text_more"',
+    'android:id="@+id/action_console"',
+    'android:id="@+id/action_import_java_class"',
+    'android:id="@+id/action_file_details"',
+    'android:id="@+id/action_version_history"',
+    'android:id="@+id/action_ace_read_only_mode"',
+    'android:id="@+id/action_open_by_other_apps"',
+  ],
+  "editor overflow menu order",
+);
+assertNotIncludes(FILES.editorMenu, 'android:id="@+id/action_editor_text_size"', "editor text size menu item moved to settings page");
+assertNotIncludes(FILES.editorMenu, 'android:id="@+id/action_ace_editor_font"', "editor font menu item moved to settings page");
+assertNotIncludes(FILES.editorMenu, 'android:id="@+id/action_editor_pinch_to_zoom"', "editor pinch menu item moved to settings page");
+assertNotIncludes(FILES.editorMenu, 'android:id="@+id/action_fx_keyboard"', "editor shortcut input menu item moved to settings page");
+assertNotIncludes(FILES.editorMenu, 'android:id="@+id/action_editor_theme"', "editor theme menu item moved to settings page");
+assertNotIncludes(FILES.editorMenu, 'android:id="@+id/action_editor_engine"', "editor engine menu item moved to settings page");
 assertMatch(
   FILES.editorEngineType,
   /enum class EditorEngineType\(val preferenceValue: String\) \{\s*NATIVE\("native"\),\s*ACE\("ace"\);/s,

@@ -76,6 +76,19 @@ const EDITOR_VIEW_PATH = path.join(
   "edit",
   "EditorView.kt",
 );
+const EDITOR_PINCH_TO_ZOOM_PREFERENCE_PATH = path.join(
+  PROJECT_ROOT,
+  "app",
+  "src",
+  "main",
+  "java",
+  "org",
+  "autojs",
+  "autojs",
+  "ui",
+  "settings",
+  "EditorPinchToZoomPreference.kt",
+);
 const CODE_COMPLETION_PATH = path.join(
   PROJECT_ROOT,
   "app",
@@ -202,6 +215,7 @@ const aceCodeEditor = read(ACE_CODE_EDITOR_PATH);
 const aceScriptEditorEngine = read(ACE_SCRIPT_EDITOR_ENGINE_PATH);
 const editorMenu = read(EDITOR_MENU_PATH);
 const editorView = read(EDITOR_VIEW_PATH);
+const editorPinchToZoomPreference = read(EDITOR_PINCH_TO_ZOOM_PREFERENCE_PATH);
 const codeCompletion = read(CODE_COMPLETION_PATH);
 const codeCompletionBar = read(CODE_COMPLETION_BAR_PATH);
 const aceShortcutPanel = read(ACE_SHORTCUT_PANEL_PATH);
@@ -408,8 +422,8 @@ assertIncludes(aceCodeEditor, "RIGHT_EDGE_BACK_GESTURE_MIN_GUARD_DP = 24f", "ACE
 
 assertIncludes(aceScriptEditorEngine, "notifyPinchToZoomStrategyChanged", "ACE pinch zoom strategy forwarding");
 assertIncludes(aceScriptEditorEngine, "onTextSizeSpChangedByGesture", "ACE pinch text-size state callback");
-assertIncludes(editorMenu, "currentEditor().getEngineType() == EditorEngineType.ACE", "ACE-only scale-view menu enablement");
-assertIncludes(editorMenu, "makeEditorPinchToZoomScaleViewUnderDev", "Native scale-view menu remains disabled");
+assertIncludes(editorPinchToZoomPreference, "EditorEnginePreferences.get() == EditorEngineType.ACE", "ACE-only scale-view preference enablement");
+assertIncludes(editorPinchToZoomPreference, "indexOf(key(R.string.key_editor_pinch_to_zoom_scale_view))", "Native scale-view preference remains disabled");
 
 assertIncludes(editorView, "AceShortcutPanel.topRowCompletions", "ACE shortcut top row binding");
 assertIncludes(editorView, "AceShortcutPanel.bottomRowCompletions", "ACE shortcut bottom row binding");
