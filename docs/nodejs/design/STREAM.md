@@ -33,6 +33,8 @@ The current test corpus covers:
 - callback `finished`
 - promise `pipeline`
 - promise `finished`
+- `Readable.toWeb()` / `Readable.fromWeb()`
+- `Writable.toWeb()` / `Writable.fromWeb()`
 - common stream state helpers
 - stream interaction with readline
 - scoped `fs.createReadStream`
@@ -77,6 +79,8 @@ Lifecycle tests should cover:
 - finished callback and promise resolution
 - readable async iteration
 - writable drain and finish
+- backpressure smoke
+- destroy propagation
 - timeout with active stream
 - service destroy with active stream
 - active scoped fs stream timeout recovery
@@ -99,6 +103,9 @@ Required coverage:
 - callback and promise pipeline success
 - callback and promise pipeline error propagation
 - `finished` callback and promise paths
+- Node/Web stream adapter smoke through `toWeb()` and `fromWeb()`
+- backpressure smoke on a slow writable
+- destroy propagation through failed pipeline
 - scoped fs read/write streams reject escaping paths
 - scoped fs read/write streams reject absolute Android/device paths, including `/proc`, `/sys`, and `/dev`
 - active scoped fs streams are visible in pending diagnostics and do not poison the next execution after timeout/service cleanup

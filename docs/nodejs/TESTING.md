@@ -276,7 +276,7 @@ Current stream focused instrumentation:
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeStreamMvpInstrumentationTest"
 ```
 
-This suite verifies `stream`/`node:stream` identity, shadowing protection, `Readable.from`, `PassThrough`, `Transform`, `stream.finished`, and `stream/promises` `pipeline`/`finished` success and error behavior.
+This suite verifies `stream`/`node:stream` and `stream/promises`/`node:stream/promises` identity, shadowing protection, `Readable.from`, async iteration, `PassThrough`, `Transform`, callback and promise `pipeline`, callback and promise `finished`, Web Streams adapters, backpressure smoke, error propagation, and destroy propagation.
 
 Current zlib focused instrumentation:
 

@@ -244,6 +244,15 @@ Limited builtin map currently includes:
 
 Limited means API-compatible enough for the current tests and targeted pure-JS npm packages, not full desktop Node.js compatibility.
 
+The `stream` wrapper is a partial compatibility surface for pure-JS packages. It
+exposes the standard constructors, `Readable.from()`, callback
+`pipeline()`/`finished()`, `stream/promises` `pipeline()`/`finished()`, selected
+state helpers, `stream/consumers`, and the current limited `stream/web` surface.
+`Readable.toWeb()`/`Readable.fromWeb()` and
+`Writable.toWeb()`/`Writable.fromWeb()` are allowed as adapters over already
+permitted streams; they do not grant raw network, process, native addon, or
+unscoped filesystem authority.
+
 The `buffer` wrapper is available through `require("buffer")`, `require("node:buffer")`,
 bare ESM `import "buffer"`, and ESM `import "node:buffer"`. It exposes the
 safe Node-managed surface already used by the runtime: `Buffer`, `Blob`, `File`,
