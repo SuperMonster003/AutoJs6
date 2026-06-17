@@ -58,6 +58,7 @@ small set of already-gated features toward practical use.
 | fs streams | partial | Scoped read/write streams support read, write, pipe, stable denial paths, active-stream diagnostics, timeout/service cleanup, and packaged smoke coverage. |
 | zlib streams | partial | Bounded transform streams support gzip/gunzip and deflate/inflate pipelines, scoped fs pipeline smoke, invalid input errors, active-stream diagnostics, timeout/service cleanup, and packaged smoke coverage. |
 | Controlled fetch | experimental | Global `fetch` and `require("fetch")` surface is hardened for v1.1 with fake-provider GET/POST, headers, string/binary bodies, response helpers, abort, timeout, budgets, redirects, and raw-network denial; live provider remains default-off. |
+| Controlled axios | experimental | `require("axios")` exposes an AutoJs6-owned fetch-backed compatibility adapter for `get`/`post`/`request`, `baseURL`, params, headers, timeout, response types, and Axios-like errors while denying custom adapter/agent/proxy/raw transport paths. |
 | WebSocket | experimental | Future v1.1 batch; raw sockets remain disabled. |
 | Worker threads | experimental | Disabled by default. |
 | Native addon | unsupported | Must remain disabled. |
@@ -97,6 +98,11 @@ small set of already-gated features toward practical use.
   text/json/arrayBuffer helpers, timeout, abort-before and abort-during
   dispatch, response budget, redirect modes, unsupported schemes, raw network
   denial, diagnostics, and default Android provider denial.
+- Controlled axios smoke passes for reserved `require("axios")`, fake-provider
+  get/post/request, `baseURL`, params serialization, headers, timeout,
+  json/text/arraybuffer response types, Axios-like error shape, custom
+  adapter/agent/proxy denial, `node_modules/axios` shadow denial, packaged
+  default-provider denial, and raw network denial.
 - fs stream smoke passes for read/write/pipe, scoped escape denial,
   `/proc`/`/sys`/`/dev` absolute path denial, active stream timeout cleanup,
   and packaged APK markers.

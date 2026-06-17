@@ -38,6 +38,7 @@ private val nodeTypeDeclarationModules = listOf(
     "image",
     "images",
     "fetch",
+    "axios",
     "websocket",
     "work_manager",
 )

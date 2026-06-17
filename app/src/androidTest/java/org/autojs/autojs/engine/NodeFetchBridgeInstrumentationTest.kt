@@ -720,6 +720,251 @@ class NodeFetchBridgeInstrumentationTest {
     }
 
     @Test
+    fun jsAxiosCompatibilityLayerUsesControlledFetchOnly() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node axios controlled fetch compatibility regression")
+
+        val workDir = File(context.cacheDir, "node-bridge-axios-shadow").apply {
+            deleteRecursively()
+            check(mkdirs()) { "Failed to create axios bridge working directory: $absolutePath" }
+        }
+        File(workDir, "node_modules/axios").apply {
+            check(mkdirs()) { "Failed to create axios shadow module directory: $absolutePath" }
+        }.resolve("index.js").writeText("""module.exports = { shadow: true };""")
+
+        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+            """
+            "nodejs";
+            (async function main() {
+              const bridge = require("autojs6:bridge");
+              const { Buffer } = require("buffer");
+              const axios = require("axios");
+              const requests = [];
+              function codeOf(error) {
+                return error && (error.autojs6Code || error.code) || "";
+              }
+              function headerValue(headers, name) {
+                const lower = String(name).toLowerCase();
+                const found = (headers || []).find((entry) => String(entry[0]).toLowerCase() === lower);
+                return found ? String(found[1]) : "";
+              }
+              function requestBody(payload) {
+                if (payload.bodyBase64 !== undefined) {
+                  return Buffer.from(payload.bodyBase64, "base64").toString("utf8");
+                }
+                return String(payload.bodyText || "");
+              }
+              function json(payload, body, status, statusText) {
+                return {
+                  url: payload.url,
+                  status: status || 200,
+                  statusText: statusText || "OK",
+                  headers: [["content-type", "application/json"], ["x-mode", headerValue(payload.headers, "x-mode")]],
+                  bodyBase64: Buffer.from(JSON.stringify(body)).toString("base64")
+                };
+              }
+              bridge.__test.setTransport({
+                postMessage(message) {
+                  const request = JSON.parse(message);
+                  requests.push(request);
+                  const payload = request.args[0];
+                  if (payload.url.indexOf("/timeout") >= 0) {
+                    return;
+                  }
+                  let result;
+                  if (payload.url.indexOf("/items") >= 0) {
+                    result = json(payload, {
+                      method: payload.method,
+                      url: payload.url,
+                      mode: headerValue(payload.headers, "x-mode")
+                    });
+                  } else if (payload.url.indexOf("/post") >= 0) {
+                    result = json(payload, {
+                      method: payload.method,
+                      body: requestBody(payload),
+                      contentType: headerValue(payload.headers, "content-type")
+                    }, 201, "Created");
+                  } else if (payload.url.indexOf("/text") >= 0) {
+                    result = {
+                      url: payload.url,
+                      status: 200,
+                      statusText: "OK",
+                      headers: [["content-type", "text/plain"]],
+                      bodyBase64: Buffer.from("plain-text").toString("base64"),
+                      bodyBytes: 10
+                    };
+                  } else if (payload.url.indexOf("/array") >= 0) {
+                    result = {
+                      url: payload.url,
+                      status: 200,
+                      statusText: "OK",
+                      headers: [["content-type", "application/octet-stream"]],
+                      bodyBase64: Buffer.from([7, 8, 9]).toString("base64"),
+                      bodyBytes: 3
+                    };
+                  } else if (payload.url.indexOf("/status") >= 0) {
+                    result = json(payload, { message: "bad" }, 500, "Server Error");
+                  } else {
+                    result = {
+                      url: payload.url,
+                      status: 404,
+                      statusText: "Not Found",
+                      headers: [["content-type", "application/json"]],
+                      bodyBase64: Buffer.from(JSON.stringify({ message: "missing" })).toString("base64")
+                    };
+                  }
+                  setImmediate(() => {
+                    bridge.__test.receiveMessage(JSON.stringify({
+                      id: request.id,
+                      ok: true,
+                      result
+                    }));
+                  });
+                }
+              });
+
+              const resolved = require.resolve("axios");
+              const get = await axios.get("items", {
+                baseURL: "https://api.example.invalid/v1",
+                params: { tag: ["a", "b"], q: "one two" },
+                headers: { "x-mode": "get" },
+                responseType: "json",
+                timeout: 1000
+              });
+              const post = await axios.post("https://api.example.invalid/post", { hello: "world" }, {
+                responseType: "json",
+                timeout: 1000
+              });
+              const text = await axios({
+                method: "GET",
+                url: "https://api.example.invalid/text",
+                responseType: "text",
+                timeout: 1000
+              });
+              const array = await axios.request({
+                method: "GET",
+                url: "https://api.example.invalid/array",
+                responseType: "arraybuffer",
+                timeout: 1000
+              });
+              const arrayHex = Buffer.from(new Uint8Array(array.data)).toString("hex");
+
+              let statusShape = "";
+              try {
+                await axios.get("https://api.example.invalid/status", {
+                  responseType: "json",
+                  timeout: 1000
+                });
+              } catch (error) {
+                statusShape = [
+                  axios.isAxiosError(error),
+                  error.name,
+                  error.code,
+                  error.response && error.response.status,
+                  error.response && error.response.data && error.response.data.message
+                ].join("|");
+              }
+
+              let timeoutShape = "";
+              try {
+                await axios.get("https://api.example.invalid/timeout", { timeout: 25 });
+              } catch (error) {
+                timeoutShape = [
+                  axios.isAxiosError(error),
+                  error.name,
+                  codeOf(error)
+                ].join("|");
+              }
+
+              const policyCodes = [];
+              for (const config of [
+                { adapter: function customAdapter() {} },
+                { httpAgent: {} },
+                { proxy: { host: "127.0.0.1", port: 8080 } },
+                { responseType: "stream" }
+              ]) {
+                try {
+                  await axios.get("https://api.example.invalid/policy", Object.assign({ timeout: 1000 }, config));
+                } catch (error) {
+                  policyCodes.push(codeOf(error));
+                }
+              }
+
+              let rawHttpsCode = "";
+              try {
+                require("node:https").request("https://example.invalid/");
+              } catch (error) {
+                rawHttpsCode = codeOf(error);
+              }
+
+              console.log("axios.resolve=" + resolved);
+              console.log("axios.shadow=" + (axios.shadow === true));
+              console.log("axios.surface=" + [
+                typeof axios,
+                typeof axios.get,
+                typeof axios.post,
+                typeof axios.request,
+                axios.default === axios,
+                Object.isFrozen(axios),
+                axios.adapterName
+              ].join("|"));
+              console.log("axios.get=" + [
+                get.status,
+                get.data.method,
+                get.data.url,
+                get.data.mode,
+                get.headers["x-mode"]
+              ].join("|"));
+              console.log("axios.post=" + [
+                post.status,
+                post.statusText,
+                post.data.method,
+                post.data.body,
+                post.data.contentType
+              ].join("|"));
+              console.log("axios.responseTypes=" + [text.data, arrayHex].join("|"));
+              console.log("axios.statusError=" + statusShape);
+              console.log("axios.timeout=" + timeoutShape);
+              console.log("axios.policy=" + policyCodes.join("|"));
+              console.log("axios.requests=" + requests.map((request) => request.args[0].method + ":" + request.args[0].url.split("/").pop()).join("|"));
+              console.log("axios.permissions=" + requests.every((request) => request.permissions.indexOf("network") >= 0));
+              console.log("axios.raw_https=" + rawHttpsCode);
+              console.log("axios.pending=" + bridge.__test.pendingCount());
+            })();
+            """.trimIndent(),
+            "<embedded-autojs-axios-controlled-fetch-source.js>",
+            workingDirectory = workDir,
+            timeoutMs = 10_000L,
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("axios controlled fetch", result)
+        assertTrue(result.stdout.contains("axios.resolve=axios"))
+        assertTrue(result.stdout.contains("axios.shadow=false"))
+        assertTrue(result.stdout.contains("axios.surface=function|function|function|function|true|true|autojs6-controlled-fetch"))
+        assertTrue(
+            result.stdout.contains(
+                "axios.get=200|GET|https://api.example.invalid/v1/items?tag=a&tag=b&q=one+two|get|get",
+            ),
+        )
+        assertTrue(result.stdout.contains("""axios.post=201|Created|POST|{"hello":"world"}|application/json"""))
+        assertTrue(result.stdout.contains("axios.responseTypes=plain-text|070809"))
+        assertTrue(result.stdout.contains("axios.statusError=true|AxiosError|ERR_BAD_RESPONSE|500|bad"))
+        assertTrue(result.stdout.contains("axios.timeout=true|AxiosError|ERR_AUTOJS6_NETWORK_TIMEOUT"))
+        assertTrue(
+            result.stdout.contains(
+                "axios.policy=ERR_AUTOJS6_NETWORK_POLICY_DENIED|ERR_AUTOJS6_NETWORK_POLICY_DENIED|ERR_AUTOJS6_NETWORK_POLICY_DENIED|ERR_AUTOJS6_NETWORK_POLICY_DENIED",
+            ),
+        )
+        assertTrue(
+            result.stdout.contains(
+                "axios.requests=GET:items?tag=a&tag=b&q=one+two|POST:post|GET:text|GET:array|GET:status|GET:timeout|GET:policy",
+            ),
+        )
+        assertTrue(result.stdout.contains("axios.permissions=true"))
+        assertTrue(result.stdout.contains("axios.raw_https=ERR_AUTOJS6_NETWORK_DISABLED"))
+        assertTrue(result.stdout.contains("axios.pending=0"))
+    }
+
+    @Test
     fun androidFetchProviderStaysDisabledInNormalBuilds() {
         val provider = AndroidNodeBridgeCapabilityProvider(context)
         val responses = mutableListOf<NodeBridgeResponse>()

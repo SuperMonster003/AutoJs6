@@ -482,15 +482,16 @@ With the flag off:
 
 - global `fetch()` is an AutoJs6 controlled bridge wrapper, but the default Android provider rejects before performing I/O
 - `require("fetch")` exposes the same controlled wrapper for CommonJS scripts
+- `require("axios")` exposes an AutoJs6-owned axios-shaped adapter backed by controlled fetch
 - `http`, `https`, `net`, `tls`, `dns`, and `dns/promises` operations reject with `ERR_AUTOJS6_NETWORK_DISABLED`
 - `dgram` remains a disabled builtin
 - raw sockets, servers, DNS queries, TLS sessions, datagrams, and unrestricted HTTP requests remain unavailable
 
-Use global `fetch()` or `require("fetch")` for controlled request experiments, and use `require("websocket")` for the controlled WebSocket bridge. Userland packages such as `axios` must run on the controlled fetch path or another AutoJs6 bridge adapter; they cannot assume desktop Node `http`/`https` adapters. Raw Node networking is not part of the Safe Node Profile: bare names and `node:` aliases are intercepted, and local `node_modules/http`, `node_modules/https`, `node_modules/net`, `node_modules/tls`, `node_modules/dns`, `node_modules/dns/promises`, or `node_modules/dgram` fixtures cannot bypass the policy.
+Use global `fetch()` or `require("fetch")` for controlled request experiments, use `require("axios")` for the AutoJs6-owned axios-shaped compatibility adapter, and use `require("websocket")` for the controlled WebSocket bridge. Userland HTTP clients cannot assume desktop Node `http`/`https` adapters. Raw Node networking is not part of the Safe Node Profile: bare names and `node:` aliases are intercepted, and local `node_modules/http`, `node_modules/https`, `node_modules/net`, `node_modules/tls`, `node_modules/dns`, `node_modules/dns/promises`, `node_modules/dgram`, or `node_modules/axios` fixtures cannot bypass the policy.
 
 Current `require("autojs6:profile")` reports `network=false` and `experimentalFlags.network=false`.
 
-Current controlled fetch support includes `GET`/`POST`, headers, string or binary bodies, `timeoutMs`, `AbortController.signal`, `maxResponseBytes`, `maxRedirects`, text/arrayBuffer/json response helpers, and Web Stream reads through `response.body.stream()`. The live provider is backed by Android/OkHttp behind `BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED`; normal release builds keep that flag false. No `axios` builtin adapter is exposed.
+Current controlled fetch support includes `GET`/`POST`, headers, string or binary bodies, `timeoutMs`, `AbortController.signal`, `maxResponseBytes`, `maxRedirects`, text/arrayBuffer/json response helpers, and Web Stream reads through `response.body.stream()`. The live provider is backed by Android/OkHttp behind `BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED`; normal release builds keep that flag false. The axios-shaped adapter supports `axios(config)`, `axios.request`, `axios.get`, `axios.post`, `baseURL`, params, headers, `timeout`, and `responseType: "json" | "text" | "arraybuffer"` while rejecting custom adapters, agents, proxy configuration, custom transport, and raw socket assumptions.
 
 The controlled request policy is bounded even when fake or experimental live providers are used:
 
@@ -889,6 +890,14 @@ Overrides outside the documented safe range are ignored and reported in `profile
   - response helpers: `text()`, `arrayBuffer()`, and `json()`
   - normal builds reject through the Android provider with `ERR_AUTOJS6_NETWORK_DISABLED`; fake-provider tests cover success, timeout, abort, response budget, unsupported scheme, redirect limit, concurrency limit, and service-destroy paths
   - raw `http`, `https`, `net`, `tls`, `dns`, and `dgram` modules remain unavailable for network I/O, including `node:` aliases and local `node_modules` shadow attempts
+- `axios`
+  - `axios(config)`, `axios.request(config)`, `axios.get(url, config?)`, and `axios.post(url, data?, config?)` through `require("axios")`
+  - options: `{ url?, baseURL?, method?, headers?, params?, data?, timeout?, maxResponseBytes?, maxContentLength?, maxRedirects?, responseType?, signal?, validateStatus? }`
+  - supported `responseType`: `json`, `text`, and `arraybuffer`
+  - returns Axios-like responses with `data`, `status`, `statusText`, `headers`, `config`, and a provider-owned request descriptor
+  - non-2xx status and provider failures reject with `AxiosError` shape while preserving AutoJs6 network codes
+  - rejects `adapter`, `httpAgent`, `httpsAgent`, `agent`, `transport`, `socketPath`, custom `paramsSerializer`, and proxy configuration
+  - backed by controlled fetch only; local `node_modules/axios` cannot shadow it, and raw network modules remain denied
 - `websocket`
   - `connect(url, options?): Promise<WebSocketConnection>` through `require("websocket")`
   - options: `{ headers?: object | array, protocols?: string[] | string, timeoutMs?: number, maxMessageBytes?: number, maxQueueSize?: number, signal?: AbortSignal }`

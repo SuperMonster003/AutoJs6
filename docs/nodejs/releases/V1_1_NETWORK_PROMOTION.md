@@ -13,10 +13,10 @@ Package identity: production, `org.autojs.autojs6`
 Keep controlled network experimental for Node Profile v1.1.
 
 Do not promote controlled `fetch`, controlled `websocket`, or axios-shaped
-network compatibility to partial support yet. The current bridge wrappers and
-default-denial policy are healthy under production identity, but the evidence
-still proves a gated experiment rather than a user-visible stable network
-contract:
+network compatibility to partial support yet. The current bridge wrappers,
+Task 167 fetch-backed axios adapter, and default-denial policy are healthy
+under production identity, but the evidence still proves a gated experiment
+rather than a user-visible stable network contract:
 
 - the focused production-identity network suite passes wrapper, budget, service
   destroy, diagnostics, and denial cases;
@@ -26,8 +26,9 @@ contract:
   enabled `autojs.nodejs.network.experimental=true` profile;
 - there is no packaged network opt-in fixture proving project metadata,
   `android.permission.INTERNET`, and live provider behavior together;
-- axios is not backed by an AutoJs6-owned adapter and desktop Node adapters
-  still depend on denied raw network modules;
+- axios is backed only by the AutoJs6-owned controlled-fetch adapter; desktop
+  Node adapters, agents, proxy tunneling, and raw network transports remain
+  denied;
 - privacy review and release text for live network behavior are not complete.
 
 Normal builds must continue to keep:
@@ -94,7 +95,7 @@ The refreshed packaged aggregate report was written to
 | packaged smoke verifier | Pass | Pulled and verified current packaged smoke APK artifacts and template readiness. |
 | packaged network opt-in fixture | Missing | No fixture proves declared network capability, packaged manifest, and live provider together. |
 | live real-network smoke | Missing | No explicit live Android/OkHttp request path was run for v1.1 promotion. |
-| axios compatibility | Not supported | No AutoJs6-owned adapter or fetch-adapter corpus is admitted. |
+| axios compatibility | Pass as experiment | Task 167 adds reserved `require("axios")` backed by controlled fetch with get/post/request, params, response types, Axios-like errors, adapter/agent/proxy denial, packaged default-provider denial, and raw network denial. |
 | privacy/release review | Missing | Live network behavior needs explicit user-facing privacy and permission review before promotion. |
 
 ## Packaged APK Position
@@ -115,25 +116,28 @@ Before partial promotion, add a packaged network fixture that:
 
 ## Axios Decision
 
-Axios remains outside the v1.1 support contract.
+Axios remains outside the promoted live-network support contract.
 
-The existing runtime contains legacy Rhino-facing axios integration, but Node
-Profile network support cannot inherit that as a desktop Node guarantee. Node
-axios adapters commonly depend on `http`, `https`, socket agents, streams, and
-DNS behavior that the Safe Node Profile intentionally denies. Axios can be
-reconsidered only after an AutoJs6-owned adapter or pinned fetch-compatible
-adapter has its own corpus and packaged gate.
+Task 167 adds a Node Profile `require("axios")` adapter owned by AutoJs6 and
+backed by controlled fetch. This is intentionally not the desktop axios package
+or a promise to support axios's raw Node adapters. Config fields that would
+introduce raw transport authority, including custom adapter, agents, proxy,
+transport, socket path, and custom params serializer, are denied with stable
+network policy errors. The adapter can be reconsidered for partial promotion
+only after live-provider smoke, packaged opt-in, and privacy/release review
+prove the same controlled behavior outside fake-provider tests.
 
 ## v1.1 Decision
 
 For Node Profile v1.1:
 
 - keep `autojs.nodejs.network.experimental=false` by default;
-- keep controlled `fetch` and `websocket` documented as experimental bridge
-  wrappers;
+- keep controlled `fetch`, `axios`, and `websocket` documented as experimental
+  wrappers/adapters;
 - keep raw Node networking denied for bare names, `node:` aliases, and
   shadowing attempts;
-- do not claim axios compatibility;
+- claim only the AutoJs6 fetch-backed axios adapter surface, not desktop axios
+  network compatibility;
 - do not update `NODE_PROFILE_V1_STABLE_SURFACE.md` to include live network
   support;
 - require explicit promotion evidence before enabling Android/OkHttp live I/O.
@@ -148,6 +152,7 @@ Before reconsidering partial promotion, add:
   abort, redirect, response-size, headers, body, TLS, and service destroy;
 - packaged network opt-in fixture with manifest permission verification;
 - privacy review covering user-visible permission and network disclosure;
-- axios/fetch-adapter corpus only if axios is meant to be user-visible;
+- expanded axios/fetch-adapter corpus if axios is meant to move beyond
+  experimental;
 - release-note text that distinguishes controlled wrappers from raw Node
   networking.

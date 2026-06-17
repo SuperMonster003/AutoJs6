@@ -10,6 +10,7 @@ import mediaProjection = require("media_projection");
 import image = require("image");
 import images = require("images");
 import fetchModule = require("fetch");
+import axios = require("axios");
 import websocket = require("websocket");
 import workManager = require("work_manager");
 
@@ -93,6 +94,18 @@ async function smoke(): Promise<void> {
   const responseText: string = await response.text();
   const responseJson: unknown = await fetchModule.default("https://example.invalid/json", { timeoutMs: 1000 }).then((item) => item.json());
   const fetchDiagnostics: fetchModule.Diagnostics = fetchModule.diagnostics();
+  const axiosResponse: axios.Response<{ ok: boolean }> = await axios.get("https://example.invalid/axios", {
+    baseURL: "https://example.invalid",
+    params: { q: "types" },
+    responseType: "json",
+    timeout: 1000
+  });
+  const axiosText: axios.Response<string> = await axios.post("https://example.invalid/axios", "payload", {
+    headers: { "content-type": "text/plain" },
+    responseType: "text",
+    timeout: 1000
+  });
+  const axiosDiagnostics: axios.Diagnostics = axios.diagnostics();
 
   const connection: websocket.Connection = await websocket.connect("wss://example.invalid/socket", {
     timeoutMs: websocket.policy.defaultTimeoutMs,
@@ -152,6 +165,9 @@ async function smoke(): Promise<void> {
   void responseText;
   void responseJson;
   void fetchDiagnostics;
+  void axiosResponse;
+  void axiosText;
+  void axiosDiagnostics;
   void websocketDiagnostics;
   void periodicId;
   void tasks;

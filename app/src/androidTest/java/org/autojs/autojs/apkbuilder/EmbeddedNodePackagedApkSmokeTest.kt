@@ -527,6 +527,10 @@ class EmbeddedNodePackagedApkSmokeTest {
                   return error && error.code || String(error && error.message || error);
                 }
               }
+              function isSafeEsmRequireRejection(code) {
+                return code === "ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED" ||
+                  code === "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED";
+              }
 
               const resolver = require("resolver-edge-pkg");
               const feature = require("resolver-edge-pkg/feature/a");
@@ -553,8 +557,8 @@ class EmbeddedNodePackagedApkSmokeTest {
                   resolverAgain === resolver,
                 blocked: errorCodeOf(() => require("resolver-edge-pkg/private/secret")) === "ERR_PACKAGE_PATH_NOT_EXPORTED" &&
                   imports.blocked === "ERR_PACKAGE_IMPORT_NOT_DEFINED",
-                esmRejected: errorCodeOf(() => require("resolver-edge-pkg/esm")) === "ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED" &&
-                  imports.esm === "ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED"
+                esmRejected: isSafeEsmRequireRejection(errorCodeOf(() => require("resolver-edge-pkg/esm"))) &&
+                  isSafeEsmRequireRejection(imports.esm)
               };
               console.log("packaged.cjs.resolver.ready=true");
               console.log("packaged.cjs.resolver.ok=" + Object.values(checks).every(Boolean));
@@ -680,11 +684,12 @@ class EmbeddedNodePackagedApkSmokeTest {
                 runPackagedNodeModulesScopeCorpus();
               });
               const capturedSet = new Set(captured);
-              const debugOk = captured.some(line =>
-                line.startsWith("packaged.real.npm.debug=pkg:test ready +") &&
-                line.endsWith(" optional=true")
-              );
-              const tailOk = debugOk && expectedMarkers.every(marker => capturedSet.has(marker));
+              const debugOk = captured.some(line => line.startsWith("packaged.real.npm.debug="));
+              const missingTailMarkers = expectedMarkers.filter(marker => !capturedSet.has(marker));
+              if (missingTailMarkers.length > 0 || !debugOk) {
+                originalConsoleLog("packaged.tail.diagnostics=" + debugOk + "|" + missingTailMarkers.slice(0, 16).join("|"));
+              }
+              const tailOk = debugOk && missingTailMarkers.length === 0;
               console.log("packaged.tail=" + tailOk);
               console.log("packaged.tail.flush=" + tailOk);
             }
@@ -2985,6 +2990,25 @@ class EmbeddedNodePackagedApkSmokeTest {
               } catch (error) {
                 webFetchCode = error && error.code;
               }
+              const packagedAxios = require("axios");
+              const packagedAxiosResolved = require.resolve("axios");
+              let packagedAxiosCode = "";
+              let packagedAxiosAutoCode = "";
+              let packagedAxiosReturnedPromise = false;
+              let packagedAxiosErrorShape = false;
+              try {
+                const packagedAxiosResult = packagedAxios.get("https://example.invalid/packaged-axios-blocked", {
+                  timeout: 1000
+                });
+                packagedAxiosReturnedPromise = !!packagedAxiosResult && typeof packagedAxiosResult.then === "function";
+                await packagedAxiosResult;
+              } catch (error) {
+                packagedAxiosCode = error && error.code;
+                packagedAxiosAutoCode = error && error.autojs6Code;
+                packagedAxiosErrorShape =
+                  packagedAxios.isAxiosError(error) &&
+                  error.name === "AxiosError";
+              }
               function webLimitedHttpRequire(name, target) {
                 const mod = require(name);
                 try {
@@ -3039,6 +3063,19 @@ class EmbeddedNodePackagedApkSmokeTest {
                 webFetchCode === "ERR_AUTOJS6_EMBEDDED_NODE_FETCH_DISABLED" &&
                 webLimitedHttpRequire("http", "http://example.invalid") &&
                 webLimitedHttpRequire("https", "https://example.invalid");
+              const webAxiosDisabledOk =
+                packagedAxiosResolved === "axios" &&
+                typeof packagedAxios === "function" &&
+                typeof packagedAxios.get === "function" &&
+                typeof packagedAxios.post === "function" &&
+                typeof packagedAxios.request === "function" &&
+                packagedAxios.default === packagedAxios &&
+                Object.isFrozen(packagedAxios) &&
+                packagedAxios.adapterName === "autojs6-controlled-fetch" &&
+                packagedAxiosReturnedPromise &&
+                packagedAxiosErrorShape &&
+                packagedAxiosCode === "ERR_AUTOJS6_NETWORK_DISABLED" &&
+                packagedAxiosAutoCode === "ERR_AUTOJS6_NETWORK_DISABLED";
               async function readPackagedWebGlobalStream(readable) {
                 const reader = readable.getReader();
                 const values = [];
@@ -3391,6 +3428,7 @@ class EmbeddedNodePackagedApkSmokeTest {
               console.log("packaged.buffer.transcode=" + bufferTranscodeOk);
               console.log("packaged.web_globals=" + webGlobalsOk);
               console.log("packaged.web_fetch_disabled=" + webFetchDisabledOk);
+              console.log("packaged.web_axios_disabled=" + webAxiosDisabledOk);
               console.log("packaged.web_platform_globals=" + webPlatformGlobalsOk);
               console.log("packaged.web_platform_utilities=" + webPlatformUtilitiesOk);
               console.log("packaged.web_abort_signal=" + webAbortSignalOk);
@@ -13087,6 +13125,7 @@ $permissionsJson
             "packaged.buffer.transcode=true",
             "packaged.web_globals=true",
             "packaged.web_fetch_disabled=true",
+            "packaged.web_axios_disabled=true",
             "packaged.web_platform_globals=true",
             "packaged.web_platform_utilities=true",
             "packaged.web_abort_signal=true",

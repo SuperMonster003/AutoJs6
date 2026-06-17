@@ -55,7 +55,7 @@ Reasons:
 - request and response bodies can be budgeted before exposing stream semantics
 - the API can be backed by Android or AutoJs6 providers without giving Node direct socket authority
 
-The MVP should not shadow user-installed `axios` with a builtin `require("axios")`. If axios compatibility is needed later, it should use an explicit AutoJs6 adapter built on the same controlled fetch provider.
+Task 167 adds an explicit AutoJs6-owned `require("axios")` compatibility adapter on top of the same controlled fetch provider. It is not the desktop axios package and does not enable raw Node `http`, `https`, socket agents, proxy tunneling, or custom adapters.
 
 User-facing entries:
 
@@ -97,7 +97,15 @@ The wrapper supports:
 - `require("fetch").policy`
 - `require("fetch").diagnostics()`
 
-The first implementation intentionally does not add a builtin `require("axios")` adapter.
+The axios-shaped adapter supports:
+
+- `axios(config)`, `axios.request(config)`, `axios.get(url, config?)`, and `axios.post(url, data?, config?)`
+- `baseURL`, default params serialization, headers, `timeout`, and response body budgets through the fetch policy
+- `responseType: "json" | "text" | "arraybuffer"`
+- Axios-like error shape with `name="AxiosError"`, `isAxiosError`, `code`, `autojs6Code`, and `response` for non-2xx status responses
+- stable denial for `adapter`, `httpAgent`, `httpsAgent`, `agent`, `transport`, `socketPath`, custom `paramsSerializer`, and proxy configuration
+
+`require("axios")` is reserved by the Safe Node Profile and cannot be shadowed by `node_modules/axios`.
 
 ## Authority Boundary
 
@@ -174,6 +182,7 @@ Controlled fetch support must not imply support for:
 - TLS socket APIs
 - UDP datagrams
 - HTTP upgrade or CONNECT tunnels
+- desktop axios adapters based on raw `http`/`https`, agents, proxy tunneling, or custom transport
 
 ## Android Permission Policy
 
@@ -335,6 +344,7 @@ Before live network capability is enabled in release builds, tests must cover:
 - redirect limit, `redirect: "manual"`, and `redirect: "error"` behavior: covered by `NodeFetchBridgeInstrumentationTest`
 - service destroy rejection and active-count cleanup: covered by `NodeFetchBridgeInstrumentationTest`
 - diagnostics counters for active, timeout, policy rejection, and abort paths: covered by `NodeFetchBridgeInstrumentationTest`
+- `require("axios")` fetch-backed adapter surface, params serialization, response types, Axios-like errors, custom adapter/agent/proxy denial, and `node_modules/axios` shadow denial: covered by `NodeFetchBridgeInstrumentationTest`
 - raw modules still denied: covered by `NodeFetchBridgeInstrumentationTest` and security regression tests
 - default Android provider disabled with the flag off: covered by `NodeFetchBridgeInstrumentationTest`
 - service destroy cancellation: provider destroy cancels tracked OkHttp calls; broader live-provider lifecycle stress remains a follow-up
@@ -351,7 +361,7 @@ Task 41 does not enable:
 - `node:tls`
 - `node:dns`
 - `node:dgram`
-- userland axios adapter
+- desktop/userland axios adapters backed by raw network authority
 - request streaming
 - response streaming
 - background transfers

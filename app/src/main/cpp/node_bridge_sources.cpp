@@ -8009,6 +8009,7 @@ std::string buildEmbeddedScriptExecutionSource(
   let __autojs6_limited_device_cache = null;
   let __autojs6_limited_shell_cache = null;
   let __autojs6_limited_fetch_cache = null;
+  let __autojs6_limited_axios_cache = null;
   let __autojs6_limited_websocket_cache = null;
   let __autojs6_limited_work_manager_cache = null;
   let __autojs6_limited_java_cache = null;
@@ -9771,6 +9772,313 @@ std::string buildEmbeddedScriptExecutionSource(
     });
     __autojs6_limited_fetch_cache = Object.freeze(fetchModule);
     return __autojs6_limited_fetch_cache;
+  }
+  function __autojs6_axios_is_plain_object(value) {
+    if (!value || Object.prototype.toString.call(value) !== "[object Object]") {
+      return false;
+    }
+    const proto = Object.getPrototypeOf(value);
+    return proto === Object.prototype || proto === null;
+  }
+  function __autojs6_axios_is_absolute_url(value) {
+    return /^[a-z][a-z0-9+.-]*:/i.test(String(value || ""));
+  }
+  function __autojs6_axios_combine_url(baseURL, url) {
+    const rawUrl = url === undefined || url === null ? "" : String(url);
+    if (__autojs6_axios_is_absolute_url(rawUrl) || !baseURL) {
+      return rawUrl;
+    }
+    return String(baseURL).replace(/\/+$/, "") + "/" + rawUrl.replace(/^\/+/, "");
+  }
+  function __autojs6_axios_params_string(params) {
+    if (params === undefined || params === null) {
+      return "";
+    }
+    if (typeof URLSearchParams === "function" && params instanceof URLSearchParams) {
+      return params.toString();
+    }
+    if (typeof params === "string") {
+      return params.charAt(0) === "?" ? params.slice(1) : params;
+    }
+    const search = new URLSearchParams();
+    if (Array.isArray(params)) {
+      for (const entry of params) {
+        if (entry && entry.length >= 2 && entry[1] !== undefined && entry[1] !== null) {
+          search.append(String(entry[0]), String(entry[1]));
+        }
+      }
+      return search.toString();
+    }
+    if (typeof params === "object") {
+      Object.keys(params).forEach(function(key) {
+        const value = params[key];
+        if (value === undefined || value === null) {
+          return;
+        }
+        if (Array.isArray(value)) {
+          value.forEach(function(item) {
+            if (item !== undefined && item !== null) {
+              search.append(key, String(item));
+            }
+          });
+        } else {
+          search.append(key, String(value));
+        }
+      });
+      return search.toString();
+    }
+    return String(params);
+  }
+  function __autojs6_axios_append_params(url, params) {
+    const query = __autojs6_axios_params_string(params);
+    if (!query) {
+      return url;
+    }
+    const hashIndex = url.indexOf("#");
+    const base = hashIndex >= 0 ? url.slice(0, hashIndex) : url;
+    const hash = hashIndex >= 0 ? url.slice(hashIndex) : "";
+    return base + (base.indexOf("?") >= 0 ? "&" : "?") + query + hash;
+  }
+  function __autojs6_axios_headers_object(headers) {
+    const result = {};
+    const normalized = new Headers(headers || undefined);
+    normalized.forEach(function(value, name) {
+      result[String(name)] = String(value);
+    });
+    return Object.freeze(result);
+  }
+  function __autojs6_axios_error(message, code, config, request, response, cause) {
+    const error = __autojs6_with_error_code(new Error(message), code);
+    error.name = "AxiosError";
+    error.config = config || {};
+    if (request !== undefined) {
+      error.request = request;
+    }
+    if (response !== undefined) {
+      error.response = response;
+      error.status = response && response.status;
+    }
+    if (cause !== undefined) {
+      error.cause = cause;
+      const causeCode = cause && (cause.autojs6Code || cause.code);
+      if (causeCode && String(causeCode).indexOf("ERR_AUTOJS6_") === 0) {
+        __autojs6_define_error_property(error, "autojs6Code", String(causeCode));
+      }
+    }
+    __autojs6_define_error_property(error, "isAxiosError", true);
+    error.toJSON = function() {
+      return {
+        message: this.message,
+        name: this.name,
+        code: this.code,
+        autojs6Code: this.autojs6Code,
+        status: this.status
+      };
+    };
+    return error;
+  }
+  function __autojs6_axios_wrap_error(error, config, request, response) {
+    if (error && error.isAxiosError) {
+      return error;
+    }
+    const code = error && (error.autojs6Code || error.code) || "ERR_AUTOJS6_NETWORK_ERROR";
+    return __autojs6_axios_error(
+      error && error.message ? error.message : "AutoJs6 controlled axios request failed.",
+      code,
+      config,
+      request,
+      response,
+      error
+    );
+  }
+  function __autojs6_axios_policy_error(message, reason, config) {
+    return __autojs6_axios_wrap_error(
+      __autojs6_fetch_policy_error(message, reason, "ERR_AUTOJS6_NETWORK_POLICY_DENIED"),
+      config
+    );
+  }
+  function __autojs6_axios_assert_supported_config(config) {
+    const denied = [
+      "adapter",
+      "httpAgent",
+      "httpsAgent",
+      "agent",
+      "transport",
+      "socketPath",
+      "paramsSerializer"
+    ];
+    for (const name of denied) {
+      if (config[name] !== undefined && config[name] !== null) {
+        throw __autojs6_axios_policy_error(
+          "AutoJs6 controlled axios does not support config." + name + ".",
+          "axios_" + name,
+          config
+        );
+      }
+    }
+    if (config.proxy !== undefined && config.proxy !== null && config.proxy !== false) {
+      throw __autojs6_axios_policy_error(
+        "AutoJs6 controlled axios does not support proxy configuration.",
+        "axios_proxy",
+        config
+      );
+    }
+  }
+  function __autojs6_axios_merge_config(defaultConfig, configOrUrl, maybeConfig) {
+    const defaults = defaultConfig && typeof defaultConfig === "object" ? defaultConfig : {};
+    const config = Object.assign({}, defaults);
+    const defaultHeaders = defaults.headers;
+    let requestHeaders;
+    if (typeof configOrUrl === "string" || (typeof URL === "function" && configOrUrl instanceof URL)) {
+      Object.assign(config, maybeConfig && typeof maybeConfig === "object" ? maybeConfig : {});
+      config.url = String(configOrUrl);
+      requestHeaders = maybeConfig && typeof maybeConfig === "object" ? maybeConfig.headers : undefined;
+    } else if (configOrUrl && typeof configOrUrl === "object") {
+      Object.assign(config, configOrUrl);
+      requestHeaders = configOrUrl.headers;
+    }
+    if (defaultHeaders !== undefined || requestHeaders !== undefined) {
+      config.headers = __autojs6_fetch_merge_headers(defaultHeaders, requestHeaders);
+    }
+    return config;
+  }
+  function __autojs6_axios_prepare_body(config, headers) {
+    const hasData = __autojs6_has_own(config, "data");
+    const hasBody = __autojs6_has_own(config, "body");
+    if (!hasData && !hasBody) {
+      return undefined;
+    }
+    const body = hasData ? config.data : config.body;
+    if (__autojs6_axios_is_plain_object(body)) {
+      if (!headers.has("content-type")) {
+        headers.set("content-type", "application/json");
+      }
+      return JSON.stringify(body);
+    }
+    if (typeof URLSearchParams === "function" && body instanceof URLSearchParams) {
+      if (!headers.has("content-type")) {
+        headers.set("content-type", "application/x-www-form-urlencoded;charset=UTF-8");
+      }
+      return body.toString();
+    }
+    return body;
+  }
+  function __autojs6_axios_response_data(response, responseType) {
+    const normalizedType = responseType === undefined || responseType === null ? "" : String(responseType).toLowerCase();
+    if (normalizedType === "arraybuffer") {
+      return response.arrayBuffer();
+    }
+    if (normalizedType === "text") {
+      return response.text();
+    }
+    if (normalizedType && normalizedType !== "json") {
+      throw __autojs6_fetch_policy_error(
+        "AutoJs6 controlled axios supports only json, text, and arraybuffer responseType.",
+        "axios_response_type",
+        "ERR_AUTOJS6_NETWORK_POLICY_DENIED"
+      );
+    }
+    const contentType = response.headers && typeof response.headers.get === "function"
+      ? String(response.headers.get("content-type") || "").toLowerCase()
+      : "";
+    if (normalizedType === "json" || contentType.indexOf("application/json") >= 0 || contentType.indexOf("+json") >= 0) {
+      return response.text().then(function(text) {
+        return text ? JSON.parse(text) : null;
+      });
+    }
+    return response.text();
+  }
+  function __autojs6_axios_validate_status(config, status) {
+    if (config.validateStatus === null) {
+      return true;
+    }
+    if (typeof config.validateStatus === "function") {
+      return !!config.validateStatus(status);
+    }
+    return status >= 200 && status < 300;
+  }
+  function __autojs6_axios_dispatch(defaultConfig, configOrUrl, maybeConfig) {
+    let config = {};
+    let request = undefined;
+    return Promise.resolve().then(function() {
+      config = __autojs6_axios_merge_config(defaultConfig, configOrUrl, maybeConfig);
+      __autojs6_axios_assert_supported_config(config);
+      const method = String(config.method || "GET").toUpperCase();
+      const headers = new Headers(config.headers || undefined);
+      const url = __autojs6_axios_append_params(
+        __autojs6_axios_combine_url(config.baseURL, config.url),
+        config.params
+      );
+      const body = __autojs6_axios_prepare_body(config, headers);
+      const fetchInit = {
+        method,
+        headers,
+        timeoutMs: config.timeout,
+        maxResponseBytes: config.maxResponseBytes !== undefined ? config.maxResponseBytes : config.maxContentLength,
+        maxRedirects: config.maxRedirects,
+        redirect: config.redirect,
+        signal: config.signal
+      };
+      if (body !== undefined) {
+        fetchInit.body = body;
+      }
+      request = Object.freeze({ method, url });
+      return __autojs6_controlled_fetch(url, fetchInit).then(function(response) {
+        return __autojs6_axios_response_data(response, config.responseType).then(function(data) {
+          const axiosResponse = Object.freeze({
+            data,
+            status: response.status,
+            statusText: response.statusText,
+            headers: __autojs6_axios_headers_object(response.headers),
+            config,
+            request
+          });
+          if (!__autojs6_axios_validate_status(config, response.status)) {
+            throw __autojs6_axios_error(
+              "Request failed with status code " + response.status,
+              response.status >= 500 ? "ERR_BAD_RESPONSE" : "ERR_BAD_REQUEST",
+              config,
+              request,
+              axiosResponse
+            );
+          }
+          return axiosResponse;
+        });
+      });
+    }).catch(function(error) {
+      throw __autojs6_axios_wrap_error(error, config, request);
+    });
+  }
+  function __autojs6_axios_create(defaultConfig) {
+    const defaults = Object.freeze(Object.assign({}, defaultConfig && typeof defaultConfig === "object" ? defaultConfig : {}));
+    function axios(configOrUrl, maybeConfig) {
+      return __autojs6_axios_dispatch(defaults, configOrUrl, maybeConfig);
+    }
+    function AxiosError(message, code, config, request, response) {
+      return __autojs6_axios_error(message, code, config, request, response);
+    }
+    Object.defineProperties(axios, {
+      request: { value: function(config) { return axios(config); }, enumerable: true },
+      get: { value: function(url, config) { return axios(Object.assign({}, config || {}, { method: "GET", url: String(url) })); }, enumerable: true },
+      post: { value: function(url, data, config) { return axios(Object.assign({}, config || {}, { method: "POST", url: String(url), data })); }, enumerable: true },
+      create: { value: function(config) { return __autojs6_axios_create(Object.assign({}, defaults, config || {})); }, enumerable: true },
+      isAxiosError: { value: function(value) { return !!(value && value.isAxiosError === true); }, enumerable: true },
+      AxiosError: { value: AxiosError, enumerable: true },
+      defaults: { value: defaults, enumerable: true },
+      adapterName: { value: "autojs6-controlled-fetch", enumerable: true },
+      VERSION: { value: "autojs6-v1.1-fetch-adapter", enumerable: true },
+      policy: { value: __autojs6_fetch_policy_snapshot(), enumerable: true },
+      diagnostics: { value: __autojs6_fetch_diagnostics_snapshot, enumerable: true },
+      default: { value: axios, enumerable: true }
+    });
+    return Object.freeze(axios);
+  }
+  function __autojs6_limited_axios() {
+    if (__autojs6_limited_axios_cache) {
+      return __autojs6_limited_axios_cache;
+    }
+    __autojs6_limited_axios_cache = __autojs6_axios_create({});
+    return __autojs6_limited_axios_cache;
   }
   function __autojs6_websocket_error(message, code) {
     return __autojs6_error(message, code);
@@ -13413,6 +13721,7 @@ std::string buildEmbeddedScriptExecutionSource(
     return null;
   }
   function __autojs6_module_metadata_record(resolved, allowEsm) {
+    __autojs6_throw_if_disallowed_module_source_extension(resolved, allowEsm, "Embedded Node module metadata source");
     if (__autojs6_has_own(__autojs6_module_sources, resolved)) {
       return __autojs6_module_sources[resolved];
     }
@@ -13502,6 +13811,7 @@ std::string buildEmbeddedScriptExecutionSource(
     return record;
   }
   function __autojs6_module_record(resolved, allowEsm) {
+    __autojs6_throw_if_disallowed_module_source_extension(resolved, allowEsm, "Embedded Node module source");
     if (__autojs6_has_own(__autojs6_module_sources, resolved)) {
       return __autojs6_module_sources[resolved];
     }
@@ -13521,6 +13831,23 @@ std::string buildEmbeddedScriptExecutionSource(
   }
   function __autojs6_is_native_addon_extension(extension) {
     return __autojs6_normalized_extension(extension) === ".node";
+  }
+  function __autojs6_throw_if_disallowed_module_source_extension(resolved, allowEsm, context) {
+    const path = __autojs6_path_module();
+    const absolute = path && typeof path.resolve === "function" ? path.resolve(resolved) : String(resolved || "");
+    const extension = path && typeof path.extname === "function" ? path.extname(absolute) : "";
+    if (!allowEsm) {
+      __autojs6_throw_if_esm_extension(extension, absolute, context);
+    }
+    __autojs6_throw_if_native_addon_extension(
+      extension,
+      absolute,
+      context,
+      "Unsupported Embedded Node module source extension in MVP: " + absolute
+    );
+    if (extension && !__autojs6_supported_local_module_extension(extension) && !(allowEsm && __autojs6_is_esm_extension(extension))) {
+      throw __autojs6_runtime_module_error("Unsupported Embedded Node module source extension in MVP: " + absolute);
+    }
   }
   function __autojs6_throw_if_esm_extension(extension, moduleName, context) {
     if (__autojs6_is_esm_extension(extension)) {
@@ -27373,6 +27700,9 @@ std::string buildEmbeddedScriptExecutionSource(
     if (name === "fetch") {
       return "fetch";
     }
+    if (name === "axios") {
+      return "axios";
+    }
     if (name === "websocket") {
       return "websocket";
     }
@@ -27596,6 +27926,9 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     if (name === "fetch") {
       return __autojs6_limited_fetch();
+    }
+    if (name === "axios") {
+      return __autojs6_limited_axios();
     }
     if (name === "websocket") {
       return __autojs6_limited_websocket();
