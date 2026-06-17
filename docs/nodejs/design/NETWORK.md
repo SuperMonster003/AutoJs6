@@ -326,12 +326,13 @@ Before live network capability is enabled in release builds, tests must cover:
 - `require("autojs6:profile").experimentalFlags.network` is false
 - raw modules remain denied even if live controlled fetch is enabled
 - fake provider success for GET and POST: covered by `NodeFetchBridgeInstrumentationTest`
+- object/array headers, string/Buffer/Uint8Array request bodies, and `Response.text()`/`json()`/`arrayBuffer()`: covered by `NodeFetchBridgeInstrumentationTest`
 - timeout cancellation: covered by `NodeFetchBridgeInstrumentationTest`
 - abort before dispatch and during dispatch: covered by `NodeFetchBridgeInstrumentationTest`
 - response body budget rejection: covered by `NodeFetchBridgeInstrumentationTest`
 - max concurrent request rejection: covered by `NodeFetchBridgeInstrumentationTest`
 - unsupported scheme rejection: covered by `NodeFetchBridgeInstrumentationTest`
-- redirect limit rejection: covered by `NodeFetchBridgeInstrumentationTest`
+- redirect limit, `redirect: "manual"`, and `redirect: "error"` behavior: covered by `NodeFetchBridgeInstrumentationTest`
 - service destroy rejection and active-count cleanup: covered by `NodeFetchBridgeInstrumentationTest`
 - diagnostics counters for active, timeout, policy rejection, and abort paths: covered by `NodeFetchBridgeInstrumentationTest`
 - raw modules still denied: covered by `NodeFetchBridgeInstrumentationTest` and security regression tests

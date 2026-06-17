@@ -78,6 +78,7 @@ The refreshed packaged aggregate report was written to
 | Gate | Status | Notes |
 | --- | --- | --- |
 | controlled `fetch` wrapper | Pass as experiment | Fake-provider `GET`/`POST`, global `fetch`, and `require("fetch")` pass. |
+| controlled `fetch` partial surface | Pass as experiment | Task 166 hardens headers, string/Buffer/Uint8Array bodies, `Response.text()`/`json()`/`arrayBuffer()`, abort-before-dispatch, redirect manual/error, and raw `node:https` denial. |
 | controlled WebSocket wrapper | Pass as experiment | Fake-provider connect, send, receive, close, `require("websocket")`, and diagnostics pass. |
 | timeout policy | Pass | Focused fetch and WebSocket tests cover timeout rejection. |
 | abort policy | Pass for fetch | Fetch abort rejection is covered. WebSocket cancellation remains tied to timeout/destroy paths. |

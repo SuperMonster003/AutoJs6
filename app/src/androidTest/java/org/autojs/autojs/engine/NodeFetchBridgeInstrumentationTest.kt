@@ -269,6 +269,234 @@ class NodeFetchBridgeInstrumentationTest {
     }
 
     @Test
+    fun jsFetchPartialSurfaceHandlesBodiesResponsesAbortAndRedirectModes() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node fetch partial surface regression")
+
+        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+            """
+            "nodejs";
+            (async function main() {
+              const bridge = require("autojs6:bridge");
+              const { Buffer } = require("buffer");
+              const fetchModule = require("fetch");
+              const requests = [];
+              function codeOf(error) {
+                return error && (error.autojs6Code || error.code) || "";
+              }
+              function headerValue(headers, name) {
+                const lower = String(name).toLowerCase();
+                const found = (headers || []).find((entry) => String(entry[0]).toLowerCase() === lower);
+                return found ? String(found[1]) : "";
+              }
+              function requestBody(payload) {
+                if (payload.bodyBase64 !== undefined) {
+                  return Buffer.from(payload.bodyBase64, "base64").toString("utf8");
+                }
+                return String(payload.bodyText || "");
+              }
+              function jsonResponse(payload, body) {
+                return {
+                  url: payload.url,
+                  status: 200,
+                  statusText: "OK",
+                  headers: [["content-type", "application/json"]],
+                  bodyBase64: Buffer.from(JSON.stringify(body)).toString("base64")
+                };
+              }
+              bridge.__test.setTransport({
+                postMessage(message) {
+                  const request = JSON.parse(message);
+                  requests.push(request);
+                  const payload = request.args[0];
+                  let result;
+                  if (payload.url.indexOf("/string") >= 0) {
+                    result = jsonResponse(payload, {
+                      method: payload.method,
+                      body: requestBody(payload),
+                      bodyKind: payload.bodyText !== undefined ? "text" : "base64",
+                      type: headerValue(payload.headers, "content-type"),
+                      mode: headerValue(payload.headers, "x-mode")
+                    });
+                  } else if (payload.url.indexOf("/uint8") >= 0) {
+                    result = jsonResponse(payload, {
+                      method: payload.method,
+                      body: requestBody(payload),
+                      bodyKind: payload.bodyBase64 !== undefined ? "base64" : "text",
+                      mode: headerValue(payload.headers, "x-mode")
+                    });
+                  } else if (payload.url.indexOf("/array") >= 0) {
+                    result = {
+                      url: payload.url,
+                      status: 200,
+                      statusText: "OK",
+                      headers: [["content-type", "application/octet-stream"], ["x-array", headerValue(payload.headers, "x-array")]],
+                      bodyBase64: Buffer.from([1, 2, 255]).toString("base64"),
+                      bodyBytes: 3
+                    };
+                  } else if (payload.url.indexOf("/manual") >= 0) {
+                    result = {
+                      url: payload.url,
+                      status: 302,
+                      statusText: "Found",
+                      headers: [["location", "/manual-target"], ["content-type", "text/plain"]],
+                      bodyBase64: Buffer.from("manual").toString("base64"),
+                      bodyBytes: 6
+                    };
+                  } else if (payload.url.indexOf("/error-redirect") >= 0) {
+                    result = {
+                      url: payload.url,
+                      status: 302,
+                      statusText: "Found",
+                      headers: [["location", "/blocked"]],
+                      bodyBase64: "",
+                      bodyBytes: 0
+                    };
+                  } else {
+                    result = {
+                      url: payload.url,
+                      status: 404,
+                      statusText: "Not Found",
+                      headers: [],
+                      bodyBase64: "",
+                      bodyBytes: 0
+                    };
+                  }
+                  setImmediate(() => {
+                    bridge.__test.receiveMessage(JSON.stringify({
+                      id: request.id,
+                      ok: true,
+                      result
+                    }));
+                  });
+                }
+              });
+
+              const stringResponse = await fetch("https://example.invalid/string", {
+                method: "POST",
+                headers: [["content-type", "text/plain"], ["x-mode", "string"]],
+                body: "alpha",
+                timeoutMs: 1000
+              });
+              const stringJson = await stringResponse.json();
+
+              const uint8Response = await fetch("https://example.invalid/uint8", {
+                method: "POST",
+                headers: { "x-mode": "uint8" },
+                body: new Uint8Array([98, 105, 110]),
+                timeoutMs: 1000
+              });
+              const uint8Json = await uint8Response.json();
+
+              const arrayResponse = await fetch(new URL("https://example.invalid/array"), {
+                headers: [["x-array", "yes"]],
+                timeoutMs: 1000,
+                maxResponseBytes: 8
+              });
+              const arrayHex = Buffer.from(new Uint8Array(await arrayResponse.arrayBuffer())).toString("hex");
+
+              const manualResponse = await fetch("https://example.invalid/manual", {
+                redirect: "manual",
+                timeoutMs: 1000
+              });
+              const manualText = await manualResponse.text();
+
+              let redirectErrorCode = "";
+              try {
+                await fetch("https://example.invalid/error-redirect", {
+                  redirect: "error",
+                  timeoutMs: 1000
+                });
+              } catch (error) {
+                redirectErrorCode = codeOf(error);
+              }
+
+              let getBodyCode = "";
+              try {
+                await fetch("https://example.invalid/get-body", {
+                  body: "blocked",
+                  timeoutMs: 1000
+                });
+              } catch (error) {
+                getBodyCode = codeOf(error);
+              }
+
+              const requestsBeforeAbort = requests.length;
+              let abortBeforeCode = "";
+              const controller = new AbortController();
+              controller.abort();
+              try {
+                await fetch("https://example.invalid/abort-before", {
+                  signal: controller.signal,
+                  timeoutMs: 1000
+                });
+              } catch (error) {
+                abortBeforeCode = codeOf(error);
+              }
+              const abortBeforeStarted = requests.length > requestsBeforeAbort;
+
+              let rawNodeHttpsCode = "";
+              try {
+                require("node:https").get("https://example.invalid/");
+              } catch (error) {
+                rawNodeHttpsCode = codeOf(error);
+              }
+
+              console.log("fetch.surface.string=" + [
+                stringJson.method,
+                stringJson.body,
+                stringJson.bodyKind,
+                stringJson.type,
+                stringJson.mode
+              ].join("|"));
+              console.log("fetch.surface.uint8=" + [
+                uint8Json.method,
+                uint8Json.body,
+                uint8Json.bodyKind,
+                uint8Json.mode
+              ].join("|"));
+              console.log("fetch.surface.arrayBuffer=" + [
+                arrayResponse.status,
+                arrayResponse.headers.get("x-array"),
+                arrayHex
+              ].join("|"));
+              console.log("fetch.surface.redirectManual=" + [
+                manualResponse.status,
+                manualResponse.statusText,
+                manualResponse.headers.get("location"),
+                manualText
+              ].join("|"));
+              console.log("fetch.surface.denials=" + [
+                redirectErrorCode,
+                getBodyCode,
+                abortBeforeCode,
+                abortBeforeStarted,
+                rawNodeHttpsCode
+              ].join("|"));
+              console.log("fetch.surface.requests=" + requests.map((request) => request.args[0].method + ":" + request.args[0].url.split("/").pop()).join("|"));
+              console.log("fetch.surface.policyFrozen=" + (Object.isFrozen(fetchModule.policy) && Object.isFrozen(fetchModule.policy.allowedSchemes)));
+              console.log("fetch.surface.pending=" + bridge.__test.pendingCount());
+            })();
+            """.trimIndent(),
+            "<embedded-autojs-fetch-partial-surface-source.js>",
+            timeoutMs = 10_000L,
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("fetch partial surface", result)
+        assertTrue(result.stdout.contains("fetch.surface.string=POST|alpha|text|text/plain|string"))
+        assertTrue(result.stdout.contains("fetch.surface.uint8=POST|bin|base64|uint8"))
+        assertTrue(result.stdout.contains("fetch.surface.arrayBuffer=200|yes|0102ff"))
+        assertTrue(result.stdout.contains("fetch.surface.redirectManual=302|Found|/manual-target|manual"))
+        assertTrue(
+            result.stdout.contains(
+                "fetch.surface.denials=ERR_AUTOJS6_NETWORK_POLICY_DENIED|ERR_AUTOJS6_NETWORK_POLICY_DENIED|ERR_AUTOJS6_NETWORK_ABORTED|false|ERR_AUTOJS6_NETWORK_DISABLED",
+            ),
+        )
+        assertTrue(result.stdout.contains("fetch.surface.requests=POST:string|POST:uint8|GET:array|GET:manual|GET:error-redirect"))
+        assertTrue(result.stdout.contains("fetch.surface.policyFrozen=true"))
+        assertTrue(result.stdout.contains("fetch.surface.pending=0"))
+    }
+
+    @Test
     fun jsFetchPolicyHardeningUsesFakeTransport() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node fetch policy hardening regression")
 

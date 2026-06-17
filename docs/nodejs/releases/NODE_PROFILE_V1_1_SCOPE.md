@@ -57,7 +57,7 @@ small set of already-gated features toward practical use.
 | Web Streams | partial | `stream/web`, globals, Blob streams, Node/Web adapters, and bounded fetch `response.body.stream()` reads are supported without direct network streaming. |
 | fs streams | partial | Scoped read/write streams support read, write, pipe, stable denial paths, active-stream diagnostics, timeout/service cleanup, and packaged smoke coverage. |
 | zlib streams | partial | Bounded transform streams support gzip/gunzip and deflate/inflate pipelines, scoped fs pipeline smoke, invalid input errors, active-stream diagnostics, timeout/service cleanup, and packaged smoke coverage. |
-| Controlled fetch | experimental | Future v1.1 batch; raw network remains disabled. |
+| Controlled fetch | experimental | Global `fetch` and `require("fetch")` surface is hardened for v1.1 with fake-provider GET/POST, headers, string/binary bodies, response helpers, abort, timeout, budgets, redirects, and raw-network denial; live provider remains default-off. |
 | WebSocket | experimental | Future v1.1 batch; raw sockets remain disabled. |
 | Worker threads | experimental | Disabled by default. |
 | Native addon | unsupported | Must remain disabled. |
@@ -92,6 +92,11 @@ small set of already-gated features toward practical use.
 - Web Streams smoke passes for `stream/web`, global constructors, Blob streams,
   Node/Web adapters, controlled fetch `response.body.stream()` reads, and
   packaged APK markers.
+- Controlled fetch smoke passes for global `fetch`, `require("fetch")`,
+  GET/POST, headers, string/Buffer/Uint8Array bodies, response
+  text/json/arrayBuffer helpers, timeout, abort-before and abort-during
+  dispatch, response budget, redirect modes, unsupported schemes, raw network
+  denial, diagnostics, and default Android provider denial.
 - fs stream smoke passes for read/write/pipe, scoped escape denial,
   `/proc`/`/sys`/`/dev` absolute path denial, active stream timeout cleanup,
   and packaged APK markers.
