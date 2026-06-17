@@ -51,6 +51,7 @@ small set of already-gated features toward practical use.
 | Dynamic import | partial | Local-only dynamic import is enabled by default for relative modules, allowed builtins, and scoped packages. |
 | Packaged ESM | partial | Packaged `.mjs` entry plus local `.mjs`/CommonJS graph smoke is required; dynamic import local graph smoke is covered separately. |
 | Buffer module | partial | `require("buffer")`, `require("node:buffer")`, and ESM `node:buffer` use the same builtin wrapper and cannot be shadowed by `node_modules/buffer`. |
+| Core builtin feature-detect modules | partial | `constants`, `util/types`, `events`, and `diagnostics_channel` support CJS and partial ESM import paths with shadowing denial and no `process.getBuiltinModule()` bypass. |
 | Stream primitives | partial | Async iteration, callback/promise pipeline and finished helpers, Web Streams adapters, backpressure smoke, destroy propagation, and shadowing denial stay covered as pure-JS compatibility surface. |
 | Web Streams | partial | `stream/web`, globals, Blob streams, Node/Web adapters, and bounded fetch `response.body.stream()` reads are supported without direct network streaming. |
 | fs streams | partial | Scoped read/write streams support read, write, pipe, stable denial paths, active-stream diagnostics, timeout/service cleanup, and packaged smoke coverage. |
@@ -78,6 +79,10 @@ small set of already-gated features toward practical use.
   remain denied.
 - Buffer smoke passes for CJS and ESM import forms, global consistency, common
   construction APIs, and `node_modules/buffer` shadow denial.
+- Core builtin compatibility smoke passes for `constants`, `util/types`,
+  `events`, and `diagnostics_channel` aliases, CJS and partial ESM import
+  forms, shadow denial, `process.getBuiltinModule()` denial, and disabled
+  builtin regressions.
 - Stream smoke passes for async iteration, callback and promise pipeline,
   callback and promise finished, Web Streams adapters, slow-writable
   backpressure, destroy propagation, and `node_modules/stream` shadow denial.

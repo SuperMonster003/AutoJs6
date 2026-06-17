@@ -141,6 +141,7 @@ patterns rather than broad npm compatibility claims:
 - semver parsing plus querystring/URL utility use
 - glob/path matching plus crypto hash utility use
 - stream utility plus zlib buffer utility use
+- core builtin feature detection for `constants`, `util/types`, `events`, and `diagnostics_channel`
 
 These fixtures are intentionally checked in. Tests must not fetch packages from the network, run install/postinstall
 scripts, load native addons, or include ESM-only packages.
@@ -243,6 +244,13 @@ Limited builtin map currently includes:
 - `zlib`
 
 Limited means API-compatible enough for the current tests and targeted pure-JS npm packages, not full desktop Node.js compatibility.
+
+The v1.1 core builtin compatibility gate treats `constants`, `util/types`, `events`, and `diagnostics_channel` as
+low-risk feature-detection modules. Bare and `node:` specifiers route to the same frozen wrappers, `node_modules` shadows
+are ignored, and `process.getBuiltinModule()` remains disabled so scripts cannot bypass the limited wrappers. The
+`events` wrapper exposes `EventEmitter` and helper functions such as `once()`/`on()`, but does not expose
+`EventEmitterAsyncResource` or `EventTarget`; Web-style `EventTarget` remains a global. `diagnostics_channel` exposes a
+bounded publish/subscribe/tracing surface without raw subscriber internals.
 
 The `stream` wrapper is a partial compatibility surface for pure-JS packages. It
 exposes the standard constructors, `Readable.from()`, callback

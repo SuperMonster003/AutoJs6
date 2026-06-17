@@ -29,7 +29,7 @@ class NodeRealNpmCompatInstrumentationTest {
         try {
             val corpusRoot = File(workDir, CORPUS_ASSET_DIR)
             val fixtures = readFixtures(corpusRoot)
-            assertEquals("unexpected real npm fixture count", 4, fixtures.size)
+            assertEquals("unexpected real npm fixture count", 5, fixtures.size)
 
             fixtures.forEach { fixture ->
                 val fixtureDir = File(corpusRoot, fixture.name)

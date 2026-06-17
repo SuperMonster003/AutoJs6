@@ -29,6 +29,14 @@
         "stream utility",
         "zlib buffer utility"
       ]
+    },
+    {
+      "name": "core-feature-detect",
+      "patterns": [
+        "core builtin feature detection",
+        "constants/util.types/events",
+        "diagnostics_channel graceful support"
+      ]
     }
   ]
 }

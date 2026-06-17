@@ -165,8 +165,9 @@ Current fixed real npm corpus instrumentation:
 
 This suite copies `app/src/androidTest/assets/npm_compat_real/` into a scoped working directory and runs fixed, offline,
 license-noted CommonJS package snapshots. It covers small utilities, nested dependencies, semver parsing,
-querystring/URL utilities, glob/path matching, crypto hashing, stream utilities, and zlib buffer utilities. It also
-checks that the corpus contains no native addons, no install/postinstall scripts, and no ESM-only package metadata.
+querystring/URL utilities, glob/path matching, crypto hashing, stream utilities, zlib buffer utilities, and core builtin
+feature detection for `constants`, `util/types`, `events`, and `diagnostics_channel`. It also checks that the corpus
+contains no native addons, no install/postinstall scripts, and no ESM-only package metadata.
 
 Desktop Node differential harness:
 
@@ -309,6 +310,17 @@ Current `node:module` safe subset focused instrumentation:
 ```
 
 This suite verifies the partial `module`/`node:module` surface, shadowing protection, filtered `builtinModules`, scoped `createRequire` loading for local and package dependencies, `child_process` denial through created require functions, and unsafe base or target rejection.
+
+Current core builtin compatibility focused instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeCoreBuiltinCompatibilityInstrumentationTest"
+```
+
+This suite verifies `constants`, `util/types`, `events`, and `diagnostics_channel` bare/`node:` aliases, shadowing
+protection, CJS and partial ESM import paths, frozen wrappers, the `events`/global `EventTarget` boundary,
+`diagnostics_channel` publish/subscribe behavior, `process.getBuiltinModule()` denial, and unchanged denial for disabled
+builtins such as `child_process`, `vm`, and `dgram`.
 
 Current `vm` design gate focused instrumentation:
 

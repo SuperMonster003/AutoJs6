@@ -1,0 +1,15 @@
+{
+  "name": "@autojs6-fixtures/core-feature-detect-app",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "test": "node test.cjs"
+  },
+  "dependencies": {
+    "constants-probe": "1.0.0",
+    "diagnostics-probe": "1.0.0",
+    "events-probe": "1.0.0",
+    "util-types-probe": "1.0.0"
+  }
+}
