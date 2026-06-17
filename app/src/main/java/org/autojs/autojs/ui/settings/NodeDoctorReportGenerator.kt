@@ -2,6 +2,7 @@ package org.autojs.autojs.ui.settings
 
 import android.content.Context
 import android.os.Build
+import org.autojs.autojs.engine.NodeBridgePermissionManifest
 import org.autojs.autojs.engine.NativeNodeEmbeddedRuntimeBridge
 import org.autojs.autojs.engine.NodeRuntimeCapabilities
 import org.autojs.autojs6.BuildConfig
@@ -51,6 +52,7 @@ object NodeDoctorReportGenerator {
             put("featureFlags", featureFlagsJson())
             put("nativeLibraries", nativeLibrariesJson(context, probeResult))
             put("capabilityProfile", capabilityProfileJson())
+            put("bridgeCapabilities", bridgeCapabilitiesJson())
             put("packagedTemplate", packagedTemplateJson(context))
             put("lastNodeError", lastErrorJson())
             put(
@@ -155,6 +157,42 @@ object NodeDoctorReportGenerator {
         put("childProcessDefaultEnabled", false)
     }
 
+    private fun bridgeCapabilitiesJson() = JSONObject().apply {
+        put("manifestVersion", 1)
+        put("projectManifestSupported", true)
+        put("enforcedWhenDeclared", true)
+        put(
+            "declarationKeys",
+            JSONArray(
+                listOf(
+                    "project.json:node.permissions",
+                    "package.json:autojs6.node.permissions",
+                ),
+            ),
+        )
+        put("knownCapabilities", JSONArray(NodeBridgePermissionManifest.definedCapabilities))
+        put("network", networkCapabilityJson())
+    }
+
+    private fun networkCapabilityJson(): JSONObject {
+        val requiredAndroidPermissions = NodeBridgePermissionManifest.androidPermissionsForCapabilities(
+            listOf(NodeBridgePermissionManifest.NETWORK),
+        )
+        return JSONObject().apply {
+            put("capability", NodeBridgePermissionManifest.NETWORK)
+            put("requiresDeclaration", true)
+            put("providerFeatureFlag", "autojs.nodejs.network.experimental")
+            put("providerEnabled", BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED)
+            put("requiredAndroidPermissions", JSONArray(requiredAndroidPermissions))
+            put(
+                "requiresAndroidInternet",
+                NodeBridgePermissionManifest.ANDROID_PERMISSION_INTERNET in requiredAndroidPermissions,
+            )
+            put("controlledModules", JSONArray(listOf("fetch", "axios", "websocket")))
+            put("rawNodeNetworkModulesEnabled", false)
+        }
+    }
+
     private fun packagedTemplateJson(context: Context) = JSONObject().apply {
         val assets = runCatching { context.assets.list("").orEmpty().toList() }.getOrDefault(emptyList())
         val present = TEMPLATE_APK_NAME in assets
@@ -220,6 +258,19 @@ object NodeDoctorReportGenerator {
             appendLine("  direct builtins: ${json.getJSONObject("capabilityProfile").getJSONArray("directBuiltins").length()}")
             appendLine("  limited builtins: ${json.getJSONObject("capabilityProfile").getJSONArray("limitedBuiltins").length()}")
             appendLine("  disabled builtins: ${json.getJSONObject("capabilityProfile").getJSONArray("disabledBuiltins").join(", ")}")
+            appendLine()
+            val bridgeCapabilities = json.getJSONObject("bridgeCapabilities")
+            val networkCapability = bridgeCapabilities.getJSONObject("network")
+            appendLine("Bridge Capabilities:")
+            appendLine("  manifest supported: ${bridgeCapabilities.getBoolean("projectManifestSupported")}")
+            appendLine("  enforced when declared: ${bridgeCapabilities.getBoolean("enforcedWhenDeclared")}")
+            appendLine(
+                "  network capability: requires declaration=${networkCapability.getBoolean("requiresDeclaration")} " +
+                        "provider enabled=${networkCapability.getBoolean("providerEnabled")}",
+            )
+            appendLine("  network Android permissions: ${networkCapability.getJSONArray("requiredAndroidPermissions").join(", ")}")
+            appendLine("  controlled network modules: ${networkCapability.getJSONArray("controlledModules").join(", ")}")
+            appendLine("  raw Node network modules enabled: ${networkCapability.getBoolean("rawNodeNetworkModulesEnabled")}")
             appendLine()
             appendLine("Packaged Template:")
             appendLine("  ${packagedTemplate.getString("templateAsset")}: ${packagedTemplate.getString("status")}")

@@ -92,6 +92,7 @@ The refreshed packaged aggregate report was written to
 | raw network modules | Pass as denial | `http`, `https`, `net`, `tls`, `dns`, `dns/promises`, and `dgram` plus `node:` aliases remain denied. |
 | policy shadowing | Pass | Local `node_modules` fixtures cannot shadow controlled or denied modules. |
 | capability to Android permission mapping | Pass | `network` maps to `android.permission.INTERNET`; mismatch detection is covered. |
+| network capability doctor visibility | Pass | Host and device Node doctor reports expose bridge capability manifest status, the `network` provider flag state, required Android permission mapping, controlled network modules, and raw network denial. |
 | packaged smoke verifier | Pass | Pulled and verified current packaged smoke APK artifacts and template readiness. |
 | packaged network opt-in fixture | Missing | No fixture proves declared network capability, packaged manifest, and live provider together. |
 | live real-network smoke | Missing | No explicit live Android/OkHttp request path was run for v1.1 promotion. |
@@ -103,6 +104,7 @@ The refreshed packaged aggregate report was written to
 The packaged verifier evidence is useful but not sufficient for promotion. It
 proves current packaged artifacts can be pulled and statically verified, and the
 capability manifest tests prove `network` maps to `android.permission.INTERNET`.
+Doctor reports also expose the mapping and current provider flag state.
 It does not prove a packaged app can opt into controlled live network I/O.
 
 Before partial promotion, add a packaged network fixture that:

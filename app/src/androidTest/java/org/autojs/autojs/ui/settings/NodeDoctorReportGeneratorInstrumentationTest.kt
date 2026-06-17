@@ -1,5 +1,6 @@
 package org.autojs.autojs.ui.settings
 
+import org.autojs.autojs.engine.NodeBridgePermissionManifest
 import org.autojs.autojs.engine.NodeEmbeddedTestHarness
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
@@ -28,6 +29,22 @@ class NodeDoctorReportGeneratorInstrumentationTest {
         assertFalse(json.getJSONObject("privacy").getBoolean("scriptContentsIncluded"))
         assertFalse(json.getJSONObject("privacy").getBoolean("environmentValuesIncluded"))
         assertTrue(json.getJSONObject("privacy").getBoolean("pathsRedacted"))
+        val bridgeCapabilities = json.getJSONObject("bridgeCapabilities")
+        val networkCapability = bridgeCapabilities.getJSONObject("network")
+        assertTrue(bridgeCapabilities.getBoolean("projectManifestSupported"))
+        assertTrue(bridgeCapabilities.getBoolean("enforcedWhenDeclared"))
+        assertEquals(NodeBridgePermissionManifest.NETWORK, networkCapability.getString("capability"))
+        assertTrue(networkCapability.getBoolean("requiresDeclaration"))
+        assertTrue(networkCapability.getBoolean("requiresAndroidInternet"))
+        assertFalse(networkCapability.getBoolean("rawNodeNetworkModulesEnabled"))
+        assertTrue(
+            networkCapability
+                .getJSONArray("requiredAndroidPermissions")
+                .toString()
+                .contains(NodeBridgePermissionManifest.ANDROID_PERMISSION_INTERNET),
+        )
+        assertTrue(text.contains("Bridge Capabilities:"))
+        assertTrue(text.contains("network capability: requires declaration=true"))
         assertFalse(text.contains(context.filesDir.absolutePath))
         assertFalse(jsonText.contains(context.filesDir.absolutePath))
     }

@@ -188,25 +188,34 @@ Controlled fetch support must not imply support for:
 
 The main app may already declare `android.permission.INTERNET` for other product features. That does not make network part of the Safe Node Profile.
 
-Packaged APKs should include `android.permission.INTERNET` for Node only when project metadata explicitly opts into controlled network. The packaged verifier now reports whether the inspected manifest declares `android.permission.INTERNET`; a later packaging task should turn that diagnostic into an opt-in gate:
+Packaged APKs include `android.permission.INTERNET` for Node only when project metadata explicitly opts into controlled network with the bridge capability manifest:
 
 - no network opt-in: Node network disabled and no Node-driven INTERNET requirement
-- network opt-in: INTERNET permission present, controlled client enabled, raw modules still denied
+- network opt-in: `network` capability declared, `android.permission.INTERNET` merged into the packaged manifest, controlled client enabled only when the experimental provider flag is on, raw modules still denied
 
-Example future project metadata:
+Project-level opt-in:
 
 ```json
 {
   "node": {
-    "network": {
-      "enabled": true,
-      "client": "fetch",
-      "timeoutMs": 30000,
-      "maxResponseBytes": 1048576
+    "permissions": ["network"]
+  }
+}
+```
+
+Package-level opt-in:
+
+```json
+{
+  "autojs6": {
+    "node": {
+      "permissions": ["network"]
     }
   }
 }
 ```
+
+The doctor report exposes the bridge capability manifest schema, the `network -> android.permission.INTERNET` mapping, the network provider feature flag state, and the controlled modules (`fetch`, `axios`, and `websocket`). Missing declarations reject bridge calls before dispatch with `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`.
 
 ## Timeout
 
@@ -348,7 +357,7 @@ Before live network capability is enabled in release builds, tests must cover:
 - raw modules still denied: covered by `NodeFetchBridgeInstrumentationTest` and security regression tests
 - default Android provider disabled with the flag off: covered by `NodeFetchBridgeInstrumentationTest`
 - service destroy cancellation: provider destroy cancels tracked OkHttp calls; broader live-provider lifecycle stress remains a follow-up
-- packaged APK manifest behavior with and without opt-in: current verifier reports INTERNET presence; opt-in gating remains a follow-up
+- packaged APK manifest behavior with and without opt-in: capability metadata drives `INTERNET` merging, and verifier/doctor reports expose the mapping and manifest result
 
 ## Non-Goals
 

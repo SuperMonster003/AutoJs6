@@ -216,15 +216,17 @@ Current doctor diagnostics:
 
 `embeddedNodeDoctorReport` writes attachable text and JSON reports under
 `app/build/reports/nodejs/doctor/`. It aggregates the compatibility profile, backend and feature flags, enabled/disabled
-modules, native library hashes from the symbol archive report, optional packaged APK diagnostics, dependency bundler
-status, and differential harness status when those reports are available. Host-only fields such as live
+modules, bridge capability manifest status including the controlled network capability, native library hashes from the
+symbol archive report, optional packaged APK diagnostics, dependency bundler status, and differential harness status
+when those reports are available. Host-only fields such as live
 `workingDirectory`, last error, lifecycle state, and resource counts are marked as unavailable until a device/runtime
 diagnostic is attached.
 
 The app UI also exposes `Developer options > Node.js > Node.js Doctor`. It exports privacy-redacted text or JSON reports
 through the system share sheet. Device reports include backend, expected and observed Node version when the native probe
-is available, ABI, feature flags, native library hashes, capability profile, packaged template presence, and last-error
-availability. They do not include user script contents or environment values.
+is available, ABI, feature flags, native library hashes, capability profile, bridge capability manifest status, the
+`network -> android.permission.INTERNET` mapping, packaged template presence, and last-error availability. They do not
+include user script contents or environment values.
 
 Focused device report generator instrumentation:
 

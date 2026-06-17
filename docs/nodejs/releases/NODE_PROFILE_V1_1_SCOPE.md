@@ -108,6 +108,10 @@ small set of already-gated features toward practical use.
   descriptors, text and binary payloads, handler properties, listener aliases,
   close/error event shape, timeout, message budget, max connection, service
   destroy cleanup, default-provider denial, and raw socket denial.
+- Network capability manifest v2 gates controlled `fetch`, `axios`, and
+  `websocket` with the `network` bridge capability, maps that capability to
+  `android.permission.INTERNET` for packaged APKs, and reports the mapping in
+  Node doctor text/JSON output.
 - fs stream smoke passes for read/write/pipe, scoped escape denial,
   `/proc`/`/sys`/`/dev` absolute path denial, active stream timeout cleanup,
   and packaged APK markers.

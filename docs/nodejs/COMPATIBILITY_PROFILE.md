@@ -709,6 +709,8 @@ Current foundation:
 - Node projects may declare bridge capabilities in `project.json` under `node.permissions`, or in `package.json` under `autojs6.node.permissions`
 - when a bridge capability manifest is present, missing capabilities reject before dispatch with `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`
 - `require("autojs6:bridge").permissions()` and `require("autojs6:profile").bridgePermissions` expose the read-only capability report
+- declaring `network` covers controlled `fetch`, `axios`, and `websocket`; packaged builds derive `android.permission.INTERNET` from that capability rather than from module presence
+- Node doctor text/JSON reports expose the bridge capability manifest schema, `network` capability status, required Android permission mapping, and raw network denial state
 - Node projects may declare bridge limits in `project.json` under `node.bridgeLimits`, or in `package.json` under `autojs6.node.bridgeLimits`
 - `require("autojs6:profile").bridgeLimits` exposes the effective read-only limit report, including warnings for ignored overrides
 - malformed live bridge requests reject with `ERR_AUTOJS6_BRIDGE_INVALID_REQUEST` when a response id can be recovered
