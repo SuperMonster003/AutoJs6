@@ -59,12 +59,29 @@ class PreferencesFragment : PreferenceFragmentCompat(), SharedPreferences.OnShar
         listOf(
             R.string.key_ace_editor_font,
             R.string.key_ace_word_wrap_enabled,
-            R.string.key_ace_line_numbers_enabled,
             R.string.key_ace_lsp_enabled,
         ).forEach { setPreferenceVisible(it, aceSelected) }
+        setPreferenceEnabled(
+            keyRes = R.string.key_editor_fold_markers_enabled,
+            enabled = aceSelected,
+            enabledSummaryRes = R.string.summary_editor_fold_markers_enabled,
+            disabledSummaryRes = R.string.summary_editor_setting_unavailable_for_current_engine,
+        )
     }
 
     private fun setPreferenceVisible(@StringRes keyRes: Int, visible: Boolean) {
         findPreference<Preference>(getString(keyRes))?.isVisible = visible
+    }
+
+    private fun setPreferenceEnabled(
+        @StringRes keyRes: Int,
+        enabled: Boolean,
+        @StringRes enabledSummaryRes: Int,
+        @StringRes disabledSummaryRes: Int,
+    ) {
+        findPreference<Preference>(getString(keyRes))?.apply {
+            isEnabled = enabled
+            summary = getString(if (enabled) enabledSummaryRes else disabledSummaryRes)
+        }
     }
 }

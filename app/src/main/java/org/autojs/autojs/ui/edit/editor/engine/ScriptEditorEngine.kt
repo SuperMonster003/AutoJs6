@@ -84,6 +84,7 @@ interface ScriptEditorEngine {
     fun setTextSizeSp(size: Float)
     fun getTextSizeSp(): Float
     fun notifyPinchToZoomStrategyChanged(newKey: String?)
+    fun notifyDisplayPreferencesChanged()
 
     fun addCursorChangeCallback(listener: EditorCursorChangeListener)
     fun removeCursorChangeCallback(listener: EditorCursorChangeListener)

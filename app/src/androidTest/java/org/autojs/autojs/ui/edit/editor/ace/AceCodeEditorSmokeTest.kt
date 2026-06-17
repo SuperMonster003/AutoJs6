@@ -64,6 +64,8 @@ class AceCodeEditorSmokeTest {
         AceEditorTestHooks.reset()
         AceEditorDisplayPreferences.setWordWrapEnabled(false)
         AceEditorDisplayPreferences.setLineNumbersEnabled(true)
+        AceEditorDisplayPreferences.setBreakpointMarkersEnabled(true)
+        AceEditorDisplayPreferences.setFoldMarkersEnabled(true)
         AceEditorLspPreferences.setEnabled(false)
         AceActionHistoryStore.clear(instrumentation.targetContext)
         EditorEnginePreferences.set(EditorEngineType.NATIVE)
@@ -122,6 +124,8 @@ class AceCodeEditorSmokeTest {
     fun displayPreferencesApplyToAceSession() {
         AceEditorDisplayPreferences.setWordWrapEnabled(true)
         AceEditorDisplayPreferences.setLineNumbersEnabled(false)
+        AceEditorDisplayPreferences.setBreakpointMarkersEnabled(false)
+        AceEditorDisplayPreferences.setFoldMarkersEnabled(false)
         val editor = launchReadyEditor()
 
         val initialState = evaluateJsonObject(
@@ -131,16 +135,24 @@ class AceCodeEditorSmokeTest {
                     return JSON.stringify({
                         wrap: editor.session.getUseWrapMode(),
                         showLineNumbers: editor.getOption("showLineNumbers"),
+                        showFoldWidgets: editor.getOption("showFoldWidgets"),
+                        hidesBreakpointMarkers: editor.container.classList.contains("autojs6-hide-breakpoint-markers"),
+                        hidesFoldMarkers: editor.container.classList.contains("autojs6-hide-fold-markers"),
                         fixedWidthGutter: editor.getOption("fixedWidthGutter") === true,
                         hasRuntimeApi:
                             typeof window.AutoJsAce.setWordWrapEnabled === "function" &&
-                            typeof window.AutoJsAce.setLineNumbersEnabled === "function"
+                            typeof window.AutoJsAce.setLineNumbersEnabled === "function" &&
+                            typeof window.AutoJsAce.setBreakpointMarkersEnabled === "function" &&
+                            typeof window.AutoJsAce.setFoldMarkersEnabled === "function"
                     });
                 })();
             """.trimIndent(),
         )
         assertTrue(initialState.getBoolean("wrap"))
         assertFalse(initialState.getBoolean("showLineNumbers"))
+        assertFalse(initialState.getBoolean("showFoldWidgets"))
+        assertTrue(initialState.getBoolean("hidesBreakpointMarkers"))
+        assertTrue(initialState.getBoolean("hidesFoldMarkers"))
         assertTrue(initialState.getBoolean("fixedWidthGutter"))
         assertTrue(initialState.getBoolean("hasRuntimeApi"))
 
@@ -150,15 +162,23 @@ class AceCodeEditorSmokeTest {
                 (function() {
                     window.AutoJsAce.setWordWrapEnabled(false);
                     window.AutoJsAce.setLineNumbersEnabled(true);
+                    window.AutoJsAce.setBreakpointMarkersEnabled(true);
+                    window.AutoJsAce.setFoldMarkersEnabled(true);
                     return JSON.stringify({
                         wrap: editor.session.getUseWrapMode(),
-                        showLineNumbers: editor.getOption("showLineNumbers")
+                        showLineNumbers: editor.getOption("showLineNumbers"),
+                        showFoldWidgets: editor.getOption("showFoldWidgets"),
+                        hidesBreakpointMarkers: editor.container.classList.contains("autojs6-hide-breakpoint-markers"),
+                        hidesFoldMarkers: editor.container.classList.contains("autojs6-hide-fold-markers")
                     });
                 })();
             """.trimIndent(),
         )
         assertFalse(toggledState.getBoolean("wrap"))
         assertTrue(toggledState.getBoolean("showLineNumbers"))
+        assertTrue(toggledState.getBoolean("showFoldWidgets"))
+        assertFalse(toggledState.getBoolean("hidesBreakpointMarkers"))
+        assertFalse(toggledState.getBoolean("hidesFoldMarkers"))
     }
 
     @Test

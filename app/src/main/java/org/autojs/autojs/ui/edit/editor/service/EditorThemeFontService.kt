@@ -42,6 +42,7 @@ class EditorThemeFontService(
     fun applyEditorPreferences() {
         val editor = currentEditor()
         editor.setTextSizeSp(getEditorTextSize(editor.getTextSizeSp().toInt()).toFloat())
+        editor.notifyDisplayPreferencesChanged()
         applyPreferredAceFont()
     }
 

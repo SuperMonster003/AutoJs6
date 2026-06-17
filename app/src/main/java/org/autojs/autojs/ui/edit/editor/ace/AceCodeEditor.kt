@@ -41,6 +41,7 @@ import android.webkit.WebViewClient
 import android.widget.FrameLayout
 import androidx.annotation.VisibleForTesting
 import org.autojs.autojs.core.pref.Pref.getString
+import org.autojs.autojs.ui.edit.editor.EditorDisplayPreferences
 import org.autojs.autojs.ui.edit.editor.ace.diagnostics.AceDiagnostics
 import org.autojs.autojs.ui.edit.editor.ace.diagnostics.AceDiagnosticsSnapshot
 import org.autojs.autojs.ui.edit.editor.ace.diagnostics.AceRuntimeEventHistory
@@ -522,6 +523,13 @@ class AceCodeEditor @JvmOverloads constructor(
         invokeAce("setFontFamily", quote(fontFamily))
     }
 
+    fun notifyDisplayPreferencesChanged() {
+        invokeAce("setWordWrapEnabled", EditorDisplayPreferences.isWordWrapEnabled().toString())
+        invokeAce("setLineNumbersEnabled", EditorDisplayPreferences.isLineNumbersEnabled().toString())
+        invokeAce("setBreakpointMarkersEnabled", EditorDisplayPreferences.isBreakpointMarkersEnabled().toString())
+        invokeAce("setFoldMarkersEnabled", EditorDisplayPreferences.isFoldMarkersEnabled().toString())
+    }
+
     private fun applyPinchToZoomStrategy(newKey: String?) {
         pinchZoomStrategy = PinchZoomStrategy.fromKey(newKey ?: currentPinchToZoomStrategyKey())
         pinchGestureActive = false
@@ -955,6 +963,14 @@ class AceCodeEditor @JvmOverloads constructor(
 
     internal fun bridgeLineNumbersEnabled(): Boolean {
         return AceEditorDisplayPreferences.isLineNumbersEnabled()
+    }
+
+    internal fun bridgeBreakpointMarkersEnabled(): Boolean {
+        return AceEditorDisplayPreferences.isBreakpointMarkersEnabled()
+    }
+
+    internal fun bridgeFoldMarkersEnabled(): Boolean {
+        return AceEditorDisplayPreferences.isFoldMarkersEnabled()
     }
 
     internal fun bridgeLspOptions(): String {

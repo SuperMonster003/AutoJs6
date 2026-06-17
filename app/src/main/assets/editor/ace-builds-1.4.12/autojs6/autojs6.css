@@ -109,6 +109,15 @@ body.ace-ready #editor {
         no-repeat;
 }
 
+#editor.autojs6-hide-breakpoint-markers .ace_gutter-cell.ace_breakpoint {
+    background: none !important;
+}
+
+#editor.autojs6-hide-fold-markers .ace_fold-widget {
+    display: none !important;
+    pointer-events: none !important;
+}
+
 .autojs6_debug_line {
     position: absolute;
     z-index: 5;

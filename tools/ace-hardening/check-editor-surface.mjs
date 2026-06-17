@@ -233,6 +233,8 @@ assertMatch(css, /#editor,\s*\.ace_editor\s*\{[\s\S]*JetBrains Mono/, "stable AC
 assertMatch(css, /#editor,\s*\.ace_editor\s*\{[\s\S]*-webkit-user-select:\s*text/, "ACE text selection enabled");
 assertMatch(css, /\.ace_gutter-cell\.ace_breakpoint\s*\{[\s\S]*radial-gradient/, "breakpoint gutter marker");
 assertMatch(css, /\.ace_gutter-cell\.ace_breakpoint\s*\{[\s\S]*7px center/, "breakpoint gutter marker anchor");
+assertIncludes(css, "#editor.autojs6-hide-breakpoint-markers .ace_gutter-cell.ace_breakpoint", "breakpoint marker visibility class");
+assertIncludes(css, "#editor.autojs6-hide-fold-markers .ace_fold-widget", "fold marker visibility class");
 assertMatch(css, /\.autojs6_debug_line\s*\{[\s\S]*position:\s*absolute/, "debug line marker positioning");
 assertMatch(css, /\.autojs6_debug_line\s*\{[\s\S]*z-index:\s*5/, "debug line marker z-index");
 assertMatch(css, /\.ace_gutter,\s*\.ace_gutter-cell\s*\{[\s\S]*user-select:\s*none/, "gutter selection suppression");
@@ -292,7 +294,10 @@ assertIncludes(bridge, "getBoundingClientRect().left + 24", "gutter breakpoint t
 assertIncludes(bridge, "event.stop();", "gutter click event stop");
 assertIncludes(bridge, 'callBridgeBoolean("isWordWrapEnabled", false)', "ACE word wrap preference bridge");
 assertIncludes(bridge, 'callBridgeBoolean("isLineNumbersEnabled", true)', "ACE line number preference bridge");
+assertIncludes(bridge, 'callBridgeBoolean("isBreakpointMarkersEnabled", true)', "ACE breakpoint marker preference bridge");
+assertIncludes(bridge, 'callBridgeBoolean("isFoldMarkersEnabled", true)', "ACE fold marker preference bridge");
 assertIncludes(bridge, "fixedWidthGutter: true", "fixed-width ACE gutter");
+assertIncludes(bridge, "showFoldWidgets: foldMarkersEnabled", "ACE fold widget preference option");
 assertIncludes(bridge, "function expandFoldAt(row, column)", "fold placeholder expansion helper");
 assertIncludes(bridge, "session.getFoldLine && session.getFoldLine(row)", "fold placeholder row fallback");
 assertIncludes(bridge, 'hasClassToken(target, "ace_fold-widget")', "fold placeholder handler excludes gutter fold widget");
@@ -302,6 +307,8 @@ assertIncludes(bridge, 'editor.container.addEventListener("click", expandFoldFro
 assertIncludes(bridge, 'editor.on("click", function(event)', "fold placeholder click handler");
 assertIncludes(bridge, "setWordWrapEnabled: setWordWrapEnabled", "ACE word wrap runtime API");
 assertIncludes(bridge, "setLineNumbersEnabled: setLineNumbersEnabled", "ACE line number runtime API");
+assertIncludes(bridge, "setBreakpointMarkersEnabled: setBreakpointMarkersEnabled", "ACE breakpoint marker runtime API");
+assertIncludes(bridge, "setFoldMarkersEnabled: setFoldMarkersEnabled", "ACE fold marker runtime API");
 assertIncludes(bridge, "function setFontSizeSpKeepingFocus", "ACE focus-preserving zoom helper");
 assertIncludes(bridge, "setFontSizeSpKeepingFocus: setFontSizeSpKeepingFocus", "ACE focus-preserving zoom public API");
 assertIncludes(bridge, "function insertTab()", "ACE shortcut TAB helper");

@@ -6,6 +6,7 @@ import android.text.TextWatcher
 import android.view.View
 import org.autojs.autojs.model.autocomplete.AutoCompletion
 import org.autojs.autojs.ui.edit.editor.CodeEditor
+import org.autojs.autojs.ui.edit.editor.EditorDisplayPreferences
 import org.autojs.autojs.ui.edit.editor.LayoutHelper
 import org.autojs.autojs.ui.edit.theme.Theme
 import org.autojs.autojs.ui.widget.SimpleTextWatcher
@@ -25,6 +26,10 @@ class NativeCodeEditorEngine(
     private var themeKey: String? = null
     private var searchQuery: String? = null
     private var searchOptions: EditorSearchOptions? = null
+
+    init {
+        applyDisplayPreferences()
+    }
 
     override val view: View
         get() = codeEditor
@@ -334,6 +339,18 @@ class NativeCodeEditorEngine(
 
     override fun notifyPinchToZoomStrategyChanged(newKey: String?) {
         codeEditor.notifyPinchToZoomStrategyChanged(newKey)
+    }
+
+    override fun notifyDisplayPreferencesChanged() {
+        applyDisplayPreferences()
+    }
+
+    private fun applyDisplayPreferences() {
+        codeEditor.setGutterDisplayOptions(
+            showBreakpointMarkers = EditorDisplayPreferences.isBreakpointMarkersEnabled(),
+            showLineNumbers = EditorDisplayPreferences.isLineNumbersEnabled(),
+            showFoldMarkers = EditorDisplayPreferences.isFoldMarkersEnabled(),
+        )
     }
 
     override fun addCursorChangeCallback(listener: EditorCursorChangeListener) {

@@ -89,6 +89,9 @@ class CodeEditText : AppCompatEditText {
     private var mUnmatchedBracket = -1
     private var mDebuggingLine = -1
     private var mCursorChangeCallbacks: CopyOnWriteArrayList<CursorChangeCallback>? = null
+    private var mShowBreakpointMarkers = true
+    private var mShowLineNumbers = true
+    private var mShowFoldMarkers = true
 
     // Callback when user touches the editor text area (not gutter).
     // This is used by large-file loader to avoid forcing caret to 0 after user interaction.
@@ -176,6 +179,25 @@ class CodeEditText : AppCompatEditText {
     // zh-CN: 对外暴露加载状态, 以便外部组件抑制高开销 UI 更新.
     fun isLoadingText(): Boolean = mLoadingText
 
+    fun setGutterDisplayOptions(
+        showBreakpointMarkers: Boolean,
+        showLineNumbers: Boolean,
+        showFoldMarkers: Boolean,
+    ) {
+        if (
+            mShowBreakpointMarkers == showBreakpointMarkers &&
+            mShowLineNumbers == showLineNumbers &&
+            mShowFoldMarkers == showFoldMarkers
+        ) {
+            return
+        }
+        mShowBreakpointMarkers = showBreakpointMarkers
+        mShowLineNumbers = showLineNumbers
+        mShowFoldMarkers = showFoldMarkers
+        updatePaddingForGutter()
+        invalidate()
+    }
+
     // Configure a fixed gutter width for loading.
     // zh-CN: 配置加载期间的固定 gutter 宽度.
     fun setLoadingGutterDigits(digits: Int) {
@@ -188,10 +210,9 @@ class CodeEditText : AppCompatEditText {
     private fun applyFixedGutterPaddingForLoading() {
         // Pre-allocate gutter width based on digits, e.g., "888888".
         // zh-CN: 基于位数预分配 gutter 宽度, 例如 "888888".
-        val sample = "8".repeat(mLoadingGutterDigits)
-        val gutterWidth = paint.measureText(sample) + 20
-        if (paddingLeft.toFloat() != gutterWidth) {
-            setPadding(gutterWidth.toInt(), 0, 0, 0)
+        val gutterWidth = calculateGutterWidth(mLoadingGutterDigits)
+        if (paddingLeft != gutterWidth) {
+            setPadding(gutterWidth, 0, 0, 0)
         }
     }
 
@@ -364,11 +385,24 @@ class CodeEditText : AppCompatEditText {
         }
 
         // 根据行号计算左边距 padding 留出绘制行号的空间
-        val max = lineCount.toString()
-        val gutterWidth = paint.measureText(max) + 20
-        if (paddingLeft.toFloat() != gutterWidth) {
-            setPadding(gutterWidth.toInt(), 0, 0, 0)
+        val gutterWidth = calculateGutterWidth(lineCount.toString().length)
+        if (paddingLeft != gutterWidth) {
+            setPadding(gutterWidth, 0, 0, 0)
         }
+    }
+
+    private fun calculateGutterWidth(lineNumberDigits: Int): Int {
+        if (!mShowBreakpointMarkers && !mShowLineNumbers) {
+            return 0
+        }
+        val breakpointWidth = if (mShowBreakpointMarkers) GUTTER_BREAKPOINT_WIDTH_PX else 0
+        val lineNumberWidth = if (mShowLineNumbers) {
+            val sample = "8".repeat(lineNumberDigits.coerceAtLeast(1))
+            (paint.measureText(sample) + GUTTER_LINE_NUMBER_HORIZONTAL_PADDING_PX).toInt()
+        } else {
+            0
+        }
+        return maxOf(breakpointWidth, lineNumberWidth)
     }
 
     // 该方法中内联了很多函数来提高效率, 但这是必要的吗?
@@ -391,7 +425,7 @@ class CodeEditText : AppCompatEditText {
             val lineBaseline = lineBottom - layout.getLineDescent(line)
 
             // if there is a breakpoint at this line, draw a highlight background for line number
-            if (breakpoints.containsKey(line)) {
+            if (mShowBreakpointMarkers && breakpoints.containsKey(line)) {
                 canvas.drawRect(
                     /* left = */ 0f,
                     /* top = */ lineTop.toFloat(),
@@ -400,14 +434,16 @@ class CodeEditText : AppCompatEditText {
                     /* paint = */ paint.apply { color = mTheme.breakpointColor },
                 )
             }
-            canvas.drawText(
-                /* text = */ lineNumberText,
-                /* start = */ 0,
-                /* end = */ lineNumberText.length,
-                /* x = */ 10f,
-                /* y = */ lineBaseline.toFloat(),
-                /* paint = */ paint.apply { color = mTheme.lineNumberColor },
-            )
+            if (mShowLineNumbers) {
+                canvas.drawText(
+                    /* text = */ lineNumberText,
+                    /* start = */ 0,
+                    /* end = */ lineNumberText.length,
+                    /* x = */ GUTTER_LINE_NUMBER_START_X_PX.toFloat(),
+                    /* y = */ lineBaseline.toFloat(),
+                    /* paint = */ paint.apply { color = mTheme.lineNumberColor },
+                )
+            }
 
             val lineStart = layout.getLineStart(line)
 
@@ -722,7 +758,7 @@ class CodeEditText : AppCompatEditText {
         }
 
         // 如果行号区域被按下
-        if (event.action == MotionEvent.ACTION_DOWN && event.x < paddingLeft) {
+        if (mShowBreakpointMarkers && event.action == MotionEvent.ACTION_DOWN && event.x < paddingLeft) {
             // 则计算当前行, 如果行号有效, 记录起来
             val line = layout.getLineForVertical(event.y.toInt())
             if (line >= 0) {
@@ -791,5 +827,8 @@ class CodeEditText : AppCompatEditText {
 
     companion object {
         const val TAG = "CodeEditText"
+        private const val GUTTER_BREAKPOINT_WIDTH_PX = 20
+        private const val GUTTER_LINE_NUMBER_HORIZONTAL_PADDING_PX = 20
+        private const val GUTTER_LINE_NUMBER_START_X_PX = 10
     }
 }

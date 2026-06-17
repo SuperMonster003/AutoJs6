@@ -397,6 +397,10 @@ class AceScriptEditorEngine(
         aceCodeEditor.notifyPinchToZoomStrategyChanged(newKey)
     }
 
+    override fun notifyDisplayPreferencesChanged() {
+        aceCodeEditor.notifyDisplayPreferencesChanged()
+    }
+
     override fun addCursorChangeCallback(listener: EditorCursorChangeListener) {
         cursorCallbacks += listener
     }

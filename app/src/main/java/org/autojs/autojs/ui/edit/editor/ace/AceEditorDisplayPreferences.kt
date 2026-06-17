@@ -1,28 +1,41 @@
 package org.autojs.autojs.ui.edit.editor.ace
 
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.ui.edit.editor.EditorDisplayPreferences
 
 object AceEditorDisplayPreferences {
 
-    const val KEY_ACE_WORD_WRAP_ENABLED = "key_\$_ace_word_wrap_enabled"
-    const val KEY_ACE_LINE_NUMBERS_ENABLED = "key_\$_ace_line_numbers_enabled"
-
-    private const val DEFAULT_WORD_WRAP_ENABLED = false
-    private const val DEFAULT_LINE_NUMBERS_ENABLED = true
+    const val KEY_ACE_WORD_WRAP_ENABLED = EditorDisplayPreferences.KEY_WORD_WRAP_ENABLED
+    const val KEY_ACE_LINE_NUMBERS_ENABLED = EditorDisplayPreferences.KEY_LINE_NUMBERS_ENABLED
 
     fun isWordWrapEnabled(): Boolean {
-        return Pref.getBoolean(KEY_ACE_WORD_WRAP_ENABLED, DEFAULT_WORD_WRAP_ENABLED)
+        return EditorDisplayPreferences.isWordWrapEnabled()
     }
 
     fun setWordWrapEnabled(enabled: Boolean) {
-        Pref.putBoolean(KEY_ACE_WORD_WRAP_ENABLED, enabled)
+        EditorDisplayPreferences.setWordWrapEnabled(enabled)
     }
 
     fun isLineNumbersEnabled(): Boolean {
-        return Pref.getBoolean(KEY_ACE_LINE_NUMBERS_ENABLED, DEFAULT_LINE_NUMBERS_ENABLED)
+        return EditorDisplayPreferences.isLineNumbersEnabled()
     }
 
     fun setLineNumbersEnabled(enabled: Boolean) {
-        Pref.putBoolean(KEY_ACE_LINE_NUMBERS_ENABLED, enabled)
+        EditorDisplayPreferences.setLineNumbersEnabled(enabled)
+    }
+
+    fun isBreakpointMarkersEnabled(): Boolean {
+        return EditorDisplayPreferences.isBreakpointMarkersEnabled()
+    }
+
+    fun setBreakpointMarkersEnabled(enabled: Boolean) {
+        EditorDisplayPreferences.setBreakpointMarkersEnabled(enabled)
+    }
+
+    fun isFoldMarkersEnabled(): Boolean {
+        return EditorDisplayPreferences.isFoldMarkersEnabled()
+    }
+
+    fun setFoldMarkersEnabled(enabled: Boolean) {
+        EditorDisplayPreferences.setFoldMarkersEnabled(enabled)
     }
 }

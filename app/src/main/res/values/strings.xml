@@ -80,6 +80,8 @@
     <string name="key_ace_line_numbers_enabled" translatable="false">key_$_ace_line_numbers_enabled</string>
     <string name="key_ace_lsp_enabled" translatable="false">key_$_ace_lsp_enabled</string>
     <string name="key_ace_word_wrap_enabled" translatable="false">key_$_ace_word_wrap_enabled</string>
+    <string name="key_editor_breakpoint_markers_enabled" translatable="false">key_$_editor_breakpoint_markers_enabled</string>
+    <string name="key_editor_fold_markers_enabled" translatable="false">key_$_editor_fold_markers_enabled</string>
     <string name="key_about_app_and_developer" translatable="false">key_$_about_app_and_developer</string>
     <string name="key_about_app_tips" translatable="false">key_$_about_app_tips</string>
     <string name="key_all_files_access" translatable="false">key_$_all_files_access</string>
@@ -1075,12 +1077,14 @@
     <string name="text_edit_prepare_script">Edit pre-execute script</string>
     <string name="text_edit_script">Edit script</string>
     <string name="text_editor_theme">Editor theme</string>
-    <string name="text_ace_editor_font">ACE editor font</string>
-    <string name="text_ace_editor_font_changed" formatted="true">ACE editor font switched to %s</string>
-    <string name="text_ace_read_only_mode">ACE read-only mode</string>
-    <string name="text_ace_read_only_mode_enabled">ACE read-only mode enabled</string>
-    <string name="text_ace_read_only_mode_disabled">ACE read-only mode disabled</string>
-    <string name="text_ace_line_numbers_enabled">ACE line numbers</string>
+    <string name="text_ace_editor_font">Editor font</string>
+    <string name="text_ace_editor_font_changed" formatted="true">Editor font switched to %s</string>
+    <string name="text_ace_read_only_mode">Read-only mode</string>
+    <string name="text_ace_read_only_mode_enabled">Read-only mode enabled</string>
+    <string name="text_ace_read_only_mode_disabled">Read-only mode disabled</string>
+    <string name="text_ace_line_numbers_enabled">Line numbers</string>
+    <string name="text_editor_breakpoint_markers_enabled">Breakpoint markers</string>
+    <string name="text_editor_fold_markers_enabled">Code folding markers</string>
     <string name="text_ace_action_favorites">ACE action favorites</string>
     <string name="text_ace_action_history_empty">No editor action history</string>
     <string name="text_ace_action_pin">Pin</string>
@@ -1094,7 +1098,7 @@
     <string name="text_editor_engine_switched_with_undo_notice" formatted="true">Editor engine switched to %s. Undo/redo history is not preserved across editor engines</string>
     <string name="text_ace_editor_fallback_native" formatted="true">ACE editor failed (%1$s); switched to native editor. Copy ACE diagnostics from the More menu for details</string>
     <string name="text_ace_large_file_uses_native_editor">ACE editor is routed to the native editor by the active fallback policy</string>
-    <string name="text_ace_word_wrap_enabled">ACE word wrap</string>
+    <string name="text_ace_word_wrap_enabled">Word wrap</string>
 
     <plurals name="text_ace_action_used_times">
         <item quantity="one">Used %1$d time</item>
@@ -1776,14 +1780,19 @@
     <string name="text_editor_auto_show_log_bottom_sheet_on_run">Auto show bottom log panel after running</string>
     <string name="text_editor_log_button_behavior">Editor log button behavior</string>
     <string name="summary_editor_auto_show_log_bottom_sheet_on_run">Automatically open the bottom log panel after the editor Run button starts a script</string>
-    <string name="summary_ace_line_numbers_enabled">Show line numbers in the ACE gutter.</string>
+    <string name="summary_ace_line_numbers_enabled">Show line numbers in the editor gutter.</string>
+    <string name="summary_editor_breakpoint_markers_enabled">Show breakpoint markers in the editor gutter.</string>
+    <string name="summary_editor_fold_markers_enabled">Show code folding markers in the editor gutter.</string>
+    <string name="summary_editor_setting_unavailable_for_current_engine">Not available for the current editor engine.</string>
     <string name="summary_ace_lsp_enabled">Enable experimental ACE LSP configuration; static completion remains the fallback.</string>
-    <string name="summary_ace_word_wrap_enabled">Wrap long lines inside the ACE editor viewport.</string>
+    <string name="summary_ace_word_wrap_enabled">Wrap long lines inside the editor viewport.</string>
     <string name="text_ace_lsp_enabled">ACE LSP smart completion (experimental)</string>
     <string name="description_editor_log_button_behavior_preference">Choose how the editor log button opens logs: bottom log panel or fullscreen log page.</string>
     <string name="description_editor_engine_preference">ACE is the default editor. Native remains available as a fallback and can be selected explicitly.</string>
-    <string name="description_ace_editor_font_preference">Choose the ACE editor font. JetBrains Mono is the default; Source Code Pro and system monospace are available fallbacks.</string>
-    <string name="description_ace_line_numbers_enabled_preference">Show or hide ACE gutter line numbers. Folding, breakpoints, and gutter layout remain available.</string>
+    <string name="description_ace_editor_font_preference">Choose the editor font. JetBrains Mono is the default; Source Code Pro and system monospace are available fallbacks.</string>
+    <string name="description_ace_line_numbers_enabled_preference">Show or hide editor gutter line numbers. Folding, breakpoints, and gutter layout remain available.</string>
+    <string name="description_editor_breakpoint_markers_enabled_preference">Show or hide breakpoint markers in the editor gutter. Breakpoint data and debug menu actions remain available.</string>
+    <string name="description_editor_fold_markers_enabled_preference">Show or hide code folding markers in the editor gutter. Native editor has no fold-marker surface.</string>
     <string name="description_ace_lsp_enabled_preference">Experimental ACE LSP support is off by default. The current build only exposes bridge options; if no LSP server is available, ACE keeps using static completion.</string>
-    <string name="description_ace_word_wrap_enabled_preference">Enable ACE session wrap mode for long lines. This does not modify file contents.</string>
+    <string name="description_ace_word_wrap_enabled_preference">Enable editor wrap mode for long lines. This does not modify file contents.</string>
 </resources>

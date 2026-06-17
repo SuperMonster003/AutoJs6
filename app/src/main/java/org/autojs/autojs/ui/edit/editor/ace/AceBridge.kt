@@ -63,6 +63,16 @@ class AceBridge(
     }
 
     @JavascriptInterface
+    fun isBreakpointMarkersEnabled(): Boolean {
+        return editor.bridgeBreakpointMarkersEnabled()
+    }
+
+    @JavascriptInterface
+    fun isFoldMarkersEnabled(): Boolean {
+        return editor.bridgeFoldMarkersEnabled()
+    }
+
+    @JavascriptInterface
     fun getLspOptions(): String {
         return editor.bridgeLspOptions()
     }

@@ -161,6 +161,8 @@ assertIncludes(FILES.strings, '<string name="key_editor_engine_ace" translatable
 assertIncludes(FILES.stringsZh, 'name="text_editor_engine"', "Simplified Chinese editor engine string");
 assertIncludes(FILES.stringsZh, 'name="text_ace_word_wrap_enabled"', "Simplified Chinese ACE word wrap string");
 assertIncludes(FILES.stringsZh, 'name="text_ace_line_numbers_enabled"', "Simplified Chinese ACE line number string");
+assertIncludes(FILES.stringsZh, 'name="text_editor_breakpoint_markers_enabled"', "Simplified Chinese editor breakpoint marker string");
+assertIncludes(FILES.stringsZh, 'name="text_editor_fold_markers_enabled"', "Simplified Chinese editor fold marker string");
 assertOrder(
   FILES.arrays,
   [
@@ -181,6 +183,8 @@ assertOrder(
     'app:key="@string/key_ace_editor_font"',
     'app:key="@string/key_ace_word_wrap_enabled"',
     'app:key="@string/key_ace_line_numbers_enabled"',
+    'app:key="@string/key_editor_breakpoint_markers_enabled"',
+    'app:key="@string/key_editor_fold_markers_enabled"',
     'app:key="@string/key_ace_lsp_enabled"',
   ],
   "code editor preference order",

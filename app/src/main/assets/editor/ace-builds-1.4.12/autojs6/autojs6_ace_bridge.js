@@ -12,6 +12,8 @@
     var dirty = false;
     var suppressChange = false;
     var breakpoints = [];
+    var breakpointMarkersEnabled = true;
+    var foldMarkersEnabled = true;
     var debugMarker = null;
     var storedReplacement = "";
     var scrollNotifyTimer = null;
@@ -1264,6 +1266,31 @@
         notifyStateChanged("lineNumbersChanged");
     }
 
+    function setEditorContainerClass(className, enabled) {
+        if (editor && editor.container && editor.container.classList) {
+            editor.container.classList.toggle(className, !!enabled);
+        }
+    }
+
+    function setBreakpointMarkersEnabled(enabled) {
+        breakpointMarkersEnabled = !!enabled;
+        setEditorContainerClass("autojs6-hide-breakpoint-markers", !breakpointMarkersEnabled);
+        scheduleResize("breakpoint_markers_changed");
+        notifyStateChanged("breakpointMarkersChanged");
+    }
+
+    function setFoldMarkersEnabled(enabled) {
+        foldMarkersEnabled = !!enabled;
+        try {
+            editor.setOption("showFoldWidgets", foldMarkersEnabled);
+        } catch (ignore) {
+            // ACE 1.4.x also honors the CSS fallback below.
+        }
+        setEditorContainerClass("autojs6-hide-fold-markers", !foldMarkersEnabled);
+        scheduleResize("fold_markers_changed");
+        notifyStateChanged("foldMarkersChanged");
+    }
+
     function setReadOnlyMode(readOnly) {
         readOnly = !!readOnly;
         editor.setReadOnly(readOnly);
@@ -1421,6 +1448,8 @@
         var initialTheme = callBridge("getTheme") || "ace/theme/textmate";
         var wordWrapEnabled = callBridgeBoolean("isWordWrapEnabled", false);
         var lineNumbersEnabled = callBridgeBoolean("isLineNumbersEnabled", true);
+        breakpointMarkersEnabled = callBridgeBoolean("isBreakpointMarkersEnabled", true);
+        foldMarkersEnabled = callBridgeBoolean("isFoldMarkersEnabled", true);
         applyThemeClass(initialTheme);
         editor.setTheme(initialTheme);
         editor.setOptions({
@@ -1429,12 +1458,15 @@
             enableSnippets: true,
             showPrintMargin: false,
             showLineNumbers: lineNumbersEnabled,
+            showFoldWidgets: foldMarkersEnabled,
             fixedWidthGutter: true,
             highlightActiveLine: true,
             wrap: wordWrapEnabled,
             fontFamily: callBridge("getFontFamily") || DEFAULT_FONT_FAMILY
         });
         session.setUseWrapMode(wordWrapEnabled);
+        setEditorContainerClass("autojs6-hide-breakpoint-markers", !breakpointMarkersEnabled);
+        setEditorContainerClass("autojs6-hide-fold-markers", !foldMarkersEnabled);
         editor.setFontSize("14px");
 
         if (global.AutoJsAceCompleter) {
@@ -1468,6 +1500,9 @@
         });
 
         editor.on("guttermousedown", function(event) {
+            if (!breakpointMarkersEnabled) {
+                return;
+            }
             var target = event.domEvent.target;
             if (!target || target.className.indexOf("ace_gutter-cell") === -1) {
                 return;
@@ -1531,6 +1566,8 @@
             setFontFamily: setFontFamily,
             setWordWrapEnabled: setWordWrapEnabled,
             setLineNumbersEnabled: setLineNumbersEnabled,
+            setBreakpointMarkersEnabled: setBreakpointMarkersEnabled,
+            setFoldMarkersEnabled: setFoldMarkersEnabled,
             scheduleResize: scheduleResize,
             requestFirstPaint: requestFirstPaint,
             restoreScroll: restoreScroll,

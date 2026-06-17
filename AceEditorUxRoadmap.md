@@ -172,7 +172,7 @@ Notes:
 - [ ] Add word wrap support to the Native editor if technically feasible.
 - [ ] Add a wrap indentation style setting: continuation indent, default, and
   classic flush continuation.
-- [ ] Expand line-number visibility into independent gutter visibility controls
+- [x] Expand line-number visibility into independent gutter visibility controls
   for breakpoints, line numbers, and fold markers across ACE and Native where
   feasible.
 - [x] Slightly enlarge ACE shortcut arrow icons to better match Auto.js Pro.
@@ -200,3 +200,11 @@ Acceptance:
 - [ ] Native and ACE editor settings share engine-neutral service boundaries and
   keep unsupported engine-specific options disabled instead of hidden on the
   dedicated settings surface.
+
+Notes:
+
+- Breakpoint markers, line numbers, and fold markers now use shared editor
+  display preferences. ACE applies all three through bridge runtime APIs and CSS
+  fallbacks; Native applies breakpoint marker and line-number visibility, while
+  fold markers remain disabled/no-op because the Native editor has no fold
+  marker surface.
