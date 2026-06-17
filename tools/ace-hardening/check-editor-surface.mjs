@@ -241,6 +241,8 @@ assertMatch(css, /body\.autojs6-native-action-mode \.ace_mobile-menu\s*\{[\s\S]*
 assertMatch(css, /body\.autojs6-native-action-mode \.ace_mobile-menu\s*\{[\s\S]*pointer-events:\s*none !important/, "suppressed ACE mobile menu cannot steal touch input");
 assertMatch(css, /body\.autojs6-selection-menu-suppressed \.ace_mobile-menu\s*\{[\s\S]*display:\s*none !important/, "stale selection-menu suppression hides ACE mobile menu");
 assertMatch(css, /body\.autojs6-selection-menu-suppressed \.ace_mobile-menu\s*\{[\s\S]*pointer-events:\s*none !important/, "stale selection-menu suppression blocks ACE mobile menu touch input");
+assertMatch(css, /body\.autojs6-host-selection-action-mode \.ace_mobile-menu\s*\{[\s\S]*display:\s*none !important/, "host selection action-mode hides ACE mobile menu by default");
+assertMatch(css, /body\.autojs6-host-selection-action-mode \.ace_mobile-menu\s*\{[\s\S]*pointer-events:\s*none !important/, "host selection action-mode blocks ACE mobile menu touch input");
 assertMatch(css, /body\.ace-theme-dark \.ace_marker-layer \.ace_selection\s*\{[\s\S]*rgba\(88,\s*166,\s*255,\s*0\.42\)/, "dark selection contrast");
 assertMatch(css, /\.autojs6_hover_tooltip\s*\{[\s\S]*pointer-events:\s*none/, "ACE hover tooltip must not steal touch input");
 assertMatch(css, /body\.ace-theme-dark \.autojs6_hover_tooltip\s*\{[\s\S]*background:\s*#20242b/, "ACE hover tooltip dark style");
@@ -263,10 +265,13 @@ assertIncludes(bridge, 'callBridge("notifyEvent", ["firstPaint", lightweightStat
 assertIncludes(bridge, "var nativeActionModeActive = false;", "native action-mode state flag");
 assertIncludes(bridge, "var selectionMenuSuppressed = false;", "selection menu suppression state flag");
 assertIncludes(bridge, "var ACTION_MODE_NOTIFY_THROTTLE_MS = 0;", "selection action-mode immediate handoff");
+assertIncludes(bridge, "var RIGHT_EDGE_GESTURE_GUARD_CSS_PX = 72;", "DOM right-edge gesture guard width");
 assertIncludes(bridge, "function setNativeActionModeActive(active)", "native action-mode state class helper");
 assertIncludes(bridge, 'document.body.classList.toggle("autojs6-native-action-mode", active)', "native action-mode host class toggle");
 assertIncludes(bridge, "function suppressSelectionActionModeMenu(reason)", "stale selection menu suppression helper");
 assertIncludes(bridge, "suppressSelectionActionModeMenu: suppressSelectionActionModeMenu", "native pointer guard selection menu suppression API");
+assertIncludes(bridge, "function handleRightEdgeGestureGuardTouch(event)", "DOM right-edge gesture guard");
+assertIncludes(bridge, 'document.addEventListener(type, handleRightEdgeGestureGuardTouch, true)', "DOM right-edge gesture capture listener");
 assertIncludes(bridge, "function wrapScrollMethod(owner, methodName)", "scroll method hook wrapper");
 assertIncludes(bridge, 'wrapScrollMethod(editor.renderer, "scrollToY")', "renderer vertical scroll hook");
 assertIncludes(bridge, 'wrapScrollMethod(session, "setScrollTop")', "session vertical scroll hook");
@@ -288,6 +293,8 @@ assertIncludes(bridge, "fixedWidthGutter: true", "fixed-width ACE gutter");
 assertIncludes(bridge, "function expandFoldAt(row, column)", "fold placeholder expansion helper");
 assertIncludes(bridge, "session.getFoldLine && session.getFoldLine(row)", "fold placeholder row fallback");
 assertIncludes(bridge, "function isFoldPlaceholderTarget(target)", "fold placeholder target helper");
+assertIncludes(bridge, "function expandFoldFromDomEvent(event)", "fold placeholder DOM capture expansion");
+assertIncludes(bridge, 'editor.container.addEventListener("click", expandFoldFromDomEvent, true)', "fold placeholder click capture listener");
 assertIncludes(bridge, 'editor.on("click", function(event)', "fold placeholder click handler");
 assertIncludes(bridge, "setWordWrapEnabled: setWordWrapEnabled", "ACE word wrap runtime API");
 assertIncludes(bridge, "setLineNumbersEnabled: setLineNumbersEnabled", "ACE line number runtime API");
@@ -298,7 +305,9 @@ assertIncludes(bridge, "function isCompletionPopupOpen()", "ACE completion popup
 assertIncludes(bridge, "function moveCompletionSelectionOrCursor(delta)", "ACE completion selection shortcut helper");
 assertIncludes(bridge, "function acceptCompletionOrInsertTab()", "ACE completion accept shortcut helper");
 assertIncludes(bridge, "function handleEscapeKey()", "ACE shortcut ESC helper");
+assertIncludes(bridge, "function jumpToOffset(offset)", "ACE absolute cursor offset helper");
 assertIncludes(bridge, "insertTab: insertTab", "ACE shortcut TAB public API");
+assertIncludes(bridge, "jumpToOffset: jumpToOffset", "ACE absolute cursor offset public API");
 assertIncludes(bridge, "acceptCompletionOrInsertTab: acceptCompletionOrInsertTab", "ACE completion accept public API");
 assertIncludes(bridge, "moveCompletionSelectionOrCursor: moveCompletionSelectionOrCursor", "ACE completion selection public API");
 assertIncludes(bridge, "handleEscapeKey: handleEscapeKey", "ACE shortcut ESC public API");
@@ -367,6 +376,8 @@ assertIncludes(aceCodeEditor, "fun moveCompletionSelectionOrCursor", "native ACE
 assertIncludes(aceCodeEditor, "fun handleEscapeKey()", "native ACE shortcut ESC bridge call");
 assertIncludes(aceCodeEditor, "handleSoftKeyboardCursorKey", "ACE soft-keyboard cursor key handler");
 assertIncludes(aceCodeEditor, "handleSoftKeyboardCursorSelection", "ACE soft-keyboard InputConnection cursor selection handler");
+assertIncludes(aceCodeEditor, "flushPendingImeCursorSelection", "ACE IME cursor offset coalescing");
+assertIncludes(aceCodeEditor, 'invokeAce("jumpToOffset", offset.toString())', "ACE IME cursor absolute offset dispatch");
 assertIncludes(aceCodeEditor, "InputConnectionWrapper", "ACE WebView InputConnection wrapper");
 assertIncludes(aceCodeEditor, "override fun setSelection(start: Int, end: Int)", "ACE IME setSelection cursor interception");
 assertIncludes(aceCodeEditor, '"ime_cursor_selection"', "ACE IME setSelection diagnostics event");
@@ -374,10 +385,14 @@ assertIncludes(aceCodeEditor, "KeyEvent.KEYCODE_DPAD_LEFT", "ACE soft-keyboard c
 assertIncludes(aceCodeEditor, "KeyEvent.KEYCODE_DPAD_RIGHT", "ACE soft-keyboard cursor right key");
 assertIncludes(aceCodeEditor, "KeyEvent.FLAG_SOFT_KEYBOARD", "ACE soft-keyboard cursor source guard");
 assertIncludes(aceCodeEditor, "startingHostSelectionActionMode", "ACE host-owned action-mode guard");
+assertIncludes(aceCodeEditor, "pendingSelectionActionModeRequest", "ACE touch-deferred action mode request");
+assertIncludes(aceCodeEditor, "hasRecentTextTouchAnchor", "ACE touch-anchored action-mode rect");
+assertIncludes(aceCodeEditor, "invalidateContentRect()", "ACE floating action-mode rect invalidation");
 assertIncludes(aceCodeEditor, "override fun startActionMode(callback: ActionMode.Callback", "ACE WebView action-mode suppression");
 assertIncludes(aceCodeEditor, '"webview_action_mode_suppressed"', "ACE WebView action-mode suppression diagnostics");
 assertIncludes(aceCodeEditor, "suppressSelectionActionModeForPointerGuard", "ACE right-edge gesture selection suppression");
 assertIncludes(aceCodeEditor, "val insetOrFallback = if (systemGestureInsetRight > 0)", "ACE right-edge gesture fallback width");
+assertIncludes(aceCodeEditor, "RIGHT_EDGE_BACK_GESTURE_MIN_GUARD_DP = 72f", "ACE right-edge gesture widened fallback");
 
 assertIncludes(aceScriptEditorEngine, "notifyPinchToZoomStrategyChanged", "ACE pinch zoom strategy forwarding");
 assertIncludes(aceScriptEditorEngine, "onTextSizeSpChangedByGesture", "ACE pinch text-size state callback");

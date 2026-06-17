@@ -33,12 +33,15 @@
     var firstPaintNotified = false;
     var lastSelectionBrowseScrollAt = 0;
     var programmaticScrollUntil = 0;
+    var rightEdgeGestureGuardActive = false;
+    var rightEdgeGestureGuardNotified = false;
     var DEFAULT_FONT_FAMILY = '"JetBrains Mono", "Source Code Pro", monospace';
     var STATE_NOTIFY_THROTTLE_MS = 100;
     var TEXT_NOTIFY_THROTTLE_MS = 100;
     var CURSOR_NOTIFY_THROTTLE_MS = 50;
     var ACTION_MODE_NOTIFY_THROTTLE_MS = 0;
     var SELECTION_BROWSE_REVEAL_SUPPRESS_MS = 1600;
+    var RIGHT_EDGE_GESTURE_GUARD_CSS_PX = 72;
 
     function callBridge(name, args) {
         try {
@@ -290,6 +293,71 @@
                 JSON.stringify({ reason: String(reason || "") })
             ]);
         }
+    }
+
+    function rightEdgeGestureGuardWidth() {
+        var viewportWidth = Math.max(
+            1,
+            Number(global.innerWidth) ||
+                Number(document.documentElement && document.documentElement.clientWidth) ||
+                1
+        );
+        return Math.min(Math.round(viewportWidth * 0.24), RIGHT_EDGE_GESTURE_GUARD_CSS_PX);
+    }
+
+    function stopDomTouchEvent(event) {
+        if (!event) {
+            return;
+        }
+        if (event.cancelable !== false && event.preventDefault) {
+            event.preventDefault();
+        }
+        if (event.stopPropagation) {
+            event.stopPropagation();
+        }
+        if (event.stopImmediatePropagation) {
+            event.stopImmediatePropagation();
+        }
+    }
+
+    function handleRightEdgeGestureGuardTouch(event) {
+        var type = event && event.type;
+        if (type === "touchstart") {
+            var touch = event.touches && event.touches[0];
+            var viewportWidth = Math.max(
+                1,
+                Number(global.innerWidth) ||
+                    Number(document.documentElement && document.documentElement.clientWidth) ||
+                    1
+            );
+            rightEdgeGestureGuardActive = !!touch &&
+                Number(touch.clientX) >= viewportWidth - rightEdgeGestureGuardWidth();
+            rightEdgeGestureGuardNotified = false;
+        }
+        if (rightEdgeGestureGuardActive) {
+            suppressSelectionActionModeMenu("right_edge_back_gesture_dom");
+            stopDomTouchEvent(event);
+            if (!rightEdgeGestureGuardNotified) {
+                rightEdgeGestureGuardNotified = true;
+                callBridge("notifyEvent", [
+                    "rightEdgeGestureDomGuard",
+                    JSON.stringify({ type: String(type || "") })
+                ]);
+            }
+        }
+        if (type === "touchend" || type === "touchcancel") {
+            rightEdgeGestureGuardActive = false;
+            rightEdgeGestureGuardNotified = false;
+        }
+    }
+
+    function installRightEdgeGestureGuard() {
+        if (!document || !document.addEventListener) {
+            return;
+        }
+        ["touchstart", "touchmove", "touchend", "touchcancel"].forEach(function(type) {
+            document.addEventListener(type, handleRightEdgeGestureGuardTouch, true);
+        });
     }
 
     function getActionModeFallbackRect() {
@@ -929,6 +997,19 @@
         jumpTo(0, 0);
     }
 
+    function jumpToOffset(offset) {
+        if (!editor || !session) {
+            return false;
+        }
+        offset = Math.max(0, Math.min(Number(offset) || 0, session.getValue().length));
+        editor.focus();
+        editor.clearSelection();
+        editor.moveCursorToPosition(indexToPosition(offset));
+        notifyCursorChanged();
+        notifySelectionChanged();
+        return true;
+    }
+
     function jumpToEnd() {
         var row = Math.max(0, session.getLength() - 1);
         jumpTo(row, getLine(row).length);
@@ -1180,6 +1261,42 @@
         return false;
     }
 
+    function stopFoldPlaceholderClick(event) {
+        if (!event) {
+            return;
+        }
+        if (event.preventDefault) {
+            event.preventDefault();
+        }
+        if (event.stopPropagation) {
+            event.stopPropagation();
+        }
+        if (event.stopImmediatePropagation) {
+            event.stopImmediatePropagation();
+        }
+    }
+
+    function expandFoldFromDomEvent(event) {
+        if (!editor || !editor.renderer || !isFoldPlaceholderTarget(event && event.target)) {
+            return false;
+        }
+        var position = editor.renderer.screenToTextCoordinates &&
+            editor.renderer.screenToTextCoordinates(event.clientX, event.clientY);
+        position = position || editor.getCursorPosition();
+        if (expandFoldAt(position.row, position.column) || expandFoldAt(position.row, 0)) {
+            stopFoldPlaceholderClick(event);
+            return true;
+        }
+        return false;
+    }
+
+    function installFoldPlaceholderClickCapture() {
+        if (!editor || !editor.container || !editor.container.addEventListener) {
+            return;
+        }
+        editor.container.addEventListener("click", expandFoldFromDomEvent, true);
+    }
+
     function initEditor() {
         if (!global.ace) {
             notifyFatalError({
@@ -1202,6 +1319,11 @@
         // ACE 1.4.12 ext-language_tools references a global `editor` in insertMatch().
         global.editor = editor;
         session = editor.getSession();
+        if (document && document.body && document.body.classList) {
+            document.body.classList.add("autojs6-host-selection-action-mode");
+        }
+        installRightEdgeGestureGuard();
+        installFoldPlaceholderClickCapture();
         session.setMode("ace/mode/javascript");
         session.setUseWorker(false);
         session.setTabSize(4);
@@ -1294,6 +1416,7 @@
             insertAtLine: insertAtLine,
             appendTextChunk: appendTextChunk,
             jumpTo: jumpTo,
+            jumpToOffset: jumpToOffset,
             jumpToStart: jumpToStart,
             jumpToEnd: jumpToEnd,
             jumpToLineStart: jumpToLineStart,

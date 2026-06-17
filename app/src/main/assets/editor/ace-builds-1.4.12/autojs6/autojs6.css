@@ -139,6 +139,12 @@ body.autojs6-selection-menu-suppressed .ace_mobile-menu {
     pointer-events: none !important;
 }
 
+body.autojs6-host-selection-action-mode .ace_mobile-menu {
+    display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
 .autojs6_hover_tooltip {
     position: fixed;
     z-index: 30;

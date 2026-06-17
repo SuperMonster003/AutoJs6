@@ -225,7 +225,8 @@ class AceCodeEditorSmokeTest {
             val state = evaluateJsonObject(editor, ACTION_MODE_MENU_STATE_SCRIPT)
             !state.getBoolean("nativeActionModeActive") &&
                 !state.getBoolean("selectionMenuSuppressed") &&
-                state.getString("mobileMenuDisplay") != "none"
+                state.getBoolean("hostSelectionActionMode") &&
+                state.getString("mobileMenuDisplay") == "none"
         }
     }
 
@@ -271,7 +272,8 @@ class AceCodeEditorSmokeTest {
             val state = evaluateJsonObject(editor, ACTION_MODE_MENU_STATE_SCRIPT)
             !state.getBoolean("nativeActionModeActive") &&
                 !state.getBoolean("selectionMenuSuppressed") &&
-                state.getString("mobileMenuDisplay") != "none"
+                state.getBoolean("hostSelectionActionMode") &&
+                state.getString("mobileMenuDisplay") == "none"
         }
     }
 
@@ -314,7 +316,7 @@ class AceCodeEditorSmokeTest {
         assertFalse(
             runOnMainSync {
                 editor.shouldGuardRightEdgeBackGestureTouchStartForTest(
-                    x = viewWidth - 200f,
+                    x = viewWidth - 320f,
                     viewWidth = viewWidth,
                     systemGestureInsetRight = 0,
                 )
@@ -1560,6 +1562,7 @@ class AceCodeEditorSmokeTest {
                 return JSON.stringify({
                     nativeActionModeActive: document.body.classList.contains("autojs6-native-action-mode"),
                     selectionMenuSuppressed: document.body.classList.contains("autojs6-selection-menu-suppressed"),
+                    hostSelectionActionMode: document.body.classList.contains("autojs6-host-selection-action-mode"),
                     mobileMenuDisplay: style.display,
                     mobileMenuPointerEvents: style.pointerEvents
                 });
