@@ -162,6 +162,12 @@ assertIncludes(
 );
 assertIncludes(FILES.strings, '<string name="key_editor_engine_native" translatable="false">native</string>');
 assertIncludes(FILES.strings, '<string name="key_editor_engine_ace" translatable="false">ace</string>');
+assertIncludes(FILES.strings, '<string name="entry_editor_engine_ace">Web editor (experimental)</string>');
+assertIncludes(FILES.strings, '<string name="text_ace_lsp_enabled">LSP smart completion (experimental)</string>');
+assertIncludes(FILES.strings, '<string name="summary_ace_lsp_enabled">Enable experimental LSP configuration; static completion remains the fallback.</string>');
+assertIncludes(FILES.stringsZh, '<string name="entry_editor_engine_ace">Web 编辑器 (实验性)</string>');
+assertIncludes(FILES.stringsZh, '<string name="text_ace_lsp_enabled">LSP 智能补全 (实验性)</string>');
+assertIncludes(FILES.stringsZh, '<string name="summary_ace_lsp_enabled">启用实验性的 LSP 配置；静态补全仍作为 fallback。</string>');
 assertIncludes(FILES.stringsZh, 'name="text_editor_engine"', "Simplified Chinese editor engine string");
 assertIncludes(FILES.stringsZh, 'name="text_ace_word_wrap_enabled"', "Simplified Chinese ACE word wrap string");
 assertIncludes(FILES.stringsZh, 'name="text_ace_line_numbers_enabled"', "Simplified Chinese ACE line number string");

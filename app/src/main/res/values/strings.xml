@@ -487,7 +487,7 @@
     <string name="entry_editor_pinch_to_zoom_change_text_size">Change text size</string>
     <string name="entry_editor_pinch_to_zoom_disable">Disable</string>
     <string name="entry_editor_pinch_to_zoom_scale_view">Scale view</string>
-    <string name="entry_editor_engine_ace">ACE editor (experimental)</string>
+    <string name="entry_editor_engine_ace">Web editor (experimental)</string>
     <string name="entry_editor_engine_native">Native editor</string>
     <string name="entry_ace_editor_font_jetbrains_mono">JetBrains Mono</string>
     <string name="entry_ace_editor_font_source_code_pro">Source Code Pro</string>
@@ -1793,15 +1793,15 @@
     <string name="summary_editor_breakpoint_markers_enabled">Show breakpoint markers in the editor gutter.</string>
     <string name="summary_editor_fold_markers_enabled">Show code folding markers in the editor gutter.</string>
     <string name="summary_editor_setting_unavailable_for_current_engine">Not available for the current editor engine.</string>
-    <string name="summary_ace_lsp_enabled">Enable experimental ACE LSP configuration; static completion remains the fallback.</string>
+    <string name="summary_ace_lsp_enabled">Enable experimental LSP configuration; static completion remains the fallback.</string>
     <string name="summary_ace_word_wrap_enabled">Wrap long lines inside the editor viewport.</string>
-    <string name="text_ace_lsp_enabled">ACE LSP smart completion (experimental)</string>
+    <string name="text_ace_lsp_enabled">LSP smart completion (experimental)</string>
     <string name="description_editor_log_button_behavior_preference">Choose how the editor log button opens logs: bottom log panel or fullscreen log page.</string>
-    <string name="description_editor_engine_preference">ACE is the default editor. Native remains available as a fallback and can be selected explicitly.</string>
+    <string name="description_editor_engine_preference">The Web editor is the default. Native remains available as a fallback and can be selected explicitly.</string>
     <string name="description_ace_editor_font_preference">Choose the editor font. JetBrains Mono is the default; Source Code Pro and system monospace are available fallbacks.</string>
     <string name="description_ace_line_numbers_enabled_preference">Show or hide editor gutter line numbers. Folding, breakpoints, and gutter layout remain available.</string>
     <string name="description_editor_breakpoint_markers_enabled_preference">Show or hide breakpoint markers in the editor gutter. Breakpoint data and debug menu actions remain available.</string>
     <string name="description_editor_fold_markers_enabled_preference">Show or hide code folding markers in the editor gutter. Native editor has no fold-marker surface.</string>
-    <string name="description_ace_lsp_enabled_preference">Experimental ACE LSP support is off by default. The current build only exposes bridge options; if no LSP server is available, ACE keeps using static completion.</string>
+    <string name="description_ace_lsp_enabled_preference">Experimental LSP support is off by default. The current build only exposes bridge options; if no LSP server is available, the editor keeps using static completion.</string>
     <string name="description_ace_word_wrap_enabled_preference">Enable editor wrap mode for long lines. This does not modify file contents.</string>
 </resources>

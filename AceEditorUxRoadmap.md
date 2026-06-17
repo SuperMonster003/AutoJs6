@@ -185,7 +185,7 @@ Notes:
 - [x] Reorganize global settings and editor overflow menus so top-level editor
   settings stay concise and advanced options move into the dedicated page or
   dialog.
-- [ ] Keep all code editor setting labels engine-neutral; show unsupported
+- [x] Keep all code editor setting labels engine-neutral; show unsupported
   options disabled with a hint explaining that they are not available for the
   current engine.
 - [x] Ensure Clear is undoable and enables the undo affordance after clearing
@@ -214,3 +214,6 @@ Notes:
   common editor actions at the top level and moves advanced editor preferences
   behind the Settings entry; the in-editor settings dialog embeds the same
   settings fragment as the standalone page.
+- Settings labels now avoid exposing the ACE implementation name on the
+  dedicated settings surface. Engine-specific preferences stay visible but
+  disabled with a current-engine availability hint when they do not apply.

@@ -1436,7 +1436,7 @@
     <string name="entry_ace_editor_font_jetbrains_mono">JetBrains Mono</string>
     <string name="entry_ace_editor_font_source_code_pro">Source Code Pro</string>
     <string name="entry_ace_editor_font_system_monospace">系统等宽字体</string>
-    <string name="entry_editor_engine_ace">ACE 编辑器 (实验性)</string>
+    <string name="entry_editor_engine_ace">Web 编辑器 (实验性)</string>
     <string name="entry_editor_engine_native">原生编辑器</string>
     <string name="text_ace_diagnostics_copied">ACE 诊断信息已复制到剪贴板</string>
     <string name="text_ace_editor_debug">ACE 编辑器调试</string>
@@ -1467,7 +1467,7 @@
     <string name="text_ace_line_numbers_enabled">行号</string>
     <string name="text_editor_breakpoint_markers_enabled">断点标记</string>
     <string name="text_editor_fold_markers_enabled">代码折叠标记</string>
-    <string name="text_ace_lsp_enabled">ACE LSP 智能补全 (实验性)</string>
+    <string name="text_ace_lsp_enabled">LSP 智能补全 (实验性)</string>
     <string name="text_ace_set_sample">设置示例</string>
     <string name="text_ace_word_wrap_enabled">自动换行</string>
     <string name="text_editor_engine">编辑器引擎</string>
@@ -1477,15 +1477,15 @@
     <string name="summary_editor_breakpoint_markers_enabled">在编辑器边栏中显示断点标记。</string>
     <string name="summary_editor_fold_markers_enabled">在编辑器边栏中显示代码折叠标记。</string>
     <string name="summary_editor_setting_unavailable_for_current_engine">不适用于当前编辑器引擎。</string>
-    <string name="summary_ace_lsp_enabled">启用实验性的 ACE LSP 配置；静态补全仍作为 fallback。</string>
+    <string name="summary_ace_lsp_enabled">启用实验性的 LSP 配置；静态补全仍作为 fallback。</string>
     <string name="summary_ace_word_wrap_enabled">在编辑器可视区域内对长行自动换行。</string>
     <string name="description_ace_editor_font_preference">选择编辑器字体。JetBrains Mono 为默认字体；Source Code Pro 和系统等宽字体作为 fallback。</string>
     <string name="description_ace_line_numbers_enabled_preference">显示或隐藏编辑器边栏行号。代码折叠、断点和边栏布局仍然可用。</string>
     <string name="description_editor_breakpoint_markers_enabled_preference">显示或隐藏编辑器边栏中的断点标记。断点数据和调试菜单操作仍然可用。</string>
     <string name="description_editor_fold_markers_enabled_preference">显示或隐藏编辑器边栏中的代码折叠标记。原生编辑器没有折叠标记显示面。</string>
-    <string name="description_ace_lsp_enabled_preference">实验性 ACE LSP 支持默认关闭。当前版本仅暴露桥接配置；如果没有可用的 LSP server，ACE 会继续使用静态补全。</string>
+    <string name="description_ace_lsp_enabled_preference">实验性 LSP 支持默认关闭。当前版本仅暴露桥接配置；如果没有可用的 LSP server，编辑器会继续使用静态补全。</string>
     <string name="description_ace_word_wrap_enabled_preference">为长行启用编辑器自动换行模式。此设置不会修改文件内容。</string>
-    <string name="description_editor_engine_preference">ACE 是默认编辑器。原生编辑器仍可作为 fallback 使用，也可以手动选择。</string>
+    <string name="description_editor_engine_preference">Web 编辑器是默认编辑器。原生编辑器仍可作为 fallback 使用，也可以手动选择。</string>
     <string name="text_code_editor">代码编辑器</string>
     <string name="text_code_editor_settings">代码编辑器设置</string>
     <string name="text_editor_assistance">辅助</string>
