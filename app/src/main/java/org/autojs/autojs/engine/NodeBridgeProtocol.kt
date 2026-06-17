@@ -17,6 +17,7 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.net.Uri
 import android.os.Build
+import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.PowerManager
@@ -490,6 +491,10 @@ object NodeBridgeModules {
         "clickText",
         "findOne",
         "findAll",
+        "longClick",
+        "setText",
+        "scrollForward",
+        "scrollBackward",
     )
     val mediaProjectionMethods = setOf("requestScreenCapture", "nextImage", "stop")
     val imageModules = setOf(IMAGE, IMAGES)
@@ -799,6 +804,22 @@ class AndroidNodeBridgeCapabilityProvider(
             "findOne" -> dispatchAccessibilityFindOne(request, service)
             "findAll" -> dispatchAccessibilityFindAll(request, service)
             "click" -> dispatchAccessibilityClick(request, service)
+            "longClick" -> dispatchAccessibilitySelectorAction(
+                request,
+                service,
+                AccessibilityNodeInfo.ACTION_LONG_CLICK,
+            )
+            "setText" -> dispatchAccessibilitySetText(request, service)
+            "scrollForward" -> dispatchAccessibilitySelectorAction(
+                request,
+                service,
+                AccessibilityNodeInfo.ACTION_SCROLL_FORWARD,
+            )
+            "scrollBackward" -> dispatchAccessibilitySelectorAction(
+                request,
+                service,
+                AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD,
+            )
             else -> unavailable(request)
         }
     }
@@ -859,6 +880,41 @@ class AndroidNodeBridgeCapabilityProvider(
         return NodeBridgeResponse.success(request.id, node?.clickAccessibilityNode().toString())
     }
 
+    private fun dispatchAccessibilitySelectorAction(
+        request: NodeBridgeRequest,
+        service: AutoJsAccessibilityService,
+        action: Int,
+    ): NodeBridgeResponse {
+        val selector = request.args().optJSONObject(0) ?: return NodeBridgeResponse.failure(
+            request.id,
+            NodeBridgeError.permissionDenied(
+                message = "AutoJs6 accessibility bridge supports ${request.method} only through selector descriptors.",
+                module = request.module,
+                method = request.method,
+            ),
+        )
+        val node = service.findAccessibilityNodes(selector).firstOrNull()
+        return NodeBridgeResponse.success(request.id, node?.performAccessibilityNodeAction(action).toString())
+    }
+
+    private fun dispatchAccessibilitySetText(
+        request: NodeBridgeRequest,
+        service: AutoJsAccessibilityService,
+    ): NodeBridgeResponse {
+        val args = request.args()
+        val selector = args.optJSONObject(0) ?: return NodeBridgeResponse.failure(
+            request.id,
+            NodeBridgeError.permissionDenied(
+                message = "AutoJs6 accessibility bridge supports setText only through selector descriptors.",
+                module = request.module,
+                method = request.method,
+            ),
+        )
+        val text = args.optString(1)
+        val node = service.findAccessibilityNodes(selector).firstOrNull()
+        return NodeBridgeResponse.success(request.id, node?.setAccessibilityNodeText(text).toString())
+    }
+
     private fun NodeBridgeRequest.args(): JSONArray {
         return runCatching { JSONArray(argsJson) }.getOrDefault(JSONArray())
     }
@@ -869,16 +925,8 @@ class AndroidNodeBridgeCapabilityProvider(
 
     private fun AutoJsAccessibilityService.findAccessibilityNodes(selector: JSONObject): List<AccessibilityNodeInfo> {
         val root = accessibilityRoot() ?: return emptyList()
-        val text = selector.optString("text").takeIf { it.isNotBlank() }
-        if (text != null) {
-            return root.findAccessibilityNodeInfosByText(text).orEmpty()
-        }
-        val textContains = selector.optString("textContains").takeIf { it.isNotBlank() }
-        if (textContains != null) {
-            return root.findAccessibilityNodeInfosByText(textContains).orEmpty()
-        }
         val nodes = mutableListOf<AccessibilityNodeInfo>()
-        collectAccessibilityNodes(root, selector, nodes)
+        collectAccessibilityNodes(root, selector, nodes, depth = 0)
         return nodes
     }
 
@@ -886,36 +934,157 @@ class AndroidNodeBridgeCapabilityProvider(
         node: AccessibilityNodeInfo?,
         selector: JSONObject,
         output: MutableList<AccessibilityNodeInfo>,
+        depth: Int,
     ) {
         if (node == null) {
             return
         }
-        if (node.matchesAccessibilitySelector(selector)) {
+        if (node.matchesAccessibilitySelector(selector, depth)) {
             output += node
         }
         repeat(node.childCount) { index ->
-            collectAccessibilityNodes(runCatching { node.getChild(index) }.getOrNull(), selector, output)
+            collectAccessibilityNodes(
+                runCatching { node.getChild(index) }.getOrNull(),
+                selector,
+                output,
+                depth = depth + 1,
+            )
         }
     }
 
-    private fun AccessibilityNodeInfo.matchesAccessibilitySelector(selector: JSONObject): Boolean {
+    private fun AccessibilityNodeInfo.matchesAccessibilitySelector(selector: JSONObject, depth: Int): Boolean {
+        var hasMatcher = false
+        fun markMatcher(): Boolean {
+            hasMatcher = true
+            return true
+        }
+
+        val nodeText = text?.toString().orEmpty()
+        val text = selector.optString("text").takeIf { it.isNotBlank() }
+        if (text != null && (!markMatcher() || nodeText != text)) {
+            return false
+        }
+        val textContains = selector.optString("textContains").takeIf { it.isNotBlank() }
+        if (textContains != null && (!markMatcher() || !nodeText.contains(textContains))) {
+            return false
+        }
+        val textMatches = selector.optRegex("textMatches")
+        if (textMatches != null && (!markMatcher() || !textMatches.matches(nodeText))) {
+            return false
+        }
+
+        val nodeDesc = contentDescription?.toString().orEmpty()
         val desc = selector.optString("desc").takeIf { it.isNotBlank() }
-        if (desc != null && contentDescription?.toString() != desc) {
+        if (desc != null && (!markMatcher() || nodeDesc != desc)) {
             return false
         }
         val descContains = selector.optString("descContains").takeIf { it.isNotBlank() }
-        if (descContains != null && contentDescription?.toString()?.contains(descContains) != true) {
+        if (descContains != null && (!markMatcher() || !nodeDesc.contains(descContains))) {
             return false
         }
+        val descMatches = selector.optRegex("descMatches")
+        if (descMatches != null && (!markMatcher() || !descMatches.matches(nodeDesc))) {
+            return false
+        }
+
+        val nodeId = viewIdResourceName.orEmpty()
         val id = selector.optString("id").takeIf { it.isNotBlank() }
-        if (id != null && viewIdResourceName != id) {
+        if (id != null && (!markMatcher() || nodeId != id)) {
             return false
         }
+        val idMatches = selector.optRegex("idMatches")
+        if (idMatches != null && (!markMatcher() || !idMatches.matches(nodeId))) {
+            return false
+        }
+
+        val nodeClassName = className?.toString().orEmpty()
         val className = selector.optString("className").takeIf { it.isNotBlank() }
-        if (className != null && this.className?.toString() != className) {
+        if (className != null && (!markMatcher() || nodeClassName != className)) {
             return false
         }
-        return desc != null || descContains != null || id != null || className != null
+        val classNameMatches = selector.optRegex("classNameMatches")
+        if (classNameMatches != null && (!markMatcher() || !classNameMatches.matches(nodeClassName))) {
+            return false
+        }
+
+        if (selector.has("clickable") && (!markMatcher() || selector.optBoolean("clickable") != isClickable)) {
+            return false
+        }
+        if (selector.has("enabled") && (!markMatcher() || selector.optBoolean("enabled") != isEnabled)) {
+            return false
+        }
+        if (selector.has("depth") && (!markMatcher() || selector.optInt("depth", -1) != depth)) {
+            return false
+        }
+
+        val bounds = Rect()
+        getBoundsInScreen(bounds)
+        selector.optBounds("boundsInside")?.let { target ->
+            if (!markMatcher() || !bounds.insideAccessibilityBounds(target)) {
+                return false
+            }
+        }
+        selector.optBounds("boundsContains")?.let { target ->
+            if (!markMatcher() || !bounds.containsAccessibilityBounds(target)) {
+                return false
+            }
+        }
+        return hasMatcher
+    }
+
+    private fun JSONObject.optRegex(name: String): Regex? {
+        val value = opt(name) ?: return null
+        val pattern = when (value) {
+            is JSONObject -> value.optString("pattern")
+            is String -> value
+            else -> return null
+        }.takeIf { it.isNotBlank() } ?: return null
+        val flags = (value as? JSONObject)?.optString("flags").orEmpty()
+        val options = buildSet {
+            if ('i' in flags) add(RegexOption.IGNORE_CASE)
+            if ('m' in flags) add(RegexOption.MULTILINE)
+            if ('s' in flags) add(RegexOption.DOT_MATCHES_ALL)
+        }
+        return runCatching { Regex(pattern, options) }.getOrNull()
+    }
+
+    private fun JSONObject.optBounds(name: String): Rect? {
+        val value = optJSONObject(name) ?: return null
+        return Rect(
+            value.optInt("left"),
+            value.optInt("top"),
+            value.optInt("right"),
+            value.optInt("bottom"),
+        )
+    }
+
+    private fun Rect.insideAccessibilityBounds(bounds: Rect): Boolean {
+        return left >= bounds.left && top >= bounds.top && right <= bounds.right && bottom <= bounds.bottom
+    }
+
+    private fun Rect.containsAccessibilityBounds(bounds: Rect): Boolean {
+        return left <= bounds.left && top <= bounds.top && right >= bounds.right && bottom >= bounds.bottom
+    }
+
+    private fun AccessibilityNodeInfo.performAccessibilityNodeAction(action: Int): Boolean {
+        var current: AccessibilityNodeInfo? = this
+        while (current != null) {
+            if (current.isEnabled && runCatching { current.performAction(action) }.getOrDefault(false)) {
+                return true
+            }
+            current = runCatching { current.parent }.getOrNull()
+        }
+        return false
+    }
+
+    private fun AccessibilityNodeInfo.setAccessibilityNodeText(text: String): Boolean {
+        if (!isEnabled) {
+            return false
+        }
+        val arguments = Bundle().apply {
+            putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, text)
+        }
+        return runCatching { performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments) }.getOrDefault(false)
     }
 
     private fun AccessibilityNodeInfo.toAccessibilityJson(): JSONObject {

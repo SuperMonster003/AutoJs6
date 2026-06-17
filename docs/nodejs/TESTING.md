@@ -373,7 +373,7 @@ Current `accessibility` selector bridge focused instrumentation:
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeAccessibilitySelectorBridgeInstrumentationTest"
 ```
 
-This suite verifies selector v1 builder shape, bridge registry entries for `findOne`/`findAll`, fake provider request/response behavior, `require("accessibility")`, shadowing protection, frozen selector descriptors, frozen node snapshots, invalid descriptor pre-dispatch rejection, timeout and permission propagation, and stable Android provider rejection when an accessibility provider is unavailable in the current process.
+This suite verifies selector v2 builder shape, bridge registry entries for `findOne`/`findAll` and selector actions, fake provider request/response behavior, `require("accessibility")`, shadowing protection, frozen selector descriptors, regex/boolean/depth/bounds JSON descriptors, frozen node snapshots with no raw node leak, invalid descriptor pre-dispatch rejection, timeout/cancellation cleanup, permission propagation, and stable Android provider rejection when an accessibility provider is unavailable in the current process.
 
 Optional real-device `accessibility` smoke:
 

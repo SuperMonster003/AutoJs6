@@ -64,6 +64,7 @@ small set of already-gated features toward practical use.
 | Storage | partial | `require("storage")` and `require("storages")` expose JSON-only project/package-scoped key-value stores with explicit `storage` capability checks. |
 | Notifications | partial | `require("notifications")` exposes post-only `notify`, `cancel`, and `cancelAll` with explicit `notifications` capability checks, Android `POST_NOTIFICATIONS` permission mapping, and owned-resource cleanup. |
 | Sensors | partial | `require("sensors")` exposes `getAvailableSensors`, `once`, and bounded callback subscriptions for `accelerometer`, `gyroscope`, and `light` with explicit `sensors` capability checks. |
+| Accessibility selector v2 | partial | `require("accessibility")` expands selector descriptors with regex, clickable/enabled, depth, and bounds fields plus selector actions for long-click, set-text, and scroll while keeping JSON-only snapshots and explicit `accessibility` capability checks. |
 | Worker threads | blocked | Disabled by default. Task 170 rechecked the pure-JS worker target, but the current Embedded Node build still lacks native `worker_threads`; no runnable v1.1 partial support is advertised. |
 | Native addon | unsupported | Must remain disabled. |
 | Child process | disabled | Use controlled `shell` bridge instead. |
@@ -131,6 +132,10 @@ small set of already-gated features toward practical use.
   `subscribe`, fake-provider event draining, manifest denial, Android sensor
   listing, live subscription cleanup when a supported sensor exists, and
   TypeScript declarations.
+- Accessibility selector v2 smoke passes for regex, clickable/enabled, depth,
+  bounds descriptors, `longClick`, `setText`, `scrollForward`,
+  `scrollBackward`, timeout/cancellation cleanup, manifest denial, no raw node
+  leak, and TypeScript declarations.
 - Worker threads remain default-off and blocked for v1.1 runnable partial
   support until native `worker_threads` availability changes and the focused
   execution/stress suites pass on Sony.

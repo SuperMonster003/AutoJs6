@@ -129,7 +129,7 @@ class NodeBridgeConformanceInstrumentationTest {
                     else if (method === "execScript") result = engineResult("inline");
                     else if (method === "execScriptFile") result = engineResult(request.args[0]);
                   } else if (moduleName === "accessibility") {
-                    if (method === "isEnabled" || method === "ensureEnabled" || method === "click" || method === "back" || method === "home" || method === "recentApps" || method === "clickText") result = true;
+                    if (method === "isEnabled" || method === "ensureEnabled" || method === "click" || method === "back" || method === "home" || method === "recentApps" || method === "clickText" || method === "longClick" || method === "setText" || method === "scrollForward" || method === "scrollBackward") result = true;
                     else if (method === "findByText" || method === "findOne") result = uiNode(method);
                     else if (method === "findAll") result = [uiNode("one"), uiNode("two")];
                   } else if (moduleName === "media_projection") {
@@ -230,7 +230,7 @@ class NodeBridgeConformanceInstrumentationTest {
               expectExports("device", device, ["isScreenOn", "wakeUp", "vibrate"]);
               expectExports("shell", shell, ["exec"]);
               expectExports("engines", engines, ["myEngine", "all", "stopAll", "stopSelf", "execScript", "execScriptFile"]);
-              expectExports("accessibility", accessibility, ["isEnabled", "ensureEnabled", "click", "back", "home", "recentApps", "findByText", "clickText", "findOne", "findAll", "text", "desc", "id", "className", "textContains", "descContains"]);
+              expectExports("accessibility", accessibility, ["isEnabled", "ensureEnabled", "click", "back", "home", "recentApps", "findByText", "clickText", "findOne", "findAll", "longClick", "setText", "scrollForward", "scrollBackward", "text", "desc", "id", "className", "textContains", "descContains", "textMatches", "descMatches", "idMatches", "classNameMatches", "clickable", "enabled", "depth", "boundsInside", "boundsContains"]);
               expectExports("media_projection", mediaProjection, ["requestScreenCapture"]);
               expectExports("image", image, ["captureScreen", "readImage", "saveImage", "clip", "resize", "findImage", "recycle"]);
               expectExports("images", images, ["captureScreen", "readImage", "saveImage", "clip", "resize", "findImage", "recycle"]);
@@ -284,6 +284,10 @@ class NodeBridgeConformanceInstrumentationTest {
               assert.strictEqual(await expectPromise("accessibility.clickText", accessibility.clickText("OK", { timeoutMs: 1040 })), true);
               assert.strictEqual((await expectPromise("accessibility.findOne", accessibility.findOne(accessibility.text("OK"), { timeoutMs: 1041 }))).text, "findOne");
               assert.strictEqual((await expectPromise("accessibility.findAll", accessibility.findAll(accessibility.textContains("O"), { timeoutMs: 1042 }))).length, 2);
+              assert.strictEqual(await expectPromise("accessibility.longClick", accessibility.longClick(accessibility.classNameMatches(/Button$/), { timeoutMs: 1043 })), true);
+              assert.strictEqual(await expectPromise("accessibility.setText", accessibility.setText(accessibility.idMatches(".*:id/input"), "typed", { timeoutMs: 1044 })), true);
+              assert.strictEqual(await expectPromise("accessibility.scrollForward", accessibility.scrollForward(accessibility.clickable(), { timeoutMs: 1045 })), true);
+              assert.strictEqual(await expectPromise("accessibility.scrollBackward", accessibility.scrollBackward(accessibility.enabled(false), { timeoutMs: 1046 })), true);
 
               const capturer = await expectPromise("media_projection.requestScreenCapture", mediaProjection.requestScreenCapture({ timeoutMs: 1043 }));
               expectFrozen("media_projection.capturer", capturer);
@@ -348,6 +352,7 @@ class NodeBridgeConformanceInstrumentationTest {
                 "shell.exec",
                 "engines.execScriptFile",
                 "accessibility.findAll",
+                "accessibility.setText",
                 "media_projection.nextImage",
                 "image.findImage",
                 "images.resize",
@@ -535,6 +540,10 @@ class NodeBridgeConformanceInstrumentationTest {
                 "clickText",
                 "findOne",
                 "findAll",
+                "longClick",
+                "setText",
+                "scrollForward",
+                "scrollBackward",
             ),
             NodeBridgeModules.MEDIA_PROJECTION to setOf("requestScreenCapture", "nextImage", "stop"),
             NodeBridgeModules.IMAGE to setOf("captureScreen", "readImage", "saveImage", "clip", "resize", "findImage", "recycle"),

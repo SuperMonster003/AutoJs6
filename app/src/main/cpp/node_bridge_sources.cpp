@@ -12280,6 +12280,16 @@ std::string buildEmbeddedScriptExecutionSource(
     const text = value === undefined || value === null ? "" : String(value);
     return text;
   }
+  function __autojs6_accessibility_text_input(value, methodName) {
+    const text = value === undefined || value === null ? "" : String(value);
+    if (text.indexOf("\u0000") !== -1) {
+      throw __autojs6_accessibility_invalid_argument_error(
+        methodName,
+        "accessibility." + methodName + " text must not contain NUL bytes."
+      );
+    }
+    return text;
+  }
   const __autojs6_accessibility_selector_type = "autojs6.accessibility.selector";
   const __autojs6_accessibility_selector_fields = Object.freeze([
     "text",
@@ -12287,7 +12297,16 @@ std::string buildEmbeddedScriptExecutionSource(
     "id",
     "className",
     "textContains",
-    "descContains"
+    "descContains",
+    "textMatches",
+    "descMatches",
+    "idMatches",
+    "classNameMatches",
+    "clickable",
+    "enabled",
+    "depth",
+    "boundsInside",
+    "boundsContains"
   ]);
   function __autojs6_accessibility_selector_text(value, methodName, fieldName) {
     const text = value === undefined || value === null ? "" : String(value);
@@ -12299,13 +12318,92 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     return text;
   }
+  function __autojs6_accessibility_selector_regex(value, methodName, fieldName) {
+    let pattern = "";
+    let flags = "";
+    if (value instanceof RegExp) {
+      pattern = value.source;
+      flags = (value.ignoreCase ? "i" : "") + (value.multiline ? "m" : "") + (value.dotAll ? "s" : "");
+    } else if (value && typeof value === "object" && !Array.isArray(value)) {
+      pattern = value.pattern === undefined || value.pattern === null ? "" : String(value.pattern);
+      const rawFlags = value.flags === undefined || value.flags === null ? "" : String(value.flags);
+      for (let i = 0; i < rawFlags.length; i++) {
+        const flag = rawFlags.charAt(i);
+        if ((flag === "i" || flag === "m" || flag === "s") && flags.indexOf(flag) < 0) {
+          flags += flag;
+        }
+      }
+    } else {
+      pattern = value === undefined || value === null ? "" : String(value);
+    }
+    if (pattern.length === 0 || pattern.indexOf("\u0000") !== -1) {
+      throw __autojs6_accessibility_invalid_argument_error(
+        methodName,
+        "accessibility." + methodName + " requires non-empty selector " + fieldName + " pattern without NUL bytes."
+      );
+    }
+    return Object.freeze({ pattern, flags });
+  }
+  function __autojs6_accessibility_selector_boolean(value) {
+    return value !== false;
+  }
+  function __autojs6_accessibility_selector_depth(value, methodName, fieldName) {
+    const number = Number(value);
+    if (!Number.isFinite(number) || Math.trunc(number) < 0) {
+      throw __autojs6_accessibility_invalid_argument_error(
+        methodName,
+        "accessibility." + methodName + " requires non-negative integer selector " + fieldName + "."
+      );
+    }
+    return Math.trunc(number);
+  }
+  function __autojs6_accessibility_selector_bounds(value, methodName, fieldName) {
+    const input = value && typeof value === "object" && !Array.isArray(value) ? value : {};
+    const bounds = Object.freeze({
+      left: __autojs6_accessibility_finite_number(input.left),
+      top: __autojs6_accessibility_finite_number(input.top),
+      right: __autojs6_accessibility_finite_number(input.right),
+      bottom: __autojs6_accessibility_finite_number(input.bottom)
+    });
+    if (!Number.isFinite(bounds.left) || !Number.isFinite(bounds.top) ||
+        !Number.isFinite(bounds.right) || !Number.isFinite(bounds.bottom) ||
+        bounds.right < bounds.left || bounds.bottom < bounds.top) {
+      throw __autojs6_accessibility_invalid_argument_error(
+        methodName,
+        "accessibility." + methodName + " requires finite selector " + fieldName + " bounds."
+      );
+    }
+    return bounds;
+  }
+  function __autojs6_accessibility_selector_value(fieldName, value, methodName) {
+    if (fieldName === "textMatches" || fieldName === "descMatches" ||
+        fieldName === "idMatches" || fieldName === "classNameMatches") {
+      return __autojs6_accessibility_selector_regex(value, methodName, fieldName);
+    }
+    if (fieldName === "clickable" || fieldName === "enabled") {
+      return __autojs6_accessibility_selector_boolean(value);
+    }
+    if (fieldName === "depth") {
+      return __autojs6_accessibility_selector_depth(value, methodName, fieldName);
+    }
+    if (fieldName === "boundsInside" || fieldName === "boundsContains") {
+      return __autojs6_accessibility_selector_bounds(value, methodName, fieldName);
+    }
+    return __autojs6_accessibility_selector_text(value, methodName, fieldName);
+  }
   function __autojs6_accessibility_selector(fieldName, value, methodName) {
     const selector = {
       type: __autojs6_accessibility_selector_type,
       version: 1
     };
-    selector[fieldName] = __autojs6_accessibility_selector_text(value, methodName, fieldName);
+    selector[fieldName] = __autojs6_accessibility_selector_value(fieldName, value, methodName);
     return Object.freeze(selector);
+  }
+  function __autojs6_accessibility_bounds_input(args) {
+    if (args.length === 1 && args[0] && typeof args[0] === "object" && !Array.isArray(args[0])) {
+      return args[0];
+    }
+    return { left: args[0], top: args[1], right: args[2], bottom: args[3] };
   }
   function __autojs6_accessibility_is_selector_input(value) {
     if (!value || typeof value !== "object" || Array.isArray(value)) {
@@ -12327,7 +12425,7 @@ std::string buildEmbeddedScriptExecutionSource(
         Number(value.version) !== 1) {
       throw __autojs6_accessibility_invalid_argument_error(
         methodName,
-        "accessibility." + methodName + " requires a selector descriptor created by accessibility.text/desc/id/className/textContains/descContains."
+        "accessibility." + methodName + " requires a selector descriptor created by an accessibility selector builder."
       );
     }
     const descriptor = {
@@ -12338,7 +12436,7 @@ std::string buildEmbeddedScriptExecutionSource(
     for (let i = 0; i < __autojs6_accessibility_selector_fields.length; i++) {
       const fieldName = __autojs6_accessibility_selector_fields[i];
       if (value[fieldName] !== undefined) {
-        descriptor[fieldName] = __autojs6_accessibility_selector_text(value[fieldName], methodName, fieldName);
+        descriptor[fieldName] = __autojs6_accessibility_selector_value(fieldName, value[fieldName], methodName);
         fieldCount += 1;
       }
     }
@@ -12510,6 +12608,42 @@ std::string buildEmbeddedScriptExecutionSource(
         __autojs6_accessibility_bridge_options(findOptions, 10000)
       ).then(__autojs6_accessibility_normalize_nodes);
     }
+    function selectorAction(methodName, selector, options) {
+      let descriptor;
+      try {
+        descriptor = __autojs6_accessibility_selector_descriptor(selector, methodName);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      const actionOptions = __autojs6_accessibility_options(options);
+      return __autojs6_call_autojs(
+        "accessibility",
+        methodName,
+        [descriptor, actionOptions],
+        __autojs6_accessibility_bridge_options(actionOptions, 10000)
+      ).then(function(result) {
+        return result === true;
+      });
+    }
+    function setText(selector, text, options) {
+      let descriptor;
+      let targetText;
+      try {
+        descriptor = __autojs6_accessibility_selector_descriptor(selector, "setText");
+        targetText = __autojs6_accessibility_text_input(text, "setText");
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      const actionOptions = __autojs6_accessibility_options(options);
+      return __autojs6_call_autojs(
+        "accessibility",
+        "setText",
+        [descriptor, targetText, actionOptions],
+        __autojs6_accessibility_bridge_options(actionOptions, 10000)
+      ).then(function(result) {
+        return result === true;
+      });
+    }
     function clickText(text, options) {
       const target = __autojs6_accessibility_non_empty_string(text);
       if (!target) {
@@ -12547,6 +12681,33 @@ std::string buildEmbeddedScriptExecutionSource(
       descContains: function(value) {
         return __autojs6_accessibility_selector("descContains", value, "descContains");
       },
+      textMatches: function(value) {
+        return __autojs6_accessibility_selector("textMatches", value, "textMatches");
+      },
+      descMatches: function(value) {
+        return __autojs6_accessibility_selector("descMatches", value, "descMatches");
+      },
+      idMatches: function(value) {
+        return __autojs6_accessibility_selector("idMatches", value, "idMatches");
+      },
+      classNameMatches: function(value) {
+        return __autojs6_accessibility_selector("classNameMatches", value, "classNameMatches");
+      },
+      clickable: function(value) {
+        return __autojs6_accessibility_selector("clickable", value, "clickable");
+      },
+      enabled: function(value) {
+        return __autojs6_accessibility_selector("enabled", value, "enabled");
+      },
+      depth: function(value) {
+        return __autojs6_accessibility_selector("depth", value, "depth");
+      },
+      boundsInside: function(left, top, right, bottom) {
+        return __autojs6_accessibility_selector("boundsInside", __autojs6_accessibility_bounds_input(arguments), "boundsInside");
+      },
+      boundsContains: function(left, top, right, bottom) {
+        return __autojs6_accessibility_selector("boundsContains", __autojs6_accessibility_bounds_input(arguments), "boundsContains");
+      },
       isEnabled,
       ensureEnabled,
       click,
@@ -12562,7 +12723,17 @@ std::string buildEmbeddedScriptExecutionSource(
       findByText,
       findOne,
       findAll,
-      clickText
+      clickText,
+      longClick: function(selector, options) {
+        return selectorAction("longClick", selector, options);
+      },
+      setText,
+      scrollForward: function(selector, options) {
+        return selectorAction("scrollForward", selector, options);
+      },
+      scrollBackward: function(selector, options) {
+        return selectorAction("scrollBackward", selector, options);
+      }
     });
     return __autojs6_limited_accessibility_cache;
   }

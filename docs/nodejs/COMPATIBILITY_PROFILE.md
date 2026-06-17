@@ -818,10 +818,23 @@ Overrides outside the documented safe range are ignored and reported in `profile
   - `className(value): Selector`
   - `textContains(value): Selector`
   - `descContains(value): Selector`
+  - `textMatches(value): Selector`
+  - `descMatches(value): Selector`
+  - `idMatches(value): Selector`
+  - `classNameMatches(value): Selector`
+  - `clickable(value?): Selector`
+  - `enabled(value?): Selector`
+  - `depth(value): Selector`
+  - `boundsInside(bounds): Selector`
+  - `boundsContains(bounds): Selector`
   - `isEnabled(options?): Promise<boolean>`
   - `ensureEnabled(options?): Promise<boolean>`
   - `click(x, y, options?): Promise<boolean>`
   - `click(selector, options?): Promise<boolean>`
+  - `longClick(selector, options?): Promise<boolean>`
+  - `setText(selector, text, options?): Promise<boolean>`
+  - `scrollForward(selector, options?): Promise<boolean>`
+  - `scrollBackward(selector, options?): Promise<boolean>`
   - `back(options?): Promise<boolean>`
   - `home(options?): Promise<boolean>`
   - `recentApps(options?): Promise<boolean>`
@@ -830,9 +843,10 @@ Overrides outside the documented safe range are ignored and reported in `profile
   - `findOne(selector, options?): Promise<UiNode | null>`
   - `findAll(selector, options?): Promise<readonly UiNode[]>`
   - selector descriptors are frozen plain JSON values such as `{ type: "autojs6.accessibility.selector", version: 1, text: "OK" }`
+  - selector v2 fields remain JSON-only descriptors: regular expressions are serialized as `{ pattern, flags }`, bounds are `{ left, top, right, bottom }`, and no raw selector or node object crosses the bridge
   - returned `UiNode` values are frozen JSON snapshots only; no live `AccessibilityNodeInfo`, `UiObject`, or selector object crosses into Node
   - current JavaScript API, fake-provider tests, and bridge protocol are stable
-  - when an operational AutoJs6 accessibility service is visible in the current process, the Android provider can validate `isEnabled`, `ensureEnabled`, `findByText`, `clickText`, selector `findOne`/`findAll`, selector `click`, and Back/Home/Recents global actions through controlled JSON snapshots and booleans
+  - when an operational AutoJs6 accessibility service is visible in the current process, the Android provider can validate `isEnabled`, `ensureEnabled`, `findByText`, `clickText`, selector `findOne`/`findAll`, selector `click`/`longClick`/`setText`/`scrollForward`/`scrollBackward`, and Back/Home/Recents global actions through controlled JSON snapshots and booleans
   - when an accessibility provider is unavailable in the current process, including isolated embedded service processes that cannot see the main-process service instance, `isEnabled`/`ensureEnabled` return `false` and action/query methods reject with `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED`
 - `media_projection`
   - `requestScreenCapture(options?): Promise<ScreenCapturer>`

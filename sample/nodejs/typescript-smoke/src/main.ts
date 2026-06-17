@@ -70,7 +70,15 @@ async function smoke(): Promise<void> {
   const foundText = await accessibility.findByText("OK", { timeoutMs: 1000 });
   const foundOne = await accessibility.findOne(selector, { timeoutMs: 1000 });
   const foundAll: readonly accessibility.UiNodeSnapshot[] = await accessibility.findAll(accessibility.textContains("O"), { timeoutMs: 1000 });
+  const matchedOne = await accessibility.findOne(accessibility.textMatches(/OK/i), { timeoutMs: 1000 });
+  const boundedAll = await accessibility.findAll(accessibility.boundsContains({ left: 0, top: 0, right: 100, bottom: 100 }), { timeoutMs: 1000 });
   const clickedText: boolean = await accessibility.clickText("OK", { timeoutMs: 1000 });
+  const longClicked: boolean = await accessibility.longClick(accessibility.classNameMatches(/Button$/), { timeoutMs: 1000 });
+  const typed: boolean = await accessibility.setText(accessibility.idMatches(".*:id/input"), "typed", { timeoutMs: 1000 });
+  const scrolledForward: boolean = await accessibility.scrollForward(accessibility.clickable(true), { timeoutMs: 1000 });
+  const scrolledBackward: boolean = await accessibility.scrollBackward(accessibility.enabled(false), { timeoutMs: 1000 });
+  const insideSelector: accessibility.SelectorDescriptor = accessibility.boundsInside(0, 0, 100, 100);
+  const depthSelector: accessibility.SelectorDescriptor = accessibility.depth(2);
   await accessibility.back({ timeoutMs: 1000 });
   await accessibility.home({ timeoutMs: 1000 });
   await accessibility.recentApps({ timeoutMs: 1000 });
