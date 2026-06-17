@@ -157,3 +157,46 @@ Notes:
 - ACE `Scale view` is enabled in the pinch-to-zoom menu and uses session-local
   focus-preserving visual zoom. Native `Scale view` remains disabled as under
   development.
+
+## Gate UX-7: Follow-Up UX Feedback
+
+- [ ] Stabilize Gboard spacebar cursor direction in ACE without treating IME
+  selection offsets as document-absolute offsets.
+- [ ] Keep double-tap and long-press host action modes anchored near the user's
+  touch point without upper-left fallback flicker.
+- [ ] Preserve gutter fold toggle while keeping folded-code placeholder unfold
+  support.
+- [ ] Keep Sony right-edge back gesture protection while preserving normal tap,
+  long-press, double-tap, and vertical scroll behavior outside the narrow
+  system gesture edge.
+- [ ] Add word wrap support to the Native editor if technically feasible.
+- [ ] Add a wrap indentation style setting: continuation indent, default, and
+  classic flush continuation.
+- [ ] Expand line-number visibility into independent gutter visibility controls
+  for breakpoints, line numbers, and fold markers across ACE and Native where
+  feasible.
+- [ ] Slightly enlarge ACE shortcut arrow icons to better match Auto.js Pro.
+- [ ] Make ACE shortcut long-press UP/DOWN repeat completion highlight movement
+  while the completion popup is open instead of jumping to file start/end.
+- [ ] Record every cursor location change as a TAB long-press return point,
+  independent of which command caused the jump.
+- [ ] Add a standalone Code editor settings page and an in-editor settings
+  dialog using the same content model.
+- [ ] Reorganize global settings and editor overflow menus so top-level editor
+  settings stay concise and advanced options move into the dedicated page or
+  dialog.
+- [ ] Keep all code editor setting labels engine-neutral; show unsupported
+  options disabled with a hint explaining that they are not available for the
+  current engine.
+- [ ] Ensure Clear is undoable and enables the undo affordance after clearing
+  non-empty editor text.
+
+Acceptance:
+
+- [ ] Sony XQ-DQ72 first, then XQ-AT72 fallback, confirms the four regression
+  fixes for Gboard cursor motion, mobile selection menus, fold toggle/unfold,
+  and right-edge back gesture behavior.
+- [ ] Settings changes remain bilingual in English and Simplified Chinese.
+- [ ] Native and ACE editor settings share engine-neutral service boundaries and
+  keep unsupported engine-specific options disabled instead of hidden on the
+  dedicated settings surface.

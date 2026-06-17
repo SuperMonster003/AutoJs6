@@ -610,6 +610,36 @@ class AceCodeEditorSmokeTest {
     }
 
     @Test
+    fun aceClearCanUndo() {
+        val editor = launchReadyEditor()
+        val initialText = "alpha();\nbeta();\ngamma();\n"
+
+        runOnMainSync {
+            editor.setText(initialText)
+        }
+        waitForEditorText(editor, initialText, "ACE text should be ready before clear undo smoke")
+
+        runOnMainSync {
+            editor.clear()
+        }
+        waitUntil("ACE clear should empty text and enable undo") {
+            val state = evaluateJsonObject(editor, "JSON.stringify(window.AutoJsAce.getState());")
+            state.getString("text").isEmpty() && state.getBoolean("canUndo")
+        }
+
+        evaluateJsonObject(
+            editor,
+            """
+                (function() {
+                    window.AutoJsAce.undo();
+                    return JSON.stringify(window.AutoJsAce.getState());
+                })();
+            """.trimIndent(),
+        )
+        waitForEditorText(editor, initialText, "ACE undo should restore text after clear")
+    }
+
+    @Test
     fun aceReadOnlyModeBlocksMutationsAndDoesNotPersist() {
         val editor = launchReadyEditor()
         val initialText = "alpha();\nbeta();\ngamma();\n"

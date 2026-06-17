@@ -401,7 +401,12 @@ class CodeEditor : HVScrollView {
     }
 
     fun clear() {
-        codeEditText.setText("")
+        val text = codeEditText.text
+        if (text == null) {
+            codeEditText.setText("")
+            return
+        }
+        text.replace(0, text.length, "")
     }
 
     fun jumpToStart() {

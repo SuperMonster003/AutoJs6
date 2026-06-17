@@ -32,16 +32,28 @@
     var resizeReason = "";
     var firstPaintNotified = false;
     var lastSelectionBrowseScrollAt = 0;
+    var lastSelectionChangedAt = 0;
+    var lastSelectionActionModeStartedAt = 0;
+    var lastTouchClientX = -1;
+    var lastTouchClientY = -1;
+    var lastTouchAt = 0;
     var programmaticScrollUntil = 0;
     var rightEdgeGestureGuardActive = false;
     var rightEdgeGestureGuardNotified = false;
+    var rightEdgeGestureGuardStartX = 0;
+    var rightEdgeGestureGuardStartY = 0;
+    var rightEdgeGestureGuardTracking = false;
     var DEFAULT_FONT_FAMILY = '"JetBrains Mono", "Source Code Pro", monospace';
     var STATE_NOTIFY_THROTTLE_MS = 100;
     var TEXT_NOTIFY_THROTTLE_MS = 100;
     var CURSOR_NOTIFY_THROTTLE_MS = 50;
     var ACTION_MODE_NOTIFY_THROTTLE_MS = 0;
     var SELECTION_BROWSE_REVEAL_SUPPRESS_MS = 1600;
-    var RIGHT_EDGE_GESTURE_GUARD_CSS_PX = 72;
+    var ACTION_MODE_SCROLL_SUPPRESS_GRACE_MS = 650;
+    var TOUCH_ANCHOR_MAX_AGE_MS = 2500;
+    var RIGHT_EDGE_GESTURE_GUARD_CSS_PX = 24;
+    var RIGHT_EDGE_GESTURE_ACTIVATE_DELTA_X = 14;
+    var RIGHT_EDGE_GESTURE_VERTICAL_SLOP = 24;
 
     function callBridge(name, args) {
         try {
@@ -302,7 +314,7 @@
                 Number(document.documentElement && document.documentElement.clientWidth) ||
                 1
         );
-        return Math.min(Math.round(viewportWidth * 0.24), RIGHT_EDGE_GESTURE_GUARD_CSS_PX);
+        return Math.min(Math.round(viewportWidth * 0.08), RIGHT_EDGE_GESTURE_GUARD_CSS_PX);
     }
 
     function stopDomTouchEvent(event) {
@@ -320,19 +332,62 @@
         }
     }
 
+    function touchFromEvent(event) {
+        return (event && event.touches && event.touches[0]) ||
+            (event && event.changedTouches && event.changedTouches[0]) ||
+            null;
+    }
+
+    function rememberTouchAnchor(event) {
+        var touch = touchFromEvent(event);
+        if (!touch) {
+            return;
+        }
+        lastTouchClientX = Number(touch.clientX);
+        lastTouchClientY = Number(touch.clientY);
+        lastTouchAt = Date.now();
+    }
+
+    function isRecentTouchAnchor() {
+        return lastTouchClientX >= 0 &&
+            lastTouchClientY >= 0 &&
+            Date.now() - lastTouchAt <= TOUCH_ANCHOR_MAX_AGE_MS;
+    }
+
+    function maybeActivateRightEdgeGestureGuard(event) {
+        if (rightEdgeGestureGuardActive || !rightEdgeGestureGuardTracking) {
+            return;
+        }
+        var touch = touchFromEvent(event);
+        if (!touch) {
+            return;
+        }
+        var dx = Number(touch.clientX) - rightEdgeGestureGuardStartX;
+        var dy = Math.abs(Number(touch.clientY) - rightEdgeGestureGuardStartY);
+        if (dx <= -RIGHT_EDGE_GESTURE_ACTIVATE_DELTA_X && dy <= RIGHT_EDGE_GESTURE_VERTICAL_SLOP) {
+            rightEdgeGestureGuardActive = true;
+        }
+    }
+
     function handleRightEdgeGestureGuardTouch(event) {
         var type = event && event.type;
+        rememberTouchAnchor(event);
         if (type === "touchstart") {
-            var touch = event.touches && event.touches[0];
+            var touch = touchFromEvent(event);
             var viewportWidth = Math.max(
                 1,
                 Number(global.innerWidth) ||
                     Number(document.documentElement && document.documentElement.clientWidth) ||
                     1
             );
-            rightEdgeGestureGuardActive = !!touch &&
+            rightEdgeGestureGuardTracking = !!touch &&
                 Number(touch.clientX) >= viewportWidth - rightEdgeGestureGuardWidth();
+            rightEdgeGestureGuardActive = false;
             rightEdgeGestureGuardNotified = false;
+            rightEdgeGestureGuardStartX = touch ? Number(touch.clientX) : 0;
+            rightEdgeGestureGuardStartY = touch ? Number(touch.clientY) : 0;
+        } else if (type === "touchmove") {
+            maybeActivateRightEdgeGestureGuard(event);
         }
         if (rightEdgeGestureGuardActive) {
             suppressSelectionActionModeMenu("right_edge_back_gesture_dom");
@@ -348,6 +403,7 @@
         if (type === "touchend" || type === "touchcancel") {
             rightEdgeGestureGuardActive = false;
             rightEdgeGestureGuardNotified = false;
+            rightEdgeGestureGuardTracking = false;
         }
     }
 
@@ -390,6 +446,14 @@
 
     function getSelectionScreenRect() {
         var fallback = getActionModeFallbackRect();
+        if (isRecentTouchAnchor()) {
+            return {
+                left: Math.max(0, lastTouchClientX),
+                top: Math.max(0, lastTouchClientY),
+                right: Math.max(1, lastTouchClientX + 1),
+                bottom: Math.max(1, lastTouchClientY + (editor && editor.renderer && editor.renderer.lineHeight || 20))
+            };
+        }
         if (!editor || !editor.renderer || !editor.renderer.textToScreenCoordinates) {
             return fallback;
         }
@@ -446,6 +510,7 @@
         }
         var rect = getSelectionScreenRect();
         lastActionModeSelectedText = selection.text;
+        lastSelectionActionModeStartedAt = Date.now();
         setNativeActionModeActive(true);
         dispatchSelectionActionModeState("selectionActionModeStarted");
         callBridge("startActionMode", [
@@ -520,7 +585,13 @@
     }
 
     function notifyScrollChanged() {
-        if (hasActiveSelection() && Date.now() > programmaticScrollUntil) {
+        var now = Date.now();
+        if (
+            hasActiveSelection() &&
+            now > programmaticScrollUntil &&
+            now - lastSelectionChangedAt > ACTION_MODE_SCROLL_SUPPRESS_GRACE_MS &&
+            now - lastSelectionActionModeStartedAt > ACTION_MODE_SCROLL_SUPPRESS_GRACE_MS
+        ) {
             lastSelectionBrowseScrollAt = Date.now();
             suppressSelectionActionModeMenu("browse_scroll");
         }
@@ -645,6 +716,7 @@
     }
 
     function notifySelectionChanged() {
+        lastSelectionChangedAt = Date.now();
         setSelectionMenuSuppressed(false);
         var selection = getSelectionState();
         if (selection.text || lastActionModeSelectedText) {
@@ -1054,7 +1126,16 @@
 
     function clear() {
         return runTextMutation("clear", function() {
-            setText("");
+            if (!session.getValue()) {
+                notifyStateChanged("clearNoop");
+                return false;
+            }
+            var lastRow = Math.max(0, session.getLength() - 1);
+            session.remove(new Range(0, 0, lastRow, getLine(lastRow).length));
+            editor.clearSelection();
+            editor.moveCursorTo(0, 0);
+            notifyTextChanged(true);
+            notifyCursorChanged();
             return true;
         }, false);
     }
@@ -1251,9 +1332,16 @@
         return false;
     }
 
+    function hasClassToken(target, token) {
+        return (" " + String(target && target.className || "") + " ").indexOf(" " + token + " ") >= 0;
+    }
+
     function isFoldPlaceholderTarget(target) {
         while (target && target !== editor.container) {
-            if (String(target.className || "").indexOf("ace_fold") >= 0) {
+            if (hasClassToken(target, "ace_gutter-cell") || hasClassToken(target, "ace_fold-widget")) {
+                return false;
+            }
+            if (hasClassToken(target, "ace_fold")) {
                 return true;
             }
             target = target.parentNode;

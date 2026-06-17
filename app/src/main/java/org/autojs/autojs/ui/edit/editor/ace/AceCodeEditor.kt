@@ -184,7 +184,6 @@ class AceCodeEditor @JvmOverloads constructor(
     private val selectionActionModeRect = Rect()
     private var startingHostSelectionActionMode = false
     private var pendingSelectionActionModeRequest: SelectionActionModeRequest? = null
-    private var pendingImeCursorOffset: Int? = null
     private var pendingImeCursorDelta = 0
     private var lastTextTouchX = -1f
     private var lastTextTouchY = -1f
@@ -1451,12 +1450,10 @@ class AceCodeEditor @JvmOverloads constructor(
         if (
             !isReady ||
             delta == 0 ||
-            abs(delta) > IME_SELECTION_CURSOR_MAX_DELTA ||
-            offset !in 0..textSnapshot.length
+            abs(delta) > IME_SELECTION_CURSOR_MAX_DELTA
         ) {
             return false
         }
-        pendingImeCursorOffset = offset
         pendingImeCursorDelta += delta
         eventHistory.record(
             "ime_cursor_selection",
@@ -1468,15 +1465,16 @@ class AceCodeEditor @JvmOverloads constructor(
     }
 
     private fun flushPendingImeCursorSelection() {
-        val offset = pendingImeCursorOffset ?: return
         val delta = pendingImeCursorDelta
-        pendingImeCursorOffset = null
         pendingImeCursorDelta = 0
+        if (delta == 0) {
+            return
+        }
         eventHistory.record(
             "ime_cursor_selection_apply",
-            "offset=$offset,delta=$delta",
+            "delta=$delta",
         )
-        invokeAce("jumpToOffset", offset.toString())
+        moveCursor(delta)
     }
 
     private fun isSoftKeyboardCursorKey(keyCode: Int, event: KeyEvent): Boolean {
@@ -2075,8 +2073,8 @@ class AceCodeEditor @JvmOverloads constructor(
         private const val IME_TEXT_INPUT_SELECTION_SUPPRESS_MS = 120L
         private const val RESIZE_SETTLE_DELAY_MS = 120L
         private const val IME_HEIGHT_THRESHOLD_DP = 80f
-        private const val RIGHT_EDGE_BACK_GESTURE_MIN_GUARD_DP = 72f
-        private const val RIGHT_EDGE_BACK_GESTURE_MAX_WIDTH_RATIO = 0.24f
+        private const val RIGHT_EDGE_BACK_GESTURE_MIN_GUARD_DP = 24f
+        private const val RIGHT_EDGE_BACK_GESTURE_MAX_WIDTH_RATIO = 0.08f
         private const val RIGHT_EDGE_BACK_GESTURE_HAPTIC_SUPPRESS_MS = 1_500L
         private const val ACTION_MODE_AFTER_TOUCH_DELAY_MS = 48L
         private const val ACTION_MODE_TOUCH_ANCHOR_MAX_AGE_MS = 2_000L
