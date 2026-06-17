@@ -295,6 +295,10 @@ updates, and permission delegation. This must remain design-only until
 - update/signature policy;
 - packaged APK policy.
 
+Task 150 adds that gate in [PLUGIN_SYSTEM.md](PLUGIN_SYSTEM.md). The current
+decision remains no Node plugin runtime in v1.1, and native addons stay disabled
+unless a separate signed-native-provider model is accepted.
+
 #### Shizuku/Root Advanced Shell
 
 The current `shell` bridge already has explicit `shell.root` capability for root

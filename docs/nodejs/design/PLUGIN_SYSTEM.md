@@ -1,0 +1,362 @@
+# Node Plugin System Design Gate
+
+Status: design gate only. No Node plugin runtime, installer, resolver, native
+plugin loader, or `require("plugins")` API is implemented by this document.
+
+## Goal
+
+Node Profile plugins must not become a back door around the Safe Node Profile.
+
+AutoJs6 already has multiple extension concepts:
+
+- npm packages loaded from the scoped Node project
+- AutoJs6 Android plugins exposed through AIDL-style APIs
+- packaged APK templates and project assets
+- native libraries bundled with the host app
+
+A Node plugin model must define which of these are allowed, how they are
+declared, how permissions are granted, how updates are verified, and whether
+native code is ever acceptable. Until that model exists, Node scripts should use
+ordinary pure JavaScript npm packages and named AutoJs bridge modules only.
+
+## Current Decision
+
+Do not expose a Node plugin system in v1.1.
+
+Native addons remain disabled:
+
+```text
+require("./addon.node") -> ERR_AUTOJS6_NATIVE_ADDON_DISABLED
+process.dlopen -> unavailable
+```
+
+Existing AutoJs6 plugin-center metadata and AIDL plugin APIs are not
+automatically visible to Node. A future Node plugin can call Android or AutoJs
+authority only through a named bridge/provider contract with explicit
+capabilities and tests.
+
+## Terminology
+
+| Term | Meaning |
+| --- | --- |
+| npm package | Pure JavaScript package resolved by the scoped CommonJS resolver. |
+| Node plugin | Future signed package that extends Node Profile through declared bridge capabilities. |
+| Android plugin APK | Existing AutoJs6 plugin ecosystem package installed as an Android app. |
+| Native plugin | Any plugin carrying `.so`, `.node`, or other native executable code. |
+| Plugin manifest | Signed metadata that declares identity, permissions, entry points, assets, hashes, and compatibility. |
+
+## Mode Comparison
+
+| Mode | Description | Decision |
+| --- | --- | --- |
+| Pure JS npm package | Runs under existing scoped resolver and builtin policy. | Already supported; not a plugin system. |
+| Manifested JS plugin | Signed package with JS entry and declared bridge capabilities. | Possible first Node plugin model. |
+| Android plugin adapter | Node talks to an installed AutoJs6 plugin through a bridge provider. | Possible later, AIDL/permission design required. |
+| Signed native provider plugin | Native code runs behind a host-owned provider boundary. | High risk, not v1.1. |
+| Node native addon | Node loads `.node` directly into embedded process. | Rejected for default profile. |
+| Unrestricted downloaded code | Plugin downloads and runs new code after install. | Rejected. |
+
+## Package Format
+
+A future Node plugin should be a deterministic archive with a top-level manifest:
+
+```text
+plugin.zip
+  autojs6-node-plugin.json
+  package/
+    index.cjs
+    package.json
+  assets/
+  abi/
+    arm64-v8a/
+    armeabi-v7a/
+  signatures/
+    manifest.sig
+```
+
+The first implementation should allow only `package/` and `assets/`. `abi/`
+must be rejected until signed native plugins are explicitly approved.
+
+Illustrative manifest:
+
+```json
+{
+  "schemaVersion": 1,
+  "id": "org.example.autojs6.node.plugin.demo",
+  "name": "Demo Plugin",
+  "version": "1.0.0",
+  "nodeProfile": {
+    "min": "1.1.0",
+    "max": "1.x"
+  },
+  "entry": "package/index.cjs",
+  "permissions": {
+    "requires": ["toast"],
+    "exports": ["plugin.org.example.demo"]
+  },
+  "android": {
+    "permissions": [],
+    "services": [],
+    "receivers": []
+  },
+  "native": {
+    "enabled": false,
+    "abis": []
+  },
+  "javaInterop": {
+    "enabled": false
+  },
+  "assets": [
+    {
+      "path": "assets/model.bin",
+      "sha256": "..."
+    }
+  ],
+  "signature": {
+    "scheme": "autojs6-plugin-signature-v1",
+    "signer": "..."
+  }
+}
+```
+
+Required manifest properties:
+
+- stable reverse-DNS plugin id
+- semantic version
+- Node Profile compatibility range
+- deterministic entry path under the archive
+- exact file hashes
+- requested capabilities
+- exported plugin capabilities
+- Android manifest additions, if any
+- native-code declaration, default `false`
+- signer identity
+
+The manifest must be parsed before any plugin code is resolved.
+
+## Permission Declaration
+
+Plugins must not grant themselves authority.
+
+Effective authority should be the intersection of:
+
+```text
+script/project declared capabilities
+  AND plugin manifest requested capabilities
+  AND host/package Android permissions
+  AND feature flag policy
+```
+
+Rules:
+
+- a project must opt into using a plugin id
+- a project must declare the bridge capabilities the plugin will use
+- a plugin can export namespaced capabilities, such as
+  `plugin.org.example.demo`
+- plugin-exported capabilities do not imply core bridge capabilities
+- `shell.root`, `ui.overlay`, native code, Java interop, and network remain
+  explicit high-risk declarations
+- missing declarations reject before code execution or provider dispatch
+
+Example project metadata:
+
+```json
+{
+  "type": "node",
+  "node": {
+    "plugins": [
+      {
+        "id": "org.example.autojs6.node.plugin.demo",
+        "version": "1.0.0"
+      }
+    ],
+    "permissions": [
+      "toast",
+      "plugin.org.example.demo"
+    ]
+  }
+}
+```
+
+## Native Code Policy
+
+Native code is disabled unless a separate signed-native-plugin model is
+implemented.
+
+Default denials:
+
+- `.node` native addons
+- `process.dlopen`
+- arbitrary `.so` extraction and loading
+- `System.load` and `System.loadLibrary`
+- native code downloaded after install
+- ABI fallback to unknown or host-incompatible libraries
+
+If signed native plugins are ever allowed, they must use a provider boundary:
+
+- native code is declared in the plugin manifest
+- every ABI library has a hash and symbol archive
+- supported ABI list is exact
+- no direct Node `.node` loading into the embedded process
+- native calls happen through a host-owned bridge or isolated service
+- crashes are attributed to plugin id, version, ABI, and signer
+- release gates include ABI size, dependency, and symbol reports
+- packaged APKs include only reviewed ABI slices
+
+Native support must not be enabled merely because a plugin archive contains
+native files.
+
+## Java Interop Policy
+
+Plugins must not expand Java interop.
+
+Rules:
+
+- `java_interop` remains disabled by default
+- plugins cannot add classes to the Java allowlist at runtime
+- plugins cannot expose raw `Context`, `Activity`, `Service`, `View`, Binder,
+  `ClassLoader`, reflection, filesystem, process, or native-library APIs
+- Android operations must be represented as named bridge/provider methods
+- AIDL plugin APIs must be wrapped by a host-owned provider that returns JSON
+  snapshots or opaque handles
+- provider handles are scoped to one Node execution and cleaned up on stop
+
+If an Android plugin adapter is added, Node should see only the adapter's
+declared JSON protocol, not the Android plugin service object.
+
+## Packaging Policy
+
+Packaged APK support must be designed before plugins ship.
+
+Required packaged behavior:
+
+- packaged project declares exact plugin ids and versions
+- plugin archives are bundled at build time or rejected
+- no first-run plugin download is required for a packaged app to start
+- Android permissions, services, receivers, providers, and foreground-service
+  types are injected only from reviewed plugin metadata
+- package identity and signer are recorded in diagnostics
+- encrypted scripts cannot request undeclared plugin authority at runtime
+- ABI-specific native plugin assets are included only for selected APK ABIs
+- model or data assets have size budgets and hashes
+
+Packaged APK verifier must fail closed when:
+
+- a declared plugin is missing
+- a plugin manifest hash does not match
+- a plugin requests unsupported Android manifest entries
+- a plugin requests native code while native plugins are disabled
+- plugin ABI assets do not match the packaged ABI set
+
+## Update And Signature Policy
+
+Plugins must be verified before installation and before update.
+
+Minimum policy:
+
+- plugin archives are signed
+- signer identity is pinned by plugin id after first trusted install
+- update version must be monotonic unless user explicitly allows rollback
+- all files listed in the manifest have hashes
+- unlisted executable files reject installation
+- update channel is explicit: official, third-party, local, or developer
+- official and third-party indexes are cached but not trusted without archive
+  signature verification
+- silent background updates are not allowed for plugins used by packaged APKs
+- rollback retains old archive and diagnostics until cleanup
+
+Third-party plugins should require clearer user confirmation than official
+plugins. Developer/local plugins should show diagnostics that they are outside
+normal release support.
+
+## Resolver Policy
+
+Plugin resolution must be deterministic.
+
+Rules:
+
+- a plugin id resolves only if declared in project metadata
+- local `node_modules/<plugin-id>` cannot shadow a declared signed plugin
+- signed plugin packages cannot shadow core bridge modules
+- plugin code uses the same scoped resolver and builtin allowlist as user code
+- plugin package dependencies are vendored or resolved inside the plugin archive
+- plugin code cannot reach the host app filesystem outside its scoped plugin
+  unpack directory
+
+Pure npm packages remain separate from the plugin resolver. They do not receive
+plugin privileges.
+
+## Runtime Boundary
+
+Future plugin execution should be one of:
+
+- same Node execution, pure JavaScript only, no extra authority except declared
+  bridge calls
+- host-owned provider, where plugin code runs in Android/Kotlin/Java and Node
+  sees only JSON bridge methods
+- isolated service/process for high-risk native or Android plugin adapters
+
+The first plugin model should prefer pure JavaScript plus bridge provider
+interfaces. High-risk plugins should not run in the embedded Node process.
+
+## Diagnostics
+
+Node Doctor and release reports should include:
+
+- plugin system enabled/disabled
+- declared plugin ids and versions
+- installed plugin ids, versions, signers, and hashes
+- requested and effective capabilities
+- native-code status
+- Java interop status
+- packaged plugin manifest entries
+- last plugin verification error
+- plugin crash attribution
+
+Crash intake should collect plugin id, version, ABI, signer, and native symbol
+archive id when a plugin is involved.
+
+## Test Gate
+
+Before any implementation, add tests for:
+
+- manifest parser accepts valid package and rejects malformed schema
+- hash mismatch rejects before code execution
+- unsigned or wrong-signer update rejects
+- undeclared plugin id cannot be required
+- local `node_modules` cannot shadow signed plugin ids
+- plugin cannot shadow core bridge modules
+- missing project capability rejects before plugin code runs
+- plugin requested capability not declared by plugin manifest rejects
+- native files reject while native plugins are disabled
+- Java interop remains disabled through plugins
+- packaged verifier fails closed for missing plugin, unsupported native code, and
+  Android manifest mismatch
+- diagnostics report plugin id, version, signer, and capability state
+- service destroy and script stop release plugin-owned handles
+
+## Open Questions
+
+- Should Node plugin installation be managed by the existing AutoJs6 plugin
+  center or by project-local archives only?
+- Should plugins be per-project, per-user, or global app installations?
+- What signer trust roots are acceptable for official and third-party plugins?
+- Can packaged APKs include third-party plugins, or only project-local signed
+  archives?
+- Should plugin code be allowed to declare its own npm dependencies?
+- Should plugin updates be allowed while a script that uses the plugin is
+  running?
+- Should Android plugin APK adapters run in the plugin app process, host app
+  process, or a dedicated bridge service?
+- What is the minimum symbol and ABI metadata required for native plugin crash
+  triage?
+
+## Recommendation
+
+Keep plugins as a v1.1 design gate. The first shippable direction, if pursued,
+should be manifested pure JavaScript plugins with signed archives, explicit
+project opt-in, no native code, no Java interop expansion, and no packaged APK
+runtime downloads.
+
+Signed native provider plugins require a separate design and must not relax the
+default native addon denial.
